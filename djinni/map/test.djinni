@@ -1,0 +1,6 @@
+@extern "../../../graphics-core/djinni/yaml/test_enum.yaml"
+
+test_interface = interface +c
+{
+    static test(value: i32): test_enum;
+}
