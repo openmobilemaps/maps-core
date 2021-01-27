@@ -1,35 +1,51 @@
-@extern "../yaml/graphics_object.yaml"
+@extern "../yaml/graphics_object_interface.yaml"
+@extern "../yaml/graphics_object_factory_interface.yaml"
+@extern "../yaml/shader_factory_interface.yaml"
+@extern "../yaml/vec_3_f.yaml"
+@extern "../yaml/vec_2_i.yaml"
 
-rendering_context = interface +c +j +o
+scene = interface +c
 {
-	get_self() : rendering_context;
-	# Ensure calling on graphics thread
-	on_surface_created();
-	# Ensure calling on graphics thread
-	set_viewport(w:i32,h:i32);
+    static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface) : scene;
+    static createWithOpenGl() : scene;
+    set_rendering_context(rendering_context: rendering_context_interface);
+    get_rendering_context() : rendering_context_interface;
+    set_camera(camera: camera_interface);
+    get_camera() : camera_interface;
+    get_renderer() : renderer_interface;
+    draw_frame();
+    clear();
 }
 
-render_pass = interface +c +j +o
+rendering_context_interface = interface +c +j +o
 {
-	get_graphics_objects() : list<graphics_object>;
+    # Ensure calling on graphics thread
+    on_surface_created();
+    # Ensure calling on graphics thread
+    set_viewport_size(size: vec_2_i);
+    get_viewport_size() : vec_2_i; 
 }
 
-renderer = interface +c +j +o
+render_pass_interface = interface +c +j +o
 {
-	add_to_render_queue(render_pass: render_pass);
-	# Ensure calling on graphics thread
-	draw_frame(rendering_context: rendering_context, camera: camera);
+    get_graphics_objects() : list<graphics_object_interface>;
 }
 
-camera = interface +c +j +o
+renderer_interface = interface +c +j +o
 {
-	get_mvp_matrix() : i64;
-	add_listener(listener: camera_listener);
-	remove_listener(listener: camera_listener);
+    add_to_render_queue(render_pass: render_pass_interface);
+    # Ensure calling on graphics thread
+    draw_frame(rendering_context: rendering_context_interface, camera: camera_interface);
 }
 
-camera_listener = interface +c +j +o
+camera_interface = interface +c +j +o
 {
-	# Todo: Add position record (vec3 or similar)
-	on_position_changed();
+    get_mvp_matrix() : i64;
+    add_listener(listener: camera_listener_interface);
+    remove_listener(listener: camera_listener_interface);
+}
+
+camera_listener_interface = interface +c +j +o
+{
+    on_position_changed(position: vec_3_f);
 }

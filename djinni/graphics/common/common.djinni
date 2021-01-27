@@ -1,0 +1,35 @@
+rect_f = record {
+    x: f32;
+    y: f32;
+    width: f32;
+    height: f32;
+}
+
+rect_i = record {
+    x: i32;
+    y: i32;
+    width: i32;
+    height: i32;
+}
+
+vec_2_f = record {
+    x: f32;
+    y: f32;
+}
+
+vec_3_f = record {
+    x: f32;
+    y: f32;
+    z: f32;
+}
+
+vec_2_i = record {
+    x: i32;
+    y: i32;
+}
+
+vec_3_i = record {
+    x: i32;
+    y: i32;
+    z: i32;
+}

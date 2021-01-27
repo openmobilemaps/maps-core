@@ -1,5 +1,0 @@
-test_enum = enum
-{
-    test_1;
-    test_2;
-}
