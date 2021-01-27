@@ -9,14 +9,14 @@ cpp:
   header: '"Polygon2dInterface.h"'
   byValue: false
 objc:
-  typename: 'GPHCPolygon2dInterface'
+  typename: 'MCPolygon2dInterface'
   pointer: true
   hash: '%s.hash'
-  boxed: 'GPHCPolygon2dInterface'
-  header: '"GPHCPolygon2dInterface.h"'
+  boxed: 'MCPolygon2dInterface'
+  header: '"MCPolygon2dInterface.h"'
 objcpp:
   translator: '::djinni_generated::Polygon2dInterface'
-  header: '"GPHCPolygon2dInterface+Private.h"'
+  header: '"MCPolygon2dInterface+Private.h"'
 java:
   reference: true
   typename: 'ch.ubique.mapscore.shared.graphics.objects.Polygon2dInterface'

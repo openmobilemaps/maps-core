@@ -9,14 +9,14 @@ cpp:
   header: '"Scene.h"'
   byValue: false
 objc:
-  typename: 'GPHCScene'
+  typename: 'MCScene'
   pointer: true
   hash: '%s.hash'
-  boxed: 'GPHCScene'
-  header: '"GPHCScene.h"'
+  boxed: 'MCScene'
+  header: '"MCScene.h"'
 objcpp:
   translator: '::djinni_generated::Scene'
-  header: '"GPHCScene+Private.h"'
+  header: '"MCScene+Private.h"'
 java:
   reference: true
   typename: 'ch.ubique.mapscore.shared.graphics.Scene'

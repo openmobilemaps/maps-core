@@ -9,14 +9,14 @@ cpp:
   header: '"RenderPassInterface.h"'
   byValue: false
 objc:
-  typename: 'GPHCRenderPassInterface'
+  typename: 'MCRenderPassInterface'
   pointer: true
   hash: '%s.hash'
-  boxed: 'GPHCRenderPassInterface'
-  header: '"GPHCRenderPassInterface.h"'
+  boxed: 'MCRenderPassInterface'
+  header: '"MCRenderPassInterface.h"'
 objcpp:
   translator: '::djinni_generated::RenderPassInterface'
-  header: '"GPHCRenderPassInterface+Private.h"'
+  header: '"MCRenderPassInterface+Private.h"'
 java:
   reference: true
   typename: 'ch.ubique.mapscore.shared.graphics.RenderPassInterface'

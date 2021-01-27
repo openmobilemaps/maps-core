@@ -9,14 +9,14 @@ cpp:
   header: '"RendererInterface.h"'
   byValue: false
 objc:
-  typename: 'GPHCRendererInterface'
+  typename: 'MCRendererInterface'
   pointer: true
   hash: '%s.hash'
-  boxed: 'GPHCRendererInterface'
-  header: '"GPHCRendererInterface.h"'
+  boxed: 'MCRendererInterface'
+  header: '"MCRendererInterface.h"'
 objcpp:
   translator: '::djinni_generated::RendererInterface'
-  header: '"GPHCRendererInterface+Private.h"'
+  header: '"MCRendererInterface+Private.h"'
 java:
   reference: true
   typename: 'ch.ubique.mapscore.shared.graphics.RendererInterface'

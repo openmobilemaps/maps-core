@@ -9,14 +9,14 @@ cpp:
   header: '"Line2dInterface.h"'
   byValue: false
 objc:
-  typename: 'GPHCLine2dInterface'
+  typename: 'MCLine2dInterface'
   pointer: true
   hash: '%s.hash'
-  boxed: 'GPHCLine2dInterface'
-  header: '"GPHCLine2dInterface.h"'
+  boxed: 'MCLine2dInterface'
+  header: '"MCLine2dInterface.h"'
 objcpp:
   translator: '::djinni_generated::Line2dInterface'
-  header: '"GPHCLine2dInterface+Private.h"'
+  header: '"MCLine2dInterface+Private.h"'
 java:
   reference: true
   typename: 'ch.ubique.mapscore.shared.graphics.objects.Line2dInterface'

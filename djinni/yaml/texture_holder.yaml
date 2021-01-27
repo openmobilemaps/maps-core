@@ -9,14 +9,14 @@ cpp:
   header: '"TextureHolder.h"'
   byValue: false
 objc:
-  typename: 'GPHCTextureHolder'
+  typename: 'MCTextureHolder'
   pointer: true
   hash: '%s.hash'
-  boxed: 'GPHCTextureHolder'
-  header: '"GPHCTextureHolder.h"'
+  boxed: 'MCTextureHolder'
+  header: '"MCTextureHolder.h"'
 objcpp:
   translator: '::djinni_generated::TextureHolder'
-  header: '"GPHCTextureHolder+Private.h"'
+  header: '"MCTextureHolder+Private.h"'
 java:
   reference: true
   typename: 'ch.ubique.mapscore.shared.graphics.objects.TextureHolder'

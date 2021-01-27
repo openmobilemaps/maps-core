@@ -9,14 +9,14 @@ cpp:
   header: '"LineShaderProgramInterface.h"'
   byValue: false
 objc:
-  typename: 'GPHCLineShaderProgramInterface'
+  typename: 'MCLineShaderProgramInterface'
   pointer: true
   hash: '%s.hash'
-  boxed: 'GPHCLineShaderProgramInterface'
-  header: '"GPHCLineShaderProgramInterface.h"'
+  boxed: 'MCLineShaderProgramInterface'
+  header: '"MCLineShaderProgramInterface.h"'
 objcpp:
   translator: '::djinni_generated::LineShaderProgramInterface'
-  header: '"GPHCLineShaderProgramInterface+Private.h"'
+  header: '"MCLineShaderProgramInterface+Private.h"'
 java:
   reference: true
   typename: 'ch.ubique.mapscore.shared.graphics.shader.LineShaderProgramInterface'

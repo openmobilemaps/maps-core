@@ -9,14 +9,14 @@ cpp:
   header: '"RectI.h"'
   byValue: false
 objc:
-  typename: 'GPHCRectI'
+  typename: 'MCRectI'
   pointer: true
   hash: '%s.hash'
-  boxed: 'GPHCRectI'
-  header: '"GPHCRectI.h"'
+  boxed: 'MCRectI'
+  header: '"MCRectI.h"'
 objcpp:
   translator: '::djinni_generated::RectI'
-  header: '"GPHCRectI+Private.h"'
+  header: '"MCRectI+Private.h"'
 java:
   reference: true
   typename: 'ch.ubique.mapscore.shared.graphics.common.RectI'

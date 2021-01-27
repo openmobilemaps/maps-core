@@ -9,14 +9,14 @@ cpp:
   header: '"Rectangle2dInterface.h"'
   byValue: false
 objc:
-  typename: 'GPHCRectangle2dInterface'
+  typename: 'MCRectangle2dInterface'
   pointer: true
   hash: '%s.hash'
-  boxed: 'GPHCRectangle2dInterface'
-  header: '"GPHCRectangle2dInterface.h"'
+  boxed: 'MCRectangle2dInterface'
+  header: '"MCRectangle2dInterface.h"'
 objcpp:
   translator: '::djinni_generated::Rectangle2dInterface'
-  header: '"GPHCRectangle2dInterface+Private.h"'
+  header: '"MCRectangle2dInterface+Private.h"'
 java:
   reference: true
   typename: 'ch.ubique.mapscore.shared.graphics.objects.Rectangle2dInterface'

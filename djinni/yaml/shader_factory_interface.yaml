@@ -9,14 +9,14 @@ cpp:
   header: '"ShaderFactoryInterface.h"'
   byValue: false
 objc:
-  typename: 'GPHCShaderFactoryInterface'
+  typename: 'MCShaderFactoryInterface'
   pointer: true
   hash: '%s.hash'
-  boxed: 'GPHCShaderFactoryInterface'
-  header: '"GPHCShaderFactoryInterface.h"'
+  boxed: 'MCShaderFactoryInterface'
+  header: '"MCShaderFactoryInterface.h"'
 objcpp:
   translator: '::djinni_generated::ShaderFactoryInterface'
-  header: '"GPHCShaderFactoryInterface+Private.h"'
+  header: '"MCShaderFactoryInterface+Private.h"'
 java:
   reference: true
   typename: 'ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface'

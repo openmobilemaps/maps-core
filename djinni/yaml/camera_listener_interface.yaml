@@ -9,14 +9,14 @@ cpp:
   header: '"CameraListenerInterface.h"'
   byValue: false
 objc:
-  typename: 'GPHCCameraListenerInterface'
+  typename: 'MCCameraListenerInterface'
   pointer: true
   hash: '%s.hash'
-  boxed: 'GPHCCameraListenerInterface'
-  header: '"GPHCCameraListenerInterface.h"'
+  boxed: 'MCCameraListenerInterface'
+  header: '"MCCameraListenerInterface.h"'
 objcpp:
   translator: '::djinni_generated::CameraListenerInterface'
-  header: '"GPHCCameraListenerInterface+Private.h"'
+  header: '"MCCameraListenerInterface+Private.h"'
 java:
   reference: true
   typename: 'ch.ubique.mapscore.shared.graphics.CameraListenerInterface'

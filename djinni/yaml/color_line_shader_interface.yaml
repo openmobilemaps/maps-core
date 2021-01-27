@@ -9,14 +9,14 @@ cpp:
   header: '"ColorLineShaderInterface.h"'
   byValue: false
 objc:
-  typename: 'GPHCColorLineShaderInterface'
+  typename: 'MCColorLineShaderInterface'
   pointer: true
   hash: '%s.hash'
-  boxed: 'GPHCColorLineShaderInterface'
-  header: '"GPHCColorLineShaderInterface.h"'
+  boxed: 'MCColorLineShaderInterface'
+  header: '"MCColorLineShaderInterface.h"'
 objcpp:
   translator: '::djinni_generated::ColorLineShaderInterface'
-  header: '"GPHCColorLineShaderInterface+Private.h"'
+  header: '"MCColorLineShaderInterface+Private.h"'
 java:
   reference: true
   typename: 'ch.ubique.mapscore.shared.graphics.shader.ColorLineShaderInterface'

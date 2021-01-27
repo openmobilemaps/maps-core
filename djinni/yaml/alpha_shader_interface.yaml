@@ -9,14 +9,14 @@ cpp:
   header: '"AlphaShaderInterface.h"'
   byValue: false
 objc:
-  typename: 'GPHCAlphaShaderInterface'
+  typename: 'MCAlphaShaderInterface'
   pointer: true
   hash: '%s.hash'
-  boxed: 'GPHCAlphaShaderInterface'
-  header: '"GPHCAlphaShaderInterface.h"'
+  boxed: 'MCAlphaShaderInterface'
+  header: '"MCAlphaShaderInterface.h"'
 objcpp:
   translator: '::djinni_generated::AlphaShaderInterface'
-  header: '"GPHCAlphaShaderInterface+Private.h"'
+  header: '"MCAlphaShaderInterface+Private.h"'
 java:
   reference: true
   typename: 'ch.ubique.mapscore.shared.graphics.shader.AlphaShaderInterface'

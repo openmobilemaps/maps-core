@@ -13,7 +13,7 @@ DJINNI_OUT_DIR := ../shared/generated
 DJINNI_SOURCE := ./$(FILE)
 
 PROJECT_NAME := mapscore_shared
-PROJECT_PREFIX := GPHC
+PROJECT_PREFIX := MC
 JAVA_PACKAGE := ch.ubique.mapscore.shared
 
 OBJC_OUT := $(DJINNI_OUT_DIR)/objc/objc

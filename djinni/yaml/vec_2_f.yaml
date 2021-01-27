@@ -9,14 +9,14 @@ cpp:
   header: '"Vec2F.h"'
   byValue: false
 objc:
-  typename: 'GPHCVec2F'
+  typename: 'MCVec2F'
   pointer: true
   hash: '%s.hash'
-  boxed: 'GPHCVec2F'
-  header: '"GPHCVec2F.h"'
+  boxed: 'MCVec2F'
+  header: '"MCVec2F.h"'
 objcpp:
   translator: '::djinni_generated::Vec2F'
-  header: '"GPHCVec2F+Private.h"'
+  header: '"MCVec2F+Private.h"'
 java:
   reference: true
   typename: 'ch.ubique.mapscore.shared.graphics.common.Vec2F'

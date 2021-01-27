@@ -9,14 +9,14 @@ cpp:
   header: '"RectF.h"'
   byValue: false
 objc:
-  typename: 'GPHCRectF'
+  typename: 'MCRectF'
   pointer: true
   hash: '%s.hash'
-  boxed: 'GPHCRectF'
-  header: '"GPHCRectF.h"'
+  boxed: 'MCRectF'
+  header: '"MCRectF.h"'
 objcpp:
   translator: '::djinni_generated::RectF'
-  header: '"GPHCRectF+Private.h"'
+  header: '"MCRectF+Private.h"'
 java:
   reference: true
   typename: 'ch.ubique.mapscore.shared.graphics.common.RectF'

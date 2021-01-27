@@ -9,14 +9,14 @@ cpp:
   header: '"GraphicsObjectInterface.h"'
   byValue: false
 objc:
-  typename: 'GPHCGraphicsObjectInterface'
+  typename: 'MCGraphicsObjectInterface'
   pointer: true
   hash: '%s.hash'
-  boxed: 'GPHCGraphicsObjectInterface'
-  header: '"GPHCGraphicsObjectInterface.h"'
+  boxed: 'MCGraphicsObjectInterface'
+  header: '"MCGraphicsObjectInterface.h"'
 objcpp:
   translator: '::djinni_generated::GraphicsObjectInterface'
-  header: '"GPHCGraphicsObjectInterface+Private.h"'
+  header: '"MCGraphicsObjectInterface+Private.h"'
 java:
   reference: true
   typename: 'ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectInterface'

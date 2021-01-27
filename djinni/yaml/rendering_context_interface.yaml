@@ -9,14 +9,14 @@ cpp:
   header: '"RenderingContextInterface.h"'
   byValue: false
 objc:
-  typename: 'GPHCRenderingContextInterface'
+  typename: 'MCRenderingContextInterface'
   pointer: true
   hash: '%s.hash'
-  boxed: 'GPHCRenderingContextInterface'
-  header: '"GPHCRenderingContextInterface.h"'
+  boxed: 'MCRenderingContextInterface'
+  header: '"MCRenderingContextInterface.h"'
 objcpp:
   translator: '::djinni_generated::RenderingContextInterface'
-  header: '"GPHCRenderingContextInterface+Private.h"'
+  header: '"MCRenderingContextInterface+Private.h"'
 java:
   reference: true
   typename: 'ch.ubique.mapscore.shared.graphics.RenderingContextInterface'
