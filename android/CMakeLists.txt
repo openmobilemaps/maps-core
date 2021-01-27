@@ -33,8 +33,8 @@ add_library( # Sets the name of the library.
         ${cpp_SRC})
 
 include_directories(../../external/djinni/support-lib ../../external/djinni/support-lib/jni)
-include_directories(../generated/jni/graphics ../generated/jni/map)
-include_directories(../src ../src/graphics ../src/map)
+include_directories(../shared/generated/jni/graphics ../shared/generated/jni/map)
+include_directories(../shared/src ../shared/src/graphics ../shared/src/map)
 include_directories(src/main/cpp)
 
 

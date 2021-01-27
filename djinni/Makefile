@@ -9,7 +9,7 @@ notarget:
 # DJINNI TARGET #
 #################
 
-DJINNI_OUT_DIR := ../generated
+DJINNI_OUT_DIR := ../shared/generated
 DJINNI_SOURCE := ./$(FILE)
 
 PROJECT_NAME := mapscore_shared
@@ -29,7 +29,7 @@ JNI_OUT := $(DJINNI_OUT_DIR)/jni
 IDENT_JNI_CLASS := NativeFooBar
 IDENT_JAVA := fooBar
 
-CPP_OUT := ../src
+CPP_OUT := ../shared/src
 HPP_EXT := h
 IDENT_CPP := FooBar
 IDENT_CPP_FIELD := fooBar
