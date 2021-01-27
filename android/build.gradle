@@ -36,7 +36,6 @@ android {
 }
 
 dependencies {
-	api project(':graphics-core')
 	implementation fileTree(dir: 'libs', include: ['*.jar'])
 	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 

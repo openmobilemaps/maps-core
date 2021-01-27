@@ -6,7 +6,7 @@ package ch.ubique.mapscore.shared.map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class TestInterface {
-    public static ch.ubique.graphicscore.shared.graphics.TestEnum test(int value)
+    public static ch.ubique.mapscore.shared.graphics.TestEnum test(int value)
     {
         return CppProxy.test(value);
     }
@@ -34,6 +34,6 @@ public abstract class TestInterface {
             super.finalize();
         }
 
-        public static native ch.ubique.graphicscore.shared.graphics.TestEnum test(int value);
+        public static native ch.ubique.mapscore.shared.graphics.TestEnum test(int value);
     }
 }

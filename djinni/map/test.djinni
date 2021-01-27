@@ -1,4 +1,4 @@
-@extern "../../../graphics-core/djinni/yaml/test_enum.yaml"
+@extern "../yaml/test_enum.yaml"
 
 test_interface = interface +c
 {

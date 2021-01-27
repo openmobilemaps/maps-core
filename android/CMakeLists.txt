@@ -33,12 +33,9 @@ add_library( # Sets the name of the library.
         ${cpp_SRC})
 
 include_directories(../../external/djinni/support-lib ../../external/djinni/support-lib/jni)
-include_directories(../generated/jni/map)
-include_directories(../src ../src/map)
+include_directories(../generated/jni/graphics ../generated/jni/map)
+include_directories(../src ../src/graphics ../src/map)
 include_directories(src/main/cpp)
-include_directories(../../graphics-core/src ../../graphics-core/src/graphics)
-include_directories(../../graphics-core/android/src/main/cpp)
-include_directories(../../graphics-core/generated/jni ../../graphics-core/generated/jni/graphics)
 
 
 # Searches for a specified prebuilt library and stores the path as a
@@ -70,8 +67,3 @@ find_library(opengl-lib
 
 target_link_libraries(mapscore_shared
         ${opengl-lib})
-
-add_library(graphicscore_shared SHARED IMPORTED)
-string(REPLACE "maps-core" "graphics-core" SDK_SO_PATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
-set_property(TARGET graphicscore_shared PROPERTY IMPORTED_LOCATION "${SDK_SO_PATH}/libgraphicscore_shared.so")
-target_link_libraries(mapscore_shared graphicscore_shared)
