@@ -25,11 +25,10 @@ let package = Package(
             dependencies: ["DjinniSupport"],
             path: "shared",
             exclude: ["generated/jni",
-                      "generated/java",
-                      "generated/objc/objcpp"],
+                      "generated/java"],
             publicHeadersPath: "generated/objc/objc",
             cxxSettings: [
-                .headerSearchPath("generated/objc/objc/"),
+            .headerSearchPath("generated/objc/objc/"),
             .headerSearchPath("src/grpahics/common"),
             .headerSearchPath("src/grpahics/object"),
             .headerSearchPath("src/grpahics/shader"),

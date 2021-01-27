@@ -9,14 +9,14 @@ cpp:
   header: '"RenderPassConfig.h"'
   byValue: false
 objc:
-  typename: 'GPHCRenderPassConfig'
+  typename: 'MCRenderPassConfig'
   pointer: true
   hash: '%s.hash'
-  boxed: 'GPHCRenderPassConfig'
-  header: '"GPHCRenderPassConfig.h"'
+  boxed: 'MCRenderPassConfig'
+  header: '"MCRenderPassConfig.h"'
 objcpp:
   translator: '::djinni_generated::RenderPassConfig'
-  header: '"GPHCRenderPassConfig+Private.h"'
+  header: '"MCRenderPassConfig+Private.h"'
 java:
   reference: true
   typename: 'ch.ubique.mapscore.shared.graphics.RenderPassConfig'

@@ -1,11 +1,15 @@
 import Foundation
 import MapCoreSharedModule
 
-class Line2d: BaseGraphicsObject {
+class Polygon2d: BaseGraphicsObject {
+    let shader: MCShaderProgramInterface
+    init(shader: MCShaderProgramInterface) {
+        self.shader = shader
+    }
 }
 
-extension Line2d: MCLine2dInterface {
-    func setLinePositions(_ positions: [MCVec2F]) {
+extension Polygon2d: MCPolygon2dInterface {
+    func setPolygonPositions(_ positions: [MCVec2F], holes: [[MCVec2F]], isConvex: Bool) {
     }
 
     func getAsGraphicsObject() -> MCGraphicsObjectInterface? {

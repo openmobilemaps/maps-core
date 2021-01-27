@@ -3,7 +3,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface GPHCRenderPassConfig : NSObject
+@interface MCRenderPassConfig : NSObject
 - (nonnull instancetype)initWithRenderPassIndex:(int32_t)renderPassIndex;
 + (nonnull instancetype)renderPassConfigWithRenderPassIndex:(int32_t)renderPassIndex;
 

@@ -2,6 +2,10 @@ import Foundation
 import MapCoreSharedModule
 
 class Rectangle2d: BaseGraphicsObject {
+    let shader: MCShaderProgramInterface
+    init(shader: MCShaderProgramInterface) {
+        self.shader = shader
+    }
 }
 
 

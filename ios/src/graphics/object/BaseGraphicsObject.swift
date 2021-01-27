@@ -7,6 +7,8 @@ class BaseGraphicsObject {
 }
 
 extension BaseGraphicsObject: MCGraphicsObjectInterface {
+
+
     func setup(_ context: MCRenderingContextInterface?) {
         self.context = context
     }
@@ -15,6 +17,6 @@ extension BaseGraphicsObject: MCGraphicsObjectInterface {
 
     func isReady() -> Bool { isReadyFlag }
 
-    func render(_ context: MCRenderingContextInterface?, renderPass: MCRenderPassInterface?, mvpMatrix: Int64) {
+    func render(_ context: MCRenderingContextInterface?, renderPass: MCRenderPassConfig, mvpMatrix: Int64) {
     }
 }
