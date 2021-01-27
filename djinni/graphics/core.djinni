@@ -29,6 +29,12 @@ rendering_context_interface = interface +c +j +o
 render_pass_interface = interface +c +j +o
 {
     get_graphics_objects() : list<graphics_object_interface>;
+    get_render_pass_config() : render_pass_config;
+}
+
+render_pass_config = record
+{
+    render_pass_index: i32;
 }
 
 renderer_interface = interface +c +j +o

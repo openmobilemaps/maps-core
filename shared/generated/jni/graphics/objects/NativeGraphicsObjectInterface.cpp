@@ -3,7 +3,7 @@
 
 #include "NativeGraphicsObjectInterface.h"  // my header
 #include "Marshal.hpp"
-#include "NativeRenderPassInterface.h"
+#include "NativeRenderPassConfig.h"
 #include "NativeRenderingContextInterface.h"
 
 namespace djinni_generated {
@@ -39,13 +39,13 @@ void NativeGraphicsObjectInterface::JavaProxy::clear() {
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_clear);
     ::djinni::jniExceptionCheck(jniEnv);
 }
-void NativeGraphicsObjectInterface::JavaProxy::render(const std::shared_ptr<::RenderingContextInterface> & c_context, const std::shared_ptr<::RenderPassInterface> & c_renderPass, int64_t c_mvpMatrix) {
+void NativeGraphicsObjectInterface::JavaProxy::render(const std::shared_ptr<::RenderingContextInterface> & c_context, const ::RenderPassConfig & c_renderPass, int64_t c_mvpMatrix) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeGraphicsObjectInterface>::get();
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_render,
                            ::djinni::get(::djinni_generated::NativeRenderingContextInterface::fromCpp(jniEnv, c_context)),
-                           ::djinni::get(::djinni_generated::NativeRenderPassInterface::fromCpp(jniEnv, c_renderPass)),
+                           ::djinni::get(::djinni_generated::NativeRenderPassConfig::fromCpp(jniEnv, c_renderPass)),
                            ::djinni::get(::djinni::I64::fromCpp(jniEnv, c_mvpMatrix)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
@@ -86,13 +86,13 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_Graphics
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_GraphicsObjectInterface_00024CppProxy_native_1render(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderingContextInterface::JniType j_context, ::djinni_generated::NativeRenderPassInterface::JniType j_renderPass, jlong j_mvpMatrix)
+CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_GraphicsObjectInterface_00024CppProxy_native_1render(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderingContextInterface::JniType j_context, ::djinni_generated::NativeRenderPassConfig::JniType j_renderPass, jlong j_mvpMatrix)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::GraphicsObjectInterface>(nativeRef);
         ref->render(::djinni_generated::NativeRenderingContextInterface::toCpp(jniEnv, j_context),
-                    ::djinni_generated::NativeRenderPassInterface::toCpp(jniEnv, j_renderPass),
+                    ::djinni_generated::NativeRenderPassConfig::toCpp(jniEnv, j_renderPass),
                     ::djinni::I64::toCpp(jniEnv, j_mvpMatrix));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }

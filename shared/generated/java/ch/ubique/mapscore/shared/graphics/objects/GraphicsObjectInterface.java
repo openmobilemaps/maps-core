@@ -16,7 +16,7 @@ public abstract class GraphicsObjectInterface {
     public abstract void clear();
 
     /** Render the graphics object; ensure calling on graphics thread */
-    public abstract void render(ch.ubique.mapscore.shared.graphics.RenderingContextInterface context, ch.ubique.mapscore.shared.graphics.RenderPassInterface renderPass, long mvpMatrix);
+    public abstract void render(ch.ubique.mapscore.shared.graphics.RenderingContextInterface context, ch.ubique.mapscore.shared.graphics.RenderPassConfig renderPass, long mvpMatrix);
 
     private static final class CppProxy extends GraphicsObjectInterface
     {
@@ -66,11 +66,11 @@ public abstract class GraphicsObjectInterface {
         private native void native_clear(long _nativeRef);
 
         @Override
-        public void render(ch.ubique.mapscore.shared.graphics.RenderingContextInterface context, ch.ubique.mapscore.shared.graphics.RenderPassInterface renderPass, long mvpMatrix)
+        public void render(ch.ubique.mapscore.shared.graphics.RenderingContextInterface context, ch.ubique.mapscore.shared.graphics.RenderPassConfig renderPass, long mvpMatrix)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
             native_render(this.nativeRef, context, renderPass, mvpMatrix);
         }
-        private native void native_render(long _nativeRef, ch.ubique.mapscore.shared.graphics.RenderingContextInterface context, ch.ubique.mapscore.shared.graphics.RenderPassInterface renderPass, long mvpMatrix);
+        private native void native_render(long _nativeRef, ch.ubique.mapscore.shared.graphics.RenderingContextInterface context, ch.ubique.mapscore.shared.graphics.RenderPassConfig renderPass, long mvpMatrix);
     }
 }

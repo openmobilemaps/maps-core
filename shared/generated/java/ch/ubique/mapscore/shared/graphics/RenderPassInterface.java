@@ -9,6 +9,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class RenderPassInterface {
     public abstract ArrayList<ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectInterface> getGraphicsObjects();
 
+    public abstract RenderPassConfig getRenderPassConfig();
+
     private static final class CppProxy extends RenderPassInterface
     {
         private final long nativeRef;
@@ -39,5 +41,13 @@ public abstract class RenderPassInterface {
             return native_getGraphicsObjects(this.nativeRef);
         }
         private native ArrayList<ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectInterface> native_getGraphicsObjects(long _nativeRef);
+
+        @Override
+        public RenderPassConfig getRenderPassConfig()
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            return native_getRenderPassConfig(this.nativeRef);
+        }
+        private native RenderPassConfig native_getRenderPassConfig(long _nativeRef);
     }
 }

@@ -36,7 +36,7 @@ private:
         bool isReady() override;
         void setup(const std::shared_ptr<::RenderingContextInterface> & context) override;
         void clear() override;
-        void render(const std::shared_ptr<::RenderingContextInterface> & context, const std::shared_ptr<::RenderPassInterface> & renderPass, int64_t mvpMatrix) override;
+        void render(const std::shared_ptr<::RenderingContextInterface> & context, const ::RenderPassConfig & renderPass, int64_t mvpMatrix) override;
 
     private:
         friend ::djinni::JniInterface<::GraphicsObjectInterface, ::djinni_generated::NativeGraphicsObjectInterface>;
@@ -46,7 +46,7 @@ private:
     const jmethodID method_isReady { ::djinni::jniGetMethodID(clazz.get(), "isReady", "()Z") };
     const jmethodID method_setup { ::djinni::jniGetMethodID(clazz.get(), "setup", "(Lch/ubique/mapscore/shared/graphics/RenderingContextInterface;)V") };
     const jmethodID method_clear { ::djinni::jniGetMethodID(clazz.get(), "clear", "()V") };
-    const jmethodID method_render { ::djinni::jniGetMethodID(clazz.get(), "render", "(Lch/ubique/mapscore/shared/graphics/RenderingContextInterface;Lch/ubique/mapscore/shared/graphics/RenderPassInterface;J)V") };
+    const jmethodID method_render { ::djinni::jniGetMethodID(clazz.get(), "render", "(Lch/ubique/mapscore/shared/graphics/RenderingContextInterface;Lch/ubique/mapscore/shared/graphics/RenderPassConfig;J)V") };
 };
 
 }  // namespace djinni_generated

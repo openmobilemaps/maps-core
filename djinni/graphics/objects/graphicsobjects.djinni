@@ -1,5 +1,5 @@
 @extern "../../yaml/rendering_context_interface.yaml"
-@extern "../../yaml/render_pass_interface.yaml"
+@extern "../../yaml/render_pass_config.yaml"
 @extern "../../yaml/shader_program_interface.yaml"
 @extern "../../yaml/line_shader_program_interface.yaml"
 @extern "../../yaml/rect_f.yaml"
@@ -14,7 +14,7 @@ graphics_object_interface = interface +c +j +o
     # Clear graphics object and invalidate isReady
     clear();
     # Render the graphics object; ensure calling on graphics thread
-    render(context: rendering_context_interface, render_pass: render_pass_interface, mvp_matrix: i64);
+    render(context: rendering_context_interface, render_pass: render_pass_config, mvp_matrix: i64);
 }
 
 graphics_object_factory_interface = interface +c +j +o
