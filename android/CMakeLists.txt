@@ -11,12 +11,12 @@ cmake_minimum_required(VERSION 3.4.1)
 # Gradle automatically packages shared libraries with your APK.
 
 file(GLOB_RECURSE cpp_SRC
-        "../generated/jni/*.h"
-        "../generated/jni/*.hpp"
-        "../generated/jni/*.cpp"
-        "../src/*.h"
-        "../src/*.cpp"
-        "../src/*.hpp"
+        "../shared/generated/jni/*.h"
+        "../shared/generated/jni/*.hpp"
+        "../shared/generated/jni/*.cpp"
+        "../shared/src/*.h"
+        "../shared/src/*.cpp"
+        "../shared/src/*.hpp"
         "../android/src/main/cpp/*.h"
         "../android/src/main/cpp/*.cpp"
         "../../external/djinni/support-lib/*.h"
