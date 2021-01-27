@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "DjinniSupport",
+        "repositoryURL": "https://bitbucket.org/ubique-innovation/djinni",
+        "state": {
+          "branch": "master",
+          "revision": "93dd157addeed82ff7df7bc498a58043671789b4",
+          "version": null
+        }
+      }
+    ]
+  },
+  "version": 1
+}
