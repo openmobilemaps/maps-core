@@ -1,0 +1,35 @@
+@extern "../yaml/graphics_object.yaml"
+
+rendering_context = interface +c +j +o
+{
+	get_self() : rendering_context;
+	# Ensure calling on graphics thread
+	on_surface_created();
+	# Ensure calling on graphics thread
+	set_viewport(w:i32,h:i32);
+}
+
+render_pass = interface +c +j +o
+{
+	get_graphics_objects() : list<graphics_object>;
+}
+
+renderer = interface +c +j +o
+{
+	add_to_render_queue(render_pass: render_pass);
+	# Ensure calling on graphics thread
+	draw_frame(rendering_context: rendering_context, camera: camera);
+}
+
+camera = interface +c +j +o
+{
+	get_mvp_matrix() : i64;
+	add_listener(listener: camera_listener);
+	remove_listener(listener: camera_listener);
+}
+
+camera_listener = interface +c +j +o
+{
+	# Todo: Add position record (vec3 or similar)
+	on_position_changed();
+}
