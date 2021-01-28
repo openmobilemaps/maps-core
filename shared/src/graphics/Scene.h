@@ -19,4 +19,11 @@ public:
     void drawFrame();
 
     void clear();
+
+private:
+    std::shared_ptr<RenderingContextInterface> renderingContext;
+    std::shared_ptr<CameraInterface> camera;
+
+    const std::shared_ptr<::GraphicsObjectFactoryInterface> & graphicsFactory;
+    const std::shared_ptr<::ShaderFactoryInterface> & shaderFactory;
 };
