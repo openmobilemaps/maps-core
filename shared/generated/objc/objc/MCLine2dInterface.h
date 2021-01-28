@@ -10,6 +10,6 @@
 
 - (void)setLinePositions:(nonnull NSArray<MCVec2F *> *)positions;
 
-- (nullable id<MCGraphicsObjectInterface>)getAsGraphicsObject;
+- (nullable id<MCGraphicsObjectInterface>)asGraphicsObject;
 
 @end

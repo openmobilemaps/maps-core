@@ -12,7 +12,7 @@ public abstract class ColorLineShaderInterface {
 
     public abstract void setZoomFactor(float zoom);
 
-    public abstract LineShaderProgramInterface asShaderProgramInterface(ColorLineShaderInterface ptrToSelf);
+    public abstract LineShaderProgramInterface asShaderProgramInterface();
 
     private static final class CppProxy extends ColorLineShaderInterface
     {
@@ -62,11 +62,11 @@ public abstract class ColorLineShaderInterface {
         private native void native_setZoomFactor(long _nativeRef, float zoom);
 
         @Override
-        public LineShaderProgramInterface asShaderProgramInterface(ColorLineShaderInterface ptrToSelf)
+        public LineShaderProgramInterface asShaderProgramInterface()
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
-            return native_asShaderProgramInterface(this.nativeRef, ptrToSelf);
+            return native_asShaderProgramInterface(this.nativeRef);
         }
-        private native LineShaderProgramInterface native_asShaderProgramInterface(long _nativeRef, ColorLineShaderInterface ptrToSelf);
+        private native LineShaderProgramInterface native_asShaderProgramInterface(long _nativeRef);
     }
 }

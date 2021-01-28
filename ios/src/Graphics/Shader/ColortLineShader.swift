@@ -74,7 +74,7 @@ extension ColorLineShader: MCColorLineShaderInterface {
         self.zoom = zoom
     }
 
-    func asShaderProgram(_ ptrToSelf: MCColorLineShaderInterface?) -> MCLineShaderProgramInterface? {
+    func asShaderProgram() -> MCLineShaderProgramInterface? {
         self
     }
 }

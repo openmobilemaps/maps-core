@@ -39,9 +39,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nullable id<MCGraphicsObjectInterface>)getAsGraphicsObject {
+- (nullable id<MCGraphicsObjectInterface>)asGraphicsObject {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->getAsGraphicsObject();
+        auto objcpp_result_ = _cppRefHandle.get()->asGraphicsObject();
         return ::djinni_generated::GraphicsObjectInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -61,10 +61,10 @@ public:
             [djinni_private_get_proxied_objc_object() setLinePositions:(::djinni::List<::djinni_generated::Vec2F>::fromCpp(c_positions))];
         }
     }
-    std::shared_ptr<::GraphicsObjectInterface> getAsGraphicsObject() override
+    std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getAsGraphicsObject];
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() asGraphicsObject];
             return ::djinni_generated::GraphicsObjectInterface::toCpp(objcpp_result_);
         }
     }

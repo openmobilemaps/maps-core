@@ -17,5 +17,5 @@ public:
 
     virtual void setZoomFactor(float zoom) = 0;
 
-    virtual std::shared_ptr<LineShaderProgramInterface> asShaderProgramInterface(const std::shared_ptr<ColorLineShaderInterface> & ptrToSelf) = 0;
+    virtual std::shared_ptr<LineShaderProgramInterface> asShaderProgramInterface() = 0;
 };

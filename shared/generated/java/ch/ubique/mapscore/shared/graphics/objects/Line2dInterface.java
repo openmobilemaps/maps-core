@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class Line2dInterface {
     public abstract void setLinePositions(ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2F> positions);
 
-    public abstract GraphicsObjectInterface getAsGraphicsObject();
+    public abstract GraphicsObjectInterface asGraphicsObject();
 
     private static final class CppProxy extends Line2dInterface
     {
@@ -43,11 +43,11 @@ public abstract class Line2dInterface {
         private native void native_setLinePositions(long _nativeRef, ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2F> positions);
 
         @Override
-        public GraphicsObjectInterface getAsGraphicsObject()
+        public GraphicsObjectInterface asGraphicsObject()
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
-            return native_getAsGraphicsObject(this.nativeRef);
+            return native_asGraphicsObject(this.nativeRef);
         }
-        private native GraphicsObjectInterface native_getAsGraphicsObject(long _nativeRef);
+        private native GraphicsObjectInterface native_asGraphicsObject(long _nativeRef);
     }
 }

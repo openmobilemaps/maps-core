@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class AlphaShaderInterface {
     public abstract void updateAlpha(float value);
 
-    public abstract ShaderProgramInterface asShaderProgramInterface(AlphaShaderInterface ptrToSelf);
+    public abstract ShaderProgramInterface asShaderProgramInterface();
 
     private static final class CppProxy extends AlphaShaderInterface
     {
@@ -42,11 +42,11 @@ public abstract class AlphaShaderInterface {
         private native void native_updateAlpha(long _nativeRef, float value);
 
         @Override
-        public ShaderProgramInterface asShaderProgramInterface(AlphaShaderInterface ptrToSelf)
+        public ShaderProgramInterface asShaderProgramInterface()
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
-            return native_asShaderProgramInterface(this.nativeRef, ptrToSelf);
+            return native_asShaderProgramInterface(this.nativeRef);
         }
-        private native ShaderProgramInterface native_asShaderProgramInterface(long _nativeRef, AlphaShaderInterface ptrToSelf);
+        private native ShaderProgramInterface native_asShaderProgramInterface(long _nativeRef);
     }
 }

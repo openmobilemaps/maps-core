@@ -20,5 +20,5 @@ public:
 
     virtual void removeTextures(const std::shared_ptr<::RenderingContextInterface> & context) = 0;
 
-    virtual std::shared_ptr<GraphicsObjectInterface> getAsGraphicsObject() = 0;
+    virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() = 0;
 };

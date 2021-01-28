@@ -171,7 +171,7 @@ extension Line2d: MCLine2dInterface {
         pointsCount = positions.count
     }
 
-    func getAsGraphicsObject() -> MCGraphicsObjectInterface? {
+    func asGraphicsObject() -> MCGraphicsObjectInterface? {
         self
     }
 }

@@ -12,7 +12,7 @@ public abstract class Rectangle2dInterface {
 
     public abstract void removeTextures(ch.ubique.mapscore.shared.graphics.RenderingContextInterface context);
 
-    public abstract GraphicsObjectInterface getAsGraphicsObject();
+    public abstract GraphicsObjectInterface asGraphicsObject();
 
     private static final class CppProxy extends Rectangle2dInterface
     {
@@ -62,11 +62,11 @@ public abstract class Rectangle2dInterface {
         private native void native_removeTextures(long _nativeRef, ch.ubique.mapscore.shared.graphics.RenderingContextInterface context);
 
         @Override
-        public GraphicsObjectInterface getAsGraphicsObject()
+        public GraphicsObjectInterface asGraphicsObject()
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
-            return native_getAsGraphicsObject(this.nativeRef);
+            return native_asGraphicsObject(this.nativeRef);
         }
-        private native GraphicsObjectInterface native_getAsGraphicsObject(long _nativeRef);
+        private native GraphicsObjectInterface native_asGraphicsObject(long _nativeRef);
     }
 }

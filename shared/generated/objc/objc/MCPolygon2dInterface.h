@@ -12,6 +12,6 @@
                       holes:(nonnull NSArray<NSArray<MCVec2F *> *> *)holes
                    isConvex:(BOOL)isConvex;
 
-- (nullable id<MCGraphicsObjectInterface>)getAsGraphicsObject;
+- (nullable id<MCGraphicsObjectInterface>)asGraphicsObject;
 
 @end

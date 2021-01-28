@@ -4,9 +4,9 @@ import MapCoreSharedModule
 
 class Rectangle2d: BaseGraphicsObject {
 
-    private var verticesBuffer: MTLBuffer!
+    private var verticesBuffer: MTLBuffer?
 
-    private var indicesBuffer: MTLBuffer!
+    private var indicesBuffer: MTLBuffer?
 
     private var indicesCount: Int = 0
 
@@ -24,6 +24,8 @@ class Rectangle2d: BaseGraphicsObject {
                          context: RenderingContext,
                          renderPass: MCRenderPassConfig,
                          mvpMatrix: Int64) {
+        guard let verticesBuffer = verticesBuffer,
+              let indicesBuffer = indicesBuffer else { return }
         shader.setupProgram(context)
         shader.preRender(context)
 
@@ -91,5 +93,5 @@ extension Rectangle2d: MCRectangle2dInterface {
         texture = nil
     }
 
-    func getAsGraphicsObject() -> MCGraphicsObjectInterface? { self }
+    func asGraphicsObject() -> MCGraphicsObjectInterface? { self }
 }

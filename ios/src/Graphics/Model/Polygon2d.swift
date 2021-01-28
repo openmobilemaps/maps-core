@@ -185,7 +185,5 @@ extension Polygon2d: MCPolygon2dInterface {
         indicesBuffer = i
     }
 
-    func getAsGraphicsObject() -> MCGraphicsObjectInterface? {
-        self
-    }
+    func asGraphicsObject() -> MCGraphicsObjectInterface? { self }
 }

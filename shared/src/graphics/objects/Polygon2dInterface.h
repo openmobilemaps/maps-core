@@ -15,5 +15,5 @@ public:
 
     virtual void setPolygonPositions(const std::vector<::Vec2F> & positions, const std::vector<std::vector<::Vec2F>> & holes, bool isConvex) = 0;
 
-    virtual std::shared_ptr<GraphicsObjectInterface> getAsGraphicsObject() = 0;
+    virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() = 0;
 };

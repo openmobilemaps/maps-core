@@ -34,7 +34,7 @@ private:
         ~JavaProxy();
 
         void setLinePositions(const std::vector<::Vec2F> & positions) override;
-        std::shared_ptr<::GraphicsObjectInterface> getAsGraphicsObject() override;
+        std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override;
 
     private:
         friend ::djinni::JniInterface<::Line2dInterface, ::djinni_generated::NativeLine2dInterface>;
@@ -42,7 +42,7 @@ private:
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/graphics/objects/Line2dInterface") };
     const jmethodID method_setLinePositions { ::djinni::jniGetMethodID(clazz.get(), "setLinePositions", "(Ljava/util/ArrayList;)V") };
-    const jmethodID method_getAsGraphicsObject { ::djinni::jniGetMethodID(clazz.get(), "getAsGraphicsObject", "()Lch/ubique/mapscore/shared/graphics/objects/GraphicsObjectInterface;") };
+    const jmethodID method_asGraphicsObject { ::djinni::jniGetMethodID(clazz.get(), "asGraphicsObject", "()Lch/ubique/mapscore/shared/graphics/objects/GraphicsObjectInterface;") };
 };
 
 }  // namespace djinni_generated

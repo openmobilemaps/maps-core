@@ -1,4 +1,9 @@
 #include "Scene.h"
+#include "ColorShaderInterface.h"
+#include "RenderPass.h"
+#include "Rectangle2dInterface.h"
+#include "Renderer.h"
+#include "ExampleCamera.cpp"
 
 std::shared_ptr <SceneInterface> SceneInterface::create(const std::shared_ptr<::GraphicsObjectFactoryInterface> &graphicsFactory,
                                       const std::shared_ptr<::ShaderFactoryInterface> &shaderFactory) {
@@ -11,8 +16,20 @@ std::shared_ptr <SceneInterface> SceneInterface::createWithOpenGl() {
 
 
 Scene::Scene(const std::shared_ptr<::GraphicsObjectFactoryInterface> & graphicsFactory,
-             const std::shared_ptr<::ShaderFactoryInterface> & shaderFactory) : graphicsFactory(graphicsFactory), shaderFactory(shaderFactory) {
+             const std::shared_ptr<::ShaderFactoryInterface> & shaderFactory) :
+graphicsFactory(graphicsFactory),
+shaderFactory(shaderFactory),
+renderer(std::make_shared<Renderer>()) {
 
+    // Begin testing code
+    auto shader = shaderFactory->createColorShader();
+    auto rect = graphicsFactory->createRectangle(shader->asShaderProgramInterface());
+    rect->setFrame(RectF(0, 0, 0.2, 0.2), RectF(0, 0, 0.2, 0.2));
+    shader->setColor(1, 0, 0, 0.5);
+    std::vector<std::shared_ptr<GraphicsObjectInterface>> objects{rect->asGraphicsObject()};
+    renderPass = std::make_shared<RenderPass>(RenderPassConfig(0), objects);
+    setCamera(std::make_shared<ExampleCamera>());
+    // End testing code
 }
 
 void Scene::setRenderingContext(const std::shared_ptr<RenderingContextInterface> & renderingContext) {
@@ -36,7 +53,12 @@ std::shared_ptr<RendererInterface> Scene::getRenderer() {
 }
 
 void Scene::drawFrame() {
-    renderer->drawFrame(renderingContext, camera);
+    if (auto renderPass = this->renderPass) {
+        // Begin testing code
+        renderer->addToRenderQueue(renderPass);
+        // End testing code
+        renderer->drawFrame(renderingContext, camera);
+    }
 }
 
 void Scene::clear() {

@@ -15,5 +15,5 @@ public:
 
     virtual void setLinePositions(const std::vector<::Vec2F> & positions) = 0;
 
-    virtual std::shared_ptr<GraphicsObjectInterface> getAsGraphicsObject() = 0;
+    virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() = 0;
 };

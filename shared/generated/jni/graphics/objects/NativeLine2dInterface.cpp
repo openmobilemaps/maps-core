@@ -24,11 +24,11 @@ void NativeLine2dInterface::JavaProxy::setLinePositions(const std::vector<::Vec2
                            ::djinni::get(::djinni::List<::djinni_generated::NativeVec2F>::fromCpp(jniEnv, c_positions)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
-std::shared_ptr<::GraphicsObjectInterface> NativeLine2dInterface::JavaProxy::getAsGraphicsObject() {
+std::shared_ptr<::GraphicsObjectInterface> NativeLine2dInterface::JavaProxy::asGraphicsObject() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeLine2dInterface>::get();
-    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getAsGraphicsObject);
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_asGraphicsObject);
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativeGraphicsObjectInterface::toCpp(jniEnv, jret);
 }
@@ -50,12 +50,12 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_Line2dIn
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_Line2dInterface_00024CppProxy_native_1getAsGraphicsObject(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_Line2dInterface_00024CppProxy_native_1asGraphicsObject(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::Line2dInterface>(nativeRef);
-        auto r = ref->getAsGraphicsObject();
+        auto r = ref->asGraphicsObject();
         return ::djinni::release(::djinni_generated::NativeGraphicsObjectInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

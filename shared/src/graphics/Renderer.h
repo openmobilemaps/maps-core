@@ -1,7 +1,7 @@
 #pragma once
 
 #include "RendererInterface.h"
-#include <vector>
+#include <queue>
 
 class Renderer: public RendererInterface {
 public:
@@ -12,5 +12,5 @@ public:
                     const std::shared_ptr<CameraInterface> & camera);
 
 private:
-    std::vector<const std::shared_ptr<RenderPassInterface>> renderQueue;
+    std::queue<const std::shared_ptr<RenderPassInterface>> renderQueue;
 };

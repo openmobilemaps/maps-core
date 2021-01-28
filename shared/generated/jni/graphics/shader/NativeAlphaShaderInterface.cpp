@@ -29,12 +29,12 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_AlphaShad
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_AlphaShaderInterface_00024CppProxy_native_1asShaderProgramInterface(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_ptrToSelf)
+CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_AlphaShaderInterface_00024CppProxy_native_1asShaderProgramInterface(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::AlphaShaderInterface>(nativeRef);
-        auto r = ref->asShaderProgramInterface(::djinni_generated::NativeAlphaShaderInterface::toCpp(jniEnv, j_ptrToSelf));
+        auto r = ref->asShaderProgramInterface();
         return ::djinni::release(::djinni_generated::NativeShaderProgramInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

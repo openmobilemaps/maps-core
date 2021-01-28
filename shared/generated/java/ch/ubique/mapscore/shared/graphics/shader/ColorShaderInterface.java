@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class ColorShaderInterface {
     public abstract void setColor(float red, float green, float blue, float alpha);
 
-    public abstract ShaderProgramInterface asShaderProgramInterface(ColorShaderInterface ptrToSelf);
+    public abstract ShaderProgramInterface asShaderProgramInterface();
 
     private static final class CppProxy extends ColorShaderInterface
     {
@@ -42,11 +42,11 @@ public abstract class ColorShaderInterface {
         private native void native_setColor(long _nativeRef, float red, float green, float blue, float alpha);
 
         @Override
-        public ShaderProgramInterface asShaderProgramInterface(ColorShaderInterface ptrToSelf)
+        public ShaderProgramInterface asShaderProgramInterface()
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
-            return native_asShaderProgramInterface(this.nativeRef, ptrToSelf);
+            return native_asShaderProgramInterface(this.nativeRef);
         }
-        private native ShaderProgramInterface native_asShaderProgramInterface(long _nativeRef, ColorShaderInterface ptrToSelf);
+        private native ShaderProgramInterface native_asShaderProgramInterface(long _nativeRef);
     }
 }

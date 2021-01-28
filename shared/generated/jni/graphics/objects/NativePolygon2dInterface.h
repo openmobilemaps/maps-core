@@ -34,7 +34,7 @@ private:
         ~JavaProxy();
 
         void setPolygonPositions(const std::vector<::Vec2F> & positions, const std::vector<std::vector<::Vec2F>> & holes, bool isConvex) override;
-        std::shared_ptr<::GraphicsObjectInterface> getAsGraphicsObject() override;
+        std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override;
 
     private:
         friend ::djinni::JniInterface<::Polygon2dInterface, ::djinni_generated::NativePolygon2dInterface>;
@@ -42,7 +42,7 @@ private:
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/graphics/objects/Polygon2dInterface") };
     const jmethodID method_setPolygonPositions { ::djinni::jniGetMethodID(clazz.get(), "setPolygonPositions", "(Ljava/util/ArrayList;Ljava/util/ArrayList;Z)V") };
-    const jmethodID method_getAsGraphicsObject { ::djinni::jniGetMethodID(clazz.get(), "getAsGraphicsObject", "()Lch/ubique/mapscore/shared/graphics/objects/GraphicsObjectInterface;") };
+    const jmethodID method_asGraphicsObject { ::djinni::jniGetMethodID(clazz.get(), "asGraphicsObject", "()Lch/ubique/mapscore/shared/graphics/objects/GraphicsObjectInterface;") };
 };
 
 }  // namespace djinni_generated

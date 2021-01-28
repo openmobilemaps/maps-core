@@ -29,4 +29,6 @@ private:
     const std::shared_ptr<::ShaderFactoryInterface> & shaderFactory;
 
     std::shared_ptr<RendererInterface> renderer;
+
+    std::shared_ptr<RenderPassInterface> renderPass;
 };

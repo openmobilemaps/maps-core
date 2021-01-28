@@ -38,9 +38,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nullable id<MCShaderProgramInterface>)asShaderProgramInterface:(nullable id<MCAlphaShaderInterface>)ptrToSelf {
+- (nullable id<MCShaderProgramInterface>)asShaderProgramInterface {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->asShaderProgramInterface(::djinni_generated::AlphaShaderInterface::toCpp(ptrToSelf));
+        auto objcpp_result_ = _cppRefHandle.get()->asShaderProgramInterface();
         return ::djinni_generated::ShaderProgramInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -60,10 +60,10 @@ public:
             [djinni_private_get_proxied_objc_object() updateAlpha:(::djinni::F32::fromCpp(c_value))];
         }
     }
-    std::shared_ptr<::ShaderProgramInterface> asShaderProgramInterface(const std::shared_ptr<::AlphaShaderInterface> & c_ptrToSelf) override
+    std::shared_ptr<::ShaderProgramInterface> asShaderProgramInterface() override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() asShaderProgramInterface:(::djinni_generated::AlphaShaderInterface::fromCpp(c_ptrToSelf))];
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() asShaderProgramInterface];
             return ::djinni_generated::ShaderProgramInterface::toCpp(objcpp_result_);
         }
     }

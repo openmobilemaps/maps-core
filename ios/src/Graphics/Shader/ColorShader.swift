@@ -27,7 +27,7 @@ extension ColorShader: MCColorShaderInterface {
         color = [red, green, blue, alpha]
     }
 
-    func asShaderProgram(_ ptrToSelf: MCColorShaderInterface?) -> MCShaderProgramInterface? {
+    func asShaderProgram() -> MCShaderProgramInterface? {
         self
     }
 }

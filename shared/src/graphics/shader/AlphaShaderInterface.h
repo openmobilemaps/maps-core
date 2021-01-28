@@ -13,5 +13,5 @@ public:
 
     virtual void updateAlpha(float value) = 0;
 
-    virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface(const std::shared_ptr<AlphaShaderInterface> & ptrToSelf) = 0;
+    virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() = 0;
 };

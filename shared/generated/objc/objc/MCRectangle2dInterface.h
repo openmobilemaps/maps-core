@@ -18,6 +18,6 @@ textureHolderInterface:(nullable id<MCTextureHolderInterface>)textureHolderInter
 
 - (void)removeTextures:(nullable id<MCRenderingContextInterface>)context;
 
-- (nullable id<MCGraphicsObjectInterface>)getAsGraphicsObject;
+- (nullable id<MCGraphicsObjectInterface>)asGraphicsObject;
 
 @end

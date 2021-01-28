@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class Polygon2dInterface {
     public abstract void setPolygonPositions(ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2F> positions, ArrayList<ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2F>> holes, boolean isConvex);
 
-    public abstract GraphicsObjectInterface getAsGraphicsObject();
+    public abstract GraphicsObjectInterface asGraphicsObject();
 
     private static final class CppProxy extends Polygon2dInterface
     {
@@ -43,11 +43,11 @@ public abstract class Polygon2dInterface {
         private native void native_setPolygonPositions(long _nativeRef, ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2F> positions, ArrayList<ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2F>> holes, boolean isConvex);
 
         @Override
-        public GraphicsObjectInterface getAsGraphicsObject()
+        public GraphicsObjectInterface asGraphicsObject()
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
-            return native_getAsGraphicsObject(this.nativeRef);
+            return native_asGraphicsObject(this.nativeRef);
         }
-        private native GraphicsObjectInterface native_getAsGraphicsObject(long _nativeRef);
+        private native GraphicsObjectInterface native_asGraphicsObject(long _nativeRef);
     }
 }

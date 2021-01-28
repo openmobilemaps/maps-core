@@ -13,5 +13,5 @@ public:
 
     virtual void setColor(float red, float green, float blue, float alpha) = 0;
 
-    virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface(const std::shared_ptr<ColorShaderInterface> & ptrToSelf) = 0;
+    virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() = 0;
 };

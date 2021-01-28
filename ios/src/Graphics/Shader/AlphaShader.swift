@@ -34,7 +34,7 @@ extension AlphaShader: MCAlphaShaderInterface {
         alpha = value
     }
 
-    func asShaderProgram(_ ptrToSelf: MCAlphaShaderInterface?) -> MCShaderProgramInterface? {
+    func asShaderProgram() -> MCShaderProgramInterface? {
         self
     }
 }
