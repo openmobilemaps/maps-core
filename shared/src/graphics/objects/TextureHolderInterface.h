@@ -5,9 +5,9 @@
 
 #include <cstdint>
 
-class TextureHolder {
+class TextureHolderInterface {
 public:
-    virtual ~TextureHolder() {}
+    virtual ~TextureHolderInterface() {}
 
     virtual int32_t getImageWidth() = 0;
 

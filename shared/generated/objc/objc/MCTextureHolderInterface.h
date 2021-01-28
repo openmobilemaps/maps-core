@@ -4,7 +4,7 @@
 #import <Foundation/Foundation.h>
 
 
-@protocol MCTextureHolder
+@protocol MCTextureHolderInterface
 
 - (int32_t)getImageWidth;
 

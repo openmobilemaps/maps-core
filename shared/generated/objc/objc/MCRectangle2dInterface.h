@@ -5,7 +5,7 @@
 #import "MCRenderingContextInterface.h"
 #import <Foundation/Foundation.h>
 @protocol MCGraphicsObjectInterface;
-@protocol MCTextureHolder;
+@protocol MCTextureHolderInterface;
 
 
 @protocol MCRectangle2dInterface
@@ -14,7 +14,7 @@
 textureCoordinates:(nonnull MCRectF *)textureCoordinates;
 
 - (void)loadTexture:(nullable id<MCRenderingContextInterface>)context
-      textureHolder:(nullable id<MCTextureHolder>)textureHolder;
+textureHolderInterface:(nullable id<MCTextureHolderInterface>)textureHolderInterface;
 
 - (void)removeTextures:(nullable id<MCRenderingContextInterface>)context;
 

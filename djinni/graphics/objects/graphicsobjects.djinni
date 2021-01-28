@@ -27,7 +27,7 @@ graphics_object_factory_interface = interface +c +j +o
 rectangle_2d_interface = interface +c +j +o
 {
     set_frame(frame: rect_f, texture_coordinates: rect_f);
-    load_texture(context: rendering_context_interface, texture_holder: texture_holder);
+    load_texture(context: rendering_context_interface, texture_holder_interface: texture_holder_interface);
     remove_textures(context: rendering_context_interface);
     get_as_graphics_object(): graphics_object_interface;
 }
@@ -44,7 +44,7 @@ polygon_2d_interface = interface +c +j +o
     get_as_graphics_object(): graphics_object_interface;
 }
 
-texture_holder = interface +j +o
+texture_holder_interface = interface +j +o
 {
     get_image_width() : i32;
     get_image_height() : i32;

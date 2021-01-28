@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class Rectangle2dInterface {
     public abstract void setFrame(ch.ubique.mapscore.shared.graphics.common.RectF frame, ch.ubique.mapscore.shared.graphics.common.RectF textureCoordinates);
 
-    public abstract void loadTexture(ch.ubique.mapscore.shared.graphics.RenderingContextInterface context, TextureHolder textureHolder);
+    public abstract void loadTexture(ch.ubique.mapscore.shared.graphics.RenderingContextInterface context, TextureHolderInterface textureHolderInterface);
 
     public abstract void removeTextures(ch.ubique.mapscore.shared.graphics.RenderingContextInterface context);
 
@@ -46,12 +46,12 @@ public abstract class Rectangle2dInterface {
         private native void native_setFrame(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.RectF frame, ch.ubique.mapscore.shared.graphics.common.RectF textureCoordinates);
 
         @Override
-        public void loadTexture(ch.ubique.mapscore.shared.graphics.RenderingContextInterface context, TextureHolder textureHolder)
+        public void loadTexture(ch.ubique.mapscore.shared.graphics.RenderingContextInterface context, TextureHolderInterface textureHolderInterface)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
-            native_loadTexture(this.nativeRef, context, textureHolder);
+            native_loadTexture(this.nativeRef, context, textureHolderInterface);
         }
-        private native void native_loadTexture(long _nativeRef, ch.ubique.mapscore.shared.graphics.RenderingContextInterface context, TextureHolder textureHolder);
+        private native void native_loadTexture(long _nativeRef, ch.ubique.mapscore.shared.graphics.RenderingContextInterface context, TextureHolderInterface textureHolderInterface);
 
         @Override
         public void removeTextures(ch.ubique.mapscore.shared.graphics.RenderingContextInterface context)

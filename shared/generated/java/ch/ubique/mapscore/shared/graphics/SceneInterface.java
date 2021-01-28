@@ -5,7 +5,7 @@ package ch.ubique.mapscore.shared.graphics;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public abstract class Scene {
+public abstract class SceneInterface {
     public abstract void setRenderingContext(RenderingContextInterface renderingContext);
 
     public abstract RenderingContextInterface getRenderingContext();
@@ -20,18 +20,18 @@ public abstract class Scene {
 
     public abstract void clear();
 
-    public static Scene create(ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface graphicsFactory, ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface shaderFactory)
+    public static SceneInterface create(ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface graphicsFactory, ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface shaderFactory)
     {
         return CppProxy.create(graphicsFactory,
                                shaderFactory);
     }
 
-    public static Scene createWithOpenGl()
+    public static SceneInterface createWithOpenGl()
     {
         return CppProxy.createWithOpenGl();
     }
 
-    private static final class CppProxy extends Scene
+    private static final class CppProxy extends SceneInterface
     {
         private final long nativeRef;
         private final AtomicBoolean destroyed = new AtomicBoolean(false);
@@ -110,8 +110,8 @@ public abstract class Scene {
         }
         private native void native_clear(long _nativeRef);
 
-        public static native Scene create(ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface graphicsFactory, ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface shaderFactory);
+        public static native SceneInterface create(ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface graphicsFactory, ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface shaderFactory);
 
-        public static native Scene createWithOpenGl();
+        public static native SceneInterface createWithOpenGl();
     }
 }
