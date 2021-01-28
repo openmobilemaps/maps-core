@@ -1,0 +1,95 @@
+import Foundation
+import Metal
+import MapCoreSharedModule
+
+class Rectangle2d: BaseGraphicsObject {
+
+    private var verticesBuffer: MTLBuffer!
+
+    private var indicesBuffer: MTLBuffer!
+
+    private var indicesCount: Int = 0
+
+    private var texture: MTLTexture?
+
+    private var shader: MCShaderProgramInterface
+    
+    init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
+        self.shader = shader
+        super.init(device: metalContext.device,
+                   sampler: metalContext.samplerLibrary.value(.magLinear))
+    }
+
+    override func render(encoder: MTLRenderCommandEncoder,
+                         context: RenderingContext,
+                         renderPass: MCRenderPassConfig,
+                         mvpMatrix: Int64) {
+        shader.setupProgram(context)
+        shader.preRender(context)
+
+        encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
+        let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix))!
+        encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+
+        encoder.setFragmentSamplerState(sampler, index: 0)
+
+        if let texture = texture {
+            encoder.setFragmentTexture(texture, index: 0)
+        }
+
+        encoder.drawIndexedPrimitives(type: .triangle,
+                                      indexCount: indicesCount,
+                                      indexType: .uint16,
+                                      indexBuffer: indicesBuffer,
+                                      indexBufferOffset: 0)
+    }
+}
+
+
+extension Rectangle2d: MCRectangle2dInterface {
+    func setFrame(_ frame: MCRectF, textureCoordinates: MCRectF) {
+        /*
+         The quad is made out of 4 vertices as following
+         B----C
+         |    |
+         |    |
+         A----D
+         Where A-C are joined to form two triangles
+         */
+        let minX = frame.x
+        let minY = frame.y
+        let maxX = minX + frame.width
+        let maxY = minY + frame.height
+        let vertecies: [Vertex] = [
+            Vertex(x: minX, y: maxY, textureU: textureCoordinates.x,     textureV: textureCoordinates.height), // A
+            Vertex(x: minX, y: minY, textureU: textureCoordinates.x,     textureV: textureCoordinates.y),      // B
+            Vertex(x: maxX, y: minY, textureU: textureCoordinates.width, textureV: textureCoordinates.y),      // C
+            Vertex(x: maxX, y: maxY, textureU: textureCoordinates.width, textureV: textureCoordinates.height), // D
+        ]
+        let indices: [UInt16] = [
+            0, 1, 2, // ABC
+            0, 2, 3, // ACD
+        ]
+
+        guard let verticesBuffer = device.makeBuffer(bytes: vertecies, length: MemoryLayout<Vertex>.stride * vertecies.count, options: []), let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: []) else {
+            fatalError("Cannot allocate buffers for the UBTileModel")
+        }
+
+        indicesCount = indices.count
+        self.verticesBuffer = verticesBuffer
+        self.indicesBuffer = indicesBuffer
+    }
+
+    func loadTexture(_ context: MCRenderingContextInterface?, textureHolder: MCTextureHolder?) {
+        guard let textureHolder = textureHolder as? TextureHolderImpl else {
+            fatalError("unexpected TextureHolder")
+        }
+        texture = textureHolder.texture
+    }
+
+    func removeTextures(_ context: MCRenderingContextInterface?) {
+        texture = nil
+    }
+
+    func getAsGraphicsObject() -> MCGraphicsObjectInterface? { self }
+}

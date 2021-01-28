@@ -1,0 +1,45 @@
+import Foundation
+import MapCoreSharedModule
+import Metal
+
+class BaseGraphicsObject {
+    private var isReadyFlag: Bool = false
+    
+    private var context: MCRenderingContextInterface!
+
+    let device: MTLDevice
+
+    let sampler: MTLSamplerState
+
+    init(device: MTLDevice, sampler: MTLSamplerState) {
+        self.device = device
+        self.sampler = sampler
+    }
+
+    func render(encoder: MTLRenderCommandEncoder,
+                context: RenderingContext,
+                renderPass: MCRenderPassConfig,
+                mvpMatrix: Int64) {
+        fatalError("has to be overwritten by subclass")
+    }
+}
+
+extension BaseGraphicsObject: MCGraphicsObjectInterface {
+    func setup(_ context: MCRenderingContextInterface?) {
+        self.context = context
+    }
+
+    func clear() { }
+
+    func isReady() -> Bool { isReadyFlag }
+
+    func render(_ context: MCRenderingContextInterface?, renderPass: MCRenderPassConfig, mvpMatrix: Int64) {
+        guard let context = context as? RenderingContext,
+              let encoder = context.encoder
+        else { return }
+        render(encoder: encoder,
+               context: context,
+               renderPass: renderPass,
+               mvpMatrix: mvpMatrix)
+    }
+}

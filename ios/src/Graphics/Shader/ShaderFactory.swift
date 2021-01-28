@@ -1,7 +1,6 @@
 import Foundation
 import MapCoreSharedModule
 
-/*
 class ShaderFactory: MCShaderFactoryInterface {
     func createAlphaShader() -> MCAlphaShaderInterface? {
         AlphaShader()
@@ -15,4 +14,3 @@ class ShaderFactory: MCShaderFactoryInterface {
         ColorShader()
     }
 }
-*/

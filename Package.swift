@@ -4,6 +4,9 @@ import PackageDescription
 
 let package = Package(
     name: "MapCore",
+    platforms: [
+        .iOS(.v10)
+    ],
     products: [
         .library(
             name: "MapCore",
@@ -28,11 +31,6 @@ let package = Package(
                       "generated/java"],
             publicHeadersPath: "generated/objc/objc",
             cxxSettings: [
-            .headerSearchPath("generated/objc/objc/"),
-            .headerSearchPath("src/grpahics/common"),
-            .headerSearchPath("src/grpahics/object"),
-            .headerSearchPath("src/grpahics/shader"),
-            .headerSearchPath("src/grpahics"),
             .headerSearchPath("**")
             ]),
         .testTarget(
