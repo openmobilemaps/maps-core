@@ -22,13 +22,7 @@ int __android_log_print(int prio, const char* tag, const char* fmt, ...);
 #endif
 
 #if defined(__APPLE__) && !defined(BANDIT_TESTING)
-extern "C" {
-void UBSharedLibLogAdapterError(const char* msg) {};
-void UBSharedLibLogAdapterWarning(const char* msg) {};
-void UBSharedLibLogAdapterDebug(const char* msg) {};
-void UBSharedLibLogAdapterInfo(const char* msg) {};
-void UBSharedLibLogAdapterTrace(const char* msg) {};
-}
+#include <os/log.h>
 #endif
 
 Logger& Logger::operator()(int p)
@@ -91,32 +85,32 @@ void Logger::log(int prio, const char* tag, const char* fmt, ...) const
     {
         case 0:
         {
-            UBSharedLibLogAdapterError(fmt);
+            os_log(OS_LOG_DEFAULT, "%s", fmt);
             break;
         }
         case 1:
         {
-            UBSharedLibLogAdapterWarning(fmt);
+            os_log_error(OS_LOG_DEFAULT, "%s", fmt);
             break;
         }
         case 2:
         {
-            UBSharedLibLogAdapterDebug(fmt);
+            os_log_debug(OS_LOG_DEFAULT, "%s", fmt);
             break;
         }
         case 3:
         {
-            UBSharedLibLogAdapterInfo(fmt);
+            os_log_info(OS_LOG_DEFAULT, "%s", fmt);
             break;
         }
         case 4:
         {
-            UBSharedLibLogAdapterTrace(fmt);
+            os_log(OS_LOG_DEFAULT, "%s", fmt);
             break;
         }
         default:
         {
-            UBSharedLibLogAdapterError(fmt);
+            os_log(OS_LOG_DEFAULT, "%s", fmt);
         }
     }
 #endif
