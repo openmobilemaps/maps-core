@@ -23,11 +23,11 @@ int __android_log_print(int prio, const char* tag, const char* fmt, ...);
 
 #if defined(__APPLE__) && !defined(BANDIT_TESTING)
 extern "C" {
-void UBSharedLibLogAdapterError(const char* msg);
-void UBSharedLibLogAdapterWarning(const char* msg);
-void UBSharedLibLogAdapterDebug(const char* msg);
-void UBSharedLibLogAdapterInfo(const char* msg);
-void UBSharedLibLogAdapterTrace(const char* msg);
+void UBSharedLibLogAdapterError(const char* msg) {};
+void UBSharedLibLogAdapterWarning(const char* msg) {};
+void UBSharedLibLogAdapterDebug(const char* msg) {};
+void UBSharedLibLogAdapterInfo(const char* msg) {};
+void UBSharedLibLogAdapterTrace(const char* msg) {};
 }
 #endif
 

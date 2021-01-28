@@ -31,7 +31,8 @@ let package = Package(
             dependencies: ["DjinniSupport"],
             path: "shared",
             exclude: ["generated/jni",
-                      "generated/java"],
+                      "generated/java",
+                      "generated/graphics"],
             publicHeadersPath: "generated/objc/objc",
             cxxSettings: [
             .headerSearchPath("**")
