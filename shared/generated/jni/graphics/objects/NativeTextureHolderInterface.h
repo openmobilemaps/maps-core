@@ -3,31 +3,31 @@
 
 #pragma once
 
-#include "TextureHolder.h"
+#include "TextureHolderInterface.h"
 #include "djinni_support.hpp"
 
 namespace djinni_generated {
 
-class NativeTextureHolder final : ::djinni::JniInterface<::TextureHolder, NativeTextureHolder> {
+class NativeTextureHolderInterface final : ::djinni::JniInterface<::TextureHolderInterface, NativeTextureHolderInterface> {
 public:
-    using CppType = std::shared_ptr<::TextureHolder>;
-    using CppOptType = std::shared_ptr<::TextureHolder>;
+    using CppType = std::shared_ptr<::TextureHolderInterface>;
+    using CppOptType = std::shared_ptr<::TextureHolderInterface>;
     using JniType = jobject;
 
-    using Boxed = NativeTextureHolder;
+    using Boxed = NativeTextureHolderInterface;
 
-    ~NativeTextureHolder();
+    ~NativeTextureHolderInterface();
 
-    static CppType toCpp(JNIEnv* jniEnv, JniType j) { return ::djinni::JniClass<NativeTextureHolder>::get()._fromJava(jniEnv, j); }
-    static ::djinni::LocalRef<JniType> fromCppOpt(JNIEnv* jniEnv, const CppOptType& c) { return {jniEnv, ::djinni::JniClass<NativeTextureHolder>::get()._toJava(jniEnv, c)}; }
+    static CppType toCpp(JNIEnv* jniEnv, JniType j) { return ::djinni::JniClass<NativeTextureHolderInterface>::get()._fromJava(jniEnv, j); }
+    static ::djinni::LocalRef<JniType> fromCppOpt(JNIEnv* jniEnv, const CppOptType& c) { return {jniEnv, ::djinni::JniClass<NativeTextureHolderInterface>::get()._toJava(jniEnv, c)}; }
     static ::djinni::LocalRef<JniType> fromCpp(JNIEnv* jniEnv, const CppType& c) { return fromCppOpt(jniEnv, c); }
 
 private:
-    NativeTextureHolder();
-    friend ::djinni::JniClass<NativeTextureHolder>;
-    friend ::djinni::JniInterface<::TextureHolder, NativeTextureHolder>;
+    NativeTextureHolderInterface();
+    friend ::djinni::JniClass<NativeTextureHolderInterface>;
+    friend ::djinni::JniInterface<::TextureHolderInterface, NativeTextureHolderInterface>;
 
-    class JavaProxy final : ::djinni::JavaProxyHandle<JavaProxy>, public ::TextureHolder
+    class JavaProxy final : ::djinni::JavaProxyHandle<JavaProxy>, public ::TextureHolderInterface
     {
     public:
         JavaProxy(JniType j);
@@ -40,10 +40,10 @@ private:
         void attachToGraphics() override;
 
     private:
-        friend ::djinni::JniInterface<::TextureHolder, ::djinni_generated::NativeTextureHolder>;
+        friend ::djinni::JniInterface<::TextureHolderInterface, ::djinni_generated::NativeTextureHolderInterface>;
     };
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/graphics/objects/TextureHolder") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/graphics/objects/TextureHolderInterface") };
     const jmethodID method_getImageWidth { ::djinni::jniGetMethodID(clazz.get(), "getImageWidth", "()I") };
     const jmethodID method_getImageHeight { ::djinni::jniGetMethodID(clazz.get(), "getImageHeight", "()I") };
     const jmethodID method_getTextureWidth { ::djinni::jniGetMethodID(clazz.get(), "getTextureWidth", "()I") };

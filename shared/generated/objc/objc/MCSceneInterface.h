@@ -4,18 +4,18 @@
 #import "MCGraphicsObjectFactoryInterface.h"
 #import "MCShaderFactoryInterface.h"
 #import <Foundation/Foundation.h>
-@class MCScene;
+@class MCSceneInterface;
 @protocol MCCameraInterface;
 @protocol MCRendererInterface;
 @protocol MCRenderingContextInterface;
 
 
-@interface MCScene : NSObject
+@interface MCSceneInterface : NSObject
 
-+ (nullable MCScene *)create:(nullable id<MCGraphicsObjectFactoryInterface>)graphicsFactory
-               shaderFactory:(nullable id<MCShaderFactoryInterface>)shaderFactory;
++ (nullable MCSceneInterface *)create:(nullable id<MCGraphicsObjectFactoryInterface>)graphicsFactory
+                        shaderFactory:(nullable id<MCShaderFactoryInterface>)shaderFactory;
 
-+ (nullable MCScene *)createWithOpenGl;
++ (nullable MCSceneInterface *)createWithOpenGl;
 
 - (void)setRenderingContext:(nullable id<MCRenderingContextInterface>)renderingContext;
 

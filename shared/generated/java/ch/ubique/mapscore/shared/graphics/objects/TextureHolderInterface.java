@@ -3,7 +3,7 @@
 
 package ch.ubique.mapscore.shared.graphics.objects;
 
-public abstract class TextureHolder {
+public abstract class TextureHolderInterface {
     public abstract int getImageWidth();
 
     public abstract int getImageHeight();
