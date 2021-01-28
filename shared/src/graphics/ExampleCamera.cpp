@@ -1,5 +1,4 @@
 #include "ExampleCamera.h"
-#include <vector>
 
 ExampleCamera::ExampleCamera() : mvpMatrix(16,0) {
 }

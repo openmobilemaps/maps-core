@@ -3,7 +3,7 @@
 #include "RenderPass.h"
 #include "Rectangle2dInterface.h"
 #include "Renderer.h"
-#include "ExampleCamera.cpp"
+#include "ExampleCamera.h"
 
 std::shared_ptr <SceneInterface> SceneInterface::create(const std::shared_ptr<::GraphicsObjectFactoryInterface> &graphicsFactory,
                                       const std::shared_ptr<::ShaderFactoryInterface> &shaderFactory) {
