@@ -17,8 +17,8 @@ file(GLOB_RECURSE cpp_SRC
         "../shared/src/*.h"
         "../shared/src/*.cpp"
         "../shared/src/*.hpp"
-        "../android/src/main/cpp/*.h"
-        "../android/src/main/cpp/*.cpp"
+        "src/main/cpp/*.h"
+        "src/main/cpp/*.cpp"
         "../../external/djinni/support-lib/*.h"
         "../../external/djinni/support-lib/*.hpp"
         "../../external/djinni/support-lib/*.cpp"
@@ -35,7 +35,7 @@ add_library( # Sets the name of the library.
 include_directories(../../external/djinni/support-lib ../../external/djinni/support-lib/jni)
 include_directories(../shared/generated/jni/graphics ../shared/generated/jni/graphics/common ../shared/generated/jni/graphics/objects ../shared/generated/jni/graphics/shader)
 include_directories(../shared/generated/jni/map)
-include_directories(../shared/src)
+include_directories(../shared/src ../shared/src/logger)
 include_directories(../shared/src/graphics ../shared/src/graphics/common ../shared/src/graphics/objects ../shared/src/graphics/shader)
 include_directories(../shared/src/map)
 include_directories(src/main/cpp src/main/cpp/graphics src/main/cpp/graphics/objects)
