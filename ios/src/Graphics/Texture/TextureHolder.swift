@@ -3,7 +3,7 @@ import MapCoreSharedModule
 import MetalKit
 
 @objc
-public class TextureHolderImpl: NSObject {
+public class TextureHolder: NSObject {
 
     let texture: MTLTexture?
 
@@ -41,7 +41,7 @@ public class TextureHolderImpl: NSObject {
     }
 }
 
-extension TextureHolderImpl: MCTextureHolder {
+extension TextureHolder: MCTextureHolderInterface {
     public func getImageWidth() -> Int32 {
         Int32(texture?.width ?? 0)
     }
@@ -61,7 +61,7 @@ extension TextureHolderImpl: MCTextureHolder {
     public func attachToGraphics() {  }
 }
 
-extension TextureHolderImpl {
+extension TextureHolder {
  struct TextureUsableSize {
      let width: Int
      let height: Int

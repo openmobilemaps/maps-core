@@ -3,7 +3,7 @@
 using namespace metal;
 
 vertex VertexOut
-baseMapVertexShader(const VertexIn vertexIn [[stage_in]],
+baseVertexShader(const VertexIn vertexIn [[stage_in]],
                     constant float4x4 &mvpMatrix [[buffer(1)]])
 {
     VertexOut out {
@@ -15,7 +15,7 @@ baseMapVertexShader(const VertexIn vertexIn [[stage_in]],
 }
 
 fragment float4
-baseMapFragmentShader(VertexOut in [[stage_in]],
+baseFragmentShader(VertexOut in [[stage_in]],
                       constant float &alpha [[buffer(1)]],
                       texture2d<float> texture0 [[ texture(0)]],
                       sampler textureSampler [[sampler(0)]])

@@ -56,7 +56,7 @@ enum PipelineKey: CaseIterable {
 
     private func vertexShader() -> String {
         switch self {
-        case .alphaShader: return "baseMapVertexShader"
+        case .alphaShader: return "baseVertexShader"
         case .lineShader: return "lineVertexShader"
         case .pointShader: return "pointVertexShader"
         case .colorShader: return "colorVertexShader"
@@ -66,7 +66,7 @@ enum PipelineKey: CaseIterable {
 
     private func fragmentShader() -> String {
         switch self {
-        case .alphaShader: return "baseMapFragmentShader"
+        case .alphaShader: return "baseFragmentShader"
         case .lineShader: return "lineFragmentShader"
         case .pointShader: return "pointFragmentShader"
         case .colorShader: return "colorFragmentShader"
