@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SceneInterface.h"
+#include "RendererInterface.h"
 
 class Scene: public SceneInterface {
 public:
@@ -26,4 +27,6 @@ private:
 
     const std::shared_ptr<::GraphicsObjectFactoryInterface> & graphicsFactory;
     const std::shared_ptr<::ShaderFactoryInterface> & shaderFactory;
+
+    std::shared_ptr<RendererInterface> renderer;
 };

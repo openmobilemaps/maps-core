@@ -32,11 +32,11 @@ std::shared_ptr<CameraInterface> Scene::getCamera() {
 }
 
 std::shared_ptr<RendererInterface> Scene::getRenderer() {
-
+    return renderer;
 }
 
 void Scene::drawFrame() {
-
+    renderer->drawFrame(renderingContext, camera);
 }
 
 void Scene::clear() {
