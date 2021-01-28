@@ -11,7 +11,7 @@ class MetalContext {
             fatalError("No command queue found. Are you testing with iOS 12 Simulator?")
         }
         do {
-            let library = try device.makeDefaultLibrary(bundle: Bundle(for: MetalContext.self))
+            let library = try device.makeDefaultLibrary(bundle: Bundle.module)
             return MetalContext(device: device, commandQueue: commandQueue, library: library)
         } catch {
             fatalError("No Default Metal Library found")

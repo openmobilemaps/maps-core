@@ -1,4 +1,4 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.3
 
 import PackageDescription
 
@@ -22,7 +22,10 @@ let package = Package(
         .target(
             name: "MapCore",
             dependencies: ["MapCoreSharedModule"],
-            path: "ios/src"),
+            path: "ios/src",
+            resources: [
+                .process("ios/src/Graphics/Shader/Metal")
+            ]),
         .target(
             name: "MapCoreSharedModule",
             dependencies: ["DjinniSupport"],
