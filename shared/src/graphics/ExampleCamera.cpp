@@ -1,6 +1,8 @@
 #include "ExampleCamera.h"
+#include "Matrix.h"
 
 ExampleCamera::ExampleCamera() : mvpMatrix(16,0) {
+    Matrix::setIdentityM(mvpMatrix, 0);
 }
 
 int64_t ExampleCamera::getMvpMatrix() {

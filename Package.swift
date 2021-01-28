@@ -35,7 +35,8 @@ let package = Package(
                       "generated/graphics"],
             publicHeadersPath: "generated/objc/objc",
             cxxSettings: [
-            .headerSearchPath("**")
+            .headerSearchPath("**"),
+                .headerSearchPath("src/graphics/helpers/")
             ]),
         .testTarget(
             name: "Tests",
