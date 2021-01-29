@@ -34,8 +34,8 @@ private:
         ~JavaProxy();
 
         void setFrame(const ::RectF & frame, const ::RectF & textureCoordinates) override;
-        void loadTexture(const std::shared_ptr<::RenderingContextInterface> & context, const std::shared_ptr<::TextureHolderInterface> & textureHolderInterface) override;
-        void removeTextures(const std::shared_ptr<::RenderingContextInterface> & context) override;
+        void loadTexture(const std::shared_ptr<::RenderingContextInterface> & context, const std::shared_ptr<::TextureHolderInterface> & textureHolder) override;
+        void removeTexture(const std::shared_ptr<::RenderingContextInterface> & context) override;
         std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override;
 
     private:
@@ -45,7 +45,7 @@ private:
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/graphics/objects/Rectangle2dInterface") };
     const jmethodID method_setFrame { ::djinni::jniGetMethodID(clazz.get(), "setFrame", "(Lch/ubique/mapscore/shared/graphics/common/RectF;Lch/ubique/mapscore/shared/graphics/common/RectF;)V") };
     const jmethodID method_loadTexture { ::djinni::jniGetMethodID(clazz.get(), "loadTexture", "(Lch/ubique/mapscore/shared/graphics/RenderingContextInterface;Lch/ubique/mapscore/shared/graphics/objects/TextureHolderInterface;)V") };
-    const jmethodID method_removeTextures { ::djinni::jniGetMethodID(clazz.get(), "removeTextures", "(Lch/ubique/mapscore/shared/graphics/RenderingContextInterface;)V") };
+    const jmethodID method_removeTexture { ::djinni::jniGetMethodID(clazz.get(), "removeTexture", "(Lch/ubique/mapscore/shared/graphics/RenderingContextInterface;)V") };
     const jmethodID method_asGraphicsObject { ::djinni::jniGetMethodID(clazz.get(), "asGraphicsObject", "()Lch/ubique/mapscore/shared/graphics/objects/GraphicsObjectInterface;") };
 };
 

@@ -12,7 +12,8 @@
 #include "LineShaderProgramInterface.h"
 #include "Line2dInterface.h"
 
-class Line2dOpenGl : public GraphicsObjectInterface, public Line2dInterface {
+class Line2dOpenGl
+        : public GraphicsObjectInterface, public Line2dInterface, public std::enable_shared_from_this<GraphicsObjectInterface> {
 public:
     Line2dOpenGl(const std::shared_ptr<::LineShaderProgramInterface> &shader);
 
@@ -29,7 +30,7 @@ public:
 
     virtual void setLinePositions(const std::vector<::Vec2F> &positions);
 
-    virtual std::shared_ptr<GraphicsObjectInterface> getAsGraphicsObject();
+    virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject();
 
 protected:
     void initializeLineAndPoints();

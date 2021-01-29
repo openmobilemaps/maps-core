@@ -27,8 +27,8 @@ graphics_object_factory_interface = interface +c +j +o
 rectangle_2d_interface = interface +c +j +o
 {
     set_frame(frame: rect_f, texture_coordinates: rect_f);
-    load_texture(context: rendering_context_interface, texture_holder_interface: texture_holder_interface);
-    remove_textures(context: rendering_context_interface);
+    load_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
+    remove_texture(context: rendering_context_interface);
     as_graphics_object(): graphics_object_interface;
 }
 

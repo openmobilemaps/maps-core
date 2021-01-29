@@ -7,11 +7,22 @@
 
 Line2dOpenGl::Line2dOpenGl(const std::shared_ptr<::LineShaderProgramInterface> &shader) : shaderProgram(shader) {}
 
+std::shared_ptr<GraphicsObjectInterface> Line2dOpenGl::asGraphicsObject() {
+    return shared_from_this();
+}
+
 bool Line2dOpenGl::isReady() {
     return ready;
 }
 
+void Line2dOpenGl::setLinePositions(const std::vector<::Vec2F> &positions) {
+    lineCoordinates = positions;
+    ready = false;
+}
+
 void Line2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
+    if (ready) return;
+
     std::shared_ptr<OpenGLContext> openGlContext = std::static_pointer_cast<OpenGLContext>(context);
     if (openGlContext->getProgram(shaderProgram->getPointProgramName()) == 0) {
         shaderProgram->setupPointProgram(openGlContext);
@@ -21,19 +32,6 @@ void Line2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &con
     }
     initializeLineAndPoints();
     ready = true;
-}
-
-void Line2dOpenGl::clear() {
-
-}
-
-void Line2dOpenGl::setLinePositions(const std::vector<::Vec2F> &positions) {
-    lineCoordinates = positions;
-    ready = false;
-}
-
-std::shared_ptr<GraphicsObjectInterface> Line2dOpenGl::getAsGraphicsObject() {
-    return std::shared_ptr<GraphicsObjectInterface>();
 }
 
 void Line2dOpenGl::initializeLineAndPoints() {
@@ -93,6 +91,11 @@ void Line2dOpenGl::initializeLineAndPoints() {
         lineIndexBuffer.push_back(4 * i + 1);
         lineIndexBuffer.push_back(4 * i + 3);
     }
+}
+
+void Line2dOpenGl::clear() {
+    // TODO TOPO-1470: Clear GL-Data (careful with shared program/textures)
+    ready = false;
 }
 
 void Line2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,

@@ -16,9 +16,9 @@ public:
 
     virtual void setFrame(const ::RectF & frame, const ::RectF & textureCoordinates) = 0;
 
-    virtual void loadTexture(const std::shared_ptr<::RenderingContextInterface> & context, const std::shared_ptr<TextureHolderInterface> & textureHolderInterface) = 0;
+    virtual void loadTexture(const std::shared_ptr<::RenderingContextInterface> & context, const std::shared_ptr<TextureHolderInterface> & textureHolder) = 0;
 
-    virtual void removeTextures(const std::shared_ptr<::RenderingContextInterface> & context) = 0;
+    virtual void removeTexture(const std::shared_ptr<::RenderingContextInterface> & context) = 0;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() = 0;
 };
