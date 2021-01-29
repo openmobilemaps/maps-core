@@ -1,10 +1,10 @@
-#include "OpenGLContext.h"
+#include "OpenGlContext.h"
 #include "opengl_wrapper.h"
 
-OpenGLContext::OpenGLContext() : programs(), texturePointers() {
+OpenGlContext::OpenGlContext() : programs(), texturePointers() {
 }
 
-int OpenGLContext::getProgram(std::string name) {
+int OpenGlContext::getProgram(std::string name) {
     if (programs.find(name) == programs.end()) {
         return 0;
     } else {
@@ -12,11 +12,11 @@ int OpenGLContext::getProgram(std::string name) {
     }
 }
 
-void OpenGLContext::storeProgram(std::string name, int program) {
+void OpenGlContext::storeProgram(std::string name, int program) {
     programs[name] = program;
 }
 
-std::vector<unsigned int> &OpenGLContext::getTexturePointerArray(std::string name, int capacity) {
+std::vector<unsigned int> &OpenGlContext::getTexturePointerArray(std::string name, int capacity) {
     if (texturePointers.find(name) == texturePointers.end()) {
         texturePointers[name] = std::vector<unsigned int>(capacity, 0);
     }
@@ -24,7 +24,7 @@ std::vector<unsigned int> &OpenGLContext::getTexturePointerArray(std::string nam
     return texturePointers[name];
 }
 
-void OpenGLContext::cleanAll() {
+void OpenGlContext::cleanAll() {
     for (std::map<std::string, int>::iterator it = programs.begin(); it != programs.end(); ++it) {
         glDeleteProgram(it->second);
     }
@@ -38,18 +38,18 @@ void OpenGLContext::cleanAll() {
     texturePointers.clear();
 }
 
-void OpenGLContext::onSurfaceCreated() {
+void OpenGlContext::onSurfaceCreated() {
     cleanAll();
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
 }
 
-void OpenGLContext::setViewportSize(const ::Vec2I & size) {
+void OpenGlContext::setViewportSize(const ::Vec2I & size) {
     viewportSize = size;
     glViewport(0, 0, size.x, size.y);
 }
 
-::Vec2I OpenGLContext::getViewportSize() {
+::Vec2I OpenGlContext::getViewportSize() {
     return viewportSize;
 }

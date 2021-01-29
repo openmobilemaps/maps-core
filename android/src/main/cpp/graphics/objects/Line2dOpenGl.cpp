@@ -23,7 +23,7 @@ void Line2dOpenGl::setLinePositions(const std::vector<::Vec2F> &positions) {
 void Line2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
     if (ready) return;
 
-    std::shared_ptr<OpenGLContext> openGlContext = std::static_pointer_cast<OpenGLContext>(context);
+    std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     if (openGlContext->getProgram(shaderProgram->getPointProgramName()) == 0) {
         shaderProgram->setupPointProgram(openGlContext);
     }
@@ -102,7 +102,7 @@ void Line2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
                           int64_t mvpMatrix) {
     if (!ready) return;
 
-    std::shared_ptr<OpenGLContext> openGlContext = std::static_pointer_cast<OpenGLContext>(context);
+    std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
 
     glEnable(GL_STENCIL_TEST);
     glStencilMask(0xFF);
@@ -123,7 +123,7 @@ void Line2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     glDisable(GL_STENCIL_TEST);
 }
 
-void Line2dOpenGl::drawLineSegments(std::shared_ptr<OpenGLContext> openGlContext, int64_t mvpMatrix) {
+void Line2dOpenGl::drawLineSegments(std::shared_ptr<OpenGlContext> openGlContext, int64_t mvpMatrix) {
     int program = openGlContext->getProgram(shaderProgram->getRectProgramName());
     // Add program to OpenGL environment
     glUseProgram(program);
@@ -166,7 +166,7 @@ void Line2dOpenGl::drawLineSegments(std::shared_ptr<OpenGLContext> openGlContext
     glDisable(GL_BLEND);
 }
 
-void Line2dOpenGl::drawPoints(std::shared_ptr<OpenGLContext> openGlContext, int64_t mvpMatrix) {
+void Line2dOpenGl::drawPoints(std::shared_ptr<OpenGlContext> openGlContext, int64_t mvpMatrix) {
     int program = openGlContext->getProgram(shaderProgram->getPointProgramName());
     // Add program to OpenGL environment
     glUseProgram(program);

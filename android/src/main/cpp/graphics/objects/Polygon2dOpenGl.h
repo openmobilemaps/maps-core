@@ -6,7 +6,7 @@
 #define MAPSDK_POLYGON2DOPENGL_H
 
 
-#include "OpenGLContext.h"
+#include "OpenGlContext.h"
 #include "ShaderProgramInterface.h"
 #include "GraphicsObjectInterface.h"
 #include "Polygon2dInterface.h"
@@ -36,7 +36,7 @@ public:
 protected:
     void initializePolygon();
 
-    void drawPolygon(std::shared_ptr<OpenGLContext> openGlContext, int program, int64_t mvpMatrix);
+    void drawPolygon(std::shared_ptr<OpenGlContext> openGlContext, int program, int64_t mvpMatrix);
 
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
 

@@ -41,7 +41,7 @@ void Rectangle2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
     };
     adjustTextureCoordinates();
 
-    std::shared_ptr<OpenGLContext> openGlContext = std::static_pointer_cast<OpenGLContext>(context);
+    std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     if (openGlContext->getProgram(shaderProgram->getProgramName()) == 0) {
         shaderProgram->setupProgram(openGlContext);
     }
@@ -94,7 +94,7 @@ void Rectangle2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
                                int64_t mvpMatrix) {
     if (!ready) return;
 
-    std::shared_ptr<OpenGLContext> openGlContext = std::static_pointer_cast<OpenGLContext>(context);
+    std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
 
     int mProgram = openGlContext->getProgram(shaderProgram->getProgramName());
 
@@ -140,7 +140,7 @@ void Rectangle2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     glDisable(GL_BLEND);
 }
 
-void Rectangle2dOpenGl::prepareTextureDraw(std::shared_ptr<OpenGLContext> &openGLContext, int mProgram) {
+void Rectangle2dOpenGl::prepareTextureDraw(std::shared_ptr<OpenGlContext> &openGLContext, int mProgram) {
     int mTextureUniformHandle = glGetUniformLocation(mProgram, "u_Texture");
 
     // Set the active texture unit to texture unit 0.
