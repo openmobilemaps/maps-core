@@ -20,10 +20,13 @@ public abstract class SceneInterface {
 
     public abstract void clear();
 
-    public static SceneInterface create(ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface graphicsFactory, ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface shaderFactory)
+    public abstract void invalidate();
+
+    public static SceneInterface create(ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface graphicsFactory, ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface shaderFactory, SceneCallbackInterface callbackInterface)
     {
         return CppProxy.create(graphicsFactory,
-                               shaderFactory);
+                               shaderFactory,
+                               callbackInterface);
     }
 
     public static SceneInterface createWithOpenGl()
@@ -110,7 +113,15 @@ public abstract class SceneInterface {
         }
         private native void native_clear(long _nativeRef);
 
-        public static native SceneInterface create(ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface graphicsFactory, ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface shaderFactory);
+        @Override
+        public void invalidate()
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            native_invalidate(this.nativeRef);
+        }
+        private native void native_invalidate(long _nativeRef);
+
+        public static native SceneInterface create(ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface graphicsFactory, ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface shaderFactory, SceneCallbackInterface callbackInterface);
 
         public static native SceneInterface createWithOpenGl();
     }

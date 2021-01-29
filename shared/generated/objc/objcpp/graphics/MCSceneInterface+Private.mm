@@ -9,6 +9,7 @@
 #import "MCGraphicsObjectFactoryInterface+Private.h"
 #import "MCRendererInterface+Private.h"
 #import "MCRenderingContextInterface+Private.h"
+#import "MCSceneCallbackInterface+Private.h"
 #import "MCShaderFactoryInterface+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -35,10 +36,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 }
 
 + (nullable MCSceneInterface *)create:(nullable id<MCGraphicsObjectFactoryInterface>)graphicsFactory
-                        shaderFactory:(nullable id<MCShaderFactoryInterface>)shaderFactory {
+                        shaderFactory:(nullable id<MCShaderFactoryInterface>)shaderFactory
+                    callbackInterface:(nullable id<MCSceneCallbackInterface>)callbackInterface {
     try {
         auto objcpp_result_ = ::SceneInterface::create(::djinni_generated::GraphicsObjectFactoryInterface::toCpp(graphicsFactory),
-                                                       ::djinni_generated::ShaderFactoryInterface::toCpp(shaderFactory));
+                                                       ::djinni_generated::ShaderFactoryInterface::toCpp(shaderFactory),
+                                                       ::djinni_generated::SceneCallbackInterface::toCpp(callbackInterface));
         return ::djinni_generated::SceneInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -92,6 +95,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)clear {
     try {
         _cppRefHandle.get()->clear();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)invalidate {
+    try {
+        _cppRefHandle.get()->invalidate();
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

@@ -6,7 +6,7 @@
 
 scene_interface = interface +c
 {
-    static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface) : scene_interface;
+    static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface, callback_interface: scene_callback_interface) : scene_interface;
     static createWithOpenGl() : scene_interface;
     set_rendering_context(rendering_context: rendering_context_interface);
     get_rendering_context() : rendering_context_interface;
@@ -15,6 +15,12 @@ scene_interface = interface +c
     get_renderer() : renderer_interface;
     draw_frame();
     clear();
+    invalidate();
+}
+
+scene_callback_interface = interface +c +j +o 
+{
+    invalidate();
 }
 
 rendering_context_interface = interface +c +j +o

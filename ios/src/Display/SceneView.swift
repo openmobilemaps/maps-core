@@ -16,6 +16,7 @@ public class SceneView: MTKView {
         self.scene = scene
         self.renderingContext = RenderingContext()
         super.init(frame: .zero, device: MetalContext.current.device)
+        self.renderingContext.sceneView = self
         setup()
     }
 

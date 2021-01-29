@@ -8,12 +8,14 @@
 @protocol MCCameraInterface;
 @protocol MCRendererInterface;
 @protocol MCRenderingContextInterface;
+@protocol MCSceneCallbackInterface;
 
 
 @interface MCSceneInterface : NSObject
 
 + (nullable MCSceneInterface *)create:(nullable id<MCGraphicsObjectFactoryInterface>)graphicsFactory
-                        shaderFactory:(nullable id<MCShaderFactoryInterface>)shaderFactory;
+                        shaderFactory:(nullable id<MCShaderFactoryInterface>)shaderFactory
+                    callbackInterface:(nullable id<MCSceneCallbackInterface>)callbackInterface;
 
 + (nullable MCSceneInterface *)createWithOpenGl;
 
@@ -30,5 +32,7 @@
 - (void)drawFrame;
 
 - (void)clear;
+
+- (void)invalidate;
 
 @end

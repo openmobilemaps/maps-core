@@ -10,12 +10,13 @@
 class CameraInterface;
 class RendererInterface;
 class RenderingContextInterface;
+class SceneCallbackInterface;
 
 class SceneInterface {
 public:
     virtual ~SceneInterface() {}
 
-    static std::shared_ptr<SceneInterface> create(const std::shared_ptr<::GraphicsObjectFactoryInterface> & graphicsFactory, const std::shared_ptr<::ShaderFactoryInterface> & shaderFactory);
+    static std::shared_ptr<SceneInterface> create(const std::shared_ptr<::GraphicsObjectFactoryInterface> & graphicsFactory, const std::shared_ptr<::ShaderFactoryInterface> & shaderFactory, const std::shared_ptr<SceneCallbackInterface> & callbackInterface);
 
     static std::shared_ptr<SceneInterface> createWithOpenGl();
 
@@ -32,4 +33,6 @@ public:
     virtual void drawFrame() = 0;
 
     virtual void clear() = 0;
+
+    virtual void invalidate() = 0;
 };

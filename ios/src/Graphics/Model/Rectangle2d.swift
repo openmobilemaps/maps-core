@@ -82,16 +82,16 @@ extension Rectangle2d: MCRectangle2dInterface {
         self.indicesBuffer = indicesBuffer
     }
 
-    func loadTexture(_ context: MCRenderingContextInterface?, textureHolderInterface textureHolder: MCTextureHolderInterface?) {
+    func loadTexture(_ textureHolder: MCTextureHolderInterface?) {
         guard let textureHolder = textureHolder as? TextureHolder else {
             fatalError("unexpected TextureHolder")
         }
         texture = textureHolder.texture
     }
 
-    func removeTextures(_ context: MCRenderingContextInterface?) {
+    func removeTexture() {
         texture = nil
     }
-
+    
     func asGraphicsObject() -> MCGraphicsObjectInterface? { self }
 }

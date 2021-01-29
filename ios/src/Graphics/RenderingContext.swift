@@ -4,7 +4,8 @@ import MapCoreSharedModule
 
 @objc
 class RenderingContext: NSObject {
-    var encoder: MTLRenderCommandEncoder?
+    weak var encoder: MTLRenderCommandEncoder?
+    weak var sceneView: SceneView!
 }
 
 extension RenderingContext: MCRenderingContextInterface {

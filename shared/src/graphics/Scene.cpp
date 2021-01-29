@@ -24,7 +24,7 @@ renderer(std::make_shared<Renderer>()) {
     // Begin testing code
     auto shader = shaderFactory->createColorShader();
     auto rect = graphicsFactory->createRectangle(shader->asShaderProgramInterface());
-    rect->setFrame(RectF(0, 0, 0.2, 0.2), RectF(0, 0, 0.2, 0.2));
+    rect->setFrame(RectF(0, 0, 0.8, 0.8), RectF(0, 0, 0.2, 0.2));
     shader->setColor(1, 0, 0, 0.5);
     std::vector<std::shared_ptr<GraphicsObjectInterface>> objects{rect->asGraphicsObject()};
     renderPass = std::make_shared<RenderPass>(RenderPassConfig(0), objects);
