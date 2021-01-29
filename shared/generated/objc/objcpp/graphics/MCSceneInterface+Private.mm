@@ -36,12 +36,10 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 }
 
 + (nullable MCSceneInterface *)create:(nullable id<MCGraphicsObjectFactoryInterface>)graphicsFactory
-                        shaderFactory:(nullable id<MCShaderFactoryInterface>)shaderFactory
-                    callbackInterface:(nullable id<MCSceneCallbackInterface>)callbackInterface {
+                        shaderFactory:(nullable id<MCShaderFactoryInterface>)shaderFactory {
     try {
         auto objcpp_result_ = ::SceneInterface::create(::djinni_generated::GraphicsObjectFactoryInterface::toCpp(graphicsFactory),
-                                                       ::djinni_generated::ShaderFactoryInterface::toCpp(shaderFactory),
-                                                       ::djinni_generated::SceneCallbackInterface::toCpp(callbackInterface));
+                                                       ::djinni_generated::ShaderFactoryInterface::toCpp(shaderFactory));
         return ::djinni_generated::SceneInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -50,6 +48,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = ::SceneInterface::createWithOpenGl();
         return ::djinni_generated::SceneInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setCallbackHandler:(nullable id<MCSceneCallbackInterface>)callbackInterface {
+    try {
+        _cppRefHandle.get()->setCallbackHandler(::djinni_generated::SceneCallbackInterface::toCpp(callbackInterface));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

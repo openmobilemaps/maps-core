@@ -61,6 +61,8 @@ void Scene::drawFrame() {
     }
 }
 
-void Scene::clear() {
+void Scene::clear() {}
 
-}
+void Scene::invalidate() {}
+
+void Scene::setCallbackHandler(const std::shared_ptr<SceneCallbackInterface> & callbackInterface) {}

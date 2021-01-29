@@ -14,10 +14,11 @@
 @interface MCSceneInterface : NSObject
 
 + (nullable MCSceneInterface *)create:(nullable id<MCGraphicsObjectFactoryInterface>)graphicsFactory
-                        shaderFactory:(nullable id<MCShaderFactoryInterface>)shaderFactory
-                    callbackInterface:(nullable id<MCSceneCallbackInterface>)callbackInterface;
+                        shaderFactory:(nullable id<MCShaderFactoryInterface>)shaderFactory;
 
 + (nullable MCSceneInterface *)createWithOpenGl;
+
+- (void)setCallbackHandler:(nullable id<MCSceneCallbackInterface>)callbackInterface;
 
 - (void)setRenderingContext:(nullable id<MCRenderingContextInterface>)renderingContext;
 
