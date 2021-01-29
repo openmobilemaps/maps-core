@@ -8,9 +8,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class Rectangle2dInterface {
     public abstract void setFrame(ch.ubique.mapscore.shared.graphics.common.RectF frame, ch.ubique.mapscore.shared.graphics.common.RectF textureCoordinates);
 
-    public abstract void loadTexture(ch.ubique.mapscore.shared.graphics.RenderingContextInterface context, TextureHolderInterface textureHolder);
+    public abstract void loadTexture(TextureHolderInterface textureHolder);
 
-    public abstract void removeTexture(ch.ubique.mapscore.shared.graphics.RenderingContextInterface context);
+    public abstract void removeTexture();
 
     public abstract GraphicsObjectInterface asGraphicsObject();
 
@@ -46,20 +46,20 @@ public abstract class Rectangle2dInterface {
         private native void native_setFrame(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.RectF frame, ch.ubique.mapscore.shared.graphics.common.RectF textureCoordinates);
 
         @Override
-        public void loadTexture(ch.ubique.mapscore.shared.graphics.RenderingContextInterface context, TextureHolderInterface textureHolder)
+        public void loadTexture(TextureHolderInterface textureHolder)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
-            native_loadTexture(this.nativeRef, context, textureHolder);
+            native_loadTexture(this.nativeRef, textureHolder);
         }
-        private native void native_loadTexture(long _nativeRef, ch.ubique.mapscore.shared.graphics.RenderingContextInterface context, TextureHolderInterface textureHolder);
+        private native void native_loadTexture(long _nativeRef, TextureHolderInterface textureHolder);
 
         @Override
-        public void removeTexture(ch.ubique.mapscore.shared.graphics.RenderingContextInterface context)
+        public void removeTexture()
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
-            native_removeTexture(this.nativeRef, context);
+            native_removeTexture(this.nativeRef);
         }
-        private native void native_removeTexture(long _nativeRef, ch.ubique.mapscore.shared.graphics.RenderingContextInterface context);
+        private native void native_removeTexture(long _nativeRef);
 
         @Override
         public GraphicsObjectInterface asGraphicsObject()
