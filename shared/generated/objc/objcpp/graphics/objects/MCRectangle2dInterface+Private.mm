@@ -43,16 +43,16 @@ textureCoordinates:(nonnull MCRectF *)textureCoordinates {
 }
 
 - (void)loadTexture:(nullable id<MCRenderingContextInterface>)context
-textureHolderInterface:(nullable id<MCTextureHolderInterface>)textureHolderInterface {
+      textureHolder:(nullable id<MCTextureHolderInterface>)textureHolder {
     try {
         _cppRefHandle.get()->loadTexture(::djinni_generated::RenderingContextInterface::toCpp(context),
-                                         ::djinni_generated::TextureHolderInterface::toCpp(textureHolderInterface));
+                                         ::djinni_generated::TextureHolderInterface::toCpp(textureHolder));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)removeTextures:(nullable id<MCRenderingContextInterface>)context {
+- (void)removeTexture:(nullable id<MCRenderingContextInterface>)context {
     try {
-        _cppRefHandle.get()->removeTextures(::djinni_generated::RenderingContextInterface::toCpp(context));
+        _cppRefHandle.get()->removeTexture(::djinni_generated::RenderingContextInterface::toCpp(context));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -79,17 +79,17 @@ public:
                                             textureCoordinates:(::djinni_generated::RectF::fromCpp(c_textureCoordinates))];
         }
     }
-    void loadTexture(const std::shared_ptr<::RenderingContextInterface> & c_context, const std::shared_ptr<::TextureHolderInterface> & c_textureHolderInterface) override
+    void loadTexture(const std::shared_ptr<::RenderingContextInterface> & c_context, const std::shared_ptr<::TextureHolderInterface> & c_textureHolder) override
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() loadTexture:(::djinni_generated::RenderingContextInterface::fromCpp(c_context))
-                                           textureHolderInterface:(::djinni_generated::TextureHolderInterface::fromCpp(c_textureHolderInterface))];
+                                                    textureHolder:(::djinni_generated::TextureHolderInterface::fromCpp(c_textureHolder))];
         }
     }
-    void removeTextures(const std::shared_ptr<::RenderingContextInterface> & c_context) override
+    void removeTexture(const std::shared_ptr<::RenderingContextInterface> & c_context) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() removeTextures:(::djinni_generated::RenderingContextInterface::fromCpp(c_context))];
+            [djinni_private_get_proxied_objc_object() removeTexture:(::djinni_generated::RenderingContextInterface::fromCpp(c_context))];
         }
     }
     std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override

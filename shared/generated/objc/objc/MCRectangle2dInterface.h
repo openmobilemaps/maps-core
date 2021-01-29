@@ -14,9 +14,9 @@
 textureCoordinates:(nonnull MCRectF *)textureCoordinates;
 
 - (void)loadTexture:(nullable id<MCRenderingContextInterface>)context
-textureHolderInterface:(nullable id<MCTextureHolderInterface>)textureHolderInterface;
+      textureHolder:(nullable id<MCTextureHolderInterface>)textureHolder;
 
-- (void)removeTextures:(nullable id<MCRenderingContextInterface>)context;
+- (void)removeTexture:(nullable id<MCRenderingContextInterface>)context;
 
 - (nullable id<MCGraphicsObjectInterface>)asGraphicsObject;
 

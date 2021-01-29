@@ -1,0 +1,54 @@
+//
+// Created by Christoph Maurhofer on 28.01.2021.
+//
+
+#ifndef MAPSDK_POLYGON2DOPENGL_H
+#define MAPSDK_POLYGON2DOPENGL_H
+
+
+#include "OpenGLContext.h"
+#include "ShaderProgramInterface.h"
+#include "GraphicsObjectInterface.h"
+#include "Polygon2dInterface.h"
+#include "opengl_wrapper.h"
+
+class Polygon2dOpenGl
+        : public GraphicsObjectInterface, public Polygon2dInterface, public std::enable_shared_from_this<GraphicsObjectInterface> {
+public:
+    Polygon2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader);
+
+    ~Polygon2dOpenGl() {};
+
+    virtual bool isReady();
+
+    virtual void setup(const std::shared_ptr<::RenderingContextInterface> &context);
+
+    virtual void clear();
+
+    virtual void
+    render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass, int64_t mvpMatrix);
+
+    virtual void
+    setPolygonPositions(const std::vector<::Vec2F> &positions, const std::vector<std::vector<::Vec2F>> &holes, bool isConvex);
+
+    virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject();
+
+protected:
+    void initializePolygon();
+
+    void drawPolygon(std::shared_ptr<OpenGLContext> openGlContext, int program, int64_t mvpMatrix);
+
+    std::shared_ptr<ShaderProgramInterface> shaderProgram;
+
+    bool polygonIsConvex = false;
+    std::vector<::Vec2F> polygonCoordinates;
+    std::vector<std::vector<::Vec2F>> holePolygonCoordinates;
+
+    std::vector<GLfloat> vertexBuffer;
+    std::vector<GLushort> indexBuffer;
+
+    bool ready = false;
+};
+
+
+#endif //MAPSDK_POLYGON2DOPENGL_H
