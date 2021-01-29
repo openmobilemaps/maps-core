@@ -24,7 +24,7 @@ public:
 
     virtual ::Vec2I getViewportSize();
 
-    virtual void clearWithColor(float r, float g, float b, float a);
+    virtual void setupDrawFrame();
 
 protected:
     std::map<std::string, int> programs;

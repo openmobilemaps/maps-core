@@ -16,7 +16,7 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> & rend
     {
         auto pass = renderQueue.front();
 
-        renderingContext->clearWithColor(245.0 / 255.0, 245.0 / 255.0, 246.0 / 255.0, 1);
+        renderingContext->setupDrawFrame();
 
         for (const auto &object: pass->getGraphicsObjects()) {
             // begin test code

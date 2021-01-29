@@ -5,7 +5,6 @@
 #import "MCRenderingContextInterface.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
-#import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCVec2I+Private.h"
 #include <exception>
@@ -51,15 +50,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)clearWithColor:(float)r
-                     g:(float)g
-                     b:(float)b
-                     a:(float)a {
+- (void)setupDrawFrame {
     try {
-        _cppRefHandle.get()->clearWithColor(::djinni::F32::toCpp(r),
-                                            ::djinni::F32::toCpp(g),
-                                            ::djinni::F32::toCpp(b),
-                                            ::djinni::F32::toCpp(a));
+        _cppRefHandle.get()->setupDrawFrame();
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -91,13 +84,10 @@ public:
             return ::djinni_generated::Vec2I::toCpp(objcpp_result_);
         }
     }
-    void clearWithColor(float c_r, float c_g, float c_b, float c_a) override
+    void setupDrawFrame() override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() clearWithColor:(::djinni::F32::fromCpp(c_r))
-                                                                   g:(::djinni::F32::fromCpp(c_g))
-                                                                   b:(::djinni::F32::fromCpp(c_b))
-                                                                   a:(::djinni::F32::fromCpp(c_a))];
+            [djinni_private_get_proxied_objc_object() setupDrawFrame];
         }
     }
 };

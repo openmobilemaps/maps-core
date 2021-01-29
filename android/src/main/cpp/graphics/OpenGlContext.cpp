@@ -54,7 +54,7 @@ void OpenGlContext::setViewportSize(const ::Vec2I &size) {
     return viewportSize;
 }
 
-void OpenGlContext::clearWithColor(float r, float g, float b, float a) {
-    glClearColor(r, g, b, a);
+void OpenGlContext::setupDrawFrame() {
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 }
