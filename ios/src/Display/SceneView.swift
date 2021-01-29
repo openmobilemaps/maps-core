@@ -9,6 +9,9 @@ public class SceneView: MTKView {
     private var sizeChanged: Bool = false
     private var backgroundDisable = false
 
+    private var framesToRender: UInt = 5
+    private let framesToRenderAfterInvalidate: UInt = 5
+
     public init() {
         guard let scene = MCSceneInterface.create(GraphicsFactory(), shaderFactory: ShaderFactory()) else {
             fatalError("Can't create Scene")
@@ -38,7 +41,13 @@ public class SceneView: MTKView {
 
         scene.setRenderingContext(renderingContext)
     }
+}
 
+extension SceneView: MCSceneCallbackInterface {
+    public func invalidate() {
+        isPaused = false
+        framesToRender = framesToRenderAfterInvalidate
+    }
 }
 
 extension SceneView: MTKViewDelegate {
@@ -51,6 +60,13 @@ extension SceneView: MTKViewDelegate {
         guard !backgroundDisable else {
             return // don't execute metal calls in background
         }
+
+        guard framesToRender != 0 else {
+            isPaused = true
+            return
+        }
+
+        framesToRender -= 1
 
         guard let renderPassDescriptor = view.currentRenderPassDescriptor,
               let commandBuffer = MetalContext.current.commandQueue.makeCommandBuffer(),

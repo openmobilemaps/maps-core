@@ -36,6 +36,10 @@ void Scene::setRenderingContext(const std::shared_ptr<RenderingContextInterface>
     this->renderingContext = renderingContext;
 }
 
+void Scene::setCallbackHandler(const std::shared_ptr<SceneCallbackInterface> & callbackInterface) {
+    callbackHandler = callbackInterface;
+}
+
 std::shared_ptr<RenderingContextInterface> Scene::getRenderingContext() {
     return renderingContext;
 }
@@ -63,6 +67,8 @@ void Scene::drawFrame() {
 
 void Scene::clear() {}
 
-void Scene::invalidate() {}
-
-void Scene::setCallbackHandler(const std::shared_ptr<SceneCallbackInterface> & callbackInterface) {}
+void Scene::invalidate() {
+    if (auto handler = callbackHandler) {
+        (*handler)->invalidate();
+    }
+}
