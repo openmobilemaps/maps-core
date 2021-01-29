@@ -3,7 +3,7 @@ import MapCoreSharedModule
 import Metal
 
 class BaseGraphicsObject {
-    private var isReadyFlag: Bool = false
+    private var ReadyFlag_: Bool = false
     
     private var context: MCRenderingContextInterface!
 
@@ -31,7 +31,7 @@ extension BaseGraphicsObject: MCGraphicsObjectInterface {
 
     func clear() { }
 
-    func isReady() -> Bool { isReadyFlag }
+    func isReady() -> Bool { ReadyFlag_ }
 
     func render(_ context: MCRenderingContextInterface?, renderPass: MCRenderPassConfig, mvpMatrix: Int64) {
         guard let context = context as? RenderingContext,

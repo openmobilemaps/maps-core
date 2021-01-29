@@ -74,7 +74,7 @@ extension Rectangle2d: MCRectangle2dInterface {
         ]
 
         guard let verticesBuffer = device.makeBuffer(bytes: vertecies, length: MemoryLayout<Vertex>.stride * vertecies.count, options: []), let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: []) else {
-            fatalError("Cannot allocate buffers for the UBTileModel")
+            fatalError("Cannot allocate buffers")
         }
 
         indicesCount = indices.count
