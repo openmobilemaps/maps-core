@@ -19,7 +19,8 @@ std::shared_ptr<GraphicsObjectInterface> Rectangle2dOpenGl::asGraphicsObject() {
 
 void Rectangle2dOpenGl::clear() {
     // TODO TOPO-1470: Clear GL-Data (careful with shared program/textures)
-    // textureLoaded = false; ready = false;
+    removeTexture();
+    ready = false;
 }
 
 void Rectangle2dOpenGl::setFrame(const RectF &frame, const RectF &textureCoordinates) {
@@ -48,8 +49,7 @@ void Rectangle2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
     ready = true;
 }
 
-void Rectangle2dOpenGl::loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
-                                    const std::shared_ptr<TextureHolderInterface> &textureHolder) {
+void Rectangle2dOpenGl::loadTexture(const std::shared_ptr<TextureHolderInterface> &textureHolder) {
     glGenTextures(1, (unsigned int *) &texturePointer[0]);
 
     if (textureHolder != nullptr) {
@@ -75,7 +75,7 @@ void Rectangle2dOpenGl::loadTexture(const std::shared_ptr<::RenderingContextInte
     }
 }
 
-void Rectangle2dOpenGl::removeTexture(const std::shared_ptr<::RenderingContextInterface> &context) {
+void Rectangle2dOpenGl::removeTexture() {
     glDeleteTextures(1, &texturePointer[0]);
     texturePointer = std::vector<GLuint>(1, 0);
     textureLoaded = false;
@@ -92,6 +92,8 @@ void Rectangle2dOpenGl::adjustTextureCoordinates() {
 
 void Rectangle2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                                int64_t mvpMatrix) {
+    if (!ready) return;
+
     std::shared_ptr<OpenGLContext> openGlContext = std::static_pointer_cast<OpenGLContext>(context);
 
     int mProgram = openGlContext->getProgram(shaderProgram->getProgramName());

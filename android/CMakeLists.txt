@@ -36,7 +36,7 @@ include_directories(../../external/djinni/support-lib ../../external/djinni/supp
 include_directories(../shared/generated/jni/graphics ../shared/generated/jni/graphics/common ../shared/generated/jni/graphics/objects ../shared/generated/jni/graphics/shader)
 include_directories(../shared/generated/jni/map)
 include_directories(../shared/src ../shared/src/logger)
-include_directories(../shared/src/graphics ../shared/src/graphics/common ../shared/src/graphics/objects ../shared/src/graphics/shader)
+include_directories(../shared/src/graphics ../shared/src/graphics/common ../shared/src/graphics/objects ../shared/src/graphics/shader ../shared/src/graphics/helpers)
 include_directories(../shared/src/map)
 include_directories(src/main/cpp src/main/cpp/graphics src/main/cpp/graphics/objects)
 

@@ -33,10 +33,9 @@ public:
 
     virtual void setFrame(const ::RectF &frame, const ::RectF &textureCoordinates);
 
-    virtual void loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
-                             const std::shared_ptr<TextureHolderInterface> &textureHolder);
+    virtual void loadTexture(const std::shared_ptr<TextureHolderInterface> &textureHolder);
 
-    virtual void removeTexture(const std::shared_ptr<::RenderingContextInterface> &context);
+    virtual void removeTexture();
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject();
 

@@ -4,7 +4,6 @@
 #include "NativeRectangle2dInterface.h"  // my header
 #include "NativeGraphicsObjectInterface.h"
 #include "NativeRectF.h"
-#include "NativeRenderingContextInterface.h"
 #include "NativeTextureHolderInterface.h"
 
 namespace djinni_generated {
@@ -26,21 +25,19 @@ void NativeRectangle2dInterface::JavaProxy::setFrame(const ::RectF & c_frame, co
                            ::djinni::get(::djinni_generated::NativeRectF::fromCpp(jniEnv, c_textureCoordinates)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
-void NativeRectangle2dInterface::JavaProxy::loadTexture(const std::shared_ptr<::RenderingContextInterface> & c_context, const std::shared_ptr<::TextureHolderInterface> & c_textureHolder) {
+void NativeRectangle2dInterface::JavaProxy::loadTexture(const std::shared_ptr<::TextureHolderInterface> & c_textureHolder) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeRectangle2dInterface>::get();
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_loadTexture,
-                           ::djinni::get(::djinni_generated::NativeRenderingContextInterface::fromCpp(jniEnv, c_context)),
                            ::djinni::get(::djinni_generated::NativeTextureHolderInterface::fromCpp(jniEnv, c_textureHolder)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
-void NativeRectangle2dInterface::JavaProxy::removeTexture(const std::shared_ptr<::RenderingContextInterface> & c_context) {
+void NativeRectangle2dInterface::JavaProxy::removeTexture() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeRectangle2dInterface>::get();
-    jniEnv->CallVoidMethod(Handle::get().get(), data.method_removeTexture,
-                           ::djinni::get(::djinni_generated::NativeRenderingContextInterface::fromCpp(jniEnv, c_context)));
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_removeTexture);
     ::djinni::jniExceptionCheck(jniEnv);
 }
 std::shared_ptr<::GraphicsObjectInterface> NativeRectangle2dInterface::JavaProxy::asGraphicsObject() {
@@ -70,22 +67,21 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_Rectangl
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_Rectangle2dInterface_00024CppProxy_native_1loadTexture(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderingContextInterface::JniType j_context, jobject j_textureHolder)
+CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_Rectangle2dInterface_00024CppProxy_native_1loadTexture(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_textureHolder)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::Rectangle2dInterface>(nativeRef);
-        ref->loadTexture(::djinni_generated::NativeRenderingContextInterface::toCpp(jniEnv, j_context),
-                         ::djinni_generated::NativeTextureHolderInterface::toCpp(jniEnv, j_textureHolder));
+        ref->loadTexture(::djinni_generated::NativeTextureHolderInterface::toCpp(jniEnv, j_textureHolder));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_Rectangle2dInterface_00024CppProxy_native_1removeTexture(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderingContextInterface::JniType j_context)
+CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_Rectangle2dInterface_00024CppProxy_native_1removeTexture(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::Rectangle2dInterface>(nativeRef);
-        ref->removeTexture(::djinni_generated::NativeRenderingContextInterface::toCpp(jniEnv, j_context));
+        ref->removeTexture();
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
