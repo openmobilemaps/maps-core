@@ -9,14 +9,19 @@ void Renderer::addToRenderQueue(const std::shared_ptr<RenderPassInterface> & ren
 /** Ensure calling on graphics thread */
 void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> & renderingContext,
                          const std::shared_ptr<CameraInterface> & camera) {
-    
+
     auto mvpMatrix = camera->getMvpMatrix();
 
     while (!renderQueue.empty())
     {
         auto pass = renderQueue.front();
 
+        renderingContext->clearWithColor(245.0 / 255.0, 245.0 / 255.0, 246.0 / 255.0, 1);
+
         for (const auto &object: pass->getGraphicsObjects()) {
+            // begin test code
+            if (!object->isReady()) object->setup(renderingContext);
+            // end test code
             object->render(renderingContext, pass->getRenderPassConfig(), mvpMatrix);
         }
 

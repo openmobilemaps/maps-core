@@ -14,6 +14,8 @@ public abstract class RenderingContextInterface {
 
     public abstract ch.ubique.mapscore.shared.graphics.common.Vec2I getViewportSize();
 
+    public abstract void clearWithColor(float r, float g, float b, float a);
+
     private static final class CppProxy extends RenderingContextInterface
     {
         private final long nativeRef;
@@ -60,5 +62,13 @@ public abstract class RenderingContextInterface {
             return native_getViewportSize(this.nativeRef);
         }
         private native ch.ubique.mapscore.shared.graphics.common.Vec2I native_getViewportSize(long _nativeRef);
+
+        @Override
+        public void clearWithColor(float r, float g, float b, float a)
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            native_clearWithColor(this.nativeRef, r, g, b, a);
+        }
+        private native void native_clearWithColor(long _nativeRef, float r, float g, float b, float a);
     }
 }

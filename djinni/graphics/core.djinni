@@ -31,6 +31,7 @@ rendering_context_interface = interface +c +j +o
     # Ensure calling on graphics thread
     set_viewport_size(size: vec_2_i);
     get_viewport_size() : vec_2_i; 
+    clearWithColor(r: f32, g: f32, b: f32, a: f32);
 }
 
 render_pass_interface = interface +c +j +o

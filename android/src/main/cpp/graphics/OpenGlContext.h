@@ -24,6 +24,8 @@ public:
 
     virtual ::Vec2I getViewportSize();
 
+    virtual void clearWithColor(float r, float g, float b, float a);
+
 protected:
     std::map<std::string, int> programs;
     std::map<std::string, std::vector<unsigned int>> texturePointers;

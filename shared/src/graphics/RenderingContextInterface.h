@@ -16,4 +16,6 @@ public:
     virtual void setViewportSize(const ::Vec2I & size) = 0;
 
     virtual ::Vec2I getViewportSize() = 0;
+
+    virtual void clearWithColor(float r, float g, float b, float a) = 0;
 };

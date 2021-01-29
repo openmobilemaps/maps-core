@@ -45,11 +45,16 @@ void OpenGlContext::onSurfaceCreated() {
     glDisable(GL_BLEND);
 }
 
-void OpenGlContext::setViewportSize(const ::Vec2I & size) {
+void OpenGlContext::setViewportSize(const ::Vec2I &size) {
     viewportSize = size;
     glViewport(0, 0, size.x, size.y);
 }
 
 ::Vec2I OpenGlContext::getViewportSize() {
     return viewportSize;
+}
+
+void OpenGlContext::clearWithColor(float r, float g, float b, float a) {
+    glClearColor(r, g, b, a);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 }
