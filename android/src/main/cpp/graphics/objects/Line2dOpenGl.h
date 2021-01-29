@@ -7,7 +7,7 @@
 
 #include "opengl_wrapper.h"
 #include "OpenGlHelper.h"
-#include "OpenGLContext.h"
+#include "OpenGlContext.h"
 #include "GraphicsObjectInterface.h"
 #include "LineShaderProgramInterface.h"
 #include "Line2dInterface.h"
@@ -35,9 +35,9 @@ public:
 protected:
     void initializeLineAndPoints();
 
-    void drawLineSegments(std::shared_ptr<OpenGLContext> openGlContext, int64_t mvpMatrix);
+    void drawLineSegments(std::shared_ptr<OpenGlContext> openGlContext, int64_t mvpMatrix);
 
-    void drawPoints(std::shared_ptr<OpenGLContext> openGlContext, int64_t mvpMatrix);
+    void drawPoints(std::shared_ptr<OpenGlContext> openGlContext, int64_t mvpMatrix);
 
     std::vector<Vec2F> lineCoordinates;
 

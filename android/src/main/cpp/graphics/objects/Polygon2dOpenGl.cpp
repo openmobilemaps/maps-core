@@ -26,7 +26,7 @@ void Polygon2dOpenGl::setPolygonPositions(const std::vector<::Vec2F> &positions,
 void Polygon2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
     if (ready) return;
 
-    std::shared_ptr<OpenGLContext> openGlContext = std::static_pointer_cast<OpenGLContext>(context);
+    std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     if (openGlContext->getProgram(shaderProgram->getProgramName()) == 0) {
         shaderProgram->setupProgram(openGlContext);
     }
@@ -78,7 +78,7 @@ void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> 
                              int64_t mvpMatrix) {
     if (!ready) return;
 
-    std::shared_ptr<OpenGLContext> openGlContext = std::static_pointer_cast<OpenGLContext>(context);
+    std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     int program = openGlContext->getProgram(shaderProgram->getProgramName());
 
     glEnable(GL_STENCIL_TEST);
@@ -114,7 +114,7 @@ void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> 
     glDisable(GL_STENCIL_TEST);
 }
 
-void Polygon2dOpenGl::drawPolygon(std::shared_ptr<OpenGLContext> openGlContext, int program, int64_t mvpMatrix) {
+void Polygon2dOpenGl::drawPolygon(std::shared_ptr<OpenGlContext> openGlContext, int program, int64_t mvpMatrix) {
     // Add program to OpenGL environment
     glUseProgram(program);
 

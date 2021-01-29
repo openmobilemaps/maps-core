@@ -6,9 +6,9 @@
 #include <map>
 #include "RenderingContextInterface.h"
 
-class OpenGLContext : public RenderingContextInterface, std::enable_shared_from_this<OpenGLContext> {
+class OpenGlContext : public RenderingContextInterface, std::enable_shared_from_this<OpenGlContext> {
 public:
-    OpenGLContext();
+    OpenGlContext();
 
     int getProgram(std::string name);
 

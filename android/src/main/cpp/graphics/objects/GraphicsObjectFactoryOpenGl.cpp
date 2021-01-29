@@ -5,10 +5,11 @@
 #include "GraphicsObjectFactoryOpenGl.h"
 #include "Line2dOpenGl.h"
 #include "Polygon2dOpenGl.h"
+#include "Rectangle2dOpenGl.h"
 
 std::shared_ptr<Rectangle2dInterface>
 GraphicsObjectFactoryOpenGl::createRectangle(const std::shared_ptr<::ShaderProgramInterface> &shader) {
-    return std::shared_ptr<Rectangle2dInterface>();
+    return std::make_shared<Rectangle2dOpenGl>(shader);
 }
 
 std::shared_ptr<Line2dInterface>

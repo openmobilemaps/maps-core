@@ -38,7 +38,7 @@ include_directories(../shared/generated/jni/map)
 include_directories(../shared/src ../shared/src/logger)
 include_directories(../shared/src/graphics ../shared/src/graphics/common ../shared/src/graphics/objects ../shared/src/graphics/shader ../shared/src/graphics/helpers)
 include_directories(../shared/src/map)
-include_directories(src/main/cpp src/main/cpp/graphics src/main/cpp/graphics/objects)
+include_directories(src/main/cpp src/main/cpp/graphics src/main/cpp/graphics/objects src/main/cpp/graphics/shader)
 
 
 # Searches for a specified prebuilt library and stores the path as a

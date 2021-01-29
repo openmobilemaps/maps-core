@@ -11,7 +11,7 @@
 #include "GraphicsObjectInterface.h"
 #include "Rectangle2dInterface.h"
 #include "opengl_wrapper.h"
-#include "OpenGLContext.h"
+#include "OpenGlContext.h"
 
 class Rectangle2dOpenGl
         : public GraphicsObjectInterface,
@@ -42,7 +42,7 @@ public:
 protected:
     virtual void adjustTextureCoordinates();
 
-    virtual void prepareTextureDraw(std::shared_ptr<OpenGLContext> &openGLContext, int mProgram);
+    virtual void prepareTextureDraw(std::shared_ptr<OpenGlContext> &openGLContext, int mProgram);
 
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
 
