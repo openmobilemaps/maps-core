@@ -50,7 +50,6 @@ Scene::Scene(const std::shared_ptr<::GraphicsObjectFactoryInterface> &graphicsFa
     auto lineShader = shaderFactory->createColorLineShader();
     lineShader->setColor(1, 0, 0, 0.5);
     lineShader->setMiter(4.0);
-    lineShader->setZoomFactor(1.0);
     auto line = graphicsFactory->createLine(lineShader->asLineShaderProgramInterface());
     line->setLinePositions({Vec2F(-0.2, 0.0), Vec2F(0.2, 0.0)});
     std::vector<std::shared_ptr<GraphicsObjectInterface>> objects{rect->asGraphicsObject(), line->asGraphicsObject()};

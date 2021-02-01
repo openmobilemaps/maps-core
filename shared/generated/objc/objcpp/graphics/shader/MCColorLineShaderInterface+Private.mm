@@ -50,12 +50,6 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setZoomFactor:(float)zoom {
-    try {
-        _cppRefHandle.get()->setZoomFactor(::djinni::F32::toCpp(zoom));
-    } DJINNI_TRANSLATE_EXCEPTIONS()
-}
-
 - (nullable id<MCLineShaderProgramInterface>)asLineShaderProgramInterface {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->asLineShaderProgramInterface();
@@ -85,12 +79,6 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() setMiter:(::djinni::F32::fromCpp(c_miter))];
-        }
-    }
-    void setZoomFactor(float c_zoom) override
-    {
-        @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setZoomFactor:(::djinni::F32::fromCpp(c_zoom))];
         }
     }
     std::shared_ptr<::LineShaderProgramInterface> asLineShaderProgramInterface() override

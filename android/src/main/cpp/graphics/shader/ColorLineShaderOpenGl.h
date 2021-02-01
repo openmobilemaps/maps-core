@@ -44,12 +44,9 @@ public:
 
     virtual void setMiter(float miter);
 
-    virtual void setZoomFactor(float zoom);
-
 private:
     std::vector<float> lineColor;
     float miter;
-    float zoom;
 };
 
 

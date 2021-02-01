@@ -36,7 +36,7 @@ void ColorLineShaderOpenGl::setupRectProgram(const std::shared_ptr<::RenderingCo
 }
 
 void ColorLineShaderOpenGl::preRenderRect(const std::shared_ptr<::RenderingContextInterface> &context) {
-    std::shared_ptr<OpenGlContext>openGlContext = std::static_pointer_cast<OpenGlContext>(context);
+    std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     int program = openGlContext->getProgram(getRectProgramName());
 
     int mColorHandle = glGetUniformLocation(program, "vColor");
@@ -45,7 +45,7 @@ void ColorLineShaderOpenGl::preRenderRect(const std::shared_ptr<::RenderingConte
 
     int mMiterHandle = glGetUniformLocation(program, "miter");
     // Set color for drawing the triangle
-    glUniform1f(mMiterHandle, miter * zoom);
+    glUniform1f(mMiterHandle, miter);
 }
 
 void ColorLineShaderOpenGl::setupPointProgram(const std::shared_ptr<::RenderingContextInterface> &context) {
@@ -90,23 +90,16 @@ void ColorLineShaderOpenGl::setMiter(float miter_) {
     miter = miter_;
 }
 
-void ColorLineShaderOpenGl::setZoomFactor(float zoom_) {
-    zoom = zoom_;
-}
-
 std::string ColorLineShaderOpenGl::getRectVertexShader() {
     return UBRendererShaderCode(precision
                                         highp float;
-                                        uniform
-                                        mat4 uMVPMatrix;
-                                        attribute
-                                        vec4 vPosition;
-                                        attribute
-                                        vec4 vNormal;
+                                        uniform mat4 uMVPMatrix;
+                                        attribute vec4 vPosition;
+                                        attribute vec4 vNormal;
                                         uniform float miter;
 
                                         void main() {
-                                            gl_Position = uMVPMatrix * (vPosition + (vNormal * vec4(miter, miter, 0.0, 0.0)));
+                                            gl_Position = uMVPMatrix * (vPosition + (vNormal * vec4(miter, miter, miter, 0.0)));
                                         });
 }
 
@@ -126,12 +119,9 @@ std::string ColorLineShaderOpenGl::getRectFragmentShader() {
 std::string ColorLineShaderOpenGl::getPointVertexShader() {
     return UBRendererShaderCode(precision
                                         highp float;
-                                        uniform
-                                        mat4 uMVPMatrix;
-                                        attribute
-                                        vec4 vPosition;
-                                        uniform
-                                        highp float vPointSize;
+                                        uniform mat4 uMVPMatrix;
+                                        attribute vec4 vPosition;
+                                        uniform highp float vPointSize;
 
                                         void main() {
                                             gl_PointSize = vPointSize;
@@ -142,8 +132,7 @@ std::string ColorLineShaderOpenGl::getPointVertexShader() {
 std::string ColorLineShaderOpenGl::getPointFragmentShader() {
     return UBRendererShaderCode(precision
                                         highp float;
-                                        uniform
-                                        vec4 vColor;
+                                        uniform vec4 vColor;
 
                                         void main() {
                                             vec2 coord = gl_PointCoord.st - vec2(0.5);  //from [0,1] to [-0.5,0.5]

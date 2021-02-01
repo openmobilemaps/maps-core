@@ -15,7 +15,5 @@ public:
 
     virtual void setMiter(float miter) = 0;
 
-    virtual void setZoomFactor(float zoom) = 0;
-
     virtual std::shared_ptr<LineShaderProgramInterface> asLineShaderProgramInterface() = 0;
 };
