@@ -1,13 +1,13 @@
 import Foundation
-import Metal
 import MapCoreSharedModule
+import Metal
 
 class AlphaShader: BaseShader {
     private var alpha: Float = 1.0
     private var pipeline: MTLRenderPipelineState?
     private var stencilState: MTLDepthStencilState?
 
-    override func setupProgram(_ context: MCRenderingContextInterface?) {
+    override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
             pipeline = MetalContext.current.pipelineLibrary.value(PipelineKey.alphaShader)
         }
@@ -17,7 +17,7 @@ class AlphaShader: BaseShader {
         }
     }
 
-    override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
+    override func preRender(encoder: MTLRenderCommandEncoder, context _: RenderingContext) {
         guard let pipeline = pipeline,
               let stencilState = stencilState else { return }
 
@@ -26,7 +26,6 @@ class AlphaShader: BaseShader {
 
         encoder.setFragmentBytes(&alpha, length: MemoryLayout<Float>.stride, index: 1)
     }
-
 }
 
 extension AlphaShader: MCAlphaShaderInterface {

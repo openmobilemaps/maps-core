@@ -63,8 +63,8 @@ extension Vertex {
     /// The texture V-coordinate mapping
     var textureV: Float { textureCoordinate.x }
 
-    var normalX: Float { return normal.x }
-    var normalY: Float { return normal.y }
+    var normalX: Float { normal.x }
+    var normalY: Float { normal.y }
 }
 
 extension Vertex: CustomDebugStringConvertible {

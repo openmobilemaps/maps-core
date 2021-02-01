@@ -4,7 +4,7 @@ import Metal
 
 class BaseGraphicsObject {
     private var ReadyFlag_: Bool = false
-    
+
     private var context: MCRenderingContextInterface!
 
     let device: MTLDevice
@@ -16,10 +16,11 @@ class BaseGraphicsObject {
         self.sampler = sampler
     }
 
-    func render(encoder: MTLRenderCommandEncoder,
-                context: RenderingContext,
-                renderPass: MCRenderPassConfig,
-                mvpMatrix: Int64) {
+    func render(encoder _: MTLRenderCommandEncoder,
+                context _: RenderingContext,
+                renderPass _: MCRenderPassConfig,
+                mvpMatrix _: Int64)
+    {
         fatalError("has to be overwritten by subclass")
     }
 }
@@ -29,7 +30,7 @@ extension BaseGraphicsObject: MCGraphicsObjectInterface {
         self.context = context
     }
 
-    func clear() { }
+    func clear() {}
 
     func isReady() -> Bool { ReadyFlag_ }
 

@@ -4,7 +4,7 @@ import UIKit
 extension UIColor {
     /// Check if a color is opaque
     var isOpaque: Bool {
-        return !hasTransparency
+        !hasTransparency
     }
 
     /// Check if a color has transparency

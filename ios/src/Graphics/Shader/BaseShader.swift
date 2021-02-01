@@ -7,7 +7,7 @@ class BaseShader: MCShaderProgramInterface {
         ""
     }
 
-    func setupProgram(_ context: MCRenderingContextInterface?) { }
+    func setupProgram(_: MCRenderingContextInterface?) {}
 
     func preRender(_ context: MCRenderingContextInterface?) {
         guard let context = context as? RenderingContext,
@@ -15,8 +15,6 @@ class BaseShader: MCShaderProgramInterface {
         preRender(encoder: encoder, context: context)
     }
 
-    func preRender(encoder: MTLRenderCommandEncoder,
-                   context: RenderingContext) {
-
-    }
+    func preRender(encoder _: MTLRenderCommandEncoder,
+                   context _: RenderingContext) {}
 }

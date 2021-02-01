@@ -34,7 +34,8 @@ enum PipelineKey: CaseIterable {
         pipelineDescriptor.label = label()
 
         guard let vertexFunction = MetalContext.current.library.makeFunction(name: vertexShader()),
-              let fragmentFunction = MetalContext.current.library.makeFunction(name: fragmentShader()) else {
+              let fragmentFunction = MetalContext.current.library.makeFunction(name: fragmentShader())
+        else {
             fatalError("Cannot locate the shaders for UBTileModel")
         }
 

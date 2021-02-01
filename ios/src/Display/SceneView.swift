@@ -17,13 +17,14 @@ public class SceneView: MTKView {
             fatalError("Can't create Scene")
         }
         self.scene = scene
-        self.renderingContext = RenderingContext()
+        renderingContext = RenderingContext()
         super.init(frame: .zero, device: MetalContext.current.device)
-        self.renderingContext.sceneView = self
+        renderingContext.sceneView = self
         setup()
     }
 
-    required init(coder: NSCoder) {
+    @available(*, unavailable)
+    required init(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
@@ -51,7 +52,7 @@ extension SceneView: MCSceneCallbackInterface {
 }
 
 extension SceneView: MTKViewDelegate {
-    public func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
+    public func mtkView(_: MTKView, drawableSizeWillChange _: CGSize) {
         sizeChanged = true
         isPaused = false
     }
@@ -70,7 +71,8 @@ extension SceneView: MTKViewDelegate {
 
         guard let renderPassDescriptor = view.currentRenderPassDescriptor,
               let commandBuffer = MetalContext.current.commandQueue.makeCommandBuffer(),
-              let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {
+              let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)
+        else {
             return
         }
 

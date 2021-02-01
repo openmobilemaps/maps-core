@@ -25,7 +25,7 @@ class StaticMetalLibrary<Key: Hashable & CaseIterable, Value>: Library {
     }
 
     final func value(_ key: Key) -> Value {
-        return storage[key]!
+        storage[key]!
     }
 
     final subscript(_ key: Key) -> Value {

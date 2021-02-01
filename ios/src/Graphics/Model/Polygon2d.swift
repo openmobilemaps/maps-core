@@ -22,8 +22,9 @@ class Polygon2d: BaseGraphicsObject {
 
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
-                         renderPass: MCRenderPassConfig,
-                         mvpMatrix: Int64) {
+                         renderPass _: MCRenderPassConfig,
+                         mvpMatrix: Int64)
+    {
         guard let verticesBuffer = verticesBuffer,
               let indicesBuffer = indicesBuffer
         else { return }
@@ -56,7 +57,6 @@ class Polygon2d: BaseGraphicsObject {
 
         encoder.drawIndexedPrimitives(type: .triangle, indexCount: indicesCount, indexType: .uint16, indexBuffer: indicesBuffer, indexBufferOffset: 0)
     }
-
 
     private func setupStencilStates() {
         if allIsConvex {
@@ -133,8 +133,7 @@ class Polygon2d: BaseGraphicsObject {
 }
 
 extension Polygon2d: MCPolygon2dInterface {
-    func setPolygonPositions(_ positions: [MCVec2F], holes: [[MCVec2F]], isConvex: Bool) {
-
+    func setPolygonPositions(_ positions: [MCVec2F], holes: [[MCVec2F]], isConvex _: Bool) {
         stencilStatePrepare = nil
         stencilState = nil
 

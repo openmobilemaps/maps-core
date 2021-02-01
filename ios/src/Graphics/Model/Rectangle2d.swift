@@ -1,9 +1,8 @@
 import Foundation
-import Metal
 import MapCoreSharedModule
+import Metal
 
 class Rectangle2d: BaseGraphicsObject {
-
     private var verticesBuffer: MTLBuffer?
 
     private var indicesBuffer: MTLBuffer?
@@ -13,7 +12,7 @@ class Rectangle2d: BaseGraphicsObject {
     private var texture: MTLTexture?
 
     private var shader: MCShaderProgramInterface
-    
+
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader
         super.init(device: metalContext.device,
@@ -22,8 +21,9 @@ class Rectangle2d: BaseGraphicsObject {
 
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
-                         renderPass: MCRenderPassConfig,
-                         mvpMatrix: Int64) {
+                         renderPass _: MCRenderPassConfig,
+                         mvpMatrix: Int64)
+    {
         guard let verticesBuffer = verticesBuffer,
               let indicesBuffer = indicesBuffer else { return }
         shader.setupProgram(context)
@@ -47,7 +47,6 @@ class Rectangle2d: BaseGraphicsObject {
     }
 }
 
-
 extension Rectangle2d: MCRectangle2dInterface {
     func setFrame(_ frame: MCRectF, textureCoordinates: MCRectF) {
         /*
@@ -63,9 +62,9 @@ extension Rectangle2d: MCRectangle2dInterface {
         let maxX = minX + frame.width
         let maxY = minY + frame.height
         let vertecies: [Vertex] = [
-            Vertex(x: minX, y: maxY, textureU: textureCoordinates.x,     textureV: textureCoordinates.height), // A
-            Vertex(x: minX, y: minY, textureU: textureCoordinates.x,     textureV: textureCoordinates.y),      // B
-            Vertex(x: maxX, y: minY, textureU: textureCoordinates.width, textureV: textureCoordinates.y),      // C
+            Vertex(x: minX, y: maxY, textureU: textureCoordinates.x, textureV: textureCoordinates.height), // A
+            Vertex(x: minX, y: minY, textureU: textureCoordinates.x, textureV: textureCoordinates.y), // B
+            Vertex(x: maxX, y: minY, textureU: textureCoordinates.width, textureV: textureCoordinates.y), // C
             Vertex(x: maxX, y: maxY, textureU: textureCoordinates.width, textureV: textureCoordinates.height), // D
         ]
         let indices: [UInt16] = [
@@ -92,6 +91,6 @@ extension Rectangle2d: MCRectangle2dInterface {
     func removeTexture() {
         texture = nil
     }
-    
+
     func asGraphicsObject() -> MCGraphicsObjectInterface? { self }
 }

@@ -4,7 +4,6 @@ import MetalKit
 
 @objc
 public class TextureHolder: NSObject {
-
     let texture: MTLTexture?
 
     let textureUsableSize: TextureUsableSize?
@@ -14,7 +13,6 @@ public class TextureHolder: NSObject {
         self.textureUsableSize = textureUsableSize
         super.init()
     }
-
 
     convenience init(_ url: URL, textureUsableSize: TextureUsableSize? = nil) throws {
         let options: [MTKTextureLoader.Option: Any] = [
@@ -58,12 +56,12 @@ extension TextureHolder: MCTextureHolderInterface {
         Int32(textureUsableSize?.height ?? texture?.height ?? 0)
     }
 
-    public func attachToGraphics() {  }
+    public func attachToGraphics() {}
 }
 
 extension TextureHolder {
- struct TextureUsableSize {
-     let width: Int
-     let height: Int
- }
+    struct TextureUsableSize {
+        let width: Int
+        let height: Int
+    }
 }

@@ -3,7 +3,7 @@ import MapCoreSharedModule
 import Metal
 
 class ColorLineShader: BaseShader {
-    private var color: SIMD4<Float> = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
+    private var color = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
 
     private var miter: Float = 0.0
 
@@ -17,13 +17,13 @@ extension ColorLineShader: MCLineShaderProgramInterface {
 
     func getPointProgramName() -> String { "" }
 
-    func setupRectProgram(_ context: MCRenderingContextInterface?) {
+    func setupRectProgram(_: MCRenderingContextInterface?) {
         if linePipeline == nil {
             linePipeline = MetalContext.current.pipelineLibrary.value(PipelineKey.lineShader)
         }
     }
 
-    func setupPointProgram(_ context: MCRenderingContextInterface?) {
+    func setupPointProgram(_: MCRenderingContextInterface?) {
         if pointPipeline == nil {
             pointPipeline = MetalContext.current.pipelineLibrary.value(PipelineKey.pointShader)
         }

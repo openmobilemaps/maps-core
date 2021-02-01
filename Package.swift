@@ -5,18 +5,20 @@ import PackageDescription
 let package = Package(
     name: "MapCore",
     platforms: [
-        .iOS(.v10)
+        .iOS(.v10),
     ],
     products: [
         .library(
             name: "MapCore",
-            targets: ["MapCore"]),
+            targets: ["MapCore"]
+        ),
         .library(
             name: "MapCoreSharedModule",
-            targets: ["MapCoreSharedModule"])
+            targets: ["MapCoreSharedModule"]
+        ),
     ],
     dependencies: [
-        .package(name: "DjinniSupport", url: "https://bitbucket.org/ubique-innovation/djinni", .branch("master"))
+        .package(name: "DjinniSupport", url: "https://bitbucket.org/ubique-innovation/djinni", .branch("master")),
     ],
     targets: [
         .target(
@@ -24,8 +26,9 @@ let package = Package(
             dependencies: ["MapCoreSharedModule"],
             path: "ios/src",
             resources: [
-                .process("ios/src/Graphics/Shader/Metal")
-            ]),
+                .process("ios/src/Graphics/Shader/Metal"),
+            ]
+        ),
         .target(
             name: "MapCoreSharedModule",
             dependencies: ["DjinniSupport"],
@@ -35,12 +38,14 @@ let package = Package(
                       "generated/graphics"],
             publicHeadersPath: "generated/objc/objc",
             cxxSettings: [
-                .headerSearchPath("**")
-            ]),
+                .headerSearchPath("**"),
+            ]
+        ),
         .testTarget(
             name: "Tests",
             dependencies: ["MapCore"],
-            path: "ios/Tests/Tests"),
+            path: "ios/Tests/Tests"
+        ),
     ],
     cxxLanguageStandard: .cxx1z
 )

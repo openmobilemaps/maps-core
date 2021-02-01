@@ -49,8 +49,9 @@ class Line2d: BaseGraphicsObject {
 
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
-                         renderPass: MCRenderPassConfig,
-                         mvpMatrix: Int64) {
+                         renderPass _: MCRenderPassConfig,
+                         mvpMatrix: Int64)
+    {
         guard let lineVerticesBuffer = lineVerticesBuffer,
               let lineIndicesBuffer = lineIndicesBuffer,
               let pointsVerticesBuffer = pointsVerticesBuffer
