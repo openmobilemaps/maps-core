@@ -7,8 +7,6 @@ class ColorLineShader: BaseShader {
 
     private var miter: Float = 0.0
 
-    private var zoom: Float = 0.0
-
     private var linePipeline: MTLRenderPipelineState?
 
     private var pointPipeline: MTLRenderPipelineState?
@@ -38,7 +36,7 @@ extension ColorLineShader: MCLineShaderProgramInterface {
 
         encoder.setRenderPipelineState(pipeline)
 
-        var m = miter * zoom
+        var m = miter
         encoder.setVertexBytes(&m, length: MemoryLayout<Float>.stride, index: 2)
 
         var c = SIMD4<Float>(color)
@@ -52,7 +50,7 @@ extension ColorLineShader: MCLineShaderProgramInterface {
 
         encoder.setRenderPipelineState(pipeline)
 
-        // radius is twice the miter (without the zoom-factor)
+        // radius is twice the miter
         var m = 2.0 * miter
         encoder.setVertexBytes(&m, length: MemoryLayout<Float>.stride, index: 2)
 
@@ -70,11 +68,7 @@ extension ColorLineShader: MCColorLineShaderInterface {
         self.miter = miter
     }
 
-    func setZoomFactor(_ zoom: Float) {
-        self.zoom = zoom
-    }
-
-    func asShaderProgram() -> MCLineShaderProgramInterface? {
+    func asLineShaderProgram() -> MCLineShaderProgramInterface? {
         self
     }
 }

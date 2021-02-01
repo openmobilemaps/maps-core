@@ -9,6 +9,8 @@ class RenderingContext: NSObject {
 }
 
 extension RenderingContext: MCRenderingContextInterface {
+    func setupDrawFrame() {}
+
     func onSurfaceCreated() { }
 
     func setViewportSize(_ size: MCVec2I) {}
