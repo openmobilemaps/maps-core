@@ -1,0 +1,44 @@
+@extern "../yaml/vec_2_f.yaml"
+@extern "../yaml/scheduler_interface.yaml"
+@extern "../yaml/touch_handler_interface.yaml"
+
+map_interface = interface +c
+{
+    static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface, map_config: map_config, scheduler: scheduler_interface) : scene_interface;
+    static createWithOpenGl(map_config: map_config, scheduler: scheduler_interface) : scene_interface;
+    set_callback_handler(callback_interface: map_callback_interface);
+    set_camera(camera: camera_interface);
+    get_camera() : camera_interface;
+    set_touch_handler(touch_handler: touch_handler_interface);
+    get_touch_handler() : touch_handler_interface;
+    invalidate();
+    draw_frame();
+    start();
+    resume();
+    pause();
+    stop(); # TODO: check, which of those lifecycle calls really are necessary
+
+    # TODO: Add layer stuff (incl. loader_interface)
+
+}
+
+map_callback_interface = interface +c +j +o
+{
+    invalidate();
+}
+
+map_config = record
+{
+    map_coordinate_system: map_coordinate_system;
+}
+
+map_coordinate_system = record
+{
+    identifier: string;
+    bounds_left: f32;
+    bounds_top: f32;
+    bounds_right: f32;
+    bounds_bottom: f32;
+    zoom_min: f32;
+    zoom_max: f32;
+}

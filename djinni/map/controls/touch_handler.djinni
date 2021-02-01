@@ -1,0 +1,33 @@
+@extern "../../yaml/vec_2_f.yaml"
+
+touch_handler_interface = interface +c +j +o
+{
+    on_touch_event(touch_event: touch_event);
+    add_listener(listener: touch_interface);
+    remove_listener(listener: touch_interface);
+}
+
+touch_interface = interface +c
+{
+    on_click_unconfirmed(pos_screen: vec_2_f);
+    on_click_confirmed(pos_screen: vec_2_f);
+    on_double_click(pos_screen: vec_2_f);
+    on_long_press(pos_screen: vec_2_f);
+    on_move(delta_screen: vec_2_f, confirmed: bool, double_click: bool);
+    on_move_complete();
+    on_two_finger_click(pos_screen_1: vec_2_f, pos_screen_2: vec_2_f);
+    on_two_finger_move(pos_screen_old: list<vec_2_f>, pos_screen_new: list<vec_2_f>);
+}
+
+touch_event = record
+{
+    pointers: list<vec_2_f>;
+    touch_action: touch_action;
+}
+
+touch_action = enum
+{
+    down;
+    move;
+    up;
+}
