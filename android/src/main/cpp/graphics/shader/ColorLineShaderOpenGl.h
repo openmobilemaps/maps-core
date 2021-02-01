@@ -18,7 +18,7 @@ class ColorLineShaderOpenGl
           public std::enable_shared_from_this<LineShaderProgramInterface> {
 public:
 
-    virtual std::shared_ptr <LineShaderProgramInterface> asShaderProgramInterface();
+    virtual std::shared_ptr <LineShaderProgramInterface> asLineShaderProgramInterface();
 
     virtual std::string getRectProgramName();
 

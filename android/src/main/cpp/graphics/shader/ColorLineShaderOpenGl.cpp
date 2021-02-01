@@ -158,6 +158,6 @@ std::string ColorLineShaderOpenGl::getPointFragmentShader() {
 }
 
 std::shared_ptr<LineShaderProgramInterface>
-ColorLineShaderOpenGl::asShaderProgramInterface() {
+ColorLineShaderOpenGl::asLineShaderProgramInterface() {
     return shared_from_this();
 }

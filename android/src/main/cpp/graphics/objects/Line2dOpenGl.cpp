@@ -39,7 +39,7 @@ void Line2dOpenGl::initializeLineAndPoints() {
     for (auto &p : lineCoordinates) {
         pointsVertexBuffer.push_back(p.x);
         pointsVertexBuffer.push_back(p.y);
-        pointsVertexBuffer.push_back(1.0);
+        pointsVertexBuffer.push_back(0.0);
     }
 
     pointCount = (int) lineCoordinates.size();

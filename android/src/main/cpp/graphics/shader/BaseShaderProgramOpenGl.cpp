@@ -65,12 +65,9 @@ void BaseShaderProgramOpenGl::checkGlProgramLinking(GLuint program) {
 std::string BaseShaderProgramOpenGl::getVertexShader() {
     return UBRendererShaderCode(uniform
                                         mat4 uMVPMatrix;
-                                        attribute
-                                        vec4 vPosition;
-                                        attribute
-                                        vec2 texCoordinate;
-                                        varying
-                                        vec2 v_texcoord;
+                                        attribute vec4 vPosition;
+                                        attribute vec2 texCoordinate;
+                                        varying vec2 v_texcoord;
 
                                         void main() {
                                             gl_Position = uMVPMatrix * vPosition;
@@ -81,15 +78,8 @@ std::string BaseShaderProgramOpenGl::getVertexShader() {
 std::string BaseShaderProgramOpenGl::getFragmentShader() {
     return UBRendererShaderCode(precision
                                         mediump float;
-                                        uniform
-                                        sampler2D u_texture;
-                                        varying
-                                        vec2 v_texcoord;
-                                        vec4 Desaturate(vec3 color, float Desaturation) {
-                                            vec3 grayXfer = vec3(0.3, 0.59, 0.11);
-                                            vec3 gray = vec3(dot(grayXfer, color));
-                                            return vec4(mix(color, gray, Desaturation), 1.0);
-                                        }
+                                        uniform sampler2D u_texture;
+                                        varying vec2 v_texcoord;
 
                                         void main() {
                                             gl_FragColor = texture2D(u_texture, v_texcoord);

@@ -56,9 +56,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nullable id<MCLineShaderProgramInterface>)asShaderProgramInterface {
+- (nullable id<MCLineShaderProgramInterface>)asLineShaderProgramInterface {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->asShaderProgramInterface();
+        auto objcpp_result_ = _cppRefHandle.get()->asLineShaderProgramInterface();
         return ::djinni_generated::LineShaderProgramInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -93,10 +93,10 @@ public:
             [djinni_private_get_proxied_objc_object() setZoomFactor:(::djinni::F32::fromCpp(c_zoom))];
         }
     }
-    std::shared_ptr<::LineShaderProgramInterface> asShaderProgramInterface() override
+    std::shared_ptr<::LineShaderProgramInterface> asLineShaderProgramInterface() override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() asShaderProgramInterface];
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() asLineShaderProgramInterface];
             return ::djinni_generated::LineShaderProgramInterface::toCpp(objcpp_result_);
         }
     }

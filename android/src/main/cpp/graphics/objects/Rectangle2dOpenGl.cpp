@@ -39,6 +39,9 @@ void Rectangle2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
             frame.x + frame.width, frame.y + frame.height, frameZ,
             frame.x + frame.width, frame.y, frameZ,
     };
+    indexBuffer = {
+            0, 1, 2, 0, 2, 3,
+    };
     adjustTextureCoordinates();
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);

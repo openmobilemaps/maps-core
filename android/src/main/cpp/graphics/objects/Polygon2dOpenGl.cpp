@@ -41,7 +41,7 @@ void Polygon2dOpenGl::initializePolygon() {
     for (auto &p : polygonCoordinates) {
         vertexBuffer.push_back(p.x);
         vertexBuffer.push_back(p.y);
-        vertexBuffer.push_back(1.0);
+        vertexBuffer.push_back(0.0);
     }
 
     for (size_t i = 0; i < polygonCoordinates.size() - 2; ++i) {
@@ -56,7 +56,7 @@ void Polygon2dOpenGl::initializePolygon() {
         for (auto &p : h) {
             vertexBuffer.push_back(p.x);
             vertexBuffer.push_back(p.y);
-            vertexBuffer.push_back(1.0);
+            vertexBuffer.push_back(0.0);
         }
 
         for (size_t i = 0; i < h.size() - 2; ++i) {

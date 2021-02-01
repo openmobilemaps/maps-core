@@ -8,9 +8,11 @@
 
 #include "Scene.h"
 #include "ColorShaderInterface.h"
+#include "ColorLineShaderInterface.h"
 #include "RenderPass.h"
 #include "Rectangle2dInterface.h"
 #include "Polygon2dInterface.h"
+#include "Line2dInterface.h"
 #include "Renderer.h"
 #include "ExampleCamera.h"
 
@@ -40,11 +42,18 @@ Scene::Scene(const std::shared_ptr<::GraphicsObjectFactoryInterface> &graphicsFa
 
     // Begin testing code
     auto shader = shaderFactory->createColorShader();
-    auto rect = graphicsFactory->createPolygon(shader->asShaderProgramInterface());
-    //rect->setFrame(RectF(0, 0, 0.8, 0.8), RectF(0, 0, 0.2, 0.2));
-    rect->setPolygonPositions({Vec2F(-0.2f, -0.2f), Vec2F(0.2f, -0.2f), Vec2F(0.2f, 0.2f), Vec2F(-0.2f, 0.2f)}, {}, true);
     shader->setColor(1, 0, 0, 0.5);
-    std::vector<std::shared_ptr<GraphicsObjectInterface>> objects{rect->asGraphicsObject()};
+    //auto rect = graphicsFactory->createPolygon(shader->asShaderProgramInterface());
+    //rect->setPolygonPositions({Vec2F(-0.2, -0.2), Vec2F(0.2, -0.2), Vec2F(0.2, 0.2), Vec2F(-0.2, 0.2)}, {}, true);
+    auto rect = graphicsFactory->createRectangle(shader->asShaderProgramInterface());
+    rect->setFrame(RectF(-0.2, -0.2, 0.4, 0.4), RectF(0, 0, 0.2, 0.2));
+    auto lineShader = shaderFactory->createColorLineShader();
+    lineShader->setColor(1, 0, 0, 0.5);
+    lineShader->setMiter(4.0);
+    lineShader->setZoomFactor(1.0);
+    auto line = graphicsFactory->createLine(lineShader->asLineShaderProgramInterface());
+    line->setLinePositions({Vec2F(-0.2, 0.0), Vec2F(0.2, 0.0)});
+    std::vector<std::shared_ptr<GraphicsObjectInterface>> objects{rect->asGraphicsObject(), line->asGraphicsObject()};
     renderPass = std::make_shared<RenderPass>(RenderPassConfig(0), objects);
     setCamera(std::make_shared<ExampleCamera>());
     // End testing code
@@ -54,7 +63,7 @@ void Scene::setRenderingContext(const std::shared_ptr<RenderingContextInterface>
     this->renderingContext = renderingContext;
 }
 
-void Scene::setCallbackHandler(const std::shared_ptr<SceneCallbackInterface> & callbackInterface) {
+void Scene::setCallbackHandler(const std::shared_ptr<SceneCallbackInterface> &callbackInterface) {
     callbackHandler = callbackInterface;
 }
 

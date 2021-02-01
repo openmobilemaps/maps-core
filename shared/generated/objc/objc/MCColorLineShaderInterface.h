@@ -16,6 +16,6 @@
 
 - (void)setZoomFactor:(float)zoom;
 
-- (nullable id<MCLineShaderProgramInterface>)asShaderProgramInterface;
+- (nullable id<MCLineShaderProgramInterface>)asLineShaderProgramInterface;
 
 @end
