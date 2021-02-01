@@ -10,7 +10,7 @@
 Rectangle2dOpenGl::Rectangle2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader) : shaderProgram(shader) {}
 
 bool Rectangle2dOpenGl::isReady() {
-    return textureLoaded;
+    return ready;
 }
 
 std::shared_ptr<GraphicsObjectInterface> Rectangle2dOpenGl::asGraphicsObject() {

@@ -118,7 +118,7 @@ void Line2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
-    drawPoints(openGlContext, mvpMatrix);
+    //drawPoints(openGlContext, mvpMatrix);
 
     glDisable(GL_STENCIL_TEST);
 }

@@ -41,18 +41,19 @@ Scene::Scene(const std::shared_ptr<::GraphicsObjectFactoryInterface> &graphicsFa
         renderer(std::make_shared<Renderer>()) {
 
     // Begin testing code
-    auto shader = shaderFactory->createColorShader();
-    shader->setColor(1, 0, 0, 0.5);
-    //auto rect = graphicsFactory->createPolygon(shader->asShaderProgramInterface());
-    //rect->setPolygonPositions({Vec2F(-0.2, -0.2), Vec2F(0.2, -0.2), Vec2F(0.2, 0.2), Vec2F(-0.2, 0.2)}, {}, true);
-    auto rect = graphicsFactory->createRectangle(shader->asShaderProgramInterface());
-    rect->setFrame(RectF(-0.2, -0.2, 0.4, 0.4), RectF(0, 0, 0.2, 0.2));
+    auto colorShader = shaderFactory->createColorShader();
+    colorShader->setColor(1.0, 0.0, 0.0, 0.5);
+    auto poly = graphicsFactory->createPolygon(colorShader->asShaderProgramInterface());
+    poly->setPolygonPositions({Vec2F(0.1, -0.3), Vec2F(0.4, -0.4), Vec2F(0.5, -0.05), Vec2F(0.15, 0)}, {}, true);
+    auto rect = graphicsFactory->createRectangle(colorShader->asShaderProgramInterface());
+    rect->setFrame(RectF(-0.2, -0.2, 0.4, 0.4), RectF(0, 0, 1, 1));
     auto lineShader = shaderFactory->createColorLineShader();
-    lineShader->setColor(1, 0, 0, 0.5);
-    lineShader->setMiter(4.0);
+    lineShader->setColor(1.0, 0.0, 0.0, 0.5);
+    lineShader->setMiter(0.005);
     auto line = graphicsFactory->createLine(lineShader->asLineShaderProgramInterface());
-    line->setLinePositions({Vec2F(-0.2, 0.0), Vec2F(0.2, 0.0)});
-    std::vector<std::shared_ptr<GraphicsObjectInterface>> objects{rect->asGraphicsObject(), line->asGraphicsObject()};
+    line->setLinePositions({Vec2F(-0.4, -0.1), Vec2F(0.4, 0.1)});
+    std::vector<std::shared_ptr<GraphicsObjectInterface>> objects{rect->asGraphicsObject(), line->asGraphicsObject(),
+                                                                  poly->asGraphicsObject()};
     renderPass = std::make_shared<RenderPass>(RenderPassConfig(0), objects);
     setCamera(std::make_shared<ExampleCamera>());
     // End testing code
