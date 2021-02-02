@@ -40,7 +40,8 @@ let package = Package(
             publicHeadersPath: "generated/objc/objc",
             cxxSettings: [
                 .headerSearchPath("**"),
-                .headerSearchPath("src/map/**")
+                .headerSearchPath("src/map/"),
+                .headerSearchPath("src/graphics/")
             ]
         ),
         .testTarget(

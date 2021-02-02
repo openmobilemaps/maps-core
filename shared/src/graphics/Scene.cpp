@@ -1,11 +1,3 @@
-#ifdef __ANDROID__
-
-#include "GraphicsObjectFactoryOpenGl.h"
-#include "ShaderFactoryOpenGl.h"
-#include "OpenGlContext.h"
-
-#endif
-
 #include "Scene.h"
 #include "ColorShaderInterface.h"
 #include "ColorLineShaderInterface.h"
@@ -15,24 +7,6 @@
 #include "Line2dInterface.h"
 #include "Renderer.h"
 #include "ExampleCamera.h"
-
-std::shared_ptr<SceneInterface> SceneInterface::create(const std::shared_ptr<::GraphicsObjectFactoryInterface> &graphicsFactory,
-                                                       const std::shared_ptr<::ShaderFactoryInterface> &shaderFactory) {
-    return std::make_shared<Scene>(graphicsFactory, shaderFactory);
-}
-
-std::shared_ptr<SceneInterface> SceneInterface::createWithOpenGl() {
-#ifdef __ANDROID__
-    auto scene = std::static_pointer_cast<SceneInterface>(std::make_shared<Scene>(
-            std::make_shared<GraphicsObjectFactoryOpenGl>(),
-            std::make_shared<ShaderFactoryOpenGl>()));
-    scene->setRenderingContext(std::make_shared<OpenGlContext>());
-    return scene;
-#else
-    return nullptr;
-#endif
-}
-
 
 Scene::Scene(const std::shared_ptr<::GraphicsObjectFactoryInterface> &graphicsFactory,
              const std::shared_ptr<::ShaderFactoryInterface> &shaderFactory) :

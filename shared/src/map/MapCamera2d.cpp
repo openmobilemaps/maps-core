@@ -1,10 +1,6 @@
 #include "MapCamera2d.h"
 #include "Vec2F.h"
 
-std::shared_ptr<MapCamera2dInterface> MapCamera2dInterface::create() {
-    return std::make_shared<MapCamera2d>();
-}
-
 MapCamera2d::MapCamera2d() {
 
 }
