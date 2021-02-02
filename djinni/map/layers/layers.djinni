@@ -1,4 +1,15 @@
-layer_interfae = interface +c +j +o
-{
-	
+@extern "../../yaml/render_pass_interface.yaml"
+@extern "../../yaml/map_interface.yaml"
+
+layer_interface = interface +c +j +o {
+	build_render_passes(): list<render_pass_interface>;
+    get_identifier(): string;
+    pause();
+    resume();
+    hide();
+    show();
+}
+
+tiled_2d_map_layer_interface = interface +c +j +o {
+    asLayerInterface(): layer_interface;
 }

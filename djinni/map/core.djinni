@@ -1,37 +1,38 @@
 @extern "../yaml/vec_2_f.yaml"
 @extern "../yaml/scheduler_interface.yaml"
 @extern "../yaml/touch_handler_interface.yaml"
+@extern "../yaml/shader_factory_interface.yaml"
+@extern "../yaml/graphics_object_factory_interface.yaml"
+@extern "../yaml/camera_interface.yaml"
+@extern "../yaml/loader_interface.yaml"
+@extern "../yaml/layer_interface.yaml"
 
-map_interface = interface +c
-{
-    static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface, map_config: map_config, scheduler: scheduler_interface) : scene_interface;
-    static createWithOpenGl(map_config: map_config, scheduler: scheduler_interface) : scene_interface;
+map_interface = interface +c {
+    static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface, map_config: map_config, scheduler: scheduler_interface) : map_interface;
+    static createWithOpenGl(map_config: map_config, scheduler: scheduler_interface) : map_interface;
     set_callback_handler(callback_interface: map_callback_interface);
     set_camera(camera: camera_interface);
     get_camera() : camera_interface;
     set_touch_handler(touch_handler: touch_handler_interface);
     get_touch_handler() : touch_handler_interface;
+    set_loader(loader: loader_interface);
+    add_layer(layer: layer_interface);
+    remove_layer(layer: layer_interface);
     invalidate();
     draw_frame();
     resume();
     pause();
-
-    # TODO: Add layer stuff (incl. loader_interface)
-
 }
 
-map_callback_interface = interface +c +j +o
-{
+map_callback_interface = interface +c +j +o {
     invalidate();
 }
 
-map_config = record
-{
+map_config = record {
     map_coordinate_system: map_coordinate_system;
 }
 
-map_coordinate_system = record
-{
+map_coordinate_system = record {
     identifier: string;
     bounds_left: f32;
     bounds_top: f32;
@@ -39,4 +40,31 @@ map_coordinate_system = record
     bounds_bottom: f32;
     zoom_min: f32;
     zoom_max: f32;
+}
+
+map_camera_2d_interface = interface +c {
+    static create(): map_camera_2d_interface;
+
+    move_to_center_position(position: vec_2_f, zoom: f32, animated: bool);
+
+    move_to_center_positon(position: vec_2_f, animated: bool);
+    get_center_position(): vec_2_f;
+
+    set_zoom(zoom: f32, animated: bool);
+    get_zoom(): f32;
+
+    set_padding_left(padding: f32);
+    set_padding_right(padding: f32);
+    set_padding_top(padding: f32);
+    set_padding_bottom(padding: f32);
+
+    
+    add_listener(listener: map_camera_2d_listener_interface);
+    remove_listener(listener: map_camera_2d_listener_interface);
+
+    as_camera_intercace(): camera_interface;
+}
+
+map_camera_2d_listener_interface = interface +c +j +o {
+    on_center_position_changed(position: vec_2_f, zoom: f32);
 }

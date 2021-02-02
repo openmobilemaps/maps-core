@@ -4,8 +4,7 @@
 @extern "../yaml/vec_3_f.yaml"
 @extern "../yaml/vec_2_i.yaml"
 
-scene_interface = interface +c
-{
+scene_interface = interface +c {
     static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface) : scene_interface;
     static createWithOpenGl() : scene_interface;
     set_callback_handler(callback_interface: scene_callback_interface);
@@ -19,13 +18,11 @@ scene_interface = interface +c
     invalidate();
 }
 
-scene_callback_interface = interface +c +j +o 
-{
+scene_callback_interface = interface +c +j +o  {
     invalidate();
 }
 
-rendering_context_interface = interface +c +j +o
-{
+rendering_context_interface = interface +c +j +o {
     # Ensure calling on graphics thread
     on_surface_created();
     # Ensure calling on graphics thread
@@ -34,32 +31,27 @@ rendering_context_interface = interface +c +j +o
     setupDrawFrame();
 }
 
-render_pass_interface = interface +c +j +o
-{
+render_pass_interface = interface +c +j +o {
     get_graphics_objects() : list<graphics_object_interface>;
     get_render_pass_config() : render_pass_config;
 }
 
-render_pass_config = record
-{
+render_pass_config = record {
     render_pass_index: i32;
 }
 
-renderer_interface = interface +c +j +o
-{
+renderer_interface = interface +c +j +o {
     add_to_render_queue(render_pass: render_pass_interface);
     # Ensure calling on graphics thread
     draw_frame(rendering_context: rendering_context_interface, camera: camera_interface);
 }
 
-camera_interface = interface +c +j +o
-{
+camera_interface = interface +c +j +o {
     get_mvp_matrix() : i64;
     add_listener(listener: camera_listener_interface);
     remove_listener(listener: camera_listener_interface);
 }
 
-camera_listener_interface = interface +c +j +o
-{
+camera_listener_interface = interface +c +j +o {
     on_position_changed(position: vec_3_f);
 }

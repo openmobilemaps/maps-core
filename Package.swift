@@ -35,7 +35,8 @@ let package = Package(
             path: "shared",
             exclude: ["generated/jni",
                       "generated/java",
-                      "generated/graphics"],
+                      "generated/graphics",
+                      "generated/map"],
             publicHeadersPath: "generated/objc/objc",
             cxxSettings: [
                 .headerSearchPath("**"),

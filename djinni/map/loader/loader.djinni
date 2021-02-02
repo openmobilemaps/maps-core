@@ -1,0 +1,3 @@
+loader_interface = interface +c +j +o {
+    load_date(url: string): binary;
+}

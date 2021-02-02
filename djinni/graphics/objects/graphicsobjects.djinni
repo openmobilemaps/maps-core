@@ -5,8 +5,7 @@
 @extern "../../yaml/rect_f.yaml"
 @extern "../../yaml/vec_2_f.yaml"
 
-graphics_object_interface = interface +c +j +o
-{
+graphics_object_interface = interface +c +j +o {
     # Returns true, if graphics object is ready to be drawn
     isReady() : bool;
     # Ensure calling on graphics thread
@@ -17,35 +16,30 @@ graphics_object_interface = interface +c +j +o
     render(context: rendering_context_interface, render_pass: render_pass_config, mvp_matrix: i64);
 }
 
-graphics_object_factory_interface = interface +c +j +o
-{
+graphics_object_factory_interface = interface +c +j +o {
     create_rectangle(shader: shader_program_interface) : rectangle_2d_interface;
     create_line(line_shader: line_shader_program_interface) : line_2d_interface;
     create_polygon(shader: shader_program_interface) : polygon_2d_interface;
 }
 
-rectangle_2d_interface = interface +c +j +o
-{
+rectangle_2d_interface = interface +c +j +o {
     set_frame(frame: rect_f, texture_coordinates: rect_f);
     load_texture(texture_holder: texture_holder_interface);
     remove_texture();
     as_graphics_object(): graphics_object_interface;
 }
 
-line_2d_interface = interface +c +j +o
-{
+line_2d_interface = interface +c +j +o {
     set_line_positions(positions: list<vec_2_f>);
     as_graphics_object(): graphics_object_interface;
 }
 
-polygon_2d_interface = interface +c +j +o
-{
+polygon_2d_interface = interface +c +j +o {
     set_polygon_positions(positions: list<vec_2_f>, holes: list<list<vec_2_f>>, is_convex: bool);
     as_graphics_object(): graphics_object_interface;
 }
 
-texture_holder_interface = interface +j +o
-{
+texture_holder_interface = interface +j +o {
     get_image_width() : i32;
     get_image_height() : i32;
     get_texture_width() : i32;
