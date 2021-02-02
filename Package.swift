@@ -26,7 +26,7 @@ let package = Package(
             dependencies: ["MapCoreSharedModule"],
             path: "ios/src",
             resources: [
-                .process("ios/src/Graphics/Shader/Metal"),
+                .process("ios/src/graphics/Shader/Metal"),
             ]
         ),
         .target(
