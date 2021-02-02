@@ -13,10 +13,8 @@ map_interface = interface +c
     get_touch_handler() : touch_handler_interface;
     invalidate();
     draw_frame();
-    start();
     resume();
     pause();
-    stop(); # TODO: check, which of those lifecycle calls really are necessary
 
     # TODO: Add layer stuff (incl. loader_interface)
 
