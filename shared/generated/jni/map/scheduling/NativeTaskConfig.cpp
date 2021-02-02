@@ -16,6 +16,7 @@ auto NativeTaskConfig::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinni::Lo
     const auto& data = ::djinni::JniClass<NativeTaskConfig>::get();
     auto r = ::djinni::LocalRef<JniType>{jniEnv->NewObject(data.clazz.get(), data.jconstructor,
                                                            ::djinni::get(::djinni::String::fromCpp(jniEnv, c.id)),
+                                                           ::djinni::get(::djinni::I32::fromCpp(jniEnv, c.delay)),
                                                            ::djinni::get(::djinni_generated::NativeTaskPriority::fromCpp(jniEnv, c.priority)),
                                                            ::djinni::get(::djinni_generated::NativeExecutionEnvironment::fromCpp(jniEnv, c.executionEnvironment)))};
     ::djinni::jniExceptionCheck(jniEnv);
@@ -23,10 +24,11 @@ auto NativeTaskConfig::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinni::Lo
 }
 
 auto NativeTaskConfig::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
-    ::djinni::JniLocalScope jscope(jniEnv, 4);
+    ::djinni::JniLocalScope jscope(jniEnv, 5);
     assert(j != nullptr);
     const auto& data = ::djinni::JniClass<NativeTaskConfig>::get();
     return {::djinni::String::toCpp(jniEnv, (jstring)jniEnv->GetObjectField(j, data.field_id)),
+            ::djinni::I32::toCpp(jniEnv, jniEnv->GetIntField(j, data.field_delay)),
             ::djinni_generated::NativeTaskPriority::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_priority)),
             ::djinni_generated::NativeExecutionEnvironment::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_executionEnvironment))};
 }

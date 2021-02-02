@@ -8,15 +8,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class SceneInterface {
     public abstract void setCallbackHandler(SceneCallbackInterface callbackInterface);
 
-    public abstract void setRenderingContext(RenderingContextInterface renderingContext);
-
-    public abstract RenderingContextInterface getRenderingContext();
-
     public abstract void setCamera(CameraInterface camera);
 
     public abstract CameraInterface getCamera();
 
     public abstract RendererInterface getRenderer();
+
+    public abstract ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface getGraphicsFactory();
+
+    public abstract ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface getShaderFactory();
 
     public abstract void drawFrame();
 
@@ -24,10 +24,11 @@ public abstract class SceneInterface {
 
     public abstract void invalidate();
 
-    public static SceneInterface create(ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface graphicsFactory, ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface shaderFactory)
+    public static SceneInterface create(ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface graphicsFactory, ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface shaderFactory, RenderingContextInterface renderingContext)
     {
         return CppProxy.create(graphicsFactory,
-                               shaderFactory);
+                               shaderFactory,
+                               renderingContext);
     }
 
     public static SceneInterface createWithOpenGl()
@@ -67,22 +68,6 @@ public abstract class SceneInterface {
         private native void native_setCallbackHandler(long _nativeRef, SceneCallbackInterface callbackInterface);
 
         @Override
-        public void setRenderingContext(RenderingContextInterface renderingContext)
-        {
-            assert !this.destroyed.get() : "trying to use a destroyed object";
-            native_setRenderingContext(this.nativeRef, renderingContext);
-        }
-        private native void native_setRenderingContext(long _nativeRef, RenderingContextInterface renderingContext);
-
-        @Override
-        public RenderingContextInterface getRenderingContext()
-        {
-            assert !this.destroyed.get() : "trying to use a destroyed object";
-            return native_getRenderingContext(this.nativeRef);
-        }
-        private native RenderingContextInterface native_getRenderingContext(long _nativeRef);
-
-        @Override
         public void setCamera(CameraInterface camera)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
@@ -105,6 +90,22 @@ public abstract class SceneInterface {
             return native_getRenderer(this.nativeRef);
         }
         private native RendererInterface native_getRenderer(long _nativeRef);
+
+        @Override
+        public ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface getGraphicsFactory()
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            return native_getGraphicsFactory(this.nativeRef);
+        }
+        private native ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface native_getGraphicsFactory(long _nativeRef);
+
+        @Override
+        public ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface getShaderFactory()
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            return native_getShaderFactory(this.nativeRef);
+        }
+        private native ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface native_getShaderFactory(long _nativeRef);
 
         @Override
         public void drawFrame()
@@ -130,7 +131,7 @@ public abstract class SceneInterface {
         }
         private native void native_invalidate(long _nativeRef);
 
-        public static native SceneInterface create(ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface graphicsFactory, ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface shaderFactory);
+        public static native SceneInterface create(ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface graphicsFactory, ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface shaderFactory, RenderingContextInterface renderingContext);
 
         public static native SceneInterface createWithOpenGl();
     }

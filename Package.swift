@@ -41,7 +41,7 @@ let package = Package(
             cxxSettings: [
                 .headerSearchPath("**"),
                 .headerSearchPath("src/map/"),
-                .headerSearchPath("src/graphics/")
+                .headerSearchPath("src/graphics/"),
             ]
         ),
         .testTarget(

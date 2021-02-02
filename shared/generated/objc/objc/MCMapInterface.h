@@ -6,6 +6,7 @@
 #import "MCLayerInterface.h"
 #import "MCLoaderInterface.h"
 #import "MCMapConfig.h"
+#import "MCRenderingContextInterface.h"
 #import "MCSchedulerInterface.h"
 #import "MCShaderFactoryInterface.h"
 #import "MCTouchHandlerInterface.h"
@@ -18,6 +19,7 @@
 
 + (nullable MCMapInterface *)create:(nullable id<MCGraphicsObjectFactoryInterface>)graphicsFactory
                       shaderFactory:(nullable id<MCShaderFactoryInterface>)shaderFactory
+                   renderingContext:(nullable id<MCRenderingContextInterface>)renderingContext
                           mapConfig:(nonnull MCMapConfig *)mapConfig
                           scheduler:(nullable id<MCSchedulerInterface>)scheduler;
 

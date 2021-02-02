@@ -2,8 +2,8 @@ import Foundation
 import MapCoreSharedModule
 import MetalKit
 
-public class SceneView: MTKView {
-    private let scene: MCSceneInterface
+public class MapView: MTKView {
+    private let mapInterface: MCMapInterface
     private let renderingContext: RenderingContext
 
     private var sizeChanged: Bool = false
@@ -13,11 +13,16 @@ public class SceneView: MTKView {
     private let framesToRenderAfterInvalidate: UInt = 5
 
     public init() {
-        guard let scene = MCSceneInterface.create(GraphicsFactory(), shaderFactory: ShaderFactory()) else {
-            fatalError("Can't create Scene")
+        let renderingContext = RenderingContext()
+        guard let mapInterface = MCMapInterface.create(GraphicsFactory(),
+                                                       shaderFactory: ShaderFactory(),
+                                                       renderingContext: renderingContext,
+                                                       mapConfig: .LV95,
+                                                       scheduler: Scheduler()) else {
+            fatalError("Can't create MCMapInterface")
         }
-        self.scene = scene
-        renderingContext = RenderingContext()
+        self.mapInterface = mapInterface
+        self.renderingContext = renderingContext
         super.init(frame: .zero, device: MetalContext.current.device)
         renderingContext.sceneView = self
         setup()
@@ -40,18 +45,18 @@ public class SceneView: MTKView {
 
         isMultipleTouchEnabled = true
 
-        scene.setRenderingContext(renderingContext)
+        mapInterface.setCallbackHandler(self)
     }
 }
 
-extension SceneView: MCSceneCallbackInterface {
+extension MapView: MCMapCallbackInterface {
     public func invalidate() {
         isPaused = false
         framesToRender = framesToRenderAfterInvalidate
     }
 }
 
-extension SceneView: MTKViewDelegate {
+extension MapView: MTKViewDelegate {
     public func mtkView(_: MTKView, drawableSizeWillChange _: CGSize) {
         sizeChanged = true
         isPaused = false
@@ -80,11 +85,11 @@ extension SceneView: MTKViewDelegate {
 
         // Shared lib stuff
         if sizeChanged {
-            scene.getRenderingContext()?.setViewportSize(view.drawableSize.vec2)
+            renderingContext.setViewportSize(view.drawableSize.vec2)
             sizeChanged = false
         }
 
-        scene.drawFrame()
+        mapInterface.drawFrame()
 
         renderEncoder.endEncoding()
 

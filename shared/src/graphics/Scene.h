@@ -7,19 +7,21 @@
 
 class Scene: public SceneInterface {
 public:
-    Scene(const std::shared_ptr<::GraphicsObjectFactoryInterface> & graphicsFactory, const std::shared_ptr<::ShaderFactoryInterface> & shaderFactory);
+    Scene(const std::shared_ptr<::GraphicsObjectFactoryInterface> & graphicsFactory,
+          const std::shared_ptr<::ShaderFactoryInterface> & shaderFactory,
+          const std::shared_ptr<::RenderingContextInterface> & renderingContext);
 
     virtual void setCallbackHandler(const std::shared_ptr<SceneCallbackInterface> & callbackInterface);
-
-    virtual void setRenderingContext(const std::shared_ptr<RenderingContextInterface> & renderingContext);
-
-    virtual std::shared_ptr<RenderingContextInterface> getRenderingContext();
 
     virtual void setCamera(const std::shared_ptr<CameraInterface> & camera);
 
     virtual std::shared_ptr<CameraInterface> getCamera();
 
     virtual std::shared_ptr<RendererInterface> getRenderer();
+
+    virtual std::shared_ptr<::GraphicsObjectFactoryInterface> getGraphicsFactory();
+
+    virtual std::shared_ptr<::ShaderFactoryInterface> getShaderFactory();
 
     virtual void drawFrame();
 
@@ -31,7 +33,7 @@ private:
     std::shared_ptr<RenderingContextInterface> renderingContext;
     std::shared_ptr<CameraInterface> camera;
 
-    std::optional<std::shared_ptr<SceneCallbackInterface>> callbackHandler;
+    std::shared_ptr<SceneCallbackInterface> callbackHandler;
     const std::shared_ptr<::GraphicsObjectFactoryInterface> graphicsFactory;
     const std::shared_ptr<::ShaderFactoryInterface> & shaderFactory;
 

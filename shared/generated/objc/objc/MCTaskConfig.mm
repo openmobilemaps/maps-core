@@ -7,11 +7,13 @@
 @implementation MCTaskConfig
 
 - (nonnull instancetype)initWithId:(nonnull NSString *)id
+                             delay:(int32_t)delay
                           priority:(MCTaskPriority)priority
               executionEnvironment:(MCExecutionEnvironment)executionEnvironment
 {
     if (self = [super init]) {
         _id = [id copy];
+        _delay = delay;
         _priority = priority;
         _executionEnvironment = executionEnvironment;
     }
@@ -19,17 +21,19 @@
 }
 
 + (nonnull instancetype)taskConfigWithId:(nonnull NSString *)id
+                                   delay:(int32_t)delay
                                 priority:(MCTaskPriority)priority
                     executionEnvironment:(MCExecutionEnvironment)executionEnvironment
 {
     return [(MCTaskConfig*)[self alloc] initWithId:id
+                                             delay:delay
                                           priority:priority
                               executionEnvironment:executionEnvironment];
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p id:%@ priority:%@ executionEnvironment:%@>", self.class, (void *)self, self.id, @(self.priority), @(self.executionEnvironment)];
+    return [NSString stringWithFormat:@"<%@ %p id:%@ delay:%@ priority:%@ executionEnvironment:%@>", self.class, (void *)self, self.id, @(self.delay), @(self.priority), @(self.executionEnvironment)];
 }
 
 @end

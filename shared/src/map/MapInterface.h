@@ -7,6 +7,7 @@
 #include "GraphicsObjectFactoryInterface.h"
 #include "LayerInterface.h"
 #include "LoaderInterface.h"
+#include "RenderingContextInterface.h"
 #include "SchedulerInterface.h"
 #include "ShaderFactoryInterface.h"
 #include "TouchHandlerInterface.h"
@@ -19,7 +20,7 @@ class MapInterface {
 public:
     virtual ~MapInterface() {}
 
-    static std::shared_ptr<MapInterface> create(const std::shared_ptr<::GraphicsObjectFactoryInterface> & graphicsFactory, const std::shared_ptr<::ShaderFactoryInterface> & shaderFactory, const MapConfig & mapConfig, const std::shared_ptr<::SchedulerInterface> & scheduler);
+    static std::shared_ptr<MapInterface> create(const std::shared_ptr<::GraphicsObjectFactoryInterface> & graphicsFactory, const std::shared_ptr<::ShaderFactoryInterface> & shaderFactory, const std::shared_ptr<::RenderingContextInterface> & renderingContext, const MapConfig & mapConfig, const std::shared_ptr<::SchedulerInterface> & scheduler);
 
     static std::shared_ptr<MapInterface> createWithOpenGl(const MapConfig & mapConfig, const std::shared_ptr<::SchedulerInterface> & scheduler);
 

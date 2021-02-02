@@ -30,10 +30,11 @@ public abstract class MapInterface {
 
     public abstract void pause();
 
-    public static MapInterface create(ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface graphicsFactory, ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface shaderFactory, MapConfig mapConfig, ch.ubique.mapscore.shared.map.scheduling.SchedulerInterface scheduler)
+    public static MapInterface create(ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface graphicsFactory, ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface shaderFactory, ch.ubique.mapscore.shared.graphics.RenderingContextInterface renderingContext, MapConfig mapConfig, ch.ubique.mapscore.shared.map.scheduling.SchedulerInterface scheduler)
     {
         return CppProxy.create(graphicsFactory,
                                shaderFactory,
+                               renderingContext,
                                mapConfig,
                                scheduler);
     }
@@ -163,7 +164,7 @@ public abstract class MapInterface {
         }
         private native void native_pause(long _nativeRef);
 
-        public static native MapInterface create(ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface graphicsFactory, ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface shaderFactory, MapConfig mapConfig, ch.ubique.mapscore.shared.map.scheduling.SchedulerInterface scheduler);
+        public static native MapInterface create(ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface graphicsFactory, ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface shaderFactory, ch.ubique.mapscore.shared.graphics.RenderingContextInterface renderingContext, MapConfig mapConfig, ch.ubique.mapscore.shared.map.scheduling.SchedulerInterface scheduler);
 
         public static native MapInterface createWithOpenGl(MapConfig mapConfig, ch.ubique.mapscore.shared.map.scheduling.SchedulerInterface scheduler);
     }

@@ -11,6 +11,7 @@
 #import "MCLoaderInterface+Private.h"
 #import "MCMapCallbackInterface+Private.h"
 #import "MCMapConfig+Private.h"
+#import "MCRenderingContextInterface+Private.h"
 #import "MCSchedulerInterface+Private.h"
 #import "MCShaderFactoryInterface+Private.h"
 #import "MCTouchHandlerInterface+Private.h"
@@ -40,11 +41,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 
 + (nullable MCMapInterface *)create:(nullable id<MCGraphicsObjectFactoryInterface>)graphicsFactory
                       shaderFactory:(nullable id<MCShaderFactoryInterface>)shaderFactory
+                   renderingContext:(nullable id<MCRenderingContextInterface>)renderingContext
                           mapConfig:(nonnull MCMapConfig *)mapConfig
                           scheduler:(nullable id<MCSchedulerInterface>)scheduler {
     try {
         auto objcpp_result_ = ::MapInterface::create(::djinni_generated::GraphicsObjectFactoryInterface::toCpp(graphicsFactory),
                                                      ::djinni_generated::ShaderFactoryInterface::toCpp(shaderFactory),
+                                                     ::djinni_generated::RenderingContextInterface::toCpp(renderingContext),
                                                      ::djinni_generated::MapConfig::toCpp(mapConfig),
                                                      ::djinni_generated::SchedulerInterface::toCpp(scheduler));
         return ::djinni_generated::MapInterface::fromCpp(objcpp_result_);

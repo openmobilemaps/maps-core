@@ -36,10 +36,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 }
 
 + (nullable MCSceneInterface *)create:(nullable id<MCGraphicsObjectFactoryInterface>)graphicsFactory
-                        shaderFactory:(nullable id<MCShaderFactoryInterface>)shaderFactory {
+                        shaderFactory:(nullable id<MCShaderFactoryInterface>)shaderFactory
+                     renderingContext:(nullable id<MCRenderingContextInterface>)renderingContext {
     try {
         auto objcpp_result_ = ::SceneInterface::create(::djinni_generated::GraphicsObjectFactoryInterface::toCpp(graphicsFactory),
-                                                       ::djinni_generated::ShaderFactoryInterface::toCpp(shaderFactory));
+                                                       ::djinni_generated::ShaderFactoryInterface::toCpp(shaderFactory),
+                                                       ::djinni_generated::RenderingContextInterface::toCpp(renderingContext));
         return ::djinni_generated::SceneInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -54,19 +56,6 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)setCallbackHandler:(nullable id<MCSceneCallbackInterface>)callbackInterface {
     try {
         _cppRefHandle.get()->setCallbackHandler(::djinni_generated::SceneCallbackInterface::toCpp(callbackInterface));
-    } DJINNI_TRANSLATE_EXCEPTIONS()
-}
-
-- (void)setRenderingContext:(nullable id<MCRenderingContextInterface>)renderingContext {
-    try {
-        _cppRefHandle.get()->setRenderingContext(::djinni_generated::RenderingContextInterface::toCpp(renderingContext));
-    } DJINNI_TRANSLATE_EXCEPTIONS()
-}
-
-- (nullable id<MCRenderingContextInterface>)getRenderingContext {
-    try {
-        auto objcpp_result_ = _cppRefHandle.get()->getRenderingContext();
-        return ::djinni_generated::RenderingContextInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -87,6 +76,20 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getRenderer();
         return ::djinni_generated::RendererInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCGraphicsObjectFactoryInterface>)getGraphicsFactory {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getGraphicsFactory();
+        return ::djinni_generated::GraphicsObjectFactoryInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCShaderFactoryInterface>)getShaderFactory {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getShaderFactory();
+        return ::djinni_generated::ShaderFactoryInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

@@ -1,10 +1,12 @@
 #pragma once
 
+#include "Scene.h"
 #include "MapInterface.h"
+#include "MapConfig.h"
 
-class MapScene: public MapInterface {
+class MapScene: public MapInterface, public SceneCallbackInterface, public std::enable_shared_from_this<MapScene> {
 public:
-    MapScene();
+    MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig & mapConfig, const std::shared_ptr<::SchedulerInterface> & scheduler);
 
     virtual ~MapScene() {}
 
@@ -31,4 +33,13 @@ public:
     virtual void resume();
 
     virtual void pause();
+private:
+
+    const MapConfig mapConfig;
+    
+    std::shared_ptr<MapCallbackInterface> callbackHandler;
+
+    std::shared_ptr<SchedulerInterface> scheduler;
+
+    std::shared_ptr<SceneInterface> scene;
 };
