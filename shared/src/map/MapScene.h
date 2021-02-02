@@ -3,6 +3,7 @@
 #include "MapInterface.h"
 
 class MapScene: public MapInterface {
+public:
     MapScene();
 
     virtual ~MapScene() {}

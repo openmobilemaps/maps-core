@@ -3,10 +3,10 @@
 #include "MapCamera2dInterface.h"
 
 class MapCamera2d: public MapCamera2dInterface {
-
+public:
     MapCamera2d();
     
-    ~MapCamera2d() {};
+    ~MapCamera2d(){};
 
     virtual void moveToCenterPosition(const ::Vec2F & position, float zoom, bool animated);
 
@@ -31,4 +31,4 @@ class MapCamera2d: public MapCamera2dInterface {
     virtual void removeListener(const std::shared_ptr<MapCamera2dListenerInterface> & listener);
 
     virtual std::shared_ptr<::CameraInterface> asCameraIntercace();
-}
+};
