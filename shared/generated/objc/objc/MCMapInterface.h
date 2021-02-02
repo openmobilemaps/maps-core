@@ -26,6 +26,8 @@
 + (nullable MCMapInterface *)createWithOpenGl:(nonnull MCMapConfig *)mapConfig
                                     scheduler:(nullable id<MCSchedulerInterface>)scheduler;
 
+- (nullable id<MCRenderingContextInterface>)getRenderingContext;
+
 - (void)setCallbackHandler:(nullable id<MCMapCallbackInterface>)callbackInterface;
 
 - (void)setCamera:(nullable id<MCCameraInterface>)camera;

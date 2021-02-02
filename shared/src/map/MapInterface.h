@@ -24,6 +24,8 @@ public:
 
     static std::shared_ptr<MapInterface> createWithOpenGl(const MapConfig & mapConfig, const std::shared_ptr<::SchedulerInterface> & scheduler);
 
+    virtual std::shared_ptr<::RenderingContextInterface> getRenderingContext() = 0;
+
     virtual void setCallbackHandler(const std::shared_ptr<MapCallbackInterface> & callbackInterface) = 0;
 
     virtual void setCamera(const std::shared_ptr<::CameraInterface> & camera) = 0;

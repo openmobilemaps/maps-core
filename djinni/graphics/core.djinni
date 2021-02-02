@@ -11,6 +11,7 @@ scene_interface = interface +c {
     set_camera(camera: camera_interface);
     get_camera() : camera_interface;
     get_renderer() : renderer_interface;
+    get_rendering_context() : rendering_context_interface;
     get_graphics_factory(): graphics_object_factory_interface;
     get_shader_factory(): shader_factory_interface;
     draw_frame();

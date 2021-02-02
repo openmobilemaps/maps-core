@@ -79,6 +79,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable id<MCRenderingContextInterface>)getRenderingContext {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getRenderingContext();
+        return ::djinni_generated::RenderingContextInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nullable id<MCGraphicsObjectFactoryInterface>)getGraphicsFactory {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getGraphicsFactory();

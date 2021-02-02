@@ -51,6 +51,16 @@ CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT ::djinni_generated::NativeRenderingContextInterface::JniType JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1getRenderingContext(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
+        auto r = ref->getRenderingContext();
+        return ::djinni::release(::djinni_generated::NativeRenderingContextInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1setCallbackHandler(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_callbackInterface)
 {
     try {

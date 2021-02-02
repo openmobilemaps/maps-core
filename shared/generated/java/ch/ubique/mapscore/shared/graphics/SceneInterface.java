@@ -14,6 +14,8 @@ public abstract class SceneInterface {
 
     public abstract RendererInterface getRenderer();
 
+    public abstract RenderingContextInterface getRenderingContext();
+
     public abstract ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface getGraphicsFactory();
 
     public abstract ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface getShaderFactory();
@@ -90,6 +92,14 @@ public abstract class SceneInterface {
             return native_getRenderer(this.nativeRef);
         }
         private native RendererInterface native_getRenderer(long _nativeRef);
+
+        @Override
+        public RenderingContextInterface getRenderingContext()
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            return native_getRenderingContext(this.nativeRef);
+        }
+        private native RenderingContextInterface native_getRenderingContext(long _nativeRef);
 
         @Override
         public ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface getGraphicsFactory()

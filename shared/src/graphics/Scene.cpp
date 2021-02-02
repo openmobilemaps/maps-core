@@ -59,6 +59,10 @@ std::shared_ptr<RendererInterface> Scene::getRenderer() {
     return renderer;
 }
 
+std::shared_ptr<RenderingContextInterface> Scene::getRenderingContext() {
+    return renderingContext;
+}
+
 void Scene::drawFrame() {
     if (auto renderPass = this->renderPass) {
         // Begin testing code

@@ -6,6 +6,8 @@ package ch.ubique.mapscore.shared.map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class MapInterface {
+    public abstract ch.ubique.mapscore.shared.graphics.RenderingContextInterface getRenderingContext();
+
     public abstract void setCallbackHandler(MapCallbackInterface callbackInterface);
 
     public abstract void setCamera(ch.ubique.mapscore.shared.graphics.CameraInterface camera);
@@ -67,6 +69,14 @@ public abstract class MapInterface {
             _djinni_private_destroy();
             super.finalize();
         }
+
+        @Override
+        public ch.ubique.mapscore.shared.graphics.RenderingContextInterface getRenderingContext()
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            return native_getRenderingContext(this.nativeRef);
+        }
+        private native ch.ubique.mapscore.shared.graphics.RenderingContextInterface native_getRenderingContext(long _nativeRef);
 
         @Override
         public void setCallbackHandler(MapCallbackInterface callbackInterface)

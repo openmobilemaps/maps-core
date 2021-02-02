@@ -5,6 +5,10 @@ MapScene::MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig & mapC
 scene(scene), mapConfig(mapConfig), scheduler(scheduler){
 }
 
+std::shared_ptr<::RenderingContextInterface> MapScene::getRenderingContext() {
+    return scene->getRenderingContext();
+}
+
 void MapScene::setCallbackHandler(const std::shared_ptr<MapCallbackInterface> & callbackInterface) {
     scene->setCallbackHandler(shared_from_this());
     callbackHandler = callbackInterface;

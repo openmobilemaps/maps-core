@@ -82,6 +82,16 @@ CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_SceneInterfac
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_SceneInterface_00024CppProxy_native_1getRenderingContext(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::SceneInterface>(nativeRef);
+        auto r = ref->getRenderingContext();
+        return ::djinni::release(::djinni_generated::NativeRenderingContextInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 CJNIEXPORT ::djinni_generated::NativeGraphicsObjectFactoryInterface::JniType JNICALL Java_ch_ubique_mapscore_shared_graphics_SceneInterface_00024CppProxy_native_1getGraphicsFactory(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {

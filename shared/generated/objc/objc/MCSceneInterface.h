@@ -27,6 +27,8 @@
 
 - (nullable id<MCRendererInterface>)getRenderer;
 
+- (nullable id<MCRenderingContextInterface>)getRenderingContext;
+
 - (nullable id<MCGraphicsObjectFactoryInterface>)getGraphicsFactory;
 
 - (nullable id<MCShaderFactoryInterface>)getShaderFactory;

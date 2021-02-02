@@ -28,6 +28,8 @@ public:
 
     virtual std::shared_ptr<RendererInterface> getRenderer() = 0;
 
+    virtual std::shared_ptr<RenderingContextInterface> getRenderingContext() = 0;
+
     virtual std::shared_ptr<::GraphicsObjectFactoryInterface> getGraphicsFactory() = 0;
 
     virtual std::shared_ptr<::ShaderFactoryInterface> getShaderFactory() = 0;

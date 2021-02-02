@@ -11,7 +11,7 @@ std::shared_ptr<MapInterface> MapInterface::create(const std::shared_ptr<::Graph
 
 std::shared_ptr<MapInterface> MapInterface::createWithOpenGl(const MapConfig & mapConfig, const std::shared_ptr<::SchedulerInterface> & scheduler) {
 #ifdef __ANDROID__
-    return std::make_shared<MapScene>();
+    return std::make_shared<MapScene>(SceneInterface::createWithOpenGl(), mapConfig, scheduler);
 #else
     return nullptr;
 #endif

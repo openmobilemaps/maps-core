@@ -10,6 +10,8 @@ public:
 
     virtual ~MapScene() {}
 
+    virtual std::shared_ptr<::RenderingContextInterface> getRenderingContext();
+
     virtual void setCallbackHandler(const std::shared_ptr<MapCallbackInterface> & callbackInterface);
 
     virtual void setCamera(const std::shared_ptr<::CameraInterface> & camera);
