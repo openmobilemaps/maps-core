@@ -18,13 +18,13 @@ import javax.microedition.khronos.opengles.GL10
 class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
 	GlTextureView(context, attrs, defStyleAttr), GLSurfaceView.Renderer, AndroidSchedulerCallback, LifecycleObserver {
 
-	//lateinit var mapInterface: MapInterface
-	var scene: SceneInterface = SceneInterface.createWithOpenGl()
+	var mapInterface: MapInterface
 	var scheduler: AndroidScheduler
 
 	init {
 		setRenderer(this)
 		scheduler = AndroidScheduler(this)
+		mapInterface = MapInterface.createWithOpenGl(MapConfig(MapCoordinateSystem("Test", 0f, 0f, 0f, 0f, 0f, 0f)), scheduler)
 	}
 
 	fun registerLifecycle(lifecycle: Lifecycle) {
@@ -33,15 +33,15 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
 	}
 
 	override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
-		scene.renderingContext.onSurfaceCreated()
+		mapInterface.renderingContext.onSurfaceCreated()
 	}
 
 	override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
-		scene.renderingContext.viewportSize
+		mapInterface.renderingContext.viewportSize
 	}
 
 	override fun onDrawFrame(gl: GL10?) {
-		scene.drawFrame()
+		mapInterface.drawFrame()
 	}
 
 	override fun scheduleOnGlThread(task: TaskInterface) {
