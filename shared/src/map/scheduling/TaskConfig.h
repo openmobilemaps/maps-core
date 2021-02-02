@@ -5,18 +5,22 @@
 
 #include "ExecutionEnvironment.h"
 #include "TaskPriority.h"
+#include <cstdint>
 #include <string>
 #include <utility>
 
 struct TaskConfig final {
     std::string id;
+    int32_t delay;
     TaskPriority priority;
     ExecutionEnvironment executionEnvironment;
 
     TaskConfig(std::string id_,
+               int32_t delay_,
                TaskPriority priority_,
                ExecutionEnvironment executionEnvironment_)
     : id(std::move(id_))
+    , delay(std::move(delay_))
     , priority(std::move(priority_))
     , executionEnvironment(std::move(executionEnvironment_))
     {}
