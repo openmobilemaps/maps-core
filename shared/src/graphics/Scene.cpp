@@ -9,9 +9,11 @@
 #include "ExampleCamera.h"
 
 Scene::Scene(const std::shared_ptr<::GraphicsObjectFactoryInterface> &graphicsFactory,
-             const std::shared_ptr<::ShaderFactoryInterface> &shaderFactory) :
+             const std::shared_ptr<::ShaderFactoryInterface> &shaderFactory,
+             const std::shared_ptr<::RenderingContextInterface> & renderingContext) :
         graphicsFactory(graphicsFactory),
         shaderFactory(shaderFactory),
+        renderingContext(renderingContext),
         renderer(std::make_shared<Renderer>()) {
 
     // Begin testing code
@@ -33,20 +35,20 @@ Scene::Scene(const std::shared_ptr<::GraphicsObjectFactoryInterface> &graphicsFa
     // End testing code
 }
 
-void Scene::setRenderingContext(const std::shared_ptr<RenderingContextInterface> &renderingContext) {
-    this->renderingContext = renderingContext;
-}
-
 void Scene::setCallbackHandler(const std::shared_ptr<SceneCallbackInterface> &callbackInterface) {
     callbackHandler = callbackInterface;
 }
 
-std::shared_ptr<RenderingContextInterface> Scene::getRenderingContext() {
-    return renderingContext;
-}
-
 void Scene::setCamera(const std::shared_ptr<CameraInterface> &camera) {
     this->camera = camera;
+}
+
+std::shared_ptr<::GraphicsObjectFactoryInterface> Scene::getGraphicsFactory() {
+    return graphicsFactory;
+}
+
+std::shared_ptr<::ShaderFactoryInterface> Scene::getShaderFactory() {
+    return shaderFactory;
 }
 
 std::shared_ptr<CameraInterface> Scene::getCamera() {
@@ -70,6 +72,6 @@ void Scene::clear() {}
 
 void Scene::invalidate() {
     if (auto handler = callbackHandler) {
-        (*handler)->invalidate();
+        handler->invalidate();
     }
 }

@@ -2,7 +2,6 @@ import Foundation
 import MapCoreSharedModule
 
 class Scheduler: MCSchedulerInterface {
-
     private let ioHighDispatchQueue = DispatchQueue(label: "ioHighQueue", qos: .userInitiated, attributes: .concurrent)
     private let ioNormalDispatchQueue = DispatchQueue(label: "ioNormalQueue", qos: .default, attributes: .concurrent)
     private let ioLowDispatchQueue = DispatchQueue(label: "ioLowQueue", qos: .background, attributes: .concurrent)
@@ -20,7 +19,7 @@ class Scheduler: MCSchedulerInterface {
     private var outstandingWorkItems: [String: WeakWorkItem] = [:]
 
     func addTask(_ task: MCTaskInterface?) {
-        cleanUpFinishedOutstandingWorkItems();
+        cleanUpFinishedOutstandingWorkItems()
         guard let task = task else { return }
         let config = task.getConfig()
         let delay = TimeInterval(config.delay)
@@ -97,9 +96,9 @@ class Scheduler: MCSchedulerInterface {
         computationHighDispatchQueue.resume()
     }
 
-    func cleanUpFinishedOutstandingWorkItems(){
-        outstandingWorkItems = outstandingWorkItems.filter({
+    func cleanUpFinishedOutstandingWorkItems() {
+        outstandingWorkItems = outstandingWorkItems.filter {
             !($1.workItem?.isCancelled ?? false) || $1.workItem != nil
-        })
+        }
     }
 }

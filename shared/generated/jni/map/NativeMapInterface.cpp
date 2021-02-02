@@ -8,6 +8,7 @@
 #include "NativeLoaderInterface.h"
 #include "NativeMapCallbackInterface.h"
 #include "NativeMapConfig.h"
+#include "NativeRenderingContextInterface.h"
 #include "NativeSchedulerInterface.h"
 #include "NativeShaderFactoryInterface.h"
 #include "NativeTouchHandlerInterface.h"
@@ -27,12 +28,13 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024Cpp
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_create(JNIEnv* jniEnv, jobject /*this*/, ::djinni_generated::NativeGraphicsObjectFactoryInterface::JniType j_graphicsFactory, ::djinni_generated::NativeShaderFactoryInterface::JniType j_shaderFactory, jobject j_mapConfig, ::djinni_generated::NativeSchedulerInterface::JniType j_scheduler)
+CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_create(JNIEnv* jniEnv, jobject /*this*/, ::djinni_generated::NativeGraphicsObjectFactoryInterface::JniType j_graphicsFactory, ::djinni_generated::NativeShaderFactoryInterface::JniType j_shaderFactory, ::djinni_generated::NativeRenderingContextInterface::JniType j_renderingContext, jobject j_mapConfig, ::djinni_generated::NativeSchedulerInterface::JniType j_scheduler)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE0(jniEnv);
         auto r = ::MapInterface::create(::djinni_generated::NativeGraphicsObjectFactoryInterface::toCpp(jniEnv, j_graphicsFactory),
                                         ::djinni_generated::NativeShaderFactoryInterface::toCpp(jniEnv, j_shaderFactory),
+                                        ::djinni_generated::NativeRenderingContextInterface::toCpp(jniEnv, j_renderingContext),
                                         ::djinni_generated::NativeMapConfig::toCpp(jniEnv, j_mapConfig),
                                         ::djinni_generated::NativeSchedulerInterface::toCpp(jniEnv, j_scheduler));
         return ::djinni::release(::djinni_generated::NativeMapInterface::fromCpp(jniEnv, r));

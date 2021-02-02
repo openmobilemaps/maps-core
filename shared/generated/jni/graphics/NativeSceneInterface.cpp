@@ -24,12 +24,13 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_SceneInterface_0
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_SceneInterface_00024CppProxy_create(JNIEnv* jniEnv, jobject /*this*/, ::djinni_generated::NativeGraphicsObjectFactoryInterface::JniType j_graphicsFactory, ::djinni_generated::NativeShaderFactoryInterface::JniType j_shaderFactory)
+CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_SceneInterface_00024CppProxy_create(JNIEnv* jniEnv, jobject /*this*/, ::djinni_generated::NativeGraphicsObjectFactoryInterface::JniType j_graphicsFactory, ::djinni_generated::NativeShaderFactoryInterface::JniType j_shaderFactory, jobject j_renderingContext)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE0(jniEnv);
         auto r = ::SceneInterface::create(::djinni_generated::NativeGraphicsObjectFactoryInterface::toCpp(jniEnv, j_graphicsFactory),
-                                          ::djinni_generated::NativeShaderFactoryInterface::toCpp(jniEnv, j_shaderFactory));
+                                          ::djinni_generated::NativeShaderFactoryInterface::toCpp(jniEnv, j_shaderFactory),
+                                          ::djinni_generated::NativeRenderingContextInterface::toCpp(jniEnv, j_renderingContext));
         return ::djinni::release(::djinni_generated::NativeSceneInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
@@ -50,25 +51,6 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_SceneInterface_0
         const auto& ref = ::djinni::objectFromHandleAddress<::SceneInterface>(nativeRef);
         ref->setCallbackHandler(::djinni_generated::NativeSceneCallbackInterface::toCpp(jniEnv, j_callbackInterface));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
-}
-
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_SceneInterface_00024CppProxy_native_1setRenderingContext(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_renderingContext)
-{
-    try {
-        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
-        const auto& ref = ::djinni::objectFromHandleAddress<::SceneInterface>(nativeRef);
-        ref->setRenderingContext(::djinni_generated::NativeRenderingContextInterface::toCpp(jniEnv, j_renderingContext));
-    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
-}
-
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_SceneInterface_00024CppProxy_native_1getRenderingContext(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
-{
-    try {
-        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
-        const auto& ref = ::djinni::objectFromHandleAddress<::SceneInterface>(nativeRef);
-        auto r = ref->getRenderingContext();
-        return ::djinni::release(::djinni_generated::NativeRenderingContextInterface::fromCpp(jniEnv, r));
-    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
 CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_SceneInterface_00024CppProxy_native_1setCamera(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_camera)
@@ -97,6 +79,26 @@ CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_SceneInterfac
         const auto& ref = ::djinni::objectFromHandleAddress<::SceneInterface>(nativeRef);
         auto r = ref->getRenderer();
         return ::djinni::release(::djinni_generated::NativeRendererInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT ::djinni_generated::NativeGraphicsObjectFactoryInterface::JniType JNICALL Java_ch_ubique_mapscore_shared_graphics_SceneInterface_00024CppProxy_native_1getGraphicsFactory(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::SceneInterface>(nativeRef);
+        auto r = ref->getGraphicsFactory();
+        return ::djinni::release(::djinni_generated::NativeGraphicsObjectFactoryInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT ::djinni_generated::NativeShaderFactoryInterface::JniType JNICALL Java_ch_ubique_mapscore_shared_graphics_SceneInterface_00024CppProxy_native_1getShaderFactory(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::SceneInterface>(nativeRef);
+        auto r = ref->getShaderFactory();
+        return ::djinni::release(::djinni_generated::NativeShaderFactoryInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

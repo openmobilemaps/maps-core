@@ -16,21 +16,21 @@ class SceneInterface {
 public:
     virtual ~SceneInterface() {}
 
-    static std::shared_ptr<SceneInterface> create(const std::shared_ptr<::GraphicsObjectFactoryInterface> & graphicsFactory, const std::shared_ptr<::ShaderFactoryInterface> & shaderFactory);
+    static std::shared_ptr<SceneInterface> create(const std::shared_ptr<::GraphicsObjectFactoryInterface> & graphicsFactory, const std::shared_ptr<::ShaderFactoryInterface> & shaderFactory, const std::shared_ptr<RenderingContextInterface> & renderingContext);
 
     static std::shared_ptr<SceneInterface> createWithOpenGl();
 
     virtual void setCallbackHandler(const std::shared_ptr<SceneCallbackInterface> & callbackInterface) = 0;
-
-    virtual void setRenderingContext(const std::shared_ptr<RenderingContextInterface> & renderingContext) = 0;
-
-    virtual std::shared_ptr<RenderingContextInterface> getRenderingContext() = 0;
 
     virtual void setCamera(const std::shared_ptr<CameraInterface> & camera) = 0;
 
     virtual std::shared_ptr<CameraInterface> getCamera() = 0;
 
     virtual std::shared_ptr<RendererInterface> getRenderer() = 0;
+
+    virtual std::shared_ptr<::GraphicsObjectFactoryInterface> getGraphicsFactory() = 0;
+
+    virtual std::shared_ptr<::ShaderFactoryInterface> getShaderFactory() = 0;
 
     virtual void drawFrame() = 0;
 

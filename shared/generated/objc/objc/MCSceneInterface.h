@@ -14,21 +14,22 @@
 @interface MCSceneInterface : NSObject
 
 + (nullable MCSceneInterface *)create:(nullable id<MCGraphicsObjectFactoryInterface>)graphicsFactory
-                        shaderFactory:(nullable id<MCShaderFactoryInterface>)shaderFactory;
+                        shaderFactory:(nullable id<MCShaderFactoryInterface>)shaderFactory
+                     renderingContext:(nullable id<MCRenderingContextInterface>)renderingContext;
 
 + (nullable MCSceneInterface *)createWithOpenGl;
 
 - (void)setCallbackHandler:(nullable id<MCSceneCallbackInterface>)callbackInterface;
-
-- (void)setRenderingContext:(nullable id<MCRenderingContextInterface>)renderingContext;
-
-- (nullable id<MCRenderingContextInterface>)getRenderingContext;
 
 - (void)setCamera:(nullable id<MCCameraInterface>)camera;
 
 - (nullable id<MCCameraInterface>)getCamera;
 
 - (nullable id<MCRendererInterface>)getRenderer;
+
+- (nullable id<MCGraphicsObjectFactoryInterface>)getGraphicsFactory;
+
+- (nullable id<MCShaderFactoryInterface>)getShaderFactory;
 
 - (void)drawFrame;
 

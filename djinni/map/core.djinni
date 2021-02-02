@@ -6,9 +6,11 @@
 @extern "../yaml/camera_interface.yaml"
 @extern "../yaml/loader_interface.yaml"
 @extern "../yaml/layer_interface.yaml"
+@extern "../yaml/scene_interface.yaml"
+@extern "../yaml/rendering_context_interface.yaml"
 
 map_interface = interface +c {
-    static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface, map_config: map_config, scheduler: scheduler_interface) : map_interface;
+    static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface, rendering_context: rendering_context_interface, map_config: map_config, scheduler: scheduler_interface) : map_interface;
     static createWithOpenGl(map_config: map_config, scheduler: scheduler_interface) : map_interface;
     set_callback_handler(callback_interface: map_callback_interface);
     set_camera(camera: camera_interface);

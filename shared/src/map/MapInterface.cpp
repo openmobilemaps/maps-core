@@ -2,9 +2,11 @@
 
 std::shared_ptr<MapInterface> MapInterface::create(const std::shared_ptr<::GraphicsObjectFactoryInterface> & graphicsFactory,
                                                     const std::shared_ptr<::ShaderFactoryInterface> & shaderFactory,
+                                                    const std::shared_ptr<::RenderingContextInterface> & renderingContext,
                                                     const MapConfig & mapConfig,
                                                     const std::shared_ptr<::SchedulerInterface> & scheduler) {
-    return std::make_shared<MapScene>();
+    auto scene = SceneInterface::create(graphicsFactory, shaderFactory, renderingContext);
+    return std::make_shared<MapScene>(scene, mapConfig, scheduler);
 }
 
 std::shared_ptr<MapInterface> MapInterface::createWithOpenGl(const MapConfig & mapConfig, const std::shared_ptr<::SchedulerInterface> & scheduler) {
