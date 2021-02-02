@@ -19,6 +19,7 @@ JAVA_PACKAGE := ch.ubique.mapscore.shared
 OBJC_OUT := $(DJINNI_OUT_DIR)/objc/objc
 OBJC_PREFIX := $(PROJECT_PREFIX)
 OBJCPP_OUT := $(DJINNI_OUT_DIR)/objc/objcpp
+UB_FOUNDATION_HEADER := '<Foundation/Foundation.h>'
 
 YAML_ARG := --yaml-out ./yaml
 
@@ -50,7 +51,28 @@ $(DJINNI_OUT_DIR)/%.log: $(DJINNISRCDIR)/%.djinni
 	mkdir -p $(DJINNI_OUT_DIR)
 	mkdir -p $(DJINNI_OUT_DIR)/$(SUB)
 #	cp -f $(SHARED_LIBRARY)/djinni/optional_wrapper.h $(CPP_OUT)/optional_wrapper.h
-	$(DJINNI_RUN) --idl ../djinni/$< --java-out $(JAVA_OUT)/$(SUB) --jni-out $(JNI_OUT)/$(SUB) --objc-out $(OBJC_OUT)/ --cpp-out $(CPP_OUT)/$(SUB) --ident-jni-class $(IDENT_JNI_CLASS) --objc-type-prefix $(OBJC_PREFIX) --objcpp-out $(OBJCPP_OUT)/$(SUB) --hpp-ext $(HPP_EXT) --ident-cpp-type $(IDENT_CPP) --ident-cpp-file $(IDENT_CPP) --ident-cpp-enum $(IDENT_CPP_ENUM) --ident-cpp-type-param $(IDENT_CPP_METHOD) --ident-cpp-method $(IDENT_CPP_METHOD) --ident-cpp-local $(IDENT_CPP_METHOD) --ident-cpp-field $(IDENT_CPP_FIELD) --ident-java-field $(IDENT_JAVA) --ident-java-enum $(IDENT_CPP_ENUM) --ident-objc-enum $(IDENT_CPP_ENUM) --java-package $(JAVA_PACKAGE)$(SUBPOINT) --ident-jni-file $(IDENT_JNI_CLASS) $(YAML_ARG) > $@
+	$(DJINNI_RUN) --idl ../djinni/$< \
+	--java-out $(JAVA_OUT)/$(SUB) \
+	--jni-out $(JNI_OUT)/$(SUB) \
+	--objc-out $(OBJC_OUT)/ \
+	--cpp-out $(CPP_OUT)/$(SUB) \
+	--ident-jni-class $(IDENT_JNI_CLASS) \
+	--objc-type-prefix $(OBJC_PREFIX) \
+	--objcpp-out $(OBJCPP_OUT)/$(SUB) \
+	--hpp-ext $(HPP_EXT) \
+	--ident-cpp-type $(IDENT_CPP) \
+	--ident-cpp-file $(IDENT_CPP) \
+	--ident-cpp-enum $(IDENT_CPP_ENUM) \
+	--ident-cpp-type-param $(IDENT_CPP_METHOD) \
+	--ident-cpp-method $(IDENT_CPP_METHOD) \
+	--ident-cpp-local $(IDENT_CPP_METHOD) \
+	--ident-cpp-field $(IDENT_CPP_FIELD) \
+	--ident-java-field $(IDENT_JAVA) \
+	--ident-java-enum $(IDENT_CPP_ENUM) \
+	--ident-objc-enum $(IDENT_CPP_ENUM) \
+	--java-package $(JAVA_PACKAGE)$(SUBPOINT) \
+	--ident-jni-file $(IDENT_JNI_CLASS) $(YAML_ARG) \
+	--ub-foundation-header $(UB_FOUNDATION_HEADER) > $@
 
 djinni: $(DJINNILOG)
 	@echo Djinni finished
