@@ -11,7 +11,7 @@ void MapScene::setCallbackHandler(const std::shared_ptr<MapCallbackInterface> & 
 }
 
 void MapScene::setCamera(const std::shared_ptr<::CameraInterface> & camera) {
-    scene->setCallbackHandler(camera);
+    scene->setCamera(camera);
 }
 
 std::shared_ptr<::CameraInterface> MapScene::getCamera() {
