@@ -14,6 +14,7 @@ struct MapCoordinateSystem final {
     float boundsBottom;
     float zoomMin;
     float zoomMax;
+    float unitToMeterFactor;
 
     MapCoordinateSystem(std::string identifier_,
                         float boundsLeft_,
@@ -21,7 +22,8 @@ struct MapCoordinateSystem final {
                         float boundsRight_,
                         float boundsBottom_,
                         float zoomMin_,
-                        float zoomMax_)
+                        float zoomMax_,
+                        float unitToMeterFactor_)
     : identifier(std::move(identifier_))
     , boundsLeft(std::move(boundsLeft_))
     , boundsTop(std::move(boundsTop_))
@@ -29,5 +31,6 @@ struct MapCoordinateSystem final {
     , boundsBottom(std::move(boundsBottom_))
     , zoomMin(std::move(zoomMin_))
     , zoomMax(std::move(zoomMax_))
+    , unitToMeterFactor(std::move(unitToMeterFactor_))
     {}
 };

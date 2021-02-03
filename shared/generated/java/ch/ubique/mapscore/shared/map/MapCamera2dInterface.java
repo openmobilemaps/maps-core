@@ -30,9 +30,9 @@ public abstract class MapCamera2dInterface {
 
     public abstract ch.ubique.mapscore.shared.graphics.CameraInterface asCameraIntercace();
 
-    public static MapCamera2dInterface create()
+    public static MapCamera2dInterface create(float screenDensityPpi)
     {
-        return CppProxy.create();
+        return CppProxy.create(screenDensityPpi);
     }
 
     private static final class CppProxy extends MapCamera2dInterface
@@ -154,6 +154,6 @@ public abstract class MapCamera2dInterface {
         }
         private native ch.ubique.mapscore.shared.graphics.CameraInterface native_asCameraIntercace(long _nativeRef);
 
-        public static native MapCamera2dInterface create();
+        public static native MapCamera2dInterface create(float screenDensityPpi);
     }
 }

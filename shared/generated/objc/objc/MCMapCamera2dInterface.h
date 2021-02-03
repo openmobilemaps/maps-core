@@ -10,7 +10,7 @@
 
 @interface MCMapCamera2dInterface : NSObject
 
-+ (nullable MCMapCamera2dInterface *)create;
++ (nullable MCMapCamera2dInterface *)create:(float)screenDensityPpi;
 
 - (void)moveToCenterPosition:(nonnull MCVec2F *)position
                         zoom:(float)zoom

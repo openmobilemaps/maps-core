@@ -13,7 +13,7 @@ class MapCamera2dInterface {
 public:
     virtual ~MapCamera2dInterface() {}
 
-    static std::shared_ptr<MapCamera2dInterface> create();
+    static std::shared_ptr<MapCamera2dInterface> create(float screenDensityPpi);
 
     virtual void moveToCenterPosition(const ::Vec2F & position, float zoom, bool animated) = 0;
 

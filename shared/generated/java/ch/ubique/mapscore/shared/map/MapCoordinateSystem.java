@@ -21,6 +21,8 @@ public final class MapCoordinateSystem implements java.io.Serializable {
 
     protected float zoomMax;
 
+    protected float unitToMeterFactor;
+
     public MapCoordinateSystem(
             String identifier,
             float boundsLeft,
@@ -28,7 +30,8 @@ public final class MapCoordinateSystem implements java.io.Serializable {
             float boundsRight,
             float boundsBottom,
             float zoomMin,
-            float zoomMax) {
+            float zoomMax,
+            float unitToMeterFactor) {
         this.identifier = identifier;
         this.boundsLeft = boundsLeft;
         this.boundsTop = boundsTop;
@@ -36,6 +39,7 @@ public final class MapCoordinateSystem implements java.io.Serializable {
         this.boundsBottom = boundsBottom;
         this.zoomMin = zoomMin;
         this.zoomMax = zoomMax;
+        this.unitToMeterFactor = unitToMeterFactor;
     }
 
     public String getIdentifier() {
@@ -66,6 +70,10 @@ public final class MapCoordinateSystem implements java.io.Serializable {
         return zoomMax;
     }
 
+    public float getUnitToMeterFactor() {
+        return unitToMeterFactor;
+    }
+
     public void setIdentifier(String identifier) {
         this.identifier = identifier;
     }
@@ -94,6 +102,10 @@ public final class MapCoordinateSystem implements java.io.Serializable {
         this.zoomMax = zoomMax;
     }
 
+    public void setUnitToMeterFactor(float unitToMeterFactor) {
+        this.unitToMeterFactor = unitToMeterFactor;
+    }
+
     @Override
     public String toString() {
         return "MapCoordinateSystem{" +
@@ -104,6 +116,7 @@ public final class MapCoordinateSystem implements java.io.Serializable {
                 "," + "boundsBottom=" + boundsBottom +
                 "," + "zoomMin=" + zoomMin +
                 "," + "zoomMax=" + zoomMax +
+                "," + "unitToMeterFactor=" + unitToMeterFactor +
         "}";
     }
 

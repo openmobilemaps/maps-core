@@ -22,11 +22,11 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapCamera2dInterface_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_create(JNIEnv* jniEnv, jobject /*this*/)
+CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_create(JNIEnv* jniEnv, jobject /*this*/, jfloat j_screenDensityPpi)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE0(jniEnv);
-        auto r = ::MapCamera2dInterface::create();
+        auto r = ::MapCamera2dInterface::create(::djinni::F32::toCpp(jniEnv, j_screenDensityPpi));
         return ::djinni::release(::djinni_generated::NativeMapCamera2dInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

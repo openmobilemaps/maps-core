@@ -43,10 +43,11 @@ map_coordinate_system = record {
     bounds_bottom: f32;
     zoom_min: f32;
     zoom_max: f32;
+    unit_to_meter_factor: f32;
 }
 
 map_camera_2d_interface = interface +c {
-    static create(): map_camera_2d_interface;
+    static create(screen_density_ppi: f32): map_camera_2d_interface;
 
     move_to_center_position(position: vec_2_f, zoom: f32, animated: bool);
 

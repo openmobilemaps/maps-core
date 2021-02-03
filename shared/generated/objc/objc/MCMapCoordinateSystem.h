@@ -10,14 +10,16 @@
                                boundsRight:(float)boundsRight
                               boundsBottom:(float)boundsBottom
                                    zoomMin:(float)zoomMin
-                                   zoomMax:(float)zoomMax;
+                                   zoomMax:(float)zoomMax
+                         unitToMeterFactor:(float)unitToMeterFactor;
 + (nonnull instancetype)mapCoordinateSystemWithIdentifier:(nonnull NSString *)identifier
                                                boundsLeft:(float)boundsLeft
                                                 boundsTop:(float)boundsTop
                                               boundsRight:(float)boundsRight
                                              boundsBottom:(float)boundsBottom
                                                   zoomMin:(float)zoomMin
-                                                  zoomMax:(float)zoomMax;
+                                                  zoomMax:(float)zoomMax
+                                        unitToMeterFactor:(float)unitToMeterFactor;
 
 @property (nonatomic, readonly, nonnull) NSString * identifier;
 
@@ -32,5 +34,7 @@
 @property (nonatomic, readonly) float zoomMin;
 
 @property (nonatomic, readonly) float zoomMax;
+
+@property (nonatomic, readonly) float unitToMeterFactor;
 
 @end

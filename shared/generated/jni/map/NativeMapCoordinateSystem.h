@@ -25,7 +25,7 @@ private:
     friend ::djinni::JniClass<NativeMapCoordinateSystem>;
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/map/MapCoordinateSystem") };
-    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Ljava/lang/String;FFFFFF)V") };
+    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Ljava/lang/String;FFFFFFF)V") };
     const jfieldID field_identifier { ::djinni::jniGetFieldID(clazz.get(), "identifier", "Ljava/lang/String;") };
     const jfieldID field_boundsLeft { ::djinni::jniGetFieldID(clazz.get(), "boundsLeft", "F") };
     const jfieldID field_boundsTop { ::djinni::jniGetFieldID(clazz.get(), "boundsTop", "F") };
@@ -33,6 +33,7 @@ private:
     const jfieldID field_boundsBottom { ::djinni::jniGetFieldID(clazz.get(), "boundsBottom", "F") };
     const jfieldID field_zoomMin { ::djinni::jniGetFieldID(clazz.get(), "zoomMin", "F") };
     const jfieldID field_zoomMax { ::djinni::jniGetFieldID(clazz.get(), "zoomMax", "F") };
+    const jfieldID field_unitToMeterFactor { ::djinni::jniGetFieldID(clazz.get(), "unitToMeterFactor", "F") };
 };
 
 }  // namespace djinni_generated

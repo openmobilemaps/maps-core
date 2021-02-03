@@ -33,9 +33,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-+ (nullable MCMapCamera2dInterface *)create {
++ (nullable MCMapCamera2dInterface *)create:(float)screenDensityPpi {
     try {
-        auto objcpp_result_ = ::MapCamera2dInterface::create();
+        auto objcpp_result_ = ::MapCamera2dInterface::create(::djinni::F32::toCpp(screenDensityPpi));
         return ::djinni_generated::MapCamera2dInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }

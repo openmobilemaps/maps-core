@@ -13,6 +13,7 @@
                               boundsBottom:(float)boundsBottom
                                    zoomMin:(float)zoomMin
                                    zoomMax:(float)zoomMax
+                         unitToMeterFactor:(float)unitToMeterFactor
 {
     if (self = [super init]) {
         _identifier = [identifier copy];
@@ -22,6 +23,7 @@
         _boundsBottom = boundsBottom;
         _zoomMin = zoomMin;
         _zoomMax = zoomMax;
+        _unitToMeterFactor = unitToMeterFactor;
     }
     return self;
 }
@@ -33,6 +35,7 @@
                                              boundsBottom:(float)boundsBottom
                                                   zoomMin:(float)zoomMin
                                                   zoomMax:(float)zoomMax
+                                        unitToMeterFactor:(float)unitToMeterFactor
 {
     return [(MCMapCoordinateSystem*)[self alloc] initWithIdentifier:identifier
                                                          boundsLeft:boundsLeft
@@ -40,12 +43,13 @@
                                                         boundsRight:boundsRight
                                                        boundsBottom:boundsBottom
                                                             zoomMin:zoomMin
-                                                            zoomMax:zoomMax];
+                                                            zoomMax:zoomMax
+                                                  unitToMeterFactor:unitToMeterFactor];
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p identifier:%@ boundsLeft:%@ boundsTop:%@ boundsRight:%@ boundsBottom:%@ zoomMin:%@ zoomMax:%@>", self.class, (void *)self, self.identifier, @(self.boundsLeft), @(self.boundsTop), @(self.boundsRight), @(self.boundsBottom), @(self.zoomMin), @(self.zoomMax)];
+    return [NSString stringWithFormat:@"<%@ %p identifier:%@ boundsLeft:%@ boundsTop:%@ boundsRight:%@ boundsBottom:%@ zoomMin:%@ zoomMax:%@ unitToMeterFactor:%@>", self.class, (void *)self, self.identifier, @(self.boundsLeft), @(self.boundsTop), @(self.boundsRight), @(self.boundsBottom), @(self.zoomMin), @(self.zoomMax), @(self.unitToMeterFactor)];
 }
 
 @end
