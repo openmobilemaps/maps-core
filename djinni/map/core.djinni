@@ -33,6 +33,8 @@ map_callback_interface = interface +c +j +o {
 
 map_config = record {
     map_coordinate_system: map_coordinate_system;
+    zoom_min: f64;
+    zoom_max: f64;
 }
 
 map_coordinate_system = record {
@@ -41,8 +43,6 @@ map_coordinate_system = record {
     bounds_top: f64;
     bounds_right: f64;
     bounds_bottom: f64;
-    zoom_min: f64;
-    zoom_max: f64;
     unit_to_meter_factor: f32;
 }
 

@@ -11,8 +11,6 @@
                                  boundsTop:(double)boundsTop
                                boundsRight:(double)boundsRight
                               boundsBottom:(double)boundsBottom
-                                   zoomMin:(double)zoomMin
-                                   zoomMax:(double)zoomMax
                          unitToMeterFactor:(float)unitToMeterFactor
 {
     if (self = [super init]) {
@@ -21,8 +19,6 @@
         _boundsTop = boundsTop;
         _boundsRight = boundsRight;
         _boundsBottom = boundsBottom;
-        _zoomMin = zoomMin;
-        _zoomMax = zoomMax;
         _unitToMeterFactor = unitToMeterFactor;
     }
     return self;
@@ -33,8 +29,6 @@
                                                 boundsTop:(double)boundsTop
                                               boundsRight:(double)boundsRight
                                              boundsBottom:(double)boundsBottom
-                                                  zoomMin:(double)zoomMin
-                                                  zoomMax:(double)zoomMax
                                         unitToMeterFactor:(float)unitToMeterFactor
 {
     return [(MCMapCoordinateSystem*)[self alloc] initWithIdentifier:identifier
@@ -42,14 +36,12 @@
                                                           boundsTop:boundsTop
                                                         boundsRight:boundsRight
                                                        boundsBottom:boundsBottom
-                                                            zoomMin:zoomMin
-                                                            zoomMax:zoomMax
                                                   unitToMeterFactor:unitToMeterFactor];
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p identifier:%@ boundsLeft:%@ boundsTop:%@ boundsRight:%@ boundsBottom:%@ zoomMin:%@ zoomMax:%@ unitToMeterFactor:%@>", self.class, (void *)self, self.identifier, @(self.boundsLeft), @(self.boundsTop), @(self.boundsRight), @(self.boundsBottom), @(self.zoomMin), @(self.zoomMax), @(self.unitToMeterFactor)];
+    return [NSString stringWithFormat:@"<%@ %p identifier:%@ boundsLeft:%@ boundsTop:%@ boundsRight:%@ boundsBottom:%@ unitToMeterFactor:%@>", self.class, (void *)self, self.identifier, @(self.boundsLeft), @(self.boundsTop), @(self.boundsRight), @(self.boundsBottom), @(self.unitToMeterFactor)];
 }
 
 @end

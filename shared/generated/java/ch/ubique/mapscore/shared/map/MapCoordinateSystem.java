@@ -17,10 +17,6 @@ public final class MapCoordinateSystem implements java.io.Serializable {
 
     protected double boundsBottom;
 
-    protected double zoomMin;
-
-    protected double zoomMax;
-
     protected float unitToMeterFactor;
 
     public MapCoordinateSystem(
@@ -29,16 +25,12 @@ public final class MapCoordinateSystem implements java.io.Serializable {
             double boundsTop,
             double boundsRight,
             double boundsBottom,
-            double zoomMin,
-            double zoomMax,
             float unitToMeterFactor) {
         this.identifier = identifier;
         this.boundsLeft = boundsLeft;
         this.boundsTop = boundsTop;
         this.boundsRight = boundsRight;
         this.boundsBottom = boundsBottom;
-        this.zoomMin = zoomMin;
-        this.zoomMax = zoomMax;
         this.unitToMeterFactor = unitToMeterFactor;
     }
 
@@ -60,14 +52,6 @@ public final class MapCoordinateSystem implements java.io.Serializable {
 
     public double getBoundsBottom() {
         return boundsBottom;
-    }
-
-    public double getZoomMin() {
-        return zoomMin;
-    }
-
-    public double getZoomMax() {
-        return zoomMax;
     }
 
     public float getUnitToMeterFactor() {
@@ -94,14 +78,6 @@ public final class MapCoordinateSystem implements java.io.Serializable {
         this.boundsBottom = boundsBottom;
     }
 
-    public void setZoomMin(double zoomMin) {
-        this.zoomMin = zoomMin;
-    }
-
-    public void setZoomMax(double zoomMax) {
-        this.zoomMax = zoomMax;
-    }
-
     public void setUnitToMeterFactor(float unitToMeterFactor) {
         this.unitToMeterFactor = unitToMeterFactor;
     }
@@ -114,8 +90,6 @@ public final class MapCoordinateSystem implements java.io.Serializable {
                 "," + "boundsTop=" + boundsTop +
                 "," + "boundsRight=" + boundsRight +
                 "," + "boundsBottom=" + boundsBottom +
-                "," + "zoomMin=" + zoomMin +
-                "," + "zoomMax=" + zoomMax +
                 "," + "unitToMeterFactor=" + unitToMeterFactor +
         "}";
     }

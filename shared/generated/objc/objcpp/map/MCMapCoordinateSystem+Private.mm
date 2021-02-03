@@ -15,8 +15,6 @@ auto MapCoordinateSystem::toCpp(ObjcType obj) -> CppType
             ::djinni::F64::toCpp(obj.boundsTop),
             ::djinni::F64::toCpp(obj.boundsRight),
             ::djinni::F64::toCpp(obj.boundsBottom),
-            ::djinni::F64::toCpp(obj.zoomMin),
-            ::djinni::F64::toCpp(obj.zoomMax),
             ::djinni::F32::toCpp(obj.unitToMeterFactor)};
 }
 
@@ -27,8 +25,6 @@ auto MapCoordinateSystem::fromCpp(const CppType& cpp) -> ObjcType
                                                    boundsTop:(::djinni::F64::fromCpp(cpp.boundsTop))
                                                  boundsRight:(::djinni::F64::fromCpp(cpp.boundsRight))
                                                 boundsBottom:(::djinni::F64::fromCpp(cpp.boundsBottom))
-                                                     zoomMin:(::djinni::F64::fromCpp(cpp.zoomMin))
-                                                     zoomMax:(::djinni::F64::fromCpp(cpp.zoomMax))
                                            unitToMeterFactor:(::djinni::F32::fromCpp(cpp.unitToMeterFactor))];
 }
 

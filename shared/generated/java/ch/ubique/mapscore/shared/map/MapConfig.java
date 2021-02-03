@@ -8,23 +8,49 @@ public final class MapConfig implements java.io.Serializable {
 
     protected MapCoordinateSystem mapCoordinateSystem;
 
+    protected double zoomMin;
+
+    protected double zoomMax;
+
     public MapConfig(
-            MapCoordinateSystem mapCoordinateSystem) {
+            MapCoordinateSystem mapCoordinateSystem,
+            double zoomMin,
+            double zoomMax) {
         this.mapCoordinateSystem = mapCoordinateSystem;
+        this.zoomMin = zoomMin;
+        this.zoomMax = zoomMax;
     }
 
     public MapCoordinateSystem getMapCoordinateSystem() {
         return mapCoordinateSystem;
     }
 
+    public double getZoomMin() {
+        return zoomMin;
+    }
+
+    public double getZoomMax() {
+        return zoomMax;
+    }
+
     public void setMapCoordinateSystem(MapCoordinateSystem mapCoordinateSystem) {
         this.mapCoordinateSystem = mapCoordinateSystem;
+    }
+
+    public void setZoomMin(double zoomMin) {
+        this.zoomMin = zoomMin;
+    }
+
+    public void setZoomMax(double zoomMax) {
+        this.zoomMax = zoomMax;
     }
 
     @Override
     public String toString() {
         return "MapConfig{" +
                 "mapCoordinateSystem=" + mapCoordinateSystem +
+                "," + "zoomMin=" + zoomMin +
+                "," + "zoomMax=" + zoomMax +
         "}";
     }
 

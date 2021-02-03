@@ -5,9 +5,17 @@
 #import <Foundation/Foundation.h>
 
 @interface MCMapConfig : NSObject
-- (nonnull instancetype)initWithMapCoordinateSystem:(nonnull MCMapCoordinateSystem *)mapCoordinateSystem;
-+ (nonnull instancetype)mapConfigWithMapCoordinateSystem:(nonnull MCMapCoordinateSystem *)mapCoordinateSystem;
+- (nonnull instancetype)initWithMapCoordinateSystem:(nonnull MCMapCoordinateSystem *)mapCoordinateSystem
+                                            zoomMin:(double)zoomMin
+                                            zoomMax:(double)zoomMax;
++ (nonnull instancetype)mapConfigWithMapCoordinateSystem:(nonnull MCMapCoordinateSystem *)mapCoordinateSystem
+                                                 zoomMin:(double)zoomMin
+                                                 zoomMax:(double)zoomMax;
 
 @property (nonatomic, readonly, nonnull) MCMapCoordinateSystem * mapCoordinateSystem;
+
+@property (nonatomic, readonly) double zoomMin;
+
+@property (nonatomic, readonly) double zoomMax;
 
 @end
