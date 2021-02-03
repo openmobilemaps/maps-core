@@ -5,6 +5,7 @@
 
 MapScene::MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig & mapConfig, const std::shared_ptr<::SchedulerInterface> & scheduler):
 scene(scene), mapConfig(mapConfig), scheduler(scheduler){
+    addLayer(std::make_shared<TestingLayer>(scene->getGraphicsFactory(), scene->getShaderFactory()));
 }
 
 std::shared_ptr<::RenderingContextInterface> MapScene::getRenderingContext() {
@@ -51,9 +52,6 @@ void MapScene::invalidate() {
 }
 
 void MapScene::drawFrame() {
-    /*if (layers.empty()) {
-        addLayer(std::make_shared<TestingLayer>(scene->getGraphicsFactory(), scene->getShaderFactory()));
-    }*/
 
     for (const auto &layer : layers) {
         for (const auto &renderPass : layer->buildRenderPasses()) {

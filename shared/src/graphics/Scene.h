@@ -37,7 +37,7 @@ private:
 
     std::shared_ptr<SceneCallbackInterface> callbackHandler;
     const std::shared_ptr<::GraphicsObjectFactoryInterface> graphicsFactory;
-    const std::shared_ptr<::ShaderFactoryInterface> & shaderFactory;
+    const std::shared_ptr<::ShaderFactoryInterface> shaderFactory;
 
     std::shared_ptr<RendererInterface> renderer;
 };
