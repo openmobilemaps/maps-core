@@ -5,35 +5,35 @@
 
 @interface MCMapCoordinateSystem : NSObject
 - (nonnull instancetype)initWithIdentifier:(nonnull NSString *)identifier
-                                boundsLeft:(float)boundsLeft
-                                 boundsTop:(float)boundsTop
-                               boundsRight:(float)boundsRight
-                              boundsBottom:(float)boundsBottom
-                                   zoomMin:(float)zoomMin
-                                   zoomMax:(float)zoomMax
+                                boundsLeft:(double)boundsLeft
+                                 boundsTop:(double)boundsTop
+                               boundsRight:(double)boundsRight
+                              boundsBottom:(double)boundsBottom
+                                   zoomMin:(double)zoomMin
+                                   zoomMax:(double)zoomMax
                          unitToMeterFactor:(float)unitToMeterFactor;
 + (nonnull instancetype)mapCoordinateSystemWithIdentifier:(nonnull NSString *)identifier
-                                               boundsLeft:(float)boundsLeft
-                                                boundsTop:(float)boundsTop
-                                              boundsRight:(float)boundsRight
-                                             boundsBottom:(float)boundsBottom
-                                                  zoomMin:(float)zoomMin
-                                                  zoomMax:(float)zoomMax
+                                               boundsLeft:(double)boundsLeft
+                                                boundsTop:(double)boundsTop
+                                              boundsRight:(double)boundsRight
+                                             boundsBottom:(double)boundsBottom
+                                                  zoomMin:(double)zoomMin
+                                                  zoomMax:(double)zoomMax
                                         unitToMeterFactor:(float)unitToMeterFactor;
 
 @property (nonatomic, readonly, nonnull) NSString * identifier;
 
-@property (nonatomic, readonly) float boundsLeft;
+@property (nonatomic, readonly) double boundsLeft;
 
-@property (nonatomic, readonly) float boundsTop;
+@property (nonatomic, readonly) double boundsTop;
 
-@property (nonatomic, readonly) float boundsRight;
+@property (nonatomic, readonly) double boundsRight;
 
-@property (nonatomic, readonly) float boundsBottom;
+@property (nonatomic, readonly) double boundsBottom;
 
-@property (nonatomic, readonly) float zoomMin;
+@property (nonatomic, readonly) double zoomMin;
 
-@property (nonatomic, readonly) float zoomMax;
+@property (nonatomic, readonly) double zoomMax;
 
 @property (nonatomic, readonly) float unitToMeterFactor;
 

@@ -24,7 +24,7 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
 	init {
 		setRenderer(this)
 		scheduler = AndroidScheduler(this)
-		mapInterface = MapInterface.createWithOpenGl(MapConfig(MapCoordinateSystem("Test", 0f, 0f, 0f, 0f, 0f, 0f)), scheduler)
+		mapInterface = MapInterface.createWithOpenGl(MapConfig(MapCoordinateSystem("Test", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0f)), scheduler)
 	}
 
 	fun registerLifecycle(lifecycle: Lifecycle) {

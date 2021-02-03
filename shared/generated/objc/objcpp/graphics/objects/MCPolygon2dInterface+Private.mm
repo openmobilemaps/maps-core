@@ -8,7 +8,7 @@
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCGraphicsObjectInterface+Private.h"
-#import "MCVec2F+Private.h"
+#import "MCVec2D+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -33,12 +33,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (void)setPolygonPositions:(nonnull NSArray<MCVec2F *> *)positions
-                      holes:(nonnull NSArray<NSArray<MCVec2F *> *> *)holes
+- (void)setPolygonPositions:(nonnull NSArray<MCVec2D *> *)positions
+                      holes:(nonnull NSArray<NSArray<MCVec2D *> *> *)holes
                    isConvex:(BOOL)isConvex {
     try {
-        _cppRefHandle.get()->setPolygonPositions(::djinni::List<::djinni_generated::Vec2F>::toCpp(positions),
-                                                 ::djinni::List<::djinni::List<::djinni_generated::Vec2F>>::toCpp(holes),
+        _cppRefHandle.get()->setPolygonPositions(::djinni::List<::djinni_generated::Vec2D>::toCpp(positions),
+                                                 ::djinni::List<::djinni::List<::djinni_generated::Vec2D>>::toCpp(holes),
                                                  ::djinni::Bool::toCpp(isConvex));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -59,11 +59,11 @@ class Polygon2dInterface::ObjcProxy final
     friend class ::djinni_generated::Polygon2dInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void setPolygonPositions(const std::vector<::Vec2F> & c_positions, const std::vector<std::vector<::Vec2F>> & c_holes, bool c_isConvex) override
+    void setPolygonPositions(const std::vector<::Vec2D> & c_positions, const std::vector<std::vector<::Vec2D>> & c_holes, bool c_isConvex) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setPolygonPositions:(::djinni::List<::djinni_generated::Vec2F>::fromCpp(c_positions))
-                                                                    holes:(::djinni::List<::djinni::List<::djinni_generated::Vec2F>>::fromCpp(c_holes))
+            [djinni_private_get_proxied_objc_object() setPolygonPositions:(::djinni::List<::djinni_generated::Vec2D>::fromCpp(c_positions))
+                                                                    holes:(::djinni::List<::djinni::List<::djinni_generated::Vec2D>>::fromCpp(c_holes))
                                                                  isConvex:(::djinni::Bool::fromCpp(c_isConvex))];
         }
     }

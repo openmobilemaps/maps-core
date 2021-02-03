@@ -8,6 +8,6 @@ std::vector<std::shared_ptr<RenderConfigInterface>> Polygon2dLayerObject::getRen
     return {renderConfig};
 }
 
-void Polygon2dLayerObject::setPositions(std::vector<Vec2F> positions) {
+void Polygon2dLayerObject::setPositions(std::vector<Vec2D> positions) {
     polygon->setPolygonPositions(positions, {}, true);
 }

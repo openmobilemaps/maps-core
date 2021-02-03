@@ -8,7 +8,7 @@
 #import "DJIMarshal+Private.h"
 #import "MCCameraInterface+Private.h"
 #import "MCMapCamera2dListenerInterface+Private.h"
-#import "MCVec2F+Private.h"
+#import "MCVec2D+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -40,43 +40,43 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)moveToCenterPosition:(nonnull MCVec2F *)position
-                        zoom:(float)zoom
+- (void)moveToCenterPosition:(nonnull MCVec2D *)position
+                        zoom:(double)zoom
                     animated:(BOOL)animated {
     try {
-        _cppRefHandle.get()->moveToCenterPosition(::djinni_generated::Vec2F::toCpp(position),
-                                                  ::djinni::F32::toCpp(zoom),
+        _cppRefHandle.get()->moveToCenterPosition(::djinni_generated::Vec2D::toCpp(position),
+                                                  ::djinni::F64::toCpp(zoom),
                                                   ::djinni::Bool::toCpp(animated));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)moveToCenterPositon:(nonnull MCVec2F *)position
+- (void)moveToCenterPositon:(nonnull MCVec2D *)position
                    animated:(BOOL)animated {
     try {
-        _cppRefHandle.get()->moveToCenterPositon(::djinni_generated::Vec2F::toCpp(position),
+        _cppRefHandle.get()->moveToCenterPositon(::djinni_generated::Vec2D::toCpp(position),
                                                  ::djinni::Bool::toCpp(animated));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nonnull MCVec2F *)getCenterPosition {
+- (nonnull MCVec2D *)getCenterPosition {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getCenterPosition();
-        return ::djinni_generated::Vec2F::fromCpp(objcpp_result_);
+        return ::djinni_generated::Vec2D::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setZoom:(float)zoom
+- (void)setZoom:(double)zoom
        animated:(BOOL)animated {
     try {
-        _cppRefHandle.get()->setZoom(::djinni::F32::toCpp(zoom),
+        _cppRefHandle.get()->setZoom(::djinni::F64::toCpp(zoom),
                                      ::djinni::Bool::toCpp(animated));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (float)getZoom {
+- (double)getZoom {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getZoom();
-        return ::djinni::F32::fromCpp(objcpp_result_);
+        return ::djinni::F64::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

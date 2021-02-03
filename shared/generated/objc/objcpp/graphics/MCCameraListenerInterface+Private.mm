@@ -6,7 +6,7 @@
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
 #import "DJIObjcWrapperCache+Private.h"
-#import "MCVec3F+Private.h"
+#import "MCVec3D+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -31,9 +31,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (void)onPositionChanged:(nonnull MCVec3F *)position {
+- (void)onPositionChanged:(nonnull MCVec3D *)position {
     try {
-        _cppRefHandle.get()->onPositionChanged(::djinni_generated::Vec3F::toCpp(position));
+        _cppRefHandle.get()->onPositionChanged(::djinni_generated::Vec3D::toCpp(position));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -46,10 +46,10 @@ class CameraListenerInterface::ObjcProxy final
     friend class ::djinni_generated::CameraListenerInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void onPositionChanged(const ::Vec3F & c_position) override
+    void onPositionChanged(const ::Vec3D & c_position) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() onPositionChanged:(::djinni_generated::Vec3F::fromCpp(c_position))];
+            [djinni_private_get_proxied_objc_object() onPositionChanged:(::djinni_generated::Vec3D::fromCpp(c_position))];
         }
     }
 };

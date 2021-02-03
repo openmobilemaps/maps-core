@@ -4,7 +4,7 @@
 #include "NativePolygon2dInterface.h"  // my header
 #include "Marshal.hpp"
 #include "NativeGraphicsObjectInterface.h"
-#include "NativeVec2F.h"
+#include "NativeVec2D.h"
 
 namespace djinni_generated {
 
@@ -16,13 +16,13 @@ NativePolygon2dInterface::JavaProxy::JavaProxy(JniType j) : Handle(::djinni::jni
 
 NativePolygon2dInterface::JavaProxy::~JavaProxy() = default;
 
-void NativePolygon2dInterface::JavaProxy::setPolygonPositions(const std::vector<::Vec2F> & c_positions, const std::vector<std::vector<::Vec2F>> & c_holes, bool c_isConvex) {
+void NativePolygon2dInterface::JavaProxy::setPolygonPositions(const std::vector<::Vec2D> & c_positions, const std::vector<std::vector<::Vec2D>> & c_holes, bool c_isConvex) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativePolygon2dInterface>::get();
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_setPolygonPositions,
-                           ::djinni::get(::djinni::List<::djinni_generated::NativeVec2F>::fromCpp(jniEnv, c_positions)),
-                           ::djinni::get(::djinni::List<::djinni::List<::djinni_generated::NativeVec2F>>::fromCpp(jniEnv, c_holes)),
+                           ::djinni::get(::djinni::List<::djinni_generated::NativeVec2D>::fromCpp(jniEnv, c_positions)),
+                           ::djinni::get(::djinni::List<::djinni::List<::djinni_generated::NativeVec2D>>::fromCpp(jniEnv, c_holes)),
                            ::djinni::get(::djinni::Bool::fromCpp(jniEnv, c_isConvex)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
@@ -48,8 +48,8 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_Polygon2
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::Polygon2dInterface>(nativeRef);
-        ref->setPolygonPositions(::djinni::List<::djinni_generated::NativeVec2F>::toCpp(jniEnv, j_positions),
-                                 ::djinni::List<::djinni::List<::djinni_generated::NativeVec2F>>::toCpp(jniEnv, j_holes),
+        ref->setPolygonPositions(::djinni::List<::djinni_generated::NativeVec2D>::toCpp(jniEnv, j_positions),
+                                 ::djinni::List<::djinni::List<::djinni_generated::NativeVec2D>>::toCpp(jniEnv, j_holes),
                                  ::djinni::Bool::toCpp(jniEnv, j_isConvex));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }

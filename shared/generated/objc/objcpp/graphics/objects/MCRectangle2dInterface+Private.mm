@@ -7,7 +7,7 @@
 #import "DJIError.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCGraphicsObjectInterface+Private.h"
-#import "MCRectF+Private.h"
+#import "MCRectD+Private.h"
 #import "MCTextureHolderInterface+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -33,11 +33,11 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (void)setFrame:(nonnull MCRectF *)frame
-textureCoordinates:(nonnull MCRectF *)textureCoordinates {
+- (void)setFrame:(nonnull MCRectD *)frame
+textureCoordinates:(nonnull MCRectD *)textureCoordinates {
     try {
-        _cppRefHandle.get()->setFrame(::djinni_generated::RectF::toCpp(frame),
-                                      ::djinni_generated::RectF::toCpp(textureCoordinates));
+        _cppRefHandle.get()->setFrame(::djinni_generated::RectD::toCpp(frame),
+                                      ::djinni_generated::RectD::toCpp(textureCoordinates));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -69,11 +69,11 @@ class Rectangle2dInterface::ObjcProxy final
     friend class ::djinni_generated::Rectangle2dInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void setFrame(const ::RectF & c_frame, const ::RectF & c_textureCoordinates) override
+    void setFrame(const ::RectD & c_frame, const ::RectD & c_textureCoordinates) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setFrame:(::djinni_generated::RectF::fromCpp(c_frame))
-                                            textureCoordinates:(::djinni_generated::RectF::fromCpp(c_textureCoordinates))];
+            [djinni_private_get_proxied_objc_object() setFrame:(::djinni_generated::RectD::fromCpp(c_frame))
+                                            textureCoordinates:(::djinni_generated::RectD::fromCpp(c_textureCoordinates))];
         }
     }
     void loadTexture(const std::shared_ptr<::TextureHolderInterface> & c_textureHolder) override

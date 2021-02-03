@@ -33,14 +33,14 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        void onPositionChanged(const ::Vec3F & position) override;
+        void onPositionChanged(const ::Vec3D & position) override;
 
     private:
         friend ::djinni::JniInterface<::CameraListenerInterface, ::djinni_generated::NativeCameraListenerInterface>;
     };
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/graphics/CameraListenerInterface") };
-    const jmethodID method_onPositionChanged { ::djinni::jniGetMethodID(clazz.get(), "onPositionChanged", "(Lch/ubique/mapscore/shared/graphics/common/Vec3F;)V") };
+    const jmethodID method_onPositionChanged { ::djinni::jniGetMethodID(clazz.get(), "onPositionChanged", "(Lch/ubique/mapscore/shared/graphics/common/Vec3D;)V") };
 };
 
 }  // namespace djinni_generated

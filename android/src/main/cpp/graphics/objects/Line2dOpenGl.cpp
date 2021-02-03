@@ -15,7 +15,7 @@ bool Line2dOpenGl::isReady() {
     return ready;
 }
 
-void Line2dOpenGl::setLinePositions(const std::vector<::Vec2F> &positions) {
+void Line2dOpenGl::setLinePositions(const std::vector<::Vec2D> &positions) {
     lineCoordinates = positions;
     ready = false;
 }

@@ -29,7 +29,7 @@ public:
     render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass, int64_t mvpMatrix);
 
     virtual void
-    setPolygonPositions(const std::vector<::Vec2F> &positions, const std::vector<std::vector<::Vec2F>> &holes, bool isConvex);
+    setPolygonPositions(const std::vector<::Vec2D> &positions, const std::vector<std::vector<::Vec2D>> &holes, bool isConvex);
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject();
 
@@ -41,8 +41,8 @@ protected:
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
 
     bool polygonIsConvex = false;
-    std::vector<::Vec2F> polygonCoordinates;
-    std::vector<std::vector<::Vec2F>> holePolygonCoordinates;
+    std::vector<::Vec2D> polygonCoordinates;
+    std::vector<std::vector<::Vec2D>> holePolygonCoordinates;
 
     std::vector<GLfloat> vertexBuffer;
     std::vector<GLushort> indexBuffer;

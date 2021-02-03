@@ -6,7 +6,7 @@ package ch.ubique.mapscore.shared.graphics;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class CameraListenerInterface {
-    public abstract void onPositionChanged(ch.ubique.mapscore.shared.graphics.common.Vec3F position);
+    public abstract void onPositionChanged(ch.ubique.mapscore.shared.graphics.common.Vec3D position);
 
     private static final class CppProxy extends CameraListenerInterface
     {
@@ -32,11 +32,11 @@ public abstract class CameraListenerInterface {
         }
 
         @Override
-        public void onPositionChanged(ch.ubique.mapscore.shared.graphics.common.Vec3F position)
+        public void onPositionChanged(ch.ubique.mapscore.shared.graphics.common.Vec3D position)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
             native_onPositionChanged(this.nativeRef, position);
         }
-        private native void native_onPositionChanged(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Vec3F position);
+        private native void native_onPositionChanged(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Vec3D position);
     }
 }

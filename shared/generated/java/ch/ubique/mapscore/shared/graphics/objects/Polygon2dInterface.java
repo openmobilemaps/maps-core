@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class Polygon2dInterface {
-    public abstract void setPolygonPositions(ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2F> positions, ArrayList<ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2F>> holes, boolean isConvex);
+    public abstract void setPolygonPositions(ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2D> positions, ArrayList<ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2D>> holes, boolean isConvex);
 
     public abstract GraphicsObjectInterface asGraphicsObject();
 
@@ -35,12 +35,12 @@ public abstract class Polygon2dInterface {
         }
 
         @Override
-        public void setPolygonPositions(ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2F> positions, ArrayList<ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2F>> holes, boolean isConvex)
+        public void setPolygonPositions(ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2D> positions, ArrayList<ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2D>> holes, boolean isConvex)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
             native_setPolygonPositions(this.nativeRef, positions, holes, isConvex);
         }
-        private native void native_setPolygonPositions(long _nativeRef, ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2F> positions, ArrayList<ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2F>> holes, boolean isConvex);
+        private native void native_setPolygonPositions(long _nativeRef, ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2D> positions, ArrayList<ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2D>> holes, boolean isConvex);
 
         @Override
         public GraphicsObjectInterface asGraphicsObject()

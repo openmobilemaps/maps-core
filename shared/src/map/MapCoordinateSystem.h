@@ -8,21 +8,21 @@
 
 struct MapCoordinateSystem final {
     std::string identifier;
-    float boundsLeft;
-    float boundsTop;
-    float boundsRight;
-    float boundsBottom;
-    float zoomMin;
-    float zoomMax;
+    double boundsLeft;
+    double boundsTop;
+    double boundsRight;
+    double boundsBottom;
+    double zoomMin;
+    double zoomMax;
     float unitToMeterFactor;
 
     MapCoordinateSystem(std::string identifier_,
-                        float boundsLeft_,
-                        float boundsTop_,
-                        float boundsRight_,
-                        float boundsBottom_,
-                        float zoomMin_,
-                        float zoomMax_,
+                        double boundsLeft_,
+                        double boundsTop_,
+                        double boundsRight_,
+                        double boundsBottom_,
+                        double zoomMin_,
+                        double zoomMax_,
                         float unitToMeterFactor_)
     : identifier(std::move(identifier_))
     , boundsLeft(std::move(boundsLeft_))

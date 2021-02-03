@@ -1,7 +1,7 @@
 @extern "../yaml/graphics_object_interface.yaml"
 @extern "../yaml/graphics_object_factory_interface.yaml"
 @extern "../yaml/shader_factory_interface.yaml"
-@extern "../yaml/vec_3_f.yaml"
+@extern "../yaml/vec_3_d.yaml"
 @extern "../yaml/vec_2_i.yaml"
 
 scene_interface = interface +c {
@@ -54,5 +54,5 @@ camera_interface = interface +c +j +o {
 }
 
 camera_listener_interface = interface +c +j +o {
-    on_position_changed(position: vec_3_f);
+    on_position_changed(position: vec_3_d);
 }

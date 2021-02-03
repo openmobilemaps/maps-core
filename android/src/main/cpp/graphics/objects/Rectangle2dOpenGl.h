@@ -31,7 +31,7 @@ public:
     virtual void
     render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass, int64_t mvpMatrix);
 
-    virtual void setFrame(const ::RectF &frame, const ::RectF &textureCoordinates);
+    virtual void setFrame(const ::RectD &frame, const ::RectD &textureCoordinates);
 
     virtual void loadTexture(const std::shared_ptr<TextureHolderInterface> &textureHolder);
 
@@ -52,10 +52,10 @@ protected:
     std::vector<GLuint> texturePointer;
     bool textureLoaded = false;
 
-    RectF frame = RectF(0.0f, 0.0f, 0.0f, 0.0f);
-    RectF textureCoordinates = RectF(0.0f, 0.0f, 0.0f, 0.0f);
-    float factorHeight = 1.0f;
-    float factorWidth = 1.0f;
+    RectD frame = RectD(0.0, 0.0, 0.0, 0.0);
+    RectD textureCoordinates = RectD(0.0, 0.0, 0.0, 0.0);
+    double factorHeight = 1.0;
+    double factorWidth = 1.0;
 
     bool ready = false;
 };

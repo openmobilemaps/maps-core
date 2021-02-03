@@ -5,7 +5,7 @@
 #include "Marshal.hpp"
 #include "NativeCameraInterface.h"
 #include "NativeMapCamera2dListenerInterface.h"
-#include "NativeVec2F.h"
+#include "NativeVec2D.h"
 
 namespace djinni_generated {
 
@@ -31,54 +31,54 @@ CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_MapCamera2dInterfa
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1moveToCenterPosition(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec2F::JniType j_position, jfloat j_zoom, jboolean j_animated)
+CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1moveToCenterPosition(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec2D::JniType j_position, jdouble j_zoom, jboolean j_animated)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
-        ref->moveToCenterPosition(::djinni_generated::NativeVec2F::toCpp(jniEnv, j_position),
-                                  ::djinni::F32::toCpp(jniEnv, j_zoom),
+        ref->moveToCenterPosition(::djinni_generated::NativeVec2D::toCpp(jniEnv, j_position),
+                                  ::djinni::F64::toCpp(jniEnv, j_zoom),
                                   ::djinni::Bool::toCpp(jniEnv, j_animated));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1moveToCenterPositon(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec2F::JniType j_position, jboolean j_animated)
+CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1moveToCenterPositon(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec2D::JniType j_position, jboolean j_animated)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
-        ref->moveToCenterPositon(::djinni_generated::NativeVec2F::toCpp(jniEnv, j_position),
+        ref->moveToCenterPositon(::djinni_generated::NativeVec2D::toCpp(jniEnv, j_position),
                                  ::djinni::Bool::toCpp(jniEnv, j_animated));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT ::djinni_generated::NativeVec2F::JniType JNICALL Java_ch_ubique_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1getCenterPosition(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT ::djinni_generated::NativeVec2D::JniType JNICALL Java_ch_ubique_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1getCenterPosition(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
         auto r = ref->getCenterPosition();
-        return ::djinni::release(::djinni_generated::NativeVec2F::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni_generated::NativeVec2D::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1setZoom(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jfloat j_zoom, jboolean j_animated)
+CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1setZoom(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jdouble j_zoom, jboolean j_animated)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
-        ref->setZoom(::djinni::F32::toCpp(jniEnv, j_zoom),
+        ref->setZoom(::djinni::F64::toCpp(jniEnv, j_zoom),
                      ::djinni::Bool::toCpp(jniEnv, j_animated));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jfloat JNICALL Java_ch_ubique_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1getZoom(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jdouble JNICALL Java_ch_ubique_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1getZoom(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
         auto r = ref->getZoom();
-        return ::djinni::release(::djinni::F32::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni::F64::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

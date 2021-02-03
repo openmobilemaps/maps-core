@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class Line2dInterface {
-    public abstract void setLinePositions(ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2F> positions);
+    public abstract void setLinePositions(ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2D> positions);
 
     public abstract GraphicsObjectInterface asGraphicsObject();
 
@@ -35,12 +35,12 @@ public abstract class Line2dInterface {
         }
 
         @Override
-        public void setLinePositions(ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2F> positions)
+        public void setLinePositions(ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2D> positions)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
             native_setLinePositions(this.nativeRef, positions);
         }
-        private native void native_setLinePositions(long _nativeRef, ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2F> positions);
+        private native void native_setLinePositions(long _nativeRef, ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2D> positions);
 
         @Override
         public GraphicsObjectInterface asGraphicsObject()

@@ -4,7 +4,7 @@
 #include "NativeLine2dInterface.h"  // my header
 #include "Marshal.hpp"
 #include "NativeGraphicsObjectInterface.h"
-#include "NativeVec2F.h"
+#include "NativeVec2D.h"
 
 namespace djinni_generated {
 
@@ -16,12 +16,12 @@ NativeLine2dInterface::JavaProxy::JavaProxy(JniType j) : Handle(::djinni::jniGet
 
 NativeLine2dInterface::JavaProxy::~JavaProxy() = default;
 
-void NativeLine2dInterface::JavaProxy::setLinePositions(const std::vector<::Vec2F> & c_positions) {
+void NativeLine2dInterface::JavaProxy::setLinePositions(const std::vector<::Vec2D> & c_positions) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeLine2dInterface>::get();
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_setLinePositions,
-                           ::djinni::get(::djinni::List<::djinni_generated::NativeVec2F>::fromCpp(jniEnv, c_positions)));
+                           ::djinni::get(::djinni::List<::djinni_generated::NativeVec2D>::fromCpp(jniEnv, c_positions)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
 std::shared_ptr<::GraphicsObjectInterface> NativeLine2dInterface::JavaProxy::asGraphicsObject() {
@@ -46,7 +46,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_Line2dIn
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::Line2dInterface>(nativeRef);
-        ref->setLinePositions(::djinni::List<::djinni_generated::NativeVec2F>::toCpp(jniEnv, j_positions));
+        ref->setLinePositions(::djinni::List<::djinni_generated::NativeVec2D>::toCpp(jniEnv, j_positions));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

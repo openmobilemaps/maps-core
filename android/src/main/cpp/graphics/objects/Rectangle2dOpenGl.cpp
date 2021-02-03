@@ -23,7 +23,7 @@ void Rectangle2dOpenGl::clear() {
     ready = false;
 }
 
-void Rectangle2dOpenGl::setFrame(const RectF &frame, const RectF &textureCoordinates) {
+void Rectangle2dOpenGl::setFrame(const RectD &frame, const RectD &textureCoordinates) {
     this->frame = frame;
     this->textureCoordinates = textureCoordinates;
     ready = false;
@@ -34,10 +34,10 @@ void Rectangle2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
 
     float frameZ = 0;
     vertexBuffer = {
-            frame.x, frame.y, frameZ,
-            frame.x, frame.y + frame.height, frameZ,
-            frame.x + frame.width, frame.y + frame.height, frameZ,
-            frame.x + frame.width, frame.y, frameZ,
+            (float) frame.x, (float) frame.y, frameZ,
+            (float) frame.x, (float) (frame.y + frame.height), frameZ,
+            (float) (frame.x + frame.width), (float) (frame.y + frame.height), frameZ,
+                    (float) (frame.x + frame.width), (float) frame.y, frameZ,
     };
     indexBuffer = {
             0, 1, 2, 0, 2, 3,

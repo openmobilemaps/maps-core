@@ -11,24 +11,24 @@ auto MapCoordinateSystem::toCpp(ObjcType obj) -> CppType
 {
     assert(obj);
     return {::djinni::String::toCpp(obj.identifier),
-            ::djinni::F32::toCpp(obj.boundsLeft),
-            ::djinni::F32::toCpp(obj.boundsTop),
-            ::djinni::F32::toCpp(obj.boundsRight),
-            ::djinni::F32::toCpp(obj.boundsBottom),
-            ::djinni::F32::toCpp(obj.zoomMin),
-            ::djinni::F32::toCpp(obj.zoomMax),
+            ::djinni::F64::toCpp(obj.boundsLeft),
+            ::djinni::F64::toCpp(obj.boundsTop),
+            ::djinni::F64::toCpp(obj.boundsRight),
+            ::djinni::F64::toCpp(obj.boundsBottom),
+            ::djinni::F64::toCpp(obj.zoomMin),
+            ::djinni::F64::toCpp(obj.zoomMax),
             ::djinni::F32::toCpp(obj.unitToMeterFactor)};
 }
 
 auto MapCoordinateSystem::fromCpp(const CppType& cpp) -> ObjcType
 {
     return [[MCMapCoordinateSystem alloc] initWithIdentifier:(::djinni::String::fromCpp(cpp.identifier))
-                                                  boundsLeft:(::djinni::F32::fromCpp(cpp.boundsLeft))
-                                                   boundsTop:(::djinni::F32::fromCpp(cpp.boundsTop))
-                                                 boundsRight:(::djinni::F32::fromCpp(cpp.boundsRight))
-                                                boundsBottom:(::djinni::F32::fromCpp(cpp.boundsBottom))
-                                                     zoomMin:(::djinni::F32::fromCpp(cpp.zoomMin))
-                                                     zoomMax:(::djinni::F32::fromCpp(cpp.zoomMax))
+                                                  boundsLeft:(::djinni::F64::fromCpp(cpp.boundsLeft))
+                                                   boundsTop:(::djinni::F64::fromCpp(cpp.boundsTop))
+                                                 boundsRight:(::djinni::F64::fromCpp(cpp.boundsRight))
+                                                boundsBottom:(::djinni::F64::fromCpp(cpp.boundsBottom))
+                                                     zoomMin:(::djinni::F64::fromCpp(cpp.zoomMin))
+                                                     zoomMax:(::djinni::F64::fromCpp(cpp.zoomMax))
                                            unitToMeterFactor:(::djinni::F32::fromCpp(cpp.unitToMeterFactor))];
 }
 

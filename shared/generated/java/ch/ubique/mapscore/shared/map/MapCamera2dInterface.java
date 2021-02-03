@@ -6,15 +6,15 @@ package ch.ubique.mapscore.shared.map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class MapCamera2dInterface {
-    public abstract void moveToCenterPosition(ch.ubique.mapscore.shared.graphics.common.Vec2F position, float zoom, boolean animated);
+    public abstract void moveToCenterPosition(ch.ubique.mapscore.shared.graphics.common.Vec2D position, double zoom, boolean animated);
 
-    public abstract void moveToCenterPositon(ch.ubique.mapscore.shared.graphics.common.Vec2F position, boolean animated);
+    public abstract void moveToCenterPositon(ch.ubique.mapscore.shared.graphics.common.Vec2D position, boolean animated);
 
-    public abstract ch.ubique.mapscore.shared.graphics.common.Vec2F getCenterPosition();
+    public abstract ch.ubique.mapscore.shared.graphics.common.Vec2D getCenterPosition();
 
-    public abstract void setZoom(float zoom, boolean animated);
+    public abstract void setZoom(double zoom, boolean animated);
 
-    public abstract float getZoom();
+    public abstract double getZoom();
 
     public abstract void setPaddingLeft(float padding);
 
@@ -59,44 +59,44 @@ public abstract class MapCamera2dInterface {
         }
 
         @Override
-        public void moveToCenterPosition(ch.ubique.mapscore.shared.graphics.common.Vec2F position, float zoom, boolean animated)
+        public void moveToCenterPosition(ch.ubique.mapscore.shared.graphics.common.Vec2D position, double zoom, boolean animated)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
             native_moveToCenterPosition(this.nativeRef, position, zoom, animated);
         }
-        private native void native_moveToCenterPosition(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Vec2F position, float zoom, boolean animated);
+        private native void native_moveToCenterPosition(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Vec2D position, double zoom, boolean animated);
 
         @Override
-        public void moveToCenterPositon(ch.ubique.mapscore.shared.graphics.common.Vec2F position, boolean animated)
+        public void moveToCenterPositon(ch.ubique.mapscore.shared.graphics.common.Vec2D position, boolean animated)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
             native_moveToCenterPositon(this.nativeRef, position, animated);
         }
-        private native void native_moveToCenterPositon(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Vec2F position, boolean animated);
+        private native void native_moveToCenterPositon(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Vec2D position, boolean animated);
 
         @Override
-        public ch.ubique.mapscore.shared.graphics.common.Vec2F getCenterPosition()
+        public ch.ubique.mapscore.shared.graphics.common.Vec2D getCenterPosition()
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
             return native_getCenterPosition(this.nativeRef);
         }
-        private native ch.ubique.mapscore.shared.graphics.common.Vec2F native_getCenterPosition(long _nativeRef);
+        private native ch.ubique.mapscore.shared.graphics.common.Vec2D native_getCenterPosition(long _nativeRef);
 
         @Override
-        public void setZoom(float zoom, boolean animated)
+        public void setZoom(double zoom, boolean animated)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
             native_setZoom(this.nativeRef, zoom, animated);
         }
-        private native void native_setZoom(long _nativeRef, float zoom, boolean animated);
+        private native void native_setZoom(long _nativeRef, double zoom, boolean animated);
 
         @Override
-        public float getZoom()
+        public double getZoom()
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
             return native_getZoom(this.nativeRef);
         }
-        private native float native_getZoom(long _nativeRef);
+        private native double native_getZoom(long _nativeRef);
 
         @Override
         public void setPaddingLeft(float padding)

@@ -33,7 +33,7 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        void setPolygonPositions(const std::vector<::Vec2F> & positions, const std::vector<std::vector<::Vec2F>> & holes, bool isConvex) override;
+        void setPolygonPositions(const std::vector<::Vec2D> & positions, const std::vector<std::vector<::Vec2D>> & holes, bool isConvex) override;
         std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override;
 
     private:

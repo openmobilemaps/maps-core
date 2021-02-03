@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Vec2F.h"
+#include "Vec2D.h"
 #include <memory>
 #include <vector>
 
@@ -13,7 +13,7 @@ class Polygon2dInterface {
 public:
     virtual ~Polygon2dInterface() {}
 
-    virtual void setPolygonPositions(const std::vector<::Vec2F> & positions, const std::vector<std::vector<::Vec2F>> & holes, bool isConvex) = 0;
+    virtual void setPolygonPositions(const std::vector<::Vec2D> & positions, const std::vector<std::vector<::Vec2D>> & holes, bool isConvex) = 0;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() = 0;
 };

@@ -19,9 +19,6 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> & rend
         renderingContext->setupDrawFrame();
 
         for (const auto &object: pass->getGraphicsObjects()) {
-            // begin test code
-            if (!object->isReady()) object->setup(renderingContext);
-            // end test code
             object->render(renderingContext, pass->getRenderPassConfig(), mvpMatrix);
         }
 

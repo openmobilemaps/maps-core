@@ -3,11 +3,11 @@
 
 #pragma once
 
-#include "Vec3F.h"
+#include "Vec3D.h"
 
 class CameraListenerInterface {
 public:
     virtual ~CameraListenerInterface() {}
 
-    virtual void onPositionChanged(const ::Vec3F & position) = 0;
+    virtual void onPositionChanged(const ::Vec3D & position) = 0;
 };

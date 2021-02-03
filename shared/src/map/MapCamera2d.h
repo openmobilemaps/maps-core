@@ -8,15 +8,15 @@ public:
     
     ~MapCamera2d(){};
 
-    virtual void moveToCenterPosition(const ::Vec2F & position, float zoom, bool animated);
+    virtual void moveToCenterPosition(const ::Vec2D & position, double zoom, bool animated);
 
-    virtual void moveToCenterPositon(const ::Vec2F & position, bool animated);
+    virtual void moveToCenterPositon(const ::Vec2D & position, bool animated);
 
-    virtual ::Vec2F getCenterPosition();
+    virtual ::Vec2D getCenterPosition();
 
-    virtual void setZoom(float zoom, bool animated);
+    virtual void setZoom(double zoom, bool animated);
 
-    virtual float getZoom();
+    virtual double getZoom();
 
     virtual void setPaddingLeft(float padding);
 

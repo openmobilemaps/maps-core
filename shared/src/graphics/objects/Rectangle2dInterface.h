@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "RectF.h"
+#include "RectD.h"
 #include <memory>
 
 class GraphicsObjectInterface;
@@ -13,7 +13,7 @@ class Rectangle2dInterface {
 public:
     virtual ~Rectangle2dInterface() {}
 
-    virtual void setFrame(const ::RectF & frame, const ::RectF & textureCoordinates) = 0;
+    virtual void setFrame(const ::RectD & frame, const ::RectD & textureCoordinates) = 0;
 
     virtual void loadTexture(const std::shared_ptr<TextureHolderInterface> & textureHolder) = 0;
 

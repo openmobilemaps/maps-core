@@ -28,7 +28,7 @@ public:
     virtual void
     render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass, int64_t mvpMatrix);
 
-    virtual void setLinePositions(const std::vector<::Vec2F> &positions);
+    virtual void setLinePositions(const std::vector<::Vec2D> &positions);
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject();
 
@@ -39,7 +39,7 @@ protected:
 
     void drawPoints(std::shared_ptr<OpenGlContext> openGlContext, int64_t mvpMatrix);
 
-    std::vector<Vec2F> lineCoordinates;
+    std::vector<Vec2D> lineCoordinates;
 
     std::shared_ptr<LineShaderProgramInterface> shaderProgram;
     std::vector<GLfloat> pointsVertexBuffer;

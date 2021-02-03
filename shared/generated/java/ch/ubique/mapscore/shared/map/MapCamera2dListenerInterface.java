@@ -6,7 +6,7 @@ package ch.ubique.mapscore.shared.map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class MapCamera2dListenerInterface {
-    public abstract void onCenterPositionChanged(ch.ubique.mapscore.shared.graphics.common.Vec2F position, float zoom);
+    public abstract void onCenterPositionChanged(ch.ubique.mapscore.shared.graphics.common.Vec2D position, double zoom);
 
     private static final class CppProxy extends MapCamera2dListenerInterface
     {
@@ -32,11 +32,11 @@ public abstract class MapCamera2dListenerInterface {
         }
 
         @Override
-        public void onCenterPositionChanged(ch.ubique.mapscore.shared.graphics.common.Vec2F position, float zoom)
+        public void onCenterPositionChanged(ch.ubique.mapscore.shared.graphics.common.Vec2D position, double zoom)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
             native_onCenterPositionChanged(this.nativeRef, position, zoom);
         }
-        private native void native_onCenterPositionChanged(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Vec2F position, float zoom);
+        private native void native_onCenterPositionChanged(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Vec2D position, double zoom);
     }
 }

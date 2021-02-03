@@ -9,28 +9,28 @@ public final class MapCoordinateSystem implements java.io.Serializable {
     @androidx.annotation.NonNull
     protected String identifier;
 
-    protected float boundsLeft;
+    protected double boundsLeft;
 
-    protected float boundsTop;
+    protected double boundsTop;
 
-    protected float boundsRight;
+    protected double boundsRight;
 
-    protected float boundsBottom;
+    protected double boundsBottom;
 
-    protected float zoomMin;
+    protected double zoomMin;
 
-    protected float zoomMax;
+    protected double zoomMax;
 
     protected float unitToMeterFactor;
 
     public MapCoordinateSystem(
             String identifier,
-            float boundsLeft,
-            float boundsTop,
-            float boundsRight,
-            float boundsBottom,
-            float zoomMin,
-            float zoomMax,
+            double boundsLeft,
+            double boundsTop,
+            double boundsRight,
+            double boundsBottom,
+            double zoomMin,
+            double zoomMax,
             float unitToMeterFactor) {
         this.identifier = identifier;
         this.boundsLeft = boundsLeft;
@@ -46,27 +46,27 @@ public final class MapCoordinateSystem implements java.io.Serializable {
         return identifier;
     }
 
-    public float getBoundsLeft() {
+    public double getBoundsLeft() {
         return boundsLeft;
     }
 
-    public float getBoundsTop() {
+    public double getBoundsTop() {
         return boundsTop;
     }
 
-    public float getBoundsRight() {
+    public double getBoundsRight() {
         return boundsRight;
     }
 
-    public float getBoundsBottom() {
+    public double getBoundsBottom() {
         return boundsBottom;
     }
 
-    public float getZoomMin() {
+    public double getZoomMin() {
         return zoomMin;
     }
 
-    public float getZoomMax() {
+    public double getZoomMax() {
         return zoomMax;
     }
 
@@ -78,27 +78,27 @@ public final class MapCoordinateSystem implements java.io.Serializable {
         this.identifier = identifier;
     }
 
-    public void setBoundsLeft(float boundsLeft) {
+    public void setBoundsLeft(double boundsLeft) {
         this.boundsLeft = boundsLeft;
     }
 
-    public void setBoundsTop(float boundsTop) {
+    public void setBoundsTop(double boundsTop) {
         this.boundsTop = boundsTop;
     }
 
-    public void setBoundsRight(float boundsRight) {
+    public void setBoundsRight(double boundsRight) {
         this.boundsRight = boundsRight;
     }
 
-    public void setBoundsBottom(float boundsBottom) {
+    public void setBoundsBottom(double boundsBottom) {
         this.boundsBottom = boundsBottom;
     }
 
-    public void setZoomMin(float zoomMin) {
+    public void setZoomMin(double zoomMin) {
         this.zoomMin = zoomMin;
     }
 
-    public void setZoomMax(float zoomMax) {
+    public void setZoomMax(double zoomMax) {
         this.zoomMax = zoomMax;
     }
 

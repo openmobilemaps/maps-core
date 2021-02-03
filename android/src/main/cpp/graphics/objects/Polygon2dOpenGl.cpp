@@ -15,7 +15,7 @@ bool Polygon2dOpenGl::isReady() {
     return ready;
 }
 
-void Polygon2dOpenGl::setPolygonPositions(const std::vector<::Vec2F> &positions, const std::vector<std::vector<::Vec2F>> &holes,
+void Polygon2dOpenGl::setPolygonPositions(const std::vector<::Vec2D> &positions, const std::vector<std::vector<::Vec2D>> &holes,
                                           bool isConvex) {
     polygonCoordinates = positions;
     holePolygonCoordinates = holes;

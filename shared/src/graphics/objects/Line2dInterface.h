@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Vec2F.h"
+#include "Vec2D.h"
 #include <memory>
 #include <vector>
 
@@ -13,7 +13,7 @@ class Line2dInterface {
 public:
     virtual ~Line2dInterface() {}
 
-    virtual void setLinePositions(const std::vector<::Vec2F> & positions) = 0;
+    virtual void setLinePositions(const std::vector<::Vec2D> & positions) = 0;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() = 0;
 };

@@ -3,7 +3,7 @@
 #include "RenderConfigInterface.h"
 #include "Rectangle2dInterface.h"
 #include "AlphaShaderInterface.h"
-#include "Vec2F.h"
+#include "Vec2D.h"
 
 
 class Textured2dLayerObject: public LayerObjectInterface {

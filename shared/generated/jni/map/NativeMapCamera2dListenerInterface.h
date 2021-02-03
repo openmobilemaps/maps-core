@@ -33,14 +33,14 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        void onCenterPositionChanged(const ::Vec2F & position, float zoom) override;
+        void onCenterPositionChanged(const ::Vec2D & position, double zoom) override;
 
     private:
         friend ::djinni::JniInterface<::MapCamera2dListenerInterface, ::djinni_generated::NativeMapCamera2dListenerInterface>;
     };
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/map/MapCamera2dListenerInterface") };
-    const jmethodID method_onCenterPositionChanged { ::djinni::jniGetMethodID(clazz.get(), "onCenterPositionChanged", "(Lch/ubique/mapscore/shared/graphics/common/Vec2F;F)V") };
+    const jmethodID method_onCenterPositionChanged { ::djinni::jniGetMethodID(clazz.get(), "onCenterPositionChanged", "(Lch/ubique/mapscore/shared/graphics/common/Vec2D;D)V") };
 };
 
 }  // namespace djinni_generated

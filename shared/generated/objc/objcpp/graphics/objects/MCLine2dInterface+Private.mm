@@ -8,7 +8,7 @@
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCGraphicsObjectInterface+Private.h"
-#import "MCVec2F+Private.h"
+#import "MCVec2D+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -33,9 +33,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (void)setLinePositions:(nonnull NSArray<MCVec2F *> *)positions {
+- (void)setLinePositions:(nonnull NSArray<MCVec2D *> *)positions {
     try {
-        _cppRefHandle.get()->setLinePositions(::djinni::List<::djinni_generated::Vec2F>::toCpp(positions));
+        _cppRefHandle.get()->setLinePositions(::djinni::List<::djinni_generated::Vec2D>::toCpp(positions));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -55,10 +55,10 @@ class Line2dInterface::ObjcProxy final
     friend class ::djinni_generated::Line2dInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void setLinePositions(const std::vector<::Vec2F> & c_positions) override
+    void setLinePositions(const std::vector<::Vec2D> & c_positions) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setLinePositions:(::djinni::List<::djinni_generated::Vec2F>::fromCpp(c_positions))];
+            [djinni_private_get_proxied_objc_object() setLinePositions:(::djinni::List<::djinni_generated::Vec2D>::fromCpp(c_positions))];
         }
     }
     std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override

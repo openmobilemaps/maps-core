@@ -33,7 +33,7 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        void setLinePositions(const std::vector<::Vec2F> & positions) override;
+        void setLinePositions(const std::vector<::Vec2D> & positions) override;
         std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override;
 
     private:

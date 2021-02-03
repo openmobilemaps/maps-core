@@ -7,12 +7,12 @@
 @implementation MCMapCoordinateSystem
 
 - (nonnull instancetype)initWithIdentifier:(nonnull NSString *)identifier
-                                boundsLeft:(float)boundsLeft
-                                 boundsTop:(float)boundsTop
-                               boundsRight:(float)boundsRight
-                              boundsBottom:(float)boundsBottom
-                                   zoomMin:(float)zoomMin
-                                   zoomMax:(float)zoomMax
+                                boundsLeft:(double)boundsLeft
+                                 boundsTop:(double)boundsTop
+                               boundsRight:(double)boundsRight
+                              boundsBottom:(double)boundsBottom
+                                   zoomMin:(double)zoomMin
+                                   zoomMax:(double)zoomMax
                          unitToMeterFactor:(float)unitToMeterFactor
 {
     if (self = [super init]) {
@@ -29,12 +29,12 @@
 }
 
 + (nonnull instancetype)mapCoordinateSystemWithIdentifier:(nonnull NSString *)identifier
-                                               boundsLeft:(float)boundsLeft
-                                                boundsTop:(float)boundsTop
-                                              boundsRight:(float)boundsRight
-                                             boundsBottom:(float)boundsBottom
-                                                  zoomMin:(float)zoomMin
-                                                  zoomMax:(float)zoomMax
+                                               boundsLeft:(double)boundsLeft
+                                                boundsTop:(double)boundsTop
+                                              boundsRight:(double)boundsRight
+                                             boundsBottom:(double)boundsBottom
+                                                  zoomMin:(double)zoomMin
+                                                  zoomMax:(double)zoomMax
                                         unitToMeterFactor:(float)unitToMeterFactor
 {
     return [(MCMapCoordinateSystem*)[self alloc] initWithIdentifier:identifier

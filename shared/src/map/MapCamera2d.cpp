@@ -1,28 +1,28 @@
 #include "MapCamera2d.h"
-#include "Vec2F.h"
+#include "Vec2D.h"
 
 MapCamera2d::MapCamera2d(float screenDensityPpi) {
 
 }
 
-void MapCamera2d::moveToCenterPosition(const ::Vec2F & position, float zoom, bool animated) {
+void MapCamera2d::moveToCenterPosition(const ::Vec2D & position, double zoom, bool animated) {
 
 }
 
-void MapCamera2d::moveToCenterPositon(const ::Vec2F & position, bool animated) {
+void MapCamera2d::moveToCenterPositon(const ::Vec2D & position, bool animated) {
 
 }
 
-::Vec2F MapCamera2d::getCenterPosition() {
-    Vec2F(0.0f ,0.0f);
+::Vec2D MapCamera2d::getCenterPosition() {
+    Vec2D(0.0 ,0.0);
 }
 
-void MapCamera2d::setZoom(float zoom, bool animated) {
+void MapCamera2d::setZoom(double zoom, bool animated) {
 
 }
 
-float MapCamera2d::getZoom() {
-    return 1.0f;
+double MapCamera2d::getZoom() {
+    return 1.0;
 }
 
 void MapCamera2d::setPaddingLeft(float padding) {
