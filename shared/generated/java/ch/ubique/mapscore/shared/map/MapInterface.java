@@ -14,6 +14,8 @@ public abstract class MapInterface {
 
     public abstract ch.ubique.mapscore.shared.graphics.CameraInterface getCamera();
 
+    public abstract void addDefaultTouchHandler(float density);
+
     public abstract void setTouchHandler(ch.ubique.mapscore.shared.map.controls.TouchHandlerInterface touchHandler);
 
     public abstract ch.ubique.mapscore.shared.map.controls.TouchHandlerInterface getTouchHandler();
@@ -101,6 +103,14 @@ public abstract class MapInterface {
             return native_getCamera(this.nativeRef);
         }
         private native ch.ubique.mapscore.shared.graphics.CameraInterface native_getCamera(long _nativeRef);
+
+        @Override
+        public void addDefaultTouchHandler(float density)
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            native_addDefaultTouchHandler(this.nativeRef, density);
+        }
+        private native void native_addDefaultTouchHandler(long _nativeRef, float density);
 
         @Override
         public void setTouchHandler(ch.ubique.mapscore.shared.map.controls.TouchHandlerInterface touchHandler)

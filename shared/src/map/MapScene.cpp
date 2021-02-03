@@ -1,10 +1,13 @@
 #include "MapScene.h"
 #include "MapCallbackInterface.h"
 #include "TestingLayer.h"
+#include "DefaultTouchHandler.h"
 #include <algorithm>
 
 MapScene::MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig & mapConfig, const std::shared_ptr<::SchedulerInterface> & scheduler):
-scene(scene), mapConfig(mapConfig), scheduler(scheduler){
+scene(scene),
+mapConfig(mapConfig),
+scheduler(scheduler){
     addLayer(std::make_shared<TestingLayer>(scene->getGraphicsFactory(), scene->getShaderFactory()));
 }
 
@@ -23,6 +26,10 @@ void MapScene::setCamera(const std::shared_ptr<::CameraInterface> & camera) {
 
 std::shared_ptr<::CameraInterface> MapScene::getCamera() {
     return scene->getCamera();
+}
+
+void MapScene::addDefaultTouchHandler(float density) {
+    this->touchHandler = std::make_shared<DefaultTouchHandler>(scheduler, density);
 }
 
 void MapScene::setTouchHandler(const std::shared_ptr<::TouchHandlerInterface> & touchHandler) {

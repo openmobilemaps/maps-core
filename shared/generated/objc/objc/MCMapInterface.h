@@ -34,6 +34,8 @@
 
 - (nullable id<MCCameraInterface>)getCamera;
 
+- (void)addDefaultTouchHandler:(float)density;
+
 - (void)setTouchHandler:(nullable id<MCTouchHandlerInterface>)touchHandler;
 
 - (nullable id<MCTouchHandlerInterface>)getTouchHandler;

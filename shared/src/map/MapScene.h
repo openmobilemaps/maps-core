@@ -18,6 +18,8 @@ public:
 
     virtual std::shared_ptr<::CameraInterface> getCamera();
 
+    virtual void addDefaultTouchHandler(float density);
+
     virtual void setTouchHandler(const std::shared_ptr<::TouchHandlerInterface> & touchHandler);
 
     virtual std::shared_ptr<::TouchHandlerInterface> getTouchHandler();

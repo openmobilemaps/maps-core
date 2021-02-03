@@ -5,6 +5,7 @@
 #import "MCMapInterface.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
+#import "DJIMarshal+Private.h"
 #import "MCCameraInterface+Private.h"
 #import "MCGraphicsObjectFactoryInterface+Private.h"
 #import "MCLayerInterface+Private.h"
@@ -86,6 +87,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getCamera();
         return ::djinni_generated::CameraInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)addDefaultTouchHandler:(float)density {
+    try {
+        _cppRefHandle.get()->addDefaultTouchHandler(::djinni::F32::toCpp(density));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

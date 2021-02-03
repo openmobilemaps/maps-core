@@ -16,6 +16,7 @@ map_interface = interface +c {
     set_callback_handler(callback_interface: map_callback_interface);
     set_camera(camera: camera_interface);
     get_camera() : camera_interface;
+    add_default_touch_handler(density: f32);
     set_touch_handler(touch_handler: touch_handler_interface);
     get_touch_handler() : touch_handler_interface;
     set_loader(loader: loader_interface);
