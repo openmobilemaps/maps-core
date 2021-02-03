@@ -1,7 +1,7 @@
 #include "MapCamera2d.h"
 #include "Vec2F.h"
 
-MapCamera2d::MapCamera2d() {
+MapCamera2d::MapCamera2d(float screenDensityPpi) {
 
 }
 

@@ -4,7 +4,7 @@
 
 class MapCamera2d: public MapCamera2dInterface {
 public:
-    MapCamera2d();
+    MapCamera2d(float screenDensityPpi);
     
     ~MapCamera2d(){};
 
