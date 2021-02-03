@@ -14,14 +14,14 @@ NativeLoaderInterface::JavaProxy::JavaProxy(JniType j) : Handle(::djinni::jniGet
 
 NativeLoaderInterface::JavaProxy::~JavaProxy() = default;
 
-std::vector<uint8_t> NativeLoaderInterface::JavaProxy::loadDate(const std::string & c_url) {
+std::optional<std::vector<uint8_t>> NativeLoaderInterface::JavaProxy::loadDate(const std::string & c_url) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeLoaderInterface>::get();
     auto jret = (jbyteArray)jniEnv->CallObjectMethod(Handle::get().get(), data.method_loadDate,
                                                      ::djinni::get(::djinni::String::fromCpp(jniEnv, c_url)));
     ::djinni::jniExceptionCheck(jniEnv);
-    return ::djinni::Binary::toCpp(jniEnv, jret);
+    return ::djinni::Optional<std::optional, ::djinni::Binary>::toCpp(jniEnv, jret);
 }
 
 CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_loader_LoaderInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
@@ -38,7 +38,7 @@ CJNIEXPORT jbyteArray JNICALL Java_ch_ubique_mapscore_shared_map_loader_LoaderIn
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::LoaderInterface>(nativeRef);
         auto r = ref->loadDate(::djinni::String::toCpp(jniEnv, j_url));
-        return ::djinni::release(::djinni::Binary::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni::Binary>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

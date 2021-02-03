@@ -6,10 +6,10 @@ package ch.ubique.mapscore.shared.map.layers.objects;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public abstract class LayerObject {
-    public abstract ArrayList<RenderConfig> getRenderConfig();
+public abstract class LayerObjectInterface {
+    public abstract ArrayList<RenderConfigInterface> getRenderConfig();
 
-    private static final class CppProxy extends LayerObject
+    private static final class CppProxy extends LayerObjectInterface
     {
         private final long nativeRef;
         private final AtomicBoolean destroyed = new AtomicBoolean(false);
@@ -33,11 +33,11 @@ public abstract class LayerObject {
         }
 
         @Override
-        public ArrayList<RenderConfig> getRenderConfig()
+        public ArrayList<RenderConfigInterface> getRenderConfig()
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
             return native_getRenderConfig(this.nativeRef);
         }
-        private native ArrayList<RenderConfig> native_getRenderConfig(long _nativeRef);
+        private native ArrayList<RenderConfigInterface> native_getRenderConfig(long _nativeRef);
     }
 }

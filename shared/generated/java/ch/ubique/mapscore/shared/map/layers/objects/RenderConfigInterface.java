@@ -5,12 +5,12 @@ package ch.ubique.mapscore.shared.map.layers.objects;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public abstract class RenderConfig {
+public abstract class RenderConfigInterface {
     public abstract ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectInterface getGraphicsObject();
 
     public abstract int getRenderIndex();
 
-    private static final class CppProxy extends RenderConfig
+    private static final class CppProxy extends RenderConfigInterface
     {
         private final long nativeRef;
         private final AtomicBoolean destroyed = new AtomicBoolean(false);

@@ -5,7 +5,7 @@
 #import <Foundation/Foundation.h>
 
 
-@interface MCRenderConfig : NSObject
+@interface MCRenderConfigInterface : NSObject
 
 - (nullable id<MCGraphicsObjectInterface>)getGraphicsObject;
 

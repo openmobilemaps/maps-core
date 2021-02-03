@@ -4,6 +4,7 @@
 #pragma once
 
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -11,5 +12,5 @@ class LoaderInterface {
 public:
     virtual ~LoaderInterface() {}
 
-    virtual std::vector<uint8_t> loadDate(const std::string & url) = 0;
+    virtual std::optional<std::vector<uint8_t>> loadDate(const std::string & url) = 0;
 };

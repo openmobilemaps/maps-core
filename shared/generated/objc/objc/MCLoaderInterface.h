@@ -6,6 +6,6 @@
 
 @protocol MCLoaderInterface
 
-- (nonnull NSData *)loadDate:(nonnull NSString *)url;
+- (nullable NSData *)loadDate:(nonnull NSString *)url;
 
 @end

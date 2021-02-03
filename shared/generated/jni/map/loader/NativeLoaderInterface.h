@@ -33,7 +33,7 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        std::vector<uint8_t> loadDate(const std::string & url) override;
+        std::optional<std::vector<uint8_t>> loadDate(const std::string & url) override;
 
     private:
         friend ::djinni::JniInterface<::LoaderInterface, ::djinni_generated::NativeLoaderInterface>;

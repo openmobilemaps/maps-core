@@ -5,6 +5,7 @@ import MetalKit
 public class MapView: MTKView {
     private let mapInterface: MCMapInterface
     private let renderingContext: RenderingContext
+    private let loader = Loader()
 
     private var sizeChanged: Bool = false
     private var backgroundDisable = false
@@ -46,6 +47,8 @@ public class MapView: MTKView {
         isMultipleTouchEnabled = true
 
         mapInterface.setCallbackHandler(self)
+
+        mapInterface.setLoader(loader)
     }
 }
 

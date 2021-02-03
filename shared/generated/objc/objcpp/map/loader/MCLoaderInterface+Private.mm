@@ -31,10 +31,10 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (nonnull NSData *)loadDate:(nonnull NSString *)url {
+- (nullable NSData *)loadDate:(nonnull NSString *)url {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->loadDate(::djinni::String::toCpp(url));
-        return ::djinni::Binary::fromCpp(objcpp_result_);
+        return ::djinni::Optional<std::optional, ::djinni::Binary>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -47,11 +47,11 @@ class LoaderInterface::ObjcProxy final
     friend class ::djinni_generated::LoaderInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    std::vector<uint8_t> loadDate(const std::string & c_url) override
+    std::optional<std::vector<uint8_t>> loadDate(const std::string & c_url) override
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() loadDate:(::djinni::String::fromCpp(c_url))];
-            return ::djinni::Binary::toCpp(objcpp_result_);
+            return ::djinni::Optional<std::optional, ::djinni::Binary>::toCpp(objcpp_result_);
         }
     }
 };
