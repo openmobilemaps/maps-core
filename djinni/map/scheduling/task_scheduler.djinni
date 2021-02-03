@@ -13,7 +13,7 @@ task_interface = interface +c +j +o {
 
 task_config = record {
     id: string;
-    delay: i32;
+    delay: i64;
     priority: task_priority;
     execution_environment: execution_environment;
 }

@@ -7,7 +7,7 @@
 @implementation MCTaskConfig
 
 - (nonnull instancetype)initWithId:(nonnull NSString *)id
-                             delay:(int32_t)delay
+                             delay:(int64_t)delay
                           priority:(MCTaskPriority)priority
               executionEnvironment:(MCExecutionEnvironment)executionEnvironment
 {
@@ -21,7 +21,7 @@
 }
 
 + (nonnull instancetype)taskConfigWithId:(nonnull NSString *)id
-                                   delay:(int32_t)delay
+                                   delay:(int64_t)delay
                                 priority:(MCTaskPriority)priority
                     executionEnvironment:(MCExecutionEnvironment)executionEnvironment
 {

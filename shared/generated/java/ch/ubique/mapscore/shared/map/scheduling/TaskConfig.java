@@ -9,7 +9,7 @@ public final class TaskConfig implements java.io.Serializable {
     @androidx.annotation.NonNull
     protected String id;
 
-    protected int delay;
+    protected long delay;
 
     protected TaskPriority priority;
 
@@ -17,7 +17,7 @@ public final class TaskConfig implements java.io.Serializable {
 
     public TaskConfig(
             String id,
-            int delay,
+            long delay,
             TaskPriority priority,
             ExecutionEnvironment executionEnvironment) {
         this.id = id;
@@ -30,7 +30,7 @@ public final class TaskConfig implements java.io.Serializable {
         return id;
     }
 
-    public int getDelay() {
+    public long getDelay() {
         return delay;
     }
 
@@ -46,7 +46,7 @@ public final class TaskConfig implements java.io.Serializable {
         this.id = id;
     }
 
-    public void setDelay(int delay) {
+    public void setDelay(long delay) {
         this.delay = delay;
     }
 

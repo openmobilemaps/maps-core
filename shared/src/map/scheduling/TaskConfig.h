@@ -11,12 +11,12 @@
 
 struct TaskConfig final {
     std::string id;
-    int32_t delay;
+    int64_t delay;
     TaskPriority priority;
     ExecutionEnvironment executionEnvironment;
 
     TaskConfig(std::string id_,
-               int32_t delay_,
+               int64_t delay_,
                TaskPriority priority_,
                ExecutionEnvironment executionEnvironment_)
     : id(std::move(id_))

@@ -13,7 +13,7 @@ auto TaskConfig::toCpp(ObjcType obj) -> CppType
 {
     assert(obj);
     return {::djinni::String::toCpp(obj.id),
-            ::djinni::I32::toCpp(obj.delay),
+            ::djinni::I64::toCpp(obj.delay),
             ::djinni::Enum<::TaskPriority, MCTaskPriority>::toCpp(obj.priority),
             ::djinni::Enum<::ExecutionEnvironment, MCExecutionEnvironment>::toCpp(obj.executionEnvironment)};
 }
@@ -21,7 +21,7 @@ auto TaskConfig::toCpp(ObjcType obj) -> CppType
 auto TaskConfig::fromCpp(const CppType& cpp) -> ObjcType
 {
     return [[MCTaskConfig alloc] initWithId:(::djinni::String::fromCpp(cpp.id))
-                                      delay:(::djinni::I32::fromCpp(cpp.delay))
+                                      delay:(::djinni::I64::fromCpp(cpp.delay))
                                    priority:(::djinni::Enum<::TaskPriority, MCTaskPriority>::fromCpp(cpp.priority))
                        executionEnvironment:(::djinni::Enum<::ExecutionEnvironment, MCExecutionEnvironment>::fromCpp(cpp.executionEnvironment))];
 }

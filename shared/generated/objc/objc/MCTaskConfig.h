@@ -7,17 +7,17 @@
 
 @interface MCTaskConfig : NSObject
 - (nonnull instancetype)initWithId:(nonnull NSString *)id
-                             delay:(int32_t)delay
+                             delay:(int64_t)delay
                           priority:(MCTaskPriority)priority
               executionEnvironment:(MCExecutionEnvironment)executionEnvironment;
 + (nonnull instancetype)taskConfigWithId:(nonnull NSString *)id
-                                   delay:(int32_t)delay
+                                   delay:(int64_t)delay
                                 priority:(MCTaskPriority)priority
                     executionEnvironment:(MCExecutionEnvironment)executionEnvironment;
 
 @property (nonatomic, readonly, nonnull) NSString * id;
 
-@property (nonatomic, readonly) int32_t delay;
+@property (nonatomic, readonly) int64_t delay;
 
 @property (nonatomic, readonly) MCTaskPriority priority;
 

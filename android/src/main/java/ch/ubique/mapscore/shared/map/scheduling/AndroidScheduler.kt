@@ -1,9 +1,6 @@
 package ch.ubique.mapscore.shared.map.scheduling
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
@@ -14,9 +11,11 @@ class AndroidScheduler(private val schedulerCallback: AndroidSchedulerCallback) 
 	private lateinit var coroutineScope: CoroutineScope
 
 	private val taskQueueMap: ConcurrentHashMap<TaskPriority, ConcurrentLinkedQueue<TaskInterface>> = ConcurrentHashMap()
+
 	init {
 		TaskPriority.values().forEach { taskQueueMap.put(it, ConcurrentLinkedQueue()) }
 	}
+
 	private val delayedTaskMap: ConcurrentHashMap<String, Job> = ConcurrentHashMap()
 
 	fun setCoroutineScope(coroutineScope: CoroutineScope) {
@@ -26,14 +25,33 @@ class AndroidScheduler(private val schedulerCallback: AndroidSchedulerCallback) 
 	override fun addTask(task: TaskInterface?) {
 		val task = task ?: return
 		if (isResumed.get()) {
-			scheduleTask(task)
+			handleNewTask(task)
 		} else {
 			taskQueueMap[task.config.priority]!!.offer(task)
 		}
 	}
 
+	private fun handleNewTask(task: TaskInterface) {
+		if (task.config.delay > 0) {
+			val id = task.config.id
+			delayedTaskMap.put(id, coroutineScope.launch(Dispatchers.Default) {
+				delay(task.config.delay)
+				if (isActive) {
+					if (isResumed.get()) {
+						scheduleTask(task)
+					} else {
+						task.config.delay = 0
+						taskQueueMap[task.config.priority]!!.offer(task)
+					}
+					delayedTaskMap.remove(id)
+				}
+			})
+		} else {
+			scheduleTask(task)
+		}
+	}
+
 	private fun scheduleTask(task: TaskInterface) {
-		// TODO: if is delayed - wrap execution/graphics schedule in cancellable coroutine and delay
 		when (task.config.executionEnvironment) {
 			ExecutionEnvironment.GRAPHICS -> schedulerCallback.scheduleOnGlThread(task)
 			ExecutionEnvironment.IO -> coroutineScope.launch(Dispatchers.IO) { task.run() }
@@ -60,7 +78,7 @@ class AndroidScheduler(private val schedulerCallback: AndroidSchedulerCallback) 
 		listOf(TaskPriority.HIGH, TaskPriority.NORMAL, TaskPriority.LOW).forEach { priority ->
 			val taskQueue = taskQueueMap[priority] ?: return@forEach
 			while (taskQueue.isNotEmpty()) {
-				taskQueue.poll()?.let { ::scheduleTask }
+				taskQueue.poll()?.let { ::handleNewTask }
 			}
 		}
 	}
