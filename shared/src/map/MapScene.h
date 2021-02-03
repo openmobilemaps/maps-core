@@ -44,4 +44,8 @@ private:
     std::shared_ptr<SchedulerInterface> scheduler;
 
     std::shared_ptr<SceneInterface> scene;
+
+    std::shared_ptr<LoaderInterface> loader;
+
+    std::vector<std::shared_ptr<LayerInterface>> layers;
 };

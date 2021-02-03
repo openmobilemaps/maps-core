@@ -1,6 +1,7 @@
 #include "MapScene.h"
 #include "MapCallbackInterface.h"
 #include "TestingLayer.h"
+#include <algorithm>
 
 MapScene::MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig & mapConfig, const std::shared_ptr<::SchedulerInterface> & scheduler):
 scene(scene), mapConfig(mapConfig), scheduler(scheduler){
@@ -33,15 +34,15 @@ std::shared_ptr<::TouchHandlerInterface> MapScene::getTouchHandler() {
 }
 
 void MapScene::setLoader(const std::shared_ptr<::LoaderInterface> & loader) {
-
+    this->loader = loader;
 }
 
 void MapScene::addLayer(const std::shared_ptr<::LayerInterface> & layer) {
-
+    layers.push_back(layer);
 }
 
 void MapScene::removeLayer(const std::shared_ptr<::LayerInterface> & layer) {
-
+    layers.erase(std::remove(layers.begin(), layers.end(), layer), layers.end());
 }
 
 void MapScene::invalidate() {
@@ -51,6 +52,12 @@ void MapScene::invalidate() {
 }
 
 void MapScene::drawFrame() {
+    for (const auto &layer : layers) {
+        for (const auto &renderPass : layer->buildRenderPasses()) {
+            scene->getRenderer()->addToRenderQueue(renderPass);
+        }
+    }
+
     scene->drawFrame();
 }
 
