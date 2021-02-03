@@ -7,24 +7,26 @@
 
 @interface MCTouchInterface : NSObject
 
-- (void)onClickUnconfirmed:(nonnull MCVec2F *)posScreen;
+- (BOOL)onClickUnconfirmed:(nonnull MCVec2F *)posScreen;
 
-- (void)onClickConfirmed:(nonnull MCVec2F *)posScreen;
+- (BOOL)onClickConfirmed:(nonnull MCVec2F *)posScreen;
 
-- (void)onDoubleClick:(nonnull MCVec2F *)posScreen;
+- (BOOL)onDoubleClick:(nonnull MCVec2F *)posScreen;
 
-- (void)onLongPress:(nonnull MCVec2F *)posScreen;
+- (BOOL)onLongPress:(nonnull MCVec2F *)posScreen;
 
-- (void)onMove:(nonnull MCVec2F *)deltaScreen
+- (BOOL)onMove:(nonnull MCVec2F *)deltaScreen
      confirmed:(BOOL)confirmed
    doubleClick:(BOOL)doubleClick;
 
-- (void)onMoveComplete;
+- (BOOL)onMoveComplete;
 
-- (void)onTwoFingerClick:(nonnull MCVec2F *)posScreen1
+- (BOOL)onTwoFingerClick:(nonnull MCVec2F *)posScreen1
               posScreen2:(nonnull MCVec2F *)posScreen2;
 
-- (void)onTwoFingerMove:(nonnull NSArray<MCVec2F *> *)posScreenOld
+- (BOOL)onTwoFingerMove:(nonnull NSArray<MCVec2F *> *)posScreenOld
            posScreenNew:(nonnull NSArray<MCVec2F *> *)posScreenNew;
+
+- (void)clearTouch;
 
 @end

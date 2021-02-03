@@ -7,14 +7,15 @@ touch_handler_interface = interface +c +j +o {
 }
 
 touch_interface = interface +c {
-    on_click_unconfirmed(pos_screen: vec_2_f);
-    on_click_confirmed(pos_screen: vec_2_f);
-    on_double_click(pos_screen: vec_2_f);
-    on_long_press(pos_screen: vec_2_f);
-    on_move(delta_screen: vec_2_f, confirmed: bool, double_click: bool);
-    on_move_complete();
-    on_two_finger_click(pos_screen_1: vec_2_f, pos_screen_2: vec_2_f);
-    on_two_finger_move(pos_screen_old: list<vec_2_f>, pos_screen_new: list<vec_2_f>);
+    on_click_unconfirmed(pos_screen: vec_2_f) : bool;
+    on_click_confirmed(pos_screen: vec_2_f) : bool;
+    on_double_click(pos_screen: vec_2_f) : bool;
+    on_long_press(pos_screen: vec_2_f) : bool;
+    on_move(delta_screen: vec_2_f, confirmed: bool, double_click: bool) : bool;
+    on_move_complete() : bool;
+    on_two_finger_click(pos_screen_1: vec_2_f, pos_screen_2: vec_2_f) : bool;
+    on_two_finger_move(pos_screen_old: list<vec_2_f>, pos_screen_new: list<vec_2_f>) : bool;
+    clear_touch();
 }
 
 touch_event = record {

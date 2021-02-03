@@ -7,21 +7,23 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class TouchInterface {
-    public abstract void onClickUnconfirmed(ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen);
+    public abstract boolean onClickUnconfirmed(ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen);
 
-    public abstract void onClickConfirmed(ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen);
+    public abstract boolean onClickConfirmed(ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen);
 
-    public abstract void onDoubleClick(ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen);
+    public abstract boolean onDoubleClick(ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen);
 
-    public abstract void onLongPress(ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen);
+    public abstract boolean onLongPress(ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen);
 
-    public abstract void onMove(ch.ubique.mapscore.shared.graphics.common.Vec2F deltaScreen, boolean confirmed, boolean doubleClick);
+    public abstract boolean onMove(ch.ubique.mapscore.shared.graphics.common.Vec2F deltaScreen, boolean confirmed, boolean doubleClick);
 
-    public abstract void onMoveComplete();
+    public abstract boolean onMoveComplete();
 
-    public abstract void onTwoFingerClick(ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen1, ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen2);
+    public abstract boolean onTwoFingerClick(ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen1, ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen2);
 
-    public abstract void onTwoFingerMove(ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2F> posScreenOld, ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2F> posScreenNew);
+    public abstract boolean onTwoFingerMove(ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2F> posScreenOld, ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2F> posScreenNew);
+
+    public abstract void clearTouch();
 
     private static final class CppProxy extends TouchInterface
     {
@@ -47,67 +49,75 @@ public abstract class TouchInterface {
         }
 
         @Override
-        public void onClickUnconfirmed(ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen)
+        public boolean onClickUnconfirmed(ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
-            native_onClickUnconfirmed(this.nativeRef, posScreen);
+            return native_onClickUnconfirmed(this.nativeRef, posScreen);
         }
-        private native void native_onClickUnconfirmed(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen);
+        private native boolean native_onClickUnconfirmed(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen);
 
         @Override
-        public void onClickConfirmed(ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen)
+        public boolean onClickConfirmed(ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
-            native_onClickConfirmed(this.nativeRef, posScreen);
+            return native_onClickConfirmed(this.nativeRef, posScreen);
         }
-        private native void native_onClickConfirmed(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen);
+        private native boolean native_onClickConfirmed(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen);
 
         @Override
-        public void onDoubleClick(ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen)
+        public boolean onDoubleClick(ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
-            native_onDoubleClick(this.nativeRef, posScreen);
+            return native_onDoubleClick(this.nativeRef, posScreen);
         }
-        private native void native_onDoubleClick(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen);
+        private native boolean native_onDoubleClick(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen);
 
         @Override
-        public void onLongPress(ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen)
+        public boolean onLongPress(ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
-            native_onLongPress(this.nativeRef, posScreen);
+            return native_onLongPress(this.nativeRef, posScreen);
         }
-        private native void native_onLongPress(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen);
+        private native boolean native_onLongPress(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen);
 
         @Override
-        public void onMove(ch.ubique.mapscore.shared.graphics.common.Vec2F deltaScreen, boolean confirmed, boolean doubleClick)
+        public boolean onMove(ch.ubique.mapscore.shared.graphics.common.Vec2F deltaScreen, boolean confirmed, boolean doubleClick)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
-            native_onMove(this.nativeRef, deltaScreen, confirmed, doubleClick);
+            return native_onMove(this.nativeRef, deltaScreen, confirmed, doubleClick);
         }
-        private native void native_onMove(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Vec2F deltaScreen, boolean confirmed, boolean doubleClick);
+        private native boolean native_onMove(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Vec2F deltaScreen, boolean confirmed, boolean doubleClick);
 
         @Override
-        public void onMoveComplete()
+        public boolean onMoveComplete()
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
-            native_onMoveComplete(this.nativeRef);
+            return native_onMoveComplete(this.nativeRef);
         }
-        private native void native_onMoveComplete(long _nativeRef);
+        private native boolean native_onMoveComplete(long _nativeRef);
 
         @Override
-        public void onTwoFingerClick(ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen1, ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen2)
+        public boolean onTwoFingerClick(ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen1, ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen2)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
-            native_onTwoFingerClick(this.nativeRef, posScreen1, posScreen2);
+            return native_onTwoFingerClick(this.nativeRef, posScreen1, posScreen2);
         }
-        private native void native_onTwoFingerClick(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen1, ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen2);
+        private native boolean native_onTwoFingerClick(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen1, ch.ubique.mapscore.shared.graphics.common.Vec2F posScreen2);
 
         @Override
-        public void onTwoFingerMove(ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2F> posScreenOld, ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2F> posScreenNew)
+        public boolean onTwoFingerMove(ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2F> posScreenOld, ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2F> posScreenNew)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
-            native_onTwoFingerMove(this.nativeRef, posScreenOld, posScreenNew);
+            return native_onTwoFingerMove(this.nativeRef, posScreenOld, posScreenNew);
         }
-        private native void native_onTwoFingerMove(long _nativeRef, ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2F> posScreenOld, ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2F> posScreenNew);
+        private native boolean native_onTwoFingerMove(long _nativeRef, ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2F> posScreenOld, ArrayList<ch.ubique.mapscore.shared.graphics.common.Vec2F> posScreenNew);
+
+        @Override
+        public void clearTouch()
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            native_clearTouch(this.nativeRef);
+        }
+        private native void native_clearTouch(long _nativeRef);
     }
 }

@@ -10,19 +10,21 @@ class TouchInterface {
 public:
     virtual ~TouchInterface() {}
 
-    virtual void onClickUnconfirmed(const ::Vec2F & posScreen) = 0;
+    virtual bool onClickUnconfirmed(const ::Vec2F & posScreen) = 0;
 
-    virtual void onClickConfirmed(const ::Vec2F & posScreen) = 0;
+    virtual bool onClickConfirmed(const ::Vec2F & posScreen) = 0;
 
-    virtual void onDoubleClick(const ::Vec2F & posScreen) = 0;
+    virtual bool onDoubleClick(const ::Vec2F & posScreen) = 0;
 
-    virtual void onLongPress(const ::Vec2F & posScreen) = 0;
+    virtual bool onLongPress(const ::Vec2F & posScreen) = 0;
 
-    virtual void onMove(const ::Vec2F & deltaScreen, bool confirmed, bool doubleClick) = 0;
+    virtual bool onMove(const ::Vec2F & deltaScreen, bool confirmed, bool doubleClick) = 0;
 
-    virtual void onMoveComplete() = 0;
+    virtual bool onMoveComplete() = 0;
 
-    virtual void onTwoFingerClick(const ::Vec2F & posScreen1, const ::Vec2F & posScreen2) = 0;
+    virtual bool onTwoFingerClick(const ::Vec2F & posScreen1, const ::Vec2F & posScreen2) = 0;
 
-    virtual void onTwoFingerMove(const std::vector<::Vec2F> & posScreenOld, const std::vector<::Vec2F> & posScreenNew) = 0;
+    virtual bool onTwoFingerMove(const std::vector<::Vec2F> & posScreenOld, const std::vector<::Vec2F> & posScreenNew) = 0;
+
+    virtual void clearTouch() = 0;
 };

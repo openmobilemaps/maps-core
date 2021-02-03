@@ -31,59 +31,73 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (void)onClickUnconfirmed:(nonnull MCVec2F *)posScreen {
+- (BOOL)onClickUnconfirmed:(nonnull MCVec2F *)posScreen {
     try {
-        _cppRefHandle.get()->onClickUnconfirmed(::djinni_generated::Vec2F::toCpp(posScreen));
+        auto objcpp_result_ = _cppRefHandle.get()->onClickUnconfirmed(::djinni_generated::Vec2F::toCpp(posScreen));
+        return ::djinni::Bool::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)onClickConfirmed:(nonnull MCVec2F *)posScreen {
+- (BOOL)onClickConfirmed:(nonnull MCVec2F *)posScreen {
     try {
-        _cppRefHandle.get()->onClickConfirmed(::djinni_generated::Vec2F::toCpp(posScreen));
+        auto objcpp_result_ = _cppRefHandle.get()->onClickConfirmed(::djinni_generated::Vec2F::toCpp(posScreen));
+        return ::djinni::Bool::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)onDoubleClick:(nonnull MCVec2F *)posScreen {
+- (BOOL)onDoubleClick:(nonnull MCVec2F *)posScreen {
     try {
-        _cppRefHandle.get()->onDoubleClick(::djinni_generated::Vec2F::toCpp(posScreen));
+        auto objcpp_result_ = _cppRefHandle.get()->onDoubleClick(::djinni_generated::Vec2F::toCpp(posScreen));
+        return ::djinni::Bool::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)onLongPress:(nonnull MCVec2F *)posScreen {
+- (BOOL)onLongPress:(nonnull MCVec2F *)posScreen {
     try {
-        _cppRefHandle.get()->onLongPress(::djinni_generated::Vec2F::toCpp(posScreen));
+        auto objcpp_result_ = _cppRefHandle.get()->onLongPress(::djinni_generated::Vec2F::toCpp(posScreen));
+        return ::djinni::Bool::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)onMove:(nonnull MCVec2F *)deltaScreen
+- (BOOL)onMove:(nonnull MCVec2F *)deltaScreen
      confirmed:(BOOL)confirmed
    doubleClick:(BOOL)doubleClick {
     try {
-        _cppRefHandle.get()->onMove(::djinni_generated::Vec2F::toCpp(deltaScreen),
-                                    ::djinni::Bool::toCpp(confirmed),
-                                    ::djinni::Bool::toCpp(doubleClick));
+        auto objcpp_result_ = _cppRefHandle.get()->onMove(::djinni_generated::Vec2F::toCpp(deltaScreen),
+                                                          ::djinni::Bool::toCpp(confirmed),
+                                                          ::djinni::Bool::toCpp(doubleClick));
+        return ::djinni::Bool::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)onMoveComplete {
+- (BOOL)onMoveComplete {
     try {
-        _cppRefHandle.get()->onMoveComplete();
+        auto objcpp_result_ = _cppRefHandle.get()->onMoveComplete();
+        return ::djinni::Bool::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)onTwoFingerClick:(nonnull MCVec2F *)posScreen1
+- (BOOL)onTwoFingerClick:(nonnull MCVec2F *)posScreen1
               posScreen2:(nonnull MCVec2F *)posScreen2 {
     try {
-        _cppRefHandle.get()->onTwoFingerClick(::djinni_generated::Vec2F::toCpp(posScreen1),
-                                              ::djinni_generated::Vec2F::toCpp(posScreen2));
+        auto objcpp_result_ = _cppRefHandle.get()->onTwoFingerClick(::djinni_generated::Vec2F::toCpp(posScreen1),
+                                                                    ::djinni_generated::Vec2F::toCpp(posScreen2));
+        return ::djinni::Bool::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)onTwoFingerMove:(nonnull NSArray<MCVec2F *> *)posScreenOld
+- (BOOL)onTwoFingerMove:(nonnull NSArray<MCVec2F *> *)posScreenOld
            posScreenNew:(nonnull NSArray<MCVec2F *> *)posScreenNew {
     try {
-        _cppRefHandle.get()->onTwoFingerMove(::djinni::List<::djinni_generated::Vec2F>::toCpp(posScreenOld),
-                                             ::djinni::List<::djinni_generated::Vec2F>::toCpp(posScreenNew));
+        auto objcpp_result_ = _cppRefHandle.get()->onTwoFingerMove(::djinni::List<::djinni_generated::Vec2F>::toCpp(posScreenOld),
+                                                                   ::djinni::List<::djinni_generated::Vec2F>::toCpp(posScreenNew));
+        return ::djinni::Bool::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)clearTouch {
+    try {
+        _cppRefHandle.get()->clearTouch();
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

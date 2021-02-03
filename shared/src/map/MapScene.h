@@ -48,4 +48,6 @@ private:
     std::shared_ptr<LoaderInterface> loader;
 
     std::vector<std::shared_ptr<LayerInterface>> layers;
+
+    std::shared_ptr<::TouchHandlerInterface> touchHandler;
 };

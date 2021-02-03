@@ -26,11 +26,11 @@ std::shared_ptr<::CameraInterface> MapScene::getCamera() {
 }
 
 void MapScene::setTouchHandler(const std::shared_ptr<::TouchHandlerInterface> & touchHandler) {
-
+    this->touchHandler = touchHandler;
 }
 
 std::shared_ptr<::TouchHandlerInterface> MapScene::getTouchHandler() {
-    return nullptr;
+    return touchHandler;
 }
 
 void MapScene::setLoader(const std::shared_ptr<::LoaderInterface> & loader) {
