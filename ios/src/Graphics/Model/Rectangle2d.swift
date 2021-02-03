@@ -48,7 +48,7 @@ class Rectangle2d: BaseGraphicsObject {
 }
 
 extension Rectangle2d: MCRectangle2dInterface {
-    func setFrame(_ frame: MCRectF, textureCoordinates: MCRectF) {
+    func setFrame(_ frame: MCRectD, textureCoordinates: MCRectD) {
         /*
          The quad is made out of 4 vertices as following
          B----C
@@ -57,15 +57,15 @@ extension Rectangle2d: MCRectangle2dInterface {
          A----D
          Where A-C are joined to form two triangles
          */
-        let minX = frame.x
-        let minY = frame.y
-        let maxX = minX + frame.width
-        let maxY = minY + frame.height
+        let minX = frame.xF
+        let minY = frame.yF
+        let maxX = minX + frame.widthF
+        let maxY = minY + frame.heightF
         let vertecies: [Vertex] = [
-            Vertex(x: minX, y: maxY, textureU: textureCoordinates.x, textureV: textureCoordinates.height), // A
-            Vertex(x: minX, y: minY, textureU: textureCoordinates.x, textureV: textureCoordinates.y), // B
-            Vertex(x: maxX, y: minY, textureU: textureCoordinates.width, textureV: textureCoordinates.y), // C
-            Vertex(x: maxX, y: maxY, textureU: textureCoordinates.width, textureV: textureCoordinates.height), // D
+            Vertex(x: minX, y: maxY, textureU: textureCoordinates.xF, textureV: textureCoordinates.heightF), // A
+            Vertex(x: minX, y: minY, textureU: textureCoordinates.xF, textureV: textureCoordinates.yF), // B
+            Vertex(x: maxX, y: minY, textureU: textureCoordinates.widthF, textureV: textureCoordinates.yF), // C
+            Vertex(x: maxX, y: maxY, textureU: textureCoordinates.widthF, textureV: textureCoordinates.heightF), // D
         ]
         let indices: [UInt16] = [
             0, 1, 2, // ABC

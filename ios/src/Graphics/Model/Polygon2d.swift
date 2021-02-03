@@ -133,7 +133,7 @@ class Polygon2d: BaseGraphicsObject {
 }
 
 extension Polygon2d: MCPolygon2dInterface {
-    func setPolygonPositions(_ positions: [MCVec2F], holes: [[MCVec2F]], isConvex _: Bool) {
+    func setPolygonPositions(_ positions: [MCVec2D], holes: [[MCVec2D]], isConvex _: Bool) {
         stencilStatePrepare = nil
         stencilState = nil
 
@@ -148,7 +148,7 @@ extension Polygon2d: MCPolygon2dInterface {
         var indices: [UInt16] = []
 
         for c in positions {
-            vertices.append(Vertex(x: c.x, y: c.y, textureU: 0.0, textureV: 0.0))
+            vertices.append(Vertex(x: c.xF, y: c.yF, textureU: 0.0, textureV: 0.0))
         }
 
         for i in 0 ..< positions.count - 2 {
@@ -161,7 +161,7 @@ extension Polygon2d: MCPolygon2dInterface {
 
         for h in holes {
             for c in h {
-                vertices.append(Vertex(x: c.x, y: c.y, textureU: 0.0, textureV: 0.0))
+                vertices.append(Vertex(x: c.xF, y: c.yF, textureU: 0.0, textureV: 0.0))
             }
 
             for i in 0 ..< h.count - 2 {

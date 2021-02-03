@@ -115,7 +115,7 @@ class Line2d: BaseGraphicsObject {
 }
 
 extension Line2d: MCLine2dInterface {
-    func setLinePositions(_ positions: [MCVec2F]) {
+    func setLinePositions(_ positions: [MCVec2D]) {
         guard positions.count > 1 else {
             indicesCount = 0
             lineVerticesBuffer = nil
@@ -135,15 +135,15 @@ extension Line2d: MCLine2dInterface {
             let ci = positions[i]
             let ciNext = positions[iNext]
 
-            let lineNormalX = -(ciNext.y - ci.y)
-            let lineNormalY = ciNext.x - ci.x
+            let lineNormalX = -(ciNext.yF - ci.yF)
+            let lineNormalY = ciNext.xF - ci.xF
             let lineLength = sqrt(lineNormalX * lineNormalX + lineNormalY * lineNormalY)
 
-            lineVertices.append(Vertex(x: ci.x, y: ci.y, normalX: lineNormalX / lineLength, normalY: lineNormalY / lineLength))
-            lineVertices.append(Vertex(x: ci.x, y: ci.y, normalX: -lineNormalX / lineLength, normalY: -lineNormalY / lineLength))
+            lineVertices.append(Vertex(x: ci.xF, y: ci.yF, normalX: lineNormalX / lineLength, normalY: lineNormalY / lineLength))
+            lineVertices.append(Vertex(x: ci.xF, y: ci.yF, normalX: -lineNormalX / lineLength, normalY: -lineNormalY / lineLength))
 
-            lineVertices.append(Vertex(x: ciNext.x, y: ciNext.y, normalX: lineNormalX / lineLength, normalY: lineNormalY / lineLength))
-            lineVertices.append(Vertex(x: ciNext.x, y: ciNext.y, normalX: -lineNormalX / lineLength, normalY: -lineNormalY / lineLength))
+            lineVertices.append(Vertex(x: ciNext.xF, y: ciNext.yF, normalX: lineNormalX / lineLength, normalY: lineNormalY / lineLength))
+            lineVertices.append(Vertex(x: ciNext.xF, y: ciNext.yF, normalX: -lineNormalX / lineLength, normalY: -lineNormalY / lineLength))
 
             indices.append(UInt32(4 * i))
             indices.append(UInt32(4 * i + 1))
@@ -155,7 +155,7 @@ extension Line2d: MCLine2dInterface {
         }
 
         for c in positions {
-            pointVertices.append(Vertex(x: c.x, y: c.y, normalX: 0.0, normalY: 0.0))
+            pointVertices.append(Vertex(x: c.xF, y: c.yF, normalX: 0.0, normalY: 0.0))
         }
 
         guard let verticesBuffer = device.makeBuffer(bytes: lineVertices, length: MemoryLayout<Vertex>.stride * lineVertices.count, options: []),
