@@ -6,9 +6,9 @@ package ch.ubique.mapscore.shared.map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class MapCamera2dInterface {
-    public abstract void moveToCenterPosition(ch.ubique.mapscore.shared.graphics.common.Vec2D position, double zoom, boolean animated);
+    public abstract void moveToCenterPositionZoom(ch.ubique.mapscore.shared.graphics.common.Vec2D centerPosition, double zoom, boolean animated);
 
-    public abstract void moveToCenterPositon(ch.ubique.mapscore.shared.graphics.common.Vec2D position, boolean animated);
+    public abstract void moveToCenterPosition(ch.ubique.mapscore.shared.graphics.common.Vec2D centerPosition, boolean animated);
 
     public abstract ch.ubique.mapscore.shared.graphics.common.Vec2D getCenterPosition();
 
@@ -28,11 +28,12 @@ public abstract class MapCamera2dInterface {
 
     public abstract void removeListener(MapCamera2dListenerInterface listener);
 
-    public abstract ch.ubique.mapscore.shared.graphics.CameraInterface asCameraIntercace();
+    public abstract ch.ubique.mapscore.shared.graphics.CameraInterface asCameraInterface();
 
-    public static MapCamera2dInterface create(float screenDensityPpi)
+    public static MapCamera2dInterface create(MapInterface mapInterface, float screenDensityPpi)
     {
-        return CppProxy.create(screenDensityPpi);
+        return CppProxy.create(mapInterface,
+                               screenDensityPpi);
     }
 
     private static final class CppProxy extends MapCamera2dInterface
@@ -59,20 +60,20 @@ public abstract class MapCamera2dInterface {
         }
 
         @Override
-        public void moveToCenterPosition(ch.ubique.mapscore.shared.graphics.common.Vec2D position, double zoom, boolean animated)
+        public void moveToCenterPositionZoom(ch.ubique.mapscore.shared.graphics.common.Vec2D centerPosition, double zoom, boolean animated)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
-            native_moveToCenterPosition(this.nativeRef, position, zoom, animated);
+            native_moveToCenterPositionZoom(this.nativeRef, centerPosition, zoom, animated);
         }
-        private native void native_moveToCenterPosition(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Vec2D position, double zoom, boolean animated);
+        private native void native_moveToCenterPositionZoom(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Vec2D centerPosition, double zoom, boolean animated);
 
         @Override
-        public void moveToCenterPositon(ch.ubique.mapscore.shared.graphics.common.Vec2D position, boolean animated)
+        public void moveToCenterPosition(ch.ubique.mapscore.shared.graphics.common.Vec2D centerPosition, boolean animated)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
-            native_moveToCenterPositon(this.nativeRef, position, animated);
+            native_moveToCenterPosition(this.nativeRef, centerPosition, animated);
         }
-        private native void native_moveToCenterPositon(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Vec2D position, boolean animated);
+        private native void native_moveToCenterPosition(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Vec2D centerPosition, boolean animated);
 
         @Override
         public ch.ubique.mapscore.shared.graphics.common.Vec2D getCenterPosition()
@@ -147,13 +148,13 @@ public abstract class MapCamera2dInterface {
         private native void native_removeListener(long _nativeRef, MapCamera2dListenerInterface listener);
 
         @Override
-        public ch.ubique.mapscore.shared.graphics.CameraInterface asCameraIntercace()
+        public ch.ubique.mapscore.shared.graphics.CameraInterface asCameraInterface()
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
-            return native_asCameraIntercace(this.nativeRef);
+            return native_asCameraInterface(this.nativeRef);
         }
-        private native ch.ubique.mapscore.shared.graphics.CameraInterface native_asCameraIntercace(long _nativeRef);
+        private native ch.ubique.mapscore.shared.graphics.CameraInterface native_asCameraInterface(long _nativeRef);
 
-        public static native MapCamera2dInterface create(float screenDensityPpi);
+        public static native MapCamera2dInterface create(MapInterface mapInterface, float screenDensityPpi);
     }
 }

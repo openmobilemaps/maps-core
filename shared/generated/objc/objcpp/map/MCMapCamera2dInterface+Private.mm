@@ -8,6 +8,7 @@
 #import "DJIMarshal+Private.h"
 #import "MCCameraInterface+Private.h"
 #import "MCMapCamera2dListenerInterface+Private.h"
+#import "MCMapInterface+Private.h"
 #import "MCVec2D+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -33,28 +34,30 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-+ (nullable MCMapCamera2dInterface *)create:(float)screenDensityPpi {
++ (nullable MCMapCamera2dInterface *)create:(nullable MCMapInterface *)mapInterface
+                           screenDensityPpi:(float)screenDensityPpi {
     try {
-        auto objcpp_result_ = ::MapCamera2dInterface::create(::djinni::F32::toCpp(screenDensityPpi));
+        auto objcpp_result_ = ::MapCamera2dInterface::create(::djinni_generated::MapInterface::toCpp(mapInterface),
+                                                             ::djinni::F32::toCpp(screenDensityPpi));
         return ::djinni_generated::MapCamera2dInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)moveToCenterPosition:(nonnull MCVec2D *)position
-                        zoom:(double)zoom
-                    animated:(BOOL)animated {
+- (void)moveToCenterPositionZoom:(nonnull MCVec2D *)centerPosition
+                            zoom:(double)zoom
+                        animated:(BOOL)animated {
     try {
-        _cppRefHandle.get()->moveToCenterPosition(::djinni_generated::Vec2D::toCpp(position),
-                                                  ::djinni::F64::toCpp(zoom),
-                                                  ::djinni::Bool::toCpp(animated));
+        _cppRefHandle.get()->moveToCenterPositionZoom(::djinni_generated::Vec2D::toCpp(centerPosition),
+                                                      ::djinni::F64::toCpp(zoom),
+                                                      ::djinni::Bool::toCpp(animated));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)moveToCenterPositon:(nonnull MCVec2D *)position
-                   animated:(BOOL)animated {
+- (void)moveToCenterPosition:(nonnull MCVec2D *)centerPosition
+                    animated:(BOOL)animated {
     try {
-        _cppRefHandle.get()->moveToCenterPositon(::djinni_generated::Vec2D::toCpp(position),
-                                                 ::djinni::Bool::toCpp(animated));
+        _cppRefHandle.get()->moveToCenterPosition(::djinni_generated::Vec2D::toCpp(centerPosition),
+                                                  ::djinni::Bool::toCpp(animated));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -116,9 +119,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nullable id<MCCameraInterface>)asCameraIntercace {
+- (nullable id<MCCameraInterface>)asCameraInterface {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->asCameraIntercace();
+        auto objcpp_result_ = _cppRefHandle.get()->asCameraInterface();
         return ::djinni_generated::CameraInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }

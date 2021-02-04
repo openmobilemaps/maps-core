@@ -12,16 +12,27 @@
 map_interface = interface +c {
     static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface, rendering_context: rendering_context_interface, map_config: map_config, scheduler: scheduler_interface) : map_interface;
     static createWithOpenGl(map_config: map_config, scheduler: scheduler_interface) : map_interface;
-    get_rendering_context() : rendering_context_interface;
+
     set_callback_handler(callback_interface: map_callback_interface);
+    set_loader(loader: loader_interface);
+
+    get_graphics_object_factory() : graphics_object_factory_interface;
+    get_shader_factory() : shader_factory_interface;
+
+    get_scheduler() : scheduler_interface;
+    get_rendering_context() : rendering_context_interface;
+    get_map_config() : map_config;
+
     set_camera(camera: camera_interface);
     get_camera() : camera_interface;
+
     add_default_touch_handler(density: f32);
     set_touch_handler(touch_handler: touch_handler_interface);
     get_touch_handler() : touch_handler_interface;
-    set_loader(loader: loader_interface);
+
     add_layer(layer: layer_interface);
     remove_layer(layer: layer_interface);
+
     invalidate();
     draw_frame();
     resume();
@@ -48,11 +59,10 @@ map_coordinate_system = record {
 }
 
 map_camera_2d_interface = interface +c {
-    static create(screen_density_ppi: f32): map_camera_2d_interface;
+    static create(map_interface: map_interface, screen_density_ppi: f32): map_camera_2d_interface;
 
-    move_to_center_position(position: vec_2_d, zoom: f64, animated: bool);
-
-    move_to_center_positon(position: vec_2_d, animated: bool);
+    move_to_center_position_zoom(center_position: vec_2_d, zoom: f64, animated: bool);
+    move_to_center_position(center_position: vec_2_d, animated: bool);
     get_center_position(): vec_2_d;
 
     set_zoom(zoom: f64, animated: bool);
@@ -67,7 +77,7 @@ map_camera_2d_interface = interface +c {
     add_listener(listener: map_camera_2d_listener_interface);
     remove_listener(listener: map_camera_2d_listener_interface);
 
-    as_camera_intercace(): camera_interface;
+    as_camera_interface(): camera_interface;
 }
 
 map_camera_2d_listener_interface = interface +c +j +o {

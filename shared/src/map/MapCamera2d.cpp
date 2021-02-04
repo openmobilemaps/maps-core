@@ -1,54 +1,106 @@
+#include "Matrix.h"
 #include "MapCamera2d.h"
 #include "Vec2D.h"
+#include "MapInterface.h"
+#include "MapConfig.h"
 
-MapCamera2d::MapCamera2d(float screenDensityPpi) {
-
+MapCamera2d::MapCamera2d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi) :
+        mapInterface(mapInterface),
+        mapCoordinateSystem(mapInterface->getMapConfig().mapCoordinateSystem),
+        screenDensityPpi(screenDensityPpi),
+        screenPixelAsRealMeterFactor(1.0 / (254 * screenDensityPpi)),
+        currentMvpMatrix(16, 0) {
+    auto mapConfig = mapInterface->getMapConfig();
+    mapCoordinateSystem = mapConfig.mapCoordinateSystem;
+    double centerX = mapCoordinateSystem.boundsLeft + 0.5 * (mapCoordinateSystem.boundsRight - mapCoordinateSystem.boundsLeft);
+    double centerY = mapCoordinateSystem.boundsBottom + 0.5 * (mapCoordinateSystem.boundsTop - mapCoordinateSystem.boundsBottom);
+    centerPosition = Vec2D(centerX, centerY);
+    zoom = mapConfig.zoomMin;
 }
 
-void MapCamera2d::moveToCenterPosition(const ::Vec2D & position, double zoom, bool animated) {
-
+void MapCamera2d::moveToCenterPositionZoom(const ::Vec2D &centerPosition, double zoom, bool animated) {
+    if (animated) {
+        // TODO
+    } else {
+        this->zoom = zoom;
+        this->centerPosition = centerPosition;
+    }
 }
 
-void MapCamera2d::moveToCenterPositon(const ::Vec2D & position, bool animated) {
-
+void MapCamera2d::moveToCenterPosition(const ::Vec2D &centerPosition, bool animated) {
+    if (animated) {
+        // TODO
+    } else {
+        this->centerPosition = centerPosition;
+    }
 }
 
 ::Vec2D MapCamera2d::getCenterPosition() {
-    Vec2D(0.0 ,0.0);
+    return centerPosition;
 }
 
 void MapCamera2d::setZoom(double zoom, bool animated) {
-
+    if (animated) {
+        // TODO
+    } else {
+        this->zoom = zoom;
+    }
 }
 
 double MapCamera2d::getZoom() {
-    return 1.0;
+    return zoom;
 }
 
 void MapCamera2d::setPaddingLeft(float padding) {
-
+    paddingLeft = padding;
 }
 
 void MapCamera2d::setPaddingRight(float padding) {
-
+    paddingRight = padding;
 }
 
 void MapCamera2d::setPaddingTop(float padding) {
-
+    paddingTop = padding;
 }
 
 void MapCamera2d::setPaddingBottom(float padding) {
-
+    paddingBottom = padding;
 }
 
-void MapCamera2d::addListener(const std::shared_ptr<MapCamera2dListenerInterface> & listener) {
-
+void MapCamera2d::addListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) {
+    listeners.insert(listener);
 }
 
-void MapCamera2d::removeListener(const std::shared_ptr<MapCamera2dListenerInterface> & listener) {
-
+void MapCamera2d::removeListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) {
+    listeners.erase(listener);
 }
 
-std::shared_ptr<::CameraInterface> MapCamera2d::asCameraIntercace() {
-    return nullptr;
+std::shared_ptr<::CameraInterface> MapCamera2d::asCameraInterface() {
+    return shared_from_this();
+}
+
+std::vector<float> MapCamera2d::getMvpMatrix() {
+    std::vector<float> newMvpMatrix(16, 0);
+
+    Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
+    double zoomFactor = screenPixelAsRealMeterFactor * zoom;
+    Vec2D coordTopLeft = Vec2D(centerPosition.x - ((sizeViewport.x - paddingRight) * 0.5 * zoomFactor) + paddingLeft,
+                               centerPosition.y - ((sizeViewport.y - paddingBottom) * 0.5 * zoomFactor) + paddingTop);
+
+    Matrix::setIdentityM(newMvpMatrix, 0);
+    Matrix::orthoM(newMvpMatrix, 0, 0, sizeViewport.x, sizeViewport.y, 0, -1, 1);
+
+    Matrix::scaleM(newMvpMatrix, 0, zoomFactor, zoomFactor, 1);
+    Matrix::translateM(newMvpMatrix, 0, -coordTopLeft.x, -coordTopLeft.y, 0);
+
+    Matrix::translateM(newMvpMatrix, 0, -centerPosition.x, -centerPosition.y, 0);
+    Matrix::rotateM(newMvpMatrix, 0.0, angle, 0.0, 0.0, 1.0);
+    Matrix::translateM(newMvpMatrix, 0, centerPosition.x, centerPosition.y, 0);
+
+    currentMvpMatrix = newMvpMatrix;
+    return currentMvpMatrix;
+}
+
+bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleClick) {
+    return false;
 }

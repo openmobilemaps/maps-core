@@ -7,7 +7,6 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
-#import "MCCameraListenerInterface+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -32,22 +31,10 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (int64_t)getMvpMatrix {
+- (nonnull NSArray<NSNumber *> *)getMvpMatrix {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getMvpMatrix();
-        return ::djinni::I64::fromCpp(objcpp_result_);
-    } DJINNI_TRANSLATE_EXCEPTIONS()
-}
-
-- (void)addListener:(nullable id<MCCameraListenerInterface>)listener {
-    try {
-        _cppRefHandle.get()->addListener(::djinni_generated::CameraListenerInterface::toCpp(listener));
-    } DJINNI_TRANSLATE_EXCEPTIONS()
-}
-
-- (void)removeListener:(nullable id<MCCameraListenerInterface>)listener {
-    try {
-        _cppRefHandle.get()->removeListener(::djinni_generated::CameraListenerInterface::toCpp(listener));
+        return ::djinni::List<::djinni::F32>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -60,23 +47,11 @@ class CameraInterface::ObjcProxy final
     friend class ::djinni_generated::CameraInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    int64_t getMvpMatrix() override
+    std::vector<float> getMvpMatrix() override
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getMvpMatrix];
-            return ::djinni::I64::toCpp(objcpp_result_);
-        }
-    }
-    void addListener(const std::shared_ptr<::CameraListenerInterface> & c_listener) override
-    {
-        @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() addListener:(::djinni_generated::CameraListenerInterface::fromCpp(c_listener))];
-        }
-    }
-    void removeListener(const std::shared_ptr<::CameraListenerInterface> & c_listener) override
-    {
-        @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() removeListener:(::djinni_generated::CameraListenerInterface::fromCpp(c_listener))];
+            return ::djinni::List<::djinni::F32>::toCpp(objcpp_result_);
         }
     }
 };

@@ -10,7 +10,15 @@ public:
 
     virtual ~MapScene() {}
 
+    virtual std::shared_ptr<::GraphicsObjectFactoryInterface> getGraphicsObjectFactory();
+
+    virtual std::shared_ptr<::ShaderFactoryInterface> getShaderFactory();
+
+    virtual std::shared_ptr<::SchedulerInterface> getScheduler();
+
     virtual std::shared_ptr<::RenderingContextInterface> getRenderingContext();
+
+    virtual MapConfig getMapConfig();
 
     virtual void setCallbackHandler(const std::shared_ptr<MapCallbackInterface> & callbackInterface);
 
@@ -52,4 +60,6 @@ private:
     std::vector<std::shared_ptr<LayerInterface>> layers;
 
     std::shared_ptr<::TouchHandlerInterface> touchHandler;
+
+    bool isResumed = false;
 };

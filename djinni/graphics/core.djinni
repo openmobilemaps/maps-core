@@ -48,11 +48,5 @@ renderer_interface = interface +c +j +o {
 }
 
 camera_interface = interface +c +j +o {
-    get_mvp_matrix() : i64;
-    add_listener(listener: camera_listener_interface);
-    remove_listener(listener: camera_listener_interface);
-}
-
-camera_listener_interface = interface +c +j +o {
-    on_position_changed(position: vec_3_d);
+    get_mvp_matrix() : list<f32>;
 }

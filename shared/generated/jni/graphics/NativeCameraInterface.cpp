@@ -3,7 +3,6 @@
 
 #include "NativeCameraInterface.h"  // my header
 #include "Marshal.hpp"
-#include "NativeCameraListenerInterface.h"
 
 namespace djinni_generated {
 
@@ -15,29 +14,13 @@ NativeCameraInterface::JavaProxy::JavaProxy(JniType j) : Handle(::djinni::jniGet
 
 NativeCameraInterface::JavaProxy::~JavaProxy() = default;
 
-int64_t NativeCameraInterface::JavaProxy::getMvpMatrix() {
+std::vector<float> NativeCameraInterface::JavaProxy::getMvpMatrix() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeCameraInterface>::get();
-    auto jret = jniEnv->CallLongMethod(Handle::get().get(), data.method_getMvpMatrix);
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getMvpMatrix);
     ::djinni::jniExceptionCheck(jniEnv);
-    return ::djinni::I64::toCpp(jniEnv, jret);
-}
-void NativeCameraInterface::JavaProxy::addListener(const std::shared_ptr<::CameraListenerInterface> & c_listener) {
-    auto jniEnv = ::djinni::jniGetThreadEnv();
-    ::djinni::JniLocalScope jscope(jniEnv, 10);
-    const auto& data = ::djinni::JniClass<::djinni_generated::NativeCameraInterface>::get();
-    jniEnv->CallVoidMethod(Handle::get().get(), data.method_addListener,
-                           ::djinni::get(::djinni_generated::NativeCameraListenerInterface::fromCpp(jniEnv, c_listener)));
-    ::djinni::jniExceptionCheck(jniEnv);
-}
-void NativeCameraInterface::JavaProxy::removeListener(const std::shared_ptr<::CameraListenerInterface> & c_listener) {
-    auto jniEnv = ::djinni::jniGetThreadEnv();
-    ::djinni::JniLocalScope jscope(jniEnv, 10);
-    const auto& data = ::djinni::JniClass<::djinni_generated::NativeCameraInterface>::get();
-    jniEnv->CallVoidMethod(Handle::get().get(), data.method_removeListener,
-                           ::djinni::get(::djinni_generated::NativeCameraListenerInterface::fromCpp(jniEnv, c_listener)));
-    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni::List<::djinni::F32>::toCpp(jniEnv, jret);
 }
 
 CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_CameraInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
@@ -48,32 +31,14 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_CameraInterface_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jlong JNICALL Java_ch_ubique_mapscore_shared_graphics_CameraInterface_00024CppProxy_native_1getMvpMatrix(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_CameraInterface_00024CppProxy_native_1getMvpMatrix(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::CameraInterface>(nativeRef);
         auto r = ref->getMvpMatrix();
-        return ::djinni::release(::djinni::I64::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni::List<::djinni::F32>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
-}
-
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_CameraInterface_00024CppProxy_native_1addListener(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_listener)
-{
-    try {
-        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
-        const auto& ref = ::djinni::objectFromHandleAddress<::CameraInterface>(nativeRef);
-        ref->addListener(::djinni_generated::NativeCameraListenerInterface::toCpp(jniEnv, j_listener));
-    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
-}
-
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_CameraInterface_00024CppProxy_native_1removeListener(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_listener)
-{
-    try {
-        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
-        const auto& ref = ::djinni::objectFromHandleAddress<::CameraInterface>(nativeRef);
-        ref->removeListener(::djinni_generated::NativeCameraListenerInterface::toCpp(jniEnv, j_listener));
-    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
 }  // namespace djinni_generated

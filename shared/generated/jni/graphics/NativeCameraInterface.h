@@ -33,18 +33,14 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        int64_t getMvpMatrix() override;
-        void addListener(const std::shared_ptr<::CameraListenerInterface> & listener) override;
-        void removeListener(const std::shared_ptr<::CameraListenerInterface> & listener) override;
+        std::vector<float> getMvpMatrix() override;
 
     private:
         friend ::djinni::JniInterface<::CameraInterface, ::djinni_generated::NativeCameraInterface>;
     };
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/graphics/CameraInterface") };
-    const jmethodID method_getMvpMatrix { ::djinni::jniGetMethodID(clazz.get(), "getMvpMatrix", "()J") };
-    const jmethodID method_addListener { ::djinni::jniGetMethodID(clazz.get(), "addListener", "(Lch/ubique/mapscore/shared/graphics/CameraListenerInterface;)V") };
-    const jmethodID method_removeListener { ::djinni::jniGetMethodID(clazz.get(), "removeListener", "(Lch/ubique/mapscore/shared/graphics/CameraListenerInterface;)V") };
+    const jmethodID method_getMvpMatrix { ::djinni::jniGetMethodID(clazz.get(), "getMvpMatrix", "()Ljava/util/ArrayList;") };
 };
 
 }  // namespace djinni_generated

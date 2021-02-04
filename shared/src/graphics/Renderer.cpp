@@ -10,7 +10,7 @@ void Renderer::addToRenderQueue(const std::shared_ptr<RenderPassInterface> & ren
 void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> & renderingContext,
                          const std::shared_ptr<CameraInterface> & camera) {
 
-    auto mvpMatrix = camera->getMvpMatrix();
+    auto mvpMatrix = (int64_t) camera->getMvpMatrix().data();
 
     while (!renderQueue.empty())
     {

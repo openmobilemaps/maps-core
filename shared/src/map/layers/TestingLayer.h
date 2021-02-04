@@ -1,4 +1,6 @@
 #pragma once
+
+#include "MapInterface.h"
 #include "LayerInterface.h"
 #include "GraphicsObjectFactoryInterface.h"
 #include "ShaderFactoryInterface.h"
@@ -7,7 +9,7 @@
 
 class TestingLayer: public LayerInterface {
 public:
-    TestingLayer(std::shared_ptr<GraphicsObjectFactoryInterface> graphicsObjectFactory, std::shared_ptr<ShaderFactoryInterface> shaderFactory);
+    TestingLayer(const std::shared_ptr<MapInterface> &mapInterface);
 
     ~TestingLayer() {}
 
@@ -24,6 +26,7 @@ public:
     void show();
 
 private:
+    std::shared_ptr<MapInterface> mapInterface;
     std::shared_ptr<Polygon2dLayerObject> object;
     std::shared_ptr<RenderPass> renderPass;
 };

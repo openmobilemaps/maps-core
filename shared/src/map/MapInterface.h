@@ -24,9 +24,19 @@ public:
 
     static std::shared_ptr<MapInterface> createWithOpenGl(const MapConfig & mapConfig, const std::shared_ptr<::SchedulerInterface> & scheduler);
 
+    virtual void setCallbackHandler(const std::shared_ptr<MapCallbackInterface> & callbackInterface) = 0;
+
+    virtual void setLoader(const std::shared_ptr<::LoaderInterface> & loader) = 0;
+
+    virtual std::shared_ptr<::GraphicsObjectFactoryInterface> getGraphicsObjectFactory() = 0;
+
+    virtual std::shared_ptr<::ShaderFactoryInterface> getShaderFactory() = 0;
+
+    virtual std::shared_ptr<::SchedulerInterface> getScheduler() = 0;
+
     virtual std::shared_ptr<::RenderingContextInterface> getRenderingContext() = 0;
 
-    virtual void setCallbackHandler(const std::shared_ptr<MapCallbackInterface> & callbackInterface) = 0;
+    virtual MapConfig getMapConfig() = 0;
 
     virtual void setCamera(const std::shared_ptr<::CameraInterface> & camera) = 0;
 
@@ -37,8 +47,6 @@ public:
     virtual void setTouchHandler(const std::shared_ptr<::TouchHandlerInterface> & touchHandler) = 0;
 
     virtual std::shared_ptr<::TouchHandlerInterface> getTouchHandler() = 0;
-
-    virtual void setLoader(const std::shared_ptr<::LoaderInterface> & loader) = 0;
 
     virtual void addLayer(const std::shared_ptr<::LayerInterface> & layer) = 0;
 

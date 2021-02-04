@@ -5,19 +5,21 @@
 #import "MCVec2D.h"
 #import <Foundation/Foundation.h>
 @class MCMapCamera2dInterface;
+@class MCMapInterface;
 @protocol MCMapCamera2dListenerInterface;
 
 
 @interface MCMapCamera2dInterface : NSObject
 
-+ (nullable MCMapCamera2dInterface *)create:(float)screenDensityPpi;
++ (nullable MCMapCamera2dInterface *)create:(nullable MCMapInterface *)mapInterface
+                           screenDensityPpi:(float)screenDensityPpi;
 
-- (void)moveToCenterPosition:(nonnull MCVec2D *)position
-                        zoom:(double)zoom
+- (void)moveToCenterPositionZoom:(nonnull MCVec2D *)centerPosition
+                            zoom:(double)zoom
+                        animated:(BOOL)animated;
+
+- (void)moveToCenterPosition:(nonnull MCVec2D *)centerPosition
                     animated:(BOOL)animated;
-
-- (void)moveToCenterPositon:(nonnull MCVec2D *)position
-                   animated:(BOOL)animated;
 
 - (nonnull MCVec2D *)getCenterPosition;
 
@@ -38,6 +40,6 @@
 
 - (void)removeListener:(nullable id<MCMapCamera2dListenerInterface>)listener;
 
-- (nullable id<MCCameraInterface>)asCameraIntercace;
+- (nullable id<MCCameraInterface>)asCameraInterface;
 
 @end

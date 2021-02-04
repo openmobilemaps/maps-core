@@ -15,6 +15,10 @@ public:
 
     void setPositions(std::vector<Vec2D> positions);
 
+    std::shared_ptr<GraphicsObjectInterface> getPolygonObject();
+
+    std::shared_ptr<ShaderProgramInterface> getShaderProgram();
+
 private:
     std::shared_ptr<Polygon2dInterface> polygon;
     std::shared_ptr<ColorShaderInterface> shader;

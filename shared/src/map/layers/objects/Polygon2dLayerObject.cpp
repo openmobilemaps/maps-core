@@ -11,3 +11,11 @@ std::vector<std::shared_ptr<RenderConfigInterface>> Polygon2dLayerObject::getRen
 void Polygon2dLayerObject::setPositions(std::vector<Vec2D> positions) {
     polygon->setPolygonPositions(positions, {}, true);
 }
+
+std::shared_ptr<GraphicsObjectInterface> Polygon2dLayerObject::getPolygonObject() {
+    return polygon->asGraphicsObject();
+}
+
+std::shared_ptr<ShaderProgramInterface> Polygon2dLayerObject::getShaderProgram() {
+    return shader->asShaderProgramInterface();
+}

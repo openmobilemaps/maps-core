@@ -64,6 +64,39 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setCallbackHandler:(nullable id<MCMapCallbackInterface>)callbackInterface {
+    try {
+        _cppRefHandle.get()->setCallbackHandler(::djinni_generated::MapCallbackInterface::toCpp(callbackInterface));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setLoader:(nullable id<MCLoaderInterface>)loader {
+    try {
+        _cppRefHandle.get()->setLoader(::djinni_generated::LoaderInterface::toCpp(loader));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCGraphicsObjectFactoryInterface>)getGraphicsObjectFactory {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getGraphicsObjectFactory();
+        return ::djinni_generated::GraphicsObjectFactoryInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCShaderFactoryInterface>)getShaderFactory {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getShaderFactory();
+        return ::djinni_generated::ShaderFactoryInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCSchedulerInterface>)getScheduler {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getScheduler();
+        return ::djinni_generated::SchedulerInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nullable id<MCRenderingContextInterface>)getRenderingContext {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getRenderingContext();
@@ -71,9 +104,10 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setCallbackHandler:(nullable id<MCMapCallbackInterface>)callbackInterface {
+- (nonnull MCMapConfig *)getMapConfig {
     try {
-        _cppRefHandle.get()->setCallbackHandler(::djinni_generated::MapCallbackInterface::toCpp(callbackInterface));
+        auto objcpp_result_ = _cppRefHandle.get()->getMapConfig();
+        return ::djinni_generated::MapConfig::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -106,12 +140,6 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getTouchHandler();
         return ::djinni_generated::TouchHandlerInterface::fromCpp(objcpp_result_);
-    } DJINNI_TRANSLATE_EXCEPTIONS()
-}
-
-- (void)setLoader:(nullable id<MCLoaderInterface>)loader {
-    try {
-        _cppRefHandle.get()->setLoader(::djinni_generated::LoaderInterface::toCpp(loader));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

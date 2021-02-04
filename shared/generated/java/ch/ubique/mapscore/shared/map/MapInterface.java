@@ -6,9 +6,19 @@ package ch.ubique.mapscore.shared.map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class MapInterface {
+    public abstract void setCallbackHandler(MapCallbackInterface callbackInterface);
+
+    public abstract void setLoader(ch.ubique.mapscore.shared.map.loader.LoaderInterface loader);
+
+    public abstract ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface getGraphicsObjectFactory();
+
+    public abstract ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface getShaderFactory();
+
+    public abstract ch.ubique.mapscore.shared.map.scheduling.SchedulerInterface getScheduler();
+
     public abstract ch.ubique.mapscore.shared.graphics.RenderingContextInterface getRenderingContext();
 
-    public abstract void setCallbackHandler(MapCallbackInterface callbackInterface);
+    public abstract MapConfig getMapConfig();
 
     public abstract void setCamera(ch.ubique.mapscore.shared.graphics.CameraInterface camera);
 
@@ -19,8 +29,6 @@ public abstract class MapInterface {
     public abstract void setTouchHandler(ch.ubique.mapscore.shared.map.controls.TouchHandlerInterface touchHandler);
 
     public abstract ch.ubique.mapscore.shared.map.controls.TouchHandlerInterface getTouchHandler();
-
-    public abstract void setLoader(ch.ubique.mapscore.shared.map.loader.LoaderInterface loader);
 
     public abstract void addLayer(ch.ubique.mapscore.shared.map.layers.LayerInterface layer);
 
@@ -73,6 +81,46 @@ public abstract class MapInterface {
         }
 
         @Override
+        public void setCallbackHandler(MapCallbackInterface callbackInterface)
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            native_setCallbackHandler(this.nativeRef, callbackInterface);
+        }
+        private native void native_setCallbackHandler(long _nativeRef, MapCallbackInterface callbackInterface);
+
+        @Override
+        public void setLoader(ch.ubique.mapscore.shared.map.loader.LoaderInterface loader)
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            native_setLoader(this.nativeRef, loader);
+        }
+        private native void native_setLoader(long _nativeRef, ch.ubique.mapscore.shared.map.loader.LoaderInterface loader);
+
+        @Override
+        public ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface getGraphicsObjectFactory()
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            return native_getGraphicsObjectFactory(this.nativeRef);
+        }
+        private native ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface native_getGraphicsObjectFactory(long _nativeRef);
+
+        @Override
+        public ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface getShaderFactory()
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            return native_getShaderFactory(this.nativeRef);
+        }
+        private native ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface native_getShaderFactory(long _nativeRef);
+
+        @Override
+        public ch.ubique.mapscore.shared.map.scheduling.SchedulerInterface getScheduler()
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            return native_getScheduler(this.nativeRef);
+        }
+        private native ch.ubique.mapscore.shared.map.scheduling.SchedulerInterface native_getScheduler(long _nativeRef);
+
+        @Override
         public ch.ubique.mapscore.shared.graphics.RenderingContextInterface getRenderingContext()
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
@@ -81,12 +129,12 @@ public abstract class MapInterface {
         private native ch.ubique.mapscore.shared.graphics.RenderingContextInterface native_getRenderingContext(long _nativeRef);
 
         @Override
-        public void setCallbackHandler(MapCallbackInterface callbackInterface)
+        public MapConfig getMapConfig()
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
-            native_setCallbackHandler(this.nativeRef, callbackInterface);
+            return native_getMapConfig(this.nativeRef);
         }
-        private native void native_setCallbackHandler(long _nativeRef, MapCallbackInterface callbackInterface);
+        private native MapConfig native_getMapConfig(long _nativeRef);
 
         @Override
         public void setCamera(ch.ubique.mapscore.shared.graphics.CameraInterface camera)
@@ -127,14 +175,6 @@ public abstract class MapInterface {
             return native_getTouchHandler(this.nativeRef);
         }
         private native ch.ubique.mapscore.shared.map.controls.TouchHandlerInterface native_getTouchHandler(long _nativeRef);
-
-        @Override
-        public void setLoader(ch.ubique.mapscore.shared.map.loader.LoaderInterface loader)
-        {
-            assert !this.destroyed.get() : "trying to use a destroyed object";
-            native_setLoader(this.nativeRef, loader);
-        }
-        private native void native_setLoader(long _nativeRef, ch.ubique.mapscore.shared.map.loader.LoaderInterface loader);
 
         @Override
         public void addLayer(ch.ubique.mapscore.shared.map.layers.LayerInterface layer)

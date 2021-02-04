@@ -3,18 +3,11 @@
 
 #pragma once
 
-#include <cstdint>
-#include <memory>
-
-class CameraListenerInterface;
+#include <vector>
 
 class CameraInterface {
 public:
     virtual ~CameraInterface() {}
 
-    virtual int64_t getMvpMatrix() = 0;
-
-    virtual void addListener(const std::shared_ptr<CameraListenerInterface> & listener) = 0;
-
-    virtual void removeListener(const std::shared_ptr<CameraListenerInterface> & listener) = 0;
+    virtual std::vector<float> getMvpMatrix() = 0;
 };

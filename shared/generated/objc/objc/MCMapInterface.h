@@ -26,9 +26,19 @@
 + (nullable MCMapInterface *)createWithOpenGl:(nonnull MCMapConfig *)mapConfig
                                     scheduler:(nullable id<MCSchedulerInterface>)scheduler;
 
+- (void)setCallbackHandler:(nullable id<MCMapCallbackInterface>)callbackInterface;
+
+- (void)setLoader:(nullable id<MCLoaderInterface>)loader;
+
+- (nullable id<MCGraphicsObjectFactoryInterface>)getGraphicsObjectFactory;
+
+- (nullable id<MCShaderFactoryInterface>)getShaderFactory;
+
+- (nullable id<MCSchedulerInterface>)getScheduler;
+
 - (nullable id<MCRenderingContextInterface>)getRenderingContext;
 
-- (void)setCallbackHandler:(nullable id<MCMapCallbackInterface>)callbackInterface;
+- (nonnull MCMapConfig *)getMapConfig;
 
 - (void)setCamera:(nullable id<MCCameraInterface>)camera;
 
@@ -39,8 +49,6 @@
 - (void)setTouchHandler:(nullable id<MCTouchHandlerInterface>)touchHandler;
 
 - (nullable id<MCTouchHandlerInterface>)getTouchHandler;
-
-- (void)setLoader:(nullable id<MCLoaderInterface>)loader;
 
 - (void)addLayer:(nullable id<MCLayerInterface>)layer;
 

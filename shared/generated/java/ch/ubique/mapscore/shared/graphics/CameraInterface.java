@@ -3,14 +3,11 @@
 
 package ch.ubique.mapscore.shared.graphics;
 
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class CameraInterface {
-    public abstract long getMvpMatrix();
-
-    public abstract void addListener(CameraListenerInterface listener);
-
-    public abstract void removeListener(CameraListenerInterface listener);
+    public abstract ArrayList<Float> getMvpMatrix();
 
     private static final class CppProxy extends CameraInterface
     {
@@ -36,27 +33,11 @@ public abstract class CameraInterface {
         }
 
         @Override
-        public long getMvpMatrix()
+        public ArrayList<Float> getMvpMatrix()
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
             return native_getMvpMatrix(this.nativeRef);
         }
-        private native long native_getMvpMatrix(long _nativeRef);
-
-        @Override
-        public void addListener(CameraListenerInterface listener)
-        {
-            assert !this.destroyed.get() : "trying to use a destroyed object";
-            native_addListener(this.nativeRef, listener);
-        }
-        private native void native_addListener(long _nativeRef, CameraListenerInterface listener);
-
-        @Override
-        public void removeListener(CameraListenerInterface listener)
-        {
-            assert !this.destroyed.get() : "trying to use a destroyed object";
-            native_removeListener(this.nativeRef, listener);
-        }
-        private native void native_removeListener(long _nativeRef, CameraListenerInterface listener);
+        private native ArrayList<Float> native_getMvpMatrix(long _nativeRef);
     }
 }

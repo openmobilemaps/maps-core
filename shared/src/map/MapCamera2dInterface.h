@@ -8,16 +8,17 @@
 #include <memory>
 
 class MapCamera2dListenerInterface;
+class MapInterface;
 
 class MapCamera2dInterface {
 public:
     virtual ~MapCamera2dInterface() {}
 
-    static std::shared_ptr<MapCamera2dInterface> create(float screenDensityPpi);
+    static std::shared_ptr<MapCamera2dInterface> create(const std::shared_ptr<MapInterface> & mapInterface, float screenDensityPpi);
 
-    virtual void moveToCenterPosition(const ::Vec2D & position, double zoom, bool animated) = 0;
+    virtual void moveToCenterPositionZoom(const ::Vec2D & centerPosition, double zoom, bool animated) = 0;
 
-    virtual void moveToCenterPositon(const ::Vec2D & position, bool animated) = 0;
+    virtual void moveToCenterPosition(const ::Vec2D & centerPosition, bool animated) = 0;
 
     virtual ::Vec2D getCenterPosition() = 0;
 
@@ -37,5 +38,5 @@ public:
 
     virtual void removeListener(const std::shared_ptr<MapCamera2dListenerInterface> & listener) = 0;
 
-    virtual std::shared_ptr<::CameraInterface> asCameraIntercace() = 0;
+    virtual std::shared_ptr<::CameraInterface> asCameraInterface() = 0;
 };
