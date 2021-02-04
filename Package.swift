@@ -18,7 +18,7 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(name: "DjinniSupport", url: "https://bitbucket.org/ubique-innovation/djinni", .branch("master")),
+        .package(name: "DjinniSupport", url: "git@bitbucket.org:ubique-innovation/djinni.git", .branch("master")),
     ],
     targets: [
         .target(
@@ -39,7 +39,19 @@ let package = Package(
                       "generated/map"],
             publicHeadersPath: "generated/objc/objc",
             cxxSettings: [
-                .headerSearchPath("**")
+                .headerSearchPath("**"),
+                .headerSearchPath("src/graphics/"),
+                .headerSearchPath("src/graphics/common"),
+                .headerSearchPath("src/graphics/helpers"),
+                .headerSearchPath("src/graphics/objects"),
+                .headerSearchPath("src/graphics/shader"),
+                .headerSearchPath("src/map/"),
+                .headerSearchPath("src/map/controls"),
+                .headerSearchPath("src/map/layers"),
+                .headerSearchPath("src/map/layers/objects"),
+                .headerSearchPath("src/map/loader"),
+                .headerSearchPath("src/map/scheduling"),
+                .headerSearchPath("src/logger"),
             ]
         ),
         .testTarget(

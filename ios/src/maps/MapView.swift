@@ -13,6 +13,8 @@ public class MapView: MTKView {
     private var framesToRender: UInt = 5
     private let framesToRenderAfterInvalidate: UInt = 5
 
+    private let touchHandler: MapViewTouchHandler
+
     public init() {
         let renderingContext = RenderingContext()
         guard let mapInterface = MCMapInterface.create(GraphicsFactory(),
@@ -24,6 +26,8 @@ public class MapView: MTKView {
         }
         self.mapInterface = mapInterface
         self.renderingContext = renderingContext
+        mapInterface.addDefaultTouchHandler(Float(UIScreen.main.scale))
+        self.touchHandler = .init(touchHandler: mapInterface.getTouchHandler())
         super.init(frame: .zero, device: MetalContext.current.device)
         renderingContext.sceneView = self
         setup()
@@ -49,6 +53,9 @@ public class MapView: MTKView {
         mapInterface.setCallbackHandler(self)
 
         mapInterface.setLoader(loader)
+
+        touchHandler.mapView = self
+
     }
 }
 
@@ -109,5 +116,29 @@ extension CGSize {
     var vec2: MCVec2I {
         MCVec2I(x: Int32(width),
                 y: Int32(height))
+    }
+}
+
+
+public extension MapView {
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesBegan(touches, with: event)
+        touchHandler.touchesBegan(touches, with: event )
+    }
+
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesEnded(touches, with: event)
+        touchHandler.touchesEnded(touches, with: event )
+    }
+
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesCancelled(touches, with: event)
+        touchHandler.touchesCancelled(touches, with: event )
+    }
+
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesMoved(touches, with: event)
+        touchHandler.touchesMoved(touches, with: event )
+
     }
 }
