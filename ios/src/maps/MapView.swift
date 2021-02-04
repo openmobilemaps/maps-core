@@ -26,7 +26,7 @@ public class MapView: MTKView {
         }
         self.mapInterface = mapInterface
         self.renderingContext = renderingContext
-        mapInterface.addDefaultTouchHandler(Float(UIScreen.main.scale))
+        mapInterface.addDefaultTouchHandler(Float(UIScreen.pixelsPerInch))
         self.touchHandler = .init(touchHandler: mapInterface.getTouchHandler())
         super.init(frame: .zero, device: MetalContext.current.device)
         renderingContext.sceneView = self
@@ -56,6 +56,10 @@ public class MapView: MTKView {
 
         touchHandler.mapView = self
 
+        if let camera = MCMapCamera2dInterface.create(mapInterface, screenDensityPpi: Float(UIScreen.pixelsPerInch)) {
+            mapInterface.setCamera(camera.asCameraInterface())
+        }
+
     }
 }
 
@@ -77,12 +81,12 @@ extension MapView: MTKViewDelegate {
             return // don't execute metal calls in background
         }
 
-        guard framesToRender != 0 else {
+        /*guard framesToRender != 0 else {
             isPaused = true
             return
         }
 
-        framesToRender -= 1
+        framesToRender -= 1*/
 
         guard let renderPassDescriptor = view.currentRenderPassDescriptor,
               let commandBuffer = MetalContext.current.commandQueue.makeCommandBuffer(),

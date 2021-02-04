@@ -22,8 +22,10 @@ class Scheduler: MCSchedulerInterface {
         cleanUpFinishedOutstandingWorkItems()
         guard let task = task else { return }
         let config = task.getConfig()
-        let delay = TimeInterval(config.delay)
-        let workItem = DispatchWorkItem(block: task.run)
+        let delay = TimeInterval( config.delay / 1000 )
+        let workItem = DispatchWorkItem {
+            task.run()
+        }
         outstandingWorkItems[config.id] = .init(workItem: workItem)
 
         switch config.executionEnvironment {
