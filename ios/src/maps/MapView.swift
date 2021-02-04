@@ -60,6 +60,8 @@ public class MapView: MTKView {
             mapInterface.setCamera(camera.asCameraInterface())
         }
 
+        mapInterface.resume()
+
     }
 }
 

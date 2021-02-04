@@ -47,6 +47,8 @@ public:
 
     virtual bool onMove(const ::Vec2F &deltaScreen, bool confirmed, bool doubleClick);
 
+    virtual bool onDoubleClick(const ::Vec2F &posScreen);
+
 protected:
 
     std::set<std::shared_ptr<MapCamera2dListenerInterface>> listeners;

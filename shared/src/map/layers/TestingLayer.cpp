@@ -31,7 +31,7 @@ TestingLayer::TestingLayer(const std::shared_ptr<MapInterface> &mapInterface) : 
     shader2->setColor(1, 0, 0, 0.5);
 
     auto config = RenderPassConfig(0);
-    auto vector = {renderConfig[0]->getGraphicsObject(), rectangle->asGraphicsObject(), rectangle2->asGraphicsObject()};
+    auto vector = { renderConfig[0]->getGraphicsObject(), rectangle->asGraphicsObject(), rectangle2->asGraphicsObject()};
     renderPass = std::make_shared<RenderPass>(config, vector);
 }
 

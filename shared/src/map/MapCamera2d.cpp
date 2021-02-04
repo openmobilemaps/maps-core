@@ -8,7 +8,7 @@ MapCamera2d::MapCamera2d(const std::shared_ptr<MapInterface> &mapInterface, floa
         mapInterface(mapInterface),
         mapCoordinateSystem(mapInterface->getMapConfig().mapCoordinateSystem),
         screenDensityPpi(screenDensityPpi),
-        screenPixelAsRealMeterFactor(1.0 / (254 * screenDensityPpi)) {
+        screenPixelAsRealMeterFactor(1.0 / (2.54 * screenDensityPpi)) {
     auto mapConfig = mapInterface->getMapConfig();
     mapCoordinateSystem = mapConfig.mapCoordinateSystem;
     double centerX = mapCoordinateSystem.boundsLeft + 0.5 * (mapCoordinateSystem.boundsRight - mapCoordinateSystem.boundsLeft);
@@ -82,7 +82,7 @@ std::vector<float> MapCamera2d::getMvpMatrix() {
     std::vector<float> newMvpMatrix(16, 0);
 
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
-    double zoomFactor = screenPixelAsRealMeterFactor * zoom * 20;
+    double zoomFactor =  screenPixelAsRealMeterFactor * zoom;
     Vec2D coordBottomLeft = Vec2D(centerPosition.x - ((sizeViewport.x) * 0.5 * zoomFactor) + paddingLeft,
                                centerPosition.y - ((sizeViewport.y) * 0.5 * zoomFactor) + paddingTop);
 
@@ -91,7 +91,6 @@ std::vector<float> MapCamera2d::getMvpMatrix() {
 
     Matrix::scaleM(newMvpMatrix, 0, 1 / zoomFactor, 1 / zoomFactor, 1);
     Matrix::translateM(newMvpMatrix, 0, -coordBottomLeft.x, -coordBottomLeft.y, 0);
-    //Matrix::translateM(newMvpMatrix, 0, -2485071.58, -1299941.79, 0);
 
     Matrix::translateM(newMvpMatrix, 0, centerPosition.x, centerPosition.y, 0);
     Matrix::rotateM(newMvpMatrix, 0.0, angle, 0.0, 0.0, 1.0);
@@ -101,5 +100,12 @@ std::vector<float> MapCamera2d::getMvpMatrix() {
 }
 
 bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleClick) {
-    return false;
+    centerPosition.x -= deltaScreen.x * zoom * screenPixelAsRealMeterFactor;
+    centerPosition.y += deltaScreen.y * zoom * screenPixelAsRealMeterFactor;
+    return true;
+}
+
+
+bool MapCamera2d::onDoubleClick(const ::Vec2F &posScreen) {
+    zoom = std::max(zoom / 2, mapInterface->getMapConfig().zoomMax);
 }
