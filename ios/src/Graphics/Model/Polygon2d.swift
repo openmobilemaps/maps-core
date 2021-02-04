@@ -12,7 +12,7 @@ class Polygon2d: BaseGraphicsObject {
     private var stencilStatePrepare: MTLDepthStencilState?
     private var stencilState: MTLDepthStencilState?
 
-    private let allIsConvex: Bool = true
+    private var allIsConvex: Bool = true
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader
@@ -133,7 +133,7 @@ class Polygon2d: BaseGraphicsObject {
 }
 
 extension Polygon2d: MCPolygon2dInterface {
-    func setPolygonPositions(_ positions: [MCVec2D], holes: [[MCVec2D]], isConvex _: Bool) {
+    func setPolygonPositions(_ positions: [MCVec2D], holes: [[MCVec2D]], isConvex: Bool) {
         stencilStatePrepare = nil
         stencilState = nil
 
@@ -143,6 +143,7 @@ extension Polygon2d: MCPolygon2dInterface {
             indicesCount = 0
             return
         }
+        allIsConvex = isConvex
 
         var vertices: [Vertex] = []
         var indices: [UInt16] = []
