@@ -26,7 +26,7 @@ public class MapView: MTKView {
         }
         self.mapInterface = mapInterface
         self.renderingContext = renderingContext
-        mapInterface.addDefaultTouchHandler(Float(UIScreen.main.scale))
+        mapInterface.addDefaultTouchHandler(Float(UIScreen.main.nativeScale))
         self.touchHandler = .init(touchHandler: mapInterface.getTouchHandler())
         super.init(frame: .zero, device: MetalContext.current.device)
         renderingContext.sceneView = self
@@ -55,6 +55,10 @@ public class MapView: MTKView {
         mapInterface.setLoader(loader)
 
         touchHandler.mapView = self
+
+        if let camera = MCMapCamera2dInterface.create(Float(UIScreen.main.nativeScale)) {
+            mapInterface.setCamera(camera.asCameraIntercace())
+        }
 
     }
 }
