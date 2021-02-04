@@ -8,8 +8,7 @@ MapCamera2d::MapCamera2d(const std::shared_ptr<MapInterface> &mapInterface, floa
         mapInterface(mapInterface),
         mapCoordinateSystem(mapInterface->getMapConfig().mapCoordinateSystem),
         screenDensityPpi(screenDensityPpi),
-        screenPixelAsRealMeterFactor(1.0 / (254 * screenDensityPpi)),
-        currentMvpMatrix(16, 0) {
+        screenPixelAsRealMeterFactor(1.0 / (254 * screenDensityPpi)) {
     auto mapConfig = mapInterface->getMapConfig();
     mapCoordinateSystem = mapConfig.mapCoordinateSystem;
     double centerX = mapCoordinateSystem.boundsLeft + 0.5 * (mapCoordinateSystem.boundsRight - mapCoordinateSystem.boundsLeft);
@@ -83,22 +82,22 @@ std::vector<float> MapCamera2d::getMvpMatrix() {
     std::vector<float> newMvpMatrix(16, 0);
 
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
-    double zoomFactor = screenPixelAsRealMeterFactor * zoom;
-    Vec2D coordTopLeft = Vec2D(centerPosition.x - ((sizeViewport.x - paddingRight) * 0.5 * zoomFactor) + paddingLeft,
-                               centerPosition.y - ((sizeViewport.y - paddingBottom) * 0.5 * zoomFactor) + paddingTop);
+    double zoomFactor = screenPixelAsRealMeterFactor * zoom * 20;
+    Vec2D coordBottomLeft = Vec2D(centerPosition.x - ((sizeViewport.x) * 0.5 * zoomFactor) + paddingLeft,
+                               centerPosition.y - ((sizeViewport.y) * 0.5 * zoomFactor) + paddingTop);
 
     Matrix::setIdentityM(newMvpMatrix, 0);
-    Matrix::orthoM(newMvpMatrix, 0, 0, sizeViewport.x, sizeViewport.y, 0, -1, 1);
+    Matrix::orthoM(newMvpMatrix, 0, 0, sizeViewport.x, 0, sizeViewport.y, -1, 1);
 
-    Matrix::scaleM(newMvpMatrix, 0, zoomFactor, zoomFactor, 1);
-    Matrix::translateM(newMvpMatrix, 0, -coordTopLeft.x, -coordTopLeft.y, 0);
+    Matrix::scaleM(newMvpMatrix, 0, 1 / zoomFactor, 1 / zoomFactor, 1);
+    Matrix::translateM(newMvpMatrix, 0, -coordBottomLeft.x, -coordBottomLeft.y, 0);
+    //Matrix::translateM(newMvpMatrix, 0, -2485071.58, -1299941.79, 0);
 
-    Matrix::translateM(newMvpMatrix, 0, -centerPosition.x, -centerPosition.y, 0);
-    Matrix::rotateM(newMvpMatrix, 0.0, angle, 0.0, 0.0, 1.0);
     Matrix::translateM(newMvpMatrix, 0, centerPosition.x, centerPosition.y, 0);
+    Matrix::rotateM(newMvpMatrix, 0.0, angle, 0.0, 0.0, 1.0);
+    Matrix::translateM(newMvpMatrix, 0, -centerPosition.x, -centerPosition.y, 0);
 
-    currentMvpMatrix = newMvpMatrix;
-    return currentMvpMatrix;
+    return newMvpMatrix;
 }
 
 bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleClick) {

@@ -37,7 +37,7 @@ void Rectangle2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
             (float) frame.x, (float) frame.y, frameZ,
             (float) frame.x, (float) (frame.y + frame.height), frameZ,
             (float) (frame.x + frame.width), (float) (frame.y + frame.height), frameZ,
-                    (float) (frame.x + frame.width), (float) frame.y, frameZ,
+            (float) (frame.x + frame.width), (float) frame.y, frameZ,
     };
     indexBuffer = {
             0, 1, 2, 0, 2, 3,

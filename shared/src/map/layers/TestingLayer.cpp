@@ -4,30 +4,34 @@
 
 TestingLayer::TestingLayer(const std::shared_ptr<MapInterface> &mapInterface) : mapInterface(mapInterface) {
     auto shader = mapInterface->getShaderFactory()->createColorShader();
+    auto shader2 = mapInterface->getShaderFactory()->createColorShader();
+    rectangle = mapInterface->getGraphicsObjectFactory()->createRectangle(shader2->asShaderProgramInterface());
+    rectangle2 = mapInterface->getGraphicsObjectFactory()->createRectangle(shader->asShaderProgramInterface());
     object = std::make_shared<Polygon2dLayerObject>(
             mapInterface->getGraphicsObjectFactory()->createPolygon(shader->asShaderProgramInterface()), shader);
     auto renderConfig = object->getRenderConfig();
-
-    object->setPositions({Vec2D(2483750.172633792, 1110749.9292120978),
-                          Vec2D(2484250.1398714944, 1121749.9210555588),
-                          Vec2D(2493750.1353852837, 1124749.932216558),
-                          Vec2D(2497750.1114729308, 1134249.9298414628),
-                          Vec2D(2490250.0966190984, 1140749.9155252017),
-                          Vec2D(2496750.055996045, 1161249.912233307),
-                          Vec2D(2519750.007658271, 1181249.9364165873),
-                          Vec2D(2521249.96731385, 1200749.9402584787),
-                          Vec2D(2527249.951458698, 1207249.9519499454),
-                          Vec2D(2540249.945291664, 1210249.9739189378),
-                          Vec2D(2539249.9310220755, 1216749.9768762388),
-                          Vec2D(2559249.911010254, 1233750.0250706144),
-                          Vec2D(2567249.906174939, 1243250.0498991741),
-                          Vec2D(2556249.887021004, 1242750.0333215091),
-                          Vec2D(2566749.861025399, 1264250.0877615795),
-                          Vec2D(2584249.9217585553, 1262750.1053500893)});
+    rectangle->setFrame(RectD(2485071.58, 1075346.31, 343444.24, 224595.48), RectD(0, 0, 1, 1));
+    rectangle2->setFrame(RectD(2641681.14, 1158846.230, 1000, 1000), RectD(0, 0, 1, 1));
+    object->setPositions({Vec2D(2481483.3, 1107166.7),
+                          Vec2D(2569883.3, 1263166.7),
+                          Vec2D(2685583.3, 1299566.7),
+                          Vec2D(2825333.3, 1209216.7),
+                          Vec2D(2830533.3, 1159166.7),
+                          Vec2D(2806483.3, 1126666.7),
+                          Vec2D(2742133.3, 1149416.7),
+                          Vec2D(2718733.3, 1076616.7),
+                          Vec2D(2671283.3, 1143566.7),
+                          Vec2D(2629033.3, 1084416.7),
+                          Vec2D(2571833.3, 1081166.7),
+                          Vec2D(2534133.3, 1141616.7),
+                          Vec2D(2514633.3, 1123416.7),
+                          Vec2D(2499033.3, 1109116.7),
+                          Vec2D(2491333.3, 1109833.3)});
     shader->setColor(0, 1, 0, 0.5);
+    shader2->setColor(1, 0, 0, 0.5);
 
     auto config = RenderPassConfig(0);
-    auto vector = {renderConfig[0]->getGraphicsObject()};
+    auto vector = {renderConfig[0]->getGraphicsObject(), rectangle->asGraphicsObject(), rectangle2->asGraphicsObject()};
     renderPass = std::make_shared<RenderPass>(config, vector);
 }
 
@@ -49,6 +53,8 @@ void TestingLayer::resume() {
             TaskConfig("PolygonSchweiz_Setup", 0, TaskPriority::HIGH, ExecutionEnvironment::GRAPHICS),
             [=] {
                 object->getPolygonObject()->setup(renderingContext);
+                rectangle->asGraphicsObject()->setup(renderingContext);
+                rectangle2->asGraphicsObject()->setup(renderingContext);
             }));
 }
 

@@ -51,20 +51,18 @@ protected:
 
     std::set<std::shared_ptr<MapCamera2dListenerInterface>> listeners;
 
-    std::vector<float> currentMvpMatrix;
-
     std::shared_ptr<MapInterface> mapInterface;
     MapCoordinateSystem mapCoordinateSystem;
     float screenDensityPpi;
     double screenPixelAsRealMeterFactor;
 
     Vec2D centerPosition = Vec2D(0.0, 0.0);
-    double zoom;
-    double angle;
+    double zoom = 0;
+    double angle = 0;
 
-    double paddingLeft;
-    double paddingTop;
-    double paddingRight;
-    double paddingBottom;
+    double paddingLeft = 0;
+    double paddingTop = 0;
+    double paddingRight = 0;
+    double paddingBottom = 0;
 
 };
