@@ -3,7 +3,7 @@ import MapCoreSharedModule
 
 class MapViewTouchHandler: NSObject {
 
-    private weak var touchHandler: MCTouchHandlerInterface!
+    private let  touchHandler: MCTouchHandlerInterface!
 
     weak var mapView: UIView!
 
@@ -12,8 +12,8 @@ class MapViewTouchHandler: NSObject {
     private var originalTouchLocations: [UITouch: CGPoint] = [:]
 
     init(touchHandler: MCTouchHandlerInterface?) {
-        super.init()
         self.touchHandler = touchHandler
+        super.init()
     }
 
     func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
