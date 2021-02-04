@@ -55,7 +55,7 @@ let package = Package(
             ]
         ),
         .testTarget(
-            name: "Tests",
+            name: "MapCoreTests",
             dependencies: ["MapCore"],
             path: "ios/Tests/Tests"
         ),
