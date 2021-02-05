@@ -113,5 +113,11 @@ bool MapCamera2d::onDoubleClick(const ::Vec2F &posScreen) {
 bool MapCamera2d::onTwoFingerMove(const std::vector< ::Vec2F> &posScreenOld, const std::vector< ::Vec2F> &posScreenNew) {
     if (posScreenOld.size() >= 2) {
         zoom /= Vec2FHelper::distance(posScreenNew[0], posScreenNew[1]) / Vec2FHelper::distance(posScreenOld[0], posScreenOld[1]);
+
+        auto midpoint = Vec2FHelper::midpoint(posScreenNew[0], posScreenNew[1]);
+        auto oldMidpoint = Vec2FHelper::midpoint(posScreenOld[0], posScreenOld[1]);
+
+        centerPosition.x -= (midpoint.x - oldMidpoint.x) * zoom * screenPixelAsRealMeterFactor;
+        centerPosition.y += (midpoint.y - oldMidpoint.y) * zoom * screenPixelAsRealMeterFactor;
     }
 }
