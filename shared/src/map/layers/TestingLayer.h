@@ -28,7 +28,7 @@ public:
 
 private:
     std::shared_ptr<MapInterface> mapInterface;
-    std::shared_ptr<Polygon2dLayerObject> object;
+    std::shared_ptr<Polygon2dLayerObject> polygonObject;
     std::shared_ptr<Rectangle2dInterface> rectangle;
     std::shared_ptr<Rectangle2dInterface> rectangle2;
     std::shared_ptr<RenderPass> renderPass;
