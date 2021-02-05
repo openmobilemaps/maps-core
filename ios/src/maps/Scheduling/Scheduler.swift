@@ -22,6 +22,11 @@ class Scheduler: MCSchedulerInterface {
         cleanUpFinishedOutstandingWorkItems()
         guard let task = task else { return }
         let config = task.getConfig()
+
+        if outstandingWorkItems[config.id] != nil {
+            self.removeTask(config.id)
+        }
+
         let delay = TimeInterval( config.delay / 1000 )
         let workItem = DispatchWorkItem {
             task.run()
