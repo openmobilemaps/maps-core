@@ -8,7 +8,7 @@
 #include "CoordinateConversionHelperInterface.h"
 #include "MapCoordinateSystem.h"
 #include <unordered_map>
-#include "HashedTouple.h"
+#include "HashedTuple.h"
 #include "string"
 
 class CoordinateConversionHelper : public CoordinateConversionHelperInterface {

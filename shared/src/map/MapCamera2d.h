@@ -5,6 +5,7 @@
 #include "MapCamera2dInterface.h"
 #include "MapCoordinateSystem.h"
 #include "MapCamera2dListenerInterface.h"
+#include "CoordinateConversionHelperInterface.h"
 #include <set>
 
 class MapCamera2d
@@ -56,6 +57,7 @@ protected:
     std::set<std::shared_ptr<MapCamera2dListenerInterface>> listeners;
 
     std::shared_ptr<MapInterface> mapInterface;
+    std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
     MapCoordinateSystem mapCoordinateSystem;
     float screenDensityPpi;
     double screenPixelAsRealMeterFactor;

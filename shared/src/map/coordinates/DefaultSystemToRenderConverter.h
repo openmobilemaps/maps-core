@@ -8,7 +8,6 @@
 #include "MapCoordinateSystem.h"
 #include "Coord.h"
 #include "CoordinateConversionHelper.h"
-#include <cmath>
 
 class DefaultSystemToRenderConverter : public CoordinateConverterInterface {
 public:
@@ -17,13 +16,13 @@ public:
         boundsTop = mapCoordinateSystem.boundsTop;
         boundsRight = mapCoordinateSystem.boundsRight;
         boundsBottom = mapCoordinateSystem.boundsBottom;
-        halfWidth = 0.5 * std::abs(boundsRight - boundsLeft);
-        halfHeight = 0.5 * std::abs(boundsBottom - boundsTop);
+        halfWidth = 0.5 * (boundsRight - boundsLeft);
+        halfHeight = 0.5 * (boundsBottom - boundsTop);
     }
 
     Coord convert(const Coord &coordinate) {
-        double x = (boundsRight < boundsLeft) ? boundsLeft - coordinate.x :  x;
-        double y = (boundsBottom < boundsTop) ? boundsTop - coordinate.y : y;
+        double x = (boundsRight < boundsLeft) ? -coordinate.x + boundsRight : (coordinate.x - boundsLeft);
+        double y = (boundsBottom < boundsTop) ? -coordinate.y + boundsBottom : (coordinate.y - boundsTop);
         return Coord(CoordinateConversionHelper::RENDER_SYSTEM_ID, x - halfWidth, y - halfHeight, coordinate.z);
     }
 

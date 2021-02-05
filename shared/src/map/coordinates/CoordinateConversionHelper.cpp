@@ -30,7 +30,7 @@ Coord CoordinateConversionHelper::convert(const std::string &to, const Coord &co
         }
     }
 
-    throw std::invalid_argument("Could not find an eligible converter");
+    throw std::invalid_argument("Could not find an eligible converter from: \'" + coordinate.systemIdentifier + "\' to \'" + to + "\'");
 }
 
 Coord CoordinateConversionHelper::convertToRenderSystem(const Coord &coordinate) {
