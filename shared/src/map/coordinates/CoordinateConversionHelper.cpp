@@ -7,20 +7,32 @@
 
 std::string CoordinateConversionHelper::RENDER_SYSTEM_ID = "render_system";
 
-CoordinateConversionHelper::CoordinateConversionHelper(MapCoordinateSystem mapCoordinateSystem) {
+CoordinateConversionHelper::CoordinateConversionHelper(MapCoordinateSystem mapCoordinateSystem): mapCoordinateSystemIdentier(mapCoordinateSystem.identifier) {
     registerConverter(mapCoordinateSystem.identifier, RENDER_SYSTEM_ID,
                       std::make_shared<DefaultSystemToRenderConverter>(mapCoordinateSystem));
 }
 
 void CoordinateConversionHelper::registerConverter(const std::string &from, const std::string &to,
                                                    const std::shared_ptr<CoordinateConverterInterface> &converter) {
-    //fromToConverterMap.insert(std::make_tuple(from, to), converter);
+    fromToConverterMap[{from, to}] = converter;
 }
 
 Coord CoordinateConversionHelper::convert(const std::string &to, const Coord &coordinate) {
-    return Coord(to, 0, 0, 0);
+    // first try if we can directly convert
+    if ( auto converter = fromToConverterMap[{coordinate.systemIdentifier, to}]) {
+        return converter->convert(coordinate);
+    }
+
+    // if we can't convert directly we try if we can first convert to mapCoordinateSystemIdentier and from there to the wished system
+    if ( auto converterMapCoordinateSystem = fromToConverterMap[{coordinate.systemIdentifier, mapCoordinateSystemIdentier}]) {
+        if ( auto converterTo = fromToConverterMap[{mapCoordinateSystemIdentier, to}]) {
+            return converterTo->convert(converterMapCoordinateSystem->convert(coordinate));
+        }
+    }
+
+    throw std::invalid_argument("Could not find an eligible converter");
 }
 
 Coord CoordinateConversionHelper::convertToRenderSystem(const Coord &coordinate) {
-    return Coord(RENDER_SYSTEM_ID, 0, 0, 0);
+    return convert(RENDER_SYSTEM_ID, coordinate);
 }

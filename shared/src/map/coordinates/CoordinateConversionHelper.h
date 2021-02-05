@@ -7,7 +7,8 @@
 #include "Coord.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "MapCoordinateSystem.h"
-#include "map"
+#include <unordered_map>
+#include "HashedTouple.h"
 #include "string"
 
 class CoordinateConversionHelper : public CoordinateConversionHelperInterface {
@@ -23,6 +24,8 @@ public:
     Coord convertToRenderSystem(const Coord & coordinate);
 
 private:
-    std::map<std::tuple<std::string, std::string>, std::shared_ptr<CoordinateConverterInterface>> fromToConverterMap;
+    std::unordered_map<std::tuple<std::string, std::string>, std::shared_ptr<CoordinateConverterInterface>> fromToConverterMap;
+
+    std::string mapCoordinateSystemIdentier;
 
 };
