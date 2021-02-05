@@ -3,6 +3,7 @@
 #include "Vec2D.h"
 #include "MapInterface.h"
 #include "MapConfig.h"
+#include "Vec2FHelper.h"
 
 MapCamera2d::MapCamera2d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi) :
         mapInterface(mapInterface),
@@ -105,7 +106,12 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     return true;
 }
 
-
 bool MapCamera2d::onDoubleClick(const ::Vec2F &posScreen) {
     zoom = std::max(zoom / 2, mapInterface->getMapConfig().zoomMax);
+}
+
+bool MapCamera2d::onTwoFingerMove(const std::vector< ::Vec2F> &posScreenOld, const std::vector< ::Vec2F> &posScreenNew) {
+    if (posScreenOld.size() >= 2) {
+        zoom /= Vec2FHelper::distance(posScreenNew[0], posScreenNew[1]) / Vec2FHelper::distance(posScreenOld[0], posScreenOld[1]);
+    }
 }

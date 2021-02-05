@@ -69,7 +69,8 @@ void DefaultTouchHandler::onTouchEvent(const TouchEvent &touchEvent) {
                 handleTwoFingerDown();
                 break;
             case TouchAction::MOVE:
-                oldPointer = { touchEvent.pointers[0], touchEvent.pointers[1]};
+                oldPointer = pointer;
+                pointer = { touchEvent.pointers[0], touchEvent.pointers[1]};
 
                 if (std::get<0>(oldPointer).x != 0 ||
                     std::get<0>(oldPointer).y != 0 ||

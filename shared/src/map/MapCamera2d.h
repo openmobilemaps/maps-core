@@ -49,6 +49,8 @@ public:
 
     virtual bool onDoubleClick(const ::Vec2F &posScreen);
 
+    virtual bool onTwoFingerMove(const std::vector< ::Vec2F> &posScreenOld, const std::vector< ::Vec2F> &posScreenNew);
+
 protected:
 
     std::set<std::shared_ptr<MapCamera2dListenerInterface>> listeners;
