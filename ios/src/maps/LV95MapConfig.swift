@@ -9,7 +9,7 @@ extension MCMapConfig {
                                                boundsRight: 2828515.82,
                                                boundsBottom: 1075346.31,
                                                unitToMeterFactor: 1),
-                    zoomMin: 3_000_000,
+                    zoomMin: 40_000_000,
                     zoomMax: 300)
     }
 }

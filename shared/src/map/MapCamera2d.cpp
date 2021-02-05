@@ -11,7 +11,7 @@ MapCamera2d::MapCamera2d(const std::shared_ptr<MapInterface> &mapInterface, floa
         conversionHelper(mapInterface->getCoordinateConverterHelper()),
         mapCoordinateSystem(mapInterface->getMapConfig().mapCoordinateSystem),
         screenDensityPpi(screenDensityPpi),
-        screenPixelAsRealMeterFactor(1.0 / (2.54 * screenDensityPpi)) {
+        screenPixelAsRealMeterFactor(1.0 / (254 * screenDensityPpi)) {
     auto mapConfig = mapInterface->getMapConfig();
     mapCoordinateSystem = mapConfig.mapCoordinateSystem;
     double centerX = mapCoordinateSystem.boundsLeft + 0.5 * (mapCoordinateSystem.boundsRight - mapCoordinateSystem.boundsLeft);
@@ -86,22 +86,33 @@ std::vector<float> MapCamera2d::getMvpMatrix() {
 
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
     double zoomFactor = screenPixelAsRealMeterFactor * zoom;
-    Coord mapCoordTopLeft = Coord(mapCoordinateSystem.identifier,
+    Coord mapCoordBottomLeft = Coord(mapCoordinateSystem.identifier,
                                   centerPosition.x - ((sizeViewport.x) * 0.5 * zoomFactor) + paddingLeft,
                                   centerPosition.y - ((sizeViewport.y) * 0.5 * zoomFactor) + paddingTop,
                                   0);
-    Coord renderCoordTopLeft = conversionHelper->convertToRenderSystem(mapCoordTopLeft);
+    Coord renderCoordTopLeft = conversionHelper->convertToRenderSystem(mapCoordBottomLeft);
     Coord renderCoordCenter = conversionHelper->convertToRenderSystem(
-            Coord(mapCoordinateSystem.identifier, centerPosition.x, centerPosition.y, 0));
+            Coord(mapCoordinateSystem.identifier,
+                  centerPosition.x,
+                  centerPosition.y,
+                  0));
 
     Matrix::setIdentityM(newMvpMatrix, 0);
-    Matrix::orthoM(newMvpMatrix, 0, 0, sizeViewport.x, 0, sizeViewport.y, -1, 1);
 
-    Matrix::scaleM(newMvpMatrix, 0, 1 / zoomFactor, 1 / zoomFactor, 1);
-    Matrix::translateM(newMvpMatrix, 0, -renderCoordTopLeft.x, -renderCoordTopLeft.y, 0);
+
+    Matrix::orthoM(newMvpMatrix, 0,
+                   renderCoordCenter.x - 0.5 * sizeViewport.x,
+                   renderCoordCenter.x + 0.5 * sizeViewport.x,
+                   renderCoordCenter.y + 0.5 * sizeViewport.y,
+                   renderCoordCenter.y - 0.5 * sizeViewport.y, -1, 1);
+
 
     Matrix::translateM(newMvpMatrix, 0, renderCoordCenter.x, renderCoordCenter.y, 0);
+
+    Matrix::scaleM(newMvpMatrix, 0, 1 / zoomFactor, 1 / zoomFactor, 1);
+
     Matrix::rotateM(newMvpMatrix, 0.0, angle, 0.0, 0.0, 1.0);
+
     Matrix::translateM(newMvpMatrix, 0, -renderCoordCenter.x, -renderCoordCenter.y, 0);
 
     return newMvpMatrix;

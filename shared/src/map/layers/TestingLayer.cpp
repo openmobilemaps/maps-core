@@ -13,8 +13,8 @@ TestingLayer::TestingLayer(const std::shared_ptr<MapInterface> &mapInterface) : 
                                                            mapInterface->getGraphicsObjectFactory()->createPolygon(
                                                                    shader->asShaderProgramInterface()), shader);
     auto renderConfig = polygonObject->getRenderConfig();
-    rectangle->setFrame(RectD(2485071.58, 1075346.31, 343444.24, 224595.48), RectD(0, 0, 1, 1));
-    rectangle2->setFrame(RectD(2641681.14, 1158846.230, 1000, 1000), RectD(0, 0, 1, 1));
+    rectangle->setFrame(RectD(-1000, -1000000, 2000, 2000000), RectD(0, 0, 1, 1));
+    rectangle2->setFrame(RectD(-1000000, -1000, 2000000, 2000), RectD(0, 0, 1, 1));
     std::string mapCoordSystemId = mapInterface->getMapConfig().mapCoordinateSystem.identifier;
     polygonObject->setPositions({Coord(mapCoordSystemId, 2481483.3, 1107166.7, 0),
                                  Coord(mapCoordSystemId, 2569883.3, 1263166.7, 0),
