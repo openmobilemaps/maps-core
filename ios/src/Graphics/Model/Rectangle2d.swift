@@ -1,6 +1,7 @@
 import Foundation
 import MapCoreSharedModule
 import Metal
+import UIKit
 
 class Rectangle2d: BaseGraphicsObject {
     private var verticesBuffer: MTLBuffer?
@@ -17,6 +18,9 @@ class Rectangle2d: BaseGraphicsObject {
         self.shader = shader
         super.init(device: metalContext.device,
                    sampler: metalContext.samplerLibrary.value(.magLinear))
+
+        let image = UIImage(named:"ubique")
+        loadTexture(try! TextureHolder(image!.cgImage!))
     }
 
     override func render(encoder: MTLRenderCommandEncoder,
