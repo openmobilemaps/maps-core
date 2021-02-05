@@ -6,14 +6,14 @@ package ch.ubique.mapscore.shared.map;
 public final class MapConfig implements java.io.Serializable {
 
 
-    protected MapCoordinateSystem mapCoordinateSystem;
+    protected ch.ubique.mapscore.shared.map.coordinates.MapCoordinateSystem mapCoordinateSystem;
 
     protected double zoomMin;
 
     protected double zoomMax;
 
     public MapConfig(
-            MapCoordinateSystem mapCoordinateSystem,
+            ch.ubique.mapscore.shared.map.coordinates.MapCoordinateSystem mapCoordinateSystem,
             double zoomMin,
             double zoomMax) {
         this.mapCoordinateSystem = mapCoordinateSystem;
@@ -21,7 +21,7 @@ public final class MapConfig implements java.io.Serializable {
         this.zoomMax = zoomMax;
     }
 
-    public MapCoordinateSystem getMapCoordinateSystem() {
+    public ch.ubique.mapscore.shared.map.coordinates.MapCoordinateSystem getMapCoordinateSystem() {
         return mapCoordinateSystem;
     }
 
@@ -33,7 +33,7 @@ public final class MapConfig implements java.io.Serializable {
         return zoomMax;
     }
 
-    public void setMapCoordinateSystem(MapCoordinateSystem mapCoordinateSystem) {
+    public void setMapCoordinateSystem(ch.ubique.mapscore.shared.map.coordinates.MapCoordinateSystem mapCoordinateSystem) {
         this.mapCoordinateSystem = mapCoordinateSystem;
     }
 

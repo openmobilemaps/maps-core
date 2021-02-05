@@ -20,6 +20,8 @@ public abstract class MapInterface {
 
     public abstract MapConfig getMapConfig();
 
+    public abstract ch.ubique.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface getCoordinateConverterHelper();
+
     public abstract void setCamera(ch.ubique.mapscore.shared.graphics.CameraInterface camera);
 
     public abstract ch.ubique.mapscore.shared.graphics.CameraInterface getCamera();
@@ -135,6 +137,14 @@ public abstract class MapInterface {
             return native_getMapConfig(this.nativeRef);
         }
         private native MapConfig native_getMapConfig(long _nativeRef);
+
+        @Override
+        public ch.ubique.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface getCoordinateConverterHelper()
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            return native_getCoordinateConverterHelper(this.nativeRef);
+        }
+        private native ch.ubique.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface native_getCoordinateConverterHelper(long _nativeRef);
 
         @Override
         public void setCamera(ch.ubique.mapscore.shared.graphics.CameraInterface camera)

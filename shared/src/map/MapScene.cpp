@@ -4,11 +4,13 @@
 #include "DefaultTouchHandler.h"
 #include "TouchInterface.h"
 #include <algorithm>
+#include "CoordinateConversionHelper.h"
 
 MapScene::MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig & mapConfig, const std::shared_ptr<::SchedulerInterface> & scheduler):
 scene(scene),
 mapConfig(mapConfig),
-scheduler(scheduler){
+scheduler(scheduler),
+conversionHelper(std::make_shared<CoordinateConversionHelper>(mapConfig.mapCoordinateSystem)){
 }
 
 std::shared_ptr<::GraphicsObjectFactoryInterface> MapScene::getGraphicsObjectFactory() {
@@ -30,6 +32,11 @@ std::shared_ptr<::RenderingContextInterface> MapScene::getRenderingContext() {
 MapConfig MapScene::getMapConfig() {
     return mapConfig;
 }
+
+std::shared_ptr<::CoordinateConversionHelperInterface> MapScene::getCoordinateConverterHelper() {
+    return conversionHelper;
+}
+
 
 void MapScene::setCallbackHandler(const std::shared_ptr<MapCallbackInterface> & callbackInterface) {
     scene->setCallbackHandler(shared_from_this());

@@ -4,6 +4,7 @@
 #include "NativeMapInterface.h"  // my header
 #include "Marshal.hpp"
 #include "NativeCameraInterface.h"
+#include "NativeCoordinateConversionHelperInterface.h"
 #include "NativeGraphicsObjectFactoryInterface.h"
 #include "NativeLayerInterface.h"
 #include "NativeLoaderInterface.h"
@@ -117,6 +118,16 @@ CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024
         const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
         auto r = ref->getMapConfig();
         return ::djinni::release(::djinni_generated::NativeMapConfig::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT ::djinni_generated::NativeCoordinateConversionHelperInterface::JniType JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1getCoordinateConverterHelper(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
+        auto r = ref->getCoordinateConverterHelper();
+        return ::djinni::release(::djinni_generated::NativeCoordinateConversionHelperInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

@@ -7,11 +7,11 @@
 #include <utility>
 
 struct MapConfig final {
-    MapCoordinateSystem mapCoordinateSystem;
+    ::MapCoordinateSystem mapCoordinateSystem;
     double zoomMin;
     double zoomMax;
 
-    MapConfig(MapCoordinateSystem mapCoordinateSystem_,
+    MapConfig(::MapCoordinateSystem mapCoordinateSystem_,
               double zoomMin_,
               double zoomMax_)
     : mapCoordinateSystem(std::move(mapCoordinateSystem_))

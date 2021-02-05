@@ -25,8 +25,8 @@ private:
     friend ::djinni::JniClass<NativeMapConfig>;
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/map/MapConfig") };
-    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Lch/ubique/mapscore/shared/map/MapCoordinateSystem;DD)V") };
-    const jfieldID field_mapCoordinateSystem { ::djinni::jniGetFieldID(clazz.get(), "mapCoordinateSystem", "Lch/ubique/mapscore/shared/map/MapCoordinateSystem;") };
+    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Lch/ubique/mapscore/shared/map/coordinates/MapCoordinateSystem;DD)V") };
+    const jfieldID field_mapCoordinateSystem { ::djinni::jniGetFieldID(clazz.get(), "mapCoordinateSystem", "Lch/ubique/mapscore/shared/map/coordinates/MapCoordinateSystem;") };
     const jfieldID field_zoomMin { ::djinni::jniGetFieldID(clazz.get(), "zoomMin", "D") };
     const jfieldID field_zoomMax { ::djinni::jniGetFieldID(clazz.get(), "zoomMax", "D") };
 };

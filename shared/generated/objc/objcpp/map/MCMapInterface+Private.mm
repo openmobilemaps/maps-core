@@ -7,6 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "MCCameraInterface+Private.h"
+#import "MCCoordinateConversionHelperInterface+Private.h"
 #import "MCGraphicsObjectFactoryInterface+Private.h"
 #import "MCLayerInterface+Private.h"
 #import "MCLoaderInterface+Private.h"
@@ -108,6 +109,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getMapConfig();
         return ::djinni_generated::MapConfig::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable MCCoordinateConversionHelperInterface *)getCoordinateConverterHelper {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getCoordinateConverterHelper();
+        return ::djinni_generated::CoordinateConversionHelperInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

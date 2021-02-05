@@ -20,6 +20,8 @@ public:
 
     virtual MapConfig getMapConfig();
 
+    virtual std::shared_ptr<::CoordinateConversionHelperInterface> getCoordinateConverterHelper();
+
     virtual void setCallbackHandler(const std::shared_ptr<MapCallbackInterface> & callbackInterface);
 
     virtual void setCamera(const std::shared_ptr<::CameraInterface> & camera);
@@ -59,7 +61,9 @@ private:
 
     std::vector<std::shared_ptr<LayerInterface>> layers;
 
-    std::shared_ptr<::TouchHandlerInterface> touchHandler;
+    std::shared_ptr<TouchHandlerInterface> touchHandler;
+
+    std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
 
     bool isResumed = false;
 };

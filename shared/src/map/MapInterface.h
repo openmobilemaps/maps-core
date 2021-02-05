@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CameraInterface.h"
+#include "CoordinateConversionHelperInterface.h"
 #include "GraphicsObjectFactoryInterface.h"
 #include "LayerInterface.h"
 #include "LoaderInterface.h"
@@ -37,6 +38,8 @@ public:
     virtual std::shared_ptr<::RenderingContextInterface> getRenderingContext() = 0;
 
     virtual MapConfig getMapConfig() = 0;
+
+    virtual std::shared_ptr<::CoordinateConversionHelperInterface> getCoordinateConverterHelper() = 0;
 
     virtual void setCamera(const std::shared_ptr<::CameraInterface> & camera) = 0;
 
