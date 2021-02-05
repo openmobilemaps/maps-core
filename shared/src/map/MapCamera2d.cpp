@@ -103,11 +103,15 @@ std::vector<float> MapCamera2d::getMvpMatrix() {
 bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleClick) {
     centerPosition.x -= deltaScreen.x * zoom * screenPixelAsRealMeterFactor;
     centerPosition.y += deltaScreen.y * zoom * screenPixelAsRealMeterFactor;
-    return true;
+
+    mapInterface->invalidate();
+    return false;
 }
 
 bool MapCamera2d::onDoubleClick(const ::Vec2F &posScreen) {
     zoom = std::max(zoom / 2, mapInterface->getMapConfig().zoomMax);
+
+    mapInterface->invalidate();
 }
 
 bool MapCamera2d::onTwoFingerMove(const std::vector< ::Vec2F> &posScreenOld, const std::vector< ::Vec2F> &posScreenNew) {
@@ -119,5 +123,7 @@ bool MapCamera2d::onTwoFingerMove(const std::vector< ::Vec2F> &posScreenOld, con
 
         centerPosition.x -= (midpoint.x - oldMidpoint.x) * zoom * screenPixelAsRealMeterFactor;
         centerPosition.y += (midpoint.y - oldMidpoint.y) * zoom * screenPixelAsRealMeterFactor;
+
+        mapInterface->invalidate();
     }
 }
