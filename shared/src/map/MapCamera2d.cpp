@@ -131,13 +131,14 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     centerPosition.y += deltaScreen.y * zoom * screenPixelAsRealMeterFactor;
 
     mapInterface->invalidate();
-    return false;
+    return true;
 }
 
 bool MapCamera2d::onDoubleClick(const ::Vec2F &posScreen) {
     auto targetZoom = std::max(zoom / 2, mapInterface->getMapConfig().zoomMax);
 
     beginAnimation(targetZoom, coordFromScreenPosition(posScreen));
+    return true;
 }
 
 bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) {
@@ -160,6 +161,7 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
 
         mapInterface->invalidate();
     }
+    return true;
 }
 
 
