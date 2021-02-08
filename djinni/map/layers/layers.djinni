@@ -1,5 +1,6 @@
 @extern "../../yaml/render_pass_interface.yaml"
 @extern "../../yaml/map_interface.yaml"
+@extern "../../yaml/rect_d.yaml"
 
 layer_interface = interface +c +j +o {
 	build_render_passes(): list<render_pass_interface>;
@@ -12,4 +13,10 @@ layer_interface = interface +c +j +o {
 
 tiled_2d_map_layer_interface = interface +c +j +o {
     asLayerInterface(): layer_interface;
+}
+
+tiles_2d_map_layer_config = interface +c +j +o {
+  get_bounds(): rect_d;
+  get_tile_url(x:i32, y:i32, zoom:i32): string;
+  get_tile_identifier(x:i32, y:i32, zoom:i32): string;
 }

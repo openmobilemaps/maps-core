@@ -25,9 +25,10 @@ void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
     if (animated) {
       beginAnimation(zoom, centerPosition);
     } else {
-        this->zoom = zoom;
-        this->centerPosition.x = centerPosition.x;
-        this->centerPosition.y = centerPosition.y;
+      this->zoom = zoom;
+      this->centerPosition.x = centerPosition.x;
+      this->centerPosition.y = centerPosition.y;
+      notifyListeners();
     }
 }
 
@@ -37,6 +38,7 @@ void MapCamera2d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
     } else {
       this->centerPosition.x = centerPosition.x;
       this->centerPosition.y = centerPosition.y;
+      notifyListeners();
     }
 }
 
@@ -48,7 +50,8 @@ void MapCamera2d::setZoom(double zoom, bool animated) {
     if (animated) {
       beginAnimation(zoom, centerPosition);
     } else {
-        this->zoom = zoom;
+      this->zoom = zoom;
+      notifyListeners();
     }
 }
 
@@ -116,6 +119,13 @@ std::vector<float> MapCamera2d::getMvpMatrix() {
     return newMvpMatrix;
 }
 
+
+void MapCamera2d::notifyListeners() {
+  for (auto listener: listeners) {
+    listener->onCenterPositionChanged(centerPosition, zoom);
+  }
+}
+
 bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleClick) {
     centerPosition.x -= deltaScreen.x * zoom * screenPixelAsRealMeterFactor;
     centerPosition.y += deltaScreen.y * zoom * screenPixelAsRealMeterFactor;
@@ -133,7 +143,6 @@ bool MapCamera2d::onDoubleClick(const ::Vec2F &posScreen) {
 bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) {
     if (posScreenOld.size() >= 2) {
         zoom /= Vec2FHelper::distance(posScreenNew[0], posScreenNew[1]) / Vec2FHelper::distance(posScreenOld[0], posScreenOld[1]);
-
 
         zoom = std::max(std::min(zoom, mapInterface->getMapConfig().zoomMin), mapInterface->getMapConfig().zoomMax);
 
@@ -192,10 +201,11 @@ void MapCamera2d::applyAnimationState() {
       centerPosition.y = cameraAnimation->targetCenterPosition.y;
       this->cameraAnimation = std::nullopt;
     } else {
-        zoom = cameraAnimation->startZoom + (cameraAnimation->targetZoom - cameraAnimation->startZoom) * std::pow(progress, 2);
-        centerPosition.x = cameraAnimation->startCenterPosition.x + (cameraAnimation->targetCenterPosition.x - cameraAnimation->startCenterPosition.x) * std::pow(progress, 2);
-        centerPosition.y = cameraAnimation->startCenterPosition.y + (cameraAnimation->targetCenterPosition.y - cameraAnimation->startCenterPosition.y) * std::pow(progress, 2);
+      zoom = cameraAnimation->startZoom + (cameraAnimation->targetZoom - cameraAnimation->startZoom) * std::pow(progress, 2);
+      centerPosition.x = cameraAnimation->startCenterPosition.x + (cameraAnimation->targetCenterPosition.x - cameraAnimation->startCenterPosition.x) * std::pow(progress, 2);
+      centerPosition.y = cameraAnimation->startCenterPosition.y + (cameraAnimation->targetCenterPosition.y - cameraAnimation->startCenterPosition.y) * std::pow(progress, 2);
     }
+    notifyListeners();
     mapInterface->invalidate();
   }
 }

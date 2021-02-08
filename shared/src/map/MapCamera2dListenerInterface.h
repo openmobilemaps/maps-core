@@ -3,11 +3,11 @@
 
 #pragma once
 
-#include "Vec2D.h"
+#include "Coord.h"
 
 class MapCamera2dListenerInterface {
 public:
     virtual ~MapCamera2dListenerInterface() {}
 
-    virtual void onCenterPositionChanged(const ::Vec2D & position, double zoom) = 0;
+    virtual void onCenterPositionChanged(const ::Coord & position, double zoom) = 0;
 };

@@ -76,5 +76,5 @@ map_camera_2d_interface = interface +c {
 }
 
 map_camera_2d_listener_interface = interface +c +j +o {
-    on_center_position_changed(position: vec_2_d, zoom: f64);
+    on_center_position_changed(position: coord, zoom: f64);
 }

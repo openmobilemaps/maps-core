@@ -73,6 +73,8 @@ protected:
     double paddingRight = 0;
     double paddingBottom = 0;
 
+    void notifyListeners();
+
             
     Coord coordFromScreenPosition(const ::Vec2F &posScreen);
     // MARK: Animations

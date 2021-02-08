@@ -7,7 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
-#import "MCVec2D+Private.h"
+#import "MCCoord+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -32,10 +32,10 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (void)onCenterPositionChanged:(nonnull MCVec2D *)position
+- (void)onCenterPositionChanged:(nonnull MCCoord *)position
                            zoom:(double)zoom {
     try {
-        _cppRefHandle.get()->onCenterPositionChanged(::djinni_generated::Vec2D::toCpp(position),
+        _cppRefHandle.get()->onCenterPositionChanged(::djinni_generated::Coord::toCpp(position),
                                                      ::djinni::F64::toCpp(zoom));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -49,10 +49,10 @@ class MapCamera2dListenerInterface::ObjcProxy final
     friend class ::djinni_generated::MapCamera2dListenerInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void onCenterPositionChanged(const ::Vec2D & c_position, double c_zoom) override
+    void onCenterPositionChanged(const ::Coord & c_position, double c_zoom) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() onCenterPositionChanged:(::djinni_generated::Vec2D::fromCpp(c_position))
+            [djinni_private_get_proxied_objc_object() onCenterPositionChanged:(::djinni_generated::Coord::fromCpp(c_position))
                                                                          zoom:(::djinni::F64::fromCpp(c_zoom))];
         }
     }
