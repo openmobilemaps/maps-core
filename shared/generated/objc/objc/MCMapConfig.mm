@@ -7,29 +7,29 @@
 @implementation MCMapConfig
 
 - (nonnull instancetype)initWithMapCoordinateSystem:(nonnull MCMapCoordinateSystem *)mapCoordinateSystem
-                                            zoomMin:(double)zoomMin
-                                            zoomMax:(double)zoomMax
+                                           scaleMin:(double)scaleMin
+                                           scaleMax:(double)scaleMax
 {
     if (self = [super init]) {
         _mapCoordinateSystem = mapCoordinateSystem;
-        _zoomMin = zoomMin;
-        _zoomMax = zoomMax;
+        _scaleMin = scaleMin;
+        _scaleMax = scaleMax;
     }
     return self;
 }
 
 + (nonnull instancetype)mapConfigWithMapCoordinateSystem:(nonnull MCMapCoordinateSystem *)mapCoordinateSystem
-                                                 zoomMin:(double)zoomMin
-                                                 zoomMax:(double)zoomMax
+                                                scaleMin:(double)scaleMin
+                                                scaleMax:(double)scaleMax
 {
     return [(MCMapConfig*)[self alloc] initWithMapCoordinateSystem:mapCoordinateSystem
-                                                           zoomMin:zoomMin
-                                                           zoomMax:zoomMax];
+                                                          scaleMin:scaleMin
+                                                          scaleMax:scaleMax];
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p mapCoordinateSystem:%@ zoomMin:%@ zoomMax:%@>", self.class, (void *)self, self.mapCoordinateSystem, @(self.zoomMin), @(self.zoomMax)];
+    return [NSString stringWithFormat:@"<%@ %p mapCoordinateSystem:%@ scaleMin:%@ scaleMax:%@>", self.class, (void *)self, self.mapCoordinateSystem, @(self.scaleMin), @(self.scaleMax)];
 }
 
 @end

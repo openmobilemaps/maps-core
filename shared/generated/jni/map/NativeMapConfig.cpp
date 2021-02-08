@@ -15,8 +15,8 @@ auto NativeMapConfig::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinni::Loc
     const auto& data = ::djinni::JniClass<NativeMapConfig>::get();
     auto r = ::djinni::LocalRef<JniType>{jniEnv->NewObject(data.clazz.get(), data.jconstructor,
                                                            ::djinni::get(::djinni_generated::NativeMapCoordinateSystem::fromCpp(jniEnv, c.mapCoordinateSystem)),
-                                                           ::djinni::get(::djinni::F64::fromCpp(jniEnv, c.zoomMin)),
-                                                           ::djinni::get(::djinni::F64::fromCpp(jniEnv, c.zoomMax)))};
+                                                           ::djinni::get(::djinni::F64::fromCpp(jniEnv, c.scaleMin)),
+                                                           ::djinni::get(::djinni::F64::fromCpp(jniEnv, c.scaleMax)))};
     ::djinni::jniExceptionCheck(jniEnv);
     return r;
 }
@@ -26,8 +26,8 @@ auto NativeMapConfig::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
     assert(j != nullptr);
     const auto& data = ::djinni::JniClass<NativeMapConfig>::get();
     return {::djinni_generated::NativeMapCoordinateSystem::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_mapCoordinateSystem)),
-            ::djinni::F64::toCpp(jniEnv, jniEnv->GetDoubleField(j, data.field_zoomMin)),
-            ::djinni::F64::toCpp(jniEnv, jniEnv->GetDoubleField(j, data.field_zoomMax))};
+            ::djinni::F64::toCpp(jniEnv, jniEnv->GetDoubleField(j, data.field_scaleMin)),
+            ::djinni::F64::toCpp(jniEnv, jniEnv->GetDoubleField(j, data.field_scaleMax))};
 }
 
 }  // namespace djinni_generated

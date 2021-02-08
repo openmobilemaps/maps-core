@@ -12,15 +12,15 @@ auto MapConfig::toCpp(ObjcType obj) -> CppType
 {
     assert(obj);
     return {::djinni_generated::MapCoordinateSystem::toCpp(obj.mapCoordinateSystem),
-            ::djinni::F64::toCpp(obj.zoomMin),
-            ::djinni::F64::toCpp(obj.zoomMax)};
+            ::djinni::F64::toCpp(obj.scaleMin),
+            ::djinni::F64::toCpp(obj.scaleMax)};
 }
 
 auto MapConfig::fromCpp(const CppType& cpp) -> ObjcType
 {
     return [[MCMapConfig alloc] initWithMapCoordinateSystem:(::djinni_generated::MapCoordinateSystem::fromCpp(cpp.mapCoordinateSystem))
-                                                    zoomMin:(::djinni::F64::fromCpp(cpp.zoomMin))
-                                                    zoomMax:(::djinni::F64::fromCpp(cpp.zoomMax))];
+                                                   scaleMin:(::djinni::F64::fromCpp(cpp.scaleMin))
+                                                   scaleMax:(::djinni::F64::fromCpp(cpp.scaleMax))];
 }
 
 }  // namespace djinni_generated

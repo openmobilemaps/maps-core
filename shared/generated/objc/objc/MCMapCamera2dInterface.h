@@ -14,19 +14,19 @@
 + (nullable MCMapCamera2dInterface *)create:(nullable MCMapInterface *)mapInterface
                            screenDensityPpi:(float)screenDensityPpi;
 
-- (void)moveToCenterPositionZoom:(nonnull MCCoord *)centerPosition
-                            zoom:(double)zoom
-                        animated:(BOOL)animated;
+- (void)moveToCenterPositionScale:(nonnull MCCoord *)centerPosition
+                            scale:(double)scale
+                         animated:(BOOL)animated;
 
 - (void)moveToCenterPosition:(nonnull MCCoord *)centerPosition
                     animated:(BOOL)animated;
 
 - (nonnull MCCoord *)getCenterPosition;
 
-- (void)setZoom:(double)zoom
-       animated:(BOOL)animated;
+- (void)setScale:(double)scale
+        animated:(BOOL)animated;
 
-- (double)getZoom;
+- (double)getScale;
 
 - (void)setPaddingLeft:(float)padding;
 

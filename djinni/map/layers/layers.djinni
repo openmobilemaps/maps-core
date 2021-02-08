@@ -10,13 +10,3 @@ layer_interface = interface +c +j +o {
     hide();
     show();
 }
-
-tiled_2d_map_layer_interface = interface +c +j +o {
-    asLayerInterface(): layer_interface;
-}
-
-tiles_2d_map_layer_config = interface +c +j +o {
-  get_bounds(): rect_d;
-  get_tile_url(x:i32, y:i32, zoom:i32): string;
-  get_tile_identifier(x:i32, y:i32, zoom:i32): string;
-}

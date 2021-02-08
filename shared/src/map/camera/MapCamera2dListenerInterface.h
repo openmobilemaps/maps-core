@@ -9,7 +9,7 @@ class MapCamera2dListenerInterface {
 public:
     virtual ~MapCamera2dListenerInterface() {}
 
-    virtual void onCenterPositionChanged(const ::Coord & position, double zoom) = 0;
+    virtual void onCenterPositionChanged(const ::Coord & position, double scale) = 0;
 
-    virtual void onVisibleBoundsChanged(const ::Coord & topLeft, const ::Coord & bottomRight, double zoom) = 0;
+    virtual void onVisibleBoundsChanged(const ::Coord & topLeft, const ::Coord & bottomRight, double scale) = 0;
 };

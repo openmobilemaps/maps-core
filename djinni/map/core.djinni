@@ -51,6 +51,6 @@ map_callback_interface = interface +c +j +o {
 
 map_config = record {
     map_coordinate_system: map_coordinate_system;
-    zoom_min: f64;
-    zoom_max: f64;
+    scale_min: f64;
+    scale_max: f64;
 }

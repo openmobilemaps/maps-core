@@ -8,49 +8,49 @@ public final class MapConfig implements java.io.Serializable {
 
     protected ch.ubique.mapscore.shared.map.coordinates.MapCoordinateSystem mapCoordinateSystem;
 
-    protected double zoomMin;
+    protected double scaleMin;
 
-    protected double zoomMax;
+    protected double scaleMax;
 
     public MapConfig(
             ch.ubique.mapscore.shared.map.coordinates.MapCoordinateSystem mapCoordinateSystem,
-            double zoomMin,
-            double zoomMax) {
+            double scaleMin,
+            double scaleMax) {
         this.mapCoordinateSystem = mapCoordinateSystem;
-        this.zoomMin = zoomMin;
-        this.zoomMax = zoomMax;
+        this.scaleMin = scaleMin;
+        this.scaleMax = scaleMax;
     }
 
     public ch.ubique.mapscore.shared.map.coordinates.MapCoordinateSystem getMapCoordinateSystem() {
         return mapCoordinateSystem;
     }
 
-    public double getZoomMin() {
-        return zoomMin;
+    public double getScaleMin() {
+        return scaleMin;
     }
 
-    public double getZoomMax() {
-        return zoomMax;
+    public double getScaleMax() {
+        return scaleMax;
     }
 
     public void setMapCoordinateSystem(ch.ubique.mapscore.shared.map.coordinates.MapCoordinateSystem mapCoordinateSystem) {
         this.mapCoordinateSystem = mapCoordinateSystem;
     }
 
-    public void setZoomMin(double zoomMin) {
-        this.zoomMin = zoomMin;
+    public void setScaleMin(double scaleMin) {
+        this.scaleMin = scaleMin;
     }
 
-    public void setZoomMax(double zoomMax) {
-        this.zoomMax = zoomMax;
+    public void setScaleMax(double scaleMax) {
+        this.scaleMax = scaleMax;
     }
 
     @Override
     public String toString() {
         return "MapConfig{" +
                 "mapCoordinateSystem=" + mapCoordinateSystem +
-                "," + "zoomMin=" + zoomMin +
-                "," + "zoomMax=" + zoomMax +
+                "," + "scaleMin=" + scaleMin +
+                "," + "scaleMax=" + scaleMax +
         "}";
     }
 

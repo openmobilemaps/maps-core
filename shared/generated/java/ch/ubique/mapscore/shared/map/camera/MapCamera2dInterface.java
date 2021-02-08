@@ -6,15 +6,15 @@ package ch.ubique.mapscore.shared.map.camera;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class MapCamera2dInterface {
-    public abstract void moveToCenterPositionZoom(ch.ubique.mapscore.shared.map.coordinates.Coord centerPosition, double zoom, boolean animated);
+    public abstract void moveToCenterPositionScale(ch.ubique.mapscore.shared.map.coordinates.Coord centerPosition, double scale, boolean animated);
 
     public abstract void moveToCenterPosition(ch.ubique.mapscore.shared.map.coordinates.Coord centerPosition, boolean animated);
 
     public abstract ch.ubique.mapscore.shared.map.coordinates.Coord getCenterPosition();
 
-    public abstract void setZoom(double zoom, boolean animated);
+    public abstract void setScale(double scale, boolean animated);
 
-    public abstract double getZoom();
+    public abstract double getScale();
 
     public abstract void setPaddingLeft(float padding);
 
@@ -60,12 +60,12 @@ public abstract class MapCamera2dInterface {
         }
 
         @Override
-        public void moveToCenterPositionZoom(ch.ubique.mapscore.shared.map.coordinates.Coord centerPosition, double zoom, boolean animated)
+        public void moveToCenterPositionScale(ch.ubique.mapscore.shared.map.coordinates.Coord centerPosition, double scale, boolean animated)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
-            native_moveToCenterPositionZoom(this.nativeRef, centerPosition, zoom, animated);
+            native_moveToCenterPositionScale(this.nativeRef, centerPosition, scale, animated);
         }
-        private native void native_moveToCenterPositionZoom(long _nativeRef, ch.ubique.mapscore.shared.map.coordinates.Coord centerPosition, double zoom, boolean animated);
+        private native void native_moveToCenterPositionScale(long _nativeRef, ch.ubique.mapscore.shared.map.coordinates.Coord centerPosition, double scale, boolean animated);
 
         @Override
         public void moveToCenterPosition(ch.ubique.mapscore.shared.map.coordinates.Coord centerPosition, boolean animated)
@@ -84,20 +84,20 @@ public abstract class MapCamera2dInterface {
         private native ch.ubique.mapscore.shared.map.coordinates.Coord native_getCenterPosition(long _nativeRef);
 
         @Override
-        public void setZoom(double zoom, boolean animated)
+        public void setScale(double scale, boolean animated)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
-            native_setZoom(this.nativeRef, zoom, animated);
+            native_setScale(this.nativeRef, scale, animated);
         }
-        private native void native_setZoom(long _nativeRef, double zoom, boolean animated);
+        private native void native_setScale(long _nativeRef, double scale, boolean animated);
 
         @Override
-        public double getZoom()
+        public double getScale()
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
-            return native_getZoom(this.nativeRef);
+            return native_getScale(this.nativeRef);
         }
-        private native double native_getZoom(long _nativeRef);
+        private native double native_getScale(long _nativeRef);
 
         @Override
         public void setPaddingLeft(float padding)

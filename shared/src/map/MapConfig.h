@@ -8,14 +8,14 @@
 
 struct MapConfig final {
     ::MapCoordinateSystem mapCoordinateSystem;
-    double zoomMin;
-    double zoomMax;
+    double scaleMin;
+    double scaleMax;
 
     MapConfig(::MapCoordinateSystem mapCoordinateSystem_,
-              double zoomMin_,
-              double zoomMax_)
+              double scaleMin_,
+              double scaleMax_)
     : mapCoordinateSystem(std::move(mapCoordinateSystem_))
-    , zoomMin(std::move(zoomMin_))
-    , zoomMax(std::move(zoomMax_))
+    , scaleMin(std::move(scaleMin_))
+    , scaleMax(std::move(scaleMax_))
     {}
 };

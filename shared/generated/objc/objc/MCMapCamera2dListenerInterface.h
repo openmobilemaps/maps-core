@@ -8,10 +8,10 @@
 @protocol MCMapCamera2dListenerInterface
 
 - (void)onCenterPositionChanged:(nonnull MCCoord *)position
-                           zoom:(double)zoom;
+                          scale:(double)scale;
 
 - (void)onVisibleBoundsChanged:(nonnull MCCoord *)topLeft
                    bottomRight:(nonnull MCCoord *)bottomRight
-                          zoom:(double)zoom;
+                         scale:(double)scale;
 
 @end

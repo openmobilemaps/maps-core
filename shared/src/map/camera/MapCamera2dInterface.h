@@ -16,15 +16,15 @@ public:
 
     static std::shared_ptr<MapCamera2dInterface> create(const std::shared_ptr<::MapInterface> & mapInterface, float screenDensityPpi);
 
-    virtual void moveToCenterPositionZoom(const ::Coord & centerPosition, double zoom, bool animated) = 0;
+    virtual void moveToCenterPositionScale(const ::Coord & centerPosition, double scale, bool animated) = 0;
 
     virtual void moveToCenterPosition(const ::Coord & centerPosition, bool animated) = 0;
 
     virtual ::Coord getCenterPosition() = 0;
 
-    virtual void setZoom(double zoom, bool animated) = 0;
+    virtual void setScale(double scale, bool animated) = 0;
 
-    virtual double getZoom() = 0;
+    virtual double getScale() = 0;
 
     virtual void setPaddingLeft(float padding) = 0;
 
