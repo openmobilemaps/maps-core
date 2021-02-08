@@ -8,6 +8,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class MapCamera2dListenerInterface {
     public abstract void onCenterPositionChanged(ch.ubique.mapscore.shared.map.coordinates.Coord position, double zoom);
 
+    public abstract void onVisibleBoundsChanged(ch.ubique.mapscore.shared.map.coordinates.Coord topLeft, ch.ubique.mapscore.shared.map.coordinates.Coord bottomRight, double zoom);
+
     private static final class CppProxy extends MapCamera2dListenerInterface
     {
         private final long nativeRef;
@@ -38,5 +40,13 @@ public abstract class MapCamera2dListenerInterface {
             native_onCenterPositionChanged(this.nativeRef, position, zoom);
         }
         private native void native_onCenterPositionChanged(long _nativeRef, ch.ubique.mapscore.shared.map.coordinates.Coord position, double zoom);
+
+        @Override
+        public void onVisibleBoundsChanged(ch.ubique.mapscore.shared.map.coordinates.Coord topLeft, ch.ubique.mapscore.shared.map.coordinates.Coord bottomRight, double zoom)
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            native_onVisibleBoundsChanged(this.nativeRef, topLeft, bottomRight, zoom);
+        }
+        private native void native_onVisibleBoundsChanged(long _nativeRef, ch.ubique.mapscore.shared.map.coordinates.Coord topLeft, ch.ubique.mapscore.shared.map.coordinates.Coord bottomRight, double zoom);
     }
 }

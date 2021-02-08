@@ -10,4 +10,8 @@
 - (void)onCenterPositionChanged:(nonnull MCCoord *)position
                            zoom:(double)zoom;
 
+- (void)onVisibleBoundsChanged:(nonnull MCCoord *)topLeft
+                   bottomRight:(nonnull MCCoord *)bottomRight
+                          zoom:(double)zoom;
+
 @end

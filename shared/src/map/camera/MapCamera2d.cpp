@@ -121,8 +121,19 @@ std::vector<float> MapCamera2d::getMvpMatrix() {
 
 
 void MapCamera2d::notifyListeners() {
+  Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
+  double zoomFactor = screenPixelAsRealMeterFactor * zoom;
+  Coord topLeft = Coord(mapCoordinateSystem.identifier,
+                        centerPosition.x - ((double)sizeViewport.x / 2.0) * zoomFactor,
+                        centerPosition.y + ((double)sizeViewport.y / 2.0) * zoomFactor,
+                        centerPosition.z);
+  Coord bottomRight = Coord(mapCoordinateSystem.identifier,
+                            centerPosition.x + ((double)sizeViewport.x / 2.0) * zoomFactor,
+                            centerPosition.y - ((double)sizeViewport.y / 2.0) * zoomFactor,
+                            centerPosition.z);
   for (auto listener: listeners) {
     listener->onCenterPositionChanged(centerPosition, zoom);
+    listener->onVisibleBoundsChanged(topLeft, bottomRight, zoom);
   }
 }
 
@@ -130,6 +141,7 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     centerPosition.x -= deltaScreen.x * zoom * screenPixelAsRealMeterFactor;
     centerPosition.y += deltaScreen.y * zoom * screenPixelAsRealMeterFactor;
 
+    notifyListeners();
     mapInterface->invalidate();
     return true;
 }
@@ -159,6 +171,7 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
         angle += (olda - newa) / M_PI * 180.0;*/
 
 
+        notifyListeners();
         mapInterface->invalidate();
     }
     return true;

@@ -24,6 +24,16 @@ void NativeMapCamera2dListenerInterface::JavaProxy::onCenterPositionChanged(cons
                            ::djinni::get(::djinni::F64::fromCpp(jniEnv, c_zoom)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
+void NativeMapCamera2dListenerInterface::JavaProxy::onVisibleBoundsChanged(const ::Coord & c_topLeft, const ::Coord & c_bottomRight, double c_zoom) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeMapCamera2dListenerInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_onVisibleBoundsChanged,
+                           ::djinni::get(::djinni_generated::NativeCoord::fromCpp(jniEnv, c_topLeft)),
+                           ::djinni::get(::djinni_generated::NativeCoord::fromCpp(jniEnv, c_bottomRight)),
+                           ::djinni::get(::djinni::F64::fromCpp(jniEnv, c_zoom)));
+    ::djinni::jniExceptionCheck(jniEnv);
+}
 
 CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_camera_MapCamera2dListenerInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
@@ -40,6 +50,17 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_camera_MapCamera2dLis
         const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dListenerInterface>(nativeRef);
         ref->onCenterPositionChanged(::djinni_generated::NativeCoord::toCpp(jniEnv, j_position),
                                      ::djinni::F64::toCpp(jniEnv, j_zoom));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_camera_MapCamera2dListenerInterface_00024CppProxy_native_1onVisibleBoundsChanged(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeCoord::JniType j_topLeft, ::djinni_generated::NativeCoord::JniType j_bottomRight, jdouble j_zoom)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dListenerInterface>(nativeRef);
+        ref->onVisibleBoundsChanged(::djinni_generated::NativeCoord::toCpp(jniEnv, j_topLeft),
+                                    ::djinni_generated::NativeCoord::toCpp(jniEnv, j_bottomRight),
+                                    ::djinni::F64::toCpp(jniEnv, j_zoom));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
