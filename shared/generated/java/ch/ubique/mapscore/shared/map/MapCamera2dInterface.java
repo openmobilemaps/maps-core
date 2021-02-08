@@ -6,11 +6,11 @@ package ch.ubique.mapscore.shared.map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class MapCamera2dInterface {
-    public abstract void moveToCenterPositionZoom(ch.ubique.mapscore.shared.graphics.common.Vec2D centerPosition, double zoom, boolean animated);
+    public abstract void moveToCenterPositionZoom(ch.ubique.mapscore.shared.map.coordinates.Coord centerPosition, double zoom, boolean animated);
 
-    public abstract void moveToCenterPosition(ch.ubique.mapscore.shared.graphics.common.Vec2D centerPosition, boolean animated);
+    public abstract void moveToCenterPosition(ch.ubique.mapscore.shared.map.coordinates.Coord centerPosition, boolean animated);
 
-    public abstract ch.ubique.mapscore.shared.graphics.common.Vec2D getCenterPosition();
+    public abstract ch.ubique.mapscore.shared.map.coordinates.Coord getCenterPosition();
 
     public abstract void setZoom(double zoom, boolean animated);
 
@@ -60,28 +60,28 @@ public abstract class MapCamera2dInterface {
         }
 
         @Override
-        public void moveToCenterPositionZoom(ch.ubique.mapscore.shared.graphics.common.Vec2D centerPosition, double zoom, boolean animated)
+        public void moveToCenterPositionZoom(ch.ubique.mapscore.shared.map.coordinates.Coord centerPosition, double zoom, boolean animated)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
             native_moveToCenterPositionZoom(this.nativeRef, centerPosition, zoom, animated);
         }
-        private native void native_moveToCenterPositionZoom(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Vec2D centerPosition, double zoom, boolean animated);
+        private native void native_moveToCenterPositionZoom(long _nativeRef, ch.ubique.mapscore.shared.map.coordinates.Coord centerPosition, double zoom, boolean animated);
 
         @Override
-        public void moveToCenterPosition(ch.ubique.mapscore.shared.graphics.common.Vec2D centerPosition, boolean animated)
+        public void moveToCenterPosition(ch.ubique.mapscore.shared.map.coordinates.Coord centerPosition, boolean animated)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
             native_moveToCenterPosition(this.nativeRef, centerPosition, animated);
         }
-        private native void native_moveToCenterPosition(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Vec2D centerPosition, boolean animated);
+        private native void native_moveToCenterPosition(long _nativeRef, ch.ubique.mapscore.shared.map.coordinates.Coord centerPosition, boolean animated);
 
         @Override
-        public ch.ubique.mapscore.shared.graphics.common.Vec2D getCenterPosition()
+        public ch.ubique.mapscore.shared.map.coordinates.Coord getCenterPosition()
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
             return native_getCenterPosition(this.nativeRef);
         }
-        private native ch.ubique.mapscore.shared.graphics.common.Vec2D native_getCenterPosition(long _nativeRef);
+        private native ch.ubique.mapscore.shared.map.coordinates.Coord native_getCenterPosition(long _nativeRef);
 
         @Override
         public void setZoom(double zoom, boolean animated)

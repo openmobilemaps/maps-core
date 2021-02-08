@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CameraInterface.h"
-#include "Vec2D.h"
+#include "Coord.h"
 #include <memory>
 
 class MapCamera2dListenerInterface;
@@ -16,11 +16,11 @@ public:
 
     static std::shared_ptr<MapCamera2dInterface> create(const std::shared_ptr<MapInterface> & mapInterface, float screenDensityPpi);
 
-    virtual void moveToCenterPositionZoom(const ::Vec2D & centerPosition, double zoom, bool animated) = 0;
+    virtual void moveToCenterPositionZoom(const ::Coord & centerPosition, double zoom, bool animated) = 0;
 
-    virtual void moveToCenterPosition(const ::Vec2D & centerPosition, bool animated) = 0;
+    virtual void moveToCenterPosition(const ::Coord & centerPosition, bool animated) = 0;
 
-    virtual ::Vec2D getCenterPosition() = 0;
+    virtual ::Coord getCenterPosition() = 0;
 
     virtual void setZoom(double zoom, bool animated) = 0;
 

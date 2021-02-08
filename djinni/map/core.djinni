@@ -10,6 +10,7 @@
 @extern "../yaml/rendering_context_interface.yaml"
 @extern "../yaml/map_coordinate_system.yaml"
 @extern "../yaml/coordinate_conversion_helper_interface.yaml"
+@extern "../yaml/coord.yaml"
 
 map_interface = interface +c {
     static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface, rendering_context: rendering_context_interface, map_config: map_config, scheduler: scheduler_interface) : map_interface;
@@ -55,9 +56,9 @@ map_config = record {
 map_camera_2d_interface = interface +c {
     static create(map_interface: map_interface, screen_density_ppi: f32): map_camera_2d_interface;
 
-    move_to_center_position_zoom(center_position: vec_2_d, zoom: f64, animated: bool);
-    move_to_center_position(center_position: vec_2_d, animated: bool);
-    get_center_position(): vec_2_d;
+    move_to_center_position_zoom(center_position: coord, zoom: f64, animated: bool);
+    move_to_center_position(center_position: coord, animated: bool);
+    get_center_position(): coord;
 
     set_zoom(zoom: f64, animated: bool);
     get_zoom(): f64;

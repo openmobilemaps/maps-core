@@ -7,6 +7,8 @@
 #include "MapCamera2dListenerInterface.h"
 #include "CoordinateConversionHelperInterface.h"
 #include <set>
+#include <optional>
+#include "Coord.h"
 
 class MapCamera2d
         : public MapCamera2dInterface,
@@ -20,11 +22,11 @@ public:
 
     ~MapCamera2d() {};
 
-    virtual void moveToCenterPositionZoom(const ::Vec2D &centerPosition, double zoom, bool animated);
+    virtual void moveToCenterPositionZoom(const ::Coord &centerPosition, double zoom, bool animated);
 
-    virtual void moveToCenterPosition(const ::Vec2D &centerPosition, bool animated);
+    virtual void moveToCenterPosition(const ::Coord &centerPosition, bool animated);
 
-    virtual ::Vec2D getCenterPosition();
+    virtual ::Coord getCenterPosition();
 
     virtual void setZoom(double zoom, bool animated);
 
@@ -62,7 +64,7 @@ protected:
     float screenDensityPpi;
     double screenPixelAsRealMeterFactor;
 
-    Vec2D centerPosition = Vec2D(0.0, 0.0);
+    Coord centerPosition;
     double zoom = 0;
     double angle = 0;
 
@@ -71,4 +73,21 @@ protected:
     double paddingRight = 0;
     double paddingBottom = 0;
 
+            
+    Coord coordFromScreenPosition(const ::Vec2F &posScreen);
+    // MARK: Animations
+
+    struct CameraAnimation {
+      Coord startCenterPosition;
+      double startZoom;
+      Coord targetCenterPosition;
+      double targetZoom;
+      long long startTime;
+      long long duration;
+    };
+
+    std::optional<CameraAnimation> cameraAnimation;
+
+    void beginAnimation(double zoom, Coord centerPosition);
+    void applyAnimationState();
 };
