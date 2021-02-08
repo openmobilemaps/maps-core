@@ -6,30 +6,30 @@ mapInterface(mapInterface) {
 
 }
 
-virtual std::shared_ptr<LayerInterface> Tiled2dMapLayer::asLayerInterface() {
+std::shared_ptr<LayerInterface> Tiled2dMapLayer::asLayerInterface() {
+  return nullptr;
+}
+
+std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapLayer::buildRenderPasses() {
+  return {};
+}
+
+std::string Tiled2dMapLayer::getIdentifier(){
+  return "identifier";
+}
+
+void Tiled2dMapLayer::pause() {
 
 }
 
-virtual std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapLayer::buildRenderPasses() {
+void Tiled2dMapLayer::resume() {
 
 }
 
-virtual std::string Tiled2dMapLayer::getIdentifier(){
+void Tiled2dMapLayer::hide() {
 
 }
 
-virtual void Tiled2dMapLayer::pause() {
-
-}
-
-virtual void Tiled2dMapLayer::resume() {
-
-}
-
-virtual void Tiled2dMapLayer::hide() {
-
-}
-
-virtual void Tiled2dMapLayer::show() {
+void Tiled2dMapLayer::show() {
 
 }
