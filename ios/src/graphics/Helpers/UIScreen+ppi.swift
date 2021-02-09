@@ -10,12 +10,12 @@ extension UIScreen {
              "iPhone13,3": // iPhone 12 Pro
             return 460
 
-        case "iPhone13,4",// iPhone 12 Pro Max
-             "iPhone12,3",// iPhone 11 Pro
-             "iPhone12,5",// iPhone 11 Pro Max
-             "iPhone11,2",// iPhone XS
-             "iPhone11,4", "iPhone11,6",// iPhone XS Max
-             "iPhone10,3", "iPhone10,6":// iPhone X
+        case "iPhone13,4", // iPhone 12 Pro Max
+             "iPhone12,3", // iPhone 11 Pro
+             "iPhone12,5", // iPhone 11 Pro Max
+             "iPhone11,2", // iPhone XS
+             "iPhone11,4", "iPhone11,6", // iPhone XS Max
+             "iPhone10,3", "iPhone10,6": // iPhone X
             return 458
 
         case "iPhone10,2", "iPhone10,5", // iPhone 8 Plus
@@ -43,27 +43,27 @@ extension UIScreen {
              "iPad5,1", "iPad5,2", // iPad mini 4
              "iPad4,7", "iPad4,8", "iPad4,9", // iPad mini 3
              "iPad4,4", "iPad4,5", "iPad4,6": // iPad mini 2
-        return 326
+            return 326
         case "iPad13,1", "iPad13,2", // iPad Air (4th generation)
-            "iPad11,6", "iPad11,7", // iPad (8th generation)
-            "iPad8,11", "iPad8,12", // iPad Pro (12.9″, 4th generation)
-            "iPad8,9", "iPad8,10", // iPad Pro (11″, 2nd generation)
-            "iPad7,11", "iPad7,12", // iPad (7th generation)
-            "iPad11,3", "iPad11,4", // iPad Air (3rd generation)
-            "iPad8,5", "iPad8,6", "iPad8,7", "iPad8,8", // iPad Pro (12.9″, 3rd generation)
-            "iPad8,1", "iPad8,2", "iPad8,3", "iPad8,4", // iPad Pro (11″)
-            "iPad7,5", "iPad7,6", // iPad (6th generation)
-            "iPad7,3", "iPad7,4", // iPad Pro (10.5″)
-            "iPad7,1", "iPad7,2", // iPad Pro (12.9″, 2nd generation)
-            "iPad6,11", "iPad6,12", // iPad (5th generation)
-            "iPad6,7", "iPad6,8", // iPad Pro (12.9″)
-            "iPad6,3", "iPad6,4", // iPad Pro (9.7″)
-            "iPad5,3", "iPad5,4", // iPad Air 2
-            "iPad4,1", "iPad4,2", "iPad4,3", // iPad Air
-            "iPad3,4", "iPad3,5", "iPad3,6", // iPad (4th generation)
-            "iPad3,1", "iPad3,2", "iPad3,3": // iPad (3rd generation)
+             "iPad11,6", "iPad11,7", // iPad (8th generation)
+             "iPad8,11", "iPad8,12", // iPad Pro (12.9″, 4th generation)
+             "iPad8,9", "iPad8,10", // iPad Pro (11″, 2nd generation)
+             "iPad7,11", "iPad7,12", // iPad (7th generation)
+             "iPad11,3", "iPad11,4", // iPad Air (3rd generation)
+             "iPad8,5", "iPad8,6", "iPad8,7", "iPad8,8", // iPad Pro (12.9″, 3rd generation)
+             "iPad8,1", "iPad8,2", "iPad8,3", "iPad8,4", // iPad Pro (11″)
+             "iPad7,5", "iPad7,6", // iPad (6th generation)
+             "iPad7,3", "iPad7,4", // iPad Pro (10.5″)
+             "iPad7,1", "iPad7,2", // iPad Pro (12.9″, 2nd generation)
+             "iPad6,11", "iPad6,12", // iPad (5th generation)
+             "iPad6,7", "iPad6,8", // iPad Pro (12.9″)
+             "iPad6,3", "iPad6,4", // iPad Pro (9.7″)
+             "iPad5,3", "iPad5,4", // iPad Air 2
+             "iPad4,1", "iPad4,2", "iPad4,3", // iPad Air
+             "iPad3,4", "iPad3,5", "iPad3,6", // iPad (4th generation)
+             "iPad3,1", "iPad3,2", "iPad3,3": // iPad (3rd generation)
             return 264
-        case  "iPad2,5", "iPad2,6", "iPad2,7": // iPad mini
+        case "iPad2,5", "iPad2,6", "iPad2,7": // iPad mini
             return 163
         default:
             if UIDevice.current.userInterfaceIdiom == .pad {
@@ -81,9 +81,7 @@ extension UIScreen {
     }
 }
 
-
 private extension UIDevice {
-
     // model identifiers can be found at https://www.theiphonewiki.com/wiki/Models
     static let modelIdentifier: String = {
         if let simulatorModelIdentifier = ProcessInfo().environment["SIMULATOR_MODEL_IDENTIFIER"] { return simulatorModelIdentifier }
@@ -91,5 +89,4 @@ private extension UIDevice {
         uname(&sysinfo) // ignore return value
         return String(bytes: Data(bytes: &sysinfo.machine, count: Int(_SYS_NAMELEN)), encoding: .ascii)!.trimmingCharacters(in: .controlCharacters)
     }()
-
 }

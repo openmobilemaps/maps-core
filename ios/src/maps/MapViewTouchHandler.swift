@@ -1,9 +1,8 @@
-import UIKit
 import MapCoreSharedModule
+import UIKit
 
 class MapViewTouchHandler: NSObject {
-
-    private let  touchHandler: MCTouchHandlerInterface!
+    private let touchHandler: MCTouchHandlerInterface!
 
     weak var mapView: UIView!
 
@@ -16,8 +15,7 @@ class MapViewTouchHandler: NSObject {
         super.init()
     }
 
-    func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-
+    func touchesBegan(_ touches: Set<UITouch>, with _: UIEvent?) {
         touches.forEach {
             activeTouches.insert($0)
             originalTouchLocations[$0] = $0.location(in: mapView)
@@ -36,21 +34,21 @@ class MapViewTouchHandler: NSObject {
         }
     }
 
-    func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+    func touchesEnded(_ touches: Set<UITouch>, with _: UIEvent?) {
         touchUp(touches)
     }
 
-    func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+    func touchesCancelled(_ touches: Set<UITouch>, with _: UIEvent?) {
         touchUp(touches)
     }
 
-    func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+    func touchesMoved(_ touches: Set<UITouch>, with _: UIEvent?) {
         func CGPointDistanceSquared(from: CGPoint, to: CGPoint) -> CGFloat {
-            return (from.x - to.x) * (from.x - to.x) + (from.y - to.y) * (from.y - to.y)
+            (from.x - to.x) * (from.x - to.x) + (from.y - to.y) * (from.y - to.y)
         }
 
         func CGPointDistance(from: CGPoint, to: CGPoint) -> CGFloat {
-            return sqrt(CGPointDistanceSquared(from: from, to: to))
+            sqrt(CGPointDistanceSquared(from: from, to: to))
         }
 
         touches.forEach {
@@ -66,7 +64,7 @@ class MapViewTouchHandler: NSObject {
 
 private extension Set where Element == UITouch {
     func asMCTouchLocation(in view: UIView, scale: Float) -> [MCVec2F] {
-        return map {
+        map {
             let location = $0.location(in: view)
             let x = Float(location.x) * scale
             let y = Float(location.y) * scale
