@@ -3,7 +3,7 @@
 
 #include "NativeTiled2dMapSourceInterface.h"  // my header
 #include "Marshal.hpp"
-#include "NativeCoord.h"
+#include "NativeRectCoord.h"
 
 namespace djinni_generated {
 
@@ -20,14 +20,13 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_tiled_Tiled2dM
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_tiled_Tiled2dMapSourceInterface_00024CppProxy_native_1onVisibleRectChanged(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeCoord::JniType j_topLeft, ::djinni_generated::NativeCoord::JniType j_bottomRight, jdouble j_zoom)
+CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_tiled_Tiled2dMapSourceInterface_00024CppProxy_native_1onVisibleBoundsChanged(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRectCoord::JniType j_visibleBounds, jdouble j_zoom)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapSourceInterface>(nativeRef);
-        ref->onVisibleRectChanged(::djinni_generated::NativeCoord::toCpp(jniEnv, j_topLeft),
-                                  ::djinni_generated::NativeCoord::toCpp(jniEnv, j_bottomRight),
-                                  ::djinni::F64::toCpp(jniEnv, j_zoom));
+        ref->onVisibleBoundsChanged(::djinni_generated::NativeRectCoord::toCpp(jniEnv, j_visibleBounds),
+                                    ::djinni::F64::toCpp(jniEnv, j_zoom));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

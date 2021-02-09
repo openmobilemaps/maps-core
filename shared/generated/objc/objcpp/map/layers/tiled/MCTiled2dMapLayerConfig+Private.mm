@@ -7,8 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
-#import "MCRectD+Private.h"
-#import "MCTiled2dMapSourceInterface+Private.h"
+#import "MCRectCoord+Private.h"
 #import "MCTiled2dMapZoomLevelInfo+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -34,10 +33,10 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (nonnull MCRectD *)getBounds {
+- (nonnull MCRectCoord *)getBounds {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getBounds();
-        return ::djinni_generated::RectD::fromCpp(objcpp_result_);
+        return ::djinni_generated::RectCoord::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -70,13 +69,6 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nullable MCTiled2dMapSourceInterface *)createTiledLayerSource {
-    try {
-        auto objcpp_result_ = _cppRefHandle.get()->createTiledLayerSource();
-        return ::djinni_generated::Tiled2dMapSourceInterface::fromCpp(objcpp_result_);
-    } DJINNI_TRANSLATE_EXCEPTIONS()
-}
-
 namespace djinni_generated {
 
 class Tiled2dMapLayerConfig::ObjcProxy final
@@ -86,11 +78,11 @@ class Tiled2dMapLayerConfig::ObjcProxy final
     friend class ::djinni_generated::Tiled2dMapLayerConfig;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    ::RectD getBounds() override
+    ::RectCoord getBounds() override
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getBounds];
-            return ::djinni_generated::RectD::toCpp(objcpp_result_);
+            return ::djinni_generated::RectCoord::toCpp(objcpp_result_);
         }
     }
     std::string getTileUrl(int32_t c_x, int32_t c_y, int32_t c_zoom) override
@@ -116,13 +108,6 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getZoomLevelInfos];
             return ::djinni::List<::djinni_generated::Tiled2dMapZoomLevelInfo>::toCpp(objcpp_result_);
-        }
-    }
-    std::shared_ptr<::Tiled2dMapSourceInterface> createTiledLayerSource() override
-    {
-        @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createTiledLayerSource];
-            return ::djinni_generated::Tiled2dMapSourceInterface::toCpp(objcpp_result_);
         }
     }
 };

@@ -131,8 +131,7 @@ void MapCamera2d::notifyListeners() {
                               centerPosition.y - ((double) sizeViewport.y / 2.0) * zoomFactor,
                               centerPosition.z);
     for (auto listener: listeners) {
-        listener->onCenterPositionChanged(centerPosition, zoom);
-        listener->onVisibleBoundsChanged(topLeft, bottomRight, zoom);
+        listener->onVisibleBoundsChanged(RectCoord(topLeft, bottomRight), zoom);
     }
 }
 

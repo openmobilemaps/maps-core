@@ -3,26 +3,22 @@
 
 #pragma once
 
-#include "RectD.h"
+#include "RectCoord.h"
 #include <cstdint>
-#include <memory>
 #include <string>
 #include <vector>
 
-class Tiled2dMapSourceInterface;
 struct Tiled2dMapZoomLevelInfo;
 
 class Tiled2dMapLayerConfig {
 public:
     virtual ~Tiled2dMapLayerConfig() {}
 
-    virtual ::RectD getBounds() = 0;
+    virtual ::RectCoord getBounds() = 0;
 
     virtual std::string getTileUrl(int32_t x, int32_t y, int32_t zoom) = 0;
 
     virtual std::string getTileIdentifier(int32_t x, int32_t y, int32_t zoom) = 0;
 
     virtual std::vector<Tiled2dMapZoomLevelInfo> getZoomLevelInfos() = 0;
-
-    virtual std::shared_ptr<Tiled2dMapSourceInterface> createTiledLayerSource() = 0;
 };

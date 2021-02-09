@@ -3,7 +3,7 @@
 
 #include "NativeMapCamera2dListenerInterface.h"  // my header
 #include "Marshal.hpp"
-#include "NativeCoord.h"
+#include "NativeRectCoord.h"
 
 namespace djinni_generated {
 
@@ -15,22 +15,12 @@ NativeMapCamera2dListenerInterface::JavaProxy::JavaProxy(JniType j) : Handle(::d
 
 NativeMapCamera2dListenerInterface::JavaProxy::~JavaProxy() = default;
 
-void NativeMapCamera2dListenerInterface::JavaProxy::onCenterPositionChanged(const ::Coord & c_position, double c_zoom) {
-    auto jniEnv = ::djinni::jniGetThreadEnv();
-    ::djinni::JniLocalScope jscope(jniEnv, 10);
-    const auto& data = ::djinni::JniClass<::djinni_generated::NativeMapCamera2dListenerInterface>::get();
-    jniEnv->CallVoidMethod(Handle::get().get(), data.method_onCenterPositionChanged,
-                           ::djinni::get(::djinni_generated::NativeCoord::fromCpp(jniEnv, c_position)),
-                           ::djinni::get(::djinni::F64::fromCpp(jniEnv, c_zoom)));
-    ::djinni::jniExceptionCheck(jniEnv);
-}
-void NativeMapCamera2dListenerInterface::JavaProxy::onVisibleBoundsChanged(const ::Coord & c_topLeft, const ::Coord & c_bottomRight, double c_zoom) {
+void NativeMapCamera2dListenerInterface::JavaProxy::onVisibleBoundsChanged(const ::RectCoord & c_visibleBounds, double c_zoom) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeMapCamera2dListenerInterface>::get();
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_onVisibleBoundsChanged,
-                           ::djinni::get(::djinni_generated::NativeCoord::fromCpp(jniEnv, c_topLeft)),
-                           ::djinni::get(::djinni_generated::NativeCoord::fromCpp(jniEnv, c_bottomRight)),
+                           ::djinni::get(::djinni_generated::NativeRectCoord::fromCpp(jniEnv, c_visibleBounds)),
                            ::djinni::get(::djinni::F64::fromCpp(jniEnv, c_zoom)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
@@ -43,23 +33,12 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_camera_MapCamera2dLis
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_camera_MapCamera2dListenerInterface_00024CppProxy_native_1onCenterPositionChanged(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeCoord::JniType j_position, jdouble j_zoom)
+CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_camera_MapCamera2dListenerInterface_00024CppProxy_native_1onVisibleBoundsChanged(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRectCoord::JniType j_visibleBounds, jdouble j_zoom)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dListenerInterface>(nativeRef);
-        ref->onCenterPositionChanged(::djinni_generated::NativeCoord::toCpp(jniEnv, j_position),
-                                     ::djinni::F64::toCpp(jniEnv, j_zoom));
-    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
-}
-
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_camera_MapCamera2dListenerInterface_00024CppProxy_native_1onVisibleBoundsChanged(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeCoord::JniType j_topLeft, ::djinni_generated::NativeCoord::JniType j_bottomRight, jdouble j_zoom)
-{
-    try {
-        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
-        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dListenerInterface>(nativeRef);
-        ref->onVisibleBoundsChanged(::djinni_generated::NativeCoord::toCpp(jniEnv, j_topLeft),
-                                    ::djinni_generated::NativeCoord::toCpp(jniEnv, j_bottomRight),
+        ref->onVisibleBoundsChanged(::djinni_generated::NativeRectCoord::toCpp(jniEnv, j_visibleBounds),
                                     ::djinni::F64::toCpp(jniEnv, j_zoom));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }

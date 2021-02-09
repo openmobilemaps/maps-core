@@ -3,11 +3,11 @@
 
 #pragma once
 
-#include "Coord.h"
+#include "RectCoord.h"
 
 class Tiled2dMapSourceInterface {
 public:
     virtual ~Tiled2dMapSourceInterface() {}
 
-    virtual void onVisibleRectChanged(const ::Coord & topLeft, const ::Coord & bottomRight, double zoom) = 0;
+    virtual void onVisibleBoundsChanged(const ::RectCoord & visibleBounds, double zoom) = 0;
 };

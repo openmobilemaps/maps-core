@@ -6,7 +6,7 @@
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
-#import "MCCoord+Private.h"
+#import "MCRectCoord+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -31,13 +31,11 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (void)onVisibleRectChanged:(nonnull MCCoord *)topLeft
-                 bottomRight:(nonnull MCCoord *)bottomRight
-                        zoom:(double)zoom {
+- (void)onVisibleBoundsChanged:(nonnull MCRectCoord *)visibleBounds
+                          zoom:(double)zoom {
     try {
-        _cppRefHandle.get()->onVisibleRectChanged(::djinni_generated::Coord::toCpp(topLeft),
-                                                  ::djinni_generated::Coord::toCpp(bottomRight),
-                                                  ::djinni::F64::toCpp(zoom));
+        _cppRefHandle.get()->onVisibleBoundsChanged(::djinni_generated::RectCoord::toCpp(visibleBounds),
+                                                    ::djinni::F64::toCpp(zoom));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

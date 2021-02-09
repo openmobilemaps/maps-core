@@ -7,7 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
-#import "MCCoord+Private.h"
+#import "MCRectCoord+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -32,20 +32,10 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (void)onCenterPositionChanged:(nonnull MCCoord *)position
-                           zoom:(double)zoom {
-    try {
-        _cppRefHandle.get()->onCenterPositionChanged(::djinni_generated::Coord::toCpp(position),
-                                                     ::djinni::F64::toCpp(zoom));
-    } DJINNI_TRANSLATE_EXCEPTIONS()
-}
-
-- (void)onVisibleBoundsChanged:(nonnull MCCoord *)topLeft
-                   bottomRight:(nonnull MCCoord *)bottomRight
+- (void)onVisibleBoundsChanged:(nonnull MCRectCoord *)visibleBounds
                           zoom:(double)zoom {
     try {
-        _cppRefHandle.get()->onVisibleBoundsChanged(::djinni_generated::Coord::toCpp(topLeft),
-                                                    ::djinni_generated::Coord::toCpp(bottomRight),
+        _cppRefHandle.get()->onVisibleBoundsChanged(::djinni_generated::RectCoord::toCpp(visibleBounds),
                                                     ::djinni::F64::toCpp(zoom));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -59,18 +49,10 @@ class MapCamera2dListenerInterface::ObjcProxy final
     friend class ::djinni_generated::MapCamera2dListenerInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void onCenterPositionChanged(const ::Coord & c_position, double c_zoom) override
+    void onVisibleBoundsChanged(const ::RectCoord & c_visibleBounds, double c_zoom) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() onCenterPositionChanged:(::djinni_generated::Coord::fromCpp(c_position))
-                                                                         zoom:(::djinni::F64::fromCpp(c_zoom))];
-        }
-    }
-    void onVisibleBoundsChanged(const ::Coord & c_topLeft, const ::Coord & c_bottomRight, double c_zoom) override
-    {
-        @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() onVisibleBoundsChanged:(::djinni_generated::Coord::fromCpp(c_topLeft))
-                                                                 bottomRight:(::djinni_generated::Coord::fromCpp(c_bottomRight))
+            [djinni_private_get_proxied_objc_object() onVisibleBoundsChanged:(::djinni_generated::RectCoord::fromCpp(c_visibleBounds))
                                                                         zoom:(::djinni::F64::fromCpp(c_zoom))];
         }
     }

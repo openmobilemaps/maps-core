@@ -1,0 +1,9 @@
+@extern "../../../../yaml/map_interface.yaml"
+@extern "../../../../yaml/tiled_2d_map_layer_config.yaml"
+@extern "../../../../yaml/texture_loader_interface.yaml"
+@extern "../../../../yaml/layer_interface.yaml"
+
+tiled_2d_map_raster_layer_interface = interface +c {
+    static create(map_interface: map_interface, layer_config: tiled_2d_map_layer_config, texture_loader: texture_loader_interface) : tiled_2d_map_raster_layer_interface;
+    asLayerInterface(): layer_interface;
+}

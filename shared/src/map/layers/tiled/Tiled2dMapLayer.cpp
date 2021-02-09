@@ -2,36 +2,30 @@
 
 
 Tiled2dMapLayer::Tiled2dMapLayer(const std::shared_ptr<MapInterface> &mapInterface,
-                                 const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig) :
+                                 const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
+                                 const std::shared_ptr<Tiled2dMapSourceInterface> &source) :
         mapInterface(mapInterface),
-        layerConfig(layerConfig) {
+        layerConfig(layerConfig),
+        source(source) {
 
-}
-
-std::shared_ptr<LayerInterface> Tiled2dMapLayer::asLayerInterface() {
-    return shared_from_this();
-}
-
-std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapLayer::buildRenderPasses() {
-    return {};
-}
-
-std::string Tiled2dMapLayer::getIdentifier() {
-    return "identifier";
 }
 
 void Tiled2dMapLayer::pause() {
-
+    // TODO: Adjust source
 }
 
 void Tiled2dMapLayer::resume() {
-
+    // TODO: Adjust source
 }
 
 void Tiled2dMapLayer::hide() {
-
+    isHidden = true;
 }
 
 void Tiled2dMapLayer::show() {
+    isHidden = false;
+}
 
+void Tiled2dMapLayer::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom) {
+    source->onVisibleBoundsChanged(visibleBounds, zoom);
 }

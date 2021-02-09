@@ -4,7 +4,6 @@
 @extern "../yaml/shader_factory_interface.yaml"
 @extern "../yaml/graphics_object_factory_interface.yaml"
 @extern "../yaml/camera_interface.yaml"
-@extern "../yaml/loader_interface.yaml"
 @extern "../yaml/layer_interface.yaml"
 @extern "../yaml/scene_interface.yaml"
 @extern "../yaml/rendering_context_interface.yaml"

@@ -33,16 +33,14 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        void onCenterPositionChanged(const ::Coord & position, double zoom) override;
-        void onVisibleBoundsChanged(const ::Coord & topLeft, const ::Coord & bottomRight, double zoom) override;
+        void onVisibleBoundsChanged(const ::RectCoord & visibleBounds, double zoom) override;
 
     private:
         friend ::djinni::JniInterface<::MapCamera2dListenerInterface, ::djinni_generated::NativeMapCamera2dListenerInterface>;
     };
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/map/camera/MapCamera2dListenerInterface") };
-    const jmethodID method_onCenterPositionChanged { ::djinni::jniGetMethodID(clazz.get(), "onCenterPositionChanged", "(Lch/ubique/mapscore/shared/map/coordinates/Coord;D)V") };
-    const jmethodID method_onVisibleBoundsChanged { ::djinni::jniGetMethodID(clazz.get(), "onVisibleBoundsChanged", "(Lch/ubique/mapscore/shared/map/coordinates/Coord;Lch/ubique/mapscore/shared/map/coordinates/Coord;D)V") };
+    const jmethodID method_onVisibleBoundsChanged { ::djinni::jniGetMethodID(clazz.get(), "onVisibleBoundsChanged", "(Lch/ubique/mapscore/shared/map/coordinates/RectCoord;D)V") };
 };
 
 }  // namespace djinni_generated

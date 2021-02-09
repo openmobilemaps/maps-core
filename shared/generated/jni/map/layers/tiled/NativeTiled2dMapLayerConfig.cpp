@@ -3,8 +3,7 @@
 
 #include "NativeTiled2dMapLayerConfig.h"  // my header
 #include "Marshal.hpp"
-#include "NativeRectD.h"
-#include "NativeTiled2dMapSourceInterface.h"
+#include "NativeRectCoord.h"
 #include "NativeTiled2dMapZoomLevelInfo.h"
 
 namespace djinni_generated {
@@ -17,13 +16,13 @@ NativeTiled2dMapLayerConfig::JavaProxy::JavaProxy(JniType j) : Handle(::djinni::
 
 NativeTiled2dMapLayerConfig::JavaProxy::~JavaProxy() = default;
 
-::RectD NativeTiled2dMapLayerConfig::JavaProxy::getBounds() {
+::RectCoord NativeTiled2dMapLayerConfig::JavaProxy::getBounds() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeTiled2dMapLayerConfig>::get();
     auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getBounds);
     ::djinni::jniExceptionCheck(jniEnv);
-    return ::djinni_generated::NativeRectD::toCpp(jniEnv, jret);
+    return ::djinni_generated::NativeRectCoord::toCpp(jniEnv, jret);
 }
 std::string NativeTiled2dMapLayerConfig::JavaProxy::getTileUrl(int32_t c_x, int32_t c_y, int32_t c_zoom) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
@@ -55,14 +54,6 @@ std::vector<::Tiled2dMapZoomLevelInfo> NativeTiled2dMapLayerConfig::JavaProxy::g
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::List<::djinni_generated::NativeTiled2dMapZoomLevelInfo>::toCpp(jniEnv, jret);
 }
-std::shared_ptr<::Tiled2dMapSourceInterface> NativeTiled2dMapLayerConfig::JavaProxy::createTiledLayerSource() {
-    auto jniEnv = ::djinni::jniGetThreadEnv();
-    ::djinni::JniLocalScope jscope(jniEnv, 10);
-    const auto& data = ::djinni::JniClass<::djinni_generated::NativeTiled2dMapLayerConfig>::get();
-    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_createTiledLayerSource);
-    ::djinni::jniExceptionCheck(jniEnv);
-    return ::djinni_generated::NativeTiled2dMapSourceInterface::toCpp(jniEnv, jret);
-}
 
 CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_tiled_Tiled2dMapLayerConfig_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
@@ -72,13 +63,13 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_tiled_Tiled2dM
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT ::djinni_generated::NativeRectD::JniType JNICALL Java_ch_ubique_mapscore_shared_map_layers_tiled_Tiled2dMapLayerConfig_00024CppProxy_native_1getBounds(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT ::djinni_generated::NativeRectCoord::JniType JNICALL Java_ch_ubique_mapscore_shared_map_layers_tiled_Tiled2dMapLayerConfig_00024CppProxy_native_1getBounds(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapLayerConfig>(nativeRef);
         auto r = ref->getBounds();
-        return ::djinni::release(::djinni_generated::NativeRectD::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni_generated::NativeRectCoord::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
@@ -113,16 +104,6 @@ CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_layers_tiled_Tiled
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapLayerConfig>(nativeRef);
         auto r = ref->getZoomLevelInfos();
         return ::djinni::release(::djinni::List<::djinni_generated::NativeTiled2dMapZoomLevelInfo>::fromCpp(jniEnv, r));
-    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
-}
-
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_layers_tiled_Tiled2dMapLayerConfig_00024CppProxy_native_1createTiledLayerSource(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
-{
-    try {
-        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
-        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapLayerConfig>(nativeRef);
-        auto r = ref->createTiledLayerSource();
-        return ::djinni::release(::djinni_generated::NativeTiled2dMapSourceInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

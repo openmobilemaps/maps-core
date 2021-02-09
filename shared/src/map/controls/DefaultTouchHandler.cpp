@@ -120,7 +120,7 @@ void DefaultTouchHandler::handleTouchDown(Vec2F position) {
         state = ONE_FINGER_DOWN;
     }
     stateTime = DateHelper::currentTimeMillis();
-    scheduler->addTask(std::make_shared<LambdaTask>(TaskConfig("LongPressTask", LONG_PRESS_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::IO), [=] { checkState(); }));
+    scheduler->addTask(std::make_shared<LambdaTask>(TaskConfig("LongPressTask", LONG_PRESS_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION), [=] { checkState(); }));
     /*for (auto &listener : listeners) {
         if (listener->onTouch(x, y)) {
             break;
@@ -173,7 +173,7 @@ void DefaultTouchHandler::handleTouchUp() {
             }
         }
         state = ONE_FINGER_UP_AFTER_CLICK;
-        scheduler->addTask(std::make_shared<LambdaTask>(TaskConfig("DoubleTapTask", DOUBLE_TAP_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::IO), [=] { checkState(); }));
+        scheduler->addTask(std::make_shared<LambdaTask>(TaskConfig("DoubleTapTask", DOUBLE_TAP_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION), [=] { checkState(); }));
     } else if (state == TWO_FINGER_DOWN && stateTime >= DateHelper::currentTimeMillis() - TWO_FINGER_TOUCH_TIMEOUT) {
         LogDebug <<= "TouchHandler: Two finger click detected";
         for (auto &listener : listeners) {
@@ -207,7 +207,7 @@ void DefaultTouchHandler::handleTwoFingerDown() {
     }
     state = TWO_FINGER_DOWN;
     stateTime = DateHelper::currentTimeMillis();
-    scheduler->addTask(std::make_shared<LambdaTask>(TaskConfig("LongPressTask", LONG_PRESS_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::IO), [=] { checkState(); }));
+    scheduler->addTask(std::make_shared<LambdaTask>(TaskConfig("LongPressTask", LONG_PRESS_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION), [=] { checkState(); }));
     for (auto &listener : listeners) {
         listener->clearTouch();
     }

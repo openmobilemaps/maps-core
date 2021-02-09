@@ -4,24 +4,31 @@
 
 #pragma once
 
+#include <set>
 #include "Tiled2dMapSourceInterface.h"
 #include "Tiled2dMapLayerConfig.h"
-#include "LoaderInterface.h"
 #include "SchedulerInterface.h"
 #include "Coord.h"
+#include "Tiled2dMapTileInfo.h"
+#include "Tiled2dMapSourceListenerInterface.h"
 
 class Tiled2dMapSource : public Tiled2dMapSourceInterface {
 public:
-    Tiled2dMapSource(const std::shared_ptr <Tiled2dMapLayerConfig> &layerConfig,
-                     const std::shared_ptr <SchedulerInterface> &scheduler,
-                     const std::shared_ptr <LoaderInterface> &loader);
+    Tiled2dMapSource(const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
+                     const std::shared_ptr<SchedulerInterface> &scheduler,
+                     const std::shared_ptr<Tiled2dMapSourceListenerInterface> &listener);
 
-    virtual void onVisibleRectChanged(const Coord &topLeft, const Coord &bottomRight, double zoom);
+    virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom);
 
 protected:
-    virtual void loadTile(int left, int top, int zoom) = 0;
+    virtual void onVisibleTilesChanged(const std::set<Tiled2dMapTileInfo> &visibleTiles) = 0;
 
-    std::shared_ptr <Tiled2dMapLayerConfig> layerConfig;
-    std::shared_ptr <SchedulerInterface> scheduler;
-    std::shared_ptr <LoaderInterface> loader;
+    std::shared_ptr<Tiled2dMapLayerConfig> layerConfig;
+    std::shared_ptr<SchedulerInterface> scheduler;
+    std::shared_ptr<Tiled2dMapSourceListenerInterface> listener;
+
+    const std::vector<Tiled2dMapZoomLevelInfo> zoomInfo;
+
+private:
+    void updateCurrentTileset(const ::RectCoord &visibleBounds, double zoom);
 };

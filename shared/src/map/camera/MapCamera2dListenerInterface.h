@@ -3,13 +3,11 @@
 
 #pragma once
 
-#include "Coord.h"
+#include "RectCoord.h"
 
 class MapCamera2dListenerInterface {
 public:
     virtual ~MapCamera2dListenerInterface() {}
 
-    virtual void onCenterPositionChanged(const ::Coord & position, double zoom) = 0;
-
-    virtual void onVisibleBoundsChanged(const ::Coord & topLeft, const ::Coord & bottomRight, double zoom) = 0;
+    virtual void onVisibleBoundsChanged(const ::RectCoord & visibleBounds, double zoom) = 0;
 };

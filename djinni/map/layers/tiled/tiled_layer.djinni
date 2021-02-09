@@ -1,17 +1,10 @@
-@extern "../../../yaml/layer_interface.yaml"
-@extern "../../../yaml/rect_d.yaml"
-@extern "../../../yaml/coord.yaml"
-
-tiled_2d_map_layer_interface = interface +c +j +o {
-    asLayerInterface(): layer_interface;
-}
+@extern "../../../yaml/rect_coord.yaml"
 
 tiled_2d_map_layer_config = interface +c +j +o {
-    get_bounds(): rect_d;
+    get_bounds(): rect_coord;
     get_tile_url(x:i32, y:i32, zoom:i32): string;
     get_tile_identifier(x:i32, y:i32, zoom: i32): string;
     get_zoom_level_infos() : list<tiled_2d_map_zoom_level_info>;
-    create_tiled_layer_source() : tiled_2d_map_source_interface;
 }
 
 tiled_2d_map_zoom_level_info = record {
@@ -23,5 +16,6 @@ tiled_2d_map_zoom_level_info = record {
 }
 
 tiled_2d_map_source_interface = interface +c {
-    on_visible_rect_changed(top_left: coord, bottom_right: coord, zoom: f64);
+    on_visible_bounds_changed(visible_bounds: rect_coord, zoom: f64);
 }
+

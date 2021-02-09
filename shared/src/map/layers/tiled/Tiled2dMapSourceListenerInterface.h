@@ -6,5 +6,5 @@
 
 class Tiled2dMapSourceListenerInterface {
 public:
-    virtual void onTileUpdate() = 0;
+    virtual void onTilesUpdated() = 0;
 };

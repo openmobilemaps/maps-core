@@ -23,3 +23,8 @@ coord = record {
     y: f64;
     z: f64;
 }
+
+rect_coord = record {
+    top_left: coord;
+    bottom_right: coord;
+}

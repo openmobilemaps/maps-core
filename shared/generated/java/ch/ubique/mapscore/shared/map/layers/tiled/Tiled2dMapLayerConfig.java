@@ -7,15 +7,13 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class Tiled2dMapLayerConfig {
-    public abstract ch.ubique.mapscore.shared.graphics.common.RectD getBounds();
+    public abstract ch.ubique.mapscore.shared.map.coordinates.RectCoord getBounds();
 
     public abstract String getTileUrl(int x, int y, int zoom);
 
     public abstract String getTileIdentifier(int x, int y, int zoom);
 
     public abstract ArrayList<Tiled2dMapZoomLevelInfo> getZoomLevelInfos();
-
-    public abstract Tiled2dMapSourceInterface createTiledLayerSource();
 
     private static final class CppProxy extends Tiled2dMapLayerConfig
     {
@@ -41,12 +39,12 @@ public abstract class Tiled2dMapLayerConfig {
         }
 
         @Override
-        public ch.ubique.mapscore.shared.graphics.common.RectD getBounds()
+        public ch.ubique.mapscore.shared.map.coordinates.RectCoord getBounds()
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
             return native_getBounds(this.nativeRef);
         }
-        private native ch.ubique.mapscore.shared.graphics.common.RectD native_getBounds(long _nativeRef);
+        private native ch.ubique.mapscore.shared.map.coordinates.RectCoord native_getBounds(long _nativeRef);
 
         @Override
         public String getTileUrl(int x, int y, int zoom)
@@ -71,13 +69,5 @@ public abstract class Tiled2dMapLayerConfig {
             return native_getZoomLevelInfos(this.nativeRef);
         }
         private native ArrayList<Tiled2dMapZoomLevelInfo> native_getZoomLevelInfos(long _nativeRef);
-
-        @Override
-        public Tiled2dMapSourceInterface createTiledLayerSource()
-        {
-            assert !this.destroyed.get() : "trying to use a destroyed object";
-            return native_createTiledLayerSource(this.nativeRef);
-        }
-        private native Tiled2dMapSourceInterface native_createTiledLayerSource(long _nativeRef);
     }
 }
