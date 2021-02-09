@@ -2,7 +2,6 @@ import Foundation
 import MapCoreSharedModule
 
 class Loader: MCLoaderInterface {
-
     func loadDate(_ url: String) -> Data? {
         let urlString = url
         guard let url = URL(string: urlString) else {
@@ -12,7 +11,7 @@ class Loader: MCLoaderInterface {
 
         var result: Data?
 
-        let task = URLSession.shared.dataTask(with: url) {(data, response, error) in
+        let task = URLSession.shared.dataTask(with: url) { data, _, _ in
             result = data
             semaphore.signal()
         }

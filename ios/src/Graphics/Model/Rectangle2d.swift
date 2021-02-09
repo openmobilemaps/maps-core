@@ -19,7 +19,7 @@ class Rectangle2d: BaseGraphicsObject {
         super.init(device: metalContext.device,
                    sampler: metalContext.samplerLibrary.value(.magLinear))
 
-        let image = UIImage(named:"ubique")
+        let image = UIImage(named: "ubique")
         loadTexture(try! TextureHolder(image!.cgImage!))
     }
 
