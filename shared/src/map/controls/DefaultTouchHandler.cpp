@@ -10,6 +10,7 @@ DefaultTouchHandler::DefaultTouchHandler(std::shared_ptr<SchedulerInterface> sch
 :
 scheduler(scheduler),
 density(density),
+clickDistancePx(CLICK_DISTANCE_MM * density / 25.4),
 state(IDLE),
 stateTime(0),
 touchPosition(0, 0),
@@ -115,6 +116,7 @@ void DefaultTouchHandler::handleTouchDown(Vec2F position) {
     if (state == ONE_FINGER_UP_AFTER_CLICK && stateTime >= DateHelper::currentTimeMillis() - DOUBLE_TAP_TIMEOUT) {
         state = ONE_FINGER_DOUBLE_CLICK_DOWN;
     } else {
+        LogDebug <<= "TouchHandler: is touching down (one finger)";
         state = ONE_FINGER_DOWN;
     }
     stateTime = DateHelper::currentTimeMillis();
@@ -127,12 +129,15 @@ void DefaultTouchHandler::handleTouchDown(Vec2F position) {
 }
 
 void DefaultTouchHandler::handleMove(Vec2F delta) {
+    LogDebug <<= "TouchHandler: handle move";
     std::vector<float> diffPointer = {touchStartPosition.x, touchStartPosition.y, touchPosition.x, touchPosition.y};
-    if (distance(diffPointer) > 10 * density) {
+    if (distance(diffPointer) > clickDistancePx) {
+        LogDebug <<= "TouchHandler: moved large distance";
         if (state == ONE_FINGER_DOUBLE_CLICK_DOWN || state == ONE_FINGER_DOUBLE_CLICK_MOVE) {
             state = ONE_FINGER_DOUBLE_CLICK_MOVE;
         }
         else {
+            LogDebug <<= "TouchHandler: is moving now";
             state = ONE_FINGER_MOVING;
         }
         stateTime = DateHelper::currentTimeMillis();
@@ -216,7 +221,7 @@ void DefaultTouchHandler::handleTwoFingerMove(std::tuple<Vec2F, Vec2F> oldPointe
             }
         }
     }
-    if (multiTouchMoved(oldPointer, newpointer, 10 * density)) {
+    if (multiTouchMoved(oldPointer, newpointer, clickDistancePx)) {
         state = TWO_FINGER_MOVING;
         stateTime = DateHelper::currentTimeMillis();
     }

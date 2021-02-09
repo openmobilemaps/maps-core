@@ -49,8 +49,10 @@ private:
     int32_t TWO_FINGER_TOUCH_TIMEOUT = 100;
     int32_t DOUBLE_TAP_TIMEOUT = 300;
     int32_t LONG_PRESS_TIMEOUT = 500;
+    int32_t CLICK_DISTANCE_MM = 3;
 
     float density;
+    float clickDistancePx;
 
     std::vector<std::shared_ptr<TouchInterface>> listeners;
     
