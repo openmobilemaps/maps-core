@@ -9,13 +9,13 @@
                                  boundsTop:(double)boundsTop
                                boundsRight:(double)boundsRight
                               boundsBottom:(double)boundsBottom
-                         unitToMeterFactor:(float)unitToMeterFactor;
+                   unitToScreenMeterFactor:(float)unitToScreenMeterFactor;
 + (nonnull instancetype)mapCoordinateSystemWithIdentifier:(nonnull NSString *)identifier
                                                boundsLeft:(double)boundsLeft
                                                 boundsTop:(double)boundsTop
                                               boundsRight:(double)boundsRight
                                              boundsBottom:(double)boundsBottom
-                                        unitToMeterFactor:(float)unitToMeterFactor;
+                                  unitToScreenMeterFactor:(float)unitToScreenMeterFactor;
 
 @property (nonatomic, readonly, nonnull) NSString * identifier;
 
@@ -27,6 +27,6 @@
 
 @property (nonatomic, readonly) double boundsBottom;
 
-@property (nonatomic, readonly) float unitToMeterFactor;
+@property (nonatomic, readonly) float unitToScreenMeterFactor;
 
 @end

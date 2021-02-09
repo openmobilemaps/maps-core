@@ -15,7 +15,7 @@ auto MapCoordinateSystem::toCpp(ObjcType obj) -> CppType
             ::djinni::F64::toCpp(obj.boundsTop),
             ::djinni::F64::toCpp(obj.boundsRight),
             ::djinni::F64::toCpp(obj.boundsBottom),
-            ::djinni::F32::toCpp(obj.unitToMeterFactor)};
+            ::djinni::F32::toCpp(obj.unitToScreenMeterFactor)};
 }
 
 auto MapCoordinateSystem::fromCpp(const CppType& cpp) -> ObjcType
@@ -25,7 +25,7 @@ auto MapCoordinateSystem::fromCpp(const CppType& cpp) -> ObjcType
                                                    boundsTop:(::djinni::F64::fromCpp(cpp.boundsTop))
                                                  boundsRight:(::djinni::F64::fromCpp(cpp.boundsRight))
                                                 boundsBottom:(::djinni::F64::fromCpp(cpp.boundsBottom))
-                                           unitToMeterFactor:(::djinni::F32::fromCpp(cpp.unitToMeterFactor))];
+                                     unitToScreenMeterFactor:(::djinni::F32::fromCpp(cpp.unitToScreenMeterFactor))];
 }
 
 }  // namespace djinni_generated

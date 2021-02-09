@@ -17,7 +17,7 @@ public final class MapCoordinateSystem implements java.io.Serializable {
 
     protected double boundsBottom;
 
-    protected float unitToMeterFactor;
+    protected float unitToScreenMeterFactor;
 
     public MapCoordinateSystem(
             String identifier,
@@ -25,13 +25,13 @@ public final class MapCoordinateSystem implements java.io.Serializable {
             double boundsTop,
             double boundsRight,
             double boundsBottom,
-            float unitToMeterFactor) {
+            float unitToScreenMeterFactor) {
         this.identifier = identifier;
         this.boundsLeft = boundsLeft;
         this.boundsTop = boundsTop;
         this.boundsRight = boundsRight;
         this.boundsBottom = boundsBottom;
-        this.unitToMeterFactor = unitToMeterFactor;
+        this.unitToScreenMeterFactor = unitToScreenMeterFactor;
     }
 
     public String getIdentifier() {
@@ -54,8 +54,8 @@ public final class MapCoordinateSystem implements java.io.Serializable {
         return boundsBottom;
     }
 
-    public float getUnitToMeterFactor() {
-        return unitToMeterFactor;
+    public float getUnitToScreenMeterFactor() {
+        return unitToScreenMeterFactor;
     }
 
     public void setIdentifier(String identifier) {
@@ -78,8 +78,8 @@ public final class MapCoordinateSystem implements java.io.Serializable {
         this.boundsBottom = boundsBottom;
     }
 
-    public void setUnitToMeterFactor(float unitToMeterFactor) {
-        this.unitToMeterFactor = unitToMeterFactor;
+    public void setUnitToScreenMeterFactor(float unitToScreenMeterFactor) {
+        this.unitToScreenMeterFactor = unitToScreenMeterFactor;
     }
 
     @Override
@@ -90,7 +90,7 @@ public final class MapCoordinateSystem implements java.io.Serializable {
                 "," + "boundsTop=" + boundsTop +
                 "," + "boundsRight=" + boundsRight +
                 "," + "boundsBottom=" + boundsBottom +
-                "," + "unitToMeterFactor=" + unitToMeterFactor +
+                "," + "unitToScreenMeterFactor=" + unitToScreenMeterFactor +
         "}";
     }
 

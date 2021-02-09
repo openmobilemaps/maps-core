@@ -10,7 +10,7 @@ namespace djinni_generated {
 auto Tiled2dMapZoomLevelInfo::toCpp(ObjcType obj) -> CppType
 {
     assert(obj);
-    return {::djinni::F64::toCpp(obj.scale),
+    return {::djinni::F64::toCpp(obj.zoom),
             ::djinni::I64::toCpp(obj.tileWidthMillimeter),
             ::djinni::I32::toCpp(obj.numTilesX),
             ::djinni::I32::toCpp(obj.numTilesY),
@@ -19,11 +19,11 @@ auto Tiled2dMapZoomLevelInfo::toCpp(ObjcType obj) -> CppType
 
 auto Tiled2dMapZoomLevelInfo::fromCpp(const CppType& cpp) -> ObjcType
 {
-    return [[MCTiled2dMapZoomLevelInfo alloc] initWithScale:(::djinni::F64::fromCpp(cpp.scale))
-                                        tileWidthMillimeter:(::djinni::I64::fromCpp(cpp.tileWidthMillimeter))
-                                                  numTilesX:(::djinni::I32::fromCpp(cpp.numTilesX))
-                                                  numTilesY:(::djinni::I32::fromCpp(cpp.numTilesY))
-                                        zoomLevelIdentifier:(::djinni::I32::fromCpp(cpp.zoomLevelIdentifier))];
+    return [[MCTiled2dMapZoomLevelInfo alloc] initWithZoom:(::djinni::F64::fromCpp(cpp.zoom))
+                                       tileWidthMillimeter:(::djinni::I64::fromCpp(cpp.tileWidthMillimeter))
+                                                 numTilesX:(::djinni::I32::fromCpp(cpp.numTilesX))
+                                                 numTilesY:(::djinni::I32::fromCpp(cpp.numTilesY))
+                                       zoomLevelIdentifier:(::djinni::I32::fromCpp(cpp.zoomLevelIdentifier))];
 }
 
 }  // namespace djinni_generated

@@ -33,11 +33,11 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 
 - (void)onVisibleRectChanged:(nonnull MCCoord *)topLeft
                  bottomRight:(nonnull MCCoord *)bottomRight
-                       scale:(double)scale {
+                        zoom:(double)zoom {
     try {
         _cppRefHandle.get()->onVisibleRectChanged(::djinni_generated::Coord::toCpp(topLeft),
                                                   ::djinni_generated::Coord::toCpp(bottomRight),
-                                                  ::djinni::F64::toCpp(scale));
+                                                  ::djinni::F64::toCpp(zoom));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

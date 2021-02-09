@@ -12,6 +12,7 @@ TestingLayer::TestingLayer(const std::shared_ptr<MapInterface> &mapInterface) : 
     rectangle = mapInterface->getGraphicsObjectFactory()->createRectangle(shader2->asShaderProgramInterface());
     rectangle2 = mapInterface->getGraphicsObjectFactory()->createRectangle(shader->asShaderProgramInterface());
     rectangle3 = mapInterface->getGraphicsObjectFactory()->createRectangle(texture->asShaderProgramInterface());
+    rectangle4 = mapInterface->getGraphicsObjectFactory()->createRectangle(shader2->asShaderProgramInterface());
     polygonObject = std::make_shared<Polygon2dLayerObject>(mapInterface->getCoordinateConverterHelper(),
                                                            mapInterface->getGraphicsObjectFactory()->createPolygon(
                                                                    shader->asShaderProgramInterface()), shader);
@@ -19,6 +20,7 @@ TestingLayer::TestingLayer(const std::shared_ptr<MapInterface> &mapInterface) : 
     rectangle->setFrame(RectD(-1000, -1000000, 2000, 2000000), RectD(0, 0, 1, 1));
     rectangle2->setFrame(RectD(-1000000, -1000, 2000000, 2000), RectD(0, 0, 1, 1));
     rectangle3->setFrame(RectD(0, 0, 200000, 200000), RectD(0, 0, 1, 1));
+    rectangle4->setFrame(RectD(0, 0, 20000, 20000), RectD(0, 0, 1, 1));
     std::string mapCoordSystemId = mapInterface->getMapConfig().mapCoordinateSystem.identifier;
     polygonObject->setPositions({Coord(mapCoordSystemId, 2481483.3, 1107166.7, 0),
                                  Coord(mapCoordSystemId, 2569883.3, 1263166.7, 0),
@@ -39,7 +41,8 @@ TestingLayer::TestingLayer(const std::shared_ptr<MapInterface> &mapInterface) : 
     shader2->setColor(1, 0, 0, 0.5);
 
     auto config = RenderPassConfig(0);
-    auto vector = {rectangle3->asGraphicsObject(), rectangle->asGraphicsObject(), rectangle2->asGraphicsObject(), renderConfig[0]->getGraphicsObject()};
+    auto vector = {rectangle3->asGraphicsObject(), rectangle->asGraphicsObject(), rectangle2->asGraphicsObject(),
+                   rectangle4->asGraphicsObject(), renderConfig[0]->getGraphicsObject()};
     renderPass = std::make_shared<RenderPass>(config, vector);
 }
 
@@ -63,6 +66,7 @@ void TestingLayer::resume() {
                 polygonObject->getPolygonObject()->setup(renderingContext);
                 rectangle->asGraphicsObject()->setup(renderingContext);
                 rectangle2->asGraphicsObject()->setup(renderingContext);
+                rectangle4->asGraphicsObject()->setup(renderingContext);
             }));
 }
 

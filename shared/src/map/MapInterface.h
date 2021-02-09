@@ -7,7 +7,6 @@
 #include "CoordinateConversionHelperInterface.h"
 #include "GraphicsObjectFactoryInterface.h"
 #include "LayerInterface.h"
-#include "LoaderInterface.h"
 #include "RenderingContextInterface.h"
 #include "SchedulerInterface.h"
 #include "ShaderFactoryInterface.h"
@@ -26,8 +25,6 @@ public:
     static std::shared_ptr<MapInterface> createWithOpenGl(const MapConfig & mapConfig, const std::shared_ptr<::SchedulerInterface> & scheduler);
 
     virtual void setCallbackHandler(const std::shared_ptr<MapCallbackInterface> & callbackInterface) = 0;
-
-    virtual void setLoader(const std::shared_ptr<::LoaderInterface> & loader) = 0;
 
     virtual std::shared_ptr<::GraphicsObjectFactoryInterface> getGraphicsObjectFactory() = 0;
 

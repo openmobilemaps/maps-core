@@ -9,6 +9,6 @@
 
 - (void)onVisibleRectChanged:(nonnull MCCoord *)topLeft
                  bottomRight:(nonnull MCCoord *)bottomRight
-                       scale:(double)scale;
+                        zoom:(double)zoom;
 
 @end

@@ -26,7 +26,7 @@ private:
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/map/layers/tiled/Tiled2dMapZoomLevelInfo") };
     const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(DJIII)V") };
-    const jfieldID field_scale { ::djinni::jniGetFieldID(clazz.get(), "scale", "D") };
+    const jfieldID field_zoom { ::djinni::jniGetFieldID(clazz.get(), "zoom", "D") };
     const jfieldID field_tileWidthMillimeter { ::djinni::jniGetFieldID(clazz.get(), "tileWidthMillimeter", "J") };
     const jfieldID field_numTilesX { ::djinni::jniGetFieldID(clazz.get(), "numTilesX", "I") };
     const jfieldID field_numTilesY { ::djinni::jniGetFieldID(clazz.get(), "numTilesY", "I") };

@@ -5,12 +5,12 @@
 map_camera_2d_interface = interface +c {
     static create(map_interface: map_interface, screen_density_ppi: f32): map_camera_2d_interface;
 
-    move_to_center_position_scale(center_position: coord, scale: f64, animated: bool);
+    move_to_center_position_zoom(center_position: coord, zoom: f64, animated: bool);
     move_to_center_position(center_position: coord, animated: bool);
     get_center_position(): coord;
 
-    set_scale(scale: f64, animated: bool);
-    get_scale(): f64;
+    set_zoom(zoom: f64, animated: bool);
+    get_zoom(): f64;
 
     set_padding_left(padding: f32);
     set_padding_right(padding: f32);
@@ -25,6 +25,6 @@ map_camera_2d_interface = interface +c {
 }
 
 map_camera_2d_listener_interface = interface +c +j +o {
-    on_center_position_changed(position: coord, scale: f64);
-    on_visible_bounds_changed(topLeft: coord, bottomRight: coord, scale: f64);
+    on_center_position_changed(position: coord, zoom: f64);
+    on_visible_bounds_changed(topLeft: coord, bottomRight: coord, zoom: f64);
 }

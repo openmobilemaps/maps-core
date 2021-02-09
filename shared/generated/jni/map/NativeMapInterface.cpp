@@ -7,7 +7,6 @@
 #include "NativeCoordinateConversionHelperInterface.h"
 #include "NativeGraphicsObjectFactoryInterface.h"
 #include "NativeLayerInterface.h"
-#include "NativeLoaderInterface.h"
 #include "NativeMapCallbackInterface.h"
 #include "NativeMapConfig.h"
 #include "NativeRenderingContextInterface.h"
@@ -59,15 +58,6 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024Cpp
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
         ref->setCallbackHandler(::djinni_generated::NativeMapCallbackInterface::toCpp(jniEnv, j_callbackInterface));
-    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
-}
-
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1setLoader(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeLoaderInterface::JniType j_loader)
-{
-    try {
-        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
-        const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
-        ref->setLoader(::djinni_generated::NativeLoaderInterface::toCpp(jniEnv, j_loader));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

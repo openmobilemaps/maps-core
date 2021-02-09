@@ -289,9 +289,9 @@ void Matrix::setIdentityM(std::vector<float>& sm, int smOffset)
  * @param smOffset index into sm where the result matrix starts
  * @param m source matrix
  * @param mOffset index into m where the source matrix starts
- * @param x scale factor x
- * @param y scale factor y
- * @param z scale factor z
+ * @param x zoom factor x
+ * @param y zoom factor y
+ * @param z zoom factor z
  */
 void Matrix::scaleM(std::vector<float>& sm, int smOffset, std::vector<float>& m, int mOffset, float x, float y, float z)
 {
@@ -309,11 +309,11 @@ void Matrix::scaleM(std::vector<float>& sm, int smOffset, std::vector<float>& m,
 /**
  * Scales matrix m in place by sx, sy, and sz.
  *
- * @param m matrix to scale
+ * @param m matrix to zoom
  * @param mOffset index into m where the matrix starts
- * @param x scale factor x
- * @param y scale factor y
- * @param z scale factor z
+ * @param x zoom factor x
+ * @param y zoom factor y
+ * @param z zoom factor z
  */
 void Matrix::scaleM(std::vector<float>& m, int mOffset, float x, float y, float z)
 {

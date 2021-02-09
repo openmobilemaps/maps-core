@@ -34,8 +34,6 @@ public:
 
     virtual std::shared_ptr<::TouchHandlerInterface> getTouchHandler();
 
-    virtual void setLoader(const std::shared_ptr<::LoaderInterface> & loader);
-
     virtual void addLayer(const std::shared_ptr<::LayerInterface> & layer);
 
     virtual void removeLayer(const std::shared_ptr<::LayerInterface> & layer);
@@ -56,8 +54,6 @@ private:
     std::shared_ptr<SchedulerInterface> scheduler;
 
     std::shared_ptr<SceneInterface> scene;
-
-    std::shared_ptr<LoaderInterface> loader;
 
     std::vector<std::shared_ptr<LayerInterface>> layers;
 

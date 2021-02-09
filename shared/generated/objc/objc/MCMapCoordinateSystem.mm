@@ -11,7 +11,7 @@
                                  boundsTop:(double)boundsTop
                                boundsRight:(double)boundsRight
                               boundsBottom:(double)boundsBottom
-                         unitToMeterFactor:(float)unitToMeterFactor
+                   unitToScreenMeterFactor:(float)unitToScreenMeterFactor
 {
     if (self = [super init]) {
         _identifier = [identifier copy];
@@ -19,7 +19,7 @@
         _boundsTop = boundsTop;
         _boundsRight = boundsRight;
         _boundsBottom = boundsBottom;
-        _unitToMeterFactor = unitToMeterFactor;
+        _unitToScreenMeterFactor = unitToScreenMeterFactor;
     }
     return self;
 }
@@ -29,19 +29,19 @@
                                                 boundsTop:(double)boundsTop
                                               boundsRight:(double)boundsRight
                                              boundsBottom:(double)boundsBottom
-                                        unitToMeterFactor:(float)unitToMeterFactor
+                                  unitToScreenMeterFactor:(float)unitToScreenMeterFactor
 {
     return [(MCMapCoordinateSystem*)[self alloc] initWithIdentifier:identifier
                                                          boundsLeft:boundsLeft
                                                           boundsTop:boundsTop
                                                         boundsRight:boundsRight
                                                        boundsBottom:boundsBottom
-                                                  unitToMeterFactor:unitToMeterFactor];
+                                            unitToScreenMeterFactor:unitToScreenMeterFactor];
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p identifier:%@ boundsLeft:%@ boundsTop:%@ boundsRight:%@ boundsBottom:%@ unitToMeterFactor:%@>", self.class, (void *)self, self.identifier, @(self.boundsLeft), @(self.boundsTop), @(self.boundsRight), @(self.boundsBottom), @(self.unitToMeterFactor)];
+    return [NSString stringWithFormat:@"<%@ %p identifier:%@ boundsLeft:%@ boundsTop:%@ boundsRight:%@ boundsBottom:%@ unitToScreenMeterFactor:%@>", self.class, (void *)self, self.identifier, @(self.boundsLeft), @(self.boundsTop), @(self.boundsRight), @(self.boundsBottom), @(self.unitToScreenMeterFactor)];
 }
 
 @end

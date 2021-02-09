@@ -9,5 +9,5 @@ class Tiled2dMapSourceInterface {
 public:
     virtual ~Tiled2dMapSourceInterface() {}
 
-    virtual void onVisibleRectChanged(const ::Coord & topLeft, const ::Coord & bottomRight, double scale) = 0;
+    virtual void onVisibleRectChanged(const ::Coord & topLeft, const ::Coord & bottomRight, double zoom) = 0;
 };

@@ -7,18 +7,18 @@
 #include <utility>
 
 struct Tiled2dMapZoomLevelInfo final {
-    double scale;
+    double zoom;
     int64_t tileWidthMillimeter;
     int32_t numTilesX;
     int32_t numTilesY;
     int32_t zoomLevelIdentifier;
 
-    Tiled2dMapZoomLevelInfo(double scale_,
+    Tiled2dMapZoomLevelInfo(double zoom_,
                             int64_t tileWidthMillimeter_,
                             int32_t numTilesX_,
                             int32_t numTilesY_,
                             int32_t zoomLevelIdentifier_)
-    : scale(std::move(scale_))
+    : zoom(std::move(zoom_))
     , tileWidthMillimeter(std::move(tileWidthMillimeter_))
     , numTilesX(std::move(numTilesX_))
     , numTilesY(std::move(numTilesY_))

@@ -6,14 +6,14 @@
 
 @implementation MCTiled2dMapZoomLevelInfo
 
-- (nonnull instancetype)initWithScale:(double)scale
-                  tileWidthMillimeter:(int64_t)tileWidthMillimeter
-                            numTilesX:(int32_t)numTilesX
-                            numTilesY:(int32_t)numTilesY
-                  zoomLevelIdentifier:(int32_t)zoomLevelIdentifier
+- (nonnull instancetype)initWithZoom:(double)zoom
+                 tileWidthMillimeter:(int64_t)tileWidthMillimeter
+                           numTilesX:(int32_t)numTilesX
+                           numTilesY:(int32_t)numTilesY
+                 zoomLevelIdentifier:(int32_t)zoomLevelIdentifier
 {
     if (self = [super init]) {
-        _scale = scale;
+        _zoom = zoom;
         _tileWidthMillimeter = tileWidthMillimeter;
         _numTilesX = numTilesX;
         _numTilesY = numTilesY;
@@ -22,22 +22,22 @@
     return self;
 }
 
-+ (nonnull instancetype)tiled2dMapZoomLevelInfoWithScale:(double)scale
-                                     tileWidthMillimeter:(int64_t)tileWidthMillimeter
-                                               numTilesX:(int32_t)numTilesX
-                                               numTilesY:(int32_t)numTilesY
-                                     zoomLevelIdentifier:(int32_t)zoomLevelIdentifier
++ (nonnull instancetype)tiled2dMapZoomLevelInfoWithZoom:(double)zoom
+                                    tileWidthMillimeter:(int64_t)tileWidthMillimeter
+                                              numTilesX:(int32_t)numTilesX
+                                              numTilesY:(int32_t)numTilesY
+                                    zoomLevelIdentifier:(int32_t)zoomLevelIdentifier
 {
-    return [(MCTiled2dMapZoomLevelInfo*)[self alloc] initWithScale:scale
-                                               tileWidthMillimeter:tileWidthMillimeter
-                                                         numTilesX:numTilesX
-                                                         numTilesY:numTilesY
-                                               zoomLevelIdentifier:zoomLevelIdentifier];
+    return [(MCTiled2dMapZoomLevelInfo*)[self alloc] initWithZoom:zoom
+                                              tileWidthMillimeter:tileWidthMillimeter
+                                                        numTilesX:numTilesX
+                                                        numTilesY:numTilesY
+                                              zoomLevelIdentifier:zoomLevelIdentifier];
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p scale:%@ tileWidthMillimeter:%@ numTilesX:%@ numTilesY:%@ zoomLevelIdentifier:%@>", self.class, (void *)self, @(self.scale), @(self.tileWidthMillimeter), @(self.numTilesX), @(self.numTilesY), @(self.zoomLevelIdentifier)];
+    return [NSString stringWithFormat:@"<%@ %p zoom:%@ tileWidthMillimeter:%@ numTilesX:%@ numTilesY:%@ zoomLevelIdentifier:%@>", self.class, (void *)self, @(self.zoom), @(self.tileWidthMillimeter), @(self.numTilesX), @(self.numTilesY), @(self.zoomLevelIdentifier)];
 }
 
 @end

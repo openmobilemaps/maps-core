@@ -6,7 +6,7 @@ package ch.ubique.mapscore.shared.map.layers.tiled;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class Tiled2dMapSourceInterface {
-    public abstract void onVisibleRectChanged(ch.ubique.mapscore.shared.map.coordinates.Coord topLeft, ch.ubique.mapscore.shared.map.coordinates.Coord bottomRight, double scale);
+    public abstract void onVisibleRectChanged(ch.ubique.mapscore.shared.map.coordinates.Coord topLeft, ch.ubique.mapscore.shared.map.coordinates.Coord bottomRight, double zoom);
 
     private static final class CppProxy extends Tiled2dMapSourceInterface
     {
@@ -32,11 +32,11 @@ public abstract class Tiled2dMapSourceInterface {
         }
 
         @Override
-        public void onVisibleRectChanged(ch.ubique.mapscore.shared.map.coordinates.Coord topLeft, ch.ubique.mapscore.shared.map.coordinates.Coord bottomRight, double scale)
+        public void onVisibleRectChanged(ch.ubique.mapscore.shared.map.coordinates.Coord topLeft, ch.ubique.mapscore.shared.map.coordinates.Coord bottomRight, double zoom)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
-            native_onVisibleRectChanged(this.nativeRef, topLeft, bottomRight, scale);
+            native_onVisibleRectChanged(this.nativeRef, topLeft, bottomRight, zoom);
         }
-        private native void native_onVisibleRectChanged(long _nativeRef, ch.ubique.mapscore.shared.map.coordinates.Coord topLeft, ch.ubique.mapscore.shared.map.coordinates.Coord bottomRight, double scale);
+        private native void native_onVisibleRectChanged(long _nativeRef, ch.ubique.mapscore.shared.map.coordinates.Coord topLeft, ch.ubique.mapscore.shared.map.coordinates.Coord bottomRight, double zoom);
     }
 }

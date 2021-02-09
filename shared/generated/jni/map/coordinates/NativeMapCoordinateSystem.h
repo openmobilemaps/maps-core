@@ -31,7 +31,7 @@ private:
     const jfieldID field_boundsTop { ::djinni::jniGetFieldID(clazz.get(), "boundsTop", "D") };
     const jfieldID field_boundsRight { ::djinni::jniGetFieldID(clazz.get(), "boundsRight", "D") };
     const jfieldID field_boundsBottom { ::djinni::jniGetFieldID(clazz.get(), "boundsBottom", "D") };
-    const jfieldID field_unitToMeterFactor { ::djinni::jniGetFieldID(clazz.get(), "unitToMeterFactor", "F") };
+    const jfieldID field_unitToScreenMeterFactor { ::djinni::jniGetFieldID(clazz.get(), "unitToScreenMeterFactor", "F") };
 };
 
 }  // namespace djinni_generated

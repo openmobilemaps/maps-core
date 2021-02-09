@@ -19,7 +19,6 @@ map_interface = interface +c {
     static createWithOpenGl(map_config: map_config, scheduler: scheduler_interface) : map_interface;
 
     set_callback_handler(callback_interface: map_callback_interface);
-    set_loader(loader: loader_interface);
 
     get_graphics_object_factory() : graphics_object_factory_interface;
     get_shader_factory() : shader_factory_interface;
@@ -51,6 +50,6 @@ map_callback_interface = interface +c +j +o {
 
 map_config = record {
     map_coordinate_system: map_coordinate_system;
-    scale_min: f64;
-    scale_max: f64;
+    zoom_min: f64;
+    zoom_max: f64;
 }

@@ -10,7 +10,6 @@
 #import "MCCoordinateConversionHelperInterface+Private.h"
 #import "MCGraphicsObjectFactoryInterface+Private.h"
 #import "MCLayerInterface+Private.h"
-#import "MCLoaderInterface+Private.h"
 #import "MCMapCallbackInterface+Private.h"
 #import "MCMapConfig+Private.h"
 #import "MCRenderingContextInterface+Private.h"
@@ -68,12 +67,6 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)setCallbackHandler:(nullable id<MCMapCallbackInterface>)callbackInterface {
     try {
         _cppRefHandle.get()->setCallbackHandler(::djinni_generated::MapCallbackInterface::toCpp(callbackInterface));
-    } DJINNI_TRANSLATE_EXCEPTIONS()
-}
-
-- (void)setLoader:(nullable id<MCLoaderInterface>)loader {
-    try {
-        _cppRefHandle.get()->setLoader(::djinni_generated::LoaderInterface::toCpp(loader));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

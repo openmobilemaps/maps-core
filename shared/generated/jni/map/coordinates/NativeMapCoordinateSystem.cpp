@@ -18,7 +18,7 @@ auto NativeMapCoordinateSystem::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::d
                                                            ::djinni::get(::djinni::F64::fromCpp(jniEnv, c.boundsTop)),
                                                            ::djinni::get(::djinni::F64::fromCpp(jniEnv, c.boundsRight)),
                                                            ::djinni::get(::djinni::F64::fromCpp(jniEnv, c.boundsBottom)),
-                                                           ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.unitToMeterFactor)))};
+                                                           ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.unitToScreenMeterFactor)))};
     ::djinni::jniExceptionCheck(jniEnv);
     return r;
 }
@@ -32,7 +32,7 @@ auto NativeMapCoordinateSystem::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
             ::djinni::F64::toCpp(jniEnv, jniEnv->GetDoubleField(j, data.field_boundsTop)),
             ::djinni::F64::toCpp(jniEnv, jniEnv->GetDoubleField(j, data.field_boundsRight)),
             ::djinni::F64::toCpp(jniEnv, jniEnv->GetDoubleField(j, data.field_boundsBottom)),
-            ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_unitToMeterFactor))};
+            ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_unitToScreenMeterFactor))};
 }
 
 }  // namespace djinni_generated

@@ -6,7 +6,7 @@ package ch.ubique.mapscore.shared.map.layers.tiled;
 public final class Tiled2dMapZoomLevelInfo implements java.io.Serializable {
 
 
-    protected double scale;
+    protected double zoom;
 
     protected long tileWidthMillimeter;
 
@@ -17,20 +17,20 @@ public final class Tiled2dMapZoomLevelInfo implements java.io.Serializable {
     protected int zoomLevelIdentifier;
 
     public Tiled2dMapZoomLevelInfo(
-            double scale,
+            double zoom,
             long tileWidthMillimeter,
             int numTilesX,
             int numTilesY,
             int zoomLevelIdentifier) {
-        this.scale = scale;
+        this.zoom = zoom;
         this.tileWidthMillimeter = tileWidthMillimeter;
         this.numTilesX = numTilesX;
         this.numTilesY = numTilesY;
         this.zoomLevelIdentifier = zoomLevelIdentifier;
     }
 
-    public double getScale() {
-        return scale;
+    public double getZoom() {
+        return zoom;
     }
 
     public long getTileWidthMillimeter() {
@@ -49,8 +49,8 @@ public final class Tiled2dMapZoomLevelInfo implements java.io.Serializable {
         return zoomLevelIdentifier;
     }
 
-    public void setScale(double scale) {
-        this.scale = scale;
+    public void setZoom(double zoom) {
+        this.zoom = zoom;
     }
 
     public void setTileWidthMillimeter(long tileWidthMillimeter) {
@@ -72,7 +72,7 @@ public final class Tiled2dMapZoomLevelInfo implements java.io.Serializable {
     @Override
     public String toString() {
         return "Tiled2dMapZoomLevelInfo{" +
-                "scale=" + scale +
+                "zoom=" + zoom +
                 "," + "tileWidthMillimeter=" + tileWidthMillimeter +
                 "," + "numTilesX=" + numTilesX +
                 "," + "numTilesY=" + numTilesY +

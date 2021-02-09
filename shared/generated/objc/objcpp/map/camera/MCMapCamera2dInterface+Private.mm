@@ -43,13 +43,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)moveToCenterPositionScale:(nonnull MCCoord *)centerPosition
-                            scale:(double)scale
-                         animated:(BOOL)animated {
+- (void)moveToCenterPositionZoom:(nonnull MCCoord *)centerPosition
+                            zoom:(double)zoom
+                        animated:(BOOL)animated {
     try {
-        _cppRefHandle.get()->moveToCenterPositionScale(::djinni_generated::Coord::toCpp(centerPosition),
-                                                       ::djinni::F64::toCpp(scale),
-                                                       ::djinni::Bool::toCpp(animated));
+        _cppRefHandle.get()->moveToCenterPositionZoom(::djinni_generated::Coord::toCpp(centerPosition),
+                                                      ::djinni::F64::toCpp(zoom),
+                                                      ::djinni::Bool::toCpp(animated));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -68,17 +68,17 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setScale:(double)scale
-        animated:(BOOL)animated {
+- (void)setZoom:(double)zoom
+       animated:(BOOL)animated {
     try {
-        _cppRefHandle.get()->setScale(::djinni::F64::toCpp(scale),
-                                      ::djinni::Bool::toCpp(animated));
+        _cppRefHandle.get()->setZoom(::djinni::F64::toCpp(zoom),
+                                     ::djinni::Bool::toCpp(animated));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (double)getScale {
+- (double)getZoom {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->getScale();
+        auto objcpp_result_ = _cppRefHandle.get()->getZoom();
         return ::djinni::F64::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }

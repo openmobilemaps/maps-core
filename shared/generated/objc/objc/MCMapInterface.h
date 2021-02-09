@@ -5,7 +5,6 @@
 #import "MCCoordinateConversionHelperInterface.h"
 #import "MCGraphicsObjectFactoryInterface.h"
 #import "MCLayerInterface.h"
-#import "MCLoaderInterface.h"
 #import "MCMapConfig.h"
 #import "MCRenderingContextInterface.h"
 #import "MCSchedulerInterface.h"
@@ -28,8 +27,6 @@
                                     scheduler:(nullable id<MCSchedulerInterface>)scheduler;
 
 - (void)setCallbackHandler:(nullable id<MCMapCallbackInterface>)callbackInterface;
-
-- (void)setLoader:(nullable id<MCLoaderInterface>)loader;
 
 - (nullable id<MCGraphicsObjectFactoryInterface>)getGraphicsObjectFactory;
 

@@ -14,7 +14,7 @@ map_coordinate_system = record {
     bounds_top: f64;
     bounds_right: f64;
     bounds_bottom: f64;
-    unit_to_meter_factor: f32;
+    unit_to_screen_meter_factor: f32;
 }
 
 coord = record {

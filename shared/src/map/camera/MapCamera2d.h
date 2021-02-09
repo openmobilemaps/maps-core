@@ -22,15 +22,15 @@ public:
 
     ~MapCamera2d() {};
 
-    virtual void moveToCenterPositionScale(const ::Coord &centerPosition, double scale, bool animated);
+    virtual void moveToCenterPositionZoom(const ::Coord &centerPosition, double zoom, bool animated);
 
     virtual void moveToCenterPosition(const ::Coord &centerPosition, bool animated);
 
     virtual ::Coord getCenterPosition();
 
-    virtual void setScale(double scale, bool animated);
+    virtual void setZoom(double zoom, bool animated);
 
-    virtual double getScale();
+    virtual double getZoom();
 
     virtual void setPaddingLeft(float padding);
 
@@ -65,7 +65,7 @@ protected:
     double screenPixelAsRealMeterFactor;
 
     Coord centerPosition;
-    double scale = 0;
+    double zoom = 0;
     double angle = 0;
 
     double paddingLeft = 0;
@@ -81,15 +81,15 @@ protected:
 
     struct CameraAnimation {
       Coord startCenterPosition;
-      double startScale;
+      double startZoom;
       Coord targetCenterPosition;
-      double targetScale;
+      double targetZoom;
       long long startTime;
       long long duration;
     };
 
     std::optional<CameraAnimation> cameraAnimation;
 
-    void beginAnimation(double scale, Coord centerPosition);
+    void beginAnimation(double zoom, Coord centerPosition);
     void applyAnimationState();
 };

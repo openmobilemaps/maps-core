@@ -8,8 +8,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class MapInterface {
     public abstract void setCallbackHandler(MapCallbackInterface callbackInterface);
 
-    public abstract void setLoader(ch.ubique.mapscore.shared.map.loader.LoaderInterface loader);
-
     public abstract ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface getGraphicsObjectFactory();
 
     public abstract ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface getShaderFactory();
@@ -89,14 +87,6 @@ public abstract class MapInterface {
             native_setCallbackHandler(this.nativeRef, callbackInterface);
         }
         private native void native_setCallbackHandler(long _nativeRef, MapCallbackInterface callbackInterface);
-
-        @Override
-        public void setLoader(ch.ubique.mapscore.shared.map.loader.LoaderInterface loader)
-        {
-            assert !this.destroyed.get() : "trying to use a destroyed object";
-            native_setLoader(this.nativeRef, loader);
-        }
-        private native void native_setLoader(long _nativeRef, ch.ubique.mapscore.shared.map.loader.LoaderInterface loader);
 
         @Override
         public ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface getGraphicsObjectFactory()

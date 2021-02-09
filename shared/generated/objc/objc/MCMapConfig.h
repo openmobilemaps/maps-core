@@ -6,16 +6,16 @@
 
 @interface MCMapConfig : NSObject
 - (nonnull instancetype)initWithMapCoordinateSystem:(nonnull MCMapCoordinateSystem *)mapCoordinateSystem
-                                           scaleMin:(double)scaleMin
-                                           scaleMax:(double)scaleMax;
+                                            zoomMin:(double)zoomMin
+                                            zoomMax:(double)zoomMax;
 + (nonnull instancetype)mapConfigWithMapCoordinateSystem:(nonnull MCMapCoordinateSystem *)mapCoordinateSystem
-                                                scaleMin:(double)scaleMin
-                                                scaleMax:(double)scaleMax;
+                                                 zoomMin:(double)zoomMin
+                                                 zoomMax:(double)zoomMax;
 
 @property (nonatomic, readonly, nonnull) MCMapCoordinateSystem * mapCoordinateSystem;
 
-@property (nonatomic, readonly) double scaleMin;
+@property (nonatomic, readonly) double zoomMin;
 
-@property (nonatomic, readonly) double scaleMax;
+@property (nonatomic, readonly) double zoomMax;
 
 @end

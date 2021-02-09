@@ -12,7 +12,7 @@ Tiled2dMapSource::Tiled2dMapSource(const std::shared_ptr<Tiled2dMapLayerConfig> 
 
 }
 
-void Tiled2dMapSource::onVisibleRectChanged(const Coord &topLeft, const Coord &bottomRight, double scale) {
+void Tiled2dMapSource::onVisibleRectChanged(const Coord &topLeft, const Coord &bottomRight, double zoom) {
 
 }
 

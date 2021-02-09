@@ -33,8 +33,8 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        void onCenterPositionChanged(const ::Coord & position, double scale) override;
-        void onVisibleBoundsChanged(const ::Coord & topLeft, const ::Coord & bottomRight, double scale) override;
+        void onCenterPositionChanged(const ::Coord & position, double zoom) override;
+        void onVisibleBoundsChanged(const ::Coord & topLeft, const ::Coord & bottomRight, double zoom) override;
 
     private:
         friend ::djinni::JniInterface<::MapCamera2dListenerInterface, ::djinni_generated::NativeMapCamera2dListenerInterface>;

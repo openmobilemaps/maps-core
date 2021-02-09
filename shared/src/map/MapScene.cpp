@@ -79,10 +79,6 @@ std::shared_ptr<::TouchHandlerInterface> MapScene::getTouchHandler() {
     return touchHandler;
 }
 
-void MapScene::setLoader(const std::shared_ptr<::LoaderInterface> & loader) {
-    this->loader = loader;
-}
-
 void MapScene::addLayer(const std::shared_ptr<::LayerInterface> & layer) {
     layers.push_back(layer);
 }

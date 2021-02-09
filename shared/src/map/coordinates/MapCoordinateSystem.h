@@ -12,19 +12,19 @@ struct MapCoordinateSystem final {
     double boundsTop;
     double boundsRight;
     double boundsBottom;
-    float unitToMeterFactor;
+    float unitToScreenMeterFactor;
 
     MapCoordinateSystem(std::string identifier_,
                         double boundsLeft_,
                         double boundsTop_,
                         double boundsRight_,
                         double boundsBottom_,
-                        float unitToMeterFactor_)
+                        float unitToScreenMeterFactor_)
     : identifier(std::move(identifier_))
     , boundsLeft(std::move(boundsLeft_))
     , boundsTop(std::move(boundsTop_))
     , boundsRight(std::move(boundsRight_))
     , boundsBottom(std::move(boundsBottom_))
-    , unitToMeterFactor(std::move(unitToMeterFactor_))
+    , unitToScreenMeterFactor(std::move(unitToScreenMeterFactor_))
     {}
 };
