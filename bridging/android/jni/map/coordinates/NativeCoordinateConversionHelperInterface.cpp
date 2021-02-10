@@ -55,6 +55,16 @@ CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_coordinates_Coordi
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_coordinates_CoordinateConversionHelperInterface_00024CppProxy_native_1convertRectToRenderSystem(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_rect)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::CoordinateConversionHelperInterface>(nativeRef);
+        auto r = ref->convertRectToRenderSystem(::djinni_generated::NativeRectCoord::toCpp(jniEnv, j_rect));
+        return ::djinni::release(::djinni_generated::NativeRectCoord::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_coordinates_CoordinateConversionHelperInterface_00024CppProxy_native_1convertToRenderSystem(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_coordinate)
 {
     try {

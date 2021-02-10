@@ -14,7 +14,7 @@
 
 class CoordinateConversionHelper : public CoordinateConversionHelperInterface {
 public:
-    static std::string RENDER_SYSTEM_ID;
+    static inline const std::string RENDER_SYSTEM_ID = "render_system";
 
     CoordinateConversionHelper(MapCoordinateSystem mapCoordinateSystem);
 
@@ -23,6 +23,8 @@ public:
     Coord convert(const std::string & to, const Coord & coordinate);
 
     RectCoord convertRect(const std::string & to, const RectCoord & rect);
+
+    RectCoord convertRectToRenderSystem(const RectCoord & rect);
 
     Coord convertToRenderSystem(const Coord & coordinate);
 

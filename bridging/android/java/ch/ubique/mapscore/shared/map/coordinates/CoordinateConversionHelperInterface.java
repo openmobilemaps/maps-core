@@ -12,6 +12,8 @@ public abstract class CoordinateConversionHelperInterface {
 
     public abstract RectCoord convertRect(String to, RectCoord rect);
 
+    public abstract RectCoord convertRectToRenderSystem(RectCoord rect);
+
     public abstract Coord convertToRenderSystem(Coord coordinate);
 
     private static final class CppProxy extends CoordinateConversionHelperInterface
@@ -60,6 +62,14 @@ public abstract class CoordinateConversionHelperInterface {
             return native_convertRect(this.nativeRef, to, rect);
         }
         private native RectCoord native_convertRect(long _nativeRef, String to, RectCoord rect);
+
+        @Override
+        public RectCoord convertRectToRenderSystem(RectCoord rect)
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            return native_convertRectToRenderSystem(this.nativeRef, rect);
+        }
+        private native RectCoord native_convertRectToRenderSystem(long _nativeRef, RectCoord rect);
 
         @Override
         public Coord convertToRenderSystem(Coord coordinate)

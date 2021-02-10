@@ -19,10 +19,23 @@ void Textured2dLayerObject::setPosition(const ::Coord & coord, double width, dou
   setFrame(RectD(renderCoord.x, renderCoord.y, width, height));
 }
 
+
+void Textured2dLayerObject::setRectCoord(const ::RectCoord & rectCoord) {
+  auto renderCoord = conversionHelper->convertRectToRenderSystem(rectCoord);
+  auto width = renderCoord.bottomRight.x - renderCoord.topLeft.x;
+  auto height = renderCoord.topLeft.y - renderCoord.bottomRight.y;
+  setFrame(RectD(renderCoord.topLeft.x, renderCoord.topLeft.y, width, height));
+}
+
 std::vector<std::shared_ptr<RenderConfigInterface>> Textured2dLayerObject::getRenderConfig() {
   return { renderConfig };
 }
 
 void Textured2dLayerObject::setAlpha(float alpha) {
   shader->updateAlpha(alpha);
+}
+
+
+std::shared_ptr<Rectangle2dInterface> Textured2dLayerObject::getRectangleObject() {
+  return rectangle;
 }

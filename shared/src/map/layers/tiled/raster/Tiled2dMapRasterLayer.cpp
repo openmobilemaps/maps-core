@@ -15,8 +15,8 @@ Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::MapInterfac
 
 void Tiled2dMapRasterLayer::onAdded() {
     Tiled2dMapLayer::onAdded();
-    colorShader = mapInterface->getShaderFactory()->createColorShader();
-    colorShader->setColor(0, 1, 1, 0.5);
+    alphaShader = mapInterface->getShaderFactory()->createAlphaShader();
+  alphaShader->updateAlpha(0.5);
 
     rasterSource = std::make_shared<Tiled2dMapRasterSource>(mapInterface->getMapConfig(),
                                                             layerConfig,
@@ -47,7 +47,7 @@ std::string Tiled2dMapRasterLayer::getIdentifier() {
 void Tiled2dMapRasterLayer::pause() {
     rasterSource->pause();
     for (const auto &tileObject : tileObjectMap) {
-        tileObject.second->getPolygonObject()->clear();
+      tileObject.second->getRectangleObject()->removeTexture();
     }
 }
 
@@ -55,7 +55,7 @@ void Tiled2dMapRasterLayer::resume() {
     rasterSource->resume();
     auto renderingContext = mapInterface->getRenderingContext();
     for (const auto &tileObject : tileObjectMap) {
-        tileObject.second->getPolygonObject()->setup(renderingContext);
+      tileObject.second->getRectangleObject()->loadTexture(tileObject.first.textureHolder);
     }
 }
 
@@ -86,34 +86,27 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
                 auto graphicsFactory = mapInterface->getGraphicsObjectFactory();
 
                 for (const auto &tile : tilesToAdd) {
-                    auto tileObject = std::make_shared<Polygon2dLayerObject>(mapInterface->getCoordinateConverterHelper(),
-                                                                             graphicsFactory->createPolygon(
-                                                                                     colorShader->asShaderProgramInterface()),
-                                                                             colorShader);
-                    auto topLeft = tile.tileInfo.bounds.topLeft;
-                    auto bottomRight = tile.tileInfo.bounds.bottomRight;
-                    auto borderWidth = 0.1 * (bottomRight.x - topLeft.x);
-                    tileObject->setPositions({Coord(topLeft.systemIdentifier, topLeft.x + borderWidth, topLeft.y + borderWidth, 0),
-                                              Coord(topLeft.systemIdentifier, bottomRight.x - borderWidth, topLeft.y + borderWidth,
-                                                    0),
-                                              Coord(topLeft.systemIdentifier, bottomRight.x - borderWidth,bottomRight.y - borderWidth,
-                                                    0),
-                                              Coord(topLeft.systemIdentifier, topLeft.x + borderWidth, bottomRight.y - borderWidth,
-                                                    0)});
-                    tileObject->getPolygonObject()->setup(renderingContext);
+
+                    auto tileObject = std::make_shared<Textured2dLayerObject>(graphicsFactory->createRectangle(alphaShader->asShaderProgramInterface()),
+                                                                              alphaShader,
+                                                                              mapInterface->getCoordinateConverterHelper());
+
+                    tileObject->setRectCoord(tile.tileInfo.bounds);
+
+                  tileObject->getRectangleObject()->loadTexture(tile.textureHolder);
                     tileObjectMap[tile] = tileObject;
                 }
 
                 for (const auto &tile : tilesToRemove) {
                     auto tileObject = tileObjectMap[tile];
-                    tileObject->getPolygonObject()->clear();
+                    tileObject->getRectangleObject()->removeTexture();
                     tileObjectMap.erase(tile);
                 }
 
                 std::vector<std::shared_ptr<GraphicsObjectInterface>> renderObjects;
                 for (const auto &objectEntry : tileObjectMap) {
                     // TODO: Build correct number of render passes by respecting configs received from each LayerObject
-                    renderObjects.push_back(objectEntry.second->getRenderConfig()[0]->getGraphicsObject());
+                    renderObjects.push_back(objectEntry.second->getRectangleObject()->asGraphicsObject());
                 }
                 std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(0), renderObjects);
                 renderPasses = {renderPass};

@@ -5,7 +5,6 @@
 #include "CoordinateConversionHelper.h"
 #include "DefaultSystemToRenderConverter.h"
 
-std::string CoordinateConversionHelper::RENDER_SYSTEM_ID = "render_system";
 
 CoordinateConversionHelper::CoordinateConversionHelper(MapCoordinateSystem mapCoordinateSystem): mapCoordinateSystemIdentier(mapCoordinateSystem.identifier) {
     registerConverter(mapCoordinateSystem.identifier, RENDER_SYSTEM_ID,
@@ -39,6 +38,10 @@ Coord CoordinateConversionHelper::convert(const std::string &to, const Coord &co
 
 RectCoord CoordinateConversionHelper::convertRect(const std::string & to, const RectCoord & rect) {
     return RectCoord(convert(to, rect.topLeft), convert(to, rect.bottomRight));
+}
+
+RectCoord CoordinateConversionHelper::convertRectToRenderSystem(const RectCoord & rect) {
+  return convertRect(RENDER_SYSTEM_ID, rect);
 }
 
 Coord CoordinateConversionHelper::convertToRenderSystem(const Coord &coordinate) {

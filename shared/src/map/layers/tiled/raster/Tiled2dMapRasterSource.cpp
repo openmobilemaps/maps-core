@@ -34,7 +34,8 @@ void Tiled2dMapRasterSource::onVisibleTilesChanged(const std::unordered_set<Tile
     }
 
     for (const auto &addedTile : toAdd) {
-        currentTiles[addedTile] = nullptr;
+      std::string url = "https://wmts100.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/2056/" + std::to_string(addedTile.zoom) + "/" + std::to_string(addedTile.x) + "/" + std::to_string(addedTile.y) + ".jpeg";
+      currentTiles[addedTile] = loader->loadTexture(url);
     }
 
     listener->onTilesUpdated();

@@ -19,6 +19,8 @@
 - (nonnull MCRectCoord *)convertRect:(nonnull NSString *)to
                                 rect:(nonnull MCRectCoord *)rect;
 
+- (nonnull MCRectCoord *)convertRectToRenderSystem:(nonnull MCRectCoord *)rect;
+
 - (nonnull MCCoord *)convertToRenderSystem:(nonnull MCCoord *)coordinate;
 
 @end

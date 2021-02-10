@@ -20,5 +20,7 @@ public:
 
     virtual RectCoord convertRect(const std::string & to, const RectCoord & rect) = 0;
 
+    virtual RectCoord convertRectToRenderSystem(const RectCoord & rect) = 0;
+
     virtual Coord convertToRenderSystem(const Coord & coordinate) = 0;
 };

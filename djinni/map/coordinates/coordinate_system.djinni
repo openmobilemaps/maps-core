@@ -2,6 +2,7 @@ coordinate_conversion_helper_interface = interface +c {
     register_converter(from: string, to: string, converter: coordinate_converter_interface);
     convert(to: string, coordinate: coord) : coord;
     convert_rect(to: string, rect: rect_coord) : rect_coord;
+    convert_rect_to_render_system(rect: rect_coord) : rect_coord;
     convert_to_render_system(coordinate: coord) : coord;
 }
 

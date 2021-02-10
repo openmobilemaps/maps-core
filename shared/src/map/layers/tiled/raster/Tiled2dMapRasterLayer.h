@@ -11,8 +11,7 @@
 #include "Tiled2dMapRasterLayerInterface.h"
 #include "LayerInterface.h"
 #include "Tiled2dMapRasterSource.h"
-#include "Line2dLayerObject.h"
-#include "Polygon2dLayerObject.h"
+#include "Textured2dLayerObject.h"
 
 class Tiled2dMapRasterLayer
         : public Tiled2dMapLayer, public Tiled2dMapRasterLayerInterface {
@@ -42,8 +41,8 @@ private:
     std::shared_ptr<Tiled2dMapRasterSource> rasterSource;
 
     std::recursive_mutex updateMutex;
-    std::unordered_map<Tiled2dMapRasterTileInfo, std::shared_ptr<Polygon2dLayerObject>> tileObjectMap;
+    std::unordered_map<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>> tileObjectMap;
     std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
-
-    std::shared_ptr<ColorShaderInterface> colorShader;
+          
+    std::shared_ptr<AlphaShaderInterface> alphaShader;
 };
