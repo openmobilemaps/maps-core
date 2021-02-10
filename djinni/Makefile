@@ -9,28 +9,28 @@ notarget:
 # DJINNI TARGET #
 #################
 
-DJINNI_OUT_DIR := ../shared/generated
+DJINNI_OUT_DIR := ../bridging
 DJINNI_SOURCE := ./$(FILE)
 
 PROJECT_NAME := mapscore_shared
 PROJECT_PREFIX := MC
 JAVA_PACKAGE := ch.ubique.mapscore.shared
 
-OBJC_OUT := $(DJINNI_OUT_DIR)/objc/objc
+OBJC_OUT := $(DJINNI_OUT_DIR)/ios
 OBJC_PREFIX := $(PROJECT_PREFIX)
-OBJCPP_OUT := $(DJINNI_OUT_DIR)/objc/objcpp
+OBJCPP_OUT := $(DJINNI_OUT_DIR)/ios
 UB_FOUNDATION_HEADER := '<Foundation/Foundation.h>'
 
 YAML_ARG := --yaml-out ./yaml
 
 DJINNI_RUN := ../../external/djinni/src/run
 
-JAVA_OUT := $(DJINNI_OUT_DIR)/java/ch/ubique/mapscore/shared
-JNI_OUT := $(DJINNI_OUT_DIR)/jni
+JAVA_OUT := $(DJINNI_OUT_DIR)/android/java/ch/ubique/mapscore/shared
+JNI_OUT := $(DJINNI_OUT_DIR)/android/jni
 IDENT_JNI_CLASS := NativeFooBar
 IDENT_JAVA := fooBar
 
-CPP_OUT := ../shared/src
+CPP_OUT := ../shared/public
 HPP_EXT := h
 IDENT_CPP := FooBar
 IDENT_CPP_FIELD := fooBar
@@ -49,8 +49,7 @@ $(DJINNI_OUT_DIR)/%.log: $(DJINNISRCDIR)/%.djinni
 	$(eval SUBPOINT := $(shell if [ "$(SUBPOINT)" == "" ];then echo ""; else echo ".$(SUBPOINT)"; fi ))
 
 	mkdir -p $(DJINNI_OUT_DIR)
-	mkdir -p $(DJINNI_OUT_DIR)/$(SUB)
-#	cp -f $(SHARED_LIBRARY)/djinni/optional_wrapper.h $(CPP_OUT)/optional_wrapper.h
+
 	$(DJINNI_RUN) --idl ../djinni/$< \
 	--java-out $(JAVA_OUT)/$(SUB) \
 	--jni-out $(JNI_OUT)/$(SUB) \
@@ -58,7 +57,7 @@ $(DJINNI_OUT_DIR)/%.log: $(DJINNISRCDIR)/%.djinni
 	--cpp-out $(CPP_OUT)/$(SUB) \
 	--ident-jni-class $(IDENT_JNI_CLASS) \
 	--objc-type-prefix $(OBJC_PREFIX) \
-	--objcpp-out $(OBJCPP_OUT)/$(SUB) \
+	--objcpp-out $(OBJCPP_OUT)/ \
 	--hpp-ext $(HPP_EXT) \
 	--ident-cpp-type $(IDENT_CPP) \
 	--ident-cpp-file $(IDENT_CPP) \
@@ -72,13 +71,13 @@ $(DJINNI_OUT_DIR)/%.log: $(DJINNISRCDIR)/%.djinni
 	--ident-objc-enum $(IDENT_CPP_ENUM) \
 	--java-package $(JAVA_PACKAGE)$(SUBPOINT) \
 	--ident-jni-file $(IDENT_JNI_CLASS) $(YAML_ARG) \
-	--ub-foundation-header $(UB_FOUNDATION_HEADER) > $@
+	--ub-foundation-header $(UB_FOUNDATION_HEADER)
 
 djinni: $(DJINNILOG)
 	@echo Djinni finished
 
 clean:
-	rm -rf ../shared/generated
+	rm -rf ../bridging
 
 install:
 	@echo Nothing to install

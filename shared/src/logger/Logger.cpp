@@ -81,7 +81,7 @@ void Logger::log(int prio, const char* tag, const char* fmt, ...) const
 #endif
 
 #if (defined(__APPLE__) && !defined(BANDIT_TESTING)) || defined(_WIN32)
-    switch(loadPriority)
+    switch(priority)
     {
         case 0:
         {
