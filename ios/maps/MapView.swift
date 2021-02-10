@@ -3,7 +3,7 @@ import MapCoreSharedModule
 import MetalKit
 
 open class MapView: MTKView {
-    private let mapInterface: MCMapInterface
+    public let mapInterface: MCMapInterface
     private let renderingContext: RenderingContext
 
     private var sizeChanged: Bool = false

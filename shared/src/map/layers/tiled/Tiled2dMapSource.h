@@ -14,6 +14,7 @@
 #include "Tiled2dMapZoomLevelInfo.h"
 #include "MapConfig.h"
 #include "CoordinateConversionHelperInterface.h"
+#include <mutex>
 
 class Tiled2dMapSource : public Tiled2dMapSourceInterface {
 public:
@@ -44,4 +45,6 @@ protected:
 
 private:
     void updateCurrentTileset(const ::RectCoord &visibleBounds, double zoom);
+
+    std::recursive_mutex updateTilesMutex;
 };
