@@ -1,10 +1,11 @@
 @extern "../../yaml/render_pass_interface.yaml"
-@extern "../../yaml/map_interface.yaml"
 @extern "../../yaml/rect_d.yaml"
 
 layer_interface = interface +c +j +o {
-	build_render_passes(): list<render_pass_interface>;
+    build_render_passes(): list<render_pass_interface>;
     get_identifier(): string;
+    onAdded();
+    onRemoved();
     pause();
     resume();
     hide();

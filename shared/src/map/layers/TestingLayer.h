@@ -18,6 +18,10 @@ public:
 
     std::string getIdentifier();
 
+    virtual void onAdded();
+
+    virtual void onRemoved();
+
     void pause();
 
     void resume();

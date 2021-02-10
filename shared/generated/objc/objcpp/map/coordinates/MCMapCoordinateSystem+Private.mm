@@ -3,6 +3,7 @@
 
 #import "MCMapCoordinateSystem+Private.h"
 #import "DJIMarshal+Private.h"
+#import "MCRectCoord+Private.h"
 #include <cassert>
 
 namespace djinni_generated {
@@ -11,20 +12,14 @@ auto MapCoordinateSystem::toCpp(ObjcType obj) -> CppType
 {
     assert(obj);
     return {::djinni::String::toCpp(obj.identifier),
-            ::djinni::F64::toCpp(obj.boundsLeft),
-            ::djinni::F64::toCpp(obj.boundsTop),
-            ::djinni::F64::toCpp(obj.boundsRight),
-            ::djinni::F64::toCpp(obj.boundsBottom),
+            ::djinni_generated::RectCoord::toCpp(obj.bounds),
             ::djinni::F32::toCpp(obj.unitToScreenMeterFactor)};
 }
 
 auto MapCoordinateSystem::fromCpp(const CppType& cpp) -> ObjcType
 {
     return [[MCMapCoordinateSystem alloc] initWithIdentifier:(::djinni::String::fromCpp(cpp.identifier))
-                                                  boundsLeft:(::djinni::F64::fromCpp(cpp.boundsLeft))
-                                                   boundsTop:(::djinni::F64::fromCpp(cpp.boundsTop))
-                                                 boundsRight:(::djinni::F64::fromCpp(cpp.boundsRight))
-                                                boundsBottom:(::djinni::F64::fromCpp(cpp.boundsBottom))
+                                                      bounds:(::djinni_generated::RectCoord::fromCpp(cpp.bounds))
                                      unitToScreenMeterFactor:(::djinni::F32::fromCpp(cpp.unitToScreenMeterFactor))];
 }
 

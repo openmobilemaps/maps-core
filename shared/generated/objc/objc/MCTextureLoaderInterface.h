@@ -7,6 +7,6 @@
 
 @protocol MCTextureLoaderInterface
 
-- (nullable id<MCTextureHolderInterface>)loadDate:(nonnull NSString *)url;
+- (nullable id<MCTextureHolderInterface>)loadTexture:(nonnull NSString *)url;
 
 @end

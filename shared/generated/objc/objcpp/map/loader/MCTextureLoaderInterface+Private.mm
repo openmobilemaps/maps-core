@@ -32,9 +32,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (nullable id<MCTextureHolderInterface>)loadDate:(nonnull NSString *)url {
+- (nullable id<MCTextureHolderInterface>)loadTexture:(nonnull NSString *)url {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->loadDate(::djinni::String::toCpp(url));
+        auto objcpp_result_ = _cppRefHandle.get()->loadTexture(::djinni::String::toCpp(url));
         return ::djinni_generated::TextureHolderInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -48,10 +48,10 @@ class TextureLoaderInterface::ObjcProxy final
     friend class ::djinni_generated::TextureLoaderInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    std::shared_ptr<::TextureHolderInterface> loadDate(const std::string & c_url) override
+    std::shared_ptr<::TextureHolderInterface> loadTexture(const std::string & c_url) override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() loadDate:(::djinni::String::fromCpp(c_url))];
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() loadTexture:(::djinni::String::fromCpp(c_url))];
             return ::djinni_generated::TextureHolderInterface::toCpp(objcpp_result_);
         }
     }

@@ -7,41 +7,29 @@
 @implementation MCMapCoordinateSystem
 
 - (nonnull instancetype)initWithIdentifier:(nonnull NSString *)identifier
-                                boundsLeft:(double)boundsLeft
-                                 boundsTop:(double)boundsTop
-                               boundsRight:(double)boundsRight
-                              boundsBottom:(double)boundsBottom
+                                    bounds:(nonnull MCRectCoord *)bounds
                    unitToScreenMeterFactor:(float)unitToScreenMeterFactor
 {
     if (self = [super init]) {
         _identifier = [identifier copy];
-        _boundsLeft = boundsLeft;
-        _boundsTop = boundsTop;
-        _boundsRight = boundsRight;
-        _boundsBottom = boundsBottom;
+        _bounds = bounds;
         _unitToScreenMeterFactor = unitToScreenMeterFactor;
     }
     return self;
 }
 
 + (nonnull instancetype)mapCoordinateSystemWithIdentifier:(nonnull NSString *)identifier
-                                               boundsLeft:(double)boundsLeft
-                                                boundsTop:(double)boundsTop
-                                              boundsRight:(double)boundsRight
-                                             boundsBottom:(double)boundsBottom
+                                                   bounds:(nonnull MCRectCoord *)bounds
                                   unitToScreenMeterFactor:(float)unitToScreenMeterFactor
 {
     return [(MCMapCoordinateSystem*)[self alloc] initWithIdentifier:identifier
-                                                         boundsLeft:boundsLeft
-                                                          boundsTop:boundsTop
-                                                        boundsRight:boundsRight
-                                                       boundsBottom:boundsBottom
+                                                             bounds:bounds
                                             unitToScreenMeterFactor:unitToScreenMeterFactor];
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p identifier:%@ boundsLeft:%@ boundsTop:%@ boundsRight:%@ boundsBottom:%@ unitToScreenMeterFactor:%@>", self.class, (void *)self, self.identifier, @(self.boundsLeft), @(self.boundsTop), @(self.boundsRight), @(self.boundsBottom), @(self.unitToScreenMeterFactor)];
+    return [NSString stringWithFormat:@"<%@ %p identifier:%@ bounds:%@ unitToScreenMeterFactor:%@>", self.class, (void *)self, self.identifier, self.bounds, @(self.unitToScreenMeterFactor)];
 }
 
 @end

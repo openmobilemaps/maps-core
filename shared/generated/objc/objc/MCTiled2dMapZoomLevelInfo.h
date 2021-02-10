@@ -5,19 +5,19 @@
 
 @interface MCTiled2dMapZoomLevelInfo : NSObject
 - (nonnull instancetype)initWithZoom:(double)zoom
-                 tileWidthMillimeter:(int64_t)tileWidthMillimeter
+           tileWidthLayerSystemUnits:(float)tileWidthLayerSystemUnits
                            numTilesX:(int32_t)numTilesX
                            numTilesY:(int32_t)numTilesY
                  zoomLevelIdentifier:(int32_t)zoomLevelIdentifier;
 + (nonnull instancetype)tiled2dMapZoomLevelInfoWithZoom:(double)zoom
-                                    tileWidthMillimeter:(int64_t)tileWidthMillimeter
+                              tileWidthLayerSystemUnits:(float)tileWidthLayerSystemUnits
                                               numTilesX:(int32_t)numTilesX
                                               numTilesY:(int32_t)numTilesY
                                     zoomLevelIdentifier:(int32_t)zoomLevelIdentifier;
 
 @property (nonatomic, readonly) double zoom;
 
-@property (nonatomic, readonly) int64_t tileWidthMillimeter;
+@property (nonatomic, readonly) float tileWidthLayerSystemUnits;
 
 @property (nonatomic, readonly) int32_t numTilesX;
 

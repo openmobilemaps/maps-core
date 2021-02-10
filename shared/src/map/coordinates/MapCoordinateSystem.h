@@ -3,28 +3,20 @@
 
 #pragma once
 
+#include "RectCoord.h"
 #include <string>
 #include <utility>
 
 struct MapCoordinateSystem final {
     std::string identifier;
-    double boundsLeft;
-    double boundsTop;
-    double boundsRight;
-    double boundsBottom;
+    RectCoord bounds;
     float unitToScreenMeterFactor;
 
     MapCoordinateSystem(std::string identifier_,
-                        double boundsLeft_,
-                        double boundsTop_,
-                        double boundsRight_,
-                        double boundsBottom_,
+                        RectCoord bounds_,
                         float unitToScreenMeterFactor_)
     : identifier(std::move(identifier_))
-    , boundsLeft(std::move(boundsLeft_))
-    , boundsTop(std::move(boundsTop_))
-    , boundsRight(std::move(boundsRight_))
-    , boundsBottom(std::move(boundsBottom_))
+    , bounds(std::move(bounds_))
     , unitToScreenMeterFactor(std::move(unitToScreenMeterFactor_))
     {}
 };

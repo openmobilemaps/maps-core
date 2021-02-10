@@ -1,5 +1,5 @@
 @extern "../../yaml/texture_holder_interface.yaml"
 
 texture_loader_interface = interface +c +j +o {
-    load_date(url: string): texture_holder_interface;
+    load_texture(url: string): texture_holder_interface;
 }

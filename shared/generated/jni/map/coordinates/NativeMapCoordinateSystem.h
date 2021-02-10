@@ -25,12 +25,9 @@ private:
     friend ::djinni::JniClass<NativeMapCoordinateSystem>;
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/map/coordinates/MapCoordinateSystem") };
-    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Ljava/lang/String;DDDDF)V") };
+    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Ljava/lang/String;Lch/ubique/mapscore/shared/map/coordinates/RectCoord;F)V") };
     const jfieldID field_identifier { ::djinni::jniGetFieldID(clazz.get(), "identifier", "Ljava/lang/String;") };
-    const jfieldID field_boundsLeft { ::djinni::jniGetFieldID(clazz.get(), "boundsLeft", "D") };
-    const jfieldID field_boundsTop { ::djinni::jniGetFieldID(clazz.get(), "boundsTop", "D") };
-    const jfieldID field_boundsRight { ::djinni::jniGetFieldID(clazz.get(), "boundsRight", "D") };
-    const jfieldID field_boundsBottom { ::djinni::jniGetFieldID(clazz.get(), "boundsBottom", "D") };
+    const jfieldID field_bounds { ::djinni::jniGetFieldID(clazz.get(), "bounds", "Lch/ubique/mapscore/shared/map/coordinates/RectCoord;") };
     const jfieldID field_unitToScreenMeterFactor { ::djinni::jniGetFieldID(clazz.get(), "unitToScreenMeterFactor", "F") };
 };
 

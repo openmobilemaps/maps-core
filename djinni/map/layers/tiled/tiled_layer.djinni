@@ -9,7 +9,7 @@ tiled_2d_map_layer_config = interface +c +j +o {
 
 tiled_2d_map_zoom_level_info = record {
 	zoom: f64;
-	tile_width_millimeter: i64;
+	tile_width_layer_system_units: f32;
 	num_tiles_x: i32;
 	num_tiles_y: i32;
 	zoom_level_identifier: i32;

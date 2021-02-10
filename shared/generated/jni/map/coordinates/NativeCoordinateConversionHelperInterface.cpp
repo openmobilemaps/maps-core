@@ -5,6 +5,7 @@
 #include "Marshal.hpp"
 #include "NativeCoord.h"
 #include "NativeCoordinateConverterInterface.h"
+#include "NativeRectCoord.h"
 
 namespace djinni_generated {
 
@@ -40,6 +41,17 @@ CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_coordinates_Coordi
         auto r = ref->convert(::djinni::String::toCpp(jniEnv, j_to),
                               ::djinni_generated::NativeCoord::toCpp(jniEnv, j_coordinate));
         return ::djinni::release(::djinni_generated::NativeCoord::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_coordinates_CoordinateConversionHelperInterface_00024CppProxy_native_1convertRect(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_to, jobject j_rect)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::CoordinateConversionHelperInterface>(nativeRef);
+        auto r = ref->convertRect(::djinni::String::toCpp(jniEnv, j_to),
+                                  ::djinni_generated::NativeRectCoord::toCpp(jniEnv, j_rect));
+        return ::djinni::release(::djinni_generated::NativeRectCoord::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

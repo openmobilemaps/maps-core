@@ -1,6 +1,7 @@
 coordinate_conversion_helper_interface = interface +c {
     register_converter(from: string, to: string, converter: coordinate_converter_interface);
     convert(to: string, coordinate: coord) : coord;
+    convert_rect(to: string, rect: rect_coord) : rect_coord;
     convert_to_render_system(coordinate: coord) : coord;
 }
 
@@ -10,10 +11,7 @@ coordinate_converter_interface = interface +c +j +o {
 
 map_coordinate_system = record {
     identifier: string;
-    bounds_left: f64;
-    bounds_top: f64;
-    bounds_right: f64;
-    bounds_bottom: f64;
+    bounds: rect_coord;
     unit_to_screen_meter_factor: f32;
 }
 

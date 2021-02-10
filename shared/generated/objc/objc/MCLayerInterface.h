@@ -11,6 +11,10 @@
 
 - (nonnull NSString *)getIdentifier;
 
+- (void)onAdded;
+
+- (void)onRemoved;
+
 - (void)pause;
 
 - (void)resume;

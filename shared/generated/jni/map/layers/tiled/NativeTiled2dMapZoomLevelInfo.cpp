@@ -14,7 +14,7 @@ auto NativeTiled2dMapZoomLevelInfo::fromCpp(JNIEnv* jniEnv, const CppType& c) ->
     const auto& data = ::djinni::JniClass<NativeTiled2dMapZoomLevelInfo>::get();
     auto r = ::djinni::LocalRef<JniType>{jniEnv->NewObject(data.clazz.get(), data.jconstructor,
                                                            ::djinni::get(::djinni::F64::fromCpp(jniEnv, c.zoom)),
-                                                           ::djinni::get(::djinni::I64::fromCpp(jniEnv, c.tileWidthMillimeter)),
+                                                           ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.tileWidthLayerSystemUnits)),
                                                            ::djinni::get(::djinni::I32::fromCpp(jniEnv, c.numTilesX)),
                                                            ::djinni::get(::djinni::I32::fromCpp(jniEnv, c.numTilesY)),
                                                            ::djinni::get(::djinni::I32::fromCpp(jniEnv, c.zoomLevelIdentifier)))};
@@ -27,7 +27,7 @@ auto NativeTiled2dMapZoomLevelInfo::toCpp(JNIEnv* jniEnv, JniType j) -> CppType 
     assert(j != nullptr);
     const auto& data = ::djinni::JniClass<NativeTiled2dMapZoomLevelInfo>::get();
     return {::djinni::F64::toCpp(jniEnv, jniEnv->GetDoubleField(j, data.field_zoom)),
-            ::djinni::I64::toCpp(jniEnv, jniEnv->GetLongField(j, data.field_tileWidthMillimeter)),
+            ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_tileWidthLayerSystemUnits)),
             ::djinni::I32::toCpp(jniEnv, jniEnv->GetIntField(j, data.field_numTilesX)),
             ::djinni::I32::toCpp(jniEnv, jniEnv->GetIntField(j, data.field_numTilesY)),
             ::djinni::I32::toCpp(jniEnv, jniEnv->GetIntField(j, data.field_zoomLevelIdentifier))};

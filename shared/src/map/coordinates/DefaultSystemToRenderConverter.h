@@ -12,10 +12,10 @@
 class DefaultSystemToRenderConverter : public CoordinateConverterInterface {
 public:
     DefaultSystemToRenderConverter(const MapCoordinateSystem &mapCoordinateSystem) {
-        boundsLeft = mapCoordinateSystem.boundsLeft;
-        boundsTop = mapCoordinateSystem.boundsTop;
-        boundsRight = mapCoordinateSystem.boundsRight;
-        boundsBottom = mapCoordinateSystem.boundsBottom;
+        boundsLeft = mapCoordinateSystem.bounds.topLeft.x;
+        boundsTop = mapCoordinateSystem.bounds.topLeft.y;
+        boundsRight = mapCoordinateSystem.bounds.bottomRight.x;
+        boundsBottom = mapCoordinateSystem.bounds.bottomRight.y;
         halfWidth = 0.5 * (boundsRight - boundsLeft);
         halfHeight = 0.5 * (boundsBottom - boundsTop);
     }

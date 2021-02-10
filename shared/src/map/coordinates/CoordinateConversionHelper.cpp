@@ -18,6 +18,10 @@ void CoordinateConversionHelper::registerConverter(const std::string &from, cons
 }
 
 Coord CoordinateConversionHelper::convert(const std::string &to, const Coord &coordinate) {
+    if (coordinate.systemIdentifier == to) {
+        return coordinate;
+    }
+
     // first try if we can directly convert
     if ( auto converter = fromToConverterMap[{coordinate.systemIdentifier, to}]) {
         return converter->convert(coordinate);
@@ -31,6 +35,10 @@ Coord CoordinateConversionHelper::convert(const std::string &to, const Coord &co
     }
 
     throw std::invalid_argument("Could not find an eligible converter from: \'" + coordinate.systemIdentifier + "\' to \'" + to + "\'");
+}
+
+RectCoord CoordinateConversionHelper::convertRect(const std::string & to, const RectCoord & rect) {
+    return RectCoord(convert(to, rect.topLeft), convert(to, rect.bottomRight));
 }
 
 Coord CoordinateConversionHelper::convertToRenderSystem(const Coord &coordinate) {

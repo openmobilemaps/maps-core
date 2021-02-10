@@ -10,6 +10,8 @@ public abstract class CoordinateConversionHelperInterface {
 
     public abstract Coord convert(String to, Coord coordinate);
 
+    public abstract RectCoord convertRect(String to, RectCoord rect);
+
     public abstract Coord convertToRenderSystem(Coord coordinate);
 
     private static final class CppProxy extends CoordinateConversionHelperInterface
@@ -50,6 +52,14 @@ public abstract class CoordinateConversionHelperInterface {
             return native_convert(this.nativeRef, to, coordinate);
         }
         private native Coord native_convert(long _nativeRef, String to, Coord coordinate);
+
+        @Override
+        public RectCoord convertRect(String to, RectCoord rect)
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            return native_convertRect(this.nativeRef, to, rect);
+        }
+        private native RectCoord native_convertRect(long _nativeRef, String to, RectCoord rect);
 
         @Override
         public Coord convertToRenderSystem(Coord coordinate)

@@ -54,6 +54,15 @@ std::string TestingLayer::getIdentifier() {
     return "TestingLayer";
 }
 
+void TestingLayer::onAdded() {
+
+}
+
+void TestingLayer::onRemoved() {
+
+}
+
+
 void TestingLayer::pause() {
     polygonObject->getPolygonObject()->clear();
 }

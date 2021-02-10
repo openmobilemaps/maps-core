@@ -8,7 +8,7 @@ public final class Tiled2dMapZoomLevelInfo implements java.io.Serializable {
 
     protected double zoom;
 
-    protected long tileWidthMillimeter;
+    protected float tileWidthLayerSystemUnits;
 
     protected int numTilesX;
 
@@ -18,12 +18,12 @@ public final class Tiled2dMapZoomLevelInfo implements java.io.Serializable {
 
     public Tiled2dMapZoomLevelInfo(
             double zoom,
-            long tileWidthMillimeter,
+            float tileWidthLayerSystemUnits,
             int numTilesX,
             int numTilesY,
             int zoomLevelIdentifier) {
         this.zoom = zoom;
-        this.tileWidthMillimeter = tileWidthMillimeter;
+        this.tileWidthLayerSystemUnits = tileWidthLayerSystemUnits;
         this.numTilesX = numTilesX;
         this.numTilesY = numTilesY;
         this.zoomLevelIdentifier = zoomLevelIdentifier;
@@ -33,8 +33,8 @@ public final class Tiled2dMapZoomLevelInfo implements java.io.Serializable {
         return zoom;
     }
 
-    public long getTileWidthMillimeter() {
-        return tileWidthMillimeter;
+    public float getTileWidthLayerSystemUnits() {
+        return tileWidthLayerSystemUnits;
     }
 
     public int getNumTilesX() {
@@ -53,8 +53,8 @@ public final class Tiled2dMapZoomLevelInfo implements java.io.Serializable {
         this.zoom = zoom;
     }
 
-    public void setTileWidthMillimeter(long tileWidthMillimeter) {
-        this.tileWidthMillimeter = tileWidthMillimeter;
+    public void setTileWidthLayerSystemUnits(float tileWidthLayerSystemUnits) {
+        this.tileWidthLayerSystemUnits = tileWidthLayerSystemUnits;
     }
 
     public void setNumTilesX(int numTilesX) {
@@ -73,7 +73,7 @@ public final class Tiled2dMapZoomLevelInfo implements java.io.Serializable {
     public String toString() {
         return "Tiled2dMapZoomLevelInfo{" +
                 "zoom=" + zoom +
-                "," + "tileWidthMillimeter=" + tileWidthMillimeter +
+                "," + "tileWidthLayerSystemUnits=" + tileWidthLayerSystemUnits +
                 "," + "numTilesX=" + numTilesX +
                 "," + "numTilesY=" + numTilesY +
                 "," + "zoomLevelIdentifier=" + zoomLevelIdentifier +

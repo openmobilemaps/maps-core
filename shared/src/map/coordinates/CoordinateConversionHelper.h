@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Coord.h"
+#include "RectCoord.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "MapCoordinateSystem.h"
 #include <unordered_map>
@@ -20,6 +21,8 @@ public:
     void registerConverter(const std::string & from, const std::string & to, const std::shared_ptr<CoordinateConverterInterface> & converter);
 
     Coord convert(const std::string & to, const Coord & coordinate);
+
+    RectCoord convertRect(const std::string & to, const RectCoord & rect);
 
     Coord convertToRenderSystem(const Coord & coordinate);
 

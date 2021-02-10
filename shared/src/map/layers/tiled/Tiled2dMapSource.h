@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <set>
+#include <unordered_set>
 #include "Tiled2dMapSourceInterface.h"
 #include "Tiled2dMapLayerConfig.h"
 #include "SchedulerInterface.h"
@@ -12,19 +12,31 @@
 #include "Tiled2dMapTileInfo.h"
 #include "Tiled2dMapSourceListenerInterface.h"
 #include "Tiled2dMapZoomLevelInfo.h"
+#include "MapConfig.h"
+#include "CoordinateConversionHelperInterface.h"
 
 class Tiled2dMapSource : public Tiled2dMapSourceInterface {
 public:
-    Tiled2dMapSource(const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
+    Tiled2dMapSource(const MapConfig &mapConfig,
+                     const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
+                     const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                      const std::shared_ptr<SchedulerInterface> &scheduler,
                      const std::shared_ptr<Tiled2dMapSourceListenerInterface> &listener);
 
     virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom);
 
-protected:
-    virtual void onVisibleTilesChanged(const std::set<Tiled2dMapTileInfo> &visibleTiles) = 0;
+    virtual void pause() = 0;
 
+    virtual void resume() = 0;
+
+protected:
+    virtual void onVisibleTilesChanged(const std::unordered_set<Tiled2dMapTileInfo> &visibleTiles) = 0;
+
+    MapConfig mapConfig;
     std::shared_ptr<Tiled2dMapLayerConfig> layerConfig;
+    RectCoord layerBoundsMapSystem;
+    std::string layerSystemIdentifier;
+    std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
     std::shared_ptr<SchedulerInterface> scheduler;
     std::shared_ptr<Tiled2dMapSourceListenerInterface> listener;
 

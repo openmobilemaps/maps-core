@@ -8,6 +8,7 @@
 #import "DJIMarshal+Private.h"
 #import "MCCoord+Private.h"
 #import "MCCoordinateConverterInterface+Private.h"
+#import "MCRectCoord+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -48,6 +49,15 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
         auto objcpp_result_ = _cppRefHandle.get()->convert(::djinni::String::toCpp(to),
                                                            ::djinni_generated::Coord::toCpp(coordinate));
         return ::djinni_generated::Coord::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nonnull MCRectCoord *)convertRect:(nonnull NSString *)to
+                                rect:(nonnull MCRectCoord *)rect {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->convertRect(::djinni::String::toCpp(to),
+                                                               ::djinni_generated::RectCoord::toCpp(rect));
+        return ::djinni_generated::RectCoord::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

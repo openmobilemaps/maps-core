@@ -8,6 +8,7 @@
 
 class CoordinateConverterInterface;
 struct Coord;
+struct RectCoord;
 
 class CoordinateConversionHelperInterface {
 public:
@@ -16,6 +17,8 @@ public:
     virtual void registerConverter(const std::string & from, const std::string & to, const std::shared_ptr<CoordinateConverterInterface> & converter) = 0;
 
     virtual Coord convert(const std::string & to, const Coord & coordinate) = 0;
+
+    virtual RectCoord convertRect(const std::string & to, const RectCoord & rect) = 0;
 
     virtual Coord convertToRenderSystem(const Coord & coordinate) = 0;
 };

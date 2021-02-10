@@ -17,7 +17,7 @@ void Polygon2dLayerObject::setPositions(std::vector<Coord> positions) {
         Coord renderCoord = conversionHelper->convertToRenderSystem(mapCoord);
         renderCoords.push_back(Vec2D(renderCoord.x, renderCoord.y));
     }
-    polygon->setPolygonPositions(renderCoords, {}, false);
+    polygon->setPolygonPositions(renderCoords, {}, false); // TODO: Add holes
 }
 
 std::shared_ptr<GraphicsObjectInterface> Polygon2dLayerObject::getPolygonObject() {

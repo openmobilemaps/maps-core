@@ -8,18 +8,18 @@
 
 struct Tiled2dMapZoomLevelInfo final {
     double zoom;
-    int64_t tileWidthMillimeter;
+    float tileWidthLayerSystemUnits;
     int32_t numTilesX;
     int32_t numTilesY;
     int32_t zoomLevelIdentifier;
 
     Tiled2dMapZoomLevelInfo(double zoom_,
-                            int64_t tileWidthMillimeter_,
+                            float tileWidthLayerSystemUnits_,
                             int32_t numTilesX_,
                             int32_t numTilesY_,
                             int32_t zoomLevelIdentifier_)
     : zoom(std::move(zoom_))
-    , tileWidthMillimeter(std::move(tileWidthMillimeter_))
+    , tileWidthLayerSystemUnits(std::move(tileWidthLayerSystemUnits_))
     , numTilesX(std::move(numTilesX_))
     , numTilesY(std::move(numTilesY_))
     , zoomLevelIdentifier(std::move(zoomLevelIdentifier_))

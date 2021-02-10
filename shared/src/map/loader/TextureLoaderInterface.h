@@ -11,5 +11,5 @@ class TextureLoaderInterface {
 public:
     virtual ~TextureLoaderInterface() {}
 
-    virtual std::shared_ptr<::TextureHolderInterface> loadDate(const std::string & url) = 0;
+    virtual std::shared_ptr<::TextureHolderInterface> loadTexture(const std::string & url) = 0;
 };

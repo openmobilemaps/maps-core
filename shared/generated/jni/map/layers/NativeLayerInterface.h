@@ -35,6 +35,8 @@ private:
 
         std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override;
         std::string getIdentifier() override;
+        void onAdded() override;
+        void onRemoved() override;
         void pause() override;
         void resume() override;
         void hide() override;
@@ -47,6 +49,8 @@ private:
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/map/layers/LayerInterface") };
     const jmethodID method_buildRenderPasses { ::djinni::jniGetMethodID(clazz.get(), "buildRenderPasses", "()Ljava/util/ArrayList;") };
     const jmethodID method_getIdentifier { ::djinni::jniGetMethodID(clazz.get(), "getIdentifier", "()Ljava/lang/String;") };
+    const jmethodID method_onAdded { ::djinni::jniGetMethodID(clazz.get(), "onAdded", "()V") };
+    const jmethodID method_onRemoved { ::djinni::jniGetMethodID(clazz.get(), "onRemoved", "()V") };
     const jmethodID method_pause { ::djinni::jniGetMethodID(clazz.get(), "pause", "()V") };
     const jmethodID method_resume { ::djinni::jniGetMethodID(clazz.get(), "resume", "()V") };
     const jmethodID method_hide { ::djinni::jniGetMethodID(clazz.get(), "hide", "()V") };

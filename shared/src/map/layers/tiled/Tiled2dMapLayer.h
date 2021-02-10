@@ -8,19 +8,25 @@
 #include "Tiled2dMapSourceListenerInterface.h"
 #include "MapCamera2dListenerInterface.h"
 
-class Tiled2dMapLayer : public LayerInterface, public Tiled2dMapSourceListenerInterface, public MapCamera2dListenerInterface {
+class Tiled2dMapLayer : public LayerInterface, public Tiled2dMapSourceListenerInterface, public MapCamera2dListenerInterface,
+                        public std::enable_shared_from_this<Tiled2dMapLayer> {
 public:
 
-    Tiled2dMapLayer(const std::shared_ptr<MapInterface> &mapInterface, const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
-                    const std::shared_ptr<Tiled2dMapSourceInterface> &source);
+    Tiled2dMapLayer(const std::shared_ptr<MapInterface> &mapInterface, const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig);
+
+    void setSourceInterface(const std::shared_ptr<Tiled2dMapSourceInterface> &sourceInterface);
 
     virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() = 0;
 
     virtual std::string getIdentifier() = 0;
 
-    virtual void pause();
+    virtual void onAdded();
 
-    virtual void resume();
+    virtual void onRemoved();
+
+    virtual void pause() = 0;
+
+    virtual void resume() = 0;
 
     virtual void hide();
 
@@ -33,7 +39,7 @@ public:
 protected:
     const std::shared_ptr<MapInterface> mapInterface;
     const std::shared_ptr<Tiled2dMapLayerConfig> layerConfig;
-    std::shared_ptr<Tiled2dMapSourceInterface> source;
+    std::shared_ptr<Tiled2dMapSourceInterface> sourceInterface;
 
     bool isHidden = false;
 };

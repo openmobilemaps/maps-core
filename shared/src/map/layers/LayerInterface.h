@@ -16,6 +16,10 @@ public:
 
     virtual std::string getIdentifier() = 0;
 
+    virtual void onAdded() = 0;
+
+    virtual void onRemoved() = 0;
+
     virtual void pause() = 0;
 
     virtual void resume() = 0;

@@ -11,6 +11,10 @@ public abstract class LayerInterface {
 
     public abstract String getIdentifier();
 
+    public abstract void onAdded();
+
+    public abstract void onRemoved();
+
     public abstract void pause();
 
     public abstract void resume();
@@ -57,6 +61,22 @@ public abstract class LayerInterface {
             return native_getIdentifier(this.nativeRef);
         }
         private native String native_getIdentifier(long _nativeRef);
+
+        @Override
+        public void onAdded()
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            native_onAdded(this.nativeRef);
+        }
+        private native void native_onAdded(long _nativeRef);
+
+        @Override
+        public void onRemoved()
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            native_onRemoved(this.nativeRef);
+        }
+        private native void native_onRemoved(long _nativeRef);
 
         @Override
         public void pause()

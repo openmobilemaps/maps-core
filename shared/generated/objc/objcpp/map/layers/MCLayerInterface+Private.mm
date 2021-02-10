@@ -46,6 +46,18 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)onAdded {
+    try {
+        _cppRefHandle.get()->onAdded();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)onRemoved {
+    try {
+        _cppRefHandle.get()->onRemoved();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)pause {
     try {
         _cppRefHandle.get()->pause();
@@ -91,6 +103,18 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getIdentifier];
             return ::djinni::String::toCpp(objcpp_result_);
+        }
+    }
+    void onAdded() override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() onAdded];
+        }
+    }
+    void onRemoved() override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() onRemoved];
         }
     }
     void pause() override

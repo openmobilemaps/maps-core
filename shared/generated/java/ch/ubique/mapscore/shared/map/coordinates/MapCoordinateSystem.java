@@ -9,28 +9,16 @@ public final class MapCoordinateSystem implements java.io.Serializable {
     @androidx.annotation.NonNull
     protected String identifier;
 
-    protected double boundsLeft;
-
-    protected double boundsTop;
-
-    protected double boundsRight;
-
-    protected double boundsBottom;
+    protected RectCoord bounds;
 
     protected float unitToScreenMeterFactor;
 
     public MapCoordinateSystem(
             String identifier,
-            double boundsLeft,
-            double boundsTop,
-            double boundsRight,
-            double boundsBottom,
+            RectCoord bounds,
             float unitToScreenMeterFactor) {
         this.identifier = identifier;
-        this.boundsLeft = boundsLeft;
-        this.boundsTop = boundsTop;
-        this.boundsRight = boundsRight;
-        this.boundsBottom = boundsBottom;
+        this.bounds = bounds;
         this.unitToScreenMeterFactor = unitToScreenMeterFactor;
     }
 
@@ -38,20 +26,8 @@ public final class MapCoordinateSystem implements java.io.Serializable {
         return identifier;
     }
 
-    public double getBoundsLeft() {
-        return boundsLeft;
-    }
-
-    public double getBoundsTop() {
-        return boundsTop;
-    }
-
-    public double getBoundsRight() {
-        return boundsRight;
-    }
-
-    public double getBoundsBottom() {
-        return boundsBottom;
+    public RectCoord getBounds() {
+        return bounds;
     }
 
     public float getUnitToScreenMeterFactor() {
@@ -62,20 +38,8 @@ public final class MapCoordinateSystem implements java.io.Serializable {
         this.identifier = identifier;
     }
 
-    public void setBoundsLeft(double boundsLeft) {
-        this.boundsLeft = boundsLeft;
-    }
-
-    public void setBoundsTop(double boundsTop) {
-        this.boundsTop = boundsTop;
-    }
-
-    public void setBoundsRight(double boundsRight) {
-        this.boundsRight = boundsRight;
-    }
-
-    public void setBoundsBottom(double boundsBottom) {
-        this.boundsBottom = boundsBottom;
+    public void setBounds(RectCoord bounds) {
+        this.bounds = bounds;
     }
 
     public void setUnitToScreenMeterFactor(float unitToScreenMeterFactor) {
@@ -86,10 +50,7 @@ public final class MapCoordinateSystem implements java.io.Serializable {
     public String toString() {
         return "MapCoordinateSystem{" +
                 "identifier=" + identifier +
-                "," + "boundsLeft=" + boundsLeft +
-                "," + "boundsTop=" + boundsTop +
-                "," + "boundsRight=" + boundsRight +
-                "," + "boundsBottom=" + boundsBottom +
+                "," + "bounds=" + bounds +
                 "," + "unitToScreenMeterFactor=" + unitToScreenMeterFactor +
         "}";
     }

@@ -80,10 +80,12 @@ std::shared_ptr<::TouchHandlerInterface> MapScene::getTouchHandler() {
 }
 
 void MapScene::addLayer(const std::shared_ptr<::LayerInterface> & layer) {
+    layer->onAdded();
     layers.push_back(layer);
 }
 
 void MapScene::removeLayer(const std::shared_ptr<::LayerInterface> & layer) {
+    layer->onRemoved();
     layers.erase(std::remove(layers.begin(), layers.end(), layer), layers.end());
 }
 
@@ -107,7 +109,7 @@ void MapScene::drawFrame() {
 
 void MapScene::resume() {
     isResumed = true;
-    addLayer(std::make_shared<TestingLayer>(shared_from_this()));
+    //addLayer(std::make_shared<TestingLayer>(shared_from_this()));
     for (const auto &layer : layers) {
         layer->resume();
     }
