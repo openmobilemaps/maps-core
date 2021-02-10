@@ -11,6 +11,7 @@
 #include "Coord.h"
 #include "Tiled2dMapTileInfo.h"
 #include "Tiled2dMapSourceListenerInterface.h"
+#include "Tiled2dMapZoomLevelInfo.h"
 
 class Tiled2dMapSource : public Tiled2dMapSourceInterface {
 public:

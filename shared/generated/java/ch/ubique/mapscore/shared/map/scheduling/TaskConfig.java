@@ -63,7 +63,7 @@ public final class TaskConfig implements java.io.Serializable {
         return "TaskConfig{" +
                 "id=" + id +
                 "," + "delay=" + delay +
-                "," + "loadPriority=" + priority +
+                "," + "priority=" + priority +
                 "," + "executionEnvironment=" + executionEnvironment +
         "}";
     }
