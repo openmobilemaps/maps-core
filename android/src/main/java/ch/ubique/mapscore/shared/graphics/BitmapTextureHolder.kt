@@ -38,7 +38,6 @@ class BitmapTextureHolder(bitmap: Bitmap) : TextureHolderInterface() {
 
 	override fun attachToGraphics() {
 		GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0)
-		bitmap.recycle()
 	}
 
 	companion object {

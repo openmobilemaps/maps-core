@@ -31,7 +31,7 @@ protected:
     virtual std::string getFragmentShader();
 
 private:
-    float alpha;
+    float alpha = 1;
 
 };
 

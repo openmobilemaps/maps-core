@@ -11,12 +11,12 @@ cmake_minimum_required(VERSION 3.4.1)
 # Gradle automatically packages shared libraries with your APK.
 
 file(GLOB_RECURSE cpp_SRC
-        "../shared/generated/jni/*.h"
-        "../shared/generated/jni/*.hpp"
-        "../shared/generated/jni/*.cpp"
-        "../shared/src/*.h"
-        "../shared/src/*.cpp"
-        "../shared/src/*.hpp"
+        "../bridging/android/jni/*.h"
+        "../bridging/android/jni/*.hpp"
+        "../bridging/android/jni/*.cpp"
+        "../shared/*.h"
+        "../shared/*.cpp"
+        "../shared/*.hpp"
         "src/main/cpp/*.h"
         "src/main/cpp/*.cpp"
         "../../external/djinni/support-lib/*.h"
@@ -34,37 +34,48 @@ add_library( # Sets the name of the library.
 
 include_directories(../../external/djinni/support-lib)
 include_directories(../../external/djinni/support-lib/jni)
-include_directories(../shared/generated/jni/graphics)
-include_directories(../shared/generated/jni/graphics/common)
-include_directories(../shared/generated/jni/graphics/objects)
-include_directories(../shared/generated/jni/graphics/shader)
-include_directories(../shared/generated/jni/map)
-include_directories(../shared/generated/jni/map/controls)
-include_directories(../shared/generated/jni/map/layers)
-include_directories(../shared/generated/jni/map/layers/objects)
-include_directories(../shared/generated/jni/map/layers/tiled)
-include_directories(../shared/generated/jni/map/layers/tiled/raster)
-include_directories(../shared/generated/jni/map/loader)
-include_directories(../shared/generated/jni/map/scheduling)
-include_directories(../shared/generated/jni/map/coordinates)
-include_directories(../shared/generated/jni/map/camera)
+include_directories(../bridging/android/jni/graphics)
+include_directories(../bridging/android/jni/graphics/common)
+include_directories(../bridging/android/jni/graphics/objects)
+include_directories(../bridging/android/jni/graphics/shader)
+include_directories(../bridging/android/jni/map)
+include_directories(../bridging/android/jni/map/controls)
+include_directories(../bridging/android/jni/map/layers)
+include_directories(../bridging/android/jni/map/layers/objects)
+include_directories(../bridging/android/jni/map/layers/tiled)
+include_directories(../bridging/android/jni/map/layers/tiled/raster)
+include_directories(../bridging/android/jni/map/loader)
+include_directories(../bridging/android/jni/map/scheduling)
+include_directories(../bridging/android/jni/map/coordinates)
+include_directories(../bridging/android/jni/map/camera)
+include_directories(../shared/public)
+include_directories(../shared/public/graphics)
+include_directories(../shared/public/graphics/common)
+include_directories(../shared/public/graphics/objects)
+include_directories(../shared/public/graphics/shader)
+include_directories(../shared/public/map)
+include_directories(../shared/public/map/camera)
+include_directories(../shared/public/map/controls)
+include_directories(../shared/public/map/coordinates)
+include_directories(../shared/public/map/layers)
+include_directories(../shared/public/map/layers/objects)
+include_directories(../shared/public/map/layers/tiled)
+include_directories(../shared/public/map/layers/tiled/raster)
+include_directories(../shared/public/map/loader)
+include_directories(../shared/public/map/scheduling)
 include_directories(../shared/src)
 include_directories(../shared/src/logger)
 include_directories(../shared/src/graphics)
-include_directories(../shared/src/graphics/common)
-include_directories(../shared/src/graphics/objects)
-include_directories(../shared/src/graphics/shader)
 include_directories(../shared/src/graphics/helpers)
 include_directories(../shared/src/map)
+include_directories(../shared/src/map/camera)
 include_directories(../shared/src/map/controls)
+include_directories(../shared/src/map/coordinates)
 include_directories(../shared/src/map/layers)
 include_directories(../shared/src/map/layers/objects)
 include_directories(../shared/src/map/layers/tiled)
 include_directories(../shared/src/map/layers/tiled/raster)
-include_directories(../shared/src/map/loader)
 include_directories(../shared/src/map/scheduling)
-include_directories(../shared/src/map/coordinates)
-include_directories(../shared/src/map/camera)
 include_directories(src/main/cpp)
 include_directories(src/main/cpp/graphics)
 include_directories(src/main/cpp/graphics/objects)

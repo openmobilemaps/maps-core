@@ -91,8 +91,9 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
                                                                               mapInterface->getCoordinateConverterHelper());
 
                     tileObject->setRectCoord(tile.tileInfo.bounds);
+                    tileObject->getRectangleObject()->asGraphicsObject()->setup(renderingContext);
 
-                    if (auto textureHolder = tile.textureHolder) {
+                    if (tile.textureHolder) {
                       tileObject->getRectangleObject()->loadTexture(tile.textureHolder);
                     }
                   

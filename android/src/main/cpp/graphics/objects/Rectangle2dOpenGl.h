@@ -49,7 +49,7 @@ protected:
     std::vector<GLfloat> vertexBuffer;
     std::vector<GLfloat> textureBuffer;
     std::vector<GLubyte> indexBuffer;
-    std::vector<GLuint> texturePointer;
+    std::vector<GLuint> texturePointer = { 0 };
     bool textureLoaded = false;
 
     RectD frame = RectD(0.0, 0.0, 0.0, 0.0);

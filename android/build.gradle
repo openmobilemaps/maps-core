@@ -29,7 +29,7 @@ android {
 		main {
 			java {
 				srcDir 'src/main/java'
-				srcDir '../shared/generated/java'
+				srcDir '../bridging/android/java'
 			}
 		}
 	}
