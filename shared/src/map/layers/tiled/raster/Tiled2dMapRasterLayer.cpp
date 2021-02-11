@@ -14,9 +14,7 @@ Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::MapInterfac
 }
 
 void Tiled2dMapRasterLayer::onAdded() {
-    Tiled2dMapLayer::onAdded();
     alphaShader = mapInterface->getShaderFactory()->createAlphaShader();
-  alphaShader->updateAlpha(0.5);
 
     rasterSource = std::make_shared<Tiled2dMapRasterSource>(mapInterface->getMapConfig(),
                                                             layerConfig,
@@ -25,6 +23,7 @@ void Tiled2dMapRasterLayer::onAdded() {
                                                             textureLoader,
                                                             shared_from_this());
     setSourceInterface(rasterSource);
+    Tiled2dMapLayer::onAdded();
 }
 
 void Tiled2dMapRasterLayer::onRemoved() {
@@ -93,7 +92,10 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
 
                     tileObject->setRectCoord(tile.tileInfo.bounds);
 
-                  tileObject->getRectangleObject()->loadTexture(tile.textureHolder);
+                    if (auto textureHolder = tile.textureHolder) {
+                      tileObject->getRectangleObject()->loadTexture(tile.textureHolder);
+                    }
+                  
                     tileObjectMap[tile] = tileObject;
                 }
 

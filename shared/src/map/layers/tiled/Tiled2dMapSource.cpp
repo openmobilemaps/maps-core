@@ -31,13 +31,6 @@ void Tiled2dMapSource::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, 
 }
 
 void Tiled2dMapSource::updateCurrentTileset(const RectCoord &visibleBounds, double zoom) {
-    //TODO: check if it okay to not handle all touch inputs
-    std::unique_lock<std::recursive_mutex> lock(updateTilesMutex, std::try_to_lock);
-    if(!lock.owns_lock()) {
-        // update tiles is already happening
-      return;
-    }
-
     // TODO: update current tileset -> call onVisibleTilesChanged
     std::unordered_set<Tiled2dMapTileInfo> visibleTiles;
 

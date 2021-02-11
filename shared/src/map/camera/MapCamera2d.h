@@ -54,6 +54,8 @@ public:
 
     virtual bool onTwoFingerMove(const std::vector< ::Vec2F> &posScreenOld, const std::vector< ::Vec2F> &posScreenNew);
 
+    RectCoord getVisibileRect();
+
 protected:
 
     std::set<std::shared_ptr<MapCamera2dListenerInterface>> listeners;
@@ -75,7 +77,6 @@ protected:
 
     void notifyListeners();
 
-            
     Coord coordFromScreenPosition(const ::Vec2F &posScreen);
     // MARK: Animations
 

@@ -15,6 +15,13 @@ Tiled2dMapRasterSource::Tiled2dMapRasterSource(const MapConfig &mapConfig,
 }
 
 void Tiled2dMapRasterSource::onVisibleTilesChanged(const std::unordered_set<Tiled2dMapTileInfo> &visibleTiles) {
+    //TODO: check if it okay to not handle all touch inputs
+    std::unique_lock<std::recursive_mutex> lock(currentTilesMutex, std::try_to_lock);
+    if(!lock.owns_lock()) {
+      // update tiles is already happening
+      return;
+    }
+
     // TODO: Check difference in currentSet/newVisible tiles, load new ones, inform the listener via listener->onTilesUpdated()
 
     std::unordered_set<Tiled2dMapTileInfo> toAdd;

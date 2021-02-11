@@ -13,11 +13,11 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> & rend
     auto mvpMatrix = camera->getMvpMatrix();
     auto mvpMatrixPointer = (int64_t) mvpMatrix.data();
 
+    renderingContext->setupDrawFrame();
+
     while (!renderQueue.empty())
     {
         auto pass = renderQueue.front();
-
-        renderingContext->setupDrawFrame();
 
         for (const auto &object: pass->getGraphicsObjects()) {
             object->render(renderingContext, pass->getRenderPassConfig(), mvpMatrixPointer);

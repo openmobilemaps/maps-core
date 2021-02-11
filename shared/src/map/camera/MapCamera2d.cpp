@@ -119,19 +119,24 @@ std::vector<float> MapCamera2d::getMvpMatrix() {
 }
 
 
+RectCoord MapCamera2d::getVisibileRect() {
+  Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
+  double zoomFactor = screenPixelAsRealMeterFactor * zoom;
+  Coord topLeft = Coord(mapCoordinateSystem.identifier,
+                        centerPosition.x - ((double) sizeViewport.x / 2.0) * zoomFactor,
+                        centerPosition.y + ((double) sizeViewport.y / 2.0) * zoomFactor,
+                        centerPosition.z);
+  Coord bottomRight = Coord(mapCoordinateSystem.identifier,
+                            centerPosition.x + ((double) sizeViewport.x / 2.0) * zoomFactor,
+                            centerPosition.y - ((double) sizeViewport.y / 2.0) * zoomFactor,
+                            centerPosition.z);
+  return RectCoord(topLeft, bottomRight);
+}
+
 void MapCamera2d::notifyListeners() {
-    Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
-    double zoomFactor = screenPixelAsRealMeterFactor * zoom;
-    Coord topLeft = Coord(mapCoordinateSystem.identifier,
-                          centerPosition.x - ((double) sizeViewport.x / 2.0) * zoomFactor,
-                          centerPosition.y + ((double) sizeViewport.y / 2.0) * zoomFactor,
-                          centerPosition.z);
-    Coord bottomRight = Coord(mapCoordinateSystem.identifier,
-                              centerPosition.x + ((double) sizeViewport.x / 2.0) * zoomFactor,
-                              centerPosition.y - ((double) sizeViewport.y / 2.0) * zoomFactor,
-                              centerPosition.z);
+    auto visibleRect = getVisibileRect();
     for (auto listener: listeners) {
-        listener->onVisibleBoundsChanged(RectCoord(topLeft, bottomRight), zoom);
+        listener->onVisibleBoundsChanged(visibleRect, zoom);
     }
 }
 

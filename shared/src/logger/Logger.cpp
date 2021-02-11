@@ -116,9 +116,9 @@ void Logger::log(int prio, const char* tag, const char* fmt, ...) const
 #endif
 
 #ifdef BANDIT_TESTING
-    if(loadPriority <= LOG_LEVEL)
+    if(priority <= LOG_LEVEL)
     {
-        switch(loadPriority)
+        switch(priority)
         {
             case 0:
             {

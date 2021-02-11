@@ -9,6 +9,7 @@
 #include "Tiled2dMapRasterTileInfo.h"
 #include "Tiled2dMapSource.h"
 #include "MapConfig.h"
+#include <mutex>
 
 class Tiled2dMapRasterSource : public Tiled2dMapSource {
 public:
@@ -32,6 +33,8 @@ private:
     const std::shared_ptr<TextureLoaderInterface> loader;
 
     std::map<Tiled2dMapTileInfo, std::shared_ptr<TextureHolderInterface>> currentTiles;
+
+    std::recursive_mutex currentTilesMutex;
 };
 
 
