@@ -9,11 +9,11 @@
 #include "Tiled2dMapLayerConfig.h"
 #include "SchedulerInterface.h"
 #include "Coord.h"
-#include "Tiled2dMapTileInfo.h"
 #include "Tiled2dMapSourceListenerInterface.h"
 #include "Tiled2dMapZoomLevelInfo.h"
 #include "MapConfig.h"
 #include "CoordinateConversionHelperInterface.h"
+#include "PrioritizedTiled2dMapTileInfo.h"
 
 class Tiled2dMapSource : public Tiled2dMapSourceInterface {
 public:
@@ -30,7 +30,7 @@ public:
     virtual void resume() = 0;
 
 protected:
-    virtual void onVisibleTilesChanged(const std::unordered_set<Tiled2dMapTileInfo> &visibleTiles) = 0;
+    virtual void onVisibleTilesChanged(const std::unordered_set<PrioritizedTiled2dMapTileInfo> &visibleTiles) = 0;
 
     MapConfig mapConfig;
     std::shared_ptr<Tiled2dMapLayerConfig> layerConfig;

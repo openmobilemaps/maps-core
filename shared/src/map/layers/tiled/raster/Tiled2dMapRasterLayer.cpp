@@ -73,7 +73,9 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
 
                 std::unordered_set<Tiled2dMapRasterTileInfo> tilesToAdd;
                 for (const auto &rasterTileInfo: currentTileInfos) {
-                    if (!tileObjectMap[rasterTileInfo]) tilesToAdd.insert(rasterTileInfo);
+                  if (!tileObjectMap[rasterTileInfo]) {
+                    tilesToAdd.insert(rasterTileInfo);
+                  }
                 }
 
                 std::unordered_set<Tiled2dMapRasterTileInfo> tilesToRemove;
@@ -114,6 +116,8 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
                 }
                 std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(0), renderObjects);
                 renderPasses = {renderPass};
+      
+                mapInterface->invalidate();
             }));
 }
 

@@ -32,7 +32,7 @@ void Tiled2dMapSource::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, 
 
 void Tiled2dMapSource::updateCurrentTileset(const RectCoord &visibleBounds, double zoom) {
     // TODO: update current tileset -> call onVisibleTilesChanged
-    std::unordered_set<Tiled2dMapTileInfo> visibleTiles;
+    std::unordered_set<PrioritizedTiled2dMapTileInfo> visibleTiles;
 
     RectCoord layerBounds = layerConfig->getBounds();
     RectCoord visibleBoundsLayer = conversionHelper->convertRect(layerSystemId, visibleBounds);
@@ -64,11 +64,10 @@ void Tiled2dMapSource::updateCurrentTileset(const RectCoord &visibleBounds, doub
                 for (int y = startTileTop; y <= maxTileTop && y < zoomLevelInfo.numTilesY; y++) {
                     Coord tileTopLeft = Coord(layerSystemId, x * tileWidthAdj + boundsLeft, y * tileHeightAdj + boundsTop, 0);
                     Coord tileBottomRight = Coord(layerSystemId, tileTopLeft.x + tileWidthAdj, tileTopLeft.y + tileHeightAdj, 0);
+                    RectCoord rect(tileTopLeft, tileBottomRight);
 
                     // TODO: Set priority to useful value instead of '1' (e.g. weighted by distance to center)
-                    visibleTiles.insert(Tiled2dMapTileInfo(RectCoord(tileTopLeft, tileBottomRight),
-                                                           x, y, zoomLevelInfo.zoomLevelIdentifier,
-                                                           1));
+                    visibleTiles.insert(PrioritizedTiled2dMapTileInfo(Tiled2dMapTileInfo(rect, x, y, zoomLevelInfo.zoomLevelIdentifier), 1));
                 }
             }
             break;

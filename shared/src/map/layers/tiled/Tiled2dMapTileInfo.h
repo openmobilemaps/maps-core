@@ -7,56 +7,22 @@
 #include "RectCoord.h"
 #include <stdint.h>
 
-struct TileInfo {
-  int x;
-  int y;
-  int zoom;
-
-  TileInfo(int x, int y, int zoom)
-          : x(x), y(y), zoom(zoom) {}
-
-  bool operator==(const TileInfo &o) const {
-      return x == o.x && y == o.y && zoom == o.zoom;
-  }
-
-  bool operator<(const TileInfo &o) const {
-      return x < o.x && y < o.y && zoom < o.zoom;
-  }
-
-  bool operator>(const TileInfo &o) const {
-      return x > o.x && y > o.y && zoom > o.zoom;
-  }
-};
-
-namespace std {
-    template<>
-    struct hash<TileInfo> {
-        inline size_t operator()(const TileInfo& tileInfo) const {
-          int sizeBits = (SIZE_MAX == 0xFFFFFFFF) ? 32 : 64;
-          size_t hash = ((size_t) tileInfo.x << (2 * sizeBits / 3)) | ((size_t) tileInfo.y << (sizeBits / 3)) | ((size_t) tileInfo.zoom) ;
-          return hash;
-        }
-    };
-}
-
 struct Tiled2dMapTileInfo {
     RectCoord bounds;
-    //TileInfo tileInfo; //TOOD: move x,y, zoom into struct
     int x;
     int y;
     int zoom;
-    int loadingPriority; // priorities > 0, if must be loaded
 
-    Tiled2dMapTileInfo(RectCoord bounds, int x, int y, int zoom, int loadingPriority)
-            : bounds(bounds), x(x), y(y), zoom(zoom), loadingPriority(loadingPriority) {}
+    Tiled2dMapTileInfo(RectCoord bounds, int x, int y, int zoom)
+            : bounds(bounds), x(x), y(y), zoom(zoom) {}
 
     bool operator==(const Tiled2dMapTileInfo &o) const {
-        return x == o.x && y == o.y && zoom == o.zoom && loadingPriority == o.loadingPriority;
+        return x == o.x && y == o.y && zoom == o.zoom;
     }
 
     bool operator<(const Tiled2dMapTileInfo &o) const {
         return x < o.x || (x == o.x && y < o.y) || (x == o.x && y == o.y && zoom < o.zoom) ||
-               (x == o.x && y == o.y && zoom == o.zoom && loadingPriority < o.loadingPriority);
+               (x == o.x && y == o.y && zoom == o.zoom);
     }
 };
 

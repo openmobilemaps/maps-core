@@ -9,8 +9,8 @@ open class MapView: MTKView {
     private var sizeChanged: Bool = false
     private var backgroundDisable = false
 
-    private var framesToRender: UInt = 500
-    private let framesToRenderAfterInvalidate: UInt = 500
+    private var framesToRender: UInt = 1
+    private let framesToRenderAfterInvalidate: UInt = 1
 
     private let touchHandler: MapViewTouchHandler
 

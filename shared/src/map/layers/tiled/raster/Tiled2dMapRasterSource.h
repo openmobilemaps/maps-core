@@ -4,15 +4,15 @@
 
 #pragma once
 
-#include <map>
+#include <unordered_map>
 #include "TextureLoaderInterface.h"
 #include "Tiled2dMapRasterTileInfo.h"
 #include "Tiled2dMapSource.h"
 #include "MapConfig.h"
 #include <mutex>
-#include "PriorityQueue.h"
+#include <queue>
 #include <optional>
-
+#include <unordered_set>
 
 class Tiled2dMapRasterSource : public Tiled2dMapSource {
 public:
@@ -30,19 +30,21 @@ public:
     virtual void resume();
 
 protected:
-    virtual void onVisibleTilesChanged(const std::unordered_set<Tiled2dMapTileInfo> &visibleTiles);
+    // tuple of tileInfo ans priority
+    virtual void onVisibleTilesChanged(const std::unordered_set<PrioritizedTiled2dMapTileInfo> &visibleTiles);
 
 private:
     const std::shared_ptr<TextureLoaderInterface> loader;
 
-    std::map<Tiled2dMapTileInfo, std::shared_ptr<TextureHolderInterface>> currentTiles;
+    std::unordered_map<Tiled2dMapTileInfo, std::shared_ptr<TextureHolderInterface>> currentTiles;
 
     std::recursive_mutex currentTilesMutex;
 
 
     std::recursive_mutex priorityQueueMutex;
-    PriorityQueue<int, TileInfo> loadingQueue;
+    //std::priority_queue<PrioritizedTiled2dMapTileInfo, std::vector<PrioritizedTiled2dMapTileInfo>, PrioritizedTiled2dMapTileInfoCompare> loadingQueue;
+    std::unordered_set<PrioritizedTiled2dMapTileInfo> loadingQueue;
 
-    std::optional<const Tiled2dMapTileInfo> dequeueLoadingTask();
+    std::optional<Tiled2dMapTileInfo> dequeueLoadingTask();
     void performLoadingTask();
 };

@@ -1,66 +1,88 @@
 import Foundation
 import MapCoreSharedModule
 
+extension OperationQueue {
+  convenience init(concurrentOperations: Int, qos: QualityOfService, queue: DispatchQueue? = nil) {
+    self.init()
+    qualityOfService = qos
+    maxConcurrentOperationCount = concurrentOperations
+    underlyingQueue = queue
+  }
+}
+
+class TaskOperation: Operation {
+  var task: MCTaskInterface
+
+  init(task: MCTaskInterface) {
+    self.task = task
+  }
+
+  override func main() {
+    task.run()
+  }
+}
+
 class Scheduler: MCSchedulerInterface {
-  private let ioHighDispatchQueue = DispatchQueue(label: "ioHighQueue", qos: .userInitiated, attributes: .concurrent)
-  private let ioNormalDispatchQueue = DispatchQueue(label: "ioNormalQueue", qos: .default, attributes: .concurrent)
-  private let ioLowDispatchQueue = DispatchQueue(label: "ioLowQueue", qos: .background, attributes: .concurrent)
 
-  private let computationHighDispatchQueue = DispatchQueue(label: "computationHighQueue", qos: .userInitiated, attributes: .concurrent)
-  private let computationNormalDispatchQueue = DispatchQueue(label: "computationNormalQueue", qos: .default, attributes: .concurrent)
-  private let computationLowDispatchQueue = DispatchQueue(label: "computationLowQueue", qos: .background, attributes: .concurrent)
+  private let ioHighQueue = OperationQueue(concurrentOperations: 10, qos: .userInteractive)
+  private let ioNormalQueue = OperationQueue(concurrentOperations: 10, qos: .default)
+  private let ioLowQueue = OperationQueue(concurrentOperations: 10, qos: .background)
 
-  private let graphicsDispatchQueue = DispatchQueue.main
+  private let computationHighQueue = OperationQueue(concurrentOperations: 10, qos: .userInteractive)
+  private let computationNormalQueue = OperationQueue(concurrentOperations: 10, qos: .default)
+  private let computationLowQueue = OperationQueue(concurrentOperations: 10, qos: .background)
+
+  private let graphicsQueue = OperationQueue(concurrentOperations: 1, qos: .userInteractive, queue: .main)
 
   private let internalSchedulerQueue = DispatchQueue(label: "internalSchedulerQueue")
 
-  struct WeakWorkItem {
-    weak var workItem: DispatchWorkItem?
-  }
 
-  private var outstandingWorkItems: [String: WeakWorkItem] = [:]
+  private var outstandingOperations: [String: TaskOperation] = [:]
 
   func addTask(_ task: MCTaskInterface?) {
-    internalSchedulerQueue.async {
-      self.cleanUpFinishedOutstandingWorkItems()
-      guard let task = task else { return }
-      let config = task.getConfig()
+    guard let task = task else { return }
 
-      if self.outstandingWorkItems[config.id] != nil {
+    let config = task.getConfig()
+    let delay = TimeInterval(config.delay / 1000)
+
+    internalSchedulerQueue.asyncAfter(deadline: .now() + delay) {
+
+      self.cleanUpFinishedOutstandingOperations()
+
+
+      if self.outstandingOperations[config.id] != nil {
         self.removeTask(config.id)
       }
 
-      let delay = TimeInterval(config.delay / 1000)
-      let workItem = DispatchWorkItem {
-        task.run()
-      }
-      self.outstandingWorkItems[config.id] = .init(workItem: workItem)
+      let operation = TaskOperation(task: task)
+
+      self.outstandingOperations[config.id] = operation
 
       switch config.executionEnvironment {
       case .IO:
         switch config.priority {
         case .HIGH:
-          self.ioHighDispatchQueue.asyncAfter(deadline: .now() + delay, execute: workItem)
+          self.ioHighQueue.addOperation(operation)
         case .NORMAL:
-          self.ioNormalDispatchQueue.asyncAfter(deadline: .now() + delay, execute: workItem)
+          self.ioNormalQueue.addOperation(operation)
         case .LOW:
-          self.ioLowDispatchQueue.asyncAfter(deadline: .now() + delay, execute: workItem)
+          self.ioLowQueue.addOperation(operation)
         @unknown default:
           fatalError("unknown priority")
         }
       case .COMPUTATION:
         switch config.priority {
         case .HIGH:
-          self.computationHighDispatchQueue.asyncAfter(deadline: .now() + delay, execute: workItem)
+          self.computationHighQueue.addOperation(operation)
         case .NORMAL:
-          self.computationNormalDispatchQueue.asyncAfter(deadline: .now() + delay, execute: workItem)
+          self.computationNormalQueue.addOperation(operation)
         case .LOW:
-          self.computationLowDispatchQueue.asyncAfter(deadline: .now() + delay, execute: workItem)
+          self.computationLowQueue.addOperation(operation)
         @unknown default:
           fatalError("unknown priority")
         }
       case .GRAPHICS:
-        self.graphicsDispatchQueue.asyncAfter(deadline: .now() + delay, execute: workItem)
+        self.graphicsQueue.addOperation(operation)
       @unknown default:
         fatalError("unexpected executionEnvironment")
       }
@@ -68,48 +90,48 @@ class Scheduler: MCSchedulerInterface {
   }
 
   func removeTask(_ id: String) {
-    cleanUpFinishedOutstandingWorkItems()
-    outstandingWorkItems[id]?.workItem?.cancel()
+    cleanUpFinishedOutstandingOperations()
+    outstandingOperations[id]?.cancel()
   }
 
   func clear() {
-    outstandingWorkItems.forEach {
-      $1.workItem?.cancel()
+    outstandingOperations.forEach {
+      $1.cancel()
     }
-    cleanUpFinishedOutstandingWorkItems()
+    cleanUpFinishedOutstandingOperations()
   }
 
   func pause() {
-    cleanUpFinishedOutstandingWorkItems()
+    cleanUpFinishedOutstandingOperations()
 
-    ioHighDispatchQueue.suspend()
-    ioNormalDispatchQueue.suspend()
-    ioLowDispatchQueue.suspend()
-    
-    graphicsDispatchQueue.suspend()
+    ioHighQueue.isSuspended = true
+    ioNormalQueue.isSuspended = true
+    ioLowQueue.isSuspended = true
 
-    computationLowDispatchQueue.suspend()
-    computationNormalDispatchQueue.suspend()
-    computationHighDispatchQueue.suspend()
+    computationHighQueue.isSuspended = true
+    computationNormalQueue.isSuspended = true
+    computationLowQueue.isSuspended = true
+
+    graphicsQueue.isSuspended = true
   }
 
   func resume() {
-    cleanUpFinishedOutstandingWorkItems()
+    cleanUpFinishedOutstandingOperations()
 
-    ioHighDispatchQueue.resume()
-    ioNormalDispatchQueue.resume()
-    ioLowDispatchQueue.resume()
+    ioHighQueue.isSuspended = false
+    ioNormalQueue.isSuspended = false
+    ioLowQueue.isSuspended = false
 
-    graphicsDispatchQueue.resume()
+    computationHighQueue.isSuspended = false
+    computationNormalQueue.isSuspended = false
+    computationLowQueue.isSuspended = false
 
-    computationLowDispatchQueue.resume()
-    computationNormalDispatchQueue.resume()
-    computationHighDispatchQueue.resume()
+    graphicsQueue.isSuspended = false
   }
 
-  func cleanUpFinishedOutstandingWorkItems() {
-    outstandingWorkItems = outstandingWorkItems.filter {
-      !($1.workItem?.isCancelled ?? false) || $1.workItem != nil
+  func cleanUpFinishedOutstandingOperations() {
+    outstandingOperations = outstandingOperations.filter {
+      !($1.isCancelled)
     }
   }
 }
