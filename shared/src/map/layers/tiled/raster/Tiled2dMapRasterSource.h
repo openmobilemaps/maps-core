@@ -10,6 +10,9 @@
 #include "Tiled2dMapSource.h"
 #include "MapConfig.h"
 #include <mutex>
+#include "PriorityQueue.h"
+#include <optional>
+
 
 class Tiled2dMapRasterSource : public Tiled2dMapSource {
 public:
@@ -35,6 +38,11 @@ private:
     std::map<Tiled2dMapTileInfo, std::shared_ptr<TextureHolderInterface>> currentTiles;
 
     std::recursive_mutex currentTilesMutex;
+
+
+    std::recursive_mutex priorityQueueMutex;
+    PriorityQueue<int, TileInfo> loadingQueue;
+
+    std::optional<const Tiled2dMapTileInfo> dequeueLoadingTask();
+    void performLoadingTask();
 };
-
-

@@ -89,6 +89,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
                     auto tileObject = std::make_shared<Textured2dLayerObject>(graphicsFactory->createRectangle(alphaShader->asShaderProgramInterface()),
                                                                               alphaShader,
                                                                               mapInterface->getCoordinateConverterHelper());
+                    tileObject->setAlpha(1.0);
 
                     tileObject->setRectCoord(tile.tileInfo.bounds);
                     tileObject->getRectangleObject()->asGraphicsObject()->setup(renderingContext);

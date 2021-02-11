@@ -7,8 +7,41 @@
 #include "RectCoord.h"
 #include <stdint.h>
 
+struct TileInfo {
+  int x;
+  int y;
+  int zoom;
+
+  TileInfo(int x, int y, int zoom)
+          : x(x), y(y), zoom(zoom) {}
+
+  bool operator==(const TileInfo &o) const {
+      return x == o.x && y == o.y && zoom == o.zoom;
+  }
+
+  bool operator<(const TileInfo &o) const {
+      return x < o.x && y < o.y && zoom < o.zoom;
+  }
+
+  bool operator>(const TileInfo &o) const {
+      return x > o.x && y > o.y && zoom > o.zoom;
+  }
+};
+
+namespace std {
+    template<>
+    struct hash<TileInfo> {
+        inline size_t operator()(const TileInfo& tileInfo) const {
+          int sizeBits = (SIZE_MAX == 0xFFFFFFFF) ? 32 : 64;
+          size_t hash = ((size_t) tileInfo.x << (2 * sizeBits / 3)) | ((size_t) tileInfo.y << (sizeBits / 3)) | ((size_t) tileInfo.zoom) ;
+          return hash;
+        }
+    };
+}
+
 struct Tiled2dMapTileInfo {
     RectCoord bounds;
+    //TileInfo tileInfo; //TOOD: move x,y, zoom into struct
     int x;
     int y;
     int zoom;
