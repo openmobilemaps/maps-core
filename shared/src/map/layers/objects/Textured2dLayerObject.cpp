@@ -23,7 +23,7 @@ void Textured2dLayerObject::setPosition(const ::Coord & coord, double width, dou
 void Textured2dLayerObject::setRectCoord(const ::RectCoord & rectCoord) {
   auto renderCoord = conversionHelper->convertRectToRenderSystem(rectCoord);
   auto width = renderCoord.bottomRight.x - renderCoord.topLeft.x;
-  auto height = renderCoord.topLeft.y - renderCoord.bottomRight.y;
+  auto height = renderCoord.bottomRight.y - renderCoord.topLeft.y;
   setFrame(RectD(renderCoord.topLeft.x, renderCoord.topLeft.y, width, height));
 }
 

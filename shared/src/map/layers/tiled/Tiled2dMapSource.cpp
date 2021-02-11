@@ -48,17 +48,22 @@ void Tiled2dMapSource::updateCurrentTileset(const RectCoord &visibleBounds, doub
             double visibleLeft = visibleBoundsLayer.topLeft.x;
             double boundsLeft = layerBounds.topLeft.x;
             int startTileLeft = std::floor(std::max(visibleLeft - boundsLeft, 0.0) / tileWidth);
-            double visibleBottom = visibleBoundsLayer.bottomRight.y;
-            double boundsBottom = layerBounds.bottomRight.y;
-            int startTileBottom = std::floor(std::max(visibleBottom - boundsBottom, 0.0) / tileWidth);
+            double visibleTop = visibleBoundsLayer.topLeft.y;
+            double boundsTop = layerBounds.topLeft.y;
+            int startTileTop = std::floor(std::max(boundsTop - visibleTop, 0.0) / tileWidth);
 
             for (int x = startTileLeft; x * tileWidth + boundsLeft <= std::min(visibleBoundsLayer.bottomRight.x, layerBounds.bottomRight.x); x++) {
-                for (int y = startTileBottom; y * tileWidth + boundsBottom <= std::min(visibleBoundsLayer.topLeft.y, layerBounds.topLeft.y); y++) {
-                    Coord tileTopLeft = Coord(layerSystemIdentifier, x * tileWidth + boundsLeft, y * tileWidth + boundsBottom, 0);
-                    Coord tileBottomRight = Coord(layerSystemIdentifier, tileTopLeft.x + tileWidth, tileTopLeft.y + tileWidth, 0);
+                for (int y = startTileTop; boundsTop - y * tileWidth >= std::max(visibleBoundsLayer.bottomRight.y, layerBounds.bottomRight.y); y++) {
+                    Coord tileTopLeft = Coord(layerSystemIdentifier, x * tileWidth + boundsLeft, boundsTop - y * tileWidth, 0);
+                    Coord tileBottomRight = Coord(layerSystemIdentifier, tileTopLeft.x + tileWidth, tileTopLeft.y - tileWidth, 0);
+
+                    int finalX = x;
+                    int finalY = y;
+                    int finalZoom = zoomLevelInfo.zoomLevelIdentifier;
+
                     // TODO: Set priority to useful value instead of '1' (e.g. weighted by distance to center)
                     visibleTiles.insert(Tiled2dMapTileInfo(RectCoord(tileTopLeft, tileBottomRight),
-                                                           x, y, zoomLevelInfo.zoomLevelIdentifier,
+                                                           finalX, finalY, finalZoom,
                                                            1));
                 }
             }

@@ -37,8 +37,8 @@ TestingLayer::TestingLayer(const std::shared_ptr<MapInterface> &mapInterface) : 
                                  Coord(mapCoordSystemId, 2514633.3, 1123416.7, 0),
                                  Coord(mapCoordSystemId, 2499033.3, 1109116.7, 0),
                                  Coord(mapCoordSystemId, 2491333.3, 1109833.3, 0)});
-    shader->setColor(0, 1, 0, 0.5);
-    shader2->setColor(1, 0, 0, 0.5);
+    shader->setColor(0, 1, 0, 0.25);
+    shader2->setColor(1, 0, 0, 0.25);
 
     auto config = RenderPassConfig(0);
     auto vector = {rectangle3->asGraphicsObject(), rectangle->asGraphicsObject(), rectangle2->asGraphicsObject(),
