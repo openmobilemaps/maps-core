@@ -18,7 +18,7 @@ Tiled2dMapSource::Tiled2dMapSource(const MapConfig &mapConfig,
           listener(listener),
           zoomInfo(layerConfig->getZoomLevelInfos()),
           layerBoundsMapSystem(conversionHelper->convertRect(mapConfig.mapCoordinateSystem.identifier, layerConfig->getBounds())),
-          layerSystemIdentifier(layerConfig->getBounds().topLeft.systemIdentifier) {
+          layerSystemId(layerConfig->getBounds().topLeft.systemIdentifier) {
 }
 
 void Tiled2dMapSource::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom) {
@@ -35,35 +35,39 @@ void Tiled2dMapSource::updateCurrentTileset(const RectCoord &visibleBounds, doub
     std::unordered_set<Tiled2dMapTileInfo> visibleTiles;
 
     RectCoord layerBounds = layerConfig->getBounds();
-    RectCoord visibleBoundsLayer = conversionHelper->convertRect(layerSystemIdentifier, visibleBounds);
+    RectCoord visibleBoundsLayer = conversionHelper->convertRect(layerSystemId, visibleBounds);
 
     // for(über alle relevanten layers) { hinzufügen von sichtbaren tiles }
 
     for (const Tiled2dMapZoomLevelInfo &zoomLevelInfo : zoomInfo) {
         if (zoomLevelInfo.zoom < zoom) {
 
-            // TODO: solve correct for other systems (i.e. top.y < bottom.y)
             double tileWidth = zoomLevelInfo.tileWidthLayerSystemUnits;
 
+            bool leftToRight = layerBounds.topLeft.x < layerBounds.bottomRight.x;
+            bool topToBottom = layerBounds.topLeft.y < layerBounds.bottomRight.y;
+            double tileWidthAdj = leftToRight ? tileWidth : -tileWidth;
+            double tileHeightAdj = topToBottom ? tileWidth : -tileWidth;
+
             double visibleLeft = visibleBoundsLayer.topLeft.x;
+            double visibleRight = visibleBoundsLayer.bottomRight.x;
             double boundsLeft = layerBounds.topLeft.x;
-            int startTileLeft = std::floor(std::max(visibleLeft - boundsLeft, 0.0) / tileWidth);
+            int startTileLeft = std::floor(std::abs(visibleLeft - boundsLeft) / tileWidth);
+            int maxTileLeft = std::ceil(std::abs(visibleLeft - visibleRight) / tileWidth) + startTileLeft;
             double visibleTop = visibleBoundsLayer.topLeft.y;
+            double visibleBottom = visibleBoundsLayer.bottomRight.y;
             double boundsTop = layerBounds.topLeft.y;
-            int startTileTop = std::floor(std::max(boundsTop - visibleTop, 0.0) / tileWidth);
+            int startTileTop = std::floor(std::abs(visibleTop - boundsTop) / tileWidth);
+            int maxTileTop = std::ceil(std::abs(visibleTop - visibleBottom) / tileWidth) + startTileTop;
 
-            for (int x = startTileLeft; x * tileWidth + boundsLeft <= std::min(visibleBoundsLayer.bottomRight.x, layerBounds.bottomRight.x); x++) {
-                for (int y = startTileTop; boundsTop - y * tileWidth >= std::max(visibleBoundsLayer.bottomRight.y, layerBounds.bottomRight.y); y++) {
-                    Coord tileTopLeft = Coord(layerSystemIdentifier, x * tileWidth + boundsLeft, boundsTop - y * tileWidth, 0);
-                    Coord tileBottomRight = Coord(layerSystemIdentifier, tileTopLeft.x + tileWidth, tileTopLeft.y - tileWidth, 0);
-
-                    int finalX = x;
-                    int finalY = y;
-                    int finalZoom = zoomLevelInfo.zoomLevelIdentifier;
+            for (int x = startTileLeft; x <= maxTileLeft && x < zoomLevelInfo.numTilesX; x++) {
+                for (int y = startTileTop; y <= maxTileTop && y < zoomLevelInfo.numTilesY; y++) {
+                    Coord tileTopLeft = Coord(layerSystemId, x * tileWidthAdj + boundsLeft, y * tileHeightAdj + boundsTop, 0);
+                    Coord tileBottomRight = Coord(layerSystemId, tileTopLeft.x + tileWidthAdj, tileTopLeft.y + tileHeightAdj, 0);
 
                     // TODO: Set priority to useful value instead of '1' (e.g. weighted by distance to center)
                     visibleTiles.insert(Tiled2dMapTileInfo(RectCoord(tileTopLeft, tileBottomRight),
-                                                           finalX, finalY, finalZoom,
+                                                           x, y, zoomLevelInfo.zoomLevelIdentifier,
                                                            1));
                 }
             }
@@ -73,4 +77,3 @@ void Tiled2dMapSource::updateCurrentTileset(const RectCoord &visibleBounds, doub
 
     onVisibleTilesChanged(visibleTiles);
 }
-
