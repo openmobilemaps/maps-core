@@ -40,6 +40,8 @@ public:
 
     virtual void setViewportSize(const ::Vec2I & size);
 
+    virtual void setBackgroundColor(const Color &color);
+
     virtual void invalidate();
 
     virtual void drawFrame();

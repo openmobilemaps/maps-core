@@ -3,6 +3,7 @@
 @extern "../yaml/shader_factory_interface.yaml"
 @extern "../yaml/vec_3_d.yaml"
 @extern "../yaml/vec_2_i.yaml"
+@extern "../yaml/color.yaml"
 
 scene_interface = interface +c {
     static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface, rendering_context: rendering_context_interface) : scene_interface;
@@ -28,7 +29,8 @@ rendering_context_interface = interface +c +j +o {
     on_surface_created();
     # Ensure calling on graphics thread
     set_viewport_size(size: vec_2_i);
-    get_viewport_size() : vec_2_i; 
+    get_viewport_size() : vec_2_i;
+    set_background_color(color: color);
     setupDrawFrame();
 }
 

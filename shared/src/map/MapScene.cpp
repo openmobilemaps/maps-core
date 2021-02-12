@@ -97,6 +97,10 @@ void MapScene::setViewportSize(const ::Vec2I & size) {
     getCamera()->viewportSizeChanged();
 }
 
+void MapScene::setBackgroundColor(const Color &color) {
+    getRenderingContext()->setBackgroundColor(color);
+}
+
 void MapScene::invalidate() {
     if (auto handler = callbackHandler) {
         handler->invalidate();

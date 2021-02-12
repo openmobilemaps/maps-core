@@ -36,6 +36,7 @@ private:
         void onSurfaceCreated() override;
         void setViewportSize(const ::Vec2I & size) override;
         ::Vec2I getViewportSize() override;
+        void setBackgroundColor(const ::Color & color) override;
         void setupDrawFrame() override;
 
     private:
@@ -46,6 +47,7 @@ private:
     const jmethodID method_onSurfaceCreated { ::djinni::jniGetMethodID(clazz.get(), "onSurfaceCreated", "()V") };
     const jmethodID method_setViewportSize { ::djinni::jniGetMethodID(clazz.get(), "setViewportSize", "(Lch/ubique/mapscore/shared/graphics/common/Vec2I;)V") };
     const jmethodID method_getViewportSize { ::djinni::jniGetMethodID(clazz.get(), "getViewportSize", "()Lch/ubique/mapscore/shared/graphics/common/Vec2I;") };
+    const jmethodID method_setBackgroundColor { ::djinni::jniGetMethodID(clazz.get(), "setBackgroundColor", "(Lch/ubique/mapscore/shared/graphics/common/Color;)V") };
     const jmethodID method_setupDrawFrame { ::djinni::jniGetMethodID(clazz.get(), "setupDrawFrame", "()V") };
 };
 

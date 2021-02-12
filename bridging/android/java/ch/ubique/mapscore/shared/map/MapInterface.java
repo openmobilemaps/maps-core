@@ -36,6 +36,8 @@ public abstract class MapInterface {
 
     public abstract void setViewportSize(ch.ubique.mapscore.shared.graphics.common.Vec2I size);
 
+    public abstract void setBackgroundColor(ch.ubique.mapscore.shared.graphics.common.Color color);
+
     public abstract void invalidate();
 
     public abstract void drawFrame();
@@ -201,6 +203,14 @@ public abstract class MapInterface {
             native_setViewportSize(this.nativeRef, size);
         }
         private native void native_setViewportSize(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Vec2I size);
+
+        @Override
+        public void setBackgroundColor(ch.ubique.mapscore.shared.graphics.common.Color color)
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            native_setBackgroundColor(this.nativeRef, color);
+        }
+        private native void native_setBackgroundColor(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Color color);
 
         @Override
         public void invalidate()

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CameraInterface.h"
+#include "Color.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "GraphicsObjectFactoryInterface.h"
 #include "LayerInterface.h"
@@ -54,6 +55,8 @@ public:
     virtual void removeLayer(const std::shared_ptr<::LayerInterface> & layer) = 0;
 
     virtual void setViewportSize(const ::Vec2I & size) = 0;
+
+    virtual void setBackgroundColor(const ::Color & color) = 0;
 
     virtual void invalidate() = 0;
 

@@ -14,6 +14,8 @@ public abstract class RenderingContextInterface {
 
     public abstract ch.ubique.mapscore.shared.graphics.common.Vec2I getViewportSize();
 
+    public abstract void setBackgroundColor(ch.ubique.mapscore.shared.graphics.common.Color color);
+
     public abstract void setupDrawFrame();
 
     private static final class CppProxy extends RenderingContextInterface
@@ -62,6 +64,14 @@ public abstract class RenderingContextInterface {
             return native_getViewportSize(this.nativeRef);
         }
         private native ch.ubique.mapscore.shared.graphics.common.Vec2I native_getViewportSize(long _nativeRef);
+
+        @Override
+        public void setBackgroundColor(ch.ubique.mapscore.shared.graphics.common.Color color)
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            native_setBackgroundColor(this.nativeRef, color);
+        }
+        private native void native_setBackgroundColor(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Color color);
 
         @Override
         public void setupDrawFrame()

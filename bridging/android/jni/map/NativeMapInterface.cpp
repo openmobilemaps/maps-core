@@ -4,6 +4,7 @@
 #include "NativeMapInterface.h"  // my header
 #include "Marshal.hpp"
 #include "NativeCameraInterface.h"
+#include "NativeColor.h"
 #include "NativeCoordinateConversionHelperInterface.h"
 #include "NativeGraphicsObjectFactoryInterface.h"
 #include "NativeLayerInterface.h"
@@ -193,6 +194,15 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024Cpp
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
         ref->setViewportSize(::djinni_generated::NativeVec2I::toCpp(jniEnv, j_size));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1setBackgroundColor(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeColor::JniType j_color)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
+        ref->setBackgroundColor(::djinni_generated::NativeColor::toCpp(jniEnv, j_color));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

@@ -51,3 +51,10 @@ vec_3_d = record {
     y: f64;
     z: f64;
 }
+
+color = record {
+    r: f32;
+    g: f32;
+    b: f32;
+    a: f32;
+}

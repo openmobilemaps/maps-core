@@ -7,6 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "MCCameraInterface+Private.h"
+#import "MCColor+Private.h"
 #import "MCCoordinateConversionHelperInterface+Private.h"
 #import "MCGraphicsObjectFactoryInterface+Private.h"
 #import "MCLayerInterface+Private.h"
@@ -160,6 +161,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)setViewportSize:(nonnull MCVec2I *)size {
     try {
         _cppRefHandle.get()->setViewportSize(::djinni_generated::Vec2I::toCpp(size));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setBackgroundColor:(nonnull MCColor *)color {
+    try {
+        _cppRefHandle.get()->setBackgroundColor(::djinni_generated::Color::toCpp(color));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

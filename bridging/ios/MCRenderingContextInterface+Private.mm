@@ -6,6 +6,7 @@
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
 #import "DJIObjcWrapperCache+Private.h"
+#import "MCColor+Private.h"
 #import "MCVec2I+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -50,6 +51,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setBackgroundColor:(nonnull MCColor *)color {
+    try {
+        _cppRefHandle.get()->setBackgroundColor(::djinni_generated::Color::toCpp(color));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)setupDrawFrame {
     try {
         _cppRefHandle.get()->setupDrawFrame();
@@ -82,6 +89,12 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getViewportSize];
             return ::djinni_generated::Vec2I::toCpp(objcpp_result_);
+        }
+    }
+    void setBackgroundColor(const ::Color & c_color) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setBackgroundColor:(::djinni_generated::Color::fromCpp(c_color))];
         }
     }
     void setupDrawFrame() override

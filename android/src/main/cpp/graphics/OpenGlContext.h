@@ -24,9 +24,13 @@ public:
 
     virtual ::Vec2I getViewportSize();
 
+    virtual void setBackgroundColor(const ::Color & color);
+
     virtual void setupDrawFrame();
 
 protected:
+    Color backgroundColor = Color(0, 0, 0, 1);
+
     std::map<std::string, int> programs;
     std::map<std::string, std::vector<unsigned int>> texturePointers;
 

@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Color.h"
 #include "Vec2I.h"
 
 class RenderingContextInterface {
@@ -16,6 +17,8 @@ public:
     virtual void setViewportSize(const ::Vec2I & size) = 0;
 
     virtual ::Vec2I getViewportSize() = 0;
+
+    virtual void setBackgroundColor(const ::Color & color) = 0;
 
     virtual void setupDrawFrame() = 0;
 };

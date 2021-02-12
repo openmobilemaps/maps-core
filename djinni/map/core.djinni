@@ -13,6 +13,7 @@
 @extern "../yaml/coord.yaml"
 @extern "../yaml/map_camera_2d_interface.yaml"
 @extern "../yaml/map_camera_2d_listener_interface.yaml"
+@extern "../yaml/color.yaml"
 
 map_interface = interface +c {
     static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface, rendering_context: rendering_context_interface, map_config: map_config, scheduler: scheduler_interface) : map_interface;
@@ -39,6 +40,7 @@ map_interface = interface +c {
     remove_layer(layer: layer_interface);
 
     set_viewport_size(size: vec_2_i);
+    set_background_color(color: color);
 
     invalidate();
     draw_frame();
