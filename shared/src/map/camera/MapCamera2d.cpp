@@ -122,13 +122,20 @@ std::vector<float> MapCamera2d::getMvpMatrix() {
 RectCoord MapCamera2d::getVisibileRect() {
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
     double zoomFactor = screenPixelAsRealMeterFactor * zoom;
+
+    double topLeftX = centerPosition.x - ((double) sizeViewport.x / 2.0) * zoomFactor;
+    double topLeftY = centerPosition.y + ((double) sizeViewport.y / 2.0) * zoomFactor;
+
+    double bottomRightX = centerPosition.x + ((double) sizeViewport.x / 2.0) * zoomFactor;
+    double bottomRightY = centerPosition.y - ((double) sizeViewport.y / 2.0) * zoomFactor;
+
     Coord topLeft = Coord(mapCoordinateSystem.identifier,
-                          centerPosition.x - ((double) sizeViewport.x / 2.0) * zoomFactor,
-                          centerPosition.y + ((double) sizeViewport.y / 2.0) * zoomFactor,
+                          topLeftX,
+                          topLeftY,
                           centerPosition.z);
     Coord bottomRight = Coord(mapCoordinateSystem.identifier,
-                              centerPosition.x + ((double) sizeViewport.x / 2.0) * zoomFactor,
-                              centerPosition.y - ((double) sizeViewport.y / 2.0) * zoomFactor,
+                              bottomRightX,
+                              bottomRightY,
                               centerPosition.z);
     return RectCoord(topLeft, bottomRight);
 }
@@ -141,8 +148,18 @@ void MapCamera2d::notifyListeners() {
 }
 
 bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleClick) {
-    centerPosition.x -= deltaScreen.x * zoom * screenPixelAsRealMeterFactor;
-    centerPosition.y += deltaScreen.y * zoom * screenPixelAsRealMeterFactor;
+
+    float dx = deltaScreen.x;
+    float dy = deltaScreen.y;
+
+    float sinAngle = sin(angle * M_PI / 180.0);
+    float cosAngle = cos(angle * M_PI / 180.0);
+
+    float leftDiff = (cosAngle * dx + sinAngle * dy);
+    float topDiff = (-sinAngle * dx + cosAngle * dy);
+
+    centerPosition.x -= leftDiff * zoom * screenPixelAsRealMeterFactor;
+    centerPosition.y += topDiff * zoom * screenPixelAsRealMeterFactor;
 
     notifyListeners();
     mapInterface->invalidate();
@@ -165,14 +182,21 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
         auto midpoint = Vec2FHelper::midpoint(posScreenNew[0], posScreenNew[1]);
         auto oldMidpoint = Vec2FHelper::midpoint(posScreenOld[0], posScreenOld[1]);
 
-        centerPosition.x -= (midpoint.x - oldMidpoint.x) * zoom * screenPixelAsRealMeterFactor;
-        centerPosition.y += (midpoint.y - oldMidpoint.y) * zoom * screenPixelAsRealMeterFactor;
+        float dx = midpoint.x - oldMidpoint.x;
+        float dy = midpoint.y - oldMidpoint.y;
 
-        /*
-         float olda = atan2(posScreenOld[0].x - posScreenOld[1].x, posScreenOld[0].y - posScreenOld[1].x);
-         float newa = atan2(posScreenNew[0].x - posScreenNew[1].x, posScreenNew[0].y - posScreenNew[1].y);
-         angle += (olda - newa) / M_PI * 180.0;*/
+        float sinAngle = sin(angle * M_PI / 180.0);
+        float cosAngle = cos(angle * M_PI / 180.0);
 
+        float leftDiff = (cosAngle * dx + sinAngle * dy);
+        float topDiff = (-sinAngle * dx + cosAngle * dy);
+
+        centerPosition.x -= leftDiff * zoom * screenPixelAsRealMeterFactor;
+        centerPosition.y += topDiff * zoom * screenPixelAsRealMeterFactor;
+
+        float olda = atan2(posScreenOld[0].x - posScreenOld[1].x, posScreenOld[0].y - posScreenOld[1].y);
+        float newa = atan2(posScreenNew[0].x - posScreenNew[1].x, posScreenNew[0].y - posScreenNew[1].y);
+        angle = angle + (olda - newa) / M_PI * 180.0;
 
         notifyListeners();
         mapInterface->invalidate();
