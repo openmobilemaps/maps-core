@@ -11,7 +11,7 @@
 #include "MapConfig.h"
 #include <mutex>
 #include <optional>
-#include <unordered_set>
+#include <set>
 
 class Tiled2dMapRasterSource : public Tiled2dMapSource {
 public:
@@ -40,7 +40,7 @@ private:
     std::unordered_set<Tiled2dMapTileInfo> currentVisibleTiles;
 
     std::recursive_mutex priorityQueueMutex;
-    std::unordered_set<PrioritizedTiled2dMapTileInfo> loadingQueue;
+    std::set<PrioritizedTiled2dMapTileInfo> loadingQueue;
 
     std::optional<Tiled2dMapTileInfo> dequeueLoadingTask();
     void performLoadingTask();

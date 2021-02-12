@@ -84,6 +84,7 @@ void Tiled2dMapRasterSource::onVisibleTilesChanged(const std::unordered_set<Prio
 }
 
 std::unordered_set<Tiled2dMapRasterTileInfo> Tiled2dMapRasterSource::getCurrentTiles() {
+    std::lock_guard<std::recursive_mutex> lock(currentTilesMutex);
     std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos;
     for (const auto &tileEntry: currentTiles) {
         currentTileInfos.insert(Tiled2dMapRasterTileInfo(tileEntry.first, tileEntry.second));
@@ -107,16 +108,11 @@ std::optional<Tiled2dMapTileInfo> Tiled2dMapRasterSource::dequeueLoadingTask(){
         return std::nullopt;
     }
 
-    std::unordered_set<PrioritizedTiled2dMapTileInfo>::iterator highestPrioTileInfo = loadingQueue.begin();
-    for (auto it = loadingQueue.begin(); it != loadingQueue.end(); it++) {
-        if (it->priority < highestPrioTileInfo->priority) {
-            highestPrioTileInfo = it;
-        }
-    }
+    auto tile = loadingQueue.begin();
 
-    loadingQueue.erase(highestPrioTileInfo);
+    loadingQueue.erase(tile);
 
-    return highestPrioTileInfo->tileInfo;
+    return tile->tileInfo;
 }
 
 void Tiled2dMapRasterSource::performLoadingTask() {
