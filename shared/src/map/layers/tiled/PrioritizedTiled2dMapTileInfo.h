@@ -15,7 +15,7 @@ struct PrioritizedTiled2dMapTileInfo {
   }
 
   bool operator<(const PrioritizedTiled2dMapTileInfo &o) const {
-      return tileInfo < o.tileInfo;
+      return (priority < o.priority) || (priority == o.priority && tileInfo < o.tileInfo);
   }
 };
 
@@ -27,9 +27,3 @@ namespace std {
         }
     };
 }
-
-struct PrioritizedTiled2dMapTileInfoCompare{
-  bool operator()(const PrioritizedTiled2dMapTileInfo& a, const PrioritizedTiled2dMapTileInfo& b) {
-    return a.priority > b.priority;
-  }
-};
