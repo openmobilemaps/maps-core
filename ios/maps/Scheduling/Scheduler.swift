@@ -24,11 +24,11 @@ class TaskOperation: Operation {
 
 class Scheduler: MCSchedulerInterface {
 
-  private let ioQueue = OperationQueue(concurrentOperations: 5)
+  private let ioQueue = OperationQueue(concurrentOperations: 15)
 
-  private let computationQueue = OperationQueue(concurrentOperations: 5)
+  private let computationQueue = OperationQueue(concurrentOperations: 15)
 
-  private let graphicsQueue = OperationQueue(concurrentOperations: 1, queue: .main)
+  private let graphicsQueue = OperationQueue(concurrentOperations: 15)
 
   private let internalSchedulerQueue = DispatchQueue(label: "internalSchedulerQueue")
 
@@ -46,11 +46,6 @@ class Scheduler: MCSchedulerInterface {
     internalSchedulerQueue.asyncAfter(deadline: .now() + delay) {
 
       self.cleanUpFinishedOutstandingOperations()
-
-
-      if self.outstandingOperations[config.id] != nil {
-        self.removeTask(config.id)
-      }
 
       let operation = TaskOperation(task: task)
 
@@ -81,40 +76,48 @@ class Scheduler: MCSchedulerInterface {
   }
 
   func removeTask(_ id: String) {
-    cleanUpFinishedOutstandingOperations()
-    outstandingOperations[id]?.cancel()
+    internalSchedulerQueue.async {
+        self.cleanUpFinishedOutstandingOperations()
+        self.outstandingOperations[id]?.cancel()
+    }
   }
 
   func clear() {
-    outstandingOperations.forEach {
-      $1.cancel()
+    internalSchedulerQueue.async {
+        self.outstandingOperations.forEach {
+          $1.cancel()
+        }
+        self.cleanUpFinishedOutstandingOperations()
     }
-    cleanUpFinishedOutstandingOperations()
   }
 
   func pause() {
-    cleanUpFinishedOutstandingOperations()
+    internalSchedulerQueue.async {
+        self.cleanUpFinishedOutstandingOperations()
 
-    ioQueue.isSuspended = true
+        self.ioQueue.isSuspended = true
 
-    computationQueue.isSuspended = true
+        self.computationQueue.isSuspended = true
 
-    graphicsQueue.isSuspended = true
+        self.graphicsQueue.isSuspended = true
+    }
   }
 
   func resume() {
-    cleanUpFinishedOutstandingOperations()
+    internalSchedulerQueue.async {
+        self.cleanUpFinishedOutstandingOperations()
 
-    ioQueue.isSuspended = false
+        self.ioQueue.isSuspended = false
 
-    computationQueue.isSuspended = false
+        self.computationQueue.isSuspended = false
 
-    graphicsQueue.isSuspended = false
+        self.graphicsQueue.isSuspended = false
+    }
   }
 
   func cleanUpFinishedOutstandingOperations() {
     outstandingOperations = outstandingOperations.filter {
-      !($1.isCancelled)
+      !$1.isCancelled
     }
   }
 }

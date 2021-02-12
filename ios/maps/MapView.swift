@@ -59,6 +59,18 @@ open class MapView: MTKView {
 
         mapInterface.resume()
     }
+
+    /// The view’s background color.
+    override public var backgroundColor: UIColor? {
+        get {
+            return super.backgroundColor
+        }
+        set {
+            super.backgroundColor = newValue
+            mapInterface.setBackgroundColor(newValue?.mapCoreColor ?? UIColor.clear.mapCoreColor)
+            isOpaque = newValue?.isOpaque ?? false
+        }
+    }
 }
 
 extension MapView: MCMapCallbackInterface {

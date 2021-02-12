@@ -83,7 +83,7 @@ void MapScene::addLayer(const std::shared_ptr<::LayerInterface> & layer) {
     layer->onAdded();
     layers.push_back(layer);
 
-    layers.push_back(std::make_shared<TestingLayer>(shared_from_this()));
+    //layers.push_back(std::make_shared<TestingLayer>(shared_from_this()));
 }
 
 void MapScene::removeLayer(const std::shared_ptr<::LayerInterface> & layer) {
