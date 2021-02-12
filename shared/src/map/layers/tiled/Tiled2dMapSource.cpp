@@ -55,13 +55,13 @@ void Tiled2dMapSource::updateCurrentTileset(const RectCoord &visibleBounds, doub
             double visibleRight = visibleBoundsLayer.bottomRight.x;
             double visibleWidth = std::abs(visibleLeft - visibleRight);
             double boundsLeft = layerBounds.topLeft.x;
-            int startTileLeft = std::floor(std::abs(visibleLeft - boundsLeft) / tileWidth);
+            int startTileLeft = std::floor(std::max(leftToRight ? (visibleLeft - boundsLeft) : (boundsLeft - visibleLeft), 0.0) / tileWidth);
             int maxTileLeft = std::ceil(visibleWidth / tileWidth) + startTileLeft;
             double visibleTop = visibleBoundsLayer.topLeft.y;
             double visibleBottom = visibleBoundsLayer.bottomRight.y;
             double visibleHeight = std::abs(visibleTop - visibleBottom);
             double boundsTop = layerBounds.topLeft.y;
-            int startTileTop = std::floor(std::abs(visibleTop - boundsTop) / tileWidth);
+            int startTileTop = std::floor(std::max(topToBottom ? (visibleTop - boundsTop) : (boundsTop - visibleTop), 0.0) / tileWidth);
             int maxTileTop = std::ceil(visibleHeight / tileWidth) + startTileTop;
 
             double maxDisCenterX = visibleWidth * 0.5 + tileWidth;
