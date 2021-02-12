@@ -31,14 +31,16 @@ void Tiled2dMapSource::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, 
 }
 
 void Tiled2dMapSource::updateCurrentTileset(const RectCoord &visibleBounds, double zoom) {
-    // TODO: update current tileset -> call onVisibleTilesChanged
     std::unordered_set<PrioritizedTiled2dMapTileInfo> visibleTiles;
 
     RectCoord layerBounds = layerConfig->getBounds();
     RectCoord visibleBoundsLayer = conversionHelper->convertRect(layerSystemId, visibleBounds);
 
-    // for(über alle relevanten layers) { hinzufügen von sichtbaren tiles }
+    double centerVisibleX = visibleBoundsLayer.topLeft.x + 0.5 * (visibleBoundsLayer.bottomRight.x - visibleBoundsLayer.topLeft.x);
+    double centerVisibleY = visibleBoundsLayer.topLeft.y + 0.5 * (visibleBoundsLayer.bottomRight.y - visibleBoundsLayer.topLeft.y);
 
+    int zoomInd = 0;
+    int zoomPriorityRange = 20;
     for (const Tiled2dMapZoomLevelInfo &zoomLevelInfo : zoomInfo) {
         if (zoomLevelInfo.zoom < zoom) {
 
@@ -51,14 +53,20 @@ void Tiled2dMapSource::updateCurrentTileset(const RectCoord &visibleBounds, doub
 
             double visibleLeft = visibleBoundsLayer.topLeft.x;
             double visibleRight = visibleBoundsLayer.bottomRight.x;
+            double visibleWidth = std::abs(visibleLeft - visibleRight);
             double boundsLeft = layerBounds.topLeft.x;
             int startTileLeft = std::floor(std::abs(visibleLeft - boundsLeft) / tileWidth);
-            int maxTileLeft = std::ceil(std::abs(visibleLeft - visibleRight) / tileWidth) + startTileLeft;
+            int maxTileLeft = std::ceil(visibleWidth / tileWidth) + startTileLeft;
             double visibleTop = visibleBoundsLayer.topLeft.y;
             double visibleBottom = visibleBoundsLayer.bottomRight.y;
+            double visibleHeight = std::abs(visibleTop - visibleBottom);
             double boundsTop = layerBounds.topLeft.y;
             int startTileTop = std::floor(std::abs(visibleTop - boundsTop) / tileWidth);
-            int maxTileTop = std::ceil(std::abs(visibleTop - visibleBottom) / tileWidth) + startTileTop;
+            int maxTileTop = std::ceil(visibleHeight / tileWidth) + startTileTop;
+
+            double maxDisCenterX = visibleWidth * 0.5 + tileWidth;
+            double maxDisCenterY = visibleHeight * 0.5 + tileWidth;
+            double maxDisCenter = std::sqrt(maxDisCenterX * maxDisCenterX + maxDisCenterY * maxDisCenterY);
 
             for (int x = startTileLeft; x <= maxTileLeft && x < zoomLevelInfo.numTilesX; x++) {
                 for (int y = startTileTop; y <= maxTileTop && y < zoomLevelInfo.numTilesY; y++) {
@@ -66,12 +74,22 @@ void Tiled2dMapSource::updateCurrentTileset(const RectCoord &visibleBounds, doub
                     Coord tileBottomRight = Coord(layerSystemId, tileTopLeft.x + tileWidthAdj, tileTopLeft.y + tileHeightAdj, 0);
                     RectCoord rect(tileTopLeft, tileBottomRight);
 
-                    // TODO: Set priority to useful value instead of '1' (e.g. weighted by distance to center)
-                    visibleTiles.insert(PrioritizedTiled2dMapTileInfo(Tiled2dMapTileInfo(rect, x, y, zoomLevelInfo.zoomLevelIdentifier), 1));
+                    double tileCenterX = tileTopLeft.x + 0.5f * (tileBottomRight.x - tileTopLeft.x);
+                    double tileCenterY = tileTopLeft.y + 0.5f * (tileBottomRight.y - tileTopLeft.y);
+                    double tileCenterDis = std::sqrt(
+                            std::pow(tileCenterX - centerVisibleX, 2.0) + std::pow(tileCenterY - centerVisibleY, 2.0));
+
+                    visibleTiles.insert(
+                            PrioritizedTiled2dMapTileInfo(Tiled2dMapTileInfo(rect, x, y, zoomLevelInfo.zoomLevelIdentifier),
+                                                          std::ceil((tileCenterDis / maxDisCenter) * zoomPriorityRange) +
+                                                          zoomInd * zoomPriorityRange));
                 }
             }
+
+            zoomInd++;
             break;
         }
+
     }
 
     onVisibleTilesChanged(visibleTiles);
