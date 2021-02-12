@@ -116,10 +116,16 @@ std::optional<Tiled2dMapTileInfo> Tiled2dMapRasterSource::dequeueLoadingTask(){
         return std::nullopt;
     }
 
-    auto tile = *loadingQueue.begin();
-    loadingQueue.erase(tile);
+    std::unordered_set<PrioritizedTiled2dMapTileInfo>::iterator highestPrioTileInfo = loadingQueue.begin();
+    for (auto it = loadingQueue.begin(); it != loadingQueue.end(); it++) {
+        if (it->priority > highestPrioTileInfo->priority) {
+            highestPrioTileInfo = it;
+        }
+    }
 
-    return tile.tileInfo;
+    loadingQueue.erase(highestPrioTileInfo);
+
+    return highestPrioTileInfo->tileInfo;
 }
 
 void Tiled2dMapRasterSource::performLoadingTask() {
