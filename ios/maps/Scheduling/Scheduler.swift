@@ -2,9 +2,8 @@ import Foundation
 import MapCoreSharedModule
 
 extension OperationQueue {
-  convenience init(concurrentOperations: Int, qos: QualityOfService, queue: DispatchQueue? = nil) {
+  convenience init(concurrentOperations: Int, queue: DispatchQueue? = nil) {
     self.init()
-    qualityOfService = qos
     maxConcurrentOperationCount = concurrentOperations
     underlyingQueue = queue
   }
@@ -24,18 +23,13 @@ class TaskOperation: Operation {
 
 class Scheduler: MCSchedulerInterface {
 
-  private let ioHighQueue = OperationQueue(concurrentOperations: 10, qos: .userInteractive)
-  private let ioNormalQueue = OperationQueue(concurrentOperations: 10, qos: .default)
-  private let ioLowQueue = OperationQueue(concurrentOperations: 10, qos: .background)
+  private let ioQueue = OperationQueue(concurrentOperations: 10)
 
-  private let computationHighQueue = OperationQueue(concurrentOperations: 10, qos: .userInteractive)
-  private let computationNormalQueue = OperationQueue(concurrentOperations: 10, qos: .default)
-  private let computationLowQueue = OperationQueue(concurrentOperations: 10, qos: .background)
+  private let computationQueue = OperationQueue(concurrentOperations: 10)
 
-  private let graphicsQueue = OperationQueue(concurrentOperations: 1, qos: .userInteractive, queue: .main)
+  private let graphicsQueue = OperationQueue(concurrentOperations: 1, queue: .main)
 
   private let internalSchedulerQueue = DispatchQueue(label: "internalSchedulerQueue")
-
 
   private var outstandingOperations: [String: TaskOperation] = [:]
 
@@ -56,31 +50,24 @@ class Scheduler: MCSchedulerInterface {
 
       let operation = TaskOperation(task: task)
 
+      switch config.priority {
+      case .HIGH:
+        operation.queuePriority = .high
+      case .NORMAL:
+        operation.queuePriority = .normal
+      case .LOW:
+        operation.queuePriority = .low
+      @unknown default:
+        fatalError("unknown priority")
+      }
+
       self.outstandingOperations[config.id] = operation
 
       switch config.executionEnvironment {
       case .IO:
-        switch config.priority {
-        case .HIGH:
-          self.ioHighQueue.addOperation(operation)
-        case .NORMAL:
-          self.ioNormalQueue.addOperation(operation)
-        case .LOW:
-          self.ioLowQueue.addOperation(operation)
-        @unknown default:
-          fatalError("unknown priority")
-        }
+        self.ioQueue.addOperation(operation)
       case .COMPUTATION:
-        switch config.priority {
-        case .HIGH:
-          self.computationHighQueue.addOperation(operation)
-        case .NORMAL:
-          self.computationNormalQueue.addOperation(operation)
-        case .LOW:
-          self.computationLowQueue.addOperation(operation)
-        @unknown default:
-          fatalError("unknown priority")
-        }
+        self.computationQueue.addOperation(operation)
       case .GRAPHICS:
         self.graphicsQueue.addOperation(operation)
       @unknown default:
@@ -104,13 +91,9 @@ class Scheduler: MCSchedulerInterface {
   func pause() {
     cleanUpFinishedOutstandingOperations()
 
-    ioHighQueue.isSuspended = true
-    ioNormalQueue.isSuspended = true
-    ioLowQueue.isSuspended = true
+    ioQueue.isSuspended = true
 
-    computationHighQueue.isSuspended = true
-    computationNormalQueue.isSuspended = true
-    computationLowQueue.isSuspended = true
+    computationQueue.isSuspended = true
 
     graphicsQueue.isSuspended = true
   }
@@ -118,13 +101,9 @@ class Scheduler: MCSchedulerInterface {
   func resume() {
     cleanUpFinishedOutstandingOperations()
 
-    ioHighQueue.isSuspended = false
-    ioNormalQueue.isSuspended = false
-    ioLowQueue.isSuspended = false
+    ioQueue.isSuspended = false
 
-    computationHighQueue.isSuspended = false
-    computationNormalQueue.isSuspended = false
-    computationLowQueue.isSuspended = false
+    computationQueue.isSuspended = false
 
     graphicsQueue.isSuspended = false
   }
