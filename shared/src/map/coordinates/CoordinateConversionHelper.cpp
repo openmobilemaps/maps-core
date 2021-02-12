@@ -13,6 +13,7 @@ CoordinateConversionHelper::CoordinateConversionHelper(MapCoordinateSystem mapCo
 
 void CoordinateConversionHelper::registerConverter(const std::string &from, const std::string &to,
                                                    const std::shared_ptr<CoordinateConverterInterface> &converter) {
+    std::lock_guard<std::recursive_mutex> overlayLock(converterMutex);
     fromToConverterMap[{from, to}] = converter;
 }
 
@@ -20,6 +21,8 @@ Coord CoordinateConversionHelper::convert(const std::string &to, const Coord &co
     if (coordinate.systemIdentifier == to) {
         return coordinate;
     }
+
+    std::lock_guard<std::recursive_mutex> overlayLock(converterMutex);
 
     // first try if we can directly convert
     if ( auto converter = fromToConverterMap[{coordinate.systemIdentifier, to}]) {

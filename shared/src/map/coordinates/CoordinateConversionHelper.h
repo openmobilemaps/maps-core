@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include "HashedTuple.h"
 #include "string"
+#include <mutex>
 
 class CoordinateConversionHelper : public CoordinateConversionHelperInterface {
 public:
@@ -33,4 +34,5 @@ private:
 
     std::string mapCoordinateSystemIdentier;
 
+    std::recursive_mutex converterMutex;
 };

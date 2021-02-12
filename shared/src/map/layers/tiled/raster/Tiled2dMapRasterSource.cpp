@@ -68,26 +68,21 @@ void Tiled2dMapRasterSource::onVisibleTilesChanged(const std::unordered_set<Prio
 
     for (const auto &addedTile : toAdd) {
 
-        bool scheudleTask = true;
         {
             std::lock_guard<std::recursive_mutex> overlayLock(priorityQueueMutex);
             if (loadingQueue.count(addedTile) == 0) {
                 loadingQueue.insert(addedTile);
-            } else {
-                scheudleTask = false;
             }
         }
 
 
-        if (scheudleTask) {
-            auto taskIdentifier = "Tiled2dMapRasterSource_loadTile" + layerConfig->getTileIdentifier(addedTile.tileInfo.x, addedTile.tileInfo.y, addedTile.tileInfo.zoom);
-            scheduler->addTask(std::make_shared<LambdaTask>(
-                                                            TaskConfig(taskIdentifier,
-                                                                       0,
-                                                                       TaskPriority::NORMAL,
-                                                                       ExecutionEnvironment::IO),
-                                                            [=] { performLoadingTask(); }));
-        }
+        auto taskIdentifier = "Tiled2dMapRasterSource_loadTile" + layerConfig->getTileIdentifier(addedTile.tileInfo.x, addedTile.tileInfo.y, addedTile.tileInfo.zoom);
+        scheduler->addTask(std::make_shared<LambdaTask>(
+                                                        TaskConfig(taskIdentifier,
+                                                                   0,
+                                                                   TaskPriority::NORMAL,
+                                                                   ExecutionEnvironment::IO),
+                                                        [=] { performLoadingTask(); }));
     }
 }
 
