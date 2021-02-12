@@ -18,14 +18,14 @@ loader(loader) {
 }
 
 void Tiled2dMapRasterSource::onVisibleTilesChanged(const std::unordered_set<PrioritizedTiled2dMapTileInfo> &visibleTiles) {
-    std::unique_lock<std::recursive_mutex> lock(currentTilesMutex, std::try_to_lock);
-    if(!lock.owns_lock()) {
-        // update tiles is already happening
-        return;
-    }
+    std::lock_guard<std::recursive_mutex> lock(currentTilesMutex);
+
+    currentVisibleTiles.clear();
 
     std::unordered_set<PrioritizedTiled2dMapTileInfo> toAdd;
     for (const auto &tileInfo: visibleTiles) {
+        currentVisibleTiles.insert(tileInfo.tileInfo);
+
         if (currentTiles.count(tileInfo.tileInfo) == 0) {
             toAdd.insert(tileInfo);
         }
@@ -123,8 +123,12 @@ void Tiled2dMapRasterSource::performLoadingTask() {
     if (auto tile = dequeueLoadingTask()) {
         auto texture = loader->loadTexture(layerConfig->getTileUrl(tile->x, tile->y, tile->zoom));
 
-        std::lock_guard<std::recursive_mutex> lock(currentTilesMutex);
-        currentTiles[*tile] = texture;
+        {
+            std::lock_guard<std::recursive_mutex> lock(currentTilesMutex);
+            if (currentVisibleTiles.count(*tile)) {
+                currentTiles[*tile] = texture;
+            }
+        }
         listener->onTilesUpdated();
     }
 }

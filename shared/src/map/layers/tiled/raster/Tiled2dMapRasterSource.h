@@ -10,7 +10,6 @@
 #include "Tiled2dMapSource.h"
 #include "MapConfig.h"
 #include <mutex>
-#include <queue>
 #include <optional>
 #include <unordered_set>
 
@@ -36,13 +35,11 @@ protected:
 private:
     const std::shared_ptr<TextureLoaderInterface> loader;
 
-    std::unordered_map<Tiled2dMapTileInfo, std::shared_ptr<TextureHolderInterface>> currentTiles;
-
     std::recursive_mutex currentTilesMutex;
-
+    std::unordered_map<Tiled2dMapTileInfo, std::shared_ptr<TextureHolderInterface>> currentTiles;
+    std::unordered_set<Tiled2dMapTileInfo> currentVisibleTiles;
 
     std::recursive_mutex priorityQueueMutex;
-    //std::priority_queue<PrioritizedTiled2dMapTileInfo, std::vector<PrioritizedTiled2dMapTileInfo>, PrioritizedTiled2dMapTileInfoCompare> loadingQueue;
     std::unordered_set<PrioritizedTiled2dMapTileInfo> loadingQueue;
 
     std::optional<Tiled2dMapTileInfo> dequeueLoadingTask();

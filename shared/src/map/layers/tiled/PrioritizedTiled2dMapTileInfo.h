@@ -11,11 +11,11 @@ struct PrioritizedTiled2dMapTileInfo {
           : tileInfo(tileInfo), priority(priority) {}
 
   bool operator==(const PrioritizedTiled2dMapTileInfo &o) const {
-    return tileInfo == o.tileInfo && priority == o.priority;
+    return tileInfo == o.tileInfo;
   }
 
   bool operator<(const PrioritizedTiled2dMapTileInfo &o) const {
-      return tileInfo < o.tileInfo || (tileInfo == o.tileInfo && priority < o.priority);
+      return tileInfo < o.tileInfo;
   }
 };
 
