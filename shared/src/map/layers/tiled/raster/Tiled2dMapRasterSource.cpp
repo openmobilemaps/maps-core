@@ -61,6 +61,8 @@ void Tiled2dMapRasterSource::onVisibleTilesChanged(const std::unordered_set<Prio
         currentTiles.erase(removedTile);
     }
 
+    listener->onTilesUpdated();
+
     for (const auto &addedTile : toAdd) {
 
         {
@@ -107,7 +109,7 @@ std::optional<Tiled2dMapTileInfo> Tiled2dMapRasterSource::dequeueLoadingTask(){
 
     std::unordered_set<PrioritizedTiled2dMapTileInfo>::iterator highestPrioTileInfo = loadingQueue.begin();
     for (auto it = loadingQueue.begin(); it != loadingQueue.end(); it++) {
-        if (it->priority > highestPrioTileInfo->priority) {
+        if (it->priority < highestPrioTileInfo->priority) {
             highestPrioTileInfo = it;
         }
     }
