@@ -16,6 +16,7 @@
 #import "MCSchedulerInterface+Private.h"
 #import "MCShaderFactoryInterface+Private.h"
 #import "MCTouchHandlerInterface+Private.h"
+#import "MCVec2I+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -153,6 +154,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)removeLayer:(nullable id<MCLayerInterface>)layer {
     try {
         _cppRefHandle.get()->removeLayer(::djinni_generated::LayerInterface::toCpp(layer));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setViewportSize:(nonnull MCVec2I *)size {
+    try {
+        _cppRefHandle.get()->setViewportSize(::djinni_generated::Vec2I::toCpp(size));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

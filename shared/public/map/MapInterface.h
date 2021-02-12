@@ -11,6 +11,7 @@
 #include "SchedulerInterface.h"
 #include "ShaderFactoryInterface.h"
 #include "TouchHandlerInterface.h"
+#include "Vec2I.h"
 #include <memory>
 
 class MapCallbackInterface;
@@ -51,6 +52,8 @@ public:
     virtual void addLayer(const std::shared_ptr<::LayerInterface> & layer) = 0;
 
     virtual void removeLayer(const std::shared_ptr<::LayerInterface> & layer) = 0;
+
+    virtual void setViewportSize(const ::Vec2I & size) = 0;
 
     virtual void invalidate() = 0;
 

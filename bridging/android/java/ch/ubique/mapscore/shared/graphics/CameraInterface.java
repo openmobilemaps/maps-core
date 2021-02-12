@@ -9,6 +9,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class CameraInterface {
     public abstract ArrayList<Float> getMvpMatrix();
 
+    public abstract void viewportSizeChanged();
+
     private static final class CppProxy extends CameraInterface
     {
         private final long nativeRef;
@@ -39,5 +41,13 @@ public abstract class CameraInterface {
             return native_getMvpMatrix(this.nativeRef);
         }
         private native ArrayList<Float> native_getMvpMatrix(long _nativeRef);
+
+        @Override
+        public void viewportSizeChanged()
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            native_viewportSizeChanged(this.nativeRef);
+        }
+        private native void native_viewportSizeChanged(long _nativeRef);
     }
 }

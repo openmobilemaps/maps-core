@@ -38,6 +38,8 @@ public:
 
     virtual void removeLayer(const std::shared_ptr<::LayerInterface> & layer);
 
+    virtual void setViewportSize(const ::Vec2I & size);
+
     virtual void invalidate();
 
     virtual void drawFrame();

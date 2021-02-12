@@ -8,12 +8,12 @@
 #include "DateHelper.h"
 
 MapCamera2d::MapCamera2d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi) :
-        mapInterface(mapInterface),
-        conversionHelper(mapInterface->getCoordinateConverterHelper()),
-        mapCoordinateSystem(mapInterface->getMapConfig().mapCoordinateSystem),
-        screenDensityPpi(screenDensityPpi),
-        screenPixelAsRealMeterFactor(0.0254 / screenDensityPpi),
-        centerPosition(mapCoordinateSystem.identifier, 0, 0, 0) {
+mapInterface(mapInterface),
+conversionHelper(mapInterface->getCoordinateConverterHelper()),
+mapCoordinateSystem(mapInterface->getMapConfig().mapCoordinateSystem),
+screenDensityPpi(screenDensityPpi),
+screenPixelAsRealMeterFactor(0.0254 / screenDensityPpi),
+centerPosition(mapCoordinateSystem.identifier, 0, 0, 0) {
     auto mapConfig = mapInterface->getMapConfig();
     mapCoordinateSystem = mapConfig.mapCoordinateSystem;
     centerPosition.x = mapCoordinateSystem.bounds.topLeft.x + 0.5 * (mapCoordinateSystem.bounds.bottomRight.x - mapCoordinateSystem.bounds.topLeft.x);
@@ -120,17 +120,17 @@ std::vector<float> MapCamera2d::getMvpMatrix() {
 
 
 RectCoord MapCamera2d::getVisibileRect() {
-  Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
-  double zoomFactor = screenPixelAsRealMeterFactor * zoom;
-  Coord topLeft = Coord(mapCoordinateSystem.identifier,
-                        centerPosition.x - ((double) sizeViewport.x / 2.0) * zoomFactor,
-                        centerPosition.y + ((double) sizeViewport.y / 2.0) * zoomFactor,
-                        centerPosition.z);
-  Coord bottomRight = Coord(mapCoordinateSystem.identifier,
-                            centerPosition.x + ((double) sizeViewport.x / 2.0) * zoomFactor,
-                            centerPosition.y - ((double) sizeViewport.y / 2.0) * zoomFactor,
-                            centerPosition.z);
-  return RectCoord(topLeft, bottomRight);
+    Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
+    double zoomFactor = screenPixelAsRealMeterFactor * zoom;
+    Coord topLeft = Coord(mapCoordinateSystem.identifier,
+                          centerPosition.x - ((double) sizeViewport.x / 2.0) * zoomFactor,
+                          centerPosition.y + ((double) sizeViewport.y / 2.0) * zoomFactor,
+                          centerPosition.z);
+    Coord bottomRight = Coord(mapCoordinateSystem.identifier,
+                              centerPosition.x + ((double) sizeViewport.x / 2.0) * zoomFactor,
+                              centerPosition.y - ((double) sizeViewport.y / 2.0) * zoomFactor,
+                              centerPosition.z);
+    return RectCoord(topLeft, bottomRight);
 }
 
 void MapCamera2d::notifyListeners() {
@@ -169,9 +169,9 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
         centerPosition.y += (midpoint.y - oldMidpoint.y) * zoom * screenPixelAsRealMeterFactor;
 
         /*
-        float olda = atan2(posScreenOld[0].x - posScreenOld[1].x, posScreenOld[0].y - posScreenOld[1].x);
-        float newa = atan2(posScreenNew[0].x - posScreenNew[1].x, posScreenNew[0].y - posScreenNew[1].y);
-        angle += (olda - newa) / M_PI * 180.0;*/
+         float olda = atan2(posScreenOld[0].x - posScreenOld[1].x, posScreenOld[0].y - posScreenOld[1].x);
+         float newa = atan2(posScreenNew[0].x - posScreenNew[1].x, posScreenNew[0].y - posScreenNew[1].y);
+         angle += (olda - newa) / M_PI * 180.0;*/
 
 
         notifyListeners();
@@ -197,13 +197,13 @@ Coord MapCamera2d::coordFromScreenPosition(const ::Vec2F &posScreen) {
 
 void MapCamera2d::beginAnimation(double zoom, Coord centerPosition) {
     cameraAnimation = std::make_optional<CameraAnimation>({
-                                                                  this->centerPosition,
-                                                                  this->zoom,
-                                                                  centerPosition,
-                                                                  zoom,
-                                                                  DateHelper::currentTimeMillis(),
-                                                                  300
-                                                          });
+        this->centerPosition,
+        this->zoom,
+        centerPosition,
+        zoom,
+        DateHelper::currentTimeMillis(),
+        300
+    });
 
     mapInterface->invalidate();
 }
@@ -220,15 +220,20 @@ void MapCamera2d::applyAnimationState() {
             this->cameraAnimation = std::nullopt;
         } else {
             zoom = cameraAnimation->startZoom +
-                   (cameraAnimation->targetZoom - cameraAnimation->startZoom) * std::pow(progress, 2);
+            (cameraAnimation->targetZoom - cameraAnimation->startZoom) * std::pow(progress, 2);
             centerPosition.x = cameraAnimation->startCenterPosition.x +
-                               (cameraAnimation->targetCenterPosition.x - cameraAnimation->startCenterPosition.x) *
-                               std::pow(progress, 2);
+            (cameraAnimation->targetCenterPosition.x - cameraAnimation->startCenterPosition.x) *
+            std::pow(progress, 2);
             centerPosition.y = cameraAnimation->startCenterPosition.y +
-                               (cameraAnimation->targetCenterPosition.y - cameraAnimation->startCenterPosition.y) *
-                               std::pow(progress, 2);
+            (cameraAnimation->targetCenterPosition.y - cameraAnimation->startCenterPosition.y) *
+            std::pow(progress, 2);
         }
         notifyListeners();
         mapInterface->invalidate();
     }
+}
+
+
+void MapCamera2d::viewportSizeChanged() {
+    notifyListeners();
 }

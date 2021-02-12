@@ -18,14 +18,11 @@ loader(loader) {
 }
 
 void Tiled2dMapRasterSource::onVisibleTilesChanged(const std::unordered_set<PrioritizedTiled2dMapTileInfo> &visibleTiles) {
-    //TODO: check if it okay to not handle all touch inputs
     std::unique_lock<std::recursive_mutex> lock(currentTilesMutex, std::try_to_lock);
     if(!lock.owns_lock()) {
         // update tiles is already happening
         return;
     }
-
-    // TODO: Check difference in currentSet/newVisible tiles, load new ones, inform the listener via listener->onTilesUpdated()
 
     std::unordered_set<PrioritizedTiled2dMapTileInfo> toAdd;
     for (const auto &tileInfo: visibleTiles) {
@@ -59,8 +56,6 @@ void Tiled2dMapRasterSource::onVisibleTilesChanged(const std::unordered_set<Prio
             }
         }
     }
-
-    // TODO: load new tiles, remove the removed ones
 
     for (const auto &removedTile : toRemove) {
         currentTiles.erase(removedTile);

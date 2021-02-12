@@ -8,4 +8,6 @@
 
 - (nonnull NSArray<NSNumber *> *)getMvpMatrix;
 
+- (void)viewportSizeChanged;
+
 @end

@@ -91,6 +91,12 @@ void MapScene::removeLayer(const std::shared_ptr<::LayerInterface> & layer) {
     layers.erase(std::remove(layers.begin(), layers.end(), layer), layers.end());
 }
 
+
+void MapScene::setViewportSize(const ::Vec2I & size) {
+    getRenderingContext()->setViewportSize(size);
+    getCamera()->viewportSizeChanged();
+}
+
 void MapScene::invalidate() {
     if (auto handler = callbackHandler) {
         handler->invalidate();

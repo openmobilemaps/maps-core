@@ -10,6 +10,7 @@
 #import "MCSchedulerInterface.h"
 #import "MCShaderFactoryInterface.h"
 #import "MCTouchHandlerInterface.h"
+#import "MCVec2I.h"
 #import <Foundation/Foundation.h>
 @class MCMapInterface;
 @protocol MCMapCallbackInterface;
@@ -53,6 +54,8 @@
 - (void)addLayer:(nullable id<MCLayerInterface>)layer;
 
 - (void)removeLayer:(nullable id<MCLayerInterface>)layer;
+
+- (void)setViewportSize:(nonnull MCVec2I *)size;
 
 - (void)invalidate;
 

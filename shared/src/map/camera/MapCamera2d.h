@@ -54,6 +54,8 @@ public:
 
     virtual bool onTwoFingerMove(const std::vector< ::Vec2F> &posScreenOld, const std::vector< ::Vec2F> &posScreenNew);
 
+    virtual void viewportSizeChanged();
+
     RectCoord getVisibileRect();
 
 protected:

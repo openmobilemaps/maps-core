@@ -1,4 +1,5 @@
 @extern "../yaml/vec_2_d.yaml"
+@extern "../yaml/vec_2_i.yaml"
 @extern "../yaml/scheduler_interface.yaml"
 @extern "../yaml/touch_handler_interface.yaml"
 @extern "../yaml/shader_factory_interface.yaml"
@@ -36,6 +37,8 @@ map_interface = interface +c {
 
     add_layer(layer: layer_interface);
     remove_layer(layer: layer_interface);
+
+    set_viewport_size(size: vec_2_i);
 
     invalidate();
     draw_frame();

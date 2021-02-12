@@ -34,6 +34,8 @@ public abstract class MapInterface {
 
     public abstract void removeLayer(ch.ubique.mapscore.shared.map.layers.LayerInterface layer);
 
+    public abstract void setViewportSize(ch.ubique.mapscore.shared.graphics.common.Vec2I size);
+
     public abstract void invalidate();
 
     public abstract void drawFrame();
@@ -191,6 +193,14 @@ public abstract class MapInterface {
             native_removeLayer(this.nativeRef, layer);
         }
         private native void native_removeLayer(long _nativeRef, ch.ubique.mapscore.shared.map.layers.LayerInterface layer);
+
+        @Override
+        public void setViewportSize(ch.ubique.mapscore.shared.graphics.common.Vec2I size)
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            native_setViewportSize(this.nativeRef, size);
+        }
+        private native void native_setViewportSize(long _nativeRef, ch.ubique.mapscore.shared.graphics.common.Vec2I size);
 
         @Override
         public void invalidate()

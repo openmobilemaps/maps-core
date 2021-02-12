@@ -38,6 +38,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)viewportSizeChanged {
+    try {
+        _cppRefHandle.get()->viewportSizeChanged();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class CameraInterface::ObjcProxy final
@@ -52,6 +58,12 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getMvpMatrix];
             return ::djinni::List<::djinni::F32>::toCpp(objcpp_result_);
+        }
+    }
+    void viewportSizeChanged() override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() viewportSizeChanged];
         }
     }
 };

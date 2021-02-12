@@ -22,6 +22,13 @@ std::vector<float> NativeCameraInterface::JavaProxy::getMvpMatrix() {
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::List<::djinni::F32>::toCpp(jniEnv, jret);
 }
+void NativeCameraInterface::JavaProxy::viewportSizeChanged() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeCameraInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_viewportSizeChanged);
+    ::djinni::jniExceptionCheck(jniEnv);
+}
 
 CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_CameraInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
@@ -39,6 +46,15 @@ CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_CameraInterfa
         auto r = ref->getMvpMatrix();
         return ::djinni::release(::djinni::List<::djinni::F32>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_CameraInterface_00024CppProxy_native_1viewportSizeChanged(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::CameraInterface>(nativeRef);
+        ref->viewportSizeChanged();
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
 }  // namespace djinni_generated

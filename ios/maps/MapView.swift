@@ -71,7 +71,7 @@ extension MapView: MCMapCallbackInterface {
 extension MapView: MTKViewDelegate {
     public func mtkView(_: MTKView, drawableSizeWillChange _: CGSize) {
         sizeChanged = true
-        isPaused = false
+        invalidate()
     }
 
     public func draw(in view: MTKView) {
@@ -97,7 +97,7 @@ extension MapView: MTKViewDelegate {
 
         // Shared lib stuff
         if sizeChanged {
-            renderingContext.setViewportSize(view.drawableSize.vec2)
+            mapInterface.setViewportSize(view.drawableSize.vec2)
             sizeChanged = false
         }
 
