@@ -17,7 +17,7 @@ class Line2dOpenGl
 public:
     Line2dOpenGl(const std::shared_ptr<::LineShaderProgramInterface> &shader);
 
-    virtual ~Line2dOpenGl() { override}
+    virtual ~Line2dOpenGl() { }
 
     virtual bool isReady() override;
 

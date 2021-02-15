@@ -32,13 +32,13 @@ public:
 
     virtual void preRenderPoint(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
-    virtual std::string getRectVertexShader() override;
+    virtual std::string getRectVertexShader();
 
-    virtual std::string getRectFragmentShader() override;
+    virtual std::string getRectFragmentShader();
 
-    virtual std::string getPointVertexShader() override;
+    virtual std::string getPointVertexShader();
 
-    virtual std::string getPointFragmentShader() override;
+    virtual std::string getPointFragmentShader();
 
     virtual void setColor(float red, float green, float blue, float alpha) override;
 

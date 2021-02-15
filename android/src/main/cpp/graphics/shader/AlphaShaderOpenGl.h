@@ -28,7 +28,7 @@ public:
     virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() override;
     
 protected:
-    virtual std::string getFragmentShader();
+    virtual std::string getFragmentShader() override;
 
 private:
     float alpha = 1;
