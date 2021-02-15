@@ -77,6 +77,15 @@ protected:
     double paddingRight = 0;
     double paddingBottom = 0;
 
+    struct CameraConfiguration {
+        bool roationEnabled = false;
+        bool doubleClickZoomEnabled = true;
+        bool twoFingerZoomEnabled = true;
+        bool moveEnabled = true;
+    };
+              
+    CameraConfiguration config;
+
     void notifyListeners();
 
     Coord coordFromScreenPosition(const ::Vec2F &posScreen);

@@ -148,6 +148,7 @@ void MapCamera2d::notifyListeners() {
 }
 
 bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleClick) {
+    if (!config.moveEnabled) return;
 
     float dx = deltaScreen.x;
     float dy = deltaScreen.y;
@@ -167,6 +168,8 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
 }
 
 bool MapCamera2d::onDoubleClick(const ::Vec2F &posScreen) {
+    if (!config.doubleClickZoomEnabled) return;
+
     auto targetZoom = zoom / 2;
 
     targetZoom = std::max(std::min(targetZoom, mapInterface->getMapConfig().zoomMin), mapInterface->getMapConfig().zoomMax);
@@ -176,6 +179,8 @@ bool MapCamera2d::onDoubleClick(const ::Vec2F &posScreen) {
 }
 
 bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) {
+    if (!config.twoFingerZoomEnabled) return;
+
     if (posScreenOld.size() >= 2) {
         zoom /= Vec2FHelper::distance(posScreenNew[0], posScreenNew[1]) / Vec2FHelper::distance(posScreenOld[0], posScreenOld[1]);
 
@@ -196,9 +201,11 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
         centerPosition.x -= leftDiff * zoom * screenPixelAsRealMeterFactor;
         centerPosition.y += topDiff * zoom * screenPixelAsRealMeterFactor;
 
-        float olda = atan2(posScreenOld[0].x - posScreenOld[1].x, posScreenOld[0].y - posScreenOld[1].y);
-        float newa = atan2(posScreenNew[0].x - posScreenNew[1].x, posScreenNew[0].y - posScreenNew[1].y);
-        angle = angle + (olda - newa) / M_PI * 180.0;
+        if (config.roationEnabled) {
+            float olda = atan2(posScreenOld[0].x - posScreenOld[1].x, posScreenOld[0].y - posScreenOld[1].y);
+            float newa = atan2(posScreenNew[0].x - posScreenNew[1].x, posScreenNew[0].y - posScreenNew[1].y);
+            angle = angle + (olda - newa) / M_PI * 180.0;
+        }
 
         notifyListeners();
         mapInterface->invalidate();
