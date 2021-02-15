@@ -22,26 +22,25 @@ class AndroidScheduler(private val schedulerCallback: AndroidSchedulerCallback) 
 		this.coroutineScope = coroutineScope
 	}
 
-	override fun addTask(task: TaskInterface?) {
-		val task = task ?: return
+	override fun addTask(task: TaskInterface) {
 		if (isResumed.get()) {
 			handleNewTask(task)
 		} else {
-			taskQueueMap[task.config.priority]!!.offer(task)
+			taskQueueMap[task.getConfig().priority]!!.offer(task)
 		}
 	}
 
 	private fun handleNewTask(task: TaskInterface) {
-		if (task.config.delay > 0) {
-			val id = task.config.id
+		if (task.getConfig().delay > 0) {
+			val id = task.getConfig().id
 			delayedTaskMap.put(id, coroutineScope.launch(Dispatchers.Default) {
-				delay(task.config.delay)
+				delay(task.getConfig().delay)
 				if (isActive) {
 					if (isResumed.get()) {
 						scheduleTask(task)
 					} else {
-						task.config.delay = 0
-						taskQueueMap[task.config.priority]!!.offer(task)
+						task.getConfig().delay = 0
+						taskQueueMap[task.getConfig().priority]!!.offer(task)
 					}
 					delayedTaskMap.remove(id)
 				}
@@ -52,7 +51,7 @@ class AndroidScheduler(private val schedulerCallback: AndroidSchedulerCallback) 
 	}
 
 	private fun scheduleTask(task: TaskInterface) {
-		when (task.config.executionEnvironment) {
+		when (task.getConfig().executionEnvironment) {
 			ExecutionEnvironment.GRAPHICS -> schedulerCallback.scheduleOnGlThread(task)
 			ExecutionEnvironment.IO -> coroutineScope.launch(Dispatchers.IO) { task.run() }
 			ExecutionEnvironment.COMPUTATION -> coroutineScope.launch(Dispatchers.Default) { task.run() }
@@ -60,8 +59,7 @@ class AndroidScheduler(private val schedulerCallback: AndroidSchedulerCallback) 
 		}
 	}
 
-	override fun removeTask(id: String?) {
-		val id = id ?: return
+	override fun removeTask(id: String) {
 		delayedTaskMap.remove(id)?.cancel()
 	}
 

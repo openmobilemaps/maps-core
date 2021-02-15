@@ -51,7 +51,7 @@ $(DJINNI_OUT_DIR)/%.log: $(DJINNISRCDIR)/%.djinni
 	mkdir -p $(DJINNI_OUT_DIR)
 
 	$(DJINNI_RUN) --idl ../djinni/$< \
-	--java-out $(JAVA_OUT)/$(SUB) \
+	--kotlin-out $(JAVA_OUT)/$(SUB) \
 	--jni-out $(JNI_OUT)/$(SUB) \
 	--objc-out $(OBJC_OUT)/ \
 	--cpp-out $(CPP_OUT)/$(SUB) \
