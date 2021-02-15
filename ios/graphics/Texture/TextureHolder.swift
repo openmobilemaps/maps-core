@@ -30,7 +30,7 @@ public class TextureHolder: NSObject {
         self.init(texture)
     }
 
-    convenience init(_ data: Data, textureUsableSize: TextureUsableSize? = nil) throws {
+    public convenience init(_ data: Data, textureUsableSize: TextureUsableSize? = nil) throws {
         let options: [MTKTextureLoader.Option: Any] = [
             MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
         ]
@@ -60,7 +60,7 @@ extension TextureHolder: MCTextureHolderInterface {
 }
 
 extension TextureHolder {
-    struct TextureUsableSize {
+    public struct TextureUsableSize {
         let width: Int
         let height: Int
     }

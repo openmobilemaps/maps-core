@@ -21,6 +21,10 @@ centerPosition(mapCoordinateSystem.identifier, 0, 0, 0) {
     zoom = mapConfig.zoomMin;
 }
 
+void MapCamera2d::viewportSizeChanged() {
+    notifyListeners();
+}
+
 void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double zoom, bool animated) {
     if (animated) {
         beginAnimation(zoom, centerPosition);
@@ -297,9 +301,4 @@ void MapCamera2d::applyAnimationState() {
         notifyListeners();
         mapInterface->invalidate();
     }
-}
-
-
-void MapCamera2d::viewportSizeChanged() {
-    notifyListeners();
 }
