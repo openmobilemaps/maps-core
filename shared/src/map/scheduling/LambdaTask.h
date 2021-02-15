@@ -7,8 +7,8 @@
 class LambdaTask: public TaskInterface {
 public:
     LambdaTask(TaskConfig config_, std::function<void()> method_);
-    virtual TaskConfig getConfig();
-    virtual void run();
+    virtual TaskConfig getConfig() override;
+    virtual void run() override;
 private:
     TaskConfig config;
     std::function<void()> method;

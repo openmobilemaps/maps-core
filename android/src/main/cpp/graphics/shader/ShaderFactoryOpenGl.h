@@ -9,11 +9,11 @@
 
 class ShaderFactoryOpenGl : public ShaderFactoryInterface {
 
-    virtual std::shared_ptr<AlphaShaderInterface> createAlphaShader();
+    virtual std::shared_ptr<AlphaShaderInterface> createAlphaShader() override;
 
-    virtual std::shared_ptr<ColorLineShaderInterface> createColorLineShader();
+    virtual std::shared_ptr<ColorLineShaderInterface> createColorLineShader() override;
 
-    virtual std::shared_ptr<ColorShaderInterface> createColorShader();
+    virtual std::shared_ptr<ColorShaderInterface> createColorShader() override;
 
 };
 

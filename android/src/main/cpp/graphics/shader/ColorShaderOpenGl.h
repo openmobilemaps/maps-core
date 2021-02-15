@@ -17,20 +17,20 @@ class ColorShaderOpenGl
           public ShaderProgramInterface,
           public std::enable_shared_from_this<ShaderProgramInterface> {
 public:
-    virtual std::shared_ptr <ShaderProgramInterface> asShaderProgramInterface();
+    virtual std::shared_ptr <ShaderProgramInterface> asShaderProgramInterface() override;
 
-    virtual std::string getProgramName();
+    virtual std::string getProgramName() override;
 
-    virtual void setupProgram(const std::shared_ptr<::RenderingContextInterface> &context);
+    virtual void setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
-    virtual void preRender(const std::shared_ptr<::RenderingContextInterface> &context);
+    virtual void preRender(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
-    virtual void setColor(float red, float green, float blue, float alpha);
+    virtual void setColor(float red, float green, float blue, float alpha) override;
 
 protected:
-    virtual std::string getVertexShader();
+    virtual std::string getVertexShader() override;
 
-    virtual std::string getFragmentShader();
+    virtual std::string getFragmentShader() override;
 
 private:
     std::vector<float> color;

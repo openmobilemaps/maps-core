@@ -17,20 +17,20 @@ class Line2dOpenGl
 public:
     Line2dOpenGl(const std::shared_ptr<::LineShaderProgramInterface> &shader);
 
-    virtual ~Line2dOpenGl() {}
+    virtual ~Line2dOpenGl() { override}
 
-    virtual bool isReady();
+    virtual bool isReady() override;
 
-    virtual void setup(const std::shared_ptr<::RenderingContextInterface> &context);
+    virtual void setup(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
-    virtual void clear();
+    virtual void clear() override;
 
     virtual void
-    render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass, int64_t mvpMatrix);
+    render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass, int64_t mvpMatrix) override;
 
-    virtual void setLinePositions(const std::vector<::Vec2D> &positions);
+    virtual void setLinePositions(const std::vector<::Vec2D> &positions) override;
 
-    virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject();
+    virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() override;
 
 protected:
     void initializeLineAndPoints();

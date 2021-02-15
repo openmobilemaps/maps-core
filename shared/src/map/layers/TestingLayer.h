@@ -14,21 +14,21 @@ public:
 
     ~TestingLayer() {}
 
-    std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses();
+    std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override;
 
-    std::string getIdentifier();
+    std::string getIdentifier() override;
 
-    virtual void onAdded();
+    virtual void onAdded() override;
 
-    virtual void onRemoved();
+    virtual void onRemoved() override;
 
-    void pause();
+    void pause() override;
 
-    void resume();
+    void resume() override;
 
-    void hide();
+    void hide() override;
 
-    void show();
+    void show() override;
 
 private:
     std::shared_ptr<MapInterface> mapInterface;

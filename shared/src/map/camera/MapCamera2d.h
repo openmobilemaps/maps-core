@@ -22,39 +22,39 @@ public:
 
     ~MapCamera2d() {};
 
-    virtual void moveToCenterPositionZoom(const ::Coord &centerPosition, double zoom, bool animated);
+    virtual void moveToCenterPositionZoom(const ::Coord &centerPosition, double zoom, bool animated) override;
 
-    virtual void moveToCenterPosition(const ::Coord &centerPosition, bool animated);
+    virtual void moveToCenterPosition(const ::Coord &centerPosition, bool animated) override;
 
-    virtual ::Coord getCenterPosition();
+    virtual ::Coord getCenterPosition() override;
 
-    virtual void setZoom(double zoom, bool animated);
+    virtual void setZoom(double zoom, bool animated) override;
 
-    virtual double getZoom();
+    virtual double getZoom() override;
 
-    virtual void setPaddingLeft(float padding);
+    virtual void setPaddingLeft(float padding) override;
 
-    virtual void setPaddingRight(float padding);
+    virtual void setPaddingRight(float padding) override;
 
-    virtual void setPaddingTop(float padding);
+    virtual void setPaddingTop(float padding) override;
 
-    virtual void setPaddingBottom(float padding);
+    virtual void setPaddingBottom(float padding) override;
 
-    virtual void addListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener);
+    virtual void addListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) override;
 
-    virtual void removeListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener);
+    virtual void removeListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) override;
 
-    virtual std::shared_ptr<::CameraInterface> asCameraInterface();
+    virtual std::shared_ptr<::CameraInterface> asCameraInterface() override;
 
-    virtual std::vector<float> getMvpMatrix();
+    virtual std::vector<float> getMvpMatrix() override;
 
-    virtual bool onMove(const ::Vec2F &deltaScreen, bool confirmed, bool doubleClick);
+    virtual bool onMove(const ::Vec2F &deltaScreen, bool confirmed, bool doubleClick) override;
 
-    virtual bool onDoubleClick(const ::Vec2F &posScreen);
+    virtual bool onDoubleClick(const ::Vec2F &posScreen) override;
 
-    virtual bool onTwoFingerMove(const std::vector< ::Vec2F> &posScreenOld, const std::vector< ::Vec2F> &posScreenNew);
+    virtual bool onTwoFingerMove(const std::vector< ::Vec2F> &posScreenOld, const std::vector< ::Vec2F> &posScreenNew) override;
 
-    virtual void viewportSizeChanged();
+    virtual void viewportSizeChanged() override;
 
     RectCoord getVisibileRect();
 

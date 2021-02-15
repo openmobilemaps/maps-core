@@ -13,9 +13,9 @@ public:
     Polygon2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                          const std::shared_ptr<Polygon2dInterface> &polygon, const std::shared_ptr<ColorShaderInterface> &shader);
 
-    virtual ~Polygon2dLayerObject() {}
+    virtual ~Polygon2dLayerObject() override {}
 
-    virtual std::vector<std::shared_ptr<RenderConfigInterface>> getRenderConfig();
+    virtual std::vector<std::shared_ptr<RenderConfigInterface>> getRenderConfig() override;
 
     void setPositions(std::vector<Coord> positions);
 

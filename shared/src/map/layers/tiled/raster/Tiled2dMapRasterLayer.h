@@ -20,21 +20,21 @@ public:
                           const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                           const std::shared_ptr<::TextureLoaderInterface> &textureLoader);
 
-    virtual void onAdded();
+    virtual void onAdded() override;
 
-    virtual void onRemoved();
+    virtual void onRemoved() override;
 
-    virtual std::shared_ptr<::LayerInterface> asLayerInterface();
+    virtual std::shared_ptr<::LayerInterface> asLayerInterface() override;
 
-    virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses();
+    virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override;
 
-    virtual std::string getIdentifier();
+    virtual std::string getIdentifier() override;
 
-    virtual void pause();
+    virtual void pause() override;
 
-    virtual void resume();
+    virtual void resume() override;
 
-    virtual void onTilesUpdated();
+    virtual void onTilesUpdated() override;
 
 private:
     std::shared_ptr<TextureLoaderInterface> textureLoader;

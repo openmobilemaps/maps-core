@@ -18,31 +18,31 @@ class ColorLineShaderOpenGl
           public std::enable_shared_from_this<LineShaderProgramInterface> {
 public:
 
-    virtual std::shared_ptr <LineShaderProgramInterface> asLineShaderProgramInterface();
+    virtual std::shared_ptr <LineShaderProgramInterface> asLineShaderProgramInterface() override;
 
-    virtual std::string getRectProgramName();
+    virtual std::string getRectProgramName() override;
 
-    virtual void setupRectProgram(const std::shared_ptr<::RenderingContextInterface> &context);
+    virtual void setupRectProgram(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
-    virtual void preRenderRect(const std::shared_ptr<::RenderingContextInterface> &context);
+    virtual void preRenderRect(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
-    virtual std::string getPointProgramName();
+    virtual std::string getPointProgramName() override;
 
-    virtual void setupPointProgram(const std::shared_ptr<::RenderingContextInterface> &context);
+    virtual void setupPointProgram(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
-    virtual void preRenderPoint(const std::shared_ptr<::RenderingContextInterface> &context);
+    virtual void preRenderPoint(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
-    virtual std::string getRectVertexShader();
+    virtual std::string getRectVertexShader() override;
 
-    virtual std::string getRectFragmentShader();
+    virtual std::string getRectFragmentShader() override;
 
-    virtual std::string getPointVertexShader();
+    virtual std::string getPointVertexShader() override;
 
-    virtual std::string getPointFragmentShader();
+    virtual std::string getPointFragmentShader() override;
 
-    virtual void setColor(float red, float green, float blue, float alpha);
+    virtual void setColor(float red, float green, float blue, float alpha) override;
 
-    virtual void setMiter(float miter);
+    virtual void setMiter(float miter) override;
 
 private:
     std::vector<float> lineColor;

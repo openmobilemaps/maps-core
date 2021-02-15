@@ -23,7 +23,7 @@ public:
                      const std::shared_ptr<SchedulerInterface> &scheduler,
                      const std::shared_ptr<Tiled2dMapSourceListenerInterface> &listener);
 
-    virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom);
+    virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom) override;
 
     virtual void pause() = 0;
 

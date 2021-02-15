@@ -10,45 +10,45 @@ public:
 
     virtual ~MapScene() {}
 
-    virtual std::shared_ptr<::GraphicsObjectFactoryInterface> getGraphicsObjectFactory();
+    virtual std::shared_ptr<::GraphicsObjectFactoryInterface> getGraphicsObjectFactory() override;
 
-    virtual std::shared_ptr<::ShaderFactoryInterface> getShaderFactory();
+    virtual std::shared_ptr<::ShaderFactoryInterface> getShaderFactory() override;
 
-    virtual std::shared_ptr<::SchedulerInterface> getScheduler();
+    virtual std::shared_ptr<::SchedulerInterface> getScheduler() override;
 
-    virtual std::shared_ptr<::RenderingContextInterface> getRenderingContext();
+    virtual std::shared_ptr<::RenderingContextInterface> getRenderingContext() override;
 
-    virtual MapConfig getMapConfig();
+    virtual MapConfig getMapConfig() override;
 
-    virtual std::shared_ptr<::CoordinateConversionHelperInterface> getCoordinateConverterHelper();
+    virtual std::shared_ptr<::CoordinateConversionHelperInterface> getCoordinateConverterHelper() override;
 
-    virtual void setCallbackHandler(const std::shared_ptr<MapCallbackInterface> & callbackInterface);
+    virtual void setCallbackHandler(const std::shared_ptr<MapCallbackInterface> & callbackInterface) override;
 
-    virtual void setCamera(const std::shared_ptr<::CameraInterface> & camera);
+    virtual void setCamera(const std::shared_ptr<::CameraInterface> & camera) override;
 
-    virtual std::shared_ptr<::CameraInterface> getCamera();
+    virtual std::shared_ptr<::CameraInterface> getCamera() override;
 
-    virtual void addDefaultTouchHandler(float density);
+    virtual void addDefaultTouchHandler(float density) override;
 
-    virtual void setTouchHandler(const std::shared_ptr<::TouchHandlerInterface> & touchHandler);
+    virtual void setTouchHandler(const std::shared_ptr<::TouchHandlerInterface> & touchHandler) override;
 
-    virtual std::shared_ptr<::TouchHandlerInterface> getTouchHandler();
+    virtual std::shared_ptr<::TouchHandlerInterface> getTouchHandler() override;
 
-    virtual void addLayer(const std::shared_ptr<::LayerInterface> & layer);
+    virtual void addLayer(const std::shared_ptr<::LayerInterface> & layer) override;
 
-    virtual void removeLayer(const std::shared_ptr<::LayerInterface> & layer);
+    virtual void removeLayer(const std::shared_ptr<::LayerInterface> & layer) override;
 
-    virtual void setViewportSize(const ::Vec2I & size);
+    virtual void setViewportSize(const ::Vec2I & size) override;
 
-    virtual void setBackgroundColor(const Color &color);
+    virtual void setBackgroundColor(const Color &color) override;
 
-    virtual void invalidate();
+    virtual void invalidate() override;
 
-    virtual void drawFrame();
+    virtual void drawFrame() override;
 
-    virtual void resume();
+    virtual void resume() override;
 
-    virtual void pause();
+    virtual void pause() override;
 private:
 
     const MapConfig mapConfig;

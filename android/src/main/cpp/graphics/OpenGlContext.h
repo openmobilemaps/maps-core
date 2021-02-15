@@ -18,15 +18,15 @@ public:
 
     void cleanAll();
 
-    virtual void onSurfaceCreated();
+    virtual void onSurfaceCreated() override;
 
-    virtual void setViewportSize(const ::Vec2I & size);
+    virtual void setViewportSize(const ::Vec2I & size) override;
 
-    virtual ::Vec2I getViewportSize();
+    virtual ::Vec2I getViewportSize() override;
 
-    virtual void setBackgroundColor(const ::Color & color);
+    virtual void setBackgroundColor(const ::Color & color) override;
 
-    virtual void setupDrawFrame();
+    virtual void setupDrawFrame() override;
 
 protected:
     Color backgroundColor = Color(0, 0, 0, 1);

@@ -11,25 +11,25 @@ public:
           const std::shared_ptr<::ShaderFactoryInterface> & shaderFactory,
           const std::shared_ptr<::RenderingContextInterface> & renderingContext);
 
-    virtual void setCallbackHandler(const std::shared_ptr<SceneCallbackInterface> & callbackInterface);
+    virtual void setCallbackHandler(const std::shared_ptr<SceneCallbackInterface> & callbackInterface) override;
 
-    virtual void setCamera(const std::shared_ptr<CameraInterface> & camera);
+    virtual void setCamera(const std::shared_ptr<CameraInterface> & camera) override;
 
-    virtual std::shared_ptr<CameraInterface> getCamera();
+    virtual std::shared_ptr<CameraInterface> getCamera() override;
 
-    virtual std::shared_ptr<RendererInterface> getRenderer();
+    virtual std::shared_ptr<RendererInterface> getRenderer() override;
 
-    virtual std::shared_ptr<RenderingContextInterface> getRenderingContext();
+    virtual std::shared_ptr<RenderingContextInterface> getRenderingContext() override;
 
-    virtual std::shared_ptr<::GraphicsObjectFactoryInterface> getGraphicsFactory();
+    virtual std::shared_ptr<::GraphicsObjectFactoryInterface> getGraphicsFactory() override;
 
-    virtual std::shared_ptr<::ShaderFactoryInterface> getShaderFactory();
+    virtual std::shared_ptr<::ShaderFactoryInterface> getShaderFactory() override;
 
-    virtual void drawFrame();
+    virtual void drawFrame() override;
 
-    virtual void clear();
+    virtual void clear() override;
 
-    virtual void invalidate();
+    virtual void invalidate() override;
 
 private:
     std::shared_ptr<RenderingContextInterface> renderingContext;

@@ -16,25 +16,25 @@ public:
 
     void setSourceInterface(const std::shared_ptr<Tiled2dMapSourceInterface> &sourceInterface);
 
-    virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() = 0;
+    virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override = 0;
 
-    virtual std::string getIdentifier() = 0;
+    virtual std::string getIdentifier() override = 0;
 
-    virtual void onAdded();
+    virtual void onAdded() override;
 
-    virtual void onRemoved();
+    virtual void onRemoved()override;
 
-    virtual void pause() = 0;
+    virtual void pause() override = 0;
 
-    virtual void resume() = 0;
+    virtual void resume() override = 0;
 
-    virtual void hide();
+    virtual void hide() override;
 
-    virtual void show();
+    virtual void show() override;
 
-    virtual void onTilesUpdated() = 0;
+    virtual void onTilesUpdated() override = 0;
 
-    virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom);
+    virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom) override;
 
 protected:
     const std::shared_ptr<MapInterface> mapInterface;

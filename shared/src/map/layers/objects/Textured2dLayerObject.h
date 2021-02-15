@@ -15,9 +15,9 @@ public:
                           std::shared_ptr<AlphaShaderInterface> shader,
                           const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper);
 
-    virtual ~Textured2dLayerObject() {}
+  virtual ~Textured2dLayerObject() override {}
 
-    virtual std::vector<std::shared_ptr<RenderConfigInterface>> getRenderConfig();
+  virtual std::vector<std::shared_ptr<RenderConfigInterface>> getRenderConfig() override;
 
   void setFrame(const ::RectD & frame);
 

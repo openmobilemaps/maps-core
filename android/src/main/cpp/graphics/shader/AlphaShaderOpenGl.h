@@ -17,15 +17,15 @@ class AlphaShaderOpenGl
           public std::enable_shared_from_this<ShaderProgramInterface> {
 
 public:
-    virtual std::string getProgramName();
+    virtual std::string getProgramName() override;
 
-    virtual void setupProgram(const std::shared_ptr<::RenderingContextInterface> &context);
+    virtual void setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
-    virtual void preRender(const std::shared_ptr<::RenderingContextInterface> &context);
+    virtual void preRender(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
-    virtual void updateAlpha(float value);
+    virtual void updateAlpha(float value) override;
 
-    virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface();
+    virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() override;
     
 protected:
     virtual std::string getFragmentShader();

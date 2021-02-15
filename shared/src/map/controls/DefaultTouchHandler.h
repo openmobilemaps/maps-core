@@ -10,11 +10,11 @@ class DefaultTouchHandler: public TouchHandlerInterface {
 public:
     DefaultTouchHandler(const std::shared_ptr<SchedulerInterface> SchedulerInterface, float density);
 
-    virtual void onTouchEvent(const TouchEvent & touchEvent);
+    virtual void onTouchEvent(const TouchEvent & touchEvent) override;
 
-    virtual void addListener(const std::shared_ptr<TouchInterface> & listener);
+    virtual void addListener(const std::shared_ptr<TouchInterface> & listener) override;
 
-    virtual void removeListener(const std::shared_ptr<TouchInterface> & listener);
+    virtual void removeListener(const std::shared_ptr<TouchInterface> & listener) override;
 
 private:
 

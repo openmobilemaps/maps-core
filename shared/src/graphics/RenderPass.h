@@ -6,8 +6,8 @@
 class RenderPass: public RenderPassInterface {
 public:
     RenderPass(RenderPassConfig config, std::vector<std::shared_ptr<::GraphicsObjectInterface>> graphicsObjects);
-    virtual std::vector<std::shared_ptr<::GraphicsObjectInterface>> getGraphicsObjects();
-    virtual RenderPassConfig getRenderPassConfig();
+    virtual std::vector<std::shared_ptr<::GraphicsObjectInterface>> getGraphicsObjects() override;
+    virtual RenderPassConfig getRenderPassConfig() override;
 private:
     RenderPassConfig config;
     std::vector<std::shared_ptr<::GraphicsObjectInterface>> graphicsObjects;

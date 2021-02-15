@@ -22,15 +22,15 @@ public:
                            const std::shared_ptr<TextureLoaderInterface> &loader,
                            const std::shared_ptr<Tiled2dMapSourceListenerInterface> &listener);
 
-    virtual std::unordered_set<Tiled2dMapRasterTileInfo> getCurrentTiles();
+    std::unordered_set<Tiled2dMapRasterTileInfo> getCurrentTiles();
 
-    virtual void pause();
+    virtual void pause() override;
 
-    virtual void resume();
+    virtual void resume() override;
 
 protected:
     // tuple of tileInfo ans priority
-    virtual void onVisibleTilesChanged(const std::unordered_set<PrioritizedTiled2dMapTileInfo> &visibleTiles);
+    virtual void onVisibleTilesChanged(const std::unordered_set<PrioritizedTiled2dMapTileInfo> &visibleTiles) override;
 
 private:
     const std::shared_ptr<TextureLoaderInterface> loader;

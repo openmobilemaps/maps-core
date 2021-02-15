@@ -19,19 +19,19 @@ public:
 
     ~Polygon2dOpenGl() {};
 
-    virtual bool isReady();
+    virtual bool isReady() override;
 
-    virtual void setup(const std::shared_ptr<::RenderingContextInterface> &context);
+    virtual void setup(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
-    virtual void clear();
-
-    virtual void
-    render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass, int64_t mvpMatrix);
+    virtual void clear() override;
 
     virtual void
-    setPolygonPositions(const std::vector<::Vec2D> &positions, const std::vector<std::vector<::Vec2D>> &holes, bool isConvex);
+    render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass, int64_t mvpMatrix) override;
 
-    virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject();
+    virtual void
+    setPolygonPositions(const std::vector<::Vec2D> &positions, const std::vector<std::vector<::Vec2D>> &holes, bool isConvex) override;
+
+    virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() override;
 
 protected:
     void initializePolygon();

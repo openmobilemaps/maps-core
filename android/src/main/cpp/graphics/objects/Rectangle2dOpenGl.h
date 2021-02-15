@@ -22,22 +22,22 @@ public:
 
     ~Rectangle2dOpenGl() {};
 
-    virtual bool isReady();
+    virtual bool isReady() override;
 
-    virtual void setup(const std::shared_ptr<::RenderingContextInterface> &context);
+    virtual void setup(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
-    virtual void clear();
+    virtual void clear() override;
 
     virtual void
-    render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass, int64_t mvpMatrix);
+    render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass, int64_t mvpMatrix) override;
 
-    virtual void setFrame(const ::RectD &frame, const ::RectD &textureCoordinates);
+    virtual void setFrame(const ::RectD &frame, const ::RectD &textureCoordinates) override;
 
-    virtual void loadTexture(const std::shared_ptr<TextureHolderInterface> &textureHolder);
+    virtual void loadTexture(const std::shared_ptr<TextureHolderInterface> &textureHolder) override;
 
-    virtual void removeTexture();
+    virtual void removeTexture() override;
 
-    virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject();
+    virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() override;
 
 protected:
     virtual void adjustTextureCoordinates();
