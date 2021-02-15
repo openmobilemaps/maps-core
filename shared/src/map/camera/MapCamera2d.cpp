@@ -152,7 +152,7 @@ void MapCamera2d::notifyListeners() {
 }
 
 bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleClick) {
-    if (!config.moveEnabled) return;
+    if (!config.moveEnabled) return false;
 
     float dx = deltaScreen.x;
     float dy = deltaScreen.y;
@@ -182,7 +182,7 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
 }
 
 bool MapCamera2d::onDoubleClick(const ::Vec2F &posScreen) {
-    if (!config.doubleClickZoomEnabled) return;
+    if (!config.doubleClickZoomEnabled) return false;
 
     auto targetZoom = zoom / 2;
 
@@ -206,7 +206,7 @@ bool MapCamera2d::onDoubleClick(const ::Vec2F &posScreen) {
 }
 
 bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) {
-    if (!config.twoFingerZoomEnabled) return;
+    if (!config.twoFingerZoomEnabled) return false;
 
     if (posScreenOld.size() >= 2) {
         zoom /= Vec2FHelper::distance(posScreenNew[0], posScreenNew[1]) / Vec2FHelper::distance(posScreenOld[0], posScreenOld[1]);
