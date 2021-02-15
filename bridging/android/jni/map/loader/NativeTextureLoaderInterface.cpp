@@ -3,7 +3,7 @@
 
 #include "NativeTextureLoaderInterface.h"  // my header
 #include "Marshal.hpp"
-#include "NativeTextureHolderInterface.h"
+#include "NativeTextureLoaderResult.h"
 
 namespace djinni_generated {
 
@@ -15,14 +15,14 @@ NativeTextureLoaderInterface::JavaProxy::JavaProxy(JniType j) : Handle(::djinni:
 
 NativeTextureLoaderInterface::JavaProxy::~JavaProxy() = default;
 
-std::shared_ptr<::TextureHolderInterface> NativeTextureLoaderInterface::JavaProxy::loadTexture(const std::string & c_url) {
+::TextureLoaderResult NativeTextureLoaderInterface::JavaProxy::loadTexture(const std::string & c_url) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeTextureLoaderInterface>::get();
     auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_loadTexture,
                                          ::djinni::get(::djinni::String::fromCpp(jniEnv, c_url)));
     ::djinni::jniExceptionCheck(jniEnv);
-    return ::djinni_generated::NativeTextureHolderInterface::toCpp(jniEnv, jret);
+    return ::djinni_generated::NativeTextureLoaderResult::toCpp(jniEnv, jret);
 }
 
 CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_loader_TextureLoaderInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
@@ -33,13 +33,13 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_loader_TextureLoaderI
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT ::djinni_generated::NativeTextureHolderInterface::JniType JNICALL Java_ch_ubique_mapscore_shared_map_loader_TextureLoaderInterface_00024CppProxy_native_1loadTexture(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_url)
+CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_loader_TextureLoaderInterface_00024CppProxy_native_1loadTexture(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_url)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::TextureLoaderInterface>(nativeRef);
         auto r = ref->loadTexture(::djinni::String::toCpp(jniEnv, j_url));
-        return ::djinni::release(::djinni_generated::NativeTextureHolderInterface::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni_generated::NativeTextureLoaderResult::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

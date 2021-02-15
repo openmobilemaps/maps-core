@@ -33,14 +33,14 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        std::shared_ptr<::TextureHolderInterface> loadTexture(const std::string & url) override;
+        ::TextureLoaderResult loadTexture(const std::string & url) override;
 
     private:
         friend ::djinni::JniInterface<::TextureLoaderInterface, ::djinni_generated::NativeTextureLoaderInterface>;
     };
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/map/loader/TextureLoaderInterface") };
-    const jmethodID method_loadTexture { ::djinni::jniGetMethodID(clazz.get(), "loadTexture", "(Ljava/lang/String;)Lch/ubique/mapscore/shared/graphics/objects/TextureHolderInterface;") };
+    const jmethodID method_loadTexture { ::djinni::jniGetMethodID(clazz.get(), "loadTexture", "(Ljava/lang/String;)Lch/ubique/mapscore/shared/map/loader/TextureLoaderResult;") };
 };
 
 }  // namespace djinni_generated

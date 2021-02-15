@@ -1,5 +1,18 @@
 @extern "../../yaml/texture_holder_interface.yaml"
 
+texture_loader_status = enum {
+    ok;
+    error_404;
+    error_timeout;
+    error_other;
+}
+
+texture_loader_result = record {
+    texture_holder: optional<texture_holder_interface>;
+    status: texture_loader_status;
+}
+
+
 texture_loader_interface = interface +c +j +o {
-    load_texture(url: string): texture_holder_interface;
+    load_texture(url: string): texture_loader_result;
 }

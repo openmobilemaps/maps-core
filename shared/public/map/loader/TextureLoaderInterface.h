@@ -3,13 +3,13 @@
 
 #pragma once
 
-#include "TextureHolderInterface.h"
-#include <memory>
 #include <string>
+
+struct TextureLoaderResult;
 
 class TextureLoaderInterface {
 public:
     virtual ~TextureLoaderInterface() {}
 
-    virtual std::shared_ptr<::TextureHolderInterface> loadTexture(const std::string & url) = 0;
+    virtual TextureLoaderResult loadTexture(const std::string & url) = 0;
 };

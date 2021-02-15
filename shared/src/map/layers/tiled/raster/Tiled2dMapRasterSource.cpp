@@ -7,6 +7,7 @@
 #include <algorithm>
 #include "LambdaTask.h"
 #include <cmath>
+#include "TextureLoaderResult.h"
 
 Tiled2dMapRasterSource::Tiled2dMapRasterSource(const MapConfig &mapConfig,
                                                const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
@@ -125,14 +126,18 @@ std::optional<Tiled2dMapTileInfo> Tiled2dMapRasterSource::dequeueLoadingTask(){
 
 void Tiled2dMapRasterSource::performLoadingTask() {
     if (auto tile = dequeueLoadingTask()) {
-        auto texture = loader->loadTexture(layerConfig->getTileUrl(tile->x, tile->y, tile->zoom));
+        auto loaderResult = loader->loadTexture(layerConfig->getTileUrl(tile->x, tile->y, tile->zoom));
 
-        {
+
+        if ( loaderResult.textureHolder ){
             std::lock_guard<std::recursive_mutex> lock(currentTilesMutex);
             if (currentVisibleTiles.count(*tile)) {
-                currentTiles[*tile] = texture;
+                currentTiles[*tile] = loaderResult.textureHolder;
             }
+        } else {
+            // TODO: handle error eg. exp. backoff
         }
+        
         listener->onTilesUpdated();
     }
 }

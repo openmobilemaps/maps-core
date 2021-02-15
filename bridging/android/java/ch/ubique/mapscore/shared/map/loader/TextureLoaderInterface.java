@@ -6,7 +6,7 @@ package ch.ubique.mapscore.shared.map.loader;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class TextureLoaderInterface {
-    public abstract ch.ubique.mapscore.shared.graphics.objects.TextureHolderInterface loadTexture(String url);
+    public abstract TextureLoaderResult loadTexture(String url);
 
     private static final class CppProxy extends TextureLoaderInterface
     {
@@ -32,11 +32,11 @@ public abstract class TextureLoaderInterface {
         }
 
         @Override
-        public ch.ubique.mapscore.shared.graphics.objects.TextureHolderInterface loadTexture(String url)
+        public TextureLoaderResult loadTexture(String url)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
             return native_loadTexture(this.nativeRef, url);
         }
-        private native ch.ubique.mapscore.shared.graphics.objects.TextureHolderInterface native_loadTexture(long _nativeRef, String url);
+        private native TextureLoaderResult native_loadTexture(long _nativeRef, String url);
     }
 }
