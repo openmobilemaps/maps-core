@@ -47,7 +47,9 @@ let package = Package(
       sources: ["src"],
       publicHeadersPath: "public/**",
       cxxSettings: [
-        .headerSearchPath("**")
+        .headerSearchPath("**"),
+        .unsafeFlags(["-fno-sized-deallocation",
+                      "-fno-aligned-allocation"])
       ]
     )
   ],
