@@ -162,6 +162,16 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     centerPosition.x -= leftDiff * zoom * screenPixelAsRealMeterFactor;
     centerPosition.y += topDiff * zoom * screenPixelAsRealMeterFactor;
 
+    auto config = mapInterface->getMapConfig();
+    auto bottomRight = config.mapCoordinateSystem.bounds.bottomRight;
+    auto topLeft = config.mapCoordinateSystem.bounds.topLeft;
+
+    centerPosition.x = std::min(centerPosition.x, bottomRight.x);
+    centerPosition.x = std::max(centerPosition.x, topLeft.x);
+
+    centerPosition.y = std::max(centerPosition.y, bottomRight.y);
+    centerPosition.y = std::min(centerPosition.y, topLeft.y);
+
     notifyListeners();
     mapInterface->invalidate();
     return true;
@@ -174,7 +184,20 @@ bool MapCamera2d::onDoubleClick(const ::Vec2F &posScreen) {
 
     targetZoom = std::max(std::min(targetZoom, mapInterface->getMapConfig().zoomMin), mapInterface->getMapConfig().zoomMax);
 
-    beginAnimation(targetZoom, coordFromScreenPosition(posScreen));
+    auto position = coordFromScreenPosition(posScreen);
+
+    auto config = mapInterface->getMapConfig();
+    auto bottomRight = config.mapCoordinateSystem.bounds.bottomRight;
+    auto topLeft = config.mapCoordinateSystem.bounds.topLeft;
+
+    position.x = std::min(position.x, bottomRight.x);
+    position.x = std::max(position.x, topLeft.x);
+
+    position.y = std::max(position.y, bottomRight.y);
+    position.y = std::min(position.y, topLeft.y);
+
+
+    beginAnimation(targetZoom, position);
     return true;
 }
 
@@ -200,6 +223,16 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
 
         centerPosition.x -= leftDiff * zoom * screenPixelAsRealMeterFactor;
         centerPosition.y += topDiff * zoom * screenPixelAsRealMeterFactor;
+
+        auto mapConfig = mapInterface->getMapConfig();
+        auto bottomRight = mapConfig.mapCoordinateSystem.bounds.bottomRight;
+        auto topLeft = mapConfig.mapCoordinateSystem.bounds.topLeft;
+
+        centerPosition.x = std::min(centerPosition.x, bottomRight.x);
+        centerPosition.x = std::max(centerPosition.x, topLeft.x);
+
+        centerPosition.y = std::max(centerPosition.y, bottomRight.y);
+        centerPosition.y = std::min(centerPosition.y, topLeft.y);
 
         if (config.roationEnabled) {
             float olda = atan2(posScreenOld[0].x - posScreenOld[1].x, posScreenOld[0].y - posScreenOld[1].y);
