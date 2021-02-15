@@ -40,7 +40,7 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 	private var glThread: GLThread? = null
 	private var renderer: GLSurfaceView.Renderer? = null
 
-	var glRunList = ConcurrentLinkedQueue<Runnable>()
+	var glRunList = ConcurrentLinkedQueue<()->Unit>()
 	private val runNotifier = Object()
 
 	private val isDirty = AtomicBoolean(false)
@@ -70,7 +70,7 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 		synchronized(runNotifier) { runNotifier.notify() }
 	}
 
-	fun queueEvent(clearQueueIfNotRunning: Boolean = false, r: Runnable) {
+	fun queueEvent(clearQueueIfNotRunning: Boolean = false, r: ()->Unit) {
 		if (clearQueueIfNotRunning && (glThread == null || glThread?.isAlive != true)) {
 			glRunList.clear()
 		} else {
@@ -111,7 +111,7 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 					sizeChanged = false
 				}
 				while (glRunList.isNotEmpty()) {
-					glRunList.poll()?.run()
+					glRunList.poll()?.invoke()
 				}
 				renderer.onDrawFrame(gl10)
 				if (egl?.eglSwapBuffers(eglDisplay, eglSurface) != true) {
