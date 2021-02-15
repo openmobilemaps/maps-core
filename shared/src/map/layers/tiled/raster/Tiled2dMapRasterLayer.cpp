@@ -61,7 +61,7 @@ void Tiled2dMapRasterLayer::resume() {
 void Tiled2dMapRasterLayer::onTilesUpdated() {
     // TODO: Check for current tiles in source and create corresponding layer objects (resp. remove old ones)
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
-            TaskConfig("Tiled2dMapSource_Update",
+            TaskConfig("Tiled2dMapRasterLayer_onTilesUpdated",
                        0,
                        TaskPriority::NORMAL,
                        ExecutionEnvironment::GRAPHICS),

@@ -6,6 +6,7 @@
 #include <string>
 #include <algorithm>
 #include "LambdaTask.h"
+#include <cmath>
 
 Tiled2dMapRasterSource::Tiled2dMapRasterSource(const MapConfig &mapConfig,
                                                const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
@@ -45,8 +46,14 @@ void Tiled2dMapRasterSource::onVisibleTilesChanged(const std::unordered_set<Prio
         }
     }
 
+
+    for (const auto &removedTile : toRemove) {
+        currentTiles.erase(removedTile);
+    }
+
     {
         std::lock_guard<std::recursive_mutex> overlayLock(priorityQueueMutex);
+
         for (auto it = loadingQueue.begin(); it != loadingQueue.end(); ) {
             if (visibleTiles.count(*it) == 0) {
                 it = loadingQueue.erase(it);
@@ -55,32 +62,31 @@ void Tiled2dMapRasterSource::onVisibleTilesChanged(const std::unordered_set<Prio
                 ++it;
             }
         }
-    }
 
-    for (const auto &removedTile : toRemove) {
-        currentTiles.erase(removedTile);
-    }
+        for (const auto &addedTile : toAdd) {
 
-    listener->onTilesUpdated();
-
-    for (const auto &addedTile : toAdd) {
-
-        {
-            std::lock_guard<std::recursive_mutex> overlayLock(priorityQueueMutex);
-            if (loadingQueue.count(addedTile) == 0) {
-                loadingQueue.insert(addedTile);
+            {
+                std::lock_guard<std::recursive_mutex> overlayLock(priorityQueueMutex);
+                if (loadingQueue.count(addedTile) == 0) {
+                    loadingQueue.insert(addedTile);
+                }
             }
         }
 
-
-        auto taskIdentifier = "Tiled2dMapRasterSource_loadTile" + layerConfig->getTileIdentifier(addedTile.tileInfo.x, addedTile.tileInfo.y, addedTile.tileInfo.zoom);
-        scheduler->addTask(std::make_shared<LambdaTask>(
-                                                        TaskConfig(taskIdentifier,
-                                                                   0,
-                                                                   TaskPriority::NORMAL,
-                                                                   ExecutionEnvironment::IO),
-                                                        [=] { performLoadingTask(); }));
+        size_t tasksToAdd = loadingQueue.size() > dispatchedTasks ? loadingQueue.size() - dispatchedTasks : 0;
+        for (int taskCount = 0;  taskCount < tasksToAdd; taskCount++) {
+            auto taskIdentifier = "Tiled2dMapRasterSource_loadTile_" + std::to_string(taskCount);
+            scheduler->addTask(std::make_shared<LambdaTask>(
+                                                            TaskConfig(taskIdentifier,
+                                                                       0,
+                                                                       TaskPriority::NORMAL,
+                                                                       ExecutionEnvironment::IO),
+                                                            [=] { performLoadingTask(); }));
+            dispatchedTasks += 1;
+        }
     }
+
+    //listener->onTilesUpdated();
 }
 
 std::unordered_set<Tiled2dMapRasterTileInfo> Tiled2dMapRasterSource::getCurrentTiles() {
@@ -103,6 +109,8 @@ void Tiled2dMapRasterSource::resume() {
 
 std::optional<Tiled2dMapTileInfo> Tiled2dMapRasterSource::dequeueLoadingTask(){
     std::lock_guard<std::recursive_mutex> lock(priorityQueueMutex);
+
+    dispatchedTasks -= 1;
 
     if (loadingQueue.empty()) {
         return std::nullopt;

@@ -39,7 +39,8 @@ private:
     std::unordered_map<Tiled2dMapTileInfo, std::shared_ptr<TextureHolderInterface>> currentTiles;
     std::unordered_set<Tiled2dMapTileInfo> currentVisibleTiles;
 
-    std::recursive_mutex priorityQueueMutex;
+    std::recursive_mutex priorityQueueMutex; // used for dispatchedTasks and loadingQueue
+    int dispatchedTasks;
     std::set<PrioritizedTiled2dMapTileInfo> loadingQueue;
 
     std::optional<Tiled2dMapTileInfo> dequeueLoadingTask();

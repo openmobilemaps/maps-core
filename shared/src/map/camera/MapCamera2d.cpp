@@ -167,7 +167,9 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
 }
 
 bool MapCamera2d::onDoubleClick(const ::Vec2F &posScreen) {
-    auto targetZoom = std::max(zoom / 2, mapInterface->getMapConfig().zoomMax);
+    auto targetZoom = zoom / 2;
+
+    targetZoom = std::max(std::min(targetZoom, mapInterface->getMapConfig().zoomMin), mapInterface->getMapConfig().zoomMax);
 
     beginAnimation(targetZoom, coordFromScreenPosition(posScreen));
     return true;

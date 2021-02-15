@@ -24,11 +24,11 @@ class TaskOperation: Operation {
 
 class Scheduler: MCSchedulerInterface {
 
-  private let ioQueue = OperationQueue(concurrentOperations: 15)
+  private let ioQueue = OperationQueue(concurrentOperations: 10)
 
-  private let computationQueue = OperationQueue(concurrentOperations: 15)
+  private let computationQueue = OperationQueue(concurrentOperations: 4)
 
-  private let graphicsQueue = OperationQueue(concurrentOperations: 15)
+  private let graphicsQueue = OperationQueue(concurrentOperations: 1)
 
   private let internalSchedulerQueue = DispatchQueue(label: "internalSchedulerQueue")
 
