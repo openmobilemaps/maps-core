@@ -118,10 +118,11 @@ std::optional<Tiled2dMapTileInfo> Tiled2dMapRasterSource::dequeueLoadingTask(){
     }
 
     auto tile = loadingQueue.begin();
+    auto tileInfo = tile->tileInfo;
 
     loadingQueue.erase(tile);
 
-    return tile->tileInfo;
+    return tileInfo;
 }
 
 void Tiled2dMapRasterSource::performLoadingTask() {
