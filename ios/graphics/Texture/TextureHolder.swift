@@ -59,8 +59,8 @@ extension TextureHolder: MCTextureHolderInterface {
     public func attachToGraphics() {}
 }
 
-extension TextureHolder {
-    public struct TextureUsableSize {
+public extension TextureHolder {
+    struct TextureUsableSize {
         let width: Int
         let height: Int
     }

@@ -1,6 +1,6 @@
+import MapCoreSharedModule
 import Metal
 import UIKit
-import MapCoreSharedModule
 
 extension UIColor {
     /// Check if a color is opaque
@@ -55,7 +55,7 @@ extension UIColor {
             g = components[1]
             b = components[2]
         default:
-            return MCColor(r: 0,g: 0, b: 0, a: Float(alpha))
+            return MCColor(r: 0, g: 0, b: 0, a: Float(alpha))
         }
         return MCColor(r: Float(r), g: Float(g), b: Float(b), a: Float(alpha))
     }

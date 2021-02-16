@@ -25,4 +25,3 @@ extension RenderingContext: MCRenderingContextInterface {
         sceneView?.clearColor = color.metalColor
     }
 }
-

@@ -63,7 +63,7 @@ open class MapView: MTKView {
     /// The view’s background color.
     override public var backgroundColor: UIColor? {
         get {
-            return super.backgroundColor
+            super.backgroundColor
         }
         set {
             super.backgroundColor = newValue
