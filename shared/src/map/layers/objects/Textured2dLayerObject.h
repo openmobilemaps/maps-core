@@ -17,6 +17,8 @@ public:
 
   virtual ~Textured2dLayerObject() override {}
 
+  virtual void update() override;
+
   virtual std::vector<std::shared_ptr<RenderConfigInterface>> getRenderConfig() override;
 
   void setFrame(const ::RectD & frame);

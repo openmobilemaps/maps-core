@@ -2,6 +2,7 @@
 @extern "../../yaml/rect_d.yaml"
 
 layer_interface = interface +c +j +o {
+    update();
     build_render_passes(): list<render_pass_interface>;
     get_identifier(): string;
     onAdded();

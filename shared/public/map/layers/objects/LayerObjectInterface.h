@@ -12,5 +12,7 @@ class LayerObjectInterface {
 public:
     virtual ~LayerObjectInterface() {}
 
+    virtual void update() = 0;
+
     virtual std::vector<std::shared_ptr<RenderConfigInterface>> getRenderConfig() = 0;
 };

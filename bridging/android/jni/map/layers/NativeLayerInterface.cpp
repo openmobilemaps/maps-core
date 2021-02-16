@@ -15,6 +15,13 @@ NativeLayerInterface::JavaProxy::JavaProxy(JniType j) : Handle(::djinni::jniGetT
 
 NativeLayerInterface::JavaProxy::~JavaProxy() = default;
 
+void NativeLayerInterface::JavaProxy::update() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeLayerInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_update);
+    ::djinni::jniExceptionCheck(jniEnv);
+}
 std::vector<std::shared_ptr<::RenderPassInterface>> NativeLayerInterface::JavaProxy::buildRenderPasses() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -79,6 +86,15 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_LayerInterface
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         delete reinterpret_cast<::djinni::CppProxyHandle<::LayerInterface>*>(nativeRef);
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_LayerInterface_00024CppProxy_native_1update(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::LayerInterface>(nativeRef);
+        ref->update();
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

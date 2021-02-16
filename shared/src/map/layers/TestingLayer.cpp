@@ -46,6 +46,10 @@ TestingLayer::TestingLayer(const std::shared_ptr<MapInterface> &mapInterface) : 
     renderPass = std::make_shared<RenderPass>(config, vector);
 }
 
+void TestingLayer::update() {
+
+}
+
 std::vector<std::shared_ptr<::RenderPassInterface>> TestingLayer::buildRenderPasses() {
     return {renderPass};
 }

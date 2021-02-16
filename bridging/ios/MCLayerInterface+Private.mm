@@ -32,6 +32,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
+- (void)update {
+    try {
+        _cppRefHandle.get()->update();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nonnull NSArray<id<MCRenderPassInterface>> *)buildRenderPasses {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->buildRenderPasses();
@@ -91,6 +97,12 @@ class LayerInterface::ObjcProxy final
     friend class ::djinni_generated::LayerInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
+    void update() override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() update];
+        }
+    }
     std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override
     {
         @autoreleasepool {

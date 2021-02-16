@@ -18,7 +18,6 @@ std::shared_ptr<GraphicsObjectInterface> Rectangle2dOpenGl::asGraphicsObject() {
 }
 
 void Rectangle2dOpenGl::clear() {
-    // TODO TOPO-1470: Clear GL-Data (careful with shared program/textures)
     removeTexture();
     ready = false;
 }

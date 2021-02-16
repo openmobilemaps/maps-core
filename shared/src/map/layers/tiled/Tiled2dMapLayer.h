@@ -16,6 +16,8 @@ public:
 
     void setSourceInterface(const std::shared_ptr<Tiled2dMapSourceInterface> &sourceInterface);
 
+    virtual void update() override = 0;
+
     virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override = 0;
 
     virtual std::string getIdentifier() override = 0;

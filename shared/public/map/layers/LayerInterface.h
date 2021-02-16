@@ -12,6 +12,8 @@ class LayerInterface {
 public:
     virtual ~LayerInterface() {}
 
+    virtual void update() = 0;
+
     virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() = 0;
 
     virtual std::string getIdentifier() = 0;

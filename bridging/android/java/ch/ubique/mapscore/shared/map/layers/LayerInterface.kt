@@ -7,6 +7,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class LayerInterface {
 
+    abstract fun update()
+
     abstract fun buildRenderPasses(): ArrayList<ch.ubique.mapscore.shared.graphics.RenderPassInterface>
 
     abstract fun getIdentifier(): String
@@ -40,6 +42,12 @@ abstract class LayerInterface {
         protected fun finalize() {
             _djinni_private_destroy()
         }
+
+        override fun update() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_update(this.nativeRef)
+        }
+        private external fun native_update(_nativeRef: Long)
 
         override fun buildRenderPasses(): ArrayList<ch.ubique.mapscore.shared.graphics.RenderPassInterface> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

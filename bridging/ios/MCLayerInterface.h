@@ -7,6 +7,8 @@
 
 @protocol MCLayerInterface
 
+- (void)update;
+
 - (nonnull NSArray<id<MCRenderPassInterface>> *)buildRenderPasses;
 
 - (nonnull NSString *)getIdentifier;

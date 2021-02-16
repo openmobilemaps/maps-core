@@ -33,6 +33,7 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
+        void update() override;
         std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override;
         std::string getIdentifier() override;
         void onAdded() override;
@@ -47,6 +48,7 @@ private:
     };
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/map/layers/LayerInterface") };
+    const jmethodID method_update { ::djinni::jniGetMethodID(clazz.get(), "update", "()V") };
     const jmethodID method_buildRenderPasses { ::djinni::jniGetMethodID(clazz.get(), "buildRenderPasses", "()Ljava/util/ArrayList;") };
     const jmethodID method_getIdentifier { ::djinni::jniGetMethodID(clazz.get(), "getIdentifier", "()Ljava/lang/String;") };
     const jmethodID method_onAdded { ::djinni::jniGetMethodID(clazz.get(), "onAdded", "()V") };

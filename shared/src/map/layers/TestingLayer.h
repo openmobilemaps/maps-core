@@ -14,6 +14,8 @@ public:
 
     ~TestingLayer() {}
 
+    virtual void update() override;
+
     std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override;
 
     std::string getIdentifier() override;

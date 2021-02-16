@@ -26,6 +26,8 @@ public:
 
     virtual std::shared_ptr<::LayerInterface> asLayerInterface() override;
 
+    virtual void update() override;
+
     virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override;
 
     virtual std::string getIdentifier() override;

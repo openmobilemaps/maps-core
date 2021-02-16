@@ -1,6 +1,7 @@
 @extern "../../../yaml/graphics_object_interface.yaml"
 
 layer_object_interface = interface +c {
+	update();
     get_render_config(): list<render_config_interface>;
 }
 

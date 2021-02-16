@@ -7,6 +7,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class LayerObjectInterface {
 
+    abstract fun update()
+
     abstract fun getRenderConfig(): ArrayList<RenderConfigInterface>
 
     private class CppProxy : LayerObjectInterface {
@@ -26,6 +28,12 @@ abstract class LayerObjectInterface {
         protected fun finalize() {
             _djinni_private_destroy()
         }
+
+        override fun update() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_update(this.nativeRef)
+        }
+        private external fun native_update(_nativeRef: Long)
 
         override fun getRenderConfig(): ArrayList<RenderConfigInterface> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

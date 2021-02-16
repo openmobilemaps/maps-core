@@ -19,6 +19,8 @@ public:
 
     ~Line2dLayerObject() {};
 
+    virtual void update() override;
+
     virtual std::vector<std::shared_ptr<RenderConfigInterface>> getRenderConfig() override;
 
     void setPositions(std::vector<Coord> positions);

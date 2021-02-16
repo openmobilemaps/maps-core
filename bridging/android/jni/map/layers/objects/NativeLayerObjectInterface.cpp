@@ -20,6 +20,15 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_objects_LayerO
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
+CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_objects_LayerObjectInterface_00024CppProxy_native_1update(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::LayerObjectInterface>(nativeRef);
+        ref->update();
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
 CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_layers_objects_LayerObjectInterface_00024CppProxy_native_1getRenderConfig(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {

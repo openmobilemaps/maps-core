@@ -27,6 +27,10 @@ void Textured2dLayerObject::setRectCoord(const ::RectCoord & rectCoord) {
   setFrame(RectD(renderCoord.topLeft.x, renderCoord.topLeft.y, width, height));
 }
 
+void Textured2dLayerObject::update() {
+
+}
+
 std::vector<std::shared_ptr<RenderConfigInterface>> Textured2dLayerObject::getRenderConfig() {
   return { renderConfig };
 }

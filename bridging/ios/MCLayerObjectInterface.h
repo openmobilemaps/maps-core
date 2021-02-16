@@ -7,6 +7,8 @@
 
 @interface MCLayerObjectInterface : NSObject
 
+- (void)update;
+
 - (nonnull NSArray<MCRenderConfigInterface *> *)getRenderConfig;
 
 @end

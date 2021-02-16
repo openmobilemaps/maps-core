@@ -11,6 +11,10 @@ Line2dLayerObject::Line2dLayerObject(const std::shared_ptr<CoordinateConversionH
     renderConfig = { std::make_shared<RenderConfig>(line->asGraphicsObject(), 0) };
 }
 
+void Line2dLayerObject::update() {
+
+}
+
 std::vector<std::shared_ptr<RenderConfigInterface>> Line2dLayerObject::getRenderConfig() {
     return renderConfig;
 }

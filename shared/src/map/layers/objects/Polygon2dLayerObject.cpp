@@ -7,6 +7,10 @@ Polygon2dLayerObject::Polygon2dLayerObject(const std::shared_ptr<CoordinateConve
     renderConfig = std::make_shared<RenderConfig>(polygon->asGraphicsObject(), 0);
 }
 
+void Polygon2dLayerObject::update() {
+
+}
+
 std::vector<std::shared_ptr<RenderConfigInterface>> Polygon2dLayerObject::getRenderConfig() {
     return {renderConfig};
 }
