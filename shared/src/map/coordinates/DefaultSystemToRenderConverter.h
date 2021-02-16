@@ -8,7 +8,7 @@
 #include "MapCoordinateSystem.h"
 #include "Coord.h"
 #include "CoordinateConversionHelper.h"
-#include "CoordinateConversionCommon.h"
+#include "CoordinateSystemIdentifiers.h"
 
 class DefaultSystemToRenderConverter : public CoordinateConverterInterface {
 public:
@@ -33,7 +33,7 @@ public:
     }
 
     virtual std::string getTo() override {
-        return CoordinateConversionCommon::RENDER_SYSTEM_ID;
+        return CoordinateSystemIdentifiers::RENDERSYSTEM();
     }
 
 private:

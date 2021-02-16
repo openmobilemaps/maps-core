@@ -4,7 +4,7 @@
 
 #include "CoordinateConversionHelper.h"
 #include "DefaultSystemToRenderConverter.h"
-#include "CoordinateConversionCommon.h"
+#include "CoordinateSystemIdentifiers.h"
 #include "EPSG4326ToEPSG3857Converter.h"
 #include "EPSG3857ToEPSG4326Converter.h"
 #include "EPSG2056ToEPSG4326Converter.h"
@@ -57,11 +57,11 @@ RectCoord CoordinateConversionHelper::convertRect(const std::string & to, const 
 }
 
 RectCoord CoordinateConversionHelper::convertRectToRenderSystem(const RectCoord & rect) {
-  return convertRect(CoordinateConversionCommon::RENDER_SYSTEM_ID, rect);
+  return convertRect(CoordinateSystemIdentifiers::RENDERSYSTEM(), rect);
 }
 
 Coord CoordinateConversionHelper::convertToRenderSystem(const Coord &coordinate) {
-    return convert(CoordinateConversionCommon::RENDER_SYSTEM_ID, coordinate);
+    return convert(CoordinateSystemIdentifiers::RENDERSYSTEM(), coordinate);
 }
 
 void CoordinateConversionHelper::precomputeConverterHelper() {

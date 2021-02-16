@@ -4,7 +4,7 @@
 #include "MapCoordinateSystem.h"
 #include "Coord.h"
 #include "CoordinateConversionHelper.h"
-#include "CoordinateConversionCommon.h"
+#include "CoordinateSystemIdentifiers.h"
 
 /// Convert WGS 84 / Pseudo-Mercator to LV03
 ///  https://epsg.io/4326 to https://epsg.io/2056
@@ -39,11 +39,11 @@ public:
     }
 
     virtual std::string getFrom() override {
-        return CoordinateConversionCommon::EPSG4326;
+        return CoordinateSystemIdentifiers::EPSG4326();
     }
 
     virtual std::string getTo() override {
-        return CoordinateConversionCommon::EPSG2056;
+        return CoordinateSystemIdentifiers::EPSG2056();
     }
 
 private:
