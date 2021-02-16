@@ -31,7 +31,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024Cpp
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_create(JNIEnv* jniEnv, jobject /*this*/, ::djinni_generated::NativeGraphicsObjectFactoryInterface::JniType j_graphicsFactory, ::djinni_generated::NativeShaderFactoryInterface::JniType j_shaderFactory, ::djinni_generated::NativeRenderingContextInterface::JniType j_renderingContext, jobject j_mapConfig, ::djinni_generated::NativeSchedulerInterface::JniType j_scheduler)
+CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_create(JNIEnv* jniEnv, jobject /*this*/, ::djinni_generated::NativeGraphicsObjectFactoryInterface::JniType j_graphicsFactory, ::djinni_generated::NativeShaderFactoryInterface::JniType j_shaderFactory, ::djinni_generated::NativeRenderingContextInterface::JniType j_renderingContext, jobject j_mapConfig, ::djinni_generated::NativeSchedulerInterface::JniType j_scheduler, jfloat j_pixelDensity)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE0(jniEnv);
@@ -39,17 +39,19 @@ CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024
                                         ::djinni_generated::NativeShaderFactoryInterface::toCpp(jniEnv, j_shaderFactory),
                                         ::djinni_generated::NativeRenderingContextInterface::toCpp(jniEnv, j_renderingContext),
                                         ::djinni_generated::NativeMapConfig::toCpp(jniEnv, j_mapConfig),
-                                        ::djinni_generated::NativeSchedulerInterface::toCpp(jniEnv, j_scheduler));
+                                        ::djinni_generated::NativeSchedulerInterface::toCpp(jniEnv, j_scheduler),
+                                        ::djinni::F32::toCpp(jniEnv, j_pixelDensity));
         return ::djinni::release(::djinni_generated::NativeMapInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_createWithOpenGl(JNIEnv* jniEnv, jobject /*this*/, jobject j_mapConfig, ::djinni_generated::NativeSchedulerInterface::JniType j_scheduler)
+CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_createWithOpenGl(JNIEnv* jniEnv, jobject /*this*/, jobject j_mapConfig, ::djinni_generated::NativeSchedulerInterface::JniType j_scheduler, jfloat j_pixelDensity)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE0(jniEnv);
         auto r = ::MapInterface::createWithOpenGl(::djinni_generated::NativeMapConfig::toCpp(jniEnv, j_mapConfig),
-                                                  ::djinni_generated::NativeSchedulerInterface::toCpp(jniEnv, j_scheduler));
+                                                  ::djinni_generated::NativeSchedulerInterface::toCpp(jniEnv, j_scheduler),
+                                                  ::djinni::F32::toCpp(jniEnv, j_pixelDensity));
         return ::djinni::release(::djinni_generated::NativeMapInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
@@ -140,15 +142,6 @@ CJNIEXPORT ::djinni_generated::NativeCameraInterface::JniType JNICALL Java_ch_ub
         auto r = ref->getCamera();
         return ::djinni::release(::djinni_generated::NativeCameraInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
-}
-
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1addDefaultTouchHandler(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jfloat j_density)
-{
-    try {
-        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
-        const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
-        ref->addDefaultTouchHandler(::djinni::F32::toCpp(jniEnv, j_density));
-    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
 CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1setTouchHandler(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeTouchHandlerInterface::JniType j_touchHandler)

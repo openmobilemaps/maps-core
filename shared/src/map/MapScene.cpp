@@ -1,18 +1,27 @@
 #include "MapScene.h"
 #include "MapCallbackInterface.h"
 #include "TestingLayer.h"
-#include "DefaultTouchHandler.h"
+#include "DefaultTouchHandlerInterface.h"
+#include "MapCamera2dInterface.h"
 #include "TouchInterface.h"
 #include <algorithm>
 #include "LambdaTask.h"
 #include "CoordinateConversionHelper.h"
 
-MapScene::MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig &mapConfig,
-                   const std::shared_ptr<::SchedulerInterface> &scheduler) :
-        scene(scene),
-        mapConfig(mapConfig),
-        scheduler(scheduler),
-        conversionHelper(std::make_shared<CoordinateConversionHelper>(mapConfig.mapCoordinateSystem)) {
+MapScene::MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig & mapConfig, const std::shared_ptr<::SchedulerInterface> & scheduler,
+                   float pixelDensity):
+scene(scene),
+mapConfig(mapConfig),
+scheduler(scheduler),
+conversionHelper(std::make_shared<CoordinateConversionHelper>(mapConfig.mapCoordinateSystem)){
+    // add default touch handler
+    setTouchHandler(DefaultTouchHandlerInterface::create(scheduler, pixelDensity));
+
+    // workaround to use sharedpointer to self from constructor
+    auto ptr = std::shared_ptr<MapScene>( this, [](MapScene*){} );
+
+    // add default camera
+    setCamera(MapCamera2dInterface::create(ptr, pixelDensity)->asCameraInterface());
 }
 
 std::shared_ptr<::GraphicsObjectFactoryInterface> MapScene::getGraphicsObjectFactory() {
@@ -61,12 +70,7 @@ std::shared_ptr<::CameraInterface> MapScene::getCamera() {
     return scene->getCamera();
 }
 
-void MapScene::addDefaultTouchHandler(float density) {
-    auto touchHandler = std::make_shared<DefaultTouchHandler>(scheduler, density);
-    setTouchHandler(touchHandler);
-}
-
-void MapScene::setTouchHandler(const std::shared_ptr<::TouchHandlerInterface> &touchHandler) {
+void MapScene::setTouchHandler(const std::shared_ptr<::TouchHandlerInterface> & touchHandler) {
     auto currentCamera = std::dynamic_pointer_cast<TouchInterface>(scene->getCamera());
     if (this->touchHandler && currentCamera) {
         this->touchHandler->removeListener(currentCamera);

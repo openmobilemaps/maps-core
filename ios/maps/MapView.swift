@@ -20,12 +20,12 @@ open class MapView: MTKView {
                                                        shaderFactory: ShaderFactory(),
                                                        renderingContext: renderingContext,
                                                        mapConfig: mapConfig,
-                                                       scheduler: Scheduler()) else {
+                                                       scheduler: Scheduler(),
+                                                       pixelDensity: Float(UIScreen.pixelsPerInch)) else {
             fatalError("Can't create MCMapInterface")
         }
         self.mapInterface = mapInterface
         self.renderingContext = renderingContext
-        mapInterface.addDefaultTouchHandler(Float(UIScreen.pixelsPerInch))
         touchHandler = .init(touchHandler: mapInterface.getTouchHandler())
         super.init(frame: .zero, device: MetalContext.current.device)
         renderingContext.sceneView = self
@@ -52,10 +52,6 @@ open class MapView: MTKView {
         mapInterface.setCallbackHandler(self)
 
         touchHandler.mapView = self
-
-        if let camera = MCMapCamera2dInterface.create(mapInterface, screenDensityPpi: Float(UIScreen.pixelsPerInch)) {
-            mapInterface.setCamera(camera.asCameraInterface())
-        }
 
         mapInterface.resume()
     }

@@ -22,9 +22,9 @@ class MapInterface {
 public:
     virtual ~MapInterface() {}
 
-    static std::shared_ptr<MapInterface> create(const std::shared_ptr<::GraphicsObjectFactoryInterface> & graphicsFactory, const std::shared_ptr<::ShaderFactoryInterface> & shaderFactory, const std::shared_ptr<::RenderingContextInterface> & renderingContext, const MapConfig & mapConfig, const std::shared_ptr<::SchedulerInterface> & scheduler);
+    static std::shared_ptr<MapInterface> create(const std::shared_ptr<::GraphicsObjectFactoryInterface> & graphicsFactory, const std::shared_ptr<::ShaderFactoryInterface> & shaderFactory, const std::shared_ptr<::RenderingContextInterface> & renderingContext, const MapConfig & mapConfig, const std::shared_ptr<::SchedulerInterface> & scheduler, float pixelDensity);
 
-    static std::shared_ptr<MapInterface> createWithOpenGl(const MapConfig & mapConfig, const std::shared_ptr<::SchedulerInterface> & scheduler);
+    static std::shared_ptr<MapInterface> createWithOpenGl(const MapConfig & mapConfig, const std::shared_ptr<::SchedulerInterface> & scheduler, float pixelDensity);
 
     virtual void setCallbackHandler(const std::shared_ptr<MapCallbackInterface> & callbackInterface) = 0;
 
@@ -43,8 +43,6 @@ public:
     virtual void setCamera(const std::shared_ptr<::CameraInterface> & camera) = 0;
 
     virtual std::shared_ptr<::CameraInterface> getCamera() = 0;
-
-    virtual void addDefaultTouchHandler(float density) = 0;
 
     virtual void setTouchHandler(const std::shared_ptr<::TouchHandlerInterface> & touchHandler) = 0;
 

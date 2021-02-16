@@ -6,7 +6,7 @@
 
 class MapScene: public MapInterface, public SceneCallbackInterface, public std::enable_shared_from_this<MapScene> {
 public:
-    MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig & mapConfig, const std::shared_ptr<::SchedulerInterface> & scheduler);
+    MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig & mapConfig, const std::shared_ptr<::SchedulerInterface> & scheduler, float pixelDensity);
 
     virtual ~MapScene() {}
 
@@ -27,8 +27,6 @@ public:
     virtual void setCamera(const std::shared_ptr<::CameraInterface> & camera) override;
 
     virtual std::shared_ptr<::CameraInterface> getCamera() override;
-
-    virtual void addDefaultTouchHandler(float density) override;
 
     virtual void setTouchHandler(const std::shared_ptr<::TouchHandlerInterface> & touchHandler) override;
 

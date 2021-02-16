@@ -16,8 +16,8 @@
 @extern "../yaml/color.yaml"
 
 map_interface = interface +c {
-    static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface, rendering_context: rendering_context_interface, map_config: map_config, scheduler: scheduler_interface) : map_interface;
-    static createWithOpenGl(map_config: map_config, scheduler: scheduler_interface) : map_interface;
+    static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface, rendering_context: rendering_context_interface, map_config: map_config, scheduler: scheduler_interface, pixel_density: f32) : map_interface;
+    static createWithOpenGl(map_config: map_config, scheduler: scheduler_interface, pixel_density: f32) : map_interface;
 
     set_callback_handler(callback_interface: map_callback_interface);
 
@@ -32,7 +32,6 @@ map_interface = interface +c {
     set_camera(camera: camera_interface);
     get_camera() : camera_interface;
 
-    add_default_touch_handler(density: f32);
     set_touch_handler(touch_handler: touch_handler_interface);
     get_touch_handler() : touch_handler_interface;
 

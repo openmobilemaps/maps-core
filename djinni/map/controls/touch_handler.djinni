@@ -1,9 +1,14 @@
 @extern "../../yaml/vec_2_f.yaml"
+@extern "../../yaml/scheduler_interface.yaml"
 
 touch_handler_interface = interface +c +j +o {
     on_touch_event(touch_event: touch_event);
     add_listener(listener: touch_interface);
     remove_listener(listener: touch_interface);
+}
+
+default_touch_handler_interface = interface +c {
+    static create(scheduler: scheduler_interface, density: f32): touch_handler_interface;
 }
 
 touch_interface = interface +c {

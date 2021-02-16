@@ -23,10 +23,12 @@
                       shaderFactory:(nullable id<MCShaderFactoryInterface>)shaderFactory
                    renderingContext:(nullable id<MCRenderingContextInterface>)renderingContext
                           mapConfig:(nonnull MCMapConfig *)mapConfig
-                          scheduler:(nullable id<MCSchedulerInterface>)scheduler;
+                          scheduler:(nullable id<MCSchedulerInterface>)scheduler
+                       pixelDensity:(float)pixelDensity;
 
 + (nullable MCMapInterface *)createWithOpenGl:(nonnull MCMapConfig *)mapConfig
-                                    scheduler:(nullable id<MCSchedulerInterface>)scheduler;
+                                    scheduler:(nullable id<MCSchedulerInterface>)scheduler
+                                 pixelDensity:(float)pixelDensity;
 
 - (void)setCallbackHandler:(nullable id<MCMapCallbackInterface>)callbackInterface;
 
@@ -45,8 +47,6 @@
 - (void)setCamera:(nullable id<MCCameraInterface>)camera;
 
 - (nullable id<MCCameraInterface>)getCamera;
-
-- (void)addDefaultTouchHandler:(float)density;
 
 - (void)setTouchHandler:(nullable id<MCTouchHandlerInterface>)touchHandler;
 

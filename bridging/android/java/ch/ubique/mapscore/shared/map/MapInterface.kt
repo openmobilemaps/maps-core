@@ -25,8 +25,6 @@ abstract class MapInterface {
 
     abstract fun getCamera(): ch.ubique.mapscore.shared.graphics.CameraInterface
 
-    abstract fun addDefaultTouchHandler(density: Float)
-
     abstract fun setTouchHandler(touchHandler: ch.ubique.mapscore.shared.map.controls.TouchHandlerInterface)
 
     abstract fun getTouchHandler(): ch.ubique.mapscore.shared.map.controls.TouchHandlerInterface
@@ -49,13 +47,13 @@ abstract class MapInterface {
 
     companion object {
         @JvmStatic
-        fun create(graphicsFactory: ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface, shaderFactory: ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface, renderingContext: ch.ubique.mapscore.shared.graphics.RenderingContextInterface, mapConfig: MapConfig, scheduler: ch.ubique.mapscore.shared.map.scheduling.SchedulerInterface): MapInterface {
-            return CppProxy.create(graphicsFactory, shaderFactory, renderingContext, mapConfig, scheduler)
+        fun create(graphicsFactory: ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface, shaderFactory: ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface, renderingContext: ch.ubique.mapscore.shared.graphics.RenderingContextInterface, mapConfig: MapConfig, scheduler: ch.ubique.mapscore.shared.map.scheduling.SchedulerInterface, pixelDensity: Float): MapInterface {
+            return CppProxy.create(graphicsFactory, shaderFactory, renderingContext, mapConfig, scheduler, pixelDensity)
         }
 
         @JvmStatic
-        fun createWithOpenGl(mapConfig: MapConfig, scheduler: ch.ubique.mapscore.shared.map.scheduling.SchedulerInterface): MapInterface {
-            return CppProxy.createWithOpenGl(mapConfig, scheduler)
+        fun createWithOpenGl(mapConfig: MapConfig, scheduler: ch.ubique.mapscore.shared.map.scheduling.SchedulerInterface, pixelDensity: Float): MapInterface {
+            return CppProxy.createWithOpenGl(mapConfig, scheduler, pixelDensity)
         }
     }
 
@@ -131,12 +129,6 @@ abstract class MapInterface {
         }
         private external fun native_getCamera(_nativeRef: Long): ch.ubique.mapscore.shared.graphics.CameraInterface
 
-        override fun addDefaultTouchHandler(density: Float) {
-            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_addDefaultTouchHandler(this.nativeRef, density)
-        }
-        private external fun native_addDefaultTouchHandler(_nativeRef: Long, density: Float)
-
         override fun setTouchHandler(touchHandler: ch.ubique.mapscore.shared.map.controls.TouchHandlerInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_setTouchHandler(this.nativeRef, touchHandler)
@@ -199,10 +191,10 @@ abstract class MapInterface {
 
         companion object {
             @JvmStatic
-            external fun create(graphicsFactory: ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface, shaderFactory: ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface, renderingContext: ch.ubique.mapscore.shared.graphics.RenderingContextInterface, mapConfig: MapConfig, scheduler: ch.ubique.mapscore.shared.map.scheduling.SchedulerInterface): MapInterface
+            external fun create(graphicsFactory: ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface, shaderFactory: ch.ubique.mapscore.shared.graphics.shader.ShaderFactoryInterface, renderingContext: ch.ubique.mapscore.shared.graphics.RenderingContextInterface, mapConfig: MapConfig, scheduler: ch.ubique.mapscore.shared.map.scheduling.SchedulerInterface, pixelDensity: Float): MapInterface
 
             @JvmStatic
-            external fun createWithOpenGl(mapConfig: MapConfig, scheduler: ch.ubique.mapscore.shared.map.scheduling.SchedulerInterface): MapInterface
+            external fun createWithOpenGl(mapConfig: MapConfig, scheduler: ch.ubique.mapscore.shared.map.scheduling.SchedulerInterface, pixelDensity: Float): MapInterface
         }
     }
 }
