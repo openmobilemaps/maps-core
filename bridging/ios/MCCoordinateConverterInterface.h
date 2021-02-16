@@ -9,4 +9,8 @@
 
 - (nonnull MCCoord *)convert:(nonnull MCCoord *)coordinate;
 
+- (nonnull NSString *)getFrom;
+
+- (nonnull NSString *)getTo;
+
 @end

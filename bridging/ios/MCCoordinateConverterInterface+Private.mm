@@ -5,6 +5,7 @@
 #import "MCCoordinateConverterInterface.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
+#import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCCoord+Private.h"
 #include <exception>
@@ -38,6 +39,20 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nonnull NSString *)getFrom {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getFrom();
+        return ::djinni::String::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nonnull NSString *)getTo {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getTo();
+        return ::djinni::String::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class CoordinateConverterInterface::ObjcProxy final
@@ -52,6 +67,20 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() convert:(::djinni_generated::Coord::fromCpp(c_coordinate))];
             return ::djinni_generated::Coord::toCpp(objcpp_result_);
+        }
+    }
+    std::string getFrom() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getFrom];
+            return ::djinni::String::toCpp(objcpp_result_);
+        }
+    }
+    std::string getTo() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getTo];
+            return ::djinni::String::toCpp(objcpp_result_);
         }
     }
 };

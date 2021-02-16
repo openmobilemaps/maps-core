@@ -8,10 +8,11 @@
 #include "MapCoordinateSystem.h"
 #include "Coord.h"
 #include "CoordinateConversionHelper.h"
+#include "CoordinateConversionCommon.h"
 
 class DefaultSystemToRenderConverter : public CoordinateConverterInterface {
 public:
-    DefaultSystemToRenderConverter(const MapCoordinateSystem &mapCoordinateSystem) {
+    DefaultSystemToRenderConverter(const MapCoordinateSystem &mapCoordinateSystem): mapCoordinateSystemIdentifier(mapCoordinateSystem.identifier) {
         boundsLeft = mapCoordinateSystem.bounds.topLeft.x;
         boundsTop = mapCoordinateSystem.bounds.topLeft.y;
         boundsRight = mapCoordinateSystem.bounds.bottomRight.x;
@@ -20,10 +21,19 @@ public:
         halfHeight = 0.5 * (boundsBottom - boundsTop);
     }
 
-    Coord convert(const Coord &coordinate) {
+    virtual Coord convert(const Coord &coordinate) override {
         double x = (boundsRight < boundsLeft) ? -coordinate.x + boundsRight : (coordinate.x - boundsLeft);
         double y = (boundsBottom < boundsTop) ? -coordinate.y + boundsBottom : (coordinate.y - boundsTop);
-        return Coord(CoordinateConversionHelper::RENDER_SYSTEM_ID, x - halfWidth, y - halfHeight, coordinate.z);
+        return Coord(getTo(), x - halfWidth, y - halfHeight, coordinate.z);
+    }
+
+
+    virtual std::string getFrom() override {
+        return mapCoordinateSystemIdentifier;
+    }
+
+    virtual std::string getTo() override {
+        return CoordinateConversionCommon::RENDER_SYSTEM_ID;
     }
 
 private:
@@ -33,4 +43,6 @@ private:
     double boundsBottom;
     double halfWidth;
     double halfHeight;
+
+    std::string mapCoordinateSystemIdentifier;
 };

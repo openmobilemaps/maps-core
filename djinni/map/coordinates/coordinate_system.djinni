@@ -1,5 +1,5 @@
 coordinate_conversion_helper_interface = interface +c {
-    register_converter(from: string, to: string, converter: coordinate_converter_interface);
+    register_converter(converter: coordinate_converter_interface);
     convert(to: string, coordinate: coord) : coord;
     convert_rect(to: string, rect: rect_coord) : rect_coord;
     convert_rect_to_render_system(rect: rect_coord) : rect_coord;
@@ -8,6 +8,8 @@ coordinate_conversion_helper_interface = interface +c {
 
 coordinate_converter_interface = interface +c +j +o {
     convert(coordinate: coord) : coord;
+    get_from() : string;
+    get_to() : string;
 }
 
 map_coordinate_system = record {

@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <string>
+
 struct Coord;
 
 class CoordinateConverterInterface {
@@ -10,4 +12,8 @@ public:
     virtual ~CoordinateConverterInterface() {}
 
     virtual Coord convert(const Coord & coordinate) = 0;
+
+    virtual std::string getFrom() = 0;
+
+    virtual std::string getTo() = 0;
 };

@@ -22,14 +22,12 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_coordinates_Coordinat
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_coordinates_CoordinateConversionHelperInterface_00024CppProxy_native_1registerConverter(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_from, jstring j_to, jobject j_converter)
+CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_coordinates_CoordinateConversionHelperInterface_00024CppProxy_native_1registerConverter(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_converter)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::CoordinateConversionHelperInterface>(nativeRef);
-        ref->registerConverter(::djinni::String::toCpp(jniEnv, j_from),
-                               ::djinni::String::toCpp(jniEnv, j_to),
-                               ::djinni_generated::NativeCoordinateConverterInterface::toCpp(jniEnv, j_converter));
+        ref->registerConverter(::djinni_generated::NativeCoordinateConverterInterface::toCpp(jniEnv, j_converter));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

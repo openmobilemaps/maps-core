@@ -14,7 +14,7 @@ class CoordinateConversionHelperInterface {
 public:
     virtual ~CoordinateConversionHelperInterface() {}
 
-    virtual void registerConverter(const std::string & from, const std::string & to, const std::shared_ptr<CoordinateConverterInterface> & converter) = 0;
+    virtual void registerConverter(const std::shared_ptr<CoordinateConverterInterface> & converter) = 0;
 
     virtual Coord convert(const std::string & to, const Coord & coordinate) = 0;
 

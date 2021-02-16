@@ -12,27 +12,31 @@
 #include "HashedTuple.h"
 #include "string"
 #include <mutex>
+#include <vector>
 
 class CoordinateConversionHelper : public CoordinateConversionHelperInterface {
 public:
-    static inline const std::string RENDER_SYSTEM_ID = "render_system";
 
     CoordinateConversionHelper(MapCoordinateSystem mapCoordinateSystem);
 
-    void registerConverter(const std::string & from, const std::string & to, const std::shared_ptr<CoordinateConverterInterface> & converter);
+    virtual void registerConverter(const std::shared_ptr<CoordinateConverterInterface> & converter) override;
 
-    Coord convert(const std::string & to, const Coord & coordinate);
+    virtual Coord convert(const std::string & to, const Coord & coordinate) override;
 
-    RectCoord convertRect(const std::string & to, const RectCoord & rect);
+    virtual RectCoord convertRect(const std::string & to, const RectCoord & rect) override;
 
-    RectCoord convertRectToRenderSystem(const RectCoord & rect);
+    virtual RectCoord convertRectToRenderSystem(const RectCoord & rect) override;
 
-    Coord convertToRenderSystem(const Coord & coordinate);
+    virtual Coord convertToRenderSystem(const Coord & coordinate) override;
 
 private:
     std::unordered_map<std::tuple<std::string, std::string>, std::shared_ptr<CoordinateConverterInterface>> fromToConverterMap;
 
+    std::unordered_map<std::tuple<std::string, std::string>, std::vector<std::shared_ptr<CoordinateConverterInterface>>> converterHelper;
+
     std::string mapCoordinateSystemIdentier;
 
     std::recursive_mutex converterMutex;
+
+    void precomputeConverterHelper();
 };

@@ -9,9 +9,7 @@
 
 @interface MCCoordinateConversionHelperInterface : NSObject
 
-- (void)registerConverter:(nonnull NSString *)from
-                       to:(nonnull NSString *)to
-                converter:(nullable id<MCCoordinateConverterInterface>)converter;
+- (void)registerConverter:(nullable id<MCCoordinateConverterInterface>)converter;
 
 - (nonnull MCCoord *)convert:(nonnull NSString *)to
                   coordinate:(nonnull MCCoord *)coordinate;

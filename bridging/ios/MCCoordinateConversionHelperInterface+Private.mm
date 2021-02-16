@@ -33,13 +33,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (void)registerConverter:(nonnull NSString *)from
-                       to:(nonnull NSString *)to
-                converter:(nullable id<MCCoordinateConverterInterface>)converter {
+- (void)registerConverter:(nullable id<MCCoordinateConverterInterface>)converter {
     try {
-        _cppRefHandle.get()->registerConverter(::djinni::String::toCpp(from),
-                                               ::djinni::String::toCpp(to),
-                                               ::djinni_generated::CoordinateConverterInterface::toCpp(converter));
+        _cppRefHandle.get()->registerConverter(::djinni_generated::CoordinateConverterInterface::toCpp(converter));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
