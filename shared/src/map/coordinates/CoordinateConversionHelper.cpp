@@ -67,11 +67,13 @@ Coord CoordinateConversionHelper::convertToRenderSystem(const Coord &coordinate)
 void CoordinateConversionHelper::precomputeConverterHelper() {
     converterHelper.clear();
 
+    // two steps
     for (auto const &converterFirst: fromToConverterMap) {
         for (auto const &converterSecond: fromToConverterMap) {
             // if output of first converter is inpute of second
             auto from = converterFirst.second->getFrom();
             auto to = converterSecond.second->getTo();
+
             if (converterFirst.second->getTo() == converterSecond.second->getFrom() &&
                 from != to &&
                 fromToConverterMap.count({from, to}) == 0) {
@@ -79,4 +81,25 @@ void CoordinateConversionHelper::precomputeConverterHelper() {
             }
         }
     }
+
+    // three steps
+    for (auto const &converterFirst: fromToConverterMap) {
+        for (auto const &converterSecond: fromToConverterMap) {
+            for (auto const &converterThird: fromToConverterMap) {
+                // if output of first converter is inpute of second
+                auto from = converterFirst.second->getFrom();
+                auto to = converterThird.second->getTo();
+
+                if (converterFirst.second->getTo() == converterSecond.second->getFrom() &&
+                    converterSecond.second->getTo() == converterThird.second->getFrom() &&
+                    from != to &&
+                    fromToConverterMap.count({from, to}) == 0 &&
+                    converterHelper.count({from, to}) == 0) {
+                    converterHelper[{from, to}] = {converterFirst.second, converterSecond.second, converterThird.second};
+                }
+            }
+        }
+    }
+
+    //three steps
 }
