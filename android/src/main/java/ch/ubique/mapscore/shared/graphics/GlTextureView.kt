@@ -23,9 +23,10 @@ import javax.microedition.khronos.opengles.GL10
  * [TextureViewDemo](https://github.com/dalinaum/TextureViewDemo/blob/master/src/kr/gdg/android/textureview/GLTriangleActivity.java) github project
  * and of course on original [GLSurfaceView]'s GLThread
  */
-open class GlTextureView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : TextureView(
-	context, attrs, defStyleAttr
-), SurfaceTextureListener {
+open class GlTextureView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
+	TextureView(
+		context, attrs, defStyleAttr
+	), SurfaceTextureListener {
 
 	companion object {
 		private const val TAG = "GLTextureView"
@@ -40,7 +41,7 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 	private var glThread: GLThread? = null
 	private var renderer: GLSurfaceView.Renderer? = null
 
-	var glRunList = ConcurrentLinkedQueue<()->Unit>()
+	var glRunList = ConcurrentLinkedQueue<() -> Unit>()
 	private val runNotifier = Object()
 
 	private val isDirty = AtomicBoolean(false)
@@ -70,7 +71,7 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 		synchronized(runNotifier) { runNotifier.notify() }
 	}
 
-	fun queueEvent(clearQueueIfNotRunning: Boolean = false, r: ()->Unit) {
+	fun queueEvent(clearQueueIfNotRunning: Boolean = false, r: () -> Unit) {
 		if (clearQueueIfNotRunning && (glThread == null || glThread?.isAlive != true)) {
 			glRunList.clear()
 		} else {
@@ -110,8 +111,10 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 					renderer.onSurfaceChanged(gl10, width, height)
 					sizeChanged = false
 				}
-				while (glRunList.isNotEmpty()) {
+				var i = 0
+				while (glRunList.isNotEmpty() && i < 4) {
 					glRunList.poll()?.invoke()
+					i++
 				}
 				renderer.onDrawFrame(gl10)
 				if (egl?.eglSwapBuffers(eglDisplay, eglSurface) != true) {
@@ -133,7 +136,9 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 						e.printStackTrace()
 					}
 				}
-				isDirty.set(false)
+				if (glRunList.isEmpty()) {
+					isDirty.set(false)
+				}
 			}
 			finishGL()
 		}
