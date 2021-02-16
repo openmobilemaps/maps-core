@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class CoordinateConversionHelperInterface {
 
-    abstract fun registerConverter(from: String, to: String, converter: CoordinateConverterInterface)
+    abstract fun registerConverter(converter: CoordinateConverterInterface)
 
     abstract fun convert(to: String, coordinate: Coord): Coord
 
@@ -35,11 +35,11 @@ abstract class CoordinateConversionHelperInterface {
             _djinni_private_destroy()
         }
 
-        override fun registerConverter(from: String, to: String, converter: CoordinateConverterInterface) {
+        override fun registerConverter(converter: CoordinateConverterInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_registerConverter(this.nativeRef, from, to, converter)
+            native_registerConverter(this.nativeRef, converter)
         }
-        private external fun native_registerConverter(_nativeRef: Long, from: String, to: String, converter: CoordinateConverterInterface)
+        private external fun native_registerConverter(_nativeRef: Long, converter: CoordinateConverterInterface)
 
         override fun convert(to: String, coordinate: Coord): Coord {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

@@ -43,7 +43,7 @@ Coord CoordinateConversionHelper::convert(const std::string &to, const Coord &co
         for (auto const &converter: converterChain) {
             intermediateCoord = converter->convert(intermediateCoord);
         }
-        if (intermediateCoord.systemIdentifier == to) {
+        if (intermediateCoord.systemIdentifier != to) {
             throw std::logic_error("converterHelper contains invalid entry");
         }
         return intermediateCoord;

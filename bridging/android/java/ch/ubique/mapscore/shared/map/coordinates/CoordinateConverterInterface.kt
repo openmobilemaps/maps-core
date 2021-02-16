@@ -9,6 +9,10 @@ abstract class CoordinateConverterInterface {
 
     abstract fun convert(coordinate: Coord): Coord
 
+    abstract fun getFrom(): String
+
+    abstract fun getTo(): String
+
     private class CppProxy : CoordinateConverterInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -32,5 +36,17 @@ abstract class CoordinateConverterInterface {
             return native_convert(this.nativeRef, coordinate)
         }
         private external fun native_convert(_nativeRef: Long, coordinate: Coord): Coord
+
+        override fun getFrom(): String {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getFrom(this.nativeRef)
+        }
+        private external fun native_getFrom(_nativeRef: Long): String
+
+        override fun getTo(): String {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getTo(this.nativeRef)
+        }
+        private external fun native_getTo(_nativeRef: Long): String
     }
 }
