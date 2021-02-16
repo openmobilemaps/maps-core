@@ -28,7 +28,7 @@ void Tiled2dMapRasterSource::onVisibleTilesChanged(const std::unordered_set<Prio
     for (const auto &tileInfo: visibleTiles) {
         currentVisibleTiles.insert(tileInfo.tileInfo);
 
-        if (currentTiles.count(tileInfo.tileInfo) == 0) {
+        if (currentTiles.count(tileInfo.tileInfo) == 0 && currentlyLoading.count(tileInfo.tileInfo) == 0) {
             toAdd.insert(tileInfo);
         }
     }
@@ -122,6 +122,8 @@ std::optional<Tiled2dMapTileInfo> Tiled2dMapRasterSource::dequeueLoadingTask(){
 
     loadingQueue.erase(tile);
 
+    currentlyLoading.insert(tileInfo);
+
     return tileInfo;
 }
 
@@ -138,6 +140,12 @@ void Tiled2dMapRasterSource::performLoadingTask() {
         } else {
             // TODO: handle error eg. exp. backoff
         }
+
+        {
+            std::lock_guard<std::recursive_mutex> lock(priorityQueueMutex);
+            currentlyLoading.erase(*tile);
+        }
+
         
         listener->onTilesUpdated();
     }

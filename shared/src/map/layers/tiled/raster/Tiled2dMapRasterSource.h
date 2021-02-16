@@ -41,6 +41,7 @@ private:
 
     std::recursive_mutex priorityQueueMutex; // used for dispatchedTasks and loadingQueue
     int dispatchedTasks;
+    std::unordered_set<Tiled2dMapTileInfo> currentlyLoading;
     std::set<PrioritizedTiled2dMapTileInfo> loadingQueue;
 
     std::optional<Tiled2dMapTileInfo> dequeueLoadingTask();
