@@ -2,18 +2,9 @@
 
 #include <tuple>
 
-/// taken from https://stackoverflow.com/a/7115547/2920969
-/// alows tuples with standard types to be used in std::unordered_map wich gives us O(1) access
 namespace std{
     namespace
     {
-
-        // Code from boost
-        // Reciprocal of the golden ratio helps spread entropy
-        //     and handles duplicates.
-        // See Mike Seymour in magic-numbers-in-boosthash-combine:
-        //     http://stackoverflow.com/questions/4948780
-
         template <class T>
         inline void hash_combine(std::size_t& seed, T const& v)
         {

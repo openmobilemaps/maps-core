@@ -14,15 +14,7 @@ import javax.microedition.khronos.egl.*
 import javax.microedition.khronos.opengles.GL
 import javax.microedition.khronos.opengles.GL10
 
-/**
- *
- * TextureView implementation for displaying openGL rendering.
- * based on Romain Guy answer in
- * ["Re: How to replace GLSurfaceView with TextureView in Android Ice Cream Sandwich?"](https://groups.google.com/forum/#!topic/android-developers/U5RXFGpAHPE)
- * also on this
- * [TextureViewDemo](https://github.com/dalinaum/TextureViewDemo/blob/master/src/kr/gdg/android/textureview/GLTriangleActivity.java) github project
- * and of course on original [GLSurfaceView]'s GLThread
- */
+
 open class GlTextureView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
 	TextureView(
 		context, attrs, defStyleAttr
