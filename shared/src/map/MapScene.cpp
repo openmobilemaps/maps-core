@@ -117,6 +117,10 @@ void MapScene::drawFrame() {
     if (!isResumed) return;
 
     for (const auto &layer : layers) {
+        layer->update();
+    }
+
+    for (const auto &layer : layers) {
         for (const auto &renderPass : layer->buildRenderPasses()) {
             scene->getRenderer()->addToRenderQueue(renderPass);
         }

@@ -30,6 +30,10 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 		surfaceTextureListener = this
 	}
 
+	private var beforeRenderTimes = LongArray(50)
+	private var renderTimes = LongArray(50)
+	private var currentTimeRec = 0
+
 	private var glThread: GLThread? = null
 	private var renderer: GLSurfaceView.Renderer? = null
 
@@ -108,7 +112,21 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 					glRunList.poll()?.invoke()
 					i++
 				}
+
+				beforeRenderTimes[currentTimeRec] = timestampStartRender - System.currentTimeMillis()
+				val startDraw = System.currentTimeMillis()
+
 				renderer.onDrawFrame(gl10)
+
+				val afterDraw = System.currentTimeMillis()
+				renderTimes[currentTimeRec] = afterDraw - startDraw
+				currentTimeRec = (currentTimeRec + 1) % renderTimes.size
+				beforeRenderTimes[currentTimeRec] = System.currentTimeMillis()
+				val avg = renderTimes.filter { l -> l > 0 }.average()
+				val avgBetween = beforeRenderTimes.filter { l -> l > 0 }.average()
+				Log.d("GLTEXTURE", "Avg. render time: $avg ms")
+				Log.d("GLTEXTURE", "Avg. before render time: $avgBetween ms")
+
 				if (egl?.eglSwapBuffers(eglDisplay, eglSurface) != true) {
 					throw RuntimeException("Cannot swap buffers")
 				}
