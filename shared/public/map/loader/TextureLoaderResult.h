@@ -3,19 +3,19 @@
 
 #pragma once
 
+#include "LoaderStatus.h"
 #include "TextureHolderInterface.h"
-#include "TextureLoaderStatus.h"
 #include <memory>
 #include <optional>
 #include <utility>
 
 struct TextureLoaderResult final {
-    std::shared_ptr<::TextureHolderInterface> textureHolder;
-    TextureLoaderStatus status;
+    std::shared_ptr<::TextureHolderInterface> data;
+    LoaderStatus status;
 
-    TextureLoaderResult(std::shared_ptr<::TextureHolderInterface> textureHolder_,
-                        TextureLoaderStatus status_)
-    : textureHolder(std::move(textureHolder_))
+    TextureLoaderResult(std::shared_ptr<::TextureHolderInterface> data_,
+                        LoaderStatus status_)
+    : data(std::move(data_))
     , status(std::move(status_))
     {}
 };

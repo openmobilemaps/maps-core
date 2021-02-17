@@ -4,8 +4,9 @@
 #include "Tiled2dMapRasterTileInfo.h"
 #include "Tiled2dMapSource.h"
 #include "MapConfig.h"
+#include "TextureLoaderResult.h"
 
-class Tiled2dMapRasterSource : public Tiled2dMapSource<TextureHolderInterface> {
+class Tiled2dMapRasterSource : public Tiled2dMapSource<TextureHolderInterface, TextureLoaderResult> {
 public:
     Tiled2dMapRasterSource(const MapConfig &mapConfig,
                            const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
@@ -22,7 +23,7 @@ public:
 
 protected:
 
-    virtual void loadTile(Tiled2dMapTileInfo tile) override;
+    virtual TextureLoaderResult loadTile(Tiled2dMapTileInfo tile) override;
 
 private:
     

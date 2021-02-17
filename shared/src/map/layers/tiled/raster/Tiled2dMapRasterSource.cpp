@@ -7,7 +7,6 @@
 #include <algorithm>
 #include "LambdaTask.h"
 #include <cmath>
-#include "TextureLoaderResult.h"
 
 Tiled2dMapRasterSource::Tiled2dMapRasterSource(const MapConfig &mapConfig,
                                                const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
@@ -15,21 +14,12 @@ Tiled2dMapRasterSource::Tiled2dMapRasterSource(const MapConfig &mapConfig,
                                                const std::shared_ptr<SchedulerInterface> &scheduler,
                                                const std::shared_ptr<TextureLoaderInterface> &loader,
                                                const std::shared_ptr<Tiled2dMapSourceListenerInterface> &listener)
-: Tiled2dMapSource<TextureHolderInterface>(mapConfig, layerConfig, conversionHelper, scheduler, listener),
+: Tiled2dMapSource<TextureHolderInterface, TextureLoaderResult>(mapConfig, layerConfig, conversionHelper, scheduler, listener),
 loader(loader) {
 }
 
-void Tiled2dMapRasterSource::loadTile(Tiled2dMapTileInfo tile) {
-    auto loaderResult = loader->loadTexture(layerConfig->getTileUrl(tile.x, tile.y, tile.zoom));
-
-    if ( loaderResult.textureHolder ){
-        std::lock_guard<std::recursive_mutex> lock(currentTilesMutex);
-        if (currentVisibleTiles.count(tile)) {
-            currentTiles[tile] = loaderResult.textureHolder;
-        }
-    } else {
-        // TODO: handle error eg. exp. backoff
-    }
+TextureLoaderResult Tiled2dMapRasterSource::loadTile(Tiled2dMapTileInfo tile) {
+    return loader->loadTexture(layerConfig->getTileUrl(tile.x, tile.y, tile.zoom));
 }
 
 std::unordered_set<Tiled2dMapRasterTileInfo> Tiled2dMapRasterSource::getCurrentTiles() {

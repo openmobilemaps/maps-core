@@ -21,7 +21,9 @@
 #include <cmath>
 #include "LambdaTask.h"
 
-template <class T>
+// T is the Object used for loading
+// L is the Loading type
+template <class T, class L>
 class Tiled2dMapSource : public Tiled2dMapSourceInterface {
 public:
     Tiled2dMapSource(const MapConfig &mapConfig,
@@ -38,7 +40,7 @@ public:
 
 protected:
 
-    virtual void loadTile(Tiled2dMapTileInfo tile) = 0;
+    virtual L loadTile(Tiled2dMapTileInfo tile) = 0;
 
     MapConfig mapConfig;
     std::shared_ptr<Tiled2dMapLayerConfig> layerConfig;
@@ -66,6 +68,18 @@ private:
     int dispatchedTasks = 0;
     std::unordered_set<Tiled2dMapTileInfo> currentlyLoading;
     std::set<PrioritizedTiled2dMapTileInfo> loadingQueue;
+
+    struct TileErrorInfo {
+        long long lastLoad;
+        long long nextLoad;
+    };
+
+
+    std::recursive_mutex errorTilesMutex;
+    std::unordered_map<Tiled2dMapTileInfo, TileErrorInfo> errorTiles;
+
+    std::recursive_mutex notFoundTilesMutex;
+    std::set<Tiled2dMapTileInfo> notFoundTiles;
 
     std::optional<Tiled2dMapTileInfo> dequeueLoadingTask();
 };

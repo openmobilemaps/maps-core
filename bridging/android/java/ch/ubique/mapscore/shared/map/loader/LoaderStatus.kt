@@ -3,9 +3,10 @@
 
 package ch.ubique.mapscore.shared.map.loader
 
-enum class TextureLoaderStatus {
+enum class LoaderStatus {
     OK,
     ERROR_404,
     ERROR_TIMEOUT,
+    ERROR_NETWORK,
     ERROR_OTHER,
 }

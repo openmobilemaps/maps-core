@@ -6,26 +6,26 @@
 
 @implementation MCTextureLoaderResult
 
-- (nonnull instancetype)initWithTextureHolder:(nullable id<MCTextureHolderInterface>)textureHolder
-                                       status:(MCTextureLoaderStatus)status
+- (nonnull instancetype)initWithData:(nullable id<MCTextureHolderInterface>)data
+                              status:(MCLoaderStatus)status
 {
     if (self = [super init]) {
-        _textureHolder = textureHolder;
+        _data = data;
         _status = status;
     }
     return self;
 }
 
-+ (nonnull instancetype)textureLoaderResultWithTextureHolder:(nullable id<MCTextureHolderInterface>)textureHolder
-                                                      status:(MCTextureLoaderStatus)status
++ (nonnull instancetype)textureLoaderResultWithData:(nullable id<MCTextureHolderInterface>)data
+                                             status:(MCLoaderStatus)status
 {
-    return [(MCTextureLoaderResult*)[self alloc] initWithTextureHolder:textureHolder
-                                                                status:status];
+    return [(MCTextureLoaderResult*)[self alloc] initWithData:data
+                                                       status:status];
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p textureHolder:%@ status:%@>", self.class, (void *)self, self.textureHolder, @(self.status)];
+    return [NSString stringWithFormat:@"<%@ %p data:%@ status:%@>", self.class, (void *)self, self.data, @(self.status)];
 }
 
 @end

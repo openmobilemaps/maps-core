@@ -4,6 +4,6 @@
 package ch.ubique.mapscore.shared.map.loader
 
 data class TextureLoaderResult(
-    var textureHolder: ch.ubique.mapscore.shared.graphics.objects.TextureHolderInterface,
-    var status: TextureLoaderStatus,
+    var data: ch.ubique.mapscore.shared.graphics.objects.TextureHolderInterface,
+    var status: LoaderStatus,
 )

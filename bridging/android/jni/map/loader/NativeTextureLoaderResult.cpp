@@ -3,8 +3,8 @@
 
 #include "NativeTextureLoaderResult.h"  // my header
 #include "Marshal.hpp"
+#include "NativeLoaderStatus.h"
 #include "NativeTextureHolderInterface.h"
-#include "NativeTextureLoaderStatus.h"
 
 namespace djinni_generated {
 
@@ -15,8 +15,8 @@ NativeTextureLoaderResult::~NativeTextureLoaderResult() = default;
 auto NativeTextureLoaderResult::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinni::LocalRef<JniType> {
     const auto& data = ::djinni::JniClass<NativeTextureLoaderResult>::get();
     auto r = ::djinni::LocalRef<JniType>{jniEnv->NewObject(data.clazz.get(), data.jconstructor,
-                                                           ::djinni::get(::djinni::Optional<std::optional, ::djinni_generated::NativeTextureHolderInterface>::fromCpp(jniEnv, c.textureHolder)),
-                                                           ::djinni::get(::djinni_generated::NativeTextureLoaderStatus::fromCpp(jniEnv, c.status)))};
+                                                           ::djinni::get(::djinni::Optional<std::optional, ::djinni_generated::NativeTextureHolderInterface>::fromCpp(jniEnv, c.data)),
+                                                           ::djinni::get(::djinni_generated::NativeLoaderStatus::fromCpp(jniEnv, c.status)))};
     ::djinni::jniExceptionCheck(jniEnv);
     return r;
 }
@@ -25,8 +25,8 @@ auto NativeTextureLoaderResult::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
     ::djinni::JniLocalScope jscope(jniEnv, 3);
     assert(j != nullptr);
     const auto& data = ::djinni::JniClass<NativeTextureLoaderResult>::get();
-    return {::djinni::Optional<std::optional, ::djinni_generated::NativeTextureHolderInterface>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_textureHolder)),
-            ::djinni_generated::NativeTextureLoaderStatus::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_status))};
+    return {::djinni::Optional<std::optional, ::djinni_generated::NativeTextureHolderInterface>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_data)),
+            ::djinni_generated::NativeLoaderStatus::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_status))};
 }
 
 }  // namespace djinni_generated
