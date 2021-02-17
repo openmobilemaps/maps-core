@@ -209,10 +209,9 @@ std::optional<Tiled2dMapTileInfo> Tiled2dMapSource<T, L>::dequeueLoadingTask() {
 
     if (loadingQueue.empty()) {
         std::lock_guard<std::recursive_mutex> lock(errorTilesMutex);
-        auto currentTimestamp = DateHelper::currentTimeMillis();
         for (auto const &errorTile: errorTiles) {
-            if (errorTile.second.lastLoad + errorTile.second.delay >= currentTimestamp) {
-                errorTiles.erase(errorTile.first);
+            if (errorTile.second.lastLoad + errorTile.second.delay <= DateHelper::currentTimeMillis() &&
+                currentlyLoading.count(errorTile.first) == 0) {
                 currentlyLoading.insert(errorTile.first);
                 return errorTile.first;
             }
@@ -240,6 +239,10 @@ void Tiled2dMapSource<T, L>::performLoadingTask() {
 
         switch (status) {
             case LoaderStatus::OK: {
+                {
+                    std::lock_guard<std::recursive_mutex> lock(errorTilesMutex);
+                    errorTiles.erase(*tile);
+                }
                 std::lock_guard<std::recursive_mutex> lock(currentTilesMutex);
                 if (currentVisibleTiles.count(*tile)) {
                     currentTiles[*tile] = loaderResult.data;
@@ -257,12 +260,11 @@ void Tiled2dMapSource<T, L>::performLoadingTask() {
             case LoaderStatus::ERROR_OTHER:
             case LoaderStatus::ERROR_NETWORK: {
                 std::lock_guard<std::recursive_mutex> lock(errorTilesMutex);
-                auto currentTimestamp = DateHelper::currentTimeMillis();
                 if (errorTiles.count(*tile) != 0) {
-                    errorTiles[*tile].lastLoad = currentTimestamp;
+                    errorTiles[*tile].lastLoad = DateHelper::currentTimeMillis();
                     errorTiles[*tile].delay = std::min(2 * errorTiles[*tile].delay, MAX_WAIT_TIME);
                 } else {
-                    errorTiles[*tile] = { currentTimestamp, MIN_WAIT_TIME };
+                    errorTiles[*tile] = { DateHelper::currentTimeMillis(), MIN_WAIT_TIME };
                 }
                 auto delay = errorTiles[*tile].delay;
                 auto taskIdentifier = "Tiled2dMapSource_loadingErrorTask";
