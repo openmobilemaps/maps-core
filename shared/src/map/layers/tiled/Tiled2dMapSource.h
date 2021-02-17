@@ -50,7 +50,7 @@ protected:
     std::shared_ptr<SchedulerInterface> scheduler;
     std::shared_ptr<Tiled2dMapSourceListenerInterface> listener;
 
-    const std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfos;
+    std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfos;
     const Tiled2dMapZoomInfo zoomInfo;
 
     std::recursive_mutex currentTilesMutex;
