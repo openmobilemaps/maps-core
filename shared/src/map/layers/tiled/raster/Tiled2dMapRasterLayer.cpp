@@ -2,17 +2,19 @@
 // Created by Christoph Maurhofer on 09.02.2021.
 //
 
+#include <map>
 #include "Tiled2dMapRasterLayer.h"
 #include "MapConfig.h"
 #include "LambdaTask.h"
 #include "RenderPass.h"
+#include "RenderConfigInterface.h"
 
 Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                                              const std::shared_ptr<::TextureLoaderInterface> &textureLoader)
         : Tiled2dMapLayer(layerConfig), textureLoader(textureLoader) {
 }
 
-void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> & mapInterface) {
+void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface) {
     alphaShader = mapInterface->getShaderFactory()->createAlphaShader();
 
     rasterSource = std::make_shared<Tiled2dMapRasterSource>(mapInterface->getMapConfig(),
@@ -48,6 +50,7 @@ std::string Tiled2dMapRasterLayer::getIdentifier() {
 
 void Tiled2dMapRasterLayer::pause() {
     rasterSource->pause();
+    std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
     for (const auto &tileObject : tileObjectMap) {
         tileObject.second->getRectangleObject()->asGraphicsObject()->clear();
     }
@@ -56,6 +59,7 @@ void Tiled2dMapRasterLayer::pause() {
 void Tiled2dMapRasterLayer::resume() {
     rasterSource->resume();
     auto renderingContext = mapInterface->getRenderingContext();
+    std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
     for (const auto &tileObject : tileObjectMap) {
         auto rectangle = tileObject.second->getRectangleObject();
         rectangle->asGraphicsObject()->setup(renderingContext);
@@ -64,14 +68,12 @@ void Tiled2dMapRasterLayer::resume() {
 }
 
 void Tiled2dMapRasterLayer::onTilesUpdated() {
-    // TODO: Check for current tiles in source and create corresponding layer objects (resp. remove old ones)
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
             TaskConfig("Tiled2dMapRasterLayer_onTilesUpdated",
                        0,
                        TaskPriority::NORMAL,
                        ExecutionEnvironment::GRAPHICS),
             [=] {
-                // TODO: Check if this task is still relevant/the most current one
                 std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
 
                 auto currentTileInfos = rasterSource->getCurrentTiles();
@@ -115,13 +117,32 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
                     tileObjectMap.erase(tile);
                 }
 
-                std::vector<std::shared_ptr<GraphicsObjectInterface>> renderObjects;
-                for (const auto &objectEntry : tileObjectMap) {
-                    // TODO: Build correct number of render passes by respecting configs received from each LayerObject
-                    renderObjects.push_back(objectEntry.second->getRectangleObject()->asGraphicsObject());
+                std::map<int, std::vector<std::shared_ptr<GraphicsObjectInterface>>> renderPassObjectMap;
+                std::vector<std::pair<int, std::shared_ptr<Textured2dLayerObject>>> mapEntries;
+                for (auto &entry : tileObjectMap) {
+                    mapEntries.push_back(std::make_pair(entry.first.tileInfo.zoomLevel, entry.second));
                 }
-                std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(0), renderObjects);
-                renderPasses = {renderPass};
+                sort(mapEntries.begin(), mapEntries.end(),
+                     [=](std::pair<int, std::shared_ptr<Textured2dLayerObject>> &a,
+                         std::pair<int, std::shared_ptr<Textured2dLayerObject>> &b) {
+                         return a.first < b.first;
+                     }
+                );
+
+                for (const auto &objectEntry : mapEntries) {
+                    objectEntry.second->getRectangleObject()->asGraphicsObject();
+                    for (auto config : objectEntry.second->getRenderConfig()) {
+                        renderPassObjectMap[config->getRenderIndex()].push_back(config->getGraphicsObject());
+                    }
+                }
+
+                std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
+                for (const auto &passEntry : renderPassObjectMap) {
+                    std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first),
+                                                                                          passEntry.second);
+                    newRenderPasses.push_back(renderPass);
+                }
+                renderPasses = newRenderPasses;
 
                 mapInterface->invalidate();
             }));
