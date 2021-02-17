@@ -14,14 +14,20 @@
 #include "MapConfig.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "PrioritizedTiled2dMapTileInfo.h"
+#include <mutex>
+#include <unordered_map>
+#include <set>
+#include <cmath>
+#include "LambdaTask.h"
 
+template <class T>
 class Tiled2dMapSource : public Tiled2dMapSourceInterface {
 public:
     Tiled2dMapSource(const MapConfig &mapConfig,
-                     const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
-                     const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
-                     const std::shared_ptr<SchedulerInterface> &scheduler,
-                     const std::shared_ptr<Tiled2dMapSourceListenerInterface> &listener);
+                      const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
+                      const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
+                      const std::shared_ptr<SchedulerInterface> &scheduler,
+                      const std::shared_ptr<Tiled2dMapSourceListenerInterface> &listener);
 
     virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom) override;
 
@@ -30,7 +36,8 @@ public:
     virtual void resume() = 0;
 
 protected:
-    virtual void onVisibleTilesChanged(const std::unordered_set<PrioritizedTiled2dMapTileInfo> &visibleTiles) = 0;
+
+    virtual void loadTile(Tiled2dMapTileInfo tile) = 0;
 
     MapConfig mapConfig;
     std::shared_ptr<Tiled2dMapLayerConfig> layerConfig;
@@ -42,6 +49,23 @@ protected:
 
     const std::vector<Tiled2dMapZoomLevelInfo> zoomInfo;
 
+    std::recursive_mutex currentTilesMutex;
+    std::unordered_map<Tiled2dMapTileInfo, std::shared_ptr<T>> currentTiles;
+    std::unordered_set<Tiled2dMapTileInfo> currentVisibleTiles;
+
 private:
     void updateCurrentTileset(const ::RectCoord &visibleBounds, double zoom);
+
+    void performLoadingTask();
+
+    void onVisibleTilesChanged(const std::unordered_set<PrioritizedTiled2dMapTileInfo> &visibleTiles);
+
+    std::recursive_mutex priorityQueueMutex;
+    int dispatchedTasks = 0;
+    std::unordered_set<Tiled2dMapTileInfo> currentlyLoading;
+    std::set<PrioritizedTiled2dMapTileInfo> loadingQueue;
+
+    std::optional<Tiled2dMapTileInfo> dequeueLoadingTask();
 };
+
+#include "Tiled2dMapSourceImpl.h"
