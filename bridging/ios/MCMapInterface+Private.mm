@@ -6,12 +6,12 @@
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
-#import "MCCameraInterface+Private.h"
 #import "MCColor+Private.h"
 #import "MCCoordinateConversionHelperInterface+Private.h"
 #import "MCGraphicsObjectFactoryInterface+Private.h"
 #import "MCLayerInterface+Private.h"
 #import "MCMapCallbackInterface+Private.h"
+#import "MCMapCamera2dInterface+Private.h"
 #import "MCMapConfig+Private.h"
 #import "MCRenderingContextInterface+Private.h"
 #import "MCSchedulerInterface+Private.h"
@@ -118,16 +118,16 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setCamera:(nullable id<MCCameraInterface>)camera {
+- (void)setCamera:(nullable MCMapCamera2dInterface *)camera {
     try {
-        _cppRefHandle.get()->setCamera(::djinni_generated::CameraInterface::toCpp(camera));
+        _cppRefHandle.get()->setCamera(::djinni_generated::MapCamera2dInterface::toCpp(camera));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nullable id<MCCameraInterface>)getCamera {
+- (nullable MCMapCamera2dInterface *)getCamera {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getCamera();
-        return ::djinni_generated::CameraInterface::fromCpp(objcpp_result_);
+        return ::djinni_generated::MapCamera2dInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

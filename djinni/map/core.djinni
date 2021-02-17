@@ -10,7 +10,6 @@
 @extern "../yaml/map_coordinate_system.yaml"
 @extern "../yaml/coordinate_conversion_helper_interface.yaml"
 @extern "../yaml/coord.yaml"
-@extern "../yaml/map_camera_2d_interface.yaml"
 @extern "../yaml/map_camera_2d_listener_interface.yaml"
 @extern "../yaml/color.yaml"
 @extern "../yaml/render_pass_interface.yaml"
@@ -29,8 +28,8 @@ map_interface = interface +c {
     get_map_config() : map_config;
     get_coordinate_converter_helper() : coordinate_conversion_helper_interface;
 
-    set_camera(camera: camera_interface);
-    get_camera() : camera_interface;
+    set_camera(camera: map_camera_2d_interface);
+    get_camera() : map_camera_2d_interface;
 
     set_touch_handler(touch_handler: touch_handler_interface);
     get_touch_handler() : touch_handler_interface;
@@ -67,4 +66,26 @@ layer_interface = interface +c +j +o {
     resume();
     hide();
     show();
+}
+
+map_camera_2d_interface = interface +c {
+    static create(map_interface: map_interface, screen_density_ppi: f32): map_camera_2d_interface;
+
+    move_to_center_position_zoom(center_position: coord, zoom: f64, animated: bool);
+    move_to_center_position(center_position: coord, animated: bool);
+    get_center_position(): coord;
+
+    set_zoom(zoom: f64, animated: bool);
+    get_zoom(): f64;
+
+    set_padding_left(padding: f32);
+    set_padding_right(padding: f32);
+    set_padding_top(padding: f32);
+    set_padding_bottom(padding: f32);
+
+
+    add_listener(listener: map_camera_2d_listener_interface);
+    remove_listener(listener: map_camera_2d_listener_interface);
+
+    as_camera_interface(): camera_interface;
 }

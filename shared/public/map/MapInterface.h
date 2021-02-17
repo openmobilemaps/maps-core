@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "CameraInterface.h"
 #include "Color.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "GraphicsObjectFactoryInterface.h"
@@ -16,6 +15,7 @@
 
 class LayerInterface;
 class MapCallbackInterface;
+class MapCamera2dInterface;
 struct MapConfig;
 
 class MapInterface {
@@ -40,9 +40,9 @@ public:
 
     virtual std::shared_ptr<::CoordinateConversionHelperInterface> getCoordinateConverterHelper() = 0;
 
-    virtual void setCamera(const std::shared_ptr<::CameraInterface> & camera) = 0;
+    virtual void setCamera(const std::shared_ptr<MapCamera2dInterface> & camera) = 0;
 
-    virtual std::shared_ptr<::CameraInterface> getCamera() = 0;
+    virtual std::shared_ptr<MapCamera2dInterface> getCamera() = 0;
 
     virtual void setTouchHandler(const std::shared_ptr<::TouchHandlerInterface> & touchHandler) = 0;
 

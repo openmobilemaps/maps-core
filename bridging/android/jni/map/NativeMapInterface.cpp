@@ -3,12 +3,12 @@
 
 #include "NativeMapInterface.h"  // my header
 #include "Marshal.hpp"
-#include "NativeCameraInterface.h"
 #include "NativeColor.h"
 #include "NativeCoordinateConversionHelperInterface.h"
 #include "NativeGraphicsObjectFactoryInterface.h"
 #include "NativeLayerInterface.h"
 #include "NativeMapCallbackInterface.h"
+#include "NativeMapCamera2dInterface.h"
 #include "NativeMapConfig.h"
 #include "NativeRenderingContextInterface.h"
 #include "NativeSchedulerInterface.h"
@@ -125,22 +125,22 @@ CJNIEXPORT ::djinni_generated::NativeCoordinateConversionHelperInterface::JniTyp
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1setCamera(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeCameraInterface::JniType j_camera)
+CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1setCamera(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_camera)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
-        ref->setCamera(::djinni_generated::NativeCameraInterface::toCpp(jniEnv, j_camera));
+        ref->setCamera(::djinni_generated::NativeMapCamera2dInterface::toCpp(jniEnv, j_camera));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT ::djinni_generated::NativeCameraInterface::JniType JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1getCamera(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1getCamera(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
         auto r = ref->getCamera();
-        return ::djinni::release(::djinni_generated::NativeCameraInterface::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni_generated::NativeMapCamera2dInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

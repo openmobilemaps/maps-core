@@ -21,7 +21,7 @@ conversionHelper(std::make_shared<CoordinateConversionHelper>(mapConfig.mapCoord
     auto ptr = std::shared_ptr<MapScene>( this, [](MapScene*){} );
 
     // add default camera
-    setCamera(MapCamera2dInterface::create(ptr, pixelDensity)->asCameraInterface());
+    setCamera(MapCamera2dInterface::create(ptr, pixelDensity));
 }
 
 std::shared_ptr<::GraphicsObjectFactoryInterface> MapScene::getGraphicsObjectFactory() {
@@ -54,7 +54,7 @@ void MapScene::setCallbackHandler(const std::shared_ptr<MapCallbackInterface> &c
     callbackHandler = callbackInterface;
 }
 
-void MapScene::setCamera(const std::shared_ptr<::CameraInterface> &camera) {
+void MapScene::setCamera(const std::shared_ptr<::MapCamera2dInterface> &camera) {
     if (touchHandler && std::dynamic_pointer_cast<TouchInterface>(camera)) {
         auto prevCamera = std::dynamic_pointer_cast<TouchInterface>(scene->getCamera());
         if (prevCamera) {
@@ -63,11 +63,12 @@ void MapScene::setCamera(const std::shared_ptr<::CameraInterface> &camera) {
         auto newCamera = std::dynamic_pointer_cast<TouchInterface>(camera);
         touchHandler->addListener(newCamera);
     }
-    scene->setCamera(camera);
+    this->camera = camera;
+    scene->setCamera(camera->asCameraInterface());
 }
 
-std::shared_ptr<::CameraInterface> MapScene::getCamera() {
-    return scene->getCamera();
+std::shared_ptr<::MapCamera2dInterface> MapScene::getCamera() {
+    return camera;
 }
 
 void MapScene::setTouchHandler(const std::shared_ptr<::TouchHandlerInterface> & touchHandler) {
@@ -100,7 +101,7 @@ void MapScene::removeLayer(const std::shared_ptr<::LayerInterface> &layer) {
 
 void MapScene::setViewportSize(const ::Vec2I &size) {
     getRenderingContext()->setViewportSize(size);
-    getCamera()->viewportSizeChanged();
+    camera->asCameraInterface()->viewportSizeChanged();
 }
 
 void MapScene::setBackgroundColor(const Color &color) {

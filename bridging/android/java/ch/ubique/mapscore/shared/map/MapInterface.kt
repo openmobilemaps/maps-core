@@ -21,9 +21,9 @@ abstract class MapInterface {
 
     abstract fun getCoordinateConverterHelper(): ch.ubique.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface
 
-    abstract fun setCamera(camera: ch.ubique.mapscore.shared.graphics.CameraInterface)
+    abstract fun setCamera(camera: MapCamera2dInterface)
 
-    abstract fun getCamera(): ch.ubique.mapscore.shared.graphics.CameraInterface
+    abstract fun getCamera(): MapCamera2dInterface
 
     abstract fun setTouchHandler(touchHandler: ch.ubique.mapscore.shared.map.controls.TouchHandlerInterface)
 
@@ -117,17 +117,17 @@ abstract class MapInterface {
         }
         private external fun native_getCoordinateConverterHelper(_nativeRef: Long): ch.ubique.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface
 
-        override fun setCamera(camera: ch.ubique.mapscore.shared.graphics.CameraInterface) {
+        override fun setCamera(camera: MapCamera2dInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_setCamera(this.nativeRef, camera)
         }
-        private external fun native_setCamera(_nativeRef: Long, camera: ch.ubique.mapscore.shared.graphics.CameraInterface)
+        private external fun native_setCamera(_nativeRef: Long, camera: MapCamera2dInterface)
 
-        override fun getCamera(): ch.ubique.mapscore.shared.graphics.CameraInterface {
+        override fun getCamera(): MapCamera2dInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_getCamera(this.nativeRef)
         }
-        private external fun native_getCamera(_nativeRef: Long): ch.ubique.mapscore.shared.graphics.CameraInterface
+        private external fun native_getCamera(_nativeRef: Long): MapCamera2dInterface
 
         override fun setTouchHandler(touchHandler: ch.ubique.mapscore.shared.map.controls.TouchHandlerInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

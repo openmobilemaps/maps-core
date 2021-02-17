@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include "Scene.h"
 #include "MapInterface.h"
 #include "MapConfig.h"
@@ -24,9 +25,9 @@ public:
 
     virtual void setCallbackHandler(const std::shared_ptr<MapCallbackInterface> & callbackInterface) override;
 
-    virtual void setCamera(const std::shared_ptr<::CameraInterface> & camera) override;
+    virtual void setCamera(const std::shared_ptr<::MapCamera2dInterface> & camera) override;
 
-    virtual std::shared_ptr<::CameraInterface> getCamera() override;
+    virtual std::shared_ptr<::MapCamera2dInterface> getCamera() override;
 
     virtual void setTouchHandler(const std::shared_ptr<::TouchHandlerInterface> & touchHandler) override;
 
@@ -56,6 +57,8 @@ private:
     std::shared_ptr<SchedulerInterface> scheduler;
 
     std::shared_ptr<SceneInterface> scene;
+
+    std::shared_ptr<MapCamera2dInterface> camera;
 
     std::vector<std::shared_ptr<LayerInterface>> layers;
 
