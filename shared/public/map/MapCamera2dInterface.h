@@ -6,6 +6,7 @@
 #include "CameraInterface.h"
 #include "Coord.h"
 #include "MapCamera2dListenerInterface.h"
+#include "RectCoord.h"
 #include <memory>
 
 class MapInterface;
@@ -33,6 +34,8 @@ public:
     virtual void setPaddingTop(float padding) = 0;
 
     virtual void setPaddingBottom(float padding) = 0;
+
+    virtual ::RectCoord getVisibleRect() = 0;
 
     virtual void addListener(const std::shared_ptr<::MapCamera2dListenerInterface> & listener) = 0;
 

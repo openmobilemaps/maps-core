@@ -1,6 +1,7 @@
 import Foundation
 import MapCoreSharedModule
 import MetalKit
+import os
 
 open class MapView: MTKView {
     public let mapInterface: MCMapInterface
@@ -108,8 +109,10 @@ extension MapView: MTKViewDelegate {
             mapInterface.setViewportSize(view.drawableSize.vec2)
             sizeChanged = false
         }
-
+        let start = CFAbsoluteTimeGetCurrent()
         mapInterface.drawFrame()
+        let diff = CFAbsoluteTimeGetCurrent() - start
+        os_log("drawFrame took %.10f milliseconds", diff * 1000)
 
         renderEncoder.endEncoding()
 

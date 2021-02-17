@@ -10,6 +10,7 @@
 @extern "../yaml/map_coordinate_system.yaml"
 @extern "../yaml/coordinate_conversion_helper_interface.yaml"
 @extern "../yaml/coord.yaml"
+@extern "../yaml/rect_coord.yaml"
 @extern "../yaml/map_camera_2d_listener_interface.yaml"
 @extern "../yaml/color.yaml"
 @extern "../yaml/render_pass_interface.yaml"
@@ -83,6 +84,7 @@ map_camera_2d_interface = interface +c {
     set_padding_top(padding: f32);
     set_padding_bottom(padding: f32);
 
+    get_visible_rect() : rect_coord;
 
     add_listener(listener: map_camera_2d_listener_interface);
     remove_listener(listener: map_camera_2d_listener_interface);

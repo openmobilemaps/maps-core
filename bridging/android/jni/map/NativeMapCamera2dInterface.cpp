@@ -7,6 +7,7 @@
 #include "NativeCoord.h"
 #include "NativeMapCamera2dListenerInterface.h"
 #include "NativeMapInterface.h"
+#include "NativeRectCoord.h"
 
 namespace djinni_generated {
 
@@ -118,6 +119,16 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapCamera2dInterface_
         const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
         ref->setPaddingBottom(::djinni::F32::toCpp(jniEnv, j_padding));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT ::djinni_generated::NativeRectCoord::JniType JNICALL Java_ch_ubique_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1getVisibleRect(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        auto r = ref->getVisibleRect();
+        return ::djinni::release(::djinni_generated::NativeRectCoord::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
 CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1addListener(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeMapCamera2dListenerInterface::JniType j_listener)

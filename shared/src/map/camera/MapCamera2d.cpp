@@ -123,7 +123,7 @@ std::vector<float> MapCamera2d::getMvpMatrix() {
 }
 
 
-RectCoord MapCamera2d::getVisibileRect() {
+RectCoord MapCamera2d::getVisibleRect() {
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
     double zoomFactor = screenPixelAsRealMeterFactor * zoom;
 
@@ -145,7 +145,7 @@ RectCoord MapCamera2d::getVisibileRect() {
 }
 
 void MapCamera2d::notifyListeners() {
-    auto visibleRect = getVisibileRect();
+    auto visibleRect = getVisibleRect();
     for (auto listener: listeners) {
         listener->onVisibleBoundsChanged(visibleRect, zoom);
     }

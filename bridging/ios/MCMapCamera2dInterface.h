@@ -4,6 +4,7 @@
 #import "MCCameraInterface.h"
 #import "MCCoord.h"
 #import "MCMapCamera2dListenerInterface.h"
+#import "MCRectCoord.h"
 #import <Foundation/Foundation.h>
 @class MCMapCamera2dInterface;
 @class MCMapInterface;
@@ -35,6 +36,8 @@
 - (void)setPaddingTop:(float)padding;
 
 - (void)setPaddingBottom:(float)padding;
+
+- (nonnull MCRectCoord *)getVisibleRect;
 
 - (void)addListener:(nullable id<MCMapCamera2dListenerInterface>)listener;
 

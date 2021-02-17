@@ -25,6 +25,8 @@ abstract class MapCamera2dInterface {
 
     abstract fun setPaddingBottom(padding: Float)
 
+    abstract fun getVisibleRect(): ch.ubique.mapscore.shared.map.coordinates.RectCoord
+
     abstract fun addListener(listener: ch.ubique.mapscore.shared.map.camera.MapCamera2dListenerInterface)
 
     abstract fun removeListener(listener: ch.ubique.mapscore.shared.map.camera.MapCamera2dListenerInterface)
@@ -109,6 +111,12 @@ abstract class MapCamera2dInterface {
             native_setPaddingBottom(this.nativeRef, padding)
         }
         private external fun native_setPaddingBottom(_nativeRef: Long, padding: Float)
+
+        override fun getVisibleRect(): ch.ubique.mapscore.shared.map.coordinates.RectCoord {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getVisibleRect(this.nativeRef)
+        }
+        private external fun native_getVisibleRect(_nativeRef: Long): ch.ubique.mapscore.shared.map.coordinates.RectCoord
 
         override fun addListener(listener: ch.ubique.mapscore.shared.map.camera.MapCamera2dListenerInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
