@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+struct Tiled2dMapZoomInfo;
 struct Tiled2dMapZoomLevelInfo;
 
 class Tiled2dMapLayerConfig {
@@ -21,4 +22,6 @@ public:
     virtual std::string getTileIdentifier(int32_t x, int32_t y, int32_t zoom) = 0;
 
     virtual std::vector<Tiled2dMapZoomLevelInfo> getZoomLevelInfos() = 0;
+
+    virtual Tiled2dMapZoomInfo getZoomInfo() = 0;
 };

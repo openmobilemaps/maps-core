@@ -11,6 +11,7 @@
 #include "Coord.h"
 #include "Tiled2dMapSourceListenerInterface.h"
 #include "Tiled2dMapZoomLevelInfo.h"
+#include "Tiled2dMapZoomInfo.h"
 #include "MapConfig.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "PrioritizedTiled2dMapTileInfo.h"
@@ -47,7 +48,8 @@ protected:
     std::shared_ptr<SchedulerInterface> scheduler;
     std::shared_ptr<Tiled2dMapSourceListenerInterface> listener;
 
-    const std::vector<Tiled2dMapZoomLevelInfo> zoomInfo;
+    const std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfos;
+    const Tiled2dMapZoomInfo zoomInfo;
 
     std::recursive_mutex currentTilesMutex;
     std::unordered_map<Tiled2dMapTileInfo, std::shared_ptr<T>> currentTiles;
