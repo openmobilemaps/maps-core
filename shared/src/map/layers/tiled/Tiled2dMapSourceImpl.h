@@ -1,5 +1,6 @@
 #include "LoaderStatus.h"
 #include "DateHelper.h"
+#include <algorithm>
 
 template<class T, class L>
 Tiled2dMapSource<T, L>::Tiled2dMapSource(const MapConfig &mapConfig,
@@ -15,7 +16,8 @@ Tiled2dMapSource<T, L>::Tiled2dMapSource(const MapConfig &mapConfig,
           zoomLevelInfos(layerConfig->getZoomLevelInfos()),
           zoomInfo(layerConfig->getZoomInfo()),
           layerBoundsMapSystem(conversionHelper->convertRect(mapConfig.mapCoordinateSystem.identifier, layerConfig->getBounds())),
-          layerSystemId(layerConfig->getBounds().topLeft.systemIdentifier) {
+          layerSystemId(layerConfig->getBounds().topLeft.systemIdentifier),
+          dispatchedTasks(0){
 
     std::sort(zoomLevelInfos.begin(), zoomLevelInfos.end(),
               [](const Tiled2dMapZoomLevelInfo &a, const Tiled2dMapZoomLevelInfo &b) -> bool {
@@ -154,17 +156,36 @@ void Tiled2dMapSource<T, L>::onVisibleTilesChanged(const std::unordered_set<Prio
             }
         }
 
-        for (const auto &addedTile : toAdd) {
-
-            {
-                std::lock_guard<std::recursive_mutex> overlayLock(priorityQueueMutex);
-                if (loadingQueue.count(addedTile) == 0) {
-                    loadingQueue.insert(addedTile);
+        {
+            std::lock_guard<std::recursive_mutex> lock(errorTilesMutex);
+            for (auto it = errorTiles.begin(); it != errorTiles.end();) {
+                if (visibleTiles.count({it->first, 0}) == 0) {
+                    it = errorTiles.erase(it);
+                } else {
+                    ++it;
                 }
             }
         }
 
-        size_t tasksToAdd = loadingQueue.size() > dispatchedTasks ? loadingQueue.size() - dispatchedTasks : 0;
+        for (const auto &addedTile : toAdd) {
+
+            {
+                std::lock_guard<std::recursive_mutex> overlayLock(priorityQueueMutex);
+                std::lock_guard<std::recursive_mutex> lock(errorTilesMutex);
+                if (loadingQueue.count(addedTile) == 0 && errorTiles.count(addedTile.tileInfo) == 0) {
+                    loadingQueue.insert(addedTile);
+                }
+            }
+        }
+        size_t errorTilesCount = 0;
+        {
+            std::lock_guard<std::recursive_mutex> lock(errorTilesMutex);
+            errorTilesCount = errorTiles.size();
+        }
+
+        size_t totalOutstandingTasks = errorTilesCount + loadingQueue.size();
+        size_t dispatchedTaskCount = dispatchedTasks.load();
+        size_t tasksToAdd = totalOutstandingTasks > dispatchedTaskCount ? totalOutstandingTasks - dispatchedTaskCount : 0;
         for (int taskCount = 0; taskCount < tasksToAdd; taskCount++) {
             auto taskIdentifier = "Tiled2dMapSource_loadingTask" + std::to_string(taskCount);
             scheduler->addTask(std::make_shared<LambdaTask>(
@@ -173,7 +194,7 @@ void Tiled2dMapSource<T, L>::onVisibleTilesChanged(const std::unordered_set<Prio
                                TaskPriority::NORMAL,
                                ExecutionEnvironment::IO),
                     [=] { performLoadingTask(); }));
-            dispatchedTasks += 1;
+            dispatchedTasks++;
         }
     }
 
@@ -184,9 +205,18 @@ template<class T, class L>
 std::optional<Tiled2dMapTileInfo> Tiled2dMapSource<T, L>::dequeueLoadingTask() {
     std::lock_guard<std::recursive_mutex> lock(priorityQueueMutex);
 
-    dispatchedTasks -= 1;
+    dispatchedTasks--;
 
     if (loadingQueue.empty()) {
+        std::lock_guard<std::recursive_mutex> lock(errorTilesMutex);
+        auto currentTimestamp = DateHelper::currentTimeMillis();
+        for (auto const &errorTile: errorTiles) {
+            if (errorTile.second.lastLoad + errorTile.second.delay >= currentTimestamp) {
+                errorTiles.erase(errorTile.first);
+                currentlyLoading.insert(errorTile.first);
+                return errorTile.first;
+            }
+        }
         return std::nullopt;
     }
 
@@ -214,16 +244,36 @@ void Tiled2dMapSource<T, L>::performLoadingTask() {
                 if (currentVisibleTiles.count(*tile)) {
                     currentTiles[*tile] = loaderResult.data;
                 }
+                break;
             }
-            case LoaderStatus::ERROR_404: {
+            case LoaderStatus::ERROR_400:
+            case LoaderStatus::ERROR_404:{
                 std::lock_guard<std::recursive_mutex> lock(notFoundTilesMutex);
                 notFoundTiles.insert(*tile);
+                break;
             }
 
             case LoaderStatus::ERROR_TIMEOUT:
             case LoaderStatus::ERROR_OTHER:
             case LoaderStatus::ERROR_NETWORK: {
-
+                std::lock_guard<std::recursive_mutex> lock(errorTilesMutex);
+                auto currentTimestamp = DateHelper::currentTimeMillis();
+                if (errorTiles.count(*tile) != 0) {
+                    errorTiles[*tile].lastLoad = currentTimestamp;
+                    errorTiles[*tile].delay = std::min(2 * errorTiles[*tile].delay, MAX_WAIT_TIME);
+                } else {
+                    errorTiles[*tile] = { currentTimestamp, MIN_WAIT_TIME };
+                }
+                auto delay = errorTiles[*tile].delay;
+                auto taskIdentifier = "Tiled2dMapSource_loadingErrorTask";
+                dispatchedTasks++;
+                scheduler->addTask(std::make_shared<LambdaTask>(
+                                                                TaskConfig(taskIdentifier,
+                                                                           delay,
+                                                                           TaskPriority::NORMAL,
+                                                                           ExecutionEnvironment::IO),
+                                                                [=] { performLoadingTask(); }));
+                break;
             }
         }
 

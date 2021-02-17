@@ -5,6 +5,7 @@ package ch.ubique.mapscore.shared.map.loader
 
 enum class LoaderStatus {
     OK,
+    ERROR_400,
     ERROR_404,
     ERROR_TIMEOUT,
     ERROR_NETWORK,

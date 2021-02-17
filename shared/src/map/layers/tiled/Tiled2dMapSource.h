@@ -19,6 +19,7 @@
 #include <unordered_map>
 #include <set>
 #include <cmath>
+#include <atomic>
 #include "LambdaTask.h"
 
 // T is the Object used for loading
@@ -65,18 +66,20 @@ private:
     void onVisibleTilesChanged(const std::unordered_set<PrioritizedTiled2dMapTileInfo> &visibleTiles);
 
     std::recursive_mutex priorityQueueMutex;
-    int dispatchedTasks = 0;
+    std::atomic_size_t dispatchedTasks;
     std::unordered_set<Tiled2dMapTileInfo> currentlyLoading;
     std::set<PrioritizedTiled2dMapTileInfo> loadingQueue;
 
-    struct TileErrorInfo {
+    const long long MAX_WAIT_TIME = 32000;
+    const long long MIN_WAIT_TIME = 1000;
+
+    struct ErrorInfo {
         long long lastLoad;
-        long long nextLoad;
+        long long delay;
     };
 
-
     std::recursive_mutex errorTilesMutex;
-    std::unordered_map<Tiled2dMapTileInfo, TileErrorInfo> errorTiles;
+    std::unordered_map<Tiled2dMapTileInfo, ErrorInfo> errorTiles;
 
     std::recursive_mutex notFoundTilesMutex;
     std::set<Tiled2dMapTileInfo> notFoundTiles;

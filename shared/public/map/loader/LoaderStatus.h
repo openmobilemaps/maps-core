@@ -7,6 +7,7 @@
 
 enum class LoaderStatus : int {
     OK,
+    ERROR_400,
     ERROR_404,
     ERROR_TIMEOUT,
     ERROR_NETWORK,

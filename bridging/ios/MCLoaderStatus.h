@@ -6,6 +6,7 @@
 typedef NS_ENUM(NSInteger, MCLoaderStatus)
 {
     MCLoaderStatusOK,
+    MCLoaderStatusERROR_400,
     MCLoaderStatusERROR_404,
     MCLoaderStatusERROR_TIMEOUT,
     MCLoaderStatusERROR_NETWORK,

@@ -2,6 +2,7 @@
 
 loader_status = enum {
     ok;
+    error_400;
     error_404;
     error_timeout;
     error_network;
