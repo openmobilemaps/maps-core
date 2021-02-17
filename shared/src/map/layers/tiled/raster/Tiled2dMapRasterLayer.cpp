@@ -7,13 +7,12 @@
 #include "LambdaTask.h"
 #include "RenderPass.h"
 
-Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::MapInterface> &mapInterface,
-                                             const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
+Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                                              const std::shared_ptr<::TextureLoaderInterface> &textureLoader)
-        : Tiled2dMapLayer(mapInterface, layerConfig), textureLoader(textureLoader) {
+        : Tiled2dMapLayer(layerConfig), textureLoader(textureLoader) {
 }
 
-void Tiled2dMapRasterLayer::onAdded() {
+void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> & mapInterface) {
     alphaShader = mapInterface->getShaderFactory()->createAlphaShader();
 
     rasterSource = std::make_shared<Tiled2dMapRasterSource>(mapInterface->getMapConfig(),
@@ -23,7 +22,7 @@ void Tiled2dMapRasterLayer::onAdded() {
                                                             textureLoader,
                                                             shared_from_this());
     setSourceInterface(rasterSource);
-    Tiled2dMapLayer::onAdded();
+    Tiled2dMapLayer::onAdded(mapInterface);
 }
 
 void Tiled2dMapRasterLayer::onRemoved() {

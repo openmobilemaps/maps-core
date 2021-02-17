@@ -3,7 +3,6 @@
 
 #include "NativeTiled2dMapRasterLayerInterface.h"  // my header
 #include "NativeLayerInterface.h"
-#include "NativeMapInterface.h"
 #include "NativeTextureLoaderInterface.h"
 #include "NativeTiled2dMapLayerConfig.h"
 
@@ -22,12 +21,11 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_tiled_raster_T
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_create(JNIEnv* jniEnv, jobject /*this*/, ::djinni_generated::NativeMapInterface::JniType j_mapInterface, ::djinni_generated::NativeTiled2dMapLayerConfig::JniType j_layerConfig, ::djinni_generated::NativeTextureLoaderInterface::JniType j_textureLoader)
+CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_create(JNIEnv* jniEnv, jobject /*this*/, ::djinni_generated::NativeTiled2dMapLayerConfig::JniType j_layerConfig, ::djinni_generated::NativeTextureLoaderInterface::JniType j_textureLoader)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE0(jniEnv);
-        auto r = ::Tiled2dMapRasterLayerInterface::create(::djinni_generated::NativeMapInterface::toCpp(jniEnv, j_mapInterface),
-                                                          ::djinni_generated::NativeTiled2dMapLayerConfig::toCpp(jniEnv, j_layerConfig),
+        auto r = ::Tiled2dMapRasterLayerInterface::create(::djinni_generated::NativeTiled2dMapLayerConfig::toCpp(jniEnv, j_layerConfig),
                                                           ::djinni_generated::NativeTextureLoaderInterface::toCpp(jniEnv, j_textureLoader));
         return ::djinni::release(::djinni_generated::NativeTiled2dMapRasterLayerInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)

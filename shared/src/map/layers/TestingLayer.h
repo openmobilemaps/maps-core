@@ -20,7 +20,7 @@ public:
 
     std::string getIdentifier() override;
 
-    virtual void onAdded() override;
+    virtual void onAdded(const std::shared_ptr<::MapInterface> & mapInterface) override;
 
     virtual void onRemoved() override;
 

@@ -5,7 +5,6 @@
 #import "MCColor.h"
 #import "MCCoordinateConversionHelperInterface.h"
 #import "MCGraphicsObjectFactoryInterface.h"
-#import "MCLayerInterface.h"
 #import "MCMapConfig.h"
 #import "MCRenderingContextInterface.h"
 #import "MCSchedulerInterface.h"
@@ -14,6 +13,7 @@
 #import "MCVec2I.h"
 #import <Foundation/Foundation.h>
 @class MCMapInterface;
+@protocol MCLayerInterface;
 @protocol MCMapCallbackInterface;
 
 

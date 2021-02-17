@@ -2,16 +2,16 @@
 #include "Tiled2dMapLayer.h"
 
 
-Tiled2dMapLayer::Tiled2dMapLayer(const std::shared_ptr<MapInterface> &mapInterface,
-                                 const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig)
-        : mapInterface(mapInterface), layerConfig(layerConfig) {
+Tiled2dMapLayer::Tiled2dMapLayer(const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig)
+        : layerConfig(layerConfig) {
 }
 
 void Tiled2dMapLayer::setSourceInterface(const std::shared_ptr<Tiled2dMapSourceInterface> &sourceInterface) {
     this->sourceInterface = sourceInterface;
 }
 
-void Tiled2dMapLayer::onAdded() {
+void Tiled2dMapLayer::onAdded(const std::shared_ptr<::MapInterface> & mapInterface) {
+    this->mapInterface = mapInterface;
     auto camera = std::dynamic_pointer_cast<MapCamera2d>(mapInterface->getCamera());
     if (camera) {
         camera->addListener(shared_from_this());

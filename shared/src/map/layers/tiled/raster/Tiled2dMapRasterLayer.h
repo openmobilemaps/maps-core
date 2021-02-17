@@ -16,11 +16,10 @@
 class Tiled2dMapRasterLayer
         : public Tiled2dMapLayer, public Tiled2dMapRasterLayerInterface {
 public:
-    Tiled2dMapRasterLayer(const std::shared_ptr<::MapInterface> &mapInterface,
-                          const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
+    Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                           const std::shared_ptr<::TextureLoaderInterface> &textureLoader);
 
-    virtual void onAdded() override;
+    virtual void onAdded(const std::shared_ptr<::MapInterface> & mapInterface) override;
 
     virtual void onRemoved() override;
 

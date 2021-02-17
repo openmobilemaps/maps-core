@@ -86,7 +86,7 @@ std::shared_ptr<::TouchHandlerInterface> MapScene::getTouchHandler() {
 }
 
 void MapScene::addLayer(const std::shared_ptr<::LayerInterface> &layer) {
-    layer->onAdded();
+    layer->onAdded(shared_from_this());
     layers.push_back(layer);
 
     //layers.push_back(std::make_shared<TestingLayer>(shared_from_this()));

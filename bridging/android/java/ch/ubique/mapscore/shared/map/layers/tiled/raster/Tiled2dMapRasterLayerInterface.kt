@@ -7,12 +7,12 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class Tiled2dMapRasterLayerInterface {
 
-    abstract fun asLayerInterface(): ch.ubique.mapscore.shared.map.layers.LayerInterface
+    abstract fun asLayerInterface(): ch.ubique.mapscore.shared.map.LayerInterface
 
     companion object {
         @JvmStatic
-        fun create(mapInterface: ch.ubique.mapscore.shared.map.MapInterface, layerConfig: ch.ubique.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, textureLoader: ch.ubique.mapscore.shared.map.loader.TextureLoaderInterface): Tiled2dMapRasterLayerInterface {
-            return CppProxy.create(mapInterface, layerConfig, textureLoader)
+        fun create(layerConfig: ch.ubique.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, textureLoader: ch.ubique.mapscore.shared.map.loader.TextureLoaderInterface): Tiled2dMapRasterLayerInterface {
+            return CppProxy.create(layerConfig, textureLoader)
         }
     }
 
@@ -34,15 +34,15 @@ abstract class Tiled2dMapRasterLayerInterface {
             _djinni_private_destroy()
         }
 
-        override fun asLayerInterface(): ch.ubique.mapscore.shared.map.layers.LayerInterface {
+        override fun asLayerInterface(): ch.ubique.mapscore.shared.map.LayerInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_asLayerInterface(this.nativeRef)
         }
-        private external fun native_asLayerInterface(_nativeRef: Long): ch.ubique.mapscore.shared.map.layers.LayerInterface
+        private external fun native_asLayerInterface(_nativeRef: Long): ch.ubique.mapscore.shared.map.LayerInterface
 
         companion object {
             @JvmStatic
-            external fun create(mapInterface: ch.ubique.mapscore.shared.map.MapInterface, layerConfig: ch.ubique.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, textureLoader: ch.ubique.mapscore.shared.map.loader.TextureLoaderInterface): Tiled2dMapRasterLayerInterface
+            external fun create(layerConfig: ch.ubique.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, textureLoader: ch.ubique.mapscore.shared.map.loader.TextureLoaderInterface): Tiled2dMapRasterLayerInterface
         }
     }
 }

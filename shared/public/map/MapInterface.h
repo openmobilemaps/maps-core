@@ -7,7 +7,6 @@
 #include "Color.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "GraphicsObjectFactoryInterface.h"
-#include "LayerInterface.h"
 #include "RenderingContextInterface.h"
 #include "SchedulerInterface.h"
 #include "ShaderFactoryInterface.h"
@@ -15,6 +14,7 @@
 #include "Vec2I.h"
 #include <memory>
 
+class LayerInterface;
 class MapCallbackInterface;
 struct MapConfig;
 
@@ -48,9 +48,9 @@ public:
 
     virtual std::shared_ptr<::TouchHandlerInterface> getTouchHandler() = 0;
 
-    virtual void addLayer(const std::shared_ptr<::LayerInterface> & layer) = 0;
+    virtual void addLayer(const std::shared_ptr<LayerInterface> & layer) = 0;
 
-    virtual void removeLayer(const std::shared_ptr<::LayerInterface> & layer) = 0;
+    virtual void removeLayer(const std::shared_ptr<LayerInterface> & layer) = 0;
 
     virtual void setViewportSize(const ::Vec2I & size) = 0;
 

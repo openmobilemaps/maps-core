@@ -12,7 +12,7 @@ class Tiled2dMapLayer : public LayerInterface, public Tiled2dMapSourceListenerIn
                         public std::enable_shared_from_this<Tiled2dMapLayer> {
 public:
 
-    Tiled2dMapLayer(const std::shared_ptr<MapInterface> &mapInterface, const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig);
+    Tiled2dMapLayer(const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig);
 
     void setSourceInterface(const std::shared_ptr<Tiled2dMapSourceInterface> &sourceInterface);
 
@@ -22,7 +22,7 @@ public:
 
     virtual std::string getIdentifier() override = 0;
 
-    virtual void onAdded() override;
+    virtual void onAdded(const std::shared_ptr<::MapInterface> & mapInterface) override;
 
     virtual void onRemoved()override;
 
@@ -39,7 +39,7 @@ public:
     virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom) override;
 
 protected:
-    const std::shared_ptr<MapInterface> mapInterface;
+    std::shared_ptr<MapInterface> mapInterface;
     const std::shared_ptr<Tiled2dMapLayerConfig> layerConfig;
     std::shared_ptr<Tiled2dMapSourceInterface> sourceInterface;
 

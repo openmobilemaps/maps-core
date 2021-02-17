@@ -29,9 +29,9 @@ abstract class MapInterface {
 
     abstract fun getTouchHandler(): ch.ubique.mapscore.shared.map.controls.TouchHandlerInterface
 
-    abstract fun addLayer(layer: ch.ubique.mapscore.shared.map.layers.LayerInterface)
+    abstract fun addLayer(layer: LayerInterface)
 
-    abstract fun removeLayer(layer: ch.ubique.mapscore.shared.map.layers.LayerInterface)
+    abstract fun removeLayer(layer: LayerInterface)
 
     abstract fun setViewportSize(size: ch.ubique.mapscore.shared.graphics.common.Vec2I)
 
@@ -141,17 +141,17 @@ abstract class MapInterface {
         }
         private external fun native_getTouchHandler(_nativeRef: Long): ch.ubique.mapscore.shared.map.controls.TouchHandlerInterface
 
-        override fun addLayer(layer: ch.ubique.mapscore.shared.map.layers.LayerInterface) {
+        override fun addLayer(layer: LayerInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_addLayer(this.nativeRef, layer)
         }
-        private external fun native_addLayer(_nativeRef: Long, layer: ch.ubique.mapscore.shared.map.layers.LayerInterface)
+        private external fun native_addLayer(_nativeRef: Long, layer: LayerInterface)
 
-        override fun removeLayer(layer: ch.ubique.mapscore.shared.map.layers.LayerInterface) {
+        override fun removeLayer(layer: LayerInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_removeLayer(this.nativeRef, layer)
         }
-        private external fun native_removeLayer(_nativeRef: Long, layer: ch.ubique.mapscore.shared.map.layers.LayerInterface)
+        private external fun native_removeLayer(_nativeRef: Long, layer: LayerInterface)
 
         override fun setViewportSize(size: ch.ubique.mapscore.shared.graphics.common.Vec2I) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

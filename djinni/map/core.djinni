@@ -5,7 +5,6 @@
 @extern "../yaml/shader_factory_interface.yaml"
 @extern "../yaml/graphics_object_factory_interface.yaml"
 @extern "../yaml/camera_interface.yaml"
-@extern "../yaml/layer_interface.yaml"
 @extern "../yaml/scene_interface.yaml"
 @extern "../yaml/rendering_context_interface.yaml"
 @extern "../yaml/map_coordinate_system.yaml"
@@ -14,6 +13,7 @@
 @extern "../yaml/map_camera_2d_interface.yaml"
 @extern "../yaml/map_camera_2d_listener_interface.yaml"
 @extern "../yaml/color.yaml"
+@extern "../yaml/render_pass_interface.yaml"
 
 map_interface = interface +c {
     static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface, rendering_context: rendering_context_interface, map_config: map_config, scheduler: scheduler_interface, pixel_density: f32) : map_interface;
@@ -55,4 +55,16 @@ map_config = record {
     map_coordinate_system: map_coordinate_system;
     zoom_min: f64;
     zoom_max: f64;
+}
+
+layer_interface = interface +c +j +o {
+    update();
+    build_render_passes(): list<render_pass_interface>;
+    get_identifier(): string;
+    onAdded(map_interface: map_interface);
+    onRemoved();
+    pause();
+    resume();
+    hide();
+    show();
 }

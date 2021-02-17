@@ -58,7 +58,7 @@ std::string TestingLayer::getIdentifier() {
     return "TestingLayer";
 }
 
-void TestingLayer::onAdded() {
+void TestingLayer::onAdded(const std::shared_ptr<::MapInterface> & mapInterface) {
 
 }
 
