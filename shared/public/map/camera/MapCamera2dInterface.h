@@ -6,6 +6,7 @@
 #include "CameraInterface.h"
 #include "Coord.h"
 #include "MapInterface.h"
+#include "RectCoord.h"
 #include <memory>
 
 class MapCamera2dListenerInterface;
@@ -37,6 +38,8 @@ public:
     virtual void addListener(const std::shared_ptr<MapCamera2dListenerInterface> & listener) = 0;
 
     virtual void removeListener(const std::shared_ptr<MapCamera2dListenerInterface> & listener) = 0;
+
+    virtual ::RectCoord getVisibileRect() = 0;
 
     virtual std::shared_ptr<::CameraInterface> asCameraInterface() = 0;
 };

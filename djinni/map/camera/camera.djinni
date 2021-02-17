@@ -18,9 +18,10 @@ map_camera_2d_interface = interface +c {
     set_padding_top(padding: f32);
     set_padding_bottom(padding: f32);
 
-
     add_listener(listener: map_camera_2d_listener_interface);
     remove_listener(listener: map_camera_2d_listener_interface);
+
+    get_visibile_rect(): rect_coord;
 
     as_camera_interface(): camera_interface;
 }

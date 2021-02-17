@@ -29,6 +29,8 @@ abstract class MapCamera2dInterface {
 
     abstract fun removeListener(listener: MapCamera2dListenerInterface)
 
+    abstract fun getVisibileRect(): ch.ubique.mapscore.shared.map.coordinates.RectCoord
+
     abstract fun asCameraInterface(): ch.ubique.mapscore.shared.graphics.CameraInterface
 
     companion object {
@@ -121,6 +123,12 @@ abstract class MapCamera2dInterface {
             native_removeListener(this.nativeRef, listener)
         }
         private external fun native_removeListener(_nativeRef: Long, listener: MapCamera2dListenerInterface)
+
+        override fun getVisibileRect(): ch.ubique.mapscore.shared.map.coordinates.RectCoord {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getVisibileRect(this.nativeRef)
+        }
+        private external fun native_getVisibileRect(_nativeRef: Long): ch.ubique.mapscore.shared.map.coordinates.RectCoord
 
         override fun asCameraInterface(): ch.ubique.mapscore.shared.graphics.CameraInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

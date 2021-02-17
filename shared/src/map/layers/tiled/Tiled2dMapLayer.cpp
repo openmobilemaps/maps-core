@@ -1,4 +1,4 @@
-#include "MapCamera2d.h"
+#include "MapCamera2dInterface.h"
 #include "Tiled2dMapLayer.h"
 
 
@@ -12,7 +12,7 @@ void Tiled2dMapLayer::setSourceInterface(const std::shared_ptr<Tiled2dMapSourceI
 
 void Tiled2dMapLayer::onAdded(const std::shared_ptr<::MapInterface> & mapInterface) {
     this->mapInterface = mapInterface;
-    auto camera = std::dynamic_pointer_cast<MapCamera2d>(mapInterface->getCamera());
+    auto camera = std::dynamic_pointer_cast<MapCamera2dInterface>(mapInterface->getCamera());
     if (camera) {
         camera->addListener(shared_from_this());
         onVisibleBoundsChanged(camera->getVisibileRect(), camera->getZoom());
@@ -20,7 +20,7 @@ void Tiled2dMapLayer::onAdded(const std::shared_ptr<::MapInterface> & mapInterfa
 }
 
 void Tiled2dMapLayer::onRemoved() {
-    auto camera = std::dynamic_pointer_cast<MapCamera2d>(mapInterface->getCamera());
+    auto camera = std::dynamic_pointer_cast<MapCamera2dInterface>(mapInterface->getCamera());
     if (camera) {
         camera->removeListener(shared_from_this());
     }

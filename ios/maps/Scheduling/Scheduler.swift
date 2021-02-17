@@ -39,9 +39,9 @@ class Scheduler: MCSchedulerInterface {
         let config = task.getConfig()
         let delay = TimeInterval(config.delay / 1000)
 
-        if #available(iOS 14.0, *) {
+        /*if #available(iOS 14.0, *) {
             os_log("dispatching Task \(config.id)")
-        }
+        }*/
         internalSchedulerQueue.asyncAfter(deadline: .now() + delay) {
             self.cleanUpFinishedOutstandingOperations()
 

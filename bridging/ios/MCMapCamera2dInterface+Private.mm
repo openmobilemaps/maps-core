@@ -10,6 +10,7 @@
 #import "MCCoord+Private.h"
 #import "MCMapCamera2dListenerInterface+Private.h"
 #import "MCMapInterface+Private.h"
+#import "MCRectCoord+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -116,6 +117,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)removeListener:(nullable id<MCMapCamera2dListenerInterface>)listener {
     try {
         _cppRefHandle.get()->removeListener(::djinni_generated::MapCamera2dListenerInterface::toCpp(listener));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nonnull MCRectCoord *)getVisibileRect {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getVisibileRect();
+        return ::djinni_generated::RectCoord::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

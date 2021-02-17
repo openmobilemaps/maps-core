@@ -4,6 +4,7 @@
 #import "MCCameraInterface.h"
 #import "MCCoord.h"
 #import "MCMapInterface.h"
+#import "MCRectCoord.h"
 #import <Foundation/Foundation.h>
 @class MCMapCamera2dInterface;
 @protocol MCMapCamera2dListenerInterface;
@@ -39,6 +40,8 @@
 - (void)addListener:(nullable id<MCMapCamera2dListenerInterface>)listener;
 
 - (void)removeListener:(nullable id<MCMapCamera2dListenerInterface>)listener;
+
+- (nonnull MCRectCoord *)getVisibileRect;
 
 - (nullable id<MCCameraInterface>)asCameraInterface;
 

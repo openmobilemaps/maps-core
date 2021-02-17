@@ -56,7 +56,7 @@ public:
 
     virtual void viewportSizeChanged() override;
 
-    RectCoord getVisibileRect();
+    virtual RectCoord getVisibileRect() override;
 
 protected:
 
