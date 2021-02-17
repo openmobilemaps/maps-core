@@ -19,7 +19,7 @@ loader(loader) {
 }
 
 TextureLoaderResult Tiled2dMapRasterSource::loadTile(Tiled2dMapTileInfo tile) {
-    return loader->loadTexture(layerConfig->getTileUrl(tile.x, tile.y, tile.zoom));
+    return loader->loadTexture(layerConfig->getTileUrl(tile.x, tile.y, tile.zoomIdentifier));
 }
 
 std::unordered_set<Tiled2dMapRasterTileInfo> Tiled2dMapRasterSource::getCurrentTiles() {

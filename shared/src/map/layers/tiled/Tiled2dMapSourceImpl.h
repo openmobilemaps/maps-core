@@ -97,7 +97,7 @@ void Tiled2dMapSource<T, L>::updateCurrentTileset(const RectCoord &visibleBounds
                         std::pow(tileCenterX - centerVisibleX, 2.0) + std::pow(tileCenterY - centerVisibleY, 2.0));
 
                 visibleTiles.insert(
-                        PrioritizedTiled2dMapTileInfo(Tiled2dMapTileInfo(rect, x, y, zoomLevelInfo.zoomLevelIdentifier),
+                        PrioritizedTiled2dMapTileInfo(Tiled2dMapTileInfo(rect, x, y, zoomLevelInfo.zoomLevelIdentifier, i),
                                                       std::ceil((tileCenterDis / maxDisCenter) * zoomPriorityRange) +
                                                       zoomInd * zoomPriorityRange));
             }
