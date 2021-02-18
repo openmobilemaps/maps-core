@@ -29,13 +29,17 @@
 
 - (double)getZoom;
 
-- (void)setPaddingLeft:(float)padding;
+- (void)setPaddingLeft:(float)padding
+              animated:(BOOL)animated;
 
-- (void)setPaddingRight:(float)padding;
+- (void)setPaddingRight:(float)padding
+               animated:(BOOL)animated;
 
-- (void)setPaddingTop:(float)padding;
+- (void)setPaddingTop:(float)padding
+             animated:(BOOL)animated;
 
-- (void)setPaddingBottom:(float)padding;
+- (void)setPaddingBottom:(float)padding
+                animated:(BOOL)animated;
 
 - (nonnull MCRectCoord *)getVisibleRect;
 

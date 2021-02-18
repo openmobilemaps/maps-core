@@ -17,13 +17,13 @@ abstract class MapCamera2dInterface {
 
     abstract fun getZoom(): Double
 
-    abstract fun setPaddingLeft(padding: Float)
+    abstract fun setPaddingLeft(padding: Float, animated: Boolean)
 
-    abstract fun setPaddingRight(padding: Float)
+    abstract fun setPaddingRight(padding: Float, animated: Boolean)
 
-    abstract fun setPaddingTop(padding: Float)
+    abstract fun setPaddingTop(padding: Float, animated: Boolean)
 
-    abstract fun setPaddingBottom(padding: Float)
+    abstract fun setPaddingBottom(padding: Float, animated: Boolean)
 
     abstract fun getVisibleRect(): ch.ubique.mapscore.shared.map.coordinates.RectCoord
 
@@ -88,29 +88,29 @@ abstract class MapCamera2dInterface {
         }
         private external fun native_getZoom(_nativeRef: Long): Double
 
-        override fun setPaddingLeft(padding: Float) {
+        override fun setPaddingLeft(padding: Float, animated: Boolean) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setPaddingLeft(this.nativeRef, padding)
+            native_setPaddingLeft(this.nativeRef, padding, animated)
         }
-        private external fun native_setPaddingLeft(_nativeRef: Long, padding: Float)
+        private external fun native_setPaddingLeft(_nativeRef: Long, padding: Float, animated: Boolean)
 
-        override fun setPaddingRight(padding: Float) {
+        override fun setPaddingRight(padding: Float, animated: Boolean) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setPaddingRight(this.nativeRef, padding)
+            native_setPaddingRight(this.nativeRef, padding, animated)
         }
-        private external fun native_setPaddingRight(_nativeRef: Long, padding: Float)
+        private external fun native_setPaddingRight(_nativeRef: Long, padding: Float, animated: Boolean)
 
-        override fun setPaddingTop(padding: Float) {
+        override fun setPaddingTop(padding: Float, animated: Boolean) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setPaddingTop(this.nativeRef, padding)
+            native_setPaddingTop(this.nativeRef, padding, animated)
         }
-        private external fun native_setPaddingTop(_nativeRef: Long, padding: Float)
+        private external fun native_setPaddingTop(_nativeRef: Long, padding: Float, animated: Boolean)
 
-        override fun setPaddingBottom(padding: Float) {
+        override fun setPaddingBottom(padding: Float, animated: Boolean) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setPaddingBottom(this.nativeRef, padding)
+            native_setPaddingBottom(this.nativeRef, padding, animated)
         }
-        private external fun native_setPaddingBottom(_nativeRef: Long, padding: Float)
+        private external fun native_setPaddingBottom(_nativeRef: Long, padding: Float, animated: Boolean)
 
         override fun getVisibleRect(): ch.ubique.mapscore.shared.map.coordinates.RectCoord {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

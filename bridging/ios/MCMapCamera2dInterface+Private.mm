@@ -84,27 +84,35 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setPaddingLeft:(float)padding {
+- (void)setPaddingLeft:(float)padding
+              animated:(BOOL)animated {
     try {
-        _cppRefHandle.get()->setPaddingLeft(::djinni::F32::toCpp(padding));
+        _cppRefHandle.get()->setPaddingLeft(::djinni::F32::toCpp(padding),
+                                            ::djinni::Bool::toCpp(animated));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setPaddingRight:(float)padding {
+- (void)setPaddingRight:(float)padding
+               animated:(BOOL)animated {
     try {
-        _cppRefHandle.get()->setPaddingRight(::djinni::F32::toCpp(padding));
+        _cppRefHandle.get()->setPaddingRight(::djinni::F32::toCpp(padding),
+                                             ::djinni::Bool::toCpp(animated));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setPaddingTop:(float)padding {
+- (void)setPaddingTop:(float)padding
+             animated:(BOOL)animated {
     try {
-        _cppRefHandle.get()->setPaddingTop(::djinni::F32::toCpp(padding));
+        _cppRefHandle.get()->setPaddingTop(::djinni::F32::toCpp(padding),
+                                           ::djinni::Bool::toCpp(animated));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setPaddingBottom:(float)padding {
+- (void)setPaddingBottom:(float)padding
+                animated:(BOOL)animated {
     try {
-        _cppRefHandle.get()->setPaddingBottom(::djinni::F32::toCpp(padding));
+        _cppRefHandle.get()->setPaddingBottom(::djinni::F32::toCpp(padding),
+                                              ::djinni::Bool::toCpp(animated));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

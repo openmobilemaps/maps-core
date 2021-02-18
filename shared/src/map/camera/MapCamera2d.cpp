@@ -63,20 +63,24 @@ double MapCamera2d::getZoom() {
     return zoom;
 }
 
-void MapCamera2d::setPaddingLeft(float padding) {
+void MapCamera2d::setPaddingLeft(float padding, bool animated) {
     paddingLeft = padding;
+    mapInterface->invalidate();
 }
 
-void MapCamera2d::setPaddingRight(float padding) {
+void MapCamera2d::setPaddingRight(float padding, bool animated) {
     paddingRight = padding;
+    mapInterface->invalidate();
 }
 
-void MapCamera2d::setPaddingTop(float padding) {
+void MapCamera2d::setPaddingTop(float padding, bool animated) {
     paddingTop = padding;
+    mapInterface->invalidate();
 }
 
-void MapCamera2d::setPaddingBottom(float padding) {
+void MapCamera2d::setPaddingBottom(float padding, bool animated) {
     paddingBottom = padding;
+    mapInterface->invalidate();
 }
 
 void MapCamera2d::addListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) {
@@ -118,6 +122,8 @@ std::vector<float> MapCamera2d::getMvpMatrix() {
     Matrix::rotateM(newMvpMatrix, 0.0, angle, 0.0, 0.0, 1.0);
 
     Matrix::translateM(newMvpMatrix, 0, -renderCoordCenter.x, -renderCoordCenter.y, 0);
+
+    Matrix::translateM(newMvpMatrix, 0, (paddingLeft - paddingRight) * zoomFactor, (paddingTop - paddingBottom) * zoomFactor, 0);
 
     return newMvpMatrix;
 }

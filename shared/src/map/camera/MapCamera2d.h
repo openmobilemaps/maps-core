@@ -32,13 +32,13 @@ public:
 
     virtual double getZoom() override;
 
-    virtual void setPaddingLeft(float padding) override;
+    virtual void setPaddingLeft(float padding, bool animated) override;
 
-    virtual void setPaddingRight(float padding) override;
+    virtual void setPaddingRight(float padding, bool animated) override;
 
-    virtual void setPaddingTop(float padding) override;
+    virtual void setPaddingTop(float padding, bool animated) override;
 
-    virtual void setPaddingBottom(float padding) override;
+    virtual void setPaddingBottom(float padding, bool animated) override;
 
     virtual void addListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) override;
 
@@ -104,4 +104,6 @@ protected:
 
     void beginAnimation(double zoom, Coord centerPosition);
     void applyAnimationState();
+
+    Coord getPaddingCorrectedCenterPosition();
 };

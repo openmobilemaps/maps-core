@@ -27,13 +27,13 @@ public:
 
     virtual double getZoom() = 0;
 
-    virtual void setPaddingLeft(float padding) = 0;
+    virtual void setPaddingLeft(float padding, bool animated) = 0;
 
-    virtual void setPaddingRight(float padding) = 0;
+    virtual void setPaddingRight(float padding, bool animated) = 0;
 
-    virtual void setPaddingTop(float padding) = 0;
+    virtual void setPaddingTop(float padding, bool animated) = 0;
 
-    virtual void setPaddingBottom(float padding) = 0;
+    virtual void setPaddingBottom(float padding, bool animated) = 0;
 
     virtual ::RectCoord getVisibleRect() = 0;
 
