@@ -136,11 +136,19 @@ RectCoord MapCamera2d::getVisibleRect() {
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
     double zoomFactor = screenPixelAsRealMeterFactor * zoom;
 
-    double topLeftX = centerPosition.x - ((double) sizeViewport.x / 2.0) * zoomFactor;
-    double topLeftY = centerPosition.y + ((double) sizeViewport.y / 2.0) * zoomFactor;
+    double halfWidth = sizeViewport.x * 0.5 * zoomFactor;
+    double halfHeight = sizeViewport.y * 0.5 * zoomFactor;
 
-    double bottomRightX = centerPosition.x + ((double) sizeViewport.x / 2.0) * zoomFactor;
-    double bottomRightY = centerPosition.y - ((double) sizeViewport.y / 2.0) * zoomFactor;
+    double sinAngle = std::abs(sin(angle * M_PI / 180.0));
+    double cosAngle = std::abs(cos(angle * M_PI / 180.0));
+
+    double deltaX = halfWidth * cosAngle + halfHeight * sinAngle;
+    double deltaY = halfWidth * sinAngle + halfHeight * cosAngle;
+
+    double topLeftX = centerPosition.x - deltaX;
+    double topLeftY = centerPosition.y + deltaY;
+    double bottomRightX = centerPosition.x + deltaX;
+    double bottomRightY = centerPosition.y - deltaY;
 
     Coord topLeft = Coord(mapCoordinateSystem.identifier,
                           topLeftX,
@@ -257,7 +265,7 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
         if (config.rotationEnabled) {
             float olda = atan2(posScreenOld[0].x - posScreenOld[1].x, posScreenOld[0].y - posScreenOld[1].y);
             float newa = atan2(posScreenNew[0].x - posScreenNew[1].x, posScreenNew[0].y - posScreenNew[1].y);
-            angle = angle + (olda - newa) / M_PI * 180.0;
+            angle = fmod((angle + (olda - newa) / M_PI * 180.0) + 360.0, 360.0);
         }
 
         notifyListeners();

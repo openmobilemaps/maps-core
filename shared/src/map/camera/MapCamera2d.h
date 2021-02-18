@@ -71,6 +71,7 @@ protected:
     Coord centerPosition;
     double zoom = 0;
     double angle = 0;
+    double lockedAngle = 0;
 
     double paddingLeft = 0;
     double paddingTop = 0;
