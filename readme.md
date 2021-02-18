@@ -4,6 +4,8 @@
   <img width="200" height="45" src="logo.svg" />
   <br />
   The lightweight and modern Map SDK for Android (6.0+) and iOS (10+)
+  <br />
+  <a href="https://openmobilemaps.io/">openmobilemaps.io</a>
 </div>
 <br />
 <div align="center">
@@ -27,7 +29,9 @@
 
 ### Features
 * Multi-platform graphics engine based on OpenGL for Android and Metal for iOS
-* ...
+* Touch and gesture handling
+* Tiled Map Layers
+* Polygon Layers
 
 ## Architecture
 
