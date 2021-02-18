@@ -33,9 +33,11 @@
 * Tiled Map Layers
 * Polygon Layers
 
+...and more to come! See our roadmap at [openmobilemaps.io](https://openmobilemaps.io)
+
 ## Architecture
 
-To support both the Android and iOS, most of the code-base is written in C++ and shared between the two platforms. The Kotlin and swift interface bindings are generated with a fork of the [Djinni library](UBIQUE_DJINNI) (TODO: link zu Ubique Repo mit Djinni). The Maps library intenionally is designed to have a modular structure, so that most parts of it can be adjusted or completely replaced with custom implementations. Most of the interfaces are also exposed to Swift and Kotlin, so extensions can also conveniently be programmed in those languages.
+To support both the Android and iOS, most of the code-base is written in C++ and shared between the two platforms. The Kotlin and swift interface bindings are generated with a fork of the [Djinni library](https://github.com/UbiqueInnovation/djinni). The Maps library intentionally is designed to have a modular structure, so that most parts of it can be adjusted or completely replaced with custom implementations. Most of the interfaces are also exposed to Swift and Kotlin, so extensions can also conveniently be programmed in those languages.
 
 The internal structure of the project is split into two main modules: the graphics-core and the maps-core. While the first implements a generic structure for rendering basic graphic primitives on Android and iOS, the latter is a collection of classes that provide the basics for creating a digital map.
 
@@ -58,3 +60,7 @@ The rendering concept in the graphics core is built around generic graphics prim
 #### Camera
 
 ## Contribution
+
+
+## License
+This project is licensed under the terms of the MPL 2 license. See the [LICENSE](LICENSE) file.
