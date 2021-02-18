@@ -23,7 +23,7 @@ let package = Package(
     ],
     dependencies: [
         .package(name: "DjinniSupport",
-                 url: "git@github.com:UbiqueInnovation/djinni.git",
+                 url: "https://github.com/UbiqueInnovation/djinni.git",
                  .branch("master")),
     ],
     targets: [
