@@ -61,8 +61,6 @@ The rendering concept in the graphics core is built around generic graphics prim
 
 #### Camera
 
-## Contribution
-
 
 ## License
 This project is licensed under the terms of the MPL 2 license. See the [LICENSE](LICENSE) file.
