@@ -130,6 +130,18 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
 		mapInterface.addLayer(layer)
 	}
 
+	fun insertLayerAt(layer: LayerInterface, at: Int) {
+		mapInterface.insertLayerAt(layer, at)
+	}
+
+	fun insertLayerAbove(layer: LayerInterface, above: LayerInterface) {
+		mapInterface.insertLayerAbove(layer, above)
+	}
+
+	fun insertLayerBelow(layer: LayerInterface, below: LayerInterface) {
+		mapInterface.insertLayerBelow(layer, below)
+	}
+
 	fun getCamera() : MapCamera2dInterface {
 		return mapInterface.getCamera()
 	}
