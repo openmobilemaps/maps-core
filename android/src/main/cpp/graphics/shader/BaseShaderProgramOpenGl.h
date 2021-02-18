@@ -9,8 +9,8 @@
  */
 
 
-#ifndef SWISSTOPO_BASESHADERPROGRAMOPENGL_H
-#define SWISSTOPO_BASESHADERPROGRAMOPENGL_H
+#ifndef MAPSCORE_BASESHADERPROGRAMOPENGL_H
+#define MAPSCORE_BASESHADERPROGRAMOPENGL_H
 
 #define UBRendererShaderCode(...) #__VA_ARGS__
 
@@ -29,4 +29,4 @@ class BaseShaderProgramOpenGl {
     virtual std::string getFragmentShader();
 };
 
-#endif // SWISSTOPO_BASESHADERPROGRAMOPENGL_H
+#endif // MAPSCORE_BASESHADERPROGRAMOPENGL_H

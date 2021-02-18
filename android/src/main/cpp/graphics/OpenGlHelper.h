@@ -9,8 +9,8 @@
  */
 
 
-#ifndef SWISSTOPO_OPENGLHELPER_H
-#define SWISSTOPO_OPENGLHELPER_H
+#ifndef MAPSCORE_OPENGLHELPER_H
+#define MAPSCORE_OPENGLHELPER_H
 
 #include "logger/Logger.h"
 #include "opengl_wrapper.h"
@@ -25,4 +25,4 @@ class OpenGlHelper {
     }
 };
 
-#endif // SWISSTOPO_OPENGLHELPER_H
+#endif // MAPSCORE_OPENGLHELPER_H

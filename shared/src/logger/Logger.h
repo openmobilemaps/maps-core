@@ -8,8 +8,8 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#ifndef __ubb_shared__Logger__Logger__
-#define __ubb_shared__Logger__Logger__
+#ifndef MAPSCORE__Logger__Logger__
+#define MAPSCORE__Logger__Logger__
 
 #ifndef LogError
 #define LogError utility::Logger()(0)
@@ -73,4 +73,4 @@ template <typename T> bool operator<<=(const Logger &logger, T thing) {
 }
 } // namespace utility
 
-#endif // defined(__utility__Logger__)
+#endif // MAPSCORE__Logger__Logger__
