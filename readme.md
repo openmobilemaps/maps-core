@@ -1,9 +1,9 @@
 # Open Mobile Maps
 
-[Readme Android](android/readme.md)
+[Readme Android](./android/)
 
 
-[Readme iOS](ios/readme.md)
+[Readme iOS](./ios/)
 
 
 ## Architecture
