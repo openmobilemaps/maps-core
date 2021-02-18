@@ -1,4 +1,3 @@
-#include <logger/Logger.h>
 #include "Matrix.h"
 #include "MapCamera2d.h"
 #include "Vec2D.h"
