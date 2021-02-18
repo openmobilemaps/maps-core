@@ -19,7 +19,9 @@ public:
 
     virtual std::vector<std::shared_ptr<RenderConfigInterface>> getRenderConfig() override;
 
-    void setPositions(std::vector<Coord> positions);
+    void setPositions(const std::vector<Coord> &positions, std::vector<std::vector<Coord>> &holes, bool isConvex);
+
+    void setPositions(const std::vector<Coord> &positions, bool isConvex);
 
     std::shared_ptr<GraphicsObjectInterface> getPolygonObject();
 
