@@ -11,11 +11,6 @@
 </div>
 <br />
 <div align="center">
-    <!-- SPM -->
-    <a href="https://github.com/apple/swift-package-manager">
-      <img alt="Swift Package Manager"
-      src="https://img.shields.io/badge/SPM-%E2%9C%93-brightgreen.svg?style=flat">
-    </a>
     <!-- License -->
     <a href="https://github.com/UbiqueInnovation/notifyme-app-ios/blob/master/LICENSE">
       <img alt="License: MPL 2.0"
