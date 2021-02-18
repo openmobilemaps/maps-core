@@ -5,6 +5,6 @@
 #pragma once
 
 class Tiled2dMapSourceListenerInterface {
-public:
+  public:
     virtual void onTilesUpdated() = 0;
 };

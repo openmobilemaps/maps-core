@@ -4,20 +4,20 @@
 
 #pragma once
 
+#include "ColorLineShaderInterface.h"
+#include "Coord.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "LayerObjectInterface.h"
 #include "Line2dInterface.h"
-#include "ColorLineShaderInterface.h"
-#include "Vec2D.h"
 #include "RenderConfig.h"
-#include "Coord.h"
+#include "Vec2D.h"
 
 class Line2dLayerObject : public LayerObjectInterface {
-public:
+  public:
     Line2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
-                         const std::shared_ptr<Line2dInterface> &line, const std::shared_ptr<ColorLineShaderInterface> &shader);
+                      const std::shared_ptr<Line2dInterface> &line, const std::shared_ptr<ColorLineShaderInterface> &shader);
 
-    ~Line2dLayerObject() {};
+    ~Line2dLayerObject(){};
 
     virtual void update() override;
 
@@ -29,7 +29,7 @@ public:
 
     std::shared_ptr<LineShaderProgramInterface> getShaderProgram();
 
-private:
+  private:
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
     std::shared_ptr<Line2dInterface> line;
     std::shared_ptr<ColorLineShaderInterface> shader;

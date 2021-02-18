@@ -5,18 +5,17 @@
 #ifndef MAPSDK_ALPHASHADEROPENGL_H
 #define MAPSDK_ALPHASHADEROPENGL_H
 
-#include "BaseShaderProgramOpenGl.h"
-#include "ShaderProgramInterface.h"
 #include "AlphaShaderInterface.h"
+#include "BaseShaderProgramOpenGl.h"
 #include "RenderingContextInterface.h"
+#include "ShaderProgramInterface.h"
 
-class AlphaShaderOpenGl
-        : public BaseShaderProgramOpenGl,
-          public ShaderProgramInterface,
-          public AlphaShaderInterface,
-          public std::enable_shared_from_this<ShaderProgramInterface> {
+class AlphaShaderOpenGl : public BaseShaderProgramOpenGl,
+                          public ShaderProgramInterface,
+                          public AlphaShaderInterface,
+                          public std::enable_shared_from_this<ShaderProgramInterface> {
 
-public:
+  public:
     virtual std::string getProgramName() override;
 
     virtual void setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) override;
@@ -26,14 +25,12 @@ public:
     virtual void updateAlpha(float value) override;
 
     virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() override;
-    
-protected:
+
+  protected:
     virtual std::string getFragmentShader() override;
 
-private:
+  private:
     float alpha = 1;
-
 };
 
-
-#endif //MAPSDK_ALPHASHADEROPENGL_H
+#endif // MAPSDK_ALPHASHADEROPENGL_H

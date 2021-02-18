@@ -14,8 +14,6 @@ class ShaderFactoryOpenGl : public ShaderFactoryInterface {
     virtual std::shared_ptr<ColorLineShaderInterface> createColorLineShader() override;
 
     virtual std::shared_ptr<ColorShaderInterface> createColorShader() override;
-
 };
 
-
-#endif //MAPSDK_SHADERFACTORYOPENGL_H
+#endif // MAPSDK_SHADERFACTORYOPENGL_H

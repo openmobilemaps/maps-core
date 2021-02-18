@@ -2,17 +2,13 @@
 // Created by Christoph Maurhofer on 26.02.2020.
 //
 
+#include "ColorLineShaderOpenGl.h"
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
-#include "ColorLineShaderOpenGl.h"
 
-std::string ColorLineShaderOpenGl::getRectProgramName() {
-    return "UBMAP_LineColorRectShaderOpenGl";
-}
+std::string ColorLineShaderOpenGl::getRectProgramName() { return "UBMAP_LineColorRectShaderOpenGl"; }
 
-std::string ColorLineShaderOpenGl::getPointProgramName() {
-    return "UBMAP_LineColorPointShaderOpenGl";
-}
+std::string ColorLineShaderOpenGl::getPointProgramName() { return "UBMAP_LineColorPointShaderOpenGl"; }
 
 void ColorLineShaderOpenGl::setupRectProgram(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
@@ -86,67 +82,48 @@ void ColorLineShaderOpenGl::setColor(float red, float green, float blue, float a
     lineColor = std::vector<float>{red, green, blue, alpha};
 }
 
-void ColorLineShaderOpenGl::setMiter(float miter_) {
-    miter = miter_;
-}
+void ColorLineShaderOpenGl::setMiter(float miter_) { miter = miter_; }
 
 std::string ColorLineShaderOpenGl::getRectVertexShader() {
-    return UBRendererShaderCode(precision
-                                        highp float;
-                                        uniform mat4 uMVPMatrix;
-                                        attribute vec4 vPosition;
-                                        attribute vec4 vNormal;
-                                        uniform float miter;
+    return UBRendererShaderCode(
+        precision highp float; uniform mat4 uMVPMatrix; attribute vec4 vPosition; attribute vec4 vNormal; uniform float miter;
 
-                                        void main() {
-                                            gl_Position = uMVPMatrix * (vPosition + (vNormal * vec4(miter, miter, miter, 0.0)));
-                                        });
+        void main() { gl_Position = uMVPMatrix * (vPosition + (vNormal * vec4(miter, miter, miter, 0.0))); });
 }
 
 std::string ColorLineShaderOpenGl::getRectFragmentShader() {
-    return UBRendererShaderCode(precision
-                                        mediump float;
-                                        uniform
-                                        vec4 vColor;
+    return UBRendererShaderCode(precision mediump float; uniform vec4 vColor;
 
-                                        void main() {
-                                            gl_FragColor = vColor;
-                                            gl_FragColor.a = 1.0;
-                                            gl_FragColor *= vColor.a;
-                                        });
+                                void main() {
+                                    gl_FragColor = vColor;
+                                    gl_FragColor.a = 1.0;
+                                    gl_FragColor *= vColor.a;
+                                });
 }
 
 std::string ColorLineShaderOpenGl::getPointVertexShader() {
-    return UBRendererShaderCode(precision
-                                        highp float;
-                                        uniform mat4 uMVPMatrix;
-                                        attribute vec4 vPosition;
-                                        uniform highp float vPointSize;
+    return UBRendererShaderCode(precision highp float; uniform mat4 uMVPMatrix; attribute vec4 vPosition;
+                                uniform highp float vPointSize;
 
-                                        void main() {
-                                            gl_PointSize = vPointSize;
-                                            gl_Position = uMVPMatrix * vPosition;
-                                        });
+                                void main() {
+                                    gl_PointSize = vPointSize;
+                                    gl_Position = uMVPMatrix * vPosition;
+                                });
 }
 
 std::string ColorLineShaderOpenGl::getPointFragmentShader() {
-    return UBRendererShaderCode(precision
-                                        highp float;
-                                        uniform vec4 vColor;
+    return UBRendererShaderCode(precision highp float; uniform vec4 vColor;
 
-                                        void main() {
-                                            vec2 coord = gl_PointCoord.st - vec2(0.5);  //from [0,1] to [-0.5,0.5]
-                                            if (length(coord) > 0.5) {                 //outside of circle radius?
-                                                discard;
-                                            }
+                                void main() {
+                                    vec2 coord = gl_PointCoord.st - vec2(0.5); // from [0,1] to [-0.5,0.5]
+                                    if (length(coord) > 0.5) {                 // outside of circle radius?
+                                        discard;
+                                    }
 
-                                            gl_FragColor = vColor;
-                                            gl_FragColor.a = 1.0;
-                                            gl_FragColor *= vColor.a;
-                                        });
+                                    gl_FragColor = vColor;
+                                    gl_FragColor.a = 1.0;
+                                    gl_FragColor *= vColor.a;
+                                });
 }
 
-std::shared_ptr<LineShaderProgramInterface>
-ColorLineShaderOpenGl::asLineShaderProgramInterface() {
-    return shared_from_this();
-}
+std::shared_ptr<LineShaderProgramInterface> ColorLineShaderOpenGl::asLineShaderProgramInterface() { return shared_from_this(); }

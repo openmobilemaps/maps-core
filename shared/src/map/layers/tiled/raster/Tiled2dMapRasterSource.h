@@ -1,15 +1,14 @@
 #pragma once
 
+#include "MapConfig.h"
 #include "TextureLoaderInterface.h"
+#include "TextureLoaderResult.h"
 #include "Tiled2dMapRasterTileInfo.h"
 #include "Tiled2dMapSource.h"
-#include "MapConfig.h"
-#include "TextureLoaderResult.h"
 
 class Tiled2dMapRasterSource : public Tiled2dMapSource<TextureHolderInterface, TextureLoaderResult> {
-public:
-    Tiled2dMapRasterSource(const MapConfig &mapConfig,
-                           const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
+  public:
+    Tiled2dMapRasterSource(const MapConfig &mapConfig, const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
                            const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                            const std::shared_ptr<SchedulerInterface> &scheduler,
                            const std::shared_ptr<TextureLoaderInterface> &loader,
@@ -21,11 +20,9 @@ public:
 
     virtual void resume() override;
 
-protected:
-
+  protected:
     virtual TextureLoaderResult loadTile(Tiled2dMapTileInfo tile) override;
 
-private:
-    
+  private:
     const std::shared_ptr<TextureLoaderInterface> loader;
 };

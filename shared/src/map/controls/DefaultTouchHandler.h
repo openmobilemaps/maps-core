@@ -1,23 +1,22 @@
 #pragma once
 
-#include "TouchHandlerInterface.h"
 #include "SchedulerInterface.h"
-#include <vector>
+#include "TouchHandlerInterface.h"
 #include "Vec2F.h"
+#include <vector>
 
-class DefaultTouchHandler: public TouchHandlerInterface {
+class DefaultTouchHandler : public TouchHandlerInterface {
 
-public:
+  public:
     DefaultTouchHandler(const std::shared_ptr<SchedulerInterface> SchedulerInterface, float density);
 
-    virtual void onTouchEvent(const TouchEvent & touchEvent) override;
+    virtual void onTouchEvent(const TouchEvent &touchEvent) override;
 
-    virtual void addListener(const std::shared_ptr<TouchInterface> & listener) override;
+    virtual void addListener(const std::shared_ptr<TouchInterface> &listener) override;
 
-    virtual void removeListener(const std::shared_ptr<TouchInterface> & listener) override;
+    virtual void removeListener(const std::shared_ptr<TouchInterface> &listener) override;
 
-private:
-
+  private:
     enum TouchHandlingState {
         IDLE,
         ONE_FINGER_DOWN,
@@ -28,7 +27,6 @@ private:
         TWO_FINGER_DOWN,
         TWO_FINGER_MOVING
     };
-
 
     void handleTouchDown(Vec2F position);
 
@@ -55,7 +53,7 @@ private:
     float clickDistancePx;
 
     std::vector<std::shared_ptr<TouchInterface>> listeners;
-    
+
     const std::shared_ptr<SchedulerInterface> scheduler;
 
     TouchHandlingState state;

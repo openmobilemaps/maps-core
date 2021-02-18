@@ -4,22 +4,20 @@
 
 #pragma once
 
-
-#include <unordered_map>
-#include <mutex>
+#include "LayerInterface.h"
+#include "Textured2dLayerObject.h"
 #include "Tiled2dMapLayer.h"
 #include "Tiled2dMapRasterLayerInterface.h"
-#include "LayerInterface.h"
 #include "Tiled2dMapRasterSource.h"
-#include "Textured2dLayerObject.h"
+#include <mutex>
+#include <unordered_map>
 
-class Tiled2dMapRasterLayer
-        : public Tiled2dMapLayer, public Tiled2dMapRasterLayerInterface {
-public:
+class Tiled2dMapRasterLayer : public Tiled2dMapLayer, public Tiled2dMapRasterLayerInterface {
+  public:
     Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                           const std::shared_ptr<::TextureLoaderInterface> &textureLoader);
 
-    virtual void onAdded(const std::shared_ptr<::MapInterface> & mapInterface) override;
+    virtual void onAdded(const std::shared_ptr<::MapInterface> &mapInterface) override;
 
     virtual void onRemoved() override;
 
@@ -35,13 +33,13 @@ public:
 
     virtual void onTilesUpdated() override;
 
-private:
+  private:
     std::shared_ptr<TextureLoaderInterface> textureLoader;
     std::shared_ptr<Tiled2dMapRasterSource> rasterSource;
 
     std::recursive_mutex updateMutex;
     std::unordered_map<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>> tileObjectMap;
     std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
-          
+
     std::shared_ptr<AlphaShaderInterface> alphaShader;
 };

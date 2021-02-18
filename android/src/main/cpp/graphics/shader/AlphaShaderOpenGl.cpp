@@ -6,13 +6,9 @@
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
 
-std::string AlphaShaderOpenGl::getProgramName() {
-    return "UBMAP_AlphaShaderOpenGl";
-}
+std::string AlphaShaderOpenGl::getProgramName() { return "UBMAP_AlphaShaderOpenGl"; }
 
-void AlphaShaderOpenGl::updateAlpha(float value) {
-    alpha = value;
-}
+void AlphaShaderOpenGl::updateAlpha(float value) { alpha = value; }
 
 void AlphaShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
@@ -44,23 +40,14 @@ void AlphaShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInt
 }
 
 std::string AlphaShaderOpenGl::getFragmentShader() {
-    return UBRendererShaderCode(precision
-                                        mediump float;
-                                        uniform
-                                        sampler2D u_texture;
-                                        varying
-                                        vec2 v_texcoord;
-                                        uniform
-                                        highp float alpha;
+    return UBRendererShaderCode(precision mediump float; uniform sampler2D u_texture; varying vec2 v_texcoord;
+                                uniform highp float alpha;
 
-                                        void main() {
-                                            vec4 c = texture2D(u_texture, v_texcoord);
-                                            highp float a = c.a * alpha;
-                                            gl_FragColor = vec4(c.r * a, c.g * a, c.b * a, a);
-                                        });
+                                void main() {
+                                    vec4 c = texture2D(u_texture, v_texcoord);
+                                    highp float a = c.a * alpha;
+                                    gl_FragColor = vec4(c.r * a, c.g * a, c.b * a, a);
+                                });
 }
 
-std::shared_ptr<ShaderProgramInterface>
-AlphaShaderOpenGl::asShaderProgramInterface() {
-    return shared_from_this();
-}
+std::shared_ptr<ShaderProgramInterface> AlphaShaderOpenGl::asShaderProgramInterface() { return shared_from_this(); }

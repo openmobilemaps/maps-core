@@ -3,15 +3,15 @@
 //
 
 #include "CoordinateConversionHelper.h"
-#include "DefaultSystemToRenderConverter.h"
 #include "CoordinateSystemIdentifiers.h"
-#include "EPSG4326ToEPSG3857Converter.h"
-#include "EPSG3857ToEPSG4326Converter.h"
+#include "DefaultSystemToRenderConverter.h"
 #include "EPSG2056ToEPSG4326Converter.h"
+#include "EPSG3857ToEPSG4326Converter.h"
 #include "EPSG4326ToEPSG2056Converter.h"
+#include "EPSG4326ToEPSG3857Converter.h"
 
-
-CoordinateConversionHelper::CoordinateConversionHelper(MapCoordinateSystem mapCoordinateSystem): mapCoordinateSystemIdentier(mapCoordinateSystem.identifier) {
+CoordinateConversionHelper::CoordinateConversionHelper(MapCoordinateSystem mapCoordinateSystem)
+    : mapCoordinateSystemIdentier(mapCoordinateSystem.identifier) {
 
     registerConverter(std::make_shared<DefaultSystemToRenderConverter>(mapCoordinateSystem));
 
@@ -33,14 +33,14 @@ Coord CoordinateConversionHelper::convert(const std::string &to, const Coord &co
     }
 
     // first try if we can directly convert
-    if ( auto const &converter = fromToConverterMap[{coordinate.systemIdentifier, to}]) {
+    if (auto const &converter = fromToConverterMap[{coordinate.systemIdentifier, to}]) {
         return converter->convert(coordinate);
     }
 
-    if ( converterHelper.count({coordinate.systemIdentifier, to}) != 0 ) {
+    if (converterHelper.count({coordinate.systemIdentifier, to}) != 0) {
         auto const &converterChain = converterHelper[{coordinate.systemIdentifier, to}];
         auto intermediateCoord = coordinate;
-        for (auto const &converter: converterChain) {
+        for (auto const &converter : converterChain) {
             intermediateCoord = converter->convert(intermediateCoord);
         }
         if (intermediateCoord.systemIdentifier != to) {
@@ -49,15 +49,16 @@ Coord CoordinateConversionHelper::convert(const std::string &to, const Coord &co
         return intermediateCoord;
     }
 
-    throw std::invalid_argument("Could not find an eligible converter from: \'" + coordinate.systemIdentifier + "\' to \'" + to + "\'");
+    throw std::invalid_argument("Could not find an eligible converter from: \'" + coordinate.systemIdentifier + "\' to \'" + to +
+                                "\'");
 }
 
-RectCoord CoordinateConversionHelper::convertRect(const std::string & to, const RectCoord & rect) {
+RectCoord CoordinateConversionHelper::convertRect(const std::string &to, const RectCoord &rect) {
     return RectCoord(convert(to, rect.topLeft), convert(to, rect.bottomRight));
 }
 
-RectCoord CoordinateConversionHelper::convertRectToRenderSystem(const RectCoord & rect) {
-  return convertRect(CoordinateSystemIdentifiers::RENDERSYSTEM(), rect);
+RectCoord CoordinateConversionHelper::convertRectToRenderSystem(const RectCoord &rect) {
+    return convertRect(CoordinateSystemIdentifiers::RENDERSYSTEM(), rect);
 }
 
 Coord CoordinateConversionHelper::convertToRenderSystem(const Coord &coordinate) {
@@ -68,14 +69,13 @@ void CoordinateConversionHelper::precomputeConverterHelper() {
     converterHelper.clear();
 
     // two steps
-    for (auto const &converterFirst: fromToConverterMap) {
-        for (auto const &converterSecond: fromToConverterMap) {
+    for (auto const &converterFirst : fromToConverterMap) {
+        for (auto const &converterSecond : fromToConverterMap) {
             // if output of first converter is inpute of second
             auto from = converterFirst.second->getFrom();
             auto to = converterSecond.second->getTo();
 
-            if (converterFirst.second->getTo() == converterSecond.second->getFrom() &&
-                from != to &&
+            if (converterFirst.second->getTo() == converterSecond.second->getFrom() && from != to &&
                 fromToConverterMap.count({from, to}) == 0) {
                 converterHelper[{from, to}] = {converterFirst.second, converterSecond.second};
             }
@@ -83,23 +83,21 @@ void CoordinateConversionHelper::precomputeConverterHelper() {
     }
 
     // three steps
-    for (auto const &converterFirst: fromToConverterMap) {
-        for (auto const &converterSecond: fromToConverterMap) {
-            for (auto const &converterThird: fromToConverterMap) {
+    for (auto const &converterFirst : fromToConverterMap) {
+        for (auto const &converterSecond : fromToConverterMap) {
+            for (auto const &converterThird : fromToConverterMap) {
                 // if output of first converter is inpute of second
                 auto from = converterFirst.second->getFrom();
                 auto to = converterThird.second->getTo();
 
                 if (converterFirst.second->getTo() == converterSecond.second->getFrom() &&
-                    converterSecond.second->getTo() == converterThird.second->getFrom() &&
-                    from != to &&
-                    fromToConverterMap.count({from, to}) == 0 &&
-                    converterHelper.count({from, to}) == 0) {
+                    converterSecond.second->getTo() == converterThird.second->getFrom() && from != to &&
+                    fromToConverterMap.count({from, to}) == 0 && converterHelper.count({from, to}) == 0) {
                     converterHelper[{from, to}] = {converterFirst.second, converterSecond.second, converterThird.second};
                 }
             }
         }
     }
 
-    //three steps
+    // three steps
 }

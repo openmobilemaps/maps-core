@@ -1,15 +1,15 @@
 #pragma once
 
-#include "CoordinateConverterInterface.h"
-#include "MapCoordinateSystem.h"
 #include "Coord.h"
 #include "CoordinateConversionHelper.h"
+#include "CoordinateConverterInterface.h"
 #include "CoordinateSystemIdentifiers.h"
+#include "MapCoordinateSystem.h"
 
 /// Convert LV03 to WGS 84 / Pseudo-Mercator
 ///  https://epsg.io/2056 to https://epsg.io/4326
 class EPSG2056ToEPSG4326Converter : public CoordinateConverterInterface {
-public:
+  public:
     EPSG2056ToEPSG4326Converter() {}
 
     virtual Coord convert(const Coord &coordinate) override {
@@ -20,18 +20,13 @@ public:
         return Coord(getTo(), x, y, 0);
     }
 
-    virtual std::string getFrom() override {
-        return CoordinateSystemIdentifiers::EPSG2056();
-    }
+    virtual std::string getFrom() override { return CoordinateSystemIdentifiers::EPSG2056(); }
 
-    virtual std::string getTo() override {
-        return CoordinateSystemIdentifiers::EPSG4326();
-    }
+    virtual std::string getTo() override { return CoordinateSystemIdentifiers::EPSG4326(); }
 
-private:
+  private:
     // Convert CH y/x to WGS lat
-    double CHtoWGSlat(const Coord &coordinate)
-    {
+    double CHtoWGSlat(const Coord &coordinate) {
         // Converts militar to civil and to unit = 1000km
         // Axiliary values (% Bern)
         double y_aux = (coordinate.x - 2600000) / 1000000;
@@ -48,8 +43,7 @@ private:
     }
 
     // Convert CH y/x to WGS long
-    double CHtoWGSlng(const Coord &coordinate)
-    {
+    double CHtoWGSlng(const Coord &coordinate) {
         // Converts militar to civil and to unit = 1000km
         // Axiliary values (% Bern)
         double y_aux = (coordinate.x - 2600000) / 1000000;
@@ -64,5 +58,4 @@ private:
 
         return lng;
     }
-
 };

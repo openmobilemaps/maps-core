@@ -1,13 +1,13 @@
 #ifndef MAPSDK_OPENGLCONTEXT_H
 #define MAPSDK_OPENGLCONTEXT_H
 
-#include <vector>
-#include <string>
-#include <map>
 #include "RenderingContextInterface.h"
+#include <map>
+#include <string>
+#include <vector>
 
 class OpenGlContext : public RenderingContextInterface, std::enable_shared_from_this<OpenGlContext> {
-public:
+  public:
     OpenGlContext();
 
     int getProgram(std::string name);
@@ -20,15 +20,15 @@ public:
 
     virtual void onSurfaceCreated() override;
 
-    virtual void setViewportSize(const ::Vec2I & size) override;
+    virtual void setViewportSize(const ::Vec2I &size) override;
 
     virtual ::Vec2I getViewportSize() override;
 
-    virtual void setBackgroundColor(const ::Color & color) override;
+    virtual void setBackgroundColor(const ::Color &color) override;
 
     virtual void setupDrawFrame() override;
 
-protected:
+  protected:
     Color backgroundColor = Color(0, 0, 0, 1);
 
     std::map<std::string, int> programs;

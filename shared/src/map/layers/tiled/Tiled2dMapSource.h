@@ -4,34 +4,32 @@
 
 #pragma once
 
-#include <unordered_set>
-#include "Tiled2dMapSourceInterface.h"
-#include "Tiled2dMapLayerConfig.h"
-#include "SchedulerInterface.h"
 #include "Coord.h"
-#include "Tiled2dMapSourceListenerInterface.h"
-#include "Tiled2dMapZoomLevelInfo.h"
-#include "Tiled2dMapZoomInfo.h"
-#include "MapConfig.h"
 #include "CoordinateConversionHelperInterface.h"
-#include "PrioritizedTiled2dMapTileInfo.h"
-#include <mutex>
-#include <unordered_map>
-#include <set>
-#include <cmath>
-#include <atomic>
 #include "LambdaTask.h"
+#include "MapConfig.h"
+#include "PrioritizedTiled2dMapTileInfo.h"
+#include "SchedulerInterface.h"
+#include "Tiled2dMapLayerConfig.h"
+#include "Tiled2dMapSourceInterface.h"
+#include "Tiled2dMapSourceListenerInterface.h"
+#include "Tiled2dMapZoomInfo.h"
+#include "Tiled2dMapZoomLevelInfo.h"
+#include <atomic>
+#include <cmath>
+#include <mutex>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
 
 // T is the Object used for loading
 // L is the Loading type
-template <class T, class L>
-class Tiled2dMapSource : public Tiled2dMapSourceInterface {
-public:
-    Tiled2dMapSource(const MapConfig &mapConfig,
-                      const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
-                      const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
-                      const std::shared_ptr<SchedulerInterface> &scheduler,
-                      const std::shared_ptr<Tiled2dMapSourceListenerInterface> &listener);
+template <class T, class L> class Tiled2dMapSource : public Tiled2dMapSourceInterface {
+  public:
+    Tiled2dMapSource(const MapConfig &mapConfig, const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
+                     const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
+                     const std::shared_ptr<SchedulerInterface> &scheduler,
+                     const std::shared_ptr<Tiled2dMapSourceListenerInterface> &listener);
 
     virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom) override;
 
@@ -39,8 +37,7 @@ public:
 
     virtual void resume() = 0;
 
-protected:
-
+  protected:
     virtual L loadTile(Tiled2dMapTileInfo tile) = 0;
 
     MapConfig mapConfig;
@@ -58,7 +55,7 @@ protected:
     std::unordered_map<Tiled2dMapTileInfo, std::shared_ptr<T>> currentTiles;
     std::unordered_set<Tiled2dMapTileInfo> currentVisibleTiles;
 
-private:
+  private:
     void updateCurrentTileset(const ::RectCoord &visibleBounds, double zoom);
 
     void performLoadingTask();

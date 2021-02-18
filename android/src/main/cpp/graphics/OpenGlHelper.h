@@ -9,7 +9,7 @@
 #include "opengl_wrapper.h"
 
 class OpenGlHelper {
-public:
+  public:
     static void checkGlError(std::string glOperation) {
         int error;
         while ((error = glGetError()) != GL_NO_ERROR) {
@@ -18,5 +18,4 @@ public:
     }
 };
 
-
-#endif //SWISSTOPO_OPENGLHELPER_H
+#endif // SWISSTOPO_OPENGLHELPER_H

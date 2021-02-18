@@ -1,16 +1,14 @@
-#include "MapCamera2dInterface.h"
 #include "Tiled2dMapLayer.h"
-
+#include "MapCamera2dInterface.h"
 
 Tiled2dMapLayer::Tiled2dMapLayer(const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig)
-        : layerConfig(layerConfig) {
-}
+    : layerConfig(layerConfig) {}
 
 void Tiled2dMapLayer::setSourceInterface(const std::shared_ptr<Tiled2dMapSourceInterface> &sourceInterface) {
     this->sourceInterface = sourceInterface;
 }
 
-void Tiled2dMapLayer::onAdded(const std::shared_ptr<::MapInterface> & mapInterface) {
+void Tiled2dMapLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface) {
     this->mapInterface = mapInterface;
     auto camera = std::dynamic_pointer_cast<MapCamera2dInterface>(mapInterface->getCamera());
     if (camera) {
@@ -26,13 +24,9 @@ void Tiled2dMapLayer::onRemoved() {
     }
 }
 
-void Tiled2dMapLayer::hide() {
-    isHidden = true;
-}
+void Tiled2dMapLayer::hide() { isHidden = true; }
 
-void Tiled2dMapLayer::show() {
-    isHidden = false;
-}
+void Tiled2dMapLayer::show() { isHidden = false; }
 
 void Tiled2dMapLayer::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom) {
     sourceInterface->onVisibleBoundsChanged(visibleBounds, zoom);

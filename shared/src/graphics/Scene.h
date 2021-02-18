@@ -1,19 +1,19 @@
 #pragma once
 
-#include "SceneInterface.h"
 #include "RendererInterface.h"
 #include "SceneCallbackInterface.h"
+#include "SceneInterface.h"
 #include <optional>
 
-class Scene: public SceneInterface {
-public:
-    Scene(const std::shared_ptr<::GraphicsObjectFactoryInterface> & graphicsFactory,
-          const std::shared_ptr<::ShaderFactoryInterface> & shaderFactory,
-          const std::shared_ptr<::RenderingContextInterface> & renderingContext);
+class Scene : public SceneInterface {
+  public:
+    Scene(const std::shared_ptr<::GraphicsObjectFactoryInterface> &graphicsFactory,
+          const std::shared_ptr<::ShaderFactoryInterface> &shaderFactory,
+          const std::shared_ptr<::RenderingContextInterface> &renderingContext);
 
-    virtual void setCallbackHandler(const std::shared_ptr<SceneCallbackInterface> & callbackInterface) override;
+    virtual void setCallbackHandler(const std::shared_ptr<SceneCallbackInterface> &callbackInterface) override;
 
-    virtual void setCamera(const std::shared_ptr<CameraInterface> & camera) override;
+    virtual void setCamera(const std::shared_ptr<CameraInterface> &camera) override;
 
     virtual std::shared_ptr<CameraInterface> getCamera() override;
 
@@ -31,7 +31,7 @@ public:
 
     virtual void invalidate() override;
 
-private:
+  private:
     std::shared_ptr<RenderingContextInterface> renderingContext;
     std::shared_ptr<CameraInterface> camera;
 

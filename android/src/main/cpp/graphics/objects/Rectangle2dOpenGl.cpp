@@ -3,19 +3,15 @@
 //
 
 #include "Rectangle2dOpenGl.h"
-#include "TextureHolderInterface.h"
 #include "OpenGlHelper.h"
+#include "TextureHolderInterface.h"
 
+Rectangle2dOpenGl::Rectangle2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
+    : shaderProgram(shader) {}
 
-Rectangle2dOpenGl::Rectangle2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader) : shaderProgram(shader) {}
+bool Rectangle2dOpenGl::isReady() { return ready; }
 
-bool Rectangle2dOpenGl::isReady() {
-    return ready;
-}
-
-std::shared_ptr<GraphicsObjectInterface> Rectangle2dOpenGl::asGraphicsObject() {
-    return shared_from_this();
-}
+std::shared_ptr<GraphicsObjectInterface> Rectangle2dOpenGl::asGraphicsObject() { return shared_from_this(); }
 
 void Rectangle2dOpenGl::clear() {
     removeTexture();
@@ -29,17 +25,26 @@ void Rectangle2dOpenGl::setFrame(const RectD &frame, const RectD &textureCoordin
 }
 
 void Rectangle2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
-    if (ready) return;
+    if (ready)
+        return;
 
     float frameZ = 0;
     vertexBuffer = {
-            (float) frame.x, (float) frame.y, frameZ,
-            (float) frame.x, (float) (frame.y + frame.height), frameZ,
-            (float) (frame.x + frame.width), (float) (frame.y + frame.height), frameZ,
-            (float) (frame.x + frame.width), (float) frame.y, frameZ,
+        (float)frame.x,
+        (float)frame.y,
+        frameZ,
+        (float)frame.x,
+        (float)(frame.y + frame.height),
+        frameZ,
+        (float)(frame.x + frame.width),
+        (float)(frame.y + frame.height),
+        frameZ,
+        (float)(frame.x + frame.width),
+        (float)frame.y,
+        frameZ,
     };
     indexBuffer = {
-            0, 1, 2, 0, 2, 3,
+        0, 1, 2, 0, 2, 3,
     };
     adjustTextureCoordinates();
 
@@ -52,10 +57,10 @@ void Rectangle2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
 }
 
 void Rectangle2dOpenGl::loadTexture(const std::shared_ptr<TextureHolderInterface> &textureHolder) {
-    glGenTextures(1, (unsigned int *) &texturePointer[0]);
+    glGenTextures(1, (unsigned int *)&texturePointer[0]);
 
     if (textureHolder != nullptr) {
-        glBindTexture(GL_TEXTURE_2D, (unsigned int) texturePointer[0]);
+        glBindTexture(GL_TEXTURE_2D, (unsigned int)texturePointer[0]);
 
         textureHolder->attachToGraphics();
 
@@ -94,7 +99,8 @@ void Rectangle2dOpenGl::adjustTextureCoordinates() {
 
 void Rectangle2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                                int64_t mvpMatrix) {
-    if (!ready) return;
+    if (!ready)
+        return;
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
 
@@ -105,7 +111,8 @@ void Rectangle2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     glUseProgram(mProgram);
     OpenGlHelper::checkGlError("glUseProgram RectangleOpenGl");
 
-    if (textureLoaded) prepareTextureDraw(openGlContext, mProgram);
+    if (textureLoaded)
+        prepareTextureDraw(openGlContext, mProgram);
 
     shaderProgram->preRender(context);
 
@@ -124,7 +131,7 @@ void Rectangle2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     OpenGlHelper::checkGlError("glGetUniformLocation");
 
     // Apply the projection and view transformation
-    glUniformMatrix4fv(mMVPMatrixHandle, 1, false, (GLfloat *) mvpMatrix);
+    glUniformMatrix4fv(mMVPMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
     OpenGlHelper::checkGlError("glUniformMatrix4fv");
 
     // Enable blending
@@ -149,7 +156,7 @@ void Rectangle2dOpenGl::prepareTextureDraw(std::shared_ptr<OpenGlContext> &openG
     glActiveTexture(GL_TEXTURE0);
 
     // Bind the texture to this unit.
-    glBindTexture(GL_TEXTURE_2D, (unsigned int) texturePointer[0]);
+    glBindTexture(GL_TEXTURE_2D, (unsigned int)texturePointer[0]);
 
     // Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0.
     glUniform1i(mTextureUniformHandle, 0);

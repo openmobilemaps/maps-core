@@ -6,8 +6,8 @@
 //
 
 #include "Logger.h"
-#include <iostream>
 #include <cstdarg>
+#include <iostream>
 
 #ifdef _WIN32
 #include "WindowsLogger.h"
@@ -17,7 +17,7 @@ using namespace utility;
 
 #ifdef __ANDROID__
 extern "C" {
-int __android_log_print(int prio, const char* tag, const char* fmt, ...);
+int __android_log_print(int prio, const char *tag, const char *fmt, ...);
 }
 #endif
 
@@ -25,53 +25,41 @@ int __android_log_print(int prio, const char* tag, const char* fmt, ...);
 #include <os/log.h>
 #endif
 
-Logger& Logger::operator()(int p)
-{
+Logger &Logger::operator()(int p) {
     static Logger l;
     l.priority = p;
     return l;
 }
 
-std::stringstream& Logger::stream() const
-{
-    return ss;
-}
+std::stringstream &Logger::stream() const { return ss; }
 
-void Logger::log(int prio, const char* tag, const char* fmt, ...) const
-{
+void Logger::log(int prio, const char *tag, const char *fmt, ...) const {
 #ifdef __ANDROID__
     int androidPrio = 3;
-    switch(priority)
-    {
-        case 0:
-        {
-            androidPrio = 6;
-            break;
-        }
-        case 1:
-        {
-            androidPrio = 5;
-            break;
-        }
-        case 2:
-        {
-            androidPrio = 3;
-            break;
-        }
-        case 3:
-        {
-            androidPrio = 4;
-            break;
-        }
-        case 4:
-        {
-            androidPrio = 2;
-            break;
-        }
-        default:
-        {
-            break;
-        }
+    switch (priority) {
+    case 0: {
+        androidPrio = 6;
+        break;
+    }
+    case 1: {
+        androidPrio = 5;
+        break;
+    }
+    case 2: {
+        androidPrio = 3;
+        break;
+    }
+    case 3: {
+        androidPrio = 4;
+        break;
+    }
+    case 4: {
+        androidPrio = 2;
+        break;
+    }
+    default: {
+        break;
+    }
     }
 
     va_list args;
@@ -81,119 +69,104 @@ void Logger::log(int prio, const char* tag, const char* fmt, ...) const
 #endif
 
 #if (defined(__APPLE__) && !defined(BANDIT_TESTING)) || defined(_WIN32)
-    switch(priority)
-    {
-        case 0:
-        {
-            os_log(OS_LOG_DEFAULT, "%s", fmt);
-            break;
-        }
-        case 1:
-        {
-            os_log_error(OS_LOG_DEFAULT, "%s", fmt);
-            break;
-        }
-        case 2:
-        {
-            os_log_debug(OS_LOG_DEFAULT, "%s", fmt);
-            break;
-        }
-        case 3:
-        {
-            os_log_info(OS_LOG_DEFAULT, "%s", fmt);
-            break;
-        }
-        case 4:
-        {
-            os_log(OS_LOG_DEFAULT, "%s", fmt);
-            break;
-        }
-        default:
-        {
-            os_log(OS_LOG_DEFAULT, "%s", fmt);
-        }
+    switch (priority) {
+    case 0: {
+        os_log(OS_LOG_DEFAULT, "%s", fmt);
+        break;
+    }
+    case 1: {
+        os_log_error(OS_LOG_DEFAULT, "%s", fmt);
+        break;
+    }
+    case 2: {
+        os_log_debug(OS_LOG_DEFAULT, "%s", fmt);
+        break;
+    }
+    case 3: {
+        os_log_info(OS_LOG_DEFAULT, "%s", fmt);
+        break;
+    }
+    case 4: {
+        os_log(OS_LOG_DEFAULT, "%s", fmt);
+        break;
+    }
+    default: {
+        os_log(OS_LOG_DEFAULT, "%s", fmt);
+    }
     }
 #endif
 
 #ifdef BANDIT_TESTING
-    if(priority <= LOG_LEVEL)
-    {
-        switch(priority)
-        {
-            case 0:
-            {
-                std::cout
+    if (priority <= LOG_LEVEL) {
+        switch (priority) {
+        case 0: {
+            std::cout
 #ifdef SHOW_COLORS
-                    << "\033["
-                    << "fg192,53,40;"
+                << "\033["
+                << "fg192,53,40;"
 #endif
-                    << "ERROR: " << fmt << std::endl
+                << "ERROR: " << fmt << std::endl
 #ifdef SHOW_COLORS
-                    << "\033[;"
+                << "\033[;"
 #endif
-                    ;
-                break;
-            }
-            case 1:
-            {
-                std::cout
+                ;
+            break;
+        }
+        case 1: {
+            std::cout
 #ifdef SHOW_COLORS
-                    << "\033["
-                    << "fg211,84,0;"
+                << "\033["
+                << "fg211,84,0;"
 #endif
-                    << "WARNING: " << fmt << std::endl
+                << "WARNING: " << fmt << std::endl
 #ifdef SHOW_COLORS
-                    << "\033[;"
+                << "\033[;"
 #endif
-                    ;
-                break;
-            }
-            case 2:
-            {
-                std::cout
+                ;
+            break;
+        }
+        case 2: {
+            std::cout
 #ifdef SHOW_COLORS
-                    << "\033["
-                    << "fg22,160,133;"
+                << "\033["
+                << "fg22,160,133;"
 #endif
-                    << "DEBUG: " << fmt << std::endl
+                << "DEBUG: " << fmt << std::endl
 #ifdef SHOW_COLORS
-                    << "\033[;"
+                << "\033[;"
 #endif
-                    ;
-                break;
-            }
-            case 3:
-            {
-                std::cout
+                ;
+            break;
+        }
+        case 3: {
+            std::cout
 #ifdef SHOW_COLORS
-                    << "\033["
-                    << "fg41,128,185;"
+                << "\033["
+                << "fg41,128,185;"
 #endif
-                    << "INFO: " << fmt << std::endl
+                << "INFO: " << fmt << std::endl
 #ifdef SHOW_COLORS
-                    << "\033[;"
+                << "\033[;"
 #endif
-                    ;
-                break;
-            }
-            case 4:
-            {
-                std::cout
+                ;
+            break;
+        }
+        case 4: {
+            std::cout
 #ifdef SHOW_COLORS
-                    << "\033["
-                    << "fg127,140,141;"
+                << "\033["
+                << "fg127,140,141;"
 #endif
-                    << "TRACE: " << fmt << std::endl
+                << "TRACE: " << fmt << std::endl
 #ifdef SHOW_COLORS
-                    << "\033[;"
+                << "\033[;"
 #endif
-                    ;
-                break;
-            }
-            default:
-            {
-                break;
-            }
+                ;
+            break;
+        }
+        default: {
+            break;
+        }
         }
     }
 #endif

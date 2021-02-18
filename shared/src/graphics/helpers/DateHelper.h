@@ -1,7 +1,6 @@
 #pragma once
 
-class DateHelper
-{
-    public:
+class DateHelper {
+  public:
     static long long currentTimeMillis();
 };

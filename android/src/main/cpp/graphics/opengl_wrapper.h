@@ -4,10 +4,9 @@
 #endif
 
 #if defined(__APPLE__) && !defined(BANDIT_TESTING)
+#include <OpenGLES/ES1/glext.h>
 #include <OpenGLES/ES2/gl.h>
 #include <OpenGLES/ES2/glext.h>
-#include <OpenGLES/ES1/glext.h>
-
 
 #endif
 
@@ -28,10 +27,10 @@
 #endif
 
 #ifdef BANDIT_TESTING
-	#ifdef __APPLE__
-		#include <OpenGL/OpenGL.h>
-		#include <OpenGL/gl.h>
-	#else
-		#include <GLES2/gl2.h>
-	#endif
+#ifdef __APPLE__
+#include <OpenGL/OpenGL.h>
+#include <OpenGL/gl.h>
+#else
+#include <GLES2/gl2.h>
+#endif
 #endif

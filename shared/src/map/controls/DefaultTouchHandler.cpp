@@ -1,30 +1,27 @@
 #include "DefaultTouchHandler.h"
-#include "TouchEvent.h"
 #include "DateHelper.h"
-#include <cmath>
-#include "Logger.h"
 #include "LambdaTask.h"
+#include "Logger.h"
+#include "TouchEvent.h"
 #include "TouchInterface.h"
+#include <cmath>
 
 DefaultTouchHandler::DefaultTouchHandler(std::shared_ptr<SchedulerInterface> scheduler, float density)
-:
-scheduler(scheduler),
-density(density),
-clickDistancePx(CLICK_DISTANCE_MM * density / 25.4),
-state(IDLE),
-stateTime(0),
-touchPosition(0, 0),
-touchStartPosition(0, 0),
-pointer(Vec2F(0, 0), Vec2F(0, 0)),
-oldPointer(Vec2F(0, 0), Vec2F(0, 0)) {
-}
+    : scheduler(scheduler)
+    , density(density)
+    , clickDistancePx(CLICK_DISTANCE_MM * density / 25.4)
+    , state(IDLE)
+    , stateTime(0)
+    , touchPosition(0, 0)
+    , touchStartPosition(0, 0)
+    , pointer(Vec2F(0, 0), Vec2F(0, 0))
+    , oldPointer(Vec2F(0, 0), Vec2F(0, 0)) {}
 
-
-void DefaultTouchHandler::addListener(const std::shared_ptr<TouchInterface> & listener) {
+void DefaultTouchHandler::addListener(const std::shared_ptr<TouchInterface> &listener) {
     listeners.insert(listeners.begin(), listener);
 }
 
-void DefaultTouchHandler::removeListener(const std::shared_ptr<TouchInterface> & listener) {
+void DefaultTouchHandler::removeListener(const std::shared_ptr<TouchInterface> &listener) {
     listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end());
 }
 
@@ -33,84 +30,81 @@ void DefaultTouchHandler::onTouchEvent(const TouchEvent &touchEvent) {
     if (touchEvent.pointers.size() == 1) {
 
         switch (touchEvent.touchAction) {
-            case TouchAction::DOWN: {
+        case TouchAction::DOWN: {
 
+            touchPosition = touchEvent.pointers[0];
+            touchStartPosition = touchPosition;
+            handleTouchDown(touchPosition);
+            break;
+        }
+
+        case TouchAction::MOVE: {
+            if (state != ONE_FINGER_DOWN && state != ONE_FINGER_DOUBLE_CLICK_DOWN && state != ONE_FINGER_MOVING &&
+                state != ONE_FINGER_DOUBLE_CLICK_MOVE) {
                 touchPosition = touchEvent.pointers[0];
-                touchStartPosition = touchPosition;
-                handleTouchDown(touchPosition);
-                break;
             }
 
-            case TouchAction::MOVE: {
-                if (state != ONE_FINGER_DOWN && state != ONE_FINGER_DOUBLE_CLICK_DOWN && state != ONE_FINGER_MOVING && state != ONE_FINGER_DOUBLE_CLICK_MOVE) {
-                    touchPosition = touchEvent.pointers[0];
-                }
+            Vec2F delta = Vec2F(touchEvent.pointers[0].x - touchPosition.x, touchEvent.pointers[0].y - touchPosition.y);
 
-                Vec2F delta = Vec2F(touchEvent.pointers[0].x - touchPosition.x,
-                                    touchEvent.pointers[0].y - touchPosition.y);
+            touchPosition = touchEvent.pointers[0];
 
-                touchPosition = touchEvent.pointers[0];
+            handleMove(delta);
+            break;
+        }
 
-                handleMove(delta);
-                break;
-            }
-
-            case TouchAction::UP: {
-                handleTouchUp();
-                break;
-            }
+        case TouchAction::UP: {
+            handleTouchUp();
+            break;
+        }
         }
 
     } else if (touchEvent.pointers.size() == 2) {
 
         switch (touchEvent.touchAction) {
-            case TouchAction::DOWN:
-                pointer = { Vec2F(0, 0), Vec2F(0, 0)};
-                oldPointer = { touchEvent.pointers[0], touchEvent.pointers[1]};
-                handleTwoFingerDown();
-                break;
-            case TouchAction::MOVE:
-                oldPointer = pointer;
-                pointer = { touchEvent.pointers[0], touchEvent.pointers[1]};
+        case TouchAction::DOWN:
+            pointer = {Vec2F(0, 0), Vec2F(0, 0)};
+            oldPointer = {touchEvent.pointers[0], touchEvent.pointers[1]};
+            handleTwoFingerDown();
+            break;
+        case TouchAction::MOVE:
+            oldPointer = pointer;
+            pointer = {touchEvent.pointers[0], touchEvent.pointers[1]};
 
-                if (std::get<0>(oldPointer).x != 0 ||
-                    std::get<0>(oldPointer).y != 0 ||
-                    std::get<1>(oldPointer).x != 0 ||
-                    std::get<1>(oldPointer).y != 0) {
-                    handleTwoFingerMove(oldPointer, pointer);
-                }
+            if (std::get<0>(oldPointer).x != 0 || std::get<0>(oldPointer).y != 0 || std::get<1>(oldPointer).x != 0 ||
+                std::get<1>(oldPointer).y != 0) {
+                handleTwoFingerMove(oldPointer, pointer);
+            }
 
-                oldPointer = pointer;
+            oldPointer = pointer;
 
-                break;
-            case TouchAction::UP:
+            break;
+        case TouchAction::UP:
 
-                handleTwoFingerUp(oldPointer);
+            handleTwoFingerUp(oldPointer);
 
-                break;
+            break;
         }
 
     } else {
-        pointer = { Vec2F(0, 0), Vec2F(0, 0)};
-        oldPointer = { Vec2F(0, 0), Vec2F(0, 0)};
+        pointer = {Vec2F(0, 0), Vec2F(0, 0)};
+        oldPointer = {Vec2F(0, 0), Vec2F(0, 0)};
         handleMoreThanTwoFingers();
     }
-
 }
 
 double distance(std::vector<float> &pointer) {
-    return sqrt((pointer[0] - pointer[2]) * (pointer[0] - pointer[2]) +
-                (pointer[1] - pointer[3]) * (pointer[1] - pointer[3]));
+    return sqrt((pointer[0] - pointer[2]) * (pointer[0] - pointer[2]) + (pointer[1] - pointer[3]) * (pointer[1] - pointer[3]));
 }
 
 bool multiTouchMoved(std::tuple<Vec2F, Vec2F> &pointer1, std::tuple<Vec2F, Vec2F> &pointer2, float value) {
-    float diffA = (float) sqrt((std::get<0>(pointer1).x - std::get<0>(pointer2).x) * (std::get<0>(pointer1).x - std::get<0>(pointer2).x) +
-                               (std::get<0>(pointer1).y - std::get<0>(pointer1).y) * (std::get<0>(pointer1).y - std::get<0>(pointer1).y));
-    float diffB = (float) sqrt((std::get<1>(pointer1).x - std::get<1>(pointer1).x) * (std::get<1>(pointer1).x - std::get<1>(pointer1).x) +
-                               (std::get<1>(pointer1).y - std::get<1>(pointer1).y) * (std::get<1>(pointer1).y - std::get<1>(pointer1).y));
+    float diffA =
+        (float)sqrt((std::get<0>(pointer1).x - std::get<0>(pointer2).x) * (std::get<0>(pointer1).x - std::get<0>(pointer2).x) +
+                    (std::get<0>(pointer1).y - std::get<0>(pointer1).y) * (std::get<0>(pointer1).y - std::get<0>(pointer1).y));
+    float diffB =
+        (float)sqrt((std::get<1>(pointer1).x - std::get<1>(pointer1).x) * (std::get<1>(pointer1).x - std::get<1>(pointer1).x) +
+                    (std::get<1>(pointer1).y - std::get<1>(pointer1).y) * (std::get<1>(pointer1).y - std::get<1>(pointer1).y));
     return (diffA > value || diffB > value);
 }
-
 
 void DefaultTouchHandler::handleTouchDown(Vec2F position) {
     if (state == ONE_FINGER_UP_AFTER_CLICK && stateTime >= DateHelper::currentTimeMillis() - DOUBLE_TAP_TIMEOUT) {
@@ -120,7 +114,9 @@ void DefaultTouchHandler::handleTouchDown(Vec2F position) {
         state = ONE_FINGER_DOWN;
     }
     stateTime = DateHelper::currentTimeMillis();
-    scheduler->addTask(std::make_shared<LambdaTask>(TaskConfig("LongPressTask", LONG_PRESS_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION), [=] { checkState(); }));
+    scheduler->addTask(std::make_shared<LambdaTask>(
+        TaskConfig("LongPressTask", LONG_PRESS_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
+        [=] { checkState(); }));
     /*for (auto &listener : listeners) {
         if (listener->onTouch(x, y)) {
             break;
@@ -135,8 +131,7 @@ void DefaultTouchHandler::handleMove(Vec2F delta) {
         LogDebug <<= "TouchHandler: moved large distance";
         if (state == ONE_FINGER_DOUBLE_CLICK_DOWN || state == ONE_FINGER_DOUBLE_CLICK_MOVE) {
             state = ONE_FINGER_DOUBLE_CLICK_MOVE;
-        }
-        else {
+        } else {
             LogDebug <<= "TouchHandler: is moving now";
             state = ONE_FINGER_MOVING;
         }
@@ -144,7 +139,7 @@ void DefaultTouchHandler::handleMove(Vec2F delta) {
     }
     for (auto &listener : listeners) {
         if (listener->onMove(delta,
-                             state == ONE_FINGER_MOVING, // confirmed
+                             state == ONE_FINGER_MOVING,             // confirmed
                              state == ONE_FINGER_DOUBLE_CLICK_MOVE)) // double click move
         {
             break;
@@ -156,8 +151,7 @@ void DefaultTouchHandler::handleTouchUp() {
     if (state == ONE_FINGER_DOUBLE_CLICK_MOVE) {
         LogDebug <<= "TouchHandler: double click move ended";
         state = IDLE;
-    }
-    else if (state == ONE_FINGER_DOUBLE_CLICK_DOWN) {
+    } else if (state == ONE_FINGER_DOUBLE_CLICK_DOWN) {
         LogDebug <<= "TouchHandler: double click detected";
         for (auto &listener : listeners) {
             if (listener->onDoubleClick(touchPosition)) {
@@ -173,7 +167,9 @@ void DefaultTouchHandler::handleTouchUp() {
             }
         }
         state = ONE_FINGER_UP_AFTER_CLICK;
-        scheduler->addTask(std::make_shared<LambdaTask>(TaskConfig("DoubleTapTask", DOUBLE_TAP_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION), [=] { checkState(); }));
+        scheduler->addTask(std::make_shared<LambdaTask>(
+            TaskConfig("DoubleTapTask", DOUBLE_TAP_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
+            [=] { checkState(); }));
     } else if (state == TWO_FINGER_DOWN && stateTime >= DateHelper::currentTimeMillis() - TWO_FINGER_TOUCH_TIMEOUT) {
         LogDebug <<= "TouchHandler: Two finger click detected";
         for (auto &listener : listeners) {
@@ -207,7 +203,9 @@ void DefaultTouchHandler::handleTwoFingerDown() {
     }
     state = TWO_FINGER_DOWN;
     stateTime = DateHelper::currentTimeMillis();
-    scheduler->addTask(std::make_shared<LambdaTask>(TaskConfig("LongPressTask", LONG_PRESS_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION), [=] { checkState(); }));
+    scheduler->addTask(std::make_shared<LambdaTask>(
+        TaskConfig("LongPressTask", LONG_PRESS_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
+        [=] { checkState(); }));
     for (auto &listener : listeners) {
         listener->clearTouch();
     }
@@ -227,7 +225,7 @@ void DefaultTouchHandler::handleTwoFingerMove(std::tuple<Vec2F, Vec2F> oldPointe
     }
     for (auto &listener : listeners) {
         if (listener->onTwoFingerMove({std::get<0>(oldPointer), std::get<1>(oldPointer)},
-                                      {std::get<0>(newpointer), std::get<1>(newpointer)})){
+                                      {std::get<0>(newpointer), std::get<1>(newpointer)})) {
             break;
         }
     }
@@ -272,7 +270,7 @@ void DefaultTouchHandler::checkState() {
                 break;
             }
         }
-        state = ONE_FINGER_MOVING; //prevents further single click and allows to transition from long press to moving
+        state = ONE_FINGER_MOVING; // prevents further single click and allows to transition from long press to moving
         stateTime = DateHelper::currentTimeMillis();
     } else if (state == TWO_FINGER_DOWN && stateTime <= DateHelper::currentTimeMillis() - LONG_PRESS_TIMEOUT) {
         state = TWO_FINGER_MOVING;

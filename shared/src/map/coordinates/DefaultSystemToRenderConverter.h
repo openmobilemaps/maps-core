@@ -4,15 +4,16 @@
 
 #pragma once
 
-#include "CoordinateConverterInterface.h"
-#include "MapCoordinateSystem.h"
 #include "Coord.h"
 #include "CoordinateConversionHelper.h"
+#include "CoordinateConverterInterface.h"
 #include "CoordinateSystemIdentifiers.h"
+#include "MapCoordinateSystem.h"
 
 class DefaultSystemToRenderConverter : public CoordinateConverterInterface {
-public:
-    DefaultSystemToRenderConverter(const MapCoordinateSystem &mapCoordinateSystem): mapCoordinateSystemIdentifier(mapCoordinateSystem.identifier) {
+  public:
+    DefaultSystemToRenderConverter(const MapCoordinateSystem &mapCoordinateSystem)
+        : mapCoordinateSystemIdentifier(mapCoordinateSystem.identifier) {
         boundsLeft = mapCoordinateSystem.bounds.topLeft.x;
         boundsTop = mapCoordinateSystem.bounds.topLeft.y;
         boundsRight = mapCoordinateSystem.bounds.bottomRight.x;
@@ -27,16 +28,11 @@ public:
         return Coord(getTo(), x - halfWidth, y - halfHeight, coordinate.z);
     }
 
+    virtual std::string getFrom() override { return mapCoordinateSystemIdentifier; }
 
-    virtual std::string getFrom() override {
-        return mapCoordinateSystemIdentifier;
-    }
+    virtual std::string getTo() override { return CoordinateSystemIdentifiers::RENDERSYSTEM(); }
 
-    virtual std::string getTo() override {
-        return CoordinateSystemIdentifiers::RENDERSYSTEM();
-    }
-
-private:
+  private:
     double boundsLeft;
     double boundsTop;
     double boundsRight;

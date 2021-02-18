@@ -5,20 +5,17 @@
 #ifndef MAPSDK_COLORLINESHADEROPENGL_H
 #define MAPSDK_COLORLINESHADEROPENGL_H
 
-
-#include <vector>
-#include "LineShaderProgramInterface.h"
-#include "ColorLineShaderInterface.h"
 #include "BaseShaderProgramOpenGl.h"
+#include "ColorLineShaderInterface.h"
+#include "LineShaderProgramInterface.h"
+#include <vector>
 
-class ColorLineShaderOpenGl
-        : public BaseShaderProgramOpenGl,
-          public LineShaderProgramInterface,
-          public ColorLineShaderInterface,
-          public std::enable_shared_from_this<LineShaderProgramInterface> {
-public:
-
-    virtual std::shared_ptr <LineShaderProgramInterface> asLineShaderProgramInterface() override;
+class ColorLineShaderOpenGl : public BaseShaderProgramOpenGl,
+                              public LineShaderProgramInterface,
+                              public ColorLineShaderInterface,
+                              public std::enable_shared_from_this<LineShaderProgramInterface> {
+  public:
+    virtual std::shared_ptr<LineShaderProgramInterface> asLineShaderProgramInterface() override;
 
     virtual std::string getRectProgramName() override;
 
@@ -44,10 +41,9 @@ public:
 
     virtual void setMiter(float miter) override;
 
-private:
+  private:
     std::vector<float> lineColor;
     float miter;
 };
 
-
-#endif //MAPSDK_COLORLINESHADEROPENGL_H
+#endif // MAPSDK_COLORLINESHADEROPENGL_H

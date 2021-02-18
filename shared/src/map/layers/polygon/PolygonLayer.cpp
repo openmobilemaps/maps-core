@@ -1,27 +1,27 @@
 #include "PolygonLayer.h"
-#include "MapInterface.h"
 #include "ColorShaderInterface.h"
 #include "GraphicsObjectInterface.h"
+#include "MapInterface.h"
 #include "RenderPass.h"
 #include <map>
 
-PolygonLayer::PolygonLayer(): isHidden(false) {
+PolygonLayer::PolygonLayer()
+    : isHidden(false) {}
 
-}
-
-void PolygonLayer::setPolygons(const std::vector<Polygon> & polygons) {
+void PolygonLayer::setPolygons(const std::vector<Polygon> &polygons) {
     clear();
-    for (auto const &polygon: polygons) {
+    for (auto const &polygon : polygons) {
         add(polygon);
     }
     generateRenderPasses();
-    if (mapInterface) mapInterface->invalidate();
+    if (mapInterface)
+        mapInterface->invalidate();
 }
 
 std::vector<Polygon> PolygonLayer::getPolygons() {
     std::vector<Polygon> polygons;
     if (!mapInterface) {
-        for (auto const &polygon: addingQueue) {
+        for (auto const &polygon : addingQueue) {
             polygons.push_back(polygon);
         }
         return polygons;
@@ -32,7 +32,7 @@ std::vector<Polygon> PolygonLayer::getPolygons() {
     return polygons;
 }
 
-void PolygonLayer::remove(const Polygon & polygon) {
+void PolygonLayer::remove(const Polygon &polygon) {
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         addingQueue.erase(polygon);
@@ -40,7 +40,7 @@ void PolygonLayer::remove(const Polygon & polygon) {
     }
     {
         std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
-        for(auto it = polygons.begin(); it != polygons.end(); it++) {
+        for (auto it = polygons.begin(); it != polygons.end(); it++) {
             if (it->first.identifier == polygon.identifier) {
                 polygons.erase(it);
                 break;
@@ -48,10 +48,11 @@ void PolygonLayer::remove(const Polygon & polygon) {
         }
     }
     generateRenderPasses();
-    if (mapInterface) mapInterface->invalidate();
+    if (mapInterface)
+        mapInterface->invalidate();
 }
 
-void PolygonLayer::add(const Polygon & polygon) {
+void PolygonLayer::add(const Polygon &polygon) {
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         addingQueue.insert(polygon);
@@ -67,9 +68,8 @@ void PolygonLayer::add(const Polygon & polygon) {
 
     polygonGraphicsObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
 
-    auto polygonObject = std::make_shared<Polygon2dLayerObject>(mapInterface->getCoordinateConverterHelper(),
-                                                                polygonGraphicsObject,
-                                                                shader);
+    auto polygonObject =
+        std::make_shared<Polygon2dLayerObject>(mapInterface->getCoordinateConverterHelper(), polygonGraphicsObject, shader);
 
     polygonObject->setPositions(polygon.coordinates, polygon.holes, polygon.isConvex);
     {
@@ -77,7 +77,8 @@ void PolygonLayer::add(const Polygon & polygon) {
         polygons[polygon] = polygonObject;
     }
     generateRenderPasses();
-    if (mapInterface) mapInterface->invalidate();
+    if (mapInterface)
+        mapInterface->invalidate();
 }
 
 void PolygonLayer::clear() {
@@ -91,7 +92,8 @@ void PolygonLayer::clear() {
         polygons.clear();
     }
     generateRenderPasses();
-    if (mapInterface) mapInterface->invalidate();
+    if (mapInterface)
+        mapInterface->invalidate();
 }
 
 void PolygonLayer::pause() {
@@ -108,10 +110,7 @@ void PolygonLayer::resume() {
     }
 }
 
-std::shared_ptr<::LayerInterface> PolygonLayer::asLayerInterface() {
-    return shared_from_this();
-}
-
+std::shared_ptr<::LayerInterface> PolygonLayer::asLayerInterface() { return shared_from_this(); }
 
 void PolygonLayer::generateRenderPasses() {
     std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
@@ -123,8 +122,7 @@ void PolygonLayer::generateRenderPasses() {
     }
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
     for (const auto &passEntry : renderPassObjectMap) {
-        std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first),
-                                                                              passEntry.second);
+        std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second);
         newRenderPasses.push_back(renderPass);
     }
     renderPasses = newRenderPasses;
@@ -138,11 +136,11 @@ std::vector<std::shared_ptr<::RenderPassInterface>> PolygonLayer::buildRenderPas
     }
 }
 
-void PolygonLayer::onAdded(const std::shared_ptr<MapInterface> & mapInterface) {
+void PolygonLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
     this->mapInterface = mapInterface;
     {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
-        for (auto const &polygon: addingQueue) {
+        for (auto const &polygon : addingQueue) {
             add(polygon);
         }
         addingQueue.clear();

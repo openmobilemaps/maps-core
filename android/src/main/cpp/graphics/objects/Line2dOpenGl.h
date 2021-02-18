@@ -5,19 +5,20 @@
 #ifndef MAPSDK_LINE2DOPENGL_H
 #define MAPSDK_LINE2DOPENGL_H
 
-#include "opengl_wrapper.h"
-#include "OpenGlHelper.h"
-#include "OpenGlContext.h"
 #include "GraphicsObjectInterface.h"
-#include "LineShaderProgramInterface.h"
 #include "Line2dInterface.h"
+#include "LineShaderProgramInterface.h"
+#include "OpenGlContext.h"
+#include "OpenGlHelper.h"
+#include "opengl_wrapper.h"
 
-class Line2dOpenGl
-        : public GraphicsObjectInterface, public Line2dInterface, public std::enable_shared_from_this<GraphicsObjectInterface> {
-public:
+class Line2dOpenGl : public GraphicsObjectInterface,
+                     public Line2dInterface,
+                     public std::enable_shared_from_this<GraphicsObjectInterface> {
+  public:
     Line2dOpenGl(const std::shared_ptr<::LineShaderProgramInterface> &shader);
 
-    virtual ~Line2dOpenGl() { }
+    virtual ~Line2dOpenGl() {}
 
     virtual bool isReady() override;
 
@@ -25,14 +26,14 @@ public:
 
     virtual void clear() override;
 
-    virtual void
-    render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass, int64_t mvpMatrix) override;
+    virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
+                        int64_t mvpMatrix) override;
 
     virtual void setLinePositions(const std::vector<::Vec2D> &positions) override;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() override;
 
-protected:
+  protected:
     void initializeLineAndPoints();
 
     void drawLineSegments(std::shared_ptr<OpenGlContext> openGlContext, int64_t mvpMatrix);
@@ -51,5 +52,4 @@ protected:
     bool ready = false;
 };
 
-
-#endif //MAPSDK_LINE2DOPENGL_H
+#endif // MAPSDK_LINE2DOPENGL_H

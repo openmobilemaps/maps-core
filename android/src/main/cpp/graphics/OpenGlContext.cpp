@@ -1,8 +1,9 @@
 #include "OpenGlContext.h"
 #include "opengl_wrapper.h"
 
-OpenGlContext::OpenGlContext() : programs(), texturePointers() {
-}
+OpenGlContext::OpenGlContext()
+    : programs()
+    , texturePointers() {}
 
 int OpenGlContext::getProgram(std::string name) {
     if (programs.find(name) == programs.end()) {
@@ -12,9 +13,7 @@ int OpenGlContext::getProgram(std::string name) {
     }
 }
 
-void OpenGlContext::storeProgram(std::string name, int program) {
-    programs[name] = program;
-}
+void OpenGlContext::storeProgram(std::string name, int program) { programs[name] = program; }
 
 std::vector<unsigned int> &OpenGlContext::getTexturePointerArray(std::string name, int capacity) {
     if (texturePointers.find(name) == texturePointers.end()) {
@@ -31,8 +30,8 @@ void OpenGlContext::cleanAll() {
 
     programs.clear();
 
-    for (std::map<std::string, std::vector<unsigned int>>::iterator it = texturePointers.begin();
-         it != texturePointers.end(); ++it) {
+    for (std::map<std::string, std::vector<unsigned int>>::iterator it = texturePointers.begin(); it != texturePointers.end();
+         ++it) {
         glDeleteTextures(GLsizei(it->second.size()), &it->second[0]);
     }
     texturePointers.clear();
@@ -50,13 +49,9 @@ void OpenGlContext::setViewportSize(const ::Vec2I &size) {
     glViewport(0, 0, size.x, size.y);
 }
 
-::Vec2I OpenGlContext::getViewportSize() {
-    return viewportSize;
-}
+::Vec2I OpenGlContext::getViewportSize() { return viewportSize; }
 
-void OpenGlContext::setBackgroundColor(const Color &color) {
-    backgroundColor = color;
-}
+void OpenGlContext::setBackgroundColor(const Color &color) { backgroundColor = color; }
 
 void OpenGlContext::setupDrawFrame() {
     glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);

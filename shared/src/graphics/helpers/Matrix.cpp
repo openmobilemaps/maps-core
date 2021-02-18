@@ -11,10 +11,8 @@
  * @param m the input array
  * @param mOffset an offset into m where the input matrix is stored.
  */
-void Matrix::transposeM(std::vector<float>& mTrans, int mTransOffset, std::vector<float>& m, int mOffset)
-{
-    for(int i = 0; i < 4; i++)
-    {
+void Matrix::transposeM(std::vector<float> &mTrans, int mTransOffset, std::vector<float> &m, int mOffset) {
+    for (int i = 0; i < 4; i++) {
         int mBase = i * 4 + mOffset;
         mTrans[i + mTransOffset] = m[mBase];
         mTrans[i + 4 + mTransOffset] = m[mBase + 1];
@@ -35,8 +33,7 @@ void Matrix::transposeM(std::vector<float>& mTrans, int mTransOffset, std::vecto
  * @param mOffset an offset into m where the input matrix is stored.
  * @return true if the matrix could be inverted, false if it could not.
  */
-bool Matrix::invertM(std::vector<float>& mInv, int mInvOffset, std::vector<float>& m, int mOffset)
-{
+bool Matrix::invertM(std::vector<float> &mInv, int mInvOffset, std::vector<float> &m, int mOffset) {
     // Invert a 4 x 4 matrix using Cramer's Rule
 
     // transpose matrix
@@ -111,8 +108,7 @@ bool Matrix::invertM(std::vector<float>& mInv, int mInvOffset, std::vector<float
     // calculate determinant
     float det = src0 * dst0 + src1 * dst1 + src2 * dst2 + src3 * dst3;
 
-    if(det == 0.0f)
-    {
+    if (det == 0.0f) {
         return false;
     }
 
@@ -146,9 +142,7 @@ bool Matrix::invertM(std::vector<float>& mInv, int mInvOffset, std::vector<float
  *
  * @param m returns the result
  */
-void Matrix::orthoM(std::vector<float>& m, int mOffset, float left, float right, float bottom, float top, float near,
-                    float far)
-{
+void Matrix::orthoM(std::vector<float> &m, int mOffset, float left, float right, float bottom, float top, float near, float far) {
     float r_width = 1.0f / (right - left);
     float r_height = 1.0f / (top - bottom);
     float r_depth = 1.0f / (far - near);
@@ -183,9 +177,7 @@ void Matrix::orthoM(std::vector<float>& m, int mOffset, float left, float right,
  * @param offset the offset into float array m where the perspective
  *        matrix data is written
  */
-void Matrix::frustumM(std::vector<float>& m, int offset, float left, float right, float bottom, float top, float near,
-                      float far)
-{
+void Matrix::frustumM(std::vector<float> &m, int offset, float left, float right, float bottom, float top, float near, float far) {
     float r_width = 1.0f / (right - left);
     float r_height = 1.0f / (top - bottom);
     float r_depth = 1.0f / (near - far);
@@ -223,8 +215,7 @@ void Matrix::frustumM(std::vector<float>& m, int offset, float left, float right
  * @param fovy field of view in y direction, in degrees
  * @param aspect width to height aspect ratio of the viewport
  */
-void Matrix::perspectiveM(std::vector<float>& m, int offset, float fovy, float aspect, float zNear, float zFar)
-{
+void Matrix::perspectiveM(std::vector<float> &m, int offset, float fovy, float aspect, float zNear, float zFar) {
     float f = 1.0f / (float)std::tan(fovy * (M_PI / 360.0));
     float rangeReciprocal = 1.0f / (zNear - zFar);
 
@@ -257,10 +248,7 @@ void Matrix::perspectiveM(std::vector<float>& m, int offset, float fovy, float a
  * @param z z coordinate of a vector
  * @return the length of a vector
  */
-float Matrix::length(float x, float y, float z)
-{
-    return (float)std::sqrt(x * x + y * y + z * z);
-}
+float Matrix::length(float x, float y, float z) { return (float)std::sqrt(x * x + y * y + z * z); }
 
 /**
  * Sets matrix m to the identity matrix.
@@ -268,14 +256,11 @@ float Matrix::length(float x, float y, float z)
  * @param sm returns the result
  * @param smOffset index into sm where the result matrix starts
  */
-void Matrix::setIdentityM(std::vector<float>& sm, int smOffset)
-{
-    for(int i = 0; i < 16; i++)
-    {
+void Matrix::setIdentityM(std::vector<float> &sm, int smOffset) {
+    for (int i = 0; i < 16; i++) {
         sm[smOffset + i] = 0;
     }
-    for(int i = 0; i < 16; i += 5)
-    {
+    for (int i = 0; i < 16; i += 5) {
         sm[smOffset + i] = 1.0f;
     }
 }
@@ -293,10 +278,8 @@ void Matrix::setIdentityM(std::vector<float>& sm, int smOffset)
  * @param y zoom factor y
  * @param z zoom factor z
  */
-void Matrix::scaleM(std::vector<float>& sm, int smOffset, std::vector<float>& m, int mOffset, float x, float y, float z)
-{
-    for(int i = 0; i < 4; i++)
-    {
+void Matrix::scaleM(std::vector<float> &sm, int smOffset, std::vector<float> &m, int mOffset, float x, float y, float z) {
+    for (int i = 0; i < 4; i++) {
         int smi = smOffset + i;
         int mi = mOffset + i;
         sm[smi] = m[mi] * x;
@@ -315,10 +298,8 @@ void Matrix::scaleM(std::vector<float>& sm, int smOffset, std::vector<float>& m,
  * @param y zoom factor y
  * @param z zoom factor z
  */
-void Matrix::scaleM(std::vector<float>& m, int mOffset, float x, float y, float z)
-{
-    for(int i = 0; i < 4; i++)
-    {
+void Matrix::scaleM(std::vector<float> &m, int mOffset, float x, float y, float z) {
+    for (int i = 0; i < 4; i++) {
         int mi = mOffset + i;
         m[mi] *= x;
         m[4 + mi] *= y;
@@ -339,15 +320,11 @@ void Matrix::scaleM(std::vector<float>& m, int mOffset, float x, float y, float 
  * @param y translation factor y
  * @param z translation factor z
  */
-void Matrix::translateM(std::vector<float>& tm, int tmOffset, std::vector<float>& m, int mOffset, float x, float y,
-                        float z)
-{
-    for(int i = 0; i < 12; i++)
-    {
+void Matrix::translateM(std::vector<float> &tm, int tmOffset, std::vector<float> &m, int mOffset, float x, float y, float z) {
+    for (int i = 0; i < 12; i++) {
         tm[tmOffset + i] = m[mOffset + i];
     }
-    for(int i = 0; i < 4; i++)
-    {
+    for (int i = 0; i < 4; i++) {
         int tmi = tmOffset + i;
         int mi = mOffset + i;
         tm[12 + tmi] = m[mi] * x + m[4 + mi] * y + m[8 + mi] * z + m[12 + mi];
@@ -363,10 +340,8 @@ void Matrix::translateM(std::vector<float>& tm, int tmOffset, std::vector<float>
  * @param y translation factor y
  * @param z translation factor z
  */
-void Matrix::translateM(std::vector<float>& m, int mOffset, float x, float y, float z)
-{
-    for(int i = 0; i < 4; i++)
-    {
+void Matrix::translateM(std::vector<float> &m, int mOffset, float x, float y, float z) {
+    for (int i = 0; i < 4; i++) {
         int mi = mOffset + i;
         m[12 + mi] += m[mi] * x + m[4 + mi] * y + m[8 + mi] * z;
     }
@@ -388,9 +363,8 @@ void Matrix::translateM(std::vector<float>& m, int mOffset, float x, float y, fl
  * @param upY up vector Y
  * @param upZ up vector Z
  */
-void Matrix::setLookAtM(std::vector<float>& rm, int rmOffset, float eyeX, float eyeY, float eyeZ, float centerX,
-                        float centerY, float centerZ, float upX, float upY, float upZ)
-{
+void Matrix::setLookAtM(std::vector<float> &rm, int rmOffset, float eyeX, float eyeY, float eyeZ, float centerX, float centerY,
+                        float centerZ, float upX, float upY, float upZ) {
 
     // See the OpenGL GLUT documentation for gluLookAt for a description
     // of the algorithm. We implement it in a straightforward way:
@@ -457,12 +431,10 @@ std::vector<float> Matrix::sTemp = std::vector<float>(32, 0);
  * @param y Y axis component
  * @param z Z axis component
  */
-void Matrix::rotateM(std::vector<float>& m, int mOffset, float a, float x, float y, float z)
-{
+void Matrix::rotateM(std::vector<float> &m, int mOffset, float a, float x, float y, float z) {
     setRotateM(sTemp, 0, a, x, y, z);
     multiplyMM(sTemp, 16, m, mOffset, sTemp, 0);
-    for(int i = 0; i < 16; i++)
-    {
+    for (int i = 0; i < 16; i++) {
         m[mOffset + i] = sTemp[16 + i];
     }
 }
@@ -481,8 +453,7 @@ void Matrix::rotateM(std::vector<float>& m, int mOffset, float a, float x, float
  * @param y Y axis component
  * @param z Z axis component
  */
-void Matrix::setRotateM(std::vector<float>& rm, int rmOffset, float a, float x, float y, float z)
-{
+void Matrix::setRotateM(std::vector<float> &rm, int rmOffset, float a, float x, float y, float z) {
     rm[rmOffset + 3] = 0;
     rm[rmOffset + 7] = 0;
     rm[rmOffset + 11] = 0;
@@ -493,8 +464,7 @@ void Matrix::setRotateM(std::vector<float>& rm, int rmOffset, float a, float x, 
     a *= (float)(M_PI / 180.0f);
     float s = (float)sin(a);
     float c = (float)cos(a);
-    if(1.0f == x && 0.0f == y && 0.0f == z)
-    {
+    if (1.0f == x && 0.0f == y && 0.0f == z) {
         rm[rmOffset + 5] = c;
         rm[rmOffset + 10] = c;
         rm[rmOffset + 6] = s;
@@ -504,9 +474,7 @@ void Matrix::setRotateM(std::vector<float>& rm, int rmOffset, float a, float x, 
         rm[rmOffset + 4] = 0;
         rm[rmOffset + 8] = 0;
         rm[rmOffset + 0] = 1;
-    }
-    else if(0.0f == x && 1.0f == y && 0.0f == z)
-    {
+    } else if (0.0f == x && 1.0f == y && 0.0f == z) {
         rm[rmOffset + 0] = c;
         rm[rmOffset + 10] = c;
         rm[rmOffset + 8] = s;
@@ -516,9 +484,7 @@ void Matrix::setRotateM(std::vector<float>& rm, int rmOffset, float a, float x, 
         rm[rmOffset + 6] = 0;
         rm[rmOffset + 9] = 0;
         rm[rmOffset + 5] = 1;
-    }
-    else if(0.0f == x && 0.0f == y && 1.0f == z)
-    {
+    } else if (0.0f == x && 0.0f == y && 1.0f == z) {
         rm[rmOffset + 0] = c;
         rm[rmOffset + 5] = c;
         rm[rmOffset + 1] = s;
@@ -528,12 +494,9 @@ void Matrix::setRotateM(std::vector<float>& rm, int rmOffset, float a, float x, 
         rm[rmOffset + 8] = 0;
         rm[rmOffset + 9] = 0;
         rm[rmOffset + 10] = 1;
-    }
-    else
-    {
+    } else {
         float len = length(x, y, z);
-        if(1.0f != len)
-        {
+        if (1.0f != len) {
             float recipLen = 1.0f / len;
             x *= recipLen;
             y *= recipLen;
@@ -560,18 +523,15 @@ void Matrix::setRotateM(std::vector<float>& rm, int rmOffset, float a, float x, 
 
 #define I(_i, _j) ((_j) + 4 * (_i))
 
-void Matrix::multiplyMM(std::vector<float>& r, int resultOffset, std::vector<float>& lhs, int lhsOffset,
-                        std::vector<float>& rhs, int rhsOffset)
-{
-    for(int i = 0; i < 4; i++)
-    {
+void Matrix::multiplyMM(std::vector<float> &r, int resultOffset, std::vector<float> &lhs, int lhsOffset, std::vector<float> &rhs,
+                        int rhsOffset) {
+    for (int i = 0; i < 4; i++) {
         const float rhs_i0 = rhs[rhsOffset + I(i, 0)];
         float ri0 = lhs[lhsOffset + I(0, 0)] * rhs_i0;
         float ri1 = lhs[lhsOffset + I(0, 1)] * rhs_i0;
         float ri2 = lhs[lhsOffset + I(0, 2)] * rhs_i0;
         float ri3 = lhs[lhsOffset + I(0, 3)] * rhs_i0;
-        for(int j = 1; j < 4; j++)
-        {
+        for (int j = 1; j < 4; j++) {
             const float rhs_ij = rhs[rhsOffset + I(i, j)];
             ri0 += lhs[lhsOffset + I(j, 0)] * rhs_ij;
             ri1 += lhs[lhsOffset + I(j, 1)] * rhs_ij;
@@ -585,16 +545,13 @@ void Matrix::multiplyMM(std::vector<float>& r, int resultOffset, std::vector<flo
     }
 }
 
-std::vector<float> Matrix::multiply(const std::vector<float>& M, const std::vector<float>& x)
-{
+std::vector<float> Matrix::multiply(const std::vector<float> &M, const std::vector<float> &x) {
     // calculates Mx and returns result
-    std::vector<float> result = {0.0,0.0,0.0,0.0};
+    std::vector<float> result = {0.0, 0.0, 0.0, 0.0};
 
-    for (int i = 0; i < 4; i++)
-    {
-        for (int j = 0; j < 4; j++)
-        {
-            result[i] += M[I(j,i)] * x[j];
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            result[i] += M[I(j, i)] * x[j];
         }
     }
 

@@ -2,18 +2,15 @@
 // Created by Christoph Maurhofer on 28.01.2021.
 //
 
-#include "OpenGlHelper.h"
 #include "Polygon2dOpenGl.h"
+#include "OpenGlHelper.h"
 
-Polygon2dOpenGl::Polygon2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader) : shaderProgram(shader) {}
+Polygon2dOpenGl::Polygon2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
+    : shaderProgram(shader) {}
 
-std::shared_ptr<GraphicsObjectInterface> Polygon2dOpenGl::asGraphicsObject() {
-    return shared_from_this();
-}
+std::shared_ptr<GraphicsObjectInterface> Polygon2dOpenGl::asGraphicsObject() { return shared_from_this(); }
 
-bool Polygon2dOpenGl::isReady() {
-    return ready;
-}
+bool Polygon2dOpenGl::isReady() { return ready; }
 
 void Polygon2dOpenGl::setPolygonPositions(const std::vector<::Vec2D> &positions, const std::vector<std::vector<::Vec2D>> &holes,
                                           bool isConvex) {
@@ -24,7 +21,8 @@ void Polygon2dOpenGl::setPolygonPositions(const std::vector<::Vec2D> &positions,
 }
 
 void Polygon2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
-    if (ready) return;
+    if (ready)
+        return;
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     if (openGlContext->getProgram(shaderProgram->getProgramName()) == 0) {
@@ -76,7 +74,8 @@ void Polygon2dOpenGl::clear() {
 
 void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                              int64_t mvpMatrix) {
-    if (!ready) return;
+    if (!ready)
+        return;
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     int program = openGlContext->getProgram(shaderProgram->getProgramName());
@@ -128,7 +127,7 @@ void Polygon2dOpenGl::drawPolygon(std::shared_ptr<OpenGlContext> openGlContext, 
     OpenGlHelper::checkGlError("glGetUniformLocation");
 
     // Apply the projection and view transformation
-    glUniformMatrix4fv(mMVPMatrixHandle, 1, false, (GLfloat *) mvpMatrix);
+    glUniformMatrix4fv(mMVPMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
     OpenGlHelper::checkGlError("glUniformMatrix4fv");
 
     glEnable(GL_BLEND);
@@ -140,12 +139,10 @@ void Polygon2dOpenGl::drawPolygon(std::shared_ptr<OpenGlContext> openGlContext, 
     glVertexAttribPointer(positionHandle, 3, GL_FLOAT, false, 12, &vertexBuffer[0]);
 
     // Draw the triangle
-    glDrawElements(GL_TRIANGLES, (unsigned short) indexBuffer.size(), GL_UNSIGNED_SHORT, &indexBuffer[0]);
+    glDrawElements(GL_TRIANGLES, (unsigned short)indexBuffer.size(), GL_UNSIGNED_SHORT, &indexBuffer[0]);
 
     // Disable vertex array
     glDisableVertexAttribArray(positionHandle);
 
     glDisable(GL_BLEND);
 }
-
-

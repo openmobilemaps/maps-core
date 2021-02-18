@@ -1,26 +1,23 @@
 #pragma once
 
-#include "SimpleTouchInterface.h"
 #include "CameraInterface.h"
-#include "MapCamera2dInterface.h"
-#include "MapCoordinateSystem.h"
-#include "MapCamera2dListenerInterface.h"
-#include "CoordinateConversionHelperInterface.h"
-#include <set>
-#include <optional>
 #include "Coord.h"
+#include "CoordinateConversionHelperInterface.h"
+#include "MapCamera2dInterface.h"
+#include "MapCamera2dListenerInterface.h"
+#include "MapCoordinateSystem.h"
+#include "SimpleTouchInterface.h"
+#include <optional>
+#include <set>
 
-class MapCamera2d
-        : public MapCamera2dInterface,
-          public CameraInterface,
-          public SimpleTouchInterface,
-          public std::enable_shared_from_this<CameraInterface> {
-public:
-    MapCamera2d(
-            const std::shared_ptr<MapInterface> &mapInterface,
-            float screenDensityPpi);
+class MapCamera2d : public MapCamera2dInterface,
+                    public CameraInterface,
+                    public SimpleTouchInterface,
+                    public std::enable_shared_from_this<CameraInterface> {
+  public:
+    MapCamera2d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi);
 
-    ~MapCamera2d() {};
+    ~MapCamera2d(){};
 
     virtual void moveToCenterPositionZoom(const ::Coord &centerPosition, double zoom, bool animated) override;
 
@@ -52,14 +49,13 @@ public:
 
     virtual bool onDoubleClick(const ::Vec2F &posScreen) override;
 
-    virtual bool onTwoFingerMove(const std::vector< ::Vec2F> &posScreenOld, const std::vector< ::Vec2F> &posScreenNew) override;
+    virtual bool onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) override;
 
     virtual void viewportSizeChanged() override;
 
     virtual RectCoord getVisibleRect() override;
 
-protected:
-
+  protected:
     std::set<std::shared_ptr<MapCamera2dListenerInterface>> listeners;
 
     std::shared_ptr<MapInterface> mapInterface;
@@ -83,7 +79,7 @@ protected:
         bool twoFingerZoomEnabled = true;
         bool moveEnabled = true;
     };
-              
+
     CameraConfiguration config;
 
     void notifyListeners();
@@ -92,12 +88,12 @@ protected:
     // MARK: Animations
 
     struct CameraAnimation {
-      Coord startCenterPosition;
-      double startZoom;
-      Coord targetCenterPosition;
-      double targetZoom;
-      long long startTime;
-      long long duration;
+        Coord startCenterPosition;
+        double startZoom;
+        Coord targetCenterPosition;
+        double targetZoom;
+        long long startTime;
+        long long duration;
     };
 
     std::optional<CameraAnimation> cameraAnimation;

@@ -6,18 +6,16 @@
 
 Line2dLayerObject::Line2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                      const std::shared_ptr<Line2dInterface> &line,
-                                     const std::shared_ptr<ColorLineShaderInterface> &shader) : conversionHelper(
-        conversionHelper), line(line), shader(shader) {
-    renderConfig = { std::make_shared<RenderConfig>(line->asGraphicsObject(), 0) };
+                                     const std::shared_ptr<ColorLineShaderInterface> &shader)
+    : conversionHelper(conversionHelper)
+    , line(line)
+    , shader(shader) {
+    renderConfig = {std::make_shared<RenderConfig>(line->asGraphicsObject(), 0)};
 }
 
-void Line2dLayerObject::update() {
+void Line2dLayerObject::update() {}
 
-}
-
-std::vector<std::shared_ptr<RenderConfigInterface>> Line2dLayerObject::getRenderConfig() {
-    return renderConfig;
-}
+std::vector<std::shared_ptr<RenderConfigInterface>> Line2dLayerObject::getRenderConfig() { return renderConfig; }
 
 void Line2dLayerObject::setPositions(std::vector<Coord> positions) {
     std::vector<Vec2D> renderCoords;
@@ -28,10 +26,6 @@ void Line2dLayerObject::setPositions(std::vector<Coord> positions) {
     line->setLinePositions(renderCoords);
 }
 
-std::shared_ptr<GraphicsObjectInterface> Line2dLayerObject::getLineObject() {
-    return line->asGraphicsObject();
-}
+std::shared_ptr<GraphicsObjectInterface> Line2dLayerObject::getLineObject() { return line->asGraphicsObject(); }
 
-std::shared_ptr<LineShaderProgramInterface> Line2dLayerObject::getShaderProgram() {
-    return shader->asLineShaderProgramInterface();
-}
+std::shared_ptr<LineShaderProgramInterface> Line2dLayerObject::getShaderProgram() { return shader->asLineShaderProgramInterface(); }

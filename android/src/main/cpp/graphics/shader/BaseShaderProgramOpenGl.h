@@ -7,12 +7,12 @@
 
 #define UBRendererShaderCode(...) #__VA_ARGS__
 
-#include "ShaderProgramInterface.h"
 #include "../logger/Logger.h"
+#include "ShaderProgramInterface.h"
 #include "opengl_wrapper.h"
 
 class BaseShaderProgramOpenGl {
-protected:
+  protected:
     int loadShader(int type, std::string shaderCode);
 
     void checkGlProgramLinking(GLuint program);
@@ -22,5 +22,4 @@ protected:
     virtual std::string getFragmentShader();
 };
 
-
-#endif //SWISSTOPO_BASESHADERPROGRAMOPENGL_H
+#endif // SWISSTOPO_BASESHADERPROGRAMOPENGL_H

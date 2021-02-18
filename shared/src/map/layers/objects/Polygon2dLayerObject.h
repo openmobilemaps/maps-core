@@ -1,21 +1,21 @@
 #pragma once
 
+#include "ColorShaderInterface.h"
+#include "Coord.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "LayerObjectInterface.h"
 #include "Polygon2dInterface.h"
-#include "ColorShaderInterface.h"
-#include "Vec2D.h"
 #include "RenderConfig.h"
-#include "Coord.h"
+#include "Vec2D.h"
 
 class Polygon2dLayerObject : public LayerObjectInterface {
-public:
+  public:
     Polygon2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                          const std::shared_ptr<Polygon2dInterface> &polygon, const std::shared_ptr<ColorShaderInterface> &shader);
 
     virtual ~Polygon2dLayerObject() override {}
 
-    virtual void update() override {};
+    virtual void update() override{};
 
     virtual std::vector<std::shared_ptr<RenderConfigInterface>> getRenderConfig() override;
 
@@ -25,7 +25,7 @@ public:
 
     std::shared_ptr<ShaderProgramInterface> getShaderProgram();
 
-private:
+  private:
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
     std::shared_ptr<Polygon2dInterface> polygon;
     std::shared_ptr<ColorShaderInterface> shader;

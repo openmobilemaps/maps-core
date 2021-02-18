@@ -1,15 +1,15 @@
 #pragma once
 
-#include "CoordinateConverterInterface.h"
-#include "MapCoordinateSystem.h"
 #include "Coord.h"
 #include "CoordinateConversionHelper.h"
+#include "CoordinateConverterInterface.h"
 #include "CoordinateSystemIdentifiers.h"
+#include "MapCoordinateSystem.h"
 
 /// Convert WGS84 to WGS 84 / Pseudo-Mercator
 ///  https://epsg.io/4326 to https://epsg.io/3857
 class EPSG4326ToEPSG3857Converter : public CoordinateConverterInterface {
-public:
+  public:
     EPSG4326ToEPSG3857Converter() {}
 
     virtual Coord convert(const Coord &coordinate) override {
@@ -21,11 +21,7 @@ public:
         return Coord(getTo(), x, y, 0);
     }
 
-    virtual std::string getFrom() override {
-        return CoordinateSystemIdentifiers::EPSG4326();
-    }
+    virtual std::string getFrom() override { return CoordinateSystemIdentifiers::EPSG4326(); }
 
-    virtual std::string getTo() override {
-        return CoordinateSystemIdentifiers::EPSG3857();
-    }
+    virtual std::string getTo() override { return CoordinateSystemIdentifiers::EPSG3857(); }
 };

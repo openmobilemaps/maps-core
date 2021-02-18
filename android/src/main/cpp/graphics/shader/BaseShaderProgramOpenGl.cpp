@@ -10,7 +10,7 @@ int BaseShaderProgramOpenGl::loadShader(int type, std::string shaderCode) {
     // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
     int shader = glCreateShader(type);
 
-    //LogInfo << "Compiling Shader Code: " <<= shaderCode;
+    // LogInfo << "Compiling Shader Code: " <<= shaderCode;
 
     // add the source code to the shader and compile it
     const char *code = shaderCode.c_str();
@@ -63,25 +63,17 @@ void BaseShaderProgramOpenGl::checkGlProgramLinking(GLuint program) {
 }
 
 std::string BaseShaderProgramOpenGl::getVertexShader() {
-    return UBRendererShaderCode(uniform
-                                        mat4 uMVPMatrix;
-                                        attribute vec4 vPosition;
-                                        attribute vec2 texCoordinate;
-                                        varying vec2 v_texcoord;
+    return UBRendererShaderCode(uniform mat4 uMVPMatrix; attribute vec4 vPosition; attribute vec2 texCoordinate;
+                                varying vec2 v_texcoord;
 
-                                        void main() {
-                                            gl_Position = uMVPMatrix * vPosition;
-                                            v_texcoord = texCoordinate;
-                                        });
+                                void main() {
+                                    gl_Position = uMVPMatrix * vPosition;
+                                    v_texcoord = texCoordinate;
+                                });
 }
 
 std::string BaseShaderProgramOpenGl::getFragmentShader() {
-    return UBRendererShaderCode(precision
-                                        mediump float;
-                                        uniform sampler2D u_texture;
-                                        varying vec2 v_texcoord;
+    return UBRendererShaderCode(precision mediump float; uniform sampler2D u_texture; varying vec2 v_texcoord;
 
-                                        void main() {
-                                            gl_FragColor = texture2D(u_texture, v_texcoord);
-                                        });
+                                void main() { gl_FragColor = texture2D(u_texture, v_texcoord); });
 }

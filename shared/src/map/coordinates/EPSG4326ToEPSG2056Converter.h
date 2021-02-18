@@ -1,15 +1,15 @@
 #pragma once
 
-#include "CoordinateConverterInterface.h"
-#include "MapCoordinateSystem.h"
 #include "Coord.h"
 #include "CoordinateConversionHelper.h"
+#include "CoordinateConverterInterface.h"
 #include "CoordinateSystemIdentifiers.h"
+#include "MapCoordinateSystem.h"
 
 /// Convert WGS 84 / Pseudo-Mercator to LV03
 ///  https://epsg.io/4326 to https://epsg.io/2056
 class EPSG4326ToEPSG2056Converter : public CoordinateConverterInterface {
-public:
+  public:
     EPSG4326ToEPSG2056Converter() {}
 
     virtual Coord convert(const Coord &coordinate) override {
@@ -34,21 +34,16 @@ public:
 
         y += 1000000;
         x += 2000000;
-        
+
         return Coord(getTo(), x, y, 0);
     }
 
-    virtual std::string getFrom() override {
-        return CoordinateSystemIdentifiers::EPSG4326();
-    }
+    virtual std::string getFrom() override { return CoordinateSystemIdentifiers::EPSG4326(); }
 
-    virtual std::string getTo() override {
-        return CoordinateSystemIdentifiers::EPSG2056();
-    }
+    virtual std::string getTo() override { return CoordinateSystemIdentifiers::EPSG2056(); }
 
-private:
-    double DECtoSEX(double angle)
-    {
+  private:
+    double DECtoSEX(double angle) {
         // Extract DMS
         double deg = angle;
         double min = (angle - deg) * 60;
@@ -59,8 +54,7 @@ private:
     }
 
     // Convert Degrees angle to seconds
-    double DEGtoSEC(double angle)
-    {
+    double DEGtoSEC(double angle) {
         // Extract DMS
         double deg = angle;
         double min = (angle - deg) * 100;
@@ -69,5 +63,4 @@ private:
         // Result in degrees sex (dd.mmss)
         return sec + min * 60 + deg * 3600;
     }
-
 };

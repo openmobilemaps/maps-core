@@ -2,13 +2,11 @@
 // Created by Christoph Maurhofer on 26.02.2020.
 //
 
+#include "ColorShaderOpenGl.h"
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
-#include "ColorShaderOpenGl.h"
 
-std::string ColorShaderOpenGl::getProgramName() {
-    return "UBMAP_ColorShaderOpenGl";
-}
+std::string ColorShaderOpenGl::getProgramName() { return "UBMAP_ColorShaderOpenGl"; }
 
 void ColorShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
@@ -45,32 +43,19 @@ void ColorShaderOpenGl::setColor(float red, float green, float blue, float alpha
 }
 
 std::string ColorShaderOpenGl::getVertexShader() {
-    return UBRendererShaderCode(precision
-                                        highp float;
-                                        uniform
-                                        mat4 uMVPMatrix;
-                                        attribute
-                                        vec4 vPosition;
+    return UBRendererShaderCode(precision highp float; uniform mat4 uMVPMatrix; attribute vec4 vPosition;
 
-                                        void main() {
-                                            gl_Position = uMVPMatrix * vPosition;
-                                        });
+                                void main() { gl_Position = uMVPMatrix * vPosition; });
 }
 
 std::string ColorShaderOpenGl::getFragmentShader() {
-    return UBRendererShaderCode(precision
-                                        mediump float;
-                                        uniform
-                                        vec4 vColor;
+    return UBRendererShaderCode(precision mediump float; uniform vec4 vColor;
 
-                                        void main() {
-                                            gl_FragColor = vColor;
-                                            gl_FragColor.a = 1.0;
-                                            gl_FragColor *= vColor.a;
-                                        });
+                                void main() {
+                                    gl_FragColor = vColor;
+                                    gl_FragColor.a = 1.0;
+                                    gl_FragColor *= vColor.a;
+                                });
 }
 
-std::shared_ptr<ShaderProgramInterface>
-ColorShaderOpenGl::asShaderProgramInterface() {
-    return shared_from_this();
-}
+std::shared_ptr<ShaderProgramInterface> ColorShaderOpenGl::asShaderProgramInterface() { return shared_from_this(); }

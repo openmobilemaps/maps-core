@@ -1,53 +1,40 @@
 #include "MapScene.h"
-#include "MapCallbackInterface.h"
+#include "CoordinateConversionHelper.h"
 #include "DefaultTouchHandlerInterface.h"
+#include "LambdaTask.h"
+#include "LayerInterface.h"
+#include "MapCallbackInterface.h"
 #include "MapCamera2dInterface.h"
 #include "TouchInterface.h"
 #include <algorithm>
-#include "LambdaTask.h"
-#include "CoordinateConversionHelper.h"
-#include "LayerInterface.h"
 
-MapScene::MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig & mapConfig, const std::shared_ptr<::SchedulerInterface> & scheduler,
-                   float pixelDensity):
-scene(scene),
-mapConfig(mapConfig),
-scheduler(scheduler),
-conversionHelper(std::make_shared<CoordinateConversionHelper>(mapConfig.mapCoordinateSystem)){
+MapScene::MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig &mapConfig,
+                   const std::shared_ptr<::SchedulerInterface> &scheduler, float pixelDensity)
+    : scene(scene)
+    , mapConfig(mapConfig)
+    , scheduler(scheduler)
+    , conversionHelper(std::make_shared<CoordinateConversionHelper>(mapConfig.mapCoordinateSystem)) {
     // add default touch handler
     setTouchHandler(DefaultTouchHandlerInterface::create(scheduler, pixelDensity));
 
     // workaround to use sharedpointer to self from constructor
-    auto ptr = std::shared_ptr<MapScene>( this, [](MapScene*){} );
+    auto ptr = std::shared_ptr<MapScene>(this, [](MapScene *) {});
 
     // add default camera
     setCamera(MapCamera2dInterface::create(ptr, pixelDensity));
 }
 
-std::shared_ptr<::GraphicsObjectFactoryInterface> MapScene::getGraphicsObjectFactory() {
-    return scene->getGraphicsFactory();
-}
+std::shared_ptr<::GraphicsObjectFactoryInterface> MapScene::getGraphicsObjectFactory() { return scene->getGraphicsFactory(); }
 
-std::shared_ptr<::ShaderFactoryInterface> MapScene::getShaderFactory() {
-    return scene->getShaderFactory();
-}
+std::shared_ptr<::ShaderFactoryInterface> MapScene::getShaderFactory() { return scene->getShaderFactory(); }
 
-std::shared_ptr<::SchedulerInterface> MapScene::getScheduler() {
-    return scheduler;
-}
+std::shared_ptr<::SchedulerInterface> MapScene::getScheduler() { return scheduler; }
 
-std::shared_ptr<::RenderingContextInterface> MapScene::getRenderingContext() {
-    return scene->getRenderingContext();
-}
+std::shared_ptr<::RenderingContextInterface> MapScene::getRenderingContext() { return scene->getRenderingContext(); }
 
-MapConfig MapScene::getMapConfig() {
-    return mapConfig;
-}
+MapConfig MapScene::getMapConfig() { return mapConfig; }
 
-std::shared_ptr<::CoordinateConversionHelperInterface> MapScene::getCoordinateConverterHelper() {
-    return conversionHelper;
-}
-
+std::shared_ptr<::CoordinateConversionHelperInterface> MapScene::getCoordinateConverterHelper() { return conversionHelper; }
 
 void MapScene::setCallbackHandler(const std::shared_ptr<MapCallbackInterface> &callbackInterface) {
     scene->setCallbackHandler(shared_from_this());
@@ -67,11 +54,9 @@ void MapScene::setCamera(const std::shared_ptr<::MapCamera2dInterface> &camera) 
     scene->setCamera(camera->asCameraInterface());
 }
 
-std::shared_ptr<::MapCamera2dInterface> MapScene::getCamera() {
-    return camera;
-}
+std::shared_ptr<::MapCamera2dInterface> MapScene::getCamera() { return camera; }
 
-void MapScene::setTouchHandler(const std::shared_ptr<::TouchHandlerInterface> & touchHandler) {
+void MapScene::setTouchHandler(const std::shared_ptr<::TouchHandlerInterface> &touchHandler) {
     auto currentCamera = std::dynamic_pointer_cast<TouchInterface>(scene->getCamera());
     if (this->touchHandler && currentCamera) {
         this->touchHandler->removeListener(currentCamera);
@@ -82,14 +67,9 @@ void MapScene::setTouchHandler(const std::shared_ptr<::TouchHandlerInterface> & 
     }
 }
 
-std::shared_ptr<::TouchHandlerInterface> MapScene::getTouchHandler() {
-    return touchHandler;
-}
+std::shared_ptr<::TouchHandlerInterface> MapScene::getTouchHandler() { return touchHandler; }
 
-
-std::vector<std::shared_ptr<LayerInterface>> MapScene::getLayers() {
-    return layers;
-};
+std::vector<std::shared_ptr<LayerInterface>> MapScene::getLayers() { return layers; };
 
 void MapScene::addLayer(const std::shared_ptr<::LayerInterface> &layer) {
     layer->onAdded(shared_from_this());
@@ -97,14 +77,14 @@ void MapScene::addLayer(const std::shared_ptr<::LayerInterface> &layer) {
     layers.push_back(layer);
 }
 
-void MapScene::insertLayerAt(const std::shared_ptr<LayerInterface> & layer, int32_t atIndex) {
+void MapScene::insertLayerAt(const std::shared_ptr<LayerInterface> &layer, int32_t atIndex) {
     layer->onAdded(shared_from_this());
     std::lock_guard<std::recursive_mutex> lock(layersMutex);
     auto it = layers.begin() + atIndex;
     layers.insert(it, layer);
 };
 
-void MapScene::insertLayerAbove(const std::shared_ptr<LayerInterface> & layer, const std::shared_ptr<LayerInterface> & above) {
+void MapScene::insertLayerAbove(const std::shared_ptr<LayerInterface> &layer, const std::shared_ptr<LayerInterface> &above) {
     layer->onAdded(shared_from_this());
     std::lock_guard<std::recursive_mutex> lock(layersMutex);
     auto position = std::find(std::begin(layers), std::end(layers), above);
@@ -114,7 +94,7 @@ void MapScene::insertLayerAbove(const std::shared_ptr<LayerInterface> & layer, c
     layers.insert(++position, layer);
 };
 
-void MapScene::insertLayerBelow(const std::shared_ptr<LayerInterface> & layer, const std::shared_ptr<LayerInterface> & below) {
+void MapScene::insertLayerBelow(const std::shared_ptr<LayerInterface> &layer, const std::shared_ptr<LayerInterface> &below) {
     layer->onAdded(shared_from_this());
     std::lock_guard<std::recursive_mutex> lock(layersMutex);
     auto position = std::find(std::begin(layers), std::end(layers), below);
@@ -130,15 +110,12 @@ void MapScene::removeLayer(const std::shared_ptr<::LayerInterface> &layer) {
     layers.erase(std::remove(layers.begin(), layers.end(), layer), layers.end());
 }
 
-
 void MapScene::setViewportSize(const ::Vec2I &size) {
     getRenderingContext()->setViewportSize(size);
     camera->asCameraInterface()->viewportSizeChanged();
 }
 
-void MapScene::setBackgroundColor(const Color &color) {
-    getRenderingContext()->setBackgroundColor(color);
-}
+void MapScene::setBackgroundColor(const Color &color) { getRenderingContext()->setBackgroundColor(color); }
 
 void MapScene::invalidate() {
     if (auto handler = callbackHandler) {
@@ -147,7 +124,8 @@ void MapScene::invalidate() {
 }
 
 void MapScene::drawFrame() {
-    if (!isResumed) return;
+    if (!isResumed)
+        return;
 
     for (const auto &layer : layers) {
         layer->update();
@@ -164,28 +142,20 @@ void MapScene::drawFrame() {
 
 void MapScene::resume() {
     isResumed = true;
-    scheduler->addTask(std::make_shared<LambdaTask>(
-            TaskConfig("MapScene_pause",
-                       0,
-                       TaskPriority::NORMAL,
-                       ExecutionEnvironment::GRAPHICS),
-            [=] {
-                for (const auto &layer : layers) {
-                    layer->resume();
-                }
-            }));
+    scheduler->addTask(
+        std::make_shared<LambdaTask>(TaskConfig("MapScene_pause", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [=] {
+            for (const auto &layer : layers) {
+                layer->resume();
+            }
+        }));
 }
 
 void MapScene::pause() {
     isResumed = false;
-    scheduler->addTask(std::make_shared<LambdaTask>(
-            TaskConfig("MapScene_pause",
-                       0,
-                       TaskPriority::NORMAL,
-                       ExecutionEnvironment::GRAPHICS),
-            [=] {
-                for (const auto &layer : layers) {
-                    layer->pause();
-                }
-            }));
+    scheduler->addTask(
+        std::make_shared<LambdaTask>(TaskConfig("MapScene_pause", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [=] {
+            for (const auto &layer : layers) {
+                layer->pause();
+            }
+        }));
 }

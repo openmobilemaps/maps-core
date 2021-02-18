@@ -2,18 +2,15 @@
 // Created by Christoph on 28.01.2021.
 //
 
-#include <cmath>
 #include "Line2dOpenGl.h"
+#include <cmath>
 
-Line2dOpenGl::Line2dOpenGl(const std::shared_ptr<::LineShaderProgramInterface> &shader) : shaderProgram(shader) {}
+Line2dOpenGl::Line2dOpenGl(const std::shared_ptr<::LineShaderProgramInterface> &shader)
+    : shaderProgram(shader) {}
 
-std::shared_ptr<GraphicsObjectInterface> Line2dOpenGl::asGraphicsObject() {
-    return shared_from_this();
-}
+std::shared_ptr<GraphicsObjectInterface> Line2dOpenGl::asGraphicsObject() { return shared_from_this(); }
 
-bool Line2dOpenGl::isReady() {
-    return ready;
-}
+bool Line2dOpenGl::isReady() { return ready; }
 
 void Line2dOpenGl::setLinePositions(const std::vector<::Vec2D> &positions) {
     lineCoordinates = positions;
@@ -21,14 +18,16 @@ void Line2dOpenGl::setLinePositions(const std::vector<::Vec2D> &positions) {
 }
 
 void Line2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
-    if (ready) return;
+    if (ready)
+        return;
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     if (openGlContext->getProgram(shaderProgram->getPointProgramName()) == 0) {
         shaderProgram->setupPointProgram(openGlContext);
     }
     if (openGlContext->getProgram(shaderProgram->getRectProgramName()) == 0) {
-        shaderProgram->setupRectProgram(openGlContext);;
+        shaderProgram->setupRectProgram(openGlContext);
+        ;
     }
     initializeLineAndPoints();
     ready = true;
@@ -42,7 +41,7 @@ void Line2dOpenGl::initializeLineAndPoints() {
         pointsVertexBuffer.push_back(0.0);
     }
 
-    pointCount = (int) lineCoordinates.size();
+    pointCount = (int)lineCoordinates.size();
 
     for (int i = 0; i < (pointCount - 1); i++) {
         int iNext = i + 1;
@@ -100,7 +99,8 @@ void Line2dOpenGl::clear() {
 
 void Line2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                           int64_t mvpMatrix) {
-    if (!ready) return;
+    if (!ready)
+        return;
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
 
@@ -118,7 +118,7 @@ void Line2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
-    //drawPoints(openGlContext, mvpMatrix);
+    // drawPoints(openGlContext, mvpMatrix);
 
     glDisable(GL_STENCIL_TEST);
 }
@@ -199,4 +199,3 @@ void Line2dOpenGl::drawPoints(std::shared_ptr<OpenGlContext> openGlContext, int6
 
     glDisable(GL_BLEND);
 }
-
