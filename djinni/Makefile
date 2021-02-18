@@ -23,7 +23,7 @@ UB_FOUNDATION_HEADER := '<Foundation/Foundation.h>'
 
 YAML_ARG := --yaml-out ./yaml
 
-DJINNI_RUN := ../../external/djinni/src/run
+DJINNI_RUN := ../external/djinni/src/run
 
 JAVA_OUT := $(DJINNI_OUT_DIR)/android/java/ch/ubique/mapscore/shared
 JNI_OUT := $(DJINNI_OUT_DIR)/android/jni

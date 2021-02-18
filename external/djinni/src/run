@@ -1,0 +1,26 @@
+#! /usr/bin/env bash
+set -eu
+
+# Locate the script file.  Cross symlinks if necessary.
+loc="$0"
+while [ -h "$loc" ]; do
+    ls=`ls -ld "$loc"`
+    link=`expr "$ls" : '.*-> \(.*\)$'`
+    if expr "$link" : '/.*' > /dev/null; then
+        loc="$link"  # Absolute link
+    else
+        loc="`dirname "$loc"`/$link"  # Relative link
+    fi
+done
+base_dir=$(cd "`dirname "$loc"`" > /dev/null && pwd)
+
+"$base_dir/build"
+
+# Determine os version and choose correspondent .sh or .bat file accordingly.
+os_version="`uname -a`"
+
+if [[ $os_version == *"MINGW"* ]] || [[ $os_version == *"MSYS_NT"* ]]; then  
+  cmd //C "$base_dir/target/start.bat" "$@"
+else  
+  exec "$base_dir/target/start" "$@"
+fi

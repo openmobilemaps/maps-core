@@ -19,9 +19,9 @@ file(GLOB_RECURSE cpp_SRC
         "../shared/*.hpp"
         "src/main/cpp/*.h"
         "src/main/cpp/*.cpp"
-        "../../external/djinni/support-lib/*.h"
-        "../../external/djinni/support-lib/*.hpp"
-        "../../external/djinni/support-lib/*.cpp"
+        "../external/djinni/support-lib/*.h"
+        "../external/djinni/support-lib/*.hpp"
+        "../external/djinni/support-lib/*.cpp"
         )
 
 add_library( # Sets the name of the library.
@@ -32,8 +32,8 @@ add_library( # Sets the name of the library.
 
         ${cpp_SRC})
 
-include_directories(../../external/djinni/support-lib)
-include_directories(../../external/djinni/support-lib/jni)
+include_directories(../external/djinni/support-lib)
+include_directories(../external/djinni/support-lib/jni)
 include_directories(../bridging/android/jni/graphics)
 include_directories(../bridging/android/jni/graphics/common)
 include_directories(../bridging/android/jni/graphics/objects)
@@ -61,6 +61,7 @@ include_directories(../shared/public/map/layers)
 include_directories(../shared/public/map/layers/objects)
 include_directories(../shared/public/map/layers/tiled)
 include_directories(../shared/public/map/layers/tiled/raster)
+include_directories(../shared/public/map/layers/polygon)
 include_directories(../shared/public/map/loader)
 include_directories(../shared/public/map/scheduling)
 include_directories(../shared/src)
@@ -75,6 +76,7 @@ include_directories(../shared/src/map/layers)
 include_directories(../shared/src/map/layers/objects)
 include_directories(../shared/src/map/layers/tiled)
 include_directories(../shared/src/map/layers/tiled/raster)
+include_directories(../shared/src/map/layers/polygon)
 include_directories(../shared/src/map/scheduling)
 include_directories(src/main/cpp)
 include_directories(src/main/cpp/graphics)
