@@ -23,7 +23,7 @@ let package = Package(
     ],
     dependencies: [
         .package(name: "DjinniSupport",
-                 url: "git@bitbucket.org:ubique-innovation/djinni.git",
+                 url: "git@github.com:UbiqueInnovation/djinni.git",
                  .branch("master")),
     ],
     targets: [
@@ -31,6 +31,7 @@ let package = Package(
             name: "MapCore",
             dependencies: ["MapCoreSharedModule"],
             path: "ios",
+            exclude: ["readme.md"],
             resources: [
                 .process("ios/graphics/Shader/Metal"),
             ]
@@ -49,8 +50,6 @@ let package = Package(
             publicHeadersPath: "public/**",
             cxxSettings: [
                 .headerSearchPath("**"),
-                .unsafeFlags(["-fno-sized-deallocation",
-                              "-fno-aligned-allocation"]),
             ]
         ),
     ],

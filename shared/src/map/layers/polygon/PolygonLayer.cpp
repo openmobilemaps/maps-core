@@ -149,10 +149,12 @@ void PolygonLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
 
 void PolygonLayer::hide() {
     isHidden = true;
-    mapInterface->invalidate();
+    if (mapInterface)
+        mapInterface->invalidate();
 }
 
 void PolygonLayer::show() {
     isHidden = false;
-    mapInterface->invalidate();
+    if (mapInterface)
+        mapInterface->invalidate();
 }

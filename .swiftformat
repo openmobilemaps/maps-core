@@ -1,0 +1,4 @@
+--disable wrapMultilineStatementBraces
+--disable initCoderUnavailable
+--swiftversion 5.3
+--exclude external

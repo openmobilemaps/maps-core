@@ -3,10 +3,10 @@
     "pins": [
       {
         "package": "DjinniSupport",
-        "repositoryURL": "git@bitbucket.org:ubique-innovation/djinni.git",
+        "repositoryURL": "git@github.com:UbiqueInnovation/djinni.git",
         "state": {
           "branch": "master",
-          "revision": "3ede285dea21d86762b46c2e4f81ec8f6e63c801",
+          "revision": "806c9c99044eef882843a578a7109fc090c69c58",
           "version": null
         }
       }

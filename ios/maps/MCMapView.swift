@@ -110,10 +110,8 @@ extension MCMapView: MTKViewDelegate {
             mapInterface.setViewportSize(view.drawableSize.vec2)
             sizeChanged = false
         }
-        let start = CFAbsoluteTimeGetCurrent()
+        
         mapInterface.drawFrame()
-        let diff = CFAbsoluteTimeGetCurrent() - start
-        os_log("drawFrame took %.10f milliseconds", diff * 1000)
 
         renderEncoder.endEncoding()
 
