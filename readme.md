@@ -3,7 +3,9 @@
 <div align="center">
   <img width="200" height="45" src="logo.svg" />
   <br />
+  <br />
   The lightweight and modern Map SDK for Android (6.0+) and iOS (10+)
+  <br />
   <br />
   <a href="https://openmobilemaps.io/">openmobilemaps.io</a>
 </div>
