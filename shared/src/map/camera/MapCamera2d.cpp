@@ -138,11 +138,11 @@ RectCoord MapCamera2d::getVisibleRect() {
     double halfWidth = sizeViewport.x * 0.5 * zoomFactor;
     double halfHeight = sizeViewport.y * 0.5 * zoomFactor;
 
-    double sinAngle = std::abs(sin(angle * M_PI / 180.0));
-    double cosAngle = std::abs(cos(angle * M_PI / 180.0));
+    double sinAngle = sin(angle * M_PI / 180.0);
+    double cosAngle = cos(angle * M_PI / 180.0);
 
-    double deltaX = halfWidth * cosAngle + halfHeight * sinAngle;
-    double deltaY = halfWidth * sinAngle + halfHeight * cosAngle;
+    double deltaX = std::abs(halfWidth * cosAngle) + std::abs(halfHeight * sinAngle);
+    double deltaY = std::abs(halfWidth * sinAngle) + std::abs(halfHeight * cosAngle);
 
     double topLeftX = centerPosition.x - deltaX;
     double topLeftY = centerPosition.y + deltaY;
