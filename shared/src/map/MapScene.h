@@ -4,6 +4,7 @@
 #include "Scene.h"
 #include "MapInterface.h"
 #include "MapConfig.h"
+#include <mutex>
 
 class MapScene: public MapInterface, public SceneCallbackInterface, public std::enable_shared_from_this<MapScene> {
 public:
@@ -33,7 +34,15 @@ public:
 
     virtual std::shared_ptr<::TouchHandlerInterface> getTouchHandler() override;
 
+    virtual std::vector<std::shared_ptr<LayerInterface>> getLayers() override;
+
     virtual void addLayer(const std::shared_ptr<::LayerInterface> & layer) override;
+
+    virtual void insertLayerAt(const std::shared_ptr<LayerInterface> & layer, int32_t atIndex) override;
+
+    virtual void insertLayerAbove(const std::shared_ptr<LayerInterface> & layer, const std::shared_ptr<LayerInterface> & above) override;
+
+    virtual void insertLayerBelow(const std::shared_ptr<LayerInterface> & layer, const std::shared_ptr<LayerInterface> & below) override;
 
     virtual void removeLayer(const std::shared_ptr<::LayerInterface> & layer) override;
 
@@ -60,6 +69,8 @@ private:
 
     std::shared_ptr<MapCamera2dInterface> camera;
 
+
+    std::recursive_mutex layersMutex;
     std::vector<std::shared_ptr<LayerInterface>> layers;
 
     std::shared_ptr<TouchHandlerInterface> touchHandler;

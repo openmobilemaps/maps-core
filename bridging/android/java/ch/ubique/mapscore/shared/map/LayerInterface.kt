@@ -11,8 +11,6 @@ abstract class LayerInterface {
 
     abstract fun buildRenderPasses(): ArrayList<ch.ubique.mapscore.shared.graphics.RenderPassInterface>
 
-    abstract fun getIdentifier(): String
-
     abstract fun onAdded(mapInterface: MapInterface)
 
     abstract fun onRemoved()
@@ -54,12 +52,6 @@ abstract class LayerInterface {
             return native_buildRenderPasses(this.nativeRef)
         }
         private external fun native_buildRenderPasses(_nativeRef: Long): ArrayList<ch.ubique.mapscore.shared.graphics.RenderPassInterface>
-
-        override fun getIdentifier(): String {
-            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_getIdentifier(this.nativeRef)
-        }
-        private external fun native_getIdentifier(_nativeRef: Long): String
 
         override fun onAdded(mapInterface: MapInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

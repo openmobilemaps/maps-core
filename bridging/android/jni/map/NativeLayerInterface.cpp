@@ -31,14 +31,6 @@ std::vector<std::shared_ptr<::RenderPassInterface>> NativeLayerInterface::JavaPr
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::List<::djinni_generated::NativeRenderPassInterface>::toCpp(jniEnv, jret);
 }
-std::string NativeLayerInterface::JavaProxy::getIdentifier() {
-    auto jniEnv = ::djinni::jniGetThreadEnv();
-    ::djinni::JniLocalScope jscope(jniEnv, 10);
-    const auto& data = ::djinni::JniClass<::djinni_generated::NativeLayerInterface>::get();
-    auto jret = (jstring)jniEnv->CallObjectMethod(Handle::get().get(), data.method_getIdentifier);
-    ::djinni::jniExceptionCheck(jniEnv);
-    return ::djinni::String::toCpp(jniEnv, jret);
-}
 void NativeLayerInterface::JavaProxy::onAdded(const std::shared_ptr<::MapInterface> & c_mapInterface) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -107,16 +99,6 @@ CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_LayerInterface_000
         const auto& ref = ::djinni::objectFromHandleAddress<::LayerInterface>(nativeRef);
         auto r = ref->buildRenderPasses();
         return ::djinni::release(::djinni::List<::djinni_generated::NativeRenderPassInterface>::fromCpp(jniEnv, r));
-    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
-}
-
-CJNIEXPORT jstring JNICALL Java_ch_ubique_mapscore_shared_map_LayerInterface_00024CppProxy_native_1getIdentifier(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
-{
-    try {
-        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
-        const auto& ref = ::djinni::objectFromHandleAddress<::LayerInterface>(nativeRef);
-        auto r = ref->getIdentifier();
-        return ::djinni::release(::djinni::String::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

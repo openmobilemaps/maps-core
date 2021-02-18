@@ -44,10 +44,6 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapRasterLayer::build
     return renderPasses;
 }
 
-std::string Tiled2dMapRasterLayer::getIdentifier() {
-    return "RasterTileLayer"; // TODO: Fix identifier (e.g. include layerConfig-Info)
-}
-
 void Tiled2dMapRasterLayer::pause() {
     rasterSource->pause();
     std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);

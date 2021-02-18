@@ -29,8 +29,6 @@ public:
 
     virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override;
 
-    virtual std::string getIdentifier() override;
-
     virtual void pause() override;
 
     virtual void resume() override;

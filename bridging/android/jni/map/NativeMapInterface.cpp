@@ -163,12 +163,52 @@ CJNIEXPORT ::djinni_generated::NativeTouchHandlerInterface::JniType JNICALL Java
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1getLayers(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
+        auto r = ref->getLayers();
+        return ::djinni::release(::djinni::List<::djinni_generated::NativeLayerInterface>::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1addLayer(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_layer)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
         ref->addLayer(::djinni_generated::NativeLayerInterface::toCpp(jniEnv, j_layer));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1insertLayerAt(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_layer, jint j_atIndex)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
+        ref->insertLayerAt(::djinni_generated::NativeLayerInterface::toCpp(jniEnv, j_layer),
+                           ::djinni::I32::toCpp(jniEnv, j_atIndex));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1insertLayerAbove(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_layer, jobject j_above)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
+        ref->insertLayerAbove(::djinni_generated::NativeLayerInterface::toCpp(jniEnv, j_layer),
+                              ::djinni_generated::NativeLayerInterface::toCpp(jniEnv, j_above));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1insertLayerBelow(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_layer, jobject j_below)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
+        ref->insertLayerBelow(::djinni_generated::NativeLayerInterface::toCpp(jniEnv, j_layer),
+                              ::djinni_generated::NativeLayerInterface::toCpp(jniEnv, j_below));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

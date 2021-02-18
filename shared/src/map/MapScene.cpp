@@ -1,12 +1,12 @@
 #include "MapScene.h"
 #include "MapCallbackInterface.h"
-#include "TestingLayer.h"
 #include "DefaultTouchHandlerInterface.h"
 #include "MapCamera2dInterface.h"
 #include "TouchInterface.h"
 #include <algorithm>
 #include "LambdaTask.h"
 #include "CoordinateConversionHelper.h"
+#include "LayerInterface.h"
 
 MapScene::MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig & mapConfig, const std::shared_ptr<::SchedulerInterface> & scheduler,
                    float pixelDensity):
@@ -86,15 +86,48 @@ std::shared_ptr<::TouchHandlerInterface> MapScene::getTouchHandler() {
     return touchHandler;
 }
 
+
+std::vector<std::shared_ptr<LayerInterface>> MapScene::getLayers() {
+    return layers;
+};
+
 void MapScene::addLayer(const std::shared_ptr<::LayerInterface> &layer) {
     layer->onAdded(shared_from_this());
+    std::lock_guard<std::recursive_mutex> lock(layersMutex);
     layers.push_back(layer);
-
-    //layers.push_back(std::make_shared<TestingLayer>(shared_from_this()));
 }
+
+void MapScene::insertLayerAt(const std::shared_ptr<LayerInterface> & layer, int32_t atIndex) {
+    layer->onAdded(shared_from_this());
+    std::lock_guard<std::recursive_mutex> lock(layersMutex);
+    auto it = layers.begin() + atIndex;
+    layers.insert(it, layer);
+};
+
+void MapScene::insertLayerAbove(const std::shared_ptr<LayerInterface> & layer, const std::shared_ptr<LayerInterface> & above) {
+    layer->onAdded(shared_from_this());
+    std::lock_guard<std::recursive_mutex> lock(layersMutex);
+    auto position = std::find(std::begin(layers), std::end(layers), above);
+    if (position == layers.end()) {
+        throw std::invalid_argument("MapScene does not contain above layer");
+    }
+    layers.insert(position, layer);
+};
+
+void MapScene::insertLayerBelow(const std::shared_ptr<LayerInterface> & layer, const std::shared_ptr<LayerInterface> & below) {
+    layer->onAdded(shared_from_this());
+    std::lock_guard<std::recursive_mutex> lock(layersMutex);
+    auto position = std::find(std::begin(layers), std::end(layers), below);
+    if (position == layers.end()) {
+        throw std::invalid_argument("MapScene does not contain below layer");
+    }
+    position--;
+    layers.insert(position, layer);
+};
 
 void MapScene::removeLayer(const std::shared_ptr<::LayerInterface> &layer) {
     layer->onRemoved();
+    std::lock_guard<std::recursive_mutex> lock(layersMutex);
     layers.erase(std::remove(layers.begin(), layers.end(), layer), layers.end());
 }
 

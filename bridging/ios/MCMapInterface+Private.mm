@@ -144,9 +144,40 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nonnull NSArray<id<MCLayerInterface>> *)getLayers {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getLayers();
+        return ::djinni::List<::djinni_generated::LayerInterface>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)addLayer:(nullable id<MCLayerInterface>)layer {
     try {
         _cppRefHandle.get()->addLayer(::djinni_generated::LayerInterface::toCpp(layer));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)insertLayerAt:(nullable id<MCLayerInterface>)layer
+              atIndex:(int32_t)atIndex {
+    try {
+        _cppRefHandle.get()->insertLayerAt(::djinni_generated::LayerInterface::toCpp(layer),
+                                           ::djinni::I32::toCpp(atIndex));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)insertLayerAbove:(nullable id<MCLayerInterface>)layer
+                   above:(nullable id<MCLayerInterface>)above {
+    try {
+        _cppRefHandle.get()->insertLayerAbove(::djinni_generated::LayerInterface::toCpp(layer),
+                                              ::djinni_generated::LayerInterface::toCpp(above));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)insertLayerBelow:(nullable id<MCLayerInterface>)layer
+                   below:(nullable id<MCLayerInterface>)below {
+    try {
+        _cppRefHandle.get()->insertLayerBelow(::djinni_generated::LayerInterface::toCpp(layer),
+                                              ::djinni_generated::LayerInterface::toCpp(below));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

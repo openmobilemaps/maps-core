@@ -35,7 +35,13 @@ map_interface = interface +c {
     set_touch_handler(touch_handler: touch_handler_interface);
     get_touch_handler() : touch_handler_interface;
 
+    get_layers(): list<layer_interface>;
+
     add_layer(layer: layer_interface);
+    insert_layer_at(layer: layer_interface, at_index: i32);
+    insert_layer_above(layer: layer_interface, above: layer_interface);
+    insert_layer_below(layer: layer_interface, below: layer_interface);
+
     remove_layer(layer: layer_interface);
 
     set_viewport_size(size: vec_2_i);
@@ -60,7 +66,6 @@ map_config = record {
 layer_interface = interface +c +j +o {
     update();
     build_render_passes(): list<render_pass_interface>;
-    get_identifier(): string;
     onAdded(map_interface: map_interface);
     onRemoved();
     pause();

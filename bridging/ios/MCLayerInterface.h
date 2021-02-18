@@ -12,8 +12,6 @@
 
 - (nonnull NSArray<id<MCRenderPassInterface>> *)buildRenderPasses;
 
-- (nonnull NSString *)getIdentifier;
-
 - (void)onAdded:(nullable MCMapInterface *)mapInterface;
 
 - (void)onRemoved;

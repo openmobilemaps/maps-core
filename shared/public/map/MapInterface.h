@@ -11,7 +11,9 @@
 #include "ShaderFactoryInterface.h"
 #include "TouchHandlerInterface.h"
 #include "Vec2I.h"
+#include <cstdint>
 #include <memory>
+#include <vector>
 
 class LayerInterface;
 class MapCallbackInterface;
@@ -48,7 +50,15 @@ public:
 
     virtual std::shared_ptr<::TouchHandlerInterface> getTouchHandler() = 0;
 
+    virtual std::vector<std::shared_ptr<LayerInterface>> getLayers() = 0;
+
     virtual void addLayer(const std::shared_ptr<LayerInterface> & layer) = 0;
+
+    virtual void insertLayerAt(const std::shared_ptr<LayerInterface> & layer, int32_t atIndex) = 0;
+
+    virtual void insertLayerAbove(const std::shared_ptr<LayerInterface> & layer, const std::shared_ptr<LayerInterface> & above) = 0;
+
+    virtual void insertLayerBelow(const std::shared_ptr<LayerInterface> & layer, const std::shared_ptr<LayerInterface> & below) = 0;
 
     virtual void removeLayer(const std::shared_ptr<LayerInterface> & layer) = 0;
 

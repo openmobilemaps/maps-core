@@ -52,7 +52,18 @@
 
 - (nullable id<MCTouchHandlerInterface>)getTouchHandler;
 
+- (nonnull NSArray<id<MCLayerInterface>> *)getLayers;
+
 - (void)addLayer:(nullable id<MCLayerInterface>)layer;
+
+- (void)insertLayerAt:(nullable id<MCLayerInterface>)layer
+              atIndex:(int32_t)atIndex;
+
+- (void)insertLayerAbove:(nullable id<MCLayerInterface>)layer
+                   above:(nullable id<MCLayerInterface>)above;
+
+- (void)insertLayerBelow:(nullable id<MCLayerInterface>)layer
+                   below:(nullable id<MCLayerInterface>)below;
 
 - (void)removeLayer:(nullable id<MCLayerInterface>)layer;
 

@@ -46,13 +46,6 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nonnull NSString *)getIdentifier {
-    try {
-        auto objcpp_result_ = _cppRefHandle.get()->getIdentifier();
-        return ::djinni::String::fromCpp(objcpp_result_);
-    } DJINNI_TRANSLATE_EXCEPTIONS()
-}
-
 - (void)onAdded:(nullable MCMapInterface *)mapInterface {
     try {
         _cppRefHandle.get()->onAdded(::djinni_generated::MapInterface::toCpp(mapInterface));
@@ -109,13 +102,6 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() buildRenderPasses];
             return ::djinni::List<::djinni_generated::RenderPassInterface>::toCpp(objcpp_result_);
-        }
-    }
-    std::string getIdentifier() override
-    {
-        @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getIdentifier];
-            return ::djinni::String::toCpp(objcpp_result_);
         }
     }
     void onAdded(const std::shared_ptr<::MapInterface> & c_mapInterface) override

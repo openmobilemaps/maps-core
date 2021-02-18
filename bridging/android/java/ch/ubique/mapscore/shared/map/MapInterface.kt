@@ -29,7 +29,15 @@ abstract class MapInterface {
 
     abstract fun getTouchHandler(): ch.ubique.mapscore.shared.map.controls.TouchHandlerInterface
 
+    abstract fun getLayers(): ArrayList<LayerInterface>
+
     abstract fun addLayer(layer: LayerInterface)
+
+    abstract fun insertLayerAt(layer: LayerInterface, atIndex: Int)
+
+    abstract fun insertLayerAbove(layer: LayerInterface, above: LayerInterface)
+
+    abstract fun insertLayerBelow(layer: LayerInterface, below: LayerInterface)
 
     abstract fun removeLayer(layer: LayerInterface)
 
@@ -141,11 +149,35 @@ abstract class MapInterface {
         }
         private external fun native_getTouchHandler(_nativeRef: Long): ch.ubique.mapscore.shared.map.controls.TouchHandlerInterface
 
+        override fun getLayers(): ArrayList<LayerInterface> {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getLayers(this.nativeRef)
+        }
+        private external fun native_getLayers(_nativeRef: Long): ArrayList<LayerInterface>
+
         override fun addLayer(layer: LayerInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_addLayer(this.nativeRef, layer)
         }
         private external fun native_addLayer(_nativeRef: Long, layer: LayerInterface)
+
+        override fun insertLayerAt(layer: LayerInterface, atIndex: Int) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_insertLayerAt(this.nativeRef, layer, atIndex)
+        }
+        private external fun native_insertLayerAt(_nativeRef: Long, layer: LayerInterface, atIndex: Int)
+
+        override fun insertLayerAbove(layer: LayerInterface, above: LayerInterface) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_insertLayerAbove(this.nativeRef, layer, above)
+        }
+        private external fun native_insertLayerAbove(_nativeRef: Long, layer: LayerInterface, above: LayerInterface)
+
+        override fun insertLayerBelow(layer: LayerInterface, below: LayerInterface) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_insertLayerBelow(this.nativeRef, layer, below)
+        }
+        private external fun native_insertLayerBelow(_nativeRef: Long, layer: LayerInterface, below: LayerInterface)
 
         override fun removeLayer(layer: LayerInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

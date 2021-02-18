@@ -5,7 +5,6 @@
 
 #include "RenderPassInterface.h"
 #include <memory>
-#include <string>
 #include <vector>
 
 class MapInterface;
@@ -17,8 +16,6 @@ public:
     virtual void update() = 0;
 
     virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() = 0;
-
-    virtual std::string getIdentifier() = 0;
 
     virtual void onAdded(const std::shared_ptr<MapInterface> & mapInterface) = 0;
 

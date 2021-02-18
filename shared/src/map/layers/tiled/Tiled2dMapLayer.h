@@ -20,8 +20,6 @@ public:
 
     virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override = 0;
 
-    virtual std::string getIdentifier() override = 0;
-
     virtual void onAdded(const std::shared_ptr<::MapInterface> & mapInterface) override;
 
     virtual void onRemoved()override;
