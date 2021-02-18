@@ -159,4 +159,24 @@ public extension MCMapView {
     var camera: MCMapCamera2dInterface {
         mapInterface.getCamera()!
     }
+
+    func add(layer: MCLayerInterface?) {
+        mapInterface.addLayer(layer)
+    }
+
+    func insert(layer: MCLayerInterface?, at index: Int) {
+        mapInterface.insertLayer(at: layer, at: Int32(index))
+    }
+
+    func insert(layer: MCLayerInterface?, above: MCLayerInterface?) {
+        mapInterface.insertLayer(above: layer, above: above)
+    }
+
+    func insert(layer: MCLayerInterface?, below: MCLayerInterface?) {
+        mapInterface.insertLayer(below: layer, below: below)
+    }
+
+    func remove(layer: MCLayerInterface?) {
+        mapInterface.removeLayer(layer)
+    }
 }

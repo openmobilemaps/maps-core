@@ -38,7 +38,19 @@ extension UIColor {
         }
         return MTLClearColorMake(Double(r), Double(g), Double(b), Double(alpha))
     }
+}
 
+extension MCColor {
+    var metalColor: MTLClearColor {
+        MTLClearColor(red: Double(r),
+                      green: Double(g),
+                      blue: Double(b),
+                      alpha: Double(a))
+    }
+}
+
+
+public extension UIColor {
     var mapCoreColor: MCColor {
         let color = cgColor
         guard let components = color.components, let alpha = components.last else {
@@ -58,14 +70,5 @@ extension UIColor {
             return MCColor(r: 0, g: 0, b: 0, a: Float(alpha))
         }
         return MCColor(r: Float(r), g: Float(g), b: Float(b), a: Float(alpha))
-    }
-}
-
-extension MCColor {
-    var metalColor: MTLClearColor {
-        MTLClearColor(red: Double(r),
-                      green: Double(g),
-                      blue: Double(b),
-                      alpha: Double(a))
     }
 }

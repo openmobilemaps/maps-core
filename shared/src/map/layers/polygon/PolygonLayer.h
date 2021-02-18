@@ -5,8 +5,9 @@
 #include "Polygon2dLayerObject.h"
 #include <mutex>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
-
+#include <atomic>
 
 class PolygonLayer:
     public PolygonLayerInterface,
@@ -39,13 +40,13 @@ public:
 
     virtual void onRemoved() override {};
 
-    virtual void pause() override {};
+    virtual void pause() override;
 
-    virtual void resume() override {};
+    virtual void resume() override;
 
-    virtual void hide() override {};
+    virtual void hide() override;
 
-    virtual void show() override {};
+    virtual void show() override;
 private:
     std::shared_ptr<MapInterface> mapInterface;
 
@@ -54,4 +55,9 @@ private:
 
     void generateRenderPasses();
     std::vector<std::shared_ptr<::RenderPassInterface>> renderPasses;
+
+    std::recursive_mutex addingQueueMutex;
+    std::unordered_set<Polygon> addingQueue;
+
+    std::atomic<bool> isHidden;
 };

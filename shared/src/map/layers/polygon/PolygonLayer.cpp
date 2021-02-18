@@ -5,7 +5,7 @@
 #include "RenderPass.h"
 #include <map>
 
-PolygonLayer::PolygonLayer() {
+PolygonLayer::PolygonLayer(): isHidden(false) {
 
 }
 
@@ -14,12 +14,18 @@ void PolygonLayer::setPolygons(const std::vector<Polygon> & polygons) {
     for (auto const &polygon: polygons) {
         add(polygon);
     }
-    buildRenderPasses();
-    mapInterface->invalidate();
+    generateRenderPasses();
+    if (mapInterface) mapInterface->invalidate();
 }
 
 std::vector<Polygon> PolygonLayer::getPolygons() {
     std::vector<Polygon> polygons;
+    if (!mapInterface) {
+        for (auto const &polygon: addingQueue) {
+            polygons.push_back(polygon);
+        }
+        return polygons;
+    }
     for (auto const &polygon : this->polygons) {
         polygons.push_back(polygon.first);
     }
@@ -27,6 +33,11 @@ std::vector<Polygon> PolygonLayer::getPolygons() {
 }
 
 void PolygonLayer::remove(const Polygon & polygon) {
+    if (!mapInterface) {
+        std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
+        addingQueue.erase(polygon);
+        return;
+    }
     {
         std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
         for(auto it = polygons.begin(); it != polygons.end(); it++) {
@@ -36,17 +47,25 @@ void PolygonLayer::remove(const Polygon & polygon) {
             }
         }
     }
-    buildRenderPasses();
-    mapInterface->invalidate();
+    generateRenderPasses();
+    if (mapInterface) mapInterface->invalidate();
 }
 
 void PolygonLayer::add(const Polygon & polygon) {
+    if (!mapInterface) {
+        std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
+        addingQueue.insert(polygon);
+        return;
+    }
+
     const auto &objectFactory = mapInterface->getGraphicsObjectFactory();
     const auto &shaderFactory = mapInterface->getShaderFactory();
 
     auto shader = shaderFactory->createColorShader();
     shader->setColor(polygon.color.r, polygon.color.g, polygon.color.b, polygon.color.a);
     auto polygonGraphicsObject = objectFactory->createPolygon(shader->asShaderProgramInterface());
+
+    polygonGraphicsObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
 
     auto polygonObject = std::make_shared<Polygon2dLayerObject>(mapInterface->getCoordinateConverterHelper(),
                                                                 polygonGraphicsObject,
@@ -57,17 +76,36 @@ void PolygonLayer::add(const Polygon & polygon) {
         std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
         polygons[polygon] = polygonObject;
     }
-    buildRenderPasses();
-    mapInterface->invalidate();
+    generateRenderPasses();
+    if (mapInterface) mapInterface->invalidate();
 }
 
 void PolygonLayer::clear() {
+    if (!mapInterface) {
+        std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
+        addingQueue.clear();
+        return;
+    }
     {
         std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
         polygons.clear();
     }
-    buildRenderPasses();
-    mapInterface->invalidate();
+    generateRenderPasses();
+    if (mapInterface) mapInterface->invalidate();
+}
+
+void PolygonLayer::pause() {
+    std::lock_guard<std::recursive_mutex> overlayLock(polygonsMutex);
+    for (const auto &polygon : polygons) {
+        polygon.second->getPolygonObject()->clear();
+    }
+}
+
+void PolygonLayer::resume() {
+    std::lock_guard<std::recursive_mutex> overlayLock(polygonsMutex);
+    for (const auto &polygon : polygons) {
+        polygon.second->getPolygonObject()->setup(mapInterface->getRenderingContext());
+    }
 }
 
 std::shared_ptr<::LayerInterface> PolygonLayer::asLayerInterface() {
@@ -93,9 +131,30 @@ void PolygonLayer::generateRenderPasses() {
 }
 
 std::vector<std::shared_ptr<::RenderPassInterface>> PolygonLayer::buildRenderPasses() {
-    return renderPasses;
+    if (isHidden) {
+        return {};
+    } else {
+        return renderPasses;
+    }
 }
 
 void PolygonLayer::onAdded(const std::shared_ptr<MapInterface> & mapInterface) {
     this->mapInterface = mapInterface;
+    {
+        std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
+        for (auto const &polygon: addingQueue) {
+            add(polygon);
+        }
+        addingQueue.clear();
+    }
+}
+
+void PolygonLayer::hide() {
+    isHidden = true;
+    mapInterface->invalidate();
+}
+
+void PolygonLayer::show() {
+    isHidden = false;
+    mapInterface->invalidate();
 }

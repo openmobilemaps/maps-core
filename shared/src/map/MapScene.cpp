@@ -111,7 +111,7 @@ void MapScene::insertLayerAbove(const std::shared_ptr<LayerInterface> & layer, c
     if (position == layers.end()) {
         throw std::invalid_argument("MapScene does not contain above layer");
     }
-    layers.insert(position, layer);
+    layers.insert(++position, layer);
 };
 
 void MapScene::insertLayerBelow(const std::shared_ptr<LayerInterface> & layer, const std::shared_ptr<LayerInterface> & below) {
@@ -121,7 +121,6 @@ void MapScene::insertLayerBelow(const std::shared_ptr<LayerInterface> & layer, c
     if (position == layers.end()) {
         throw std::invalid_argument("MapScene does not contain below layer");
     }
-    position--;
     layers.insert(position, layer);
 };
 
