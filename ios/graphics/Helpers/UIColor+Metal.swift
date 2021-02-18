@@ -63,9 +63,9 @@ extension UIColor {
 
 extension MCColor {
     var metalColor: MTLClearColor {
-        .init(red: Double(r),
-              green: Double(g),
-              blue: Double(b),
-              alpha: Double(a))
+        MTLClearColor(red: Double(r),
+                      green: Double(g),
+                      blue: Double(b),
+                      alpha: Double(a))
     }
 }

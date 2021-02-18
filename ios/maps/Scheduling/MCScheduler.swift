@@ -1,28 +1,7 @@
 import Foundation
 import MapCoreSharedModule
-import os
 
-extension OperationQueue {
-    convenience init(concurrentOperations: Int, queue: DispatchQueue? = nil) {
-        self.init()
-        maxConcurrentOperationCount = concurrentOperations
-        underlyingQueue = queue
-    }
-}
-
-class TaskOperation: Operation {
-    var task: MCTaskInterface
-
-    init(task: MCTaskInterface) {
-        self.task = task
-    }
-
-    override func main() {
-        task.run()
-    }
-}
-
-class Scheduler: MCSchedulerInterface {
+class MCScheduler: MCSchedulerInterface {
     private let ioQueue = OperationQueue(concurrentOperations: 10)
 
     private let computationQueue = OperationQueue(concurrentOperations: 4)
@@ -37,11 +16,9 @@ class Scheduler: MCSchedulerInterface {
         guard let task = task else { return }
 
         let config = task.getConfig()
+
         let delay = TimeInterval(config.delay / 1000)
 
-        /*if #available(iOS 14.0, *) {
-            os_log("dispatching Task \(config.id)")
-        }*/
         internalSchedulerQueue.asyncAfter(deadline: .now() + delay) {
             self.cleanUpFinishedOutstandingOperations()
 
@@ -117,5 +94,25 @@ class Scheduler: MCSchedulerInterface {
         outstandingOperations = outstandingOperations.filter {
             !$1.isCancelled
         }
+    }
+}
+
+private extension OperationQueue {
+    convenience init(concurrentOperations: Int, queue: DispatchQueue? = nil) {
+        self.init()
+        maxConcurrentOperationCount = concurrentOperations
+        underlyingQueue = queue
+    }
+}
+
+private class TaskOperation: Operation {
+    var task: MCTaskInterface
+
+    init(task: MCTaskInterface) {
+        self.task = task
+    }
+
+    override func main() {
+        task.run()
     }
 }

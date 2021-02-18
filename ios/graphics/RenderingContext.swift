@@ -5,7 +5,7 @@ import Metal
 @objc
 class RenderingContext: NSObject {
     weak var encoder: MTLRenderCommandEncoder?
-    weak var sceneView: MapView?
+    weak var sceneView: MCMapView?
 
     var viewportSize: MCVec2I = .init(x: 0, y: 0)
 }

@@ -1,7 +1,7 @@
 import MapCoreSharedModule
 import UIKit
 
-class MapViewTouchHandler: NSObject {
+class MCMapViewTouchHandler: NSObject {
     private let touchHandler: MCTouchHandlerInterface!
 
     weak var mapView: UIView!

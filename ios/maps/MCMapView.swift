@@ -3,7 +3,7 @@ import MapCoreSharedModule
 import MetalKit
 import os
 
-open class MapView: MTKView {
+open class MCMapView: MTKView {
     public let mapInterface: MCMapInterface
     private let renderingContext: RenderingContext
 
@@ -13,7 +13,7 @@ open class MapView: MTKView {
     private var framesToRender: UInt = 1
     private let framesToRenderAfterInvalidate: UInt = 1
 
-    private let touchHandler: MapViewTouchHandler
+    private let touchHandler: MCMapViewTouchHandler
 
     public init(mapConfig: MCMapConfig) {
         let renderingContext = RenderingContext()
@@ -21,15 +21,14 @@ open class MapView: MTKView {
                                                        shaderFactory: ShaderFactory(),
                                                        renderingContext: renderingContext,
                                                        mapConfig: mapConfig,
-                                                       scheduler: Scheduler(),
+                                                       scheduler: MCScheduler(),
                                                        pixelDensity: Float(UIScreen.pixelsPerInch)) else {
             fatalError("Can't create MCMapInterface")
         }
         self.mapInterface = mapInterface
         self.renderingContext = renderingContext
-        touchHandler = .init(touchHandler: mapInterface.getTouchHandler())
+        touchHandler = MCMapViewTouchHandler(touchHandler: mapInterface.getTouchHandler())
         super.init(frame: .zero, device: MetalContext.current.device)
-        renderingContext.sceneView = self
         setup()
     }
 
@@ -39,6 +38,8 @@ open class MapView: MTKView {
     }
 
     private func setup() {
+        renderingContext.sceneView = self
+
         device = MetalContext.current.device
 
         colorPixelFormat = MetalContext.current.colorPixelFormat
@@ -70,14 +71,14 @@ open class MapView: MTKView {
     }
 }
 
-extension MapView: MCMapCallbackInterface {
+extension MCMapView: MCMapCallbackInterface {
     public func invalidate() {
         isPaused = false
         framesToRender = framesToRenderAfterInvalidate
     }
 }
 
-extension MapView: MTKViewDelegate {
+extension MCMapView: MTKViewDelegate {
     public func mtkView(_: MTKView, drawableSizeWillChange _: CGSize) {
         sizeChanged = true
         invalidate()
@@ -132,7 +133,7 @@ extension CGSize {
     }
 }
 
-public extension MapView {
+public extension MCMapView {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
         touchHandler.touchesBegan(touches, with: event)
@@ -151,5 +152,11 @@ public extension MapView {
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesMoved(touches, with: event)
         touchHandler.touchesMoved(touches, with: event)
+    }
+}
+
+public extension MCMapView {
+    var camera: MCMapCamera2dInterface {
+        mapInterface.getCamera()!
     }
 }
