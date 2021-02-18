@@ -3,7 +3,7 @@
 <div align="center">
   <img width="200" height="45" src="logo.svg" />
   <br />
-  The Lightweight And Modern Map SDK for Android (6.0+) and iOS (10+)
+  The lightweight and modern Map SDK for Android (6.0+) and iOS (10+)
 </div>
 <br />
 <div align="center">
