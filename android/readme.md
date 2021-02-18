@@ -31,3 +31,8 @@ The bridging interface between Kotlin and C++ are defined in the djinni files un
 ```make clean djinni```
 
 in the folder [djinni](../djinni). This generates the Kotlin bindings, the C++ header files as well as all the JNI glue code.
+
+
+
+## License
+This project is licensed under the terms of the MPL 2 license. See the [LICENSE](../LICENSE) file.
