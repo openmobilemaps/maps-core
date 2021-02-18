@@ -15,13 +15,11 @@ public:
 
     virtual ~Polygon2dLayerObject() override {}
 
-    virtual void update() override;
+    virtual void update() override {};
 
     virtual std::vector<std::shared_ptr<RenderConfigInterface>> getRenderConfig() override;
 
-    void setPositions(const std::vector<Coord> &positions, std::vector<std::vector<Coord>> &holes, bool isConvex);
-
-    void setPositions(const std::vector<Coord> &positions, bool isConvex);
+    void setPositions(const std::vector<Coord> &positions, const std::vector<std::vector<Coord>> &holes, bool isConvex);
 
     std::shared_ptr<GraphicsObjectInterface> getPolygonObject();
 

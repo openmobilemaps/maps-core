@@ -7,24 +7,11 @@ Polygon2dLayerObject::Polygon2dLayerObject(const std::shared_ptr<CoordinateConve
     renderConfig = std::make_shared<RenderConfig>(polygon->asGraphicsObject(), 0);
 }
 
-void Polygon2dLayerObject::update() {
-
-}
-
 std::vector<std::shared_ptr<RenderConfigInterface>> Polygon2dLayerObject::getRenderConfig() {
     return {renderConfig};
 }
 
-void Polygon2dLayerObject::setPositions(const std::vector<Coord> &positions, bool isConvex) {
-    std::vector<Vec2D> renderCoords;
-    for (const Coord &mapCoord : positions) {
-        Coord renderCoord = conversionHelper->convertToRenderSystem(mapCoord);
-        renderCoords.push_back(Vec2D(renderCoord.x, renderCoord.y));
-    }
-    polygon->setPolygonPositions(renderCoords, {}, isConvex);
-}
-
-void Polygon2dLayerObject::setPositions(const std::vector<Coord> &positions, std::vector<std::vector<Coord>> &holes, bool isConvex) {
+void Polygon2dLayerObject::setPositions(const std::vector<Coord> &positions, const std::vector<std::vector<Coord>> &holes, bool isConvex) {
     std::vector<Vec2D> renderCoords;
     for (const Coord &mapCoord : positions) {
         Coord renderCoord = conversionHelper->convertToRenderSystem(mapCoord);

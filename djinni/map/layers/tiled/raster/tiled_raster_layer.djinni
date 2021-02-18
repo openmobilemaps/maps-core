@@ -1,4 +1,3 @@
-@extern "../../../../yaml/map_interface.yaml"
 @extern "../../../../yaml/tiled_2d_map_layer_config.yaml"
 @extern "../../../../yaml/texture_loader_interface.yaml"
 @extern "../../../../yaml/layer_interface.yaml"
