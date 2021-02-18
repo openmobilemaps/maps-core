@@ -12,7 +12,7 @@
 <br />
 <div align="center">
     <!-- License -->
-    <a href="https://github.com/UbiqueInnovation/notifyme-app-ios/blob/master/LICENSE">
+    <a href="https://github.com/openmobilemaps/maps-core/blob/master/LICENSE">
       <img alt="License: MPL 2.0"
       src="https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg">
     </a>
