@@ -23,13 +23,13 @@
     </a>
 </div>
 
-### Getting started
+## Getting started
 
 [Readme Android](./android/)
 
 [Readme iOS](./ios/)
 
-### Features
+## Features
 * Multi-platform graphics engine based on OpenGL for Android and Metal for iOS
 * Touch and gesture handling
 * Tiled Map Layers
