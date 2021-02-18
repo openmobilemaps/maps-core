@@ -78,7 +78,7 @@ protected:
     double paddingBottom = 0;
 
     struct CameraConfiguration {
-        bool roationEnabled = false;
+        bool rotationEnabled = false;
         bool doubleClickZoomEnabled = true;
         bool twoFingerZoomEnabled = true;
         bool moveEnabled = true;

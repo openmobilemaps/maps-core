@@ -238,7 +238,7 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
         centerPosition.y = std::max(centerPosition.y, bottomRight.y);
         centerPosition.y = std::min(centerPosition.y, topLeft.y);
 
-        if (config.roationEnabled) {
+        if (config.rotationEnabled) {
             float olda = atan2(posScreenOld[0].x - posScreenOld[1].x, posScreenOld[0].y - posScreenOld[1].y);
             float newa = atan2(posScreenNew[0].x - posScreenNew[1].x, posScreenNew[0].y - posScreenNew[1].y);
             angle = angle + (olda - newa) / M_PI * 180.0;
