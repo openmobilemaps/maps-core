@@ -10,6 +10,7 @@
   <a href="https://openmobilemaps.io/">openmobilemaps.io</a>
 </div>
 <br />
+
 <div align="center">
     <!-- SPM -->
     <a href="https://github.com/apple/swift-package-manager">
@@ -53,13 +54,33 @@ The rendering concept in the graphics core is built around generic graphics prim
 
 (Diagram MapsCore Part)
 
-#### MapInterface
+Building on top of the graphics core, the maps core wraps the generic render code into a more accessible collection of higher-level classes with the functionality to build and display a digital map.  
 
-#### Coordinates
+#### MapView
+
+On both platforms, the MapView builds the central ui element that can directly be added to the app and be interacted with. It handles the interactions between each platform and the shared library, as well as setting up relevant platform-specific components and exposing the necessary methods for manipulating all elements of the map.
+
+#### MapScene
+
+The MapScene, implementing the MapInterface, holds the necessary resources for interacting with the underlying render system and creating the graphics primitives, but also builds the main access point for the other components that are relevant for a functioning map. Such as the map configuration file, the camera, the touch handler and other. It also holds the collection of all layers in the scene and provides the necessary methods to adjust it.
+
+#### Map Configuration & Coordinates
+
+When setting up the Map, a coordinate system for the map needs to be specified. In the current implementation, the system is assumed to be a uniform, two-dimensional grid. 
+
+All map positions handled within maps core are of the type Coord. Along with the three-dimensional position values, it holds a coordinate system identifier with the purpose of specifically exposing the system that the values should be interpreted in at that time. To switch between different coordinate systems, the MapScene holds a CoordinateConversionHelper. This helper uses pre-defined and additionally registered custom converters to transform coordinates between two systems, specified by their system identifier.
+
+This library comes with the implementations for two prominent coordinate systems: EPSG:2056 (LV95/LV03+) and EPSG:3857 (Pseudo-Mercator). They can be created using the CoordinateSystemFactory.
+
+#### Camera
+
+
+
+#### Interaction
 
 #### Layers
 
-#### Camera
+
 
 
 ## License
