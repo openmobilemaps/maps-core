@@ -24,7 +24,7 @@ let package = Package(
     dependencies: [
         .package(name: "DjinniSupport",
                  url: "https://github.com/UbiqueInnovation/djinni.git",
-                 .branch("master")),
+                 .upToNextMajor(from: "1.0.0")),
     ],
     targets: [
         .target(
