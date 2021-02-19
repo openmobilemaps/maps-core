@@ -52,7 +52,7 @@ lazy var mapConfig: MCMapConfig = {
                         y: -20048966.10, z: 0)
   let bounds = MCRectCoord(topLeft: topLeft, bottomRight: bottomRight)
   let coordinateSystem = MCMapCoordinateSystem(identifier: identifier,
-                                                bounds: .init(topLeft: topLeft, bottomRight: bottomRight),
+                                                bounds: bounds,
                                                 unitToScreenMeterFactor: 1)
 
   return MCMapConfig(mapCoordinateSystem: coordinateSystem,
