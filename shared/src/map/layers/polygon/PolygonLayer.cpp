@@ -8,7 +8,7 @@
 PolygonLayer::PolygonLayer()
     : isHidden(false) {}
 
-void PolygonLayer::setPolygons(const std::vector<Polygon> &polygons) {
+void PolygonLayer::setPolygons(const std::vector<PolygonInfo> &polygons) {
     clear();
     for (auto const &polygon : polygons) {
         add(polygon);
@@ -18,8 +18,8 @@ void PolygonLayer::setPolygons(const std::vector<Polygon> &polygons) {
         mapInterface->invalidate();
 }
 
-std::vector<Polygon> PolygonLayer::getPolygons() {
-    std::vector<Polygon> polygons;
+std::vector<PolygonInfo> PolygonLayer::getPolygons() {
+    std::vector<PolygonInfo> polygons;
     if (!mapInterface) {
         for (auto const &polygon : addingQueue) {
             polygons.push_back(polygon);
@@ -32,7 +32,7 @@ std::vector<Polygon> PolygonLayer::getPolygons() {
     return polygons;
 }
 
-void PolygonLayer::remove(const Polygon &polygon) {
+void PolygonLayer::remove(const PolygonInfo &polygon) {
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         addingQueue.erase(polygon);
@@ -52,7 +52,7 @@ void PolygonLayer::remove(const Polygon &polygon) {
         mapInterface->invalidate();
 }
 
-void PolygonLayer::add(const Polygon &polygon) {
+void PolygonLayer::add(const PolygonInfo &polygon) {
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         addingQueue.insert(polygon);

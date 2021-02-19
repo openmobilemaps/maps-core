@@ -7,13 +7,13 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class PolygonLayerInterface {
 
-    abstract fun setPolygons(polygons: ArrayList<Polygon>)
+    abstract fun setPolygons(polygons: ArrayList<PolygonInfo>)
 
-    abstract fun getPolygons(): ArrayList<Polygon>
+    abstract fun getPolygons(): ArrayList<PolygonInfo>
 
-    abstract fun remove(polygon: Polygon)
+    abstract fun remove(polygon: PolygonInfo)
 
-    abstract fun add(polygon: Polygon)
+    abstract fun add(polygon: PolygonInfo)
 
     abstract fun clear()
 
@@ -44,29 +44,29 @@ abstract class PolygonLayerInterface {
             _djinni_private_destroy()
         }
 
-        override fun setPolygons(polygons: ArrayList<Polygon>) {
+        override fun setPolygons(polygons: ArrayList<PolygonInfo>) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_setPolygons(this.nativeRef, polygons)
         }
-        private external fun native_setPolygons(_nativeRef: Long, polygons: ArrayList<Polygon>)
+        private external fun native_setPolygons(_nativeRef: Long, polygons: ArrayList<PolygonInfo>)
 
-        override fun getPolygons(): ArrayList<Polygon> {
+        override fun getPolygons(): ArrayList<PolygonInfo> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_getPolygons(this.nativeRef)
         }
-        private external fun native_getPolygons(_nativeRef: Long): ArrayList<Polygon>
+        private external fun native_getPolygons(_nativeRef: Long): ArrayList<PolygonInfo>
 
-        override fun remove(polygon: Polygon) {
+        override fun remove(polygon: PolygonInfo) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_remove(this.nativeRef, polygon)
         }
-        private external fun native_remove(_nativeRef: Long, polygon: Polygon)
+        private external fun native_remove(_nativeRef: Long, polygon: PolygonInfo)
 
-        override fun add(polygon: Polygon) {
+        override fun add(polygon: PolygonInfo) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_add(this.nativeRef, polygon)
         }
-        private external fun native_add(_nativeRef: Long, polygon: Polygon)
+        private external fun native_add(_nativeRef: Long, polygon: PolygonInfo)
 
         override fun clear() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

@@ -54,7 +54,7 @@ $(DJINNI_OUT_DIR)/%.log: $(DJINNISRCDIR)/%.djinni
 	--kotlin-out $(JAVA_OUT)/$(SUB) \
 	--jni-out $(JNI_OUT)/$(SUB) \
 	--objc-out $(OBJC_OUT)/ \
-	--cpp-out $(CPP_OUT)/$(SUB) \
+	--cpp-out $(CPP_OUT)/ \
 	--ident-jni-class $(IDENT_JNI_CLASS) \
 	--objc-type-prefix $(OBJC_PREFIX) \
 	--objcpp-out $(OBJCPP_OUT)/ \

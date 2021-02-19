@@ -16,13 +16,13 @@ class PolygonLayer : public PolygonLayerInterface, public LayerInterface, public
     ~PolygonLayer(){};
 
     // PolygonLayerInterface
-    virtual void setPolygons(const std::vector<Polygon> &polygons) override;
+    virtual void setPolygons(const std::vector<PolygonInfo> &polygons) override;
 
-    virtual std::vector<Polygon> getPolygons() override;
+    virtual std::vector<PolygonInfo> getPolygons() override;
 
-    virtual void remove(const Polygon &polygon) override;
+    virtual void remove(const PolygonInfo &polygon) override;
 
-    virtual void add(const Polygon &polygon) override;
+    virtual void add(const PolygonInfo &polygon) override;
 
     virtual void clear() override;
 
@@ -49,13 +49,13 @@ class PolygonLayer : public PolygonLayerInterface, public LayerInterface, public
     std::shared_ptr<MapInterface> mapInterface;
 
     std::recursive_mutex polygonsMutex;
-    std::unordered_map<Polygon, std::shared_ptr<Polygon2dLayerObject>> polygons;
+    std::unordered_map<PolygonInfo, std::shared_ptr<Polygon2dLayerObject>> polygons;
 
     void generateRenderPasses();
     std::vector<std::shared_ptr<::RenderPassInterface>> renderPasses;
 
     std::recursive_mutex addingQueueMutex;
-    std::unordered_set<Polygon> addingQueue;
+    std::unordered_set<PolygonInfo> addingQueue;
 
     std::atomic<bool> isHidden;
 };

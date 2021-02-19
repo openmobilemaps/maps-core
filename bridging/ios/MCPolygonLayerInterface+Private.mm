@@ -7,7 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "MCLayerInterface+Private.h"
-#import "MCPolygon+Private.h"
+#import "MCPolygonInfo+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -39,28 +39,28 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setPolygons:(nonnull NSArray<MCPolygon *> *)polygons {
+- (void)setPolygons:(nonnull NSArray<MCPolygonInfo *> *)polygons {
     try {
-        _cppRefHandle.get()->setPolygons(::djinni::List<::djinni_generated::Polygon>::toCpp(polygons));
+        _cppRefHandle.get()->setPolygons(::djinni::List<::djinni_generated::PolygonInfo>::toCpp(polygons));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nonnull NSArray<MCPolygon *> *)getPolygons {
+- (nonnull NSArray<MCPolygonInfo *> *)getPolygons {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getPolygons();
-        return ::djinni::List<::djinni_generated::Polygon>::fromCpp(objcpp_result_);
+        return ::djinni::List<::djinni_generated::PolygonInfo>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)remove:(nonnull MCPolygon *)polygon {
+- (void)remove:(nonnull MCPolygonInfo *)polygon {
     try {
-        _cppRefHandle.get()->remove(::djinni_generated::Polygon::toCpp(polygon));
+        _cppRefHandle.get()->remove(::djinni_generated::PolygonInfo::toCpp(polygon));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)add:(nonnull MCPolygon *)polygon {
+- (void)add:(nonnull MCPolygonInfo *)polygon {
     try {
-        _cppRefHandle.get()->add(::djinni_generated::Polygon::toCpp(polygon));
+        _cppRefHandle.get()->add(::djinni_generated::PolygonInfo::toCpp(polygon));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

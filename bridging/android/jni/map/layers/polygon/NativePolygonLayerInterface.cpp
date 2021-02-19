@@ -4,7 +4,7 @@
 #include "NativePolygonLayerInterface.h"  // my header
 #include "Marshal.hpp"
 #include "NativeLayerInterface.h"
-#include "NativePolygon.h"
+#include "NativePolygonInfo.h"
 
 namespace djinni_generated {
 
@@ -35,7 +35,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_polygon_Polygo
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::PolygonLayerInterface>(nativeRef);
-        ref->setPolygons(::djinni::List<::djinni_generated::NativePolygon>::toCpp(jniEnv, j_polygons));
+        ref->setPolygons(::djinni::List<::djinni_generated::NativePolygonInfo>::toCpp(jniEnv, j_polygons));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
@@ -45,7 +45,7 @@ CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_layers_polygon_Pol
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::PolygonLayerInterface>(nativeRef);
         auto r = ref->getPolygons();
-        return ::djinni::release(::djinni::List<::djinni_generated::NativePolygon>::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni::List<::djinni_generated::NativePolygonInfo>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
@@ -54,7 +54,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_polygon_Polygo
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::PolygonLayerInterface>(nativeRef);
-        ref->remove(::djinni_generated::NativePolygon::toCpp(jniEnv, j_polygon));
+        ref->remove(::djinni_generated::NativePolygonInfo::toCpp(jniEnv, j_polygon));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
@@ -63,7 +63,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_polygon_Polygo
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::PolygonLayerInterface>(nativeRef);
-        ref->add(::djinni_generated::NativePolygon::toCpp(jniEnv, j_polygon));
+        ref->add(::djinni_generated::NativePolygonInfo::toCpp(jniEnv, j_polygon));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

@@ -5,17 +5,17 @@
 #import "MCCoord.h"
 #import <Foundation/Foundation.h>
 
-@interface MCPolygon : NSObject
+@interface MCPolygonInfo : NSObject
 - (nonnull instancetype)initWithIdentifier:(nonnull NSString *)identifier
                                coordinates:(nonnull NSArray<MCCoord *> *)coordinates
                                      holes:(nonnull NSArray<NSArray<MCCoord *> *> *)holes
                                   isConvex:(BOOL)isConvex
                                      color:(nonnull MCColor *)color;
-+ (nonnull instancetype)polygonWithIdentifier:(nonnull NSString *)identifier
-                                  coordinates:(nonnull NSArray<MCCoord *> *)coordinates
-                                        holes:(nonnull NSArray<NSArray<MCCoord *> *> *)holes
-                                     isConvex:(BOOL)isConvex
-                                        color:(nonnull MCColor *)color;
++ (nonnull instancetype)polygonInfoWithIdentifier:(nonnull NSString *)identifier
+                                      coordinates:(nonnull NSArray<MCCoord *> *)coordinates
+                                            holes:(nonnull NSArray<NSArray<MCCoord *> *> *)holes
+                                         isConvex:(BOOL)isConvex
+                                            color:(nonnull MCColor *)color;
 
 @property (nonatomic, readonly, nonnull) NSString * identifier;
 

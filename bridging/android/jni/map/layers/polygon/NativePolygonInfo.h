@@ -3,28 +3,28 @@
 
 #pragma once
 
-#include "Polygon.h"
+#include "PolygonInfo.h"
 #include "djinni_support.hpp"
 
 namespace djinni_generated {
 
-class NativePolygon final {
+class NativePolygonInfo final {
 public:
-    using CppType = ::Polygon;
+    using CppType = ::PolygonInfo;
     using JniType = jobject;
 
-    using Boxed = NativePolygon;
+    using Boxed = NativePolygonInfo;
 
-    ~NativePolygon();
+    ~NativePolygonInfo();
 
     static CppType toCpp(JNIEnv* jniEnv, JniType j);
     static ::djinni::LocalRef<JniType> fromCpp(JNIEnv* jniEnv, const CppType& c);
 
 private:
-    NativePolygon();
-    friend ::djinni::JniClass<NativePolygon>;
+    NativePolygonInfo();
+    friend ::djinni::JniClass<NativePolygonInfo>;
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/map/layers/polygon/Polygon") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/map/layers/polygon/PolygonInfo") };
     const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Ljava/lang/String;Ljava/util/ArrayList;Ljava/util/ArrayList;ZLch/ubique/mapscore/shared/graphics/common/Color;)V") };
     const jfieldID field_identifier { ::djinni::jniGetFieldID(clazz.get(), "identifier", "Ljava/lang/String;") };
     const jfieldID field_coordinates { ::djinni::jniGetFieldID(clazz.get(), "coordinates", "Ljava/util/ArrayList;") };

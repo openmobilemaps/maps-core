@@ -2,7 +2,7 @@
 @extern "../../../yaml/color.yaml"
 @extern "../../../yaml/coord.yaml"
 
-polygon = record {
+polygon_info = record {
     identifier: string;
     coordinates: list<coord>;
     holes: list<list<coord>>;
@@ -12,10 +12,10 @@ polygon = record {
 
 polygon_layer_interface = interface +c {
     static create() : polygon_layer_interface;
-    set_polygons(polygons: list<polygon>);
-    get_polygons(): list<polygon>;
-    remove(polygon: polygon);
-    add(polygon: polygon);
+    set_polygons(polygons: list<polygon_info>);
+    get_polygons(): list<polygon_info>;
+    remove(polygon: polygon_info);
+    add(polygon: polygon_info);
     clear();
     asLayerInterface(): layer_interface;
 }

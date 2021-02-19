@@ -3,7 +3,7 @@
 
 package ch.ubique.mapscore.shared.map.layers.polygon
 
-data class Polygon(
+data class PolygonInfo(
     var identifier: String,
     var coordinates: ArrayList<ch.ubique.mapscore.shared.map.coordinates.Coord>,
     var holes: ArrayList<ArrayList<ch.ubique.mapscore.shared.map.coordinates.Coord>>,

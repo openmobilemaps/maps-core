@@ -9,18 +9,18 @@
 #include <utility>
 #include <vector>
 
-struct Polygon final {
+struct PolygonInfo final {
     std::string identifier;
     std::vector<::Coord> coordinates;
     std::vector<std::vector<::Coord>> holes;
     bool isConvex;
     ::Color color;
 
-    Polygon(std::string identifier_,
-            std::vector<::Coord> coordinates_,
-            std::vector<std::vector<::Coord>> holes_,
-            bool isConvex_,
-            ::Color color_)
+    PolygonInfo(std::string identifier_,
+                std::vector<::Coord> coordinates_,
+                std::vector<std::vector<::Coord>> holes_,
+                bool isConvex_,
+                ::Color color_)
     : identifier(std::move(identifier_))
     , coordinates(std::move(coordinates_))
     , holes(std::move(holes_))

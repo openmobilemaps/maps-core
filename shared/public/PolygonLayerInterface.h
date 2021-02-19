@@ -7,7 +7,7 @@
 #include <memory>
 #include <vector>
 
-struct Polygon;
+struct PolygonInfo;
 
 class PolygonLayerInterface {
 public:
@@ -15,13 +15,13 @@ public:
 
     static std::shared_ptr<PolygonLayerInterface> create();
 
-    virtual void setPolygons(const std::vector<Polygon> & polygons) = 0;
+    virtual void setPolygons(const std::vector<PolygonInfo> & polygons) = 0;
 
-    virtual std::vector<Polygon> getPolygons() = 0;
+    virtual std::vector<PolygonInfo> getPolygons() = 0;
 
-    virtual void remove(const Polygon & polygon) = 0;
+    virtual void remove(const PolygonInfo & polygon) = 0;
 
-    virtual void add(const Polygon & polygon) = 0;
+    virtual void add(const PolygonInfo & polygon) = 0;
 
     virtual void clear() = 0;
 
