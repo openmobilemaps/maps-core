@@ -29,14 +29,14 @@ For App integration add this package to your App target. To do this, check [Addi
 ### Swift Package
 
 Once you have your Swift package set up, adding open mobile maps as a dependency is as easy as adding it to the dependencies value of your Package.swift.
-```
+```swift
 dependencies: [
     .package(url: "https://github.com/openmobilemaps/maps-core.git", .branch("develop"))
 ]
 ```
 
 ## How to use
-```
+```swift
 import MapsCore
 import MapCoreSharedModule
 
@@ -66,7 +66,7 @@ let view = MCMapView(config: mapConfig)
 ## How to build
 
 Make sure you have all submodules initialized and updated. to do this use
-```
+```shell
 git submodule init
 git submodule update
 ```
