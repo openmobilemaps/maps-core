@@ -1,0 +1,27 @@
+@extern "../../../yaml/rect_coord.yaml"
+
+tiled_2d_map_layer_config = interface +c +j +o {
+    get_bounds(): rect_coord;
+    get_tile_url(x:i32, y:i32, zoom:i32): string;
+    get_tile_identifier(x:i32, y:i32, zoom: i32): string;
+    get_zoom_level_infos() : list<tiled_2d_map_zoom_level_info>;
+    get_zoom_info(): tiled_2d_map_zoom_info;
+}
+
+tiled_2d_map_zoom_level_info = record {
+	zoom: f64;
+	tile_width_layer_system_units: f32;
+	num_tiles_x: i32;
+	num_tiles_y: i32;
+	zoom_level_identifier: i32;
+}
+
+tiled_2d_map_zoom_info = record {
+	zoom_level_scale_factor: f32;
+	num_draw_previous_layers: i32;
+}
+
+tiled_2d_map_source_interface = interface +c {
+    on_visible_bounds_changed(visible_bounds: rect_coord, zoom: f64);
+}
+

@@ -1,0 +1,52 @@
+coordinate_conversion_helper_interface = interface +c {
+    register_converter(converter: coordinate_converter_interface);
+    convert(to: string, coordinate: coord) : coord;
+    convert_rect(to: string, rect: rect_coord) : rect_coord;
+    convert_rect_to_render_system(rect: rect_coord) : rect_coord;
+    convert_to_render_system(coordinate: coord) : coord;
+}
+
+coordinate_converter_interface = interface +c +j +o {
+    convert(coordinate: coord) : coord;
+    get_from() : string;
+    get_to() : string;
+}
+
+coordinate_system_identifiers = interface +c {
+    static RENDERSYSTEM(): string;
+
+    # WGS 84 / Pseudo-Mercator
+    # https://epsg.io/3857
+    static EPSG3857(): string;
+
+    # WGS 84
+    # https://epsg.io/4326
+    static EPSG4326(): string;
+
+    # LV03+
+    # https://epsg.io/2056
+    static EPSG2056(): string;
+}
+
+map_coordinate_system = record {
+    identifier: string;
+    bounds: rect_coord;
+    unit_to_screen_meter_factor: f32;
+}
+
+coordinate_system_factory = interface +c {
+    static get_epsg_2056_system() : map_coordinate_system;
+    static get_epsg_3857_system() : map_coordinate_system;
+}
+
+coord = record {
+    system_identifier: string;
+    x: f64;
+    y: f64;
+    z: f64;
+}
+
+rect_coord = record {
+    top_left: coord;
+    bottom_right: coord;
+}

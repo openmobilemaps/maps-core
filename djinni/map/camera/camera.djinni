@@ -1,0 +1,8 @@
+@extern "../../yaml/map_interface.yaml"
+@extern "../../yaml/coord.yaml"
+@extern "../../yaml/camera_interface.yaml"
+@extern "../../yaml/rect_coord.yaml"
+
+map_camera_2d_listener_interface = interface +c +j +o {
+    on_visible_bounds_changed(visible_bounds: rect_coord, zoom: f64);
+}

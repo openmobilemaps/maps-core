@@ -1,0 +1,11 @@
+@extern "../../../yaml/graphics_object_interface.yaml"
+
+layer_object_interface = interface +c {
+	update();
+    get_render_config(): list<render_config_interface>;
+}
+
+render_config_interface = interface +c {
+    get_graphics_object(): graphics_object_interface;
+    get_render_index(): i32;
+}

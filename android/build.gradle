@@ -1,0 +1,67 @@
+buildscript {
+	ext.kotlin_version = "1.4.20"
+	repositories {
+		google()
+		jcenter()
+	}
+	dependencies {
+		classpath "com.android.tools.build:gradle:4.1.2"
+		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+	}
+}
+
+repositories {
+	google()
+	jcenter()
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+	compileSdkVersion 30
+
+	defaultConfig {
+		minSdkVersion 23
+		targetSdkVersion 30
+		versionCode 1
+		versionName "1.0"
+
+		testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+		consumerProguardFiles 'consumer-rules.pro'
+		externalNativeBuild {
+			cmake {
+				cppFlags "-std=c++17 -frtti -fexceptions"
+			}
+		}
+	}
+
+	externalNativeBuild {
+		cmake {
+			path "CMakeLists.txt"
+		}
+	}
+
+	sourceSets {
+		main {
+			java {
+				srcDir 'src/main/java'
+				srcDir '../bridging/android/java'
+			}
+		}
+	}
+}
+
+dependencies {
+	implementation fileTree(dir: 'libs', include: ['*.jar'])
+	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+	implementation "androidx.annotation:annotation:1.1.0"
+	implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0"
+	implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.2"
+
+	implementation 'com.squareup.okhttp3:okhttp:4.7.2'
+
+	testImplementation 'junit:junit:4.13.1'
+	androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+	androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+}

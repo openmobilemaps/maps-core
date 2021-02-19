@@ -1,0 +1,3 @@
+[submodule "external/djinni"]
+	path = external/djinni
+	url = git@github.com:UbiqueInnovation/djinni.git

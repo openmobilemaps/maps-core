@@ -1,0 +1,11 @@
+# using clang-format version 5.0.0
+Language: Cpp
+BasedOnStyle: LLVM
+
+ColumnLimit: 132
+ContinuationIndentWidth: 4
+IndentWidth: 4
+TabWidth: 4
+UseTab: "Never"
+
+BreakConstructorInitializers: BeforeComma

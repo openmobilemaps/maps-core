@@ -1,0 +1,35 @@
+@extern "../../yaml/vec_2_f.yaml"
+@extern "../../yaml/scheduler_interface.yaml"
+
+touch_handler_interface = interface +c +j +o {
+    on_touch_event(touch_event: touch_event);
+    add_listener(listener: touch_interface);
+    remove_listener(listener: touch_interface);
+}
+
+default_touch_handler_interface = interface +c {
+    static create(scheduler: scheduler_interface, density: f32): touch_handler_interface;
+}
+
+touch_interface = interface +c {
+    on_click_unconfirmed(pos_screen: vec_2_f) : bool;
+    on_click_confirmed(pos_screen: vec_2_f) : bool;
+    on_double_click(pos_screen: vec_2_f) : bool;
+    on_long_press(pos_screen: vec_2_f) : bool;
+    on_move(delta_screen: vec_2_f, confirmed: bool, double_click: bool) : bool;
+    on_move_complete() : bool;
+    on_two_finger_click(pos_screen_1: vec_2_f, pos_screen_2: vec_2_f) : bool;
+    on_two_finger_move(pos_screen_old: list<vec_2_f>, pos_screen_new: list<vec_2_f>) : bool;
+    clear_touch();
+}
+
+touch_event = record {
+    pointers: list<vec_2_f>;
+    touch_action: touch_action;
+}
+
+touch_action = enum { 
+    down;
+    move;
+    up;
+}

@@ -1,0 +1,31 @@
+scheduler_interface = interface +c +j +o {
+    addTask(task: task_interface);
+    removeTask(id: string);
+    clear();
+    pause();
+    resume();
+}
+
+task_interface = interface +c +j +o {
+    get_config() : task_config;
+    run();
+}
+
+task_config = record {
+    id: string;
+    delay: i64;
+    priority: task_priority;
+    execution_environment: execution_environment;
+}
+
+task_priority = enum {
+    high;
+    normal;
+    low;
+}
+
+execution_environment = enum {
+    io;
+    computation;
+    graphics;
+}
