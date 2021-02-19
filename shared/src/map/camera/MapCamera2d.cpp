@@ -36,22 +36,24 @@ MapCamera2d::MapCamera2d(const std::shared_ptr<MapInterface> &mapInterface, floa
 void MapCamera2d::viewportSizeChanged() { notifyListeners(); }
 
 void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double zoom, bool animated) {
+    Coord positionMapSystem = conversionHelper->convert(mapCoordinateSystem.identifier, centerPosition);
     if (animated) {
-        beginAnimation(zoom, centerPosition);
+        beginAnimation(zoom, positionMapSystem);
     } else {
         this->zoom = zoom;
-        this->centerPosition.x = centerPosition.x;
-        this->centerPosition.y = centerPosition.y;
+        this->centerPosition.x = positionMapSystem.x;
+        this->centerPosition.y = positionMapSystem.y;
         notifyListeners();
     }
 }
 
 void MapCamera2d::moveToCenterPosition(const ::Coord &centerPosition, bool animated) {
+    Coord positionMapSystem = conversionHelper->convert(mapCoordinateSystem.identifier, centerPosition);
     if (animated) {
-        beginAnimation(zoom, centerPosition);
+        beginAnimation(zoom, positionMapSystem);
     } else {
-        this->centerPosition.x = centerPosition.x;
-        this->centerPosition.y = centerPosition.y;
+        this->centerPosition.x = positionMapSystem.x;
+        this->centerPosition.y = positionMapSystem.y;
         notifyListeners();
     }
 }
