@@ -34,6 +34,11 @@ map_coordinate_system = record {
     unit_to_screen_meter_factor: f32;
 }
 
+coordinate_system_factory = interface +c {
+    static get_epsg_2056_system() : map_coordinate_system;
+    static get_epsg_3857_system() : map_coordinate_system;
+}
+
 coord = record {
     system_identifier: string;
     x: f64;
