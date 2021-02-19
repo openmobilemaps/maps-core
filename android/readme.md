@@ -27,7 +27,7 @@
 
 ## How to build
 
-Make sure you have all submodules initialized and updated. to do this use
+Make sure you have all submodules initialized and updated. To do this, use
 
 ```
 git submodule init
@@ -44,17 +44,17 @@ in the folder [djinni](../djinni). This generates the Kotlin bindings, the C++ h
 
 ### Building the Android Library
 
-The Android library can be opened as an Android Studio project in the [android](.) folder. Alternatively you can build the library using gradle from the command line using
+The Android library can be opened as an Android Studio project in the [android](.) folder. Alternatively, you can build the library using gradle from the command line using
 
 ```
 ./gradlew assemble
 ```
 
-and you find the generated .aar library under build/outputs/aar/. For development, it is easiest to include this library directly as a module into a wrapping Android application project that can be run on a device.
+and you find the generated .aar library under `build/outputs/aar/`. For development, it is easiest to include this library directly as a module into a wrapping Android application project, that can be run on a device.
 
 <h2>Installation</h2>
 
-Either include the Android fold as a module in the Android project or moving the generated .aar to e.g. the `app/libs` folder of the project and including it in the project via the apps `build.gradle`:
+Either include the `android` folder as a module in the Android project or moving the generated .aar to e.g. the `app/libs` folder of the project and including it in the project via the apps `build.gradle`:
 
 ```
 implementation fileTree(dir: 'libs', include: ['*.aar'])
@@ -75,7 +75,7 @@ implementation 'com.squareup.okhttp3:okhttp:4.7.2' // used for the default Textu
 
 ### MapView
 
-The main ui element to use open mobile maps is the MapView provided with it. To use it, the following steps are necessary to set it up:
+The main ui element to use Open Mobile Maps is the MapView provided with it. To use it, the following steps are necessary to set it up:
 
 ```kotlin
 val mapView = findViewById<MapView>(R.id.mapView)
@@ -83,11 +83,11 @@ mapView.setupMap(MapConfig(...))
 mapView.registerLifecycle(lifecycle)
 ```
 
-The map needs to be initialized with a MapConfig, which specifies the coordinate system used and the respective bounds and zoom levels that the camera operates in. Additionally the MapView needs to be registered to a lifecycle that also provides a coroutine context, in which the maps tasks can be scheduled (e.g. for tile loading).
+The map needs to be initialized with a `MapConfig`, which specifies the coordinate system used and the respective bounds and zoom levels that the camera operates in. Additionally, the `MapView` needs to be registered to a lifecycle that also provides a coroutine context, in which the maps tasks can be scheduled (e.g. for tile loading).
 
 ### Displaying a Tiled Raster Map
 
-A standard use-case is to display content from a tile-server as a layer in the map, e.g. one containing data from [OpenStreetMap](https://wiki.openstreetmap.org/). In this example case, the map is a projection in the EPSG:3857 system. Thus the MapView is recommended to be initialized with a matching MapConfig.
+A standard use-case is to display content from a tile-server as a layer in the map, e.g. one containing data from [OpenStreetMap](https://wiki.openstreetmap.org/). In this example case, the map is a projection in the EPSG:3857 system. Thus the `MapView` is recommended to be initialized with a matching `MapConfig`.
 
 ```kotlin
 mapView.setupMap(MapConfig(CoordinateSystemFactory.getEpsg3857System(), 500000000.0, 1000.0))
@@ -99,13 +99,13 @@ To display the tiles, a Tiled2dMapRasterLayer must be created with both a Tiled2
 val tiledLayer = Tiled2dMapRasterLayerInterface.create(layerConfig, textureLoader)
 ```
 
-Open Maps Mobile provides a default implementation for a TextureLoader which uses OkHttp to load a bitmap from a given URL. Of course, a custom implementation of the TextureLoaderInterface can be used as well.
+Open Maps Mobile provides a default implementation for a `TextureLoader`, which uses OkHttp to load a bitmap from a given URL. Of course, a custom implementation of the `TextureLoaderInterface` can be used as well.
 
 ```kotlin
 val textureLoader = TextureLoader(this, cacheDir, 50L * 1024L * 1024L)
 ```
 
-The LayerConfig contains the information needed for the layer to compute the visible tiles in the current camera configuration, as well as to load and display them.
+The `LayerConfig` contains the information needed for the layer to compute the visible tiles in the current camera configuration, as well as to load and display them.
 
 ```kotlin
 val layerConfig = object : Tiled2dMapLayerConfig() {
@@ -165,7 +165,7 @@ mapView.addLayer(tiledLayer.asLayerInterface())
 
 ### Adjusting the Camera
 
-The camera position and zoom can easily be adjusted by manipulating the Camera2dInterface received from the map. E.g. to set a custom location:
+The camera position and zoom can easily be adjusted by manipulating the `Camera2dInterface` received from the map. For example, to set a custom location:
 
 ```kotlin
 mapView.getCamera().moveToCenterPositionZoom(
