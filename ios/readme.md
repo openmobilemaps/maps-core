@@ -20,7 +20,7 @@
 
 <h1>iOS</h1>
 
-## How to use
+## Installation
 Open mobile maps is available through [Swift Package Manager](https://swift.org/package-manager/).
 
 ### Xcode
@@ -33,6 +33,34 @@ Once you have your Swift package set up, adding open mobile maps as a dependency
 dependencies: [
     .package(url: "https://github.com/openmobilemaps/maps-core.git", .branch("develop"))
 ]
+```
+
+## How to use
+```
+import MapsCore
+import MapCoreSharedModule
+
+// create MCMapConfig for epsg3857 coordinate system https://epsg.io/3857
+lazy var mapConfig: MCMapConfig = {
+  let identifier = MCCoordinateSystemIdentifiers.epsg3857();
+
+  let topLeft = MCCoord(systemIdentifier: identifier,
+                        x: -20026376.39,
+                        y: 20048966.10, z: 0)
+  let bottomRight = MCCoord(systemIdentifier: identifier,
+                        x: 20026376.39,
+                        y: -20048966.10, z: 0)
+  let bounds = MCRectCoord(topLeft: topLeft, bottomRight: bottomRight)
+  let coordinateSystem = MCMapCoordinateSystem(identifier: identifier,
+                                                bounds: .init(topLeft: topLeft, bottomRight: bottomRight),
+                                                unitToScreenMeterFactor: 1)
+
+  return MCMapConfig(mapCoordinateSystem: coordinateSystem,
+                     zoomMin: 500_000_000,
+                     zoomMax: 1_000)
+}()
+
+let view = MCMapView(config: mapConfig)
 ```
 
 ## How to build
