@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2021 Ubique Innovation AG <https://www.ubique.ch>
+ *
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ *  SPDX-License-Identifier: MPL-2.0
+ */
+
 #include "MapCamera2d.h"
 #include "Coord.h"
 #include "DateHelper.h"
@@ -26,22 +36,24 @@ MapCamera2d::MapCamera2d(const std::shared_ptr<MapInterface> &mapInterface, floa
 void MapCamera2d::viewportSizeChanged() { notifyListeners(); }
 
 void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double zoom, bool animated) {
+    Coord positionMapSystem = conversionHelper->convert(mapCoordinateSystem.identifier, centerPosition);
     if (animated) {
-        beginAnimation(zoom, centerPosition);
+        beginAnimation(zoom, positionMapSystem);
     } else {
         this->zoom = zoom;
-        this->centerPosition.x = centerPosition.x;
-        this->centerPosition.y = centerPosition.y;
+        this->centerPosition.x = positionMapSystem.x;
+        this->centerPosition.y = positionMapSystem.y;
         notifyListeners();
     }
 }
 
 void MapCamera2d::moveToCenterPosition(const ::Coord &centerPosition, bool animated) {
+    Coord positionMapSystem = conversionHelper->convert(mapCoordinateSystem.identifier, centerPosition);
     if (animated) {
-        beginAnimation(zoom, centerPosition);
+        beginAnimation(zoom, positionMapSystem);
     } else {
-        this->centerPosition.x = centerPosition.x;
-        this->centerPosition.y = centerPosition.y;
+        this->centerPosition.x = positionMapSystem.x;
+        this->centerPosition.y = positionMapSystem.y;
         notifyListeners();
     }
 }

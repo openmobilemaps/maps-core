@@ -1,9 +1,16 @@
-//
-// Created by Christoph Maurhofer on 20.02.2020.
-//
+/*
+ * Copyright (c) 2021 Ubique Innovation AG <https://www.ubique.ch>
+ *
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ *  SPDX-License-Identifier: MPL-2.0
+ */
 
-#ifndef SWISSTOPO_OPENGLHELPER_H
-#define SWISSTOPO_OPENGLHELPER_H
+
+#ifndef MAPSCORE_OPENGLHELPER_H
+#define MAPSCORE_OPENGLHELPER_H
 
 #include "logger/Logger.h"
 #include "opengl_wrapper.h"
@@ -18,4 +25,4 @@ class OpenGlHelper {
     }
 };
 
-#endif // SWISSTOPO_OPENGLHELPER_H
+#endif // MAPSCORE_OPENGLHELPER_H

@@ -1,9 +1,16 @@
-//
-// Created by Christoph Maurhofer on 20.02.2020.
-//
+/*
+ * Copyright (c) 2021 Ubique Innovation AG <https://www.ubique.ch>
+ *
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ *  SPDX-License-Identifier: MPL-2.0
+ */
 
-#ifndef SWISSTOPO_BASESHADERPROGRAMOPENGL_H
-#define SWISSTOPO_BASESHADERPROGRAMOPENGL_H
+
+#ifndef MAPSCORE_BASESHADERPROGRAMOPENGL_H
+#define MAPSCORE_BASESHADERPROGRAMOPENGL_H
 
 #define UBRendererShaderCode(...) #__VA_ARGS__
 
@@ -22,4 +29,4 @@ class BaseShaderProgramOpenGl {
     virtual std::string getFragmentShader();
 };
 
-#endif // SWISSTOPO_BASESHADERPROGRAMOPENGL_H
+#endif // MAPSCORE_BASESHADERPROGRAMOPENGL_H
