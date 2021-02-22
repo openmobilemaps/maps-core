@@ -66,8 +66,6 @@ class PolygonLayer : public PolygonLayerInterface,
 
     virtual bool onClickUnconfirmed(const ::Vec2F &posScreen) override;
 
-    virtual bool onMove(const ::Vec2F &deltaScreen, bool confirmed, bool doubleClick) override;
-
     virtual void clearTouch() override;
 
   private:

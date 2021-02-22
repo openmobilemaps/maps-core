@@ -15,6 +15,7 @@
 #include "MapInterface.h"
 #include "PolygonHelper.h"
 #include "RenderPass.h"
+#include "LambdaTask.h"
 #include <map>
 
 PolygonLayer::PolygonLayer()
@@ -77,13 +78,17 @@ void PolygonLayer::add(const PolygonInfo &polygon) {
     auto shader = shaderFactory->createColorShader();
     auto polygonGraphicsObject = objectFactory->createPolygon(shader->asShaderProgramInterface());
 
-    polygonGraphicsObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
-
     auto polygonObject =
         std::make_shared<Polygon2dLayerObject>(mapInterface->getCoordinateConverterHelper(), polygonGraphicsObject, shader);
 
     polygonObject->setPositions(polygon.coordinates, polygon.holes, polygon.isConvex);
     polygonObject->setColor(polygon.color);
+
+    mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
+            TaskConfig("PolygonLayer_setup_" + polygon.identifier, 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [=] {
+                polygonGraphicsObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+            }));
+
     {
         std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
         polygons[polygon] = polygonObject;
@@ -187,11 +192,6 @@ bool PolygonLayer::onTouchDown(const ::Vec2F &posScreen) {
             return true;
         }
     }
-    return false;
-}
-
-bool PolygonLayer::onMove(const ::Vec2F &deltaScreen, bool confirmed, bool doubleClick) {
-    clearTouch();
     return false;
 }
 
