@@ -8,7 +8,6 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#include <logger/Logger.h>
 #include "Textured2dLayerObject.h"
 
 Textured2dLayerObject::Textured2dLayerObject(std::shared_ptr<Quad2dInterface> rectangle,
