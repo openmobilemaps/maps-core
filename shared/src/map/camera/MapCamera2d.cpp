@@ -17,6 +17,8 @@
 #include "Vec2D.h"
 #include "Vec2FHelper.h"
 
+#define ROTATION_THREASHOLD 20
+
 MapCamera2d::MapCamera2d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi)
     : mapInterface(mapInterface)
     , conversionHelper(mapInterface->getCoordinateConverterHelper())
@@ -210,6 +212,12 @@ bool MapCamera2d::onDoubleClick(const ::Vec2F &posScreen) {
     return true;
 }
 
+void MapCamera2d::clearTouch() {
+    isRotationThreasholdReached = false;
+    tempAngle = angle;
+}
+
+
 bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) {
     if (!config.twoFingerZoomEnabled)
         return false;
@@ -254,7 +262,14 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
         if (config.rotationEnabled) {
             float olda = atan2(posScreenOld[0].x - posScreenOld[1].x, posScreenOld[0].y - posScreenOld[1].y);
             float newa = atan2(posScreenNew[0].x - posScreenNew[1].x, posScreenNew[0].y - posScreenNew[1].y);
-            angle = fmod((angle + (olda - newa) / M_PI * 180.0) + 360.0, 360.0);
+            if(isRotationThreasholdReached){
+                angle = fmod((angle + (olda - newa) / M_PI * 180.0) + 360.0, 360.0);
+            } else {
+                tempAngle = fmod((tempAngle + (olda - newa) / M_PI * 180.0) + 360.0, 360.0);
+                if (std::abs(tempAngle - angle) >= ROTATION_THREASHOLD){
+                    isRotationThreasholdReached = true;
+                }
+            }
         }
 
         notifyListeners();
