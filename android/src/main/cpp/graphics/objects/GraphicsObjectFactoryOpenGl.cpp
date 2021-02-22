@@ -9,13 +9,13 @@
  */
 
 #include "GraphicsObjectFactoryOpenGl.h"
+#include "Quad2dOpenGl.h"
 #include "Line2dOpenGl.h"
 #include "Polygon2dOpenGl.h"
-#include "Rectangle2dOpenGl.h"
 
-std::shared_ptr<Rectangle2dInterface>
-GraphicsObjectFactoryOpenGl::createRectangle(const std::shared_ptr<::ShaderProgramInterface> &shader) {
-    return std::make_shared<Rectangle2dOpenGl>(shader);
+std::shared_ptr<Quad2dInterface>
+GraphicsObjectFactoryOpenGl::createQuad(const std::shared_ptr<::ShaderProgramInterface> &shader) {
+    return std::make_shared<Quad2dOpenGl>(shader);
 }
 
 std::shared_ptr<Line2dInterface>

@@ -9,45 +9,45 @@
  */
 
 
-#include "Rectangle2dOpenGl.h"
+#include "Quad2dOpenGl.h"
 #include "OpenGlHelper.h"
 #include "TextureHolderInterface.h"
 
-Rectangle2dOpenGl::Rectangle2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
+Quad2dOpenGl::Quad2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
     : shaderProgram(shader) {}
 
-bool Rectangle2dOpenGl::isReady() { return ready; }
+bool Quad2dOpenGl::isReady() { return ready; }
 
-std::shared_ptr<GraphicsObjectInterface> Rectangle2dOpenGl::asGraphicsObject() { return shared_from_this(); }
+std::shared_ptr<GraphicsObjectInterface> Quad2dOpenGl::asGraphicsObject() { return shared_from_this(); }
 
-void Rectangle2dOpenGl::clear() {
+void Quad2dOpenGl::clear() {
     removeTexture();
     ready = false;
 }
 
-void Rectangle2dOpenGl::setFrame(const RectD &frame, const RectD &textureCoordinates) {
+void Quad2dOpenGl::setFrame(const Quad2dD &frame, const RectD &textureCoordinates) {
     this->frame = frame;
     this->textureCoordinates = textureCoordinates;
     ready = false;
 }
 
-void Rectangle2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
+void Quad2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
     if (ready)
         return;
 
     float frameZ = 0;
     vertexBuffer = {
-        (float)frame.x,
-        (float)frame.y,
+        (float)frame.topLeft.x,
+        (float)frame.topLeft.y,
         frameZ,
-        (float)frame.x,
-        (float)(frame.y + frame.height),
+        (float)frame.bottomLeft.x,
+        (float)frame.bottomLeft.y,
         frameZ,
-        (float)(frame.x + frame.width),
-        (float)(frame.y + frame.height),
+        (float)frame.bottomRight.x,
+        (float)frame.bottomRight.y,
         frameZ,
-        (float)(frame.x + frame.width),
-        (float)frame.y,
+        (float)frame.topRight.x,
+        (float)frame.topRight.y,
         frameZ,
     };
     indexBuffer = {
@@ -63,7 +63,7 @@ void Rectangle2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
     ready = true;
 }
 
-void Rectangle2dOpenGl::loadTexture(const std::shared_ptr<TextureHolderInterface> &textureHolder) {
+void Quad2dOpenGl::loadTexture(const std::shared_ptr<TextureHolderInterface> &textureHolder) {
     glGenTextures(1, (unsigned int *)&texturePointer[0]);
 
     if (textureHolder != nullptr) {
@@ -89,13 +89,13 @@ void Rectangle2dOpenGl::loadTexture(const std::shared_ptr<TextureHolderInterface
     }
 }
 
-void Rectangle2dOpenGl::removeTexture() {
+void Quad2dOpenGl::removeTexture() {
     glDeleteTextures(1, &texturePointer[0]);
     texturePointer = std::vector<GLuint>(1, 0);
     textureLoaded = false;
 }
 
-void Rectangle2dOpenGl::adjustTextureCoordinates() {
+void Quad2dOpenGl::adjustTextureCoordinates() {
     float tMinX = factorWidth * textureCoordinates.x;
     float tMaxX = factorWidth * (textureCoordinates.x + textureCoordinates.width);
     float tMinY = factorHeight * textureCoordinates.y;
@@ -104,8 +104,8 @@ void Rectangle2dOpenGl::adjustTextureCoordinates() {
     textureBuffer = {tMinX, tMinY, tMinX, tMaxY, tMaxX, tMaxY, tMaxX, tMinY};
 }
 
-void Rectangle2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                               int64_t mvpMatrix) {
+void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
+                          int64_t mvpMatrix) {
     if (!ready)
         return;
 
@@ -156,7 +156,7 @@ void Rectangle2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     glDisable(GL_BLEND);
 }
 
-void Rectangle2dOpenGl::prepareTextureDraw(std::shared_ptr<OpenGlContext> &openGLContext, int mProgram) {
+void Quad2dOpenGl::prepareTextureDraw(std::shared_ptr<OpenGlContext> &openGLContext, int mProgram) {
     int mTextureUniformHandle = glGetUniformLocation(mProgram, "u_Texture");
 
     // Set the active texture unit to texture unit 0.

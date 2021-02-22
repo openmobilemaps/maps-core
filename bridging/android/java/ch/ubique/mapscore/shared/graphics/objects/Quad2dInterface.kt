@@ -5,9 +5,9 @@ package ch.ubique.mapscore.shared.graphics.objects
 
 import java.util.concurrent.atomic.AtomicBoolean
 
-abstract class Rectangle2dInterface {
+abstract class Quad2dInterface {
 
-    abstract fun setFrame(frame: ch.ubique.mapscore.shared.graphics.common.RectD, textureCoordinates: ch.ubique.mapscore.shared.graphics.common.RectD)
+    abstract fun setFrame(frame: ch.ubique.mapscore.shared.graphics.common.Quad2dD, textureCoordinates: ch.ubique.mapscore.shared.graphics.common.RectD)
 
     abstract fun loadTexture(textureHolder: TextureHolderInterface)
 
@@ -15,7 +15,7 @@ abstract class Rectangle2dInterface {
 
     abstract fun asGraphicsObject(): GraphicsObjectInterface
 
-    private class CppProxy : Rectangle2dInterface {
+    private class CppProxy : Quad2dInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 
@@ -33,11 +33,11 @@ abstract class Rectangle2dInterface {
             _djinni_private_destroy()
         }
 
-        override fun setFrame(frame: ch.ubique.mapscore.shared.graphics.common.RectD, textureCoordinates: ch.ubique.mapscore.shared.graphics.common.RectD) {
+        override fun setFrame(frame: ch.ubique.mapscore.shared.graphics.common.Quad2dD, textureCoordinates: ch.ubique.mapscore.shared.graphics.common.RectD) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_setFrame(this.nativeRef, frame, textureCoordinates)
         }
-        private external fun native_setFrame(_nativeRef: Long, frame: ch.ubique.mapscore.shared.graphics.common.RectD, textureCoordinates: ch.ubique.mapscore.shared.graphics.common.RectD)
+        private external fun native_setFrame(_nativeRef: Long, frame: ch.ubique.mapscore.shared.graphics.common.Quad2dD, textureCoordinates: ch.ubique.mapscore.shared.graphics.common.RectD)
 
         override fun loadTexture(textureHolder: TextureHolderInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

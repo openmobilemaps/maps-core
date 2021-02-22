@@ -5,6 +5,7 @@
 #include "Marshal.hpp"
 #include "NativeCoord.h"
 #include "NativeCoordinateConverterInterface.h"
+#include "NativeQuadCoord.h"
 #include "NativeRectCoord.h"
 
 namespace djinni_generated {
@@ -60,6 +61,27 @@ CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_coordinates_Coordi
         const auto& ref = ::djinni::objectFromHandleAddress<::CoordinateConversionHelperInterface>(nativeRef);
         auto r = ref->convertRectToRenderSystem(::djinni_generated::NativeRectCoord::toCpp(jniEnv, j_rect));
         return ::djinni::release(::djinni_generated::NativeRectCoord::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_coordinates_CoordinateConversionHelperInterface_00024CppProxy_native_1convertQuad(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_to, jobject j_quad)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::CoordinateConversionHelperInterface>(nativeRef);
+        auto r = ref->convertQuad(::djinni::String::toCpp(jniEnv, j_to),
+                                  ::djinni_generated::NativeQuadCoord::toCpp(jniEnv, j_quad));
+        return ::djinni::release(::djinni_generated::NativeQuadCoord::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_coordinates_CoordinateConversionHelperInterface_00024CppProxy_native_1convertQuadToRenderSystem(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_quad)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::CoordinateConversionHelperInterface>(nativeRef);
+        auto r = ref->convertQuadToRenderSystem(::djinni_generated::NativeQuadCoord::toCpp(jniEnv, j_quad));
+        return ::djinni::release(::djinni_generated::NativeQuadCoord::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

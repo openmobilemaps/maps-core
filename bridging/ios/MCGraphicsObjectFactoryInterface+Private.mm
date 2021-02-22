@@ -9,7 +9,7 @@
 #import "MCLine2dInterface+Private.h"
 #import "MCLineShaderProgramInterface+Private.h"
 #import "MCPolygon2dInterface+Private.h"
-#import "MCRectangle2dInterface+Private.h"
+#import "MCQuad2dInterface+Private.h"
 #import "MCShaderProgramInterface+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -35,10 +35,10 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (nullable id<MCRectangle2dInterface>)createRectangle:(nullable id<MCShaderProgramInterface>)shader {
+- (nullable id<MCQuad2dInterface>)createQuad:(nullable id<MCShaderProgramInterface>)shader {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->createRectangle(::djinni_generated::ShaderProgramInterface::toCpp(shader));
-        return ::djinni_generated::Rectangle2dInterface::fromCpp(objcpp_result_);
+        auto objcpp_result_ = _cppRefHandle.get()->createQuad(::djinni_generated::ShaderProgramInterface::toCpp(shader));
+        return ::djinni_generated::Quad2dInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -65,11 +65,11 @@ class GraphicsObjectFactoryInterface::ObjcProxy final
     friend class ::djinni_generated::GraphicsObjectFactoryInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    std::shared_ptr<::Rectangle2dInterface> createRectangle(const std::shared_ptr<::ShaderProgramInterface> & c_shader) override
+    std::shared_ptr<::Quad2dInterface> createQuad(const std::shared_ptr<::ShaderProgramInterface> & c_shader) override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createRectangle:(::djinni_generated::ShaderProgramInterface::fromCpp(c_shader))];
-            return ::djinni_generated::Rectangle2dInterface::toCpp(objcpp_result_);
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createQuad:(::djinni_generated::ShaderProgramInterface::fromCpp(c_shader))];
+            return ::djinni_generated::Quad2dInterface::toCpp(objcpp_result_);
         }
     }
     std::shared_ptr<::Line2dInterface> createLine(const std::shared_ptr<::LineShaderProgramInterface> & c_lineShader) override

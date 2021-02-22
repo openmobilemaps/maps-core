@@ -52,6 +52,13 @@ vec_3_d = record {
     z: f64;
 }
 
+quad_2d_d = record {
+    top_left: vec_2_d;
+    top_right: vec_2_d;
+    bottom_right: vec_2_d;
+    bottom_left: vec_2_d;
+}
+
 color = record {
     r: f32;
     g: f32;

@@ -8,6 +8,7 @@
 #import "DJIMarshal+Private.h"
 #import "MCCoord+Private.h"
 #import "MCCoordinateConverterInterface+Private.h"
+#import "MCQuadCoord+Private.h"
 #import "MCRectCoord+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -61,6 +62,22 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->convertRectToRenderSystem(::djinni_generated::RectCoord::toCpp(rect));
         return ::djinni_generated::RectCoord::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nonnull MCQuadCoord *)convertQuad:(nonnull NSString *)to
+                                quad:(nonnull MCQuadCoord *)quad {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->convertQuad(::djinni::String::toCpp(to),
+                                                               ::djinni_generated::QuadCoord::toCpp(quad));
+        return ::djinni_generated::QuadCoord::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nonnull MCQuadCoord *)convertQuadToRenderSystem:(nonnull MCQuadCoord *)quad {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->convertQuadToRenderSystem(::djinni_generated::QuadCoord::toCpp(quad));
+        return ::djinni_generated::QuadCoord::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

@@ -8,6 +8,7 @@
 
 class CoordinateConverterInterface;
 struct Coord;
+struct QuadCoord;
 struct RectCoord;
 
 class CoordinateConversionHelperInterface {
@@ -21,6 +22,10 @@ public:
     virtual RectCoord convertRect(const std::string & to, const RectCoord & rect) = 0;
 
     virtual RectCoord convertRectToRenderSystem(const RectCoord & rect) = 0;
+
+    virtual QuadCoord convertQuad(const std::string & to, const QuadCoord & quad) = 0;
+
+    virtual QuadCoord convertQuadToRenderSystem(const QuadCoord & quad) = 0;
 
     virtual Coord convertToRenderSystem(const Coord & coordinate) = 0;
 };

@@ -3,6 +3,8 @@ coordinate_conversion_helper_interface = interface +c {
     convert(to: string, coordinate: coord) : coord;
     convert_rect(to: string, rect: rect_coord) : rect_coord;
     convert_rect_to_render_system(rect: rect_coord) : rect_coord;
+    convert_quad(to: string, quad: quad_coord) : quad_coord;
+    convert_quad_to_render_system(quad: quad_coord) : quad_coord;
     convert_to_render_system(coordinate: coord) : coord;
 }
 
@@ -49,4 +51,11 @@ coord = record {
 rect_coord = record {
     top_left: coord;
     bottom_right: coord;
+}
+
+quad_coord = record {
+    top_left: coord;
+    top_right: coord;
+    bottom_right: coord;
+    bottom_left: coord;
 }

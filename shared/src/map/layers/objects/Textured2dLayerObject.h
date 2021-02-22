@@ -9,19 +9,21 @@
  */
 
 #pragma once
+
+#include "QuadCoord.h"
 #include "AlphaShaderInterface.h"
 #include "Coord.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "LayerObjectInterface.h"
 #include "RectCoord.h"
-#include "Rectangle2dInterface.h"
+#include "Quad2dInterface.h"
 #include "RenderConfig.h"
 #include "RenderConfigInterface.h"
 #include "Vec2D.h"
 
 class Textured2dLayerObject : public LayerObjectInterface {
-  public:
-    Textured2dLayerObject(std::shared_ptr<Rectangle2dInterface> rectangle, std::shared_ptr<AlphaShaderInterface> shader,
+public:
+    Textured2dLayerObject(std::shared_ptr<Quad2dInterface> rectangle, std::shared_ptr<AlphaShaderInterface> shader,
                           const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper);
 
     virtual ~Textured2dLayerObject() override {}
@@ -30,18 +32,21 @@ class Textured2dLayerObject : public LayerObjectInterface {
 
     virtual std::vector<std::shared_ptr<RenderConfigInterface>> getRenderConfig() override;
 
-    void setFrame(const ::RectD &frame);
-
     void setPosition(const ::Coord &coord, double width, double height);
+
+    void setPositions(const ::QuadCoord &coords);
 
     void setRectCoord(const ::RectCoord &rectCoord);
 
     void setAlpha(float alpha);
 
-    std::shared_ptr<Rectangle2dInterface> getRectangleObject();
+    std::shared_ptr<Quad2dInterface> getQuadObject();
 
-  private:
-    std::shared_ptr<Rectangle2dInterface> rectangle;
+protected:
+    void setFrame(const ::Quad2dD &frame);
+
+private:
+    std::shared_ptr<Quad2dInterface> quad;
     std::shared_ptr<AlphaShaderInterface> shader;
 
     std::shared_ptr<RenderConfig> renderConfig;

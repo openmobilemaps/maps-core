@@ -18,7 +18,7 @@
 #include "EPSG4326ToEPSG3857Converter.h"
 
 CoordinateConversionHelper::CoordinateConversionHelper(MapCoordinateSystem mapCoordinateSystem)
-    : mapCoordinateSystemIdentier(mapCoordinateSystem.identifier) {
+        : mapCoordinateSystemIdentier(mapCoordinateSystem.identifier) {
 
     registerConverter(std::make_shared<DefaultSystemToRenderConverter>(mapCoordinateSystem));
 
@@ -70,6 +70,32 @@ RectCoord CoordinateConversionHelper::convertRectToRenderSystem(const RectCoord 
 
 Coord CoordinateConversionHelper::convertToRenderSystem(const Coord &coordinate) {
     return convert(CoordinateSystemIdentifiers::RENDERSYSTEM(), coordinate);
+}
+
+QuadCoord CoordinateConversionHelper::convertQuad(const std::string &to, const QuadCoord &quad) {
+    Coord topLeft = convert(to, quad.topLeft);
+    Coord topRight = convert(to, quad.topRight);
+    Coord bottomRight = convert(to, quad.bottomRight);
+    Coord bottomLeft = convert(to, quad.bottomLeft);
+    bool ltr = topRight.x > topLeft.x;
+    bool ttb = bottomLeft.y > topLeft.y;
+    if (ltr) {
+        if (ttb) {
+            return QuadCoord(topLeft, topRight, bottomRight, bottomLeft);
+        } else {
+            return QuadCoord(bottomLeft, bottomRight, topRight, topLeft);
+        }
+    } else {
+        if (ttb) {
+            return QuadCoord(topRight, topLeft, bottomLeft, bottomRight);
+        } else {
+            return QuadCoord(bottomRight, bottomLeft, topLeft, topRight);
+        }
+    }
+}
+
+QuadCoord CoordinateConversionHelper::convertQuadToRenderSystem(const QuadCoord &quad) {
+    return convertQuad(CoordinateSystemIdentifiers::RENDERSYSTEM(), quad);
 }
 
 void CoordinateConversionHelper::precomputeConverterHelper() {

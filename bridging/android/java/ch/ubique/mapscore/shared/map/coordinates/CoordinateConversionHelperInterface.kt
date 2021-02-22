@@ -15,6 +15,10 @@ abstract class CoordinateConversionHelperInterface {
 
     abstract fun convertRectToRenderSystem(rect: RectCoord): RectCoord
 
+    abstract fun convertQuad(to: String, quad: QuadCoord): QuadCoord
+
+    abstract fun convertQuadToRenderSystem(quad: QuadCoord): QuadCoord
+
     abstract fun convertToRenderSystem(coordinate: Coord): Coord
 
     private class CppProxy : CoordinateConversionHelperInterface {
@@ -58,6 +62,18 @@ abstract class CoordinateConversionHelperInterface {
             return native_convertRectToRenderSystem(this.nativeRef, rect)
         }
         private external fun native_convertRectToRenderSystem(_nativeRef: Long, rect: RectCoord): RectCoord
+
+        override fun convertQuad(to: String, quad: QuadCoord): QuadCoord {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_convertQuad(this.nativeRef, to, quad)
+        }
+        private external fun native_convertQuad(_nativeRef: Long, to: String, quad: QuadCoord): QuadCoord
+
+        override fun convertQuadToRenderSystem(quad: QuadCoord): QuadCoord {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_convertQuadToRenderSystem(this.nativeRef, quad)
+        }
+        private external fun native_convertQuadToRenderSystem(_nativeRef: Long, quad: QuadCoord): QuadCoord
 
         override fun convertToRenderSystem(coordinate: Coord): Coord {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
