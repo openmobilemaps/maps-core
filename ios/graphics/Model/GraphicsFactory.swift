@@ -12,9 +12,9 @@ import Foundation
 import MapCoreSharedModule
 
 class GraphicsFactory: MCGraphicsObjectFactoryInterface {
-    func createRectangle(_ shader: MCShaderProgramInterface?) -> MCRectangle2dInterface? {
+    func createQuad(_ shader: MCShaderProgramInterface?) -> MCQuad2dInterface? {
         guard let shader = shader else { fatalError("No Shader provided") }
-        return Rectangle2d(shader: shader, metalContext: .current)
+        return Quad2d(shader: shader, metalContext: .current)
     }
 
     func createLine(_ lineShader: MCLineShaderProgramInterface?) -> MCLine2dInterface? {

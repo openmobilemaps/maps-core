@@ -9,6 +9,7 @@
  */
 
 import MetalKit
+import MapCoreSharedModule
 
 /// A 2D point in the X-Y coordinate system carrying a texture coordinate
 struct Vertex: Equatable {
@@ -60,6 +61,10 @@ struct Vertex: Equatable {
         position = SIMD2([x, y])
         normal = SIMD2([normalX, normalY])
         textureCoordinate = SIMD2([0.0, 0.0])
+    }
+
+    init(position: MCVec2D, textureU: Float, textureV: Float) {
+        self.init(x: position.xF, y: position.yF, textureU: textureU, textureV: textureV)
     }
 }
 
