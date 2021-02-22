@@ -5,6 +5,7 @@
 #import "MCCoord.h"
 #import "MCMapCamera2dListenerInterface.h"
 #import "MCRectCoord.h"
+#import "MCVec2F.h"
 #import <Foundation/Foundation.h>
 @class MCMapCamera2dInterface;
 @class MCMapInterface;
@@ -46,6 +47,8 @@
 - (void)addListener:(nullable id<MCMapCamera2dListenerInterface>)listener;
 
 - (void)removeListener:(nullable id<MCMapCamera2dListenerInterface>)listener;
+
+- (nonnull MCCoord *)coordFromScreenPosition:(nonnull MCVec2F *)posScreen;
 
 - (nullable id<MCCameraInterface>)asCameraInterface;
 

@@ -8,13 +8,14 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-
 #pragma once
 
 #include "TouchInterface.h"
 
 class SimpleTouchInterface : public TouchInterface {
   public:
+    virtual bool onTouchDown(const ::Vec2F &posScreen) override { return false; };
+
     virtual bool onClickUnconfirmed(const ::Vec2F &posScreen) override { return false; };
 
     virtual bool onClickConfirmed(const ::Vec2F &posScreen) override { return false; };

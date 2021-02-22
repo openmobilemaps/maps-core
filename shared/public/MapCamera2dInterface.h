@@ -7,6 +7,7 @@
 #include "Coord.h"
 #include "MapCamera2dListenerInterface.h"
 #include "RectCoord.h"
+#include "Vec2F.h"
 #include <memory>
 
 class MapInterface;
@@ -40,6 +41,8 @@ public:
     virtual void addListener(const std::shared_ptr<::MapCamera2dListenerInterface> & listener) = 0;
 
     virtual void removeListener(const std::shared_ptr<::MapCamera2dListenerInterface> & listener) = 0;
+
+    virtual ::Coord coordFromScreenPosition(const ::Vec2F & posScreen) = 0;
 
     virtual std::shared_ptr<::CameraInterface> asCameraInterface() = 0;
 };

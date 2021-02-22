@@ -12,14 +12,19 @@
 
 #include "Polygon2dLayerObject.h"
 #include "PolygonCompare.h"
+#include "PolygonLayerCallbackInterface.h"
 #include "PolygonLayerInterface.h"
+#include "SimpleTouchInterface.h"
 #include <atomic>
 #include <mutex>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
-class PolygonLayer : public PolygonLayerInterface, public LayerInterface, public std::enable_shared_from_this<PolygonLayer> {
+class PolygonLayer : public PolygonLayerInterface,
+                     public LayerInterface,
+                     public SimpleTouchInterface,
+                     public std::enable_shared_from_this<PolygonLayer> {
   public:
     PolygonLayer();
 
@@ -38,6 +43,8 @@ class PolygonLayer : public PolygonLayerInterface, public LayerInterface, public
 
     virtual std::shared_ptr<::LayerInterface> asLayerInterface() override;
 
+    virtual void setCallbackHandler(const std::shared_ptr<PolygonLayerCallbackInterface> &handler) override;
+
     // LayerInterface
     virtual void update() override{};
 
@@ -55,8 +62,16 @@ class PolygonLayer : public PolygonLayerInterface, public LayerInterface, public
 
     virtual void show() override;
 
+    virtual bool onTouchDown(const ::Vec2F &posScreen) override;
+
+    virtual bool onClickUnconfirmed(const ::Vec2F &posScreen) override;
+
+    virtual void clearTouch() override;
+
   private:
     std::shared_ptr<MapInterface> mapInterface;
+
+    std::shared_ptr<PolygonLayerCallbackInterface> callbackHandler;
 
     std::recursive_mutex polygonsMutex;
     std::unordered_map<PolygonInfo, std::shared_ptr<Polygon2dLayerObject>> polygons;
@@ -66,6 +81,8 @@ class PolygonLayer : public PolygonLayerInterface, public LayerInterface, public
 
     std::recursive_mutex addingQueueMutex;
     std::unordered_set<PolygonInfo> addingQueue;
+
+    std::optional<PolygonInfo> highlightedPolygon;
 
     std::atomic<bool> isHidden;
 };

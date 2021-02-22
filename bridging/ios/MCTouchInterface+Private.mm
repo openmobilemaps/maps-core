@@ -31,6 +31,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
+- (BOOL)onTouchDown:(nonnull MCVec2F *)posScreen {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->onTouchDown(::djinni_generated::Vec2F::toCpp(posScreen));
+        return ::djinni::Bool::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (BOOL)onClickUnconfirmed:(nonnull MCVec2F *)posScreen {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->onClickUnconfirmed(::djinni_generated::Vec2F::toCpp(posScreen));

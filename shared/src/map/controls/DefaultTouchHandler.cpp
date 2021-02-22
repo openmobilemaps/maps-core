@@ -127,11 +127,11 @@ void DefaultTouchHandler::handleTouchDown(Vec2F position) {
     scheduler->addTask(std::make_shared<LambdaTask>(
         TaskConfig("LongPressTask", LONG_PRESS_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
         [=] { checkState(); }));
-    /*for (auto &listener : listeners) {
-        if (listener->onTouch(x, y)) {
+    for (auto &listener : listeners) {
+        if (listener->onTouchDown(position)) {
             break;
         }
-    }*/
+    }
 }
 
 void DefaultTouchHandler::handleMove(Vec2F delta) {

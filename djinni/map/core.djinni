@@ -1,4 +1,4 @@
-@extern "../yaml/vec_2_d.yaml"
+@extern "../yaml/vec_2_f.yaml"
 @extern "../yaml/vec_2_i.yaml"
 @extern "../yaml/scheduler_interface.yaml"
 @extern "../yaml/touch_handler_interface.yaml"
@@ -93,6 +93,8 @@ map_camera_2d_interface = interface +c {
 
     add_listener(listener: map_camera_2d_listener_interface);
     remove_listener(listener: map_camera_2d_listener_interface);
+
+    coord_from_screen_position(pos_screen: vec_2_f): coord;
 
     as_camera_interface(): camera_interface;
 }

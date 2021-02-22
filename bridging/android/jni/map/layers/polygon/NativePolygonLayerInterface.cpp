@@ -5,6 +5,7 @@
 #include "Marshal.hpp"
 #include "NativeLayerInterface.h"
 #include "NativePolygonInfo.h"
+#include "NativePolygonLayerCallbackInterface.h"
 
 namespace djinni_generated {
 
@@ -73,6 +74,15 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_polygon_Polygo
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::PolygonLayerInterface>(nativeRef);
         ref->clear();
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_polygon_PolygonLayerInterface_00024CppProxy_native_1setCallbackHandler(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_handler)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::PolygonLayerInterface>(nativeRef);
+        ref->setCallbackHandler(::djinni_generated::NativePolygonLayerCallbackInterface::toCpp(jniEnv, j_handler));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

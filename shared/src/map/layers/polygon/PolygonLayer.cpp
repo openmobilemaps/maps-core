@@ -11,8 +11,11 @@
 #include "PolygonLayer.h"
 #include "ColorShaderInterface.h"
 #include "GraphicsObjectInterface.h"
+#include "MapCamera2dInterface.h"
 #include "MapInterface.h"
+#include "PolygonHelper.h"
 #include "RenderPass.h"
+#include "LambdaTask.h"
 #include <map>
 
 PolygonLayer::PolygonLayer()
@@ -73,15 +76,19 @@ void PolygonLayer::add(const PolygonInfo &polygon) {
     const auto &shaderFactory = mapInterface->getShaderFactory();
 
     auto shader = shaderFactory->createColorShader();
-    shader->setColor(polygon.color.r, polygon.color.g, polygon.color.b, polygon.color.a);
     auto polygonGraphicsObject = objectFactory->createPolygon(shader->asShaderProgramInterface());
-
-    polygonGraphicsObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
 
     auto polygonObject =
         std::make_shared<Polygon2dLayerObject>(mapInterface->getCoordinateConverterHelper(), polygonGraphicsObject, shader);
 
     polygonObject->setPositions(polygon.coordinates, polygon.holes, polygon.isConvex);
+    polygonObject->setColor(polygon.color);
+
+    mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
+            TaskConfig("PolygonLayer_setup_" + polygon.identifier, 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [=] {
+                polygonGraphicsObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+            }));
+
     {
         std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
         polygons[polygon] = polygonObject;
@@ -155,7 +162,11 @@ void PolygonLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
         }
         addingQueue.clear();
     }
+
+    mapInterface->getTouchHandler()->addListener(shared_from_this());
 }
+
+void PolygonLayer::setCallbackHandler(const std::shared_ptr<PolygonLayerCallbackInterface> &handler) { callbackHandler = handler; }
 
 void PolygonLayer::hide() {
     isHidden = true;
@@ -167,4 +178,49 @@ void PolygonLayer::show() {
     isHidden = false;
     if (mapInterface)
         mapInterface->invalidate();
+}
+
+bool PolygonLayer::onTouchDown(const ::Vec2F &posScreen) {
+    auto point = mapInterface->getCamera()->coordFromScreenPosition(posScreen);
+
+    std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
+    for (auto const &polygon : polygons) {
+        if (PolygonHelper::pointInside(polygon.first, point, mapInterface->getCoordinateConverterHelper())) {
+            polygon.second->setColor(polygon.first.highlightColor);
+            highlightedPolygon = polygon.first;
+            mapInterface->invalidate();
+            return true;
+        }
+    }
+    return false;
+}
+
+void PolygonLayer::clearTouch() {
+    if (highlightedPolygon) {
+        {
+            std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
+            polygons[*highlightedPolygon]->setColor(highlightedPolygon->color);
+        }
+
+        highlightedPolygon = std::nullopt;
+        mapInterface->invalidate();
+    }
+}
+
+bool PolygonLayer::onClickUnconfirmed(const ::Vec2F &posScreen) {
+    if (highlightedPolygon) {
+        {
+            std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
+            polygons[*highlightedPolygon]->setColor(highlightedPolygon->color);
+        }
+
+        if (callbackHandler) {
+            callbackHandler->onClickConfirmed(*highlightedPolygon);
+        }
+
+        highlightedPolygon = std::nullopt;
+        mapInterface->invalidate();
+        return true;
+    }
+    return false;
 }
