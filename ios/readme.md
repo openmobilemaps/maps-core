@@ -37,7 +37,7 @@ dependencies: [
 
 ## How to use
 
-### Display tiled raster map in [EPSG3857](https://epsg.io/4326) system
+### Display tiled raster map in [EPSG3857](https://epsg.io/3857) system
 
 #### MCTiled2dMapLayerConfig
 
@@ -57,10 +57,16 @@ class TiledLayerConfig: MCTiled2dMapLayerConfig {
 
     // Defines the bounds of the layer
     func getBounds() -> MCRectCoord {
+      let identifer = MCCoordinateSystemIdentifiers.epsg3857()
+      let topLeft = MCCoord(systemIdentifier: identifer, 
+                            x: -20037508.34, 
+                            y: 20037508.34, z: 0.0)
+      let bottomRight = MCCoord(systemIdentifier: identifer, 
+                                x: 20037508.34, 
+                                y: -20037508.34, z: 0.0)
       return MCRectCoord(
-          MCCoord(MCCoordinateSystemIdentifiers.EPSG3857(), -20037508.34, 20037508.34, 0.0),
-          MCCoord(MCCoordinateSystemIdentifiers.EPSG3857(), 20037508.34, -20037508.34, 0.0)
-        )
+        topLeft: topLeft,
+        bottomRight: bottomRight)
     }
 
     // Defines the url-pattern to load tiles. Enter a valid OSM tile server here
