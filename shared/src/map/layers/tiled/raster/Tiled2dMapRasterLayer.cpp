@@ -22,8 +22,6 @@ Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapL
     , textureLoader(textureLoader) {}
 
 void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface) {
-    alphaShader = mapInterface->getShaderFactory()->createAlphaShader();
-
     rasterSource = std::make_shared<Tiled2dMapRasterSource>(mapInterface->getMapConfig(), layerConfig,
                                                             mapInterface->getCoordinateConverterHelper(),
                                                             mapInterface->getScheduler(), textureLoader, shared_from_this());
@@ -38,7 +36,12 @@ void Tiled2dMapRasterLayer::onRemoved() {
 
 std::shared_ptr<::LayerInterface> Tiled2dMapRasterLayer::asLayerInterface() { return shared_from_this(); }
 
-void Tiled2dMapRasterLayer::update() {}
+void Tiled2dMapRasterLayer::update() {
+    std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
+    for (auto const &tile: tileObjectMap) {
+        tile.second->update();
+    }
+}
 
 std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapRasterLayer::buildRenderPasses() { return renderPasses; }
 
@@ -86,10 +89,11 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
 
             for (const auto &tile : tilesToAdd) {
 
+                auto alphaShader = mapInterface->getShaderFactory()->createAlphaShader();
                 auto tileObject = std::make_shared<Textured2dLayerObject>(
                     graphicsFactory->createRectangle(alphaShader->asShaderProgramInterface()), alphaShader,
-                    mapInterface->getCoordinateConverterHelper());
-                tileObject->setAlpha(1.0);
+                    mapInterface);
+                tileObject->beginAlphaAnimation(0.0, 1.0, 150);
 
                 tileObject->setRectCoord(tile.tileInfo.bounds);
                 tileObject->getRectangleObject()->asGraphicsObject()->setup(renderingContext);

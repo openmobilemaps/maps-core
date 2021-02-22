@@ -46,6 +46,4 @@ class Tiled2dMapRasterLayer : public Tiled2dMapLayer, public Tiled2dMapRasterLay
     std::recursive_mutex updateMutex;
     std::unordered_map<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>> tileObjectMap;
     std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
-
-    std::shared_ptr<AlphaShaderInterface> alphaShader;
 };

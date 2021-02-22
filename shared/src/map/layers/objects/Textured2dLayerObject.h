@@ -12,17 +12,19 @@
 #include "AlphaShaderInterface.h"
 #include "Coord.h"
 #include "CoordinateConversionHelperInterface.h"
+#include "MapInterface.h"
 #include "LayerObjectInterface.h"
 #include "RectCoord.h"
 #include "Rectangle2dInterface.h"
 #include "RenderConfig.h"
 #include "RenderConfigInterface.h"
 #include "Vec2D.h"
+#include <optional>
 
 class Textured2dLayerObject : public LayerObjectInterface {
   public:
     Textured2dLayerObject(std::shared_ptr<Rectangle2dInterface> rectangle, std::shared_ptr<AlphaShaderInterface> shader,
-                          const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper);
+                          const std::shared_ptr<MapInterface> &mapInterface);
 
     virtual ~Textured2dLayerObject() override {}
 
@@ -40,11 +42,25 @@ class Textured2dLayerObject : public LayerObjectInterface {
 
     std::shared_ptr<Rectangle2dInterface> getRectangleObject();
 
+    void beginAlphaAnimation(double startAlpha, double targetAlpha, long long duration);
+
   private:
     std::shared_ptr<Rectangle2dInterface> rectangle;
     std::shared_ptr<AlphaShaderInterface> shader;
 
     std::shared_ptr<RenderConfig> renderConfig;
 
-    std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
+    const std::shared_ptr<MapInterface> mapInterface;
+    const std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
+
+    struct AlphaAnimation {
+        double startAlpha;
+        double targetAlpha;
+        long long startTime;
+        long long duration;
+    };
+
+    std::optional<AlphaAnimation> alphaAnimation;
+
+    void applyAnimationState();
 };
