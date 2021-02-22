@@ -13,6 +13,10 @@ import MapCoreSharedModule
 import MetalKit
 import os
 
+enum MCMapViewError: Error {
+    case invalidLayerType
+}
+
 open class MCMapView: MTKView {
     public let mapInterface: MCMapInterface
     private let renderingContext: RenderingContext
@@ -168,23 +172,68 @@ public extension MCMapView {
         mapInterface.getCamera()!
     }
 
-    func add(layer: MCLayerInterface?) {
+    private func unpackLayer(layer: NSObject?) throws -> MCLayerInterface {
+        if let layer = layer as? MCLayerInterface {
+            return layer
+        }
+
+        // otherwise there might be a "asLayerInterface" method
+        let selector = NSSelectorFromString("asLayerInterface")
+        guard let layer = layer,
+              layer.responds(to: selector) else {
+            throw MCMapViewError.invalidLayerType
+        }
+        guard let wrappedLayer = layer.perform(selector) else {
+            throw MCMapViewError.invalidLayerType
+        }
+        let unretainedLayer = wrappedLayer.takeUnretainedValue()
+        guard let result = unretainedLayer as? MCLayerInterface else {
+            throw MCMapViewError.invalidLayerType
+        }
+        return result
+    }
+
+    /// layer has to either be a MCLayerInterface or the Object has to respond to the selector "asLayerInterface"
+    /// which returns a MCLayerInterface
+    func add(layer: NSObject?) throws {
+        let layer = try unpackLayer(layer: layer)
+        add(layer: layer)
+    }
+    func add(layer: MCLayerInterface?){
         mapInterface.addLayer(layer)
     }
 
-    func insert(layer: MCLayerInterface?, at index: Int) {
+    func insert(layer: NSObject?, at index: Int) throws {
+        let layer = try unpackLayer(layer: layer)
+        insert(layer: layer, at: index)
+    }
+    func insert(layer: MCLayerInterface?, at index: Int){
         mapInterface.insertLayer(at: layer, at: Int32(index))
     }
 
+    func insert(layer: NSObject?, above: NSObject?) throws {
+        let layer = try unpackLayer(layer: layer)
+        let above = try unpackLayer(layer: above)
+        insert(layer: layer, above: above)
+    }
     func insert(layer: MCLayerInterface?, above: MCLayerInterface?) {
         mapInterface.insertLayer(above: layer, above: above)
     }
 
+    func insert(layer: NSObject?, below: NSObject?) throws {
+        let layer = try unpackLayer(layer: layer)
+        let below = try unpackLayer(layer: below)
+        mapInterface.insertLayer(below: layer, below: below)
+    }
     func insert(layer: MCLayerInterface?, below: MCLayerInterface?) {
         mapInterface.insertLayer(below: layer, below: below)
     }
 
-    func remove(layer: MCLayerInterface?) {
+    func remove(layer: NSObject?) throws {
+        let layer = try unpackLayer(layer: layer)
+        remove(layer: layer)
+    }
+    func remove(layer: MCLayerInterface?){
         mapInterface.removeLayer(layer)
     }
 }
