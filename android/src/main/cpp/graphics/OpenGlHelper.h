@@ -8,7 +8,6 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-
 #ifndef MAPSCORE_OPENGLHELPER_H
 #define MAPSCORE_OPENGLHELPER_H
 

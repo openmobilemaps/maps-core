@@ -9,13 +9,13 @@
 
 class Line2dInterface;
 class Polygon2dInterface;
-class Rectangle2dInterface;
+class Quad2dInterface;
 
 class GraphicsObjectFactoryInterface {
 public:
     virtual ~GraphicsObjectFactoryInterface() {}
 
-    virtual std::shared_ptr<Rectangle2dInterface> createRectangle(const std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
+    virtual std::shared_ptr<Quad2dInterface> createQuad(const std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
 
     virtual std::shared_ptr<Line2dInterface> createLine(const std::shared_ptr<::LineShaderProgramInterface> & lineShader) = 0;
 

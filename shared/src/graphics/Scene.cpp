@@ -11,9 +11,6 @@
 #include "Scene.h"
 #include "ColorLineShaderInterface.h"
 #include "ColorShaderInterface.h"
-#include "Line2dInterface.h"
-#include "Polygon2dInterface.h"
-#include "Rectangle2dInterface.h"
 #include "RenderPass.h"
 #include "Renderer.h"
 

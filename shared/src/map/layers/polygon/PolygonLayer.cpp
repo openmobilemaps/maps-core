@@ -11,11 +11,11 @@
 #include "PolygonLayer.h"
 #include "ColorShaderInterface.h"
 #include "GraphicsObjectInterface.h"
+#include "LambdaTask.h"
 #include "MapCamera2dInterface.h"
 #include "MapInterface.h"
 #include "PolygonHelper.h"
 #include "RenderPass.h"
-#include "LambdaTask.h"
 #include <map>
 
 PolygonLayer::PolygonLayer()
@@ -85,9 +85,8 @@ void PolygonLayer::add(const PolygonInfo &polygon) {
     polygonObject->setColor(polygon.color);
 
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
-            TaskConfig("PolygonLayer_setup_" + polygon.identifier, 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [=] {
-                polygonGraphicsObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
-            }));
+        TaskConfig("PolygonLayer_setup_" + polygon.identifier, 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+        [=] { polygonGraphicsObject->asGraphicsObject()->setup(mapInterface->getRenderingContext()); }));
 
     {
         std::lock_guard<std::recursive_mutex> lock(polygonsMutex);

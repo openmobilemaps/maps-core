@@ -8,7 +8,6 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-
 #include "Tiled2dMapRasterLayer.h"
 #include "LambdaTask.h"
 #include "MapConfig.h"
@@ -38,7 +37,7 @@ std::shared_ptr<::LayerInterface> Tiled2dMapRasterLayer::asLayerInterface() { re
 
 void Tiled2dMapRasterLayer::update() {
     std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
-    for (auto const &tile: tileObjectMap) {
+    for (auto const &tile : tileObjectMap) {
         tile.second->update();
     }
 }
@@ -49,7 +48,7 @@ void Tiled2dMapRasterLayer::pause() {
     rasterSource->pause();
     std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
     for (const auto &tileObject : tileObjectMap) {
-        tileObject.second->getRectangleObject()->asGraphicsObject()->clear();
+        tileObject.second->getQuadObject()->asGraphicsObject()->clear();
     }
 }
 
@@ -58,7 +57,7 @@ void Tiled2dMapRasterLayer::resume() {
     auto renderingContext = mapInterface->getRenderingContext();
     std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
     for (const auto &tileObject : tileObjectMap) {
-        auto rectangle = tileObject.second->getRectangleObject();
+        auto rectangle = tileObject.second->getQuadObject();
         rectangle->asGraphicsObject()->setup(renderingContext);
         rectangle->loadTexture(tileObject.first.textureHolder);
     }
@@ -88,18 +87,16 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
             auto graphicsFactory = mapInterface->getGraphicsObjectFactory();
 
             for (const auto &tile : tilesToAdd) {
-
                 auto alphaShader = mapInterface->getShaderFactory()->createAlphaShader();
                 auto tileObject = std::make_shared<Textured2dLayerObject>(
-                    graphicsFactory->createRectangle(alphaShader->asShaderProgramInterface()), alphaShader,
-                    mapInterface);
+                    graphicsFactory->createQuad(alphaShader->asShaderProgramInterface()), alphaShader, mapInterface);
                 tileObject->beginAlphaAnimation(0.0, 1.0, 150);
 
                 tileObject->setRectCoord(tile.tileInfo.bounds);
-                tileObject->getRectangleObject()->asGraphicsObject()->setup(renderingContext);
+                tileObject->getQuadObject()->asGraphicsObject()->setup(renderingContext);
 
                 if (tile.textureHolder) {
-                    tileObject->getRectangleObject()->loadTexture(tile.textureHolder);
+                    tileObject->getQuadObject()->loadTexture(tile.textureHolder);
                 }
 
                 tileObjectMap[tile] = tileObject;
@@ -107,7 +104,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
 
             for (const auto &tile : tilesToRemove) {
                 auto tileObject = tileObjectMap[tile];
-                tileObject->getRectangleObject()->removeTexture();
+                tileObject->getQuadObject()->removeTexture();
                 tileObjectMap.erase(tile);
             }
 
@@ -121,7 +118,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
                      std::pair<int, std::shared_ptr<Textured2dLayerObject>> &b) { return a.first < b.first; });
 
             for (const auto &objectEntry : mapEntries) {
-                objectEntry.second->getRectangleObject()->asGraphicsObject();
+                objectEntry.second->getQuadObject()->asGraphicsObject();
                 for (auto config : objectEntry.second->getRenderConfig()) {
                     renderPassObjectMap[config->getRenderIndex()].push_back(config->getGraphicsObject());
                 }

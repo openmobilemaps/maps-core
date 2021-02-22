@@ -3,17 +3,18 @@
 
 #pragma once
 
+#include "Quad2dD.h"
 #include "RectD.h"
 #include <memory>
 
 class GraphicsObjectInterface;
 class TextureHolderInterface;
 
-class Rectangle2dInterface {
+class Quad2dInterface {
 public:
-    virtual ~Rectangle2dInterface() {}
+    virtual ~Quad2dInterface() {}
 
-    virtual void setFrame(const ::RectD & frame, const ::RectD & textureCoordinates) = 0;
+    virtual void setFrame(const ::Quad2dD & frame, const ::RectD & textureCoordinates) = 0;
 
     virtual void loadTexture(const std::shared_ptr<TextureHolderInterface> & textureHolder) = 0;
 

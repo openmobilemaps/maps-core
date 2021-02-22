@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class GraphicsObjectFactoryInterface {
 
-    abstract fun createRectangle(shader: ch.ubique.mapscore.shared.graphics.shader.ShaderProgramInterface): Rectangle2dInterface
+    abstract fun createQuad(shader: ch.ubique.mapscore.shared.graphics.shader.ShaderProgramInterface): Quad2dInterface
 
     abstract fun createLine(lineShader: ch.ubique.mapscore.shared.graphics.shader.LineShaderProgramInterface): Line2dInterface
 
@@ -31,11 +31,11 @@ abstract class GraphicsObjectFactoryInterface {
             _djinni_private_destroy()
         }
 
-        override fun createRectangle(shader: ch.ubique.mapscore.shared.graphics.shader.ShaderProgramInterface): Rectangle2dInterface {
+        override fun createQuad(shader: ch.ubique.mapscore.shared.graphics.shader.ShaderProgramInterface): Quad2dInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_createRectangle(this.nativeRef, shader)
+            return native_createQuad(this.nativeRef, shader)
         }
-        private external fun native_createRectangle(_nativeRef: Long, shader: ch.ubique.mapscore.shared.graphics.shader.ShaderProgramInterface): Rectangle2dInterface
+        private external fun native_createQuad(_nativeRef: Long, shader: ch.ubique.mapscore.shared.graphics.shader.ShaderProgramInterface): Quad2dInterface
 
         override fun createLine(lineShader: ch.ubique.mapscore.shared.graphics.shader.LineShaderProgramInterface): Line2dInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

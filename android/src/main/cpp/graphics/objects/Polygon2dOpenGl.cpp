@@ -8,7 +8,6 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-
 #include "Polygon2dOpenGl.h"
 #include "OpenGlHelper.h"
 

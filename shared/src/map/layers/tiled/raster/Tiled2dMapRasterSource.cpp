@@ -8,7 +8,6 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-
 #include "Tiled2dMapRasterSource.h"
 #include "LambdaTask.h"
 #include <algorithm>

@@ -8,7 +8,6 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-
 #ifndef MAPSDK_LINE2DOPENGL_H
 #define MAPSDK_LINE2DOPENGL_H
 

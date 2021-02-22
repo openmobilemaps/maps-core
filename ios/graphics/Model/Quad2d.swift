@@ -13,7 +13,7 @@ import MapCoreSharedModule
 import Metal
 import UIKit
 
-class Rectangle2d: BaseGraphicsObject {
+class Quad2d: BaseGraphicsObject {
     private var verticesBuffer: MTLBuffer?
 
     private var indicesBuffer: MTLBuffer?
@@ -58,8 +58,8 @@ class Rectangle2d: BaseGraphicsObject {
     }
 }
 
-extension Rectangle2d: MCRectangle2dInterface {
-    func setFrame(_ frame: MCRectD, textureCoordinates: MCRectD) {
+extension Quad2d: MCQuad2dInterface {
+    func setFrame(_ frame: MCQuad2dD, textureCoordinates: MCRectD) {
         /*
          The quad is made out of 4 vertices as following
          B----C
@@ -68,15 +68,11 @@ extension Rectangle2d: MCRectangle2dInterface {
          A----D
          Where A-C are joined to form two triangles
          */
-        let minX = frame.xF
-        let minY = frame.yF
-        let maxX = minX + frame.widthF
-        let maxY = minY + frame.heightF
         let vertecies: [Vertex] = [
-            Vertex(x: minX, y: maxY, textureU: textureCoordinates.xF, textureV: textureCoordinates.heightF), // A
-            Vertex(x: minX, y: minY, textureU: textureCoordinates.xF, textureV: textureCoordinates.yF), // B
-            Vertex(x: maxX, y: minY, textureU: textureCoordinates.widthF, textureV: textureCoordinates.yF), // C
-            Vertex(x: maxX, y: maxY, textureU: textureCoordinates.widthF, textureV: textureCoordinates.heightF), // D
+            Vertex(position: frame.bottomLeft, textureU: textureCoordinates.xF, textureV: textureCoordinates.heightF), // A
+            Vertex(position: frame.topLeft, textureU: textureCoordinates.xF, textureV: textureCoordinates.yF), // B
+            Vertex(position: frame.topRight, textureU: textureCoordinates.widthF, textureV: textureCoordinates.yF), // C
+            Vertex(position: frame.bottomRight, textureU: textureCoordinates.widthF, textureV: textureCoordinates.heightF), // D
         ]
         let indices: [UInt16] = [
             0, 1, 2, // ABC

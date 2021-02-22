@@ -8,24 +8,23 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-
 #ifndef MAPSDK_RECTANGLE2DOPENGL_H
 #define MAPSDK_RECTANGLE2DOPENGL_H
 
 #include "GraphicsObjectInterface.h"
 #include "OpenGlContext.h"
-#include "Rectangle2dInterface.h"
+#include "Quad2dInterface.h"
 #include "ShaderProgramInterface.h"
 #include "opengl_wrapper.h"
 #include <vector>
 
-class Rectangle2dOpenGl : public GraphicsObjectInterface,
-                          public Rectangle2dInterface,
-                          public std::enable_shared_from_this<GraphicsObjectInterface> {
+class Quad2dOpenGl : public GraphicsObjectInterface,
+                     public Quad2dInterface,
+                     public std::enable_shared_from_this<GraphicsObjectInterface> {
   public:
-    Rectangle2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader);
+    Quad2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader);
 
-    ~Rectangle2dOpenGl(){};
+    ~Quad2dOpenGl(){};
 
     virtual bool isReady() override;
 
@@ -36,7 +35,7 @@ class Rectangle2dOpenGl : public GraphicsObjectInterface,
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
                         int64_t mvpMatrix) override;
 
-    virtual void setFrame(const ::RectD &frame, const ::RectD &textureCoordinates) override;
+    virtual void setFrame(const ::Quad2dD &frame, const ::RectD &textureCoordinates) override;
 
     virtual void loadTexture(const std::shared_ptr<TextureHolderInterface> &textureHolder) override;
 
@@ -57,7 +56,7 @@ class Rectangle2dOpenGl : public GraphicsObjectInterface,
     std::vector<GLuint> texturePointer = {0};
     bool textureLoaded = false;
 
-    RectD frame = RectD(0.0, 0.0, 0.0, 0.0);
+    Quad2dD frame = Quad2dD(Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0));
     RectD textureCoordinates = RectD(0.0, 0.0, 0.0, 0.0);
     double factorHeight = 1.0;
     double factorWidth = 1.0;
