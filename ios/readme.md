@@ -35,6 +35,9 @@ dependencies: [
 ]
 ```
 
+### iOS 10
+Unfortunately, Swift package is only supported starting with iOS 11. If you need iOS 10 support you have to compile the library as a framework yourself.
+
 ## How to use
 
 ### Display tiled raster map in [EPSG3857](https://epsg.io/3857) system
