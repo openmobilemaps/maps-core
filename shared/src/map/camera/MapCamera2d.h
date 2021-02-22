@@ -61,6 +61,8 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual bool onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) override;
 
+    virtual void clearTouch() override;
+
     virtual void viewportSizeChanged() override;
 
     virtual RectCoord getVisibleRect() override;
@@ -77,6 +79,8 @@ class MapCamera2d : public MapCamera2dInterface,
     Coord centerPosition;
     double zoom = 0;
     double angle = 0;
+    double tempAngle = 0;
+    bool isRotationThreasholdReached = false;
 
     double paddingLeft = 0;
     double paddingTop = 0;
@@ -84,7 +88,7 @@ class MapCamera2d : public MapCamera2dInterface,
     double paddingBottom = 0;
 
     struct CameraConfiguration {
-        bool rotationEnabled = false;
+        bool rotationEnabled = true;
         bool doubleClickZoomEnabled = true;
         bool twoFingerZoomEnabled = true;
         bool moveEnabled = true;
