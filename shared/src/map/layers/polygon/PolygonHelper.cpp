@@ -25,6 +25,7 @@ bool PolygonHelper::pointInside(const Coord &point, const std::vector<Coord> &po
     for (auto &hole : holes) {
         if (pointInside(point, hole, conversionHelper)) {
             inside = false;
+            break;
         }
     }
 
