@@ -31,9 +31,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (void)didTouchUpPolygon:(nonnull MCPolygonInfo *)polygon {
+- (void)onClickConfirmed:(nonnull MCPolygonInfo *)polygon {
     try {
-        _cppRefHandle.get()->didTouchUpPolygon(::djinni_generated::PolygonInfo::toCpp(polygon));
+        _cppRefHandle.get()->onClickConfirmed(::djinni_generated::PolygonInfo::toCpp(polygon));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -46,10 +46,10 @@ class PolygonLayerCallbackInterface::ObjcProxy final
     friend class ::djinni_generated::PolygonLayerCallbackInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void didTouchUpPolygon(const ::PolygonInfo & c_polygon) override
+    void onClickConfirmed(const ::PolygonInfo & c_polygon) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() didTouchUpPolygon:(::djinni_generated::PolygonInfo::fromCpp(c_polygon))];
+            [djinni_private_get_proxied_objc_object() onClickConfirmed:(::djinni_generated::PolygonInfo::fromCpp(c_polygon))];
         }
     }
 };

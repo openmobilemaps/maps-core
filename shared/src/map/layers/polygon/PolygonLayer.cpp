@@ -215,7 +215,7 @@ bool PolygonLayer::onClickUnconfirmed(const ::Vec2F &posScreen) {
         }
 
         if (callbackHandler) {
-            callbackHandler->didTouchUpPolygon(*highlightedPolygon);
+            callbackHandler->onClickConfirmed(*highlightedPolygon);
         }
 
         highlightedPolygon = std::nullopt;

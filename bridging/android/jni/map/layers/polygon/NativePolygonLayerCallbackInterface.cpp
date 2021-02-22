@@ -14,11 +14,11 @@ NativePolygonLayerCallbackInterface::JavaProxy::JavaProxy(JniType j) : Handle(::
 
 NativePolygonLayerCallbackInterface::JavaProxy::~JavaProxy() = default;
 
-void NativePolygonLayerCallbackInterface::JavaProxy::didTouchUpPolygon(const ::PolygonInfo & c_polygon) {
+void NativePolygonLayerCallbackInterface::JavaProxy::onClickConfirmed(const ::PolygonInfo & c_polygon) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativePolygonLayerCallbackInterface>::get();
-    jniEnv->CallVoidMethod(Handle::get().get(), data.method_didTouchUpPolygon,
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_onClickConfirmed,
                            ::djinni::get(::djinni_generated::NativePolygonInfo::fromCpp(jniEnv, c_polygon)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
@@ -31,12 +31,12 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_polygon_Polygo
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_polygon_PolygonLayerCallbackInterface_00024CppProxy_native_1didTouchUpPolygon(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_polygon)
+CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_polygon_PolygonLayerCallbackInterface_00024CppProxy_native_1onClickConfirmed(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_polygon)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::PolygonLayerCallbackInterface>(nativeRef);
-        ref->didTouchUpPolygon(::djinni_generated::NativePolygonInfo::toCpp(jniEnv, j_polygon));
+        ref->onClickConfirmed(::djinni_generated::NativePolygonInfo::toCpp(jniEnv, j_polygon));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

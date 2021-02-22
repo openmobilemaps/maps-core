@@ -12,7 +12,7 @@ polygon_info = record {
 }
 
 polygon_layer_callback_interface = interface +c +j +o {
-    did_touch_up_polygon(polygon: polygon_info);
+    on_click_confirmed(polygon: polygon_info);
 }
 
 polygon_layer_interface = interface +c {

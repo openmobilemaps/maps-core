@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class PolygonLayerCallbackInterface {
 
-    abstract fun didTouchUpPolygon(polygon: PolygonInfo)
+    abstract fun onClickConfirmed(polygon: PolygonInfo)
 
     private class CppProxy : PolygonLayerCallbackInterface {
         private val nativeRef: Long
@@ -27,10 +27,10 @@ abstract class PolygonLayerCallbackInterface {
             _djinni_private_destroy()
         }
 
-        override fun didTouchUpPolygon(polygon: PolygonInfo) {
+        override fun onClickConfirmed(polygon: PolygonInfo) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_didTouchUpPolygon(this.nativeRef, polygon)
+            native_onClickConfirmed(this.nativeRef, polygon)
         }
-        private external fun native_didTouchUpPolygon(_nativeRef: Long, polygon: PolygonInfo)
+        private external fun native_onClickConfirmed(_nativeRef: Long, polygon: PolygonInfo)
     }
 }

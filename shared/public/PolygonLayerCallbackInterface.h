@@ -9,5 +9,5 @@ class PolygonLayerCallbackInterface {
 public:
     virtual ~PolygonLayerCallbackInterface() {}
 
-    virtual void didTouchUpPolygon(const PolygonInfo & polygon) = 0;
+    virtual void onClickConfirmed(const PolygonInfo & polygon) = 0;
 };

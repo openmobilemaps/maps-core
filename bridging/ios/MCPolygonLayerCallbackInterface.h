@@ -7,6 +7,6 @@
 
 @protocol MCPolygonLayerCallbackInterface
 
-- (void)didTouchUpPolygon:(nonnull MCPolygonInfo *)polygon;
+- (void)onClickConfirmed:(nonnull MCPolygonInfo *)polygon;
 
 @end
