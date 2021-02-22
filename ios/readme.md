@@ -57,7 +57,10 @@ class TiledLayerConfig: MCTiled2dMapLayerConfig {
 
     // Defines the bounds of the layer
     func getBounds() -> MCRectCoord {
-      return MCCoordinateSystemFactory.getEpsg3857System().bounds
+      return MCRectCoord(
+          MCCoord(MCCoordinateSystemIdentifiers.EPSG3857(), -20037508.34, 20037508.34, 0.0),
+          MCCoord(MCCoordinateSystemIdentifiers.EPSG3857(), 20037508.34, -20037508.34, 0.0)
+        )
     }
 
     // Defines the url-pattern to load tiles. Enter a valid OSM tile server here

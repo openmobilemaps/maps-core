@@ -111,8 +111,8 @@ The `LayerConfig` contains the information needed for the layer to compute the v
 val layerConfig = object : Tiled2dMapLayerConfig() {
 			// Defines the bounds of the layer and implicitly the coordinate system used by the layer as well
 			override fun getBounds(): RectCoord = RectCoord(
-				Coord(CoordinateSystemIdentifiers.EPSG3857(), -20026376.39, 20048966.10, 0.0),
-				Coord(CoordinateSystemIdentifiers.EPSG3857(), 20026376.39, -20048966.10, 0.0)
+				Coord(CoordinateSystemIdentifiers.EPSG3857(), -20037508.34, 20037508.34, 0.0),
+				Coord(CoordinateSystemIdentifiers.EPSG3857(), 20037508.34, -20037508.34, 0.0)
 			)
 
 			// Pattern to create a tile identifier used internally 
