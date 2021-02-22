@@ -5,8 +5,8 @@
 #include "CoordinateSystemFactory.h"
 #include "Coord.h"
 #include "CoordinateSystemIdentifiers.h"
-#include "RectCoord.h"
 #include "MapCoordinateSystem.h"
+#include "RectCoord.h"
 
 ::MapCoordinateSystem CoordinateSystemFactory::getEpsg2056System() {
     return MapCoordinateSystem(CoordinateSystemIdentifiers::EPSG2056(),

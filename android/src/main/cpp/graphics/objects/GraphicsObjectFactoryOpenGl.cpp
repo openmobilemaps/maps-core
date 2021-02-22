@@ -9,12 +9,11 @@
  */
 
 #include "GraphicsObjectFactoryOpenGl.h"
-#include "Quad2dOpenGl.h"
 #include "Line2dOpenGl.h"
 #include "Polygon2dOpenGl.h"
+#include "Quad2dOpenGl.h"
 
-std::shared_ptr<Quad2dInterface>
-GraphicsObjectFactoryOpenGl::createQuad(const std::shared_ptr<::ShaderProgramInterface> &shader) {
+std::shared_ptr<Quad2dInterface> GraphicsObjectFactoryOpenGl::createQuad(const std::shared_ptr<::ShaderProgramInterface> &shader) {
     return std::make_shared<Quad2dOpenGl>(shader);
 }
 

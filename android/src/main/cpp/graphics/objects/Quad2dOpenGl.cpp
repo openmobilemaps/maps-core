@@ -8,7 +8,6 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-
 #include "Quad2dOpenGl.h"
 #include "OpenGlHelper.h"
 #include "TextureHolderInterface.h"
@@ -37,18 +36,10 @@ void Quad2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &con
 
     float frameZ = 0;
     vertexBuffer = {
-        (float)frame.topLeft.x,
-        (float)frame.topLeft.y,
-        frameZ,
-        (float)frame.bottomLeft.x,
-        (float)frame.bottomLeft.y,
-        frameZ,
-        (float)frame.bottomRight.x,
-        (float)frame.bottomRight.y,
-        frameZ,
-        (float)frame.topRight.x,
-        (float)frame.topRight.y,
-        frameZ,
+        (float)frame.topLeft.x,     (float)frame.topLeft.y,     frameZ,
+        (float)frame.bottomLeft.x,  (float)frame.bottomLeft.y,  frameZ,
+        (float)frame.bottomRight.x, (float)frame.bottomRight.y, frameZ,
+        (float)frame.topRight.x,    (float)frame.topRight.y,    frameZ,
     };
     indexBuffer = {
         0, 1, 2, 0, 2, 3,

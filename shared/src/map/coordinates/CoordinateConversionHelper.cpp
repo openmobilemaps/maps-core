@@ -8,7 +8,6 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-
 #include "CoordinateConversionHelper.h"
 #include "CoordinateSystemIdentifiers.h"
 #include "DefaultSystemToRenderConverter.h"
@@ -18,7 +17,7 @@
 #include "EPSG4326ToEPSG3857Converter.h"
 
 CoordinateConversionHelper::CoordinateConversionHelper(MapCoordinateSystem mapCoordinateSystem)
-        : mapCoordinateSystemIdentier(mapCoordinateSystem.identifier) {
+    : mapCoordinateSystemIdentier(mapCoordinateSystem.identifier) {
 
     registerConverter(std::make_shared<DefaultSystemToRenderConverter>(mapCoordinateSystem));
 

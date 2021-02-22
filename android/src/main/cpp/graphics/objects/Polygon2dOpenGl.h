@@ -8,7 +8,6 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-
 #ifndef MAPSDK_POLYGON2DOPENGL_H
 #define MAPSDK_POLYGON2DOPENGL_H
 

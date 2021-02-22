@@ -8,7 +8,6 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-
 #ifndef MAPSDK_SHADERFACTORYOPENGL_H
 #define MAPSDK_SHADERFACTORYOPENGL_H
 

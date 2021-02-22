@@ -217,7 +217,6 @@ void MapCamera2d::clearTouch() {
     tempAngle = angle;
 }
 
-
 bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) {
     if (!config.twoFingerZoomEnabled)
         return false;
@@ -262,11 +261,11 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
         if (config.rotationEnabled) {
             float olda = atan2(posScreenOld[0].x - posScreenOld[1].x, posScreenOld[0].y - posScreenOld[1].y);
             float newa = atan2(posScreenNew[0].x - posScreenNew[1].x, posScreenNew[0].y - posScreenNew[1].y);
-            if(isRotationThreasholdReached){
+            if (isRotationThreasholdReached) {
                 angle = fmod((angle + (olda - newa) / M_PI * 180.0) + 360.0, 360.0);
             } else {
                 tempAngle = fmod((tempAngle + (olda - newa) / M_PI * 180.0) + 360.0, 360.0);
-                if (std::abs(tempAngle - angle) >= ROTATION_THREASHOLD){
+                if (std::abs(tempAngle - angle) >= ROTATION_THREASHOLD) {
                     isRotationThreasholdReached = true;
                 }
             }

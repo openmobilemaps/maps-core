@@ -14,8 +14,8 @@
 #include "CoordinateConversionHelperInterface.h"
 #include "HashedTuple.h"
 #include "MapCoordinateSystem.h"
-#include "RectCoord.h"
 #include "QuadCoord.h"
+#include "RectCoord.h"
 #include "string"
 #include <mutex>
 #include <unordered_map>
@@ -33,9 +33,9 @@ class CoordinateConversionHelper : public CoordinateConversionHelperInterface {
 
     virtual RectCoord convertRectToRenderSystem(const RectCoord &rect) override;
 
-    virtual QuadCoord convertQuad(const std::string & to, const QuadCoord & quad) override;
+    virtual QuadCoord convertQuad(const std::string &to, const QuadCoord &quad) override;
 
-    virtual QuadCoord convertQuadToRenderSystem(const QuadCoord & quad) override;
+    virtual QuadCoord convertQuadToRenderSystem(const QuadCoord &quad) override;
 
     virtual Coord convertToRenderSystem(const Coord &coordinate) override;
 

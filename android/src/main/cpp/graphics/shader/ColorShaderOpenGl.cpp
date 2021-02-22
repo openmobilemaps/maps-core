@@ -8,7 +8,6 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-
 #include "ColorShaderOpenGl.h"
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"

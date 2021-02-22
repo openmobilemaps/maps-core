@@ -8,7 +8,6 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-
 #include "Line2dOpenGl.h"
 #include <cmath>
 

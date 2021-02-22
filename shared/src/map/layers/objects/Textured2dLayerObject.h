@@ -10,14 +10,14 @@
 
 #pragma once
 
-#include "QuadCoord.h"
 #include "AlphaShaderInterface.h"
 #include "Coord.h"
 #include "CoordinateConversionHelperInterface.h"
-#include "MapInterface.h"
 #include "LayerObjectInterface.h"
-#include "RectCoord.h"
+#include "MapInterface.h"
 #include "Quad2dInterface.h"
+#include "QuadCoord.h"
+#include "RectCoord.h"
 #include "RenderConfig.h"
 #include "RenderConfigInterface.h"
 #include "Vec2D.h"
@@ -46,10 +46,10 @@ class Textured2dLayerObject : public LayerObjectInterface {
 
     void beginAlphaAnimation(double startAlpha, double targetAlpha, long long duration);
 
-protected:
-
+  protected:
     void setFrame(const ::Quad2dD &frame);
-private:
+
+  private:
     std::shared_ptr<Quad2dInterface> quad;
     std::shared_ptr<AlphaShaderInterface> shader;
 

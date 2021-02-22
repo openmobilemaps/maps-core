@@ -8,7 +8,6 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-
 #include "Tiled2dMapRasterLayer.h"
 #include "LambdaTask.h"
 #include "MapConfig.h"
@@ -38,7 +37,7 @@ std::shared_ptr<::LayerInterface> Tiled2dMapRasterLayer::asLayerInterface() { re
 
 void Tiled2dMapRasterLayer::update() {
     std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
-    for (auto const &tile: tileObjectMap) {
+    for (auto const &tile : tileObjectMap) {
         tile.second->update();
     }
 }
@@ -90,8 +89,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
             for (const auto &tile : tilesToAdd) {
                 auto alphaShader = mapInterface->getShaderFactory()->createAlphaShader();
                 auto tileObject = std::make_shared<Textured2dLayerObject>(
-                    graphicsFactory->createQuad(alphaShader->asShaderProgramInterface()), alphaShader,
-                    mapInterface);
+                    graphicsFactory->createQuad(alphaShader->asShaderProgramInterface()), alphaShader, mapInterface);
                 tileObject->beginAlphaAnimation(0.0, 1.0, 150);
 
                 tileObject->setRectCoord(tile.tileInfo.bounds);
