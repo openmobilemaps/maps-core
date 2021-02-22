@@ -40,6 +40,8 @@ void Polygon2dLayerObject::setPositions(const std::vector<Coord> &positions, con
     polygon->setPolygonPositions(renderCoords, holesCoords, isConvex);
 }
 
+void Polygon2dLayerObject::setColor(const Color &color) { shader->setColor(color.r, color.g, color.b, color.a); }
+
 std::shared_ptr<GraphicsObjectInterface> Polygon2dLayerObject::getPolygonObject() { return polygon->asGraphicsObject(); }
 
 std::shared_ptr<ShaderProgramInterface> Polygon2dLayerObject::getShaderProgram() { return shader->asShaderProgramInterface(); }

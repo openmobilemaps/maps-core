@@ -10,6 +10,8 @@ class TouchInterface {
 public:
     virtual ~TouchInterface() {}
 
+    virtual bool onTouchDown(const ::Vec2F & posScreen) = 0;
+
     virtual bool onClickUnconfirmed(const ::Vec2F & posScreen) = 0;
 
     virtual bool onClickConfirmed(const ::Vec2F & posScreen) = 0;

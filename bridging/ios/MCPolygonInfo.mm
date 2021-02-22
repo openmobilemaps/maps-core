@@ -11,6 +11,7 @@
                                      holes:(nonnull NSArray<NSArray<MCCoord *> *> *)holes
                                   isConvex:(BOOL)isConvex
                                      color:(nonnull MCColor *)color
+                            highlightColor:(nonnull MCColor *)highlightColor
 {
     if (self = [super init]) {
         _identifier = [identifier copy];
@@ -18,6 +19,7 @@
         _holes = [holes copy];
         _isConvex = isConvex;
         _color = color;
+        _highlightColor = highlightColor;
     }
     return self;
 }
@@ -27,17 +29,19 @@
                                             holes:(nonnull NSArray<NSArray<MCCoord *> *> *)holes
                                          isConvex:(BOOL)isConvex
                                             color:(nonnull MCColor *)color
+                                   highlightColor:(nonnull MCColor *)highlightColor
 {
     return [(MCPolygonInfo*)[self alloc] initWithIdentifier:identifier
                                                 coordinates:coordinates
                                                       holes:holes
                                                    isConvex:isConvex
-                                                      color:color];
+                                                      color:color
+                                             highlightColor:highlightColor];
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p identifier:%@ coordinates:%@ holes:%@ isConvex:%@ color:%@>", self.class, (void *)self, self.identifier, self.coordinates, self.holes, @(self.isConvex), self.color];
+    return [NSString stringWithFormat:@"<%@ %p identifier:%@ coordinates:%@ holes:%@ isConvex:%@ color:%@ highlightColor:%@>", self.class, (void *)self, self.identifier, self.coordinates, self.holes, @(self.isConvex), self.color, self.highlightColor];
 }
 
 @end

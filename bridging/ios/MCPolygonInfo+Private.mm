@@ -16,7 +16,8 @@ auto PolygonInfo::toCpp(ObjcType obj) -> CppType
             ::djinni::List<::djinni_generated::Coord>::toCpp(obj.coordinates),
             ::djinni::List<::djinni::List<::djinni_generated::Coord>>::toCpp(obj.holes),
             ::djinni::Bool::toCpp(obj.isConvex),
-            ::djinni_generated::Color::toCpp(obj.color)};
+            ::djinni_generated::Color::toCpp(obj.color),
+            ::djinni_generated::Color::toCpp(obj.highlightColor)};
 }
 
 auto PolygonInfo::fromCpp(const CppType& cpp) -> ObjcType
@@ -25,7 +26,8 @@ auto PolygonInfo::fromCpp(const CppType& cpp) -> ObjcType
                                          coordinates:(::djinni::List<::djinni_generated::Coord>::fromCpp(cpp.coordinates))
                                                holes:(::djinni::List<::djinni::List<::djinni_generated::Coord>>::fromCpp(cpp.holes))
                                             isConvex:(::djinni::Bool::fromCpp(cpp.isConvex))
-                                               color:(::djinni_generated::Color::fromCpp(cpp.color))];
+                                               color:(::djinni_generated::Color::fromCpp(cpp.color))
+                                      highlightColor:(::djinni_generated::Color::fromCpp(cpp.highlightColor))];
 }
 
 }  // namespace djinni_generated

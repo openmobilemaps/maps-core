@@ -15,16 +15,19 @@ struct PolygonInfo final {
     std::vector<std::vector<::Coord>> holes;
     bool isConvex;
     ::Color color;
+    ::Color highlightColor;
 
     PolygonInfo(std::string identifier_,
                 std::vector<::Coord> coordinates_,
                 std::vector<std::vector<::Coord>> holes_,
                 bool isConvex_,
-                ::Color color_)
+                ::Color color_,
+                ::Color highlightColor_)
     : identifier(std::move(identifier_))
     , coordinates(std::move(coordinates_))
     , holes(std::move(holes_))
     , isConvex(std::move(isConvex_))
     , color(std::move(color_))
+    , highlightColor(std::move(highlightColor_))
     {}
 };

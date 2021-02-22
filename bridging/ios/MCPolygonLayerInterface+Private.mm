@@ -8,6 +8,7 @@
 #import "DJIMarshal+Private.h"
 #import "MCLayerInterface+Private.h"
 #import "MCPolygonInfo+Private.h"
+#import "MCPolygonLayerCallbackInterface+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -67,6 +68,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)clear {
     try {
         _cppRefHandle.get()->clear();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setCallbackHandler:(nullable id<MCPolygonLayerCallbackInterface>)handler {
+    try {
+        _cppRefHandle.get()->setCallbackHandler(::djinni_generated::PolygonLayerCallbackInterface::toCpp(handler));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

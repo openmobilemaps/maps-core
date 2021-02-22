@@ -8,6 +8,11 @@ polygon_info = record {
     holes: list<list<coord>>;
     isConvex: bool;
     color: color;
+    highlight_color: color;
+}
+
+polygon_layer_callback_interface = interface +c +j +o {
+    did_touch_up_polygon(polygon: polygon_info);
 }
 
 polygon_layer_interface = interface +c {
@@ -17,5 +22,6 @@ polygon_layer_interface = interface +c {
     remove(polygon: polygon_info);
     add(polygon: polygon_info);
     clear();
+    set_callback_handler(handler: polygon_layer_callback_interface);
     asLayerInterface(): layer_interface;
 }

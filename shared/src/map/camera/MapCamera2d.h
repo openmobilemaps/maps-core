@@ -65,6 +65,8 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual RectCoord getVisibleRect() override;
 
+    virtual ::Coord coordFromScreenPosition(const ::Vec2F &posScreen) override;
+
   protected:
     std::set<std::shared_ptr<MapCamera2dListenerInterface>> listeners;
 
@@ -94,7 +96,6 @@ class MapCamera2d : public MapCamera2dInterface,
 
     void notifyListeners();
 
-    Coord coordFromScreenPosition(const ::Vec2F &posScreen);
     // MARK: Animations
 
     struct CameraAnimation {

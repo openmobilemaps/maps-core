@@ -9,4 +9,5 @@ data class PolygonInfo(
     var holes: ArrayList<ArrayList<ch.ubique.mapscore.shared.map.coordinates.Coord>>,
     var isConvex: Boolean,
     var color: ch.ubique.mapscore.shared.graphics.common.Color,
+    var highlightColor: ch.ubique.mapscore.shared.graphics.common.Color,
 )

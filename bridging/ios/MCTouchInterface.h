@@ -7,6 +7,8 @@
 
 @interface MCTouchInterface : NSObject
 
+- (BOOL)onTouchDown:(nonnull MCVec2F *)posScreen;
+
 - (BOOL)onClickUnconfirmed:(nonnull MCVec2F *)posScreen;
 
 - (BOOL)onClickConfirmed:(nonnull MCVec2F *)posScreen;

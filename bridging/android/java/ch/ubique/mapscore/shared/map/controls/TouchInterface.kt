@@ -7,6 +7,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class TouchInterface {
 
+    abstract fun onTouchDown(posScreen: ch.ubique.mapscore.shared.graphics.common.Vec2F): Boolean
+
     abstract fun onClickUnconfirmed(posScreen: ch.ubique.mapscore.shared.graphics.common.Vec2F): Boolean
 
     abstract fun onClickConfirmed(posScreen: ch.ubique.mapscore.shared.graphics.common.Vec2F): Boolean
@@ -42,6 +44,12 @@ abstract class TouchInterface {
         protected fun finalize() {
             _djinni_private_destroy()
         }
+
+        override fun onTouchDown(posScreen: ch.ubique.mapscore.shared.graphics.common.Vec2F): Boolean {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_onTouchDown(this.nativeRef, posScreen)
+        }
+        private external fun native_onTouchDown(_nativeRef: Long, posScreen: ch.ubique.mapscore.shared.graphics.common.Vec2F): Boolean
 
         override fun onClickUnconfirmed(posScreen: ch.ubique.mapscore.shared.graphics.common.Vec2F): Boolean {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

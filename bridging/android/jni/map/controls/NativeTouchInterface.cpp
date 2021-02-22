@@ -20,6 +20,16 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchInterfa
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
+CJNIEXPORT jboolean JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchInterface_00024CppProxy_native_1onTouchDown(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec2F::JniType j_posScreen)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::TouchInterface>(nativeRef);
+        auto r = ref->onTouchDown(::djinni_generated::NativeVec2F::toCpp(jniEnv, j_posScreen));
+        return ::djinni::release(::djinni::Bool::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 CJNIEXPORT jboolean JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchInterface_00024CppProxy_native_1onClickUnconfirmed(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec2F::JniType j_posScreen)
 {
     try {

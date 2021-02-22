@@ -17,6 +17,8 @@ abstract class PolygonLayerInterface {
 
     abstract fun clear()
 
+    abstract fun setCallbackHandler(handler: PolygonLayerCallbackInterface)
+
     abstract fun asLayerInterface(): ch.ubique.mapscore.shared.map.LayerInterface
 
     companion object {
@@ -73,6 +75,12 @@ abstract class PolygonLayerInterface {
             native_clear(this.nativeRef)
         }
         private external fun native_clear(_nativeRef: Long)
+
+        override fun setCallbackHandler(handler: PolygonLayerCallbackInterface) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setCallbackHandler(this.nativeRef, handler)
+        }
+        private external fun native_setCallbackHandler(_nativeRef: Long, handler: PolygonLayerCallbackInterface)
 
         override fun asLayerInterface(): ch.ubique.mapscore.shared.map.LayerInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
