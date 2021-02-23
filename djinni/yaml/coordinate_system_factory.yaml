@@ -19,14 +19,14 @@ objcpp:
   header: '"MCCoordinateSystemFactory+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.map.coordinates.CoordinateSystemFactory'
+  typename: 'io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemFactory'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.map.coordinates.CoordinateSystemFactory'
+  boxed: 'io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemFactory'
 jni:
   translator: '::djinni_generated::NativeCoordinateSystemFactory'
   header: '"NativeCoordinateSystemFactory.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/map/coordinates/CoordinateSystemFactory;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/map/coordinates/CoordinateSystemFactory;'

@@ -19,14 +19,14 @@ objcpp:
   header: '"MCExecutionEnvironment+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.map.scheduling.ExecutionEnvironment'
+  typename: 'io.openmobilemaps.mapscore.shared.map.scheduling.ExecutionEnvironment'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.map.scheduling.ExecutionEnvironment'
+  boxed: 'io.openmobilemaps.mapscore.shared.map.scheduling.ExecutionEnvironment'
 jni:
   translator: '::djinni_generated::NativeExecutionEnvironment'
   header: '"NativeExecutionEnvironment.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/map/scheduling/ExecutionEnvironment;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/map/scheduling/ExecutionEnvironment;'

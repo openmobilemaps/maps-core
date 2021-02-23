@@ -7,7 +7,7 @@
 
 namespace djinni_generated {
 
-NativeSchedulerInterface::NativeSchedulerInterface() : ::djinni::JniInterface<::SchedulerInterface, NativeSchedulerInterface>("ch/ubique/mapscore/shared/map/scheduling/SchedulerInterface$CppProxy") {}
+NativeSchedulerInterface::NativeSchedulerInterface() : ::djinni::JniInterface<::SchedulerInterface, NativeSchedulerInterface>("io/openmobilemaps/mapscore/shared/map/scheduling/SchedulerInterface$CppProxy") {}
 
 NativeSchedulerInterface::~NativeSchedulerInterface() = default;
 
@@ -53,7 +53,7 @@ void NativeSchedulerInterface::JavaProxy::resume() {
     ::djinni::jniExceptionCheck(jniEnv);
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_scheduling_SchedulerInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_scheduling_SchedulerInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -61,7 +61,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_scheduling_SchedulerI
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_scheduling_SchedulerInterface_00024CppProxy_native_1addTask(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_task)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_scheduling_SchedulerInterface_00024CppProxy_native_1addTask(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_task)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -70,7 +70,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_scheduling_SchedulerI
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_scheduling_SchedulerInterface_00024CppProxy_native_1removeTask(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_id)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_scheduling_SchedulerInterface_00024CppProxy_native_1removeTask(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_id)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -79,7 +79,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_scheduling_SchedulerI
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_scheduling_SchedulerInterface_00024CppProxy_native_1clear(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_scheduling_SchedulerInterface_00024CppProxy_native_1clear(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -88,7 +88,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_scheduling_SchedulerI
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_scheduling_SchedulerInterface_00024CppProxy_native_1pause(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_scheduling_SchedulerInterface_00024CppProxy_native_1pause(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -97,7 +97,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_scheduling_SchedulerI
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_scheduling_SchedulerInterface_00024CppProxy_native_1resume(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_scheduling_SchedulerInterface_00024CppProxy_native_1resume(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);

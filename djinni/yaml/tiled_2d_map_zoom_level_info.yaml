@@ -19,14 +19,14 @@ objcpp:
   header: '"MCTiled2dMapZoomLevelInfo+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.map.layers.tiled.Tiled2dMapZoomLevelInfo'
+  typename: 'io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomLevelInfo'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.map.layers.tiled.Tiled2dMapZoomLevelInfo'
+  boxed: 'io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomLevelInfo'
 jni:
   translator: '::djinni_generated::NativeTiled2dMapZoomLevelInfo'
   header: '"NativeTiled2dMapZoomLevelInfo.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/map/layers/tiled/Tiled2dMapZoomLevelInfo;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/map/layers/tiled/Tiled2dMapZoomLevelInfo;'

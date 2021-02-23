@@ -39,8 +39,8 @@ private:
         friend ::djinni::JniInterface<::MapCamera2dListenerInterface, ::djinni_generated::NativeMapCamera2dListenerInterface>;
     };
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/map/camera/MapCamera2dListenerInterface") };
-    const jmethodID method_onVisibleBoundsChanged { ::djinni::jniGetMethodID(clazz.get(), "onVisibleBoundsChanged", "(Lch/ubique/mapscore/shared/map/coordinates/RectCoord;D)V") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/camera/MapCamera2dListenerInterface") };
+    const jmethodID method_onVisibleBoundsChanged { ::djinni::jniGetMethodID(clazz.get(), "onVisibleBoundsChanged", "(Lio/openmobilemaps/mapscore/shared/map/coordinates/RectCoord;D)V") };
 };
 
 }  // namespace djinni_generated

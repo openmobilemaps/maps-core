@@ -8,12 +8,12 @@
 
 namespace djinni_generated {
 
-NativeDefaultTouchHandlerInterface::NativeDefaultTouchHandlerInterface() : ::djinni::JniInterface<::DefaultTouchHandlerInterface, NativeDefaultTouchHandlerInterface>("ch/ubique/mapscore/shared/map/controls/DefaultTouchHandlerInterface$CppProxy") {}
+NativeDefaultTouchHandlerInterface::NativeDefaultTouchHandlerInterface() : ::djinni::JniInterface<::DefaultTouchHandlerInterface, NativeDefaultTouchHandlerInterface>("io/openmobilemaps/mapscore/shared/map/controls/DefaultTouchHandlerInterface$CppProxy") {}
 
 NativeDefaultTouchHandlerInterface::~NativeDefaultTouchHandlerInterface() = default;
 
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_controls_DefaultTouchHandlerInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_controls_DefaultTouchHandlerInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -21,7 +21,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_controls_DefaultTouch
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_controls_DefaultTouchHandlerInterface_00024CppProxy_create(JNIEnv* jniEnv, jobject /*this*/, ::djinni_generated::NativeSchedulerInterface::JniType j_scheduler, jfloat j_density)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_controls_DefaultTouchHandlerInterface_00024CppProxy_create(JNIEnv* jniEnv, jobject /*this*/, ::djinni_generated::NativeSchedulerInterface::JniType j_scheduler, jfloat j_density)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE0(jniEnv);

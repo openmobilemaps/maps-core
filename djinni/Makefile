@@ -14,7 +14,7 @@ DJINNI_SOURCE := ./$(FILE)
 
 PROJECT_NAME := mapscore_shared
 PROJECT_PREFIX := MC
-JAVA_PACKAGE := ch.ubique.mapscore.shared
+JAVA_PACKAGE := io.openmobilemaps.mapscore.shared
 
 OBJC_OUT := $(DJINNI_OUT_DIR)/ios
 OBJC_PREFIX := $(PROJECT_PREFIX)
@@ -25,7 +25,7 @@ YAML_ARG := --yaml-out ./yaml
 
 DJINNI_RUN := ../external/djinni/src/run
 
-JAVA_OUT := $(DJINNI_OUT_DIR)/android/java/ch/ubique/mapscore/shared
+JAVA_OUT := $(DJINNI_OUT_DIR)/android/java/io/openmobilemaps/mapscore/shared
 JNI_OUT := $(DJINNI_OUT_DIR)/android/jni
 IDENT_JNI_CLASS := NativeFooBar
 IDENT_JAVA := fooBar

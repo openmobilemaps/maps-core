@@ -19,14 +19,14 @@ objcpp:
   header: '"MCTiled2dMapRasterLayerInterface+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface'
+  typename: 'io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface'
+  boxed: 'io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface'
 jni:
   translator: '::djinni_generated::NativeTiled2dMapRasterLayerInterface'
   header: '"NativeTiled2dMapRasterLayerInterface.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/map/layers/tiled/raster/Tiled2dMapRasterLayerInterface;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/map/layers/tiled/raster/Tiled2dMapRasterLayerInterface;'

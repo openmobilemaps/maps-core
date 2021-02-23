@@ -19,14 +19,14 @@ objcpp:
   header: '"MCShaderProgramInterface+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.graphics.shader.ShaderProgramInterface'
+  typename: 'io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.graphics.shader.ShaderProgramInterface'
+  boxed: 'io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface'
 jni:
   translator: '::djinni_generated::NativeShaderProgramInterface'
   header: '"NativeShaderProgramInterface.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/graphics/shader/ShaderProgramInterface;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/graphics/shader/ShaderProgramInterface;'

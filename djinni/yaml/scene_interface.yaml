@@ -19,14 +19,14 @@ objcpp:
   header: '"MCSceneInterface+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.graphics.SceneInterface'
+  typename: 'io.openmobilemaps.mapscore.shared.graphics.SceneInterface'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.graphics.SceneInterface'
+  boxed: 'io.openmobilemaps.mapscore.shared.graphics.SceneInterface'
 jni:
   translator: '::djinni_generated::NativeSceneInterface'
   header: '"NativeSceneInterface.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/graphics/SceneInterface;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/graphics/SceneInterface;'

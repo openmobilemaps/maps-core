@@ -19,14 +19,14 @@ objcpp:
   header: '"MCCoordinateConverterInterface+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.map.coordinates.CoordinateConverterInterface'
+  typename: 'io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConverterInterface'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.map.coordinates.CoordinateConverterInterface'
+  boxed: 'io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConverterInterface'
 jni:
   translator: '::djinni_generated::NativeCoordinateConverterInterface'
   header: '"NativeCoordinateConverterInterface.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/map/coordinates/CoordinateConverterInterface;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/map/coordinates/CoordinateConverterInterface;'

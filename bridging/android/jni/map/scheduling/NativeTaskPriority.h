@@ -19,7 +19,7 @@ public:
     static ::djinni::LocalRef<JniType> fromCpp(JNIEnv* jniEnv, CppType c) { return ::djinni::JniClass<NativeTaskPriority>::get().create(jniEnv, static_cast<jint>(c)); }
 
 private:
-    NativeTaskPriority() : JniEnum("ch/ubique/mapscore/shared/map/scheduling/TaskPriority") {}
+    NativeTaskPriority() : JniEnum("io/openmobilemaps/mapscore/shared/map/scheduling/TaskPriority") {}
     friend ::djinni::JniClass<NativeTaskPriority>;
 };
 

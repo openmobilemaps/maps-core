@@ -6,7 +6,7 @@
 
 namespace djinni_generated {
 
-NativePolygonLayerCallbackInterface::NativePolygonLayerCallbackInterface() : ::djinni::JniInterface<::PolygonLayerCallbackInterface, NativePolygonLayerCallbackInterface>("ch/ubique/mapscore/shared/map/layers/polygon/PolygonLayerCallbackInterface$CppProxy") {}
+NativePolygonLayerCallbackInterface::NativePolygonLayerCallbackInterface() : ::djinni::JniInterface<::PolygonLayerCallbackInterface, NativePolygonLayerCallbackInterface>("io/openmobilemaps/mapscore/shared/map/layers/polygon/PolygonLayerCallbackInterface$CppProxy") {}
 
 NativePolygonLayerCallbackInterface::~NativePolygonLayerCallbackInterface() = default;
 
@@ -23,7 +23,7 @@ void NativePolygonLayerCallbackInterface::JavaProxy::onClickConfirmed(const ::Po
     ::djinni::jniExceptionCheck(jniEnv);
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_polygon_PolygonLayerCallbackInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_polygon_PolygonLayerCallbackInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -31,7 +31,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_polygon_Polygo
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_polygon_PolygonLayerCallbackInterface_00024CppProxy_native_1onClickConfirmed(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_polygon)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_polygon_PolygonLayerCallbackInterface_00024CppProxy_native_1onClickConfirmed(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_polygon)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);

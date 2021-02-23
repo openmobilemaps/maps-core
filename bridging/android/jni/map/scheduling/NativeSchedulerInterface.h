@@ -43,8 +43,8 @@ private:
         friend ::djinni::JniInterface<::SchedulerInterface, ::djinni_generated::NativeSchedulerInterface>;
     };
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/map/scheduling/SchedulerInterface") };
-    const jmethodID method_addTask { ::djinni::jniGetMethodID(clazz.get(), "addTask", "(Lch/ubique/mapscore/shared/map/scheduling/TaskInterface;)V") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/scheduling/SchedulerInterface") };
+    const jmethodID method_addTask { ::djinni::jniGetMethodID(clazz.get(), "addTask", "(Lio/openmobilemaps/mapscore/shared/map/scheduling/TaskInterface;)V") };
     const jmethodID method_removeTask { ::djinni::jniGetMethodID(clazz.get(), "removeTask", "(Ljava/lang/String;)V") };
     const jmethodID method_clear { ::djinni::jniGetMethodID(clazz.get(), "clear", "()V") };
     const jmethodID method_pause { ::djinni::jniGetMethodID(clazz.get(), "pause", "()V") };

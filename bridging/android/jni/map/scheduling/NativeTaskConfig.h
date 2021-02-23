@@ -24,12 +24,12 @@ private:
     NativeTaskConfig();
     friend ::djinni::JniClass<NativeTaskConfig>;
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/map/scheduling/TaskConfig") };
-    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Ljava/lang/String;JLch/ubique/mapscore/shared/map/scheduling/TaskPriority;Lch/ubique/mapscore/shared/map/scheduling/ExecutionEnvironment;)V") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/scheduling/TaskConfig") };
+    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Ljava/lang/String;JLio/openmobilemaps/mapscore/shared/map/scheduling/TaskPriority;Lio/openmobilemaps/mapscore/shared/map/scheduling/ExecutionEnvironment;)V") };
     const jfieldID field_id { ::djinni::jniGetFieldID(clazz.get(), "id", "Ljava/lang/String;") };
     const jfieldID field_delay { ::djinni::jniGetFieldID(clazz.get(), "delay", "J") };
-    const jfieldID field_priority { ::djinni::jniGetFieldID(clazz.get(), "priority", "Lch/ubique/mapscore/shared/map/scheduling/TaskPriority;") };
-    const jfieldID field_executionEnvironment { ::djinni::jniGetFieldID(clazz.get(), "executionEnvironment", "Lch/ubique/mapscore/shared/map/scheduling/ExecutionEnvironment;") };
+    const jfieldID field_priority { ::djinni::jniGetFieldID(clazz.get(), "priority", "Lio/openmobilemaps/mapscore/shared/map/scheduling/TaskPriority;") };
+    const jfieldID field_executionEnvironment { ::djinni::jniGetFieldID(clazz.get(), "executionEnvironment", "Lio/openmobilemaps/mapscore/shared/map/scheduling/ExecutionEnvironment;") };
 };
 
 }  // namespace djinni_generated

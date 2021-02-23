@@ -24,12 +24,12 @@ private:
     NativeQuadCoord();
     friend ::djinni::JniClass<NativeQuadCoord>;
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/map/coordinates/QuadCoord") };
-    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Lch/ubique/mapscore/shared/map/coordinates/Coord;Lch/ubique/mapscore/shared/map/coordinates/Coord;Lch/ubique/mapscore/shared/map/coordinates/Coord;Lch/ubique/mapscore/shared/map/coordinates/Coord;)V") };
-    const jfieldID field_topLeft { ::djinni::jniGetFieldID(clazz.get(), "topLeft", "Lch/ubique/mapscore/shared/map/coordinates/Coord;") };
-    const jfieldID field_topRight { ::djinni::jniGetFieldID(clazz.get(), "topRight", "Lch/ubique/mapscore/shared/map/coordinates/Coord;") };
-    const jfieldID field_bottomRight { ::djinni::jniGetFieldID(clazz.get(), "bottomRight", "Lch/ubique/mapscore/shared/map/coordinates/Coord;") };
-    const jfieldID field_bottomLeft { ::djinni::jniGetFieldID(clazz.get(), "bottomLeft", "Lch/ubique/mapscore/shared/map/coordinates/Coord;") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/coordinates/QuadCoord") };
+    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Lio/openmobilemaps/mapscore/shared/map/coordinates/Coord;Lio/openmobilemaps/mapscore/shared/map/coordinates/Coord;Lio/openmobilemaps/mapscore/shared/map/coordinates/Coord;Lio/openmobilemaps/mapscore/shared/map/coordinates/Coord;)V") };
+    const jfieldID field_topLeft { ::djinni::jniGetFieldID(clazz.get(), "topLeft", "Lio/openmobilemaps/mapscore/shared/map/coordinates/Coord;") };
+    const jfieldID field_topRight { ::djinni::jniGetFieldID(clazz.get(), "topRight", "Lio/openmobilemaps/mapscore/shared/map/coordinates/Coord;") };
+    const jfieldID field_bottomRight { ::djinni::jniGetFieldID(clazz.get(), "bottomRight", "Lio/openmobilemaps/mapscore/shared/map/coordinates/Coord;") };
+    const jfieldID field_bottomLeft { ::djinni::jniGetFieldID(clazz.get(), "bottomLeft", "Lio/openmobilemaps/mapscore/shared/map/coordinates/Coord;") };
 };
 
 }  // namespace djinni_generated

@@ -41,10 +41,10 @@ private:
         friend ::djinni::JniInterface<::GraphicsObjectFactoryInterface, ::djinni_generated::NativeGraphicsObjectFactoryInterface>;
     };
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/graphics/objects/GraphicsObjectFactoryInterface") };
-    const jmethodID method_createQuad { ::djinni::jniGetMethodID(clazz.get(), "createQuad", "(Lch/ubique/mapscore/shared/graphics/shader/ShaderProgramInterface;)Lch/ubique/mapscore/shared/graphics/objects/Quad2dInterface;") };
-    const jmethodID method_createLine { ::djinni::jniGetMethodID(clazz.get(), "createLine", "(Lch/ubique/mapscore/shared/graphics/shader/LineShaderProgramInterface;)Lch/ubique/mapscore/shared/graphics/objects/Line2dInterface;") };
-    const jmethodID method_createPolygon { ::djinni::jniGetMethodID(clazz.get(), "createPolygon", "(Lch/ubique/mapscore/shared/graphics/shader/ShaderProgramInterface;)Lch/ubique/mapscore/shared/graphics/objects/Polygon2dInterface;") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/objects/GraphicsObjectFactoryInterface") };
+    const jmethodID method_createQuad { ::djinni::jniGetMethodID(clazz.get(), "createQuad", "(Lio/openmobilemaps/mapscore/shared/graphics/shader/ShaderProgramInterface;)Lio/openmobilemaps/mapscore/shared/graphics/objects/Quad2dInterface;") };
+    const jmethodID method_createLine { ::djinni::jniGetMethodID(clazz.get(), "createLine", "(Lio/openmobilemaps/mapscore/shared/graphics/shader/LineShaderProgramInterface;)Lio/openmobilemaps/mapscore/shared/graphics/objects/Line2dInterface;") };
+    const jmethodID method_createPolygon { ::djinni::jniGetMethodID(clazz.get(), "createPolygon", "(Lio/openmobilemaps/mapscore/shared/graphics/shader/ShaderProgramInterface;)Lio/openmobilemaps/mapscore/shared/graphics/objects/Polygon2dInterface;") };
 };
 
 }  // namespace djinni_generated

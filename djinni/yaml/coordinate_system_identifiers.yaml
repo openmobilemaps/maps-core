@@ -19,14 +19,14 @@ objcpp:
   header: '"MCCoordinateSystemIdentifiers+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.map.coordinates.CoordinateSystemIdentifiers'
+  typename: 'io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemIdentifiers'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.map.coordinates.CoordinateSystemIdentifiers'
+  boxed: 'io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemIdentifiers'
 jni:
   translator: '::djinni_generated::NativeCoordinateSystemIdentifiers'
   header: '"NativeCoordinateSystemIdentifiers.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/map/coordinates/CoordinateSystemIdentifiers;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/map/coordinates/CoordinateSystemIdentifiers;'

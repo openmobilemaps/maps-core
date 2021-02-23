@@ -19,7 +19,7 @@ public:
     static ::djinni::LocalRef<JniType> fromCpp(JNIEnv* jniEnv, CppType c) { return ::djinni::JniClass<NativeExecutionEnvironment>::get().create(jniEnv, static_cast<jint>(c)); }
 
 private:
-    NativeExecutionEnvironment() : JniEnum("ch/ubique/mapscore/shared/map/scheduling/ExecutionEnvironment") {}
+    NativeExecutionEnvironment() : JniEnum("io/openmobilemaps/mapscore/shared/map/scheduling/ExecutionEnvironment") {}
     friend ::djinni::JniClass<NativeExecutionEnvironment>;
 };
 

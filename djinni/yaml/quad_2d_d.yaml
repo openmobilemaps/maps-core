@@ -19,14 +19,14 @@ objcpp:
   header: '"MCQuad2dD+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.graphics.common.Quad2dD'
+  typename: 'io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.graphics.common.Quad2dD'
+  boxed: 'io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD'
 jni:
   translator: '::djinni_generated::NativeQuad2dD'
   header: '"NativeQuad2dD.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/graphics/common/Quad2dD;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/graphics/common/Quad2dD;'

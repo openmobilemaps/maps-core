@@ -19,14 +19,14 @@ objcpp:
   header: '"MCGraphicsObjectInterface+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectInterface'
+  typename: 'io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.graphics.objects.GraphicsObjectInterface'
+  boxed: 'io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface'
 jni:
   translator: '::djinni_generated::NativeGraphicsObjectInterface'
   header: '"NativeGraphicsObjectInterface.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/graphics/objects/GraphicsObjectInterface;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/graphics/objects/GraphicsObjectInterface;'

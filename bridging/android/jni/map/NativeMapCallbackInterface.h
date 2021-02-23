@@ -39,7 +39,7 @@ private:
         friend ::djinni::JniInterface<::MapCallbackInterface, ::djinni_generated::NativeMapCallbackInterface>;
     };
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/map/MapCallbackInterface") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/MapCallbackInterface") };
     const jmethodID method_invalidate { ::djinni::jniGetMethodID(clazz.get(), "invalidate", "()V") };
 };
 

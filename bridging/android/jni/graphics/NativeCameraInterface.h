@@ -40,7 +40,7 @@ private:
         friend ::djinni::JniInterface<::CameraInterface, ::djinni_generated::NativeCameraInterface>;
     };
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/graphics/CameraInterface") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/CameraInterface") };
     const jmethodID method_getMvpMatrix { ::djinni::jniGetMethodID(clazz.get(), "getMvpMatrix", "()Ljava/util/ArrayList;") };
     const jmethodID method_viewportSizeChanged { ::djinni::jniGetMethodID(clazz.get(), "viewportSizeChanged", "()V") };
 };

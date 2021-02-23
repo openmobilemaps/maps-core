@@ -40,9 +40,9 @@ private:
         friend ::djinni::JniInterface<::RendererInterface, ::djinni_generated::NativeRendererInterface>;
     };
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/graphics/RendererInterface") };
-    const jmethodID method_addToRenderQueue { ::djinni::jniGetMethodID(clazz.get(), "addToRenderQueue", "(Lch/ubique/mapscore/shared/graphics/RenderPassInterface;)V") };
-    const jmethodID method_drawFrame { ::djinni::jniGetMethodID(clazz.get(), "drawFrame", "(Lch/ubique/mapscore/shared/graphics/RenderingContextInterface;Lch/ubique/mapscore/shared/graphics/CameraInterface;)V") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/RendererInterface") };
+    const jmethodID method_addToRenderQueue { ::djinni::jniGetMethodID(clazz.get(), "addToRenderQueue", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderPassInterface;)V") };
+    const jmethodID method_drawFrame { ::djinni::jniGetMethodID(clazz.get(), "drawFrame", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface;Lio/openmobilemaps/mapscore/shared/graphics/CameraInterface;)V") };
 };
 
 }  // namespace djinni_generated

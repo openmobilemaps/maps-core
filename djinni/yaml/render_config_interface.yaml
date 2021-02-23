@@ -19,14 +19,14 @@ objcpp:
   header: '"MCRenderConfigInterface+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.map.layers.objects.RenderConfigInterface'
+  typename: 'io.openmobilemaps.mapscore.shared.map.layers.objects.RenderConfigInterface'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.map.layers.objects.RenderConfigInterface'
+  boxed: 'io.openmobilemaps.mapscore.shared.map.layers.objects.RenderConfigInterface'
 jni:
   translator: '::djinni_generated::NativeRenderConfigInterface'
   header: '"NativeRenderConfigInterface.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/map/layers/objects/RenderConfigInterface;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/map/layers/objects/RenderConfigInterface;'

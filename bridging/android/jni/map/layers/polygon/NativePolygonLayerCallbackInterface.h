@@ -39,8 +39,8 @@ private:
         friend ::djinni::JniInterface<::PolygonLayerCallbackInterface, ::djinni_generated::NativePolygonLayerCallbackInterface>;
     };
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/map/layers/polygon/PolygonLayerCallbackInterface") };
-    const jmethodID method_onClickConfirmed { ::djinni::jniGetMethodID(clazz.get(), "onClickConfirmed", "(Lch/ubique/mapscore/shared/map/layers/polygon/PolygonInfo;)V") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/layers/polygon/PolygonLayerCallbackInterface") };
+    const jmethodID method_onClickConfirmed { ::djinni::jniGetMethodID(clazz.get(), "onClickConfirmed", "(Lio/openmobilemaps/mapscore/shared/map/layers/polygon/PolygonInfo;)V") };
 };
 
 }  // namespace djinni_generated

@@ -8,7 +8,7 @@
 
 namespace djinni_generated {
 
-NativePolygon2dInterface::NativePolygon2dInterface() : ::djinni::JniInterface<::Polygon2dInterface, NativePolygon2dInterface>("ch/ubique/mapscore/shared/graphics/objects/Polygon2dInterface$CppProxy") {}
+NativePolygon2dInterface::NativePolygon2dInterface() : ::djinni::JniInterface<::Polygon2dInterface, NativePolygon2dInterface>("io/openmobilemaps/mapscore/shared/graphics/objects/Polygon2dInterface$CppProxy") {}
 
 NativePolygon2dInterface::~NativePolygon2dInterface() = default;
 
@@ -35,7 +35,7 @@ std::shared_ptr<::GraphicsObjectInterface> NativePolygon2dInterface::JavaProxy::
     return ::djinni_generated::NativeGraphicsObjectInterface::toCpp(jniEnv, jret);
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_Polygon2dInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_Polygon2dInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -43,7 +43,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_Polygon2
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_Polygon2dInterface_00024CppProxy_native_1setPolygonPositions(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_positions, jobject j_holes, jboolean j_isConvex)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_Polygon2dInterface_00024CppProxy_native_1setPolygonPositions(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_positions, jobject j_holes, jboolean j_isConvex)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -54,7 +54,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_Polygon2
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_Polygon2dInterface_00024CppProxy_native_1asGraphicsObject(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_Polygon2dInterface_00024CppProxy_native_1asGraphicsObject(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);

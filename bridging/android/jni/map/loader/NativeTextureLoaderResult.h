@@ -24,10 +24,10 @@ private:
     NativeTextureLoaderResult();
     friend ::djinni::JniClass<NativeTextureLoaderResult>;
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/map/loader/TextureLoaderResult") };
-    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Lch/ubique/mapscore/shared/graphics/objects/TextureHolderInterface;Lch/ubique/mapscore/shared/map/loader/LoaderStatus;)V") };
-    const jfieldID field_data { ::djinni::jniGetFieldID(clazz.get(), "data", "Lch/ubique/mapscore/shared/graphics/objects/TextureHolderInterface;") };
-    const jfieldID field_status { ::djinni::jniGetFieldID(clazz.get(), "status", "Lch/ubique/mapscore/shared/map/loader/LoaderStatus;") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/loader/TextureLoaderResult") };
+    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Lio/openmobilemaps/mapscore/shared/graphics/objects/TextureHolderInterface;Lio/openmobilemaps/mapscore/shared/map/loader/LoaderStatus;)V") };
+    const jfieldID field_data { ::djinni::jniGetFieldID(clazz.get(), "data", "Lio/openmobilemaps/mapscore/shared/graphics/objects/TextureHolderInterface;") };
+    const jfieldID field_status { ::djinni::jniGetFieldID(clazz.get(), "status", "Lio/openmobilemaps/mapscore/shared/map/loader/LoaderStatus;") };
 };
 
 }  // namespace djinni_generated

@@ -24,14 +24,14 @@ private:
     NativePolygonInfo();
     friend ::djinni::JniClass<NativePolygonInfo>;
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/map/layers/polygon/PolygonInfo") };
-    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Ljava/lang/String;Ljava/util/ArrayList;Ljava/util/ArrayList;ZLch/ubique/mapscore/shared/graphics/common/Color;Lch/ubique/mapscore/shared/graphics/common/Color;)V") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/layers/polygon/PolygonInfo") };
+    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Ljava/lang/String;Ljava/util/ArrayList;Ljava/util/ArrayList;ZLio/openmobilemaps/mapscore/shared/graphics/common/Color;Lio/openmobilemaps/mapscore/shared/graphics/common/Color;)V") };
     const jfieldID field_identifier { ::djinni::jniGetFieldID(clazz.get(), "identifier", "Ljava/lang/String;") };
     const jfieldID field_coordinates { ::djinni::jniGetFieldID(clazz.get(), "coordinates", "Ljava/util/ArrayList;") };
     const jfieldID field_holes { ::djinni::jniGetFieldID(clazz.get(), "holes", "Ljava/util/ArrayList;") };
     const jfieldID field_isConvex { ::djinni::jniGetFieldID(clazz.get(), "isConvex", "Z") };
-    const jfieldID field_color { ::djinni::jniGetFieldID(clazz.get(), "color", "Lch/ubique/mapscore/shared/graphics/common/Color;") };
-    const jfieldID field_highlightColor { ::djinni::jniGetFieldID(clazz.get(), "highlightColor", "Lch/ubique/mapscore/shared/graphics/common/Color;") };
+    const jfieldID field_color { ::djinni::jniGetFieldID(clazz.get(), "color", "Lio/openmobilemaps/mapscore/shared/graphics/common/Color;") };
+    const jfieldID field_highlightColor { ::djinni::jniGetFieldID(clazz.get(), "highlightColor", "Lio/openmobilemaps/mapscore/shared/graphics/common/Color;") };
 };
 
 }  // namespace djinni_generated

@@ -5,7 +5,7 @@
 
 namespace djinni_generated {
 
-NativeMapCallbackInterface::NativeMapCallbackInterface() : ::djinni::JniInterface<::MapCallbackInterface, NativeMapCallbackInterface>("ch/ubique/mapscore/shared/map/MapCallbackInterface$CppProxy") {}
+NativeMapCallbackInterface::NativeMapCallbackInterface() : ::djinni::JniInterface<::MapCallbackInterface, NativeMapCallbackInterface>("io/openmobilemaps/mapscore/shared/map/MapCallbackInterface$CppProxy") {}
 
 NativeMapCallbackInterface::~NativeMapCallbackInterface() = default;
 
@@ -21,7 +21,7 @@ void NativeMapCallbackInterface::JavaProxy::invalidate() {
     ::djinni::jniExceptionCheck(jniEnv);
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapCallbackInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCallbackInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -29,7 +29,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapCallbackInterface_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapCallbackInterface_00024CppProxy_native_1invalidate(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCallbackInterface_00024CppProxy_native_1invalidate(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);

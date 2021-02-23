@@ -7,7 +7,7 @@
 
 namespace djinni_generated {
 
-NativeMapCamera2dListenerInterface::NativeMapCamera2dListenerInterface() : ::djinni::JniInterface<::MapCamera2dListenerInterface, NativeMapCamera2dListenerInterface>("ch/ubique/mapscore/shared/map/camera/MapCamera2dListenerInterface$CppProxy") {}
+NativeMapCamera2dListenerInterface::NativeMapCamera2dListenerInterface() : ::djinni::JniInterface<::MapCamera2dListenerInterface, NativeMapCamera2dListenerInterface>("io/openmobilemaps/mapscore/shared/map/camera/MapCamera2dListenerInterface$CppProxy") {}
 
 NativeMapCamera2dListenerInterface::~NativeMapCamera2dListenerInterface() = default;
 
@@ -25,7 +25,7 @@ void NativeMapCamera2dListenerInterface::JavaProxy::onVisibleBoundsChanged(const
     ::djinni::jniExceptionCheck(jniEnv);
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_camera_MapCamera2dListenerInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_camera_MapCamera2dListenerInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -33,7 +33,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_camera_MapCamera2dLis
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_camera_MapCamera2dListenerInterface_00024CppProxy_native_1onVisibleBoundsChanged(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRectCoord::JniType j_visibleBounds, jdouble j_zoom)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_camera_MapCamera2dListenerInterface_00024CppProxy_native_1onVisibleBoundsChanged(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRectCoord::JniType j_visibleBounds, jdouble j_zoom)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);

@@ -19,14 +19,14 @@ objcpp:
   header: '"MCQuadCoord+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.map.coordinates.QuadCoord'
+  typename: 'io.openmobilemaps.mapscore.shared.map.coordinates.QuadCoord'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.map.coordinates.QuadCoord'
+  boxed: 'io.openmobilemaps.mapscore.shared.map.coordinates.QuadCoord'
 jni:
   translator: '::djinni_generated::NativeQuadCoord'
   header: '"NativeQuadCoord.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/map/coordinates/QuadCoord;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/map/coordinates/QuadCoord;'

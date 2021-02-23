@@ -7,12 +7,12 @@
 
 namespace djinni_generated {
 
-NativeColorShaderInterface::NativeColorShaderInterface() : ::djinni::JniInterface<::ColorShaderInterface, NativeColorShaderInterface>("ch/ubique/mapscore/shared/graphics/shader/ColorShaderInterface$CppProxy") {}
+NativeColorShaderInterface::NativeColorShaderInterface() : ::djinni::JniInterface<::ColorShaderInterface, NativeColorShaderInterface>("io/openmobilemaps/mapscore/shared/graphics/shader/ColorShaderInterface$CppProxy") {}
 
 NativeColorShaderInterface::~NativeColorShaderInterface() = default;
 
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_ColorShaderInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ColorShaderInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -20,7 +20,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_ColorShad
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_ColorShaderInterface_00024CppProxy_native_1setColor(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jfloat j_red, jfloat j_green, jfloat j_blue, jfloat j_alpha)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ColorShaderInterface_00024CppProxy_native_1setColor(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jfloat j_red, jfloat j_green, jfloat j_blue, jfloat j_alpha)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -32,7 +32,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_ColorShad
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_ColorShaderInterface_00024CppProxy_native_1asShaderProgramInterface(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ColorShaderInterface_00024CppProxy_native_1asShaderProgramInterface(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);

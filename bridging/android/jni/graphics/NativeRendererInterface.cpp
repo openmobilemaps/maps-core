@@ -8,7 +8,7 @@
 
 namespace djinni_generated {
 
-NativeRendererInterface::NativeRendererInterface() : ::djinni::JniInterface<::RendererInterface, NativeRendererInterface>("ch/ubique/mapscore/shared/graphics/RendererInterface$CppProxy") {}
+NativeRendererInterface::NativeRendererInterface() : ::djinni::JniInterface<::RendererInterface, NativeRendererInterface>("io/openmobilemaps/mapscore/shared/graphics/RendererInterface$CppProxy") {}
 
 NativeRendererInterface::~NativeRendererInterface() = default;
 
@@ -34,7 +34,7 @@ void NativeRendererInterface::JavaProxy::drawFrame(const std::shared_ptr<::Rende
     ::djinni::jniExceptionCheck(jniEnv);
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_RendererInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RendererInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -42,7 +42,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_RendererInterfac
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_RendererInterface_00024CppProxy_native_1addToRenderQueue(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_renderPass)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RendererInterface_00024CppProxy_native_1addToRenderQueue(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_renderPass)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -51,7 +51,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_RendererInterfac
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_RendererInterface_00024CppProxy_native_1drawFrame(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_renderingContext, jobject j_camera)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RendererInterface_00024CppProxy_native_1drawFrame(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_renderingContext, jobject j_camera)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);

@@ -19,14 +19,14 @@ objcpp:
   header: '"MCPolygonLayerCallbackInterface+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.map.layers.polygon.PolygonLayerCallbackInterface'
+  typename: 'io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonLayerCallbackInterface'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.map.layers.polygon.PolygonLayerCallbackInterface'
+  boxed: 'io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonLayerCallbackInterface'
 jni:
   translator: '::djinni_generated::NativePolygonLayerCallbackInterface'
   header: '"NativePolygonLayerCallbackInterface.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/map/layers/polygon/PolygonLayerCallbackInterface;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/map/layers/polygon/PolygonLayerCallbackInterface;'

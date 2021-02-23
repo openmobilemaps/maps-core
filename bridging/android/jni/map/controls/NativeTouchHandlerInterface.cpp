@@ -7,7 +7,7 @@
 
 namespace djinni_generated {
 
-NativeTouchHandlerInterface::NativeTouchHandlerInterface() : ::djinni::JniInterface<::TouchHandlerInterface, NativeTouchHandlerInterface>("ch/ubique/mapscore/shared/map/controls/TouchHandlerInterface$CppProxy") {}
+NativeTouchHandlerInterface::NativeTouchHandlerInterface() : ::djinni::JniInterface<::TouchHandlerInterface, NativeTouchHandlerInterface>("io/openmobilemaps/mapscore/shared/map/controls/TouchHandlerInterface$CppProxy") {}
 
 NativeTouchHandlerInterface::~NativeTouchHandlerInterface() = default;
 
@@ -40,7 +40,7 @@ void NativeTouchHandlerInterface::JavaProxy::removeListener(const std::shared_pt
     ::djinni::jniExceptionCheck(jniEnv);
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchHandlerInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_controls_TouchHandlerInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -48,7 +48,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchHandler
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchHandlerInterface_00024CppProxy_native_1onTouchEvent(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_touchEvent)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_controls_TouchHandlerInterface_00024CppProxy_native_1onTouchEvent(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_touchEvent)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -57,7 +57,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchHandler
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchHandlerInterface_00024CppProxy_native_1addListener(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_listener)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_controls_TouchHandlerInterface_00024CppProxy_native_1addListener(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_listener)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -66,7 +66,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchHandler
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchHandlerInterface_00024CppProxy_native_1removeListener(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_listener)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_controls_TouchHandlerInterface_00024CppProxy_native_1removeListener(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_listener)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);

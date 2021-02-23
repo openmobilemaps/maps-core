@@ -8,7 +8,7 @@
 
 namespace djinni_generated {
 
-NativeRenderPassInterface::NativeRenderPassInterface() : ::djinni::JniInterface<::RenderPassInterface, NativeRenderPassInterface>("ch/ubique/mapscore/shared/graphics/RenderPassInterface$CppProxy") {}
+NativeRenderPassInterface::NativeRenderPassInterface() : ::djinni::JniInterface<::RenderPassInterface, NativeRenderPassInterface>("io/openmobilemaps/mapscore/shared/graphics/RenderPassInterface$CppProxy") {}
 
 NativeRenderPassInterface::~NativeRenderPassInterface() = default;
 
@@ -33,7 +33,7 @@ std::vector<std::shared_ptr<::GraphicsObjectInterface>> NativeRenderPassInterfac
     return ::djinni_generated::NativeRenderPassConfig::toCpp(jniEnv, jret);
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_RenderPassInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderPassInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -41,7 +41,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_RenderPassInterf
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_RenderPassInterface_00024CppProxy_native_1getGraphicsObjects(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderPassInterface_00024CppProxy_native_1getGraphicsObjects(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -51,7 +51,7 @@ CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_RenderPassInt
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_RenderPassInterface_00024CppProxy_native_1getRenderPassConfig(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderPassInterface_00024CppProxy_native_1getRenderPassConfig(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
