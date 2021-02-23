@@ -19,14 +19,14 @@ objcpp:
   header: '"MCTaskInterface+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.map.scheduling.TaskInterface'
+  typename: 'io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.map.scheduling.TaskInterface'
+  boxed: 'io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface'
 jni:
   translator: '::djinni_generated::NativeTaskInterface'
   header: '"NativeTaskInterface.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/map/scheduling/TaskInterface;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/map/scheduling/TaskInterface;'

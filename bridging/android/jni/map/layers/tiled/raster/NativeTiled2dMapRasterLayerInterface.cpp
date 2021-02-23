@@ -8,12 +8,12 @@
 
 namespace djinni_generated {
 
-NativeTiled2dMapRasterLayerInterface::NativeTiled2dMapRasterLayerInterface() : ::djinni::JniInterface<::Tiled2dMapRasterLayerInterface, NativeTiled2dMapRasterLayerInterface>("ch/ubique/mapscore/shared/map/layers/tiled/raster/Tiled2dMapRasterLayerInterface$CppProxy") {}
+NativeTiled2dMapRasterLayerInterface::NativeTiled2dMapRasterLayerInterface() : ::djinni::JniInterface<::Tiled2dMapRasterLayerInterface, NativeTiled2dMapRasterLayerInterface>("io/openmobilemaps/mapscore/shared/map/layers/tiled/raster/Tiled2dMapRasterLayerInterface$CppProxy") {}
 
 NativeTiled2dMapRasterLayerInterface::~NativeTiled2dMapRasterLayerInterface() = default;
 
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -21,7 +21,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_tiled_raster_T
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_create(JNIEnv* jniEnv, jobject /*this*/, ::djinni_generated::NativeTiled2dMapLayerConfig::JniType j_layerConfig, ::djinni_generated::NativeTextureLoaderInterface::JniType j_textureLoader)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_create(JNIEnv* jniEnv, jobject /*this*/, ::djinni_generated::NativeTiled2dMapLayerConfig::JniType j_layerConfig, ::djinni_generated::NativeTextureLoaderInterface::JniType j_textureLoader)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE0(jniEnv);
@@ -31,7 +31,7 @@ CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_layers_tiled_raste
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT ::djinni_generated::NativeLayerInterface::JniType JNICALL Java_ch_ubique_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_native_1asLayerInterface(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT ::djinni_generated::NativeLayerInterface::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_native_1asLayerInterface(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);

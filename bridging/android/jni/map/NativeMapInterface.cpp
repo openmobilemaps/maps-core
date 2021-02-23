@@ -18,12 +18,12 @@
 
 namespace djinni_generated {
 
-NativeMapInterface::NativeMapInterface() : ::djinni::JniInterface<::MapInterface, NativeMapInterface>("ch/ubique/mapscore/shared/map/MapInterface$CppProxy") {}
+NativeMapInterface::NativeMapInterface() : ::djinni::JniInterface<::MapInterface, NativeMapInterface>("io/openmobilemaps/mapscore/shared/map/MapInterface$CppProxy") {}
 
 NativeMapInterface::~NativeMapInterface() = default;
 
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -31,7 +31,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024Cpp
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_create(JNIEnv* jniEnv, jobject /*this*/, ::djinni_generated::NativeGraphicsObjectFactoryInterface::JniType j_graphicsFactory, ::djinni_generated::NativeShaderFactoryInterface::JniType j_shaderFactory, ::djinni_generated::NativeRenderingContextInterface::JniType j_renderingContext, jobject j_mapConfig, ::djinni_generated::NativeSchedulerInterface::JniType j_scheduler, jfloat j_pixelDensity)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_create(JNIEnv* jniEnv, jobject /*this*/, ::djinni_generated::NativeGraphicsObjectFactoryInterface::JniType j_graphicsFactory, ::djinni_generated::NativeShaderFactoryInterface::JniType j_shaderFactory, ::djinni_generated::NativeRenderingContextInterface::JniType j_renderingContext, jobject j_mapConfig, ::djinni_generated::NativeSchedulerInterface::JniType j_scheduler, jfloat j_pixelDensity)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE0(jniEnv);
@@ -45,7 +45,7 @@ CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_createWithOpenGl(JNIEnv* jniEnv, jobject /*this*/, jobject j_mapConfig, ::djinni_generated::NativeSchedulerInterface::JniType j_scheduler, jfloat j_pixelDensity)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_createWithOpenGl(JNIEnv* jniEnv, jobject /*this*/, jobject j_mapConfig, ::djinni_generated::NativeSchedulerInterface::JniType j_scheduler, jfloat j_pixelDensity)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE0(jniEnv);
@@ -56,7 +56,7 @@ CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1setCallbackHandler(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_callbackInterface)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1setCallbackHandler(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_callbackInterface)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -65,7 +65,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024Cpp
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT ::djinni_generated::NativeGraphicsObjectFactoryInterface::JniType JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1getGraphicsObjectFactory(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT ::djinni_generated::NativeGraphicsObjectFactoryInterface::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1getGraphicsObjectFactory(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -75,7 +75,7 @@ CJNIEXPORT ::djinni_generated::NativeGraphicsObjectFactoryInterface::JniType JNI
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT ::djinni_generated::NativeShaderFactoryInterface::JniType JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1getShaderFactory(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT ::djinni_generated::NativeShaderFactoryInterface::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1getShaderFactory(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -85,7 +85,7 @@ CJNIEXPORT ::djinni_generated::NativeShaderFactoryInterface::JniType JNICALL Jav
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT ::djinni_generated::NativeSchedulerInterface::JniType JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1getScheduler(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT ::djinni_generated::NativeSchedulerInterface::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1getScheduler(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -95,7 +95,7 @@ CJNIEXPORT ::djinni_generated::NativeSchedulerInterface::JniType JNICALL Java_ch
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT ::djinni_generated::NativeRenderingContextInterface::JniType JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1getRenderingContext(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT ::djinni_generated::NativeRenderingContextInterface::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1getRenderingContext(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -105,7 +105,7 @@ CJNIEXPORT ::djinni_generated::NativeRenderingContextInterface::JniType JNICALL 
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1getMapConfig(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1getMapConfig(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -115,7 +115,7 @@ CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT ::djinni_generated::NativeCoordinateConversionHelperInterface::JniType JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1getCoordinateConverterHelper(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT ::djinni_generated::NativeCoordinateConversionHelperInterface::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1getCoordinateConverterHelper(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -125,7 +125,7 @@ CJNIEXPORT ::djinni_generated::NativeCoordinateConversionHelperInterface::JniTyp
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1setCamera(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_camera)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1setCamera(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_camera)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -134,7 +134,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024Cpp
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1getCamera(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1getCamera(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -144,7 +144,7 @@ CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1setTouchHandler(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeTouchHandlerInterface::JniType j_touchHandler)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1setTouchHandler(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeTouchHandlerInterface::JniType j_touchHandler)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -153,7 +153,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024Cpp
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT ::djinni_generated::NativeTouchHandlerInterface::JniType JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1getTouchHandler(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT ::djinni_generated::NativeTouchHandlerInterface::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1getTouchHandler(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -163,7 +163,7 @@ CJNIEXPORT ::djinni_generated::NativeTouchHandlerInterface::JniType JNICALL Java
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1getLayers(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1getLayers(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -173,7 +173,7 @@ CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1addLayer(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_layer)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1addLayer(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_layer)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -182,7 +182,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024Cpp
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1insertLayerAt(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_layer, jint j_atIndex)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1insertLayerAt(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_layer, jint j_atIndex)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -192,7 +192,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024Cpp
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1insertLayerAbove(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_layer, jobject j_above)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1insertLayerAbove(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_layer, jobject j_above)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -202,7 +202,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024Cpp
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1insertLayerBelow(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_layer, jobject j_below)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1insertLayerBelow(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_layer, jobject j_below)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -212,7 +212,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024Cpp
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1removeLayer(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_layer)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1removeLayer(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_layer)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -221,7 +221,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024Cpp
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1setViewportSize(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec2I::JniType j_size)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1setViewportSize(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec2I::JniType j_size)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -230,7 +230,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024Cpp
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1setBackgroundColor(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeColor::JniType j_color)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1setBackgroundColor(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeColor::JniType j_color)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -239,7 +239,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024Cpp
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1invalidate(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1invalidate(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -248,7 +248,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024Cpp
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1drawFrame(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1drawFrame(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -257,7 +257,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024Cpp
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1resume(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1resume(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -266,7 +266,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024Cpp
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_MapInterface_00024CppProxy_native_1pause(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1pause(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);

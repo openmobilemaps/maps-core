@@ -39,8 +39,8 @@ private:
         friend ::djinni::JniInterface<::TextureLoaderInterface, ::djinni_generated::NativeTextureLoaderInterface>;
     };
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/map/loader/TextureLoaderInterface") };
-    const jmethodID method_loadTexture { ::djinni::jniGetMethodID(clazz.get(), "loadTexture", "(Ljava/lang/String;)Lch/ubique/mapscore/shared/map/loader/TextureLoaderResult;") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/loader/TextureLoaderInterface") };
+    const jmethodID method_loadTexture { ::djinni::jniGetMethodID(clazz.get(), "loadTexture", "(Ljava/lang/String;)Lio/openmobilemaps/mapscore/shared/map/loader/TextureLoaderResult;") };
 };
 
 }  // namespace djinni_generated

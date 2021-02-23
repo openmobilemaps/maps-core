@@ -5,7 +5,7 @@
 
 namespace djinni_generated {
 
-NativeSceneCallbackInterface::NativeSceneCallbackInterface() : ::djinni::JniInterface<::SceneCallbackInterface, NativeSceneCallbackInterface>("ch/ubique/mapscore/shared/graphics/SceneCallbackInterface$CppProxy") {}
+NativeSceneCallbackInterface::NativeSceneCallbackInterface() : ::djinni::JniInterface<::SceneCallbackInterface, NativeSceneCallbackInterface>("io/openmobilemaps/mapscore/shared/graphics/SceneCallbackInterface$CppProxy") {}
 
 NativeSceneCallbackInterface::~NativeSceneCallbackInterface() = default;
 
@@ -21,7 +21,7 @@ void NativeSceneCallbackInterface::JavaProxy::invalidate() {
     ::djinni::jniExceptionCheck(jniEnv);
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_SceneCallbackInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_SceneCallbackInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -29,7 +29,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_SceneCallbackInt
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_SceneCallbackInterface_00024CppProxy_native_1invalidate(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_SceneCallbackInterface_00024CppProxy_native_1invalidate(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);

@@ -42,11 +42,11 @@ private:
         friend ::djinni::JniInterface<::Quad2dInterface, ::djinni_generated::NativeQuad2dInterface>;
     };
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/graphics/objects/Quad2dInterface") };
-    const jmethodID method_setFrame { ::djinni::jniGetMethodID(clazz.get(), "setFrame", "(Lch/ubique/mapscore/shared/graphics/common/Quad2dD;Lch/ubique/mapscore/shared/graphics/common/RectD;)V") };
-    const jmethodID method_loadTexture { ::djinni::jniGetMethodID(clazz.get(), "loadTexture", "(Lch/ubique/mapscore/shared/graphics/objects/TextureHolderInterface;)V") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/objects/Quad2dInterface") };
+    const jmethodID method_setFrame { ::djinni::jniGetMethodID(clazz.get(), "setFrame", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Quad2dD;Lio/openmobilemaps/mapscore/shared/graphics/common/RectD;)V") };
+    const jmethodID method_loadTexture { ::djinni::jniGetMethodID(clazz.get(), "loadTexture", "(Lio/openmobilemaps/mapscore/shared/graphics/objects/TextureHolderInterface;)V") };
     const jmethodID method_removeTexture { ::djinni::jniGetMethodID(clazz.get(), "removeTexture", "()V") };
-    const jmethodID method_asGraphicsObject { ::djinni::jniGetMethodID(clazz.get(), "asGraphicsObject", "()Lch/ubique/mapscore/shared/graphics/objects/GraphicsObjectInterface;") };
+    const jmethodID method_asGraphicsObject { ::djinni::jniGetMethodID(clazz.get(), "asGraphicsObject", "()Lio/openmobilemaps/mapscore/shared/graphics/objects/GraphicsObjectInterface;") };
 };
 
 }  // namespace djinni_generated

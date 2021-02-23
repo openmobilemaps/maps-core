@@ -19,7 +19,7 @@ public:
     static ::djinni::LocalRef<JniType> fromCpp(JNIEnv* jniEnv, CppType c) { return ::djinni::JniClass<NativeTouchAction>::get().create(jniEnv, static_cast<jint>(c)); }
 
 private:
-    NativeTouchAction() : JniEnum("ch/ubique/mapscore/shared/map/controls/TouchAction") {}
+    NativeTouchAction() : JniEnum("io/openmobilemaps/mapscore/shared/map/controls/TouchAction") {}
     friend ::djinni::JniClass<NativeTouchAction>;
 };
 

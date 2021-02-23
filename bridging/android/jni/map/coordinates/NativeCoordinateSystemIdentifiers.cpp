@@ -6,12 +6,12 @@
 
 namespace djinni_generated {
 
-NativeCoordinateSystemIdentifiers::NativeCoordinateSystemIdentifiers() : ::djinni::JniInterface<::CoordinateSystemIdentifiers, NativeCoordinateSystemIdentifiers>("ch/ubique/mapscore/shared/map/coordinates/CoordinateSystemIdentifiers$CppProxy") {}
+NativeCoordinateSystemIdentifiers::NativeCoordinateSystemIdentifiers() : ::djinni::JniInterface<::CoordinateSystemIdentifiers, NativeCoordinateSystemIdentifiers>("io/openmobilemaps/mapscore/shared/map/coordinates/CoordinateSystemIdentifiers$CppProxy") {}
 
 NativeCoordinateSystemIdentifiers::~NativeCoordinateSystemIdentifiers() = default;
 
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_coordinates_CoordinateSystemIdentifiers_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateSystemIdentifiers_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -19,7 +19,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_coordinates_Coordinat
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jstring JNICALL Java_ch_ubique_mapscore_shared_map_coordinates_CoordinateSystemIdentifiers_00024CppProxy_RENDERSYSTEM(JNIEnv* jniEnv, jobject /*this*/)
+CJNIEXPORT jstring JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateSystemIdentifiers_00024CppProxy_RENDERSYSTEM(JNIEnv* jniEnv, jobject /*this*/)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE0(jniEnv);
@@ -28,7 +28,7 @@ CJNIEXPORT jstring JNICALL Java_ch_ubique_mapscore_shared_map_coordinates_Coordi
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jstring JNICALL Java_ch_ubique_mapscore_shared_map_coordinates_CoordinateSystemIdentifiers_00024CppProxy_EPSG3857(JNIEnv* jniEnv, jobject /*this*/)
+CJNIEXPORT jstring JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateSystemIdentifiers_00024CppProxy_EPSG3857(JNIEnv* jniEnv, jobject /*this*/)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE0(jniEnv);
@@ -37,7 +37,7 @@ CJNIEXPORT jstring JNICALL Java_ch_ubique_mapscore_shared_map_coordinates_Coordi
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jstring JNICALL Java_ch_ubique_mapscore_shared_map_coordinates_CoordinateSystemIdentifiers_00024CppProxy_EPSG4326(JNIEnv* jniEnv, jobject /*this*/)
+CJNIEXPORT jstring JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateSystemIdentifiers_00024CppProxy_EPSG4326(JNIEnv* jniEnv, jobject /*this*/)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE0(jniEnv);
@@ -46,7 +46,7 @@ CJNIEXPORT jstring JNICALL Java_ch_ubique_mapscore_shared_map_coordinates_Coordi
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jstring JNICALL Java_ch_ubique_mapscore_shared_map_coordinates_CoordinateSystemIdentifiers_00024CppProxy_EPSG2056(JNIEnv* jniEnv, jobject /*this*/)
+CJNIEXPORT jstring JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateSystemIdentifiers_00024CppProxy_EPSG2056(JNIEnv* jniEnv, jobject /*this*/)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE0(jniEnv);

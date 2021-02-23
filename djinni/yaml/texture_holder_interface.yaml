@@ -19,14 +19,14 @@ objcpp:
   header: '"MCTextureHolderInterface+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.graphics.objects.TextureHolderInterface'
+  typename: 'io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.graphics.objects.TextureHolderInterface'
+  boxed: 'io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface'
 jni:
   translator: '::djinni_generated::NativeTextureHolderInterface'
   header: '"NativeTextureHolderInterface.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/graphics/objects/TextureHolderInterface;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/graphics/objects/TextureHolderInterface;'

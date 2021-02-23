@@ -7,12 +7,12 @@
 
 namespace djinni_generated {
 
-NativeAlphaShaderInterface::NativeAlphaShaderInterface() : ::djinni::JniInterface<::AlphaShaderInterface, NativeAlphaShaderInterface>("ch/ubique/mapscore/shared/graphics/shader/AlphaShaderInterface$CppProxy") {}
+NativeAlphaShaderInterface::NativeAlphaShaderInterface() : ::djinni::JniInterface<::AlphaShaderInterface, NativeAlphaShaderInterface>("io/openmobilemaps/mapscore/shared/graphics/shader/AlphaShaderInterface$CppProxy") {}
 
 NativeAlphaShaderInterface::~NativeAlphaShaderInterface() = default;
 
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_AlphaShaderInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_AlphaShaderInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -20,7 +20,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_AlphaShad
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_AlphaShaderInterface_00024CppProxy_native_1updateAlpha(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jfloat j_value)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_AlphaShaderInterface_00024CppProxy_native_1updateAlpha(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jfloat j_value)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -29,7 +29,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_AlphaShad
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_AlphaShaderInterface_00024CppProxy_native_1asShaderProgramInterface(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_AlphaShaderInterface_00024CppProxy_native_1asShaderProgramInterface(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);

@@ -7,12 +7,12 @@
 
 namespace djinni_generated {
 
-NativeLineShaderProgramInterface::NativeLineShaderProgramInterface() : ::djinni::JniInterface<::LineShaderProgramInterface, NativeLineShaderProgramInterface>("ch/ubique/mapscore/shared/graphics/shader/LineShaderProgramInterface$CppProxy") {}
+NativeLineShaderProgramInterface::NativeLineShaderProgramInterface() : ::djinni::JniInterface<::LineShaderProgramInterface, NativeLineShaderProgramInterface>("io/openmobilemaps/mapscore/shared/graphics/shader/LineShaderProgramInterface$CppProxy") {}
 
 NativeLineShaderProgramInterface::~NativeLineShaderProgramInterface() = default;
 
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_LineShaderProgramInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_LineShaderProgramInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -20,7 +20,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_LineShade
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jstring JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_LineShaderProgramInterface_00024CppProxy_native_1getRectProgramName(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jstring JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_LineShaderProgramInterface_00024CppProxy_native_1getRectProgramName(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -30,7 +30,7 @@ CJNIEXPORT jstring JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_LineSh
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_LineShaderProgramInterface_00024CppProxy_native_1setupRectProgram(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderingContextInterface::JniType j_context)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_LineShaderProgramInterface_00024CppProxy_native_1setupRectProgram(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderingContextInterface::JniType j_context)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -39,7 +39,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_LineShade
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jstring JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_LineShaderProgramInterface_00024CppProxy_native_1getPointProgramName(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jstring JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_LineShaderProgramInterface_00024CppProxy_native_1getPointProgramName(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -49,7 +49,7 @@ CJNIEXPORT jstring JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_LineSh
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_LineShaderProgramInterface_00024CppProxy_native_1setupPointProgram(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderingContextInterface::JniType j_context)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_LineShaderProgramInterface_00024CppProxy_native_1setupPointProgram(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderingContextInterface::JniType j_context)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -58,7 +58,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_LineShade
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_LineShaderProgramInterface_00024CppProxy_native_1preRenderRect(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderingContextInterface::JniType j_context)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_LineShaderProgramInterface_00024CppProxy_native_1preRenderRect(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderingContextInterface::JniType j_context)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -67,7 +67,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_LineShade
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_LineShaderProgramInterface_00024CppProxy_native_1preRenderPoint(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderingContextInterface::JniType j_context)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_LineShaderProgramInterface_00024CppProxy_native_1preRenderPoint(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderingContextInterface::JniType j_context)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);

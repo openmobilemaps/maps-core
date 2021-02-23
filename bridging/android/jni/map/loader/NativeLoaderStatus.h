@@ -19,7 +19,7 @@ public:
     static ::djinni::LocalRef<JniType> fromCpp(JNIEnv* jniEnv, CppType c) { return ::djinni::JniClass<NativeLoaderStatus>::get().create(jniEnv, static_cast<jint>(c)); }
 
 private:
-    NativeLoaderStatus() : JniEnum("ch/ubique/mapscore/shared/map/loader/LoaderStatus") {}
+    NativeLoaderStatus() : JniEnum("io/openmobilemaps/mapscore/shared/map/loader/LoaderStatus") {}
     friend ::djinni::JniClass<NativeLoaderStatus>;
 };
 

@@ -40,9 +40,9 @@ private:
         friend ::djinni::JniInterface<::Line2dInterface, ::djinni_generated::NativeLine2dInterface>;
     };
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/graphics/objects/Line2dInterface") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/objects/Line2dInterface") };
     const jmethodID method_setLinePositions { ::djinni::jniGetMethodID(clazz.get(), "setLinePositions", "(Ljava/util/ArrayList;)V") };
-    const jmethodID method_asGraphicsObject { ::djinni::jniGetMethodID(clazz.get(), "asGraphicsObject", "()Lch/ubique/mapscore/shared/graphics/objects/GraphicsObjectInterface;") };
+    const jmethodID method_asGraphicsObject { ::djinni::jniGetMethodID(clazz.get(), "asGraphicsObject", "()Lio/openmobilemaps/mapscore/shared/graphics/objects/GraphicsObjectInterface;") };
 };
 
 }  // namespace djinni_generated

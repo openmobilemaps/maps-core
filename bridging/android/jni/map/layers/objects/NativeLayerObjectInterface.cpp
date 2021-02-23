@@ -7,12 +7,12 @@
 
 namespace djinni_generated {
 
-NativeLayerObjectInterface::NativeLayerObjectInterface() : ::djinni::JniInterface<::LayerObjectInterface, NativeLayerObjectInterface>("ch/ubique/mapscore/shared/map/layers/objects/LayerObjectInterface$CppProxy") {}
+NativeLayerObjectInterface::NativeLayerObjectInterface() : ::djinni::JniInterface<::LayerObjectInterface, NativeLayerObjectInterface>("io/openmobilemaps/mapscore/shared/map/layers/objects/LayerObjectInterface$CppProxy") {}
 
 NativeLayerObjectInterface::~NativeLayerObjectInterface() = default;
 
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_objects_LayerObjectInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_objects_LayerObjectInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -20,7 +20,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_objects_LayerO
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_objects_LayerObjectInterface_00024CppProxy_native_1update(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_objects_LayerObjectInterface_00024CppProxy_native_1update(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -29,7 +29,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_objects_LayerO
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_layers_objects_LayerObjectInterface_00024CppProxy_native_1getRenderConfig(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_objects_LayerObjectInterface_00024CppProxy_native_1getRenderConfig(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);

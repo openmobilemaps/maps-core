@@ -7,7 +7,7 @@
 
 namespace djinni_generated {
 
-NativeCoordinateConverterInterface::NativeCoordinateConverterInterface() : ::djinni::JniInterface<::CoordinateConverterInterface, NativeCoordinateConverterInterface>("ch/ubique/mapscore/shared/map/coordinates/CoordinateConverterInterface$CppProxy") {}
+NativeCoordinateConverterInterface::NativeCoordinateConverterInterface() : ::djinni::JniInterface<::CoordinateConverterInterface, NativeCoordinateConverterInterface>("io/openmobilemaps/mapscore/shared/map/coordinates/CoordinateConverterInterface$CppProxy") {}
 
 NativeCoordinateConverterInterface::~NativeCoordinateConverterInterface() = default;
 
@@ -41,7 +41,7 @@ std::string NativeCoordinateConverterInterface::JavaProxy::getTo() {
     return ::djinni::String::toCpp(jniEnv, jret);
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_coordinates_CoordinateConverterInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateConverterInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -49,7 +49,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_coordinates_Coordinat
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_coordinates_CoordinateConverterInterface_00024CppProxy_native_1convert(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_coordinate)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateConverterInterface_00024CppProxy_native_1convert(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_coordinate)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -59,7 +59,7 @@ CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_coordinates_Coordi
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jstring JNICALL Java_ch_ubique_mapscore_shared_map_coordinates_CoordinateConverterInterface_00024CppProxy_native_1getFrom(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jstring JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateConverterInterface_00024CppProxy_native_1getFrom(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -69,7 +69,7 @@ CJNIEXPORT jstring JNICALL Java_ch_ubique_mapscore_shared_map_coordinates_Coordi
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jstring JNICALL Java_ch_ubique_mapscore_shared_map_coordinates_CoordinateConverterInterface_00024CppProxy_native_1getTo(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jstring JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateConverterInterface_00024CppProxy_native_1getTo(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);

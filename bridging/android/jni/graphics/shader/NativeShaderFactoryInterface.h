@@ -41,10 +41,10 @@ private:
         friend ::djinni::JniInterface<::ShaderFactoryInterface, ::djinni_generated::NativeShaderFactoryInterface>;
     };
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/graphics/shader/ShaderFactoryInterface") };
-    const jmethodID method_createAlphaShader { ::djinni::jniGetMethodID(clazz.get(), "createAlphaShader", "()Lch/ubique/mapscore/shared/graphics/shader/AlphaShaderInterface;") };
-    const jmethodID method_createColorLineShader { ::djinni::jniGetMethodID(clazz.get(), "createColorLineShader", "()Lch/ubique/mapscore/shared/graphics/shader/ColorLineShaderInterface;") };
-    const jmethodID method_createColorShader { ::djinni::jniGetMethodID(clazz.get(), "createColorShader", "()Lch/ubique/mapscore/shared/graphics/shader/ColorShaderInterface;") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/shader/ShaderFactoryInterface") };
+    const jmethodID method_createAlphaShader { ::djinni::jniGetMethodID(clazz.get(), "createAlphaShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/AlphaShaderInterface;") };
+    const jmethodID method_createColorLineShader { ::djinni::jniGetMethodID(clazz.get(), "createColorLineShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ColorLineShaderInterface;") };
+    const jmethodID method_createColorShader { ::djinni::jniGetMethodID(clazz.get(), "createColorShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ColorShaderInterface;") };
 };
 
 }  // namespace djinni_generated

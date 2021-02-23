@@ -40,9 +40,9 @@ private:
         friend ::djinni::JniInterface<::Polygon2dInterface, ::djinni_generated::NativePolygon2dInterface>;
     };
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/graphics/objects/Polygon2dInterface") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/objects/Polygon2dInterface") };
     const jmethodID method_setPolygonPositions { ::djinni::jniGetMethodID(clazz.get(), "setPolygonPositions", "(Ljava/util/ArrayList;Ljava/util/ArrayList;Z)V") };
-    const jmethodID method_asGraphicsObject { ::djinni::jniGetMethodID(clazz.get(), "asGraphicsObject", "()Lch/ubique/mapscore/shared/graphics/objects/GraphicsObjectInterface;") };
+    const jmethodID method_asGraphicsObject { ::djinni::jniGetMethodID(clazz.get(), "asGraphicsObject", "()Lio/openmobilemaps/mapscore/shared/graphics/objects/GraphicsObjectInterface;") };
 };
 
 }  // namespace djinni_generated

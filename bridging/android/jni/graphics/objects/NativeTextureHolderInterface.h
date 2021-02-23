@@ -43,7 +43,7 @@ private:
         friend ::djinni::JniInterface<::TextureHolderInterface, ::djinni_generated::NativeTextureHolderInterface>;
     };
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/graphics/objects/TextureHolderInterface") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/objects/TextureHolderInterface") };
     const jmethodID method_getImageWidth { ::djinni::jniGetMethodID(clazz.get(), "getImageWidth", "()I") };
     const jmethodID method_getImageHeight { ::djinni::jniGetMethodID(clazz.get(), "getImageHeight", "()I") };
     const jmethodID method_getTextureWidth { ::djinni::jniGetMethodID(clazz.get(), "getTextureWidth", "()I") };

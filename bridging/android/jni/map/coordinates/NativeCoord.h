@@ -24,7 +24,7 @@ private:
     NativeCoord();
     friend ::djinni::JniClass<NativeCoord>;
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/map/coordinates/Coord") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/coordinates/Coord") };
     const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Ljava/lang/String;DDD)V") };
     const jfieldID field_systemIdentifier { ::djinni::jniGetFieldID(clazz.get(), "systemIdentifier", "Ljava/lang/String;") };
     const jfieldID field_x { ::djinni::jniGetFieldID(clazz.get(), "x", "D") };

@@ -19,14 +19,14 @@ objcpp:
   header: '"MCRectD+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.graphics.common.RectD'
+  typename: 'io.openmobilemaps.mapscore.shared.graphics.common.RectD'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.graphics.common.RectD'
+  boxed: 'io.openmobilemaps.mapscore.shared.graphics.common.RectD'
 jni:
   translator: '::djinni_generated::NativeRectD'
   header: '"NativeRectD.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/graphics/common/RectD;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/graphics/common/RectD;'

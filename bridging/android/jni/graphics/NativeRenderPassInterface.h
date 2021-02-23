@@ -40,9 +40,9 @@ private:
         friend ::djinni::JniInterface<::RenderPassInterface, ::djinni_generated::NativeRenderPassInterface>;
     };
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/graphics/RenderPassInterface") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/RenderPassInterface") };
     const jmethodID method_getGraphicsObjects { ::djinni::jniGetMethodID(clazz.get(), "getGraphicsObjects", "()Ljava/util/ArrayList;") };
-    const jmethodID method_getRenderPassConfig { ::djinni::jniGetMethodID(clazz.get(), "getRenderPassConfig", "()Lch/ubique/mapscore/shared/graphics/RenderPassConfig;") };
+    const jmethodID method_getRenderPassConfig { ::djinni::jniGetMethodID(clazz.get(), "getRenderPassConfig", "()Lio/openmobilemaps/mapscore/shared/graphics/RenderPassConfig;") };
 };
 
 }  // namespace djinni_generated

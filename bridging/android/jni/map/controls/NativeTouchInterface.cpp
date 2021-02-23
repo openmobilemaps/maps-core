@@ -7,12 +7,12 @@
 
 namespace djinni_generated {
 
-NativeTouchInterface::NativeTouchInterface() : ::djinni::JniInterface<::TouchInterface, NativeTouchInterface>("ch/ubique/mapscore/shared/map/controls/TouchInterface$CppProxy") {}
+NativeTouchInterface::NativeTouchInterface() : ::djinni::JniInterface<::TouchInterface, NativeTouchInterface>("io/openmobilemaps/mapscore/shared/map/controls/TouchInterface$CppProxy") {}
 
 NativeTouchInterface::~NativeTouchInterface() = default;
 
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_controls_TouchInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -20,7 +20,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchInterfa
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jboolean JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchInterface_00024CppProxy_native_1onTouchDown(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec2F::JniType j_posScreen)
+CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_controls_TouchInterface_00024CppProxy_native_1onTouchDown(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec2F::JniType j_posScreen)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -30,7 +30,7 @@ CJNIEXPORT jboolean JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchInt
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jboolean JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchInterface_00024CppProxy_native_1onClickUnconfirmed(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec2F::JniType j_posScreen)
+CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_controls_TouchInterface_00024CppProxy_native_1onClickUnconfirmed(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec2F::JniType j_posScreen)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -40,7 +40,7 @@ CJNIEXPORT jboolean JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchInt
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jboolean JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchInterface_00024CppProxy_native_1onClickConfirmed(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec2F::JniType j_posScreen)
+CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_controls_TouchInterface_00024CppProxy_native_1onClickConfirmed(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec2F::JniType j_posScreen)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -50,7 +50,7 @@ CJNIEXPORT jboolean JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchInt
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jboolean JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchInterface_00024CppProxy_native_1onDoubleClick(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec2F::JniType j_posScreen)
+CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_controls_TouchInterface_00024CppProxy_native_1onDoubleClick(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec2F::JniType j_posScreen)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -60,7 +60,7 @@ CJNIEXPORT jboolean JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchInt
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jboolean JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchInterface_00024CppProxy_native_1onLongPress(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec2F::JniType j_posScreen)
+CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_controls_TouchInterface_00024CppProxy_native_1onLongPress(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec2F::JniType j_posScreen)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -70,7 +70,7 @@ CJNIEXPORT jboolean JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchInt
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jboolean JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchInterface_00024CppProxy_native_1onMove(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec2F::JniType j_deltaScreen, jboolean j_confirmed, jboolean j_doubleClick)
+CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_controls_TouchInterface_00024CppProxy_native_1onMove(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec2F::JniType j_deltaScreen, jboolean j_confirmed, jboolean j_doubleClick)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -82,7 +82,7 @@ CJNIEXPORT jboolean JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchInt
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jboolean JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchInterface_00024CppProxy_native_1onMoveComplete(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_controls_TouchInterface_00024CppProxy_native_1onMoveComplete(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -92,7 +92,7 @@ CJNIEXPORT jboolean JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchInt
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jboolean JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchInterface_00024CppProxy_native_1onTwoFingerClick(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec2F::JniType j_posScreen1, ::djinni_generated::NativeVec2F::JniType j_posScreen2)
+CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_controls_TouchInterface_00024CppProxy_native_1onTwoFingerClick(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec2F::JniType j_posScreen1, ::djinni_generated::NativeVec2F::JniType j_posScreen2)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -103,7 +103,7 @@ CJNIEXPORT jboolean JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchInt
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jboolean JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchInterface_00024CppProxy_native_1onTwoFingerMove(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_posScreenOld, jobject j_posScreenNew)
+CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_controls_TouchInterface_00024CppProxy_native_1onTwoFingerMove(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_posScreenOld, jobject j_posScreenNew)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -114,7 +114,7 @@ CJNIEXPORT jboolean JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchInt
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_controls_TouchInterface_00024CppProxy_native_1clearTouch(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_controls_TouchInterface_00024CppProxy_native_1clearTouch(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);

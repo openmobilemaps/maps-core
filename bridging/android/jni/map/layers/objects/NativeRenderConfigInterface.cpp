@@ -7,12 +7,12 @@
 
 namespace djinni_generated {
 
-NativeRenderConfigInterface::NativeRenderConfigInterface() : ::djinni::JniInterface<::RenderConfigInterface, NativeRenderConfigInterface>("ch/ubique/mapscore/shared/map/layers/objects/RenderConfigInterface$CppProxy") {}
+NativeRenderConfigInterface::NativeRenderConfigInterface() : ::djinni::JniInterface<::RenderConfigInterface, NativeRenderConfigInterface>("io/openmobilemaps/mapscore/shared/map/layers/objects/RenderConfigInterface$CppProxy") {}
 
 NativeRenderConfigInterface::~NativeRenderConfigInterface() = default;
 
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_objects_RenderConfigInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_objects_RenderConfigInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -20,7 +20,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_objects_Render
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT ::djinni_generated::NativeGraphicsObjectInterface::JniType JNICALL Java_ch_ubique_mapscore_shared_map_layers_objects_RenderConfigInterface_00024CppProxy_native_1getGraphicsObject(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT ::djinni_generated::NativeGraphicsObjectInterface::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_objects_RenderConfigInterface_00024CppProxy_native_1getGraphicsObject(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -30,7 +30,7 @@ CJNIEXPORT ::djinni_generated::NativeGraphicsObjectInterface::JniType JNICALL Ja
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jint JNICALL Java_ch_ubique_mapscore_shared_map_layers_objects_RenderConfigInterface_00024CppProxy_native_1getRenderIndex(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jint JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_objects_RenderConfigInterface_00024CppProxy_native_1getRenderIndex(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);

@@ -10,7 +10,7 @@
 
 namespace djinni_generated {
 
-NativeGraphicsObjectFactoryInterface::NativeGraphicsObjectFactoryInterface() : ::djinni::JniInterface<::GraphicsObjectFactoryInterface, NativeGraphicsObjectFactoryInterface>("ch/ubique/mapscore/shared/graphics/objects/GraphicsObjectFactoryInterface$CppProxy") {}
+NativeGraphicsObjectFactoryInterface::NativeGraphicsObjectFactoryInterface() : ::djinni::JniInterface<::GraphicsObjectFactoryInterface, NativeGraphicsObjectFactoryInterface>("io/openmobilemaps/mapscore/shared/graphics/objects/GraphicsObjectFactoryInterface$CppProxy") {}
 
 NativeGraphicsObjectFactoryInterface::~NativeGraphicsObjectFactoryInterface() = default;
 
@@ -46,7 +46,7 @@ std::shared_ptr<::Polygon2dInterface> NativeGraphicsObjectFactoryInterface::Java
     return ::djinni_generated::NativePolygon2dInterface::toCpp(jniEnv, jret);
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_GraphicsObjectFactoryInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_GraphicsObjectFactoryInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -54,7 +54,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_Graphics
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_GraphicsObjectFactoryInterface_00024CppProxy_native_1createQuad(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeShaderProgramInterface::JniType j_shader)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_GraphicsObjectFactoryInterface_00024CppProxy_native_1createQuad(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeShaderProgramInterface::JniType j_shader)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -64,7 +64,7 @@ CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_Graph
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_GraphicsObjectFactoryInterface_00024CppProxy_native_1createLine(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeLineShaderProgramInterface::JniType j_lineShader)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_GraphicsObjectFactoryInterface_00024CppProxy_native_1createLine(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeLineShaderProgramInterface::JniType j_lineShader)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -74,7 +74,7 @@ CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_Graph
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_GraphicsObjectFactoryInterface_00024CppProxy_native_1createPolygon(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeShaderProgramInterface::JniType j_shader)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_GraphicsObjectFactoryInterface_00024CppProxy_native_1createPolygon(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeShaderProgramInterface::JniType j_shader)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);

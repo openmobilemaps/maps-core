@@ -19,14 +19,14 @@ objcpp:
   header: '"MCRenderPassInterface+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.graphics.RenderPassInterface'
+  typename: 'io.openmobilemaps.mapscore.shared.graphics.RenderPassInterface'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.graphics.RenderPassInterface'
+  boxed: 'io.openmobilemaps.mapscore.shared.graphics.RenderPassInterface'
 jni:
   translator: '::djinni_generated::NativeRenderPassInterface'
   header: '"NativeRenderPassInterface.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/graphics/RenderPassInterface;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/graphics/RenderPassInterface;'

@@ -19,14 +19,14 @@ objcpp:
   header: '"MCTaskPriority+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.map.scheduling.TaskPriority'
+  typename: 'io.openmobilemaps.mapscore.shared.map.scheduling.TaskPriority'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.map.scheduling.TaskPriority'
+  boxed: 'io.openmobilemaps.mapscore.shared.map.scheduling.TaskPriority'
 jni:
   translator: '::djinni_generated::NativeTaskPriority'
   header: '"NativeTaskPriority.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/map/scheduling/TaskPriority;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/map/scheduling/TaskPriority;'

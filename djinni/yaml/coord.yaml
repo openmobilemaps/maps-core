@@ -19,14 +19,14 @@ objcpp:
   header: '"MCCoord+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.map.coordinates.Coord'
+  typename: 'io.openmobilemaps.mapscore.shared.map.coordinates.Coord'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.map.coordinates.Coord'
+  boxed: 'io.openmobilemaps.mapscore.shared.map.coordinates.Coord'
 jni:
   translator: '::djinni_generated::NativeCoord'
   header: '"NativeCoord.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/map/coordinates/Coord;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/map/coordinates/Coord;'

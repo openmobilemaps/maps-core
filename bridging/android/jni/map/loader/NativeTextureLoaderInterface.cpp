@@ -7,7 +7,7 @@
 
 namespace djinni_generated {
 
-NativeTextureLoaderInterface::NativeTextureLoaderInterface() : ::djinni::JniInterface<::TextureLoaderInterface, NativeTextureLoaderInterface>("ch/ubique/mapscore/shared/map/loader/TextureLoaderInterface$CppProxy") {}
+NativeTextureLoaderInterface::NativeTextureLoaderInterface() : ::djinni::JniInterface<::TextureLoaderInterface, NativeTextureLoaderInterface>("io/openmobilemaps/mapscore/shared/map/loader/TextureLoaderInterface$CppProxy") {}
 
 NativeTextureLoaderInterface::~NativeTextureLoaderInterface() = default;
 
@@ -25,7 +25,7 @@ NativeTextureLoaderInterface::JavaProxy::~JavaProxy() = default;
     return ::djinni_generated::NativeTextureLoaderResult::toCpp(jniEnv, jret);
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_loader_TextureLoaderInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_loader_TextureLoaderInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -33,7 +33,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_loader_TextureLoaderI
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_loader_TextureLoaderInterface_00024CppProxy_native_1loadTexture(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_url)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_loader_TextureLoaderInterface_00024CppProxy_native_1loadTexture(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_url)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);

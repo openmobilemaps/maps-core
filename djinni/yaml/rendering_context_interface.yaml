@@ -19,14 +19,14 @@ objcpp:
   header: '"MCRenderingContextInterface+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.graphics.RenderingContextInterface'
+  typename: 'io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.graphics.RenderingContextInterface'
+  boxed: 'io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface'
 jni:
   translator: '::djinni_generated::NativeRenderingContextInterface'
   header: '"NativeRenderingContextInterface.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/graphics/RenderingContextInterface;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface;'

@@ -40,8 +40,8 @@ private:
         friend ::djinni::JniInterface<::TaskInterface, ::djinni_generated::NativeTaskInterface>;
     };
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/map/scheduling/TaskInterface") };
-    const jmethodID method_getConfig { ::djinni::jniGetMethodID(clazz.get(), "getConfig", "()Lch/ubique/mapscore/shared/map/scheduling/TaskConfig;") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/scheduling/TaskInterface") };
+    const jmethodID method_getConfig { ::djinni::jniGetMethodID(clazz.get(), "getConfig", "()Lio/openmobilemaps/mapscore/shared/map/scheduling/TaskConfig;") };
     const jmethodID method_run { ::djinni::jniGetMethodID(clazz.get(), "run", "()V") };
 };
 

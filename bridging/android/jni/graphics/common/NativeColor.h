@@ -24,7 +24,7 @@ private:
     NativeColor();
     friend ::djinni::JniClass<NativeColor>;
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/graphics/common/Color") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/common/Color") };
     const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(FFFF)V") };
     const jfieldID field_r { ::djinni::jniGetFieldID(clazz.get(), "r", "F") };
     const jfieldID field_g { ::djinni::jniGetFieldID(clazz.get(), "g", "F") };

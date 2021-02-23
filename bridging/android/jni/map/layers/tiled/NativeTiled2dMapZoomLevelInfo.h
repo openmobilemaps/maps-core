@@ -24,7 +24,7 @@ private:
     NativeTiled2dMapZoomLevelInfo();
     friend ::djinni::JniClass<NativeTiled2dMapZoomLevelInfo>;
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/map/layers/tiled/Tiled2dMapZoomLevelInfo") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/layers/tiled/Tiled2dMapZoomLevelInfo") };
     const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(DFIII)V") };
     const jfieldID field_zoom { ::djinni::jniGetFieldID(clazz.get(), "zoom", "D") };
     const jfieldID field_tileWidthLayerSystemUnits { ::djinni::jniGetFieldID(clazz.get(), "tileWidthLayerSystemUnits", "F") };

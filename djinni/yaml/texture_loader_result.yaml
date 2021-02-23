@@ -19,14 +19,14 @@ objcpp:
   header: '"MCTextureLoaderResult+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.map.loader.TextureLoaderResult'
+  typename: 'io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.map.loader.TextureLoaderResult'
+  boxed: 'io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult'
 jni:
   translator: '::djinni_generated::NativeTextureLoaderResult'
   header: '"NativeTextureLoaderResult.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/map/loader/TextureLoaderResult;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/map/loader/TextureLoaderResult;'

@@ -19,14 +19,14 @@ objcpp:
   header: '"MCSchedulerInterface+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.map.scheduling.SchedulerInterface'
+  typename: 'io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerInterface'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.map.scheduling.SchedulerInterface'
+  boxed: 'io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerInterface'
 jni:
   translator: '::djinni_generated::NativeSchedulerInterface'
   header: '"NativeSchedulerInterface.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/map/scheduling/SchedulerInterface;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/map/scheduling/SchedulerInterface;'

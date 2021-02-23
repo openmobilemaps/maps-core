@@ -19,14 +19,14 @@ objcpp:
   header: '"MCLayerInterface+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.map.LayerInterface'
+  typename: 'io.openmobilemaps.mapscore.shared.map.LayerInterface'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.map.LayerInterface'
+  boxed: 'io.openmobilemaps.mapscore.shared.map.LayerInterface'
 jni:
   translator: '::djinni_generated::NativeLayerInterface'
   header: '"NativeLayerInterface.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/map/LayerInterface;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/map/LayerInterface;'

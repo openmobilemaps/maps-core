@@ -19,14 +19,14 @@ objcpp:
   header: '"MCLoaderStatus+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.map.loader.LoaderStatus'
+  typename: 'io.openmobilemaps.mapscore.shared.map.loader.LoaderStatus'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.map.loader.LoaderStatus'
+  boxed: 'io.openmobilemaps.mapscore.shared.map.loader.LoaderStatus'
 jni:
   translator: '::djinni_generated::NativeLoaderStatus'
   header: '"NativeLoaderStatus.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/map/loader/LoaderStatus;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/map/loader/LoaderStatus;'
