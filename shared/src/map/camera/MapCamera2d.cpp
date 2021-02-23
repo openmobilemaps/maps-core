@@ -248,6 +248,28 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
         centerPosition.x += diffCenterX;
         centerPosition.y += diffCenterY;
 
+        if (config.rotationEnabled) {
+            float olda = atan2(posScreenOld[0].x - posScreenOld[1].x, posScreenOld[0].y - posScreenOld[1].y);
+            float newa = atan2(posScreenNew[0].x - posScreenNew[1].x, posScreenNew[0].y - posScreenNew[1].y);
+            if (isRotationThreasholdReached) {
+                angle = fmod((angle + (olda - newa) / M_PI * 180.0) + 360.0, 360.0);
+
+                //Update centerPosition such that the midpoint is the rotation center
+                double centerXDiff = (centerScreen.x - midpoint.x) * cos(newa - olda) - (centerScreen.y - midpoint.y) * sin(newa - olda) + midpoint.x - centerScreen.x;
+                double centerYDiff = (centerScreen.y - midpoint.y) * cos(newa - olda) - (centerScreen.x - midpoint.x) * sin(newa - olda) + midpoint.y - centerScreen.y;
+                double rotDiffX = (cosAngle * centerXDiff - sinAngle * centerYDiff);
+                double rotDiffY = (cosAngle * centerYDiff + sinAngle * centerXDiff);
+                centerPosition.x += rotDiffX * zoom * screenPixelAsRealMeterFactor;
+                centerPosition.y += rotDiffY * zoom * screenPixelAsRealMeterFactor;
+
+            } else {
+                tempAngle = fmod((tempAngle + (olda - newa) / M_PI * 180.0) + 360.0, 360.0);
+                if (std::abs(tempAngle - angle) >= ROTATION_THREASHOLD) {
+                    isRotationThreasholdReached = true;
+                }
+            }
+        }
+
         auto mapConfig = mapInterface->getMapConfig();
         auto bottomRight = mapConfig.mapCoordinateSystem.bounds.bottomRight;
         auto topLeft = mapConfig.mapCoordinateSystem.bounds.topLeft;
@@ -257,19 +279,6 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
 
         centerPosition.y = std::max(centerPosition.y, bottomRight.y);
         centerPosition.y = std::min(centerPosition.y, topLeft.y);
-
-        if (config.rotationEnabled) {
-            float olda = atan2(posScreenOld[0].x - posScreenOld[1].x, posScreenOld[0].y - posScreenOld[1].y);
-            float newa = atan2(posScreenNew[0].x - posScreenNew[1].x, posScreenNew[0].y - posScreenNew[1].y);
-            if (isRotationThreasholdReached) {
-                angle = fmod((angle + (olda - newa) / M_PI * 180.0) + 360.0, 360.0);
-            } else {
-                tempAngle = fmod((tempAngle + (olda - newa) / M_PI * 180.0) + 360.0, 360.0);
-                if (std::abs(tempAngle - angle) >= ROTATION_THREASHOLD) {
-                    isRotationThreasholdReached = true;
-                }
-            }
-        }
 
         notifyListeners();
         mapInterface->invalidate();
