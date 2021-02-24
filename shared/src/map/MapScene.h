@@ -90,4 +90,5 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public std:
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
 
     bool isResumed = false;
+    std::atomic<bool> isInvalidated = false;
 };
