@@ -34,15 +34,17 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 		private const val TAG = "GLTextureView"
 		const val EGL_CONTEXT_CLIENT_VERSION = 0x3098
 		const val EGL_OPENGL_ES2_BIT = 4
+
+		const val MAX_NUM_GRAPHICS_PRE_TASKS = 2
 	}
 
 	init {
 		surfaceTextureListener = this
 	}
 
-	private var beforeRenderTimes = LongArray(50)
+	/*private var beforeRenderTimes = LongArray(50)
 	private var renderTimes = LongArray(50)
-	private var currentTimeRec = 0
+	private var currentTimeRec = 0*/
 
 	private var glThread: GLThread? = null
 	private var renderer: GLSurfaceView.Renderer? = null
@@ -110,7 +112,7 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 			val renderer = renderer ?: throw IllegalStateException("No renderer attached to GlTextureView")
 			renderer.onSurfaceCreated(gl10, eglConfig)
 			while (!finished) {
-				val timestampStartRender = System.currentTimeMillis()
+				val timestampStartRender = System.nanoTime()
 				checkCurrent()
 				if (sizeChanged) {
 					createSurface()
@@ -118,30 +120,29 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 					sizeChanged = false
 				}
 				var i = 0
-				while (glRunList.isNotEmpty() && i < 4) {
+				while (glRunList.isNotEmpty() && i < MAX_NUM_GRAPHICS_PRE_TASKS) {
 					glRunList.poll()?.invoke()
 					i++
 				}
 
-				/*beforeRenderTimes[currentTimeRec] = timestampStartRender - System.currentTimeMillis()
-				/val startDraw = System.currentTimeMillis()*/
+				/*beforeRenderTimes[currentTimeRec] = System.nanoTime() - timestampStartRender
+				val startDraw = System.nanoTime()*/
 
 				renderer.onDrawFrame(gl10)
 
-				/*val afterDraw = System.currentTimeMillis()
+				/*val afterDraw = System.nanoTime()
 				renderTimes[currentTimeRec] = afterDraw - startDraw
 				currentTimeRec = (currentTimeRec + 1) % renderTimes.size
-				beforeRenderTimes[currentTimeRec] = System.currentTimeMillis()
 				val avg = renderTimes.filter { l -> l > 0 }.average()
 				val avgBetween = beforeRenderTimes.filter { l -> l > 0 }.average()
-				Log.d("GLTEXTURE", "Avg. render time: $avg ms")
-				Log.d("GLTEXTURE", "Avg. before render time: $avgBetween ms")*/
+				Log.d(GlTextureView::class.java.canonicalName, "Avg. render time: ${avg / 1000000.0} ms")
+				Log.d(GlTextureView::class.java.canonicalName, "Avg. before render time: ${avgBetween / 1000000.0} ms")*/
 
 				if (egl?.eglSwapBuffers(eglDisplay, eglSurface) != true) {
 					throw RuntimeException("Cannot swap buffers")
 				}
 				if (frameRate > 0) {
-					val renderTime = System.currentTimeMillis() - timestampStartRender
+					val renderTime = (System.nanoTime() - timestampStartRender) / 1000000
 					try {
 						val sleepTime = Math.max(0, 1000 / Math.min(1000, frameRate) - renderTime)
 						if (sleepTime > 0) sleep(sleepTime)

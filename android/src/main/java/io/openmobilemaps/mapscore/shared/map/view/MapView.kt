@@ -29,6 +29,8 @@ import io.openmobilemaps.mapscore.shared.map.controls.TouchHandlerInterface
 import io.openmobilemaps.mapscore.shared.map.scheduling.AndroidScheduler
 import io.openmobilemaps.mapscore.shared.map.scheduling.AndroidSchedulerCallback
 import io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
@@ -57,7 +59,7 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
 		)
 		mapInterface.setCallbackHandler(object : MapCallbackInterface() {
 			override fun invalidate() {
-				requestRender()
+				scheduler.launchCoroutine { requestRender() }
 			}
 		})
 		touchHandler = mapInterface.getTouchHandler()
@@ -156,7 +158,7 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
 		mapInterface.removeLayer(layer)
 	}
 
-	fun getCamera() : MapCamera2dInterface {
+	fun getCamera(): MapCamera2dInterface {
 		return mapInterface.getCamera()
 	}
 

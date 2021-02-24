@@ -14,6 +14,8 @@ import kotlinx.coroutines.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 class AndroidScheduler(private val schedulerCallback: AndroidSchedulerCallback) : SchedulerInterface() {
 
@@ -89,5 +91,11 @@ class AndroidScheduler(private val schedulerCallback: AndroidSchedulerCallback) 
 				taskQueue.poll()?.let { ::handleNewTask }
 			}
 		}
+	}
+
+	fun launchCoroutine(context: CoroutineContext = EmptyCoroutineContext,
+						start: CoroutineStart = CoroutineStart.DEFAULT,
+						block: suspend CoroutineScope.() -> Unit) {
+		coroutineScope.launch(context, start, block)
 	}
 }
