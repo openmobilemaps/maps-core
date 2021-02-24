@@ -113,16 +113,23 @@ template <class T, class L> void Tiled2dMapSource<T, L>::updateCurrentTileset(co
 
 template <class T, class L>
 void Tiled2dMapSource<T, L>::onVisibleTilesChanged(const std::unordered_set<PrioritizedTiled2dMapTileInfo> &visibleTiles) {
-    std::lock_guard<std::recursive_mutex> lock(currentTilesMutex);
-
+    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
     currentVisibleTiles.clear();
 
     std::unordered_set<PrioritizedTiled2dMapTileInfo> toAdd;
     for (const auto &tileInfo : visibleTiles) {
         currentVisibleTiles.insert(tileInfo.tileInfo);
 
-        if (currentTiles.count(tileInfo.tileInfo) == 0 && currentlyLoading.count(tileInfo.tileInfo) == 0) {
-            toAdd.insert(tileInfo);
+        if (currentTiles.count(tileInfo.tileInfo) == 0 &&
+            currentlyLoading.count(tileInfo.tileInfo) == 0) {
+            for (auto it = loadingQueue.begin(); it != loadingQueue.end(); it++) {
+                if (it->tileInfo == tileInfo.tileInfo) {
+                    loadingQueue.erase(it);
+                    break;
+                }
+            }
+
+                toAdd.insert(tileInfo);
         }
     }
 
@@ -144,65 +151,50 @@ void Tiled2dMapSource<T, L>::onVisibleTilesChanged(const std::unordered_set<Prio
         currentTiles.erase(removedTile);
     }
 
-    {
-        std::lock_guard<std::recursive_mutex> overlayLock(priorityQueueMutex);
-
-        for (auto it = loadingQueue.begin(); it != loadingQueue.end();) {
-            if (visibleTiles.count(*it) == 0) {
-                it = loadingQueue.erase(it);
-            } else {
-                ++it;
-            }
+    for (auto it = loadingQueue.begin(); it != loadingQueue.end();) {
+        if (visibleTiles.count(*it) == 0) {
+            it = loadingQueue.erase(it);
+        } else {
+            ++it;
         }
+    }
 
-        {
-            std::lock_guard<std::recursive_mutex> lock(errorTilesMutex);
-            for (auto it = errorTiles.begin(); it != errorTiles.end();) {
-                if (visibleTiles.count({it->first, 0}) == 0) {
-                    it = errorTiles.erase(it);
-                } else {
-                    ++it;
-                }
-            }
+    for (auto it = errorTiles.begin(); it != errorTiles.end();) {
+        if (visibleTiles.count({it->first, 0}) == 0) {
+            it = errorTiles.erase(it);
+        } else {
+            ++it;
         }
+    }
 
-        for (const auto &addedTile : toAdd) {
+    for (const auto &addedTile : toAdd) {
+        if (loadingQueue.count(addedTile) == 0 &&
+            errorTiles.count(addedTile.tileInfo) == 0) {
+            loadingQueue.insert(addedTile);
+        }
+    }
 
-            {
-                std::lock_guard<std::recursive_mutex> overlayLock(priorityQueueMutex);
-                std::lock_guard<std::recursive_mutex> lock(errorTilesMutex);
-                if (loadingQueue.count(addedTile) == 0 && errorTiles.count(addedTile.tileInfo) == 0) {
-                    loadingQueue.insert(addedTile);
-                }
-            }
-        }
-        size_t errorTilesCount = 0;
-        {
-            std::lock_guard<std::recursive_mutex> lock(errorTilesMutex);
-            errorTilesCount = errorTiles.size();
-        }
+    size_t errorTilesCount = errorTiles.size();
 
-        size_t totalOutstandingTasks = errorTilesCount + loadingQueue.size();
-        size_t dispatchedTaskCount = dispatchedTasks.load();
-        size_t tasksToAdd = totalOutstandingTasks > dispatchedTaskCount ? totalOutstandingTasks - dispatchedTaskCount : 0;
-        for (int taskCount = 0; taskCount < tasksToAdd; taskCount++) {
-            auto taskIdentifier = "Tiled2dMapSource_loadingTask" + std::to_string(taskCount);
-            scheduler->addTask(std::make_shared<LambdaTask>(
-                TaskConfig(taskIdentifier, 0, TaskPriority::NORMAL, ExecutionEnvironment::IO), [=] { performLoadingTask(); }));
-            dispatchedTasks++;
-        }
+    size_t totalOutstandingTasks = errorTilesCount + loadingQueue.size();
+    size_t dispatchedTaskCount = dispatchedTasks.load();
+    size_t tasksToAdd = totalOutstandingTasks > dispatchedTaskCount ? totalOutstandingTasks - dispatchedTaskCount : 0;
+    for (int taskCount = 0; taskCount < tasksToAdd; taskCount++) {
+        auto taskIdentifier = "Tiled2dMapSource_loadingTask" + std::to_string(taskCount);
+        scheduler->addTask(std::make_shared<LambdaTask>(
+            TaskConfig(taskIdentifier, 0, TaskPriority::NORMAL, ExecutionEnvironment::IO), [=] { performLoadingTask(); }));
+        dispatchedTasks++;
     }
 
     listener->onTilesUpdated();
 }
 
 template <class T, class L> std::optional<Tiled2dMapTileInfo> Tiled2dMapSource<T, L>::dequeueLoadingTask() {
-    std::lock_guard<std::recursive_mutex> lock(priorityQueueMutex);
+    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
 
     dispatchedTasks--;
 
     if (loadingQueue.empty()) {
-        std::lock_guard<std::recursive_mutex> lock(errorTilesMutex);
         for (auto const &errorTile : errorTiles) {
             if (errorTile.second.lastLoad + errorTile.second.delay <= DateHelper::currentTimeMillis() &&
                 currentlyLoading.count(errorTile.first) == 0) {
@@ -215,7 +207,6 @@ template <class T, class L> std::optional<Tiled2dMapTileInfo> Tiled2dMapSource<T
 
     auto tile = loadingQueue.begin();
     auto tileInfo = tile->tileInfo;
-
     loadingQueue.erase(tile);
 
     currentlyLoading.insert(tileInfo);
@@ -225,18 +216,16 @@ template <class T, class L> std::optional<Tiled2dMapTileInfo> Tiled2dMapSource<T
 
 template <class T, class L> void Tiled2dMapSource<T, L>::performLoadingTask() {
     if (auto tile = dequeueLoadingTask()) {
-
         auto loaderResult = loadTile(*tile);
+
+        std::lock_guard<std::recursive_mutex> lock(tilesMutex);
 
         LoaderStatus status = loaderResult.status;
 
         switch (status) {
         case LoaderStatus::OK: {
-            {
-                std::lock_guard<std::recursive_mutex> lock(errorTilesMutex);
-                errorTiles.erase(*tile);
-            }
-            std::lock_guard<std::recursive_mutex> lock(currentTilesMutex);
+            errorTiles.erase(*tile);
+
             if (currentVisibleTiles.count(*tile)) {
                 currentTiles[*tile] = loaderResult.data;
             }
@@ -244,7 +233,6 @@ template <class T, class L> void Tiled2dMapSource<T, L>::performLoadingTask() {
         }
         case LoaderStatus::ERROR_400:
         case LoaderStatus::ERROR_404: {
-            std::lock_guard<std::recursive_mutex> lock(notFoundTilesMutex);
             notFoundTiles.insert(*tile);
             break;
         }
@@ -252,7 +240,6 @@ template <class T, class L> void Tiled2dMapSource<T, L>::performLoadingTask() {
         case LoaderStatus::ERROR_TIMEOUT:
         case LoaderStatus::ERROR_OTHER:
         case LoaderStatus::ERROR_NETWORK: {
-            std::lock_guard<std::recursive_mutex> lock(errorTilesMutex);
             if (errorTiles.count(*tile) != 0) {
                 errorTiles[*tile].lastLoad = DateHelper::currentTimeMillis();
                 errorTiles[*tile].delay = std::min(2 * errorTiles[*tile].delay, MAX_WAIT_TIME);
@@ -268,10 +255,7 @@ template <class T, class L> void Tiled2dMapSource<T, L>::performLoadingTask() {
         }
         }
 
-        {
-            std::lock_guard<std::recursive_mutex> lock(priorityQueueMutex);
-            currentlyLoading.erase(*tile);
-        }
+        currentlyLoading.erase(*tile);
 
         listener->onTilesUpdated();
     }

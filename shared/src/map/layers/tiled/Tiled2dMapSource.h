@@ -57,7 +57,7 @@ template <class T, class L> class Tiled2dMapSource : public Tiled2dMapSourceInte
     std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfos;
     const Tiled2dMapZoomInfo zoomInfo;
 
-    std::recursive_mutex currentTilesMutex;
+    std::recursive_mutex tilesMutex;
     std::unordered_map<Tiled2dMapTileInfo, std::shared_ptr<T>> currentTiles;
     std::unordered_set<Tiled2dMapTileInfo> currentVisibleTiles;
 
@@ -68,7 +68,6 @@ template <class T, class L> class Tiled2dMapSource : public Tiled2dMapSourceInte
 
     void onVisibleTilesChanged(const std::unordered_set<PrioritizedTiled2dMapTileInfo> &visibleTiles);
 
-    std::recursive_mutex priorityQueueMutex;
     std::atomic_size_t dispatchedTasks;
     std::unordered_set<Tiled2dMapTileInfo> currentlyLoading;
     std::set<PrioritizedTiled2dMapTileInfo> loadingQueue;
@@ -81,10 +80,7 @@ template <class T, class L> class Tiled2dMapSource : public Tiled2dMapSourceInte
         long long delay;
     };
 
-    std::recursive_mutex errorTilesMutex;
     std::unordered_map<Tiled2dMapTileInfo, ErrorInfo> errorTiles;
-
-    std::recursive_mutex notFoundTilesMutex;
     std::set<Tiled2dMapTileInfo> notFoundTiles;
 
     std::optional<Tiled2dMapTileInfo> dequeueLoadingTask();
