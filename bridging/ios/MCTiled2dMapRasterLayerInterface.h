@@ -13,6 +13,10 @@
 + (nullable MCTiled2dMapRasterLayerInterface *)create:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
                                         textureLoader:(nullable id<MCTextureLoaderInterface>)textureLoader;
 
+- (void)setAlpha:(double)alpha;
+
+- (double)getAlpha;
+
 - (nullable id<MCLayerInterface>)asLayerInterface;
 
 @end

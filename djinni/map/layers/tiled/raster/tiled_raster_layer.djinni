@@ -4,5 +4,9 @@
 
 tiled_2d_map_raster_layer_interface = interface +c {
     static create(layer_config: tiled_2d_map_layer_config, texture_loader: texture_loader_interface) : tiled_2d_map_raster_layer_interface;
+
+    set_alpha(alpha: f64);
+    get_alpha(): f64;
+
     asLayerInterface(): layer_interface;
 }

@@ -39,6 +39,10 @@ class Tiled2dMapRasterLayer : public Tiled2dMapLayer, public Tiled2dMapRasterLay
 
     virtual void onTilesUpdated() override;
 
+    virtual void setAlpha(double alpha) override;
+
+    virtual double getAlpha() override;
+
   private:
     std::shared_ptr<TextureLoaderInterface> textureLoader;
     std::shared_ptr<Tiled2dMapRasterSource> rasterSource;
@@ -46,4 +50,6 @@ class Tiled2dMapRasterLayer : public Tiled2dMapLayer, public Tiled2dMapRasterLay
     std::recursive_mutex updateMutex;
     std::unordered_map<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>> tileObjectMap;
     std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
+
+    double alpha;
 };
