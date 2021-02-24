@@ -32,11 +32,13 @@ import io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
-class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
+open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
 	GlTextureView(context, attrs, defStyleAttr), GLSurfaceView.Renderer, AndroidSchedulerCallback, LifecycleObserver {
 
-	private lateinit var mapInterface: MapInterface
-	private lateinit var scheduler: AndroidScheduler
+	protected lateinit var mapInterface: MapInterface
+		private set
+	protected lateinit var scheduler: AndroidScheduler
+		private set
 
 	private lateinit var touchHandler: TouchHandlerInterface
 	private var touchDisabled = false
@@ -45,7 +47,7 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
 		System.loadLibrary("mapscore_shared")
 	}
 
-	fun setupMap(mapConfig: MapConfig) {
+	open fun setupMap(mapConfig: MapConfig) {
 		val densityExact = resources.displayMetrics.xdpi
 
 		setRenderer(this)
@@ -86,22 +88,22 @@ class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
 	}
 
 	@OnLifecycleEvent(Lifecycle.Event.ON_START)
-	fun onStart() {
+	open fun onStart() {
 		scheduler.resume()
 	}
 
 	@OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-	fun onResume() {
+	open fun onResume() {
 		mapInterface.resume()
 	}
 
 	@OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-	fun onPause() {
+	open fun onPause() {
 		mapInterface.pause()
 	}
 
 	@OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-	fun onStop() {
+	open fun onStop() {
 		scheduler.pause()
 	}
 
