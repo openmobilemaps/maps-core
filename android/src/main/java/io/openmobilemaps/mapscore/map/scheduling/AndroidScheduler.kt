@@ -8,8 +8,9 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-package io.openmobilemaps.mapscore.shared.map.scheduling
+package io.openmobilemaps.mapscore.map.scheduling
 
+import io.openmobilemaps.mapscore.shared.map.scheduling.*
 import kotlinx.coroutines.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
