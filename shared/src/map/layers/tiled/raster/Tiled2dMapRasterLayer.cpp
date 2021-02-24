@@ -18,7 +18,8 @@
 Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                                              const std::shared_ptr<::TextureLoaderInterface> &textureLoader)
     : Tiled2dMapLayer(layerConfig)
-    , textureLoader(textureLoader) {}
+    , textureLoader(textureLoader)
+    , alpha(1.0) {}
 
 void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface) {
     rasterSource = std::make_shared<Tiled2dMapRasterSource>(mapInterface->getMapConfig(), layerConfig,
@@ -90,7 +91,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
                 auto alphaShader = mapInterface->getShaderFactory()->createAlphaShader();
                 auto tileObject = std::make_shared<Textured2dLayerObject>(
                     graphicsFactory->createQuad(alphaShader->asShaderProgramInterface()), alphaShader, mapInterface);
-                tileObject->beginAlphaAnimation(0.0, 1.0, 150);
+                tileObject->beginAlphaAnimation(0.0, alpha, 150);
 
                 tileObject->setRectCoord(tile.tileInfo.bounds);
                 tileObject->getQuadObject()->asGraphicsObject()->setup(renderingContext);
@@ -134,4 +135,18 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
 
             mapInterface->invalidate();
         }));
+}
+
+
+void Tiled2dMapRasterLayer::setAlpha(double alpha) {
+    this->alpha = alpha;
+    std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
+    for (const auto &tileObject : tileObjectMap) {
+        tileObject.second->setAlpha(alpha);
+    }
+    mapInterface->invalidate();
+}
+
+double Tiled2dMapRasterLayer::getAlpha() {
+    return alpha;
 }

@@ -14,5 +14,9 @@ public:
 
     static std::shared_ptr<Tiled2dMapRasterLayerInterface> create(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::shared_ptr<::TextureLoaderInterface> & textureLoader);
 
+    virtual void setAlpha(double alpha) = 0;
+
+    virtual double getAlpha() = 0;
+
     virtual std::shared_ptr<::LayerInterface> asLayerInterface() = 0;
 };

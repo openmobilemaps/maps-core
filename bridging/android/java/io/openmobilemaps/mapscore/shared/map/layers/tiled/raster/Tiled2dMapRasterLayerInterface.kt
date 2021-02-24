@@ -7,6 +7,10 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class Tiled2dMapRasterLayerInterface {
 
+    abstract fun setAlpha(alpha: Double)
+
+    abstract fun getAlpha(): Double
+
     abstract fun asLayerInterface(): io.openmobilemaps.mapscore.shared.map.LayerInterface
 
     companion object {
@@ -33,6 +37,18 @@ abstract class Tiled2dMapRasterLayerInterface {
         protected fun finalize() {
             _djinni_private_destroy()
         }
+
+        override fun setAlpha(alpha: Double) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setAlpha(this.nativeRef, alpha)
+        }
+        private external fun native_setAlpha(_nativeRef: Long, alpha: Double)
+
+        override fun getAlpha(): Double {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getAlpha(this.nativeRef)
+        }
+        private external fun native_getAlpha(_nativeRef: Long): Double
 
         override fun asLayerInterface(): io.openmobilemaps.mapscore.shared.map.LayerInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
