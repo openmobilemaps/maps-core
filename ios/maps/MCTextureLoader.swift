@@ -59,7 +59,9 @@ open class MCTextureLoader: MCTextureLoaderInterface {
             return .init(data: nil, status: .ERROR_OTHER)
         }
 
-        if url.pathExtension == "png" {
+        guard let textureHolder = try? TextureHolder(data) else {
+            // If metal can not load this image
+            // try workaround to first load it into UIImage context
             guard let uiImage = UIImage(data: data) else {
                 return .init(data: nil, status: .ERROR_OTHER)
             }
@@ -75,11 +77,7 @@ open class MCTextureLoader: MCTextureLoaderInterface {
             }
 
             return .init(data: textureHolder, status: .OK)
-        } else {
-            guard let textureHolder = try? TextureHolder(data) else {
-                return .init(data: nil, status: .ERROR_OTHER)
-            }
-            return .init(data: textureHolder, status: .OK)
         }
+        return .init(data: textureHolder, status: .OK)
     }
 }

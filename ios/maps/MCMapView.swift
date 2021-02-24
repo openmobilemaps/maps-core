@@ -66,6 +66,27 @@ open class MCMapView: MTKView {
         touchHandler.mapView = self
 
         mapInterface.resume()
+
+        addEventListeners();
+    }
+
+    private func addEventListeners() {
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(willEnterForeground),
+                                               name: UIApplication.willEnterForegroundNotification,
+                                               object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(didEnterBackground),
+                                               name: UIApplication.didEnterBackgroundNotification,
+                                               object: nil)
+    }
+
+    @objc func willEnterForeground() {
+        backgroundDisable = false
+        invalidate()
+    }
+
+    @objc func didEnterBackground() {
+        backgroundDisable = true
     }
 
     /// The view’s background color.
