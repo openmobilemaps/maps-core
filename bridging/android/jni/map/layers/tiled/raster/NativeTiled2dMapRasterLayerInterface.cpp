@@ -6,6 +6,7 @@
 #include "NativeLayerInterface.h"
 #include "NativeTextureLoaderInterface.h"
 #include "NativeTiled2dMapLayerConfig.h"
+#include "NativeTiled2dMapRasterLayerCallbackInterface.h"
 
 namespace djinni_generated {
 
@@ -32,6 +33,44 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_til
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT ::djinni_generated::NativeLayerInterface::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_native_1asLayerInterface(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapRasterLayerInterface>(nativeRef);
+        auto r = ref->asLayerInterface();
+        return ::djinni::release(::djinni_generated::NativeLayerInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_native_1setCallbackHandler(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_handler)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapRasterLayerInterface>(nativeRef);
+        ref->setCallbackHandler(::djinni_generated::NativeTiled2dMapRasterLayerCallbackInterface::toCpp(jniEnv, j_handler));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_native_1getCallbackHandler(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapRasterLayerInterface>(nativeRef);
+        auto r = ref->getCallbackHandler();
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni_generated::NativeTiled2dMapRasterLayerCallbackInterface>::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_native_1removeCallbackHandler(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapRasterLayerInterface>(nativeRef);
+        ref->removeCallbackHandler();
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_native_1setAlpha(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jdouble j_alpha)
 {
     try {
@@ -48,16 +87,6 @@ CJNIEXPORT jdouble JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_til
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapRasterLayerInterface>(nativeRef);
         auto r = ref->getAlpha();
         return ::djinni::release(::djinni::F64::fromCpp(jniEnv, r));
-    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
-}
-
-CJNIEXPORT ::djinni_generated::NativeLayerInterface::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_native_1asLayerInterface(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
-{
-    try {
-        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
-        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapRasterLayerInterface>(nativeRef);
-        auto r = ref->asLayerInterface();
-        return ::djinni::release(::djinni_generated::NativeLayerInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
