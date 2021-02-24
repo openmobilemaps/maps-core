@@ -9,6 +9,7 @@
 #import "MCLayerInterface+Private.h"
 #import "MCTextureLoaderInterface+Private.h"
 #import "MCTiled2dMapLayerConfig+Private.h"
+#import "MCTiled2dMapRasterLayerCallbackInterface+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -42,6 +43,32 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable id<MCLayerInterface>)asLayerInterface {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->asLayerInterface();
+        return ::djinni_generated::LayerInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setCallbackHandler:(nullable id<MCTiled2dMapRasterLayerCallbackInterface>)handler {
+    try {
+        _cppRefHandle.get()->setCallbackHandler(::djinni_generated::Tiled2dMapRasterLayerCallbackInterface::toCpp(handler));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCTiled2dMapRasterLayerCallbackInterface>)getCallbackHandler {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getCallbackHandler();
+        return ::djinni::Optional<std::optional, ::djinni_generated::Tiled2dMapRasterLayerCallbackInterface>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)removeCallbackHandler {
+    try {
+        _cppRefHandle.get()->removeCallbackHandler();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)setAlpha:(double)alpha {
     try {
         _cppRefHandle.get()->setAlpha(::djinni::F64::toCpp(alpha));
@@ -52,13 +79,6 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getAlpha();
         return ::djinni::F64::fromCpp(objcpp_result_);
-    } DJINNI_TRANSLATE_EXCEPTIONS()
-}
-
-- (nullable id<MCLayerInterface>)asLayerInterface {
-    try {
-        auto objcpp_result_ = _cppRefHandle.get()->asLayerInterface();
-        return ::djinni_generated::LayerInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

@@ -6,6 +6,7 @@
 #import "MCTiled2dMapLayerConfig.h"
 #import <Foundation/Foundation.h>
 @class MCTiled2dMapRasterLayerInterface;
+@protocol MCTiled2dMapRasterLayerCallbackInterface;
 
 
 @interface MCTiled2dMapRasterLayerInterface : NSObject
@@ -13,10 +14,16 @@
 + (nullable MCTiled2dMapRasterLayerInterface *)create:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
                                         textureLoader:(nullable id<MCTextureLoaderInterface>)textureLoader;
 
+- (nullable id<MCLayerInterface>)asLayerInterface;
+
+- (void)setCallbackHandler:(nullable id<MCTiled2dMapRasterLayerCallbackInterface>)handler;
+
+- (nullable id<MCTiled2dMapRasterLayerCallbackInterface>)getCallbackHandler;
+
+- (void)removeCallbackHandler;
+
 - (void)setAlpha:(double)alpha;
 
 - (double)getAlpha;
-
-- (nullable id<MCLayerInterface>)asLayerInterface;
 
 @end
