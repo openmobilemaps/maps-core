@@ -8,14 +8,17 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-package io.openmobilemaps.mapscore.shared.map.loader
+package io.openmobilemaps.mapscore.map.loader
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
-import io.openmobilemaps.mapscore.shared.graphics.BitmapTextureHolder
+import io.openmobilemaps.mapscore.graphics.BitmapTextureHolder
+import io.openmobilemaps.mapscore.shared.map.loader.LoaderStatus
+import io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderInterface
+import io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult
 import okhttp3.*
 import java.io.File
 import java.util.*

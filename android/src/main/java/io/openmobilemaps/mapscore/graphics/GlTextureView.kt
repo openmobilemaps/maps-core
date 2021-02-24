@@ -8,7 +8,7 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-package io.openmobilemaps.mapscore.shared.graphics
+package io.openmobilemaps.mapscore.graphics
 
 import android.content.Context
 import android.graphics.SurfaceTexture

@@ -8,7 +8,9 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-package io.openmobilemaps.mapscore.shared.map.scheduling
+package io.openmobilemaps.mapscore.map.scheduling
+
+import io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface
 
 interface AndroidSchedulerCallback {
 	fun scheduleOnGlThread(task: TaskInterface)
