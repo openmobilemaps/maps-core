@@ -90,7 +90,7 @@ The map needs to be initialized with a `MapConfig`, which specifies the coordina
 A standard use-case is to display content from a tile-server as a layer in the map, e.g. one containing data from [OpenStreetMap](https://wiki.openstreetmap.org/). In this example case, the map is a projection in the EPSG:3857 system. Thus the `MapView` is recommended to be initialized with a matching `MapConfig`.
 
 ```kotlin
-mapView.setupMap(MapConfig(CoordinateSystemFactory.getEpsg3857System(), 500000000.0, 1000.0))
+mapView.setupMap(MapConfig(CoordinateSystemFactory.getEpsg3857System()))
 ```
 
 To display the tiles, a Tiled2dMapRasterLayer must be created with both a Tiled2dMapLayerConfig and the implementation of a TextureLoader.
@@ -171,6 +171,12 @@ The camera position and zoom can easily be adjusted by manipulating the `Camera2
 mapView.getCamera().moveToCenterPositionZoom(
     Coord(CoordinateSystemIdentifiers.EPSG4326(), 8.378232525377973, 46.962592372639634, 0.0), 
     10000000.0, false)
+```
+
+In the camera, one can also override the default zoom limits with:
+```kotlin
+mapView.getCamera().setMinZoom(5000000.0)
+mapView.getCamera().setMaxZoom(300.0)
 ```
 
 ## License
