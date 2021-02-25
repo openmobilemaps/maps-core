@@ -174,7 +174,8 @@ void Tiled2dMapRasterLayer::setAlpha(double alpha) {
     for (const auto &tileObject : tileObjectMap) {
         tileObject.second->setAlpha(alpha);
     }
-    mapInterface->invalidate();
+
+    if (mapInterface) mapInterface->invalidate();
 }
 
 double Tiled2dMapRasterLayer::getAlpha() {

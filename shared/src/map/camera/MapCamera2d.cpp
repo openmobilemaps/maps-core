@@ -29,10 +29,22 @@ MapCamera2d::MapCamera2d(const std::shared_ptr<MapInterface> &mapInterface, floa
                        0.5 * (mapCoordinateSystem.bounds.bottomRight.x - mapCoordinateSystem.bounds.topLeft.x);
     centerPosition.y = mapCoordinateSystem.bounds.topLeft.y +
                        0.5 * (mapCoordinateSystem.bounds.bottomRight.y - mapCoordinateSystem.bounds.topLeft.y);
-    zoom = mapConfig.zoomMin;
+    zoom = zoomMax;
 }
 
-void MapCamera2d::viewportSizeChanged() { notifyListeners(); }
+void MapCamera2d::viewportSizeChanged() {
+    Vec2I viewportSize = mapInterface->getRenderingContext()->getViewportSize();
+    if (viewportSize.x > 0 && viewportSize.y > 0 && zoomMin < 0) {
+        double boundsWidthM = std::abs(mapCoordinateSystem.bounds.topLeft.x - mapCoordinateSystem.bounds.bottomRight.x);
+        double boundsHeightM = std::abs(mapCoordinateSystem.bounds.topLeft.y - mapCoordinateSystem.bounds.bottomRight.y);
+        double widthDeviceM = screenPixelAsRealMeterFactor * viewportSize.x;
+        double heightDeviceM = screenPixelAsRealMeterFactor * viewportSize.y;
+        zoomMin = std::max(boundsHeightM / heightDeviceM, boundsWidthM / widthDeviceM);
+        zoom = zoomMin;
+    }
+
+    notifyListeners();
+}
 
 void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double zoom, bool animated) {
     Coord positionMapSystem = conversionHelper->convert(mapCoordinateSystem.identifier, centerPosition);
@@ -161,7 +173,7 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     if (doubleClick) {
         double newZoom = zoom * (1.0 - (deltaScreen.y * 0.003));
 
-        zoom = std::max(std::min(newZoom, mapInterface->getMapConfig().zoomMin), mapInterface->getMapConfig().zoomMax);
+        zoom = std::max(std::min(newZoom, zoomMin), zoomMax);
 
         notifyListeners();
         mapInterface->invalidate();
@@ -201,7 +213,7 @@ bool MapCamera2d::onDoubleClick(const ::Vec2F &posScreen) {
 
     auto targetZoom = zoom / 2;
 
-    targetZoom = std::max(std::min(targetZoom, mapInterface->getMapConfig().zoomMin), mapInterface->getMapConfig().zoomMax);
+    targetZoom = std::max(std::min(targetZoom, zoomMin), zoomMax);
 
     auto position = coordFromScreenPosition(posScreen);
 
@@ -233,7 +245,7 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
                 Vec2FHelper::distance(posScreenNew[0], posScreenNew[1]) / Vec2FHelper::distance(posScreenOld[0], posScreenOld[1]);
         zoom /= scaleFactor;
 
-        zoom = std::max(std::min(zoom, mapInterface->getMapConfig().zoomMin), mapInterface->getMapConfig().zoomMax);
+        zoom = std::max(std::min(zoom, zoomMin), zoomMax);
 
         auto midpoint = Vec2FHelper::midpoint(posScreenNew[0], posScreenNew[1]);
         auto oldMidpoint = Vec2FHelper::midpoint(posScreenOld[0], posScreenOld[1]);
@@ -337,4 +349,12 @@ void MapCamera2d::applyAnimationState() {
         notifyListeners();
         mapInterface->invalidate();
     }
+}
+
+void MapCamera2d::setMinZoom(double zoomMin) {
+    this->zoomMin = zoomMin;
+}
+
+void MapCamera2d::setMaxZoom(double zoomMax) {
+    this->zoomMax = zoomMax;
 }

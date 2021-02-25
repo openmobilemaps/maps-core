@@ -17,6 +17,10 @@ abstract class MapCamera2dInterface {
 
     abstract fun getZoom(): Double
 
+    abstract fun setMinZoom(minZoom: Double)
+
+    abstract fun setMaxZoom(maxZoom: Double)
+
     abstract fun setPaddingLeft(padding: Float, animated: Boolean)
 
     abstract fun setPaddingRight(padding: Float, animated: Boolean)
@@ -89,6 +93,18 @@ abstract class MapCamera2dInterface {
             return native_getZoom(this.nativeRef)
         }
         private external fun native_getZoom(_nativeRef: Long): Double
+
+        override fun setMinZoom(minZoom: Double) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setMinZoom(this.nativeRef, minZoom)
+        }
+        private external fun native_setMinZoom(_nativeRef: Long, minZoom: Double)
+
+        override fun setMaxZoom(maxZoom: Double) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setMaxZoom(this.nativeRef, maxZoom)
+        }
+        private external fun native_setMaxZoom(_nativeRef: Long, maxZoom: Double)
 
         override fun setPaddingLeft(padding: Float, animated: Boolean) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

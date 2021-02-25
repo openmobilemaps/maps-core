@@ -25,10 +25,8 @@ private:
     friend ::djinni::JniClass<NativeMapConfig>;
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/MapConfig") };
-    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Lio/openmobilemaps/mapscore/shared/map/coordinates/MapCoordinateSystem;DD)V") };
+    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Lio/openmobilemaps/mapscore/shared/map/coordinates/MapCoordinateSystem;)V") };
     const jfieldID field_mapCoordinateSystem { ::djinni::jniGetFieldID(clazz.get(), "mapCoordinateSystem", "Lio/openmobilemaps/mapscore/shared/map/coordinates/MapCoordinateSystem;") };
-    const jfieldID field_zoomMin { ::djinni::jniGetFieldID(clazz.get(), "zoomMin", "D") };
-    const jfieldID field_zoomMax { ::djinni::jniGetFieldID(clazz.get(), "zoomMax", "D") };
 };
 
 }  // namespace djinni_generated

@@ -30,6 +30,10 @@
 
 - (double)getZoom;
 
+- (void)setMinZoom:(double)minZoom;
+
+- (void)setMaxZoom:(double)maxZoom;
+
 - (void)setPaddingLeft:(float)padding
               animated:(BOOL)animated;
 
