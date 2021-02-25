@@ -11,11 +11,11 @@
 package io.openmobilemaps.mapscore.map.loader
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Canvas
-import android.graphics.Color
 import io.openmobilemaps.mapscore.graphics.BitmapTextureHolder
+import io.openmobilemaps.mapscore.map.loader.networking.RefererInterceptor
+import io.openmobilemaps.mapscore.map.loader.networking.RequestUtils
+import io.openmobilemaps.mapscore.map.loader.networking.UserAgentInterceptor
 import io.openmobilemaps.mapscore.shared.map.loader.LoaderStatus
 import io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderInterface
 import io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult
@@ -24,14 +24,18 @@ import java.io.File
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-class TextureLoader(private val context: Context, private val cacheDirectory: File, private val cacheSize: Long) :
+class TextureLoader(
+	private val context: Context,
+	private val cacheDirectory: File,
+	private val cacheSize: Long,
+	private val referer: String,
+	private val userAgent: String? = null
+) :
 	TextureLoaderInterface() {
 
-	private val errorBitmap = BitmapTextureHolder(Bitmap.createBitmap(2, 2, Bitmap.Config.ARGB_8888).apply {
-		Canvas(this).apply { drawColor(Color.RED) }
-	})
-
 	private val okHttpClient = OkHttpClient.Builder()
+		.addInterceptor(UserAgentInterceptor(userAgent ?: RequestUtils.getDefaultUserAgent(context)))
+		.addInterceptor(RefererInterceptor(referer))
 		.connectionPool(ConnectionPool(8, 5000L, TimeUnit.MILLISECONDS))
 		.cache(Cache(cacheDirectory, cacheSize))
 		.dispatcher(Dispatcher().apply { maxRequestsPerHost = 8 })

@@ -32,6 +32,7 @@ void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapIn
 
 void Tiled2dMapRasterLayer::onRemoved() {
     Tiled2dMapLayer::onRemoved();
+    mapInterface->getTouchHandler()->removeListener(shared_from_this());
     pause();
 }
 
