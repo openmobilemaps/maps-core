@@ -14,11 +14,15 @@ import UIKit
 open class MCTextureLoader: MCTextureLoaderInterface {
     private let session: URLSession
 
-    public init() {
-        let sessionConfig = URLSessionConfiguration.default
-        sessionConfig.urlCache = URLCache(memoryCapacity: 100 * 1024 * 1024, diskCapacity: 500 * 1024 * 1024, diskPath: "ch.openmobilemaps.urlcache")
-        sessionConfig.networkServiceType = .responsiveData
-        session = .init(configuration: sessionConfig)
+    public init(urlSession: URLSession? = nil) {
+        if let urlSession = urlSession {
+            self.session = urlSession
+        } else  {
+            let sessionConfig = URLSessionConfiguration.default
+            sessionConfig.urlCache = URLCache(memoryCapacity: 100 * 1024 * 1024, diskCapacity: 500 * 1024 * 1024, diskPath: "ch.openmobilemaps.urlcache")
+            sessionConfig.networkServiceType = .responsiveData
+            session = .init(configuration: sessionConfig)
+        }
     }
 
     public func loadTexture(_ url: String) -> MCTextureLoaderResult {
@@ -33,7 +37,11 @@ open class MCTextureLoader: MCTextureLoaderInterface {
         var response: HTTPURLResponse?
         var error: NSError?
 
-        let task = session.dataTask(with: url) { data, response_, error_ in
+        var urlRequest = URLRequest(url: url)
+
+        modifyUrlRequest(request: &urlRequest)
+
+        let task = session.dataTask(with: urlRequest) { data, response_, error_ in
             result = data
             response = response_ as? HTTPURLResponse
             error = error_ as NSError?
@@ -80,4 +88,6 @@ open class MCTextureLoader: MCTextureLoaderInterface {
         }
         return .init(data: textureHolder, status: .OK)
     }
+
+    public func modifyUrlRequest(request: inout URLRequest){}
 }
