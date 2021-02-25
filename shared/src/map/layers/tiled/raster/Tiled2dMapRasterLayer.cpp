@@ -13,6 +13,7 @@
 #include "MapConfig.h"
 #include "RenderConfigInterface.h"
 #include "RenderPass.h"
+#include "MapCamera2dInterface.h"
 #include <map>
 
 Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
@@ -25,6 +26,8 @@ void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapIn
                                                             mapInterface->getScheduler(), textureLoader, shared_from_this());
     setSourceInterface(rasterSource);
     Tiled2dMapLayer::onAdded(mapInterface);
+
+    mapInterface->getTouchHandler()->addListener(shared_from_this());
 }
 
 void Tiled2dMapRasterLayer::onRemoved() {
@@ -152,6 +155,17 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
     mapInterface->invalidate();
 }
 
+void Tiled2dMapRasterLayer::setCallbackHandler(const std::shared_ptr<Tiled2dMapRasterLayerCallbackInterface> &handler) {
+    callbackHandler = handler;
+}
+
+void Tiled2dMapRasterLayer::removeCallbackHandler() {
+    callbackHandler = nullptr;
+}
+
+std::shared_ptr<Tiled2dMapRasterLayerCallbackInterface> Tiled2dMapRasterLayer::getCallbackHandler() {
+    return callbackHandler;
+}
 
 void Tiled2dMapRasterLayer::setAlpha(double alpha) {
     this->alpha = alpha;
@@ -164,4 +178,14 @@ void Tiled2dMapRasterLayer::setAlpha(double alpha) {
 
 double Tiled2dMapRasterLayer::getAlpha() {
     return alpha;
+}
+
+bool Tiled2dMapRasterLayer::onClickConfirmed(const Vec2F &posScreen) {
+    return (callbackHandler) ? callbackHandler->onClickConfirmed(mapInterface->getCamera()->coordFromScreenPosition(posScreen))
+                             : false;
+}
+
+bool Tiled2dMapRasterLayer::onLongPress(const Vec2F &posScreen) {
+    return (callbackHandler) ? callbackHandler->onLongPress(mapInterface->getCamera()->coordFromScreenPosition(posScreen))
+                             : false;
 }
