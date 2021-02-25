@@ -123,9 +123,7 @@ import MapCore
 import MapCoreSharedModule
 
 class MapViewController: UIViewController {
-  var mapConfig = MCMapConfig(mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg3857System(),
-                              zoomMin: 500_000_000,
-                              zoomMax: 1_000)
+  var mapConfig = MCMapConfig(mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg3857System())
 
   lazy var mapView = MCMapView(mapConfig: mapConfig)
   
