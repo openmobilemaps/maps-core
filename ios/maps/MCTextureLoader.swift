@@ -89,5 +89,5 @@ open class MCTextureLoader: MCTextureLoaderInterface {
         return .init(data: textureHolder, status: .OK)
     }
 
-    public func modifyUrlRequest(request: inout URLRequest){}
+    open func modifyUrlRequest(request: inout URLRequest){}
 }
