@@ -161,6 +161,16 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     if (!config.moveEnabled)
         return false;
 
+    if (doubleClick) {
+        double newZoom = zoom * (1.0 - (deltaScreen.y * 0.003));
+
+        zoom = std::max(std::min(newZoom, mapInterface->getMapConfig().zoomMin), mapInterface->getMapConfig().zoomMax);
+
+        notifyListeners();
+        mapInterface->invalidate();
+        return true;
+    }
+
     float dx = deltaScreen.x;
     float dy = deltaScreen.y;
 
