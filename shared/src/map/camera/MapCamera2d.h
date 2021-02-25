@@ -39,6 +39,10 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual double getZoom() override;
 
+    virtual void setMinZoom(double zoomMin) override;
+
+    virtual void setMaxZoom(double zoomMax) override;
+
     virtual void setPaddingLeft(float padding, bool animated) override;
 
     virtual void setPaddingRight(float padding, bool animated) override;
@@ -88,6 +92,9 @@ class MapCamera2d : public MapCamera2dInterface,
     double paddingTop = 0;
     double paddingRight = 0;
     double paddingBottom = 0;
+
+    double zoomMin = -1;
+    double zoomMax = 200.0;
 
     struct CameraConfiguration {
         bool rotationEnabled = true;

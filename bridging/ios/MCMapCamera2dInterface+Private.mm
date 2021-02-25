@@ -85,6 +85,18 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setMinZoom:(double)minZoom {
+    try {
+        _cppRefHandle.get()->setMinZoom(::djinni::F64::toCpp(minZoom));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setMaxZoom:(double)maxZoom {
+    try {
+        _cppRefHandle.get()->setMaxZoom(::djinni::F64::toCpp(maxZoom));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)setPaddingLeft:(float)padding
               animated:(BOOL)animated {
     try {

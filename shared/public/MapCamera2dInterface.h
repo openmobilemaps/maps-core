@@ -28,6 +28,10 @@ public:
 
     virtual double getZoom() = 0;
 
+    virtual void setMinZoom(double minZoom) = 0;
+
+    virtual void setMaxZoom(double maxZoom) = 0;
+
     virtual void setPaddingLeft(float padding, bool animated) = 0;
 
     virtual void setPaddingRight(float padding, bool animated) = 0;

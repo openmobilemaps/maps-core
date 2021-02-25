@@ -86,6 +86,24 @@ CJNIEXPORT jdouble JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1setMinZoom(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jdouble j_minZoom)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        ref->setMinZoom(::djinni::F64::toCpp(jniEnv, j_minZoom));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1setMaxZoom(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jdouble j_maxZoom)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        ref->setMaxZoom(::djinni::F64::toCpp(jniEnv, j_maxZoom));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1setPaddingLeft(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jfloat j_padding, jboolean j_animated)
 {
     try {

@@ -59,8 +59,6 @@ map_callback_interface = interface +c +j +o {
 
 map_config = record {
     map_coordinate_system: map_coordinate_system;
-    zoom_min: f64;
-    zoom_max: f64;
 }
 
 layer_interface = interface +c +j +o {
@@ -83,6 +81,9 @@ map_camera_2d_interface = interface +c {
 
     set_zoom(zoom: f64, animated: bool);
     get_zoom(): f64;
+
+    set_min_zoom(min_zoom: f64);
+    set_max_zoom(max_zoom: f64);
 
     set_padding_left(padding: f32, animated: bool);
     set_padding_right(padding: f32, animated: bool);
