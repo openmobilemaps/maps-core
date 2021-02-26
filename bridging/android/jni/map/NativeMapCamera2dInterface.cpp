@@ -183,6 +183,18 @@ CJNIEXPORT ::djinni_generated::NativeRectCoord::JniType JNICALL Java_io_openmobi
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1getInvariantMvpMatrix(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_cameraMatrix, ::djinni_generated::NativeCoord::JniType j_coordinate, jboolean j_rotationInvariant)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        auto r = ref->getInvariantMvpMatrix(::djinni::List<::djinni::F32>::toCpp(jniEnv, j_cameraMatrix),
+                                            ::djinni_generated::NativeCoord::toCpp(jniEnv, j_coordinate),
+                                            ::djinni::Bool::toCpp(jniEnv, j_rotationInvariant));
+        return ::djinni::release(::djinni::List<::djinni::F32>::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1addListener(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeMapCamera2dListenerInterface::JniType j_listener)
 {
     try {

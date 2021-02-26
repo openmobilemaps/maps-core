@@ -157,6 +157,17 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nonnull NSArray<NSNumber *> *)getInvariantMvpMatrix:(nonnull NSArray<NSNumber *> *)cameraMatrix
+                                            coordinate:(nonnull MCCoord *)coordinate
+                                     rotationInvariant:(BOOL)rotationInvariant {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getInvariantMvpMatrix(::djinni::List<::djinni::F32>::toCpp(cameraMatrix),
+                                                                         ::djinni_generated::Coord::toCpp(coordinate),
+                                                                         ::djinni::Bool::toCpp(rotationInvariant));
+        return ::djinni::List<::djinni::F32>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)addListener:(nullable id<MCMapCamera2dListenerInterface>)listener {
     try {
         _cppRefHandle.get()->addListener(::djinni_generated::MapCamera2dListenerInterface::toCpp(listener));

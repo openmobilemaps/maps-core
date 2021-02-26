@@ -96,6 +96,7 @@ map_camera_2d_interface = interface +c {
     set_padding_bottom(padding: f32, animated: bool);
 
     get_visible_rect() : rect_coord;
+    get_invariant_mvp_matrix(cameraMatrix: list<f32>, coordinate: coord, rotationInvariant: bool) : list<f32>;
 
     add_listener(listener: map_camera_2d_listener_interface);
     remove_listener(listener: map_camera_2d_listener_interface);

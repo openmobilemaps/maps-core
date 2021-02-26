@@ -47,6 +47,10 @@ std::vector<std::shared_ptr<RenderConfigInterface>> Textured2dLayerObject::getRe
 
 void Textured2dLayerObject::setAlpha(float alpha) { shader->updateAlpha(alpha); }
 
+void Textured2dLayerObject::setScale(float scale) {
+    this->scale = scale;
+}
+
 std::shared_ptr<Quad2dInterface> Textured2dLayerObject::getQuadObject() { return quad; }
 
 void Textured2dLayerObject::beginAlphaAnimation(double startAlpha, double targetAlpha, long long duration) {

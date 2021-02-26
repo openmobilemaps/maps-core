@@ -24,6 +24,22 @@ std::vector<std::shared_ptr<::GraphicsObjectInterface>> NativeRenderPassInterfac
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::List<::djinni_generated::NativeGraphicsObjectInterface>::toCpp(jniEnv, jret);
 }
+void NativeRenderPassInterface::JavaProxy::setCustomObjectTransforms(const std::unordered_map<int32_t, std::vector<float>> & c_customObjectTransforms) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeRenderPassInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_setCustomObjectTransforms,
+                           ::djinni::get(::djinni::Map<::djinni::I32, ::djinni::List<::djinni::F32>>::fromCpp(jniEnv, c_customObjectTransforms)));
+    ::djinni::jniExceptionCheck(jniEnv);
+}
+std::unordered_map<int32_t, std::vector<float>> NativeRenderPassInterface::JavaProxy::getCustomObjectTransforms() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeRenderPassInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getCustomObjectTransforms);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni::Map<::djinni::I32, ::djinni::List<::djinni::F32>>::toCpp(jniEnv, jret);
+}
 ::RenderPassConfig NativeRenderPassInterface::JavaProxy::getRenderPassConfig() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -48,6 +64,25 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_Rende
         const auto& ref = ::djinni::objectFromHandleAddress<::RenderPassInterface>(nativeRef);
         auto r = ref->getGraphicsObjects();
         return ::djinni::release(::djinni::List<::djinni_generated::NativeGraphicsObjectInterface>::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderPassInterface_00024CppProxy_native_1setCustomObjectTransforms(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_customObjectTransforms)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::RenderPassInterface>(nativeRef);
+        ref->setCustomObjectTransforms(::djinni::Map<::djinni::I32, ::djinni::List<::djinni::F32>>::toCpp(jniEnv, j_customObjectTransforms));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderPassInterface_00024CppProxy_native_1getCustomObjectTransforms(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::RenderPassInterface>(nativeRef);
+        auto r = ref->getCustomObjectTransforms();
+        return ::djinni::release(::djinni::Map<::djinni::I32, ::djinni::List<::djinni::F32>>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

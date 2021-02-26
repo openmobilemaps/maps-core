@@ -11,9 +11,22 @@
 #include "RenderPass.h"
 
 RenderPass::RenderPass(RenderPassConfig config, std::vector<std::shared_ptr<::GraphicsObjectInterface>> graphicsObjects)
-    : config(config)
-    , graphicsObjects(graphicsObjects) {}
+        : config(config), graphicsObjects(graphicsObjects),
+          customObjectTransforms(std::unordered_map<int, std::vector<float>>()) { }
+
+RenderPass::RenderPass(RenderPassConfig config, std::vector<std::shared_ptr<::GraphicsObjectInterface>> graphicsObjects,
+                       std::unordered_map<int, std::vector<float>> customObjectTransforms)
+        : config(config), graphicsObjects(graphicsObjects), customObjectTransforms(customObjectTransforms) {}
 
 std::vector<std::shared_ptr<::GraphicsObjectInterface>> RenderPass::getGraphicsObjects() { return graphicsObjects; }
+
+std::unordered_map<int32_t, std::vector<float>> RenderPass::getCustomObjectTransforms() {
+    return customObjectTransforms;
+}
+
+void RenderPass::setCustomObjectTransforms(const std::unordered_map<int32_t, std::vector<float>> &customObjectTransforms) {
+    this->customObjectTransforms = customObjectTransforms;
+}
+
 
 RenderPassConfig RenderPass::getRenderPassConfig() { return config; }

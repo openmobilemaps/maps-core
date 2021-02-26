@@ -10,16 +10,27 @@
 
 #pragma once
 
+#include <unordered_map>
 #include "GraphicsObjectInterface.h"
 #include "RenderPassInterface.h"
 
 class RenderPass : public RenderPassInterface {
-  public:
+public:
     RenderPass(RenderPassConfig config, std::vector<std::shared_ptr<::GraphicsObjectInterface>> graphicsObjects);
+
+    RenderPass(RenderPassConfig config, std::vector<std::shared_ptr<::GraphicsObjectInterface>> graphicsObjects,
+               std::unordered_map<int, std::vector<float>> customObjectTransforms);
+
     virtual std::vector<std::shared_ptr<::GraphicsObjectInterface>> getGraphicsObjects() override;
+
+    virtual std::unordered_map<int32_t, std::vector<float>> getCustomObjectTransforms() override;
+
+    virtual void setCustomObjectTransforms(const std::unordered_map<int32_t, std::vector<float>> & customObjectTransforms) override;
+
     virtual RenderPassConfig getRenderPassConfig() override;
 
-  private:
+private:
     RenderPassConfig config;
     std::vector<std::shared_ptr<::GraphicsObjectInterface>> graphicsObjects;
+    std::unordered_map<int, std::vector<float>> customObjectTransforms;
 };

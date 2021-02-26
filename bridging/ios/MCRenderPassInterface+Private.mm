@@ -40,6 +40,19 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setCustomObjectTransforms:(nonnull NSDictionary<NSNumber *, NSArray<NSNumber *> *> *)customObjectTransforms {
+    try {
+        _cppRefHandle.get()->setCustomObjectTransforms(::djinni::Map<::djinni::I32, ::djinni::List<::djinni::F32>>::toCpp(customObjectTransforms));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nonnull NSDictionary<NSNumber *, NSArray<NSNumber *> *> *)getCustomObjectTransforms {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getCustomObjectTransforms();
+        return ::djinni::Map<::djinni::I32, ::djinni::List<::djinni::F32>>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nonnull MCRenderPassConfig *)getRenderPassConfig {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getRenderPassConfig();
@@ -61,6 +74,19 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getGraphicsObjects];
             return ::djinni::List<::djinni_generated::GraphicsObjectInterface>::toCpp(objcpp_result_);
+        }
+    }
+    void setCustomObjectTransforms(const std::unordered_map<int32_t, std::vector<float>> & c_customObjectTransforms) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setCustomObjectTransforms:(::djinni::Map<::djinni::I32, ::djinni::List<::djinni::F32>>::fromCpp(c_customObjectTransforms))];
+        }
+    }
+    std::unordered_map<int32_t, std::vector<float>> getCustomObjectTransforms() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getCustomObjectTransforms];
+            return ::djinni::Map<::djinni::I32, ::djinni::List<::djinni::F32>>::toCpp(objcpp_result_);
         }
     }
     ::RenderPassConfig getRenderPassConfig() override

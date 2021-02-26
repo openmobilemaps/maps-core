@@ -19,15 +19,24 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
                          const std::shared_ptr<CameraInterface> &camera) {
 
     auto mvpMatrix = camera->getMvpMatrix();
-    auto mvpMatrixPointer = (int64_t)mvpMatrix.data();
+    auto mvpMatrixPointer = (int64_t) mvpMatrix.data();
 
     renderingContext->setupDrawFrame();
 
     while (!renderQueue.empty()) {
         auto pass = renderQueue.front();
 
-        for (const auto &object : pass->getGraphicsObjects()) {
-            object->render(renderingContext, pass->getRenderPassConfig(), mvpMatrixPointer);
+        const auto &graphicsObjects = pass->getGraphicsObjects();
+        const auto &customTransforms = pass->getCustomObjectTransforms();
+        int numGraphicsObjects = graphicsObjects.size();
+        for (int i = 0; i < numGraphicsObjects; i++) {
+            const auto &object = graphicsObjects.at(i);
+            if (customTransforms.count(i) > 0) {
+                object->render(renderingContext, pass->getRenderPassConfig(),
+                               (int64_t) customTransforms.at(i).data());
+            } else {
+                object->render(renderingContext, pass->getRenderPassConfig(), mvpMatrixPointer);
+            }
         }
 
         renderQueue.pop();

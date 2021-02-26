@@ -152,6 +152,22 @@ std::vector<float> MapCamera2d::getMvpMatrix() {
     return newMvpMatrix;
 }
 
+std::vector<float>
+MapCamera2d::getInvariantMvpMatrix(const std::vector<float> &cameraMatrix, const Coord &coordinate, bool rotationInvariant) {
+    Coord renderCoord = conversionHelper->convertToRenderSystem(coordinate);
+    std::vector<float> matrix = cameraMatrix;
+
+    Matrix::translateM(matrix, 0, renderCoord.x, renderCoord.y, renderCoord.z);
+    double zoomFactor = screenPixelAsRealMeterFactor * zoom;
+    Matrix::scaleM(matrix, 0.0, zoomFactor, zoomFactor, 1.0);
+
+    if (rotationInvariant) {
+        Matrix::rotateM(matrix, 0.0, -angle, 0.0, 0.0, 1.0);
+    }
+
+    return matrix;
+}
+
 RectCoord MapCamera2d::getVisibleRect() {
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
     double zoomFactor = screenPixelAsRealMeterFactor * zoom;

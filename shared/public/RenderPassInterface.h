@@ -4,7 +4,9 @@
 #pragma once
 
 #include "GraphicsObjectInterface.h"
+#include <cstdint>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 struct RenderPassConfig;
@@ -14,6 +16,10 @@ public:
     virtual ~RenderPassInterface() {}
 
     virtual std::vector<std::shared_ptr<::GraphicsObjectInterface>> getGraphicsObjects() = 0;
+
+    virtual void setCustomObjectTransforms(const std::unordered_map<int32_t, std::vector<float>> & customObjectTransforms) = 0;
+
+    virtual std::unordered_map<int32_t, std::vector<float>> getCustomObjectTransforms() = 0;
 
     virtual RenderPassConfig getRenderPassConfig() = 0;
 };

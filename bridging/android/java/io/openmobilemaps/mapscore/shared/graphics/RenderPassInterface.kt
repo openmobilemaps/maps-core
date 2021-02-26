@@ -9,6 +9,10 @@ abstract class RenderPassInterface {
 
     abstract fun getGraphicsObjects(): ArrayList<io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface>
 
+    abstract fun setCustomObjectTransforms(customObjectTransforms: HashMap<Int, ArrayList<Float>>)
+
+    abstract fun getCustomObjectTransforms(): HashMap<Int, ArrayList<Float>>
+
     abstract fun getRenderPassConfig(): RenderPassConfig
 
     private class CppProxy : RenderPassInterface {
@@ -34,6 +38,18 @@ abstract class RenderPassInterface {
             return native_getGraphicsObjects(this.nativeRef)
         }
         private external fun native_getGraphicsObjects(_nativeRef: Long): ArrayList<io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface>
+
+        override fun setCustomObjectTransforms(customObjectTransforms: HashMap<Int, ArrayList<Float>>) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setCustomObjectTransforms(this.nativeRef, customObjectTransforms)
+        }
+        private external fun native_setCustomObjectTransforms(_nativeRef: Long, customObjectTransforms: HashMap<Int, ArrayList<Float>>)
+
+        override fun getCustomObjectTransforms(): HashMap<Int, ArrayList<Float>> {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getCustomObjectTransforms(this.nativeRef)
+        }
+        private external fun native_getCustomObjectTransforms(_nativeRef: Long): HashMap<Int, ArrayList<Float>>
 
         override fun getRenderPassConfig(): RenderPassConfig {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

@@ -19,7 +19,7 @@
 #include <map>
 
 PolygonLayer::PolygonLayer()
-    : isHidden(false) {}
+        : isHidden(false) {}
 
 void PolygonLayer::setPolygons(const std::vector<PolygonInfo> &polygons) {
     clear();
@@ -79,14 +79,14 @@ void PolygonLayer::add(const PolygonInfo &polygon) {
     auto polygonGraphicsObject = objectFactory->createPolygon(shader->asShaderProgramInterface());
 
     auto polygonObject =
-        std::make_shared<Polygon2dLayerObject>(mapInterface->getCoordinateConverterHelper(), polygonGraphicsObject, shader);
+            std::make_shared<Polygon2dLayerObject>(mapInterface->getCoordinateConverterHelper(), polygonGraphicsObject, shader);
 
     polygonObject->setPositions(polygon.coordinates, polygon.holes, polygon.isConvex);
     polygonObject->setColor(polygon.color);
 
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
-        TaskConfig("PolygonLayer_setup_" + polygon.identifier, 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
-        [=] { polygonGraphicsObject->asGraphicsObject()->setup(mapInterface->getRenderingContext()); }));
+            TaskConfig("PolygonLayer_setup_" + polygon.identifier, 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+            [=] { polygonGraphicsObject->asGraphicsObject()->setup(mapInterface->getRenderingContext()); }));
 
     {
         std::lock_guard<std::recursive_mutex> lock(polygonsMutex);

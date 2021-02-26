@@ -9,6 +9,7 @@
 #include "RectCoord.h"
 #include "Vec2F.h"
 #include <memory>
+#include <vector>
 
 class MapInterface;
 
@@ -47,6 +48,8 @@ public:
     virtual void setPaddingBottom(float padding, bool animated) = 0;
 
     virtual ::RectCoord getVisibleRect() = 0;
+
+    virtual std::vector<float> getInvariantMvpMatrix(const std::vector<float> & cameraMatrix, const ::Coord & coordinate, bool rotationInvariant) = 0;
 
     virtual void addListener(const std::shared_ptr<::MapCamera2dListenerInterface> & listener) = 0;
 

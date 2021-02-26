@@ -34,6 +34,8 @@ private:
         ~JavaProxy();
 
         std::vector<std::shared_ptr<::GraphicsObjectInterface>> getGraphicsObjects() override;
+        void setCustomObjectTransforms(const std::unordered_map<int32_t, std::vector<float>> & customObjectTransforms) override;
+        std::unordered_map<int32_t, std::vector<float>> getCustomObjectTransforms() override;
         ::RenderPassConfig getRenderPassConfig() override;
 
     private:
@@ -42,6 +44,8 @@ private:
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/RenderPassInterface") };
     const jmethodID method_getGraphicsObjects { ::djinni::jniGetMethodID(clazz.get(), "getGraphicsObjects", "()Ljava/util/ArrayList;") };
+    const jmethodID method_setCustomObjectTransforms { ::djinni::jniGetMethodID(clazz.get(), "setCustomObjectTransforms", "(Ljava/util/HashMap;)V") };
+    const jmethodID method_getCustomObjectTransforms { ::djinni::jniGetMethodID(clazz.get(), "getCustomObjectTransforms", "()Ljava/util/HashMap;") };
     const jmethodID method_getRenderPassConfig { ::djinni::jniGetMethodID(clazz.get(), "getRenderPassConfig", "()Lio/openmobilemaps/mapscore/shared/graphics/RenderPassConfig;") };
 };
 

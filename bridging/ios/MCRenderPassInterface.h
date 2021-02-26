@@ -10,6 +10,10 @@
 
 - (nonnull NSArray<id<MCGraphicsObjectInterface>> *)getGraphicsObjects;
 
+- (void)setCustomObjectTransforms:(nonnull NSDictionary<NSNumber *, NSArray<NSNumber *> *> *)customObjectTransforms;
+
+- (nonnull NSDictionary<NSNumber *, NSArray<NSNumber *> *> *)getCustomObjectTransforms;
+
 - (nonnull MCRenderPassConfig *)getRenderPassConfig;
 
 @end
