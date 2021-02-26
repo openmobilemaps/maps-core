@@ -17,6 +17,7 @@
 #include "Vec2D.h"
 #include "Vec2FHelper.h"
 
+#define DEFAULT_ANIM_LENGTH 300
 #define ROTATION_THRESHOLD 20
 
 MapCamera2d::MapCamera2d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi)
@@ -82,6 +83,20 @@ void MapCamera2d::setZoom(double zoom, bool animated) {
 }
 
 double MapCamera2d::getZoom() { return zoom; }
+
+
+void MapCamera2d::setRotation(float angle, bool animated) {
+    double newAngle = fmod(angle + 360.0, 360.0);
+    if (animated) {
+        beginAnimation(newAngle);
+    } else {
+        this->angle = newAngle;
+    }
+}
+
+float MapCamera2d::getRotation() {
+    return angle;
+}
 
 void MapCamera2d::setPaddingLeft(float padding, bool animated) {
     paddingLeft = padding;
@@ -286,6 +301,9 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
                 centerPosition.x += rotDiffX * zoom * screenPixelAsRealMeterFactor;
                 centerPosition.y += rotDiffY * zoom * screenPixelAsRealMeterFactor;
 
+                for (auto listener : listeners) {
+                    listener->onRotationChanged(angle);
+                }
             } else {
                 tempAngle = fmod((tempAngle + (olda - newa) / M_PI * 180.0) + 360.0, 360.0);
                 if (std::abs(tempAngle - angle) >= ROTATION_THRESHOLD) {
@@ -323,7 +341,16 @@ Coord MapCamera2d::coordFromScreenPosition(const ::Vec2F &posScreen) {
 
 void MapCamera2d::beginAnimation(double zoom, Coord centerPosition) {
     cameraAnimation = std::make_optional<CameraAnimation>(
-            {this->centerPosition, this->zoom, centerPosition, zoom, DateHelper::currentTimeMillis(), 300});
+            {this->centerPosition, this->zoom, angle, centerPosition, zoom, angle, DateHelper::currentTimeMillis(),
+             DEFAULT_ANIM_LENGTH});
+
+    mapInterface->invalidate();
+}
+
+void MapCamera2d::beginAnimation(double rotationAngle) {
+    cameraAnimation = std::make_optional<CameraAnimation>(
+            {centerPosition, zoom, angle, centerPosition, zoom, rotationAngle, DateHelper::currentTimeMillis(),
+             DEFAULT_ANIM_LENGTH});
 
     mapInterface->invalidate();
 }
@@ -335,11 +362,13 @@ void MapCamera2d::applyAnimationState() {
 
         if (progress >= 1) {
             zoom = cameraAnimation->targetZoom;
+            angle = cameraAnimation->targetRotation;
             centerPosition.x = cameraAnimation->targetCenterPosition.x;
             centerPosition.y = cameraAnimation->targetCenterPosition.y;
             this->cameraAnimation = std::nullopt;
         } else {
             zoom = cameraAnimation->startZoom + (cameraAnimation->targetZoom - cameraAnimation->startZoom) * std::pow(progress, 2);
+            angle = cameraAnimation->startRotation + (cameraAnimation->targetRotation - cameraAnimation->startRotation) * std::pow(progress, 2);
             centerPosition.x =
                     cameraAnimation->startCenterPosition.x +
                     (cameraAnimation->targetCenterPosition.x - cameraAnimation->startCenterPosition.x) * std::pow(progress, 2);

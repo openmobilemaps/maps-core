@@ -9,6 +9,8 @@ abstract class MapCamera2dListenerInterface {
 
     abstract fun onVisibleBoundsChanged(visibleBounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, zoom: Double)
 
+    abstract fun onRotationChanged(angle: Float)
+
     private class CppProxy : MapCamera2dListenerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -32,5 +34,11 @@ abstract class MapCamera2dListenerInterface {
             native_onVisibleBoundsChanged(this.nativeRef, visibleBounds, zoom)
         }
         private external fun native_onVisibleBoundsChanged(_nativeRef: Long, visibleBounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, zoom: Double)
+
+        override fun onRotationChanged(angle: Float) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_onRotationChanged(this.nativeRef, angle)
+        }
+        private external fun native_onRotationChanged(_nativeRef: Long, angle: Float)
     }
 }

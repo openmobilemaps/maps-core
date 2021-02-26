@@ -82,6 +82,9 @@ map_camera_2d_interface = interface +c {
     set_zoom(zoom: f64, animated: bool);
     get_zoom(): f64;
 
+    setRotation(angle: f32, animated: bool);
+    get_rotation(): f32;
+
     set_min_zoom(min_zoom: f64);
     set_max_zoom(max_zoom: f64);
 

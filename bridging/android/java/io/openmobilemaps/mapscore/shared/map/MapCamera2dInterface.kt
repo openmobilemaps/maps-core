@@ -17,6 +17,10 @@ abstract class MapCamera2dInterface {
 
     abstract fun getZoom(): Double
 
+    abstract fun setRotation(angle: Float, animated: Boolean)
+
+    abstract fun getRotation(): Float
+
     abstract fun setMinZoom(minZoom: Double)
 
     abstract fun setMaxZoom(maxZoom: Double)
@@ -95,6 +99,18 @@ abstract class MapCamera2dInterface {
             return native_getZoom(this.nativeRef)
         }
         private external fun native_getZoom(_nativeRef: Long): Double
+
+        override fun setRotation(angle: Float, animated: Boolean) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setRotation(this.nativeRef, angle, animated)
+        }
+        private external fun native_setRotation(_nativeRef: Long, angle: Float, animated: Boolean)
+
+        override fun getRotation(): Float {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getRotation(this.nativeRef)
+        }
+        private external fun native_getRotation(_nativeRef: Long): Float
 
         override fun setMinZoom(minZoom: Double) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

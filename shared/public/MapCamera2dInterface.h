@@ -28,6 +28,10 @@ public:
 
     virtual double getZoom() = 0;
 
+    virtual void setRotation(float angle, bool animated) = 0;
+
+    virtual float getRotation() = 0;
+
     virtual void setMinZoom(double minZoom) = 0;
 
     virtual void setMaxZoom(double maxZoom) = 0;

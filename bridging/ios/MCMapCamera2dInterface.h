@@ -30,6 +30,11 @@
 
 - (double)getZoom;
 
+- (void)setRotation:(float)angle
+           animated:(BOOL)animated;
+
+- (float)getRotation;
+
 - (void)setMinZoom:(double)minZoom;
 
 - (void)setMaxZoom:(double)maxZoom;
