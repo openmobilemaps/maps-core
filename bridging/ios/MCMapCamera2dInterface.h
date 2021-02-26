@@ -30,9 +30,16 @@
 
 - (double)getZoom;
 
+- (void)setRotation:(float)angle
+           animated:(BOOL)animated;
+
+- (float)getRotation;
+
 - (void)setMinZoom:(double)minZoom;
 
 - (void)setMaxZoom:(double)maxZoom;
+
+- (void)setBounds:(nonnull MCRectCoord *)bounds;
 
 - (void)setPaddingLeft:(float)padding
               animated:(BOOL)animated;

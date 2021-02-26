@@ -41,3 +41,7 @@ void Tiled2dMapLayer::show() { isHidden = false; }
 void Tiled2dMapLayer::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom) {
     sourceInterface->onVisibleBoundsChanged(visibleBounds, zoom);
 }
+
+void Tiled2dMapLayer::onRotationChanged(float angle) {
+    // not used
+}

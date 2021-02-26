@@ -54,7 +54,7 @@ and you find the generated .aar library under `build/outputs/aar/`. For developm
 
 <h2>Installation</h2>
 
-Either include the `android` folder as a module in the Android project or moving the generated .aar to e.g. the `app/libs` folder of the project and including it in the project via the apps `build.gradle`:
+Either include the `android` folder as a module in the Android project or move the generated .aar to e.g. the `app/libs` folder of the project and include it in the project via the apps `build.gradle`:
 
 ```
 implementation fileTree(dir: 'libs', include: ['*.aar'])

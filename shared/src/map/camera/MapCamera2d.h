@@ -39,9 +39,15 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual double getZoom() override;
 
+    virtual void setRotation(float angle, bool animated) override;
+
+    virtual float getRotation() override;
+
     virtual void setMinZoom(double zoomMin) override;
 
     virtual void setMaxZoom(double zoomMax) override;
+
+    virtual void setBounds(const ::RectCoord & bounds) override;
 
     virtual void setPaddingLeft(float padding, bool animated) override;
 
@@ -96,6 +102,8 @@ class MapCamera2d : public MapCamera2dInterface,
     double zoomMin = -1;
     double zoomMax = 200.0;
 
+    RectCoord bounds;
+
     struct CameraConfiguration {
         bool rotationEnabled = true;
         bool doubleClickZoomEnabled = true;
@@ -112,8 +120,10 @@ class MapCamera2d : public MapCamera2dInterface,
     struct CameraAnimation {
         Coord startCenterPosition;
         double startZoom;
+        double startRotation;
         Coord targetCenterPosition;
         double targetZoom;
+        double targetRotation;
         long long startTime;
         long long duration;
     };
@@ -121,7 +131,9 @@ class MapCamera2d : public MapCamera2dInterface,
     std::optional<CameraAnimation> cameraAnimation;
 
     void beginAnimation(double zoom, Coord centerPosition);
+    void beginAnimation(double rotationAngle);
     void applyAnimationState();
 
-    Coord getPaddingCorrectedCenterPosition();
+    Coord getBoundsCorrectedCoords(const Coord &coords);
+
 };

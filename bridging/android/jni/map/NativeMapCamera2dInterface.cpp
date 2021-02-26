@@ -86,6 +86,26 @@ CJNIEXPORT jdouble JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1setRotation(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jfloat j_angle, jboolean j_animated)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        ref->setRotation(::djinni::F32::toCpp(jniEnv, j_angle),
+                         ::djinni::Bool::toCpp(jniEnv, j_animated));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT jfloat JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1getRotation(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        auto r = ref->getRotation();
+        return ::djinni::release(::djinni::F32::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1setMinZoom(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jdouble j_minZoom)
 {
     try {
@@ -101,6 +121,15 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dIn
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
         ref->setMaxZoom(::djinni::F64::toCpp(jniEnv, j_maxZoom));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1setBounds(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRectCoord::JniType j_bounds)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        ref->setBounds(::djinni_generated::NativeRectCoord::toCpp(jniEnv, j_bounds));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

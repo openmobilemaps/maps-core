@@ -85,6 +85,21 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setRotation:(float)angle
+           animated:(BOOL)animated {
+    try {
+        _cppRefHandle.get()->setRotation(::djinni::F32::toCpp(angle),
+                                         ::djinni::Bool::toCpp(animated));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (float)getRotation {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getRotation();
+        return ::djinni::F32::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)setMinZoom:(double)minZoom {
     try {
         _cppRefHandle.get()->setMinZoom(::djinni::F64::toCpp(minZoom));
@@ -94,6 +109,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)setMaxZoom:(double)maxZoom {
     try {
         _cppRefHandle.get()->setMaxZoom(::djinni::F64::toCpp(maxZoom));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setBounds:(nonnull MCRectCoord *)bounds {
+    try {
+        _cppRefHandle.get()->setBounds(::djinni_generated::RectCoord::toCpp(bounds));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

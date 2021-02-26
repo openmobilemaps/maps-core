@@ -34,6 +34,7 @@ private:
         ~JavaProxy();
 
         void onVisibleBoundsChanged(const ::RectCoord & visibleBounds, double zoom) override;
+        void onRotationChanged(float angle) override;
 
     private:
         friend ::djinni::JniInterface<::MapCamera2dListenerInterface, ::djinni_generated::NativeMapCamera2dListenerInterface>;
@@ -41,6 +42,7 @@ private:
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/camera/MapCamera2dListenerInterface") };
     const jmethodID method_onVisibleBoundsChanged { ::djinni::jniGetMethodID(clazz.get(), "onVisibleBoundsChanged", "(Lio/openmobilemaps/mapscore/shared/map/coordinates/RectCoord;D)V") };
+    const jmethodID method_onRotationChanged { ::djinni::jniGetMethodID(clazz.get(), "onRotationChanged", "(F)V") };
 };
 
 }  // namespace djinni_generated

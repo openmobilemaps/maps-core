@@ -17,9 +17,15 @@ abstract class MapCamera2dInterface {
 
     abstract fun getZoom(): Double
 
+    abstract fun setRotation(angle: Float, animated: Boolean)
+
+    abstract fun getRotation(): Float
+
     abstract fun setMinZoom(minZoom: Double)
 
     abstract fun setMaxZoom(maxZoom: Double)
+
+    abstract fun setBounds(bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord)
 
     abstract fun setPaddingLeft(padding: Float, animated: Boolean)
 
@@ -94,6 +100,18 @@ abstract class MapCamera2dInterface {
         }
         private external fun native_getZoom(_nativeRef: Long): Double
 
+        override fun setRotation(angle: Float, animated: Boolean) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setRotation(this.nativeRef, angle, animated)
+        }
+        private external fun native_setRotation(_nativeRef: Long, angle: Float, animated: Boolean)
+
+        override fun getRotation(): Float {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getRotation(this.nativeRef)
+        }
+        private external fun native_getRotation(_nativeRef: Long): Float
+
         override fun setMinZoom(minZoom: Double) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_setMinZoom(this.nativeRef, minZoom)
@@ -105,6 +123,12 @@ abstract class MapCamera2dInterface {
             native_setMaxZoom(this.nativeRef, maxZoom)
         }
         private external fun native_setMaxZoom(_nativeRef: Long, maxZoom: Double)
+
+        override fun setBounds(bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setBounds(this.nativeRef, bounds)
+        }
+        private external fun native_setBounds(_nativeRef: Long, bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord)
 
         override fun setPaddingLeft(padding: Float, animated: Boolean) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

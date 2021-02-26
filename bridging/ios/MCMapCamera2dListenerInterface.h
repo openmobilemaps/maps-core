@@ -10,4 +10,6 @@
 - (void)onVisibleBoundsChanged:(nonnull MCRectCoord *)visibleBounds
                           zoom:(double)zoom;
 
+- (void)onRotationChanged:(float)angle;
+
 @end

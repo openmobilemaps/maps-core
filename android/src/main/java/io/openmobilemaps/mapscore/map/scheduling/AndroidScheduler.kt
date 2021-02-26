@@ -94,9 +94,13 @@ class AndroidScheduler(private val schedulerCallback: AndroidSchedulerCallback) 
 		}
 	}
 
-	fun launchCoroutine(context: CoroutineContext = EmptyCoroutineContext,
-						start: CoroutineStart = CoroutineStart.DEFAULT,
-						block: suspend CoroutineScope.() -> Unit) {
-		coroutineScope.launch(context, start, block)
+	fun launchCoroutine(
+		context: CoroutineContext = EmptyCoroutineContext,
+		start: CoroutineStart = CoroutineStart.DEFAULT,
+		block: suspend CoroutineScope.() -> Unit
+	) {
+		if (isResumed.get()) {
+			coroutineScope.launch(context, start, block)
+		}
 	}
 }
