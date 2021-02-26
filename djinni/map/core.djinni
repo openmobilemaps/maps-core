@@ -85,6 +85,8 @@ map_camera_2d_interface = interface +c {
     set_min_zoom(min_zoom: f64);
     set_max_zoom(max_zoom: f64);
 
+    set_bounds(bounds: rect_coord);
+
     set_padding_left(padding: f32, animated: bool);
     set_padding_right(padding: f32, animated: bool);
     set_padding_top(padding: f32, animated: bool);

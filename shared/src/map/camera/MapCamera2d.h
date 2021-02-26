@@ -43,6 +43,8 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual void setMaxZoom(double zoomMax) override;
 
+    virtual void setBounds(const ::RectCoord & bounds) override;
+
     virtual void setPaddingLeft(float padding, bool animated) override;
 
     virtual void setPaddingRight(float padding, bool animated) override;
@@ -96,6 +98,8 @@ class MapCamera2d : public MapCamera2dInterface,
     double zoomMin = -1;
     double zoomMax = 200.0;
 
+    RectCoord bounds;
+
     struct CameraConfiguration {
         bool rotationEnabled = true;
         bool doubleClickZoomEnabled = true;
@@ -123,5 +127,6 @@ class MapCamera2d : public MapCamera2dInterface,
     void beginAnimation(double zoom, Coord centerPosition);
     void applyAnimationState();
 
-    Coord getPaddingCorrectedCenterPosition();
+    Coord getBoundsCorrectedCoords(const Coord &coords);
+
 };

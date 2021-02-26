@@ -97,6 +97,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setBounds:(nonnull MCRectCoord *)bounds {
+    try {
+        _cppRefHandle.get()->setBounds(::djinni_generated::RectCoord::toCpp(bounds));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)setPaddingLeft:(float)padding
               animated:(BOOL)animated {
     try {

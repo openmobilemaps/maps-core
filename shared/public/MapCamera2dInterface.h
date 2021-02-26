@@ -32,6 +32,8 @@ public:
 
     virtual void setMaxZoom(double maxZoom) = 0;
 
+    virtual void setBounds(const ::RectCoord & bounds) = 0;
+
     virtual void setPaddingLeft(float padding, bool animated) = 0;
 
     virtual void setPaddingRight(float padding, bool animated) = 0;

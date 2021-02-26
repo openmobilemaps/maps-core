@@ -21,6 +21,8 @@ abstract class MapCamera2dInterface {
 
     abstract fun setMaxZoom(maxZoom: Double)
 
+    abstract fun setBounds(bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord)
+
     abstract fun setPaddingLeft(padding: Float, animated: Boolean)
 
     abstract fun setPaddingRight(padding: Float, animated: Boolean)
@@ -105,6 +107,12 @@ abstract class MapCamera2dInterface {
             native_setMaxZoom(this.nativeRef, maxZoom)
         }
         private external fun native_setMaxZoom(_nativeRef: Long, maxZoom: Double)
+
+        override fun setBounds(bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setBounds(this.nativeRef, bounds)
+        }
+        private external fun native_setBounds(_nativeRef: Long, bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord)
 
         override fun setPaddingLeft(padding: Float, animated: Boolean) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

@@ -138,23 +138,23 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 		mapInterface.setBackgroundColor(color)
 	}
 
-	fun addLayer(layer: LayerInterface) {
+	open fun addLayer(layer: LayerInterface) {
 		mapInterface.addLayer(layer)
 	}
 
-	fun insertLayerAt(layer: LayerInterface, at: Int) {
+	open fun insertLayerAt(layer: LayerInterface, at: Int) {
 		mapInterface.insertLayerAt(layer, at)
 	}
 
-	fun insertLayerAbove(layer: LayerInterface, above: LayerInterface) {
+	open fun insertLayerAbove(layer: LayerInterface, above: LayerInterface) {
 		mapInterface.insertLayerAbove(layer, above)
 	}
 
-	fun insertLayerBelow(layer: LayerInterface, below: LayerInterface) {
+	open fun insertLayerBelow(layer: LayerInterface, below: LayerInterface) {
 		mapInterface.insertLayerBelow(layer, below)
 	}
 
-	fun removeLayer(layer: LayerInterface) {
+	open fun removeLayer(layer: LayerInterface) {
 		mapInterface.removeLayer(layer)
 	}
 

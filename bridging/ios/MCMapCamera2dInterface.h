@@ -34,6 +34,8 @@
 
 - (void)setMaxZoom:(double)maxZoom;
 
+- (void)setBounds:(nonnull MCRectCoord *)bounds;
+
 - (void)setPaddingLeft:(float)padding
               animated:(BOOL)animated;
 
