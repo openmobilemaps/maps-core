@@ -35,3 +35,4 @@ void Line2dLayerObject::setPositions(std::vector<Coord> positions) {
 std::shared_ptr<GraphicsObjectInterface> Line2dLayerObject::getLineObject() { return line->asGraphicsObject(); }
 
 std::shared_ptr<LineShaderProgramInterface> Line2dLayerObject::getShaderProgram() { return shader->asLineShaderProgramInterface(); }
+
