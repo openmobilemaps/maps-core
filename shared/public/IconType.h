@@ -5,16 +5,18 @@
 
 #include <functional>
 
-enum class IconScaleType : int {
+enum class IconType : int {
     SCALE_INVARIANT,
+    ROTATION_INVARIANT,
+    INVARIANT,
     FIXED,
 };
 
 namespace std {
 
 template <>
-struct hash<::IconScaleType> {
-    size_t operator()(::IconScaleType type) const {
+struct hash<::IconType> {
+    size_t operator()(::IconType type) const {
         return std::hash<int>()(static_cast<int>(type));
     }
 };

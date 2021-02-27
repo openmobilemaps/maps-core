@@ -55,8 +55,9 @@
 
 - (nonnull MCRectCoord *)getVisibleRect;
 
-- (nonnull NSArray<NSNumber *> *)getInvariantMvpMatrix:(nonnull NSArray<NSNumber *> *)cameraMatrix
+- (nonnull NSArray<NSNumber *> *)getInvariantMvpMatrix:(nonnull NSArray<NSNumber *> *)mvpMatrix
                                             coordinate:(nonnull MCCoord *)coordinate
+                                        scaleInvariant:(BOOL)scaleInvariant
                                      rotationInvariant:(BOOL)rotationInvariant;
 
 - (void)addListener:(nullable id<MCMapCamera2dListenerInterface>)listener;

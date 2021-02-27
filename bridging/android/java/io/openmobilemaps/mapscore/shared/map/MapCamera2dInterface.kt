@@ -37,7 +37,7 @@ abstract class MapCamera2dInterface {
 
     abstract fun getVisibleRect(): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord
 
-    abstract fun getInvariantMvpMatrix(cameraMatrix: ArrayList<Float>, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, rotationInvariant: Boolean): ArrayList<Float>
+    abstract fun getInvariantMvpMatrix(mvpMatrix: ArrayList<Float>, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, scaleInvariant: Boolean, rotationInvariant: Boolean): ArrayList<Float>
 
     abstract fun addListener(listener: io.openmobilemaps.mapscore.shared.map.camera.MapCamera2dListenerInterface)
 
@@ -162,11 +162,11 @@ abstract class MapCamera2dInterface {
         }
         private external fun native_getVisibleRect(_nativeRef: Long): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord
 
-        override fun getInvariantMvpMatrix(cameraMatrix: ArrayList<Float>, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, rotationInvariant: Boolean): ArrayList<Float> {
+        override fun getInvariantMvpMatrix(mvpMatrix: ArrayList<Float>, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, scaleInvariant: Boolean, rotationInvariant: Boolean): ArrayList<Float> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_getInvariantMvpMatrix(this.nativeRef, cameraMatrix, coordinate, rotationInvariant)
+            return native_getInvariantMvpMatrix(this.nativeRef, mvpMatrix, coordinate, scaleInvariant, rotationInvariant)
         }
-        private external fun native_getInvariantMvpMatrix(_nativeRef: Long, cameraMatrix: ArrayList<Float>, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, rotationInvariant: Boolean): ArrayList<Float>
+        private external fun native_getInvariantMvpMatrix(_nativeRef: Long, mvpMatrix: ArrayList<Float>, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, scaleInvariant: Boolean, rotationInvariant: Boolean): ArrayList<Float>
 
         override fun addListener(listener: io.openmobilemaps.mapscore.shared.map.camera.MapCamera2dListenerInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

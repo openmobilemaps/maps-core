@@ -19,13 +19,13 @@ abstract class IconInfoInterface {
 
     abstract fun getIconSize(): io.openmobilemaps.mapscore.shared.graphics.common.Vec2F
 
-    abstract fun setScaleType(scaleType: IconScaleType)
+    abstract fun setType(scaleType: IconType)
 
-    abstract fun getScaleType(): IconScaleType
+    abstract fun getType(): IconType
 
     companion object {
         @JvmStatic
-        fun create(identifier: String, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, texture: io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface, iconSize: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F, scaleType: IconScaleType): IconInfoInterface {
+        fun create(identifier: String, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, texture: io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface, iconSize: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F, scaleType: IconType): IconInfoInterface {
             return CppProxy.create(identifier, coordinate, texture, iconSize, scaleType)
         }
     }
@@ -84,21 +84,21 @@ abstract class IconInfoInterface {
         }
         private external fun native_getIconSize(_nativeRef: Long): io.openmobilemaps.mapscore.shared.graphics.common.Vec2F
 
-        override fun setScaleType(scaleType: IconScaleType) {
+        override fun setType(scaleType: IconType) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setScaleType(this.nativeRef, scaleType)
+            native_setType(this.nativeRef, scaleType)
         }
-        private external fun native_setScaleType(_nativeRef: Long, scaleType: IconScaleType)
+        private external fun native_setType(_nativeRef: Long, scaleType: IconType)
 
-        override fun getScaleType(): IconScaleType {
+        override fun getType(): IconType {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_getScaleType(this.nativeRef)
+            return native_getType(this.nativeRef)
         }
-        private external fun native_getScaleType(_nativeRef: Long): IconScaleType
+        private external fun native_getType(_nativeRef: Long): IconType
 
         companion object {
             @JvmStatic
-            external fun create(identifier: String, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, texture: io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface, iconSize: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F, scaleType: IconScaleType): IconInfoInterface
+            external fun create(identifier: String, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, texture: io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface, iconSize: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F, scaleType: IconType): IconInfoInterface
         }
     }
 }

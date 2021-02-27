@@ -3,7 +3,9 @@
 
 package io.openmobilemaps.mapscore.shared.map.layers.icon
 
-enum class IconScaleType {
+enum class IconType {
     SCALE_INVARIANT,
+    ROTATION_INVARIANT,
+    INVARIANT,
     FIXED,
 }

@@ -13,6 +13,6 @@
 
 std::shared_ptr<IconInfoInterface> IconInfoInterface::create(const std::string &identifier, const ::Coord &coordinate,
                                                              const std::shared_ptr<::TextureHolderInterface> &texture,
-                                                             const ::Vec2F &iconSize, IconScaleType scaleType) {
-    return std::make_shared<IconInfo>(identifier, coordinate, texture, iconSize, scaleType);
+                                                             const ::Vec2F &iconSize, IconType type) {
+    return std::make_shared<IconInfo>(identifier, coordinate, texture, iconSize, type);
 }

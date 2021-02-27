@@ -7,7 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "MCCoord+Private.h"
-#import "MCIconScaleType+Private.h"
+#import "MCIconType+Private.h"
 #import "MCTextureHolderInterface+Private.h"
 #import "MCVec2F+Private.h"
 #include <exception>
@@ -38,13 +38,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
                               coordinate:(nonnull MCCoord *)coordinate
                                  texture:(nullable id<MCTextureHolderInterface>)texture
                                 iconSize:(nonnull MCVec2F *)iconSize
-                               scaleType:(MCIconScaleType)scaleType {
+                               scaleType:(MCIconType)scaleType {
     try {
         auto objcpp_result_ = ::IconInfoInterface::create(::djinni::String::toCpp(identifier),
                                                           ::djinni_generated::Coord::toCpp(coordinate),
                                                           ::djinni_generated::TextureHolderInterface::toCpp(texture),
                                                           ::djinni_generated::Vec2F::toCpp(iconSize),
-                                                          ::djinni::Enum<::IconScaleType, MCIconScaleType>::toCpp(scaleType));
+                                                          ::djinni::Enum<::IconType, MCIconType>::toCpp(scaleType));
         return ::djinni_generated::IconInfoInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -89,16 +89,16 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setScaleType:(MCIconScaleType)scaleType {
+- (void)setType:(MCIconType)scaleType {
     try {
-        _cppRefHandle.get()->setScaleType(::djinni::Enum<::IconScaleType, MCIconScaleType>::toCpp(scaleType));
+        _cppRefHandle.get()->setType(::djinni::Enum<::IconType, MCIconType>::toCpp(scaleType));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (MCIconScaleType)getScaleType {
+- (MCIconType)getType {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->getScaleType();
-        return ::djinni::Enum<::IconScaleType, MCIconScaleType>::fromCpp(objcpp_result_);
+        auto objcpp_result_ = _cppRefHandle.get()->getType();
+        return ::djinni::Enum<::IconType, MCIconType>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

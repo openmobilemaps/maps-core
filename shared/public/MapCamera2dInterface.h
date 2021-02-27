@@ -49,7 +49,7 @@ public:
 
     virtual ::RectCoord getVisibleRect() = 0;
 
-    virtual std::vector<float> getInvariantMvpMatrix(const std::vector<float> & cameraMatrix, const ::Coord & coordinate, bool rotationInvariant) = 0;
+    virtual std::vector<float> getInvariantMvpMatrix(const std::vector<float> & mvpMatrix, const ::Coord & coordinate, bool scaleInvariant, bool rotationInvariant) = 0;
 
     virtual void addListener(const std::shared_ptr<::MapCamera2dListenerInterface> & listener) = 0;
 

@@ -16,7 +16,7 @@
 
 class IconInfo : public IconInfoInterface {
 public:
-    IconInfo(const std::string & identifier, const ::Coord & coordinate, const std::shared_ptr<::TextureHolderInterface> & texture, const ::Vec2F & iconSize, IconScaleType scaleType);
+    IconInfo(const std::string & identifier, const ::Coord & coordinate, const std::shared_ptr<::TextureHolderInterface> & texture, const ::Vec2F & iconSize, IconType type);
 
     virtual ~IconInfo() {}
 
@@ -32,16 +32,16 @@ public:
 
     virtual ::Vec2F getIconSize() override;
 
-    virtual void setScaleType(IconScaleType scaleType) override;
+    virtual void setType(IconType type) override;
 
-    virtual IconScaleType getScaleType() override;
+    virtual IconType getType() override;
 
 private:
     std::string identifier;
     Coord coordinate;
     std::shared_ptr<::TextureHolderInterface> texture;
     Vec2F iconSize;
-    IconScaleType scaleType;
+    IconType type;
 };
 
 

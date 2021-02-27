@@ -9,13 +9,13 @@
 #include <memory>
 #include <string>
 
-enum class IconScaleType;
+enum class IconType;
 
 class IconInfoInterface {
 public:
     virtual ~IconInfoInterface() {}
 
-    static std::shared_ptr<IconInfoInterface> create(const std::string & identifier, const ::Coord & coordinate, const std::shared_ptr<::TextureHolderInterface> & texture, const ::Vec2F & iconSize, IconScaleType scaleType);
+    static std::shared_ptr<IconInfoInterface> create(const std::string & identifier, const ::Coord & coordinate, const std::shared_ptr<::TextureHolderInterface> & texture, const ::Vec2F & iconSize, IconType scaleType);
 
     virtual std::string getIdentifier() = 0;
 
@@ -29,7 +29,7 @@ public:
 
     virtual ::Vec2F getIconSize() = 0;
 
-    virtual void setScaleType(IconScaleType scaleType) = 0;
+    virtual void setType(IconType scaleType) = 0;
 
-    virtual IconScaleType getScaleType() = 0;
+    virtual IconType getType() = 0;
 };

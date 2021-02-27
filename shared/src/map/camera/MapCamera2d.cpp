@@ -153,19 +153,27 @@ std::vector<float> MapCamera2d::getMvpMatrix() {
 }
 
 std::vector<float>
-MapCamera2d::getInvariantMvpMatrix(const std::vector<float> &cameraMatrix, const Coord &coordinate, bool rotationInvariant) {
+MapCamera2d::getInvariantMvpMatrix(const std::vector<float> &mvpMatrix, const ::Coord &coordinate, bool scaleInvariant,
+                                   bool rotationInvariant) {
     Coord renderCoord = conversionHelper->convertToRenderSystem(coordinate);
-    std::vector<float> matrix = cameraMatrix;
+    std::vector<float> newMatrix(16, 0);
 
-    Matrix::translateM(matrix, 0, renderCoord.x, renderCoord.y, renderCoord.z);
-    double zoomFactor = screenPixelAsRealMeterFactor * zoom;
-    Matrix::scaleM(matrix, 0.0, zoomFactor, zoomFactor, 1.0);
+    Matrix::setIdentityM(newMatrix, 0);
+    Matrix::translateM(newMatrix, 0, renderCoord.x, renderCoord.y, renderCoord.z);
 
-    if (rotationInvariant) {
-        Matrix::rotateM(matrix, 0.0, -angle, 0.0, 0.0, 1.0);
+    if (scaleInvariant) {
+        double zoomFactor = screenPixelAsRealMeterFactor * zoom;
+        Matrix::scaleM(newMatrix, 0.0, zoomFactor, zoomFactor, 1.0);
     }
 
-    return matrix;
+    if (rotationInvariant) {
+        Matrix::rotateM(newMatrix, 0.0, -angle, 0.0, 0.0, 1.0);
+    }
+
+    Matrix::translateM(newMatrix, 0, -renderCoord.x, -renderCoord.y, -renderCoord.z);
+
+    Matrix::multiplyMMC(newMatrix, 0, mvpMatrix, 0, newMatrix, 0);
+    return newMatrix;
 }
 
 RectCoord MapCamera2d::getVisibleRect() {
@@ -384,7 +392,8 @@ void MapCamera2d::applyAnimationState() {
             this->cameraAnimation = std::nullopt;
         } else {
             zoom = cameraAnimation->startZoom + (cameraAnimation->targetZoom - cameraAnimation->startZoom) * std::pow(progress, 2);
-            angle = cameraAnimation->startRotation + (cameraAnimation->targetRotation - cameraAnimation->startRotation) * std::pow(progress, 2);
+            angle = cameraAnimation->startRotation +
+                    (cameraAnimation->targetRotation - cameraAnimation->startRotation) * std::pow(progress, 2);
             centerPosition.x =
                     cameraAnimation->startCenterPosition.x +
                     (cameraAnimation->targetCenterPosition.x - cameraAnimation->startCenterPosition.x) * std::pow(progress, 2);

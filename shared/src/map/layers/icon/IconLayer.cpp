@@ -9,7 +9,7 @@
  */
 
 #include <map>
-#include <IconScaleType.h>
+#include <IconType.h>
 #include "IconLayer.h"
 #include "LambdaTask.h"
 #include "RenderPass.h"
@@ -100,6 +100,7 @@ void IconLayer::add(const std::shared_ptr<IconInfoInterface> &icon) {
         std::lock_guard<std::recursive_mutex> lock(iconsMutex);
         icons[icon] = iconObject;
     }
+    generateRenderPasses();
     if (mapInterface)
         mapInterface->invalidate();
 }
@@ -140,14 +141,17 @@ std::vector<std::shared_ptr<::RenderPassInterface>> IconLayer::buildRenderPasses
     if (isHidden) {
         return {};
     } else {
-        // Add current custom MVP if scaletype invariant
         auto camera = mapInterface->getCamera();
-        auto mvpMatrix = std::static_pointer_cast<CameraInterface>(camera)->getMvpMatrix();
+        auto mvpMatrix = std::dynamic_pointer_cast<CameraInterface>(camera)->getMvpMatrix();
         int i = 0;
         std::unordered_map<int, std::vector<float>> transformSet;
         for (auto const &iconTuple : icons) {
-            if (iconTuple.first->getScaleType() == IconScaleType::SCALE_INVARIANT) {
-                transformSet[i] = camera->getInvariantMvpMatrix(mvpMatrix, iconTuple.first->getCoordinate(), true);
+            IconType type = iconTuple.first->getType();
+            if (type != IconType::FIXED) {
+                bool scaleInvariant = type == IconType::INVARIANT || type == IconType::SCALE_INVARIANT;
+                bool rotationInvariant = type == IconType::INVARIANT || type == IconType::ROTATION_INVARIANT;
+                transformSet[i] = camera->getInvariantMvpMatrix(mvpMatrix, iconTuple.first->getCoordinate(), scaleInvariant,
+                                                                rotationInvariant);
             }
             i++;
         }

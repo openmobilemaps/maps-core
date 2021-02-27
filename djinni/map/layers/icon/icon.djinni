@@ -4,19 +4,21 @@
 @extern "../../../yaml/vec_2_f.yaml"
 
 icon_info_interface = interface +c {
-    static create(identifier: string, coordinate: coord, texture: texture_holder_interface, icon_size: vec_2_f, scale_type: icon_scale_type) : icon_info_interface;
+    static create(identifier: string, coordinate: coord, texture: texture_holder_interface, icon_size: vec_2_f, scale_type: icon_type) : icon_info_interface;
     get_identifier() : string;
     get_texture() : texture_holder_interface;
     set_coordinate(coord: coord);
     get_coordinate() : coord;
     set_icon_size(size: vec_2_f);
     get_icon_size() : vec_2_f;
-    set_scale_type(scale_type: icon_scale_type);
-    get_scale_type() : icon_scale_type;
+    set_type(scale_type: icon_type);
+    get_type() : icon_type;
 }
 
-icon_scale_type = enum {
+icon_type = enum {
     scale_invariant;
+    rotation_invariant;
+    invariant;
     fixed;
 }
 

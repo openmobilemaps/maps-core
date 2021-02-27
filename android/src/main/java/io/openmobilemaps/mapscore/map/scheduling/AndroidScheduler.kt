@@ -10,6 +10,7 @@
 
 package io.openmobilemaps.mapscore.map.scheduling
 
+import android.util.Log
 import io.openmobilemaps.mapscore.shared.map.scheduling.*
 import kotlinx.coroutines.*
 import java.util.concurrent.ConcurrentHashMap
@@ -64,6 +65,7 @@ class AndroidScheduler(private val schedulerCallback: AndroidSchedulerCallback) 
 	}
 
 	private fun scheduleTask(task: TaskInterface) {
+		Log.d("SCHEDULE", "schedule: ${task.getConfig().id}")
 		when (task.getConfig().executionEnvironment) {
 			ExecutionEnvironment.GRAPHICS -> schedulerCallback.scheduleOnGlThread(task)
 			ExecutionEnvironment.IO -> coroutineScope.launch(Dispatchers.IO) { task.run() }
@@ -89,7 +91,10 @@ class AndroidScheduler(private val schedulerCallback: AndroidSchedulerCallback) 
 		listOf(TaskPriority.HIGH, TaskPriority.NORMAL, TaskPriority.LOW).forEach { priority ->
 			val taskQueue = taskQueueMap[priority] ?: return@forEach
 			while (taskQueue.isNotEmpty()) {
-				taskQueue.poll()?.let { ::handleNewTask }
+				taskQueue.poll()?.let { it ->
+					Log.d("SCHEDULE", "on resume execute: ${it.getConfig().id}")
+					handleNewTask(it)
+				}
 			}
 		}
 	}

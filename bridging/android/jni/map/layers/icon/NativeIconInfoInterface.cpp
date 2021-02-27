@@ -4,7 +4,7 @@
 #include "NativeIconInfoInterface.h"  // my header
 #include "Marshal.hpp"
 #include "NativeCoord.h"
-#include "NativeIconScaleType.h"
+#include "NativeIconType.h"
 #include "NativeTextureHolderInterface.h"
 #include "NativeVec2F.h"
 
@@ -31,7 +31,7 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_ico
                                              ::djinni_generated::NativeCoord::toCpp(jniEnv, j_coordinate),
                                              ::djinni_generated::NativeTextureHolderInterface::toCpp(jniEnv, j_texture),
                                              ::djinni_generated::NativeVec2F::toCpp(jniEnv, j_iconSize),
-                                             ::djinni_generated::NativeIconScaleType::toCpp(jniEnv, j_scaleType));
+                                             ::djinni_generated::NativeIconType::toCpp(jniEnv, j_scaleType));
         return ::djinni::release(::djinni_generated::NativeIconInfoInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
@@ -94,22 +94,22 @@ CJNIEXPORT ::djinni_generated::NativeVec2F::JniType JNICALL Java_io_openmobilema
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icon_IconInfoInterface_00024CppProxy_native_1setScaleType(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_scaleType)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icon_IconInfoInterface_00024CppProxy_native_1setType(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_scaleType)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::IconInfoInterface>(nativeRef);
-        ref->setScaleType(::djinni_generated::NativeIconScaleType::toCpp(jniEnv, j_scaleType));
+        ref->setType(::djinni_generated::NativeIconType::toCpp(jniEnv, j_scaleType));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icon_IconInfoInterface_00024CppProxy_native_1getScaleType(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icon_IconInfoInterface_00024CppProxy_native_1getType(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::IconInfoInterface>(nativeRef);
-        auto r = ref->getScaleType();
-        return ::djinni::release(::djinni_generated::NativeIconScaleType::fromCpp(jniEnv, r));
+        auto r = ref->getType();
+        return ::djinni::release(::djinni_generated::NativeIconType::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
