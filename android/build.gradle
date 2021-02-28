@@ -53,8 +53,22 @@ android {
 			}
 		}
 	}
+
+	buildFeatures {
+		prefabPublishing true
+	}
+
+	prefab{
+		mapscore_shared {
+			headers ".cpp_includes"
+		}
+	}
 }
 
+task copyHeaders(type: Exec){
+	commandLine './copy_all_header_files_to_include_folder.sh'
+}
+preBuild.dependsOn copyHeaders
 
 task androidSourcesJar(type: Jar) {
 	archiveClassifier = 'sources'
