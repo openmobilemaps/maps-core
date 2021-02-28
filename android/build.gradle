@@ -80,7 +80,7 @@ afterEvaluate {
 			"sdkRelease"(MavenPublication) {
 				from components.release
 				groupId 'io.openmobilemaps.mapscore'
-				artifactId 'sdk-android'
+				artifactId 'mapscore-android'
 				version android.defaultConfig.versionName + readPropertyWithDefault('bintrayVersionSuffix', '')
 				artifact androidSourcesJar
 			}
