@@ -43,11 +43,11 @@ private:
         friend ::djinni::JniInterface<::RenderingContextInterface, ::djinni_generated::NativeRenderingContextInterface>;
     };
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/graphics/RenderingContextInterface") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface") };
     const jmethodID method_onSurfaceCreated { ::djinni::jniGetMethodID(clazz.get(), "onSurfaceCreated", "()V") };
-    const jmethodID method_setViewportSize { ::djinni::jniGetMethodID(clazz.get(), "setViewportSize", "(Lch/ubique/mapscore/shared/graphics/common/Vec2I;)V") };
-    const jmethodID method_getViewportSize { ::djinni::jniGetMethodID(clazz.get(), "getViewportSize", "()Lch/ubique/mapscore/shared/graphics/common/Vec2I;") };
-    const jmethodID method_setBackgroundColor { ::djinni::jniGetMethodID(clazz.get(), "setBackgroundColor", "(Lch/ubique/mapscore/shared/graphics/common/Color;)V") };
+    const jmethodID method_setViewportSize { ::djinni::jniGetMethodID(clazz.get(), "setViewportSize", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2I;)V") };
+    const jmethodID method_getViewportSize { ::djinni::jniGetMethodID(clazz.get(), "getViewportSize", "()Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2I;") };
+    const jmethodID method_setBackgroundColor { ::djinni::jniGetMethodID(clazz.get(), "setBackgroundColor", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Color;)V") };
     const jmethodID method_setupDrawFrame { ::djinni::jniGetMethodID(clazz.get(), "setupDrawFrame", "()V") };
 };
 

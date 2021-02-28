@@ -8,7 +8,6 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-
 #include "AlphaShaderOpenGl.h"
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"

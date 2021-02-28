@@ -39,7 +39,7 @@ private:
         friend ::djinni::JniInterface<::SceneCallbackInterface, ::djinni_generated::NativeSceneCallbackInterface>;
     };
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/graphics/SceneCallbackInterface") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/SceneCallbackInterface") };
     const jmethodID method_invalidate { ::djinni::jniGetMethodID(clazz.get(), "invalidate", "()V") };
 };
 

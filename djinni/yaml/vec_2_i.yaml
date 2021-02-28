@@ -19,14 +19,14 @@ objcpp:
   header: '"MCVec2I+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.graphics.common.Vec2I'
+  typename: 'io.openmobilemaps.mapscore.shared.graphics.common.Vec2I'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.graphics.common.Vec2I'
+  boxed: 'io.openmobilemaps.mapscore.shared.graphics.common.Vec2I'
 jni:
   translator: '::djinni_generated::NativeVec2I'
   header: '"NativeVec2I.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/graphics/common/Vec2I;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2I;'

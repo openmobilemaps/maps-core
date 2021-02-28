@@ -41,10 +41,10 @@ private:
         friend ::djinni::JniInterface<::TouchHandlerInterface, ::djinni_generated::NativeTouchHandlerInterface>;
     };
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/map/controls/TouchHandlerInterface") };
-    const jmethodID method_onTouchEvent { ::djinni::jniGetMethodID(clazz.get(), "onTouchEvent", "(Lch/ubique/mapscore/shared/map/controls/TouchEvent;)V") };
-    const jmethodID method_addListener { ::djinni::jniGetMethodID(clazz.get(), "addListener", "(Lch/ubique/mapscore/shared/map/controls/TouchInterface;)V") };
-    const jmethodID method_removeListener { ::djinni::jniGetMethodID(clazz.get(), "removeListener", "(Lch/ubique/mapscore/shared/map/controls/TouchInterface;)V") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/controls/TouchHandlerInterface") };
+    const jmethodID method_onTouchEvent { ::djinni::jniGetMethodID(clazz.get(), "onTouchEvent", "(Lio/openmobilemaps/mapscore/shared/map/controls/TouchEvent;)V") };
+    const jmethodID method_addListener { ::djinni::jniGetMethodID(clazz.get(), "addListener", "(Lio/openmobilemaps/mapscore/shared/map/controls/TouchInterface;)V") };
+    const jmethodID method_removeListener { ::djinni::jniGetMethodID(clazz.get(), "removeListener", "(Lio/openmobilemaps/mapscore/shared/map/controls/TouchInterface;)V") };
 };
 
 }  // namespace djinni_generated

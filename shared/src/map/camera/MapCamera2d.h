@@ -39,6 +39,16 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual double getZoom() override;
 
+    virtual void setRotation(float angle, bool animated) override;
+
+    virtual float getRotation() override;
+
+    virtual void setMinZoom(double zoomMin) override;
+
+    virtual void setMaxZoom(double zoomMax) override;
+
+    virtual void setBounds(const ::RectCoord & bounds) override;
+
     virtual void setPaddingLeft(float padding, bool animated) override;
 
     virtual void setPaddingRight(float padding, bool animated) override;
@@ -61,9 +71,13 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual bool onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) override;
 
+    virtual void clearTouch() override;
+
     virtual void viewportSizeChanged() override;
 
     virtual RectCoord getVisibleRect() override;
+
+    virtual ::Coord coordFromScreenPosition(const ::Vec2F &posScreen) override;
 
   protected:
     std::set<std::shared_ptr<MapCamera2dListenerInterface>> listeners;
@@ -77,14 +91,21 @@ class MapCamera2d : public MapCamera2dInterface,
     Coord centerPosition;
     double zoom = 0;
     double angle = 0;
+    double tempAngle = 0;
+    bool isRotationThreasholdReached = false;
 
     double paddingLeft = 0;
     double paddingTop = 0;
     double paddingRight = 0;
     double paddingBottom = 0;
 
+    double zoomMin = -1;
+    double zoomMax = 200.0;
+
+    RectCoord bounds;
+
     struct CameraConfiguration {
-        bool rotationEnabled = false;
+        bool rotationEnabled = true;
         bool doubleClickZoomEnabled = true;
         bool twoFingerZoomEnabled = true;
         bool moveEnabled = true;
@@ -94,14 +115,15 @@ class MapCamera2d : public MapCamera2dInterface,
 
     void notifyListeners();
 
-    Coord coordFromScreenPosition(const ::Vec2F &posScreen);
     // MARK: Animations
 
     struct CameraAnimation {
         Coord startCenterPosition;
         double startZoom;
+        double startRotation;
         Coord targetCenterPosition;
         double targetZoom;
+        double targetRotation;
         long long startTime;
         long long duration;
     };
@@ -109,7 +131,9 @@ class MapCamera2d : public MapCamera2dInterface,
     std::optional<CameraAnimation> cameraAnimation;
 
     void beginAnimation(double zoom, Coord centerPosition);
+    void beginAnimation(double rotationAngle);
     void applyAnimationState();
 
-    Coord getPaddingCorrectedCenterPosition();
+    Coord getBoundsCorrectedCoords(const Coord &coords);
+
 };

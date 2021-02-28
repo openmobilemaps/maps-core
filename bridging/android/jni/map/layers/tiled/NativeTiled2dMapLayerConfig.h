@@ -43,12 +43,12 @@ private:
         friend ::djinni::JniInterface<::Tiled2dMapLayerConfig, ::djinni_generated::NativeTiled2dMapLayerConfig>;
     };
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/map/layers/tiled/Tiled2dMapLayerConfig") };
-    const jmethodID method_getBounds { ::djinni::jniGetMethodID(clazz.get(), "getBounds", "()Lch/ubique/mapscore/shared/map/coordinates/RectCoord;") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/layers/tiled/Tiled2dMapLayerConfig") };
+    const jmethodID method_getBounds { ::djinni::jniGetMethodID(clazz.get(), "getBounds", "()Lio/openmobilemaps/mapscore/shared/map/coordinates/RectCoord;") };
     const jmethodID method_getTileUrl { ::djinni::jniGetMethodID(clazz.get(), "getTileUrl", "(III)Ljava/lang/String;") };
     const jmethodID method_getTileIdentifier { ::djinni::jniGetMethodID(clazz.get(), "getTileIdentifier", "(III)Ljava/lang/String;") };
     const jmethodID method_getZoomLevelInfos { ::djinni::jniGetMethodID(clazz.get(), "getZoomLevelInfos", "()Ljava/util/ArrayList;") };
-    const jmethodID method_getZoomInfo { ::djinni::jniGetMethodID(clazz.get(), "getZoomInfo", "()Lch/ubique/mapscore/shared/map/layers/tiled/Tiled2dMapZoomInfo;") };
+    const jmethodID method_getZoomInfo { ::djinni::jniGetMethodID(clazz.get(), "getZoomInfo", "()Lio/openmobilemaps/mapscore/shared/map/layers/tiled/Tiled2dMapZoomInfo;") };
 };
 
 }  // namespace djinni_generated

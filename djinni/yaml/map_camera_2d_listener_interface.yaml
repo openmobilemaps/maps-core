@@ -19,14 +19,14 @@ objcpp:
   header: '"MCMapCamera2dListenerInterface+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.map.camera.MapCamera2dListenerInterface'
+  typename: 'io.openmobilemaps.mapscore.shared.map.camera.MapCamera2dListenerInterface'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.map.camera.MapCamera2dListenerInterface'
+  boxed: 'io.openmobilemaps.mapscore.shared.map.camera.MapCamera2dListenerInterface'
 jni:
   translator: '::djinni_generated::NativeMapCamera2dListenerInterface'
   header: '"NativeMapCamera2dListenerInterface.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/map/camera/MapCamera2dListenerInterface;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/map/camera/MapCamera2dListenerInterface;'

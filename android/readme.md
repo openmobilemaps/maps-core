@@ -54,7 +54,7 @@ and you find the generated .aar library under `build/outputs/aar/`. For developm
 
 <h2>Installation</h2>
 
-Either include the `android` folder as a module in the Android project or moving the generated .aar to e.g. the `app/libs` folder of the project and including it in the project via the apps `build.gradle`:
+Either include the `android` folder as a module in the Android project or move the generated .aar to e.g. the `app/libs` folder of the project and include it in the project via the apps `build.gradle`:
 
 ```
 implementation fileTree(dir: 'libs', include: ['*.aar'])
@@ -90,7 +90,7 @@ The map needs to be initialized with a `MapConfig`, which specifies the coordina
 A standard use-case is to display content from a tile-server as a layer in the map, e.g. one containing data from [OpenStreetMap](https://wiki.openstreetmap.org/). In this example case, the map is a projection in the EPSG:3857 system. Thus the `MapView` is recommended to be initialized with a matching `MapConfig`.
 
 ```kotlin
-mapView.setupMap(MapConfig(CoordinateSystemFactory.getEpsg3857System(), 500000000.0, 1000.0))
+mapView.setupMap(MapConfig(CoordinateSystemFactory.getEpsg3857System()))
 ```
 
 To display the tiles, a Tiled2dMapRasterLayer must be created with both a Tiled2dMapLayerConfig and the implementation of a TextureLoader.
@@ -111,8 +111,8 @@ The `LayerConfig` contains the information needed for the layer to compute the v
 val layerConfig = object : Tiled2dMapLayerConfig() {
 			// Defines the bounds of the layer and implicitly the coordinate system used by the layer as well
 			override fun getBounds(): RectCoord = RectCoord(
-				Coord(CoordinateSystemIdentifiers.EPSG3857(), -20026376.39, 20048966.10, 0.0),
-				Coord(CoordinateSystemIdentifiers.EPSG3857(), 20026376.39, -20048966.10, 0.0)
+				Coord(CoordinateSystemIdentifiers.EPSG3857(), -20037508.34, 20037508.34, 0.0),
+				Coord(CoordinateSystemIdentifiers.EPSG3857(), 20037508.34, -20037508.34, 0.0)
 			)
 
 			// Pattern to create a tile identifier used internally 
@@ -171,6 +171,12 @@ The camera position and zoom can easily be adjusted by manipulating the `Camera2
 mapView.getCamera().moveToCenterPositionZoom(
     Coord(CoordinateSystemIdentifiers.EPSG4326(), 8.378232525377973, 46.962592372639634, 0.0), 
     10000000.0, false)
+```
+
+In the camera, one can also override the default zoom limits with:
+```kotlin
+mapView.getCamera().setMinZoom(5000000.0)
+mapView.getCamera().setMaxZoom(300.0)
 ```
 
 ## License

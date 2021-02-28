@@ -6,7 +6,7 @@
 
 namespace djinni_generated {
 
-NativeTaskInterface::NativeTaskInterface() : ::djinni::JniInterface<::TaskInterface, NativeTaskInterface>("ch/ubique/mapscore/shared/map/scheduling/TaskInterface$CppProxy") {}
+NativeTaskInterface::NativeTaskInterface() : ::djinni::JniInterface<::TaskInterface, NativeTaskInterface>("io/openmobilemaps/mapscore/shared/map/scheduling/TaskInterface$CppProxy") {}
 
 NativeTaskInterface::~NativeTaskInterface() = default;
 
@@ -30,7 +30,7 @@ void NativeTaskInterface::JavaProxy::run() {
     ::djinni::jniExceptionCheck(jniEnv);
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_scheduling_TaskInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_scheduling_TaskInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -38,7 +38,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_scheduling_TaskInterf
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_scheduling_TaskInterface_00024CppProxy_native_1getConfig(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_scheduling_TaskInterface_00024CppProxy_native_1getConfig(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -48,7 +48,7 @@ CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_map_scheduling_TaskInt
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_scheduling_TaskInterface_00024CppProxy_native_1run(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_scheduling_TaskInterface_00024CppProxy_native_1run(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);

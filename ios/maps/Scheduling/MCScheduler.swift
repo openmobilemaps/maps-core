@@ -27,7 +27,7 @@ open class MCScheduler: MCSchedulerInterface {
 
         let config = task.getConfig()
 
-        let delay = TimeInterval(config.delay / 1000)
+        let delay = TimeInterval(Double(config.delay) / 1000.0)
 
         internalSchedulerQueue.asyncAfter(deadline: .now() + delay) {
             self.cleanUpFinishedOutstandingOperations()

@@ -6,7 +6,7 @@
 
 namespace djinni_generated {
 
-NativeCameraInterface::NativeCameraInterface() : ::djinni::JniInterface<::CameraInterface, NativeCameraInterface>("ch/ubique/mapscore/shared/graphics/CameraInterface$CppProxy") {}
+NativeCameraInterface::NativeCameraInterface() : ::djinni::JniInterface<::CameraInterface, NativeCameraInterface>("io/openmobilemaps/mapscore/shared/graphics/CameraInterface$CppProxy") {}
 
 NativeCameraInterface::~NativeCameraInterface() = default;
 
@@ -30,7 +30,7 @@ void NativeCameraInterface::JavaProxy::viewportSizeChanged() {
     ::djinni::jniExceptionCheck(jniEnv);
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_CameraInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_CameraInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -38,7 +38,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_CameraInterface_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_CameraInterface_00024CppProxy_native_1getMvpMatrix(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_CameraInterface_00024CppProxy_native_1getMvpMatrix(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -48,7 +48,7 @@ CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_CameraInterfa
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_CameraInterface_00024CppProxy_native_1viewportSizeChanged(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_CameraInterface_00024CppProxy_native_1viewportSizeChanged(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);

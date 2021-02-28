@@ -8,7 +8,7 @@
 
 namespace djinni_generated {
 
-NativeLine2dInterface::NativeLine2dInterface() : ::djinni::JniInterface<::Line2dInterface, NativeLine2dInterface>("ch/ubique/mapscore/shared/graphics/objects/Line2dInterface$CppProxy") {}
+NativeLine2dInterface::NativeLine2dInterface() : ::djinni::JniInterface<::Line2dInterface, NativeLine2dInterface>("io/openmobilemaps/mapscore/shared/graphics/objects/Line2dInterface$CppProxy") {}
 
 NativeLine2dInterface::~NativeLine2dInterface() = default;
 
@@ -33,7 +33,7 @@ std::shared_ptr<::GraphicsObjectInterface> NativeLine2dInterface::JavaProxy::asG
     return ::djinni_generated::NativeGraphicsObjectInterface::toCpp(jniEnv, jret);
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_Line2dInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_Line2dInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -41,7 +41,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_Line2dIn
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_Line2dInterface_00024CppProxy_native_1setLinePositions(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_positions)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_Line2dInterface_00024CppProxy_native_1setLinePositions(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_positions)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -50,7 +50,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_Line2dIn
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_objects_Line2dInterface_00024CppProxy_native_1asGraphicsObject(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_Line2dInterface_00024CppProxy_native_1asGraphicsObject(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);

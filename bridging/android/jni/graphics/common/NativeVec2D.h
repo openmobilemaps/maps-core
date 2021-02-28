@@ -24,7 +24,7 @@ private:
     NativeVec2D();
     friend ::djinni::JniClass<NativeVec2D>;
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/graphics/common/Vec2D") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/common/Vec2D") };
     const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(DD)V") };
     const jfieldID field_x { ::djinni::jniGetFieldID(clazz.get(), "x", "D") };
     const jfieldID field_y { ::djinni::jniGetFieldID(clazz.get(), "y", "D") };

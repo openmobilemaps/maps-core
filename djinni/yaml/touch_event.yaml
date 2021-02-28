@@ -19,14 +19,14 @@ objcpp:
   header: '"MCTouchEvent+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.map.controls.TouchEvent'
+  typename: 'io.openmobilemaps.mapscore.shared.map.controls.TouchEvent'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.map.controls.TouchEvent'
+  boxed: 'io.openmobilemaps.mapscore.shared.map.controls.TouchEvent'
 jni:
   translator: '::djinni_generated::NativeTouchEvent'
   header: '"NativeTouchEvent.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/map/controls/TouchEvent;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/map/controls/TouchEvent;'

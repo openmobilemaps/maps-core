@@ -7,6 +7,7 @@
 #include "Coord.h"
 #include "MapCamera2dListenerInterface.h"
 #include "RectCoord.h"
+#include "Vec2F.h"
 #include <memory>
 
 class MapInterface;
@@ -27,6 +28,16 @@ public:
 
     virtual double getZoom() = 0;
 
+    virtual void setRotation(float angle, bool animated) = 0;
+
+    virtual float getRotation() = 0;
+
+    virtual void setMinZoom(double minZoom) = 0;
+
+    virtual void setMaxZoom(double maxZoom) = 0;
+
+    virtual void setBounds(const ::RectCoord & bounds) = 0;
+
     virtual void setPaddingLeft(float padding, bool animated) = 0;
 
     virtual void setPaddingRight(float padding, bool animated) = 0;
@@ -40,6 +51,8 @@ public:
     virtual void addListener(const std::shared_ptr<::MapCamera2dListenerInterface> & listener) = 0;
 
     virtual void removeListener(const std::shared_ptr<::MapCamera2dListenerInterface> & listener) = 0;
+
+    virtual ::Coord coordFromScreenPosition(const ::Vec2F & posScreen) = 0;
 
     virtual std::shared_ptr<::CameraInterface> asCameraInterface() = 0;
 };

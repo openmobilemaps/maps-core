@@ -11,6 +11,7 @@
 #import "MCMapCamera2dListenerInterface+Private.h"
 #import "MCMapInterface+Private.h"
 #import "MCRectCoord+Private.h"
+#import "MCVec2F+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -84,6 +85,39 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setRotation:(float)angle
+           animated:(BOOL)animated {
+    try {
+        _cppRefHandle.get()->setRotation(::djinni::F32::toCpp(angle),
+                                         ::djinni::Bool::toCpp(animated));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (float)getRotation {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getRotation();
+        return ::djinni::F32::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setMinZoom:(double)minZoom {
+    try {
+        _cppRefHandle.get()->setMinZoom(::djinni::F64::toCpp(minZoom));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setMaxZoom:(double)maxZoom {
+    try {
+        _cppRefHandle.get()->setMaxZoom(::djinni::F64::toCpp(maxZoom));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setBounds:(nonnull MCRectCoord *)bounds {
+    try {
+        _cppRefHandle.get()->setBounds(::djinni_generated::RectCoord::toCpp(bounds));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)setPaddingLeft:(float)padding
               animated:(BOOL)animated {
     try {
@@ -132,6 +166,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)removeListener:(nullable id<MCMapCamera2dListenerInterface>)listener {
     try {
         _cppRefHandle.get()->removeListener(::djinni_generated::MapCamera2dListenerInterface::toCpp(listener));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nonnull MCCoord *)coordFromScreenPosition:(nonnull MCVec2F *)posScreen {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->coordFromScreenPosition(::djinni_generated::Vec2F::toCpp(posScreen));
+        return ::djinni_generated::Coord::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

@@ -19,14 +19,14 @@ objcpp:
   header: '"MCPolygon2dInterface+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.graphics.objects.Polygon2dInterface'
+  typename: 'io.openmobilemaps.mapscore.shared.graphics.objects.Polygon2dInterface'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.graphics.objects.Polygon2dInterface'
+  boxed: 'io.openmobilemaps.mapscore.shared.graphics.objects.Polygon2dInterface'
 jni:
   translator: '::djinni_generated::NativePolygon2dInterface'
   header: '"NativePolygon2dInterface.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/graphics/objects/Polygon2dInterface;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/graphics/objects/Polygon2dInterface;'

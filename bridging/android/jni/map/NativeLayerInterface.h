@@ -46,10 +46,10 @@ private:
         friend ::djinni::JniInterface<::LayerInterface, ::djinni_generated::NativeLayerInterface>;
     };
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/map/LayerInterface") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/LayerInterface") };
     const jmethodID method_update { ::djinni::jniGetMethodID(clazz.get(), "update", "()V") };
     const jmethodID method_buildRenderPasses { ::djinni::jniGetMethodID(clazz.get(), "buildRenderPasses", "()Ljava/util/ArrayList;") };
-    const jmethodID method_onAdded { ::djinni::jniGetMethodID(clazz.get(), "onAdded", "(Lch/ubique/mapscore/shared/map/MapInterface;)V") };
+    const jmethodID method_onAdded { ::djinni::jniGetMethodID(clazz.get(), "onAdded", "(Lio/openmobilemaps/mapscore/shared/map/MapInterface;)V") };
     const jmethodID method_onRemoved { ::djinni::jniGetMethodID(clazz.get(), "onRemoved", "()V") };
     const jmethodID method_pause { ::djinni::jniGetMethodID(clazz.get(), "pause", "()V") };
     const jmethodID method_resume { ::djinni::jniGetMethodID(clazz.get(), "resume", "()V") };

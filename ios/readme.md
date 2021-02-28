@@ -35,9 +35,12 @@ dependencies: [
 ]
 ```
 
+### iOS 10
+Unfortunately, Swift package is only supported starting with iOS 11. If you need iOS 10 support you have to compile the library as a framework yourself.
+
 ## How to use
 
-### Display tiled raster map in [EPSG3857](https://epsg.io/4326) system
+### Display tiled raster map in [EPSG3857](https://epsg.io/3857) system
 
 #### MCTiled2dMapLayerConfig
 
@@ -57,7 +60,16 @@ class TiledLayerConfig: MCTiled2dMapLayerConfig {
 
     // Defines the bounds of the layer
     func getBounds() -> MCRectCoord {
-      return MCCoordinateSystemFactory.getEpsg3857System().bounds
+      let identifer = MCCoordinateSystemIdentifiers.epsg3857()
+      let topLeft = MCCoord(systemIdentifier: identifer, 
+                            x: -20037508.34, 
+                            y: 20037508.34, z: 0.0)
+      let bottomRight = MCCoord(systemIdentifier: identifer, 
+                                x: 20037508.34, 
+                                y: -20037508.34, z: 0.0)
+      return MCRectCoord(
+        topLeft: topLeft,
+        bottomRight: bottomRight)
     }
 
     // Defines the url-pattern to load tiles. Enter a valid OSM tile server here
@@ -111,9 +123,7 @@ import MapCore
 import MapCoreSharedModule
 
 class MapViewController: UIViewController {
-  var mapConfig = MCMapConfig(mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg3857System(),
-                              zoomMin: 500_000_000,
-                              zoomMax: 1_000)
+  var mapConfig = MCMapConfig(mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg3857System())
 
   lazy var mapView = MCMapView(mapConfig: mapConfig)
   

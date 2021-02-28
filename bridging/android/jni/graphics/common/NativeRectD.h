@@ -24,7 +24,7 @@ private:
     NativeRectD();
     friend ::djinni::JniClass<NativeRectD>;
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/graphics/common/RectD") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/common/RectD") };
     const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(DDDD)V") };
     const jfieldID field_x { ::djinni::jniGetFieldID(clazz.get(), "x", "D") };
     const jfieldID field_y { ::djinni::jniGetFieldID(clazz.get(), "y", "D") };

@@ -42,11 +42,11 @@ private:
         friend ::djinni::JniInterface<::GraphicsObjectInterface, ::djinni_generated::NativeGraphicsObjectInterface>;
     };
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/graphics/objects/GraphicsObjectInterface") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/objects/GraphicsObjectInterface") };
     const jmethodID method_isReady { ::djinni::jniGetMethodID(clazz.get(), "isReady", "()Z") };
-    const jmethodID method_setup { ::djinni::jniGetMethodID(clazz.get(), "setup", "(Lch/ubique/mapscore/shared/graphics/RenderingContextInterface;)V") };
+    const jmethodID method_setup { ::djinni::jniGetMethodID(clazz.get(), "setup", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface;)V") };
     const jmethodID method_clear { ::djinni::jniGetMethodID(clazz.get(), "clear", "()V") };
-    const jmethodID method_render { ::djinni::jniGetMethodID(clazz.get(), "render", "(Lch/ubique/mapscore/shared/graphics/RenderingContextInterface;Lch/ubique/mapscore/shared/graphics/RenderPassConfig;J)V") };
+    const jmethodID method_render { ::djinni::jniGetMethodID(clazz.get(), "render", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface;Lio/openmobilemaps/mapscore/shared/graphics/RenderPassConfig;J)V") };
 };
 
 }  // namespace djinni_generated

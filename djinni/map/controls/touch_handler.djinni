@@ -12,6 +12,7 @@ default_touch_handler_interface = interface +c {
 }
 
 touch_interface = interface +c {
+    on_touch_down(pos_screen: vec_2_f): bool;
     on_click_unconfirmed(pos_screen: vec_2_f) : bool;
     on_click_confirmed(pos_screen: vec_2_f) : bool;
     on_double_click(pos_screen: vec_2_f) : bool;

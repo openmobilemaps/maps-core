@@ -41,8 +41,8 @@ private:
         friend ::djinni::JniInterface<::CoordinateConverterInterface, ::djinni_generated::NativeCoordinateConverterInterface>;
     };
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("ch/ubique/mapscore/shared/map/coordinates/CoordinateConverterInterface") };
-    const jmethodID method_convert { ::djinni::jniGetMethodID(clazz.get(), "convert", "(Lch/ubique/mapscore/shared/map/coordinates/Coord;)Lch/ubique/mapscore/shared/map/coordinates/Coord;") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/coordinates/CoordinateConverterInterface") };
+    const jmethodID method_convert { ::djinni::jniGetMethodID(clazz.get(), "convert", "(Lio/openmobilemaps/mapscore/shared/map/coordinates/Coord;)Lio/openmobilemaps/mapscore/shared/map/coordinates/Coord;") };
     const jmethodID method_getFrom { ::djinni::jniGetMethodID(clazz.get(), "getFrom", "()Ljava/lang/String;") };
     const jmethodID method_getTo { ::djinni::jniGetMethodID(clazz.get(), "getTo", "()Ljava/lang/String;") };
 };

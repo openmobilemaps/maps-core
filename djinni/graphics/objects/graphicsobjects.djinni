@@ -3,6 +3,7 @@
 @extern "../../yaml/shader_program_interface.yaml"
 @extern "../../yaml/line_shader_program_interface.yaml"
 @extern "../../yaml/rect_d.yaml"
+@extern "../../yaml/quad_2d_d.yaml"
 @extern "../../yaml/vec_2_d.yaml"
 
 graphics_object_interface = interface +c +j +o {
@@ -17,13 +18,13 @@ graphics_object_interface = interface +c +j +o {
 }
 
 graphics_object_factory_interface = interface +c +j +o {
-    create_rectangle(shader: shader_program_interface) : rectangle_2d_interface;
+    create_quad(shader: shader_program_interface) : quad_2d_interface;
     create_line(line_shader: line_shader_program_interface) : line_2d_interface;
     create_polygon(shader: shader_program_interface) : polygon_2d_interface;
 }
 
-rectangle_2d_interface = interface +c +j +o {
-    set_frame(frame: rect_d, texture_coordinates: rect_d);
+quad_2d_interface = interface +c +j +o {
+    set_frame(frame: quad_2d_d, texture_coordinates: rect_d);
     load_texture(texture_holder: texture_holder_interface);
     remove_texture();
     as_graphics_object(): graphics_object_interface;

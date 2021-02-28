@@ -35,6 +35,8 @@ class Polygon2dLayerObject : public LayerObjectInterface {
 
     std::shared_ptr<ShaderProgramInterface> getShaderProgram();
 
+    void setColor(const Color &color);
+
   private:
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
     std::shared_ptr<Polygon2dInterface> polygon;

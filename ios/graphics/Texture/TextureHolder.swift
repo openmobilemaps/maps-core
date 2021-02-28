@@ -14,7 +14,7 @@ import MetalKit
 
 @objc
 public class TextureHolder: NSObject {
-    let texture: MTLTexture?
+    let texture: MTLTexture
 
     let textureUsableSize: TextureUsableSize?
 
@@ -51,19 +51,19 @@ public class TextureHolder: NSObject {
 
 extension TextureHolder: MCTextureHolderInterface {
     public func getImageWidth() -> Int32 {
-        Int32(texture?.width ?? 0)
+        Int32(texture.width)
     }
 
     public func getImageHeight() -> Int32 {
-        Int32(texture?.height ?? 0)
+        Int32(texture.height)
     }
 
     public func getTextureWidth() -> Int32 {
-        Int32(textureUsableSize?.width ?? texture?.width ?? 0)
+        Int32(textureUsableSize?.width ?? texture.width)
     }
 
     public func getTextureHeight() -> Int32 {
-        Int32(textureUsableSize?.height ?? texture?.height ?? 0)
+        Int32(textureUsableSize?.height ?? texture.height)
     }
 
     public func attachToGraphics() {}

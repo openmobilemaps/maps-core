@@ -40,6 +40,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)onRotationChanged:(float)angle {
+    try {
+        _cppRefHandle.get()->onRotationChanged(::djinni::F32::toCpp(angle));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class MapCamera2dListenerInterface::ObjcProxy final
@@ -54,6 +60,12 @@ public:
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() onVisibleBoundsChanged:(::djinni_generated::RectCoord::fromCpp(c_visibleBounds))
                                                                         zoom:(::djinni::F64::fromCpp(c_zoom))];
+        }
+    }
+    void onRotationChanged(float c_angle) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() onRotationChanged:(::djinni::F32::fromCpp(c_angle))];
         }
     }
 };

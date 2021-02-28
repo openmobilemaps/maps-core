@@ -19,14 +19,14 @@ objcpp:
   header: '"MCMapConfig+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.map.MapConfig'
+  typename: 'io.openmobilemaps.mapscore.shared.map.MapConfig'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.map.MapConfig'
+  boxed: 'io.openmobilemaps.mapscore.shared.map.MapConfig'
 jni:
   translator: '::djinni_generated::NativeMapConfig'
   header: '"NativeMapConfig.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/map/MapConfig;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/map/MapConfig;'

@@ -19,14 +19,14 @@ objcpp:
   header: '"MCCameraInterface+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.graphics.CameraInterface'
+  typename: 'io.openmobilemaps.mapscore.shared.graphics.CameraInterface'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.graphics.CameraInterface'
+  boxed: 'io.openmobilemaps.mapscore.shared.graphics.CameraInterface'
 jni:
   translator: '::djinni_generated::NativeCameraInterface'
   header: '"NativeCameraInterface.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/graphics/CameraInterface;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/graphics/CameraInterface;'

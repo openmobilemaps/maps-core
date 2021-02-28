@@ -19,14 +19,14 @@ objcpp:
   header: '"MCMapCallbackInterface+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.map.MapCallbackInterface'
+  typename: 'io.openmobilemaps.mapscore.shared.map.MapCallbackInterface'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.map.MapCallbackInterface'
+  boxed: 'io.openmobilemaps.mapscore.shared.map.MapCallbackInterface'
 jni:
   translator: '::djinni_generated::NativeMapCallbackInterface'
   header: '"NativeMapCallbackInterface.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/map/MapCallbackInterface;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/map/MapCallbackInterface;'

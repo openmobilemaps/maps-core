@@ -8,7 +8,7 @@
 
 namespace djinni_generated {
 
-NativeShaderFactoryInterface::NativeShaderFactoryInterface() : ::djinni::JniInterface<::ShaderFactoryInterface, NativeShaderFactoryInterface>("ch/ubique/mapscore/shared/graphics/shader/ShaderFactoryInterface$CppProxy") {}
+NativeShaderFactoryInterface::NativeShaderFactoryInterface() : ::djinni::JniInterface<::ShaderFactoryInterface, NativeShaderFactoryInterface>("io/openmobilemaps/mapscore/shared/graphics/shader/ShaderFactoryInterface$CppProxy") {}
 
 NativeShaderFactoryInterface::~NativeShaderFactoryInterface() = default;
 
@@ -41,7 +41,7 @@ std::shared_ptr<::ColorShaderInterface> NativeShaderFactoryInterface::JavaProxy:
     return ::djinni_generated::NativeColorShaderInterface::toCpp(jniEnv, jret);
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_ShaderFactoryInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderFactoryInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -49,7 +49,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_ShaderFac
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_ShaderFactoryInterface_00024CppProxy_native_1createAlphaShader(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderFactoryInterface_00024CppProxy_native_1createAlphaShader(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -59,7 +59,7 @@ CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_Shader
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_ShaderFactoryInterface_00024CppProxy_native_1createColorLineShader(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderFactoryInterface_00024CppProxy_native_1createColorLineShader(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -69,7 +69,7 @@ CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_Shader
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jobject JNICALL Java_ch_ubique_mapscore_shared_graphics_shader_ShaderFactoryInterface_00024CppProxy_native_1createColorShader(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderFactoryInterface_00024CppProxy_native_1createColorShader(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);

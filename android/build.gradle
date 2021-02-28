@@ -7,6 +7,7 @@ buildscript {
 	dependencies {
 		classpath "com.android.tools.build:gradle:4.1.2"
 		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+		classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5'
 	}
 }
 
@@ -17,6 +18,8 @@ repositories {
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
 
 android {
 	compileSdkVersion 30
@@ -24,8 +27,8 @@ android {
 	defaultConfig {
 		minSdkVersion 23
 		targetSdkVersion 30
-		versionCode 1
-		versionName "1.0"
+		versionCode 110
+		versionName "1.1.0"
 
 		testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 		consumerProguardFiles 'consumer-rules.pro'
@@ -49,6 +52,69 @@ android {
 				srcDir '../bridging/android/java'
 			}
 		}
+	}
+
+	buildFeatures {
+		prefabPublishing true
+	}
+
+	prefab{
+		mapscore_shared {
+			headers ".cpp_includes"
+		}
+	}
+}
+
+task copyHeaders(type: Exec){
+	commandLine './copy_all_header_files_to_include_folder.sh'
+}
+preBuild.dependsOn copyHeaders
+
+task androidSourcesJar(type: Jar) {
+	archiveClassifier = 'sources'
+	from android.sourceSets.main.java.srcDirs
+}
+afterEvaluate {
+	publishing {
+		publications {
+			"sdkRelease"(MavenPublication) {
+				from components.release
+				groupId 'io.openmobilemaps.mapscore'
+				artifactId 'mapscore-android'
+				version android.defaultConfig.versionName + readPropertyWithDefault('bintrayVersionSuffix', '')
+				artifact androidSourcesJar
+			}
+		}
+	}
+}
+
+ext.readProperty = { paramName -> readPropertyWithDefault(paramName, null) }
+ext.readPropertyWithDefault = { paramName, defaultValue ->
+	if (project.hasProperty(paramName)) {
+		return project.getProperties().get(paramName)
+	} else {
+		Properties properties = new Properties()
+		if (project.rootProject.file('local.properties').exists()) {
+			properties.load(project.rootProject.file('local.properties').newDataInputStream())
+		}
+		if (properties.getProperty(paramName) != null) {
+			return properties.getProperty(paramName)
+		} else {
+			return defaultValue
+		}
+	}
+}
+
+bintray {
+	user = readProperty('bintrayUser')
+	key = readProperty('bintrayApikey')
+	publications = ['sdkRelease']
+	publish = true
+	pkg {
+		repo = 'openmobilemaps'
+		name = 'maps-core'
+		userOrg = 'openmobilemaps'
+		licenses = ['MPL-2.0']
 	}
 }
 

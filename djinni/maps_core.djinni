@@ -1,0 +1,3 @@
+maps_core_shared_module = interface +c {
+    static version() : string;
+}

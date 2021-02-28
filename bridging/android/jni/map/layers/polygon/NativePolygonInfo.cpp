@@ -19,20 +19,22 @@ auto NativePolygonInfo::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinni::L
                                                            ::djinni::get(::djinni::List<::djinni_generated::NativeCoord>::fromCpp(jniEnv, c.coordinates)),
                                                            ::djinni::get(::djinni::List<::djinni::List<::djinni_generated::NativeCoord>>::fromCpp(jniEnv, c.holes)),
                                                            ::djinni::get(::djinni::Bool::fromCpp(jniEnv, c.isConvex)),
-                                                           ::djinni::get(::djinni_generated::NativeColor::fromCpp(jniEnv, c.color)))};
+                                                           ::djinni::get(::djinni_generated::NativeColor::fromCpp(jniEnv, c.color)),
+                                                           ::djinni::get(::djinni_generated::NativeColor::fromCpp(jniEnv, c.highlightColor)))};
     ::djinni::jniExceptionCheck(jniEnv);
     return r;
 }
 
 auto NativePolygonInfo::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
-    ::djinni::JniLocalScope jscope(jniEnv, 6);
+    ::djinni::JniLocalScope jscope(jniEnv, 7);
     assert(j != nullptr);
     const auto& data = ::djinni::JniClass<NativePolygonInfo>::get();
     return {::djinni::String::toCpp(jniEnv, (jstring)jniEnv->GetObjectField(j, data.field_identifier)),
             ::djinni::List<::djinni_generated::NativeCoord>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_coordinates)),
             ::djinni::List<::djinni::List<::djinni_generated::NativeCoord>>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_holes)),
             ::djinni::Bool::toCpp(jniEnv, jniEnv->GetBooleanField(j, data.field_isConvex)),
-            ::djinni_generated::NativeColor::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_color))};
+            ::djinni_generated::NativeColor::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_color)),
+            ::djinni_generated::NativeColor::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_highlightColor))};
 }
 
 }  // namespace djinni_generated

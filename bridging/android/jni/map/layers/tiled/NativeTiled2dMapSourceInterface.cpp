@@ -7,12 +7,12 @@
 
 namespace djinni_generated {
 
-NativeTiled2dMapSourceInterface::NativeTiled2dMapSourceInterface() : ::djinni::JniInterface<::Tiled2dMapSourceInterface, NativeTiled2dMapSourceInterface>("ch/ubique/mapscore/shared/map/layers/tiled/Tiled2dMapSourceInterface$CppProxy") {}
+NativeTiled2dMapSourceInterface::NativeTiled2dMapSourceInterface() : ::djinni::JniInterface<::Tiled2dMapSourceInterface, NativeTiled2dMapSourceInterface>("io/openmobilemaps/mapscore/shared/map/layers/tiled/Tiled2dMapSourceInterface$CppProxy") {}
 
 NativeTiled2dMapSourceInterface::~NativeTiled2dMapSourceInterface() = default;
 
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_tiled_Tiled2dMapSourceInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapSourceInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
@@ -20,7 +20,7 @@ CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_tiled_Tiled2dM
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_ch_ubique_mapscore_shared_map_layers_tiled_Tiled2dMapSourceInterface_00024CppProxy_native_1onVisibleBoundsChanged(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRectCoord::JniType j_visibleBounds, jdouble j_zoom)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapSourceInterface_00024CppProxy_native_1onVisibleBoundsChanged(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRectCoord::JniType j_visibleBounds, jdouble j_zoom)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);

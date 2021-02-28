@@ -8,7 +8,6 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-
 /**
  * Matrix math utilities. These methods operate on OpenGL ES format
  * matrices and vectors stored in float arrays.

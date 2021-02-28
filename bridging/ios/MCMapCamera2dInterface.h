@@ -5,6 +5,7 @@
 #import "MCCoord.h"
 #import "MCMapCamera2dListenerInterface.h"
 #import "MCRectCoord.h"
+#import "MCVec2F.h"
 #import <Foundation/Foundation.h>
 @class MCMapCamera2dInterface;
 @class MCMapInterface;
@@ -29,6 +30,17 @@
 
 - (double)getZoom;
 
+- (void)setRotation:(float)angle
+           animated:(BOOL)animated;
+
+- (float)getRotation;
+
+- (void)setMinZoom:(double)minZoom;
+
+- (void)setMaxZoom:(double)maxZoom;
+
+- (void)setBounds:(nonnull MCRectCoord *)bounds;
+
 - (void)setPaddingLeft:(float)padding
               animated:(BOOL)animated;
 
@@ -46,6 +58,8 @@
 - (void)addListener:(nullable id<MCMapCamera2dListenerInterface>)listener;
 
 - (void)removeListener:(nullable id<MCMapCamera2dListenerInterface>)listener;
+
+- (nonnull MCCoord *)coordFromScreenPosition:(nonnull MCVec2F *)posScreen;
 
 - (nullable id<MCCameraInterface>)asCameraInterface;
 

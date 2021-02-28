@@ -19,14 +19,14 @@ objcpp:
   header: '"MCLayerObjectInterface+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.map.layers.objects.LayerObjectInterface'
+  typename: 'io.openmobilemaps.mapscore.shared.map.layers.objects.LayerObjectInterface'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.map.layers.objects.LayerObjectInterface'
+  boxed: 'io.openmobilemaps.mapscore.shared.map.layers.objects.LayerObjectInterface'
 jni:
   translator: '::djinni_generated::NativeLayerObjectInterface'
   header: '"NativeLayerObjectInterface.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/map/layers/objects/LayerObjectInterface;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/map/layers/objects/LayerObjectInterface;'

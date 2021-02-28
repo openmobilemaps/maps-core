@@ -14,11 +14,15 @@ import UIKit
 open class MCTextureLoader: MCTextureLoaderInterface {
     private let session: URLSession
 
-    public init() {
-        let sessionConfig = URLSessionConfiguration.default
-        sessionConfig.urlCache = URLCache(memoryCapacity: 100 * 1024 * 1024, diskCapacity: 500 * 1024 * 1024, diskPath: "ch.openmobilemaps.urlcache")
-        sessionConfig.networkServiceType = .responsiveData
-        session = .init(configuration: sessionConfig)
+    public init(urlSession: URLSession? = nil) {
+        if let urlSession = urlSession {
+            self.session = urlSession
+        } else  {
+            let sessionConfig = URLSessionConfiguration.default
+            sessionConfig.urlCache = URLCache(memoryCapacity: 100 * 1024 * 1024, diskCapacity: 500 * 1024 * 1024, diskPath: "ch.openmobilemaps.urlcache")
+            sessionConfig.networkServiceType = .responsiveData
+            session = .init(configuration: sessionConfig)
+        }
     }
 
     public func loadTexture(_ url: String) -> MCTextureLoaderResult {
@@ -33,7 +37,11 @@ open class MCTextureLoader: MCTextureLoaderInterface {
         var response: HTTPURLResponse?
         var error: NSError?
 
-        let task = session.dataTask(with: url) { data, response_, error_ in
+        var urlRequest = URLRequest(url: url)
+
+        modifyUrlRequest(request: &urlRequest)
+
+        let task = session.dataTask(with: urlRequest) { data, response_, error_ in
             result = data
             response = response_ as? HTTPURLResponse
             error = error_ as NSError?
@@ -59,7 +67,9 @@ open class MCTextureLoader: MCTextureLoaderInterface {
             return .init(data: nil, status: .ERROR_OTHER)
         }
 
-        if url.pathExtension == "png" {
+        guard let textureHolder = try? TextureHolder(data) else {
+            // If metal can not load this image
+            // try workaround to first load it into UIImage context
             guard let uiImage = UIImage(data: data) else {
                 return .init(data: nil, status: .ERROR_OTHER)
             }
@@ -75,11 +85,9 @@ open class MCTextureLoader: MCTextureLoaderInterface {
             }
 
             return .init(data: textureHolder, status: .OK)
-        } else {
-            guard let textureHolder = try? TextureHolder(data) else {
-                return .init(data: nil, status: .ERROR_OTHER)
-            }
-            return .init(data: textureHolder, status: .OK)
         }
+        return .init(data: textureHolder, status: .OK)
     }
+
+    open func modifyUrlRequest(request: inout URLRequest){}
 }

@@ -8,7 +8,6 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-
 #include "Tiled2dMapRasterSource.h"
 #include "LambdaTask.h"
 #include <algorithm>
@@ -29,7 +28,7 @@ TextureLoaderResult Tiled2dMapRasterSource::loadTile(Tiled2dMapTileInfo tile) {
 }
 
 std::unordered_set<Tiled2dMapRasterTileInfo> Tiled2dMapRasterSource::getCurrentTiles() {
-    std::lock_guard<std::recursive_mutex> lock(currentTilesMutex);
+    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
     std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos;
     for (const auto &tileEntry : currentTiles) {
         currentTileInfos.insert(Tiled2dMapRasterTileInfo(tileEntry.first, tileEntry.second));

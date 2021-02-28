@@ -19,14 +19,14 @@ objcpp:
   header: '"MCTouchHandlerInterface+Private.h"'
 java:
   reference: true
-  typename: 'ch.ubique.mapscore.shared.map.controls.TouchHandlerInterface'
+  typename: 'io.openmobilemaps.mapscore.shared.map.controls.TouchHandlerInterface'
   writeToParcel: '%s.writeToParcel(out, flags)'
   generic: true
   readFromParcel: 'new %s(in)'
   hash: '%s.hashCode()'
-  boxed: 'ch.ubique.mapscore.shared.map.controls.TouchHandlerInterface'
+  boxed: 'io.openmobilemaps.mapscore.shared.map.controls.TouchHandlerInterface'
 jni:
   translator: '::djinni_generated::NativeTouchHandlerInterface'
   header: '"NativeTouchHandlerInterface.h"'
   typename: jobject
-  typeSignature: 'Lch/ubique/mapscore/shared/map/controls/TouchHandlerInterface;'
+  typeSignature: 'Lio/openmobilemaps/mapscore/shared/map/controls/TouchHandlerInterface;'

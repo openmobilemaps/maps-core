@@ -15,11 +15,13 @@
 #include "Tiled2dMapLayer.h"
 #include "Tiled2dMapRasterLayerInterface.h"
 #include "Tiled2dMapRasterSource.h"
+#include "Tiled2dMapRasterLayerCallbackInterface.h"
 #include <mutex>
 #include <unordered_map>
 
-class Tiled2dMapRasterLayer : public Tiled2dMapLayer, public Tiled2dMapRasterLayerInterface {
-  public:
+class Tiled2dMapRasterLayer
+        : public Tiled2dMapLayer, public Tiled2dMapRasterLayerInterface {
+public:
     Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                           const std::shared_ptr<::TextureLoaderInterface> &textureLoader);
 
@@ -39,7 +41,21 @@ class Tiled2dMapRasterLayer : public Tiled2dMapLayer, public Tiled2dMapRasterLay
 
     virtual void onTilesUpdated() override;
 
-  private:
+    virtual void setCallbackHandler(const std::shared_ptr<Tiled2dMapRasterLayerCallbackInterface> &handler) override;
+
+    virtual std::shared_ptr<Tiled2dMapRasterLayerCallbackInterface> getCallbackHandler() override;
+
+    virtual void removeCallbackHandler() override;
+
+    virtual void setAlpha(double alpha) override;
+
+    virtual double getAlpha() override;
+
+    bool onClickConfirmed(const Vec2F &posScreen) override;
+
+    bool onLongPress(const Vec2F &posScreen) override;
+
+private:
     std::shared_ptr<TextureLoaderInterface> textureLoader;
     std::shared_ptr<Tiled2dMapRasterSource> rasterSource;
 
@@ -47,5 +63,7 @@ class Tiled2dMapRasterLayer : public Tiled2dMapLayer, public Tiled2dMapRasterLay
     std::unordered_map<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>> tileObjectMap;
     std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
 
-    std::shared_ptr<AlphaShaderInterface> alphaShader;
+    std::shared_ptr<Tiled2dMapRasterLayerCallbackInterface> callbackHandler;
+
+    double alpha;
 };

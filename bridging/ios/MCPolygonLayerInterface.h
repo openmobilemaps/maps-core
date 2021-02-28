@@ -5,6 +5,7 @@
 #import "MCPolygonInfo.h"
 #import <Foundation/Foundation.h>
 @class MCPolygonLayerInterface;
+@protocol MCPolygonLayerCallbackInterface;
 
 
 @interface MCPolygonLayerInterface : NSObject
@@ -20,6 +21,8 @@
 - (void)add:(nonnull MCPolygonInfo *)polygon;
 
 - (void)clear;
+
+- (void)setCallbackHandler:(nullable id<MCPolygonLayerCallbackInterface>)handler;
 
 - (nullable id<MCLayerInterface>)asLayerInterface;
 
