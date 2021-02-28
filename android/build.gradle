@@ -28,7 +28,7 @@ android {
 		minSdkVersion 23
 		targetSdkVersion 30
 		versionCode 1
-		versionName "1.0"
+		versionName "1.0.0"
 
 		testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 		consumerProguardFiles 'consumer-rules.pro'
@@ -53,8 +53,22 @@ android {
 			}
 		}
 	}
+
+	buildFeatures {
+		prefabPublishing true
+	}
+
+	prefab{
+		mapscore_shared {
+			headers ".cpp_includes"
+		}
+	}
 }
 
+task copyHeaders(type: Exec){
+	commandLine './copy_all_header_files_to_include_folder.sh'
+}
+preBuild.dependsOn copyHeaders
 
 task androidSourcesJar(type: Jar) {
 	archiveClassifier = 'sources'
