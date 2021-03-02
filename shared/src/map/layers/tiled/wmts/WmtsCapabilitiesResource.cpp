@@ -115,6 +115,12 @@ private:
     void parseMatrixSet(pugi::xml_node &tileMatrixSet) {
         std::string identifier = tileMatrixSet.child_value("ows:Identifier");
 
+        std::string supportedCRS = tileMatrixSet.child_value("ows:SupportedCRS");
+        std::string coordinateSystem = CoordinateSystemIdentifiers::fromCrsIdentifier(supportedCRS);
+        if (coordinateSystem == "") {
+            printf("unknown coordinate system %s\n", supportedCRS.c_str());
+            coordinateSystem = supportedCRS;
+        }
         std::vector<WmtsTileMatrix> matrices;
 
         for (auto tileMatrix = tileMatrixSet.child("TileMatrix"); tileMatrix; tileMatrix = tileMatrix.next_sibling("TileMatrix")) {
@@ -132,7 +138,7 @@ private:
             matrices.push_back(matrix);
         }
 
-        auto matrixSet = WmtsTileMatrixSet(identifier, matrices);
+        auto matrixSet = WmtsTileMatrixSet(identifier, coordinateSystem, matrices);
         matrixSets.insert(std::make_pair(identifier, matrixSet));
     }
 
@@ -163,11 +169,9 @@ private:
         }
         dimensions.insert(std::make_pair("TileMatrixSet", description.tileMatrixSetLink));
 
-
-
         std::vector<::Tiled2dMapZoomLevelInfo>  zoomLevels;
 
-        std::string coordinateSystem = CoordinateSystemIdentifiers::EPSG3857();
+        std::string coordinateSystem = matrixSet.coordinateSystem;
 
         bounds = conversionHelper.convertRect(coordinateSystem, description.bounds);
 

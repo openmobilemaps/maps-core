@@ -21,6 +21,7 @@ wmts_tile_matrix = record {
 }
 wmts_tile_matrix_set = record {
     identifier: string;
+    coordinate_system: string;
     matrices: list<wmts_tile_matrix>;
 }
 wmts_layer_description = record {

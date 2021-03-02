@@ -34,4 +34,7 @@ public:
      * https://epsg.io/21781
      */
     static std::string EPSG21781();
+
+    /** e.g. urn:ogc:def:crs:EPSG:21781 */
+    static std::string fromCrsIdentifier(const std::string & identifier);
 };

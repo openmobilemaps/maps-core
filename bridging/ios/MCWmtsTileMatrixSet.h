@@ -6,11 +6,15 @@
 
 @interface MCWmtsTileMatrixSet : NSObject
 - (nonnull instancetype)initWithIdentifier:(nonnull NSString *)identifier
+                          coordinateSystem:(nonnull NSString *)coordinateSystem
                                   matrices:(nonnull NSArray<MCWmtsTileMatrix *> *)matrices;
 + (nonnull instancetype)wmtsTileMatrixSetWithIdentifier:(nonnull NSString *)identifier
+                                       coordinateSystem:(nonnull NSString *)coordinateSystem
                                                matrices:(nonnull NSArray<MCWmtsTileMatrix *> *)matrices;
 
 @property (nonatomic, readonly, nonnull) NSString * identifier;
+
+@property (nonatomic, readonly, nonnull) NSString * coordinateSystem;
 
 @property (nonatomic, readonly, nonnull) NSArray<MCWmtsTileMatrix *> * matrices;
 
