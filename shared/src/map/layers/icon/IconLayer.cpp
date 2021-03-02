@@ -9,7 +9,6 @@
  */
 
 #include <IconType.h>
-#include <logger/Logger.h>
 #include "IconLayer.h"
 #include "LambdaTask.h"
 #include "RenderPass.h"
@@ -291,7 +290,6 @@ bool IconLayer::onClickConfirmed(const Vec2F &posScreen) {
             }
             if (clickPos.x > -halfW && clickPos.x < halfW &&
                 clickPos.y > -halfH && clickPos.y < halfH) {
-                LogDebug <<= "DEBUG: hit icon: " + icon->getIdentifier();
                 iconsHit.push_back(icon);
             }
         }

@@ -40,8 +40,6 @@ class Textured2dLayerObject : public LayerObjectInterface {
 
     void setRectCoord(const ::RectCoord &rectCoord);
 
-    void setScale(float scale);
-
     void setAlpha(float alpha);
 
     std::shared_ptr<Quad2dInterface> getQuadObject();
@@ -54,8 +52,6 @@ class Textured2dLayerObject : public LayerObjectInterface {
   private:
     std::shared_ptr<Quad2dInterface> quad;
     std::shared_ptr<AlphaShaderInterface> shader;
-
-    float scale;
 
     std::shared_ptr<RenderConfig> renderConfig;
 
