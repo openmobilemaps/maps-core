@@ -16,7 +16,7 @@
 #include "CoordinateSystemIdentifiers.h"
 #include "MapCoordinateSystem.h"
 
-/// Convert LV03 to WGS 84 / Pseudo-Mercator
+/// Convert LV03+ to WGS 84 / Pseudo-Mercator
 ///  https://epsg.io/2056 to https://epsg.io/4326
 class EPSG2056ToEPSG4326Converter : public CoordinateConverterInterface {
   public:

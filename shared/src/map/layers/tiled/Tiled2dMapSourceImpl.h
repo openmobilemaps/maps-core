@@ -41,7 +41,7 @@ template <class T, class L> void Tiled2dMapSource<T, L>::onVisibleBoundsChanged(
 template <class T, class L> void Tiled2dMapSource<T, L>::updateCurrentTileset(const RectCoord &visibleBounds, double zoom) {
     std::unordered_set<PrioritizedTiled2dMapTileInfo> visibleTiles;
 
-    RectCoord layerBounds = layerConfig->getBounds();
+    auto layerBounds = layerConfig->getBounds();
     RectCoord visibleBoundsLayer = conversionHelper->convertRect(layerSystemId, visibleBounds);
 
     double centerVisibleX = visibleBoundsLayer.topLeft.x + 0.5 * (visibleBoundsLayer.bottomRight.x - visibleBoundsLayer.topLeft.x);
@@ -69,6 +69,9 @@ template <class T, class L> void Tiled2dMapSource<T, L>::updateCurrentTileset(co
         bool topToBottom = layerBounds.topLeft.y < layerBounds.bottomRight.y;
         double tileWidthAdj = leftToRight ? tileWidth : -tileWidth;
         double tileHeightAdj = topToBottom ? tileWidth : -tileWidth;
+
+        RectCoord layerBounds = zoomLevelInfo.bounds;
+        layerBounds = conversionHelper->convertRect(layerSystemId, layerBounds);
 
         double visibleLeft = visibleBoundsLayer.topLeft.x;
         double visibleRight = visibleBoundsLayer.bottomRight.x;

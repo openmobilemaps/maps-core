@@ -37,7 +37,8 @@ std::string WmtsTiled2dMapLayerConfig::getTileUrl(int32_t x, int32_t y, int32_t 
 
     for (auto const &dimension: configuration.dimensions) {
         auto placeHolder = "{" + dimension.first + "}";
-        if (auto it = urlFormat.find(placeHolder)) {
+        auto it = urlFormat.find(placeHolder);
+        if (it != std::string::npos) {
             urlFormat.replace(it, placeHolder.length(), dimension.second);
         }
     }
