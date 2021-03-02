@@ -19,6 +19,7 @@
 #include "SimpleTouchInterface.h"
 #include <optional>
 #include <set>
+#include "AnimationInterface.h"
 
 class MapCamera2d : public MapCamera2dInterface,
                     public CameraInterface,
@@ -117,22 +118,8 @@ class MapCamera2d : public MapCamera2dInterface,
 
     // MARK: Animations
 
-    struct CameraAnimation {
-        Coord startCenterPosition;
-        double startZoom;
-        double startRotation;
-        Coord targetCenterPosition;
-        double targetZoom;
-        double targetRotation;
-        long long startTime;
-        long long duration;
-    };
-
-    std::optional<CameraAnimation> cameraAnimation;
-
-    void beginAnimation(double zoom, Coord centerPosition);
-    void beginAnimation(double rotationAngle);
-    void applyAnimationState();
+    std::shared_ptr<AnimationInterface> coordAnimation;
+    std::shared_ptr<AnimationInterface> animation;
 
     Coord getBoundsCorrectedCoords(const Coord &coords);
 
