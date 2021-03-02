@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class IconLayerCallbackInterface {
 
-    abstract fun onClickConfirmed(icon: IconInfoInterface): Boolean
+    abstract fun onClickConfirmed(icons: ArrayList<IconInfoInterface>): Boolean
 
     private class CppProxy : IconLayerCallbackInterface {
         private val nativeRef: Long
@@ -27,10 +27,10 @@ abstract class IconLayerCallbackInterface {
             _djinni_private_destroy()
         }
 
-        override fun onClickConfirmed(icon: IconInfoInterface): Boolean {
+        override fun onClickConfirmed(icons: ArrayList<IconInfoInterface>): Boolean {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_onClickConfirmed(this.nativeRef, icon)
+            return native_onClickConfirmed(this.nativeRef, icons)
         }
-        private external fun native_onClickConfirmed(_nativeRef: Long, icon: IconInfoInterface): Boolean
+        private external fun native_onClickConfirmed(_nativeRef: Long, icons: ArrayList<IconInfoInterface>): Boolean
     }
 }

@@ -23,13 +23,6 @@ abstract class IconInfoInterface {
 
     abstract fun getType(): IconType
 
-    companion object {
-        @JvmStatic
-        fun create(identifier: String, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, texture: io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface, iconSize: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F, scaleType: IconType): IconInfoInterface {
-            return CppProxy.create(identifier, coordinate, texture, iconSize, scaleType)
-        }
-    }
-
     private class CppProxy : IconInfoInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -95,10 +88,5 @@ abstract class IconInfoInterface {
             return native_getType(this.nativeRef)
         }
         private external fun native_getType(_nativeRef: Long): IconType
-
-        companion object {
-            @JvmStatic
-            external fun create(identifier: String, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, texture: io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface, iconSize: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F, scaleType: IconType): IconInfoInterface
-        }
     }
 }

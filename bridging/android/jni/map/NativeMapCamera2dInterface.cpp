@@ -183,15 +183,14 @@ CJNIEXPORT ::djinni_generated::NativeRectCoord::JniType JNICALL Java_io_openmobi
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1getInvariantMvpMatrix(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_mvpMatrix, ::djinni_generated::NativeCoord::JniType j_coordinate, jboolean j_scaleInvariant, jboolean j_rotationInvariant)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1getInvariantModelMatrix(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeCoord::JniType j_coordinate, jboolean j_scaleInvariant, jboolean j_rotationInvariant)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
-        auto r = ref->getInvariantMvpMatrix(::djinni::List<::djinni::F32>::toCpp(jniEnv, j_mvpMatrix),
-                                            ::djinni_generated::NativeCoord::toCpp(jniEnv, j_coordinate),
-                                            ::djinni::Bool::toCpp(jniEnv, j_scaleInvariant),
-                                            ::djinni::Bool::toCpp(jniEnv, j_rotationInvariant));
+        auto r = ref->getInvariantModelMatrix(::djinni_generated::NativeCoord::toCpp(jniEnv, j_coordinate),
+                                              ::djinni::Bool::toCpp(jniEnv, j_scaleInvariant),
+                                              ::djinni::Bool::toCpp(jniEnv, j_rotationInvariant));
         return ::djinni::release(::djinni::List<::djinni::F32>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
@@ -221,6 +220,16 @@ CJNIEXPORT ::djinni_generated::NativeCoord::JniType JNICALL Java_io_openmobilema
         const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
         auto r = ref->coordFromScreenPosition(::djinni_generated::NativeVec2F::toCpp(jniEnv, j_posScreen));
         return ::djinni::release(::djinni_generated::NativeCoord::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jdouble JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1mapUnitsFromPixels(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jdouble j_distancePx)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        auto r = ref->mapUnitsFromPixels(::djinni::F64::toCpp(jniEnv, j_distancePx));
+        return ::djinni::release(::djinni::F64::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

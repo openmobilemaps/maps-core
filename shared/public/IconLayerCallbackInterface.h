@@ -4,6 +4,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 class IconInfoInterface;
 
@@ -11,5 +12,5 @@ class IconLayerCallbackInterface {
 public:
     virtual ~IconLayerCallbackInterface() {}
 
-    virtual bool onClickConfirmed(const std::shared_ptr<IconInfoInterface> & icon) = 0;
+    virtual bool onClickConfirmed(const std::vector<std::shared_ptr<IconInfoInterface>> & icons) = 0;
 };

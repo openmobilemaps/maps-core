@@ -32,9 +32,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (BOOL)onClickConfirmed:(nullable MCIconInfoInterface *)icon {
+- (BOOL)onClickConfirmed:(nonnull NSArray<MCIconInfoInterface *> *)icons {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->onClickConfirmed(::djinni_generated::IconInfoInterface::toCpp(icon));
+        auto objcpp_result_ = _cppRefHandle.get()->onClickConfirmed(::djinni::List<::djinni_generated::IconInfoInterface>::toCpp(icons));
         return ::djinni::Bool::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -48,10 +48,10 @@ class IconLayerCallbackInterface::ObjcProxy final
     friend class ::djinni_generated::IconLayerCallbackInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    bool onClickConfirmed(const std::shared_ptr<::IconInfoInterface> & c_icon) override
+    bool onClickConfirmed(const std::vector<std::shared_ptr<::IconInfoInterface>> & c_icons) override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() onClickConfirmed:(::djinni_generated::IconInfoInterface::fromCpp(c_icon))];
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() onClickConfirmed:(::djinni::List<::djinni_generated::IconInfoInterface>::fromCpp(c_icons))];
             return ::djinni::Bool::toCpp(objcpp_result_);
         }
     }

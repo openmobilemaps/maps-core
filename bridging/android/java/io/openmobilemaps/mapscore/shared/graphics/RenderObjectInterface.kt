@@ -5,15 +5,15 @@ package io.openmobilemaps.mapscore.shared.graphics
 
 import java.util.concurrent.atomic.AtomicBoolean
 
-abstract class RenderPassInterface {
+abstract class RenderObjectInterface {
 
-    abstract fun getRenderObjects(): ArrayList<RenderObjectInterface>
+    abstract fun getGraphicsObject(): io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface
 
-    abstract fun addRenderObject(renderObject: RenderObjectInterface)
+    abstract fun hasCustomModelMatrix(): Boolean
 
-    abstract fun getRenderPassConfig(): RenderPassConfig
+    abstract fun getCustomModelMatrix(): ArrayList<Float>
 
-    private class CppProxy : RenderPassInterface {
+    private class CppProxy : RenderObjectInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 
@@ -31,22 +31,22 @@ abstract class RenderPassInterface {
             _djinni_private_destroy()
         }
 
-        override fun getRenderObjects(): ArrayList<RenderObjectInterface> {
+        override fun getGraphicsObject(): io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_getRenderObjects(this.nativeRef)
+            return native_getGraphicsObject(this.nativeRef)
         }
-        private external fun native_getRenderObjects(_nativeRef: Long): ArrayList<RenderObjectInterface>
+        private external fun native_getGraphicsObject(_nativeRef: Long): io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface
 
-        override fun addRenderObject(renderObject: RenderObjectInterface) {
+        override fun hasCustomModelMatrix(): Boolean {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_addRenderObject(this.nativeRef, renderObject)
+            return native_hasCustomModelMatrix(this.nativeRef)
         }
-        private external fun native_addRenderObject(_nativeRef: Long, renderObject: RenderObjectInterface)
+        private external fun native_hasCustomModelMatrix(_nativeRef: Long): Boolean
 
-        override fun getRenderPassConfig(): RenderPassConfig {
+        override fun getCustomModelMatrix(): ArrayList<Float> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_getRenderPassConfig(this.nativeRef)
+            return native_getCustomModelMatrix(this.nativeRef)
         }
-        private external fun native_getRenderPassConfig(_nativeRef: Long): RenderPassConfig
+        private external fun native_getCustomModelMatrix(_nativeRef: Long): ArrayList<Float>
     }
 }

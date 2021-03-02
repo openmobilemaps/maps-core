@@ -34,21 +34,6 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-+ (nullable MCIconInfoInterface *)create:(nonnull NSString *)identifier
-                              coordinate:(nonnull MCCoord *)coordinate
-                                 texture:(nullable id<MCTextureHolderInterface>)texture
-                                iconSize:(nonnull MCVec2F *)iconSize
-                               scaleType:(MCIconType)scaleType {
-    try {
-        auto objcpp_result_ = ::IconInfoInterface::create(::djinni::String::toCpp(identifier),
-                                                          ::djinni_generated::Coord::toCpp(coordinate),
-                                                          ::djinni_generated::TextureHolderInterface::toCpp(texture),
-                                                          ::djinni_generated::Vec2F::toCpp(iconSize),
-                                                          ::djinni::Enum<::IconType, MCIconType>::toCpp(scaleType));
-        return ::djinni_generated::IconInfoInterface::fromCpp(objcpp_result_);
-    } DJINNI_TRANSLATE_EXCEPTIONS()
-}
-
 - (nonnull NSString *)getIdentifier {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getIdentifier();

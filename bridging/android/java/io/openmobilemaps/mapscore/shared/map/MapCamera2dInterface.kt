@@ -37,13 +37,15 @@ abstract class MapCamera2dInterface {
 
     abstract fun getVisibleRect(): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord
 
-    abstract fun getInvariantMvpMatrix(mvpMatrix: ArrayList<Float>, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, scaleInvariant: Boolean, rotationInvariant: Boolean): ArrayList<Float>
+    abstract fun getInvariantModelMatrix(coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, scaleInvariant: Boolean, rotationInvariant: Boolean): ArrayList<Float>
 
     abstract fun addListener(listener: io.openmobilemaps.mapscore.shared.map.camera.MapCamera2dListenerInterface)
 
     abstract fun removeListener(listener: io.openmobilemaps.mapscore.shared.map.camera.MapCamera2dListenerInterface)
 
     abstract fun coordFromScreenPosition(posScreen: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F): io.openmobilemaps.mapscore.shared.map.coordinates.Coord
+
+    abstract fun mapUnitsFromPixels(distancePx: Double): Double
 
     abstract fun asCameraInterface(): io.openmobilemaps.mapscore.shared.graphics.CameraInterface
 
@@ -162,11 +164,11 @@ abstract class MapCamera2dInterface {
         }
         private external fun native_getVisibleRect(_nativeRef: Long): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord
 
-        override fun getInvariantMvpMatrix(mvpMatrix: ArrayList<Float>, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, scaleInvariant: Boolean, rotationInvariant: Boolean): ArrayList<Float> {
+        override fun getInvariantModelMatrix(coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, scaleInvariant: Boolean, rotationInvariant: Boolean): ArrayList<Float> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_getInvariantMvpMatrix(this.nativeRef, mvpMatrix, coordinate, scaleInvariant, rotationInvariant)
+            return native_getInvariantModelMatrix(this.nativeRef, coordinate, scaleInvariant, rotationInvariant)
         }
-        private external fun native_getInvariantMvpMatrix(_nativeRef: Long, mvpMatrix: ArrayList<Float>, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, scaleInvariant: Boolean, rotationInvariant: Boolean): ArrayList<Float>
+        private external fun native_getInvariantModelMatrix(_nativeRef: Long, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, scaleInvariant: Boolean, rotationInvariant: Boolean): ArrayList<Float>
 
         override fun addListener(listener: io.openmobilemaps.mapscore.shared.map.camera.MapCamera2dListenerInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
@@ -185,6 +187,12 @@ abstract class MapCamera2dInterface {
             return native_coordFromScreenPosition(this.nativeRef, posScreen)
         }
         private external fun native_coordFromScreenPosition(_nativeRef: Long, posScreen: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F): io.openmobilemaps.mapscore.shared.map.coordinates.Coord
+
+        override fun mapUnitsFromPixels(distancePx: Double): Double {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_mapUnitsFromPixels(this.nativeRef, distancePx)
+        }
+        private external fun native_mapUnitsFromPixels(_nativeRef: Long, distancePx: Double): Double
 
         override fun asCameraInterface(): io.openmobilemaps.mapscore.shared.graphics.CameraInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

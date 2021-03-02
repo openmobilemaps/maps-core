@@ -15,8 +15,6 @@ class IconInfoInterface {
 public:
     virtual ~IconInfoInterface() {}
 
-    static std::shared_ptr<IconInfoInterface> create(const std::string & identifier, const ::Coord & coordinate, const std::shared_ptr<::TextureHolderInterface> & texture, const ::Vec2F & iconSize, IconType scaleType);
-
     virtual std::string getIdentifier() = 0;
 
     virtual std::shared_ptr<::TextureHolderInterface> getTexture() = 0;

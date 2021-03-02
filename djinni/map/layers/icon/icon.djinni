@@ -3,8 +3,11 @@
 @extern "../../../yaml/texture_holder_interface.yaml"
 @extern "../../../yaml/vec_2_f.yaml"
 
+icon_factory = interface +c {
+    static create_icon(identifier: string, coordinate: coord, texture: texture_holder_interface, icon_size: vec_2_f, scale_type: icon_type) : icon_info_interface;
+}
+
 icon_info_interface = interface +c {
-    static create(identifier: string, coordinate: coord, texture: texture_holder_interface, icon_size: vec_2_f, scale_type: icon_type) : icon_info_interface;
     get_identifier() : string;
     get_texture() : texture_holder_interface;
     set_coordinate(coord: coord);
@@ -23,7 +26,7 @@ icon_type = enum {
 }
 
 icon_layer_callback_interface = interface +c +j +o {
-    on_click_confirmed(icon: icon_info_interface) : bool;
+    on_click_confirmed(icons: list<icon_info_interface>) : bool;
 }
 
 icon_layer_interface = interface +c {

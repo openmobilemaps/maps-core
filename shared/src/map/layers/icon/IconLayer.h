@@ -11,6 +11,7 @@
 #pragma once
 
 #include <mutex>
+#include <map>
 #include <unordered_map>
 #include <unordered_set>
 #include "MapInterface.h"
@@ -38,6 +39,8 @@ class IconLayer : public IconLayerInterface,
     virtual void remove(const std::shared_ptr<IconInfoInterface> & icon) override;
 
     virtual void add(const std::shared_ptr<IconInfoInterface> & icon) override;
+
+    virtual void addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> & icons);
 
     virtual void clear() override;
 
@@ -74,8 +77,8 @@ class IconLayer : public IconLayerInterface,
     std::recursive_mutex iconsMutex;
     std::unordered_map<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>> icons;
 
-    void generateRenderPasses();
-    std::vector<std::shared_ptr<::RenderPassInterface>> renderPasses;
+    void preGenerateRenderPasses();
+    std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
 
     std::recursive_mutex addingQueueMutex;
     std::unordered_set<std::shared_ptr<IconInfoInterface>> addingQueue;

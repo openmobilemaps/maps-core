@@ -7,7 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
-#import "MCGraphicsObjectInterface+Private.h"
+#import "MCRenderObjectInterface+Private.h"
 #import "MCRenderPassConfig+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -33,23 +33,16 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (nonnull NSArray<id<MCGraphicsObjectInterface>> *)getGraphicsObjects {
+- (nonnull NSArray<MCRenderObjectInterface *> *)getRenderObjects {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->getGraphicsObjects();
-        return ::djinni::List<::djinni_generated::GraphicsObjectInterface>::fromCpp(objcpp_result_);
+        auto objcpp_result_ = _cppRefHandle.get()->getRenderObjects();
+        return ::djinni::List<::djinni_generated::RenderObjectInterface>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setCustomObjectTransforms:(nonnull NSDictionary<NSNumber *, NSArray<NSNumber *> *> *)customObjectTransforms {
+- (void)addRenderObject:(nullable MCRenderObjectInterface *)renderObject {
     try {
-        _cppRefHandle.get()->setCustomObjectTransforms(::djinni::Map<::djinni::I32, ::djinni::List<::djinni::F32>>::toCpp(customObjectTransforms));
-    } DJINNI_TRANSLATE_EXCEPTIONS()
-}
-
-- (nonnull NSDictionary<NSNumber *, NSArray<NSNumber *> *> *)getCustomObjectTransforms {
-    try {
-        auto objcpp_result_ = _cppRefHandle.get()->getCustomObjectTransforms();
-        return ::djinni::Map<::djinni::I32, ::djinni::List<::djinni::F32>>::fromCpp(objcpp_result_);
+        _cppRefHandle.get()->addRenderObject(::djinni_generated::RenderObjectInterface::toCpp(renderObject));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -69,24 +62,17 @@ class RenderPassInterface::ObjcProxy final
     friend class ::djinni_generated::RenderPassInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    std::vector<std::shared_ptr<::GraphicsObjectInterface>> getGraphicsObjects() override
+    std::vector<std::shared_ptr<::RenderObjectInterface>> getRenderObjects() override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getGraphicsObjects];
-            return ::djinni::List<::djinni_generated::GraphicsObjectInterface>::toCpp(objcpp_result_);
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getRenderObjects];
+            return ::djinni::List<::djinni_generated::RenderObjectInterface>::toCpp(objcpp_result_);
         }
     }
-    void setCustomObjectTransforms(const std::unordered_map<int32_t, std::vector<float>> & c_customObjectTransforms) override
+    void addRenderObject(const std::shared_ptr<::RenderObjectInterface> & c_renderObject) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setCustomObjectTransforms:(::djinni::Map<::djinni::I32, ::djinni::List<::djinni::F32>>::fromCpp(c_customObjectTransforms))];
-        }
-    }
-    std::unordered_map<int32_t, std::vector<float>> getCustomObjectTransforms() override
-    {
-        @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getCustomObjectTransforms];
-            return ::djinni::Map<::djinni::I32, ::djinni::List<::djinni::F32>>::toCpp(objcpp_result_);
+            [djinni_private_get_proxied_objc_object() addRenderObject:(::djinni_generated::RenderObjectInterface::fromCpp(c_renderObject))];
         }
     }
     ::RenderPassConfig getRenderPassConfig() override

@@ -6,16 +6,9 @@
 #import "MCTextureHolderInterface.h"
 #import "MCVec2F.h"
 #import <Foundation/Foundation.h>
-@class MCIconInfoInterface;
 
 
 @interface MCIconInfoInterface : NSObject
-
-+ (nullable MCIconInfoInterface *)create:(nonnull NSString *)identifier
-                              coordinate:(nonnull MCCoord *)coordinate
-                                 texture:(nullable id<MCTextureHolderInterface>)texture
-                                iconSize:(nonnull MCVec2F *)iconSize
-                               scaleType:(MCIconType)scaleType;
 
 - (nonnull NSString *)getIdentifier;
 

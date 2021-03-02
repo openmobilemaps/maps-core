@@ -16,6 +16,7 @@
 #include "MapInterface.h"
 #include "PolygonHelper.h"
 #include "RenderPass.h"
+#include "RenderObject.h"
 #include <map>
 
 PolygonLayer::PolygonLayer()
@@ -130,10 +131,10 @@ std::shared_ptr<::LayerInterface> PolygonLayer::asLayerInterface() { return shar
 
 void PolygonLayer::generateRenderPasses() {
     std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
-    std::map<int, std::vector<std::shared_ptr<GraphicsObjectInterface>>> renderPassObjectMap;
+    std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
     for (auto const &polygonTuple : polygons) {
         for (auto config : polygonTuple.second->getRenderConfig()) {
-            renderPassObjectMap[config->getRenderIndex()].push_back(config->getGraphicsObject());
+            renderPassObjectMap[config->getRenderIndex()].push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
         }
     }
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;

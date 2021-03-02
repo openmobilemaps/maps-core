@@ -9,8 +9,10 @@
  */
 
 #include "Renderer.h"
+#include "Matrix.h"
 #include "CameraInterface.h"
 #include "RenderPassInterface.h"
+#include "RenderObjectInterface.h"
 
 void Renderer::addToRenderQueue(const std::shared_ptr<RenderPassInterface> &renderPass) { renderQueue.push(renderPass); }
 
@@ -18,24 +20,24 @@ void Renderer::addToRenderQueue(const std::shared_ptr<RenderPassInterface> &rend
 void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &renderingContext,
                          const std::shared_ptr<CameraInterface> &camera) {
 
-    auto mvpMatrix = camera->getMvpMatrix();
-    auto mvpMatrixPointer = (int64_t) mvpMatrix.data();
+    auto vpMatrix = camera->getVpMatrix();
+    auto vpMatrixPointer = (int64_t) vpMatrix.data();
 
     renderingContext->setupDrawFrame();
 
     while (!renderQueue.empty()) {
         auto pass = renderQueue.front();
 
-        const auto &graphicsObjects = pass->getGraphicsObjects();
-        const auto &customTransforms = pass->getCustomObjectTransforms();
-        int numGraphicsObjects = graphicsObjects.size();
-        for (int i = 0; i < numGraphicsObjects; i++) {
-            const auto &object = graphicsObjects.at(i);
-            if (customTransforms.count(i) > 0) {
-                object->render(renderingContext, pass->getRenderPassConfig(),
-                               (int64_t) customTransforms.at(i).data());
+        const auto &renderObjects = pass->getRenderObjects();
+        std::vector<float> tempMvpMatrix(16, 0);
+        for (const auto &renderObject : renderObjects) {
+            const auto &graphicsObject = renderObject->getGraphicsObject();
+            if (renderObject->hasCustomModelMatrix()) {
+                Matrix::multiplyMMC(tempMvpMatrix, 0, vpMatrix, 0, renderObject->getCustomModelMatrix(), 0);
+                graphicsObject->render(renderingContext, pass->getRenderPassConfig(),
+                               (int64_t) tempMvpMatrix.data());
             } else {
-                object->render(renderingContext, pass->getRenderPassConfig(), mvpMatrixPointer);
+                graphicsObject->render(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer);
             }
         }
 

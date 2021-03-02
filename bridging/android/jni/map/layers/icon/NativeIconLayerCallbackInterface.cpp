@@ -15,12 +15,12 @@ NativeIconLayerCallbackInterface::JavaProxy::JavaProxy(JniType j) : Handle(::dji
 
 NativeIconLayerCallbackInterface::JavaProxy::~JavaProxy() = default;
 
-bool NativeIconLayerCallbackInterface::JavaProxy::onClickConfirmed(const std::shared_ptr<::IconInfoInterface> & c_icon) {
+bool NativeIconLayerCallbackInterface::JavaProxy::onClickConfirmed(const std::vector<std::shared_ptr<::IconInfoInterface>> & c_icons) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeIconLayerCallbackInterface>::get();
     auto jret = jniEnv->CallBooleanMethod(Handle::get().get(), data.method_onClickConfirmed,
-                                          ::djinni::get(::djinni_generated::NativeIconInfoInterface::fromCpp(jniEnv, c_icon)));
+                                          ::djinni::get(::djinni::List<::djinni_generated::NativeIconInfoInterface>::fromCpp(jniEnv, c_icons)));
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::Bool::toCpp(jniEnv, jret);
 }
@@ -33,12 +33,12 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icon_I
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icon_IconLayerCallbackInterface_00024CppProxy_native_1onClickConfirmed(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_icon)
+CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icon_IconLayerCallbackInterface_00024CppProxy_native_1onClickConfirmed(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_icons)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::IconLayerCallbackInterface>(nativeRef);
-        auto r = ref->onClickConfirmed(::djinni_generated::NativeIconInfoInterface::toCpp(jniEnv, j_icon));
+        auto r = ref->onClickConfirmed(::djinni::List<::djinni_generated::NativeIconInfoInterface>::toCpp(jniEnv, j_icons));
         return ::djinni::release(::djinni::Bool::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

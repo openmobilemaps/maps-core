@@ -7,6 +7,6 @@
 
 @protocol MCIconLayerCallbackInterface
 
-- (BOOL)onClickConfirmed:(nullable MCIconInfoInterface *)icon;
+- (BOOL)onClickConfirmed:(nonnull NSArray<MCIconInfoInterface *> *)icons;
 
 @end
