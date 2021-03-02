@@ -188,13 +188,11 @@ private:
             bounds = layerBounds;
         }
 
-        WmtsLayerConfiguration configuration = WmtsLayerConfiguration(description.identifier,
-                                                                      description.resourceTemplate,
-                                                                      bounds, dimensions);
+      
         Tiled2dMapZoomInfo zoomInfo = Tiled2dMapZoomInfo(1.0, 0);
 
 
-        auto layerConfig = WmtsTiled2dMapLayerConfigFactory::create(configuration, zoomLevels, zoomInfo);
+        auto layerConfig = WmtsTiled2dMapLayerConfigFactory::create(description, zoomLevels, zoomInfo);
         //
         return Tiled2dMapRasterLayerInterface::create(layerConfig, textureLoader);
     }

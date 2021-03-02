@@ -11,13 +11,13 @@
 #pragma once
 
 #include "Tiled2dMapLayerConfig.h"
-#include "WmtsLayerConfiguration.h"
+#include "WmtsLayerDescription.h"
 #include "Tiled2dMapZoomInfo.h"
 #include "Tiled2dMapZoomLevelInfo.h"
 
 class WmtsTiled2dMapLayerConfig: public Tiled2dMapLayerConfig {
 public:
-    WmtsTiled2dMapLayerConfig(const WmtsLayerConfiguration &configuration,
+    WmtsTiled2dMapLayerConfig(const WmtsLayerDescription &description,
                               std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfo,
                               const Tiled2dMapZoomInfo &zoomInfo);
 
@@ -31,7 +31,7 @@ public:
 
     virtual Tiled2dMapZoomInfo getZoomInfo() override;
 private:
-    const WmtsLayerConfiguration configuration;
+    const WmtsLayerDescription description;
     std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfo;
     const Tiled2dMapZoomInfo zoomInfo;
 };

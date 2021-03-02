@@ -10,20 +10,20 @@
 
 #include "WmtsTiled2dMapLayerConfig.h"
 
-WmtsTiled2dMapLayerConfig::WmtsTiled2dMapLayerConfig(const WmtsLayerConfiguration &configuration,
+WmtsTiled2dMapLayerConfig::WmtsTiled2dMapLayerConfig(const WmtsLayerDescription &description,
                           std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfo,
                                                      const Tiled2dMapZoomInfo &zoomInfo):
-configuration(configuration),
+description(description),
 zoomLevelInfo(zoomLevelInfo),
 zoomInfo(zoomInfo)
 {}
 
 ::RectCoord WmtsTiled2dMapLayerConfig::getBounds() {
-    return configuration.bounds;
+    return description.bounds;
 }
 
 std::string WmtsTiled2dMapLayerConfig::getTileUrl(int32_t x, int32_t y, int32_t zoom) {
-    std::string urlFormat = configuration.urlFormat;
+    std::string urlFormat = description.resourceTemplate;
 
     if (auto it = urlFormat.find("{TileMatrix}")) {
         urlFormat.replace(it, std::strlen("{TileMatrix}"), std::to_string(zoom));
@@ -35,11 +35,11 @@ std::string WmtsTiled2dMapLayerConfig::getTileUrl(int32_t x, int32_t y, int32_t 
         urlFormat.replace(it, std::strlen("{TileCol}"), std::to_string(x));
     }
 
-    for (auto const &dimension: configuration.dimensions) {
-        auto placeHolder = "{" + dimension.first + "}";
+    for (auto const &dimension: description.dimensions) {
+        auto placeHolder = "{" + dimension.identifier + "}";
         auto it = urlFormat.find(placeHolder);
         if (it != std::string::npos) {
-            urlFormat.replace(it, placeHolder.length(), dimension.second);
+            urlFormat.replace(it, placeHolder.length(), dimension.defaultValue);
         }
     }
 
@@ -47,7 +47,7 @@ std::string WmtsTiled2dMapLayerConfig::getTileUrl(int32_t x, int32_t y, int32_t 
 }
 
 std::string WmtsTiled2dMapLayerConfig::getTileIdentifier(int32_t x, int32_t y, int32_t zoom) {
-    return "<" + configuration.indentifier + "x:" + std::to_string(x) + "y:" + std::to_string(y) + "zoom:" +  std::to_string(zoom) + ">";
+    return "<" + description.identifier + "x:" + std::to_string(x) + "y:" + std::to_string(y) + "zoom:" +  std::to_string(zoom) + ">";
 }
 
 std::vector<Tiled2dMapZoomLevelInfo> WmtsTiled2dMapLayerConfig::getZoomLevelInfos() {
