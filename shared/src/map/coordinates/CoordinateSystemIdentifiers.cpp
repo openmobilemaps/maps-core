@@ -23,3 +23,7 @@ std::string CoordinateSystemIdentifiers::EPSG4326() { return "EPSG:4326"; };
 // LV03+
 // https://epsg.io/2056
 std::string CoordinateSystemIdentifiers::EPSG2056() { return "EPSG:2056"; };
+
+// CH1903 / LV03
+// https://epsg.io/21781
+std::string CoordinateSystemIdentifiers::EPSG21781() { return "EPSG:21781"; };

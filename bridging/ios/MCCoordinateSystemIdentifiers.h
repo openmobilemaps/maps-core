@@ -26,4 +26,10 @@
  */
 + (nonnull NSString *)EPSG2056;
 
+/**
+ * CH1903 / LV03
+ * https://epsg.io/21781
+ */
++ (nonnull NSString *)EPSG21781;
+
 @end

@@ -25,12 +25,13 @@ private:
     friend ::djinni::JniClass<NativeTiled2dMapZoomLevelInfo>;
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/layers/tiled/Tiled2dMapZoomLevelInfo") };
-    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(DFIII)V") };
+    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(DFIIILio/openmobilemaps/mapscore/shared/map/coordinates/RectCoord;)V") };
     const jfieldID field_zoom { ::djinni::jniGetFieldID(clazz.get(), "zoom", "D") };
     const jfieldID field_tileWidthLayerSystemUnits { ::djinni::jniGetFieldID(clazz.get(), "tileWidthLayerSystemUnits", "F") };
     const jfieldID field_numTilesX { ::djinni::jniGetFieldID(clazz.get(), "numTilesX", "I") };
     const jfieldID field_numTilesY { ::djinni::jniGetFieldID(clazz.get(), "numTilesY", "I") };
     const jfieldID field_zoomLevelIdentifier { ::djinni::jniGetFieldID(clazz.get(), "zoomLevelIdentifier", "I") };
+    const jfieldID field_bounds { ::djinni::jniGetFieldID(clazz.get(), "bounds", "Lio/openmobilemaps/mapscore/shared/map/coordinates/RectCoord;") };
 };
 
 }  // namespace djinni_generated

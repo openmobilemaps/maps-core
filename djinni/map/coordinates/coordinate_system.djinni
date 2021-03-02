@@ -28,6 +28,10 @@ coordinate_system_identifiers = interface +c {
     # LV03+
     # https://epsg.io/2056
     static EPSG2056(): string;
+
+    # CH1903 / LV03
+    # https://epsg.io/21781
+    static EPSG21781(): string;
 }
 
 map_coordinate_system = record {
@@ -39,6 +43,7 @@ map_coordinate_system = record {
 coordinate_system_factory = interface +c {
     static get_epsg_2056_system() : map_coordinate_system;
     static get_epsg_3857_system() : map_coordinate_system;
+    static get_epsg_21781_system() : map_coordinate_system;
 }
 
 coord = record {
