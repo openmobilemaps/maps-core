@@ -9,4 +9,5 @@ data class Tiled2dMapZoomLevelInfo(
     var numTilesX: Int,
     var numTilesY: Int,
     var zoomLevelIdentifier: Int,
+    var bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord,
 )

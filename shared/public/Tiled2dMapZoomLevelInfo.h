@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "RectCoord.h"
 #include <cstdint>
 #include <utility>
 
@@ -12,16 +13,19 @@ struct Tiled2dMapZoomLevelInfo final {
     int32_t numTilesX;
     int32_t numTilesY;
     int32_t zoomLevelIdentifier;
+    ::RectCoord bounds;
 
     Tiled2dMapZoomLevelInfo(double zoom_,
                             float tileWidthLayerSystemUnits_,
                             int32_t numTilesX_,
                             int32_t numTilesY_,
-                            int32_t zoomLevelIdentifier_)
+                            int32_t zoomLevelIdentifier_,
+                            ::RectCoord bounds_)
     : zoom(std::move(zoom_))
     , tileWidthLayerSystemUnits(std::move(tileWidthLayerSystemUnits_))
     , numTilesX(std::move(numTilesX_))
     , numTilesY(std::move(numTilesY_))
     , zoomLevelIdentifier(std::move(zoomLevelIdentifier_))
+    , bounds(std::move(bounds_))
     {}
 };

@@ -28,4 +28,13 @@ public:
      * https://epsg.io/2056
      */
     static std::string EPSG2056();
+
+    /**
+     * CH1903 / LV03
+     * https://epsg.io/21781
+     */
+    static std::string EPSG21781();
+
+    /** e.g. urn:ogc:def:crs:EPSG:21781 */
+    static std::string fromCrsIdentifier(const std::string & identifier);
 };
