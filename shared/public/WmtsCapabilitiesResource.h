@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "MapCoordinateSystem.h"
 #include "TextureLoaderInterface.h"
 #include "Tiled2dMapRasterLayerInterface.h"
 #include <memory>
@@ -18,7 +17,7 @@ public:
 
     static std::shared_ptr<WmtsCapabilitiesResource> create(const std::string & xml);
 
-    virtual std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayer(const std::string & identifier, const std::shared_ptr<::TextureLoaderInterface> & textureLoader, const ::MapCoordinateSystem & mapCoordinateSystem) = 0;
+    virtual std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayer(const std::string & identifier, const std::shared_ptr<::TextureLoaderInterface> & textureLoader) = 0;
 
     virtual std::vector<WmtsLayerDescription> getAllLayers() = 0;
 };

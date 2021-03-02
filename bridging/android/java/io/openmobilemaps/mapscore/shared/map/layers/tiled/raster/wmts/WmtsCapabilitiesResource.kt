@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class WmtsCapabilitiesResource {
 
-    abstract fun createLayer(identifier: String, textureLoader: io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderInterface, mapCoordinateSystem: io.openmobilemaps.mapscore.shared.map.coordinates.MapCoordinateSystem): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface
+    abstract fun createLayer(identifier: String, textureLoader: io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderInterface): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface
 
     abstract fun getAllLayers(): ArrayList<WmtsLayerDescription>
 
@@ -36,11 +36,11 @@ abstract class WmtsCapabilitiesResource {
             _djinni_private_destroy()
         }
 
-        override fun createLayer(identifier: String, textureLoader: io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderInterface, mapCoordinateSystem: io.openmobilemaps.mapscore.shared.map.coordinates.MapCoordinateSystem): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface {
+        override fun createLayer(identifier: String, textureLoader: io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderInterface): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_createLayer(this.nativeRef, identifier, textureLoader, mapCoordinateSystem)
+            return native_createLayer(this.nativeRef, identifier, textureLoader)
         }
-        private external fun native_createLayer(_nativeRef: Long, identifier: String, textureLoader: io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderInterface, mapCoordinateSystem: io.openmobilemaps.mapscore.shared.map.coordinates.MapCoordinateSystem): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface
+        private external fun native_createLayer(_nativeRef: Long, identifier: String, textureLoader: io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderInterface): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface
 
         override fun getAllLayers(): ArrayList<WmtsLayerDescription> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

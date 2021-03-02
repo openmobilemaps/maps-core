@@ -25,7 +25,7 @@ public:
         parseDoc();
     };
 
-    std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayer(const std::string & identifier, const std::shared_ptr<::TextureLoaderInterface> & textureLoader, const ::MapCoordinateSystem & mapCoordinateSystem) {
+    std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayer(const std::string & identifier, const std::shared_ptr<::TextureLoaderInterface> & textureLoader) override {
 
         for (auto &description : layers) {
 
@@ -33,7 +33,7 @@ public:
                 continue; // TODO: Codestyle - Map or find instead of loop
             }
 
-            return createLayer(description, mapCoordinateSystem, textureLoader);
+            return createLayer(description, textureLoader);
 
         }
 
@@ -155,11 +155,7 @@ private:
         }
     }
 
-    std::shared_ptr< ::Tiled2dMapRasterLayerInterface> createLayer(WmtsLayerDescription &description, const ::MapCoordinateSystem &mapCoordinateSystem, const std::shared_ptr< ::TextureLoaderInterface> &textureLoader) {
-        auto conversionHelper = CoordinateConversionHelper(mapCoordinateSystem);
-
-        auto bounds = mapCoordinateSystem.bounds;
-                    bounds = conversionHelper.convertRect(mapCoordinateSystem.identifier, description.bounds);
+    std::shared_ptr< ::Tiled2dMapRasterLayerInterface> createLayer(WmtsLayerDescription &description, const std::shared_ptr< ::TextureLoaderInterface> &textureLoader) {
 
         auto matrixSet = matrixSets.at(description.tileMatrixSetLink);
 
@@ -173,7 +169,7 @@ private:
 
         std::string coordinateSystem = matrixSet.coordinateSystem;
 
-        bounds = conversionHelper.convertRect(coordinateSystem, description.bounds);
+        auto bounds = RectCoord(Coord("", 0, 0, 0), Coord("", 0, 0, 0));
 
         for (auto & matrix : matrixSet.matrices) {
             int32_t zoomLevelIdentifier = stoi(matrix.identifier);
