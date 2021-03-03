@@ -54,6 +54,12 @@ and you find the generated .aar library under `build/outputs/aar/`. For developm
 
 <h2>Installation</h2>
 
+This library is available on JCenter. Include it with:
+
+```
+implementation 'io.openmobilemaps.mapscore:mapscore-android:1.2.0'
+```
+
 Either include the `android` folder as a module in the Android project or move the generated .aar to e.g. the `app/libs` folder of the project and include it in the project via the apps `build.gradle`:
 
 ```
@@ -62,7 +68,7 @@ implementation fileTree(dir: 'libs', include: ['*.aar'])
 
 ### Dependencies
 
-When Open Maps Mobile is included as .aar, the following dependencies in the apps `build.gradle` are necessary:
+When Open Maps Mobile is included as .aar (and not as JCenter dependency), the following dependencies in the apps `build.gradle` are necessary:
 
 ```
 implementation "androidx.activity:activity-ktx:1.1.0"
@@ -110,10 +116,13 @@ The `LayerConfig` contains the information needed for the layer to compute the v
 ```kotlin
 val layerConfig = object : Tiled2dMapLayerConfig() {
 			// Defines the bounds of the layer and implicitly the coordinate system used by the layer as well
-			override fun getBounds(): RectCoord = RectCoord(
+			val epsg3857Bounds: RectCoord = RectCoord(
 				Coord(CoordinateSystemIdentifiers.EPSG3857(), -20037508.34, 20037508.34, 0.0),
 				Coord(CoordinateSystemIdentifiers.EPSG3857(), 20037508.34, -20037508.34, 0.0)
 			)
+    
+			// Defines to map coordinate system of the layer
+			override fun getCoordinateSystemIdentifier() : String = CoordinateSystemIdentifiers.EPSG3857()
 
 			// Pattern to create a tile identifier used internally 
 			override fun getTileIdentifier(x: Int, y: Int, zoom: Int): String = "OSM_" + zoom + "_" + x + "_" + y
@@ -131,26 +140,26 @@ val layerConfig = object : Tiled2dMapLayerConfig() {
 			// zoom identifier used for the tile-url (see getTileUrl above)
 			override fun getZoomLevelInfos(): ArrayList<Tiled2dMapZoomLevelInfo> = ArrayList(
 					listOf(
-						Tiled2dMapZoomLevelInfo(500000000.0, 40075016f, 1, 1, 0),
-						Tiled2dMapZoomLevelInfo(250000000.0, 20037508f, 2, 2, 1),
-						Tiled2dMapZoomLevelInfo(150000000.0, 10018754f, 4, 4, 2),
-						Tiled2dMapZoomLevelInfo(70000000.0, 5009377.1f, 8, 8, 3),
-						Tiled2dMapZoomLevelInfo(35000000.0, 2504688.5f, 16, 16, 4),
-						Tiled2dMapZoomLevelInfo(15000000.0, 1252344.3f, 32, 32, 5),
-						Tiled2dMapZoomLevelInfo(10000000.0, 626172.1f, 64, 64, 6),
-						Tiled2dMapZoomLevelInfo(4000000.0, 313086.1f, 128, 128, 7),
-						Tiled2dMapZoomLevelInfo(2000000.0, 156543f, 256, 256, 8),
-						Tiled2dMapZoomLevelInfo(1000000.0, 78271.5f, 512, 512, 9),
-						Tiled2dMapZoomLevelInfo(500000.0, 39135.8f, 1024, 1024, 10),
-						Tiled2dMapZoomLevelInfo(250000.0, 19567.9f, 2048, 2048, 11),
-						Tiled2dMapZoomLevelInfo(150000.0, 9783.94f, 4096, 4096, 12),
-						Tiled2dMapZoomLevelInfo(70000.0, 4891.97f, 8192, 8192, 13),
-						Tiled2dMapZoomLevelInfo(35000.0, 2445.98f, 16384, 16384, 14),
-						Tiled2dMapZoomLevelInfo(15000.0, 1222.99f, 32768, 32768, 15),
-						Tiled2dMapZoomLevelInfo(8000.0, 611.496f, 65536, 65536, 16),
-						Tiled2dMapZoomLevelInfo(4000.0, 305.748f, 131072, 131072, 17),
-						Tiled2dMapZoomLevelInfo(2000.0, 152.874f, 262144, 262144, 18),
-						Tiled2dMapZoomLevelInfo(1000.0, 76.437f, 524288, 524288, 19)
+						Tiled2dMapZoomLevelInfo(500000000.0, 40075016f, 1, 1, 0, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(250000000.0, 20037508f, 2, 2, 1, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(150000000.0, 10018754f, 4, 4, 2, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(70000000.0, 5009377.1f, 8, 8, 3, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(35000000.0, 2504688.5f, 16, 16, 4, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(15000000.0, 1252344.3f, 32, 32, 5, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(10000000.0, 626172.1f, 64, 64, 6, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(4000000.0, 313086.1f, 128, 128, 7, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(2000000.0, 156543f, 256, 256, 8, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(1000000.0, 78271.5f, 512, 512, 9, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(500000.0, 39135.8f, 1024, 1024, 10, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(250000.0, 19567.9f, 2048, 2048, 11, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(150000.0, 9783.94f, 4096, 4096, 12, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(70000.0, 4891.97f, 8192, 8192, 13, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(35000.0, 2445.98f, 16384, 16384, 14, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(15000.0, 1222.99f, 32768, 32768, 15, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(8000.0, 611.496f, 65536, 65536, 16, epsg3857Bounds, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(4000.0, 305.748f, 131072, 131072, 17, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(2000.0, 152.874f, 262144, 262144, 18, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(1000.0, 76.437f, 524288, 524288, 19, epsg3857Bounds)
 					)
 				)
 			}
@@ -161,6 +170,70 @@ Finally, the layer can be added to the MapView.
 
 ```kotlin
 mapView.addLayer(tiledLayer.asLayerInterface())
+```
+
+### Parsing a WMTS Capability 
+
+Open Mobile Maps supports the [WMTS standard](https://en.wikipedia.org/wiki/Web_Map_Tile_Service) and can parse their Capability XML file to generate raster layer configurations.
+
+```kotlin
+let resource = WmtsCapabilitiesResource.create(xml)!
+```
+The created resource object is then capable of creating a layer object with a given identifier.
+
+```kotlin
+let layer = resource.createLayer("identifier", textureLoader: loader)
+mapView.add(layer: layer?.asLayerInterface())
+```
+
+This feature is still being improved to support a wider range of WMTS capabilities.
+
+### Polygon layer
+
+Open Mobile Maps provides a simple interface to create a polygon layer. The layer handles the rendering of the given polygons and calls the callback handler in case of user interaction.
+
+``` kotlin
+val polygonLayer = PolygonLayerInterface.create()
+polygonLayer.add(
+    PolygonInfo(
+        "Polygon",
+        /* Coordinates */,
+        /* holes */,
+        false,
+        Color(1.0f, 0.0f, 0.0f, 1.0f),
+        Color(1.0f, 0.4f, 0.4f, 1.0f),
+    )
+)
+polygonLayer.setCallbackHandler(object : PolygonLayerCallbackInterface(){
+    override fun onClickConfirmed(polygon: PolygonInfo) {
+        // React
+    }
+})
+mapView.addLayer(polygonLayer.asLayerInterface())
+```
+
+### Icon layer
+
+A simple icon layer is implemented as well. This supports displaying textures at the given coordinates. A scale parameter has to be provided which specifies how the icon should be affected by camera movements. In case of user interaction, the given callback handler will be called.
+
+```kotlin
+val iconLayer = IconLayerInterface.create()
+val texture = BitmapTextureHolder(/* drawable or bitmap */)
+val iconSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 48f, resources.displayMetrics)
+val icon = IconFactory.createIcon(
+				"Icon",
+				coordinate,
+				texture,
+				Vec2F(iconSize, iconSize),
+				IconType.INVARIANT)
+iconLayer.add(icon)
+iconLayer.setCallbackHandler(object : IconLayerCallbackInterface(){
+	override fun onClickConfirmed(icons: ArrayList<IconInfoInterface>): Boolean {
+		// React and return true if handled
+		return true
+	}
+})
+mapView.addLayer(iconLayer.asLayerInterface())
 ```
 
 ### Adjusting the Camera
@@ -182,3 +255,4 @@ mapView.getCamera().setMaxZoom(300.0)
 ## License
 
 This project is licensed under the terms of the MPL 2 license. See the [LICENSE](../LICENSE) file.
+
