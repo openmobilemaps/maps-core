@@ -18,8 +18,9 @@ public:
                     double endValue,
                     InterpolatorFunction interpolatorFunction,
                      std::function<void(double)> onUpdate,
-                    std::function<void()> onFinish):
+                    std::optional<std::function<void()>> onFinish = std::nullopt):
     DefaultAnimator<double>(duration, startValue, endValue, interpolatorFunction, onUpdate, onFinish) {}
+
 
     virtual void update(double adjustedProgress) override {
 

@@ -19,8 +19,8 @@ public:
                     Coord startValue,
                     Coord endValue,
                     InterpolatorFunction interpolatorFunction,
-                     std::function<void(Coord)> onUpdate,
-                    std::function<void()> onFinish):
+                    std::function<void(Coord)> onUpdate,
+                    std::optional<std::function<void()>> onFinish = std::nullopt):
     DefaultAnimator<Coord>(duration, startValue, endValue, interpolatorFunction, onUpdate, onFinish) {
         assert(startValue.systemIdentifier == endValue.systemIdentifier);
     }

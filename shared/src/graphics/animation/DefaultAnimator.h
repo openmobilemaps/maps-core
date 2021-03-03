@@ -23,7 +23,7 @@ public:
                      T endValue,
                      InterpolatorFunction interpolatorFunction,
                      std::function<void(T)> onUpdate,
-                     std::function<void()> onFinish):
+                     std::optional<std::function<void()>> onFinish = std::nullopt):
     duration(duration),
     startValue(startValue),
     endValue(endValue),
@@ -48,7 +48,9 @@ public:
     virtual void finish() override {
         animationState = State::finished;
 
-        onFinish();
+        if (onFinish != std::nullopt) {
+            (*onFinish)();
+        }
     };
 
     virtual bool isFinished() override {
@@ -84,7 +86,7 @@ protected:
     T endValue;
     AnimationInterpolator interpolator;
     std::function<void(T)> onUpdate;
-    std::function<void()> onFinish;
+    std::optional<std::function<void()>> onFinish;
     
     enum State { created, started, canceled, finished };
     State animationState = State::created;
