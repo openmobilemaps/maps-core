@@ -6,3 +6,9 @@
 - implemented camera movement inertia
 - improves animation handling
 - bugfixes and improvements
+
+## Version 1.1.0 (01.03.2021)
+- various improvments & bugfixes
+
+## Version 1.0.0 (19.02.2021)
+- initial version of open mobile maps
