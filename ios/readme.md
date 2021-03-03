@@ -144,16 +144,55 @@ class MapViewController: UIViewController {
 
 ### Parsing a WMTS Capability 
 
-Open Mobile Maps supports the [WMTS standard](https://en.wikipedia.org/wiki/Web_Map_Tile_Service) and can parse their Capability xml file to generate raster layer configurations.
+Open Mobile Maps supports the [WMTS standard](https://en.wikipedia.org/wiki/Web_Map_Tile_Service) and can parse their Capability XML file to generate raster layer configurations.
 
 ```swift
 let resource = MCWmtsCapabilitiesResource.create(xml)!
 ```
-The created resource object is than capable of creating a layer object with a given identifier.
+The created resource object is then capable of creating a layer object with a given identifier.
 
 ```swift
 let layer = resource.createLayer("identifier", textureLoader: loader)
 mapView.add(layer: layer?.asLayerInterface())
+```
+
+### Polygon layer
+
+Open Mobile Maps provides a simple interface to create a polygon layer. The layer handles the rendering of the given polygons and calls the callback handler in case of user interaction.
+
+``` swift
+let coords : [MCCoord] = [
+    /// coordinates
+]
+let polygonLayer = MCPolygonLayerInterface.create()
+let polygonInfo = MCPolygonInfo(identifier: "switzerland",
+                                coordinates: coords,
+                                holes: [],
+                                isConvex: false,
+                                color: UIColor.red.mapCoreColor,
+                                highlight: UIColor.red.withAlphaComponent(0.2).mapCoreColor)
+
+polygonLayer?.add(polygonInfo)
+polygonLayer?.setCallbackHandler(handler)
+mapView.add(layer: polygonLayer?.asLayerInterface())
+```
+
+### Icon layer
+
+A simple icon layer is implemented as well. This supports displaying textures at the given coordinates. A scale parameter has to be provided which specifies how the icon should be affected by camera movements. In case of user interaction, the given callback handler will be called.
+
+```swift
+let iconLayer = MCIconLayerInterface.create()
+let image = UIImage(named: "image")
+let texture = try! TextureHolder(image!.cgImage!)
+let icon = MCIconFactory.createIcon("icon",
+                         coordinate: coordinate,
+                         texture: texture,
+                         iconSize: .init(x: texture.getImageWidth(), y: texture.getImageHeight()),
+                         scale: .FIXED)
+iconLayer?.add(icon)
+iconLayer?.setCallbackHandler(handler)
+mapView.add(layer: iconLayer?.asLayerInterface())
 ```
 
 #### Adjusting the Camera
