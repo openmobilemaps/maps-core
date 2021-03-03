@@ -267,7 +267,8 @@ bool MapCamera2d::onMoveComplete() {
 void MapCamera2d::inertiaStep() {
     if (inertia == std::nullopt) return;
 
-    if (inertia->velocity.x <= 0.001 && inertia->velocity.y <= 0.001) {
+    if (std::abs(inertia->velocity.x) <= 0.001 &&
+        std::abs(inertia->velocity.y) <= 0.001) {
         inertia = std::nullopt;
         return;
     }
