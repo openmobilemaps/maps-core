@@ -128,6 +128,7 @@ std::shared_ptr<::CameraInterface> MapCamera2d::asCameraInterface() { return sha
 
 std::vector<float> MapCamera2d::getVpMatrix() {
     applyAnimationState();
+    inertiaStep();
 
     std::vector<float> newVpMatrix(16, 0);
 
@@ -227,11 +228,11 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     float sinAngle = sin(angle * M_PI / 180.0);
     float cosAngle = cos(angle * M_PI / 180.0);
 
-    float leftDiff = (cosAngle * dx + sinAngle * dy);
-    float topDiff = (-sinAngle * dx + cosAngle * dy);
+    float xDiff = (cosAngle * dx + sinAngle * dy);
+    float yDiff = (-sinAngle * dx + cosAngle * dy);
 
-    centerPosition.x -= leftDiff * zoom * screenPixelAsRealMeterFactor;
-    centerPosition.y += topDiff * zoom * screenPixelAsRealMeterFactor;
+    centerPosition.x -= xDiff * zoom * screenPixelAsRealMeterFactor;
+    centerPosition.y += yDiff * zoom * screenPixelAsRealMeterFactor;
 
     auto config = mapInterface->getMapConfig();
     auto bottomRight = bounds.bottomRight;
@@ -243,9 +244,54 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     centerPosition.y = std::max(centerPosition.y, bottomRight.y);
     centerPosition.y = std::min(centerPosition.y, topLeft.y);
 
+    if (velocity.x == 0 && velocity.y == 0) {
+        velocity.x = -xDiff;
+        velocity.y = -yDiff;
+    } else {
+        velocity.x = 0.5f * velocity.x - 0.5f * xDiff;
+        velocity.y = 0.5f * velocity.y - 0.5f * yDiff;
+    }
+
     notifyListeners();
     mapInterface->invalidate();
     return true;
+}
+
+bool MapCamera2d::onMoveComplete() {
+    inertia = Inertia(velocity);
+    velocity = { 0, 0 };
+}
+
+void MapCamera2d::inertiaStep() {
+    if (inertia == std::nullopt) return;
+
+    if (inertia->velocity.x == 0 && inertia->velocity.y == 0) {
+        inertia = std::nullopt;
+        return;
+    }
+
+    centerPosition.x += inertia->velocity.x * zoom * screenPixelAsRealMeterFactor;
+    centerPosition.y -= inertia->velocity.y * zoom * screenPixelAsRealMeterFactor;
+
+    auto config = mapInterface->getMapConfig();
+    auto bottomRight = bounds.bottomRight;
+    auto topLeft = bounds.topLeft;
+
+    centerPosition.x = std::min(centerPosition.x, bottomRight.x);
+    centerPosition.x = std::max(centerPosition.x, topLeft.x);
+
+    centerPosition.y = std::max(centerPosition.y, bottomRight.y);
+    centerPosition.y = std::min(centerPosition.y, topLeft.y);
+
+    float slowDown =
+    inertia->velocity.x * inertia->velocity.x + inertia->velocity.y * inertia->velocity.y > 1
+            ? 0.95f
+            : 0.6f;
+    inertia->velocity.x *= slowDown;
+    inertia->velocity.y *= slowDown;
+
+    notifyListeners();
+    mapInterface->invalidate();
 }
 
 bool MapCamera2d::onDoubleClick(const ::Vec2F &posScreen) {

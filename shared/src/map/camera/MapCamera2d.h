@@ -69,6 +69,8 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual bool onMove(const ::Vec2F &deltaScreen, bool confirmed, bool doubleClick) override;
 
+    virtual bool onMoveComplete() override;
+
     virtual bool onDoubleClick(const ::Vec2F &posScreen) override;
 
     virtual bool onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) override;
@@ -116,6 +118,20 @@ class MapCamera2d : public MapCamera2dInterface,
         bool twoFingerZoomEnabled = true;
         bool moveEnabled = true;
     };
+
+    Vec2F velocity = { 0, 0 };
+
+    /// object describing parameters of interia
+    /// currently only dragging interia is implemented
+    /// zoom and rotation are still missing
+    struct Inertia {
+        Vec2F velocity;
+        
+        Inertia(Vec2F velocity):
+        velocity(velocity) {}
+    };
+    std::optional<Inertia> inertia;
+    void inertiaStep();
 
     CameraConfiguration config;
 
