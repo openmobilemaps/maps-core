@@ -231,8 +231,8 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     float xDiff = (cosAngle * dx + sinAngle * dy);
     float yDiff = (-sinAngle * dx + cosAngle * dy);
 
-    centerPosition.x -= xDiff * zoom * screenPixelAsRealMeterFactor;
-    centerPosition.y += yDiff * zoom * screenPixelAsRealMeterFactor;
+    centerPosition.x += xDiff * zoom * screenPixelAsRealMeterFactor * ( mapSystemRtl ? -1 : 1 );
+    centerPosition.y += yDiff * zoom * screenPixelAsRealMeterFactor * ( mapSystemTtb ? -1 : 1 );
 
     auto config = mapInterface->getMapConfig();
     auto bottomRight = bounds.bottomRight;
@@ -245,11 +245,11 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     centerPosition.y = std::min(centerPosition.y, topLeft.y);
 
     if (currentDragVelocity.x == 0 && currentDragVelocity.y == 0) {
-        currentDragVelocity.x = -xDiff;
-        currentDragVelocity.y = -yDiff;
+        currentDragVelocity.x = xDiff;
+        currentDragVelocity.y = yDiff;
     } else {
-        currentDragVelocity.x = 0.5f * currentDragVelocity.x - 0.5f * xDiff;
-        currentDragVelocity.y = 0.5f * currentDragVelocity.y - 0.5f * yDiff;
+        currentDragVelocity.x = 0.5f * currentDragVelocity.x + 0.5f * xDiff;
+        currentDragVelocity.y = 0.5f * currentDragVelocity.y + 0.5f * yDiff;
     }
 
     notifyListeners();
@@ -270,8 +270,8 @@ void MapCamera2d::inertiaStep() {
         return;
     }
 
-    centerPosition.x += inertia->velocity.x * zoom * screenPixelAsRealMeterFactor;
-    centerPosition.y -= inertia->velocity.y * zoom * screenPixelAsRealMeterFactor;
+    centerPosition.x += inertia->velocity.x * zoom * screenPixelAsRealMeterFactor * ( mapSystemRtl ? -1 : 1 );
+    centerPosition.y += inertia->velocity.y * zoom * screenPixelAsRealMeterFactor * ( mapSystemTtb ? -1 : 1 );
 
     auto config = mapInterface->getMapConfig();
     auto bottomRight = bounds.bottomRight;
