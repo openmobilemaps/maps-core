@@ -228,6 +228,7 @@ std::shared_ptr<::CameraInterface> MapCamera2d::asCameraInterface() { return sha
 std::vector<float> MapCamera2d::getVpMatrix() {
     if (animation) animation->update();
     if (coordAnimation) coordAnimation->update();
+    inertiaStep();
 
     std::vector<float> newVpMatrix(16, 0);
 
@@ -311,6 +312,8 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     if (!config.moveEnabled)
         return false;
 
+    inertia = std::nullopt;
+
     if (doubleClick) {
         double newZoom = zoom * (1.0 - (deltaScreen.y * 0.003));
 
@@ -327,11 +330,11 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     float sinAngle = sin(angle * M_PI / 180.0);
     float cosAngle = cos(angle * M_PI / 180.0);
 
-    float leftDiff = (cosAngle * dx + sinAngle * dy);
-    float topDiff = (-sinAngle * dx + cosAngle * dy);
+    float xDiff = (cosAngle * dx + sinAngle * dy);
+    float yDiff = (-sinAngle * dx + cosAngle * dy);
 
-    centerPosition.x -= leftDiff * zoom * screenPixelAsRealMeterFactor;
-    centerPosition.y += topDiff * zoom * screenPixelAsRealMeterFactor;
+    centerPosition.x += xDiff * zoom * screenPixelAsRealMeterFactor * ( mapSystemRtl ? -1 : 1 );
+    centerPosition.y += yDiff * zoom * screenPixelAsRealMeterFactor * ( mapSystemTtb ? -1 : 1 );
 
     auto config = mapInterface->getMapConfig();
     auto bottomRight = bounds.bottomRight;
@@ -343,14 +346,62 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     centerPosition.y = std::max(centerPosition.y, bottomRight.y);
     centerPosition.y = std::min(centerPosition.y, topLeft.y);
 
+    if (currentDragVelocity.x == 0 && currentDragVelocity.y == 0) {
+        currentDragVelocity.x = xDiff;
+        currentDragVelocity.y = yDiff;
+    } else {
+        currentDragVelocity.x = 0.5f * currentDragVelocity.x + 0.5f * xDiff;
+        currentDragVelocity.y = 0.5f * currentDragVelocity.y + 0.5f * yDiff;
+    }
+
     notifyListeners();
     mapInterface->invalidate();
     return true;
 }
 
+bool MapCamera2d::onMoveComplete() {
+    inertia = Inertia(currentDragVelocity);
+    currentDragVelocity = { 0, 0 };
+}
+
+void MapCamera2d::inertiaStep() {
+    if (inertia == std::nullopt) return;
+
+    if (std::abs(inertia->velocity.x) <= 0.001 &&
+        std::abs(inertia->velocity.y) <= 0.001) {
+        inertia = std::nullopt;
+        return;
+    }
+
+    centerPosition.x += inertia->velocity.x * zoom * screenPixelAsRealMeterFactor * ( mapSystemRtl ? -1 : 1 );
+    centerPosition.y += inertia->velocity.y * zoom * screenPixelAsRealMeterFactor * ( mapSystemTtb ? -1 : 1 );
+
+    auto config = mapInterface->getMapConfig();
+    auto bottomRight = bounds.bottomRight;
+    auto topLeft = bounds.topLeft;
+
+    centerPosition.x = std::min(centerPosition.x, bottomRight.x);
+    centerPosition.x = std::max(centerPosition.x, topLeft.x);
+
+    centerPosition.y = std::max(centerPosition.y, bottomRight.y);
+    centerPosition.y = std::min(centerPosition.y, topLeft.y);
+
+    float slowDown =
+    inertia->velocity.x * inertia->velocity.x + inertia->velocity.y * inertia->velocity.y > 1
+            ? 0.95f
+            : 0.6f;
+    inertia->velocity.x *= slowDown;
+    inertia->velocity.y *= slowDown;
+
+    notifyListeners();
+    mapInterface->invalidate();
+}
+
 bool MapCamera2d::onDoubleClick(const ::Vec2F &posScreen) {
     if (!config.doubleClickZoomEnabled)
         return false;
+
+    inertia = std::nullopt;
 
     auto targetZoom = zoom / 2;
 
@@ -380,6 +431,8 @@ void MapCamera2d::clearTouch() {
 bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) {
     if (!config.twoFingerZoomEnabled)
         return false;
+
+    inertia = std::nullopt;
 
     if (posScreenOld.size() >= 2) {
         double scaleFactor =
