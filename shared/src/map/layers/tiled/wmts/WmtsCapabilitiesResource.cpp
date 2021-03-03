@@ -170,7 +170,7 @@ private:
 
         std::vector<::Tiled2dMapZoomLevelInfo>  zoomLevels;
 
-        std::string coordinateSystem = matrixSet.coordinateSystem;
+        std::string coordinateSystem = matrixSet.coordinateSystemIdentifier;
 
         auto bounds = RectCoord(Coord("", 0, 0, 0), Coord("", 0, 0, 0));
 
@@ -195,7 +195,7 @@ private:
         Tiled2dMapZoomInfo zoomInfo = Tiled2dMapZoomInfo(1.0, 0);
 
 
-        auto layerConfig = WmtsTiled2dMapLayerConfigFactory::create(description, zoomLevels, zoomInfo);
+        auto layerConfig = WmtsTiled2dMapLayerConfigFactory::create(description, zoomLevels, zoomInfo, matrixSet.coordinateSystemIdentifier);
         //
         return Tiled2dMapRasterLayerInterface::create(layerConfig, textureLoader);
     }

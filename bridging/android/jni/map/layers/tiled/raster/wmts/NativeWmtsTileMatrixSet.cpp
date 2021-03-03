@@ -15,7 +15,7 @@ auto NativeWmtsTileMatrixSet::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::dji
     const auto& data = ::djinni::JniClass<NativeWmtsTileMatrixSet>::get();
     auto r = ::djinni::LocalRef<JniType>{jniEnv->NewObject(data.clazz.get(), data.jconstructor,
                                                            ::djinni::get(::djinni::String::fromCpp(jniEnv, c.identifier)),
-                                                           ::djinni::get(::djinni::String::fromCpp(jniEnv, c.coordinateSystem)),
+                                                           ::djinni::get(::djinni::String::fromCpp(jniEnv, c.coordinateSystemIdentifier)),
                                                            ::djinni::get(::djinni::List<::djinni_generated::NativeWmtsTileMatrix>::fromCpp(jniEnv, c.matrices)))};
     ::djinni::jniExceptionCheck(jniEnv);
     return r;
@@ -26,7 +26,7 @@ auto NativeWmtsTileMatrixSet::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
     assert(j != nullptr);
     const auto& data = ::djinni::JniClass<NativeWmtsTileMatrixSet>::get();
     return {::djinni::String::toCpp(jniEnv, (jstring)jniEnv->GetObjectField(j, data.field_identifier)),
-            ::djinni::String::toCpp(jniEnv, (jstring)jniEnv->GetObjectField(j, data.field_coordinateSystem)),
+            ::djinni::String::toCpp(jniEnv, (jstring)jniEnv->GetObjectField(j, data.field_coordinateSystemIdentifier)),
             ::djinni::List<::djinni_generated::NativeWmtsTileMatrix>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_matrices))};
 }
 

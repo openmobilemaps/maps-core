@@ -7,29 +7,29 @@
 @implementation MCWmtsTileMatrixSet
 
 - (nonnull instancetype)initWithIdentifier:(nonnull NSString *)identifier
-                          coordinateSystem:(nonnull NSString *)coordinateSystem
+                coordinateSystemIdentifier:(nonnull NSString *)coordinateSystemIdentifier
                                   matrices:(nonnull NSArray<MCWmtsTileMatrix *> *)matrices
 {
     if (self = [super init]) {
         _identifier = [identifier copy];
-        _coordinateSystem = [coordinateSystem copy];
+        _coordinateSystemIdentifier = [coordinateSystemIdentifier copy];
         _matrices = [matrices copy];
     }
     return self;
 }
 
 + (nonnull instancetype)wmtsTileMatrixSetWithIdentifier:(nonnull NSString *)identifier
-                                       coordinateSystem:(nonnull NSString *)coordinateSystem
+                             coordinateSystemIdentifier:(nonnull NSString *)coordinateSystemIdentifier
                                                matrices:(nonnull NSArray<MCWmtsTileMatrix *> *)matrices
 {
     return [(MCWmtsTileMatrixSet*)[self alloc] initWithIdentifier:identifier
-                                                 coordinateSystem:coordinateSystem
+                                       coordinateSystemIdentifier:coordinateSystemIdentifier
                                                          matrices:matrices];
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p identifier:%@ coordinateSystem:%@ matrices:%@>", self.class, (void *)self, self.identifier, self.coordinateSystem, self.matrices];
+    return [NSString stringWithFormat:@"<%@ %p identifier:%@ coordinateSystemIdentifier:%@ matrices:%@>", self.class, (void *)self, self.identifier, self.coordinateSystemIdentifier, self.matrices];
 }
 
 @end

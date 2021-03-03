@@ -33,7 +33,7 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        ::RectCoord getBounds() override;
+        std::string getCoordinateSystemIdentifier() override;
         std::string getTileUrl(int32_t x, int32_t y, int32_t zoom) override;
         std::string getTileIdentifier(int32_t x, int32_t y, int32_t zoom) override;
         std::vector<::Tiled2dMapZoomLevelInfo> getZoomLevelInfos() override;
@@ -44,7 +44,7 @@ private:
     };
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/layers/tiled/Tiled2dMapLayerConfig") };
-    const jmethodID method_getBounds { ::djinni::jniGetMethodID(clazz.get(), "getBounds", "()Lio/openmobilemaps/mapscore/shared/map/coordinates/RectCoord;") };
+    const jmethodID method_getCoordinateSystemIdentifier { ::djinni::jniGetMethodID(clazz.get(), "getCoordinateSystemIdentifier", "()Ljava/lang/String;") };
     const jmethodID method_getTileUrl { ::djinni::jniGetMethodID(clazz.get(), "getTileUrl", "(III)Ljava/lang/String;") };
     const jmethodID method_getTileIdentifier { ::djinni::jniGetMethodID(clazz.get(), "getTileIdentifier", "(III)Ljava/lang/String;") };
     const jmethodID method_getZoomLevelInfos { ::djinni::jniGetMethodID(clazz.get(), "getZoomLevelInfos", "()Ljava/util/ArrayList;") };

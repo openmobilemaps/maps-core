@@ -6,10 +6,6 @@
 @extern "../../../../../yaml/tiled_2d_map_zoom_level_info.yaml"
 @extern "../../../../../yaml/tiled_2d_map_layer_config.yaml"
 
-
-
-
-
 wmts_layer_dimension = record {
     identifier: string;
     default_value: string;
@@ -27,7 +23,7 @@ wmts_tile_matrix = record {
 }
 wmts_tile_matrix_set = record {
     identifier: string;
-    coordinate_system: string;
+    coordinate_system_identifier: string;
     matrices: list<wmts_tile_matrix>;
 }
 wmts_layer_description = record {
@@ -49,5 +45,5 @@ wmts_capabilities_resource = interface +c {
 }
 
 wmts_tiled_2d_map_layer_config_factory = interface +c {
-    static create(wmts_layer_configuration: wmts_layer_description, zoom_level_info: list<tiled_2d_map_zoom_level_info>, zoom_info: tiled_2d_map_zoom_info) : tiled_2d_map_layer_config;
+    static create(wmts_layer_configuration: wmts_layer_description, zoom_level_info: list<tiled_2d_map_zoom_level_info>, zoom_info: tiled_2d_map_zoom_info, coordinate_system_identifier: string) : tiled_2d_map_layer_config;
 }

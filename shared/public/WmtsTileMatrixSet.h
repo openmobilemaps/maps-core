@@ -10,14 +10,14 @@
 
 struct WmtsTileMatrixSet final {
     std::string identifier;
-    std::string coordinateSystem;
+    std::string coordinateSystemIdentifier;
     std::vector<WmtsTileMatrix> matrices;
 
     WmtsTileMatrixSet(std::string identifier_,
-                      std::string coordinateSystem_,
+                      std::string coordinateSystemIdentifier_,
                       std::vector<WmtsTileMatrix> matrices_)
     : identifier(std::move(identifier_))
-    , coordinateSystem(std::move(coordinateSystem_))
+    , coordinateSystemIdentifier(std::move(coordinateSystemIdentifier_))
     , matrices(std::move(matrices_))
     {}
 };

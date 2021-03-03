@@ -12,14 +12,16 @@
 
 WmtsTiled2dMapLayerConfig::WmtsTiled2dMapLayerConfig(const WmtsLayerDescription &description,
                           std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfo,
-                                                     const Tiled2dMapZoomInfo &zoomInfo):
+                                                     const Tiled2dMapZoomInfo &zoomInfo,
+                                                     const std::string &coordinateSystemIdentifier):
 description(description),
 zoomLevelInfo(zoomLevelInfo),
-zoomInfo(zoomInfo)
+zoomInfo(zoomInfo),
+coordinateSystemIdentifier(coordinateSystemIdentifier)
 {}
 
-::RectCoord WmtsTiled2dMapLayerConfig::getBounds() {
-    return description.bounds;
+std::string WmtsTiled2dMapLayerConfig::getCoordinateSystemIdentifier() {
+    return coordinateSystemIdentifier;
 }
 
 std::string WmtsTiled2dMapLayerConfig::getTileUrl(int32_t x, int32_t y, int32_t zoom) {

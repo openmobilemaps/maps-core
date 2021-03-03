@@ -24,8 +24,7 @@ Tiled2dMapSource<T, L>::Tiled2dMapSource(const MapConfig &mapConfig, const std::
     , listener(listener)
     , zoomLevelInfos(layerConfig->getZoomLevelInfos())
     , zoomInfo(layerConfig->getZoomInfo())
-    , layerBoundsMapSystem(conversionHelper->convertRect(mapConfig.mapCoordinateSystem.identifier, layerConfig->getBounds()))
-    , layerSystemId(mapConfig.mapCoordinateSystem.identifier)
+    , layerSystemId(layerConfig->getCoordinateSystemIdentifier())
     , dispatchedTasks(0) {
 
     std::sort(zoomLevelInfos.begin(), zoomLevelInfos.end(),

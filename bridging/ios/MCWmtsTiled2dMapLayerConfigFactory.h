@@ -12,6 +12,7 @@
 
 + (nullable id<MCTiled2dMapLayerConfig>)create:(nonnull MCWmtsLayerDescription *)wmtsLayerConfiguration
                                  zoomLevelInfo:(nonnull NSArray<MCTiled2dMapZoomLevelInfo *> *)zoomLevelInfo
-                                      zoomInfo:(nonnull MCTiled2dMapZoomInfo *)zoomInfo;
+                                      zoomInfo:(nonnull MCTiled2dMapZoomInfo *)zoomInfo
+                    coordinateSystemIdentifier:(nonnull NSString *)coordinateSystemIdentifier;
 
 @end
