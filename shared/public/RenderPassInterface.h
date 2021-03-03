@@ -3,17 +3,19 @@
 
 #pragma once
 
-#include "GraphicsObjectInterface.h"
 #include <memory>
 #include <vector>
 
+class RenderObjectInterface;
 struct RenderPassConfig;
 
 class RenderPassInterface {
 public:
     virtual ~RenderPassInterface() {}
 
-    virtual std::vector<std::shared_ptr<::GraphicsObjectInterface>> getGraphicsObjects() = 0;
+    virtual std::vector<std::shared_ptr<RenderObjectInterface>> getRenderObjects() = 0;
+
+    virtual void addRenderObject(const std::shared_ptr<RenderObjectInterface> & renderObject) = 0;
 
     virtual RenderPassConfig getRenderPassConfig() = 0;
 };

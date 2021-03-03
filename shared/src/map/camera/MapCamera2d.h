@@ -64,7 +64,9 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual std::shared_ptr<::CameraInterface> asCameraInterface() override;
 
-    virtual std::vector<float> getMvpMatrix() override;
+    virtual std::vector<float> getVpMatrix() override;
+
+    virtual std::vector<float> getInvariantModelMatrix(const ::Coord & coordinate, bool scaleInvariant, bool rotationInvariant) override;
 
     virtual bool onMove(const ::Vec2F &deltaScreen, bool confirmed, bool doubleClick) override;
 
@@ -80,12 +82,16 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual ::Coord coordFromScreenPosition(const ::Vec2F &posScreen) override;
 
+    virtual double mapUnitsFromPixels(double distancePx) override;
+
   protected:
     std::set<std::shared_ptr<MapCamera2dListenerInterface>> listeners;
 
     std::shared_ptr<MapInterface> mapInterface;
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
     MapCoordinateSystem mapCoordinateSystem;
+    bool mapSystemRtl;
+    bool mapSystemTtb;
     float screenDensityPpi;
     double screenPixelAsRealMeterFactor;
 

@@ -33,7 +33,8 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        std::vector<std::shared_ptr<::GraphicsObjectInterface>> getGraphicsObjects() override;
+        std::vector<std::shared_ptr<::RenderObjectInterface>> getRenderObjects() override;
+        void addRenderObject(const std::shared_ptr<::RenderObjectInterface> & renderObject) override;
         ::RenderPassConfig getRenderPassConfig() override;
 
     private:
@@ -41,7 +42,8 @@ private:
     };
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/RenderPassInterface") };
-    const jmethodID method_getGraphicsObjects { ::djinni::jniGetMethodID(clazz.get(), "getGraphicsObjects", "()Ljava/util/ArrayList;") };
+    const jmethodID method_getRenderObjects { ::djinni::jniGetMethodID(clazz.get(), "getRenderObjects", "()Ljava/util/ArrayList;") };
+    const jmethodID method_addRenderObject { ::djinni::jniGetMethodID(clazz.get(), "addRenderObject", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderObjectInterface;)V") };
     const jmethodID method_getRenderPassConfig { ::djinni::jniGetMethodID(clazz.get(), "getRenderPassConfig", "()Lio/openmobilemaps/mapscore/shared/graphics/RenderPassConfig;") };
 };
 
