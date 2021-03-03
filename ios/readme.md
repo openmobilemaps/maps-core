@@ -161,6 +161,7 @@ The created resource object is then capable of creating a layer object with a gi
 let layer = resource.createLayer("identifier", textureLoader: loader)
 mapView.add(layer: layer?.asLayerInterface())
 ```
+This feature is still being improved to support a wider range of WMTS capabilities.
 
 ### Polygon layer
 
