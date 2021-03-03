@@ -39,6 +39,21 @@ abstract class CoordinateSystemIdentifiers {
         fun EPSG2056(): String {
             return CppProxy.EPSG2056()
         }
+
+        /**
+         * CH1903 / LV03
+         * https://epsg.io/21781
+         */
+        @JvmStatic
+        fun EPSG21781(): String {
+            return CppProxy.EPSG21781()
+        }
+
+        /** e.g. urn:ogc:def:crs:EPSG:21781 */
+        @JvmStatic
+        fun fromCrsIdentifier(identifier: String): String {
+            return CppProxy.fromCrsIdentifier(identifier)
+        }
     }
 
     private class CppProxy : CoordinateSystemIdentifiers {
@@ -71,6 +86,12 @@ abstract class CoordinateSystemIdentifiers {
 
             @JvmStatic
             external fun EPSG2056(): String
+
+            @JvmStatic
+            external fun EPSG21781(): String
+
+            @JvmStatic
+            external fun fromCrsIdentifier(identifier: String): String
         }
     }
 }

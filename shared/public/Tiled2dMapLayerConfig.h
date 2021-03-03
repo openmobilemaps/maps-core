@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "RectCoord.h"
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -15,7 +14,7 @@ class Tiled2dMapLayerConfig {
 public:
     virtual ~Tiled2dMapLayerConfig() {}
 
-    virtual ::RectCoord getBounds() = 0;
+    virtual std::string getCoordinateSystemIdentifier() = 0;
 
     virtual std::string getTileUrl(int32_t x, int32_t y, int32_t zoom) = 0;
 

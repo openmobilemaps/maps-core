@@ -21,3 +21,13 @@
                                          Coord(CoordinateSystemIdentifiers::EPSG3857(), 20026376.39, -20048966.10, 0)),
                                1.0);
 }
+
+::MapCoordinateSystem CoordinateSystemFactory::getEpsg21781System() {
+    return MapCoordinateSystem(CoordinateSystemIdentifiers::EPSG21781(),
+                               RectCoord(Coord(CoordinateSystemIdentifiers::EPSG21781(), 485071.54, 75346.36, 0),
+                                         Coord(CoordinateSystemIdentifiers::EPSG21781(), 828515.78, 299941.84, 0)),
+                               1.0);
+
+
+
+}

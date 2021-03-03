@@ -7,7 +7,6 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
-#import "MCRectCoord+Private.h"
 #import "MCTiled2dMapZoomInfo+Private.h"
 #import "MCTiled2dMapZoomLevelInfo+Private.h"
 #include <exception>
@@ -34,10 +33,10 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (nonnull MCRectCoord *)getBounds {
+- (nonnull NSString *)getCoordinateSystemIdentifier {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->getBounds();
-        return ::djinni_generated::RectCoord::fromCpp(objcpp_result_);
+        auto objcpp_result_ = _cppRefHandle.get()->getCoordinateSystemIdentifier();
+        return ::djinni::String::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -86,11 +85,11 @@ class Tiled2dMapLayerConfig::ObjcProxy final
     friend class ::djinni_generated::Tiled2dMapLayerConfig;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    ::RectCoord getBounds() override
+    std::string getCoordinateSystemIdentifier() override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getBounds];
-            return ::djinni_generated::RectCoord::toCpp(objcpp_result_);
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getCoordinateSystemIdentifier];
+            return ::djinni::String::toCpp(objcpp_result_);
         }
     }
     std::string getTileUrl(int32_t c_x, int32_t c_y, int32_t c_zoom) override

@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class Tiled2dMapLayerConfig {
 
-    abstract fun getBounds(): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord
+    abstract fun getCoordinateSystemIdentifier(): String
 
     abstract fun getTileUrl(x: Int, y: Int, zoom: Int): String
 
@@ -35,11 +35,11 @@ abstract class Tiled2dMapLayerConfig {
             _djinni_private_destroy()
         }
 
-        override fun getBounds(): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord {
+        override fun getCoordinateSystemIdentifier(): String {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_getBounds(this.nativeRef)
+            return native_getCoordinateSystemIdentifier(this.nativeRef)
         }
-        private external fun native_getBounds(_nativeRef: Long): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord
+        private external fun native_getCoordinateSystemIdentifier(_nativeRef: Long): String
 
         override fun getTileUrl(x: Int, y: Int, zoom: Int): String {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

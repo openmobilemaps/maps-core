@@ -24,8 +24,7 @@ Tiled2dMapSource<T, L>::Tiled2dMapSource(const MapConfig &mapConfig, const std::
     , listener(listener)
     , zoomLevelInfos(layerConfig->getZoomLevelInfos())
     , zoomInfo(layerConfig->getZoomInfo())
-    , layerBoundsMapSystem(conversionHelper->convertRect(mapConfig.mapCoordinateSystem.identifier, layerConfig->getBounds()))
-    , layerSystemId(layerConfig->getBounds().topLeft.systemIdentifier)
+    , layerSystemId(layerConfig->getCoordinateSystemIdentifier())
     , dispatchedTasks(0) {
 
     std::sort(zoomLevelInfos.begin(), zoomLevelInfos.end(),
@@ -41,7 +40,6 @@ template <class T, class L> void Tiled2dMapSource<T, L>::onVisibleBoundsChanged(
 template <class T, class L> void Tiled2dMapSource<T, L>::updateCurrentTileset(const RectCoord &visibleBounds, double zoom) {
     std::unordered_set<PrioritizedTiled2dMapTileInfo> visibleTiles;
 
-    RectCoord layerBounds = layerConfig->getBounds();
     RectCoord visibleBoundsLayer = conversionHelper->convertRect(layerSystemId, visibleBounds);
 
     double centerVisibleX = visibleBoundsLayer.topLeft.x + 0.5 * (visibleBoundsLayer.bottomRight.x - visibleBoundsLayer.topLeft.x);
@@ -64,6 +62,9 @@ template <class T, class L> void Tiled2dMapSource<T, L>::updateCurrentTileset(co
         const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(i);
 
         double tileWidth = zoomLevelInfo.tileWidthLayerSystemUnits;
+
+        RectCoord layerBounds = zoomLevelInfo.bounds;
+        layerBounds = conversionHelper->convertRect(layerSystemId, layerBounds);
 
         bool leftToRight = layerBounds.topLeft.x < layerBounds.bottomRight.x;
         bool topToBottom = layerBounds.topLeft.y < layerBounds.bottomRight.y;
