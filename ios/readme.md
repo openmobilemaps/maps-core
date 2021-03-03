@@ -142,6 +142,20 @@ class MapViewController: UIViewController {
 }
 ```
 
+### Parsing a WMTS Capability 
+
+Open Mobile Maps supports the [WMTS standard](https://en.wikipedia.org/wiki/Web_Map_Tile_Service) and can parse their Capability xml file to generate raster layer configurations.
+
+```swift
+let resource = MCWmtsCapabilitiesResource.create(xml)!
+```
+The created resource object is than capable of creating a layer object with a given identifier.
+
+```swift
+let layer = resource.createLayer("identifier", textureLoader: loader)
+mapView.add(layer: layer?.asLayerInterface())
+```
+
 #### Adjusting the Camera
 
 The camera position can easily be adjusted by manipulating the Camera2dInterface received from the map. E.g. to set a custom location:
