@@ -11,6 +11,7 @@
                            numTilesX:(int32_t)numTilesX
                            numTilesY:(int32_t)numTilesY
                  zoomLevelIdentifier:(int32_t)zoomLevelIdentifier
+                              bounds:(nonnull MCRectCoord *)bounds
 {
     if (self = [super init]) {
         _zoom = zoom;
@@ -18,6 +19,7 @@
         _numTilesX = numTilesX;
         _numTilesY = numTilesY;
         _zoomLevelIdentifier = zoomLevelIdentifier;
+        _bounds = bounds;
     }
     return self;
 }
@@ -27,17 +29,19 @@
                                               numTilesX:(int32_t)numTilesX
                                               numTilesY:(int32_t)numTilesY
                                     zoomLevelIdentifier:(int32_t)zoomLevelIdentifier
+                                                 bounds:(nonnull MCRectCoord *)bounds
 {
     return [(MCTiled2dMapZoomLevelInfo*)[self alloc] initWithZoom:zoom
                                         tileWidthLayerSystemUnits:tileWidthLayerSystemUnits
                                                         numTilesX:numTilesX
                                                         numTilesY:numTilesY
-                                              zoomLevelIdentifier:zoomLevelIdentifier];
+                                              zoomLevelIdentifier:zoomLevelIdentifier
+                                                           bounds:bounds];
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p zoom:%@ tileWidthLayerSystemUnits:%@ numTilesX:%@ numTilesY:%@ zoomLevelIdentifier:%@>", self.class, (void *)self, @(self.zoom), @(self.tileWidthLayerSystemUnits), @(self.numTilesX), @(self.numTilesY), @(self.zoomLevelIdentifier)];
+    return [NSString stringWithFormat:@"<%@ %p zoom:%@ tileWidthLayerSystemUnits:%@ numTilesX:%@ numTilesY:%@ zoomLevelIdentifier:%@ bounds:%@>", self.class, (void *)self, @(self.zoom), @(self.tileWidthLayerSystemUnits), @(self.numTilesX), @(self.numTilesY), @(self.zoomLevelIdentifier), self.bounds];
 }
 
 @end

@@ -13,7 +13,7 @@ import MapCoreSharedModule
 import Metal
 
 class AlphaShader: BaseShader {
-    private var alpha: Float = 0.0
+    private var alpha: Float = 1.0
     private var pipeline: MTLRenderPipelineState?
     private var stencilState: MTLDepthStencilState?
 

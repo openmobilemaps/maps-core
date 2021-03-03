@@ -6,7 +6,7 @@
 
 @protocol MCCameraInterface
 
-- (nonnull NSArray<NSNumber *> *)getMvpMatrix;
+- (nonnull NSArray<NSNumber *> *)getVpMatrix;
 
 - (void)viewportSizeChanged;
 

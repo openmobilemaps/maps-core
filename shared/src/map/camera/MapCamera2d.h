@@ -19,6 +19,7 @@
 #include "SimpleTouchInterface.h"
 #include <optional>
 #include <set>
+#include "AnimationInterface.h"
 
 class MapCamera2d : public MapCamera2dInterface,
                     public CameraInterface,
@@ -63,9 +64,13 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual std::shared_ptr<::CameraInterface> asCameraInterface() override;
 
-    virtual std::vector<float> getMvpMatrix() override;
+    virtual std::vector<float> getVpMatrix() override;
+
+    virtual std::vector<float> getInvariantModelMatrix(const ::Coord & coordinate, bool scaleInvariant, bool rotationInvariant) override;
 
     virtual bool onMove(const ::Vec2F &deltaScreen, bool confirmed, bool doubleClick) override;
+
+    virtual bool onMoveComplete() override;
 
     virtual bool onDoubleClick(const ::Vec2F &posScreen) override;
 
@@ -79,12 +84,16 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual ::Coord coordFromScreenPosition(const ::Vec2F &posScreen) override;
 
+    virtual double mapUnitsFromPixels(double distancePx) override;
+
   protected:
     std::set<std::shared_ptr<MapCamera2dListenerInterface>> listeners;
 
     std::shared_ptr<MapInterface> mapInterface;
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
     MapCoordinateSystem mapCoordinateSystem;
+    bool mapSystemRtl;
+    bool mapSystemTtb;
     float screenDensityPpi;
     double screenPixelAsRealMeterFactor;
 
@@ -111,28 +120,28 @@ class MapCamera2d : public MapCamera2dInterface,
         bool moveEnabled = true;
     };
 
+    Vec2F currentDragVelocity = { 0, 0 };
+
+    /// object describing parameters of inertia
+    /// currently only dragging inertia is implemented
+    /// zoom and rotation are still missing
+    struct Inertia {
+        Vec2F velocity;
+        
+        Inertia(Vec2F velocity):
+        velocity(velocity) {}
+    };
+    std::optional<Inertia> inertia;
+    void inertiaStep();
+
     CameraConfiguration config;
 
     void notifyListeners();
 
     // MARK: Animations
 
-    struct CameraAnimation {
-        Coord startCenterPosition;
-        double startZoom;
-        double startRotation;
-        Coord targetCenterPosition;
-        double targetZoom;
-        double targetRotation;
-        long long startTime;
-        long long duration;
-    };
-
-    std::optional<CameraAnimation> cameraAnimation;
-
-    void beginAnimation(double zoom, Coord centerPosition);
-    void beginAnimation(double rotationAngle);
-    void applyAnimationState();
+    std::shared_ptr<AnimationInterface> coordAnimation;
+    std::shared_ptr<AnimationInterface> animation;
 
     Coord getBoundsCorrectedCoords(const Coord &coords);
 

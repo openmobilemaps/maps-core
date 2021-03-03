@@ -3,7 +3,6 @@
 
 #include "NativeTiled2dMapLayerConfig.h"  // my header
 #include "Marshal.hpp"
-#include "NativeRectCoord.h"
 #include "NativeTiled2dMapZoomInfo.h"
 #include "NativeTiled2dMapZoomLevelInfo.h"
 
@@ -17,13 +16,13 @@ NativeTiled2dMapLayerConfig::JavaProxy::JavaProxy(JniType j) : Handle(::djinni::
 
 NativeTiled2dMapLayerConfig::JavaProxy::~JavaProxy() = default;
 
-::RectCoord NativeTiled2dMapLayerConfig::JavaProxy::getBounds() {
+std::string NativeTiled2dMapLayerConfig::JavaProxy::getCoordinateSystemIdentifier() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeTiled2dMapLayerConfig>::get();
-    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getBounds);
+    auto jret = (jstring)jniEnv->CallObjectMethod(Handle::get().get(), data.method_getCoordinateSystemIdentifier);
     ::djinni::jniExceptionCheck(jniEnv);
-    return ::djinni_generated::NativeRectCoord::toCpp(jniEnv, jret);
+    return ::djinni::String::toCpp(jniEnv, jret);
 }
 std::string NativeTiled2dMapLayerConfig::JavaProxy::getTileUrl(int32_t c_x, int32_t c_y, int32_t c_zoom) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
@@ -72,13 +71,13 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT ::djinni_generated::NativeRectCoord::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapLayerConfig_00024CppProxy_native_1getBounds(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jstring JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapLayerConfig_00024CppProxy_native_1getCoordinateSystemIdentifier(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapLayerConfig>(nativeRef);
-        auto r = ref->getBounds();
-        return ::djinni::release(::djinni_generated::NativeRectCoord::fromCpp(jniEnv, r));
+        auto r = ref->getCoordinateSystemIdentifier();
+        return ::djinni::release(::djinni::String::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

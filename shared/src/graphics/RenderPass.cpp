@@ -10,10 +10,13 @@
 
 #include "RenderPass.h"
 
-RenderPass::RenderPass(RenderPassConfig config, std::vector<std::shared_ptr<::GraphicsObjectInterface>> graphicsObjects)
-    : config(config)
-    , graphicsObjects(graphicsObjects) {}
+RenderPass::RenderPass(RenderPassConfig config, std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects)
+        : config(config), renderObjects(renderObjects) { }
 
-std::vector<std::shared_ptr<::GraphicsObjectInterface>> RenderPass::getGraphicsObjects() { return graphicsObjects; }
+std::vector<std::shared_ptr<::RenderObjectInterface>> RenderPass::getRenderObjects() { return renderObjects; }
+
+void RenderPass::addRenderObject(const std::shared_ptr<RenderObjectInterface> &renderObject) {
+    renderObjects.push_back(renderObject);
+}
 
 RenderPassConfig RenderPass::getRenderPassConfig() { return config; }

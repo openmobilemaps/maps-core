@@ -61,8 +61,10 @@ let package = Package(
                 .headerSearchPath("src/map/layers/polygon"),
                 .headerSearchPath("src/map/layers/tiled"),
                 .headerSearchPath("src/map/layers/tiled/raster"),
+                .headerSearchPath("src/map/layers/tiled/wmts"),
                 .headerSearchPath("src/map/scheduling"),
                 .headerSearchPath("src/map"),
+                .headerSearchPath("src/external/pugixml"),
 
             ]
         ),

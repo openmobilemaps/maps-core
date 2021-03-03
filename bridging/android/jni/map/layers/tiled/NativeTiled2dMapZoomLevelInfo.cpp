@@ -3,6 +3,7 @@
 
 #include "NativeTiled2dMapZoomLevelInfo.h"  // my header
 #include "Marshal.hpp"
+#include "NativeRectCoord.h"
 
 namespace djinni_generated {
 
@@ -17,20 +18,22 @@ auto NativeTiled2dMapZoomLevelInfo::fromCpp(JNIEnv* jniEnv, const CppType& c) ->
                                                            ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.tileWidthLayerSystemUnits)),
                                                            ::djinni::get(::djinni::I32::fromCpp(jniEnv, c.numTilesX)),
                                                            ::djinni::get(::djinni::I32::fromCpp(jniEnv, c.numTilesY)),
-                                                           ::djinni::get(::djinni::I32::fromCpp(jniEnv, c.zoomLevelIdentifier)))};
+                                                           ::djinni::get(::djinni::I32::fromCpp(jniEnv, c.zoomLevelIdentifier)),
+                                                           ::djinni::get(::djinni_generated::NativeRectCoord::fromCpp(jniEnv, c.bounds)))};
     ::djinni::jniExceptionCheck(jniEnv);
     return r;
 }
 
 auto NativeTiled2dMapZoomLevelInfo::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
-    ::djinni::JniLocalScope jscope(jniEnv, 6);
+    ::djinni::JniLocalScope jscope(jniEnv, 7);
     assert(j != nullptr);
     const auto& data = ::djinni::JniClass<NativeTiled2dMapZoomLevelInfo>::get();
     return {::djinni::F64::toCpp(jniEnv, jniEnv->GetDoubleField(j, data.field_zoom)),
             ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_tileWidthLayerSystemUnits)),
             ::djinni::I32::toCpp(jniEnv, jniEnv->GetIntField(j, data.field_numTilesX)),
             ::djinni::I32::toCpp(jniEnv, jniEnv->GetIntField(j, data.field_numTilesY)),
-            ::djinni::I32::toCpp(jniEnv, jniEnv->GetIntField(j, data.field_zoomLevelIdentifier))};
+            ::djinni::I32::toCpp(jniEnv, jniEnv->GetIntField(j, data.field_zoomLevelIdentifier)),
+            ::djinni_generated::NativeRectCoord::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_bounds))};
 }
 
 }  // namespace djinni_generated

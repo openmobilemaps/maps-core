@@ -12,4 +12,6 @@ public:
     static MapCoordinateSystem getEpsg2056System();
 
     static MapCoordinateSystem getEpsg3857System();
+
+    static MapCoordinateSystem getEpsg21781System();
 };

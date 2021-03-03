@@ -48,7 +48,6 @@ template <class T, class L> class Tiled2dMapSource : public Tiled2dMapSourceInte
 
     MapConfig mapConfig;
     std::shared_ptr<Tiled2dMapLayerConfig> layerConfig;
-    RectCoord layerBoundsMapSystem;
     std::string layerSystemId;
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
     std::shared_ptr<SchedulerInterface> scheduler;

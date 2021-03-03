@@ -17,6 +17,11 @@ abstract class CoordinateSystemFactory {
         fun getEpsg3857System(): MapCoordinateSystem {
             return CppProxy.getEpsg3857System()
         }
+
+        @JvmStatic
+        fun getEpsg21781System(): MapCoordinateSystem {
+            return CppProxy.getEpsg21781System()
+        }
     }
 
     private class CppProxy : CoordinateSystemFactory {
@@ -43,6 +48,9 @@ abstract class CoordinateSystemFactory {
 
             @JvmStatic
             external fun getEpsg3857System(): MapCoordinateSystem
+
+            @JvmStatic
+            external fun getEpsg21781System(): MapCoordinateSystem
         }
     }
 }

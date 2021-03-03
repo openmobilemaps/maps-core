@@ -3,6 +3,7 @@
 
 #import "MCTiled2dMapZoomLevelInfo+Private.h"
 #import "DJIMarshal+Private.h"
+#import "MCRectCoord+Private.h"
 #include <cassert>
 
 namespace djinni_generated {
@@ -14,7 +15,8 @@ auto Tiled2dMapZoomLevelInfo::toCpp(ObjcType obj) -> CppType
             ::djinni::F32::toCpp(obj.tileWidthLayerSystemUnits),
             ::djinni::I32::toCpp(obj.numTilesX),
             ::djinni::I32::toCpp(obj.numTilesY),
-            ::djinni::I32::toCpp(obj.zoomLevelIdentifier)};
+            ::djinni::I32::toCpp(obj.zoomLevelIdentifier),
+            ::djinni_generated::RectCoord::toCpp(obj.bounds)};
 }
 
 auto Tiled2dMapZoomLevelInfo::fromCpp(const CppType& cpp) -> ObjcType
@@ -23,7 +25,8 @@ auto Tiled2dMapZoomLevelInfo::fromCpp(const CppType& cpp) -> ObjcType
                                  tileWidthLayerSystemUnits:(::djinni::F32::fromCpp(cpp.tileWidthLayerSystemUnits))
                                                  numTilesX:(::djinni::I32::fromCpp(cpp.numTilesX))
                                                  numTilesY:(::djinni::I32::fromCpp(cpp.numTilesY))
-                                       zoomLevelIdentifier:(::djinni::I32::fromCpp(cpp.zoomLevelIdentifier))];
+                                       zoomLevelIdentifier:(::djinni::I32::fromCpp(cpp.zoomLevelIdentifier))
+                                                    bounds:(::djinni_generated::RectCoord::fromCpp(cpp.bounds))];
 }
 
 }  // namespace djinni_generated

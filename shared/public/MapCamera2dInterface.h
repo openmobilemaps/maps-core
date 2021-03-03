@@ -9,6 +9,7 @@
 #include "RectCoord.h"
 #include "Vec2F.h"
 #include <memory>
+#include <vector>
 
 class MapInterface;
 
@@ -48,11 +49,15 @@ public:
 
     virtual ::RectCoord getVisibleRect() = 0;
 
+    virtual std::vector<float> getInvariantModelMatrix(const ::Coord & coordinate, bool scaleInvariant, bool rotationInvariant) = 0;
+
     virtual void addListener(const std::shared_ptr<::MapCamera2dListenerInterface> & listener) = 0;
 
     virtual void removeListener(const std::shared_ptr<::MapCamera2dListenerInterface> & listener) = 0;
 
     virtual ::Coord coordFromScreenPosition(const ::Vec2F & posScreen) = 0;
+
+    virtual double mapUnitsFromPixels(double distancePx) = 0;
 
     virtual std::shared_ptr<::CameraInterface> asCameraInterface() = 0;
 };

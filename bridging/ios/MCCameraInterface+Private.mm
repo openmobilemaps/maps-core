@@ -31,9 +31,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (nonnull NSArray<NSNumber *> *)getMvpMatrix {
+- (nonnull NSArray<NSNumber *> *)getVpMatrix {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->getMvpMatrix();
+        auto objcpp_result_ = _cppRefHandle.get()->getVpMatrix();
         return ::djinni::List<::djinni::F32>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -53,10 +53,10 @@ class CameraInterface::ObjcProxy final
     friend class ::djinni_generated::CameraInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    std::vector<float> getMvpMatrix() override
+    std::vector<float> getVpMatrix() override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getMvpMatrix];
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getVpMatrix];
             return ::djinni::List<::djinni::F32>::toCpp(objcpp_result_);
         }
     }
