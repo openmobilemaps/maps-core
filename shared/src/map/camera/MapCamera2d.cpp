@@ -362,6 +362,7 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
 bool MapCamera2d::onMoveComplete() {
     inertia = Inertia(currentDragVelocity);
     currentDragVelocity = { 0, 0 };
+    return true;
 }
 
 void MapCamera2d::inertiaStep() {
