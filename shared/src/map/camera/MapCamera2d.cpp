@@ -74,7 +74,7 @@ void MapCamera2d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
             this->moveToCenterPosition(centerPosition, false);
         }, [=]{
             this->moveToCenterPosition(centerPosition, false);
-            this->animation = nullptr;
+            this->coordAnimation = nullptr;
         });
         coordAnimation->start();
         mapInterface->invalidate();
