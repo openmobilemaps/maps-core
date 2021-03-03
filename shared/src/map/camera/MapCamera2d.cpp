@@ -212,6 +212,8 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     if (!config.moveEnabled)
         return false;
 
+    inertia = std::nullopt;
+
     if (doubleClick) {
         double newZoom = zoom * (1.0 - (deltaScreen.y * 0.003));
 
