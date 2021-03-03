@@ -13,6 +13,7 @@
 #include "MapConfig.h"
 #include "RenderConfigInterface.h"
 #include "RenderPass.h"
+#include "RenderObject.h"
 #include "MapCamera2dInterface.h"
 #include <map>
 
@@ -108,7 +109,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
             tileObjectMap.erase(tile);
         }
 
-        std::map<int, std::vector<std::shared_ptr<GraphicsObjectInterface>>> renderPassObjectMap;
+        std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
         std::vector<std::pair<int, std::shared_ptr<Textured2dLayerObject>>> mapEntries;
         for (auto &entry : tileObjectMap) {
             mapEntries.push_back(std::make_pair(entry.first.tileInfo.zoomLevel, entry.second));
@@ -120,7 +121,8 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
         for (const auto &objectEntry : mapEntries) {
             objectEntry.second->getQuadObject()->asGraphicsObject();
             for (auto config : objectEntry.second->getRenderConfig()) {
-                renderPassObjectMap[config->getRenderIndex()].push_back(config->getGraphicsObject());
+                renderPassObjectMap[config->getRenderIndex()].push_back(
+                        std::make_shared<RenderObject>(config->getGraphicsObject()));
             }
         }
 

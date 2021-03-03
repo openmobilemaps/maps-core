@@ -55,11 +55,17 @@
 
 - (nonnull MCRectCoord *)getVisibleRect;
 
+- (nonnull NSArray<NSNumber *> *)getInvariantModelMatrix:(nonnull MCCoord *)coordinate
+                                          scaleInvariant:(BOOL)scaleInvariant
+                                       rotationInvariant:(BOOL)rotationInvariant;
+
 - (void)addListener:(nullable id<MCMapCamera2dListenerInterface>)listener;
 
 - (void)removeListener:(nullable id<MCMapCamera2dListenerInterface>)listener;
 
 - (nonnull MCCoord *)coordFromScreenPosition:(nonnull MCVec2F *)posScreen;
+
+- (double)mapUnitsFromPixels:(double)distancePx;
 
 - (nullable id<MCCameraInterface>)asCameraInterface;
 

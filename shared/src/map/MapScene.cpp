@@ -158,7 +158,7 @@ void MapScene::drawFrame() {
 void MapScene::resume() {
     isResumed = true;
     scheduler->addTask(
-        std::make_shared<LambdaTask>(TaskConfig("MapScene_pause", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [=] {
+        std::make_shared<LambdaTask>(TaskConfig("MapScene_resume", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [=] {
             for (const auto &layer : layers) {
                 layer->resume();
             }

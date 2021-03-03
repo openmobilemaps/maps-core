@@ -34,27 +34,42 @@
 #include <vector>
 
 class Matrix {
-  public:
+public:
     static void transposeM(std::vector<float> &mTrans, int mTransOffset, std::vector<float> &m, int mOffset);
+
     static bool invertM(std::vector<float> &mInv, int mInvOffset, std::vector<float> &m, int mOffset);
+
     static void orthoM(std::vector<float> &m, int mOffset, float left, float right, float bottom, float top, float near, float far);
+
     static void frustumM(std::vector<float> &m, int offset, float left, float right, float bottom, float top, float near,
                          float far);
+
     static void perspectiveM(std::vector<float> &m, int offset, float fovy, float aspect, float zNear, float zFar);
+
     static float length(float x, float y, float z);
+
     static void setIdentityM(std::vector<float> &sm, int smOffset);
+
     static void setLookAtM(std::vector<float> &rm, int rmOffset, float eyeX, float eyeY, float eyeZ, float centerX, float centerY,
                            float centerZ, float upX, float upY, float upZ);
 
     static void scaleM(std::vector<float> &sm, int smOffset, std::vector<float> &m, int mOffset, float x, float y, float z);
+
     static void scaleM(std::vector<float> &m, int mOffset, float x, float y, float z);
+
     static void translateM(std::vector<float> &tm, int tmOffset, std::vector<float> &m, int mOffset, float x, float y, float z);
+
     static void translateM(std::vector<float> &m, int mOffset, float x, float y, float z);
 
     static void rotateM(std::vector<float> &m, int mOffset, float a, float x, float y, float z);
+
     static void setRotateM(std::vector<float> &rm, int rmOffset, float a, float x, float y, float z);
+
     static void multiplyMM(std::vector<float> &r, int resultOffset, std::vector<float> &lhs, int lhsOffset, std::vector<float> &rhs,
                            int rhsOffset);
+
+    static void multiplyMMC(std::vector<float> &r, int resultOffset, const std::vector<float> &lhs, int lhsOffset,
+            const std::vector<float> &rhs, int rhsOffset);
 
     static std::vector<float> multiply(const std::vector<float> &M, const std::vector<float> &x);
 

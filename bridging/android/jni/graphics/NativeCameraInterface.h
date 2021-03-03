@@ -33,7 +33,7 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        std::vector<float> getMvpMatrix() override;
+        std::vector<float> getVpMatrix() override;
         void viewportSizeChanged() override;
 
     private:
@@ -41,7 +41,7 @@ private:
     };
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/CameraInterface") };
-    const jmethodID method_getMvpMatrix { ::djinni::jniGetMethodID(clazz.get(), "getMvpMatrix", "()Ljava/util/ArrayList;") };
+    const jmethodID method_getVpMatrix { ::djinni::jniGetMethodID(clazz.get(), "getVpMatrix", "()Ljava/util/ArrayList;") };
     const jmethodID method_viewportSizeChanged { ::djinni::jniGetMethodID(clazz.get(), "viewportSizeChanged", "()V") };
 };
 

@@ -10,16 +10,21 @@
 
 #pragma once
 
-#include "GraphicsObjectInterface.h"
+#include <unordered_map>
+#include "RenderObjectInterface.h"
 #include "RenderPassInterface.h"
 
 class RenderPass : public RenderPassInterface {
-  public:
-    RenderPass(RenderPassConfig config, std::vector<std::shared_ptr<::GraphicsObjectInterface>> graphicsObjects);
-    virtual std::vector<std::shared_ptr<::GraphicsObjectInterface>> getGraphicsObjects() override;
+public:
+    RenderPass(RenderPassConfig config, std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects);
+
+    virtual std::vector<std::shared_ptr<::RenderObjectInterface>> getRenderObjects() override;
+
+    virtual void addRenderObject(const std::shared_ptr<RenderObjectInterface> & renderObject) override;
+
     virtual RenderPassConfig getRenderPassConfig() override;
 
-  private:
+private:
     RenderPassConfig config;
-    std::vector<std::shared_ptr<::GraphicsObjectInterface>> graphicsObjects;
+    std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;
 };
