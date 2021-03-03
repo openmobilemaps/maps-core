@@ -119,10 +119,10 @@ class MapCamera2d : public MapCamera2dInterface,
         bool moveEnabled = true;
     };
 
-    Vec2F velocity = { 0, 0 };
+    Vec2F currentDragVelocity = { 0, 0 };
 
-    /// object describing parameters of interia
-    /// currently only dragging interia is implemented
+    /// object describing parameters of inertia
+    /// currently only dragging inertia is implemented
     /// zoom and rotation are still missing
     struct Inertia {
         Vec2F velocity;

@@ -244,12 +244,12 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     centerPosition.y = std::max(centerPosition.y, bottomRight.y);
     centerPosition.y = std::min(centerPosition.y, topLeft.y);
 
-    if (velocity.x == 0 && velocity.y == 0) {
-        velocity.x = -xDiff;
-        velocity.y = -yDiff;
+    if (currentDragVelocity.x == 0 && currentDragVelocity.y == 0) {
+        currentDragVelocity.x = -xDiff;
+        currentDragVelocity.y = -yDiff;
     } else {
-        velocity.x = 0.5f * velocity.x - 0.5f * xDiff;
-        velocity.y = 0.5f * velocity.y - 0.5f * yDiff;
+        currentDragVelocity.x = 0.5f * currentDragVelocity.x - 0.5f * xDiff;
+        currentDragVelocity.y = 0.5f * currentDragVelocity.y - 0.5f * yDiff;
     }
 
     notifyListeners();
@@ -258,14 +258,14 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
 }
 
 bool MapCamera2d::onMoveComplete() {
-    inertia = Inertia(velocity);
-    velocity = { 0, 0 };
+    inertia = Inertia(currentDragVelocity);
+    currentDragVelocity = { 0, 0 };
 }
 
 void MapCamera2d::inertiaStep() {
     if (inertia == std::nullopt) return;
 
-    if (inertia->velocity.x == 0 && inertia->velocity.y == 0) {
+    if (inertia->velocity.x <= 0.001 && inertia->velocity.y <= 0.001) {
         inertia = std::nullopt;
         return;
     }
