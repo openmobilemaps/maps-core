@@ -23,6 +23,8 @@
 #include "Vec2D.h"
 #include <optional>
 
+#include "AnimationInterface.h"
+
 class Textured2dLayerObject : public LayerObjectInterface {
   public:
     Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, std::shared_ptr<AlphaShaderInterface> shader,
@@ -58,14 +60,5 @@ class Textured2dLayerObject : public LayerObjectInterface {
     const std::shared_ptr<MapInterface> mapInterface;
     const std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
 
-    struct AlphaAnimation {
-        double startAlpha;
-        double targetAlpha;
-        long long startTime;
-        long long duration;
-    };
-
-    std::optional<AlphaAnimation> alphaAnimation;
-
-    void applyAnimationState();
+    std::shared_ptr<AnimationInterface> animation;
 };
