@@ -11,6 +11,7 @@
 #include "Textured2dLayerObject.h"
 #include "DateHelper.h"
 #include <cmath>
+#include "DoubleAnimation.h"
 
 Textured2dLayerObject::Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, std::shared_ptr<AlphaShaderInterface> shader,
                                              const std::shared_ptr<MapInterface> &mapInterface)
@@ -41,32 +42,32 @@ void Textured2dLayerObject::setPositions(const ::QuadCoord &coords) {
 
 void Textured2dLayerObject::setFrame(const ::Quad2dD &frame) { quad->setFrame(frame, RectD(0, 0, 1, 1)); }
 
-void Textured2dLayerObject::update() { applyAnimationState(); }
+void Textured2dLayerObject::update() {
+    if (animation) {
+        animation->update();
+    }
+}
 
 std::vector<std::shared_ptr<RenderConfigInterface>> Textured2dLayerObject::getRenderConfig() { return {renderConfig}; }
 
-void Textured2dLayerObject::setAlpha(float alpha) { shader->updateAlpha(alpha); }
+void Textured2dLayerObject::setAlpha(float alpha) {
+    shader->updateAlpha(alpha);
+    mapInterface->invalidate();
+}
 
 std::shared_ptr<Quad2dInterface> Textured2dLayerObject::getQuadObject() { return quad; }
 
 void Textured2dLayerObject::beginAlphaAnimation(double startAlpha, double targetAlpha, long long duration) {
-    alphaAnimation = {startAlpha, targetAlpha, DateHelper::currentTimeMillis(), duration};
-}
-
-void Textured2dLayerObject::applyAnimationState() {
-    if (!alphaAnimation)
-        return;
-
-    long long currentTime = DateHelper::currentTimeMillis();
-    double progress = (double)(currentTime - alphaAnimation->startTime) / alphaAnimation->duration;
-
-    if (progress >= 1) {
-        setAlpha(alphaAnimation->targetAlpha);
-        this->alphaAnimation = std::nullopt;
-    } else {
-        auto newAlpha =
-            alphaAnimation->startAlpha + (alphaAnimation->targetAlpha - alphaAnimation->startAlpha) * std::pow(progress, 2);
-        setAlpha(newAlpha);
-    }
+    animation = std::make_shared<DoubleAnimation>(duration,
+                                                  startAlpha,
+                                                  targetAlpha,
+                                                  InterpolatorFunction::EaseIn,
+       [=](double alpha){
+        this->setAlpha(alpha);
+    }, [=]{
+        this->setAlpha(targetAlpha);
+        this->animation = nullptr;
+    });
+    animation->start();
     mapInterface->invalidate();
 }
