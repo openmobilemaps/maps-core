@@ -301,6 +301,8 @@ bool MapCamera2d::onDoubleClick(const ::Vec2F &posScreen) {
     if (!config.doubleClickZoomEnabled)
         return false;
 
+    inertia = std::nullopt;
+
     auto targetZoom = zoom / 2;
 
     targetZoom = std::max(std::min(targetZoom, zoomMin), zoomMax);
@@ -329,6 +331,8 @@ void MapCamera2d::clearTouch() {
 bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) {
     if (!config.twoFingerZoomEnabled)
         return false;
+
+    inertia = std::nullopt;
 
     if (posScreenOld.size() >= 2) {
         double scaleFactor =
