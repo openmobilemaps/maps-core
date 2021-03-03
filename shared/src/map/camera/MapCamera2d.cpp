@@ -138,23 +138,83 @@ float MapCamera2d::getRotation() {
 }
 
 void MapCamera2d::setPaddingLeft(float padding, bool animated) {
-    paddingLeft = padding;
-    mapInterface->invalidate();
+    if (animated) {
+        animation = std::make_shared<DoubleAnimation>(DEFAULT_ANIM_LENGTH,
+                                                      this->paddingLeft,
+                                                      padding,
+                                                      InterpolatorFunction::EaseIn,
+           [=](double padding){
+            this->setPaddingLeft(padding, false);
+        }, [=]{
+            this->setPaddingLeft(padding, false);
+            this->animation = nullptr;
+        });
+        animation->start();
+        mapInterface->invalidate();
+    } else {
+        paddingLeft = padding;
+        mapInterface->invalidate();
+    }
 }
 
 void MapCamera2d::setPaddingRight(float padding, bool animated) {
-    paddingRight = padding;
-    mapInterface->invalidate();
+    if (animated) {
+        animation = std::make_shared<DoubleAnimation>(DEFAULT_ANIM_LENGTH,
+                                                      this->paddingRight,
+                                                      padding,
+                                                      InterpolatorFunction::EaseIn,
+           [=](double padding){
+            this->setPaddingRight(padding, false);
+        }, [=]{
+            this->setPaddingRight(padding, false);
+            this->animation = nullptr;
+        });
+        animation->start();
+        mapInterface->invalidate();
+    } else {
+        paddingRight = padding;
+        mapInterface->invalidate();
+    }
 }
 
 void MapCamera2d::setPaddingTop(float padding, bool animated) {
-    paddingTop = padding;
-    mapInterface->invalidate();
+    if (animated) {
+        animation = std::make_shared<DoubleAnimation>(DEFAULT_ANIM_LENGTH,
+                                                      this->paddingTop,
+                                                      padding,
+                                                      InterpolatorFunction::EaseIn,
+           [=](double padding){
+            this->setPaddingTop(padding, false);
+        }, [=]{
+            this->setPaddingTop(padding, false);
+            this->animation = nullptr;
+        });
+        animation->start();
+        mapInterface->invalidate();
+    } else {
+        paddingTop = padding;
+        mapInterface->invalidate();
+    }
 }
 
 void MapCamera2d::setPaddingBottom(float padding, bool animated) {
-    paddingBottom = padding;
-    mapInterface->invalidate();
+    if (animated) {
+        animation = std::make_shared<DoubleAnimation>(DEFAULT_ANIM_LENGTH,
+                                                      this->paddingBottom,
+                                                      padding,
+                                                      InterpolatorFunction::EaseIn,
+           [=](double padding){
+            this->setPaddingBottom(padding, false);
+        }, [=]{
+            this->setPaddingBottom(padding, false);
+            this->animation = nullptr;
+        });
+        animation->start();
+        mapInterface->invalidate();
+    } else {
+        paddingBottom = padding;
+        mapInterface->invalidate();
+    }
 }
 
 void MapCamera2d::addListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) { listeners.insert(listener); }
