@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class CameraInterface {
 
-    abstract fun getMvpMatrix(): ArrayList<Float>
+    abstract fun getVpMatrix(): ArrayList<Float>
 
     abstract fun viewportSizeChanged()
 
@@ -29,11 +29,11 @@ abstract class CameraInterface {
             _djinni_private_destroy()
         }
 
-        override fun getMvpMatrix(): ArrayList<Float> {
+        override fun getVpMatrix(): ArrayList<Float> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_getMvpMatrix(this.nativeRef)
+            return native_getVpMatrix(this.nativeRef)
         }
-        private external fun native_getMvpMatrix(_nativeRef: Long): ArrayList<Float>
+        private external fun native_getVpMatrix(_nativeRef: Long): ArrayList<Float>
 
         override fun viewportSizeChanged() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

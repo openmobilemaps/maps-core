@@ -7,7 +7,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class RenderPassInterface {
 
-    abstract fun getGraphicsObjects(): ArrayList<io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface>
+    abstract fun getRenderObjects(): ArrayList<RenderObjectInterface>
+
+    abstract fun addRenderObject(renderObject: RenderObjectInterface)
 
     abstract fun getRenderPassConfig(): RenderPassConfig
 
@@ -29,11 +31,17 @@ abstract class RenderPassInterface {
             _djinni_private_destroy()
         }
 
-        override fun getGraphicsObjects(): ArrayList<io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface> {
+        override fun getRenderObjects(): ArrayList<RenderObjectInterface> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_getGraphicsObjects(this.nativeRef)
+            return native_getRenderObjects(this.nativeRef)
         }
-        private external fun native_getGraphicsObjects(_nativeRef: Long): ArrayList<io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface>
+        private external fun native_getRenderObjects(_nativeRef: Long): ArrayList<RenderObjectInterface>
+
+        override fun addRenderObject(renderObject: RenderObjectInterface) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_addRenderObject(this.nativeRef, renderObject)
+        }
+        private external fun native_addRenderObject(_nativeRef: Long, renderObject: RenderObjectInterface)
 
         override fun getRenderPassConfig(): RenderPassConfig {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

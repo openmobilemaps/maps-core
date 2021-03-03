@@ -34,8 +34,15 @@ rendering_context_interface = interface +c +j +o {
     setupDrawFrame();
 }
 
+render_object_interface = interface +c {
+    get_graphics_object() : graphics_object_interface;
+    has_custom_model_matrix() : bool;
+    get_custom_model_matrix() : list<f32>;
+}
+
 render_pass_interface = interface +c +j +o {
-    get_graphics_objects() : list<graphics_object_interface>;
+    get_render_objects() : list<render_object_interface>;
+    add_render_object(render_object: render_object_interface);
     get_render_pass_config() : render_pass_config;
 }
 
@@ -50,6 +57,6 @@ renderer_interface = interface +c +j +o {
 }
 
 camera_interface = interface +c +j +o {
-    get_mvp_matrix() : list<f32>;
+    get_vp_matrix() : list<f32>;
     viewport_size_changed();
 }

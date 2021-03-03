@@ -535,6 +535,11 @@ void Matrix::setRotateM(std::vector<float> &rm, int rmOffset, float a, float x, 
 
 void Matrix::multiplyMM(std::vector<float> &r, int resultOffset, std::vector<float> &lhs, int lhsOffset, std::vector<float> &rhs,
                         int rhsOffset) {
+    multiplyMMC(r, resultOffset, lhs, lhsOffset, rhs, rhsOffset);
+}
+
+void Matrix::multiplyMMC(std::vector<float> &r, int resultOffset, const std::vector<float> &lhs, int lhsOffset,
+                        const std::vector<float> &rhs, int rhsOffset) {
     for (int i = 0; i < 4; i++) {
         const float rhs_i0 = rhs[rhsOffset + I(i, 0)];
         float ri0 = lhs[lhsOffset + I(0, 0)] * rhs_i0;

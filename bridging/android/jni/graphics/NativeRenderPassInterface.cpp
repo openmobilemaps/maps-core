@@ -3,7 +3,7 @@
 
 #include "NativeRenderPassInterface.h"  // my header
 #include "Marshal.hpp"
-#include "NativeGraphicsObjectInterface.h"
+#include "NativeRenderObjectInterface.h"
 #include "NativeRenderPassConfig.h"
 
 namespace djinni_generated {
@@ -16,13 +16,21 @@ NativeRenderPassInterface::JavaProxy::JavaProxy(JniType j) : Handle(::djinni::jn
 
 NativeRenderPassInterface::JavaProxy::~JavaProxy() = default;
 
-std::vector<std::shared_ptr<::GraphicsObjectInterface>> NativeRenderPassInterface::JavaProxy::getGraphicsObjects() {
+std::vector<std::shared_ptr<::RenderObjectInterface>> NativeRenderPassInterface::JavaProxy::getRenderObjects() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeRenderPassInterface>::get();
-    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getGraphicsObjects);
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getRenderObjects);
     ::djinni::jniExceptionCheck(jniEnv);
-    return ::djinni::List<::djinni_generated::NativeGraphicsObjectInterface>::toCpp(jniEnv, jret);
+    return ::djinni::List<::djinni_generated::NativeRenderObjectInterface>::toCpp(jniEnv, jret);
+}
+void NativeRenderPassInterface::JavaProxy::addRenderObject(const std::shared_ptr<::RenderObjectInterface> & c_renderObject) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeRenderPassInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_addRenderObject,
+                           ::djinni::get(::djinni_generated::NativeRenderObjectInterface::fromCpp(jniEnv, c_renderObject)));
+    ::djinni::jniExceptionCheck(jniEnv);
 }
 ::RenderPassConfig NativeRenderPassInterface::JavaProxy::getRenderPassConfig() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
@@ -41,14 +49,23 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderPa
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderPassInterface_00024CppProxy_native_1getGraphicsObjects(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderPassInterface_00024CppProxy_native_1getRenderObjects(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::RenderPassInterface>(nativeRef);
-        auto r = ref->getGraphicsObjects();
-        return ::djinni::release(::djinni::List<::djinni_generated::NativeGraphicsObjectInterface>::fromCpp(jniEnv, r));
+        auto r = ref->getRenderObjects();
+        return ::djinni::release(::djinni::List<::djinni_generated::NativeRenderObjectInterface>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderPassInterface_00024CppProxy_native_1addRenderObject(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_renderObject)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::RenderPassInterface>(nativeRef);
+        ref->addRenderObject(::djinni_generated::NativeRenderObjectInterface::toCpp(jniEnv, j_renderObject));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
 CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderPassInterface_00024CppProxy_native_1getRenderPassConfig(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)

@@ -9,7 +9,7 @@ class CameraInterface {
 public:
     virtual ~CameraInterface() {}
 
-    virtual std::vector<float> getMvpMatrix() = 0;
+    virtual std::vector<float> getVpMatrix() = 0;
 
     virtual void viewportSizeChanged() = 0;
 };
