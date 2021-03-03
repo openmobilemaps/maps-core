@@ -54,6 +54,12 @@ and you find the generated .aar library under `build/outputs/aar/`. For developm
 
 <h2>Installation</h2>
 
+This library is available on JCenter. Include it with:
+
+```
+implementation 'io.openmobilemaps.mapscore:mapscore-android:1.2.0'
+```
+
 Either include the `android` folder as a module in the Android project or move the generated .aar to e.g. the `app/libs` folder of the project and include it in the project via the apps `build.gradle`:
 
 ```
@@ -62,7 +68,7 @@ implementation fileTree(dir: 'libs', include: ['*.aar'])
 
 ### Dependencies
 
-When Open Maps Mobile is included as .aar, the following dependencies in the apps `build.gradle` are necessary:
+When Open Maps Mobile is included as .aar (and not as JCenter dependency), the following dependencies in the apps `build.gradle` are necessary:
 
 ```
 implementation "androidx.activity:activity-ktx:1.1.0"
@@ -180,7 +186,7 @@ let layer = resource.createLayer("identifier", textureLoader: loader)
 mapView.add(layer: layer?.asLayerInterface())
 ```
 
-This feature is still being 
+This feature is still being improved to support a wider range of WMTS capabilities.
 
 ### Polygon layer
 
@@ -249,3 +255,4 @@ mapView.getCamera().setMaxZoom(300.0)
 ## License
 
 This project is licensed under the terms of the MPL 2 license. See the [LICENSE](../LICENSE) file.
+
