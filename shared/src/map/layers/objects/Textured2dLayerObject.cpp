@@ -50,7 +50,10 @@ void Textured2dLayerObject::update() {
 
 std::vector<std::shared_ptr<RenderConfigInterface>> Textured2dLayerObject::getRenderConfig() { return {renderConfig}; }
 
-void Textured2dLayerObject::setAlpha(float alpha) { shader->updateAlpha(alpha); }
+void Textured2dLayerObject::setAlpha(float alpha) {
+    shader->updateAlpha(alpha);
+    mapInterface->invalidate();
+}
 
 std::shared_ptr<Quad2dInterface> Textured2dLayerObject::getQuadObject() { return quad; }
 
@@ -61,7 +64,6 @@ void Textured2dLayerObject::beginAlphaAnimation(double startAlpha, double target
                                                   InterpolatorFunction::EaseIn,
        [=](double alpha){
         this->setAlpha(alpha);
-        mapInterface->invalidate();
     }, [=]{
         this->setAlpha(targetAlpha);
         this->animation = nullptr;
@@ -69,22 +71,3 @@ void Textured2dLayerObject::beginAlphaAnimation(double startAlpha, double target
     animation->start();
     mapInterface->invalidate();
 }
-
-/*
-void Textured2dLayerObject::applyAnimationState() {
-    if (!alphaAnimation)
-        return;
-
-    long long currentTime = DateHelper::currentTimeMillis();
-    double progress = (double)(currentTime - alphaAnimation->startTime) / alphaAnimation->duration;
-
-    if (progress >= 1) {
-        setAlpha(alphaAnimation->targetAlpha);
-        this->alphaAnimation = std::nullopt;
-    } else {
-        auto newAlpha =
-            alphaAnimation->startAlpha + (alphaAnimation->targetAlpha - alphaAnimation->startAlpha) * std::pow(progress, 2);
-        setAlpha(newAlpha);
-    }
-    mapInterface->invalidate();
-}*/
