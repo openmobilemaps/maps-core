@@ -54,13 +54,21 @@ and you find the generated .aar library under `build/outputs/aar/`. For developm
 
 <h2>Installation</h2>
 
-This library is available on JCenter. Include it with:
+### Add the JCenter Dependency
+
+This library is available on JCenter. To add it to your Android project, add the following line to your build.gradle
 
 ```
-implementation 'io.openmobilemaps.mapscore:mapscore-android:1.2.0'
+dependencies {
+  implementation 'io.openmobilemaps.mapscore:mapscore-android:1.2.0'
+}
 ```
 
-Either include the `android` folder as a module in the Android project or move the generated .aar to e.g. the `app/libs` folder of the project and include it in the project via the apps `build.gradle`:
+Make sure you have jcenter() listed in your project repositories. 
+
+### Local Dependency
+
+Alternatively, either include the `android` folder as a module in the Android project or move the generated .aar to e.g. the `app/libs` folder of the project and include it in the project via the apps `build.gradle`:
 
 ```
 implementation fileTree(dir: 'libs', include: ['*.aar'])
