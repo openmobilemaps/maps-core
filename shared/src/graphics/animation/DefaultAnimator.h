@@ -62,9 +62,12 @@ public:
 
         auto currentTimeStamp = DateHelper::currentTimeMillis();
 
-        if (startTime + delay > currentTimeStamp) { return; }
+        if (startTime + delay > currentTimeStamp) {
+            update(0);
+            return;
+        }
 
-        double progress = std::max(std::min(((double)(currentTimeStamp - startTime) / duration), 1.0), 0.0);
+        double progress = std::max(std::min(((double)(currentTimeStamp - (startTime + delay)) / duration), 1.0), 0.0);
 
         double adjustedProgress = interpolator.interpolate(progress);
 
