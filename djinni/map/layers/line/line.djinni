@@ -1,0 +1,28 @@
+@extern "../../../yaml/layer_interface.yaml"
+@extern "../../../yaml/coord.yaml"
+@extern "../../../yaml/vec_2_f.yaml"
+@extern "../../../yaml/color.yaml"
+
+line_info = record {
+    identifier: string;
+    coordinates: list<coord>;
+    miter: f32;
+    color: color;
+    highlight_color: color;
+}
+
+line_layer_callback_interface = interface +c +j +o {
+    on_line_click_confirmed(icons: list<line_info>) : bool;
+}
+
+line_layer_interface = interface +c {
+    static create() : line_layer_interface;
+    set_lines(lines: list<line_info>);
+    get_lines(): list<line_info>;
+    remove(line: line_info);
+    add(line: line_info);
+    clear();
+    set_callback_handler(handler: line_layer_callback_interface);
+    asLayerInterface(): layer_interface;
+    invalidate();
+}

@@ -32,6 +32,14 @@ void Line2dLayerObject::setPositions(std::vector<Coord> positions) {
     line->setLinePositions(renderCoords);
 }
 
+void Line2dLayerObject::setColor(const Color &color) {
+    shader->setColor(color.r, color.g, color.b, color.a);
+}
+
+void Line2dLayerObject::setMiter(const float miter) {
+    shader->setMiter(miter);
+}
+
 std::shared_ptr<GraphicsObjectInterface> Line2dLayerObject::getLineObject() { return line->asGraphicsObject(); }
 
 std::shared_ptr<LineShaderProgramInterface> Line2dLayerObject::getShaderProgram() { return shader->asLineShaderProgramInterface(); }

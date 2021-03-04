@@ -31,6 +31,10 @@ class Line2dLayerObject : public LayerObjectInterface {
 
     void setPositions(std::vector<Coord> positions);
 
+    void setColor(const Color &color);
+
+    void setMiter(const float miter);
+
     std::shared_ptr<GraphicsObjectInterface> getLineObject();
 
     std::shared_ptr<LineShaderProgramInterface> getShaderProgram();
