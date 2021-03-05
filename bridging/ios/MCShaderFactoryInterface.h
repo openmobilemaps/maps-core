@@ -3,6 +3,7 @@
 
 #import <Foundation/Foundation.h>
 @protocol MCAlphaShaderInterface;
+@protocol MCColorCircleShaderInterface;
 @protocol MCColorLineShaderInterface;
 @protocol MCColorShaderInterface;
 
@@ -14,5 +15,7 @@
 - (nullable id<MCColorLineShaderInterface>)createColorLineShader;
 
 - (nullable id<MCColorShaderInterface>)createColorShader;
+
+- (nullable id<MCColorCircleShaderInterface>)createColorCircleShader;
 
 @end

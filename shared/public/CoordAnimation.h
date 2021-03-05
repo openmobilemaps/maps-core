@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include <logger/Logger.h>
 #include "DefaultAnimator.h"
 #include "Coord.h"
 

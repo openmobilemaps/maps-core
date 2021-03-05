@@ -55,7 +55,7 @@ void MapCamera2d::viewportSizeChanged() {
 void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double zoom, bool animated) {
     Coord positionMapSystem = getBoundsCorrectedCoords(centerPosition);
     if (animated) {
-        moveToCenterPosition(centerPosition, true);
+        moveToCenterPosition(positionMapSystem, true);
         setZoom(zoom, true);
     } else {
         this->zoom = zoom;
@@ -69,15 +69,15 @@ void MapCamera2d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
     Coord positionMapSystem = getBoundsCorrectedCoords(centerPosition);
     if (animated) {
         coordAnimation = std::make_shared<CoordAnimation>(DEFAULT_ANIM_LENGTH,
-                                                      this->centerPosition,
-                                                      centerPosition,
-                                                      InterpolatorFunction::EaseIn,
-           [=](Coord centerPosition){
-            this->moveToCenterPosition(centerPosition, false);
-        }, [=]{
-            this->moveToCenterPosition(centerPosition, false);
-            this->coordAnimation = nullptr;
-        });
+                                                          this->centerPosition,
+                                                          positionMapSystem,
+                                                          InterpolatorFunction::EaseIn,
+                                                          [=](Coord positionMapSystem) {
+                                                              this->moveToCenterPosition(positionMapSystem, false);
+                                                          }, [=] {
+                    this->moveToCenterPosition(positionMapSystem, false);
+                    this->coordAnimation = nullptr;
+                });
         coordAnimation->start();
         mapInterface->invalidate();
     } else {
@@ -95,12 +95,12 @@ void MapCamera2d::setZoom(double zoom, bool animated) {
                                                       this->zoom,
                                                       zoom,
                                                       InterpolatorFunction::EaseIn,
-           [=](double zoom){
-            this->setZoom(zoom, false);
-        }, [=]{
-            this->setZoom(zoom, false);
-            this->animation = nullptr;
-        });
+                                                      [=](double zoom) {
+                                                          this->setZoom(zoom, false);
+                                                      }, [=] {
+                    this->setZoom(zoom, false);
+                    this->animation = nullptr;
+                });
         animation->start();
         mapInterface->invalidate();
     } else {
@@ -120,12 +120,12 @@ void MapCamera2d::setRotation(float angle, bool animated) {
                                                       this->angle,
                                                       newAngle,
                                                       InterpolatorFunction::EaseIn,
-           [=](double angle){
-            this->setRotation(angle, false);
-        }, [=]{
-            this->setRotation(newAngle, false);
-            this->animation = nullptr;
-        });
+                                                      [=](double angle) {
+                                                          this->setRotation(angle, false);
+                                                      }, [=] {
+                    this->setRotation(newAngle, false);
+                    this->animation = nullptr;
+                });
         animation->start();
         mapInterface->invalidate();
     } else {
@@ -145,12 +145,12 @@ void MapCamera2d::setPaddingLeft(float padding, bool animated) {
                                                       this->paddingLeft,
                                                       padding,
                                                       InterpolatorFunction::EaseIn,
-           [=](double padding){
-            this->setPaddingLeft(padding, false);
-        }, [=]{
-            this->setPaddingLeft(padding, false);
-            this->animation = nullptr;
-        });
+                                                      [=](double padding) {
+                                                          this->setPaddingLeft(padding, false);
+                                                      }, [=] {
+                    this->setPaddingLeft(padding, false);
+                    this->animation = nullptr;
+                });
         animation->start();
         mapInterface->invalidate();
     } else {
@@ -165,12 +165,12 @@ void MapCamera2d::setPaddingRight(float padding, bool animated) {
                                                       this->paddingRight,
                                                       padding,
                                                       InterpolatorFunction::EaseIn,
-           [=](double padding){
-            this->setPaddingRight(padding, false);
-        }, [=]{
-            this->setPaddingRight(padding, false);
-            this->animation = nullptr;
-        });
+                                                      [=](double padding) {
+                                                          this->setPaddingRight(padding, false);
+                                                      }, [=] {
+                    this->setPaddingRight(padding, false);
+                    this->animation = nullptr;
+                });
         animation->start();
         mapInterface->invalidate();
     } else {
@@ -185,12 +185,12 @@ void MapCamera2d::setPaddingTop(float padding, bool animated) {
                                                       this->paddingTop,
                                                       padding,
                                                       InterpolatorFunction::EaseIn,
-           [=](double padding){
-            this->setPaddingTop(padding, false);
-        }, [=]{
-            this->setPaddingTop(padding, false);
-            this->animation = nullptr;
-        });
+                                                      [=](double padding) {
+                                                          this->setPaddingTop(padding, false);
+                                                      }, [=] {
+                    this->setPaddingTop(padding, false);
+                    this->animation = nullptr;
+                });
         animation->start();
         mapInterface->invalidate();
     } else {
@@ -205,12 +205,12 @@ void MapCamera2d::setPaddingBottom(float padding, bool animated) {
                                                       this->paddingBottom,
                                                       padding,
                                                       InterpolatorFunction::EaseIn,
-           [=](double padding){
-            this->setPaddingBottom(padding, false);
-        }, [=]{
-            this->setPaddingBottom(padding, false);
-            this->animation = nullptr;
-        });
+                                                      [=](double padding) {
+                                                          this->setPaddingBottom(padding, false);
+                                                      }, [=] {
+                    this->setPaddingBottom(padding, false);
+                    this->animation = nullptr;
+                });
         animation->start();
         mapInterface->invalidate();
     } else {
@@ -333,8 +333,8 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     float xDiff = (cosAngle * dx + sinAngle * dy);
     float yDiff = (-sinAngle * dx + cosAngle * dy);
 
-    centerPosition.x += xDiff * zoom * screenPixelAsRealMeterFactor * ( mapSystemRtl ? -1 : 1 );
-    centerPosition.y += yDiff * zoom * screenPixelAsRealMeterFactor * ( mapSystemTtb ? -1 : 1 );
+    centerPosition.x += xDiff * zoom * screenPixelAsRealMeterFactor * (mapSystemRtl ? -1 : 1);
+    centerPosition.y += yDiff * zoom * screenPixelAsRealMeterFactor * (mapSystemTtb ? -1 : 1);
 
     auto config = mapInterface->getMapConfig();
     auto bottomRight = bounds.bottomRight;
@@ -361,7 +361,7 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
 
 bool MapCamera2d::onMoveComplete() {
     inertia = Inertia(currentDragVelocity);
-    currentDragVelocity = { 0, 0 };
+    currentDragVelocity = {0, 0};
     return true;
 }
 
@@ -374,8 +374,8 @@ void MapCamera2d::inertiaStep() {
         return;
     }
 
-    centerPosition.x += inertia->velocity.x * zoom * screenPixelAsRealMeterFactor * ( mapSystemRtl ? -1 : 1 );
-    centerPosition.y += inertia->velocity.y * zoom * screenPixelAsRealMeterFactor * ( mapSystemTtb ? -1 : 1 );
+    centerPosition.x += inertia->velocity.x * zoom * screenPixelAsRealMeterFactor * (mapSystemRtl ? -1 : 1);
+    centerPosition.y += inertia->velocity.y * zoom * screenPixelAsRealMeterFactor * (mapSystemTtb ? -1 : 1);
 
     auto config = mapInterface->getMapConfig();
     auto bottomRight = bounds.bottomRight;
@@ -388,7 +388,7 @@ void MapCamera2d::inertiaStep() {
     centerPosition.y = std::min(centerPosition.y, topLeft.y);
 
     float slowDown =
-    inertia->velocity.x * inertia->velocity.x + inertia->velocity.y * inertia->velocity.y > 1
+            inertia->velocity.x * inertia->velocity.x + inertia->velocity.y * inertia->velocity.y > 1
             ? 0.95f
             : 0.6f;
     inertia->velocity.x *= slowDown;

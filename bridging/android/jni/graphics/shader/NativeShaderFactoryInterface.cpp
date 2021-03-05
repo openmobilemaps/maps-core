@@ -3,6 +3,7 @@
 
 #include "NativeShaderFactoryInterface.h"  // my header
 #include "NativeAlphaShaderInterface.h"
+#include "NativeColorCircleShaderInterface.h"
 #include "NativeColorLineShaderInterface.h"
 #include "NativeColorShaderInterface.h"
 
@@ -40,6 +41,14 @@ std::shared_ptr<::ColorShaderInterface> NativeShaderFactoryInterface::JavaProxy:
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativeColorShaderInterface::toCpp(jniEnv, jret);
 }
+std::shared_ptr<::ColorCircleShaderInterface> NativeShaderFactoryInterface::JavaProxy::createColorCircleShader() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeShaderFactoryInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_createColorCircleShader);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativeColorCircleShaderInterface::toCpp(jniEnv, jret);
+}
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderFactoryInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
@@ -76,6 +85,16 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shade
         const auto& ref = ::djinni::objectFromHandleAddress<::ShaderFactoryInterface>(nativeRef);
         auto r = ref->createColorShader();
         return ::djinni::release(::djinni_generated::NativeColorShaderInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderFactoryInterface_00024CppProxy_native_1createColorCircleShader(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::ShaderFactoryInterface>(nativeRef);
+        auto r = ref->createColorCircleShader();
+        return ::djinni::release(::djinni_generated::NativeColorCircleShaderInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

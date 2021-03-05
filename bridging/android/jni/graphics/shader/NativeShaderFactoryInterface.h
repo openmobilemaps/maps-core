@@ -36,6 +36,7 @@ private:
         std::shared_ptr<::AlphaShaderInterface> createAlphaShader() override;
         std::shared_ptr<::ColorLineShaderInterface> createColorLineShader() override;
         std::shared_ptr<::ColorShaderInterface> createColorShader() override;
+        std::shared_ptr<::ColorCircleShaderInterface> createColorCircleShader() override;
 
     private:
         friend ::djinni::JniInterface<::ShaderFactoryInterface, ::djinni_generated::NativeShaderFactoryInterface>;
@@ -45,6 +46,7 @@ private:
     const jmethodID method_createAlphaShader { ::djinni::jniGetMethodID(clazz.get(), "createAlphaShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/AlphaShaderInterface;") };
     const jmethodID method_createColorLineShader { ::djinni::jniGetMethodID(clazz.get(), "createColorLineShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ColorLineShaderInterface;") };
     const jmethodID method_createColorShader { ::djinni::jniGetMethodID(clazz.get(), "createColorShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ColorShaderInterface;") };
+    const jmethodID method_createColorCircleShader { ::djinni::jniGetMethodID(clazz.get(), "createColorCircleShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ColorCircleShaderInterface;") };
 };
 
 }  // namespace djinni_generated
