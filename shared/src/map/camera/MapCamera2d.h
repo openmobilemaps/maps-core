@@ -19,6 +19,7 @@
 #include "SimpleTouchInterface.h"
 #include <optional>
 #include <set>
+#include <mutex>
 #include "AnimationInterface.h"
 
 class MapCamera2d : public MapCamera2dInterface,
@@ -140,6 +141,7 @@ class MapCamera2d : public MapCamera2dInterface,
 
     // MARK: Animations
 
+    std::recursive_mutex animationMutex;
     std::shared_ptr<AnimationInterface> coordAnimation;
     std::shared_ptr<AnimationInterface> animation;
 

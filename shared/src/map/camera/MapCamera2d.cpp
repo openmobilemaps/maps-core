@@ -68,6 +68,7 @@ void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
 void MapCamera2d::moveToCenterPosition(const ::Coord &centerPosition, bool animated) {
     Coord positionMapSystem = getBoundsCorrectedCoords(centerPosition);
     if (animated) {
+        std::lock_guard<std::recursive_mutex> lock(animationMutex);
         coordAnimation = std::make_shared<CoordAnimation>(DEFAULT_ANIM_LENGTH,
                                                           this->centerPosition,
                                                           positionMapSystem,
@@ -91,6 +92,7 @@ void MapCamera2d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
 
 void MapCamera2d::setZoom(double zoom, bool animated) {
     if (animated) {
+        std::lock_guard<std::recursive_mutex> lock(animationMutex);
         animation = std::make_shared<DoubleAnimation>(DEFAULT_ANIM_LENGTH,
                                                       this->zoom,
                                                       zoom,
@@ -114,12 +116,13 @@ double MapCamera2d::getZoom() { return zoom; }
 
 
 void MapCamera2d::setRotation(float angle, bool animated) {
-    double newAngle = fmod(angle + 360.0, 360.0);
+    double newAngle = (angle > 360 || angle < 0) ? fmod(angle + 360.0, 360.0) : angle;
     if (animated) {
+        std::lock_guard<std::recursive_mutex> lock(animationMutex);
         animation = std::make_shared<DoubleAnimation>(DEFAULT_ANIM_LENGTH,
                                                       this->angle,
                                                       newAngle,
-                                                      InterpolatorFunction::EaseIn,
+                                                      InterpolatorFunction::Linear,
                                                       [=](double angle) {
                                                           this->setRotation(angle, false);
                                                       }, [=] {
@@ -141,6 +144,7 @@ float MapCamera2d::getRotation() {
 
 void MapCamera2d::setPaddingLeft(float padding, bool animated) {
     if (animated) {
+        std::lock_guard<std::recursive_mutex> lock(animationMutex);
         animation = std::make_shared<DoubleAnimation>(DEFAULT_ANIM_LENGTH,
                                                       this->paddingLeft,
                                                       padding,
@@ -161,6 +165,7 @@ void MapCamera2d::setPaddingLeft(float padding, bool animated) {
 
 void MapCamera2d::setPaddingRight(float padding, bool animated) {
     if (animated) {
+        std::lock_guard<std::recursive_mutex> lock(animationMutex);
         animation = std::make_shared<DoubleAnimation>(DEFAULT_ANIM_LENGTH,
                                                       this->paddingRight,
                                                       padding,
@@ -181,6 +186,7 @@ void MapCamera2d::setPaddingRight(float padding, bool animated) {
 
 void MapCamera2d::setPaddingTop(float padding, bool animated) {
     if (animated) {
+        std::lock_guard<std::recursive_mutex> lock(animationMutex);
         animation = std::make_shared<DoubleAnimation>(DEFAULT_ANIM_LENGTH,
                                                       this->paddingTop,
                                                       padding,
@@ -201,6 +207,7 @@ void MapCamera2d::setPaddingTop(float padding, bool animated) {
 
 void MapCamera2d::setPaddingBottom(float padding, bool animated) {
     if (animated) {
+        std::lock_guard<std::recursive_mutex> lock(animationMutex);
         animation = std::make_shared<DoubleAnimation>(DEFAULT_ANIM_LENGTH,
                                                       this->paddingBottom,
                                                       padding,
@@ -226,8 +233,11 @@ void MapCamera2d::removeListener(const std::shared_ptr<MapCamera2dListenerInterf
 std::shared_ptr<::CameraInterface> MapCamera2d::asCameraInterface() { return shared_from_this(); }
 
 std::vector<float> MapCamera2d::getVpMatrix() {
-    if (animation) animation->update();
-    if (coordAnimation) coordAnimation->update();
+    {
+        std::lock_guard<std::recursive_mutex> lock(animationMutex);
+        if (animation) animation->update();
+        if (coordAnimation) coordAnimation->update();
+    }
     inertiaStep();
 
     std::vector<float> newVpMatrix(16, 0);
