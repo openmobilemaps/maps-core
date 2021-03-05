@@ -43,7 +43,8 @@ lineVertexShader(const VertexIn vertexIn [[stage_in]],
 {
     VertexOut out {
         .position = mvpMatrix * float4(vertexIn.position.xy + (vertexIn.n.xy * miter), 0.0, 1.0),
-        .uv = vertexIn.uv
+        .uv = vertexIn.uv,
+        .pointsize = miter
     };
 
     return out;
@@ -53,8 +54,12 @@ fragment float4
 lineFragmentShader(VertexOut in [[stage_in]],
                    constant float4 &color [[buffer(1)]])
 {
+    if (length(in.uv - float2(0.5)) > 0.5)
+    {
+        discard_fragment();
+    }
     float a = color.a;
-    return float4(color.r * a, color.g * a, color.b * a, a);
+    return float4(color.r * a, g, color.b * a, a);
 }
 
 vertex VertexOut

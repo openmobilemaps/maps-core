@@ -90,7 +90,7 @@ class Line2d: BaseGraphicsObject {
                                       indexBuffer: lineIndicesBuffer,
                                       indexBufferOffset: 0)
 
-        shader.setupPointProgram(context)
+        /*shader.setupPointProgram(context)
         shader.preRenderPoint(context)
 
         encoder.setVertexBuffer(pointsVerticesBuffer, offset: 0, index: 0)
@@ -120,7 +120,7 @@ class Line2d: BaseGraphicsObject {
         encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
 
         encoder.setFragmentBytes(&emptyColor, length: MemoryLayout<SIMD4<Float>>.stride, index: 1)
-        encoder.drawPrimitives(type: .point, vertexStart: 0, vertexCount: pointsCount, instanceCount: 1)
+        encoder.drawPrimitives(type: .point, vertexStart: 0, vertexCount: pointsCount, instanceCount: 1)*/
     }
 }
 
