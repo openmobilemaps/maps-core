@@ -34,6 +34,7 @@ android {
 		consumerProguardFiles 'consumer-rules.pro'
 		externalNativeBuild {
 			cmake {
+				arguments "-DANDROID_STL=c++_shared"
 				cppFlags "-std=c++17 -frtti -fexceptions"
 			}
 		}
@@ -59,8 +60,10 @@ android {
 	}
 
 	prefab{
-		mapscore_shared {
+		mapscore {
 			headers ".cpp_includes"
+			name "mapscore"
+			version 120
 		}
 	}
 }
