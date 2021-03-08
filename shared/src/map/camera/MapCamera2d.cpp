@@ -559,6 +559,17 @@ void MapCamera2d::setBounds(const RectCoord &bounds) {
     mapInterface->invalidate();
 }
 
+bool MapCamera2d::isInBounds(const Coord &coords) {
+    Coord mapCoords = mapInterface->getCoordinateConverterHelper()->convert(mapCoordinateSystem.identifier, coords);
+
+    double minHor = std::min(bounds.topLeft.x, bounds.bottomRight.x);
+    double maxHor = std::max(bounds.topLeft.x, bounds.bottomRight.x);
+    double minVert = std::min(bounds.topLeft.y, bounds.bottomRight.y);
+    double maxVert = std::max(bounds.topLeft.y, bounds.bottomRight.y);
+
+    return mapCoords.x <= maxHor && mapCoords.x >= minHor && mapCoords.y <= maxVert && mapCoords.y >= minVert;
+}
+
 Coord MapCamera2d::getBoundsCorrectedCoords(const Coord &coords) {
     Coord mapCoords = mapInterface->getCoordinateConverterHelper()->convert(mapCoordinateSystem.identifier, coords);
 

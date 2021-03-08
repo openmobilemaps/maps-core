@@ -118,6 +118,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (BOOL)isInBounds:(nonnull MCCoord *)coords {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->isInBounds(::djinni_generated::Coord::toCpp(coords));
+        return ::djinni::Bool::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)setPaddingLeft:(float)padding
               animated:(BOOL)animated {
     try {

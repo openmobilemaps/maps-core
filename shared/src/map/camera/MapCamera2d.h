@@ -51,6 +51,8 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual void setBounds(const ::RectCoord & bounds) override;
 
+    virtual bool isInBounds(const ::Coord & coords) override;
+
     virtual void setPaddingLeft(float padding, bool animated) override;
 
     virtual void setPaddingRight(float padding, bool animated) override;
