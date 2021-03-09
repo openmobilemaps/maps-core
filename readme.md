@@ -45,6 +45,7 @@
 * Touch and gesture handling
 * Tiled Map Layers
 * Polygon Layers
+* Icon Layers
 
 ...and more to come! See our roadmap at [openmobilemaps.io](https://openmobilemaps.io)
 

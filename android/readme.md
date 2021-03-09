@@ -60,7 +60,7 @@ This library is available on JCenter. To add it to your Android project, add the
 
 ```
 dependencies {
-  implementation 'io.openmobilemaps.mapscore:mapscore-android:1.2.0'
+  implementation 'io.openmobilemaps.mapscore:mapscore-android:1.3.0'
 }
 ```
 
