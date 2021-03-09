@@ -12,6 +12,10 @@ import Foundation
 import MapCoreSharedModule
 
 class ShaderFactory: MCShaderFactoryInterface {
+    func createColorCircleShader() -> MCColorCircleShaderInterface? {
+        ColorCircleShader()
+    }
+
     func createAlphaShader() -> MCAlphaShaderInterface? {
         AlphaShader()
     }

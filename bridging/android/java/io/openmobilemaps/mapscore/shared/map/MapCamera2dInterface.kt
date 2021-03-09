@@ -27,6 +27,8 @@ abstract class MapCamera2dInterface {
 
     abstract fun setBounds(bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord)
 
+    abstract fun isInBounds(coords: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): Boolean
+
     abstract fun setPaddingLeft(padding: Float, animated: Boolean)
 
     abstract fun setPaddingRight(padding: Float, animated: Boolean)
@@ -133,6 +135,12 @@ abstract class MapCamera2dInterface {
             native_setBounds(this.nativeRef, bounds)
         }
         private external fun native_setBounds(_nativeRef: Long, bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord)
+
+        override fun isInBounds(coords: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): Boolean {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_isInBounds(this.nativeRef, coords)
+        }
+        private external fun native_isInBounds(_nativeRef: Long, coords: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): Boolean
 
         override fun setPaddingLeft(padding: Float, animated: Boolean) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

@@ -13,6 +13,8 @@ abstract class ShaderFactoryInterface {
 
     abstract fun createColorShader(): ColorShaderInterface
 
+    abstract fun createColorCircleShader(): ColorCircleShaderInterface
+
     private class CppProxy : ShaderFactoryInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -48,5 +50,11 @@ abstract class ShaderFactoryInterface {
             return native_createColorShader(this.nativeRef)
         }
         private external fun native_createColorShader(_nativeRef: Long): ColorShaderInterface
+
+        override fun createColorCircleShader(): ColorCircleShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createColorCircleShader(this.nativeRef)
+        }
+        private external fun native_createColorCircleShader(_nativeRef: Long): ColorCircleShaderInterface
     }
 }

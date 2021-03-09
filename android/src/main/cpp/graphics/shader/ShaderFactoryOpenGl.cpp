@@ -12,6 +12,7 @@
 #include "AlphaShaderOpenGl.h"
 #include "ColorLineShaderOpenGl.h"
 #include "ColorShaderOpenGl.h"
+#include "ColorCircleShaderOpenGl.h"
 
 std::shared_ptr<AlphaShaderInterface> ShaderFactoryOpenGl::createAlphaShader() { return std::make_shared<AlphaShaderOpenGl>(); }
 
@@ -20,3 +21,7 @@ std::shared_ptr<ColorLineShaderInterface> ShaderFactoryOpenGl::createColorLineSh
 }
 
 std::shared_ptr<ColorShaderInterface> ShaderFactoryOpenGl::createColorShader() { return std::make_shared<ColorShaderOpenGl>(); }
+
+std::shared_ptr<ColorCircleShaderInterface> ShaderFactoryOpenGl::createColorCircleShader() {
+    return std::make_shared<ColorCircleShaderOpenGl>();
+}

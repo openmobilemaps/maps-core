@@ -19,6 +19,7 @@
 #include "SimpleTouchInterface.h"
 #include <optional>
 #include <set>
+#include <mutex>
 #include "AnimationInterface.h"
 
 class MapCamera2d : public MapCamera2dInterface,
@@ -49,6 +50,8 @@ class MapCamera2d : public MapCamera2dInterface,
     virtual void setMaxZoom(double zoomMax) override;
 
     virtual void setBounds(const ::RectCoord & bounds) override;
+
+    virtual bool isInBounds(const ::Coord & coords) override;
 
     virtual void setPaddingLeft(float padding, bool animated) override;
 
@@ -140,6 +143,7 @@ class MapCamera2d : public MapCamera2dInterface,
 
     // MARK: Animations
 
+    std::recursive_mutex animationMutex;
     std::shared_ptr<AnimationInterface> coordAnimation;
     std::shared_ptr<AnimationInterface> animation;
 

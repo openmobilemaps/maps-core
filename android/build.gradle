@@ -134,3 +134,8 @@ dependencies {
 	androidTestImplementation 'androidx.test.ext:junit:1.1.2'
 	androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 }
+
+clean.doLast {
+	project.delete("${projectDir}/build")
+	project.delete("${projectDir}/.cxx")
+}
