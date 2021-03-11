@@ -34,7 +34,7 @@ android {
 		minSdkVersion 23
 		targetSdkVersion 30
 		versionCode 130
-		versionName "1.3.0"
+		versionName VERSION_NAME
 
 		testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 		consumerProguardFiles 'consumer-rules.pro'
@@ -69,7 +69,7 @@ android {
 		mapscore {
 			headers ".cpp_includes"
 			name "mapscore"
-			version 130
+			version VERSION_NAME
 		}
 	}
 }
@@ -79,10 +79,6 @@ task copyHeaders(type: Exec){
 }
 preBuild.dependsOn copyHeaders
 
-task androidSourcesJar(type: Jar) {
-	archiveClassifier = 'sources'
-	from android.sourceSets.main.java.srcDirs
-}
 afterEvaluate {
 	publishing {
 		publications {
