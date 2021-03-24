@@ -8,7 +8,6 @@ buildscript {
 	dependencies {
 		classpath "com.android.tools.build:gradle:4.1.2"
 		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-		classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5'
 
 		classpath 'com.vanniktech:gradle-maven-publish-plugin:0.13.0'
 		classpath 'org.jetbrains.dokka:dokka-gradle-plugin:1.4.10.2'
@@ -23,8 +22,6 @@ repositories {
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'maven-publish'
-apply plugin: 'com.jfrog.bintray'
 apply plugin: 'com.vanniktech.maven.publish'
 
 android {
@@ -79,20 +76,6 @@ task copyHeaders(type: Exec){
 }
 preBuild.dependsOn copyHeaders
 
-afterEvaluate {
-	publishing {
-		publications {
-			"sdkRelease"(MavenPublication) {
-				from components.release
-				groupId 'io.openmobilemaps.mapscore'
-				artifactId 'mapscore-android'
-				version android.defaultConfig.versionName + readPropertyWithDefault('bintrayVersionSuffix', '')
-				artifact androidSourcesJar
-			}
-		}
-	}
-}
-
 ext.readProperty = { paramName -> readPropertyWithDefault(paramName, null) }
 ext.readPropertyWithDefault = { paramName, defaultValue ->
 	if (project.hasProperty(paramName)) {
@@ -107,19 +90,6 @@ ext.readPropertyWithDefault = { paramName, defaultValue ->
 		} else {
 			return defaultValue
 		}
-	}
-}
-
-bintray {
-	user = readProperty('bintrayUser')
-	key = readProperty('bintrayApikey')
-	publications = ['sdkRelease']
-	publish = true
-	pkg {
-		repo = 'openmobilemaps'
-		name = 'maps-core'
-		userOrg = 'openmobilemaps'
-		licenses = ['MPL-2.0']
 	}
 }
 

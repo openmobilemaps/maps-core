@@ -1,5 +1,0 @@
-.\gradlew uploadArchives --no-daemon --no-parallel -"Psigning.secretKeyRingFile=secring.gpg" -"Psigning.password=MEq1N6c6E41gs5ztXDJn5TVkgUaX53iS" -"Psigning.keyId=1EDF5E7D"
-
-MEq1N6c6E41gs5ztXDJn5TVkgUaX53iS
-
-B71A985C0A6373E76D8DD739B38DCB851EDF5E7D.rev
