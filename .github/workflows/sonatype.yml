@@ -32,4 +32,7 @@ jobs:
           cd android; ./gradlew uploadArchives -Psigning.secretKeyRingFile=$GITHUB_WORKSPACE/signingkey.gpg -Psigning.password=$SIGNING_KEY_PASSWORD -Psigning.keyId=$SIGNING_KEY_ID
       - name: Close and release Sonatype repository
         if: ${{ success() }}
+        env:
+          SONATYPE_NEXUS_USERNAME: ${{secrets.SONATYPE_NEXUS_USERNAME}}
+          SONATYPE_NEXUS_PASSWORD: ${{secrets.SONATYPE_NEXUS_PASSWORD}}
         run: cd android; ./gradlew closeAndReleaseRepository
