@@ -65,6 +65,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)addAll:(nonnull NSArray<MCPolygonInfo *> *)polygons {
+    try {
+        _cppRefHandle.get()->addAll(::djinni::List<::djinni_generated::PolygonInfo>::toCpp(polygons));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)clear {
     try {
         _cppRefHandle.get()->clear();

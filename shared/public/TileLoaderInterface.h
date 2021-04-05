@@ -6,10 +6,13 @@
 #include <string>
 
 struct TextureLoaderResult;
+struct VectorTileLoaderResult;
 
-class TextureLoaderInterface {
+class TileLoaderInterface {
 public:
-    virtual ~TextureLoaderInterface() {}
+    virtual ~TileLoaderInterface() {}
 
     virtual TextureLoaderResult loadTexture(const std::string & url) = 0;
+
+    virtual VectorTileLoaderResult loadVectorTile(const std::string & url) = 0;
 };

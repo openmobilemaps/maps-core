@@ -23,7 +23,7 @@ class Tiled2dMapRasterLayer
         : public Tiled2dMapLayer, public Tiled2dMapRasterLayerInterface {
 public:
     Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
-                          const std::shared_ptr<::TextureLoaderInterface> &textureLoader);
+                          const std::shared_ptr<::TileLoaderInterface> & tileLoader);
 
     virtual void onAdded(const std::shared_ptr<::MapInterface> &mapInterface) override;
 
@@ -56,7 +56,7 @@ public:
     bool onLongPress(const Vec2F &posScreen) override;
 
 private:
-    std::shared_ptr<TextureLoaderInterface> textureLoader;
+    std::shared_ptr<TileLoaderInterface> textureLoader;
     std::shared_ptr<Tiled2dMapRasterSource> rasterSource;
 
     std::recursive_mutex updateMutex;

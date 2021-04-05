@@ -13,25 +13,24 @@ package io.openmobilemaps.mapscore.map.loader
 import android.content.Context
 import android.graphics.BitmapFactory
 import io.openmobilemaps.mapscore.graphics.BitmapTextureHolder
+import io.openmobilemaps.mapscore.graphics.VectorTileHolder
 import io.openmobilemaps.mapscore.map.loader.networking.RefererInterceptor
 import io.openmobilemaps.mapscore.map.loader.networking.RequestUtils
 import io.openmobilemaps.mapscore.map.loader.networking.UserAgentInterceptor
-import io.openmobilemaps.mapscore.shared.map.loader.LoaderStatus
-import io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderInterface
-import io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult
+import io.openmobilemaps.mapscore.shared.map.loader.*
 import okhttp3.*
 import java.io.File
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-class TextureLoader(
+class TileLoader(
 	private val context: Context,
 	private val cacheDirectory: File,
 	private val cacheSize: Long,
 	private val referer: String,
 	private val userAgent: String? = null
 ) :
-	TextureLoaderInterface() {
+	TileLoaderInterface() {
 
 	private val okHttpClient = OkHttpClient.Builder()
 		.addInterceptor(UserAgentInterceptor(userAgent ?: RequestUtils.getDefaultUserAgent(context)))
@@ -61,6 +60,27 @@ class TextureLoader(
 			}
 		} catch (e: Exception) {
 			return TextureLoaderResult(null, LoaderStatus.ERROR_NETWORK)
+		}
+	}
+
+	override fun loadVectorTile(url: String): VectorTileLoaderResult {
+		val request = Request.Builder()
+			.url(url)
+			.build()
+
+		try {
+			return okHttpClient.newCall(request).execute().use { response ->
+				val bytes: ByteArray? = response.body?.bytes()
+				if (response.isSuccessful && bytes != null) {
+					return@use VectorTileLoaderResult(VectorTileHolder(bytes), LoaderStatus.OK)
+				} else if (response.code == 404) {
+					return@use VectorTileLoaderResult(null, LoaderStatus.ERROR_404)
+				} else {
+					return@use VectorTileLoaderResult(null, LoaderStatus.ERROR_OTHER)
+				}
+			}
+		} catch (e: Exception) {
+			return VectorTileLoaderResult(null, LoaderStatus.ERROR_NETWORK)
 		}
 	}
 }

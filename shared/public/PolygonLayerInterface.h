@@ -24,6 +24,8 @@ public:
 
     virtual void add(const PolygonInfo & polygon) = 0;
 
+    virtual void addAll(const std::vector<PolygonInfo> & polygons) = 0;
+
     virtual void clear() = 0;
 
     virtual void setCallbackHandler(const std::shared_ptr<PolygonLayerCallbackInterface> & handler) = 0;

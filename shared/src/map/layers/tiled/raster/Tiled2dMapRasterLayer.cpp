@@ -18,8 +18,8 @@
 #include <map>
 
 Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
-                                             const std::shared_ptr<::TextureLoaderInterface> &textureLoader)
-        : Tiled2dMapLayer(layerConfig), textureLoader(textureLoader), alpha(1.0) {}
+                                             const std::shared_ptr<::TileLoaderInterface> & tileLoader)
+        : Tiled2dMapLayer(layerConfig), textureLoader(tileLoader), alpha(1.0) {}
 
 void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface) {
     rasterSource = std::make_shared<Tiled2dMapRasterSource>(mapInterface->getMapConfig(), layerConfig,

@@ -21,8 +21,8 @@ abstract class Tiled2dMapRasterLayerInterface {
 
     companion object {
         @JvmStatic
-        fun create(layerConfig: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, textureLoader: io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderInterface): Tiled2dMapRasterLayerInterface {
-            return CppProxy.create(layerConfig, textureLoader)
+        fun create(layerConfig: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, tileLoader: io.openmobilemaps.mapscore.shared.map.loader.TileLoaderInterface): Tiled2dMapRasterLayerInterface {
+            return CppProxy.create(layerConfig, tileLoader)
         }
     }
 
@@ -82,7 +82,7 @@ abstract class Tiled2dMapRasterLayerInterface {
 
         companion object {
             @JvmStatic
-            external fun create(layerConfig: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, textureLoader: io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderInterface): Tiled2dMapRasterLayerInterface
+            external fun create(layerConfig: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, tileLoader: io.openmobilemaps.mapscore.shared.map.loader.TileLoaderInterface): Tiled2dMapRasterLayerInterface
         }
     }
 }

@@ -20,6 +20,8 @@
 
 - (void)add:(nonnull MCPolygonInfo *)polygon;
 
+- (void)addAll:(nonnull NSArray<MCPolygonInfo *> *)polygons;
+
 - (void)clear;
 
 - (void)setCallbackHandler:(nullable id<MCPolygonLayerCallbackInterface>)handler;
