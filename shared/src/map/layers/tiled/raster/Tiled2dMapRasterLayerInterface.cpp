@@ -13,6 +13,6 @@
 
 std::shared_ptr<Tiled2dMapRasterLayerInterface>
 Tiled2dMapRasterLayerInterface::create(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
-                                       const std::shared_ptr<::TextureLoaderInterface> &textureLoader) {
-    return std::make_shared<Tiled2dMapRasterLayer>(layerConfig, textureLoader);
+                                       const std::shared_ptr<::TileLoaderInterface> & tileLoader) {
+    return std::make_shared<Tiled2dMapRasterLayer>(layerConfig, tileLoader);
 }

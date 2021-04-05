@@ -18,6 +18,7 @@
 #include "RenderPass.h"
 #include "RenderObject.h"
 #include <map>
+#include <logger/Logger.h>
 
 PolygonLayer::PolygonLayer()
         : isHidden(false) {}
@@ -67,32 +68,51 @@ void PolygonLayer::remove(const PolygonInfo &polygon) {
 }
 
 void PolygonLayer::add(const PolygonInfo &polygon) {
+    addAll({polygon});
+}
+
+
+void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
+    if (polygons.empty()) return;
+
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
-        addingQueue.insert(polygon);
+        for (const auto &polygon : polygons) {
+            addingQueue.insert(polygon);
+        }
         return;
     }
 
     const auto &objectFactory = mapInterface->getGraphicsObjectFactory();
     const auto &shaderFactory = mapInterface->getShaderFactory();
 
-    auto shader = shaderFactory->createColorShader();
-    auto polygonGraphicsObject = objectFactory->createPolygon(shader->asShaderProgramInterface());
-
-    auto polygonObject =
-            std::make_shared<Polygon2dLayerObject>(mapInterface->getCoordinateConverterHelper(), polygonGraphicsObject, shader);
-
-    polygonObject->setPositions(polygon.coordinates, polygon.holes, polygon.isConvex);
-    polygonObject->setColor(polygon.color);
-
-    mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
-            TaskConfig("PolygonLayer_setup_" + polygon.identifier, 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
-            [=] { polygonGraphicsObject->asGraphicsObject()->setup(mapInterface->getRenderingContext()); }));
+    std::vector<std::shared_ptr<Polygon2dInterface>> polygonGraphicObjects;
 
     {
         std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
-        polygons[polygon] = polygonObject;
+        for (const auto &polygon : polygons) {
+            auto shader = shaderFactory->createColorShader();
+            auto polygonGraphicsObject = objectFactory->createPolygon(shader->asShaderProgramInterface());
+
+            auto polygonObject =
+                    std::make_shared<Polygon2dLayerObject>(mapInterface->getCoordinateConverterHelper(), polygonGraphicsObject,
+                                                           shader);
+
+            polygonObject->setPositions(polygon.coordinates, polygon.holes, polygon.isConvex);
+            polygonObject->setColor(polygon.color);
+
+            polygonGraphicObjects.push_back(polygonGraphicsObject);
+            this->polygons[polygon] = polygonObject;
+        }
     }
+    mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
+            TaskConfig("PolygonLayer_setup_" + polygons[0].identifier, 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+            [=] {
+                for (const auto &polygonGraphicsObject : polygonGraphicObjects) {
+                    polygonGraphicsObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+                }
+            }));
+
     generateRenderPasses();
     if (mapInterface)
         mapInterface->invalidate();
@@ -224,3 +244,4 @@ bool PolygonLayer::onClickUnconfirmed(const ::Vec2F &posScreen) {
     }
     return false;
 }
+

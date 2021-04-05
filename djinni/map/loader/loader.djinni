@@ -14,6 +14,16 @@ texture_loader_result = record {
     status: loader_status;
 }
 
-texture_loader_interface = interface +c +j +o {
+vector_tile_holder_interface = interface +j +o {
+	get_data(): list<i8>;
+}
+
+vector_tile_loader_result = record {
+    data: optional<vector_tile_holder_interface>;
+    status: loader_status;
+}
+
+tile_loader_interface = interface +c +j +o {
     load_texture(url: string): texture_loader_result;
+    load_vector_tile(url: string): vector_tile_loader_result;
 }

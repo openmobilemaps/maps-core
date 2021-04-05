@@ -68,6 +68,15 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_polygo
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_polygon_PolygonLayerInterface_00024CppProxy_native_1addAll(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_polygons)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::PolygonLayerInterface>(nativeRef);
+        ref->addAll(::djinni::List<::djinni_generated::NativePolygonInfo>::toCpp(jniEnv, j_polygons));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_polygon_PolygonLayerInterface_00024CppProxy_native_1clear(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
