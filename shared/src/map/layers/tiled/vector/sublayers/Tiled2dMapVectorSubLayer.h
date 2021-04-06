@@ -54,8 +54,7 @@ private:
     Color fillColor;
 
     std::recursive_mutex updateMutex;
-    std::unordered_map<Tiled2dMapVectorTileInfo, std::vector<PolygonInfo>> tilePolygonMap;
-    std::unordered_map<std::string, std::shared_ptr<Polygon2dLayerObject>> polygonObjectMap;
+    std::unordered_map<Tiled2dMapVectorTileInfo, std::vector<std::shared_ptr<Polygon2dLayerObject>>> tilePolygonMap;
     // TODO: add line and other graphic-primitives support
 
     std::vector<std::shared_ptr<::RenderPassInterface>> renderPasses;
