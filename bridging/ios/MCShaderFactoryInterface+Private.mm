@@ -7,6 +7,7 @@
 #import "DJIError.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCAlphaShaderInterface+Private.h"
+#import "MCColorCircleShaderInterface+Private.h"
 #import "MCColorLineShaderInterface+Private.h"
 #import "MCColorShaderInterface+Private.h"
 #include <exception>
@@ -54,6 +55,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable id<MCColorCircleShaderInterface>)createColorCircleShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createColorCircleShader();
+        return ::djinni_generated::ColorCircleShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class ShaderFactoryInterface::ObjcProxy final
@@ -82,6 +90,13 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createColorShader];
             return ::djinni_generated::ColorShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    std::shared_ptr<::ColorCircleShaderInterface> createColorCircleShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createColorCircleShader];
+            return ::djinni_generated::ColorCircleShaderInterface::toCpp(objcpp_result_);
         }
     }
 };

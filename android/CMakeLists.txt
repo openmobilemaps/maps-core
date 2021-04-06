@@ -25,7 +25,7 @@ file(GLOB_RECURSE cpp_SRC
         )
 
 add_library( # Sets the name of the library.
-        mapscore_shared
+        mapscore
 
         # Sets the library as a shared library.
         SHARED
@@ -93,7 +93,7 @@ find_library( # Sets the name of the path variable.
 # build script, prebuilt third-party libraries, or system libraries.
 
 target_link_libraries( # Specifies the target library.
-        mapscore_shared
+        mapscore
 
         # Links the target library to the log library
         # included in the NDK.
@@ -102,5 +102,5 @@ target_link_libraries( # Specifies the target library.
 find_library(opengl-lib
         GLESv2)
 
-target_link_libraries(mapscore_shared
+target_link_libraries(mapscore
         ${opengl-lib})

@@ -6,6 +6,7 @@
 #include <memory>
 
 class AlphaShaderInterface;
+class ColorCircleShaderInterface;
 class ColorLineShaderInterface;
 class ColorShaderInterface;
 
@@ -18,4 +19,6 @@ public:
     virtual std::shared_ptr<ColorLineShaderInterface> createColorLineShader() = 0;
 
     virtual std::shared_ptr<ColorShaderInterface> createColorShader() = 0;
+
+    virtual std::shared_ptr<ColorCircleShaderInterface> createColorCircleShader() = 0;
 };

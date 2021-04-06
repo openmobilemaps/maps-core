@@ -5,3 +5,4 @@
 *.iml
 local.properties
 .cpp_includes
+secring.gpg

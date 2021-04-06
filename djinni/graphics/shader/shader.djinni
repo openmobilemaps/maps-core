@@ -19,6 +19,7 @@ shader_factory_interface = interface +c +j +o {
     create_alpha_shader() : alpha_shader_interface;
     create_color_line_shader() : color_line_shader_interface;
     create_color_shader() : color_shader_interface;
+    create_color_circle_shader() : color_circle_shader_interface;
 }
 
 alpha_shader_interface = interface +c +o {
@@ -35,4 +36,9 @@ color_line_shader_interface = interface +c +o {
     set_color(red: f32, green: f32, blue: f32, alpha: f32);
     set_miter(miter: f32);
     as_line_shader_program_interface() : line_shader_program_interface;
+}
+
+color_circle_shader_interface = interface +c +o {
+    set_color(red: f32, green: f32, blue: f32, alpha: f32);
+    as_shader_program_interface() : shader_program_interface;
 }

@@ -112,6 +112,15 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     if (textureLoaded)
         prepareTextureDraw(openGlContext, mProgram);
 
+    int mTextureCoordinateHandle = glGetAttribLocation(mProgram, "texCoordinate");
+    OpenGlHelper::checkGlError("glGetAttribLocation texCoordinate");
+
+    glEnableVertexAttribArray(mTextureCoordinateHandle);
+    OpenGlHelper::checkGlError("glEnableVertexAttribArray");
+
+    glVertexAttribPointer(mTextureCoordinateHandle, 2, GL_FLOAT, false, 0, &textureBuffer[0]);
+    OpenGlHelper::checkGlError("glVertexAttribPointer tex");
+
     shaderProgram->preRender(context);
 
     // get handle to vertex shader's vPosition member
@@ -158,13 +167,4 @@ void Quad2dOpenGl::prepareTextureDraw(std::shared_ptr<OpenGlContext> &openGLCont
 
     // Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0.
     glUniform1i(mTextureUniformHandle, 0);
-
-    int mTextureCoordinateHandle = glGetAttribLocation(mProgram, "texCoordinate");
-    OpenGlHelper::checkGlError("glGetAttribLocation texCoordinate");
-
-    glEnableVertexAttribArray(mTextureCoordinateHandle);
-    OpenGlHelper::checkGlError("glEnableVertexAttribArray");
-
-    glVertexAttribPointer(mTextureCoordinateHandle, 2, GL_FLOAT, false, 0, &textureBuffer[0]);
-    OpenGlHelper::checkGlError("glVertexAttribPointer tex");
 }

@@ -41,6 +41,8 @@
 
 - (void)setBounds:(nonnull MCRectCoord *)bounds;
 
+- (BOOL)isInBounds:(nonnull MCCoord *)coords;
+
 - (void)setPaddingLeft:(float)padding
               animated:(BOOL)animated;
 
