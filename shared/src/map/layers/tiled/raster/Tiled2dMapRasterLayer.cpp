@@ -129,7 +129,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
         std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
         for (const auto &passEntry : renderPassObjectMap) {
             std::shared_ptr<RenderPass> renderPass =
-                    std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second);
+                    std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second, nullptr);
             newRenderPasses.push_back(renderPass);
         }
         renderPasses = newRenderPasses;

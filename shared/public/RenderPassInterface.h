@@ -3,7 +3,9 @@
 
 #pragma once
 
+#include "GraphicsObjectInterface.h"
 #include <memory>
+#include <optional>
 #include <vector>
 
 class RenderObjectInterface;
@@ -18,4 +20,6 @@ public:
     virtual void addRenderObject(const std::shared_ptr<RenderObjectInterface> & renderObject) = 0;
 
     virtual RenderPassConfig getRenderPassConfig() = 0;
+
+    virtual std::shared_ptr<::GraphicsObjectInterface> getMaskingObject() = 0;
 };
