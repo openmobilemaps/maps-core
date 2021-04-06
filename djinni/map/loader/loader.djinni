@@ -15,7 +15,7 @@ texture_loader_result = record {
 }
 
 vector_tile_holder_interface = interface +j +o {
-	get_data(): list<i8>;
+	get_data(): binary;
 }
 
 vector_tile_loader_result = record {

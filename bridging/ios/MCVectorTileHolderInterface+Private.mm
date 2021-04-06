@@ -18,11 +18,11 @@ class VectorTileHolderInterface::ObjcProxy final
     friend class ::djinni_generated::VectorTileHolderInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    std::vector<int8_t> getData() override
+    std::vector<uint8_t> getData() override
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getData];
-            return ::djinni::List<::djinni::I8>::toCpp(objcpp_result_);
+            return ::djinni::Binary::toCpp(objcpp_result_);
         }
     }
 };

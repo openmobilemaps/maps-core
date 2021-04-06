@@ -33,14 +33,14 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        std::vector<int8_t> getData() override;
+        std::vector<uint8_t> getData() override;
 
     private:
         friend ::djinni::JniInterface<::VectorTileHolderInterface, ::djinni_generated::NativeVectorTileHolderInterface>;
     };
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/loader/VectorTileHolderInterface") };
-    const jmethodID method_getData { ::djinni::jniGetMethodID(clazz.get(), "getData", "()Ljava/util/ArrayList;") };
+    const jmethodID method_getData { ::djinni::jniGetMethodID(clazz.get(), "getData", "()[B") };
 };
 
 }  // namespace djinni_generated

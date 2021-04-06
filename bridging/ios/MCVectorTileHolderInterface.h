@@ -6,6 +6,6 @@
 
 @protocol MCVectorTileHolderInterface
 
-- (nonnull NSArray<NSNumber *> *)getData;
+- (nonnull NSData *)getData;
 
 @end
