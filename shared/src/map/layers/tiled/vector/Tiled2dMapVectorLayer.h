@@ -13,7 +13,7 @@
 #include "Tiled2dMapLayer.h"
 #include "Tiled2dMapVectorLayerInterface.h"
 #include "Tiled2dMapVectorSource.h"
-#include "PolygonLayer.h"
+#include "Tiled2dMapVectorSubLayer.h"
 
 class Tiled2dMapVectorLayer : public Tiled2dMapLayer, public Tiled2dMapVectorLayerInterface {
 public:
@@ -40,9 +40,9 @@ private:
     std::shared_ptr<Tiled2dMapVectorSource> vectorTileSource;
 
     std::recursive_mutex updateMutex;
-    std::unordered_map<Tiled2dMapVectorTileInfo, std::vector<std::shared_ptr<PolygonInfo>>> tileObjectMap;
+    std::unordered_set<Tiled2dMapVectorTileInfo> tileSet;
 
-    std::shared_ptr<PolygonLayer> polygonLayer;
+    std::shared_ptr<Tiled2dMapVectorSubLayer> sublayer; // TODO: generate layers according to style json
 };
 
 
