@@ -58,7 +58,7 @@ void Tiled2dMapVectorSubLayer::show() {
 }
 
 void
-Tiled2dMapVectorSubLayer::updateTileData(const Tiled2dMapVectorTileInfo &tileInfo, vtzero::layer data) {
+Tiled2dMapVectorSubLayer::updateTileData(const Tiled2dMapVectorTileInfo &tileInfo, vtzero::layer &data) {
     if (!mapInterface) return;
 
     std::string layerName = std::string(data.name());

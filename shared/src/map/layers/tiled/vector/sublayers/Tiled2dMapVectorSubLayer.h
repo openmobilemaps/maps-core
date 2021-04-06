@@ -41,7 +41,7 @@ public:
 
     virtual void show() override;
 
-    void updateTileData(const Tiled2dMapVectorTileInfo &tileInfo, vtzero::layer data);
+    void updateTileData(const Tiled2dMapVectorTileInfo &tileInfo, vtzero::layer &data);
 
     void clearTileData(const Tiled2dMapVectorTileInfo &tileInfo);
 
