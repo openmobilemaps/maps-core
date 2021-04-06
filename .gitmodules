@@ -1,9 +1,9 @@
 [submodule "external/djinni"]
 	path = external/djinni
 	url = https://github.com/UbiqueInnovation/djinni.git
-[submodule "external/protozero"]
-	path = external/protozero
-	url = git@github.com:mapbox/protozero.git
-[submodule "external/vtzero"]
-	path = external/vtzero
-	url = git@github.com:mapbox/vtzero.git
+[submodule "external/protozero/protozero"]
+	path = external/protozero/protozero
+	url = https://github.com/mapbox/protozero.git
+[submodule "external/vtzero/vtzero"]
+	path = external/vtzero/vtzero
+	url = https://github.com/mapbox/vtzero.git
