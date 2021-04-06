@@ -11,14 +11,11 @@
 #include <logger/Logger.h>
 #include "vtzero/vector_tile.hpp"
 #include "Tiled2dMapVectorLayer.h"
-#include "PolygonLayerInterface.h"
-#include "PolygonInfo.h"
-#include "VectorTilePolygonHandler.h"
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                                              const std::shared_ptr<::TileLoaderInterface> &tileLoader)
         : Tiled2dMapLayer(layerConfig), vectorTileLoader(tileLoader) {
-    polygonLayer = std::static_pointer_cast<PolygonLayer>(PolygonLayerInterface::create());
+    sublayer = std::make_shared<Tiled2dMapVectorSubLayer>(Color(0.0, 0.0, 1.0, 0.5));
 }
 
 std::shared_ptr<::LayerInterface> Tiled2dMapVectorLayer::asLayerInterface() {
@@ -26,12 +23,11 @@ std::shared_ptr<::LayerInterface> Tiled2dMapVectorLayer::asLayerInterface() {
 }
 
 void Tiled2dMapVectorLayer::update() {
-    polygonLayer->update();
+    sublayer->update();
 }
 
 std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::buildRenderPasses() {
-    auto passes = polygonLayer->buildRenderPasses();
-    LogDebug <<= "Renderpass objects: " + std::to_string(passes.empty() ? 0 : passes[0]->getRenderObjects().size());
+    auto passes = sublayer->buildRenderPasses();
     return passes;
 }
 
@@ -43,7 +39,7 @@ void Tiled2dMapVectorLayer::onAdded(const std::shared_ptr<::MapInterface> &mapIn
     Tiled2dMapLayer::onAdded(mapInterface);
     mapInterface->getTouchHandler()->addListener(shared_from_this());
 
-    polygonLayer->onAdded(mapInterface);
+    sublayer->onAdded(mapInterface);
 }
 
 void Tiled2dMapVectorLayer::onRemoved() {
@@ -51,17 +47,17 @@ void Tiled2dMapVectorLayer::onRemoved() {
     mapInterface->getTouchHandler()->removeListener(shared_from_this());
     pause();
 
-    polygonLayer->onRemoved();
+    sublayer->onRemoved();
 }
 
 void Tiled2dMapVectorLayer::pause() {
     vectorTileSource->pause();
-    polygonLayer->pause();
+    sublayer->pause();
 }
 
 void Tiled2dMapVectorLayer::resume() {
     vectorTileSource->resume();
-    polygonLayer->resume();
+    sublayer->resume();
 }
 
 void Tiled2dMapVectorLayer::onTilesUpdated() {
@@ -72,15 +68,15 @@ void Tiled2dMapVectorLayer::onTilesUpdated() {
 
         std::unordered_set<Tiled2dMapVectorTileInfo> tilesToAdd;
         for (const auto &vectorTileInfo : currentTileInfos) {
-            if (tileObjectMap.count(vectorTileInfo) == 0) {
+            if (tileSet.count(vectorTileInfo) == 0) {
                 tilesToAdd.insert(vectorTileInfo);
             }
         }
 
         std::unordered_set<Tiled2dMapVectorTileInfo> tilesToRemove;
-        for (const auto &tileEntry : tileObjectMap) {
-            if (currentTileInfos.count(tileEntry.first) == 0)
-                tilesToRemove.insert(tileEntry.first);
+        for (const auto &tileEntry : tileSet) {
+            if (currentTileInfos.count(tileEntry) == 0)
+                tilesToRemove.insert(tileEntry);
         }
 
         for (const auto &tile : tilesToAdd) {
@@ -93,42 +89,9 @@ void Tiled2dMapVectorLayer::onTilesUpdated() {
                              std::to_string(tile.tileInfo.y);
                 std::vector<std::string> geomTypes = {"UNKNOWN", "POINT", "LINESTRING", "POLYGON"};
 
-                std::string tileTempIdPrefix = std::to_string(tile.tileInfo.x) + "/" + std::to_string(tile.tileInfo.y) + "_";
                 while (auto layer = tileData.next_layer()) {
                     std::string layerName = std::string(layer.name());
-                    uint32_t extent = layer.extent();
-                    LogDebug <<= "    layer: " + layerName + " - v" + std::to_string(layer.version()) + " - extent: " +
-                                 std::to_string(extent);
-                    std::string layerTempIdPrefix = tileTempIdPrefix + layerName + "_";
-                    if (layerName == "water" && !layer.empty()) {
-                        LogDebug <<= "      with " + std::to_string(layer.num_features()) + " features";
-                        int featureNum = 0;
-                        std::vector<PolygonInfo> newPolygons;
-                        while (auto feature = layer.next_feature()) {
-                            if (feature.geometry_type() == vtzero::GeomType::POLYGON) {
-                                auto polygonHandler = VectorTilePolygonHandler(tile.tileInfo.bounds, extent);
-                                try {
-                                    vtzero::decode_polygon_geometry(feature.geometry(), polygonHandler);
-                                } catch (vtzero::geometry_exception geometryException) {
-                                    continue;
-                                }
-                                std::string id = feature.has_id() ? std::to_string(feature.id()) : (layerTempIdPrefix +
-                                                                                                    std::to_string(featureNum));
-                                auto polygonCoordinates = polygonHandler.getCoordinates();
-                                auto polygonHoles = polygonHandler.getHoles();
-                                for (int i = 0; i < polygonCoordinates.size(); i++) {
-                                    auto polygonInfo = std::make_shared<PolygonInfo>(id, polygonCoordinates[i],
-                                                                                     polygonHoles[i],
-                                                                                     false, Color(0.0, 0.0, 1.0, 0.5),
-                                                                                     Color(0.0, 0.0, 1.0, 0.5));
-                                    polygons.push_back(polygonInfo);
-                                    newPolygons.push_back(*polygonInfo);
-                                    featureNum++;
-                                }
-                            }
-                        }
-                        polygonLayer->addAll(newPolygons);
-                    }
+                    if (layerName == "water" && !layer.empty()) sublayer->updateTileData(tile, layer);
                 }
             }
             catch (protozero::invalid_tag_exception tagException) {
@@ -139,16 +102,15 @@ void Tiled2dMapVectorLayer::onTilesUpdated() {
                 LogError <<= "Unknown wire type exception for tile " + std::to_string(tile.tileInfo.zoomIdentifier) + "/" +
                              std::to_string(tile.tileInfo.x) + "/" + std::to_string(tile.tileInfo.y);
             }
-            tileObjectMap[tile] = polygons;
+            tileSet.insert(tile);
         }
 
         for (const auto &tile : tilesToRemove) {
-            auto polygons = tileObjectMap[tile];
-            for (const auto &polygon : polygons) {
-                polygonLayer->remove(*polygon);
-            }
-            tileObjectMap.erase(tile);
+            sublayer->clearTileData(tile);
+            tileSet.erase(tile);
         }
+
+        if (!tilesToAdd.empty() || !tilesToRemove.empty()) sublayer->preGenerateRenderPasses();
     }
 
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
