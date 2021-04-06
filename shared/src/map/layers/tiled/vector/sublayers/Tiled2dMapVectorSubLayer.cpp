@@ -37,15 +37,19 @@ void Tiled2dMapVectorSubLayer::onRemoved() {
 
 void Tiled2dMapVectorSubLayer::pause() {
     std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
-    for (const auto &polygon : polygonObjectMap) {
-        polygon.second->getPolygonObject()->clear();
+    for (const auto &tileGroup : tilePolygonMap) {
+        for (const auto &polygon : tileGroup.second) {
+            polygon->getPolygonObject()->clear();
+        }
     }
 }
 
 void Tiled2dMapVectorSubLayer::resume() {
     std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
-    for (const auto &polygon : polygonObjectMap) {
-        polygon.second->getPolygonObject()->setup(mapInterface->getRenderingContext());
+    for (const auto &tileGroup : tilePolygonMap) {
+        for (const auto &polygon : tileGroup.second) {
+            polygon->getPolygonObject()->setup(mapInterface->getRenderingContext());
+        }
     }
 }
 
@@ -97,12 +101,8 @@ void Tiled2dMapVectorSubLayer::clearTileData(const Tiled2dMapVectorTileInfo &til
     {
         std::lock_guard<std::recursive_mutex> lock(updateMutex);
         const auto &polygons = tilePolygonMap[tileInfo];
-        for (const auto &polygon : polygons) {
-            if (polygonObjectMap.count(polygon.identifier)) {
-                auto polygonObject = polygonObjectMap[polygon.identifier];
-                polygonObject->getPolygonObject()->clear();
-                polygonObjectMap.erase(polygon.identifier);
-            }
+        for (const auto &polygonObject : polygons) {
+            polygonObject->getPolygonObject()->clear();
         }
         tilePolygonMap.erase(tileInfo);
     }
@@ -131,8 +131,7 @@ Tiled2dMapVectorSubLayer::addPolygons(const Tiled2dMapVectorTileInfo &tileInfo, 
             polygonObject->setColor(polygon.color);
 
             polygonGraphicObjects.push_back(polygonGraphicsObject);
-            polygonObjectMap[polygon.identifier] = polygonObject;
-            tilePolygonMap[tileInfo].push_back(polygon);
+            tilePolygonMap[tileInfo].push_back(polygonObject);
         }
     }
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
@@ -147,9 +146,12 @@ Tiled2dMapVectorSubLayer::addPolygons(const Tiled2dMapVectorTileInfo &tileInfo, 
 void Tiled2dMapVectorSubLayer::preGenerateRenderPasses() {
     std::lock_guard<std::recursive_mutex> lock(updateMutex);
     std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
-    for (auto const &polygonTuple : polygonObjectMap) {
-        for (auto config : polygonTuple.second->getRenderConfig()) {
-            renderPassObjectMap[config->getRenderIndex()].push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
+    for (auto const &polygonTuple : tilePolygonMap) {
+        for (auto const &polygonObject : polygonTuple.second) {
+            for (auto config : polygonObject->getRenderConfig()) {
+                renderPassObjectMap[config->getRenderIndex()].push_back(
+                        std::make_shared<RenderObject>(config->getGraphicsObject()));
+            }
         }
     }
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
