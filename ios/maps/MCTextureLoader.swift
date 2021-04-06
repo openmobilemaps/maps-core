@@ -11,7 +11,8 @@
 import MapCoreSharedModule
 import UIKit
 
-open class MCTextureLoader: MCTextureLoaderInterface {
+open class MCTextureLoader: MCTileLoaderInterface {
+
     private let session: URLSession
 
     public init(urlSession: URLSession? = nil) {
@@ -23,6 +24,10 @@ open class MCTextureLoader: MCTextureLoaderInterface {
             sessionConfig.networkServiceType = .responsiveData
             session = .init(configuration: sessionConfig)
         }
+    }
+
+    public func loadVectorTile(_ url: String) -> MCVectorTileLoaderResult {
+        return .init(data: nil, status: .ERROR_OTHER)
     }
 
     public func loadTexture(_ url: String) -> MCTextureLoaderResult {
