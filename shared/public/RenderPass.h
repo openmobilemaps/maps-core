@@ -18,13 +18,18 @@ class RenderPass : public RenderPassInterface {
 public:
     RenderPass(RenderPassConfig config, std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects);
 
+    RenderPass(RenderPassConfig config, std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects, std::shared_ptr<GraphicsObjectInterface> maskingObject);
+
     virtual std::vector<std::shared_ptr<::RenderObjectInterface>> getRenderObjects() override;
 
     virtual void addRenderObject(const std::shared_ptr<RenderObjectInterface> & renderObject) override;
 
     virtual RenderPassConfig getRenderPassConfig() override;
 
+    virtual std::shared_ptr<::GraphicsObjectInterface> getMaskingObject() override;
+
 private:
     RenderPassConfig config;
     std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;
+    std::shared_ptr<GraphicsObjectInterface> maskingObject;
 };

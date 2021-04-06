@@ -22,8 +22,8 @@ file(GLOB_RECURSE cpp_SRC
         "../external/djinni/support-lib/*.h"
         "../external/djinni/support-lib/*.hpp"
         "../external/djinni/support-lib/*.cpp"
-        "../external/protozero/include/*.hpp"
-        "../external/vtzero/include/*.hpp"
+        "../external/protozero/protozero/include/*.hpp"
+        "../external/vtzero/vtzero/include/*.hpp"
         )
 
 add_library( # Sets the name of the library.
@@ -36,8 +36,8 @@ add_library( # Sets the name of the library.
 
 include_directories(../external/djinni/support-lib)
 include_directories(../external/djinni/support-lib/jni)
-include_directories(../external/protozero/include/)
-include_directories(../external/vtzero/include/)
+include_directories(../external/protozero/protozero/include/)
+include_directories(../external/vtzero/vtzero/include/)
 include_directories(../bridging/android/jni/graphics)
 include_directories(../bridging/android/jni/graphics/common)
 include_directories(../bridging/android/jni/graphics/objects)
