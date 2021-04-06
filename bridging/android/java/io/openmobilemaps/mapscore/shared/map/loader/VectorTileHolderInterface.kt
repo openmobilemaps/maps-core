@@ -5,5 +5,5 @@ package io.openmobilemaps.mapscore.shared.map.loader
 
 abstract class VectorTileHolderInterface {
 
-    abstract fun getData(): ArrayList<Byte>
+    abstract fun getData(): Array<Byte>
 }

@@ -14,13 +14,13 @@ NativeVectorTileHolderInterface::JavaProxy::JavaProxy(JniType j) : Handle(::djin
 
 NativeVectorTileHolderInterface::JavaProxy::~JavaProxy() = default;
 
-std::vector<int8_t> NativeVectorTileHolderInterface::JavaProxy::getData() {
+std::vector<uint8_t> NativeVectorTileHolderInterface::JavaProxy::getData() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeVectorTileHolderInterface>::get();
-    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getData);
+    auto jret = (jbyteArray)jniEnv->CallObjectMethod(Handle::get().get(), data.method_getData);
     ::djinni::jniExceptionCheck(jniEnv);
-    return ::djinni::List<::djinni::I8>::toCpp(jniEnv, jret);
+    return ::djinni::Binary::toCpp(jniEnv, jret);
 }
 
 }  // namespace djinni_generated

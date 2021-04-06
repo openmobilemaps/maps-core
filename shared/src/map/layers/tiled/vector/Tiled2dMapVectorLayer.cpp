@@ -83,7 +83,7 @@ void Tiled2dMapVectorLayer::onTilesUpdated() {
             auto data = tile.vectorTileHolder->getData();
             std::vector<std::shared_ptr<PolygonInfo>> polygons;
             try {
-                vtzero::vector_tile tileData(std::string(data.begin(), data.end()));
+                vtzero::vector_tile tileData((char*)data.data(), data.size());
 
                 LogDebug <<= "tile " + std::to_string(tile.tileInfo.zoomIdentifier) + "/" + std::to_string(tile.tileInfo.x) + "/" +
                              std::to_string(tile.tileInfo.y);

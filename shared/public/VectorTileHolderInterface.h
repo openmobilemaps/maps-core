@@ -10,5 +10,5 @@ class VectorTileHolderInterface {
 public:
     virtual ~VectorTileHolderInterface() {}
 
-    virtual std::vector<int8_t> getData() = 0;
+    virtual std::vector<uint8_t> getData() = 0;
 };
