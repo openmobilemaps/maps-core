@@ -13,6 +13,10 @@ abstract class GraphicsObjectFactoryInterface {
 
     abstract fun createPolygon(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Polygon2dInterface
 
+    abstract fun createQuadMask(): Quad2dInterface
+
+    abstract fun createPolygonMask(): Polygon2dInterface
+
     private class CppProxy : GraphicsObjectFactoryInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -48,5 +52,17 @@ abstract class GraphicsObjectFactoryInterface {
             return native_createPolygon(this.nativeRef, shader)
         }
         private external fun native_createPolygon(_nativeRef: Long, shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Polygon2dInterface
+
+        override fun createQuadMask(): Quad2dInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createQuadMask(this.nativeRef)
+        }
+        private external fun native_createQuadMask(_nativeRef: Long): Quad2dInterface
+
+        override fun createPolygonMask(): Polygon2dInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createPolygonMask(this.nativeRef)
+        }
+        private external fun native_createPolygonMask(_nativeRef: Long): Polygon2dInterface
     }
 }

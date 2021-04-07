@@ -8,8 +8,7 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#ifndef MAPSDK_LINE2DOPENGL_H
-#define MAPSDK_LINE2DOPENGL_H
+#pragma once
 
 #include "GraphicsObjectInterface.h"
 #include "Line2dInterface.h"
@@ -57,5 +56,3 @@ class Line2dOpenGl : public GraphicsObjectInterface,
 
     bool ready = false;
 };
-
-#endif // MAPSDK_LINE2DOPENGL_H

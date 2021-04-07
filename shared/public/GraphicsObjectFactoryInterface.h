@@ -20,4 +20,8 @@ public:
     virtual std::shared_ptr<Line2dInterface> createLine(const std::shared_ptr<::LineShaderProgramInterface> & lineShader) = 0;
 
     virtual std::shared_ptr<Polygon2dInterface> createPolygon(const std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
+
+    virtual std::shared_ptr<Quad2dInterface> createQuadMask() = 0;
+
+    virtual std::shared_ptr<Polygon2dInterface> createPolygonMask() = 0;
 };

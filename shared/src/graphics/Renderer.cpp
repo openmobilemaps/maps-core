@@ -8,6 +8,7 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
+#include <logger/Logger.h>
 #include "Renderer.h"
 #include "Matrix.h"
 #include "CameraInterface.h"
@@ -28,9 +29,16 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
     while (!renderQueue.empty()) {
         auto pass = renderQueue.front();
 
+        const auto &maskObject = pass->getMaskingObject();
+
         const auto &renderObjects = pass->getRenderObjects();
         std::vector<float> tempMvpMatrix(16, 0);
         for (const auto &renderObject : renderObjects) {
+            if (maskObject) {
+                renderingContext->preRenderStencilMask();
+                maskObject->render(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer);
+            }
+
             const auto &graphicsObject = renderObject->getGraphicsObject();
             if (renderObject->hasCustomModelMatrix()) {
                 Matrix::multiplyMMC(tempMvpMatrix, 0, vpMatrix, 0, renderObject->getCustomModelMatrix(), 0);
@@ -38,6 +46,10 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
                                (int64_t) tempMvpMatrix.data());
             } else {
                 graphicsObject->render(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer);
+            }
+
+            if (maskObject) {
+                renderingContext->postRenderStencilMask();
             }
         }
 

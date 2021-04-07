@@ -21,6 +21,9 @@ graphics_object_factory_interface = interface +c +j +o {
     create_quad(shader: shader_program_interface) : quad_2d_interface;
     create_line(line_shader: line_shader_program_interface) : line_2d_interface;
     create_polygon(shader: shader_program_interface) : polygon_2d_interface;
+
+    create_quad_mask() : quad_2d_interface;
+    create_polygon_mask() : polygon_2d_interface;
 }
 
 quad_2d_interface = interface +c +j +o {

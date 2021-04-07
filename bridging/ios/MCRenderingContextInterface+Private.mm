@@ -63,6 +63,18 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)preRenderStencilMask {
+    try {
+        _cppRefHandle.get()->preRenderStencilMask();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)postRenderStencilMask {
+    try {
+        _cppRefHandle.get()->postRenderStencilMask();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class RenderingContextInterface::ObjcProxy final
@@ -101,6 +113,18 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() setupDrawFrame];
+        }
+    }
+    void preRenderStencilMask() override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() preRenderStencilMask];
+        }
+    }
+    void postRenderStencilMask() override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() postRenderStencilMask];
         }
     }
 };

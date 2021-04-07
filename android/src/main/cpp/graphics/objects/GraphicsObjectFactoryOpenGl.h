@@ -8,8 +8,7 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#ifndef MAPSDK_GRAPHICSOBJECTFACTORYOPENGL_H
-#define MAPSDK_GRAPHICSOBJECTFACTORYOPENGL_H
+#pragma once
 
 #include "GraphicsObjectFactoryInterface.h"
 
@@ -20,6 +19,8 @@ class GraphicsObjectFactoryOpenGl : public GraphicsObjectFactoryInterface {
     virtual std::shared_ptr<Line2dInterface> createLine(const std::shared_ptr<::LineShaderProgramInterface> &lineShader) override;
 
     virtual std::shared_ptr<Polygon2dInterface> createPolygon(const std::shared_ptr<::ShaderProgramInterface> &shader) override;
-};
 
-#endif // MAPSDK_GRAPHICSOBJECTFACTORYOPENGL_H
+    virtual std::shared_ptr<Quad2dInterface> createQuadMask() override;
+
+    virtual std::shared_ptr<Polygon2dInterface> createPolygonMask() override;
+};

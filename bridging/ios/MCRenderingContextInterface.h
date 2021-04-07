@@ -20,4 +20,8 @@
 
 - (void)setupDrawFrame;
 
+- (void)preRenderStencilMask;
+
+- (void)postRenderStencilMask;
+
 @end
