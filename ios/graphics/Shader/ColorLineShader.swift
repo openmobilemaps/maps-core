@@ -46,11 +46,12 @@ extension ColorLineShader: MCLineShaderProgramInterface {
 
         encoder.setRenderPipelineState(pipeline)
 
+        var c = SIMD4<Float>(color)
+        encoder.setFragmentBytes(&c, length: MemoryLayout<SIMD4<Float>>.stride, index: 1)
+
         var m = miter
         encoder.setVertexBytes(&m, length: MemoryLayout<Float>.stride, index: 2)
 
-        var c = SIMD4<Float>(color)
-        encoder.setFragmentBytes(&c, length: MemoryLayout<SIMD4<Float>>.stride, index: 1)
     }
 
     func preRenderPoint(_ context: MCRenderingContextInterface?) {
@@ -60,12 +61,12 @@ extension ColorLineShader: MCLineShaderProgramInterface {
 
         encoder.setRenderPipelineState(pipeline)
 
-        // radius is twice the miter
-        var m = 2.0 * miter
-        encoder.setVertexBytes(&m, length: MemoryLayout<Float>.stride, index: 2)
-
         var c = SIMD4<Float>(color)
         encoder.setFragmentBytes(&c, length: MemoryLayout<SIMD4<Float>>.stride, index: 1)
+
+        // radius is twice the miter
+        var m = miter
+        encoder.setVertexBytes(&m, length: MemoryLayout<Float>.stride, index: 2)
     }
 }
 

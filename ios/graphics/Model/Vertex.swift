@@ -63,6 +63,12 @@ struct Vertex: Equatable {
         textureCoordinate = SIMD2([0.0, 0.0])
     }
 
+    init(x: Float, y: Float, p1: MCVec2D, p2: MCVec2D) {
+        position = SIMD2([x, y])
+        normal = SIMD2([p1.xF, p1.yF])
+        textureCoordinate = SIMD2([p2.xF, p2.yF])
+    }
+
     init(position: MCVec2D, textureU: Float, textureV: Float) {
         self.init(x: position.xF, y: position.yF, textureU: textureU, textureV: textureV)
     }

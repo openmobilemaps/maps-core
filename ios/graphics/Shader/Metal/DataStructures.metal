@@ -20,6 +20,7 @@ struct VertexIn {
 struct VertexOut {
     float4 position [[ position ]];
     float2 uv;
+    float2 n;
     float pointsize [[ point_size ]];
 };
 

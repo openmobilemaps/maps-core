@@ -19,9 +19,6 @@ class Line2d: BaseGraphicsObject {
     private var lineIndicesBuffer: MTLBuffer?
     private var indicesCount: Int = 0
 
-    private var pointsVerticesBuffer: MTLBuffer?
-    private var pointsCount: Int = 0
-
     private var stencilState: MTLDepthStencilState?
     private var clearStencilState: MTLDepthStencilState?
 
@@ -63,11 +60,8 @@ class Line2d: BaseGraphicsObject {
                          mvpMatrix: Int64)
     {
         guard let lineVerticesBuffer = lineVerticesBuffer,
-              let lineIndicesBuffer = lineIndicesBuffer,
-              let pointsVerticesBuffer = pointsVerticesBuffer
+              let lineIndicesBuffer = lineIndicesBuffer
         else { return }
-
-        var emptyColor = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
 
         if stencilState == nil || clearStencilState == nil {
             setupStencilBufferDescriptor()
@@ -89,38 +83,6 @@ class Line2d: BaseGraphicsObject {
                                       indexType: .uint32,
                                       indexBuffer: lineIndicesBuffer,
                                       indexBufferOffset: 0)
-
-        /*shader.setupPointProgram(context)
-        shader.preRenderPoint(context)
-
-        encoder.setVertexBuffer(pointsVerticesBuffer, offset: 0, index: 0)
-        encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
-        encoder.drawPrimitives(type: .point, vertexStart: 0, vertexCount: pointsCount, instanceCount: 1)
-
-        // stencil clear draw call
-        encoder.setDepthStencilState(clearStencilState)
-
-        shader.setupRectProgram(context)
-        shader.preRenderRect(context)
-
-        encoder.setVertexBuffer(lineVerticesBuffer, offset: 0, index: 0)
-        encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
-
-        encoder.setFragmentBytes(&emptyColor, length: MemoryLayout<SIMD4<Float>>.stride, index: 1)
-        encoder.drawIndexedPrimitives(type: .triangle,
-                                      indexCount: indicesCount,
-                                      indexType: .uint32,
-                                      indexBuffer: lineIndicesBuffer,
-                                      indexBufferOffset: 0)
-
-        shader.setupPointProgram(context)
-        shader.preRenderPoint(context)
-
-        encoder.setVertexBuffer(pointsVerticesBuffer, offset: 0, index: 0)
-        encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
-
-        encoder.setFragmentBytes(&emptyColor, length: MemoryLayout<SIMD4<Float>>.stride, index: 1)
-        encoder.drawPrimitives(type: .point, vertexStart: 0, vertexCount: pointsCount, instanceCount: 1)*/
     }
 }
 
@@ -130,14 +92,11 @@ extension Line2d: MCLine2dInterface {
             indicesCount = 0
             lineVerticesBuffer = nil
             lineIndicesBuffer = nil
-            pointsVerticesBuffer = nil
-            pointsCount = 0
             return
         }
 
         var lineVertices: [Vertex] = []
         var indices: [UInt32] = []
-        var pointVertices: [Vertex] = []
 
         for i in 0 ..< (positions.count - 1) {
             let iNext = i + 1
@@ -149,27 +108,32 @@ extension Line2d: MCLine2dInterface {
             let lineNormalY = ciNext.xF - ci.xF
             let lineLength = sqrt(lineNormalX * lineNormalX + lineNormalY * lineNormalY)
 
-            lineVertices.append(Vertex(x: ci.xF, y: ci.yF, normalX: lineNormalX / lineLength, normalY: lineNormalY / lineLength))
-            lineVertices.append(Vertex(x: ci.xF, y: ci.yF, normalX: -lineNormalX / lineLength, normalY: -lineNormalY / lineLength))
+            let miter: Float = 100;
+            let miterX: Float = lineNormalX / lineLength * miter / 2;
+            let miterY: Float = lineNormalY / lineLength * miter / 2;
 
-            lineVertices.append(Vertex(x: ciNext.xF, y: ciNext.yF, normalX: lineNormalX / lineLength, normalY: lineNormalY / lineLength))
-            lineVertices.append(Vertex(x: ciNext.xF, y: ciNext.yF, normalX: -lineNormalX / lineLength, normalY: -lineNormalY / lineLength))
+            let ciX = ci.xF - (ciNext.xF - ci.xF) / lineLength * miter / 2;
+            let ciY = ci.yF - (ciNext.yF - ci.yF) / lineLength * miter / 2;
 
-            indices.append(UInt32(4 * i))
-            indices.append(UInt32(4 * i + 1))
-            indices.append(UInt32(4 * i + 2))
+            let ciNextX = ciNext.xF - (ci.xF - ciNext.xF) / lineLength * miter / 2
+            let ciNextY = ciNext.yF - (ci.yF - ciNext.yF) / lineLength * miter / 2
 
-            indices.append(UInt32(4 * i + 2))
-            indices.append(UInt32(4 * i + 1))
-            indices.append(UInt32(4 * i + 3))
-        }
+            let vertecies: [Vertex] = [
+                Vertex(x: ciX - miterX, y: ciY - miterY, p1:ci, p2: MCVec2D(x: Double(lineNormalX), y: Double(lineNormalY))), // A
+                Vertex(x: ciX + miterX, y: ciY + miterY, p1:ci, p2: MCVec2D(x: Double(lineNormalX), y: Double(lineNormalY))), // B
+                Vertex(x: ciNextX + miterX, y: ciNextY + miterY, p1:ci, p2: MCVec2D(x: Double(lineNormalX), y: Double(lineNormalY))), // C
+                Vertex(x: ciNextX - miterX, y: ciNextY - miterY, p1:ci, p2: MCVec2D(x: Double(lineNormalX), y: Double(lineNormalY))), // D
+            ]
 
-        for c in positions {
-            pointVertices.append(Vertex(x: c.xF, y: c.yF, normalX: 0.0, normalY: 0.0))
+            lineVertices.append(contentsOf: vertecies)
+
+            indices.append(contentsOf: [
+                UInt32(4 * i), UInt32(4 * i + 1), UInt32(4 * i + 2),
+                UInt32(4 * i), UInt32(4 * i + 2), UInt32(4 * i + 3)
+            ])
         }
 
         guard let verticesBuffer = device.makeBuffer(bytes: lineVertices, length: MemoryLayout<Vertex>.stride * lineVertices.count, options: []),
-              let pointBuffer = device.makeBuffer(bytes: pointVertices, length: MemoryLayout<Vertex>.stride * pointVertices.count, options: []),
               let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt32>.stride * indices.count, options: [])
         else {
             fatalError("Cannot allocate buffers for the UBTileModel")
@@ -178,8 +142,6 @@ extension Line2d: MCLine2dInterface {
         indicesCount = indices.count
         lineVerticesBuffer = verticesBuffer
         lineIndicesBuffer = indicesBuffer
-        pointsVerticesBuffer = pointBuffer
-        pointsCount = positions.count
     }
 
     func asGraphicsObject() -> MCGraphicsObjectInterface? {
