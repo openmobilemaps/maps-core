@@ -65,5 +65,18 @@ void OpenGlContext::setBackgroundColor(const Color &color) { backgroundColor = c
 
 void OpenGlContext::setupDrawFrame() {
     glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
-    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    glClearStencil(0);
+}
+
+void OpenGlContext::preRenderStencilMask() {
+    glEnable(GL_STENCIL_TEST);
+    glClear(GL_STENCIL_BUFFER_BIT);
+    glClearStencil(0);
+    glStencilFunc(GL_ALWAYS, 128, 1);
+    glStencilOp(GL_ZERO, GL_ZERO, GL_REPLACE);
+}
+
+void OpenGlContext::postRenderStencilMask() {
+    glDisable(GL_STENCIL_TEST);
 }

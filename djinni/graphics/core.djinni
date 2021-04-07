@@ -32,6 +32,8 @@ rendering_context_interface = interface +c +j +o {
     get_viewport_size() : vec_2_i;
     set_background_color(color: color);
     setupDrawFrame();
+    pre_render_stencil_mask();
+    post_render_stencil_mask();
 }
 
 render_object_interface = interface +c {

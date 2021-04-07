@@ -8,8 +8,7 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#ifndef MAPSDK_RECTANGLE2DOPENGL_H
-#define MAPSDK_RECTANGLE2DOPENGL_H
+#pragma once
 
 #include "GraphicsObjectInterface.h"
 #include "OpenGlContext.h"
@@ -63,5 +62,3 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
 
     bool ready = false;
 };
-
-#endif // MAPSDK_RECTANGLE2DOPENGL_H

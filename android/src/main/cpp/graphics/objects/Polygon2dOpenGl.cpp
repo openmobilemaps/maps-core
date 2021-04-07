@@ -87,8 +87,6 @@ void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> 
     int program = openGlContext->getProgram(shaderProgram->getProgramName());
 
     glEnable(GL_STENCIL_TEST);
-    glClear(GL_STENCIL_BUFFER_BIT);
-    glClearStencil(0);
 
     // By drawing the triangle fan with indices around the polygon,
     // all the parts that need to be drawn are drawn an odd time.
@@ -106,10 +104,10 @@ void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> 
 
     if (polygonIsConvex) {
         // draw all the ones only
-        glStencilFunc(GL_EQUAL, 1, 255);
+        glStencilFunc(GL_EQUAL, 2, 255);
     } else {
         // draw all the odd ones
-        glStencilFunc(GL_EQUAL, 1, 1);
+        glStencilFunc(GL_EQUAL, 129, 129);
     }
     glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);

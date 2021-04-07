@@ -8,8 +8,7 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#ifndef MAPSDK_OPENGLCONTEXT_H
-#define MAPSDK_OPENGLCONTEXT_H
+#pragma once
 
 #include "RenderingContextInterface.h"
 #include <map>
@@ -38,6 +37,10 @@ class OpenGlContext : public RenderingContextInterface, std::enable_shared_from_
 
     virtual void setupDrawFrame() override;
 
+    virtual void preRenderStencilMask() override;
+
+    virtual void postRenderStencilMask() override;
+
   protected:
     Color backgroundColor = Color(0, 0, 0, 1);
 
@@ -46,5 +49,3 @@ class OpenGlContext : public RenderingContextInterface, std::enable_shared_from_
 
     Vec2I viewportSize = Vec2I(0, 0);
 };
-
-#endif // MAPSDK_OPENGLCONTEXT_H

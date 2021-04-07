@@ -18,6 +18,7 @@
 #include "Tiled2dMapVectorTileInfo.h"
 #include "PolygonInfo.h"
 #include "Polygon2dLayerObject.h"
+#include "QuadMaskObject.h"
 
 class Tiled2dMapVectorSubLayer : public LayerInterface, public std::enable_shared_from_this<Tiled2dMapVectorSubLayer> {
 public:
@@ -55,6 +56,7 @@ private:
 
     std::recursive_mutex updateMutex;
     std::unordered_map<Tiled2dMapVectorTileInfo, std::vector<std::shared_ptr<Polygon2dLayerObject>>> tilePolygonMap;
+    std::unordered_map<Tiled2dMapVectorTileInfo, std::shared_ptr<QuadMaskObject>> tileMaskMap;
     // TODO: add line and other graphic-primitives support
 
     std::vector<std::shared_ptr<::RenderPassInterface>> renderPasses;

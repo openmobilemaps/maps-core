@@ -8,8 +8,7 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#ifndef MAPSDK_POLYGON2DOPENGL_H
-#define MAPSDK_POLYGON2DOPENGL_H
+#pragma once
 
 #include "GraphicsObjectInterface.h"
 #include "OpenGlContext.h"
@@ -55,5 +54,3 @@ class Polygon2dOpenGl : public GraphicsObjectInterface,
 
     bool ready = false;
 };
-
-#endif // MAPSDK_POLYGON2DOPENGL_H

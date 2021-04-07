@@ -8,9 +8,7 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#ifndef MAPSDKEXAMPLE_ICONINFO_H
-#define MAPSDKEXAMPLE_ICONINFO_H
-
+#pragma once
 
 #include "IconInfoInterface.h"
 
@@ -43,6 +41,3 @@ private:
     Vec2F iconSize;
     IconType type;
 };
-
-
-#endif //MAPSDKEXAMPLE_ICONINFO_H

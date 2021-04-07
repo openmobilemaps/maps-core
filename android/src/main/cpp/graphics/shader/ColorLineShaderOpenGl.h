@@ -8,8 +8,7 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#ifndef MAPSDK_COLORLINESHADEROPENGL_H
-#define MAPSDK_COLORLINESHADEROPENGL_H
+#pragma once
 
 #include "BaseShaderProgramOpenGl.h"
 #include "ColorLineShaderInterface.h"

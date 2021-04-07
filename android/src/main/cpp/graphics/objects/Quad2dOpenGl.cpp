@@ -109,17 +109,18 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     glUseProgram(mProgram);
     OpenGlHelper::checkGlError("glUseProgram RectangleOpenGl");
 
-    if (textureLoaded)
+    if (textureLoaded) {
         prepareTextureDraw(openGlContext, mProgram);
 
-    int mTextureCoordinateHandle = glGetAttribLocation(mProgram, "texCoordinate");
-    OpenGlHelper::checkGlError("glGetAttribLocation texCoordinate");
+        int mTextureCoordinateHandle = glGetAttribLocation(mProgram, "texCoordinate");
+        OpenGlHelper::checkGlError("glGetAttribLocation texCoordinate");
 
-    glEnableVertexAttribArray(mTextureCoordinateHandle);
-    OpenGlHelper::checkGlError("glEnableVertexAttribArray");
+        glEnableVertexAttribArray(mTextureCoordinateHandle);
+        OpenGlHelper::checkGlError("glEnableVertexAttribArray");
 
-    glVertexAttribPointer(mTextureCoordinateHandle, 2, GL_FLOAT, false, 0, &textureBuffer[0]);
-    OpenGlHelper::checkGlError("glVertexAttribPointer tex");
+        glVertexAttribPointer(mTextureCoordinateHandle, 2, GL_FLOAT, false, 0, &textureBuffer[0]);
+        OpenGlHelper::checkGlError("glVertexAttribPointer tex");
+    }
 
     shaderProgram->preRender(context);
 
