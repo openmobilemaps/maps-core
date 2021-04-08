@@ -32,7 +32,7 @@ class Line2dOpenGl : public GraphicsObjectInterface,
     virtual void clear() override;
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                        int64_t mvpMatrix) override;
+                        int64_t mvpMatrix, bool isMasked) override;
 
     virtual void setLinePositions(const std::vector<::Vec2D> &positions) override;
 

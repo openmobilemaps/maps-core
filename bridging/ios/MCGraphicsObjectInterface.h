@@ -20,6 +20,7 @@
 /** Render the graphics object; ensure calling on graphics thread */
 - (void)render:(nullable id<MCRenderingContextInterface>)context
     renderPass:(nonnull MCRenderPassConfig *)renderPass
-     mvpMatrix:(int64_t)mvpMatrix;
+     mvpMatrix:(int64_t)mvpMatrix
+      isMasked:(BOOL)isMasked;
 
 @end

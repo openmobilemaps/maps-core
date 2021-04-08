@@ -8,6 +8,7 @@
 #include <memory>
 
 class GraphicsObjectInterface;
+class MaskingObjectInterface;
 class TextureHolderInterface;
 
 class Quad2dInterface {
@@ -21,4 +22,6 @@ public:
     virtual void removeTexture() = 0;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() = 0;
+
+    virtual std::shared_ptr<MaskingObjectInterface> asMaskingObject() = 0;
 };

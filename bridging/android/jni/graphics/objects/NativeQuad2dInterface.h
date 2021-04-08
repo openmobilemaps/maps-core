@@ -37,6 +37,7 @@ private:
         void loadTexture(const std::shared_ptr<::TextureHolderInterface> & textureHolder) override;
         void removeTexture() override;
         std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override;
+        std::shared_ptr<::MaskingObjectInterface> asMaskingObject() override;
 
     private:
         friend ::djinni::JniInterface<::Quad2dInterface, ::djinni_generated::NativeQuad2dInterface>;
@@ -47,6 +48,7 @@ private:
     const jmethodID method_loadTexture { ::djinni::jniGetMethodID(clazz.get(), "loadTexture", "(Lio/openmobilemaps/mapscore/shared/graphics/objects/TextureHolderInterface;)V") };
     const jmethodID method_removeTexture { ::djinni::jniGetMethodID(clazz.get(), "removeTexture", "()V") };
     const jmethodID method_asGraphicsObject { ::djinni::jniGetMethodID(clazz.get(), "asGraphicsObject", "()Lio/openmobilemaps/mapscore/shared/graphics/objects/GraphicsObjectInterface;") };
+    const jmethodID method_asMaskingObject { ::djinni::jniGetMethodID(clazz.get(), "asMaskingObject", "()Lio/openmobilemaps/mapscore/shared/graphics/objects/MaskingObjectInterface;") };
 };
 
 }  // namespace djinni_generated

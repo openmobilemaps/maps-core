@@ -43,7 +43,7 @@ void Tiled2dMapVectorSubLayer::pause() {
         }
     }
     for (const auto &tileGroup : tileMaskMap) {
-        if (tileGroup.second) tileGroup.second->getGraphicsObject()->clear();
+        if (tileGroup.second) tileGroup.second->getQuadObject()->asGraphicsObject()->clear();
     }
 }
 
@@ -56,7 +56,7 @@ void Tiled2dMapVectorSubLayer::resume() {
         }
     }
     for (const auto &tileGroup : tileMaskMap) {
-        if (tileGroup.second) tileGroup.second->getGraphicsObject()->setup(context);
+        if (tileGroup.second) tileGroup.second->getQuadObject()->asGraphicsObject()->setup(context);
     }
 }
 
@@ -146,7 +146,45 @@ Tiled2dMapVectorSubLayer::addPolygons(const Tiled2dMapVectorTileInfo &tileInfo, 
         const auto &graphicsObjectFactory = mapInterface->getGraphicsObjectFactory();
         const auto &conversionHelper = mapInterface->getCoordinateConverterHelper();
         auto maskingObject = std::make_shared<QuadMaskObject>(graphicsObjectFactory, conversionHelper, tileInfo.tileInfo.bounds);
-        newGraphicObjects.push_back(maskingObject->getGraphicsObject());
+
+        /* Polygon-Mask Test
+        auto maskingObject = std::make_shared<PolygonMaskObject>(graphicsObjectFactory, conversionHelper);
+        const auto &bounds = tileInfo.tileInfo.bounds;
+        double width = (bounds.bottomRight.x - bounds.topLeft.x);
+        double height = (bounds.bottomRight.y - bounds.topLeft.y);
+        std::vector<::Coord> positions = {bounds.topLeft,
+                                          Coord(bounds.topLeft.systemIdentifier, bounds.topLeft.x + width, bounds.topLeft.y,
+                                                bounds.topLeft.z),
+                                          bounds.bottomRight,
+                                          Coord(bounds.topLeft.systemIdentifier, bounds.topLeft.x, bounds.topLeft.y + height,
+                                                bounds.topLeft.z), bounds.topLeft};
+        std::vector<std::vector<::Coord>> holes = {{
+                                                           Coord(bounds.topLeft.systemIdentifier, bounds.topLeft.x + 0.05 * width,
+                                                                 bounds.topLeft.y, bounds.topLeft.z),
+                                                           Coord(bounds.topLeft.systemIdentifier, bounds.bottomRight.x,
+                                                                 bounds.topLeft.y + 0.95 * height, bounds.topLeft.z),
+                                                           Coord(bounds.topLeft.systemIdentifier, bounds.topLeft.x + 0.95 * width,
+                                                                 bounds.bottomRight.y, bounds.topLeft.z),
+                                                           Coord(bounds.topLeft.systemIdentifier, bounds.topLeft.x,
+                                                                 bounds.topLeft.y + 0.05 * height, bounds.topLeft.z),
+                                                           Coord(bounds.topLeft.systemIdentifier, bounds.topLeft.x + 0.05 * width,
+                                                                 bounds.topLeft.y, bounds.topLeft.z)
+                                                   },
+                                                   {
+                                                           Coord(bounds.topLeft.systemIdentifier, bounds.topLeft.x + 0.95 * width,
+                                                                 bounds.topLeft.y, bounds.topLeft.z),
+                                                           Coord(bounds.topLeft.systemIdentifier, bounds.bottomRight.x,
+                                                                 bounds.topLeft.y + 0.05 * height, bounds.topLeft.z),
+                                                           Coord(bounds.topLeft.systemIdentifier, bounds.topLeft.x + 0.05 * width,
+                                                                 bounds.bottomRight.y, bounds.topLeft.z),
+                                                           Coord(bounds.topLeft.systemIdentifier, bounds.topLeft.x,
+                                                                 bounds.topLeft.y + 0.95 * height, bounds.topLeft.z),
+                                                           Coord(bounds.topLeft.systemIdentifier, bounds.topLeft.x + 0.95 * width,
+                                                                 bounds.topLeft.y, bounds.topLeft.z)
+                                                   }};
+        maskingObject->setPositions(positions, holes, true); */
+
+        newGraphicObjects.push_back(maskingObject->getQuadObject()->asGraphicsObject());
         tileMaskMap[tileInfo] = maskingObject;
     }
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
@@ -173,8 +211,9 @@ void Tiled2dMapVectorSubLayer::preGenerateRenderPasses() {
         for (const auto &passEntry : renderPassObjectMap) {
             std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first),
                                                                                   passEntry.second,
-                                                                                  (tileMask ? tileMask->getGraphicsObject()
-                                                                                            : nullptr));
+                                                                                  (tileMask
+                                                                                   ? tileMask->getQuadObject()->asMaskingObject()
+                                                                                   : nullptr));
             newRenderPasses.push_back(renderPass);
         }
     }

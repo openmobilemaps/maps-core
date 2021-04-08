@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "GraphicsObjectInterface.h"
+#include "MaskingObjectInterface.h"
 #include <memory>
 #include <optional>
 #include <vector>
@@ -21,5 +21,5 @@ public:
 
     virtual RenderPassConfig getRenderPassConfig() = 0;
 
-    virtual std::shared_ptr<::GraphicsObjectInterface> getMaskingObject() = 0;
+    virtual std::shared_ptr<::MaskingObjectInterface> getMaskingObject() = 0;
 };

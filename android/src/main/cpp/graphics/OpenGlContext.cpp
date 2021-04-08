@@ -74,7 +74,7 @@ void OpenGlContext::preRenderStencilMask() {
     glClear(GL_STENCIL_BUFFER_BIT);
     glClearStencil(0);
     glStencilFunc(GL_ALWAYS, 128, 1);
-    glStencilOp(GL_ZERO, GL_ZERO, GL_REPLACE);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 }
 
 void OpenGlContext::postRenderStencilMask() {
