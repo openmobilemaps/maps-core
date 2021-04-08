@@ -33,7 +33,7 @@ public:
 
     void setPositions(const ::QuadCoord &coords);
 
-    std::shared_ptr<GraphicsObjectInterface> getGraphicsObject();
+    std::shared_ptr<Quad2dInterface> getQuadObject();
 
 private:
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;

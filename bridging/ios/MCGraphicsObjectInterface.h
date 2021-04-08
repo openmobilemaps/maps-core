@@ -21,6 +21,6 @@
 - (void)render:(nullable id<MCRenderingContextInterface>)context
     renderPass:(nonnull MCRenderPassConfig *)renderPass
      mvpMatrix:(int64_t)mvpMatrix
-screenPixelAsRealMeterFactor:(double)screenPixelAsRealMeterFactor;
+      isMasked:(BOOL)isMasked;
 
 @end

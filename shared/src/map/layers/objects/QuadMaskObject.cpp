@@ -42,6 +42,6 @@ void QuadMaskObject::setPositions(const QuadCoord &coords) {
                     Vec2D(renderCoords.bottomLeft.x, renderCoords.bottomLeft.y)), RectD(0, 0, 1, 1));
 }
 
-std::shared_ptr<GraphicsObjectInterface> QuadMaskObject::getGraphicsObject() {
-    return quad->asGraphicsObject();
+std::shared_ptr<Quad2dInterface> QuadMaskObject::getQuadObject() {
+    return quad;
 }

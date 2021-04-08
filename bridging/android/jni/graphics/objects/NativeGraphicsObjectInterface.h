@@ -36,7 +36,7 @@ private:
         bool isReady() override;
         void setup(const std::shared_ptr<::RenderingContextInterface> & context) override;
         void clear() override;
-        void render(const std::shared_ptr<::RenderingContextInterface> & context, const ::RenderPassConfig & renderPass, int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
+        void render(const std::shared_ptr<::RenderingContextInterface> & context, const ::RenderPassConfig & renderPass, int64_t mvpMatrix, bool isMasked) override;
 
     private:
         friend ::djinni::JniInterface<::GraphicsObjectInterface, ::djinni_generated::NativeGraphicsObjectInterface>;
@@ -46,7 +46,7 @@ private:
     const jmethodID method_isReady { ::djinni::jniGetMethodID(clazz.get(), "isReady", "()Z") };
     const jmethodID method_setup { ::djinni::jniGetMethodID(clazz.get(), "setup", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface;)V") };
     const jmethodID method_clear { ::djinni::jniGetMethodID(clazz.get(), "clear", "()V") };
-    const jmethodID method_render { ::djinni::jniGetMethodID(clazz.get(), "render", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface;Lio/openmobilemaps/mapscore/shared/graphics/RenderPassConfig;JD)V") };
+    const jmethodID method_render { ::djinni::jniGetMethodID(clazz.get(), "render", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface;Lio/openmobilemaps/mapscore/shared/graphics/RenderPassConfig;JZ)V") };
 };
 
 }  // namespace djinni_generated

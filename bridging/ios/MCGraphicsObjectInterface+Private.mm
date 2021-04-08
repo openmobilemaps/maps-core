@@ -55,12 +55,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)render:(nullable id<MCRenderingContextInterface>)context
     renderPass:(nonnull MCRenderPassConfig *)renderPass
      mvpMatrix:(int64_t)mvpMatrix
-screenPixelAsRealMeterFactor:(double)screenPixelAsRealMeterFactor {
+      isMasked:(BOOL)isMasked {
     try {
         _cppRefHandle.get()->render(::djinni_generated::RenderingContextInterface::toCpp(context),
                                     ::djinni_generated::RenderPassConfig::toCpp(renderPass),
                                     ::djinni::I64::toCpp(mvpMatrix),
-                                    ::djinni::F64::toCpp(screenPixelAsRealMeterFactor));
+                                    ::djinni::Bool::toCpp(isMasked));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -92,13 +92,13 @@ public:
             [djinni_private_get_proxied_objc_object() clear];
         }
     }
-    void render(const std::shared_ptr<::RenderingContextInterface> & c_context, const ::RenderPassConfig & c_renderPass, int64_t c_mvpMatrix, double c_screenPixelAsRealMeterFactor) override
+    void render(const std::shared_ptr<::RenderingContextInterface> & c_context, const ::RenderPassConfig & c_renderPass, int64_t c_mvpMatrix, bool c_isMasked) override
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() render:(::djinni_generated::RenderingContextInterface::fromCpp(c_context))
                                                   renderPass:(::djinni_generated::RenderPassConfig::fromCpp(c_renderPass))
                                                    mvpMatrix:(::djinni::I64::fromCpp(c_mvpMatrix))
-                                screenPixelAsRealMeterFactor:(::djinni::F64::fromCpp(c_screenPixelAsRealMeterFactor))];
+                                                    isMasked:(::djinni::Bool::fromCpp(c_isMasked))];
         }
     }
 };

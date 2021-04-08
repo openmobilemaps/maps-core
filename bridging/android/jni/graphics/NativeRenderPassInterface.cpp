@@ -3,7 +3,7 @@
 
 #include "NativeRenderPassInterface.h"  // my header
 #include "Marshal.hpp"
-#include "NativeGraphicsObjectInterface.h"
+#include "NativeMaskingObjectInterface.h"
 #include "NativeRenderObjectInterface.h"
 #include "NativeRenderPassConfig.h"
 
@@ -41,13 +41,13 @@ void NativeRenderPassInterface::JavaProxy::addRenderObject(const std::shared_ptr
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativeRenderPassConfig::toCpp(jniEnv, jret);
 }
-std::shared_ptr<::GraphicsObjectInterface> NativeRenderPassInterface::JavaProxy::getMaskingObject() {
+std::shared_ptr<::MaskingObjectInterface> NativeRenderPassInterface::JavaProxy::getMaskingObject() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeRenderPassInterface>::get();
     auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getMaskingObject);
     ::djinni::jniExceptionCheck(jniEnv);
-    return ::djinni::Optional<std::optional, ::djinni_generated::NativeGraphicsObjectInterface>::toCpp(jniEnv, jret);
+    return ::djinni::Optional<std::optional, ::djinni_generated::NativeMaskingObjectInterface>::toCpp(jniEnv, jret);
 }
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderPassInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
@@ -87,13 +87,13 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_Rende
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT ::djinni_generated::NativeGraphicsObjectInterface::Boxed::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderPassInterface_00024CppProxy_native_1getMaskingObject(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT ::djinni_generated::NativeMaskingObjectInterface::Boxed::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderPassInterface_00024CppProxy_native_1getMaskingObject(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::RenderPassInterface>(nativeRef);
         auto r = ref->getMaskingObject();
-        return ::djinni::release(::djinni::Optional<std::optional, ::djinni_generated::NativeGraphicsObjectInterface>::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni_generated::NativeMaskingObjectInterface>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

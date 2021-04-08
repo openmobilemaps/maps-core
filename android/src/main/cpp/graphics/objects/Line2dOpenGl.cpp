@@ -146,9 +146,14 @@ void Line2dOpenGl::clear() {
 }
 
 void Line2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                          int64_t mvpMatrix, double screenPixelAsRealMeterFactor) {
+                          int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
     if (!ready)
         return;
+
+    if (isMasked) {
+        glStencilFunc(GL_EQUAL, 128, 128);
+        glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
+    }
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
 
