@@ -82,9 +82,9 @@ void LineLayer::add(const LineInfo & line) {
     auto lineObject =
             std::make_shared<Line2dLayerObject>(mapInterface->getCoordinateConverterHelper(), lineGraphicsObject, shader);
 
+    lineObject->setMiter(line.miter);
     lineObject->setPositions(line.coordinates);
     lineObject->setColor(line.color);
-    lineObject->setMiter(line.miter);
 
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
             TaskConfig("LineLayer_setup_" + line.identifier, 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),

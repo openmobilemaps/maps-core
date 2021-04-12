@@ -15,6 +15,8 @@ struct VertexIn {
     float2 position [[attribute(0)]];
     float2 uv [[attribute(1)]];
     float2 n [[attribute(2)]];
+    float2 lineStart [[attribute(3)]];
+    float2 lineEnd [[attribute(4)]];
 };
 
 struct VertexOut {
@@ -22,5 +24,7 @@ struct VertexOut {
     float2 uv;
     float2 n;
     float pointsize [[ point_size ]];
+    float4 lineStart;
+    float4 lineEnd;
 };
 

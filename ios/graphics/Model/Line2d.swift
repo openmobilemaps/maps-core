@@ -118,14 +118,12 @@ extension Line2d: MCLine2dInterface {
             let ciNextX = ciNext.xF - (ci.xF - ciNext.xF) / lineLength * miter / 2
             let ciNextY = ciNext.yF - (ci.yF - ciNext.yF) / lineLength * miter / 2
 
-            let vertecies: [Vertex] = [
-                Vertex(x: ciX - miterX, y: ciY - miterY, p1:ci, p2: MCVec2D(x: Double(lineNormalX), y: Double(lineNormalY))), // A
-                Vertex(x: ciX + miterX, y: ciY + miterY, p1:ci, p2: MCVec2D(x: Double(lineNormalX), y: Double(lineNormalY))), // B
-                Vertex(x: ciNextX + miterX, y: ciNextY + miterY, p1:ci, p2: MCVec2D(x: Double(lineNormalX), y: Double(lineNormalY))), // C
-                Vertex(x: ciNextX - miterX, y: ciNextY - miterY, p1:ci, p2: MCVec2D(x: Double(lineNormalX), y: Double(lineNormalY))), // D
-            ]
-
-            lineVertices.append(contentsOf: vertecies)
+            lineVertices.append(contentsOf: [
+                Vertex(x: ciX - miterX, y: ciY - miterY, lineStart: ci, lineEnd: ciNext),
+                Vertex(x: ciX + miterX, y: ciY + miterY, lineStart: ci, lineEnd: ciNext),
+                Vertex(x: ciNextX + miterX, y: ciNextY + miterY, lineStart: ci, lineEnd: ciNext),
+                Vertex(x: ciNextX - miterX, y: ciNextY - miterY, lineStart: ci, lineEnd: ciNext)
+            ])
 
             indices.append(contentsOf: [
                 UInt32(4 * i), UInt32(4 * i + 1), UInt32(4 * i + 2),

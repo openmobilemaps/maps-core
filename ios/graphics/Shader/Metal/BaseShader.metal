@@ -43,8 +43,9 @@ lineVertexShader(const VertexIn vertexIn [[stage_in]],
 {
     VertexOut out {
         .position = mvpMatrix * float4(vertexIn.position.xy, 0.0, 1.0),
-        .uv = vertexIn.uv,
-        .n = vertexIn.n
+        .uv = (mvpMatrix * float4(vertexIn.position.xy, 0.0, 1.0)).xy,
+        .lineStart = mvpMatrix * float4(vertexIn.lineStart.xy, 0.0, 1.0),
+        .lineEnd = mvpMatrix * float4(vertexIn.lineEnd.xy, 0.0, 1.0),
     };
 
     return out;
@@ -52,12 +53,35 @@ lineVertexShader(const VertexIn vertexIn [[stage_in]],
 
 fragment float4
 lineFragmentShader(VertexOut in [[stage_in]],
-                   float2 pointCoord  [[point_coord]],
-                   constant float4 &color [[buffer(1)]])
+                   constant float4 &color [[buffer(1)]],
+                   float radius)
 {
-    float2 pointOnLine = in.n + in.uv * dot(pointCoord-in.n, in.uv);
-    float dist = distance(pointCoord, pointOnLine) / 10000;
-    return color;
+    float x0 = in.uv.x;
+    float y0 = in.uv.y;
+
+    float x1 = in.lineStart.x;
+    float y1 = in.lineStart.y;
+
+    float x2 = in.lineEnd.x;
+    float y2 = in.lineEnd.y;
+
+    float dis = abs((x2 - x1) * (y1 - y0) - (x1 - x0) * (y2 - y1))  / sqrt(pow(x2 - x1,2) + pow(y2 - y1,2));
+
+    if (dis > radius) {
+        discard_fragment();
+    }
+
+    return float4(dis, 0, 0, 1);
+
+
+    /*float2 pa = in.uv - in.lineStart.xy;
+    float2 ba = in.lineEnd.xy - in.lineStart.xy;
+    float h = clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0 );
+    float lenght = length( pa - ba*h ) - radius;
+    if (lenght <= -10) {
+        discard_fragment();
+    }
+    return color;*/
 }
 
 vertex VertexOut
