@@ -95,7 +95,7 @@ extension Line2d: MCLine2dInterface {
             return
         }
 
-        var lineVertices: [Vertex] = []
+        var lineVertices: [LineVertex] = []
         var indices: [UInt32] = []
 
         for i in 0 ..< (positions.count - 1) {
@@ -108,7 +108,7 @@ extension Line2d: MCLine2dInterface {
             let lineNormalY = ciNext.xF - ci.xF
             let lineLength = sqrt(lineNormalX * lineNormalX + lineNormalY * lineNormalY)
 
-            let miter: Float = 100;
+            let miter: Float = (shader as? ColorLineShader)?.miter ?? 0;
             let miterX: Float = lineNormalX / lineLength * miter / 2;
             let miterY: Float = lineNormalY / lineLength * miter / 2;
 
@@ -119,10 +119,10 @@ extension Line2d: MCLine2dInterface {
             let ciNextY = ciNext.yF - (ci.yF - ciNext.yF) / lineLength * miter / 2
 
             lineVertices.append(contentsOf: [
-                Vertex(x: ciX - miterX, y: ciY - miterY, lineStart: ci, lineEnd: ciNext),
-                Vertex(x: ciX + miterX, y: ciY + miterY, lineStart: ci, lineEnd: ciNext),
-                Vertex(x: ciNextX + miterX, y: ciNextY + miterY, lineStart: ci, lineEnd: ciNext),
-                Vertex(x: ciNextX - miterX, y: ciNextY - miterY, lineStart: ci, lineEnd: ciNext)
+                LineVertex(x: ciX - miterX, y: ciY - miterY, lineA: ci, lineB: ciNext),
+                LineVertex(x: ciX + miterX, y: ciY + miterY, lineA: ci, lineB: ciNext),
+                LineVertex(x: ciNextX + miterX, y: ciNextY + miterY, lineA: ci, lineB: ciNext),
+                LineVertex(x: ciNextX - miterX, y: ciNextY - miterY, lineA: ci, lineB: ciNext)
             ])
 
             indices.append(contentsOf: [
@@ -131,7 +131,7 @@ extension Line2d: MCLine2dInterface {
             ])
         }
 
-        guard let verticesBuffer = device.makeBuffer(bytes: lineVertices, length: MemoryLayout<Vertex>.stride * lineVertices.count, options: []),
+        guard let verticesBuffer = device.makeBuffer(bytes: lineVertices, length: MemoryLayout<LineVertex>.stride * lineVertices.count, options: []),
               let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt32>.stride * indices.count, options: [])
         else {
             fatalError("Cannot allocate buffers for the UBTileModel")

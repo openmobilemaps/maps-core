@@ -36,52 +36,43 @@ baseFragmentShader(VertexOut in [[stage_in]],
     return float4(color.r * a, color.g * a, color.b * a, a);
 }
 
-vertex VertexOut
-lineVertexShader(const VertexIn vertexIn [[stage_in]],
-                 constant float4x4 &mvpMatrix [[buffer(1)]],
-                 constant float &miter [[buffer(2)]])
+vertex LineVertexOut
+lineVertexShader(const LineVertexIn vertexIn [[stage_in]],
+                 constant float4x4 &mvpMatrix [[buffer(1)]])
 {
-    VertexOut out {
+    LineVertexOut out {
         .position = mvpMatrix * float4(vertexIn.position.xy, 0.0, 1.0),
-        .uv = (mvpMatrix * float4(vertexIn.position.xy, 0.0, 1.0)).xy,
-        .lineStart = mvpMatrix * float4(vertexIn.lineStart.xy, 0.0, 1.0),
-        .lineEnd = mvpMatrix * float4(vertexIn.lineEnd.xy, 0.0, 1.0),
+        .uv = vertexIn.position.xy,
+        .lineA= vertexIn.lineA,
+        .lineB = vertexIn.lineB
     };
 
     return out;
 }
 
 fragment float4
-lineFragmentShader(VertexOut in [[stage_in]],
+lineFragmentShader(LineVertexOut in [[stage_in]],
                    constant float4 &color [[buffer(1)]],
-                   float radius)
+                   constant float &radius [[buffer(2)]])
 {
-    float x0 = in.uv.x;
-    float y0 = in.uv.y;
 
-    float x1 = in.lineStart.x;
-    float y1 = in.lineStart.y;
+    float2 m = in.lineB - in.lineA;
+    float t0 = dot(m, in.uv - in.lineA) / dot(m, m);
+    float d;
+    if (t0 <= 0) {
+        d = length(in.uv - in.lineA) / radius;
+    } else if (t0 > 0 && t0 < 1) {
+        float2 intersectPt = in.lineA + t0 * m;
+        d = length(in.uv - intersectPt) / radius;
+    } else {
+        d = length(in.uv - in.lineB) / radius;
+    }
 
-    float x2 = in.lineEnd.x;
-    float y2 = in.lineEnd.y;
-
-    float dis = abs((x2 - x1) * (y1 - y0) - (x1 - x0) * (y2 - y1))  / sqrt(pow(x2 - x1,2) + pow(y2 - y1,2));
-
-    if (dis > radius) {
+    if (d >= 1) {
         discard_fragment();
     }
 
-    return float4(dis, 0, 0, 1);
-
-
-    /*float2 pa = in.uv - in.lineStart.xy;
-    float2 ba = in.lineEnd.xy - in.lineStart.xy;
-    float h = clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0 );
-    float lenght = length( pa - ba*h ) - radius;
-    if (lenght <= -10) {
-        discard_fragment();
-    }
-    return color;*/
+    return color;
 }
 
 vertex VertexOut

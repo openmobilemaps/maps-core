@@ -20,7 +20,7 @@ enum PipelineKey: CaseIterable {
     fileprivate func pipelineDescriptor() -> MTLRenderPipelineDescriptor {
         let pipelineDescriptor = MTLRenderPipelineDescriptor()
         pipelineDescriptor.colorAttachments[0].pixelFormat = MetalContext.current.colorPixelFormat
-        pipelineDescriptor.vertexDescriptor = Vertex.descriptor
+        pipelineDescriptor.vertexDescriptor = vertexDescriptor()
 
         let renderbufferAttachment = pipelineDescriptor.colorAttachments[0]
         renderbufferAttachment?.pixelFormat = MetalContext.current.colorPixelFormat
@@ -74,6 +74,13 @@ enum PipelineKey: CaseIterable {
         case .pointShader: return "pointFragmentShader"
         case .colorShader: return "colorFragmentShader"
         case .roundColorShader: return "roundColorFragmentShader"
+        }
+    }
+
+    private func vertexDescriptor() -> MTLVertexDescriptor {
+        switch self {
+        case .lineShader: return LineVertex.descriptor
+        default: return Vertex.descriptor
         }
     }
 }
