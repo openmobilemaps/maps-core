@@ -37,6 +37,7 @@ class Line2d: BaseGraphicsObject {
         ss.stencilFailureOperation = .keep
         ss.depthFailureOperation = .keep
         ss.depthStencilPassOperation = .invert
+        ss.writeMask = 0b011111111
 
         let s = MTLDepthStencilDescriptor()
         s.frontFaceStencil = ss
@@ -49,6 +50,7 @@ class Line2d: BaseGraphicsObject {
         ss2.stencilFailureOperation = .zero
         ss2.depthFailureOperation = .zero
         ss2.depthStencilPassOperation = .zero
+        ss2.writeMask = 0b011111111
 
         let s2 = MTLDepthStencilDescriptor()
         s2.frontFaceStencil = ss2
@@ -60,7 +62,8 @@ class Line2d: BaseGraphicsObject {
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
                          renderPass _: MCRenderPassConfig,
-                         mvpMatrix: Int64)
+                         mvpMatrix: Int64,
+                         isMasked: Bool)
     {
         guard let lineVerticesBuffer = lineVerticesBuffer,
               let lineIndicesBuffer = lineIndicesBuffer,

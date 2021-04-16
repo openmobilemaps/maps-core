@@ -7,6 +7,7 @@
 #import "DJIError.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCGraphicsObjectInterface+Private.h"
+#import "MCMaskingObjectInterface+Private.h"
 #import "MCQuad2dD+Private.h"
 #import "MCRectD+Private.h"
 #import "MCTextureHolderInterface+Private.h"
@@ -61,6 +62,13 @@ textureCoordinates:(nonnull MCRectD *)textureCoordinates {
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable id<MCMaskingObjectInterface>)asMaskingObject {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->asMaskingObject();
+        return ::djinni_generated::MaskingObjectInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class Quad2dInterface::ObjcProxy final
@@ -94,6 +102,13 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() asGraphicsObject];
             return ::djinni_generated::GraphicsObjectInterface::toCpp(objcpp_result_);
+        }
+    }
+    std::shared_ptr<::MaskingObjectInterface> asMaskingObject() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() asMaskingObject];
+            return ::djinni_generated::MaskingObjectInterface::toCpp(objcpp_result_);
         }
     }
 };

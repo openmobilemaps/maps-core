@@ -8,6 +8,7 @@
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCGraphicsObjectInterface+Private.h"
+#import "MCMaskingObjectInterface+Private.h"
 #import "MCVec2D+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -50,6 +51,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable id<MCMaskingObjectInterface>)asMaskingObject {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->asMaskingObject();
+        return ::djinni_generated::MaskingObjectInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class Polygon2dInterface::ObjcProxy final
@@ -72,6 +80,13 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() asGraphicsObject];
             return ::djinni_generated::GraphicsObjectInterface::toCpp(objcpp_result_);
+        }
+    }
+    std::shared_ptr<::MaskingObjectInterface> asMaskingObject() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() asMaskingObject];
+            return ::djinni_generated::MaskingObjectInterface::toCpp(objcpp_result_);
         }
     }
 };

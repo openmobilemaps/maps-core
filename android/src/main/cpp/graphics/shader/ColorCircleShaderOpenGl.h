@@ -8,8 +8,7 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#ifndef MAPSDK_COLORCIRCLESHADEROPENGL_H
-#define MAPSDK_COLORCIRCLESHADEROPENGL_H
+#pragma once
 
 #include "BaseShaderProgramOpenGl.h"
 #include "ColorCircleShaderInterface.h"
@@ -37,5 +36,3 @@ class ColorCircleShaderOpenGl : public BaseShaderProgramOpenGl,
   private:
     std::vector<float> color;
 };
-
-#endif // MAPSDK_COLORCIRCLESHADEROPENGL_H

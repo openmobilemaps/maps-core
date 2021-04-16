@@ -19,6 +19,10 @@ abstract class RenderingContextInterface {
 
     abstract fun setupDrawFrame()
 
+    abstract fun preRenderStencilMask()
+
+    abstract fun postRenderStencilMask()
+
     private class CppProxy : RenderingContextInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -66,5 +70,17 @@ abstract class RenderingContextInterface {
             native_setupDrawFrame(this.nativeRef)
         }
         private external fun native_setupDrawFrame(_nativeRef: Long)
+
+        override fun preRenderStencilMask() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_preRenderStencilMask(this.nativeRef)
+        }
+        private external fun native_preRenderStencilMask(_nativeRef: Long)
+
+        override fun postRenderStencilMask() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_postRenderStencilMask(this.nativeRef)
+        }
+        private external fun native_postRenderStencilMask(_nativeRef: Long)
     }
 }

@@ -53,6 +53,20 @@ void NativeRenderingContextInterface::JavaProxy::setupDrawFrame() {
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_setupDrawFrame);
     ::djinni::jniExceptionCheck(jniEnv);
 }
+void NativeRenderingContextInterface::JavaProxy::preRenderStencilMask() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeRenderingContextInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_preRenderStencilMask);
+    ::djinni::jniExceptionCheck(jniEnv);
+}
+void NativeRenderingContextInterface::JavaProxy::postRenderStencilMask() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeRenderingContextInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_postRenderStencilMask);
+    ::djinni::jniExceptionCheck(jniEnv);
+}
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderingContextInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
@@ -105,6 +119,24 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_Renderin
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::RenderingContextInterface>(nativeRef);
         ref->setupDrawFrame();
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderingContextInterface_00024CppProxy_native_1preRenderStencilMask(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::RenderingContextInterface>(nativeRef);
+        ref->preRenderStencilMask();
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderingContextInterface_00024CppProxy_native_1postRenderStencilMask(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::RenderingContextInterface>(nativeRef);
+        ref->postRenderStencilMask();
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

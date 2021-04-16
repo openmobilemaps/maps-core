@@ -33,7 +33,8 @@ class Quad2d: BaseGraphicsObject {
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
                          renderPass _: MCRenderPassConfig,
-                         mvpMatrix: Int64)
+                         mvpMatrix: Int64,
+                         isMasked: Bool)
     {
         guard let verticesBuffer = verticesBuffer,
               let indicesBuffer = indicesBuffer else { return }
@@ -41,8 +42,9 @@ class Quad2d: BaseGraphicsObject {
         shader.preRender(context)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-        let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix))!
-        encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {
+            encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+        }
 
         encoder.setFragmentSamplerState(sampler, index: 0)
 
@@ -56,6 +58,21 @@ class Quad2d: BaseGraphicsObject {
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
     }
+}
+
+extension Quad2d: MCMaskingObjectInterface {
+    func render(asMask context: MCRenderingContextInterface?, renderPass: MCRenderPassConfig, mvpMatrix: Int64) {
+        guard let context = context as? RenderingContext,
+              let encoder = context.encoder else { return }
+
+        if let mask = context.mask {
+            encoder.setDepthStencilState(mask)
+            encoder.setStencilReferenceValue(0b10000000)
+        }
+
+        render(encoder: encoder, context: context, renderPass: renderPass, mvpMatrix: mvpMatrix, isMasked: false)
+    }
+
 }
 
 extension Quad2d: MCQuad2dInterface {
@@ -100,4 +117,6 @@ extension Quad2d: MCQuad2dInterface {
     }
 
     func asGraphicsObject() -> MCGraphicsObjectInterface? { self }
+
+    func asMaskingObject() -> MCMaskingObjectInterface? { self }
 }

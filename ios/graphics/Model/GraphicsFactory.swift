@@ -26,4 +26,12 @@ class GraphicsFactory: MCGraphicsObjectFactoryInterface {
         guard let shader = shader else { fatalError("No Shader provided") }
         return Polygon2d(shader: shader, metalContext: .current)
     }
+
+    func createQuadMask() -> MCQuad2dInterface? {
+        return Quad2d(shader: ColorShader(), metalContext: .current)
+    }
+
+    func createPolygonMask() -> MCPolygon2dInterface? {
+        return Polygon2d(shader: ColorShader(), metalContext: .current)
+    }
 }

@@ -17,4 +17,8 @@
 
 - (nullable id<MCPolygon2dInterface>)createPolygon:(nullable id<MCShaderProgramInterface>)shader;
 
+- (nullable id<MCQuad2dInterface>)createQuadMask;
+
+- (nullable id<MCPolygon2dInterface>)createPolygonMask;
+
 @end

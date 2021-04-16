@@ -22,5 +22,5 @@ public:
     virtual void clear() = 0;
 
     /** Render the graphics object; ensure calling on graphics thread */
-    virtual void render(const std::shared_ptr<::RenderingContextInterface> & context, const ::RenderPassConfig & renderPass, int64_t mvpMatrix) = 0;
+    virtual void render(const std::shared_ptr<::RenderingContextInterface> & context, const ::RenderPassConfig & renderPass, int64_t mvpMatrix, bool isMasked) = 0;
 };

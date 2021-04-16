@@ -8,8 +8,7 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#ifndef MAPSDK_SHADERFACTORYOPENGL_H
-#define MAPSDK_SHADERFACTORYOPENGL_H
+#pragma once
 
 #include "ShaderFactoryInterface.h"
 
@@ -23,5 +22,3 @@ class ShaderFactoryOpenGl : public ShaderFactoryInterface {
 
     virtual std::shared_ptr<ColorCircleShaderInterface> createColorCircleShader() override;
 };
-
-#endif // MAPSDK_SHADERFACTORYOPENGL_H

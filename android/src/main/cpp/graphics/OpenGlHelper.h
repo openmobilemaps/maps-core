@@ -8,8 +8,7 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#ifndef MAPSCORE_OPENGLHELPER_H
-#define MAPSCORE_OPENGLHELPER_H
+#pragma once
 
 #include "logger/Logger.h"
 #include "opengl_wrapper.h"
@@ -23,5 +22,3 @@ class OpenGlHelper {
         }
     }
 };
-
-#endif // MAPSCORE_OPENGLHELPER_H

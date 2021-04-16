@@ -42,14 +42,21 @@ void Tiled2dMapVectorSubLayer::pause() {
             polygon->getPolygonObject()->clear();
         }
     }
+    for (const auto &tileGroup : tileMaskMap) {
+        if (tileGroup.second) tileGroup.second->getQuadObject()->asGraphicsObject()->clear();
+    }
 }
 
 void Tiled2dMapVectorSubLayer::resume() {
     std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
+    const auto &context = mapInterface->getRenderingContext();
     for (const auto &tileGroup : tilePolygonMap) {
         for (const auto &polygon : tileGroup.second) {
-            polygon->getPolygonObject()->setup(mapInterface->getRenderingContext());
+            polygon->getPolygonObject()->setup(context);
         }
+    }
+    for (const auto &tileGroup : tileMaskMap) {
+        if (tileGroup.second) tileGroup.second->getQuadObject()->asGraphicsObject()->setup(context);
     }
 }
 
@@ -105,6 +112,9 @@ void Tiled2dMapVectorSubLayer::clearTileData(const Tiled2dMapVectorTileInfo &til
             polygonObject->getPolygonObject()->clear();
         }
         tilePolygonMap.erase(tileInfo);
+        const auto &maskObject = tileMaskMap[tileInfo];
+        if (maskObject)
+            tileMaskMap.erase(tileInfo);
     }
 }
 
@@ -115,7 +125,7 @@ Tiled2dMapVectorSubLayer::addPolygons(const Tiled2dMapVectorTileInfo &tileInfo, 
     const auto &objectFactory = mapInterface->getGraphicsObjectFactory();
     const auto &shaderFactory = mapInterface->getShaderFactory();
 
-    std::vector<std::shared_ptr<Polygon2dInterface>> polygonGraphicObjects;
+    std::vector<std::shared_ptr<GraphicsObjectInterface>> newGraphicObjects;
 
     {
         std::lock_guard<std::recursive_mutex> lock(updateMutex);
@@ -130,34 +140,82 @@ Tiled2dMapVectorSubLayer::addPolygons(const Tiled2dMapVectorTileInfo &tileInfo, 
             polygonObject->setPositions(polygon.coordinates, polygon.holes, polygon.isConvex);
             polygonObject->setColor(polygon.color);
 
-            polygonGraphicObjects.push_back(polygonGraphicsObject);
+            newGraphicObjects.push_back(polygonGraphicsObject->asGraphicsObject());
             tilePolygonMap[tileInfo].push_back(polygonObject);
         }
+        const auto &graphicsObjectFactory = mapInterface->getGraphicsObjectFactory();
+        const auto &conversionHelper = mapInterface->getCoordinateConverterHelper();
+        auto maskingObject = std::make_shared<QuadMaskObject>(graphicsObjectFactory, conversionHelper, tileInfo.tileInfo.bounds);
+
+        /* Polygon-Mask Test
+        auto maskingObject = std::make_shared<PolygonMaskObject>(graphicsObjectFactory, conversionHelper);
+        const auto &bounds = tileInfo.tileInfo.bounds;
+        double width = (bounds.bottomRight.x - bounds.topLeft.x);
+        double height = (bounds.bottomRight.y - bounds.topLeft.y);
+        std::vector<::Coord> positions = {bounds.topLeft,
+                                          Coord(bounds.topLeft.systemIdentifier, bounds.topLeft.x + width, bounds.topLeft.y,
+                                                bounds.topLeft.z),
+                                          bounds.bottomRight,
+                                          Coord(bounds.topLeft.systemIdentifier, bounds.topLeft.x, bounds.topLeft.y + height,
+                                                bounds.topLeft.z), bounds.topLeft};
+        std::vector<std::vector<::Coord>> holes = {{
+                                                           Coord(bounds.topLeft.systemIdentifier, bounds.topLeft.x + 0.05 * width,
+                                                                 bounds.topLeft.y, bounds.topLeft.z),
+                                                           Coord(bounds.topLeft.systemIdentifier, bounds.bottomRight.x,
+                                                                 bounds.topLeft.y + 0.95 * height, bounds.topLeft.z),
+                                                           Coord(bounds.topLeft.systemIdentifier, bounds.topLeft.x + 0.95 * width,
+                                                                 bounds.bottomRight.y, bounds.topLeft.z),
+                                                           Coord(bounds.topLeft.systemIdentifier, bounds.topLeft.x,
+                                                                 bounds.topLeft.y + 0.05 * height, bounds.topLeft.z),
+                                                           Coord(bounds.topLeft.systemIdentifier, bounds.topLeft.x + 0.05 * width,
+                                                                 bounds.topLeft.y, bounds.topLeft.z)
+                                                   },
+                                                   {
+                                                           Coord(bounds.topLeft.systemIdentifier, bounds.topLeft.x + 0.95 * width,
+                                                                 bounds.topLeft.y, bounds.topLeft.z),
+                                                           Coord(bounds.topLeft.systemIdentifier, bounds.bottomRight.x,
+                                                                 bounds.topLeft.y + 0.05 * height, bounds.topLeft.z),
+                                                           Coord(bounds.topLeft.systemIdentifier, bounds.topLeft.x + 0.05 * width,
+                                                                 bounds.bottomRight.y, bounds.topLeft.z),
+                                                           Coord(bounds.topLeft.systemIdentifier, bounds.topLeft.x,
+                                                                 bounds.topLeft.y + 0.95 * height, bounds.topLeft.z),
+                                                           Coord(bounds.topLeft.systemIdentifier, bounds.topLeft.x + 0.95 * width,
+                                                                 bounds.topLeft.y, bounds.topLeft.z)
+                                                   }};
+        maskingObject->setPositions(positions, holes, true); */
+
+        newGraphicObjects.push_back(maskingObject->getQuadObject()->asGraphicsObject());
+        tileMaskMap[tileInfo] = maskingObject;
     }
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
             TaskConfig("PolygonLayer_setup_" + polygons[0].identifier, 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
             [=] {
-                for (const auto &polygonGraphicsObject : polygonGraphicObjects) {
-                    polygonGraphicsObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+                for (const auto &graphicsObject : newGraphicObjects) {
+                    graphicsObject->setup(mapInterface->getRenderingContext());
                 }
             }));
 }
 
 void Tiled2dMapVectorSubLayer::preGenerateRenderPasses() {
     std::lock_guard<std::recursive_mutex> lock(updateMutex);
-    std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
-    for (auto const &polygonTuple : tilePolygonMap) {
-        for (auto const &polygonObject : polygonTuple.second) {
+    std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
+    for (auto const &tilePolygonTuple : tilePolygonMap) {
+        std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
+        for (auto const &polygonObject : tilePolygonTuple.second) {
             for (auto config : polygonObject->getRenderConfig()) {
                 renderPassObjectMap[config->getRenderIndex()].push_back(
                         std::make_shared<RenderObject>(config->getGraphicsObject()));
             }
         }
-    }
-    std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
-    for (const auto &passEntry : renderPassObjectMap) {
-        std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second, nullptr);
-        newRenderPasses.push_back(renderPass);
+        const auto &tileMask = tileMaskMap[tilePolygonTuple.first];
+        for (const auto &passEntry : renderPassObjectMap) {
+            std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first),
+                                                                                  passEntry.second,
+                                                                                  (tileMask
+                                                                                   ? tileMask->getQuadObject()->asMaskingObject()
+                                                                                   : nullptr));
+            newRenderPasses.push_back(renderPass);
+        }
     }
     renderPasses = newRenderPasses;
 }

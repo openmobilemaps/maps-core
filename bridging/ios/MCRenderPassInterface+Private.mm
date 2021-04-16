@@ -7,7 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
-#import "MCGraphicsObjectInterface+Private.h"
+#import "MCMaskingObjectInterface+Private.h"
 #import "MCRenderObjectInterface+Private.h"
 #import "MCRenderPassConfig+Private.h"
 #include <exception>
@@ -54,10 +54,10 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nullable id<MCGraphicsObjectInterface>)getMaskingObject {
+- (nullable id<MCMaskingObjectInterface>)getMaskingObject {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getMaskingObject();
-        return ::djinni::Optional<std::optional, ::djinni_generated::GraphicsObjectInterface>::fromCpp(objcpp_result_);
+        return ::djinni::Optional<std::optional, ::djinni_generated::MaskingObjectInterface>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -90,11 +90,11 @@ public:
             return ::djinni_generated::RenderPassConfig::toCpp(objcpp_result_);
         }
     }
-    std::shared_ptr<::GraphicsObjectInterface> getMaskingObject() override
+    std::shared_ptr<::MaskingObjectInterface> getMaskingObject() override
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getMaskingObject];
-            return ::djinni::Optional<std::optional, ::djinni_generated::GraphicsObjectInterface>::toCpp(objcpp_result_);
+            return ::djinni::Optional<std::optional, ::djinni_generated::MaskingObjectInterface>::toCpp(objcpp_result_);
         }
     }
 };

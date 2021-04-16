@@ -5,6 +5,7 @@
 #import "MCRectD.h"
 #import <Foundation/Foundation.h>
 @protocol MCGraphicsObjectInterface;
+@protocol MCMaskingObjectInterface;
 @protocol MCTextureHolderInterface;
 
 
@@ -18,5 +19,7 @@ textureCoordinates:(nonnull MCRectD *)textureCoordinates;
 - (void)removeTexture;
 
 - (nullable id<MCGraphicsObjectInterface>)asGraphicsObject;
+
+- (nullable id<MCMaskingObjectInterface>)asMaskingObject;
 
 @end
