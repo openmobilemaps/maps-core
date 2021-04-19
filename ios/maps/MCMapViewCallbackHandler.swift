@@ -8,8 +8,14 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#include "MapsCoreSharedModule.h"
 
-std::string MapsCoreSharedModule::version() {
-    return "1.3.0";
+import Foundation
+import MapCoreSharedModule
+
+class MCMapViewCallbackHandler: MCMapCallbackInterface {
+    var invalidateCallback: (()->())?
+
+    func invalidate() {
+        invalidateCallback?()
+    }
 }

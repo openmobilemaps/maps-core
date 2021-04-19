@@ -3,23 +3,26 @@ buildscript {
 	repositories {
 		google()
 		jcenter()
+		mavenCentral()
 	}
 	dependencies {
 		classpath "com.android.tools.build:gradle:4.1.2"
 		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-		classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5'
+
+		classpath 'com.vanniktech:gradle-maven-publish-plugin:0.13.0'
+		classpath 'org.jetbrains.dokka:dokka-gradle-plugin:1.4.10.2'
 	}
 }
 
 repositories {
 	google()
 	jcenter()
+	mavenCentral()
 }
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'maven-publish'
-apply plugin: 'com.jfrog.bintray'
+apply plugin: 'com.vanniktech.maven.publish'
 
 android {
 	compileSdkVersion 30
@@ -27,13 +30,14 @@ android {
 	defaultConfig {
 		minSdkVersion 23
 		targetSdkVersion 30
-		versionCode 120
-		versionName "1.2.0"
+		versionCode 130
+		versionName VERSION_NAME
 
 		testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 		consumerProguardFiles 'consumer-rules.pro'
 		externalNativeBuild {
 			cmake {
+				arguments "-DANDROID_STL=c++_shared"
 				cppFlags "-std=c++17 -frtti -fexceptions"
 			}
 		}
@@ -59,8 +63,10 @@ android {
 	}
 
 	prefab{
-		mapscore_shared {
+		mapscore {
 			headers ".cpp_includes"
+			name "mapscore"
+			version VERSION_NAME
 		}
 	}
 }
@@ -69,24 +75,6 @@ task copyHeaders(type: Exec){
 	commandLine './copy_all_header_files_to_include_folder.sh'
 }
 preBuild.dependsOn copyHeaders
-
-task androidSourcesJar(type: Jar) {
-	archiveClassifier = 'sources'
-	from android.sourceSets.main.java.srcDirs
-}
-afterEvaluate {
-	publishing {
-		publications {
-			"sdkRelease"(MavenPublication) {
-				from components.release
-				groupId 'io.openmobilemaps.mapscore'
-				artifactId 'mapscore-android'
-				version android.defaultConfig.versionName + readPropertyWithDefault('bintrayVersionSuffix', '')
-				artifact androidSourcesJar
-			}
-		}
-	}
-}
 
 ext.readProperty = { paramName -> readPropertyWithDefault(paramName, null) }
 ext.readPropertyWithDefault = { paramName, defaultValue ->
@@ -105,19 +93,6 @@ ext.readPropertyWithDefault = { paramName, defaultValue ->
 	}
 }
 
-bintray {
-	user = readProperty('bintrayUser')
-	key = readProperty('bintrayApikey')
-	publications = ['sdkRelease']
-	publish = true
-	pkg {
-		repo = 'openmobilemaps'
-		name = 'maps-core'
-		userOrg = 'openmobilemaps'
-		licenses = ['MPL-2.0']
-	}
-}
-
 dependencies {
 	implementation fileTree(dir: 'libs', include: ['*.jar'])
 	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
@@ -130,4 +105,9 @@ dependencies {
 	testImplementation 'junit:junit:4.13.1'
 	androidTestImplementation 'androidx.test.ext:junit:1.1.2'
 	androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+}
+
+clean.doLast {
+	project.delete("${projectDir}/build")
+	project.delete("${projectDir}/.cxx")
 }

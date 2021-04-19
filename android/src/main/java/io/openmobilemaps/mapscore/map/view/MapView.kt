@@ -44,7 +44,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	private var touchDisabled = false
 
 	init {
-		System.loadLibrary("mapscore_shared")
+		System.loadLibrary("mapscore")
 	}
 
 	open fun setupMap(mapConfig: MapConfig) {
