@@ -143,7 +143,7 @@ class MapViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
       
-    mapView.add(layer: rasterLayer?.asLayerInterface())
+    mapView.add(layer: rasterLayer)
   }
 }
 ```
