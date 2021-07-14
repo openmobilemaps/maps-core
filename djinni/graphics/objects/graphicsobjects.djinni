@@ -14,7 +14,7 @@ graphics_object_interface = interface +c +j +o {
     # Clear graphics object and invalidate isReady
     clear();
     # Render the graphics object; ensure calling on graphics thread
-    render(context: rendering_context_interface, render_pass: render_pass_config, mvp_matrix: i64);
+    render(context: rendering_context_interface, render_pass: render_pass_config, mvp_matrix: i64, screenPixelAsRealMeterFactor: f64);
 }
 
 graphics_object_factory_interface = interface +c +j +o {

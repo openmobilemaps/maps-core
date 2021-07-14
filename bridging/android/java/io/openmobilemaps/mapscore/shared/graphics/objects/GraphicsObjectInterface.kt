@@ -17,7 +17,7 @@ abstract class GraphicsObjectInterface {
     abstract fun clear()
 
     /** Render the graphics object; ensure calling on graphics thread */
-    abstract fun render(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, mvpMatrix: Long)
+    abstract fun render(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, mvpMatrix: Long, screenPixelAsRealMeterFactor: Double)
 
     private class CppProxy : GraphicsObjectInterface {
         private val nativeRef: Long
@@ -55,10 +55,10 @@ abstract class GraphicsObjectInterface {
         }
         private external fun native_clear(_nativeRef: Long)
 
-        override fun render(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, mvpMatrix: Long) {
+        override fun render(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, mvpMatrix: Long, screenPixelAsRealMeterFactor: Double) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_render(this.nativeRef, context, renderPass, mvpMatrix)
+            native_render(this.nativeRef, context, renderPass, mvpMatrix, screenPixelAsRealMeterFactor)
         }
-        private external fun native_render(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, mvpMatrix: Long)
+        private external fun native_render(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, mvpMatrix: Long, screenPixelAsRealMeterFactor: Double)
     }
 }

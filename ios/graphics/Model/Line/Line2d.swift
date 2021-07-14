@@ -57,7 +57,8 @@ class Line2d: BaseGraphicsObject {
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
                          renderPass _: MCRenderPassConfig,
-                         mvpMatrix: Int64)
+                         mvpMatrix: Int64,
+                         screenPixelAsRealMeterFactor: Double)
     {
         guard let lineVerticesBuffer = lineVerticesBuffer,
               let lineIndicesBuffer = lineIndicesBuffer
@@ -70,6 +71,8 @@ class Line2d: BaseGraphicsObject {
         // draw call
         encoder.setDepthStencilState(stencilState)
         encoder.setStencilReferenceValue(0xFF)
+
+        (shader as? ColorLineShader)?.screenPixelAsRealMeterFactor = screenPixelAsRealMeterFactor
 
         shader.setupRectProgram(context)
         shader.preRenderRect(context)
@@ -108,21 +111,44 @@ extension Line2d: MCLine2dInterface {
             let lineNormalY = ciNext.xF - ci.xF
             let lineLength = sqrt(lineNormalX * lineNormalX + lineNormalY * lineNormalY)
 
-            let miter: Float = (shader as? ColorLineShader)?.miter ?? 0;
-            let miterX: Float = lineNormalX / lineLength * miter / 2;
-            let miterY: Float = lineNormalY / lineLength * miter / 2;
+            let miterX: Float = lineNormalX / lineLength * 1 / 2;
+            let miterY: Float = lineNormalY / lineLength * 1 / 2;
 
-            let ciX = ci.xF - (ciNext.xF - ci.xF) / lineLength * miter / 2;
-            let ciY = ci.yF - (ciNext.yF - ci.yF) / lineLength * miter / 2;
+            let ciX = ci.xF - (ciNext.xF - ci.xF) / lineLength * 1 / 2;
+            let ciY = ci.yF - (ciNext.yF - ci.yF) / lineLength * 1 / 2;
 
-            let ciNextX = ciNext.xF - (ci.xF - ciNext.xF) / lineLength * miter / 2
-            let ciNextY = ciNext.yF - (ci.yF - ciNext.yF) / lineLength * miter / 2
+            let ciNextX = ciNext.xF - (ci.xF - ciNext.xF) / lineLength * 1 / 2
+            let ciNextY = ciNext.yF - (ci.yF - ciNext.yF) / lineLength * 1 / 2
+
+            let fromOrigin = MCVec2D(x: (ciNext.x - ci.x), y: (ciNext.y - ci.y))
+            let divisor = sqrt(fromOrigin.x * fromOrigin.x + fromOrigin.y * fromOrigin.y)
+            let unitVector = MCVec2D(x: fromOrigin.x / divisor, y: fromOrigin.y / divisor)
 
             lineVertices.append(contentsOf: [
-                LineVertex(x: ciX - miterX, y: ciY - miterY, lineA: ci, lineB: ciNext),
-                LineVertex(x: ciX + miterX, y: ciY + miterY, lineA: ci, lineB: ciNext),
-                LineVertex(x: ciNextX + miterX, y: ciNextY + miterY, lineA: ci, lineB: ciNext),
-                LineVertex(x: ciNextX - miterX, y: ciNextY - miterY, lineA: ci, lineB: ciNext)
+                LineVertex(x: ciX - miterX,
+                           y: ciY - miterY,
+                           lineA: ci,
+                           lineB: ciNext,
+                           widthNormal: (x: -lineNormalX / lineLength, y: -lineNormalY / lineLength),
+                           lenghtNormal: (x: -unitVector.xF, y: -unitVector.yF)),
+                LineVertex(x: ciX + miterX,
+                           y: ciY + miterY,
+                           lineA: ci,
+                           lineB: ciNext,
+                           widthNormal: (x: lineNormalX / lineLength, y: lineNormalY / lineLength),
+                           lenghtNormal: (x: -unitVector.xF, y: -unitVector.yF)),
+                LineVertex(x: ciNextX + miterX,
+                           y: ciNextY + miterY,
+                           lineA: ci,
+                           lineB: ciNext,
+                           widthNormal: (x: lineNormalX / lineLength, y: lineNormalY / lineLength),
+                           lenghtNormal: (x: unitVector.xF, y: unitVector.yF)),
+                LineVertex(x: ciNextX - miterX,
+                           y: ciNextY - miterY,
+                           lineA: ci,
+                           lineB: ciNext,
+                           widthNormal: (x: -lineNormalX / lineLength, y: -lineNormalY / lineLength),
+                           lenghtNormal: (x: unitVector.xF, y: unitVector.yF))
             ])
 
             indices.append(contentsOf: [

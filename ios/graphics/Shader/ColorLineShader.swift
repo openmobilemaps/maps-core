@@ -15,9 +15,12 @@ import Metal
 class ColorLineShader: BaseShader {
     private var color = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
 
-    var miter: Float = 0.0
+    private var style: MCLineStyle?
 
     private var pipeline: MTLRenderPipelineState?
+
+    var screenPixelAsRealMeterFactor: Double = 1.0
+
 }
 
 extension ColorLineShader: MCLineShaderProgramInterface {
@@ -39,28 +42,32 @@ extension ColorLineShader: MCLineShaderProgramInterface {
     func preRenderRect(_ context: MCRenderingContextInterface?) {
         guard let context = context as? RenderingContext,
               let encoder = context.encoder,
-              let pipeline = pipeline else { return }
+              let pipeline = pipeline,
+              let style = style else { return }
 
         encoder.setRenderPipelineState(pipeline)
 
-        var c = SIMD4<Float>(color)
+        var c = SIMD4<Float>(style.color.normal.simdValues)
         encoder.setFragmentBytes(&c, length: MemoryLayout<SIMD4<Float>>.stride, index: 1)
 
-        var radius = miter / 2
+        var scaledWidth = style.width;
+
+        if style.widthType == .SCREEN_PIXEL {
+            scaledWidth *= Float(screenPixelAsRealMeterFactor)
+        }
+
+        var radius = scaledWidth / 2
 
         encoder.setFragmentBytes(&radius, length: MemoryLayout<Float>.stride, index: 2)
 
-        var width = miter
-
-        encoder.setVertexBytes(&width, length: MemoryLayout<Float>.stride, index: 2)
+        encoder.setVertexBytes(&scaledWidth, length: MemoryLayout<Float>.stride, index: 2)
 
     }
 }
 
 extension ColorLineShader: MCColorLineShaderInterface {
     func setStyle(_ lineStyle: MCLineStyle) {
-        color = lineStyle.color.normal.simdValues
-        miter = lineStyle.width
+        style = lineStyle
     }
 
     func asLineShaderProgram() -> MCLineShaderProgramInterface? {

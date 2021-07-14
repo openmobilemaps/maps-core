@@ -27,7 +27,7 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
 
     while (!renderQueue.empty()) {
         auto pass = renderQueue.front();
-
+        double factor = camera->getScalingFactor();
         const auto &renderObjects = pass->getRenderObjects();
         std::vector<float> tempMvpMatrix(16, 0);
         for (const auto &renderObject : renderObjects) {
@@ -35,9 +35,9 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
             if (renderObject->hasCustomModelMatrix()) {
                 Matrix::multiplyMMC(tempMvpMatrix, 0, vpMatrix, 0, renderObject->getCustomModelMatrix(), 0);
                 graphicsObject->render(renderingContext, pass->getRenderPassConfig(),
-                               (int64_t) tempMvpMatrix.data());
+                               (int64_t) tempMvpMatrix.data(), 1);
             } else {
-                graphicsObject->render(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer);
+                graphicsObject->render(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, factor);
             }
         }
 

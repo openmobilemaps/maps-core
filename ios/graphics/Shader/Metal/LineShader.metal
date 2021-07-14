@@ -9,18 +9,36 @@
  */
 
 #include <metal_stdlib>
-#include "DataStructures.metal"
 using namespace metal;
+
+struct LineVertexIn {
+    float2 position [[attribute(0)]];
+    float2 lineA [[attribute(1)]];
+    float2 lineB [[attribute(2)]];
+    float2 widthNormal [[attribute(3)]];
+    float2 lenghtNormal [[attribute(4)]];
+};
+
+struct LineVertexOut {
+    float4 position [[ position ]];
+    float2 uv;
+    float2 lineA;
+    float2 lineB;
+};
+
 
 vertex LineVertexOut
 lineVertexShader(const LineVertexIn vertexIn [[stage_in]],
                  constant float4x4 &mvpMatrix [[buffer(1)]],
                  constant float &width [[buffer(2)]])
 {
+    // extend position in width direction and in lenght direction by width / 2.0
+    float4 extendedPosition = float4(vertexIn.position.xy + (vertexIn.widthNormal.xy * width / 2.0) + (vertexIn.lenghtNormal.xy * width / 2.0), 0.0, 1.0);
+    
     LineVertexOut out {
-        .position = mvpMatrix * float4(vertexIn.position.xy /* + (vertexIn.n.xy * miter)*/, 0.0, 1.0),
-        .uv = vertexIn.position.xy,
-        .lineA= vertexIn.lineA,
+        .position = mvpMatrix * extendedPosition,
+        .uv = extendedPosition.xy,
+        .lineA = vertexIn.lineA,
         .lineB = vertexIn.lineB
     };
 
@@ -32,9 +50,6 @@ lineFragmentShader(LineVertexOut in [[stage_in]],
                    constant float4 &color [[buffer(1)]],
                    constant float &radius [[buffer(2)]])
 {
-
-
-
     float2 m = in.lineB - in.lineA;
     float t0 = dot(m, in.uv - in.lineA) / dot(m, m);
     float d;
