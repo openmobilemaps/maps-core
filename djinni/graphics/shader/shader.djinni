@@ -1,4 +1,5 @@
 @extern "../../yaml/rendering_context_interface.yaml"
+@extern "../../yaml/line_style.yaml"
 
 shader_program_interface = interface +c +o {
     get_program_name() : string;
@@ -33,8 +34,7 @@ color_shader_interface = interface +c +o {
 }
 
 color_line_shader_interface = interface +c +o {
-    set_color(red: f32, green: f32, blue: f32, alpha: f32);
-    set_miter(miter: f32);
+    set_style(line_style: line_style);
     as_line_shader_program_interface() : line_shader_program_interface;
 }
 

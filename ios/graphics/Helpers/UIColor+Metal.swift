@@ -57,6 +57,10 @@ extension MCColor {
                       blue: Double(b),
                       alpha: Double(a))
     }
+
+    var simdValues: SIMD4<Float> {
+        [r, g, b, a]
+    }
 }
 
 

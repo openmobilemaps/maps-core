@@ -20,6 +20,19 @@ struct VertexIn {
 struct VertexOut {
     float4 position [[ position ]];
     float2 uv;
+    float2 n;
     float pointsize [[ point_size ]];
 };
 
+struct LineVertexIn {
+    float2 position [[attribute(0)]];
+    float2 lineA [[attribute(1)]];
+    float2 lineB [[attribute(2)]];
+};
+
+struct LineVertexOut {
+    float4 position [[ position ]];
+    float2 uv;
+    float2 lineA;
+    float2 lineB;
+};

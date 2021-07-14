@@ -27,7 +27,8 @@ class BaseGraphicsObject {
     func render(encoder _: MTLRenderCommandEncoder,
                 context _: RenderingContext,
                 renderPass _: MCRenderPassConfig,
-                mvpMatrix _: Int64)
+                mvpMatrix _: Int64,
+                screenPixelAsRealMeterFactor _: Double)
     {
         fatalError("has to be overwritten by subclass")
     }
@@ -42,13 +43,14 @@ extension BaseGraphicsObject: MCGraphicsObjectInterface {
 
     func isReady() -> Bool { true }
 
-    func render(_ context: MCRenderingContextInterface?, renderPass: MCRenderPassConfig, mvpMatrix: Int64) {
+    func render(_ context: MCRenderingContextInterface?, renderPass: MCRenderPassConfig, mvpMatrix: Int64, screenPixelAsRealMeterFactor: Double) {
         guard let context = context as? RenderingContext,
               let encoder = context.encoder
         else { return }
         render(encoder: encoder,
                context: context,
                renderPass: renderPass,
-               mvpMatrix: mvpMatrix)
+               mvpMatrix: mvpMatrix,
+               screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)
     }
 }

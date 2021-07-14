@@ -38,6 +38,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (double)getScalingFactor {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getScalingFactor();
+        return ::djinni::F64::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)viewportSizeChanged {
     try {
         _cppRefHandle.get()->viewportSizeChanged();
@@ -58,6 +65,13 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getVpMatrix];
             return ::djinni::List<::djinni::F32>::toCpp(objcpp_result_);
+        }
+    }
+    double getScalingFactor() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getScalingFactor];
+            return ::djinni::F64::toCpp(objcpp_result_);
         }
     }
     void viewportSizeChanged() override

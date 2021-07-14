@@ -11,5 +11,7 @@ public:
 
     virtual std::vector<float> getVpMatrix() = 0;
 
+    virtual double getScalingFactor() = 0;
+
     virtual void viewportSizeChanged() = 0;
 };

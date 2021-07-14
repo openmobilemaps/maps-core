@@ -12,7 +12,7 @@
 #include "Tiled2dMapRasterLayerInterface.h"
 #include "WmtsTiled2dMapLayerConfigFactory.h"
 #include "WmtsLayerDescription.h"
-#include "pugixml.hpp"
+#include "pugixml.h"
 #include "WmtsLayerDimension.h"
 #include "CoordinateSystemIdentifiers.h"
 #include "WmtsLayerConfiguration.h"

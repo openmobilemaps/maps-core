@@ -538,6 +538,11 @@ double MapCamera2d::mapUnitsFromPixels(double distancePx) {
     return distancePx * screenPixelAsRealMeterFactor * zoom;
 }
 
+
+double MapCamera2d::getScalingFactor() {
+    return mapUnitsFromPixels(1.0);
+}
+
 void MapCamera2d::setMinZoom(double zoomMin) {
     this->zoomMin = zoomMin;
     if (zoom > zoomMin) zoom = zoomMin;

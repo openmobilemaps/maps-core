@@ -5,9 +5,9 @@
 #import "MCColorLineShaderInterface.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
-#import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCLineShaderProgramInterface+Private.h"
+#import "MCLineStyle+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -32,21 +32,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (void)setColor:(float)red
-           green:(float)green
-            blue:(float)blue
-           alpha:(float)alpha {
+- (void)setStyle:(nonnull MCLineStyle *)lineStyle {
     try {
-        _cppRefHandle.get()->setColor(::djinni::F32::toCpp(red),
-                                      ::djinni::F32::toCpp(green),
-                                      ::djinni::F32::toCpp(blue),
-                                      ::djinni::F32::toCpp(alpha));
-    } DJINNI_TRANSLATE_EXCEPTIONS()
-}
-
-- (void)setMiter:(float)miter {
-    try {
-        _cppRefHandle.get()->setMiter(::djinni::F32::toCpp(miter));
+        _cppRefHandle.get()->setStyle(::djinni_generated::LineStyle::toCpp(lineStyle));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -66,19 +54,10 @@ class ColorLineShaderInterface::ObjcProxy final
     friend class ::djinni_generated::ColorLineShaderInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void setColor(float c_red, float c_green, float c_blue, float c_alpha) override
+    void setStyle(const ::LineStyle & c_lineStyle) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setColor:(::djinni::F32::fromCpp(c_red))
-                                                         green:(::djinni::F32::fromCpp(c_green))
-                                                          blue:(::djinni::F32::fromCpp(c_blue))
-                                                         alpha:(::djinni::F32::fromCpp(c_alpha))];
-        }
-    }
-    void setMiter(float c_miter) override
-    {
-        @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setMiter:(::djinni::F32::fromCpp(c_miter))];
+            [djinni_private_get_proxied_objc_object() setStyle:(::djinni_generated::LineStyle::fromCpp(c_lineStyle))];
         }
     }
     std::shared_ptr<::LineShaderProgramInterface> asLineShaderProgramInterface() override

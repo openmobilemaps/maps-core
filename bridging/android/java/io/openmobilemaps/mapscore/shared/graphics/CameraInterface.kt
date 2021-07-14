@@ -9,6 +9,8 @@ abstract class CameraInterface {
 
     abstract fun getVpMatrix(): ArrayList<Float>
 
+    abstract fun getScalingFactor(): Double
+
     abstract fun viewportSizeChanged()
 
     private class CppProxy : CameraInterface {
@@ -34,6 +36,12 @@ abstract class CameraInterface {
             return native_getVpMatrix(this.nativeRef)
         }
         private external fun native_getVpMatrix(_nativeRef: Long): ArrayList<Float>
+
+        override fun getScalingFactor(): Double {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getScalingFactor(this.nativeRef)
+        }
+        private external fun native_getScalingFactor(_nativeRef: Long): Double
 
         override fun viewportSizeChanged() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

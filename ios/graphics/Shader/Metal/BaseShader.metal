@@ -37,27 +37,6 @@ baseFragmentShader(VertexOut in [[stage_in]],
 }
 
 vertex VertexOut
-lineVertexShader(const VertexIn vertexIn [[stage_in]],
-                 constant float4x4 &mvpMatrix [[buffer(1)]],
-                 constant float &miter [[buffer(2)]])
-{
-    VertexOut out {
-        .position = mvpMatrix * float4(vertexIn.position.xy + (vertexIn.n.xy * miter), 0.0, 1.0),
-        .uv = vertexIn.uv
-    };
-
-    return out;
-}
-
-fragment float4
-lineFragmentShader(VertexOut in [[stage_in]],
-                   constant float4 &color [[buffer(1)]])
-{
-    float a = color.a;
-    return float4(color.r * a, color.g * a, color.b * a, a);
-}
-
-vertex VertexOut
 pointVertexShader(const VertexIn vertexIn [[stage_in]],
                   constant float4x4 &mvpMatrix [[buffer(1)]],
                   constant float &pointSize [[buffer(2)]])
