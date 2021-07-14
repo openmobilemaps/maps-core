@@ -7,8 +7,8 @@
 #include <memory>
 #include <vector>
 
+class LineInfoInterface;
 class LineLayerCallbackInterface;
-struct LineInfo;
 
 class LineLayerInterface {
 public:
@@ -16,13 +16,13 @@ public:
 
     static std::shared_ptr<LineLayerInterface> create();
 
-    virtual void setLines(const std::vector<LineInfo> & lines) = 0;
+    virtual void setLines(const std::vector<std::shared_ptr<LineInfoInterface>> & lines) = 0;
 
-    virtual std::vector<LineInfo> getLines() = 0;
+    virtual std::vector<std::shared_ptr<LineInfoInterface>> getLines() = 0;
 
-    virtual void remove(const LineInfo & line) = 0;
+    virtual void remove(const std::shared_ptr<LineInfoInterface> & line) = 0;
 
-    virtual void add(const LineInfo & line) = 0;
+    virtual void add(const std::shared_ptr<LineInfoInterface> & line) = 0;
 
     virtual void clear() = 0;
 

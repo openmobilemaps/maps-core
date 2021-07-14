@@ -7,9 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class ColorLineShaderInterface {
 
-    abstract fun setColor(red: Float, green: Float, blue: Float, alpha: Float)
-
-    abstract fun setMiter(miter: Float)
+    abstract fun setStyle(lineStyle: io.openmobilemaps.mapscore.shared.map.layers.line.LineStyle)
 
     abstract fun asLineShaderProgramInterface(): LineShaderProgramInterface
 
@@ -31,17 +29,11 @@ abstract class ColorLineShaderInterface {
             _djinni_private_destroy()
         }
 
-        override fun setColor(red: Float, green: Float, blue: Float, alpha: Float) {
+        override fun setStyle(lineStyle: io.openmobilemaps.mapscore.shared.map.layers.line.LineStyle) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setColor(this.nativeRef, red, green, blue, alpha)
+            native_setStyle(this.nativeRef, lineStyle)
         }
-        private external fun native_setColor(_nativeRef: Long, red: Float, green: Float, blue: Float, alpha: Float)
-
-        override fun setMiter(miter: Float) {
-            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setMiter(this.nativeRef, miter)
-        }
-        private external fun native_setMiter(_nativeRef: Long, miter: Float)
+        private external fun native_setStyle(_nativeRef: Long, lineStyle: io.openmobilemaps.mapscore.shared.map.layers.line.LineStyle)
 
         override fun asLineShaderProgramInterface(): LineShaderProgramInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

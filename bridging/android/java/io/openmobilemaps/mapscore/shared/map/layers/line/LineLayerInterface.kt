@@ -7,13 +7,13 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class LineLayerInterface {
 
-    abstract fun setLines(lines: ArrayList<LineInfo>)
+    abstract fun setLines(lines: ArrayList<LineInfoInterface>)
 
-    abstract fun getLines(): ArrayList<LineInfo>
+    abstract fun getLines(): ArrayList<LineInfoInterface>
 
-    abstract fun remove(line: LineInfo)
+    abstract fun remove(line: LineInfoInterface)
 
-    abstract fun add(line: LineInfo)
+    abstract fun add(line: LineInfoInterface)
 
     abstract fun clear()
 
@@ -48,29 +48,29 @@ abstract class LineLayerInterface {
             _djinni_private_destroy()
         }
 
-        override fun setLines(lines: ArrayList<LineInfo>) {
+        override fun setLines(lines: ArrayList<LineInfoInterface>) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_setLines(this.nativeRef, lines)
         }
-        private external fun native_setLines(_nativeRef: Long, lines: ArrayList<LineInfo>)
+        private external fun native_setLines(_nativeRef: Long, lines: ArrayList<LineInfoInterface>)
 
-        override fun getLines(): ArrayList<LineInfo> {
+        override fun getLines(): ArrayList<LineInfoInterface> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_getLines(this.nativeRef)
         }
-        private external fun native_getLines(_nativeRef: Long): ArrayList<LineInfo>
+        private external fun native_getLines(_nativeRef: Long): ArrayList<LineInfoInterface>
 
-        override fun remove(line: LineInfo) {
+        override fun remove(line: LineInfoInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_remove(this.nativeRef, line)
         }
-        private external fun native_remove(_nativeRef: Long, line: LineInfo)
+        private external fun native_remove(_nativeRef: Long, line: LineInfoInterface)
 
-        override fun add(line: LineInfo) {
+        override fun add(line: LineInfoInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_add(this.nativeRef, line)
         }
-        private external fun native_add(_nativeRef: Long, line: LineInfo)
+        private external fun native_add(_nativeRef: Long, line: LineInfoInterface)
 
         override fun clear() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

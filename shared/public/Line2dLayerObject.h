@@ -12,6 +12,7 @@
 
 #include "ColorLineShaderInterface.h"
 #include "Coord.h"
+#include "LineStyle.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "LayerObjectInterface.h"
 #include "Line2dInterface.h"
@@ -31,9 +32,7 @@ class Line2dLayerObject : public LayerObjectInterface {
 
     void setPositions(std::vector<Coord> positions);
 
-    void setColor(const Color &color);
-
-    void setMiter(const float miter);
+    void setStyle(const LineStyle &style);
 
     std::shared_ptr<GraphicsObjectInterface> getLineObject();
 

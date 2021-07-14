@@ -4,7 +4,7 @@
 #include "NativeLineLayerInterface.h"  // my header
 #include "Marshal.hpp"
 #include "NativeLayerInterface.h"
-#include "NativeLineInfo.h"
+#include "NativeLineInfoInterface.h"
 #include "NativeLineLayerCallbackInterface.h"
 
 namespace djinni_generated {
@@ -36,7 +36,7 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_line_L
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::LineLayerInterface>(nativeRef);
-        ref->setLines(::djinni::List<::djinni_generated::NativeLineInfo>::toCpp(jniEnv, j_lines));
+        ref->setLines(::djinni::List<::djinni_generated::NativeLineInfoInterface>::toCpp(jniEnv, j_lines));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
@@ -46,7 +46,7 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_lin
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::LineLayerInterface>(nativeRef);
         auto r = ref->getLines();
-        return ::djinni::release(::djinni::List<::djinni_generated::NativeLineInfo>::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni::List<::djinni_generated::NativeLineInfoInterface>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
@@ -55,7 +55,7 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_line_L
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::LineLayerInterface>(nativeRef);
-        ref->remove(::djinni_generated::NativeLineInfo::toCpp(jniEnv, j_line));
+        ref->remove(::djinni_generated::NativeLineInfoInterface::toCpp(jniEnv, j_line));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
@@ -64,7 +64,7 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_line_L
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::LineLayerInterface>(nativeRef);
-        ref->add(::djinni_generated::NativeLineInfo::toCpp(jniEnv, j_line));
+        ref->add(::djinni_generated::NativeLineInfoInterface::toCpp(jniEnv, j_line));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

@@ -3,13 +3,14 @@
 
 #pragma once
 
+#include <memory>
 #include <vector>
 
-struct LineInfo;
+class LineInfoInterface;
 
 class LineLayerCallbackInterface {
 public:
     virtual ~LineLayerCallbackInterface() {}
 
-    virtual bool onLineClickConfirmed(const std::vector<LineInfo> & icons) = 0;
+    virtual bool onLineClickConfirmed(const std::vector<std::shared_ptr<LineInfoInterface>> & icons) = 0;
 };

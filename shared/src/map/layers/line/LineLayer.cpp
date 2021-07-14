@@ -17,12 +17,13 @@
 #include "RenderPass.h"
 #include "RenderObject.h"
 #include <map>
+#include "LineStyle.h"
 
 
 LineLayer::LineLayer(): isHidden(false) {};
 
 
-void LineLayer::setLines(const std::vector<LineInfo> & lines) {
+void LineLayer::setLines(const std::vector<std::shared_ptr<LineInfoInterface>> & lines) {
     clear();
     for (auto const &line : lines) {
         add(line);
@@ -32,8 +33,8 @@ void LineLayer::setLines(const std::vector<LineInfo> & lines) {
         mapInterface->invalidate();
 }
 
-std::vector<LineInfo> LineLayer::getLines() {
-    std::vector<LineInfo> lines;
+std::vector<std::shared_ptr<LineInfoInterface>> LineLayer::getLines() {
+    std::vector<std::shared_ptr<LineInfoInterface>> lines;
     if (!mapInterface) {
         for (auto const &line : addingQueue) {
             lines.push_back(line);
@@ -46,7 +47,7 @@ std::vector<LineInfo> LineLayer::getLines() {
     return lines;
 }
 
-void LineLayer::remove(const LineInfo & line) {
+void LineLayer::remove(const std::shared_ptr<LineInfoInterface> & line) {
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         addingQueue.erase(line);
@@ -55,7 +56,7 @@ void LineLayer::remove(const LineInfo & line) {
     {
         std::lock_guard<std::recursive_mutex> lock(linesMutex);
         for (auto it = lines.begin(); it != lines.end(); it++) {
-            if (it->first.identifier == line.identifier) {
+            if (it->first->getIdentifier() == line->getIdentifier()) {
                 lines.erase(it);
                 break;
             }
@@ -66,7 +67,7 @@ void LineLayer::remove(const LineInfo & line) {
         mapInterface->invalidate();
 }
 
-void LineLayer::add(const LineInfo & line) {
+void LineLayer::add(const std::shared_ptr<LineInfoInterface> & line) {
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         addingQueue.insert(line);
@@ -82,12 +83,13 @@ void LineLayer::add(const LineInfo & line) {
     auto lineObject =
             std::make_shared<Line2dLayerObject>(mapInterface->getCoordinateConverterHelper(), lineGraphicsObject, shader);
 
-    lineObject->setMiter(line.miter);
-    lineObject->setPositions(line.coordinates);
-    lineObject->setColor(line.color);
+    lineObject->setStyle(line->getStyle());
+
+    lineObject->setPositions(line->getCoordinates());
+
 
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
-            TaskConfig("LineLayer_setup_" + line.identifier, 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+                                                                       TaskConfig("LineLayer_setup_" + line->getIdentifier(), 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
             [=] { lineGraphicsObject->asGraphicsObject()->setup(mapInterface->getRenderingContext()); }));
 
     {
@@ -131,6 +133,7 @@ void LineLayer::generateRenderPasses() {
     std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
     for (auto const &lineTuple : lines) {
         for (auto config : lineTuple.second->getRenderConfig()) {
+            std::vector<float> modelMatrix = mapInterface->getCamera()->getInvariantModelMatrix(lineTuple.first->getCoordinates()[0], false,false);
             renderPassObjectMap[config->getRenderIndex()].push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
         }
     }

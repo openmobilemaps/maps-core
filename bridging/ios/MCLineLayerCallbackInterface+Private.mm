@@ -7,7 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
-#import "MCLineInfo+Private.h"
+#import "MCLineInfoInterface+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -32,9 +32,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (BOOL)onLineClickConfirmed:(nonnull NSArray<MCLineInfo *> *)icons {
+- (BOOL)onLineClickConfirmed:(nonnull NSArray<MCLineInfoInterface *> *)icons {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->onLineClickConfirmed(::djinni::List<::djinni_generated::LineInfo>::toCpp(icons));
+        auto objcpp_result_ = _cppRefHandle.get()->onLineClickConfirmed(::djinni::List<::djinni_generated::LineInfoInterface>::toCpp(icons));
         return ::djinni::Bool::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -48,10 +48,10 @@ class LineLayerCallbackInterface::ObjcProxy final
     friend class ::djinni_generated::LineLayerCallbackInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    bool onLineClickConfirmed(const std::vector<::LineInfo> & c_icons) override
+    bool onLineClickConfirmed(const std::vector<std::shared_ptr<::LineInfoInterface>> & c_icons) override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() onLineClickConfirmed:(::djinni::List<::djinni_generated::LineInfo>::fromCpp(c_icons))];
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() onLineClickConfirmed:(::djinni::List<::djinni_generated::LineInfoInterface>::fromCpp(c_icons))];
             return ::djinni::Bool::toCpp(objcpp_result_);
         }
     }

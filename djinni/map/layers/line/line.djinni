@@ -2,25 +2,35 @@
 @extern "../../../yaml/coord.yaml"
 @extern "../../../yaml/vec_2_f.yaml"
 @extern "../../../yaml/color.yaml"
+@extern "../../../yaml/size_type.yaml"
+@extern "../../../yaml/color_state_list.yaml"
 
-line_info = record {
-    identifier: string;
-    coordinates: list<coord>;
-    miter: f32;
-    color: color;
-    highlight_color: color;
+line_factory = interface +c {
+    static create_line(identifier: string, coordinates: list<coord>, style: line_style) : line_info_interface;
+}
+
+line_style = record {
+    color: color_state_list;
+    width_type: size_type;
+    width: f32;
+}
+
+line_info_interface = interface +c {
+    get_identifier(): string;
+    get_coordinates(): list<coord>;
+    get_style(): line_style;
 }
 
 line_layer_callback_interface = interface +c +j +o {
-    on_line_click_confirmed(icons: list<line_info>) : bool;
+    on_line_click_confirmed(icons: list<line_info_interface>) : bool;
 }
 
 line_layer_interface = interface +c {
     static create() : line_layer_interface;
-    set_lines(lines: list<line_info>);
-    get_lines(): list<line_info>;
-    remove(line: line_info);
-    add(line: line_info);
+    set_lines(lines: list<line_info_interface>);
+    get_lines(): list<line_info_interface>;
+    remove(line: line_info_interface);
+    add(line: line_info_interface);
     clear();
     set_callback_handler(handler: line_layer_callback_interface);
     asLayerInterface(): layer_interface;

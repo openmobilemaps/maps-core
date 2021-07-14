@@ -33,7 +33,7 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        bool onLineClickConfirmed(const std::vector<::LineInfo> & icons) override;
+        bool onLineClickConfirmed(const std::vector<std::shared_ptr<::LineInfoInterface>> & icons) override;
 
     private:
         friend ::djinni::JniInterface<::LineLayerCallbackInterface, ::djinni_generated::NativeLineLayerCallbackInterface>;

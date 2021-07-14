@@ -13,6 +13,7 @@
 #include "Line2dLayerObject.h"
 #include "LineCompare.h"
 #include "LineLayerCallbackInterface.h"
+#include "LineInfoInterface.h"
 #include "LineLayerInterface.h"
 #include "SimpleTouchInterface.h"
 #include <atomic>
@@ -31,13 +32,13 @@ class LineLayer : public LineLayerInterface,
     ~LineLayer(){};
 
     // LineLayerInterface
-    virtual void setLines(const std::vector<LineInfo> & lines) override;
+    virtual void setLines(const std::vector<std::shared_ptr<LineInfoInterface>> & lines) override;
 
-    virtual std::vector<LineInfo> getLines() override;
+    virtual std::vector<std::shared_ptr<LineInfoInterface>> getLines() override;
 
-    virtual void remove(const LineInfo & line) override;
+    virtual void remove(const std::shared_ptr<LineInfoInterface> & line) override;
 
-    virtual void add(const LineInfo & line) override;
+    virtual void add(const std::shared_ptr<LineInfoInterface> & line) override;
 
     virtual void clear() override;
 
@@ -76,15 +77,15 @@ class LineLayer : public LineLayerInterface,
     std::shared_ptr<LineLayerCallbackInterface> callbackHandler;
 
     std::recursive_mutex linesMutex;
-    std::unordered_map<LineInfo, std::shared_ptr<Line2dLayerObject>> lines;
+    std::unordered_map<std::shared_ptr<LineInfoInterface>, std::shared_ptr<Line2dLayerObject>> lines;
 
     void generateRenderPasses();
     std::vector<std::shared_ptr<::RenderPassInterface>> renderPasses;
 
     std::recursive_mutex addingQueueMutex;
-    std::unordered_set<LineInfo> addingQueue;
+    std::unordered_set<std::shared_ptr<LineInfoInterface>> addingQueue;
 
-    std::vector<LineInfo> highlightedLines;
+    std::vector<std::shared_ptr<LineInfoInterface>> highlightedLines;
 
     std::atomic<bool> isHidden;
 };

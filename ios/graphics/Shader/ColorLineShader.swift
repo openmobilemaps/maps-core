@@ -50,16 +50,17 @@ extension ColorLineShader: MCLineShaderProgramInterface {
 
         encoder.setFragmentBytes(&radius, length: MemoryLayout<Float>.stride, index: 2)
 
+        var width = miter
+
+        encoder.setVertexBytes(&width, length: MemoryLayout<Float>.stride, index: 2)
+
     }
 }
 
 extension ColorLineShader: MCColorLineShaderInterface {
-    func setColor(_ red: Float, green: Float, blue: Float, alpha: Float) {
-        color = [red, green, blue, alpha]
-    }
-
-    func setMiter(_ miter: Float) {
-        self.miter = miter
+    func setStyle(_ lineStyle: MCLineStyle) {
+        color = lineStyle.color.normal.simdValues
+        miter = lineStyle.width
     }
 
     func asLineShaderProgram() -> MCLineShaderProgramInterface? {

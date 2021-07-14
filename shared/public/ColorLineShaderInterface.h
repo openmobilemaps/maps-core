@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "LineStyle.h"
 #include <memory>
 
 class LineShaderProgramInterface;
@@ -11,9 +12,7 @@ class ColorLineShaderInterface {
 public:
     virtual ~ColorLineShaderInterface() {}
 
-    virtual void setColor(float red, float green, float blue, float alpha) = 0;
-
-    virtual void setMiter(float miter) = 0;
+    virtual void setStyle(const ::LineStyle & lineStyle) = 0;
 
     virtual std::shared_ptr<LineShaderProgramInterface> asLineShaderProgramInterface() = 0;
 };

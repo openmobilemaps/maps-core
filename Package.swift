@@ -33,7 +33,7 @@ let package = Package(
             path: "ios",
             exclude: ["readme.md"],
             resources: [
-                .process("ios/graphics/Shader/Metal"),
+                .process("ios/graphics/Shader/Metal/"),
             ]
         ),
         .target(

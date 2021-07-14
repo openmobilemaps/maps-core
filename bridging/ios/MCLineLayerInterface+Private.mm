@@ -7,7 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "MCLayerInterface+Private.h"
-#import "MCLineInfo+Private.h"
+#import "MCLineInfoInterface+Private.h"
 #import "MCLineLayerCallbackInterface+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -40,28 +40,28 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setLines:(nonnull NSArray<MCLineInfo *> *)lines {
+- (void)setLines:(nonnull NSArray<MCLineInfoInterface *> *)lines {
     try {
-        _cppRefHandle.get()->setLines(::djinni::List<::djinni_generated::LineInfo>::toCpp(lines));
+        _cppRefHandle.get()->setLines(::djinni::List<::djinni_generated::LineInfoInterface>::toCpp(lines));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nonnull NSArray<MCLineInfo *> *)getLines {
+- (nonnull NSArray<MCLineInfoInterface *> *)getLines {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getLines();
-        return ::djinni::List<::djinni_generated::LineInfo>::fromCpp(objcpp_result_);
+        return ::djinni::List<::djinni_generated::LineInfoInterface>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)remove:(nonnull MCLineInfo *)line {
+- (void)remove:(nullable MCLineInfoInterface *)line {
     try {
-        _cppRefHandle.get()->remove(::djinni_generated::LineInfo::toCpp(line));
+        _cppRefHandle.get()->remove(::djinni_generated::LineInfoInterface::toCpp(line));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)add:(nonnull MCLineInfo *)line {
+- (void)add:(nullable MCLineInfoInterface *)line {
     try {
-        _cppRefHandle.get()->add(::djinni_generated::LineInfo::toCpp(line));
+        _cppRefHandle.get()->add(::djinni_generated::LineInfoInterface::toCpp(line));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

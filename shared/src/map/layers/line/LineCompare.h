@@ -10,13 +10,13 @@
 
 #pragma once
 
-#include "LineInfo.h"
+#include "LineInfoInterface.h"
 
 namespace std {
-template <> struct hash<LineInfo> {
-    inline size_t operator()(const LineInfo &obj) const { return std::hash<std::string>{}(obj.identifier); }
+template <> struct hash<std::shared_ptr<LineInfoInterface>> {
+    inline size_t operator()(const std::shared_ptr<LineInfoInterface> &obj) const { return std::hash<std::string>{}(obj->getIdentifier()); }
 };
-template <> struct equal_to<LineInfo> {
-    inline bool operator()(const LineInfo &lhs, const LineInfo &rhs) const { return lhs.identifier == rhs.identifier; }
+template <> struct equal_to<std::shared_ptr<LineInfoInterface>> {
+    inline bool operator()(const std::shared_ptr<LineInfoInterface> &lhs, const std::shared_ptr<LineInfoInterface> &rhs) const { return lhs->getIdentifier() == rhs->getIdentifier(); }
 };
 }; // namespace std
