@@ -11,15 +11,13 @@ auto ColorStateList::toCpp(ObjcType obj) -> CppType
 {
     assert(obj);
     return {::djinni_generated::Color::toCpp(obj.normal),
-            ::djinni_generated::Color::toCpp(obj.highlighted),
-            ::djinni_generated::Color::toCpp(obj.selected)};
+            ::djinni_generated::Color::toCpp(obj.highlighted)};
 }
 
 auto ColorStateList::fromCpp(const CppType& cpp) -> ObjcType
 {
     return [[MCColorStateList alloc] initWithNormal:(::djinni_generated::Color::fromCpp(cpp.normal))
-                                        highlighted:(::djinni_generated::Color::fromCpp(cpp.highlighted))
-                                           selected:(::djinni_generated::Color::fromCpp(cpp.selected))];
+                                        highlighted:(::djinni_generated::Color::fromCpp(cpp.highlighted))];
 }
 
 }  // namespace djinni_generated

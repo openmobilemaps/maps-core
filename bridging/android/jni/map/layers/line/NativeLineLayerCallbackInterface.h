@@ -33,14 +33,14 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        bool onLineClickConfirmed(const std::vector<std::shared_ptr<::LineInfoInterface>> & icons) override;
+        void onLineClickConfirmed(const std::shared_ptr<::LineInfoInterface> & line) override;
 
     private:
         friend ::djinni::JniInterface<::LineLayerCallbackInterface, ::djinni_generated::NativeLineLayerCallbackInterface>;
     };
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/layers/line/LineLayerCallbackInterface") };
-    const jmethodID method_onLineClickConfirmed { ::djinni::jniGetMethodID(clazz.get(), "onLineClickConfirmed", "(Ljava/util/ArrayList;)Z") };
+    const jmethodID method_onLineClickConfirmed { ::djinni::jniGetMethodID(clazz.get(), "onLineClickConfirmed", "(Lio/openmobilemaps/mapscore/shared/map/layers/line/LineInfoInterface;)V") };
 };
 
 }  // namespace djinni_generated

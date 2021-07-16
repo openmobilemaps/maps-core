@@ -14,19 +14,17 @@ auto NativeColorStateList::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinni
     const auto& data = ::djinni::JniClass<NativeColorStateList>::get();
     auto r = ::djinni::LocalRef<JniType>{jniEnv->NewObject(data.clazz.get(), data.jconstructor,
                                                            ::djinni::get(::djinni_generated::NativeColor::fromCpp(jniEnv, c.normal)),
-                                                           ::djinni::get(::djinni_generated::NativeColor::fromCpp(jniEnv, c.highlighted)),
-                                                           ::djinni::get(::djinni_generated::NativeColor::fromCpp(jniEnv, c.selected)))};
+                                                           ::djinni::get(::djinni_generated::NativeColor::fromCpp(jniEnv, c.highlighted)))};
     ::djinni::jniExceptionCheck(jniEnv);
     return r;
 }
 
 auto NativeColorStateList::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
-    ::djinni::JniLocalScope jscope(jniEnv, 4);
+    ::djinni::JniLocalScope jscope(jniEnv, 3);
     assert(j != nullptr);
     const auto& data = ::djinni::JniClass<NativeColorStateList>::get();
     return {::djinni_generated::NativeColor::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_normal)),
-            ::djinni_generated::NativeColor::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_highlighted)),
-            ::djinni_generated::NativeColor::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_selected))};
+            ::djinni_generated::NativeColor::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_highlighted))};
 }
 
 }  // namespace djinni_generated

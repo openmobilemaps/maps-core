@@ -36,6 +36,10 @@ void Line2dLayerObject::setStyle(const LineStyle &style) {
     shader->setStyle(style);
 }
 
+void Line2dLayerObject::setHighlighted(bool highlighted) {
+    shader->setHighlighted(highlighted);
+}
+
 std::shared_ptr<GraphicsObjectInterface> Line2dLayerObject::getLineObject() { return line->asGraphicsObject(); }
 
 std::shared_ptr<LineShaderProgramInterface> Line2dLayerObject::getShaderProgram() { return shader->asLineShaderProgramInterface(); }

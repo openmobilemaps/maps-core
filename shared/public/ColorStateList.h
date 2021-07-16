@@ -9,13 +9,10 @@
 struct ColorStateList final {
     ::Color normal;
     ::Color highlighted;
-    ::Color selected;
 
     ColorStateList(::Color normal_,
-                   ::Color highlighted_,
-                   ::Color selected_)
+                   ::Color highlighted_)
     : normal(std::move(normal_))
     , highlighted(std::move(highlighted_))
-    , selected(std::move(selected_))
     {}
 };

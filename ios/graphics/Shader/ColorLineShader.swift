@@ -21,6 +21,12 @@ class ColorLineShader: BaseShader {
 
     var screenPixelAsRealMeterFactor: Double = 1.0
 
+    enum State {
+        case normal, highlighted
+    }
+
+    private var state = State.normal
+
 }
 
 extension ColorLineShader: MCLineShaderProgramInterface {
@@ -47,8 +53,16 @@ extension ColorLineShader: MCLineShaderProgramInterface {
 
         encoder.setRenderPipelineState(pipeline)
 
-        var c = SIMD4<Float>(style.color.normal.simdValues)
-        encoder.setFragmentBytes(&c, length: MemoryLayout<SIMD4<Float>>.stride, index: 1)
+        var color: SIMD4<Float>
+        switch state {
+        case .normal:
+            color = SIMD4<Float>(style.color.normal.simdValues)
+        case .highlighted:
+            color = SIMD4<Float>(style.color.highlighted.simdValues)
+
+        }
+
+        encoder.setFragmentBytes(&color, length: MemoryLayout<SIMD4<Float>>.stride, index: 1)
 
         var scaledWidth = style.width;
 
@@ -66,6 +80,14 @@ extension ColorLineShader: MCLineShaderProgramInterface {
 }
 
 extension ColorLineShader: MCColorLineShaderInterface {
+    func setHighlighted(_ highlighted: Bool) {
+        if highlighted {
+            state = .highlighted
+        } else if state == .highlighted {
+            state = .normal
+        }
+    }
+
     func setStyle(_ lineStyle: MCLineStyle) {
         style = lineStyle
     }

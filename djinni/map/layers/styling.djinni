@@ -8,5 +8,4 @@ size_type = enum {
 color_state_list = record {
     normal: color;
     highlighted: color;
-    selected: color;
 }

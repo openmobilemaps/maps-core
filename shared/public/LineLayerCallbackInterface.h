@@ -4,7 +4,6 @@
 #pragma once
 
 #include <memory>
-#include <vector>
 
 class LineInfoInterface;
 
@@ -12,5 +11,5 @@ class LineLayerCallbackInterface {
 public:
     virtual ~LineLayerCallbackInterface() {}
 
-    virtual bool onLineClickConfirmed(const std::vector<std::shared_ptr<LineInfoInterface>> & icons) = 0;
+    virtual void onLineClickConfirmed(const std::shared_ptr<LineInfoInterface> & line) = 0;
 };

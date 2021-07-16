@@ -18,6 +18,8 @@
 #include "RenderObject.h"
 #include <map>
 #include "LineStyle.h"
+#include "LineHelper.h"
+#include "SizeType.h"
 
 
 LineLayer::LineLayer(): isHidden(false) {};
@@ -193,13 +195,58 @@ void LineLayer::show() {
 }
 
 bool LineLayer::onTouchDown(const ::Vec2F &posScreen) {
+    auto point = mapInterface->getCamera()->coordFromScreenPosition(posScreen);
+
+
+    std::lock_guard<std::recursive_mutex> lock(linesMutex);
+    for (auto const &line : lines) {
+
+        auto distance = line.first->getStyle().width;
+
+        if (line.first->getStyle().widthType == SizeType::SCREEN_PIXEL) {
+            distance = mapInterface->getCamera()->mapUnitsFromPixels(distance);
+        }
+
+        if (LineHelper::pointWithin(line.first, point, distance, mapInterface->getCoordinateConverterHelper())) {
+            line.second->setHighlighted(true);
+            mapInterface->invalidate();
+            return true;
+        }
+    }
     return false;
 }
 
-bool LineLayer::onClickUnconfirmed(const ::Vec2F &posScreen) {
+bool LineLayer::onClickConfirmed(const ::Vec2F &posScreen) {
+    auto point = mapInterface->getCamera()->coordFromScreenPosition(posScreen);
+
+
+    std::lock_guard<std::recursive_mutex> lock(linesMutex);
+    for (auto const &line : lines) {
+
+        auto distance = line.first->getStyle().width;
+
+        if (line.first->getStyle().widthType == SizeType::SCREEN_PIXEL) {
+            distance = mapInterface->getCamera()->mapUnitsFromPixels(distance);
+        }
+
+        if (LineHelper::pointWithin(line.first, point, distance, mapInterface->getCoordinateConverterHelper())) {
+            line.second->setHighlighted(false);
+            if (callbackHandler) {
+                callbackHandler->onLineClickConfirmed(line.first);
+            }
+            mapInterface->invalidate();
+            return true;
+        }
+    }
     return false;
 }
 
 void LineLayer::clearTouch() {
-
+    {
+        std::lock_guard<std::recursive_mutex> lock(linesMutex);
+        for (auto const &line : lines) {
+            line.second->setHighlighted(false);
+        }
+    }
+    mapInterface->invalidate();
 }

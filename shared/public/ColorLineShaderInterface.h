@@ -14,5 +14,7 @@ public:
 
     virtual void setStyle(const ::LineStyle & lineStyle) = 0;
 
+    virtual void setHighlighted(bool highlighted) = 0;
+
     virtual std::shared_ptr<LineShaderProgramInterface> asLineShaderProgramInterface() = 0;
 };

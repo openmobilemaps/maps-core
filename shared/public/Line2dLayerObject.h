@@ -34,6 +34,8 @@ class Line2dLayerObject : public LayerObjectInterface {
 
     void setStyle(const LineStyle &style);
 
+    void setHighlighted(bool highlighted);
+
     std::shared_ptr<GraphicsObjectInterface> getLineObject();
 
     std::shared_ptr<LineShaderProgramInterface> getShaderProgram();

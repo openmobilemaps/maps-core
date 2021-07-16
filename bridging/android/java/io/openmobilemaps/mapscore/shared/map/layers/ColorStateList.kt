@@ -6,5 +6,4 @@ package io.openmobilemaps.mapscore.shared.map.layers
 data class ColorStateList(
     var normal: io.openmobilemaps.mapscore.shared.graphics.common.Color,
     var highlighted: io.openmobilemaps.mapscore.shared.graphics.common.Color,
-    var selected: io.openmobilemaps.mapscore.shared.graphics.common.Color,
 )

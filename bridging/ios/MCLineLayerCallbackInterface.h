@@ -7,6 +7,6 @@
 
 @protocol MCLineLayerCallbackInterface
 
-- (BOOL)onLineClickConfirmed:(nonnull NSArray<MCLineInfoInterface *> *)icons;
+- (void)onLineClickConfirmed:(nullable MCLineInfoInterface *)line;
 
 @end

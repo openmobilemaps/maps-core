@@ -9,6 +9,8 @@ abstract class ColorLineShaderInterface {
 
     abstract fun setStyle(lineStyle: io.openmobilemaps.mapscore.shared.map.layers.line.LineStyle)
 
+    abstract fun setHighlighted(highlighted: Boolean)
+
     abstract fun asLineShaderProgramInterface(): LineShaderProgramInterface
 
     private class CppProxy : ColorLineShaderInterface {
@@ -34,6 +36,12 @@ abstract class ColorLineShaderInterface {
             native_setStyle(this.nativeRef, lineStyle)
         }
         private external fun native_setStyle(_nativeRef: Long, lineStyle: io.openmobilemaps.mapscore.shared.map.layers.line.LineStyle)
+
+        override fun setHighlighted(highlighted: Boolean) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setHighlighted(this.nativeRef, highlighted)
+        }
+        private external fun native_setHighlighted(_nativeRef: Long, highlighted: Boolean)
 
         override fun asLineShaderProgramInterface(): LineShaderProgramInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

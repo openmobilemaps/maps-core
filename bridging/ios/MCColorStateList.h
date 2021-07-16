@@ -6,16 +6,12 @@
 
 @interface MCColorStateList : NSObject
 - (nonnull instancetype)initWithNormal:(nonnull MCColor *)normal
-                           highlighted:(nonnull MCColor *)highlighted
-                              selected:(nonnull MCColor *)selected;
+                           highlighted:(nonnull MCColor *)highlighted;
 + (nonnull instancetype)colorStateListWithNormal:(nonnull MCColor *)normal
-                                     highlighted:(nonnull MCColor *)highlighted
-                                        selected:(nonnull MCColor *)selected;
+                                     highlighted:(nonnull MCColor *)highlighted;
 
 @property (nonatomic, readonly, nonnull) MCColor * normal;
 
 @property (nonatomic, readonly, nonnull) MCColor * highlighted;
-
-@property (nonatomic, readonly, nonnull) MCColor * selected;
 
 @end

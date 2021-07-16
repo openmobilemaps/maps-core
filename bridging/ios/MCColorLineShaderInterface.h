@@ -10,6 +10,8 @@
 
 - (void)setStyle:(nonnull MCLineStyle *)lineStyle;
 
+- (void)setHighlighted:(BOOL)highlighted;
+
 - (nullable id<MCLineShaderProgramInterface>)asLineShaderProgramInterface;
 
 @end

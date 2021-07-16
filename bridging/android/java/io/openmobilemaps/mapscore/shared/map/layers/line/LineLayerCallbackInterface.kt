@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class LineLayerCallbackInterface {
 
-    abstract fun onLineClickConfirmed(icons: ArrayList<LineInfoInterface>): Boolean
+    abstract fun onLineClickConfirmed(line: LineInfoInterface)
 
     private class CppProxy : LineLayerCallbackInterface {
         private val nativeRef: Long
@@ -27,10 +27,10 @@ abstract class LineLayerCallbackInterface {
             _djinni_private_destroy()
         }
 
-        override fun onLineClickConfirmed(icons: ArrayList<LineInfoInterface>): Boolean {
+        override fun onLineClickConfirmed(line: LineInfoInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_onLineClickConfirmed(this.nativeRef, icons)
+            native_onLineClickConfirmed(this.nativeRef, line)
         }
-        private external fun native_onLineClickConfirmed(_nativeRef: Long, icons: ArrayList<LineInfoInterface>): Boolean
+        private external fun native_onLineClickConfirmed(_nativeRef: Long, line: LineInfoInterface)
     }
 }

@@ -35,6 +35,7 @@ color_shader_interface = interface +c +o {
 
 color_line_shader_interface = interface +c +o {
     set_style(line_style: line_style);
+    set_highlighted(highlighted: bool);
     as_line_shader_program_interface() : line_shader_program_interface;
 }
 

@@ -8,28 +8,24 @@
 
 - (nonnull instancetype)initWithNormal:(nonnull MCColor *)normal
                            highlighted:(nonnull MCColor *)highlighted
-                              selected:(nonnull MCColor *)selected
 {
     if (self = [super init]) {
         _normal = normal;
         _highlighted = highlighted;
-        _selected = selected;
     }
     return self;
 }
 
 + (nonnull instancetype)colorStateListWithNormal:(nonnull MCColor *)normal
                                      highlighted:(nonnull MCColor *)highlighted
-                                        selected:(nonnull MCColor *)selected
 {
     return [(MCColorStateList*)[self alloc] initWithNormal:normal
-                                               highlighted:highlighted
-                                                  selected:selected];
+                                               highlighted:highlighted];
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p normal:%@ highlighted:%@ selected:%@>", self.class, (void *)self, self.normal, self.highlighted, self.selected];
+    return [NSString stringWithFormat:@"<%@ %p normal:%@ highlighted:%@>", self.class, (void *)self, self.normal, self.highlighted];
 }
 
 @end

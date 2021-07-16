@@ -22,7 +22,7 @@ line_info_interface = interface +c {
 }
 
 line_layer_callback_interface = interface +c +j +o {
-    on_line_click_confirmed(icons: list<line_info_interface>) : bool;
+    on_line_click_confirmed(line: line_info_interface);
 }
 
 line_layer_interface = interface +c {

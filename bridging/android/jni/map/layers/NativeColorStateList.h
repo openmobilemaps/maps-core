@@ -25,10 +25,9 @@ private:
     friend ::djinni::JniClass<NativeColorStateList>;
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/layers/ColorStateList") };
-    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Color;Lio/openmobilemaps/mapscore/shared/graphics/common/Color;Lio/openmobilemaps/mapscore/shared/graphics/common/Color;)V") };
+    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Color;Lio/openmobilemaps/mapscore/shared/graphics/common/Color;)V") };
     const jfieldID field_normal { ::djinni::jniGetFieldID(clazz.get(), "normal", "Lio/openmobilemaps/mapscore/shared/graphics/common/Color;") };
     const jfieldID field_highlighted { ::djinni::jniGetFieldID(clazz.get(), "highlighted", "Lio/openmobilemaps/mapscore/shared/graphics/common/Color;") };
-    const jfieldID field_selected { ::djinni::jniGetFieldID(clazz.get(), "selected", "Lio/openmobilemaps/mapscore/shared/graphics/common/Color;") };
 };
 
 }  // namespace djinni_generated

@@ -5,6 +5,7 @@
 #import "MCColorLineShaderInterface.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
+#import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCLineShaderProgramInterface+Private.h"
 #import "MCLineStyle+Private.h"
@@ -38,6 +39,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setHighlighted:(BOOL)highlighted {
+    try {
+        _cppRefHandle.get()->setHighlighted(::djinni::Bool::toCpp(highlighted));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nullable id<MCLineShaderProgramInterface>)asLineShaderProgramInterface {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->asLineShaderProgramInterface();
@@ -58,6 +65,12 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() setStyle:(::djinni_generated::LineStyle::fromCpp(c_lineStyle))];
+        }
+    }
+    void setHighlighted(bool c_highlighted) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setHighlighted:(::djinni::Bool::fromCpp(c_highlighted))];
         }
     }
     std::shared_ptr<::LineShaderProgramInterface> asLineShaderProgramInterface() override
