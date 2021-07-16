@@ -1,2 +1,2 @@
 
--keep class ch.ubique.graphicscore.shared.** { *; }
+-keep class io.openmobilemaps.mapscore.shared.** { *; }
