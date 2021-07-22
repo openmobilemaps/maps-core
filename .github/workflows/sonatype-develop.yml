@@ -25,8 +25,14 @@ jobs:
           SONATYPE_NEXUS_USERNAME: ${{secrets.SONATYPE_NEXUS_USERNAME}}
           SONATYPE_NEXUS_PASSWORD: ${{secrets.SONATYPE_NEXUS_PASSWORD}}
         run: |
-          echo "Appending dev-suffix to version name"
-          sed -i "/^VERSION_NAME=/s/$/-dev-$GITHUB_RUN_NUMBER/" android/gradle.properties
+          echo "Appending dev-version number to version name"
+          sed -i "/^VERSION_NAME=/s/$/.$GITHUB_RUN_NUMBER/" android/gradle.properties
+
+          echo "Appending dev-version number to version code"
+          sed -i "/^VERSION_CODE=/s/$/$GITHUB_RUN_NUMBER/" android/gradle.properties
+
+          echo "Appending dev-suffix to artifact name"
+          sed -i "/^POM_ARTIFACT_ID=/s/$/-dev/" android/gradle.properties
 
           echo "Create .gpg key from secret"
           echo $SIGNING_KEY_ARMOR | base64 --decode > ./signingkey.asc
