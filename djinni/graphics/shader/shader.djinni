@@ -7,15 +7,6 @@ shader_program_interface = interface +c +o {
     pre_render(context: rendering_context_interface);
 }
 
-line_shader_program_interface = interface +c +o {
-    get_rect_program_name() : string;
-    setup_rect_program(context: rendering_context_interface);
-    get_point_program_name() : string;
-    setup_point_program(context: rendering_context_interface);
-    pre_render_rect(context: rendering_context_interface);
-    pre_render_point(context: rendering_context_interface);
-}
-
 shader_factory_interface = interface +c +j +o {
     create_alpha_shader() : alpha_shader_interface;
     create_color_line_shader() : color_line_shader_interface;
@@ -36,7 +27,7 @@ color_shader_interface = interface +c +o {
 color_line_shader_interface = interface +c +o {
     set_style(line_style: line_style);
     set_highlighted(highlighted: bool);
-    as_line_shader_program_interface() : line_shader_program_interface;
+    as_shader_program_interface() : shader_program_interface;
 }
 
 color_circle_shader_interface = interface +c +o {

@@ -9,7 +9,7 @@ abstract class GraphicsObjectFactoryInterface {
 
     abstract fun createQuad(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Quad2dInterface
 
-    abstract fun createLine(lineShader: io.openmobilemaps.mapscore.shared.graphics.shader.LineShaderProgramInterface): Line2dInterface
+    abstract fun createLine(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Line2dInterface
 
     abstract fun createPolygon(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Polygon2dInterface
 
@@ -37,11 +37,11 @@ abstract class GraphicsObjectFactoryInterface {
         }
         private external fun native_createQuad(_nativeRef: Long, shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Quad2dInterface
 
-        override fun createLine(lineShader: io.openmobilemaps.mapscore.shared.graphics.shader.LineShaderProgramInterface): Line2dInterface {
+        override fun createLine(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Line2dInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_createLine(this.nativeRef, lineShader)
+            return native_createLine(this.nativeRef, shader)
         }
-        private external fun native_createLine(_nativeRef: Long, lineShader: io.openmobilemaps.mapscore.shared.graphics.shader.LineShaderProgramInterface): Line2dInterface
+        private external fun native_createLine(_nativeRef: Long, shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Line2dInterface
 
         override fun createPolygon(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Polygon2dInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

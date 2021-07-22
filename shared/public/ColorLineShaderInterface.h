@@ -6,7 +6,7 @@
 #include "LineStyle.h"
 #include <memory>
 
-class LineShaderProgramInterface;
+class ShaderProgramInterface;
 
 class ColorLineShaderInterface {
 public:
@@ -16,5 +16,5 @@ public:
 
     virtual void setHighlighted(bool highlighted) = 0;
 
-    virtual std::shared_ptr<LineShaderProgramInterface> asLineShaderProgramInterface() = 0;
+    virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() = 0;
 };

@@ -3,7 +3,6 @@
 
 #include "NativeGraphicsObjectFactoryInterface.h"  // my header
 #include "NativeLine2dInterface.h"
-#include "NativeLineShaderProgramInterface.h"
 #include "NativePolygon2dInterface.h"
 #include "NativeQuad2dInterface.h"
 #include "NativeShaderProgramInterface.h"
@@ -27,12 +26,12 @@ std::shared_ptr<::Quad2dInterface> NativeGraphicsObjectFactoryInterface::JavaPro
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativeQuad2dInterface::toCpp(jniEnv, jret);
 }
-std::shared_ptr<::Line2dInterface> NativeGraphicsObjectFactoryInterface::JavaProxy::createLine(const std::shared_ptr<::LineShaderProgramInterface> & c_lineShader) {
+std::shared_ptr<::Line2dInterface> NativeGraphicsObjectFactoryInterface::JavaProxy::createLine(const std::shared_ptr<::ShaderProgramInterface> & c_shader) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeGraphicsObjectFactoryInterface>::get();
     auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_createLine,
-                                         ::djinni::get(::djinni_generated::NativeLineShaderProgramInterface::fromCpp(jniEnv, c_lineShader)));
+                                         ::djinni::get(::djinni_generated::NativeShaderProgramInterface::fromCpp(jniEnv, c_shader)));
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativeLine2dInterface::toCpp(jniEnv, jret);
 }
@@ -64,12 +63,12 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objec
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_GraphicsObjectFactoryInterface_00024CppProxy_native_1createLine(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeLineShaderProgramInterface::JniType j_lineShader)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_GraphicsObjectFactoryInterface_00024CppProxy_native_1createLine(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeShaderProgramInterface::JniType j_shader)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::GraphicsObjectFactoryInterface>(nativeRef);
-        auto r = ref->createLine(::djinni_generated::NativeLineShaderProgramInterface::toCpp(jniEnv, j_lineShader));
+        auto r = ref->createLine(::djinni_generated::NativeShaderProgramInterface::toCpp(jniEnv, j_shader));
         return ::djinni::release(::djinni_generated::NativeLine2dInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

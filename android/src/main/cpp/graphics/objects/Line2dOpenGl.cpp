@@ -11,7 +11,7 @@
 #include "Line2dOpenGl.h"
 #include <cmath>
 
-Line2dOpenGl::Line2dOpenGl(const std::shared_ptr<::LineShaderProgramInterface> &shader)
+Line2dOpenGl::Line2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
     : shaderProgram(shader) {}
 
 std::shared_ptr<GraphicsObjectInterface> Line2dOpenGl::asGraphicsObject() { return shared_from_this(); }
@@ -28,72 +28,114 @@ void Line2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &con
         return;
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    if (openGlContext->getProgram(shaderProgram->getPointProgramName()) == 0) {
-        shaderProgram->setupPointProgram(openGlContext);
-    }
-    if (openGlContext->getProgram(shaderProgram->getRectProgramName()) == 0) {
-        shaderProgram->setupRectProgram(openGlContext);
-        ;
+    if (openGlContext->getProgram(shaderProgram->getProgramName()) == 0) {
+        shaderProgram->setupProgram(openGlContext);
     }
     initializeLineAndPoints();
     ready = true;
 }
 
 void Line2dOpenGl::initializeLineAndPoints() {
-    pointsVertexBuffer = std::vector<GLfloat>();
-    for (auto &p : lineCoordinates) {
-        pointsVertexBuffer.push_back(p.x);
-        pointsVertexBuffer.push_back(p.y);
-        pointsVertexBuffer.push_back(0.0);
-    }
-
     pointCount = (int)lineCoordinates.size();
-
     for (int i = 0; i < (pointCount - 1); i++) {
-        int iNext = i + 1;
+        const Vec2D &p = lineCoordinates[i];
+        const Vec2D &pNext = lineCoordinates[i + 1];
 
-        lineVertexBuffer.push_back(pointsVertexBuffer[i * 3 + 0]);
-        lineVertexBuffer.push_back(pointsVertexBuffer[i * 3 + 1]);
-        lineVertexBuffer.push_back(pointsVertexBuffer[i * 3 + 2]);
+        float lengthNormalX = pNext.x - p.x;
+        float lengthNormalY = pNext.y - p.y;
+        float lineLength = std::sqrt(lengthNormalX * lengthNormalX + lengthNormalY * lengthNormalY);
+        lengthNormalX = lengthNormalX / lineLength;
+        lengthNormalY = lengthNormalY / lineLength;
+        float widthNormalX = -lengthNormalY;
+        float widthNormalY = lengthNormalX;
 
-        lineVertexBuffer.push_back(pointsVertexBuffer[i * 3 + 0]);
-        lineVertexBuffer.push_back(pointsVertexBuffer[i * 3 + 1]);
-        lineVertexBuffer.push_back(pointsVertexBuffer[i * 3 + 2]);
+        // Vertex 1
+        lineVertexBuffer.push_back(p.x);
+        lineVertexBuffer.push_back(p.y);
+        lineVertexBuffer.push_back(0.0);
 
-        float lineNormalX = -(pointsVertexBuffer[iNext * 3 + 1] - pointsVertexBuffer[i * 3 + 1]);
-        float lineNormalY = pointsVertexBuffer[iNext * 3 + 0] - pointsVertexBuffer[i * 3 + 0];
-        float lineLength = std::sqrt(lineNormalX * lineNormalX + lineNormalY * lineNormalY);
+        lineWidthNormalBuffer.push_back(-widthNormalX);
+        lineWidthNormalBuffer.push_back(-widthNormalY);
+        lineWidthNormalBuffer.push_back(0.0);
 
-        lineNormalBuffer.push_back(lineNormalX / lineLength);
-        lineNormalBuffer.push_back(lineNormalY / lineLength);
-        lineNormalBuffer.push_back(0.0);
+        lineLengthNormalBuffer.push_back(-lengthNormalX);
+        lineLengthNormalBuffer.push_back(-lengthNormalY);
+        lineLengthNormalBuffer.push_back(0.0);
 
-        lineNormalBuffer.push_back(-lineNormalBuffer[12 * i + 0]);
-        lineNormalBuffer.push_back(-lineNormalBuffer[12 * i + 1]);
-        lineNormalBuffer.push_back(0.0);
+        linePointABuffer.push_back(p.x);
+        linePointABuffer.push_back(p.y);
+        linePointABuffer.push_back(0.0);
+        linePointBBuffer.push_back(pNext.x);
+        linePointBBuffer.push_back(pNext.y);
+        linePointBBuffer.push_back(0.0);
 
-        lineVertexBuffer.push_back(pointsVertexBuffer[iNext * 3 + 0]);
-        lineVertexBuffer.push_back(pointsVertexBuffer[iNext * 3 + 1]);
-        lineVertexBuffer.push_back(pointsVertexBuffer[iNext * 3 + 2]);
+        // Vertex 2
+        lineVertexBuffer.push_back(p.x);
+        lineVertexBuffer.push_back(p.y);
+        lineVertexBuffer.push_back(0.0);
 
-        lineVertexBuffer.push_back(pointsVertexBuffer[iNext * 3 + 0]);
-        lineVertexBuffer.push_back(pointsVertexBuffer[iNext * 3 + 1]);
-        lineVertexBuffer.push_back(pointsVertexBuffer[iNext * 3 + 2]);
+        lineWidthNormalBuffer.push_back(widthNormalX);
+        lineWidthNormalBuffer.push_back(widthNormalY);
+        lineWidthNormalBuffer.push_back(0.0);
 
-        lineNormalBuffer.push_back(lineNormalX / lineLength);
-        lineNormalBuffer.push_back(lineNormalY / lineLength);
-        lineNormalBuffer.push_back(0.0);
+        lineLengthNormalBuffer.push_back(-lengthNormalX);
+        lineLengthNormalBuffer.push_back(-lengthNormalY);
+        lineLengthNormalBuffer.push_back(0.0);
 
-        lineNormalBuffer.push_back(-lineNormalBuffer[12 * i + 0]);
-        lineNormalBuffer.push_back(-lineNormalBuffer[12 * i + 1]);
-        lineNormalBuffer.push_back(0.0);
+        linePointABuffer.push_back(p.x);
+        linePointABuffer.push_back(p.y);
+        linePointABuffer.push_back(0.0);
+        linePointBBuffer.push_back(pNext.x);
+        linePointBBuffer.push_back(pNext.y);
+        linePointBBuffer.push_back(0.0);
 
+        // Vertex 3
+        lineVertexBuffer.push_back(pNext.x);
+        lineVertexBuffer.push_back(pNext.y);
+        lineVertexBuffer.push_back(0.0);
+
+        lineWidthNormalBuffer.push_back(widthNormalX);
+        lineWidthNormalBuffer.push_back(widthNormalY);
+        lineWidthNormalBuffer.push_back(0.0);
+
+        lineLengthNormalBuffer.push_back(lengthNormalX);
+        lineLengthNormalBuffer.push_back(lengthNormalY);
+        lineLengthNormalBuffer.push_back(0.0);
+
+        linePointABuffer.push_back(p.x);
+        linePointABuffer.push_back(p.y);
+        linePointABuffer.push_back(0.0);
+        linePointBBuffer.push_back(pNext.x);
+        linePointBBuffer.push_back(pNext.y);
+        linePointBBuffer.push_back(0.0);
+
+        // Vertex 4
+        lineVertexBuffer.push_back(pNext.x);
+        lineVertexBuffer.push_back(pNext.y);
+        lineVertexBuffer.push_back(0.0);
+
+        lineWidthNormalBuffer.push_back(-widthNormalX);
+        lineWidthNormalBuffer.push_back(-widthNormalY);
+        lineWidthNormalBuffer.push_back(0.0);
+
+        lineLengthNormalBuffer.push_back(lengthNormalX);
+        lineLengthNormalBuffer.push_back(lengthNormalY);
+        lineLengthNormalBuffer.push_back(0.0);
+
+        linePointABuffer.push_back(p.x);
+        linePointABuffer.push_back(p.y);
+        linePointABuffer.push_back(0.0);
+        linePointBBuffer.push_back(pNext.x);
+        linePointBBuffer.push_back(pNext.y);
+        linePointBBuffer.push_back(0.0);
+
+        // Vertex indices
         lineIndexBuffer.push_back(4 * i);
         lineIndexBuffer.push_back(4 * i + 1);
         lineIndexBuffer.push_back(4 * i + 2);
 
+        lineIndexBuffer.push_back(4 * i);
         lineIndexBuffer.push_back(4 * i + 2);
-        lineIndexBuffer.push_back(4 * i + 1);
         lineIndexBuffer.push_back(4 * i + 3);
     }
 }
@@ -104,7 +146,7 @@ void Line2dOpenGl::clear() {
 }
 
 void Line2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                          int64_t mvpMatrix) {
+                          int64_t mvpMatrix, double screenPixelAsRealMeterFactor) {
     if (!ready)
         return;
 
@@ -118,19 +160,13 @@ void Line2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
-    drawLineSegments(openGlContext, mvpMatrix);
-
-    glStencilFunc(GL_NOTEQUAL, 0x1, 0xFF);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
-    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-
-    // drawPoints(openGlContext, mvpMatrix);
+    drawLineSegments(openGlContext, mvpMatrix, screenPixelAsRealMeterFactor);
 
     glDisable(GL_STENCIL_TEST);
 }
 
-void Line2dOpenGl::drawLineSegments(std::shared_ptr<OpenGlContext> openGlContext, int64_t mvpMatrix) {
-    int program = openGlContext->getProgram(shaderProgram->getRectProgramName());
+void Line2dOpenGl::drawLineSegments(std::shared_ptr<OpenGlContext> openGlContext, int64_t mvpMatrix, float widthScaleFactor) {
+    int program = openGlContext->getProgram(shaderProgram->getProgramName());
     // Add program to OpenGL environment
     glUseProgram(program);
 
@@ -139,69 +175,49 @@ void Line2dOpenGl::drawLineSegments(std::shared_ptr<OpenGlContext> openGlContext
     // Enable a handle to the triangle vertices
     glEnableVertexAttribArray(positionHandle);
 
+    int widthNormalHandle = glGetAttribLocation(program, "vWidthNormal");
+    glEnableVertexAttribArray(widthNormalHandle);
+    int lengthNormalHandle = glGetAttribLocation(program, "vLengthNormal");
+    glEnableVertexAttribArray(lengthNormalHandle);
+
+    int pointAHandle = glGetAttribLocation(program, "vPointA");
+    glEnableVertexAttribArray(pointAHandle);
+    int pointBHandle = glGetAttribLocation(program, "vPointB");
+    glEnableVertexAttribArray(pointBHandle);
+
     // get handle to shape's transformation matrix
     int mMVPMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
+    int scaleFactorHandle = glGetUniformLocation(program, "scaleFactor");
     OpenGlHelper::checkGlError("glGetUniformLocation");
 
     // Apply the projection and view transformation
     glUniformMatrix4fv(mMVPMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
-    OpenGlHelper::checkGlError("glUniformMatrix4fv");
+    glUniform1f(scaleFactorHandle, widthScaleFactor);
+    OpenGlHelper::checkGlError("glUniformMatrix4fv and glUniformM1f");
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-    shaderProgram->preRenderRect(openGlContext);
+    shaderProgram->preRender(openGlContext);
 
     // Prepare the triangle coordinate data
     glVertexAttribPointer(positionHandle, 3, GL_FLOAT, false, 12, &lineVertexBuffer[0]);
 
-    // get handle to vertex shader's vPosition member
-    int normalHandle = glGetAttribLocation(program, "vNormal");
-    // Enable a handle to the triangle vertices
-    glEnableVertexAttribArray(normalHandle);
+    glVertexAttribPointer(widthNormalHandle, 3, GL_FLOAT, false, 12, &lineWidthNormalBuffer[0]);
+    glVertexAttribPointer(lengthNormalHandle, 3, GL_FLOAT, false, 12, &lineLengthNormalBuffer[0]);
 
-    // Prepare the triangle coordinate data
-    glVertexAttribPointer(normalHandle, 3, GL_FLOAT, false, 12, &lineNormalBuffer[0]);
+    glVertexAttribPointer(pointAHandle, 3, GL_FLOAT, false, 12, &linePointABuffer[0]);
+    glVertexAttribPointer(pointBHandle, 3, GL_FLOAT, false, 12, &linePointBBuffer[0]);
 
     // Draw the triangle
     glDrawElements(GL_TRIANGLES, lineIndexBuffer.size(), GL_UNSIGNED_INT, &lineIndexBuffer[0]);
 
     // Disable vertex array
     glDisableVertexAttribArray(positionHandle);
-
-    glDisable(GL_BLEND);
-}
-
-void Line2dOpenGl::drawPoints(std::shared_ptr<OpenGlContext> openGlContext, int64_t mvpMatrix) {
-    int program = openGlContext->getProgram(shaderProgram->getPointProgramName());
-    // Add program to OpenGL environment
-    glUseProgram(program);
-
-    // get handle to vertex shader's vPosition member
-    int positionHandle = glGetAttribLocation(program, "vPosition");
-    // Enable a handle to the triangle vertices
-    glEnableVertexAttribArray(positionHandle);
-
-    // get handle to shape's transformation matrix
-    int mVPMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
-    OpenGlHelper::checkGlError("glGetUniformLocation");
-
-    // Apply the projection and view transformation
-    glUniformMatrix4fv(mVPMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
-    OpenGlHelper::checkGlError("glUniformMatrix4fv");
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
-    shaderProgram->preRenderPoint(openGlContext);
-
-    // Prepare the triangle coordinate data
-    glVertexAttribPointer(positionHandle, 3, GL_FLOAT, false, 12, &pointsVertexBuffer[0]);
-
-    glDrawArrays(GL_POINTS, 0, pointCount);
-
-    // Disable vertex array
-    glDisableVertexAttribArray(positionHandle);
+    glDisableVertexAttribArray(widthNormalHandle);
+    glDisableVertexAttribArray(lengthNormalHandle);
+    glDisableVertexAttribArray(pointAHandle);
+    glDisableVertexAttribArray(pointBHandle);
 
     glDisable(GL_BLEND);
 }

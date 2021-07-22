@@ -3,7 +3,7 @@
 
 #import "MCLineStyle.h"
 #import <Foundation/Foundation.h>
-@protocol MCLineShaderProgramInterface;
+@protocol MCShaderProgramInterface;
 
 
 @protocol MCColorLineShaderInterface
@@ -12,6 +12,6 @@
 
 - (void)setHighlighted:(BOOL)highlighted;
 
-- (nullable id<MCLineShaderProgramInterface>)asLineShaderProgramInterface;
+- (nullable id<MCShaderProgramInterface>)asShaderProgramInterface;
 
 @end

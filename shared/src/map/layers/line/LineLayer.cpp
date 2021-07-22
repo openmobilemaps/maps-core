@@ -80,7 +80,7 @@ void LineLayer::add(const std::shared_ptr<LineInfoInterface> & line) {
     const auto &shaderFactory = mapInterface->getShaderFactory();
 
     auto shader = shaderFactory->createColorLineShader();
-    auto lineGraphicsObject = objectFactory->createLine(shader->asLineShaderProgramInterface());
+    auto lineGraphicsObject = objectFactory->createLine(shader->asShaderProgramInterface());
 
     auto lineObject =
             std::make_shared<Line2dLayerObject>(mapInterface->getCoordinateConverterHelper(), lineGraphicsObject, shader);

@@ -13,7 +13,7 @@
 
 #include "GraphicsObjectInterface.h"
 #include "Line2dInterface.h"
-#include "LineShaderProgramInterface.h"
+#include "ShaderProgramInterface.h"
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
 #include "opengl_wrapper.h"
@@ -22,7 +22,7 @@ class Line2dOpenGl : public GraphicsObjectInterface,
                      public Line2dInterface,
                      public std::enable_shared_from_this<GraphicsObjectInterface> {
   public:
-    Line2dOpenGl(const std::shared_ptr<::LineShaderProgramInterface> &shader);
+    Line2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader);
 
     virtual ~Line2dOpenGl() {}
 
@@ -33,7 +33,7 @@ class Line2dOpenGl : public GraphicsObjectInterface,
     virtual void clear() override;
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                        int64_t mvpMatrix) override;
+                        int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
 
     virtual void setLinePositions(const std::vector<::Vec2D> &positions) override;
 
@@ -42,16 +42,16 @@ class Line2dOpenGl : public GraphicsObjectInterface,
   protected:
     void initializeLineAndPoints();
 
-    void drawLineSegments(std::shared_ptr<OpenGlContext> openGlContext, int64_t mvpMatrix);
-
-    void drawPoints(std::shared_ptr<OpenGlContext> openGlContext, int64_t mvpMatrix);
+    void drawLineSegments(std::shared_ptr<OpenGlContext> openGlContext, int64_t mvpMatrix, float widthScaleFactor);
 
     std::vector<Vec2D> lineCoordinates;
 
-    std::shared_ptr<LineShaderProgramInterface> shaderProgram;
-    std::vector<GLfloat> pointsVertexBuffer;
+    std::shared_ptr<ShaderProgramInterface> shaderProgram;
     std::vector<GLfloat> lineVertexBuffer;
-    std::vector<GLfloat> lineNormalBuffer;
+    std::vector<GLfloat> lineWidthNormalBuffer;
+    std::vector<GLfloat> lineLengthNormalBuffer;
+    std::vector<GLfloat> linePointABuffer;
+    std::vector<GLfloat> linePointBBuffer;
     std::vector<GLuint> lineIndexBuffer;
     int pointCount;
 

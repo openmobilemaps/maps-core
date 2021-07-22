@@ -32,7 +32,7 @@ class Polygon2dOpenGl : public GraphicsObjectInterface,
     virtual void clear() override;
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                        int64_t mvpMatrix) override;
+                        int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
 
     virtual void setPolygonPositions(const std::vector<::Vec2D> &positions, const std::vector<std::vector<::Vec2D>> &holes,
                                      bool isConvex) override;

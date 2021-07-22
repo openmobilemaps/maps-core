@@ -3,8 +3,8 @@
 
 #include "NativeColorLineShaderInterface.h"  // my header
 #include "Marshal.hpp"
-#include "NativeLineShaderProgramInterface.h"
 #include "NativeLineStyle.h"
+#include "NativeShaderProgramInterface.h"
 
 namespace djinni_generated {
 
@@ -39,13 +39,13 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_C
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ColorLineShaderInterface_00024CppProxy_native_1asLineShaderProgramInterface(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ColorLineShaderInterface_00024CppProxy_native_1asShaderProgramInterface(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::ColorLineShaderInterface>(nativeRef);
-        auto r = ref->asLineShaderProgramInterface();
-        return ::djinni::release(::djinni_generated::NativeLineShaderProgramInterface::fromCpp(jniEnv, r));
+        auto r = ref->asShaderProgramInterface();
+        return ::djinni::release(::djinni_generated::NativeShaderProgramInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

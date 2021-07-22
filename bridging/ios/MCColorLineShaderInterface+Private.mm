@@ -7,8 +7,8 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
-#import "MCLineShaderProgramInterface+Private.h"
 #import "MCLineStyle+Private.h"
+#import "MCShaderProgramInterface+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -45,10 +45,10 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nullable id<MCLineShaderProgramInterface>)asLineShaderProgramInterface {
+- (nullable id<MCShaderProgramInterface>)asShaderProgramInterface {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->asLineShaderProgramInterface();
-        return ::djinni_generated::LineShaderProgramInterface::fromCpp(objcpp_result_);
+        auto objcpp_result_ = _cppRefHandle.get()->asShaderProgramInterface();
+        return ::djinni_generated::ShaderProgramInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -73,11 +73,11 @@ public:
             [djinni_private_get_proxied_objc_object() setHighlighted:(::djinni::Bool::fromCpp(c_highlighted))];
         }
     }
-    std::shared_ptr<::LineShaderProgramInterface> asLineShaderProgramInterface() override
+    std::shared_ptr<::ShaderProgramInterface> asShaderProgramInterface() override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() asLineShaderProgramInterface];
-            return ::djinni_generated::LineShaderProgramInterface::toCpp(objcpp_result_);
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() asShaderProgramInterface];
+            return ::djinni_generated::ShaderProgramInterface::toCpp(objcpp_result_);
         }
     }
 };

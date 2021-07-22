@@ -12,16 +12,18 @@
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
 
-std::string ColorLineShaderOpenGl::getRectProgramName() { return "UBMAP_LineColorRectShaderOpenGl"; }
+std::shared_ptr<ShaderProgramInterface> ColorLineShaderOpenGl::asShaderProgramInterface() { return shared_from_this(); }
 
-std::string ColorLineShaderOpenGl::getPointProgramName() { return "UBMAP_LineColorPointShaderOpenGl"; }
 
-void ColorLineShaderOpenGl::setupRectProgram(const std::shared_ptr<::RenderingContextInterface> &context) {
+std::string ColorLineShaderOpenGl::getProgramName() { return "UBMAP_LineColorShaderOpenGl"; }
+
+
+void ColorLineShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    std::string programName = getRectProgramName();
+    std::string programName = getProgramName();
     // prepare shaders and OpenGL program
-    int vertexShader = loadShader(GL_VERTEX_SHADER, getRectVertexShader());
-    int fragmentShader = loadShader(GL_FRAGMENT_SHADER, getRectFragmentShader());
+    int vertexShader = loadShader(GL_VERTEX_SHADER, getVertexShader());
+    int fragmentShader = loadShader(GL_FRAGMENT_SHADER, getFragmentShader());
 
     int program = glCreateProgram();       // create empty OpenGL Program
     glAttachShader(program, vertexShader); // add the vertex shader to program
@@ -37,99 +39,86 @@ void ColorLineShaderOpenGl::setupRectProgram(const std::shared_ptr<::RenderingCo
     openGlContext->storeProgram(programName, program);
 }
 
-void ColorLineShaderOpenGl::preRenderRect(const std::shared_ptr<::RenderingContextInterface> &context) {
+void ColorLineShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    int program = openGlContext->getProgram(getRectProgramName());
+    int program = openGlContext->getProgram(getProgramName());
 
     int mColorHandle = glGetUniformLocation(program, "vColor");
     // Set color for drawing the triangle
-    glUniform4fv(mColorHandle, 1, &lineColor[0]);
+    std::vector<float> color = {lineColor.r, lineColor.g, lineColor.b, lineColor.a};
+    glUniform4fv(mColorHandle, 1, &color[0]);
 
-    int mMiterHandle = glGetUniformLocation(program, "miter");
-    // Set color for drawing the triangle
+    int mMiterHandle = glGetUniformLocation(program, "width");
     glUniform1f(mMiterHandle, miter);
+
+    int isScaledHandle = glGetUniformLocation(program, "isScaled");
+    glUniform1f(isScaledHandle, lineStyle.widthType == SizeType::SCREEN_PIXEL ? 1.0f : 0.0f);
 }
 
-void ColorLineShaderOpenGl::setupPointProgram(const std::shared_ptr<::RenderingContextInterface> &context) {
-    std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    std::string programName = getPointProgramName();
-    // prepare shaders and OpenGL program
-    int vertexShader = loadShader(GL_VERTEX_SHADER, getPointVertexShader());
-    int fragmentShader = loadShader(GL_FRAGMENT_SHADER, getPointFragmentShader());
-
-    int program = glCreateProgram();       // create empty OpenGL Program
-    glAttachShader(program, vertexShader); // add the vertex shader to program
-    OpenGlHelper::checkGlError("glAttachShader Vertex  ColorLine Point");
-    glDeleteShader(vertexShader);
-    glAttachShader(program, fragmentShader); // add the fragment shader to program
-    OpenGlHelper::checkGlError("glAttachShader Fragment ColorLine Point");
-    glDeleteShader(fragmentShader);
-
-    glLinkProgram(program); // create OpenGL program executables
-    OpenGlHelper::checkGlError("glLinkProgram ColorLine Point");
-
-    openGlContext->storeProgram(programName, program);
+void ColorLineShaderOpenGl::setStyle(const LineStyle &lineStyle) {
+    this->lineStyle = lineStyle;
+    lineColor = isHighlighted ? lineStyle.color.highlighted : lineStyle.color.normal;
+    miter = lineStyle.width;
 }
 
-void ColorLineShaderOpenGl::preRenderPoint(const std::shared_ptr<::RenderingContextInterface> &context) {
-    std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    int program = openGlContext->getProgram(getPointProgramName());
-
-    int mColorHandle = glGetUniformLocation(program, "vColor");
-    // Set color for drawing the point
-    glUniform4fv(mColorHandle, 1, &lineColor[0]);
-
-    int mPointSizeHandle = glGetUniformLocation(program, "vPointSize");
-    // Set point size (twice the stroke width)
-    glUniform1f(mPointSizeHandle, miter * 2);
+void ColorLineShaderOpenGl::setHighlighted(bool highlighted) {
+    lineColor = highlighted ? lineStyle.color.highlighted : lineStyle.color.normal;
+    isHighlighted = highlighted;
 }
 
-void ColorLineShaderOpenGl::setColor(float red, float green, float blue, float alpha) {
-    lineColor = std::vector<float>{red, green, blue, alpha};
-}
-
-void ColorLineShaderOpenGl::setMiter(float miter_) { miter = miter_; }
-
-std::string ColorLineShaderOpenGl::getRectVertexShader() {
+std::string ColorLineShaderOpenGl::getVertexShader() {
     return UBRendererShaderCode(
-        precision highp float; uniform mat4 uMVPMatrix; attribute vec4 vPosition; attribute vec4 vNormal; uniform float miter;
+            precision highp float;
+            uniform mat4 uMVPMatrix;
+            attribute vec3 vPosition;
+            attribute vec3 vWidthNormal;
+            attribute vec3 vLengthNormal;
+            attribute vec3 vPointA;
+            attribute vec3 vPointB;
+            uniform float width;
+            uniform float isScaled;
+            uniform float scaleFactor;
 
-        void main() { gl_Position = uMVPMatrix * (vPosition + (vNormal * vec4(miter, miter, miter, 0.0))); });
+            varying float radius;
+            varying vec3 pointDeltaA;
+            varying vec3 pointBDeltaA;
+            void main() {
+                float scaledWidth = width * 0.5;
+                if (isScaled > 0.0) {
+                    scaledWidth = scaledWidth * scaleFactor;
+                }
+                vec4 extendedPosition = vec4(vPosition.xyz, 1.0) + vec4((vLengthNormal + vWidthNormal).xyz, 0.0)
+                        * vec4(scaledWidth, scaledWidth, scaledWidth, 0.0);
+                radius = scaledWidth;
+                pointDeltaA = (extendedPosition.xyz - vPointA);
+                pointBDeltaA = vPointB - vPointA;
+                gl_Position = uMVPMatrix * extendedPosition;
+            });
 }
 
-std::string ColorLineShaderOpenGl::getRectFragmentShader() {
-    return UBRendererShaderCode(precision mediump float; uniform vec4 vColor;
+std::string ColorLineShaderOpenGl::getFragmentShader() {
+    return UBRendererShaderCode(precision highp float;
+            uniform vec4 vColor;
+            varying float radius;
+            varying vec3 pointDeltaA;
+            varying vec3 pointBDeltaA;
 
-                                void main() {
-                                    gl_FragColor = vColor;
-                                    gl_FragColor.a = 1.0;
-                                    gl_FragColor *= vColor.a;
-                                });
+            void main() {
+                float d = min(length(pointDeltaA), length(pointDeltaA - pointBDeltaA));
+                if (d >= radius) {
+                    float t = dot(pointDeltaA, normalize(pointBDeltaA)) / length(pointBDeltaA);
+                    if (t > 0.0 && t < 1.0) {
+                        vec3 intersectPt = t * pointBDeltaA;
+                        d = abs(length(pointDeltaA - intersectPt));
+                    }
+                }
+
+                if (d > radius) {
+                    discard;
+                }
+
+                gl_FragColor = vColor;
+                gl_FragColor.a = 1.0;
+                gl_FragColor *= vColor.a;
+            });
 }
-
-std::string ColorLineShaderOpenGl::getPointVertexShader() {
-    return UBRendererShaderCode(precision highp float; uniform mat4 uMVPMatrix; attribute vec4 vPosition;
-                                uniform highp float vPointSize;
-
-                                void main() {
-                                    gl_PointSize = vPointSize;
-                                    gl_Position = uMVPMatrix * vPosition;
-                                });
-}
-
-std::string ColorLineShaderOpenGl::getPointFragmentShader() {
-    return UBRendererShaderCode(precision highp float; uniform vec4 vColor;
-
-                                void main() {
-                                    vec2 coord = gl_PointCoord.st - vec2(0.5); // from [0,1] to [-0.5,0.5]
-                                    if (length(coord) > 0.5) {                 // outside of circle radius?
-                                        discard;
-                                    }
-
-                                    gl_FragColor = vColor;
-                                    gl_FragColor.a = 1.0;
-                                    gl_FragColor *= vColor.a;
-                                });
-}
-
-std::shared_ptr<LineShaderProgramInterface> ColorLineShaderOpenGl::asLineShaderProgramInterface() { return shared_from_this(); }

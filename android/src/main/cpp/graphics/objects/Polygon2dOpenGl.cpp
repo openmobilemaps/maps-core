@@ -79,7 +79,7 @@ void Polygon2dOpenGl::clear() {
 }
 
 void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                             int64_t mvpMatrix) {
+                             int64_t mvpMatrix, double screenPixelAsRealMeterFactor) {
     if (!ready)
         return;
 

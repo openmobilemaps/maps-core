@@ -11,7 +11,7 @@ abstract class ColorLineShaderInterface {
 
     abstract fun setHighlighted(highlighted: Boolean)
 
-    abstract fun asLineShaderProgramInterface(): LineShaderProgramInterface
+    abstract fun asShaderProgramInterface(): ShaderProgramInterface
 
     private class CppProxy : ColorLineShaderInterface {
         private val nativeRef: Long
@@ -43,10 +43,10 @@ abstract class ColorLineShaderInterface {
         }
         private external fun native_setHighlighted(_nativeRef: Long, highlighted: Boolean)
 
-        override fun asLineShaderProgramInterface(): LineShaderProgramInterface {
+        override fun asShaderProgramInterface(): ShaderProgramInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_asLineShaderProgramInterface(this.nativeRef)
+            return native_asShaderProgramInterface(this.nativeRef)
         }
-        private external fun native_asLineShaderProgramInterface(_nativeRef: Long): LineShaderProgramInterface
+        private external fun native_asShaderProgramInterface(_nativeRef: Long): ShaderProgramInterface
     }
 }

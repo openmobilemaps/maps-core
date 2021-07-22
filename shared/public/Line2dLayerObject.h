@@ -38,7 +38,7 @@ class Line2dLayerObject : public LayerObjectInterface {
 
     std::shared_ptr<GraphicsObjectInterface> getLineObject();
 
-    std::shared_ptr<LineShaderProgramInterface> getShaderProgram();
+    std::shared_ptr<ShaderProgramInterface> getShaderProgram();
 
   private:
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
