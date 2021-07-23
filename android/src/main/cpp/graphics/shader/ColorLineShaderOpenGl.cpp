@@ -104,13 +104,13 @@ std::string ColorLineShaderOpenGl::getFragmentShader() {
             varying vec3 pointBDeltaA;
 
             void main() {
-                float d = min(length(pointDeltaA), length(pointDeltaA - pointBDeltaA));
-                if (d >= radius) {
-                    float t = dot(pointDeltaA, normalize(pointBDeltaA)) / length(pointBDeltaA);
-                    if (t > 0.0 && t < 1.0) {
-                        vec3 intersectPt = t * pointBDeltaA;
-                        d = abs(length(pointDeltaA - intersectPt));
-                    }
+                float t = dot(pointDeltaA, normalize(pointBDeltaA)) / length(pointBDeltaA);
+                float d;
+                if (t <= 0.0 || t >= 1.0) {
+                    d = min(length(pointDeltaA), length(pointDeltaA - pointBDeltaA));
+                } else {
+                    vec3 intersectPt = t * pointBDeltaA;
+                    d = abs(length(pointDeltaA - intersectPt));
                 }
 
                 if (d > radius) {
