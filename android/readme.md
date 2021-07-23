@@ -244,6 +244,25 @@ iconLayer.setCallbackHandler(object : IconLayerCallbackInterface(){
 mapView.addLayer(iconLayer.asLayerInterface())
 ```
 
+### Line layer
+
+A line layer can be added to the mapView as well. Using the MCLineFactory a LineInfo object can be created. The width can be specified in either SCREEN_PIXEL or MAP_UNIT.
+
+```kotlin
+val lineLayer = LineLayerInterface.create()
+val line = LineFactory.createLine(
+    "lineIdentifier",
+    lineCoordinates,
+    LineStyle(
+        ColorStateList(normal = Color(1.0f, 0.0f, 0.0f, 0.5f), highlighted = Color(1.0f, 0.5f, 0.0f, 0.5f)),
+        SizeType.SCREEN_PIXEL,
+        50.0f
+    )
+)
+lineLayer.add(line)
+mapView.addLayer(lineLayer.asLayerInterface())
+```
+
 ### Adjusting the Camera
 
 The camera position and zoom can easily be adjusted by manipulating the `Camera2dInterface` received from the map. For example, to set a custom location:
