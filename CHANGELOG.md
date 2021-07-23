@@ -3,8 +3,8 @@
 ## next version
 - Add line layer implementation
 
-## Version 1.3.0 (09.03.2021)
-
+## Version 1.3.0 (19.04.2021)
+- fixes iOS retain cycle
 - Native library and relevant header files are now properly included in the published dependency
 - Added a Circle2dLayerObject
 - bugfixes & improvements

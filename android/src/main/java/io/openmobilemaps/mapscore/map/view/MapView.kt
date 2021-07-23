@@ -67,8 +67,8 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	}
 
 	fun registerLifecycle(lifecycle: Lifecycle) {
-		lifecycle.addObserver(this)
 		scheduler.setCoroutineScope(lifecycle.coroutineScope)
+		lifecycle.addObserver(this)
 	}
 
 	override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {

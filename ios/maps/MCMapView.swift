@@ -24,6 +24,7 @@ open class MCMapView: MTKView {
     private let framesToRenderAfterInvalidate: UInt = 1
 
     private let touchHandler: MCMapViewTouchHandler
+    private let callbackHandler = MCMapViewCallbackHandler()
 
     public init(mapConfig: MCMapConfig) {
         let renderingContext = RenderingContext()
@@ -61,7 +62,10 @@ open class MCMapView: MTKView {
 
         isMultipleTouchEnabled = true
 
-        mapInterface.setCallbackHandler(self)
+        callbackHandler.invalidateCallback = { [weak self] in
+            self?.invalidate()
+        }
+        mapInterface.setCallbackHandler(callbackHandler)
 
         touchHandler.mapView = self
 
@@ -100,9 +104,7 @@ open class MCMapView: MTKView {
             isOpaque = newValue?.isOpaque ?? false
         }
     }
-}
 
-extension MCMapView: MCMapCallbackInterface {
     public func invalidate() {
         isPaused = false
         framesToRender = framesToRenderAfterInvalidate
