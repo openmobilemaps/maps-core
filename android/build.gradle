@@ -71,10 +71,10 @@ android {
 	}
 }
 
-/*task copyHeaders(type: Exec){
+task copyHeaders(type: Exec){
 	commandLine './copy_all_header_files_to_include_folder.sh'
 }
-preBuild.dependsOn copyHeaders*/
+preBuild.dependsOn copyHeaders
 
 ext.readProperty = { paramName -> readPropertyWithDefault(paramName, null) }
 ext.readPropertyWithDefault = { paramName, defaultValue ->
