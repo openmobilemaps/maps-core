@@ -1,5 +1,8 @@
 # Changelog for Open Mobile Maps
 
+## next version
+- Add line layer implementation
+
 ## Version 1.3.0 (09.03.2021)
 
 - Native library and relevant header files are now properly included in the published dependency
