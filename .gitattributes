@@ -1,0 +1,3 @@
+# exclude all bridging files from github diff
+bridging/**/* linguist-generated=true
+djinni/yaml/* linguist-generated=true

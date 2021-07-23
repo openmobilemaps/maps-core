@@ -13,43 +13,36 @@
 
 #include "BaseShaderProgramOpenGl.h"
 #include "ColorLineShaderInterface.h"
-#include "LineShaderProgramInterface.h"
+#include "ShaderProgramInterface.h"
 #include <vector>
 
 class ColorLineShaderOpenGl : public BaseShaderProgramOpenGl,
-                              public LineShaderProgramInterface,
                               public ColorLineShaderInterface,
-                              public std::enable_shared_from_this<LineShaderProgramInterface> {
+                              public ShaderProgramInterface,
+                              public std::enable_shared_from_this<ShaderProgramInterface> {
   public:
-    virtual std::shared_ptr<LineShaderProgramInterface> asLineShaderProgramInterface() override;
+    virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() override;
 
-    virtual std::string getRectProgramName() override;
+    virtual std::string getProgramName() override;
 
-    virtual void setupRectProgram(const std::shared_ptr<::RenderingContextInterface> &context) override;
+    virtual void setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
-    virtual void preRenderRect(const std::shared_ptr<::RenderingContextInterface> &context) override;
+    virtual void preRender(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
-    virtual std::string getPointProgramName() override;
+    virtual void setStyle(const ::LineStyle & lineStyle) override;
 
-    virtual void setupPointProgram(const std::shared_ptr<::RenderingContextInterface> &context) override;
+    virtual void setHighlighted(bool highlighted) override;
 
-    virtual void preRenderPoint(const std::shared_ptr<::RenderingContextInterface> &context) override;
+protected:
+    virtual std::string getVertexShader() override;
 
-    virtual std::string getRectVertexShader();
-
-    virtual std::string getRectFragmentShader();
-
-    virtual std::string getPointVertexShader();
-
-    virtual std::string getPointFragmentShader();
-
-    virtual void setColor(float red, float green, float blue, float alpha) override;
-
-    virtual void setMiter(float miter) override;
+    virtual std::string getFragmentShader() override;
 
   private:
-    std::vector<float> lineColor;
+    LineStyle lineStyle = LineStyle(ColorStateList(Color(1.0, 0.0, 0.0, 1.0), Color(1.0, 0.0, 0.0, 1.0)), SizeType::SCREEN_PIXEL, 4.0);
+    Color lineColor = lineStyle.color.normal;
     float miter;
+    bool isHighlighted;
 };
 
 #endif // MAPSDK_COLORLINESHADEROPENGL_H

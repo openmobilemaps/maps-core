@@ -202,6 +202,22 @@ iconLayer?.setCallbackHandler(handler)
 mapView.add(layer: iconLayer?.asLayerInterface())
 ```
 
+### Line layer
+A line layer can be added to the mapView as well. Using the MCLineFactory a LineInfo object can be created. The width can be specified in either SCREEN_PIXEL or MAP_UNIT.
+
+```swift
+let lineLayer = MCLineLayerInterface.create()
+
+lineLayer?.add(MCLineFactory.createLine("lineIdentifier",
+                                        coordinates: lineCoordinates,
+                                        style: MCLineStyle(color: MCColorStateList(normal: UIColor.systemPink.withAlphaComponent(0.5).mapCoreColor,
+                                                                                   highlighted: UIColor.blue.withAlphaComponent(0.5).mapCoreColor),
+                                                           widthType: .SCREEN_PIXEL,
+                                                           width: 50)))
+                                                           
+    mapView.add(layer: lineLayer?.asLayerInterface())
+```
+
 #### Adjusting the Camera
 
 The camera position can easily be adjusted by manipulating the Camera2dInterface received from the map. E.g. to set a custom location:

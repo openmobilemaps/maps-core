@@ -7,11 +7,11 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class ColorLineShaderInterface {
 
-    abstract fun setColor(red: Float, green: Float, blue: Float, alpha: Float)
+    abstract fun setStyle(lineStyle: io.openmobilemaps.mapscore.shared.map.layers.line.LineStyle)
 
-    abstract fun setMiter(miter: Float)
+    abstract fun setHighlighted(highlighted: Boolean)
 
-    abstract fun asLineShaderProgramInterface(): LineShaderProgramInterface
+    abstract fun asShaderProgramInterface(): ShaderProgramInterface
 
     private class CppProxy : ColorLineShaderInterface {
         private val nativeRef: Long
@@ -31,22 +31,22 @@ abstract class ColorLineShaderInterface {
             _djinni_private_destroy()
         }
 
-        override fun setColor(red: Float, green: Float, blue: Float, alpha: Float) {
+        override fun setStyle(lineStyle: io.openmobilemaps.mapscore.shared.map.layers.line.LineStyle) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setColor(this.nativeRef, red, green, blue, alpha)
+            native_setStyle(this.nativeRef, lineStyle)
         }
-        private external fun native_setColor(_nativeRef: Long, red: Float, green: Float, blue: Float, alpha: Float)
+        private external fun native_setStyle(_nativeRef: Long, lineStyle: io.openmobilemaps.mapscore.shared.map.layers.line.LineStyle)
 
-        override fun setMiter(miter: Float) {
+        override fun setHighlighted(highlighted: Boolean) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setMiter(this.nativeRef, miter)
+            native_setHighlighted(this.nativeRef, highlighted)
         }
-        private external fun native_setMiter(_nativeRef: Long, miter: Float)
+        private external fun native_setHighlighted(_nativeRef: Long, highlighted: Boolean)
 
-        override fun asLineShaderProgramInterface(): LineShaderProgramInterface {
+        override fun asShaderProgramInterface(): ShaderProgramInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_asLineShaderProgramInterface(this.nativeRef)
+            return native_asShaderProgramInterface(this.nativeRef)
         }
-        private external fun native_asLineShaderProgramInterface(_nativeRef: Long): LineShaderProgramInterface
+        private external fun native_asShaderProgramInterface(_nativeRef: Long): ShaderProgramInterface
     }
 }

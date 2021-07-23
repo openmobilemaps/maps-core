@@ -34,7 +34,7 @@ private:
         ~JavaProxy();
 
         std::shared_ptr<::Quad2dInterface> createQuad(const std::shared_ptr<::ShaderProgramInterface> & shader) override;
-        std::shared_ptr<::Line2dInterface> createLine(const std::shared_ptr<::LineShaderProgramInterface> & lineShader) override;
+        std::shared_ptr<::Line2dInterface> createLine(const std::shared_ptr<::ShaderProgramInterface> & shader) override;
         std::shared_ptr<::Polygon2dInterface> createPolygon(const std::shared_ptr<::ShaderProgramInterface> & shader) override;
 
     private:
@@ -43,7 +43,7 @@ private:
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/objects/GraphicsObjectFactoryInterface") };
     const jmethodID method_createQuad { ::djinni::jniGetMethodID(clazz.get(), "createQuad", "(Lio/openmobilemaps/mapscore/shared/graphics/shader/ShaderProgramInterface;)Lio/openmobilemaps/mapscore/shared/graphics/objects/Quad2dInterface;") };
-    const jmethodID method_createLine { ::djinni::jniGetMethodID(clazz.get(), "createLine", "(Lio/openmobilemaps/mapscore/shared/graphics/shader/LineShaderProgramInterface;)Lio/openmobilemaps/mapscore/shared/graphics/objects/Line2dInterface;") };
+    const jmethodID method_createLine { ::djinni::jniGetMethodID(clazz.get(), "createLine", "(Lio/openmobilemaps/mapscore/shared/graphics/shader/ShaderProgramInterface;)Lio/openmobilemaps/mapscore/shared/graphics/objects/Line2dInterface;") };
     const jmethodID method_createPolygon { ::djinni::jniGetMethodID(clazz.get(), "createPolygon", "(Lio/openmobilemaps/mapscore/shared/graphics/shader/ShaderProgramInterface;)Lio/openmobilemaps/mapscore/shared/graphics/objects/Polygon2dInterface;") };
 };
 

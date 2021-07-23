@@ -18,8 +18,8 @@ std::shared_ptr<Quad2dInterface> GraphicsObjectFactoryOpenGl::createQuad(const s
 }
 
 std::shared_ptr<Line2dInterface>
-GraphicsObjectFactoryOpenGl::createLine(const std::shared_ptr<::LineShaderProgramInterface> &lineShader) {
-    return std::make_shared<Line2dOpenGl>(lineShader);
+GraphicsObjectFactoryOpenGl::createLine(const std::shared_ptr<::ShaderProgramInterface> &Shader) {
+    return std::make_shared<Line2dOpenGl>(Shader);
 }
 
 std::shared_ptr<Polygon2dInterface>

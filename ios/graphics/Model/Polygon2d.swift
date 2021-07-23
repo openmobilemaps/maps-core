@@ -33,7 +33,8 @@ class Polygon2d: BaseGraphicsObject {
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
                          renderPass _: MCRenderPassConfig,
-                         mvpMatrix: Int64)
+                         mvpMatrix: Int64,
+                         screenPixelAsRealMeterFactor _: Double)
     {
         guard let verticesBuffer = verticesBuffer,
               let indicesBuffer = indicesBuffer

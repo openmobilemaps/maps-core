@@ -12,6 +12,7 @@
 
 #include "ColorLineShaderInterface.h"
 #include "Coord.h"
+#include "LineStyle.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "LayerObjectInterface.h"
 #include "Line2dInterface.h"
@@ -31,9 +32,13 @@ class Line2dLayerObject : public LayerObjectInterface {
 
     void setPositions(std::vector<Coord> positions);
 
+    void setStyle(const LineStyle &style);
+
+    void setHighlighted(bool highlighted);
+
     std::shared_ptr<GraphicsObjectInterface> getLineObject();
 
-    std::shared_ptr<LineShaderProgramInterface> getShaderProgram();
+    std::shared_ptr<ShaderProgramInterface> getShaderProgram();
 
   private:
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;

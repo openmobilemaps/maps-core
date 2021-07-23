@@ -89,6 +89,8 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual double mapUnitsFromPixels(double distancePx) override;
 
+    virtual double getScalingFactor() override;
+
   protected:
     std::set<std::shared_ptr<MapCamera2dListenerInterface>> listeners;
 
