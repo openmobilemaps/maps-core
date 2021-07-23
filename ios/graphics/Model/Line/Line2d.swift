@@ -13,7 +13,7 @@ import MapCoreSharedModule
 import Metal
 
 class Line2d: BaseGraphicsObject {
-    private var shader: MCLineShaderProgramInterface
+    private var shader: MCShaderProgramInterface
 
     private var lineVerticesBuffer: MTLBuffer?
     private var lineIndicesBuffer: MTLBuffer?
@@ -22,7 +22,7 @@ class Line2d: BaseGraphicsObject {
     private var stencilState: MTLDepthStencilState?
     private var clearStencilState: MTLDepthStencilState?
 
-    init(shader: MCLineShaderProgramInterface, metalContext: MetalContext) {
+    init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader
         super.init(device: metalContext.device,
                    sampler: metalContext.samplerLibrary.value(.magLinear))
@@ -74,9 +74,9 @@ class Line2d: BaseGraphicsObject {
 
         (shader as? ColorLineShader)?.screenPixelAsRealMeterFactor = screenPixelAsRealMeterFactor
 
-        shader.setupRectProgram(context)
-        shader.preRenderRect(context)
-
+        shader.setupProgram(context)
+        shader.preRender(context)
+        
         encoder.setVertexBuffer(lineVerticesBuffer, offset: 0, index: 0)
         let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix))!
         encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
@@ -111,14 +111,14 @@ extension Line2d: MCLine2dInterface {
             let lineNormalY = ciNext.xF - ci.xF
             let lineLength = sqrt(lineNormalX * lineNormalX + lineNormalY * lineNormalY)
 
-            let miterX: Float = lineNormalX / lineLength * 1 / 2;
-            let miterY: Float = lineNormalY / lineLength * 1 / 2;
+            let miterX: Float = lineNormalX
+            let miterY: Float = lineNormalY
 
-            let ciX = ci.xF - (ciNext.xF - ci.xF) / lineLength * 1 / 2;
-            let ciY = ci.yF - (ciNext.yF - ci.yF) / lineLength * 1 / 2;
+            let ciX = ci.xF - (ciNext.xF - ci.xF)
+            let ciY = ci.yF - (ciNext.yF - ci.yF)
 
-            let ciNextX = ciNext.xF - (ci.xF - ciNext.xF) / lineLength * 1 / 2
-            let ciNextY = ciNext.yF - (ci.yF - ciNext.yF) / lineLength * 1 / 2
+            let ciNextX = ciNext.xF - (ci.xF - ciNext.xF)
+            let ciNextY = ciNext.yF - (ci.yF - ciNext.yF)
 
             let fromOrigin = MCVec2D(x: (ciNext.x - ci.x), y: (ciNext.y - ci.y))
             let divisor = sqrt(fromOrigin.x * fromOrigin.x + fromOrigin.y * fromOrigin.y)

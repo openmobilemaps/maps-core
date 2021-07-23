@@ -27,27 +27,14 @@ class ColorLineShader: BaseShader {
 
     private var state = State.normal
 
-}
-
-extension ColorLineShader: MCLineShaderProgramInterface {
-    func preRenderPoint(_ context: MCRenderingContextInterface?) {}
-
-    func setupPointProgram(_: MCRenderingContextInterface?) {}
-
-    func getRectProgramName() -> String { "" }
-
-    func getPointProgramName() -> String { "" }
-
-    func setupRectProgram(_: MCRenderingContextInterface?) {
+    override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
             pipeline = MetalContext.current.pipelineLibrary.value(PipelineKey.lineShader)
         }
     }
 
-
-    func preRenderRect(_ context: MCRenderingContextInterface?) {
-        guard let context = context as? RenderingContext,
-              let encoder = context.encoder,
+    override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
+        guard let encoder = context.encoder,
               let pipeline = pipeline,
               let style = style else { return }
 
@@ -77,9 +64,11 @@ extension ColorLineShader: MCLineShaderProgramInterface {
         encoder.setVertexBytes(&scaledWidth, length: MemoryLayout<Float>.stride, index: 2)
 
     }
+
 }
 
 extension ColorLineShader: MCColorLineShaderInterface {
+
     func setHighlighted(_ highlighted: Bool) {
         if highlighted {
             state = .highlighted
@@ -92,7 +81,8 @@ extension ColorLineShader: MCColorLineShaderInterface {
         style = lineStyle
     }
 
-    func asLineShaderProgram() -> MCLineShaderProgramInterface? {
+
+    func asShaderProgram() -> MCShaderProgramInterface? {
         self
     }
 }
