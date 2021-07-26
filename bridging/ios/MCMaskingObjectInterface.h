@@ -10,6 +10,7 @@
 
 - (void)renderAsMask:(nullable id<MCRenderingContextInterface>)context
           renderPass:(nonnull MCRenderPassConfig *)renderPass
-           mvpMatrix:(int64_t)mvpMatrix;
+           mvpMatrix:(int64_t)mvpMatrix
+screenPixelAsRealMeterFactor:(double)screenPixelAsRealMeterFactor;
 
 @end

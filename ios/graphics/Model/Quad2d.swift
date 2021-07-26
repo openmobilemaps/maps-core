@@ -62,7 +62,11 @@ class Quad2d: BaseGraphicsObject {
 }
 
 extension Quad2d: MCMaskingObjectInterface {
-    func render(asMask context: MCRenderingContextInterface?, renderPass: MCRenderPassConfig, mvpMatrix: Int64) {
+
+    func render(asMask context: MCRenderingContextInterface?,
+                renderPass: MCRenderPassConfig,
+                mvpMatrix: Int64,
+                screenPixelAsRealMeterFactor: Double) {
         guard let context = context as? RenderingContext,
               let encoder = context.encoder else { return }
 
@@ -71,7 +75,12 @@ extension Quad2d: MCMaskingObjectInterface {
             encoder.setStencilReferenceValue(0b10000000)
         }
 
-        render(encoder: encoder, context: context, renderPass: renderPass, mvpMatrix: mvpMatrix, isMasked: false)
+        render(encoder: encoder,
+               context: context,
+               renderPass: renderPass,
+               mvpMatrix: mvpMatrix,
+               isMasked: false,
+               screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)
     }
 
 }

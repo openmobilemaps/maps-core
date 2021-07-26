@@ -157,7 +157,8 @@ extension Polygon2d: MCMaskingObjectInterface {
 
     func render(asMask context: MCRenderingContextInterface?,
                 renderPass: MCRenderPassConfig,
-                mvpMatrix: Int64) {
+                mvpMatrix: Int64,
+                screenPixelAsRealMeterFactor: Double) {
         assertionFailure("not yet implemented")
     }
 }
