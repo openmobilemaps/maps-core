@@ -16,3 +16,8 @@ Tiled2dMapRasterLayerInterface::create(const std::shared_ptr<::Tiled2dMapLayerCo
                                        const std::shared_ptr<::TileLoaderInterface> & tileLoader) {
     return std::make_shared<Tiled2dMapRasterLayer>(layerConfig, tileLoader);
 }
+
+
+std::shared_ptr<Tiled2dMapRasterLayerInterface> Tiled2dMapRasterLayerInterface::createWithMask(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::shared_ptr<::TileLoaderInterface> & tileLoader, const std::shared_ptr<::MaskingObjectInterface> & mask){
+    return std::make_shared<Tiled2dMapRasterLayer>(layerConfig, tileLoader, mask);
+}

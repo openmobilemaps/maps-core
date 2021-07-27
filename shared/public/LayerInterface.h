@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "MaskingObjectInterface.h"
 #include "RenderPassInterface.h"
 #include <memory>
 #include <vector>
@@ -12,6 +13,8 @@ class MapInterface;
 class LayerInterface {
 public:
     virtual ~LayerInterface() {}
+
+    virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) = 0;
 
     virtual void update() = 0;
 

@@ -245,3 +245,5 @@ bool PolygonLayer::onClickUnconfirmed(const ::Vec2F &posScreen) {
     return false;
 }
 
+
+void PolygonLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) {}

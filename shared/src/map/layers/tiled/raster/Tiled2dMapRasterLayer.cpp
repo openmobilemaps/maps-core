@@ -19,7 +19,12 @@
 
 Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                                              const std::shared_ptr<::TileLoaderInterface> & tileLoader)
-        : Tiled2dMapLayer(layerConfig), textureLoader(tileLoader), alpha(1.0) {}
+: Tiled2dMapLayer(layerConfig), textureLoader(tileLoader), alpha(1.0) {}
+
+Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
+                                             const std::shared_ptr<::TileLoaderInterface> & tileLoader,
+                                             const std::shared_ptr<::MaskingObjectInterface> & mask): Tiled2dMapLayer(layerConfig), textureLoader(tileLoader), alpha(1.0),
+                                                 mask(mask) {}
 
 void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface) {
     rasterSource = std::make_shared<Tiled2dMapRasterSource>(mapInterface->getMapConfig(), layerConfig,
@@ -129,7 +134,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
         std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
         for (const auto &passEntry : renderPassObjectMap) {
             std::shared_ptr<RenderPass> renderPass =
-                    std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second, nullptr);
+                    std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second, mask);
             newRenderPasses.push_back(renderPass);
         }
         renderPasses = newRenderPasses;

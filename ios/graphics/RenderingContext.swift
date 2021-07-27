@@ -46,7 +46,12 @@ class RenderingContext: NSObject {
 
     func clearStencilBuffer() {
         guard let encoder = encoder else { return }
-        stencilClearQuad.render(encoder: encoder, context: self, renderPass: .init(), mvpMatrix: 0, isMasked: false, screenPixelAsRealMeterFactor: 1)
+        stencilClearQuad.render(encoder: encoder,
+                                context: self,
+                                renderPass: .init(),
+                                mvpMatrix: 0,
+                                isMasked: false,
+                                screenPixelAsRealMeterFactor: 1)
     }
 }
 

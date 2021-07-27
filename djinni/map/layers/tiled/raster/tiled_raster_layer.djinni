@@ -2,8 +2,10 @@
 @extern "../../../../yaml/tile_loader_interface.yaml"
 @extern "../../../../yaml/layer_interface.yaml"
 @extern "../../../../yaml/coord.yaml"
+@extern "../../../../yaml/masking_object_interface.yaml"
 
 tiled_2d_map_raster_layer_interface = interface +c {
+    static create_with_mask(layer_config: tiled_2d_map_layer_config, tile_loader: tile_loader_interface, mask: masking_object_interface) : tiled_2d_map_raster_layer_interface;
     static create(layer_config: tiled_2d_map_layer_config, tile_loader: tile_loader_interface) : tiled_2d_map_raster_layer_interface;
     asLayerInterface(): layer_interface;
     set_callback_handler(handler: tiled_2d_map_raster_layer_callback_interface);

@@ -48,6 +48,9 @@ class PolygonLayer : public PolygonLayerInterface,
     virtual void setCallbackHandler(const std::shared_ptr<PolygonLayerCallbackInterface> &handler) override;
 
     // LayerInterface
+
+    virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) override;
+
     virtual void update() override{};
 
     virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override;

@@ -20,9 +20,12 @@
 #include "Polygon2dLayerObject.h"
 #include "QuadMaskObject.h"
 
-class Tiled2dMapVectorSubLayer : public LayerInterface, public std::enable_shared_from_this<Tiled2dMapVectorSubLayer> {
+class Tiled2dMapVectorSubLayer : public LayerInterface,
+                                 public std::enable_shared_from_this<Tiled2dMapVectorSubLayer> {
 public:
     Tiled2dMapVectorSubLayer(const Color &fillColor);
+
+    virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) override;
 
     virtual void update() override;
 

@@ -7,6 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "MCLayerInterface+Private.h"
+#import "MCMaskingObjectInterface+Private.h"
 #import "MCTileLoaderInterface+Private.h"
 #import "MCTiled2dMapLayerConfig+Private.h"
 #import "MCTiled2dMapRasterLayerCallbackInterface+Private.h"
@@ -32,6 +33,17 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
         _cppRefHandle.assign(cppRef);
     }
     return self;
+}
+
++ (nullable MCTiled2dMapRasterLayerInterface *)createWithMask:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
+                                                   tileLoader:(nullable id<MCTileLoaderInterface>)tileLoader
+                                                         mask:(nullable id<MCMaskingObjectInterface>)mask {
+    try {
+        auto objcpp_result_ = ::Tiled2dMapRasterLayerInterface::createWithMask(::djinni_generated::Tiled2dMapLayerConfig::toCpp(layerConfig),
+                                                                               ::djinni_generated::TileLoaderInterface::toCpp(tileLoader),
+                                                                               ::djinni_generated::MaskingObjectInterface::toCpp(mask));
+        return ::djinni_generated::Tiled2dMapRasterLayerInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
 + (nullable MCTiled2dMapRasterLayerInterface *)create:(nullable id<MCTiled2dMapLayerConfig>)layerConfig

@@ -250,3 +250,6 @@ void LineLayer::clearTouch() {
     }
     mapInterface->invalidate();
 }
+
+
+void LineLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) {}

@@ -219,3 +219,6 @@ void Tiled2dMapVectorSubLayer::preGenerateRenderPasses() {
     }
     renderPasses = newRenderPasses;
 }
+
+
+void Tiled2dMapVectorSubLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) {}

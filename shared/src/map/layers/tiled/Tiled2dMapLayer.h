@@ -29,6 +29,8 @@ class Tiled2dMapLayer : public LayerInterface,
 
     void setSourceInterface(const std::shared_ptr<Tiled2dMapSourceInterface> &sourceInterface);
 
+    virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) override;
+
     virtual void update() override = 0;
 
     virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override = 0;

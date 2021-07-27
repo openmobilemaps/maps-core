@@ -302,8 +302,4 @@ bool IconLayer::onClickConfirmed(const Vec2F &posScreen) {
 }
 
 
-
-
-
-
-
+void IconLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) {}
