@@ -155,8 +155,8 @@ void Polygon2dOpenGl::drawPolygon(std::shared_ptr<OpenGlContext> openGlContext, 
     glDisable(GL_BLEND);
 }
 
-void Polygon2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                                   int64_t mvpMatrix) {
+void Polygon2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
+                                   int64_t mvpMatrix, double screenPixelAsRealMeterFactor) {
     if (!ready) return;
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);

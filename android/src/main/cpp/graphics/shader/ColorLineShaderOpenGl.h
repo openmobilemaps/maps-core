@@ -43,5 +43,3 @@ protected:
     float miter;
     bool isHighlighted;
 };
-
-#endif // MAPSDK_COLORLINESHADEROPENGL_H
