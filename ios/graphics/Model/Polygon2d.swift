@@ -159,7 +159,36 @@ extension Polygon2d: MCMaskingObjectInterface {
                 renderPass: MCRenderPassConfig,
                 mvpMatrix: Int64,
                 screenPixelAsRealMeterFactor: Double) {
-        assertionFailure("not yet implemented")
+        guard let context = context as? RenderingContext,
+              let encoder = context.encoder else { return }
+
+        guard let verticesBuffer = verticesBuffer,
+              let indicesBuffer = indicesBuffer
+        else { return }
+
+
+        if stencilStatePrepare == nil || stencilState == nil {
+            setupStencilStates()
+        }
+
+        if let mask = context.polygonMask {
+            encoder.setDepthStencilState(mask)
+            encoder.setStencilReferenceValue(0b10000000)
+        }
+
+        // stencil prepare pass
+        shader.setupProgram(context)
+        shader.preRender(context)
+
+        var c = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
+        encoder.setFragmentBytes(&c, length: MemoryLayout<SIMD4<Float>>.stride, index: 1)
+
+        encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
+        let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix))!
+        encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+
+        encoder.drawIndexedPrimitives(type: .triangle, indexCount: indicesCount, indexType: .uint16, indexBuffer: indicesBuffer, indexBufferOffset: 0)
+
     }
 }
 
