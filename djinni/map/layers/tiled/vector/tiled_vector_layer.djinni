@@ -1,8 +1,0 @@
-@extern "../../../../yaml/tiled_2d_map_layer_config.yaml"
-@extern "../../../../yaml/tile_loader_interface.yaml"
-@extern "../../../../yaml/layer_interface.yaml"
-
-tiled_2d_map_vector_layer_interface = interface +c {
-    static create(layer_config: tiled_2d_map_layer_config, tile_loader: tile_loader_interface) : tiled_2d_map_vector_layer_interface;
-    asLayerInterface(): layer_interface;
-}
