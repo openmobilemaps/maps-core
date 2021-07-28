@@ -28,7 +28,7 @@ public:
         parseDoc();
     };
 
-    std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayer(const std::string & identifier, const std::shared_ptr<::TileLoaderInterface> & tileLoader) override {
+    std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayer(const std::string & identifier, const std::shared_ptr<::TextureLoaderInterface> & textureLoader) override {
 
         for (auto &description : layers) {
 
@@ -36,7 +36,7 @@ public:
                 continue; // TODO: Codestyle - Map or find instead of loop
             }
 
-            return createLayer(description, tileLoader);
+            return createLayer(description, textureLoader);
 
         }
 
@@ -155,7 +155,7 @@ private:
         }
     }
 
-    std::shared_ptr< ::Tiled2dMapRasterLayerInterface> createLayer(WmtsLayerDescription &description, const std::shared_ptr< ::TileLoaderInterface> &tileLoader) {
+    std::shared_ptr< ::Tiled2dMapRasterLayerInterface> createLayer(WmtsLayerDescription &description, const std::shared_ptr< ::TextureLoaderInterface> &textureLoader) {
 
         auto matrixSet = matrixSets.at(description.tileMatrixSetLink);
 
@@ -194,7 +194,7 @@ private:
 
         auto layerConfig = WmtsTiled2dMapLayerConfigFactory::create(description, zoomLevels, zoomInfo, matrixSet.coordinateSystemIdentifier);
         //
-        return Tiled2dMapRasterLayerInterface::create(layerConfig, tileLoader);
+        return Tiled2dMapRasterLayerInterface::create(layerConfig, textureLoader);
     }
 
 };

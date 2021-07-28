@@ -5,13 +5,11 @@ package io.openmobilemaps.mapscore.shared.map.loader
 
 import java.util.concurrent.atomic.AtomicBoolean
 
-abstract class TileLoaderInterface {
+abstract class TextureLoaderInterface {
 
     abstract fun loadTexture(url: String): TextureLoaderResult
 
-    abstract fun loadVectorTile(url: String): VectorTileLoaderResult
-
-    private class CppProxy : TileLoaderInterface {
+    private class CppProxy : TextureLoaderInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 
@@ -34,11 +32,5 @@ abstract class TileLoaderInterface {
             return native_loadTexture(this.nativeRef, url)
         }
         private external fun native_loadTexture(_nativeRef: Long, url: String): TextureLoaderResult
-
-        override fun loadVectorTile(url: String): VectorTileLoaderResult {
-            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_loadVectorTile(this.nativeRef, url)
-        }
-        private external fun native_loadVectorTile(_nativeRef: Long, url: String): VectorTileLoaderResult
     }
 }
