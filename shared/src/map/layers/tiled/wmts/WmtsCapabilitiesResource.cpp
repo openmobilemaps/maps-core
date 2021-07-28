@@ -36,14 +36,11 @@ public:
                 continue; // TODO: Codestyle - Map or find instead of loop
             }
 
-            return createLayer(identifier, tileLoader);
+            return createLayer(description, tileLoader);
 
         }
 
         return nullptr;
-
-
-
     };
 
     std::vector<WmtsLayerDescription> getAllLayers() override {
