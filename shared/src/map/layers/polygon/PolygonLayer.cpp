@@ -18,7 +18,6 @@
 #include "RenderPass.h"
 #include "RenderObject.h"
 #include <map>
-#include <logger/Logger.h>
 
 PolygonLayer::PolygonLayer()
         : isHidden(false) {}

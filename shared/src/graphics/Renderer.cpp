@@ -8,7 +8,6 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#include <logger/Logger.h>
 #include "Renderer.h"
 #include "Matrix.h"
 #include "CameraInterface.h"
