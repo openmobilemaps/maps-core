@@ -22,6 +22,13 @@ open class MCScheduler: MCSchedulerInterface {
 
     private var outstandingOperations: [String: TaskOperation] = [:]
 
+    deinit {
+        outstandingOperations.removeAll()
+        computationQueue.cancelAllOperations()
+        graphicsQueue.cancelAllOperations()
+        ioQueue.cancelAllOperations()
+    }
+
     public func addTask(_ task: MCTaskInterface?) {
         guard let task = task else { return }
 
@@ -33,7 +40,7 @@ open class MCScheduler: MCSchedulerInterface {
             guard let self = self else { return }
             self.cleanUpFinishedOutstandingOperations()
 
-            let operation = TaskOperation(task: task)
+            let operation = TaskOperation(task: task, scheduler: self)
 
             switch config.priority {
             case .HIGH:
@@ -118,12 +125,18 @@ private extension OperationQueue {
 
 private class TaskOperation: Operation {
     var task: MCTaskInterface
+    weak var scheduler: MCScheduler?
 
-    init(task: MCTaskInterface) {
+
+    init(task: MCTaskInterface, scheduler: MCScheduler) {
         self.task = task
+        self.scheduler = scheduler
     }
 
     override func main() {
+        guard scheduler != nil else {
+            return
+        }
         task.run()
     }
 }

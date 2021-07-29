@@ -187,7 +187,7 @@ void Tiled2dMapSource<T, L>::onVisibleTilesChanged(const std::unordered_set<Prio
         dispatchedTasks++;
     }
 
-    listener->onTilesUpdated();
+    if (listener.lock()) listener.lock()->onTilesUpdated();
 }
 
 template <class T, class L> std::optional<Tiled2dMapTileInfo> Tiled2dMapSource<T, L>::dequeueLoadingTask() {
@@ -258,6 +258,6 @@ template <class T, class L> void Tiled2dMapSource<T, L>::performLoadingTask() {
 
         currentlyLoading.erase(*tile);
 
-        listener->onTilesUpdated();
+        if (listener.lock()) listener.lock()->onTilesUpdated();
     }
 }

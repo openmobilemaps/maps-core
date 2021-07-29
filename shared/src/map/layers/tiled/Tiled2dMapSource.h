@@ -51,7 +51,7 @@ template <class T, class L> class Tiled2dMapSource : public Tiled2dMapSourceInte
     std::string layerSystemId;
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
     std::shared_ptr<SchedulerInterface> scheduler;
-    std::shared_ptr<Tiled2dMapSourceListenerInterface> listener;
+    std::weak_ptr<Tiled2dMapSourceListenerInterface> listener;
 
     std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfos;
     const Tiled2dMapZoomInfo zoomInfo;
