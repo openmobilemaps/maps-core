@@ -22,13 +22,6 @@ open class MCScheduler: MCSchedulerInterface {
 
     private var outstandingOperations: [String: TaskOperation] = [:]
 
-    deinit {
-        outstandingOperations.removeAll()
-        computationQueue.cancelAllOperations()
-        graphicsQueue.cancelAllOperations()
-        ioQueue.cancelAllOperations()
-    }
-
     public func addTask(_ task: MCTaskInterface?) {
         guard let task = task else { return }
 
