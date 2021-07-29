@@ -91,6 +91,8 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual double getScalingFactor() override;
 
+    virtual void setRotationEnabled(bool enabled) override;
+
   protected:
     std::set<std::shared_ptr<MapCamera2dListenerInterface>> listeners;
 

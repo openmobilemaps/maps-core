@@ -49,6 +49,8 @@ abstract class MapCamera2dInterface {
 
     abstract fun mapUnitsFromPixels(distancePx: Double): Double
 
+    abstract fun setRotationEnabled(enabled: Boolean)
+
     abstract fun asCameraInterface(): io.openmobilemaps.mapscore.shared.graphics.CameraInterface
 
     companion object {
@@ -201,6 +203,12 @@ abstract class MapCamera2dInterface {
             return native_mapUnitsFromPixels(this.nativeRef, distancePx)
         }
         private external fun native_mapUnitsFromPixels(_nativeRef: Long, distancePx: Double): Double
+
+        override fun setRotationEnabled(enabled: Boolean) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setRotationEnabled(this.nativeRef, enabled)
+        }
+        private external fun native_setRotationEnabled(_nativeRef: Long, enabled: Boolean)
 
         override fun asCameraInterface(): io.openmobilemaps.mapscore.shared.graphics.CameraInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

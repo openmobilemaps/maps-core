@@ -107,5 +107,7 @@ map_camera_2d_interface = interface +c {
     coord_from_screen_position(pos_screen: vec_2_f): coord;
     map_units_from_pixels(distancePx: f64): f64;
 
+    set_rotation_enabled(enabled: bool);
+
     as_camera_interface(): camera_interface;
 }
