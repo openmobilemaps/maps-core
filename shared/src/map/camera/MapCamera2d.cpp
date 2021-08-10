@@ -46,7 +46,7 @@ void MapCamera2d::viewportSizeChanged() {
         double widthDeviceM = screenPixelAsRealMeterFactor * viewportSize.x;
         double heightDeviceM = screenPixelAsRealMeterFactor * viewportSize.y;
         zoomMin = std::max(boundsHeightM / heightDeviceM, boundsWidthM / widthDeviceM);
-        zoom = zoomMin;
+        zoom = std::max(std::min(zoom, zoomMin), zoomMax);
     }
 
     notifyListeners();
@@ -62,6 +62,7 @@ void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
         this->centerPosition.x = positionMapSystem.x;
         this->centerPosition.y = positionMapSystem.y;
         notifyListeners();
+        mapInterface->invalidate();
     }
 }
 
@@ -85,6 +86,7 @@ void MapCamera2d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
         this->centerPosition.x = positionMapSystem.x;
         this->centerPosition.y = positionMapSystem.y;
         notifyListeners();
+        mapInterface->invalidate();
     }
 }
 
