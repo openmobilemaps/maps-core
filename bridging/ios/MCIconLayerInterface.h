@@ -28,6 +28,4 @@
 
 - (void)invalidate;
 
-- (void)invalidateIcon:(nullable MCIconInfoInterface *)icon;
-
 @end

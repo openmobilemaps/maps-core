@@ -39,5 +39,4 @@ icon_layer_interface = interface +c {
     set_callback_handler(handler: icon_layer_callback_interface);
     asLayerInterface(): layer_interface;
     invalidate();
-    invalidate_icon(icon: icon_info_interface);
 }

@@ -154,38 +154,6 @@ void IconLayer::invalidate() {
     setIcons(getIcons());
 }
 
-void IconLayer::invalidateIcon(const std::shared_ptr<IconInfoInterface> & icon) {
-    {
-        std::lock_guard<std::recursive_mutex> lock(iconsMutex);
-        for (const auto &existingIcon : icons) {
-            if (existingIcon.first->getIdentifier() != icon->getIdentifier()) {
-                continue;
-            }
-
-            Coord iconPosRender = mapInterface->getCoordinateConverterHelper()->convertToRenderSystem(icon->getCoordinate());
-            float halfW = icon->getIconSize().x * 0.5f;
-            float halfH = icon->getIconSize().y * 0.5f;
-            existingIcon.second->setRectCoord(
-                    RectCoord(Coord(iconPosRender.systemIdentifier, iconPosRender.x - halfW, iconPosRender.y - halfH, iconPosRender.y),
-                              Coord(iconPosRender.systemIdentifier, iconPosRender.x + halfW, iconPosRender.y + halfH,
-                                    iconPosRender.y)));
-            std::string taskId =
-                    "IconLayer_invalidate_icon_" + icon->getIdentifier();
-            mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
-                    TaskConfig(taskId, 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
-                    [=] {
-                        existingIcon.second->getQuadObject()->asGraphicsObject()->clear();
-                        existingIcon.second->getQuadObject()->asGraphicsObject()->setup(mapInterface->getRenderingContext());
-                        existingIcon.second->getQuadObject()->loadTexture(icon->getTexture());
-                    }));
-        }
-    }
-
-    preGenerateRenderPasses();
-    if (mapInterface)
-        mapInterface->invalidate();
-}
-
 std::vector<std::shared_ptr<::RenderPassInterface>> IconLayer::buildRenderPasses() {
     if (isHidden) {
         return {};

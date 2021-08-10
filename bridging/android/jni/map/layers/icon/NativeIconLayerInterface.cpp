@@ -105,13 +105,4 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icon_I
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icon_IconLayerInterface_00024CppProxy_native_1invalidateIcon(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_icon)
-{
-    try {
-        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
-        const auto& ref = ::djinni::objectFromHandleAddress<::IconLayerInterface>(nativeRef);
-        ref->invalidateIcon(::djinni_generated::NativeIconInfoInterface::toCpp(jniEnv, j_icon));
-    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
-}
-
 }  // namespace djinni_generated

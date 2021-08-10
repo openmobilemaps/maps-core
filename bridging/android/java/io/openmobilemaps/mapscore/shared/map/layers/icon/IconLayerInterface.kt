@@ -23,8 +23,6 @@ abstract class IconLayerInterface {
 
     abstract fun invalidate()
 
-    abstract fun invalidateIcon(icon: IconInfoInterface)
-
     companion object {
         @JvmStatic
         fun create(): IconLayerInterface {
@@ -97,12 +95,6 @@ abstract class IconLayerInterface {
             native_invalidate(this.nativeRef)
         }
         private external fun native_invalidate(_nativeRef: Long)
-
-        override fun invalidateIcon(icon: IconInfoInterface) {
-            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_invalidateIcon(this.nativeRef, icon)
-        }
-        private external fun native_invalidateIcon(_nativeRef: Long, icon: IconInfoInterface)
 
         companion object {
             @JvmStatic

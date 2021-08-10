@@ -50,8 +50,6 @@ class IconLayer : public IconLayerInterface,
 
     virtual void invalidate() override;
 
-    virtual void invalidateIcon(const std::shared_ptr<IconInfoInterface> & icon) override;
-
     // LayerInterface
     virtual void update() override {};
 
