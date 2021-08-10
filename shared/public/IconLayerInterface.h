@@ -31,4 +31,6 @@ public:
     virtual std::shared_ptr<::LayerInterface> asLayerInterface() = 0;
 
     virtual void invalidate() = 0;
+
+    virtual void invalidateIcon(const std::shared_ptr<IconInfoInterface> & icon) = 0;
 };
