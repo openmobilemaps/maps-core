@@ -29,10 +29,11 @@ open class MCScheduler: MCSchedulerInterface {
 
         let delay = TimeInterval(Double(config.delay) / 1000.0)
 
-        internalSchedulerQueue.asyncAfter(deadline: .now() + delay) {
+        internalSchedulerQueue.asyncAfter(deadline: .now() + delay) { [weak self] in
+            guard let self = self else { return }
             self.cleanUpFinishedOutstandingOperations()
 
-            let operation = TaskOperation(task: task)
+            let operation = TaskOperation(task: task, scheduler: self)
 
             switch config.priority {
             case .HIGH:
@@ -117,12 +118,18 @@ private extension OperationQueue {
 
 private class TaskOperation: Operation {
     var task: MCTaskInterface
+    weak var scheduler: MCScheduler?
 
-    init(task: MCTaskInterface) {
+
+    init(task: MCTaskInterface, scheduler: MCScheduler) {
         self.task = task
+        self.scheduler = scheduler
     }
 
     override func main() {
+        guard scheduler != nil else {
+            return
+        }
         task.run()
     }
 }
