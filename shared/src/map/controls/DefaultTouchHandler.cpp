@@ -120,7 +120,9 @@ void DefaultTouchHandler::handleTouchDown(Vec2F position) {
     if (state == ONE_FINGER_UP_AFTER_CLICK && stateTime >= DateHelper::currentTimeMillis() - DOUBLE_TAP_TIMEOUT) {
         state = ONE_FINGER_DOUBLE_CLICK_DOWN;
     } else {
-        LogDebug <<= "TouchHandler: is touching down (one finger)";
+        #ifdef ENABLE_TOUCH_LOGGING
+            LogDebug <<= "TouchHandler: is touching down (one finger)";
+        #endif
         state = ONE_FINGER_DOWN;
     }
     stateTime = DateHelper::currentTimeMillis();
@@ -135,14 +137,20 @@ void DefaultTouchHandler::handleTouchDown(Vec2F position) {
 }
 
 void DefaultTouchHandler::handleMove(Vec2F delta) {
-    LogDebug <<= "TouchHandler: handle move";
+    #ifdef ENABLE_TOUCH_LOGGING
+        LogDebug <<= "TouchHandler: handle move";
+    #endif
     std::vector<float> diffPointer = {touchStartPosition.x, touchStartPosition.y, touchPosition.x, touchPosition.y};
     if (distance(diffPointer) > clickDistancePx) {
-        LogDebug <<= "TouchHandler: moved large distance";
+        #ifdef ENABLE_TOUCH_LOGGING
+            LogDebug <<= "TouchHandler: moved large distance";
+        #endif
         if (state == ONE_FINGER_DOUBLE_CLICK_DOWN || state == ONE_FINGER_DOUBLE_CLICK_MOVE) {
             state = ONE_FINGER_DOUBLE_CLICK_MOVE;
         } else {
-            LogDebug <<= "TouchHandler: is moving now";
+            #ifdef ENABLE_TOUCH_LOGGING
+                LogDebug <<= "TouchHandler: is moving now";
+            #endif
             state = ONE_FINGER_MOVING;
         }
         stateTime = DateHelper::currentTimeMillis();
@@ -159,10 +167,14 @@ void DefaultTouchHandler::handleMove(Vec2F delta) {
 
 void DefaultTouchHandler::handleTouchUp() {
     if (state == ONE_FINGER_DOUBLE_CLICK_MOVE) {
-        LogDebug <<= "TouchHandler: double click move ended";
+        #ifdef ENABLE_TOUCH_LOGGING
+            LogDebug <<= "TouchHandler: double click move ended";
+        #endif
         state = IDLE;
     } else if (state == ONE_FINGER_DOUBLE_CLICK_DOWN) {
-        LogDebug <<= "TouchHandler: double click detected";
+        #ifdef ENABLE_TOUCH_LOGGING
+            LogDebug <<= "TouchHandler: double click detected";
+        #endif
         for (auto &listener : listeners) {
             if (listener->onDoubleClick(touchPosition)) {
                 break;
@@ -170,7 +182,9 @@ void DefaultTouchHandler::handleTouchUp() {
         }
         state = IDLE;
     } else if (state == ONE_FINGER_DOWN) {
-        LogDebug <<= "TouchHandler: unconfirmed click detected";
+        #ifdef ENABLE_TOUCH_LOGGING
+            LogDebug <<= "TouchHandler: unconfirmed click detected";
+        #endif
         for (auto &listener : listeners) {
             if (listener->onClickUnconfirmed(touchPosition)) {
                 break;
@@ -181,7 +195,9 @@ void DefaultTouchHandler::handleTouchUp() {
             TaskConfig("DoubleTapTask", DOUBLE_TAP_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
             [=] { checkState(); }));
     } else if (state == TWO_FINGER_DOWN && stateTime >= DateHelper::currentTimeMillis() - TWO_FINGER_TOUCH_TIMEOUT) {
-        LogDebug <<= "TouchHandler: Two finger click detected";
+        #ifdef ENABLE_TOUCH_LOGGING
+            LogDebug <<= "TouchHandler: Two finger click detected";
+        #endif
         for (auto &listener : listeners) {
             if (listener->onTwoFingerClick(std::get<0>(oldPointer), std::get<1>(oldPointer))) {
                 break;
@@ -265,7 +281,9 @@ void DefaultTouchHandler::handleMoreThanTwoFingers() {
 
 void DefaultTouchHandler::checkState() {
     if (state == ONE_FINGER_UP_AFTER_CLICK && stateTime <= DateHelper::currentTimeMillis() - DOUBLE_TAP_TIMEOUT) {
-        LogDebug <<= "TouchHandler: confirmed click detected";
+        #ifdef ENABLE_TOUCH_LOGGING
+            LogDebug <<= "TouchHandler: confirmed click detected";
+        #endif
         for (auto &listener : listeners) {
             if (listener->onClickConfirmed(touchPosition)) {
                 break;
@@ -274,7 +292,9 @@ void DefaultTouchHandler::checkState() {
         state = IDLE;
         stateTime = DateHelper::currentTimeMillis();
     } else if (state == ONE_FINGER_DOWN && stateTime <= DateHelper::currentTimeMillis() - LONG_PRESS_TIMEOUT) {
-        LogDebug <<= "TouchHandler: long press detected";
+        #ifdef ENABLE_TOUCH_LOGGING
+            LogDebug <<= "TouchHandler: long press detected";
+        #endif
         for (auto &listener : listeners) {
             if (listener->onLongPress(touchPosition)) {
                 break;
