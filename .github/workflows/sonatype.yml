@@ -3,6 +3,8 @@ name: Upload AAR to Sonatype Nexus
 on:
   push:
     branches: [ main ]
+    tags:
+      - '*'
 
 jobs:
   build:
