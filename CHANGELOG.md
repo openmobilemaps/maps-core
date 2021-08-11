@@ -1,10 +1,6 @@
 # Changelog for Open Mobile Maps
 
 ## next version
-- ...
-
-## Version 1.3.1 (11.08.2021)
-- Several bugfixes
 - Add line layer implementation
 
 ## Version 1.3.0 (19.04.2021)

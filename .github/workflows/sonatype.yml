@@ -2,9 +2,8 @@ name: Upload AAR to Sonatype Nexus
 
 on:
   push:
-    branches: [ main ]
     tags:
-      - '*'
+      - '[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
   build:
