@@ -30,7 +30,9 @@
 
 // T is the Object used for loading
 // L is the Loading type
-template <class T, class L> class Tiled2dMapSource : public Tiled2dMapSourceInterface {
+template <class T, class L> class Tiled2dMapSource :
+    public Tiled2dMapSourceInterface,
+    public std::enable_shared_from_this<Tiled2dMapSourceInterface> {
   public:
     Tiled2dMapSource(const MapConfig &mapConfig, const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
                      const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
@@ -51,7 +53,7 @@ template <class T, class L> class Tiled2dMapSource : public Tiled2dMapSourceInte
     std::string layerSystemId;
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
     std::shared_ptr<SchedulerInterface> scheduler;
-    std::shared_ptr<Tiled2dMapSourceListenerInterface> listener;
+    std::weak_ptr<Tiled2dMapSourceListenerInterface> listener;
 
     std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfos;
     const Tiled2dMapZoomInfo zoomInfo;

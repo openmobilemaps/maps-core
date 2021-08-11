@@ -47,8 +47,8 @@ void IconLayer::remove(const std::shared_ptr<IconInfoInterface> &icon) {
         std::lock_guard<std::recursive_mutex> lock(iconsMutex);
         for (auto it = icons.begin(); it != icons.end(); it++) {
             if (it->first->getIdentifier() == icon->getIdentifier()) {
-                icons.erase(it);
                 auto quadObject = it->second->getQuadObject();
+                icons.erase(it);
                 mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
                         TaskConfig("IconLayer_remove_" + icon->getIdentifier(), 0, TaskPriority::NORMAL,
                                    ExecutionEnvironment::GRAPHICS),
@@ -128,15 +128,15 @@ void IconLayer::clear() {
         addingQueue.clear();
         return;
     }
+    auto iconsToClear = icons;
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
             TaskConfig("IconLayer_clear", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
             [=] {
-                std::lock_guard<std::recursive_mutex> lock(iconsMutex);
-                for (auto &icon : icons) {
+                for (auto &icon : iconsToClear) {
                     icon.second->getQuadObject()->asGraphicsObject()->clear();
                 }
-                icons.clear();
             }));
+    icons.clear();
     renderPassObjectMap.clear();
     if (mapInterface)
         mapInterface->invalidate();
