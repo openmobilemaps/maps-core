@@ -31,6 +31,7 @@ std::vector<std::shared_ptr<IconInfoInterface>> IconLayer::getIcons() {
         }
         return icons;
     }
+    std::lock_guard<std::recursive_mutex> lock(iconsMutex);
     for (auto const &icon : this->icons) {
         icons.push_back(icon.first);
     }
@@ -128,15 +129,18 @@ void IconLayer::clear() {
         addingQueue.clear();
         return;
     }
-    auto iconsToClear = icons;
-    mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
-            TaskConfig("IconLayer_clear", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
-            [=] {
-                for (auto &icon : iconsToClear) {
-                    icon.second->getQuadObject()->asGraphicsObject()->clear();
-                }
-            }));
-    icons.clear();
+    {
+        std::lock_guard<std::recursive_mutex> lock(iconsMutex);
+        auto iconsToClear = icons;
+        mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
+                TaskConfig("IconLayer_clear", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+                [=] {
+                    for (auto &icon : iconsToClear) {
+                        icon.second->getQuadObject()->asGraphicsObject()->clear();
+                    }
+                }));
+        icons.clear();
+    }
     renderPassObjectMap.clear();
     if (mapInterface)
         mapInterface->invalidate();
@@ -160,22 +164,25 @@ std::vector<std::shared_ptr<::RenderPassInterface>> IconLayer::buildRenderPasses
     } else {
         auto camera = mapInterface->getCamera();
         int i = 0;
-        std::lock_guard<std::recursive_mutex> lock(iconsMutex);
         std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> currentRenderPassObjectMap;
         std::unordered_map<int, std::vector<float>> transformSet;
-        for (auto const &iconTuple : icons) {
-            IconType type = iconTuple.first->getType();
-            if (type != IconType::FIXED) {
-                bool scaleInvariant = type == IconType::INVARIANT || type == IconType::SCALE_INVARIANT;
-                bool rotationInvariant = type == IconType::INVARIANT || type == IconType::ROTATION_INVARIANT;
-                std::vector<float> modelMatrix = camera->getInvariantModelMatrix(iconTuple.first->getCoordinate(), scaleInvariant,
-                                                                                 rotationInvariant);
-                for (const auto &config : iconTuple.second->getRenderConfig()) {
-                    currentRenderPassObjectMap[config->getRenderIndex()].push_back(
-                            std::make_shared<RenderObject>(config->getGraphicsObject(), modelMatrix));
+        {
+            std::lock_guard<std::recursive_mutex> lock(iconsMutex);
+            for (auto const &iconTuple : icons) {
+                IconType type = iconTuple.first->getType();
+                if (type != IconType::FIXED) {
+                    bool scaleInvariant = type == IconType::INVARIANT || type == IconType::SCALE_INVARIANT;
+                    bool rotationInvariant = type == IconType::INVARIANT || type == IconType::ROTATION_INVARIANT;
+                    std::vector<float> modelMatrix = camera->getInvariantModelMatrix(iconTuple.first->getCoordinate(),
+                                                                                     scaleInvariant,
+                                                                                     rotationInvariant);
+                    for (const auto &config : iconTuple.second->getRenderConfig()) {
+                        currentRenderPassObjectMap[config->getRenderIndex()].push_back(
+                                std::make_shared<RenderObject>(config->getGraphicsObject(), modelMatrix));
+                    }
                 }
+                i++;
             }
-            i++;
         }
 
         for (auto const &passObjectEntry : renderPassObjectMap) {
@@ -210,15 +217,15 @@ void IconLayer::preGenerateRenderPasses() {
 void IconLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
     this->mapInterface = mapInterface;
     {
-        std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
-        if (!addingQueue.empty()) {
-            std::vector<std::shared_ptr<IconInfoInterface>> icons;
-            for (auto const &icon : addingQueue) {
-                icons.push_back(icon);
+        std::scoped_lock<std::recursive_mutex> lock(addingQueueMutex);
+            if (!addingQueue.empty()) {
+                std::vector<std::shared_ptr<IconInfoInterface>> icons;
+                for (auto const &icon : addingQueue) {
+                    icons.push_back(icon);
+                }
+                addingQueue.clear();
+                addIcons(icons);
             }
-            addingQueue.clear();
-            addIcons(icons);
-        }
     }
 
     mapInterface->getTouchHandler()->addListener(shared_from_this());
@@ -226,7 +233,8 @@ void IconLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
 
 void IconLayer::pause() {
     {
-        std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
+        std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> newRenderPassObjectMap;
+        std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(addingQueueMutex, iconsMutex);
         addingQueue.clear();
         for (const auto &icon: icons) {
             addingQueue.insert(icon.first);
@@ -270,27 +278,30 @@ bool IconLayer::onClickConfirmed(const Vec2F &posScreen) {
         double sinAng = std::sin(angle);
         double cosAng = std::cos(angle);
 
-        for (const auto &iconTuple : icons) {
-            std::shared_ptr<IconInfoInterface> icon = iconTuple.first;
+        {
+            std::lock_guard<std::recursive_mutex> lock(iconsMutex);
+            for (const auto &iconTuple : icons) {
+                std::shared_ptr<IconInfoInterface> icon = iconTuple.first;
 
-            double halfW = icon->getIconSize().x * 0.5f;
-            double halfH = icon->getIconSize().y * 0.5f;
-            Coord iconPos = mapInterface->getCoordinateConverterHelper()->convert(clickCoords.systemIdentifier,
-                                                                                  icon->getCoordinate());
-            IconType type = icon->getType();
-            if (type == IconType::INVARIANT || type == IconType::SCALE_INVARIANT) {
-                halfW = camera->mapUnitsFromPixels(halfW);
-                halfH = camera->mapUnitsFromPixels(halfH);
-            }
+                double halfW = icon->getIconSize().x * 0.5f;
+                double halfH = icon->getIconSize().y * 0.5f;
+                Coord iconPos = mapInterface->getCoordinateConverterHelper()->convert(clickCoords.systemIdentifier,
+                                                                                      icon->getCoordinate());
+                IconType type = icon->getType();
+                if (type == IconType::INVARIANT || type == IconType::SCALE_INVARIANT) {
+                    halfW = camera->mapUnitsFromPixels(halfW);
+                    halfH = camera->mapUnitsFromPixels(halfH);
+                }
 
-            Vec2D clickPos = Vec2D(clickCoords.x - iconPos.x, clickCoords.y - iconPos.y);
-            if (type == IconType::INVARIANT || type == IconType::ROTATION_INVARIANT) {
-                clickPos.x = cosAng * clickPos.x - sinAng * clickPos.y;
-                clickPos.y = sinAng * clickPos.y + cosAng * clickPos.x;
-            }
-            if (clickPos.x > -halfW && clickPos.x < halfW &&
-                clickPos.y > -halfH && clickPos.y < halfH) {
-                iconsHit.push_back(icon);
+                Vec2D clickPos = Vec2D(clickCoords.x - iconPos.x, clickCoords.y - iconPos.y);
+                if (type == IconType::INVARIANT || type == IconType::ROTATION_INVARIANT) {
+                    clickPos.x = cosAng * clickPos.x - sinAng * clickPos.y;
+                    clickPos.y = sinAng * clickPos.y + cosAng * clickPos.x;
+                }
+                if (clickPos.x > -halfW && clickPos.x < halfW &&
+                    clickPos.y > -halfH && clickPos.y < halfH) {
+                    iconsHit.push_back(icon);
+                }
             }
         }
 
