@@ -25,11 +25,11 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 class TextureLoader(
-	private val context: Context,
-	private val cacheDirectory: File,
-	private val cacheSize: Long,
-	private val referer: String,
-	private val userAgent: String? = null
+	context: Context,
+	cacheDirectory: File,
+	cacheSize: Long,
+	referer: String,
+	userAgent: String? = null
 ) :
 	TextureLoaderInterface() {
 

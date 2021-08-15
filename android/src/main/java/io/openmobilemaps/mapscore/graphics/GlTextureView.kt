@@ -66,7 +66,7 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 
 	override fun onSurfaceTextureUpdated(surface: SurfaceTexture) {}
 
-	fun setRenderer(renderer: GLSurfaceView.Renderer) {
+	fun setRenderer(renderer: GLSurfaceView.Renderer?) {
 		this.renderer = renderer
 	}
 
