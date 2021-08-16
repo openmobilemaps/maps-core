@@ -19,6 +19,8 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.coroutineScope
 import io.openmobilemaps.mapscore.graphics.GlTextureView
+import io.openmobilemaps.mapscore.map.scheduling.AndroidScheduler
+import io.openmobilemaps.mapscore.map.scheduling.AndroidSchedulerCallback
 import io.openmobilemaps.mapscore.shared.graphics.common.Color
 import io.openmobilemaps.mapscore.shared.graphics.common.Vec2F
 import io.openmobilemaps.mapscore.shared.graphics.common.Vec2I
@@ -26,8 +28,6 @@ import io.openmobilemaps.mapscore.shared.map.*
 import io.openmobilemaps.mapscore.shared.map.controls.TouchAction
 import io.openmobilemaps.mapscore.shared.map.controls.TouchEvent
 import io.openmobilemaps.mapscore.shared.map.controls.TouchHandlerInterface
-import io.openmobilemaps.mapscore.map.scheduling.AndroidScheduler
-import io.openmobilemaps.mapscore.map.scheduling.AndroidSchedulerCallback
 import io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
@@ -42,10 +42,6 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
 	private var touchHandler: TouchHandlerInterface? = null
 	private var touchDisabled = false
-
-	init {
-		System.loadLibrary("mapscore")
-	}
 
 	open fun setupMap(mapConfig: MapConfig) {
 		val densityExact = resources.displayMetrics.xdpi
@@ -82,7 +78,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	}
 
 	override fun onDrawFrame(gl: GL10?) {
-		requireMapInterface().drawFrame()
+		mapInterface?.drawFrame()
 	}
 
 	override fun scheduleOnGlThread(task: TaskInterface) {
