@@ -85,17 +85,22 @@ void PolygonLayer::add(const PolygonInfo &polygon) {
     polygonObject->setPositions(polygon.coordinates, polygon.holes, polygon.isConvex);
     polygonObject->setColor(polygon.color);
 
+    std::weak_ptr<PolygonLayer> selfPtr = std::dynamic_pointer_cast<PolygonLayer>(shared_from_this());
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
             TaskConfig("PolygonLayer_setup_" + polygon.identifier, 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
-            [=] { polygonGraphicsObject->asGraphicsObject()->setup(mapInterface->getRenderingContext()); }));
+            [selfPtr, polygonGraphicsObject] { if (selfPtr.lock()) selfPtr.lock()->setupPolygon(polygonGraphicsObject); }));
 
     {
         std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
         polygons[polygon] = polygonObject;
     }
     generateRenderPasses();
-    if (mapInterface)
-        mapInterface->invalidate();
+
+}
+
+void PolygonLayer::setupPolygon(const std::shared_ptr<Polygon2dInterface> &polygon) {
+    polygon->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+    if (mapInterface) mapInterface->invalidate();
 }
 
 void PolygonLayer::clear() {
