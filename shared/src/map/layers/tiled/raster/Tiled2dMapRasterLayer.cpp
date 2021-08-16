@@ -134,26 +134,36 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
         }
         renderPasses = newRenderPasses;
 
+        std::weak_ptr<Tiled2dMapRasterLayer> selfPtr = std::dynamic_pointer_cast<Tiled2dMapRasterLayer>(shared_from_this());
         mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
-                TaskConfig("Tiled2dMapRasterLayer_onTilesUpdated", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [=] {
-                    auto renderingContext = mapInterface->getRenderingContext();
-                    std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
-                    for (const auto &tile : tilesToSetup) {
-                        const auto &tileInfo = tile.first;
-                        const auto &tileObject = tile.second;
-                        if (!tileObject || !tileObjectMap[tile.first]) continue;
-                        tileObject->getQuadObject()->asGraphicsObject()->setup(renderingContext);
-
-                        if (tileInfo.textureHolder) {
-                            tileObject->getQuadObject()->loadTexture(tileInfo.textureHolder);
-                        }
-                    }
-
-                    for (const auto &tileObject : tilesToClean) {
-                        if (!tileObject) continue;
-                        tileObject->getQuadObject()->removeTexture();
-                    }
+                TaskConfig("Tiled2dMapRasterLayer_onTilesUpdated", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [selfPtr, tilesToSetup, tilesToClean] {
+                    if (selfPtr.lock()) selfPtr.lock()->setupTiles(tilesToSetup, tilesToClean);
                 }));
+    }
+}
+
+void Tiled2dMapRasterLayer::setupTiles(
+        const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToSetup,
+        const std::vector<std::shared_ptr<Textured2dLayerObject>> &tilesToClean) {
+
+    if (!mapInterface) return;
+
+    auto renderingContext = mapInterface->getRenderingContext();
+    std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
+    for (const auto &tile : tilesToSetup) {
+        const auto &tileInfo = tile.first;
+        const auto &tileObject = tile.second;
+        if (!tileObject || !tileObjectMap[tile.first]) continue;
+        tileObject->getQuadObject()->asGraphicsObject()->setup(renderingContext);
+
+        if (tileInfo.textureHolder) {
+            tileObject->getQuadObject()->loadTexture(tileInfo.textureHolder);
+        }
+    }
+
+    for (const auto &tileObject : tilesToClean) {
+        if (!tileObject) continue;
+        tileObject->getQuadObject()->removeTexture();
     }
 
     mapInterface->invalidate();
