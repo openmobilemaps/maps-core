@@ -87,6 +87,13 @@ implementation 'com.squareup.okhttp3:okhttp:4.7.2' // used for the default Textu
 
 <h2>How to use</h2>
 
+### Initializing the library
+
+To use the library, it needs to be initialized as early as possible, e.g. in the oOnCreate(), of the hosting Application by calling:
+```kotlin
+MapsCore.initialize()
+```
+
 ### MapView
 
 The main ui element to use Open Mobile Maps is the MapView provided with it. To use it, the following steps are necessary to set it up:
