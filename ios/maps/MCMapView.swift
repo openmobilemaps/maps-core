@@ -9,7 +9,7 @@
  */
 
 import Foundation
-import MapCoreSharedModule
+@_exported import MapCoreSharedModule
 import MetalKit
 import os
 
