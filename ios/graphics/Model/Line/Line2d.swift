@@ -110,18 +110,18 @@ extension Line2d: MCLine2dInterface {
             let ci = positions[i]
             let ciNext = positions[iNext]
 
-            let lineNormalX = -(ciNext.yF - ci.yF)
-            let lineNormalY = ciNext.xF - ci.xF
+            let lineNormalX = -(ciNext.y - ci.y)
+            let lineNormalY = ciNext.x - ci.x
             let lineLength = sqrt(lineNormalX * lineNormalX + lineNormalY * lineNormalY)
 
-            let miterX: Float = lineNormalX
-            let miterY: Float = lineNormalY
+            let miterX = lineNormalX
+            let miterY = lineNormalY
 
-            let ciX = ci.xF - (ciNext.xF - ci.xF)
-            let ciY = ci.yF - (ciNext.yF - ci.yF)
+            let ciX = ci.x - (ciNext.x - ci.x)
+            let ciY = ci.y - (ciNext.y - ci.y)
 
-            let ciNextX = ciNext.xF - (ci.xF - ciNext.xF)
-            let ciNextY = ciNext.yF - (ci.yF - ciNext.yF)
+            let ciNextX = ciNext.x - (ci.x - ciNext.x)
+            let ciNextY = ciNext.y - (ci.y - ciNext.y)
 
             let fromOrigin = MCVec2D(x: (ciNext.x - ci.x), y: (ciNext.y - ci.y))
             let divisor = sqrt(fromOrigin.x * fromOrigin.x + fromOrigin.y * fromOrigin.y)
@@ -133,25 +133,25 @@ extension Line2d: MCLine2dInterface {
                            lineA: ci,
                            lineB: ciNext,
                            widthNormal: (x: -lineNormalX / lineLength, y: -lineNormalY / lineLength),
-                           lenghtNormal: (x: -unitVector.xF, y: -unitVector.yF)),
+                           lenghtNormal: (x: -unitVector.x, y: -unitVector.y)),
                 LineVertex(x: ciX + miterX,
                            y: ciY + miterY,
                            lineA: ci,
                            lineB: ciNext,
                            widthNormal: (x: lineNormalX / lineLength, y: lineNormalY / lineLength),
-                           lenghtNormal: (x: -unitVector.xF, y: -unitVector.yF)),
+                           lenghtNormal: (x: -unitVector.x, y: -unitVector.y)),
                 LineVertex(x: ciNextX + miterX,
                            y: ciNextY + miterY,
                            lineA: ci,
                            lineB: ciNext,
                            widthNormal: (x: lineNormalX / lineLength, y: lineNormalY / lineLength),
-                           lenghtNormal: (x: unitVector.xF, y: unitVector.yF)),
+                           lenghtNormal: (x: unitVector.x, y: unitVector.y)),
                 LineVertex(x: ciNextX - miterX,
                            y: ciNextY - miterY,
                            lineA: ci,
                            lineB: ciNext,
                            widthNormal: (x: -lineNormalX / lineLength, y: -lineNormalY / lineLength),
-                           lenghtNormal: (x: unitVector.xF, y: unitVector.yF))
+                           lenghtNormal: (x: unitVector.x, y: unitVector.y))
             ])
 
             indices.append(contentsOf: [
