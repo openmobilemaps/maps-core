@@ -41,7 +41,7 @@ class PolygonLayer : public PolygonLayerInterface,
 
     virtual void addAll(const std::vector<PolygonInfo> & polygons) override;
 
-    virtual void setupPolygon(const std::vector<std::shared_ptr<Polygon2dInterface>> &polygon);
+    virtual void setupPolygons(const std::vector<std::shared_ptr<Polygon2dInterface>> &polygon);
 
     virtual void clear() override;
 
