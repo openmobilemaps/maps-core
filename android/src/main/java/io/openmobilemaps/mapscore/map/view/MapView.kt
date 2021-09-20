@@ -35,7 +35,7 @@ import javax.microedition.khronos.opengles.GL10
 open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
 	GlTextureView(context, attrs, defStyleAttr), GLSurfaceView.Renderer, AndroidSchedulerCallback, LifecycleObserver {
 
-	protected var mapInterface: MapInterface? = null
+	var mapInterface: MapInterface? = null
 		private set
 	protected var scheduler: AndroidScheduler? = null
 		private set

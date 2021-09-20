@@ -50,6 +50,8 @@ public:
             const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToSetup,
             const std::vector<std::shared_ptr<Textured2dLayerObject>> &tilesToClean);
 
+    virtual void generateRenderPasses();
+
     virtual void setCallbackHandler(const std::shared_ptr<Tiled2dMapRasterLayerCallbackInterface> &handler) override;
 
     virtual std::shared_ptr<Tiled2dMapRasterLayerCallbackInterface> getCallbackHandler() override;
@@ -63,6 +65,8 @@ public:
     bool onClickConfirmed(const Vec2F &posScreen) override;
 
     bool onLongPress(const Vec2F &posScreen) override;
+
+    virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) override;
 
 private:
     std::shared_ptr<::MaskingObjectInterface> mask;

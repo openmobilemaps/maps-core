@@ -114,30 +114,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
             tileObjectMap.erase(tile);
         }
 
-        std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
-        std::vector<std::pair<int, std::shared_ptr<Textured2dLayerObject>>> mapEntries;
-        for (auto &entry : tileObjectMap) {
-            mapEntries.emplace_back(std::make_pair(entry.first.tileInfo.zoomLevel, entry.second));
-        }
-        sort(mapEntries.begin(), mapEntries.end(),
-             [=](std::pair<int, std::shared_ptr<Textured2dLayerObject>> &a,
-                 std::pair<int, std::shared_ptr<Textured2dLayerObject>> &b) { return a.first < b.first; });
-
-        for (const auto &objectEntry : mapEntries) {
-            objectEntry.second->getQuadObject()->asGraphicsObject();
-            for (auto config : objectEntry.second->getRenderConfig()) {
-                renderPassObjectMap[config->getRenderIndex()].push_back(
-                        std::make_shared<RenderObject>(config->getGraphicsObject()));
-            }
-        }
-
-        std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
-        for (const auto &passEntry : renderPassObjectMap) {
-            std::shared_ptr<RenderPass> renderPass =
-                    std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second, mask);
-            newRenderPasses.push_back(renderPass);
-        }
-        renderPasses = newRenderPasses;
+        generateRenderPasses();
 
         std::weak_ptr<Tiled2dMapRasterLayer> selfPtr = std::dynamic_pointer_cast<Tiled2dMapRasterLayer>(shared_from_this());
         mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
@@ -174,6 +151,34 @@ void Tiled2dMapRasterLayer::setupTiles(
     mapInterface->invalidate();
 }
 
+void Tiled2dMapRasterLayer::generateRenderPasses() {
+    std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
+    std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
+    std::vector<std::pair<int, std::shared_ptr<Textured2dLayerObject>>> mapEntries;
+    for (auto &entry : tileObjectMap) {
+        mapEntries.emplace_back(std::make_pair(entry.first.tileInfo.zoomLevel, entry.second));
+    }
+    sort(mapEntries.begin(), mapEntries.end(),
+         [=](std::pair<int, std::shared_ptr<Textured2dLayerObject>> &a,
+             std::pair<int, std::shared_ptr<Textured2dLayerObject>> &b) { return a.first < b.first; });
+
+    for (const auto &objectEntry : mapEntries) {
+        objectEntry.second->getQuadObject()->asGraphicsObject();
+        for (auto config : objectEntry.second->getRenderConfig()) {
+            renderPassObjectMap[config->getRenderIndex()].push_back(
+                    std::make_shared<RenderObject>(config->getGraphicsObject()));
+        }
+    }
+
+    std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
+    for (const auto &passEntry : renderPassObjectMap) {
+        std::shared_ptr<RenderPass> renderPass =
+                std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second, mask);
+        newRenderPasses.push_back(renderPass);
+    }
+    renderPasses = newRenderPasses;
+}
+
 void Tiled2dMapRasterLayer::setCallbackHandler(const std::shared_ptr<Tiled2dMapRasterLayerCallbackInterface> &handler) {
     callbackHandler = handler;
 }
@@ -208,4 +213,10 @@ bool Tiled2dMapRasterLayer::onClickConfirmed(const Vec2F &posScreen) {
 bool Tiled2dMapRasterLayer::onLongPress(const Vec2F &posScreen) {
     return (callbackHandler) ? callbackHandler->onLongPress(mapInterface->getCamera()->coordFromScreenPosition(posScreen))
                              : false;
+}
+
+void Tiled2dMapRasterLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> &maskingObject) {
+    mask = maskingObject;
+    generateRenderPasses();
+    if (mapInterface) mapInterface->invalidate();
 }

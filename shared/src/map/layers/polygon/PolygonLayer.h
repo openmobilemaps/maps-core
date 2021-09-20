@@ -82,6 +82,7 @@ class PolygonLayer : public PolygonLayerInterface,
 
     std::recursive_mutex polygonsMutex;
     std::unordered_map<PolygonInfo, std::shared_ptr<Polygon2dLayerObject>> polygons;
+    std::shared_ptr<MaskingObjectInterface> mask = nullptr;
 
     void generateRenderPasses();
     std::vector<std::shared_ptr<::RenderPassInterface>> renderPasses;

@@ -164,7 +164,7 @@ void PolygonLayer::generateRenderPasses() {
     }
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
     for (const auto &passEntry : renderPassObjectMap) {
-        std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second, nullptr);
+        std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second, mask);
         newRenderPasses.push_back(renderPass);
     }
     renderPasses = newRenderPasses;
@@ -251,4 +251,8 @@ bool PolygonLayer::onClickUnconfirmed(const ::Vec2F &posScreen) {
 }
 
 
-void PolygonLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) {}
+void PolygonLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) {
+    this->mask = maskingObject;
+    generateRenderPasses();
+    if (mapInterface) mapInterface->invalidate();
+}

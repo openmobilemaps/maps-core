@@ -91,6 +91,12 @@ void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> 
     int program = openGlContext->getProgram(shaderProgram->getProgramName());
 
     glEnable(GL_STENCIL_TEST);
+    if (!isMasked) {
+        glEnable(GL_STENCIL_TEST);
+        glStencilMask(0xFF);
+        glClearStencil(0x0);
+        glClear(GL_STENCIL_BUFFER_BIT);
+    }
 
     // By drawing the triangle fan with indices around the polygon,
     // all the parts that need to be drawn are drawn an odd time.
