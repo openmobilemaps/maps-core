@@ -104,17 +104,23 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
             this->polygons[polygon] = polygonObject;
         }
     }
+
+    std::weak_ptr<PolygonLayer> selfPtr = std::dynamic_pointer_cast<PolygonLayer>(shared_from_this());
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
-            TaskConfig("PolygonLayer_setup_" + polygons[0].identifier, 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
-            [=] {
-                for (const auto &polygonGraphicsObject : polygonGraphicObjects) {
-                    polygonGraphicsObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
-                }
-            }));
+            TaskConfig("PolygonLayer_setup_" + polygons[0].identifier + ",...", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+            [selfPtr, polygonGraphicObjects] { if (selfPtr.lock()) selfPtr.lock()->setupPolygons(polygonGraphicObjects); }));
 
     generateRenderPasses();
-    if (mapInterface)
-        mapInterface->invalidate();
+
+}
+
+void PolygonLayer::setupPolygons(const std::vector<std::shared_ptr<Polygon2dInterface>> &polygons) {
+    for (const auto &polygonGraphicsObject : polygons) {
+        if (!polygonGraphicsObject->asGraphicsObject()->isReady()) {
+            polygonGraphicsObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+        }
+    }
+    if (mapInterface) mapInterface->invalidate();
 }
 
 void PolygonLayer::clear() {

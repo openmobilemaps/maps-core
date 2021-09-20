@@ -40,6 +40,8 @@ class LineLayer : public LineLayerInterface,
 
     virtual void add(const std::shared_ptr<LineInfoInterface> & line) override;
 
+    virtual void setupLine(const std::shared_ptr<Line2dInterface> & line);
+
     virtual void clear() override;
 
     virtual void setCallbackHandler(const std::shared_ptr<LineLayerCallbackInterface> & handler) override;

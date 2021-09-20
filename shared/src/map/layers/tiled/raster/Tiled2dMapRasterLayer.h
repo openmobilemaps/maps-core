@@ -46,6 +46,10 @@ public:
 
     virtual void onTilesUpdated() override;
 
+    virtual void setupTiles(
+            const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToSetup,
+            const std::vector<std::shared_ptr<Textured2dLayerObject>> &tilesToClean);
+
     virtual void setCallbackHandler(const std::shared_ptr<Tiled2dMapRasterLayerCallbackInterface> &handler) override;
 
     virtual std::shared_ptr<Tiled2dMapRasterLayerCallbackInterface> getCallbackHandler() override;

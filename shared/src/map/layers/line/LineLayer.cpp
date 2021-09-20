@@ -89,18 +89,21 @@ void LineLayer::add(const std::shared_ptr<LineInfoInterface> & line) {
 
     lineObject->setPositions(line->getCoordinates());
 
-
+    std::weak_ptr<LineLayer> selfPtr = std::dynamic_pointer_cast<LineLayer>(shared_from_this());
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
                                                                        TaskConfig("LineLayer_setup_" + line->getIdentifier(), 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
-            [=] { lineGraphicsObject->asGraphicsObject()->setup(mapInterface->getRenderingContext()); }));
+            [selfPtr, lineGraphicsObject] { if (selfPtr.lock()) selfPtr.lock()->setupLine(lineGraphicsObject); }));
 
     {
         std::lock_guard<std::recursive_mutex> lock(linesMutex);
         lines[line] = lineObject;
     }
     generateRenderPasses();
-    if (mapInterface)
-        mapInterface->invalidate();
+}
+
+void LineLayer::setupLine(const std::shared_ptr<Line2dInterface> &line) {
+    line->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+    if (mapInterface) mapInterface->invalidate();
 }
 
 void LineLayer::clear() {

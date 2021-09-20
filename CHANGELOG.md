@@ -2,6 +2,10 @@
 
 ## next version
 
+## Version 1.3.3 (16.08.2021)
+- Memory leak fix for Android
+- Fix async graphics objects setup in lines, polygons and raster tiles
+
 ## Version 1.3.2 (13.08.2021)
 - Tiled2dMapRasterLayer crash fix for Android
 

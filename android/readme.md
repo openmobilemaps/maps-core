@@ -60,7 +60,7 @@ This library is available on MavenCentral. To add it to your Android project, ad
 
 ```
 dependencies {
-  implementation 'io.openmobilemaps:mapscore:1.3.2'
+  implementation 'io.openmobilemaps:mapscore:1.3.3'
 }
 ```
 
@@ -86,6 +86,13 @@ implementation 'com.squareup.okhttp3:okhttp:4.7.2' // used for the default Textu
 ```
 
 <h2>How to use</h2>
+
+### Initializing the library
+
+To use the library, it needs to be initialized as early as possible, e.g. in the oOnCreate(), of the hosting Application by calling:
+```kotlin
+MapsCore.initialize()
+```
 
 ### MapView
 

@@ -62,7 +62,7 @@ android {
 		prefabPublishing true
 	}
 
-	prefab{
+	prefab {
 		mapscore {
 			headers ".cpp_includes"
 			name "mapscore"
@@ -70,8 +70,21 @@ android {
 	}
 }
 
-task copyHeaders(type: Exec){
-	commandLine './copy_all_header_files_to_include_folder.sh'
+task copyHeaders() {
+	String headersDir = ".cpp_includes"
+	project.delete(headersDir)
+	project.mkdir(headersDir)
+	ConfigurableFileCollection collection = project.files(
+			"src/main/cpp",
+			"../bridging/android/jni",
+			"../shared/public",
+			"../shared/src")
+	project.copy {
+		duplicatesStrategy(DuplicatesStrategy.FAIL)
+		from collection.asFileTree.getFiles()
+		include("**/*.h")
+		into project.file(headersDir)
+	}
 }
 preBuild.dependsOn copyHeaders
 
