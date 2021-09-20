@@ -79,6 +79,7 @@ class IconLayer : public IconLayerInterface,
 
     std::recursive_mutex iconsMutex;
     std::unordered_map<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>> icons;
+    std::shared_ptr<MaskingObjectInterface> mask = nullptr;
 
     void preGenerateRenderPasses();
     std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;

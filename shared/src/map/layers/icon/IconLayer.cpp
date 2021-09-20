@@ -194,7 +194,7 @@ std::vector<std::shared_ptr<::RenderPassInterface>> IconLayer::buildRenderPasses
         std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
         for (const auto &passEntry : currentRenderPassObjectMap) {
             std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first),
-                                                                                  passEntry.second, nullptr);
+                                                                                  passEntry.second, mask);
             renderPasses.push_back(renderPass);
         }
         return renderPasses;
@@ -313,4 +313,7 @@ bool IconLayer::onClickConfirmed(const Vec2F &posScreen) {
 }
 
 
-void IconLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) {}
+void IconLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) {
+    this->mask = maskingObject;
+    if (mapInterface) mapInterface->invalidate();
+}
