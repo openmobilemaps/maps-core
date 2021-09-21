@@ -8,6 +8,7 @@
 #include <vector>
 
 class GraphicsObjectInterface;
+class MaskingObjectInterface;
 
 class Polygon2dInterface {
 public:
@@ -16,4 +17,6 @@ public:
     virtual void setPolygonPositions(const std::vector<::Vec2D> & positions, const std::vector<std::vector<::Vec2D>> & holes, bool isConvex) = 0;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() = 0;
+
+    virtual std::shared_ptr<MaskingObjectInterface> asMaskingObject() = 0;
 };

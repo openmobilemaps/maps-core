@@ -8,8 +8,7 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#ifndef MAPSDK_ALPHASHADEROPENGL_H
-#define MAPSDK_ALPHASHADEROPENGL_H
+#pragma once
 
 #include "AlphaShaderInterface.h"
 #include "BaseShaderProgramOpenGl.h"
@@ -38,5 +37,3 @@ class AlphaShaderOpenGl : public BaseShaderProgramOpenGl,
   private:
     float alpha = 1;
 };
-
-#endif // MAPSDK_ALPHASHADEROPENGL_H

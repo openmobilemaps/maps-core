@@ -16,9 +16,7 @@ import io.openmobilemaps.mapscore.graphics.BitmapTextureHolder
 import io.openmobilemaps.mapscore.map.loader.networking.RefererInterceptor
 import io.openmobilemaps.mapscore.map.loader.networking.RequestUtils
 import io.openmobilemaps.mapscore.map.loader.networking.UserAgentInterceptor
-import io.openmobilemaps.mapscore.shared.map.loader.LoaderStatus
-import io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderInterface
-import io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult
+import io.openmobilemaps.mapscore.shared.map.loader.*
 import okhttp3.*
 import java.io.File
 import java.util.*
@@ -30,8 +28,7 @@ class TextureLoader(
 	cacheSize: Long,
 	referer: String,
 	userAgent: String? = null
-) :
-	TextureLoaderInterface() {
+) : TextureLoaderInterface() {
 
 	private val okHttpClient = OkHttpClient.Builder()
 		.addInterceptor(UserAgentInterceptor(userAgent ?: RequestUtils.getDefaultUserAgent(context)))

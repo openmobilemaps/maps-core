@@ -24,26 +24,59 @@ class Quad2d: BaseGraphicsObject {
 
     private var shader: MCShaderProgramInterface
 
+    private var stencilState: MTLDepthStencilState?
+
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader
         super.init(device: metalContext.device,
                    sampler: metalContext.samplerLibrary.value(.magLinear))
     }
 
+
+    private func setupStencilStates() {
+        let ss2 = MTLStencilDescriptor()
+        ss2.stencilCompareFunction = .equal
+        ss2.stencilFailureOperation = .zero
+        ss2.depthFailureOperation = .keep
+        ss2.depthStencilPassOperation = .keep
+        ss2.readMask = 0b11111111
+        ss2.writeMask = 0b00000000
+
+        let s2 = MTLDepthStencilDescriptor()
+        s2.frontFaceStencil = ss2
+        s2.backFaceStencil = ss2
+
+        stencilState = device.makeDepthStencilState(descriptor: s2)
+    }
+
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
                          renderPass _: MCRenderPassConfig,
                          mvpMatrix: Int64,
+                         isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double)
     {
         guard let verticesBuffer = verticesBuffer,
               let indicesBuffer = indicesBuffer else { return }
+
+
+
+
+        if isMasked {
+            if stencilState == nil {
+                setupStencilStates()
+            }
+            encoder.setDepthStencilState(stencilState)
+            encoder.setStencilReferenceValue(0b10000000)
+        }
+
         shader.setupProgram(context)
         shader.preRender(context)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-        let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix))!
-        encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {
+            encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+        }
 
         encoder.setFragmentSamplerState(sampler, index: 0)
 
@@ -57,6 +90,30 @@ class Quad2d: BaseGraphicsObject {
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
     }
+}
+
+extension Quad2d: MCMaskingObjectInterface {
+
+    func render(asMask context: MCRenderingContextInterface?,
+                renderPass: MCRenderPassConfig,
+                mvpMatrix: Int64,
+                screenPixelAsRealMeterFactor: Double) {
+        guard let context = context as? RenderingContext,
+              let encoder = context.encoder else { return }
+
+        if let mask = context.mask {
+            encoder.setDepthStencilState(mask)
+            encoder.setStencilReferenceValue(0b10000000)
+        }
+
+        render(encoder: encoder,
+               context: context,
+               renderPass: renderPass,
+               mvpMatrix: mvpMatrix,
+               isMasked: false,
+               screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)
+    }
+
 }
 
 extension Quad2d: MCQuad2dInterface {
@@ -101,4 +158,6 @@ extension Quad2d: MCQuad2dInterface {
     }
 
     func asGraphicsObject() -> MCGraphicsObjectInterface? { self }
+
+    func asMaskingObject() -> MCMaskingObjectInterface? { self }
 }

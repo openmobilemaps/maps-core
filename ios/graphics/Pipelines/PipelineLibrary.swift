@@ -16,6 +16,7 @@ enum PipelineKey: CaseIterable {
     case pointShader
     case colorShader
     case roundColorShader
+    case clearStencilShader
 
     fileprivate func pipelineDescriptor() -> MTLRenderPipelineDescriptor {
         let pipelineDescriptor = MTLRenderPipelineDescriptor()
@@ -54,6 +55,7 @@ enum PipelineKey: CaseIterable {
         case .pointShader: return "Point (round) shader with color"
         case .colorShader: return "Color shader"
         case .roundColorShader: return "Round color shader"
+        case .clearStencilShader: return "Clear stencil shader"
         }
     }
 
@@ -64,6 +66,7 @@ enum PipelineKey: CaseIterable {
         case .pointShader: return "pointVertexShader"
         case .colorShader: return "colorVertexShader"
         case .roundColorShader: return "colorVertexShader"
+        case .clearStencilShader: return "stencilClearVertexShader"
         }
     }
 
@@ -74,6 +77,7 @@ enum PipelineKey: CaseIterable {
         case .pointShader: return "pointFragmentShader"
         case .colorShader: return "colorFragmentShader"
         case .roundColorShader: return "roundColorFragmentShader"
+        case .clearStencilShader: return "stencilClearFragmentShader"
         }
     }
 

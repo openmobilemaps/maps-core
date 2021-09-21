@@ -80,16 +80,16 @@ struct LineVertex: Equatable {
         return vertexDescriptor
     }()
     
-    init(x: Float,
-         y: Float,
+    init(x: Double,
+         y: Double,
          lineA: MCVec2D,
          lineB: MCVec2D,
-         widthNormal: (x:Float, y:Float),
-         lenghtNormal: (x:Float, y:Float)) {
-        position = SIMD2([x, y])
+         widthNormal: (x:Double, y:Double),
+         lenghtNormal: (x:Double, y:Double)) {
+        position = SIMD2([Float(x), Float(y)])
         self.lineA = SIMD2([lineA.xF, lineA.yF])
         self.lineB = SIMD2([lineB.xF, lineB.yF])
-        self.widthNormal = SIMD2([widthNormal.x, widthNormal.y])
-        self.lenghtNormal = SIMD2([lenghtNormal.x, lenghtNormal.y])
+        self.widthNormal = SIMD2([Float(widthNormal.x), Float(widthNormal.y)])
+        self.lenghtNormal = SIMD2([Float(lenghtNormal.x), Float(lenghtNormal.y)])
     }
 }

@@ -4,6 +4,7 @@
 #import "MCVec2D.h"
 #import <Foundation/Foundation.h>
 @protocol MCGraphicsObjectInterface;
+@protocol MCMaskingObjectInterface;
 
 
 @protocol MCPolygon2dInterface
@@ -13,5 +14,7 @@
                    isConvex:(BOOL)isConvex;
 
 - (nullable id<MCGraphicsObjectInterface>)asGraphicsObject;
+
+- (nullable id<MCMaskingObjectInterface>)asMaskingObject;
 
 @end

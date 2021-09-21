@@ -69,6 +69,8 @@
 
 - (double)mapUnitsFromPixels:(double)distancePx;
 
+- (void)setRotationEnabled:(BOOL)enabled;
+
 - (nullable id<MCCameraInterface>)asCameraInterface;
 
 @end

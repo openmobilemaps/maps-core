@@ -41,9 +41,6 @@ public:
         }
 
         return nullptr;
-
-
-
     };
 
     std::vector<WmtsLayerDescription> getAllLayers() override {

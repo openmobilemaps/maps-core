@@ -13,13 +13,18 @@ graphics_object_interface = interface +c +j +o {
     # Clear graphics object and invalidate isReady
     clear();
     # Render the graphics object; ensure calling on graphics thread
-    render(context: rendering_context_interface, render_pass: render_pass_config, mvp_matrix: i64, screenPixelAsRealMeterFactor: f64);
-}
+    render(context: rendering_context_interface, render_pass: render_pass_config, mvp_matrix: i64, is_masked: bool, screenPixelAsRealMeterFactor: f64);}
+
+masking_object_interface = interface +c +j +o {
+	render_as_mask(context: rendering_context_interface, render_pass: render_pass_config, mvp_matrix: i64, screenPixelAsRealMeterFactor: f64);}
 
 graphics_object_factory_interface = interface +c +j +o {
     create_quad(shader: shader_program_interface) : quad_2d_interface;
     create_line(shader: shader_program_interface) : line_2d_interface;
     create_polygon(shader: shader_program_interface) : polygon_2d_interface;
+
+    create_quad_mask() : quad_2d_interface;
+    create_polygon_mask() : polygon_2d_interface;
 }
 
 quad_2d_interface = interface +c +j +o {
@@ -27,6 +32,7 @@ quad_2d_interface = interface +c +j +o {
     load_texture(texture_holder: texture_holder_interface);
     remove_texture();
     as_graphics_object(): graphics_object_interface;
+    as_masking_object(): masking_object_interface;
 }
 
 line_2d_interface = interface +c +j +o {
@@ -37,6 +43,7 @@ line_2d_interface = interface +c +j +o {
 polygon_2d_interface = interface +c +j +o {
     set_polygon_positions(positions: list<vec_2_d>, holes: list<list<vec_2_d>>, is_convex: bool);
     as_graphics_object(): graphics_object_interface;
+    as_masking_object(): masking_object_interface;
 }
 
 texture_holder_interface = interface +j +o {

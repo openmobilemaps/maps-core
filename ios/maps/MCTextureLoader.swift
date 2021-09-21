@@ -12,6 +12,7 @@ import MapCoreSharedModule
 import UIKit
 
 open class MCTextureLoader: MCTextureLoaderInterface {
+
     private let session: URLSession
 
     public init(urlSession: URLSession? = nil) {

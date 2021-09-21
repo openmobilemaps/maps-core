@@ -8,8 +8,7 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#ifndef MAPSDK_LINE2DOPENGL_H
-#define MAPSDK_LINE2DOPENGL_H
+#pragma once
 
 #include "GraphicsObjectInterface.h"
 #include "Line2dInterface.h"
@@ -33,7 +32,7 @@ class Line2dOpenGl : public GraphicsObjectInterface,
     virtual void clear() override;
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                        int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
+                        int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
     virtual void setLinePositions(const std::vector<::Vec2D> &positions) override;
 
@@ -57,5 +56,3 @@ class Line2dOpenGl : public GraphicsObjectInterface,
 
     bool ready = false;
 };
-
-#endif // MAPSDK_LINE2DOPENGL_H

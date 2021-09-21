@@ -590,3 +590,7 @@ Coord MapCamera2d::getBoundsCorrectedCoords(const Coord &coords) {
 
     return mapCoords;
 }
+
+void MapCamera2d::setRotationEnabled(bool enabled) {
+    config.rotationEnabled = enabled;
+}

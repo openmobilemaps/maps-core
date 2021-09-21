@@ -21,4 +21,8 @@ public:
     virtual void setBackgroundColor(const ::Color & color) = 0;
 
     virtual void setupDrawFrame() = 0;
+
+    virtual void preRenderStencilMask() = 0;
+
+    virtual void postRenderStencilMask() = 0;
 };

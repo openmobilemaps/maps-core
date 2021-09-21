@@ -15,6 +15,8 @@ abstract class PolygonLayerInterface {
 
     abstract fun add(polygon: PolygonInfo)
 
+    abstract fun addAll(polygons: ArrayList<PolygonInfo>)
+
     abstract fun clear()
 
     abstract fun setCallbackHandler(handler: PolygonLayerCallbackInterface)
@@ -69,6 +71,12 @@ abstract class PolygonLayerInterface {
             native_add(this.nativeRef, polygon)
         }
         private external fun native_add(_nativeRef: Long, polygon: PolygonInfo)
+
+        override fun addAll(polygons: ArrayList<PolygonInfo>) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_addAll(this.nativeRef, polygons)
+        }
+        private external fun native_addAll(_nativeRef: Long, polygons: ArrayList<PolygonInfo>)
 
         override fun clear() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

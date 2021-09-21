@@ -34,6 +34,7 @@ class Polygon2d: BaseGraphicsObject {
                          context: RenderingContext,
                          renderPass _: MCRenderPassConfig,
                          mvpMatrix: Int64,
+                         isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double)
     {
         guard let verticesBuffer = verticesBuffer,
@@ -64,7 +65,11 @@ class Polygon2d: BaseGraphicsObject {
         shader.preRender(context)
 
         encoder.setDepthStencilState(stencilState)
-        encoder.setStencilReferenceValue(0x1)
+        if isMasked {
+            encoder.setStencilReferenceValue(0b10000001)
+        } else {
+            encoder.setStencilReferenceValue(0b00000001)
+        }
 
         encoder.drawIndexedPrimitives(type: .triangle, indexCount: indicesCount, indexType: .uint16, indexBuffer: indicesBuffer, indexBufferOffset: 0)
     }
@@ -83,10 +88,13 @@ class Polygon2d: BaseGraphicsObject {
             ss.stencilFailureOperation = .incrementClamp
             ss.depthFailureOperation = .keep
             ss.depthStencilPassOperation = .incrementClamp
+            ss.readMask = 0b11111111
+            ss.writeMask = 0b01111111
 
             let s = MTLDepthStencilDescriptor()
             s.frontFaceStencil = ss
             s.backFaceStencil = ss
+
 
             stencilStatePrepare = device.makeDepthStencilState(descriptor: s)
 
@@ -95,6 +103,8 @@ class Polygon2d: BaseGraphicsObject {
             ss2.stencilFailureOperation = .zero
             ss2.depthFailureOperation = .zero
             ss2.depthStencilPassOperation = .zero
+            ss2.readMask = 0b11111111
+            ss2.writeMask = 0b01111111
 
             let s2 = MTLDepthStencilDescriptor()
             s2.frontFaceStencil = ss2
@@ -118,7 +128,7 @@ class Polygon2d: BaseGraphicsObject {
             ss.depthFailureOperation = .keep
             ss.depthStencilPassOperation = .invert
             ss.writeMask = 0x1
-            ss.readMask = 0x1
+            ss.readMask = 0b10000001
 
             let s = MTLDepthStencilDescriptor()
             s.frontFaceStencil = ss
@@ -132,7 +142,7 @@ class Polygon2d: BaseGraphicsObject {
             ss2.depthFailureOperation = .zero
             ss2.depthStencilPassOperation = .zero
             ss2.writeMask = 0x1
-            ss2.readMask = 0x1
+            ss.readMask = 0b10000001
 
             let s2 = MTLDepthStencilDescriptor()
             s2.frontFaceStencil = ss2
@@ -143,7 +153,47 @@ class Polygon2d: BaseGraphicsObject {
     }
 }
 
+extension Polygon2d: MCMaskingObjectInterface {
+
+    func render(asMask context: MCRenderingContextInterface?,
+                renderPass: MCRenderPassConfig,
+                mvpMatrix: Int64,
+                screenPixelAsRealMeterFactor: Double) {
+        guard let context = context as? RenderingContext,
+              let encoder = context.encoder else { return }
+
+        guard let verticesBuffer = verticesBuffer,
+              let indicesBuffer = indicesBuffer
+        else { return }
+
+
+        if stencilStatePrepare == nil || stencilState == nil {
+            setupStencilStates()
+        }
+
+        if let mask = context.polygonMask {
+            encoder.setDepthStencilState(mask)
+            encoder.setStencilReferenceValue(0b10000000)
+        }
+
+        // stencil prepare pass
+        shader.setupProgram(context)
+        shader.preRender(context)
+
+        var c = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
+        encoder.setFragmentBytes(&c, length: MemoryLayout<SIMD4<Float>>.stride, index: 1)
+
+        encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
+        let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix))!
+        encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+
+        encoder.drawIndexedPrimitives(type: .triangle, indexCount: indicesCount, indexType: .uint16, indexBuffer: indicesBuffer, indexBufferOffset: 0)
+
+    }
+}
+
 extension Polygon2d: MCPolygon2dInterface {
+
     func setPolygonPositions(_ positions: [MCVec2D], holes: [[MCVec2D]], isConvex: Bool) {
         stencilStatePrepare = nil
         stencilState = nil
@@ -197,4 +247,6 @@ extension Polygon2d: MCPolygon2dInterface {
     }
 
     func asGraphicsObject() -> MCGraphicsObjectInterface? { self }
+
+    func asMaskingObject() -> MCMaskingObjectInterface? { self }
 }

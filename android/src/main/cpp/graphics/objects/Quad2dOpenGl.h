@@ -8,10 +8,10 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#ifndef MAPSDK_RECTANGLE2DOPENGL_H
-#define MAPSDK_RECTANGLE2DOPENGL_H
+#pragma once
 
 #include "GraphicsObjectInterface.h"
+#include "MaskingObjectInterface.h"
 #include "OpenGlContext.h"
 #include "Quad2dInterface.h"
 #include "ShaderProgramInterface.h"
@@ -19,8 +19,9 @@
 #include <vector>
 
 class Quad2dOpenGl : public GraphicsObjectInterface,
+                     public MaskingObjectInterface,
                      public Quad2dInterface,
-                     public std::enable_shared_from_this<GraphicsObjectInterface> {
+                     public std::enable_shared_from_this<Quad2dOpenGl> {
   public:
     Quad2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader);
 
@@ -32,8 +33,10 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
 
     virtual void clear() override;
 
+    virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> & context, const ::RenderPassConfig & renderPass, int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
+
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                        int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
+                        int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
     virtual void setFrame(const ::Quad2dD &frame, const ::RectD &textureCoordinates) override;
 
@@ -42,6 +45,8 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
     virtual void removeTexture() override;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() override;
+
+    virtual std::shared_ptr<MaskingObjectInterface> asMaskingObject() override;
 
   protected:
     virtual void adjustTextureCoordinates();
@@ -63,5 +68,3 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
 
     bool ready = false;
 };
-
-#endif // MAPSDK_RECTANGLE2DOPENGL_H

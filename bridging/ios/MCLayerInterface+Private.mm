@@ -8,6 +8,7 @@
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCMapInterface+Private.h"
+#import "MCMaskingObjectInterface+Private.h"
 #import "MCRenderPassInterface+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -31,6 +32,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
         _cppRefHandle.assign(cppRef);
     }
     return self;
+}
+
+- (void)setMaskingObject:(nullable id<MCMaskingObjectInterface>)maskingObject {
+    try {
+        _cppRefHandle.get()->setMaskingObject(::djinni_generated::MaskingObjectInterface::toCpp(maskingObject));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
 - (void)update {
@@ -91,6 +98,12 @@ class LayerInterface::ObjcProxy final
     friend class ::djinni_generated::LayerInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
+    void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & c_maskingObject) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setMaskingObject:(::djinni_generated::MaskingObjectInterface::fromCpp(c_maskingObject))];
+        }
+    }
     void update() override
     {
         @autoreleasepool {

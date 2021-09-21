@@ -19,6 +19,10 @@ bool Quad2dOpenGl::isReady() { return ready; }
 
 std::shared_ptr<GraphicsObjectInterface> Quad2dOpenGl::asGraphicsObject() { return shared_from_this(); }
 
+std::shared_ptr<MaskingObjectInterface> Quad2dOpenGl::asMaskingObject() {
+    return shared_from_this();
+}
+
 void Quad2dOpenGl::clear() {
     removeTexture();
     ready = false;
@@ -95,10 +99,22 @@ void Quad2dOpenGl::adjustTextureCoordinates() {
     textureBuffer = {tMinX, tMinY, tMinX, tMaxY, tMaxX, tMaxY, tMaxX, tMinY};
 }
 
+void Quad2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
+                                int64_t mvpMatrix, double screenPixelAsRealMeterFactor) {
+    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+    render(context, renderPass, mvpMatrix, false, screenPixelAsRealMeterFactor);
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+}
+
 void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                          int64_t mvpMatrix, double screenPixelAsRealMeterFactor) {
+                          int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
     if (!ready)
         return;
+
+    if (isMasked) {
+        glStencilFunc(GL_EQUAL, 128, 128);
+        glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
+    }
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
 
@@ -109,17 +125,18 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     glUseProgram(mProgram);
     OpenGlHelper::checkGlError("glUseProgram RectangleOpenGl");
 
-    if (textureLoaded)
+    if (textureLoaded) {
         prepareTextureDraw(openGlContext, mProgram);
 
-    int mTextureCoordinateHandle = glGetAttribLocation(mProgram, "texCoordinate");
-    OpenGlHelper::checkGlError("glGetAttribLocation texCoordinate");
+        int mTextureCoordinateHandle = glGetAttribLocation(mProgram, "texCoordinate");
+        OpenGlHelper::checkGlError("glGetAttribLocation texCoordinate");
 
-    glEnableVertexAttribArray(mTextureCoordinateHandle);
-    OpenGlHelper::checkGlError("glEnableVertexAttribArray");
+        glEnableVertexAttribArray(mTextureCoordinateHandle);
+        OpenGlHelper::checkGlError("glEnableVertexAttribArray");
 
-    glVertexAttribPointer(mTextureCoordinateHandle, 2, GL_FLOAT, false, 0, &textureBuffer[0]);
-    OpenGlHelper::checkGlError("glVertexAttribPointer tex");
+        glVertexAttribPointer(mTextureCoordinateHandle, 2, GL_FLOAT, false, 0, &textureBuffer[0]);
+        OpenGlHelper::checkGlError("glVertexAttribPointer tex");
+    }
 
     shaderProgram->preRender(context);
 

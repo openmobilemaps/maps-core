@@ -21,7 +21,7 @@ class Tiled2dMapRasterSource : public Tiled2dMapSource<TextureHolderInterface, T
     Tiled2dMapRasterSource(const MapConfig &mapConfig, const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
                            const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                            const std::shared_ptr<SchedulerInterface> &scheduler,
-                           const std::shared_ptr<TextureLoaderInterface> &loader,
+                           const std::shared_ptr<::TextureLoaderInterface> & textureLoader,
                            const std::shared_ptr<Tiled2dMapSourceListenerInterface> &listener);
 
     std::unordered_set<Tiled2dMapRasterTileInfo> getCurrentTiles();

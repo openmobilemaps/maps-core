@@ -16,6 +16,10 @@ Polygon2dOpenGl::Polygon2dOpenGl(const std::shared_ptr<::ShaderProgramInterface>
 
 std::shared_ptr<GraphicsObjectInterface> Polygon2dOpenGl::asGraphicsObject() { return shared_from_this(); }
 
+std::shared_ptr<MaskingObjectInterface> Polygon2dOpenGl::asMaskingObject() {
+    return shared_from_this();
+}
+
 bool Polygon2dOpenGl::isReady() { return ready; }
 
 void Polygon2dOpenGl::setPolygonPositions(const std::vector<::Vec2D> &positions, const std::vector<std::vector<::Vec2D>> &holes,
@@ -79,7 +83,7 @@ void Polygon2dOpenGl::clear() {
 }
 
 void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                             int64_t mvpMatrix, double screenPixelAsRealMeterFactor) {
+                             int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
     if (!ready)
         return;
 
@@ -87,8 +91,12 @@ void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> 
     int program = openGlContext->getProgram(shaderProgram->getProgramName());
 
     glEnable(GL_STENCIL_TEST);
-    glClear(GL_STENCIL_BUFFER_BIT);
-    glClearStencil(0);
+    if (!isMasked) {
+        glEnable(GL_STENCIL_TEST);
+        glStencilMask(0xFF);
+        glClearStencil(0x0);
+        glClear(GL_STENCIL_BUFFER_BIT);
+    }
 
     // By drawing the triangle fan with indices around the polygon,
     // all the parts that need to be drawn are drawn an odd time.
@@ -99,17 +107,17 @@ void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> 
     // need a more elaborate solution.
     // (Here we fill the stencil by always increasing the it by 1)
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    glStencilFunc(GL_NEVER, 0, 1);
+    glStencilFunc(GL_NEVER, 0, 63);
     glStencilOp(GL_INCR, GL_KEEP, GL_INCR);
 
     drawPolygon(openGlContext, program, mvpMatrix);
 
     if (polygonIsConvex) {
         // draw all the ones only
-        glStencilFunc(GL_EQUAL, 1, 255);
+        glStencilFunc(GL_EQUAL, isMasked ? 129 : 1, 255);
     } else {
         // draw all the odd ones
-        glStencilFunc(GL_EQUAL, 1, 1);
+        glStencilFunc(GL_EQUAL, isMasked ? 129 : 1, isMasked ? 129 : 1);
     }
     glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -151,4 +159,17 @@ void Polygon2dOpenGl::drawPolygon(std::shared_ptr<OpenGlContext> openGlContext, 
     glDisableVertexAttribArray(positionHandle);
 
     glDisable(GL_BLEND);
+}
+
+void Polygon2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
+                                   int64_t mvpMatrix, double screenPixelAsRealMeterFactor) {
+    if (!ready) return;
+
+    std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
+    int program = openGlContext->getProgram(shaderProgram->getProgramName());
+
+    glStencilFunc(GL_EQUAL, 128, 128);
+    glStencilOp(GL_REPLACE, GL_ZERO, GL_ZERO);
+
+    drawPolygon(openGlContext, program, mvpMatrix);
 }

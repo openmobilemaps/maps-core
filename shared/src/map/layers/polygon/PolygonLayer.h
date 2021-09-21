@@ -39,7 +39,9 @@ class PolygonLayer : public PolygonLayerInterface,
 
     virtual void add(const PolygonInfo &polygon) override;
 
-    virtual void setupPolygon(const std::shared_ptr<Polygon2dInterface> &polygon);
+    virtual void addAll(const std::vector<PolygonInfo> & polygons) override;
+
+    virtual void setupPolygons(const std::vector<std::shared_ptr<Polygon2dInterface>> &polygon);
 
     virtual void clear() override;
 
@@ -48,6 +50,9 @@ class PolygonLayer : public PolygonLayerInterface,
     virtual void setCallbackHandler(const std::shared_ptr<PolygonLayerCallbackInterface> &handler) override;
 
     // LayerInterface
+
+    virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) override;
+
     virtual void update() override{};
 
     virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override;
@@ -77,6 +82,7 @@ class PolygonLayer : public PolygonLayerInterface,
 
     std::recursive_mutex polygonsMutex;
     std::unordered_map<PolygonInfo, std::shared_ptr<Polygon2dLayerObject>> polygons;
+    std::shared_ptr<MaskingObjectInterface> mask = nullptr;
 
     void generateRenderPasses();
     std::vector<std::shared_ptr<::RenderPassInterface>> renderPasses;

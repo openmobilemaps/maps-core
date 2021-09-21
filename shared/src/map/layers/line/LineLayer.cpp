@@ -144,7 +144,7 @@ void LineLayer::generateRenderPasses() {
     }
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
     for (const auto &passEntry : renderPassObjectMap) {
-        std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second);
+        std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second, mask);
         newRenderPasses.push_back(renderPass);
     }
     renderPasses = newRenderPasses;
@@ -187,14 +187,12 @@ void LineLayer::resume() {
 
 void LineLayer::hide() {
     isHidden = true;
-    if (mapInterface)
-        mapInterface->invalidate();
+    if (mapInterface) mapInterface->invalidate();
 }
 
 void LineLayer::show() {
     isHidden = false;
-    if (mapInterface)
-        mapInterface->invalidate();
+    if (mapInterface) mapInterface->invalidate();
 }
 
 bool LineLayer::onTouchDown(const ::Vec2F &posScreen) {
@@ -252,4 +250,11 @@ void LineLayer::clearTouch() {
         }
     }
     mapInterface->invalidate();
+}
+
+
+void LineLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) {
+    this->mask = maskingObject;
+    generateRenderPasses();
+    if (mapInterface) mapInterface->invalidate();
 }

@@ -51,6 +51,9 @@ class LineLayer : public LineLayerInterface,
     virtual void invalidate() override;
 
     // LayerInterface
+
+    virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) override;
+
     virtual void update() override {};
 
     virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override;
@@ -80,6 +83,7 @@ class LineLayer : public LineLayerInterface,
 
     std::recursive_mutex linesMutex;
     std::unordered_map<std::shared_ptr<LineInfoInterface>, std::shared_ptr<Line2dLayerObject>> lines;
+    std::shared_ptr<::MaskingObjectInterface> mask = nullptr;
 
     void generateRenderPasses();
     std::vector<std::shared_ptr<::RenderPassInterface>> renderPasses;

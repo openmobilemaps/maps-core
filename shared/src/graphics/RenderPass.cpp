@@ -11,7 +11,10 @@
 #include "RenderPass.h"
 
 RenderPass::RenderPass(RenderPassConfig config, std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects)
-        : config(config), renderObjects(renderObjects) { }
+        : config(config), renderObjects(renderObjects) {}
+
+RenderPass::RenderPass(RenderPassConfig config, std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects, std::shared_ptr<MaskingObjectInterface> maskingObject)
+        : config(config), renderObjects(renderObjects), maskingObject(maskingObject) {}
 
 std::vector<std::shared_ptr<::RenderObjectInterface>> RenderPass::getRenderObjects() { return renderObjects; }
 
@@ -20,3 +23,7 @@ void RenderPass::addRenderObject(const std::shared_ptr<RenderObjectInterface> &r
 }
 
 RenderPassConfig RenderPass::getRenderPassConfig() { return config; }
+
+std::shared_ptr<::MaskingObjectInterface> RenderPass::getMaskingObject() {
+    return maskingObject;
+}

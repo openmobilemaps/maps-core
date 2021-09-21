@@ -146,17 +146,21 @@ void Line2dOpenGl::clear() {
 }
 
 void Line2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                          int64_t mvpMatrix, double screenPixelAsRealMeterFactor) {
+                          int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
     if (!ready)
         return;
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
 
-    glEnable(GL_STENCIL_TEST);
-    glStencilMask(0xFF);
-    glClearStencil(0x0);
-    glClear(GL_STENCIL_BUFFER_BIT);
-    glStencilFunc(GL_NOTEQUAL, 0x1, 0xFF);
+    if (isMasked) {
+        glStencilFunc(GL_EQUAL, 128, 128);
+    } else {
+        glEnable(GL_STENCIL_TEST);
+        glStencilMask(0xFF);
+        glClearStencil(0x0);
+        glClear(GL_STENCIL_BUFFER_BIT);
+        glStencilFunc(GL_NOTEQUAL, 0x1, 0xFF);
+    }
     glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 

@@ -21,6 +21,7 @@ polygon_layer_interface = interface +c {
     get_polygons(): list<polygon_info>;
     remove(polygon: polygon_info);
     add(polygon: polygon_info);
+    addAll(polygons: list<polygon_info>);
     clear();
     set_callback_handler(handler: polygon_layer_callback_interface);
     asLayerInterface(): layer_interface;

@@ -8,22 +8,23 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#ifndef MAPSDK_POLYGON2DOPENGL_H
-#define MAPSDK_POLYGON2DOPENGL_H
+#pragma once
 
 #include "GraphicsObjectInterface.h"
+#include "MaskingObjectInterface.h"
 #include "OpenGlContext.h"
 #include "Polygon2dInterface.h"
 #include "ShaderProgramInterface.h"
 #include "opengl_wrapper.h"
 
 class Polygon2dOpenGl : public GraphicsObjectInterface,
+                        public MaskingObjectInterface,
                         public Polygon2dInterface,
-                        public std::enable_shared_from_this<GraphicsObjectInterface> {
-  public:
+                        public std::enable_shared_from_this<Polygon2dOpenGl> {
+public:
     Polygon2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader);
 
-    ~Polygon2dOpenGl(){};
+    ~Polygon2dOpenGl() {};
 
     virtual bool isReady() override;
 
@@ -32,14 +33,19 @@ class Polygon2dOpenGl : public GraphicsObjectInterface,
     virtual void clear() override;
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                        int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
+                        int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
+
+    virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
+                              int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
 
     virtual void setPolygonPositions(const std::vector<::Vec2D> &positions, const std::vector<std::vector<::Vec2D>> &holes,
                                      bool isConvex) override;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() override;
 
-  protected:
+    virtual std::shared_ptr<MaskingObjectInterface> asMaskingObject() override;
+
+protected:
     void initializePolygon();
 
     void drawPolygon(std::shared_ptr<OpenGlContext> openGlContext, int program, int64_t mvpMatrix);
@@ -55,5 +61,3 @@ class Polygon2dOpenGl : public GraphicsObjectInterface,
 
     bool ready = false;
 };
-
-#endif // MAPSDK_POLYGON2DOPENGL_H
