@@ -41,7 +41,7 @@ std::vector<std::shared_ptr<IconInfoInterface>> IconLayer::getIcons() {
 void IconLayer::remove(const std::shared_ptr<IconInfoInterface> &icon) {
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
-        addingQueue.erase(icon);
+        addingQueue.erase(std::remove(addingQueue.begin(), addingQueue.end(), icon), addingQueue.end());
         return;
     }
     {
@@ -72,7 +72,7 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         for (const auto &icon : icons) {
-            addingQueue.insert(icon);
+            addingQueue.push_back(icon);
         }
         return;
     }
@@ -99,7 +99,7 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
 
         {
             std::lock_guard<std::recursive_mutex> lock(iconsMutex);
-            this->icons[icon] = iconObject;
+            this->icons.push_back(std::make_pair(icon, iconObject));
         }
     }
 
@@ -237,7 +237,7 @@ void IconLayer::pause() {
         std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(addingQueueMutex, iconsMutex);
         addingQueue.clear();
         for (const auto &icon: icons) {
-            addingQueue.insert(icon.first);
+            addingQueue.push_back(icon.first);
         }
     }
     clear();
