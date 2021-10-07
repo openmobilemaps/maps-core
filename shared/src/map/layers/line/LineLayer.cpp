@@ -52,7 +52,7 @@ std::vector<std::shared_ptr<LineInfoInterface>> LineLayer::getLines() {
 void LineLayer::remove(const std::shared_ptr<LineInfoInterface> & line) {
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
-        addingQueue.erase(line);
+        addingQueue.erase(std::remove(addingQueue.begin(), addingQueue.end(), line), addingQueue.end());
         return;
     }
     {
@@ -72,7 +72,7 @@ void LineLayer::remove(const std::shared_ptr<LineInfoInterface> & line) {
 void LineLayer::add(const std::shared_ptr<LineInfoInterface> & line) {
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
-        addingQueue.insert(line);
+        addingQueue.push_back(line);
         return;
     }
 
@@ -96,7 +96,7 @@ void LineLayer::add(const std::shared_ptr<LineInfoInterface> & line) {
 
     {
         std::lock_guard<std::recursive_mutex> lock(linesMutex);
-        lines[line] = lineObject;
+        lines.push_back(std::make_pair(line, lineObject));
     }
     generateRenderPasses();
 }

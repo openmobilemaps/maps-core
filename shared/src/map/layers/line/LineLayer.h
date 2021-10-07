@@ -82,14 +82,14 @@ class LineLayer : public LineLayerInterface,
     std::shared_ptr<LineLayerCallbackInterface> callbackHandler;
 
     std::recursive_mutex linesMutex;
-    std::unordered_map<std::shared_ptr<LineInfoInterface>, std::shared_ptr<Line2dLayerObject>> lines;
+    std::vector<std::pair<std::shared_ptr<LineInfoInterface>, std::shared_ptr<Line2dLayerObject>>> lines;
     std::shared_ptr<::MaskingObjectInterface> mask = nullptr;
 
     void generateRenderPasses();
     std::vector<std::shared_ptr<::RenderPassInterface>> renderPasses;
 
     std::recursive_mutex addingQueueMutex;
-    std::unordered_set<std::shared_ptr<LineInfoInterface>> addingQueue;
+    std::vector<std::shared_ptr<LineInfoInterface>> addingQueue;
 
     std::vector<std::shared_ptr<LineInfoInterface>> highlightedLines;
 
