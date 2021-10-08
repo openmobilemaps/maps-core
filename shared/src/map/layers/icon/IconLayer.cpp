@@ -69,6 +69,10 @@ void IconLayer::add(const std::shared_ptr<IconInfoInterface> &icon) {
 
 
 void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &icons) {
+    if (icons.empty()) {
+        return;
+    }
+
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         for (const auto &icon : icons) {
