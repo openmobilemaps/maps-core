@@ -141,13 +141,16 @@ void MapScene::drawFrame() {
     if (!isResumed)
         return;
 
-    for (const auto &layer : layers) {
-        layer->update();
-    }
+    {
+        std::lock_guard<std::recursive_mutex> lock(layersMutex);
+        for (const auto &layer : layers) {
+            layer->update();
+        }
 
-    for (const auto &layer : layers) {
-        for (const auto &renderPass : layer->buildRenderPasses()) {
-            scene->getRenderer()->addToRenderQueue(renderPass);
+        for (const auto &layer : layers) {
+            for (const auto &renderPass : layer->buildRenderPasses()) {
+                scene->getRenderer()->addToRenderQueue(renderPass);
+            }
         }
     }
 
@@ -158,6 +161,7 @@ void MapScene::resume() {
     isResumed = true;
     scheduler->addTask(
         std::make_shared<LambdaTask>(TaskConfig("MapScene_resume", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [=] {
+            std::lock_guard<std::recursive_mutex> lock(layersMutex);
             for (const auto &layer : layers) {
                 layer->resume();
             }
@@ -168,6 +172,7 @@ void MapScene::pause() {
     isResumed = false;
     scheduler->addTask(
         std::make_shared<LambdaTask>(TaskConfig("MapScene_pause", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [=] {
+            std::lock_guard<std::recursive_mutex> lock(layersMutex);
             for (const auto &layer : layers) {
                 layer->pause();
             }

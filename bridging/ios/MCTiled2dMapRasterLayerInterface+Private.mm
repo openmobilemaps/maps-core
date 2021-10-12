@@ -8,7 +8,7 @@
 #import "DJIMarshal+Private.h"
 #import "MCLayerInterface+Private.h"
 #import "MCMaskingObjectInterface+Private.h"
-#import "MCTextureLoaderInterface+Private.h"
+#import "MCTileLoaderInterface+Private.h"
 #import "MCTiled2dMapLayerConfig+Private.h"
 #import "MCTiled2dMapRasterLayerCallbackInterface+Private.h"
 #include <exception>
@@ -36,21 +36,21 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 }
 
 + (nullable MCTiled2dMapRasterLayerInterface *)createWithMask:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
-                                                textureLoader:(nullable id<MCTextureLoaderInterface>)textureLoader
+                                                   tileLoader:(nullable id<MCTileLoaderInterface>)tileLoader
                                                          mask:(nullable id<MCMaskingObjectInterface>)mask {
     try {
         auto objcpp_result_ = ::Tiled2dMapRasterLayerInterface::createWithMask(::djinni_generated::Tiled2dMapLayerConfig::toCpp(layerConfig),
-                                                                               ::djinni_generated::TextureLoaderInterface::toCpp(textureLoader),
+                                                                               ::djinni_generated::TileLoaderInterface::toCpp(tileLoader),
                                                                                ::djinni_generated::MaskingObjectInterface::toCpp(mask));
         return ::djinni_generated::Tiled2dMapRasterLayerInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
 + (nullable MCTiled2dMapRasterLayerInterface *)create:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
-                                        textureLoader:(nullable id<MCTextureLoaderInterface>)textureLoader {
+                                           tileLoader:(nullable id<MCTileLoaderInterface>)tileLoader {
     try {
         auto objcpp_result_ = ::Tiled2dMapRasterLayerInterface::create(::djinni_generated::Tiled2dMapLayerConfig::toCpp(layerConfig),
-                                                                       ::djinni_generated::TextureLoaderInterface::toCpp(textureLoader));
+                                                                       ::djinni_generated::TileLoaderInterface::toCpp(tileLoader));
         return ::djinni_generated::Tiled2dMapRasterLayerInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }

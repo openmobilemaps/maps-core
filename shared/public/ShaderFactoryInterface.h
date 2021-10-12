@@ -9,6 +9,9 @@ class AlphaShaderInterface;
 class ColorCircleShaderInterface;
 class ColorLineShaderInterface;
 class ColorShaderInterface;
+class LineGroupShaderInterface;
+class PolygonGroupShaderInterface;
+class TextShaderInterface;
 
 class ShaderFactoryInterface {
 public:
@@ -18,7 +21,13 @@ public:
 
     virtual std::shared_ptr<ColorLineShaderInterface> createColorLineShader() = 0;
 
+    virtual std::shared_ptr<LineGroupShaderInterface> createLineGroupShader() = 0;
+
     virtual std::shared_ptr<ColorShaderInterface> createColorShader() = 0;
 
     virtual std::shared_ptr<ColorCircleShaderInterface> createColorCircleShader() = 0;
+
+    virtual std::shared_ptr<PolygonGroupShaderInterface> createPolygonGroupShader() = 0;
+
+    virtual std::shared_ptr<TextShaderInterface> createTextShader() = 0;
 };

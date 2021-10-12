@@ -32,15 +32,14 @@ class Quad2d: BaseGraphicsObject {
                    sampler: metalContext.samplerLibrary.value(.magLinear))
     }
 
-
     private func setupStencilStates() {
         let ss2 = MTLStencilDescriptor()
         ss2.stencilCompareFunction = .equal
         ss2.stencilFailureOperation = .zero
         ss2.depthFailureOperation = .keep
         ss2.depthStencilPassOperation = .keep
-        ss2.readMask = 0b11111111
-        ss2.writeMask = 0b00000000
+        ss2.readMask = 0b1111_1111
+        ss2.writeMask = 0b0000_0000
 
         let s2 = MTLDepthStencilDescriptor()
         s2.frontFaceStencil = ss2
@@ -59,15 +58,14 @@ class Quad2d: BaseGraphicsObject {
         guard let verticesBuffer = verticesBuffer,
               let indicesBuffer = indicesBuffer else { return }
 
-
-
+        encoder.pushDebugGroup("Quad2d")
 
         if isMasked {
             if stencilState == nil {
                 setupStencilStates()
             }
             encoder.setDepthStencilState(stencilState)
-            encoder.setStencilReferenceValue(0b10000000)
+            encoder.setStencilReferenceValue(0b1000_0000)
         }
 
         shader.setupProgram(context)
@@ -89,11 +87,12 @@ class Quad2d: BaseGraphicsObject {
                                       indexType: .uint16,
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
+
+        encoder.popDebugGroup()
     }
 }
 
 extension Quad2d: MCMaskingObjectInterface {
-
     func render(asMask context: MCRenderingContextInterface?,
                 renderPass: MCRenderPassConfig,
                 mvpMatrix: Int64,
@@ -103,7 +102,7 @@ extension Quad2d: MCMaskingObjectInterface {
 
         if let mask = context.mask {
             encoder.setDepthStencilState(mask)
-            encoder.setStencilReferenceValue(0b10000000)
+            encoder.setStencilReferenceValue(0b1000_0000)
         }
 
         render(encoder: encoder,
@@ -113,7 +112,6 @@ extension Quad2d: MCMaskingObjectInterface {
                isMasked: false,
                screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)
     }
-
 }
 
 extension Quad2d: MCQuad2dInterface {

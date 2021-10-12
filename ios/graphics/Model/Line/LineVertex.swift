@@ -8,11 +8,10 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-import MetalKit
 import MapCoreSharedModule
+import MetalKit
 
 struct LineVertex: Equatable {
-
     var position: SIMD2<Float>
 
     /// Line point A
@@ -27,18 +26,30 @@ struct LineVertex: Equatable {
     /// Lenght Normal
     var lenghtNormal: SIMD2<Float>
 
-    /*
-                                                 ^
-                  position                       | widthnormal
-                 +-------------------------------+-------------------------------+
-                 |                                                               |
-           <---  |  + lineA                                             lineB +  | -->
-                 |                                                               |
-   lenghtnormale +-------------------------------+-------------------------------+ Lenght normal
-                                                 |
-                                                 v  width noramale
-     */
+    var stylingIndex: Int32 = 0
 
+    enum SegmantType: Int32 {
+        case inner = 0
+        case start = 1
+        case end = 2
+        case singleSegment = 3
+    }
+
+    var segmentType: Int32
+
+    var lenghtPrefix: Float
+
+    /*
+                                                  ^
+                   position                       | widthNormal
+                  +-------------------------------+-------------------------------+
+                  |                                                               |
+            <---  |  + lineA                                             lineB +  | -->
+                  |                                                               |
+     lenghtNormal +-------------------------------+-------------------------------+ lenghtNormal
+                                                  |
+                                                  v  widthNormal
+      */
 
     /// Returns the descriptor to use when passed to a metal shader
     static let descriptor: MTLVertexDescriptor = {
@@ -76,20 +87,44 @@ struct LineVertex: Equatable {
         vertexDescriptor.attributes[4].offset = offset
         offset += MemoryLayout<SIMD2<Float>>.stride
 
+        // Styling Index
+        vertexDescriptor.attributes[5].bufferIndex = bufferIndex
+        vertexDescriptor.attributes[5].format = .int
+        vertexDescriptor.attributes[5].offset = offset
+        offset += MemoryLayout<Int32>.stride
+
+        // Segment Type
+        vertexDescriptor.attributes[6].bufferIndex = bufferIndex
+        vertexDescriptor.attributes[6].format = .int
+        vertexDescriptor.attributes[6].offset = offset
+        offset += MemoryLayout<Int32>.stride
+
+        // Lenght Prefix
+        vertexDescriptor.attributes[7].bufferIndex = bufferIndex
+        vertexDescriptor.attributes[7].format = .float
+        vertexDescriptor.attributes[7].offset = offset
+        offset += MemoryLayout<Float>.stride
+
         vertexDescriptor.layouts[0].stride = MemoryLayout<LineVertex>.stride
         return vertexDescriptor
     }()
-    
-    init(x: Double,
-         y: Double,
+
+    init(x: Float,
+         y: Float,
          lineA: MCVec2D,
          lineB: MCVec2D,
-         widthNormal: (x:Double, y:Double),
-         lenghtNormal: (x:Double, y:Double)) {
-        position = SIMD2([Float(x), Float(y)])
-        self.lineA = SIMD2([lineA.xF, lineA.yF])
-        self.lineB = SIMD2([lineB.xF, lineB.yF])
-        self.widthNormal = SIMD2([Float(widthNormal.x), Float(widthNormal.y)])
-        self.lenghtNormal = SIMD2([Float(lenghtNormal.x), Float(lenghtNormal.y)])
+         widthNormal: (x: Float, y: Float),
+         lenghtNormal: (x: Float, y: Float),
+         stylingIndex: Int32 = 0,
+         segmentType: SegmantType = .inner,
+         lengthPrefix: Float = 0) {
+        position = SIMD2(x, y)
+        self.lineA = SIMD2(lineA.xF, lineA.yF)
+        self.lineB = SIMD2(lineB.xF, lineB.yF)
+        self.widthNormal = SIMD2(widthNormal.x, widthNormal.y)
+        self.lenghtNormal = SIMD2(lenghtNormal.x, lenghtNormal.y)
+        self.stylingIndex = Int32(stylingIndex)
+        self.segmentType = segmentType.rawValue
+        lenghtPrefix = lengthPrefix
     }
 }

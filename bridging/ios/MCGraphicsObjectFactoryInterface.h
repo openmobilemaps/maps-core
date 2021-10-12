@@ -4,8 +4,11 @@
 #import "MCShaderProgramInterface.h"
 #import <Foundation/Foundation.h>
 @protocol MCLine2dInterface;
+@protocol MCLineGroup2dInterface;
 @protocol MCPolygon2dInterface;
+@protocol MCPolygonGroup2dInterface;
 @protocol MCQuad2dInterface;
+@protocol MCTextInterface;
 
 
 @protocol MCGraphicsObjectFactoryInterface
@@ -16,8 +19,14 @@
 
 - (nullable id<MCPolygon2dInterface>)createPolygon:(nullable id<MCShaderProgramInterface>)shader;
 
+- (nullable id<MCLineGroup2dInterface>)createLineGroup:(nullable id<MCShaderProgramInterface>)shader;
+
+- (nullable id<MCPolygonGroup2dInterface>)createPolygonGroup:(nullable id<MCShaderProgramInterface>)shader;
+
 - (nullable id<MCQuad2dInterface>)createQuadMask;
 
 - (nullable id<MCPolygon2dInterface>)createPolygonMask;
+
+- (nullable id<MCTextInterface>)createText:(nullable id<MCShaderProgramInterface>)shader;
 
 @end

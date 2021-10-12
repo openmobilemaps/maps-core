@@ -43,16 +43,24 @@ class Line2dOpenGl : public GraphicsObjectInterface,
 
     void drawLineSegments(std::shared_ptr<OpenGlContext> openGlContext, int64_t mvpMatrix, float widthScaleFactor);
 
+    void prepareGlData(std::shared_ptr<OpenGlContext> openGlContext);
+
+    void removeGlBuffers();
+
     std::vector<Vec2D> lineCoordinates;
 
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
-    std::vector<GLfloat> lineVertexBuffer;
-    std::vector<GLfloat> lineWidthNormalBuffer;
-    std::vector<GLfloat> lineLengthNormalBuffer;
-    std::vector<GLfloat> linePointABuffer;
-    std::vector<GLfloat> linePointBBuffer;
-    std::vector<GLuint> lineIndexBuffer;
-    int pointCount;
+    int mvpMatrixHandle;
+    int scaleFactorHandle;
+    int positionHandle;
+    int widthNormalHandle;
+    int lengthNormalHandle;
+    int pointAHandle;
+    int pointBHandle;
+    GLuint vertexAttribBuffer;
+    std::vector<GLfloat> lineAttributes;
+    GLuint indexBuffer;
+    std::vector<GLuint> lineIndices;
 
     bool ready = false;
 };

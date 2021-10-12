@@ -8,13 +8,16 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
+#include <logger/Logger.h>
 #include "Renderer.h"
 #include "Matrix.h"
 #include "CameraInterface.h"
 #include "RenderPassInterface.h"
 #include "RenderObjectInterface.h"
 
-void Renderer::addToRenderQueue(const std::shared_ptr<RenderPassInterface> &renderPass) { renderQueue.push(renderPass); }
+void Renderer::addToRenderQueue(const std::shared_ptr<RenderPassInterface> &renderPass) {
+    renderQueue.push(renderPass);
+}
 
 /** Ensure calling on graphics thread */
 void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &renderingContext,

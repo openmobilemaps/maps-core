@@ -29,7 +29,7 @@ class BaseGraphicsObject {
                 renderPass _: MCRenderPassConfig,
                 mvpMatrix _: Int64,
                 isMasked _: Bool,
-                screenPixelAsRealMeterFactor: Double)
+                screenPixelAsRealMeterFactor _: Double)
     {
         fatalError("has to be overwritten by subclass")
     }
@@ -53,6 +53,6 @@ extension BaseGraphicsObject: MCGraphicsObjectInterface {
                renderPass: renderPass,
                mvpMatrix: mvpMatrix,
                isMasked: isMasked,
-	           screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)
+               screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)
     }
 }

@@ -12,6 +12,14 @@ import Foundation
 import MapCoreSharedModule
 
 class ShaderFactory: MCShaderFactoryInterface {
+    func createTextShader() -> MCTextShaderInterface? {
+        TextShader()
+    }
+
+    func createPolygonGroupShader() -> MCPolygonGroupShaderInterface? {
+        PolygonGroupShader()
+    }
+
     func createColorCircleShader() -> MCColorCircleShaderInterface? {
         ColorCircleShader()
     }
@@ -22,6 +30,10 @@ class ShaderFactory: MCShaderFactoryInterface {
 
     func createColorLineShader() -> MCColorLineShaderInterface? {
         ColorLineShader()
+    }
+
+    func createLineGroupShader() -> MCLineGroupShaderInterface? {
+        LineGroupShader()
     }
 
     func createColorShader() -> MCColorShaderInterface? {

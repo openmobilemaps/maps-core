@@ -41,8 +41,6 @@ class PolygonLayer : public PolygonLayerInterface,
 
     virtual void addAll(const std::vector<PolygonInfo> & polygons) override;
 
-    virtual void setupPolygons(const std::vector<std::shared_ptr<Polygon2dInterface>> &polygon);
-
     virtual void clear() override;
 
     virtual std::shared_ptr<::LayerInterface> asLayerInterface() override;
@@ -50,7 +48,6 @@ class PolygonLayer : public PolygonLayerInterface,
     virtual void setCallbackHandler(const std::shared_ptr<PolygonLayerCallbackInterface> &handler) override;
 
     // LayerInterface
-
     virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) override;
 
     virtual void update() override{};
@@ -69,6 +66,9 @@ class PolygonLayer : public PolygonLayerInterface,
 
     virtual void show() override;
 
+
+
+    //SimpleTouchInterface
     virtual bool onTouchDown(const ::Vec2F &posScreen) override;
 
     virtual bool onClickUnconfirmed(const ::Vec2F &posScreen) override;
@@ -76,6 +76,8 @@ class PolygonLayer : public PolygonLayerInterface,
     virtual void clearTouch() override;
 
   private:
+    virtual void setupPolygonObjects(const std::vector<std::shared_ptr<Polygon2dInterface>> &polygonGraphicsObjects);
+
     std::shared_ptr<MapInterface> mapInterface;
 
     std::shared_ptr<PolygonLayerCallbackInterface> callbackHandler;

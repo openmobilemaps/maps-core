@@ -8,8 +8,8 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-import MetalKit
 import MapCoreSharedModule
+import MetalKit
 
 /// A 2D point in the X-Y coordinate system carrying a texture coordinate
 struct Vertex: Equatable {

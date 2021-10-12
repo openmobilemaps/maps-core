@@ -6,7 +6,7 @@
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
-#import "MCTextureLoaderInterface+Private.h"
+#import "MCTileLoaderInterface+Private.h"
 #import "MCTiled2dMapRasterLayerInterface+Private.h"
 #import "MCWmtsLayerDescription+Private.h"
 #include <exception>
@@ -41,10 +41,10 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 }
 
 - (nullable MCTiled2dMapRasterLayerInterface *)createLayer:(nonnull NSString *)identifier
-                                             textureLoader:(nullable id<MCTextureLoaderInterface>)textureLoader {
+                                                tileLoader:(nullable id<MCTileLoaderInterface>)tileLoader {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createLayer(::djinni::String::toCpp(identifier),
-                                                               ::djinni_generated::TextureLoaderInterface::toCpp(textureLoader));
+                                                               ::djinni_generated::TileLoaderInterface::toCpp(tileLoader));
         return ::djinni_generated::Tiled2dMapRasterLayerInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }

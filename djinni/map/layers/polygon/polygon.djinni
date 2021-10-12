@@ -2,6 +2,11 @@
 @extern "../../../yaml/color.yaml"
 @extern "../../../yaml/coord.yaml"
 
+polygon_style = record {
+    color: color;
+    opacity: f32;
+}
+
 polygon_info = record {
     identifier: string;
     coordinates: list<coord>;

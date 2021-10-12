@@ -45,3 +45,5 @@ void Tiled2dMapLayer::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, d
 void Tiled2dMapLayer::onRotationChanged(float angle) {
     // not used
 }
+
+void Tiled2dMapLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) {}

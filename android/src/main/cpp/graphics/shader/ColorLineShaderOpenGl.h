@@ -38,7 +38,7 @@ protected:
     virtual std::string getFragmentShader() override;
 
   private:
-    LineStyle lineStyle = LineStyle(ColorStateList(Color(1.0, 0.0, 0.0, 1.0), Color(1.0, 0.0, 0.0, 1.0)), SizeType::SCREEN_PIXEL, 4.0);
+    LineStyle lineStyle = LineStyle(ColorStateList(Color(1.0, 0.0, 0.0, 1.0), Color(1.0, 0.0, 0.0, 1.0)), 1.0, SizeType::SCREEN_PIXEL, 4.0, {}, LineCapType::ROUND);
     Color lineColor = lineStyle.color.normal;
     float miter;
     bool isHighlighted;

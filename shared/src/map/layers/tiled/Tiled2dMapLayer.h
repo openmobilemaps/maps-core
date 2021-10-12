@@ -49,6 +49,8 @@ class Tiled2dMapLayer : public LayerInterface,
 
     virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom) override;
 
+    virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) override;
+
     void onRotationChanged(float angle) override;
 
 protected:

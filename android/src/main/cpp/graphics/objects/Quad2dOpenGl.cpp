@@ -24,6 +24,7 @@ std::shared_ptr<MaskingObjectInterface> Quad2dOpenGl::asMaskingObject() {
 }
 
 void Quad2dOpenGl::clear() {
+    removeGlBuffers();
     removeTexture();
     ready = false;
 }
@@ -39,13 +40,13 @@ void Quad2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &con
         return;
 
     float frameZ = 0;
-    vertexBuffer = {
+    vertices = {
         (float)frame.topLeft.x,     (float)frame.topLeft.y,     frameZ,
         (float)frame.bottomLeft.x,  (float)frame.bottomLeft.y,  frameZ,
         (float)frame.bottomRight.x, (float)frame.bottomRight.y, frameZ,
         (float)frame.topRight.x,    (float)frame.topRight.y,    frameZ,
     };
-    indexBuffer = {
+    indices = {
         0, 1, 2, 0, 2, 3,
     };
     adjustTextureCoordinates();
@@ -55,8 +56,46 @@ void Quad2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &con
         shaderProgram->setupProgram(openGlContext);
     }
 
+    prepareGlData(openGlContext);
+
     ready = true;
 }
+
+void Quad2dOpenGl::prepareGlData(const std::shared_ptr<OpenGlContext> &openGlContext) {
+    int mProgram = openGlContext->getProgram(shaderProgram->getProgramName());
+    glUseProgram(mProgram);
+
+    positionHandle = glGetAttribLocation(mProgram, "vPosition");
+    glGenBuffers(1, &vertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
+    OpenGlHelper::checkGlError("Setup vPosition buffer");
+
+    textureCoordinateHandle = glGetAttribLocation(mProgram, "texCoordinate");
+    glGenBuffers(1, &textureCoordsBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, textureCoordsBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * textureCoords.size(), &textureCoords[0], GL_STATIC_DRAW);
+    OpenGlHelper::checkGlError("Setup texCoordinate buffer");
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glGenBuffers(1, &indexBuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLubyte) * indices.size(), &indices[0], GL_STATIC_DRAW);
+    OpenGlHelper::checkGlError("Setup index buffer");
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+
+    mvpMatrixHandle = glGetUniformLocation(mProgram, "uMVPMatrix");
+    OpenGlHelper::checkGlError("glGetUniformLocation uMVPMatrix");
+}
+
+void Quad2dOpenGl::removeGlBuffers() {
+    glDeleteBuffers(1, &vertexBuffer);
+    glDeleteBuffers(1, &textureCoordsBuffer);
+    glDeleteBuffers(1, &indexBuffer);
+}
+
 
 void Quad2dOpenGl::loadTexture(const std::shared_ptr<TextureHolderInterface> &textureHolder) {
     glGenTextures(1, (unsigned int *)&texturePointer[0]);
@@ -96,7 +135,7 @@ void Quad2dOpenGl::adjustTextureCoordinates() {
     float tMinY = factorHeight * textureCoordinates.y;
     float tMaxY = factorHeight * (textureCoordinates.y + textureCoordinates.height);
 
-    textureBuffer = {tMinX, tMinY, tMinX, tMaxY, tMaxX, tMaxY, tMaxX, tMinY};
+    textureCoords = {tMinX, tMinY, tMinX, tMaxY, tMaxX, tMaxY, tMaxX, tMinY};
 }
 
 void Quad2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
@@ -117,58 +156,51 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     }
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-
     int mProgram = openGlContext->getProgram(shaderProgram->getProgramName());
-
-    // Add program to OpenGL environment
-
     glUseProgram(mProgram);
     OpenGlHelper::checkGlError("glUseProgram RectangleOpenGl");
 
     if (textureLoaded) {
         prepareTextureDraw(openGlContext, mProgram);
 
-        int mTextureCoordinateHandle = glGetAttribLocation(mProgram, "texCoordinate");
-        OpenGlHelper::checkGlError("glGetAttribLocation texCoordinate");
-
-        glEnableVertexAttribArray(mTextureCoordinateHandle);
-        OpenGlHelper::checkGlError("glEnableVertexAttribArray");
-
-        glVertexAttribPointer(mTextureCoordinateHandle, 2, GL_FLOAT, false, 0, &textureBuffer[0]);
-        OpenGlHelper::checkGlError("glVertexAttribPointer tex");
+        glEnableVertexAttribArray(textureCoordinateHandle);
+        glBindBuffer(GL_ARRAY_BUFFER, textureCoordsBuffer);
+        glVertexAttribPointer(textureCoordinateHandle, 2, GL_FLOAT, false, 0, nullptr);
+        OpenGlHelper::checkGlError("glEnableVertexAttribArray texCoordinate");
     }
 
     shaderProgram->preRender(context);
 
-    // get handle to vertex shader's vPosition member
-    int mPositionHandle = glGetAttribLocation(mProgram, "vPosition");
-    OpenGlHelper::checkGlError("glGetAttribLocation");
+    // enable vPosition attribs
+    glEnableVertexAttribArray(positionHandle);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+    glVertexAttribPointer(positionHandle, 3, GL_FLOAT, false, 0, nullptr);
+    OpenGlHelper::checkGlError("glEnableVertexAttribArray positionHandle");
 
-    // Enable a handle to the triangle vertices
-    glEnableVertexAttribArray(mPositionHandle);
-
-    // Prepare the triangle coordinate data
-    glVertexAttribPointer(mPositionHandle, 3, GL_FLOAT, false, 12, &vertexBuffer[0]);
-
-    // get handle to shape's transformation matrix
-    int mMVPMatrixHandle = glGetUniformLocation(mProgram, "uMVPMatrix");
-    OpenGlHelper::checkGlError("glGetUniformLocation");
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // Apply the projection and view transformation
-    glUniformMatrix4fv(mMVPMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
+    glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
     OpenGlHelper::checkGlError("glUniformMatrix4fv");
 
     // Enable blending
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-    // Draw the triangle
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, &indexBuffer[0]);
+    // Draw the triangles
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, nullptr);
 
     OpenGlHelper::checkGlError("glDrawElements");
 
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
     // Disable vertex array
-    glDisableVertexAttribArray(mPositionHandle);
+    glDisableVertexAttribArray(positionHandle);
+
+    if (textureLoaded) {
+        glDisableVertexAttribArray(textureCoordinateHandle);
+    }
 
     glDisable(GL_BLEND);
 }

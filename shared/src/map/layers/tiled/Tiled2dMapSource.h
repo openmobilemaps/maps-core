@@ -21,6 +21,8 @@
 #include "Tiled2dMapSourceListenerInterface.h"
 #include "Tiled2dMapZoomInfo.h"
 #include "Tiled2dMapZoomLevelInfo.h"
+#include "QuadCoord.h"
+#include "CoordinateSystemIdentifiers.h"
 #include <atomic>
 #include <cmath>
 #include <mutex>
@@ -30,7 +32,8 @@
 
 // T is the Object used for loading
 // L is the Loading type
-template <class T, class L> class Tiled2dMapSource :
+// R is the Result type
+template <class T, class L, class R> class Tiled2dMapSource :
     public Tiled2dMapSourceInterface,
     public std::enable_shared_from_this<Tiled2dMapSourceInterface> {
   public:
@@ -41,12 +44,18 @@ template <class T, class L> class Tiled2dMapSource :
 
     virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom) override;
 
+    virtual bool isTileVisible(const Tiled2dMapTileInfo &tileInfo);
+
     virtual void pause() = 0;
 
     virtual void resume() = 0;
 
+    virtual RectCoord getCurrentViewBounds();
+
   protected:
     virtual L loadTile(Tiled2dMapTileInfo tile) = 0;
+
+    virtual R postLoadingTask(const L &loadedData, const Tiled2dMapTileInfo &tile) = 0;
 
     MapConfig mapConfig;
     std::shared_ptr<Tiled2dMapLayerConfig> layerConfig;
@@ -59,8 +68,10 @@ template <class T, class L> class Tiled2dMapSource :
     const Tiled2dMapZoomInfo zoomInfo;
 
     std::recursive_mutex tilesMutex;
-    std::unordered_map<Tiled2dMapTileInfo, std::shared_ptr<T>> currentTiles;
+    std::unordered_map<Tiled2dMapTileInfo, R> currentTiles;
     std::unordered_set<Tiled2dMapTileInfo> currentVisibleTiles;
+    RectCoord currentViewBounds = RectCoord(Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0),
+                                            Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0));
 
   private:
     void updateCurrentTileset(const ::RectCoord &visibleBounds, double zoom);
@@ -71,7 +82,7 @@ template <class T, class L> class Tiled2dMapSource :
 
     std::atomic_size_t dispatchedTasks;
     std::unordered_set<Tiled2dMapTileInfo> currentlyLoading;
-    std::set<PrioritizedTiled2dMapTileInfo> loadingQueue;
+    std::unordered_set<PrioritizedTiled2dMapTileInfo> loadingQueue;
 
     const long long MAX_WAIT_TIME = 32000;
     const long long MIN_WAIT_TIME = 1000;
@@ -82,7 +93,7 @@ template <class T, class L> class Tiled2dMapSource :
     };
 
     std::unordered_map<Tiled2dMapTileInfo, ErrorInfo> errorTiles;
-    std::set<Tiled2dMapTileInfo> notFoundTiles;
+    std::unordered_set<Tiled2dMapTileInfo> notFoundTiles;
 
     std::optional<Tiled2dMapTileInfo> dequeueLoadingTask();
 };

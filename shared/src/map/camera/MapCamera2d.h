@@ -94,6 +94,7 @@ class MapCamera2d : public MapCamera2dInterface,
     virtual void setRotationEnabled(bool enabled) override;
 
   protected:
+    std::recursive_mutex listenerMutex;
     std::set<std::shared_ptr<MapCamera2dListenerInterface>> listeners;
 
     std::shared_ptr<MapInterface> mapInterface;

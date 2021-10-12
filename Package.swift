@@ -33,7 +33,7 @@ let package = Package(
             path: "ios",
             exclude: ["readme.md"],
             resources: [
-                .process("ios/graphics/Shader/Metal/"),
+                .process("graphics/Shader/Metal/"),
             ]
         ),
         .target(
@@ -45,6 +45,7 @@ let package = Package(
         ),
         .target(
             name: "MapCoreSharedModuleCpp",
+            dependencies: [],
             path: "shared",
             sources: ["src"],
             publicHeadersPath: "public",
@@ -65,8 +66,8 @@ let package = Package(
                 .headerSearchPath("src/map/layers/tiled/wmts"),
                 .headerSearchPath("src/map/scheduling"),
                 .headerSearchPath("src/map"),
+                .headerSearchPath("src/util"),
                 .headerSearchPath("src/external/pugixml"),
-
             ]
         ),
     ],

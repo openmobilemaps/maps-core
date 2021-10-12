@@ -46,12 +46,11 @@ class ColorLineShader: BaseShader {
             color = SIMD4<Float>(style.color.normal.simdValues)
         case .highlighted:
             color = SIMD4<Float>(style.color.highlighted.simdValues)
-
         }
 
         encoder.setFragmentBytes(&color, length: MemoryLayout<SIMD4<Float>>.stride, index: 1)
 
-        var scaledWidth = style.width;
+        var scaledWidth = style.width
 
         if style.widthType == .SCREEN_PIXEL {
             scaledWidth *= Float(screenPixelAsRealMeterFactor)
@@ -62,13 +61,10 @@ class ColorLineShader: BaseShader {
         encoder.setFragmentBytes(&radius, length: MemoryLayout<Float>.stride, index: 2)
 
         encoder.setVertexBytes(&scaledWidth, length: MemoryLayout<Float>.stride, index: 2)
-
     }
-
 }
 
 extension ColorLineShader: MCColorLineShaderInterface {
-
     func setHighlighted(_ highlighted: Bool) {
         if highlighted {
             state = .highlighted
@@ -80,7 +76,6 @@ extension ColorLineShader: MCColorLineShaderInterface {
     func setStyle(_ lineStyle: MCLineStyle) {
         style = lineStyle
     }
-
 
     func asShaderProgram() -> MCShaderProgramInterface? {
         self

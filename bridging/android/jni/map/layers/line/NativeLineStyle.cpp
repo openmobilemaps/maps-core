@@ -4,6 +4,7 @@
 #include "NativeLineStyle.h"  // my header
 #include "Marshal.hpp"
 #include "NativeColorStateList.h"
+#include "NativeLineCapType.h"
 #include "NativeSizeType.h"
 
 namespace djinni_generated {
@@ -16,19 +17,25 @@ auto NativeLineStyle::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinni::Loc
     const auto& data = ::djinni::JniClass<NativeLineStyle>::get();
     auto r = ::djinni::LocalRef<JniType>{jniEnv->NewObject(data.clazz.get(), data.jconstructor,
                                                            ::djinni::get(::djinni_generated::NativeColorStateList::fromCpp(jniEnv, c.color)),
+                                                           ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.opacity)),
                                                            ::djinni::get(::djinni_generated::NativeSizeType::fromCpp(jniEnv, c.widthType)),
-                                                           ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.width)))};
+                                                           ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.width)),
+                                                           ::djinni::get(::djinni::List<::djinni::F32>::fromCpp(jniEnv, c.dashArray)),
+                                                           ::djinni::get(::djinni_generated::NativeLineCapType::fromCpp(jniEnv, c.lineCap)))};
     ::djinni::jniExceptionCheck(jniEnv);
     return r;
 }
 
 auto NativeLineStyle::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
-    ::djinni::JniLocalScope jscope(jniEnv, 4);
+    ::djinni::JniLocalScope jscope(jniEnv, 7);
     assert(j != nullptr);
     const auto& data = ::djinni::JniClass<NativeLineStyle>::get();
     return {::djinni_generated::NativeColorStateList::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_color)),
+            ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_opacity)),
             ::djinni_generated::NativeSizeType::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_widthType)),
-            ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_width))};
+            ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_width)),
+            ::djinni::List<::djinni::F32>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_dashArray)),
+            ::djinni_generated::NativeLineCapType::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_lineCap))};
 }
 
 }  // namespace djinni_generated

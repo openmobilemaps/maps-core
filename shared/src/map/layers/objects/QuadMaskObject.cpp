@@ -45,3 +45,7 @@ void QuadMaskObject::setPositions(const QuadCoord &coords) {
 std::shared_ptr<Quad2dInterface> QuadMaskObject::getQuadObject() {
     return quad;
 }
+
+std::shared_ptr<MaskingObjectInterface> QuadMaskObject::getMaskObject() {
+    return quad->asMaskingObject();
+}

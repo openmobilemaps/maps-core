@@ -19,11 +19,11 @@ class OpenGlContext : public RenderingContextInterface, std::enable_shared_from_
   public:
     OpenGlContext();
 
-    int getProgram(std::string name);
+    int getProgram(const std::string &name);
 
-    void storeProgram(std::string name, int program);
+    void storeProgram(const std::string &name, int program);
 
-    std::vector<unsigned int> &getTexturePointerArray(std::string name, int capacity);
+    std::vector<unsigned int> &getTexturePointerArray(const std::string &name, int capacity);
 
     void cleanAll();
 

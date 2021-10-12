@@ -13,9 +13,15 @@ abstract class GraphicsObjectFactoryInterface {
 
     abstract fun createPolygon(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Polygon2dInterface
 
+    abstract fun createLineGroup(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): LineGroup2dInterface
+
+    abstract fun createPolygonGroup(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): PolygonGroup2dInterface
+
     abstract fun createQuadMask(): Quad2dInterface
 
     abstract fun createPolygonMask(): Polygon2dInterface
+
+    abstract fun createText(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): TextInterface
 
     private class CppProxy : GraphicsObjectFactoryInterface {
         private val nativeRef: Long
@@ -53,6 +59,18 @@ abstract class GraphicsObjectFactoryInterface {
         }
         private external fun native_createPolygon(_nativeRef: Long, shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Polygon2dInterface
 
+        override fun createLineGroup(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): LineGroup2dInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createLineGroup(this.nativeRef, shader)
+        }
+        private external fun native_createLineGroup(_nativeRef: Long, shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): LineGroup2dInterface
+
+        override fun createPolygonGroup(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): PolygonGroup2dInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createPolygonGroup(this.nativeRef, shader)
+        }
+        private external fun native_createPolygonGroup(_nativeRef: Long, shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): PolygonGroup2dInterface
+
         override fun createQuadMask(): Quad2dInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_createQuadMask(this.nativeRef)
@@ -64,5 +82,11 @@ abstract class GraphicsObjectFactoryInterface {
             return native_createPolygonMask(this.nativeRef)
         }
         private external fun native_createPolygonMask(_nativeRef: Long): Polygon2dInterface
+
+        override fun createText(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): TextInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createText(this.nativeRef, shader)
+        }
+        private external fun native_createText(_nativeRef: Long, shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): TextInterface
     }
 }

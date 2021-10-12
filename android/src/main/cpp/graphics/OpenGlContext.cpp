@@ -15,7 +15,7 @@ OpenGlContext::OpenGlContext()
     : programs()
     , texturePointers() {}
 
-int OpenGlContext::getProgram(std::string name) {
+int OpenGlContext::getProgram(const std::string &name) {
     if (programs.find(name) == programs.end()) {
         return 0;
     } else {
@@ -23,9 +23,9 @@ int OpenGlContext::getProgram(std::string name) {
     }
 }
 
-void OpenGlContext::storeProgram(std::string name, int program) { programs[name] = program; }
+void OpenGlContext::storeProgram(const std::string &name, int program) { programs[name] = program; }
 
-std::vector<unsigned int> &OpenGlContext::getTexturePointerArray(std::string name, int capacity) {
+std::vector<unsigned int> &OpenGlContext::getTexturePointerArray(const std::string &name, int capacity) {
     if (texturePointers.find(name) == texturePointers.end()) {
         texturePointers[name] = std::vector<unsigned int>(capacity, 0);
     }

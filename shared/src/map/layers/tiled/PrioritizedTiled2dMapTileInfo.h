@@ -31,7 +31,8 @@ struct PrioritizedTiled2dMapTileInfo {
 namespace std {
 template <> struct hash<PrioritizedTiled2dMapTileInfo> {
     inline size_t operator()(const PrioritizedTiled2dMapTileInfo &tileInfo) const {
-        return std::hash<Tiled2dMapTileInfo>()(tileInfo.tileInfo);
+        auto h = std::hash<Tiled2dMapTileInfo>()(tileInfo.tileInfo);
+        return h;
     }
 };
 } // namespace std

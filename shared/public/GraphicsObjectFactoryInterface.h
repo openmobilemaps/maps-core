@@ -7,8 +7,11 @@
 #include <memory>
 
 class Line2dInterface;
+class LineGroup2dInterface;
 class Polygon2dInterface;
+class PolygonGroup2dInterface;
 class Quad2dInterface;
+class TextInterface;
 
 class GraphicsObjectFactoryInterface {
 public:
@@ -20,7 +23,13 @@ public:
 
     virtual std::shared_ptr<Polygon2dInterface> createPolygon(const std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
 
+    virtual std::shared_ptr<LineGroup2dInterface> createLineGroup(const std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
+
+    virtual std::shared_ptr<PolygonGroup2dInterface> createPolygonGroup(const std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
+
     virtual std::shared_ptr<Quad2dInterface> createQuadMask() = 0;
 
     virtual std::shared_ptr<Polygon2dInterface> createPolygonMask() = 0;
+
+    virtual std::shared_ptr<TextInterface> createText(const std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
 };

@@ -228,9 +228,15 @@ void MapCamera2d::setPaddingBottom(float padding, bool animated) {
     }
 }
 
-void MapCamera2d::addListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) { listeners.insert(listener); }
+void MapCamera2d::addListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) {
+    std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+    listeners.insert(listener);
+}
 
-void MapCamera2d::removeListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) { listeners.erase(listener); }
+void MapCamera2d::removeListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) {
+    std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+    listeners.erase(listener);
+}
 
 std::shared_ptr<::CameraInterface> MapCamera2d::asCameraInterface() { return shared_from_this(); }
 
@@ -315,6 +321,7 @@ RectCoord MapCamera2d::getVisibleRect() {
 
 void MapCamera2d::notifyListeners() {
     auto visibleRect = getVisibleRect();
+    std::lock_guard<std::recursive_mutex> lock(listenerMutex);
     for (auto listener : listeners) {
         listener->onVisibleBoundsChanged(visibleRect, zoom);
     }
@@ -492,8 +499,11 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
                 centerPosition.x += rotDiffX * zoom * screenPixelAsRealMeterFactor;
                 centerPosition.y += rotDiffY * zoom * screenPixelAsRealMeterFactor;
 
-                for (auto listener : listeners) {
-                    listener->onRotationChanged(angle);
+                {
+                    std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+                    for (auto listener : listeners) {
+                        listener->onRotationChanged(angle);
+                    }
                 }
             } else {
                 tempAngle = fmod((tempAngle + (olda - newa) / M_PI * 180.0) + 360.0, 360.0);

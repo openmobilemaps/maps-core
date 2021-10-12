@@ -53,11 +53,21 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
 
     virtual void prepareTextureDraw(std::shared_ptr<OpenGlContext> &openGLContext, int mProgram);
 
+    void prepareGlData(const std::shared_ptr<OpenGlContext> &openGlContext);
+
+    void removeGlBuffers();
+
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
 
-    std::vector<GLfloat> vertexBuffer;
-    std::vector<GLfloat> textureBuffer;
-    std::vector<GLubyte> indexBuffer;
+    int mvpMatrixHandle;
+    int positionHandle;
+    GLuint vertexBuffer;
+    std::vector<GLfloat> vertices;
+    int textureCoordinateHandle;
+    GLuint textureCoordsBuffer;
+    std::vector<GLfloat> textureCoords;
+    GLuint indexBuffer;
+    std::vector<GLubyte> indices;
     std::vector<GLuint> texturePointer = {0};
     bool textureLoaded = false;
 

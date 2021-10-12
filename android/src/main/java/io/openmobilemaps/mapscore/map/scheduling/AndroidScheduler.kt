@@ -65,7 +65,7 @@ class AndroidScheduler(private val schedulerCallback: AndroidSchedulerCallback) 
 	}
 
 	private fun scheduleTask(task: TaskInterface) {
-		Log.d("SCHEDULE", "schedule: ${task.getConfig().id}")
+		//Log.d("SCHEDULE", "schedule: ${task.getConfig().id} on ${task.getConfig().executionEnvironment}")
 		when (task.getConfig().executionEnvironment) {
 			ExecutionEnvironment.GRAPHICS -> schedulerCallback.scheduleOnGlThread(task)
 			ExecutionEnvironment.IO -> coroutineScope.launch(Dispatchers.IO) { task.run() }
@@ -92,7 +92,7 @@ class AndroidScheduler(private val schedulerCallback: AndroidSchedulerCallback) 
 			val taskQueue = taskQueueMap[priority] ?: return@forEach
 			while (taskQueue.isNotEmpty()) {
 				taskQueue.poll()?.let { it ->
-					Log.d("SCHEDULE", "on resume execute: ${it.getConfig().id}")
+					//Log.d("SCHEDULE", "on resume execute: ${it.getConfig().id}")
 					handleNewTask(it)
 				}
 			}

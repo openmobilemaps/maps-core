@@ -85,11 +85,12 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
     const auto &objectFactory = mapInterface->getGraphicsObjectFactory();
     const auto &shaderFactory = mapInterface->getShaderFactory();
 
-    std::vector<std::shared_ptr<Polygon2dInterface>> polygonGraphicObjects;
+    std::vector<std::shared_ptr<Polygon2dInterface>> polygonGraphicsObjects;
 
     {
         std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
         for (const auto &polygon : polygons) {
+
             auto shader = shaderFactory->createColorShader();
             auto polygonGraphicsObject = objectFactory->createPolygon(shader->asShaderProgramInterface());
 
@@ -100,7 +101,7 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
             polygonObject->setPositions(polygon.coordinates, polygon.holes, polygon.isConvex);
             polygonObject->setColor(polygon.color);
 
-            polygonGraphicObjects.push_back(polygonGraphicsObject);
+            polygonGraphicsObjects.push_back(polygonGraphicsObject);
             this->polygons[polygon] = polygonObject;
         }
     }
@@ -108,13 +109,13 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
     std::weak_ptr<PolygonLayer> selfPtr = std::dynamic_pointer_cast<PolygonLayer>(shared_from_this());
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
             TaskConfig("PolygonLayer_setup_" + polygons[0].identifier + ",...", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
-            [selfPtr, polygonGraphicObjects] { if (selfPtr.lock()) selfPtr.lock()->setupPolygons(polygonGraphicObjects); }));
+            [selfPtr, polygonGraphicsObjects] { if (selfPtr.lock()) selfPtr.lock()->setupPolygonObjects(polygonGraphicsObjects); }));
 
     generateRenderPasses();
 
 }
 
-void PolygonLayer::setupPolygons(const std::vector<std::shared_ptr<Polygon2dInterface>> &polygons) {
+void PolygonLayer::setupPolygonObjects(const std::vector<std::shared_ptr<Polygon2dInterface>> &polygons) {
     for (const auto &polygonGraphicsObject : polygons) {
         if (!polygonGraphicsObject->asGraphicsObject()->isReady()) {
             polygonGraphicsObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());

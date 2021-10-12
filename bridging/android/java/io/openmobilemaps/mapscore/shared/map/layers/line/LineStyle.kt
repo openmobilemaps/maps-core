@@ -5,6 +5,9 @@ package io.openmobilemaps.mapscore.shared.map.layers.line
 
 data class LineStyle(
     var color: io.openmobilemaps.mapscore.shared.map.layers.ColorStateList,
+    var opacity: Float,
     var widthType: io.openmobilemaps.mapscore.shared.map.layers.SizeType,
     var width: Float,
+    var dashArray: ArrayList<Float>,
+    var lineCap: LineCapType,
 )

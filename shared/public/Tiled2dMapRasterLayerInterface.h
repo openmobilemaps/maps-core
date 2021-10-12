@@ -5,7 +5,7 @@
 
 #include "LayerInterface.h"
 #include "MaskingObjectInterface.h"
-#include "TextureLoaderInterface.h"
+#include "TileLoaderInterface.h"
 #include "Tiled2dMapLayerConfig.h"
 #include <memory>
 #include <optional>
@@ -16,9 +16,9 @@ class Tiled2dMapRasterLayerInterface {
 public:
     virtual ~Tiled2dMapRasterLayerInterface() {}
 
-    static std::shared_ptr<Tiled2dMapRasterLayerInterface> createWithMask(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::shared_ptr<::TextureLoaderInterface> & textureLoader, const std::shared_ptr<::MaskingObjectInterface> & mask);
+    static std::shared_ptr<Tiled2dMapRasterLayerInterface> createWithMask(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::shared_ptr<::TileLoaderInterface> & tileLoader, const std::shared_ptr<::MaskingObjectInterface> & mask);
 
-    static std::shared_ptr<Tiled2dMapRasterLayerInterface> create(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::shared_ptr<::TextureLoaderInterface> & textureLoader);
+    static std::shared_ptr<Tiled2dMapRasterLayerInterface> create(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::shared_ptr<::TileLoaderInterface> & tileLoader);
 
     virtual std::shared_ptr<::LayerInterface> asLayerInterface() = 0;
 

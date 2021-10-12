@@ -18,13 +18,18 @@ Tiled2dMapRasterSource::Tiled2dMapRasterSource(const MapConfig &mapConfig,
                                                const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
                                                const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                                const std::shared_ptr<SchedulerInterface> &scheduler,
-                                               const std::shared_ptr<::TextureLoaderInterface> & textureLoader,
+                                               const std::shared_ptr<::TileLoaderInterface> & textureLoader,
                                                const std::shared_ptr<Tiled2dMapSourceListenerInterface> &listener)
-    : Tiled2dMapSource<TextureHolderInterface, TextureLoaderResult>(mapConfig, layerConfig, conversionHelper, scheduler, listener)
+    : Tiled2dMapSource<TextureHolderInterface, TextureLoaderResult, std::shared_ptr<::TextureHolderInterface>>(mapConfig, layerConfig, conversionHelper, scheduler, listener)
     , loader(textureLoader) {}
 
 TextureLoaderResult Tiled2dMapRasterSource::loadTile(Tiled2dMapTileInfo tile) {
     return loader->loadTexture(layerConfig->getTileUrl(tile.x, tile.y, tile.zoomIdentifier));
+}
+
+
+std::shared_ptr<::TextureHolderInterface> Tiled2dMapRasterSource::postLoadingTask(const TextureLoaderResult &loadedData, const Tiled2dMapTileInfo &tile) {
+    return loadedData.data;
 }
 
 std::unordered_set<Tiled2dMapRasterTileInfo> Tiled2dMapRasterSource::getCurrentTiles() {

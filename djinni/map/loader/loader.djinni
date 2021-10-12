@@ -1,4 +1,6 @@
 @extern "../../yaml/texture_holder_interface.yaml"
+@extern "../../yaml/vec_2_d.yaml"
+@extern "../../yaml/quad_2d_d.yaml"
 
 loader_status = enum {
     ok;
@@ -14,6 +16,55 @@ texture_loader_result = record {
     status: loader_status;
 }
 
-texture_loader_interface = interface +c +j +o {
+vector_tile_holder_interface = interface +j +o {
+	get_data(): binary;
+}
+
+vector_tile_loader_result = record {
+    data: optional<vector_tile_holder_interface>;
+    status: loader_status;
+}
+
+tile_loader_interface = interface +c +j +o {
     load_texture(url: string): texture_loader_result;
+    load_vector_tile(url: string): vector_tile_loader_result;
+}
+
+font = record {
+    name: string;
+}
+
+font_data = record {
+    info : font_info;
+    glyphs: list<font_glyph>;
+}
+
+font_info = record {
+    name: string;
+    ascender: f64;
+    descender: f64;
+    space_advance: f64;
+    bitmap_size: vec_2_d;
+
+    # font size rendered in bitmap multiplied by dpFactor
+    size: f64;
+}
+
+font_glyph = record {
+    char_code: string;
+    advance: vec_2_d;
+    bounding_box_size: vec_2_d;
+    bearing: vec_2_d;
+    # s0,t0,s1,t1
+    uv: quad_2d_d;
+}
+
+font_loader_result = record {
+    image_data: optional<texture_holder_interface>;
+    font_data: optional<font_data>;
+    status: loader_status;
+}
+
+font_loader_interface = interface +c +j +o {
+    load_font(font: font): font_loader_result;
 }

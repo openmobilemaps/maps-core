@@ -30,7 +30,7 @@ class Line2dLayerObject : public LayerObjectInterface {
 
     virtual std::vector<std::shared_ptr<RenderConfigInterface>> getRenderConfig() override;
 
-    void setPositions(std::vector<Coord> positions);
+    void setPositions(const std::vector<Coord> &positions);
 
     void setStyle(const LineStyle &style);
 
