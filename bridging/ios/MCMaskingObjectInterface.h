@@ -4,6 +4,7 @@
 #import "MCRenderPassConfig.h"
 #import "MCRenderingContextInterface.h"
 #import <Foundation/Foundation.h>
+@protocol MCGraphicsObjectInterface;
 
 
 @protocol MCMaskingObjectInterface
@@ -12,5 +13,7 @@
           renderPass:(nonnull MCRenderPassConfig *)renderPass
            mvpMatrix:(int64_t)mvpMatrix
 screenPixelAsRealMeterFactor:(double)screenPixelAsRealMeterFactor;
+
+- (nullable id<MCGraphicsObjectInterface>)asGraphicsObject;
 
 @end

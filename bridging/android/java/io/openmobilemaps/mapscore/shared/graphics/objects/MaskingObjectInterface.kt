@@ -9,6 +9,8 @@ abstract class MaskingObjectInterface {
 
     abstract fun renderAsMask(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, mvpMatrix: Long, screenPixelAsRealMeterFactor: Double)
 
+    abstract fun asGraphicsObject(): GraphicsObjectInterface
+
     private class CppProxy : MaskingObjectInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -32,5 +34,11 @@ abstract class MaskingObjectInterface {
             native_renderAsMask(this.nativeRef, context, renderPass, mvpMatrix, screenPixelAsRealMeterFactor)
         }
         private external fun native_renderAsMask(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, mvpMatrix: Long, screenPixelAsRealMeterFactor: Double)
+
+        override fun asGraphicsObject(): GraphicsObjectInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_asGraphicsObject(this.nativeRef)
+        }
+        private external fun native_asGraphicsObject(_nativeRef: Long): GraphicsObjectInterface
     }
 }

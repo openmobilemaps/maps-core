@@ -60,6 +60,9 @@ void Tiled2dMapRasterLayer::pause() {
     for (const auto &tileObject : tileObjectMap) {
         if (tileObject.second && tileObject.second->getQuadObject()->asGraphicsObject()->isReady()) tileObject.second->getQuadObject()->asGraphicsObject()->clear();
     }
+    if (mask) {
+        if (mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->clear();
+    }
 }
 
 void Tiled2dMapRasterLayer::resume() {
@@ -72,6 +75,9 @@ void Tiled2dMapRasterLayer::resume() {
             rectangle->asGraphicsObject()->setup(renderingContext);
             rectangle->loadTexture(tileObject.first.textureHolder);
         }
+    }
+    if (mask) {
+        if (!mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(renderingContext);
     }
 }
 
@@ -218,5 +224,10 @@ bool Tiled2dMapRasterLayer::onLongPress(const Vec2F &posScreen) {
 void Tiled2dMapRasterLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> &maskingObject) {
     mask = maskingObject;
     generateRenderPasses();
-    if (mapInterface) mapInterface->invalidate();
+    if (mapInterface) {
+        if (mask) {
+            if (!mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+        }
+        mapInterface->invalidate();
+    }
 }

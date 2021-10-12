@@ -143,12 +143,19 @@ void PolygonLayer::pause() {
     for (const auto &polygon : polygons) {
         polygon.second->getPolygonObject()->clear();
     }
+    if (mask) {
+        if (mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->clear();
+    }
 }
 
 void PolygonLayer::resume() {
     std::lock_guard<std::recursive_mutex> overlayLock(polygonsMutex);
+    auto renderingContext = mapInterface->getRenderingContext();
     for (const auto &polygon : polygons) {
-        polygon.second->getPolygonObject()->setup(mapInterface->getRenderingContext());
+        polygon.second->getPolygonObject()->setup(renderingContext);
+    }
+    if (mask) {
+        if (!mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(renderingContext);
     }
 }
 
@@ -254,5 +261,10 @@ bool PolygonLayer::onClickUnconfirmed(const ::Vec2F &posScreen) {
 void PolygonLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) {
     this->mask = maskingObject;
     generateRenderPasses();
-    if (mapInterface) mapInterface->invalidate();
+    if (mapInterface) {
+        if (mask) {
+            if (!mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+        }
+        mapInterface->invalidate();
+    }
 }

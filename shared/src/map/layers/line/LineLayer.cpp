@@ -176,12 +176,19 @@ void LineLayer::pause() {
     for (const auto &line : lines) {
         line.second->getLineObject()->clear();
     }
+    if (mask) {
+        if (mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->clear();
+    }
 }
 
 void LineLayer::resume() {
     std::lock_guard<std::recursive_mutex> overlayLock(linesMutex);
+    auto renderingContext = mapInterface->getRenderingContext();
     for (const auto &line : lines) {
-        line.second->getLineObject()->setup(mapInterface->getRenderingContext());
+        line.second->getLineObject()->setup(renderingContext);
+    }
+    if (mask) {
+        if (!mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(renderingContext);
     }
 }
 
@@ -256,5 +263,10 @@ void LineLayer::clearTouch() {
 void LineLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) {
     this->mask = maskingObject;
     generateRenderPasses();
-    if (mapInterface) mapInterface->invalidate();
+    if (mapInterface) {
+        if (mask) {
+            if (!mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+        }
+        mapInterface->invalidate();
+    }
 }

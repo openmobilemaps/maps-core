@@ -145,6 +145,9 @@ void IconLayer::clear() {
                 }));
         icons.clear();
     }
+    if (mask) {
+        if (mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->clear();
+    }
     renderPassObjectMap.clear();
     if (mapInterface)
         mapInterface->invalidate();
@@ -257,6 +260,9 @@ void IconLayer::resume() {
         addingQueue.clear();
         addIcons(icons);
     }
+    if (mask) {
+        if (!mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+    }
 }
 
 void IconLayer::hide() {
@@ -319,5 +325,10 @@ bool IconLayer::onClickConfirmed(const Vec2F &posScreen) {
 
 void IconLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) {
     this->mask = maskingObject;
-    if (mapInterface) mapInterface->invalidate();
+    if (mapInterface) {
+        if (mask) {
+            if (!mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+        }
+        mapInterface->invalidate();
+    }
 }
