@@ -4,7 +4,7 @@
 #include "NativeFontData.h"  // my header
 #include "Marshal.hpp"
 #include "NativeFontGlyph.h"
-#include "NativeFontInfo.h"
+#include "NativeFontWrapper.h"
 
 namespace djinni_generated {
 
@@ -15,7 +15,7 @@ NativeFontData::~NativeFontData() = default;
 auto NativeFontData::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinni::LocalRef<JniType> {
     const auto& data = ::djinni::JniClass<NativeFontData>::get();
     auto r = ::djinni::LocalRef<JniType>{jniEnv->NewObject(data.clazz.get(), data.jconstructor,
-                                                           ::djinni::get(::djinni_generated::NativeFontInfo::fromCpp(jniEnv, c.info)),
+                                                           ::djinni::get(::djinni_generated::NativeFontWrapper::fromCpp(jniEnv, c.info)),
                                                            ::djinni::get(::djinni::List<::djinni_generated::NativeFontGlyph>::fromCpp(jniEnv, c.glyphs)))};
     ::djinni::jniExceptionCheck(jniEnv);
     return r;
@@ -25,7 +25,7 @@ auto NativeFontData::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
     ::djinni::JniLocalScope jscope(jniEnv, 3);
     assert(j != nullptr);
     const auto& data = ::djinni::JniClass<NativeFontData>::get();
-    return {::djinni_generated::NativeFontInfo::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_info)),
+    return {::djinni_generated::NativeFontWrapper::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_info)),
             ::djinni::List<::djinni_generated::NativeFontGlyph>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_glyphs))};
 }
 

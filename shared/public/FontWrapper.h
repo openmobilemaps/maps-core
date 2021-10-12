@@ -7,7 +7,7 @@
 #include <string>
 #include <utility>
 
-struct FontInfo final {
+struct FontWrapper final {
     std::string name;
     double ascender;
     double descender;
@@ -16,12 +16,12 @@ struct FontInfo final {
     /** font size rendered in bitmap multiplied by dpFactor */
     double size;
 
-    FontInfo(std::string name_,
-             double ascender_,
-             double descender_,
-             double spaceAdvance_,
-             ::Vec2D bitmapSize_,
-             double size_)
+    FontWrapper(std::string name_,
+                double ascender_,
+                double descender_,
+                double spaceAdvance_,
+                ::Vec2D bitmapSize_,
+                double size_)
     : name(std::move(name_))
     , ascender(std::move(ascender_))
     , descender(std::move(descender_))

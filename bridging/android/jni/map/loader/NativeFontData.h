@@ -25,8 +25,8 @@ private:
     friend ::djinni::JniClass<NativeFontData>;
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/loader/FontData") };
-    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Lio/openmobilemaps/mapscore/shared/map/loader/FontInfo;Ljava/util/ArrayList;)V") };
-    const jfieldID field_info { ::djinni::jniGetFieldID(clazz.get(), "info", "Lio/openmobilemaps/mapscore/shared/map/loader/FontInfo;") };
+    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Lio/openmobilemaps/mapscore/shared/map/loader/FontWrapper;Ljava/util/ArrayList;)V") };
+    const jfieldID field_info { ::djinni::jniGetFieldID(clazz.get(), "info", "Lio/openmobilemaps/mapscore/shared/map/loader/FontWrapper;") };
     const jfieldID field_glyphs { ::djinni::jniGetFieldID(clazz.get(), "glyphs", "Ljava/util/ArrayList;") };
 };
 

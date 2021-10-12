@@ -3,28 +3,28 @@
 
 #pragma once
 
-#include "FontInfo.h"
+#include "FontWrapper.h"
 #include "djinni_support.hpp"
 
 namespace djinni_generated {
 
-class NativeFontInfo final {
+class NativeFontWrapper final {
 public:
-    using CppType = ::FontInfo;
+    using CppType = ::FontWrapper;
     using JniType = jobject;
 
-    using Boxed = NativeFontInfo;
+    using Boxed = NativeFontWrapper;
 
-    ~NativeFontInfo();
+    ~NativeFontWrapper();
 
     static CppType toCpp(JNIEnv* jniEnv, JniType j);
     static ::djinni::LocalRef<JniType> fromCpp(JNIEnv* jniEnv, const CppType& c);
 
 private:
-    NativeFontInfo();
-    friend ::djinni::JniClass<NativeFontInfo>;
+    NativeFontWrapper();
+    friend ::djinni::JniClass<NativeFontWrapper>;
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/loader/FontInfo") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/loader/FontWrapper") };
     const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Ljava/lang/String;DDDLio/openmobilemaps/mapscore/shared/graphics/common/Vec2D;D)V") };
     const jfieldID field_name { ::djinni::jniGetFieldID(clazz.get(), "name", "Ljava/lang/String;") };
     const jfieldID field_ascender { ::djinni::jniGetFieldID(clazz.get(), "ascender", "D") };

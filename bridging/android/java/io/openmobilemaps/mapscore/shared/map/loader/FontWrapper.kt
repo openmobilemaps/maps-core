@@ -3,7 +3,7 @@
 
 package io.openmobilemaps.mapscore.shared.map.loader
 
-data class FontInfo(
+data class FontWrapper(
     var name: String,
     var ascender: Double,
     var descender: Double,

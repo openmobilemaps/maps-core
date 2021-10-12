@@ -4,15 +4,15 @@
 #pragma once
 
 #include "FontGlyph.h"
-#include "FontInfo.h"
+#include "FontWrapper.h"
 #include <utility>
 #include <vector>
 
 struct FontData final {
-    FontInfo info;
+    FontWrapper info;
     std::vector<FontGlyph> glyphs;
 
-    FontData(FontInfo info_,
+    FontData(FontWrapper info_,
              std::vector<FontGlyph> glyphs_)
     : info(std::move(info_))
     , glyphs(std::move(glyphs_))

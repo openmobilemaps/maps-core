@@ -35,11 +35,11 @@ font = record {
 }
 
 font_data = record {
-    info : font_info;
+    info : font_wrapper;
     glyphs: list<font_glyph>;
 }
 
-font_info = record {
+font_wrapper = record {
     name: string;
     ascender: f64;
     descender: f64;

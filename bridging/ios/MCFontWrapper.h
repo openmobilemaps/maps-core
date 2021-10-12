@@ -4,19 +4,19 @@
 #import "MCVec2D.h"
 #import <Foundation/Foundation.h>
 
-@interface MCFontInfo : NSObject
+@interface MCFontWrapper : NSObject
 - (nonnull instancetype)initWithName:(nonnull NSString *)name
                             ascender:(double)ascender
                            descender:(double)descender
                         spaceAdvance:(double)spaceAdvance
                           bitmapSize:(nonnull MCVec2D *)bitmapSize
                                 size:(double)size;
-+ (nonnull instancetype)fontInfoWithName:(nonnull NSString *)name
-                                ascender:(double)ascender
-                               descender:(double)descender
-                            spaceAdvance:(double)spaceAdvance
-                              bitmapSize:(nonnull MCVec2D *)bitmapSize
-                                    size:(double)size;
++ (nonnull instancetype)fontWrapperWithName:(nonnull NSString *)name
+                                   ascender:(double)ascender
+                                  descender:(double)descender
+                               spaceAdvance:(double)spaceAdvance
+                                 bitmapSize:(nonnull MCVec2D *)bitmapSize
+                                       size:(double)size;
 
 @property (nonatomic, readonly, nonnull) NSString * name;
 

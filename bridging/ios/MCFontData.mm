@@ -6,7 +6,7 @@
 
 @implementation MCFontData
 
-- (nonnull instancetype)initWithInfo:(nonnull MCFontInfo *)info
+- (nonnull instancetype)initWithInfo:(nonnull MCFontWrapper *)info
                               glyphs:(nonnull NSArray<MCFontGlyph *> *)glyphs
 {
     if (self = [super init]) {
@@ -16,7 +16,7 @@
     return self;
 }
 
-+ (nonnull instancetype)fontDataWithInfo:(nonnull MCFontInfo *)info
++ (nonnull instancetype)fontDataWithInfo:(nonnull MCFontWrapper *)info
                                   glyphs:(nonnull NSArray<MCFontGlyph *> *)glyphs
 {
     return [(MCFontData*)[self alloc] initWithInfo:info

@@ -4,6 +4,6 @@
 package io.openmobilemaps.mapscore.shared.map.loader
 
 data class FontData(
-    var info: FontInfo,
+    var info: FontWrapper,
     var glyphs: ArrayList<FontGlyph>,
 )
