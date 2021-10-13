@@ -57,6 +57,7 @@ void Quad2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &con
     }
 
     prepareGlData(openGlContext);
+    prepareTextureCoordsGlData(openGlContext);
 
     ready = true;
 }
@@ -71,12 +72,6 @@ void Quad2dOpenGl::prepareGlData(const std::shared_ptr<OpenGlContext> &openGlCon
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
     OpenGlHelper::checkGlError("Setup vPosition buffer");
 
-    textureCoordinateHandle = glGetAttribLocation(mProgram, "texCoordinate");
-    glGenBuffers(1, &textureCoordsBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, textureCoordsBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * textureCoords.size(), &textureCoords[0], GL_STATIC_DRAW);
-    OpenGlHelper::checkGlError("Setup texCoordinate buffer");
-
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glGenBuffers(1, &indexBuffer);
@@ -90,6 +85,19 @@ void Quad2dOpenGl::prepareGlData(const std::shared_ptr<OpenGlContext> &openGlCon
     OpenGlHelper::checkGlError("glGetUniformLocation uMVPMatrix");
 }
 
+void Quad2dOpenGl::prepareTextureCoordsGlData(const std::shared_ptr<OpenGlContext> &openGlContext) {
+    int mProgram = openGlContext->getProgram(shaderProgram->getProgramName());
+    glUseProgram(mProgram);
+
+    textureCoordinateHandle = glGetAttribLocation(mProgram, "texCoordinate");
+    glGenBuffers(1, &textureCoordsBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, textureCoordsBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * textureCoords.size(), &textureCoords[0], GL_STATIC_DRAW);
+    OpenGlHelper::checkGlError("Setup texCoordinate buffer");
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
 void Quad2dOpenGl::removeGlBuffers() {
     glDeleteBuffers(1, &vertexBuffer);
     glDeleteBuffers(1, &textureCoordsBuffer);
@@ -97,7 +105,7 @@ void Quad2dOpenGl::removeGlBuffers() {
 }
 
 
-void Quad2dOpenGl::loadTexture(const std::shared_ptr<TextureHolderInterface> &textureHolder) {
+void Quad2dOpenGl::loadTexture(const std::shared_ptr<::RenderingContextInterface> & context, const std::shared_ptr<TextureHolderInterface> &textureHolder) {
     glGenTextures(1, (unsigned int *)&texturePointer[0]);
 
     if (textureHolder != nullptr) {
@@ -118,6 +126,9 @@ void Quad2dOpenGl::loadTexture(const std::shared_ptr<TextureHolderInterface> &te
         adjustTextureCoordinates();
 
         glBindTexture(GL_TEXTURE_2D, 0);
+
+        std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
+        prepareTextureCoordsGlData(openGlContext);
 
         textureLoaded = true;
     }

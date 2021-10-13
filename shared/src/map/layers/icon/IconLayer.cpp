@@ -117,7 +117,7 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
                     const auto &icon = std::get<0>(iconTuple);
                     const auto &quadObject = std::get<1>(iconTuple)->getQuadObject();
                     quadObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
-                    quadObject->loadTexture(icon->getTexture());
+                    quadObject->loadTexture(mapInterface->getRenderingContext(), icon->getTexture());
                 }
             }));
 

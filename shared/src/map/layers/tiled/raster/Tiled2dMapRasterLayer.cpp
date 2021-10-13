@@ -74,7 +74,7 @@ void Tiled2dMapRasterLayer::resume() {
         if (tileObject.second && !tileObject.second->getQuadObject()->asGraphicsObject()->isReady()) {
             auto rectangle = tileObject.second->getQuadObject();
             rectangle->asGraphicsObject()->setup(renderingContext);
-            rectangle->loadTexture(tileObject.first.textureHolder);
+            rectangle->loadTexture(renderingContext, tileObject.first.textureHolder);
         }
     }
     if (mask) {
@@ -173,7 +173,7 @@ void Tiled2dMapRasterLayer::setupTiles(
         tileObject->getQuadObject()->asGraphicsObject()->setup(renderingContext);
 
         if (tileInfo.textureHolder) {
-            tileObject->getQuadObject()->loadTexture(tileInfo.textureHolder);
+            tileObject->getQuadObject()->loadTexture(renderingContext, tileInfo.textureHolder);
         }
     }
 

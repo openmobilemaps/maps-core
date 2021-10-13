@@ -144,7 +144,7 @@ extension Quad2d: MCQuad2dInterface {
         self.indicesBuffer = indicesBuffer
     }
 
-    func loadTexture(_ textureHolder: MCTextureHolderInterface?) {
+    func loadTexture(_ context: RenderingContext, _ textureHolder: MCTextureHolderInterface?) {
         guard let textureHolder = textureHolder as? TextureHolder else {
             fatalError("unexpected TextureHolder")
         }

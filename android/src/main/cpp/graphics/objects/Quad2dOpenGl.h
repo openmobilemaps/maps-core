@@ -40,7 +40,7 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
 
     virtual void setFrame(const ::Quad2dD &frame, const ::RectD &textureCoordinates) override;
 
-    virtual void loadTexture(const std::shared_ptr<TextureHolderInterface> &textureHolder) override;
+    virtual void loadTexture(const std::shared_ptr<::RenderingContextInterface> & context, const std::shared_ptr<TextureHolderInterface> &textureHolder) override;
 
     virtual void removeTexture() override;
 
@@ -54,6 +54,8 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
     virtual void prepareTextureDraw(std::shared_ptr<OpenGlContext> &openGLContext, int mProgram);
 
     void prepareGlData(const std::shared_ptr<OpenGlContext> &openGlContext);
+
+    void prepareTextureCoordsGlData(const std::shared_ptr<OpenGlContext> &openGlContext);
 
     void removeGlBuffers();
 

@@ -5,6 +5,7 @@
 
 #include "Quad2dD.h"
 #include "RectD.h"
+#include "RenderingContextInterface.h"
 #include <memory>
 
 class GraphicsObjectInterface;
@@ -17,7 +18,7 @@ public:
 
     virtual void setFrame(const ::Quad2dD & frame, const ::RectD & textureCoordinates) = 0;
 
-    virtual void loadTexture(const std::shared_ptr<TextureHolderInterface> & textureHolder) = 0;
+    virtual void loadTexture(const std::shared_ptr<::RenderingContextInterface> & context, const std::shared_ptr<TextureHolderInterface> & textureHolder) = 0;
 
     virtual void removeTexture() = 0;
 
