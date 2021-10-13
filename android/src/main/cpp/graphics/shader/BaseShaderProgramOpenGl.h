@@ -12,7 +12,7 @@
 
 #define UBRendererShaderCode(...) #__VA_ARGS__
 
-#include "../logger/Logger.h"
+#include "Logger.h"
 #include "ShaderProgramInterface.h"
 #include "opengl_wrapper.h"
 
