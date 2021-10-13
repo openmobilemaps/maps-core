@@ -26,8 +26,9 @@ class EPSG2056ToEPSG4326Converter : public CoordinateConverterInterface {
 
         auto y = CHtoWGSlat(coordinate);
         auto x = CHtoWGSlng(coordinate);
+        auto z = CHtoWGSalt(coordinate);
 
-        return Coord(getTo(), x, y, 0);
+        return Coord(getTo(), x, y, z);
     }
 
     virtual std::string getFrom() override { return CoordinateSystemIdentifiers::EPSG2056(); }
@@ -67,5 +68,18 @@ class EPSG2056ToEPSG4326Converter : public CoordinateConverterInterface {
         lng = (lng * 100) / 36;
 
         return lng;
+    }
+
+    // Convert CH y/x to WGS long
+    double CHtoWGSalt(const Coord &coordinate) {
+        // Converts militar to civil and to unit = 1000km
+        // Axiliary values (% Bern)
+        double y_aux = (coordinate.x - 2600000) / 1000000;
+        double x_aux = (coordinate.y - 1200000) / 1000000;
+
+        // Process long
+        double alt = coordinate.z + 49.55 - (12.6 * y_aux) - (22.64 * x_aux);
+
+        return alt;
     }
 };

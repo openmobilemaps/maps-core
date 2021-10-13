@@ -27,7 +27,7 @@ class EPSG3857ToEPSG4326Converter : public CoordinateConverterInterface {
         double x = coordinate.x * 180 / 20037508.34;
         double y = atan(exp(coordinate.y * M_PI / 20037508.34)) * 360 / M_PI - 90;
 
-        return Coord(getTo(), x, y, 0);
+        return Coord(getTo(), x, y, coordinate.z);
     }
 
     virtual std::string getFrom() override { return CoordinateSystemIdentifiers::EPSG3857(); }

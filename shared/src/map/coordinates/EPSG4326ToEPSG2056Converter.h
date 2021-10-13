@@ -45,7 +45,9 @@ class EPSG4326ToEPSG2056Converter : public CoordinateConverterInterface {
         y += 1000000;
         x += 2000000;
 
-        return Coord(getTo(), x, y, 0);
+        double z = coordinate.z - 49.55 + 2.73 * lng_aux + 6.94 * lat_aux;
+
+        return Coord(getTo(), x, y, z);
     }
 
     virtual std::string getFrom() override { return CoordinateSystemIdentifiers::EPSG4326(); }
