@@ -18,11 +18,35 @@
 #include "EPSG2056ToEPGS21781Converter.h"
 #include "EPSG21781ToEPGS2056Converter.h"
 
+
+/**
+ * This instance is independent of the map and does not know about the rendering system.
+ * It can not be used to convert coordinates into rendering space.
+ */
+std::shared_ptr<CoordinateConversionHelperInterface> CoordinateConversionHelperInterface::independentInstance() {
+    static std::shared_ptr<CoordinateConversionHelperInterface> singleton;
+    if (singleton) return singleton;
+    singleton = std::make_shared<CoordinateConversionHelper>();
+    return singleton;
+}
+
 CoordinateConversionHelper::CoordinateConversionHelper(MapCoordinateSystem mapCoordinateSystem)
     : mapCoordinateSystemIdentier(mapCoordinateSystem.identifier) {
 
     registerConverter(std::make_shared<DefaultSystemToRenderConverter>(mapCoordinateSystem));
+    addDefaultConverters();
+}
 
+/**
+ * This instance is independent of the map and does not know about the rendering system.
+ * It can not be used to convert coordinates into rendering space.
+ */
+CoordinateConversionHelper::CoordinateConversionHelper() {
+    addDefaultConverters();
+}
+
+
+void CoordinateConversionHelper::addDefaultConverters() {
     registerConverter(std::make_shared<EPSG4326ToEPSG3857Converter>());
     registerConverter(std::make_shared<EPSG3857ToEPSG4326Converter>());
     registerConverter(std::make_shared<EPSG2056ToEPSG4326Converter>());
@@ -134,6 +158,4 @@ void CoordinateConversionHelper::precomputeConverterHelper() {
             }
         }
     }
-
-    // three steps
 }

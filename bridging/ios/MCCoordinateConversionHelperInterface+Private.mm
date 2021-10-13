@@ -34,6 +34,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
++ (nullable MCCoordinateConversionHelperInterface *)independentInstance {
+    try {
+        auto objcpp_result_ = ::CoordinateConversionHelperInterface::independentInstance();
+        return ::djinni_generated::CoordinateConversionHelperInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)registerConverter:(nullable id<MCCoordinateConverterInterface>)converter {
     try {
         _cppRefHandle.get()->registerConverter(::djinni_generated::CoordinateConverterInterface::toCpp(converter));
