@@ -15,6 +15,12 @@ class CoordinateConversionHelperInterface {
 public:
     virtual ~CoordinateConversionHelperInterface() {}
 
+    /**
+     * This instance is independent of the map and does not know about the rendering system.
+     * It can not be used to convert coordinates into rendering space.
+     */
+    static std::shared_ptr<CoordinateConversionHelperInterface> independentInstance();
+
     virtual void registerConverter(const std::shared_ptr<CoordinateConverterInterface> & converter) = 0;
 
     virtual Coord convert(const std::string & to, const Coord & coordinate) = 0;

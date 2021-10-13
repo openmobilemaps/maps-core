@@ -4,19 +4,30 @@
 #pragma once
 
 #include "ColorStateList.h"
+#include "LineCapType.h"
 #include "SizeType.h"
 #include <utility>
+#include <vector>
 
 struct LineStyle final {
     ::ColorStateList color;
+    float opacity;
     ::SizeType widthType;
     float width;
+    std::vector<float> dashArray;
+    LineCapType lineCap;
 
     LineStyle(::ColorStateList color_,
+              float opacity_,
               ::SizeType widthType_,
-              float width_)
+              float width_,
+              std::vector<float> dashArray_,
+              LineCapType lineCap_)
     : color(std::move(color_))
+    , opacity(std::move(opacity_))
     , widthType(std::move(widthType_))
     , width(std::move(width_))
+    , dashArray(std::move(dashArray_))
+    , lineCap(std::move(lineCap_))
     {}
 };

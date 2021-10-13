@@ -35,6 +35,8 @@ public:
 
     std::shared_ptr<Quad2dInterface> getQuadObject();
 
+    std::shared_ptr<MaskingObjectInterface> getMaskObject();
+
 private:
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
     std::shared_ptr<Quad2dInterface> quad;

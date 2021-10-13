@@ -9,10 +9,19 @@ line_factory = interface +c {
     static create_line(identifier: string, coordinates: list<coord>, style: line_style) : line_info_interface;
 }
 
+line_cap_type = enum {
+	BUTT;
+	ROUND;
+	SQUARE;
+}
+
 line_style = record {
     color: color_state_list;
+    opacity: f32;
     width_type: size_type;
     width: f32;
+    dash_array: list<f32>;
+    line_cap: line_cap_type;
 }
 
 line_info_interface = interface +c {

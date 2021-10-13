@@ -34,6 +34,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
+- (nullable id<MCGraphicsObjectInterface>)asGraphicsObject {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->asGraphicsObject();
+        return ::djinni_generated::GraphicsObjectInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)renderAsMask:(nullable id<MCRenderingContextInterface>)context
           renderPass:(nonnull MCRenderPassConfig *)renderPass
            mvpMatrix:(int64_t)mvpMatrix
@@ -46,13 +53,6 @@ screenPixelAsRealMeterFactor:(double)screenPixelAsRealMeterFactor {
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nullable id<MCGraphicsObjectInterface>)asGraphicsObject {
-    try {
-        auto objcpp_result_ = _cppRefHandle.get()->asGraphicsObject();
-        return ::djinni_generated::GraphicsObjectInterface::fromCpp(objcpp_result_);
-    } DJINNI_TRANSLATE_EXCEPTIONS()
-}
-
 namespace djinni_generated {
 
 class MaskingObjectInterface::ObjcProxy final
@@ -62,6 +62,13 @@ class MaskingObjectInterface::ObjcProxy final
     friend class ::djinni_generated::MaskingObjectInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
+    std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() asGraphicsObject];
+            return ::djinni_generated::GraphicsObjectInterface::toCpp(objcpp_result_);
+        }
+    }
     void renderAsMask(const std::shared_ptr<::RenderingContextInterface> & c_context, const ::RenderPassConfig & c_renderPass, int64_t c_mvpMatrix, double c_screenPixelAsRealMeterFactor) override
     {
         @autoreleasepool {
@@ -69,13 +76,6 @@ public:
                                                         renderPass:(::djinni_generated::RenderPassConfig::fromCpp(c_renderPass))
                                                          mvpMatrix:(::djinni::I64::fromCpp(c_mvpMatrix))
                                       screenPixelAsRealMeterFactor:(::djinni::F64::fromCpp(c_screenPixelAsRealMeterFactor))];
-        }
-    }
-    std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override
-    {
-        @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() asGraphicsObject];
-            return ::djinni_generated::GraphicsObjectInterface::toCpp(objcpp_result_);
         }
     }
 };

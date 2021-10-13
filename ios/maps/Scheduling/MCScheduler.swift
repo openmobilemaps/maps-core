@@ -11,16 +11,24 @@
 import Foundation
 import MapCoreSharedModule
 
+private class WeakOperation {
+    weak var operation: TaskOperation?
+
+    init(_ operation: TaskOperation) {
+        self.operation = operation
+    }
+}
+
 open class MCScheduler: MCSchedulerInterface {
-    private let ioQueue = OperationQueue(concurrentOperations: 10)
+    private let ioQueue = OperationQueue(concurrentOperations: 20, qos: .userInteractive)
 
-    private let computationQueue = OperationQueue(concurrentOperations: 4)
+    private let computationQueue = OperationQueue(concurrentOperations: 4, qos: .userInteractive)
 
-    private let graphicsQueue = OperationQueue(concurrentOperations: 1)
+    private let graphicsQueue = OperationQueue(concurrentOperations: 4, qos: .userInteractive)
 
     private let internalSchedulerQueue = DispatchQueue(label: "internalSchedulerQueue")
 
-    private var outstandingOperations: [String: TaskOperation] = [:]
+    private var outstandingOperations: [String: WeakOperation] = [:]
 
     public func addTask(_ task: MCTaskInterface?) {
         guard let task = task else { return }
@@ -46,7 +54,7 @@ open class MCScheduler: MCSchedulerInterface {
                 fatalError("unknown priority")
             }
 
-            self.outstandingOperations[config.id] = operation
+            self.outstandingOperations[config.id] = .init(operation)
 
             switch config.executionEnvironment {
             case .IO:
@@ -63,15 +71,15 @@ open class MCScheduler: MCSchedulerInterface {
 
     public func removeTask(_ id: String) {
         internalSchedulerQueue.async {
+            self.outstandingOperations[id]?.operation?.cancel()
             self.cleanUpFinishedOutstandingOperations()
-            self.outstandingOperations[id]?.cancel()
         }
     }
 
     public func clear() {
         internalSchedulerQueue.async {
             self.outstandingOperations.forEach {
-                $1.cancel()
+                $1.operation?.cancel()
             }
             self.cleanUpFinishedOutstandingOperations()
         }
@@ -103,23 +111,24 @@ open class MCScheduler: MCSchedulerInterface {
 
     func cleanUpFinishedOutstandingOperations() {
         outstandingOperations = outstandingOperations.filter {
-            !$1.isCancelled
+            guard let operation = $0.value.operation else { return false }
+            return !(operation.isCancelled || operation.isFinished)
         }
     }
 }
 
 private extension OperationQueue {
-    convenience init(concurrentOperations: Int, queue: DispatchQueue? = nil) {
+    convenience init(concurrentOperations: Int, queue: DispatchQueue? = nil, qos: QualityOfService = .default) {
         self.init()
         maxConcurrentOperationCount = concurrentOperations
         underlyingQueue = queue
+        qualityOfService = qos
     }
 }
 
 private class TaskOperation: Operation {
     var task: MCTaskInterface
     weak var scheduler: MCScheduler?
-
 
     init(task: MCTaskInterface, scheduler: MCScheduler) {
         self.task = task

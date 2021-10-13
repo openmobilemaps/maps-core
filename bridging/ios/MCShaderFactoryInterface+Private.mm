@@ -10,6 +10,9 @@
 #import "MCColorCircleShaderInterface+Private.h"
 #import "MCColorLineShaderInterface+Private.h"
 #import "MCColorShaderInterface+Private.h"
+#import "MCLineGroupShaderInterface+Private.h"
+#import "MCPolygonGroupShaderInterface+Private.h"
+#import "MCTextShaderInterface+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -48,6 +51,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable id<MCLineGroupShaderInterface>)createLineGroupShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createLineGroupShader();
+        return ::djinni_generated::LineGroupShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nullable id<MCColorShaderInterface>)createColorShader {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createColorShader();
@@ -59,6 +69,20 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createColorCircleShader();
         return ::djinni_generated::ColorCircleShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCPolygonGroupShaderInterface>)createPolygonGroupShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createPolygonGroupShader();
+        return ::djinni_generated::PolygonGroupShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCTextShaderInterface>)createTextShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createTextShader();
+        return ::djinni_generated::TextShaderInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -85,6 +109,13 @@ public:
             return ::djinni_generated::ColorLineShaderInterface::toCpp(objcpp_result_);
         }
     }
+    std::shared_ptr<::LineGroupShaderInterface> createLineGroupShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createLineGroupShader];
+            return ::djinni_generated::LineGroupShaderInterface::toCpp(objcpp_result_);
+        }
+    }
     std::shared_ptr<::ColorShaderInterface> createColorShader() override
     {
         @autoreleasepool {
@@ -97,6 +128,20 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createColorCircleShader];
             return ::djinni_generated::ColorCircleShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    std::shared_ptr<::PolygonGroupShaderInterface> createPolygonGroupShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygonGroupShader];
+            return ::djinni_generated::PolygonGroupShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    std::shared_ptr<::TextShaderInterface> createTextShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createTextShader];
+            return ::djinni_generated::TextShaderInterface::toCpp(objcpp_result_);
         }
     }
 };

@@ -6,6 +6,9 @@
 #include "NativeColorCircleShaderInterface.h"
 #include "NativeColorLineShaderInterface.h"
 #include "NativeColorShaderInterface.h"
+#include "NativeLineGroupShaderInterface.h"
+#include "NativePolygonGroupShaderInterface.h"
+#include "NativeTextShaderInterface.h"
 
 namespace djinni_generated {
 
@@ -33,6 +36,14 @@ std::shared_ptr<::ColorLineShaderInterface> NativeShaderFactoryInterface::JavaPr
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativeColorLineShaderInterface::toCpp(jniEnv, jret);
 }
+std::shared_ptr<::LineGroupShaderInterface> NativeShaderFactoryInterface::JavaProxy::createLineGroupShader() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeShaderFactoryInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_createLineGroupShader);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativeLineGroupShaderInterface::toCpp(jniEnv, jret);
+}
 std::shared_ptr<::ColorShaderInterface> NativeShaderFactoryInterface::JavaProxy::createColorShader() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -48,6 +59,22 @@ std::shared_ptr<::ColorCircleShaderInterface> NativeShaderFactoryInterface::Java
     auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_createColorCircleShader);
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativeColorCircleShaderInterface::toCpp(jniEnv, jret);
+}
+std::shared_ptr<::PolygonGroupShaderInterface> NativeShaderFactoryInterface::JavaProxy::createPolygonGroupShader() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeShaderFactoryInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_createPolygonGroupShader);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativePolygonGroupShaderInterface::toCpp(jniEnv, jret);
+}
+std::shared_ptr<::TextShaderInterface> NativeShaderFactoryInterface::JavaProxy::createTextShader() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeShaderFactoryInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_createTextShader);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativeTextShaderInterface::toCpp(jniEnv, jret);
 }
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderFactoryInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
@@ -78,6 +105,16 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shade
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderFactoryInterface_00024CppProxy_native_1createLineGroupShader(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::ShaderFactoryInterface>(nativeRef);
+        auto r = ref->createLineGroupShader();
+        return ::djinni::release(::djinni_generated::NativeLineGroupShaderInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderFactoryInterface_00024CppProxy_native_1createColorShader(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
@@ -95,6 +132,26 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shade
         const auto& ref = ::djinni::objectFromHandleAddress<::ShaderFactoryInterface>(nativeRef);
         auto r = ref->createColorCircleShader();
         return ::djinni::release(::djinni_generated::NativeColorCircleShaderInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderFactoryInterface_00024CppProxy_native_1createPolygonGroupShader(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::ShaderFactoryInterface>(nativeRef);
+        auto r = ref->createPolygonGroupShader();
+        return ::djinni::release(::djinni_generated::NativePolygonGroupShaderInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderFactoryInterface_00024CppProxy_native_1createTextShader(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::ShaderFactoryInterface>(nativeRef);
+        auto r = ref->createTextShader();
+        return ::djinni::release(::djinni_generated::NativeTextShaderInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

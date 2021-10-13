@@ -40,7 +40,6 @@ void ColorShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterf
     int program = openGlContext->getProgram(getProgramName());
 
     int mColorHandle = glGetUniformLocation(program, "vColor");
-    // Set color for drawing the triangle
     glUniform4fv(mColorHandle, 1, &color[0]);
 }
 

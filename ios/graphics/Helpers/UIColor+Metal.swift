@@ -59,10 +59,9 @@ extension MCColor {
     }
 
     var simdValues: SIMD4<Float> {
-        [r, g, b, a]
+        SIMD4<Float>(r, g, b, a)
     }
 }
-
 
 public extension UIColor {
     var mapCoreColor: MCColor {

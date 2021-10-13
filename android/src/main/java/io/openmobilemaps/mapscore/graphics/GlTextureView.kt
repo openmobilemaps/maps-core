@@ -35,7 +35,7 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 		const val EGL_CONTEXT_CLIENT_VERSION = 0x3098
 		const val EGL_OPENGL_ES2_BIT = 4
 
-		const val MAX_NUM_GRAPHICS_PRE_TASKS = 2
+		const val MAX_NUM_GRAPHICS_PRE_TASKS = 16
 	}
 
 	init {
@@ -120,12 +120,14 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 					glRunList.poll()?.invoke()
 					i++
 				}
+				val renderStart = System.nanoTime()
 
 				renderer.onDrawFrame(gl10)
 
 				if (egl?.eglSwapBuffers(eglDisplay, eglSurface) != true) {
 					throw RuntimeException("Cannot swap buffers")
 				}
+				//Log.d("RENDER_TIME", "${(System.nanoTime() - renderStart) / 1000000}ms")
 				if (frameRate > 0) {
 					val renderTime = (System.nanoTime() - timestampStartRender) / 1000000
 					try {
@@ -272,27 +274,45 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 		}
 
 		private fun chooseEglConfig(egl: EGL10): EGLConfig? {
-			val configsCount = IntArray(1)
-			val configs = arrayOfNulls<EGLConfig>(1)
-			val configSpec = config
-			require(egl.eglChooseConfig(eglDisplay, configSpec, configs, 1, configsCount)) {
-				"eglChooseConfig failed " + GLUtils.getEGLErrorString(egl.eglGetError())
+			var config: EGLConfig? = null
+			for (configSpec in configs) {
+				val configsCount = IntArray(1)
+				val configs = arrayOfNulls<EGLConfig>(1)
+				require(egl.eglChooseConfig(eglDisplay, configSpec, configs, 1, configsCount)) {
+					"eglChooseConfig failed " + GLUtils.getEGLErrorString(egl.eglGetError())
+				}
+				if (configsCount[0] > 0) {
+					config = configs[0]
+					break
+				}
 			}
-			return if (configsCount[0] > 0) {
-				configs[0]
-			} else null
+			return config
 		}
 
-		private val config: IntArray
-			get() = intArrayOf(
-				EGL10.EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-				EGL10.EGL_RED_SIZE, 8,
-				EGL10.EGL_GREEN_SIZE, 8,
-				EGL10.EGL_BLUE_SIZE, 8,
-				EGL10.EGL_ALPHA_SIZE, 8,
-				EGL10.EGL_DEPTH_SIZE, 16,
-				EGL10.EGL_STENCIL_SIZE, 8,
-				EGL10.EGL_NONE
+		private val configs: Array<IntArray>
+			get() = arrayOf(
+				intArrayOf(
+					EGL10.EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+					EGL10.EGL_RED_SIZE, 8,
+					EGL10.EGL_GREEN_SIZE, 8,
+					EGL10.EGL_BLUE_SIZE, 8,
+					EGL10.EGL_ALPHA_SIZE, 8,
+					EGL10.EGL_DEPTH_SIZE, 16,
+					EGL10.EGL_STENCIL_SIZE, 8,
+					EGL10.EGL_SAMPLE_BUFFERS, 1,
+					EGL10.EGL_SAMPLES, 4,
+					EGL10.EGL_NONE
+				),
+				intArrayOf(
+					EGL10.EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+					EGL10.EGL_RED_SIZE, 8,
+					EGL10.EGL_GREEN_SIZE, 8,
+					EGL10.EGL_BLUE_SIZE, 8,
+					EGL10.EGL_ALPHA_SIZE, 8,
+					EGL10.EGL_DEPTH_SIZE, 16,
+					EGL10.EGL_STENCIL_SIZE, 8,
+					EGL10.EGL_NONE
+				)
 			)
 
 		fun finish() {

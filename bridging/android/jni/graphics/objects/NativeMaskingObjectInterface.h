@@ -33,16 +33,16 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        void renderAsMask(const std::shared_ptr<::RenderingContextInterface> & context, const ::RenderPassConfig & renderPass, int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
         std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override;
+        void renderAsMask(const std::shared_ptr<::RenderingContextInterface> & context, const ::RenderPassConfig & renderPass, int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
 
     private:
         friend ::djinni::JniInterface<::MaskingObjectInterface, ::djinni_generated::NativeMaskingObjectInterface>;
     };
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/objects/MaskingObjectInterface") };
-    const jmethodID method_renderAsMask { ::djinni::jniGetMethodID(clazz.get(), "renderAsMask", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface;Lio/openmobilemaps/mapscore/shared/graphics/RenderPassConfig;JD)V") };
     const jmethodID method_asGraphicsObject { ::djinni::jniGetMethodID(clazz.get(), "asGraphicsObject", "()Lio/openmobilemaps/mapscore/shared/graphics/objects/GraphicsObjectInterface;") };
+    const jmethodID method_renderAsMask { ::djinni::jniGetMethodID(clazz.get(), "renderAsMask", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface;Lio/openmobilemaps/mapscore/shared/graphics/RenderPassConfig;JD)V") };
 };
 
 }  // namespace djinni_generated

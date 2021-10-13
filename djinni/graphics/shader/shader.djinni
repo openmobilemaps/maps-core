@@ -1,5 +1,7 @@
 @extern "../../yaml/rendering_context_interface.yaml"
 @extern "../../yaml/line_style.yaml"
+@extern "../../yaml/polygon_style.yaml"
+@extern "../../yaml/vec_3_d.yaml"
 
 shader_program_interface = interface +c +o {
     get_program_name() : string;
@@ -10,8 +12,11 @@ shader_program_interface = interface +c +o {
 shader_factory_interface = interface +c +j +o {
     create_alpha_shader() : alpha_shader_interface;
     create_color_line_shader() : color_line_shader_interface;
+    create_line_group_shader(): line_group_shader_interface;
     create_color_shader() : color_shader_interface;
     create_color_circle_shader() : color_circle_shader_interface;
+    create_polygon_group_shader(): polygon_group_shader_interface;
+    create_text_shader() : text_shader_interface;
 }
 
 alpha_shader_interface = interface +c +o {
@@ -30,7 +35,24 @@ color_line_shader_interface = interface +c +o {
     as_shader_program_interface() : shader_program_interface;
 }
 
+line_group_shader_interface = interface +c +o {
+    set_styles(line_styles: list<line_style>);
+    as_shader_program_interface() : shader_program_interface;
+}
+
 color_circle_shader_interface = interface +c +o {
     set_color(red: f32, green: f32, blue: f32, alpha: f32);
+    as_shader_program_interface() : shader_program_interface;
+}
+
+polygon_group_shader_interface = interface +c +o {
+    set_styles(styles: list<polygon_style>);
+    as_shader_program_interface() : shader_program_interface;
+}
+
+text_shader_interface = interface +c +o {
+    set_color(red: f32, green: f32, blue: f32, alpha: f32);
+    set_scale(scale: f32);
+    set_reference_point(point: vec_3_d);
     as_shader_program_interface() : shader_program_interface;
 }

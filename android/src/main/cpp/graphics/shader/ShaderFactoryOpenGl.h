@@ -18,7 +18,13 @@ class ShaderFactoryOpenGl : public ShaderFactoryInterface {
 
     virtual std::shared_ptr<ColorLineShaderInterface> createColorLineShader() override;
 
+    virtual std::shared_ptr<LineGroupShaderInterface> createLineGroupShader() override;
+
     virtual std::shared_ptr<ColorShaderInterface> createColorShader() override;
 
     virtual std::shared_ptr<ColorCircleShaderInterface> createColorCircleShader() override;
+
+    virtual std::shared_ptr<PolygonGroupShaderInterface> createPolygonGroupShader() override;
+
+    virtual std::shared_ptr<TextShaderInterface> createTextShader() override;
 };

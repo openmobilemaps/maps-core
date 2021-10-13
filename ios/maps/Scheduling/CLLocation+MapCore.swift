@@ -8,8 +8,8 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-import Foundation
 import CoreLocation
+import Foundation
 import MapCoreSharedModule
 
 public extension CLLocation {
@@ -21,8 +21,8 @@ public extension CLLocation {
 public extension CLLocationCoordinate2D {
     var mcCoord: MCCoord {
         MCCoord(systemIdentifier: MCCoordinateSystemIdentifiers.epsg4326(),
-                                                                     x: longitude,
-                                                                     y: latitude,
-                                                                     z: 0)
+                x: longitude,
+                y: latitude,
+                z: 0)
     }
 }

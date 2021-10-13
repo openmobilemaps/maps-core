@@ -17,6 +17,14 @@ NativeMaskingObjectInterface::JavaProxy::JavaProxy(JniType j) : Handle(::djinni:
 
 NativeMaskingObjectInterface::JavaProxy::~JavaProxy() = default;
 
+std::shared_ptr<::GraphicsObjectInterface> NativeMaskingObjectInterface::JavaProxy::asGraphicsObject() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeMaskingObjectInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_asGraphicsObject);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativeGraphicsObjectInterface::toCpp(jniEnv, jret);
+}
 void NativeMaskingObjectInterface::JavaProxy::renderAsMask(const std::shared_ptr<::RenderingContextInterface> & c_context, const ::RenderPassConfig & c_renderPass, int64_t c_mvpMatrix, double c_screenPixelAsRealMeterFactor) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -28,14 +36,6 @@ void NativeMaskingObjectInterface::JavaProxy::renderAsMask(const std::shared_ptr
                            ::djinni::get(::djinni::F64::fromCpp(jniEnv, c_screenPixelAsRealMeterFactor)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
-std::shared_ptr<::GraphicsObjectInterface> NativeMaskingObjectInterface::JavaProxy::asGraphicsObject() {
-    auto jniEnv = ::djinni::jniGetThreadEnv();
-    ::djinni::JniLocalScope jscope(jniEnv, 10);
-    const auto& data = ::djinni::JniClass<::djinni_generated::NativeMaskingObjectInterface>::get();
-    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_asGraphicsObject);
-    ::djinni::jniExceptionCheck(jniEnv);
-    return ::djinni_generated::NativeGraphicsObjectInterface::toCpp(jniEnv, jret);
-}
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_MaskingObjectInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
@@ -43,6 +43,16 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         delete reinterpret_cast<::djinni::CppProxyHandle<::MaskingObjectInterface>*>(nativeRef);
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_MaskingObjectInterface_00024CppProxy_native_1asGraphicsObject(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MaskingObjectInterface>(nativeRef);
+        auto r = ref->asGraphicsObject();
+        return ::djinni::release(::djinni_generated::NativeGraphicsObjectInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_MaskingObjectInterface_00024CppProxy_native_1renderAsMask(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderingContextInterface::JniType j_context, ::djinni_generated::NativeRenderPassConfig::JniType j_renderPass, jlong j_mvpMatrix, jdouble j_screenPixelAsRealMeterFactor)
@@ -55,16 +65,6 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_
                           ::djinni::I64::toCpp(jniEnv, j_mvpMatrix),
                           ::djinni::F64::toCpp(jniEnv, j_screenPixelAsRealMeterFactor));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
-}
-
-CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_MaskingObjectInterface_00024CppProxy_native_1asGraphicsObject(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
-{
-    try {
-        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
-        const auto& ref = ::djinni::objectFromHandleAddress<::MaskingObjectInterface>(nativeRef);
-        auto r = ref->asGraphicsObject();
-        return ::djinni::release(::djinni_generated::NativeGraphicsObjectInterface::fromCpp(jniEnv, r));
-    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
 }  // namespace djinni_generated

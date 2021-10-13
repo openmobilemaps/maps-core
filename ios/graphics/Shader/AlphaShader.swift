@@ -22,7 +22,7 @@ class AlphaShader: BaseShader {
         }
     }
 
-    override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
+    override func preRender(encoder: MTLRenderCommandEncoder, context _: RenderingContext) {
         guard let pipeline = pipeline else { return }
 
         encoder.setRenderPipelineState(pipeline)

@@ -23,6 +23,15 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_C
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateConversionHelperInterface_00024CppProxy_independentInstance(JNIEnv* jniEnv, jobject /*this*/)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE0(jniEnv);
+        auto r = ::CoordinateConversionHelperInterface::independentInstance();
+        return ::djinni::release(::djinni_generated::NativeCoordinateConversionHelperInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateConversionHelperInterface_00024CppProxy_native_1registerConverter(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_converter)
 {
     try {

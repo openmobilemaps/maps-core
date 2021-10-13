@@ -34,7 +34,7 @@ class Line2d: BaseGraphicsObject {
         ss.stencilFailureOperation = .keep
         ss.depthFailureOperation = .keep
         ss.depthStencilPassOperation = .invert
-        ss.writeMask = 0b01111111
+        ss.writeMask = 0b0_1111_1111
 
         let s = MTLDepthStencilDescriptor()
         s.frontFaceStencil = ss
@@ -47,7 +47,7 @@ class Line2d: BaseGraphicsObject {
         ss2.stencilFailureOperation = .zero
         ss2.depthFailureOperation = .zero
         ss2.depthStencilPassOperation = .zero
-        ss2.writeMask = 0b01111111
+        ss2.writeMask = 0b0_1111_1111
 
         let s2 = MTLDepthStencilDescriptor()
         s2.frontFaceStencil = ss2
@@ -60,13 +60,14 @@ class Line2d: BaseGraphicsObject {
                          context: RenderingContext,
                          renderPass _: MCRenderPassConfig,
                          mvpMatrix: Int64,
-                         isMasked: Bool,
+                         isMasked _: Bool,
                          screenPixelAsRealMeterFactor: Double)
     {
         guard let lineVerticesBuffer = lineVerticesBuffer,
               let lineIndicesBuffer = lineIndicesBuffer
         else { return }
 
+        encoder.pushDebugGroup("Line2d")
         if stencilState == nil || clearStencilState == nil {
             setupStencilBufferDescriptor()
         }
@@ -79,7 +80,7 @@ class Line2d: BaseGraphicsObject {
 
         shader.setupProgram(context)
         shader.preRender(context)
-        
+
         encoder.setVertexBuffer(lineVerticesBuffer, offset: 0, index: 0)
         let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix))!
         encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
@@ -89,6 +90,7 @@ class Line2d: BaseGraphicsObject {
                                       indexType: .uint32,
                                       indexBuffer: lineIndicesBuffer,
                                       indexBufferOffset: 0)
+        encoder.popDebugGroup()
     }
 }
 
@@ -110,20 +112,20 @@ extension Line2d: MCLine2dInterface {
             let ci = positions[i]
             let ciNext = positions[iNext]
 
-            let lineNormalX = -(ciNext.y - ci.y)
-            let lineNormalY = ciNext.x - ci.x
+            let lineNormalX = -(ciNext.yF - ci.yF)
+            let lineNormalY = ciNext.xF - ci.xF
             let lineLength = sqrt(lineNormalX * lineNormalX + lineNormalY * lineNormalY)
 
-            let miterX = lineNormalX
-            let miterY = lineNormalY
+            let miterX: Float = lineNormalX
+            let miterY: Float = lineNormalY
 
-            let ciX = ci.x - (ciNext.x - ci.x)
-            let ciY = ci.y - (ciNext.y - ci.y)
+            let ciX = ci.xF - (ciNext.xF - ci.xF)
+            let ciY = ci.yF - (ciNext.yF - ci.yF)
 
-            let ciNextX = ciNext.x - (ci.x - ciNext.x)
-            let ciNextY = ciNext.y - (ci.y - ciNext.y)
+            let ciNextX = ciNext.xF - (ci.xF - ciNext.xF)
+            let ciNextY = ciNext.yF - (ci.yF - ciNext.yF)
 
-            let fromOrigin = MCVec2D(x: (ciNext.x - ci.x), y: (ciNext.y - ci.y))
+            let fromOrigin = MCVec2D(x: ciNext.x - ci.x, y: ciNext.y - ci.y)
             let divisor = sqrt(fromOrigin.x * fromOrigin.x + fromOrigin.y * fromOrigin.y)
             let unitVector = MCVec2D(x: fromOrigin.x / divisor, y: fromOrigin.y / divisor)
 
@@ -133,30 +135,30 @@ extension Line2d: MCLine2dInterface {
                            lineA: ci,
                            lineB: ciNext,
                            widthNormal: (x: -lineNormalX / lineLength, y: -lineNormalY / lineLength),
-                           lenghtNormal: (x: -unitVector.x, y: -unitVector.y)),
+                           lenghtNormal: (x: -unitVector.xF, y: -unitVector.yF)),
                 LineVertex(x: ciX + miterX,
                            y: ciY + miterY,
                            lineA: ci,
                            lineB: ciNext,
                            widthNormal: (x: lineNormalX / lineLength, y: lineNormalY / lineLength),
-                           lenghtNormal: (x: -unitVector.x, y: -unitVector.y)),
+                           lenghtNormal: (x: -unitVector.xF, y: -unitVector.yF)),
                 LineVertex(x: ciNextX + miterX,
                            y: ciNextY + miterY,
                            lineA: ci,
                            lineB: ciNext,
                            widthNormal: (x: lineNormalX / lineLength, y: lineNormalY / lineLength),
-                           lenghtNormal: (x: unitVector.x, y: unitVector.y)),
+                           lenghtNormal: (x: unitVector.xF, y: unitVector.yF)),
                 LineVertex(x: ciNextX - miterX,
                            y: ciNextY - miterY,
                            lineA: ci,
                            lineB: ciNext,
                            widthNormal: (x: -lineNormalX / lineLength, y: -lineNormalY / lineLength),
-                           lenghtNormal: (x: unitVector.x, y: unitVector.y))
+                           lenghtNormal: (x: unitVector.xF, y: unitVector.yF)),
             ])
 
             indices.append(contentsOf: [
                 UInt32(4 * i), UInt32(4 * i + 1), UInt32(4 * i + 2),
-                UInt32(4 * i), UInt32(4 * i + 2), UInt32(4 * i + 3)
+                UInt32(4 * i), UInt32(4 * i + 2), UInt32(4 * i + 3),
             ])
         }
 

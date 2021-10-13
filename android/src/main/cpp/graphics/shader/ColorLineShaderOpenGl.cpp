@@ -15,7 +15,7 @@
 std::shared_ptr<ShaderProgramInterface> ColorLineShaderOpenGl::asShaderProgramInterface() { return shared_from_this(); }
 
 
-std::string ColorLineShaderOpenGl::getProgramName() { return "UBMAP_LineColorShaderOpenGl"; }
+std::string ColorLineShaderOpenGl::getProgramName() { return "UBMAP_ColorLineShaderOpenGl"; }
 
 
 void ColorLineShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) {

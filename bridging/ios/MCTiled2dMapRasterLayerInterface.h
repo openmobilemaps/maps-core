@@ -3,7 +3,7 @@
 
 #import "MCLayerInterface.h"
 #import "MCMaskingObjectInterface.h"
-#import "MCTextureLoaderInterface.h"
+#import "MCTileLoaderInterface.h"
 #import "MCTiled2dMapLayerConfig.h"
 #import <Foundation/Foundation.h>
 @class MCTiled2dMapRasterLayerInterface;
@@ -13,11 +13,11 @@
 @interface MCTiled2dMapRasterLayerInterface : NSObject
 
 + (nullable MCTiled2dMapRasterLayerInterface *)createWithMask:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
-                                                textureLoader:(nullable id<MCTextureLoaderInterface>)textureLoader
+                                                   tileLoader:(nullable id<MCTileLoaderInterface>)tileLoader
                                                          mask:(nullable id<MCMaskingObjectInterface>)mask;
 
 + (nullable MCTiled2dMapRasterLayerInterface *)create:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
-                                        textureLoader:(nullable id<MCTextureLoaderInterface>)textureLoader;
+                                           tileLoader:(nullable id<MCTileLoaderInterface>)tileLoader;
 
 - (nullable id<MCLayerInterface>)asLayerInterface;
 

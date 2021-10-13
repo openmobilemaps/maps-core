@@ -9,11 +9,11 @@
 
 @protocol MCMaskingObjectInterface
 
+- (nullable id<MCGraphicsObjectInterface>)asGraphicsObject;
+
 - (void)renderAsMask:(nullable id<MCRenderingContextInterface>)context
           renderPass:(nonnull MCRenderPassConfig *)renderPass
            mvpMatrix:(int64_t)mvpMatrix
 screenPixelAsRealMeterFactor:(double)screenPixelAsRealMeterFactor;
-
-- (nullable id<MCGraphicsObjectInterface>)asGraphicsObject;
 
 @end

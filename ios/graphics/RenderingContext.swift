@@ -23,7 +23,7 @@ class RenderingContext: NSObject {
         descriptor.stencilFailureOperation = .keep
         descriptor.depthFailureOperation = .keep
         descriptor.depthStencilPassOperation = .replace
-        descriptor.writeMask = 0b10000000
+        descriptor.writeMask = 0b1000_0000
         let depthStencilDescriptor = MTLDepthStencilDescriptor()
         depthStencilDescriptor.frontFaceStencil = descriptor
         depthStencilDescriptor.backFaceStencil = descriptor
@@ -36,7 +36,7 @@ class RenderingContext: NSObject {
         descriptor.stencilFailureOperation = .keep
         descriptor.depthFailureOperation = .keep
         descriptor.depthStencilPassOperation = .invert
-        descriptor.writeMask = 0b10000000
+        descriptor.writeMask = 0b1000_0000
         let depthStencilDescriptor = MTLDepthStencilDescriptor()
         depthStencilDescriptor.frontFaceStencil = descriptor
         depthStencilDescriptor.backFaceStencil = descriptor
@@ -69,7 +69,7 @@ class RenderingContext: NSObject {
 }
 
 extension RenderingContext: MCRenderingContextInterface {
-    func preRenderStencilMask() { }
+    func preRenderStencilMask() {}
 
     func postRenderStencilMask() {
         clearStencilBuffer()

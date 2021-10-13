@@ -9,7 +9,7 @@ abstract class Quad2dInterface {
 
     abstract fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.RectD)
 
-    abstract fun loadTexture(textureHolder: TextureHolderInterface)
+    abstract fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
 
     abstract fun removeTexture()
 
@@ -41,11 +41,11 @@ abstract class Quad2dInterface {
         }
         private external fun native_setFrame(_nativeRef: Long, frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.RectD)
 
-        override fun loadTexture(textureHolder: TextureHolderInterface) {
+        override fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_loadTexture(this.nativeRef, textureHolder)
+            native_loadTexture(this.nativeRef, context, textureHolder)
         }
-        private external fun native_loadTexture(_nativeRef: Long, textureHolder: TextureHolderInterface)
+        private external fun native_loadTexture(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
 
         override fun removeTexture() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

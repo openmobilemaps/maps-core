@@ -7,9 +7,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class MaskingObjectInterface {
 
-    abstract fun renderAsMask(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, mvpMatrix: Long, screenPixelAsRealMeterFactor: Double)
-
     abstract fun asGraphicsObject(): GraphicsObjectInterface
+
+    abstract fun renderAsMask(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, mvpMatrix: Long, screenPixelAsRealMeterFactor: Double)
 
     private class CppProxy : MaskingObjectInterface {
         private val nativeRef: Long
@@ -29,16 +29,16 @@ abstract class MaskingObjectInterface {
             _djinni_private_destroy()
         }
 
-        override fun renderAsMask(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, mvpMatrix: Long, screenPixelAsRealMeterFactor: Double) {
-            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_renderAsMask(this.nativeRef, context, renderPass, mvpMatrix, screenPixelAsRealMeterFactor)
-        }
-        private external fun native_renderAsMask(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, mvpMatrix: Long, screenPixelAsRealMeterFactor: Double)
-
         override fun asGraphicsObject(): GraphicsObjectInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_asGraphicsObject(this.nativeRef)
         }
         private external fun native_asGraphicsObject(_nativeRef: Long): GraphicsObjectInterface
+
+        override fun renderAsMask(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, mvpMatrix: Long, screenPixelAsRealMeterFactor: Double) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_renderAsMask(this.nativeRef, context, renderPass, mvpMatrix, screenPixelAsRealMeterFactor)
+        }
+        private external fun native_renderAsMask(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, mvpMatrix: Long, screenPixelAsRealMeterFactor: Double)
     }
 }

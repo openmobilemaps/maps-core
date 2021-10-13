@@ -23,7 +23,7 @@ void Line2dLayerObject::update() {}
 
 std::vector<std::shared_ptr<RenderConfigInterface>> Line2dLayerObject::getRenderConfig() { return renderConfig; }
 
-void Line2dLayerObject::setPositions(std::vector<Coord> positions) {
+void Line2dLayerObject::setPositions(const std::vector<Coord> &positions) {
     std::vector<Vec2D> renderCoords;
     for (Coord mapCoord : positions) {
         Coord renderCoord = conversionHelper->convertToRenderSystem(mapCoord);

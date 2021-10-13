@@ -21,7 +21,7 @@ open class MCMapView: MTKView {
     private var backgroundDisable = false
 
     private var framesToRender: UInt = 1
-    private let framesToRenderAfterInvalidate: UInt = 1
+    private let framesToRenderAfterInvalidate: UInt = 60 * 5
 
     private let touchHandler: MCMapViewTouchHandler
     private let callbackHandler = MCMapViewCallbackHandler()
@@ -62,6 +62,8 @@ open class MCMapView: MTKView {
 
         isMultipleTouchEnabled = true
 
+        preferredFramesPerSecond = 120
+
         callbackHandler.invalidateCallback = { [weak self] in
             self?.invalidate()
         }
@@ -71,7 +73,7 @@ open class MCMapView: MTKView {
 
         mapInterface.resume()
 
-        addEventListeners();
+        addEventListeners()
     }
 
     private func addEventListeners() {
@@ -143,7 +145,7 @@ extension MCMapView: MTKViewDelegate {
             mapInterface.setViewportSize(view.drawableSize.vec2)
             sizeChanged = false
         }
-        
+
         mapInterface.drawFrame()
 
         renderEncoder.endEncoding()

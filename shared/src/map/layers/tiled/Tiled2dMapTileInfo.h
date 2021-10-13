@@ -29,19 +29,22 @@ struct Tiled2dMapTileInfo {
 
     bool operator==(const Tiled2dMapTileInfo &o) const { return x == o.x && y == o.y && zoomIdentifier == o.zoomIdentifier; }
 
+    bool operator!=(const Tiled2dMapTileInfo &o) const { return !(x == o.x || y == o.y || zoomIdentifier == o.zoomIdentifier); }
+
     bool operator<(const Tiled2dMapTileInfo &o) const {
-        return x < o.x || (x == o.x && y < o.y) || (x == o.x && y == o.y && zoomIdentifier < o.zoomIdentifier) ||
-               (x == o.x && y == o.y && zoomIdentifier == o.zoomIdentifier);
+        return zoomIdentifier > o.zoomIdentifier || (zoomIdentifier == o.zoomIdentifier && x < o.x) ||
+               (zoomIdentifier == o.zoomIdentifier && x == o.x && y < o.y);
     }
 };
 
 namespace std {
 template <> struct hash<Tiled2dMapTileInfo> {
-    inline size_t operator()(const Tiled2dMapTileInfo &tileInfo) const {
-        int sizeBits = (SIZE_MAX == 0xFFFFFFFF) ? 32 : 64;
-        size_t hash =
-            ((size_t)tileInfo.x << (2 * sizeBits / 3)) | ((size_t)tileInfo.y << (sizeBits / 3)) | ((size_t)tileInfo.zoomIdentifier);
-        return hash;
+    inline size_t operator()(const Tiled2dMapTileInfo &k) const {
+        size_t res = 17;
+        res = res * 31 + std::hash<int>()( k.x );
+        res = res * 31 + std::hash<int>()( k.y );
+        res = res * 31 + std::hash<int>()( k.zoomIdentifier );
+        return res;
     }
 };
 } // namespace std
