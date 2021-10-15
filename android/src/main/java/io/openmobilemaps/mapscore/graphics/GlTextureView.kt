@@ -36,6 +36,29 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 		const val EGL_OPENGL_ES2_BIT = 4
 
 		const val MAX_NUM_GRAPHICS_PRE_TASKS = 16
+
+		private val defaultConfig = intArrayOf(
+			EGL10.EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+			EGL10.EGL_RED_SIZE, 8,
+			EGL10.EGL_GREEN_SIZE, 8,
+			EGL10.EGL_BLUE_SIZE, 8,
+			EGL10.EGL_ALPHA_SIZE, 8,
+			EGL10.EGL_DEPTH_SIZE, 16,
+			EGL10.EGL_STENCIL_SIZE, 8,
+			EGL10.EGL_NONE
+		)
+		private val msaaConfig = intArrayOf(
+			EGL10.EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+			EGL10.EGL_RED_SIZE, 8,
+			EGL10.EGL_GREEN_SIZE, 8,
+			EGL10.EGL_BLUE_SIZE, 8,
+			EGL10.EGL_ALPHA_SIZE, 8,
+			EGL10.EGL_DEPTH_SIZE, 16,
+			EGL10.EGL_STENCIL_SIZE, 8,
+			EGL10.EGL_SAMPLE_BUFFERS, 1,
+			EGL10.EGL_SAMPLES, 4,
+			EGL10.EGL_NONE
+		)
 	}
 
 	init {
@@ -44,6 +67,7 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 
 	private var glThread: GLThread? = null
 	private var renderer: GLSurfaceView.Renderer? = null
+	private var useMSAA: Boolean = false
 
 	var glRunList = ConcurrentLinkedQueue<() -> Unit>()
 	private val runNotifier = Object()
@@ -52,7 +76,7 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 	private var frameRate = -1
 
 	override fun onSurfaceTextureAvailable(surface: SurfaceTexture, width: Int, height: Int) {
-		glThread = GLThread(surface).apply { start() }
+		glThread = GLThread(surface, useMSAA).apply { start() }
 	}
 
 	override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture, width: Int, height: Int) {
@@ -68,6 +92,10 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 
 	fun setRenderer(renderer: GLSurfaceView.Renderer?) {
 		this.renderer = renderer
+	}
+
+	fun configureGL(useMSAA: Boolean) {
+		this.useMSAA = useMSAA
 	}
 
 	fun requestRender() {
@@ -88,7 +116,9 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 		this.frameRate = frameRate
 	}
 
-	private inner class GLThread internal constructor(private val surface: SurfaceTexture) : Thread("GLThread") {
+	private inner class GLThread internal constructor(private val surface: SurfaceTexture, val useMSAA: Boolean = false) :
+		Thread("GLThread") {
+
 		@Volatile
 		private var finished = false
 		private var egl: EGL10? = null
@@ -275,12 +305,11 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 
 		private fun chooseEglConfig(egl: EGL10): EGLConfig? {
 			var config: EGLConfig? = null
-			for (configSpec in configs) {
+			for (configSpec in getEglConfigs(useMSAA)) {
 				val configsCount = IntArray(1)
 				val configs = arrayOfNulls<EGLConfig>(1)
-				require(egl.eglChooseConfig(eglDisplay, configSpec, configs, 1, configsCount)) {
-					"eglChooseConfig failed " + GLUtils.getEGLErrorString(egl.eglGetError())
-				}
+				egl.eglChooseConfig(eglDisplay, configSpec, configs, 1, configsCount)
+				Log.e(TAG, "eglChooseConfig failed " + GLUtils.getEGLErrorString(egl.eglGetError()))
 				if (configsCount[0] > 0) {
 					config = configs[0]
 					break
@@ -289,31 +318,10 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 			return config
 		}
 
-		private val configs: Array<IntArray>
-			get() = arrayOf(
-				intArrayOf(
-					EGL10.EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-					EGL10.EGL_RED_SIZE, 8,
-					EGL10.EGL_GREEN_SIZE, 8,
-					EGL10.EGL_BLUE_SIZE, 8,
-					EGL10.EGL_ALPHA_SIZE, 8,
-					EGL10.EGL_DEPTH_SIZE, 16,
-					EGL10.EGL_STENCIL_SIZE, 8,
-					EGL10.EGL_SAMPLE_BUFFERS, 1,
-					EGL10.EGL_SAMPLES, 4,
-					EGL10.EGL_NONE
-				),
-				intArrayOf(
-					EGL10.EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-					EGL10.EGL_RED_SIZE, 8,
-					EGL10.EGL_GREEN_SIZE, 8,
-					EGL10.EGL_BLUE_SIZE, 8,
-					EGL10.EGL_ALPHA_SIZE, 8,
-					EGL10.EGL_DEPTH_SIZE, 16,
-					EGL10.EGL_STENCIL_SIZE, 8,
-					EGL10.EGL_NONE
-				)
-			)
+
+		private fun getEglConfigs(useMSAA: Boolean = false): Array<IntArray> {
+			return if (useMSAA) arrayOf(msaaConfig, defaultConfig) else arrayOf(defaultConfig)
+		}
 
 		fun finish() {
 			finished = true
