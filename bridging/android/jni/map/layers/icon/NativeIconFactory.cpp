@@ -37,4 +37,18 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_ico
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icon_IconFactory_00024CppProxy_createIconWithAnchor(JNIEnv* jniEnv, jobject /*this*/, jstring j_identifier, ::djinni_generated::NativeCoord::JniType j_coordinate, ::djinni_generated::NativeTextureHolderInterface::JniType j_texture, ::djinni_generated::NativeVec2F::JniType j_iconSize, jobject j_scaleType, ::djinni_generated::NativeVec2F::JniType j_iconAnchor)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE0(jniEnv);
+        auto r = ::IconFactory::createIconWithAnchor(::djinni::String::toCpp(jniEnv, j_identifier),
+                                                     ::djinni_generated::NativeCoord::toCpp(jniEnv, j_coordinate),
+                                                     ::djinni_generated::NativeTextureHolderInterface::toCpp(jniEnv, j_texture),
+                                                     ::djinni_generated::NativeVec2F::toCpp(jniEnv, j_iconSize),
+                                                     ::djinni_generated::NativeIconType::toCpp(jniEnv, j_scaleType),
+                                                     ::djinni_generated::NativeVec2F::toCpp(jniEnv, j_iconAnchor));
+        return ::djinni::release(::djinni_generated::NativeIconInfoInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 }  // namespace djinni_generated

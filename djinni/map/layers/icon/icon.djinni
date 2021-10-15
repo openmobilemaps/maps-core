@@ -5,6 +5,7 @@
 
 icon_factory = interface +c {
     static create_icon(identifier: string, coordinate: coord, texture: texture_holder_interface, icon_size: vec_2_f, scale_type: icon_type) : icon_info_interface;
+    static create_icon_with_anchor(identifier: string, coordinate: coord, texture: texture_holder_interface, icon_size: vec_2_f, scale_type: icon_type, icon_anchor: vec_2_f) : icon_info_interface;
 }
 
 icon_info_interface = interface +c {
@@ -16,6 +17,7 @@ icon_info_interface = interface +c {
     get_icon_size() : vec_2_f;
     set_type(scale_type: icon_type);
     get_type() : icon_type;
+    get_icon_anchor() : vec_2_f;
 }
 
 icon_type = enum {

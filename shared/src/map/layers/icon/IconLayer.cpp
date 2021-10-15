@@ -93,12 +93,16 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
         auto iconObject = std::make_shared<Textured2dLayerObject>(quadObject, shader, mapInterface);
 
         Coord iconPosRender = mapInterface->getCoordinateConverterHelper()->convertToRenderSystem(icon->getCoordinate());
-        float halfW = icon->getIconSize().x * 0.5f;
-        float halfH = icon->getIconSize().y * 0.5f;
+        const Vec2F &anchor = icon->getIconAnchor();
+        float ratioLeftRight = std::clamp(anchor.x, 0.0f, 1.0f);
+        float ratioTopBottom = std::clamp(anchor.y, 0.0f, 1.0f);
+        float leftW = icon->getIconSize().x * ratioLeftRight;
+        float topH = icon->getIconSize().y * ratioTopBottom;
+        float rightW = icon->getIconSize().x * (1.0f - ratioLeftRight);
+        float bottomH = icon->getIconSize().y * (1.0f - ratioTopBottom);
         iconObject->setRectCoord(
-                RectCoord(Coord(iconPosRender.systemIdentifier, iconPosRender.x - halfW, iconPosRender.y - halfH, iconPosRender.y),
-                          Coord(iconPosRender.systemIdentifier, iconPosRender.x + halfW, iconPosRender.y + halfH,
-                                iconPosRender.y)));
+                RectCoord(Coord(iconPosRender.systemIdentifier, iconPosRender.x - leftW, iconPosRender.y - topH, iconPosRender.y),
+                          Coord(iconPosRender.systemIdentifier, iconPosRender.x + rightW, iconPosRender.y + bottomH, iconPosRender.y)));
         iconObjects.push_back(std::make_tuple(icon, iconObject));
 
         {
@@ -284,7 +288,7 @@ bool IconLayer::onClickConfirmed(const Vec2F &posScreen) {
 
         Coord clickCoords = camera->coordFromScreenPosition(posScreen);
 
-        double angle = (camera->getRotation() * M_PI / 180.0);
+        double angle = -(camera->getRotation() * M_PI / 180.0);
         double sinAng = std::sin(angle);
         double cosAng = std::cos(angle);
 
@@ -293,23 +297,33 @@ bool IconLayer::onClickConfirmed(const Vec2F &posScreen) {
             for (const auto &iconTuple : icons) {
                 std::shared_ptr<IconInfoInterface> icon = iconTuple.first;
 
-                double halfW = icon->getIconSize().x * 0.5f;
-                double halfH = icon->getIconSize().y * 0.5f;
+                const Vec2F &anchor = icon->getIconAnchor();
+                float ratioLeftRight = std::clamp(anchor.x, 0.0f, 1.0f);
+                float ratioTopBottom = std::clamp(anchor.y, 0.0f, 1.0f);
+                float leftW = icon->getIconSize().x * ratioLeftRight;
+                float topH = icon->getIconSize().y * ratioTopBottom;
+                float rightW = icon->getIconSize().x * (1.0f - ratioLeftRight);
+                float bottomH = icon->getIconSize().y * (1.0f - ratioTopBottom);
+
                 Coord iconPos = mapInterface->getCoordinateConverterHelper()->convert(clickCoords.systemIdentifier,
                                                                                       icon->getCoordinate());
                 IconType type = icon->getType();
                 if (type == IconType::INVARIANT || type == IconType::SCALE_INVARIANT) {
-                    halfW = camera->mapUnitsFromPixels(halfW);
-                    halfH = camera->mapUnitsFromPixels(halfH);
+                    leftW = camera->mapUnitsFromPixels(leftW);
+                    topH = camera->mapUnitsFromPixels(topH);
+                    rightW = camera->mapUnitsFromPixels(rightW);
+                    bottomH = camera->mapUnitsFromPixels(bottomH);
                 }
 
                 Vec2D clickPos = Vec2D(clickCoords.x - iconPos.x, clickCoords.y - iconPos.y);
                 if (type == IconType::INVARIANT || type == IconType::ROTATION_INVARIANT) {
-                    clickPos.x = cosAng * clickPos.x - sinAng * clickPos.y;
-                    clickPos.y = sinAng * clickPos.y + cosAng * clickPos.x;
+                    float newX = cosAng * clickPos.x - sinAng * clickPos.y;
+                    float newY = sinAng * clickPos.x + cosAng * clickPos.y;
+                    clickPos.x = newX;
+                    clickPos.y = newY;
                 }
-                if (clickPos.x > -halfW && clickPos.x < halfW &&
-                    clickPos.y > -halfH && clickPos.y < halfH) {
+                if (clickPos.x > -leftW && clickPos.x < rightW &&
+                    clickPos.y < topH && clickPos.y > -bottomH) {
                     iconsHit.push_back(icon);
                 }
             }
