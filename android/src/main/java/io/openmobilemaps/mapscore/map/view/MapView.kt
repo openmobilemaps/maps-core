@@ -43,9 +43,10 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	private var touchHandler: TouchHandlerInterface? = null
 	private var touchDisabled = false
 
-	open fun setupMap(mapConfig: MapConfig) {
+	open fun setupMap(mapConfig: MapConfig, useMSAA: Boolean = false) {
 		val densityExact = resources.displayMetrics.xdpi
 
+		configureGL(useMSAA)
 		setRenderer(this)
 		val scheduler = AndroidScheduler(this)
 		val mapInterface = MapInterface.createWithOpenGl(
