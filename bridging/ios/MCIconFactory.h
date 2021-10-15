@@ -17,4 +17,11 @@
                                     iconSize:(nonnull MCVec2F *)iconSize
                                    scaleType:(MCIconType)scaleType;
 
++ (nullable MCIconInfoInterface *)createIconWithAnchor:(nonnull NSString *)identifier
+                                            coordinate:(nonnull MCCoord *)coordinate
+                                               texture:(nullable id<MCTextureHolderInterface>)texture
+                                              iconSize:(nonnull MCVec2F *)iconSize
+                                             scaleType:(MCIconType)scaleType
+                                            iconAnchor:(nonnull MCVec2F *)iconAnchor;
+
 @end

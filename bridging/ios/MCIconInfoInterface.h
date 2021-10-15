@@ -26,4 +26,6 @@
 
 - (MCIconType)getType;
 
+- (nonnull MCVec2F *)getIconAnchor;
+
 @end

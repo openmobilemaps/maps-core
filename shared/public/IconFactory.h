@@ -17,4 +17,6 @@ public:
     virtual ~IconFactory() {}
 
     static std::shared_ptr<IconInfoInterface> createIcon(const std::string & identifier, const ::Coord & coordinate, const std::shared_ptr<::TextureHolderInterface> & texture, const ::Vec2F & iconSize, IconType scaleType);
+
+    static std::shared_ptr<IconInfoInterface> createIconWithAnchor(const std::string & identifier, const ::Coord & coordinate, const std::shared_ptr<::TextureHolderInterface> & texture, const ::Vec2F & iconSize, IconType scaleType, const ::Vec2F & iconAnchor);
 };
