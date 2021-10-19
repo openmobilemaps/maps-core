@@ -53,6 +53,7 @@ void MapCamera2d::viewportSizeChanged() {
 }
 
 void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double zoom, bool animated) {
+    inertia = std::nullopt;
     Coord positionMapSystem = getBoundsCorrectedCoords(centerPosition);
     if (animated) {
         moveToCenterPosition(positionMapSystem, true);
@@ -67,6 +68,7 @@ void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
 }
 
 void MapCamera2d::moveToCenterPosition(const ::Coord &centerPosition, bool animated) {
+    inertia = std::nullopt;
     Coord positionMapSystem = getBoundsCorrectedCoords(centerPosition);
     if (animated) {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
