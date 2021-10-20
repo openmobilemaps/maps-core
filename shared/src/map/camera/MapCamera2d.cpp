@@ -22,6 +22,7 @@
 #define DEFAULT_ANIM_LENGTH 300
 #define ROTATION_THRESHOLD 20
 #define ROTATION_LOCKING_ANGLE 4
+#define ROTATION_LOCKING_FACTOR 1.3
 
 MapCamera2d::MapCamera2d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi)
         : mapInterface(mapInterface), conversionHelper(mapInterface->getCoordinateConverterHelper()),
@@ -469,7 +470,7 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
 
         zoom = std::max(std::min(zoom, zoomMin), zoomMax);
 
-        if (zoom > startZoom * 1.5 || zoom < startZoom / 1.5) {
+        if (zoom > startZoom * ROTATION_LOCKING_FACTOR || zoom < startZoom / ROTATION_LOCKING_FACTOR) {
             rotationPossible = false;
         }
 
