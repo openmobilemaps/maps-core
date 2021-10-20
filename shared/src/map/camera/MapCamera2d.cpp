@@ -21,6 +21,7 @@
 
 #define DEFAULT_ANIM_LENGTH 300
 #define ROTATION_THRESHOLD 20
+#define ROTATION_LOCKING_ANGLE 4
 
 MapCamera2d::MapCamera2d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi)
         : mapInterface(mapInterface), conversionHelper(mapInterface->getCoordinateConverterHelper()),
@@ -496,7 +497,14 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
             float olda = atan2(posScreenOld[0].x - posScreenOld[1].x, posScreenOld[0].y - posScreenOld[1].y);
             float newa = atan2(posScreenNew[0].x - posScreenNew[1].x, posScreenNew[0].y - posScreenNew[1].y);
             if (isRotationThreasholdReached) {
-                angle = fmod((angle + (olda - newa) / M_PI * 180.0) + 360.0, 360.0);
+                tempAngle = fmod((tempAngle + (olda - newa) / M_PI * 180.0) + 360.0, 360.0);
+
+                if (config.snapToNorth &&
+                    (tempAngle < ROTATION_LOCKING_ANGLE || tempAngle > (360 - ROTATION_LOCKING_ANGLE))) {
+                    angle = 0;
+                }else {
+                    angle = tempAngle;
+                }
 
                 //Update centerPosition such that the midpoint is the rotation center
                 double centerXDiff =
@@ -520,6 +528,7 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
                 tempAngle = fmod((tempAngle + (olda - newa) / M_PI * 180.0) + 360.0, 360.0);
                 if (std::abs(tempAngle - angle) >= ROTATION_THRESHOLD && rotationPossible) {
                     isRotationThreasholdReached = true;
+                    tempAngle = angle;
                 }
             }
         }

@@ -128,6 +128,7 @@ class MapCamera2d : public MapCamera2dInterface,
         bool doubleClickZoomEnabled = true;
         bool twoFingerZoomEnabled = true;
         bool moveEnabled = true;
+        bool snapToNorth = true;
     };
 
     Vec2F currentDragVelocity = { 0, 0 };
