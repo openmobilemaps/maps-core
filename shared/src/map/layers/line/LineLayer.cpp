@@ -138,8 +138,10 @@ void LineLayer::generateRenderPasses() {
     std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
     for (auto const &lineTuple : lines) {
         for (auto config : lineTuple.second->getRenderConfig()) {
-            std::vector<float> modelMatrix = mapInterface->getCamera()->getInvariantModelMatrix(lineTuple.first->getCoordinates()[0], false,false);
-            renderPassObjectMap[config->getRenderIndex()].push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
+            if (!lineTuple.first->getCoordinates().empty()) {
+                std::vector<float> modelMatrix = mapInterface->getCamera()->getInvariantModelMatrix(lineTuple.first->getCoordinates()[0], false,false);
+                renderPassObjectMap[config->getRenderIndex()].push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
+            }
         }
     }
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
