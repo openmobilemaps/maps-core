@@ -110,6 +110,8 @@ class MapCamera2d : public MapCamera2dInterface,
     double angle = 0;
     double tempAngle = 0;
     bool isRotationThreasholdReached = false;
+    bool rotationPossible = true;
+    double startZoom = 0;
 
     double paddingLeft = 0;
     double paddingTop = 0;

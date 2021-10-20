@@ -445,9 +445,12 @@ bool MapCamera2d::onDoubleClick(const ::Vec2F &posScreen) {
     return true;
 }
 
+
 void MapCamera2d::clearTouch() {
     isRotationThreasholdReached = false;
+    rotationPossible = true;
     tempAngle = angle;
+    startZoom = 0;
 }
 
 bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) {
@@ -456,12 +459,18 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
 
     inertia = std::nullopt;
 
+    if (startZoom == 0)
+        startZoom = zoom;
     if (posScreenOld.size() >= 2) {
         double scaleFactor =
                 Vec2FHelper::distance(posScreenNew[0], posScreenNew[1]) / Vec2FHelper::distance(posScreenOld[0], posScreenOld[1]);
         zoom /= scaleFactor;
 
         zoom = std::max(std::min(zoom, zoomMin), zoomMax);
+
+        if (zoom > startZoom * 1.5 || zoom < startZoom / 1.5) {
+            rotationPossible = false;
+        }
 
         auto midpoint = Vec2FHelper::midpoint(posScreenNew[0], posScreenNew[1]);
         auto oldMidpoint = Vec2FHelper::midpoint(posScreenOld[0], posScreenOld[1]);
@@ -509,7 +518,7 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
                 }
             } else {
                 tempAngle = fmod((tempAngle + (olda - newa) / M_PI * 180.0) + 360.0, 360.0);
-                if (std::abs(tempAngle - angle) >= ROTATION_THRESHOLD) {
+                if (std::abs(tempAngle - angle) >= ROTATION_THRESHOLD && rotationPossible) {
                     isRotationThreasholdReached = true;
                 }
             }
