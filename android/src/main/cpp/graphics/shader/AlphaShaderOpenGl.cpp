@@ -51,8 +51,7 @@ std::string AlphaShaderOpenGl::getFragmentShader() {
 
                                 void main() {
                                     vec4 c = texture2D(u_texture, v_texcoord);
-                                    highp float a = c.a * alpha;
-                                    gl_FragColor = vec4(c.r * a, c.g * a, c.b * a, a);
+                                    gl_FragColor = c * alpha;
                                 });
 }
 
