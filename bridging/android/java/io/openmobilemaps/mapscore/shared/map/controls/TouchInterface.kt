@@ -25,6 +25,8 @@ abstract class TouchInterface {
 
     abstract fun onTwoFingerMove(posScreenOld: ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2F>, posScreenNew: ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2F>): Boolean
 
+    abstract fun onTwoFingerMoveComplete(): Boolean
+
     abstract fun clearTouch()
 
     private class CppProxy : TouchInterface {
@@ -98,6 +100,12 @@ abstract class TouchInterface {
             return native_onTwoFingerMove(this.nativeRef, posScreenOld, posScreenNew)
         }
         private external fun native_onTwoFingerMove(_nativeRef: Long, posScreenOld: ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2F>, posScreenNew: ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2F>): Boolean
+
+        override fun onTwoFingerMoveComplete(): Boolean {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_onTwoFingerMoveComplete(this.nativeRef)
+        }
+        private external fun native_onTwoFingerMoveComplete(_nativeRef: Long): Boolean
 
         override fun clearTouch() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

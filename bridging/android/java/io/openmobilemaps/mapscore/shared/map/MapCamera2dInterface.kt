@@ -51,6 +51,8 @@ abstract class MapCamera2dInterface {
 
     abstract fun setRotationEnabled(enabled: Boolean)
 
+    abstract fun setSnapToNorthEnabled(enabled: Boolean)
+
     abstract fun asCameraInterface(): io.openmobilemaps.mapscore.shared.graphics.CameraInterface
 
     companion object {
@@ -209,6 +211,12 @@ abstract class MapCamera2dInterface {
             native_setRotationEnabled(this.nativeRef, enabled)
         }
         private external fun native_setRotationEnabled(_nativeRef: Long, enabled: Boolean)
+
+        override fun setSnapToNorthEnabled(enabled: Boolean) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setSnapToNorthEnabled(this.nativeRef, enabled)
+        }
+        private external fun native_setSnapToNorthEnabled(_nativeRef: Long, enabled: Boolean)
 
         override fun asCameraInterface(): io.openmobilemaps.mapscore.shared.graphics.CameraInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

@@ -23,10 +23,10 @@
 #include "AnimationInterface.h"
 
 class MapCamera2d : public MapCamera2dInterface,
-                    public CameraInterface,
-                    public SimpleTouchInterface,
-                    public std::enable_shared_from_this<CameraInterface> {
-  public:
+public CameraInterface,
+public SimpleTouchInterface,
+public std::enable_shared_from_this<CameraInterface> {
+public:
     MapCamera2d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi);
 
     ~MapCamera2d(){};
@@ -79,6 +79,8 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual bool onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) override;
 
+    virtual bool onTwoFingerMoveComplete() override;
+
     virtual void clearTouch() override;
 
     virtual void viewportSizeChanged() override;
@@ -93,7 +95,9 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual void setRotationEnabled(bool enabled) override;
 
-  protected:
+    virtual void setSnapToNorthEnabled(bool enabled) override;
+
+protected:
     std::recursive_mutex listenerMutex;
     std::set<std::shared_ptr<MapCamera2dListenerInterface>> listeners;
 
@@ -128,7 +132,7 @@ class MapCamera2d : public MapCamera2dInterface,
         bool doubleClickZoomEnabled = true;
         bool twoFingerZoomEnabled = true;
         bool moveEnabled = true;
-        bool snapToNorth = true;
+        bool snapToNorthEnabled = true;
     };
 
     Vec2F currentDragVelocity = { 0, 0 };

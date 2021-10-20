@@ -28,5 +28,7 @@ public:
 
     virtual bool onTwoFingerMove(const std::vector<::Vec2F> & posScreenOld, const std::vector<::Vec2F> & posScreenNew) = 0;
 
+    virtual bool onTwoFingerMoveComplete() = 0;
+
     virtual void clearTouch() = 0;
 };

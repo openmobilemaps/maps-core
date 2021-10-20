@@ -63,5 +63,7 @@ public:
 
     virtual void setRotationEnabled(bool enabled) = 0;
 
+    virtual void setSnapToNorthEnabled(bool enabled) = 0;
+
     virtual std::shared_ptr<::CameraInterface> asCameraInterface() = 0;
 };

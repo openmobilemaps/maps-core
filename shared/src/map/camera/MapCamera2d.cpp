@@ -21,7 +21,7 @@
 
 #define DEFAULT_ANIM_LENGTH 300
 #define ROTATION_THRESHOLD 20
-#define ROTATION_LOCKING_ANGLE 4
+#define ROTATION_LOCKING_ANGLE 10
 #define ROTATION_LOCKING_FACTOR 1.3
 
 MapCamera2d::MapCamera2d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi)
@@ -498,14 +498,7 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
             float olda = atan2(posScreenOld[0].x - posScreenOld[1].x, posScreenOld[0].y - posScreenOld[1].y);
             float newa = atan2(posScreenNew[0].x - posScreenNew[1].x, posScreenNew[0].y - posScreenNew[1].y);
             if (isRotationThreasholdReached) {
-                tempAngle = fmod((tempAngle + (olda - newa) / M_PI * 180.0) + 360.0, 360.0);
-
-                if (config.snapToNorth &&
-                    (tempAngle < ROTATION_LOCKING_ANGLE || tempAngle > (360 - ROTATION_LOCKING_ANGLE))) {
-                    angle = 0;
-                }else {
-                    angle = tempAngle;
-                }
+                angle = fmod((angle + (olda - newa) / M_PI * 180.0) + 360.0, 360.0);
 
                 //Update centerPosition such that the midpoint is the rotation center
                 double centerXDiff =
@@ -529,7 +522,6 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
                 tempAngle = fmod((tempAngle + (olda - newa) / M_PI * 180.0) + 360.0, 360.0);
                 if (std::abs(tempAngle - angle) >= ROTATION_THRESHOLD && rotationPossible) {
                     isRotationThreasholdReached = true;
-                    tempAngle = angle;
                 }
             }
         }
@@ -548,6 +540,29 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
         mapInterface->invalidate();
     }
     return true;
+}
+
+bool MapCamera2d::onTwoFingerMoveComplete() {
+    if (config.snapToNorthEnabled &&
+        (angle < ROTATION_LOCKING_ANGLE || angle > (360 - ROTATION_LOCKING_ANGLE))) {
+        std::lock_guard<std::recursive_mutex> lock(animationMutex);
+        animation = std::make_shared<DoubleAnimation>(DEFAULT_ANIM_LENGTH,
+                                                      this->angle,
+                                                      angle < ROTATION_LOCKING_ANGLE ? 0 : 360,
+                                                      InterpolatorFunction::EaseInOut,
+                                                      [=](double angle) {
+            this->angle = angle;
+            mapInterface->invalidate();
+                                                      }, [=] {
+                    this->angle = 0;
+                    this->animation = nullptr;
+                });
+        animation->start();
+        mapInterface->invalidate();
+        return true;
+    }
+
+    return false;
 }
 
 Coord MapCamera2d::coordFromScreenPosition(const ::Vec2F &posScreen) {
@@ -624,4 +639,8 @@ Coord MapCamera2d::getBoundsCorrectedCoords(const Coord &coords) {
 
 void MapCamera2d::setRotationEnabled(bool enabled) {
     config.rotationEnabled = enabled;
+}
+
+void MapCamera2d::setSnapToNorthEnabled(bool enabled) {
+    config.snapToNorthEnabled = enabled;
 }

@@ -29,6 +29,8 @@
 - (BOOL)onTwoFingerMove:(nonnull NSArray<MCVec2F *> *)posScreenOld
            posScreenNew:(nonnull NSArray<MCVec2F *> *)posScreenNew;
 
+- (BOOL)onTwoFingerMoveComplete;
+
 - (void)clearTouch;
 
 @end

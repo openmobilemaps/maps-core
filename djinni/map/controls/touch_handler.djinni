@@ -21,6 +21,7 @@ touch_interface = interface +c {
     on_move_complete() : bool;
     on_two_finger_click(pos_screen_1: vec_2_f, pos_screen_2: vec_2_f) : bool;
     on_two_finger_move(pos_screen_old: list<vec_2_f>, pos_screen_new: list<vec_2_f>) : bool;
+    on_two_finger_move_complete(): bool;
     clear_touch();
 }
 
