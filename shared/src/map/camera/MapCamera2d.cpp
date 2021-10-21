@@ -357,8 +357,11 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     float xDiff = (cosAngle * dx + sinAngle * dy);
     float yDiff = (-sinAngle * dx + cosAngle * dy);
 
-    centerPosition.x += xDiff * zoom * screenPixelAsRealMeterFactor * (mapSystemRtl ? -1 : 1);
-    centerPosition.y += yDiff * zoom * screenPixelAsRealMeterFactor * (mapSystemTtb ? -1 : 1);
+    float xDiffMap = xDiff * zoom * screenPixelAsRealMeterFactor * (mapSystemRtl ? -1 : 1);
+    float yDiffMap = yDiff * zoom * screenPixelAsRealMeterFactor * (mapSystemTtb ? -1 : 1);
+
+    centerPosition.x += xDiffMap;
+    centerPosition.y += yDiffMap;
 
     auto bottomRight = bounds.bottomRight;
     auto topLeft = bounds.topLeft;
@@ -375,11 +378,10 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
         currentDragVelocity.y = 0;
     } else {
         long long newTimestamp = DateHelper::currentTimeMicros();
-        long long deltaMs = std::max(newTimestamp - currentDragTimestamp, 8000ll);
-
-        double averageFactor = currentDragVelocity.x == 0 && currentDragVelocity.y == 0 ? 1.0 : 0.5;
-        currentDragVelocity.x = (1 - averageFactor) * currentDragVelocity.x + averageFactor * xDiff / (deltaMs / 16000.0);
-        currentDragVelocity.y = (1 - averageFactor) * currentDragVelocity.y + averageFactor * yDiff / (deltaMs / 16000.0);
+        long long deltaMcs = std::max(newTimestamp - currentDragTimestamp, 8000ll);
+        float averageFactor = currentDragVelocity.x == 0 && currentDragVelocity.y == 0 ? 1.0 : 0.5;
+        currentDragVelocity.x = (1 - averageFactor) * currentDragVelocity.x + averageFactor * xDiffMap / (deltaMcs / 16000.0);
+        currentDragVelocity.y = (1 - averageFactor) * currentDragVelocity.y + averageFactor * yDiffMap / (deltaMcs / 16000.0);
         LogDebug <<= "CurrentVelocity: " + std::to_string(currentDragVelocity.x) + ", :" + std::to_string(currentDragVelocity.y) + " dms: " + std::to_string(newTimestamp - currentDragTimestamp);
         currentDragTimestamp = newTimestamp;
     }
@@ -399,7 +401,7 @@ void MapCamera2d::setupInertia() {
     double t1 = vel >= 1.0 ? -19.4957 * std::log(1.0 / vel) : 0.0;
     double t2 = vel >= 0.01 ? -1.95762 * std::log(0.01 / 1.0) : 0.0;
     inertia = Inertia(DateHelper::currentTimeMicros(), currentDragVelocity, t1, t2);
-    LogDebug <<= "Computed inertia times t1: " + std::to_string(currentDragVelocity.x) + ", t2:" + std::to_string(currentDragVelocity.y);
+    LogDebug <<= "Computed inertia times t1: " + std::to_string(t1) + ", t2:" + std::to_string(t2);
     currentDragVelocity = {0, 0};
     currentDragTimestamp = 0;
 }
@@ -414,7 +416,7 @@ void MapCamera2d::inertiaStep() {
     inertia->velocity.x *= slowDown;
     inertia->velocity.y *= slowDown;*/
 
-    long long delta = (DateHelper::currentTimeMicros() - inertia->timestampStart) / 16000;
+    double delta = (DateHelper::currentTimeMicros() - inertia->timestampStart) / 16000.0;
 
     if (delta >= inertia->t1 + inertia->t2) {
         inertia = std::nullopt;
@@ -423,12 +425,12 @@ void MapCamera2d::inertiaStep() {
     bool afterT1 = delta > inertia->t1;
     float factor = std::pow(afterT1 ? 0.6 : 0.95, afterT1 ? delta - inertia->t1 : delta);
     LogDebug <<= "Inertia with factor: " + std::to_string(factor) + "\n    after delta/16: " + std::to_string(delta);
-    float xVel = (afterT1 ? 1.0f : inertia->velocity.x) * factor;
-    float yVel = (afterT1 ? 1.0f : inertia->velocity.y) * factor;
-    LogDebug <<= "Inertia with velocity: " + std::to_string(xVel) + ", " + std::to_string(yVel) + "\n    after delta/16: " + std::to_string(delta) + " at zoom: " + std::to_string(zoom);
+    float xDiffMap = (afterT1 ? 1.0f : inertia->velocity.x) * factor;
+    float yDiffMap = (afterT1 ? 1.0f : inertia->velocity.y) * factor;
+    LogDebug <<= "Inertia with diff: " + std::to_string(xDiffMap) + ", " + std::to_string(yDiffMap) + "\n    after delta/16: " + std::to_string(delta) + " at zoom: " + std::to_string(zoom);
 
-    centerPosition.x += xVel * zoom * screenPixelAsRealMeterFactor * (mapSystemRtl ? -1 : 1);
-    centerPosition.y += yVel * zoom * screenPixelAsRealMeterFactor * (mapSystemTtb ? -1 : 1);
+    centerPosition.x += xDiffMap;
+    centerPosition.y += yDiffMap;
 
     auto bottomRight = bounds.bottomRight;
     auto topLeft = bounds.topLeft;
