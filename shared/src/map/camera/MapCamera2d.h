@@ -145,12 +145,13 @@ class MapCamera2d : public MapCamera2dInterface,
     /// zoom and rotation are still missing
     struct Inertia {
         long timestampStart;
+        long timestampUpdate;
         Vec2F velocity;
         double t1;
         double t2;
 
         Inertia(long long timestampStart, Vec2F velocity, double t1, double t2):
-        timestampStart(timestampStart), velocity(velocity), t1(t1), t2(t2) {}
+        timestampStart(timestampStart), timestampUpdate(timestampStart), velocity(velocity), t1(t1), t2(t2) {}
     };
     std::optional<Inertia> inertia;
     void inertiaStep();

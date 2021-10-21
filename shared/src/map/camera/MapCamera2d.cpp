@@ -382,7 +382,6 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
         float averageFactor = currentDragVelocity.x == 0 && currentDragVelocity.y == 0 ? 1.0 : 0.5;
         currentDragVelocity.x = (1 - averageFactor) * currentDragVelocity.x + averageFactor * xDiffMap / (deltaMcs / 16000.0);
         currentDragVelocity.y = (1 - averageFactor) * currentDragVelocity.y + averageFactor * yDiffMap / (deltaMcs / 16000.0);
-        LogDebug <<= "CurrentVelocity: " + std::to_string(currentDragVelocity.x) + ", :" + std::to_string(currentDragVelocity.y) + " dms: " + std::to_string(newTimestamp - currentDragTimestamp);
         currentDragTimestamp = newTimestamp;
     }
 
@@ -401,7 +400,6 @@ void MapCamera2d::setupInertia() {
     double t1 = vel >= 1.0 ? -19.4957 * std::log(1.0 / vel) : 0.0;
     double t2 = vel >= 0.01 ? -1.95762 * std::log(0.01 / 1.0) : 0.0;
     inertia = Inertia(DateHelper::currentTimeMicros(), currentDragVelocity, t1, t2);
-    LogDebug <<= "Computed inertia times t1: " + std::to_string(t1) + ", t2:" + std::to_string(t2);
     currentDragVelocity = {0, 0};
     currentDragTimestamp = 0;
 }
@@ -409,14 +407,9 @@ void MapCamera2d::setupInertia() {
 void MapCamera2d::inertiaStep() {
     if (inertia == std::nullopt) return;
 
-    /*float slowDown =
-            inertia->velocity.x * inertia->velocity.x + inertia->velocity.y * inertia->velocity.y > 1
-            ? 0.95f
-            : 0.6f;
-    inertia->velocity.x *= slowDown;
-    inertia->velocity.y *= slowDown;*/
-
-    double delta = (DateHelper::currentTimeMicros() - inertia->timestampStart) / 16000.0;
+    long long now = DateHelper::currentTimeMicros();
+    double delta = (now - inertia->timestampStart) / 16000.0;
+    double deltaPrev = (now - inertia->timestampUpdate) / 16000.0;
 
     if (delta >= inertia->t1 + inertia->t2) {
         inertia = std::nullopt;
@@ -424,10 +417,9 @@ void MapCamera2d::inertiaStep() {
     }
     bool afterT1 = delta > inertia->t1;
     float factor = std::pow(afterT1 ? 0.6 : 0.95, afterT1 ? delta - inertia->t1 : delta);
-    LogDebug <<= "Inertia with factor: " + std::to_string(factor) + "\n    after delta/16: " + std::to_string(delta);
-    float xDiffMap = (afterT1 ? 1.0f : inertia->velocity.x) * factor;
-    float yDiffMap = (afterT1 ? 1.0f : inertia->velocity.y) * factor;
-    LogDebug <<= "Inertia with diff: " + std::to_string(xDiffMap) + ", " + std::to_string(yDiffMap) + "\n    after delta/16: " + std::to_string(delta) + " at zoom: " + std::to_string(zoom);
+    float xDiffMap = (afterT1 ? 1.0f : inertia->velocity.x) * factor * deltaPrev;
+    float yDiffMap = (afterT1 ? 1.0f : inertia->velocity.y) * factor * deltaPrev;
+    inertia->timestampUpdate = now;
 
     centerPosition.x += xDiffMap;
     centerPosition.y += yDiffMap;
@@ -435,13 +427,8 @@ void MapCamera2d::inertiaStep() {
     auto bottomRight = bounds.bottomRight;
     auto topLeft = bounds.topLeft;
 
-    /*centerPosition.x = std::clamp(centerPosition.y, mapSystemRtl ? bottomRight.x : topLeft.x, mapSystemRtl ? topLeft.x : bottomRight.x);
-    centerPosition.y = std::clamp(centerPosition.y, mapSystemTtb ? topLeft.y : bottomRight.y, mapSystemTtb ? bottomRight.y : topLeft.y);*/
-    centerPosition.x = std::min(centerPosition.x, bottomRight.x);
-    centerPosition.x = std::max(centerPosition.x, topLeft.x);
-
-    centerPosition.y = std::max(centerPosition.y, bottomRight.y);
-    centerPosition.y = std::min(centerPosition.y, topLeft.y);
+    centerPosition.x = std::clamp(centerPosition.x, std::min(topLeft.x, bottomRight.x), std::max(topLeft.x, bottomRight.x));
+    centerPosition.y = std::clamp(centerPosition.y, std::min(topLeft.y, bottomRight.y), std::max(topLeft.y, bottomRight.y));
 
     notifyListeners();
     mapInterface->invalidate();
