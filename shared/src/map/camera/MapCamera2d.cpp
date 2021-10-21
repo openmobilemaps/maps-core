@@ -369,19 +369,19 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     centerPosition.y = std::max(centerPosition.y, bottomRight.y);
     centerPosition.y = std::min(centerPosition.y, topLeft.y);
 
-    if (currentDragVelocity.x == 0 && currentDragVelocity.y == 0) {
-        currentDragTimestamp = DateHelper::currentTimeMillis();
+    if (currentDragTimestamp == 0) {
+        currentDragTimestamp = DateHelper::currentTimeMicros();
         currentDragVelocity.x = 0;
         currentDragVelocity.y = 0;
     } else {
-        long long newTimestamp = DateHelper::currentTimeMillis();
-        long long deltaMs = newTimestamp - currentDragTimestamp;
-        /*currentDragVelocity.x = 0.5f * currentDragVelocity.x + 0.5f * xDiff;
-        currentDragVelocity.y = 0.5f * currentDragVelocity.y + 0.5f * yDiff;*/
-        currentDragVelocity.x = xDiff / (deltaMs / 16);
-        currentDragVelocity.y = yDiff / (deltaMs / 16);
+        long long newTimestamp = DateHelper::currentTimeMicros();
+        long long deltaMs = std::max(newTimestamp - currentDragTimestamp, 8000ll);
+
+        double averageFactor = currentDragVelocity.x == 0 && currentDragVelocity.y == 0 ? 1.0 : 0.5;
+        currentDragVelocity.x = (1 - averageFactor) * currentDragVelocity.x + averageFactor * xDiff / (deltaMs / 16000.0);
+        currentDragVelocity.y = (1 - averageFactor) * currentDragVelocity.y + averageFactor * yDiff / (deltaMs / 16000.0);
+        LogDebug <<= "CurrentVelocity: " + std::to_string(currentDragVelocity.x) + ", :" + std::to_string(currentDragVelocity.y) + " dms: " + std::to_string(newTimestamp - currentDragTimestamp);
         currentDragTimestamp = newTimestamp;
-        LogDebug <<= "CurrentVelocity: " + std::to_string(currentDragVelocity.x) + ", :" + std::to_string(currentDragVelocity.y);
     }
 
     notifyListeners();
@@ -396,11 +396,12 @@ bool MapCamera2d::onMoveComplete() {
 
 void MapCamera2d::setupInertia() {
     float vel = sqrt(currentDragVelocity.x * currentDragVelocity.x + currentDragVelocity.y * currentDragVelocity.y);
-    double t1 = vel >= 1.0 ? -9.49122 * std::log(1.0 / vel) : 0.0;
-    double t2 = vel >= 0.01 ? -1.4427 * std::log(0.01 / 1.0) : 0.0;
-    inertia = Inertia(DateHelper::currentTimeMillis(), currentDragVelocity, t1, t2);
+    double t1 = vel >= 1.0 ? -19.4957 * std::log(1.0 / vel) : 0.0;
+    double t2 = vel >= 0.01 ? -1.95762 * std::log(0.01 / 1.0) : 0.0;
+    inertia = Inertia(DateHelper::currentTimeMicros(), currentDragVelocity, t1, t2);
     LogDebug <<= "Computed inertia times t1: " + std::to_string(currentDragVelocity.x) + ", t2:" + std::to_string(currentDragVelocity.y);
     currentDragVelocity = {0, 0};
+    currentDragTimestamp = 0;
 }
 
 void MapCamera2d::inertiaStep() {
@@ -413,14 +414,14 @@ void MapCamera2d::inertiaStep() {
     inertia->velocity.x *= slowDown;
     inertia->velocity.y *= slowDown;*/
 
-    long long delta = (DateHelper::currentTimeMillis() - inertia->timestampStart) / 16;
+    long long delta = (DateHelper::currentTimeMicros() - inertia->timestampStart) / 16000;
 
     if (delta >= inertia->t1 + inertia->t2) {
         inertia = std::nullopt;
         return;
     }
     bool afterT1 = delta > inertia->t1;
-    float factor = std::pow(afterT1 ? 0.5 : 0.9, afterT1 ? delta - inertia->t1 : delta);
+    float factor = std::pow(afterT1 ? 0.6 : 0.95, afterT1 ? delta - inertia->t1 : delta);
     LogDebug <<= "Inertia with factor: " + std::to_string(factor) + "\n    after delta/16: " + std::to_string(delta);
     float xVel = (afterT1 ? 1.0f : inertia->velocity.x) * factor;
     float yVel = (afterT1 ? 1.0f : inertia->velocity.y) * factor;
