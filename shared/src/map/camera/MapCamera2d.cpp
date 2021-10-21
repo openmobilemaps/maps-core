@@ -8,6 +8,7 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
+#include "Logger.h"
 #include "MapCamera2d.h"
 #include "Coord.h"
 #include "DateHelper.h"
@@ -359,7 +360,6 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     centerPosition.x += xDiff * zoom * screenPixelAsRealMeterFactor * (mapSystemRtl ? -1 : 1);
     centerPosition.y += yDiff * zoom * screenPixelAsRealMeterFactor * (mapSystemTtb ? -1 : 1);
 
-    auto config = mapInterface->getMapConfig();
     auto bottomRight = bounds.bottomRight;
     auto topLeft = bounds.topLeft;
 
@@ -370,11 +370,18 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     centerPosition.y = std::min(centerPosition.y, topLeft.y);
 
     if (currentDragVelocity.x == 0 && currentDragVelocity.y == 0) {
-        currentDragVelocity.x = xDiff;
-        currentDragVelocity.y = yDiff;
+        currentDragTimestamp = DateHelper::currentTimeMillis();
+        currentDragVelocity.x = 0;
+        currentDragVelocity.y = 0;
     } else {
-        currentDragVelocity.x = 0.5f * currentDragVelocity.x + 0.5f * xDiff;
-        currentDragVelocity.y = 0.5f * currentDragVelocity.y + 0.5f * yDiff;
+        long long newTimestamp = DateHelper::currentTimeMillis();
+        long long deltaMs = newTimestamp - currentDragTimestamp;
+        /*currentDragVelocity.x = 0.5f * currentDragVelocity.x + 0.5f * xDiff;
+        currentDragVelocity.y = 0.5f * currentDragVelocity.y + 0.5f * yDiff;*/
+        currentDragVelocity.x = xDiff / (deltaMs / 16);
+        currentDragVelocity.y = yDiff / (deltaMs / 16);
+        currentDragTimestamp = newTimestamp;
+        LogDebug <<= "CurrentVelocity: " + std::to_string(currentDragVelocity.x) + ", :" + std::to_string(currentDragVelocity.y);
     }
 
     notifyListeners();
@@ -383,39 +390,55 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
 }
 
 bool MapCamera2d::onMoveComplete() {
-    inertia = Inertia(currentDragVelocity);
-    currentDragVelocity = {0, 0};
+    setupInertia();
     return true;
+}
+
+void MapCamera2d::setupInertia() {
+    float vel = sqrt(currentDragVelocity.x * currentDragVelocity.x + currentDragVelocity.y * currentDragVelocity.y);
+    double t1 = vel >= 1.0 ? -9.49122 * std::log(1.0 / vel) : 0.0;
+    double t2 = vel >= 0.01 ? -1.4427 * std::log(0.01 / 1.0) : 0.0;
+    inertia = Inertia(DateHelper::currentTimeMillis(), currentDragVelocity, t1, t2);
+    LogDebug <<= "Computed inertia times t1: " + std::to_string(currentDragVelocity.x) + ", t2:" + std::to_string(currentDragVelocity.y);
+    currentDragVelocity = {0, 0};
 }
 
 void MapCamera2d::inertiaStep() {
     if (inertia == std::nullopt) return;
 
-    if (std::abs(inertia->velocity.x) <= 0.001 &&
-        std::abs(inertia->velocity.y) <= 0.001) {
+    /*float slowDown =
+            inertia->velocity.x * inertia->velocity.x + inertia->velocity.y * inertia->velocity.y > 1
+            ? 0.95f
+            : 0.6f;
+    inertia->velocity.x *= slowDown;
+    inertia->velocity.y *= slowDown;*/
+
+    long long delta = (DateHelper::currentTimeMillis() - inertia->timestampStart) / 16;
+
+    if (delta >= inertia->t1 + inertia->t2) {
         inertia = std::nullopt;
         return;
     }
+    bool afterT1 = delta > inertia->t1;
+    float factor = std::pow(afterT1 ? 0.5 : 0.9, afterT1 ? delta - inertia->t1 : delta);
+    LogDebug <<= "Inertia with factor: " + std::to_string(factor) + "\n    after delta/16: " + std::to_string(delta);
+    float xVel = (afterT1 ? 1.0f : inertia->velocity.x) * factor;
+    float yVel = (afterT1 ? 1.0f : inertia->velocity.y) * factor;
+    LogDebug <<= "Inertia with velocity: " + std::to_string(xVel) + ", " + std::to_string(yVel) + "\n    after delta/16: " + std::to_string(delta) + " at zoom: " + std::to_string(zoom);
 
-    centerPosition.x += inertia->velocity.x * zoom * screenPixelAsRealMeterFactor * (mapSystemRtl ? -1 : 1);
-    centerPosition.y += inertia->velocity.y * zoom * screenPixelAsRealMeterFactor * (mapSystemTtb ? -1 : 1);
+    centerPosition.x += xVel * zoom * screenPixelAsRealMeterFactor * (mapSystemRtl ? -1 : 1);
+    centerPosition.y += yVel * zoom * screenPixelAsRealMeterFactor * (mapSystemTtb ? -1 : 1);
 
-    auto config = mapInterface->getMapConfig();
     auto bottomRight = bounds.bottomRight;
     auto topLeft = bounds.topLeft;
 
+    /*centerPosition.x = std::clamp(centerPosition.y, mapSystemRtl ? bottomRight.x : topLeft.x, mapSystemRtl ? topLeft.x : bottomRight.x);
+    centerPosition.y = std::clamp(centerPosition.y, mapSystemTtb ? topLeft.y : bottomRight.y, mapSystemTtb ? bottomRight.y : topLeft.y);*/
     centerPosition.x = std::min(centerPosition.x, bottomRight.x);
     centerPosition.x = std::max(centerPosition.x, topLeft.x);
 
     centerPosition.y = std::max(centerPosition.y, bottomRight.y);
     centerPosition.y = std::min(centerPosition.y, topLeft.y);
-
-    float slowDown =
-            inertia->velocity.x * inertia->velocity.x + inertia->velocity.y * inertia->velocity.y > 1
-            ? 0.95f
-            : 0.6f;
-    inertia->velocity.x *= slowDown;
-    inertia->velocity.y *= slowDown;
 
     notifyListeners();
     mapInterface->invalidate();

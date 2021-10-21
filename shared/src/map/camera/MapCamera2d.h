@@ -23,10 +23,10 @@
 #include "AnimationInterface.h"
 
 class MapCamera2d : public MapCamera2dInterface,
-public CameraInterface,
-public SimpleTouchInterface,
-public std::enable_shared_from_this<CameraInterface> {
-public:
+                    public CameraInterface,
+                    public SimpleTouchInterface,
+                    public std::enable_shared_from_this<CameraInterface> {
+  public:
     MapCamera2d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi);
 
     ~MapCamera2d(){};
@@ -97,7 +97,9 @@ public:
 
     virtual void setSnapToNorthEnabled(bool enabled) override;
 
-protected:
+  protected:
+    virtual void setupInertia();
+
     std::recursive_mutex listenerMutex;
     std::set<std::shared_ptr<MapCamera2dListenerInterface>> listeners;
 
@@ -135,16 +137,20 @@ protected:
         bool snapToNorthEnabled = true;
     };
 
+    long long currentDragTimestamp = 0;
     Vec2F currentDragVelocity = { 0, 0 };
 
     /// object describing parameters of inertia
     /// currently only dragging inertia is implemented
     /// zoom and rotation are still missing
     struct Inertia {
+        long timestampStart;
         Vec2F velocity;
-        
-        Inertia(Vec2F velocity):
-        velocity(velocity) {}
+        double t1;
+        double t2;
+
+        Inertia(long long timestampStart, Vec2F velocity, double t1, double t2):
+        timestampStart(timestampStart), velocity(velocity), t1(t1), t2(t2) {}
     };
     std::optional<Inertia> inertia;
     void inertiaStep();
