@@ -207,6 +207,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setSnapToNorthEnabled:(BOOL)enabled {
+    try {
+        _cppRefHandle.get()->setSnapToNorthEnabled(::djinni::Bool::toCpp(enabled));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nullable id<MCCameraInterface>)asCameraInterface {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->asCameraInterface();

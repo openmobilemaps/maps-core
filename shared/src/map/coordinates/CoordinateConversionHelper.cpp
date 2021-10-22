@@ -23,16 +23,15 @@
  * This instance is independent of the map and does not know about the rendering system.
  * It can not be used to convert coordinates into rendering space.
  */
-std::shared_ptr<CoordinateConversionHelperInterface> CoordinateConversionHelperInterface::independentInstance() {
-    static std::shared_ptr<CoordinateConversionHelperInterface> singleton;
+std::shared_ptr <CoordinateConversionHelperInterface> CoordinateConversionHelperInterface::independentInstance() {
+    static std::shared_ptr <CoordinateConversionHelperInterface> singleton;
     if (singleton) return singleton;
     singleton = std::make_shared<CoordinateConversionHelper>();
     return singleton;
 }
 
 CoordinateConversionHelper::CoordinateConversionHelper(MapCoordinateSystem mapCoordinateSystem)
-    : mapCoordinateSystemIdentier(mapCoordinateSystem.identifier) {
-
+        : mapCoordinateSystemIdentier(mapCoordinateSystem.identifier) {
     registerConverter(std::make_shared<DefaultSystemToRenderConverter>(mapCoordinateSystem));
     addDefaultConverters();
 }
@@ -55,8 +54,8 @@ void CoordinateConversionHelper::addDefaultConverters() {
     registerConverter(std::make_shared<EPSG21781ToEPGS2056Converter>());
 }
 
-void CoordinateConversionHelper::registerConverter(const std::shared_ptr<CoordinateConverterInterface> &converter) {
-    std::lock_guard<std::recursive_mutex> lock(converterMutex);
+void CoordinateConversionHelper::registerConverter(const std::shared_ptr <CoordinateConverterInterface> &converter) {
+    std::lock_guard <std::recursive_mutex> lock(converterMutex);
     fromToConverterMap[{converter->getFrom(), converter->getTo()}] = converter;
     precomputeConverterHelper();
 }
@@ -67,7 +66,8 @@ Coord CoordinateConversionHelper::convert(const std::string &to, const Coord &co
     }
 
     // first try if we can directly convert
-    if (auto const &converter = fromToConverterMap[{coordinate.systemIdentifier, to}]) {
+    if (fromToConverterMap.count({coordinate.systemIdentifier, to})) {
+        auto const &converter = fromToConverterMap[{coordinate.systemIdentifier, to}];
         return converter->convert(coordinate);
     }
 
@@ -131,12 +131,12 @@ void CoordinateConversionHelper::precomputeConverterHelper() {
     // two steps
     for (auto const &converterFirst : fromToConverterMap) {
         for (auto const &converterSecond : fromToConverterMap) {
-            // if output of first converter is inpute of second
+            // if output of first converter is input of last
             auto from = converterFirst.second->getFrom();
             auto to = converterSecond.second->getTo();
 
-            if (converterFirst.second->getTo() == converterSecond.second->getFrom() && from != to &&
-                fromToConverterMap.count({from, to}) == 0) {
+            if (from != to &&
+                fromToConverterMap.count({from, to}) == 0 && converterFirst.second->getTo() == converterSecond.second->getFrom()) {
                 converterHelper[{from, to}] = {converterFirst.second, converterSecond.second};
             }
         }
@@ -146,14 +146,34 @@ void CoordinateConversionHelper::precomputeConverterHelper() {
     for (auto const &converterFirst : fromToConverterMap) {
         for (auto const &converterSecond : fromToConverterMap) {
             for (auto const &converterThird : fromToConverterMap) {
-                // if output of first converter is inpute of second
                 auto from = converterFirst.second->getFrom();
                 auto to = converterThird.second->getTo();
 
-                if (converterFirst.second->getTo() == converterSecond.second->getFrom() &&
-                    converterSecond.second->getTo() == converterThird.second->getFrom() && from != to &&
-                    fromToConverterMap.count({from, to}) == 0 && converterHelper.count({from, to}) == 0) {
+                if (from != to && fromToConverterMap.count({from, to}) == 0 && converterHelper.count({from, to}) == 0 &&
+                    converterFirst.second->getTo() == converterSecond.second->getFrom() &&
+                    converterSecond.second->getTo() == converterThird.second->getFrom()) {
                     converterHelper[{from, to}] = {converterFirst.second, converterSecond.second, converterThird.second};
+                }
+            }
+        }
+    }
+
+    // four steps
+    for (auto const &converterFirst : fromToConverterMap) {
+        for (auto const &converterSecond : fromToConverterMap) {
+            for (auto const &converterThird : fromToConverterMap) {
+                for (auto const &converterFourth : fromToConverterMap) {
+                    auto from = converterFirst.second->getFrom();
+                    auto to = converterFourth.second->getTo();
+
+                    if (from != to &&
+                        fromToConverterMap.count({from, to}) == 0 && converterHelper.count({from, to}) == 0 &&
+                        converterFirst.second->getTo() == converterSecond.second->getFrom() &&
+                        converterSecond.second->getTo() == converterThird.second->getFrom() &&
+                        converterThird.second->getTo() == converterFourth.second->getFrom()) {
+                        converterHelper[{from, to}] = {converterFirst.second, converterSecond.second, converterThird.second,
+                                                       converterFourth.second};
+                    }
                 }
             }
         }

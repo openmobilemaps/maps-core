@@ -36,12 +36,13 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
         double factor = camera->getScalingFactor();
         const auto &renderObjects = pass->getRenderObjects();
         std::vector<float> tempMvpMatrix(16, 0);
-        for (const auto &renderObject : renderObjects) {
-            if (maskObject) {
-                renderingContext->preRenderStencilMask();
-                maskObject->renderAsMask(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, factor);
-            }
 
+        if (maskObject) {
+            renderingContext->preRenderStencilMask();
+            maskObject->renderAsMask(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, factor);
+        }
+
+        for (const auto &renderObject : renderObjects) {
             const auto &graphicsObject = renderObject->getGraphicsObject();
             if (renderObject->hasCustomModelMatrix()) {
                 Matrix::multiplyMMC(tempMvpMatrix, 0, vpMatrix, 0, renderObject->getCustomModelMatrix(), 0);
@@ -50,10 +51,10 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
             } else {
                 graphicsObject->render(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, hasMask, factor);
             }
+        }
 
-            if (maskObject) {
-                renderingContext->postRenderStencilMask();
-            }
+        if (maskObject) {
+            renderingContext->postRenderStencilMask();
         }
 
         renderQueue.pop();

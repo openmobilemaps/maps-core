@@ -27,7 +27,7 @@ public:
         double x = coordinate.x + 2000000;
         double y = coordinate.y + 1000000;
 
-        return Coord(getTo(), x, y, 0);
+        return Coord(getTo(), x, y, coordinate.z);
     }
 
     virtual std::string getFrom() override { return CoordinateSystemIdentifiers::EPSG21781(); }

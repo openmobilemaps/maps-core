@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "logger/Logger.h"
+#include "Logger.h"
 #include "opengl_wrapper.h"
 
 class OpenGlHelper {

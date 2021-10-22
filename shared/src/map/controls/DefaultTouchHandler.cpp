@@ -261,6 +261,11 @@ void DefaultTouchHandler::handleTwoFingerUp(std::tuple<Vec2F, Vec2F> doubleTouch
     if (state != TWO_FINGER_DOWN) {
         state = IDLE;
         stateTime = DateHelper::currentTimeMillis();
+        for (auto &listener : listeners) {
+            if (listener->onTwoFingerMoveComplete()) {
+                break;
+            }
+        }
     }
 }
 

@@ -108,6 +108,7 @@ map_camera_2d_interface = interface +c {
     map_units_from_pixels(distancePx: f64): f64;
 
     set_rotation_enabled(enabled: bool);
+    set_snap_to_north_enabled(enabled: bool);
 
     as_camera_interface(): camera_interface;
 }

@@ -79,6 +79,8 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual bool onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) override;
 
+    virtual bool onTwoFingerMoveComplete() override;
+
     virtual void clearTouch() override;
 
     virtual void viewportSizeChanged() override;
@@ -93,7 +95,11 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual void setRotationEnabled(bool enabled) override;
 
+    virtual void setSnapToNorthEnabled(bool enabled) override;
+
   protected:
+    virtual void setupInertia();
+
     std::recursive_mutex listenerMutex;
     std::set<std::shared_ptr<MapCamera2dListenerInterface>> listeners;
 
@@ -110,6 +116,8 @@ class MapCamera2d : public MapCamera2dInterface,
     double angle = 0;
     double tempAngle = 0;
     bool isRotationThreasholdReached = false;
+    bool rotationPossible = true;
+    double startZoom = 0;
 
     double paddingLeft = 0;
     double paddingTop = 0;
@@ -126,18 +134,24 @@ class MapCamera2d : public MapCamera2dInterface,
         bool doubleClickZoomEnabled = true;
         bool twoFingerZoomEnabled = true;
         bool moveEnabled = true;
+        bool snapToNorthEnabled = true;
     };
 
+    long long currentDragTimestamp = 0;
     Vec2F currentDragVelocity = { 0, 0 };
 
     /// object describing parameters of inertia
     /// currently only dragging inertia is implemented
     /// zoom and rotation are still missing
     struct Inertia {
+        long timestampStart;
+        long timestampUpdate;
         Vec2F velocity;
-        
-        Inertia(Vec2F velocity):
-        velocity(velocity) {}
+        double t1;
+        double t2;
+
+        Inertia(long long timestampStart, Vec2F velocity, double t1, double t2):
+        timestampStart(timestampStart), timestampUpdate(timestampStart), velocity(velocity), t1(t1), t2(t2) {}
     };
     std::optional<Inertia> inertia;
     void inertiaStep();

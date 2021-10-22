@@ -71,6 +71,8 @@
 
 - (void)setRotationEnabled:(BOOL)enabled;
 
+- (void)setSnapToNorthEnabled:(BOOL)enabled;
+
 - (nullable id<MCCameraInterface>)asCameraInterface;
 
 @end
