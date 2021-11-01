@@ -163,7 +163,7 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
 
     if (isMasked) {
         glStencilFunc(GL_EQUAL, 128, 128);
-        glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
     }
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
