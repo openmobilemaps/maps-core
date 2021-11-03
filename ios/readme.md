@@ -82,9 +82,9 @@ class TiledLayerConfig: MCTiled2dMapLayerConfig {
       return "https://example.com/tiles/\(zoom)/\(x)/\(y).png"
     }
 
-    // Pattern to create a tile identifier used internally
-    func getTileIdentifier(_ x: Int32, y: Int32, zoom: Int32) -> String {
-        "ExampleTile<\(zoom)-\(x)-\(y)>"
+    // The Layername
+    func getLayerName() -> String {
+        "OSM Layer"
     }
 
     // List of valid zoom-levels and their target zoom-value, the tile size in

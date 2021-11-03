@@ -13,12 +13,14 @@ auto TextureLoaderResult::toCpp(ObjcType obj) -> CppType
 {
     assert(obj);
     return {::djinni::Optional<std::optional, ::djinni_generated::TextureHolderInterface>::toCpp(obj.data),
+            ::djinni::Optional<std::optional, ::djinni::String>::toCpp(obj.etag),
             ::djinni::Enum<::LoaderStatus, MCLoaderStatus>::toCpp(obj.status)};
 }
 
 auto TextureLoaderResult::fromCpp(const CppType& cpp) -> ObjcType
 {
     return [[MCTextureLoaderResult alloc] initWithData:(::djinni::Optional<std::optional, ::djinni_generated::TextureHolderInterface>::fromCpp(cpp.data))
+                                                  etag:(::djinni::Optional<std::optional, ::djinni::String>::fromCpp(cpp.etag))
                                                 status:(::djinni::Enum<::LoaderStatus, MCLoaderStatus>::fromCpp(cpp.status))];
 }
 

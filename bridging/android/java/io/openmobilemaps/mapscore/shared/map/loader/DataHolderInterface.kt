@@ -3,7 +3,7 @@
 
 package io.openmobilemaps.mapscore.shared.map.loader
 
-data class VectorTileLoaderResult(
-    var data: VectorTileHolderInterface?,
-    var status: LoaderStatus,
-)
+abstract class DataHolderInterface {
+
+    abstract fun getData(): ByteArray
+}

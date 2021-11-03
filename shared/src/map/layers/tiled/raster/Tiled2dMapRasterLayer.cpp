@@ -19,11 +19,11 @@
 #include <Logger.h>
 
 Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
-                                             const std::shared_ptr<::TileLoaderInterface> & tileLoader)
+                                             const std::shared_ptr<::LoaderInterface> & tileLoader)
 : Tiled2dMapLayer(layerConfig), textureLoader(tileLoader), alpha(1.0) {}
 
 Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
-                                             const std::shared_ptr<::TileLoaderInterface> & tileLoader,
+                                             const std::shared_ptr<::LoaderInterface> & tileLoader,
                                              const std::shared_ptr<::MaskingObjectInterface> & mask): Tiled2dMapLayer(layerConfig), textureLoader(tileLoader), alpha(1.0),
                                                  mask(mask) {}
 

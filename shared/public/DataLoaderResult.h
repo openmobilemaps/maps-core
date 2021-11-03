@@ -9,16 +9,16 @@
 #include <string>
 #include <utility>
 
-class VectorTileHolderInterface;
+class DataHolderInterface;
 
-struct VectorTileLoaderResult final {
-    std::shared_ptr<VectorTileHolderInterface> data;
+struct DataLoaderResult final {
+    std::shared_ptr<DataHolderInterface> data;
     std::optional<std::string> etag;
     LoaderStatus status;
 
-    VectorTileLoaderResult(std::shared_ptr<VectorTileHolderInterface> data_,
-                           std::optional<std::string> etag_,
-                           LoaderStatus status_)
+    DataLoaderResult(std::shared_ptr<DataHolderInterface> data_,
+                     std::optional<std::string> etag_,
+                     LoaderStatus status_)
     : data(std::move(data_))
     , etag(std::move(etag_))
     , status(std::move(status_))

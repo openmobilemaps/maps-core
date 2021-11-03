@@ -139,8 +139,8 @@ val layerConfig = object : Tiled2dMapLayerConfig() {
 			// Defines to map coordinate system of the layer
 			override fun getCoordinateSystemIdentifier() : String = CoordinateSystemIdentifiers.EPSG3857()
 
-			// Pattern to create a tile identifier used internally 
-			override fun getTileIdentifier(x: Int, y: Int, zoom: Int): String = "OSM_" + zoom + "_" + x + "_" + y
+            // The Layername
+			override fun getLayerName(): String = "OSMLayer"
 
 			// Defines the url-pattern to load tiles. Enter a valid OSM tile server here
 			override fun getTileUrl(x: Int, y: Int, zoom: Int): String = 

@@ -4,7 +4,7 @@
 #import <Foundation/Foundation.h>
 
 
-@protocol MCVectorTileHolderInterface
+@protocol MCDataHolderInterface
 
 - (nonnull NSData *)getData;
 

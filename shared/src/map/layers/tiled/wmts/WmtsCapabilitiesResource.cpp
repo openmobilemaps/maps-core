@@ -28,7 +28,7 @@ public:
         parseDoc();
     };
 
-    std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayer(const std::string & identifier, const std::shared_ptr<::TileLoaderInterface> & tileLoader) override {
+    std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayer(const std::string & identifier, const std::shared_ptr<::LoaderInterface> & tileLoader) override {
 
         for (auto &description : layers) {
 
@@ -155,7 +155,7 @@ private:
         }
     }
 
-    std::shared_ptr< ::Tiled2dMapRasterLayerInterface> createLayer(WmtsLayerDescription &description, const std::shared_ptr< ::TileLoaderInterface> &tileLoader) {
+    std::shared_ptr< ::Tiled2dMapRasterLayerInterface> createLayer(WmtsLayerDescription &description, const std::shared_ptr< ::LoaderInterface> &tileLoader) {
 
         auto matrixSet = matrixSets.at(description.tileMatrixSetLink);
 

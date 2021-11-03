@@ -23,11 +23,11 @@ class Tiled2dMapRasterLayer
         : public Tiled2dMapLayer, public Tiled2dMapRasterLayerInterface {
 public:
     Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
-                          const std::shared_ptr<::TileLoaderInterface> & tileLoader);
+                          const std::shared_ptr<::LoaderInterface> & tileLoader);
 
 
     Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
-                          const std::shared_ptr<::TileLoaderInterface> & tileLoader,
+                          const std::shared_ptr<::LoaderInterface> & tileLoader,
                           const std::shared_ptr<::MaskingObjectInterface> & mask);
 
     virtual void onAdded(const std::shared_ptr<::MapInterface> &mapInterface) override;
@@ -71,7 +71,7 @@ public:
 private:
     std::shared_ptr<::MaskingObjectInterface> mask;
 
-    std::shared_ptr<TileLoaderInterface> textureLoader;
+    std::shared_ptr<LoaderInterface> textureLoader;
     std::shared_ptr<Tiled2dMapRasterSource> rasterSource;
 
     std::recursive_mutex updateMutex;
