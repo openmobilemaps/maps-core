@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "TileLoaderInterface.h"
+#include "LoaderInterface.h"
 #include "Tiled2dMapRasterLayerInterface.h"
 #include <memory>
 #include <string>
@@ -17,7 +17,7 @@ public:
 
     static std::shared_ptr<WmtsCapabilitiesResource> create(const std::string & xml);
 
-    virtual std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayer(const std::string & identifier, const std::shared_ptr<::TileLoaderInterface> & tileLoader) = 0;
+    virtual std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayer(const std::string & identifier, const std::shared_ptr<::LoaderInterface> & tileLoader) = 0;
 
     virtual std::vector<WmtsLayerDescription> getAllLayers() = 0;
 };

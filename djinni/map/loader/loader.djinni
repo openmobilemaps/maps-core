@@ -13,21 +13,23 @@ loader_status = enum {
 
 texture_loader_result = record {
     data: optional<texture_holder_interface>;
+    etag: optional<string>;
     status: loader_status;
 }
 
-vector_tile_holder_interface = interface +j +o {
+data_holder_interface = interface +j +o {
 	get_data(): binary;
 }
 
-vector_tile_loader_result = record {
-    data: optional<vector_tile_holder_interface>;
+data_loader_result = record {
+    data: optional<data_holder_interface>;
+    etag: optional<string>;
     status: loader_status;
 }
 
-tile_loader_interface = interface +c +j +o {
-    load_texture(url: string): texture_loader_result;
-    load_vector_tile(url: string): vector_tile_loader_result;
+loader_interface = interface +c +j +o {
+    load_texture(url: string, etag: optional<string>): texture_loader_result;
+    load_data(url: string, etag: optional<string>): data_loader_result;
 }
 
 font = record {

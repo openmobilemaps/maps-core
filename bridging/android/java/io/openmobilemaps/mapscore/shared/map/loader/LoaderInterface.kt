@@ -5,13 +5,13 @@ package io.openmobilemaps.mapscore.shared.map.loader
 
 import java.util.concurrent.atomic.AtomicBoolean
 
-abstract class TileLoaderInterface {
+abstract class LoaderInterface {
 
-    abstract fun loadTexture(url: String): TextureLoaderResult
+    abstract fun loadTexture(url: String, etag: String?): TextureLoaderResult
 
-    abstract fun loadVectorTile(url: String): VectorTileLoaderResult
+    abstract fun loadData(url: String, etag: String?): DataLoaderResult
 
-    private class CppProxy : TileLoaderInterface {
+    private class CppProxy : LoaderInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 
@@ -29,16 +29,16 @@ abstract class TileLoaderInterface {
             _djinni_private_destroy()
         }
 
-        override fun loadTexture(url: String): TextureLoaderResult {
+        override fun loadTexture(url: String, etag: String?): TextureLoaderResult {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_loadTexture(this.nativeRef, url)
+            return native_loadTexture(this.nativeRef, url, etag)
         }
-        private external fun native_loadTexture(_nativeRef: Long, url: String): TextureLoaderResult
+        private external fun native_loadTexture(_nativeRef: Long, url: String, etag: String?): TextureLoaderResult
 
-        override fun loadVectorTile(url: String): VectorTileLoaderResult {
+        override fun loadData(url: String, etag: String?): DataLoaderResult {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_loadVectorTile(this.nativeRef, url)
+            return native_loadData(this.nativeRef, url, etag)
         }
-        private external fun native_loadVectorTile(_nativeRef: Long, url: String): VectorTileLoaderResult
+        private external fun native_loadData(_nativeRef: Long, url: String, etag: String?): DataLoaderResult
     }
 }

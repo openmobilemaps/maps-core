@@ -30,6 +30,8 @@ open class MCScheduler: MCSchedulerInterface {
 
     private var outstandingOperations: [String: WeakOperation] = [:]
 
+    public init() { }
+
     public func addTask(_ task: MCTaskInterface?) {
         guard let task = task else { return }
 

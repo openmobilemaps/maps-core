@@ -14,12 +14,10 @@
                                y:(int32_t)y
                             zoom:(int32_t)zoom;
 
-- (nonnull NSString *)getTileIdentifier:(int32_t)x
-                                      y:(int32_t)y
-                                   zoom:(int32_t)zoom;
-
 - (nonnull NSArray<MCTiled2dMapZoomLevelInfo *> *)getZoomLevelInfos;
 
 - (nonnull MCTiled2dMapZoomInfo *)getZoomInfo;
+
+- (nonnull NSString *)getLayerName;
 
 @end

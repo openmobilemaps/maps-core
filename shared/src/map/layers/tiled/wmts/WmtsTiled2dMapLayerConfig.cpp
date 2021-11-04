@@ -48,8 +48,8 @@ std::string WmtsTiled2dMapLayerConfig::getTileUrl(int32_t x, int32_t y, int32_t 
     return urlFormat;
 }
 
-std::string WmtsTiled2dMapLayerConfig::getTileIdentifier(int32_t x, int32_t y, int32_t zoom) {
-    return "<" + description.identifier + "x:" + std::to_string(x) + "y:" + std::to_string(y) + "zoom:" +  std::to_string(zoom) + ">";
+std::string WmtsTiled2dMapLayerConfig::getLayerName() {
+    return description.identifier;
 }
 
 std::vector<Tiled2dMapZoomLevelInfo> WmtsTiled2dMapLayerConfig::getZoomLevelInfos() {

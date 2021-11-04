@@ -26,7 +26,7 @@ public:
 
     virtual std::string getTileUrl(int32_t x, int32_t y, int32_t zoom) override;
 
-    virtual std::string getTileIdentifier(int32_t x, int32_t y, int32_t zoom) override;
+    virtual std::string getLayerName() override;
 
     virtual std::vector<Tiled2dMapZoomLevelInfo> getZoomLevelInfos() override;
 

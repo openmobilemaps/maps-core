@@ -13,7 +13,7 @@ package io.openmobilemaps.mapscore.map.loader
 import android.content.Context
 import android.graphics.BitmapFactory
 import io.openmobilemaps.mapscore.graphics.BitmapTextureHolder
-import io.openmobilemaps.mapscore.graphics.VectorTileHolder
+import io.openmobilemaps.mapscore.graphics.DataHolder
 import io.openmobilemaps.mapscore.map.loader.networking.RefererInterceptor
 import io.openmobilemaps.mapscore.map.loader.networking.RequestUtils
 import io.openmobilemaps.mapscore.map.loader.networking.UserAgentInterceptor
@@ -23,13 +23,17 @@ import java.io.File
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-class TileLoader(
+class DataLoader(
 	private val context: Context,
 	private val cacheDirectory: File,
 	private val cacheSize: Long,
 	private val referer: String,
 	private val userAgent: String? = null
-) : TileLoaderInterface() {
+) : LoaderInterface() {
+
+	companion object {
+		private const val HEADER_NAME_ETAG = "etag"
+	}
 
 	private val okHttpClient = OkHttpClient.Builder()
 		.addInterceptor(UserAgentInterceptor(userAgent ?: RequestUtils.getDefaultUserAgent(context)))
@@ -40,7 +44,7 @@ class TileLoader(
 		.readTimeout(20, TimeUnit.SECONDS)
 		.build()
 
-	override fun loadTexture(url: String): TextureLoaderResult {
+	override fun loadTexture(url: String, etag: String?): TextureLoaderResult {
 		val request = Request.Builder()
 			.url(url)
 			.build()
@@ -50,19 +54,19 @@ class TileLoader(
 				val bytes: ByteArray? = response.body?.bytes()
 				if (response.isSuccessful && bytes != null) {
 					val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size);
-					return@use TextureLoaderResult(BitmapTextureHolder(bitmap), LoaderStatus.OK)
+					return@use TextureLoaderResult(BitmapTextureHolder(bitmap), response.header(HEADER_NAME_ETAG, null), LoaderStatus.OK)
 				} else if (response.code == 404) {
-					return@use TextureLoaderResult(null, LoaderStatus.ERROR_404)
+					return@use TextureLoaderResult(null, null, LoaderStatus.ERROR_404)
 				} else {
-					return@use TextureLoaderResult(null, LoaderStatus.ERROR_OTHER)
+					return@use TextureLoaderResult(null, null, LoaderStatus.ERROR_OTHER)
 				}
 			}
 		} catch (e: Exception) {
-			return TextureLoaderResult(null, LoaderStatus.ERROR_NETWORK)
+			return TextureLoaderResult(null, null, LoaderStatus.ERROR_NETWORK)
 		}
 	}
 
-	override fun loadVectorTile(url: String): VectorTileLoaderResult {
+	override fun loadData(url: String, etag: String?): DataLoaderResult {
 		val request = Request.Builder()
 			.url(url)
 			.build()
@@ -71,15 +75,15 @@ class TileLoader(
 			return okHttpClient.newCall(request).execute().use { response ->
 				val bytes: ByteArray? = response.body?.bytes()
 				if (response.isSuccessful && bytes != null) {
-					return@use VectorTileLoaderResult(VectorTileHolder(bytes), LoaderStatus.OK)
+					return@use DataLoaderResult(DataHolder(bytes), response.header(HEADER_NAME_ETAG, null), LoaderStatus.OK)
 				} else if (response.code == 404) {
-					return@use VectorTileLoaderResult(null, LoaderStatus.ERROR_404)
+					return@use DataLoaderResult(null, null, LoaderStatus.ERROR_404)
 				} else {
-					return@use VectorTileLoaderResult(null, LoaderStatus.ERROR_OTHER)
+					return@use DataLoaderResult(null, null, LoaderStatus.ERROR_OTHER)
 				}
 			}
 		} catch (e: Exception) {
-			return VectorTileLoaderResult(null, LoaderStatus.ERROR_NETWORK)
+			return DataLoaderResult(null, null, LoaderStatus.ERROR_NETWORK)
 		}
 	}
 }

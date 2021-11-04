@@ -11,7 +11,7 @@
 import MapCoreSharedModule
 import UIKit
 
-class VectorDataHolder: MCVectorTileHolderInterface {
+class DataHolder: MCDataHolderInterface {
     private var data: Data
 
     init(data: Data) {
@@ -23,7 +23,8 @@ class VectorDataHolder: MCVectorTileHolderInterface {
     }
 }
 
-open class MCTextureLoader: MCTileLoaderInterface {
+open class MCTextureLoader: MCLoaderInterface {
+
     private let session: URLSession
 
     public init(urlSession: URLSession? = nil) {
@@ -37,7 +38,7 @@ open class MCTextureLoader: MCTileLoaderInterface {
         }
     }
 
-    public func loadVectorTile(_ url: String) -> MCVectorTileLoaderResult {
+    public func loadTexture(_ url: String, etag: String?) -> MCTextureLoaderResult {
         let urlString = url
         guard let url = URL(string: urlString) else {
             preconditionFailure("invalid url: \(urlString)")
@@ -64,71 +65,26 @@ open class MCTextureLoader: MCTileLoaderInterface {
         semaphore.wait()
 
         if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorTimedOut {
-            return .init(data: nil, status: .ERROR_TIMEOUT)
+            return .init(data: nil, etag: response?.etag, status: .ERROR_TIMEOUT)
         }
 
         if response?.statusCode == 404 {
-            return .init(data: nil, status: .ERROR_404)
+            return .init(data: nil, etag: response?.etag, status: .ERROR_404)
         } else if response?.statusCode == 400 {
-            return .init(data: nil, status: .ERROR_400)
+            return .init(data: nil, etag: response?.etag, status: .ERROR_400)
         } else if response?.statusCode != 200 {
-            return .init(data: nil, status: .ERROR_NETWORK)
+            return .init(data: nil, etag: response?.etag, status: .ERROR_NETWORK)
         }
 
         guard let data = result else {
-            return .init(data: nil, status: .ERROR_OTHER)
-        }
-
-        return .init(data: VectorDataHolder(data: data), status: .OK)
-    }
-
-    public func loadTexture(_ url: String) -> MCTextureLoaderResult {
-        let urlString = url
-        guard let url = URL(string: urlString) else {
-            preconditionFailure("invalid url: \(urlString)")
-        }
-
-        let semaphore = DispatchSemaphore(value: 0)
-
-        var result: Data?
-        var response: HTTPURLResponse?
-        var error: NSError?
-
-        var urlRequest = URLRequest(url: url)
-
-        modifyUrlRequest(request: &urlRequest)
-
-        let task = session.dataTask(with: urlRequest) { data, response_, error_ in
-            result = data
-            response = response_ as? HTTPURLResponse
-            error = error_ as NSError?
-            semaphore.signal()
-        }
-
-        task.resume()
-        semaphore.wait()
-
-        if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorTimedOut {
-            return .init(data: nil, status: .ERROR_TIMEOUT)
-        }
-
-        if response?.statusCode == 404 {
-            return .init(data: nil, status: .ERROR_404)
-        } else if response?.statusCode == 400 {
-            return .init(data: nil, status: .ERROR_400)
-        } else if response?.statusCode != 200 {
-            return .init(data: nil, status: .ERROR_NETWORK)
-        }
-
-        guard let data = result else {
-            return .init(data: nil, status: .ERROR_OTHER)
+            return .init(data: nil, etag: response?.etag, status: .ERROR_OTHER)
         }
 
         guard let textureHolder = try? TextureHolder(data) else {
             // If metal can not load this image
             // try workaround to first load it into UIImage context
             guard let uiImage = UIImage(data: data) else {
-                return .init(data: nil, status: .ERROR_OTHER)
+                return .init(data: nil, etag: response?.etag, status: .ERROR_OTHER)
             }
 
             let renderer = UIGraphicsImageRenderer(size: uiImage.size)
@@ -138,13 +94,73 @@ open class MCTextureLoader: MCTileLoaderInterface {
 
             guard let cgImage = img.cgImage,
                   let textureHolder = try? TextureHolder(cgImage) else {
-                return .init(data: nil, status: .ERROR_OTHER)
+                return .init(data: nil, etag: response?.etag, status: .ERROR_OTHER)
             }
 
-            return .init(data: textureHolder, status: .OK)
+            return .init(data: textureHolder, etag: response?.etag, status: .OK)
         }
-        return .init(data: textureHolder, status: .OK)
+        return .init(data: textureHolder, etag: response?.etag, status: .OK)
+
+    }
+
+    public func loadData(_ url: String, etag: String?) -> MCDataLoaderResult {
+        let urlString = url
+        guard let url = URL(string: urlString) else {
+            preconditionFailure("invalid url: \(urlString)")
+        }
+
+        let semaphore = DispatchSemaphore(value: 0)
+
+        var result: Data?
+        var response: HTTPURLResponse?
+        var error: NSError?
+
+        var urlRequest = URLRequest(url: url)
+
+        modifyUrlRequest(request: &urlRequest)
+
+        let task = session.dataTask(with: urlRequest) { data, response_, error_ in
+            result = data
+            response = response_ as? HTTPURLResponse
+            error = error_ as NSError?
+            semaphore.signal()
+        }
+
+        task.resume()
+        semaphore.wait()
+
+
+        if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorTimedOut {
+            return .init(data: nil, etag: response?.etag, status: .ERROR_TIMEOUT)
+        }
+
+        if response?.statusCode == 404 {
+            return .init(data: nil, etag: response?.etag, status: .ERROR_404)
+        } else if response?.statusCode == 400 {
+            return .init(data: nil, etag: response?.etag, status: .ERROR_400)
+        } else if response?.statusCode != 200 {
+            return .init(data: nil, etag: response?.etag, status: .ERROR_NETWORK)
+        }
+
+        guard let data = result else {
+            return .init(data: nil, etag: response?.etag, status: .ERROR_OTHER)
+        }
+
+        return .init(data: DataHolder(data: data), etag: response?.etag, status: .OK)
     }
 
     open func modifyUrlRequest(request _: inout URLRequest) {}
+}
+
+
+extension HTTPURLResponse {
+    var etag: String? {
+        let etag: String?
+        if #available(iOS 13.0, *) {
+            etag = value(forHTTPHeaderField: "ETag")
+        } else {
+            etag = allHeaderFields["ETag"] as? String
+        }
+        return etag
+    }
 }
