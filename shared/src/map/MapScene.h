@@ -14,7 +14,7 @@
 #include "MapInterface.h"
 #include "Scene.h"
 #include <mutex>
-#include <vector>
+#include <map>
 
 class MapScene : public MapInterface, public SceneCallbackInterface, public std::enable_shared_from_this<MapScene> {
   public:
@@ -83,7 +83,7 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public std:
     std::shared_ptr<MapCamera2dInterface> camera;
 
     std::recursive_mutex layersMutex;
-    std::vector<std::shared_ptr<LayerInterface>> layers;
+    std::map<int, std::shared_ptr<LayerInterface>> layers;
 
     std::shared_ptr<TouchHandlerInterface> touchHandler;
 
