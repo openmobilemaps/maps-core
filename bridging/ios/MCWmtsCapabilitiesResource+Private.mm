@@ -8,6 +8,7 @@
 #import "DJIMarshal+Private.h"
 #import "MCLoaderInterface+Private.h"
 #import "MCTiled2dMapRasterLayerInterface+Private.h"
+#import "MCTiled2dMapZoomInfo+Private.h"
 #import "MCWmtsLayerDescription+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -45,6 +46,17 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createLayer(::djinni::String::toCpp(identifier),
                                                                ::djinni_generated::LoaderInterface::toCpp(tileLoader));
+        return ::djinni_generated::Tiled2dMapRasterLayerInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable MCTiled2dMapRasterLayerInterface *)createLayerWithZoomInfo:(nonnull NSString *)identifier
+                                                            tileLoader:(nullable id<MCLoaderInterface>)tileLoader
+                                                              zoomInfo:(nonnull MCTiled2dMapZoomInfo *)zoomInfo {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createLayerWithZoomInfo(::djinni::String::toCpp(identifier),
+                                                                           ::djinni_generated::LoaderInterface::toCpp(tileLoader),
+                                                                           ::djinni_generated::Tiled2dMapZoomInfo::toCpp(zoomInfo));
         return ::djinni_generated::Tiled2dMapRasterLayerInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }

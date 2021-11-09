@@ -9,6 +9,8 @@ abstract class WmtsCapabilitiesResource {
 
     abstract fun createLayer(identifier: String, tileLoader: io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface
 
+    abstract fun createLayerWithZoomInfo(identifier: String, tileLoader: io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface
+
     abstract fun getAllLayers(): ArrayList<WmtsLayerDescription>
 
     companion object {
@@ -41,6 +43,12 @@ abstract class WmtsCapabilitiesResource {
             return native_createLayer(this.nativeRef, identifier, tileLoader)
         }
         private external fun native_createLayer(_nativeRef: Long, identifier: String, tileLoader: io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface
+
+        override fun createLayerWithZoomInfo(identifier: String, tileLoader: io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createLayerWithZoomInfo(this.nativeRef, identifier, tileLoader, zoomInfo)
+        }
+        private external fun native_createLayerWithZoomInfo(_nativeRef: Long, identifier: String, tileLoader: io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface
 
         override fun getAllLayers(): ArrayList<WmtsLayerDescription> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
