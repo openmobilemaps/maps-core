@@ -7,6 +7,7 @@
 #include "LoaderInterface.h"
 #include "MaskingObjectInterface.h"
 #include "Tiled2dMapLayerConfig.h"
+#include <cstdint>
 #include <memory>
 #include <optional>
 
@@ -31,4 +32,12 @@ public:
     virtual void setAlpha(double alpha) = 0;
 
     virtual double getAlpha() = 0;
+
+    virtual void setMinZoomLevelIdentifier(std::optional<int32_t> value) = 0;
+
+    virtual std::optional<int32_t> getMinZoomLevelIdentifier() = 0;
+
+    virtual void setMaxZoomLevelIdentifier(std::optional<int32_t> value) = 0;
+
+    virtual std::optional<int32_t> getMaxZoomLevelIdentifier() = 0;
 };

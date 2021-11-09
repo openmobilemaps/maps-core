@@ -19,6 +19,14 @@ abstract class Tiled2dMapRasterLayerInterface {
 
     abstract fun getAlpha(): Double
 
+    abstract fun setMinZoomLevelIdentifier(value: Int?)
+
+    abstract fun getMinZoomLevelIdentifier(): Int?
+
+    abstract fun setMaxZoomLevelIdentifier(value: Int?)
+
+    abstract fun getMaxZoomLevelIdentifier(): Int?
+
     companion object {
         @JvmStatic
         fun createWithMask(layerConfig: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, loader: io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface, mask: io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface): Tiled2dMapRasterLayerInterface {
@@ -84,6 +92,30 @@ abstract class Tiled2dMapRasterLayerInterface {
             return native_getAlpha(this.nativeRef)
         }
         private external fun native_getAlpha(_nativeRef: Long): Double
+
+        override fun setMinZoomLevelIdentifier(value: Int?) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setMinZoomLevelIdentifier(this.nativeRef, value)
+        }
+        private external fun native_setMinZoomLevelIdentifier(_nativeRef: Long, value: Int?)
+
+        override fun getMinZoomLevelIdentifier(): Int? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getMinZoomLevelIdentifier(this.nativeRef)
+        }
+        private external fun native_getMinZoomLevelIdentifier(_nativeRef: Long): Int?
+
+        override fun setMaxZoomLevelIdentifier(value: Int?) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setMaxZoomLevelIdentifier(this.nativeRef, value)
+        }
+        private external fun native_setMaxZoomLevelIdentifier(_nativeRef: Long, value: Int?)
+
+        override fun getMaxZoomLevelIdentifier(): Int? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getMaxZoomLevelIdentifier(this.nativeRef)
+        }
+        private external fun native_getMaxZoomLevelIdentifier(_nativeRef: Long): Int?
 
         companion object {
             @JvmStatic

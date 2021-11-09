@@ -31,4 +31,12 @@
 
 - (double)getAlpha;
 
+- (void)setMinZoomLevelIdentifier:(nullable NSNumber *)value;
+
+- (nullable NSNumber *)getMinZoomLevelIdentifier;
+
+- (void)setMaxZoomLevelIdentifier:(nullable NSNumber *)value;
+
+- (nullable NSNumber *)getMaxZoomLevelIdentifier;
+
 @end

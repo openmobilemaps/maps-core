@@ -73,6 +73,13 @@ template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::updateCurre
     for (int i = startZoomLayer; i <= targetZoomLayer; i++) {
         const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(i);
 
+        if(minZoomLevelIdentifier.has_value() && zoomLevelInfo.zoomLevelIdentifier < minZoomLevelIdentifier) {
+            continue;
+        }
+        if (maxZoomLevelIdentifier.has_value() && zoomLevelInfo.zoomLevelIdentifier > maxZoomLevelIdentifier) {
+            continue;
+        }
+
         double tileWidth = zoomLevelInfo.tileWidthLayerSystemUnits;
 
         RectCoord layerBounds = zoomLevelInfo.bounds;
@@ -296,4 +303,23 @@ template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::performLoad
 template<class T, class L, class R>
 RectCoord Tiled2dMapSource<T, L, R>::getCurrentViewBounds() {
     return currentViewBounds;
+}
+
+template<class T, class L, class R>
+void Tiled2dMapSource<T, L, R>::setMinZoomLevelIdentifier(std::optional<int32_t> value) {
+    minZoomLevelIdentifier = value;
+}
+template<class T, class L, class R>
+void Tiled2dMapSource<T, L, R>::setMaxZoomLevelIdentifier(std::optional<int32_t> value) {
+    maxZoomLevelIdentifier = value;
+}
+
+template<class T, class L, class R>
+std::optional<int32_t> Tiled2dMapSource<T, L, R>::getMinZoomLevelIdentifier() {
+    return minZoomLevelIdentifier;
+}
+
+template<class T, class L, class R>
+std::optional<int32_t> Tiled2dMapSource<T, L, R>::getMaxZoomLevelIdentifier() {
+    return maxZoomLevelIdentifier;
 }

@@ -13,6 +13,12 @@ tiled_2d_map_raster_layer_interface = interface +c {
     remove_callback_handler();
     set_alpha(alpha: f64);
     get_alpha(): f64;
+
+    set_min_zoom_level_identifier(value: optional<i32>);
+    get_min_zoom_level_identifier(): optional<i32>;
+
+    set_max_zoom_level_identifier(value: optional<i32>);
+    get_max_zoom_level_identifier(): optional<i32>;
 }
 
 tiled_2d_map_raster_layer_callback_interface = interface +c +j +o {
