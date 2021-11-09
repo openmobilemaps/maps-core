@@ -31,6 +31,8 @@ void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapIn
     rasterSource = std::make_shared<Tiled2dMapRasterSource>(mapInterface->getMapConfig(), layerConfig,
                                                             mapInterface->getCoordinateConverterHelper(),
                                                             mapInterface->getScheduler(), textureLoader, shared_from_this());
+    rasterSource->setMinZoomLevelIdentifier(minZoomLevelIdentifier);
+    rasterSource->setMaxZoomLevelIdentifier(maxZoomLevelIdentifier);
     setSourceInterface(rasterSource);
     Tiled2dMapLayer::onAdded(mapInterface);
 
@@ -258,4 +260,28 @@ void Tiled2dMapRasterLayer::setMaskingObject(const std::shared_ptr<::MaskingObje
         }
         mapInterface->invalidate();
     }
+}
+
+void Tiled2dMapRasterLayer::setMinZoomLevelIdentifier(std::optional<int32_t> value) {
+    minZoomLevelIdentifier = value;
+    if (rasterSource)
+        rasterSource->setMinZoomLevelIdentifier(value);
+}
+
+std::optional<int32_t> Tiled2dMapRasterLayer::getMinZoomLevelIdentifier() {
+    if (rasterSource)
+        return rasterSource->getMinZoomLevelIdentifier();
+    return std::nullopt;
+}
+
+void Tiled2dMapRasterLayer::setMaxZoomLevelIdentifier(std::optional<int32_t> value) {
+    maxZoomLevelIdentifier = value;
+    if (rasterSource)
+        rasterSource->setMaxZoomLevelIdentifier(value);
+}
+
+std::optional<int32_t> Tiled2dMapRasterLayer::getMaxZoomLevelIdentifier() {
+    if (rasterSource)
+        return rasterSource->getMaxZoomLevelIdentifier();
+    return std::nullopt;
 }

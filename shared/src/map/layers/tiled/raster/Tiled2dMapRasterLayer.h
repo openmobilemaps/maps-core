@@ -62,6 +62,14 @@ public:
 
     virtual double getAlpha() override;
 
+    virtual void setMinZoomLevelIdentifier(std::optional<int32_t> value) override;
+
+    virtual std::optional<int32_t> getMinZoomLevelIdentifier() override;
+
+    virtual void setMaxZoomLevelIdentifier(std::optional<int32_t> value) override;
+
+    virtual std::optional<int32_t> getMaxZoomLevelIdentifier() override;
+
     bool onClickConfirmed(const Vec2F &posScreen) override;
 
     bool onLongPress(const Vec2F &posScreen) override;
@@ -81,4 +89,7 @@ private:
     std::shared_ptr<Tiled2dMapRasterLayerCallbackInterface> callbackHandler;
 
     double alpha;
+
+    std::optional<int32_t> minZoomLevelIdentifier = std::nullopt;
+    std::optional<int32_t> maxZoomLevelIdentifier = std::nullopt;
 };

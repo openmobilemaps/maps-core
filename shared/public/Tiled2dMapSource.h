@@ -52,6 +52,12 @@ template <class T, class L, class R> class Tiled2dMapSource :
 
     virtual RectCoord getCurrentViewBounds();
 
+    void setMinZoomLevelIdentifier(std::optional<int32_t> value);
+    void setMaxZoomLevelIdentifier(std::optional<int32_t> value);
+
+    std::optional<int32_t> getMinZoomLevelIdentifier();
+    std::optional<int32_t> getMaxZoomLevelIdentifier();
+
   protected:
     virtual L loadTile(Tiled2dMapTileInfo tile) = 0;
 
@@ -66,6 +72,9 @@ template <class T, class L, class R> class Tiled2dMapSource :
 
     std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfos;
     const Tiled2dMapZoomInfo zoomInfo;
+
+    std::optional<int32_t> minZoomLevelIdentifier;
+    std::optional<int32_t> maxZoomLevelIdentifier;
 
     std::recursive_mutex tilesMutex;
     std::unordered_map<Tiled2dMapTileInfo, R> currentTiles;

@@ -3,6 +3,7 @@
 
 #import "MCLoaderInterface.h"
 #import "MCTiled2dMapRasterLayerInterface.h"
+#import "MCTiled2dMapZoomInfo.h"
 #import "MCWmtsLayerDescription.h"
 #import <Foundation/Foundation.h>
 @class MCWmtsCapabilitiesResource;
@@ -14,6 +15,10 @@
 
 - (nullable MCTiled2dMapRasterLayerInterface *)createLayer:(nonnull NSString *)identifier
                                                 tileLoader:(nullable id<MCLoaderInterface>)tileLoader;
+
+- (nullable MCTiled2dMapRasterLayerInterface *)createLayerWithZoomInfo:(nonnull NSString *)identifier
+                                                            tileLoader:(nullable id<MCLoaderInterface>)tileLoader
+                                                              zoomInfo:(nonnull MCTiled2dMapZoomInfo *)zoomInfo;
 
 - (nonnull NSArray<MCWmtsLayerDescription *> *)getAllLayers;
 
