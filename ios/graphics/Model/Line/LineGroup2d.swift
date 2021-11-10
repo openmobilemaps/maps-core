@@ -20,7 +20,7 @@ class LineGroup2d: BaseGraphicsObject {
     private var indicesCount: Int = 0
 
     private var stencilState: MTLDepthStencilState?
-    private var clearStencilState: MTLDepthStencilState?
+    private var maskedStencilState: MTLDepthStencilState?
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         guard let shader = shader as? LineGroupShader else {
@@ -43,7 +43,20 @@ class LineGroup2d: BaseGraphicsObject {
         s.frontFaceStencil = ss
         s.backFaceStencil = ss
 
-        stencilState = MetalContext.current.device.makeDepthStencilState(descriptor: s)
+        maskedStencilState = MetalContext.current.device.makeDepthStencilState(descriptor: s)
+
+        let mss = MTLStencilDescriptor()
+        mss.stencilCompareFunction = .notEqual
+        mss.stencilFailureOperation = .keep
+        mss.depthFailureOperation = .keep
+        mss.depthStencilPassOperation = .invert
+        ss.writeMask = 0xFF
+
+        let ms = MTLDepthStencilDescriptor()
+        ms.frontFaceStencil = mss
+        ms.backFaceStencil = mss
+
+        stencilState = MetalContext.current.device.makeDepthStencilState(descriptor: ms)
     }
 
     override func render(encoder: MTLRenderCommandEncoder,
@@ -64,9 +77,15 @@ class LineGroup2d: BaseGraphicsObject {
         }
 
         // draw call
-        encoder.setDepthStencilState(stencilState)
 
-        encoder.setStencilReferenceValue(0b0000_0001)
+        if isMasked {
+            encoder.setDepthStencilState(maskedStencilState)
+            encoder.setStencilReferenceValue(0b0000_0001)
+        } else {
+            encoder.setDepthStencilState(stencilState)
+            encoder.setStencilReferenceValue(0xFF)
+        }
+
 
         shader.screenPixelAsRealMeterFactor = Float(screenPixelAsRealMeterFactor)
 
