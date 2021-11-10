@@ -110,12 +110,19 @@ template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::updateCurre
 
         for (int x = startTileLeft; x <= maxTileLeft && x < zoomLevelInfo.numTilesX; x++) {
             for (int y = startTileTop; y <= maxTileTop && y < zoomLevelInfo.numTilesY; y++) {
-                Coord tileTopLeft = Coord(layerSystemId, x * tileWidthAdj + boundsLeft, y * tileHeightAdj + boundsTop, 0);
-                Coord tileBottomRight = Coord(layerSystemId, tileTopLeft.x + tileWidthAdj, tileTopLeft.y + tileHeightAdj, 0);
-                RectCoord rect(tileTopLeft, tileBottomRight);
+                Coord minCorner = Coord(layerSystemId, x * tileWidthAdj + boundsLeft, y * tileHeightAdj + boundsTop, 0);
+                Coord maxCorner = Coord(layerSystemId, minCorner.x + tileWidthAdj, minCorner.y + tileHeightAdj, 0);
+                RectCoord rect(Coord(layerSystemId,
+                                     leftToRight ? minCorner.x : maxCorner.x,
+                                     topToBottom ? minCorner.y : maxCorner.y,
+                                     0.0),
+                               Coord(layerSystemId,
+                                     leftToRight ? maxCorner.x : minCorner.x,
+                                     topToBottom ? maxCorner.y : minCorner.y,
+                                     0.0));
 
-                double tileCenterX = tileTopLeft.x + 0.5f * (tileBottomRight.x - tileTopLeft.x);
-                double tileCenterY = tileTopLeft.y + 0.5f * (tileBottomRight.y - tileTopLeft.y);
+                double tileCenterX = minCorner.x + 0.5f * (maxCorner.x - minCorner.x);
+                double tileCenterY = minCorner.y + 0.5f * (maxCorner.y - minCorner.y);
                 double tileCenterDis =
                     std::sqrt(std::pow(tileCenterX - centerVisibleX, 2.0) + std::pow(tileCenterY - centerVisibleY, 2.0));
 

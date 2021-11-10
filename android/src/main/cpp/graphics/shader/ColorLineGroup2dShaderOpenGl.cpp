@@ -117,7 +117,12 @@ std::string  ColorLineGroup2dShaderOpenGl::getVertexShader() {
 
             void main() {
                 float fStyleIndex = mod(vStyleInfo, 256.0);
-                int lineIndex = clamp(int(floor(fStyleIndex + 0.5)), 0, numStyles);
+                int lineIndex = int(floor(fStyleIndex + 0.5));
+                if (lineIndex < 0) {
+                    lineIndex = 0;
+                } else if (lineIndex > numStyles) {
+                    lineIndex = numStyles;
+                }
                 int styleIndexBase = 7 * lineIndex;
                 float width = lineStyles[styleIndexBase];
                 float isScaled = lineStyles[styleIndexBase + 1];
