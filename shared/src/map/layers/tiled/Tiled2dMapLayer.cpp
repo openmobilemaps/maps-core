@@ -20,6 +20,10 @@ void Tiled2dMapLayer::setSourceInterface(const std::shared_ptr<Tiled2dMapSourceI
 
 void Tiled2dMapLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface) {
     this->mapInterface = mapInterface;
+
+    sourceInterface->setMinZoomLevelIdentifier(minZoomLevelIdentifier);
+    sourceInterface->setMaxZoomLevelIdentifier(maxZoomLevelIdentifier);
+
     auto camera = std::dynamic_pointer_cast<MapCamera2dInterface>(mapInterface->getCamera());
     if (camera) {
         camera->addListener(shared_from_this());
@@ -47,3 +51,27 @@ void Tiled2dMapLayer::onRotationChanged(float angle) {
 }
 
 void Tiled2dMapLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) {}
+
+void Tiled2dMapLayer::setMinZoomLevelIdentifier(std::optional<int32_t> value) {
+    minZoomLevelIdentifier = value;
+    if (sourceInterface)
+        sourceInterface->setMinZoomLevelIdentifier(value);
+}
+
+std::optional<int32_t> Tiled2dMapLayer::getMinZoomLevelIdentifier() {
+    if (sourceInterface)
+        return sourceInterface->getMinZoomLevelIdentifier();
+    return std::nullopt;
+}
+
+void Tiled2dMapLayer::setMaxZoomLevelIdentifier(std::optional<int32_t> value) {
+    maxZoomLevelIdentifier = value;
+    if (sourceInterface)
+        sourceInterface->setMaxZoomLevelIdentifier(value);
+}
+
+std::optional<int32_t> Tiled2dMapLayer::getMaxZoomLevelIdentifier() {
+    if (sourceInterface)
+        return sourceInterface->getMaxZoomLevelIdentifier();
+    return std::nullopt;
+}

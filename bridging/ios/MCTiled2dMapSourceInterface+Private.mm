@@ -39,6 +39,32 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setMinZoomLevelIdentifier:(nullable NSNumber *)value {
+    try {
+        _cppRefHandle.get()->setMinZoomLevelIdentifier(::djinni::Optional<std::optional, ::djinni::I32>::toCpp(value));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable NSNumber *)getMinZoomLevelIdentifier {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getMinZoomLevelIdentifier();
+        return ::djinni::Optional<std::optional, ::djinni::I32>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setMaxZoomLevelIdentifier:(nullable NSNumber *)value {
+    try {
+        _cppRefHandle.get()->setMaxZoomLevelIdentifier(::djinni::Optional<std::optional, ::djinni::I32>::toCpp(value));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable NSNumber *)getMaxZoomLevelIdentifier {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getMaxZoomLevelIdentifier();
+        return ::djinni::Optional<std::optional, ::djinni::I32>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 auto Tiled2dMapSourceInterface::toCpp(ObjcType objc) -> CppType

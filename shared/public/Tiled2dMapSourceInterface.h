@@ -4,10 +4,20 @@
 #pragma once
 
 #include "RectCoord.h"
+#include <cstdint>
+#include <optional>
 
 class Tiled2dMapSourceInterface {
 public:
     virtual ~Tiled2dMapSourceInterface() {}
 
     virtual void onVisibleBoundsChanged(const ::RectCoord & visibleBounds, double zoom) = 0;
+
+    virtual void setMinZoomLevelIdentifier(std::optional<int32_t> value) = 0;
+
+    virtual std::optional<int32_t> getMinZoomLevelIdentifier() = 0;
+
+    virtual void setMaxZoomLevelIdentifier(std::optional<int32_t> value) = 0;
+
+    virtual std::optional<int32_t> getMaxZoomLevelIdentifier() = 0;
 };

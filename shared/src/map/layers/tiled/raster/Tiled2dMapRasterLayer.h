@@ -89,7 +89,4 @@ private:
     std::shared_ptr<Tiled2dMapRasterLayerCallbackInterface> callbackHandler;
 
     double alpha;
-
-    std::optional<int32_t> minZoomLevelIdentifier = std::nullopt;
-    std::optional<int32_t> maxZoomLevelIdentifier = std::nullopt;
 };

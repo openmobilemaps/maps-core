@@ -53,10 +53,21 @@ class Tiled2dMapLayer : public LayerInterface,
 
     void onRotationChanged(float angle) override;
 
+    void setMinZoomLevelIdentifier(std::optional<int32_t> value);
+
+    std::optional<int32_t> getMinZoomLevelIdentifier();
+
+    void setMaxZoomLevelIdentifier(std::optional<int32_t> value);
+
+    std::optional<int32_t> getMaxZoomLevelIdentifier();
+
 protected:
     std::shared_ptr<MapInterface> mapInterface;
     const std::shared_ptr<Tiled2dMapLayerConfig> layerConfig;
     std::shared_ptr<Tiled2dMapSourceInterface> sourceInterface;
 
     bool isHidden = false;
+
+    std::optional<int32_t> minZoomLevelIdentifier = std::nullopt;
+    std::optional<int32_t> maxZoomLevelIdentifier = std::nullopt;
 };

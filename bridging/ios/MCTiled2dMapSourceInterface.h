@@ -10,4 +10,12 @@
 - (void)onVisibleBoundsChanged:(nonnull MCRectCoord *)visibleBounds
                           zoom:(double)zoom;
 
+- (void)setMinZoomLevelIdentifier:(nullable NSNumber *)value;
+
+- (nullable NSNumber *)getMinZoomLevelIdentifier;
+
+- (void)setMaxZoomLevelIdentifier:(nullable NSNumber *)value;
+
+- (nullable NSNumber *)getMaxZoomLevelIdentifier;
+
 @end
