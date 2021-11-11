@@ -52,11 +52,11 @@ template <class T, class L, class R> class Tiled2dMapSource :
 
     virtual RectCoord getCurrentViewBounds();
 
-    void setMinZoomLevelIdentifier(std::optional<int32_t> value);
-    void setMaxZoomLevelIdentifier(std::optional<int32_t> value);
+    void setMinZoomLevelIdentifier(std::optional<int32_t> value) override;
+    void setMaxZoomLevelIdentifier(std::optional<int32_t> value) override;
 
-    std::optional<int32_t> getMinZoomLevelIdentifier();
-    std::optional<int32_t> getMaxZoomLevelIdentifier();
+    std::optional<int32_t> getMinZoomLevelIdentifier() override;
+    std::optional<int32_t> getMaxZoomLevelIdentifier() override;
 
   protected:
     virtual L loadTile(Tiled2dMapTileInfo tile) = 0;

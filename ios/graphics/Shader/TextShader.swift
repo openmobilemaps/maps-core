@@ -20,7 +20,7 @@ class TextShader: BaseShader {
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(PipelineKey.textShader)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline.textShader.rawValue)
         }
     }
 

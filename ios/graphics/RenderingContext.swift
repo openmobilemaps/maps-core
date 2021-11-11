@@ -13,11 +13,11 @@ import MapCoreSharedModule
 import Metal
 
 @objc
-class RenderingContext: NSObject {
-    weak var encoder: MTLRenderCommandEncoder?
-    weak var sceneView: MCMapView?
+public class RenderingContext: NSObject {
+    public weak var encoder: MTLRenderCommandEncoder?
+    public weak var sceneView: MCMapView?
 
-    lazy var mask: MTLDepthStencilState? = {
+    public lazy var mask: MTLDepthStencilState? = {
         let descriptor = MTLStencilDescriptor()
         descriptor.stencilCompareFunction = .always
         descriptor.stencilFailureOperation = .keep
@@ -30,7 +30,7 @@ class RenderingContext: NSObject {
         return MetalContext.current.device.makeDepthStencilState(descriptor: depthStencilDescriptor)
     }()
 
-    lazy var polygonMask: MTLDepthStencilState? = {
+    public lazy var polygonMask: MTLDepthStencilState? = {
         let descriptor = MTLStencilDescriptor()
         descriptor.stencilCompareFunction = .always
         descriptor.stencilFailureOperation = .keep
@@ -43,7 +43,7 @@ class RenderingContext: NSObject {
         return MetalContext.current.device.makeDepthStencilState(descriptor: depthStencilDescriptor)
     }()
 
-    var viewportSize: MCVec2I = .init(x: 0, y: 0)
+    public var viewportSize: MCVec2I = .init(x: 0, y: 0)
 
     /// a Quad that fills the whole viewport
     /// this is needed to clear the stencilbuffer
@@ -57,7 +57,7 @@ class RenderingContext: NSObject {
         return quad
     }()
 
-    func clearStencilBuffer() {
+    public func clearStencilBuffer() {
         guard let encoder = encoder else { return }
         stencilClearQuad.render(encoder: encoder,
                                 context: self,
@@ -69,23 +69,23 @@ class RenderingContext: NSObject {
 }
 
 extension RenderingContext: MCRenderingContextInterface {
-    func preRenderStencilMask() {}
+    public func preRenderStencilMask() {}
 
-    func postRenderStencilMask() {
+    public func postRenderStencilMask() {
         clearStencilBuffer()
     }
 
-    func setupDrawFrame() {}
+    public func setupDrawFrame() {}
 
-    func onSurfaceCreated() {}
+    public func onSurfaceCreated() {}
 
-    func setViewportSize(_ newSize: MCVec2I) {
+    public func setViewportSize(_ newSize: MCVec2I) {
         viewportSize = newSize
     }
 
-    func getViewportSize() -> MCVec2I { viewportSize }
+    public func getViewportSize() -> MCVec2I { viewportSize }
 
-    func setBackgroundColor(_ color: MCColor) {
+    public func setBackgroundColor(_ color: MCColor) {
         sceneView?.clearColor = color.metalColor
     }
 }

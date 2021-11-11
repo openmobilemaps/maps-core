@@ -15,22 +15,26 @@ protocol Library {
     associatedtype Value
 }
 
-class StaticMetalLibrary<Key: Hashable & CaseIterable, Value>: Library {
+public class StaticMetalLibrary<Key: Hashable, Value>: Library {
     private var storage: [Key: Value]
 
-    init(_ newInstance: (Key) throws -> Value) rethrows {
+    init(_ allKeys: [Key], _ newInstance: (Key) throws -> Value) rethrows {
         var collector: [Key: Value] = [:]
-        for key in Key.allCases {
+        for key in allKeys {
             collector[key] = try newInstance(key)
         }
         storage = collector
     }
 
-    final func value(_ key: Key) -> Value {
+    public final func register(_ value: Value, for key: Key) {
+        storage[key] = value
+    }
+
+    public final func value(_ key: Key) -> Value {
         storage[key]!
     }
 
-    final subscript(_ key: Key) -> Value {
+    public final subscript(_ key: Key) -> Value {
         value(key)
     }
 }
