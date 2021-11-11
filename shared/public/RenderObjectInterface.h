@@ -15,5 +15,5 @@ public:
 
     virtual bool hasCustomModelMatrix() = 0;
 
-    virtual std::vector<float> getCustomModelMatrix() = 0;
+    virtual std::vector<float> getCustomModelMatrix() const = 0;
 };
