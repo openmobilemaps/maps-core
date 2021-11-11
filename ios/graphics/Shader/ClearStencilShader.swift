@@ -29,7 +29,7 @@ class ClearStencilShader: BaseShader {
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(PipelineKey.clearStencilShader)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline.clearStencilShader.rawValue)
         }
     }
 

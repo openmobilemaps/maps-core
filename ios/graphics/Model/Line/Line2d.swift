@@ -25,7 +25,7 @@ class Line2d: BaseGraphicsObject {
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader
         super.init(device: metalContext.device,
-                   sampler: metalContext.samplerLibrary.value(.magLinear))
+                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue))
     }
 
     private func setupStencilBufferDescriptor() {

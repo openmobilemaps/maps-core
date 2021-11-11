@@ -11,7 +11,7 @@
 import Foundation
 import MapCoreSharedModule
 
-extension MCVec2D {
+public extension MCVec2D {
     var xF: Float {
         Float(x)
     }

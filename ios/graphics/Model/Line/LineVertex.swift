@@ -11,33 +11,33 @@
 import MapCoreSharedModule
 import MetalKit
 
-struct LineVertex: Equatable {
-    var position: SIMD2<Float>
+public struct LineVertex: Equatable {
+    public var position: SIMD2<Float>
 
     /// Line point A
-    var lineA: SIMD2<Float>
+    public var lineA: SIMD2<Float>
 
     /// Line point V
-    var lineB: SIMD2<Float>
+    public var lineB: SIMD2<Float>
 
     /// Width Normal
-    var widthNormal: SIMD2<Float>
+    public var widthNormal: SIMD2<Float>
 
     /// Lenght Normal
-    var lenghtNormal: SIMD2<Float>
+    public var lenghtNormal: SIMD2<Float>
 
-    var stylingIndex: Int32 = 0
+    public var stylingIndex: Int32 = 0
 
-    enum SegmantType: Int32 {
+    public enum SegmantType: Int32 {
         case inner = 0
         case start = 1
         case end = 2
         case singleSegment = 3
     }
 
-    var segmentType: Int32
+    public var segmentType: Int32
 
-    var lenghtPrefix: Float
+    public var lenghtPrefix: Float
 
     /*
                                                   ^
@@ -52,7 +52,7 @@ struct LineVertex: Equatable {
       */
 
     /// Returns the descriptor to use when passed to a metal shader
-    static let descriptor: MTLVertexDescriptor = {
+    public static let descriptor: MTLVertexDescriptor = {
         let vertexDescriptor = MTLVertexDescriptor()
         var offset = 0
         let bufferIndex = 0
@@ -109,7 +109,7 @@ struct LineVertex: Equatable {
         return vertexDescriptor
     }()
 
-    init(x: Float,
+    public init(x: Float,
          y: Float,
          lineA: MCVec2D,
          lineB: MCVec2D,

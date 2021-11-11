@@ -58,7 +58,7 @@ extension MCColor {
                       alpha: Double(a))
     }
 
-    var simdValues: SIMD4<Float> {
+    public var simdValues: SIMD4<Float> {
         SIMD4<Float>(r, g, b, a)
     }
 }

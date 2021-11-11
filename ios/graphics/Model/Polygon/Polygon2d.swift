@@ -27,7 +27,7 @@ class Polygon2d: BaseGraphicsObject {
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader
         super.init(device: metalContext.device,
-                   sampler: metalContext.samplerLibrary.value(.magLinear))
+                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue))
     }
 
     override func render(encoder: MTLRenderCommandEncoder,
