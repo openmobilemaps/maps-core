@@ -16,6 +16,14 @@ class AlphaShader: BaseShader {
     private var alpha: Float = 1.0
     private var pipeline: MTLRenderPipelineState?
 
+    private let buffer: MTLBuffer
+
+    override init() {
+        guard let buffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<Float>.stride, options: []) else { fatalError("Could not create buffer") }
+        self.buffer = buffer
+        buffer.contents().copyMemory(from: &alpha, byteCount: MemoryLayout<Float>.stride)
+    }
+
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
             pipeline = MetalContext.current.pipelineLibrary.value(PipelineKey.alphaShader)
@@ -26,13 +34,14 @@ class AlphaShader: BaseShader {
         guard let pipeline = pipeline else { return }
 
         encoder.setRenderPipelineState(pipeline)
-        encoder.setFragmentBytes(&alpha, length: MemoryLayout<Float>.stride, index: 1)
+        encoder.setFragmentBuffer(buffer, offset: 0, index: 1)
     }
 }
 
 extension AlphaShader: MCAlphaShaderInterface {
     func updateAlpha(_ value: Float) {
         alpha = value
+        buffer.contents().copyMemory(from: &alpha, byteCount: MemoryLayout<Float>.stride)
     }
 
     func asShaderProgram() -> MCShaderProgramInterface? {

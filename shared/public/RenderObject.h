@@ -24,7 +24,7 @@ public:
 
     virtual bool hasCustomModelMatrix() override;
 
-    virtual std::vector<float> getCustomModelMatrix() override;
+    virtual std::vector<float> getCustomModelMatrix() const override;
     
 private:
     std::shared_ptr<GraphicsObjectInterface> graphicsObject;

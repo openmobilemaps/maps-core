@@ -102,6 +102,10 @@ class LineGroup2d: BaseGraphicsObject {
                                       indexBuffer: lineIndicesBuffer,
                                       indexBufferOffset: 0)
 
+        if (!isMasked) {
+            context.clearStencilBuffer()
+        }
+
         encoder.popDebugGroup()
     }
 }
