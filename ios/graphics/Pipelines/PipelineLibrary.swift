@@ -121,7 +121,10 @@ public enum Pipeline: String, CaseIterable {
 public class PipelineLibrary: StaticMetalLibrary<String, MTLRenderPipelineState> {
     init(device: MTLDevice) throws {
         try super.init(Pipeline.allCases.map(\.rawValue)) { (key) -> MTLRenderPipelineState in
-            let pipelineDescriptor = PipelineDescriptorFactory.pipelineDescriptor(pipeline: .init(rawValue: key)!)
+            guard let pipeline = Pipeline(rawValue: key) else {
+                throw LibraryError.invalidKey
+            }
+            let pipelineDescriptor = PipelineDescriptorFactory.pipelineDescriptor(pipeline: pipeline)
             return try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
         }
     }

@@ -15,6 +15,12 @@ protocol Library {
     associatedtype Value
 }
 
+
+enum LibraryError: Error {
+    case invalidKey
+}
+
+
 public class StaticMetalLibrary<Key: Hashable, Value>: Library {
     private var storage: [Key: Value]
 

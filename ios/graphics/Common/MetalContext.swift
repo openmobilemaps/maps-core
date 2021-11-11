@@ -36,7 +36,7 @@ public class MetalContext {
     let textureLoader: MTKTextureLoader
 
     public lazy var pipelineLibrary: PipelineLibrary = try! PipelineLibrary(device: self.device)
-    public lazy var samplerLibrary = SamplerLibrary(device: self.device)
+    public lazy var samplerLibrary: SamplerLibrary = try! SamplerLibrary(device: self.device)
 
     init(device: MTLDevice, commandQueue: MTLCommandQueue, library: MTLLibrary) {
         self.device = device
