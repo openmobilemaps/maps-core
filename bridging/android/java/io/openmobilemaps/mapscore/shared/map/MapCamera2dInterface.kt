@@ -29,13 +29,13 @@ abstract class MapCamera2dInterface {
 
     abstract fun isInBounds(coords: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): Boolean
 
-    abstract fun setPaddingLeft(padding: Float, animated: Boolean)
+    abstract fun setPaddingLeft(padding: Float)
 
-    abstract fun setPaddingRight(padding: Float, animated: Boolean)
+    abstract fun setPaddingRight(padding: Float)
 
-    abstract fun setPaddingTop(padding: Float, animated: Boolean)
+    abstract fun setPaddingTop(padding: Float)
 
-    abstract fun setPaddingBottom(padding: Float, animated: Boolean)
+    abstract fun setPaddingBottom(padding: Float)
 
     abstract fun getVisibleRect(): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord
 
@@ -146,29 +146,29 @@ abstract class MapCamera2dInterface {
         }
         private external fun native_isInBounds(_nativeRef: Long, coords: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): Boolean
 
-        override fun setPaddingLeft(padding: Float, animated: Boolean) {
+        override fun setPaddingLeft(padding: Float) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setPaddingLeft(this.nativeRef, padding, animated)
+            native_setPaddingLeft(this.nativeRef, padding)
         }
-        private external fun native_setPaddingLeft(_nativeRef: Long, padding: Float, animated: Boolean)
+        private external fun native_setPaddingLeft(_nativeRef: Long, padding: Float)
 
-        override fun setPaddingRight(padding: Float, animated: Boolean) {
+        override fun setPaddingRight(padding: Float) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setPaddingRight(this.nativeRef, padding, animated)
+            native_setPaddingRight(this.nativeRef, padding)
         }
-        private external fun native_setPaddingRight(_nativeRef: Long, padding: Float, animated: Boolean)
+        private external fun native_setPaddingRight(_nativeRef: Long, padding: Float)
 
-        override fun setPaddingTop(padding: Float, animated: Boolean) {
+        override fun setPaddingTop(padding: Float) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setPaddingTop(this.nativeRef, padding, animated)
+            native_setPaddingTop(this.nativeRef, padding)
         }
-        private external fun native_setPaddingTop(_nativeRef: Long, padding: Float, animated: Boolean)
+        private external fun native_setPaddingTop(_nativeRef: Long, padding: Float)
 
-        override fun setPaddingBottom(padding: Float, animated: Boolean) {
+        override fun setPaddingBottom(padding: Float) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setPaddingBottom(this.nativeRef, padding, animated)
+            native_setPaddingBottom(this.nativeRef, padding)
         }
-        private external fun native_setPaddingBottom(_nativeRef: Long, padding: Float, animated: Boolean)
+        private external fun native_setPaddingBottom(_nativeRef: Long, padding: Float)
 
         override fun getVisibleRect(): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

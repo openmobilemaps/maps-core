@@ -57,14 +57,32 @@ void MapCamera2d::viewportSizeChanged() {
 
 void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double zoom, bool animated) {
     inertia = std::nullopt;
-    Coord positionMapSystem = getBoundsCorrectedCoords(centerPosition);
+    Coord positionMapSystem = getBoundsCorrectedCoords(adjustCoordForPadding(centerPosition, zoom));
     if (animated) {
-        moveToCenterPosition(positionMapSystem, true);
+        std::lock_guard<std::recursive_mutex> lock(animationMutex);
+        coordAnimation = std::make_shared<CoordAnimation>(DEFAULT_ANIM_LENGTH,
+                                                          getCenterPosition(),
+                                                          positionMapSystem,
+                                                          InterpolatorFunction::Linear,
+                                                          [=](Coord positionMapSystem) {
+                                                              this->centerPosition.x = positionMapSystem.x;
+                                                              this->centerPosition.y = positionMapSystem.y;
+                                                              notifyListeners();
+                                                              mapInterface->invalidate();
+                                                          }, [=] {
+                    this->centerPosition.x = positionMapSystem.x;
+                    this->centerPosition.y = positionMapSystem.y;
+                    notifyListeners();
+                    mapInterface->invalidate();
+                    this->coordAnimation = nullptr;
+                });
+        coordAnimation->start();
         setZoom(zoom, true);
+        mapInterface->invalidate();
     } else {
-        this->zoom = zoom;
         this->centerPosition.x = positionMapSystem.x;
         this->centerPosition.y = positionMapSystem.y;
+        setZoom(zoom, false);
         notifyListeners();
         mapInterface->invalidate();
     }
@@ -72,17 +90,23 @@ void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
 
 void MapCamera2d::moveToCenterPosition(const ::Coord &centerPosition, bool animated) {
     inertia = std::nullopt;
-    Coord positionMapSystem = getBoundsCorrectedCoords(centerPosition);
+    Coord positionMapSystem = getBoundsCorrectedCoords(adjustCoordForPadding(centerPosition, zoom));
     if (animated) {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         coordAnimation = std::make_shared<CoordAnimation>(DEFAULT_ANIM_LENGTH,
-                                                          this->centerPosition,
+                                                          getCenterPosition(),
                                                           positionMapSystem,
-                                                          InterpolatorFunction::EaseIn,
+                                                          InterpolatorFunction::EaseInOut,
                                                           [=](Coord positionMapSystem) {
-                                                              this->moveToCenterPosition(positionMapSystem, false);
+                                                              this->centerPosition.x = positionMapSystem.x;
+                                                              this->centerPosition.y = positionMapSystem.y;
+                                                              notifyListeners();
+                                                              mapInterface->invalidate();
                                                           }, [=] {
-                    this->moveToCenterPosition(positionMapSystem, false);
+                    this->centerPosition.x = positionMapSystem.x;
+                    this->centerPosition.y = positionMapSystem.y;
+                    notifyListeners();
+                    mapInterface->invalidate();
                     this->coordAnimation = nullptr;
                 });
         coordAnimation->start();
@@ -95,7 +119,17 @@ void MapCamera2d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
     }
 }
 
-::Coord MapCamera2d::getCenterPosition() { return centerPosition; }
+::Coord MapCamera2d::getCenterPosition() {
+    Coord center = centerPosition;
+
+    center.y += mapUnitsFromPixels(paddingBottom);
+    center.y -= mapUnitsFromPixels(paddingTop);
+
+    center.x += mapUnitsFromPixels(paddingLeft);
+    center.x -= mapUnitsFromPixels(paddingRight);
+
+    return centerPosition;
+}
 
 void MapCamera2d::setZoom(double zoom, bool animated) {
     if (animated) {
@@ -153,88 +187,20 @@ float MapCamera2d::getRotation() {
     return angle;
 }
 
-void MapCamera2d::setPaddingLeft(float padding, bool animated) {
-    if (animated) {
-        std::lock_guard<std::recursive_mutex> lock(animationMutex);
-        animation = std::make_shared<DoubleAnimation>(DEFAULT_ANIM_LENGTH,
-                                                      this->paddingLeft,
-                                                      padding,
-                                                      InterpolatorFunction::EaseIn,
-                                                      [=](double padding) {
-                                                          this->setPaddingLeft(padding, false);
-                                                      }, [=] {
-                    this->setPaddingLeft(padding, false);
-                    this->animation = nullptr;
-                });
-        animation->start();
-        mapInterface->invalidate();
-    } else {
-        paddingLeft = padding;
-        mapInterface->invalidate();
-    }
+void MapCamera2d::setPaddingLeft(float padding) {
+    paddingLeft = padding;
 }
 
-void MapCamera2d::setPaddingRight(float padding, bool animated) {
-    if (animated) {
-        std::lock_guard<std::recursive_mutex> lock(animationMutex);
-        animation = std::make_shared<DoubleAnimation>(DEFAULT_ANIM_LENGTH,
-                                                      this->paddingRight,
-                                                      padding,
-                                                      InterpolatorFunction::EaseIn,
-                                                      [=](double padding) {
-                                                          this->setPaddingRight(padding, false);
-                                                      }, [=] {
-                    this->setPaddingRight(padding, false);
-                    this->animation = nullptr;
-                });
-        animation->start();
-        mapInterface->invalidate();
-    } else {
-        paddingRight = padding;
-        mapInterface->invalidate();
-    }
+void MapCamera2d::setPaddingRight(float padding) {
+    paddingRight = padding;
 }
 
-void MapCamera2d::setPaddingTop(float padding, bool animated) {
-    if (animated) {
-        std::lock_guard<std::recursive_mutex> lock(animationMutex);
-        animation = std::make_shared<DoubleAnimation>(DEFAULT_ANIM_LENGTH,
-                                                      this->paddingTop,
-                                                      padding,
-                                                      InterpolatorFunction::EaseIn,
-                                                      [=](double padding) {
-                                                          this->setPaddingTop(padding, false);
-                                                      }, [=] {
-                    this->setPaddingTop(padding, false);
-                    this->animation = nullptr;
-                });
-        animation->start();
-        mapInterface->invalidate();
-    } else {
-        paddingTop = padding;
-        mapInterface->invalidate();
-    }
+void MapCamera2d::setPaddingTop(float padding) {
+    paddingTop = padding;
 }
 
-void MapCamera2d::setPaddingBottom(float padding, bool animated) {
-    if (animated) {
-        std::lock_guard<std::recursive_mutex> lock(animationMutex);
-        animation = std::make_shared<DoubleAnimation>(DEFAULT_ANIM_LENGTH,
-                                                      this->paddingBottom,
-                                                      padding,
-                                                      InterpolatorFunction::EaseIn,
-                                                      [=](double padding) {
-                                                          this->setPaddingBottom(padding, false);
-                                                      }, [=] {
-                    this->setPaddingBottom(padding, false);
-                    this->animation = nullptr;
-                });
-        animation->start();
-        mapInterface->invalidate();
-    } else {
-        paddingBottom = padding;
-        mapInterface->invalidate();
-    }
+void MapCamera2d::setPaddingBottom(float padding) {
+    paddingBottom = padding;
 }
 
 void MapCamera2d::addListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) {
@@ -276,8 +242,6 @@ std::vector<float> MapCamera2d::getVpMatrix() {
     Matrix::rotateM(newVpMatrix, 0.0, angle, 0.0, 0.0, 1.0);
 
     Matrix::translateM(newVpMatrix, 0, -renderCoordCenter.x, -renderCoordCenter.y, 0);
-
-    Matrix::translateM(newVpMatrix, 0, (paddingLeft - paddingRight) * zoomFactor, (paddingTop - paddingBottom) * zoomFactor, 0);
 
     return newVpMatrix;
 }
@@ -652,6 +616,18 @@ Coord MapCamera2d::getBoundsCorrectedCoords(const Coord &coords) {
     mapCoords.y = std::clamp(mapCoords.y, minVert, maxVert);
 
     return mapCoords;
+}
+
+Coord MapCamera2d::adjustCoordForPadding(const Coord &coords, double targetZoom) {
+    Coord coordinates = coords;
+
+    coordinates.y -= paddingBottom * screenPixelAsRealMeterFactor * targetZoom;
+    coordinates.y += paddingTop * screenPixelAsRealMeterFactor * targetZoom;
+
+    coordinates.x -= paddingLeft * screenPixelAsRealMeterFactor * targetZoom;
+    coordinates.x += paddingRight * screenPixelAsRealMeterFactor * targetZoom;
+
+    return coordinates;
 }
 
 void MapCamera2d::setRotationEnabled(bool enabled) {

@@ -43,17 +43,13 @@
 
 - (BOOL)isInBounds:(nonnull MCCoord *)coords;
 
-- (void)setPaddingLeft:(float)padding
-              animated:(BOOL)animated;
+- (void)setPaddingLeft:(float)padding;
 
-- (void)setPaddingRight:(float)padding
-               animated:(BOOL)animated;
+- (void)setPaddingRight:(float)padding;
 
-- (void)setPaddingTop:(float)padding
-             animated:(BOOL)animated;
+- (void)setPaddingTop:(float)padding;
 
-- (void)setPaddingBottom:(float)padding
-                animated:(BOOL)animated;
+- (void)setPaddingBottom:(float)padding;
 
 - (nonnull MCRectCoord *)getVisibleRect;
 

@@ -53,13 +53,13 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual bool isInBounds(const ::Coord & coords) override;
 
-    virtual void setPaddingLeft(float padding, bool animated) override;
+    virtual void setPaddingLeft(float padding) override;
 
-    virtual void setPaddingRight(float padding, bool animated) override;
+    virtual void setPaddingRight(float padding) override;
 
-    virtual void setPaddingTop(float padding, bool animated) override;
+    virtual void setPaddingTop(float padding) override;
 
-    virtual void setPaddingBottom(float padding, bool animated) override;
+    virtual void setPaddingBottom(float padding) override;
 
     virtual void addListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) override;
 
@@ -166,6 +166,7 @@ class MapCamera2d : public MapCamera2dInterface,
     std::shared_ptr<AnimationInterface> coordAnimation;
     std::shared_ptr<AnimationInterface> animation;
 
+    Coord adjustCoordForPadding(const Coord &coords, double targetZoom);
     Coord getBoundsCorrectedCoords(const Coord &coords);
 
 };
