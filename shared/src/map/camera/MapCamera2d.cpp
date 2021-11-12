@@ -125,9 +125,13 @@ double MapCamera2d::getZoom() { return zoom; }
 void MapCamera2d::setRotation(float angle, bool animated) {
     double newAngle = (angle > 360 || angle < 0) ? fmod(angle + 360.0, 360.0) : angle;
     if (animated) {
+        double currentAngle = fmod(this->angle, 360.0);
+        if (abs(currentAngle - newAngle) > abs(currentAngle - (newAngle + 360.0))) {
+            newAngle = newAngle + 360.0;
+        }
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         animation = std::make_shared<DoubleAnimation>(DEFAULT_ANIM_LENGTH,
-                                                      this->angle,
+                                                      currentAngle,
                                                       newAngle,
                                                       InterpolatorFunction::Linear,
                                                       [=](double angle) {

@@ -25,24 +25,39 @@ import java.util.concurrent.TimeUnit
 
 class DataLoader(
 	private val context: Context,
-	private val cacheDirectory: File,
-	private val cacheSize: Long,
-	private val referer: String,
-	private val userAgent: String? = null
+	private var cacheDirectory: File,
+	private var cacheSize: Long,
+	private var referrer: String,
+	private var userAgent: String? = null
 ) : LoaderInterface() {
 
 	companion object {
 		private const val HEADER_NAME_ETAG = "etag"
 	}
 
-	private val okHttpClient = OkHttpClient.Builder()
+	private var okHttpClient = createClient()
+
+	fun createClient(): OkHttpClient = OkHttpClient.Builder()
 		.addInterceptor(UserAgentInterceptor(userAgent ?: RequestUtils.getDefaultUserAgent(context)))
-		.addInterceptor(RefererInterceptor(referer))
+		.addInterceptor(RefererInterceptor(referrer))
 		.connectionPool(ConnectionPool(8, 5000L, TimeUnit.MILLISECONDS))
 		.cache(Cache(cacheDirectory, cacheSize))
 		.dispatcher(Dispatcher().apply { maxRequestsPerHost = 8 })
 		.readTimeout(20, TimeUnit.SECONDS)
 		.build()
+
+	fun adjustClientSettings(
+		cacheDirectory: File? = null,
+		cacheSize: Long? = null,
+		referrer: String? = null,
+		userAgent: String? = null
+	) {
+		cacheDirectory?.let { this.cacheDirectory = cacheDirectory }
+		cacheSize?.let { this.cacheSize = cacheSize }
+		referrer?.let { this.referrer = it }
+		userAgent?.let { this.userAgent = it }
+		okHttpClient = createClient();
+	}
 
 	override fun loadTexture(url: String, etag: String?): TextureLoaderResult {
 		val request = Request.Builder()
@@ -54,7 +69,11 @@ class DataLoader(
 				val bytes: ByteArray? = response.body?.bytes()
 				if (response.isSuccessful && bytes != null) {
 					val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size);
-					return@use TextureLoaderResult(BitmapTextureHolder(bitmap), response.header(HEADER_NAME_ETAG, null), LoaderStatus.OK)
+					return@use TextureLoaderResult(
+						BitmapTextureHolder(bitmap),
+						response.header(HEADER_NAME_ETAG, null),
+						LoaderStatus.OK
+					)
 				} else if (response.code == 404) {
 					return@use TextureLoaderResult(null, null, LoaderStatus.ERROR_404)
 				} else {
