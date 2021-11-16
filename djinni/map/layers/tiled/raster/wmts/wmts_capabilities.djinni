@@ -42,6 +42,9 @@ wmts_capabilities_resource = interface +c {
     create_layer(identifier: string, tile_loader: loader_interface): tiled_2d_map_raster_layer_interface;
     create_layer_with_zoom_info(identifier: string, tile_loader: loader_interface, zoom_info: tiled_2d_map_zoom_info): tiled_2d_map_raster_layer_interface;
 
+    create_layer_config(identifier: string): tiled_2d_map_layer_config;
+    create_layer_config_with_zoom_info(identifier: string, zoom_info: tiled_2d_map_zoom_info): tiled_2d_map_layer_config;
+
     get_all_layers(): list<wmts_layer_description>;
 }
 

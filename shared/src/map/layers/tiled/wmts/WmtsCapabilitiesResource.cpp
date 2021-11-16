@@ -29,17 +29,61 @@ public:
     };
 
     std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayer(const std::string & identifier, const std::shared_ptr<::LoaderInterface> & tileLoader) override {
-        Tiled2dMapZoomInfo zoomInfo = Tiled2dMapZoomInfo(1.0, 0);
-        return createLayerWithZoomInfo(identifier, tileLoader, zoomInfo);
+        auto layerConfig = createLayerConfig(identifier);
+        if (!layerConfig) return nullptr;
+        return Tiled2dMapRasterLayerInterface::create(layerConfig, tileLoader);
     };
 
 
 
     std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayerWithZoomInfo(const std::string & identifier, const std::shared_ptr<::LoaderInterface> & tileLoader, const ::Tiled2dMapZoomInfo & zoomInfo) override {
-        if (layers.count(identifier)) {
-            return createLayer(layers.at(identifier), tileLoader, zoomInfo);
+        auto layerConfig = createLayerConfigWithZoomInfo(identifier, zoomInfo);
+        if (!layerConfig) return nullptr;
+        return Tiled2dMapRasterLayerInterface::create(layerConfig, tileLoader);
+    };
+
+
+    std::shared_ptr<::Tiled2dMapLayerConfig> createLayerConfig(const std::string & identifier) override {
+        return createLayerConfigWithZoomInfo(identifier, Tiled2dMapZoomInfo(1.0, 0));
+    };
+
+    std::shared_ptr<::Tiled2dMapLayerConfig> createLayerConfigWithZoomInfo(const std::string & identifier, const ::Tiled2dMapZoomInfo & zoomInfo) override {
+        if (!layers.count(identifier)) { return nullptr; }
+
+        auto description = layers.at(identifier);
+
+        auto matrixSet = matrixSets.at(description.tileMatrixSetLink);
+
+        std::unordered_map<std::string, std::string> dimensions;
+        for (auto &dimension : description.dimensions) {
+            dimensions.insert(std::make_pair(dimension.identifier, dimension.defaultValue));
         }
-        return nullptr;
+        dimensions.insert(std::make_pair("TileMatrixSet", description.tileMatrixSetLink));
+
+        std::vector<::Tiled2dMapZoomLevelInfo>  zoomLevels;
+
+        std::string coordinateSystem = matrixSet.coordinateSystemIdentifier;
+
+        auto bounds = RectCoord(Coord("", 0, 0, 0), Coord("", 0, 0, 0));
+
+        for (auto & matrix : matrixSet.matrices) {
+            int32_t zoomLevelIdentifier = stoi(matrix.identifier);
+            auto topLeft = Coord(coordinateSystem, matrix.topLeftCornerX, matrix.topLeftCornerY, 0);
+
+            double magicNumber = 0.00028; // Each pixel is assumed to be 0.28mm – https://gis.stackexchange.com/a/315989
+            double right = topLeft.x + matrix.scaleDenominator * (double)matrix.tileWidth * (double)matrix.matrixWidth * magicNumber;
+            double bottom = topLeft.y - matrix.scaleDenominator * (double)matrix.tileHeight * (double)matrix.tileWidth * magicNumber;
+            Coord bottomRight = Coord(topLeft.systemIdentifier, right, bottom, 0);
+            RectCoord layerBounds = RectCoord(topLeft, bottomRight);
+
+            double scaledTileWidth = matrix.scaleDenominator * (double)matrix.tileWidth * magicNumber;
+            auto levelInfo = Tiled2dMapZoomLevelInfo(matrix.scaleDenominator, scaledTileWidth, matrix.matrixWidth, matrix.matrixHeight, zoomLevelIdentifier, layerBounds);
+            zoomLevels.push_back(levelInfo);
+
+            bounds = layerBounds;
+        }
+
+        return WmtsTiled2dMapLayerConfigFactory::create(description, zoomLevels, zoomInfo, matrixSet.coordinateSystemIdentifier);
     };
 
 
@@ -157,47 +201,6 @@ private:
         for (auto tileMatrixSet = contents.child("TileMatrixSet"); tileMatrixSet; tileMatrixSet = tileMatrixSet.next_sibling("TileMatrixSet")) {
             parseMatrixSet(tileMatrixSet);
         }
-    }
-
-    std::shared_ptr< ::Tiled2dMapRasterLayerInterface> createLayer(WmtsLayerDescription &description, const std::shared_ptr< ::LoaderInterface> &tileLoader, const ::Tiled2dMapZoomInfo & zoomInfo) {
-
-        auto matrixSet = matrixSets.at(description.tileMatrixSetLink);
-
-        std::unordered_map<std::string, std::string> dimensions;
-        for (auto &dimension : description.dimensions) {
-            dimensions.insert(std::make_pair(dimension.identifier, dimension.defaultValue));
-        }
-        dimensions.insert(std::make_pair("TileMatrixSet", description.tileMatrixSetLink));
-
-        std::vector<::Tiled2dMapZoomLevelInfo>  zoomLevels;
-
-        std::string coordinateSystem = matrixSet.coordinateSystemIdentifier;
-
-        auto bounds = RectCoord(Coord("", 0, 0, 0), Coord("", 0, 0, 0));
-
-        for (auto & matrix : matrixSet.matrices) {
-            int32_t zoomLevelIdentifier = stoi(matrix.identifier);
-            auto topLeft = Coord(coordinateSystem, matrix.topLeftCornerX, matrix.topLeftCornerY, 0);
-
-            double magicNumber = 0.00028; // Each pixel is assumed to be 0.28mm – https://gis.stackexchange.com/a/315989
-            double right = topLeft.x + matrix.scaleDenominator * (double)matrix.tileWidth * (double)matrix.matrixWidth * magicNumber;
-            double bottom = topLeft.y - matrix.scaleDenominator * (double)matrix.tileHeight * (double)matrix.tileWidth * magicNumber;
-            Coord bottomRight = Coord(topLeft.systemIdentifier, right, bottom, 0);
-            RectCoord layerBounds = RectCoord(topLeft, bottomRight);
-
-            double scaledTileWidth = matrix.scaleDenominator * (double)matrix.tileWidth * magicNumber;
-            auto levelInfo = Tiled2dMapZoomLevelInfo(matrix.scaleDenominator, scaledTileWidth, matrix.matrixWidth, matrix.matrixHeight, zoomLevelIdentifier, layerBounds);
-            zoomLevels.push_back(levelInfo);
-
-            bounds = layerBounds;
-        }
-
-
-
-
-        auto layerConfig = WmtsTiled2dMapLayerConfigFactory::create(description, zoomLevels, zoomInfo, matrixSet.coordinateSystemIdentifier);
-        //
-        return Tiled2dMapRasterLayerInterface::create(layerConfig, tileLoader);
     }
 
 };
