@@ -83,7 +83,7 @@ public:
             bounds = layerBounds;
         }
 
-        return WmtsTiled2dMapLayerConfigFactory::create(description, zoomLevels, zoomInfo, matrixSet.coordinateSystemIdentifier);
+        return WmtsTiled2dMapLayerConfigFactory::create(description, zoomLevels, zoomInfo, matrixSet.coordinateSystemIdentifier, matrixSet.identifier);
     };
 
 

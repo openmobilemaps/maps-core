@@ -20,7 +20,8 @@ public:
     WmtsTiled2dMapLayerConfig(const WmtsLayerDescription &description,
                               std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfo,
                               const Tiled2dMapZoomInfo &zoomInfo,
-                              const std::string &coordinateSystemIdentifier);
+                              const std::string & coordinateSystemIdentifier,
+                              const std::string & matrixSetIdentifier);
 
     virtual std::string getCoordinateSystemIdentifier() override;
 
@@ -36,4 +37,5 @@ private:
     std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfo;
     const Tiled2dMapZoomInfo zoomInfo;
     const std::string coordinateSystemIdentifier;
+    const std::string matrixSetIdentifier;
 };

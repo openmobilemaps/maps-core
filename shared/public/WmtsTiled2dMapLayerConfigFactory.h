@@ -16,5 +16,5 @@ class WmtsTiled2dMapLayerConfigFactory {
 public:
     virtual ~WmtsTiled2dMapLayerConfigFactory() {}
 
-    static std::shared_ptr<::Tiled2dMapLayerConfig> create(const WmtsLayerDescription & wmtsLayerConfiguration, const std::vector<::Tiled2dMapZoomLevelInfo> & zoomLevelInfo, const ::Tiled2dMapZoomInfo & zoomInfo, const std::string & coordinateSystemIdentifier);
+    static std::shared_ptr<::Tiled2dMapLayerConfig> create(const WmtsLayerDescription & wmtsLayerConfiguration, const std::vector<::Tiled2dMapZoomLevelInfo> & zoomLevelInfo, const ::Tiled2dMapZoomInfo & zoomInfo, const std::string & coordinateSystemIdentifier, const std::string & matrixSetIdentifier);
 };

@@ -32,6 +32,7 @@ std::string CoordinateSystemIdentifiers::fromCrsIdentifier(const std::string & i
     if (identifier == "urn:ogc:def:crs:EPSG:3857" ||
         identifier == "urn:ogc:def:crs:EPSG::3857" ||
         identifier == "EPSG:3857" ||
+        identifier == "urn:ogc:def:crs:EPSG:6.3:3857" ||
         identifier == "urn:ogc:def:crs:EPSG:6.18.3:3857")
             return EPSG3857();
     if (identifier == "urn:ogc:def:crs:EPSG:4326" ||
@@ -40,6 +41,7 @@ std::string CoordinateSystemIdentifiers::fromCrsIdentifier(const std::string & i
             return EPSG4326();
     if (identifier == "urn:ogc:def:crs:EPSG:2056" ||
         identifier == "urn:ogc:def:crs:EPSG::2056" ||
+        identifier == "urn:ogc:def:crs:EPSG:6.3:2056" ||
         identifier == "EPSG:2056")
             return EPSG2056();
     if (identifier == "urn:ogc:def:crs:EPSG:21781" ||

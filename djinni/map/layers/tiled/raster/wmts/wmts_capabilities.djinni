@@ -49,5 +49,9 @@ wmts_capabilities_resource = interface +c {
 }
 
 wmts_tiled_2d_map_layer_config_factory = interface +c {
-    static create(wmts_layer_configuration: wmts_layer_description, zoom_level_info: list<tiled_2d_map_zoom_level_info>, zoom_info: tiled_2d_map_zoom_info, coordinate_system_identifier: string) : tiled_2d_map_layer_config;
+    static create(wmts_layer_configuration: wmts_layer_description,
+                  zoom_level_info: list<tiled_2d_map_zoom_level_info>,
+                  zoom_info: tiled_2d_map_zoom_info,
+                  coordinate_system_identifier: string,
+                  matrix_set_identifier: string) : tiled_2d_map_layer_config;
 }
