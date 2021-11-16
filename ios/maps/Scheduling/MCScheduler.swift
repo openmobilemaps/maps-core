@@ -30,6 +30,8 @@ open class MCScheduler: MCSchedulerInterface {
 
     private var outstandingOperations: [String: WeakOperation] = [:]
 
+    private var lastCleanup: Date = .distantPast
+
     public init() { }
 
     public func addTask(_ task: MCTaskInterface?) {
@@ -112,10 +114,14 @@ open class MCScheduler: MCSchedulerInterface {
     }
 
     func cleanUpFinishedOutstandingOperations() {
+        guard lastCleanup.timeIntervalSinceNow > 5 else { return }
+        
         outstandingOperations = outstandingOperations.filter {
             guard let operation = $0.value.operation else { return false }
             return !(operation.isCancelled || operation.isFinished)
         }
+
+        lastCleanup = Date()
     }
 }
 
