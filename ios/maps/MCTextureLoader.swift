@@ -11,14 +11,14 @@
 import MapCoreSharedModule
 import UIKit
 
-class DataHolder: MCDataHolderInterface {
+public class DataHolder: MCDataHolderInterface {
     private var data: Data
 
-    init(data: Data) {
+    public init(data: Data) {
         self.data = data
     }
 
-    func getData() -> Data {
+    public func getData() -> Data {
         data
     }
 }
@@ -38,7 +38,7 @@ open class MCTextureLoader: MCLoaderInterface {
         }
     }
 
-    public func loadTexture(_ url: String, etag: String?) -> MCTextureLoaderResult {
+    open func loadTexture(_ url: String, etag: String?) -> MCTextureLoaderResult {
         let urlString = url
         guard let url = URL(string: urlString) else {
             preconditionFailure("invalid url: \(urlString)")
@@ -103,7 +103,7 @@ open class MCTextureLoader: MCLoaderInterface {
 
     }
 
-    public func loadData(_ url: String, etag: String?) -> MCDataLoaderResult {
+    open func loadData(_ url: String, etag: String?) -> MCDataLoaderResult {
         let urlString = url
         guard let url = URL(string: urlString) else {
             preconditionFailure("invalid url: \(urlString)")

@@ -23,7 +23,7 @@ import java.io.File
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-class DataLoader(
+open class DataLoader(
 	private val context: Context,
 	private var cacheDirectory: File,
 	private var cacheSize: Long,
