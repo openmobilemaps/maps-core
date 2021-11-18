@@ -23,6 +23,10 @@
 - (void)moveToCenterPosition:(nonnull MCCoord *)centerPosition
                     animated:(BOOL)animated;
 
+- (void)moveToBoundingBox:(nonnull MCRectCoord *)boundingBox
+                paddingPc:(float)paddingPc
+                 animated:(BOOL)animated;
+
 - (nonnull MCCoord *)getCenterPosition;
 
 - (void)setZoom:(double)zoom

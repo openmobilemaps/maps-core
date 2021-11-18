@@ -119,6 +119,38 @@ void MapCamera2d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
     }
 }
 
+void MapCamera2d::moveToBoundingBox(const RectCoord &boundingBox, float paddingPc, bool animated) {
+    RectCoord mapSystemBBox = conversionHelper->convertRect(mapCoordinateSystem.identifier, boundingBox);
+    float newLeft = boundingBox.topLeft.x + paddingPc * (boundingBox.topLeft.x - boundingBox.bottomRight.x);
+    float newRight = boundingBox.bottomRight.x + paddingPc * (boundingBox.bottomRight.x - boundingBox.topLeft.x);
+    float newTop = boundingBox.topLeft.y + paddingPc * (boundingBox.topLeft.y - boundingBox.bottomRight.y);
+    float newBottom = boundingBox.bottomRight.y + paddingPc * (boundingBox.bottomRight.y - boundingBox.topLeft.y);
+    Vec2F centerAABBox = Vec2F(newLeft + 0.5 * (newRight - newLeft), newTop + 0.5 * (newBottom - newTop));
+
+    Coord targetCenterNotBC = Coord(mapCoordinateSystem.identifier, centerAABBox.x, centerAABBox.y, 0.0);
+
+    Vec2F caTopLeft = Vec2FHelper::rotate(Vec2F(newLeft, newTop), centerAABBox, -angle);
+    Vec2F caTopRight = Vec2FHelper::rotate(Vec2F(newRight, newTop), centerAABBox, -angle);
+    Vec2F caBottomLeft = Vec2FHelper::rotate(Vec2F(newLeft, newBottom), centerAABBox, -angle);
+    Vec2F caBottomRight = Vec2FHelper::rotate(Vec2F(newRight, newBottom), centerAABBox, -angle);
+
+    float caMinX = std::min(std::min(std::min(caTopLeft.x, caTopRight.x), caBottomLeft.x), caBottomRight.x);
+    float caMaxX = std::max(std::max(std::max(caTopLeft.x, caTopRight.x), caBottomLeft.x), caBottomRight.x);
+    float caMinY = std::min(std::min(std::min(caTopLeft.y, caTopRight.y), caBottomLeft.y), caBottomRight.y);
+    float caMaxY = std::max(std::max(std::max(caTopLeft.y, caTopRight.y), caBottomLeft.y), caBottomRight.y);
+
+    float caXSpan = caMaxX - caMinX;
+    float caYSpan = caMaxY - caMinY;
+
+    Vec2I viewSize = mapInterface->getRenderingContext()->getViewportSize();
+
+    double caZoomX = caXSpan / ((viewSize.x - paddingLeft - paddingRight) * screenPixelAsRealMeterFactor);
+    double caZoomY = caYSpan / ((viewSize.y - paddingTop - paddingBottom) * screenPixelAsRealMeterFactor);
+    double targetZoom = std::max(caZoomX, caZoomY);
+
+    moveToCenterPositionZoom(targetCenterNotBC, targetZoom, animated);
+}
+
 ::Coord MapCamera2d::getCenterPosition() {
     Coord center = centerPosition;
 
@@ -533,8 +565,8 @@ bool MapCamera2d::onTwoFingerMoveComplete() {
                                                       angle < ROTATION_LOCKING_ANGLE ? 0 : 360,
                                                       InterpolatorFunction::EaseInOut,
                                                       [=](double angle) {
-            this->angle = angle;
-            mapInterface->invalidate();
+                                                          this->angle = angle;
+                                                          mapInterface->invalidate();
                                                       }, [=] {
                     this->angle = 0;
                     this->animation = nullptr;
