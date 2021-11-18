@@ -16,4 +16,6 @@ class Vec2FHelper {
     static double distance(const ::Vec2F &from, const ::Vec2F &to);
 
     static ::Vec2F midpoint(const ::Vec2F &from, const ::Vec2F &to);
+
+    static ::Vec2F rotate(const ::Vec2F &p, const ::Vec2F &origin, float angleDegree);
 };

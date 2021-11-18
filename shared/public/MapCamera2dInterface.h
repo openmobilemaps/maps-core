@@ -23,6 +23,8 @@ public:
 
     virtual void moveToCenterPosition(const ::Coord & centerPosition, bool animated) = 0;
 
+    virtual void moveToBoundingBox(const ::RectCoord & boundingBox, float paddingPc, bool animated) = 0;
+
     virtual ::Coord getCenterPosition() = 0;
 
     virtual void setZoom(double zoom, bool animated) = 0;

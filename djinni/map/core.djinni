@@ -79,6 +79,7 @@ map_camera_2d_interface = interface +c {
 
     move_to_center_position_zoom(center_position: coord, zoom: f64, animated: bool);
     move_to_center_position(center_position: coord, animated: bool);
+    move_to_bounding_box(bounding_box: rect_coord, padding_pc: f32, animated: bool);
     get_center_position(): coord;
 
     set_zoom(zoom: f64, animated: bool);

@@ -309,10 +309,11 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 				val configsCount = IntArray(1)
 				val configs = arrayOfNulls<EGLConfig>(1)
 				egl.eglChooseConfig(eglDisplay, configSpec, configs, 1, configsCount)
-				Log.e(TAG, "eglChooseConfig failed " + GLUtils.getEGLErrorString(egl.eglGetError()))
 				if (configsCount[0] > 0) {
 					config = configs[0]
 					break
+				} else {
+					Log.e(TAG, "iterative eglChooseConfig step failed " + GLUtils.getEGLErrorString(egl.eglGetError()))
 				}
 			}
 			return config
