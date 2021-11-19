@@ -46,13 +46,14 @@ class CoordinateConversionHelper : public CoordinateConversionHelperInterface {
     virtual Coord convertToRenderSystem(const Coord &coordinate) override;
 
   private:
-
     void addDefaultConverters();
 
     std::unordered_map<std::tuple<std::string, std::string>, std::shared_ptr<CoordinateConverterInterface>> fromToConverterMap;
 
     std::unordered_map<std::tuple<std::string, std::string>, std::vector<std::shared_ptr<CoordinateConverterInterface>>>
         converterHelper;
+
+    std::shared_ptr<CoordinateConverterInterface> renderSystemConverter;
 
     std::string mapCoordinateSystemIdentier;
 
