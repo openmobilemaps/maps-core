@@ -31,8 +31,8 @@ std::shared_ptr <CoordinateConversionHelperInterface> CoordinateConversionHelper
 }
 
 CoordinateConversionHelper::CoordinateConversionHelper(MapCoordinateSystem mapCoordinateSystem)
-        : mapCoordinateSystemIdentier(mapCoordinateSystem.identifier) {
-    registerConverter(std::make_shared<DefaultSystemToRenderConverter>(mapCoordinateSystem));
+        : mapCoordinateSystemIdentier(mapCoordinateSystem.identifier), renderSystemConverter(std::make_shared<DefaultSystemToRenderConverter>(mapCoordinateSystem)) {
+    registerConverter(renderSystemConverter);
     addDefaultConverters();
 }
 
@@ -65,14 +65,19 @@ Coord CoordinateConversionHelper::convert(const std::string &to, const Coord &co
         return coordinate;
     }
 
+    const auto tuple = std::tuple<std::string, std::string>(coordinate.systemIdentifier, to);
+
     // first try if we can directly convert
-    if (fromToConverterMap.count({coordinate.systemIdentifier, to})) {
-        auto const &converter = fromToConverterMap[{coordinate.systemIdentifier, to}];
-        return converter->convert(coordinate);
+    auto c = fromToConverterMap.find(tuple);
+    if(c != fromToConverterMap.end())
+    {
+        return c->second->convert(coordinate);
     }
 
-    if (converterHelper.count({coordinate.systemIdentifier, to}) != 0) {
-        auto const &converterChain = converterHelper[{coordinate.systemIdentifier, to}];
+    auto ch = converterHelper.find(tuple);
+    if(ch != converterHelper.end())
+    {
+        auto const &converterChain = ch->second;
         auto intermediateCoord = coordinate;
         for (auto const &converter : converterChain) {
             intermediateCoord = converter->convert(intermediateCoord);
@@ -92,11 +97,17 @@ RectCoord CoordinateConversionHelper::convertRect(const std::string &to, const R
 }
 
 RectCoord CoordinateConversionHelper::convertRectToRenderSystem(const RectCoord &rect) {
-    return convertRect(CoordinateSystemIdentifiers::RENDERSYSTEM(), rect);
+    auto topLeft = convertToRenderSystem(rect.topLeft);
+    auto bottomRight = convertToRenderSystem(rect.bottomRight);
+    return RectCoord(topLeft, bottomRight);
 }
 
 Coord CoordinateConversionHelper::convertToRenderSystem(const Coord &coordinate) {
-    return convert(CoordinateSystemIdentifiers::RENDERSYSTEM(), coordinate);
+    if(coordinate.systemIdentifier == mapCoordinateSystemIdentier) {
+        return renderSystemConverter->convert(coordinate);
+    } else {
+        return convert(CoordinateSystemIdentifiers::RENDERSYSTEM(), coordinate);
+    }
 }
 
 QuadCoord CoordinateConversionHelper::convertQuad(const std::string &to, const QuadCoord &quad) {
