@@ -17,6 +17,7 @@
 #include "Matrix.h"
 #include "Vec2D.h"
 #include "Vec2FHelper.h"
+#include "Vec2DHelper.h"
 #include "DoubleAnimation.h"
 #include "CoordAnimation.h"
 
@@ -154,11 +155,10 @@ void MapCamera2d::moveToBoundingBox(const RectCoord &boundingBox, float paddingP
 ::Coord MapCamera2d::getCenterPosition() {
     Coord center = centerPosition;
 
-    center.y += mapUnitsFromPixels(paddingBottom);
-    center.y -= mapUnitsFromPixels(paddingTop);
-
-    center.x += mapUnitsFromPixels(paddingLeft);
-    center.x -= mapUnitsFromPixels(paddingRight);
+    Vec2D padVec = Vec2D(0.5 * (paddingLeft - paddingRight), 0.5 * (paddingBottom - paddingTop));
+    Vec2D rotPadVec = Vec2DHelper::rotate(padVec, Vec2D(0.0, 0.0), angle);
+    center.x += rotPadVec.x;
+    center.y += rotPadVec.y;
 
     return centerPosition;
 }
@@ -654,11 +654,11 @@ Coord MapCamera2d::getBoundsCorrectedCoords(const Coord &coords) {
 Coord MapCamera2d::adjustCoordForPadding(const Coord &coords, double targetZoom) {
     Coord coordinates = coords;
 
-    coordinates.y -= paddingBottom * screenPixelAsRealMeterFactor * targetZoom;
-    coordinates.y += paddingTop * screenPixelAsRealMeterFactor * targetZoom;
-
-    coordinates.x -= paddingLeft * screenPixelAsRealMeterFactor * targetZoom;
-    coordinates.x += paddingRight * screenPixelAsRealMeterFactor * targetZoom;
+    Vec2D padVec = Vec2D(0.5 * (paddingRight - paddingLeft) * screenPixelAsRealMeterFactor * targetZoom,
+                         0.5 * (paddingTop - paddingBottom) * screenPixelAsRealMeterFactor * targetZoom);
+    Vec2D rotPadVec = Vec2DHelper::rotate(padVec, Vec2D(0.0, 0.0), angle);
+    coordinates.x += rotPadVec.x;
+    coordinates.y += rotPadVec.y;
 
     return coordinates;
 }
