@@ -35,9 +35,9 @@ open class DataLoader(
 		private const val HEADER_NAME_ETAG = "etag"
 	}
 
-	private var okHttpClient = createClient()
+	private var okHttpClient = initializeClient()
 
-	fun createClient(): OkHttpClient = OkHttpClient.Builder()
+	protected open fun createClient(): OkHttpClient = OkHttpClient.Builder()
 		.addInterceptor(UserAgentInterceptor(userAgent ?: RequestUtils.getDefaultUserAgent(context)))
 		.addInterceptor(RefererInterceptor(referrer))
 		.connectionPool(ConnectionPool(8, 5000L, TimeUnit.MILLISECONDS))
@@ -56,7 +56,7 @@ open class DataLoader(
 		cacheSize?.let { this.cacheSize = cacheSize }
 		referrer?.let { this.referrer = it }
 		userAgent?.let { this.userAgent = it }
-		okHttpClient = createClient();
+		okHttpClient = createClient()
 	}
 
 	override fun loadTexture(url: String, etag: String?): TextureLoaderResult {
@@ -68,7 +68,7 @@ open class DataLoader(
 			return okHttpClient.newCall(request).execute().use { response ->
 				val bytes: ByteArray? = response.body?.bytes()
 				if (response.isSuccessful && bytes != null) {
-					val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size);
+					val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
 					return@use TextureLoaderResult(
 						BitmapTextureHolder(bitmap),
 						response.header(HEADER_NAME_ETAG, null),
@@ -105,4 +105,6 @@ open class DataLoader(
 			return DataLoaderResult(null, null, LoaderStatus.ERROR_NETWORK)
 		}
 	}
+
+	private fun initializeClient() = createClient()
 }
