@@ -56,14 +56,15 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dIn
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1moveToBoundingBox(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRectCoord::JniType j_boundingBox, jfloat j_paddingPc, jboolean j_animated)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1moveToBoundingBox(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRectCoord::JniType j_boundingBox, jfloat j_paddingPc, jboolean j_animated, jobject j_maxZoom)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
         ref->moveToBoundingBox(::djinni_generated::NativeRectCoord::toCpp(jniEnv, j_boundingBox),
                                ::djinni::F32::toCpp(jniEnv, j_paddingPc),
-                               ::djinni::Bool::toCpp(jniEnv, j_animated));
+                               ::djinni::Bool::toCpp(jniEnv, j_animated),
+                               ::djinni::Optional<std::optional, ::djinni::F64>::toCpp(jniEnv, j_maxZoom));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

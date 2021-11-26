@@ -9,6 +9,7 @@
 #include "RectCoord.h"
 #include "Vec2F.h"
 #include <memory>
+#include <optional>
 #include <vector>
 
 class MapInterface;
@@ -23,7 +24,7 @@ public:
 
     virtual void moveToCenterPosition(const ::Coord & centerPosition, bool animated) = 0;
 
-    virtual void moveToBoundingBox(const ::RectCoord & boundingBox, float paddingPc, bool animated) = 0;
+    virtual void moveToBoundingBox(const ::RectCoord & boundingBox, float paddingPc, bool animated, std::optional<double> maxZoom) = 0;
 
     virtual ::Coord getCenterPosition() = 0;
 

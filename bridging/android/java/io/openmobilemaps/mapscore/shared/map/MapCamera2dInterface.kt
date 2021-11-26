@@ -11,7 +11,7 @@ abstract class MapCamera2dInterface {
 
     abstract fun moveToCenterPosition(centerPosition: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, animated: Boolean)
 
-    abstract fun moveToBoundingBox(boundingBox: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, paddingPc: Float, animated: Boolean)
+    abstract fun moveToBoundingBox(boundingBox: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, paddingPc: Float, animated: Boolean, maxZoom: Double?)
 
     abstract fun getCenterPosition(): io.openmobilemaps.mapscore.shared.map.coordinates.Coord
 
@@ -94,11 +94,11 @@ abstract class MapCamera2dInterface {
         }
         private external fun native_moveToCenterPosition(_nativeRef: Long, centerPosition: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, animated: Boolean)
 
-        override fun moveToBoundingBox(boundingBox: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, paddingPc: Float, animated: Boolean) {
+        override fun moveToBoundingBox(boundingBox: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, paddingPc: Float, animated: Boolean, maxZoom: Double?) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_moveToBoundingBox(this.nativeRef, boundingBox, paddingPc, animated)
+            native_moveToBoundingBox(this.nativeRef, boundingBox, paddingPc, animated, maxZoom)
         }
-        private external fun native_moveToBoundingBox(_nativeRef: Long, boundingBox: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, paddingPc: Float, animated: Boolean)
+        private external fun native_moveToBoundingBox(_nativeRef: Long, boundingBox: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, paddingPc: Float, animated: Boolean, maxZoom: Double?)
 
         override fun getCenterPosition(): io.openmobilemaps.mapscore.shared.map.coordinates.Coord {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
