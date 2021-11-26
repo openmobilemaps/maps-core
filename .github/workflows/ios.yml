@@ -7,11 +7,11 @@ on:
 jobs:
   build:
 
-    runs-on: macos-latest
+    runs-on: macos-11
 
     steps:
     - uses: actions/checkout@v2
-    - name: Switch to Xcode 12.4
-      run: sudo xcode-select --switch /Applications/Xcode_12.4.app
+    - name: Switch to Xcode 13.1
+      run: sudo xcode-select --switch /Applications/Xcode_13.1.app
     - name: Build
       run: swift build -Xswiftc "-sdk" -Xswiftc "`xcrun --sdk iphonesimulator --show-sdk-path`" -Xswiftc "-target" -Xswiftc "x86_64-apple-ios13.0-simulator"
