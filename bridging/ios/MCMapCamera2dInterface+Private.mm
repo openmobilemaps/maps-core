@@ -65,11 +65,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 
 - (void)moveToBoundingBox:(nonnull MCRectCoord *)boundingBox
                 paddingPc:(float)paddingPc
-                 animated:(BOOL)animated {
+                 animated:(BOOL)animated
+                  maxZoom:(nullable NSNumber *)maxZoom {
     try {
         _cppRefHandle.get()->moveToBoundingBox(::djinni_generated::RectCoord::toCpp(boundingBox),
                                                ::djinni::F32::toCpp(paddingPc),
-                                               ::djinni::Bool::toCpp(animated));
+                                               ::djinni::Bool::toCpp(animated),
+                                               ::djinni::Optional<std::optional, ::djinni::F64>::toCpp(maxZoom));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

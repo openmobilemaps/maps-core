@@ -25,7 +25,8 @@
 
 - (void)moveToBoundingBox:(nonnull MCRectCoord *)boundingBox
                 paddingPc:(float)paddingPc
-                 animated:(BOOL)animated;
+                 animated:(BOOL)animated
+                  maxZoom:(nullable NSNumber *)maxZoom;
 
 - (nonnull MCCoord *)getCenterPosition;
 
