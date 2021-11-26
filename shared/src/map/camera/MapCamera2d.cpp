@@ -149,7 +149,7 @@ void MapCamera2d::moveToBoundingBox(const RectCoord &boundingBox, float paddingP
     double caZoomY = caYSpan / ((viewSize.y - paddingTop - paddingBottom) * screenPixelAsRealMeterFactor);
     double targetZoom = std::max(caZoomX, caZoomY);
     if (maxZoom.has_value()) {
-        targetZoom = std::min(targetZoom, maxZoom.value());
+        targetZoom = std::min(targetZoom, *maxZoom);
     }
 
     moveToCenterPositionZoom(targetCenterNotBC, targetZoom, animated);
