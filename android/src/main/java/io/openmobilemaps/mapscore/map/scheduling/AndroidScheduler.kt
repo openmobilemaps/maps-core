@@ -10,7 +10,6 @@
 
 package io.openmobilemaps.mapscore.map.scheduling
 
-import android.util.Log
 import io.openmobilemaps.mapscore.shared.map.scheduling.*
 import kotlinx.coroutines.*
 import java.util.concurrent.ConcurrentHashMap
@@ -19,7 +18,12 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
-class AndroidScheduler(private val schedulerCallback: AndroidSchedulerCallback) : SchedulerInterface() {
+class AndroidScheduler(
+	private val schedulerCallback: AndroidSchedulerCallback,
+	private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+	private val computationDispatcher: CoroutineDispatcher = Dispatchers.Default,
+	private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
+) : SchedulerInterface() {
 
 	private var isResumed = AtomicBoolean(false)
 	private lateinit var coroutineScope: CoroutineScope
@@ -47,7 +51,7 @@ class AndroidScheduler(private val schedulerCallback: AndroidSchedulerCallback) 
 	private fun handleNewTask(task: TaskInterface) {
 		if (task.getConfig().delay > 0) {
 			val id = task.getConfig().id
-			delayedTaskMap.put(id, coroutineScope.launch(Dispatchers.Default) {
+			delayedTaskMap.put(id, coroutineScope.launch(defaultDispatcher) {
 				delay(task.getConfig().delay)
 				if (isActive) {
 					if (isResumed.get()) {
@@ -65,12 +69,11 @@ class AndroidScheduler(private val schedulerCallback: AndroidSchedulerCallback) 
 	}
 
 	private fun scheduleTask(task: TaskInterface) {
-		//Log.d("SCHEDULE", "schedule: ${task.getConfig().id} on ${task.getConfig().executionEnvironment}")
 		when (task.getConfig().executionEnvironment) {
 			ExecutionEnvironment.GRAPHICS -> schedulerCallback.scheduleOnGlThread(task)
-			ExecutionEnvironment.IO -> coroutineScope.launch(Dispatchers.IO) { task.run() }
-			ExecutionEnvironment.COMPUTATION -> coroutineScope.launch(Dispatchers.Default) { task.run() }
-			else -> coroutineScope.launch(Dispatchers.Default) { task.run() }
+			ExecutionEnvironment.IO -> coroutineScope.launch(ioDispatcher) { task.run() }
+			ExecutionEnvironment.COMPUTATION -> coroutineScope.launch(computationDispatcher) { task.run() }
+			else -> coroutineScope.launch(defaultDispatcher) { task.run() }
 		}
 	}
 
@@ -92,7 +95,6 @@ class AndroidScheduler(private val schedulerCallback: AndroidSchedulerCallback) 
 			val taskQueue = taskQueueMap[priority] ?: return@forEach
 			while (taskQueue.isNotEmpty()) {
 				taskQueue.poll()?.let { it ->
-					//Log.d("SCHEDULE", "on resume execute: ${it.getConfig().id}")
 					handleNewTask(it)
 				}
 			}
