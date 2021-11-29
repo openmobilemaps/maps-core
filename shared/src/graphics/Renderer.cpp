@@ -12,7 +12,6 @@
 #include "Renderer.h"
 #include "Matrix.h"
 #include "CameraInterface.h"
-#include "RenderPassInterface.h"
 #include "RenderObjectInterface.h"
 
 void Renderer::addToRenderQueue(const std::shared_ptr<RenderPassInterface> &renderPass) {
@@ -29,7 +28,7 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
     renderingContext->setupDrawFrame();
 
     while (!renderQueue.empty()) {
-        auto pass = renderQueue.front();
+        auto pass = renderQueue.top();
         const auto &maskObject = pass->getMaskingObject();
         const bool hasMask = maskObject != nullptr;
 
