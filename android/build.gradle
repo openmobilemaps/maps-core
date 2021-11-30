@@ -69,6 +69,14 @@ android {
 			name "mapscore"
 		}
 	}
+
+	buildTypes {
+		release {
+			ndk {
+				debugSymbolLevel 'SYMBOL_TABLE'
+			}
+		}
+	}
 }
 
 task copyHeaders() {
