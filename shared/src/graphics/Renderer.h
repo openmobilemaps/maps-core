@@ -14,6 +14,7 @@
 #include "RenderPassInterface.h"
 #include <queue>
 #include <vector>
+#include <map>
 
 struct RenderPassInterfaceCompare {
     bool operator()(std::shared_ptr<RenderPassInterface> &a,
@@ -31,7 +32,5 @@ class Renderer : public RendererInterface {
                    const std::shared_ptr<CameraInterface> &camera);
 
   private:
-    std::priority_queue<std::shared_ptr<RenderPassInterface>,
-                        std::vector<std::shared_ptr<RenderPassInterface>>,
-                        RenderPassInterfaceCompare> renderQueue;
+    std::map<int32_t, std::vector<std::shared_ptr<RenderPassInterface>>> renderQueue;
 };
