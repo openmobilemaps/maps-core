@@ -15,7 +15,8 @@
 #include "RenderObjectInterface.h"
 
 void Renderer::addToRenderQueue(const std::shared_ptr<RenderPassInterface> &renderPass) {
-    renderQueue.push(renderPass);
+    int32_t renderPassIndex = renderPass->getRenderPassConfig().renderPassIndex;
+    renderQueue[renderPassIndex].push_back(renderPass);
 }
 
 /** Ensure calling on graphics thread */
@@ -27,35 +28,35 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
 
     renderingContext->setupDrawFrame();
 
-    while (!renderQueue.empty()) {
-        auto pass = renderQueue.top();
-        const auto &maskObject = pass->getMaskingObject();
-        const bool hasMask = maskObject != nullptr;
+    for (const auto &[index, passes] : renderQueue) {
+        for (const auto &pass : passes) {
+            const auto &maskObject = pass->getMaskingObject();
+            const bool hasMask = maskObject != nullptr;
 
-        double factor = camera->getScalingFactor();
-        const auto &renderObjects = pass->getRenderObjects();
-        std::vector<float> tempMvpMatrix(16, 0);
+            double factor = camera->getScalingFactor();
+            const auto &renderObjects = pass->getRenderObjects();
+            std::vector<float> tempMvpMatrix(16, 0);
 
-        if (maskObject) {
-            renderingContext->preRenderStencilMask();
-            maskObject->renderAsMask(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, factor);
-        }
+            if (maskObject) {
+                renderingContext->preRenderStencilMask();
+                maskObject->renderAsMask(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, factor);
+            }
 
-        for (const auto &renderObject : renderObjects) {
-            const auto &graphicsObject = renderObject->getGraphicsObject();
-            if (renderObject->hasCustomModelMatrix()) {
-                Matrix::multiplyMMC(tempMvpMatrix, 0, vpMatrix, 0, renderObject->getCustomModelMatrix(), 0);
-                graphicsObject->render(renderingContext, pass->getRenderPassConfig(),
-                               (int64_t) tempMvpMatrix.data(), hasMask, factor);
-            } else {
-                graphicsObject->render(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, hasMask, factor);
+            for (const auto &renderObject : renderObjects) {
+                const auto &graphicsObject = renderObject->getGraphicsObject();
+                if (renderObject->hasCustomModelMatrix()) {
+                    Matrix::multiplyMMC(tempMvpMatrix, 0, vpMatrix, 0, renderObject->getCustomModelMatrix(), 0);
+                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(),
+                                           (int64_t) tempMvpMatrix.data(), hasMask, factor);
+                } else {
+                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, hasMask, factor);
+                }
+            }
+
+            if (maskObject) {
+                renderingContext->postRenderStencilMask();
             }
         }
-
-        if (maskObject) {
-            renderingContext->postRenderStencilMask();
-        }
-
-        renderQueue.pop();
     }
+    renderQueue.clear();
 }
