@@ -37,7 +37,7 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
             const auto &renderObjects = pass->getRenderObjects();
             std::vector<float> tempMvpMatrix(16, 0);
 
-            if (maskObject) {
+            if (hasMask) {
                 renderingContext->preRenderStencilMask();
                 maskObject->renderAsMask(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, factor);
             }
@@ -53,7 +53,7 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
                 }
             }
 
-            if (maskObject) {
+            if (hasMask) {
                 renderingContext->postRenderStencilMask();
             }
         }
