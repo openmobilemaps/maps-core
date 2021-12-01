@@ -173,12 +173,12 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
 
     if (textureLoaded) {
         prepareTextureDraw(openGlContext, mProgram);
-
-        glEnableVertexAttribArray(textureCoordinateHandle);
-        glBindBuffer(GL_ARRAY_BUFFER, textureCoordsBuffer);
-        glVertexAttribPointer(textureCoordinateHandle, 2, GL_FLOAT, false, 0, nullptr);
-        OpenGlHelper::checkGlError("glEnableVertexAttribArray texCoordinate");
     }
+
+    glEnableVertexAttribArray(textureCoordinateHandle);
+    glBindBuffer(GL_ARRAY_BUFFER, textureCoordsBuffer);
+    glVertexAttribPointer(textureCoordinateHandle, 2, GL_FLOAT, false, 0, nullptr);
+    OpenGlHelper::checkGlError("glEnableVertexAttribArray texCoordinate");
 
     shaderProgram->preRender(context);
 
