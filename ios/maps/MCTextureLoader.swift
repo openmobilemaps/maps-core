@@ -54,12 +54,14 @@ open class MCTextureLoader: MCLoaderInterface {
 
         modifyUrlRequest(request: &urlRequest)
 
-        let task = session.dataTask(with: urlRequest) { data, response_, error_ in
+        var task = session.dataTask(with: urlRequest) { data, response_, error_ in
             result = data
             response = response_ as? HTTPURLResponse
             error = error_ as NSError?
             semaphore.signal()
         }
+
+        modifyDataTask(task: &task)
 
         task.resume()
         semaphore.wait()
@@ -119,12 +121,14 @@ open class MCTextureLoader: MCLoaderInterface {
 
         modifyUrlRequest(request: &urlRequest)
 
-        let task = session.dataTask(with: urlRequest) { data, response_, error_ in
+        var task = session.dataTask(with: urlRequest) { data, response_, error_ in
             result = data
             response = response_ as? HTTPURLResponse
             error = error_ as NSError?
             semaphore.signal()
         }
+
+        modifyDataTask(task: &task)
 
         task.resume()
         semaphore.wait()
@@ -150,6 +154,8 @@ open class MCTextureLoader: MCLoaderInterface {
     }
 
     open func modifyUrlRequest(request _: inout URLRequest) {}
+
+    open func modifyDataTask(task _: inout URLSessionDataTask) {}
 }
 
 
