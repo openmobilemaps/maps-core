@@ -30,8 +30,6 @@ open class MCScheduler: MCSchedulerInterface {
 
     private var outstandingOperations: [String: WeakOperation] = [:]
 
-    private var lastCleanup: Date = .distantPast
-
     public init() { }
 
     public func addTask(_ task: MCTaskInterface?) {
@@ -43,7 +41,6 @@ open class MCScheduler: MCSchedulerInterface {
 
         internalSchedulerQueue.asyncAfter(deadline: .now() + delay) { [weak self] in
             guard let self = self else { return }
-            self.cleanUpFinishedOutstandingOperations()
 
             let operation = TaskOperation(task: task, scheduler: self)
 
@@ -59,6 +56,14 @@ open class MCScheduler: MCSchedulerInterface {
             }
 
             self.outstandingOperations[config.id] = .init(operation)
+
+            operation.completionBlock = { [weak self] in
+                guard let self = self else { return }
+                self.internalSchedulerQueue.async { [weak self] in
+                    guard let self = self else { return }
+                    self.outstandingOperations.removeValue(forKey: config.id)
+                }
+            }
 
             switch config.executionEnvironment {
             case .IO:
@@ -76,7 +81,7 @@ open class MCScheduler: MCSchedulerInterface {
     public func removeTask(_ id: String) {
         internalSchedulerQueue.async {
             self.outstandingOperations[id]?.operation?.cancel()
-            self.cleanUpFinishedOutstandingOperations()
+            self.outstandingOperations.removeValue(forKey: id)
         }
     }
 
@@ -85,13 +90,12 @@ open class MCScheduler: MCSchedulerInterface {
             self.outstandingOperations.forEach {
                 $1.operation?.cancel()
             }
-            self.cleanUpFinishedOutstandingOperations()
+            self.outstandingOperations.removeAll()
         }
     }
 
     public func pause() {
         internalSchedulerQueue.async {
-            self.cleanUpFinishedOutstandingOperations()
 
             self.ioQueue.isSuspended = true
 
@@ -103,7 +107,6 @@ open class MCScheduler: MCSchedulerInterface {
 
     public func resume() {
         internalSchedulerQueue.async {
-            self.cleanUpFinishedOutstandingOperations()
 
             self.ioQueue.isSuspended = false
 
@@ -111,17 +114,6 @@ open class MCScheduler: MCSchedulerInterface {
 
             self.graphicsQueue.isSuspended = false
         }
-    }
-
-    func cleanUpFinishedOutstandingOperations() {
-        guard lastCleanup.timeIntervalSinceNow > 5 else { return }
-        
-        outstandingOperations = outstandingOperations.filter {
-            guard let operation = $0.value.operation else { return false }
-            return !(operation.isCancelled || operation.isFinished)
-        }
-
-        lastCleanup = Date()
     }
 }
 
