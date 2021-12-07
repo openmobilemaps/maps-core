@@ -185,15 +185,22 @@ void DefaultTouchHandler::handleTouchUp() {
         #ifdef ENABLE_TOUCH_LOGGING
             LogDebug <<= "TouchHandler: unconfirmed click detected";
         #endif
+        bool clickHandled = false;
         for (auto &listener : listeners) {
             if (listener->onClickUnconfirmed(touchPosition)) {
+                clickHandled = true;
                 break;
             }
         }
-        state = ONE_FINGER_UP_AFTER_CLICK;
-        scheduler->addTask(std::make_shared<LambdaTask>(
-            TaskConfig("DoubleTapTask", DOUBLE_TAP_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
-            [=] { checkState(); }));
+        if (clickHandled) {
+            state = IDLE;
+        } else {
+            state = ONE_FINGER_UP_AFTER_CLICK;
+            scheduler->addTask(std::make_shared<LambdaTask>(
+                TaskConfig("DoubleTapTask", DOUBLE_TAP_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
+                [=] { checkState(); }));
+        }
+
     } else if (state == TWO_FINGER_DOWN && stateTime >= DateHelper::currentTimeMillis() - TWO_FINGER_TOUCH_TIMEOUT) {
         #ifdef ENABLE_TOUCH_LOGGING
             LogDebug <<= "TouchHandler: Two finger click detected";
