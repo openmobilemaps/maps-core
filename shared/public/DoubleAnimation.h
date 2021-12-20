@@ -18,17 +18,24 @@ public:
                     double endValue,
                     InterpolatorFunction interpolatorFunction,
                      std::function<void(double)> onUpdate,
-                    std::optional<std::function<void()>> onFinish = std::nullopt):
-    DefaultAnimator<double>(duration, startValue, endValue, interpolatorFunction, onUpdate, onFinish) {}
+                    std::optional<std::function<void()>> onFinish = std::nullopt,
+                    bool usesDegrees = false):
+    DefaultAnimator<double>(duration, startValue, endValue, interpolatorFunction, onUpdate, onFinish),
+    usesDegrees(usesDegrees){}
 
 
     virtual void update(double adjustedProgress) override {
-
-        double currentValue = startValue + (endValue - startValue) * adjustedProgress;
-
-        onUpdate(currentValue);
-        
+        if (usesDegrees) {
+            double currentValue = startValue + (fmod(fmod(endValue - startValue, 360) + 540, 360) - 180) * adjustedProgress;
+            onUpdate(currentValue);
+        } else {
+            double currentValue = startValue + (endValue - startValue) * adjustedProgress;
+            onUpdate(currentValue);
+        }
     };
+    
+protected:
+    bool usesDegrees;
 };
 
 
