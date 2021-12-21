@@ -159,12 +159,13 @@ void MapCamera2d::moveToBoundingBox(const RectCoord &boundingBox, float paddingP
 ::Coord MapCamera2d::getCenterPosition() {
     Coord center = centerPosition;
 
-    Vec2D padVec = Vec2D(0.5 * (paddingLeft - paddingRight), 0.5 * (paddingBottom - paddingTop));
+    Vec2D padVec = Vec2D(0.5 * (paddingLeft - paddingRight) * screenPixelAsRealMeterFactor * zoom,
+                         0.5 * (paddingBottom - paddingTop) * screenPixelAsRealMeterFactor * zoom);
     Vec2D rotPadVec = Vec2DHelper::rotate(padVec, Vec2D(0.0, 0.0), angle);
     center.x += rotPadVec.x;
     center.y += rotPadVec.y;
 
-    return centerPosition;
+    return center;
 }
 
 void MapCamera2d::setZoom(double zoom, bool animated) {
@@ -197,7 +198,9 @@ void MapCamera2d::setRotation(float angle, bool animated) {
     if (animated) {
         double currentAngle = fmod(this->angle, 360.0);
         if (abs(currentAngle - newAngle) > abs(currentAngle - (newAngle + 360.0))) {
-            newAngle = newAngle + 360.0;
+            newAngle += 360.0;
+        } else if (abs(currentAngle - newAngle) > abs(currentAngle - (newAngle - 360.0))) {
+            newAngle -= 360.0;
         }
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         animation = std::make_shared<DoubleAnimation>(DEFAULT_ANIM_LENGTH,
@@ -213,6 +216,13 @@ void MapCamera2d::setRotation(float angle, bool animated) {
         animation->start();
         mapInterface->invalidate();
     } else {
+        double angleDiff = newAngle - this->angle;
+        Coord centerScreen = centerPosition;
+        Coord realCenter = getCenterPosition();
+        Vec2D rotatedDiff = Vec2DHelper::rotate(Vec2D(centerScreen.x - realCenter.x, centerScreen.y - realCenter.y), Vec2D(0.0, 0.0), angleDiff);
+        centerPosition.x = realCenter.x + rotatedDiff.x;
+        centerPosition.y = realCenter.y + rotatedDiff.y;
+
         this->angle = newAngle;
         notifyListeners();
         mapInterface->invalidate();
