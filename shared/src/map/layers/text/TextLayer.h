@@ -73,6 +73,7 @@ class TextLayer : public TextLayerInterface,
     std::recursive_mutex textMutex;
     std::unordered_map<std::shared_ptr<TextInfoInterface>, std::shared_ptr<TextLayerObject>> texts;
 
+    std::recursive_mutex renderPassMutex;
     std::vector<std::shared_ptr<::RenderPassInterface>> renderPasses;
 
     std::recursive_mutex addingQueueMutex;

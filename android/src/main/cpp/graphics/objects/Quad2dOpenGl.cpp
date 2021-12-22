@@ -17,7 +17,9 @@ Quad2dOpenGl::Quad2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shad
 
 bool Quad2dOpenGl::isReady() { return ready; }
 
-std::shared_ptr<GraphicsObjectInterface> Quad2dOpenGl::asGraphicsObject() { return shared_from_this(); }
+std::shared_ptr<GraphicsObjectInterface> Quad2dOpenGl::asGraphicsObject() {
+    return shared_from_this();
+}
 
 std::shared_ptr<MaskingObjectInterface> Quad2dOpenGl::asMaskingObject() {
     return shared_from_this();

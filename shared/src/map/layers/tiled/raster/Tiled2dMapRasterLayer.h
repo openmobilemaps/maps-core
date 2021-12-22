@@ -84,6 +84,7 @@ private:
 
     std::recursive_mutex updateMutex;
     std::unordered_map<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>> tileObjectMap;
+    std::recursive_mutex renderPassMutex;
     std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
 
     std::shared_ptr<Tiled2dMapRasterLayerCallbackInterface> callbackHandler;

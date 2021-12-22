@@ -87,6 +87,7 @@ class PolygonLayer : public PolygonLayerInterface,
     std::shared_ptr<MaskingObjectInterface> mask = nullptr;
 
     void generateRenderPasses();
+    std::recursive_mutex renderPassMutex;
     std::vector<std::shared_ptr<::RenderPassInterface>> renderPasses;
 
     std::recursive_mutex addingQueueMutex;

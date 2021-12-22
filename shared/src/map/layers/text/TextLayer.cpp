@@ -73,6 +73,7 @@ std::vector<std::shared_ptr<::RenderPassInterface>> TextLayer::buildRenderPasses
     if (isHidden) {
         return {};
     } else {
+        std::lock_guard<std::recursive_mutex> overlayLock(renderPassMutex);
         return renderPasses;
     }
 }
@@ -152,8 +153,10 @@ void TextLayer::clear() {
                 }));
         texts.clear();
     }
-
-    renderPasses.clear();
+    {
+        std::lock_guard<std::recursive_mutex> overlayLock(renderPassMutex);
+        renderPasses.clear();
+    }
     if (mapInterface) {
         mapInterface->invalidate();
     }
@@ -177,7 +180,10 @@ void TextLayer::generateRenderPasses() {
         newRenderPasses.push_back(renderPass);
     }
 
-    renderPasses = newRenderPasses;
+    {
+        std::lock_guard<std::recursive_mutex> overlayLock(renderPassMutex);
+        renderPasses = newRenderPasses;
+    }
 }
 
 
