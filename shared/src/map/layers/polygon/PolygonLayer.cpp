@@ -175,13 +175,17 @@ void PolygonLayer::generateRenderPasses() {
         std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second, mask);
         newRenderPasses.push_back(renderPass);
     }
-    renderPasses = newRenderPasses;
+    {
+        std::lock_guard<std::recursive_mutex> overlayLock(renderPassMutex);
+        renderPasses = newRenderPasses;
+    }
 }
 
 std::vector<std::shared_ptr<::RenderPassInterface>> PolygonLayer::buildRenderPasses() {
     if (isHidden) {
         return {};
     } else {
+        std::lock_guard<std::recursive_mutex> overlayLock(renderPassMutex);
         return renderPasses;
     }
 }

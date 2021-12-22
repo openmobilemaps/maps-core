@@ -194,11 +194,12 @@ std::vector<std::shared_ptr<::RenderPassInterface>> IconLayer::buildRenderPasses
                 }
                 i++;
             }
-        }
 
-        for (auto const &passObjectEntry : renderPassObjectMap) {
-            for (const auto &object: passObjectEntry.second) {
-                currentRenderPassObjectMap[passObjectEntry.first].push_back(object);
+
+            for (auto const &passObjectEntry : renderPassObjectMap) {
+                for (const auto &object: passObjectEntry.second) {
+                    currentRenderPassObjectMap[passObjectEntry.first].push_back(object);
+                }
             }
         }
 

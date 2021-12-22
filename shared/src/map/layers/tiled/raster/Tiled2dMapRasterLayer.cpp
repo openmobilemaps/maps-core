@@ -53,7 +53,11 @@ void Tiled2dMapRasterLayer::update() {
     }
 }
 
-std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapRasterLayer::buildRenderPasses() { return renderPasses; }
+std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapRasterLayer::buildRenderPasses() {
+    //legacyRenderPasses.clear();
+    std::lock_guard<std::recursive_mutex> overlayLock(renderPassMutex);
+    return renderPasses;
+}
 
 void Tiled2dMapRasterLayer::pause() {
     rasterSource->pause();
@@ -146,8 +150,10 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
                     std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second, mask);
             newRenderPasses.push_back(renderPass);
         }
-        renderPasses = newRenderPasses;
-
+        {
+            std::lock_guard<std::recursive_mutex> overlayLock(renderPassMutex);
+            renderPasses = newRenderPasses;
+        }
         //LogDebug <<= "SCHEDULER: prepare scheduling of Tiled2dMapRasterLayer_onTilesUpdated";
         //LogDebug <<= "SCHEDULER: added: " + std::to_string(tilesToAdd.size()) + " - removed: " + std::to_string(tilesToRemove.size());
         std::weak_ptr<Tiled2dMapRasterLayer> selfPtr = std::dynamic_pointer_cast<Tiled2dMapRasterLayer>(shared_from_this());
@@ -210,7 +216,10 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
                 std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second, mask);
         newRenderPasses.push_back(renderPass);
     }
-    renderPasses = newRenderPasses;
+    {
+        std::lock_guard<std::recursive_mutex> overlayLock(renderPassMutex);
+        renderPasses = newRenderPasses;
+    }
 }
 
 void Tiled2dMapRasterLayer::setCallbackHandler(const std::shared_ptr<Tiled2dMapRasterLayerCallbackInterface> &handler) {
