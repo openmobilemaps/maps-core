@@ -61,6 +61,10 @@ lineFragmentShader(LineVertexOut in [[stage_in]],
                    constant float4 &color [[buffer(1)]],
                    constant float &radius [[buffer(2)]])
 {
+    if (color.a == 0) {
+        discard_fragment();
+    }
+
     float2 m = in.lineB - in.lineA;
     float t0 = dot(m, in.uv - in.lineA) / dot(m, m);
     float d;
@@ -137,6 +141,12 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
     half t = half(dot(in.lineA, normalize(in.lineB)) / lineLength);
     half d;
     LineStyling style = styling[in.stylingIndex];
+    
+    float a = style.color.a * style.opacity;
+    if (a == 0) {
+        discard_fragment();
+    }
+
     char capType = style.capType;
     char segmentType = in.segmentType;
     if (t < 0.0 || t > 1.0) {
