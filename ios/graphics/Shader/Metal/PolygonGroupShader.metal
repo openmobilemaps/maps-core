@@ -45,5 +45,10 @@ fragment float4
 polygonGroupFragmentShader(PolygonGroupVertexOut in [[stage_in]],
                         constant PolygonGroupStyling *styling [[buffer(1)]])
 {
-    return styling[in.stylingIndex].color * styling[in.stylingIndex].opacity;
+    PolygonGroupStyling style = styling[in.stylingIndex];
+    float a = style.color.a * style.opacity;
+    if (a == 0) {
+        discard_fragment();
+    }
+    return style.color * style.opacity;
 }
