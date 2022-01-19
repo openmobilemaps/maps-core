@@ -43,6 +43,16 @@ public class RenderingContext: NSObject {
         return MetalContext.current.device.makeDepthStencilState(descriptor: depthStencilDescriptor)
     }()
 
+    public lazy var defaultMask: MTLDepthStencilState? = {
+        let descriptor = MTLStencilDescriptor()
+        descriptor.stencilCompareFunction = .always
+        descriptor.depthStencilPassOperation = .keep
+        let depthStencilDescriptor = MTLDepthStencilDescriptor()
+        depthStencilDescriptor.frontFaceStencil = descriptor
+        depthStencilDescriptor.backFaceStencil = descriptor
+        return MetalContext.current.device.makeDepthStencilState(descriptor: depthStencilDescriptor)
+    }()
+
     public var viewportSize: MCVec2I = .init(x: 0, y: 0)
 
     /// a Quad that fills the whole viewport

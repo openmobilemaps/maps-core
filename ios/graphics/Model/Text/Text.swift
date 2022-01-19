@@ -61,6 +61,8 @@ class Text: BaseGraphicsObject {
             }
             encoder.setDepthStencilState(stencilState)
             encoder.setStencilReferenceValue(0b1000_0000)
+        } else {
+            encoder.setDepthStencilState(context.defaultMask)
         }
 
         encoder.pushDebugGroup("Text")
