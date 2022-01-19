@@ -66,6 +66,8 @@ class Quad2d: BaseGraphicsObject {
             }
             encoder.setDepthStencilState(stencilState)
             encoder.setStencilReferenceValue(0b1000_0000)
+        } else {
+            encoder.setDepthStencilState(context.defaultMask)
         }
 
         shader.setupProgram(context)
