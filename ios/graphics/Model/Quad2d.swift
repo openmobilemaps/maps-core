@@ -26,8 +26,6 @@ class Quad2d: BaseGraphicsObject {
 
     private var stencilState: MTLDepthStencilState?
 
-    private var defaultStencilState: MTLDepthStencilState?
-
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader
         super.init(device: metalContext.device,
@@ -48,16 +46,6 @@ class Quad2d: BaseGraphicsObject {
         s2.backFaceStencil = ss2
 
         stencilState = device.makeDepthStencilState(descriptor: s2)
-    }
-
-    private func setupDefaultStencilStates() {
-        let ss2 = MTLStencilDescriptor()
-        ss2.stencilCompareFunction = .always
-        ss2.depthStencilPassOperation = .keep
-        let s2 = MTLDepthStencilDescriptor()
-        s2.frontFaceStencil = ss2
-        s2.backFaceStencil = ss2
-        defaultStencilState = device.makeDepthStencilState(descriptor: s2)
     }
 
     override func render(encoder: MTLRenderCommandEncoder,
