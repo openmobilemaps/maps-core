@@ -47,6 +47,8 @@ class PolygonLayer : public PolygonLayerInterface,
 
     virtual void setCallbackHandler(const std::shared_ptr<PolygonLayerCallbackInterface> &handler) override;
 
+    virtual void resetSelection() override;
+
     // LayerInterface
     virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) override;
 
@@ -66,8 +68,6 @@ class PolygonLayer : public PolygonLayerInterface,
 
     virtual void show() override;
 
-
-
     //SimpleTouchInterface
     virtual bool onTouchDown(const ::Vec2F &posScreen) override;
 
@@ -83,7 +83,7 @@ class PolygonLayer : public PolygonLayerInterface,
     std::shared_ptr<PolygonLayerCallbackInterface> callbackHandler;
 
     std::recursive_mutex polygonsMutex;
-    std::unordered_map<PolygonInfo, std::shared_ptr<Polygon2dLayerObject>> polygons;
+    std::unordered_map<std::string, std::vector<std::pair<PolygonInfo, std::shared_ptr<Polygon2dLayerObject>>>> polygons;
     std::shared_ptr<MaskingObjectInterface> mask = nullptr;
 
     void generateRenderPasses();
@@ -91,9 +91,10 @@ class PolygonLayer : public PolygonLayerInterface,
     std::vector<std::shared_ptr<::RenderPassInterface>> renderPasses;
 
     std::recursive_mutex addingQueueMutex;
-    std::unordered_set<PolygonInfo> addingQueue;
+    std::vector<PolygonInfo> addingQueue;
 
     std::optional<PolygonInfo> highlightedPolygon;
+    std::optional<PolygonInfo> selectedPolygon;
 
     std::atomic<bool> isHidden;
 };

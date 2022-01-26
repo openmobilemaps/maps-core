@@ -30,4 +30,5 @@ polygon_layer_interface = interface +c {
     clear();
     set_callback_handler(handler: polygon_layer_callback_interface);
     asLayerInterface(): layer_interface;
+    reset_selection();
 }
