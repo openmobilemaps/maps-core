@@ -31,4 +31,6 @@ public:
     virtual void setCallbackHandler(const std::shared_ptr<PolygonLayerCallbackInterface> & handler) = 0;
 
     virtual std::shared_ptr<::LayerInterface> asLayerInterface() = 0;
+
+    virtual void resetSelection() = 0;
 };

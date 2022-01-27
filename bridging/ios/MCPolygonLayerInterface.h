@@ -28,4 +28,6 @@
 
 - (nullable id<MCLayerInterface>)asLayerInterface;
 
+- (void)resetSelection;
+
 @end

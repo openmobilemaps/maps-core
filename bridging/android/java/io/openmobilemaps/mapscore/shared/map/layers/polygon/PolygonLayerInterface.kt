@@ -23,6 +23,8 @@ abstract class PolygonLayerInterface {
 
     abstract fun asLayerInterface(): io.openmobilemaps.mapscore.shared.map.LayerInterface
 
+    abstract fun resetSelection()
+
     companion object {
         @JvmStatic
         fun create(): PolygonLayerInterface {
@@ -95,6 +97,12 @@ abstract class PolygonLayerInterface {
             return native_asLayerInterface(this.nativeRef)
         }
         private external fun native_asLayerInterface(_nativeRef: Long): io.openmobilemaps.mapscore.shared.map.LayerInterface
+
+        override fun resetSelection() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_resetSelection(this.nativeRef)
+        }
+        private external fun native_resetSelection(_nativeRef: Long)
 
         companion object {
             @JvmStatic

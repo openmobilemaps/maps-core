@@ -19,6 +19,8 @@
 #include "RenderObject.h"
 #include <map>
 
+#include "PolygonCompare.h"
+
 PolygonLayer::PolygonLayer()
         : isHidden(false) {}
 
@@ -40,24 +42,34 @@ std::vector<PolygonInfo> PolygonLayer::getPolygons() {
         }
         return polygons;
     }
-    for (auto const &polygon : this->polygons) {
-        polygons.push_back(polygon.first);
+    for (auto const &ps : this->polygons) {
+        for(auto& p : ps.second) {
+            polygons.push_back(p.first);
+        }
     }
+
     return polygons;
 }
 
 void PolygonLayer::remove(const PolygonInfo &polygon) {
+    auto equal = std::equal_to<PolygonInfo>();
+
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
-        addingQueue.erase(polygon);
+        addingQueue.erase(std::remove_if(addingQueue.begin(), addingQueue.end(), [&](const auto& p) { return equal(p, polygon); } ), addingQueue.end());
         return;
     }
     {
         std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
-        for (auto it = polygons.begin(); it != polygons.end(); it++) {
-            if (it->first.identifier == polygon.identifier) {
-                polygons.erase(it);
-                break;
+
+        for (auto pit = polygons.begin(); pit != polygons.end(); pit++) {
+            if(pit->first == polygon.identifier) {
+                for(auto it=pit->second.begin(); it!=pit->second.end(); ++it) {
+                    if(equal(it->first, polygon)) {
+                        pit->second.erase(it);
+                        break;
+                    }
+                }
             }
         }
     }
@@ -77,7 +89,7 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         for (const auto &polygon : polygons) {
-            addingQueue.insert(polygon);
+            addingQueue.push_back(polygon);
         }
         return;
     }
@@ -102,7 +114,7 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
             polygonObject->setColor(polygon.color);
 
             polygonGraphicsObjects.push_back(polygonGraphicsObject);
-            this->polygons[polygon] = polygonObject;
+            this->polygons[polygon.identifier].push_back(std::make_tuple(polygon, polygonObject));
         }
     }
 
@@ -133,7 +145,10 @@ void PolygonLayer::clear() {
     {
         std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
         polygons.clear();
+        highlightedPolygon = std::nullopt;
+        selectedPolygon = std::nullopt;
     }
+
     generateRenderPasses();
     if (mapInterface)
         mapInterface->invalidate();
@@ -142,7 +157,9 @@ void PolygonLayer::clear() {
 void PolygonLayer::pause() {
     std::lock_guard<std::recursive_mutex> overlayLock(polygonsMutex);
     for (const auto &polygon : polygons) {
-        polygon.second->getPolygonObject()->clear();
+        for(auto& p : polygon.second) {
+            p.second->getPolygonObject()->clear();
+        }
     }
     if (mask) {
         if (mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->clear();
@@ -153,7 +170,9 @@ void PolygonLayer::resume() {
     std::lock_guard<std::recursive_mutex> overlayLock(polygonsMutex);
     auto renderingContext = mapInterface->getRenderingContext();
     for (const auto &polygon : polygons) {
-        polygon.second->getPolygonObject()->setup(renderingContext);
+        for(auto& p : polygon.second) {
+            std::get<1>(p)->getPolygonObject()->setup(renderingContext);
+        }
     }
     if (mask) {
         if (!mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(renderingContext);
@@ -165,9 +184,11 @@ std::shared_ptr<::LayerInterface> PolygonLayer::asLayerInterface() { return shar
 void PolygonLayer::generateRenderPasses() {
     std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
     std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
-    for (auto const &polygonTuple : polygons) {
-        for (auto config : polygonTuple.second->getRenderConfig()) {
-            renderPassObjectMap[config->getRenderIndex()].push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
+    for (auto const &p : polygons) {
+        for(auto const &object : p.second) {
+            for (auto config : object.second->getRenderConfig()) {
+                renderPassObjectMap[config->getRenderIndex()].push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
+            }
         }
     }
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
@@ -217,14 +238,46 @@ void PolygonLayer::show() {
         mapInterface->invalidate();
 }
 
+void PolygonLayer::resetSelection() {
+    if(selectedPolygon) {
+        for(auto& p : polygons[selectedPolygon->identifier]) {
+            p.second->setColor(p.first.color);
+        }
+
+        selectedPolygon = std::nullopt;
+
+        if(mapInterface) {
+            mapInterface->invalidate();
+        }
+    }
+}
+
 bool PolygonLayer::onTouchDown(const ::Vec2F &posScreen) {
     auto point = mapInterface->getCamera()->coordFromScreenPosition(posScreen);
 
     std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
     for (auto const &polygon : polygons) {
-        if (PolygonHelper::pointInside(polygon.first, point, mapInterface->getCoordinateConverterHelper())) {
-            polygon.second->setColor(polygon.first.highlightColor);
-            highlightedPolygon = polygon.first;
+        for(auto& p : polygon.second) {
+            if(PolygonHelper::pointInside(p.first, point, mapInterface->getCoordinateConverterHelper())) {
+                highlightedPolygon = p.first;
+                break;
+            }
+        }
+
+        if(highlightedPolygon) {
+            for(auto& p : polygon.second) {
+                p.second->setColor(p.first.highlightColor);
+            }
+
+            if (selectedPolygon && ((*selectedPolygon).identifier != (*highlightedPolygon).identifier)) {
+                for(auto& p : polygons[selectedPolygon->identifier]) {
+                    p.second->setColor(p.first.color);
+
+                }
+
+                selectedPolygon = std::nullopt;
+            }
+
             mapInterface->invalidate();
             return true;
         }
@@ -236,7 +289,9 @@ void PolygonLayer::clearTouch() {
     if (highlightedPolygon) {
         {
             std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
-            polygons[*highlightedPolygon]->setColor(highlightedPolygon->color);
+            for(auto& p : polygons[highlightedPolygon->identifier]) {
+                p.second->setColor(p.first.color);
+            }
         }
 
         highlightedPolygon = std::nullopt;
@@ -246,13 +301,10 @@ void PolygonLayer::clearTouch() {
 
 bool PolygonLayer::onClickUnconfirmed(const ::Vec2F &posScreen) {
     if (highlightedPolygon) {
-        {
-            std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
-            polygons[*highlightedPolygon]->setColor(highlightedPolygon->color);
-        }
+        selectedPolygon = highlightedPolygon;
 
         if (callbackHandler) {
-            callbackHandler->onClickConfirmed(*highlightedPolygon);
+            callbackHandler->onClickConfirmed(*selectedPolygon);
         }
 
         highlightedPolygon = std::nullopt;
@@ -261,7 +313,6 @@ bool PolygonLayer::onClickUnconfirmed(const ::Vec2F &posScreen) {
     }
     return false;
 }
-
 
 void PolygonLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) {
     this->mask = maskingObject;
