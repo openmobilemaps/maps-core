@@ -75,23 +75,26 @@ class PolygonLayer : public PolygonLayerInterface,
 
     virtual void clearTouch() override;
 
-  private:
-    virtual void setupPolygonObjects(const std::vector<std::shared_ptr<Polygon2dInterface>> &polygonGraphicsObjects);
-
+  protected:
     std::shared_ptr<MapInterface> mapInterface;
 
-    std::shared_ptr<PolygonLayerCallbackInterface> callbackHandler;
+    std::recursive_mutex addingQueueMutex;
+    std::vector<PolygonInfo> addingQueue;
 
     std::recursive_mutex polygonsMutex;
     std::unordered_map<std::string, std::vector<std::pair<PolygonInfo, std::shared_ptr<Polygon2dLayerObject>>>> polygons;
+
+  private:
+    virtual void setupPolygonObjects(const std::vector<std::shared_ptr<Polygon2dInterface>> &polygonGraphicsObjects);
+
+    std::shared_ptr<PolygonLayerCallbackInterface> callbackHandler;
+
+
     std::shared_ptr<MaskingObjectInterface> mask = nullptr;
 
     void generateRenderPasses();
     std::recursive_mutex renderPassMutex;
     std::vector<std::shared_ptr<::RenderPassInterface>> renderPasses;
-
-    std::recursive_mutex addingQueueMutex;
-    std::vector<PolygonInfo> addingQueue;
 
     std::optional<PolygonInfo> highlightedPolygon;
     std::optional<PolygonInfo> selectedPolygon;
