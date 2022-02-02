@@ -19,6 +19,7 @@ class Line2d: BaseGraphicsObject {
     private var lineIndicesBuffer: MTLBuffer?
     private var indicesCount: Int = 0
 
+    private var maskStencilState: MTLDepthStencilState?
     private var stencilState: MTLDepthStencilState?
     private var clearStencilState: MTLDepthStencilState?
 
@@ -34,7 +35,7 @@ class Line2d: BaseGraphicsObject {
         ss.stencilFailureOperation = .keep
         ss.depthFailureOperation = .keep
         ss.depthStencilPassOperation = .invert
-        ss.writeMask = 0b0_1111_1111
+        ss.writeMask = 0b0111_1111
 
         let s = MTLDepthStencilDescriptor()
         s.frontFaceStencil = ss
@@ -42,12 +43,25 @@ class Line2d: BaseGraphicsObject {
 
         stencilState = MetalContext.current.device.makeDepthStencilState(descriptor: s)
 
+        let ssMask = MTLStencilDescriptor()
+        ssMask.stencilCompareFunction = .equal
+        ssMask.stencilFailureOperation = .keep
+        ssMask.depthFailureOperation = .keep
+        ssMask.depthStencilPassOperation = .invert
+        ss.writeMask = 0b0111_1111
+
+        let sMask = MTLDepthStencilDescriptor()
+        sMask.frontFaceStencil = ssMask
+        sMask.backFaceStencil = ssMask
+
+        maskStencilState = MetalContext.current.device.makeDepthStencilState(descriptor: sMask)
+
         let ss2 = MTLStencilDescriptor()
         ss2.stencilCompareFunction = .always
         ss2.stencilFailureOperation = .zero
         ss2.depthFailureOperation = .zero
         ss2.depthStencilPassOperation = .zero
-        ss2.writeMask = 0b0_1111_1111
+        ss2.writeMask = 0b0111_1111
 
         let s2 = MTLDepthStencilDescriptor()
         s2.frontFaceStencil = ss2
@@ -60,7 +74,7 @@ class Line2d: BaseGraphicsObject {
                          context: RenderingContext,
                          renderPass _: MCRenderPassConfig,
                          mvpMatrix: Int64,
-                         isMasked _: Bool,
+                         isMasked masked: Bool,
                          screenPixelAsRealMeterFactor: Double)
     {
         guard let lineVerticesBuffer = lineVerticesBuffer,
@@ -72,10 +86,15 @@ class Line2d: BaseGraphicsObject {
             setupStencilBufferDescriptor()
         }
 
-        // draw call
-        encoder.setDepthStencilState(stencilState)
-        encoder.setStencilReferenceValue(0xFF)
-
+        if masked {
+            encoder.setDepthStencilState(maskStencilState)
+            encoder.setStencilReferenceValue(0b1000_0000)
+        } else {
+            // draw call
+            encoder.setDepthStencilState(stencilState)
+            encoder.setStencilReferenceValue(0xFF)
+        }
+        
         (shader as? ColorLineShader)?.screenPixelAsRealMeterFactor = screenPixelAsRealMeterFactor
 
         shader.setupProgram(context)
