@@ -81,7 +81,7 @@ lineFragmentShader(LineVertexOut in [[stage_in]],
         discard_fragment();
     }
 
-    return color;
+    return float4(color.r, color.g, color.b, 1.0) * color.a;
 }
 
 // Line Group
