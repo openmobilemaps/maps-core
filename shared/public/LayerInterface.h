@@ -6,6 +6,7 @@
 #include "MaskingObjectInterface.h"
 #include "RenderPassInterface.h"
 #include <memory>
+#include <optional>
 #include <vector>
 
 class MapInterface;

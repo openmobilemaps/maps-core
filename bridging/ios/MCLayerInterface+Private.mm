@@ -36,7 +36,7 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 
 - (void)setMaskingObject:(nullable id<MCMaskingObjectInterface>)maskingObject {
     try {
-        _cppRefHandle.get()->setMaskingObject(::djinni_generated::MaskingObjectInterface::toCpp(maskingObject));
+        _cppRefHandle.get()->setMaskingObject(::djinni::Optional<std::optional, ::djinni_generated::MaskingObjectInterface>::toCpp(maskingObject));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -101,7 +101,7 @@ public:
     void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & c_maskingObject) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setMaskingObject:(::djinni_generated::MaskingObjectInterface::fromCpp(c_maskingObject))];
+            [djinni_private_get_proxied_objc_object() setMaskingObject:(::djinni::Optional<std::optional, ::djinni_generated::MaskingObjectInterface>::fromCpp(c_maskingObject))];
         }
     }
     void update() override

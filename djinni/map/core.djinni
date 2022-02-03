@@ -63,7 +63,7 @@ map_config = record {
 }
 
 layer_interface = interface +c +j +o {
-    set_masking_object(masking_object: masking_object_interface);
+    set_masking_object(masking_object: optional<masking_object_interface>);
     update();
     build_render_passes(): list<render_pass_interface>;
     onAdded(map_interface: map_interface);

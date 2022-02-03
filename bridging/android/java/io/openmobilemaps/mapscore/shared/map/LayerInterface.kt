@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class LayerInterface {
 
-    abstract fun setMaskingObject(maskingObject: io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface)
+    abstract fun setMaskingObject(maskingObject: io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface?)
 
     abstract fun update()
 
@@ -43,11 +43,11 @@ abstract class LayerInterface {
             _djinni_private_destroy()
         }
 
-        override fun setMaskingObject(maskingObject: io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface) {
+        override fun setMaskingObject(maskingObject: io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface?) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_setMaskingObject(this.nativeRef, maskingObject)
         }
-        private external fun native_setMaskingObject(_nativeRef: Long, maskingObject: io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface)
+        private external fun native_setMaskingObject(_nativeRef: Long, maskingObject: io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface?)
 
         override fun update() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
