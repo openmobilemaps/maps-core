@@ -251,12 +251,16 @@ void MapCamera2d::setPaddingBottom(float padding) {
 
 void MapCamera2d::addListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) {
     std::lock_guard<std::recursive_mutex> lock(listenerMutex);
-    listeners.insert(listener);
+    if (listeners.count(listener) == 0) {
+        listeners.insert(listener);
+    }
 }
 
 void MapCamera2d::removeListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) {
     std::lock_guard<std::recursive_mutex> lock(listenerMutex);
-    listeners.erase(listener);
+    if (listeners.count(listener) > 0) {
+        listeners.erase(listener);
+    }
 }
 
 std::shared_ptr<::CameraInterface> MapCamera2d::asCameraInterface() { return shared_from_this(); }
