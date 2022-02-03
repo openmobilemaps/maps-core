@@ -40,11 +40,3 @@ std::unordered_set<Tiled2dMapRasterTileInfo> Tiled2dMapRasterSource::getCurrentT
     }
     return currentTileInfos;
 }
-
-void Tiled2dMapRasterSource::pause() {
-    // TODO: Stop loading tiles
-}
-
-void Tiled2dMapRasterSource::resume() {
-    // TODO: Reload textures of current tiles
-}

@@ -37,9 +37,9 @@ class Tiled2dMapLayer : public LayerInterface,
 
     virtual void onRemoved() override;
 
-    virtual void pause() override = 0;
+    virtual void pause() override;
 
-    virtual void resume() override = 0;
+    virtual void resume() override;
 
     virtual void hide() override;
 

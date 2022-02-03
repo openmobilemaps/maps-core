@@ -18,4 +18,8 @@
 
 - (nullable NSNumber *)getMaxZoomLevelIdentifier;
 
+- (void)pause;
+
+- (void)resume;
+
 @end

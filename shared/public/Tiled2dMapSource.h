@@ -46,9 +46,9 @@ template <class T, class L, class R> class Tiled2dMapSource :
 
     virtual bool isTileVisible(const Tiled2dMapTileInfo &tileInfo);
 
-    virtual void pause() = 0;
+    virtual void pause() override;
 
-    virtual void resume() = 0;
+    virtual void resume() override;
 
     virtual RectCoord getCurrentViewBounds();
 
@@ -81,6 +81,9 @@ template <class T, class L, class R> class Tiled2dMapSource :
     std::unordered_set<Tiled2dMapTileInfo> currentVisibleTiles;
     RectCoord currentViewBounds = RectCoord(Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0),
                                             Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0));
+
+
+    std::atomic<bool> isPaused;
 
   private:
     void updateCurrentTileset(const ::RectCoord &visibleBounds, double zoom);

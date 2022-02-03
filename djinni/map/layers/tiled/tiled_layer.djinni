@@ -31,5 +31,8 @@ tiled_2d_map_source_interface = interface +c {
 
     set_max_zoom_level_identifier(value: optional<i32>);
     get_max_zoom_level_identifier(): optional<i32>;
+
+    pause();
+    resume();
 }
 
