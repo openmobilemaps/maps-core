@@ -16,6 +16,9 @@ Tiled2dMapLayer::Tiled2dMapLayer(const std::shared_ptr<Tiled2dMapLayerConfig> &l
 
 void Tiled2dMapLayer::setSourceInterface(const std::shared_ptr<Tiled2dMapSourceInterface> &sourceInterface) {
     this->sourceInterface = sourceInterface;
+    if (isHidden) {
+        sourceInterface->pause();
+    }
 }
 
 void Tiled2dMapLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface) {
@@ -38,9 +41,35 @@ void Tiled2dMapLayer::onRemoved() {
     }
 }
 
-void Tiled2dMapLayer::hide() { isHidden = true; }
+void Tiled2dMapLayer::pause() {
+    sourceInterface->pause();
+}
 
-void Tiled2dMapLayer::show() { isHidden = false; }
+void Tiled2dMapLayer::resume() {
+    if (!isHidden) {
+        sourceInterface->resume();
+    }
+}
+
+void Tiled2dMapLayer::hide() {
+    isHidden = true;
+    if (sourceInterface) {
+        sourceInterface->pause();
+    }
+    if (mapInterface) {
+        mapInterface->invalidate();
+    }
+}
+
+void Tiled2dMapLayer::show() {
+    isHidden = false;
+    if (sourceInterface) {
+        sourceInterface->resume();
+    }
+    if (mapInterface) {
+        mapInterface->invalidate();
+    }
+}
 
 void Tiled2dMapLayer::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom) {
     sourceInterface->onVisibleBoundsChanged(visibleBounds, zoom);

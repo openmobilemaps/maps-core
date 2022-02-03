@@ -20,4 +20,8 @@ public:
     virtual void setMaxZoomLevelIdentifier(std::optional<int32_t> value) = 0;
 
     virtual std::optional<int32_t> getMaxZoomLevelIdentifier() = 0;
+
+    virtual void pause() = 0;
+
+    virtual void resume() = 0;
 };

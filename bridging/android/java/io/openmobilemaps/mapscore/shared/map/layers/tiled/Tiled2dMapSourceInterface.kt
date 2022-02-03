@@ -17,6 +17,10 @@ abstract class Tiled2dMapSourceInterface {
 
     abstract fun getMaxZoomLevelIdentifier(): Int?
 
+    abstract fun pause()
+
+    abstract fun resume()
+
     private class CppProxy : Tiled2dMapSourceInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -64,5 +68,17 @@ abstract class Tiled2dMapSourceInterface {
             return native_getMaxZoomLevelIdentifier(this.nativeRef)
         }
         private external fun native_getMaxZoomLevelIdentifier(_nativeRef: Long): Int?
+
+        override fun pause() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_pause(this.nativeRef)
+        }
+        private external fun native_pause(_nativeRef: Long)
+
+        override fun resume() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_resume(this.nativeRef)
+        }
+        private external fun native_resume(_nativeRef: Long)
     }
 }

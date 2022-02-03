@@ -27,14 +27,17 @@ Tiled2dMapSource<T, L, R>::Tiled2dMapSource(const MapConfig &mapConfig, const st
     , zoomLevelInfos(layerConfig->getZoomLevelInfos())
     , zoomInfo(layerConfig->getZoomInfo())
     , layerSystemId(layerConfig->getCoordinateSystemIdentifier())
-    , dispatchedTasks(0) {
-
+    , dispatchedTasks(0)
+    , isPaused(false) {
     std::sort(zoomLevelInfos.begin(), zoomLevelInfos.end(),
               [](const Tiled2dMapZoomLevelInfo &a, const Tiled2dMapZoomLevelInfo &b) -> bool { return a.zoom > b.zoom; });
 }
 
 template <class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom) {
+    if (isPaused) {
+        return;
+    }
     std::weak_ptr<Tiled2dMapSource> selfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this());
     scheduler->addTask(std::make_shared<LambdaTask>(
                                                     TaskConfig("Tiled2dMapSource_Update", 0, TaskPriority::NORMAL, ExecutionEnvironment::IO), [selfPtr, visibleBounds, zoom] {
@@ -329,4 +332,14 @@ std::optional<int32_t> Tiled2dMapSource<T, L, R>::getMinZoomLevelIdentifier() {
 template<class T, class L, class R>
 std::optional<int32_t> Tiled2dMapSource<T, L, R>::getMaxZoomLevelIdentifier() {
     return maxZoomLevelIdentifier;
+}
+
+template<class T, class L, class R>
+void Tiled2dMapSource<T, L, R>::pause() {
+    isPaused = true;
+}
+
+template<class T, class L, class R>
+void Tiled2dMapSource<T, L, R>::resume() {
+    isPaused = false;
 }

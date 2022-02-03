@@ -60,7 +60,7 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapRasterLayer::build
 }
 
 void Tiled2dMapRasterLayer::pause() {
-    rasterSource->pause();
+    Tiled2dMapLayer::pause();
     std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
     for (const auto &tileObject : tileObjectMap) {
         if (tileObject.second && tileObject.second->getQuadObject()->asGraphicsObject()->isReady()) tileObject.second->getQuadObject()->asGraphicsObject()->clear();
@@ -71,7 +71,7 @@ void Tiled2dMapRasterLayer::pause() {
 }
 
 void Tiled2dMapRasterLayer::resume() {
-    rasterSource->resume();
+    Tiled2dMapLayer::resume();
     auto renderingContext = mapInterface->getRenderingContext();
     std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
     for (const auto &tileObject : tileObjectMap) {

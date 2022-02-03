@@ -22,7 +22,7 @@ void NativeLayerInterface::JavaProxy::setMaskingObject(const std::shared_ptr<::M
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeLayerInterface>::get();
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_setMaskingObject,
-                           ::djinni::get(::djinni_generated::NativeMaskingObjectInterface::fromCpp(jniEnv, c_maskingObject)));
+                           ::djinni::get(::djinni::Optional<std::optional, ::djinni_generated::NativeMaskingObjectInterface>::fromCpp(jniEnv, c_maskingObject)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
 void NativeLayerInterface::JavaProxy::update() {
@@ -92,12 +92,12 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInterfac
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInterface_00024CppProxy_native_1setMaskingObject(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeMaskingObjectInterface::JniType j_maskingObject)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInterface_00024CppProxy_native_1setMaskingObject(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeMaskingObjectInterface::Boxed::JniType j_maskingObject)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::LayerInterface>(nativeRef);
-        ref->setMaskingObject(::djinni_generated::NativeMaskingObjectInterface::toCpp(jniEnv, j_maskingObject));
+        ref->setMaskingObject(::djinni::Optional<std::optional, ::djinni_generated::NativeMaskingObjectInterface>::toCpp(jniEnv, j_maskingObject));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

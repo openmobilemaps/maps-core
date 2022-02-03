@@ -26,10 +26,6 @@ class Tiled2dMapRasterSource : public Tiled2dMapSource<TextureHolderInterface, T
 
     std::unordered_set<Tiled2dMapRasterTileInfo> getCurrentTiles();
 
-    virtual void pause() override;
-
-    virtual void resume() override;
-
   protected:
     virtual TextureLoaderResult loadTile(Tiled2dMapTileInfo tile) override;
 
