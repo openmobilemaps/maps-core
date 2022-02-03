@@ -156,9 +156,11 @@ void MapScene::removeLayer(const std::shared_ptr<::LayerInterface> &layer) {
                 break;
             }
         }
-        if (targetIndex > 0) layers.erase(targetIndex);
+        if (targetIndex >= 0) {
+            layers.erase(targetIndex);
+            layer->onRemoved();
+        }
     }
-    layer->onRemoved();
 }
 
 void MapScene::setViewportSize(const ::Vec2I &size) {
