@@ -147,17 +147,18 @@ void MapScene::insertLayerBelow(const std::shared_ptr<LayerInterface> &layer, co
 };
 
 void MapScene::removeLayer(const std::shared_ptr<::LayerInterface> &layer) {
-    layer->onRemoved();
-    std::lock_guard<std::recursive_mutex> lock(layersMutex);
-    int targetIndex = -1;
-    for (const auto &[i, l] : layers) {
-        if (l == layer) {
-            targetIndex = i;
-            l->onRemoved();
-            break;
+    {
+        std::lock_guard<std::recursive_mutex> lock(layersMutex);
+        int targetIndex = -1;
+        for (const auto &[i, l] : layers) {
+            if (l == layer) {
+                targetIndex = i;
+                break;
+            }
         }
+        if (targetIndex > 0) layers.erase(targetIndex);
     }
-    if (targetIndex > 0) layers.erase(targetIndex);
+    layer->onRemoved();
 }
 
 void MapScene::setViewportSize(const ::Vec2I &size) {
