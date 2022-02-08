@@ -27,6 +27,40 @@ private:
     friend ::djinni::JniClass<NativeTouchInterface>;
     friend ::djinni::JniInterface<::TouchInterface, NativeTouchInterface>;
 
+    class JavaProxy final : ::djinni::JavaProxyHandle<JavaProxy>, public ::TouchInterface
+    {
+    public:
+        JavaProxy(JniType j);
+        ~JavaProxy();
+
+        bool onTouchDown(const ::Vec2F & posScreen) override;
+        bool onClickUnconfirmed(const ::Vec2F & posScreen) override;
+        bool onClickConfirmed(const ::Vec2F & posScreen) override;
+        bool onDoubleClick(const ::Vec2F & posScreen) override;
+        bool onLongPress(const ::Vec2F & posScreen) override;
+        bool onMove(const ::Vec2F & deltaScreen, bool confirmed, bool doubleClick) override;
+        bool onMoveComplete() override;
+        bool onTwoFingerClick(const ::Vec2F & posScreen1, const ::Vec2F & posScreen2) override;
+        bool onTwoFingerMove(const std::vector<::Vec2F> & posScreenOld, const std::vector<::Vec2F> & posScreenNew) override;
+        bool onTwoFingerMoveComplete() override;
+        void clearTouch() override;
+
+    private:
+        friend ::djinni::JniInterface<::TouchInterface, ::djinni_generated::NativeTouchInterface>;
+    };
+
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/controls/TouchInterface") };
+    const jmethodID method_onTouchDown { ::djinni::jniGetMethodID(clazz.get(), "onTouchDown", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2F;)Z") };
+    const jmethodID method_onClickUnconfirmed { ::djinni::jniGetMethodID(clazz.get(), "onClickUnconfirmed", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2F;)Z") };
+    const jmethodID method_onClickConfirmed { ::djinni::jniGetMethodID(clazz.get(), "onClickConfirmed", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2F;)Z") };
+    const jmethodID method_onDoubleClick { ::djinni::jniGetMethodID(clazz.get(), "onDoubleClick", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2F;)Z") };
+    const jmethodID method_onLongPress { ::djinni::jniGetMethodID(clazz.get(), "onLongPress", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2F;)Z") };
+    const jmethodID method_onMove { ::djinni::jniGetMethodID(clazz.get(), "onMove", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2F;ZZ)Z") };
+    const jmethodID method_onMoveComplete { ::djinni::jniGetMethodID(clazz.get(), "onMoveComplete", "()Z") };
+    const jmethodID method_onTwoFingerClick { ::djinni::jniGetMethodID(clazz.get(), "onTwoFingerClick", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2F;Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2F;)Z") };
+    const jmethodID method_onTwoFingerMove { ::djinni::jniGetMethodID(clazz.get(), "onTwoFingerMove", "(Ljava/util/ArrayList;Ljava/util/ArrayList;)Z") };
+    const jmethodID method_onTwoFingerMoveComplete { ::djinni::jniGetMethodID(clazz.get(), "onTwoFingerMoveComplete", "()Z") };
+    const jmethodID method_clearTouch { ::djinni::jniGetMethodID(clazz.get(), "clearTouch", "()V") };
 };
 
 }  // namespace djinni_generated

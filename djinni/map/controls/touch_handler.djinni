@@ -11,7 +11,7 @@ default_touch_handler_interface = interface +c {
     static create(scheduler: scheduler_interface, density: f32): touch_handler_interface;
 }
 
-touch_interface = interface +c {
+touch_interface = interface +c +j +o {
     on_touch_down(pos_screen: vec_2_f): bool;
     on_click_unconfirmed(pos_screen: vec_2_f) : bool;
     on_click_confirmed(pos_screen: vec_2_f) : bool;

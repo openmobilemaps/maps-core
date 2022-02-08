@@ -5,7 +5,7 @@
 #import <Foundation/Foundation.h>
 
 
-@interface MCTouchInterface : NSObject
+@protocol MCTouchInterface
 
 - (BOOL)onTouchDown:(nonnull MCVec2F *)posScreen;
 
