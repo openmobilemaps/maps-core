@@ -192,13 +192,13 @@ mapView.addLayer(tiledLayer.asLayerInterface())
 Open Mobile Maps supports the [WMTS standard](https://en.wikipedia.org/wiki/Web_Map_Tile_Service) and can parse their Capability XML file to generate raster layer configurations.
 
 ```kotlin
-let resource = WmtsCapabilitiesResource.create(xml)!
+val ressource = WmtsCapabilitiesResource.create(xml)
 ```
 The created resource object is then capable of creating a layer object with a given identifier.
 
 ```kotlin
-let layer = resource.createLayer("identifier", textureLoader: loader)
-mapView.add(layer: layer?.asLayerInterface())
+val layer = ressource.createLayer("identifier", textureLoader)
+mapView.addLayer(layer.asLayerInterface())
 ```
 
 This feature is still being improved to support a wider range of WMTS capabilities.
