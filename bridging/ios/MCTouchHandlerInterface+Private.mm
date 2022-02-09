@@ -38,13 +38,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)addListener:(nullable MCTouchInterface *)listener {
+- (void)addListener:(nullable id<MCTouchInterface>)listener {
     try {
         _cppRefHandle.get()->addListener(::djinni_generated::TouchInterface::toCpp(listener));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)removeListener:(nullable MCTouchInterface *)listener {
+- (void)removeListener:(nullable id<MCTouchInterface>)listener {
     try {
         _cppRefHandle.get()->removeListener(::djinni_generated::TouchInterface::toCpp(listener));
     } DJINNI_TRANSLATE_EXCEPTIONS()

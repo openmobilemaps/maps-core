@@ -3,15 +3,15 @@
 
 #import "MCTouchEvent.h"
 #import <Foundation/Foundation.h>
-@class MCTouchInterface;
+@protocol MCTouchInterface;
 
 
 @protocol MCTouchHandlerInterface
 
 - (void)onTouchEvent:(nonnull MCTouchEvent *)touchEvent;
 
-- (void)addListener:(nullable MCTouchInterface *)listener;
+- (void)addListener:(nullable id<MCTouchInterface>)listener;
 
-- (void)removeListener:(nullable MCTouchInterface *)listener;
+- (void)removeListener:(nullable id<MCTouchInterface>)listener;
 
 @end

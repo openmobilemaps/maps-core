@@ -7,7 +7,7 @@
 
 static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for this file");
 
-@class MCTouchInterface;
+@protocol MCTouchInterface;
 
 namespace djinni_generated {
 
@@ -16,7 +16,7 @@ class TouchInterface
 public:
     using CppType = std::shared_ptr<::TouchInterface>;
     using CppOptType = std::shared_ptr<::TouchInterface>;
-    using ObjcType = MCTouchInterface*;
+    using ObjcType = id<MCTouchInterface>;
 
     using Boxed = TouchInterface;
 
