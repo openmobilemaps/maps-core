@@ -224,6 +224,11 @@ void PolygonLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
     mapInterface->getTouchHandler()->addListener(shared_from_this());
 }
 
+void PolygonLayer::onRemoved() {
+    mapInterface->getTouchHandler()->removeListener(shared_from_this());
+    mapInterface = nullptr;
+}
+
 void PolygonLayer::setCallbackHandler(const std::shared_ptr<PolygonLayerCallbackInterface> &handler) { callbackHandler = handler; }
 
 void PolygonLayer::hide() {
