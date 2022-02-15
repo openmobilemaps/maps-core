@@ -86,10 +86,10 @@ lineFragmentShader(LineVertexOut in [[stage_in]],
 
 // Line Group
 
-
 struct LineStyling {
     float width;
     float4 color;
+    float4 gapColor;
     char widthAsPixels;
     float opacity;
     char capType;
@@ -180,7 +180,7 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
             (intraDashPos > style.dashArray[2] * factorToT && intraDashPos < style.dashArray[3] * factorToT) ||
             (intraDashPos > style.dashArray[4] * factorToT && intraDashPos < style.dashArray[5] * factorToT) ||
             (intraDashPos > style.dashArray[6] * factorToT && intraDashPos < style.dashArray[7] * factorToT)) {
-            discard_fragment();
+            return style.gapColor * style.opacity;
         }
     }
 

@@ -7,6 +7,7 @@
 @implementation MCLineStyle
 
 - (nonnull instancetype)initWithColor:(nonnull MCColorStateList *)color
+                             gapColor:(nonnull MCColorStateList *)gapColor
                               opacity:(float)opacity
                             widthType:(MCSizeType)widthType
                                 width:(float)width
@@ -15,6 +16,7 @@
 {
     if (self = [super init]) {
         _color = color;
+        _gapColor = gapColor;
         _opacity = opacity;
         _widthType = widthType;
         _width = width;
@@ -25,6 +27,7 @@
 }
 
 + (nonnull instancetype)lineStyleWithColor:(nonnull MCColorStateList *)color
+                                  gapColor:(nonnull MCColorStateList *)gapColor
                                    opacity:(float)opacity
                                  widthType:(MCSizeType)widthType
                                      width:(float)width
@@ -32,6 +35,7 @@
                                    lineCap:(MCLineCapType)lineCap
 {
     return [(MCLineStyle*)[self alloc] initWithColor:color
+                                            gapColor:gapColor
                                              opacity:opacity
                                            widthType:widthType
                                                width:width
@@ -41,7 +45,7 @@
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p color:%@ opacity:%@ widthType:%@ width:%@ dashArray:%@ lineCap:%@>", self.class, (void *)self, self.color, @(self.opacity), @(self.widthType), @(self.width), self.dashArray, @(self.lineCap)];
+    return [NSString stringWithFormat:@"<%@ %p color:%@ gapColor:%@ opacity:%@ widthType:%@ width:%@ dashArray:%@ lineCap:%@>", self.class, (void *)self, self.color, self.gapColor, @(self.opacity), @(self.widthType), @(self.width), self.dashArray, @(self.lineCap)];
 }
 
 @end

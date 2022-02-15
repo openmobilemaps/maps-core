@@ -17,6 +17,7 @@ auto NativeLineStyle::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinni::Loc
     const auto& data = ::djinni::JniClass<NativeLineStyle>::get();
     auto r = ::djinni::LocalRef<JniType>{jniEnv->NewObject(data.clazz.get(), data.jconstructor,
                                                            ::djinni::get(::djinni_generated::NativeColorStateList::fromCpp(jniEnv, c.color)),
+                                                           ::djinni::get(::djinni_generated::NativeColorStateList::fromCpp(jniEnv, c.gapColor)),
                                                            ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.opacity)),
                                                            ::djinni::get(::djinni_generated::NativeSizeType::fromCpp(jniEnv, c.widthType)),
                                                            ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.width)),
@@ -27,10 +28,11 @@ auto NativeLineStyle::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinni::Loc
 }
 
 auto NativeLineStyle::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
-    ::djinni::JniLocalScope jscope(jniEnv, 7);
+    ::djinni::JniLocalScope jscope(jniEnv, 8);
     assert(j != nullptr);
     const auto& data = ::djinni::JniClass<NativeLineStyle>::get();
     return {::djinni_generated::NativeColorStateList::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_color)),
+            ::djinni_generated::NativeColorStateList::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_gapColor)),
             ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_opacity)),
             ::djinni_generated::NativeSizeType::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_widthType)),
             ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_width)),

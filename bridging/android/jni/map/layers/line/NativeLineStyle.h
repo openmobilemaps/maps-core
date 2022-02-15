@@ -25,8 +25,9 @@ private:
     friend ::djinni::JniClass<NativeLineStyle>;
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/layers/line/LineStyle") };
-    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Lio/openmobilemaps/mapscore/shared/map/layers/ColorStateList;FLio/openmobilemaps/mapscore/shared/map/layers/SizeType;FLjava/util/ArrayList;Lio/openmobilemaps/mapscore/shared/map/layers/line/LineCapType;)V") };
+    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Lio/openmobilemaps/mapscore/shared/map/layers/ColorStateList;Lio/openmobilemaps/mapscore/shared/map/layers/ColorStateList;FLio/openmobilemaps/mapscore/shared/map/layers/SizeType;FLjava/util/ArrayList;Lio/openmobilemaps/mapscore/shared/map/layers/line/LineCapType;)V") };
     const jfieldID field_color { ::djinni::jniGetFieldID(clazz.get(), "color", "Lio/openmobilemaps/mapscore/shared/map/layers/ColorStateList;") };
+    const jfieldID field_gapColor { ::djinni::jniGetFieldID(clazz.get(), "gapColor", "Lio/openmobilemaps/mapscore/shared/map/layers/ColorStateList;") };
     const jfieldID field_opacity { ::djinni::jniGetFieldID(clazz.get(), "opacity", "F") };
     const jfieldID field_widthType { ::djinni::jniGetFieldID(clazz.get(), "widthType", "Lio/openmobilemaps/mapscore/shared/map/layers/SizeType;") };
     const jfieldID field_width { ::djinni::jniGetFieldID(clazz.get(), "width", "F") };

@@ -8,12 +8,14 @@
 
 @interface MCLineStyle : NSObject
 - (nonnull instancetype)initWithColor:(nonnull MCColorStateList *)color
+                             gapColor:(nonnull MCColorStateList *)gapColor
                               opacity:(float)opacity
                             widthType:(MCSizeType)widthType
                                 width:(float)width
                             dashArray:(nonnull NSArray<NSNumber *> *)dashArray
                               lineCap:(MCLineCapType)lineCap;
 + (nonnull instancetype)lineStyleWithColor:(nonnull MCColorStateList *)color
+                                  gapColor:(nonnull MCColorStateList *)gapColor
                                    opacity:(float)opacity
                                  widthType:(MCSizeType)widthType
                                      width:(float)width
@@ -21,6 +23,8 @@
                                    lineCap:(MCLineCapType)lineCap;
 
 @property (nonatomic, readonly, nonnull) MCColorStateList * color;
+
+@property (nonatomic, readonly, nonnull) MCColorStateList * gapColor;
 
 @property (nonatomic, readonly) float opacity;
 
