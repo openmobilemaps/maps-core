@@ -76,7 +76,9 @@ class LineLayer : public LineLayerInterface,
 
     virtual void clearTouch() override;
 
-  private:
+    void setLayerClickable(bool isLayerClickable) override;
+
+private:
     std::shared_ptr<MapInterface> mapInterface;
 
     std::shared_ptr<LineLayerCallbackInterface> callbackHandler;
@@ -95,4 +97,5 @@ class LineLayer : public LineLayerInterface,
     std::vector<std::shared_ptr<LineInfoInterface>> highlightedLines;
 
     std::atomic<bool> isHidden;
+    std::atomic<bool> isLayerClickable = true;
 };

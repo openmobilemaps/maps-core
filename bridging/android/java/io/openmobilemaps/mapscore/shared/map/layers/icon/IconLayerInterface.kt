@@ -23,6 +23,8 @@ abstract class IconLayerInterface {
 
     abstract fun invalidate()
 
+    abstract fun setLayerClickable(isLayerClickable: Boolean)
+
     companion object {
         @JvmStatic
         fun create(): IconLayerInterface {
@@ -95,6 +97,12 @@ abstract class IconLayerInterface {
             native_invalidate(this.nativeRef)
         }
         private external fun native_invalidate(_nativeRef: Long)
+
+        override fun setLayerClickable(isLayerClickable: Boolean) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setLayerClickable(this.nativeRef, isLayerClickable)
+        }
+        private external fun native_setLayerClickable(_nativeRef: Long, isLayerClickable: Boolean)
 
         companion object {
             @JvmStatic

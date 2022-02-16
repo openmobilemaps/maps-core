@@ -31,4 +31,6 @@ public:
     virtual std::shared_ptr<::LayerInterface> asLayerInterface() = 0;
 
     virtual void invalidate() = 0;
+
+    virtual void setLayerClickable(bool isLayerClickable) = 0;
 };

@@ -72,7 +72,9 @@ class IconLayer : public IconLayerInterface,
 
     virtual bool onClickConfirmed(const ::Vec2F &posScreen) override;
 
-  private:
+    void setLayerClickable(bool isLayerClickable) override;
+
+private:
     std::shared_ptr<MapInterface> mapInterface;
 
     std::shared_ptr<IconLayerCallbackInterface> callbackHandler;
@@ -88,4 +90,5 @@ class IconLayer : public IconLayerInterface,
     std::vector<std::shared_ptr<IconInfoInterface>> addingQueue;
 
     std::atomic<bool> isHidden;
+    std::atomic<bool> isLayerClickable = true;
 };
