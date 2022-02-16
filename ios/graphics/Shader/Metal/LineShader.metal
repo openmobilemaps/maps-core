@@ -143,9 +143,7 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
     LineStyling style = styling[in.stylingIndex];
     
     float a = style.color.a * style.opacity;
-    if (a == 0) {
-        discard_fragment();
-    }
+    float aGap = style.gapColor.a * style.opacity;
 
     char capType = style.capType;
     char segmentType = in.segmentType;
@@ -180,8 +178,17 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
             (intraDashPos > style.dashArray[2] * factorToT && intraDashPos < style.dashArray[3] * factorToT) ||
             (intraDashPos > style.dashArray[4] * factorToT && intraDashPos < style.dashArray[5] * factorToT) ||
             (intraDashPos > style.dashArray[6] * factorToT && intraDashPos < style.dashArray[7] * factorToT)) {
+
+            if(aGap == 0) {
+                discard_fragment();
+            }
+
             return style.gapColor * style.opacity;
         }
+    }
+
+    if(a == 0) {
+        discard_fragment();
     }
 
     return style.color * style.opacity;
