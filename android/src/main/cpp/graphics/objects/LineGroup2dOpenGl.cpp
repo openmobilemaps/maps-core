@@ -176,19 +176,15 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
     glGenBuffers(1, &vertexAttribBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexAttribBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * lineAttributes.size(), &lineAttributes[0], GL_STATIC_DRAW);
-    OpenGlHelper::checkGlError("Setup attribute buffer");
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glGenBuffers(1, &indexBuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * lineIndices.size(), &lineIndices[0], GL_STATIC_DRAW);
-    OpenGlHelper::checkGlError("Setup index buffer");
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     mvpMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
-    OpenGlHelper::checkGlError("glGetUniformLocation uMVPMatrix");
     scaleFactorHandle = glGetUniformLocation(program, "scaleFactor");
-    OpenGlHelper::checkGlError("glGetUniformLocation scaleFactor");
 
     ready = true;
 }
@@ -224,7 +220,6 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     // Apply the projection and view transformation
     glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *) mvpMatrix);
     glUniform1f(scaleFactorHandle, screenPixelAsRealMeterFactor);
-    OpenGlHelper::checkGlError("glUniformMatrix4fv and glUniformM1f");
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);

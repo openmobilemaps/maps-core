@@ -27,14 +27,11 @@ void  ColorLineGroup2dShaderOpenGl::setupProgram(const std::shared_ptr<::Renderi
 
     int program = glCreateProgram();       // create empty OpenGL Program
     glAttachShader(program, vertexShader); // add the vertex shader to program
-    OpenGlHelper::checkGlError("glAttachShader Vertex  ColorLine Rect");
     glDeleteShader(vertexShader);
     glAttachShader(program, fragmentShader); // add the fragment shader to program
-    OpenGlHelper::checkGlError("glAttachShader Fragment ColorLine Rect");
     glDeleteShader(fragmentShader);
 
     glLinkProgram(program); // create OpenGL program executables
-    OpenGlHelper::checkGlError("glLinkProgram ColorLine Rect");
 
     openGlContext->storeProgram(programName, program);
 }
@@ -47,13 +44,10 @@ void  ColorLineGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingC
         std::lock_guard<std::recursive_mutex> lock(styleMutex);
         int lineStylesHandle = glGetUniformLocation(program, "lineStyles");
         glUniform1fv(lineStylesHandle, sizeStyleValuesArray, &lineStyles[0]);
-        OpenGlHelper::checkGlError("glUniform1f lineStyles");
         int lineDashValuesHandle = glGetUniformLocation(program, "lineDashValues");
         glUniform1fv(lineDashValuesHandle, sizeDashValuesArray, &lineDashValues[0]);
-        OpenGlHelper::checkGlError("glUniform1f lineDashValues");
         int numStylesHandle = glGetUniformLocation(program, "numStyles");
         glUniform1i(numStylesHandle, numStyles);
-        OpenGlHelper::checkGlError("glUniform1f numStyles");
     }
 }
 
