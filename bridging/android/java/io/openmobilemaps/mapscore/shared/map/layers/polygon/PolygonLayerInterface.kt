@@ -25,6 +25,8 @@ abstract class PolygonLayerInterface {
 
     abstract fun resetSelection()
 
+    abstract fun setLayerClickable(isLayerClickable: Boolean)
+
     companion object {
         @JvmStatic
         fun create(): PolygonLayerInterface {
@@ -103,6 +105,12 @@ abstract class PolygonLayerInterface {
             native_resetSelection(this.nativeRef)
         }
         private external fun native_resetSelection(_nativeRef: Long)
+
+        override fun setLayerClickable(isLayerClickable: Boolean) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setLayerClickable(this.nativeRef, isLayerClickable)
+        }
+        private external fun native_setLayerClickable(_nativeRef: Long, isLayerClickable: Boolean)
 
         companion object {
             @JvmStatic

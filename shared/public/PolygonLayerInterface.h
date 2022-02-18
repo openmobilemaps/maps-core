@@ -33,4 +33,6 @@ public:
     virtual std::shared_ptr<::LayerInterface> asLayerInterface() = 0;
 
     virtual void resetSelection() = 0;
+
+    virtual void setLayerClickable(bool isLayerClickable) = 0;
 };

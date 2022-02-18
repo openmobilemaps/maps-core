@@ -49,6 +49,8 @@ class PolygonLayer : public PolygonLayerInterface,
 
     virtual void resetSelection() override;
 
+    virtual void setLayerClickable(bool isLayerClickable) override;
+
     // LayerInterface
     virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) override;
 
@@ -58,7 +60,7 @@ class PolygonLayer : public PolygonLayerInterface,
 
     virtual void onAdded(const std::shared_ptr<MapInterface> &mapInterface) override;
 
-    virtual void onRemoved() override{};
+    virtual void onRemoved() override;
 
     virtual void pause() override;
 
@@ -100,4 +102,5 @@ class PolygonLayer : public PolygonLayerInterface,
     std::optional<PolygonInfo> selectedPolygon;
 
     std::atomic<bool> isHidden;
+    std::atomic<bool> isLayerClickable = true;
 };

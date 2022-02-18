@@ -28,4 +28,6 @@
 
 - (void)invalidate;
 
+- (void)setLayerClickable:(BOOL)isLayerClickable;
+
 @end

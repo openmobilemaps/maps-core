@@ -22,10 +22,10 @@
 #include "SizeType.h"
 
 
-LineLayer::LineLayer(): isHidden(false) {};
+LineLayer::LineLayer() : isHidden(false) {};
 
 
-void LineLayer::setLines(const std::vector<std::shared_ptr<LineInfoInterface>> & lines) {
+void LineLayer::setLines(const std::vector<std::shared_ptr<LineInfoInterface>> &lines) {
     clear();
     for (auto const &line : lines) {
         add(line);
@@ -49,7 +49,7 @@ std::vector<std::shared_ptr<LineInfoInterface>> LineLayer::getLines() {
     return lines;
 }
 
-void LineLayer::remove(const std::shared_ptr<LineInfoInterface> & line) {
+void LineLayer::remove(const std::shared_ptr<LineInfoInterface> &line) {
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         addingQueue.erase(std::remove(addingQueue.begin(), addingQueue.end(), line), addingQueue.end());
@@ -69,7 +69,7 @@ void LineLayer::remove(const std::shared_ptr<LineInfoInterface> & line) {
         mapInterface->invalidate();
 }
 
-void LineLayer::add(const std::shared_ptr<LineInfoInterface> & line) {
+void LineLayer::add(const std::shared_ptr<LineInfoInterface> &line) {
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         addingQueue.push_back(line);
@@ -91,7 +91,7 @@ void LineLayer::add(const std::shared_ptr<LineInfoInterface> & line) {
 
     std::weak_ptr<LineLayer> selfPtr = std::dynamic_pointer_cast<LineLayer>(shared_from_this());
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
-                                                                       TaskConfig("LineLayer_setup_" + line->getIdentifier(), 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+            TaskConfig("LineLayer_setup_" + line->getIdentifier(), 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
             [selfPtr, lineGraphicsObject] { if (selfPtr.lock()) selfPtr.lock()->setupLine(lineGraphicsObject); }));
 
     {
@@ -121,7 +121,7 @@ void LineLayer::clear() {
         mapInterface->invalidate();
 }
 
-void LineLayer::setCallbackHandler(const std::shared_ptr<LineLayerCallbackInterface> & handler) {
+void LineLayer::setCallbackHandler(const std::shared_ptr<LineLayerCallbackInterface> &handler) {
     callbackHandler = handler;
 }
 
@@ -139,14 +139,17 @@ void LineLayer::generateRenderPasses() {
     for (auto const &lineTuple : lines) {
         for (auto config : lineTuple.second->getRenderConfig()) {
             if (!lineTuple.first->getCoordinates().empty()) {
-                std::vector<float> modelMatrix = mapInterface->getCamera()->getInvariantModelMatrix(lineTuple.first->getCoordinates()[0], false,false);
-                renderPassObjectMap[config->getRenderIndex()].push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
+                std::vector<float> modelMatrix = mapInterface->getCamera()->getInvariantModelMatrix(
+                        lineTuple.first->getCoordinates()[0], false, false);
+                renderPassObjectMap[config->getRenderIndex()].push_back(
+                        std::make_shared<RenderObject>(config->getGraphicsObject()));
             }
         }
     }
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
     for (const auto &passEntry : renderPassObjectMap) {
-        std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second, mask);
+        std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second,
+                                                                              mask);
         newRenderPasses.push_back(renderPass);
     }
     {
@@ -173,8 +176,9 @@ void LineLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
         }
         addingQueue.clear();
     }
-
-    mapInterface->getTouchHandler()->addListener(shared_from_this());
+    if (isLayerClickable) {
+        mapInterface->getTouchHandler()->addListener(shared_from_this());
+    }
 }
 
 void LineLayer::pause() {
@@ -266,7 +270,7 @@ void LineLayer::clearTouch() {
 }
 
 
-void LineLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) {
+void LineLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> &maskingObject) {
     this->mask = maskingObject;
     generateRenderPasses();
     if (mapInterface) {
@@ -274,5 +278,17 @@ void LineLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface>
             if (!mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
         }
         mapInterface->invalidate();
+    }
+}
+
+void LineLayer::setLayerClickable(bool isLayerClickable) {
+    if(this->isLayerClickable == isLayerClickable) return;
+    this->isLayerClickable = isLayerClickable;
+    if (mapInterface) {
+        if (isLayerClickable) {
+            mapInterface->getTouchHandler()->addListener(shared_from_this());
+        } else {
+            mapInterface->getTouchHandler()->removeListener(shared_from_this());
+        }
     }
 }

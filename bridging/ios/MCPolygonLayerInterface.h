@@ -30,4 +30,6 @@
 
 - (void)resetSelection;
 
+- (void)setLayerClickable:(BOOL)isLayerClickable;
+
 @end

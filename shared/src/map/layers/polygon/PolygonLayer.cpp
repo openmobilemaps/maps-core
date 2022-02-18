@@ -43,7 +43,7 @@ std::vector<PolygonInfo> PolygonLayer::getPolygons() {
         return polygons;
     }
     for (auto const &ps : this->polygons) {
-        for(auto& p : ps.second) {
+        for (auto &p : ps.second) {
             polygons.push_back(p.first);
         }
     }
@@ -56,16 +56,17 @@ void PolygonLayer::remove(const PolygonInfo &polygon) {
 
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
-        addingQueue.erase(std::remove_if(addingQueue.begin(), addingQueue.end(), [&](const auto& p) { return equal(p, polygon); } ), addingQueue.end());
+        addingQueue.erase(std::remove_if(addingQueue.begin(), addingQueue.end(), [&](const auto &p) { return equal(p, polygon); }),
+                          addingQueue.end());
         return;
     }
     {
         std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
 
         for (auto pit = polygons.begin(); pit != polygons.end(); pit++) {
-            if(pit->first == polygon.identifier) {
-                for(auto it=pit->second.begin(); it!=pit->second.end(); ++it) {
-                    if(equal(it->first, polygon)) {
+            if (pit->first == polygon.identifier) {
+                for (auto it = pit->second.begin(); it != pit->second.end(); ++it) {
+                    if (equal(it->first, polygon)) {
                         pit->second.erase(it);
                         break;
                     }
@@ -120,8 +121,12 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
 
     std::weak_ptr<PolygonLayer> selfPtr = std::dynamic_pointer_cast<PolygonLayer>(shared_from_this());
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
-            TaskConfig("PolygonLayer_setup_" + polygons[0].identifier + ",...", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
-            [selfPtr, polygonGraphicsObjects] { if (selfPtr.lock()) selfPtr.lock()->setupPolygonObjects(polygonGraphicsObjects); }));
+            TaskConfig("PolygonLayer_setup_" + polygons[0].identifier + ",...", 0, TaskPriority::NORMAL,
+                       ExecutionEnvironment::GRAPHICS),
+            [selfPtr, polygonGraphicsObjects] {
+                if (selfPtr.lock())
+                    selfPtr.lock()->setupPolygonObjects(polygonGraphicsObjects);
+            }));
 
     generateRenderPasses();
 
@@ -157,7 +162,7 @@ void PolygonLayer::clear() {
 void PolygonLayer::pause() {
     std::lock_guard<std::recursive_mutex> overlayLock(polygonsMutex);
     for (const auto &polygon : polygons) {
-        for(auto& p : polygon.second) {
+        for (auto &p : polygon.second) {
             p.second->getPolygonObject()->clear();
         }
     }
@@ -170,7 +175,7 @@ void PolygonLayer::resume() {
     std::lock_guard<std::recursive_mutex> overlayLock(polygonsMutex);
     auto renderingContext = mapInterface->getRenderingContext();
     for (const auto &polygon : polygons) {
-        for(auto& p : polygon.second) {
+        for (auto &p : polygon.second) {
             std::get<1>(p)->getPolygonObject()->setup(renderingContext);
         }
     }
@@ -185,15 +190,17 @@ void PolygonLayer::generateRenderPasses() {
     std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
     std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
     for (auto const &p : polygons) {
-        for(auto const &object : p.second) {
+        for (auto const &object : p.second) {
             for (auto config : object.second->getRenderConfig()) {
-                renderPassObjectMap[config->getRenderIndex()].push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
+                renderPassObjectMap[config->getRenderIndex()].push_back(
+                        std::make_shared<RenderObject>(config->getGraphicsObject()));
             }
         }
     }
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
     for (const auto &passEntry : renderPassObjectMap) {
-        std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second, mask);
+        std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second,
+                                                                              mask);
         newRenderPasses.push_back(renderPass);
     }
     {
@@ -220,11 +227,18 @@ void PolygonLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
         }
         addingQueue.clear();
     }
-
-    mapInterface->getTouchHandler()->addListener(shared_from_this());
+    if (isLayerClickable) {
+        mapInterface->getTouchHandler()->addListener(shared_from_this());
+    }
 }
 
-void PolygonLayer::setCallbackHandler(const std::shared_ptr<PolygonLayerCallbackInterface> &handler) { callbackHandler = handler; }
+void PolygonLayer::onRemoved() {
+    mapInterface->getTouchHandler()->removeListener(shared_from_this());
+    mapInterface = nullptr;
+}
+
+void
+PolygonLayer::setCallbackHandler(const std::shared_ptr<PolygonLayerCallbackInterface> &handler) { callbackHandler = handler; }
 
 void PolygonLayer::hide() {
     isHidden = true;
@@ -239,14 +253,14 @@ void PolygonLayer::show() {
 }
 
 void PolygonLayer::resetSelection() {
-    if(selectedPolygon) {
-        for(auto& p : polygons[selectedPolygon->identifier]) {
+    if (selectedPolygon) {
+        for (auto &p : polygons[selectedPolygon->identifier]) {
             p.second->setColor(p.first.color);
         }
 
         selectedPolygon = std::nullopt;
 
-        if(mapInterface) {
+        if (mapInterface) {
             mapInterface->invalidate();
         }
     }
@@ -257,20 +271,20 @@ bool PolygonLayer::onTouchDown(const ::Vec2F &posScreen) {
 
     std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
     for (auto const &polygon : polygons) {
-        for(auto& p : polygon.second) {
-            if(PolygonHelper::pointInside(p.first, point, mapInterface->getCoordinateConverterHelper())) {
+        for (auto &p : polygon.second) {
+            if (PolygonHelper::pointInside(p.first, point, mapInterface->getCoordinateConverterHelper())) {
                 highlightedPolygon = p.first;
                 break;
             }
         }
 
-        if(highlightedPolygon) {
-            for(auto& p : polygon.second) {
+        if (highlightedPolygon) {
+            for (auto &p : polygon.second) {
                 p.second->setColor(p.first.highlightColor);
             }
 
             if (selectedPolygon && ((*selectedPolygon).identifier != (*highlightedPolygon).identifier)) {
-                for(auto& p : polygons[selectedPolygon->identifier]) {
+                for (auto &p : polygons[selectedPolygon->identifier]) {
                     p.second->setColor(p.first.color);
 
                 }
@@ -289,7 +303,7 @@ void PolygonLayer::clearTouch() {
     if (highlightedPolygon) {
         {
             std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
-            for(auto& p : polygons[highlightedPolygon->identifier]) {
+            for (auto &p : polygons[highlightedPolygon->identifier]) {
                 p.second->setColor(p.first.color);
             }
         }
@@ -314,7 +328,7 @@ bool PolygonLayer::onClickUnconfirmed(const ::Vec2F &posScreen) {
     return false;
 }
 
-void PolygonLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) {
+void PolygonLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> &maskingObject) {
     this->mask = maskingObject;
     generateRenderPasses();
     if (mapInterface) {
@@ -322,5 +336,17 @@ void PolygonLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterfa
             if (!mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
         }
         mapInterface->invalidate();
+    }
+}
+
+void PolygonLayer::setLayerClickable(bool isLayerClickable) {
+    if(this->isLayerClickable == isLayerClickable) return;
+    this->isLayerClickable = isLayerClickable;
+    if (mapInterface) {
+        if (isLayerClickable) {
+            mapInterface->getTouchHandler()->addListener(shared_from_this());
+        } else {
+            mapInterface->getTouchHandler()->removeListener(shared_from_this());
+        }
     }
 }

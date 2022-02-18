@@ -239,8 +239,9 @@ void IconLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
                 addIcons(icons);
             }
     }
-
-    mapInterface->getTouchHandler()->addListener(shared_from_this());
+    if (isLayerClickable) {
+        mapInterface->getTouchHandler()->addListener(shared_from_this());
+    }
 }
 
 void IconLayer::pause() {
@@ -345,5 +346,17 @@ void IconLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface>
             if (!mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
         }
         mapInterface->invalidate();
+    }
+}
+
+void IconLayer::setLayerClickable(bool isLayerClickable) {
+    if(this->isLayerClickable == isLayerClickable) return;
+    this->isLayerClickable = isLayerClickable;
+    if (mapInterface) {
+        if (isLayerClickable) {
+            mapInterface->getTouchHandler()->addListener(shared_from_this());
+        } else {
+            mapInterface->getTouchHandler()->removeListener(shared_from_this());
+        }
     }
 }
