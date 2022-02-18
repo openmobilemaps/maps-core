@@ -11,6 +11,7 @@
 #include "Quad2dOpenGl.h"
 #include "OpenGlHelper.h"
 #include "TextureHolderInterface.h"
+#include "Logger.h"
 
 Quad2dOpenGl::Quad2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
     : shaderProgram(shader) {}
@@ -89,11 +90,16 @@ void Quad2dOpenGl::prepareTextureCoordsGlData(const std::shared_ptr<OpenGlContex
     glUseProgram(mProgram);
 
     textureCoordinateHandle = glGetAttribLocation(mProgram, "texCoordinate");
+    if (textureCoordinateHandle < 0) {
+        usesTextureCoords = false;
+        return;
+    }
     glGenBuffers(1, &textureCoordsBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, textureCoordsBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * textureCoords.size(), &textureCoords[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    usesTextureCoords = true;
 }
 
 void Quad2dOpenGl::removeGlBuffers() {
@@ -170,7 +176,9 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
 
     if (textureLoaded) {
         prepareTextureDraw(openGlContext, mProgram);
+    }
 
+    if (usesTextureCoords) {
         glEnableVertexAttribArray(textureCoordinateHandle);
         glBindBuffer(GL_ARRAY_BUFFER, textureCoordsBuffer);
         glVertexAttribPointer(textureCoordinateHandle, 2, GL_FLOAT, false, 0, nullptr);
@@ -201,7 +209,7 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     // Disable vertex array
     glDisableVertexAttribArray(positionHandle);
 
-    if (textureLoaded) {
+    if (usesTextureCoords) {
         glDisableVertexAttribArray(textureCoordinateHandle);
     }
 
