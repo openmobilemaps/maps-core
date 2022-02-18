@@ -27,14 +27,11 @@ void ColorLineShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContex
 
     int program = glCreateProgram();       // create empty OpenGL Program
     glAttachShader(program, vertexShader); // add the vertex shader to program
-    OpenGlHelper::checkGlError("glAttachShader Vertex  ColorLine Rect");
     glDeleteShader(vertexShader);
     glAttachShader(program, fragmentShader); // add the fragment shader to program
-    OpenGlHelper::checkGlError("glAttachShader Fragment ColorLine Rect");
     glDeleteShader(fragmentShader);
 
     glLinkProgram(program); // create OpenGL program executables
-    OpenGlHelper::checkGlError("glLinkProgram ColorLine Rect");
 
     openGlContext->storeProgram(programName, program);
 }

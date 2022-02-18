@@ -72,6 +72,7 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
     std::vector<GLubyte> indices;
     std::vector<GLuint> texturePointer = {0};
     bool textureLoaded = false;
+    bool usesTextureCoords = false;
 
     Quad2dD frame = Quad2dD(Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0));
     RectD textureCoordinates = RectD(0.0, 0.0, 0.0, 0.0);

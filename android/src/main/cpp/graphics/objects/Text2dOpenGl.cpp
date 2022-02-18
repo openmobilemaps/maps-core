@@ -83,25 +83,20 @@ void Text2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &con
     glGenBuffers(1, &vertexBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
-    OpenGlHelper::checkGlError("Setup vPosition buffer");
 
     textureCoordinateHandle = glGetAttribLocation(mProgram, "texCoordinate");
     glGenBuffers(1, &textureCoordsBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, textureCoordsBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * textureCoords.size(), &textureCoords[0], GL_STATIC_DRAW);
-    OpenGlHelper::checkGlError("Setup texCoordinate buffer");
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glGenBuffers(1, &indexBuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLubyte) * indices.size(), &indices[0], GL_STATIC_DRAW);
-    OpenGlHelper::checkGlError("Setup index buffer");
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-
     mvpMatrixHandle = glGetUniformLocation(mProgram, "uMVPMatrix");
-    OpenGlHelper::checkGlError("glGetUniformLocation uMVPMatrix");
 
     ready = true;
 }
@@ -178,7 +173,6 @@ void Text2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     int mProgram = openGlContext->getProgram(shaderProgram->getProgramName());
     glUseProgram(mProgram);
-    OpenGlHelper::checkGlError("glUseProgram RectangleOpenGl");
 
     if (textureLoaded) {
         prepareTextureDraw(openGlContext, mProgram);
@@ -186,7 +180,6 @@ void Text2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
         glEnableVertexAttribArray(textureCoordinateHandle);
         glBindBuffer(GL_ARRAY_BUFFER, textureCoordsBuffer);
         glVertexAttribPointer(textureCoordinateHandle, 2, GL_FLOAT, false, 0, nullptr);
-        OpenGlHelper::checkGlError("glEnableVertexAttribArray texCoordinate");
     }
 
     shaderProgram->preRender(context);
@@ -195,13 +188,11 @@ void Text2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     glEnableVertexAttribArray(positionHandle);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     glVertexAttribPointer(positionHandle, 2, GL_FLOAT, false, 0, nullptr);
-    OpenGlHelper::checkGlError("glEnableVertexAttribArray positionHandle");
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // Apply the projection and view transformation
     glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
-    OpenGlHelper::checkGlError("glUniformMatrix4fv");
 
     // Enable blending
     glEnable(GL_BLEND);
@@ -211,7 +202,6 @@ void Text2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_BYTE, nullptr);
 
-    OpenGlHelper::checkGlError("glDrawElements");
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 

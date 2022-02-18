@@ -138,11 +138,9 @@ void Polygon2dOpenGl::drawPolygon(std::shared_ptr<OpenGlContext> openGlContext, 
 
     // get handle to shape's transformation matrix
     int mMVPMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
-    OpenGlHelper::checkGlError("glGetUniformLocation");
 
     // Apply the projection and view transformation
     glUniformMatrix4fv(mMVPMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
-    OpenGlHelper::checkGlError("glUniformMatrix4fv");
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);

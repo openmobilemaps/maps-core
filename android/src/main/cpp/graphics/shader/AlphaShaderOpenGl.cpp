@@ -19,7 +19,6 @@ void AlphaShaderOpenGl::updateAlpha(float value) { alpha = value; }
 void AlphaShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     int alphaLocation = glGetUniformLocation(openGlContext->getProgram(getProgramName()), "alpha");
-    OpenGlHelper::checkGlError("glGetUniformLocation alpha");
     glUniform1f(alphaLocation, alpha);
 }
 
@@ -32,15 +31,12 @@ void AlphaShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInt
 
     int program = glCreateProgram();       // create empty OpenGL Program
     glAttachShader(program, vertexShader); // add the vertex shader to program
-    OpenGlHelper::checkGlError("glAttachShader Vertex  AlphaMap");
     glDeleteShader(vertexShader);
     glAttachShader(program, fragmentShader); // add the fragment shader to program
-    OpenGlHelper::checkGlError("glAttachShader Fragment AlphaMap");
     glDeleteShader(fragmentShader);
     glLinkProgram(program); // create OpenGL program executables
 
     checkGlProgramLinking(program);
-    OpenGlHelper::checkGlError("glLinkProgram AlphaMap");
 
     openGlContext->storeProgram(programName, program);
 }

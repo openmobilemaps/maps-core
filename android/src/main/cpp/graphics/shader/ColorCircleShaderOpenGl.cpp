@@ -23,14 +23,11 @@ void ColorCircleShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingCont
 
     int program = glCreateProgram();       // create empty OpenGL Program
     glAttachShader(program, vertexShader); // add the vertex shader to program
-    OpenGlHelper::checkGlError("glAttachShader Vertex  Color");
     glDeleteShader(vertexShader);
     glAttachShader(program, fragmentShader); // add the fragment shader to program
-    OpenGlHelper::checkGlError("glAttachShader Fragment Color");
     glDeleteShader(fragmentShader);
 
     glLinkProgram(program); // create OpenGL program executables
-    OpenGlHelper::checkGlError("glLinkProgram Color");
 
     openGlContext->storeProgram(programName, program);
 }
