@@ -17,6 +17,7 @@ struct LineStyle: Equatable {
     var width: Float
 
     var color: SIMD4<Float>
+    var gapColor: SIMD4<Float>
 
     var widthAsPixels: Int8
 
@@ -38,6 +39,7 @@ struct LineStyle: Equatable {
     init(style: MCLineStyle) {
         width = style.width
         color = style.color.normal.simdValues
+        gapColor = style.gapColor.normal.simdValues
         widthAsPixels = style.widthType == .SCREEN_PIXEL ? 1 : 0
         opacity = style.opacity
 

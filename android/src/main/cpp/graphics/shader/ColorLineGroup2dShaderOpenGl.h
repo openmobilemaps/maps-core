@@ -41,7 +41,7 @@ protected:
     std::vector<GLfloat> lineDashValues;
     GLint numStyles;
 
-    const int sizeStyleValues = 7;
+    const int sizeStyleValues = 11;
     const int maxNumDashValues = 8;
     const int sizeDashValues = maxNumDashValues + 1;
     const int sizeStyleValuesArray = sizeStyleValues * 32;

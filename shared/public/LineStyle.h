@@ -11,6 +11,7 @@
 
 struct LineStyle final {
     ::ColorStateList color;
+    ::ColorStateList gapColor;
     float opacity;
     ::SizeType widthType;
     float width;
@@ -18,12 +19,14 @@ struct LineStyle final {
     LineCapType lineCap;
 
     LineStyle(::ColorStateList color_,
+              ::ColorStateList gapColor_,
               float opacity_,
               ::SizeType widthType_,
               float width_,
               std::vector<float> dashArray_,
               LineCapType lineCap_)
     : color(std::move(color_))
+    , gapColor(std::move(gapColor_))
     , opacity(std::move(opacity_))
     , widthType(std::move(widthType_))
     , width(std::move(width_))
