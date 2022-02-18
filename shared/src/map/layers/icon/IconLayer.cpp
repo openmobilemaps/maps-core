@@ -350,5 +350,13 @@ void IconLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface>
 }
 
 void IconLayer::setLayerClickable(bool isLayerClickable) {
+    if(this->isLayerClickable == isLayerClickable) return;
     this->isLayerClickable = isLayerClickable;
+    if (mapInterface) {
+        if (isLayerClickable) {
+            mapInterface->getTouchHandler()->addListener(shared_from_this());
+        } else {
+            mapInterface->getTouchHandler()->removeListener(shared_from_this());
+        }
+    }
 }
