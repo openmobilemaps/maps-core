@@ -88,6 +88,7 @@ std::vector<std::shared_ptr<LayerInterface>> MapScene::getLayers() {
 };
 
 void MapScene::addLayer(const std::shared_ptr<::LayerInterface> &layer) {
+    removeLayer(layer);
     layer->onAdded(shared_from_this());
     std::lock_guard<std::recursive_mutex> lock(layersMutex);
     int topIndex = -1;
@@ -96,6 +97,7 @@ void MapScene::addLayer(const std::shared_ptr<::LayerInterface> &layer) {
 }
 
 void MapScene::insertLayerAt(const std::shared_ptr<LayerInterface> &layer, int32_t atIndex) {
+    removeLayer(layer);
     layer->onAdded(shared_from_this());
     std::lock_guard<std::recursive_mutex> lock(layersMutex);
     if (layers.count(atIndex) > 0) {
@@ -105,6 +107,7 @@ void MapScene::insertLayerAt(const std::shared_ptr<LayerInterface> &layer, int32
 };
 
 void MapScene::insertLayerAbove(const std::shared_ptr<LayerInterface> &layer, const std::shared_ptr<LayerInterface> &above) {
+    removeLayer(layer);
     layer->onAdded(shared_from_this());
     std::lock_guard<std::recursive_mutex> lock(layersMutex);
     int targetIndex = -1;
@@ -126,6 +129,7 @@ void MapScene::insertLayerAbove(const std::shared_ptr<LayerInterface> &layer, co
 };
 
 void MapScene::insertLayerBelow(const std::shared_ptr<LayerInterface> &layer, const std::shared_ptr<LayerInterface> &below) {
+    removeLayer(layer);
     layer->onAdded(shared_from_this());
     std::lock_guard<std::recursive_mutex> lock(layersMutex);
     int targetIndex = -1;
