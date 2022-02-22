@@ -26,6 +26,8 @@ class Quad2d: BaseGraphicsObject {
 
     private var stencilState: MTLDepthStencilState?
 
+    private var renderAsMask = false
+
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader
         super.init(device: metalContext.device,
@@ -66,6 +68,9 @@ class Quad2d: BaseGraphicsObject {
             }
             encoder.setDepthStencilState(stencilState)
             encoder.setStencilReferenceValue(0b1000_0000)
+        } else if let mask = context.mask, renderAsMask {
+            encoder.setDepthStencilState(mask)
+            encoder.setStencilReferenceValue(0b1000_0000)
         } else {
             encoder.setDepthStencilState(context.defaultMask)
         }
@@ -102,10 +107,7 @@ extension Quad2d: MCMaskingObjectInterface {
         guard let context = context as? RenderingContext,
               let encoder = context.encoder else { return }
 
-        if let mask = context.mask {
-            encoder.setDepthStencilState(mask)
-            encoder.setStencilReferenceValue(0b1000_0000)
-        }
+        renderAsMask = true
 
         render(encoder: encoder,
                context: context,
