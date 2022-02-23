@@ -13,7 +13,7 @@
 #include "SchedulerInterface.h"
 #include "TouchHandlerInterface.h"
 #include "Vec2F.h"
-#include <vector>
+#include <map>
 
 class DefaultTouchHandler : public TouchHandlerInterface {
 
@@ -25,6 +25,8 @@ class DefaultTouchHandler : public TouchHandlerInterface {
     virtual void addListener(const std::shared_ptr<TouchInterface> &listener) override;
 
     virtual void removeListener(const std::shared_ptr<TouchInterface> &listener) override;
+
+    virtual void insertListener(const std::shared_ptr<TouchInterface> & listener, int32_t index) override;
 
   private:
     enum TouchHandlingState {
@@ -62,7 +64,7 @@ class DefaultTouchHandler : public TouchHandlerInterface {
     float density;
     float clickDistancePx;
 
-    std::vector<std::shared_ptr<TouchInterface>> listeners;
+    std::map<int, std::shared_ptr<TouchInterface>, std::greater<int>> listeners;
 
     const std::shared_ptr<SchedulerInterface> scheduler;
 

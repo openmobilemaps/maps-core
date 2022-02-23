@@ -28,11 +28,22 @@ DefaultTouchHandler::DefaultTouchHandler(std::shared_ptr<SchedulerInterface> sch
     , oldPointer(Vec2F(0, 0), Vec2F(0, 0)) {}
 
 void DefaultTouchHandler::addListener(const std::shared_ptr<TouchInterface> &listener) {
-    listeners.insert(listeners.begin(), listener);
+    if(listeners.size() > 0) {
+        auto key = listeners.begin()->first;
+        listeners[key + 1] = listener;
+    } else {
+        listeners[0] = listener;
+    }
+}
+
+void DefaultTouchHandler::insertListener(const std::shared_ptr<TouchInterface> & listener, int32_t index) {
+    listeners[index] = listener;
 }
 
 void DefaultTouchHandler::removeListener(const std::shared_ptr<TouchInterface> &listener) {
-    listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end());
+    for (auto it = listeners.begin(); it != listeners.end();) {
+        if(it->second == listener) { listeners.erase(it++); } else { ++it; }
+    }
 }
 
 void DefaultTouchHandler::onTouchEvent(const TouchEvent &touchEvent) {
@@ -130,7 +141,7 @@ void DefaultTouchHandler::handleTouchDown(Vec2F position) {
         TaskConfig("LongPressTask", LONG_PRESS_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
         [=] { checkState(); }));
     for (auto &listener : listeners) {
-        if (listener->onTouchDown(position)) {
+        if (listener.second->onTouchDown(position)) {
             break;
         }
     }
@@ -156,7 +167,9 @@ void DefaultTouchHandler::handleMove(Vec2F delta) {
         stateTime = DateHelper::currentTimeMillis();
     }
     for (auto &listener : listeners) {
-        if (listener->onMove(delta,
+        LogError <<= listener.first;
+
+        if (listener.second->onMove(delta,
                              state == ONE_FINGER_MOVING,             // confirmed
                              state == ONE_FINGER_DOUBLE_CLICK_MOVE)) // double click move
         {
@@ -176,7 +189,7 @@ void DefaultTouchHandler::handleTouchUp() {
             LogDebug <<= "TouchHandler: double click detected";
         #endif
         for (auto &listener : listeners) {
-            if (listener->onDoubleClick(touchPosition)) {
+            if (listener.second->onDoubleClick(touchPosition)) {
                 break;
             }
         }
@@ -187,7 +200,7 @@ void DefaultTouchHandler::handleTouchUp() {
         #endif
         bool clickHandled = false;
         for (auto &listener : listeners) {
-            if (listener->onClickUnconfirmed(touchPosition)) {
+            if (listener.second->onClickUnconfirmed(touchPosition)) {
                 clickHandled = true;
                 break;
             }
@@ -206,14 +219,14 @@ void DefaultTouchHandler::handleTouchUp() {
             LogDebug <<= "TouchHandler: Two finger click detected";
         #endif
         for (auto &listener : listeners) {
-            if (listener->onTwoFingerClick(std::get<0>(oldPointer), std::get<1>(oldPointer))) {
+            if (listener.second->onTwoFingerClick(std::get<0>(oldPointer), std::get<1>(oldPointer))) {
                 break;
             }
         }
     } else {
         if (state == ONE_FINGER_MOVING) {
             for (auto &listener : listeners) {
-                if (listener->onMoveComplete()) {
+                if (listener.second->onMoveComplete()) {
                     break;
                 }
             }
@@ -221,7 +234,7 @@ void DefaultTouchHandler::handleTouchUp() {
         state = IDLE;
     }
     for (auto &listener : listeners) {
-        listener->clearTouch();
+        listener.second->clearTouch();
     }
     stateTime = DateHelper::currentTimeMillis();
 }
@@ -229,7 +242,7 @@ void DefaultTouchHandler::handleTouchUp() {
 void DefaultTouchHandler::handleTwoFingerDown() {
     if (state == ONE_FINGER_MOVING) {
         for (auto &listener : listeners) {
-            if (listener->onMoveComplete()) {
+            if (listener.second->onMoveComplete()) {
                 break;
             }
         }
@@ -240,14 +253,14 @@ void DefaultTouchHandler::handleTwoFingerDown() {
         TaskConfig("LongPressTask", LONG_PRESS_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
         [=] { checkState(); }));
     for (auto &listener : listeners) {
-        listener->clearTouch();
+        listener.second->clearTouch();
     }
 }
 
 void DefaultTouchHandler::handleTwoFingerMove(std::tuple<Vec2F, Vec2F> oldPointer, std::tuple<Vec2F, Vec2F> newpointer) {
     if (state == ONE_FINGER_MOVING) {
         for (auto &listener : listeners) {
-            if (listener->onMoveComplete()) {
+            if (listener.second->onMoveComplete()) {
                 break;
             }
         }
@@ -257,7 +270,7 @@ void DefaultTouchHandler::handleTwoFingerMove(std::tuple<Vec2F, Vec2F> oldPointe
         stateTime = DateHelper::currentTimeMillis();
     }
     for (auto &listener : listeners) {
-        if (listener->onTwoFingerMove({std::get<0>(oldPointer), std::get<1>(oldPointer)},
+        if (listener.second->onTwoFingerMove({std::get<0>(oldPointer), std::get<1>(oldPointer)},
                                       {std::get<0>(newpointer), std::get<1>(newpointer)})) {
             break;
         }
@@ -269,7 +282,7 @@ void DefaultTouchHandler::handleTwoFingerUp(std::tuple<Vec2F, Vec2F> doubleTouch
         state = IDLE;
         stateTime = DateHelper::currentTimeMillis();
         for (auto &listener : listeners) {
-            if (listener->onTwoFingerMoveComplete()) {
+            if (listener.second->onTwoFingerMoveComplete()) {
                 break;
             }
         }
@@ -279,7 +292,7 @@ void DefaultTouchHandler::handleTwoFingerUp(std::tuple<Vec2F, Vec2F> doubleTouch
 void DefaultTouchHandler::handleMoreThanTwoFingers() {
     if (state == ONE_FINGER_MOVING) {
         for (auto &listener : listeners) {
-            if (listener->onMoveComplete()) {
+            if (listener.second->onMoveComplete()) {
                 break;
             }
         }
@@ -287,7 +300,7 @@ void DefaultTouchHandler::handleMoreThanTwoFingers() {
     state = IDLE;
     stateTime = DateHelper::currentTimeMillis();
     for (auto &listener : listeners) {
-        listener->clearTouch();
+        listener.second->clearTouch();
     }
 }
 
@@ -297,7 +310,7 @@ void DefaultTouchHandler::checkState() {
             LogDebug <<= "TouchHandler: confirmed click detected";
         #endif
         for (auto &listener : listeners) {
-            if (listener->onClickConfirmed(touchPosition)) {
+            if (listener.second->onClickConfirmed(touchPosition)) {
                 break;
             }
         }
@@ -308,7 +321,7 @@ void DefaultTouchHandler::checkState() {
             LogDebug <<= "TouchHandler: long press detected";
         #endif
         for (auto &listener : listeners) {
-            if (listener->onLongPress(touchPosition)) {
+            if (listener.second->onLongPress(touchPosition)) {
                 break;
             }
         }

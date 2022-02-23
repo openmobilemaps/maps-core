@@ -9,6 +9,8 @@ abstract class TouchHandlerInterface {
 
     abstract fun onTouchEvent(touchEvent: TouchEvent)
 
+    abstract fun insertListener(listener: TouchInterface, index: Int)
+
     abstract fun addListener(listener: TouchInterface)
 
     abstract fun removeListener(listener: TouchInterface)
@@ -36,6 +38,12 @@ abstract class TouchHandlerInterface {
             native_onTouchEvent(this.nativeRef, touchEvent)
         }
         private external fun native_onTouchEvent(_nativeRef: Long, touchEvent: TouchEvent)
+
+        override fun insertListener(listener: TouchInterface, index: Int) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_insertListener(this.nativeRef, listener, index)
+        }
+        private external fun native_insertListener(_nativeRef: Long, listener: TouchInterface, index: Int)
 
         override fun addListener(listener: TouchInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
