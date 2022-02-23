@@ -21,7 +21,7 @@ public:
     PolygonMaskObject(const std::shared_ptr<GraphicsObjectFactoryInterface> &graphicsObjectFactory,
                       const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper);
 
-    void setPositions(const std::vector<Coord> &positions, const std::vector<std::vector<Coord>> &holes, bool isConvex);
+    void setPositions(const std::vector<Coord> &positions, const std::vector<std::vector<Coord>> &holes);
 
     std::shared_ptr<Polygon2dInterface> getPolygonObject();
 

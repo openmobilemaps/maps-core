@@ -59,7 +59,7 @@ line_group_2d_interface = interface +c +j +o {
 }
 
 polygon_2d_interface = interface +c +j +o {
-    set_polygon_positions(positions: list<vec_2_d>, holes: list<list<vec_2_d>>, is_convex: bool);
+    set_vertices(vertices: list<vec_2_d>, indices: list<i32>);
     as_graphics_object(): graphics_object_interface;
     as_masking_object(): masking_object_interface;
 }

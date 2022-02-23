@@ -9,9 +9,8 @@
 
 @protocol MCPolygon2dInterface
 
-- (void)setPolygonPositions:(nonnull NSArray<MCVec2D *> *)positions
-                      holes:(nonnull NSArray<NSArray<MCVec2D *> *> *)holes
-                   isConvex:(BOOL)isConvex;
+- (void)setVertices:(nonnull NSArray<MCVec2D *> *)vertices
+            indices:(nonnull NSArray<NSNumber *> *)indices;
 
 - (nullable id<MCGraphicsObjectInterface>)asGraphicsObject;
 

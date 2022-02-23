@@ -34,13 +34,11 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (void)setPolygonPositions:(nonnull NSArray<MCVec2D *> *)positions
-                      holes:(nonnull NSArray<NSArray<MCVec2D *> *> *)holes
-                   isConvex:(BOOL)isConvex {
+- (void)setVertices:(nonnull NSArray<MCVec2D *> *)vertices
+            indices:(nonnull NSArray<NSNumber *> *)indices {
     try {
-        _cppRefHandle.get()->setPolygonPositions(::djinni::List<::djinni_generated::Vec2D>::toCpp(positions),
-                                                 ::djinni::List<::djinni::List<::djinni_generated::Vec2D>>::toCpp(holes),
-                                                 ::djinni::Bool::toCpp(isConvex));
+        _cppRefHandle.get()->setVertices(::djinni::List<::djinni_generated::Vec2D>::toCpp(vertices),
+                                         ::djinni::List<::djinni::I32>::toCpp(indices));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -67,12 +65,11 @@ class Polygon2dInterface::ObjcProxy final
     friend class ::djinni_generated::Polygon2dInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void setPolygonPositions(const std::vector<::Vec2D> & c_positions, const std::vector<std::vector<::Vec2D>> & c_holes, bool c_isConvex) override
+    void setVertices(const std::vector<::Vec2D> & c_vertices, const std::vector<int32_t> & c_indices) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setPolygonPositions:(::djinni::List<::djinni_generated::Vec2D>::fromCpp(c_positions))
-                                                                    holes:(::djinni::List<::djinni::List<::djinni_generated::Vec2D>>::fromCpp(c_holes))
-                                                                 isConvex:(::djinni::Bool::fromCpp(c_isConvex))];
+            [djinni_private_get_proxied_objc_object() setVertices:(::djinni::List<::djinni_generated::Vec2D>::fromCpp(c_vertices))
+                                                          indices:(::djinni::List<::djinni::I32>::fromCpp(c_indices))];
         }
     }
     std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override

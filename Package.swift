@@ -28,6 +28,29 @@ let package = Package(
     ],
     targets: [
         .target(
+            name: "earcut",
+            path: "external/earcut/",
+            exclude: [
+                "earcut/glfw",
+                "earcut/test",
+                "earcut/appveyor.yml",
+                "earcut/CHANGELOG.md",
+                "earcut/CMakeLists.txt",
+                "earcut/LICENSE",
+                "earcut/README.md",
+            ],
+            sources: [
+                "",
+                "earcut/include/",
+                "earcut/include/mapbox/",
+            ],
+            publicHeadersPath: "earcut/include/mapbox/",
+            cxxSettings: [
+                .headerSearchPath("earcut/include/"),
+                .headerSearchPath("earcut/include/mapbox/"),
+            ]
+        ),
+        .target(
             name: "MapCore",
             dependencies: ["MapCoreSharedModule"],
             path: "ios",
@@ -45,7 +68,7 @@ let package = Package(
         ),
         .target(
             name: "MapCoreSharedModuleCpp",
-            dependencies: [],
+            dependencies: ["earcut"],
             path: "shared",
             sources: ["src"],
             publicHeadersPath: "public",

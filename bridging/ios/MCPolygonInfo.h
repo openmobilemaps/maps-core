@@ -9,13 +9,11 @@
 - (nonnull instancetype)initWithIdentifier:(nonnull NSString *)identifier
                                coordinates:(nonnull NSArray<MCCoord *> *)coordinates
                                      holes:(nonnull NSArray<NSArray<MCCoord *> *> *)holes
-                                  isConvex:(BOOL)isConvex
                                      color:(nonnull MCColor *)color
                             highlightColor:(nonnull MCColor *)highlightColor;
 + (nonnull instancetype)polygonInfoWithIdentifier:(nonnull NSString *)identifier
                                       coordinates:(nonnull NSArray<MCCoord *> *)coordinates
                                             holes:(nonnull NSArray<NSArray<MCCoord *> *> *)holes
-                                         isConvex:(BOOL)isConvex
                                             color:(nonnull MCColor *)color
                                    highlightColor:(nonnull MCColor *)highlightColor;
 
@@ -24,8 +22,6 @@
 @property (nonatomic, readonly, nonnull) NSArray<MCCoord *> * coordinates;
 
 @property (nonatomic, readonly, nonnull) NSArray<NSArray<MCCoord *> *> * holes;
-
-@property (nonatomic, readonly) BOOL isConvex;
 
 @property (nonatomic, readonly, nonnull) MCColor * color;
 
