@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <memory>
 
 class TouchInterface;
@@ -13,6 +14,8 @@ public:
     virtual ~TouchHandlerInterface() {}
 
     virtual void onTouchEvent(const TouchEvent & touchEvent) = 0;
+
+    virtual void insertListener(const std::shared_ptr<TouchInterface> & listener, int32_t index) = 0;
 
     virtual void addListener(const std::shared_ptr<TouchInterface> & listener) = 0;
 

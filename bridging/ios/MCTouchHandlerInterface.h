@@ -10,6 +10,9 @@
 
 - (void)onTouchEvent:(nonnull MCTouchEvent *)touchEvent;
 
+- (void)insertListener:(nullable id<MCTouchInterface>)listener
+                 index:(int32_t)index;
+
 - (void)addListener:(nullable id<MCTouchInterface>)listener;
 
 - (void)removeListener:(nullable id<MCTouchInterface>)listener;
