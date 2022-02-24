@@ -167,8 +167,6 @@ void DefaultTouchHandler::handleMove(Vec2F delta) {
         stateTime = DateHelper::currentTimeMillis();
     }
     for (auto &listener : listeners) {
-        LogError <<= listener.first;
-
         if (listener.second->onMove(delta,
                              state == ONE_FINGER_MOVING,             // confirmed
                              state == ONE_FINGER_DOUBLE_CLICK_MOVE)) // double click move
