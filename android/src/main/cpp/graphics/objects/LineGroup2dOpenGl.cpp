@@ -172,7 +172,6 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
     pointBHandle = glGetAttribLocation(program, "vPointB");
     segmentStartLPosHandle = glGetAttribLocation(program, "vSegmentStartLPos");
     styleInfoHandle = glGetAttribLocation(program, "vStyleInfo");
-    OpenGlHelper::checkGlError("mau13");
     glGenBuffers(1, &vertexAttribBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexAttribBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * lineAttributes.size(), &lineAttributes[0], GL_STATIC_DRAW);
@@ -182,8 +181,6 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * lineIndices.size(), &lineIndices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    OpenGlHelper::checkGlError("mau12");
 
     mvpMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
     scaleFactorHandle = glGetUniformLocation(program, "scaleFactor");
@@ -251,9 +248,7 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
 
     // Draw the triangle
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-    OpenGlHelper::checkGlError("mau10");
     glDrawElements(GL_TRIANGLES, lineIndices.size(), GL_UNSIGNED_SHORT, nullptr);
-    OpenGlHelper::checkGlError("mau11");
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     // Disable vertex array
