@@ -172,7 +172,6 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
     pointBHandle = glGetAttribLocation(program, "vPointB");
     segmentStartLPosHandle = glGetAttribLocation(program, "vSegmentStartLPos");
     styleInfoHandle = glGetAttribLocation(program, "vStyleInfo");
-
     glGenBuffers(1, &vertexAttribBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexAttribBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * lineAttributes.size(), &lineAttributes[0], GL_STATIC_DRAW);
@@ -197,9 +196,9 @@ void LineGroup2dOpenGl::clear() {
 
 void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                                int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
+
     if (!ready)
         return;
-
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     if (isMasked) {
         glStencilFunc(GL_EQUAL, 128, 128);
@@ -250,7 +249,6 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     // Draw the triangle
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glDrawElements(GL_TRIANGLES, lineIndices.size(), GL_UNSIGNED_SHORT, nullptr);
-
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     // Disable vertex array

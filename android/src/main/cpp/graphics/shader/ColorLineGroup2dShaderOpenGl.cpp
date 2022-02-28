@@ -24,13 +24,11 @@ void  ColorLineGroup2dShaderOpenGl::setupProgram(const std::shared_ptr<::Renderi
     // prepare shaders and OpenGL program
     int vertexShader = loadShader(GL_VERTEX_SHADER, getVertexShader());
     int fragmentShader = loadShader(GL_FRAGMENT_SHADER, getFragmentShader());
-
     int program = glCreateProgram();       // create empty OpenGL Program
     glAttachShader(program, vertexShader); // add the vertex shader to program
     glDeleteShader(vertexShader);
     glAttachShader(program, fragmentShader); // add the fragment shader to program
     glDeleteShader(fragmentShader);
-
     glLinkProgram(program); // create OpenGL program executables
 
     openGlContext->storeProgram(programName, program);
@@ -122,7 +120,7 @@ std::string  ColorLineGroup2dShaderOpenGl::getVertexShader() {
                 } else if (lineIndex > numStyles) {
                     lineIndex = numStyles;
                 }
-                int styleIndexBase = 7 * lineIndex;
+                int styleIndexBase = 11 * lineIndex;
                 float width = lineStyles[styleIndexBase];
                 float isScaled = lineStyles[styleIndexBase + 1];
                 color = vec4(lineStyles[styleIndexBase + 2], lineStyles[styleIndexBase + 3], lineStyles[styleIndexBase + 4], lineStyles[styleIndexBase + 5]);
@@ -162,6 +160,7 @@ std::string  ColorLineGroup2dShaderOpenGl::getFragmentShader() {
             varying vec2 pointBDeltaA;
             varying vec4 color;
             varying float capType; // 0: butt, 1: round, 2: square
+            varying vec4 gapColor;
 
             void main() {
                 int segmentType = int(floor(fSegmentType + 0.5));
@@ -178,7 +177,7 @@ std::string  ColorLineGroup2dShaderOpenGl::getFragmentShader() {
                         float dOrth = abs(length(pointDeltaA - intersectPt));
                         d = max(dLen, dOrth);
                     } else {
-                        discard;
+                      discard;
                     }
                 } else {
                     vec2 intersectPt = t * pointBDeltaA;
@@ -189,6 +188,8 @@ std::string  ColorLineGroup2dShaderOpenGl::getFragmentShader() {
                     discard;
                 }
 
+
+                vec4 fragColor = color;
                 int dashBase = 9 * int(fLineIndex);
                 int numDashInfos = int(floor(lineDashValues[dashBase] + 0.5));
                 if (numDashInfos > 0) {
@@ -202,15 +203,12 @@ std::string  ColorLineGroup2dShaderOpenGl::getFragmentShader() {
                         (intraDashPos > lineDashValues[baseDashInfos + 2] * factorToT && intraDashPos < lineDashValues[baseDashInfos + 3] * factorToT) ||
                         (intraDashPos > lineDashValues[baseDashInfos + 4] * factorToT && intraDashPos < lineDashValues[baseDashInfos + 5] * factorToT) ||
                         (intraDashPos > lineDashValues[baseDashInfos + 6] * factorToT && intraDashPos < lineDashValues[baseDashInfos + 7] * factorToT)) {
-                        gl_FragColor = gapColor;
-                        gl_FragColor.a = 1.0;
-                        gl_FragColor *= gapColor.a;
-                        return;
+                        fragColor = gapColor;
                     }
                 }
 
-                gl_FragColor = color;
+                gl_FragColor = fragColor;
                 gl_FragColor.a = 1.0;
-                gl_FragColor *= color.a;
+                gl_FragColor *= fragColor.a;
             });
 }
