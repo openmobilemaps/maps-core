@@ -58,6 +58,8 @@
 
 - (nonnull MCRectCoord *)getVisibleRect;
 
+- (nonnull MCRectCoord *)getPaddingAdjustedVisibleRect;
+
 - (nonnull NSArray<NSNumber *> *)getInvariantModelMatrix:(nonnull MCCoord *)coordinate
                                           scaleInvariant:(BOOL)scaleInvariant
                                        rotationInvariant:(BOOL)rotationInvariant;

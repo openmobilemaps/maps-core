@@ -100,6 +100,8 @@ map_camera_2d_interface = interface +c {
     set_padding_bottom(padding: f32);
 
     get_visible_rect() : rect_coord;
+    get_padding_adjusted_visible_rect() : rect_coord;
+
     get_invariant_model_matrix(coordinate: coord, scale_invariant: bool, rotation_invariant: bool) : list<f32>;
 
     add_listener(listener: map_camera_2d_listener_interface);

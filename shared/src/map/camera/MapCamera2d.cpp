@@ -321,6 +321,21 @@ MapCamera2d::getInvariantModelMatrix(const ::Coord &coordinate, bool scaleInvari
 
 RectCoord MapCamera2d::getVisibleRect() {
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
+    return getRectFromViewport(sizeViewport, centerPosition);
+}
+
+RectCoord MapCamera2d::getPaddingAdjustedVisibleRect() {
+    Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
+
+    // adjust viewport
+    sizeViewport.x -= (paddingLeft + paddingRight);
+    sizeViewport.y -= (paddingTop + paddingBottom);
+
+    // also use the padding adjusted center position
+    return getRectFromViewport(sizeViewport, getCenterPosition());
+}
+
+RectCoord getRectFromViewport(const Vec2I &sizeViewport, const Coord &center) {
     double zoomFactor = screenPixelAsRealMeterFactor * zoom;
 
     double halfWidth = sizeViewport.x * 0.5 * zoomFactor;
@@ -332,13 +347,13 @@ RectCoord MapCamera2d::getVisibleRect() {
     double deltaX = std::abs(halfWidth * cosAngle) + std::abs(halfHeight * sinAngle);
     double deltaY = std::abs(halfWidth * sinAngle) + std::abs(halfHeight * cosAngle);
 
-    double topLeftX = centerPosition.x - deltaX;
-    double topLeftY = centerPosition.y + deltaY;
-    double bottomRightX = centerPosition.x + deltaX;
-    double bottomRightY = centerPosition.y - deltaY;
+    double topLeftX = center.x - deltaX;
+    double topLeftY = center.y + deltaY;
+    double bottomRightX = center.x + deltaX;
+    double bottomRightY = center.y - deltaY;
 
-    Coord topLeft = Coord(mapCoordinateSystem.identifier, topLeftX, topLeftY, centerPosition.z);
-    Coord bottomRight = Coord(mapCoordinateSystem.identifier, bottomRightX, bottomRightY, centerPosition.z);
+    Coord topLeft = Coord(mapCoordinateSystem.identifier, topLeftX, topLeftY, center.z);
+    Coord bottomRight = Coord(mapCoordinateSystem.identifier, bottomRightX, bottomRightY, center.z);
     return RectCoord(topLeft, bottomRight);
 }
 

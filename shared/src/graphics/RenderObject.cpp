@@ -13,7 +13,7 @@
 RenderObject::RenderObject(std::shared_ptr<::GraphicsObjectInterface> graphicsObject) : graphicsObject(graphicsObject) {}
 
 RenderObject::RenderObject(std::shared_ptr<::GraphicsObjectInterface> graphicsObject, std::vector<float> modelMatrix)
-        : graphicsObject(graphicsObject), setCustomModelMatrix(true), modelMatrix(modelMatrix) {}
+        : graphicsObject(graphicsObject), setCustomModelMatrix(true), modelMatrix(std::move(modelMatrix)) {}
 
 std::shared_ptr<::GraphicsObjectInterface> RenderObject::getGraphicsObject() {
     return graphicsObject;
