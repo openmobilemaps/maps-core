@@ -17,6 +17,7 @@
 #include "MapCamera2dListenerInterface.h"
 #include "MapCoordinateSystem.h"
 #include "SimpleTouchInterface.h"
+#include "Vec2I.h"
 #include <optional>
 #include <set>
 #include <mutex>

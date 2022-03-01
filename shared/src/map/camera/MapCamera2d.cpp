@@ -335,7 +335,7 @@ RectCoord MapCamera2d::getPaddingAdjustedVisibleRect() {
     return getRectFromViewport(sizeViewport, getCenterPosition());
 }
 
-RectCoord getRectFromViewport(const Vec2I &sizeViewport, const Coord &center) {
+RectCoord MapCamera2d::getRectFromViewport(const Vec2I &sizeViewport, const Coord &center) {
     double zoomFactor = screenPixelAsRealMeterFactor * zoom;
 
     double halfWidth = sizeViewport.x * 0.5 * zoomFactor;
