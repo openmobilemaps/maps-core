@@ -17,6 +17,7 @@
 #include "MapCamera2dListenerInterface.h"
 #include "MapCoordinateSystem.h"
 #include "SimpleTouchInterface.h"
+#include "Vec2I.h"
 #include <optional>
 #include <set>
 #include <mutex>
@@ -88,6 +89,8 @@ class MapCamera2d : public MapCamera2dInterface,
     virtual void viewportSizeChanged() override;
 
     virtual RectCoord getVisibleRect() override;
+
+    virtual RectCoord getPaddingAdjustedVisibleRect() override;
 
     virtual ::Coord coordFromScreenPosition(const ::Vec2F &posScreen) override;
 
@@ -171,4 +174,5 @@ class MapCamera2d : public MapCamera2dInterface,
     Coord adjustCoordForPadding(const Coord &coords, double targetZoom);
     Coord getBoundsCorrectedCoords(const Coord &coords);
 
+    RectCoord getRectFromViewport(const Vec2I &sizeViewport, const Coord &center);
 };

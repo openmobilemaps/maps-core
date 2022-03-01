@@ -54,6 +54,8 @@ public:
 
     virtual ::RectCoord getVisibleRect() = 0;
 
+    virtual ::RectCoord getPaddingAdjustedVisibleRect() = 0;
+
     virtual std::vector<float> getInvariantModelMatrix(const ::Coord & coordinate, bool scaleInvariant, bool rotationInvariant) = 0;
 
     virtual void addListener(const std::shared_ptr<::MapCamera2dListenerInterface> & listener) = 0;
