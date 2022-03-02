@@ -35,7 +35,7 @@ public class RenderingContext: NSObject {
         descriptor.stencilCompareFunction = .always
         descriptor.stencilFailureOperation = .keep
         descriptor.depthFailureOperation = .keep
-        descriptor.depthStencilPassOperation = .invert
+        descriptor.depthStencilPassOperation = .replace
         descriptor.writeMask = 0b1000_0000
         let depthStencilDescriptor = MTLDepthStencilDescriptor()
         depthStencilDescriptor.frontFaceStencil = descriptor

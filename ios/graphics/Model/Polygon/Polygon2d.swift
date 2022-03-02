@@ -44,7 +44,11 @@ class Polygon2d: BaseGraphicsObject {
                 setupStencilStates()
             }
             encoder.setDepthStencilState(stencilState)
-            encoder.setStencilReferenceValue(0b1000_0000)
+            if maskInverse {
+                encoder.setStencilReferenceValue(0b0000_0000)
+            } else {
+                encoder.setStencilReferenceValue(0b1000_0000)
+            }
         }
 
         shader.setupProgram(context)
