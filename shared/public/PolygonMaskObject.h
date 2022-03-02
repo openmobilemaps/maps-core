@@ -15,12 +15,18 @@
 #include "GraphicsObjectInterface.h"
 #include "Polygon2dInterface.h"
 #include "Coord.h"
+#include "PolygonCoord.h"
 
 class PolygonMaskObject {
 public:
     PolygonMaskObject(const std::shared_ptr<GraphicsObjectFactoryInterface> &graphicsObjectFactory,
                       const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper);
 
+
+    void setPolygons(const std::vector<PolygonCoord> &polygons);
+
+    void setPolygon(const PolygonCoord &polygon);
+    
     void setPositions(const std::vector<Coord> &positions, const std::vector<std::vector<Coord>> &holes);
 
     std::shared_ptr<Polygon2dInterface> getPolygonObject();
