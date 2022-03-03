@@ -38,26 +38,25 @@ public:
     virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
                               int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
 
-    virtual void setPolygonPositions(const std::vector<::Vec2D> &positions, const std::vector<std::vector<::Vec2D>> &holes,
-                                     bool isConvex) override;
+    virtual void setVertices(const std::vector<::Vec2D> & vertices, const std::vector<int32_t> & indices) override;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() override;
 
     virtual std::shared_ptr<MaskingObjectInterface> asMaskingObject() override;
 
 protected:
-    void initializePolygon();
+    void prepareGlData(const std::shared_ptr<OpenGlContext> &openGlContext);
 
     void drawPolygon(std::shared_ptr<OpenGlContext> openGlContext, int program, int64_t mvpMatrix);
 
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
 
-    bool polygonIsConvex = false;
-    std::vector<::Vec2D> polygonCoordinates;
-    std::vector<std::vector<::Vec2D>> holePolygonCoordinates;
-
-    std::vector<GLfloat> vertexBuffer;
-    std::vector<GLushort> indexBuffer;
+    int mvpMatrixHandle;
+    int positionHandle;
+    GLuint vertexBuffer;
+    std::vector<GLfloat> vertices;
+    GLuint indexBuffer;
+    std::vector<GLushort> indices;
 
     bool ready = false;
 };

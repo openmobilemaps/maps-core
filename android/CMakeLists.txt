@@ -34,6 +34,7 @@ add_library( # Sets the name of the library.
 
 include_directories(../external/djinni/support-lib)
 include_directories(../external/djinni/support-lib/jni)
+include_directories(../external/earcut/earcut/include/mapbox)
 include_directories(../bridging/android/jni/graphics)
 include_directories(../bridging/android/jni/graphics/common)
 include_directories(../bridging/android/jni/graphics/objects)
