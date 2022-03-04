@@ -118,10 +118,15 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
             TaskConfig(taskId, 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
             [=] {
                 for (const auto iconTuple : iconObjects) {
+                    if (!mapInterface) return;
                     const auto &icon = std::get<0>(iconTuple);
                     const auto &quadObject = std::get<1>(iconTuple)->getQuadObject();
                     quadObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
                     quadObject->loadTexture(mapInterface->getRenderingContext(), icon->getTexture());
+                    if (mask && !mask->asGraphicsObject()->isReady()) {
+                        mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+                    }
+                    mapInterface->invalidate();
                 }
             }));
 

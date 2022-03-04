@@ -133,12 +133,16 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
 }
 
 void PolygonLayer::setupPolygonObjects(const std::vector<std::shared_ptr<Polygon2dInterface>> &polygons) {
+    if (!mapInterface) return;
     for (const auto &polygonGraphicsObject : polygons) {
         if (!polygonGraphicsObject->asGraphicsObject()->isReady()) {
             polygonGraphicsObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
         }
     }
-    if (mapInterface) mapInterface->invalidate();
+    if (mask && !mask->asGraphicsObject()->isReady()) {
+        mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+    }
+    mapInterface->invalidate();
 }
 
 void PolygonLayer::clear() {
