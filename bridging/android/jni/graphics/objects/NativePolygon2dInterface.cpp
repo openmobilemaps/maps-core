@@ -17,14 +17,13 @@ NativePolygon2dInterface::JavaProxy::JavaProxy(JniType j) : Handle(::djinni::jni
 
 NativePolygon2dInterface::JavaProxy::~JavaProxy() = default;
 
-void NativePolygon2dInterface::JavaProxy::setPolygonPositions(const std::vector<::Vec2D> & c_positions, const std::vector<std::vector<::Vec2D>> & c_holes, bool c_isConvex) {
+void NativePolygon2dInterface::JavaProxy::setVertices(const std::vector<::Vec2D> & c_vertices, const std::vector<int32_t> & c_indices) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativePolygon2dInterface>::get();
-    jniEnv->CallVoidMethod(Handle::get().get(), data.method_setPolygonPositions,
-                           ::djinni::get(::djinni::List<::djinni_generated::NativeVec2D>::fromCpp(jniEnv, c_positions)),
-                           ::djinni::get(::djinni::List<::djinni::List<::djinni_generated::NativeVec2D>>::fromCpp(jniEnv, c_holes)),
-                           ::djinni::get(::djinni::Bool::fromCpp(jniEnv, c_isConvex)));
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_setVertices,
+                           ::djinni::get(::djinni::List<::djinni_generated::NativeVec2D>::fromCpp(jniEnv, c_vertices)),
+                           ::djinni::get(::djinni::List<::djinni::I32>::fromCpp(jniEnv, c_indices)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
 std::shared_ptr<::GraphicsObjectInterface> NativePolygon2dInterface::JavaProxy::asGraphicsObject() {
@@ -52,14 +51,13 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_Polygon2dInterface_00024CppProxy_native_1setPolygonPositions(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_positions, jobject j_holes, jboolean j_isConvex)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_Polygon2dInterface_00024CppProxy_native_1setVertices(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_vertices, jobject j_indices)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::Polygon2dInterface>(nativeRef);
-        ref->setPolygonPositions(::djinni::List<::djinni_generated::NativeVec2D>::toCpp(jniEnv, j_positions),
-                                 ::djinni::List<::djinni::List<::djinni_generated::NativeVec2D>>::toCpp(jniEnv, j_holes),
-                                 ::djinni::Bool::toCpp(jniEnv, j_isConvex));
+        ref->setVertices(::djinni::List<::djinni_generated::NativeVec2D>::toCpp(jniEnv, j_vertices),
+                         ::djinni::List<::djinni::I32>::toCpp(jniEnv, j_indices));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

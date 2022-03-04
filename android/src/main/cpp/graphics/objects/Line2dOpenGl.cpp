@@ -187,7 +187,7 @@ void Line2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
 
     if (isMasked) {
-        glStencilFunc(GL_EQUAL, 128, 128);
+        glStencilFunc(GL_EQUAL, 128, 255);
     } else {
         glEnable(GL_STENCIL_TEST);
         glStencilMask(0xFF);

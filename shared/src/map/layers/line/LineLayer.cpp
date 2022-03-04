@@ -102,8 +102,14 @@ void LineLayer::add(const std::shared_ptr<LineInfoInterface> &line) {
 }
 
 void LineLayer::setupLine(const std::shared_ptr<Line2dInterface> &line) {
-    line->asGraphicsObject()->setup(mapInterface->getRenderingContext());
-    if (mapInterface) mapInterface->invalidate();
+    if (!mapInterface) return;
+    if (!line->asGraphicsObject()->isReady()) {
+        line->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+    }
+    if (mask && !mask->asGraphicsObject()->isReady()) {
+        mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+    }
+    mapInterface->invalidate();
 }
 
 void LineLayer::clear() {

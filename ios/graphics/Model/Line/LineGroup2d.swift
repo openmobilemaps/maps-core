@@ -112,7 +112,7 @@ class LineGroup2d: BaseGraphicsObject {
 
 extension LineGroup2d: MCLineGroup2dInterface {
     func setLines(_ lines: [MCRenderLineDescription]) {
-        guard lines.count > 1 else {
+        guard lines.count >= 1 else {
             indicesCount = 0
             lineVerticesBuffer = nil
             lineIndicesBuffer = nil

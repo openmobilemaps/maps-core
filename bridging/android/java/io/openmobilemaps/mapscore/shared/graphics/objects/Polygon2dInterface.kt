@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class Polygon2dInterface {
 
-    abstract fun setPolygonPositions(positions: ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2D>, holes: ArrayList<ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2D>>, isConvex: Boolean)
+    abstract fun setVertices(vertices: ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2D>, indices: ArrayList<Int>)
 
     abstract fun asGraphicsObject(): GraphicsObjectInterface
 
@@ -31,11 +31,11 @@ abstract class Polygon2dInterface {
             _djinni_private_destroy()
         }
 
-        override fun setPolygonPositions(positions: ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2D>, holes: ArrayList<ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2D>>, isConvex: Boolean) {
+        override fun setVertices(vertices: ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2D>, indices: ArrayList<Int>) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setPolygonPositions(this.nativeRef, positions, holes, isConvex)
+            native_setVertices(this.nativeRef, vertices, indices)
         }
-        private external fun native_setPolygonPositions(_nativeRef: Long, positions: ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2D>, holes: ArrayList<ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2D>>, isConvex: Boolean)
+        private external fun native_setVertices(_nativeRef: Long, vertices: ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2D>, indices: ArrayList<Int>)
 
         override fun asGraphicsObject(): GraphicsObjectInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

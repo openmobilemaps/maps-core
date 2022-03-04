@@ -111,7 +111,7 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
                     std::make_shared<Polygon2dLayerObject>(mapInterface->getCoordinateConverterHelper(), polygonGraphicsObject,
                                                            shader);
 
-            polygonObject->setPositions(polygon.coordinates, polygon.holes, polygon.isConvex);
+            polygonObject->setPositions(polygon.coordinates, polygon.holes);
             polygonObject->setColor(polygon.color);
 
             polygonGraphicsObjects.push_back(polygonGraphicsObject);
@@ -133,12 +133,16 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
 }
 
 void PolygonLayer::setupPolygonObjects(const std::vector<std::shared_ptr<Polygon2dInterface>> &polygons) {
+    if (!mapInterface) return;
     for (const auto &polygonGraphicsObject : polygons) {
         if (!polygonGraphicsObject->asGraphicsObject()->isReady()) {
             polygonGraphicsObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
         }
     }
-    if (mapInterface) mapInterface->invalidate();
+    if (mask && !mask->asGraphicsObject()->isReady()) {
+        mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+    }
+    mapInterface->invalidate();
 }
 
 void PolygonLayer::clear() {

@@ -11,7 +11,6 @@ polygon_info = record {
     identifier: string;
     coordinates: list<coord>;
     holes: list<list<coord>>;
-    isConvex: bool;
     color: color;
     highlight_color: color;
 }
