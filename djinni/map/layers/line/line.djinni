@@ -45,5 +45,7 @@ line_layer_interface = interface +c {
     set_callback_handler(handler: line_layer_callback_interface);
     asLayerInterface(): layer_interface;
     invalidate();
+    reset_selection();
+    set_selected(selected_ids: set<string>);
     set_layer_clickable(is_layer_clickable: bool);
 }

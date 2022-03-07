@@ -90,6 +90,18 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)resetSelection {
+    try {
+        _cppRefHandle.get()->resetSelection();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setSelected:(nonnull NSSet<NSString *> *)selectedIds {
+    try {
+        _cppRefHandle.get()->setSelected(::djinni::Set<::djinni::String>::toCpp(selectedIds));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)setLayerClickable:(BOOL)isLayerClickable {
     try {
         _cppRefHandle.get()->setLayerClickable(::djinni::Bool::toCpp(isLayerClickable));

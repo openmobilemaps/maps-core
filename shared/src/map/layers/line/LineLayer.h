@@ -72,13 +72,17 @@ class LineLayer : public LineLayerInterface,
 
     virtual bool onTouchDown(const ::Vec2F &posScreen) override;
 
-    virtual bool onClickConfirmed(const ::Vec2F &posScreen) override;
+    virtual bool onClickUnconfirmed(const ::Vec2F &posScreen) override;
 
     virtual void clearTouch() override;
 
     void setLayerClickable(bool isLayerClickable) override;
 
-private:
+    void resetSelection() override;
+
+    void setSelected(const std::unordered_set<std::string> &selectedIds) override;
+
+protected:
     std::shared_ptr<MapInterface> mapInterface;
 
     std::shared_ptr<LineLayerCallbackInterface> callbackHandler;
@@ -95,6 +99,7 @@ private:
     std::vector<std::shared_ptr<LineInfoInterface>> addingQueue;
 
     std::vector<std::shared_ptr<LineInfoInterface>> highlightedLines;
+    std::vector<std::shared_ptr<LineInfoInterface>> selectedLines;
 
     std::atomic<bool> isHidden;
     std::atomic<bool> isLayerClickable = true;

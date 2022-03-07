@@ -240,7 +240,7 @@ bool LineLayer::onTouchDown(const ::Vec2F &posScreen) {
     return false;
 }
 
-bool LineLayer::onClickConfirmed(const ::Vec2F &posScreen) {
+bool LineLayer::onClickUnconfirmed(const ::Vec2F &posScreen) {
     auto point = mapInterface->getCamera()->coordFromScreenPosition(posScreen);
 
 
@@ -258,6 +258,7 @@ bool LineLayer::onClickConfirmed(const ::Vec2F &posScreen) {
             if (callbackHandler) {
                 callbackHandler->onLineClickConfirmed(line.first);
             }
+            setSelected({line.first->getIdentifier()});
             mapInterface->invalidate();
             return true;
         }
@@ -297,4 +298,27 @@ void LineLayer::setLayerClickable(bool isLayerClickable) {
             mapInterface->getTouchHandler()->removeListener(shared_from_this());
         }
     }
+}
+
+void LineLayer::resetSelection() {
+    {
+        std::lock_guard<std::recursive_mutex> lock(linesMutex);
+        for (auto const &line : lines) {
+            line.second->setHighlighted(false);
+        }
+    }
+    if (mapInterface) mapInterface->invalidate();
+}
+
+void LineLayer::setSelected(const std::unordered_set<std::string> &selectedIds) {
+    resetSelection();
+    {
+        std::lock_guard<std::recursive_mutex> lock(linesMutex);
+        for (auto const &line : lines) {
+            if (selectedIds.count(line.first->getIdentifier()) > 0) {
+                line.second->setHighlighted(true);
+            }
+        }
+    }
+    if (mapInterface) mapInterface->invalidate();
 }
