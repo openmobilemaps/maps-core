@@ -18,12 +18,12 @@
 namespace std {
 template <> struct equal_to<PolygonInfo> {
     inline bool operator()(const PolygonInfo &lhs, const PolygonInfo &rhs) const {  if(lhs.identifier != rhs.identifier) { return false; }
-        if(lhs.coordinates.size() != rhs.coordinates.size()) { return false; }
+        if(lhs.coordinates.positions.size() != rhs.coordinates.positions.size()) { return false; }
 
-        for(auto i=0; i<lhs.coordinates.size(); ++i) {
-            if(std::fabs(lhs.coordinates[i].x - rhs.coordinates[i].x) > std::numeric_limits<double>::epsilon() ||
-               std::fabs(lhs.coordinates[i].y - rhs.coordinates[i].y) > std::numeric_limits<double>::epsilon() ||
-               std::fabs(lhs.coordinates[i].z - rhs.coordinates[i].z) > std::numeric_limits<double>::epsilon() ||
+        for(auto i=0; i<lhs.coordinates.positions.size(); ++i) {
+            if(std::fabs(lhs.coordinates.positions[i].x - rhs.coordinates.positions[i].x) > std::numeric_limits<double>::epsilon() ||
+               std::fabs(lhs.coordinates.positions[i].y - rhs.coordinates.positions[i].y) > std::numeric_limits<double>::epsilon() ||
+               std::fabs(lhs.coordinates.positions[i].z - rhs.coordinates.positions[i].z) > std::numeric_limits<double>::epsilon() ||
                lhs.identifier != rhs.identifier) {
                 return false;
             }

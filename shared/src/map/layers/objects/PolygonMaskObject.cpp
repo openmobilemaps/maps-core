@@ -11,6 +11,10 @@
 #include "PolygonMaskObject.h"
 #include "EarcutVec2D.h"
 
+std::shared_ptr<PolygonMaskObjectInterface> PolygonMaskObjectInterface::create(const std::shared_ptr<::GraphicsObjectFactoryInterface> & graphicsObjectFactory, const std::shared_ptr<::CoordinateConversionHelperInterface> & conversionHelper) {
+    return std::make_shared<PolygonMaskObject>(graphicsObjectFactory,conversionHelper);
+}
+
 PolygonMaskObject::PolygonMaskObject(const std::shared_ptr<GraphicsObjectFactoryInterface> &graphicsObjectFactory,
                                      const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper)
         : conversionHelper(conversionHelper), polygon(graphicsObjectFactory->createPolygonMask()) {}
@@ -19,11 +23,11 @@ void PolygonMaskObject::setPositions(const std::vector<Coord> &positions, const 
     setPolygon({positions, holes});
 }
 
-void PolygonMaskObject::setPolygon(const PolygonCoord &polygon){
+void PolygonMaskObject::setPolygon(const ::PolygonCoord &polygon){
     setPolygons({polygon});
 }
 
-void PolygonMaskObject::setPolygons(const std::vector<PolygonCoord> &polygons){
+void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons){
     std::vector<int32_t> indices;
     std::vector<Vec2D> vertices;
     int32_t indexOffset = 0;
