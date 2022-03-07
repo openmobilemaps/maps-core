@@ -7,15 +7,13 @@
 @implementation MCPolygonInfo
 
 - (nonnull instancetype)initWithIdentifier:(nonnull NSString *)identifier
-                               coordinates:(nonnull NSArray<MCCoord *> *)coordinates
-                                     holes:(nonnull NSArray<NSArray<MCCoord *> *> *)holes
+                               coordinates:(nonnull MCPolygonCoord *)coordinates
                                      color:(nonnull MCColor *)color
                             highlightColor:(nonnull MCColor *)highlightColor
 {
     if (self = [super init]) {
         _identifier = [identifier copy];
-        _coordinates = [coordinates copy];
-        _holes = [holes copy];
+        _coordinates = coordinates;
         _color = color;
         _highlightColor = highlightColor;
     }
@@ -23,21 +21,19 @@
 }
 
 + (nonnull instancetype)polygonInfoWithIdentifier:(nonnull NSString *)identifier
-                                      coordinates:(nonnull NSArray<MCCoord *> *)coordinates
-                                            holes:(nonnull NSArray<NSArray<MCCoord *> *> *)holes
+                                      coordinates:(nonnull MCPolygonCoord *)coordinates
                                             color:(nonnull MCColor *)color
                                    highlightColor:(nonnull MCColor *)highlightColor
 {
     return [(MCPolygonInfo*)[self alloc] initWithIdentifier:identifier
                                                 coordinates:coordinates
-                                                      holes:holes
                                                       color:color
                                              highlightColor:highlightColor];
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p identifier:%@ coordinates:%@ holes:%@ color:%@ highlightColor:%@>", self.class, (void *)self, self.identifier, self.coordinates, self.holes, self.color, self.highlightColor];
+    return [NSString stringWithFormat:@"<%@ %p identifier:%@ coordinates:%@ color:%@ highlightColor:%@>", self.class, (void *)self, self.identifier, self.coordinates, self.color, self.highlightColor];
 }
 
 @end

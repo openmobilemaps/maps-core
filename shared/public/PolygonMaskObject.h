@@ -13,23 +13,23 @@
 #include "GraphicsObjectFactoryInterface.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "GraphicsObjectInterface.h"
+#include "PolygonMaskObjectInterface.h"
 #include "Polygon2dInterface.h"
 #include "Coord.h"
 #include "PolygonCoord.h"
 
-class PolygonMaskObject {
+class PolygonMaskObject: public PolygonMaskObjectInterface {
 public:
-    PolygonMaskObject(const std::shared_ptr<GraphicsObjectFactoryInterface> &graphicsObjectFactory,
-                      const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper);
+    PolygonMaskObject(const std::shared_ptr<::GraphicsObjectFactoryInterface> &graphicsObjectFactory,
+                      const std::shared_ptr<::CoordinateConversionHelperInterface> &conversionHelper);
 
+    virtual void setPolygons(const std::vector<::PolygonCoord> & polygons) override;
 
-    void setPolygons(const std::vector<PolygonCoord> &polygons);
+    virtual void setPolygon(const ::PolygonCoord & polygon) override;
 
-    void setPolygon(const PolygonCoord &polygon);
-    
     void setPositions(const std::vector<Coord> &positions, const std::vector<std::vector<Coord>> &holes);
 
-    std::shared_ptr<Polygon2dInterface> getPolygonObject();
+    virtual std::shared_ptr<::Polygon2dInterface> getPolygonObject() override;
 
 private:
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;

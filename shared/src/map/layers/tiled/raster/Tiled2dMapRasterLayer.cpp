@@ -96,7 +96,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
 
         std::unordered_set<Tiled2dMapRasterTileInfo> tilesToAdd;
         for (const auto &rasterTileInfo : currentTileInfos) {
-            if (!tileObjectMap[rasterTileInfo]) {
+            if (tileObjectMap.count(rasterTileInfo) == 0) {
                 tilesToAdd.insert(rasterTileInfo);
             }
         }
@@ -122,7 +122,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
         }
 
         for (const auto &tile : tilesToRemove) {
-            auto tileObject = tileObjectMap[tile];
+            auto tileObject = tileObjectMap.at(tile);
             tilesToClean.emplace_back(tileObject);
             tileObjectMap.erase(tile);
         }
@@ -175,7 +175,7 @@ void Tiled2dMapRasterLayer::setupTiles(
     for (const auto &tile : tilesToSetup) {
         const auto &tileInfo = tile.first;
         const auto &tileObject = tile.second;
-        if (!tileObject || !tileObjectMap[tile.first]) continue;
+        if (!tileObject || !tileObjectMap.count(tile.first)) continue;
         tileObject->getQuadObject()->asGraphicsObject()->setup(renderingContext);
 
         if (tileInfo.textureHolder) {

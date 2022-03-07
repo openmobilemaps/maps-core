@@ -5,8 +5,7 @@ package io.openmobilemaps.mapscore.shared.map.layers.polygon
 
 data class PolygonInfo(
     var identifier: String,
-    var coordinates: ArrayList<io.openmobilemaps.mapscore.shared.map.coordinates.Coord>,
-    var holes: ArrayList<ArrayList<io.openmobilemaps.mapscore.shared.map.coordinates.Coord>>,
+    var coordinates: io.openmobilemaps.mapscore.shared.map.coordinates.PolygonCoord,
     var color: io.openmobilemaps.mapscore.shared.graphics.common.Color,
     var highlightColor: io.openmobilemaps.mapscore.shared.graphics.common.Color,
 )

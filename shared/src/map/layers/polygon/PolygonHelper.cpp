@@ -12,7 +12,7 @@
 
 bool PolygonHelper::pointInside(const PolygonInfo &polygon, const Coord &point,
                                 const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper) {
-    return pointInside(point, polygon.coordinates, polygon.holes, conversionHelper);
+    return pointInside(point, polygon.coordinates.positions, polygon.coordinates.holes, conversionHelper);
 }
 
 bool PolygonHelper::pointInside(const Coord &point, const std::vector<Coord> &positions,

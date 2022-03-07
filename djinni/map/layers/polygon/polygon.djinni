@@ -1,6 +1,10 @@
 @extern "../../../yaml/layer_interface.yaml"
 @extern "../../../yaml/color.yaml"
 @extern "../../../yaml/coord.yaml"
+@extern "../../../yaml/polygon_coord.yaml"
+@extern "../../../yaml/graphics_object_factory_interface.yaml"
+@extern "../../../yaml/coordinate_conversion_helper_interface.yaml"
+@extern "../../../yaml/polygon_2d_interface.yaml"
 
 polygon_style = record {
     color: color;
@@ -9,8 +13,7 @@ polygon_style = record {
 
 polygon_info = record {
     identifier: string;
-    coordinates: list<coord>;
-    holes: list<list<coord>>;
+    coordinates: polygon_coord;
     color: color;
     highlight_color: color;
 }
@@ -31,4 +34,11 @@ polygon_layer_interface = interface +c {
     asLayerInterface(): layer_interface;
     reset_selection();
     set_layer_clickable(is_layer_clickable: bool);
+}
+
+polygon_mask_object_interface = interface +c {
+    static create(graphics_object_factory: graphics_object_factory_interface, conversion_helper: coordinate_conversion_helper_interface) : polygon_mask_object_interface;
+    set_polygons(polygons: list<polygon_coord>);
+    set_polygon(polygon: polygon_coord);
+    get_polygon_object(): polygon_2d_interface;
 }

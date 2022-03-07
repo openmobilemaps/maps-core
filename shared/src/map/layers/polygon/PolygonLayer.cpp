@@ -111,7 +111,7 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
                     std::make_shared<Polygon2dLayerObject>(mapInterface->getCoordinateConverterHelper(), polygonGraphicsObject,
                                                            shader);
 
-            polygonObject->setPositions(polygon.coordinates, polygon.holes);
+            polygonObject->setPolygon(polygon.coordinates);
             polygonObject->setColor(polygon.color);
 
             polygonGraphicsObjects.push_back(polygonGraphicsObject);

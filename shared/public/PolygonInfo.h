@@ -4,26 +4,22 @@
 #pragma once
 
 #include "Color.h"
-#include "Coord.h"
+#include "PolygonCoord.h"
 #include <string>
 #include <utility>
-#include <vector>
 
 struct PolygonInfo final {
     std::string identifier;
-    std::vector<::Coord> coordinates;
-    std::vector<std::vector<::Coord>> holes;
+    ::PolygonCoord coordinates;
     ::Color color;
     ::Color highlightColor;
 
     PolygonInfo(std::string identifier_,
-                std::vector<::Coord> coordinates_,
-                std::vector<std::vector<::Coord>> holes_,
+                ::PolygonCoord coordinates_,
                 ::Color color_,
                 ::Color highlightColor_)
     : identifier(std::move(identifier_))
     , coordinates(std::move(coordinates_))
-    , holes(std::move(holes_))
     , color(std::move(color_))
     , highlightColor(std::move(highlightColor_))
     {}
