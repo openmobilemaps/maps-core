@@ -174,6 +174,10 @@ void Line2dOpenGl::clear() {
     ready = false;
 }
 
+void Line2dOpenGl::setIsInverseMasked(bool inversed) {
+    isMaskInversed = inversed;
+}
+
 void Line2dOpenGl::removeGlBuffers() {
     glDeleteBuffers(1, &vertexAttribBuffer);
     glDeleteBuffers(1, &indexBuffer);
@@ -187,7 +191,11 @@ void Line2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
 
     if (isMasked) {
-        glStencilFunc(GL_EQUAL, 128, 255);
+        if (isMaskInversed) {
+            glStencilFunc(GL_EQUAL, 0, 255);
+        } else {
+            glStencilFunc(GL_EQUAL, 128, 255);
+        }
     } else {
         glEnable(GL_STENCIL_TEST);
         glStencilMask(0xFF);

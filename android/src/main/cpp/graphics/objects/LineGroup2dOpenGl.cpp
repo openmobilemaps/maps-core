@@ -21,7 +21,6 @@ bool LineGroup2dOpenGl::isReady() {
     return ready;
 }
 
-
 void LineGroup2dOpenGl::setLines(const std::vector<RenderLineDescription> &lines) {
     ready = false;
     dataReady = false;
@@ -194,6 +193,10 @@ void LineGroup2dOpenGl::clear() {
     glDeleteBuffers(1, &indexBuffer);
 }
 
+void LineGroup2dOpenGl::setIsInverseMasked(bool inversed) {
+    isMaskInversed = inversed;
+}
+
 void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                                int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
 
@@ -201,7 +204,11 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
         return;
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     if (isMasked) {
-        glStencilFunc(GL_EQUAL, 128, 255);
+        if (isMaskInversed) {
+            glStencilFunc(GL_EQUAL, 0, 255);
+        } else {
+            glStencilFunc(GL_EQUAL, 128, 255);
+        }
     } else {
         glEnable(GL_STENCIL_TEST);
         glStencilMask(0xFF);

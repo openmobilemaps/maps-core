@@ -48,6 +48,8 @@ class Text2dOpenGl : public GraphicsObjectInterface,
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() override;
 
+    virtual void setIsInverseMasked(bool inversed) override;
+
   protected:
     virtual void adjustTextureCoordinates();
 
@@ -77,4 +79,6 @@ class Text2dOpenGl : public GraphicsObjectInterface,
 
     bool ready = false;
     bool dataReady = false;
+
+    bool isMaskInversed = false;
 };

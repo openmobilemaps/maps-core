@@ -48,6 +48,8 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
 
     virtual std::shared_ptr<MaskingObjectInterface> asMaskingObject() override;
 
+    virtual void setIsInverseMasked(bool inversed) override;
+
   protected:
     virtual void adjustTextureCoordinates();
 
@@ -80,4 +82,6 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
     double factorWidth = 1.0;
 
     bool ready = false;
+
+    bool isMaskInversed = false;
 };

@@ -16,6 +16,12 @@ abstract class GraphicsObjectInterface {
     /** Clear graphics object and invalidate isReady */
     abstract fun clear()
 
+    /**
+     * by defaults objects if masked are only rendered where the mask is set
+     * if setting this flag the masked is applied inversly
+     */
+    abstract fun setIsInverseMasked(inversed: Boolean)
+
     /** Render the graphics object; ensure calling on graphics thread */
     abstract fun render(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, mvpMatrix: Long, isMasked: Boolean, screenPixelAsRealMeterFactor: Double)
 
@@ -54,6 +60,12 @@ abstract class GraphicsObjectInterface {
             native_clear(this.nativeRef)
         }
         private external fun native_clear(_nativeRef: Long)
+
+        override fun setIsInverseMasked(inversed: Boolean) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setIsInverseMasked(this.nativeRef, inversed)
+        }
+        private external fun native_setIsInverseMasked(_nativeRef: Long, inversed: Boolean)
 
         override fun render(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, mvpMatrix: Long, isMasked: Boolean, screenPixelAsRealMeterFactor: Double) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

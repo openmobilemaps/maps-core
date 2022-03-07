@@ -44,6 +44,8 @@ public:
 
     virtual std::shared_ptr<MaskingObjectInterface> asMaskingObject() override;
 
+    virtual void setIsInverseMasked(bool inversed) override;
+
 protected:
     void prepareGlData(const std::shared_ptr<OpenGlContext> &openGlContext);
 
@@ -59,4 +61,6 @@ protected:
     std::vector<GLushort> indices;
 
     bool ready = false;
+
+    bool isMaskInversed = false;
 };

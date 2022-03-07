@@ -137,9 +137,9 @@ fragment float4
 lineGroupFragmentShader(LineVertexOut in [[stage_in]],
                         constant LineStyling *styling [[buffer(1)]])
 {
-    half lineLength = length(in.lineB);
-    half t = half(dot(in.lineA, normalize(in.lineB)) / lineLength);
-    half d;
+    float lineLength = length(in.lineB);
+    float t = dot(in.lineA, normalize(in.lineB) / lineLength);
+    float d;
     LineStyling style = styling[in.stylingIndex];
     
     float a = style.color.a * style.opacity;
@@ -149,11 +149,11 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
     char segmentType = in.segmentType;
     if (t < 0.0 || t > 1.0) {
         if (segmentType == 0 || capType == 1 || (segmentType == 2 && t < 0.0) || (segmentType == 1 && t > 1.0)) {
-            d = half(min(length(in.lineA), length(in.lineA - in.lineB)));
+            d = min(length(in.lineA), length(in.lineA - in.lineB));
         } else if (capType == 2) {
-            half dLen = t < 0.0 ? -t * lineLength : (t - 1.0) * lineLength;
+            float dLen = t < 0.0 ? -t * lineLength : (t - 1.0) * lineLength;
             float2 intersectPt = t * in.lineB;
-            half dOrth = abs(length(in.lineA - intersectPt));
+            float dOrth = abs(length(in.lineA - intersectPt));
             d = max(dLen, dOrth);
         } else {
             d = 0;
@@ -169,10 +169,10 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
     }
 
     if (style.numDashValues > 0) {
-        half factorToT = (in.width * 2) / lineLength;
-        half dashTotal = style.dashArray[7] * factorToT;
-        half startOffsetSegment = fmod(half(in.lenghtPrefix) / lineLength, dashTotal);
-        half intraDashPos = fmod(t + startOffsetSegment, dashTotal);
+        float factorToT = (in.width * 2) / lineLength;
+        float dashTotal = style.dashArray[7] * factorToT;
+        float startOffsetSegment = fmod(in.lenghtPrefix / lineLength, dashTotal);
+        float intraDashPos = fmod(t + startOffsetSegment, dashTotal);
 
         if ((intraDashPos > style.dashArray[0] * factorToT && intraDashPos < style.dashArray[1] * factorToT) ||
             (intraDashPos > style.dashArray[2] * factorToT && intraDashPos < style.dashArray[3] * factorToT) ||
