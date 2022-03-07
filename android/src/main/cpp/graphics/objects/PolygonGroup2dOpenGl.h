@@ -43,6 +43,8 @@ public:
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> & context, const ::RenderPassConfig & renderPass, int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
+    virtual void setIsInverseMasked(bool inversed) override;
+
 protected:
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
     int mvpMatrixHandle;
@@ -55,6 +57,8 @@ protected:
 
     bool dataReady = false;
     bool ready = false;
+
+    bool isMaskInversed = false;
 };
 
 

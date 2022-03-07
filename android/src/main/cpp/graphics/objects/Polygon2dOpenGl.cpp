@@ -77,6 +77,10 @@ void Polygon2dOpenGl::clear() {
     ready = false;
 }
 
+void Polygon2dOpenGl::setIsInverseMasked(bool inversed) {
+    isMaskInversed = inversed;
+}
+
 void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                              int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
     if (!ready)
@@ -86,7 +90,11 @@ void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> 
     int program = openGlContext->getProgram(shaderProgram->getProgramName());
 
     if (isMasked) {
-        glStencilFunc(GL_EQUAL, 128, 255);
+        if (isMaskInversed) {
+            glStencilFunc(GL_EQUAL, 0, 255);
+        } else {
+            glStencilFunc(GL_EQUAL, 128, 255);
+        }
     }
     glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);

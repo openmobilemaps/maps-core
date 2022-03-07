@@ -25,6 +25,10 @@ void Text2dOpenGl::clear() {
     ready = false;
 }
 
+void Text2dOpenGl::setIsInverseMasked(bool inversed) {
+    isMaskInversed = inversed;
+}
+
 void Text2dOpenGl::setTexts(const std::vector<TextDescription> &texts) {
     ready = false;
     dataReady = false;
@@ -166,7 +170,7 @@ void Text2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
         return;
 
     if (isMasked) {
-        glStencilFunc(GL_EQUAL, 128, 128);
+        glStencilFunc(GL_EQUAL, isMaskInversed ? 0 : 128, 128);
         glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
     }
 

@@ -38,6 +38,8 @@ class Line2dOpenGl : public GraphicsObjectInterface,
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() override;
 
+    virtual void setIsInverseMasked(bool inversed) override;
+
   protected:
     void initializeLineAndPoints();
 
@@ -63,4 +65,6 @@ class Line2dOpenGl : public GraphicsObjectInterface,
     std::vector<GLuint> lineIndices;
 
     bool ready = false;
+
+    bool isMaskInversed = false;
 };
