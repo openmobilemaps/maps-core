@@ -21,7 +21,8 @@
 #include <optional>
 #include <set>
 #include <mutex>
-#include "AnimationInterface.h"
+#include "CoordAnimation.h"
+#include "DoubleAnimation.h"
 
 class MapCamera2d : public MapCamera2dInterface,
                     public CameraInterface,
@@ -168,8 +169,8 @@ class MapCamera2d : public MapCamera2dInterface,
     // MARK: Animations
 
     std::recursive_mutex animationMutex;
-    std::shared_ptr<AnimationInterface> coordAnimation;
-    std::shared_ptr<AnimationInterface> animation;
+    std::shared_ptr<CoordAnimation> coordAnimation;
+    std::shared_ptr<DoubleAnimation> animation;
 
     Coord adjustCoordForPadding(const Coord &coords, double targetZoom);
     Coord getBoundsCorrectedCoords(const Coord &coords);
