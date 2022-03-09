@@ -18,10 +18,11 @@ public:
      CoordAnimation(long long duration,
                     Coord startValue,
                     Coord endValue,
+                    std::optional<Coord> helperCoord,
                     InterpolatorFunction interpolatorFunction,
                     std::function<void(Coord)> onUpdate,
                     std::optional<std::function<void()>> onFinish = std::nullopt):
-    DefaultAnimator<Coord>(duration, startValue, endValue, interpolatorFunction, onUpdate, onFinish) {
+    DefaultAnimator<Coord>(duration, startValue, endValue, interpolatorFunction, onUpdate, onFinish), helperCoord(helperCoord) {
         assert(startValue.systemIdentifier == endValue.systemIdentifier);
     }
 
@@ -36,6 +37,8 @@ public:
         onUpdate(coord);
 
     };
+
+     std::optional<Coord> helperCoord;
 };
 
 

@@ -57,14 +57,16 @@ void MapCamera2d::viewportSizeChanged() {
 }
 
 void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double zoom, bool animated) {
+    Coord currentCenter = this->centerPosition;
     inertia = std::nullopt;
     Coord positionMapSystem = getBoundsCorrectedCoords(adjustCoordForPadding(centerPosition, zoom));
     if (animated) {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         coordAnimation = std::make_shared<CoordAnimation>(DEFAULT_ANIM_LENGTH,
-                                                          getCenterPosition(),
+                                                          currentCenter,
                                                           positionMapSystem,
-                                                          InterpolatorFunction::Linear,
+                                                          getBoundsCorrectedCoords(centerPosition),
+                                                          InterpolatorFunction::EaseInOut,
                                                           [=](Coord positionMapSystem) {
                                                               this->centerPosition.x = positionMapSystem.x;
                                                               this->centerPosition.y = positionMapSystem.y;
@@ -90,13 +92,15 @@ void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
 }
 
 void MapCamera2d::moveToCenterPosition(const ::Coord &centerPosition, bool animated) {
+    Coord currentCenter = this->centerPosition;
     inertia = std::nullopt;
     Coord positionMapSystem = getBoundsCorrectedCoords(adjustCoordForPadding(centerPosition, zoom));
     if (animated) {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         coordAnimation = std::make_shared<CoordAnimation>(DEFAULT_ANIM_LENGTH,
-                                                          getCenterPosition(),
+                                                          currentCenter,
                                                           positionMapSystem,
+                                                          centerPosition,
                                                           InterpolatorFunction::EaseInOut,
                                                           [=](Coord positionMapSystem) {
                                                               this->centerPosition.x = positionMapSystem.x;
@@ -235,18 +239,38 @@ float MapCamera2d::getRotation() {
 
 void MapCamera2d::setPaddingLeft(float padding) {
     paddingLeft = padding;
+    std::lock_guard<std::recursive_mutex> lock(animationMutex);
+    if (coordAnimation && coordAnimation->helperCoord.has_value()) {
+        double targetZoom = (animation) ? animation->endValue : getZoom();
+        coordAnimation->endValue = getBoundsCorrectedCoords(adjustCoordForPadding(*coordAnimation->helperCoord, targetZoom));
+    }
 }
 
 void MapCamera2d::setPaddingRight(float padding) {
     paddingRight = padding;
+    std::lock_guard<std::recursive_mutex> lock(animationMutex);
+    if (coordAnimation && coordAnimation->helperCoord.has_value()) {
+        double targetZoom = (animation) ? animation->endValue : getZoom();
+        coordAnimation->endValue = getBoundsCorrectedCoords(adjustCoordForPadding(*coordAnimation->helperCoord, targetZoom));
+    }
 }
 
 void MapCamera2d::setPaddingTop(float padding) {
     paddingTop = padding;
+    std::lock_guard<std::recursive_mutex> lock(animationMutex);
+    if (coordAnimation && coordAnimation->helperCoord.has_value()) {
+        double targetZoom = (animation) ? animation->endValue : getZoom();
+        coordAnimation->endValue = getBoundsCorrectedCoords(adjustCoordForPadding(*coordAnimation->helperCoord, targetZoom));
+    }
 }
 
 void MapCamera2d::setPaddingBottom(float padding) {
     paddingBottom = padding;
+    std::lock_guard<std::recursive_mutex> lock(animationMutex);
+    if (coordAnimation && coordAnimation->helperCoord.has_value()) {
+        double targetZoom = (animation) ? animation->endValue : getZoom();
+        coordAnimation->endValue = getBoundsCorrectedCoords(adjustCoordForPadding(*coordAnimation->helperCoord, targetZoom));
+    }
 }
 
 void MapCamera2d::addListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) {
@@ -268,8 +292,8 @@ std::shared_ptr<::CameraInterface> MapCamera2d::asCameraInterface() { return sha
 std::vector<float> MapCamera2d::getVpMatrix() {
     {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
-        if (animation) animation->update();
-        if (coordAnimation) coordAnimation->update();
+        if (animation) std::static_pointer_cast<AnimationInterface>(animation)->update();
+        if (coordAnimation) std::static_pointer_cast<AnimationInterface>(coordAnimation)->update();
     }
     inertiaStep();
 
