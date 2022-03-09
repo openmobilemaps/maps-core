@@ -3,4 +3,4 @@
 	url = https://github.com/UbiqueInnovation/djinni.git
 [submodule "external/earcut/earcut"]
 	path = external/earcut/earcut
-	url = git@github.com:mapbox/earcut.hpp.git
+	url = https://github.com/mapbox/earcut.hpp.git
