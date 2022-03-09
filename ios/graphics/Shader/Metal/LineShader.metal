@@ -183,7 +183,7 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
                 discard_fragment();
             }
 
-            return style.gapColor * style.opacity;
+            return float4(style.gapColor.r, style.gapColor.g, style.gapColor.b, 1.0) * style.opacity;
         }
     }
 
@@ -191,6 +191,5 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
         discard_fragment();
     }
 
-    return style.color * style.opacity;
-
+    return float4(style.color.r, style.color.g, style.color.b, 1.0) * style.color.a * style.opacity;
 }
