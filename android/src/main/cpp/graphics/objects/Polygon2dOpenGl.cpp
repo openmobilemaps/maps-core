@@ -48,15 +48,16 @@ void Polygon2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &
     if (openGlContext->getProgram(shaderProgram->getProgramName()) == 0) {
         shaderProgram->setupProgram(openGlContext);
     }
+    programHandle = openGlContext->getProgram(shaderProgram->getProgramName());
+
     prepareGlData(openGlContext);
     ready = true;
 }
 
 void Polygon2dOpenGl::prepareGlData(const std::shared_ptr <OpenGlContext> &openGlContext) {
-    int mProgram = openGlContext->getProgram(shaderProgram->getProgramName());
-    glUseProgram(mProgram);
+    glUseProgram(programHandle);
 
-    positionHandle = glGetAttribLocation(mProgram, "vPosition");
+    positionHandle = glGetAttribLocation(programHandle, "vPosition");
     glGenBuffers(1, &vertexBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
@@ -68,7 +69,7 @@ void Polygon2dOpenGl::prepareGlData(const std::shared_ptr <OpenGlContext> &openG
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * indices.size(), &indices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    mvpMatrixHandle = glGetUniformLocation(mProgram, "uMVPMatrix");
+    mvpMatrixHandle = glGetUniformLocation(programHandle, "uMVPMatrix");
 }
 
 void Polygon2dOpenGl::clear() {
@@ -87,7 +88,6 @@ void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> 
         return;
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    int program = openGlContext->getProgram(shaderProgram->getProgramName());
 
     if (isMasked) {
         if (isMaskInversed) {
@@ -99,7 +99,7 @@ void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> 
     glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
-    drawPolygon(openGlContext, program, mvpMatrix);
+    drawPolygon(openGlContext, programHandle, mvpMatrix);
 }
 
 void Polygon2dOpenGl::drawPolygon(std::shared_ptr<OpenGlContext> openGlContext, int program, int64_t mvpMatrix) {
@@ -138,9 +138,8 @@ void Polygon2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInter
     if (!ready) return;
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    int program = openGlContext->getProgram(shaderProgram->getProgramName());
 
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    drawPolygon(openGlContext, program, mvpMatrix);
+    drawPolygon(openGlContext, programHandle, mvpMatrix);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }

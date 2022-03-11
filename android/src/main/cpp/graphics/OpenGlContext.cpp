@@ -16,10 +16,11 @@ OpenGlContext::OpenGlContext()
     , texturePointers() {}
 
 int OpenGlContext::getProgram(const std::string &name) {
-    if (programs.find(name) == programs.end()) {
+    auto p = programs.find(name);
+    if (p == programs.end()) {
         return 0;
     } else {
-        return programs[name];
+        return p->second;
     }
 }
 
@@ -34,13 +35,13 @@ std::vector<unsigned int> &OpenGlContext::getTexturePointerArray(const std::stri
 }
 
 void OpenGlContext::cleanAll() {
-    for (std::map<std::string, int>::iterator it = programs.begin(); it != programs.end(); ++it) {
+    for (std::unordered_map<std::string, int>::iterator it = programs.begin(); it != programs.end(); ++it) {
         glDeleteProgram(it->second);
     }
 
     programs.clear();
 
-    for (std::map<std::string, std::vector<unsigned int>>::iterator it = texturePointers.begin(); it != texturePointers.end();
+    for (std::unordered_map<std::string, std::vector<unsigned int>>::iterator it = texturePointers.begin(); it != texturePointers.end();
          ++it) {
         glDeleteTextures(GLsizei(it->second.size()), &it->second[0]);
     }

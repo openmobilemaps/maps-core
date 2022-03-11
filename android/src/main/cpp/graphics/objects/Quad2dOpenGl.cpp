@@ -63,17 +63,18 @@ void Quad2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &con
         shaderProgram->setupProgram(openGlContext);
     }
 
-    prepareGlData(openGlContext);
-    prepareTextureCoordsGlData(openGlContext);
+    int program = openGlContext->getProgram(shaderProgram->getProgramName());
+    prepareGlData(openGlContext, program);
+    prepareTextureCoordsGlData(openGlContext, program);
 
+    programHandle = program;
     ready = true;
 }
 
-void Quad2dOpenGl::prepareGlData(const std::shared_ptr<OpenGlContext> &openGlContext) {
-    int mProgram = openGlContext->getProgram(shaderProgram->getProgramName());
-    glUseProgram(mProgram);
+void Quad2dOpenGl::prepareGlData(const std::shared_ptr<OpenGlContext> &openGlContext, const int &programHandle) {
+    glUseProgram(programHandle);
 
-    positionHandle = glGetAttribLocation(mProgram, "vPosition");
+    positionHandle = glGetAttribLocation(programHandle, "vPosition");
     glGenBuffers(1, &vertexBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
@@ -86,14 +87,13 @@ void Quad2dOpenGl::prepareGlData(const std::shared_ptr<OpenGlContext> &openGlCon
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 
-    mvpMatrixHandle = glGetUniformLocation(mProgram, "uMVPMatrix");
+    mvpMatrixHandle = glGetUniformLocation(programHandle, "uMVPMatrix");
 }
 
-void Quad2dOpenGl::prepareTextureCoordsGlData(const std::shared_ptr<OpenGlContext> &openGlContext) {
-    int mProgram = openGlContext->getProgram(shaderProgram->getProgramName());
-    glUseProgram(mProgram);
+void Quad2dOpenGl::prepareTextureCoordsGlData(const std::shared_ptr<OpenGlContext> &openGlContext, const int &programHandle) {
+    glUseProgram(programHandle);
 
-    textureCoordinateHandle = glGetAttribLocation(mProgram, "texCoordinate");
+    textureCoordinateHandle = glGetAttribLocation(programHandle, "texCoordinate");
     if (textureCoordinateHandle < 0) {
         usesTextureCoords = false;
         return;
@@ -117,7 +117,7 @@ void Quad2dOpenGl::loadTexture(const std::shared_ptr<::RenderingContextInterface
     glGenTextures(1, (unsigned int *)&texturePointer[0]);
 
     if (textureHolder != nullptr) {
-        glBindTexture(GL_TEXTURE_2D, (unsigned int)texturePointer[0]);
+        glBindTexture(GL_TEXTURE_2D, (unsigned int) texturePointer[0]);
 
         textureHolder->attachToGraphics();
 
@@ -135,8 +135,12 @@ void Quad2dOpenGl::loadTexture(const std::shared_ptr<::RenderingContextInterface
 
         glBindTexture(GL_TEXTURE_2D, 0);
 
-        std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-        prepareTextureCoordsGlData(openGlContext);
+        std::shared_ptr <OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
+        if (ready) {
+            prepareTextureCoordsGlData(openGlContext, programHandle);
+        } else {
+            prepareTextureCoordsGlData(openGlContext, openGlContext->getProgram(shaderProgram->getProgramName()));
+        }
 
         textureLoaded = true;
     }
@@ -169,17 +173,17 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     if (!ready)
         return;
 
+    glUseProgram(programHandle);
+
     if (isMasked) {
         glStencilFunc(GL_EQUAL, isMaskInversed ? 0 : 128, 128);
         glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
     }
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    int mProgram = openGlContext->getProgram(shaderProgram->getProgramName());
-    glUseProgram(mProgram);
 
     if (textureLoaded) {
-        prepareTextureDraw(openGlContext, mProgram);
+        prepareTextureDraw(openGlContext, programHandle);
     }
 
     if (usesTextureCoords) {
@@ -220,8 +224,8 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     glDisable(GL_BLEND);
 }
 
-void Quad2dOpenGl::prepareTextureDraw(std::shared_ptr<OpenGlContext> &openGLContext, int mProgram) {
-    int mTextureUniformHandle = glGetUniformLocation(mProgram, "u_Texture");
+void Quad2dOpenGl::prepareTextureDraw(std::shared_ptr<OpenGlContext> &openGLContext, int programHandle) {
+    int mTextureUniformHandle = glGetUniformLocation(programHandle, "u_Texture");
 
     // Set the active texture unit to texture unit 0.
     glActiveTexture(GL_TEXTURE0);

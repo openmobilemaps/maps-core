@@ -15,7 +15,7 @@
 
 class OpenGlHelper {
   public:
-    static void checkGlError(std::string glOperation) {
+    static void checkGlError(const std::string &glOperation) {
         int error;
         while ((error = glGetError()) != GL_NO_ERROR) {
             LogError << "GL ERROR: " << glOperation << " " <<= error;
