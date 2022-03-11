@@ -53,6 +53,7 @@ protected:
 
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
 
+    int programHandle;
     int mvpMatrixHandle;
     int positionHandle;
     GLuint vertexBuffer;

@@ -11,7 +11,7 @@
 #pragma once
 
 #include "RenderingContextInterface.h"
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <vector>
 
@@ -44,8 +44,8 @@ class OpenGlContext : public RenderingContextInterface, std::enable_shared_from_
   protected:
     Color backgroundColor = Color(0, 0, 0, 1);
 
-    std::map<std::string, int> programs;
-    std::map<std::string, std::vector<unsigned int>> texturePointers;
+    std::unordered_map<std::string, int> programs;
+    std::unordered_map<std::string, std::vector<unsigned int>> texturePointers;
 
     Vec2I viewportSize = Vec2I(0, 0);
 };

@@ -55,14 +55,15 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
 
     virtual void prepareTextureDraw(std::shared_ptr<OpenGlContext> &openGLContext, int mProgram);
 
-    void prepareGlData(const std::shared_ptr<OpenGlContext> &openGlContext);
+    void prepareGlData(const std::shared_ptr<OpenGlContext> &openGlContext, const int &programHandle);
 
-    void prepareTextureCoordsGlData(const std::shared_ptr<OpenGlContext> &openGlContext);
+    void prepareTextureCoordsGlData(const std::shared_ptr<OpenGlContext> &openGlContext, const int &programHandle);
 
     void removeGlBuffers();
 
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
 
+    int programHandle;
     int mvpMatrixHandle;
     int positionHandle;
     GLuint vertexBuffer;
