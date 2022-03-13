@@ -126,10 +126,10 @@ void MapCamera2d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
 
 void MapCamera2d::moveToBoundingBox(const RectCoord &boundingBox, float paddingPc, bool animated, std::optional<double> maxZoom) {
     RectCoord mapSystemBBox = conversionHelper->convertRect(mapCoordinateSystem.identifier, boundingBox);
-    float newLeft = boundingBox.topLeft.x + paddingPc * (boundingBox.topLeft.x - boundingBox.bottomRight.x);
-    float newRight = boundingBox.bottomRight.x + paddingPc * (boundingBox.bottomRight.x - boundingBox.topLeft.x);
-    float newTop = boundingBox.topLeft.y + paddingPc * (boundingBox.topLeft.y - boundingBox.bottomRight.y);
-    float newBottom = boundingBox.bottomRight.y + paddingPc * (boundingBox.bottomRight.y - boundingBox.topLeft.y);
+    float newLeft = mapSystemBBox.topLeft.x + paddingPc * (mapSystemBBox.topLeft.x - mapSystemBBox.bottomRight.x);
+    float newRight = mapSystemBBox.bottomRight.x + paddingPc * (mapSystemBBox.bottomRight.x - mapSystemBBox.topLeft.x);
+    float newTop = mapSystemBBox.topLeft.y + paddingPc * (mapSystemBBox.topLeft.y - mapSystemBBox.bottomRight.y);
+    float newBottom = mapSystemBBox.bottomRight.y + paddingPc * (mapSystemBBox.bottomRight.y - mapSystemBBox.topLeft.y);
     Vec2F centerAABBox = Vec2F(newLeft + 0.5 * (newRight - newLeft), newTop + 0.5 * (newBottom - newTop));
 
     Coord targetCenterNotBC = Coord(mapCoordinateSystem.identifier, centerAABBox.x, centerAABBox.y, 0.0);
