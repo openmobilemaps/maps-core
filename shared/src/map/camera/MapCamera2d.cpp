@@ -173,22 +173,24 @@ void MapCamera2d::moveToBoundingBox(const RectCoord &boundingBox, float paddingP
 }
 
 void MapCamera2d::setZoom(double zoom, bool animated) {
+    double targetZoom = std::max(std::min(zoom, zoomMin), zoomMax);
+
     if (animated) {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         animation = std::make_shared<DoubleAnimation>(DEFAULT_ANIM_LENGTH,
                                                       this->zoom,
-                                                      zoom,
+                                                      targetZoom,
                                                       InterpolatorFunction::EaseIn,
                                                       [=](double zoom) {
                                                           this->setZoom(zoom, false);
                                                       }, [=] {
-                    this->setZoom(zoom, false);
+                    this->setZoom(targetZoom, false);
                     this->animation = nullptr;
                 });
         animation->start();
         mapInterface->invalidate();
     } else {
-        this->zoom = zoom;
+        this->zoom = targetZoom;
         notifyListeners();
         mapInterface->invalidate();
     }
