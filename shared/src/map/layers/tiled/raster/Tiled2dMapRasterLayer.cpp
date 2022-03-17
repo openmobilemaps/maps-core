@@ -115,7 +115,11 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
             auto alphaShader = mapInterface->getShaderFactory()->createAlphaShader();
             auto tileObject = std::make_shared<Textured2dLayerObject>(
                     graphicsFactory->createQuad(alphaShader->asShaderProgramInterface()), alphaShader, mapInterface);
-            tileObject->beginAlphaAnimation(0.0, alpha, 150);
+            if (layerConfig->getZoomInfo().numDrawPreviousLayers == 0) {
+                tileObject->setAlpha(alpha);
+            } else {
+                tileObject->beginAlphaAnimation(0.0, alpha, 150);
+            }
             tileObject->setRectCoord(tile.tileInfo.bounds);
             tilesToSetup.emplace_back(std::make_pair(tile, tileObject));
             tileObjectMap[tile] = tileObject;
