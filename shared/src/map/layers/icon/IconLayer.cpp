@@ -73,6 +73,8 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
         return;
     }
 
+    auto lockSelfPtr = shared_from_this();
+    auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         for (const auto &icon : icons) {
@@ -84,8 +86,8 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
     std::vector<std::tuple<const std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>> iconObjects;
 
     for (const auto &icon : icons) {
-        const auto &objectFactory = mapInterface->getGraphicsObjectFactory();
-        const auto &shaderFactory = mapInterface->getShaderFactory();
+        auto objectFactory = mapInterface->getGraphicsObjectFactory();
+        auto shaderFactory = mapInterface->getShaderFactory();
 
         auto shader = shaderFactory->createAlphaShader();
         auto quadObject = objectFactory->createQuad(shader->asShaderProgramInterface());
@@ -247,6 +249,13 @@ void IconLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
     if (isLayerClickable) {
         mapInterface->getTouchHandler()->addListener(shared_from_this());
     }
+}
+
+void IconLayer::onRemoved() {
+    if (mapInterface && isLayerClickable) {
+        mapInterface->getTouchHandler()->addListener(shared_from_this());
+    }
+    mapInterface = nullptr;
 }
 
 void IconLayer::pause() {

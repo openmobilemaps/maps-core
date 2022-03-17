@@ -87,6 +87,8 @@ void PolygonLayer::add(const PolygonInfo &polygon) {
 void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
     if (polygons.empty()) return;
 
+    auto lockSelfPtr = shared_from_this();
+    auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         for (const auto &polygon : polygons) {
@@ -95,8 +97,8 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
         return;
     }
 
-    const auto &objectFactory = mapInterface->getGraphicsObjectFactory();
-    const auto &shaderFactory = mapInterface->getShaderFactory();
+    auto objectFactory = mapInterface->getGraphicsObjectFactory();
+    auto shaderFactory = mapInterface->getShaderFactory();
 
     std::vector<std::shared_ptr<Polygon2dInterface>> polygonGraphicsObjects;
 
@@ -129,7 +131,6 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
             }));
 
     generateRenderPasses();
-
 }
 
 void PolygonLayer::setupPolygonObjects(const std::vector<std::shared_ptr<Polygon2dInterface>> &polygons) {
@@ -191,6 +192,11 @@ void PolygonLayer::resume() {
 std::shared_ptr<::LayerInterface> PolygonLayer::asLayerInterface() { return shared_from_this(); }
 
 void PolygonLayer::generateRenderPasses() {
+    auto lockSelfPtr = shared_from_this();
+    if (!lockSelfPtr) {
+        return;
+    }
+
     std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
     std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
     for (auto const &p : polygons) {
@@ -237,7 +243,7 @@ void PolygonLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
 }
 
 void PolygonLayer::onRemoved() {
-    mapInterface->getTouchHandler()->removeListener(shared_from_this());
+    if (mapInterface && isLayerClickable) mapInterface->getTouchHandler()->removeListener(shared_from_this());
     mapInterface = nullptr;
 }
 

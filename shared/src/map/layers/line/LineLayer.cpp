@@ -70,14 +70,16 @@ void LineLayer::remove(const std::shared_ptr<LineInfoInterface> &line) {
 }
 
 void LineLayer::add(const std::shared_ptr<LineInfoInterface> &line) {
+    auto lockSelfPtr = shared_from_this();
+    auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         addingQueue.push_back(line);
         return;
     }
 
-    const auto &objectFactory = mapInterface->getGraphicsObjectFactory();
-    const auto &shaderFactory = mapInterface->getShaderFactory();
+    auto objectFactory = mapInterface->getGraphicsObjectFactory();
+    auto shaderFactory = mapInterface->getShaderFactory();
 
     auto shader = shaderFactory->createColorLineShader();
     auto lineGraphicsObject = objectFactory->createLine(shader->asShaderProgramInterface());
@@ -140,6 +142,12 @@ void LineLayer::invalidate() {
 }
 
 void LineLayer::generateRenderPasses() {
+    auto lockSelfPtr = shared_from_this();
+    auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
+    if (!mapInterface) {
+        return;
+    }
+
     std::lock_guard<std::recursive_mutex> lock(linesMutex);
     std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
     for (auto const &lineTuple : lines) {
@@ -185,6 +193,11 @@ void LineLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
     if (isLayerClickable) {
         mapInterface->getTouchHandler()->addListener(shared_from_this());
     }
+}
+
+void LineLayer::onRemoved() {
+    if (mapInterface && isLayerClickable) mapInterface->getTouchHandler()->removeListener(shared_from_this());
+    mapInterface = nullptr;
 }
 
 void LineLayer::pause() {

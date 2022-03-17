@@ -34,6 +34,13 @@ MapScene::MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig &mapCo
     setCamera(MapCamera2dInterface::create(ptr, pixelDensity));
 }
 
+MapScene::~MapScene() {
+    std::lock_guard<std::recursive_mutex> lock(layersMutex);
+    for (const auto &layerEntry: layers) {
+        layerEntry.second->onRemoved();
+    }
+}
+
 std::shared_ptr<::GraphicsObjectFactoryInterface> MapScene::getGraphicsObjectFactory() { return scene->getGraphicsFactory(); }
 
 std::shared_ptr<::ShaderFactoryInterface> MapScene::getShaderFactory() { return scene->getShaderFactory(); }
