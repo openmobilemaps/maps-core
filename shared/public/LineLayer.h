@@ -60,7 +60,7 @@ class LineLayer : public LineLayerInterface,
 
     virtual void onAdded(const std::shared_ptr<MapInterface> &mapInterface) override;
 
-    virtual void onRemoved() override {};
+    virtual void onRemoved() override;
 
     virtual void pause() override;
 
