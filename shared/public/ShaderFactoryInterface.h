@@ -4,6 +4,7 @@
 #pragma once
 
 #include <memory>
+#include "Logger.h"
 
 class AlphaShaderInterface;
 class ColorCircleShaderInterface;
@@ -15,7 +16,9 @@ class TextShaderInterface;
 
 class ShaderFactoryInterface {
 public:
-    virtual ~ShaderFactoryInterface() {}
+    virtual ~ShaderFactoryInterface() {
+        LogDebug <<= "ShaderFactory is destroyed";
+    }
 
     virtual std::shared_ptr<AlphaShaderInterface> createAlphaShader() = 0;
 

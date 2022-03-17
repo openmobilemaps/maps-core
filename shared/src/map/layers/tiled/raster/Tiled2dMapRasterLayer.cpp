@@ -87,6 +87,12 @@ void Tiled2dMapRasterLayer::resume() {
 }
 
 void Tiled2dMapRasterLayer::onTilesUpdated() {
+    auto lockSelfPtr = std::static_pointer_cast<Tiled2dMapRasterLayer>(shared_from_this());
+    auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
+    if (!mapInterface) {
+        return;
+    }
+
     {
         std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
         std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> tilesToSetup;
