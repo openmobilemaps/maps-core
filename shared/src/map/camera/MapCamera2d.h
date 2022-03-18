@@ -170,7 +170,8 @@ class MapCamera2d : public MapCamera2dInterface,
 
     std::recursive_mutex animationMutex;
     std::shared_ptr<CoordAnimation> coordAnimation;
-    std::shared_ptr<DoubleAnimation> animation;
+    std::shared_ptr<DoubleAnimation> zoomAnimation;
+    std::shared_ptr<DoubleAnimation> rotationAnimation;
 
     Coord adjustCoordForPadding(const Coord &coords, double targetZoom);
     Coord getBoundsCorrectedCoords(const Coord &coords);

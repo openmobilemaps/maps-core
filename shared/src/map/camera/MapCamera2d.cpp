@@ -8,7 +8,6 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#include "Logger.h"
 #include "MapCamera2d.h"
 #include "Coord.h"
 #include "DateHelper.h"
@@ -177,7 +176,7 @@ void MapCamera2d::setZoom(double zoom, bool animated) {
 
     if (animated) {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
-        animation = std::make_shared<DoubleAnimation>(DEFAULT_ANIM_LENGTH,
+        zoomAnimation = std::make_shared<DoubleAnimation>(DEFAULT_ANIM_LENGTH,
                                                       this->zoom,
                                                       targetZoom,
                                                       InterpolatorFunction::EaseIn,
@@ -185,9 +184,9 @@ void MapCamera2d::setZoom(double zoom, bool animated) {
                                                           this->setZoom(zoom, false);
                                                       }, [=] {
                     this->setZoom(targetZoom, false);
-                    this->animation = nullptr;
+                    this->zoomAnimation = nullptr;
                 });
-        animation->start();
+        zoomAnimation->start();
         mapInterface->invalidate();
     } else {
         this->zoom = targetZoom;
@@ -209,7 +208,7 @@ void MapCamera2d::setRotation(float angle, bool animated) {
             newAngle -= 360.0;
         }
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
-        animation = std::make_shared<DoubleAnimation>(DEFAULT_ANIM_LENGTH,
+        rotationAnimation = std::make_shared<DoubleAnimation>(DEFAULT_ANIM_LENGTH,
                                                       currentAngle,
                                                       newAngle,
                                                       InterpolatorFunction::Linear,
@@ -217,9 +216,9 @@ void MapCamera2d::setRotation(float angle, bool animated) {
                                                           this->setRotation(angle, false);
                                                       }, [=] {
                     this->setRotation(newAngle, false);
-                    this->animation = nullptr;
+                    this->rotationAnimation = nullptr;
                 });
-        animation->start();
+        rotationAnimation->start();
         mapInterface->invalidate();
     } else {
         double angleDiff = newAngle - this->angle;
@@ -243,7 +242,7 @@ void MapCamera2d::setPaddingLeft(float padding) {
     paddingLeft = padding;
     std::lock_guard<std::recursive_mutex> lock(animationMutex);
     if (coordAnimation && coordAnimation->helperCoord.has_value()) {
-        double targetZoom = (animation) ? animation->endValue : getZoom();
+        double targetZoom = (zoomAnimation) ? zoomAnimation->endValue : getZoom();
         coordAnimation->endValue = getBoundsCorrectedCoords(adjustCoordForPadding(*coordAnimation->helperCoord, targetZoom));
     }
 }
@@ -252,7 +251,7 @@ void MapCamera2d::setPaddingRight(float padding) {
     paddingRight = padding;
     std::lock_guard<std::recursive_mutex> lock(animationMutex);
     if (coordAnimation && coordAnimation->helperCoord.has_value()) {
-        double targetZoom = (animation) ? animation->endValue : getZoom();
+        double targetZoom = (zoomAnimation) ? zoomAnimation->endValue : getZoom();
         coordAnimation->endValue = getBoundsCorrectedCoords(adjustCoordForPadding(*coordAnimation->helperCoord, targetZoom));
     }
 }
@@ -261,7 +260,7 @@ void MapCamera2d::setPaddingTop(float padding) {
     paddingTop = padding;
     std::lock_guard<std::recursive_mutex> lock(animationMutex);
     if (coordAnimation && coordAnimation->helperCoord.has_value()) {
-        double targetZoom = (animation) ? animation->endValue : getZoom();
+        double targetZoom = (zoomAnimation) ? zoomAnimation->endValue : getZoom();
         coordAnimation->endValue = getBoundsCorrectedCoords(adjustCoordForPadding(*coordAnimation->helperCoord, targetZoom));
     }
 }
@@ -270,7 +269,7 @@ void MapCamera2d::setPaddingBottom(float padding) {
     paddingBottom = padding;
     std::lock_guard<std::recursive_mutex> lock(animationMutex);
     if (coordAnimation && coordAnimation->helperCoord.has_value()) {
-        double targetZoom = (animation) ? animation->endValue : getZoom();
+        double targetZoom = (zoomAnimation) ? zoomAnimation->endValue : getZoom();
         coordAnimation->endValue = getBoundsCorrectedCoords(adjustCoordForPadding(*coordAnimation->helperCoord, targetZoom));
     }
 }
@@ -294,7 +293,8 @@ std::shared_ptr<::CameraInterface> MapCamera2d::asCameraInterface() { return sha
 std::vector<float> MapCamera2d::getVpMatrix() {
     {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
-        if (animation) std::static_pointer_cast<AnimationInterface>(animation)->update();
+        if (zoomAnimation) std::static_pointer_cast<AnimationInterface>(zoomAnimation)->update();
+        if (rotationAnimation) std::static_pointer_cast<AnimationInterface>(rotationAnimation)->update();
         if (coordAnimation) std::static_pointer_cast<AnimationInterface>(coordAnimation)->update();
     }
     inertiaStep();
@@ -619,7 +619,7 @@ bool MapCamera2d::onTwoFingerMoveComplete() {
     if (config.snapToNorthEnabled &&
         (angle < ROTATION_LOCKING_ANGLE || angle > (360 - ROTATION_LOCKING_ANGLE))) {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
-        animation = std::make_shared<DoubleAnimation>(DEFAULT_ANIM_LENGTH,
+        rotationAnimation = std::make_shared<DoubleAnimation>(DEFAULT_ANIM_LENGTH,
                                                       this->angle,
                                                       angle < ROTATION_LOCKING_ANGLE ? 0 : 360,
                                                       InterpolatorFunction::EaseInOut,
@@ -628,9 +628,9 @@ bool MapCamera2d::onTwoFingerMoveComplete() {
                                                           mapInterface->invalidate();
                                                       }, [=] {
                     this->angle = 0;
-                    this->animation = nullptr;
+                    this->rotationAnimation = nullptr;
                 });
-        animation->start();
+        rotationAnimation->start();
         mapInterface->invalidate();
         return true;
     }
