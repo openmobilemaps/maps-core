@@ -104,6 +104,12 @@ void MapScene::addLayer(const std::shared_ptr<::LayerInterface> &layer) {
 }
 
 void MapScene::insertLayerAt(const std::shared_ptr<LayerInterface> &layer, int32_t atIndex) {
+    {
+        std::lock_guard<std::recursive_mutex> lock(layersMutex);
+        if (layers.count(atIndex) > 0 && layers.at(atIndex) == layer) {
+            return;
+        }
+    }
     removeLayer(layer);
     layer->onAdded(shared_from_this());
     std::lock_guard<std::recursive_mutex> lock(layersMutex);
