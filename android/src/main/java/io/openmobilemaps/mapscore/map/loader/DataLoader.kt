@@ -35,7 +35,7 @@ open class DataLoader(
 		private const val HEADER_NAME_ETAG = "etag"
 	}
 
-	private var okHttpClient = initializeClient()
+	protected var okHttpClient = initializeClient()
 
 	protected open fun createClient(): OkHttpClient = OkHttpClient.Builder()
 		.addInterceptor(UserAgentInterceptor(userAgent ?: RequestUtils.getDefaultUserAgent(context)))
