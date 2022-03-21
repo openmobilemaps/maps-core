@@ -32,6 +32,10 @@ open class MCScheduler: MCSchedulerInterface {
 
     public init() { }
 
+    public func addTasks(_ tasks: [MCTaskInterface]) {
+        tasks.forEach(addTask(_:))
+    }
+
     public func addTask(_ task: MCTaskInterface?) {
         guard let task = task else { return }
 

@@ -40,6 +40,10 @@ class AndroidScheduler(
 		this.coroutineScope = coroutineScope
 	}
 
+    override fun addTasks(tasks: ArrayList<TaskInterface>) {
+        tasks.forEach { addTask(it) }
+    }
+
 	override fun addTask(task: TaskInterface) {
 		if (isResumed.get()) {
 			handleNewTask(task)

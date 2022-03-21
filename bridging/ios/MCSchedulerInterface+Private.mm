@@ -38,6 +38,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)addTasks:(nonnull NSArray<id<MCTaskInterface>> *)tasks {
+    try {
+        _cppRefHandle.get()->addTasks(::djinni::List<::djinni_generated::TaskInterface>::toCpp(tasks));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)removeTask:(nonnull NSString *)id {
     try {
         _cppRefHandle.get()->removeTask(::djinni::String::toCpp(id));
@@ -75,6 +81,12 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() addTask:(::djinni_generated::TaskInterface::fromCpp(c_task))];
+        }
+    }
+    void addTasks(const std::vector<std::shared_ptr<::TaskInterface>> & c_tasks) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() addTasks:(::djinni::List<::djinni_generated::TaskInterface>::fromCpp(c_tasks))];
         }
     }
     void removeTask(const std::string & c_id) override

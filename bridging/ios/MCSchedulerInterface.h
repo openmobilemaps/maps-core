@@ -9,6 +9,8 @@
 
 - (void)addTask:(nullable id<MCTaskInterface>)task;
 
+- (void)addTasks:(nonnull NSArray<id<MCTaskInterface>> *)tasks;
+
 - (void)removeTask:(nonnull NSString *)id;
 
 - (void)clear;
