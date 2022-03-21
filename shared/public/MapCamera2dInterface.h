@@ -40,6 +40,10 @@ public:
 
     virtual void setMaxZoom(double maxZoom) = 0;
 
+    virtual double getMinZoom() = 0;
+
+    virtual double getMaxZoom() = 0;
+
     virtual void setBounds(const ::RectCoord & bounds) = 0;
 
     virtual bool isInBounds(const ::Coord & coords) = 0;

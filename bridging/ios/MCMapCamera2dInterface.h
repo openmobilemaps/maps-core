@@ -44,6 +44,10 @@
 
 - (void)setMaxZoom:(double)maxZoom;
 
+- (double)getMinZoom;
+
+- (double)getMaxZoom;
+
 - (void)setBounds:(nonnull MCRectCoord *)bounds;
 
 - (BOOL)isInBounds:(nonnull MCCoord *)coords;
