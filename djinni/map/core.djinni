@@ -91,6 +91,9 @@ map_camera_2d_interface = interface +c {
     set_min_zoom(min_zoom: f64);
     set_max_zoom(max_zoom: f64);
 
+    get_min_zoom(): f64;
+    get_max_zoom(): f64;
+
     set_bounds(bounds: rect_coord);
     is_in_bounds(coords: coord) : bool;
 

@@ -53,6 +53,10 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual void setMaxZoom(double zoomMax) override;
 
+    virtual double getMinZoom() override;
+
+    virtual double getMaxZoom() override;
+
     virtual void setBounds(const ::RectCoord & bounds) override;
 
     virtual bool isInBounds(const ::Coord & coords) override;

@@ -676,6 +676,14 @@ void MapCamera2d::setMaxZoom(double zoomMax) {
     mapInterface->invalidate();
 }
 
+double MapCamera2d::getMinZoom() {
+    return zoomMin;
+}
+
+double MapCamera2d::getMaxZoom() {
+    return zoomMax;
+}
+
 void MapCamera2d::setBounds(const RectCoord &bounds) {
     RectCoord boundsMapSpace = mapInterface->getCoordinateConverterHelper()->convertRect(mapCoordinateSystem.identifier, bounds);
     this->bounds = boundsMapSpace;

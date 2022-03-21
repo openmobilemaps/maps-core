@@ -27,6 +27,10 @@ abstract class MapCamera2dInterface {
 
     abstract fun setMaxZoom(maxZoom: Double)
 
+    abstract fun getMinZoom(): Double
+
+    abstract fun getMaxZoom(): Double
+
     abstract fun setBounds(bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord)
 
     abstract fun isInBounds(coords: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): Boolean
@@ -143,6 +147,18 @@ abstract class MapCamera2dInterface {
             native_setMaxZoom(this.nativeRef, maxZoom)
         }
         private external fun native_setMaxZoom(_nativeRef: Long, maxZoom: Double)
+
+        override fun getMinZoom(): Double {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getMinZoom(this.nativeRef)
+        }
+        private external fun native_getMinZoom(_nativeRef: Long): Double
+
+        override fun getMaxZoom(): Double {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getMaxZoom(this.nativeRef)
+        }
+        private external fun native_getMaxZoom(_nativeRef: Long): Double
 
         override fun setBounds(bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

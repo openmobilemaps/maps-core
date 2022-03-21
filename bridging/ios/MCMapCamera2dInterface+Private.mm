@@ -124,6 +124,20 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (double)getMinZoom {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getMinZoom();
+        return ::djinni::F64::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (double)getMaxZoom {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getMaxZoom();
+        return ::djinni::F64::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)setBounds:(nonnull MCRectCoord *)bounds {
     try {
         _cppRefHandle.get()->setBounds(::djinni_generated::RectCoord::toCpp(bounds));
