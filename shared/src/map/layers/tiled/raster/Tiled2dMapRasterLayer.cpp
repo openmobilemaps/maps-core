@@ -49,11 +49,11 @@ void Tiled2dMapRasterLayer::onRemoved() {
 std::shared_ptr<::LayerInterface> Tiled2dMapRasterLayer::asLayerInterface() { return shared_from_this(); }
 
 void Tiled2dMapRasterLayer::update() {
-    std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
     auto mapInterface = this->mapInterface;
     if (mapInterface && mask) {
         if (!mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
     }
+    std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
     for (auto const &tile : tileObjectMap) {
         if (tile.second)
             tile.second->update();
@@ -67,28 +67,33 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapRasterLayer::build
 
 void Tiled2dMapRasterLayer::pause() {
     Tiled2dMapLayer::pause();
+    if (mask) {
+        if (mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->clear();
+    }
     std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
     for (const auto &tileObject : tileObjectMap) {
         if (tileObject.second && tileObject.second->getQuadObject()->asGraphicsObject()->isReady()) tileObject.second->getQuadObject()->asGraphicsObject()->clear();
-    }
-    if (mask) {
-        if (mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->clear();
     }
 }
 
 void Tiled2dMapRasterLayer::resume() {
     Tiled2dMapLayer::resume();
-    auto renderingContext = mapInterface->getRenderingContext();
+    auto mapInterface = this->mapInterface;
+    auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
+    if (!renderingContext) {
+        return;
+    }
+
+    if (mask) {
+        if (!mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(renderingContext);
+    }
     std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
     for (const auto &tileObject : tileObjectMap) {
-        if (tileObject.second && !tileObject.second->getQuadObject()->asGraphicsObject()->isReady()) {
+        if (tileObject.second) {
             auto rectangle = tileObject.second->getQuadObject();
             rectangle->asGraphicsObject()->setup(renderingContext);
             rectangle->loadTexture(renderingContext, tileObject.first.textureHolder);
         }
-    }
-    if (mask) {
-        if (!mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(renderingContext);
     }
 }
 
@@ -185,19 +190,21 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
 void Tiled2dMapRasterLayer::setupTiles(
         const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToSetup,
         const std::vector<std::shared_ptr<Textured2dLayerObject>> &tilesToClean) {
+    auto mapInterface = this->mapInterface;
+    auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
+    if (!renderingContext) return;
 
-    if (!mapInterface) return;
+    {
+        std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
+        for (const auto &tile : tilesToSetup) {
+            const auto &tileInfo = tile.first;
+            const auto &tileObject = tile.second;
+            if (!tileObject || !tileObjectMap.count(tile.first)) continue;
+            tileObject->getQuadObject()->asGraphicsObject()->setup(renderingContext);
 
-    auto renderingContext = mapInterface->getRenderingContext();
-    std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
-    for (const auto &tile : tilesToSetup) {
-        const auto &tileInfo = tile.first;
-        const auto &tileObject = tile.second;
-        if (!tileObject || !tileObjectMap.count(tile.first)) continue;
-        tileObject->getQuadObject()->asGraphicsObject()->setup(renderingContext);
-
-        if (tileInfo.textureHolder) {
-            tileObject->getQuadObject()->loadTexture(renderingContext, tileInfo.textureHolder);
+            if (tileInfo.textureHolder) {
+                tileObject->getQuadObject()->loadTexture(renderingContext, tileInfo.textureHolder);
+            }
         }
     }
 
@@ -210,11 +217,13 @@ void Tiled2dMapRasterLayer::setupTiles(
 }
 
 void Tiled2dMapRasterLayer::generateRenderPasses() {
-    std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
     std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
     std::vector<std::pair<int, std::shared_ptr<Textured2dLayerObject>>> mapEntries;
-    for (auto &entry : tileObjectMap) {
-        mapEntries.emplace_back(std::make_pair(entry.first.tileInfo.zoomLevel, entry.second));
+    {
+        std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
+        for (auto &entry : tileObjectMap) {
+            mapEntries.emplace_back(std::make_pair(entry.first.tileInfo.zoomLevel, entry.second));
+        }
     }
     sort(mapEntries.begin(), mapEntries.end(),
          [=](std::pair<int, std::shared_ptr<Textured2dLayerObject>> &a,
@@ -254,9 +263,11 @@ std::shared_ptr<Tiled2dMapRasterLayerCallbackInterface> Tiled2dMapRasterLayer::g
 
 void Tiled2dMapRasterLayer::setAlpha(double alpha) {
     this->alpha = alpha;
-    std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
-    for (const auto &tileObject : tileObjectMap) {
-        tileObject.second->setAlpha(alpha);
+    {
+        std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
+        for (const auto &tileObject : tileObjectMap) {
+            tileObject.second->setAlpha(alpha);
+        }
     }
 
     if (mapInterface) mapInterface->invalidate();
@@ -267,13 +278,13 @@ double Tiled2dMapRasterLayer::getAlpha() {
 }
 
 bool Tiled2dMapRasterLayer::onClickConfirmed(const Vec2F &posScreen) {
-    return (callbackHandler) ? callbackHandler->onClickConfirmed(mapInterface->getCamera()->coordFromScreenPosition(posScreen))
-                             : false;
+    auto callbackHandler = this->callbackHandler;
+    return (callbackHandler) && callbackHandler->onClickConfirmed(mapInterface->getCamera()->coordFromScreenPosition(posScreen));
 }
 
 bool Tiled2dMapRasterLayer::onLongPress(const Vec2F &posScreen) {
-    return (callbackHandler) ? callbackHandler->onLongPress(mapInterface->getCamera()->coordFromScreenPosition(posScreen))
-                             : false;
+    auto callbackHandler = this->callbackHandler;
+    return (callbackHandler) && callbackHandler->onLongPress(mapInterface->getCamera()->coordFromScreenPosition(posScreen));
 }
 
 void Tiled2dMapRasterLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> &maskingObject) {
