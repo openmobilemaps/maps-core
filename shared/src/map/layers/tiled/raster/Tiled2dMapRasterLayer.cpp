@@ -48,7 +48,7 @@ std::shared_ptr<::LayerInterface> Tiled2dMapRasterLayer::asLayerInterface() { re
 void Tiled2dMapRasterLayer::update() {
     std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
     auto mapInterface = this->mapInterface;
-    if (mask) {
+    if (mapInterface && mask) {
         if (!mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
     }
     for (auto const &tile : tileObjectMap) {
@@ -58,7 +58,6 @@ void Tiled2dMapRasterLayer::update() {
 }
 
 std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapRasterLayer::buildRenderPasses() {
-    //legacyRenderPasses.clear();
     std::lock_guard<std::recursive_mutex> overlayLock(renderPassMutex);
     return renderPasses;
 }

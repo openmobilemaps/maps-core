@@ -174,7 +174,7 @@ void LineLayer::generateRenderPasses() {
 
 void LineLayer::update() {
     auto mapInterface = this->mapInterface;
-    if (mask) {
+    if (mapInterface && mask) {
         if (!mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
     }
 }
