@@ -41,6 +41,7 @@ void Tiled2dMapLayer::onRemoved() {
             camera->removeListener(shared_from_this());
         }
     }
+    mapInterface = nullptr;
 }
 
 void Tiled2dMapLayer::pause() {
