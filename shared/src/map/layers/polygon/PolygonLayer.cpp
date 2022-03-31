@@ -219,6 +219,13 @@ void PolygonLayer::generateRenderPasses() {
     }
 }
 
+void PolygonLayer::update() {
+    auto mapInterface = this->mapInterface;
+    if (mapInterface && mask) {
+        if (!mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+    }
+}
+
 std::vector<std::shared_ptr<::RenderPassInterface>> PolygonLayer::buildRenderPasses() {
     if (isHidden) {
         return {};
@@ -341,10 +348,8 @@ bool PolygonLayer::onClickUnconfirmed(const ::Vec2F &posScreen) {
 void PolygonLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> &maskingObject) {
     this->mask = maskingObject;
     generateRenderPasses();
+    auto mapInterface = this->mapInterface;
     if (mapInterface) {
-        if (mask) {
-            if (!mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
-        }
         mapInterface->invalidate();
     }
 }

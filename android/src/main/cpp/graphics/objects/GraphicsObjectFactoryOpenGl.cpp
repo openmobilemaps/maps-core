@@ -46,7 +46,9 @@ std::shared_ptr<Quad2dInterface> GraphicsObjectFactoryOpenGl::createQuadMask() {
 }
 
 std::shared_ptr<Polygon2dInterface> GraphicsObjectFactoryOpenGl::createPolygonMask() {
-    return std::make_shared<Polygon2dOpenGl>(std::make_shared<ColorShaderOpenGl>());
+    std::shared_ptr<ColorShaderOpenGl> shader = std::make_shared<ColorShaderOpenGl>();
+    shader->setColor(1,1,1,1);
+    return std::make_shared<Polygon2dOpenGl>(shader);
 }
 
 std::shared_ptr<TextInterface> GraphicsObjectFactoryOpenGl::createText(const std::shared_ptr<::ShaderProgramInterface> &shader) {

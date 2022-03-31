@@ -54,7 +54,7 @@ class IconLayer : public IconLayerInterface,
 
     virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) override;
 
-    virtual void update() override {};
+    virtual void update() override;
 
     virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override;
 
