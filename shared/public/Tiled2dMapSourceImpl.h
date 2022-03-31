@@ -257,54 +257,59 @@ template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::performLoad
         LoaderStatus status = loaderResult.status;
 
         switch (status) {
-        case LoaderStatus::OK: {
-            bool isVisible = true;
-            {
+            case LoaderStatus::OK: {
+                bool isVisible;
+                {
+                    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+                    isVisible = currentVisibleTiles.count(*tile);
+                }
+                if (isVisible) {
+                    R da = postLoadingTask(loaderResult, *tile);
+
+                    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+                    currentTiles[*tile] = std::move(da);
+
+                    errorTiles.erase(*tile);
+                }
+                break;
+            }
+            case LoaderStatus::ERROR_400:
+            case LoaderStatus::ERROR_404: {
                 std::lock_guard<std::recursive_mutex> lock(tilesMutex);
-                isVisible = currentVisibleTiles.count(*tile);
+                notFoundTiles.insert(*tile);
+                break;
             }
-            if (isVisible) {
-                R da = postLoadingTask(loaderResult, *tile);
 
-                std::lock_guard<std::recursive_mutex> lock(tilesMutex);
-                currentTiles[*tile] = std::move(da);
+            case LoaderStatus::ERROR_TIMEOUT:
+            case LoaderStatus::ERROR_OTHER:
+            case LoaderStatus::ERROR_NETWORK: {
+                int64_t delay = 0;
+                {
+                    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+                    if (errorTiles.count(*tile) != 0) {
+                        errorTiles[*tile].lastLoad = DateHelper::currentTimeMillis();
+                        errorTiles[*tile].delay = std::min(2 * errorTiles[*tile].delay, MAX_WAIT_TIME);
+                    } else {
+                        errorTiles[*tile] = {DateHelper::currentTimeMillis(), MIN_WAIT_TIME};
+                    }
+                    delay = errorTiles[*tile].delay;
+                    dispatchedTasks++;
+                }
+                auto taskIdentifier = "Tiled2dMapSource_loadingErrorTask";
 
-                errorTiles.erase(*tile);
+                std::weak_ptr<Tiled2dMapSource> selfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this());
+                scheduler->addTask(std::make_shared<LambdaTask>(
+                        TaskConfig(taskIdentifier, delay, TaskPriority::NORMAL, ExecutionEnvironment::IO), [selfPtr] {
+                            if (selfPtr.lock()) selfPtr.lock()->performLoadingTask();
+                        }));
+                break;
             }
-            break;
         }
-        case LoaderStatus::ERROR_400:
-        case LoaderStatus::ERROR_404: {
+
+        {
             std::lock_guard<std::recursive_mutex> lock(tilesMutex);
-            notFoundTiles.insert(*tile);
-            break;
+            currentlyLoading.erase(*tile);
         }
-
-        case LoaderStatus::ERROR_TIMEOUT:
-        case LoaderStatus::ERROR_OTHER:
-        case LoaderStatus::ERROR_NETWORK: {
-            std::lock_guard<std::recursive_mutex> lock(tilesMutex);
-            if (errorTiles.count(*tile) != 0) {
-                errorTiles[*tile].lastLoad = DateHelper::currentTimeMillis();
-                errorTiles[*tile].delay = std::min(2 * errorTiles[*tile].delay, MAX_WAIT_TIME);
-            } else {
-                errorTiles[*tile] = {DateHelper::currentTimeMillis(), MIN_WAIT_TIME};
-            }
-            auto delay = errorTiles[*tile].delay;
-            auto taskIdentifier = "Tiled2dMapSource_loadingErrorTask";
-            dispatchedTasks++;
-
-            std::weak_ptr<Tiled2dMapSource> selfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this());
-            scheduler->addTask(std::make_shared<LambdaTask>(
-                TaskConfig(taskIdentifier, 0, TaskPriority::NORMAL, ExecutionEnvironment::IO), [selfPtr] {
-                    if (selfPtr.lock()) selfPtr.lock()->performLoadingTask();
-                }));
-            break;
-        }
-        }
-
-        std::lock_guard<std::recursive_mutex> lock(tilesMutex);
-        currentlyLoading.erase(*tile);
 
         if (listener.lock()) listener.lock()->onTilesUpdated();
     }
