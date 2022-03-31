@@ -23,6 +23,7 @@ std::shared_ptr<MaskingObjectInterface> Polygon2dOpenGl::asMaskingObject() {
 bool Polygon2dOpenGl::isReady() { return ready; }
 
 void Polygon2dOpenGl::setVertices(const std::vector<::Vec2D> &vertices, const std::vector <int32_t> &indices) {
+    ready = false;
     this->vertices.clear();
     this->indices.clear();
 
@@ -35,8 +36,6 @@ void Polygon2dOpenGl::setVertices(const std::vector<::Vec2D> &vertices, const st
     for (auto &i : indices) {
         this->indices.push_back(i);
     }
-
-    ready = false;
 }
 
 

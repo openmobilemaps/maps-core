@@ -47,6 +47,7 @@ std::shared_ptr<::LayerInterface> Tiled2dMapRasterLayer::asLayerInterface() { re
 
 void Tiled2dMapRasterLayer::update() {
     std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
+    auto mapInterface = this->mapInterface;
     if (mask) {
         if (!mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
     }
@@ -274,6 +275,7 @@ bool Tiled2dMapRasterLayer::onLongPress(const Vec2F &posScreen) {
 void Tiled2dMapRasterLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> &maskingObject) {
     mask = maskingObject;
     generateRenderPasses();
+    auto mapInterface = this->mapInterface;
     if (mapInterface) {
         mapInterface->invalidate();
     }

@@ -172,6 +172,13 @@ void LineLayer::generateRenderPasses() {
     }
 }
 
+void LineLayer::update() {
+    auto mapInterface = this->mapInterface;
+    if (mask) {
+        if (!mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+    }
+}
+
 std::vector<std::shared_ptr<::RenderPassInterface>> LineLayer::buildRenderPasses() {
     if (isHidden) {
         return {};
@@ -293,10 +300,8 @@ void LineLayer::clearTouch() {
 void LineLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> &maskingObject) {
     this->mask = maskingObject;
     generateRenderPasses();
+    auto mapInterface = this->mapInterface;
     if (mapInterface) {
-        if (mask) {
-            if (!mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
-        }
         mapInterface->invalidate();
     }
 }

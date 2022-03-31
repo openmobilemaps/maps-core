@@ -176,6 +176,13 @@ void IconLayer::invalidate() {
     setIcons(getIcons());
 }
 
+void IconLayer::update() {
+    auto mapInterface = this->mapInterface;
+    if (mask) {
+        if (!mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+    }
+}
+
 std::vector<std::shared_ptr<::RenderPassInterface>> IconLayer::buildRenderPasses() {
     if (isHidden) {
         return {};
@@ -355,10 +362,8 @@ bool IconLayer::onClickConfirmed(const Vec2F &posScreen) {
 
 void IconLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) {
     this->mask = maskingObject;
+    auto mapInterface = this->mapInterface;
     if (mapInterface) {
-        if (mask) {
-            if (!mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
-        }
         mapInterface->invalidate();
     }
 }
