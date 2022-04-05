@@ -22,6 +22,7 @@ bool LineGroup2dOpenGl::isReady() {
 }
 
 void LineGroup2dOpenGl::setLines(const std::vector<RenderLineDescription> &lines) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
     ready = false;
     dataReady = false;
 
@@ -154,6 +155,7 @@ void LineGroup2dOpenGl::setLines(const std::vector<RenderLineDescription> &lines
 }
 
 void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (ready || !dataReady) return;
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
@@ -188,6 +190,7 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
 }
 
 void LineGroup2dOpenGl::clear() {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
     ready = false;
     glDeleteBuffers(1, &vertexAttribBuffer);
     glDeleteBuffers(1, &indexBuffer);

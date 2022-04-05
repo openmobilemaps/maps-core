@@ -16,6 +16,7 @@
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
 #include "opengl_wrapper.h"
+#include <mutex>
 
 class Line2dOpenGl : public GraphicsObjectInterface,
                      public Line2dInterface,
@@ -65,6 +66,7 @@ class Line2dOpenGl : public GraphicsObjectInterface,
     std::vector<GLuint> lineIndices;
 
     bool ready = false;
+    std::recursive_mutex dataMutex;
 
     bool isMaskInversed = false;
 };

@@ -19,6 +19,7 @@
 #include "GlyphDescription.h"
 #include "opengl_wrapper.h"
 #include <vector>
+#include <mutex>
 
 class Text2dOpenGl : public GraphicsObjectInterface,
                      public MaskingObjectInterface,
@@ -79,6 +80,7 @@ class Text2dOpenGl : public GraphicsObjectInterface,
 
     bool ready = false;
     bool dataReady = false;
+    std::recursive_mutex dataMutex;
 
     bool isMaskInversed = false;
 };

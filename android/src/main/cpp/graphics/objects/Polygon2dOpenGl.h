@@ -16,6 +16,7 @@
 #include "Polygon2dInterface.h"
 #include "ShaderProgramInterface.h"
 #include "opengl_wrapper.h"
+#include <mutex>
 
 class Polygon2dOpenGl : public GraphicsObjectInterface,
                         public MaskingObjectInterface,
@@ -62,6 +63,7 @@ protected:
     std::vector<GLushort> indices;
 
     bool ready = false;
+    std::recursive_mutex dataMutex;
 
     bool isMaskInversed = false;
 };

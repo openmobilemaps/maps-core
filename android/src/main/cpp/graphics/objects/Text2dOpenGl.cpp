@@ -20,9 +20,10 @@ bool Text2dOpenGl::isReady() { return ready; }
 std::shared_ptr<GraphicsObjectInterface> Text2dOpenGl::asGraphicsObject() { return shared_from_this(); }
 
 void Text2dOpenGl::clear() {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    ready = false;
     removeGlBuffers();
     removeTexture();
-    ready = false;
 }
 
 void Text2dOpenGl::setIsInverseMasked(bool inversed) {
@@ -30,6 +31,7 @@ void Text2dOpenGl::setIsInverseMasked(bool inversed) {
 }
 
 void Text2dOpenGl::setTexts(const std::vector<TextDescription> &texts) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
     ready = false;
     dataReady = false;
 
@@ -74,6 +76,7 @@ void Text2dOpenGl::setTexts(const std::vector<TextDescription> &texts) {
 
 void Text2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
     if (ready || !dataReady) return;
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     if (openGlContext->getProgram(shaderProgram->getProgramName()) == 0) {
@@ -112,6 +115,7 @@ void Text2dOpenGl::removeGlBuffers() {
 }
 
 void Text2dOpenGl::loadTexture(const std::shared_ptr<TextureHolderInterface> &textureHolder) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
     glGenTextures(1, (unsigned int *)&texturePointer[0]);
 
     if (textureHolder != nullptr) {
@@ -138,6 +142,7 @@ void Text2dOpenGl::loadTexture(const std::shared_ptr<TextureHolderInterface> &te
 }
 
 void Text2dOpenGl::removeTexture() {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
     glDeleteTextures(1, &texturePointer[0]);
     texturePointer = std::vector<GLuint>(1, 0);
     textureLoaded = false;

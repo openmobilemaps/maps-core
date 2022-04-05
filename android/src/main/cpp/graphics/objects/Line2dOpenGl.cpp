@@ -19,12 +19,14 @@ std::shared_ptr<GraphicsObjectInterface> Line2dOpenGl::asGraphicsObject() { retu
 bool Line2dOpenGl::isReady() { return ready; }
 
 void Line2dOpenGl::setLinePositions(const std::vector<::Vec2D> &positions) {
-    lineCoordinates = positions;
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
     ready = false;
+    lineCoordinates = positions;
     initializeLineAndPoints();
 }
 
 void Line2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (ready)
         return;
 
@@ -170,8 +172,9 @@ void Line2dOpenGl::prepareGlData(std::shared_ptr<OpenGlContext> openGlContext) {
 }
 
 void Line2dOpenGl::clear() {
-    removeGlBuffers();
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
     ready = false;
+    removeGlBuffers();
 }
 
 void Line2dOpenGl::setIsInverseMasked(bool inversed) {
