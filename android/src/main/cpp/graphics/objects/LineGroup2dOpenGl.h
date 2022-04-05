@@ -17,6 +17,7 @@
 #include "OpenGlHelper.h"
 #include "opengl_wrapper.h"
 #include "RenderLineDescription.h"
+#include <mutex>
 
 class LineGroup2dOpenGl : public GraphicsObjectInterface,
                           public LineGroup2dInterface,
@@ -61,6 +62,7 @@ protected:
 
     bool ready = false;
     bool dataReady = false;
+    std::recursive_mutex dataMutex;
 
     bool isMaskInversed = false;
 };

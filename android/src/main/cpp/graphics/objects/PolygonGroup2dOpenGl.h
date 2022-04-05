@@ -17,6 +17,7 @@
 #include "OpenGlHelper.h"
 #include "opengl_wrapper.h"
 #include "RenderLineDescription.h"
+#include <mutex>
 
 class PolygonGroup2dOpenGl : public GraphicsObjectInterface,
                              public PolygonGroup2dInterface,
@@ -57,6 +58,7 @@ protected:
 
     bool dataReady = false;
     bool ready = false;
+    std::recursive_mutex dataMutex;
 
     bool isMaskInversed = false;
 };

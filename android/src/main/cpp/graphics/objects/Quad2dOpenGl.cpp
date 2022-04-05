@@ -27,9 +27,10 @@ std::shared_ptr<MaskingObjectInterface> Quad2dOpenGl::asMaskingObject() {
 }
 
 void Quad2dOpenGl::clear() {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    ready = false;
     removeGlBuffers();
     removeTexture();
-    ready = false;
 }
 
 void Quad2dOpenGl::setIsInverseMasked(bool inversed) {
@@ -37,14 +38,16 @@ void Quad2dOpenGl::setIsInverseMasked(bool inversed) {
 }
 
 void Quad2dOpenGl::setFrame(const Quad2dD &frame, const RectD &textureCoordinates) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    ready = false;
     this->frame = frame;
     this->textureCoordinates = textureCoordinates;
-    ready = false;
 }
 
 void Quad2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
     if (ready)
         return;
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
 
     float frameZ = 0;
     vertices = {
@@ -114,6 +117,7 @@ void Quad2dOpenGl::removeGlBuffers() {
 
 
 void Quad2dOpenGl::loadTexture(const std::shared_ptr<::RenderingContextInterface> & context, const std::shared_ptr<TextureHolderInterface> &textureHolder) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
     glGenTextures(1, (unsigned int *)&texturePointer[0]);
 
     if (textureHolder != nullptr) {
@@ -147,6 +151,7 @@ void Quad2dOpenGl::loadTexture(const std::shared_ptr<::RenderingContextInterface
 }
 
 void Quad2dOpenGl::removeTexture() {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
     glDeleteTextures(1, &texturePointer[0]);
     texturePointer = std::vector<GLuint>(1, 0);
     textureLoaded = false;

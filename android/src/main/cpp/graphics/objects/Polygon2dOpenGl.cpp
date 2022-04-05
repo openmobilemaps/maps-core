@@ -23,6 +23,7 @@ std::shared_ptr<MaskingObjectInterface> Polygon2dOpenGl::asMaskingObject() {
 bool Polygon2dOpenGl::isReady() { return ready; }
 
 void Polygon2dOpenGl::setVertices(const std::vector<::Vec2D> &vertices, const std::vector <int32_t> &indices) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
     ready = false;
     this->vertices.clear();
     this->indices.clear();
@@ -40,6 +41,7 @@ void Polygon2dOpenGl::setVertices(const std::vector<::Vec2D> &vertices, const st
 
 
 void Polygon2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (ready)
         return;
 
@@ -72,6 +74,7 @@ void Polygon2dOpenGl::prepareGlData(const std::shared_ptr <OpenGlContext> &openG
 }
 
 void Polygon2dOpenGl::clear() {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
     glDeleteBuffers(1, &vertexBuffer);
     glDeleteBuffers(1, &indexBuffer);
     ready = false;

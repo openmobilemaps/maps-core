@@ -17,6 +17,7 @@
 #include "ShaderProgramInterface.h"
 #include "opengl_wrapper.h"
 #include <vector>
+#include <mutex>
 
 class Quad2dOpenGl : public GraphicsObjectInterface,
                      public MaskingObjectInterface,
@@ -83,6 +84,7 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
     double factorWidth = 1.0;
 
     bool ready = false;
+    std::recursive_mutex dataMutex;
 
     bool isMaskInversed = false;
 };
