@@ -17,8 +17,13 @@
 <div align="center">
     <!-- License -->
     <a href="https://github.com/openmobilemaps/maps-core/blob/master/LICENSE">
-      <img alt="License: MPL 2.0"
-      src="https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg">
+      <img alt="License: MPL 2.0" src="https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg">
+    </a>
+    <a href="https://search.maven.org/search?q=g:%22io.openmobilemaps%22%20AND%20a:%22mapscore%22">
+      <img alt="Maven Central" src="https://img.shields.io/maven-central/v/io.openmobilemaps/mapscore.svg?label=Maven%20Central">
+    </a>
+    <a href="https://search.maven.org/search?q=g:%22io.openmobilemaps%22%20AND%20a:%22mapscore-dev%22">
+      <img alt="Maven Central Dev" src="https://img.shields.io/maven-central/v/io.openmobilemaps/mapscore-dev.svg?label=Maven%20Central">
     </a>
 </div>
 
