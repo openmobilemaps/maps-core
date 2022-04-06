@@ -38,11 +38,13 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
     if (isPaused) {
         return;
     }
-    std::weak_ptr<Tiled2dMapSource> selfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this());
+    std::weak_ptr<Tiled2dMapSource> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this());
     scheduler->addTask(std::make_shared<LambdaTask>(
-                                                    TaskConfig("Tiled2dMapSource_Update", 0, TaskPriority::NORMAL, ExecutionEnvironment::IO), [selfPtr, visibleBounds, zoom] {
-                                                        if (selfPtr.lock()) selfPtr.lock()->updateCurrentTileset(visibleBounds, zoom);
-                                                    }));
+            TaskConfig("Tiled2dMapSource_Update", 0, TaskPriority::NORMAL, ExecutionEnvironment::IO),
+            [weakSelfPtr, visibleBounds, zoom] {
+                auto selfPtr = weakSelfPtr.lock();
+                if (selfPtr) selfPtr->updateCurrentTileset(visibleBounds, zoom);
+            }));
 }
 
 template<class T, class L, class R>
@@ -216,10 +218,11 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::unordered_set<P
     for (int taskCount = 0; taskCount < tasksToAdd; taskCount++) {
         auto taskIdentifier = "Tiled2dMapSource_loadingTask" + std::to_string(taskCount);
 
-        std::weak_ptr<Tiled2dMapSource> selfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this());
+        std::weak_ptr<Tiled2dMapSource> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this());
         scheduler->addTask(std::make_shared<LambdaTask>(
-            TaskConfig(taskIdentifier, 0, TaskPriority::NORMAL, ExecutionEnvironment::IO), [selfPtr] {
-                if (selfPtr.lock()) selfPtr.lock()->performLoadingTask();
+            TaskConfig(taskIdentifier, 0, TaskPriority::NORMAL, ExecutionEnvironment::IO), [weakSelfPtr] {
+                auto selfPtr = weakSelfPtr.lock();
+                if (selfPtr) selfPtr->performLoadingTask();
             }));
         dispatchedTasks++;
     }
@@ -303,10 +306,11 @@ template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::performLoad
                 }
                 auto taskIdentifier = "Tiled2dMapSource_loadingErrorTask";
 
-                std::weak_ptr<Tiled2dMapSource> selfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this());
+                std::weak_ptr<Tiled2dMapSource> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this());
                 scheduler->addTask(std::make_shared<LambdaTask>(
-                        TaskConfig(taskIdentifier, delay, TaskPriority::NORMAL, ExecutionEnvironment::IO), [selfPtr] {
-                            if (selfPtr.lock()) selfPtr.lock()->performLoadingTask();
+                        TaskConfig(taskIdentifier, delay, TaskPriority::NORMAL, ExecutionEnvironment::IO), [weakSelfPtr] {
+                            auto selfPtr = weakSelfPtr.lock();
+                            if (selfPtr) selfPtr->performLoadingTask();
                         }));
                 break;
             }

@@ -122,19 +122,19 @@ void TextLayer::resume() {
 
 void TextLayer::hide() {
     isHidden = true;
-    if (mapInterface) {
-        mapInterface->invalidate();
-    }
+    auto mapInterface = this->mapInterface;
+    if (mapInterface) mapInterface->invalidate();
 }
 
 void TextLayer::show() {
     isHidden = false;
-    if (mapInterface) {
-        mapInterface->invalidate();
-    }
+    auto mapInterface = this->mapInterface;
+    if (mapInterface) mapInterface->invalidate();
 }
 
 void TextLayer::clear() {
+    auto lockSelfPtr = shared_from_this();
+    auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         addingQueue.clear();
@@ -157,9 +157,8 @@ void TextLayer::clear() {
         std::lock_guard<std::recursive_mutex> overlayLock(renderPassMutex);
         renderPasses.clear();
     }
-    if (mapInterface) {
-        mapInterface->invalidate();
-    }
+
+    mapInterface->invalidate();
 }
 
 void TextLayer::generateRenderPasses() {
@@ -193,6 +192,8 @@ void TextLayer::add(const std::shared_ptr<TextInfoInterface> &text) {
 
 
 void TextLayer::addTexts(const std::vector<std::shared_ptr<TextInfoInterface>> &texts) {
+    auto lockSelfPtr = shared_from_this();
+    auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         for (const auto &text : texts) {
@@ -219,26 +220,38 @@ void TextLayer::addTexts(const std::vector<std::shared_ptr<TextInfoInterface>> &
         }
     }
 
-    std::string taskId =
-            "TextLayer_setup_coll_" + std::get<0>(textObjects.at(0))->getText() + "_[" + std::to_string(textObjects.size()) +
-            "]";
+    std::weak_ptr<TextLayer> weakSelfPtr = std::dynamic_pointer_cast<TextLayer>(shared_from_this());
+    std::string taskId = "TextLayer_setup_coll_" + std::get<0>(textObjects.at(0))->getText()
+            + "_[" + std::to_string(textObjects.size()) + "]";
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
             TaskConfig(taskId, 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
-            [=] {
-                for (const auto& textTuple : textObjects) {
-                    const auto &text = std::get<0>(textTuple);
-                    const auto &textObject = std::get<1>(textTuple)->getTextObject();
-                    textObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
-
-                    auto font = fontLoader->loadFont(text->getFont());
-                    if(font.imageData) {
-                        textObject->loadTexture(font.imageData);
-                    }
-                }
+            [weakSelfPtr, textObjects] {
+                auto selfPtr = weakSelfPtr.lock();
+                if (selfPtr) selfPtr->setupTextObjects(textObjects);
             }));
 
     generateRenderPasses();
 
-    if (mapInterface)
-        mapInterface->invalidate();
+    if (mapInterface) mapInterface->invalidate();
+}
+
+void TextLayer::setupTextObjects(const std::vector<std::tuple<const std::shared_ptr<TextInfoInterface>, std::shared_ptr<TextLayerObject>>> &textObjects) {
+    auto mapInterface = this->mapInterface;
+    auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
+    if (!renderingContext) {
+        return;
+    }
+
+    for (const auto& textTuple : textObjects) {
+        const auto &text = std::get<0>(textTuple);
+        const auto &textObject = std::get<1>(textTuple)->getTextObject();
+        textObject->asGraphicsObject()->setup(renderingContext);
+
+        auto font = fontLoader->loadFont(text->getFont());
+        if(font.imageData) {
+            textObject->loadTexture(font.imageData);
+        }
+    }
+
+    mapInterface->invalidate();
 }

@@ -91,10 +91,13 @@ void LineLayer::add(const std::shared_ptr<LineInfoInterface> &line) {
 
     lineObject->setPositions(line->getCoordinates());
 
-    std::weak_ptr<LineLayer> selfPtr = std::dynamic_pointer_cast<LineLayer>(shared_from_this());
+    std::weak_ptr<LineLayer> weakSelfPtr = std::dynamic_pointer_cast<LineLayer>(shared_from_this());
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
             TaskConfig("LineLayer_setup_" + line->getIdentifier(), 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
-            [selfPtr, lineGraphicsObject] { if (selfPtr.lock()) selfPtr.lock()->setupLine(lineGraphicsObject); }));
+            [weakSelfPtr, lineGraphicsObject] {
+                auto selfPtr = weakSelfPtr.lock();
+                if (selfPtr) selfPtr->setupLine(lineGraphicsObject);
+            }));
 
     {
         std::lock_guard<std::recursive_mutex> lock(linesMutex);
@@ -104,12 +107,17 @@ void LineLayer::add(const std::shared_ptr<LineInfoInterface> &line) {
 }
 
 void LineLayer::setupLine(const std::shared_ptr<Line2dInterface> &line) {
-    if (!mapInterface) return;
+    auto mapInterface = this->mapInterface;
+    auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
+    if (!renderingContext) {
+        return;
+    }
+
     if (!line->asGraphicsObject()->isReady()) {
-        line->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+        line->asGraphicsObject()->setup(renderingContext);
     }
     if (mask && !mask->asGraphicsObject()->isReady()) {
-        mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+        mask->asGraphicsObject()->setup(renderingContext);
     }
     mapInterface->invalidate();
 }
@@ -218,8 +226,12 @@ void LineLayer::pause() {
 }
 
 void LineLayer::resume() {
+    auto mapInterface = this->mapInterface;
+    auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
+    if (!renderingContext) {
+        return;
+    }
     std::lock_guard<std::recursive_mutex> overlayLock(linesMutex);
-    auto renderingContext = mapInterface->getRenderingContext();
     for (const auto &line : lines) {
         line.second->getLineObject()->setup(renderingContext);
     }

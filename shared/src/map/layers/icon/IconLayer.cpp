@@ -39,6 +39,8 @@ std::vector<std::shared_ptr<IconInfoInterface>> IconLayer::getIcons() {
 }
 
 void IconLayer::remove(const std::shared_ptr<IconInfoInterface> &icon) {
+    auto lockSelfPtr = shared_from_this();
+    auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         addingQueue.erase(std::remove(addingQueue.begin(), addingQueue.end(), icon), addingQueue.end());
@@ -113,23 +115,14 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
         }
     }
 
-    std::string taskId =
-            "IconLayer_setup_coll_" + std::get<0>(iconObjects.at(0))->getIdentifier() + "_[" + std::to_string(iconObjects.size()) +
-            "]";
+    std::weak_ptr<IconLayer> weakSelfPtr = std::dynamic_pointer_cast<IconLayer>(shared_from_this());
+    std::string taskId = "IconLayer_setup_coll_" + std::get<0>(iconObjects.at(0))->getIdentifier()
+            + "_[" + std::to_string(iconObjects.size()) + "]";
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
             TaskConfig(taskId, 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
-            [=] {
-                for (const auto iconTuple : iconObjects) {
-                    if (!mapInterface) return;
-                    const auto &icon = std::get<0>(iconTuple);
-                    const auto &quadObject = std::get<1>(iconTuple)->getQuadObject();
-                    quadObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
-                    quadObject->loadTexture(mapInterface->getRenderingContext(), icon->getTexture());
-                    if (mask && !mask->asGraphicsObject()->isReady()) {
-                        mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
-                    }
-                    mapInterface->invalidate();
-                }
+            [weakSelfPtr, iconObjects] {
+                auto selfPtr = weakSelfPtr.lock();
+                if (selfPtr) selfPtr->setupIconObjects(iconObjects);
             }));
 
     preGenerateRenderPasses();
@@ -137,8 +130,29 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
         mapInterface->invalidate();
 }
 
+void IconLayer::setupIconObjects(const std::vector<std::tuple<const std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>> &iconObjects) {
+    auto mapInterface = this->mapInterface;
+    auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
+    if (!renderingContext) {
+        return;
+    }
+
+    for (const auto iconTuple : iconObjects) {
+        const auto &icon = std::get<0>(iconTuple);
+        const auto &quadObject = std::get<1>(iconTuple)->getQuadObject();
+        quadObject->asGraphicsObject()->setup(renderingContext);
+        quadObject->loadTexture(renderingContext, icon->getTexture());
+        if (mask && !mask->asGraphicsObject()->isReady()) {
+            mask->asGraphicsObject()->setup(renderingContext);
+        }
+    }
+
+    mapInterface->invalidate();
+}
 
 void IconLayer::clear() {
+    auto lockSelfPtr = shared_from_this();
+    auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         addingQueue.clear();
@@ -160,8 +174,7 @@ void IconLayer::clear() {
         if (mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->clear();
     }
     renderPassObjectMap.clear();
-    if (mapInterface)
-        mapInterface->invalidate();
+    mapInterface->invalidate();
 }
 
 void IconLayer::setCallbackHandler(const std::shared_ptr<IconLayerCallbackInterface> &handler) {
@@ -177,17 +190,24 @@ void IconLayer::invalidate() {
 }
 
 void IconLayer::update() {
-    auto mapInterface = this->mapInterface;
+    auto lockSelfPtr = shared_from_this();
+    auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
     if (mapInterface && mask) {
         if (!mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
     }
 }
 
 std::vector<std::shared_ptr<::RenderPassInterface>> IconLayer::buildRenderPasses() {
+    auto lockSelfPtr = shared_from_this();
+    auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
+    auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+    if (!camera) {
+        return {};
+    }
+
     if (isHidden) {
         return {};
     } else {
-        auto camera = mapInterface->getCamera();
         int i = 0;
         std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> currentRenderPassObjectMap;
         std::unordered_map<int, std::vector<float>> transformSet;
@@ -259,10 +279,11 @@ void IconLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
 }
 
 void IconLayer::onRemoved() {
+    auto mapInterface = this->mapInterface;
     if (mapInterface && isLayerClickable) {
         mapInterface->getTouchHandler()->addListener(shared_from_this());
     }
-    mapInterface = nullptr;
+    this->mapInterface = nullptr;
 }
 
 void IconLayer::pause() {
@@ -288,25 +309,34 @@ void IconLayer::resume() {
         addIcons(icons);
     }
     if (mask) {
-        if (!mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+        auto mapInterface = this->mapInterface;
+        auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
+        if (renderingContext && !mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(renderingContext);
     }
 }
 
 void IconLayer::hide() {
     isHidden = true;
-    if (mapInterface)
-        mapInterface->invalidate();
+    auto mapInterface = this->mapInterface;
+    if (mapInterface) mapInterface->invalidate();
 }
 
 void IconLayer::show() {
     isHidden = false;
-    if (mapInterface)
-        mapInterface->invalidate();
+    auto mapInterface = this->mapInterface;
+    if (mapInterface) mapInterface->invalidate();
 }
 
 bool IconLayer::onClickConfirmed(const Vec2F &posScreen) {
+    auto lockSelfPtr = shared_from_this();
+    auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
+    auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+    auto conversionHelper = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
+    if (!camera || !conversionHelper) {
+        return false;
+    }
+
     if (callbackHandler) {
-        std::shared_ptr<MapCamera2dInterface> camera = mapInterface->getCamera();
         std::vector<std::shared_ptr<IconInfoInterface>> iconsHit;
 
         Coord clickCoords = camera->coordFromScreenPosition(posScreen);
@@ -328,7 +358,7 @@ bool IconLayer::onClickConfirmed(const Vec2F &posScreen) {
                 float rightW = icon->getIconSize().x * (1.0f - ratioLeftRight);
                 float bottomH = icon->getIconSize().y * (1.0f - ratioTopBottom);
 
-                Coord iconPos = mapInterface->getCoordinateConverterHelper()->convert(clickCoords.systemIdentifier,
+                Coord iconPos = conversionHelper->convert(clickCoords.systemIdentifier,
                                                                                       icon->getCoordinate());
                 IconType type = icon->getType();
                 if (type == IconType::INVARIANT || type == IconType::SCALE_INVARIANT) {
@@ -369,8 +399,9 @@ void IconLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface>
 }
 
 void IconLayer::setLayerClickable(bool isLayerClickable) {
-    if(this->isLayerClickable == isLayerClickable) return;
+    if (this->isLayerClickable == isLayerClickable) return;
     this->isLayerClickable = isLayerClickable;
+    auto mapInterface = this->mapInterface;
     if (mapInterface) {
         if (isLayerClickable) {
             mapInterface->getTouchHandler()->addListener(shared_from_this());
