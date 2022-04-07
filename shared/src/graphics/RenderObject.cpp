@@ -23,6 +23,6 @@ bool RenderObject::hasCustomModelMatrix() {
     return setCustomModelMatrix;
 }
 
-std::vector<float> RenderObject::getCustomModelMatrix() const {
+std::vector<float> RenderObject::getCustomModelMatrix() {
     return modelMatrix;
 }

@@ -34,14 +34,14 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (nonnull NSArray<MCRenderObjectInterface *> *)getRenderObjects {
+- (nonnull NSArray<id<MCRenderObjectInterface>> *)getRenderObjects {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getRenderObjects();
         return ::djinni::List<::djinni_generated::RenderObjectInterface>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)addRenderObject:(nullable MCRenderObjectInterface *)renderObject {
+- (void)addRenderObject:(nullable id<MCRenderObjectInterface>)renderObject {
     try {
         _cppRefHandle.get()->addRenderObject(::djinni_generated::RenderObjectInterface::toCpp(renderObject));
     } DJINNI_TRANSLATE_EXCEPTIONS()
