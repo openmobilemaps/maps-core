@@ -38,11 +38,13 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
     if (isPaused) {
         return;
     }
-    std::weak_ptr<Tiled2dMapSource> selfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this());
+    std::weak_ptr<Tiled2dMapSource> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this());
     scheduler->addTask(std::make_shared<LambdaTask>(
-                                                    TaskConfig("Tiled2dMapSource_Update", 0, TaskPriority::NORMAL, ExecutionEnvironment::IO), [selfPtr, visibleBounds, zoom] {
-                                                        if (selfPtr.lock()) selfPtr.lock()->updateCurrentTileset(visibleBounds, zoom);
-                                                    }));
+            TaskConfig("Tiled2dMapSource_Update", 0, TaskPriority::NORMAL, ExecutionEnvironment::IO),
+            [weakSelfPtr, visibleBounds, zoom] {
+                auto selfPtr = weakSelfPtr.lock();
+                if (selfPtr) selfPtr->updateCurrentTileset(visibleBounds, zoom);
+            }));
 }
 
 template<class T, class L, class R>
@@ -144,84 +146,91 @@ template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::updateCurre
 
 template <class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::unordered_set<PrioritizedTiled2dMapTileInfo> &visibleTiles) {
-    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
-    currentVisibleTiles.clear();
+    size_t tasksToAdd;
+    {
+        std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+        currentVisibleTiles.clear();
 
-    std::unordered_set<PrioritizedTiled2dMapTileInfo> toAdd;
-    for (const auto &tileInfo : visibleTiles) {
-        currentVisibleTiles.insert(tileInfo.tileInfo);
+        std::unordered_set<PrioritizedTiled2dMapTileInfo> toAdd;
+        for (const auto &tileInfo : visibleTiles) {
+            currentVisibleTiles.insert(tileInfo.tileInfo);
 
-        if (currentTiles.count(tileInfo.tileInfo) == 0 &&
-            currentlyLoading.count(tileInfo.tileInfo) == 0) {
-            for (auto it = loadingQueue.begin(); it != loadingQueue.end(); it++) {
-                if (it->tileInfo == tileInfo.tileInfo) {
-                    loadingQueue.erase(it);
+            if (currentTiles.count(tileInfo.tileInfo) == 0 &&
+                currentlyLoading.count(tileInfo.tileInfo) == 0) {
+                for (auto it = loadingQueue.begin(); it != loadingQueue.end(); it++) {
+                    if (it->tileInfo == tileInfo.tileInfo) {
+                        loadingQueue.erase(it);
+                        break;
+                    }
+                }
+
+                toAdd.insert(tileInfo);
+            }
+        }
+
+        std::unordered_set<Tiled2dMapTileInfo> toRemove;
+        for (const auto &tileEntry : currentTiles) {
+            bool found = false;
+            for (const auto &tile : visibleTiles) {
+                if (tileEntry.first == tile.tileInfo) {
+                    found = true;
                     break;
                 }
             }
-
-            toAdd.insert(tileInfo);
-        }
-    }
-
-    std::unordered_set<Tiled2dMapTileInfo> toRemove;
-    for (const auto &tileEntry : currentTiles) {
-        bool found = false;
-        for (const auto &tile : visibleTiles) {
-            if (tileEntry.first == tile.tileInfo) {
-                found = true;
-                break;
+            if (!found) {
+                toRemove.insert(tileEntry.first);
             }
         }
-        if (!found) {
-            toRemove.insert(tileEntry.first);
+
+        for (const auto &removedTile : toRemove) {
+            currentTiles.erase(removedTile);
         }
-    }
 
-    for (const auto &removedTile : toRemove) {
-        currentTiles.erase(removedTile);
-    }
-
-    for (auto it = loadingQueue.begin(); it != loadingQueue.end();) {
-        if (visibleTiles.count(*it) == 0) {
-            it = loadingQueue.erase(it);
-        } else {
-            ++it;
+        for (auto it = loadingQueue.begin(); it != loadingQueue.end();) {
+            if (visibleTiles.count(*it) == 0) {
+                it = loadingQueue.erase(it);
+            } else {
+                ++it;
+            }
         }
-    }
 
-    for (auto it = errorTiles.begin(); it != errorTiles.end();) {
-        if (visibleTiles.count({it->first, 0}) == 0) {
-            it = errorTiles.erase(it);
-        } else {
-            ++it;
+        for (auto it = errorTiles.begin(); it != errorTiles.end();) {
+            if (visibleTiles.count({it->first, 0}) == 0) {
+                it = errorTiles.erase(it);
+            } else {
+                ++it;
+            }
         }
-    }
 
-    for (const auto &addedTile : toAdd) {
-        if (loadingQueue.count(addedTile) == 0 &&
-            errorTiles.count(addedTile.tileInfo) == 0) {
-            loadingQueue.insert(addedTile);
+        for (const auto &addedTile : toAdd) {
+            if (loadingQueue.count(addedTile) == 0 &&
+                errorTiles.count(addedTile.tileInfo) == 0) {
+                loadingQueue.insert(addedTile);
+            }
         }
+
+        size_t errorTilesCount = errorTiles.size();
+
+        size_t totalOutstandingTasks = errorTilesCount + loadingQueue.size();
+        size_t dispatchedTaskCount = dispatchedTasks.load();
+        tasksToAdd = totalOutstandingTasks > dispatchedTaskCount ? totalOutstandingTasks - dispatchedTaskCount : 0;
     }
-
-    size_t errorTilesCount = errorTiles.size();
-
-    size_t totalOutstandingTasks = errorTilesCount + loadingQueue.size();
-    size_t dispatchedTaskCount = dispatchedTasks.load();
-    size_t tasksToAdd = totalOutstandingTasks > dispatchedTaskCount ? totalOutstandingTasks - dispatchedTaskCount : 0;
     for (int taskCount = 0; taskCount < tasksToAdd; taskCount++) {
         auto taskIdentifier = "Tiled2dMapSource_loadingTask" + std::to_string(taskCount);
 
-        std::weak_ptr<Tiled2dMapSource> selfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this());
+        std::weak_ptr<Tiled2dMapSource> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this());
         scheduler->addTask(std::make_shared<LambdaTask>(
-            TaskConfig(taskIdentifier, 0, TaskPriority::NORMAL, ExecutionEnvironment::IO), [selfPtr] {
-                if (selfPtr.lock()) selfPtr.lock()->performLoadingTask();
+            TaskConfig(taskIdentifier, 0, TaskPriority::NORMAL, ExecutionEnvironment::IO), [weakSelfPtr] {
+                auto selfPtr = weakSelfPtr.lock();
+                if (selfPtr) selfPtr->performLoadingTask();
             }));
         dispatchedTasks++;
     }
 
-    if (listener.lock()) listener.lock()->onTilesUpdated();
+    auto listenerPtr = listener.lock();
+    if (listenerPtr) {
+        listenerPtr->onTilesUpdated();
+    }
 }
 
 template <class T, class L, class R> std::optional<Tiled2dMapTileInfo> Tiled2dMapSource<T, L, R>::dequeueLoadingTask() {
@@ -297,10 +306,11 @@ template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::performLoad
                 }
                 auto taskIdentifier = "Tiled2dMapSource_loadingErrorTask";
 
-                std::weak_ptr<Tiled2dMapSource> selfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this());
+                std::weak_ptr<Tiled2dMapSource> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this());
                 scheduler->addTask(std::make_shared<LambdaTask>(
-                        TaskConfig(taskIdentifier, delay, TaskPriority::NORMAL, ExecutionEnvironment::IO), [selfPtr] {
-                            if (selfPtr.lock()) selfPtr.lock()->performLoadingTask();
+                        TaskConfig(taskIdentifier, delay, TaskPriority::NORMAL, ExecutionEnvironment::IO), [weakSelfPtr] {
+                            auto selfPtr = weakSelfPtr.lock();
+                            if (selfPtr) selfPtr->performLoadingTask();
                         }));
                 break;
             }
@@ -311,7 +321,10 @@ template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::performLoad
             currentlyLoading.erase(*tile);
         }
 
-        if (listener.lock()) listener.lock()->onTilesUpdated();
+        auto listenerPtr = listener.lock();
+        if (listenerPtr) {
+            listenerPtr->onTilesUpdated();
+        }
     }
 }
 

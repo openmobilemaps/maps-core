@@ -63,6 +63,8 @@ class TextLayer : public TextLayerInterface,
     void add(const std::shared_ptr<TextInfoInterface> &text);
     void addTexts(const std::vector<std::shared_ptr<TextInfoInterface>> &texts);
 
+    void setupTextObjects(const std::vector<std::tuple<const std::shared_ptr<TextInfoInterface>, std::shared_ptr<TextLayerObject>>> &textObjects);
+
     std::vector<std::shared_ptr<TextInfoInterface>> getTexts();
 
   private:

@@ -179,10 +179,12 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
             renderPasses = newRenderPasses;
         }
 
-        std::weak_ptr<Tiled2dMapRasterLayer> selfPtr = std::dynamic_pointer_cast<Tiled2dMapRasterLayer>(shared_from_this());
+        std::weak_ptr<Tiled2dMapRasterLayer> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapRasterLayer>(shared_from_this());
         mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
-                TaskConfig("Tiled2dMapRasterLayer_onTilesUpdated", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [selfPtr, tilesToSetup, tilesToClean] {
-                    if (selfPtr.lock()) selfPtr.lock()->setupTiles(tilesToSetup, tilesToClean);
+                TaskConfig("Tiled2dMapRasterLayer_onTilesUpdated", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+                [weakSelfPtr, tilesToSetup, tilesToClean] {
+                    auto selfPtr = weakSelfPtr.lock();
+                    if (selfPtr) selfPtr->setupTiles(tilesToSetup, tilesToClean);
                 }));
     }
 }

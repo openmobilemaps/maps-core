@@ -121,27 +121,32 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
         }
     }
 
-    std::weak_ptr<PolygonLayer> selfPtr = std::dynamic_pointer_cast<PolygonLayer>(shared_from_this());
+    std::weak_ptr<PolygonLayer> weakSelfPtr = std::dynamic_pointer_cast<PolygonLayer>(shared_from_this());
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
             TaskConfig("PolygonLayer_setup_" + polygons[0].identifier + ",...", 0, TaskPriority::NORMAL,
                        ExecutionEnvironment::GRAPHICS),
-            [selfPtr, polygonGraphicsObjects] {
-                if (selfPtr.lock())
-                    selfPtr.lock()->setupPolygonObjects(polygonGraphicsObjects);
+            [weakSelfPtr, polygonGraphicsObjects] {
+                auto selfPtr = weakSelfPtr.lock();
+                if (selfPtr) selfPtr->setupPolygonObjects(polygonGraphicsObjects);
             }));
 
     generateRenderPasses();
 }
 
 void PolygonLayer::setupPolygonObjects(const std::vector<std::shared_ptr<Polygon2dInterface>> &polygons) {
-    if (!mapInterface) return;
+    auto mapInterface = this->mapInterface;
+    auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
+    if (!renderingContext) {
+        return;
+    }
+
     for (const auto &polygonGraphicsObject : polygons) {
         if (!polygonGraphicsObject->asGraphicsObject()->isReady()) {
-            polygonGraphicsObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+            polygonGraphicsObject->asGraphicsObject()->setup(renderingContext);
         }
     }
     if (mask && !mask->asGraphicsObject()->isReady()) {
-        mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+        mask->asGraphicsObject()->setup(renderingContext);
     }
     mapInterface->invalidate();
 }
@@ -177,8 +182,12 @@ void PolygonLayer::pause() {
 }
 
 void PolygonLayer::resume() {
+    auto mapInterface = this->mapInterface;
+    auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
+    if (!renderingContext) {
+        return;
+    }
     std::lock_guard<std::recursive_mutex> overlayLock(polygonsMutex);
-    auto renderingContext = mapInterface->getRenderingContext();
     for (const auto &polygon : polygons) {
         for (auto &p : polygon.second) {
             std::get<1>(p)->getPolygonObject()->setup(renderingContext);
