@@ -20,6 +20,9 @@ map_interface = interface +c {
     static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface, rendering_context: rendering_context_interface, map_config: map_config, scheduler: scheduler_interface, pixel_density: f32) : map_interface;
     static createWithOpenGl(map_config: map_config, scheduler: scheduler_interface, pixel_density: f32) : map_interface;
 
+    static convertMvpMatrixToViewportBounds(mvpMatrix:i64, viewport:vec_2_i):rect_coord;
+    static convertMvpMatrixToRotation(mvpMatrix:i64, viewport:vec_2_i):f32;
+
     set_callback_handler(callback_interface: map_callback_interface);
 
     get_graphics_object_factory() : graphics_object_factory_interface;
