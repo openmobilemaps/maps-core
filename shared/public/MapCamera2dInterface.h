@@ -75,4 +75,10 @@ public:
     virtual void setSnapToNorthEnabled(bool enabled) = 0;
 
     virtual std::shared_ptr<::CameraInterface> asCameraInterface() = 0;
+
+    virtual std::optional<::RectCoord> getLastVpMatrixViewBounds() = 0;
+
+    virtual std::optional<float> getLastVpMatrixRotation() = 0;
+
+    virtual std::optional<float> getLastVpMatrixZoom() = 0;
 };

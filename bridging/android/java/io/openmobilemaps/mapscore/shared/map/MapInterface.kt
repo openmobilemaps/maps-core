@@ -63,16 +63,6 @@ abstract class MapInterface {
         fun createWithOpenGl(mapConfig: MapConfig, scheduler: io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerInterface, pixelDensity: Float): MapInterface {
             return CppProxy.createWithOpenGl(mapConfig, scheduler, pixelDensity)
         }
-
-        @JvmStatic
-        fun convertMvpMatrixToViewportBounds(mvpMatrix: Long, viewport: io.openmobilemaps.mapscore.shared.graphics.common.Vec2I): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord {
-            return CppProxy.convertMvpMatrixToViewportBounds(mvpMatrix, viewport)
-        }
-
-        @JvmStatic
-        fun convertMvpMatrixToRotation(mvpMatrix: Long, viewport: io.openmobilemaps.mapscore.shared.graphics.common.Vec2I): Float {
-            return CppProxy.convertMvpMatrixToRotation(mvpMatrix, viewport)
-        }
     }
 
     private class CppProxy : MapInterface {
@@ -237,12 +227,6 @@ abstract class MapInterface {
 
             @JvmStatic
             external fun createWithOpenGl(mapConfig: MapConfig, scheduler: io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerInterface, pixelDensity: Float): MapInterface
-
-            @JvmStatic
-            external fun convertMvpMatrixToViewportBounds(mvpMatrix: Long, viewport: io.openmobilemaps.mapscore.shared.graphics.common.Vec2I): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord
-
-            @JvmStatic
-            external fun convertMvpMatrixToRotation(mvpMatrix: Long, viewport: io.openmobilemaps.mapscore.shared.graphics.common.Vec2I): Float
         }
     }
 }

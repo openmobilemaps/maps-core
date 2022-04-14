@@ -5,7 +5,6 @@
 #import "MCCoordinateConversionHelperInterface.h"
 #import "MCGraphicsObjectFactoryInterface.h"
 #import "MCMapConfig.h"
-#import "MCRectCoord.h"
 #import "MCRenderingContextInterface.h"
 #import "MCSchedulerInterface.h"
 #import "MCShaderFactoryInterface.h"
@@ -30,12 +29,6 @@
 + (nullable MCMapInterface *)createWithOpenGl:(nonnull MCMapConfig *)mapConfig
                                     scheduler:(nullable id<MCSchedulerInterface>)scheduler
                                  pixelDensity:(float)pixelDensity;
-
-+ (nonnull MCRectCoord *)convertMvpMatrixToViewportBounds:(int64_t)mvpMatrix
-                                                 viewport:(nonnull MCVec2I *)viewport;
-
-+ (float)convertMvpMatrixToRotation:(int64_t)mvpMatrix
-                           viewport:(nonnull MCVec2I *)viewport;
 
 - (void)setCallbackHandler:(nullable id<MCMapCallbackInterface>)callbackInterface;
 

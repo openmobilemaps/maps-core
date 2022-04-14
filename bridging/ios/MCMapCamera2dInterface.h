@@ -82,4 +82,10 @@
 
 - (nullable id<MCCameraInterface>)asCameraInterface;
 
+- (nullable MCRectCoord *)getLastVpMatrixViewBounds;
+
+- (nullable NSNumber *)getLastVpMatrixRotation;
+
+- (nullable NSNumber *)getLastVpMatrixZoom;
+
 @end

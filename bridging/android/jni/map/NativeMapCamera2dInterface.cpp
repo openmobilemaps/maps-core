@@ -309,4 +309,34 @@ CJNIEXPORT ::djinni_generated::NativeCameraInterface::JniType JNICALL Java_io_op
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT ::djinni_generated::NativeRectCoord::Boxed::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1getLastVpMatrixViewBounds(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        auto r = ref->getLastVpMatrixViewBounds();
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni_generated::NativeRectCoord>::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1getLastVpMatrixRotation(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        auto r = ref->getLastVpMatrixRotation();
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni::F32>::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1getLastVpMatrixZoom(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        auto r = ref->getLastVpMatrixZoom();
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni::F32>::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 }  // namespace djinni_generated

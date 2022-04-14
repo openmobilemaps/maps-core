@@ -63,6 +63,12 @@ abstract class MapCamera2dInterface {
 
     abstract fun asCameraInterface(): io.openmobilemaps.mapscore.shared.graphics.CameraInterface
 
+    abstract fun getLastVpMatrixViewBounds(): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord?
+
+    abstract fun getLastVpMatrixRotation(): Float?
+
+    abstract fun getLastVpMatrixZoom(): Float?
+
     companion object {
         @JvmStatic
         fun create(mapInterface: MapInterface, screenDensityPpi: Float): MapCamera2dInterface {
@@ -255,6 +261,24 @@ abstract class MapCamera2dInterface {
             return native_asCameraInterface(this.nativeRef)
         }
         private external fun native_asCameraInterface(_nativeRef: Long): io.openmobilemaps.mapscore.shared.graphics.CameraInterface
+
+        override fun getLastVpMatrixViewBounds(): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getLastVpMatrixViewBounds(this.nativeRef)
+        }
+        private external fun native_getLastVpMatrixViewBounds(_nativeRef: Long): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord?
+
+        override fun getLastVpMatrixRotation(): Float? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getLastVpMatrixRotation(this.nativeRef)
+        }
+        private external fun native_getLastVpMatrixRotation(_nativeRef: Long): Float?
+
+        override fun getLastVpMatrixZoom(): Float? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getLastVpMatrixZoom(this.nativeRef)
+        }
+        private external fun native_getLastVpMatrixZoom(_nativeRef: Long): Float?
 
         companion object {
             @JvmStatic

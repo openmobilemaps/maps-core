@@ -11,7 +11,6 @@
 #include "CoordinateConversionHelper.h"
 #include "CoordinateSystemIdentifiers.h"
 #include "DefaultSystemToRenderConverter.h"
-#include "RenderToDefaultSystemConverter.h"
 #include "EPSG2056ToEPSG4326Converter.h"
 #include "EPSG3857ToEPSG4326Converter.h"
 #include "EPSG4326ToEPSG2056Converter.h"
@@ -35,7 +34,6 @@ CoordinateConversionHelper::CoordinateConversionHelper(MapCoordinateSystem mapCo
         : mapCoordinateSystemIdentier(mapCoordinateSystem.identifier),
           renderSystemConverter(std::make_shared<DefaultSystemToRenderConverter>(mapCoordinateSystem)) {
     registerConverter(renderSystemConverter);
-    registerConverter(std::make_shared<RenderToDefaultSystemConverter>(mapCoordinateSystem));
     addDefaultConverters();
 }
 

@@ -77,6 +77,12 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual std::vector<float> getVpMatrix() override;
 
+    std::optional<::RectCoord> getLastVpMatrixViewBounds() override;
+
+    std::optional<float> getLastVpMatrixRotation() override;
+
+    std::optional<float> getLastVpMatrixZoom() override;
+
     virtual std::vector<float> getInvariantModelMatrix(const ::Coord & coordinate, bool scaleInvariant, bool rotationInvariant) override;
 
     virtual bool onMove(const ::Vec2F &deltaScreen, bool confirmed, bool doubleClick) override;
@@ -138,6 +144,11 @@ class MapCamera2d : public MapCamera2dInterface,
     double zoomMax = 200.0;
 
     RectCoord bounds;
+
+    std::recursive_mutex vpDataMutex;
+    std::optional<RectCoord> lastVpBounds = std::nullopt;
+    std::optional<double> lastVpRotation = std::nullopt;
+    std::optional<double> lastVpZoom = std::nullopt;
 
     struct CameraConfiguration {
         bool rotationEnabled = true;

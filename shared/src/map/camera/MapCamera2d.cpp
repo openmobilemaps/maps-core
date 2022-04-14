@@ -302,7 +302,10 @@ std::vector<float> MapCamera2d::getVpMatrix() {
     std::vector<float> newVpMatrix(16, 0);
 
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
-    double zoomFactor = screenPixelAsRealMeterFactor * zoom;
+    double currentRotation = angle;
+    double currentZoom = zoom;
+    double zoomFactor = screenPixelAsRealMeterFactor * currentZoom;
+    RectCoord viewBounds = getRectFromViewport(sizeViewport, centerPosition);
 
     Coord renderCoordCenter = conversionHelper->convertToRenderSystem(centerPosition);
 
@@ -315,11 +318,30 @@ std::vector<float> MapCamera2d::getVpMatrix() {
 
     Matrix::scaleM(newVpMatrix, 0, 1 / zoomFactor, 1 / zoomFactor, 1);
 
-    Matrix::rotateM(newVpMatrix, 0.0, angle, 0.0, 0.0, 1.0);
+    Matrix::rotateM(newVpMatrix, 0.0, currentRotation, 0.0, 0.0, 1.0);
 
     Matrix::translateM(newVpMatrix, 0, -renderCoordCenter.x, -renderCoordCenter.y, 0);
 
+    std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
+    lastVpBounds = viewBounds;
+    lastVpRotation = currentRotation;
+    lastVpZoom = currentZoom;
     return newVpMatrix;
+}
+
+std::optional<::RectCoord> MapCamera2d::getLastVpMatrixViewBounds() {
+    std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
+    return lastVpBounds;
+}
+
+std::optional<float> MapCamera2d::getLastVpMatrixRotation() {
+    std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
+    return lastVpRotation;
+}
+
+std::optional<float> MapCamera2d::getLastVpMatrixZoom() {
+    std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
+    return lastVpZoom;
 }
 
 std::vector<float>

@@ -10,7 +10,6 @@
 #include "NativeMapCallbackInterface.h"
 #include "NativeMapCamera2dInterface.h"
 #include "NativeMapConfig.h"
-#include "NativeRectCoord.h"
 #include "NativeRenderingContextInterface.h"
 #include "NativeSchedulerInterface.h"
 #include "NativeShaderFactoryInterface.h"
@@ -54,26 +53,6 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterfa
                                                   ::djinni_generated::NativeSchedulerInterface::toCpp(jniEnv, j_scheduler),
                                                   ::djinni::F32::toCpp(jniEnv, j_pixelDensity));
         return ::djinni::release(::djinni_generated::NativeMapInterface::fromCpp(jniEnv, r));
-    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
-}
-
-CJNIEXPORT ::djinni_generated::NativeRectCoord::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_convertMvpMatrixToViewportBounds(JNIEnv* jniEnv, jobject /*this*/, jlong j_mvpMatrix, ::djinni_generated::NativeVec2I::JniType j_viewport)
-{
-    try {
-        DJINNI_FUNCTION_PROLOGUE0(jniEnv);
-        auto r = ::MapInterface::convertMvpMatrixToViewportBounds(::djinni::I64::toCpp(jniEnv, j_mvpMatrix),
-                                                                  ::djinni_generated::NativeVec2I::toCpp(jniEnv, j_viewport));
-        return ::djinni::release(::djinni_generated::NativeRectCoord::fromCpp(jniEnv, r));
-    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
-}
-
-CJNIEXPORT jfloat JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_convertMvpMatrixToRotation(JNIEnv* jniEnv, jobject /*this*/, jlong j_mvpMatrix, ::djinni_generated::NativeVec2I::JniType j_viewport)
-{
-    try {
-        DJINNI_FUNCTION_PROLOGUE0(jniEnv);
-        auto r = ::MapInterface::convertMvpMatrixToRotation(::djinni::I64::toCpp(jniEnv, j_mvpMatrix),
-                                                            ::djinni_generated::NativeVec2I::toCpp(jniEnv, j_viewport));
-        return ::djinni::release(::djinni::F32::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

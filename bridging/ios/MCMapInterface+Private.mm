@@ -13,7 +13,6 @@
 #import "MCMapCallbackInterface+Private.h"
 #import "MCMapCamera2dInterface+Private.h"
 #import "MCMapConfig+Private.h"
-#import "MCRectCoord+Private.h"
 #import "MCRenderingContextInterface+Private.h"
 #import "MCSchedulerInterface+Private.h"
 #import "MCShaderFactoryInterface+Private.h"
@@ -68,24 +67,6 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
                                                                ::djinni_generated::SchedulerInterface::toCpp(scheduler),
                                                                ::djinni::F32::toCpp(pixelDensity));
         return ::djinni_generated::MapInterface::fromCpp(objcpp_result_);
-    } DJINNI_TRANSLATE_EXCEPTIONS()
-}
-
-+ (nonnull MCRectCoord *)convertMvpMatrixToViewportBounds:(int64_t)mvpMatrix
-                                                 viewport:(nonnull MCVec2I *)viewport {
-    try {
-        auto objcpp_result_ = ::MapInterface::convertMvpMatrixToViewportBounds(::djinni::I64::toCpp(mvpMatrix),
-                                                                               ::djinni_generated::Vec2I::toCpp(viewport));
-        return ::djinni_generated::RectCoord::fromCpp(objcpp_result_);
-    } DJINNI_TRANSLATE_EXCEPTIONS()
-}
-
-+ (float)convertMvpMatrixToRotation:(int64_t)mvpMatrix
-                           viewport:(nonnull MCVec2I *)viewport {
-    try {
-        auto objcpp_result_ = ::MapInterface::convertMvpMatrixToRotation(::djinni::I64::toCpp(mvpMatrix),
-                                                                         ::djinni_generated::Vec2I::toCpp(viewport));
-        return ::djinni::F32::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
