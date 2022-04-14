@@ -245,6 +245,27 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable MCRectCoord *)getLastVpMatrixViewBounds {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getLastVpMatrixViewBounds();
+        return ::djinni::Optional<std::optional, ::djinni_generated::RectCoord>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable NSNumber *)getLastVpMatrixRotation {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getLastVpMatrixRotation();
+        return ::djinni::Optional<std::optional, ::djinni::F32>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable NSNumber *)getLastVpMatrixZoom {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getLastVpMatrixZoom();
+        return ::djinni::Optional<std::optional, ::djinni::F32>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 auto MapCamera2dInterface::toCpp(ObjcType objc) -> CppType

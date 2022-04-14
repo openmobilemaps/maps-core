@@ -7,7 +7,7 @@
 
 static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for this file");
 
-@class MCRenderObjectInterface;
+@protocol MCRenderObjectInterface;
 
 namespace djinni_generated {
 
@@ -16,7 +16,7 @@ class RenderObjectInterface
 public:
     using CppType = std::shared_ptr<::RenderObjectInterface>;
     using CppOptType = std::shared_ptr<::RenderObjectInterface>;
-    using ObjcType = MCRenderObjectInterface*;
+    using ObjcType = id<MCRenderObjectInterface>;
 
     using Boxed = RenderObjectInterface;
 

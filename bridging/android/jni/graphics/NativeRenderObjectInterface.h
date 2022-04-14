@@ -27,6 +27,24 @@ private:
     friend ::djinni::JniClass<NativeRenderObjectInterface>;
     friend ::djinni::JniInterface<::RenderObjectInterface, NativeRenderObjectInterface>;
 
+    class JavaProxy final : ::djinni::JavaProxyHandle<JavaProxy>, public ::RenderObjectInterface
+    {
+    public:
+        JavaProxy(JniType j);
+        ~JavaProxy();
+
+        std::shared_ptr<::GraphicsObjectInterface> getGraphicsObject() override;
+        bool hasCustomModelMatrix() override;
+        std::vector<float> getCustomModelMatrix() override;
+
+    private:
+        friend ::djinni::JniInterface<::RenderObjectInterface, ::djinni_generated::NativeRenderObjectInterface>;
+    };
+
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/RenderObjectInterface") };
+    const jmethodID method_getGraphicsObject { ::djinni::jniGetMethodID(clazz.get(), "getGraphicsObject", "()Lio/openmobilemaps/mapscore/shared/graphics/objects/GraphicsObjectInterface;") };
+    const jmethodID method_hasCustomModelMatrix { ::djinni::jniGetMethodID(clazz.get(), "hasCustomModelMatrix", "()Z") };
+    const jmethodID method_getCustomModelMatrix { ::djinni::jniGetMethodID(clazz.get(), "getCustomModelMatrix", "()Ljava/util/ArrayList;") };
 };
 
 }  // namespace djinni_generated

@@ -23,15 +23,16 @@
  * This instance is independent of the map and does not know about the rendering system.
  * It can not be used to convert coordinates into rendering space.
  */
-std::shared_ptr <CoordinateConversionHelperInterface> CoordinateConversionHelperInterface::independentInstance() {
-    static std::shared_ptr <CoordinateConversionHelperInterface> singleton;
+std::shared_ptr<CoordinateConversionHelperInterface> CoordinateConversionHelperInterface::independentInstance() {
+    static std::shared_ptr<CoordinateConversionHelperInterface> singleton;
     if (singleton) return singleton;
     singleton = std::make_shared<CoordinateConversionHelper>();
     return singleton;
 }
 
 CoordinateConversionHelper::CoordinateConversionHelper(MapCoordinateSystem mapCoordinateSystem)
-        : mapCoordinateSystemIdentier(mapCoordinateSystem.identifier), renderSystemConverter(std::make_shared<DefaultSystemToRenderConverter>(mapCoordinateSystem)) {
+        : mapCoordinateSystemIdentier(mapCoordinateSystem.identifier),
+          renderSystemConverter(std::make_shared<DefaultSystemToRenderConverter>(mapCoordinateSystem)) {
     registerConverter(renderSystemConverter);
     addDefaultConverters();
 }
@@ -54,8 +55,8 @@ void CoordinateConversionHelper::addDefaultConverters() {
     registerConverter(std::make_shared<EPSG21781ToEPGS2056Converter>());
 }
 
-void CoordinateConversionHelper::registerConverter(const std::shared_ptr <CoordinateConverterInterface> &converter) {
-    std::lock_guard <std::recursive_mutex> lock(converterMutex);
+void CoordinateConversionHelper::registerConverter(const std::shared_ptr<CoordinateConverterInterface> &converter) {
+    std::lock_guard<std::recursive_mutex> lock(converterMutex);
     fromToConverterMap[{converter->getFrom(), converter->getTo()}] = converter;
     precomputeConverterHelper();
 }
@@ -69,14 +70,12 @@ Coord CoordinateConversionHelper::convert(const std::string &to, const Coord &co
 
     // first try if we can directly convert
     auto c = fromToConverterMap.find(tuple);
-    if(c != fromToConverterMap.end())
-    {
+    if (c != fromToConverterMap.end()) {
         return c->second->convert(coordinate);
     }
 
     auto ch = converterHelper.find(tuple);
-    if(ch != converterHelper.end())
-    {
+    if (ch != converterHelper.end()) {
         auto const &converterChain = ch->second;
         auto intermediateCoord = coordinate;
         for (auto const &converter : converterChain) {
@@ -103,7 +102,7 @@ RectCoord CoordinateConversionHelper::convertRectToRenderSystem(const RectCoord 
 }
 
 Coord CoordinateConversionHelper::convertToRenderSystem(const Coord &coordinate) {
-    if(coordinate.systemIdentifier == mapCoordinateSystemIdentier) {
+    if (coordinate.systemIdentifier == mapCoordinateSystemIdentier) {
         return renderSystemConverter->convert(coordinate);
     } else {
         return convert(CoordinateSystemIdentifiers::RENDERSYSTEM(), coordinate);

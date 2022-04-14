@@ -4,14 +4,14 @@
 #import "MCMaskingObjectInterface.h"
 #import "MCRenderPassConfig.h"
 #import <Foundation/Foundation.h>
-@class MCRenderObjectInterface;
+@protocol MCRenderObjectInterface;
 
 
 @protocol MCRenderPassInterface
 
-- (nonnull NSArray<MCRenderObjectInterface *> *)getRenderObjects;
+- (nonnull NSArray<id<MCRenderObjectInterface>> *)getRenderObjects;
 
-- (void)addRenderObject:(nullable MCRenderObjectInterface *)renderObject;
+- (void)addRenderObject:(nullable id<MCRenderObjectInterface>)renderObject;
 
 - (nonnull MCRenderPassConfig *)getRenderPassConfig;
 
