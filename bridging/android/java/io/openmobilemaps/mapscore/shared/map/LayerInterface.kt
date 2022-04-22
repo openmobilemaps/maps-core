@@ -25,6 +25,9 @@ abstract class LayerInterface {
 
     abstract fun show()
 
+    /** optional rectangle, remove scissoring when not set */
+    abstract fun setScissorRect(scissorRect: io.openmobilemaps.mapscore.shared.graphics.common.RectI?)
+
     private class CppProxy : LayerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -96,5 +99,11 @@ abstract class LayerInterface {
             native_show(this.nativeRef)
         }
         private external fun native_show(_nativeRef: Long)
+
+        override fun setScissorRect(scissorRect: io.openmobilemaps.mapscore.shared.graphics.common.RectI?) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setScissorRect(this.nativeRef, scissorRect)
+        }
+        private external fun native_setScissorRect(_nativeRef: Long, scissorRect: io.openmobilemaps.mapscore.shared.graphics.common.RectI?)
     }
 }

@@ -101,4 +101,24 @@ extension RenderingContext: MCRenderingContextInterface {
     public func setBackgroundColor(_ color: MCColor) {
         sceneView?.clearColor = color.metalColor
     }
+
+    public func applyScissorRect(_ scissorRect: MCRectI?) {
+        if let sr = scissorRect {
+            encoder?.setScissorRect(sr.scissorRect)
+        } else {
+            encoder?.setScissorRect(viewportSize.scissorRect)
+        }
+    }
+}
+
+private extension MCRectI {
+    var scissorRect: MTLScissorRect {
+        MTLScissorRect(x: Int(x), y: Int(y), width: Int(width), height: Int(height))
+    }
+}
+
+private extension MCVec2I {
+    var scissorRect: MTLScissorRect {
+        MTLScissorRect(x: 0, y: 0, width: Int(x), height: Int(y))
+    }
 }

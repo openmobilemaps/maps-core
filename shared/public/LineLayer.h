@@ -15,6 +15,7 @@
 #include "LineLayerCallbackInterface.h"
 #include "LineInfoInterface.h"
 #include "LineLayerInterface.h"
+#include "SimpleLayerInterface.h"
 #include "SimpleTouchInterface.h"
 #include <atomic>
 #include <mutex>
@@ -23,7 +24,7 @@
 #include <vector>
 
 class LineLayer : public LineLayerInterface,
-                     public LayerInterface,
+                     public SimpleLayerInterface,
                      public SimpleTouchInterface,
                      public std::enable_shared_from_this<LineLayer> {
   public:

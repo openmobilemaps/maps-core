@@ -37,6 +37,8 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
             const auto &renderObjects = pass->getRenderObjects();
             std::vector<float> tempMvpMatrix(16, 0);
 
+            renderingContext->applyScissorRect(pass->getScissoringRect());
+
             if (hasMask) {
                 renderingContext->preRenderStencilMask();
                 maskObject->renderAsMask(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, factor);

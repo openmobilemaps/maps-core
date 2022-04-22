@@ -5,6 +5,7 @@
 #include "Marshal.hpp"
 #include "NativeMapInterface.h"
 #include "NativeMaskingObjectInterface.h"
+#include "NativeRectI.h"
 #include "NativeRenderPassInterface.h"
 
 namespace djinni_generated {
@@ -81,6 +82,14 @@ void NativeLayerInterface::JavaProxy::show() {
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeLayerInterface>::get();
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_show);
+    ::djinni::jniExceptionCheck(jniEnv);
+}
+void NativeLayerInterface::JavaProxy::setScissorRect(const std::optional<::RectI> & c_scissorRect) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeLayerInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_setScissorRect,
+                           ::djinni::get(::djinni::Optional<std::optional, ::djinni_generated::NativeRectI>::fromCpp(jniEnv, c_scissorRect)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
 
@@ -171,6 +180,15 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInterfac
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::LayerInterface>(nativeRef);
         ref->show();
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInterface_00024CppProxy_native_1setScissorRect(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRectI::Boxed::JniType j_scissorRect)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::LayerInterface>(nativeRef);
+        ref->setScissorRect(::djinni::Optional<std::optional, ::djinni_generated::NativeRectI>::toCpp(jniEnv, j_scissorRect));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

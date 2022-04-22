@@ -15,6 +15,7 @@
 #include "PolygonLayerCallbackInterface.h"
 #include "PolygonLayerInterface.h"
 #include "SimpleTouchInterface.h"
+#include "SimpleLayerInterface.h"
 #include <atomic>
 #include <mutex>
 #include <unordered_map>
@@ -22,7 +23,7 @@
 #include <vector>
 
 class PolygonLayer : public PolygonLayerInterface,
-                     public LayerInterface,
+                     public SimpleLayerInterface,
                      public SimpleTouchInterface,
                      public std::enable_shared_from_this<PolygonLayer> {
   public:

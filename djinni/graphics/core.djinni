@@ -4,6 +4,7 @@
 @extern "../yaml/shader_factory_interface.yaml"
 @extern "../yaml/vec_3_d.yaml"
 @extern "../yaml/vec_2_i.yaml"
+@extern "../yaml/rect_i.yaml"
 @extern "../yaml/color.yaml"
 
 scene_interface = interface +c {
@@ -35,6 +36,9 @@ rendering_context_interface = interface +c +j +o {
     setupDrawFrame();
     pre_render_stencil_mask();
     post_render_stencil_mask();
+
+    # optional rectangle, remove scissoring when not set
+    apply_scissor_rect(scissor_rect: optional<rect_i>);
 }
 
 render_object_interface = interface +c +j +o {
@@ -48,6 +52,7 @@ render_pass_interface = interface +c +j +o {
     add_render_object(render_object: render_object_interface);
     get_render_pass_config() : render_pass_config;
     get_masking_object(): optional<masking_object_interface>;
+    get_scissoring_rect() : optional<rect_i>;
 }
 
 render_pass_config = record {

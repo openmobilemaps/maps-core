@@ -4,6 +4,7 @@
 #include "NativeRenderPassInterface.h"  // my header
 #include "Marshal.hpp"
 #include "NativeMaskingObjectInterface.h"
+#include "NativeRectI.h"
 #include "NativeRenderObjectInterface.h"
 #include "NativeRenderPassConfig.h"
 
@@ -48,6 +49,14 @@ std::shared_ptr<::MaskingObjectInterface> NativeRenderPassInterface::JavaProxy::
     auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getMaskingObject);
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::Optional<std::optional, ::djinni_generated::NativeMaskingObjectInterface>::toCpp(jniEnv, jret);
+}
+std::optional<::RectI> NativeRenderPassInterface::JavaProxy::getScissoringRect() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeRenderPassInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getScissoringRect);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni::Optional<std::optional, ::djinni_generated::NativeRectI>::toCpp(jniEnv, jret);
 }
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderPassInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
@@ -94,6 +103,16 @@ CJNIEXPORT ::djinni_generated::NativeMaskingObjectInterface::Boxed::JniType JNIC
         const auto& ref = ::djinni::objectFromHandleAddress<::RenderPassInterface>(nativeRef);
         auto r = ref->getMaskingObject();
         return ::djinni::release(::djinni::Optional<std::optional, ::djinni_generated::NativeMaskingObjectInterface>::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT ::djinni_generated::NativeRectI::Boxed::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderPassInterface_00024CppProxy_native_1getScissoringRect(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::RenderPassInterface>(nativeRef);
+        auto r = ref->getScissoringRect();
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni_generated::NativeRectI>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

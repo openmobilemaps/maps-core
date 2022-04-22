@@ -172,6 +172,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
         for (const auto &passEntry : renderPassObjectMap) {
             std::shared_ptr<RenderPass> renderPass =
                     std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second, mask);
+            renderPass->setScissoringRect(scissorRect);
             newRenderPasses.push_back(renderPass);
         }
         {
@@ -243,6 +244,7 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
     for (const auto &passEntry : renderPassObjectMap) {
         std::shared_ptr<RenderPass> renderPass =
                 std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second, mask);
+        renderPass->setScissoringRect(scissorRect);
         newRenderPasses.push_back(renderPass);
     }
     {
@@ -287,6 +289,15 @@ bool Tiled2dMapRasterLayer::onClickConfirmed(const Vec2F &posScreen) {
 bool Tiled2dMapRasterLayer::onLongPress(const Vec2F &posScreen) {
     auto callbackHandler = this->callbackHandler;
     return (callbackHandler) && callbackHandler->onLongPress(mapInterface->getCamera()->coordFromScreenPosition(posScreen));
+}
+
+void Tiled2dMapRasterLayer::setScissorRect(const std::optional<::RectI> & scissorRect) {
+    this->scissorRect = scissorRect;
+    generateRenderPasses();
+    auto mapInterface = this->mapInterface;
+    if (mapInterface) {
+        mapInterface->invalidate();
+    }
 }
 
 void Tiled2dMapRasterLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> &maskingObject) {

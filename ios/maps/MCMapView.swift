@@ -26,6 +26,8 @@ open class MCMapView: MTKView {
     private let touchHandler: MCMapViewTouchHandler
     private let callbackHandler = MCMapViewCallbackHandler()
 
+    public weak var sizeDelegate: MCMapSizeDelegate?
+
     public init(mapConfig: MCMapConfig) {
         let renderingContext = RenderingContext()
         guard let mapInterface = MCMapInterface.create(GraphicsFactory(),
@@ -114,7 +116,7 @@ open class MCMapView: MTKView {
 }
 
 extension MCMapView: MTKViewDelegate {
-    public func mtkView(_: MTKView, drawableSizeWillChange _: CGSize) {
+    open func mtkView(_: MTKView, drawableSizeWillChange _: CGSize) {
         sizeChanged = true
         invalidate()
     }
@@ -143,6 +145,9 @@ extension MCMapView: MTKViewDelegate {
         // Shared lib stuff
         if sizeChanged {
             mapInterface.setViewportSize(view.drawableSize.vec2)
+
+            sizeDelegate?.sizeChanged()
+
             sizeChanged = false
         }
 

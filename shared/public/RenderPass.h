@@ -28,8 +28,14 @@ public:
 
     virtual std::shared_ptr<::MaskingObjectInterface> getMaskingObject() override;
 
+    virtual std::optional< ::RectI> getScissoringRect() override;
+
+    void setScissoringRect(std::optional< ::RectI> rect);
+
 private:
     RenderPassConfig config;
     std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;
     std::shared_ptr<MaskingObjectInterface> maskingObject;
+
+    std::optional< ::RectI> scissoringRect = std::nullopt;
 };

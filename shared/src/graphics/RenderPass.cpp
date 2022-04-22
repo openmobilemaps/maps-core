@@ -27,3 +27,11 @@ RenderPassConfig RenderPass::getRenderPassConfig() { return config; }
 std::shared_ptr<::MaskingObjectInterface> RenderPass::getMaskingObject() {
     return maskingObject;
 }
+
+void RenderPass::setScissoringRect(std::optional< ::RectI> rect) {
+    scissoringRect = rect;
+}
+
+std::optional< ::RectI> RenderPass::getScissoringRect() {
+    return scissoringRect;
+}
