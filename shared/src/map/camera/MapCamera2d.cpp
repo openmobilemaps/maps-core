@@ -614,7 +614,7 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
                 }
             } else {
                 tempAngle = fmod((tempAngle + (olda - newa) / M_PI * 180.0) + 360.0, 360.0);
-                auto diff = std::min(tempAngle - angle, 360.0 - (tempAngle - angle));
+                auto diff = std::min(std::abs(tempAngle - angle), std::abs(360.0 - (tempAngle - angle)));
                 if (diff >= ROTATION_THRESHOLD && rotationPossible) {
                     isRotationThreasholdReached = true;
                 }
