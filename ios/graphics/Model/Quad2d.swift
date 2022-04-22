@@ -55,8 +55,7 @@ class Quad2d: BaseGraphicsObject {
                          renderPass _: MCRenderPassConfig,
                          mvpMatrix: Int64,
                          isMasked: Bool,
-                         screenPixelAsRealMeterFactor _: Double)
-    {
+                         screenPixelAsRealMeterFactor _: Double) {
         guard let verticesBuffer = verticesBuffer,
               let indicesBuffer = indicesBuffer else { return }
 
@@ -147,7 +146,7 @@ extension Quad2d: MCQuad2dInterface {
         self.verticesBuffer = verticesBuffer
         self.indicesBuffer = indicesBuffer
     }
-    
+
     func loadTexture(_ context: MCRenderingContextInterface?, textureHolder: MCTextureHolderInterface?) {
         guard let textureHolder = textureHolder as? TextureHolder else {
             fatalError("unexpected TextureHolder")

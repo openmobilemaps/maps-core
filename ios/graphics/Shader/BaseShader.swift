@@ -13,14 +13,15 @@ import MapCoreSharedModule
 import Metal
 
 open class BaseShader: MCShaderProgramInterface {
-
-    public init () { }
+    public init() {
+    }
 
     open func getProgramName() -> String {
         ""
     }
 
-    open func setupProgram(_: MCRenderingContextInterface?) {}
+    open func setupProgram(_: MCRenderingContextInterface?) {
+    }
 
     open func preRender(_ context: MCRenderingContextInterface?) {
         guard let context = context as? RenderingContext,
@@ -29,5 +30,6 @@ open class BaseShader: MCShaderProgramInterface {
     }
 
     open func preRender(encoder _: MTLRenderCommandEncoder,
-                   context _: RenderingContext) {}
+                        context _: RenderingContext) {
+    }
 }

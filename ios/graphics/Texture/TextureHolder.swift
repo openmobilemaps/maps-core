@@ -74,7 +74,8 @@ extension TextureHolder: MCTextureHolderInterface {
         Int32(textureUsableSize?.height ?? texture.height)
     }
 
-    public func attachToGraphics() {}
+    public func attachToGraphics() {
+    }
 }
 
 public extension TextureHolder {

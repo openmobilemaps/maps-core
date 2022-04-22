@@ -117,11 +117,10 @@ extension LineGroupShader: MCLineGroupShaderInterface {
 
         currentStyles = lineStyles
 
-        var mappedLineStyles : [LineStyle] = []
+        var mappedLineStyles: [LineStyle] = []
         for l in lineStyles {
             mappedLineStyles.append(LineStyle(style: l))
         }
-
 
         lineStyleBuffer.contents().copyMemory(from: mappedLineStyles, byteCount: mappedLineStyles.count * MemoryLayout<LineStyle>.stride)
     }

@@ -75,8 +75,7 @@ class Line2d: BaseGraphicsObject {
                          renderPass _: MCRenderPassConfig,
                          mvpMatrix: Int64,
                          isMasked masked: Bool,
-                         screenPixelAsRealMeterFactor: Double)
-    {
+                         screenPixelAsRealMeterFactor: Double) {
         guard let lineVerticesBuffer = lineVerticesBuffer,
               let lineIndicesBuffer = lineIndicesBuffer
         else { return }
@@ -94,7 +93,7 @@ class Line2d: BaseGraphicsObject {
             encoder.setDepthStencilState(stencilState)
             encoder.setStencilReferenceValue(0xFF)
         }
-        
+
         (shader as? ColorLineShader)?.screenPixelAsRealMeterFactor = screenPixelAsRealMeterFactor
 
         shader.setupProgram(context)

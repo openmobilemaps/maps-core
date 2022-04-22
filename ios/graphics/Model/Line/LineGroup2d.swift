@@ -64,8 +64,7 @@ class LineGroup2d: BaseGraphicsObject {
                          renderPass _: MCRenderPassConfig,
                          mvpMatrix: Int64,
                          isMasked: Bool,
-                         screenPixelAsRealMeterFactor: Double)
-    {
+                         screenPixelAsRealMeterFactor: Double) {
         guard let lineVerticesBuffer = lineVerticesBuffer,
               let lineIndicesBuffer = lineIndicesBuffer
         else { return }
@@ -86,7 +85,6 @@ class LineGroup2d: BaseGraphicsObject {
             encoder.setStencilReferenceValue(0xFF)
         }
 
-
         shader.screenPixelAsRealMeterFactor = Float(screenPixelAsRealMeterFactor)
 
         shader.setupProgram(context)
@@ -102,7 +100,7 @@ class LineGroup2d: BaseGraphicsObject {
                                       indexBuffer: lineIndicesBuffer,
                                       indexBufferOffset: 0)
 
-        if (!isMasked) {
+        if !isMasked {
             context.clearStencilBuffer()
         }
 
@@ -193,7 +191,7 @@ extension LineGroup2d: MCLineGroup2dInterface {
                 lineVertex.lenghtNormal = unitVector
 
                 lineVertices.append(lineVertex)
-                
+
                 lineVertex.position = SIMD2<Float>(x: ciNextX - miterX, y: ciNextY - miterY)
                 lineVertex.widthNormal = SIMD2<Float>(x: -lineNormalX / lineLength, y: -lineNormalY / lineLength)
 

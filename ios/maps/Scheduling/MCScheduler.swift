@@ -30,7 +30,8 @@ open class MCScheduler: MCSchedulerInterface {
 
     private var outstandingOperations: [String: WeakOperation] = [:]
 
-    public init() { }
+    public init() {
+    }
 
     public func addTasks(_ tasks: [MCTaskInterface]) {
         tasks.forEach(addTask(_:))
@@ -100,7 +101,6 @@ open class MCScheduler: MCSchedulerInterface {
 
     public func pause() {
         internalSchedulerQueue.async {
-
             self.ioQueue.isSuspended = true
 
             self.computationQueue.isSuspended = true
@@ -111,7 +111,6 @@ open class MCScheduler: MCSchedulerInterface {
 
     public func resume() {
         internalSchedulerQueue.async {
-
             self.ioQueue.isSuspended = false
 
             self.computationQueue.isSuspended = false
