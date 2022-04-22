@@ -53,6 +53,8 @@ class Tiled2dMapLayer : public LayerInterface,
 
     void onRotationChanged(float angle) override;
 
+    void onMapInteraction() override;
+
     void setMinZoomLevelIdentifier(std::optional<int32_t> value);
 
     std::optional<int32_t> getMinZoomLevelIdentifier();

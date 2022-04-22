@@ -12,4 +12,6 @@ public:
     virtual void onVisibleBoundsChanged(const ::RectCoord & visibleBounds, double zoom) = 0;
 
     virtual void onRotationChanged(float angle) = 0;
+
+    virtual void onMapInteraction() = 0;
 };

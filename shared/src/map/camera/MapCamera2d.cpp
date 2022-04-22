@@ -468,6 +468,13 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
 
     notifyListeners();
     mapInterface->invalidate();
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+        for (auto listener : listeners) {
+            listener->onMapInteraction();
+        }
+    }
     return true;
 }
 
@@ -538,6 +545,13 @@ bool MapCamera2d::onDoubleClick(const ::Vec2F &posScreen) {
     position.y = std::min(position.y, topLeft.y);
 
     setZoom(targetZoom, true);
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+        for (auto listener : listeners) {
+            listener->onMapInteraction();
+        }
+    }
     return true;
 }
 
@@ -633,6 +647,13 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
 
         notifyListeners();
         mapInterface->invalidate();
+
+        {
+            std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+            for (auto listener : listeners) {
+                listener->onMapInteraction();
+            }
+        }
     }
     return true;
 }
