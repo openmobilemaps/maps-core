@@ -642,16 +642,25 @@ bool MapCamera2d::onTwoFingerMoveComplete() {
         (angle < ROTATION_LOCKING_ANGLE || angle > (360 - ROTATION_LOCKING_ANGLE))) {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         rotationAnimation = std::make_shared<DoubleAnimation>(DEFAULT_ANIM_LENGTH,
-                                                      this->angle,
-                                                      angle < ROTATION_LOCKING_ANGLE ? 0 : 360,
-                                                      InterpolatorFunction::EaseInOut,
-                                                      [=](double angle) {
-                                                          this->angle = angle;
-                                                          mapInterface->invalidate();
-                                                      }, [=] {
-                    this->angle = 0;
-                    this->rotationAnimation = nullptr;
-                });
+                                                              this->angle,
+                                                              angle < ROTATION_LOCKING_ANGLE ? 0 : 360,
+                                                              InterpolatorFunction::EaseInOut,
+                                                              [=](double angle) {
+            this->angle = angle;
+            mapInterface->invalidate();
+            std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+            for (auto listener : listeners) {
+                listener->onRotationChanged(angle);
+            }
+        }, [=] {
+            this->angle = 0;
+            this->rotationAnimation = nullptr;
+            mapInterface->invalidate();
+            std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+            for (auto listener : listeners) {
+                listener->onRotationChanged(angle);
+            }
+        });
         rotationAnimation->start();
         mapInterface->invalidate();
         return true;
