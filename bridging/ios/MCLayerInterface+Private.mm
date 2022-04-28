@@ -9,6 +9,7 @@
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCMapInterface+Private.h"
 #import "MCMaskingObjectInterface+Private.h"
+#import "MCRectI+Private.h"
 #import "MCRenderPassInterface+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -89,6 +90,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setScissorRect:(nullable MCRectI *)scissorRect {
+    try {
+        _cppRefHandle.get()->setScissorRect(::djinni::Optional<std::optional, ::djinni_generated::RectI>::toCpp(scissorRect));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class LayerInterface::ObjcProxy final
@@ -151,6 +158,12 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() show];
+        }
+    }
+    void setScissorRect(const std::optional<::RectI> & c_scissorRect) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setScissorRect:(::djinni::Optional<std::optional, ::djinni_generated::RectI>::fromCpp(c_scissorRect))];
         }
     }
 };

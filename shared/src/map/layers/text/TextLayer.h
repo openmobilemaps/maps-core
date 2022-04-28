@@ -11,7 +11,7 @@
 #pragma once
 
 #include "TextLayerInterface.h"
-#include "LayerInterface.h"
+#include "SimpleLayerInterface.h"
 
 #include "Coord.h"
 #include "FontLoaderInterface.h"
@@ -27,7 +27,7 @@
 #include <vector>
 
 class TextLayer : public TextLayerInterface,
-                  public LayerInterface,
+                  public SimpleLayerInterface,
                   public std::enable_shared_from_this<TextLayer> {
   public:
     TextLayer(const std::shared_ptr<::FontLoaderInterface> & fontLoader);

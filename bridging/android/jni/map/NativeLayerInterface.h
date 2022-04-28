@@ -42,6 +42,7 @@ private:
         void resume() override;
         void hide() override;
         void show() override;
+        void setScissorRect(const std::optional<::RectI> & scissorRect) override;
 
     private:
         friend ::djinni::JniInterface<::LayerInterface, ::djinni_generated::NativeLayerInterface>;
@@ -57,6 +58,7 @@ private:
     const jmethodID method_resume { ::djinni::jniGetMethodID(clazz.get(), "resume", "()V") };
     const jmethodID method_hide { ::djinni::jniGetMethodID(clazz.get(), "hide", "()V") };
     const jmethodID method_show { ::djinni::jniGetMethodID(clazz.get(), "show", "()V") };
+    const jmethodID method_setScissorRect { ::djinni::jniGetMethodID(clazz.get(), "setScissorRect", "(Lio/openmobilemaps/mapscore/shared/graphics/common/RectI;)V") };
 };
 
 }  // namespace djinni_generated

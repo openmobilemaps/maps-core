@@ -37,6 +37,7 @@ private:
         void addRenderObject(const std::shared_ptr<::RenderObjectInterface> & renderObject) override;
         ::RenderPassConfig getRenderPassConfig() override;
         std::shared_ptr<::MaskingObjectInterface> getMaskingObject() override;
+        std::optional<::RectI> getScissoringRect() override;
 
     private:
         friend ::djinni::JniInterface<::RenderPassInterface, ::djinni_generated::NativeRenderPassInterface>;
@@ -47,6 +48,7 @@ private:
     const jmethodID method_addRenderObject { ::djinni::jniGetMethodID(clazz.get(), "addRenderObject", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderObjectInterface;)V") };
     const jmethodID method_getRenderPassConfig { ::djinni::jniGetMethodID(clazz.get(), "getRenderPassConfig", "()Lio/openmobilemaps/mapscore/shared/graphics/RenderPassConfig;") };
     const jmethodID method_getMaskingObject { ::djinni::jniGetMethodID(clazz.get(), "getMaskingObject", "()Lio/openmobilemaps/mapscore/shared/graphics/objects/MaskingObjectInterface;") };
+    const jmethodID method_getScissoringRect { ::djinni::jniGetMethodID(clazz.get(), "getScissoringRect", "()Lio/openmobilemaps/mapscore/shared/graphics/common/RectI;") };
 };
 
 }  // namespace djinni_generated

@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "LayerInterface.h"
+#include "SimpleLayerInterface.h"
 #include "MapCamera2dListenerInterface.h"
 #include "MapInterface.h"
 #include "RenderPassInterface.h"
@@ -19,7 +19,7 @@
 #include "Tiled2dMapSourceListenerInterface.h"
 #include "SimpleTouchInterface.h"
 
-class Tiled2dMapLayer : public LayerInterface,
+class Tiled2dMapLayer : public SimpleLayerInterface,
                         public Tiled2dMapSourceListenerInterface,
                         public MapCamera2dListenerInterface,
                         public SimpleTouchInterface,

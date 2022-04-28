@@ -8,6 +8,7 @@
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCMaskingObjectInterface+Private.h"
+#import "MCRectI+Private.h"
 #import "MCRenderObjectInterface+Private.h"
 #import "MCRenderPassConfig+Private.h"
 #include <exception>
@@ -61,6 +62,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable MCRectI *)getScissoringRect {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getScissoringRect();
+        return ::djinni::Optional<std::optional, ::djinni_generated::RectI>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class RenderPassInterface::ObjcProxy final
@@ -95,6 +103,13 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getMaskingObject];
             return ::djinni::Optional<std::optional, ::djinni_generated::MaskingObjectInterface>::toCpp(objcpp_result_);
+        }
+    }
+    std::optional<::RectI> getScissoringRect() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getScissoringRect];
+            return ::djinni::Optional<std::optional, ::djinni_generated::RectI>::toCpp(objcpp_result_);
         }
     }
 };

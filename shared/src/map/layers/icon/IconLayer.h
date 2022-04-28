@@ -16,14 +16,14 @@
 #include <unordered_set>
 #include "MapInterface.h"
 #include "IconLayerInterface.h"
-#include "LayerInterface.h"
+#include "SimpleLayerInterface.h"
 #include "SimpleTouchInterface.h"
 #include "IconInfoInterface.h"
 #include "IconLayerCallbackInterface.h"
 #include "Textured2dLayerObject.h"
 
 class IconLayer : public IconLayerInterface,
-                  public LayerInterface,
+                  public SimpleLayerInterface,
                   public SimpleTouchInterface,
                   public std::enable_shared_from_this<IconLayer> {
   public:

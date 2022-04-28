@@ -5,8 +5,10 @@
 #import "MCRenderingContextInterface.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
+#import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCColor+Private.h"
+#import "MCRectI+Private.h"
 #import "MCVec2I+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -75,6 +77,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)applyScissorRect:(nullable MCRectI *)scissorRect {
+    try {
+        _cppRefHandle.get()->applyScissorRect(::djinni::Optional<std::optional, ::djinni_generated::RectI>::toCpp(scissorRect));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class RenderingContextInterface::ObjcProxy final
@@ -125,6 +133,12 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() postRenderStencilMask];
+        }
+    }
+    void applyScissorRect(const std::optional<::RectI> & c_scissorRect) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() applyScissorRect:(::djinni::Optional<std::optional, ::djinni_generated::RectI>::fromCpp(c_scissorRect))];
         }
     }
 };

@@ -76,7 +76,10 @@ public:
 
     virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) override;
 
+    virtual void setScissorRect(const std::optional<::RectI> & scissorRect) override;
+
 private:
+    std::optional<::RectI> scissorRect = std::nullopt;
     std::shared_ptr<::MaskingObjectInterface> mask;
 
     std::shared_ptr<LoaderInterface> textureLoader;

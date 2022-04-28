@@ -1,5 +1,6 @@
 @extern "../yaml/vec_2_f.yaml"
 @extern "../yaml/vec_2_i.yaml"
+@extern "../yaml/rect_i.yaml"
 @extern "../yaml/scheduler_interface.yaml"
 @extern "../yaml/touch_handler_interface.yaml"
 @extern "../yaml/shader_factory_interface.yaml"
@@ -72,6 +73,9 @@ layer_interface = interface +c +j +o {
     resume();
     hide();
     show();
+
+    # optional rectangle, remove scissoring when not set
+    set_scissor_rect(scissor_rect: optional<rect_i>);
 }
 
 map_camera_2d_interface = interface +c {

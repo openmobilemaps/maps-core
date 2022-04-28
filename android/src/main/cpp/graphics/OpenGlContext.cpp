@@ -81,3 +81,12 @@ void OpenGlContext::preRenderStencilMask() {
 void OpenGlContext::postRenderStencilMask() {
     glDisable(GL_STENCIL_TEST);
 }
+
+void OpenGlContext::applyScissorRect(const std::optional<::RectI> &scissorRect) {
+    if (scissorRect) {
+        glEnable(GL_SCISSOR_TEST);
+        glScissor(scissorRect->x, scissorRect->y, scissorRect->width, scissorRect->height);
+    } else {
+        glDisable(GL_SCISSOR_TEST);
+    }
+}
