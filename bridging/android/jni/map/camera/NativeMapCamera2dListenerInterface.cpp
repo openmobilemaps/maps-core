@@ -32,6 +32,13 @@ void NativeMapCamera2dListenerInterface::JavaProxy::onRotationChanged(float c_an
                            ::djinni::get(::djinni::F32::fromCpp(jniEnv, c_angle)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
+void NativeMapCamera2dListenerInterface::JavaProxy::onMapInteraction() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeMapCamera2dListenerInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_onMapInteraction);
+    ::djinni::jniExceptionCheck(jniEnv);
+}
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_camera_MapCamera2dListenerInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
@@ -57,6 +64,15 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_camera_MapCam
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dListenerInterface>(nativeRef);
         ref->onRotationChanged(::djinni::F32::toCpp(jniEnv, j_angle));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_camera_MapCamera2dListenerInterface_00024CppProxy_native_1onMapInteraction(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dListenerInterface>(nativeRef);
+        ref->onMapInteraction();
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

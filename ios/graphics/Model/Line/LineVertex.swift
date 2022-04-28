@@ -110,14 +110,14 @@ public struct LineVertex: Equatable {
     }()
 
     public init(x: Float,
-         y: Float,
-         lineA: MCVec2D,
-         lineB: MCVec2D,
-         widthNormal: (x: Float, y: Float),
-         lenghtNormal: (x: Float, y: Float),
-         stylingIndex: Int32 = 0,
-         segmentType: SegmantType = .inner,
-         lengthPrefix: Float = 0) {
+                y: Float,
+                lineA: MCVec2D,
+                lineB: MCVec2D,
+                widthNormal: (x: Float, y: Float),
+                lenghtNormal: (x: Float, y: Float),
+                stylingIndex: Int32 = 0,
+                segmentType: SegmantType = .inner,
+                lengthPrefix: Float = 0) {
         position = SIMD2(x, y)
         self.lineA = SIMD2(lineA.xF, lineA.yF)
         self.lineB = SIMD2(lineB.xF, lineB.yF)

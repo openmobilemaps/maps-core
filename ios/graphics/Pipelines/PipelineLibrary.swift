@@ -48,23 +48,23 @@ public enum PipelineDescriptorFactory {
 
 extension PipelineDescriptorFactory {
     static func pipelineDescriptor(pipeline: Pipeline) -> MTLRenderPipelineDescriptor {
-        return pipelineDescriptor(vertexDescriptor: pipeline.vertexDescriptor,
-                                  label: pipeline.label,
-                                  vertexShader: pipeline.vertexShader,
-                                  fragmentShader: pipeline.fragmentShader)
+        pipelineDescriptor(vertexDescriptor: pipeline.vertexDescriptor,
+                           label: pipeline.label,
+                           vertexShader: pipeline.vertexShader,
+                           fragmentShader: pipeline.fragmentShader)
     }
 }
 
 public enum Pipeline: String, CaseIterable {
-    case alphaShader = "alphaShader"
-    case lineShader = "lineShader"
-    case lineGroupShader = "lineGroupShader"
-    case polygonGroupShader = "polygonGroupShader"
-    case pointShader = "pointShader"
-    case colorShader = "colorShader"
-    case roundColorShader = "roundColorShader"
-    case clearStencilShader = "clearStencilShader"
-    case textShader = "textShader"
+    case alphaShader
+    case lineShader
+    case lineGroupShader
+    case polygonGroupShader
+    case pointShader
+    case colorShader
+    case roundColorShader
+    case clearStencilShader
+    case textShader
 
     var label: String {
         switch self {
@@ -120,7 +120,7 @@ public enum Pipeline: String, CaseIterable {
 
 public class PipelineLibrary: StaticMetalLibrary<String, MTLRenderPipelineState> {
     init(device: MTLDevice) throws {
-        try super.init(Pipeline.allCases.map(\.rawValue)) { (key) -> MTLRenderPipelineState in
+        try super.init(Pipeline.allCases.map(\.rawValue)) { key -> MTLRenderPipelineState in
             guard let pipeline = Pipeline(rawValue: key) else {
                 throw LibraryError.invalidKey
             }

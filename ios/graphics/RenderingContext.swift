@@ -79,15 +79,18 @@ public class RenderingContext: NSObject {
 }
 
 extension RenderingContext: MCRenderingContextInterface {
-    public func preRenderStencilMask() {}
+    public func preRenderStencilMask() {
+    }
 
     public func postRenderStencilMask() {
         clearStencilBuffer()
     }
 
-    public func setupDrawFrame() {}
+    public func setupDrawFrame() {
+    }
 
-    public func onSurfaceCreated() {}
+    public func onSurfaceCreated() {
+    }
 
     public func setViewportSize(_ newSize: MCVec2I) {
         viewportSize = newSize

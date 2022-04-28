@@ -11,6 +11,8 @@ abstract class MapCamera2dListenerInterface {
 
     abstract fun onRotationChanged(angle: Float)
 
+    abstract fun onMapInteraction()
+
     private class CppProxy : MapCamera2dListenerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -40,5 +42,11 @@ abstract class MapCamera2dListenerInterface {
             native_onRotationChanged(this.nativeRef, angle)
         }
         private external fun native_onRotationChanged(_nativeRef: Long, angle: Float)
+
+        override fun onMapInteraction() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_onMapInteraction(this.nativeRef)
+        }
+        private external fun native_onMapInteraction(_nativeRef: Long)
     }
 }

@@ -468,6 +468,13 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
 
     notifyListeners();
     mapInterface->invalidate();
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+        for (auto listener : listeners) {
+            listener->onMapInteraction();
+        }
+    }
     return true;
 }
 
@@ -538,6 +545,13 @@ bool MapCamera2d::onDoubleClick(const ::Vec2F &posScreen) {
     position.y = std::min(position.y, topLeft.y);
 
     setZoom(targetZoom, true);
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+        for (auto listener : listeners) {
+            listener->onMapInteraction();
+        }
+    }
     return true;
 }
 
@@ -614,7 +628,7 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
                 }
             } else {
                 tempAngle = fmod((tempAngle + (olda - newa) / M_PI * 180.0) + 360.0, 360.0);
-                auto diff = std::min(tempAngle - angle, 360.0 - (tempAngle - angle));
+                auto diff = std::min(std::abs(tempAngle - angle), std::abs(360.0 - (tempAngle - angle)));
                 if (diff >= ROTATION_THRESHOLD && rotationPossible) {
                     isRotationThreasholdReached = true;
                 }
@@ -633,6 +647,13 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
 
         notifyListeners();
         mapInterface->invalidate();
+
+        {
+            std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+            for (auto listener : listeners) {
+                listener->onMapInteraction();
+            }
+        }
     }
     return true;
 }
@@ -642,16 +663,25 @@ bool MapCamera2d::onTwoFingerMoveComplete() {
         (angle < ROTATION_LOCKING_ANGLE || angle > (360 - ROTATION_LOCKING_ANGLE))) {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         rotationAnimation = std::make_shared<DoubleAnimation>(DEFAULT_ANIM_LENGTH,
-                                                      this->angle,
-                                                      angle < ROTATION_LOCKING_ANGLE ? 0 : 360,
-                                                      InterpolatorFunction::EaseInOut,
-                                                      [=](double angle) {
-                                                          this->angle = angle;
-                                                          mapInterface->invalidate();
-                                                      }, [=] {
-                    this->angle = 0;
-                    this->rotationAnimation = nullptr;
-                });
+                                                              this->angle,
+                                                              angle < ROTATION_LOCKING_ANGLE ? 0 : 360,
+                                                              InterpolatorFunction::EaseInOut,
+                                                              [=](double angle) {
+            this->angle = angle;
+            mapInterface->invalidate();
+            std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+            for (auto listener : listeners) {
+                listener->onRotationChanged(angle);
+            }
+        }, [=] {
+            this->angle = 0;
+            this->rotationAnimation = nullptr;
+            mapInterface->invalidate();
+            std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+            for (auto listener : listeners) {
+                listener->onRotationChanged(angle);
+            }
+        });
         rotationAnimation->start();
         mapInterface->invalidate();
         return true;

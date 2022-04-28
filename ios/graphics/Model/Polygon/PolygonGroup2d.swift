@@ -18,7 +18,7 @@ class PolygonGroup2d: BaseGraphicsObject {
     private var verticesBuffer: MTLBuffer?
     private var indicesBuffer: MTLBuffer?
     private var indicesCount: Int = 0
-    
+
     private var stencilState: MTLDepthStencilState?
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
@@ -51,8 +51,7 @@ class PolygonGroup2d: BaseGraphicsObject {
                          renderPass _: MCRenderPassConfig,
                          mvpMatrix: Int64,
                          isMasked: Bool,
-                         screenPixelAsRealMeterFactor _: Double)
-    {
+                         screenPixelAsRealMeterFactor _: Double) {
         guard let verticesBuffer = verticesBuffer,
               let indicesBuffer = indicesBuffer else { return }
 

@@ -32,8 +32,7 @@ class Polygon2d: BaseGraphicsObject {
                          renderPass _: MCRenderPassConfig,
                          mvpMatrix: Int64,
                          isMasked: Bool,
-                         screenPixelAsRealMeterFactor _: Double)
-    {
+                         screenPixelAsRealMeterFactor _: Double) {
         guard let verticesBuffer = verticesBuffer,
               let indicesBuffer = indicesBuffer else { return }
 
@@ -97,7 +96,6 @@ extension Polygon2d: MCMaskingObjectInterface {
               let indicesBuffer = indicesBuffer
         else { return }
 
-
         encoder.pushDebugGroup("Polygon2d")
 
         if stencilState == nil {
@@ -125,7 +123,6 @@ extension Polygon2d: MCMaskingObjectInterface {
                                       indexBufferOffset: 0)
 
         encoder.popDebugGroup()
-
     }
 }
 

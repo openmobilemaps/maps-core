@@ -24,7 +24,6 @@ public class DataHolder: MCDataHolderInterface {
 }
 
 open class MCTextureLoader: MCLoaderInterface {
-
     private let session: URLSession
 
     public init(urlSession: URLSession? = nil) {
@@ -102,7 +101,6 @@ open class MCTextureLoader: MCLoaderInterface {
             return .init(data: textureHolder, etag: response?.etag, status: .OK)
         }
         return .init(data: textureHolder, etag: response?.etag, status: .OK)
-
     }
 
     open func loadData(_ url: String, etag: String?) -> MCDataLoaderResult {
@@ -133,7 +131,6 @@ open class MCTextureLoader: MCLoaderInterface {
         task.resume()
         semaphore.wait()
 
-
         if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorTimedOut {
             return .init(data: nil, etag: response?.etag, status: .ERROR_TIMEOUT)
         }
@@ -153,11 +150,12 @@ open class MCTextureLoader: MCLoaderInterface {
         return .init(data: DataHolder(data: data), etag: response?.etag, status: .OK)
     }
 
-    open func modifyUrlRequest(request _: inout URLRequest) {}
+    open func modifyUrlRequest(request _: inout URLRequest) {
+    }
 
-    open func modifyDataTask(task _: inout URLSessionDataTask) {}
+    open func modifyDataTask(task _: inout URLSessionDataTask) {
+    }
 }
-
 
 extension HTTPURLResponse {
     var etag: String? {

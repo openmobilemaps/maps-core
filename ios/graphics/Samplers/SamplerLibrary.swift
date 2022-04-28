@@ -23,15 +23,15 @@ public enum SamplerFactory {
     }
 }
 
-extension SamplerFactory {
-    public static func descriptor(sampler: Sampler) -> MTLSamplerDescriptor {
-        return descriptor(label: sampler.label, magFilter: sampler.magFilter)
+public extension SamplerFactory {
+    static func descriptor(sampler: Sampler) -> MTLSamplerDescriptor {
+        descriptor(label: sampler.label, magFilter: sampler.magFilter)
     }
 }
 
 public enum Sampler: String, CaseIterable {
-    case magLinear = "magLinear"
-    case magNearest = "magNearest"
+    case magLinear
+    case magNearest
 
     fileprivate var label: String {
         rawValue
@@ -43,14 +43,13 @@ public enum Sampler: String, CaseIterable {
             return .linear
         case .magNearest:
             return .nearest
-
         }
     }
 }
 
 public class SamplerLibrary: StaticMetalLibrary<String, MTLSamplerState> {
     init(device: MTLDevice) throws {
-        try super.init(Sampler.allCases.map(\.rawValue)) { (key) -> MTLSamplerState in
+        try super.init(Sampler.allCases.map(\.rawValue)) { key -> MTLSamplerState in
             guard let sampler = Sampler(rawValue: key) else {
                 throw LibraryError.invalidKey
             }

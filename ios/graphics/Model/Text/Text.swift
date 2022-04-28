@@ -50,8 +50,7 @@ class Text: BaseGraphicsObject {
                          renderPass _: MCRenderPassConfig,
                          mvpMatrix: Int64,
                          isMasked: Bool,
-                         screenPixelAsRealMeterFactor _: Double)
-    {
+                         screenPixelAsRealMeterFactor _: Double) {
         guard let verticesBuffer = verticesBuffer,
               let indicesBuffer = indicesBuffer else { return }
 
