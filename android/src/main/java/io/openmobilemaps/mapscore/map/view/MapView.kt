@@ -11,6 +11,8 @@
 package io.openmobilemaps.mapscore.map.view
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -29,6 +31,10 @@ import io.openmobilemaps.mapscore.shared.map.controls.TouchAction
 import io.openmobilemaps.mapscore.shared.map.controls.TouchEvent
 import io.openmobilemaps.mapscore.shared.map.controls.TouchHandlerInterface
 import io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.nio.ShortBuffer
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
@@ -42,6 +48,10 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
 	private var touchHandler: TouchHandlerInterface? = null
 	private var touchDisabled = false
+
+	private val saveFrame: AtomicBoolean = AtomicBoolean(false)
+	private var saveFrameSpec: SaveFrameSpec? = null
+	private var saveFrameCallback: SaveFrameCallback? = null
 
 	open fun setupMap(mapConfig: MapConfig, useMSAA: Boolean = false) {
 		val densityExact = resources.displayMetrics.xdpi
@@ -80,6 +90,9 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
 	override fun onDrawFrame(gl: GL10?) {
 		mapInterface?.drawFrame()
+		if (saveFrame.getAndSet(false)) {
+			saveFrame()
+		}
 	}
 
 	override fun scheduleOnGlThread(task: TaskInterface) {
@@ -169,7 +182,82 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 		return requireMapInterface().getCamera()
 	}
 
-	fun requireMapInterface(): MapInterface = mapInterface  ?: throw IllegalStateException("Map is not setup or already destroyed!")
-	fun requireScheduler(): AndroidScheduler = scheduler  ?: throw IllegalStateException("Map is not setup or already destroyed!")
+	fun saveFrame(saveFrameSpec: SaveFrameSpec, saveFrameCallback: SaveFrameCallback) {
+		this.saveFrameSpec = saveFrameSpec
+		this.saveFrameCallback = saveFrameCallback
+		saveFrame.set(true)
+		invalidate()
+	}
 
+	private fun saveFrame() {
+		val callback = saveFrameCallback ?: return
+		val spec = saveFrameSpec ?: return
+
+		try {
+			val left = (spec.cropLeftPc * width).toInt()
+			val right = ((1f - spec.cropRightPc) * width).toInt()
+			val top = ((1f - spec.cropTopPc) * height).toInt()
+			val bottom = (spec.cropBottomPc * height).toInt()
+
+			val width: Int = right - left
+			val height: Int = top - bottom
+			val screenshotSize = width * height
+			val bb = ByteBuffer.allocateDirect(screenshotSize * 4)
+			bb.order(ByteOrder.nativeOrder())
+			GLES20.glReadPixels(left, bottom, width, height, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, bb)
+			val pixelsBuffer = IntArray(screenshotSize)
+			bb.asIntBuffer()[pixelsBuffer]
+			val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
+			bitmap.setPixels(pixelsBuffer, screenshotSize - width, -width, 0, 0, width, height)
+			val scaledBitmap = Bitmap.createScaledBitmap(bitmap, spec.targetWidthPx ?: width, spec.targetHeightPx ?: height, false)
+
+			val sBuffer = ShortArray(screenshotSize)
+			val sb = ShortBuffer.wrap(sBuffer)
+			scaledBitmap.copyPixelsToBuffer(sb)
+
+			for (i in 0 until screenshotSize) {
+				val v: Long = sBuffer[i].toLong()
+				sBuffer[i] = (((v and 0x1f) shl 11) or (v and 0x7e0) or ((v and 0xf800) shr 11)).toShort()
+			}
+			sb.rewind()
+			scaledBitmap.copyPixelsFromBuffer(sb)
+
+			val size: Int = scaledBitmap.rowBytes * scaledBitmap.height
+
+			val b = ByteBuffer.allocate(size)
+
+			scaledBitmap.copyPixelsToBuffer(b)
+			b.rewind()
+			val bytes = ByteArray(size)
+			b.get(bytes)
+			post {
+				saveFrameSpec = null
+				saveFrameCallback?.onResult(bytes)
+				saveFrameCallback = null
+			}
+		} catch (e: Exception) {
+			post {
+				saveFrameSpec = null
+				saveFrameCallback?.onError()
+				saveFrameCallback = null
+			}
+		}
+	}
+
+	fun requireMapInterface(): MapInterface = mapInterface ?: throw IllegalStateException("Map is not setup or already destroyed!")
+	fun requireScheduler(): AndroidScheduler = scheduler ?: throw IllegalStateException("Map is not setup or already destroyed!")
+
+	data class SaveFrameSpec(
+		val targetWidthPx: Int? = null,
+		val targetHeightPx: Int? = null,
+		val cropLeftPc: Float = 0f,
+		val cropTopPc: Float = 0f,
+		val cropRightPc: Float = 0f,
+		val cropBottomPc: Float = 0f
+	)
+
+	interface SaveFrameCallback {
+		fun onResult(thumbnail: ByteArray)
+		fun onError()
+	}
 }
