@@ -179,7 +179,13 @@ class MapCamera2d : public MapCamera2dInterface,
 
     CameraConfiguration config;
 
-    void notifyListeners();
+    enum ListenerType {
+        BOUNDS = 1,
+        ROTATION = 1 << 1,
+        MAP_INTERACTION = 1 << 2
+    };
+
+    void notifyListeners(const int &listenerType);
 
     // MARK: Animations
 

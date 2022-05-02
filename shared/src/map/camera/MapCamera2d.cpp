@@ -52,7 +52,7 @@ void MapCamera2d::viewportSizeChanged() {
         zoom = std::max(std::min(zoom, zoomMin), zoomMax);
     }
 
-    notifyListeners();
+    notifyListeners(ListenerType::BOUNDS);
 }
 
 void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double zoom, bool animated) {
@@ -69,12 +69,12 @@ void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
                                                           [=](Coord positionMapSystem) {
                                                               this->centerPosition.x = positionMapSystem.x;
                                                               this->centerPosition.y = positionMapSystem.y;
-                                                              notifyListeners();
+                                                              notifyListeners(ListenerType::BOUNDS);
                                                               mapInterface->invalidate();
                                                           }, [=] {
                     this->centerPosition.x = positionMapSystem.x;
                     this->centerPosition.y = positionMapSystem.y;
-                    notifyListeners();
+                    notifyListeners(ListenerType::BOUNDS);
                     mapInterface->invalidate();
                     this->coordAnimation = nullptr;
                 });
@@ -85,7 +85,7 @@ void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
         this->centerPosition.x = positionMapSystem.x;
         this->centerPosition.y = positionMapSystem.y;
         setZoom(zoom, false);
-        notifyListeners();
+        notifyListeners(ListenerType::BOUNDS);
         mapInterface->invalidate();
     }
 }
@@ -104,12 +104,12 @@ void MapCamera2d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
                                                           [=](Coord positionMapSystem) {
                                                               this->centerPosition.x = positionMapSystem.x;
                                                               this->centerPosition.y = positionMapSystem.y;
-                                                              notifyListeners();
+                                                              notifyListeners(ListenerType::BOUNDS);
                                                               mapInterface->invalidate();
                                                           }, [=] {
                     this->centerPosition.x = positionMapSystem.x;
                     this->centerPosition.y = positionMapSystem.y;
-                    notifyListeners();
+                    notifyListeners(ListenerType::BOUNDS);
                     mapInterface->invalidate();
                     this->coordAnimation = nullptr;
                 });
@@ -118,7 +118,7 @@ void MapCamera2d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
     } else {
         this->centerPosition.x = positionMapSystem.x;
         this->centerPosition.y = positionMapSystem.y;
-        notifyListeners();
+        notifyListeners(ListenerType::BOUNDS);
         mapInterface->invalidate();
     }
 }
@@ -190,7 +190,7 @@ void MapCamera2d::setZoom(double zoom, bool animated) {
         mapInterface->invalidate();
     } else {
         this->zoom = targetZoom;
-        notifyListeners();
+        notifyListeners(ListenerType::BOUNDS);
         mapInterface->invalidate();
     }
 }
@@ -229,7 +229,7 @@ void MapCamera2d::setRotation(float angle, bool animated) {
         centerPosition.y = realCenter.y + rotatedDiff.y;
 
         this->angle = newAngle;
-        notifyListeners();
+        notifyListeners(ListenerType::ROTATION | ListenerType::BOUNDS);
         mapInterface->invalidate();
     }
 }
@@ -405,11 +405,21 @@ RectCoord MapCamera2d::getRectFromViewport(const Vec2I &sizeViewport, const Coor
     return RectCoord(topLeft, bottomRight);
 }
 
-void MapCamera2d::notifyListeners() {
-    auto visibleRect = getVisibleRect();
+void MapCamera2d::notifyListeners(const int &listenerType) {
+    std::optional<RectCoord> visibleRect = (listenerType & ListenerType::BOUNDS) ? std::optional<RectCoord>(getVisibleRect()) : std::nullopt;
+    double angle = this->angle;
+    double zoom = this->zoom;
     std::lock_guard<std::recursive_mutex> lock(listenerMutex);
     for (auto listener : listeners) {
-        listener->onVisibleBoundsChanged(visibleRect, zoom);
+        if (listenerType & ListenerType::BOUNDS) {
+            listener->onVisibleBoundsChanged(*visibleRect, zoom);
+        }
+        if (listenerType & ListenerType::ROTATION) {
+            listener->onRotationChanged(angle);
+        }
+        if (listenerType & ListenerType::MAP_INTERACTION) {
+            listener->onMapInteraction();
+        }
     }
 }
 
@@ -424,7 +434,7 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
 
         zoom = std::max(std::min(newZoom, zoomMin), zoomMax);
 
-        notifyListeners();
+        notifyListeners(ListenerType::BOUNDS | ListenerType::MAP_INTERACTION);
         mapInterface->invalidate();
         return true;
     }
@@ -466,15 +476,8 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
         currentDragTimestamp = newTimestamp;
     }
 
-    notifyListeners();
+    notifyListeners(ListenerType::BOUNDS | ListenerType::MAP_INTERACTION);
     mapInterface->invalidate();
-
-    {
-        std::lock_guard<std::recursive_mutex> lock(listenerMutex);
-        for (auto listener : listeners) {
-            listener->onMapInteraction();
-        }
-    }
     return true;
 }
 
@@ -518,7 +521,7 @@ void MapCamera2d::inertiaStep() {
     centerPosition.x = std::clamp(centerPosition.x, std::min(topLeft.x, bottomRight.x), std::max(topLeft.x, bottomRight.x));
     centerPosition.y = std::clamp(centerPosition.y, std::min(topLeft.y, bottomRight.y), std::max(topLeft.y, bottomRight.y));
 
-    notifyListeners();
+    notifyListeners(ListenerType::BOUNDS);
     mapInterface->invalidate();
 }
 
@@ -544,14 +547,9 @@ bool MapCamera2d::onDoubleClick(const ::Vec2F &posScreen) {
     position.y = std::max(position.y, bottomRight.y);
     position.y = std::min(position.y, topLeft.y);
 
-    setZoom(targetZoom, true);
+    moveToCenterPositionZoom(position, targetZoom, true);
 
-    {
-        std::lock_guard<std::recursive_mutex> lock(listenerMutex);
-        for (auto listener : listeners) {
-            listener->onMapInteraction();
-        }
-    }
+    notifyListeners(ListenerType::MAP_INTERACTION);
     return true;
 }
 
@@ -572,6 +570,8 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
     if (startZoom == 0)
         startZoom = zoom;
     if (posScreenOld.size() >= 2) {
+        auto listenerType = ListenerType::BOUNDS | ListenerType::MAP_INTERACTION;
+
         double scaleFactor =
                 Vec2FHelper::distance(posScreenNew[0], posScreenNew[1]) / Vec2FHelper::distance(posScreenOld[0], posScreenOld[1]);
         zoom /= scaleFactor;
@@ -620,12 +620,7 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
                 centerPosition.x += rotDiffX * zoom * screenPixelAsRealMeterFactor;
                 centerPosition.y += rotDiffY * zoom * screenPixelAsRealMeterFactor;
 
-                {
-                    std::lock_guard<std::recursive_mutex> lock(listenerMutex);
-                    for (auto listener : listeners) {
-                        listener->onRotationChanged(angle);
-                    }
-                }
+                listenerType |= ListenerType::ROTATION;
             } else {
                 tempAngle = fmod((tempAngle + (olda - newa) / M_PI * 180.0) + 360.0, 360.0);
                 auto diff = std::min(std::abs(tempAngle - angle), std::abs(360.0 - (tempAngle - angle)));
@@ -645,15 +640,8 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
         centerPosition.y = std::max(centerPosition.y, bottomRight.y);
         centerPosition.y = std::min(centerPosition.y, topLeft.y);
 
-        notifyListeners();
+        notifyListeners(listenerType);
         mapInterface->invalidate();
-
-        {
-            std::lock_guard<std::recursive_mutex> lock(listenerMutex);
-            for (auto listener : listeners) {
-                listener->onMapInteraction();
-            }
-        }
     }
     return true;
 }
@@ -661,27 +649,21 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
 bool MapCamera2d::onTwoFingerMoveComplete() {
     if (config.snapToNorthEnabled &&
         (angle < ROTATION_LOCKING_ANGLE || angle > (360 - ROTATION_LOCKING_ANGLE))) {
-        std::lock_guard<std::recursive_mutex> lock(animationMutex);
+        std::lock_guard <std::recursive_mutex> lock(animationMutex);
         rotationAnimation = std::make_shared<DoubleAnimation>(DEFAULT_ANIM_LENGTH,
                                                               this->angle,
                                                               angle < ROTATION_LOCKING_ANGLE ? 0 : 360,
                                                               InterpolatorFunction::EaseInOut,
                                                               [=](double angle) {
-            this->angle = angle;
-            mapInterface->invalidate();
-            std::lock_guard<std::recursive_mutex> lock(listenerMutex);
-            for (auto listener : listeners) {
-                listener->onRotationChanged(angle);
-            }
-        }, [=] {
-            this->angle = 0;
-            this->rotationAnimation = nullptr;
-            mapInterface->invalidate();
-            std::lock_guard<std::recursive_mutex> lock(listenerMutex);
-            for (auto listener : listeners) {
-                listener->onRotationChanged(angle);
-            }
-        });
+                                                                  this->angle = angle;
+                                                                  mapInterface->invalidate();
+                                                                  notifyListeners(ListenerType::ROTATION | ListenerType::BOUNDS);
+                                                              }, [=] {
+                    this->angle = 0;
+                    this->rotationAnimation = nullptr;
+                    mapInterface->invalidate();
+                    notifyListeners(ListenerType::ROTATION | ListenerType::BOUNDS);
+                });
         rotationAnimation->start();
         mapInterface->invalidate();
         return true;
