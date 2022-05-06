@@ -101,13 +101,13 @@ template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::updateCurre
         double boundsLeft = layerBounds.topLeft.x;
         int startTileLeft =
             std::floor(std::max(leftToRight ? (visibleLeft - boundsLeft) : (boundsLeft - visibleLeft), 0.0) / tileWidth);
-        int maxTileLeft = std::ceil(visibleWidth / tileWidth) + startTileLeft;
+        int maxTileLeft = std::floor(std::max(leftToRight ? (visibleRight - boundsLeft) : (boundsLeft - visibleRight), 0.0) / tileWidth);
         double visibleTop = visibleBoundsLayer.topLeft.y;
         double visibleBottom = visibleBoundsLayer.bottomRight.y;
         double visibleHeight = std::abs(visibleTop - visibleBottom);
         double boundsTop = layerBounds.topLeft.y;
         int startTileTop = std::floor(std::max(topToBottom ? (visibleTop - boundsTop) : (boundsTop - visibleTop), 0.0) / tileWidth);
-        int maxTileTop = std::ceil(visibleHeight / tileWidth) + startTileTop;
+        int maxTileTop = std::floor(std::max(topToBottom ? (visibleBottom - boundsTop) : (boundsTop - visibleBottom), 0.0) / tileWidth);
 
         double maxDisCenterX = visibleWidth * 0.5 + tileWidth;
         double maxDisCenterY = visibleHeight * 0.5 + tileWidth;
