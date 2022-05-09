@@ -9,6 +9,7 @@ enum class TouchAction : int {
     DOWN,
     MOVE,
     UP,
+    CANCEL,
 };
 
 namespace std {

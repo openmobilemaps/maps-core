@@ -46,6 +46,8 @@ class DefaultTouchHandler : public TouchHandlerInterface {
 
     void handleTouchUp();
 
+    void handleTouchCancel();
+
     void handleTwoFingerDown();
 
     void handleTwoFingerMove(std::tuple<Vec2F, Vec2F> oldpointer, std::tuple<Vec2F, Vec2F> pointer);

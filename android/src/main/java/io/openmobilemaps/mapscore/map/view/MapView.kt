@@ -140,6 +140,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 			MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> TouchAction.DOWN
 			MotionEvent.ACTION_MOVE -> TouchAction.MOVE
 			MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> TouchAction.UP
+			MotionEvent.ACTION_CANCEL -> TouchAction.CANCEL
 			else -> null
 		}
 
