@@ -11,6 +11,7 @@
 #include "BoundingBox.h"
 
 #include "CoordinateSystemIdentifiers.h"
+#include "CoordinateConversionHelperInterface.h"
 
 BoundingBox::BoundingBox(const std::string &systemIdentifier)
 : systemIdentifier(systemIdentifier),
@@ -21,9 +22,8 @@ BoundingBox::BoundingBox(const std::string &systemIdentifier)
 
 void BoundingBox::addPoint(const Coord& p)
 {
-    if(p.systemIdentifier == systemIdentifier) {
-        addPoint(p.x, p.y, p.z);
-    }
+    auto const &conv = CoordinateConversionHelperInterface::independentInstance()->convert(systemIdentifier, p);
+    addPoint(conv.x, conv.y, conv.z);
 }
 
 void BoundingBox::addPoint(const double x, const double y, const double z)
