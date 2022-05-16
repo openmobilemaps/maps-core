@@ -72,8 +72,8 @@ void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
                                                               notifyListeners(ListenerType::BOUNDS);
                                                               mapInterface->invalidate();
                                                           }, [=] {
-                    this->centerPosition.x = positionMapSystem.x;
-                    this->centerPosition.y = positionMapSystem.y;
+                    this->centerPosition.x = this->coordAnimation->endValue.x;
+                    this->centerPosition.y = this->coordAnimation->endValue.y;
                     notifyListeners(ListenerType::BOUNDS);
                     mapInterface->invalidate();
                     this->coordAnimation = nullptr;
@@ -107,8 +107,8 @@ void MapCamera2d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
                                                               notifyListeners(ListenerType::BOUNDS);
                                                               mapInterface->invalidate();
                                                           }, [=] {
-                    this->centerPosition.x = positionMapSystem.x;
-                    this->centerPosition.y = positionMapSystem.y;
+                    this->centerPosition.x = this->coordAnimation->endValue.x;
+                    this->centerPosition.y = this->coordAnimation->endValue.y;
                     notifyListeners(ListenerType::BOUNDS);
                     mapInterface->invalidate();
                     this->coordAnimation = nullptr;
