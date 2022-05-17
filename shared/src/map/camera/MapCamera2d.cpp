@@ -454,14 +454,7 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     centerPosition.x += xDiffMap;
     centerPosition.y += yDiffMap;
 
-    auto bottomRight = bounds.bottomRight;
-    auto topLeft = bounds.topLeft;
-
-    centerPosition.x = std::min(centerPosition.x, bottomRight.x);
-    centerPosition.x = std::max(centerPosition.x, topLeft.x);
-
-    centerPosition.y = std::max(centerPosition.y, bottomRight.y);
-    centerPosition.y = std::min(centerPosition.y, topLeft.y);
+    clampCenterToPaddingCorrectedBounds();
 
     if (currentDragTimestamp == 0) {
         currentDragTimestamp = DateHelper::currentTimeMicros();
@@ -515,11 +508,7 @@ void MapCamera2d::inertiaStep() {
     centerPosition.x += xDiffMap;
     centerPosition.y += yDiffMap;
 
-    auto bottomRight = bounds.bottomRight;
-    auto topLeft = bounds.topLeft;
-
-    centerPosition.x = std::clamp(centerPosition.x, std::min(topLeft.x, bottomRight.x), std::max(topLeft.x, bottomRight.x));
-    centerPosition.y = std::clamp(centerPosition.y, std::min(topLeft.y, bottomRight.y), std::max(topLeft.y, bottomRight.y));
+    clampCenterToPaddingCorrectedBounds();
 
     notifyListeners(ListenerType::BOUNDS);
     mapInterface->invalidate();
@@ -631,14 +620,8 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
         }
 
         auto mapConfig = mapInterface->getMapConfig();
-        auto bottomRight = bounds.bottomRight;
-        auto topLeft = bounds.topLeft;
 
-        centerPosition.x = std::min(centerPosition.x, bottomRight.x);
-        centerPosition.x = std::max(centerPosition.x, topLeft.x);
-
-        centerPosition.y = std::max(centerPosition.y, bottomRight.y);
-        centerPosition.y = std::min(centerPosition.y, topLeft.y);
+        clampCenterToPaddingCorrectedBounds();
 
         notifyListeners(listenerType);
         mapInterface->invalidate();
@@ -730,10 +713,12 @@ void MapCamera2d::setBounds(const RectCoord &bounds) {
 bool MapCamera2d::isInBounds(const Coord &coords) {
     Coord mapCoords = mapInterface->getCoordinateConverterHelper()->convert(mapCoordinateSystem.identifier, coords);
 
-    double minHor = std::min(bounds.topLeft.x, bounds.bottomRight.x);
-    double maxHor = std::max(bounds.topLeft.x, bounds.bottomRight.x);
-    double minVert = std::min(bounds.topLeft.y, bounds.bottomRight.y);
-    double maxVert = std::max(bounds.topLeft.y, bounds.bottomRight.y);
+    auto const &paddingCorrectedBounds = getPaddingCorrectedBounds();
+
+    double minHor = std::min(paddingCorrectedBounds.topLeft.x, paddingCorrectedBounds.bottomRight.x);
+    double maxHor = std::max(paddingCorrectedBounds.topLeft.x, paddingCorrectedBounds.bottomRight.x);
+    double minVert = std::min(paddingCorrectedBounds.topLeft.y, paddingCorrectedBounds.bottomRight.y);
+    double maxVert = std::max(paddingCorrectedBounds.topLeft.y, paddingCorrectedBounds.bottomRight.y);
 
     return mapCoords.x <= maxHor && mapCoords.x >= minHor && mapCoords.y <= maxVert && mapCoords.y >= minVert;
 }
@@ -741,10 +726,12 @@ bool MapCamera2d::isInBounds(const Coord &coords) {
 Coord MapCamera2d::getBoundsCorrectedCoords(const Coord &coords) {
     Coord mapCoords = mapInterface->getCoordinateConverterHelper()->convert(mapCoordinateSystem.identifier, coords);
 
-    double minHor = std::min(bounds.topLeft.x, bounds.bottomRight.x);
-    double maxHor = std::max(bounds.topLeft.x, bounds.bottomRight.x);
-    double minVert = std::min(bounds.topLeft.y, bounds.bottomRight.y);
-    double maxVert = std::max(bounds.topLeft.y, bounds.bottomRight.y);
+    auto const &paddingCorrectedBounds = getPaddingCorrectedBounds();
+
+    double minHor = std::min(paddingCorrectedBounds.topLeft.x, paddingCorrectedBounds.bottomRight.x);
+    double maxHor = std::max(paddingCorrectedBounds.topLeft.x, paddingCorrectedBounds.bottomRight.x);
+    double minVert = std::min(paddingCorrectedBounds.topLeft.y, paddingCorrectedBounds.bottomRight.y);
+    double maxVert = std::max(paddingCorrectedBounds.topLeft.y, paddingCorrectedBounds.bottomRight.y);
 
     mapCoords.x = std::clamp(mapCoords.x, minHor, maxHor);
     mapCoords.y = std::clamp(mapCoords.y, minVert, maxVert);
@@ -764,6 +751,36 @@ Coord MapCamera2d::adjustCoordForPadding(const Coord &coords, double targetZoom)
     coordinates.y += rotPadVec.y;
 
     return coordinates;
+}
+
+RectCoord MapCamera2d::getPaddingCorrectedBounds() {
+    double const factor = screenPixelAsRealMeterFactor * zoom;
+
+    Vec2D const padVec = Vec2D(0.5 * (paddingRight - paddingLeft) * factor,
+                         0.5 * (paddingTop - paddingBottom) * factor);
+
+    Coord const topLeft(bounds.topLeft.systemIdentifier,
+                  bounds.topLeft.x + padVec.x,
+                  bounds.topLeft.y + padVec.y,
+                  bounds.topLeft.z);
+
+    Coord const bottomRight(bounds.bottomRight.systemIdentifier,
+                      bounds.bottomRight.x + padVec.x,
+                      bounds.bottomRight.y + padVec.y,
+                      bounds.bottomRight.z);
+
+    return RectCoord(topLeft, bottomRight);
+}
+
+void MapCamera2d::clampCenterToPaddingCorrectedBounds() {
+    auto const &paddingCorrectedBounds = getPaddingCorrectedBounds();
+
+    centerPosition.x = std::clamp(centerPosition.x,
+                                  std::min(paddingCorrectedBounds.topLeft.x, paddingCorrectedBounds.bottomRight.x),
+                                  std::max(paddingCorrectedBounds.topLeft.x, paddingCorrectedBounds.bottomRight.x));
+    centerPosition.y = std::clamp(centerPosition.y,
+                                  std::min(paddingCorrectedBounds.topLeft.y, paddingCorrectedBounds.bottomRight.y),
+                                  std::max(paddingCorrectedBounds.topLeft.y, paddingCorrectedBounds.bottomRight.y));
 }
 
 void MapCamera2d::setRotationEnabled(bool enabled) {
