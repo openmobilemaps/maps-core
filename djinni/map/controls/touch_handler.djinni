@@ -35,4 +35,5 @@ touch_action = enum {
     down;
     move;
     up;
+    cancel;
 }

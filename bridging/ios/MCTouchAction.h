@@ -8,4 +8,5 @@ typedef NS_ENUM(NSInteger, MCTouchAction)
     MCTouchActionDOWN,
     MCTouchActionMOVE,
     MCTouchActionUP,
+    MCTouchActionCANCEL,
 };

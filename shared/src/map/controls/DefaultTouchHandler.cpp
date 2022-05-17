@@ -51,59 +51,70 @@ void DefaultTouchHandler::onTouchEvent(const TouchEvent &touchEvent) {
     if (touchEvent.pointers.size() == 1) {
 
         switch (touchEvent.touchAction) {
-        case TouchAction::DOWN: {
-
-            touchPosition = touchEvent.pointers[0];
-            touchStartPosition = touchPosition;
-            handleTouchDown(touchPosition);
-            break;
-        }
-
-        case TouchAction::MOVE: {
-            if (state != ONE_FINGER_DOWN && state != ONE_FINGER_DOUBLE_CLICK_DOWN && state != ONE_FINGER_MOVING &&
-                state != ONE_FINGER_DOUBLE_CLICK_MOVE) {
+            case TouchAction::DOWN: {
                 touchPosition = touchEvent.pointers[0];
+                touchStartPosition = touchPosition;
+                handleTouchDown(touchPosition);
+                break;
             }
 
-            Vec2F delta = Vec2F(touchEvent.pointers[0].x - touchPosition.x, touchEvent.pointers[0].y - touchPosition.y);
+            case TouchAction::MOVE: {
+                if (state != ONE_FINGER_DOWN && state != ONE_FINGER_DOUBLE_CLICK_DOWN && state != ONE_FINGER_MOVING &&
+                    state != ONE_FINGER_DOUBLE_CLICK_MOVE) {
+                    touchPosition = touchEvent.pointers[0];
+                }
 
-            touchPosition = touchEvent.pointers[0];
+                Vec2F delta = Vec2F(touchEvent.pointers[0].x - touchPosition.x, touchEvent.pointers[0].y - touchPosition.y);
 
-            handleMove(delta);
-            break;
-        }
+                touchPosition = touchEvent.pointers[0];
 
-        case TouchAction::UP: {
-            handleTouchUp();
-            break;
-        }
+                handleMove(delta);
+                break;
+            }
+
+            case TouchAction::UP: {
+                handleTouchUp();
+                break;
+            }
+
+            case TouchAction::CANCEL: {
+                handleTouchCancel();
+                break;
+            }
         }
 
     } else if (touchEvent.pointers.size() == 2) {
 
         switch (touchEvent.touchAction) {
-        case TouchAction::DOWN:
-            pointer = {Vec2F(0, 0), Vec2F(0, 0)};
-            oldPointer = {touchEvent.pointers[0], touchEvent.pointers[1]};
-            handleTwoFingerDown();
-            break;
-        case TouchAction::MOVE:
-            oldPointer = pointer;
-            pointer = {touchEvent.pointers[0], touchEvent.pointers[1]};
-
-            if (std::get<0>(oldPointer).x != 0 || std::get<0>(oldPointer).y != 0 || std::get<1>(oldPointer).x != 0 ||
-                std::get<1>(oldPointer).y != 0) {
-                handleTwoFingerMove(oldPointer, pointer);
+            case TouchAction::DOWN: {
+                pointer = {Vec2F(0, 0), Vec2F(0, 0)};
+                oldPointer = {touchEvent.pointers[0], touchEvent.pointers[1]};
+                handleTwoFingerDown();
+                break;
             }
 
-            oldPointer = pointer;
+            case TouchAction::MOVE: {
+                oldPointer = pointer;
+                pointer = {touchEvent.pointers[0], touchEvent.pointers[1]};
 
-            break;
-        case TouchAction::UP:
+                if (std::get<0>(oldPointer).x != 0 || std::get<0>(oldPointer).y != 0 || std::get<1>(oldPointer).x != 0 ||
+                    std::get<1>(oldPointer).y != 0) {
+                    handleTwoFingerMove(oldPointer, pointer);
+                }
 
-            handleTwoFingerUp(oldPointer);
+                oldPointer = pointer;
+                break;
+            }
 
-            break;
+            case TouchAction::UP: {
+                handleTwoFingerUp(oldPointer);
+                break;
+            }
+
+            case TouchAction::CANCEL: {
+                handleTouchCancel();
+                break;
+            }
         }
 
     } else {
@@ -231,6 +242,14 @@ void DefaultTouchHandler::handleTouchUp() {
         }
         state = IDLE;
     }
+    for (auto &[index, listener] : listeners) {
+        listener->clearTouch();
+    }
+    stateTime = DateHelper::currentTimeMillis();
+}
+
+void DefaultTouchHandler::handleTouchCancel() {
+    state = IDLE;
     for (auto &[index, listener] : listeners) {
         listener->clearTouch();
     }
