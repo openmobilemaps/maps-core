@@ -197,5 +197,8 @@ class MapCamera2d : public MapCamera2dInterface,
     Coord adjustCoordForPadding(const Coord &coords, double targetZoom);
     Coord getBoundsCorrectedCoords(const Coord &coords);
 
+    RectCoord getPaddingCorrectedBounds();
+    void clampCenterToPaddingCorrectedBounds();
+
     RectCoord getRectFromViewport(const Vec2I &sizeViewport, const Coord &center);
 };
