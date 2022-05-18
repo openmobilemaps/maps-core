@@ -64,6 +64,9 @@
 
 - (nonnull MCRectCoord *)getPaddingAdjustedVisibleRect;
 
+/** this method is called just before the update methods on all layers */
+- (void)update;
+
 - (nonnull NSArray<NSNumber *> *)getInvariantModelMatrix:(nonnull MCCoord *)coordinate
                                           scaleInvariant:(BOOL)scaleInvariant
                                        rotationInvariant:(BOOL)rotationInvariant;

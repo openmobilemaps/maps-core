@@ -47,6 +47,9 @@ abstract class MapCamera2dInterface {
 
     abstract fun getPaddingAdjustedVisibleRect(): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord
 
+    /** this method is called just before the update methods on all layers */
+    abstract fun update()
+
     abstract fun getInvariantModelMatrix(coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, scaleInvariant: Boolean, rotationInvariant: Boolean): ArrayList<Float>
 
     abstract fun addListener(listener: io.openmobilemaps.mapscore.shared.map.camera.MapCamera2dListenerInterface)
@@ -213,6 +216,12 @@ abstract class MapCamera2dInterface {
             return native_getPaddingAdjustedVisibleRect(this.nativeRef)
         }
         private external fun native_getPaddingAdjustedVisibleRect(_nativeRef: Long): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord
+
+        override fun update() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_update(this.nativeRef)
+        }
+        private external fun native_update(_nativeRef: Long)
 
         override fun getInvariantModelMatrix(coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, scaleInvariant: Boolean, rotationInvariant: Boolean): ArrayList<Float> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

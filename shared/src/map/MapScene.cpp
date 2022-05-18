@@ -201,8 +201,14 @@ void MapScene::drawFrame() {
     if (!isResumed)
         return;
 
+    auto const camera = this->camera;
+    if (camera) {
+        camera->update();
+    }
+
     {
         std::lock_guard<std::recursive_mutex> lock(layersMutex);
+
         for (const auto &layer : layers) {
             layer.second->update();
         }

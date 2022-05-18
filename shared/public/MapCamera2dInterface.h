@@ -60,6 +60,9 @@ public:
 
     virtual ::RectCoord getPaddingAdjustedVisibleRect() = 0;
 
+    /** this method is called just before the update methods on all layers */
+    virtual void update() = 0;
+
     virtual std::vector<float> getInvariantModelMatrix(const ::Coord & coordinate, bool scaleInvariant, bool rotationInvariant) = 0;
 
     virtual void addListener(const std::shared_ptr<::MapCamera2dListenerInterface> & listener) = 0;
