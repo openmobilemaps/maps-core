@@ -297,7 +297,6 @@ std::vector<float> MapCamera2d::getVpMatrix() {
         if (rotationAnimation) std::static_pointer_cast<AnimationInterface>(rotationAnimation)->update();
         if (coordAnimation) std::static_pointer_cast<AnimationInterface>(coordAnimation)->update();
     }
-    inertiaStep();
 
     std::vector<float> newVpMatrix(16, 0);
 
@@ -342,6 +341,11 @@ std::optional<float> MapCamera2d::getLastVpMatrixRotation() {
 std::optional<float> MapCamera2d::getLastVpMatrixZoom() {
     std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
     return lastVpZoom;
+}
+
+/** this method is called just before the update methods on all layers */
+void MapCamera2d::update() {
+    inertiaStep();
 }
 
 std::vector<float>

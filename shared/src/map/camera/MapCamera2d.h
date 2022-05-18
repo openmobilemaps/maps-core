@@ -83,6 +83,9 @@ class MapCamera2d : public MapCamera2dInterface,
 
     std::optional<float> getLastVpMatrixZoom() override;
 
+    /** this method is called just before the update methods on all layers */
+    virtual void update() override;
+
     virtual std::vector<float> getInvariantModelMatrix(const ::Coord & coordinate, bool scaleInvariant, bool rotationInvariant) override;
 
     virtual bool onMove(const ::Vec2F &deltaScreen, bool confirmed, bool doubleClick) override;

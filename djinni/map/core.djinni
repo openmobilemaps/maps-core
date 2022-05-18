@@ -109,6 +109,9 @@ map_camera_2d_interface = interface +c {
     get_visible_rect() : rect_coord;
     get_padding_adjusted_visible_rect() : rect_coord;
 
+    # this method is called just before the update methods on all layers
+    update();
+
     get_invariant_model_matrix(coordinate: coord, scale_invariant: bool, rotation_invariant: bool) : list<f32>;
 
     add_listener(listener: map_camera_2d_listener_interface);
