@@ -63,6 +63,8 @@ class Tiled2dMapLayer : public SimpleLayerInterface,
 
     std::optional<int32_t> getMaxZoomLevelIdentifier();
 
+    virtual LayerReadyState isReadyToRenderOffscreen() override;
+
 protected:
     std::shared_ptr<MapInterface> mapInterface;
     const std::shared_ptr<Tiled2dMapLayerConfig> layerConfig;

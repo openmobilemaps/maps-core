@@ -3,6 +3,7 @@
 
 #include "NativeTiled2dMapSourceInterface.h"  // my header
 #include "Marshal.hpp"
+#include "NativeLayerReadyState.h"
 #include "NativeRectCoord.h"
 
 namespace djinni_generated {
@@ -84,6 +85,16 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapSourceInterface>(nativeRef);
         ref->resume();
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT ::djinni_generated::NativeLayerReadyState::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapSourceInterface_00024CppProxy_native_1isReadyToRenderOffscreen(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapSourceInterface>(nativeRef);
+        auto r = ref->isReadyToRenderOffscreen();
+        return ::djinni::release(::djinni_generated::NativeLayerReadyState::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
 }  // namespace djinni_generated

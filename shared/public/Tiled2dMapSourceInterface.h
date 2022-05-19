@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "LayerReadyState.h"
 #include "RectCoord.h"
 #include <cstdint>
 #include <optional>
@@ -24,4 +25,6 @@ public:
     virtual void pause() = 0;
 
     virtual void resume() = 0;
+
+    virtual ::LayerReadyState isReadyToRenderOffscreen() = 0;
 };

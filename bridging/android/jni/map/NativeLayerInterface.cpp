@@ -3,6 +3,7 @@
 
 #include "NativeLayerInterface.h"  // my header
 #include "Marshal.hpp"
+#include "NativeLayerReadyState.h"
 #include "NativeMapInterface.h"
 #include "NativeMaskingObjectInterface.h"
 #include "NativeRectI.h"
@@ -90,6 +91,22 @@ void NativeLayerInterface::JavaProxy::setScissorRect(const std::optional<::RectI
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeLayerInterface>::get();
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_setScissorRect,
                            ::djinni::get(::djinni::Optional<std::optional, ::djinni_generated::NativeRectI>::fromCpp(jniEnv, c_scissorRect)));
+    ::djinni::jniExceptionCheck(jniEnv);
+}
+::LayerReadyState NativeLayerInterface::JavaProxy::isReadyToRenderOffscreen() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeLayerInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_isReadyToRenderOffscreen);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativeLayerReadyState::toCpp(jniEnv, jret);
+}
+void NativeLayerInterface::JavaProxy::enableAnimations(bool c_enabled) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeLayerInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_enableAnimations,
+                           ::djinni::get(::djinni::Bool::fromCpp(jniEnv, c_enabled)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
 
@@ -189,6 +206,25 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInterfac
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::LayerInterface>(nativeRef);
         ref->setScissorRect(::djinni::Optional<std::optional, ::djinni_generated::NativeRectI>::toCpp(jniEnv, j_scissorRect));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInterface_00024CppProxy_native_1isReadyToRenderOffscreen(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::LayerInterface>(nativeRef);
+        auto r = ref->isReadyToRenderOffscreen();
+        return ::djinni::release(::djinni_generated::NativeLayerReadyState::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInterface_00024CppProxy_native_1enableAnimations(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jboolean j_enabled)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::LayerInterface>(nativeRef);
+        ref->enableAnimations(::djinni::Bool::toCpp(jniEnv, j_enabled));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

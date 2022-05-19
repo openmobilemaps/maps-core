@@ -11,6 +11,7 @@
 #include <vector>
 
 class MapInterface;
+enum class LayerReadyState;
 
 class LayerInterface {
 public:
@@ -36,4 +37,8 @@ public:
 
     /** optional rectangle, remove scissoring when not set */
     virtual void setScissorRect(const std::optional<::RectI> & scissorRect) = 0;
+
+    virtual LayerReadyState isReadyToRenderOffscreen() = 0;
+
+    virtual void enableAnimations(bool enabled) = 0;
 };

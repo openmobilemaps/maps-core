@@ -13,6 +13,8 @@
 #import "MCMapCallbackInterface+Private.h"
 #import "MCMapCamera2dInterface+Private.h"
 #import "MCMapConfig+Private.h"
+#import "MCMapReadyCallbackInterface+Private.h"
+#import "MCRectCoord+Private.h"
 #import "MCRenderingContextInterface+Private.h"
 #import "MCSchedulerInterface+Private.h"
 #import "MCShaderFactoryInterface+Private.h"
@@ -220,6 +222,16 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)pause {
     try {
         _cppRefHandle.get()->pause();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)drawReadyFrame:(nonnull MCRectCoord *)bounds
+               timeout:(float)timeout
+             callbacks:(nullable id<MCMapReadyCallbackInterface>)callbacks {
+    try {
+        _cppRefHandle.get()->drawReadyFrame(::djinni_generated::RectCoord::toCpp(bounds),
+                                            ::djinni::F32::toCpp(timeout),
+                                            ::djinni_generated::MapReadyCallbackInterface::toCpp(callbacks));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

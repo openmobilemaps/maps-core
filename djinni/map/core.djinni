@@ -53,10 +53,25 @@ map_interface = interface +c {
     draw_frame();
     resume();
     pause();
+
+    # changes bounds to bounds, checks all layers for readiness, and updates callbacks, timeout in
+    # seconds
+    draw_ready_frame(bounds: rect_coord, timeout: f32, callbacks: map_ready_callback_interface);
 }
 
 map_callback_interface = interface +c +j +o {
     invalidate();
+}
+
+map_ready_callback_interface = interface +j +o {
+    state_did_update(state: layer_ready_state);
+}
+
+layer_ready_state = enum {
+    ready;
+    not_ready;
+    error;
+    timeout_error;
 }
 
 map_config = record {
@@ -76,6 +91,9 @@ layer_interface = interface +c +j +o {
 
     # optional rectangle, remove scissoring when not set
     set_scissor_rect(scissor_rect: optional<rect_i>);
+
+    is_ready_to_render_offscreen() : layer_ready_state;
+    enable_animations(enabled: bool);
 }
 
 map_camera_2d_interface = interface +c {

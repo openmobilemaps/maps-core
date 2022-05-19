@@ -361,3 +361,24 @@ template<class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::resume() {
     isPaused = false;
 }
+
+template<class T, class L, class R>
+::LayerReadyState Tiled2dMapSource<T, L, R>::isReadyToRenderOffscreen() {
+    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+
+    if(errorTiles.size() > 0) {
+        return LayerReadyState::ERROR;
+    }
+
+    if(dispatchedTasks > 0) {
+        return LayerReadyState::NOT_READY;
+    }
+
+    for(auto& visible : currentVisibleTiles) {
+        if(currentTiles.count(visible) == 0) {
+            return LayerReadyState::NOT_READY;
+        }
+    }
+
+    return LayerReadyState::READY;
+}

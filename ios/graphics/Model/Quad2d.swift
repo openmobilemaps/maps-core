@@ -152,6 +152,8 @@ extension Quad2d: MCQuad2dInterface {
             fatalError("unexpected TextureHolder")
         }
         texture = textureHolder.texture
+
+        ready = true
     }
 
     func removeTexture() {

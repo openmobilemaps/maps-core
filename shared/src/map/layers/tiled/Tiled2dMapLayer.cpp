@@ -111,3 +111,11 @@ std::optional<int32_t> Tiled2dMapLayer::getMaxZoomLevelIdentifier() {
         return sourceInterface->getMaxZoomLevelIdentifier();
     return std::nullopt;
 }
+
+LayerReadyState Tiled2dMapLayer::isReadyToRenderOffscreen() {
+    if (sourceInterface) {
+        return sourceInterface->isReadyToRenderOffscreen();
+    }
+
+    return LayerReadyState::READY;
+}

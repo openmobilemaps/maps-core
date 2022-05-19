@@ -21,6 +21,8 @@ abstract class Tiled2dMapSourceInterface {
 
     abstract fun resume()
 
+    abstract fun isReadyToRenderOffscreen(): io.openmobilemaps.mapscore.shared.map.LayerReadyState
+
     private class CppProxy : Tiled2dMapSourceInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -80,5 +82,11 @@ abstract class Tiled2dMapSourceInterface {
             native_resume(this.nativeRef)
         }
         private external fun native_resume(_nativeRef: Long)
+
+        override fun isReadyToRenderOffscreen(): io.openmobilemaps.mapscore.shared.map.LayerReadyState {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_isReadyToRenderOffscreen(this.nativeRef)
+        }
+        private external fun native_isReadyToRenderOffscreen(_nativeRef: Long): io.openmobilemaps.mapscore.shared.map.LayerReadyState
     }
 }

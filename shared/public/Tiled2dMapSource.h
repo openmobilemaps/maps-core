@@ -58,6 +58,9 @@ template <class T, class L, class R> class Tiled2dMapSource :
     std::optional<int32_t> getMinZoomLevelIdentifier() override;
     std::optional<int32_t> getMaxZoomLevelIdentifier() override;
 
+    virtual ::LayerReadyState isReadyToRenderOffscreen() override;
+
+
   protected:
     virtual L loadTile(Tiled2dMapTileInfo tile) = 0;
 
