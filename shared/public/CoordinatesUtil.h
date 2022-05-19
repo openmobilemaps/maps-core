@@ -11,6 +11,7 @@
 #pragma once
 
 #include "QuadCoord.h"
+#include "CoordinateConversionHelperInterface.h"
 
 namespace coordsutil {
 
@@ -20,6 +21,17 @@ namespace coordsutil {
                  std::max(r2.topLeft.x, r2.bottomRight.x) < std::min(r1.topLeft.x, r1.bottomRight.x) ||
                  std::min(r2.topLeft.y, r2.bottomRight.y) > std::max(r1.topLeft.y, r1.bottomRight.y) ||
                  std::max(r2.topLeft.y, r2.bottomRight.y) < std::min(r1.topLeft.y, r1.bottomRight.y));
+    }
+
+    static bool checkRectContainsCoord(const RectCoord &rect, const Coord &coord, const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper) {
+        auto convRect = conversionHelper->convertRect(coord.systemIdentifier, rect);
+
+        auto maxX = std::max(convRect.topLeft.x, convRect.bottomRight.x);
+        auto minX = std::min(convRect.topLeft.x, convRect.bottomRight.x);
+        auto maxY = std::max(convRect.topLeft.y, convRect.bottomRight.y);
+        auto minY = std::min(convRect.topLeft.y, convRect.bottomRight.y);
+
+        return coord.x > minX && coord.x < maxX && coord.y > minY && coord.y < maxY;
     }
 
 }
