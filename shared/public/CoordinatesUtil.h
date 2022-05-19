@@ -24,14 +24,16 @@ namespace coordsutil {
     }
 
     static bool checkRectContainsCoord(const RectCoord &rect, const Coord &coord, const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper) {
-        auto convRect = conversionHelper->convertRect(coord.systemIdentifier, rect);
+        assert(rect.topLeft.systemIdentifier == rect.bottomRight.systemIdentifier);
+        
+        auto convCoord = conversionHelper->convert(rect.topLeft.systemIdentifier, coord);
 
-        auto maxX = std::max(convRect.topLeft.x, convRect.bottomRight.x);
-        auto minX = std::min(convRect.topLeft.x, convRect.bottomRight.x);
-        auto maxY = std::max(convRect.topLeft.y, convRect.bottomRight.y);
-        auto minY = std::min(convRect.topLeft.y, convRect.bottomRight.y);
+        auto maxX = std::max(rect.topLeft.x, rect.bottomRight.x);
+        auto minX = std::min(rect.topLeft.x, rect.bottomRight.x);
+        auto maxY = std::max(rect.topLeft.y, rect.bottomRight.y);
+        auto minY = std::min(rect.topLeft.y, rect.bottomRight.y);
 
-        return coord.x > minX && coord.x < maxX && coord.y > minY && coord.y < maxY;
+        return convCoord.x > minX && convCoord.x < maxX && convCoord.y > minY && convCoord.y < maxY;
     }
 
 }
