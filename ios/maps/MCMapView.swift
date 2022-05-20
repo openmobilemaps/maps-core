@@ -178,7 +178,8 @@ extension MCMapView {
         guard let texture = self.currentDrawable?.texture else { return nil }
 
         let context = CIContext()
-        let cImg = CIImage(mtlTexture: texture, options: nil)!
+        let kciOptions: [CIImageOption:Any] = [.colorSpace: CGColorSpaceCreateDeviceRGB()]
+        let cImg = CIImage(mtlTexture: texture, options: kciOptions)!
         return context.createCGImage(cImg, from: cImg.extent)?.toImage()
     }
 }

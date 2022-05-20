@@ -251,21 +251,24 @@ void MapScene::pause() {
 
 void MapScene::drawReadyFrame(const ::RectCoord & bounds, float timeout, const std::shared_ptr<MapReadyCallbackInterface> & callbacks) {
 
+    for (const auto &layer : layers) {
+        layer.second->enableAnimations(false);
+    }
+
     auto state = LayerReadyState::NOT_READY;
+
+    invalidate();
     callbacks->stateDidUpdate(state);
 
     auto camera = getCamera();
     camera->moveToBoundingBox(bounds, 0.0, false, std::nullopt);
 
-    for (const auto &layer : layers) {
-        layer.second->enableAnimations(false);
-    }
+    invalidate();
+    callbacks->stateDidUpdate(state);
 
     long long timeoutTimestamp = DateHelper::currentTimeMillis() + (long long)(timeout * 1000);
 
     while(state == LayerReadyState::NOT_READY) {
-        invalidate();
-
         state = getLayersReadyState();
 
         auto now = DateHelper::currentTimeMillis();
@@ -273,8 +276,11 @@ void MapScene::drawReadyFrame(const ::RectCoord & bounds, float timeout, const s
             state = LayerReadyState::TIMEOUT_ERROR;
         }
 
+        invalidate();
         callbacks->stateDidUpdate(state);
     }
+
+    callbacks->stateDidUpdate(state);
 }
 
 LayerReadyState MapScene::getLayersReadyState() {

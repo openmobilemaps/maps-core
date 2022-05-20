@@ -366,7 +366,7 @@ template<class T, class L, class R>
 ::LayerReadyState Tiled2dMapSource<T, L, R>::isReadyToRenderOffscreen() {
     std::lock_guard<std::recursive_mutex> lock(tilesMutex);
 
-    if(errorTiles.size() > 0) {
+    if(errorTiles.size() > 0 || notFoundTiles.size() > 0) {
         return LayerReadyState::ERROR;
     }
 
