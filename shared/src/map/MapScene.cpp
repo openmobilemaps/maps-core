@@ -251,6 +251,8 @@ void MapScene::pause() {
 
 void MapScene::drawReadyFrame(const ::RectCoord & bounds, float timeout, const std::shared_ptr<MapReadyCallbackInterface> & callbacks) {
 
+    // for now we only support drawing a ready frame, therefore
+    // we disable animations in the layers
     for (const auto &layer : layers) {
         layer.second->enableAnimations(false);
     }
@@ -282,6 +284,12 @@ void MapScene::drawReadyFrame(const ::RectCoord & bounds, float timeout, const s
 
     invalidate();
     callbacks->stateDidUpdate(state);
+
+    // re-enable animations if the map scene is used not only for
+    // drawReadyFrame
+    for (const auto &layer : layers) {
+        layer.second->enableAnimations(true);
+    }
 }
 
 LayerReadyState MapScene::getLayersReadyState() {
