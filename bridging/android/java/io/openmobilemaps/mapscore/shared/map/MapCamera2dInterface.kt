@@ -51,6 +51,8 @@ abstract class MapCamera2dInterface {
 
     abstract fun getPaddingAdjustedVisibleRect(): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord
 
+    abstract fun getScreenDensityPpi(): Float
+
     /** this method is called just before the update methods on all layers */
     abstract fun update()
 
@@ -232,6 +234,12 @@ abstract class MapCamera2dInterface {
             return native_getPaddingAdjustedVisibleRect(this.nativeRef)
         }
         private external fun native_getPaddingAdjustedVisibleRect(_nativeRef: Long): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord
+
+        override fun getScreenDensityPpi(): Float {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getScreenDensityPpi(this.nativeRef)
+        }
+        private external fun native_getScreenDensityPpi(_nativeRef: Long): Float
 
         override fun update() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

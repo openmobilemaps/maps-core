@@ -18,7 +18,8 @@ template <class T, class L, class R>
 Tiled2dMapSource<T, L, R>::Tiled2dMapSource(const MapConfig &mapConfig, const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
                                          const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                          const std::shared_ptr<SchedulerInterface> &scheduler,
-                                         const std::shared_ptr<Tiled2dMapSourceListenerInterface> &listener)
+                                         const std::shared_ptr<Tiled2dMapSourceListenerInterface> &listener,
+                                         float screenDensityPpi)
     : mapConfig(mapConfig)
     , layerConfig(layerConfig)
     , conversionHelper(conversionHelper)
@@ -28,7 +29,8 @@ Tiled2dMapSource<T, L, R>::Tiled2dMapSource(const MapConfig &mapConfig, const st
     , zoomInfo(layerConfig->getZoomInfo())
     , layerSystemId(layerConfig->getCoordinateSystemIdentifier())
     , dispatchedTasks(0)
-    , isPaused(false) {
+    , isPaused(false)
+    , screenDensityPpi(screenDensityPpi) {
     std::sort(zoomLevelInfos.begin(), zoomLevelInfos.end(),
               [](const Tiled2dMapZoomLevelInfo &a, const Tiled2dMapZoomLevelInfo &b) -> bool { return a.zoom > b.zoom; });
 }
@@ -67,9 +69,10 @@ template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::updateCurre
 
     size_t numZoomLevels = zoomLevelInfos.size();
     int targetZoomLayer = -1;
+    const float screenScaleFactor = screenDensityPpi / (0.0254 / 0.00028); // Each pixel is assumed to be 0.28mm – https://gis.stackexchange.com/a/315989
     for (int i = 0; i < numZoomLevels; i++) {
         const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(i);
-        if (zoomInfo.zoomLevelScaleFactor * zoomLevelInfo.zoom < zoom) {
+        if (zoomInfo.zoomLevelScaleFactor * screenScaleFactor * zoomLevelInfo.zoom < zoom) {
             targetZoomLayer = std::max(i - 1, 0);
             break;
         }

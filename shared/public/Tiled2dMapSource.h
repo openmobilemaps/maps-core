@@ -40,7 +40,8 @@ template <class T, class L, class R> class Tiled2dMapSource :
     Tiled2dMapSource(const MapConfig &mapConfig, const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
                      const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                      const std::shared_ptr<SchedulerInterface> &scheduler,
-                     const std::shared_ptr<Tiled2dMapSourceListenerInterface> &listener);
+                     const std::shared_ptr<Tiled2dMapSourceListenerInterface> &listener,
+                     float screenDensityPpi);
 
     virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom) override;
 
@@ -87,6 +88,8 @@ template <class T, class L, class R> class Tiled2dMapSource :
 
 
     std::atomic<bool> isPaused;
+
+    float screenDensityPpi;
 
   private:
     void updateCurrentTileset(const ::RectCoord &visibleBounds, double zoom);

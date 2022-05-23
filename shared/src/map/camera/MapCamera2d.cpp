@@ -813,3 +813,8 @@ void MapCamera2d::setRotationEnabled(bool enabled) {
 void MapCamera2d::setSnapToNorthEnabled(bool enabled) {
     config.snapToNorthEnabled = enabled;
 }
+
+
+float MapCamera2d::getScreenDensityPpi() {
+    return screenDensityPpi;
+}

@@ -30,7 +30,10 @@ Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapL
 void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface) {
     rasterSource = std::make_shared<Tiled2dMapRasterSource>(mapInterface->getMapConfig(), layerConfig,
                                                             mapInterface->getCoordinateConverterHelper(),
-                                                            mapInterface->getScheduler(), textureLoader, shared_from_this());
+                                                            mapInterface->getScheduler(),
+                                                            textureLoader,
+                                                            shared_from_this(),
+                                                            mapInterface->getCamera()->getScreenDensityPpi());
     setSourceInterface(rasterSource);
     Tiled2dMapLayer::onAdded(mapInterface);
 

@@ -120,6 +120,8 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual void setSnapToNorthEnabled(bool enabled) override;
 
+    virtual float getScreenDensityPpi() override;
+
   protected:
     virtual void setupInertia();
 

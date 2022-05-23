@@ -68,6 +68,8 @@
 
 - (nonnull MCRectCoord *)getPaddingAdjustedVisibleRect;
 
+- (float)getScreenDensityPpi;
+
 /** this method is called just before the update methods on all layers */
 - (void)update;
 
