@@ -165,6 +165,10 @@ extension MCMapView: MTKViewDelegate {
 
     public func renderToImage(size: CGSize, timeout: Float, bounds: MCRectCoord, callback: @escaping (UIImage?, MCLayerReadyState) -> Void) {
 
+        self.frame = CGRect(origin: .zero, size: size)
+        self.setNeedsLayout()
+        self.layoutIfNeeded()
+
         let mapReadyCallbacks = MCMapViewMapReadyCallbacks()
         mapReadyCallbacks.delegate = self
         mapReadyCallbacks.callback = callback

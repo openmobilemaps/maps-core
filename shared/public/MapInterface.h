@@ -78,7 +78,7 @@ public:
 
     /**
      * changes bounds to bounds, checks all layers for readiness, and updates callbacks, timeout in
-     * seconds
+     * seconds, always draw the frame when state is updated in the ready callbacks
      */
     virtual void drawReadyFrame(const ::RectCoord & bounds, float timeout, const std::shared_ptr<MapReadyCallbackInterface> & callbacks) = 0;
 };

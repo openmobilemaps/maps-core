@@ -83,7 +83,7 @@
 
 /**
  * changes bounds to bounds, checks all layers for readiness, and updates callbacks, timeout in
- * seconds
+ * seconds, always draw the frame when state is updated in the ready callbacks
  */
 - (void)drawReadyFrame:(nonnull MCRectCoord *)bounds
                timeout:(float)timeout

@@ -55,7 +55,7 @@ abstract class MapInterface {
 
     /**
      * changes bounds to bounds, checks all layers for readiness, and updates callbacks, timeout in
-     * seconds
+     * seconds, always draw the frame when state is updated in the ready callbacks
      */
     abstract fun drawReadyFrame(bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, timeout: Float, callbacks: MapReadyCallbackInterface)
 
