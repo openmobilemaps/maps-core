@@ -11,6 +11,7 @@
 #pragma once
 
 #include "LayerInterface.h"
+#include "LayerReadyState.h"
 
 class SimpleLayerInterface : public LayerInterface {
 
@@ -37,4 +38,7 @@ class SimpleLayerInterface : public LayerInterface {
     /** optional rectangle, remove scissoring when not set */
     virtual void setScissorRect(const std::optional<::RectI> & scissorRect) {};
 
+    virtual LayerReadyState isReadyToRenderOffscreen() { return LayerReadyState::READY; }
+
+    virtual void enableAnimations(bool enabled) {};
 };

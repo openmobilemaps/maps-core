@@ -11,6 +11,7 @@
 import Foundation
 import MapCoreSharedModule
 import Metal
+import UIKit
 
 @objc
 public class RenderingContext: NSObject {
@@ -106,7 +107,15 @@ extension RenderingContext: MCRenderingContextInterface {
         if let sr = scissorRect {
             encoder?.setScissorRect(sr.scissorRect)
         } else {
-            encoder?.setScissorRect(viewportSize.scissorRect)
+            var s = self.sceneView?.frame.size ?? CGSize(width: 1.0, height: 1.0)
+            s.width = UIScreen.main.scale * s.width
+            s.height = UIScreen.main.scale * s.height
+
+            var size = viewportSize.scissorRect
+            size.width = min(size.width, Int(s.width))
+            size.height = min(size.height, Int(s.height))
+
+            encoder?.setScissorRect(size)
         }
     }
 }

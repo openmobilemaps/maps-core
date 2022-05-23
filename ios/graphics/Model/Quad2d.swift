@@ -151,10 +151,13 @@ extension Quad2d: MCQuad2dInterface {
         guard let textureHolder = textureHolder as? TextureHolder else {
             fatalError("unexpected TextureHolder")
         }
+
         texture = textureHolder.texture
+        ready = true
     }
 
     func removeTexture() {
+        ready = false
         texture = nil
     }
 

@@ -135,7 +135,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
                 auto alphaShader = shaderFactory->createAlphaShader();
                 auto tileObject = std::make_shared<Textured2dLayerObject>(
                         graphicsFactory->createQuad(alphaShader->asShaderProgramInterface()), alphaShader, mapInterface);
-                if (layerConfig->getZoomInfo().numDrawPreviousLayers == 0) {
+                if (layerConfig->getZoomInfo().numDrawPreviousLayers == 0 || !animationsEnabled) {
                     tileObject->setAlpha(alpha);
                 } else {
                     tileObject->beginAlphaAnimation(0.0, alpha, 150);
@@ -233,7 +233,6 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
              std::pair<int, std::shared_ptr<Textured2dLayerObject>> &b) { return a.first < b.first; });
 
     for (const auto &objectEntry : mapEntries) {
-        objectEntry.second->getQuadObject()->asGraphicsObject();
         for (auto config : objectEntry.second->getRenderConfig()) {
             renderPassObjectMap[config->getRenderIndex()].push_back(
                     std::make_shared<RenderObject>(config->getGraphicsObject()));
@@ -323,4 +322,25 @@ void Tiled2dMapRasterLayer::setMaxZoomLevelIdentifier(std::optional<int32_t> val
 
 std::optional<int32_t> Tiled2dMapRasterLayer::getMaxZoomLevelIdentifier() {
     return Tiled2dMapLayer::getMaxZoomLevelIdentifier();
+}
+
+void Tiled2dMapRasterLayer::enableAnimations(bool enabled) {
+    animationsEnabled = enabled;
+}
+
+LayerReadyState Tiled2dMapRasterLayer::isReadyToRenderOffscreen() {
+    std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
+
+    auto sourceReady = Tiled2dMapLayer::isReadyToRenderOffscreen();
+    if(sourceReady != LayerReadyState::READY) {
+        return sourceReady;
+    }
+
+    for(auto& to : tileObjectMap) {
+        if(!to.second->getQuadObject()->asGraphicsObject()->isReady()) {
+            return LayerReadyState::NOT_READY;
+        }
+    }
+
+    return LayerReadyState::READY;
 }

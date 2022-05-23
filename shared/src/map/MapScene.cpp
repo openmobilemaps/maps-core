@@ -16,7 +16,11 @@
 #include "MapCallbackInterface.h"
 #include "MapCamera2dInterface.h"
 #include "TouchInterface.h"
+#include "DateHelper.h"
+#include "MapReadyCallbackInterface.h"
 #include <algorithm>
+
+#include "Tiled2dMapRasterLayer.h"
 
 MapScene::MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig &mapConfig,
                    const std::shared_ptr<::SchedulerInterface> &scheduler, float pixelDensity)
@@ -243,4 +247,62 @@ void MapScene::pause() {
                 layer.second->pause();
             }
         }));
+}
+
+void MapScene::drawReadyFrame(const ::RectCoord & bounds, float timeout, const std::shared_ptr<MapReadyCallbackInterface> & callbacks) {
+
+    // for now we only support drawing a ready frame, therefore
+    // we disable animations in the layers
+    for (const auto &layer : layers) {
+        layer.second->enableAnimations(false);
+    }
+
+    auto state = LayerReadyState::NOT_READY;
+
+    invalidate();
+    callbacks->stateDidUpdate(state);
+
+    auto camera = getCamera();
+    camera->moveToBoundingBox(bounds, 0.0, false, std::nullopt);
+
+    invalidate();
+    callbacks->stateDidUpdate(state);
+
+    long long timeoutTimestamp = DateHelper::currentTimeMillis() + (long long)(timeout * 1000);
+
+    while(state == LayerReadyState::NOT_READY) {
+        state = getLayersReadyState();
+
+        auto now = DateHelper::currentTimeMillis();
+        if(now > timeoutTimestamp) {
+            state = LayerReadyState::TIMEOUT_ERROR;
+        }
+
+        invalidate();
+        callbacks->stateDidUpdate(state);
+    }
+
+    invalidate();
+    callbacks->stateDidUpdate(state);
+
+    // re-enable animations if the map scene is used not only for
+    // drawReadyFrame
+    for (const auto &layer : layers) {
+        layer.second->enableAnimations(true);
+    }
+}
+
+LayerReadyState MapScene::getLayersReadyState() {
+    std::lock_guard<std::recursive_mutex> lock(layersMutex);
+
+    for (const auto &layer : layers) {
+        auto state = layer.second->isReadyToRenderOffscreen();
+        if(state == LayerReadyState::READY) {
+            continue;
+        }
+
+        return state;
+    }
+
+    return LayerReadyState::READY;
 }
