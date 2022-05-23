@@ -27,7 +27,6 @@ class Quad2d: BaseGraphicsObject {
     private var stencilState: MTLDepthStencilState?
 
     private var renderAsMask = false
-    private var frameReady = false
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader
@@ -97,10 +96,6 @@ class Quad2d: BaseGraphicsObject {
 
         encoder.popDebugGroup()
     }
-
-    override func isReady() -> Bool {
-        return super.isReady() && frameReady
-    }
 }
 
 extension Quad2d: MCMaskingObjectInterface {
@@ -150,16 +145,14 @@ extension Quad2d: MCQuad2dInterface {
         indicesCount = indices.count
         self.verticesBuffer = verticesBuffer
         self.indicesBuffer = indicesBuffer
-
-        frameReady = true
     }
 
     func loadTexture(_ context: MCRenderingContextInterface?, textureHolder: MCTextureHolderInterface?) {
         guard let textureHolder = textureHolder as? TextureHolder else {
             fatalError("unexpected TextureHolder")
         }
-        texture = textureHolder.texture
 
+        texture = textureHolder.texture
         ready = true
     }
 
