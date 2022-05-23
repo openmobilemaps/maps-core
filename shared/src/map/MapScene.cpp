@@ -280,6 +280,7 @@ void MapScene::drawReadyFrame(const ::RectCoord & bounds, float timeout, const s
         callbacks->stateDidUpdate(state);
     }
 
+    invalidate();
     callbacks->stateDidUpdate(state);
 }
 
