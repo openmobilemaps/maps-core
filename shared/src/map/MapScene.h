@@ -97,6 +97,4 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public std:
 
     bool isResumed = false;
     std::atomic_flag isInvalidated = ATOMIC_FLAG_INIT;
-
-    int64_t notReady;
 };
