@@ -46,6 +46,8 @@ public:
 
     virtual void setBounds(const ::RectCoord & bounds) = 0;
 
+    virtual ::RectCoord getBounds() = 0;
+
     virtual bool isInBounds(const ::Coord & coords) = 0;
 
     virtual void setPaddingLeft(float padding) = 0;
