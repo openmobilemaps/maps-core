@@ -50,6 +50,8 @@
 
 - (void)setBounds:(nonnull MCRectCoord *)bounds;
 
+- (nonnull MCRectCoord *)getBounds;
+
 - (BOOL)isInBounds:(nonnull MCCoord *)coords;
 
 - (void)setPaddingLeft:(float)padding;

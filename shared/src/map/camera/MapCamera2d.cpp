@@ -714,6 +714,10 @@ void MapCamera2d::setBounds(const RectCoord &bounds) {
     mapInterface->invalidate();
 }
 
+RectCoord MapCamera2d::getBounds() {
+    return bounds;
+}
+
 bool MapCamera2d::isInBounds(const Coord &coords) {
     Coord mapCoords = mapInterface->getCoordinateConverterHelper()->convert(mapCoordinateSystem.identifier, coords);
 
