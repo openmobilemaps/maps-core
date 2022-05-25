@@ -42,6 +42,10 @@ void  ColorLineGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingC
         std::lock_guard<std::recursive_mutex> lock(styleMutex);
         int lineStylesHandle = glGetUniformLocation(program, "lineStyles");
         glUniform1fv(lineStylesHandle, sizeStyleValuesArray, &lineStyles[0]);
+        int lineColorsHandle = glGetUniformLocation(program, "lineColors");
+        glUniform1fv(lineColorsHandle, sizeColorValuesArray, &lineColors[0]);
+        int lineGapColorsHandle = glGetUniformLocation(program, "lineGapColors");
+        glUniform1fv(lineGapColorsHandle, sizeGapColorValuesArray, &lineGapColors[0]);
         int lineDashValuesHandle = glGetUniformLocation(program, "lineDashValues");
         glUniform1fv(lineDashValuesHandle, sizeDashValuesArray, &lineDashValues[0]);
         int numStylesHandle = glGetUniformLocation(program, "numStyles");
@@ -51,22 +55,23 @@ void  ColorLineGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingC
 
 void  ColorLineGroup2dShaderOpenGl::setStyles(const std::vector<::LineStyle> &lineStyles) {
     std::vector<float> styleValues(sizeStyleValuesArray, 0.0);
+    std::vector<float> colorValues(sizeColorValuesArray, 0.0);
+    std::vector<float> gapColorValues(sizeGapColorValuesArray, 0.0);
     std::vector<float> dashValues(sizeDashValuesArray, 0.0);
     int numStyles = lineStyles.size();
     for (int i = 0; i < lineStyles.size(); i++) {
         const auto &style = lineStyles[i];
         styleValues[sizeStyleValues * i] = style.width;
         styleValues[sizeStyleValues * i + 1] = style.widthType == SizeType::SCREEN_PIXEL ? 1.0f : 0.0f;
-        styleValues[sizeStyleValues * i + 2] = style.color.normal.r;
-        styleValues[sizeStyleValues * i + 3] = style.color.normal.g;
-        styleValues[sizeStyleValues * i + 4] = style.color.normal.b;
-        styleValues[sizeStyleValues * i + 5] = style.color.normal.a * style.opacity;
-        styleValues[sizeStyleValues * i + 6] = style.gapColor.normal.r;
-        styleValues[sizeStyleValues * i + 7] = style.gapColor.normal.g;
-        styleValues[sizeStyleValues * i + 8] = style.gapColor.normal.b;
-        styleValues[sizeStyleValues * i + 9] = style.gapColor.normal.a * style.opacity;
-        styleValues[sizeStyleValues * i + 10] = (int) style.lineCap;
-
+        styleValues[sizeStyleValues * i + 2] = (int) style.lineCap;
+        colorValues[sizeColorValues * i] = style.color.normal.r;
+        colorValues[sizeColorValues * i + 1] = style.color.normal.g;
+        colorValues[sizeColorValues * i + 2] = style.color.normal.b;
+        colorValues[sizeColorValues * i + 3] = style.color.normal.a * style.opacity;
+        gapColorValues[sizeGapColorValues * i] = style.gapColor.normal.r;
+        gapColorValues[sizeGapColorValues * i + 1] = style.gapColor.normal.g;
+        gapColorValues[sizeGapColorValues * i + 2] = style.gapColor.normal.b;
+        gapColorValues[sizeGapColorValues * i + 3] = style.gapColor.normal.a * style.opacity;
         int numDashInfo = std::min((int) style.dashArray.size(), maxNumDashValues); // Max num dash infos: 8 (4 dash/gap lengths)
         dashValues[sizeDashValues * i] = numDashInfo;
         float sum = 0.0;
@@ -79,6 +84,8 @@ void  ColorLineGroup2dShaderOpenGl::setStyles(const std::vector<::LineStyle> &li
     {
         std::lock_guard<std::recursive_mutex> overlayLock(styleMutex);
         this->lineStyles = styleValues;
+        this->lineColors = colorValues;
+        this->lineGapColors = gapColorValues;
         this->lineDashValues = dashValues;
         this->numStyles = numStyles;
     }
@@ -97,8 +104,12 @@ std::string  ColorLineGroup2dShaderOpenGl::getVertexShader() {
             attribute vec2 vPointB;
             attribute float vSegmentStartLPos;
             attribute float vStyleInfo;
-            // lineStyles: {float width, float isScaled, vec4 color, vec4 gapColor, int capType} -> stride = 11
-            uniform float lineStyles[11 * 32];
+            // lineStyles: {float width, float isScaled, int capType} -> stride = 3
+            uniform float lineStyles[3 * 32];
+            // lineStyles: {vec4 color} -> stride = 4
+            uniform float lineColors[4 * 32];
+            // lineStyles: {vec4 gapColor} -> stride = 4
+            uniform float lineGapColors[4 * 32];
             uniform int numStyles;
             uniform float scaleFactor;
 
@@ -120,12 +131,14 @@ std::string  ColorLineGroup2dShaderOpenGl::getVertexShader() {
                 } else if (lineIndex > numStyles) {
                     lineIndex = numStyles;
                 }
-                int styleIndexBase = 11 * lineIndex;
+                int styleIndexBase = 3 * lineIndex;
+                int colorIndexBase = 4 * lineIndex;
+                int gapColorIndexBase = 4 * lineIndex;
                 float width = lineStyles[styleIndexBase];
                 float isScaled = lineStyles[styleIndexBase + 1];
-                color = vec4(lineStyles[styleIndexBase + 2], lineStyles[styleIndexBase + 3], lineStyles[styleIndexBase + 4], lineStyles[styleIndexBase + 5]);
-                gapColor = vec4(lineStyles[styleIndexBase + 6], lineStyles[styleIndexBase + 7], lineStyles[styleIndexBase + 8], lineStyles[styleIndexBase + 9]);
-                capType = lineStyles[styleIndexBase + 10];
+                capType = lineStyles[styleIndexBase + 2];
+                color = vec4(lineColors[colorIndexBase], lineColors[colorIndexBase + 1], lineColors[colorIndexBase + 2], lineColors[colorIndexBase + 3]);
+                gapColor = vec4(lineGapColors[gapColorIndexBase], lineGapColors[gapColorIndexBase + 1], lineGapColors[gapColorIndexBase + 2], lineGapColors[gapColorIndexBase + 3]);
                 segmentStartLPos = vSegmentStartLPos;
                 fLineIndex = float(lineIndex);
                 fSegmentType = vStyleInfo / 256.0;
@@ -149,8 +162,8 @@ std::string  ColorLineGroup2dShaderOpenGl::getFragmentShader() {
     return UBRendererShaderCode(
             precision highp float;
 
-            // lineDashValues: {int numDashInfo, vec8 dashArray} -> stride = 9
-            uniform float lineDashValues[9 * 32];
+            // lineDashValues: {int numDashInfo, vec4 dashArray} -> stride = 5
+            uniform float lineDashValues[5 * 32];
 
             varying float fLineIndex;
             varying float radius;
@@ -200,9 +213,7 @@ std::string  ColorLineGroup2dShaderOpenGl::getFragmentShader() {
                     float intraDashPos = mod(t + startOffsetSegment, dashTotal);
                     // unrolled for efficiency reasons
                     if ((intraDashPos > lineDashValues[baseDashInfos + 0] * factorToT && intraDashPos < lineDashValues[baseDashInfos + 1] * factorToT) ||
-                        (intraDashPos > lineDashValues[baseDashInfos + 2] * factorToT && intraDashPos < lineDashValues[baseDashInfos + 3] * factorToT) ||
-                        (intraDashPos > lineDashValues[baseDashInfos + 4] * factorToT && intraDashPos < lineDashValues[baseDashInfos + 5] * factorToT) ||
-                        (intraDashPos > lineDashValues[baseDashInfos + 6] * factorToT && intraDashPos < lineDashValues[baseDashInfos + 7] * factorToT)) {
+                        (intraDashPos > lineDashValues[baseDashInfos + 2] * factorToT && intraDashPos < lineDashValues[baseDashInfos + 3] * factorToT)) {
                         fragColor = gapColor;
                     }
                 }
