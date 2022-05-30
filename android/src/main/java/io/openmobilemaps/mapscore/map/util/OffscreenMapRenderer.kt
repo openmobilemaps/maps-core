@@ -28,8 +28,9 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 	private var saveFrameSpec: SaveFrameSpec? = null
 	private var saveFrameCallback: SaveFrameCallback? = null
 
-	open fun setupMap(mapConfig: MapConfig, useMSAA: Boolean = false) {
+	open fun setupMap(coroutineScope: CoroutineScope, mapConfig: MapConfig, useMSAA: Boolean = false) {
 		val scheduler = AndroidScheduler(this)
+		scheduler.setCoroutineScope(coroutineScope)
 		val mapInterface = MapInterface.createWithOpenGl(
 			mapConfig,
 			scheduler,
@@ -55,10 +56,6 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 
 	fun setOnDrawCallback(onDrawCallback: (() -> Unit)? = null) {
 		glThread.onDrawCallback = onDrawCallback
-	}
-
-	fun setCoroutineScope(coroutineScope: CoroutineScope) {
-		requireScheduler().setCoroutineScope(coroutineScope)
 	}
 
 	override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
