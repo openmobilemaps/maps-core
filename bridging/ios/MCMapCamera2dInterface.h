@@ -16,6 +16,8 @@
 + (nullable MCMapCamera2dInterface *)create:(nullable MCMapInterface *)mapInterface
                            screenDensityPpi:(float)screenDensityPpi;
 
+- (void)freeze:(BOOL)freeze;
+
 - (void)moveToCenterPositionZoom:(nonnull MCCoord *)centerPosition
                             zoom:(double)zoom
                         animated:(BOOL)animated;

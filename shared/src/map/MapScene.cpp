@@ -264,6 +264,7 @@ void MapScene::drawReadyFrame(const ::RectCoord & bounds, float timeout, const s
 
     auto camera = getCamera();
     camera->moveToBoundingBox(bounds, 0.0, false, std::nullopt);
+    camera->freeze(true);
 
     invalidate();
     callbacks->stateDidUpdate(state);
@@ -279,7 +280,7 @@ void MapScene::drawReadyFrame(const ::RectCoord & bounds, float timeout, const s
         }
 
         invalidate();
-        callbacks->stateDidUpdate(state);
+        callbacks->stateDidUpdate(LayerReadyState::NOT_READY);
     }
 
     invalidate();
@@ -287,6 +288,7 @@ void MapScene::drawReadyFrame(const ::RectCoord & bounds, float timeout, const s
 
     // re-enable animations if the map scene is used not only for
     // drawReadyFrame
+    camera->freeze(false);
     for (const auto &layer : layers) {
         layer.second->enableAnimations(true);
     }

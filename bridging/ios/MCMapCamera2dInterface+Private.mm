@@ -45,6 +45,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)freeze:(BOOL)freeze {
+    try {
+        _cppRefHandle.get()->freeze(::djinni::Bool::toCpp(freeze));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)moveToCenterPositionZoom:(nonnull MCCoord *)centerPosition
                             zoom:(double)zoom
                         animated:(BOOL)animated {

@@ -33,6 +33,8 @@ class MapCamera2d : public MapCamera2dInterface,
 
     ~MapCamera2d(){};
 
+    void freeze(bool freeze) override;
+
     virtual void moveToCenterPositionZoom(const ::Coord &centerPosition, double zoom, bool animated) override;
 
     virtual void moveToCenterPosition(const ::Coord &centerPosition, bool animated) override;
@@ -154,6 +156,8 @@ class MapCamera2d : public MapCamera2dInterface,
     std::optional<RectCoord> lastVpBounds = std::nullopt;
     std::optional<double> lastVpRotation = std::nullopt;
     std::optional<double> lastVpZoom = std::nullopt;
+
+    bool cameraFrozen = false;
 
     struct CameraConfiguration {
         bool rotationEnabled = true;

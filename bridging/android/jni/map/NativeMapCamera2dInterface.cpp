@@ -35,6 +35,15 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1freeze(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jboolean j_freeze)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        ref->freeze(::djinni::Bool::toCpp(jniEnv, j_freeze));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1moveToCenterPositionZoom(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeCoord::JniType j_centerPosition, jdouble j_zoom, jboolean j_animated)
 {
     try {

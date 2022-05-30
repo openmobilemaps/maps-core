@@ -38,12 +38,16 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
     if (isPaused) {
         return;
     }
+    pendingUpdates++;
     std::weak_ptr<Tiled2dMapSource> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this());
     scheduler->addTask(std::make_shared<LambdaTask>(
             TaskConfig("Tiled2dMapSource_Update", 0, TaskPriority::NORMAL, ExecutionEnvironment::IO),
             [weakSelfPtr, visibleBounds, zoom] {
                 auto selfPtr = weakSelfPtr.lock();
-                if (selfPtr) selfPtr->updateCurrentTileset(visibleBounds, zoom);
+                if (selfPtr) {
+                    selfPtr->updateCurrentTileset(visibleBounds, zoom);
+                    selfPtr->pendingUpdates--;
+                }
             }));
 }
 
@@ -370,7 +374,7 @@ template<class T, class L, class R>
         return LayerReadyState::ERROR;
     }
 
-    if(dispatchedTasks > 0) {
+    if(pendingUpdates > 0 || dispatchedTasks > 0) {
         return LayerReadyState::NOT_READY;
     }
 

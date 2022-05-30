@@ -20,6 +20,8 @@ public:
 
     static std::shared_ptr<MapCamera2dInterface> create(const std::shared_ptr<MapInterface> & mapInterface, float screenDensityPpi);
 
+    virtual void freeze(bool freeze) = 0;
+
     virtual void moveToCenterPositionZoom(const ::Coord & centerPosition, double zoom, bool animated) = 0;
 
     virtual void moveToCenterPosition(const ::Coord & centerPosition, bool animated) = 0;
