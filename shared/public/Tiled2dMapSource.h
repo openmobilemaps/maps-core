@@ -95,6 +95,8 @@ template <class T, class L, class R> class Tiled2dMapSource :
 
     void onVisibleTilesChanged(const std::unordered_set<PrioritizedTiled2dMapTileInfo> &visibleTiles);
 
+    std::atomic_int pendingUpdates = 0;
+
     std::atomic_size_t dispatchedTasks;
     std::unordered_set<Tiled2dMapTileInfo> currentlyLoading;
     std::unordered_set<PrioritizedTiled2dMapTileInfo> loadingQueue;

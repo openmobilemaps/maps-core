@@ -99,6 +99,8 @@ layer_interface = interface +c +j +o {
 map_camera_2d_interface = interface +c {
     static create(map_interface: map_interface, screen_density_ppi: f32): map_camera_2d_interface;
 
+	freeze(freeze: bool);
+
     move_to_center_position_zoom(center_position: coord, zoom: f64, animated: bool);
     move_to_center_position(center_position: coord, animated: bool);
     move_to_bounding_box(bounding_box: rect_coord, padding_pc: f32, animated: bool, max_zoom: optional<f64>);

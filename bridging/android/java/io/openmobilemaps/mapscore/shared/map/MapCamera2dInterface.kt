@@ -7,6 +7,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class MapCamera2dInterface {
 
+    abstract fun freeze(freeze: Boolean)
+
     abstract fun moveToCenterPositionZoom(centerPosition: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, zoom: Double, animated: Boolean)
 
     abstract fun moveToCenterPosition(centerPosition: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, animated: Boolean)
@@ -98,6 +100,12 @@ abstract class MapCamera2dInterface {
         protected fun finalize() {
             _djinni_private_destroy()
         }
+
+        override fun freeze(freeze: Boolean) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_freeze(this.nativeRef, freeze)
+        }
+        private external fun native_freeze(_nativeRef: Long, freeze: Boolean)
 
         override fun moveToCenterPositionZoom(centerPosition: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, zoom: Double, animated: Boolean) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
