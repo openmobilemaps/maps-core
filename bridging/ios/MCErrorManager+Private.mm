@@ -6,9 +6,7 @@
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
-#import "MCErrorManagerConfiguration+Private.h"
 #import "MCErrorManagerListener+Private.h"
-#import "MCMapCamera2dInterface+Private.h"
 #import "MCTiledLayerError+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -34,18 +32,10 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-+ (nullable MCErrorManager *)create:(nonnull MCErrorManagerConfiguration *)config
-                             camera:(nullable MCMapCamera2dInterface *)camera {
++ (nullable MCErrorManager *)create {
     try {
-        auto objcpp_result_ = ::ErrorManager::create(::djinni_generated::ErrorManagerConfiguration::toCpp(config),
-                                                     ::djinni_generated::MapCamera2dInterface::toCpp(camera));
+        auto objcpp_result_ = ::ErrorManager::create();
         return ::djinni_generated::ErrorManager::fromCpp(objcpp_result_);
-    } DJINNI_TRANSLATE_EXCEPTIONS()
-}
-
-- (void)setConfiguration:(nonnull MCErrorManagerConfiguration *)config {
-    try {
-        _cppRefHandle.get()->setConfiguration(::djinni_generated::ErrorManagerConfiguration::toCpp(config));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

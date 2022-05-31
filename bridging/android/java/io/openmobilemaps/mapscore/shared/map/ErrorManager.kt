@@ -7,8 +7,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class ErrorManager {
 
-    abstract fun setConfiguration(config: ErrorManagerConfiguration)
-
     abstract fun addTiledLayerError(error: TiledLayerError)
 
     abstract fun removeError(url: String)
@@ -21,8 +19,8 @@ abstract class ErrorManager {
 
     companion object {
         @JvmStatic
-        fun create(config: ErrorManagerConfiguration, camera: io.openmobilemaps.mapscore.shared.map.MapCamera2dInterface): ErrorManager {
-            return CppProxy.create(config, camera)
+        fun create(): ErrorManager {
+            return CppProxy.create()
         }
     }
 
@@ -43,12 +41,6 @@ abstract class ErrorManager {
         protected fun finalize() {
             _djinni_private_destroy()
         }
-
-        override fun setConfiguration(config: ErrorManagerConfiguration) {
-            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setConfiguration(this.nativeRef, config)
-        }
-        private external fun native_setConfiguration(_nativeRef: Long, config: ErrorManagerConfiguration)
 
         override fun addTiledLayerError(error: TiledLayerError) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
@@ -82,7 +74,7 @@ abstract class ErrorManager {
 
         companion object {
             @JvmStatic
-            external fun create(config: ErrorManagerConfiguration, camera: io.openmobilemaps.mapscore.shared.map.MapCamera2dInterface): ErrorManager
+            external fun create(): ErrorManager
         }
     }
 }

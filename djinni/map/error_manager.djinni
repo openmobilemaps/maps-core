@@ -2,15 +2,9 @@
 @extern "../yaml/loader_status.yaml"
 @extern "../yaml/map_camera_2d_interface.yaml"
 
-error_manager_configuration = record {
-    clear_errors_on_map_bounds_update: bool;
-}
-
 error_manager = interface +c
 {
-    static create(config: error_manager_configuration, camera: map_camera_2d_interface) : error_manager;
-    
-    set_configuration(config: error_manager_configuration);
+    static create() : error_manager;
 
     add_tiled_layer_error(error: tiled_layer_error);
     remove_error(url: string);

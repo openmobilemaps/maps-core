@@ -10,22 +10,14 @@
 #include "ErrorManager.h"
 #include "TiledLayerError.h"
 #include "ErrorManagerListener.h"
-#include "ErrorManagerConfiguration.h"
-
 #include <vector>
 #include <mutex>
-#include <unordered_map>>
+#include <unordered_map>
 
 class ErrorManagerImpl: public ErrorManager,
-                         public MapCamera2dListenerInterface,
                          public std::enable_shared_from_this<ErrorManagerImpl> {
 public:
-
-    ErrorManagerImpl(const ErrorManagerConfiguration & config, const std::shared_ptr<::MapCamera2dInterface> & camera);
-
-    ~ErrorManagerImpl();
-
-    virtual void setConfiguration(const ErrorManagerConfiguration & config) override;
+   ErrorManagerImpl() {};
 
     virtual void addErrorListener(const std::shared_ptr<ErrorManagerListener> & listener) override;
 
@@ -37,18 +29,7 @@ public:
 
     virtual void clearAllErrors() override;
 
-    // MapCamera2dListenerInterface
-
-    virtual void onVisibleBoundsChanged(const ::RectCoord & visibleBounds, double zoom) override;
-
-    virtual void onRotationChanged(float angle) override {};
-
-    virtual void onMapInteraction() override {};
-
 private:
-    ErrorManagerConfiguration config;
-    const std::shared_ptr<::MapCamera2dInterface> camera;
-
     std::recursive_mutex mutex;
     std::unordered_map<std::string, TiledLayerError> tiledLayerErrors;
     std::vector<std::shared_ptr<ErrorManagerListener>> listeners;

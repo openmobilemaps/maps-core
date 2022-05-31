@@ -3,9 +3,7 @@
 
 #include "NativeErrorManager.h"  // my header
 #include "Marshal.hpp"
-#include "NativeErrorManagerConfiguration.h"
 #include "NativeErrorManagerListener.h"
-#include "NativeMapCamera2dInterface.h"
 #include "NativeTiledLayerError.h"
 
 namespace djinni_generated {
@@ -23,23 +21,13 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_ErrorManager_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_ErrorManager_00024CppProxy_create(JNIEnv* jniEnv, jobject /*this*/, jobject j_config, ::djinni_generated::NativeMapCamera2dInterface::JniType j_camera)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_ErrorManager_00024CppProxy_create(JNIEnv* jniEnv, jobject /*this*/)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE0(jniEnv);
-        auto r = ::ErrorManager::create(::djinni_generated::NativeErrorManagerConfiguration::toCpp(jniEnv, j_config),
-                                        ::djinni_generated::NativeMapCamera2dInterface::toCpp(jniEnv, j_camera));
+        auto r = ::ErrorManager::create();
         return ::djinni::release(::djinni_generated::NativeErrorManager::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
-}
-
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_ErrorManager_00024CppProxy_native_1setConfiguration(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_config)
-{
-    try {
-        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
-        const auto& ref = ::djinni::objectFromHandleAddress<::ErrorManager>(nativeRef);
-        ref->setConfiguration(::djinni_generated::NativeErrorManagerConfiguration::toCpp(jniEnv, j_config));
-    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_ErrorManager_00024CppProxy_native_1addTiledLayerError(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_error)

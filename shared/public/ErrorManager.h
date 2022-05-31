@@ -3,21 +3,17 @@
 
 #pragma once
 
-#include "MapCamera2dInterface.h"
 #include <memory>
 #include <string>
 
 class ErrorManagerListener;
-struct ErrorManagerConfiguration;
 struct TiledLayerError;
 
 class ErrorManager {
 public:
     virtual ~ErrorManager() {}
 
-    static std::shared_ptr<ErrorManager> create(const ErrorManagerConfiguration & config, const std::shared_ptr<::MapCamera2dInterface> & camera);
-
-    virtual void setConfiguration(const ErrorManagerConfiguration & config) = 0;
+    static std::shared_ptr<ErrorManager> create();
 
     virtual void addTiledLayerError(const TiledLayerError & error) = 0;
 
