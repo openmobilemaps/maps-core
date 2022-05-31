@@ -35,7 +35,6 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
 
             double factor = camera->getScalingFactor();
             const auto &renderObjects = pass->getRenderObjects();
-            std::vector<float> tempMvpMatrix(16, 0);
 
             renderingContext->applyScissorRect(pass->getScissoringRect());
 

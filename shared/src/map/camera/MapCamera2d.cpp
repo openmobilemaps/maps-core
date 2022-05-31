@@ -314,8 +314,6 @@ std::vector<float> MapCamera2d::getVpMatrix() {
         if (coordAnimation) std::static_pointer_cast<AnimationInterface>(coordAnimation)->update();
     }
 
-    std::vector<float> newVpMatrix(16, 0);
-
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
     double currentRotation = angle;
     double currentZoom = zoom;
