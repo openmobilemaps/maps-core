@@ -16,6 +16,7 @@ auto NativeTiledLayerError::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinn
     const auto& data = ::djinni::JniClass<NativeTiledLayerError>::get();
     auto r = ::djinni::LocalRef<JniType>{jniEnv->NewObject(data.clazz.get(), data.jconstructor,
                                                            ::djinni::get(::djinni_generated::NativeLoaderStatus::fromCpp(jniEnv, c.status)),
+                                                           ::djinni::get(::djinni::Optional<std::optional, ::djinni::String>::fromCpp(jniEnv, c.errorCode)),
                                                            ::djinni::get(::djinni::String::fromCpp(jniEnv, c.layerName)),
                                                            ::djinni::get(::djinni::String::fromCpp(jniEnv, c.url)),
                                                            ::djinni::get(::djinni::Bool::fromCpp(jniEnv, c.isRecoverable)),
@@ -25,10 +26,11 @@ auto NativeTiledLayerError::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinn
 }
 
 auto NativeTiledLayerError::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
-    ::djinni::JniLocalScope jscope(jniEnv, 6);
+    ::djinni::JniLocalScope jscope(jniEnv, 7);
     assert(j != nullptr);
     const auto& data = ::djinni::JniClass<NativeTiledLayerError>::get();
     return {::djinni_generated::NativeLoaderStatus::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_status)),
+            ::djinni::Optional<std::optional, ::djinni::String>::toCpp(jniEnv, (jstring)jniEnv->GetObjectField(j, data.field_errorCode)),
             ::djinni::String::toCpp(jniEnv, (jstring)jniEnv->GetObjectField(j, data.field_layerName)),
             ::djinni::String::toCpp(jniEnv, (jstring)jniEnv->GetObjectField(j, data.field_url)),
             ::djinni::Bool::toCpp(jniEnv, jniEnv->GetBooleanField(j, data.field_isRecoverable)),

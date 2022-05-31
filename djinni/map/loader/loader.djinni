@@ -15,6 +15,7 @@ texture_loader_result = record {
     data: optional<texture_holder_interface>;
     etag: optional<string>;
     status: loader_status;
+    error_code: optional<string>;
 }
 
 data_holder_interface = interface +j +o {
@@ -25,6 +26,7 @@ data_loader_result = record {
     data: optional<data_holder_interface>;
     etag: optional<string>;
     status: loader_status;
+    error_code: optional<string>;
 }
 
 loader_interface = interface +c +j +o {

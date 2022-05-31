@@ -15,12 +15,15 @@ struct DataLoaderResult final {
     std::shared_ptr<DataHolderInterface> data;
     std::optional<std::string> etag;
     LoaderStatus status;
+    std::optional<std::string> errorCode;
 
     DataLoaderResult(std::shared_ptr<DataHolderInterface> data_,
                      std::optional<std::string> etag_,
-                     LoaderStatus status_)
+                     LoaderStatus status_,
+                     std::optional<std::string> errorCode_)
     : data(std::move(data_))
     , etag(std::move(etag_))
     , status(std::move(status_))
+    , errorCode(std::move(errorCode_))
     {}
 };

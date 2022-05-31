@@ -7,4 +7,5 @@ data class DataLoaderResult(
     var data: DataHolderInterface?,
     var etag: String?,
     var status: LoaderStatus,
+    var errorCode: String?,
 )

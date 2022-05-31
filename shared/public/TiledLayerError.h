@@ -5,22 +5,26 @@
 
 #include "LoaderStatus.h"
 #include "RectCoord.h"
+#include <optional>
 #include <string>
 #include <utility>
 
 struct TiledLayerError final {
     ::LoaderStatus status;
+    std::optional<std::string> errorCode;
     std::string layerName;
     std::string url;
     bool isRecoverable;
     ::RectCoord bounds;
 
     TiledLayerError(::LoaderStatus status_,
+                    std::optional<std::string> errorCode_,
                     std::string layerName_,
                     std::string url_,
                     bool isRecoverable_,
                     ::RectCoord bounds_)
     : status(std::move(status_))
+    , errorCode(std::move(errorCode_))
     , layerName(std::move(layerName_))
     , url(std::move(url_))
     , isRecoverable(std::move(isRecoverable_))

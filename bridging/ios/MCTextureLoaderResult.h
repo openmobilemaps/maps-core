@@ -8,15 +8,19 @@
 @interface MCTextureLoaderResult : NSObject
 - (nonnull instancetype)initWithData:(nullable id<MCTextureHolderInterface>)data
                                 etag:(nullable NSString *)etag
-                              status:(MCLoaderStatus)status;
+                              status:(MCLoaderStatus)status
+                           errorCode:(nullable NSString *)errorCode;
 + (nonnull instancetype)textureLoaderResultWithData:(nullable id<MCTextureHolderInterface>)data
                                                etag:(nullable NSString *)etag
-                                             status:(MCLoaderStatus)status;
+                                             status:(MCLoaderStatus)status
+                                          errorCode:(nullable NSString *)errorCode;
 
 @property (nonatomic, readonly, nullable) id<MCTextureHolderInterface> data;
 
 @property (nonatomic, readonly, nullable) NSString * etag;
 
 @property (nonatomic, readonly) MCLoaderStatus status;
+
+@property (nonatomic, readonly, nullable) NSString * errorCode;
 
 @end

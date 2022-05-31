@@ -25,8 +25,9 @@ private:
     friend ::djinni::JniClass<NativeTiledLayerError>;
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/TiledLayerError") };
-    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Lio/openmobilemaps/mapscore/shared/map/loader/LoaderStatus;Ljava/lang/String;Ljava/lang/String;ZLio/openmobilemaps/mapscore/shared/map/coordinates/RectCoord;)V") };
+    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Lio/openmobilemaps/mapscore/shared/map/loader/LoaderStatus;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLio/openmobilemaps/mapscore/shared/map/coordinates/RectCoord;)V") };
     const jfieldID field_status { ::djinni::jniGetFieldID(clazz.get(), "status", "Lio/openmobilemaps/mapscore/shared/map/loader/LoaderStatus;") };
+    const jfieldID field_errorCode { ::djinni::jniGetFieldID(clazz.get(), "errorCode", "Ljava/lang/String;") };
     const jfieldID field_layerName { ::djinni::jniGetFieldID(clazz.get(), "layerName", "Ljava/lang/String;") };
     const jfieldID field_url { ::djinni::jniGetFieldID(clazz.get(), "url", "Ljava/lang/String;") };
     const jfieldID field_isRecoverable { ::djinni::jniGetFieldID(clazz.get(), "isRecoverable", "Z") };

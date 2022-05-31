@@ -5,6 +5,7 @@ package io.openmobilemaps.mapscore.shared.map
 
 data class TiledLayerError(
     var status: io.openmobilemaps.mapscore.shared.map.loader.LoaderStatus,
+    var errorCode: String?,
     var layerName: String,
     var url: String,
     var isRecoverable: Boolean,

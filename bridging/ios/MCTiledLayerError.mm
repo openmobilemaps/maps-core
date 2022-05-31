@@ -7,6 +7,7 @@
 @implementation MCTiledLayerError
 
 - (nonnull instancetype)initWithStatus:(MCLoaderStatus)status
+                             errorCode:(nullable NSString *)errorCode
                              layerName:(nonnull NSString *)layerName
                                    url:(nonnull NSString *)url
                          isRecoverable:(BOOL)isRecoverable
@@ -14,6 +15,7 @@
 {
     if (self = [super init]) {
         _status = status;
+        _errorCode = [errorCode copy];
         _layerName = [layerName copy];
         _url = [url copy];
         _isRecoverable = isRecoverable;
@@ -23,12 +25,14 @@
 }
 
 + (nonnull instancetype)tiledLayerErrorWithStatus:(MCLoaderStatus)status
+                                        errorCode:(nullable NSString *)errorCode
                                         layerName:(nonnull NSString *)layerName
                                               url:(nonnull NSString *)url
                                     isRecoverable:(BOOL)isRecoverable
                                            bounds:(nonnull MCRectCoord *)bounds
 {
     return [(MCTiledLayerError*)[self alloc] initWithStatus:status
+                                                  errorCode:errorCode
                                                   layerName:layerName
                                                         url:url
                                               isRecoverable:isRecoverable
@@ -37,7 +41,7 @@
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p status:%@ layerName:%@ url:%@ isRecoverable:%@ bounds:%@>", self.class, (void *)self, @(self.status), self.layerName, self.url, @(self.isRecoverable), self.bounds];
+    return [NSString stringWithFormat:@"<%@ %p status:%@ errorCode:%@ layerName:%@ url:%@ isRecoverable:%@ bounds:%@>", self.class, (void *)self, @(self.status), self.errorCode, self.layerName, self.url, @(self.isRecoverable), self.bounds];
 }
 
 @end

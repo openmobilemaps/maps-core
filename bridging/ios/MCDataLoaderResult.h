@@ -8,15 +8,19 @@
 @interface MCDataLoaderResult : NSObject
 - (nonnull instancetype)initWithData:(nullable id<MCDataHolderInterface>)data
                                 etag:(nullable NSString *)etag
-                              status:(MCLoaderStatus)status;
+                              status:(MCLoaderStatus)status
+                           errorCode:(nullable NSString *)errorCode;
 + (nonnull instancetype)dataLoaderResultWithData:(nullable id<MCDataHolderInterface>)data
                                             etag:(nullable NSString *)etag
-                                          status:(MCLoaderStatus)status;
+                                          status:(MCLoaderStatus)status
+                                       errorCode:(nullable NSString *)errorCode;
 
 @property (nonatomic, readonly, nullable) id<MCDataHolderInterface> data;
 
 @property (nonatomic, readonly, nullable) NSString * etag;
 
 @property (nonatomic, readonly) MCLoaderStatus status;
+
+@property (nonatomic, readonly, nullable) NSString * errorCode;
 
 @end

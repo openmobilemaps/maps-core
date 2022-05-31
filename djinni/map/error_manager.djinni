@@ -22,6 +22,7 @@ error_manager_listener = interface +c +j +o
 tiled_layer_error = record
 {
     status: loader_status;
+    error_code: optional<string>;
     layer_name: string;
     url: string;
     is_recoverable: bool;

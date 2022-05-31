@@ -7,17 +7,21 @@
 
 @interface MCTiledLayerError : NSObject
 - (nonnull instancetype)initWithStatus:(MCLoaderStatus)status
+                             errorCode:(nullable NSString *)errorCode
                              layerName:(nonnull NSString *)layerName
                                    url:(nonnull NSString *)url
                          isRecoverable:(BOOL)isRecoverable
                                 bounds:(nonnull MCRectCoord *)bounds;
 + (nonnull instancetype)tiledLayerErrorWithStatus:(MCLoaderStatus)status
+                                        errorCode:(nullable NSString *)errorCode
                                         layerName:(nonnull NSString *)layerName
                                               url:(nonnull NSString *)url
                                     isRecoverable:(BOOL)isRecoverable
                                            bounds:(nonnull MCRectCoord *)bounds;
 
 @property (nonatomic, readonly) MCLoaderStatus status;
+
+@property (nonatomic, readonly, nullable) NSString * errorCode;
 
 @property (nonatomic, readonly, nonnull) NSString * layerName;
 

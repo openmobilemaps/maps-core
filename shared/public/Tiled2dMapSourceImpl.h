@@ -299,6 +299,7 @@ template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::performLoad
                 notFoundTiles.insert(*tile);
                 if (errorManager) {
                     errorManager->addTiledLayerError(TiledLayerError(status,
+                                                                     loaderResult.errorCode,
                                                                      layerConfig->getLayerName(),
                                                                      layerConfig->getTileUrl(tile->x, tile->y, tile->zoomIdentifier),
                                                                      false,
@@ -324,6 +325,7 @@ template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::performLoad
                 }
                 if (errorManager) {
                     errorManager->addTiledLayerError(TiledLayerError(status,
+                                                                     loaderResult.errorCode,
                                                                      layerConfig->getLayerName(),
                                                                      layerConfig->getTileUrl(tile->x, tile->y, tile->zoomIdentifier),
                                                                      true,

@@ -66,26 +66,26 @@ open class MCTextureLoader: MCLoaderInterface {
         semaphore.wait()
 
         if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorTimedOut {
-            return .init(data: nil, etag: response?.etag, status: .ERROR_TIMEOUT)
+            return .init(data: nil, etag: response?.etag, status: .ERROR_TIMEOUT, errorCode: (error?.code).stringOrNil)
         }
 
         if response?.statusCode == 404 {
-            return .init(data: nil, etag: response?.etag, status: .ERROR_404)
+            return .init(data: nil, etag: response?.etag, status: .ERROR_404, errorCode: (response?.statusCode).stringOrNil)
         } else if response?.statusCode == 400 {
-            return .init(data: nil, etag: response?.etag, status: .ERROR_400)
+            return .init(data: nil, etag: response?.etag, status: .ERROR_400, errorCode: (response?.statusCode).stringOrNil)
         } else if response?.statusCode != 200 {
-            return .init(data: nil, etag: response?.etag, status: .ERROR_NETWORK)
+            return .init(data: nil, etag: response?.etag, status: .ERROR_NETWORK, errorCode: (response?.statusCode).stringOrNil)
         }
 
         guard let data = result else {
-            return .init(data: nil, etag: response?.etag, status: .ERROR_OTHER)
+            return .init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: (response?.statusCode).stringOrNil)
         }
 
         guard let textureHolder = try? TextureHolder(data) else {
             // If metal can not load this image
             // try workaround to first load it into UIImage context
             guard let uiImage = UIImage(data: data) else {
-                return .init(data: nil, etag: response?.etag, status: .ERROR_OTHER)
+                return .init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: "MNL")
             }
 
             let renderer = UIGraphicsImageRenderer(size: uiImage.size)
@@ -95,12 +95,12 @@ open class MCTextureLoader: MCLoaderInterface {
 
             guard let cgImage = img.cgImage,
                   let textureHolder = try? TextureHolder(cgImage) else {
-                return .init(data: nil, etag: response?.etag, status: .ERROR_OTHER)
+                return .init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: "UINL")
             }
 
-            return .init(data: textureHolder, etag: response?.etag, status: .OK)
+            return .init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil)
         }
-        return .init(data: textureHolder, etag: response?.etag, status: .OK)
+        return .init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil)
     }
 
     open func loadData(_ url: String, etag: String?) -> MCDataLoaderResult {
@@ -132,22 +132,22 @@ open class MCTextureLoader: MCLoaderInterface {
         semaphore.wait()
 
         if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorTimedOut {
-            return .init(data: nil, etag: response?.etag, status: .ERROR_TIMEOUT)
+            return .init(data: nil, etag: response?.etag, status: .ERROR_TIMEOUT, errorCode: (error?.code).stringOrNil)
         }
 
         if response?.statusCode == 404 {
-            return .init(data: nil, etag: response?.etag, status: .ERROR_404)
+            return .init(data: nil, etag: response?.etag, status: .ERROR_404, errorCode: (response?.statusCode).stringOrNil)
         } else if response?.statusCode == 400 {
-            return .init(data: nil, etag: response?.etag, status: .ERROR_400)
+            return .init(data: nil, etag: response?.etag, status: .ERROR_400, errorCode: (response?.statusCode).stringOrNil)
         } else if response?.statusCode != 200 {
-            return .init(data: nil, etag: response?.etag, status: .ERROR_NETWORK)
+            return .init(data: nil, etag: response?.etag, status: .ERROR_NETWORK, errorCode: (response?.statusCode).stringOrNil)
         }
 
         guard let data = result else {
-            return .init(data: nil, etag: response?.etag, status: .ERROR_OTHER)
+            return .init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: (response?.statusCode).stringOrNil)
         }
 
-        return .init(data: DataHolder(data: data), etag: response?.etag, status: .OK)
+        return .init(data: DataHolder(data: data), etag: response?.etag, status: .OK, errorCode: nil)
     }
 
     open func modifyUrlRequest(request _: inout URLRequest) {
@@ -166,5 +166,16 @@ extension HTTPURLResponse {
             etag = allHeaderFields["ETag"] as? String
         }
         return etag
+    }
+}
+
+fileprivate extension Optional where Wrapped == Int {
+    var stringOrNil: String {
+        switch self {
+        case .none:
+            return ""
+        case .some(let wrapped):
+            return "\(wrapped)"
+        }
     }
 }
