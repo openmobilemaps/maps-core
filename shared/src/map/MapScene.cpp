@@ -280,11 +280,8 @@ void MapScene::drawReadyFrame(const ::RectCoord & bounds, float timeout, const s
         }
 
         invalidate();
-        callbacks->stateDidUpdate(LayerReadyState::NOT_READY);
+        callbacks->stateDidUpdate(state);
     }
-
-    invalidate();
-    callbacks->stateDidUpdate(state);
 
     // re-enable animations if the map scene is used not only for
     // drawReadyFrame

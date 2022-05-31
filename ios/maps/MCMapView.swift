@@ -17,8 +17,9 @@ open class MCMapView: MTKView {
     public let mapInterface: MCMapInterface
     private let renderingContext: RenderingContext
 
-    private var sizeChanged: Bool = false
+    private var sizeChanged = false
     private var backgroundDisable = false
+    private var saveDrawable = false
 
     private var framesToRender: UInt = 1
     private let framesToRenderAfterInvalidate: UInt = 25
@@ -145,9 +146,7 @@ extension MCMapView: MTKViewDelegate {
         // Shared lib stuff
         if sizeChanged {
             mapInterface.setViewportSize(view.drawableSize.vec2)
-
             sizeDelegate?.sizeChanged()
-
             sizeChanged = false
         }
 
@@ -159,8 +158,15 @@ extension MCMapView: MTKViewDelegate {
             return
         }
 
-        commandBuffer.present(drawable)
-        commandBuffer.commit()
+        // if we want to save the drawable (offscreen rendering), we commit and wait synchronously
+        // until the command buffer completes, also we don't present it
+        if self.saveDrawable {
+            commandBuffer.commit()
+            commandBuffer.waitUntilCompleted()
+        } else {
+            commandBuffer.present(drawable)
+            commandBuffer.commit()
+        }
     }
 
     public func renderToImage(size: CGSize, timeout: Float, bounds: MCRectCoord, callback: @escaping (UIImage?, MCLayerReadyState) -> Void) {
@@ -179,6 +185,11 @@ extension MCMapView: MTKViewDelegate {
 
 extension MCMapView {
     fileprivate func currentDrawableImage() -> UIImage? {
+        self.saveDrawable = true
+        self.invalidate()
+        self.draw(in: self)
+        self.saveDrawable = false
+
         guard let texture = self.currentDrawable?.texture else { return nil }
 
         let context = CIContext()
