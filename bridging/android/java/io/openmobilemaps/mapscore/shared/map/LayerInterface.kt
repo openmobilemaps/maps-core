@@ -32,6 +32,10 @@ abstract class LayerInterface {
 
     abstract fun enableAnimations(enabled: Boolean)
 
+    abstract fun setErrorManager(errorManager: io.openmobilemaps.mapscore.shared.map.ErrorManager)
+
+    abstract fun forceReload()
+
     private class CppProxy : LayerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -121,5 +125,17 @@ abstract class LayerInterface {
             native_enableAnimations(this.nativeRef, enabled)
         }
         private external fun native_enableAnimations(_nativeRef: Long, enabled: Boolean)
+
+        override fun setErrorManager(errorManager: io.openmobilemaps.mapscore.shared.map.ErrorManager) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setErrorManager(this.nativeRef, errorManager)
+        }
+        private external fun native_setErrorManager(_nativeRef: Long, errorManager: io.openmobilemaps.mapscore.shared.map.ErrorManager)
+
+        override fun forceReload() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_forceReload(this.nativeRef)
+        }
+        private external fun native_forceReload(_nativeRef: Long)
     }
 }

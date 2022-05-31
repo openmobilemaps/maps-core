@@ -40,5 +40,9 @@ class SimpleLayerInterface : public LayerInterface {
 
     virtual LayerReadyState isReadyToRenderOffscreen() { return LayerReadyState::READY; }
 
-    virtual void enableAnimations(bool enabled) {};
+    virtual void enableAnimations(bool enabled) {}
+
+    virtual void setErrorManager(const std::shared_ptr<::ErrorManager> & errorManager) {}
+
+    virtual void forceReload() {}
 };

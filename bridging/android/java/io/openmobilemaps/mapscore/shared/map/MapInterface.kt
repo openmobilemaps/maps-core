@@ -59,6 +59,8 @@ abstract class MapInterface {
      */
     abstract fun drawReadyFrame(bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, timeout: Float, callbacks: MapReadyCallbackInterface)
 
+    abstract fun forceReload()
+
     companion object {
         @JvmStatic
         fun create(graphicsFactory: io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface, shaderFactory: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderFactoryInterface, renderingContext: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, mapConfig: MapConfig, scheduler: io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerInterface, pixelDensity: Float): MapInterface {
@@ -232,6 +234,12 @@ abstract class MapInterface {
             native_drawReadyFrame(this.nativeRef, bounds, timeout, callbacks)
         }
         private external fun native_drawReadyFrame(_nativeRef: Long, bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, timeout: Float, callbacks: MapReadyCallbackInterface)
+
+        override fun forceReload() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_forceReload(this.nativeRef)
+        }
+        private external fun native_forceReload(_nativeRef: Long)
 
         companion object {
             @JvmStatic

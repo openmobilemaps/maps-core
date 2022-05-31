@@ -6,6 +6,7 @@
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
+#import "MCErrorManager+Private.h"
 #import "MCLayerReadyState+Private.h"
 #import "MCRectCoord+Private.h"
 #include <exception>
@@ -82,6 +83,18 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->isReadyToRenderOffscreen();
         return ::djinni::Enum<::LayerReadyState, MCLayerReadyState>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setErrorManager:(nullable MCErrorManager *)errorManager {
+    try {
+        _cppRefHandle.get()->setErrorManager(::djinni_generated::ErrorManager::toCpp(errorManager));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)forceReload {
+    try {
+        _cppRefHandle.get()->forceReload();
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

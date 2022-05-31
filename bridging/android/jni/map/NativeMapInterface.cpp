@@ -288,4 +288,13 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1forceReload(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
+        ref->forceReload();
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
 }  // namespace djinni_generated
