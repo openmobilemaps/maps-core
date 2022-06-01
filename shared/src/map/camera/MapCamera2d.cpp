@@ -518,10 +518,13 @@ void MapCamera2d::inertiaStep() {
         inertia = std::nullopt;
         return;
     }
-    bool afterT1 = delta > inertia->t1;
-    float factor = std::pow(afterT1 ? 0.6 : 0.95, afterT1 ? delta - inertia->t1 : delta);
-    float xDiffMap = (afterT1 ? 1.0f : inertia->velocity.x) * factor * deltaPrev;
-    float yDiffMap = (afterT1 ? 1.0f : inertia->velocity.y) * factor * deltaPrev;
+
+    float factor = std::pow(0.95, delta);
+    if (delta > inertia->t1) {
+        factor *= std::pow(0.6, delta - inertia->t1);
+    }
+    float xDiffMap = (inertia->velocity.x) * factor * deltaPrev;
+    float yDiffMap = (inertia->velocity.y) * factor * deltaPrev;
     inertia->timestampUpdate = now;
 
     centerPosition.x += xDiffMap;
