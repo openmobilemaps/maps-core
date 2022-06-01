@@ -189,12 +189,12 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::unordered_set<P
 
         for (const auto &removedTile : toRemove) {
             currentTiles.erase(removedTile);
-            errorManager->removeError(layerConfig->getTileUrl(removedTile.x, removedTile.y, removedTile.zoomIdentifier));
+            if (errorManager) errorManager->removeError(layerConfig->getTileUrl(removedTile.x, removedTile.y, removedTile.zoomIdentifier));
         }
 
         for (auto it = loadingQueue.begin(); it != loadingQueue.end();) {
             if (visibleTiles.count(*it) == 0) {
-                errorManager->removeError(layerConfig->getTileUrl(it->tileInfo.x, it->tileInfo.y, it->tileInfo.zoomIdentifier));
+                if (errorManager) errorManager->removeError(layerConfig->getTileUrl(it->tileInfo.x, it->tileInfo.y, it->tileInfo.zoomIdentifier));
                 it = loadingQueue.erase(it);
             } else {
                 ++it;
@@ -203,7 +203,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::unordered_set<P
 
         for (auto it = errorTiles.begin(); it != errorTiles.end();) {
             if (visibleTiles.count({it->first, 0}) == 0) {
-                errorManager->removeError(layerConfig->getTileUrl(it->first.x, it->first.y, it->first.zoomIdentifier));
+                if (errorManager) errorManager->removeError(layerConfig->getTileUrl(it->first.x, it->first.y, it->first.zoomIdentifier));
                 it = errorTiles.erase(it);
             } else {
                 ++it;
