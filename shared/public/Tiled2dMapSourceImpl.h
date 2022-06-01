@@ -69,7 +69,8 @@ template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::updateCurre
 
     size_t numZoomLevels = zoomLevelInfos.size();
     int targetZoomLayer = -1;
-    const float screenScaleFactor = screenDensityPpi / (0.0254 / 0.00028); // Each pixel is assumed to be 0.28mm – https://gis.stackexchange.com/a/315989
+    // Each pixel is assumed to be 0.28mm – https://gis.stackexchange.com/a/315989
+    const float screenScaleFactor = zoomInfo.adaptScaleToScreen ? screenDensityPpi / (0.0254 / 0.00028) : 1.0;
     for (int i = 0; i < numZoomLevels; i++) {
         const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(i);
         if (zoomInfo.zoomLevelScaleFactor * screenScaleFactor * zoomLevelInfo.zoom < zoom) {
