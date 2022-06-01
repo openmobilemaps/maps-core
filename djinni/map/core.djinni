@@ -16,6 +16,7 @@
 @extern "../yaml/color.yaml"
 @extern "../yaml/render_pass_interface.yaml"
 @extern "../yaml/masking_object_interface.yaml"
+@extern "../yaml/error_manager.yaml"
 
 map_interface = interface +c {
     static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface, rendering_context: rendering_context_interface, map_config: map_config, scheduler: scheduler_interface, pixel_density: f32) : map_interface;
@@ -57,6 +58,8 @@ map_interface = interface +c {
     # changes bounds to bounds, checks all layers for readiness, and updates callbacks, timeout in
     # seconds, always draw the frame when state is updated in the ready callbacks
     draw_ready_frame(bounds: rect_coord, timeout: f32, callbacks: map_ready_callback_interface);
+
+    force_reload();
 }
 
 map_callback_interface = interface +c +j +o {
@@ -94,6 +97,9 @@ layer_interface = interface +c +j +o {
 
     is_ready_to_render_offscreen() : layer_ready_state;
     enable_animations(enabled: bool);
+
+    set_error_manager(error_manager: error_manager);
+    force_reload();
 }
 
 map_camera_2d_interface = interface +c {

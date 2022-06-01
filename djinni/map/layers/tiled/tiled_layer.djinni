@@ -1,6 +1,7 @@
 @extern "../../../yaml/rect_coord.yaml"
 @extern "../../../yaml/coord.yaml"
 @extern "../../../yaml/layer_ready_state.yaml"
+@extern "../../../yaml/error_manager.yaml"
 
 tiled_2d_map_layer_config = interface +c +j +o {
     get_coordinate_system_identifier(): string;
@@ -37,5 +38,8 @@ tiled_2d_map_source_interface = interface +c {
     resume();
 
     is_ready_to_render_offscreen() : layer_ready_state;
+
+    set_error_manager(error_manager: error_manager);
+    force_reload();
 }
 

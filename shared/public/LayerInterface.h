@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "ErrorManager.h"
 #include "MaskingObjectInterface.h"
 #include "RectI.h"
 #include "RenderPassInterface.h"
@@ -41,4 +42,8 @@ public:
     virtual LayerReadyState isReadyToRenderOffscreen() = 0;
 
     virtual void enableAnimations(bool enabled) = 0;
+
+    virtual void setErrorManager(const std::shared_ptr<::ErrorManager> & errorManager) = 0;
+
+    virtual void forceReload() = 0;
 };

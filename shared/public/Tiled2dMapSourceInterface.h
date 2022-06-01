@@ -3,9 +3,11 @@
 
 #pragma once
 
+#include "ErrorManager.h"
 #include "LayerReadyState.h"
 #include "RectCoord.h"
 #include <cstdint>
+#include <memory>
 #include <optional>
 
 class Tiled2dMapSourceInterface {
@@ -27,4 +29,8 @@ public:
     virtual void resume() = 0;
 
     virtual ::LayerReadyState isReadyToRenderOffscreen() = 0;
+
+    virtual void setErrorManager(const std::shared_ptr<::ErrorManager> & errorManager) = 0;
+
+    virtual void forceReload() = 0;
 };

@@ -60,6 +60,10 @@ template <class T, class L, class R> class Tiled2dMapSource :
 
     virtual ::LayerReadyState isReadyToRenderOffscreen() override;
 
+    virtual void setErrorManager(const std::shared_ptr<::ErrorManager> & errorManager) override;
+
+    virtual void forceReload() override;
+
 
   protected:
     virtual L loadTile(Tiled2dMapTileInfo tile) = 0;
@@ -72,6 +76,7 @@ template <class T, class L, class R> class Tiled2dMapSource :
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
     std::shared_ptr<SchedulerInterface> scheduler;
     std::weak_ptr<Tiled2dMapSourceListenerInterface> listener;
+    std::shared_ptr<::ErrorManager>  errorManager;
 
     std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfos;
     const Tiled2dMapZoomInfo zoomInfo;

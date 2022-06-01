@@ -14,14 +14,16 @@ auto DataLoaderResult::toCpp(ObjcType obj) -> CppType
     assert(obj);
     return {::djinni::Optional<std::optional, ::djinni_generated::DataHolderInterface>::toCpp(obj.data),
             ::djinni::Optional<std::optional, ::djinni::String>::toCpp(obj.etag),
-            ::djinni::Enum<::LoaderStatus, MCLoaderStatus>::toCpp(obj.status)};
+            ::djinni::Enum<::LoaderStatus, MCLoaderStatus>::toCpp(obj.status),
+            ::djinni::Optional<std::optional, ::djinni::String>::toCpp(obj.errorCode)};
 }
 
 auto DataLoaderResult::fromCpp(const CppType& cpp) -> ObjcType
 {
     return [[MCDataLoaderResult alloc] initWithData:(::djinni::Optional<std::optional, ::djinni_generated::DataHolderInterface>::fromCpp(cpp.data))
                                                etag:(::djinni::Optional<std::optional, ::djinni::String>::fromCpp(cpp.etag))
-                                             status:(::djinni::Enum<::LoaderStatus, MCLoaderStatus>::fromCpp(cpp.status))];
+                                             status:(::djinni::Enum<::LoaderStatus, MCLoaderStatus>::fromCpp(cpp.status))
+                                          errorCode:(::djinni::Optional<std::optional, ::djinni::String>::fromCpp(cpp.errorCode))];
 }
 
 }  // namespace djinni_generated

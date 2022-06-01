@@ -7,6 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
+#import "MCErrorManager+Private.h"
 #import "MCLayerReadyState+Private.h"
 #import "MCMapInterface+Private.h"
 #import "MCMaskingObjectInterface+Private.h"
@@ -110,6 +111,18 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setErrorManager:(nullable MCErrorManager *)errorManager {
+    try {
+        _cppRefHandle.get()->setErrorManager(::djinni_generated::ErrorManager::toCpp(errorManager));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)forceReload {
+    try {
+        _cppRefHandle.get()->forceReload();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class LayerInterface::ObjcProxy final
@@ -191,6 +204,18 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() enableAnimations:(::djinni::Bool::fromCpp(c_enabled))];
+        }
+    }
+    void setErrorManager(const std::shared_ptr<::ErrorManager> & c_errorManager) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setErrorManager:(::djinni_generated::ErrorManager::fromCpp(c_errorManager))];
+        }
+    }
+    void forceReload() override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() forceReload];
         }
     }
 };

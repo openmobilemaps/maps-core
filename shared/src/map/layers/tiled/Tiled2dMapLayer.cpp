@@ -19,6 +19,10 @@ void Tiled2dMapLayer::setSourceInterface(const std::shared_ptr<Tiled2dMapSourceI
     if (isHidden) {
         sourceInterface->pause();
     }
+    auto errorManager = this->errorManager;
+    if (errorManager) {
+        this->sourceInterface->setErrorManager(errorManager);
+    }
 }
 
 void Tiled2dMapLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface) {
@@ -118,4 +122,19 @@ LayerReadyState Tiled2dMapLayer::isReadyToRenderOffscreen() {
     }
 
     return LayerReadyState::READY;
+}
+
+void Tiled2dMapLayer::setErrorManager(const std::shared_ptr< ::ErrorManager> &errorManager) {
+    this->errorManager = errorManager;
+    auto sourceInterface = this->sourceInterface;
+    if (sourceInterface) {
+        sourceInterface->setErrorManager(errorManager);
+    }
+}
+
+void Tiled2dMapLayer::forceReload() {
+    auto sourceInterface = this->sourceInterface;
+    if (sourceInterface) {
+        sourceInterface->forceReload();
+    }
 }

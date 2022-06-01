@@ -89,4 +89,6 @@
                timeout:(float)timeout
              callbacks:(nullable id<MCMapReadyCallbackInterface>)callbacks;
 
+- (void)forceReload;
+
 @end

@@ -235,6 +235,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)forceReload {
+    try {
+        _cppRefHandle.get()->forceReload();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 auto MapInterface::toCpp(ObjcType objc) -> CppType

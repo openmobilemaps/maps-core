@@ -305,3 +305,12 @@ LayerReadyState MapScene::getLayersReadyState() {
 
     return LayerReadyState::READY;
 }
+
+
+void MapScene::forceReload() {
+    std::lock_guard<std::recursive_mutex> lock(layersMutex);
+
+    for (const auto &[index, layer] : layers) {
+        layer->forceReload();
+    }
+}
