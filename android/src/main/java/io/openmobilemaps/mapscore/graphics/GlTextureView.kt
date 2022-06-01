@@ -23,10 +23,6 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 		context, attrs, defStyleAttr
 	), SurfaceTextureListener {
 
-	companion object {
-		private const val TAG = "GLTextureView"
-	}
-
 	init {
 		surfaceTextureListener = this
 	}
@@ -35,10 +31,17 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 	private var renderer: GLSurfaceView.Renderer? = null
 	private var glThread: GLThread? = null
 
+	private val pendingTaskQueue = ArrayDeque<Pair<Boolean, () -> Unit>>()
+	private var pendingTargetFrameRate = -1
+
 	override fun onSurfaceTextureAvailable(surface: SurfaceTexture, width: Int, height: Int) {
 		glThread = GLThread(surface, useMSAA).apply {
 			onWindowResize(getWidth(), getHeight())
 			renderer = this@GlTextureView.renderer
+			targetFrameRate = pendingTargetFrameRate
+			while (pendingTaskQueue.isNotEmpty()) {
+				pendingTaskQueue.removeFirstOrNull()?.let { queueEvent(it.first, it.second) }
+			}
 			start()
 		}
 	}
@@ -67,10 +70,11 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 	}
 
 	fun queueEvent(clearQueueIfNotRunning: Boolean = false, r: () -> Unit) {
-		glThread?.queueEvent(clearQueueIfNotRunning, r)
+		glThread?.queueEvent(clearQueueIfNotRunning, r) ?: pendingTaskQueue.add(Pair(clearQueueIfNotRunning, r))
 	}
 
 	fun setTargetFrameRate(frameRate: Int) {
+		pendingTargetFrameRate = frameRate
 		glThread?.targetFrameRate = frameRate
 	}
 }
