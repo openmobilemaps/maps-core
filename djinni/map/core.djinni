@@ -136,6 +136,8 @@ map_camera_2d_interface = interface +c {
     get_visible_rect() : rect_coord;
     get_padding_adjusted_visible_rect() : rect_coord;
 
+    get_screen_density_ppi(): f32;
+
     # this method is called just before the update methods on all layers
     update();
 

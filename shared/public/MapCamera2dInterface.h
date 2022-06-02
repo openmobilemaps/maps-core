@@ -64,6 +64,8 @@ public:
 
     virtual ::RectCoord getPaddingAdjustedVisibleRect() = 0;
 
+    virtual float getScreenDensityPpi() = 0;
+
     /** this method is called just before the update methods on all layers */
     virtual void update() = 0;
 
