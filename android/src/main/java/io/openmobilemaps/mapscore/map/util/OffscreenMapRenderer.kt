@@ -45,7 +45,8 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 		this.mapInterface = mapInterface
 		this.scheduler = scheduler
 
-		glThread = GLThread(null, useMSAA).apply {
+		glThread = GLThread().apply {
+			this.useMSAA = true
 			onWindowResize(sizePx.x, sizePx.y)
 			renderer = this@OffscreenMapRenderer
 			start()
