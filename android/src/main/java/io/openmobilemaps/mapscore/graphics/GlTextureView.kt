@@ -27,22 +27,25 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 		surfaceTextureListener = this
 	}
 
-	private var useMSAA = false
 	private var renderer: GLSurfaceView.Renderer? = null
 	private var glThread: GLThread? = null
+
+	private var useMSAA = false
 
 	private val pendingTaskQueue = ArrayDeque<Pair<Boolean, () -> Unit>>()
 	private var pendingTargetFrameRate = -1
 
-	override fun onSurfaceTextureAvailable(surface: SurfaceTexture, width: Int, height: Int) {
-		glThread = GLThread(surface, useMSAA).apply {
+	override fun onSurfaceTextureAvailable(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
+		glThread = GLThread().apply {
+			surface = surfaceTexture
 			onWindowResize(getWidth(), getHeight())
+			useMSAA = this@GlTextureView.useMSAA
 			renderer = this@GlTextureView.renderer
 			targetFrameRate = pendingTargetFrameRate
-			while (pendingTaskQueue.isNotEmpty()) {
-				pendingTaskQueue.removeFirstOrNull()?.let { queueEvent(it.first, it.second) }
-			}
 			start()
+		}
+		while (pendingTaskQueue.isNotEmpty()) {
+			pendingTaskQueue.removeFirstOrNull()?.let { queueEvent(it.first, it.second) }
 		}
 	}
 
@@ -52,6 +55,7 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 
 	override fun onSurfaceTextureDestroyed(surface: SurfaceTexture): Boolean {
 		glThread?.finish()
+		glThread = null
 		return false
 	}
 
