@@ -103,7 +103,8 @@ extension Quad2d: MCMaskingObjectInterface {
                 renderPass: MCRenderPassConfig,
                 mvpMatrix: Int64,
                 screenPixelAsRealMeterFactor: Double) {
-        guard let context = context as? RenderingContext,
+        guard ready,
+              let context = context as? RenderingContext,
               let encoder = context.encoder else { return }
 
         renderAsMask = true

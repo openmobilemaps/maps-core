@@ -89,7 +89,8 @@ extension Polygon2d: MCMaskingObjectInterface {
                 renderPass _: MCRenderPassConfig,
                 mvpMatrix: Int64,
                 screenPixelAsRealMeterFactor _: Double) {
-        guard let context = context as? RenderingContext,
+        guard ready,
+              let context = context as? RenderingContext,
               let encoder = context.encoder else { return }
 
         guard let verticesBuffer = verticesBuffer,
