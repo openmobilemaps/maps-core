@@ -68,52 +68,52 @@ public enum Pipeline: String, CaseIterable {
 
     var label: String {
         switch self {
-        case .alphaShader: return "Alpha shader with texture"
-        case .lineShader: return "Line shader with color"
-        case .lineGroupShader: return "Line Group shader"
-        case .polygonGroupShader: return "Polygon Group shader"
-        case .pointShader: return "Point (round) shader with color"
-        case .colorShader: return "Color shader"
-        case .roundColorShader: return "Round color shader"
-        case .clearStencilShader: return "Clear stencil shader"
-        case .textShader: return "Text shader"
+            case .alphaShader: return "Alpha shader with texture"
+            case .lineShader: return "Line shader with color"
+            case .lineGroupShader: return "Line Group shader"
+            case .polygonGroupShader: return "Polygon Group shader"
+            case .pointShader: return "Point (round) shader with color"
+            case .colorShader: return "Color shader"
+            case .roundColorShader: return "Round color shader"
+            case .clearStencilShader: return "Clear stencil shader"
+            case .textShader: return "Text shader"
         }
     }
 
     var vertexShader: String {
         switch self {
-        case .alphaShader: return "baseVertexShader"
-        case .lineShader: return "lineVertexShader"
-        case .lineGroupShader: return "lineGroupVertexShader"
-        case .polygonGroupShader: return "polygonGroupVertexShader"
-        case .pointShader: return "pointVertexShader"
-        case .colorShader: return "colorVertexShader"
-        case .roundColorShader: return "colorVertexShader"
-        case .clearStencilShader: return "stencilClearVertexShader"
-        case .textShader: return "textVertexShader"
+            case .alphaShader: return "baseVertexShader"
+            case .lineShader: return "lineVertexShader"
+            case .lineGroupShader: return "lineGroupVertexShader"
+            case .polygonGroupShader: return "polygonGroupVertexShader"
+            case .pointShader: return "pointVertexShader"
+            case .colorShader: return "colorVertexShader"
+            case .roundColorShader: return "colorVertexShader"
+            case .clearStencilShader: return "stencilClearVertexShader"
+            case .textShader: return "textVertexShader"
         }
     }
 
     var fragmentShader: String {
         switch self {
-        case .alphaShader: return "baseFragmentShader"
-        case .lineShader: return "lineFragmentShader"
-        case .lineGroupShader: return "lineGroupFragmentShader"
-        case .polygonGroupShader: return "polygonGroupFragmentShader"
-        case .pointShader: return "pointFragmentShader"
-        case .colorShader: return "colorFragmentShader"
-        case .roundColorShader: return "roundColorFragmentShader"
-        case .clearStencilShader: return "stencilClearFragmentShader"
-        case .textShader: return "textFragmentShader"
+            case .alphaShader: return "baseFragmentShader"
+            case .lineShader: return "lineFragmentShader"
+            case .lineGroupShader: return "lineGroupFragmentShader"
+            case .polygonGroupShader: return "polygonGroupFragmentShader"
+            case .pointShader: return "pointFragmentShader"
+            case .colorShader: return "colorFragmentShader"
+            case .roundColorShader: return "roundColorFragmentShader"
+            case .clearStencilShader: return "stencilClearFragmentShader"
+            case .textShader: return "textFragmentShader"
         }
     }
 
     var vertexDescriptor: MTLVertexDescriptor {
         switch self {
-        case .lineShader: return LineVertex.descriptor
-        case .lineGroupShader: return LineVertex.descriptor
-        case .polygonGroupShader: return PolygonVertex.descriptor
-        default: return Vertex.descriptor
+            case .lineShader: return LineVertex.descriptor
+            case .lineGroupShader: return LineVertex.descriptor
+            case .polygonGroupShader: return PolygonVertex.descriptor
+            default: return Vertex.descriptor
         }
     }
 }
