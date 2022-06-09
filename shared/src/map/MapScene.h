@@ -13,6 +13,7 @@
 #include "MapConfig.h"
 #include "MapInterface.h"
 #include "Scene.h"
+#include "LayerReadyState.h"
 #include <mutex>
 #include <map>
 
@@ -70,6 +71,13 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public std:
     virtual void resume() override;
 
     virtual void pause() override;
+
+    virtual void drawReadyFrame(const ::RectCoord & bounds, float timeout, const std::shared_ptr<MapReadyCallbackInterface> & callbacks) override;
+
+    virtual void forceReload() override;
+
+  private:
+    LayerReadyState getLayersReadyState();
 
   private:
     const MapConfig mapConfig;

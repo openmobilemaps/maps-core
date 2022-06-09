@@ -10,7 +10,7 @@
 
 #pragma once
 
-#define UBRendererShaderCode(...) #__VA_ARGS__
+#define UBRendererShaderCode(...) std::string (#__VA_ARGS__)
 
 #include "Logger.h"
 #include "ShaderProgramInterface.h"

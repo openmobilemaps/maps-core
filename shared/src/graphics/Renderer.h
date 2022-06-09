@@ -33,4 +33,6 @@ class Renderer : public RendererInterface {
 
   private:
     std::map<int32_t, std::vector<std::shared_ptr<RenderPassInterface>>> renderQueue;
+
+    std::vector<float> tempMvpMatrix = std::vector<float>(16, 0.0);
 };

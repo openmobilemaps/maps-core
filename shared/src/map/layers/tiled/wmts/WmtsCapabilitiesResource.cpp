@@ -44,7 +44,7 @@ public:
 
 
     std::shared_ptr<::Tiled2dMapLayerConfig> createLayerConfig(const std::string & identifier) override {
-        return createLayerConfigWithZoomInfo(identifier, Tiled2dMapZoomInfo(1.0, 0));
+        return createLayerConfigWithZoomInfo(identifier, Tiled2dMapZoomInfo(1.0, 0, true));
     };
 
     std::shared_ptr<::Tiled2dMapLayerConfig> createLayerConfigWithZoomInfo(const std::string & identifier, const ::Tiled2dMapZoomInfo & zoomInfo) override {

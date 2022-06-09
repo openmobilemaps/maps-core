@@ -40,7 +40,8 @@ template <class T, class L, class R> class Tiled2dMapSource :
     Tiled2dMapSource(const MapConfig &mapConfig, const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
                      const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                      const std::shared_ptr<SchedulerInterface> &scheduler,
-                     const std::shared_ptr<Tiled2dMapSourceListenerInterface> &listener);
+                     const std::shared_ptr<Tiled2dMapSourceListenerInterface> &listener,
+                     float screenDensityPpi);
 
     virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom) override;
 
@@ -58,6 +59,13 @@ template <class T, class L, class R> class Tiled2dMapSource :
     std::optional<int32_t> getMinZoomLevelIdentifier() override;
     std::optional<int32_t> getMaxZoomLevelIdentifier() override;
 
+    virtual ::LayerReadyState isReadyToRenderOffscreen() override;
+
+    virtual void setErrorManager(const std::shared_ptr<::ErrorManager> & errorManager) override;
+
+    virtual void forceReload() override;
+
+
   protected:
     virtual L loadTile(Tiled2dMapTileInfo tile) = 0;
 
@@ -69,6 +77,7 @@ template <class T, class L, class R> class Tiled2dMapSource :
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
     std::shared_ptr<SchedulerInterface> scheduler;
     std::weak_ptr<Tiled2dMapSourceListenerInterface> listener;
+    std::shared_ptr<::ErrorManager>  errorManager;
 
     std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfos;
     const Tiled2dMapZoomInfo zoomInfo;
@@ -85,12 +94,16 @@ template <class T, class L, class R> class Tiled2dMapSource :
 
     std::atomic<bool> isPaused;
 
+    float screenDensityPpi;
+
   private:
     void updateCurrentTileset(const ::RectCoord &visibleBounds, double zoom);
 
     void performLoadingTask();
 
     void onVisibleTilesChanged(const std::unordered_set<PrioritizedTiled2dMapTileInfo> &visibleTiles);
+
+    std::atomic_int pendingUpdates = 0;
 
     std::atomic_size_t dispatchedTasks;
     std::unordered_set<Tiled2dMapTileInfo> currentlyLoading;

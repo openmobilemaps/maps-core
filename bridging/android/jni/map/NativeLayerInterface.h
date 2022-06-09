@@ -43,6 +43,10 @@ private:
         void hide() override;
         void show() override;
         void setScissorRect(const std::optional<::RectI> & scissorRect) override;
+        ::LayerReadyState isReadyToRenderOffscreen() override;
+        void enableAnimations(bool enabled) override;
+        void setErrorManager(const std::shared_ptr<::ErrorManager> & errorManager) override;
+        void forceReload() override;
 
     private:
         friend ::djinni::JniInterface<::LayerInterface, ::djinni_generated::NativeLayerInterface>;
@@ -59,6 +63,10 @@ private:
     const jmethodID method_hide { ::djinni::jniGetMethodID(clazz.get(), "hide", "()V") };
     const jmethodID method_show { ::djinni::jniGetMethodID(clazz.get(), "show", "()V") };
     const jmethodID method_setScissorRect { ::djinni::jniGetMethodID(clazz.get(), "setScissorRect", "(Lio/openmobilemaps/mapscore/shared/graphics/common/RectI;)V") };
+    const jmethodID method_isReadyToRenderOffscreen { ::djinni::jniGetMethodID(clazz.get(), "isReadyToRenderOffscreen", "()Lio/openmobilemaps/mapscore/shared/map/LayerReadyState;") };
+    const jmethodID method_enableAnimations { ::djinni::jniGetMethodID(clazz.get(), "enableAnimations", "(Z)V") };
+    const jmethodID method_setErrorManager { ::djinni::jniGetMethodID(clazz.get(), "setErrorManager", "(Lio/openmobilemaps/mapscore/shared/map/ErrorManager;)V") };
+    const jmethodID method_forceReload { ::djinni::jniGetMethodID(clazz.get(), "forceReload", "()V") };
 };
 
 }  // namespace djinni_generated

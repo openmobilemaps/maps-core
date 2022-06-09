@@ -55,7 +55,19 @@ void MapCamera2d::viewportSizeChanged() {
     notifyListeners(ListenerType::BOUNDS);
 }
 
+void MapCamera2d::freeze(bool freeze) {
+    cameraFrozen = freeze;
+    {
+        std::lock_guard<std::recursive_mutex> lock(animationMutex);
+        if (coordAnimation) coordAnimation->cancel();
+        if (zoomAnimation) zoomAnimation->cancel();
+        if (rotationAnimation) rotationAnimation->cancel();
+    }
+    inertia = std::nullopt;
+}
+
 void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double zoom, bool animated) {
+    if (cameraFrozen) return;
     Coord currentCenter = this->centerPosition;
     inertia = std::nullopt;
     Coord positionMapSystem = getBoundsCorrectedCoords(adjustCoordForPadding(centerPosition, zoom));
@@ -91,6 +103,7 @@ void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
 }
 
 void MapCamera2d::moveToCenterPosition(const ::Coord &centerPosition, bool animated) {
+    if (cameraFrozen) return;
     Coord currentCenter = this->centerPosition;
     inertia = std::nullopt;
     Coord positionMapSystem = getBoundsCorrectedCoords(adjustCoordForPadding(centerPosition, zoom));
@@ -124,6 +137,7 @@ void MapCamera2d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
 }
 
 void MapCamera2d::moveToBoundingBox(const RectCoord &boundingBox, float paddingPc, bool animated, std::optional<double> maxZoom) {
+    if (cameraFrozen) return;
     RectCoord mapSystemBBox = conversionHelper->convertRect(mapCoordinateSystem.identifier, boundingBox);
     float newLeft = mapSystemBBox.topLeft.x + paddingPc * (mapSystemBBox.topLeft.x - mapSystemBBox.bottomRight.x);
     float newRight = mapSystemBBox.bottomRight.x + paddingPc * (mapSystemBBox.bottomRight.x - mapSystemBBox.topLeft.x);
@@ -172,6 +186,7 @@ void MapCamera2d::moveToBoundingBox(const RectCoord &boundingBox, float paddingP
 }
 
 void MapCamera2d::setZoom(double zoom, bool animated) {
+    if (cameraFrozen) return;
     double targetZoom = std::clamp(zoom, zoomMax, zoomMin);
 
     if (animated) {
@@ -199,6 +214,7 @@ double MapCamera2d::getZoom() { return zoom; }
 
 
 void MapCamera2d::setRotation(float angle, bool animated) {
+    if (cameraFrozen) return;
     double newAngle = (angle > 360 || angle < 0) ? fmod(angle + 360.0, 360.0) : angle;
     if (animated) {
         double currentAngle = fmod(this->angle, 360.0);
@@ -297,8 +313,6 @@ std::vector<float> MapCamera2d::getVpMatrix() {
         if (rotationAnimation) std::static_pointer_cast<AnimationInterface>(rotationAnimation)->update();
         if (coordAnimation) std::static_pointer_cast<AnimationInterface>(coordAnimation)->update();
     }
-
-    std::vector<float> newVpMatrix(16, 0);
 
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
     double currentRotation = angle;
@@ -428,7 +442,7 @@ void MapCamera2d::notifyListeners(const int &listenerType) {
 }
 
 bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleClick) {
-    if (!config.moveEnabled)
+    if (!config.moveEnabled || cameraFrozen)
         return false;
 
     inertia = std::nullopt;
@@ -479,6 +493,7 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
 }
 
 bool MapCamera2d::onMoveComplete() {
+    if (cameraFrozen) return false;
     setupInertia();
     return true;
 }
@@ -503,10 +518,13 @@ void MapCamera2d::inertiaStep() {
         inertia = std::nullopt;
         return;
     }
-    bool afterT1 = delta > inertia->t1;
-    float factor = std::pow(afterT1 ? 0.6 : 0.95, afterT1 ? delta - inertia->t1 : delta);
-    float xDiffMap = (afterT1 ? 1.0f : inertia->velocity.x) * factor * deltaPrev;
-    float yDiffMap = (afterT1 ? 1.0f : inertia->velocity.y) * factor * deltaPrev;
+
+    float factor = std::pow(0.95, delta);
+    if (delta > inertia->t1) {
+        factor *= std::pow(0.6, delta - inertia->t1);
+    }
+    float xDiffMap = (inertia->velocity.x) * factor * deltaPrev;
+    float yDiffMap = (inertia->velocity.y) * factor * deltaPrev;
     inertia->timestampUpdate = now;
 
     centerPosition.x += xDiffMap;
@@ -519,7 +537,7 @@ void MapCamera2d::inertiaStep() {
 }
 
 bool MapCamera2d::onDoubleClick(const ::Vec2F &posScreen) {
-    if (!config.doubleClickZoomEnabled)
+    if (!config.doubleClickZoomEnabled || cameraFrozen)
         return false;
 
     inertia = std::nullopt;
@@ -555,7 +573,7 @@ void MapCamera2d::clearTouch() {
 }
 
 bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) {
-    if (!config.twoFingerZoomEnabled)
+    if (!config.twoFingerZoomEnabled || cameraFrozen)
         return false;
 
     inertia = std::nullopt;
@@ -634,7 +652,7 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
 }
 
 bool MapCamera2d::onTwoFingerMoveComplete() {
-    if (config.snapToNorthEnabled &&
+    if (config.snapToNorthEnabled && !cameraFrozen &&
         (angle < ROTATION_LOCKING_ANGLE || angle > (360 - ROTATION_LOCKING_ANGLE))) {
         std::lock_guard <std::recursive_mutex> lock(animationMutex);
         rotationAnimation = std::make_shared<DoubleAnimation>(DEFAULT_ANIM_LENGTH,
@@ -712,6 +730,10 @@ void MapCamera2d::setBounds(const RectCoord &bounds) {
     centerPosition = getBoundsCorrectedCoords(centerPosition);
 
     mapInterface->invalidate();
+}
+
+RectCoord MapCamera2d::getBounds() {
+    return bounds;
 }
 
 bool MapCamera2d::isInBounds(const Coord &coords) {
@@ -793,4 +815,9 @@ void MapCamera2d::setRotationEnabled(bool enabled) {
 
 void MapCamera2d::setSnapToNorthEnabled(bool enabled) {
     config.snapToNorthEnabled = enabled;
+}
+
+
+float MapCamera2d::getScreenDensityPpi() {
+    return screenDensityPpi;
 }

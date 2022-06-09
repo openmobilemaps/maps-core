@@ -11,8 +11,6 @@
 package io.openmobilemaps.mapscore.map.view
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -23,6 +21,10 @@ import androidx.lifecycle.coroutineScope
 import io.openmobilemaps.mapscore.graphics.GlTextureView
 import io.openmobilemaps.mapscore.map.scheduling.AndroidScheduler
 import io.openmobilemaps.mapscore.map.scheduling.AndroidSchedulerCallback
+import io.openmobilemaps.mapscore.map.util.MapViewInterface
+import io.openmobilemaps.mapscore.map.util.SaveFrameCallback
+import io.openmobilemaps.mapscore.map.util.SaveFrameSpec
+import io.openmobilemaps.mapscore.map.util.SaveFrameUtil
 import io.openmobilemaps.mapscore.shared.graphics.common.Color
 import io.openmobilemaps.mapscore.shared.graphics.common.Vec2F
 import io.openmobilemaps.mapscore.shared.graphics.common.Vec2I
@@ -31,15 +33,14 @@ import io.openmobilemaps.mapscore.shared.map.controls.TouchAction
 import io.openmobilemaps.mapscore.shared.map.controls.TouchEvent
 import io.openmobilemaps.mapscore.shared.map.controls.TouchHandlerInterface
 import io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.nio.ShortBuffer
+import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
 open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
-	GlTextureView(context, attrs, defStyleAttr), GLSurfaceView.Renderer, AndroidSchedulerCallback, LifecycleObserver {
+	GlTextureView(context, attrs, defStyleAttr), GLSurfaceView.Renderer, AndroidSchedulerCallback, LifecycleObserver,
+	MapViewInterface {
 
 	var mapInterface: MapInterface? = null
 		private set
@@ -155,31 +156,31 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 		return true
 	}
 
-	fun setBackgroundColor(color: Color) {
+	override fun setBackgroundColor(color: Color) {
 		requireMapInterface().setBackgroundColor(color)
 	}
 
-	open fun addLayer(layer: LayerInterface) {
+	override fun addLayer(layer: LayerInterface) {
 		requireMapInterface().addLayer(layer)
 	}
 
-	open fun insertLayerAt(layer: LayerInterface, at: Int) {
+	override fun insertLayerAt(layer: LayerInterface, at: Int) {
 		requireMapInterface().insertLayerAt(layer, at)
 	}
 
-	open fun insertLayerAbove(layer: LayerInterface, above: LayerInterface) {
+	override fun insertLayerAbove(layer: LayerInterface, above: LayerInterface) {
 		requireMapInterface().insertLayerAbove(layer, above)
 	}
 
-	open fun insertLayerBelow(layer: LayerInterface, below: LayerInterface) {
+	override fun insertLayerBelow(layer: LayerInterface, below: LayerInterface) {
 		requireMapInterface().insertLayerBelow(layer, below)
 	}
 
-	open fun removeLayer(layer: LayerInterface) {
+	override fun removeLayer(layer: LayerInterface) {
 		requireMapInterface().removeLayer(layer)
 	}
 
-	fun getCamera(): MapCamera2dInterface {
+	override fun getCamera(): MapCamera2dInterface {
 		return requireMapInterface().getCamera()
 	}
 
@@ -193,72 +194,11 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	private fun saveFrame() {
 		val callback = saveFrameCallback ?: return
 		val spec = saveFrameSpec ?: return
-
-		try {
-			val left = (spec.cropLeftPc * width).toInt()
-			val right = ((1f - spec.cropRightPc) * width).toInt()
-			val top = ((1f - spec.cropTopPc) * height).toInt()
-			val bottom = (spec.cropBottomPc * height).toInt()
-
-			val width: Int = right - left
-			val height: Int = top - bottom
-			val screenshotSize = width * height
-			val bb = ByteBuffer.allocateDirect(screenshotSize * 4)
-			bb.order(ByteOrder.nativeOrder())
-			GLES20.glReadPixels(left, bottom, width, height, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, bb)
-			val pixelsBuffer = IntArray(screenshotSize)
-			bb.asIntBuffer()[pixelsBuffer]
-			val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
-			bitmap.setPixels(pixelsBuffer, screenshotSize - width, -width, 0, 0, width, height)
-			val scaledBitmap = Bitmap.createScaledBitmap(bitmap, spec.targetWidthPx ?: width, spec.targetHeightPx ?: height, false)
-
-			val sBuffer = ShortArray(screenshotSize)
-			val sb = ShortBuffer.wrap(sBuffer)
-			scaledBitmap.copyPixelsToBuffer(sb)
-
-			for (i in 0 until screenshotSize) {
-				val v: Long = sBuffer[i].toLong()
-				sBuffer[i] = (((v and 0x1f) shl 11) or (v and 0x7e0) or ((v and 0xf800) shr 11)).toShort()
-			}
-			sb.rewind()
-			scaledBitmap.copyPixelsFromBuffer(sb)
-
-			val size: Int = scaledBitmap.rowBytes * scaledBitmap.height
-
-			val b = ByteBuffer.allocate(size)
-
-			scaledBitmap.copyPixelsToBuffer(b)
-			b.rewind()
-			val bytes = ByteArray(size)
-			b.get(bytes)
-			post {
-				saveFrameSpec = null
-				saveFrameCallback?.onResult(bytes)
-				saveFrameCallback = null
-			}
-		} catch (e: Exception) {
-			post {
-				saveFrameSpec = null
-				saveFrameCallback?.onError()
-				saveFrameCallback = null
-			}
-		}
+		saveFrameCallback = null
+		saveFrameSpec = null
+		SaveFrameUtil.saveCurrentFrame(Vec2I(width, height), spec, callback)
 	}
 
-	fun requireMapInterface(): MapInterface = mapInterface ?: throw IllegalStateException("Map is not setup or already destroyed!")
-	fun requireScheduler(): AndroidScheduler = scheduler ?: throw IllegalStateException("Map is not setup or already destroyed!")
-
-	data class SaveFrameSpec(
-		val targetWidthPx: Int? = null,
-		val targetHeightPx: Int? = null,
-		val cropLeftPc: Float = 0f,
-		val cropTopPc: Float = 0f,
-		val cropRightPc: Float = 0f,
-		val cropBottomPc: Float = 0f
-	)
-
-	interface SaveFrameCallback {
-		fun onResult(thumbnail: ByteArray)
-		fun onError()
-	}
+	override fun requireMapInterface(): MapInterface = mapInterface ?: throw IllegalStateException("Map is not setup or already destroyed!")
+	override fun requireScheduler(): AndroidScheduler = scheduler ?: throw IllegalStateException("Map is not setup or already destroyed!")
 }

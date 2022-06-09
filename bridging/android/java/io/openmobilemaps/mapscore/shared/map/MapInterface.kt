@@ -53,6 +53,14 @@ abstract class MapInterface {
 
     abstract fun pause()
 
+    /**
+     * changes bounds to bounds, checks all layers for readiness, and updates callbacks, timeout in
+     * seconds, always draw the frame when state is updated in the ready callbacks
+     */
+    abstract fun drawReadyFrame(bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, timeout: Float, callbacks: MapReadyCallbackInterface)
+
+    abstract fun forceReload()
+
     companion object {
         @JvmStatic
         fun create(graphicsFactory: io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface, shaderFactory: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderFactoryInterface, renderingContext: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, mapConfig: MapConfig, scheduler: io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerInterface, pixelDensity: Float): MapInterface {
@@ -220,6 +228,18 @@ abstract class MapInterface {
             native_pause(this.nativeRef)
         }
         private external fun native_pause(_nativeRef: Long)
+
+        override fun drawReadyFrame(bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, timeout: Float, callbacks: MapReadyCallbackInterface) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_drawReadyFrame(this.nativeRef, bounds, timeout, callbacks)
+        }
+        private external fun native_drawReadyFrame(_nativeRef: Long, bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, timeout: Float, callbacks: MapReadyCallbackInterface)
+
+        override fun forceReload() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_forceReload(this.nativeRef)
+        }
+        private external fun native_forceReload(_nativeRef: Long)
 
         companion object {
             @JvmStatic

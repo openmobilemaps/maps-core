@@ -20,6 +20,8 @@ public:
 
     static std::shared_ptr<MapCamera2dInterface> create(const std::shared_ptr<MapInterface> & mapInterface, float screenDensityPpi);
 
+    virtual void freeze(bool freeze) = 0;
+
     virtual void moveToCenterPositionZoom(const ::Coord & centerPosition, double zoom, bool animated) = 0;
 
     virtual void moveToCenterPosition(const ::Coord & centerPosition, bool animated) = 0;
@@ -46,6 +48,8 @@ public:
 
     virtual void setBounds(const ::RectCoord & bounds) = 0;
 
+    virtual ::RectCoord getBounds() = 0;
+
     virtual bool isInBounds(const ::Coord & coords) = 0;
 
     virtual void setPaddingLeft(float padding) = 0;
@@ -59,6 +63,8 @@ public:
     virtual ::RectCoord getVisibleRect() = 0;
 
     virtual ::RectCoord getPaddingAdjustedVisibleRect() = 0;
+
+    virtual float getScreenDensityPpi() = 0;
 
     /** this method is called just before the update methods on all layers */
     virtual void update() = 0;

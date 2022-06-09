@@ -1,5 +1,7 @@
 @extern "../../../yaml/rect_coord.yaml"
 @extern "../../../yaml/coord.yaml"
+@extern "../../../yaml/layer_ready_state.yaml"
+@extern "../../../yaml/error_manager.yaml"
 
 tiled_2d_map_layer_config = interface +c +j +o {
     get_coordinate_system_identifier(): string;
@@ -19,8 +21,12 @@ tiled_2d_map_zoom_level_info = record {
 }
 
 tiled_2d_map_zoom_info = record {
+    # this factor is applied to the the scale
 	zoom_level_scale_factor: f32;
 	num_draw_previous_layers: i32;
+    # if this flag is set to true the map is scaled according to the wmts scaledenominator (https://gis.stackexchange.com/questions/315881/what-is-wmts-scaledenominator)
+    # and the screen ppi
+    adapt_scale_to_screen: bool;
 }
 
 tiled_2d_map_source_interface = interface +c {
@@ -34,5 +40,10 @@ tiled_2d_map_source_interface = interface +c {
 
     pause();
     resume();
+
+    is_ready_to_render_offscreen() : layer_ready_state;
+
+    set_error_manager(error_manager: error_manager);
+    force_reload();
 }
 

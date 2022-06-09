@@ -33,6 +33,8 @@ class MapCamera2d : public MapCamera2dInterface,
 
     ~MapCamera2d(){};
 
+    void freeze(bool freeze) override;
+
     virtual void moveToCenterPositionZoom(const ::Coord &centerPosition, double zoom, bool animated) override;
 
     virtual void moveToCenterPosition(const ::Coord &centerPosition, bool animated) override;
@@ -58,6 +60,8 @@ class MapCamera2d : public MapCamera2dInterface,
     virtual double getMaxZoom() override;
 
     virtual void setBounds(const ::RectCoord & bounds) override;
+
+    virtual ::RectCoord getBounds() override;
 
     virtual bool isInBounds(const ::Coord & coords) override;
 
@@ -116,6 +120,8 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual void setSnapToNorthEnabled(bool enabled) override;
 
+    virtual float getScreenDensityPpi() override;
+
   protected:
     virtual void setupInertia();
 
@@ -152,6 +158,8 @@ class MapCamera2d : public MapCamera2dInterface,
     std::optional<RectCoord> lastVpBounds = std::nullopt;
     std::optional<double> lastVpRotation = std::nullopt;
     std::optional<double> lastVpZoom = std::nullopt;
+
+    bool cameraFrozen = false;
 
     struct CameraConfiguration {
         bool rotationEnabled = true;
@@ -204,4 +212,6 @@ class MapCamera2d : public MapCamera2dInterface,
     void clampCenterToPaddingCorrectedBounds();
 
     RectCoord getRectFromViewport(const Vec2I &sizeViewport, const Coord &center);
+
+    std::vector<float> newVpMatrix = std::vector<float>(16, 0.0);
 };
