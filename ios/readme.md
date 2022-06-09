@@ -48,7 +48,6 @@ To display a map, you first need to add a layer config for your project. The lay
 
 ```swift
 import MapCore
-import MapCoreSharedModule
 
 class TiledLayerConfig: MCTiled2dMapLayerConfig {
     // Defines both an additional scale factor for the tiles, as well as how many
@@ -159,7 +158,7 @@ let resource = MCWmtsCapabilitiesResource.create(xml)!
 The created resource object is then capable of creating a layer object with a given identifier.
 
 ```swift
-let layer = resource.createLayer("identifier", textureLoader: loader)
+let layer = resource.createLayer("identifier", tileLoader: loader)
 mapView.add(layer: layer?.asLayerInterface())
 ```
 This feature is still being improved to support a wider range of WMTS capabilities.
@@ -174,9 +173,7 @@ let coords : [MCCoord] = [
 ]
 let polygonLayer = MCPolygonLayerInterface.create()
 let polygonInfo = MCPolygonInfo(identifier: "switzerland",
-                                coordinates: coords,
-                                holes: [],
-                                isConvex: false,
+                                coordinates: MCPolygonCoord(positions: coords, holes: []),
                                 color: UIColor.red.mapCoreColor,
                                 highlight: UIColor.red.withAlphaComponent(0.2).mapCoreColor)
 
@@ -196,7 +193,7 @@ let texture = try! TextureHolder(image!.cgImage!)
 let icon = MCIconFactory.createIcon("icon",
                          coordinate: coordinate,
                          texture: texture,
-                         iconSize: .init(x: texture.getImageWidth(), y: texture.getImageHeight()),
+                         iconSize: .init(x: Float(texture.getImageWidth()), y: Float(texture.getImageHeight())),
                          scale: .FIXED)
 iconLayer?.add(icon)
 iconLayer?.setCallbackHandler(handler)
@@ -210,11 +207,16 @@ A line layer can be added to the mapView as well. Using the MCLineFactory a Line
 let lineLayer = MCLineLayerInterface.create()
 
 lineLayer?.add(MCLineFactory.createLine("lineIdentifier",
-                                        coordinates: lineCoordinates,
+                                        coordinates: coords,
                                         style: MCLineStyle(color: MCColorStateList(normal: UIColor.systemPink.withAlphaComponent(0.5).mapCoreColor,
                                                                                    highlighted: UIColor.blue.withAlphaComponent(0.5).mapCoreColor),
+                                                           gapColor: MCColorStateList(normal: UIColor.red.withAlphaComponent(0.5).mapCoreColor,
+                                                                                      highlighted: UIColor.gray.withAlphaComponent(0.5).mapCoreColor),
+                                                           opacity: 1.0,
                                                            widthType: .SCREEN_PIXEL,
-                                                           width: 50)))
+                                                           width: 50,
+                                                           dashArray: [1,1],
+                                                           lineCap: .BUTT)))
                                                            
     mapView.add(layer: lineLayer?.asLayerInterface())
 ```
