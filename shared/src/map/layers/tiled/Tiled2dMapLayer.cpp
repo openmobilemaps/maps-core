@@ -48,9 +48,7 @@ void Tiled2dMapLayer::onRemoved() {
     mapInterface = nullptr;
 }
 
-void Tiled2dMapLayer::pause() {
-    sourceInterface->pause();
-}
+void Tiled2dMapLayer::pause() { sourceInterface->pause(); }
 
 void Tiled2dMapLayer::resume() {
     if (!isHidden) {
@@ -87,10 +85,10 @@ void Tiled2dMapLayer::onRotationChanged(float angle) {
 }
 
 void Tiled2dMapLayer::onMapInteraction() {
-    //not used
+    // not used
 }
 
-void Tiled2dMapLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) {}
+void Tiled2dMapLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> &maskingObject) {}
 
 void Tiled2dMapLayer::setMinZoomLevelIdentifier(std::optional<int32_t> value) {
     minZoomLevelIdentifier = value;
@@ -124,7 +122,7 @@ LayerReadyState Tiled2dMapLayer::isReadyToRenderOffscreen() {
     return LayerReadyState::READY;
 }
 
-void Tiled2dMapLayer::setErrorManager(const std::shared_ptr< ::ErrorManager> &errorManager) {
+void Tiled2dMapLayer::setErrorManager(const std::shared_ptr<::ErrorManager> &errorManager) {
     this->errorManager = errorManager;
     auto sourceInterface = this->sourceInterface;
     if (sourceInterface) {

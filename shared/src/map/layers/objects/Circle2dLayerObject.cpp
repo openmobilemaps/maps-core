@@ -13,31 +13,24 @@
 #include "Quad2dInterface.h"
 
 Circle2dLayerObject::Circle2dLayerObject(const std::shared_ptr<MapInterface> &mapInterface)
-        : conversionHelper(mapInterface->getCoordinateConverterHelper()),
-          shader(),
-          quad() {
+    : conversionHelper(mapInterface->getCoordinateConverterHelper())
+    , shader()
+    , quad() {
     std::shared_ptr<ColorCircleShaderInterface> shader = mapInterface->getShaderFactory()->createColorCircleShader();
     quad = mapInterface->getGraphicsObjectFactory()->createQuad(shader->asShaderProgramInterface());
     this->shader = shader;
     renderConfig = std::make_shared<RenderConfig>(quad->asGraphicsObject(), 0);
 }
 
-std::vector<std::shared_ptr<RenderConfigInterface>> Circle2dLayerObject::getRenderConfig() {
-    return { renderConfig };
-}
+std::vector<std::shared_ptr<RenderConfigInterface>> Circle2dLayerObject::getRenderConfig() { return {renderConfig}; }
 
-void Circle2dLayerObject::setColor(Color color) {
-    shader->setColor(color.r, color.g, color.b, color.a);
-}
+void Circle2dLayerObject::setColor(Color color) { shader->setColor(color.r, color.g, color.b, color.a); }
 
 void Circle2dLayerObject::setPosition(Coord position, double radius) {
     Coord renderPos = conversionHelper->convertToRenderSystem(position);
-    quad->setFrame(Quad2dD(Vec2D(renderPos.x - radius, renderPos.y - radius),
-            Vec2D(renderPos.x + radius, renderPos.y - radius),
-            Vec2D(renderPos.x + radius, renderPos.y + radius),
-            Vec2D(renderPos.x - radius, renderPos.y + radius)), RectD(0, 0, 1, 1));
+    quad->setFrame(Quad2dD(Vec2D(renderPos.x - radius, renderPos.y - radius), Vec2D(renderPos.x + radius, renderPos.y - radius),
+                           Vec2D(renderPos.x + radius, renderPos.y + radius), Vec2D(renderPos.x - radius, renderPos.y + radius)),
+                   RectD(0, 0, 1, 1));
 }
 
-std::shared_ptr<Quad2dInterface> Circle2dLayerObject::getQuadObject() {
-    return quad;
-}
+std::shared_ptr<Quad2dInterface> Circle2dLayerObject::getQuadObject() { return quad; }

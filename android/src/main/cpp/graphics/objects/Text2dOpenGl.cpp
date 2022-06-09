@@ -26,9 +26,7 @@ void Text2dOpenGl::clear() {
     removeTexture();
 }
 
-void Text2dOpenGl::setIsInverseMasked(bool inversed) {
-    isMaskInversed = inversed;
-}
+void Text2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
 
 void Text2dOpenGl::setTexts(const std::vector<TextDescription> &texts) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
@@ -36,8 +34,8 @@ void Text2dOpenGl::setTexts(const std::vector<TextDescription> &texts) {
     dataReady = false;
 
     std::vector<GlyphDescription> newGlyphs;
-    for (const auto & text : texts) {
-        for (const auto & glyph : text.glyphs) {
+    for (const auto &text : texts) {
+        for (const auto &glyph : text.glyphs) {
             newGlyphs.push_back(glyph);
         }
     }
@@ -50,17 +48,17 @@ void Text2dOpenGl::setTexts(const std::vector<TextDescription> &texts) {
     for (int i = 0; i < numGlyphs; i++) {
         const auto &glyph = glyphDescriptions.at(i);
 
-        vertices.push_back((float) glyph.frame.topLeft.x);
-        vertices.push_back((float) glyph.frame.topLeft.y);
+        vertices.push_back((float)glyph.frame.topLeft.x);
+        vertices.push_back((float)glyph.frame.topLeft.y);
 
-        vertices.push_back((float) glyph.frame.bottomLeft.x);
-        vertices.push_back((float) glyph.frame.bottomLeft.y);
+        vertices.push_back((float)glyph.frame.bottomLeft.x);
+        vertices.push_back((float)glyph.frame.bottomLeft.y);
 
-        vertices.push_back((float) glyph.frame.bottomRight.x);
-        vertices.push_back((float) glyph.frame.bottomRight.y);
+        vertices.push_back((float)glyph.frame.bottomRight.x);
+        vertices.push_back((float)glyph.frame.bottomRight.y);
 
-        vertices.push_back((float) glyph.frame.topRight.x);
-        vertices.push_back((float) glyph.frame.topRight.y);
+        vertices.push_back((float)glyph.frame.topRight.x);
+        vertices.push_back((float)glyph.frame.topRight.y);
 
         indices.push_back(i * 4);
         indices.push_back(i * 4 + 1);
@@ -75,7 +73,8 @@ void Text2dOpenGl::setTexts(const std::vector<TextDescription> &texts) {
 }
 
 void Text2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
-    if (ready || !dataReady) return;
+    if (ready || !dataReady)
+        return;
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
@@ -210,7 +209,6 @@ void Text2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     // Draw the triangles
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_BYTE, nullptr);
-
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 

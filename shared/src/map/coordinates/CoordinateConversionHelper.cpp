@@ -11,13 +11,12 @@
 #include "CoordinateConversionHelper.h"
 #include "CoordinateSystemIdentifiers.h"
 #include "DefaultSystemToRenderConverter.h"
+#include "EPSG2056ToEPGS21781Converter.h"
 #include "EPSG2056ToEPSG4326Converter.h"
+#include "EPSG21781ToEPGS2056Converter.h"
 #include "EPSG3857ToEPSG4326Converter.h"
 #include "EPSG4326ToEPSG2056Converter.h"
 #include "EPSG4326ToEPSG3857Converter.h"
-#include "EPSG2056ToEPGS21781Converter.h"
-#include "EPSG21781ToEPGS2056Converter.h"
-
 
 /**
  * This instance is independent of the map and does not know about the rendering system.
@@ -25,14 +24,15 @@
  */
 std::shared_ptr<CoordinateConversionHelperInterface> CoordinateConversionHelperInterface::independentInstance() {
     static std::shared_ptr<CoordinateConversionHelperInterface> singleton;
-    if (singleton) return singleton;
+    if (singleton)
+        return singleton;
     singleton = std::make_shared<CoordinateConversionHelper>();
     return singleton;
 }
 
 CoordinateConversionHelper::CoordinateConversionHelper(MapCoordinateSystem mapCoordinateSystem)
-        : mapCoordinateSystemIdentier(mapCoordinateSystem.identifier),
-          renderSystemConverter(std::make_shared<DefaultSystemToRenderConverter>(mapCoordinateSystem)) {
+    : mapCoordinateSystemIdentier(mapCoordinateSystem.identifier)
+    , renderSystemConverter(std::make_shared<DefaultSystemToRenderConverter>(mapCoordinateSystem)) {
     registerConverter(renderSystemConverter);
     addDefaultConverters();
 }
@@ -41,10 +41,7 @@ CoordinateConversionHelper::CoordinateConversionHelper(MapCoordinateSystem mapCo
  * This instance is independent of the map and does not know about the rendering system.
  * It can not be used to convert coordinates into rendering space.
  */
-CoordinateConversionHelper::CoordinateConversionHelper() {
-    addDefaultConverters();
-}
-
+CoordinateConversionHelper::CoordinateConversionHelper() { addDefaultConverters(); }
 
 void CoordinateConversionHelper::addDefaultConverters() {
     registerConverter(std::make_shared<EPSG4326ToEPSG3857Converter>());
@@ -145,8 +142,8 @@ void CoordinateConversionHelper::precomputeConverterHelper() {
             auto from = converterFirst.second->getFrom();
             auto to = converterSecond.second->getTo();
 
-            if (from != to &&
-                fromToConverterMap.count({from, to}) == 0 && converterFirst.second->getTo() == converterSecond.second->getFrom()) {
+            if (from != to && fromToConverterMap.count({from, to}) == 0 &&
+                converterFirst.second->getTo() == converterSecond.second->getFrom()) {
                 converterHelper[{from, to}] = {converterFirst.second, converterSecond.second};
             }
         }
@@ -176,8 +173,7 @@ void CoordinateConversionHelper::precomputeConverterHelper() {
                     auto from = converterFirst.second->getFrom();
                     auto to = converterFourth.second->getTo();
 
-                    if (from != to &&
-                        fromToConverterMap.count({from, to}) == 0 && converterHelper.count({from, to}) == 0 &&
+                    if (from != to && fromToConverterMap.count({from, to}) == 0 && converterHelper.count({from, to}) == 0 &&
                         converterFirst.second->getTo() == converterSecond.second->getFrom() &&
                         converterSecond.second->getTo() == converterThird.second->getFrom() &&
                         converterThird.second->getTo() == converterFourth.second->getFrom()) {

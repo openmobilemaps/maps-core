@@ -12,8 +12,8 @@
 #include "IconInfo.h"
 
 std::shared_ptr<IconInfoInterface> IconFactory::createIcon(const std::string &identifier, const ::Coord &coordinate,
-                                                             const std::shared_ptr<::TextureHolderInterface> &texture,
-                                                             const ::Vec2F &iconSize, IconType scaleType) {
+                                                           const std::shared_ptr<::TextureHolderInterface> &texture,
+                                                           const ::Vec2F &iconSize, IconType scaleType) {
     return std::make_shared<IconInfo>(identifier, coordinate, texture, iconSize, scaleType, Vec2F(0.5, 0.5));
 }
 

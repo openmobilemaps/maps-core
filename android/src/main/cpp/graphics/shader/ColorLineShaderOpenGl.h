@@ -28,17 +28,19 @@ class ColorLineShaderOpenGl : public BaseShaderProgramOpenGl,
 
     virtual void preRender(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
-    virtual void setStyle(const ::LineStyle & lineStyle) override;
+    virtual void setStyle(const ::LineStyle &lineStyle) override;
 
     virtual void setHighlighted(bool highlighted) override;
 
-protected:
+  protected:
     virtual std::string getVertexShader() override;
 
     virtual std::string getFragmentShader() override;
 
   private:
-    LineStyle lineStyle = LineStyle(ColorStateList(Color(1.0, 0.0, 0.0, 1.0), Color(1.0, 0.0, 0.0, 1.0)), ColorStateList(Color(0.0, 0.0, 0.0, 0.0), Color(0.0, 0.0, 0.0, 0.0)), 1.0, SizeType::SCREEN_PIXEL, 4.0, {}, LineCapType::ROUND);
+    LineStyle lineStyle = LineStyle(ColorStateList(Color(1.0, 0.0, 0.0, 1.0), Color(1.0, 0.0, 0.0, 1.0)),
+                                    ColorStateList(Color(0.0, 0.0, 0.0, 0.0), Color(0.0, 0.0, 0.0, 0.0)), 1.0,
+                                    SizeType::SCREEN_PIXEL, 4.0, {}, LineCapType::ROUND);
     Color lineColor = lineStyle.color.normal;
     float miter;
     bool isHighlighted;

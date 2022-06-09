@@ -15,14 +15,14 @@
 #include "MapCamera2dInterface.h"
 #include "MapInterface.h"
 #include "PolygonHelper.h"
-#include "RenderPass.h"
 #include "RenderObject.h"
+#include "RenderPass.h"
 #include <map>
 
 #include "PolygonCompare.h"
 
 PolygonLayer::PolygonLayer()
-        : isHidden(false) {}
+    : isHidden(false) {}
 
 void PolygonLayer::setPolygons(const std::vector<PolygonInfo> &polygons) {
     clear();
@@ -79,13 +79,11 @@ void PolygonLayer::remove(const PolygonInfo &polygon) {
         mapInterface->invalidate();
 }
 
-void PolygonLayer::add(const PolygonInfo &polygon) {
-    addAll({polygon});
-}
-
+void PolygonLayer::add(const PolygonInfo &polygon) { addAll({polygon}); }
 
 void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
-    if (polygons.empty()) return;
+    if (polygons.empty())
+        return;
 
     auto lockSelfPtr = shared_from_this();
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
@@ -110,8 +108,7 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
             auto polygonGraphicsObject = objectFactory->createPolygon(shader->asShaderProgramInterface());
 
             auto polygonObject =
-                    std::make_shared<Polygon2dLayerObject>(mapInterface->getCoordinateConverterHelper(), polygonGraphicsObject,
-                                                           shader);
+                std::make_shared<Polygon2dLayerObject>(mapInterface->getCoordinateConverterHelper(), polygonGraphicsObject, shader);
 
             polygonObject->setPolygon(polygon.coordinates);
             polygonObject->setColor(polygon.color);
@@ -122,13 +119,14 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
     }
 
     std::weak_ptr<PolygonLayer> weakSelfPtr = std::dynamic_pointer_cast<PolygonLayer>(shared_from_this());
-    mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
-            TaskConfig("PolygonLayer_setup_" + polygons[0].identifier + ",...", 0, TaskPriority::NORMAL,
-                       ExecutionEnvironment::GRAPHICS),
-            [weakSelfPtr, polygonGraphicsObjects] {
-                auto selfPtr = weakSelfPtr.lock();
-                if (selfPtr) selfPtr->setupPolygonObjects(polygonGraphicsObjects);
-            }));
+    mapInterface->getScheduler()->addTask(
+        std::make_shared<LambdaTask>(TaskConfig("PolygonLayer_setup_" + polygons[0].identifier + ",...", 0, TaskPriority::NORMAL,
+                                                ExecutionEnvironment::GRAPHICS),
+                                     [weakSelfPtr, polygonGraphicsObjects] {
+                                         auto selfPtr = weakSelfPtr.lock();
+                                         if (selfPtr)
+                                             selfPtr->setupPolygonObjects(polygonGraphicsObjects);
+                                     }));
 
     generateRenderPasses();
 }
@@ -177,7 +175,8 @@ void PolygonLayer::pause() {
         }
     }
     if (mask) {
-        if (mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->clear();
+        if (mask->asGraphicsObject()->isReady())
+            mask->asGraphicsObject()->clear();
     }
 }
 
@@ -194,7 +193,8 @@ void PolygonLayer::resume() {
         }
     }
     if (mask) {
-        if (!mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(renderingContext);
+        if (!mask->asGraphicsObject()->isReady())
+            mask->asGraphicsObject()->setup(renderingContext);
     }
 }
 
@@ -212,14 +212,14 @@ void PolygonLayer::generateRenderPasses() {
         for (auto const &object : p.second) {
             for (auto config : object.second->getRenderConfig()) {
                 renderPassObjectMap[config->getRenderIndex()].push_back(
-                        std::make_shared<RenderObject>(config->getGraphicsObject()));
+                    std::make_shared<RenderObject>(config->getGraphicsObject()));
             }
         }
     }
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
     for (const auto &passEntry : renderPassObjectMap) {
-        std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second,
-                                                                              mask);
+        std::shared_ptr<RenderPass> renderPass =
+            std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second, mask);
         newRenderPasses.push_back(renderPass);
     }
     {
@@ -231,7 +231,8 @@ void PolygonLayer::generateRenderPasses() {
 void PolygonLayer::update() {
     auto mapInterface = this->mapInterface;
     if (mapInterface && mask) {
-        if (!mask->asGraphicsObject()->isReady()) mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+        if (!mask->asGraphicsObject()->isReady())
+            mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
     }
 }
 
@@ -259,12 +260,12 @@ void PolygonLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
 }
 
 void PolygonLayer::onRemoved() {
-    if (mapInterface && isLayerClickable) mapInterface->getTouchHandler()->removeListener(shared_from_this());
+    if (mapInterface && isLayerClickable)
+        mapInterface->getTouchHandler()->removeListener(shared_from_this());
     mapInterface = nullptr;
 }
 
-void
-PolygonLayer::setCallbackHandler(const std::shared_ptr<PolygonLayerCallbackInterface> &handler) { callbackHandler = handler; }
+void PolygonLayer::setCallbackHandler(const std::shared_ptr<PolygonLayerCallbackInterface> &handler) { callbackHandler = handler; }
 
 void PolygonLayer::hide() {
     isHidden = true;
@@ -312,7 +313,6 @@ bool PolygonLayer::onTouchDown(const ::Vec2F &posScreen) {
             if (selectedPolygon && ((*selectedPolygon).identifier != (*highlightedPolygon).identifier)) {
                 for (auto &p : polygons[selectedPolygon->identifier]) {
                     p.second->setColor(p.first.color);
-
                 }
 
                 selectedPolygon = std::nullopt;
@@ -364,7 +364,8 @@ void PolygonLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterfa
 }
 
 void PolygonLayer::setLayerClickable(bool isLayerClickable) {
-    if(this->isLayerClickable == isLayerClickable) return;
+    if (this->isLayerClickable == isLayerClickable)
+        return;
     this->isLayerClickable = isLayerClickable;
     if (mapInterface) {
         if (isLayerClickable) {

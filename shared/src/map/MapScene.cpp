@@ -10,14 +10,14 @@
 
 #include "MapScene.h"
 #include "CoordinateConversionHelper.h"
+#include "DateHelper.h"
 #include "DefaultTouchHandlerInterface.h"
 #include "LambdaTask.h"
 #include "LayerInterface.h"
 #include "MapCallbackInterface.h"
 #include "MapCamera2dInterface.h"
-#include "TouchInterface.h"
-#include "DateHelper.h"
 #include "MapReadyCallbackInterface.h"
+#include "TouchInterface.h"
 #include <algorithm>
 
 #include "Tiled2dMapRasterLayer.h"
@@ -40,7 +40,7 @@ MapScene::MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig &mapCo
 
 MapScene::~MapScene() {
     std::lock_guard<std::recursive_mutex> lock(layersMutex);
-    for (const auto &layerEntry: layers) {
+    for (const auto &layerEntry : layers) {
         layerEntry.second->onRemoved();
     }
 }
@@ -103,7 +103,8 @@ void MapScene::addLayer(const std::shared_ptr<::LayerInterface> &layer) {
     layer->onAdded(shared_from_this());
     std::lock_guard<std::recursive_mutex> lock(layersMutex);
     int topIndex = -1;
-    if (!layers.empty()) topIndex = layers.rbegin()->first;
+    if (!layers.empty())
+        topIndex = layers.rbegin()->first;
     layers[topIndex + 1] = layer;
 }
 
@@ -192,7 +193,8 @@ void MapScene::setViewportSize(const ::Vec2I &size) {
 void MapScene::setBackgroundColor(const Color &color) { getRenderingContext()->setBackgroundColor(color); }
 
 void MapScene::invalidate() {
-    if (isInvalidated.test_and_set()) return;
+    if (isInvalidated.test_and_set())
+        return;
 
     if (auto handler = callbackHandler) {
         handler->invalidate();
@@ -249,7 +251,8 @@ void MapScene::pause() {
         }));
 }
 
-void MapScene::drawReadyFrame(const ::RectCoord & bounds, float timeout, const std::shared_ptr<MapReadyCallbackInterface> & callbacks) {
+void MapScene::drawReadyFrame(const ::RectCoord &bounds, float timeout,
+                              const std::shared_ptr<MapReadyCallbackInterface> &callbacks) {
 
     // for now we only support drawing a ready frame, therefore
     // we disable animations in the layers
@@ -271,11 +274,11 @@ void MapScene::drawReadyFrame(const ::RectCoord & bounds, float timeout, const s
 
     long long timeoutTimestamp = DateHelper::currentTimeMillis() + (long long)(timeout * 1000);
 
-    while(state == LayerReadyState::NOT_READY) {
+    while (state == LayerReadyState::NOT_READY) {
         state = getLayersReadyState();
 
         auto now = DateHelper::currentTimeMillis();
-        if(now > timeoutTimestamp) {
+        if (now > timeoutTimestamp) {
             state = LayerReadyState::TIMEOUT_ERROR;
         }
 
@@ -296,7 +299,7 @@ LayerReadyState MapScene::getLayersReadyState() {
 
     for (const auto &layer : layers) {
         auto state = layer.second->isReadyToRenderOffscreen();
-        if(state == LayerReadyState::READY) {
+        if (state == LayerReadyState::READY) {
             continue;
         }
 
@@ -305,7 +308,6 @@ LayerReadyState MapScene::getLayersReadyState() {
 
     return LayerReadyState::READY;
 }
-
 
 void MapScene::forceReload() {
     std::lock_guard<std::recursive_mutex> lock(layersMutex);

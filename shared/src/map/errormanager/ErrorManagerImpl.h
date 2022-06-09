@@ -10,32 +10,31 @@
 #pragma once
 
 #include "ErrorManager.h"
-#include "TiledLayerError.h"
 #include "ErrorManagerListener.h"
-#include <vector>
+#include "TiledLayerError.h"
 #include <mutex>
 #include <unordered_map>
+#include <vector>
 
-class ErrorManagerImpl: public ErrorManager,
-                         public std::enable_shared_from_this<ErrorManagerImpl> {
-public:
-   ErrorManagerImpl() {};
+class ErrorManagerImpl : public ErrorManager, public std::enable_shared_from_this<ErrorManagerImpl> {
+  public:
+    ErrorManagerImpl(){};
 
-    virtual void addErrorListener(const std::shared_ptr<ErrorManagerListener> & listener) override;
+    virtual void addErrorListener(const std::shared_ptr<ErrorManagerListener> &listener) override;
 
-    virtual void removeErrorListener(const std::shared_ptr<ErrorManagerListener> & listener) override;
+    virtual void removeErrorListener(const std::shared_ptr<ErrorManagerListener> &listener) override;
 
-    virtual void addTiledLayerError(const TiledLayerError & error) override;
+    virtual void addTiledLayerError(const TiledLayerError &error) override;
 
-    virtual void removeError(const std::string & url) override;
+    virtual void removeError(const std::string &url) override;
 
     virtual void clearAllErrors() override;
 
-private:
+  private:
     std::recursive_mutex mutex;
     std::unordered_map<std::string, TiledLayerError> tiledLayerErrors;
     std::vector<std::shared_ptr<ErrorManagerListener>> listeners;
 
-    bool containsRect(const ::RectCoord & outer, const ::RectCoord & inner);
+    bool containsRect(const ::RectCoord &outer, const ::RectCoord &inner);
     void notifyListeners();
 };
