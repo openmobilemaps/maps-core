@@ -137,7 +137,7 @@ class MapViewController: UIViewController {
   lazy var loader = MCTextureLoader()
 
   lazy var rasterLayer = MCTiled2dMapRasterLayerInterface.create(TiledLayerConfig(),
-                                                    textureLoader: loader)
+                                                    loader: loader)
   
   override func loadView() { view = mapView }
   
