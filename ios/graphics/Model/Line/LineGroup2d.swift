@@ -233,7 +233,7 @@ extension LineGroup2d: MCLineGroup2dInterface {
 extension LineGroup2d: MCLine2dInterface {
     func setLinePositions(_ positions: [MCVec2D]) {
         setLines([
-            MCRenderLineDescription(positions: positions, styleIndex: 0)
+            MCRenderLineDescription(positions: positions, styleIndex: 0),
         ])
     }
 }

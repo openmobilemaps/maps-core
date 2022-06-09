@@ -92,10 +92,9 @@ class LineGroupShader: BaseShader {
     }
 
     private var state = State.normal
-    
 
-    init(sigleStyle: Bool = false) {
-        self.styleBufferSize = sigleStyle ? 1 : 32
+    init(styleBufferSize: Int = 32) {
+        self.styleBufferSize = styleBufferSize
         guard let buffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<LineGroupStyle>.stride * self.styleBufferSize, options: []) else { fatalError("Could not create buffer") }
         lineStyleBuffer = buffer
     }
@@ -122,7 +121,7 @@ class LineGroupShader: BaseShader {
 
 extension LineGroupShader: MCLineGroupShaderInterface {
     func setStyles(_ lineStyles: [MCLineStyle]) {
-        guard lineStyles.count < self.styleBufferSize else { fatalError("line style error exceeds buffer size") }
+        guard lineStyles.count <= self.styleBufferSize else { fatalError("line style error exceeds buffer size") }
 
         guard lineStyles != currentStyles else {
             return
@@ -132,7 +131,7 @@ extension LineGroupShader: MCLineGroupShaderInterface {
 
         var mappedLineStyles: [LineGroupStyle] = []
         for l in lineStyles {
-            mappedLineStyles.append(LineGroupStyle(style: l, highlighted: false))
+            mappedLineStyles.append(LineGroupStyle(style: l, highlighted: state == .highlighted))
         }
 
         lineStyleBuffer.contents().copyMemory(from: mappedLineStyles, byteCount: mappedLineStyles.count * MemoryLayout<LineGroupStyle>.stride)
@@ -143,25 +142,19 @@ extension LineGroupShader: MCLineGroupShaderInterface {
     }
 }
 
-
 extension LineGroupShader: MCColorLineShaderInterface {
     func setStyle(_ lineStyle: MCLineStyle) {
-
-        currentStyles = [lineStyle]
-
-        var mappedLineStyles: [LineGroupStyle] = []
-        mappedLineStyles.append(LineGroupStyle(style: lineStyle, highlighted: state == .highlighted))
-        lineStyleBuffer.contents().copyMemory(from: mappedLineStyles, byteCount: MemoryLayout<LineGroupStyle>.stride)
+        setStyles([lineStyle])
     }
+
     func setHighlighted(_ highlighted: Bool) {
         if highlighted {
             state = .highlighted
         } else if state == .highlighted {
             state = .normal
         }
-
-        if let style = currentStyles.first {
-            setStyle(style)
-        }
+        let styles = currentStyles
+        currentStyles.removeAll()
+        setStyles(styles)
     }
 }

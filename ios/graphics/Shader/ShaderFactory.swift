@@ -29,7 +29,7 @@ class ShaderFactory: MCShaderFactoryInterface {
     }
 
     func createColorLineShader() -> MCColorLineShaderInterface? {
-        LineGroupShader(sigleStyle: true)
+        LineGroupShader(styleBufferSize: 1)
     }
 
     func createLineGroupShader() -> MCLineGroupShaderInterface? {
