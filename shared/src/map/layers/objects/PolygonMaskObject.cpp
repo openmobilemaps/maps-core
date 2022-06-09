@@ -11,28 +11,29 @@
 #include "PolygonMaskObject.h"
 #include "EarcutVec2D.h"
 
-std::shared_ptr<PolygonMaskObjectInterface> PolygonMaskObjectInterface::create(const std::shared_ptr<::GraphicsObjectFactoryInterface> & graphicsObjectFactory, const std::shared_ptr<::CoordinateConversionHelperInterface> & conversionHelper) {
-    return std::make_shared<PolygonMaskObject>(graphicsObjectFactory,conversionHelper);
+std::shared_ptr<PolygonMaskObjectInterface>
+PolygonMaskObjectInterface::create(const std::shared_ptr<::GraphicsObjectFactoryInterface> &graphicsObjectFactory,
+                                   const std::shared_ptr<::CoordinateConversionHelperInterface> &conversionHelper) {
+    return std::make_shared<PolygonMaskObject>(graphicsObjectFactory, conversionHelper);
 }
 
 PolygonMaskObject::PolygonMaskObject(const std::shared_ptr<GraphicsObjectFactoryInterface> &graphicsObjectFactory,
                                      const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper)
-        : conversionHelper(conversionHelper), polygon(graphicsObjectFactory->createPolygonMask()) {}
+    : conversionHelper(conversionHelper)
+    , polygon(graphicsObjectFactory->createPolygonMask()) {}
 
 void PolygonMaskObject::setPositions(const std::vector<Coord> &positions, const std::vector<std::vector<Coord>> &holes) {
     setPolygon({positions, holes});
 }
 
-void PolygonMaskObject::setPolygon(const ::PolygonCoord &polygon){
-    setPolygons({polygon});
-}
+void PolygonMaskObject::setPolygon(const ::PolygonCoord &polygon) { setPolygons({polygon}); }
 
-void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons){
+void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons) {
     std::vector<int32_t> indices;
     std::vector<Vec2D> vertices;
     int32_t indexOffset = 0;
 
-    for (auto const &polygon: polygons) {
+    for (auto const &polygon : polygons) {
         std::vector<std::vector<Vec2D>> renderCoords;
         std::vector<Vec2D> polygonCoords;
         for (const Coord &mapCoord : polygon.positions) {
@@ -51,22 +52,18 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons)
         }
         std::vector<int32_t> curIndices = mapbox::earcut<int32_t>(renderCoords);
 
-        for (auto const& index: curIndices) {
+        for (auto const &index : curIndices) {
             indices.push_back(indexOffset + index);
         }
 
-        for (auto const &list: renderCoords) {
+        for (auto const &list : renderCoords) {
             indexOffset += list.size();
 
             vertices.insert(vertices.end(), list.begin(), list.end());
         }
-
     }
 
     polygon->setVertices(vertices, indices);
 }
 
-
-std::shared_ptr<Polygon2dInterface> PolygonMaskObject::getPolygonObject() {
-    return polygon;
-}
+std::shared_ptr<Polygon2dInterface> PolygonMaskObject::getPolygonObject() { return polygon; }

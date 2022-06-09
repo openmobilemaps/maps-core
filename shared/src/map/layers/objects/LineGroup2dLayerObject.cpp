@@ -12,8 +12,8 @@
 #include "RenderLineDescription.h"
 
 LineGroup2dLayerObject::LineGroup2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
-                                     const std::shared_ptr<LineGroup2dInterface> &line,
-                                     const std::shared_ptr<LineGroupShaderInterface> &shader)
+                                               const std::shared_ptr<LineGroup2dInterface> &line,
+                                               const std::shared_ptr<LineGroupShaderInterface> &shader)
     : conversionHelper(conversionHelper)
     , line(line)
     , shader(shader)
@@ -23,10 +23,9 @@ void LineGroup2dLayerObject::update() {}
 
 std::vector<std::shared_ptr<RenderConfigInterface>> LineGroup2dLayerObject::getRenderConfig() { return {renderConfig}; }
 
-
 void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<Coord>, int>> &lines) {
     std::vector<RenderLineDescription> renderCoordsGroups;
-    for (auto const &line: lines) {
+    for (auto const &line : lines) {
         std::vector<Vec2D> renderCoords;
         for (auto const &mapCoord : std::get<0>(line)) {
             Coord renderCoord = conversionHelper->convertToRenderSystem(mapCoord);
@@ -38,9 +37,7 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<C
     line->setLines(renderCoordsGroups);
 }
 
-void LineGroup2dLayerObject::setStyles(const std::vector<LineStyle> &styles){
-    shader->setStyles(styles);
-}
+void LineGroup2dLayerObject::setStyles(const std::vector<LineStyle> &styles) { shader->setStyles(styles); }
 
 std::shared_ptr<GraphicsObjectInterface> LineGroup2dLayerObject::getLineObject() { return line->asGraphicsObject(); }
 

@@ -9,22 +9,18 @@
  */
 
 #include "Quad2dOpenGl.h"
+#include "Logger.h"
 #include "OpenGlHelper.h"
 #include "TextureHolderInterface.h"
-#include "Logger.h"
 
 Quad2dOpenGl::Quad2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
     : shaderProgram(shader) {}
 
 bool Quad2dOpenGl::isReady() { return ready; }
 
-std::shared_ptr<GraphicsObjectInterface> Quad2dOpenGl::asGraphicsObject() {
-    return shared_from_this();
-}
+std::shared_ptr<GraphicsObjectInterface> Quad2dOpenGl::asGraphicsObject() { return shared_from_this(); }
 
-std::shared_ptr<MaskingObjectInterface> Quad2dOpenGl::asMaskingObject() {
-    return shared_from_this();
-}
+std::shared_ptr<MaskingObjectInterface> Quad2dOpenGl::asMaskingObject() { return shared_from_this(); }
 
 void Quad2dOpenGl::clear() {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
@@ -33,9 +29,7 @@ void Quad2dOpenGl::clear() {
     removeTexture();
 }
 
-void Quad2dOpenGl::setIsInverseMasked(bool inversed) {
-    isMaskInversed = inversed;
-}
+void Quad2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
 
 void Quad2dOpenGl::setFrame(const Quad2dD &frame, const RectD &textureCoordinates) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
@@ -89,7 +83,6 @@ void Quad2dOpenGl::prepareGlData(const std::shared_ptr<OpenGlContext> &openGlCon
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLubyte) * indices.size(), &indices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-
     mvpMatrixHandle = glGetUniformLocation(programHandle, "uMVPMatrix");
 }
 
@@ -115,13 +108,13 @@ void Quad2dOpenGl::removeGlBuffers() {
     glDeleteBuffers(1, &indexBuffer);
 }
 
-
-void Quad2dOpenGl::loadTexture(const std::shared_ptr<::RenderingContextInterface> & context, const std::shared_ptr<TextureHolderInterface> &textureHolder) {
+void Quad2dOpenGl::loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
+                               const std::shared_ptr<TextureHolderInterface> &textureHolder) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     glGenTextures(1, (unsigned int *)&texturePointer[0]);
 
     if (textureHolder != nullptr) {
-        glBindTexture(GL_TEXTURE_2D, (unsigned int) texturePointer[0]);
+        glBindTexture(GL_TEXTURE_2D, (unsigned int)texturePointer[0]);
 
         textureHolder->attachToGraphics();
 
@@ -139,7 +132,7 @@ void Quad2dOpenGl::loadTexture(const std::shared_ptr<::RenderingContextInterface
 
         glBindTexture(GL_TEXTURE_2D, 0);
 
-        std::shared_ptr <OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
+        std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
         if (ready) {
             prepareTextureCoordsGlData(openGlContext, programHandle);
         } else {

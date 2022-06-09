@@ -14,9 +14,7 @@
 
 std::shared_ptr<ShaderProgramInterface> ColorLineShaderOpenGl::asShaderProgramInterface() { return shared_from_this(); }
 
-
 std::string ColorLineShaderOpenGl::getProgramName() { return "UBMAP_ColorLineShaderOpenGl"; }
-
 
 void ColorLineShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
@@ -64,58 +62,45 @@ void ColorLineShaderOpenGl::setHighlighted(bool highlighted) {
 }
 
 std::string ColorLineShaderOpenGl::getVertexShader() {
-    return UBRendererShaderCode(
-            precision highp float;
-            uniform mat4 uMVPMatrix;
-            attribute vec3 vPosition;
-            attribute vec3 vWidthNormal;
-            attribute vec3 vLengthNormal;
-            attribute vec3 vPointA;
-            attribute vec3 vPointB;
-            uniform float width;
-            uniform float isScaled;
-            uniform float scaleFactor;
+    return UBRendererShaderCode(precision highp float; uniform mat4 uMVPMatrix; attribute vec3 vPosition;
+                                attribute vec3 vWidthNormal; attribute vec3 vLengthNormal; attribute vec3 vPointA;
+                                attribute vec3 vPointB; uniform float width; uniform float isScaled; uniform float scaleFactor;
 
-            varying float radius;
-            varying vec3 pointDeltaA;
-            varying vec3 pointBDeltaA;
-            void main() {
-                float scaledWidth = width * 0.5;
-                if (isScaled > 0.0) {
-                    scaledWidth = scaledWidth * scaleFactor;
-                }
-                vec4 extendedPosition = vec4(vPosition.xyz, 1.0) + vec4((vLengthNormal + vWidthNormal).xyz, 0.0)
-                        * vec4(scaledWidth, scaledWidth, scaledWidth, 0.0);
-                radius = scaledWidth;
-                pointDeltaA = (extendedPosition.xyz - vPointA);
-                pointBDeltaA = vPointB - vPointA;
-                gl_Position = uMVPMatrix * extendedPosition;
-            });
+                                varying float radius; varying vec3 pointDeltaA; varying vec3 pointBDeltaA; void main() {
+                                    float scaledWidth = width * 0.5;
+                                    if (isScaled > 0.0) {
+                                        scaledWidth = scaledWidth * scaleFactor;
+                                    }
+                                    vec4 extendedPosition =
+                                        vec4(vPosition.xyz, 1.0) + vec4((vLengthNormal + vWidthNormal).xyz, 0.0) *
+                                                                       vec4(scaledWidth, scaledWidth, scaledWidth, 0.0);
+                                    radius = scaledWidth;
+                                    pointDeltaA = (extendedPosition.xyz - vPointA);
+                                    pointBDeltaA = vPointB - vPointA;
+                                    gl_Position = uMVPMatrix * extendedPosition;
+                                });
 }
 
 std::string ColorLineShaderOpenGl::getFragmentShader() {
-    return UBRendererShaderCode(precision highp float;
-            uniform vec4 vColor;
-            varying float radius;
-            varying vec3 pointDeltaA;
-            varying vec3 pointBDeltaA;
+    return UBRendererShaderCode(precision highp float; uniform vec4 vColor; varying float radius; varying vec3 pointDeltaA;
+                                varying vec3 pointBDeltaA;
 
-            void main() {
-                float t = dot(pointDeltaA, normalize(pointBDeltaA)) / length(pointBDeltaA);
-                float d;
-                if (t <= 0.0 || t >= 1.0) {
-                    d = min(length(pointDeltaA), length(pointDeltaA - pointBDeltaA));
-                } else {
-                    vec3 intersectPt = t * pointBDeltaA;
-                    d = abs(length(pointDeltaA - intersectPt));
-                }
+                                void main() {
+                                    float t = dot(pointDeltaA, normalize(pointBDeltaA)) / length(pointBDeltaA);
+                                    float d;
+                                    if (t <= 0.0 || t >= 1.0) {
+                                        d = min(length(pointDeltaA), length(pointDeltaA - pointBDeltaA));
+                                    } else {
+                                        vec3 intersectPt = t * pointBDeltaA;
+                                        d = abs(length(pointDeltaA - intersectPt));
+                                    }
 
-                if (d > radius) {
-                    discard;
-                }
+                                    if (d > radius) {
+                                        discard;
+                                    }
 
-                gl_FragColor = vColor;
-                gl_FragColor.a = 1.0;
-                gl_FragColor *= vColor.a;
-            });
+                                    gl_FragColor = vColor;
+                                    gl_FragColor.a = 1.0;
+                                    gl_FragColor *= vColor.a;
+                                });
 }

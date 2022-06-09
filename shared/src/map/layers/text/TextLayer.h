@@ -10,41 +10,39 @@
 
 #pragma once
 
-#include "TextLayerInterface.h"
 #include "SimpleLayerInterface.h"
+#include "TextLayerInterface.h"
 
 #include "Coord.h"
 #include "FontLoaderInterface.h"
-#include "TextLayerObject.h"
-#include "TextInfo.h"
 #include "MapInterface.h"
+#include "TextInfo.h"
+#include "TextLayerObject.h"
 
 #include <atomic>
+#include <map>
 #include <mutex>
 #include <unordered_map>
-#include <map>
 #include <unordered_set>
 #include <vector>
 
-class TextLayer : public TextLayerInterface,
-                  public SimpleLayerInterface,
-                  public std::enable_shared_from_this<TextLayer> {
+class TextLayer : public TextLayerInterface, public SimpleLayerInterface, public std::enable_shared_from_this<TextLayer> {
   public:
-    TextLayer(const std::shared_ptr<::FontLoaderInterface> & fontLoader);
+    TextLayer(const std::shared_ptr<::FontLoaderInterface> &fontLoader);
 
-    virtual void setTexts(const std::vector<std::shared_ptr<TextInfoInterface>> & texts);
+    virtual void setTexts(const std::vector<std::shared_ptr<TextInfoInterface>> &texts);
 
     virtual std::shared_ptr<::LayerInterface> asLayerInterface();
 
     virtual void invalidate();
 
-    virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject);
+    virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> &maskingObject);
 
-    virtual void update() {};
+    virtual void update(){};
 
     virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses();
 
-    virtual void onAdded(const std::shared_ptr<MapInterface> & mapInterface);
+    virtual void onAdded(const std::shared_ptr<MapInterface> &mapInterface);
 
     virtual void onRemoved();
 
@@ -63,7 +61,8 @@ class TextLayer : public TextLayerInterface,
     void add(const std::shared_ptr<TextInfoInterface> &text);
     void addTexts(const std::vector<std::shared_ptr<TextInfoInterface>> &texts);
 
-    void setupTextObjects(const std::vector<std::tuple<const std::shared_ptr<TextInfoInterface>, std::shared_ptr<TextLayerObject>>> &textObjects);
+    void setupTextObjects(
+        const std::vector<std::tuple<const std::shared_ptr<TextInfoInterface>, std::shared_ptr<TextLayerObject>>> &textObjects);
 
     std::vector<std::shared_ptr<TextInfoInterface>> getTexts();
 

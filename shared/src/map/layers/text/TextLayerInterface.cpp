@@ -12,7 +12,6 @@
 
 #include "TextLayer.h"
 
-std::shared_ptr<TextLayerInterface> TextLayerInterface::create(const std::shared_ptr<::FontLoaderInterface> & fontLoader) {
+std::shared_ptr<TextLayerInterface> TextLayerInterface::create(const std::shared_ptr<::FontLoaderInterface> &fontLoader) {
     return std::make_shared<TextLayer>(fontLoader);
 }
-

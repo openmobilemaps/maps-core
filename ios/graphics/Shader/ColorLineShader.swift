@@ -42,10 +42,10 @@ class ColorLineShader: BaseShader {
 
         var color: SIMD4<Float>
         switch state {
-        case .normal:
-            color = SIMD4<Float>(style.color.normal.simdValues)
-        case .highlighted:
-            color = SIMD4<Float>(style.color.highlighted.simdValues)
+            case .normal:
+                color = SIMD4<Float>(style.color.normal.simdValues)
+            case .highlighted:
+                color = SIMD4<Float>(style.color.highlighted.simdValues)
         }
 
         encoder.setFragmentBytes(&color, length: MemoryLayout<SIMD4<Float>>.stride, index: 1)

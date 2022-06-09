@@ -11,15 +11,12 @@
 #include "LineGroup2dOpenGl.h"
 #include <cmath>
 
-LineGroup2dOpenGl::LineGroup2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader) : shaderProgram(shader) { }
+LineGroup2dOpenGl::LineGroup2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
+    : shaderProgram(shader) {}
 
-std::shared_ptr<GraphicsObjectInterface> LineGroup2dOpenGl::asGraphicsObject() {
-    return shared_from_this();
-}
+std::shared_ptr<GraphicsObjectInterface> LineGroup2dOpenGl::asGraphicsObject() { return shared_from_this(); }
 
-bool LineGroup2dOpenGl::isReady() {
-    return ready;
-}
+bool LineGroup2dOpenGl::isReady() { return ready; }
 
 void LineGroup2dOpenGl::setLines(const std::vector<RenderLineDescription> &lines) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
@@ -29,11 +26,11 @@ void LineGroup2dOpenGl::setLines(const std::vector<RenderLineDescription> &lines
     lineIndices.clear();
     lineAttributes.clear();
 
-    int numLines = (int) lines.size();
+    int numLines = (int)lines.size();
     int lineIndexOffset = 0;
     for (int lineIndex = 0; lineIndex < numLines; lineIndex++) {
         int lineStyleIndex = lines[lineIndex].styleIndex;
-        int pointCount = (int) lines[lineIndex].positions.size();
+        int pointCount = (int)lines[lineIndex].positions.size();
 
         float prefixTotalLineLength = 0.0;
 
@@ -52,10 +49,10 @@ void LineGroup2dOpenGl::setLines(const std::vector<RenderLineDescription> &lines
 
             // SegmentType (0 inner, 1 start, 2 end, 3 single segment) | lineStyleIndex
             // (each one Byte, i.e. up to 256 styles if supported by shader!)
-            float lineStyleInfo = lineStyleIndex + (i == 0 && i == iSecondToLast ? (3 << 8)
-                    : (i == 0 ? (float) (1 << 8)
-                    : (i == iSecondToLast ? (float) (2 << 8)
-                    : 0.0)));
+            float lineStyleInfo =
+                lineStyleIndex + (i == 0 && i == iSecondToLast
+                                      ? (3 << 8)
+                                      : (i == 0 ? (float)(1 << 8) : (i == iSecondToLast ? (float)(2 << 8) : 0.0)));
 
             // Vertex 1
             // Position
@@ -156,7 +153,8 @@ void LineGroup2dOpenGl::setLines(const std::vector<RenderLineDescription> &lines
 
 void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (ready || !dataReady) return;
+    if (ready || !dataReady)
+        return;
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     if (openGlContext->getProgram(shaderProgram->getProgramName()) == 0) {
@@ -196,9 +194,7 @@ void LineGroup2dOpenGl::clear() {
     glDeleteBuffers(1, &indexBuffer);
 }
 
-void LineGroup2dOpenGl::setIsInverseMasked(bool inversed) {
-    isMaskInversed = inversed;
-}
+void LineGroup2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
 
 void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                                int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
@@ -227,7 +223,7 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     glUseProgram(program);
 
     // Apply the projection and view transformation
-    glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *) mvpMatrix);
+    glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
     glUniform1f(scaleFactorHandle, screenPixelAsRealMeterFactor);
 
     glEnable(GL_BLEND);
@@ -243,17 +239,17 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     glEnableVertexAttribArray(positionHandle);
     glVertexAttribPointer(positionHandle, 2, GL_FLOAT, false, stride, nullptr);
     glEnableVertexAttribArray(widthNormalHandle);
-    glVertexAttribPointer(widthNormalHandle, 2, GL_FLOAT, false, stride, (float *) sizeAttribGroup);
+    glVertexAttribPointer(widthNormalHandle, 2, GL_FLOAT, false, stride, (float *)sizeAttribGroup);
     glEnableVertexAttribArray(lengthNormalHandle);
-    glVertexAttribPointer(lengthNormalHandle, 2, GL_FLOAT, false, stride, (float *) (sizeAttribGroup * 2));
+    glVertexAttribPointer(lengthNormalHandle, 2, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 2));
     glEnableVertexAttribArray(pointAHandle);
-    glVertexAttribPointer(pointAHandle, 2, GL_FLOAT, false, stride, (float *) (sizeAttribGroup * 3));
+    glVertexAttribPointer(pointAHandle, 2, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 3));
     glEnableVertexAttribArray(pointBHandle);
-    glVertexAttribPointer(pointBHandle, 2, GL_FLOAT, false, stride, (float *) (sizeAttribGroup * 4));
+    glVertexAttribPointer(pointBHandle, 2, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 4));
     glEnableVertexAttribArray(segmentStartLPosHandle);
-    glVertexAttribPointer(segmentStartLPosHandle, 1, GL_FLOAT, false, stride, (float *) (sizeAttribGroup * 5));
+    glVertexAttribPointer(segmentStartLPosHandle, 1, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 5));
     glEnableVertexAttribArray(styleInfoHandle);
-    glVertexAttribPointer(styleInfoHandle, 1, GL_FLOAT, false, stride, (float *) (sizeAttribGroup * 5 + floatSize));
+    glVertexAttribPointer(styleInfoHandle, 1, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 5 + floatSize));
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // Draw the triangle

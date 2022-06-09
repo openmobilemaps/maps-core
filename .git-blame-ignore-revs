@@ -1,0 +1,9 @@
+# .git-blame-ignore-revs
+#  swiftformat
+90d994a7d211aaa6ab09cbec3310e0d8692e7ddb
+# clangformat
+d95d2abcc2be21a9d893bf3f701f38a0cfffd249
+# swiftformat
+6de638a3781c973f292dc11dd142d3417bdee5fc
+# run clang-format
+b4e0611a1886b0c0f8e4e4eafbf4051423ae983b

@@ -58,15 +58,15 @@ struct LineStyle: Equatable {
         dashValue7 = (size > 7 ? Float(truncating: style.dashArray[7]) : 0.0) + dashValue6
 
         switch style.lineCap {
-        case .BUTT:
-            lineCap = 0
-        case .ROUND:
-            lineCap = 1
-        case .SQUARE:
-            lineCap = 2
-        @unknown default:
-            assertionFailure("Line Cap type not supported")
-            lineCap = 1
+            case .BUTT:
+                lineCap = 0
+            case .ROUND:
+                lineCap = 1
+            case .SQUARE:
+                lineCap = 2
+            @unknown default:
+                assertionFailure("Line Cap type not supported")
+                lineCap = 1
         }
     }
 }

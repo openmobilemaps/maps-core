@@ -39,10 +39,10 @@ public enum Sampler: String, CaseIterable {
 
     fileprivate var magFilter: MTLSamplerMinMagFilter {
         switch self {
-        case .magLinear:
-            return .linear
-        case .magNearest:
-            return .nearest
+            case .magLinear:
+                return .linear
+            case .magNearest:
+                return .nearest
         }
     }
 }

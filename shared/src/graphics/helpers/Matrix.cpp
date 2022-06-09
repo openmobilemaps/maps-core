@@ -539,7 +539,7 @@ void Matrix::multiplyMM(std::vector<float> &r, int resultOffset, std::vector<flo
 }
 
 void Matrix::multiplyMMC(std::vector<float> &r, int resultOffset, const std::vector<float> &lhs, int lhsOffset,
-                        const std::vector<float> &rhs, int rhsOffset) {
+                         const std::vector<float> &rhs, int rhsOffset) {
     for (int i = 0; i < 4; i++) {
         const float rhs_i0 = rhs[rhsOffset + I(i, 0)];
         float ri0 = lhs[lhsOffset + I(0, 0)] * rhs_i0;

@@ -28,26 +28,17 @@ std::string CoordinateSystemIdentifiers::EPSG2056() { return "EPSG:2056"; };
 // https://epsg.io/21781
 std::string CoordinateSystemIdentifiers::EPSG21781() { return "EPSG:21781"; };
 
-std::string CoordinateSystemIdentifiers::fromCrsIdentifier(const std::string & identifier) {
-    if (identifier == "urn:ogc:def:crs:EPSG:3857" ||
-        identifier == "urn:ogc:def:crs:EPSG::3857" ||
-        identifier == "EPSG:3857" ||
-        identifier == "urn:ogc:def:crs:EPSG:6.3:3857" ||
-        identifier == "urn:ogc:def:crs:EPSG:6.18.3:3857")
-            return EPSG3857();
-    if (identifier == "urn:ogc:def:crs:EPSG:4326" ||
-        identifier == "urn:ogc:def:crs:EPSG::4326" ||
-        identifier == "EPSG:4326")
-            return EPSG4326();
-    if (identifier == "urn:ogc:def:crs:EPSG:2056" ||
-        identifier == "urn:ogc:def:crs:EPSG::2056" ||
-        identifier == "urn:ogc:def:crs:EPSG:6.3:2056" ||
-        identifier == "EPSG:2056")
-            return EPSG2056();
-    if (identifier == "urn:ogc:def:crs:EPSG:21781" ||
-        identifier == "urn:ogc:def:crs:EPSG::21781" ||
-        identifier == "EPSG:21781")
-            return EPSG21781();
+std::string CoordinateSystemIdentifiers::fromCrsIdentifier(const std::string &identifier) {
+    if (identifier == "urn:ogc:def:crs:EPSG:3857" || identifier == "urn:ogc:def:crs:EPSG::3857" || identifier == "EPSG:3857" ||
+        identifier == "urn:ogc:def:crs:EPSG:6.3:3857" || identifier == "urn:ogc:def:crs:EPSG:6.18.3:3857")
+        return EPSG3857();
+    if (identifier == "urn:ogc:def:crs:EPSG:4326" || identifier == "urn:ogc:def:crs:EPSG::4326" || identifier == "EPSG:4326")
+        return EPSG4326();
+    if (identifier == "urn:ogc:def:crs:EPSG:2056" || identifier == "urn:ogc:def:crs:EPSG::2056" ||
+        identifier == "urn:ogc:def:crs:EPSG:6.3:2056" || identifier == "EPSG:2056")
+        return EPSG2056();
+    if (identifier == "urn:ogc:def:crs:EPSG:21781" || identifier == "urn:ogc:def:crs:EPSG::21781" || identifier == "EPSG:21781")
+        return EPSG21781();
 
-     return "";
+    return "";
 };
