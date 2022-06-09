@@ -40,6 +40,7 @@ open class BaseGraphicsObject {
 extension BaseGraphicsObject: MCGraphicsObjectInterface {
     public func setup(_ context: MCRenderingContextInterface?) {
         self.context = context
+        self.ready = true
     }
 
     public func clear() {
