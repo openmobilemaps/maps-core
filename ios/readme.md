@@ -31,7 +31,7 @@ For App integration within XCode, add this package to your App target. To do thi
 Once you have your Swift package set up, adding Open Mobile Maps as a dependency is as easy as adding it to the dependencies value of your Package.swift.
 ```swift
 dependencies: [
-    .package(url: "https://github.com/openmobilemaps/maps-core.git", .upToNextMajor(from: "1.0.0"))
+    .package(url: "https://github.com/openmobilemaps/maps-core.git", .upToNextMajor(from: "1.4.0"))
 ]
 ```
 
@@ -54,8 +54,9 @@ class TiledLayerConfig: MCTiled2dMapLayerConfig {
     // Defines both an additional scale factor for the tiles, as well as how many
  		// layers above the ideal one should be loaded an displayed as well.
     func getZoomInfo() -> MCTiled2dMapZoomInfo {
-      MCTiled2dMapZoomInfo(zoomLevelScaleFactor: 1.2,
-                           numDrawPreviousLayers: 1)
+      MCTiled2dMapZoomInfo(zoomLevelScaleFactor: 0.65,
+                           numDrawPreviousLayers: 1,
+                           adaptScaleToScreen: true)
     }
 
     // Defines to map coordinate system of the layer

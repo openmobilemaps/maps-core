@@ -1,6 +1,14 @@
 # Changelog for Open Mobile Maps
 
-## next version
+## Version 1.4.0 (09.06.2022)
+- includes earcut.hpp dependency for polygon triangulation
+- adds polygon and line group rendering objects which can be used to efficiently render many objects with a limited number of styles
+- expands line style options
+- adds masking methods to the layerInterface
+- adds scissoring methods to the layerInterface
+- adds option to display tiled raster layer density dependent
+- adds off screen rendering helpers
+- many improvements and bugfixes
 
 ## Version 1.3.3 (16.08.2021)
 - Memory leak fix for Android
