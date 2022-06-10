@@ -13,7 +13,7 @@ import MapCoreSharedModule
 import Metal
 import UIKit
 
-struct LineStyle: Equatable {
+struct LineGroupStyle: Equatable {
     var width: Float
 
     var color: SIMD4<Float>
@@ -36,10 +36,15 @@ struct LineStyle: Equatable {
     var dashValue6: Float = 0
     var dashValue7: Float = 0
 
-    init(style: MCLineStyle) {
+    init(style: MCLineStyle, highlighted: Bool) {
         width = style.width
-        color = style.color.normal.simdValues
-        gapColor = style.gapColor.normal.simdValues
+        if highlighted {
+            color = style.color.highlighted.simdValues
+            gapColor = style.gapColor.highlighted.simdValues
+        } else {
+            color = style.color.normal.simdValues
+            gapColor = style.gapColor.normal.simdValues
+        }
         widthAsPixels = style.widthType == .SCREEN_PIXEL ? 1 : 0
         opacity = style.opacity
 
@@ -74,7 +79,7 @@ struct LineStyle: Equatable {
 class LineGroupShader: BaseShader {
     private var lineStyleBuffer: MTLBuffer
 
-    static let styleBufferSize: Int = 32
+    let styleBufferSize: Int
 
     private var pipeline: MTLRenderPipelineState?
 
@@ -82,8 +87,15 @@ class LineGroupShader: BaseShader {
 
     var currentStyles: [MCLineStyle] = []
 
-    override init() {
-        guard let buffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<LineStyle>.size * Self.styleBufferSize, options: []) else { fatalError("Could not create buffer") }
+    enum State {
+        case normal, highlighted
+    }
+
+    private var state = State.normal
+
+    init(styleBufferSize: Int = 32) {
+        self.styleBufferSize = styleBufferSize
+        guard let buffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<LineGroupStyle>.stride * self.styleBufferSize, options: []) else { fatalError("Could not create buffer") }
         lineStyleBuffer = buffer
     }
 
@@ -109,7 +121,7 @@ class LineGroupShader: BaseShader {
 
 extension LineGroupShader: MCLineGroupShaderInterface {
     func setStyles(_ lineStyles: [MCLineStyle]) {
-        guard lineStyles.count < Self.styleBufferSize else { fatalError("line style error exceeds buffer size") }
+        guard lineStyles.count <= self.styleBufferSize else { fatalError("line style error exceeds buffer size") }
 
         guard lineStyles != currentStyles else {
             return
@@ -117,15 +129,32 @@ extension LineGroupShader: MCLineGroupShaderInterface {
 
         currentStyles = lineStyles
 
-        var mappedLineStyles: [LineStyle] = []
+        var mappedLineStyles: [LineGroupStyle] = []
         for l in lineStyles {
-            mappedLineStyles.append(LineStyle(style: l))
+            mappedLineStyles.append(LineGroupStyle(style: l, highlighted: state == .highlighted))
         }
 
-        lineStyleBuffer.contents().copyMemory(from: mappedLineStyles, byteCount: mappedLineStyles.count * MemoryLayout<LineStyle>.stride)
+        lineStyleBuffer.contents().copyMemory(from: mappedLineStyles, byteCount: mappedLineStyles.count * MemoryLayout<LineGroupStyle>.stride)
     }
 
     func asShaderProgram() -> MCShaderProgramInterface? {
         self
+    }
+}
+
+extension LineGroupShader: MCColorLineShaderInterface {
+    func setStyle(_ lineStyle: MCLineStyle) {
+        setStyles([lineStyle])
+    }
+
+    func setHighlighted(_ highlighted: Bool) {
+        if highlighted {
+            state = .highlighted
+        } else if state == .highlighted {
+            state = .normal
+        }
+        let styles = currentStyles
+        currentStyles.removeAll()
+        setStyles(styles)
     }
 }

@@ -57,7 +57,6 @@ extension PipelineDescriptorFactory {
 
 public enum Pipeline: String, CaseIterable {
     case alphaShader
-    case lineShader
     case lineGroupShader
     case polygonGroupShader
     case pointShader
@@ -69,7 +68,6 @@ public enum Pipeline: String, CaseIterable {
     var label: String {
         switch self {
             case .alphaShader: return "Alpha shader with texture"
-            case .lineShader: return "Line shader with color"
             case .lineGroupShader: return "Line Group shader"
             case .polygonGroupShader: return "Polygon Group shader"
             case .pointShader: return "Point (round) shader with color"
@@ -83,7 +81,6 @@ public enum Pipeline: String, CaseIterable {
     var vertexShader: String {
         switch self {
             case .alphaShader: return "baseVertexShader"
-            case .lineShader: return "lineVertexShader"
             case .lineGroupShader: return "lineGroupVertexShader"
             case .polygonGroupShader: return "polygonGroupVertexShader"
             case .pointShader: return "pointVertexShader"
@@ -97,7 +94,6 @@ public enum Pipeline: String, CaseIterable {
     var fragmentShader: String {
         switch self {
             case .alphaShader: return "baseFragmentShader"
-            case .lineShader: return "lineFragmentShader"
             case .lineGroupShader: return "lineGroupFragmentShader"
             case .polygonGroupShader: return "polygonGroupFragmentShader"
             case .pointShader: return "pointFragmentShader"
@@ -110,7 +106,6 @@ public enum Pipeline: String, CaseIterable {
 
     var vertexDescriptor: MTLVertexDescriptor {
         switch self {
-            case .lineShader: return LineVertex.descriptor
             case .lineGroupShader: return LineVertex.descriptor
             case .polygonGroupShader: return PolygonVertex.descriptor
             default: return Vertex.descriptor
