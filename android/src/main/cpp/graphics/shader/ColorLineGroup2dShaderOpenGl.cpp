@@ -70,7 +70,7 @@ void ColorLineGroup2dShaderOpenGl::setStyles(const std::vector<::LineStyle> &lin
         gapColorValues[sizeGapColorValues * i + 1] = style.gapColor.normal.g;
         gapColorValues[sizeGapColorValues * i + 2] = style.gapColor.normal.b;
         gapColorValues[sizeGapColorValues * i + 3] = style.gapColor.normal.a * style.opacity;
-        int numDashInfo = std::min((int)style.dashArray.size(), maxNumDashValues); // Max num dash infos: 8 (4 dash/gap lengths)
+        int numDashInfo = std::min((int)style.dashArray.size(), maxNumDashValues); // Max num dash infos: 4 (2 dash/gap lengths)
         dashValues[sizeDashValues * i] = numDashInfo;
         float sum = 0.0;
         for (int iDash = 0; iDash < numDashInfo; iDash++) {
@@ -183,7 +183,7 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
                                     }
 
                                     vec4 fragColor = color;
-                                    int dashBase = 9 * int(fLineIndex);
+                                    int dashBase = 5 * int(fLineIndex);
                                     int numDashInfos = int(floor(lineDashValues[dashBase] + 0.5));
                                     if (numDashInfos > 0) {
                                         int baseDashInfos = dashBase + 1;

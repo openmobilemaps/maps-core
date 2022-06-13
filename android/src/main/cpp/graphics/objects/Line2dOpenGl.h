@@ -60,6 +60,8 @@ class Line2dOpenGl : public GraphicsObjectInterface,
     int lengthNormalHandle;
     int pointAHandle;
     int pointBHandle;
+    int segmentStartLPosHandle;
+    int styleInfoHandle;
     GLuint vertexAttribBuffer;
     std::vector<GLfloat> lineAttributes;
     GLuint indexBuffer;
