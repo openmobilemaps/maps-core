@@ -51,6 +51,10 @@ class Tiled2dMapLayer : public SimpleLayerInterface,
 
     virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) override;
 
+    virtual void setErrorManager(const std::shared_ptr< ::ErrorManager> &errorManager) override;
+
+    virtual void forceReload() override;
+
     void onRotationChanged(float angle) override;
 
     void onMapInteraction() override;
@@ -63,9 +67,12 @@ class Tiled2dMapLayer : public SimpleLayerInterface,
 
     std::optional<int32_t> getMaxZoomLevelIdentifier();
 
+    virtual LayerReadyState isReadyToRenderOffscreen() override;
+
 protected:
     std::shared_ptr<MapInterface> mapInterface;
     const std::shared_ptr<Tiled2dMapLayerConfig> layerConfig;
+    std::shared_ptr< ::ErrorManager> errorManager;
     std::shared_ptr<Tiled2dMapSourceInterface> sourceInterface;
 
     bool isHidden = false;

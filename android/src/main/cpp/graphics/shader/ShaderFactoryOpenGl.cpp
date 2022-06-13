@@ -10,11 +10,11 @@
 
 #include "ShaderFactoryOpenGl.h"
 #include "AlphaShaderOpenGl.h"
-#include "ColorLineShaderOpenGl.h"
-#include "ColorLineGroup2dShaderOpenGl.h"
-#include "ColorShaderOpenGl.h"
 #include "ColorCircleShaderOpenGl.h"
+#include "ColorLineGroup2dShaderOpenGl.h"
+#include "ColorLineShaderOpenGl.h"
 #include "ColorPolygonGroup2dShaderOpenGl.h"
+#include "ColorShaderOpenGl.h"
 #include "TextShaderOpenGl.h"
 
 std::shared_ptr<AlphaShaderInterface> ShaderFactoryOpenGl::createAlphaShader() { return std::make_shared<AlphaShaderOpenGl>(); }
@@ -37,6 +37,4 @@ std::shared_ptr<PolygonGroupShaderInterface> ShaderFactoryOpenGl::createPolygonG
     return std::make_shared<ColorPolygonGroup2dShaderOpenGl>();
 }
 
-std::shared_ptr<TextShaderInterface> ShaderFactoryOpenGl::createTextShader() {
-    return std::make_shared<TextShaderOpenGl>();
-}
+std::shared_ptr<TextShaderInterface> ShaderFactoryOpenGl::createTextShader() { return std::make_shared<TextShaderOpenGl>(); }

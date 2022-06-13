@@ -10,15 +10,14 @@
 
 #pragma once
 
-#include "RendererInterface.h"
 #include "RenderPassInterface.h"
+#include "RendererInterface.h"
+#include <map>
 #include <queue>
 #include <vector>
-#include <map>
 
 struct RenderPassInterfaceCompare {
-    bool operator()(std::shared_ptr<RenderPassInterface> &a,
-                    std::shared_ptr<RenderPassInterface> &b){
+    bool operator()(std::shared_ptr<RenderPassInterface> &a, std::shared_ptr<RenderPassInterface> &b) {
         return a->getRenderPassConfig().renderPassIndex > b->getRenderPassConfig().renderPassIndex;
     }
 };
@@ -33,4 +32,6 @@ class Renderer : public RendererInterface {
 
   private:
     std::map<int32_t, std::vector<std::shared_ptr<RenderPassInterface>>> renderQueue;
+
+    std::vector<float> tempMvpMatrix = std::vector<float>(16, 0.0);
 };

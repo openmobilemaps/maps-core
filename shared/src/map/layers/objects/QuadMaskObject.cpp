@@ -13,12 +13,14 @@
 
 QuadMaskObject::QuadMaskObject(const std::shared_ptr<GraphicsObjectFactoryInterface> &graphicsObjectFactory,
                                const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper)
-        : conversionHelper(conversionHelper), quad(graphicsObjectFactory->createQuadMask()) {}
+    : conversionHelper(conversionHelper)
+    , quad(graphicsObjectFactory->createQuadMask()) {}
 
 QuadMaskObject::QuadMaskObject(const std::shared_ptr<GraphicsObjectFactoryInterface> &graphicsObjectFactory,
                                const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                const RectCoord &rectCoord)
-        : conversionHelper(conversionHelper), quad(graphicsObjectFactory->createQuadMask()) {
+    : conversionHelper(conversionHelper)
+    , quad(graphicsObjectFactory->createQuadMask()) {
     setRectCoord(rectCoord);
 }
 
@@ -36,16 +38,13 @@ void QuadMaskObject::setPosition(const ::Coord &coord, double width, double heig
 
 void QuadMaskObject::setPositions(const QuadCoord &coords) {
     QuadCoord renderCoords = conversionHelper->convertQuadToRenderSystem(coords);
-    quad->setFrame(
-            Quad2dD(Vec2D(renderCoords.topLeft.x, renderCoords.topLeft.y), Vec2D(renderCoords.topRight.x, renderCoords.topRight.y),
-                    Vec2D(renderCoords.bottomRight.x, renderCoords.bottomRight.y),
-                    Vec2D(renderCoords.bottomLeft.x, renderCoords.bottomLeft.y)), RectD(0, 0, 1, 1));
+    quad->setFrame(Quad2dD(Vec2D(renderCoords.topLeft.x, renderCoords.topLeft.y),
+                           Vec2D(renderCoords.topRight.x, renderCoords.topRight.y),
+                           Vec2D(renderCoords.bottomRight.x, renderCoords.bottomRight.y),
+                           Vec2D(renderCoords.bottomLeft.x, renderCoords.bottomLeft.y)),
+                   RectD(0, 0, 1, 1));
 }
 
-std::shared_ptr<Quad2dInterface> QuadMaskObject::getQuadObject() {
-    return quad;
-}
+std::shared_ptr<Quad2dInterface> QuadMaskObject::getQuadObject() { return quad; }
 
-std::shared_ptr<MaskingObjectInterface> QuadMaskObject::getMaskObject() {
-    return quad->asMaskingObject();
-}
+std::shared_ptr<MaskingObjectInterface> QuadMaskObject::getMaskObject() { return quad->asMaskingObject(); }

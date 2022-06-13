@@ -26,7 +26,7 @@ class DefaultTouchHandler : public TouchHandlerInterface {
 
     virtual void removeListener(const std::shared_ptr<TouchInterface> &listener) override;
 
-    virtual void insertListener(const std::shared_ptr<TouchInterface> & listener, int32_t index) override;
+    virtual void insertListener(const std::shared_ptr<TouchInterface> &listener, int32_t index) override;
 
   private:
     enum TouchHandlingState {

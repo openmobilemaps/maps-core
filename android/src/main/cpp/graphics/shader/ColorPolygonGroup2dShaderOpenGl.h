@@ -19,7 +19,7 @@ class ColorPolygonGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
                                         public PolygonGroupShaderInterface,
                                         public ShaderProgramInterface,
                                         public std::enable_shared_from_this<ShaderProgramInterface> {
-public:
+  public:
     virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() override;
 
     virtual std::string getProgramName() override;
@@ -28,15 +28,14 @@ public:
 
     virtual void preRender(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
-    virtual void setStyles(const std::vector<::PolygonStyle> & styles) override;
+    virtual void setStyles(const std::vector<::PolygonStyle> &styles) override;
 
-
-protected:
+  protected:
     virtual std::string getVertexShader() override;
 
     virtual std::string getFragmentShader() override;
 
-private:
+  private:
     std::recursive_mutex styleMutex;
     std::vector<GLfloat> polygonStyles;
     GLint numStyles;

@@ -5,6 +5,7 @@
 #import "MCCoordinateConversionHelperInterface.h"
 #import "MCGraphicsObjectFactoryInterface.h"
 #import "MCMapConfig.h"
+#import "MCRectCoord.h"
 #import "MCRenderingContextInterface.h"
 #import "MCSchedulerInterface.h"
 #import "MCShaderFactoryInterface.h"
@@ -15,6 +16,7 @@
 @class MCMapInterface;
 @protocol MCLayerInterface;
 @protocol MCMapCallbackInterface;
+@protocol MCMapReadyCallbackInterface;
 
 
 @interface MCMapInterface : NSObject
@@ -78,5 +80,15 @@
 - (void)resume;
 
 - (void)pause;
+
+/**
+ * changes bounds to bounds, checks all layers for readiness, and updates callbacks, timeout in
+ * seconds, always draw the frame when state is updated in the ready callbacks
+ */
+- (void)drawReadyFrame:(nonnull MCRectCoord *)bounds
+               timeout:(float)timeout
+             callbacks:(nullable id<MCMapReadyCallbackInterface>)callbacks;
+
+- (void)forceReload;
 
 @end

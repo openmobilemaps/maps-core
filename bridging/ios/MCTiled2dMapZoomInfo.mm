@@ -8,24 +8,28 @@
 
 - (nonnull instancetype)initWithZoomLevelScaleFactor:(float)zoomLevelScaleFactor
                                numDrawPreviousLayers:(int32_t)numDrawPreviousLayers
+                                  adaptScaleToScreen:(BOOL)adaptScaleToScreen
 {
     if (self = [super init]) {
         _zoomLevelScaleFactor = zoomLevelScaleFactor;
         _numDrawPreviousLayers = numDrawPreviousLayers;
+        _adaptScaleToScreen = adaptScaleToScreen;
     }
     return self;
 }
 
 + (nonnull instancetype)tiled2dMapZoomInfoWithZoomLevelScaleFactor:(float)zoomLevelScaleFactor
                                              numDrawPreviousLayers:(int32_t)numDrawPreviousLayers
+                                                adaptScaleToScreen:(BOOL)adaptScaleToScreen
 {
     return [(MCTiled2dMapZoomInfo*)[self alloc] initWithZoomLevelScaleFactor:zoomLevelScaleFactor
-                                                       numDrawPreviousLayers:numDrawPreviousLayers];
+                                                       numDrawPreviousLayers:numDrawPreviousLayers
+                                                          adaptScaleToScreen:adaptScaleToScreen];
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p zoomLevelScaleFactor:%@ numDrawPreviousLayers:%@>", self.class, (void *)self, @(self.zoomLevelScaleFactor), @(self.numDrawPreviousLayers)];
+    return [NSString stringWithFormat:@"<%@ %p zoomLevelScaleFactor:%@ numDrawPreviousLayers:%@ adaptScaleToScreen:%@>", self.class, (void *)self, @(self.zoomLevelScaleFactor), @(self.numDrawPreviousLayers), @(self.adaptScaleToScreen)];
 }
 
 @end

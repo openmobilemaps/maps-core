@@ -10,17 +10,17 @@
 
 #pragma once
 
-#include <mutex>
-#include <map>
-#include <unordered_map>
-#include <unordered_set>
-#include "MapInterface.h"
-#include "IconLayerInterface.h"
-#include "SimpleLayerInterface.h"
-#include "SimpleTouchInterface.h"
 #include "IconInfoInterface.h"
 #include "IconLayerCallbackInterface.h"
+#include "IconLayerInterface.h"
+#include "MapInterface.h"
+#include "SimpleLayerInterface.h"
+#include "SimpleTouchInterface.h"
 #include "Textured2dLayerObject.h"
+#include <map>
+#include <mutex>
+#include <unordered_map>
+#include <unordered_set>
 
 class IconLayer : public IconLayerInterface,
                   public SimpleLayerInterface,
@@ -32,19 +32,19 @@ class IconLayer : public IconLayerInterface,
     ~IconLayer(){};
 
     // IconLayerInterface
-    virtual void setIcons(const std::vector<std::shared_ptr<IconInfoInterface>> & icons) override;
+    virtual void setIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &icons) override;
 
     virtual std::vector<std::shared_ptr<IconInfoInterface>> getIcons() override;
 
-    virtual void remove(const std::shared_ptr<IconInfoInterface> & icon) override;
+    virtual void remove(const std::shared_ptr<IconInfoInterface> &icon) override;
 
-    virtual void add(const std::shared_ptr<IconInfoInterface> & icon) override;
+    virtual void add(const std::shared_ptr<IconInfoInterface> &icon) override;
 
-    virtual void addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> & icons);
+    virtual void addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &icons);
 
     virtual void clear() override;
 
-    virtual void setCallbackHandler(const std::shared_ptr<IconLayerCallbackInterface> & handler) override;
+    virtual void setCallbackHandler(const std::shared_ptr<IconLayerCallbackInterface> &handler) override;
 
     virtual std::shared_ptr<::LayerInterface> asLayerInterface() override;
 
@@ -52,7 +52,7 @@ class IconLayer : public IconLayerInterface,
 
     // LayerInterface
 
-    virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) override;
+    virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> &maskingObject) override;
 
     virtual void update() override;
 
@@ -74,8 +74,10 @@ class IconLayer : public IconLayerInterface,
 
     void setLayerClickable(bool isLayerClickable) override;
 
-private:
-    void setupIconObjects(const std::vector<std::tuple<const std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>> &iconObjects);
+  private:
+    void
+    setupIconObjects(const std::vector<std::tuple<const std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>>
+                         &iconObjects);
 
     std::shared_ptr<MapInterface> mapInterface;
 

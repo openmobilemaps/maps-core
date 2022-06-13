@@ -24,7 +24,7 @@ class GraphicsFactory: MCGraphicsObjectFactoryInterface {
 
     func createLine(_ shader: MCShaderProgramInterface?) -> MCLine2dInterface? {
         guard let shader = shader else { fatalError("No Shader provided") }
-        return Line2d(shader: shader, metalContext: .current)
+        return LineGroup2d(shader: shader, metalContext: .current)
     }
 
     func createLineGroup(_ shader: MCShaderProgramInterface?) -> MCLineGroup2dInterface? {

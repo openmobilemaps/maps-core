@@ -12,39 +12,40 @@
 
 #include "GraphicsObjectInterface.h"
 #include "LineGroup2dInterface.h"
-#include "ShaderProgramInterface.h"
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
-#include "opengl_wrapper.h"
 #include "RenderLineDescription.h"
+#include "ShaderProgramInterface.h"
+#include "opengl_wrapper.h"
 #include <mutex>
 
 class LineGroup2dOpenGl : public GraphicsObjectInterface,
                           public LineGroup2dInterface,
                           public std::enable_shared_from_this<GraphicsObjectInterface> {
-public:
+  public:
     LineGroup2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader);
 
     virtual ~LineGroup2dOpenGl() {}
 
     // LineGroup2dInterface
 
-    virtual void setLines(const std::vector<RenderLineDescription> & lines) override;
+    virtual void setLines(const std::vector<RenderLineDescription> &lines) override;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() override;
 
     // GraphicsObjectInterface
     virtual bool isReady() override;
 
-    virtual void setup(const std::shared_ptr<::RenderingContextInterface> & context) override;
+    virtual void setup(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
     virtual void clear() override;
 
-    virtual void render(const std::shared_ptr<::RenderingContextInterface> & context, const ::RenderPassConfig & renderPass, int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
+    virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
+                        int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
     virtual void setIsInverseMasked(bool inversed) override;
 
-protected:
+  protected:
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
     int mvpMatrixHandle;
     int scaleFactorHandle;
@@ -66,5 +67,3 @@ protected:
 
     bool isMaskInversed = false;
 };
-
-

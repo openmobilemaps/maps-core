@@ -9,20 +9,19 @@
  */
 
 #include "GraphicsObjectFactoryOpenGl.h"
+#include "ColorShaderOpenGl.h"
 #include "Line2dOpenGl.h"
 #include "LineGroup2dOpenGl.h"
 #include "Polygon2dOpenGl.h"
 #include "PolygonGroup2dOpenGl.h"
 #include "Quad2dOpenGl.h"
-#include "ColorShaderOpenGl.h"
 #include "Text2dOpenGl.h"
 
 std::shared_ptr<Quad2dInterface> GraphicsObjectFactoryOpenGl::createQuad(const std::shared_ptr<::ShaderProgramInterface> &shader) {
     return std::make_shared<Quad2dOpenGl>(shader);
 }
 
-std::shared_ptr<Line2dInterface>
-GraphicsObjectFactoryOpenGl::createLine(const std::shared_ptr<::ShaderProgramInterface> &Shader) {
+std::shared_ptr<Line2dInterface> GraphicsObjectFactoryOpenGl::createLine(const std::shared_ptr<::ShaderProgramInterface> &Shader) {
     return std::make_shared<Line2dOpenGl>(Shader);
 }
 
@@ -47,7 +46,7 @@ std::shared_ptr<Quad2dInterface> GraphicsObjectFactoryOpenGl::createQuadMask() {
 
 std::shared_ptr<Polygon2dInterface> GraphicsObjectFactoryOpenGl::createPolygonMask() {
     std::shared_ptr<ColorShaderOpenGl> shader = std::make_shared<ColorShaderOpenGl>();
-    shader->setColor(1,1,1,1);
+    shader->setColor(1, 1, 1, 1);
     return std::make_shared<Polygon2dOpenGl>(shader);
 }
 

@@ -16,6 +16,7 @@
 @extern "../yaml/color.yaml"
 @extern "../yaml/render_pass_interface.yaml"
 @extern "../yaml/masking_object_interface.yaml"
+@extern "../yaml/error_manager.yaml"
 
 map_interface = interface +c {
     static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface, rendering_context: rendering_context_interface, map_config: map_config, scheduler: scheduler_interface, pixel_density: f32) : map_interface;
@@ -53,10 +54,27 @@ map_interface = interface +c {
     draw_frame();
     resume();
     pause();
+
+    # changes bounds to bounds, checks all layers for readiness, and updates callbacks, timeout in
+    # seconds, always draw the frame when state is updated in the ready callbacks
+    draw_ready_frame(bounds: rect_coord, timeout: f32, callbacks: map_ready_callback_interface);
+
+    force_reload();
 }
 
 map_callback_interface = interface +c +j +o {
     invalidate();
+}
+
+map_ready_callback_interface = interface +j +o {
+    state_did_update(state: layer_ready_state);
+}
+
+layer_ready_state = enum {
+    ready;
+    not_ready;
+    error;
+    timeout_error;
 }
 
 map_config = record {
@@ -76,10 +94,18 @@ layer_interface = interface +c +j +o {
 
     # optional rectangle, remove scissoring when not set
     set_scissor_rect(scissor_rect: optional<rect_i>);
+
+    is_ready_to_render_offscreen() : layer_ready_state;
+    enable_animations(enabled: bool);
+
+    set_error_manager(error_manager: error_manager);
+    force_reload();
 }
 
 map_camera_2d_interface = interface +c {
     static create(map_interface: map_interface, screen_density_ppi: f32): map_camera_2d_interface;
+
+	freeze(freeze: bool);
 
     move_to_center_position_zoom(center_position: coord, zoom: f64, animated: bool);
     move_to_center_position(center_position: coord, animated: bool);
@@ -99,6 +125,7 @@ map_camera_2d_interface = interface +c {
     get_max_zoom(): f64;
 
     set_bounds(bounds: rect_coord);
+    get_bounds() : rect_coord;
     is_in_bounds(coords: coord) : bool;
 
     set_padding_left(padding: f32);
@@ -108,6 +135,8 @@ map_camera_2d_interface = interface +c {
 
     get_visible_rect() : rect_coord;
     get_padding_adjusted_visible_rect() : rect_coord;
+
+    get_screen_density_ppi(): f32;
 
     # this method is called just before the update methods on all layers
     update();

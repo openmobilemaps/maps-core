@@ -1,4 +1,4 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.5
 
 import PackageDescription
 
@@ -91,8 +91,10 @@ let package = Package(
                 .headerSearchPath("src/map"),
                 .headerSearchPath("src/util"),
                 .headerSearchPath("src/external/pugixml"),
+                .define("DEBUG", to: "1", .when(configuration: .debug)),
+                .define("NDEBUG", to: "1", .when(configuration: .release)),
             ]
         ),
     ],
-    cxxLanguageStandard: .cxx1z
+    cxxLanguageStandard: .cxx17
 )

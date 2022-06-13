@@ -11,18 +11,15 @@
 #include "PolygonGroup2dOpenGl.h"
 #include "RenderVerticesDescription.h"
 
-PolygonGroup2dOpenGl::PolygonGroup2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader) : shaderProgram(shader) {}
+PolygonGroup2dOpenGl::PolygonGroup2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
+    : shaderProgram(shader) {}
 
-std::shared_ptr<GraphicsObjectInterface> PolygonGroup2dOpenGl::asGraphicsObject() {
-    return shared_from_this();
-}
+std::shared_ptr<GraphicsObjectInterface> PolygonGroup2dOpenGl::asGraphicsObject() { return shared_from_this(); }
 
-bool PolygonGroup2dOpenGl::isReady() {
-    return ready;
-}
+bool PolygonGroup2dOpenGl::isReady() { return ready; }
 
-void
-PolygonGroup2dOpenGl::setVertices(const std::vector<RenderVerticesDescription> &vertices, const std::vector<int32_t> &indices) {
+void PolygonGroup2dOpenGl::setVertices(const std::vector<RenderVerticesDescription> &vertices,
+                                       const std::vector<int32_t> &indices) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     ready = false;
     dataReady = false;
@@ -33,7 +30,7 @@ PolygonGroup2dOpenGl::setVertices(const std::vector<RenderVerticesDescription> &
     int numPolygons = vertices.size();
     for (int polygonIndex = 0; polygonIndex < numPolygons; polygonIndex++) {
         int styleIndex = vertices[polygonIndex].styleIndex;
-        int numVertices = (int) vertices[polygonIndex].vertices.size();
+        int numVertices = (int)vertices[polygonIndex].vertices.size();
 
         for (int i = 0; i < numVertices; i++) {
             const Vec2D &p = vertices[polygonIndex].vertices[i];
@@ -43,7 +40,6 @@ PolygonGroup2dOpenGl::setVertices(const std::vector<RenderVerticesDescription> &
             // StyleIndex
             polygonAttributes.push_back(styleIndex);
         }
-
     }
     // Indices
     int numIndices = indices.size();
@@ -56,7 +52,8 @@ PolygonGroup2dOpenGl::setVertices(const std::vector<RenderVerticesDescription> &
 
 void PolygonGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (ready || !dataReady) return;
+    if (ready || !dataReady)
+        return;
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     if (openGlContext->getProgram(shaderProgram->getProgramName()) == 0) {
@@ -91,13 +88,12 @@ void PolygonGroup2dOpenGl::clear() {
     glDeleteBuffers(1, &indexBuffer);
 }
 
-void PolygonGroup2dOpenGl::setIsInverseMasked(bool inversed) {
-    isMaskInversed = inversed;
-}
+void PolygonGroup2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
 
 void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                                   int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
-    if (!ready) return;
+    if (!ready)
+        return;
 
     if (isMasked) {
         glStencilFunc(GL_EQUAL, isMaskInversed ? 0 : 128, 128);
@@ -122,7 +118,7 @@ void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterf
     glEnableVertexAttribArray(positionHandle);
     glVertexAttribPointer(positionHandle, 2, GL_FLOAT, false, stride, nullptr);
     glEnableVertexAttribArray(styleIndexHandle);
-    glVertexAttribPointer(styleIndexHandle, 1, GL_FLOAT, false, stride, (float *) (2 * floatSize));
+    glVertexAttribPointer(styleIndexHandle, 1, GL_FLOAT, false, stride, (float *)(2 * floatSize));
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);

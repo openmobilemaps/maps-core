@@ -72,16 +72,17 @@ open class DataLoader(
 					return@use TextureLoaderResult(
 						BitmapTextureHolder(bitmap),
 						response.header(HEADER_NAME_ETAG, null),
-						LoaderStatus.OK
+						LoaderStatus.OK,
+						null
 					)
 				} else if (response.code == 404) {
-					return@use TextureLoaderResult(null, null, LoaderStatus.ERROR_404)
+					return@use TextureLoaderResult(null, null, LoaderStatus.ERROR_404, response.code.toString())
 				} else {
-					return@use TextureLoaderResult(null, null, LoaderStatus.ERROR_OTHER)
+					return@use TextureLoaderResult(null, null, LoaderStatus.ERROR_OTHER, response.code.toString())
 				}
 			}
 		} catch (e: Exception) {
-			return TextureLoaderResult(null, null, LoaderStatus.ERROR_NETWORK)
+			return TextureLoaderResult(null, null, LoaderStatus.ERROR_NETWORK, null)
 		}
 	}
 
@@ -94,15 +95,15 @@ open class DataLoader(
 			return okHttpClient.newCall(request).execute().use { response ->
 				val bytes: ByteArray? = response.body?.bytes()
 				if (response.isSuccessful && bytes != null) {
-					return@use DataLoaderResult(DataHolder(bytes), response.header(HEADER_NAME_ETAG, null), LoaderStatus.OK)
+					return@use DataLoaderResult(DataHolder(bytes), response.header(HEADER_NAME_ETAG, null), LoaderStatus.OK, null)
 				} else if (response.code == 404) {
-					return@use DataLoaderResult(null, null, LoaderStatus.ERROR_404)
+					return@use DataLoaderResult(null, null, LoaderStatus.ERROR_404, response.code.toString())
 				} else {
-					return@use DataLoaderResult(null, null, LoaderStatus.ERROR_OTHER)
+					return@use DataLoaderResult(null, null, LoaderStatus.ERROR_OTHER, response.code.toString())
 				}
 			}
 		} catch (e: Exception) {
-			return DataLoaderResult(null, null, LoaderStatus.ERROR_NETWORK)
+			return DataLoaderResult(null, null, LoaderStatus.ERROR_NETWORK, null)
 		}
 	}
 

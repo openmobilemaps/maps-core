@@ -28,9 +28,9 @@ class ColorLineGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
 
     virtual void preRender(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
-    virtual void setStyles(const std::vector<::LineStyle> & lineStyles) override;
+    virtual void setStyles(const std::vector<::LineStyle> &lineStyles) override;
 
-protected:
+  protected:
     virtual std::string getVertexShader() override;
 
     virtual std::string getFragmentShader() override;
@@ -38,12 +38,19 @@ protected:
   private:
     std::recursive_mutex styleMutex;
     std::vector<GLfloat> lineStyles;
+    std::vector<GLfloat> lineColors;
+    std::vector<GLfloat> lineGapColors;
     std::vector<GLfloat> lineDashValues;
     GLint numStyles;
 
-    const int sizeStyleValues = 11;
-    const int maxNumDashValues = 8;
+    const int maxNumStyles = 32;
+    const int sizeStyleValues = 3;
+    const int sizeStyleValuesArray = sizeStyleValues * maxNumStyles;
+    const int sizeColorValues = 4;
+    const int sizeColorValuesArray = sizeColorValues * maxNumStyles;
+    const int sizeGapColorValues = 4;
+    const int sizeGapColorValuesArray = sizeGapColorValues * maxNumStyles;
+    const int maxNumDashValues = 4;
     const int sizeDashValues = maxNumDashValues + 1;
-    const int sizeStyleValuesArray = sizeStyleValues * 32;
-    const int sizeDashValuesArray = sizeDashValues * 32;
+    const int sizeDashValuesArray = sizeDashValues * maxNumStyles;
 };

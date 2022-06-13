@@ -21,6 +21,12 @@ abstract class Tiled2dMapSourceInterface {
 
     abstract fun resume()
 
+    abstract fun isReadyToRenderOffscreen(): io.openmobilemaps.mapscore.shared.map.LayerReadyState
+
+    abstract fun setErrorManager(errorManager: io.openmobilemaps.mapscore.shared.map.ErrorManager)
+
+    abstract fun forceReload()
+
     private class CppProxy : Tiled2dMapSourceInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -80,5 +86,23 @@ abstract class Tiled2dMapSourceInterface {
             native_resume(this.nativeRef)
         }
         private external fun native_resume(_nativeRef: Long)
+
+        override fun isReadyToRenderOffscreen(): io.openmobilemaps.mapscore.shared.map.LayerReadyState {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_isReadyToRenderOffscreen(this.nativeRef)
+        }
+        private external fun native_isReadyToRenderOffscreen(_nativeRef: Long): io.openmobilemaps.mapscore.shared.map.LayerReadyState
+
+        override fun setErrorManager(errorManager: io.openmobilemaps.mapscore.shared.map.ErrorManager) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setErrorManager(this.nativeRef, errorManager)
+        }
+        private external fun native_setErrorManager(_nativeRef: Long, errorManager: io.openmobilemaps.mapscore.shared.map.ErrorManager)
+
+        override fun forceReload() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_forceReload(this.nativeRef)
+        }
+        private external fun native_forceReload(_nativeRef: Long)
     }
 }

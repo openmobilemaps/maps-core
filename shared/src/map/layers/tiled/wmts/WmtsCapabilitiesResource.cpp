@@ -9,46 +9,50 @@
  */
 
 #include "WmtsCapabilitiesResource.h"
-#include "Tiled2dMapRasterLayerInterface.h"
-#include "WmtsTiled2dMapLayerConfigFactory.h"
-#include "WmtsLayerDescription.h"
-#include "pugixml.h"
-#include "WmtsLayerDimension.h"
-#include "CoordinateSystemIdentifiers.h"
-#include "WmtsLayerConfiguration.h"
-#include "WmtsTileMatrixSet.h"
 #include "CoordinateConversionHelper.h"
+#include "CoordinateSystemIdentifiers.h"
+#include "Tiled2dMapRasterLayerInterface.h"
+#include "WmtsLayerConfiguration.h"
+#include "WmtsLayerDescription.h"
+#include "WmtsLayerDimension.h"
+#include "WmtsTileMatrixSet.h"
+#include "WmtsTiled2dMapLayerConfigFactory.h"
+#include "pugixml.h"
 
-class WmtsCapabilitiesResourceImpl: public WmtsCapabilitiesResource {
+class WmtsCapabilitiesResourceImpl : public WmtsCapabilitiesResource {
 
-public:
-
-    WmtsCapabilitiesResourceImpl(const std::string & xml) {
+  public:
+    WmtsCapabilitiesResourceImpl(const std::string &xml) {
         doc.load_string(xml.c_str());
         parseDoc();
     };
 
-    std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayer(const std::string & identifier, const std::shared_ptr<::LoaderInterface> & tileLoader) override {
+    std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayer(const std::string &identifier,
+                                                                  const std::shared_ptr<::LoaderInterface> &tileLoader) override {
         auto layerConfig = createLayerConfig(identifier);
-        if (!layerConfig) return nullptr;
+        if (!layerConfig)
+            return nullptr;
         return Tiled2dMapRasterLayerInterface::create(layerConfig, tileLoader);
     };
 
-
-
-    std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayerWithZoomInfo(const std::string & identifier, const std::shared_ptr<::LoaderInterface> & tileLoader, const ::Tiled2dMapZoomInfo & zoomInfo) override {
+    std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayerWithZoomInfo(const std::string &identifier,
+                                                                              const std::shared_ptr<::LoaderInterface> &tileLoader,
+                                                                              const ::Tiled2dMapZoomInfo &zoomInfo) override {
         auto layerConfig = createLayerConfigWithZoomInfo(identifier, zoomInfo);
-        if (!layerConfig) return nullptr;
+        if (!layerConfig)
+            return nullptr;
         return Tiled2dMapRasterLayerInterface::create(layerConfig, tileLoader);
     };
 
-
-    std::shared_ptr<::Tiled2dMapLayerConfig> createLayerConfig(const std::string & identifier) override {
-        return createLayerConfigWithZoomInfo(identifier, Tiled2dMapZoomInfo(1.0, 0));
+    std::shared_ptr<::Tiled2dMapLayerConfig> createLayerConfig(const std::string &identifier) override {
+        return createLayerConfigWithZoomInfo(identifier, Tiled2dMapZoomInfo(1.0, 0, true));
     };
 
-    std::shared_ptr<::Tiled2dMapLayerConfig> createLayerConfigWithZoomInfo(const std::string & identifier, const ::Tiled2dMapZoomInfo & zoomInfo) override {
-        if (!layers.count(identifier)) { return nullptr; }
+    std::shared_ptr<::Tiled2dMapLayerConfig> createLayerConfigWithZoomInfo(const std::string &identifier,
+                                                                           const ::Tiled2dMapZoomInfo &zoomInfo) override {
+        if (!layers.count(identifier)) {
+            return nullptr;
+        }
 
         auto description = layers.at(identifier);
 
@@ -60,43 +64,45 @@ public:
         }
         dimensions.insert(std::make_pair("TileMatrixSet", description.tileMatrixSetLink));
 
-        std::vector<::Tiled2dMapZoomLevelInfo>  zoomLevels;
+        std::vector<::Tiled2dMapZoomLevelInfo> zoomLevels;
 
         std::string coordinateSystem = matrixSet.coordinateSystemIdentifier;
 
         auto bounds = RectCoord(Coord("", 0, 0, 0), Coord("", 0, 0, 0));
 
-        for (auto & matrix : matrixSet.matrices) {
+        for (auto &matrix : matrixSet.matrices) {
             int32_t zoomLevelIdentifier = stoi(matrix.identifier);
             auto topLeft = Coord(coordinateSystem, matrix.topLeftCornerX, matrix.topLeftCornerY, 0);
 
             double magicNumber = 0.00028; // Each pixel is assumed to be 0.28mm – https://gis.stackexchange.com/a/315989
-            double right = topLeft.x + matrix.scaleDenominator * (double)matrix.tileWidth * (double)matrix.matrixWidth * magicNumber;
-            double bottom = topLeft.y - matrix.scaleDenominator * (double)matrix.tileHeight * (double)matrix.tileWidth * magicNumber;
+            double right =
+                topLeft.x + matrix.scaleDenominator * (double)matrix.tileWidth * (double)matrix.matrixWidth * magicNumber;
+            double bottom =
+                topLeft.y - matrix.scaleDenominator * (double)matrix.tileHeight * (double)matrix.tileWidth * magicNumber;
             Coord bottomRight = Coord(topLeft.systemIdentifier, right, bottom, 0);
             RectCoord layerBounds = RectCoord(topLeft, bottomRight);
 
             double scaledTileWidth = matrix.scaleDenominator * (double)matrix.tileWidth * magicNumber;
-            auto levelInfo = Tiled2dMapZoomLevelInfo(matrix.scaleDenominator, scaledTileWidth, matrix.matrixWidth, matrix.matrixHeight, zoomLevelIdentifier, layerBounds);
+            auto levelInfo = Tiled2dMapZoomLevelInfo(matrix.scaleDenominator, scaledTileWidth, matrix.matrixWidth,
+                                                     matrix.matrixHeight, zoomLevelIdentifier, layerBounds);
             zoomLevels.push_back(levelInfo);
 
             bounds = layerBounds;
         }
 
-        return WmtsTiled2dMapLayerConfigFactory::create(description, zoomLevels, zoomInfo, matrixSet.coordinateSystemIdentifier, matrixSet.identifier);
+        return WmtsTiled2dMapLayerConfigFactory::create(description, zoomLevels, zoomInfo, matrixSet.coordinateSystemIdentifier,
+                                                        matrixSet.identifier);
     };
-
 
     std::vector<WmtsLayerDescription> getAllLayers() override {
         std::vector<WmtsLayerDescription> layerVector;
-        for (auto const &[identifier, layer]: layers) {
+        for (auto const &[identifier, layer] : layers) {
             layerVector.push_back(layer);
         }
         return layerVector;
     }
 
-private:
-
+  private:
     pugi::xml_document doc;
 
     std::unordered_map<std::string, WmtsLayerDescription> layers;
@@ -108,7 +114,7 @@ private:
         std::optional<std::string> abstractText = layer.child_value("ows:Abstract");
         std::vector<WmtsLayerDimension> dimensions;
 
-        for(auto dimension = layer.child("Dimension"); dimension; dimension = dimension.next_sibling("Dimension")) {
+        for (auto dimension = layer.child("Dimension"); dimension; dimension = dimension.next_sibling("Dimension")) {
             std::string dimensionIdentifier = dimension.child_value("ows:Identifier");
             std::string defaultValue = dimension.child_value("Default");
             std::vector<std::string> dimensionValues;
@@ -118,7 +124,6 @@ private:
             auto dim = WmtsLayerDimension(dimensionIdentifier, defaultValue, dimensionValues);
             dimensions.push_back(dim);
         }
-
 
         std::vector<std::string> styleDimensionValues;
         std::string styleDefaultValue = "";
@@ -149,14 +154,14 @@ private:
             c4 = std::stod(upperCorner.substr(lowerCorner.find(" ")));
         }
 
-
         auto bounds = RectCoord(Coord(CoordinateSystemIdentifiers::EPSG4326(), c1, c2, 0),
                                 Coord(CoordinateSystemIdentifiers::EPSG4326(), c3, c4, 0));
         std::string tileMatrixSetLink = layer.child("TileMatrixSetLink").child_value("TileMatrixSet");
         std::string resourceTemplate = layer.child("ResourceURL").attribute("template").as_string();
         std::string resourceFormat = layer.child("ResourceURL").attribute("format").as_string();
 
-        auto wmtsLayer = WmtsLayerDescription(identifier, title, abstractText, dimensions, bounds, tileMatrixSetLink, resourceTemplate, resourceFormat);
+        auto wmtsLayer = WmtsLayerDescription(identifier, title, abstractText, dimensions, bounds, tileMatrixSetLink,
+                                              resourceTemplate, resourceFormat);
         layers.insert({identifier, wmtsLayer});
     }
 
@@ -182,7 +187,8 @@ private:
             int32_t matrixWidth = std::stoi(tileMatrix.child_value("MatrixWidth"));
             int32_t matrixHeight = std::stoi(tileMatrix.child_value("MatrixHeight"));
 
-            auto matrix = WmtsTileMatrix(matrixIdentifier, scaleDenominator, c1, c2, tileWidth, tileHeight, matrixWidth, matrixHeight);
+            auto matrix =
+                WmtsTileMatrix(matrixIdentifier, scaleDenominator, c1, c2, tileWidth, tileHeight, matrixWidth, matrixHeight);
             matrices.push_back(matrix);
         }
 
@@ -198,15 +204,13 @@ private:
             parseLayer(layer);
         }
 
-        for (auto tileMatrixSet = contents.child("TileMatrixSet"); tileMatrixSet; tileMatrixSet = tileMatrixSet.next_sibling("TileMatrixSet")) {
+        for (auto tileMatrixSet = contents.child("TileMatrixSet"); tileMatrixSet;
+             tileMatrixSet = tileMatrixSet.next_sibling("TileMatrixSet")) {
             parseMatrixSet(tileMatrixSet);
         }
     }
-
 };
 
-
-std::shared_ptr<WmtsCapabilitiesResource> WmtsCapabilitiesResource::create(const std::string & xml) {
+std::shared_ptr<WmtsCapabilitiesResource> WmtsCapabilitiesResource::create(const std::string &xml) {
     return std::make_shared<WmtsCapabilitiesResourceImpl>(xml);
 }
-

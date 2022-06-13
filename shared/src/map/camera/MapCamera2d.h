@@ -12,17 +12,17 @@
 
 #include "CameraInterface.h"
 #include "Coord.h"
+#include "CoordAnimation.h"
 #include "CoordinateConversionHelperInterface.h"
+#include "DoubleAnimation.h"
 #include "MapCamera2dInterface.h"
 #include "MapCamera2dListenerInterface.h"
 #include "MapCoordinateSystem.h"
 #include "SimpleTouchInterface.h"
 #include "Vec2I.h"
+#include <mutex>
 #include <optional>
 #include <set>
-#include <mutex>
-#include "CoordAnimation.h"
-#include "DoubleAnimation.h"
 
 class MapCamera2d : public MapCamera2dInterface,
                     public CameraInterface,
@@ -33,11 +33,14 @@ class MapCamera2d : public MapCamera2dInterface,
 
     ~MapCamera2d(){};
 
+    void freeze(bool freeze) override;
+
     virtual void moveToCenterPositionZoom(const ::Coord &centerPosition, double zoom, bool animated) override;
 
     virtual void moveToCenterPosition(const ::Coord &centerPosition, bool animated) override;
 
-    virtual void moveToBoundingBox(const ::RectCoord & boundingBox, float paddingPc, bool animated, std::optional<double> maxZoom) override;
+    virtual void moveToBoundingBox(const ::RectCoord &boundingBox, float paddingPc, bool animated,
+                                   std::optional<double> maxZoom) override;
 
     virtual ::Coord getCenterPosition() override;
 
@@ -57,9 +60,11 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual double getMaxZoom() override;
 
-    virtual void setBounds(const ::RectCoord & bounds) override;
+    virtual void setBounds(const ::RectCoord &bounds) override;
 
-    virtual bool isInBounds(const ::Coord & coords) override;
+    virtual ::RectCoord getBounds() override;
+
+    virtual bool isInBounds(const ::Coord &coords) override;
 
     virtual void setPaddingLeft(float padding) override;
 
@@ -86,7 +91,8 @@ class MapCamera2d : public MapCamera2dInterface,
     /** this method is called just before the update methods on all layers */
     virtual void update() override;
 
-    virtual std::vector<float> getInvariantModelMatrix(const ::Coord & coordinate, bool scaleInvariant, bool rotationInvariant) override;
+    virtual std::vector<float> getInvariantModelMatrix(const ::Coord &coordinate, bool scaleInvariant,
+                                                       bool rotationInvariant) override;
 
     virtual bool onMove(const ::Vec2F &deltaScreen, bool confirmed, bool doubleClick) override;
 
@@ -115,6 +121,8 @@ class MapCamera2d : public MapCamera2dInterface,
     virtual void setRotationEnabled(bool enabled) override;
 
     virtual void setSnapToNorthEnabled(bool enabled) override;
+
+    virtual float getScreenDensityPpi() override;
 
   protected:
     virtual void setupInertia();
@@ -153,6 +161,8 @@ class MapCamera2d : public MapCamera2dInterface,
     std::optional<double> lastVpRotation = std::nullopt;
     std::optional<double> lastVpZoom = std::nullopt;
 
+    bool cameraFrozen = false;
+
     struct CameraConfiguration {
         bool rotationEnabled = true;
         bool doubleClickZoomEnabled = true;
@@ -162,7 +172,7 @@ class MapCamera2d : public MapCamera2dInterface,
     };
 
     long long currentDragTimestamp = 0;
-    Vec2F currentDragVelocity = { 0, 0 };
+    Vec2F currentDragVelocity = {0, 0};
 
     /// object describing parameters of inertia
     /// currently only dragging inertia is implemented
@@ -174,19 +184,19 @@ class MapCamera2d : public MapCamera2dInterface,
         double t1;
         double t2;
 
-        Inertia(long long timestampStart, Vec2F velocity, double t1, double t2):
-        timestampStart(timestampStart), timestampUpdate(timestampStart), velocity(velocity), t1(t1), t2(t2) {}
+        Inertia(long long timestampStart, Vec2F velocity, double t1, double t2)
+            : timestampStart(timestampStart)
+            , timestampUpdate(timestampStart)
+            , velocity(velocity)
+            , t1(t1)
+            , t2(t2) {}
     };
     std::optional<Inertia> inertia;
     void inertiaStep();
 
     CameraConfiguration config;
 
-    enum ListenerType {
-        BOUNDS = 1,
-        ROTATION = 1 << 1,
-        MAP_INTERACTION = 1 << 2
-    };
+    enum ListenerType { BOUNDS = 1, ROTATION = 1 << 1, MAP_INTERACTION = 1 << 2 };
 
     void notifyListeners(const int &listenerType);
 
@@ -204,4 +214,6 @@ class MapCamera2d : public MapCamera2dInterface,
     void clampCenterToPaddingCorrectedBounds();
 
     RectCoord getRectFromViewport(const Vec2I &sizeViewport, const Coord &center);
+
+    std::vector<float> newVpMatrix = std::vector<float>(16, 0.0);
 };

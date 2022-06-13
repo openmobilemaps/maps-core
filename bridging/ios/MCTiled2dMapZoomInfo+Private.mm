@@ -11,13 +11,15 @@ auto Tiled2dMapZoomInfo::toCpp(ObjcType obj) -> CppType
 {
     assert(obj);
     return {::djinni::F32::toCpp(obj.zoomLevelScaleFactor),
-            ::djinni::I32::toCpp(obj.numDrawPreviousLayers)};
+            ::djinni::I32::toCpp(obj.numDrawPreviousLayers),
+            ::djinni::Bool::toCpp(obj.adaptScaleToScreen)};
 }
 
 auto Tiled2dMapZoomInfo::fromCpp(const CppType& cpp) -> ObjcType
 {
     return [[MCTiled2dMapZoomInfo alloc] initWithZoomLevelScaleFactor:(::djinni::F32::fromCpp(cpp.zoomLevelScaleFactor))
-                                                numDrawPreviousLayers:(::djinni::I32::fromCpp(cpp.numDrawPreviousLayers))];
+                                                numDrawPreviousLayers:(::djinni::I32::fromCpp(cpp.numDrawPreviousLayers))
+                                                   adaptScaleToScreen:(::djinni::Bool::fromCpp(cpp.adaptScaleToScreen))];
 }
 
 }  // namespace djinni_generated

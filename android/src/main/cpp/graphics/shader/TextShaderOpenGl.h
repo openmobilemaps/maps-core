@@ -10,16 +10,16 @@
 
 #pragma once
 
-#include "TextShaderInterface.h"
 #include "BaseShaderProgramOpenGl.h"
 #include "RenderingContextInterface.h"
 #include "ShaderProgramInterface.h"
+#include "TextShaderInterface.h"
 #include <vector>
 
 class TextShaderOpenGl : public BaseShaderProgramOpenGl,
-                          public ShaderProgramInterface,
-                          public TextShaderInterface,
-                          public std::enable_shared_from_this<ShaderProgramInterface> {
+                         public ShaderProgramInterface,
+                         public TextShaderInterface,
+                         public std::enable_shared_from_this<ShaderProgramInterface> {
 
   public:
     virtual std::string getProgramName() override;
@@ -32,7 +32,7 @@ class TextShaderOpenGl : public BaseShaderProgramOpenGl,
 
     virtual void setScale(float scale) override;
 
-    virtual void setReferencePoint(const ::Vec3D & point) override;
+    virtual void setReferencePoint(const ::Vec3D &point) override;
 
     virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() override;
 

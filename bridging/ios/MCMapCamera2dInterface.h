@@ -16,6 +16,8 @@
 + (nullable MCMapCamera2dInterface *)create:(nullable MCMapInterface *)mapInterface
                            screenDensityPpi:(float)screenDensityPpi;
 
+- (void)freeze:(BOOL)freeze;
+
 - (void)moveToCenterPositionZoom:(nonnull MCCoord *)centerPosition
                             zoom:(double)zoom
                         animated:(BOOL)animated;
@@ -50,6 +52,8 @@
 
 - (void)setBounds:(nonnull MCRectCoord *)bounds;
 
+- (nonnull MCRectCoord *)getBounds;
+
 - (BOOL)isInBounds:(nonnull MCCoord *)coords;
 
 - (void)setPaddingLeft:(float)padding;
@@ -63,6 +67,8 @@
 - (nonnull MCRectCoord *)getVisibleRect;
 
 - (nonnull MCRectCoord *)getPaddingAdjustedVisibleRect;
+
+- (float)getScreenDensityPpi;
 
 /** this method is called just before the update methods on all layers */
 - (void)update;

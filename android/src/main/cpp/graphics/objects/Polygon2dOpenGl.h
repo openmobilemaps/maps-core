@@ -22,10 +22,10 @@ class Polygon2dOpenGl : public GraphicsObjectInterface,
                         public MaskingObjectInterface,
                         public Polygon2dInterface,
                         public std::enable_shared_from_this<Polygon2dOpenGl> {
-public:
+  public:
     Polygon2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader);
 
-    ~Polygon2dOpenGl() {};
+    ~Polygon2dOpenGl(){};
 
     virtual bool isReady() override;
 
@@ -39,7 +39,7 @@ public:
     virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
                               int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
 
-    virtual void setVertices(const std::vector<::Vec2D> & vertices, const std::vector<int32_t> & indices) override;
+    virtual void setVertices(const std::vector<::Vec2D> &vertices, const std::vector<int32_t> &indices) override;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() override;
 
@@ -47,7 +47,7 @@ public:
 
     virtual void setIsInverseMasked(bool inversed) override;
 
-protected:
+  protected:
     void prepareGlData(const std::shared_ptr<OpenGlContext> &openGlContext);
 
     void drawPolygon(std::shared_ptr<OpenGlContext> openGlContext, int program, int64_t mvpMatrix);

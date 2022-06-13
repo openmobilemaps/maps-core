@@ -67,6 +67,11 @@ class Quad2d: BaseGraphicsObject {
         guard let verticesBuffer = verticesBuffer,
               let indicesBuffer = indicesBuffer else { return }
 
+        if shader is AlphaShader, texture == nil {
+            ready = false
+            return
+        }
+
         encoder.pushDebugGroup("Quad2d")
 
         if isMasked {

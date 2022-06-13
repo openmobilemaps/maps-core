@@ -12,7 +12,7 @@
 #include <cmath>
 
 Line2dOpenGl::Line2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
-        : shaderProgram(shader) {}
+    : shaderProgram(shader) {}
 
 std::shared_ptr<GraphicsObjectInterface> Line2dOpenGl::asGraphicsObject() { return shared_from_this(); }
 
@@ -39,7 +39,7 @@ void Line2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &con
 }
 
 void Line2dOpenGl::initializeLineAndPoints() {
-    int pointCount = (int) lineCoordinates.size();
+    int pointCount = (int)lineCoordinates.size();
     for (int i = 0; i < (pointCount - 1); i++) {
         const Vec2D &p = lineCoordinates[i];
         const Vec2D &pNext = lineCoordinates[i + 1];
@@ -177,9 +177,7 @@ void Line2dOpenGl::clear() {
     removeGlBuffers();
 }
 
-void Line2dOpenGl::setIsInverseMasked(bool inversed) {
-    isMaskInversed = inversed;
-}
+void Line2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
 
 void Line2dOpenGl::removeGlBuffers() {
     glDeleteBuffers(1, &vertexAttribBuffer);
@@ -220,7 +218,7 @@ void Line2dOpenGl::drawLineSegments(std::shared_ptr<OpenGlContext> openGlContext
     glUseProgram(program);
 
     // Apply the projection and view transformation
-    glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *) mvpMatrix);
+    glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
     glUniform1f(scaleFactorHandle, widthScaleFactor);
 
     glEnable(GL_BLEND);
@@ -235,13 +233,13 @@ void Line2dOpenGl::drawLineSegments(std::shared_ptr<OpenGlContext> openGlContext
     glEnableVertexAttribArray(positionHandle);
     glVertexAttribPointer(positionHandle, 3, GL_FLOAT, false, stride, nullptr);
     glEnableVertexAttribArray(widthNormalHandle);
-    glVertexAttribPointer(widthNormalHandle, 3, GL_FLOAT, false, stride, (float *) sizeAttribGroup);
+    glVertexAttribPointer(widthNormalHandle, 3, GL_FLOAT, false, stride, (float *)sizeAttribGroup);
     glEnableVertexAttribArray(lengthNormalHandle);
-    glVertexAttribPointer(lengthNormalHandle, 3, GL_FLOAT, false, stride, (float *) (sizeAttribGroup * 2));
+    glVertexAttribPointer(lengthNormalHandle, 3, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 2));
     glEnableVertexAttribArray(pointAHandle);
-    glVertexAttribPointer(pointAHandle, 3, GL_FLOAT, false, stride, (float *) (sizeAttribGroup * 3));
+    glVertexAttribPointer(pointAHandle, 3, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 3));
     glEnableVertexAttribArray(pointBHandle);
-    glVertexAttribPointer(pointBHandle, 3, GL_FLOAT, false, stride, (float *) (sizeAttribGroup * 4));
+    glVertexAttribPointer(pointBHandle, 3, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 4));
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // Draw the triangle

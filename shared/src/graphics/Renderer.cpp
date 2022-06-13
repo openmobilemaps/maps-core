@@ -8,11 +8,11 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#include <Logger.h>
 #include "Renderer.h"
-#include "Matrix.h"
 #include "CameraInterface.h"
+#include "Matrix.h"
 #include "RenderObjectInterface.h"
+#include <Logger.h>
 
 void Renderer::addToRenderQueue(const std::shared_ptr<RenderPassInterface> &renderPass) {
     int32_t renderPassIndex = renderPass->getRenderPassConfig().renderPassIndex;
@@ -24,7 +24,7 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
                          const std::shared_ptr<CameraInterface> &camera) {
 
     auto vpMatrix = camera->getVpMatrix();
-    auto vpMatrixPointer = (int64_t) vpMatrix.data();
+    auto vpMatrixPointer = (int64_t)vpMatrix.data();
 
     renderingContext->setupDrawFrame();
 
@@ -35,7 +35,6 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
 
             double factor = camera->getScalingFactor();
             const auto &renderObjects = pass->getRenderObjects();
-            std::vector<float> tempMvpMatrix(16, 0);
 
             renderingContext->applyScissorRect(pass->getScissoringRect());
 
@@ -48,8 +47,8 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
                 const auto &graphicsObject = renderObject->getGraphicsObject();
                 if (renderObject->hasCustomModelMatrix()) {
                     Matrix::multiplyMMC(tempMvpMatrix, 0, vpMatrix, 0, renderObject->getCustomModelMatrix(), 0);
-                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(),
-                                           (int64_t) tempMvpMatrix.data(), hasMask, factor);
+                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(), (int64_t)tempMvpMatrix.data(), hasMask,
+                                           factor);
                 } else {
                     graphicsObject->render(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, hasMask, factor);
                 }
