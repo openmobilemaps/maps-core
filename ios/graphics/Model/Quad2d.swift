@@ -50,6 +50,14 @@ class Quad2d: BaseGraphicsObject {
         stencilState = device.makeDepthStencilState(descriptor: s2)
     }
 
+    override func isReady() -> Bool {
+        guard ready else { return false }
+        if shader is AlphaShader {
+            return texture != nil
+        }
+        return true
+    }
+
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
                          renderPass _: MCRenderPassConfig,
@@ -108,7 +116,8 @@ extension Quad2d: MCMaskingObjectInterface {
                 renderPass: MCRenderPassConfig,
                 mvpMatrix: Int64,
                 screenPixelAsRealMeterFactor: Double) {
-        guard let context = context as? RenderingContext,
+        guard isReady(),
+              let context = context as? RenderingContext,
               let encoder = context.encoder else { return }
 
         renderAsMask = true
@@ -156,14 +165,11 @@ extension Quad2d: MCQuad2dInterface {
         guard let textureHolder = textureHolder as? TextureHolder else {
             fatalError("unexpected TextureHolder")
         }
-
         texture = textureHolder.texture
-        ready = true
     }
 
     func removeTexture() {
         texture = nil
-        ready = false
     }
 
     func asGraphicsObject() -> MCGraphicsObjectInterface? { self }
