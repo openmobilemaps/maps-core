@@ -264,7 +264,7 @@ mapView.addLayer(iconLayer.asLayerInterface())
 A line layer can be added to the mapView as well. Using the MCLineFactory a LineInfo object can be created. The width can be specified in either SCREEN_PIXEL or MAP_UNIT.
 
 ```kotlin
-		val lineLayer = LineLayerInterface.create()
+val lineLayer = LineLayerInterface.create()
 val line = LineFactory.createLine(
 	identifier = "lineIdentifier",
 	coordinates = lineCoordinates,
