@@ -24,7 +24,7 @@ open class MCScheduler: MCSchedulerInterface {
 
     private let computationQueue = OperationQueue(concurrentOperations: 4, qos: .userInteractive)
 
-    private let graphicsQueue = OperationQueue(concurrentOperations: 4, qos: .userInteractive)
+    private let graphicsQueue = OperationQueue.main
 
     private let internalSchedulerQueue = DispatchQueue(label: "internalSchedulerQueue")
 
