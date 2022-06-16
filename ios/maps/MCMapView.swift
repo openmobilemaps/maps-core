@@ -20,6 +20,7 @@ open class MCMapView: MTKView {
     private var sizeChanged = false
     private var backgroundDisable = false
     private var saveDrawable = false
+    private lazy var renderToImageQueue = DispatchQueue(label: "io.openmobilemaps.renderToImagQueue", qos: .userInteractive)
 
     private var framesToRender: UInt = 1
     private let framesToRenderAfterInvalidate: UInt = 25
@@ -170,15 +171,17 @@ extension MCMapView: MTKViewDelegate {
     }
 
     public func renderToImage(size: CGSize, timeout: Float, bounds: MCRectCoord, callback: @escaping (UIImage?, MCLayerReadyState) -> Void) {
-        self.frame = CGRect(origin: .zero, size: size)
-        self.setNeedsLayout()
-        self.layoutIfNeeded()
+        renderToImageQueue.async {
+            self.frame = CGRect(origin: .zero, size: size)
+            self.setNeedsLayout()
+            self.layoutIfNeeded()
 
-        let mapReadyCallbacks = MCMapViewMapReadyCallbacks()
-        mapReadyCallbacks.delegate = self
-        mapReadyCallbacks.callback = callback
+            let mapReadyCallbacks = MCMapViewMapReadyCallbacks()
+            mapReadyCallbacks.delegate = self
+            mapReadyCallbacks.callback = callback
 
-        self.mapInterface.drawReadyFrame(bounds, timeout: timeout, callbacks: mapReadyCallbacks)
+            self.mapInterface.drawReadyFrame(bounds, timeout: timeout, callbacks: mapReadyCallbacks)
+        }
     }
 }
 
@@ -277,15 +280,17 @@ private class MCMapViewMapReadyCallbacks: MCMapReadyCallbackInterface {
 
         delegate.draw(in: delegate)
 
-        switch state {
-            case .NOT_READY:
-                break
-            case .ERROR, .TIMEOUT_ERROR:
-                self.callback?(nil, state)
-            case .READY:
-                self.callback?(delegate.currentDrawableImage(), state)
-            @unknown default:
-                break
+        DispatchQueue.main.async {
+            switch state {
+                case .NOT_READY:
+                    break
+                case .ERROR, .TIMEOUT_ERROR:
+                    self.callback?(nil, state)
+                case .READY:
+                    self.callback?(delegate.currentDrawableImage(), state)
+                @unknown default:
+                    break
+            }
         }
     }
 }
