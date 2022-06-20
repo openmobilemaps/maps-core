@@ -65,6 +65,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)addAll:(nonnull NSArray<MCPolygonInfo *> *)polygons {
+    try {
+        _cppRefHandle.get()->addAll(::djinni::List<::djinni_generated::PolygonInfo>::toCpp(polygons));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)clear {
     try {
         _cppRefHandle.get()->clear();
@@ -81,6 +87,18 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->asLayerInterface();
         return ::djinni_generated::LayerInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)resetSelection {
+    try {
+        _cppRefHandle.get()->resetSelection();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setLayerClickable:(BOOL)isLayerClickable {
+    try {
+        _cppRefHandle.get()->setLayerClickable(::djinni::Bool::toCpp(isLayerClickable));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

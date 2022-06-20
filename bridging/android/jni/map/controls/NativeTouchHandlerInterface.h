@@ -34,6 +34,7 @@ private:
         ~JavaProxy();
 
         void onTouchEvent(const ::TouchEvent & touchEvent) override;
+        void insertListener(const std::shared_ptr<::TouchInterface> & listener, int32_t index) override;
         void addListener(const std::shared_ptr<::TouchInterface> & listener) override;
         void removeListener(const std::shared_ptr<::TouchInterface> & listener) override;
 
@@ -43,6 +44,7 @@ private:
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/controls/TouchHandlerInterface") };
     const jmethodID method_onTouchEvent { ::djinni::jniGetMethodID(clazz.get(), "onTouchEvent", "(Lio/openmobilemaps/mapscore/shared/map/controls/TouchEvent;)V") };
+    const jmethodID method_insertListener { ::djinni::jniGetMethodID(clazz.get(), "insertListener", "(Lio/openmobilemaps/mapscore/shared/map/controls/TouchInterface;I)V") };
     const jmethodID method_addListener { ::djinni::jniGetMethodID(clazz.get(), "addListener", "(Lio/openmobilemaps/mapscore/shared/map/controls/TouchInterface;)V") };
     const jmethodID method_removeListener { ::djinni::jniGetMethodID(clazz.get(), "removeListener", "(Lio/openmobilemaps/mapscore/shared/map/controls/TouchInterface;)V") };
 };

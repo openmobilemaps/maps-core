@@ -11,6 +11,9 @@
 #include "WmtsTiled2dMapLayerConfigFactory.h"
 #include "WmtsTiled2dMapLayerConfig.h"
 
-std::shared_ptr<::Tiled2dMapLayerConfig> WmtsTiled2dMapLayerConfigFactory::create(const WmtsLayerDescription & wmtsLayerDescription, const std::vector<::Tiled2dMapZoomLevelInfo> & zoomLevelInfo, const ::Tiled2dMapZoomInfo & zoomInfo, const std::string & coordinateSystemIdentifier) {
-    return std::make_shared<WmtsTiled2dMapLayerConfig>(wmtsLayerDescription, zoomLevelInfo, zoomInfo, coordinateSystemIdentifier);
+std::shared_ptr<::Tiled2dMapLayerConfig> WmtsTiled2dMapLayerConfigFactory::create(
+    const WmtsLayerDescription &wmtsLayerDescription, const std::vector<::Tiled2dMapZoomLevelInfo> &zoomLevelInfo,
+    const ::Tiled2dMapZoomInfo &zoomInfo, const std::string &coordinateSystemIdentifier, const std::string &matrixSetIdentifier) {
+    return std::make_shared<WmtsTiled2dMapLayerConfig>(wmtsLayerDescription, zoomLevelInfo, zoomInfo, coordinateSystemIdentifier,
+                                                       matrixSetIdentifier);
 }

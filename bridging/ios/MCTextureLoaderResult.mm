@@ -7,25 +7,33 @@
 @implementation MCTextureLoaderResult
 
 - (nonnull instancetype)initWithData:(nullable id<MCTextureHolderInterface>)data
+                                etag:(nullable NSString *)etag
                               status:(MCLoaderStatus)status
+                           errorCode:(nullable NSString *)errorCode
 {
     if (self = [super init]) {
         _data = data;
+        _etag = [etag copy];
         _status = status;
+        _errorCode = [errorCode copy];
     }
     return self;
 }
 
 + (nonnull instancetype)textureLoaderResultWithData:(nullable id<MCTextureHolderInterface>)data
+                                               etag:(nullable NSString *)etag
                                              status:(MCLoaderStatus)status
+                                          errorCode:(nullable NSString *)errorCode
 {
     return [(MCTextureLoaderResult*)[self alloc] initWithData:data
-                                                       status:status];
+                                                         etag:etag
+                                                       status:status
+                                                    errorCode:errorCode];
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p data:%@ status:%@>", self.class, (void *)self, self.data, @(self.status)];
+    return [NSString stringWithFormat:@"<%@ %p data:%@ etag:%@ status:%@ errorCode:%@>", self.class, (void *)self, self.data, self.etag, @(self.status), self.errorCode];
 }
 
 @end

@@ -9,6 +9,8 @@ abstract class SchedulerInterface {
 
     abstract fun addTask(task: TaskInterface)
 
+    abstract fun addTasks(tasks: ArrayList<TaskInterface>)
+
     abstract fun removeTask(id: String)
 
     abstract fun clear()
@@ -40,6 +42,12 @@ abstract class SchedulerInterface {
             native_addTask(this.nativeRef, task)
         }
         private external fun native_addTask(_nativeRef: Long, task: TaskInterface)
+
+        override fun addTasks(tasks: ArrayList<TaskInterface>) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_addTasks(this.nativeRef, tasks)
+        }
+        private external fun native_addTasks(_nativeRef: Long, tasks: ArrayList<TaskInterface>)
 
         override fun removeTask(id: String) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

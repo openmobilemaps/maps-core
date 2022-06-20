@@ -12,15 +12,17 @@
 
 #include "CameraInterface.h"
 #include "Coord.h"
+#include "CoordAnimation.h"
 #include "CoordinateConversionHelperInterface.h"
+#include "DoubleAnimation.h"
 #include "MapCamera2dInterface.h"
 #include "MapCamera2dListenerInterface.h"
 #include "MapCoordinateSystem.h"
 #include "SimpleTouchInterface.h"
+#include "Vec2I.h"
+#include <mutex>
 #include <optional>
 #include <set>
-#include <mutex>
-#include "AnimationInterface.h"
 
 class MapCamera2d : public MapCamera2dInterface,
                     public CameraInterface,
@@ -31,9 +33,14 @@ class MapCamera2d : public MapCamera2dInterface,
 
     ~MapCamera2d(){};
 
+    void freeze(bool freeze) override;
+
     virtual void moveToCenterPositionZoom(const ::Coord &centerPosition, double zoom, bool animated) override;
 
     virtual void moveToCenterPosition(const ::Coord &centerPosition, bool animated) override;
+
+    virtual void moveToBoundingBox(const ::RectCoord &boundingBox, float paddingPc, bool animated,
+                                   std::optional<double> maxZoom) override;
 
     virtual ::Coord getCenterPosition() override;
 
@@ -49,17 +56,23 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual void setMaxZoom(double zoomMax) override;
 
-    virtual void setBounds(const ::RectCoord & bounds) override;
+    virtual double getMinZoom() override;
 
-    virtual bool isInBounds(const ::Coord & coords) override;
+    virtual double getMaxZoom() override;
 
-    virtual void setPaddingLeft(float padding, bool animated) override;
+    virtual void setBounds(const ::RectCoord &bounds) override;
 
-    virtual void setPaddingRight(float padding, bool animated) override;
+    virtual ::RectCoord getBounds() override;
 
-    virtual void setPaddingTop(float padding, bool animated) override;
+    virtual bool isInBounds(const ::Coord &coords) override;
 
-    virtual void setPaddingBottom(float padding, bool animated) override;
+    virtual void setPaddingLeft(float padding) override;
+
+    virtual void setPaddingRight(float padding) override;
+
+    virtual void setPaddingTop(float padding) override;
+
+    virtual void setPaddingBottom(float padding) override;
 
     virtual void addListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) override;
 
@@ -69,7 +82,17 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual std::vector<float> getVpMatrix() override;
 
-    virtual std::vector<float> getInvariantModelMatrix(const ::Coord & coordinate, bool scaleInvariant, bool rotationInvariant) override;
+    std::optional<::RectCoord> getLastVpMatrixViewBounds() override;
+
+    std::optional<float> getLastVpMatrixRotation() override;
+
+    std::optional<float> getLastVpMatrixZoom() override;
+
+    /** this method is called just before the update methods on all layers */
+    virtual void update() override;
+
+    virtual std::vector<float> getInvariantModelMatrix(const ::Coord &coordinate, bool scaleInvariant,
+                                                       bool rotationInvariant) override;
 
     virtual bool onMove(const ::Vec2F &deltaScreen, bool confirmed, bool doubleClick) override;
 
@@ -79,11 +102,15 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual bool onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) override;
 
+    virtual bool onTwoFingerMoveComplete() override;
+
     virtual void clearTouch() override;
 
     virtual void viewportSizeChanged() override;
 
     virtual RectCoord getVisibleRect() override;
+
+    virtual RectCoord getPaddingAdjustedVisibleRect() override;
 
     virtual ::Coord coordFromScreenPosition(const ::Vec2F &posScreen) override;
 
@@ -91,7 +118,16 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual double getScalingFactor() override;
 
+    virtual void setRotationEnabled(bool enabled) override;
+
+    virtual void setSnapToNorthEnabled(bool enabled) override;
+
+    virtual float getScreenDensityPpi() override;
+
   protected:
+    virtual void setupInertia();
+
+    std::recursive_mutex listenerMutex;
     std::set<std::shared_ptr<MapCamera2dListenerInterface>> listeners;
 
     std::shared_ptr<MapInterface> mapInterface;
@@ -107,6 +143,8 @@ class MapCamera2d : public MapCamera2dInterface,
     double angle = 0;
     double tempAngle = 0;
     bool isRotationThreasholdReached = false;
+    bool rotationPossible = true;
+    double startZoom = 0;
 
     double paddingLeft = 0;
     double paddingTop = 0;
@@ -118,37 +156,64 @@ class MapCamera2d : public MapCamera2dInterface,
 
     RectCoord bounds;
 
+    std::recursive_mutex vpDataMutex;
+    std::optional<RectCoord> lastVpBounds = std::nullopt;
+    std::optional<double> lastVpRotation = std::nullopt;
+    std::optional<double> lastVpZoom = std::nullopt;
+
+    bool cameraFrozen = false;
+
     struct CameraConfiguration {
         bool rotationEnabled = true;
         bool doubleClickZoomEnabled = true;
         bool twoFingerZoomEnabled = true;
         bool moveEnabled = true;
+        bool snapToNorthEnabled = true;
     };
 
-    Vec2F currentDragVelocity = { 0, 0 };
+    long long currentDragTimestamp = 0;
+    Vec2F currentDragVelocity = {0, 0};
 
     /// object describing parameters of inertia
     /// currently only dragging inertia is implemented
     /// zoom and rotation are still missing
     struct Inertia {
+        long timestampStart;
+        long timestampUpdate;
         Vec2F velocity;
-        
-        Inertia(Vec2F velocity):
-        velocity(velocity) {}
+        double t1;
+        double t2;
+
+        Inertia(long long timestampStart, Vec2F velocity, double t1, double t2)
+            : timestampStart(timestampStart)
+            , timestampUpdate(timestampStart)
+            , velocity(velocity)
+            , t1(t1)
+            , t2(t2) {}
     };
     std::optional<Inertia> inertia;
     void inertiaStep();
 
     CameraConfiguration config;
 
-    void notifyListeners();
+    enum ListenerType { BOUNDS = 1, ROTATION = 1 << 1, MAP_INTERACTION = 1 << 2 };
+
+    void notifyListeners(const int &listenerType);
 
     // MARK: Animations
 
     std::recursive_mutex animationMutex;
-    std::shared_ptr<AnimationInterface> coordAnimation;
-    std::shared_ptr<AnimationInterface> animation;
+    std::shared_ptr<CoordAnimation> coordAnimation;
+    std::shared_ptr<DoubleAnimation> zoomAnimation;
+    std::shared_ptr<DoubleAnimation> rotationAnimation;
 
+    Coord adjustCoordForPadding(const Coord &coords, double targetZoom);
     Coord getBoundsCorrectedCoords(const Coord &coords);
 
+    RectCoord getPaddingCorrectedBounds();
+    void clampCenterToPaddingCorrectedBounds();
+
+    RectCoord getRectFromViewport(const Vec2I &sizeViewport, const Coord &center);
+
+    std::vector<float> newVpMatrix = std::vector<float>(16, 0.0);
 };

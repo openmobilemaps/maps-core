@@ -11,29 +11,30 @@
 #pragma once
 
 #include "Tiled2dMapLayerConfig.h"
-#include "WmtsLayerDescription.h"
 #include "Tiled2dMapZoomInfo.h"
 #include "Tiled2dMapZoomLevelInfo.h"
+#include "WmtsLayerDescription.h"
 
-class WmtsTiled2dMapLayerConfig: public Tiled2dMapLayerConfig {
-public:
-    WmtsTiled2dMapLayerConfig(const WmtsLayerDescription &description,
-                              std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfo,
-                              const Tiled2dMapZoomInfo &zoomInfo,
-                              const std::string &coordinateSystemIdentifier);
+class WmtsTiled2dMapLayerConfig : public Tiled2dMapLayerConfig {
+  public:
+    WmtsTiled2dMapLayerConfig(const WmtsLayerDescription &description, std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfo,
+                              const Tiled2dMapZoomInfo &zoomInfo, const std::string &coordinateSystemIdentifier,
+                              const std::string &matrixSetIdentifier);
 
     virtual std::string getCoordinateSystemIdentifier() override;
 
     virtual std::string getTileUrl(int32_t x, int32_t y, int32_t zoom) override;
 
-    virtual std::string getTileIdentifier(int32_t x, int32_t y, int32_t zoom) override;
+    virtual std::string getLayerName() override;
 
     virtual std::vector<Tiled2dMapZoomLevelInfo> getZoomLevelInfos() override;
 
     virtual Tiled2dMapZoomInfo getZoomInfo() override;
-private:
+
+  private:
     const WmtsLayerDescription description;
     std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfo;
     const Tiled2dMapZoomInfo zoomInfo;
     const std::string coordinateSystemIdentifier;
+    const std::string matrixSetIdentifier;
 };

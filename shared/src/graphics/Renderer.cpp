@@ -9,38 +9,55 @@
  */
 
 #include "Renderer.h"
-#include "Matrix.h"
 #include "CameraInterface.h"
-#include "RenderPassInterface.h"
+#include "Matrix.h"
 #include "RenderObjectInterface.h"
+#include <Logger.h>
 
-void Renderer::addToRenderQueue(const std::shared_ptr<RenderPassInterface> &renderPass) { renderQueue.push(renderPass); }
+void Renderer::addToRenderQueue(const std::shared_ptr<RenderPassInterface> &renderPass) {
+    int32_t renderPassIndex = renderPass->getRenderPassConfig().renderPassIndex;
+    renderQueue[renderPassIndex].push_back(renderPass);
+}
 
 /** Ensure calling on graphics thread */
 void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &renderingContext,
                          const std::shared_ptr<CameraInterface> &camera) {
 
     auto vpMatrix = camera->getVpMatrix();
-    auto vpMatrixPointer = (int64_t) vpMatrix.data();
+    auto vpMatrixPointer = (int64_t)vpMatrix.data();
 
     renderingContext->setupDrawFrame();
 
-    while (!renderQueue.empty()) {
-        auto pass = renderQueue.front();
-        double factor = camera->getScalingFactor();
-        const auto &renderObjects = pass->getRenderObjects();
-        std::vector<float> tempMvpMatrix(16, 0);
-        for (const auto &renderObject : renderObjects) {
-            const auto &graphicsObject = renderObject->getGraphicsObject();
-            if (renderObject->hasCustomModelMatrix()) {
-                Matrix::multiplyMMC(tempMvpMatrix, 0, vpMatrix, 0, renderObject->getCustomModelMatrix(), 0);
-                graphicsObject->render(renderingContext, pass->getRenderPassConfig(),
-                               (int64_t) tempMvpMatrix.data(), 1);
-            } else {
-                graphicsObject->render(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, factor);
+    for (const auto &[index, passes] : renderQueue) {
+        for (const auto &pass : passes) {
+            const auto &maskObject = pass->getMaskingObject();
+            const bool hasMask = maskObject != nullptr;
+
+            double factor = camera->getScalingFactor();
+            const auto &renderObjects = pass->getRenderObjects();
+
+            renderingContext->applyScissorRect(pass->getScissoringRect());
+
+            if (hasMask) {
+                renderingContext->preRenderStencilMask();
+                maskObject->renderAsMask(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, factor);
+            }
+
+            for (const auto &renderObject : renderObjects) {
+                const auto &graphicsObject = renderObject->getGraphicsObject();
+                if (renderObject->hasCustomModelMatrix()) {
+                    Matrix::multiplyMMC(tempMvpMatrix, 0, vpMatrix, 0, renderObject->getCustomModelMatrix(), 0);
+                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(), (int64_t)tempMvpMatrix.data(), hasMask,
+                                           factor);
+                } else {
+                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, hasMask, factor);
+                }
+            }
+
+            if (hasMask) {
+                renderingContext->postRenderStencilMask();
             }
         }
-
-        renderQueue.pop();
     }
+    renderQueue.clear();
 }

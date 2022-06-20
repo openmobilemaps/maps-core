@@ -8,12 +8,11 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#ifndef MAPSCORE_BASESHADERPROGRAMOPENGL_H
-#define MAPSCORE_BASESHADERPROGRAMOPENGL_H
+#pragma once
 
-#define UBRendererShaderCode(...) #__VA_ARGS__
+#define UBRendererShaderCode(...) std::string(#__VA_ARGS__)
 
-#include "../logger/Logger.h"
+#include "Logger.h"
 #include "ShaderProgramInterface.h"
 #include "opengl_wrapper.h"
 
@@ -27,5 +26,3 @@ class BaseShaderProgramOpenGl {
 
     virtual std::string getFragmentShader();
 };
-
-#endif // MAPSCORE_BASESHADERPROGRAMOPENGL_H

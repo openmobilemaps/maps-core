@@ -5,12 +5,21 @@
 
 @interface MCTiled2dMapZoomInfo : NSObject
 - (nonnull instancetype)initWithZoomLevelScaleFactor:(float)zoomLevelScaleFactor
-                               numDrawPreviousLayers:(int32_t)numDrawPreviousLayers;
+                               numDrawPreviousLayers:(int32_t)numDrawPreviousLayers
+                                  adaptScaleToScreen:(BOOL)adaptScaleToScreen;
 + (nonnull instancetype)tiled2dMapZoomInfoWithZoomLevelScaleFactor:(float)zoomLevelScaleFactor
-                                             numDrawPreviousLayers:(int32_t)numDrawPreviousLayers;
+                                             numDrawPreviousLayers:(int32_t)numDrawPreviousLayers
+                                                adaptScaleToScreen:(BOOL)adaptScaleToScreen;
 
+/** this factor is applied to the the scale */
 @property (nonatomic, readonly) float zoomLevelScaleFactor;
 
 @property (nonatomic, readonly) int32_t numDrawPreviousLayers;
+
+/**
+ * if this flag is set to true the map is scaled according to the wmts scaledenominator (https://gis.stackexchange.com/questions/315881/what-is-wmts-scaledenominator)
+ * and the screen ppi
+ */
+@property (nonatomic, readonly) BOOL adaptScaleToScreen;
 
 @end

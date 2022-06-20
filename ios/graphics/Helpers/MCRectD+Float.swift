@@ -11,7 +11,7 @@
 import Foundation
 import MapCoreSharedModule
 
-extension MCRectD {
+public extension MCRectD {
     var xF: Float {
         Float(x)
     }

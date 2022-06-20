@@ -15,11 +15,17 @@ abstract class PolygonLayerInterface {
 
     abstract fun add(polygon: PolygonInfo)
 
+    abstract fun addAll(polygons: ArrayList<PolygonInfo>)
+
     abstract fun clear()
 
     abstract fun setCallbackHandler(handler: PolygonLayerCallbackInterface)
 
     abstract fun asLayerInterface(): io.openmobilemaps.mapscore.shared.map.LayerInterface
+
+    abstract fun resetSelection()
+
+    abstract fun setLayerClickable(isLayerClickable: Boolean)
 
     companion object {
         @JvmStatic
@@ -70,6 +76,12 @@ abstract class PolygonLayerInterface {
         }
         private external fun native_add(_nativeRef: Long, polygon: PolygonInfo)
 
+        override fun addAll(polygons: ArrayList<PolygonInfo>) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_addAll(this.nativeRef, polygons)
+        }
+        private external fun native_addAll(_nativeRef: Long, polygons: ArrayList<PolygonInfo>)
+
         override fun clear() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_clear(this.nativeRef)
@@ -87,6 +99,18 @@ abstract class PolygonLayerInterface {
             return native_asLayerInterface(this.nativeRef)
         }
         private external fun native_asLayerInterface(_nativeRef: Long): io.openmobilemaps.mapscore.shared.map.LayerInterface
+
+        override fun resetSelection() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_resetSelection(this.nativeRef)
+        }
+        private external fun native_resetSelection(_nativeRef: Long)
+
+        override fun setLayerClickable(isLayerClickable: Boolean) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setLayerClickable(this.nativeRef, isLayerClickable)
+        }
+        private external fun native_setLayerClickable(_nativeRef: Long, isLayerClickable: Boolean)
 
         companion object {
             @JvmStatic

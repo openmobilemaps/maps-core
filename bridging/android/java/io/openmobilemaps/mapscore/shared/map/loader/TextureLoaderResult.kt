@@ -5,5 +5,7 @@ package io.openmobilemaps.mapscore.shared.map.loader
 
 data class TextureLoaderResult(
     var data: io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface?,
+    var etag: String?,
     var status: LoaderStatus,
+    var errorCode: String?,
 )

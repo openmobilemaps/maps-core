@@ -9,8 +9,8 @@ abstract class WmtsTiled2dMapLayerConfigFactory {
 
     companion object {
         @JvmStatic
-        fun create(wmtsLayerConfiguration: WmtsLayerDescription, zoomLevelInfo: ArrayList<io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomLevelInfo>, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo, coordinateSystemIdentifier: String): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig {
-            return CppProxy.create(wmtsLayerConfiguration, zoomLevelInfo, zoomInfo, coordinateSystemIdentifier)
+        fun create(wmtsLayerConfiguration: WmtsLayerDescription, zoomLevelInfo: ArrayList<io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomLevelInfo>, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo, coordinateSystemIdentifier: String, matrixSetIdentifier: String): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig {
+            return CppProxy.create(wmtsLayerConfiguration, zoomLevelInfo, zoomInfo, coordinateSystemIdentifier, matrixSetIdentifier)
         }
     }
 
@@ -34,7 +34,7 @@ abstract class WmtsTiled2dMapLayerConfigFactory {
 
         companion object {
             @JvmStatic
-            external fun create(wmtsLayerConfiguration: WmtsLayerDescription, zoomLevelInfo: ArrayList<io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomLevelInfo>, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo, coordinateSystemIdentifier: String): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig
+            external fun create(wmtsLayerConfiguration: WmtsLayerDescription, zoomLevelInfo: ArrayList<io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomLevelInfo>, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo, coordinateSystemIdentifier: String, matrixSetIdentifier: String): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig
         }
     }
 }

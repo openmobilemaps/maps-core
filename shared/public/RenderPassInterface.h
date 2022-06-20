@@ -3,7 +3,10 @@
 
 #pragma once
 
+#include "MaskingObjectInterface.h"
+#include "RectI.h"
 #include <memory>
+#include <optional>
 #include <vector>
 
 class RenderObjectInterface;
@@ -18,4 +21,8 @@ public:
     virtual void addRenderObject(const std::shared_ptr<RenderObjectInterface> & renderObject) = 0;
 
     virtual RenderPassConfig getRenderPassConfig() = 0;
+
+    virtual std::shared_ptr<::MaskingObjectInterface> getMaskingObject() = 0;
+
+    virtual std::optional<::RectI> getScissoringRect() = 0;
 };

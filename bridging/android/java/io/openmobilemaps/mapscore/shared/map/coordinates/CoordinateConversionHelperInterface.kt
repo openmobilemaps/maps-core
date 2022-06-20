@@ -21,6 +21,17 @@ abstract class CoordinateConversionHelperInterface {
 
     abstract fun convertToRenderSystem(coordinate: Coord): Coord
 
+    companion object {
+        /**
+         * This instance is independent of the map and does not know about the rendering system.
+         * It can not be used to convert coordinates into rendering space.
+         */
+        @JvmStatic
+        fun independentInstance(): CoordinateConversionHelperInterface {
+            return CppProxy.independentInstance()
+        }
+    }
+
     private class CppProxy : CoordinateConversionHelperInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -80,5 +91,10 @@ abstract class CoordinateConversionHelperInterface {
             return native_convertToRenderSystem(this.nativeRef, coordinate)
         }
         private external fun native_convertToRenderSystem(_nativeRef: Long, coordinate: Coord): Coord
+
+        companion object {
+            @JvmStatic
+            external fun independentInstance(): CoordinateConversionHelperInterface
+        }
     }
 }

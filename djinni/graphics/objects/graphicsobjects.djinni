@@ -12,21 +12,38 @@ graphics_object_interface = interface +c +j +o {
     setup(context: rendering_context_interface);
     # Clear graphics object and invalidate isReady
     clear();
+    # by defaults objects if masked are only rendered where the mask is set
+    # if setting this flag the masked is applied inversly
+    set_is_inverse_masked(inversed: bool);
     # Render the graphics object; ensure calling on graphics thread
-    render(context: rendering_context_interface, render_pass: render_pass_config, mvp_matrix: i64, screenPixelAsRealMeterFactor: f64);
+    render(context: rendering_context_interface, render_pass: render_pass_config, mvp_matrix: i64, is_masked: bool, screenPixelAsRealMeterFactor: f64);
+}
+
+masking_object_interface = interface +c +j +o {
+    as_graphics_object(): graphics_object_interface;
+	render_as_mask(context: rendering_context_interface, render_pass: render_pass_config, mvp_matrix: i64, screenPixelAsRealMeterFactor: f64);
 }
 
 graphics_object_factory_interface = interface +c +j +o {
     create_quad(shader: shader_program_interface) : quad_2d_interface;
     create_line(shader: shader_program_interface) : line_2d_interface;
     create_polygon(shader: shader_program_interface) : polygon_2d_interface;
+
+    create_line_group(shader: shader_program_interface): line_group_2d_interface;
+    create_polygon_group(shader: shader_program_interface): polygon_group_2d_interface;
+
+    create_quad_mask() : quad_2d_interface;
+    create_polygon_mask() : polygon_2d_interface;
+
+    create_text(shader: shader_program_interface) : text_interface;
 }
 
 quad_2d_interface = interface +c +j +o {
     set_frame(frame: quad_2d_d, texture_coordinates: rect_d);
-    load_texture(texture_holder: texture_holder_interface);
+    load_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
     remove_texture();
     as_graphics_object(): graphics_object_interface;
+    as_masking_object(): masking_object_interface;
 }
 
 line_2d_interface = interface +c +j +o {
@@ -34,8 +51,29 @@ line_2d_interface = interface +c +j +o {
     as_graphics_object(): graphics_object_interface;
 }
 
+render_line_description = record {
+    positions: list<vec_2_d>;
+    style_index: i32;
+}
+
+line_group_2d_interface = interface +c +j +o {
+    set_lines(lines: list<render_line_description>);
+    as_graphics_object(): graphics_object_interface;
+}
+
 polygon_2d_interface = interface +c +j +o {
-    set_polygon_positions(positions: list<vec_2_d>, holes: list<list<vec_2_d>>, is_convex: bool);
+    set_vertices(vertices: list<vec_2_d>, indices: list<i32>);
+    as_graphics_object(): graphics_object_interface;
+    as_masking_object(): masking_object_interface;
+}
+
+render_vertices_description = record {
+    vertices: list<vec_2_d>;
+    style_index: i32;
+}
+
+polygon_group_2d_interface = interface +c +j +o {
+    set_vertices(vertices: list<render_vertices_description>, indices: list<i32>);
     as_graphics_object(): graphics_object_interface;
 }
 
@@ -45,4 +83,20 @@ texture_holder_interface = interface +j +o {
     get_texture_width() : i32;
     get_texture_height() : i32;
     attachToGraphics();
+}
+
+text_interface = interface +c +j +o {
+    set_texts(texts: list<text_description>);
+    load_texture(texture_holder: texture_holder_interface);
+    remove_texture();
+    as_graphics_object(): graphics_object_interface;
+}
+
+text_description = record {
+    glyphs: list<glyph_description>;
+}
+
+glyph_description = record {
+    frame: quad_2d_d;
+    texture_coordinates: quad_2d_d;
 }

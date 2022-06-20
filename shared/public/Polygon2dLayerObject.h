@@ -11,6 +11,7 @@
 #pragma once
 
 #include "ColorShaderInterface.h"
+#include "PolygonCoord.h"
 #include "Coord.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "LayerObjectInterface.h"
@@ -29,7 +30,11 @@ class Polygon2dLayerObject : public LayerObjectInterface {
 
     virtual std::vector<std::shared_ptr<RenderConfigInterface>> getRenderConfig() override;
 
-    void setPositions(const std::vector<Coord> &positions, const std::vector<std::vector<Coord>> &holes, bool isConvex);
+    void setPolygons(const std::vector<PolygonCoord> &polygons);
+
+    void setPolygon(const PolygonCoord &polygon);
+
+    void setPositions(const std::vector<Coord> &positions, const std::vector<std::vector<Coord>> &holes);
 
     std::shared_ptr<GraphicsObjectInterface> getPolygonObject();
 

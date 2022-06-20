@@ -100,4 +100,14 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_ico
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT ::djinni_generated::NativeVec2F::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icon_IconInfoInterface_00024CppProxy_native_1getIconAnchor(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::IconInfoInterface>(nativeRef);
+        auto r = ref->getIconAnchor();
+        return ::djinni::release(::djinni_generated::NativeVec2F::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 }  // namespace djinni_generated

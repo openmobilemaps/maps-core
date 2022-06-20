@@ -91,17 +91,13 @@ The camera attached to the `MapScene` defines the section of the map that is ren
 
 The graphical content displayed in the `MapScene` is grouped in layers. A layer contains one to many `LayerObject`s. These are collections of the information necessary to place a graphics primitive in the maps coordinate space and that define their appearance. Before a new frame is drawn, the `MapScene` queries all added layers for a configuration, specifying which graphics need to be drawn in which respective order.
 
-Two layer types are available with `MapCore`: `Tiled2dMapRasterLayer` and `PolygonLayer`.
+The layer types available with `MapsCore` are: `Tiled2dMapRasterLayer`, `PolygonLayer`, `IconLayer` and `LineLayer`.
 
 ##### TiledRasterLayer
 
 The content of most digital maps is split into hierarchical layers of map tiles. This layer supports both the loading and displaying of the relevant tiles for a given camera position and zoom-value. On creation of such a layer, a `Tiled2dMapLayerConfig` needs to be defined. It specifies the layers coordinate system by setting the bounds coordinates, as well as the different zoom layers and provides the url/identifier for loading the tiles.
 
 In addition to the configuration, an implementation of the `TextureLoaderInterface` needs to be supplied. A default implementation to load tiles from a given URL is contained in maps core on both platforms.
-
-##### PolygonLayer
-
-The `PolygonLayer` provides an interface to create and draw uniformly colored polygons in the map space.   
 
 
 ## License

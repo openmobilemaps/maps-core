@@ -6,6 +6,7 @@
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
+#import "DJIObjcWrapperCache+Private.h"
 #import "MCGraphicsObjectInterface+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -13,13 +14,13 @@
 
 static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for this file");
 
-@interface MCRenderObjectInterface ()
+@interface MCRenderObjectInterfaceCppProxy : NSObject<MCRenderObjectInterface>
 
 - (id)initWithCpp:(const std::shared_ptr<::RenderObjectInterface>&)cppRef;
 
 @end
 
-@implementation MCRenderObjectInterface {
+@implementation MCRenderObjectInterfaceCppProxy {
     ::djinni::CppProxyCache::Handle<std::shared_ptr<::RenderObjectInterface>> _cppRefHandle;
 }
 
@@ -54,12 +55,49 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 
 namespace djinni_generated {
 
+class RenderObjectInterface::ObjcProxy final
+: public ::RenderObjectInterface
+, private ::djinni::ObjcProxyBase<ObjcType>
+{
+    friend class ::djinni_generated::RenderObjectInterface;
+public:
+    using ObjcProxyBase::ObjcProxyBase;
+    std::shared_ptr<::GraphicsObjectInterface> getGraphicsObject() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getGraphicsObject];
+            return ::djinni_generated::GraphicsObjectInterface::toCpp(objcpp_result_);
+        }
+    }
+    bool hasCustomModelMatrix() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() hasCustomModelMatrix];
+            return ::djinni::Bool::toCpp(objcpp_result_);
+        }
+    }
+    std::vector<float> getCustomModelMatrix() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getCustomModelMatrix];
+            return ::djinni::List<::djinni::F32>::toCpp(objcpp_result_);
+        }
+    }
+};
+
+}  // namespace djinni_generated
+
+namespace djinni_generated {
+
 auto RenderObjectInterface::toCpp(ObjcType objc) -> CppType
 {
     if (!objc) {
         return nullptr;
     }
-    return objc->_cppRefHandle.get();
+    if ([(id)objc isKindOfClass:[MCRenderObjectInterfaceCppProxy class]]) {
+        return ((MCRenderObjectInterfaceCppProxy*)objc)->_cppRefHandle.get();
+    }
+    return ::djinni::get_objc_proxy<ObjcProxy>(objc);
 }
 
 auto RenderObjectInterface::fromCppOpt(const CppOptType& cpp) -> ObjcType
@@ -67,7 +105,10 @@ auto RenderObjectInterface::fromCppOpt(const CppOptType& cpp) -> ObjcType
     if (!cpp) {
         return nil;
     }
-    return ::djinni::get_cpp_proxy<MCRenderObjectInterface>(cpp);
+    if (auto cppPtr = dynamic_cast<ObjcProxy*>(cpp.get())) {
+        return cppPtr->djinni_private_get_proxied_objc_object();
+    }
+    return ::djinni::get_cpp_proxy<MCRenderObjectInterfaceCppProxy>(cpp);
 }
 
 }  // namespace djinni_generated

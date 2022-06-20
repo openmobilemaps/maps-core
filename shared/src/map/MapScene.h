@@ -10,18 +10,19 @@
 
 #pragma once
 
+#include "LayerReadyState.h"
 #include "MapConfig.h"
 #include "MapInterface.h"
 #include "Scene.h"
+#include <map>
 #include <mutex>
-#include <vector>
 
 class MapScene : public MapInterface, public SceneCallbackInterface, public std::enable_shared_from_this<MapScene> {
   public:
     MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig &mapConfig,
              const std::shared_ptr<::SchedulerInterface> &scheduler, float pixelDensity);
 
-    virtual ~MapScene() {}
+    virtual ~MapScene();
 
     virtual std::shared_ptr<::GraphicsObjectFactoryInterface> getGraphicsObjectFactory() override;
 
@@ -71,6 +72,14 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public std:
 
     virtual void pause() override;
 
+    virtual void drawReadyFrame(const ::RectCoord &bounds, float timeout,
+                                const std::shared_ptr<MapReadyCallbackInterface> &callbacks) override;
+
+    virtual void forceReload() override;
+
+  private:
+    LayerReadyState getLayersReadyState();
+
   private:
     const MapConfig mapConfig;
 
@@ -83,7 +92,7 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public std:
     std::shared_ptr<MapCamera2dInterface> camera;
 
     std::recursive_mutex layersMutex;
-    std::vector<std::shared_ptr<LayerInterface>> layers;
+    std::map<int, std::shared_ptr<LayerInterface>> layers;
 
     std::shared_ptr<TouchHandlerInterface> touchHandler;
 

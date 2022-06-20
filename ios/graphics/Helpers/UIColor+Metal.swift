@@ -33,18 +33,18 @@ extension UIColor {
         guard let components = color.components, let alpha = components.last else {
             return MTLClearColorMake(0, 0, 0, 1.0)
         }
-        let r, g, b: CGFloat
+        let r, g, b: Double
         switch color.numberOfComponents {
-        case 2:
-            r = components[0]
-            g = components[0]
-            b = components[0]
-        case 4:
-            r = components[0]
-            g = components[1]
-            b = components[2]
-        default:
-            return MTLClearColorMake(0, 0, 0, Double(alpha))
+            case 2:
+                r = components[0]
+                g = components[0]
+                b = components[0]
+            case 4:
+                r = components[0]
+                g = components[1]
+                b = components[2]
+            default:
+                return MTLClearColorMake(0, 0, 0, Double(alpha))
         }
         return MTLClearColorMake(Double(r), Double(g), Double(b), Double(alpha))
     }
@@ -58,11 +58,10 @@ extension MCColor {
                       alpha: Double(a))
     }
 
-    var simdValues: SIMD4<Float> {
-        [r, g, b, a]
+    public var simdValues: SIMD4<Float> {
+        SIMD4<Float>(r, g, b, a)
     }
 }
-
 
 public extension UIColor {
     var mapCoreColor: MCColor {
@@ -70,18 +69,18 @@ public extension UIColor {
         guard let components = color.components, let alpha = components.last else {
             return MCColor(r: 0, g: 0, b: 0, a: 1.0)
         }
-        let r, g, b: CGFloat
+        let r, g, b: Double
         switch color.numberOfComponents {
-        case 2:
-            r = components[0]
-            g = components[0]
-            b = components[0]
-        case 4:
-            r = components[0]
-            g = components[1]
-            b = components[2]
-        default:
-            return MCColor(r: 0, g: 0, b: 0, a: Float(alpha))
+            case 2:
+                r = components[0]
+                g = components[0]
+                b = components[0]
+            case 4:
+                r = components[0]
+                g = components[1]
+                b = components[2]
+            default:
+                return MCColor(r: 0, g: 0, b: 0, a: Float(alpha))
         }
         return MCColor(r: Float(r), g: Float(g), b: Float(b), a: Float(alpha))
     }

@@ -33,6 +33,11 @@ baseFragmentShader(VertexOut in [[stage_in]],
     float4 color = texture0.sample(textureSampler, in.uv);
     
     float a = color.a * alpha;
+
+    if (a == 0) {
+       discard_fragment();
+    }
+
     return float4(color.r * a, color.g * a, color.b * a, a);
 }
 
@@ -62,6 +67,11 @@ pointFragmentShader(VertexOut in [[stage_in]],
     }
 
     float a = color.a;
+
+    if (a == 0) {
+       discard_fragment();
+    }
+
     return float4(color.r * a, color.g * a, color.b * a, a);
 }
 
@@ -95,5 +105,10 @@ roundColorFragmentShader(VertexOut in [[stage_in]],
     }
 
     float a = color.a;
+
+    if (a == 0) {
+       discard_fragment();
+    }
+
     return float4(color.r * a, color.g * a, color.b * a, a);
 }

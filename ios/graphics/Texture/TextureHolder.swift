@@ -40,6 +40,14 @@ public class TextureHolder: NSObject {
         self.init(texture)
     }
 
+    public convenience init(name: String, scaleFactor: Double, bundle: Bundle?) throws {
+        let options: [MTKTextureLoader.Option: Any] = [
+            MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
+        ]
+        let texture = try MetalContext.current.textureLoader.newTexture(name: name, scaleFactor: scaleFactor, bundle: bundle, options: options)
+        self.init(texture)
+    }
+
     public convenience init(_ data: Data, textureUsableSize: TextureUsableSize? = nil) throws {
         let options: [MTKTextureLoader.Option: Any] = [
             MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
@@ -66,7 +74,8 @@ extension TextureHolder: MCTextureHolderInterface {
         Int32(textureUsableSize?.height ?? texture.height)
     }
 
-    public func attachToGraphics() {}
+    public func attachToGraphics() {
+    }
 }
 
 public extension TextureHolder {

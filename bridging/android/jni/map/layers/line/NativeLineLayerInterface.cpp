@@ -105,4 +105,31 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_line_L
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_line_LineLayerInterface_00024CppProxy_native_1resetSelection(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::LineLayerInterface>(nativeRef);
+        ref->resetSelection();
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_line_LineLayerInterface_00024CppProxy_native_1setSelected(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_selectedIds)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::LineLayerInterface>(nativeRef);
+        ref->setSelected(::djinni::Set<::djinni::String>::toCpp(jniEnv, j_selectedIds));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_line_LineLayerInterface_00024CppProxy_native_1setLayerClickable(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jboolean j_isLayerClickable)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::LineLayerInterface>(nativeRef);
+        ref->setLayerClickable(::djinni::Bool::toCpp(jniEnv, j_isLayerClickable));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
 }  // namespace djinni_generated

@@ -5,7 +5,7 @@
 #import <Foundation/Foundation.h>
 
 
-@interface MCTouchInterface : NSObject
+@protocol MCTouchInterface
 
 - (BOOL)onTouchDown:(nonnull MCVec2F *)posScreen;
 
@@ -28,6 +28,8 @@
 
 - (BOOL)onTwoFingerMove:(nonnull NSArray<MCVec2F *> *)posScreenOld
            posScreenNew:(nonnull NSArray<MCVec2F *> *)posScreenNew;
+
+- (BOOL)onTwoFingerMoveComplete;
 
 - (void)clearTouch;
 

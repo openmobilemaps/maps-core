@@ -3,15 +3,22 @@
 
 #pragma once
 
+#include "ErrorManager.h"
+#include "MaskingObjectInterface.h"
+#include "RectI.h"
 #include "RenderPassInterface.h"
 #include <memory>
+#include <optional>
 #include <vector>
 
 class MapInterface;
+enum class LayerReadyState;
 
 class LayerInterface {
 public:
     virtual ~LayerInterface() {}
+
+    virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) = 0;
 
     virtual void update() = 0;
 
@@ -28,4 +35,15 @@ public:
     virtual void hide() = 0;
 
     virtual void show() = 0;
+
+    /** optional rectangle, remove scissoring when not set */
+    virtual void setScissorRect(const std::optional<::RectI> & scissorRect) = 0;
+
+    virtual LayerReadyState isReadyToRenderOffscreen() = 0;
+
+    virtual void enableAnimations(bool enabled) = 0;
+
+    virtual void setErrorManager(const std::shared_ptr<::ErrorManager> & errorManager) = 0;
+
+    virtual void forceReload() = 0;
 };

@@ -8,8 +8,7 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#ifndef MAPSDK_COLORCIRCLESHADEROPENGL_H
-#define MAPSDK_COLORCIRCLESHADEROPENGL_H
+#pragma once
 
 #include "BaseShaderProgramOpenGl.h"
 #include "ColorCircleShaderInterface.h"
@@ -17,9 +16,9 @@
 #include <vector>
 
 class ColorCircleShaderOpenGl : public BaseShaderProgramOpenGl,
-                          public ColorCircleShaderInterface,
-                          public ShaderProgramInterface,
-                          public std::enable_shared_from_this<ShaderProgramInterface> {
+                                public ColorCircleShaderInterface,
+                                public ShaderProgramInterface,
+                                public std::enable_shared_from_this<ShaderProgramInterface> {
   public:
     virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() override;
 
@@ -37,5 +36,3 @@ class ColorCircleShaderOpenGl : public BaseShaderProgramOpenGl,
   private:
     std::vector<float> color;
 };
-
-#endif // MAPSDK_COLORCIRCLESHADEROPENGL_H

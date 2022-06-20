@@ -5,10 +5,17 @@
 #import "MCQuadCoord.h"
 #import "MCRectCoord.h"
 #import <Foundation/Foundation.h>
+@class MCCoordinateConversionHelperInterface;
 @protocol MCCoordinateConverterInterface;
 
 
 @interface MCCoordinateConversionHelperInterface : NSObject
+
+/**
+ * This instance is independent of the map and does not know about the rendering system.
+ * It can not be used to convert coordinates into rendering space.
+ */
++ (nullable MCCoordinateConversionHelperInterface *)independentInstance;
 
 - (void)registerConverter:(nullable id<MCCoordinateConverterInterface>)converter;
 

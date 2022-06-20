@@ -51,17 +51,25 @@ open class MCMapViewTouchHandler: NSObject {
     }
 
     func touchesCancelled(_ touches: Set<UITouch>, with _: UIEvent?) {
-        touchUp(touches)
+        guard let touchHandler = touchHandler else { return }
+        touches.forEach {
+            activeTouches.insert($0)
+
+            touchHandler.onTouchEvent(activeTouches.asMCTouchEvent(in: mapView, scale: Float(mapView.contentScaleFactor), action: .CANCEL))
+
+            activeTouches.remove($0)
+            originalTouchLocations.removeValue(forKey: $0)
+        }
     }
 
     func touchesMoved(_ touches: Set<UITouch>, with _: UIEvent?) {
         guard let touchHandler = touchHandler else { return }
 
-        func CGPointDistanceSquared(from: CGPoint, to: CGPoint) -> CGFloat {
+        func CGPointDistanceSquared(from: CGPoint, to: CGPoint) -> Double {
             (from.x - to.x) * (from.x - to.x) + (from.y - to.y) * (from.y - to.y)
         }
 
-        func CGPointDistance(from: CGPoint, to: CGPoint) -> CGFloat {
+        func CGPointDistance(from: CGPoint, to: CGPoint) -> Double {
             sqrt(CGPointDistanceSquared(from: from, to: to))
         }
 

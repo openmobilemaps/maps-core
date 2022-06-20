@@ -23,14 +23,11 @@ void ColorShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInt
 
     int program = glCreateProgram();       // create empty OpenGL Program
     glAttachShader(program, vertexShader); // add the vertex shader to program
-    OpenGlHelper::checkGlError("glAttachShader Vertex  Color");
     glDeleteShader(vertexShader);
     glAttachShader(program, fragmentShader); // add the fragment shader to program
-    OpenGlHelper::checkGlError("glAttachShader Fragment Color");
     glDeleteShader(fragmentShader);
 
     glLinkProgram(program); // create OpenGL program executables
-    OpenGlHelper::checkGlError("glLinkProgram Color");
 
     openGlContext->storeProgram(programName, program);
 }
@@ -40,7 +37,6 @@ void ColorShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterf
     int program = openGlContext->getProgram(getProgramName());
 
     int mColorHandle = glGetUniformLocation(program, "vColor");
-    // Set color for drawing the triangle
     glUniform4fv(mColorHandle, 1, &color[0]);
 }
 

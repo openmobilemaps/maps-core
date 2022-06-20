@@ -8,20 +8,17 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#ifndef MAPSCORE_OPENGLHELPER_H
-#define MAPSCORE_OPENGLHELPER_H
+#pragma once
 
-#include "logger/Logger.h"
+#include "Logger.h"
 #include "opengl_wrapper.h"
 
 class OpenGlHelper {
   public:
-    static void checkGlError(std::string glOperation) {
+    static void checkGlError(const std::string &glOperation) {
         int error;
         while ((error = glGetError()) != GL_NO_ERROR) {
             LogError << "GL ERROR: " << glOperation << " " <<= error;
         }
     }
 };
-
-#endif // MAPSCORE_OPENGLHELPER_H

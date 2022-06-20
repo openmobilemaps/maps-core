@@ -35,6 +35,15 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1freeze(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jboolean j_freeze)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        ref->freeze(::djinni::Bool::toCpp(jniEnv, j_freeze));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1moveToCenterPositionZoom(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeCoord::JniType j_centerPosition, jdouble j_zoom, jboolean j_animated)
 {
     try {
@@ -53,6 +62,18 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dIn
         const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
         ref->moveToCenterPosition(::djinni_generated::NativeCoord::toCpp(jniEnv, j_centerPosition),
                                   ::djinni::Bool::toCpp(jniEnv, j_animated));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1moveToBoundingBox(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRectCoord::JniType j_boundingBox, jfloat j_paddingPc, jboolean j_animated, jobject j_maxZoom)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        ref->moveToBoundingBox(::djinni_generated::NativeRectCoord::toCpp(jniEnv, j_boundingBox),
+                               ::djinni::F32::toCpp(jniEnv, j_paddingPc),
+                               ::djinni::Bool::toCpp(jniEnv, j_animated),
+                               ::djinni::Optional<std::optional, ::djinni::F64>::toCpp(jniEnv, j_maxZoom));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
@@ -124,6 +145,26 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dIn
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
+CJNIEXPORT jdouble JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1getMinZoom(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        auto r = ref->getMinZoom();
+        return ::djinni::release(::djinni::F64::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jdouble JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1getMaxZoom(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        auto r = ref->getMaxZoom();
+        return ::djinni::release(::djinni::F64::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1setBounds(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRectCoord::JniType j_bounds)
 {
     try {
@@ -131,6 +172,16 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dIn
         const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
         ref->setBounds(::djinni_generated::NativeRectCoord::toCpp(jniEnv, j_bounds));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT ::djinni_generated::NativeRectCoord::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1getBounds(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        auto r = ref->getBounds();
+        return ::djinni::release(::djinni_generated::NativeRectCoord::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
 CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1isInBounds(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeCoord::JniType j_coords)
@@ -143,43 +194,39 @@ CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1setPaddingLeft(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jfloat j_padding, jboolean j_animated)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1setPaddingLeft(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jfloat j_padding)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
-        ref->setPaddingLeft(::djinni::F32::toCpp(jniEnv, j_padding),
-                            ::djinni::Bool::toCpp(jniEnv, j_animated));
+        ref->setPaddingLeft(::djinni::F32::toCpp(jniEnv, j_padding));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1setPaddingRight(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jfloat j_padding, jboolean j_animated)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1setPaddingRight(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jfloat j_padding)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
-        ref->setPaddingRight(::djinni::F32::toCpp(jniEnv, j_padding),
-                             ::djinni::Bool::toCpp(jniEnv, j_animated));
+        ref->setPaddingRight(::djinni::F32::toCpp(jniEnv, j_padding));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1setPaddingTop(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jfloat j_padding, jboolean j_animated)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1setPaddingTop(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jfloat j_padding)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
-        ref->setPaddingTop(::djinni::F32::toCpp(jniEnv, j_padding),
-                           ::djinni::Bool::toCpp(jniEnv, j_animated));
+        ref->setPaddingTop(::djinni::F32::toCpp(jniEnv, j_padding));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1setPaddingBottom(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jfloat j_padding, jboolean j_animated)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1setPaddingBottom(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jfloat j_padding)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
-        ref->setPaddingBottom(::djinni::F32::toCpp(jniEnv, j_padding),
-                              ::djinni::Bool::toCpp(jniEnv, j_animated));
+        ref->setPaddingBottom(::djinni::F32::toCpp(jniEnv, j_padding));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
@@ -191,6 +238,35 @@ CJNIEXPORT ::djinni_generated::NativeRectCoord::JniType JNICALL Java_io_openmobi
         auto r = ref->getVisibleRect();
         return ::djinni::release(::djinni_generated::NativeRectCoord::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT ::djinni_generated::NativeRectCoord::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1getPaddingAdjustedVisibleRect(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        auto r = ref->getPaddingAdjustedVisibleRect();
+        return ::djinni::release(::djinni_generated::NativeRectCoord::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jfloat JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1getScreenDensityPpi(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        auto r = ref->getScreenDensityPpi();
+        return ::djinni::release(::djinni::F32::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1update(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        ref->update();
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
 CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1getInvariantModelMatrix(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeCoord::JniType j_coordinate, jboolean j_scaleInvariant, jboolean j_rotationInvariant)
@@ -243,6 +319,24 @@ CJNIEXPORT jdouble JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1setRotationEnabled(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jboolean j_enabled)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        ref->setRotationEnabled(::djinni::Bool::toCpp(jniEnv, j_enabled));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1setSnapToNorthEnabled(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jboolean j_enabled)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        ref->setSnapToNorthEnabled(::djinni::Bool::toCpp(jniEnv, j_enabled));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
 CJNIEXPORT ::djinni_generated::NativeCameraInterface::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1asCameraInterface(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
@@ -250,6 +344,36 @@ CJNIEXPORT ::djinni_generated::NativeCameraInterface::JniType JNICALL Java_io_op
         const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
         auto r = ref->asCameraInterface();
         return ::djinni::release(::djinni_generated::NativeCameraInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT ::djinni_generated::NativeRectCoord::Boxed::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1getLastVpMatrixViewBounds(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        auto r = ref->getLastVpMatrixViewBounds();
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni_generated::NativeRectCoord>::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1getLastVpMatrixRotation(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        auto r = ref->getLastVpMatrixRotation();
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni::F32>::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1getLastVpMatrixZoom(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        auto r = ref->getLastVpMatrixZoom();
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni::F32>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

@@ -11,33 +11,35 @@
 #include "WmtsTiled2dMapLayerConfig.h"
 
 WmtsTiled2dMapLayerConfig::WmtsTiled2dMapLayerConfig(const WmtsLayerDescription &description,
-                          std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfo,
+                                                     std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfo,
                                                      const Tiled2dMapZoomInfo &zoomInfo,
-                                                     const std::string &coordinateSystemIdentifier):
-description(description),
-zoomLevelInfo(zoomLevelInfo),
-zoomInfo(zoomInfo),
-coordinateSystemIdentifier(coordinateSystemIdentifier)
-{}
+                                                     const std::string &coordinateSystemIdentifier,
+                                                     const std::string &matrixSetIdentifier)
+    : description(description)
+    , zoomLevelInfo(zoomLevelInfo)
+    , zoomInfo(zoomInfo)
+    , coordinateSystemIdentifier(coordinateSystemIdentifier)
+    , matrixSetIdentifier(matrixSetIdentifier) {}
 
-std::string WmtsTiled2dMapLayerConfig::getCoordinateSystemIdentifier() {
-    return coordinateSystemIdentifier;
-}
+std::string WmtsTiled2dMapLayerConfig::getCoordinateSystemIdentifier() { return coordinateSystemIdentifier; }
 
 std::string WmtsTiled2dMapLayerConfig::getTileUrl(int32_t x, int32_t y, int32_t zoom) {
     std::string urlFormat = description.resourceTemplate;
 
-    if (auto it = urlFormat.find("{TileMatrix}")) {
+    if (auto it = urlFormat.find("{TileMatrix}"); it != std::string::npos) {
         urlFormat.replace(it, std::strlen("{TileMatrix}"), std::to_string(zoom));
     }
-    if (auto it = urlFormat.find("{TileRow}")) {
+    if (auto it = urlFormat.find("{TileMatrixSet}"); it != std::string::npos) {
+        urlFormat.replace(it, std::strlen("{TileMatrixSet}"), matrixSetIdentifier);
+    }
+    if (auto it = urlFormat.find("{TileRow}"); it != std::string::npos) {
         urlFormat.replace(it, std::strlen("{TileRow}"), std::to_string(y));
     }
-    if (auto it = urlFormat.find("{TileCol}")) {
+    if (auto it = urlFormat.find("{TileCol}"); it != std::string::npos) {
         urlFormat.replace(it, std::strlen("{TileCol}"), std::to_string(x));
     }
 
-    for (auto const &dimension: description.dimensions) {
+    for (auto const &dimension : description.dimensions) {
         auto placeHolder = "{" + dimension.identifier + "}";
         auto it = urlFormat.find(placeHolder);
         if (it != std::string::npos) {
@@ -48,14 +50,8 @@ std::string WmtsTiled2dMapLayerConfig::getTileUrl(int32_t x, int32_t y, int32_t 
     return urlFormat;
 }
 
-std::string WmtsTiled2dMapLayerConfig::getTileIdentifier(int32_t x, int32_t y, int32_t zoom) {
-    return "<" + description.identifier + "x:" + std::to_string(x) + "y:" + std::to_string(y) + "zoom:" +  std::to_string(zoom) + ">";
-}
+std::string WmtsTiled2dMapLayerConfig::getLayerName() { return description.identifier; }
 
-std::vector<Tiled2dMapZoomLevelInfo> WmtsTiled2dMapLayerConfig::getZoomLevelInfos() {
-    return zoomLevelInfo;
-}
+std::vector<Tiled2dMapZoomLevelInfo> WmtsTiled2dMapLayerConfig::getZoomLevelInfos() { return zoomLevelInfo; }
 
-Tiled2dMapZoomInfo WmtsTiled2dMapLayerConfig::getZoomInfo() {
-    return zoomInfo;
-}
+Tiled2dMapZoomInfo WmtsTiled2dMapLayerConfig::getZoomInfo() { return zoomInfo; }

@@ -8,19 +8,21 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#ifndef MAPSDK_RECTANGLE2DOPENGL_H
-#define MAPSDK_RECTANGLE2DOPENGL_H
+#pragma once
 
 #include "GraphicsObjectInterface.h"
+#include "MaskingObjectInterface.h"
 #include "OpenGlContext.h"
 #include "Quad2dInterface.h"
 #include "ShaderProgramInterface.h"
 #include "opengl_wrapper.h"
+#include <mutex>
 #include <vector>
 
 class Quad2dOpenGl : public GraphicsObjectInterface,
+                     public MaskingObjectInterface,
                      public Quad2dInterface,
-                     public std::enable_shared_from_this<GraphicsObjectInterface> {
+                     public std::enable_shared_from_this<Quad2dOpenGl> {
   public:
     Quad2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader);
 
@@ -32,29 +34,51 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
 
     virtual void clear() override;
 
+    virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
+                              int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
+
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                        int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
+                        int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
     virtual void setFrame(const ::Quad2dD &frame, const ::RectD &textureCoordinates) override;
 
-    virtual void loadTexture(const std::shared_ptr<TextureHolderInterface> &textureHolder) override;
+    virtual void loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
+                             const std::shared_ptr<TextureHolderInterface> &textureHolder) override;
 
     virtual void removeTexture() override;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() override;
+
+    virtual std::shared_ptr<MaskingObjectInterface> asMaskingObject() override;
+
+    virtual void setIsInverseMasked(bool inversed) override;
 
   protected:
     virtual void adjustTextureCoordinates();
 
     virtual void prepareTextureDraw(std::shared_ptr<OpenGlContext> &openGLContext, int mProgram);
 
+    void prepareGlData(const std::shared_ptr<OpenGlContext> &openGlContext, const int &programHandle);
+
+    void prepareTextureCoordsGlData(const std::shared_ptr<OpenGlContext> &openGlContext, const int &programHandle);
+
+    void removeGlBuffers();
+
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
 
-    std::vector<GLfloat> vertexBuffer;
-    std::vector<GLfloat> textureBuffer;
-    std::vector<GLubyte> indexBuffer;
+    int programHandle;
+    int mvpMatrixHandle;
+    int positionHandle;
+    GLuint vertexBuffer;
+    std::vector<GLfloat> vertices;
+    int textureCoordinateHandle;
+    GLuint textureCoordsBuffer;
+    std::vector<GLfloat> textureCoords;
+    GLuint indexBuffer;
+    std::vector<GLubyte> indices;
     std::vector<GLuint> texturePointer = {0};
     bool textureLoaded = false;
+    bool usesTextureCoords = false;
 
     Quad2dD frame = Quad2dD(Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0));
     RectD textureCoordinates = RectD(0.0, 0.0, 0.0, 0.0);
@@ -62,6 +86,7 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
     double factorWidth = 1.0;
 
     bool ready = false;
-};
+    std::recursive_mutex dataMutex;
 
-#endif // MAPSDK_RECTANGLE2DOPENGL_H
+    bool isMaskInversed = false;
+};

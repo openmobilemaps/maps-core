@@ -51,17 +51,6 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nonnull NSString *)getTileIdentifier:(int32_t)x
-                                      y:(int32_t)y
-                                   zoom:(int32_t)zoom {
-    try {
-        auto objcpp_result_ = _cppRefHandle.get()->getTileIdentifier(::djinni::I32::toCpp(x),
-                                                                     ::djinni::I32::toCpp(y),
-                                                                     ::djinni::I32::toCpp(zoom));
-        return ::djinni::String::fromCpp(objcpp_result_);
-    } DJINNI_TRANSLATE_EXCEPTIONS()
-}
-
 - (nonnull NSArray<MCTiled2dMapZoomLevelInfo *> *)getZoomLevelInfos {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getZoomLevelInfos();
@@ -73,6 +62,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getZoomInfo();
         return ::djinni_generated::Tiled2dMapZoomInfo::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nonnull NSString *)getLayerName {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getLayerName();
+        return ::djinni::String::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -101,15 +97,6 @@ public:
             return ::djinni::String::toCpp(objcpp_result_);
         }
     }
-    std::string getTileIdentifier(int32_t c_x, int32_t c_y, int32_t c_zoom) override
-    {
-        @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getTileIdentifier:(::djinni::I32::fromCpp(c_x))
-                                                                                            y:(::djinni::I32::fromCpp(c_y))
-                                                                                         zoom:(::djinni::I32::fromCpp(c_zoom))];
-            return ::djinni::String::toCpp(objcpp_result_);
-        }
-    }
     std::vector<::Tiled2dMapZoomLevelInfo> getZoomLevelInfos() override
     {
         @autoreleasepool {
@@ -122,6 +109,13 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getZoomInfo];
             return ::djinni_generated::Tiled2dMapZoomInfo::toCpp(objcpp_result_);
+        }
+    }
+    std::string getLayerName() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getLayerName];
+            return ::djinni::String::toCpp(objcpp_result_);
         }
     }
 };

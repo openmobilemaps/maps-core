@@ -12,4 +12,6 @@
 
 - (void)onRotationChanged:(float)angle;
 
+- (void)onMapInteraction;
+
 @end

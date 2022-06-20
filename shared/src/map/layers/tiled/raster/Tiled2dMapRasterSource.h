@@ -10,29 +10,29 @@
 
 #pragma once
 
+#include "LoaderInterface.h"
 #include "MapConfig.h"
-#include "TextureLoaderInterface.h"
 #include "TextureLoaderResult.h"
 #include "Tiled2dMapRasterTileInfo.h"
 #include "Tiled2dMapSource.h"
 
-class Tiled2dMapRasterSource : public Tiled2dMapSource<TextureHolderInterface, TextureLoaderResult> {
+class Tiled2dMapRasterSource
+    : public Tiled2dMapSource<TextureHolderInterface, TextureLoaderResult, std::shared_ptr<::TextureHolderInterface>> {
   public:
     Tiled2dMapRasterSource(const MapConfig &mapConfig, const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
                            const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                            const std::shared_ptr<SchedulerInterface> &scheduler,
-                           const std::shared_ptr<TextureLoaderInterface> &loader,
-                           const std::shared_ptr<Tiled2dMapSourceListenerInterface> &listener);
+                           const std::shared_ptr<::LoaderInterface> &textureLoader,
+                           const std::shared_ptr<Tiled2dMapSourceListenerInterface> &listener, float screenDensityPpi);
 
     std::unordered_set<Tiled2dMapRasterTileInfo> getCurrentTiles();
-
-    virtual void pause() override;
-
-    virtual void resume() override;
 
   protected:
     virtual TextureLoaderResult loadTile(Tiled2dMapTileInfo tile) override;
 
+    virtual std::shared_ptr<::TextureHolderInterface> postLoadingTask(const TextureLoaderResult &loadedData,
+                                                                      const Tiled2dMapTileInfo &tile) override;
+
   private:
-    const std::shared_ptr<TextureLoaderInterface> loader;
+    const std::shared_ptr<LoaderInterface> loader;
 };

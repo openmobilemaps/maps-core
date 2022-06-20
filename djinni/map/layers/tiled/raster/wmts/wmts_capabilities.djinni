@@ -1,5 +1,5 @@
 @extern "../../../../../yaml/tiled_2d_map_raster_layer_interface.yaml"
-@extern "../../../../../yaml/texture_loader_interface.yaml"
+@extern "../../../../../yaml/loader_interface.yaml"
 @extern "../../../../../yaml/rect_coord.yaml"
 @extern "../../../../../yaml/map_coordinate_system.yaml"
 @extern "../../../../../yaml/tiled_2d_map_zoom_info.yaml"
@@ -39,11 +39,19 @@ wmts_layer_description = record {
 
 wmts_capabilities_resource = interface +c {
     static create(xml: string) : wmts_capabilities_resource;
-    create_layer(identifier: string, texture_loader: texture_loader_interface): tiled_2d_map_raster_layer_interface;
+    create_layer(identifier: string, tile_loader: loader_interface): tiled_2d_map_raster_layer_interface;
+    create_layer_with_zoom_info(identifier: string, tile_loader: loader_interface, zoom_info: tiled_2d_map_zoom_info): tiled_2d_map_raster_layer_interface;
+
+    create_layer_config(identifier: string): tiled_2d_map_layer_config;
+    create_layer_config_with_zoom_info(identifier: string, zoom_info: tiled_2d_map_zoom_info): tiled_2d_map_layer_config;
 
     get_all_layers(): list<wmts_layer_description>;
 }
 
 wmts_tiled_2d_map_layer_config_factory = interface +c {
-    static create(wmts_layer_configuration: wmts_layer_description, zoom_level_info: list<tiled_2d_map_zoom_level_info>, zoom_info: tiled_2d_map_zoom_info, coordinate_system_identifier: string) : tiled_2d_map_layer_config;
+    static create(wmts_layer_configuration: wmts_layer_description,
+                  zoom_level_info: list<tiled_2d_map_zoom_level_info>,
+                  zoom_info: tiled_2d_map_zoom_info,
+                  coordinate_system_identifier: string,
+                  matrix_set_identifier: string) : tiled_2d_map_layer_config;
 }

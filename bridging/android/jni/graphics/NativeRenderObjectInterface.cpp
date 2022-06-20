@@ -11,6 +11,34 @@ NativeRenderObjectInterface::NativeRenderObjectInterface() : ::djinni::JniInterf
 
 NativeRenderObjectInterface::~NativeRenderObjectInterface() = default;
 
+NativeRenderObjectInterface::JavaProxy::JavaProxy(JniType j) : Handle(::djinni::jniGetThreadEnv(), j) { }
+
+NativeRenderObjectInterface::JavaProxy::~JavaProxy() = default;
+
+std::shared_ptr<::GraphicsObjectInterface> NativeRenderObjectInterface::JavaProxy::getGraphicsObject() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeRenderObjectInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getGraphicsObject);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativeGraphicsObjectInterface::toCpp(jniEnv, jret);
+}
+bool NativeRenderObjectInterface::JavaProxy::hasCustomModelMatrix() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeRenderObjectInterface>::get();
+    auto jret = jniEnv->CallBooleanMethod(Handle::get().get(), data.method_hasCustomModelMatrix);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni::Bool::toCpp(jniEnv, jret);
+}
+std::vector<float> NativeRenderObjectInterface::JavaProxy::getCustomModelMatrix() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeRenderObjectInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getCustomModelMatrix);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni::List<::djinni::F32>::toCpp(jniEnv, jret);
+}
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderObjectInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {

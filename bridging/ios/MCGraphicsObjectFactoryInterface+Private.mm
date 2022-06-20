@@ -7,9 +7,12 @@
 #import "DJIError.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCLine2dInterface+Private.h"
+#import "MCLineGroup2dInterface+Private.h"
 #import "MCPolygon2dInterface+Private.h"
+#import "MCPolygonGroup2dInterface+Private.h"
 #import "MCQuad2dInterface+Private.h"
 #import "MCShaderProgramInterface+Private.h"
+#import "MCTextInterface+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -55,6 +58,41 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable id<MCLineGroup2dInterface>)createLineGroup:(nullable id<MCShaderProgramInterface>)shader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createLineGroup(::djinni_generated::ShaderProgramInterface::toCpp(shader));
+        return ::djinni_generated::LineGroup2dInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCPolygonGroup2dInterface>)createPolygonGroup:(nullable id<MCShaderProgramInterface>)shader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createPolygonGroup(::djinni_generated::ShaderProgramInterface::toCpp(shader));
+        return ::djinni_generated::PolygonGroup2dInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCQuad2dInterface>)createQuadMask {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createQuadMask();
+        return ::djinni_generated::Quad2dInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCPolygon2dInterface>)createPolygonMask {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createPolygonMask();
+        return ::djinni_generated::Polygon2dInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCTextInterface>)createText:(nullable id<MCShaderProgramInterface>)shader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createText(::djinni_generated::ShaderProgramInterface::toCpp(shader));
+        return ::djinni_generated::TextInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class GraphicsObjectFactoryInterface::ObjcProxy final
@@ -83,6 +121,41 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygon:(::djinni_generated::ShaderProgramInterface::fromCpp(c_shader))];
             return ::djinni_generated::Polygon2dInterface::toCpp(objcpp_result_);
+        }
+    }
+    std::shared_ptr<::LineGroup2dInterface> createLineGroup(const std::shared_ptr<::ShaderProgramInterface> & c_shader) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createLineGroup:(::djinni_generated::ShaderProgramInterface::fromCpp(c_shader))];
+            return ::djinni_generated::LineGroup2dInterface::toCpp(objcpp_result_);
+        }
+    }
+    std::shared_ptr<::PolygonGroup2dInterface> createPolygonGroup(const std::shared_ptr<::ShaderProgramInterface> & c_shader) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygonGroup:(::djinni_generated::ShaderProgramInterface::fromCpp(c_shader))];
+            return ::djinni_generated::PolygonGroup2dInterface::toCpp(objcpp_result_);
+        }
+    }
+    std::shared_ptr<::Quad2dInterface> createQuadMask() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createQuadMask];
+            return ::djinni_generated::Quad2dInterface::toCpp(objcpp_result_);
+        }
+    }
+    std::shared_ptr<::Polygon2dInterface> createPolygonMask() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygonMask];
+            return ::djinni_generated::Polygon2dInterface::toCpp(objcpp_result_);
+        }
+    }
+    std::shared_ptr<::TextInterface> createText(const std::shared_ptr<::ShaderProgramInterface> & c_shader) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createText:(::djinni_generated::ShaderProgramInterface::fromCpp(c_shader))];
+            return ::djinni_generated::TextInterface::toCpp(objcpp_result_);
         }
     }
 };

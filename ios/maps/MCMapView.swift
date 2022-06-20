@@ -17,14 +17,18 @@ open class MCMapView: MTKView {
     public let mapInterface: MCMapInterface
     private let renderingContext: RenderingContext
 
-    private var sizeChanged: Bool = false
+    private var sizeChanged = false
     private var backgroundDisable = false
+    private var saveDrawable = false
+    private lazy var renderToImageQueue = DispatchQueue(label: "io.openmobilemaps.renderToImagQueue", qos: .userInteractive)
 
     private var framesToRender: UInt = 1
-    private let framesToRenderAfterInvalidate: UInt = 1
+    private let framesToRenderAfterInvalidate: UInt = 25
 
     private let touchHandler: MCMapViewTouchHandler
     private let callbackHandler = MCMapViewCallbackHandler()
+
+    public weak var sizeDelegate: MCMapSizeDelegate?
 
     public init(mapConfig: MCMapConfig) {
         let renderingContext = RenderingContext()
@@ -62,6 +66,8 @@ open class MCMapView: MTKView {
 
         isMultipleTouchEnabled = true
 
+        preferredFramesPerSecond = 120
+
         callbackHandler.invalidateCallback = { [weak self] in
             self?.invalidate()
         }
@@ -71,7 +77,7 @@ open class MCMapView: MTKView {
 
         mapInterface.resume()
 
-        addEventListeners();
+        addEventListeners()
     }
 
     private func addEventListeners() {
@@ -112,7 +118,7 @@ open class MCMapView: MTKView {
 }
 
 extension MCMapView: MTKViewDelegate {
-    public func mtkView(_: MTKView, drawableSizeWillChange _: CGSize) {
+    open func mtkView(_: MTKView, drawableSizeWillChange _: CGSize) {
         sizeChanged = true
         invalidate()
     }
@@ -141,9 +147,10 @@ extension MCMapView: MTKViewDelegate {
         // Shared lib stuff
         if sizeChanged {
             mapInterface.setViewportSize(view.drawableSize.vec2)
+            sizeDelegate?.sizeChanged()
             sizeChanged = false
         }
-        
+
         mapInterface.drawFrame()
 
         renderEncoder.endEncoding()
@@ -152,8 +159,60 @@ extension MCMapView: MTKViewDelegate {
             return
         }
 
-        commandBuffer.present(drawable)
-        commandBuffer.commit()
+        // if we want to save the drawable (offscreen rendering), we commit and wait synchronously
+        // until the command buffer completes, also we don't present it
+        if self.saveDrawable {
+            commandBuffer.commit()
+            commandBuffer.waitUntilCompleted()
+        } else {
+            commandBuffer.present(drawable)
+            commandBuffer.commit()
+        }
+    }
+
+    public func renderToImage(size: CGSize, timeout: Float, bounds: MCRectCoord, callback: @escaping (UIImage?, MCLayerReadyState) -> Void) {
+        renderToImageQueue.async {
+            self.frame = CGRect(origin: .zero, size: size)
+            self.setNeedsLayout()
+            self.layoutIfNeeded()
+
+            let mapReadyCallbacks = MCMapViewMapReadyCallbacks()
+            mapReadyCallbacks.delegate = self
+            mapReadyCallbacks.callback = callback
+
+            self.mapInterface.drawReadyFrame(bounds, timeout: timeout, callbacks: mapReadyCallbacks)
+        }
+    }
+}
+
+private extension MCMapView {
+    func currentDrawableImage() -> UIImage? {
+        self.saveDrawable = true
+        self.invalidate()
+        self.draw(in: self)
+        self.saveDrawable = false
+
+        guard let texture = self.currentDrawable?.texture else { return nil }
+
+        let context = CIContext()
+        let kciOptions: [CIImageOption: Any] = [.colorSpace: CGColorSpaceCreateDeviceRGB()]
+        let cImg = CIImage(mtlTexture: texture, options: kciOptions)!
+        return context.createCGImage(cImg, from: cImg.extent)?.toImage()
+    }
+}
+
+private extension CGImage {
+    func toImage() -> UIImage? {
+        let w = Double(width) / UIScreen.main.scale
+        let h = Double(height) / UIScreen.main.scale
+        UIGraphicsBeginImageContext(CGSize(width: w, height: h))
+        let context = UIGraphicsGetCurrentContext()
+        context?.draw(self, in: CGRect(x: 0, y: 0, width: w, height: h))
+
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+
+        return newImage
     }
 }
 
@@ -209,5 +268,29 @@ public extension MCMapView {
 
     func remove(layer: MCLayerInterface?) {
         mapInterface.removeLayer(layer)
+    }
+}
+
+private class MCMapViewMapReadyCallbacks: MCMapReadyCallbackInterface {
+    public weak var delegate: MCMapView?
+    public var callback: ((UIImage?, MCLayerReadyState) -> Void)?
+
+    func stateDidUpdate(_ state: MCLayerReadyState) {
+        guard let delegate = self.delegate else { return }
+
+        delegate.draw(in: delegate)
+
+        DispatchQueue.main.async {
+            switch state {
+                case .NOT_READY:
+                    break
+                case .ERROR, .TIMEOUT_ERROR:
+                    self.callback?(nil, state)
+                case .READY:
+                    self.callback?(delegate.currentDrawableImage(), state)
+                @unknown default:
+                    break
+            }
+        }
     }
 }

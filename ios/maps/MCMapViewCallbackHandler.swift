@@ -8,12 +8,11 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-
 import Foundation
 import MapCoreSharedModule
 
 class MCMapViewCallbackHandler: MCMapCallbackInterface {
-    var invalidateCallback: (()->())?
+    var invalidateCallback: (() -> Void)?
 
     func invalidate() {
         invalidateCallback?()

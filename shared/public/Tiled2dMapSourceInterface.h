@@ -3,11 +3,34 @@
 
 #pragma once
 
+#include "ErrorManager.h"
+#include "LayerReadyState.h"
 #include "RectCoord.h"
+#include <cstdint>
+#include <memory>
+#include <optional>
 
 class Tiled2dMapSourceInterface {
 public:
     virtual ~Tiled2dMapSourceInterface() {}
 
     virtual void onVisibleBoundsChanged(const ::RectCoord & visibleBounds, double zoom) = 0;
+
+    virtual void setMinZoomLevelIdentifier(std::optional<int32_t> value) = 0;
+
+    virtual std::optional<int32_t> getMinZoomLevelIdentifier() = 0;
+
+    virtual void setMaxZoomLevelIdentifier(std::optional<int32_t> value) = 0;
+
+    virtual std::optional<int32_t> getMaxZoomLevelIdentifier() = 0;
+
+    virtual void pause() = 0;
+
+    virtual void resume() = 0;
+
+    virtual ::LayerReadyState isReadyToRenderOffscreen() = 0;
+
+    virtual void setErrorManager(const std::shared_ptr<::ErrorManager> & errorManager) = 0;
+
+    virtual void forceReload() = 0;
 };

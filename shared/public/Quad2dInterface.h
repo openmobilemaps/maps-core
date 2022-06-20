@@ -5,9 +5,11 @@
 
 #include "Quad2dD.h"
 #include "RectD.h"
+#include "RenderingContextInterface.h"
 #include <memory>
 
 class GraphicsObjectInterface;
+class MaskingObjectInterface;
 class TextureHolderInterface;
 
 class Quad2dInterface {
@@ -16,9 +18,11 @@ public:
 
     virtual void setFrame(const ::Quad2dD & frame, const ::RectD & textureCoordinates) = 0;
 
-    virtual void loadTexture(const std::shared_ptr<TextureHolderInterface> & textureHolder) = 0;
+    virtual void loadTexture(const std::shared_ptr<::RenderingContextInterface> & context, const std::shared_ptr<TextureHolderInterface> & textureHolder) = 0;
 
     virtual void removeTexture() = 0;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() = 0;
+
+    virtual std::shared_ptr<MaskingObjectInterface> asMaskingObject() = 0;
 };

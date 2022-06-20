@@ -6,6 +6,7 @@
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
+#import "DJIObjcWrapperCache+Private.h"
 #import "MCVec2F+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -13,13 +14,13 @@
 
 static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for this file");
 
-@interface MCTouchInterface ()
+@interface MCTouchInterfaceCppProxy : NSObject<MCTouchInterface>
 
 - (id)initWithCpp:(const std::shared_ptr<::TouchInterface>&)cppRef;
 
 @end
 
-@implementation MCTouchInterface {
+@implementation MCTouchInterfaceCppProxy {
     ::djinni::CppProxyCache::Handle<std::shared_ptr<::TouchInterface>> _cppRefHandle;
 }
 
@@ -102,6 +103,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (BOOL)onTwoFingerMoveComplete {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->onTwoFingerMoveComplete();
+        return ::djinni::Bool::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)clearTouch {
     try {
         _cppRefHandle.get()->clearTouch();
@@ -110,12 +118,108 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 
 namespace djinni_generated {
 
+class TouchInterface::ObjcProxy final
+: public ::TouchInterface
+, private ::djinni::ObjcProxyBase<ObjcType>
+{
+    friend class ::djinni_generated::TouchInterface;
+public:
+    using ObjcProxyBase::ObjcProxyBase;
+    bool onTouchDown(const ::Vec2F & c_posScreen) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() onTouchDown:(::djinni_generated::Vec2F::fromCpp(c_posScreen))];
+            return ::djinni::Bool::toCpp(objcpp_result_);
+        }
+    }
+    bool onClickUnconfirmed(const ::Vec2F & c_posScreen) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() onClickUnconfirmed:(::djinni_generated::Vec2F::fromCpp(c_posScreen))];
+            return ::djinni::Bool::toCpp(objcpp_result_);
+        }
+    }
+    bool onClickConfirmed(const ::Vec2F & c_posScreen) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() onClickConfirmed:(::djinni_generated::Vec2F::fromCpp(c_posScreen))];
+            return ::djinni::Bool::toCpp(objcpp_result_);
+        }
+    }
+    bool onDoubleClick(const ::Vec2F & c_posScreen) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() onDoubleClick:(::djinni_generated::Vec2F::fromCpp(c_posScreen))];
+            return ::djinni::Bool::toCpp(objcpp_result_);
+        }
+    }
+    bool onLongPress(const ::Vec2F & c_posScreen) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() onLongPress:(::djinni_generated::Vec2F::fromCpp(c_posScreen))];
+            return ::djinni::Bool::toCpp(objcpp_result_);
+        }
+    }
+    bool onMove(const ::Vec2F & c_deltaScreen, bool c_confirmed, bool c_doubleClick) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() onMove:(::djinni_generated::Vec2F::fromCpp(c_deltaScreen))
+                                                                         confirmed:(::djinni::Bool::fromCpp(c_confirmed))
+                                                                       doubleClick:(::djinni::Bool::fromCpp(c_doubleClick))];
+            return ::djinni::Bool::toCpp(objcpp_result_);
+        }
+    }
+    bool onMoveComplete() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() onMoveComplete];
+            return ::djinni::Bool::toCpp(objcpp_result_);
+        }
+    }
+    bool onTwoFingerClick(const ::Vec2F & c_posScreen1, const ::Vec2F & c_posScreen2) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() onTwoFingerClick:(::djinni_generated::Vec2F::fromCpp(c_posScreen1))
+                                                                                  posScreen2:(::djinni_generated::Vec2F::fromCpp(c_posScreen2))];
+            return ::djinni::Bool::toCpp(objcpp_result_);
+        }
+    }
+    bool onTwoFingerMove(const std::vector<::Vec2F> & c_posScreenOld, const std::vector<::Vec2F> & c_posScreenNew) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() onTwoFingerMove:(::djinni::List<::djinni_generated::Vec2F>::fromCpp(c_posScreenOld))
+                                                                               posScreenNew:(::djinni::List<::djinni_generated::Vec2F>::fromCpp(c_posScreenNew))];
+            return ::djinni::Bool::toCpp(objcpp_result_);
+        }
+    }
+    bool onTwoFingerMoveComplete() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() onTwoFingerMoveComplete];
+            return ::djinni::Bool::toCpp(objcpp_result_);
+        }
+    }
+    void clearTouch() override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() clearTouch];
+        }
+    }
+};
+
+}  // namespace djinni_generated
+
+namespace djinni_generated {
+
 auto TouchInterface::toCpp(ObjcType objc) -> CppType
 {
     if (!objc) {
         return nullptr;
     }
-    return objc->_cppRefHandle.get();
+    if ([(id)objc isKindOfClass:[MCTouchInterfaceCppProxy class]]) {
+        return ((MCTouchInterfaceCppProxy*)objc)->_cppRefHandle.get();
+    }
+    return ::djinni::get_objc_proxy<ObjcProxy>(objc);
 }
 
 auto TouchInterface::fromCppOpt(const CppOptType& cpp) -> ObjcType
@@ -123,7 +227,10 @@ auto TouchInterface::fromCppOpt(const CppOptType& cpp) -> ObjcType
     if (!cpp) {
         return nil;
     }
-    return ::djinni::get_cpp_proxy<MCTouchInterface>(cpp);
+    if (auto cppPtr = dynamic_cast<ObjcProxy*>(cpp.get())) {
+        return cppPtr->djinni_private_get_proxied_objc_object();
+    }
+    return ::djinni::get_cpp_proxy<MCTouchInterfaceCppProxy>(cpp);
 }
 
 }  // namespace djinni_generated

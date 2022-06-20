@@ -7,6 +7,8 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
+#import "MCMaskingObjectInterface+Private.h"
+#import "MCRectI+Private.h"
 #import "MCRenderObjectInterface+Private.h"
 #import "MCRenderPassConfig+Private.h"
 #include <exception>
@@ -33,14 +35,14 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (nonnull NSArray<MCRenderObjectInterface *> *)getRenderObjects {
+- (nonnull NSArray<id<MCRenderObjectInterface>> *)getRenderObjects {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getRenderObjects();
         return ::djinni::List<::djinni_generated::RenderObjectInterface>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)addRenderObject:(nullable MCRenderObjectInterface *)renderObject {
+- (void)addRenderObject:(nullable id<MCRenderObjectInterface>)renderObject {
     try {
         _cppRefHandle.get()->addRenderObject(::djinni_generated::RenderObjectInterface::toCpp(renderObject));
     } DJINNI_TRANSLATE_EXCEPTIONS()
@@ -50,6 +52,20 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getRenderPassConfig();
         return ::djinni_generated::RenderPassConfig::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCMaskingObjectInterface>)getMaskingObject {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getMaskingObject();
+        return ::djinni::Optional<std::optional, ::djinni_generated::MaskingObjectInterface>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable MCRectI *)getScissoringRect {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getScissoringRect();
+        return ::djinni::Optional<std::optional, ::djinni_generated::RectI>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -80,6 +96,20 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getRenderPassConfig];
             return ::djinni_generated::RenderPassConfig::toCpp(objcpp_result_);
+        }
+    }
+    std::shared_ptr<::MaskingObjectInterface> getMaskingObject() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getMaskingObject];
+            return ::djinni::Optional<std::optional, ::djinni_generated::MaskingObjectInterface>::toCpp(objcpp_result_);
+        }
+    }
+    std::optional<::RectI> getScissoringRect() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getScissoringRect];
+            return ::djinni::Optional<std::optional, ::djinni_generated::RectI>::toCpp(objcpp_result_);
         }
     }
 };

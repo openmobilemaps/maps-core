@@ -23,7 +23,7 @@ void Line2dLayerObject::update() {}
 
 std::vector<std::shared_ptr<RenderConfigInterface>> Line2dLayerObject::getRenderConfig() { return renderConfig; }
 
-void Line2dLayerObject::setPositions(std::vector<Coord> positions) {
+void Line2dLayerObject::setPositions(const std::vector<Coord> &positions) {
     std::vector<Vec2D> renderCoords;
     for (Coord mapCoord : positions) {
         Coord renderCoord = conversionHelper->convertToRenderSystem(mapCoord);
@@ -32,13 +32,9 @@ void Line2dLayerObject::setPositions(std::vector<Coord> positions) {
     line->setLinePositions(renderCoords);
 }
 
-void Line2dLayerObject::setStyle(const LineStyle &style) {
-    shader->setStyle(style);
-}
+void Line2dLayerObject::setStyle(const LineStyle &style) { shader->setStyle(style); }
 
-void Line2dLayerObject::setHighlighted(bool highlighted) {
-    shader->setHighlighted(highlighted);
-}
+void Line2dLayerObject::setHighlighted(bool highlighted) { shader->setHighlighted(highlighted); }
 
 std::shared_ptr<GraphicsObjectInterface> Line2dLayerObject::getLineObject() { return line->asGraphicsObject(); }
 

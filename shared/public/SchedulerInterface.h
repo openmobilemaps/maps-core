@@ -5,6 +5,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 class TaskInterface;
 
@@ -13,6 +14,8 @@ public:
     virtual ~SchedulerInterface() {}
 
     virtual void addTask(const std::shared_ptr<TaskInterface> & task) = 0;
+
+    virtual void addTasks(const std::vector<std::shared_ptr<TaskInterface>> & tasks) = 0;
 
     virtual void removeTask(const std::string & id) = 0;
 

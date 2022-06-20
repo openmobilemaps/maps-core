@@ -8,15 +8,14 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#ifndef MAPSDKEXAMPLE_ICONINFO_H
-#define MAPSDKEXAMPLE_ICONINFO_H
-
+#pragma once
 
 #include "IconInfoInterface.h"
 
 class IconInfo : public IconInfoInterface {
-public:
-    IconInfo(const std::string & identifier, const ::Coord & coordinate, const std::shared_ptr<::TextureHolderInterface> & texture, const ::Vec2F & iconSize, IconType type);
+  public:
+    IconInfo(const std::string &identifier, const ::Coord &coordinate, const std::shared_ptr<::TextureHolderInterface> &texture,
+             const ::Vec2F &iconSize, IconType type, const ::Vec2F &anchor);
 
     virtual ~IconInfo() {}
 
@@ -24,11 +23,11 @@ public:
 
     virtual std::shared_ptr<::TextureHolderInterface> getTexture() override;
 
-    virtual void setCoordinate(const ::Coord & coord) override;
+    virtual void setCoordinate(const ::Coord &coord) override;
 
     virtual ::Coord getCoordinate() override;
 
-    virtual void setIconSize(const ::Vec2F & size) override;
+    virtual void setIconSize(const ::Vec2F &size) override;
 
     virtual ::Vec2F getIconSize() override;
 
@@ -36,13 +35,13 @@ public:
 
     virtual IconType getType() override;
 
-private:
+    virtual ::Vec2F getIconAnchor() override;
+
+  private:
     std::string identifier;
     Coord coordinate;
     std::shared_ptr<::TextureHolderInterface> texture;
     Vec2F iconSize;
     IconType type;
+    Vec2F anchor;
 };
-
-
-#endif //MAPSDKEXAMPLE_ICONINFO_H

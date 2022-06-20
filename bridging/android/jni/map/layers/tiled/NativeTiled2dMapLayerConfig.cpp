@@ -35,17 +35,6 @@ std::string NativeTiled2dMapLayerConfig::JavaProxy::getTileUrl(int32_t c_x, int3
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::String::toCpp(jniEnv, jret);
 }
-std::string NativeTiled2dMapLayerConfig::JavaProxy::getTileIdentifier(int32_t c_x, int32_t c_y, int32_t c_zoom) {
-    auto jniEnv = ::djinni::jniGetThreadEnv();
-    ::djinni::JniLocalScope jscope(jniEnv, 10);
-    const auto& data = ::djinni::JniClass<::djinni_generated::NativeTiled2dMapLayerConfig>::get();
-    auto jret = (jstring)jniEnv->CallObjectMethod(Handle::get().get(), data.method_getTileIdentifier,
-                                                  ::djinni::get(::djinni::I32::fromCpp(jniEnv, c_x)),
-                                                  ::djinni::get(::djinni::I32::fromCpp(jniEnv, c_y)),
-                                                  ::djinni::get(::djinni::I32::fromCpp(jniEnv, c_zoom)));
-    ::djinni::jniExceptionCheck(jniEnv);
-    return ::djinni::String::toCpp(jniEnv, jret);
-}
 std::vector<::Tiled2dMapZoomLevelInfo> NativeTiled2dMapLayerConfig::JavaProxy::getZoomLevelInfos() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -61,6 +50,14 @@ std::vector<::Tiled2dMapZoomLevelInfo> NativeTiled2dMapLayerConfig::JavaProxy::g
     auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getZoomInfo);
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativeTiled2dMapZoomInfo::toCpp(jniEnv, jret);
+}
+std::string NativeTiled2dMapLayerConfig::JavaProxy::getLayerName() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeTiled2dMapLayerConfig>::get();
+    auto jret = (jstring)jniEnv->CallObjectMethod(Handle::get().get(), data.method_getLayerName);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni::String::toCpp(jniEnv, jret);
 }
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapLayerConfig_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
@@ -93,18 +90,6 @@ CJNIEXPORT jstring JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_til
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jstring JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapLayerConfig_00024CppProxy_native_1getTileIdentifier(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jint j_x, jint j_y, jint j_zoom)
-{
-    try {
-        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
-        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapLayerConfig>(nativeRef);
-        auto r = ref->getTileIdentifier(::djinni::I32::toCpp(jniEnv, j_x),
-                                        ::djinni::I32::toCpp(jniEnv, j_y),
-                                        ::djinni::I32::toCpp(jniEnv, j_zoom));
-        return ::djinni::release(::djinni::String::fromCpp(jniEnv, r));
-    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
-}
-
 CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapLayerConfig_00024CppProxy_native_1getZoomLevelInfos(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
@@ -122,6 +107,16 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_til
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapLayerConfig>(nativeRef);
         auto r = ref->getZoomInfo();
         return ::djinni::release(::djinni_generated::NativeTiled2dMapZoomInfo::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jstring JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapLayerConfig_00024CppProxy_native_1getLayerName(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapLayerConfig>(nativeRef);
+        auto r = ref->getLayerName();
+        return ::djinni::release(::djinni::String::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

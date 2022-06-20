@@ -4,8 +4,10 @@
 #pragma once
 
 #include "LayerInterface.h"
-#include "TextureLoaderInterface.h"
+#include "LoaderInterface.h"
+#include "MaskingObjectInterface.h"
 #include "Tiled2dMapLayerConfig.h"
+#include <cstdint>
 #include <memory>
 #include <optional>
 
@@ -15,7 +17,9 @@ class Tiled2dMapRasterLayerInterface {
 public:
     virtual ~Tiled2dMapRasterLayerInterface() {}
 
-    static std::shared_ptr<Tiled2dMapRasterLayerInterface> create(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::shared_ptr<::TextureLoaderInterface> & textureLoader);
+    static std::shared_ptr<Tiled2dMapRasterLayerInterface> createWithMask(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::shared_ptr<::LoaderInterface> & loader, const std::shared_ptr<::MaskingObjectInterface> & mask);
+
+    static std::shared_ptr<Tiled2dMapRasterLayerInterface> create(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::shared_ptr<::LoaderInterface> & loader);
 
     virtual std::shared_ptr<::LayerInterface> asLayerInterface() = 0;
 
@@ -28,4 +32,12 @@ public:
     virtual void setAlpha(double alpha) = 0;
 
     virtual double getAlpha() = 0;
+
+    virtual void setMinZoomLevelIdentifier(std::optional<int32_t> value) = 0;
+
+    virtual std::optional<int32_t> getMinZoomLevelIdentifier() = 0;
+
+    virtual void setMaxZoomLevelIdentifier(std::optional<int32_t> value) = 0;
+
+    virtual std::optional<int32_t> getMaxZoomLevelIdentifier() = 0;
 };

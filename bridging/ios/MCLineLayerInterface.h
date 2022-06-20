@@ -28,4 +28,10 @@
 
 - (void)invalidate;
 
+- (void)resetSelection;
+
+- (void)setSelected:(nonnull NSSet<NSString *> *)selectedIds;
+
+- (void)setLayerClickable:(BOOL)isLayerClickable;
+
 @end

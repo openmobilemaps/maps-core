@@ -6,6 +6,7 @@
 #include "Color.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "GraphicsObjectFactoryInterface.h"
+#include "RectCoord.h"
 #include "RenderingContextInterface.h"
 #include "SchedulerInterface.h"
 #include "ShaderFactoryInterface.h"
@@ -18,6 +19,7 @@
 class LayerInterface;
 class MapCallbackInterface;
 class MapCamera2dInterface;
+class MapReadyCallbackInterface;
 struct MapConfig;
 
 class MapInterface {
@@ -73,4 +75,12 @@ public:
     virtual void resume() = 0;
 
     virtual void pause() = 0;
+
+    /**
+     * changes bounds to bounds, checks all layers for readiness, and updates callbacks, timeout in
+     * seconds, always draw the frame when state is updated in the ready callbacks
+     */
+    virtual void drawReadyFrame(const ::RectCoord & bounds, float timeout, const std::shared_ptr<MapReadyCallbackInterface> & callbacks) = 0;
+
+    virtual void forceReload() = 0;
 };

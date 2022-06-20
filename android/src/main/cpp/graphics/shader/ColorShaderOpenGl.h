@@ -8,8 +8,7 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#ifndef MAPSDK_COLORSHADEROPENGL_H
-#define MAPSDK_COLORSHADEROPENGL_H
+#pragma once
 
 #include "BaseShaderProgramOpenGl.h"
 #include "ColorShaderInterface.h"
@@ -37,7 +36,5 @@ class ColorShaderOpenGl : public BaseShaderProgramOpenGl,
     virtual std::string getFragmentShader() override;
 
   private:
-    std::vector<float> color;
+    std::vector<float> color = {0, 0, 0, 0};
 };
-
-#endif // MAPSDK_COLORSHADEROPENGL_H

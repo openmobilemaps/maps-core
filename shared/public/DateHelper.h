@@ -13,4 +13,5 @@
 class DateHelper {
   public:
     static long long currentTimeMillis();
+    static long long currentTimeMicros();
 };

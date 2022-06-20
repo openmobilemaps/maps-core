@@ -4,6 +4,7 @@
 #import "MCLineStyle+Private.h"
 #import "DJIMarshal+Private.h"
 #import "MCColorStateList+Private.h"
+#import "MCLineCapType+Private.h"
 #import "MCSizeType+Private.h"
 #include <cassert>
 
@@ -13,15 +14,23 @@ auto LineStyle::toCpp(ObjcType obj) -> CppType
 {
     assert(obj);
     return {::djinni_generated::ColorStateList::toCpp(obj.color),
+            ::djinni_generated::ColorStateList::toCpp(obj.gapColor),
+            ::djinni::F32::toCpp(obj.opacity),
             ::djinni::Enum<::SizeType, MCSizeType>::toCpp(obj.widthType),
-            ::djinni::F32::toCpp(obj.width)};
+            ::djinni::F32::toCpp(obj.width),
+            ::djinni::List<::djinni::F32>::toCpp(obj.dashArray),
+            ::djinni::Enum<::LineCapType, MCLineCapType>::toCpp(obj.lineCap)};
 }
 
 auto LineStyle::fromCpp(const CppType& cpp) -> ObjcType
 {
     return [[MCLineStyle alloc] initWithColor:(::djinni_generated::ColorStateList::fromCpp(cpp.color))
+                                     gapColor:(::djinni_generated::ColorStateList::fromCpp(cpp.gapColor))
+                                      opacity:(::djinni::F32::fromCpp(cpp.opacity))
                                     widthType:(::djinni::Enum<::SizeType, MCSizeType>::fromCpp(cpp.widthType))
-                                        width:(::djinni::F32::fromCpp(cpp.width))];
+                                        width:(::djinni::F32::fromCpp(cpp.width))
+                                    dashArray:(::djinni::List<::djinni::F32>::fromCpp(cpp.dashArray))
+                                      lineCap:(::djinni::Enum<::LineCapType, MCLineCapType>::fromCpp(cpp.lineCap))];
 }
 
 }  // namespace djinni_generated

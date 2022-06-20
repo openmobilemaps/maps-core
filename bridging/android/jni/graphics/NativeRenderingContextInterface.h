@@ -38,6 +38,9 @@ private:
         ::Vec2I getViewportSize() override;
         void setBackgroundColor(const ::Color & color) override;
         void setupDrawFrame() override;
+        void preRenderStencilMask() override;
+        void postRenderStencilMask() override;
+        void applyScissorRect(const std::optional<::RectI> & scissorRect) override;
 
     private:
         friend ::djinni::JniInterface<::RenderingContextInterface, ::djinni_generated::NativeRenderingContextInterface>;
@@ -49,6 +52,9 @@ private:
     const jmethodID method_getViewportSize { ::djinni::jniGetMethodID(clazz.get(), "getViewportSize", "()Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2I;") };
     const jmethodID method_setBackgroundColor { ::djinni::jniGetMethodID(clazz.get(), "setBackgroundColor", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Color;)V") };
     const jmethodID method_setupDrawFrame { ::djinni::jniGetMethodID(clazz.get(), "setupDrawFrame", "()V") };
+    const jmethodID method_preRenderStencilMask { ::djinni::jniGetMethodID(clazz.get(), "preRenderStencilMask", "()V") };
+    const jmethodID method_postRenderStencilMask { ::djinni::jniGetMethodID(clazz.get(), "postRenderStencilMask", "()V") };
+    const jmethodID method_applyScissorRect { ::djinni::jniGetMethodID(clazz.get(), "applyScissorRect", "(Lio/openmobilemaps/mapscore/shared/graphics/common/RectI;)V") };
 };
 
 }  // namespace djinni_generated

@@ -50,6 +50,23 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
++ (nullable MCIconInfoInterface *)createIconWithAnchor:(nonnull NSString *)identifier
+                                            coordinate:(nonnull MCCoord *)coordinate
+                                               texture:(nullable id<MCTextureHolderInterface>)texture
+                                              iconSize:(nonnull MCVec2F *)iconSize
+                                             scaleType:(MCIconType)scaleType
+                                            iconAnchor:(nonnull MCVec2F *)iconAnchor {
+    try {
+        auto objcpp_result_ = ::IconFactory::createIconWithAnchor(::djinni::String::toCpp(identifier),
+                                                                  ::djinni_generated::Coord::toCpp(coordinate),
+                                                                  ::djinni_generated::TextureHolderInterface::toCpp(texture),
+                                                                  ::djinni_generated::Vec2F::toCpp(iconSize),
+                                                                  ::djinni::Enum<::IconType, MCIconType>::toCpp(scaleType),
+                                                                  ::djinni_generated::Vec2F::toCpp(iconAnchor));
+        return ::djinni_generated::IconInfoInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 auto IconFactory::toCpp(ObjcType objc) -> CppType

@@ -7,9 +7,13 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class MapCamera2dInterface {
 
+    abstract fun freeze(freeze: Boolean)
+
     abstract fun moveToCenterPositionZoom(centerPosition: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, zoom: Double, animated: Boolean)
 
     abstract fun moveToCenterPosition(centerPosition: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, animated: Boolean)
+
+    abstract fun moveToBoundingBox(boundingBox: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, paddingPc: Float, animated: Boolean, maxZoom: Double?)
 
     abstract fun getCenterPosition(): io.openmobilemaps.mapscore.shared.map.coordinates.Coord
 
@@ -25,19 +29,32 @@ abstract class MapCamera2dInterface {
 
     abstract fun setMaxZoom(maxZoom: Double)
 
+    abstract fun getMinZoom(): Double
+
+    abstract fun getMaxZoom(): Double
+
     abstract fun setBounds(bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord)
+
+    abstract fun getBounds(): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord
 
     abstract fun isInBounds(coords: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): Boolean
 
-    abstract fun setPaddingLeft(padding: Float, animated: Boolean)
+    abstract fun setPaddingLeft(padding: Float)
 
-    abstract fun setPaddingRight(padding: Float, animated: Boolean)
+    abstract fun setPaddingRight(padding: Float)
 
-    abstract fun setPaddingTop(padding: Float, animated: Boolean)
+    abstract fun setPaddingTop(padding: Float)
 
-    abstract fun setPaddingBottom(padding: Float, animated: Boolean)
+    abstract fun setPaddingBottom(padding: Float)
 
     abstract fun getVisibleRect(): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord
+
+    abstract fun getPaddingAdjustedVisibleRect(): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord
+
+    abstract fun getScreenDensityPpi(): Float
+
+    /** this method is called just before the update methods on all layers */
+    abstract fun update()
 
     abstract fun getInvariantModelMatrix(coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, scaleInvariant: Boolean, rotationInvariant: Boolean): ArrayList<Float>
 
@@ -49,7 +66,17 @@ abstract class MapCamera2dInterface {
 
     abstract fun mapUnitsFromPixels(distancePx: Double): Double
 
+    abstract fun setRotationEnabled(enabled: Boolean)
+
+    abstract fun setSnapToNorthEnabled(enabled: Boolean)
+
     abstract fun asCameraInterface(): io.openmobilemaps.mapscore.shared.graphics.CameraInterface
+
+    abstract fun getLastVpMatrixViewBounds(): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord?
+
+    abstract fun getLastVpMatrixRotation(): Float?
+
+    abstract fun getLastVpMatrixZoom(): Float?
 
     companion object {
         @JvmStatic
@@ -76,6 +103,12 @@ abstract class MapCamera2dInterface {
             _djinni_private_destroy()
         }
 
+        override fun freeze(freeze: Boolean) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_freeze(this.nativeRef, freeze)
+        }
+        private external fun native_freeze(_nativeRef: Long, freeze: Boolean)
+
         override fun moveToCenterPositionZoom(centerPosition: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, zoom: Double, animated: Boolean) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_moveToCenterPositionZoom(this.nativeRef, centerPosition, zoom, animated)
@@ -87,6 +120,12 @@ abstract class MapCamera2dInterface {
             native_moveToCenterPosition(this.nativeRef, centerPosition, animated)
         }
         private external fun native_moveToCenterPosition(_nativeRef: Long, centerPosition: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, animated: Boolean)
+
+        override fun moveToBoundingBox(boundingBox: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, paddingPc: Float, animated: Boolean, maxZoom: Double?) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_moveToBoundingBox(this.nativeRef, boundingBox, paddingPc, animated, maxZoom)
+        }
+        private external fun native_moveToBoundingBox(_nativeRef: Long, boundingBox: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, paddingPc: Float, animated: Boolean, maxZoom: Double?)
 
         override fun getCenterPosition(): io.openmobilemaps.mapscore.shared.map.coordinates.Coord {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
@@ -130,11 +169,29 @@ abstract class MapCamera2dInterface {
         }
         private external fun native_setMaxZoom(_nativeRef: Long, maxZoom: Double)
 
+        override fun getMinZoom(): Double {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getMinZoom(this.nativeRef)
+        }
+        private external fun native_getMinZoom(_nativeRef: Long): Double
+
+        override fun getMaxZoom(): Double {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getMaxZoom(this.nativeRef)
+        }
+        private external fun native_getMaxZoom(_nativeRef: Long): Double
+
         override fun setBounds(bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_setBounds(this.nativeRef, bounds)
         }
         private external fun native_setBounds(_nativeRef: Long, bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord)
+
+        override fun getBounds(): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getBounds(this.nativeRef)
+        }
+        private external fun native_getBounds(_nativeRef: Long): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord
 
         override fun isInBounds(coords: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): Boolean {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
@@ -142,35 +199,53 @@ abstract class MapCamera2dInterface {
         }
         private external fun native_isInBounds(_nativeRef: Long, coords: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): Boolean
 
-        override fun setPaddingLeft(padding: Float, animated: Boolean) {
+        override fun setPaddingLeft(padding: Float) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setPaddingLeft(this.nativeRef, padding, animated)
+            native_setPaddingLeft(this.nativeRef, padding)
         }
-        private external fun native_setPaddingLeft(_nativeRef: Long, padding: Float, animated: Boolean)
+        private external fun native_setPaddingLeft(_nativeRef: Long, padding: Float)
 
-        override fun setPaddingRight(padding: Float, animated: Boolean) {
+        override fun setPaddingRight(padding: Float) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setPaddingRight(this.nativeRef, padding, animated)
+            native_setPaddingRight(this.nativeRef, padding)
         }
-        private external fun native_setPaddingRight(_nativeRef: Long, padding: Float, animated: Boolean)
+        private external fun native_setPaddingRight(_nativeRef: Long, padding: Float)
 
-        override fun setPaddingTop(padding: Float, animated: Boolean) {
+        override fun setPaddingTop(padding: Float) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setPaddingTop(this.nativeRef, padding, animated)
+            native_setPaddingTop(this.nativeRef, padding)
         }
-        private external fun native_setPaddingTop(_nativeRef: Long, padding: Float, animated: Boolean)
+        private external fun native_setPaddingTop(_nativeRef: Long, padding: Float)
 
-        override fun setPaddingBottom(padding: Float, animated: Boolean) {
+        override fun setPaddingBottom(padding: Float) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setPaddingBottom(this.nativeRef, padding, animated)
+            native_setPaddingBottom(this.nativeRef, padding)
         }
-        private external fun native_setPaddingBottom(_nativeRef: Long, padding: Float, animated: Boolean)
+        private external fun native_setPaddingBottom(_nativeRef: Long, padding: Float)
 
         override fun getVisibleRect(): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_getVisibleRect(this.nativeRef)
         }
         private external fun native_getVisibleRect(_nativeRef: Long): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord
+
+        override fun getPaddingAdjustedVisibleRect(): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getPaddingAdjustedVisibleRect(this.nativeRef)
+        }
+        private external fun native_getPaddingAdjustedVisibleRect(_nativeRef: Long): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord
+
+        override fun getScreenDensityPpi(): Float {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getScreenDensityPpi(this.nativeRef)
+        }
+        private external fun native_getScreenDensityPpi(_nativeRef: Long): Float
+
+        override fun update() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_update(this.nativeRef)
+        }
+        private external fun native_update(_nativeRef: Long)
 
         override fun getInvariantModelMatrix(coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, scaleInvariant: Boolean, rotationInvariant: Boolean): ArrayList<Float> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
@@ -202,11 +277,41 @@ abstract class MapCamera2dInterface {
         }
         private external fun native_mapUnitsFromPixels(_nativeRef: Long, distancePx: Double): Double
 
+        override fun setRotationEnabled(enabled: Boolean) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setRotationEnabled(this.nativeRef, enabled)
+        }
+        private external fun native_setRotationEnabled(_nativeRef: Long, enabled: Boolean)
+
+        override fun setSnapToNorthEnabled(enabled: Boolean) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setSnapToNorthEnabled(this.nativeRef, enabled)
+        }
+        private external fun native_setSnapToNorthEnabled(_nativeRef: Long, enabled: Boolean)
+
         override fun asCameraInterface(): io.openmobilemaps.mapscore.shared.graphics.CameraInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_asCameraInterface(this.nativeRef)
         }
         private external fun native_asCameraInterface(_nativeRef: Long): io.openmobilemaps.mapscore.shared.graphics.CameraInterface
+
+        override fun getLastVpMatrixViewBounds(): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getLastVpMatrixViewBounds(this.nativeRef)
+        }
+        private external fun native_getLastVpMatrixViewBounds(_nativeRef: Long): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord?
+
+        override fun getLastVpMatrixRotation(): Float? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getLastVpMatrixRotation(this.nativeRef)
+        }
+        private external fun native_getLastVpMatrixRotation(_nativeRef: Long): Float?
+
+        override fun getLastVpMatrixZoom(): Float? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getLastVpMatrixZoom(this.nativeRef)
+        }
+        private external fun native_getLastVpMatrixZoom(_nativeRef: Long): Float?
 
         companion object {
             @JvmStatic

@@ -21,7 +21,7 @@ class ColorShader: BaseShader {
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(PipelineKey.colorShader)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline.colorShader.rawValue)
         }
     }
 

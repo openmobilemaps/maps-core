@@ -34,5 +34,7 @@ class SimpleTouchInterface : public TouchInterface {
         return false;
     };
 
+    virtual bool onTwoFingerMoveComplete() override { return false; };
+
     virtual void clearTouch() override{};
 };

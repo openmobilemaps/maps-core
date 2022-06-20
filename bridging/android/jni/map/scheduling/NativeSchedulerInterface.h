@@ -34,6 +34,7 @@ private:
         ~JavaProxy();
 
         void addTask(const std::shared_ptr<::TaskInterface> & task) override;
+        void addTasks(const std::vector<std::shared_ptr<::TaskInterface>> & tasks) override;
         void removeTask(const std::string & id) override;
         void clear() override;
         void pause() override;
@@ -45,6 +46,7 @@ private:
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/scheduling/SchedulerInterface") };
     const jmethodID method_addTask { ::djinni::jniGetMethodID(clazz.get(), "addTask", "(Lio/openmobilemaps/mapscore/shared/map/scheduling/TaskInterface;)V") };
+    const jmethodID method_addTasks { ::djinni::jniGetMethodID(clazz.get(), "addTasks", "(Ljava/util/ArrayList;)V") };
     const jmethodID method_removeTask { ::djinni::jniGetMethodID(clazz.get(), "removeTask", "(Ljava/lang/String;)V") };
     const jmethodID method_clear { ::djinni::jniGetMethodID(clazz.get(), "clear", "()V") };
     const jmethodID method_pause { ::djinni::jniGetMethodID(clazz.get(), "pause", "()V") };

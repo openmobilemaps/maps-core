@@ -33,6 +33,7 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
+        void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) override;
         void update() override;
         std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override;
         void onAdded(const std::shared_ptr<::MapInterface> & mapInterface) override;
@@ -41,12 +42,18 @@ private:
         void resume() override;
         void hide() override;
         void show() override;
+        void setScissorRect(const std::optional<::RectI> & scissorRect) override;
+        ::LayerReadyState isReadyToRenderOffscreen() override;
+        void enableAnimations(bool enabled) override;
+        void setErrorManager(const std::shared_ptr<::ErrorManager> & errorManager) override;
+        void forceReload() override;
 
     private:
         friend ::djinni::JniInterface<::LayerInterface, ::djinni_generated::NativeLayerInterface>;
     };
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/LayerInterface") };
+    const jmethodID method_setMaskingObject { ::djinni::jniGetMethodID(clazz.get(), "setMaskingObject", "(Lio/openmobilemaps/mapscore/shared/graphics/objects/MaskingObjectInterface;)V") };
     const jmethodID method_update { ::djinni::jniGetMethodID(clazz.get(), "update", "()V") };
     const jmethodID method_buildRenderPasses { ::djinni::jniGetMethodID(clazz.get(), "buildRenderPasses", "()Ljava/util/ArrayList;") };
     const jmethodID method_onAdded { ::djinni::jniGetMethodID(clazz.get(), "onAdded", "(Lio/openmobilemaps/mapscore/shared/map/MapInterface;)V") };
@@ -55,6 +62,11 @@ private:
     const jmethodID method_resume { ::djinni::jniGetMethodID(clazz.get(), "resume", "()V") };
     const jmethodID method_hide { ::djinni::jniGetMethodID(clazz.get(), "hide", "()V") };
     const jmethodID method_show { ::djinni::jniGetMethodID(clazz.get(), "show", "()V") };
+    const jmethodID method_setScissorRect { ::djinni::jniGetMethodID(clazz.get(), "setScissorRect", "(Lio/openmobilemaps/mapscore/shared/graphics/common/RectI;)V") };
+    const jmethodID method_isReadyToRenderOffscreen { ::djinni::jniGetMethodID(clazz.get(), "isReadyToRenderOffscreen", "()Lio/openmobilemaps/mapscore/shared/map/LayerReadyState;") };
+    const jmethodID method_enableAnimations { ::djinni::jniGetMethodID(clazz.get(), "enableAnimations", "(Z)V") };
+    const jmethodID method_setErrorManager { ::djinni::jniGetMethodID(clazz.get(), "setErrorManager", "(Lio/openmobilemaps/mapscore/shared/map/ErrorManager;)V") };
+    const jmethodID method_forceReload { ::djinni::jniGetMethodID(clazz.get(), "forceReload", "()V") };
 };
 
 }  // namespace djinni_generated

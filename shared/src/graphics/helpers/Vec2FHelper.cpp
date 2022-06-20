@@ -18,3 +18,13 @@ double Vec2FHelper::distance(const ::Vec2F &from, const ::Vec2F &to) {
 ::Vec2F Vec2FHelper::midpoint(const ::Vec2F &from, const ::Vec2F &to) {
     return Vec2F((from.x + to.x) / 2.0, (from.y + to.y) / 2.0);
 }
+
+::Vec2F Vec2FHelper::rotate(const Vec2F &p, const Vec2F &origin, float angleDegree) {
+    double sinAngle = sin(angleDegree * M_PI / 180.0);
+    double cosAngle = cos(angleDegree * M_PI / 180.0);
+    float x = p.x - origin.x;
+    float y = p.y - origin.y;
+    float rX = x * cosAngle - y * sinAngle;
+    float rY = x * sinAngle + y * cosAngle;
+    return Vec2F(rX + origin.x, rY + origin.y);
+}

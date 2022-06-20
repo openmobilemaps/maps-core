@@ -8,15 +8,15 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#ifndef MAPSDK_LINE2DOPENGL_H
-#define MAPSDK_LINE2DOPENGL_H
+#pragma once
 
 #include "GraphicsObjectInterface.h"
 #include "Line2dInterface.h"
-#include "ShaderProgramInterface.h"
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
+#include "ShaderProgramInterface.h"
 #include "opengl_wrapper.h"
+#include <mutex>
 
 class Line2dOpenGl : public GraphicsObjectInterface,
                      public Line2dInterface,
@@ -33,29 +33,42 @@ class Line2dOpenGl : public GraphicsObjectInterface,
     virtual void clear() override;
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                        int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
+                        int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
     virtual void setLinePositions(const std::vector<::Vec2D> &positions) override;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() override;
+
+    virtual void setIsInverseMasked(bool inversed) override;
 
   protected:
     void initializeLineAndPoints();
 
     void drawLineSegments(std::shared_ptr<OpenGlContext> openGlContext, int64_t mvpMatrix, float widthScaleFactor);
 
+    void prepareGlData(std::shared_ptr<OpenGlContext> openGlContext);
+
+    void removeGlBuffers();
+
     std::vector<Vec2D> lineCoordinates;
 
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
-    std::vector<GLfloat> lineVertexBuffer;
-    std::vector<GLfloat> lineWidthNormalBuffer;
-    std::vector<GLfloat> lineLengthNormalBuffer;
-    std::vector<GLfloat> linePointABuffer;
-    std::vector<GLfloat> linePointBBuffer;
-    std::vector<GLuint> lineIndexBuffer;
-    int pointCount;
+    int mvpMatrixHandle;
+    int scaleFactorHandle;
+    int positionHandle;
+    int widthNormalHandle;
+    int lengthNormalHandle;
+    int pointAHandle;
+    int pointBHandle;
+    int segmentStartLPosHandle;
+    int styleInfoHandle;
+    GLuint vertexAttribBuffer;
+    std::vector<GLfloat> lineAttributes;
+    GLuint indexBuffer;
+    std::vector<GLuint> lineIndices;
 
     bool ready = false;
-};
+    std::recursive_mutex dataMutex;
 
-#endif // MAPSDK_LINE2DOPENGL_H
+    bool isMaskInversed = false;
+};

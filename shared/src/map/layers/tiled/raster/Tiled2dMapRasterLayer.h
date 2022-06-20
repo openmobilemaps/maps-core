@@ -13,17 +13,20 @@
 #include "LayerInterface.h"
 #include "Textured2dLayerObject.h"
 #include "Tiled2dMapLayer.h"
+#include "Tiled2dMapRasterLayerCallbackInterface.h"
 #include "Tiled2dMapRasterLayerInterface.h"
 #include "Tiled2dMapRasterSource.h"
-#include "Tiled2dMapRasterLayerCallbackInterface.h"
 #include <mutex>
 #include <unordered_map>
 
-class Tiled2dMapRasterLayer
-        : public Tiled2dMapLayer, public Tiled2dMapRasterLayerInterface {
-public:
+class Tiled2dMapRasterLayer : public Tiled2dMapLayer, public Tiled2dMapRasterLayerInterface {
+  public:
     Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
-                          const std::shared_ptr<::TextureLoaderInterface> &textureLoader);
+                          const std::shared_ptr<::LoaderInterface> &tileLoader);
+
+    Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
+                          const std::shared_ptr<::LoaderInterface> &tileLoader,
+                          const std::shared_ptr<::MaskingObjectInterface> &mask);
 
     virtual void onAdded(const std::shared_ptr<::MapInterface> &mapInterface) override;
 
@@ -42,8 +45,10 @@ public:
     virtual void onTilesUpdated() override;
 
     virtual void setupTiles(
-            const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToSetup,
-            const std::vector<std::shared_ptr<Textured2dLayerObject>> &tilesToClean);
+        const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToSetup,
+        const std::vector<std::shared_ptr<Textured2dLayerObject>> &tilesToClean);
+
+    virtual void generateRenderPasses();
 
     virtual void setCallbackHandler(const std::shared_ptr<Tiled2dMapRasterLayerCallbackInterface> &handler) override;
 
@@ -55,19 +60,40 @@ public:
 
     virtual double getAlpha() override;
 
+    virtual void setMinZoomLevelIdentifier(std::optional<int32_t> value) override;
+
+    virtual std::optional<int32_t> getMinZoomLevelIdentifier() override;
+
+    virtual void setMaxZoomLevelIdentifier(std::optional<int32_t> value) override;
+
+    virtual std::optional<int32_t> getMaxZoomLevelIdentifier() override;
+
     bool onClickConfirmed(const Vec2F &posScreen) override;
 
     bool onLongPress(const Vec2F &posScreen) override;
 
-private:
-    std::shared_ptr<TextureLoaderInterface> textureLoader;
+    virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> &maskingObject) override;
+
+    virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
+
+    virtual void enableAnimations(bool enabled) override;
+
+    virtual LayerReadyState isReadyToRenderOffscreen() override;
+
+  private:
+    std::optional<::RectI> scissorRect = std::nullopt;
+    std::shared_ptr<::MaskingObjectInterface> mask;
+
+    std::shared_ptr<LoaderInterface> textureLoader;
     std::shared_ptr<Tiled2dMapRasterSource> rasterSource;
 
     std::recursive_mutex updateMutex;
     std::unordered_map<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>> tileObjectMap;
+    std::recursive_mutex renderPassMutex;
     std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
 
     std::shared_ptr<Tiled2dMapRasterLayerCallbackInterface> callbackHandler;
 
     double alpha;
+    bool animationsEnabled = true;
 };

@@ -12,45 +12,57 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 
-class BaseGraphicsObject {
+open class BaseGraphicsObject {
     private var context: MCRenderingContextInterface!
 
-    let device: MTLDevice
+    public let device: MTLDevice
 
-    let sampler: MTLSamplerState
+    public let sampler: MTLSamplerState
 
-    init(device: MTLDevice, sampler: MTLSamplerState) {
+    var maskInverse = false
+    var ready = false
+
+    public init(device: MTLDevice, sampler: MTLSamplerState) {
         self.device = device
         self.sampler = sampler
     }
 
-    func render(encoder _: MTLRenderCommandEncoder,
-                context _: RenderingContext,
-                renderPass _: MCRenderPassConfig,
-                mvpMatrix _: Int64,
-                screenPixelAsRealMeterFactor _: Double)
-    {
+    open func render(encoder _: MTLRenderCommandEncoder,
+                     context _: RenderingContext,
+                     renderPass _: MCRenderPassConfig,
+                     mvpMatrix _: Int64,
+                     isMasked _: Bool,
+                     screenPixelAsRealMeterFactor _: Double) {
         fatalError("has to be overwritten by subclass")
     }
 }
 
 extension BaseGraphicsObject: MCGraphicsObjectInterface {
-    func setup(_ context: MCRenderingContextInterface?) {
+    public func setup(_ context: MCRenderingContextInterface?) {
         self.context = context
+        self.ready = true
     }
 
-    func clear() {}
+    public func clear() {
+        self.ready = false
+    }
 
-    func isReady() -> Bool { true }
+    public func isReady() -> Bool { ready }
 
-    func render(_ context: MCRenderingContextInterface?, renderPass: MCRenderPassConfig, mvpMatrix: Int64, screenPixelAsRealMeterFactor: Double) {
-        guard let context = context as? RenderingContext,
+    public func setIsInverseMasked(_ inversed: Bool) {
+        maskInverse = inversed
+    }
+
+    public func render(_ context: MCRenderingContextInterface?, renderPass: MCRenderPassConfig, mvpMatrix: Int64, isMasked: Bool, screenPixelAsRealMeterFactor: Double) {
+        guard isReady(),
+              let context = context as? RenderingContext,
               let encoder = context.encoder
         else { return }
         render(encoder: encoder,
                context: context,
                renderPass: renderPass,
                mvpMatrix: mvpMatrix,
+               isMasked: isMasked,
                screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)
     }
 }

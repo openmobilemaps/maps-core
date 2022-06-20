@@ -23,6 +23,14 @@ void NativeSchedulerInterface::JavaProxy::addTask(const std::shared_ptr<::TaskIn
                            ::djinni::get(::djinni_generated::NativeTaskInterface::fromCpp(jniEnv, c_task)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
+void NativeSchedulerInterface::JavaProxy::addTasks(const std::vector<std::shared_ptr<::TaskInterface>> & c_tasks) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeSchedulerInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_addTasks,
+                           ::djinni::get(::djinni::List<::djinni_generated::NativeTaskInterface>::fromCpp(jniEnv, c_tasks)));
+    ::djinni::jniExceptionCheck(jniEnv);
+}
 void NativeSchedulerInterface::JavaProxy::removeTask(const std::string & c_id) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -67,6 +75,15 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_scheduling_Sc
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::SchedulerInterface>(nativeRef);
         ref->addTask(::djinni_generated::NativeTaskInterface::toCpp(jniEnv, j_task));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_scheduling_SchedulerInterface_00024CppProxy_native_1addTasks(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_tasks)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::SchedulerInterface>(nativeRef);
+        ref->addTasks(::djinni::List<::djinni_generated::NativeTaskInterface>::toCpp(jniEnv, j_tasks));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

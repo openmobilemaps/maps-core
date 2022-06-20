@@ -11,6 +11,7 @@
 #pragma once
 #include <functional>
 #include <algorithm>
+#include <optional>
 #include "DateHelper.h"
 #include "AnimationInterpolator.h"
 #include "AnimationInterface.h"
@@ -80,13 +81,14 @@ public:
 
     virtual void update(double adjustedProgress) = 0;
 
+    T startValue;
+    T endValue;
+
 protected:
+    long long duration;
     long long startTime = 0;
     long long delay = 0;
 
-    long long duration;
-    T startValue;
-    T endValue;
     AnimationInterpolator interpolator;
     std::function<void(T)> onUpdate;
     std::optional<std::function<void()>> onFinish;

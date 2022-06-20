@@ -11,11 +11,11 @@ abstract class Tiled2dMapLayerConfig {
 
     abstract fun getTileUrl(x: Int, y: Int, zoom: Int): String
 
-    abstract fun getTileIdentifier(x: Int, y: Int, zoom: Int): String
-
     abstract fun getZoomLevelInfos(): ArrayList<Tiled2dMapZoomLevelInfo>
 
     abstract fun getZoomInfo(): Tiled2dMapZoomInfo
+
+    abstract fun getLayerName(): String
 
     private class CppProxy : Tiled2dMapLayerConfig {
         private val nativeRef: Long
@@ -47,12 +47,6 @@ abstract class Tiled2dMapLayerConfig {
         }
         private external fun native_getTileUrl(_nativeRef: Long, x: Int, y: Int, zoom: Int): String
 
-        override fun getTileIdentifier(x: Int, y: Int, zoom: Int): String {
-            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_getTileIdentifier(this.nativeRef, x, y, zoom)
-        }
-        private external fun native_getTileIdentifier(_nativeRef: Long, x: Int, y: Int, zoom: Int): String
-
         override fun getZoomLevelInfos(): ArrayList<Tiled2dMapZoomLevelInfo> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_getZoomLevelInfos(this.nativeRef)
@@ -64,5 +58,11 @@ abstract class Tiled2dMapLayerConfig {
             return native_getZoomInfo(this.nativeRef)
         }
         private external fun native_getZoomInfo(_nativeRef: Long): Tiled2dMapZoomInfo
+
+        override fun getLayerName(): String {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getLayerName(this.nativeRef)
+        }
+        private external fun native_getLayerName(_nativeRef: Long): String
     }
 }

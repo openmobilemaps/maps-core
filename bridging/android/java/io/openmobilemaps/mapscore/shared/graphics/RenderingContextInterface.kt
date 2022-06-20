@@ -19,6 +19,13 @@ abstract class RenderingContextInterface {
 
     abstract fun setupDrawFrame()
 
+    abstract fun preRenderStencilMask()
+
+    abstract fun postRenderStencilMask()
+
+    /** optional rectangle, remove scissoring when not set */
+    abstract fun applyScissorRect(scissorRect: io.openmobilemaps.mapscore.shared.graphics.common.RectI?)
+
     private class CppProxy : RenderingContextInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -66,5 +73,23 @@ abstract class RenderingContextInterface {
             native_setupDrawFrame(this.nativeRef)
         }
         private external fun native_setupDrawFrame(_nativeRef: Long)
+
+        override fun preRenderStencilMask() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_preRenderStencilMask(this.nativeRef)
+        }
+        private external fun native_preRenderStencilMask(_nativeRef: Long)
+
+        override fun postRenderStencilMask() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_postRenderStencilMask(this.nativeRef)
+        }
+        private external fun native_postRenderStencilMask(_nativeRef: Long)
+
+        override fun applyScissorRect(scissorRect: io.openmobilemaps.mapscore.shared.graphics.common.RectI?) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_applyScissorRect(this.nativeRef, scissorRect)
+        }
+        private external fun native_applyScissorRect(_nativeRef: Long, scissorRect: io.openmobilemaps.mapscore.shared.graphics.common.RectI?)
     }
 }

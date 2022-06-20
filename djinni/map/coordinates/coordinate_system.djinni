@@ -1,4 +1,7 @@
 coordinate_conversion_helper_interface = interface +c {
+    # This instance is independent of the map and does not know about the rendering system.
+    # It can not be used to convert coordinates into rendering space.
+    static independent_instance(): coordinate_conversion_helper_interface;
     register_converter(converter: coordinate_converter_interface);
     convert(to: string, coordinate: coord) : coord;
     convert_rect(to: string, rect: rect_coord) : rect_coord;
@@ -66,4 +69,9 @@ quad_coord = record {
     top_right: coord;
     bottom_right: coord;
     bottom_left: coord;
+}
+
+polygon_coord = record {
+    positions: list<coord>;
+    holes: list<list<coord>>;
 }

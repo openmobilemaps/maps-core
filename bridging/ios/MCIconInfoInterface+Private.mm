@@ -87,6 +87,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nonnull MCVec2F *)getIconAnchor {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getIconAnchor();
+        return ::djinni_generated::Vec2F::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 auto IconInfoInterface::toCpp(ObjcType objc) -> CppType

@@ -15,32 +15,33 @@ import Metal
 class AlphaShader: BaseShader {
     private var alpha: Float = 1.0
     private var pipeline: MTLRenderPipelineState?
-    private var stencilState: MTLDepthStencilState?
+
+    private let buffer: MTLBuffer
+
+    override init() {
+        guard let buffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<Float>.stride, options: []) else { fatalError("Could not create buffer") }
+        self.buffer = buffer
+        buffer.contents().copyMemory(from: &alpha, byteCount: MemoryLayout<Float>.stride)
+    }
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(PipelineKey.alphaShader)
-        }
-
-        if stencilState == nil {
-            stencilState = MetalContext.current.device.makeDepthStencilState(descriptor: MTLDepthStencilDescriptor())
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline.alphaShader.rawValue)
         }
     }
 
     override func preRender(encoder: MTLRenderCommandEncoder, context _: RenderingContext) {
-        guard let pipeline = pipeline,
-              let stencilState = stencilState else { return }
+        guard let pipeline = pipeline else { return }
 
         encoder.setRenderPipelineState(pipeline)
-        encoder.setDepthStencilState(stencilState)
-
-        encoder.setFragmentBytes(&alpha, length: MemoryLayout<Float>.stride, index: 1)
+        encoder.setFragmentBuffer(buffer, offset: 0, index: 1)
     }
 }
 
 extension AlphaShader: MCAlphaShaderInterface {
     func updateAlpha(_ value: Float) {
         alpha = value
+        buffer.contents().copyMemory(from: &alpha, byteCount: MemoryLayout<Float>.stride)
     }
 
     func asShaderProgram() -> MCShaderProgramInterface? {

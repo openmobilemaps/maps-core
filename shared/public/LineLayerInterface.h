@@ -5,6 +5,8 @@
 
 #include "LayerInterface.h"
 #include <memory>
+#include <string>
+#include <unordered_set>
 #include <vector>
 
 class LineInfoInterface;
@@ -31,4 +33,10 @@ public:
     virtual std::shared_ptr<::LayerInterface> asLayerInterface() = 0;
 
     virtual void invalidate() = 0;
+
+    virtual void resetSelection() = 0;
+
+    virtual void setSelected(const std::unordered_set<std::string> & selectedIds) = 0;
+
+    virtual void setLayerClickable(bool isLayerClickable) = 0;
 };

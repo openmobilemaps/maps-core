@@ -10,9 +10,12 @@
 
 #include "ShaderFactoryOpenGl.h"
 #include "AlphaShaderOpenGl.h"
-#include "ColorLineShaderOpenGl.h"
-#include "ColorShaderOpenGl.h"
 #include "ColorCircleShaderOpenGl.h"
+#include "ColorLineGroup2dShaderOpenGl.h"
+#include "ColorLineShaderOpenGl.h"
+#include "ColorPolygonGroup2dShaderOpenGl.h"
+#include "ColorShaderOpenGl.h"
+#include "TextShaderOpenGl.h"
 
 std::shared_ptr<AlphaShaderInterface> ShaderFactoryOpenGl::createAlphaShader() { return std::make_shared<AlphaShaderOpenGl>(); }
 
@@ -20,8 +23,18 @@ std::shared_ptr<ColorLineShaderInterface> ShaderFactoryOpenGl::createColorLineSh
     return std::make_shared<ColorLineShaderOpenGl>();
 }
 
+std::shared_ptr<LineGroupShaderInterface> ShaderFactoryOpenGl::createLineGroupShader() {
+    return std::make_shared<ColorLineGroup2dShaderOpenGl>();
+}
+
 std::shared_ptr<ColorShaderInterface> ShaderFactoryOpenGl::createColorShader() { return std::make_shared<ColorShaderOpenGl>(); }
 
 std::shared_ptr<ColorCircleShaderInterface> ShaderFactoryOpenGl::createColorCircleShader() {
     return std::make_shared<ColorCircleShaderOpenGl>();
 }
+
+std::shared_ptr<PolygonGroupShaderInterface> ShaderFactoryOpenGl::createPolygonGroupShader() {
+    return std::make_shared<ColorPolygonGroup2dShaderOpenGl>();
+}
+
+std::shared_ptr<TextShaderInterface> ShaderFactoryOpenGl::createTextShader() { return std::make_shared<TextShaderOpenGl>(); }

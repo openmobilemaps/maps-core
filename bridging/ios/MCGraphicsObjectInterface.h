@@ -17,10 +17,17 @@
 /** Clear graphics object and invalidate isReady */
 - (void)clear;
 
+/**
+ * by defaults objects if masked are only rendered where the mask is set
+ * if setting this flag the masked is applied inversly
+ */
+- (void)setIsInverseMasked:(BOOL)inversed;
+
 /** Render the graphics object; ensure calling on graphics thread */
 - (void)render:(nullable id<MCRenderingContextInterface>)context
     renderPass:(nonnull MCRenderPassConfig *)renderPass
      mvpMatrix:(int64_t)mvpMatrix
+      isMasked:(BOOL)isMasked
 screenPixelAsRealMeterFactor:(double)screenPixelAsRealMeterFactor;
 
 @end

@@ -13,6 +13,10 @@ abstract class RenderPassInterface {
 
     abstract fun getRenderPassConfig(): RenderPassConfig
 
+    abstract fun getMaskingObject(): io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface?
+
+    abstract fun getScissoringRect(): io.openmobilemaps.mapscore.shared.graphics.common.RectI?
+
     private class CppProxy : RenderPassInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -48,5 +52,17 @@ abstract class RenderPassInterface {
             return native_getRenderPassConfig(this.nativeRef)
         }
         private external fun native_getRenderPassConfig(_nativeRef: Long): RenderPassConfig
+
+        override fun getMaskingObject(): io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getMaskingObject(this.nativeRef)
+        }
+        private external fun native_getMaskingObject(_nativeRef: Long): io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface?
+
+        override fun getScissoringRect(): io.openmobilemaps.mapscore.shared.graphics.common.RectI? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getScissoringRect(this.nativeRef)
+        }
+        private external fun native_getScissoringRect(_nativeRef: Long): io.openmobilemaps.mapscore.shared.graphics.common.RectI?
     }
 }

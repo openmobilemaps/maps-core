@@ -45,6 +45,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)freeze:(BOOL)freeze {
+    try {
+        _cppRefHandle.get()->freeze(::djinni::Bool::toCpp(freeze));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)moveToCenterPositionZoom:(nonnull MCCoord *)centerPosition
                             zoom:(double)zoom
                         animated:(BOOL)animated {
@@ -60,6 +66,18 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         _cppRefHandle.get()->moveToCenterPosition(::djinni_generated::Coord::toCpp(centerPosition),
                                                   ::djinni::Bool::toCpp(animated));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)moveToBoundingBox:(nonnull MCRectCoord *)boundingBox
+                paddingPc:(float)paddingPc
+                 animated:(BOOL)animated
+                  maxZoom:(nullable NSNumber *)maxZoom {
+    try {
+        _cppRefHandle.get()->moveToBoundingBox(::djinni_generated::RectCoord::toCpp(boundingBox),
+                                               ::djinni::F32::toCpp(paddingPc),
+                                               ::djinni::Bool::toCpp(animated),
+                                               ::djinni::Optional<std::optional, ::djinni::F64>::toCpp(maxZoom));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -112,9 +130,30 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (double)getMinZoom {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getMinZoom();
+        return ::djinni::F64::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (double)getMaxZoom {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getMaxZoom();
+        return ::djinni::F64::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)setBounds:(nonnull MCRectCoord *)bounds {
     try {
         _cppRefHandle.get()->setBounds(::djinni_generated::RectCoord::toCpp(bounds));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nonnull MCRectCoord *)getBounds {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getBounds();
+        return ::djinni_generated::RectCoord::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -125,35 +164,27 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setPaddingLeft:(float)padding
-              animated:(BOOL)animated {
+- (void)setPaddingLeft:(float)padding {
     try {
-        _cppRefHandle.get()->setPaddingLeft(::djinni::F32::toCpp(padding),
-                                            ::djinni::Bool::toCpp(animated));
+        _cppRefHandle.get()->setPaddingLeft(::djinni::F32::toCpp(padding));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setPaddingRight:(float)padding
-               animated:(BOOL)animated {
+- (void)setPaddingRight:(float)padding {
     try {
-        _cppRefHandle.get()->setPaddingRight(::djinni::F32::toCpp(padding),
-                                             ::djinni::Bool::toCpp(animated));
+        _cppRefHandle.get()->setPaddingRight(::djinni::F32::toCpp(padding));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setPaddingTop:(float)padding
-             animated:(BOOL)animated {
+- (void)setPaddingTop:(float)padding {
     try {
-        _cppRefHandle.get()->setPaddingTop(::djinni::F32::toCpp(padding),
-                                           ::djinni::Bool::toCpp(animated));
+        _cppRefHandle.get()->setPaddingTop(::djinni::F32::toCpp(padding));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setPaddingBottom:(float)padding
-                animated:(BOOL)animated {
+- (void)setPaddingBottom:(float)padding {
     try {
-        _cppRefHandle.get()->setPaddingBottom(::djinni::F32::toCpp(padding),
-                                              ::djinni::Bool::toCpp(animated));
+        _cppRefHandle.get()->setPaddingBottom(::djinni::F32::toCpp(padding));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -161,6 +192,26 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getVisibleRect();
         return ::djinni_generated::RectCoord::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nonnull MCRectCoord *)getPaddingAdjustedVisibleRect {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getPaddingAdjustedVisibleRect();
+        return ::djinni_generated::RectCoord::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (float)getScreenDensityPpi {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getScreenDensityPpi();
+        return ::djinni::F32::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)update {
+    try {
+        _cppRefHandle.get()->update();
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -201,10 +252,43 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setRotationEnabled:(BOOL)enabled {
+    try {
+        _cppRefHandle.get()->setRotationEnabled(::djinni::Bool::toCpp(enabled));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setSnapToNorthEnabled:(BOOL)enabled {
+    try {
+        _cppRefHandle.get()->setSnapToNorthEnabled(::djinni::Bool::toCpp(enabled));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nullable id<MCCameraInterface>)asCameraInterface {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->asCameraInterface();
         return ::djinni_generated::CameraInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable MCRectCoord *)getLastVpMatrixViewBounds {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getLastVpMatrixViewBounds();
+        return ::djinni::Optional<std::optional, ::djinni_generated::RectCoord>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable NSNumber *)getLastVpMatrixRotation {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getLastVpMatrixRotation();
+        return ::djinni::Optional<std::optional, ::djinni::F32>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable NSNumber *)getLastVpMatrixZoom {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getLastVpMatrixZoom();
+        return ::djinni::Optional<std::optional, ::djinni::F32>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

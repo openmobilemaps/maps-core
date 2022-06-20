@@ -7,7 +7,11 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
+#import "MCErrorManager+Private.h"
+#import "MCLayerReadyState+Private.h"
 #import "MCMapInterface+Private.h"
+#import "MCMaskingObjectInterface+Private.h"
+#import "MCRectI+Private.h"
 #import "MCRenderPassInterface+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -31,6 +35,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
         _cppRefHandle.assign(cppRef);
     }
     return self;
+}
+
+- (void)setMaskingObject:(nullable id<MCMaskingObjectInterface>)maskingObject {
+    try {
+        _cppRefHandle.get()->setMaskingObject(::djinni::Optional<std::optional, ::djinni_generated::MaskingObjectInterface>::toCpp(maskingObject));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
 - (void)update {
@@ -82,6 +92,37 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setScissorRect:(nullable MCRectI *)scissorRect {
+    try {
+        _cppRefHandle.get()->setScissorRect(::djinni::Optional<std::optional, ::djinni_generated::RectI>::toCpp(scissorRect));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (MCLayerReadyState)isReadyToRenderOffscreen {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->isReadyToRenderOffscreen();
+        return ::djinni::Enum<::LayerReadyState, MCLayerReadyState>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)enableAnimations:(BOOL)enabled {
+    try {
+        _cppRefHandle.get()->enableAnimations(::djinni::Bool::toCpp(enabled));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setErrorManager:(nullable MCErrorManager *)errorManager {
+    try {
+        _cppRefHandle.get()->setErrorManager(::djinni_generated::ErrorManager::toCpp(errorManager));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)forceReload {
+    try {
+        _cppRefHandle.get()->forceReload();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class LayerInterface::ObjcProxy final
@@ -91,6 +132,12 @@ class LayerInterface::ObjcProxy final
     friend class ::djinni_generated::LayerInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
+    void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & c_maskingObject) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setMaskingObject:(::djinni::Optional<std::optional, ::djinni_generated::MaskingObjectInterface>::fromCpp(c_maskingObject))];
+        }
+    }
     void update() override
     {
         @autoreleasepool {
@@ -138,6 +185,37 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() show];
+        }
+    }
+    void setScissorRect(const std::optional<::RectI> & c_scissorRect) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setScissorRect:(::djinni::Optional<std::optional, ::djinni_generated::RectI>::fromCpp(c_scissorRect))];
+        }
+    }
+    ::LayerReadyState isReadyToRenderOffscreen() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() isReadyToRenderOffscreen];
+            return ::djinni::Enum<::LayerReadyState, MCLayerReadyState>::toCpp(objcpp_result_);
+        }
+    }
+    void enableAnimations(bool c_enabled) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() enableAnimations:(::djinni::Bool::fromCpp(c_enabled))];
+        }
+    }
+    void setErrorManager(const std::shared_ptr<::ErrorManager> & c_errorManager) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setErrorManager:(::djinni_generated::ErrorManager::fromCpp(c_errorManager))];
+        }
+    }
+    void forceReload() override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() forceReload];
         }
     }
 };

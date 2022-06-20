@@ -1,4 +1,4 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.5
 
 import PackageDescription
 
@@ -28,12 +28,35 @@ let package = Package(
     ],
     targets: [
         .target(
+            name: "earcut",
+            path: "external/earcut/",
+            exclude: [
+                "earcut/glfw",
+                "earcut/test",
+                "earcut/appveyor.yml",
+                "earcut/CHANGELOG.md",
+                "earcut/CMakeLists.txt",
+                "earcut/LICENSE",
+                "earcut/README.md",
+            ],
+            sources: [
+                "",
+                "earcut/include/",
+                "earcut/include/mapbox/",
+            ],
+            publicHeadersPath: "earcut/include/mapbox/",
+            cxxSettings: [
+                .headerSearchPath("earcut/include/"),
+                .headerSearchPath("earcut/include/mapbox/"),
+            ]
+        ),
+        .target(
             name: "MapCore",
             dependencies: ["MapCoreSharedModule"],
             path: "ios",
             exclude: ["readme.md"],
             resources: [
-                .process("ios/graphics/Shader/Metal/"),
+                .process("graphics/Shader/Metal/"),
             ]
         ),
         .target(
@@ -45,6 +68,7 @@ let package = Package(
         ),
         .target(
             name: "MapCoreSharedModuleCpp",
+            dependencies: ["earcut"],
             path: "shared",
             sources: ["src"],
             publicHeadersPath: "public",
@@ -65,10 +89,12 @@ let package = Package(
                 .headerSearchPath("src/map/layers/tiled/wmts"),
                 .headerSearchPath("src/map/scheduling"),
                 .headerSearchPath("src/map"),
+                .headerSearchPath("src/util"),
                 .headerSearchPath("src/external/pugixml"),
-
+                .define("DEBUG", to: "1", .when(configuration: .debug)),
+                .define("NDEBUG", to: "1", .when(configuration: .release)),
             ]
         ),
     ],
-    cxxLanguageStandard: .cxx1z
+    cxxLanguageStandard: .cxx17
 )

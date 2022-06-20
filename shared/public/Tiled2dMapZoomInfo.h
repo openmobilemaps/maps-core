@@ -7,12 +7,20 @@
 #include <utility>
 
 struct Tiled2dMapZoomInfo final {
+    /** this factor is applied to the the scale */
     float zoomLevelScaleFactor;
     int32_t numDrawPreviousLayers;
+    /**
+     * if this flag is set to true the map is scaled according to the wmts scaledenominator (https://gis.stackexchange.com/questions/315881/what-is-wmts-scaledenominator)
+     * and the screen ppi
+     */
+    bool adaptScaleToScreen;
 
     Tiled2dMapZoomInfo(float zoomLevelScaleFactor_,
-                       int32_t numDrawPreviousLayers_)
+                       int32_t numDrawPreviousLayers_,
+                       bool adaptScaleToScreen_)
     : zoomLevelScaleFactor(std::move(zoomLevelScaleFactor_))
     , numDrawPreviousLayers(std::move(numDrawPreviousLayers_))
+    , adaptScaleToScreen(std::move(adaptScaleToScreen_))
     {}
 };

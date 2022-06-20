@@ -3,9 +3,12 @@
 
 #include "NativeGraphicsObjectFactoryInterface.h"  // my header
 #include "NativeLine2dInterface.h"
+#include "NativeLineGroup2dInterface.h"
 #include "NativePolygon2dInterface.h"
+#include "NativePolygonGroup2dInterface.h"
 #include "NativeQuad2dInterface.h"
 #include "NativeShaderProgramInterface.h"
+#include "NativeTextInterface.h"
 
 namespace djinni_generated {
 
@@ -44,6 +47,49 @@ std::shared_ptr<::Polygon2dInterface> NativeGraphicsObjectFactoryInterface::Java
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativePolygon2dInterface::toCpp(jniEnv, jret);
 }
+std::shared_ptr<::LineGroup2dInterface> NativeGraphicsObjectFactoryInterface::JavaProxy::createLineGroup(const std::shared_ptr<::ShaderProgramInterface> & c_shader) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeGraphicsObjectFactoryInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_createLineGroup,
+                                         ::djinni::get(::djinni_generated::NativeShaderProgramInterface::fromCpp(jniEnv, c_shader)));
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativeLineGroup2dInterface::toCpp(jniEnv, jret);
+}
+std::shared_ptr<::PolygonGroup2dInterface> NativeGraphicsObjectFactoryInterface::JavaProxy::createPolygonGroup(const std::shared_ptr<::ShaderProgramInterface> & c_shader) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeGraphicsObjectFactoryInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_createPolygonGroup,
+                                         ::djinni::get(::djinni_generated::NativeShaderProgramInterface::fromCpp(jniEnv, c_shader)));
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativePolygonGroup2dInterface::toCpp(jniEnv, jret);
+}
+std::shared_ptr<::Quad2dInterface> NativeGraphicsObjectFactoryInterface::JavaProxy::createQuadMask() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeGraphicsObjectFactoryInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_createQuadMask);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativeQuad2dInterface::toCpp(jniEnv, jret);
+}
+std::shared_ptr<::Polygon2dInterface> NativeGraphicsObjectFactoryInterface::JavaProxy::createPolygonMask() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeGraphicsObjectFactoryInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_createPolygonMask);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativePolygon2dInterface::toCpp(jniEnv, jret);
+}
+std::shared_ptr<::TextInterface> NativeGraphicsObjectFactoryInterface::JavaProxy::createText(const std::shared_ptr<::ShaderProgramInterface> & c_shader) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeGraphicsObjectFactoryInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_createText,
+                                         ::djinni::get(::djinni_generated::NativeShaderProgramInterface::fromCpp(jniEnv, c_shader)));
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativeTextInterface::toCpp(jniEnv, jret);
+}
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_GraphicsObjectFactoryInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
@@ -80,6 +126,56 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objec
         const auto& ref = ::djinni::objectFromHandleAddress<::GraphicsObjectFactoryInterface>(nativeRef);
         auto r = ref->createPolygon(::djinni_generated::NativeShaderProgramInterface::toCpp(jniEnv, j_shader));
         return ::djinni::release(::djinni_generated::NativePolygon2dInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_GraphicsObjectFactoryInterface_00024CppProxy_native_1createLineGroup(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeShaderProgramInterface::JniType j_shader)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::GraphicsObjectFactoryInterface>(nativeRef);
+        auto r = ref->createLineGroup(::djinni_generated::NativeShaderProgramInterface::toCpp(jniEnv, j_shader));
+        return ::djinni::release(::djinni_generated::NativeLineGroup2dInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_GraphicsObjectFactoryInterface_00024CppProxy_native_1createPolygonGroup(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeShaderProgramInterface::JniType j_shader)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::GraphicsObjectFactoryInterface>(nativeRef);
+        auto r = ref->createPolygonGroup(::djinni_generated::NativeShaderProgramInterface::toCpp(jniEnv, j_shader));
+        return ::djinni::release(::djinni_generated::NativePolygonGroup2dInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_GraphicsObjectFactoryInterface_00024CppProxy_native_1createQuadMask(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::GraphicsObjectFactoryInterface>(nativeRef);
+        auto r = ref->createQuadMask();
+        return ::djinni::release(::djinni_generated::NativeQuad2dInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_GraphicsObjectFactoryInterface_00024CppProxy_native_1createPolygonMask(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::GraphicsObjectFactoryInterface>(nativeRef);
+        auto r = ref->createPolygonMask();
+        return ::djinni::release(::djinni_generated::NativePolygon2dInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_GraphicsObjectFactoryInterface_00024CppProxy_native_1createText(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeShaderProgramInterface::JniType j_shader)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::GraphicsObjectFactoryInterface>(nativeRef);
+        auto r = ref->createText(::djinni_generated::NativeShaderProgramInterface::toCpp(jniEnv, j_shader));
+        return ::djinni::release(::djinni_generated::NativeTextInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

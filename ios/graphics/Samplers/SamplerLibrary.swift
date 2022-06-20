@@ -11,32 +11,50 @@
 import Foundation
 import MetalKit
 
-enum SamplerKey: CaseIterable {
-    case magLinear
-    case magNearest
-
-    fileprivate func create() -> MTLSamplerDescriptor {
+public enum SamplerFactory {
+    public static func descriptor(label: String, magFilter: MTLSamplerMinMagFilter) -> MTLSamplerDescriptor {
         let samplerDescriptor = MTLSamplerDescriptor()
         samplerDescriptor.minFilter = .nearest
         samplerDescriptor.sAddressMode = .clampToEdge
         samplerDescriptor.tAddressMode = .clampToEdge
-
-        switch self {
-        case .magLinear:
-            samplerDescriptor.label = "Smapler Mag Linear"
-            samplerDescriptor.magFilter = .linear
-        case .magNearest:
-            samplerDescriptor.label = "Smapler Mag Nearest"
-            samplerDescriptor.magFilter = .nearest
-        }
+        samplerDescriptor.label = label
+        samplerDescriptor.magFilter = magFilter
         return samplerDescriptor
     }
 }
 
-class SamplerLibrary: StaticMetalLibrary<SamplerKey, MTLSamplerState> {
-    init(device: MTLDevice) {
-        super.init { (key) -> MTLSamplerState in
-            let samplerDescriptor = key.create()
+public extension SamplerFactory {
+    static func descriptor(sampler: Sampler) -> MTLSamplerDescriptor {
+        descriptor(label: sampler.label, magFilter: sampler.magFilter)
+    }
+}
+
+public enum Sampler: String, CaseIterable {
+    case magLinear
+    case magNearest
+
+    fileprivate var label: String {
+        rawValue
+    }
+
+    fileprivate var magFilter: MTLSamplerMinMagFilter {
+        switch self {
+            case .magLinear:
+                return .linear
+            case .magNearest:
+                return .nearest
+        }
+    }
+}
+
+public class SamplerLibrary: StaticMetalLibrary<String, MTLSamplerState> {
+    init(device: MTLDevice) throws {
+        try super.init(Sampler.allCases.map(\.rawValue)) { key -> MTLSamplerState in
+            guard let sampler = Sampler(rawValue: key) else {
+                throw LibraryError.invalidKey
+            }
+            let samplerDescriptor = SamplerFactory.descriptor(sampler: sampler)
+
             guard let samplerState = device.makeSamplerState(descriptor: samplerDescriptor) else {
                 fatalError("Cannot create Sampler \(key)")
             }

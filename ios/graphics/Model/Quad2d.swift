@@ -24,26 +24,76 @@ class Quad2d: BaseGraphicsObject {
 
     private var shader: MCShaderProgramInterface
 
+    private var stencilState: MTLDepthStencilState?
+
+    private var renderAsMask = false
+
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader
         super.init(device: metalContext.device,
-                   sampler: metalContext.samplerLibrary.value(.magLinear))
+                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue))
+    }
+
+    private func setupStencilStates() {
+        let ss2 = MTLStencilDescriptor()
+        ss2.stencilCompareFunction = .equal
+        ss2.stencilFailureOperation = .zero
+        ss2.depthFailureOperation = .keep
+        ss2.depthStencilPassOperation = .keep
+        ss2.readMask = 0b1111_1111
+        ss2.writeMask = 0b0000_0000
+
+        let s2 = MTLDepthStencilDescriptor()
+        s2.frontFaceStencil = ss2
+        s2.backFaceStencil = ss2
+
+        stencilState = device.makeDepthStencilState(descriptor: s2)
+    }
+
+    override func isReady() -> Bool {
+        guard ready else { return false }
+        if shader is AlphaShader {
+            return texture != nil
+        }
+        return true
     }
 
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
                          renderPass _: MCRenderPassConfig,
                          mvpMatrix: Int64,
-                         screenPixelAsRealMeterFactor _: Double)
-    {
+                         isMasked: Bool,
+                         screenPixelAsRealMeterFactor _: Double) {
         guard let verticesBuffer = verticesBuffer,
               let indicesBuffer = indicesBuffer else { return }
+
+        if shader is AlphaShader, texture == nil {
+            ready = false
+            return
+        }
+
+        encoder.pushDebugGroup("Quad2d")
+
+        if isMasked {
+            if stencilState == nil {
+                setupStencilStates()
+            }
+            encoder.setDepthStencilState(stencilState)
+            encoder.setStencilReferenceValue(0b1000_0000)
+        } else if let mask = context.mask, renderAsMask {
+            encoder.setDepthStencilState(mask)
+            encoder.setStencilReferenceValue(0b1000_0000)
+        } else {
+            encoder.setDepthStencilState(context.defaultMask)
+        }
+
         shader.setupProgram(context)
         shader.preRender(context)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-        let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix))!
-        encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {
+            encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+        }
 
         encoder.setFragmentSamplerState(sampler, index: 0)
 
@@ -56,6 +106,28 @@ class Quad2d: BaseGraphicsObject {
                                       indexType: .uint16,
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
+
+        encoder.popDebugGroup()
+    }
+}
+
+extension Quad2d: MCMaskingObjectInterface {
+    func render(asMask context: MCRenderingContextInterface?,
+                renderPass: MCRenderPassConfig,
+                mvpMatrix: Int64,
+                screenPixelAsRealMeterFactor: Double) {
+        guard isReady(),
+              let context = context as? RenderingContext,
+              let encoder = context.encoder else { return }
+
+        renderAsMask = true
+
+        render(encoder: encoder,
+               context: context,
+               renderPass: renderPass,
+               mvpMatrix: mvpMatrix,
+               isMasked: false,
+               screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)
     }
 }
 
@@ -89,7 +161,7 @@ extension Quad2d: MCQuad2dInterface {
         self.indicesBuffer = indicesBuffer
     }
 
-    func loadTexture(_ textureHolder: MCTextureHolderInterface?) {
+    func loadTexture(_ context: MCRenderingContextInterface?, textureHolder: MCTextureHolderInterface?) {
         guard let textureHolder = textureHolder as? TextureHolder else {
             fatalError("unexpected TextureHolder")
         }
@@ -101,4 +173,6 @@ extension Quad2d: MCQuad2dInterface {
     }
 
     func asGraphicsObject() -> MCGraphicsObjectInterface? { self }
+
+    func asMaskingObject() -> MCMaskingObjectInterface? { self }
 }

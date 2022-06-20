@@ -10,17 +10,15 @@
 
 import Metal
 
-enum PipelineKey: CaseIterable {
-    case alphaShader
-    case lineShader
-    case pointShader
-    case colorShader
-    case roundColorShader
-
-    fileprivate func pipelineDescriptor() -> MTLRenderPipelineDescriptor {
+public enum PipelineDescriptorFactory {
+    public static func pipelineDescriptor(vertexDescriptor: MTLVertexDescriptor,
+                                          label: String,
+                                          vertexShader: String,
+                                          fragmentShader: String,
+                                          library: MTLLibrary = MetalContext.current.library) -> MTLRenderPipelineDescriptor {
         let pipelineDescriptor = MTLRenderPipelineDescriptor()
         pipelineDescriptor.colorAttachments[0].pixelFormat = MetalContext.current.colorPixelFormat
-        pipelineDescriptor.vertexDescriptor = vertexDescriptor()
+        pipelineDescriptor.vertexDescriptor = vertexDescriptor
 
         let renderbufferAttachment = pipelineDescriptor.colorAttachments[0]
         renderbufferAttachment?.pixelFormat = MetalContext.current.colorPixelFormat
@@ -33,10 +31,10 @@ enum PipelineKey: CaseIterable {
         renderbufferAttachment?.destinationAlphaBlendFactor = .oneMinusSourceAlpha
 
         pipelineDescriptor.stencilAttachmentPixelFormat = .stencil8
-        pipelineDescriptor.label = label()
+        pipelineDescriptor.label = label
 
-        guard let vertexFunction = MetalContext.current.library.makeFunction(name: vertexShader()),
-              let fragmentFunction = MetalContext.current.library.makeFunction(name: fragmentShader())
+        guard let vertexFunction = library.makeFunction(name: vertexShader),
+              let fragmentFunction = library.makeFunction(name: fragmentShader)
         else {
             fatalError("Cannot locate the shaders for UBTileModel")
         }
@@ -46,49 +44,82 @@ enum PipelineKey: CaseIterable {
 
         return pipelineDescriptor
     }
+}
 
-    private func label() -> String {
+extension PipelineDescriptorFactory {
+    static func pipelineDescriptor(pipeline: Pipeline) -> MTLRenderPipelineDescriptor {
+        pipelineDescriptor(vertexDescriptor: pipeline.vertexDescriptor,
+                           label: pipeline.label,
+                           vertexShader: pipeline.vertexShader,
+                           fragmentShader: pipeline.fragmentShader)
+    }
+}
+
+public enum Pipeline: String, CaseIterable {
+    case alphaShader
+    case lineGroupShader
+    case polygonGroupShader
+    case pointShader
+    case colorShader
+    case roundColorShader
+    case clearStencilShader
+    case textShader
+
+    var label: String {
         switch self {
-        case .alphaShader: return "Alpha shader with texture"
-        case .lineShader: return "Line shader with color"
-        case .pointShader: return "Point (round) shader with color"
-        case .colorShader: return "Color shader"
-        case .roundColorShader: return "Round color shader"
+            case .alphaShader: return "Alpha shader with texture"
+            case .lineGroupShader: return "Line Group shader"
+            case .polygonGroupShader: return "Polygon Group shader"
+            case .pointShader: return "Point (round) shader with color"
+            case .colorShader: return "Color shader"
+            case .roundColorShader: return "Round color shader"
+            case .clearStencilShader: return "Clear stencil shader"
+            case .textShader: return "Text shader"
         }
     }
 
-    private func vertexShader() -> String {
+    var vertexShader: String {
         switch self {
-        case .alphaShader: return "baseVertexShader"
-        case .lineShader: return "lineVertexShader"
-        case .pointShader: return "pointVertexShader"
-        case .colorShader: return "colorVertexShader"
-        case .roundColorShader: return "colorVertexShader"
+            case .alphaShader: return "baseVertexShader"
+            case .lineGroupShader: return "lineGroupVertexShader"
+            case .polygonGroupShader: return "polygonGroupVertexShader"
+            case .pointShader: return "pointVertexShader"
+            case .colorShader: return "colorVertexShader"
+            case .roundColorShader: return "colorVertexShader"
+            case .clearStencilShader: return "stencilClearVertexShader"
+            case .textShader: return "textVertexShader"
         }
     }
 
-    private func fragmentShader() -> String {
+    var fragmentShader: String {
         switch self {
-        case .alphaShader: return "baseFragmentShader"
-        case .lineShader: return "lineFragmentShader"
-        case .pointShader: return "pointFragmentShader"
-        case .colorShader: return "colorFragmentShader"
-        case .roundColorShader: return "roundColorFragmentShader"
+            case .alphaShader: return "baseFragmentShader"
+            case .lineGroupShader: return "lineGroupFragmentShader"
+            case .polygonGroupShader: return "polygonGroupFragmentShader"
+            case .pointShader: return "pointFragmentShader"
+            case .colorShader: return "colorFragmentShader"
+            case .roundColorShader: return "roundColorFragmentShader"
+            case .clearStencilShader: return "stencilClearFragmentShader"
+            case .textShader: return "textFragmentShader"
         }
     }
 
-    private func vertexDescriptor() -> MTLVertexDescriptor {
+    var vertexDescriptor: MTLVertexDescriptor {
         switch self {
-        case .lineShader: return LineVertex.descriptor
-        default: return Vertex.descriptor
+            case .lineGroupShader: return LineVertex.descriptor
+            case .polygonGroupShader: return PolygonVertex.descriptor
+            default: return Vertex.descriptor
         }
     }
 }
 
-class PipelineLibrary: StaticMetalLibrary<PipelineKey, MTLRenderPipelineState> {
+public class PipelineLibrary: StaticMetalLibrary<String, MTLRenderPipelineState> {
     init(device: MTLDevice) throws {
-        try super.init { (key) -> MTLRenderPipelineState in
-            let pipelineDescriptor = key.pipelineDescriptor()
+        try super.init(Pipeline.allCases.map(\.rawValue)) { key -> MTLRenderPipelineState in
+            guard let pipeline = Pipeline(rawValue: key) else {
+                throw LibraryError.invalidKey
+            }
+            let pipelineDescriptor = PipelineDescriptorFactory.pipelineDescriptor(pipeline: pipeline)
             return try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
         }
     }

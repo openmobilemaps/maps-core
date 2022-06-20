@@ -19,7 +19,7 @@
 /// Convert (new, prefixed) LV03+ to (old, not-prefixed) LV03
 /// https://epsg.io/2056 to https://epsg.io/21781
 class EPSG2056ToEPGS21781Converter : public CoordinateConverterInterface {
-public:
+  public:
     EPSG2056ToEPGS21781Converter() {}
 
     virtual Coord convert(const Coord &coordinate) override {
@@ -27,7 +27,7 @@ public:
         double x = coordinate.x - 2000000;
         double y = coordinate.y - 1000000;
 
-        return Coord(getTo(), x, y, 0);
+        return Coord(getTo(), x, y, coordinate.z);
     }
 
     virtual std::string getFrom() override { return CoordinateSystemIdentifiers::EPSG2056(); }

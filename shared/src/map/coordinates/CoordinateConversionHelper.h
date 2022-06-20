@@ -25,6 +25,12 @@ class CoordinateConversionHelper : public CoordinateConversionHelperInterface {
   public:
     CoordinateConversionHelper(MapCoordinateSystem mapCoordinateSystem);
 
+    /**
+     * This instance is independent of the map and does not know about the rendering system.
+     * It can not be used to convert coordinates into rendering space.
+     */
+    CoordinateConversionHelper();
+
     virtual void registerConverter(const std::shared_ptr<CoordinateConverterInterface> &converter) override;
 
     virtual Coord convert(const std::string &to, const Coord &coordinate) override;
@@ -40,10 +46,14 @@ class CoordinateConversionHelper : public CoordinateConversionHelperInterface {
     virtual Coord convertToRenderSystem(const Coord &coordinate) override;
 
   private:
+    void addDefaultConverters();
+
     std::unordered_map<std::tuple<std::string, std::string>, std::shared_ptr<CoordinateConverterInterface>> fromToConverterMap;
 
     std::unordered_map<std::tuple<std::string, std::string>, std::vector<std::shared_ptr<CoordinateConverterInterface>>>
         converterHelper;
+
+    std::shared_ptr<CoordinateConverterInterface> renderSystemConverter;
 
     std::string mapCoordinateSystemIdentier;
 

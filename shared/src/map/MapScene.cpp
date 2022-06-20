@@ -10,13 +10,17 @@
 
 #include "MapScene.h"
 #include "CoordinateConversionHelper.h"
+#include "DateHelper.h"
 #include "DefaultTouchHandlerInterface.h"
 #include "LambdaTask.h"
 #include "LayerInterface.h"
 #include "MapCallbackInterface.h"
 #include "MapCamera2dInterface.h"
+#include "MapReadyCallbackInterface.h"
 #include "TouchInterface.h"
 #include <algorithm>
+
+#include "Tiled2dMapRasterLayer.h"
 
 MapScene::MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig &mapConfig,
                    const std::shared_ptr<::SchedulerInterface> &scheduler, float pixelDensity)
@@ -32,6 +36,13 @@ MapScene::MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig &mapCo
 
     // add default camera
     setCamera(MapCamera2dInterface::create(ptr, pixelDensity));
+}
+
+MapScene::~MapScene() {
+    std::lock_guard<std::recursive_mutex> lock(layersMutex);
+    for (const auto &layerEntry : layers) {
+        layerEntry.second->onRemoved();
+    }
 }
 
 std::shared_ptr<::GraphicsObjectFactoryInterface> MapScene::getGraphicsObjectFactory() { return scene->getGraphicsFactory(); }
@@ -79,45 +90,99 @@ void MapScene::setTouchHandler(const std::shared_ptr<::TouchHandlerInterface> &t
 
 std::shared_ptr<::TouchHandlerInterface> MapScene::getTouchHandler() { return touchHandler; }
 
-std::vector<std::shared_ptr<LayerInterface>> MapScene::getLayers() { return layers; };
+std::vector<std::shared_ptr<LayerInterface>> MapScene::getLayers() {
+    std::vector<std::shared_ptr<LayerInterface>> layersList;
+    for (const auto &l : layers) {
+        layersList.emplace_back(l.second);
+    }
+    return layersList;
+};
 
 void MapScene::addLayer(const std::shared_ptr<::LayerInterface> &layer) {
+    removeLayer(layer);
     layer->onAdded(shared_from_this());
     std::lock_guard<std::recursive_mutex> lock(layersMutex);
-    layers.push_back(layer);
+    int topIndex = -1;
+    if (!layers.empty())
+        topIndex = layers.rbegin()->first;
+    layers[topIndex + 1] = layer;
 }
 
 void MapScene::insertLayerAt(const std::shared_ptr<LayerInterface> &layer, int32_t atIndex) {
+    {
+        std::lock_guard<std::recursive_mutex> lock(layersMutex);
+        if (layers.count(atIndex) > 0 && layers.at(atIndex) == layer) {
+            return;
+        }
+    }
+    removeLayer(layer);
     layer->onAdded(shared_from_this());
     std::lock_guard<std::recursive_mutex> lock(layersMutex);
-    auto it = layers.begin() + atIndex;
-    layers.insert(it, layer);
+    if (layers.count(atIndex) > 0) {
+        layers[atIndex]->onRemoved();
+    }
+    layers[atIndex] = layer;
 };
 
 void MapScene::insertLayerAbove(const std::shared_ptr<LayerInterface> &layer, const std::shared_ptr<LayerInterface> &above) {
+    removeLayer(layer);
     layer->onAdded(shared_from_this());
     std::lock_guard<std::recursive_mutex> lock(layersMutex);
-    auto position = std::find(std::begin(layers), std::end(layers), above);
-    if (position == layers.end()) {
+    int targetIndex = -1;
+    for (const auto &[i, l] : layers) {
+        if (l == above) {
+            targetIndex = i;
+            break;
+        }
+    }
+    if (targetIndex < 0) {
         throw std::invalid_argument("MapScene does not contain above layer");
     }
-    layers.insert(++position, layer);
+    std::map<int, std::shared_ptr<LayerInterface>> newLayers;
+    for (auto iter = layers.rbegin(); iter != layers.rend(); iter++) {
+        newLayers[iter->first > targetIndex ? iter->first + 1 : iter->first] = iter->second;
+    }
+    newLayers[targetIndex + 1] = layer;
+    layers = newLayers;
 };
 
 void MapScene::insertLayerBelow(const std::shared_ptr<LayerInterface> &layer, const std::shared_ptr<LayerInterface> &below) {
+    removeLayer(layer);
     layer->onAdded(shared_from_this());
     std::lock_guard<std::recursive_mutex> lock(layersMutex);
-    auto position = std::find(std::begin(layers), std::end(layers), below);
-    if (position == layers.end()) {
+    int targetIndex = -1;
+    for (const auto &[i, l] : layers) {
+        if (l == below) {
+            targetIndex = i;
+            break;
+        }
+    }
+    if (targetIndex < 0) {
         throw std::invalid_argument("MapScene does not contain below layer");
     }
-    layers.insert(position, layer);
+    std::map<int, std::shared_ptr<LayerInterface>> newLayers;
+    for (auto iter = layers.rbegin(); iter != layers.rend(); iter++) {
+        newLayers[iter->first >= targetIndex ? iter->first + 1 : iter->first] = iter->second;
+    }
+    newLayers[targetIndex] = layer;
+    layers = newLayers;
 };
 
 void MapScene::removeLayer(const std::shared_ptr<::LayerInterface> &layer) {
-    layer->onRemoved();
-    std::lock_guard<std::recursive_mutex> lock(layersMutex);
-    layers.erase(std::remove(layers.begin(), layers.end(), layer), layers.end());
+    {
+        std::lock_guard<std::recursive_mutex> lock(layersMutex);
+        int targetIndex = -1;
+        for (const auto &[i, l] : layers) {
+            if (l == layer) {
+                targetIndex = i;
+                break;
+            }
+        }
+        if (targetIndex >= 0) {
+            layers.erase(targetIndex);
+            layer->onRemoved();
+        }
+    }
 }
 
 void MapScene::setViewportSize(const ::Vec2I &size) {
@@ -128,7 +193,8 @@ void MapScene::setViewportSize(const ::Vec2I &size) {
 void MapScene::setBackgroundColor(const Color &color) { getRenderingContext()->setBackgroundColor(color); }
 
 void MapScene::invalidate() {
-    if (!isInvalidated.test_and_set()) return;
+    if (isInvalidated.test_and_set())
+        return;
 
     if (auto handler = callbackHandler) {
         handler->invalidate();
@@ -141,13 +207,22 @@ void MapScene::drawFrame() {
     if (!isResumed)
         return;
 
-    for (const auto &layer : layers) {
-        layer->update();
+    auto const camera = this->camera;
+    if (camera) {
+        camera->update();
     }
 
-    for (const auto &layer : layers) {
-        for (const auto &renderPass : layer->buildRenderPasses()) {
-            scene->getRenderer()->addToRenderQueue(renderPass);
+    {
+        std::lock_guard<std::recursive_mutex> lock(layersMutex);
+
+        for (const auto &layer : layers) {
+            layer.second->update();
+        }
+
+        for (const auto &layer : layers) {
+            for (const auto &renderPass : layer.second->buildRenderPasses()) {
+                scene->getRenderer()->addToRenderQueue(renderPass);
+            }
         }
     }
 
@@ -158,8 +233,9 @@ void MapScene::resume() {
     isResumed = true;
     scheduler->addTask(
         std::make_shared<LambdaTask>(TaskConfig("MapScene_resume", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [=] {
+            std::lock_guard<std::recursive_mutex> lock(layersMutex);
             for (const auto &layer : layers) {
-                layer->resume();
+                layer.second->resume();
             }
         }));
 }
@@ -168,8 +244,75 @@ void MapScene::pause() {
     isResumed = false;
     scheduler->addTask(
         std::make_shared<LambdaTask>(TaskConfig("MapScene_pause", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [=] {
+            std::lock_guard<std::recursive_mutex> lock(layersMutex);
             for (const auto &layer : layers) {
-                layer->pause();
+                layer.second->pause();
             }
         }));
+}
+
+void MapScene::drawReadyFrame(const ::RectCoord &bounds, float timeout,
+                              const std::shared_ptr<MapReadyCallbackInterface> &callbacks) {
+
+    // for now we only support drawing a ready frame, therefore
+    // we disable animations in the layers
+    for (const auto &layer : layers) {
+        layer.second->enableAnimations(false);
+    }
+
+    auto state = LayerReadyState::NOT_READY;
+
+    invalidate();
+    callbacks->stateDidUpdate(state);
+
+    auto camera = getCamera();
+    camera->moveToBoundingBox(bounds, 0.0, false, std::nullopt);
+    camera->freeze(true);
+
+    invalidate();
+    callbacks->stateDidUpdate(state);
+
+    long long timeoutTimestamp = DateHelper::currentTimeMillis() + (long long)(timeout * 1000);
+
+    while (state == LayerReadyState::NOT_READY) {
+        state = getLayersReadyState();
+
+        auto now = DateHelper::currentTimeMillis();
+        if (now > timeoutTimestamp) {
+            state = LayerReadyState::TIMEOUT_ERROR;
+        }
+
+        invalidate();
+        callbacks->stateDidUpdate(state);
+    }
+
+    // re-enable animations if the map scene is used not only for
+    // drawReadyFrame
+    camera->freeze(false);
+    for (const auto &layer : layers) {
+        layer.second->enableAnimations(true);
+    }
+}
+
+LayerReadyState MapScene::getLayersReadyState() {
+    std::lock_guard<std::recursive_mutex> lock(layersMutex);
+
+    for (const auto &layer : layers) {
+        auto state = layer.second->isReadyToRenderOffscreen();
+        if (state == LayerReadyState::READY) {
+            continue;
+        }
+
+        return state;
+    }
+
+    return LayerReadyState::READY;
+}
+
+void MapScene::forceReload() {
+    std::lock_guard<std::recursive_mutex> lock(layersMutex);
+
+    for (const auto &[index, layer] : layers) {
+        layer->forceReload();
+    }
 }

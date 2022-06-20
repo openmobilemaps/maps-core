@@ -8,18 +8,20 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#ifndef MAPSDK_POLYGON2DOPENGL_H
-#define MAPSDK_POLYGON2DOPENGL_H
+#pragma once
 
 #include "GraphicsObjectInterface.h"
+#include "MaskingObjectInterface.h"
 #include "OpenGlContext.h"
 #include "Polygon2dInterface.h"
 #include "ShaderProgramInterface.h"
 #include "opengl_wrapper.h"
+#include <mutex>
 
 class Polygon2dOpenGl : public GraphicsObjectInterface,
+                        public MaskingObjectInterface,
                         public Polygon2dInterface,
-                        public std::enable_shared_from_this<GraphicsObjectInterface> {
+                        public std::enable_shared_from_this<Polygon2dOpenGl> {
   public:
     Polygon2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader);
 
@@ -32,28 +34,36 @@ class Polygon2dOpenGl : public GraphicsObjectInterface,
     virtual void clear() override;
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                        int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
+                        int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
-    virtual void setPolygonPositions(const std::vector<::Vec2D> &positions, const std::vector<std::vector<::Vec2D>> &holes,
-                                     bool isConvex) override;
+    virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
+                              int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
+
+    virtual void setVertices(const std::vector<::Vec2D> &vertices, const std::vector<int32_t> &indices) override;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() override;
 
+    virtual std::shared_ptr<MaskingObjectInterface> asMaskingObject() override;
+
+    virtual void setIsInverseMasked(bool inversed) override;
+
   protected:
-    void initializePolygon();
+    void prepareGlData(const std::shared_ptr<OpenGlContext> &openGlContext);
 
     void drawPolygon(std::shared_ptr<OpenGlContext> openGlContext, int program, int64_t mvpMatrix);
 
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
 
-    bool polygonIsConvex = false;
-    std::vector<::Vec2D> polygonCoordinates;
-    std::vector<std::vector<::Vec2D>> holePolygonCoordinates;
-
-    std::vector<GLfloat> vertexBuffer;
-    std::vector<GLushort> indexBuffer;
+    int programHandle;
+    int mvpMatrixHandle;
+    int positionHandle;
+    GLuint vertexBuffer;
+    std::vector<GLfloat> vertices;
+    GLuint indexBuffer;
+    std::vector<GLushort> indices;
 
     bool ready = false;
-};
+    std::recursive_mutex dataMutex;
 
-#endif // MAPSDK_POLYGON2DOPENGL_H
+    bool isMaskInversed = false;
+};

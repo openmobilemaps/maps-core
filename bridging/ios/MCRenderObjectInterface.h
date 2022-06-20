@@ -5,7 +5,7 @@
 #import <Foundation/Foundation.h>
 
 
-@interface MCRenderObjectInterface : NSObject
+@protocol MCRenderObjectInterface
 
 - (nullable id<MCGraphicsObjectInterface>)getGraphicsObject;
 

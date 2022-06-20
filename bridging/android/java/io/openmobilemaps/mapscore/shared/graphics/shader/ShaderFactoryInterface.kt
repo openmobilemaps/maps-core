@@ -11,9 +11,15 @@ abstract class ShaderFactoryInterface {
 
     abstract fun createColorLineShader(): ColorLineShaderInterface
 
+    abstract fun createLineGroupShader(): LineGroupShaderInterface
+
     abstract fun createColorShader(): ColorShaderInterface
 
     abstract fun createColorCircleShader(): ColorCircleShaderInterface
+
+    abstract fun createPolygonGroupShader(): PolygonGroupShaderInterface
+
+    abstract fun createTextShader(): TextShaderInterface
 
     private class CppProxy : ShaderFactoryInterface {
         private val nativeRef: Long
@@ -45,6 +51,12 @@ abstract class ShaderFactoryInterface {
         }
         private external fun native_createColorLineShader(_nativeRef: Long): ColorLineShaderInterface
 
+        override fun createLineGroupShader(): LineGroupShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createLineGroupShader(this.nativeRef)
+        }
+        private external fun native_createLineGroupShader(_nativeRef: Long): LineGroupShaderInterface
+
         override fun createColorShader(): ColorShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_createColorShader(this.nativeRef)
@@ -56,5 +68,17 @@ abstract class ShaderFactoryInterface {
             return native_createColorCircleShader(this.nativeRef)
         }
         private external fun native_createColorCircleShader(_nativeRef: Long): ColorCircleShaderInterface
+
+        override fun createPolygonGroupShader(): PolygonGroupShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createPolygonGroupShader(this.nativeRef)
+        }
+        private external fun native_createPolygonGroupShader(_nativeRef: Long): PolygonGroupShaderInterface
+
+        override fun createTextShader(): TextShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createTextShader(this.nativeRef)
+        }
+        private external fun native_createTextShader(_nativeRef: Long): TextShaderInterface
     }
 }

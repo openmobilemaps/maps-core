@@ -30,4 +30,6 @@ public:
     virtual void setType(IconType scaleType) = 0;
 
     virtual IconType getType() = 0;
+
+    virtual ::Vec2F getIconAnchor() = 0;
 };

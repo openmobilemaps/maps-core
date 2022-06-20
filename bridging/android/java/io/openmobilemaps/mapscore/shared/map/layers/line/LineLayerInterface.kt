@@ -23,6 +23,12 @@ abstract class LineLayerInterface {
 
     abstract fun invalidate()
 
+    abstract fun resetSelection()
+
+    abstract fun setSelected(selectedIds: HashSet<String>)
+
+    abstract fun setLayerClickable(isLayerClickable: Boolean)
+
     companion object {
         @JvmStatic
         fun create(): LineLayerInterface {
@@ -95,6 +101,24 @@ abstract class LineLayerInterface {
             native_invalidate(this.nativeRef)
         }
         private external fun native_invalidate(_nativeRef: Long)
+
+        override fun resetSelection() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_resetSelection(this.nativeRef)
+        }
+        private external fun native_resetSelection(_nativeRef: Long)
+
+        override fun setSelected(selectedIds: HashSet<String>) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setSelected(this.nativeRef, selectedIds)
+        }
+        private external fun native_setSelected(_nativeRef: Long, selectedIds: HashSet<String>)
+
+        override fun setLayerClickable(isLayerClickable: Boolean) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setLayerClickable(this.nativeRef, isLayerClickable)
+        }
+        private external fun native_setLayerClickable(_nativeRef: Long, isLayerClickable: Boolean)
 
         companion object {
             @JvmStatic

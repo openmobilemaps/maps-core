@@ -6,8 +6,10 @@
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
-#import "MCTextureLoaderInterface+Private.h"
+#import "MCLoaderInterface+Private.h"
+#import "MCTiled2dMapLayerConfig+Private.h"
 #import "MCTiled2dMapRasterLayerInterface+Private.h"
+#import "MCTiled2dMapZoomInfo+Private.h"
 #import "MCWmtsLayerDescription+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -41,11 +43,38 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 }
 
 - (nullable MCTiled2dMapRasterLayerInterface *)createLayer:(nonnull NSString *)identifier
-                                             textureLoader:(nullable id<MCTextureLoaderInterface>)textureLoader {
+                                                tileLoader:(nullable id<MCLoaderInterface>)tileLoader {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createLayer(::djinni::String::toCpp(identifier),
-                                                               ::djinni_generated::TextureLoaderInterface::toCpp(textureLoader));
+                                                               ::djinni_generated::LoaderInterface::toCpp(tileLoader));
         return ::djinni_generated::Tiled2dMapRasterLayerInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable MCTiled2dMapRasterLayerInterface *)createLayerWithZoomInfo:(nonnull NSString *)identifier
+                                                            tileLoader:(nullable id<MCLoaderInterface>)tileLoader
+                                                              zoomInfo:(nonnull MCTiled2dMapZoomInfo *)zoomInfo {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createLayerWithZoomInfo(::djinni::String::toCpp(identifier),
+                                                                           ::djinni_generated::LoaderInterface::toCpp(tileLoader),
+                                                                           ::djinni_generated::Tiled2dMapZoomInfo::toCpp(zoomInfo));
+        return ::djinni_generated::Tiled2dMapRasterLayerInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCTiled2dMapLayerConfig>)createLayerConfig:(nonnull NSString *)identifier {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createLayerConfig(::djinni::String::toCpp(identifier));
+        return ::djinni_generated::Tiled2dMapLayerConfig::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCTiled2dMapLayerConfig>)createLayerConfigWithZoomInfo:(nonnull NSString *)identifier
+                                                             zoomInfo:(nonnull MCTiled2dMapZoomInfo *)zoomInfo {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createLayerConfigWithZoomInfo(::djinni::String::toCpp(identifier),
+                                                                                 ::djinni_generated::Tiled2dMapZoomInfo::toCpp(zoomInfo));
+        return ::djinni_generated::Tiled2dMapLayerConfig::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

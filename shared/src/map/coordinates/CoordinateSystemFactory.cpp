@@ -1,6 +1,12 @@
-//
-// Created by Christoph Maurhofer on 03.02.2021.
-//
+/*
+ * Copyright (c) 2021 Ubique Innovation AG <https://www.ubique.ch>
+ *
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ *  SPDX-License-Identifier: MPL-2.0
+ */
 
 #include "CoordinateSystemFactory.h"
 #include "Coord.h"
@@ -10,8 +16,8 @@
 
 ::MapCoordinateSystem CoordinateSystemFactory::getEpsg2056System() {
     return MapCoordinateSystem(CoordinateSystemIdentifiers::EPSG2056(),
-                               RectCoord(Coord(CoordinateSystemIdentifiers::EPSG2056(), 2485071.58, 1299941.79, 0),
-                                         Coord(CoordinateSystemIdentifiers::EPSG2056(), 2828515.82, 1075346.31, 0)),
+                               RectCoord(Coord(CoordinateSystemIdentifiers::EPSG2056(), 2485000.0, 1300000.0, 0),
+                                         Coord(CoordinateSystemIdentifiers::EPSG2056(), 2840000.0, 1070000.0, 0)),
                                1.0);
 }
 
@@ -24,10 +30,7 @@
 
 ::MapCoordinateSystem CoordinateSystemFactory::getEpsg21781System() {
     return MapCoordinateSystem(CoordinateSystemIdentifiers::EPSG21781(),
-                               RectCoord(Coord(CoordinateSystemIdentifiers::EPSG21781(), 485071.54, 75346.36, 0),
-                                         Coord(CoordinateSystemIdentifiers::EPSG21781(), 828515.78, 299941.84, 0)),
+                               RectCoord(Coord(CoordinateSystemIdentifiers::EPSG21781(), 485000.0, 300000.0, 0),
+                                         Coord(CoordinateSystemIdentifiers::EPSG21781(), 840000.0, 70000.0, 0)),
                                1.0);
-
-
-
 }

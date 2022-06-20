@@ -5,6 +5,7 @@
 #import "MCTouchHandlerInterface.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
+#import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCTouchEvent+Private.h"
 #import "MCTouchInterface+Private.h"
@@ -38,13 +39,21 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)addListener:(nullable MCTouchInterface *)listener {
+- (void)insertListener:(nullable id<MCTouchInterface>)listener
+                 index:(int32_t)index {
+    try {
+        _cppRefHandle.get()->insertListener(::djinni_generated::TouchInterface::toCpp(listener),
+                                            ::djinni::I32::toCpp(index));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)addListener:(nullable id<MCTouchInterface>)listener {
     try {
         _cppRefHandle.get()->addListener(::djinni_generated::TouchInterface::toCpp(listener));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)removeListener:(nullable MCTouchInterface *)listener {
+- (void)removeListener:(nullable id<MCTouchInterface>)listener {
     try {
         _cppRefHandle.get()->removeListener(::djinni_generated::TouchInterface::toCpp(listener));
     } DJINNI_TRANSLATE_EXCEPTIONS()
@@ -63,6 +72,13 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() onTouchEvent:(::djinni_generated::TouchEvent::fromCpp(c_touchEvent))];
+        }
+    }
+    void insertListener(const std::shared_ptr<::TouchInterface> & c_listener, int32_t c_index) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() insertListener:(::djinni_generated::TouchInterface::fromCpp(c_listener))
+                                                               index:(::djinni::I32::fromCpp(c_index))];
         }
     }
     void addListener(const std::shared_ptr<::TouchInterface> & c_listener) override

@@ -17,8 +17,13 @@
 <div align="center">
     <!-- License -->
     <a href="https://github.com/openmobilemaps/maps-core/blob/master/LICENSE">
-      <img alt="License: MPL 2.0"
-      src="https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg">
+      <img alt="License: MPL 2.0" src="https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg">
+    </a>
+    <a href="https://search.maven.org/search?q=g:%22io.openmobilemaps%22%20AND%20a:%22mapscore%22">
+      <img alt="Maven Central" src="https://img.shields.io/maven-central/v/io.openmobilemaps/mapscore.svg?label=Maven%20Central">
+    </a>
+    <a href="https://search.maven.org/search?q=g:%22io.openmobilemaps%22%20AND%20a:%22mapscore-dev%22">
+      <img alt="Maven Central Dev" src="https://img.shields.io/maven-central/v/io.openmobilemaps/mapscore-dev.svg?label=Maven%20Central">
     </a>
 </div>
 
@@ -60,7 +65,7 @@ This library is available on MavenCentral. To add it to your Android project, ad
 
 ```
 dependencies {
-  implementation 'io.openmobilemaps:mapscore:1.3.3'
+  implementation 'io.openmobilemaps:mapscore:1.4.0'
 }
 ```
 
@@ -120,10 +125,10 @@ To display the tiles, a Tiled2dMapRasterLayer must be created with both a Tiled2
 val tiledLayer = Tiled2dMapRasterLayerInterface.create(layerConfig, textureLoader)
 ```
 
-Open Maps Mobile provides a default implementation for a `TextureLoader`, which uses OkHttp to load a bitmap from a given URL. Of course, a custom implementation of the `TextureLoaderInterface` can be used as well.
+Open Maps Mobile provides a default implementation for a `DataLoader`, which uses OkHttp to load a bitmap from a given URL. Of course, a custom implementation of the `LoaderInterface` can be used as well.
 
 ```kotlin
-val textureLoader = TextureLoader(this, cacheDir, 50L * 1024L * 1024L)
+val textureLoader = DataLoader(this, cacheDir, 50L * 1024L * 1024L)
 ```
 
 The `LayerConfig` contains the information needed for the layer to compute the visible tiles in the current camera configuration, as well as to load and display them.
@@ -139,8 +144,8 @@ val layerConfig = object : Tiled2dMapLayerConfig() {
 			// Defines to map coordinate system of the layer
 			override fun getCoordinateSystemIdentifier() : String = CoordinateSystemIdentifiers.EPSG3857()
 
-			// Pattern to create a tile identifier used internally 
-			override fun getTileIdentifier(x: Int, y: Int, zoom: Int): String = "OSM_" + zoom + "_" + x + "_" + y
+	        // Name of the layer
+			override fun getLayerName(): String = "OSMLayer"
 
 			// Defines the url-pattern to load tiles. Enter a valid OSM tile server here
 			override fun getTileUrl(x: Int, y: Int, zoom: Int): String = 
@@ -148,7 +153,11 @@ val layerConfig = object : Tiled2dMapLayerConfig() {
 
 			// Defines both an additional scale factor for the tiles, as well as how many
 			// layers above the ideal one should be loaded an displayed as well.
-			override fun getZoomInfo(): Tiled2dMapZoomInfo = Tiled2dMapZoomInfo(1.2f, 2)
+			override fun getZoomInfo(): Tiled2dMapZoomInfo = Tiled2dMapZoomInfo(
+				zoomLevelScaleFactor = 0.6f,
+				numDrawPreviousLayers = 2,
+				adaptScaleToScreen = true
+			)
 
 			// List of valid zoom-levels and their target zoom-value, the tile size in
 			// the layers coordinate system, the number of tiles on that level and the
@@ -171,14 +180,13 @@ val layerConfig = object : Tiled2dMapLayerConfig() {
 						Tiled2dMapZoomLevelInfo(70000.0, 4891.97f, 8192, 8192, 13, epsg3857Bounds),
 						Tiled2dMapZoomLevelInfo(35000.0, 2445.98f, 16384, 16384, 14, epsg3857Bounds),
 						Tiled2dMapZoomLevelInfo(15000.0, 1222.99f, 32768, 32768, 15, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(8000.0, 611.496f, 65536, 65536, 16, epsg3857Bounds, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(8000.0, 611.496f, 65536, 65536, 16, epsg3857Bounds),
 						Tiled2dMapZoomLevelInfo(4000.0, 305.748f, 131072, 131072, 17, epsg3857Bounds),
 						Tiled2dMapZoomLevelInfo(2000.0, 152.874f, 262144, 262144, 18, epsg3857Bounds),
 						Tiled2dMapZoomLevelInfo(1000.0, 76.437f, 524288, 524288, 19, epsg3857Bounds)
 					)
 				)
 			}
-		}
 ```
 
 Finally, the layer can be added to the MapView.
@@ -192,13 +200,13 @@ mapView.addLayer(tiledLayer.asLayerInterface())
 Open Mobile Maps supports the [WMTS standard](https://en.wikipedia.org/wiki/Web_Map_Tile_Service) and can parse their Capability XML file to generate raster layer configurations.
 
 ```kotlin
-let resource = WmtsCapabilitiesResource.create(xml)!
+val ressource = WmtsCapabilitiesResource.create(xml)
 ```
 The created resource object is then capable of creating a layer object with a given identifier.
 
 ```kotlin
-let layer = resource.createLayer("identifier", textureLoader: loader)
-mapView.add(layer: layer?.asLayerInterface())
+val layer = ressource.createLayer("identifier", textureLoader)
+mapView.addLayer(layer.asLayerInterface())
 ```
 
 This feature is still being improved to support a wider range of WMTS capabilities.
@@ -207,22 +215,22 @@ This feature is still being improved to support a wider range of WMTS capabiliti
 
 Open Mobile Maps provides a simple interface to create a polygon layer. The layer handles the rendering of the given polygons and calls the callback handler in case of user interaction.
 
-``` kotlin
+```kotlin
 val polygonLayer = PolygonLayerInterface.create()
 polygonLayer.add(
-    PolygonInfo(
-        "Polygon",
-        /* Coordinates */,
-        /* holes */,
-        false,
-        Color(1.0f, 0.0f, 0.0f, 1.0f),
-        Color(1.0f, 0.4f, 0.4f, 1.0f),
-    )
+	PolygonInfo(
+		identifier = "Polygon",
+		coordinates = PolygonCoord(
+			positions = /* coordinates */, holes = /* hole coordinates */
+		),
+		color = Color(1.0f, 0.0f, 0.0f, 0.5f),
+		highlightColor = Color(1.0f, 0.4f, 0.4f, 0.7f),
+	)
 )
 polygonLayer.setCallbackHandler(object : PolygonLayerCallbackInterface(){
-    override fun onClickConfirmed(polygon: PolygonInfo) {
-        // React
-    }
+	override fun onClickConfirmed(polygon: PolygonInfo) {
+		// React
+	}
 })
 mapView.addLayer(polygonLayer.asLayerInterface())
 ```
@@ -234,13 +242,13 @@ A simple icon layer is implemented as well. This supports displaying textures at
 ```kotlin
 val iconLayer = IconLayerInterface.create()
 val texture = BitmapTextureHolder(/* drawable or bitmap */)
-val iconSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 48f, resources.displayMetrics)
 val icon = IconFactory.createIcon(
-				"Icon",
-				coordinate,
-				texture,
-				Vec2F(iconSize, iconSize),
-				IconType.INVARIANT)
+	identifier = "Icon",
+	coordinate = coordinate,
+	texture = texture,
+	iconSize = Vec2F(iconSize, iconSize),
+	scaleType = IconType.INVARIANT
+)
 iconLayer.add(icon)
 iconLayer.setCallbackHandler(object : IconLayerCallbackInterface(){
 	override fun onClickConfirmed(icons: ArrayList<IconInfoInterface>): Boolean {
@@ -258,13 +266,17 @@ A line layer can be added to the mapView as well. Using the MCLineFactory a Line
 ```kotlin
 val lineLayer = LineLayerInterface.create()
 val line = LineFactory.createLine(
-    "lineIdentifier",
-    lineCoordinates,
-    LineStyle(
-        ColorStateList(normal = Color(1.0f, 0.0f, 0.0f, 0.5f), highlighted = Color(1.0f, 0.5f, 0.0f, 0.5f)),
-        SizeType.SCREEN_PIXEL,
-        50.0f
-    )
+	identifier = "lineIdentifier",
+	coordinates = lineCoordinates,
+	style = LineStyle(
+		color = ColorStateList(normal = Color(1.0f, 0.0f, 0.0f, 1.0f), highlighted = Color(1.0f, 0.5f, 0.0f, 1.0f)),
+		gapColor = ColorStateList(normal = Color(0.0f, 0.0f, 0.0f, 0.0f), highlighted = Color(0.0f, 0.0f, 0.0f, 0.0f)),
+		opacity = 1.0f,
+		widthType = SizeType.SCREEN_PIXEL,
+		width = lineWidth,
+		dashArray = arrayListOf(4.0f, 2.0f),
+		lineCap = LineCapType.SQUARE
+	)
 )
 lineLayer.add(line)
 mapView.addLayer(lineLayer.asLayerInterface())

@@ -12,6 +12,11 @@ abstract class IconFactory {
         fun createIcon(identifier: String, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, texture: io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface, iconSize: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F, scaleType: IconType): IconInfoInterface {
             return CppProxy.createIcon(identifier, coordinate, texture, iconSize, scaleType)
         }
+
+        @JvmStatic
+        fun createIconWithAnchor(identifier: String, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, texture: io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface, iconSize: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F, scaleType: IconType, iconAnchor: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F): IconInfoInterface {
+            return CppProxy.createIconWithAnchor(identifier, coordinate, texture, iconSize, scaleType, iconAnchor)
+        }
     }
 
     private class CppProxy : IconFactory {
@@ -35,6 +40,9 @@ abstract class IconFactory {
         companion object {
             @JvmStatic
             external fun createIcon(identifier: String, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, texture: io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface, iconSize: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F, scaleType: IconType): IconInfoInterface
+
+            @JvmStatic
+            external fun createIconWithAnchor(identifier: String, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, texture: io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface, iconSize: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F, scaleType: IconType, iconAnchor: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F): IconInfoInterface
         }
     }
 }

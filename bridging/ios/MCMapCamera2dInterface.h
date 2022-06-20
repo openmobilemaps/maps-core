@@ -16,12 +16,19 @@
 + (nullable MCMapCamera2dInterface *)create:(nullable MCMapInterface *)mapInterface
                            screenDensityPpi:(float)screenDensityPpi;
 
+- (void)freeze:(BOOL)freeze;
+
 - (void)moveToCenterPositionZoom:(nonnull MCCoord *)centerPosition
                             zoom:(double)zoom
                         animated:(BOOL)animated;
 
 - (void)moveToCenterPosition:(nonnull MCCoord *)centerPosition
                     animated:(BOOL)animated;
+
+- (void)moveToBoundingBox:(nonnull MCRectCoord *)boundingBox
+                paddingPc:(float)paddingPc
+                 animated:(BOOL)animated
+                  maxZoom:(nullable NSNumber *)maxZoom;
 
 - (nonnull MCCoord *)getCenterPosition;
 
@@ -39,23 +46,32 @@
 
 - (void)setMaxZoom:(double)maxZoom;
 
+- (double)getMinZoom;
+
+- (double)getMaxZoom;
+
 - (void)setBounds:(nonnull MCRectCoord *)bounds;
+
+- (nonnull MCRectCoord *)getBounds;
 
 - (BOOL)isInBounds:(nonnull MCCoord *)coords;
 
-- (void)setPaddingLeft:(float)padding
-              animated:(BOOL)animated;
+- (void)setPaddingLeft:(float)padding;
 
-- (void)setPaddingRight:(float)padding
-               animated:(BOOL)animated;
+- (void)setPaddingRight:(float)padding;
 
-- (void)setPaddingTop:(float)padding
-             animated:(BOOL)animated;
+- (void)setPaddingTop:(float)padding;
 
-- (void)setPaddingBottom:(float)padding
-                animated:(BOOL)animated;
+- (void)setPaddingBottom:(float)padding;
 
 - (nonnull MCRectCoord *)getVisibleRect;
+
+- (nonnull MCRectCoord *)getPaddingAdjustedVisibleRect;
+
+- (float)getScreenDensityPpi;
+
+/** this method is called just before the update methods on all layers */
+- (void)update;
 
 - (nonnull NSArray<NSNumber *> *)getInvariantModelMatrix:(nonnull MCCoord *)coordinate
                                           scaleInvariant:(BOOL)scaleInvariant
@@ -69,6 +85,16 @@
 
 - (double)mapUnitsFromPixels:(double)distancePx;
 
+- (void)setRotationEnabled:(BOOL)enabled;
+
+- (void)setSnapToNorthEnabled:(BOOL)enabled;
+
 - (nullable id<MCCameraInterface>)asCameraInterface;
+
+- (nullable MCRectCoord *)getLastVpMatrixViewBounds;
+
+- (nullable NSNumber *)getLastVpMatrixRotation;
+
+- (nullable NSNumber *)getLastVpMatrixZoom;
 
 @end

@@ -8,40 +8,51 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-import MetalKit
 import MapCoreSharedModule
+import MetalKit
 
-struct LineVertex: Equatable {
-
-    var position: SIMD2<Float>
+public struct LineVertex: Equatable {
+    public var position: SIMD2<Float>
 
     /// Line point A
-    var lineA: SIMD2<Float>
+    public var lineA: SIMD2<Float>
 
     /// Line point V
-    var lineB: SIMD2<Float>
+    public var lineB: SIMD2<Float>
 
     /// Width Normal
-    var widthNormal: SIMD2<Float>
+    public var widthNormal: SIMD2<Float>
 
     /// Lenght Normal
-    var lenghtNormal: SIMD2<Float>
+    public var lenghtNormal: SIMD2<Float>
+
+    public var stylingIndex: Int32 = 0
+
+    public enum SegmantType: Int32 {
+        case inner = 0
+        case start = 1
+        case end = 2
+        case singleSegment = 3
+    }
+
+    public var segmentType: Int32
+
+    public var lenghtPrefix: Float
 
     /*
-                                                 ^
-                  position                       | widthnormal
-                 +-------------------------------+-------------------------------+
-                 |                                                               |
-           <---  |  + lineA                                             lineB +  | -->
-                 |                                                               |
-   lenghtnormale +-------------------------------+-------------------------------+ Lenght normal
-                                                 |
-                                                 v  width noramale
-     */
-
+                                                  ^
+                   position                       | widthNormal
+                  +-------------------------------+-------------------------------+
+                  |                                                               |
+            <---  |  + lineA                                             lineB +  | -->
+                  |                                                               |
+     lenghtNormal +-------------------------------+-------------------------------+ lenghtNormal
+                                                  |
+                                                  v  widthNormal
+      */
 
     /// Returns the descriptor to use when passed to a metal shader
-    static let descriptor: MTLVertexDescriptor = {
+    public static let descriptor: MTLVertexDescriptor = {
         let vertexDescriptor = MTLVertexDescriptor()
         var offset = 0
         let bufferIndex = 0
@@ -76,20 +87,44 @@ struct LineVertex: Equatable {
         vertexDescriptor.attributes[4].offset = offset
         offset += MemoryLayout<SIMD2<Float>>.stride
 
+        // Styling Index
+        vertexDescriptor.attributes[5].bufferIndex = bufferIndex
+        vertexDescriptor.attributes[5].format = .int
+        vertexDescriptor.attributes[5].offset = offset
+        offset += MemoryLayout<Int32>.stride
+
+        // Segment Type
+        vertexDescriptor.attributes[6].bufferIndex = bufferIndex
+        vertexDescriptor.attributes[6].format = .int
+        vertexDescriptor.attributes[6].offset = offset
+        offset += MemoryLayout<Int32>.stride
+
+        // Lenght Prefix
+        vertexDescriptor.attributes[7].bufferIndex = bufferIndex
+        vertexDescriptor.attributes[7].format = .float
+        vertexDescriptor.attributes[7].offset = offset
+        offset += MemoryLayout<Float>.stride
+
         vertexDescriptor.layouts[0].stride = MemoryLayout<LineVertex>.stride
         return vertexDescriptor
     }()
-    
-    init(x: Float,
-         y: Float,
-         lineA: MCVec2D,
-         lineB: MCVec2D,
-         widthNormal: (x:Float, y:Float),
-         lenghtNormal: (x:Float, y:Float)) {
-        position = SIMD2([x, y])
-        self.lineA = SIMD2([lineA.xF, lineA.yF])
-        self.lineB = SIMD2([lineB.xF, lineB.yF])
-        self.widthNormal = SIMD2([widthNormal.x, widthNormal.y])
-        self.lenghtNormal = SIMD2([lenghtNormal.x, lenghtNormal.y])
+
+    public init(x: Float,
+                y: Float,
+                lineA: MCVec2D,
+                lineB: MCVec2D,
+                widthNormal: (x: Float, y: Float),
+                lenghtNormal: (x: Float, y: Float),
+                stylingIndex: Int32 = 0,
+                segmentType: SegmantType = .inner,
+                lengthPrefix: Float = 0) {
+        position = SIMD2(x, y)
+        self.lineA = SIMD2(lineA.xF, lineA.yF)
+        self.lineB = SIMD2(lineB.xF, lineB.yF)
+        self.widthNormal = SIMD2(widthNormal.x, widthNormal.y)
+        self.lenghtNormal = SIMD2(lenghtNormal.x, lenghtNormal.y)
+        self.stylingIndex = Int32(stylingIndex)
+        self.segmentType = segmentType.rawValue
+        lenghtPrefix = lengthPrefix
     }
 }
