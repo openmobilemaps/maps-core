@@ -30,14 +30,14 @@ open class MCMapView: MTKView {
 
     public weak var sizeDelegate: MCMapSizeDelegate?
 
-    public init(mapConfig: MCMapConfig) {
+    public init(mapConfig: MCMapConfig, pixelsPerInch: Float? = nil) {
         let renderingContext = RenderingContext()
         guard let mapInterface = MCMapInterface.create(GraphicsFactory(),
                                                        shaderFactory: ShaderFactory(),
                                                        renderingContext: renderingContext,
                                                        mapConfig: mapConfig,
                                                        scheduler: MCScheduler(),
-                                                       pixelDensity: Float(UIScreen.pixelsPerInch)) else {
+                                                       pixelDensity: pixelsPerInch ?? Float(UIScreen.pixelsPerInch)) else {
             fatalError("Can't create MCMapInterface")
         }
         self.mapInterface = mapInterface
@@ -172,7 +172,7 @@ extension MCMapView: MTKViewDelegate {
 
     public func renderToImage(size: CGSize, timeout: Float, bounds: MCRectCoord, callback: @escaping (UIImage?, MCLayerReadyState) -> Void) {
         renderToImageQueue.async {
-            self.frame = CGRect(origin: .zero, size: size)
+            self.frame = CGRect(origin: .zero, size: .init(width: size.width / UIScreen.main.scale, height: size.height / UIScreen.main.scale))
             self.setNeedsLayout()
             self.layoutIfNeeded()
 
@@ -203,8 +203,8 @@ private extension MCMapView {
 
 private extension CGImage {
     func toImage() -> UIImage? {
-        let w = Double(width) / UIScreen.main.scale
-        let h = Double(height) / UIScreen.main.scale
+        let w = Double(width)
+        let h = Double(height)
         UIGraphicsBeginImageContext(CGSize(width: w, height: h))
         let context = UIGraphicsGetCurrentContext()
         context?.draw(self, in: CGRect(x: 0, y: 0, width: w, height: h))
