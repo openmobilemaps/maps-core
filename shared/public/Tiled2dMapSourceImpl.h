@@ -12,6 +12,7 @@
 #include "LoaderStatus.h"
 #include "Tiled2dMapSource.h"
 #include "TiledLayerError.h"
+#include "Logger.h"
 
 #include <algorithm>
 
@@ -41,14 +42,33 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
     if (isPaused) {
         return;
     }
+    {
+        std::lock_guard<std::recursive_mutex> updateLock(updateMutex);
+        updateBounds = visibleBounds;
+        updateZoom = zoom;
+    }
+    if (updateFlag.test_and_set()) {
+        return;
+    }
+
     pendingUpdates++;
     std::weak_ptr<Tiled2dMapSource> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this());
     scheduler->addTask(std::make_shared<LambdaTask>(
             TaskConfig("Tiled2dMapSource_Update", 0, TaskPriority::NORMAL, ExecutionEnvironment::IO),
-            [weakSelfPtr, visibleBounds, zoom] {
+            [weakSelfPtr] {
                 auto selfPtr = weakSelfPtr.lock();
                 if (selfPtr) {
-                    selfPtr->updateCurrentTileset(visibleBounds, zoom);
+                    std::optional<RectCoord> bounds;
+                    std::optional<double> zoom;
+                    {
+                        std::lock_guard<std::recursive_mutex> updateLock(selfPtr->updateMutex);
+                        bounds = selfPtr->updateBounds;
+                        zoom = selfPtr->updateZoom;
+                    }
+                    selfPtr->updateFlag.clear();
+                    if (bounds.has_value() && zoom.has_value()) {
+                        selfPtr->updateCurrentTileset(*bounds, *zoom);
+                    }
                     selfPtr->pendingUpdates--;
                 }
             }));
@@ -348,14 +368,14 @@ template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::performLoad
             }
         }
 
-        {
-            std::lock_guard<std::recursive_mutex> lock(tilesMutex);
-            currentlyLoading.erase(*tile);
-        }
-
         auto listenerPtr = listener.lock();
         if (listenerPtr) {
             listenerPtr->onTilesUpdated();
+        }
+
+        {
+            std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+            currentlyLoading.erase(*tile);
         }
     }
 }
@@ -402,7 +422,7 @@ template<class T, class L, class R>
         return LayerReadyState::ERROR;
     }
 
-    if(pendingUpdates > 0 || dispatchedTasks > 0) {
+    if(pendingUpdates > 0 || dispatchedTasks > 0 || !currentlyLoading.empty()) {
         return LayerReadyState::NOT_READY;
     }
 

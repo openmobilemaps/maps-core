@@ -116,13 +116,18 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
     }
 
     {
-        auto currentTileInfos = rasterSource->getCurrentTiles();
+        if (updateFlag.test_and_set()) {
+            return;
+        }
+
         std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> tilesToSetup;
         std::vector<std::shared_ptr<Textured2dLayerObject>> tilesToClean;
         std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
 
         {
             std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
+            updateFlag.clear();
+            auto currentTileInfos = rasterSource->getCurrentTiles();
 
             std::unordered_set<Tiled2dMapRasterTileInfo> tilesToAdd;
             for (const auto &rasterTileInfo : currentTileInfos) {
