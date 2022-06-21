@@ -18,6 +18,7 @@
 #include "MapCamera2dInterface.h"
 #include "MapReadyCallbackInterface.h"
 #include "TouchInterface.h"
+#include "Logger.h"
 #include <algorithm>
 
 #include "Tiled2dMapRasterLayer.h"
@@ -285,7 +286,6 @@ void MapScene::drawReadyFrame(const ::RectCoord &bounds, float timeout,
         invalidate();
         callbacks->stateDidUpdate(state);
     }
-
     // re-enable animations if the map scene is used not only for
     // drawReadyFrame
     camera->freeze(false);

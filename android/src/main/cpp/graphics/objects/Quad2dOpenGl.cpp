@@ -16,7 +16,7 @@
 Quad2dOpenGl::Quad2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
     : shaderProgram(shader) {}
 
-bool Quad2dOpenGl::isReady() { return ready; }
+bool Quad2dOpenGl::isReady() { return ready && (!usesTextureCoords || textureLoaded); }
 
 std::shared_ptr<GraphicsObjectInterface> Quad2dOpenGl::asGraphicsObject() { return shared_from_this(); }
 
