@@ -11,16 +11,23 @@
 #pragma once
 
 #include "TextureHolderInterface.h"
+#include "PolygonCoord.h"
 #include "Tiled2dMapTileInfo.h"
 #include <functional>
 
 struct Tiled2dMapRasterTileInfo {
     Tiled2dMapTileInfo tileInfo;
     std::shared_ptr<TextureHolderInterface> textureHolder;
+    PolygonCoord mask;
 
-    Tiled2dMapRasterTileInfo(Tiled2dMapTileInfo tileInfo, const std::shared_ptr<TextureHolderInterface> textureHolder)
+    Tiled2dMapRasterTileInfo(Tiled2dMapTileInfo tileInfo, const std::shared_ptr<TextureHolderInterface> textureHolder, const PolygonCoord mask)
         : tileInfo(tileInfo)
-        , textureHolder(textureHolder) {}
+        , textureHolder(textureHolder)
+        , mask(mask) {}
+
+    void updateMask(PolygonCoord mask){
+        this->mask = mask;
+    }
 
     bool operator==(const Tiled2dMapRasterTileInfo &o) const { return tileInfo == o.tileInfo; }
 

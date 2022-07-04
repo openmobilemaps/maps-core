@@ -4,3 +4,9 @@
 [submodule "external/earcut/earcut"]
 	path = external/earcut/earcut
 	url = https://github.com/mapbox/earcut.hpp.git
+[submodule "external/protozero/protozero"]
+	path = external/protozero/protozero
+	url = https://github.com/mapbox/protozero.git
+[submodule "external/vtzero/vtzero"]
+	path = external/vtzero/vtzero
+	url = https://github.com/mapbox/vtzero.git

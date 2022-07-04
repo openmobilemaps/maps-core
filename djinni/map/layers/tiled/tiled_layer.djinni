@@ -27,6 +27,7 @@ tiled_2d_map_zoom_info = record {
     # if this flag is set to true the map is scaled according to the wmts scaledenominator (https://gis.stackexchange.com/questions/315881/what-is-wmts-scaledenominator)
     # and the screen ppi
     adapt_scale_to_screen: bool;
+    mask_tile: bool;
 }
 
 tiled_2d_map_source_interface = interface +c {

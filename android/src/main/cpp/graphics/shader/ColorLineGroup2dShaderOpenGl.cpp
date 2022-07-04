@@ -22,12 +22,17 @@ void ColorLineGroup2dShaderOpenGl::setupProgram(const std::shared_ptr<::Renderin
     // prepare shaders and OpenGL program
     int vertexShader = loadShader(GL_VERTEX_SHADER, getVertexShader());
     int fragmentShader = loadShader(GL_FRAGMENT_SHADER, getFragmentShader());
+
     int program = glCreateProgram();       // create empty OpenGL Program
     glAttachShader(program, vertexShader); // add the vertex shader to program
+    OpenGlHelper::checkGlError("glAttachShader Vertex  ColorLine Rect");
     glDeleteShader(vertexShader);
     glAttachShader(program, fragmentShader); // add the fragment shader to program
+    OpenGlHelper::checkGlError("glAttachShader Fragment ColorLine Rect");
     glDeleteShader(fragmentShader);
+
     glLinkProgram(program); // create OpenGL program executables
+    OpenGlHelper::checkGlError("glLinkProgram ColorLine Rect");
 
     openGlContext->storeProgram(programName, program);
 }
@@ -46,8 +51,10 @@ void ColorLineGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingCo
         glUniform1fv(lineGapColorsHandle, sizeGapColorValuesArray, &lineGapColors[0]);
         int lineDashValuesHandle = glGetUniformLocation(program, "lineDashValues");
         glUniform1fv(lineDashValuesHandle, sizeDashValuesArray, &lineDashValues[0]);
+        OpenGlHelper::checkGlError("glUniform1f lineDashValues");
         int numStylesHandle = glGetUniformLocation(program, "numStyles");
         glUniform1i(numStylesHandle, numStyles);
+        OpenGlHelper::checkGlError("glUniform1f numStyles");
     }
 }
 
@@ -57,7 +64,7 @@ void ColorLineGroup2dShaderOpenGl::setStyles(const std::vector<::LineStyle> &lin
     std::vector<float> gapColorValues(sizeGapColorValuesArray, 0.0);
     std::vector<float> dashValues(sizeDashValuesArray, 0.0);
     int numStyles = lineStyles.size();
-    for (int i = 0; i < lineStyles.size(); i++) {
+    for (int i = 0; i < numStyles; i++) {
         const auto &style = lineStyles[i];
         styleValues[sizeStyleValues * i] = style.width;
         styleValues[sizeStyleValues * i + 1] = style.widthType == SizeType::SCREEN_PIXEL ? 1.0f : 0.0f;

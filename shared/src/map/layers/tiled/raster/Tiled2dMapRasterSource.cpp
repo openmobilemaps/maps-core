@@ -38,7 +38,7 @@ std::unordered_set<Tiled2dMapRasterTileInfo> Tiled2dMapRasterSource::getCurrentT
     std::lock_guard<std::recursive_mutex> lock(tilesMutex);
     std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos;
     for (const auto &tileEntry : currentTiles) {
-        currentTileInfos.insert(Tiled2dMapRasterTileInfo(tileEntry.first, tileEntry.second));
+        currentTileInfos.insert(Tiled2dMapRasterTileInfo(tileEntry.first, tileEntry.second.result, tileEntry.second.mask));
     }
     return currentTileInfos;
 }

@@ -29,7 +29,7 @@ class LineGroup2dOpenGl : public GraphicsObjectInterface,
 
     // LineGroup2dInterface
 
-    virtual void setLines(const std::vector<RenderLineDescription> &lines) override;
+    virtual void setLines(const ::SharedBytes & lines, const ::SharedBytes & indices) override;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() override;
 
@@ -45,7 +45,10 @@ class LineGroup2dOpenGl : public GraphicsObjectInterface,
 
     virtual void setIsInverseMasked(bool inversed) override;
 
-  protected:
+protected:
+
+    virtual void removeGlBuffers();
+
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
     int mvpMatrixHandle;
     int scaleFactorHandle;
@@ -59,7 +62,7 @@ class LineGroup2dOpenGl : public GraphicsObjectInterface,
     GLuint vertexAttribBuffer;
     std::vector<GLfloat> lineAttributes;
     GLuint indexBuffer;
-    std::vector<GLushort> lineIndices;
+    std::vector<GLuint> lineIndices;
 
     bool ready = false;
     bool dataReady = false;

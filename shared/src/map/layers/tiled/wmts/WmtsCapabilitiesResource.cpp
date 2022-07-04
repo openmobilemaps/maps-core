@@ -45,7 +45,7 @@ class WmtsCapabilitiesResourceImpl : public WmtsCapabilitiesResource {
     };
 
     std::shared_ptr<::Tiled2dMapLayerConfig> createLayerConfig(const std::string &identifier) override {
-        return createLayerConfigWithZoomInfo(identifier, Tiled2dMapZoomInfo(1.0, 0, true));
+        return createLayerConfigWithZoomInfo(identifier, Tiled2dMapZoomInfo(1.0, 0, true, true));
     };
 
     std::shared_ptr<::Tiled2dMapLayerConfig> createLayerConfigWithZoomInfo(const std::string &identifier,

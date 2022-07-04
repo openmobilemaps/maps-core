@@ -33,15 +33,16 @@ class LineGroup2d: BaseGraphicsObject {
 
     private func setupStencilBufferDescriptor() {
         let ss = MTLStencilDescriptor()
-        ss.stencilCompareFunction = .less
+        ss.stencilCompareFunction = .notEqual
         ss.stencilFailureOperation = .keep
         ss.depthFailureOperation = .keep
         ss.depthStencilPassOperation = .invert
-        ss.writeMask = 0b0111_1111
+        ss.writeMask = 0b01111111
 
         let s = MTLDepthStencilDescriptor()
         s.frontFaceStencil = ss
         s.backFaceStencil = ss
+        s.label = "LineGroup2d.maskedStencilState"
 
         maskedStencilState = MetalContext.current.device.makeDepthStencilState(descriptor: s)
 
@@ -49,12 +50,13 @@ class LineGroup2d: BaseGraphicsObject {
         mss.stencilCompareFunction = .notEqual
         mss.stencilFailureOperation = .keep
         mss.depthFailureOperation = .keep
-        mss.depthStencilPassOperation = .invert
+        mss.depthStencilPassOperation = .replace
         ss.writeMask = 0xFF
 
         let ms = MTLDepthStencilDescriptor()
         ms.frontFaceStencil = mss
         ms.backFaceStencil = mss
+        ms.label = "LineGroup2d.stencilState"
 
         stencilState = MetalContext.current.device.makeDepthStencilState(descriptor: ms)
     }
@@ -79,7 +81,7 @@ class LineGroup2d: BaseGraphicsObject {
 
         if isMasked {
             encoder.setDepthStencilState(maskedStencilState)
-            encoder.setStencilReferenceValue(0b0000_0001)
+            encoder.setStencilReferenceValue(0xFF)
         } else {
             encoder.setDepthStencilState(stencilState)
             encoder.setStencilReferenceValue(0xFF)
@@ -109,118 +111,17 @@ class LineGroup2d: BaseGraphicsObject {
 }
 
 extension LineGroup2d: MCLineGroup2dInterface {
-    func setLines(_ lines: [MCRenderLineDescription]) {
-        guard lines.count >= 1 else {
-            indicesCount = 0
-            lineVerticesBuffer = nil
-            lineIndicesBuffer = nil
-            return
-        }
-
-        var lineVertices: [LineVertex] = Array()
-        var indices: [UInt32] = []
-
-        var sum = 0
-        for line in lines {
-            sum = sum + (line.positions.count - 1) * 4
-        }
-
-        lineVertices.reserveCapacity(sum)
-        indices.reserveCapacity(sum * 3 / 2)
-
-        var offset = 0
-
-        var lineVertex = LineVertex(x: 0.0, y: 0.0, lineA: MCVec2D(x: 0.0, y: 0.0), lineB: MCVec2D(x: 0.0, y: 0.0), widthNormal: (x: 0.0, y: 0.0), lenghtNormal: (x: 0.0, y: 0.0))
-
-        for line in lines {
-            var lenghtPrefix: Float = 0.0
-
-            var ci = line.positions[0]
-
-            var i = 0
-
-            while i < (line.positions.count - 1) {
-                let iNext = i + 1
-                let ciNext = line.positions[iNext]
-
-                let lineNormalX = -(ciNext.yF - ci.yF)
-                let lineNormalY = ciNext.xF - ci.xF
-                let lineLength = sqrt(lineNormalX * lineNormalX + lineNormalY * lineNormalY)
-
-                let miterX: Float = lineNormalX
-                let miterY: Float = lineNormalY
-
-                let ciX = ci.xF - (ciNext.xF - ci.xF)
-                let ciY = ci.yF - (ciNext.yF - ci.yF)
-
-                let ciNextX = ciNext.xF - (ci.xF - ciNext.xF)
-                let ciNextY = ciNext.yF - (ci.yF - ciNext.yF)
-
-                let fromOrigin = SIMD2<Float>(x: Float(ciNext.x - ci.x), y: Float(ciNext.y - ci.y))
-                let divisor = sqrt(fromOrigin.x * fromOrigin.x + fromOrigin.y * fromOrigin.y)
-                let unitVector = SIMD2<Float>(x: fromOrigin.x / divisor, y: fromOrigin.y / divisor)
-
-                let segmentType: LineVertex.SegmantType
-                if i == 0, i == (line.positions.count - 2) {
-                    segmentType = .singleSegment
-                } else if i == 0 {
-                    segmentType = .start
-                } else if i == (line.positions.count - 2) {
-                    segmentType = .end
-                } else {
-                    segmentType = .inner
-                }
-
-                lineVertex.position = SIMD2<Float>(x: ciX - miterX, y: ciY - miterY)
-                lineVertex.lineA = SIMD2<Float>(x: ci.xF, y: ci.yF)
-                lineVertex.lineB = SIMD2<Float>(x: ciNext.xF, y: ciNext.yF)
-                lineVertex.widthNormal = SIMD2<Float>(x: -lineNormalX / lineLength, y: -lineNormalY / lineLength)
-                lineVertex.lenghtNormal = SIMD2<Float>(x: -unitVector.x, y: -unitVector.y)
-                lineVertex.stylingIndex = line.styleIndex
-                lineVertex.segmentType = segmentType.rawValue
-                lineVertex.lenghtPrefix = lenghtPrefix
-
-                lineVertices.append(lineVertex)
-
-                lineVertex.position = SIMD2<Float>(x: ciX + miterX, y: ciY + miterY)
-                lineVertex.widthNormal = SIMD2<Float>(x: lineNormalX / lineLength, y: lineNormalY / lineLength)
-
-                lineVertices.append(lineVertex)
-
-                lineVertex.position = SIMD2<Float>(x: ciNextX + miterX, y: ciNextY + miterY)
-                lineVertex.lenghtNormal = unitVector
-
-                lineVertices.append(lineVertex)
-
-                lineVertex.position = SIMD2<Float>(x: ciNextX - miterX, y: ciNextY - miterY)
-                lineVertex.widthNormal = SIMD2<Float>(x: -lineNormalX / lineLength, y: -lineNormalY / lineLength)
-
-                lineVertices.append(lineVertex)
-
-                let first = UInt32(4 * i + offset)
-                indices.append(first)
-                indices.append(first + 1)
-                indices.append(first + 2)
-                indices.append(first)
-                indices.append(first + 2)
-                indices.append(first + 3)
-
-                lenghtPrefix += lineLength
-
-                ci = ciNext
-
-                i += 1
-            }
-            offset = lineVertices.count
-        }
-
-        guard let verticesBuffer = device.makeBuffer(bytes: lineVertices, length: MemoryLayout<LineVertex>.stride * lineVertices.count, options: []),
-              let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt32>.stride * indices.count, options: [])
+    func setLines(_ lines: MCSharedBytes, indices: MCSharedBytes) {
+        guard let verticesBuffer = device.makeBuffer(from: lines),
+              let indicesBuffer = device.makeBuffer(from: indices)
         else {
-            fatalError("Cannot allocate buffers for the UBTileModel")
+            fatalError("Cannot allocate buffers for LineGroup2d")
         }
 
-        indicesCount = indices.count
+        verticesBuffer.label = "LineGroup2d.verticesBuffer"
+        indicesBuffer.label = "LineGroup2d.indicesBuffer"
+
+        indicesCount = Int(indices.elementCount)
         lineVerticesBuffer = verticesBuffer
         lineIndicesBuffer = indicesBuffer
     }
@@ -231,9 +132,7 @@ extension LineGroup2d: MCLineGroup2dInterface {
 }
 
 extension LineGroup2d: MCLine2dInterface {
-    func setLinePositions(_ positions: [MCVec2D]) {
-        setLines([
-            MCRenderLineDescription(positions: positions, styleIndex: 0),
-        ])
+    func setLine(_ line: MCSharedBytes, indices: MCSharedBytes) {
+        setLines(line, indices: indices)
     }
 }

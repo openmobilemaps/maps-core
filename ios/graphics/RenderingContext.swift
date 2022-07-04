@@ -56,15 +56,18 @@ public class RenderingContext: NSObject {
 
     public var viewportSize: MCVec2I = .init(x: 0, y: 0)
 
+    var isScissoringDirty = false
+
     /// a Quad that fills the whole viewport
     /// this is needed to clear the stencilbuffer
     lazy var stencilClearQuad: Quad2d = {
-        let quad = Quad2d(shader: ClearStencilShader(), metalContext: .current)
+        let quad = Quad2d(shader: ClearStencilShader(), metalContext: .current, label: "ClearStencil")
         quad.setFrame(.init(topLeft: .init(x: -1, y: 1),
                             topRight: .init(x: 1, y: 1),
                             bottomRight: .init(x: 1, y: -1),
                             bottomLeft: .init(x: -1, y: -1)),
                       textureCoordinates: .init())
+        quad.setup(self)
         return quad
     }()
 
@@ -106,7 +109,8 @@ extension RenderingContext: MCRenderingContextInterface {
     public func applyScissorRect(_ scissorRect: MCRectI?) {
         if let sr = scissorRect {
             encoder?.setScissorRect(sr.scissorRect)
-        } else {
+            isScissoringDirty = true
+        } else if isScissoringDirty {
             var s = self.sceneView?.frame.size ?? CGSize(width: 1.0, height: 1.0)
             s.width = UIScreen.main.scale * s.width
             s.height = UIScreen.main.scale * s.height
@@ -116,6 +120,7 @@ extension RenderingContext: MCRenderingContextInterface {
             size.height = min(size.height, Int(s.height))
 
             encoder?.setScissorRect(size)
+            isScissoringDirty = false
         }
     }
 }

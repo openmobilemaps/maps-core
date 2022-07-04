@@ -22,6 +22,8 @@ open class BaseGraphicsObject {
     var maskInverse = false
     var ready = false
 
+    var isReadyFlag = false
+
     public init(device: MTLDevice, sampler: MTLSamplerState) {
         self.device = device
         self.sampler = sampler

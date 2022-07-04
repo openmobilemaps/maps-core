@@ -16,8 +16,11 @@
 #include "Tiled2dMapRasterLayerCallbackInterface.h"
 #include "Tiled2dMapRasterLayerInterface.h"
 #include "Tiled2dMapRasterSource.h"
+#include "Tiled2dMapRasterLayerCallbackInterface.h"
+#include "PolygonMaskObject.h"
 #include <mutex>
 #include <unordered_map>
+#include <map>
 #include <atomic>
 
 class Tiled2dMapRasterLayer : public Tiled2dMapLayer, public Tiled2dMapRasterLayerInterface {
@@ -46,8 +49,8 @@ class Tiled2dMapRasterLayer : public Tiled2dMapLayer, public Tiled2dMapRasterLay
     virtual void onTilesUpdated() override;
 
     virtual void setupTiles(
-        const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToSetup,
-        const std::vector<std::shared_ptr<Textured2dLayerObject>> &tilesToClean);
+            const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToSetup,
+            const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToClean);
 
     virtual void generateRenderPasses();
 
@@ -77,6 +80,10 @@ class Tiled2dMapRasterLayer : public Tiled2dMapLayer, public Tiled2dMapRasterLay
 
     virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
 
+private:
+    virtual void updateMaskObjects(const std::vector<const std::shared_ptr<MaskingObjectInterface>> &newMaskObjects,
+                                   const std::vector<const std::shared_ptr<MaskingObjectInterface>> &obsoleteMaskObjects);
+
     virtual void enableAnimations(bool enabled) override;
 
     virtual LayerReadyState isReadyToRenderOffscreen() override;
@@ -90,7 +97,8 @@ class Tiled2dMapRasterLayer : public Tiled2dMapLayer, public Tiled2dMapRasterLay
 
     std::atomic_flag updateFlag = ATOMIC_FLAG_INIT;
     std::recursive_mutex updateMutex;
-    std::unordered_map<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>> tileObjectMap;
+    std::map<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>> tileObjectMap;
+    std::unordered_map<Tiled2dMapTileInfo, std::shared_ptr<PolygonMaskObject>> tileMaskMap;
     std::recursive_mutex renderPassMutex;
     std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
 

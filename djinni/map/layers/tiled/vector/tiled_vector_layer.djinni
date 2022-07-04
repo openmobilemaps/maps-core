@@ -1,0 +1,9 @@
+@extern "../../../../yaml/tiled_2d_map_layer_config.yaml"
+@extern "../../../../yaml/loader_interface.yaml"
+@extern "../../../../yaml/layer_interface.yaml"
+@extern "../../../../yaml/tiled_2d_map_raster_layer_interface.yaml"
+@extern "../../../../yaml/font_loader_interface.yaml"
+
+tiled_2d_map_vector_layer_interface = interface +c {
+    asLayerInterface(): layer_interface;
+}

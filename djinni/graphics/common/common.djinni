@@ -65,3 +65,9 @@ color = record {
     b: f32;
     a: f32;
 }
+
+shared_bytes = record {
+    address: i64;
+    element_count: i32;
+    bytes_per_element: i32;
+}

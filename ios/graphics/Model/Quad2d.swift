@@ -28,7 +28,10 @@ class Quad2d: BaseGraphicsObject {
 
     private var renderAsMask = false
 
-    init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
+    private let label: String
+
+    init(shader: MCShaderProgramInterface, metalContext: MetalContext, label: String = "Quad2d") {
+        self.label = label
         self.shader = shader
         super.init(device: metalContext.device,
                    sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue))
@@ -64,7 +67,8 @@ class Quad2d: BaseGraphicsObject {
                          mvpMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
-        guard let verticesBuffer = verticesBuffer,
+        guard isReady(),
+              let verticesBuffer = verticesBuffer,
               let indicesBuffer = indicesBuffer else { return }
 
         if shader is AlphaShader, texture == nil {
@@ -72,7 +76,7 @@ class Quad2d: BaseGraphicsObject {
             return
         }
 
-        encoder.pushDebugGroup("Quad2d")
+        encoder.pushDebugGroup(label)
 
         if isMasked {
             if stencilState == nil {
@@ -100,6 +104,7 @@ class Quad2d: BaseGraphicsObject {
         if let texture = texture {
             encoder.setFragmentTexture(texture, index: 0)
         }
+
 
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,
@@ -166,13 +171,16 @@ extension Quad2d: MCQuad2dInterface {
             fatalError("unexpected TextureHolder")
         }
         texture = textureHolder.texture
+
     }
 
     func removeTexture() {
         texture = nil
     }
 
-    func asGraphicsObject() -> MCGraphicsObjectInterface? { self }
+    func asGraphicsObject() -> MCGraphicsObjectInterface? {
+        self
+    }
 
     func asMaskingObject() -> MCMaskingObjectInterface? { self }
 }

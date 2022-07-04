@@ -32,7 +32,7 @@ struct Tiled2dMapTileInfo {
     bool operator!=(const Tiled2dMapTileInfo &o) const { return !(x == o.x || y == o.y || zoomIdentifier == o.zoomIdentifier); }
 
     bool operator<(const Tiled2dMapTileInfo &o) const {
-        return zoomIdentifier > o.zoomIdentifier || (zoomIdentifier == o.zoomIdentifier && x < o.x) ||
+        return zoomIdentifier < o.zoomIdentifier || (zoomIdentifier == o.zoomIdentifier && x < o.x) ||
                (zoomIdentifier == o.zoomIdentifier && x == o.x && y < o.y);
     }
 };

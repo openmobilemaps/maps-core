@@ -51,12 +51,73 @@ let package = Package(
             ]
         ),
         .target(
+            name: "protozero",
+            path: "external/protozero/",
+            exclude: [
+                "protozero/bench",
+                "protozero/cmake",
+                "protozero/test",
+                "protozero/doc",
+                "protozero/test",
+                "protozero/tools",
+                "protozero/appveyor.yml",
+                "protozero/CHANGELOG.md",
+                "protozero/CMakeLists.txt",
+                "protozero/CONTRIBUTING.md",
+                "protozero/FUZZING.md",
+                "protozero/LICENSE.from_folly",
+                "protozero/LICENSE.md",
+                "protozero/README.md",
+                "protozero/UPGRADING.md",
+            ],
+            sources: [
+                "",
+                "protozero/include/",
+            ],
+            publicHeadersPath: "protozero/include/",
+            cxxSettings: [
+                .headerSearchPath("protozero/include/"),
+            ]
+        ),
+        .target(
+            name: "vtzero",
+            dependencies: ["protozero"],
+            path: "external/vtzero/",
+            exclude: [
+                "vtzero/cmake",
+                "vtzero/test",
+                "vtzero/doc",
+                "vtzero/test",
+                "vtzero/examples",
+                "vtzero/include-external",
+                "vtzero/appveyor.yml",
+                "vtzero/build-appveyor.bat",
+                "vtzero/build-msys2.bat",
+                "vtzero/CHANGELOG.md",
+                "vtzero/CMakeLists.txt",
+                "vtzero/codecov.yml",
+                "vtzero/CONTRIBUTING.md",
+                "vtzero/EXTERNAL_LICENSES.txt",
+                "vtzero/LICENSE",
+                "vtzero/README.md",
+            ],
+            sources: [
+                "",
+                "vtzero/include/",
+            ],
+            publicHeadersPath: "vtzero/include/",
+            cxxSettings: [
+                .headerSearchPath("vtzero/include/"),
+            ]
+        ),
+        .target(
             name: "MapCore",
             dependencies: ["MapCoreSharedModule"],
             path: "ios",
             exclude: ["readme.md"],
             resources: [
                 .process("graphics/Shader/Metal/"),
+                .process("resources/"),
             ]
         ),
         .target(
@@ -68,7 +129,7 @@ let package = Package(
         ),
         .target(
             name: "MapCoreSharedModuleCpp",
-            dependencies: ["earcut"],
+            dependencies: ["vtzero", "earcut"],
             path: "shared",
             sources: ["src"],
             publicHeadersPath: "public",

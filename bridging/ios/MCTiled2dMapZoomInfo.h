@@ -6,10 +6,12 @@
 @interface MCTiled2dMapZoomInfo : NSObject
 - (nonnull instancetype)initWithZoomLevelScaleFactor:(float)zoomLevelScaleFactor
                                numDrawPreviousLayers:(int32_t)numDrawPreviousLayers
-                                  adaptScaleToScreen:(BOOL)adaptScaleToScreen;
+                                  adaptScaleToScreen:(BOOL)adaptScaleToScreen
+                                            maskTile:(BOOL)maskTile;
 + (nonnull instancetype)tiled2dMapZoomInfoWithZoomLevelScaleFactor:(float)zoomLevelScaleFactor
                                              numDrawPreviousLayers:(int32_t)numDrawPreviousLayers
-                                                adaptScaleToScreen:(BOOL)adaptScaleToScreen;
+                                                adaptScaleToScreen:(BOOL)adaptScaleToScreen
+                                                          maskTile:(BOOL)maskTile;
 
 /** this factor is applied to the the scale */
 @property (nonatomic, readonly) float zoomLevelScaleFactor;
@@ -21,5 +23,7 @@
  * and the screen ppi
  */
 @property (nonatomic, readonly) BOOL adaptScaleToScreen;
+
+@property (nonatomic, readonly) BOOL maskTile;
 
 @end

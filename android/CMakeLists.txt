@@ -28,6 +28,9 @@ file(GLOB_RECURSE cpp_SRC
         "../external/djinni/support-lib/*.h"
         "../external/djinni/support-lib/*.hpp"
         "../external/djinni/support-lib/*.cpp"
+        "../external/protozero/protozero/include/*.hpp"
+        "../external/vtzero/vtzero/include/*.hpp"
+        "../external/earcut/earcut/include/*.hpp"
         )
 
 add_library( # Sets the name of the library.
@@ -40,7 +43,9 @@ add_library( # Sets the name of the library.
 
 include_directories(../external/djinni/support-lib)
 include_directories(../external/djinni/support-lib/jni)
-include_directories(../external/earcut/earcut/include/mapbox)
+include_directories(../external/protozero/protozero/include/)
+include_directories(../external/vtzero/vtzero/include/)
+include_directories(../external/earcut/earcut/include/mapbox/)
 include_directories(../bridging/android/jni/graphics)
 include_directories(../bridging/android/jni/graphics/common)
 include_directories(../bridging/android/jni/graphics/objects)
@@ -63,6 +68,7 @@ include_directories(../bridging/android/jni/map/camera)
 include_directories(../shared/public)
 include_directories(../shared/src)
 include_directories(../shared/src/external/pugixml)
+include_directories(../shared/src/external/gpc)
 include_directories(../shared/src/logger)
 include_directories(../shared/src/graphics)
 include_directories(../shared/src/graphics/helpers)
@@ -88,7 +94,6 @@ include_directories(../shared/src/map/layers/icon)
 include_directories(../shared/src/map/layers/line)
 include_directories(../shared/src/map/layers/text)
 include_directories(../shared/src/map/scheduling)
-include_directories(../shared/src/util)
 include_directories(src/main/cpp)
 include_directories(src/main/cpp/graphics)
 include_directories(src/main/cpp/graphics/objects)

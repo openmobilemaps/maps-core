@@ -4,6 +4,7 @@
 @extern "../../yaml/rect_d.yaml"
 @extern "../../yaml/quad_2d_d.yaml"
 @extern "../../yaml/vec_2_d.yaml"
+@extern "../../yaml/shared_bytes.yaml"
 
 graphics_object_interface = interface +c +j +o {
     # Returns true, if graphics object is ready to be drawn
@@ -47,7 +48,7 @@ quad_2d_interface = interface +c +j +o {
 }
 
 line_2d_interface = interface +c +j +o {
-    set_line_positions(positions: list<vec_2_d>);
+    set_line(line: shared_bytes, indices: shared_bytes);
     as_graphics_object(): graphics_object_interface;
 }
 
@@ -57,7 +58,7 @@ render_line_description = record {
 }
 
 line_group_2d_interface = interface +c +j +o {
-    set_lines(lines: list<render_line_description>);
+    set_lines(lines: shared_bytes, indices: shared_bytes);
     as_graphics_object(): graphics_object_interface;
 }
 
@@ -73,7 +74,7 @@ render_vertices_description = record {
 }
 
 polygon_group_2d_interface = interface +c +j +o {
-    set_vertices(vertices: list<render_vertices_description>, indices: list<i32>);
+    set_vertices(vertices: shared_bytes, indices: shared_bytes);
     as_graphics_object(): graphics_object_interface;
 }
 

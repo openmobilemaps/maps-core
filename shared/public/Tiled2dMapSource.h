@@ -22,6 +22,7 @@
 #include "Tiled2dMapZoomInfo.h"
 #include "Tiled2dMapZoomLevelInfo.h"
 #include "QuadCoord.h"
+#include "PolygonCoord.h"
 #include "CoordinateSystemIdentifiers.h"
 #include <atomic>
 #include <cmath>
@@ -29,6 +30,16 @@
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
+
+template <class R>
+struct TileWrapper {
+public:
+    const R result;
+    PolygonCoord mask;
+
+    TileWrapper(const R &result, PolygonCoord mask): result(std::move(result)), mask(mask) {};
+};
+
 
 // T is the Object used for loading
 // L is the Loading type
@@ -65,6 +76,8 @@ template <class T, class L, class R> class Tiled2dMapSource :
 
     virtual void forceReload() override;
 
+    void setTileReady(const Tiled2dMapTileInfo &tile);
+    void setTilesReady(const std::vector<const Tiled2dMapTileInfo> &tiles);
 
   protected:
     virtual L loadTile(Tiled2dMapTileInfo tile) = 0;
@@ -86,8 +99,12 @@ template <class T, class L, class R> class Tiled2dMapSource :
     std::optional<int32_t> maxZoomLevelIdentifier;
 
     std::recursive_mutex tilesMutex;
-    std::unordered_map<Tiled2dMapTileInfo, R> currentTiles;
+
+    std::unordered_map<Tiled2dMapTileInfo, TileWrapper<R>> currentTiles;
     std::unordered_set<Tiled2dMapTileInfo> currentVisibleTiles;
+
+    std::vector<VisibleTilesLayer> currentPyramid;
+
     RectCoord currentViewBounds = RectCoord(Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0),
                                             Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0));
 
@@ -95,13 +112,17 @@ template <class T, class L, class R> class Tiled2dMapSource :
     std::atomic<bool> isPaused;
 
     float screenDensityPpi;
+    std::recursive_mutex tilesReadyMutex;
+    std::set<Tiled2dMapTileInfo> readyTiles;
 
   private:
     void updateCurrentTileset(const ::RectCoord &visibleBounds, double zoom);
 
     void performLoadingTask();
 
-    void onVisibleTilesChanged(const std::unordered_set<PrioritizedTiled2dMapTileInfo> &visibleTiles);
+    void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid);
+
+    void updateTileMasks();
 
     std::atomic_flag updateFlag = ATOMIC_FLAG_INIT;
     std::atomic_int pendingUpdates = 0;

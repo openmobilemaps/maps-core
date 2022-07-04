@@ -31,10 +31,6 @@ struct LineGroupStyle: Equatable {
     var dashValue1: Float = 0
     var dashValue2: Float = 0
     var dashValue3: Float = 0
-    var dashValue4: Float = 0
-    var dashValue5: Float = 0
-    var dashValue6: Float = 0
-    var dashValue7: Float = 0
 
     init(style: MCLineStyle, highlighted: Bool) {
         width = style.width
@@ -57,10 +53,6 @@ struct LineGroupStyle: Equatable {
         dashValue1 = (size > 1 ? Float(truncating: style.dashArray[1]) : 0.0) + dashValue0
         dashValue2 = (size > 2 ? Float(truncating: style.dashArray[2]) : 0.0) + dashValue1
         dashValue3 = (size > 3 ? Float(truncating: style.dashArray[3]) : 0.0) + dashValue2
-        dashValue4 = (size > 4 ? Float(truncating: style.dashArray[4]) : 0.0) + dashValue3
-        dashValue5 = (size > 5 ? Float(truncating: style.dashArray[5]) : 0.0) + dashValue4
-        dashValue6 = (size > 6 ? Float(truncating: style.dashArray[6]) : 0.0) + dashValue5
-        dashValue7 = (size > 7 ? Float(truncating: style.dashArray[7]) : 0.0) + dashValue6
 
         switch style.lineCap {
             case .BUTT:
@@ -120,21 +112,29 @@ class LineGroupShader: BaseShader {
 }
 
 extension LineGroupShader: MCLineGroupShaderInterface {
-    func setStyles(_ lineStyles: [MCLineStyle]) {
-        guard lineStyles.count <= self.styleBufferSize else { fatalError("line style error exceeds buffer size") }
 
-        guard lineStyles != currentStyles else {
+    func setStyles(_ styles: [MCLineStyle]) {
+        guard styles.count <= self.styleBufferSize else { fatalError("line style error exceeds buffer size") }
+
+        guard styles != currentStyles else {
             return
         }
 
-        currentStyles = lineStyles
+        currentStyles = styles
 
         var mappedLineStyles: [LineGroupStyle] = []
-        for l in lineStyles {
+        for l in styles {
             mappedLineStyles.append(LineGroupStyle(style: l, highlighted: state == .highlighted))
         }
 
         lineStyleBuffer.contents().copyMemory(from: mappedLineStyles, byteCount: mappedLineStyles.count * MemoryLayout<LineGroupStyle>.stride)
+    }
+
+
+    func setStyles(_ styles: MCSharedBytes) {
+        guard styles.elementCount < self.styleBufferSize else { fatalError("line style error exceeds buffer size") }
+
+        lineStyleBuffer.copyMemory(from: styles)
     }
 
     func asShaderProgram() -> MCShaderProgramInterface? {

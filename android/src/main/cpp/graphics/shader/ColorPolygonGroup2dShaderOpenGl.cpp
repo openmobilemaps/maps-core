@@ -11,6 +11,7 @@
 #include "ColorPolygonGroup2dShaderOpenGl.h"
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
+#include "ColorPolygonGroup2dShaderOpenGl.h"
 
 std::shared_ptr<ShaderProgramInterface> ColorPolygonGroup2dShaderOpenGl::asShaderProgramInterface() { return shared_from_this(); }
 
@@ -25,11 +26,14 @@ void ColorPolygonGroup2dShaderOpenGl::setupProgram(const std::shared_ptr<::Rende
 
     int program = glCreateProgram();       // create empty OpenGL Program
     glAttachShader(program, vertexShader); // add the vertex shader to program
+    OpenGlHelper::checkGlError("glAttachShader Vertex  PolygonGroup");
     glDeleteShader(vertexShader);
     glAttachShader(program, fragmentShader); // add the fragment shader to program
+    OpenGlHelper::checkGlError("glAttachShader Fragment PolygonGroup");
     glDeleteShader(fragmentShader);
 
     glLinkProgram(program); // create OpenGL program executables
+    OpenGlHelper::checkGlError("glLinkProgram PolygonGroup");
 
     openGlContext->storeProgram(programName, program);
 }
@@ -42,35 +46,34 @@ void ColorPolygonGroup2dShaderOpenGl::preRender(const std::shared_ptr<::Renderin
         std::lock_guard<std::recursive_mutex> overlayLock(styleMutex);
         int lineStylesHandle = glGetUniformLocation(program, "polygonStyles");
         glUniform1fv(lineStylesHandle, sizeStyleValuesArray, &polygonStyles[0]);
+        OpenGlHelper::checkGlError("glUniform1f polygonStyles");
         int numStylesHandle = glGetUniformLocation(program, "numStyles");
         glUniform1i(numStylesHandle, numStyles);
+        OpenGlHelper::checkGlError("glUniform1f numStyles");
     }
 }
 
-void ColorPolygonGroup2dShaderOpenGl::setStyles(const std::vector<::PolygonStyle> &styles) {
-    std::vector<float> styleValues(sizeStyleValuesArray, 0.0);
-    int numStyles = styles.size();
-    for (int i = 0; i < styles.size(); i++) {
-        const auto &style = styles[i];
-        styleValues[sizeStyleValues * i] = style.color.r;
-        styleValues[sizeStyleValues * i + 1] = style.color.g;
-        styleValues[sizeStyleValues * i + 2] = style.color.b;
-        styleValues[sizeStyleValues * i + 3] = style.color.a * style.opacity;
-    }
-
+void ColorPolygonGroup2dShaderOpenGl::setStyles(const ::SharedBytes & styles) {
     {
         std::lock_guard<std::recursive_mutex> overlayLock(styleMutex);
-        this->polygonStyles = styleValues;
-        this->numStyles = numStyles;
+        this->polygonStyles.resize(sizeStyleValuesArray);
+        if (styles.elementCount > 0) {
+            std::memcpy(this->polygonStyles.data(), (void *) styles.address,
+                    styles.elementCount * styles.bytesPerElement);
+        }
+        this->numStyles = styles.elementCount;
     }
 }
 
 std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
     return UBRendererShaderCode(precision highp float;
 
-                                uniform mat4 uMVPMatrix; attribute vec2 vPosition; attribute float vStyleIndex;
-                                // polygonStyles: {vec4 color} - stride = 4
-                                uniform float polygonStyles[4 * 32]; uniform int numStyles;
+            uniform mat4 uMVPMatrix;
+            attribute vec2 vPosition;
+            attribute float vStyleIndex;
+            // polygonStyles: {vec4 color, float opacity} - stride = 5
+            uniform float polygonStyles[5 * 32];
+            uniform int numStyles;
 
                                 varying vec4 color;
 
@@ -81,9 +84,9 @@ std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
                                     } else if (styleIndex > numStyles) {
                                         styleIndex = numStyles;
                                     }
-                                    styleIndex = styleIndex * 4;
+                                    styleIndex = styleIndex * 5;
                                     color = vec4(polygonStyles[styleIndex], polygonStyles[styleIndex + 1],
-                                                 polygonStyles[styleIndex + 2], polygonStyles[styleIndex + 3]);
+                                                 polygonStyles[styleIndex + 2], polygonStyles[styleIndex + 3] * polygonStyles[styleIndex + 4]);
                                     gl_Position = uMVPMatrix * vec4(vPosition, 0.0, 1.0);
                                 });
 }
