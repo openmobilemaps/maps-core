@@ -108,8 +108,8 @@ extension RenderingContext: MCRenderingContextInterface {
             encoder?.setScissorRect(sr.scissorRect)
         } else {
             var s = self.sceneView?.frame.size ?? CGSize(width: 1.0, height: 1.0)
-            s.width = UIScreen.main.scale * s.width
-            s.height = UIScreen.main.scale * s.height
+            s.width = UIScreen.main.nativeScale * s.width
+            s.height = UIScreen.main.nativeScale * s.height
 
             var size = viewportSize.scissorRect
             size.width = min(size.width, Int(s.width))
