@@ -36,8 +36,8 @@ class LineGroup2d: BaseGraphicsObject {
         ss.stencilCompareFunction = .less
         ss.stencilFailureOperation = .keep
         ss.depthFailureOperation = .keep
-        ss.depthStencilPassOperation = .invert
-        ss.writeMask = 0b0111_1111
+        ss.depthStencilPassOperation = .zero
+        ss.writeMask = 0xFF
 
         let s = MTLDepthStencilDescriptor()
         s.frontFaceStencil = ss
