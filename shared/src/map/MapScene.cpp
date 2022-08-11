@@ -232,10 +232,14 @@ void MapScene::drawFrame() {
 
 void MapScene::resume() {
     isResumed = true;
+    std::weak_ptr<MapScene> weakSelfPtr = weak_from_this();
     scheduler->addTask(
-        std::make_shared<LambdaTask>(TaskConfig("MapScene_resume", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [=] {
-            std::lock_guard<std::recursive_mutex> lock(layersMutex);
-            for (const auto &layer : layers) {
+        std::make_shared<LambdaTask>(TaskConfig("MapScene_resume", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [weakSelfPtr] {
+            auto selfPtr = weakSelfPtr.lock();
+            if (!selfPtr) { return; }
+
+            std::lock_guard<std::recursive_mutex> lock(selfPtr->layersMutex);
+            for (const auto &layer : selfPtr->layers) {
                 layer.second->resume();
             }
         }));
@@ -243,10 +247,15 @@ void MapScene::resume() {
 
 void MapScene::pause() {
     isResumed = false;
+
+    std::weak_ptr<MapScene> weakSelfPtr = weak_from_this();
     scheduler->addTask(
-        std::make_shared<LambdaTask>(TaskConfig("MapScene_pause", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [=] {
-            std::lock_guard<std::recursive_mutex> lock(layersMutex);
-            for (const auto &layer : layers) {
+        std::make_shared<LambdaTask>(TaskConfig("MapScene_pause", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [weakSelfPtr] {
+            auto selfPtr = weakSelfPtr.lock();
+            if (!selfPtr) { return; }
+
+            std::lock_guard<std::recursive_mutex> lock(selfPtr->layersMutex);
+            for (const auto &layer : selfPtr->layers) {
                 layer.second->pause();
             }
         }));
