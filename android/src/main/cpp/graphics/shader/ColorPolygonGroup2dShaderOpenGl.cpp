@@ -8,17 +8,13 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
+#include "ColorPolygonGroup2dShaderOpenGl.h"
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
-#include "ColorPolygonGroup2dShaderOpenGl.h"
 
-std::shared_ptr <ShaderProgramInterface> ColorPolygonGroup2dShaderOpenGl::asShaderProgramInterface() {
-    return shared_from_this();
-}
+std::shared_ptr<ShaderProgramInterface> ColorPolygonGroup2dShaderOpenGl::asShaderProgramInterface() { return shared_from_this(); }
 
-std::string ColorPolygonGroup2dShaderOpenGl::getProgramName() {
-    return "UBMAP_ColorPolygonGroupShaderOpenGl";
-}
+std::string ColorPolygonGroup2dShaderOpenGl::getProgramName() { return "UBMAP_ColorPolygonGroupShaderOpenGl"; }
 
 void ColorPolygonGroup2dShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
@@ -70,41 +66,36 @@ void ColorPolygonGroup2dShaderOpenGl::setStyles(const std::vector<::PolygonStyle
 }
 
 std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
-    return UBRendererShaderCode(
-            precision highp float;
+    return UBRendererShaderCode(precision highp float;
 
-            uniform mat4 uMVPMatrix;
-            attribute vec2 vPosition;
-            attribute float vStyleIndex;
-            // polygonStyles: {vec4 color} - stride = 4
-            uniform float polygonStyles[4 * 32];
-            uniform int numStyles;
+                                uniform mat4 uMVPMatrix; attribute vec2 vPosition; attribute float vStyleIndex;
+                                // polygonStyles: {vec4 color} - stride = 4
+                                uniform float polygonStyles[4 * 32]; uniform int numStyles;
 
-            varying vec4 color;
+                                varying vec4 color;
 
-            void main() {
-                int styleIndex = int(floor(vStyleIndex + 0.5));
-                if (styleIndex < 0) {
-                    styleIndex = 0;
-                } else if (styleIndex > numStyles) {
-                    styleIndex = numStyles;
-                }
-                styleIndex = styleIndex * 4;
-                color = vec4(polygonStyles[styleIndex], polygonStyles[styleIndex + 1], polygonStyles[styleIndex + 2], polygonStyles[styleIndex + 3]);
-                gl_Position = uMVPMatrix * vec4(vPosition, 0.0, 1.0);
-            });
+                                void main() {
+                                    int styleIndex = int(floor(vStyleIndex + 0.5));
+                                    if (styleIndex < 0) {
+                                        styleIndex = 0;
+                                    } else if (styleIndex > numStyles) {
+                                        styleIndex = numStyles;
+                                    }
+                                    styleIndex = styleIndex * 4;
+                                    color = vec4(polygonStyles[styleIndex], polygonStyles[styleIndex + 1],
+                                                 polygonStyles[styleIndex + 2], polygonStyles[styleIndex + 3]);
+                                    gl_Position = uMVPMatrix * vec4(vPosition, 0.0, 1.0);
+                                });
 }
 
 std::string ColorPolygonGroup2dShaderOpenGl::getFragmentShader() {
-    return UBRendererShaderCode(
-            precision highp float;
+    return UBRendererShaderCode(precision highp float;
 
-            varying vec4 color;
+                                varying vec4 color;
 
-            void main() {
-                gl_FragColor = color;
-                gl_FragColor.a = 1.0;
-                gl_FragColor *= color.a;
-            });
+                                void main() {
+                                    gl_FragColor = color;
+                                    gl_FragColor.a = 1.0;
+                                    gl_FragColor *= color.a;
+                                });
 }
-

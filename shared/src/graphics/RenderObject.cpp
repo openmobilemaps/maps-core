@@ -10,19 +10,16 @@
 
 #include "RenderObject.h"
 
-RenderObject::RenderObject(std::shared_ptr<::GraphicsObjectInterface> graphicsObject) : graphicsObject(graphicsObject) {}
+RenderObject::RenderObject(std::shared_ptr<::GraphicsObjectInterface> graphicsObject)
+    : graphicsObject(graphicsObject) {}
 
 RenderObject::RenderObject(std::shared_ptr<::GraphicsObjectInterface> graphicsObject, std::vector<float> modelMatrix)
-        : graphicsObject(graphicsObject), setCustomModelMatrix(true), modelMatrix(modelMatrix) {}
+    : graphicsObject(graphicsObject)
+    , setCustomModelMatrix(true)
+    , modelMatrix(modelMatrix) {}
 
-std::shared_ptr<::GraphicsObjectInterface> RenderObject::getGraphicsObject() {
-    return graphicsObject;
-}
+std::shared_ptr<::GraphicsObjectInterface> RenderObject::getGraphicsObject() { return graphicsObject; }
 
-bool RenderObject::hasCustomModelMatrix() {
-    return setCustomModelMatrix;
-}
+bool RenderObject::hasCustomModelMatrix() { return setCustomModelMatrix; }
 
-std::vector<float> RenderObject::getCustomModelMatrix() {
-    return modelMatrix;
-}
+std::vector<float> RenderObject::getCustomModelMatrix() { return modelMatrix; }

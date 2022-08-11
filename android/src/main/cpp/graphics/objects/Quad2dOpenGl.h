@@ -16,8 +16,8 @@
 #include "Quad2dInterface.h"
 #include "ShaderProgramInterface.h"
 #include "opengl_wrapper.h"
-#include <vector>
 #include <mutex>
+#include <vector>
 
 class Quad2dOpenGl : public GraphicsObjectInterface,
                      public MaskingObjectInterface,
@@ -34,14 +34,16 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
 
     virtual void clear() override;
 
-    virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> & context, const ::RenderPassConfig & renderPass, int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
+    virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
+                              int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
                         int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
     virtual void setFrame(const ::Quad2dD &frame, const ::RectD &textureCoordinates) override;
 
-    virtual void loadTexture(const std::shared_ptr<::RenderingContextInterface> & context, const std::shared_ptr<TextureHolderInterface> &textureHolder) override;
+    virtual void loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
+                             const std::shared_ptr<TextureHolderInterface> &textureHolder) override;
 
     virtual void removeTexture() override;
 

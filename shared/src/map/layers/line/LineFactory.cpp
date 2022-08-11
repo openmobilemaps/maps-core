@@ -11,8 +11,7 @@
 #include "LineFactory.h"
 #include "LineInfo.h"
 
-std::shared_ptr<LineInfoInterface> LineFactory::createLine(const std::string & identifier,
-                                                           const std::vector<::Coord> & coordinates,
-                                                           const LineStyle & style) {
+std::shared_ptr<LineInfoInterface> LineFactory::createLine(const std::string &identifier, const std::vector<::Coord> &coordinates,
+                                                           const LineStyle &style) {
     return std::make_shared<LineInfo>(identifier, coordinates, style);
 }

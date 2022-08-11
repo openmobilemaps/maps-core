@@ -26,16 +26,14 @@ void Polygon2dLayerObject::setPositions(const std::vector<Coord> &positions, con
     setPolygon({positions, holes});
 }
 
-void Polygon2dLayerObject::setPolygon(const PolygonCoord &polygon){
-    setPolygons({polygon});
-}
+void Polygon2dLayerObject::setPolygon(const PolygonCoord &polygon) { setPolygons({polygon}); }
 
-void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons){
+void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons) {
     std::vector<int32_t> indices;
     std::vector<Vec2D> vertices;
     int32_t indexOffset = 0;
 
-    for (auto const &polygon: polygons) {
+    for (auto const &polygon : polygons) {
         std::vector<std::vector<Vec2D>> renderCoords;
         std::vector<Vec2D> polygonCoords;
         for (const Coord &mapCoord : polygon.positions) {
@@ -54,21 +52,19 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
         }
         std::vector<int32_t> curIndices = mapbox::earcut<int32_t>(renderCoords);
 
-        for (auto const& index: curIndices) {
+        for (auto const &index : curIndices) {
             indices.push_back(indexOffset + index);
         }
 
-        for (auto const &list: renderCoords) {
+        for (auto const &list : renderCoords) {
             indexOffset += list.size();
 
             vertices.insert(vertices.end(), list.begin(), list.end());
         }
-
     }
 
     polygon->setVertices(vertices, indices);
 }
-
 
 void Polygon2dLayerObject::setColor(const Color &color) { shader->setColor(color.r, color.g, color.b, color.a); }
 

@@ -41,8 +41,8 @@ void OpenGlContext::cleanAll() {
 
     programs.clear();
 
-    for (std::unordered_map<std::string, std::vector<unsigned int>>::iterator it = texturePointers.begin(); it != texturePointers.end();
-         ++it) {
+    for (std::unordered_map<std::string, std::vector<unsigned int>>::iterator it = texturePointers.begin();
+         it != texturePointers.end(); ++it) {
         glDeleteTextures(GLsizei(it->second.size()), &it->second[0]);
     }
     texturePointers.clear();
@@ -78,9 +78,7 @@ void OpenGlContext::preRenderStencilMask() {
     glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 }
 
-void OpenGlContext::postRenderStencilMask() {
-    glDisable(GL_STENCIL_TEST);
-}
+void OpenGlContext::postRenderStencilMask() { glDisable(GL_STENCIL_TEST); }
 
 void OpenGlContext::applyScissorRect(const std::optional<::RectI> &scissorRect) {
     if (scissorRect) {

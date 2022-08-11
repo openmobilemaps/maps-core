@@ -11,8 +11,8 @@
 #pragma once
 
 #include "RenderingContextInterface.h"
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 class OpenGlContext : public RenderingContextInterface, std::enable_shared_from_this<OpenGlContext> {
@@ -41,7 +41,7 @@ class OpenGlContext : public RenderingContextInterface, std::enable_shared_from_
 
     virtual void postRenderStencilMask() override;
 
-    virtual void applyScissorRect(const std::optional<::RectI> & scissorRect) override;
+    virtual void applyScissorRect(const std::optional<::RectI> &scissorRect) override;
 
   protected:
     Color backgroundColor = Color(0, 0, 0, 1);

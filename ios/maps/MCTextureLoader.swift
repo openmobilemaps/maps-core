@@ -169,13 +169,13 @@ extension HTTPURLResponse {
     }
 }
 
-fileprivate extension Optional where Wrapped == Int {
+private extension Optional where Wrapped == Int {
     var stringOrNil: String {
         switch self {
-        case .none:
-            return ""
-        case .some(let wrapped):
-            return "\(wrapped)"
+            case .none:
+                return ""
+            case let .some(wrapped):
+                return "\(wrapped)"
         }
     }
 }

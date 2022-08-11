@@ -24,7 +24,7 @@ open class MCScheduler: MCSchedulerInterface {
 
     private let computationQueue = OperationQueue(concurrentOperations: 4, qos: .userInteractive)
 
-    private let graphicsQueue = OperationQueue(concurrentOperations: 4, qos: .userInteractive)
+    private let graphicsQueue = OperationQueue.main
 
     private let internalSchedulerQueue = DispatchQueue(label: "internalSchedulerQueue")
 
@@ -50,14 +50,14 @@ open class MCScheduler: MCSchedulerInterface {
             let operation = TaskOperation(task: task, scheduler: self)
 
             switch config.priority {
-            case .HIGH:
-                operation.queuePriority = .high
-            case .NORMAL:
-                operation.queuePriority = .normal
-            case .LOW:
-                operation.queuePriority = .low
-            @unknown default:
-                fatalError("unknown priority")
+                case .HIGH:
+                    operation.queuePriority = .high
+                case .NORMAL:
+                    operation.queuePriority = .normal
+                case .LOW:
+                    operation.queuePriority = .low
+                @unknown default:
+                    fatalError("unknown priority")
             }
 
             self.outstandingOperations[config.id] = .init(operation)
@@ -71,14 +71,14 @@ open class MCScheduler: MCSchedulerInterface {
             }
 
             switch config.executionEnvironment {
-            case .IO:
-                self.ioQueue.addOperation(operation)
-            case .COMPUTATION:
-                self.computationQueue.addOperation(operation)
-            case .GRAPHICS:
-                self.graphicsQueue.addOperation(operation)
-            @unknown default:
-                fatalError("unexpected executionEnvironment")
+                case .IO:
+                    self.ioQueue.addOperation(operation)
+                case .COMPUTATION:
+                    self.computationQueue.addOperation(operation)
+                case .GRAPHICS:
+                    self.graphicsQueue.addOperation(operation)
+                @unknown default:
+                    fatalError("unexpected executionEnvironment")
             }
         }
     }

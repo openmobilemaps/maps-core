@@ -12,7 +12,7 @@
 #include <cmath>
 
 Line2dOpenGl::Line2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
-        : shaderProgram(shader) {}
+    : shaderProgram(shader) {}
 
 std::shared_ptr<GraphicsObjectInterface> Line2dOpenGl::asGraphicsObject() { return shared_from_this(); }
 
@@ -39,7 +39,11 @@ void Line2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &con
 }
 
 void Line2dOpenGl::initializeLineAndPoints() {
-    int pointCount = (int) lineCoordinates.size();
+    int pointCount = (int)lineCoordinates.size();
+    int iSecondToLast = pointCount - 2;
+
+    float prefixTotalLineLength = 0.0;
+
     for (int i = 0; i < (pointCount - 1); i++) {
         const Vec2D &p = lineCoordinates[i];
         const Vec2D &pNext = lineCoordinates[i + 1];
@@ -51,6 +55,12 @@ void Line2dOpenGl::initializeLineAndPoints() {
         lengthNormalY = lengthNormalY / lineLength;
         float widthNormalX = -lengthNormalY;
         float widthNormalY = lengthNormalX;
+
+        // SegmentType (0 inner, 1 start, 2 end, 3 single segment)
+        float lineStyleInfo = (i == 0 && i == iSecondToLast ? 3.0f
+                                  : (i == 0 ? 1.0f
+                                  : (i == iSecondToLast ? 2.0f
+                                  : 0.0f)));
 
         // Vertex 1
         // Position
@@ -76,6 +86,12 @@ void Line2dOpenGl::initializeLineAndPoints() {
         lineAttributes.push_back(pNext.y);
         lineAttributes.push_back(0.0);
 
+        // Segment Start Length Position (length prefix sum)
+        lineAttributes.push_back(prefixTotalLineLength);
+
+        // Style Info
+        lineAttributes.push_back(lineStyleInfo);
+
         // Vertex 2
         lineAttributes.push_back(p.x);
         lineAttributes.push_back(p.y);
@@ -95,6 +111,10 @@ void Line2dOpenGl::initializeLineAndPoints() {
         lineAttributes.push_back(pNext.x);
         lineAttributes.push_back(pNext.y);
         lineAttributes.push_back(0.0);
+
+        lineAttributes.push_back(prefixTotalLineLength);
+
+        lineAttributes.push_back(lineStyleInfo);
 
         // Vertex 3
         lineAttributes.push_back(pNext.x);
@@ -116,6 +136,10 @@ void Line2dOpenGl::initializeLineAndPoints() {
         lineAttributes.push_back(pNext.y);
         lineAttributes.push_back(0.0);
 
+        lineAttributes.push_back(prefixTotalLineLength);
+
+        lineAttributes.push_back(lineStyleInfo);
+
         // Vertex 4
         lineAttributes.push_back(pNext.x);
         lineAttributes.push_back(pNext.y);
@@ -136,6 +160,10 @@ void Line2dOpenGl::initializeLineAndPoints() {
         lineAttributes.push_back(pNext.y);
         lineAttributes.push_back(0.0);
 
+        lineAttributes.push_back(prefixTotalLineLength);
+
+        lineAttributes.push_back(lineStyleInfo);
+
         // Vertex indices
         lineIndices.push_back(4 * i);
         lineIndices.push_back(4 * i + 1);
@@ -144,7 +172,10 @@ void Line2dOpenGl::initializeLineAndPoints() {
         lineIndices.push_back(4 * i);
         lineIndices.push_back(4 * i + 2);
         lineIndices.push_back(4 * i + 3);
+
+        prefixTotalLineLength += lineLength;
     }
+
 }
 
 void Line2dOpenGl::prepareGlData(std::shared_ptr<OpenGlContext> openGlContext) {
@@ -156,6 +187,8 @@ void Line2dOpenGl::prepareGlData(std::shared_ptr<OpenGlContext> openGlContext) {
     lengthNormalHandle = glGetAttribLocation(program, "vLengthNormal");
     pointAHandle = glGetAttribLocation(program, "vPointA");
     pointBHandle = glGetAttribLocation(program, "vPointB");
+    segmentStartLPosHandle = glGetAttribLocation(program, "vSegmentStartLPos");
+    styleInfoHandle = glGetAttribLocation(program, "vStyleInfo");
 
     glGenBuffers(1, &vertexAttribBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexAttribBuffer);
@@ -177,9 +210,7 @@ void Line2dOpenGl::clear() {
     removeGlBuffers();
 }
 
-void Line2dOpenGl::setIsInverseMasked(bool inversed) {
-    isMaskInversed = inversed;
-}
+void Line2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
 
 void Line2dOpenGl::removeGlBuffers() {
     glDeleteBuffers(1, &vertexAttribBuffer);
@@ -220,7 +251,7 @@ void Line2dOpenGl::drawLineSegments(std::shared_ptr<OpenGlContext> openGlContext
     glUseProgram(program);
 
     // Apply the projection and view transformation
-    glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *) mvpMatrix);
+    glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
     glUniform1f(scaleFactorHandle, widthScaleFactor);
 
     glEnable(GL_BLEND);
@@ -229,19 +260,24 @@ void Line2dOpenGl::drawLineSegments(std::shared_ptr<OpenGlContext> openGlContext
     shaderProgram->preRender(openGlContext);
 
     // Prepare the vertex attributes
-    size_t sizeAttribGroup = sizeof(GLfloat) * 3;
-    size_t stride = sizeAttribGroup * 5;
+    size_t floatSize = sizeof(GLfloat);
+    size_t sizeAttribGroup = floatSize * 3;
+    size_t stride = sizeAttribGroup * 5 + 2 * floatSize;
     glBindBuffer(GL_ARRAY_BUFFER, vertexAttribBuffer);
     glEnableVertexAttribArray(positionHandle);
     glVertexAttribPointer(positionHandle, 3, GL_FLOAT, false, stride, nullptr);
     glEnableVertexAttribArray(widthNormalHandle);
-    glVertexAttribPointer(widthNormalHandle, 3, GL_FLOAT, false, stride, (float *) sizeAttribGroup);
+    glVertexAttribPointer(widthNormalHandle, 3, GL_FLOAT, false, stride, (float *)sizeAttribGroup);
     glEnableVertexAttribArray(lengthNormalHandle);
-    glVertexAttribPointer(lengthNormalHandle, 3, GL_FLOAT, false, stride, (float *) (sizeAttribGroup * 2));
+    glVertexAttribPointer(lengthNormalHandle, 3, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 2));
     glEnableVertexAttribArray(pointAHandle);
-    glVertexAttribPointer(pointAHandle, 3, GL_FLOAT, false, stride, (float *) (sizeAttribGroup * 3));
+    glVertexAttribPointer(pointAHandle, 3, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 3));
     glEnableVertexAttribArray(pointBHandle);
-    glVertexAttribPointer(pointBHandle, 3, GL_FLOAT, false, stride, (float *) (sizeAttribGroup * 4));
+    glVertexAttribPointer(pointBHandle, 3, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 4));
+    glEnableVertexAttribArray(segmentStartLPosHandle);
+    glVertexAttribPointer(segmentStartLPosHandle, 1, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 5));
+    glEnableVertexAttribArray(styleInfoHandle);
+    glVertexAttribPointer(styleInfoHandle, 1, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 5 + floatSize));
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // Draw the triangle
@@ -256,6 +292,8 @@ void Line2dOpenGl::drawLineSegments(std::shared_ptr<OpenGlContext> openGlContext
     glDisableVertexAttribArray(lengthNormalHandle);
     glDisableVertexAttribArray(pointAHandle);
     glDisableVertexAttribArray(pointBHandle);
+    glDisableVertexAttribArray(segmentStartLPosHandle);
+    glDisableVertexAttribArray(styleInfoHandle);
 
     glDisable(GL_BLEND);
 }

@@ -10,23 +10,24 @@
 
 #pragma once
 
-#include "TextShaderInterface.h"
 #include "Coord.h"
-#include "LineStyle.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "LayerObjectInterface.h"
 #include "Line2dInterface.h"
+#include "LineStyle.h"
 #include "RenderConfig.h"
-#include "Vec2D.h"
 #include "TextInterface.h"
+#include "TextShaderInterface.h"
+#include "Vec2D.h"
 
 class TextLayerObject : public LayerObjectInterface {
   public:
-    TextLayerObject(const std::shared_ptr<TextInterface> &text, const std::shared_ptr<TextShaderInterface> &shader, const Coord& referencePoint, float referenceSize);
+    TextLayerObject(const std::shared_ptr<TextInterface> &text, const std::shared_ptr<TextShaderInterface> &shader,
+                    const Coord &referencePoint, float referenceSize);
 
-    virtual ~TextLayerObject() {};
+    virtual ~TextLayerObject(){};
 
-    virtual void update() {};
+    virtual void update(){};
 
     virtual std::vector<std::shared_ptr<RenderConfigInterface>> getRenderConfig();
 

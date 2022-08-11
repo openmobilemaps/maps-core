@@ -13,8 +13,9 @@
 #include "IconInfoInterface.h"
 
 class IconInfo : public IconInfoInterface {
-public:
-    IconInfo(const std::string & identifier, const ::Coord & coordinate, const std::shared_ptr<::TextureHolderInterface> & texture, const ::Vec2F & iconSize, IconType type, const ::Vec2F & anchor);
+  public:
+    IconInfo(const std::string &identifier, const ::Coord &coordinate, const std::shared_ptr<::TextureHolderInterface> &texture,
+             const ::Vec2F &iconSize, IconType type, const ::Vec2F &anchor);
 
     virtual ~IconInfo() {}
 
@@ -22,11 +23,11 @@ public:
 
     virtual std::shared_ptr<::TextureHolderInterface> getTexture() override;
 
-    virtual void setCoordinate(const ::Coord & coord) override;
+    virtual void setCoordinate(const ::Coord &coord) override;
 
     virtual ::Coord getCoordinate() override;
 
-    virtual void setIconSize(const ::Vec2F & size) override;
+    virtual void setIconSize(const ::Vec2F &size) override;
 
     virtual ::Vec2F getIconSize() override;
 
@@ -36,7 +37,7 @@ public:
 
     virtual ::Vec2F getIconAnchor() override;
 
-private:
+  private:
     std::string identifier;
     Coord coordinate;
     std::shared_ptr<::TextureHolderInterface> texture;

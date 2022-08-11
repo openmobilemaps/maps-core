@@ -12,9 +12,9 @@
 
 #include "GraphicsObjectInterface.h"
 #include "Line2dInterface.h"
-#include "ShaderProgramInterface.h"
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
+#include "ShaderProgramInterface.h"
 #include "opengl_wrapper.h"
 #include <mutex>
 
@@ -60,6 +60,8 @@ class Line2dOpenGl : public GraphicsObjectInterface,
     int lengthNormalHandle;
     int pointAHandle;
     int pointBHandle;
+    int segmentStartLPosHandle;
+    int styleInfoHandle;
     GLuint vertexAttribBuffer;
     std::vector<GLfloat> lineAttributes;
     GLuint indexBuffer;

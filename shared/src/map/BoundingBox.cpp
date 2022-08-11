@@ -10,24 +10,21 @@
 
 #include "BoundingBox.h"
 
-#include "CoordinateSystemIdentifiers.h"
 #include "CoordinateConversionHelperInterface.h"
+#include "CoordinateSystemIdentifiers.h"
 
 BoundingBox::BoundingBox(const std::string &systemIdentifier)
-: systemIdentifier(systemIdentifier),
-  min(systemIdentifier, std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()),
-  max(systemIdentifier, std::numeric_limits<float>::min(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min())
-{
-}
+    : systemIdentifier(systemIdentifier)
+    , min(systemIdentifier, std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max())
+    , max(systemIdentifier, std::numeric_limits<float>::min(), std::numeric_limits<float>::min(),
+          std::numeric_limits<float>::min()) {}
 
-void BoundingBox::addPoint(const Coord& p)
-{
+void BoundingBox::addPoint(const Coord &p) {
     auto const &conv = CoordinateConversionHelperInterface::independentInstance()->convert(systemIdentifier, p);
     addPoint(conv.x, conv.y, conv.z);
 }
 
-void BoundingBox::addPoint(const double x, const double y, const double z)
-{
+void BoundingBox::addPoint(const double x, const double y, const double z) {
     min.x = std::min(x, min.x);
     min.y = std::min(y, min.y);
     min.z = std::min(z, min.z);
@@ -36,16 +33,16 @@ void BoundingBox::addPoint(const double x, const double y, const double z)
     max.z = std::max(z, max.z);
 }
 
-void BoundingBox::addBox(const std::optional<BoundingBox>& box)
-{
-    if(!box) { return; }
+void BoundingBox::addBox(const std::optional<BoundingBox> &box) {
+    if (!box) {
+        return;
+    }
 
     addPoint(box->min);
     addPoint(box->max);
 }
 
-Coord BoundingBox::center() const
-{
+Coord BoundingBox::center() const {
     return Coord(systemIdentifier, 0.5 * (max.x + min.x), 0.5 * (max.y + min.y), 0.5 * (max.z + min.z));
 }
 

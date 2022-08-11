@@ -10,16 +10,14 @@
 
 #include "TextLayerObject.h"
 
-TextLayerObject::TextLayerObject(const std::shared_ptr<TextInterface> &text, const std::shared_ptr<TextShaderInterface> &shader, const Coord& referencePoint, float referenceSize):
-text(text),
-shader(shader),
-referencePoint(referencePoint),
-referenceSize(referenceSize)
-{
-    renderConfig = { std::make_shared<RenderConfig>(text->asGraphicsObject(), 0) };
+TextLayerObject::TextLayerObject(const std::shared_ptr<TextInterface> &text, const std::shared_ptr<TextShaderInterface> &shader,
+                                 const Coord &referencePoint, float referenceSize)
+    : text(text)
+    , shader(shader)
+    , referencePoint(referencePoint)
+    , referenceSize(referenceSize) {
+    renderConfig = {std::make_shared<RenderConfig>(text->asGraphicsObject(), 0)};
     shader->setReferencePoint(Vec3D(referencePoint.x, referencePoint.y, referencePoint.z));
 }
 
-std::vector<std::shared_ptr<RenderConfigInterface>> TextLayerObject::getRenderConfig() {
-    return renderConfig;
-}
+std::vector<std::shared_ptr<RenderConfigInterface>> TextLayerObject::getRenderConfig() { return renderConfig; }

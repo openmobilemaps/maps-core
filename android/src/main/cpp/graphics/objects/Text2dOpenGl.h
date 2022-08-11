@@ -10,16 +10,16 @@
 
 #pragma once
 
+#include "GlyphDescription.h"
 #include "GraphicsObjectInterface.h"
 #include "MaskingObjectInterface.h"
 #include "OpenGlContext.h"
-#include "TextInterface.h"
 #include "ShaderProgramInterface.h"
 #include "TextDescription.h"
-#include "GlyphDescription.h"
+#include "TextInterface.h"
 #include "opengl_wrapper.h"
-#include <vector>
 #include <mutex>
+#include <vector>
 
 class Text2dOpenGl : public GraphicsObjectInterface,
                      public MaskingObjectInterface,
@@ -36,12 +36,13 @@ class Text2dOpenGl : public GraphicsObjectInterface,
 
     virtual void clear() override;
 
-    virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> & context, const ::RenderPassConfig & renderPass, int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
+    virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
+                              int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
                         int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
-    virtual void setTexts(const std::vector<TextDescription> & texts) override;
+    virtual void setTexts(const std::vector<TextDescription> &texts) override;
 
     virtual void loadTexture(const std::shared_ptr<TextureHolderInterface> &textureHolder) override;
 

@@ -10,8 +10,8 @@
 
 #include "Textured2dLayerObject.h"
 #include "DateHelper.h"
-#include <cmath>
 #include "DoubleAnimation.h"
+#include <cmath>
 
 Textured2dLayerObject::Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, std::shared_ptr<AlphaShaderInterface> shader,
                                              const std::shared_ptr<MapInterface> &mapInterface)
@@ -58,16 +58,12 @@ void Textured2dLayerObject::setAlpha(float alpha) {
 std::shared_ptr<Quad2dInterface> Textured2dLayerObject::getQuadObject() { return quad; }
 
 void Textured2dLayerObject::beginAlphaAnimation(double startAlpha, double targetAlpha, long long duration) {
-    animation = std::make_shared<DoubleAnimation>(duration,
-                                                  startAlpha,
-                                                  targetAlpha,
-                                                  InterpolatorFunction::EaseIn,
-       [=](double alpha){
-        this->setAlpha(alpha);
-    }, [=]{
-        this->setAlpha(targetAlpha);
-        this->animation = nullptr;
-    });
+    animation = std::make_shared<DoubleAnimation>(
+        duration, startAlpha, targetAlpha, InterpolatorFunction::EaseIn, [=](double alpha) { this->setAlpha(alpha); },
+        [=] {
+            this->setAlpha(targetAlpha);
+            this->animation = nullptr;
+        });
     animation->start();
     mapInterface->invalidate();
 }

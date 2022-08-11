@@ -18,12 +18,10 @@ void TextShaderOpenGl::setColor(float red, float green, float blue, float alpha)
     color = std::vector<float>{red, green, blue, alpha};
 }
 
-void TextShaderOpenGl::setScale(float scale) {
-    this->scale = scale;
-}
+void TextShaderOpenGl::setScale(float scale) { this->scale = scale; }
 
 void TextShaderOpenGl::setReferencePoint(const Vec3D &point) {
-    this->referencePoint = {(float) point.x, (float) point.y, (float) point.z};
+    this->referencePoint = {(float)point.x, (float)point.y, (float)point.z};
 }
 
 void TextShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) {
@@ -60,27 +58,20 @@ void TextShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterfa
 }
 
 std::string TextShaderOpenGl::getVertexShader() {
-    return UBRendererShaderCode(uniform mat4 uMVPMatrix;
-                                        uniform vec3 vReferencePoint;
-                                        uniform float vScale;
-                                        attribute vec2 vPosition;
-                                        attribute vec2 texCoordinate;
-                                        varying vec2 v_texcoord;
+    return UBRendererShaderCode(uniform mat4 uMVPMatrix; uniform vec3 vReferencePoint; uniform float vScale;
+                                attribute vec2 vPosition; attribute vec2 texCoordinate; varying vec2 v_texcoord;
 
-                                        void main() {
-                                            vec2 pos = (uMVPMatrix * vec4(vPosition.xy, 0.0, 1.0)).xy;
-                                            vec2 ref = (uMVPMatrix * vec4(vReferencePoint.xy, 0.0, 1.0)).xy;
-                                            pos = ref.xy + (pos.xy - ref.xy) * vScale;
-                                            gl_Position = vec4(pos.xy, 0.0, 1.0);
-                                            v_texcoord = texCoordinate;
-                                        });
+                                void main() {
+                                    vec2 pos = (uMVPMatrix * vec4(vPosition.xy, 0.0, 1.0)).xy;
+                                    vec2 ref = (uMVPMatrix * vec4(vReferencePoint.xy, 0.0, 1.0)).xy;
+                                    pos = ref.xy + (pos.xy - ref.xy) * vScale;
+                                    gl_Position = vec4(pos.xy, 0.0, 1.0);
+                                    v_texcoord = texCoordinate;
+                                });
 }
 
 std::string TextShaderOpenGl::getFragmentShader() {
-    return UBRendererShaderCode(precision highp float;
-                                uniform sampler2D u_texture;
-                                uniform vec4 vColor;
-                                varying vec2 v_texcoord;
+    return UBRendererShaderCode(precision highp float; uniform sampler2D u_texture; uniform vec4 vColor; varying vec2 v_texcoord;
 
                                 void main() {
                                     float delta = 0.1;

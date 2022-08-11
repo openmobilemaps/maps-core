@@ -20,6 +20,7 @@ open class MCMapView: MTKView {
     private var sizeChanged = false
     private var backgroundDisable = false
     private var saveDrawable = false
+    private lazy var renderToImageQueue = DispatchQueue(label: "io.openmobilemaps.renderToImagQueue", qos: .userInteractive)
 
     private var framesToRender: UInt = 1
     private let framesToRenderAfterInvalidate: UInt = 25
@@ -29,14 +30,14 @@ open class MCMapView: MTKView {
 
     public weak var sizeDelegate: MCMapSizeDelegate?
 
-    public init(mapConfig: MCMapConfig) {
+    public init(mapConfig: MCMapConfig, pixelsPerInch: Float? = nil) {
         let renderingContext = RenderingContext()
         guard let mapInterface = MCMapInterface.create(GraphicsFactory(),
                                                        shaderFactory: ShaderFactory(),
                                                        renderingContext: renderingContext,
                                                        mapConfig: mapConfig,
                                                        scheduler: MCScheduler(),
-                                                       pixelDensity: Float(UIScreen.pixelsPerInch)) else {
+                                                       pixelDensity: pixelsPerInch ?? Float(UIScreen.pixelsPerInch)) else {
             fatalError("Can't create MCMapInterface")
         }
         self.mapInterface = mapInterface
@@ -170,21 +171,22 @@ extension MCMapView: MTKViewDelegate {
     }
 
     public func renderToImage(size: CGSize, timeout: Float, bounds: MCRectCoord, callback: @escaping (UIImage?, MCLayerReadyState) -> Void) {
+        renderToImageQueue.async {
+            self.frame = CGRect(origin: .zero, size: .init(width: size.width / UIScreen.main.scale, height: size.height / UIScreen.main.scale))
+            self.setNeedsLayout()
+            self.layoutIfNeeded()
 
-        self.frame = CGRect(origin: .zero, size: size)
-        self.setNeedsLayout()
-        self.layoutIfNeeded()
+            let mapReadyCallbacks = MCMapViewMapReadyCallbacks()
+            mapReadyCallbacks.delegate = self
+            mapReadyCallbacks.callback = callback
 
-        let mapReadyCallbacks = MCMapViewMapReadyCallbacks()
-        mapReadyCallbacks.delegate = self
-        mapReadyCallbacks.callback = callback
-
-        self.mapInterface.drawReadyFrame(bounds, timeout: timeout, callbacks: mapReadyCallbacks)
+            self.mapInterface.drawReadyFrame(bounds, timeout: timeout, callbacks: mapReadyCallbacks)
+        }
     }
 }
 
-extension MCMapView {
-    fileprivate func currentDrawableImage() -> UIImage? {
+private extension MCMapView {
+    func currentDrawableImage() -> UIImage? {
         self.saveDrawable = true
         self.invalidate()
         self.draw(in: self)
@@ -193,7 +195,7 @@ extension MCMapView {
         guard let texture = self.currentDrawable?.texture else { return nil }
 
         let context = CIContext()
-        let kciOptions: [CIImageOption:Any] = [.colorSpace: CGColorSpaceCreateDeviceRGB()]
+        let kciOptions: [CIImageOption: Any] = [.colorSpace: CGColorSpaceCreateDeviceRGB()]
         let cImg = CIImage(mtlTexture: texture, options: kciOptions)!
         return context.createCGImage(cImg, from: cImg.extent)?.toImage()
     }
@@ -201,8 +203,8 @@ extension MCMapView {
 
 private extension CGImage {
     func toImage() -> UIImage? {
-        let w = CGFloat(width) / UIScreen.main.scale
-        let h = CGFloat(height) / UIScreen.main.scale
+        let w = Double(width)
+        let h = Double(height)
         UIGraphicsBeginImageContext(CGSize(width: w, height: h))
         let context = UIGraphicsGetCurrentContext()
         context?.draw(self, in: CGRect(x: 0, y: 0, width: w, height: h))
@@ -213,7 +215,6 @@ private extension CGImage {
         return newImage
     }
 }
-
 
 extension CGSize {
     var vec2: MCVec2I {
@@ -270,8 +271,8 @@ public extension MCMapView {
     }
 }
 
-private class MCMapViewMapReadyCallbacks : MCMapReadyCallbackInterface {
-    public weak var delegate : MCMapView?
+private class MCMapViewMapReadyCallbacks: MCMapReadyCallbackInterface {
+    public weak var delegate: MCMapView?
     public var callback: ((UIImage?, MCLayerReadyState) -> Void)?
 
     func stateDidUpdate(_ state: MCLayerReadyState) {
@@ -279,15 +280,17 @@ private class MCMapViewMapReadyCallbacks : MCMapReadyCallbackInterface {
 
         delegate.draw(in: delegate)
 
-        switch state {
-        case .NOT_READY:
-            break
-        case .ERROR, .TIMEOUT_ERROR:
-            self.callback?(nil, state)
-        case .READY:
-            self.callback?(delegate.currentDrawableImage(), state)
-        @unknown default:
-            break
+        DispatchQueue.main.async {
+            switch state {
+                case .NOT_READY:
+                    break
+                case .ERROR, .TIMEOUT_ERROR:
+                    self.callback?(nil, state)
+                case .READY:
+                    self.callback?(delegate.currentDrawableImage(), state)
+                @unknown default:
+                    break
+            }
         }
     }
 }

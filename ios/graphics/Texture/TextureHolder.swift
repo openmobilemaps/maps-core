@@ -40,7 +40,7 @@ public class TextureHolder: NSObject {
         self.init(texture)
     }
 
-    public convenience init(name: String, scaleFactor: CGFloat, bundle: Bundle?) throws {
+    public convenience init(name: String, scaleFactor: Double, bundle: Bundle?) throws {
         let options: [MTKTextureLoader.Option: Any] = [
             MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
         ]

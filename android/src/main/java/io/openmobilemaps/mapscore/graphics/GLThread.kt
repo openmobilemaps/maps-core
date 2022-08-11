@@ -24,8 +24,6 @@ import kotlin.math.max
 import kotlin.math.min
 
 class GLThread constructor(
-	val surface: SurfaceTexture?,
-	private val useMSAA: Boolean = false,
 	var onDrawCallback: (() -> Unit)? = null
 ) :
 	Thread("GLThread") {
@@ -66,7 +64,9 @@ class GLThread constructor(
 	val isDirty = AtomicBoolean(false)
 
 	var renderer: GLSurfaceView.Renderer? = null
+	var surface: SurfaceTexture? = null
 
+	var useMSAA: Boolean = false
 	var targetFrameRate = -1
 
 	@Volatile
@@ -246,6 +246,7 @@ class GLThread constructor(
 		egl?.eglDestroyContext(eglDisplay, eglContext)
 		egl?.eglTerminate(eglDisplay)
 		egl?.eglDestroySurface(eglDisplay, eglSurface)
+		surface?.release()
 	}
 
 	private fun initGL() {

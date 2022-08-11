@@ -28,7 +28,7 @@ DefaultTouchHandler::DefaultTouchHandler(std::shared_ptr<SchedulerInterface> sch
     , oldPointer(Vec2F(0, 0), Vec2F(0, 0)) {}
 
 void DefaultTouchHandler::addListener(const std::shared_ptr<TouchInterface> &listener) {
-    if(listeners.size() > 0) {
+    if (listeners.size() > 0) {
         auto key = listeners.begin()->first;
         listeners[key + 1] = listener;
     } else {
@@ -36,13 +36,17 @@ void DefaultTouchHandler::addListener(const std::shared_ptr<TouchInterface> &lis
     }
 }
 
-void DefaultTouchHandler::insertListener(const std::shared_ptr<TouchInterface> & listener, int32_t index) {
+void DefaultTouchHandler::insertListener(const std::shared_ptr<TouchInterface> &listener, int32_t index) {
     listeners[index] = listener;
 }
 
 void DefaultTouchHandler::removeListener(const std::shared_ptr<TouchInterface> &listener) {
     for (auto it = listeners.begin(); it != listeners.end();) {
-        if(it->second == listener) { listeners.erase(it++); } else { ++it; }
+        if (it->second == listener) {
+            listeners.erase(it++);
+        } else {
+            ++it;
+        }
     }
 }
 
@@ -51,70 +55,70 @@ void DefaultTouchHandler::onTouchEvent(const TouchEvent &touchEvent) {
     if (touchEvent.pointers.size() == 1) {
 
         switch (touchEvent.touchAction) {
-            case TouchAction::DOWN: {
+        case TouchAction::DOWN: {
+            touchPosition = touchEvent.pointers[0];
+            touchStartPosition = touchPosition;
+            handleTouchDown(touchPosition);
+            break;
+        }
+
+        case TouchAction::MOVE: {
+            if (state != ONE_FINGER_DOWN && state != ONE_FINGER_DOUBLE_CLICK_DOWN && state != ONE_FINGER_MOVING &&
+                state != ONE_FINGER_DOUBLE_CLICK_MOVE) {
                 touchPosition = touchEvent.pointers[0];
-                touchStartPosition = touchPosition;
-                handleTouchDown(touchPosition);
-                break;
             }
 
-            case TouchAction::MOVE: {
-                if (state != ONE_FINGER_DOWN && state != ONE_FINGER_DOUBLE_CLICK_DOWN && state != ONE_FINGER_MOVING &&
-                    state != ONE_FINGER_DOUBLE_CLICK_MOVE) {
-                    touchPosition = touchEvent.pointers[0];
-                }
+            Vec2F delta = Vec2F(touchEvent.pointers[0].x - touchPosition.x, touchEvent.pointers[0].y - touchPosition.y);
 
-                Vec2F delta = Vec2F(touchEvent.pointers[0].x - touchPosition.x, touchEvent.pointers[0].y - touchPosition.y);
+            touchPosition = touchEvent.pointers[0];
 
-                touchPosition = touchEvent.pointers[0];
+            handleMove(delta);
+            break;
+        }
 
-                handleMove(delta);
-                break;
-            }
+        case TouchAction::UP: {
+            handleTouchUp();
+            break;
+        }
 
-            case TouchAction::UP: {
-                handleTouchUp();
-                break;
-            }
-
-            case TouchAction::CANCEL: {
-                handleTouchCancel();
-                break;
-            }
+        case TouchAction::CANCEL: {
+            handleTouchCancel();
+            break;
+        }
         }
 
     } else if (touchEvent.pointers.size() == 2) {
 
         switch (touchEvent.touchAction) {
-            case TouchAction::DOWN: {
-                pointer = {Vec2F(0, 0), Vec2F(0, 0)};
-                oldPointer = {touchEvent.pointers[0], touchEvent.pointers[1]};
-                handleTwoFingerDown();
-                break;
+        case TouchAction::DOWN: {
+            pointer = {Vec2F(0, 0), Vec2F(0, 0)};
+            oldPointer = {touchEvent.pointers[0], touchEvent.pointers[1]};
+            handleTwoFingerDown();
+            break;
+        }
+
+        case TouchAction::MOVE: {
+            oldPointer = pointer;
+            pointer = {touchEvent.pointers[0], touchEvent.pointers[1]};
+
+            if (std::get<0>(oldPointer).x != 0 || std::get<0>(oldPointer).y != 0 || std::get<1>(oldPointer).x != 0 ||
+                std::get<1>(oldPointer).y != 0) {
+                handleTwoFingerMove(oldPointer, pointer);
             }
 
-            case TouchAction::MOVE: {
-                oldPointer = pointer;
-                pointer = {touchEvent.pointers[0], touchEvent.pointers[1]};
+            oldPointer = pointer;
+            break;
+        }
 
-                if (std::get<0>(oldPointer).x != 0 || std::get<0>(oldPointer).y != 0 || std::get<1>(oldPointer).x != 0 ||
-                    std::get<1>(oldPointer).y != 0) {
-                    handleTwoFingerMove(oldPointer, pointer);
-                }
+        case TouchAction::UP: {
+            handleTwoFingerUp(oldPointer);
+            break;
+        }
 
-                oldPointer = pointer;
-                break;
-            }
-
-            case TouchAction::UP: {
-                handleTwoFingerUp(oldPointer);
-                break;
-            }
-
-            case TouchAction::CANCEL: {
-                handleTouchCancel();
-                break;
-            }
+        case TouchAction::CANCEL: {
+            handleTouchCancel();
+            break;
+        }
         }
 
     } else {
@@ -142,9 +146,9 @@ void DefaultTouchHandler::handleTouchDown(Vec2F position) {
     if (state == ONE_FINGER_UP_AFTER_CLICK && stateTime >= DateHelper::currentTimeMillis() - DOUBLE_TAP_TIMEOUT) {
         state = ONE_FINGER_DOUBLE_CLICK_DOWN;
     } else {
-        #ifdef ENABLE_TOUCH_LOGGING
-            LogDebug <<= "TouchHandler: is touching down (one finger)";
-        #endif
+#ifdef ENABLE_TOUCH_LOGGING
+        LogDebug <<= "TouchHandler: is touching down (one finger)";
+#endif
         state = ONE_FINGER_DOWN;
     }
     stateTime = DateHelper::currentTimeMillis();
@@ -159,20 +163,20 @@ void DefaultTouchHandler::handleTouchDown(Vec2F position) {
 }
 
 void DefaultTouchHandler::handleMove(Vec2F delta) {
-    #ifdef ENABLE_TOUCH_LOGGING
-        LogDebug <<= "TouchHandler: handle move";
-    #endif
+#ifdef ENABLE_TOUCH_LOGGING
+    LogDebug <<= "TouchHandler: handle move";
+#endif
     std::vector<float> diffPointer = {touchStartPosition.x, touchStartPosition.y, touchPosition.x, touchPosition.y};
     if (distance(diffPointer) > clickDistancePx) {
-        #ifdef ENABLE_TOUCH_LOGGING
-            LogDebug <<= "TouchHandler: moved large distance";
-        #endif
+#ifdef ENABLE_TOUCH_LOGGING
+        LogDebug <<= "TouchHandler: moved large distance";
+#endif
         if (state == ONE_FINGER_DOUBLE_CLICK_DOWN || state == ONE_FINGER_DOUBLE_CLICK_MOVE) {
             state = ONE_FINGER_DOUBLE_CLICK_MOVE;
         } else {
-            #ifdef ENABLE_TOUCH_LOGGING
-                LogDebug <<= "TouchHandler: is moving now";
-            #endif
+#ifdef ENABLE_TOUCH_LOGGING
+            LogDebug <<= "TouchHandler: is moving now";
+#endif
             state = ONE_FINGER_MOVING;
         }
         stateTime = DateHelper::currentTimeMillis();
@@ -189,14 +193,14 @@ void DefaultTouchHandler::handleMove(Vec2F delta) {
 
 void DefaultTouchHandler::handleTouchUp() {
     if (state == ONE_FINGER_DOUBLE_CLICK_MOVE) {
-        #ifdef ENABLE_TOUCH_LOGGING
-            LogDebug <<= "TouchHandler: double click move ended";
-        #endif
+#ifdef ENABLE_TOUCH_LOGGING
+        LogDebug <<= "TouchHandler: double click move ended";
+#endif
         state = IDLE;
     } else if (state == ONE_FINGER_DOUBLE_CLICK_DOWN) {
-        #ifdef ENABLE_TOUCH_LOGGING
-            LogDebug <<= "TouchHandler: double click detected";
-        #endif
+#ifdef ENABLE_TOUCH_LOGGING
+        LogDebug <<= "TouchHandler: double click detected";
+#endif
         for (auto &[index, listener] : listeners) {
             if (listener->onDoubleClick(touchPosition)) {
                 break;
@@ -204,9 +208,9 @@ void DefaultTouchHandler::handleTouchUp() {
         }
         state = IDLE;
     } else if (state == ONE_FINGER_DOWN) {
-        #ifdef ENABLE_TOUCH_LOGGING
-            LogDebug <<= "TouchHandler: unconfirmed click detected";
-        #endif
+#ifdef ENABLE_TOUCH_LOGGING
+        LogDebug <<= "TouchHandler: unconfirmed click detected";
+#endif
         bool clickHandled = false;
         for (auto &[index, listener] : listeners) {
             if (listener->onClickUnconfirmed(touchPosition)) {
@@ -224,9 +228,9 @@ void DefaultTouchHandler::handleTouchUp() {
         }
 
     } else if (state == TWO_FINGER_DOWN && stateTime >= DateHelper::currentTimeMillis() - TWO_FINGER_TOUCH_TIMEOUT) {
-        #ifdef ENABLE_TOUCH_LOGGING
-            LogDebug <<= "TouchHandler: Two finger click detected";
-        #endif
+#ifdef ENABLE_TOUCH_LOGGING
+        LogDebug <<= "TouchHandler: Two finger click detected";
+#endif
         for (auto &[index, listener] : listeners) {
             if (listener->onTwoFingerClick(std::get<0>(oldPointer), std::get<1>(oldPointer))) {
                 break;
@@ -323,9 +327,9 @@ void DefaultTouchHandler::handleMoreThanTwoFingers() {
 
 void DefaultTouchHandler::checkState() {
     if (state == ONE_FINGER_UP_AFTER_CLICK && stateTime <= DateHelper::currentTimeMillis() - DOUBLE_TAP_TIMEOUT) {
-        #ifdef ENABLE_TOUCH_LOGGING
-            LogDebug <<= "TouchHandler: confirmed click detected";
-        #endif
+#ifdef ENABLE_TOUCH_LOGGING
+        LogDebug <<= "TouchHandler: confirmed click detected";
+#endif
         for (auto &[index, listener] : listeners) {
             if (listener->onClickConfirmed(touchPosition)) {
                 break;
@@ -334,9 +338,9 @@ void DefaultTouchHandler::checkState() {
         state = IDLE;
         stateTime = DateHelper::currentTimeMillis();
     } else if (state == ONE_FINGER_DOWN && stateTime <= DateHelper::currentTimeMillis() - LONG_PRESS_TIMEOUT) {
-        #ifdef ENABLE_TOUCH_LOGGING
-            LogDebug <<= "TouchHandler: long press detected";
-        #endif
+#ifdef ENABLE_TOUCH_LOGGING
+        LogDebug <<= "TouchHandler: long press detected";
+#endif
         for (auto &[index, listener] : listeners) {
             if (listener->onLongPress(touchPosition)) {
                 break;

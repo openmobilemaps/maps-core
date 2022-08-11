@@ -36,8 +36,8 @@ class LineGroup2d: BaseGraphicsObject {
         ss.stencilCompareFunction = .less
         ss.stencilFailureOperation = .keep
         ss.depthFailureOperation = .keep
-        ss.depthStencilPassOperation = .invert
-        ss.writeMask = 0b0111_1111
+        ss.depthStencilPassOperation = .zero
+        ss.writeMask = 0xFF
 
         let s = MTLDepthStencilDescriptor()
         s.frontFaceStencil = ss
@@ -227,5 +227,13 @@ extension LineGroup2d: MCLineGroup2dInterface {
 
     func asGraphicsObject() -> MCGraphicsObjectInterface? {
         self
+    }
+}
+
+extension LineGroup2d: MCLine2dInterface {
+    func setLinePositions(_ positions: [MCVec2D]) {
+        setLines([
+            MCRenderLineDescription(positions: positions, styleIndex: 0),
+        ])
     }
 }

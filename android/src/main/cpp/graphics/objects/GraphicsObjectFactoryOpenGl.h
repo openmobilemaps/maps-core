@@ -20,13 +20,14 @@ class GraphicsObjectFactoryOpenGl : public GraphicsObjectFactoryInterface {
 
     virtual std::shared_ptr<Polygon2dInterface> createPolygon(const std::shared_ptr<::ShaderProgramInterface> &shader) override;
 
-    virtual std::shared_ptr<LineGroup2dInterface> createLineGroup(const std::shared_ptr<::ShaderProgramInterface> & shader) override;
+    virtual std::shared_ptr<LineGroup2dInterface> createLineGroup(const std::shared_ptr<::ShaderProgramInterface> &shader) override;
 
-    virtual std::shared_ptr<PolygonGroup2dInterface> createPolygonGroup(const std::shared_ptr<::ShaderProgramInterface> & shader) override;
+    virtual std::shared_ptr<PolygonGroup2dInterface>
+    createPolygonGroup(const std::shared_ptr<::ShaderProgramInterface> &shader) override;
 
     virtual std::shared_ptr<Quad2dInterface> createQuadMask() override;
 
     virtual std::shared_ptr<Polygon2dInterface> createPolygonMask() override;
 
-    virtual std::shared_ptr<TextInterface> createText(const std::shared_ptr<::ShaderProgramInterface> & shader) override;
+    virtual std::shared_ptr<TextInterface> createText(const std::shared_ptr<::ShaderProgramInterface> &shader) override;
 };

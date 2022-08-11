@@ -33,7 +33,4 @@
                                RectCoord(Coord(CoordinateSystemIdentifiers::EPSG21781(), 485000.0, 300000.0, 0),
                                          Coord(CoordinateSystemIdentifiers::EPSG21781(), 840000.0, 70000.0, 0)),
                                1.0);
-
-
-
 }

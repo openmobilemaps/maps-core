@@ -16,13 +16,11 @@ Polygon2dOpenGl::Polygon2dOpenGl(const std::shared_ptr<::ShaderProgramInterface>
 
 std::shared_ptr<GraphicsObjectInterface> Polygon2dOpenGl::asGraphicsObject() { return shared_from_this(); }
 
-std::shared_ptr<MaskingObjectInterface> Polygon2dOpenGl::asMaskingObject() {
-    return shared_from_this();
-}
+std::shared_ptr<MaskingObjectInterface> Polygon2dOpenGl::asMaskingObject() { return shared_from_this(); }
 
 bool Polygon2dOpenGl::isReady() { return ready; }
 
-void Polygon2dOpenGl::setVertices(const std::vector<::Vec2D> &vertices, const std::vector <int32_t> &indices) {
+void Polygon2dOpenGl::setVertices(const std::vector<::Vec2D> &vertices, const std::vector<int32_t> &indices) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     ready = false;
     this->vertices.clear();
@@ -39,7 +37,6 @@ void Polygon2dOpenGl::setVertices(const std::vector<::Vec2D> &vertices, const st
     }
 }
 
-
 void Polygon2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (ready)
@@ -55,7 +52,7 @@ void Polygon2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &
     ready = true;
 }
 
-void Polygon2dOpenGl::prepareGlData(const std::shared_ptr <OpenGlContext> &openGlContext) {
+void Polygon2dOpenGl::prepareGlData(const std::shared_ptr<OpenGlContext> &openGlContext) {
     glUseProgram(programHandle);
 
     positionHandle = glGetAttribLocation(programHandle, "vPosition");
@@ -80,9 +77,7 @@ void Polygon2dOpenGl::clear() {
     ready = false;
 }
 
-void Polygon2dOpenGl::setIsInverseMasked(bool inversed) {
-    isMaskInversed = inversed;
-}
+void Polygon2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
 
 void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                              int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
@@ -135,9 +130,10 @@ void Polygon2dOpenGl::drawPolygon(std::shared_ptr<OpenGlContext> openGlContext, 
     glDisable(GL_BLEND);
 }
 
-void Polygon2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                                   int64_t mvpMatrix, double screenPixelAsRealMeterFactor) {
-    if (!ready) return;
+void Polygon2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context,
+                                   const ::RenderPassConfig &renderPass, int64_t mvpMatrix, double screenPixelAsRealMeterFactor) {
+    if (!ready)
+        return;
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
 

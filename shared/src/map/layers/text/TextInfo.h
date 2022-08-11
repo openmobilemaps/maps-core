@@ -10,19 +10,21 @@
 
 #pragma once
 
-#include "TextInfoInterface.h"
 #include "GraphicsObjectInterface.h"
+#include "TextInfoInterface.h"
 
 #include "Coord.h"
 #include "FontLoaderInterface.h"
 
 class TextInfo : public TextInfoInterface {
   public:
-    TextInfo(const std::string & text, const ::Coord & coordinate, const ::Font & font)
-    : text(text), coordinate(coordinate), font(font) {};
+    TextInfo(const std::string &text, const ::Coord &coordinate, const ::Font &font)
+        : text(text)
+        , coordinate(coordinate)
+        , font(font){};
 
     // Text Interface
-    virtual ~TextInfo() {};
+    virtual ~TextInfo(){};
 
     virtual std::string getText() { return text; };
 

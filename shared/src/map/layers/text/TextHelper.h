@@ -10,10 +10,10 @@
 
 #pragma once
 
-#include "MapInterface.h"
-#include "TextLayerObject.h"
-#include "TextInfoInterface.h"
 #include "FontData.h"
+#include "MapInterface.h"
+#include "TextInfoInterface.h"
+#include "TextLayerObject.h"
 #include "Vec2F.h"
 
 #include <optional>
@@ -22,9 +22,10 @@ class TextHelper {
   public:
     TextHelper(const std::shared_ptr<MapInterface> &mapInterface);
 
-    virtual std::shared_ptr<TextLayerObject> textLayer(const std::shared_ptr<TextInfoInterface> &text, std::optional<FontData> fontData, Vec2F offset);
+    virtual std::shared_ptr<TextLayerObject> textLayer(const std::shared_ptr<TextInfoInterface> &text,
+                                                       std::optional<FontData> fontData, Vec2F offset);
 
-    static std::string uppercase(const std::string& string);
+    static std::string uppercase(const std::string &string);
 
   private:
     std::shared_ptr<MapInterface> mapInterface;

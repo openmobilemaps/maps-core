@@ -10,15 +10,14 @@
 
 #pragma once
 
-#include "RendererInterface.h"
 #include "RenderPassInterface.h"
+#include "RendererInterface.h"
+#include <map>
 #include <queue>
 #include <vector>
-#include <map>
 
 struct RenderPassInterfaceCompare {
-    bool operator()(std::shared_ptr<RenderPassInterface> &a,
-                    std::shared_ptr<RenderPassInterface> &b){
+    bool operator()(std::shared_ptr<RenderPassInterface> &a, std::shared_ptr<RenderPassInterface> &b) {
         return a->getRenderPassConfig().renderPassIndex > b->getRenderPassConfig().renderPassIndex;
     }
 };
