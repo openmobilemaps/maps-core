@@ -81,7 +81,12 @@ open class MCTextureLoader: MCLoaderInterface {
             return .init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: (response?.statusCode).stringOrNil)
         }
 
-        guard let textureHolder = try? TextureHolder(data) else {
+        do {
+            let textureHolder = try TextureHolder(data)
+            return .init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil)
+        } catch TextureHolderError.emptyData {
+            return .init(data: nil, etag: response?.etag, status: .OK, errorCode: nil)
+        } catch {
             // If metal can not load this image
             // try workaround to first load it into UIImage context
             guard let uiImage = UIImage(data: data) else {
@@ -100,7 +105,6 @@ open class MCTextureLoader: MCLoaderInterface {
 
             return .init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil)
         }
-        return .init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil)
     }
 
     open func loadData(_ url: String, etag: String?) -> MCDataLoaderResult {
