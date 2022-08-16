@@ -18,6 +18,7 @@
 #include "Tiled2dMapRasterSource.h"
 #include <mutex>
 #include <unordered_map>
+#include <atomic>
 
 class Tiled2dMapRasterLayer : public Tiled2dMapLayer, public Tiled2dMapRasterLayerInterface {
   public:
@@ -87,6 +88,7 @@ class Tiled2dMapRasterLayer : public Tiled2dMapLayer, public Tiled2dMapRasterLay
     std::shared_ptr<LoaderInterface> textureLoader;
     std::shared_ptr<Tiled2dMapRasterSource> rasterSource;
 
+    std::atomic_flag updateFlag = ATOMIC_FLAG_INIT;
     std::recursive_mutex updateMutex;
     std::unordered_map<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>> tileObjectMap;
     std::recursive_mutex renderPassMutex;

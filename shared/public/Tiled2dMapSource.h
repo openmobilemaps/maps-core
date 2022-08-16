@@ -103,7 +103,11 @@ template <class T, class L, class R> class Tiled2dMapSource :
 
     void onVisibleTilesChanged(const std::unordered_set<PrioritizedTiled2dMapTileInfo> &visibleTiles);
 
+    std::atomic_flag updateFlag = ATOMIC_FLAG_INIT;
     std::atomic_int pendingUpdates = 0;
+    std::recursive_mutex updateMutex;
+    std::optional<RectCoord> updateBounds;
+    std::optional<double> updateZoom;
 
     std::atomic_size_t dispatchedTasks;
     std::unordered_set<Tiled2dMapTileInfo> currentlyLoading;
