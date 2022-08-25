@@ -190,12 +190,12 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::unordered_set<P
         for (const auto &tileInfo : visibleTiles) {
             newCurrentVisibleTiles.insert(tileInfo.tileInfo);
 
-            int currentTilesCount = 0;
+            size_t currentTilesCount = 0;
             {
                 std::lock_guard<std::recursive_mutex> lock(currentTilesMutex);
                 currentTilesCount = currentTiles.count(tileInfo.tileInfo);
             }
-            int currentlyLoadingCount = 0;
+            size_t currentlyLoadingCount = 0;
             {
                 std::lock_guard<std::recursive_mutex> lock(currentlyLoadingMutex);
                 currentlyLoadingCount = currentlyLoading.count(tileInfo.tileInfo);
