@@ -87,8 +87,10 @@ template <class T, class L, class R> class Tiled2dMapSource :
     std::optional<int32_t> minZoomLevelIdentifier;
     std::optional<int32_t> maxZoomLevelIdentifier;
 
-    std::recursive_mutex tilesMutex;
+    std::recursive_mutex currentTilesMutex;
     std::unordered_map<Tiled2dMapTileInfo, R> currentTiles;
+
+    std::recursive_mutex currentVisibleTilesMutex;
     std::unordered_set<Tiled2dMapTileInfo> currentVisibleTiles;
     RectCoord currentViewBounds = RectCoord(Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0),
                                             Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0));
@@ -111,10 +113,14 @@ template <class T, class L, class R> class Tiled2dMapSource :
     std::optional<RectCoord> updateBounds;
     std::optional<double> updateZoom;
 
+    std::recursive_mutex currentlyLoadingMutex;
     std::unordered_set<Tiled2dMapTileInfo> currentlyLoading;
 
+    std::recursive_mutex dispatchedTasksMutex;
     std::unordered_map<size_t, size_t > dispatchedTasks;
-    // the key of the map is the loader index, if the first loader returns noop the next one will be use
+
+        // the key of the map is the loader index, if the first loader returns noop the next one will be use
+    std::recursive_mutex loadingQueueMutex;
     std::unordered_map<size_t, std::set<PrioritizedTiled2dMapTileInfo>> loadingQueues;
 
     const int max_parallel_loading_tasks = 8;
@@ -126,7 +132,10 @@ template <class T, class L, class R> class Tiled2dMapSource :
         long long delay;
     };
 
+    std::recursive_mutex errorTilesMutex;
     std::unordered_map<size_t, std::map<PrioritizedTiled2dMapTileInfo, ErrorInfo>> errorTiles;
+
+    std::recursive_mutex notFoundTilesMutex;
     std::unordered_set<Tiled2dMapTileInfo> notFoundTiles;
 
     std::optional<PrioritizedTiled2dMapTileInfo> dequeueLoadingTask(size_t loaderIndex);

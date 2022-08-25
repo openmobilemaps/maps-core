@@ -35,7 +35,7 @@ std::shared_ptr<::TextureHolderInterface> Tiled2dMapRasterSource::postLoadingTas
 }
 
 std::unordered_set<Tiled2dMapRasterTileInfo> Tiled2dMapRasterSource::getCurrentTiles() {
-    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+    std::lock_guard<std::recursive_mutex> lock(currentTilesMutex);
     std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos;
     for (const auto &tileEntry : currentTiles) {
         currentTileInfos.insert(Tiled2dMapRasterTileInfo(tileEntry.first, tileEntry.second));
