@@ -376,7 +376,6 @@ template <class T, class L, class R> std::optional<PrioritizedTiled2dMapTileInfo
 }
 
 template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::performLoadingTask(size_t loaderIndex) {
-    // TODO: pass the current task identifier to thsi queue
     while (auto tile = dequeueLoadingTask(loaderIndex)) {
         auto loaderResult = loadTile(tile->tileInfo, loaderIndex);
         auto errorManager = this->errorManager;
