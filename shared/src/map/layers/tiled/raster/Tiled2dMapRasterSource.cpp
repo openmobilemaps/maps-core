@@ -18,15 +18,15 @@ Tiled2dMapRasterSource::Tiled2dMapRasterSource(const MapConfig &mapConfig,
                                                const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
                                                const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                                const std::shared_ptr<SchedulerInterface> &scheduler,
-                                               const std::shared_ptr<::LoaderInterface> &textureLoader,
+                                               const std::vector<std::shared_ptr<::LoaderInterface>> & loaders,
                                                const std::shared_ptr<Tiled2dMapSourceListenerInterface> &listener,
                                                float screenDensityPpi)
     : Tiled2dMapSource<TextureHolderInterface, TextureLoaderResult, std::shared_ptr<::TextureHolderInterface>>(
-          mapConfig, layerConfig, conversionHelper, scheduler, listener, screenDensityPpi)
-    , loader(textureLoader) {}
+          mapConfig, layerConfig, conversionHelper, scheduler, listener, screenDensityPpi, loaders.size())
+    , loaders(loaders) {}
 
-TextureLoaderResult Tiled2dMapRasterSource::loadTile(Tiled2dMapTileInfo tile) {
-    return loader->loadTexture(layerConfig->getTileUrl(tile.x, tile.y, tile.zoomIdentifier), std::nullopt);
+TextureLoaderResult Tiled2dMapRasterSource::loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) {
+    return loaders[loaderIndex]->loadTexture(layerConfig->getTileUrl(tile.x, tile.y, tile.zoomIdentifier), std::nullopt);
 }
 
 std::shared_ptr<::TextureHolderInterface> Tiled2dMapRasterSource::postLoadingTask(const TextureLoaderResult &loadedData,

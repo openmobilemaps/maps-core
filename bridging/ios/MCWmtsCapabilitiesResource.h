@@ -15,10 +15,10 @@
 + (nullable MCWmtsCapabilitiesResource *)create:(nonnull NSString *)xml;
 
 - (nullable MCTiled2dMapRasterLayerInterface *)createLayer:(nonnull NSString *)identifier
-                                                tileLoader:(nullable id<MCLoaderInterface>)tileLoader;
+                                               tileLoaders:(nonnull NSArray<id<MCLoaderInterface>> *)tileLoaders;
 
 - (nullable MCTiled2dMapRasterLayerInterface *)createLayerWithZoomInfo:(nonnull NSString *)identifier
-                                                            tileLoader:(nullable id<MCLoaderInterface>)tileLoader
+                                                           tileLoaders:(nonnull NSArray<id<MCLoaderInterface>> *)tileLoaders
                                                               zoomInfo:(nonnull MCTiled2dMapZoomInfo *)zoomInfo;
 
 - (nullable id<MCTiled2dMapLayerConfig>)createLayerConfig:(nonnull NSString *)identifier;

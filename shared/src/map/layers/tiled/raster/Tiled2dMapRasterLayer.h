@@ -23,10 +23,10 @@
 class Tiled2dMapRasterLayer : public Tiled2dMapLayer, public Tiled2dMapRasterLayerInterface {
   public:
     Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
-                          const std::shared_ptr<::LoaderInterface> &tileLoader);
+                          const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders);
 
     Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
-                          const std::shared_ptr<::LoaderInterface> &tileLoader,
+                          const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
                           const std::shared_ptr<::MaskingObjectInterface> &mask);
 
     virtual void onAdded(const std::shared_ptr<::MapInterface> &mapInterface) override;
@@ -85,7 +85,7 @@ class Tiled2dMapRasterLayer : public Tiled2dMapLayer, public Tiled2dMapRasterLay
     std::optional<::RectI> scissorRect = std::nullopt;
     std::shared_ptr<::MaskingObjectInterface> mask;
 
-    std::shared_ptr<LoaderInterface> textureLoader;
+    const std::vector<std::shared_ptr<::LoaderInterface>> loaders;
     std::shared_ptr<Tiled2dMapRasterSource> rasterSource;
 
     std::atomic_flag updateFlag = ATOMIC_FLAG_INIT;

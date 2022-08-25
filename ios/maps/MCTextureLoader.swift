@@ -24,9 +24,11 @@ public class DataHolder: MCDataHolderInterface {
 }
 
 open class MCTextureLoader: MCLoaderInterface {
+
     private let session: URLSession
 
-    public init(urlSession: URLSession? = nil) {
+    public init(urlSession: URLSession? = nil)
+    {
         if let urlSession = urlSession {
             session = urlSession
         } else {

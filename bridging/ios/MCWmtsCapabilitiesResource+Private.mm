@@ -43,20 +43,20 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 }
 
 - (nullable MCTiled2dMapRasterLayerInterface *)createLayer:(nonnull NSString *)identifier
-                                                tileLoader:(nullable id<MCLoaderInterface>)tileLoader {
+                                               tileLoaders:(nonnull NSArray<id<MCLoaderInterface>> *)tileLoaders {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createLayer(::djinni::String::toCpp(identifier),
-                                                               ::djinni_generated::LoaderInterface::toCpp(tileLoader));
+                                                               ::djinni::List<::djinni_generated::LoaderInterface>::toCpp(tileLoaders));
         return ::djinni_generated::Tiled2dMapRasterLayerInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
 - (nullable MCTiled2dMapRasterLayerInterface *)createLayerWithZoomInfo:(nonnull NSString *)identifier
-                                                            tileLoader:(nullable id<MCLoaderInterface>)tileLoader
+                                                           tileLoaders:(nonnull NSArray<id<MCLoaderInterface>> *)tileLoaders
                                                               zoomInfo:(nonnull MCTiled2dMapZoomInfo *)zoomInfo {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createLayerWithZoomInfo(::djinni::String::toCpp(identifier),
-                                                                           ::djinni_generated::LoaderInterface::toCpp(tileLoader),
+                                                                           ::djinni::List<::djinni_generated::LoaderInterface>::toCpp(tileLoaders),
                                                                            ::djinni_generated::Tiled2dMapZoomInfo::toCpp(zoomInfo));
         return ::djinni_generated::Tiled2dMapRasterLayerInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()

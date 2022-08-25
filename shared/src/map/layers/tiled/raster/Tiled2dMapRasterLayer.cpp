@@ -19,23 +19,23 @@
 #include <map>
 
 Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
-                                             const std::shared_ptr<::LoaderInterface> &tileLoader)
+                                             const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders)
     : Tiled2dMapLayer(layerConfig)
-    , textureLoader(tileLoader)
+    , loaders(tileLoaders)
     , alpha(1.0) {}
 
 Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
-                                             const std::shared_ptr<::LoaderInterface> &tileLoader,
+                                             const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
                                              const std::shared_ptr<::MaskingObjectInterface> &mask)
     : Tiled2dMapLayer(layerConfig)
-    , textureLoader(tileLoader)
+    , loaders(tileLoaders)
     , alpha(1.0)
     , mask(mask) {}
 
 void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface) {
     rasterSource = std::make_shared<Tiled2dMapRasterSource>(
         mapInterface->getMapConfig(), layerConfig, mapInterface->getCoordinateConverterHelper(), mapInterface->getScheduler(),
-        textureLoader, shared_from_this(), mapInterface->getCamera()->getScreenDensityPpi());
+        loaders, shared_from_this(), mapInterface->getCamera()->getScreenDensityPpi());
     setSourceInterface(rasterSource);
     Tiled2dMapLayer::onAdded(mapInterface);
 

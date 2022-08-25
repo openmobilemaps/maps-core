@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <memory>
 #include <optional>
+#include <vector>
 
 class Tiled2dMapRasterLayerCallbackInterface;
 
@@ -17,9 +18,11 @@ class Tiled2dMapRasterLayerInterface {
 public:
     virtual ~Tiled2dMapRasterLayerInterface() {}
 
-    static std::shared_ptr<Tiled2dMapRasterLayerInterface> createWithMask(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::shared_ptr<::LoaderInterface> & loader, const std::shared_ptr<::MaskingObjectInterface> & mask);
+    /** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
+    static std::shared_ptr<Tiled2dMapRasterLayerInterface> createWithMask(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::vector<std::shared_ptr<::LoaderInterface>> & loaders, const std::shared_ptr<::MaskingObjectInterface> & mask);
 
-    static std::shared_ptr<Tiled2dMapRasterLayerInterface> create(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::shared_ptr<::LoaderInterface> & loader);
+    /** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
+    static std::shared_ptr<Tiled2dMapRasterLayerInterface> create(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::vector<std::shared_ptr<::LoaderInterface>> & loaders);
 
     virtual std::shared_ptr<::LayerInterface> asLayerInterface() = 0;
 
