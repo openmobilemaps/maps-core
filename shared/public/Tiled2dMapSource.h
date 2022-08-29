@@ -119,7 +119,7 @@ template <class T, class L, class R> class Tiled2dMapSource :
     std::recursive_mutex dispatchedTasksMutex;
     std::unordered_map<size_t, size_t > dispatchedTasks;
 
-        // the key of the map is the loader index, if the first loader returns noop the next one will be use
+        // the key of the map is the loader index, if the first loader returns noop the next one will be used
     std::recursive_mutex loadingQueueMutex;
     std::unordered_map<size_t, std::set<PrioritizedTiled2dMapTileInfo>> loadingQueues;
 
