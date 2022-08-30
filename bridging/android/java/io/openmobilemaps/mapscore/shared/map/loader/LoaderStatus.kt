@@ -10,4 +10,5 @@ enum class LoaderStatus {
     ERROR_TIMEOUT,
     ERROR_NETWORK,
     ERROR_OTHER,
+    NOOP,
 }

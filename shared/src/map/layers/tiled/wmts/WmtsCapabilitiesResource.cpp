@@ -28,20 +28,20 @@ class WmtsCapabilitiesResourceImpl : public WmtsCapabilitiesResource {
     };
 
     std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayer(const std::string &identifier,
-                                                                  const std::shared_ptr<::LoaderInterface> &tileLoader) override {
+                                                                  const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders) override {
         auto layerConfig = createLayerConfig(identifier);
         if (!layerConfig)
             return nullptr;
-        return Tiled2dMapRasterLayerInterface::create(layerConfig, tileLoader);
+        return Tiled2dMapRasterLayerInterface::create(layerConfig, tileLoaders);
     };
 
     std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayerWithZoomInfo(const std::string &identifier,
-                                                                              const std::shared_ptr<::LoaderInterface> &tileLoader,
+                                                                              const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
                                                                               const ::Tiled2dMapZoomInfo &zoomInfo) override {
         auto layerConfig = createLayerConfigWithZoomInfo(identifier, zoomInfo);
         if (!layerConfig)
             return nullptr;
-        return Tiled2dMapRasterLayerInterface::create(layerConfig, tileLoader);
+        return Tiled2dMapRasterLayerInterface::create(layerConfig, tileLoaders);
     };
 
     std::shared_ptr<::Tiled2dMapLayerConfig> createLayerConfig(const std::string &identifier) override {

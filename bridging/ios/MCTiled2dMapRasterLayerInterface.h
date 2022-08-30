@@ -12,12 +12,14 @@
 
 @interface MCTiled2dMapRasterLayerInterface : NSObject
 
+/** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
 + (nullable MCTiled2dMapRasterLayerInterface *)createWithMask:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
-                                                       loader:(nullable id<MCLoaderInterface>)loader
+                                                      loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
                                                          mask:(nullable id<MCMaskingObjectInterface>)mask;
 
+/** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
 + (nullable MCTiled2dMapRasterLayerInterface *)create:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
-                                               loader:(nullable id<MCLoaderInterface>)loader;
+                                              loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders;
 
 - (nullable id<MCLayerInterface>)asLayerInterface;
 

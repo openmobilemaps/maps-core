@@ -19,9 +19,9 @@ public:
 
     static std::shared_ptr<WmtsCapabilitiesResource> create(const std::string & xml);
 
-    virtual std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayer(const std::string & identifier, const std::shared_ptr<::LoaderInterface> & tileLoader) = 0;
+    virtual std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayer(const std::string & identifier, const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders) = 0;
 
-    virtual std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayerWithZoomInfo(const std::string & identifier, const std::shared_ptr<::LoaderInterface> & tileLoader, const ::Tiled2dMapZoomInfo & zoomInfo) = 0;
+    virtual std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayerWithZoomInfo(const std::string & identifier, const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders, const ::Tiled2dMapZoomInfo & zoomInfo) = 0;
 
     virtual std::shared_ptr<::Tiled2dMapLayerConfig> createLayerConfig(const std::string & identifier) = 0;
 

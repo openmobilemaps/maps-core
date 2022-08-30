@@ -36,21 +36,21 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 }
 
 + (nullable MCTiled2dMapRasterLayerInterface *)createWithMask:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
-                                                       loader:(nullable id<MCLoaderInterface>)loader
+                                                      loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
                                                          mask:(nullable id<MCMaskingObjectInterface>)mask {
     try {
         auto objcpp_result_ = ::Tiled2dMapRasterLayerInterface::createWithMask(::djinni_generated::Tiled2dMapLayerConfig::toCpp(layerConfig),
-                                                                               ::djinni_generated::LoaderInterface::toCpp(loader),
+                                                                               ::djinni::List<::djinni_generated::LoaderInterface>::toCpp(loaders),
                                                                                ::djinni_generated::MaskingObjectInterface::toCpp(mask));
         return ::djinni_generated::Tiled2dMapRasterLayerInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
 + (nullable MCTiled2dMapRasterLayerInterface *)create:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
-                                               loader:(nullable id<MCLoaderInterface>)loader {
+                                              loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders {
     try {
         auto objcpp_result_ = ::Tiled2dMapRasterLayerInterface::create(::djinni_generated::Tiled2dMapLayerConfig::toCpp(layerConfig),
-                                                                       ::djinni_generated::LoaderInterface::toCpp(loader));
+                                                                       ::djinni::List<::djinni_generated::LoaderInterface>::toCpp(loaders));
         return ::djinni_generated::Tiled2dMapRasterLayerInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
