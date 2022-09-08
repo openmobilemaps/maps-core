@@ -465,7 +465,7 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
     std::lock_guard<std::recursive_mutex> lock(symbolMutex);
 
 
-    double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
+    double zoomIdentifier = std::ceil(Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom()));
     auto scaleFactor = camera->mapUnitsFromPixels(1.0);
 
 

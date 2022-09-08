@@ -189,7 +189,14 @@ void Tiled2dMapVectorPolygonSubLayer::addPolygons(const Tiled2dMapTileInfo &tile
         return;
     }
 
-    const auto &objectFactory = mapInterface->getGraphicsObjectFactory();
+    auto mapInterface = this->mapInterface;
+    auto objectFactory = mapInterface ? mapInterface->getGraphicsObjectFactory() : nullptr;
+    auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
+    auto converter = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
+
+    if (!mapInterface || !objectFactory || !scheduler || !converter) {
+        return;
+    }
 
     std::vector<std::shared_ptr<PolygonGroup2dLayerObject>> polygonObjects;
     std::vector<std::shared_ptr<GraphicsObjectInterface>> newGraphicObjects;
@@ -197,7 +204,7 @@ void Tiled2dMapVectorPolygonSubLayer::addPolygons(const Tiled2dMapTileInfo &tile
     for (auto const& tuple: polygons) {
         const auto polygonObject = objectFactory->createPolygonGroup(shader->asShaderProgramInterface());
 
-        auto layerObject = std::make_shared<PolygonGroup2dLayerObject>(mapInterface->getCoordinateConverterHelper(),
+        auto layerObject = std::make_shared<PolygonGroup2dLayerObject>(converter,
                                                                        polygonObject, shader);
 
 
@@ -219,7 +226,7 @@ void Tiled2dMapVectorPolygonSubLayer::addPolygons(const Tiled2dMapTileInfo &tile
 
     std::weak_ptr<Tiled2dMapVectorPolygonSubLayer> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapVectorPolygonSubLayer>(
             shared_from_this());
-    mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
+    scheduler->addTask(std::make_shared<LambdaTask>(
             TaskConfig("Tiled2dMapVectorPolygonSubLayer_setup", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
             [weakSelfPtr, tileInfo, newGraphicObjects] {
                 auto selfPtr = weakSelfPtr.lock();
