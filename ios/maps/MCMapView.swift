@@ -63,6 +63,10 @@ open class MCMapView: MTKView {
         delegate = self
 
         depthStencilPixelFormat = .stencil8
+        
+        //if #available(iOS 16.0, *) {
+        //   depthStencilStorageMode = .private
+        //}
 
         isMultipleTouchEnabled = true
 

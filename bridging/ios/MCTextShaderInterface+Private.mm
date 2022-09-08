@@ -7,6 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
+#import "MCColor+Private.h"
 #import "MCShaderProgramInterface+Private.h"
 #import "MCVec3D+Private.h"
 #include <exception>
@@ -33,15 +34,15 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (void)setColor:(float)red
-           green:(float)green
-            blue:(float)blue
-           alpha:(float)alpha {
+- (void)setColor:(nonnull MCColor *)color {
     try {
-        _cppRefHandle.get()->setColor(::djinni::F32::toCpp(red),
-                                      ::djinni::F32::toCpp(green),
-                                      ::djinni::F32::toCpp(blue),
-                                      ::djinni::F32::toCpp(alpha));
+        _cppRefHandle.get()->setColor(::djinni_generated::Color::toCpp(color));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setHaloColor:(nonnull MCColor *)color {
+    try {
+        _cppRefHandle.get()->setHaloColor(::djinni_generated::Color::toCpp(color));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -73,13 +74,16 @@ class TextShaderInterface::ObjcProxy final
     friend class ::djinni_generated::TextShaderInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void setColor(float c_red, float c_green, float c_blue, float c_alpha) override
+    void setColor(const ::Color & c_color) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setColor:(::djinni::F32::fromCpp(c_red))
-                                                         green:(::djinni::F32::fromCpp(c_green))
-                                                          blue:(::djinni::F32::fromCpp(c_blue))
-                                                         alpha:(::djinni::F32::fromCpp(c_alpha))];
+            [djinni_private_get_proxied_objc_object() setColor:(::djinni_generated::Color::fromCpp(c_color))];
+        }
+    }
+    void setHaloColor(const ::Color & c_color) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setHaloColor:(::djinni_generated::Color::fromCpp(c_color))];
         }
     }
     void setScale(float c_scale) override

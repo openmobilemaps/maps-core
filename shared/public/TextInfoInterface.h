@@ -5,15 +5,20 @@
 
 #include "Coord.h"
 #include "Font.h"
-#include <string>
+#include <vector>
+
+enum class Anchor;
+struct FormattedStringEntry;
 
 class TextInfoInterface {
 public:
     virtual ~TextInfoInterface() {}
 
-    virtual std::string getText() = 0;
+    virtual std::vector<FormattedStringEntry> getText() = 0;
 
     virtual ::Coord getCoordinate() = 0;
 
     virtual ::Font getFont() = 0;
+
+    virtual Anchor getTextAnchor() = 0;
 };

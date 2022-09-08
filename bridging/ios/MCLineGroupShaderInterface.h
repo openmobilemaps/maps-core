@@ -8,7 +8,7 @@
 
 @protocol MCLineGroupShaderInterface
 
-- (void)setStyles:(nonnull NSArray<MCLineStyle *> *)lineStyles;
+- (void)setStyles:(nonnull NSArray<MCLineStyle *> *)styles;
 
 - (nullable id<MCShaderProgramInterface>)asShaderProgramInterface;
 

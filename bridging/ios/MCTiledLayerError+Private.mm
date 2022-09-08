@@ -17,7 +17,7 @@ auto TiledLayerError::toCpp(ObjcType obj) -> CppType
             ::djinni::String::toCpp(obj.layerName),
             ::djinni::String::toCpp(obj.url),
             ::djinni::Bool::toCpp(obj.isRecoverable),
-            ::djinni_generated::RectCoord::toCpp(obj.bounds)};
+            ::djinni::Optional<std::optional, ::djinni_generated::RectCoord>::toCpp(obj.bounds)};
 }
 
 auto TiledLayerError::fromCpp(const CppType& cpp) -> ObjcType
@@ -27,7 +27,7 @@ auto TiledLayerError::fromCpp(const CppType& cpp) -> ObjcType
                                            layerName:(::djinni::String::fromCpp(cpp.layerName))
                                                  url:(::djinni::String::fromCpp(cpp.url))
                                        isRecoverable:(::djinni::Bool::fromCpp(cpp.isRecoverable))
-                                              bounds:(::djinni_generated::RectCoord::fromCpp(cpp.bounds))];
+                                              bounds:(::djinni::Optional<std::optional, ::djinni_generated::RectCoord>::fromCpp(cpp.bounds))];
 }
 
 }  // namespace djinni_generated

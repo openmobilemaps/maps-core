@@ -35,22 +35,18 @@ class Line2dOpenGl : public GraphicsObjectInterface,
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
                         int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
-    virtual void setLinePositions(const std::vector<::Vec2D> &positions) override;
+    virtual void setLine(const ::SharedBytes & line, const ::SharedBytes & indices) override;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() override;
 
     virtual void setIsInverseMasked(bool inversed) override;
 
   protected:
-    void initializeLineAndPoints();
-
     void drawLineSegments(std::shared_ptr<OpenGlContext> openGlContext, int64_t mvpMatrix, float widthScaleFactor);
 
     void prepareGlData(std::shared_ptr<OpenGlContext> openGlContext);
 
     void removeGlBuffers();
-
-    std::vector<Vec2D> lineCoordinates;
 
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
     int mvpMatrixHandle;
@@ -68,6 +64,7 @@ class Line2dOpenGl : public GraphicsObjectInterface,
     std::vector<GLuint> lineIndices;
 
     bool ready = false;
+    bool dataReady = false;
     std::recursive_mutex dataMutex;
 
     bool isMaskInversed = false;

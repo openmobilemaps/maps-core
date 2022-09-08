@@ -21,12 +21,12 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_L
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_LineGroupShaderInterface_00024CppProxy_native_1setStyles(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_lineStyles)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_LineGroupShaderInterface_00024CppProxy_native_1setStyles(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_styles)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::LineGroupShaderInterface>(nativeRef);
-        ref->setStyles(::djinni::List<::djinni_generated::NativeLineStyle>::toCpp(jniEnv, j_lineStyles));
+        ref->setStyles(::djinni::List<::djinni_generated::NativeLineStyle>::toCpp(jniEnv, j_styles));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

@@ -97,15 +97,11 @@ extension Polygon2d: MCMaskingObjectInterface {
               let indicesBuffer = indicesBuffer
         else { return }
 
-        encoder.pushDebugGroup("Polygon2d")
-
-        if stencilState == nil {
-            setupStencilStates()
-        }
+        encoder.pushDebugGroup("Polygon2dMask")
 
         if let mask = context.polygonMask {
+            encoder.setStencilReferenceValue(0xFF)
             encoder.setDepthStencilState(mask)
-            encoder.setStencilReferenceValue(0b1000_0000)
         }
 
         // stencil prepare pass
@@ -129,7 +125,7 @@ extension Polygon2d: MCMaskingObjectInterface {
 
 extension Polygon2d: MCPolygon2dInterface {
     func setVertices(_ vertices: [MCVec2D], indices: [NSNumber]) {
-        guard !vertices.isEmpty else {
+        guard !vertices.isEmpty, !indices.isEmpty else {
             indicesCount = 0
             verticesBuffer = nil
             indicesBuffer = nil

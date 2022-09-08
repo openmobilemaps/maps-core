@@ -23,6 +23,8 @@ struct LineGroupStyle: Equatable {
 
     var opacity: Float
 
+    var blur: Float
+
     var lineCap: Int8
 
     var numDashValues: Int8
@@ -31,10 +33,6 @@ struct LineGroupStyle: Equatable {
     var dashValue1: Float = 0
     var dashValue2: Float = 0
     var dashValue3: Float = 0
-    var dashValue4: Float = 0
-    var dashValue5: Float = 0
-    var dashValue6: Float = 0
-    var dashValue7: Float = 0
 
     init(style: MCLineStyle, highlighted: Bool) {
         width = style.width
@@ -46,21 +44,19 @@ struct LineGroupStyle: Equatable {
             gapColor = style.gapColor.normal.simdValues
         }
         widthAsPixels = style.widthType == .SCREEN_PIXEL ? 1 : 0
+        
         opacity = style.opacity
+
+        blur = style.blur
 
         numDashValues = Int8(style.dashArray.count)
 
         // if you think, you can do this faster with a loop, you can try, but we need
         // a proof from the profiler
-        let size = style.dashArray.count
-        dashValue0 = (size > 0 ? Float(truncating: style.dashArray[0]) : 0.0)
-        dashValue1 = (size > 1 ? Float(truncating: style.dashArray[1]) : 0.0) + dashValue0
-        dashValue2 = (size > 2 ? Float(truncating: style.dashArray[2]) : 0.0) + dashValue1
-        dashValue3 = (size > 3 ? Float(truncating: style.dashArray[3]) : 0.0) + dashValue2
-        dashValue4 = (size > 4 ? Float(truncating: style.dashArray[4]) : 0.0) + dashValue3
-        dashValue5 = (size > 5 ? Float(truncating: style.dashArray[5]) : 0.0) + dashValue4
-        dashValue6 = (size > 6 ? Float(truncating: style.dashArray[6]) : 0.0) + dashValue5
-        dashValue7 = (size > 7 ? Float(truncating: style.dashArray[7]) : 0.0) + dashValue6
+        dashValue0 = (numDashValues > 0 ? Float(truncating: style.dashArray[0]) : 0.0)
+        dashValue1 = (numDashValues > 1 ? Float(truncating: style.dashArray[1]) : 0.0) + dashValue0
+        dashValue2 = (numDashValues > 2 ? Float(truncating: style.dashArray[2]) : 0.0) + dashValue1
+        dashValue3 = (numDashValues > 3 ? Float(truncating: style.dashArray[3]) : 0.0) + dashValue2
 
         switch style.lineCap {
             case .BUTT:
@@ -93,7 +89,7 @@ class LineGroupShader: BaseShader {
 
     private var state = State.normal
 
-    init(styleBufferSize: Int = 32) {
+    init(styleBufferSize: Int = 256) {
         self.styleBufferSize = styleBufferSize
         guard let buffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<LineGroupStyle>.stride * self.styleBufferSize, options: []) else { fatalError("Could not create buffer") }
         lineStyleBuffer = buffer
@@ -120,21 +116,23 @@ class LineGroupShader: BaseShader {
 }
 
 extension LineGroupShader: MCLineGroupShaderInterface {
-    func setStyles(_ lineStyles: [MCLineStyle]) {
-        guard lineStyles.count <= self.styleBufferSize else { fatalError("line style error exceeds buffer size") }
 
-        guard lineStyles != currentStyles else {
-            return
-        }
-
-        currentStyles = lineStyles
+    func setStyles(_ styles: [MCLineStyle]) {
+        guard styles.count <= self.styleBufferSize else { fatalError("line style error exceeds buffer size") }
 
         var mappedLineStyles: [LineGroupStyle] = []
-        for l in lineStyles {
+        for l in styles {
             mappedLineStyles.append(LineGroupStyle(style: l, highlighted: state == .highlighted))
         }
 
         lineStyleBuffer.contents().copyMemory(from: mappedLineStyles, byteCount: mappedLineStyles.count * MemoryLayout<LineGroupStyle>.stride)
+    }
+
+
+    func setStyles(_ styles: MCSharedBytes) {
+        guard styles.elementCount < self.styleBufferSize else { fatalError("line style error exceeds buffer size") }
+
+        lineStyleBuffer.copyMemory(from: styles)
     }
 
     func asShaderProgram() -> MCShaderProgramInterface? {

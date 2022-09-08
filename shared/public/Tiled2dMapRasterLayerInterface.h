@@ -6,6 +6,7 @@
 #include "LayerInterface.h"
 #include "LoaderInterface.h"
 #include "MaskingObjectInterface.h"
+#include "ShaderProgramInterface.h"
 #include "Tiled2dMapLayerConfig.h"
 #include <cstdint>
 #include <memory>
@@ -20,6 +21,9 @@ public:
 
     /** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
     static std::shared_ptr<Tiled2dMapRasterLayerInterface> createWithMask(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::vector<std::shared_ptr<::LoaderInterface>> & loaders, const std::shared_ptr<::MaskingObjectInterface> & mask);
+
+    /** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
+    static std::shared_ptr<Tiled2dMapRasterLayerInterface> createWithShader(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::vector<std::shared_ptr<::LoaderInterface>> & loaders, const std::shared_ptr<::ShaderProgramInterface> & shader);
 
     /** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
     static std::shared_ptr<Tiled2dMapRasterLayerInterface> create(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::vector<std::shared_ptr<::LoaderInterface>> & loaders);
@@ -43,4 +47,8 @@ public:
     virtual void setMaxZoomLevelIdentifier(std::optional<int32_t> value) = 0;
 
     virtual std::optional<int32_t> getMaxZoomLevelIdentifier() = 0;
+
+    virtual void setT(int32_t t) = 0;
+
+    virtual std::shared_ptr<::Tiled2dMapLayerConfig> getConfig() = 0;
 };

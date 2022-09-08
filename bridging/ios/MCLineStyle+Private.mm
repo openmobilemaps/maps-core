@@ -16,6 +16,7 @@ auto LineStyle::toCpp(ObjcType obj) -> CppType
     return {::djinni_generated::ColorStateList::toCpp(obj.color),
             ::djinni_generated::ColorStateList::toCpp(obj.gapColor),
             ::djinni::F32::toCpp(obj.opacity),
+            ::djinni::F32::toCpp(obj.blur),
             ::djinni::Enum<::SizeType, MCSizeType>::toCpp(obj.widthType),
             ::djinni::F32::toCpp(obj.width),
             ::djinni::List<::djinni::F32>::toCpp(obj.dashArray),
@@ -27,6 +28,7 @@ auto LineStyle::fromCpp(const CppType& cpp) -> ObjcType
     return [[MCLineStyle alloc] initWithColor:(::djinni_generated::ColorStateList::fromCpp(cpp.color))
                                      gapColor:(::djinni_generated::ColorStateList::fromCpp(cpp.gapColor))
                                       opacity:(::djinni::F32::fromCpp(cpp.opacity))
+                                         blur:(::djinni::F32::fromCpp(cpp.blur))
                                     widthType:(::djinni::Enum<::SizeType, MCSizeType>::fromCpp(cpp.widthType))
                                         width:(::djinni::F32::fromCpp(cpp.width))
                                     dashArray:(::djinni::List<::djinni::F32>::fromCpp(cpp.dashArray))

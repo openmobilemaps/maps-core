@@ -62,7 +62,7 @@ class PolygonGroup2d: BaseGraphicsObject {
                 setupStencilStates()
             }
             encoder.setDepthStencilState(stencilState)
-            encoder.setStencilReferenceValue(0b1000_0000)
+            encoder.setStencilReferenceValue(0b1100_0000)
         }
 
         shader.setupProgram(context)
@@ -84,26 +84,21 @@ class PolygonGroup2d: BaseGraphicsObject {
 }
 
 extension PolygonGroup2d: MCPolygonGroup2dInterface {
-    func setVertices(_ vertices: [MCRenderVerticesDescription], indices: [NSNumber]) {
-        guard !vertices.isEmpty else {
-            indicesCount = 0
+    func setVertices(_ vertices: MCSharedBytes, indices: MCSharedBytes) {
+        guard vertices.elementCount > 0 else {
+            self.indicesCount = 0
             verticesBuffer = nil
             indicesBuffer = nil
             return
         }
 
-        let polygonVertices: [PolygonVertex] = Array(vertices.map { vertex in vertex.vertices.map {
-            PolygonVertex(x: $0.xF, y: $0.yF, stylingIndex: vertex.styleIndex)
-        }}.joined())
-        let indices: [UInt16] = indices.map(\.uint16Value)
-
-        guard let verticesBuffer = device.makeBuffer(bytes: polygonVertices, length: MemoryLayout<PolygonVertex>.stride * polygonVertices.count, options: []),
-              let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: [])
+        guard let verticesBuffer = device.makeBuffer(from: vertices),
+              let indicesBuffer = device.makeBuffer(from: indices)
         else {
             fatalError("Cannot allocate buffers for the UBTileModel")
         }
 
-        indicesCount = indices.count
+        self.indicesCount = Int(indices.elementCount)
         self.verticesBuffer = verticesBuffer
         self.indicesBuffer = indicesBuffer
     }

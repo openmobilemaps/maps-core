@@ -72,10 +72,11 @@ class Text2dOpenGl : public GraphicsObjectInterface,
     std::vector<GLfloat> textureCoords;
     GLuint indexBuffer;
     std::vector<GLubyte> indices;
-    std::vector<GLuint> texturePointer = {0};
-    bool textureLoaded = false;
 
     std::vector<GlyphDescription> glyphDescriptions;
+
+    std::shared_ptr<TextureHolderInterface> textureHolder;
+    int texturePointer;
     double factorHeight = 1.0;
     double factorWidth = 1.0;
 

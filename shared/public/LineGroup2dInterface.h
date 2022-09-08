@@ -3,17 +3,16 @@
 
 #pragma once
 
+#include "SharedBytes.h"
 #include <memory>
-#include <vector>
 
 class GraphicsObjectInterface;
-struct RenderLineDescription;
 
 class LineGroup2dInterface {
 public:
     virtual ~LineGroup2dInterface() {}
 
-    virtual void setLines(const std::vector<RenderLineDescription> & lines) = 0;
+    virtual void setLines(const ::SharedBytes & lines, const ::SharedBytes & indices) = 0;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() = 0;
 };

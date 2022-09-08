@@ -10,6 +10,7 @@
            tileWidthLayerSystemUnits:(float)tileWidthLayerSystemUnits
                            numTilesX:(int32_t)numTilesX
                            numTilesY:(int32_t)numTilesY
+                           numTilesT:(int32_t)numTilesT
                  zoomLevelIdentifier:(int32_t)zoomLevelIdentifier
                               bounds:(nonnull MCRectCoord *)bounds
 {
@@ -18,6 +19,7 @@
         _tileWidthLayerSystemUnits = tileWidthLayerSystemUnits;
         _numTilesX = numTilesX;
         _numTilesY = numTilesY;
+        _numTilesT = numTilesT;
         _zoomLevelIdentifier = zoomLevelIdentifier;
         _bounds = bounds;
     }
@@ -28,6 +30,7 @@
                               tileWidthLayerSystemUnits:(float)tileWidthLayerSystemUnits
                                               numTilesX:(int32_t)numTilesX
                                               numTilesY:(int32_t)numTilesY
+                                              numTilesT:(int32_t)numTilesT
                                     zoomLevelIdentifier:(int32_t)zoomLevelIdentifier
                                                  bounds:(nonnull MCRectCoord *)bounds
 {
@@ -35,13 +38,14 @@
                                         tileWidthLayerSystemUnits:tileWidthLayerSystemUnits
                                                         numTilesX:numTilesX
                                                         numTilesY:numTilesY
+                                                        numTilesT:numTilesT
                                               zoomLevelIdentifier:zoomLevelIdentifier
                                                            bounds:bounds];
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p zoom:%@ tileWidthLayerSystemUnits:%@ numTilesX:%@ numTilesY:%@ zoomLevelIdentifier:%@ bounds:%@>", self.class, (void *)self, @(self.zoom), @(self.tileWidthLayerSystemUnits), @(self.numTilesX), @(self.numTilesY), @(self.zoomLevelIdentifier), self.bounds];
+    return [NSString stringWithFormat:@"<%@ %p zoom:%@ tileWidthLayerSystemUnits:%@ numTilesX:%@ numTilesY:%@ numTilesT:%@ zoomLevelIdentifier:%@ bounds:%@>", self.class, (void *)self, @(self.zoom), @(self.tileWidthLayerSystemUnits), @(self.numTilesX), @(self.numTilesY), @(self.numTilesT), @(self.zoomLevelIdentifier), self.bounds];
 }
 
 @end

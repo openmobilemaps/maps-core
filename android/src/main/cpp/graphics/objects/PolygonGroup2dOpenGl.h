@@ -29,7 +29,7 @@ class PolygonGroup2dOpenGl : public GraphicsObjectInterface,
 
     // PolygonGroup2dInterface
 
-    virtual void setVertices(const std::vector<RenderVerticesDescription> &vertices, const std::vector<int32_t> &indices) override;
+    virtual void setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices) override;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() override;
 
@@ -46,7 +46,10 @@ class PolygonGroup2dOpenGl : public GraphicsObjectInterface,
 
     virtual void setIsInverseMasked(bool inversed) override;
 
-  protected:
+protected:
+
+    virtual void removeGlBuffers();
+
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
     int mvpMatrixHandle;
     int positionHandle;

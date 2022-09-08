@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class Line2dInterface {
 
-    abstract fun setLinePositions(positions: ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2D>)
+    abstract fun setLine(line: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
     abstract fun asGraphicsObject(): GraphicsObjectInterface
 
@@ -29,11 +29,11 @@ abstract class Line2dInterface {
             _djinni_private_destroy()
         }
 
-        override fun setLinePositions(positions: ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2D>) {
+        override fun setLine(line: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setLinePositions(this.nativeRef, positions)
+            native_setLine(this.nativeRef, line, indices)
         }
-        private external fun native_setLinePositions(_nativeRef: Long, positions: ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2D>)
+        private external fun native_setLine(_nativeRef: Long, line: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
         override fun asGraphicsObject(): GraphicsObjectInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

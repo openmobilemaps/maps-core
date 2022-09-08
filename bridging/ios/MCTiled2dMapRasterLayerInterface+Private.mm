@@ -9,6 +9,7 @@
 #import "MCLayerInterface+Private.h"
 #import "MCLoaderInterface+Private.h"
 #import "MCMaskingObjectInterface+Private.h"
+#import "MCShaderProgramInterface+Private.h"
 #import "MCTiled2dMapLayerConfig+Private.h"
 #import "MCTiled2dMapRasterLayerCallbackInterface+Private.h"
 #include <exception>
@@ -42,6 +43,17 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
         auto objcpp_result_ = ::Tiled2dMapRasterLayerInterface::createWithMask(::djinni_generated::Tiled2dMapLayerConfig::toCpp(layerConfig),
                                                                                ::djinni::List<::djinni_generated::LoaderInterface>::toCpp(loaders),
                                                                                ::djinni_generated::MaskingObjectInterface::toCpp(mask));
+        return ::djinni_generated::Tiled2dMapRasterLayerInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
++ (nullable MCTiled2dMapRasterLayerInterface *)createWithShader:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
+                                                        loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
+                                                         shader:(nullable id<MCShaderProgramInterface>)shader {
+    try {
+        auto objcpp_result_ = ::Tiled2dMapRasterLayerInterface::createWithShader(::djinni_generated::Tiled2dMapLayerConfig::toCpp(layerConfig),
+                                                                                 ::djinni::List<::djinni_generated::LoaderInterface>::toCpp(loaders),
+                                                                                 ::djinni_generated::ShaderProgramInterface::toCpp(shader));
         return ::djinni_generated::Tiled2dMapRasterLayerInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -117,6 +129,19 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getMaxZoomLevelIdentifier();
         return ::djinni::Optional<std::optional, ::djinni::I32>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setT:(int32_t)t {
+    try {
+        _cppRefHandle.get()->setT(::djinni::I32::toCpp(t));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCTiled2dMapLayerConfig>)getConfig {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getConfig();
+        return ::djinni_generated::Tiled2dMapLayerConfig::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

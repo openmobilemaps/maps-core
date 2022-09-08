@@ -9,6 +9,7 @@
 - (nonnull instancetype)initWithColor:(nonnull MCColorStateList *)color
                              gapColor:(nonnull MCColorStateList *)gapColor
                               opacity:(float)opacity
+                                 blur:(float)blur
                             widthType:(MCSizeType)widthType
                                 width:(float)width
                             dashArray:(nonnull NSArray<NSNumber *> *)dashArray
@@ -18,6 +19,7 @@
         _color = color;
         _gapColor = gapColor;
         _opacity = opacity;
+        _blur = blur;
         _widthType = widthType;
         _width = width;
         _dashArray = [dashArray copy];
@@ -29,6 +31,7 @@
 + (nonnull instancetype)lineStyleWithColor:(nonnull MCColorStateList *)color
                                   gapColor:(nonnull MCColorStateList *)gapColor
                                    opacity:(float)opacity
+                                      blur:(float)blur
                                  widthType:(MCSizeType)widthType
                                      width:(float)width
                                  dashArray:(nonnull NSArray<NSNumber *> *)dashArray
@@ -37,6 +40,7 @@
     return [(MCLineStyle*)[self alloc] initWithColor:color
                                             gapColor:gapColor
                                              opacity:opacity
+                                                blur:blur
                                            widthType:widthType
                                                width:width
                                            dashArray:dashArray
@@ -45,7 +49,7 @@
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p color:%@ gapColor:%@ opacity:%@ widthType:%@ width:%@ dashArray:%@ lineCap:%@>", self.class, (void *)self, self.color, self.gapColor, @(self.opacity), @(self.widthType), @(self.width), self.dashArray, @(self.lineCap)];
+    return [NSString stringWithFormat:@"<%@ %p color:%@ gapColor:%@ opacity:%@ blur:%@ widthType:%@ width:%@ dashArray:%@ lineCap:%@>", self.class, (void *)self, self.color, self.gapColor, @(self.opacity), @(self.blur), @(self.widthType), @(self.width), self.dashArray, @(self.lineCap)];
 }
 
 @end

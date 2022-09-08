@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class Tiled2dMapSourceInterface {
 
-    abstract fun onVisibleBoundsChanged(visibleBounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, zoom: Double)
+    abstract fun onVisibleBoundsChanged(visibleBounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, curT: Int, zoom: Double)
 
     abstract fun setMinZoomLevelIdentifier(value: Int?)
 
@@ -45,11 +45,11 @@ abstract class Tiled2dMapSourceInterface {
             _djinni_private_destroy()
         }
 
-        override fun onVisibleBoundsChanged(visibleBounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, zoom: Double) {
+        override fun onVisibleBoundsChanged(visibleBounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, curT: Int, zoom: Double) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_onVisibleBoundsChanged(this.nativeRef, visibleBounds, zoom)
+            native_onVisibleBoundsChanged(this.nativeRef, visibleBounds, curT, zoom)
         }
-        private external fun native_onVisibleBoundsChanged(_nativeRef: Long, visibleBounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, zoom: Double)
+        private external fun native_onVisibleBoundsChanged(_nativeRef: Long, visibleBounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, curT: Int, zoom: Double)
 
         override fun setMinZoomLevelIdentifier(value: Int?) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

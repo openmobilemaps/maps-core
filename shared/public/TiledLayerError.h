@@ -15,14 +15,14 @@ struct TiledLayerError final {
     std::string layerName;
     std::string url;
     bool isRecoverable;
-    ::RectCoord bounds;
+    std::optional<::RectCoord> bounds;
 
     TiledLayerError(::LoaderStatus status_,
                     std::optional<std::string> errorCode_,
                     std::string layerName_,
                     std::string url_,
                     bool isRecoverable_,
-                    ::RectCoord bounds_)
+                    std::optional<::RectCoord> bounds_)
     : status(std::move(status_))
     , errorCode(std::move(errorCode_))
     , layerName(std::move(layerName_))

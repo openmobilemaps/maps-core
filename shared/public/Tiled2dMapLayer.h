@@ -25,7 +25,7 @@ class Tiled2dMapLayer : public SimpleLayerInterface,
                         public SimpleTouchInterface,
                         public std::enable_shared_from_this<Tiled2dMapLayer> {
   public:
-    Tiled2dMapLayer(const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig);
+    Tiled2dMapLayer();
 
     void setSourceInterface(const std::shared_ptr<Tiled2dMapSourceInterface> &sourceInterface);
 
@@ -69,9 +69,10 @@ class Tiled2dMapLayer : public SimpleLayerInterface,
 
     virtual LayerReadyState isReadyToRenderOffscreen() override;
 
+    virtual void setT(int32_t t);
+
 protected:
     std::shared_ptr<MapInterface> mapInterface;
-    const std::shared_ptr<Tiled2dMapLayerConfig> layerConfig;
     std::shared_ptr< ::ErrorManager> errorManager;
     std::shared_ptr<Tiled2dMapSourceInterface> sourceInterface;
 
@@ -79,4 +80,6 @@ protected:
 
     std::optional<int32_t> minZoomLevelIdentifier = std::nullopt;
     std::optional<int32_t> maxZoomLevelIdentifier = std::nullopt;
+
+    int curT;
 };

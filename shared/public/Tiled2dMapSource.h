@@ -22,6 +22,7 @@
 #include "Tiled2dMapZoomInfo.h"
 #include "Tiled2dMapZoomLevelInfo.h"
 #include "QuadCoord.h"
+#include "PolygonCoord.h"
 #include "CoordinateSystemIdentifiers.h"
 #include <atomic>
 #include <cmath>
@@ -30,14 +31,36 @@
 #include <map>
 #include <unordered_map>
 #include <unordered_set>
+#include "gpc.h"
+
+template<class R>
+struct TileWrapper {
+public:
+    const R result;
+    std::vector<::PolygonCoord> masks;
+    const PolygonCoord tileBounds;
+    gpc_polygon tilePolygon;
+    bool isVisible = true;
+
+    TileWrapper(const R &result,
+                const std::vector<::PolygonCoord> & masks,
+                const PolygonCoord & tileBounds,
+                const gpc_polygon &tilePolygon) :
+    result(std::move(result)),
+    masks(std::move(masks)),
+    tileBounds(std::move(tileBounds)),
+    tilePolygon(std::move(tilePolygon)) {};
+};
+
 
 // T is the Object used for loading
 // L is the Loading type
 // R is the Result type
-template <class T, class L, class R> class Tiled2dMapSource :
-    public Tiled2dMapSourceInterface,
-    public std::enable_shared_from_this<Tiled2dMapSourceInterface> {
-  public:
+template<class T, class L, class R>
+class Tiled2dMapSource :
+        public Tiled2dMapSourceInterface,
+        public std::enable_shared_from_this<Tiled2dMapSourceInterface> {
+public:
     Tiled2dMapSource(const MapConfig &mapConfig, const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
                      const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                      const std::shared_ptr<SchedulerInterface> &scheduler,
@@ -45,7 +68,7 @@ template <class T, class L, class R> class Tiled2dMapSource :
                      float screenDensityPpi,
                      size_t loaderCount);
 
-    virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom) override;
+    virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, int curT, double zoom) override;
 
     virtual bool isTileVisible(const Tiled2dMapTileInfo &tileInfo);
 
@@ -56,20 +79,26 @@ template <class T, class L, class R> class Tiled2dMapSource :
     virtual RectCoord getCurrentViewBounds();
 
     void setMinZoomLevelIdentifier(std::optional<int32_t> value) override;
+
     void setMaxZoomLevelIdentifier(std::optional<int32_t> value) override;
 
     std::optional<int32_t> getMinZoomLevelIdentifier() override;
+
     std::optional<int32_t> getMaxZoomLevelIdentifier() override;
 
     virtual ::LayerReadyState isReadyToRenderOffscreen() override;
 
-    virtual void setErrorManager(const std::shared_ptr<::ErrorManager> & errorManager) override;
+    virtual void setErrorManager(const std::shared_ptr<::ErrorManager> &errorManager) override;
 
     virtual void forceReload() override;
 
+    void setTileReady(const Tiled2dMapTileInfo &tile);
+
+    void setTilesReady(const std::vector<const Tiled2dMapTileInfo> &tiles);
+
+    virtual L loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) = 0;
 
   protected:
-    virtual L loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) = 0;
 
     virtual R postLoadingTask(const L &loadedData, const Tiled2dMapTileInfo &tile) = 0;
 
@@ -79,7 +108,7 @@ template <class T, class L, class R> class Tiled2dMapSource :
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
     std::shared_ptr<SchedulerInterface> scheduler;
     std::weak_ptr<Tiled2dMapSourceListenerInterface> listener;
-    std::shared_ptr<::ErrorManager>  errorManager;
+    std::shared_ptr<::ErrorManager> errorManager;
 
     std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfos;
     const Tiled2dMapZoomInfo zoomInfo;
@@ -88,10 +117,18 @@ template <class T, class L, class R> class Tiled2dMapSource :
     std::optional<int32_t> maxZoomLevelIdentifier;
 
     std::recursive_mutex currentTilesMutex;
-    std::unordered_map<Tiled2dMapTileInfo, R> currentTiles;
+    std::map<Tiled2dMapTileInfo, TileWrapper<R>> currentTiles;
+
+
+    std::recursive_mutex currentZoomLevelMutex;
+    int currentZoomLevel = 0;
 
     std::recursive_mutex currentVisibleTilesMutex;
     std::unordered_set<Tiled2dMapTileInfo> currentVisibleTiles;
+
+    std::recursive_mutex currentPyramidMutex;
+    std::vector<VisibleTilesLayer> currentPyramid;
+
     RectCoord currentViewBounds = RectCoord(Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0),
                                             Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0));
 
@@ -99,20 +136,27 @@ template <class T, class L, class R> class Tiled2dMapSource :
     std::atomic<bool> isPaused;
 
     float screenDensityPpi;
+    std::recursive_mutex tilesReadyMutex;
+    std::set<Tiled2dMapTileInfo> readyTiles;
 
-  private:
-    void updateCurrentTileset(const ::RectCoord &visibleBounds, double zoom);
+private:
+    void updateCurrentTileset(const ::RectCoord &visibleBounds, int curT, double zoom);
 
     void performLoadingTask(size_t loaderIndex);
 
-    void onVisibleTilesChanged(const std::unordered_set<PrioritizedTiled2dMapTileInfo> &visibleTiles);
+    void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid);
+
+    void updateTileMasks();
 
     std::atomic_flag updateFlag = ATOMIC_FLAG_INIT;
     std::atomic_int pendingUpdates = 0;
     std::recursive_mutex updateMutex;
     std::optional<RectCoord> updateBounds;
+    std::optional<int> updateT;
     std::optional<double> updateZoom;
 
+
+    std::recursive_mutex updateTilesetMutex;
     std::recursive_mutex currentlyLoadingMutex;
     std::unordered_set<Tiled2dMapTileInfo> currentlyLoading;
 
