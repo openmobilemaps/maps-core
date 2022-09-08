@@ -11,8 +11,8 @@
 #include "Tiled2dMapLayer.h"
 #include "MapCamera2dInterface.h"
 
-Tiled2dMapLayer::Tiled2dMapLayer(const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig)
-    : layerConfig(layerConfig) {}
+Tiled2dMapLayer::Tiled2dMapLayer()
+    : curT(0) {}
 
 void Tiled2dMapLayer::setSourceInterface(const std::shared_ptr<Tiled2dMapSourceInterface> &sourceInterface) {
     this->sourceInterface = sourceInterface;
@@ -77,7 +77,7 @@ void Tiled2dMapLayer::show() {
 }
 
 void Tiled2dMapLayer::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom) {
-    sourceInterface->onVisibleBoundsChanged(visibleBounds, zoom);
+    sourceInterface->onVisibleBoundsChanged(visibleBounds, curT, zoom);
 }
 
 void Tiled2dMapLayer::onRotationChanged(float angle) {
@@ -135,4 +135,18 @@ void Tiled2dMapLayer::forceReload() {
     if (sourceInterface) {
         sourceInterface->forceReload();
     }
+}
+
+void Tiled2dMapLayer::setT(int t) {
+    curT = t;
+
+    auto mapInterface = this->mapInterface;
+    if (mapInterface) {
+        auto camera = std::dynamic_pointer_cast<MapCamera2dInterface>(mapInterface->getCamera());
+        if (camera) {
+            onVisibleBoundsChanged(camera->getVisibleRect(), camera->getZoom());
+        }
+    }
+
+    onTilesUpdated();
 }

@@ -8,6 +8,7 @@ data class Tiled2dMapZoomLevelInfo(
     var tileWidthLayerSystemUnits: Float,
     var numTilesX: Int,
     var numTilesY: Int,
+    var numTilesT: Int,
     var zoomLevelIdentifier: Int,
     var bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord,
 )

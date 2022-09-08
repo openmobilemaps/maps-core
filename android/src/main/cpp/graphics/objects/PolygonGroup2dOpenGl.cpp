@@ -18,33 +18,20 @@ std::shared_ptr<GraphicsObjectInterface> PolygonGroup2dOpenGl::asGraphicsObject(
 
 bool PolygonGroup2dOpenGl::isReady() { return ready; }
 
-void PolygonGroup2dOpenGl::setVertices(const std::vector<RenderVerticesDescription> &vertices,
-                                       const std::vector<int32_t> &indices) {
-    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+void
+PolygonGroup2dOpenGl::setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices) {
     ready = false;
     dataReady = false;
 
-    polygonIndices.clear();
-    polygonAttributes.clear();
-
-    int numPolygons = vertices.size();
-    for (int polygonIndex = 0; polygonIndex < numPolygons; polygonIndex++) {
-        int styleIndex = vertices[polygonIndex].styleIndex;
-        int numVertices = (int)vertices[polygonIndex].vertices.size();
-
-        for (int i = 0; i < numVertices; i++) {
-            const Vec2D &p = vertices[polygonIndex].vertices[i];
-            // Position
-            polygonAttributes.push_back(p.x);
-            polygonAttributes.push_back(p.y);
-            // StyleIndex
-            polygonAttributes.push_back(styleIndex);
-        }
+    polygonIndices.resize(indices.elementCount);
+    polygonAttributes.resize(vertices.elementCount);
+    if(indices.elementCount > 0) {
+        std::memcpy(polygonIndices.data(), (void *) indices.address,indices.elementCount * indices.bytesPerElement);
     }
-    // Indices
-    int numIndices = indices.size();
-    for (int i = 0; i < numIndices; i++) {
-        polygonIndices.push_back(indices[i]);
+
+    if(vertices.elementCount > 0) {
+        std::memcpy(polygonAttributes.data(), (void *) vertices.address,
+                    vertices.elementCount * vertices.bytesPerElement);
     }
 
     dataReady = true;
@@ -63,20 +50,25 @@ void PolygonGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterfa
     int program = openGlContext->getProgram(shaderProgram->getProgramName());
     glUseProgram(program);
 
+    removeGlBuffers();
+
     positionHandle = glGetAttribLocation(program, "vPosition");
     styleIndexHandle = glGetAttribLocation(program, "vStyleIndex");
 
     glGenBuffers(1, &attribBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, attribBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * polygonAttributes.size(), &polygonAttributes[0], GL_STATIC_DRAW);
+    OpenGlHelper::checkGlError("Setup attribute buffer");
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glGenBuffers(1, &indexBuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * polygonIndices.size(), &polygonIndices[0], GL_STATIC_DRAW);
+    OpenGlHelper::checkGlError("Setup index buffer");
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     mvpMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
+    OpenGlHelper::checkGlError("glGetUniformLocation uMVPMatrix");
 
     ready = true;
 }
@@ -84,6 +76,10 @@ void PolygonGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterfa
 void PolygonGroup2dOpenGl::clear() {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     ready = false;
+    removeGlBuffers();
+}
+
+void PolygonGroup2dOpenGl::removeGlBuffers() {
     glDeleteBuffers(1, &attribBuffer);
     glDeleteBuffers(1, &indexBuffer);
 }
@@ -103,11 +99,13 @@ void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterf
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     int mProgram = openGlContext->getProgram(shaderProgram->getProgramName());
     glUseProgram(mProgram);
+    OpenGlHelper::checkGlError("glUseProgram PolygonGroupOpenGl");
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
     glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
+    OpenGlHelper::checkGlError("glUniformMatrix4fv");
 
     shaderProgram->preRender(context);
 
@@ -123,6 +121,8 @@ void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterf
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glDrawElements(GL_TRIANGLES, polygonIndices.size(), GL_UNSIGNED_SHORT, nullptr);
+
+    OpenGlHelper::checkGlError("glDrawElements");
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 

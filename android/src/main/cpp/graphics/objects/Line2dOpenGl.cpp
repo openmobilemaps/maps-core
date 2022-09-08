@@ -18,16 +18,25 @@ std::shared_ptr<GraphicsObjectInterface> Line2dOpenGl::asGraphicsObject() { retu
 
 bool Line2dOpenGl::isReady() { return ready; }
 
-void Line2dOpenGl::setLinePositions(const std::vector<::Vec2D> &positions) {
-    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+void Line2dOpenGl::setLine(const ::SharedBytes & lines, const ::SharedBytes & indices) {
     ready = false;
-    lineCoordinates = positions;
-    initializeLineAndPoints();
+    dataReady = false;
+
+    lineIndices.resize(indices.elementCount);
+    lineAttributes.resize(lines.elementCount);
+    if (indices.elementCount > 0) {
+        std::memcpy(lineIndices.data(), (void *) indices.address, indices.elementCount * indices.bytesPerElement);
+    }
+    if (lines.elementCount > 0) {
+        std::memcpy(lineAttributes.data(), (void *) lines.address, lines.elementCount * lines.bytesPerElement);
+    }
+
+    dataReady = true;
 }
 
 void Line2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (ready)
+    if (ready || !dataReady)
         return;
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
@@ -38,149 +47,11 @@ void Line2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &con
     ready = true;
 }
 
-void Line2dOpenGl::initializeLineAndPoints() {
-    int pointCount = (int)lineCoordinates.size();
-    int iSecondToLast = pointCount - 2;
-
-    float prefixTotalLineLength = 0.0;
-
-    for (int i = 0; i < (pointCount - 1); i++) {
-        const Vec2D &p = lineCoordinates[i];
-        const Vec2D &pNext = lineCoordinates[i + 1];
-
-        float lengthNormalX = pNext.x - p.x;
-        float lengthNormalY = pNext.y - p.y;
-        float lineLength = std::sqrt(lengthNormalX * lengthNormalX + lengthNormalY * lengthNormalY);
-        lengthNormalX = lengthNormalX / lineLength;
-        lengthNormalY = lengthNormalY / lineLength;
-        float widthNormalX = -lengthNormalY;
-        float widthNormalY = lengthNormalX;
-
-        // SegmentType (0 inner, 1 start, 2 end, 3 single segment)
-        float lineStyleInfo = (i == 0 && i == iSecondToLast ? 3.0f
-                                  : (i == 0 ? 1.0f
-                                  : (i == iSecondToLast ? 2.0f
-                                  : 0.0f)));
-
-        // Vertex 1
-        // Position
-        lineAttributes.push_back(p.x);
-        lineAttributes.push_back(p.y);
-        lineAttributes.push_back(0.0);
-
-        // Width normal
-        lineAttributes.push_back(-widthNormalX);
-        lineAttributes.push_back(-widthNormalY);
-        lineAttributes.push_back(0.0);
-
-        // Length normal
-        lineAttributes.push_back(-lengthNormalX);
-        lineAttributes.push_back(-lengthNormalY);
-        lineAttributes.push_back(0.0);
-
-        // Position pointA and pointB
-        lineAttributes.push_back(p.x);
-        lineAttributes.push_back(p.y);
-        lineAttributes.push_back(0.0);
-        lineAttributes.push_back(pNext.x);
-        lineAttributes.push_back(pNext.y);
-        lineAttributes.push_back(0.0);
-
-        // Segment Start Length Position (length prefix sum)
-        lineAttributes.push_back(prefixTotalLineLength);
-
-        // Style Info
-        lineAttributes.push_back(lineStyleInfo);
-
-        // Vertex 2
-        lineAttributes.push_back(p.x);
-        lineAttributes.push_back(p.y);
-        lineAttributes.push_back(0.0);
-
-        lineAttributes.push_back(widthNormalX);
-        lineAttributes.push_back(widthNormalY);
-        lineAttributes.push_back(0.0);
-
-        lineAttributes.push_back(-lengthNormalX);
-        lineAttributes.push_back(-lengthNormalY);
-        lineAttributes.push_back(0.0);
-
-        lineAttributes.push_back(p.x);
-        lineAttributes.push_back(p.y);
-        lineAttributes.push_back(0.0);
-        lineAttributes.push_back(pNext.x);
-        lineAttributes.push_back(pNext.y);
-        lineAttributes.push_back(0.0);
-
-        lineAttributes.push_back(prefixTotalLineLength);
-
-        lineAttributes.push_back(lineStyleInfo);
-
-        // Vertex 3
-        lineAttributes.push_back(pNext.x);
-        lineAttributes.push_back(pNext.y);
-        lineAttributes.push_back(0.0);
-
-        lineAttributes.push_back(widthNormalX);
-        lineAttributes.push_back(widthNormalY);
-        lineAttributes.push_back(0.0);
-
-        lineAttributes.push_back(lengthNormalX);
-        lineAttributes.push_back(lengthNormalY);
-        lineAttributes.push_back(0.0);
-
-        lineAttributes.push_back(p.x);
-        lineAttributes.push_back(p.y);
-        lineAttributes.push_back(0.0);
-        lineAttributes.push_back(pNext.x);
-        lineAttributes.push_back(pNext.y);
-        lineAttributes.push_back(0.0);
-
-        lineAttributes.push_back(prefixTotalLineLength);
-
-        lineAttributes.push_back(lineStyleInfo);
-
-        // Vertex 4
-        lineAttributes.push_back(pNext.x);
-        lineAttributes.push_back(pNext.y);
-        lineAttributes.push_back(0.0);
-
-        lineAttributes.push_back(-widthNormalX);
-        lineAttributes.push_back(-widthNormalY);
-        lineAttributes.push_back(0.0);
-
-        lineAttributes.push_back(lengthNormalX);
-        lineAttributes.push_back(lengthNormalY);
-        lineAttributes.push_back(0.0);
-
-        lineAttributes.push_back(p.x);
-        lineAttributes.push_back(p.y);
-        lineAttributes.push_back(0.0);
-        lineAttributes.push_back(pNext.x);
-        lineAttributes.push_back(pNext.y);
-        lineAttributes.push_back(0.0);
-
-        lineAttributes.push_back(prefixTotalLineLength);
-
-        lineAttributes.push_back(lineStyleInfo);
-
-        // Vertex indices
-        lineIndices.push_back(4 * i);
-        lineIndices.push_back(4 * i + 1);
-        lineIndices.push_back(4 * i + 2);
-
-        lineIndices.push_back(4 * i);
-        lineIndices.push_back(4 * i + 2);
-        lineIndices.push_back(4 * i + 3);
-
-        prefixTotalLineLength += lineLength;
-    }
-
-}
-
 void Line2dOpenGl::prepareGlData(std::shared_ptr<OpenGlContext> openGlContext) {
     int program = openGlContext->getProgram(shaderProgram->getProgramName());
     glUseProgram(program);
+
+    removeGlBuffers();
 
     positionHandle = glGetAttribLocation(program, "vPosition");
     widthNormalHandle = glGetAttribLocation(program, "vWidthNormal");
@@ -242,7 +113,9 @@ void Line2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
 
     drawLineSegments(openGlContext, mvpMatrix, screenPixelAsRealMeterFactor);
 
-    glDisable(GL_STENCIL_TEST);
+    if (!isMasked) {
+        glDisable(GL_STENCIL_TEST);
+    }
 }
 
 void Line2dOpenGl::drawLineSegments(std::shared_ptr<OpenGlContext> openGlContext, int64_t mvpMatrix, float widthScaleFactor) {

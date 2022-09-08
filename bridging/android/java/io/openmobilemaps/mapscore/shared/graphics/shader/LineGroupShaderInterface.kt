@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class LineGroupShaderInterface {
 
-    abstract fun setStyles(lineStyles: ArrayList<io.openmobilemaps.mapscore.shared.map.layers.line.LineStyle>)
+    abstract fun setStyles(styles: ArrayList<io.openmobilemaps.mapscore.shared.map.layers.line.LineStyle>)
 
     abstract fun asShaderProgramInterface(): ShaderProgramInterface
 
@@ -29,11 +29,11 @@ abstract class LineGroupShaderInterface {
             _djinni_private_destroy()
         }
 
-        override fun setStyles(lineStyles: ArrayList<io.openmobilemaps.mapscore.shared.map.layers.line.LineStyle>) {
+        override fun setStyles(styles: ArrayList<io.openmobilemaps.mapscore.shared.map.layers.line.LineStyle>) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setStyles(this.nativeRef, lineStyles)
+            native_setStyles(this.nativeRef, styles)
         }
-        private external fun native_setStyles(_nativeRef: Long, lineStyles: ArrayList<io.openmobilemaps.mapscore.shared.map.layers.line.LineStyle>)
+        private external fun native_setStyles(_nativeRef: Long, styles: ArrayList<io.openmobilemaps.mapscore.shared.map.layers.line.LineStyle>)
 
         override fun asShaderProgramInterface(): ShaderProgramInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

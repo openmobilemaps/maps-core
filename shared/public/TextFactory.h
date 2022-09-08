@@ -6,13 +6,15 @@
 #include "Coord.h"
 #include "Font.h"
 #include <memory>
-#include <string>
+#include <vector>
 
 class TextInfoInterface;
+enum class Anchor;
+struct FormattedStringEntry;
 
 class TextFactory {
 public:
     virtual ~TextFactory() {}
 
-    static std::shared_ptr<TextInfoInterface> createText(const std::string & text, const ::Coord & coordinate, const ::Font & font);
+    static std::shared_ptr<TextInfoInterface> createText(const std::vector<FormattedStringEntry> & text, const ::Coord & coordinate, const ::Font & font, Anchor textAnchor);
 };

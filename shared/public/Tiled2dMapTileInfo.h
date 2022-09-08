@@ -17,23 +17,26 @@ struct Tiled2dMapTileInfo {
     RectCoord bounds;
     int x;
     int y;
+    int t;
     int zoomIdentifier;
     int zoomLevel;
 
-    Tiled2dMapTileInfo(RectCoord bounds, int x, int y, int zoomIdentifier, int zoomLevel)
+    Tiled2dMapTileInfo(RectCoord bounds, int x, int y, int z, int zoomIdentifier, int zoomLevel)
         : bounds(bounds)
         , x(x)
         , y(y)
+        , t(z)
         , zoomIdentifier(zoomIdentifier)
         , zoomLevel(zoomLevel) {}
 
-    bool operator==(const Tiled2dMapTileInfo &o) const { return x == o.x && y == o.y && zoomIdentifier == o.zoomIdentifier; }
+    bool operator==(const Tiled2dMapTileInfo &o) const { return x == o.x && y == o.y  && t == o.t && zoomIdentifier == o.zoomIdentifier; }
 
-    bool operator!=(const Tiled2dMapTileInfo &o) const { return !(x == o.x || y == o.y || zoomIdentifier == o.zoomIdentifier); }
+    bool operator!=(const Tiled2dMapTileInfo &o) const { return !(x == o.x || y == o.y || t == o.t || zoomIdentifier == o.zoomIdentifier); }
 
     bool operator<(const Tiled2dMapTileInfo &o) const {
-        return zoomIdentifier > o.zoomIdentifier || (zoomIdentifier == o.zoomIdentifier && x < o.x) ||
-               (zoomIdentifier == o.zoomIdentifier && x == o.x && y < o.y);
+        return zoomIdentifier < o.zoomIdentifier || (zoomIdentifier == o.zoomIdentifier && x < o.x) ||
+               (zoomIdentifier == o.zoomIdentifier && x == o.x && y < o.y) ||
+                (zoomIdentifier == o.zoomIdentifier && x == o.x && y == o.y && t < o.t);
     }
 };
 
@@ -43,6 +46,7 @@ template <> struct hash<Tiled2dMapTileInfo> {
         size_t res = 17;
         res = res * 31 + std::hash<int>()( k.x );
         res = res * 31 + std::hash<int>()( k.y );
+        res = res * 31 + std::hash<int>()( k.t );
         res = res * 31 + std::hash<int>()( k.zoomIdentifier );
         return res;
     }

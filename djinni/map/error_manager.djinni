@@ -26,5 +26,5 @@ tiled_layer_error = record
     layer_name: string;
     url: string;
     is_recoverable: bool;
-    bounds: rect_coord;
+    bounds: optional<rect_coord>;
 }

@@ -21,4 +21,6 @@
 
 @property (nonatomic, readonly) float a;
 
+- (NSComparisonResult)compare:(nonnull MCColor *)other;
+
 @end

@@ -37,7 +37,8 @@ private:
         int32_t getImageHeight() override;
         int32_t getTextureWidth() override;
         int32_t getTextureHeight() override;
-        void attachToGraphics() override;
+        int32_t attachToGraphics() override;
+        void clearFromGraphics() override;
 
     private:
         friend ::djinni::JniInterface<::TextureHolderInterface, ::djinni_generated::NativeTextureHolderInterface>;
@@ -48,7 +49,8 @@ private:
     const jmethodID method_getImageHeight { ::djinni::jniGetMethodID(clazz.get(), "getImageHeight", "()I") };
     const jmethodID method_getTextureWidth { ::djinni::jniGetMethodID(clazz.get(), "getTextureWidth", "()I") };
     const jmethodID method_getTextureHeight { ::djinni::jniGetMethodID(clazz.get(), "getTextureHeight", "()I") };
-    const jmethodID method_attachToGraphics { ::djinni::jniGetMethodID(clazz.get(), "attachToGraphics", "()V") };
+    const jmethodID method_attachToGraphics { ::djinni::jniGetMethodID(clazz.get(), "attachToGraphics", "()I") };
+    const jmethodID method_clearFromGraphics { ::djinni::jniGetMethodID(clazz.get(), "clearFromGraphics", "()V") };
 };
 
 }  // namespace djinni_generated

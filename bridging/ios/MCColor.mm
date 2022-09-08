@@ -31,6 +31,73 @@
                                            a:a];
 }
 
+- (BOOL)isEqual:(id)other
+{
+    if (![other isKindOfClass:[MCColor class]]) {
+        return NO;
+    }
+    MCColor *typedOther = (MCColor *)other;
+    return self.r == typedOther.r &&
+            self.g == typedOther.g &&
+            self.b == typedOther.b &&
+            self.a == typedOther.a;
+}
+
+- (NSUInteger)hash
+{
+    return NSStringFromClass([self class]).hash ^
+            (NSUInteger)self.r ^
+            (NSUInteger)self.g ^
+            (NSUInteger)self.b ^
+            (NSUInteger)self.a;
+}
+
+- (NSComparisonResult)compare:(MCColor *)other
+{
+    NSComparisonResult tempResult;
+    if (self.r < other.r) {
+        tempResult = NSOrderedAscending;
+    } else if (self.r > other.r) {
+        tempResult = NSOrderedDescending;
+    } else {
+        tempResult = NSOrderedSame;
+    }
+    if (tempResult != NSOrderedSame) {
+        return tempResult;
+    }
+    if (self.g < other.g) {
+        tempResult = NSOrderedAscending;
+    } else if (self.g > other.g) {
+        tempResult = NSOrderedDescending;
+    } else {
+        tempResult = NSOrderedSame;
+    }
+    if (tempResult != NSOrderedSame) {
+        return tempResult;
+    }
+    if (self.b < other.b) {
+        tempResult = NSOrderedAscending;
+    } else if (self.b > other.b) {
+        tempResult = NSOrderedDescending;
+    } else {
+        tempResult = NSOrderedSame;
+    }
+    if (tempResult != NSOrderedSame) {
+        return tempResult;
+    }
+    if (self.a < other.a) {
+        tempResult = NSOrderedAscending;
+    } else if (self.a > other.a) {
+        tempResult = NSOrderedDescending;
+    } else {
+        tempResult = NSOrderedSame;
+    }
+    if (tempResult != NSOrderedSame) {
+        return tempResult;
+    }
+    return NSOrderedSame;
+}
+
 - (NSString *)description
 {
     return [NSString stringWithFormat:@"<%@ %p r:%@ g:%@ b:%@ a:%@>", self.class, (void *)self, @(self.r), @(self.g), @(self.b), @(self.a)];

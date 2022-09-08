@@ -10,6 +10,9 @@
 
 #include "LineGroup2dLayerObject.h"
 #include "RenderLineDescription.h"
+#include "Logger.h"
+
+#include <cmath>
 
 LineGroup2dLayerObject::LineGroup2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                                const std::shared_ptr<LineGroup2dInterface> &line,
@@ -24,20 +27,149 @@ void LineGroup2dLayerObject::update() {}
 std::vector<std::shared_ptr<RenderConfigInterface>> LineGroup2dLayerObject::getRenderConfig() { return {renderConfig}; }
 
 void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<Coord>, int>> &lines) {
-    std::vector<RenderLineDescription> renderCoordsGroups;
-    for (auto const &line : lines) {
+
+    std::vector<uint32_t> lineIndices;
+    std::vector<float> lineAttributes;
+
+    int numLines = (int) lines.size();
+
+    int lineIndexOffset = 0;
+    for (int lineIndex = 0; lineIndex < numLines; lineIndex++) {
+        int lineStyleIndex = std::get<1>(lines[lineIndex]);
+
         std::vector<Vec2D> renderCoords;
-        for (auto const &mapCoord : std::get<0>(line)) {
+        for (auto const &mapCoord : std::get<0>(lines[lineIndex])) {
             Coord renderCoord = conversionHelper->convertToRenderSystem(mapCoord);
             renderCoords.push_back(Vec2D(renderCoord.x, renderCoord.y));
         }
-        renderCoordsGroups.push_back(RenderLineDescription(renderCoords, std::get<1>(line)));
+
+        int pointCount = (int)renderCoords.size();
+
+        float prefixTotalLineLength = 0.0;
+
+        int iSecondToLast = pointCount - 2;
+        for (int i = 0; i <= iSecondToLast; i++) {
+            const Vec2D &p = renderCoords[i];
+            const Vec2D &pNext = renderCoords[i + 1];
+
+            float lengthNormalX = pNext.x - p.x;
+            float lengthNormalY = pNext.y - p.y;
+            float lineLength = std::sqrt(lengthNormalX * lengthNormalX + lengthNormalY * lengthNormalY);
+            lengthNormalX = lengthNormalX / lineLength;
+            lengthNormalY = lengthNormalY / lineLength;
+            float widthNormalX = -lengthNormalY;
+            float widthNormalY = lengthNormalX;
+
+            // SegmentType (0 inner, 1 start, 2 end, 3 single segment) | lineStyleIndex
+            // (each one Byte, i.e. up to 256 styles if supported by shader!)
+            float lineStyleInfo = lineStyleIndex + (i == 0 && i == iSecondToLast ? (3 << 8)
+                    : (i == 0 ? (float) (1 << 8)
+                    : (i == iSecondToLast ? (float) (2 << 8)
+                    : 0.0)));
+
+            // Vertex 1
+            // Position
+            lineAttributes.push_back(p.x);
+            lineAttributes.push_back(p.y);
+
+            // Width normal
+            lineAttributes.push_back(-widthNormalX);
+            lineAttributes.push_back(-widthNormalY);
+
+            // Length normal
+            lineAttributes.push_back(-lengthNormalX);
+            lineAttributes.push_back(-lengthNormalY);
+
+            // Position pointA and pointB
+            lineAttributes.push_back(p.x);
+            lineAttributes.push_back(p.y);
+            lineAttributes.push_back(pNext.x);
+            lineAttributes.push_back(pNext.y);
+
+            // Segment Start Length Position (length prefix sum)
+            lineAttributes.push_back(prefixTotalLineLength);
+
+            // Style Info
+            lineAttributes.push_back(lineStyleInfo);
+
+            // Vertex 2
+            lineAttributes.push_back(p.x);
+            lineAttributes.push_back(p.y);
+
+            lineAttributes.push_back(widthNormalX);
+            lineAttributes.push_back(widthNormalY);
+
+            lineAttributes.push_back(-lengthNormalX);
+            lineAttributes.push_back(-lengthNormalY);
+
+            lineAttributes.push_back(p.x);
+            lineAttributes.push_back(p.y);
+            lineAttributes.push_back(pNext.x);
+            lineAttributes.push_back(pNext.y);
+
+            lineAttributes.push_back(prefixTotalLineLength);
+
+            lineAttributes.push_back(lineStyleInfo);
+
+            // Vertex 3
+            lineAttributes.push_back(pNext.x);
+            lineAttributes.push_back(pNext.y);
+
+            lineAttributes.push_back(widthNormalX);
+            lineAttributes.push_back(widthNormalY);
+
+            lineAttributes.push_back(lengthNormalX);
+            lineAttributes.push_back(lengthNormalY);
+
+            lineAttributes.push_back(p.x);
+            lineAttributes.push_back(p.y);
+            lineAttributes.push_back(pNext.x);
+            lineAttributes.push_back(pNext.y);
+            lineAttributes.push_back(prefixTotalLineLength);
+
+            lineAttributes.push_back(lineStyleInfo);
+
+            // Vertex 4
+            lineAttributes.push_back(pNext.x);
+            lineAttributes.push_back(pNext.y);
+
+            lineAttributes.push_back(-widthNormalX);
+            lineAttributes.push_back(-widthNormalY);
+
+            lineAttributes.push_back(lengthNormalX);
+            lineAttributes.push_back(lengthNormalY);
+
+            lineAttributes.push_back(p.x);
+            lineAttributes.push_back(p.y);
+            lineAttributes.push_back(pNext.x);
+            lineAttributes.push_back(pNext.y);
+
+            lineAttributes.push_back(prefixTotalLineLength);
+
+            lineAttributes.push_back(lineStyleInfo);
+
+            // Vertex indices
+            lineIndices.push_back(lineIndexOffset + 4 * i);
+            lineIndices.push_back(lineIndexOffset + 4 * i + 1);
+            lineIndices.push_back(lineIndexOffset + 4 * i + 2);
+
+            lineIndices.push_back(lineIndexOffset + 4 * i);
+            lineIndices.push_back(lineIndexOffset + 4 * i + 2);
+            lineIndices.push_back(lineIndexOffset + 4 * i + 3);
+
+            prefixTotalLineLength += lineLength;
+        }
+        lineIndexOffset += ((pointCount - 1) * 4);
     }
 
-    line->setLines(renderCoordsGroups);
+    auto attributes = SharedBytes((int64_t) lineAttributes.data(), (int32_t) lineAttributes.size(), (int32_t) sizeof(float));
+    auto indices = SharedBytes((int64_t) lineIndices.data(), (int32_t) lineIndices.size(), (int32_t) sizeof(uint32_t));
+    line->setLines(attributes, indices);
 }
 
-void LineGroup2dLayerObject::setStyles(const std::vector<LineStyle> &styles) { shader->setStyles(styles); }
+void LineGroup2dLayerObject::setStyles(const std::vector<LineStyle> &styles) {
+    shader->setStyles(styles);
+}
 
 std::shared_ptr<GraphicsObjectInterface> LineGroup2dLayerObject::getLineObject() { return line->asGraphicsObject(); }
 

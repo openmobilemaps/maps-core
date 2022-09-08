@@ -12,6 +12,7 @@ struct Tiled2dMapZoomLevelInfo final {
     float tileWidthLayerSystemUnits;
     int32_t numTilesX;
     int32_t numTilesY;
+    int32_t numTilesT;
     int32_t zoomLevelIdentifier;
     ::RectCoord bounds;
 
@@ -19,12 +20,14 @@ struct Tiled2dMapZoomLevelInfo final {
                             float tileWidthLayerSystemUnits_,
                             int32_t numTilesX_,
                             int32_t numTilesY_,
+                            int32_t numTilesT_,
                             int32_t zoomLevelIdentifier_,
                             ::RectCoord bounds_)
     : zoom(std::move(zoom_))
     , tileWidthLayerSystemUnits(std::move(tileWidthLayerSystemUnits_))
     , numTilesX(std::move(numTilesX_))
     , numTilesY(std::move(numTilesY_))
+    , numTilesT(std::move(numTilesT_))
     , zoomLevelIdentifier(std::move(zoomLevelIdentifier_))
     , bounds(std::move(bounds_))
     {}

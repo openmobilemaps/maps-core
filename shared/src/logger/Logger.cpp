@@ -28,10 +28,8 @@ int __android_log_print(int prio, const char *tag, const char *fmt, ...);
 #include <os/log.h>
 #endif
 
-Logger &Logger::operator()(int p) {
-    static Logger l;
-    l.priority = p;
-    return l;
+Logger::Logger(int p){
+    priority = p;
 }
 
 std::stringstream &Logger::stream() const { return ss; }

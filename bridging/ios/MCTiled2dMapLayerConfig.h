@@ -12,6 +12,7 @@
 
 - (nonnull NSString *)getTileUrl:(int32_t)x
                                y:(int32_t)y
+                               t:(int32_t)t
                             zoom:(int32_t)zoom;
 
 - (nonnull NSArray<MCTiled2dMapZoomLevelInfo *> *)getZoomLevelInfos;

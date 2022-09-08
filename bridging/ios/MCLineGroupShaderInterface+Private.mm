@@ -33,9 +33,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (void)setStyles:(nonnull NSArray<MCLineStyle *> *)lineStyles {
+- (void)setStyles:(nonnull NSArray<MCLineStyle *> *)styles {
     try {
-        _cppRefHandle.get()->setStyles(::djinni::List<::djinni_generated::LineStyle>::toCpp(lineStyles));
+        _cppRefHandle.get()->setStyles(::djinni::List<::djinni_generated::LineStyle>::toCpp(styles));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -55,10 +55,10 @@ class LineGroupShaderInterface::ObjcProxy final
     friend class ::djinni_generated::LineGroupShaderInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void setStyles(const std::vector<::LineStyle> & c_lineStyles) override
+    void setStyles(const std::vector<::LineStyle> & c_styles) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setStyles:(::djinni::List<::djinni_generated::LineStyle>::fromCpp(c_lineStyles))];
+            [djinni_private_get_proxied_objc_object() setStyles:(::djinni::List<::djinni_generated::LineStyle>::fromCpp(c_styles))];
         }
     }
     std::shared_ptr<::ShaderProgramInterface> asShaderProgramInterface() override

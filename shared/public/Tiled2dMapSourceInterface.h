@@ -14,7 +14,7 @@ class Tiled2dMapSourceInterface {
 public:
     virtual ~Tiled2dMapSourceInterface() {}
 
-    virtual void onVisibleBoundsChanged(const ::RectCoord & visibleBounds, double zoom) = 0;
+    virtual void onVisibleBoundsChanged(const ::RectCoord & visibleBounds, int32_t curT, double zoom) = 0;
 
     virtual void setMinZoomLevelIdentifier(std::optional<int32_t> value) = 0;
 

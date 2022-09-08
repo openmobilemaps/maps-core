@@ -26,7 +26,7 @@ Tiled2dMapRasterSource::Tiled2dMapRasterSource(const MapConfig &mapConfig,
     , loaders(loaders) {}
 
 TextureLoaderResult Tiled2dMapRasterSource::loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) {
-    return loaders[loaderIndex]->loadTexture(layerConfig->getTileUrl(tile.x, tile.y, tile.zoomIdentifier), std::nullopt);
+    return loaders[loaderIndex]->loadTexture(layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier), std::nullopt);
 }
 
 std::shared_ptr<::TextureHolderInterface> Tiled2dMapRasterSource::postLoadingTask(const TextureLoaderResult &loadedData,
@@ -37,8 +37,11 @@ std::shared_ptr<::TextureHolderInterface> Tiled2dMapRasterSource::postLoadingTas
 std::unordered_set<Tiled2dMapRasterTileInfo> Tiled2dMapRasterSource::getCurrentTiles() {
     std::lock_guard<std::recursive_mutex> lock(currentTilesMutex);
     std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos;
-    for (const auto &tileEntry : currentTiles) {
-        currentTileInfos.insert(Tiled2dMapRasterTileInfo(tileEntry.first, tileEntry.second));
+    for (auto it = currentTiles.rbegin(); it != currentTiles.rend(); it++ ) {
+        auto &[tileInfo, tileWrapper] = *it;
+        if (tileWrapper.isVisible) {
+            currentTileInfos.insert(Tiled2dMapRasterTileInfo(tileInfo, tileWrapper.result, tileWrapper.masks));
+        }
     }
     return currentTileInfos;
 }

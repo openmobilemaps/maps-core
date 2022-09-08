@@ -65,6 +65,10 @@ public class TextureHolder: NSObject {
 }
 
 extension TextureHolder: MCTextureHolderInterface {
+    public func clearFromGraphics() {}
+
+    public func attachToGraphics() -> Int32 { 0 }
+
     public func getImageWidth() -> Int32 {
         Int32(texture.width)
     }
@@ -79,9 +83,6 @@ extension TextureHolder: MCTextureHolderInterface {
 
     public func getTextureHeight() -> Int32 {
         Int32(textureUsableSize?.height ?? texture.height)
-    }
-
-    public func attachToGraphics() {
     }
 }
 

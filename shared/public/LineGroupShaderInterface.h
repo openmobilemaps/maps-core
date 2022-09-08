@@ -13,7 +13,7 @@ class LineGroupShaderInterface {
 public:
     virtual ~LineGroupShaderInterface() {}
 
-    virtual void setStyles(const std::vector<::LineStyle> & lineStyles) = 0;
+    virtual void setStyles(const std::vector<::LineStyle> & styles) = 0;
 
     virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() = 0;
 };

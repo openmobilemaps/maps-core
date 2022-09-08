@@ -14,8 +14,12 @@
 
 std::string TextShaderOpenGl::getProgramName() { return "UBMAP_TextShaderOpenGl"; }
 
-void TextShaderOpenGl::setColor(float red, float green, float blue, float alpha) {
-    color = std::vector<float>{red, green, blue, alpha};
+void TextShaderOpenGl::setColor(const ::Color & color) {
+    this->color = std::vector<float>{color.r, color.g, color.b, color.a};
+}
+
+void TextShaderOpenGl::setHaloColor(const ::Color & color) {
+    this->haloColor = std::vector<float>{color.r, color.g, color.b, color.a};
 }
 
 void TextShaderOpenGl::setScale(float scale) { this->scale = scale; }
@@ -33,12 +37,15 @@ void TextShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInte
 
     int program = glCreateProgram();       // create empty OpenGL Program
     glAttachShader(program, vertexShader); // add the vertex shader to program
+    OpenGlHelper::checkGlError("glAttachShader Vertex  Text");
     glDeleteShader(vertexShader);
     glAttachShader(program, fragmentShader); // add the fragment shader to program
+    OpenGlHelper::checkGlError("glAttachShader Fragment Text");
     glDeleteShader(fragmentShader);
     glLinkProgram(program); // create OpenGL program executables
 
     checkGlProgramLinking(program);
+    OpenGlHelper::checkGlError("glLinkProgram Text");
 
     openGlContext->storeProgram(programName, program);
 }
@@ -47,40 +54,54 @@ void TextShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterfa
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     int program = openGlContext->getProgram(getProgramName());
 
-    int mColorHandle = glGetUniformLocation(program, "vColor");
-    glUniform4fv(mColorHandle, 1, &color[0]);
+    int colorHandle = glGetUniformLocation(program, "color");
+    glUniform4fv(colorHandle, 1, &color[0]);
 
-    int mRefPointHandle = glGetUniformLocation(program, "vReferencePoint");
-    glUniform3fv(mRefPointHandle, 1, &referencePoint[0]);
+    int haloColorHandle = glGetUniformLocation(program, "haloColor");
+    glUniform4fv(haloColorHandle, 1, &haloColor[0]);
 
-    int mScaleHandle = glGetUniformLocation(program, "vScale");
-    glUniform1f(mScaleHandle, scale);
+    int refPointHandle = glGetUniformLocation(program, "referencePoint");
+    glUniform3fv(refPointHandle, 1, &referencePoint[0]);
+
+    int scaleHandle = glGetUniformLocation(program, "scale");
+    glUniform1f(scaleHandle, scale);
 }
 
 std::string TextShaderOpenGl::getVertexShader() {
-    return UBRendererShaderCode(uniform mat4 uMVPMatrix; uniform vec3 vReferencePoint; uniform float vScale;
-                                attribute vec2 vPosition; attribute vec2 texCoordinate; varying vec2 v_texcoord;
+    return UBRendererShaderCode(uniform mat4 uMVPMatrix;
+                                        attribute vec2 vPosition;
+                                        attribute vec2 texCoordinate;
+                                        uniform vec3 referencePoint;
+                                        uniform float scale;
+                                        varying vec2 vTextCoord;
 
-                                void main() {
-                                    vec2 pos = (uMVPMatrix * vec4(vPosition.xy, 0.0, 1.0)).xy;
-                                    vec2 ref = (uMVPMatrix * vec4(vReferencePoint.xy, 0.0, 1.0)).xy;
-                                    pos = ref.xy + (pos.xy - ref.xy) * vScale;
-                                    gl_Position = vec4(pos.xy, 0.0, 1.0);
-                                    v_texcoord = texCoordinate;
-                                });
+                                        void main() {
+                                            vec2 pos = (uMVPMatrix * vec4(vPosition.xy, 0.0, 1.0)).xy;
+                                            vec2 ref = (uMVPMatrix * vec4(referencePoint.xy, 0.0, 1.0)).xy;
+                                            pos = ref.xy + (pos.xy - ref.xy) * scale;
+                                            gl_Position = vec4(pos.xy, 0.0, 1.0);
+                                            vTextCoord = texCoordinate;
+                                        });
 }
 
 std::string TextShaderOpenGl::getFragmentShader() {
-    return UBRendererShaderCode(precision highp float; uniform sampler2D u_texture; uniform vec4 vColor; varying vec2 v_texcoord;
+    return UBRendererShaderCode(precision highp float;
+                                        uniform sampler2D texture;
+                                        uniform vec4 color;
+                                        uniform vec4 haloColor;
+                                        varying vec2 vTextCoord;
 
-                                void main() {
-                                    float delta = 0.1;
-                                    vec4 dist = texture2D(u_texture, v_texcoord);
-                                    float alpha = smoothstep(0.5 - delta, 0.5 + delta, dist.x) * vColor.a;
-                                    gl_FragColor = vColor;
-                                    gl_FragColor.a = 1.0;
-                                    gl_FragColor *= alpha;
-                                });
+                                        void main() {
+                                            float delta = 0.1;
+                                            vec4 dist = texture2D(texture, vTextCoord);
+                                            float alpha = smoothstep(0.5 - delta, 0.5 + delta, dist.x);
+                                            vec4 glyphColor = vec4(color.r, color.g, color.b, color.a * alpha);
+                                            vec4 mixed = mix(haloColor, glyphColor, alpha);
+                                            float a2 = smoothstep(0.40, 0.5, sqrt(dist.x));
+                                            gl_FragColor = mixed;
+                                            gl_FragColor.a = 1.0;
+                                            gl_FragColor *= a2;
+                                        });
 }
 
 std::shared_ptr<ShaderProgramInterface> TextShaderOpenGl::asShaderProgramInterface() { return shared_from_this(); }

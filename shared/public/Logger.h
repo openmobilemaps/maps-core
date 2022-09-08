@@ -12,23 +12,23 @@
 #define MAPSCORE__Logger__Logger__
 
 #ifndef LogError
-#define LogError utility::Logger()(0)
+#define LogError utility::Logger(0)
 #endif
 
 #ifndef LogWarning
-#define LogWarning utility::Logger()(1)
+#define LogWarning utility::Logger(1)
 #endif
 
 #ifndef LogDebug
-#define LogDebug utility::Logger()(2)
+#define LogDebug utility::Logger(2)
 #endif
 
 #ifndef LogInfo
-#define LogInfo utility::Logger()(3)
+#define LogInfo utility::Logger(3)
 #endif
 
 #ifndef LogTrace
-#define LogTrace utility::Logger()(4)
+#define LogTrace utility::Logger(4)
 #endif
 
 //#define SHOW_COLORS 0
@@ -42,7 +42,7 @@ class Logger {
   public:
     std::stringstream &stream() const;
 
-    Logger &operator()(int p);
+    Logger(int p);
 
     template <typename T> friend bool operator<<=(const Logger &logger, T thing);
 

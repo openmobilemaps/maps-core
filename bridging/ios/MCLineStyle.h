@@ -10,6 +10,7 @@
 - (nonnull instancetype)initWithColor:(nonnull MCColorStateList *)color
                              gapColor:(nonnull MCColorStateList *)gapColor
                               opacity:(float)opacity
+                                 blur:(float)blur
                             widthType:(MCSizeType)widthType
                                 width:(float)width
                             dashArray:(nonnull NSArray<NSNumber *> *)dashArray
@@ -17,6 +18,7 @@
 + (nonnull instancetype)lineStyleWithColor:(nonnull MCColorStateList *)color
                                   gapColor:(nonnull MCColorStateList *)gapColor
                                    opacity:(float)opacity
+                                      blur:(float)blur
                                  widthType:(MCSizeType)widthType
                                      width:(float)width
                                  dashArray:(nonnull NSArray<NSNumber *> *)dashArray
@@ -27,6 +29,8 @@
 @property (nonatomic, readonly, nonnull) MCColorStateList * gapColor;
 
 @property (nonatomic, readonly) float opacity;
+
+@property (nonatomic, readonly) float blur;
 
 @property (nonatomic, readonly) MCSizeType widthType;
 

@@ -17,6 +17,7 @@ class TextShader: BaseShader {
     private var referencePoint = MCVec3D()
     private var scaleFactor: Float = 1.0
     private var color = MCColor(r: 0.0, g: 0.0, b: 0.0, a: 0.0)
+    private var haloColor = MCColor(r: 0.0, g: 0.0, b: 0.0, a: 1.0)
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
@@ -36,6 +37,9 @@ class TextShader: BaseShader {
 
         var c = color.simdValues
         encoder.setFragmentBytes(&c, length: MemoryLayout<SIMD4<Float>>.stride, index: 1)
+
+        var hc = haloColor.simdValues
+        encoder.setFragmentBytes(&hc, length: MemoryLayout<SIMD4<Float>>.stride, index: 2)
     }
 }
 
@@ -48,8 +52,12 @@ extension TextShader: MCTextShaderInterface {
         scaleFactor = scale
     }
 
-    func setColor(_ red: Float, green: Float, blue: Float, alpha: Float) {
-        color = MCColor(r: red, g: green, b: blue, a: alpha)
+    func setColor(_ color: MCColor) {
+        self.color = color
+    }
+
+    func setHaloColor(_ color: MCColor) {
+        self.haloColor = color
     }
 
     func asShaderProgram() -> MCShaderProgramInterface? {

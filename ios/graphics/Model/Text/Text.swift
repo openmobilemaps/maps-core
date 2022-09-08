@@ -128,6 +128,10 @@ extension Text: MCTextInterface {
             }
         }
 
+        guard !vertices.isEmpty else {
+            return
+        }
+
         guard let verticesBuffer = device.makeBuffer(bytes: vertices, length: MemoryLayout<Vertex>.stride * vertices.count, options: []), let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: []) else {
             fatalError("Cannot allocate buffers")
         }

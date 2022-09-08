@@ -36,3 +36,20 @@ template <> struct hash<PrioritizedTiled2dMapTileInfo> {
     }
 };
 } // namespace std
+
+#include <vector>
+#include <unordered_set>
+
+struct VisibleTilesLayer {
+
+    std::unordered_set<PrioritizedTiled2dMapTileInfo> visibleTiles;
+
+    // 0 means this is the target zoom level
+    // negative means this is "above" the target
+    // positive mens this is "below" the target
+    int targetZoomLevelOffset;
+
+    VisibleTilesLayer(const std::unordered_set<PrioritizedTiled2dMapTileInfo> &visibleTiles, int targetZoomLevelOffset): visibleTiles(visibleTiles), targetZoomLevelOffset(targetZoomLevelOffset) {}
+
+    VisibleTilesLayer(int targetZoomLevelOffset): visibleTiles(), targetZoomLevelOffset(targetZoomLevelOffset) {}
+};

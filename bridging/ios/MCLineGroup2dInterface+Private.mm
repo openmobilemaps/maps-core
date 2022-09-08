@@ -5,10 +5,9 @@
 #import "MCLineGroup2dInterface.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
-#import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCGraphicsObjectInterface+Private.h"
-#import "MCRenderLineDescription+Private.h"
+#import "MCSharedBytes+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -33,9 +32,11 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (void)setLines:(nonnull NSArray<MCRenderLineDescription *> *)lines {
+- (void)setLines:(nonnull MCSharedBytes *)lines
+         indices:(nonnull MCSharedBytes *)indices {
     try {
-        _cppRefHandle.get()->setLines(::djinni::List<::djinni_generated::RenderLineDescription>::toCpp(lines));
+        _cppRefHandle.get()->setLines(::djinni_generated::SharedBytes::toCpp(lines),
+                                      ::djinni_generated::SharedBytes::toCpp(indices));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -55,10 +56,11 @@ class LineGroup2dInterface::ObjcProxy final
     friend class ::djinni_generated::LineGroup2dInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void setLines(const std::vector<::RenderLineDescription> & c_lines) override
+    void setLines(const ::SharedBytes & c_lines, const ::SharedBytes & c_indices) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setLines:(::djinni::List<::djinni_generated::RenderLineDescription>::fromCpp(c_lines))];
+            [djinni_private_get_proxied_objc_object() setLines:(::djinni_generated::SharedBytes::fromCpp(c_lines))
+                                                       indices:(::djinni_generated::SharedBytes::fromCpp(c_indices))];
         }
     }
     std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override

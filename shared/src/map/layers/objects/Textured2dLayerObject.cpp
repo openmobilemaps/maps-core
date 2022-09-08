@@ -15,11 +15,8 @@
 
 Textured2dLayerObject::Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, std::shared_ptr<AlphaShaderInterface> shader,
                                              const std::shared_ptr<MapInterface> &mapInterface)
-    : quad(quad)
-    , shader(shader)
-    , mapInterface(mapInterface)
-    , conversionHelper(mapInterface->getCoordinateConverterHelper())
-    , renderConfig(std::make_shared<RenderConfig>(quad->asGraphicsObject(), 0)) {}
+        : quad(quad), shader(shader), mapInterface(mapInterface), conversionHelper(mapInterface->getCoordinateConverterHelper()),
+          renderConfig(std::make_shared<RenderConfig>(quad->asGraphicsObject(), 0)) {}
 
 void Textured2dLayerObject::setRectCoord(const ::RectCoord &rectCoord) {
     auto width = rectCoord.bottomRight.x - rectCoord.topLeft.x;
@@ -51,7 +48,9 @@ void Textured2dLayerObject::update() {
 std::vector<std::shared_ptr<RenderConfigInterface>> Textured2dLayerObject::getRenderConfig() { return {renderConfig}; }
 
 void Textured2dLayerObject::setAlpha(float alpha) {
-    shader->updateAlpha(alpha);
+    if (shader) {
+        shader->updateAlpha(alpha);
+    }
     mapInterface->invalidate();
 }
 
@@ -59,11 +58,11 @@ std::shared_ptr<Quad2dInterface> Textured2dLayerObject::getQuadObject() { return
 
 void Textured2dLayerObject::beginAlphaAnimation(double startAlpha, double targetAlpha, long long duration) {
     animation = std::make_shared<DoubleAnimation>(
-        duration, startAlpha, targetAlpha, InterpolatorFunction::EaseIn, [=](double alpha) { this->setAlpha(alpha); },
-        [=] {
-            this->setAlpha(targetAlpha);
-            this->animation = nullptr;
-        });
+            duration, startAlpha, targetAlpha, InterpolatorFunction::EaseIn, [=](double alpha) { this->setAlpha(alpha); },
+            [=] {
+                this->setAlpha(targetAlpha);
+                this->animation = nullptr;
+            });
     animation->start();
     mapInterface->invalidate();
 }

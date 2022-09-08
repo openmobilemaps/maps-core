@@ -55,6 +55,8 @@ void Polygon2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &
 void Polygon2dOpenGl::prepareGlData(const std::shared_ptr<OpenGlContext> &openGlContext) {
     glUseProgram(programHandle);
 
+    removeGlBuffers();
+
     positionHandle = glGetAttribLocation(programHandle, "vPosition");
     glGenBuffers(1, &vertexBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
@@ -72,9 +74,13 @@ void Polygon2dOpenGl::prepareGlData(const std::shared_ptr<OpenGlContext> &openGl
 
 void Polygon2dOpenGl::clear() {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    ready = false;
+    removeGlBuffers();
+}
+
+void Polygon2dOpenGl::removeGlBuffers() {
     glDeleteBuffers(1, &vertexBuffer);
     glDeleteBuffers(1, &indexBuffer);
-    ready = false;
 }
 
 void Polygon2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }

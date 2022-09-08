@@ -11,6 +11,15 @@ struct Color final {
     float b;
     float a;
 
+    friend bool operator==(const Color& lhs, const Color& rhs);
+    friend bool operator!=(const Color& lhs, const Color& rhs);
+
+    friend bool operator<(const Color& lhs, const Color& rhs);
+    friend bool operator>(const Color& lhs, const Color& rhs);
+
+    friend bool operator<=(const Color& lhs, const Color& rhs);
+    friend bool operator>=(const Color& lhs, const Color& rhs);
+
     Color(float r_,
           float g_,
           float b_,
