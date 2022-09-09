@@ -51,6 +51,8 @@ public:
 
     virtual void tileIsReady(const Tiled2dMapTileInfo &tile) override;
 
+    virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
+
 private:
     void scheduleStyleJsonLoading();
 

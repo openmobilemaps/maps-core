@@ -44,6 +44,7 @@ public:
 
     virtual void clearTileData(const Tiled2dMapTileInfo &tileInfo) override {};
 
+    virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
 
 private:
     std::shared_ptr<BackgroundVectorLayerDescription> description;
