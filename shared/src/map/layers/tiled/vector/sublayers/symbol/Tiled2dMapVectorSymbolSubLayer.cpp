@@ -284,23 +284,29 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
                             auto position = pos->centerPosition;
 
 
-                            std::optional<double> minDistance;
-                            for (auto const &entry: tileTextPositionMap) {
-                                auto it = entry.second.find(fullText);
-                                if (it != entry.second.end()) {
-                                    for (auto const &pos: entry.second.at(fullText)) {
-                                        auto distance = Vec2DHelper::distance(Vec2D(pos.x, pos.y), Vec2D(position.x, position.y));
-                                        if (!minDistance || distance < *minDistance) {
-                                            minDistance = distance;
+                            {
+                                std::lock_guard<std::recursive_mutex> lock(tileTextPositionMapMutex);
+
+                                std::optional<double> minDistance;
+
+                                for (auto const &entry: tileTextPositionMap) {
+                                    auto it = entry.second.find(fullText);
+                                    if (it != entry.second.end()) {
+                                        for (auto const &pos: entry.second.at(fullText)) {
+                                            auto distance = Vec2DHelper::distance(Vec2D(pos.x, pos.y), Vec2D(position.x, position.y));
+                                            if (!minDistance || distance < *minDistance) {
+                                                minDistance = distance;
+                                            }
                                         }
                                     }
                                 }
-                            }
-                            if (minDistance && *minDistance < symbolSpacingMeters) {
-                                continue;
-                            }
+                                if (minDistance && *minDistance < symbolSpacingMeters) {
+                                    continue;
+                                }
 
-                            tileTextPositionMap[tileInfo][fullText].push_back(position);
+                                tileTextPositionMap[tileInfo][fullText].push_back(position);
+
+                            }
 
                             wasPlaced = true;
                             textInfos.push_back({context, std::make_shared<SymbolInfo>(text,
@@ -322,20 +328,26 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
                 std::optional<double> angle = std::nullopt;
 
 
-                std::optional<double> minDistance;
-                for (auto const &entry: tileTextPositionMap) {
-                    auto it = entry.second.find(fullText);
-                    if (it != entry.second.end()) {
-                        for (auto const &pos: entry.second.at(fullText)) {
-                            auto distance = Vec2DHelper::distance(Vec2D(pos.x, pos.y), Vec2D(midP->x, midP->y));
-                            if (!minDistance || distance < *minDistance) {
-                                minDistance = distance;
+                {
+                    std::lock_guard<std::recursive_mutex> lock(tileTextPositionMapMutex);
+
+                    std::optional<double> minDistance;
+                    for (auto const &entry: tileTextPositionMap) {
+                        auto it = entry.second.find(fullText);
+                        if (it != entry.second.end()) {
+                            for (auto const &pos: entry.second.at(fullText)) {
+                                auto distance = Vec2DHelper::distance(Vec2D(pos.x, pos.y), Vec2D(midP->x, midP->y));
+                                if (!minDistance || distance < *minDistance) {
+                                    minDistance = distance;
+                                }
                             }
                         }
                     }
-                }
-                if (minDistance && *minDistance < symbolSpacingMeters) {
-                    continue;
+                    if (minDistance && *minDistance < symbolSpacingMeters) {
+                        continue;
+                    }
+
+                    tileTextPositionMap[tileInfo][fullText].push_back(*midP);
                 }
 
                 textInfos.push_back({context, std::make_shared<SymbolInfo>(text,
@@ -346,7 +358,6 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
                 });
 
 
-                tileTextPositionMap[tileInfo][fullText].push_back(*midP);
             }
         }
     }
@@ -689,6 +700,10 @@ void Tiled2dMapVectorSymbolSubLayer::clearTileData(const Tiled2dMapTileInfo &til
             }
             tileTextMap.erase(tileInfo);
         }
+    }
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(tileTextPositionMapMutex);
         tileTextPositionMap.erase(tileInfo);
     }
 
