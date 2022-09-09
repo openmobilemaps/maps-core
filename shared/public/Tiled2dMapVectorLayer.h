@@ -23,11 +23,11 @@
 
 class Tiled2dMapVectorLayer : public Tiled2dMapLayer, public Tiled2dMapVectorLayerInterface, public Tiled2dMapVectorLayerReadyInterface {
 public:
-    Tiled2dMapVectorLayer(const std::string &path, const std::string &vectorSource,
+    Tiled2dMapVectorLayer(const std::string &layerName, const std::string &path, const std::string &vectorSource,
                           const std::vector <std::shared_ptr<::LoaderInterface>> &loaders,
                           const std::shared_ptr<::FontLoaderInterface> &fontLoader, double dpFactor);
 
-    Tiled2dMapVectorLayer(const std::shared_ptr<VectorMapDescription> & mapDescription,
+    Tiled2dMapVectorLayer(const std::string &layerName, const std::shared_ptr<VectorMapDescription> & mapDescription,
                           const std::vector<std::shared_ptr<::LoaderInterface>> & loaders,
                           const std::shared_ptr<::FontLoaderInterface> & fontLoader);
 
@@ -66,6 +66,7 @@ private:
 
     std::optional<double> dpFactor;
 
+    std::string layerName;
     std::optional<std::string> styleJsonPath;
     std::optional<std::string> vectorSource;
     std::shared_ptr<VectorMapDescription> mapDescription;

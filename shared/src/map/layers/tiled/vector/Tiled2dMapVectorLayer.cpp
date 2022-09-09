@@ -38,10 +38,11 @@
 #include "LoaderHelper.h"
 
 
-Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &path, const std::string &vectorSource,
+Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName, const std::string &path, const std::string &vectorSource,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
                                              const std::shared_ptr<::FontLoaderInterface> &fontLoader, double dpFactor) :
         Tiled2dMapLayer(),
+        layerName(layerName),
         styleJsonPath(path),
         vectorSource(vectorSource),
         loaders(loaders),
@@ -49,10 +50,11 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &path, const std:
         dpFactor(dpFactor),
         sublayers() {}
 
-Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::shared_ptr<VectorMapDescription> &mapDescription,
+Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName, const std::shared_ptr<VectorMapDescription> &mapDescription,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
                                              const std::shared_ptr<::FontLoaderInterface> &fontLoader) :
         Tiled2dMapLayer(),
+        layerName(layerName),
         loaders(loaders),
         fontLoader(fontLoader),
         sublayers() {
@@ -79,7 +81,7 @@ void Tiled2dMapVectorLayer::loadStyleJson() {
     if (!styleJsonPath.has_value() || !vectorSource.has_value() || !dpFactor.has_value()) {
         return;
     }
-    auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJson(*styleJsonPath, *vectorSource, *dpFactor, loaders);
+    auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJson(layerName, *styleJsonPath, *vectorSource, *dpFactor, loaders);
     if (parseResult.status == LoaderStatus::OK) {
         if (errorManager) {
             errorManager->removeError(*styleJsonPath);
