@@ -660,6 +660,10 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(size_t loaderIndex) {
 template<class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::updateTileMasks() {
 
+    if (!zoomInfo.maskTile) {
+        return;
+    }
+
     std::lock_guard<std::recursive_mutex> lock(currentTilesMutex);
 
     std::vector<Tiled2dMapTileInfo> tilesToRemove;
