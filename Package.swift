@@ -5,8 +5,7 @@ import PackageDescription
 let package = Package(
     name: "MapCore",
     platforms: [
-        .iOS(.v11),
-        .macOS(.v12)
+        .iOS(.v11)
     ],
     products: [
         .library(
