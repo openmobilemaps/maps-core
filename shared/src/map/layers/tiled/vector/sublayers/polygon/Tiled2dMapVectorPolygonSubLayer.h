@@ -48,6 +48,8 @@ public:
 
     virtual void clearTileData(const Tiled2dMapTileInfo &tileInfo) override;
 
+    virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
+
 protected:
 
     void setupPolygons(const Tiled2dMapTileInfo &tileInfo, const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects);
@@ -55,6 +57,8 @@ protected:
     void preGenerateRenderPasses();
 
 private:
+    std::optional<::RectI> scissorRect = std::nullopt;
+                                         
     std::shared_ptr<PolygonVectorLayerDescription> description;
 
     void addPolygons(const Tiled2dMapTileInfo &tileInfo, const std::vector<std::tuple<std::vector<std::tuple<std::vector<Coord>, int>>, std::vector<int32_t>>> &polygons);

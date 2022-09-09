@@ -755,11 +755,8 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorSymbolSubLay
 
         const auto &tileMask = tileMaskMap[tile];
         for (const auto &passEntry : renderPassObjectMap) {
-            std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first),
-                                                                                  passEntry.second,
-                                                                                  (/*tileMask
-                                                                                   ? tileMask
-                                                                                   : */nullptr));
+            std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second);
+            renderPass->setScissoringRect(scissorRect);
             newRenderPasses.push_back(renderPass);
         }
     }
@@ -814,4 +811,8 @@ void Tiled2dMapVectorSymbolSubLayer::setSprites(std::shared_ptr<TextureHolderInt
                  }
 
     }));
+}
+
+void Tiled2dMapVectorSymbolSubLayer::setScissorRect(const std::optional<::RectI> &scissorRect) {
+    this->scissorRect = scissorRect;
 }

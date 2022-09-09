@@ -635,3 +635,16 @@ void Tiled2dMapVectorLayer::loadSpriteData() {
                                                     )
                        );
 }
+
+void Tiled2dMapVectorLayer::setScissorRect(const std::optional<::RectI> &scissorRect) {
+    {
+        std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
+        for (auto const &sublayer: sublayers) {
+            sublayer->setScissorRect(scissorRect);
+        }
+    }
+    auto mapInterface = this->mapInterface;
+    if (mapInterface) {
+        mapInterface->invalidate();
+    }
+}

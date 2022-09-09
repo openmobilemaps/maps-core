@@ -334,6 +334,7 @@ void Tiled2dMapVectorPolygonSubLayer::preGenerateRenderPasses() {
                                                                                   (tileMask
                                                                                    ? tileMask
                                                                                    : nullptr));
+            renderPass->setScissoringRect(scissorRect);
             newTileRenderPasses.push_back(renderPass);
         }
         newRenderPasses.insert({tileLineTuple.first, newTileRenderPasses});
@@ -344,5 +345,10 @@ void Tiled2dMapVectorPolygonSubLayer::preGenerateRenderPasses() {
 void Tiled2dMapVectorPolygonSubLayer::updateTileMask(const Tiled2dMapTileInfo &tileInfo,
                                                      const std::shared_ptr<MaskingObjectInterface> &tileMask) {
     Tiled2dMapVectorSubLayer::updateTileMask(tileInfo, tileMask);
+    preGenerateRenderPasses();
+}
+
+void Tiled2dMapVectorPolygonSubLayer::setScissorRect(const std::optional<::RectI> &scissorRect) {
+    this->scissorRect = scissorRect;
     preGenerateRenderPasses();
 }

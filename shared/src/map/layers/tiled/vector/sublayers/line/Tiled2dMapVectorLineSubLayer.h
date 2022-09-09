@@ -46,6 +46,8 @@ public:
 
     virtual void clearTileData(const Tiled2dMapTileInfo &tileInfo) override;
 
+    virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
+
 protected:
     void addLines(const Tiled2dMapTileInfo &tileInfo, const std::unordered_map<int, std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> &styleIdLinesMap);
 
@@ -70,5 +72,7 @@ private:
     std::unordered_map<size_t, std::pair<int, int>> styleHashToGroupMap;
 
     const std::unordered_set<std::string> usedKeys;
+
+    std::optional<::RectI> scissorRect = std::nullopt;
 };
 

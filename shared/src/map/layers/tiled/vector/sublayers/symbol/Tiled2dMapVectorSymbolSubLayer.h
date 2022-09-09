@@ -100,6 +100,8 @@ public:
 
     void setSprites(std::shared_ptr<TextureHolderInterface> spriteTexture, std::shared_ptr<SpriteData> spriteData);
 
+    virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
+
 protected:
     void addTexts(const Tiled2dMapTileInfo &tileInfo,
                   const std::vector< std::tuple<const FeatureContext, std::shared_ptr<SymbolInfo>>> &texts);
@@ -110,6 +112,8 @@ protected:
     FontLoaderResult loadFont(const Font &font);
 
 private:
+
+    std::optional<::RectI> scissorRect = std::nullopt;
 
     std::optional<Tiled2dMapVectorSymbolSubLayerPositioningWrapper> getPositioning(std::vector<::Coord>::const_iterator &iterator, const std::vector<::Coord> & collection);
                                          
