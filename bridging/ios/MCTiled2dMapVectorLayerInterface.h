@@ -10,7 +10,8 @@
 
 @interface MCTiled2dMapVectorLayerInterface : NSObject
 
-+ (nullable MCTiled2dMapVectorLayerInterface *)createFromStyleJson:(nonnull NSString *)path
++ (nullable MCTiled2dMapVectorLayerInterface *)createFromStyleJson:(nonnull NSString *)layerName
+                                                              path:(nonnull NSString *)path
                                                       vectorSource:(nonnull NSString *)vectorSource
                                                            loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
                                                         fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader

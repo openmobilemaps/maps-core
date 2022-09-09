@@ -29,7 +29,7 @@
 
 class Tiled2dMapVectorLayerParserHelper {
 public:
-    static Tiled2dMapVectorLayerParserResult parseStyleJson(const std::string &styleJsonPath,
+    static Tiled2dMapVectorLayerParserResult parseStyleJson(const std::string &layerName, const std::string &styleJsonPath,
                                                             const std::string &vectorSource,
                                                             const double &dpFactor,
                                                             const std::vector<std::shared_ptr<::LoaderInterface>> &loaders) {
@@ -76,7 +76,7 @@ public:
                     url = json["tiles"].begin()->get<std::string>();
                 }
 
-                rasterLayerMap[key] = std::make_shared<RasterVectorLayerDescription>(key,
+                rasterLayerMap[key] = std::make_shared<RasterVectorLayerDescription>(layerName,
                                                                                      val.value("minZoom", 0),
                                                                                      val.value("maxZoom", 22),
                                                                                      url,
@@ -202,7 +202,7 @@ public:
         }
 
 
-        auto mapDesc = std::make_shared<VectorMapDescription>(vectorSource,
+        auto mapDesc = std::make_shared<VectorMapDescription>(layerName,
                                                               tileJson["tiles"].begin()->get<std::string>(),
                                                               tileJson["minzoom"].get<int>(),
                                                               tileJson["maxzoom"].get<int>(),

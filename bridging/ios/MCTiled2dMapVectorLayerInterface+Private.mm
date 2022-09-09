@@ -33,13 +33,15 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-+ (nullable MCTiled2dMapVectorLayerInterface *)createFromStyleJson:(nonnull NSString *)path
++ (nullable MCTiled2dMapVectorLayerInterface *)createFromStyleJson:(nonnull NSString *)layerName
+                                                              path:(nonnull NSString *)path
                                                       vectorSource:(nonnull NSString *)vectorSource
                                                            loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
                                                         fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
                                                           dpFactor:(double)dpFactor {
     try {
-        auto objcpp_result_ = ::Tiled2dMapVectorLayerInterface::createFromStyleJson(::djinni::String::toCpp(path),
+        auto objcpp_result_ = ::Tiled2dMapVectorLayerInterface::createFromStyleJson(::djinni::String::toCpp(layerName),
+                                                                                    ::djinni::String::toCpp(path),
                                                                                     ::djinni::String::toCpp(vectorSource),
                                                                                     ::djinni::List<::djinni_generated::LoaderInterface>::toCpp(loaders),
                                                                                     ::djinni_generated::FontLoaderInterface::toCpp(fontLoader),

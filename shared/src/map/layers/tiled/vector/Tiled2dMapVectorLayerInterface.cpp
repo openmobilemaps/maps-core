@@ -11,8 +11,8 @@
 #include "Tiled2dMapVectorLayer.h"
 
 std::shared_ptr <Tiled2dMapVectorLayerInterface>
-Tiled2dMapVectorLayerInterface::createFromStyleJson(const std::string &path, const std::string &vectorSource,
+Tiled2dMapVectorLayerInterface::createFromStyleJson(const std::string &layerName, const std::string &path, const std::string &vectorSource,
                                                     const std::vector <std::shared_ptr<::LoaderInterface>> &loaders,
                                                     const std::shared_ptr<::FontLoaderInterface> &fontLoader, double dpFactor) {
-    return std::make_shared<Tiled2dMapVectorLayer>(path, vectorSource, loaders, fontLoader, dpFactor);
+    return std::make_shared<Tiled2dMapVectorLayer>(layerName, path, vectorSource, loaders, fontLoader, dpFactor);
 }
