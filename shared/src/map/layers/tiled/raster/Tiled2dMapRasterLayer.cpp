@@ -171,17 +171,19 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
 
             if (tilesToAdd.empty() && tilesToRemove.empty() && newTileMasks.empty()) return;
 
-            for (const auto &tileEntry : tileObjectMap) {
-                if (tilesToRemove.count(tileEntry.first) == 0) {
-                    const auto &curTile = currentTileInfos.find(tileEntry.first);
-                    const size_t hash = std::hash<std::vector<::PolygonCoord>>()(curTile->masks);
+            if (layerConfig->getZoomInfo().maskTile) {
+                for (const auto &tileEntry : tileObjectMap) {
+                    if (tilesToRemove.count(tileEntry.first) == 0) {
+                        const auto &curTile = currentTileInfos.find(tileEntry.first);
+                        const size_t hash = std::hash<std::vector<::PolygonCoord>>()(curTile->masks);
 
-                    if (tileMaskMap[tileEntry.first.tileInfo].polygonHash != hash) {
-                        const auto &tileMask = std::make_shared<PolygonMaskObject>(graphicsFactory,
-                                                                                   coordinateConverterHelper);
+                        if (tileMaskMap[tileEntry.first.tileInfo].polygonHash != hash) {
+                            const auto &tileMask = std::make_shared<PolygonMaskObject>(graphicsFactory,
+                                                                                       coordinateConverterHelper);
 
-                        tileMask->setPolygons(curTile->masks);
-                        newTileMasks[tileEntry.first.tileInfo] = Tiled2dMapLayerMaskWrapper(tileMask, hash);
+                            tileMask->setPolygons(curTile->masks);
+                            newTileMasks[tileEntry.first.tileInfo] = Tiled2dMapLayerMaskWrapper(tileMask, hash);
+                        }
                     }
                 }
             }
