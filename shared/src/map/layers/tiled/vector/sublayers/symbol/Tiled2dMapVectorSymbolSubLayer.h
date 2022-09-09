@@ -118,10 +118,12 @@ private:
 
     std::recursive_mutex fontResultsMutex;
     std::unordered_map<std::string, FontLoaderResult> fontLoaderResults;
+
     std::recursive_mutex symbolMutex;
     std::unordered_map<Tiled2dMapTileInfo, std::vector<Tiled2dMapVectorSymbolFeatureWrapper>> tileTextMap;
     std::shared_ptr<TextureHolderInterface> spriteTexture;
     std::shared_ptr<SpriteData> spriteData;
 
+    std::recursive_mutex tileTextPositionMapMutex;
     std::unordered_map<Tiled2dMapTileInfo, std::unordered_map<std::string, std::vector<Coord>>> tileTextPositionMap;
 };
