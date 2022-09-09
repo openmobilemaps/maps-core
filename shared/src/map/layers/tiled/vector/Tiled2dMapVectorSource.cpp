@@ -40,20 +40,20 @@ std::shared_ptr<LayerFeatureMapType> Tiled2dMapVectorSource::postLoadingTask(con
             std::string sourceLayerName = std::string(layer.name());
             if (layersToDecode.count(sourceLayerName) > 0 && !layer.empty()) {
                 int extent = (int) layer.extent();
-                std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> features;
-                features.reserve(layer.num_features());
+                layerFeatureMap->emplace(sourceLayerName, std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>());
+                layerFeatureMap->at(sourceLayerName).reserve(layer.num_features());
                 while (const auto &feature = layer.next_feature()) {
                     auto const featureContext = FeatureContext(feature);
                     try {
                         VectorTileGeometryHandler geometryHandler = VectorTileGeometryHandler(tile.bounds, extent);
                         vtzero::decode_geometry(feature.geometry(), geometryHandler);
-                        features.push_back({featureContext, geometryHandler});
+                        layerFeatureMap->at(sourceLayerName).push_back({featureContext, geometryHandler});
                     } catch (vtzero::geometry_exception &geometryException) {
                         continue;
                     }
                 }
-                if (!features.empty()) {
-                    layerFeatureMap->emplace(sourceLayerName, features);
+                if (layerFeatureMap->at(sourceLayerName).empty()) {
+                    layerFeatureMap->erase(sourceLayerName);
                 }
             }
             if (!isTileVisible(tile)) return std::make_shared<LayerFeatureMapType>();
