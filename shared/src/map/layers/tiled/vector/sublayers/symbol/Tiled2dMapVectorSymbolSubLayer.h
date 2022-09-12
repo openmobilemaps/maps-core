@@ -29,6 +29,7 @@
 #include "Quad2dInterface.h"
 
 //#define DRAW_TEXT_BOUNDING_BOXES
+//#define DRAW_COLLIDED_TEXT_BOUNDING_BOXES
 
 struct Tiled2dMapVectorSymbolFeatureWrapper {
     FeatureContext featureContext;

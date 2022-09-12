@@ -28,6 +28,7 @@
 #include "FormattedStringEntry.h"
 #include "LineCapType.h"
 #include "TextTransform.h"
+#include <sstream>
 
 namespace std {
     template <>
@@ -406,6 +407,13 @@ public:
 
             return res;
 
+        } else if (std::holds_alternative<std::vector<std::string>>(value)) {
+            std::vector<std::string> res = std::get<std::vector<std::string>>(value);
+            if (!res.empty() && *res.begin() == "zoom" && context.zoomLevel) {
+                return *context.zoomLevel;
+            }
+
+            return value;
         } else {
 
             return value;
@@ -651,6 +659,245 @@ private:
     std::vector<std::tuple<double, std::shared_ptr<Value>>> stops;
 };
 
+enum class PropertyCompareType {
+    EQUAL,
+    NOTEQUAL,
+    LESS,
+    LESSEQUAL,
+    GREATER,
+    GREATEREQUAL
+};
+
+class ValueVariantCompareHelper {
+public:
+    static bool compare(const ValueVariant &lhs, const ValueVariant &rhs, PropertyCompareType type) {
+
+        auto fallback = [](const ValueVariant &lhs, const ValueVariant &rhs, PropertyCompareType type) -> bool{
+            switch (type) {
+                case PropertyCompareType::EQUAL:
+                    return lhs == rhs;
+                case PropertyCompareType::NOTEQUAL:
+                    return lhs != rhs;
+                case PropertyCompareType::LESS:
+                    return lhs < rhs;
+                case PropertyCompareType::LESSEQUAL:
+                    return lhs <= rhs;
+                case PropertyCompareType::GREATER:
+                    return lhs > rhs;
+                case PropertyCompareType::GREATEREQUAL:
+                    return lhs >= rhs;
+            }
+        };
+
+        return std::visit(overloaded {
+            [&](std::string lhsValue){
+                return std::visit(overloaded {
+                    [&lhsValue, &type](std::string rhsValue){
+                        switch (type) {
+                            case PropertyCompareType::EQUAL:
+                                return lhsValue == rhsValue;
+                            case PropertyCompareType::NOTEQUAL:
+                                return lhsValue != rhsValue;
+                            case PropertyCompareType::LESS:
+                                return lhsValue < rhsValue;
+                            case PropertyCompareType::LESSEQUAL:
+                                return lhsValue <= rhsValue;
+                            case PropertyCompareType::GREATER:
+                                return lhsValue > rhsValue;
+                            case PropertyCompareType::GREATEREQUAL:
+                                return lhsValue >= rhsValue;
+                        }
+                    },
+                    [&](double rhsValue){
+                        return fallback(lhs, rhs, type);
+                    },
+                    [&](int64_t rhsValue){
+                        return fallback(lhs, rhs, type);
+                    },
+                    [&](bool rhsValue){
+                        return fallback(lhs, rhs, type);
+                    },
+                    [&](Color rhsValue){
+                        return fallback(lhs, rhs, type);
+                    },
+                    [&](std::vector<float> rhsValue){
+                        return fallback(lhs, rhs, type);
+                    },
+                    [&](std::vector<std::string> rhsValue){
+                        return fallback(lhs, rhs, type);
+                    },
+                    [&](std::vector<FormattedStringEntry> rhsValue){
+                        return fallback(lhs, rhs, type);
+                    }
+                }, rhs);
+            },
+            [&](double lhsValue){
+                return std::visit(overloaded {
+                    [&](std::string rhsValue){
+                        return fallback(lhs, rhs, type);
+                    },
+                    [&lhsValue, &type](double rhsValue){
+                        switch (type) {
+                            case PropertyCompareType::EQUAL:
+                                return lhsValue == rhsValue;
+                            case PropertyCompareType::NOTEQUAL:
+                                return lhsValue != rhsValue;
+                            case PropertyCompareType::LESS:
+                                return lhsValue < rhsValue;
+                            case PropertyCompareType::LESSEQUAL:
+                                return lhsValue <= rhsValue;
+                            case PropertyCompareType::GREATER:
+                                return lhsValue > rhsValue;
+                            case PropertyCompareType::GREATEREQUAL:
+                                return lhsValue >= rhsValue;
+                        }
+                    },
+                    [&lhsValue, &type](int64_t rhsValue){
+                        double rhsDoubleValue = rhsValue;
+                        switch (type) {
+                            case PropertyCompareType::EQUAL:
+                                return lhsValue == rhsDoubleValue;
+                            case PropertyCompareType::NOTEQUAL:
+                                return lhsValue != rhsDoubleValue;
+                            case PropertyCompareType::LESS:
+                                return lhsValue < rhsDoubleValue;
+                            case PropertyCompareType::LESSEQUAL:
+                                return lhsValue <= rhsDoubleValue;
+                            case PropertyCompareType::GREATER:
+                                return lhsValue > rhsDoubleValue;
+                            case PropertyCompareType::GREATEREQUAL:
+                                return lhsValue >= rhsDoubleValue;
+                        }
+                    },
+                    [=](bool rhsValue){
+                        return fallback(lhs, rhs, type);
+                    },
+                    [=](Color rhsValue){
+                        return fallback(lhs, rhs, type);
+                    },
+                    [=](std::vector<float> rhsValue){
+                        return fallback(lhs, rhs, type);
+                    },
+                    [=](std::vector<std::string> rhsValue){
+                        return fallback(lhs, rhs, type);
+                    },
+                    [=](std::vector<FormattedStringEntry> rhsValue){
+                        return fallback(lhs, rhs, type);
+                    }
+                }, rhs);
+            },
+            [&](int64_t lhsValue){
+                return std::visit(overloaded {
+                    [&](std::string rhsValue){
+                        return fallback(lhs, rhs, type);
+                    },
+                    [&lhsValue, &type](double rhsValue){
+                        int64_t rhsIntValue = rhsValue;
+                        switch (type) {
+                            case PropertyCompareType::EQUAL:
+                                return lhsValue == rhsIntValue;
+                            case PropertyCompareType::NOTEQUAL:
+                                return lhsValue != rhsIntValue;
+                            case PropertyCompareType::LESS:
+                                return lhsValue < rhsIntValue;
+                            case PropertyCompareType::LESSEQUAL:
+                                return lhsValue <= rhsIntValue;
+                            case PropertyCompareType::GREATER:
+                                return lhsValue > rhsIntValue;
+                            case PropertyCompareType::GREATEREQUAL:
+                                return lhsValue >= rhsIntValue;
+                        }
+                    },
+                    [&lhsValue, &type](int64_t rhsValue){
+                        switch (type) {
+                            case PropertyCompareType::EQUAL:
+                                return lhsValue == rhsValue;
+                            case PropertyCompareType::NOTEQUAL:
+                                return lhsValue != rhsValue;
+                            case PropertyCompareType::LESS:
+                                return lhsValue < rhsValue;
+                            case PropertyCompareType::LESSEQUAL:
+                                return lhsValue <= rhsValue;
+                            case PropertyCompareType::GREATER:
+                                return lhsValue > rhsValue;
+                            case PropertyCompareType::GREATEREQUAL:
+                                return lhsValue >= rhsValue;
+                        }
+                    },
+                    [&](bool rhsValue){
+                        return fallback(lhs, rhs, type);
+                    },
+                    [&](Color rhsValue){
+                        return fallback(lhs, rhs, type);
+                    },
+                    [&](std::vector<float> rhsValue){
+                        return fallback(lhs, rhs, type);
+                    },
+                    [&](std::vector<std::string> rhsValue){
+                        return fallback(lhs, rhs, type);
+                    },
+                    [&](std::vector<FormattedStringEntry> rhsValue){
+                        return fallback(lhs, rhs, type);
+                    }
+                }, rhs);
+            },
+            [&](bool lhsValue){
+                return std::visit(overloaded {
+                    [&](std::string rhsValue){
+                        return fallback(lhs, rhs, type);
+                    },
+                    [&](double rhsValue){
+                        return fallback(lhs, rhs, type);
+                    },
+                    [&](int64_t rhsValue){
+                        return fallback(lhs, rhs, type);
+                    },
+                    [&lhsValue, &type](bool rhsValue){
+                        switch (type) {
+                            case PropertyCompareType::EQUAL:
+                                return lhsValue == rhsValue;
+                            case PropertyCompareType::NOTEQUAL:
+                                return lhsValue != rhsValue;
+                            case PropertyCompareType::LESS:
+                                return lhsValue < rhsValue;
+                            case PropertyCompareType::LESSEQUAL:
+                                return lhsValue <= rhsValue;
+                            case PropertyCompareType::GREATER:
+                                return lhsValue > rhsValue;
+                            case PropertyCompareType::GREATEREQUAL:
+                                return lhsValue >= rhsValue;
+                        }
+                    },
+                    [&](Color rhsValue){
+                        return fallback(lhs, rhs, type);
+                    },
+                    [&](std::vector<float> rhsValue){
+                        return fallback(lhs, rhs, type);
+                    },
+                    [&](std::vector<std::string> rhsValue){
+                        return fallback(lhs, rhs, type);
+                    },
+                    [&](std::vector<FormattedStringEntry> rhsValue){
+                        return fallback(lhs, rhs, type);
+                    }
+                }, rhs);
+            },
+            [&](Color lhsValue){
+                return fallback(lhs, rhs, type);
+            },
+            [&](std::vector<float> lhsValue){
+                return fallback(lhs, rhs, type);
+            },
+            [&](std::vector<std::string> lhsValue){
+                return fallback(lhs, rhs, type);
+            },
+            [&](std::vector<FormattedStringEntry> lhsValue){
+                return fallback(lhs, rhs, type);
+            }
+        }, lhs);
+    }
+};
+
 class StepValue : public Value {
 public:
     StepValue(const std::shared_ptr<Value> compareValue, const std::vector<std::tuple<std::shared_ptr<Value>, std::shared_ptr<Value>>> stops, std::shared_ptr<Value> defaultValue) : compareValue(compareValue), stops(stops), defaultValue(defaultValue) {}
@@ -668,7 +915,7 @@ public:
         auto compareValue_ = compareValue->evaluate(context);
 
         for (const auto &[stop, value] : stops) {
-            if (stop->evaluate(context) > compareValue_) {
+            if (ValueVariantCompareHelper::compare(stop->evaluate(context), compareValue_, PropertyCompareType::GREATER)) {
                 return value->evaluate(context);
             }
         }
@@ -931,15 +1178,6 @@ private:
     const std::vector<const std::shared_ptr<Value>> values;
 };
 
-enum class PropertyCompareType {
-    EQUAL,
-    NOTEQUAL,
-    LESS,
-    LESSEQUAL,
-    GREATER,
-    GREATEREQUAL
-};
-
 class PropertyCompareValue: public Value {
 public:
     PropertyCompareValue(const std::shared_ptr<Value> lhs, const std::shared_ptr<Value> rhs, const PropertyCompareType type) : lhs(lhs), rhs( rhs), type(type) {
@@ -962,21 +1200,9 @@ public:
  ValueVariant evaluate(const EvaluationContext &context) override {
      auto const lhsValue = lhs->evaluate(context);
      auto const rhsValue = rhs->evaluate(context);
-        switch (type) {
-            case PropertyCompareType::EQUAL:
-                return lhsValue == rhsValue;
-            case PropertyCompareType::NOTEQUAL:
-                return lhsValue != rhsValue;
-            case PropertyCompareType::LESS:
-                return lhsValue < rhsValue;
-            case PropertyCompareType::LESSEQUAL:
-                return lhsValue <= rhsValue;
-            case PropertyCompareType::GREATER:
-                return lhsValue > rhsValue;
-            case PropertyCompareType::GREATEREQUAL:
-                return lhsValue >= rhsValue;
-        }
-    };
+
+     return ValueVariantCompareHelper::compare(lhsValue, rhsValue, type);
+ };
 
 private:
     const std::shared_ptr<Value> lhs;

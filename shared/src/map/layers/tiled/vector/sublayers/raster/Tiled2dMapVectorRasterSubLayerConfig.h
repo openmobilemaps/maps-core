@@ -49,7 +49,7 @@ public:
     }
 
     Tiled2dMapZoomInfo getZoomInfo() override {
-        return Tiled2dMapZoomInfo(0.65, description->numDrawPreviousLayers, description->adaptScaleToScreen, true);
+        return Tiled2dMapZoomInfo(description->zoomLevelScaleFactor, description->numDrawPreviousLayers, description->adaptScaleToScreen, description->maskTiles);
     }
 
     static double getZoomIdentifier(double zoom) {

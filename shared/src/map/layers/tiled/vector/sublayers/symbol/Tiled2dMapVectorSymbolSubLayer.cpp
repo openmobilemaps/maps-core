@@ -633,7 +633,7 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
                     }
                 }
             }
-#ifdef DRAW_TEXT_BOUNDING_BOXES
+#ifdef DRAW_COLLIDED_TEXT_BOUNDING_BOXES
             else {
                 if (object->getShader()) {
                     object->getShader()->setColor(Color(1.0, 0.0, 0.0, 1.0));
@@ -731,7 +731,7 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorSymbolSubLay
         if (tiles.count(tile) == 0) continue;
         std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
         for (auto const &wrapper : wrapperVector) {
-#ifndef DRAW_TEXT_BOUNDING_BOXES
+#ifndef DRAW_COLLIDED_TEXT_BOUNDING_BOXES
             if (wrapper.collides) {
                 continue;
             }
