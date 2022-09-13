@@ -273,7 +273,7 @@ void IconLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
 void IconLayer::onRemoved() {
     auto mapInterface = this->mapInterface;
     if (mapInterface && isLayerClickable) {
-        mapInterface->getTouchHandler()->addListener(shared_from_this());
+        mapInterface->getTouchHandler()->removeListener(shared_from_this());
     }
     this->mapInterface = nullptr;
 }
