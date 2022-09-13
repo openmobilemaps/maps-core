@@ -282,10 +282,9 @@ void Tiled2dMapRasterLayer::setupTiles(
 
             if (tileInfo.textureHolder) {
                 tileObject->getQuadObject()->loadTexture(renderingContext, tileInfo.textureHolder);
-                tilesReady.push_back(tileInfo.tileInfo);
-            } else {
-                assert(false);//"this should never happen"
             }
+            // the texture holder can be empty, some tileserver serve 0 byte textures
+            tilesReady.push_back(tileInfo.tileInfo);
         }
 
         for (const auto &[tile, tileObject] : tilesToClean) {
