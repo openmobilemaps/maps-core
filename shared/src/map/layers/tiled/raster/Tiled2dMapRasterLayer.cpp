@@ -378,6 +378,9 @@ void Tiled2dMapRasterLayer::removeCallbackHandler() { callbackHandler = nullptr;
 std::shared_ptr<Tiled2dMapRasterLayerCallbackInterface> Tiled2dMapRasterLayer::getCallbackHandler() { return callbackHandler; }
 
 void Tiled2dMapRasterLayer::setAlpha(double alpha) {
+    if (this->alpha == alpha) {
+        return;
+    }
     this->alpha = alpha;
     {
         std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
