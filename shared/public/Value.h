@@ -114,9 +114,19 @@ public:
 
     FeatureContext(vtzero::feature const &feature) {
         geomType = feature.geometry_type();
-        identifier = feature.id();
 
         propertiesMap = vtzero::create_properties_map<mapType, keyType, valueType, property_value_mapping>(feature);
+
+        if (feature.has_id()) {
+            identifier = feature.id();
+        } else {
+            size_t hash = 0;
+            for(auto const [key, val]: propertiesMap) {
+                std::hash_combine(hash, std::hash<valueType>{}(val));
+            }
+            identifier = hash;
+        }
+
 
         switch (geomType) {
             case vtzero::GeomType::LINESTRING:

@@ -591,6 +591,14 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
 
                         auto iconSize = description->style.getIconSize(evalContext) * scaleFactor;
 
+
+                        {
+                            std::lock_guard<std::recursive_mutex> lock(selectedFeatureIdentifierMutex);
+                            if (wrapper.featureContext.identifier == selectedFeatureIdentifier) {
+                                iconSize *= 2.0;
+                            }
+                        }
+
                         Matrix::scaleM(wrapper.iconModelMatrix, 0, iconSize, iconSize, 1.0);
                         Matrix::rotateM(wrapper.iconModelMatrix, 0.0, rotation, 0.0, 0.0, 1.0);
                         Matrix::translateM(wrapper.iconModelMatrix, 0, -renderCoord.x, -renderCoord.y, -renderCoord.z);
@@ -836,7 +844,6 @@ bool Tiled2dMapVectorSymbolSubLayer::onClickConfirmed(const ::Vec2F &posScreen) 
         return false;
     }
 
-    std::lock_guard<std::recursive_mutex> lock(symbolMutex);
 
     Coord clickCoords = camera->coordFromScreenPosition(posScreen);
     Coord clickCoordsRenderCoord = conversionHelper->convertToRenderSystem(clickCoords);
@@ -848,15 +855,32 @@ bool Tiled2dMapVectorSymbolSubLayer::onClickConfirmed(const ::Vec2F &posScreen) 
                        Vec2D(clickCoordsRenderCoord.x + clickPadding, clickCoordsRenderCoord.y + clickPadding),
                        Vec2D(clickCoordsRenderCoord.x - clickPadding, clickCoordsRenderCoord.y + clickPadding));
 
-    for (auto &[tile, wrapperVector]: tileTextMap) {
-        for (auto &wrapper: wrapperVector) {
-            if (wrapper.collides) { continue; }
-            if (wrapper.textOrientedBoundingBox.overlaps(tinyClickBox) && selectionDelegate->didSelectFeature(wrapper.featureContext, wrapper.textInfo->getCoordinate())) {
-                return true;
-            } else if (wrapper.iconOrientedBoundingBox.overlaps(tinyClickBox) && selectionDelegate->didSelectFeature(wrapper.featureContext, wrapper.textInfo->getCoordinate())) {
-                return true;
+    std::optional<FeatureContext> selectedFeatureContext;
+    std::optional<Coord> selectedCoordinate;
+    {
+        std::lock_guard<std::recursive_mutex> lock(symbolMutex);
+        for (auto &[tile, wrapperVector]: tileTextMap) {
+            for (auto &wrapper: wrapperVector) {
+                if (wrapper.collides) { continue; }
+                if (wrapper.textOrientedBoundingBox.overlaps(tinyClickBox)) {
+                    selectedCoordinate = wrapper.textInfo->getCoordinate();
+                    selectedFeatureContext = wrapper.featureContext;
+                    break;
+                } else if (wrapper.iconOrientedBoundingBox.overlaps(tinyClickBox)) {
+                    selectedCoordinate = wrapper.textInfo->getCoordinate();
+                    selectedFeatureContext = wrapper.featureContext;
+                    break;
+                }
+            }
+            if (selectedFeatureContext && selectedCoordinate) {
+                break;
             }
         }
     }
+
+    if (selectedFeatureContext && selectedCoordinate) {
+        return selectionDelegate->didSelectFeature(*selectedFeatureContext, *selectedCoordinate);
+    }
+
     return false;
 }

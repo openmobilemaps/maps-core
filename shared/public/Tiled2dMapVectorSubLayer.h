@@ -55,6 +55,8 @@ public:
 
     void setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate);
 
+    void setSelectedFeatureIdentfier(std::optional<int64_t> identifier);
+
 protected:
     std::recursive_mutex maskMutex;
     std::unordered_map<Tiled2dMapTileInfo, std::shared_ptr<MaskingObjectInterface>> tileMaskMap;
@@ -68,4 +70,7 @@ protected:
     std::weak_ptr<Tiled2dMapVectorLayerReadyInterface> readyDelegate;
 
     std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate;
+
+    std::recursive_mutex selectedFeatureIdentifierMutex;
+    std::optional<int64_t> selectedFeatureIdentifier;
 };

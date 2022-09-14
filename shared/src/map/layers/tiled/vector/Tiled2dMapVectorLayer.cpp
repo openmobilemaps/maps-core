@@ -662,3 +662,15 @@ void Tiled2dMapVectorLayer::setSelectionDelegate(const std::weak_ptr<Tiled2dMapV
         }
     }
 }
+
+void Tiled2dMapVectorLayer::setSelectedFeatureIdentfier(std::optional<int64_t> identifier) {
+    {
+        std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
+        for (auto const &sublayer: sublayers) {
+            auto vectorSubLayer = std::dynamic_pointer_cast<Tiled2dMapVectorSubLayer>(sublayer);
+            if (vectorSubLayer) {
+                vectorSubLayer->setSelectedFeatureIdentfier(identifier);
+            }
+        }
+    }
+}
