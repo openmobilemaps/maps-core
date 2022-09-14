@@ -218,6 +218,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer(const std::vector<std::shared_
         if (vectorSubLayer) {
             vectorSubLayer->setTilesReadyDelegate(
                     std::dynamic_pointer_cast<Tiled2dMapVectorLayerReadyInterface>(shared_from_this()));
+            vectorSubLayer->setSelectionDelegate(selectionDelegate);
         }
     }
 
@@ -646,5 +647,18 @@ void Tiled2dMapVectorLayer::setScissorRect(const std::optional<::RectI> &scissor
     auto mapInterface = this->mapInterface;
     if (mapInterface) {
         mapInterface->invalidate();
+    }
+}
+
+void Tiled2dMapVectorLayer::setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate) {
+    this->selectionDelegate = selectionDelegate;
+    {
+        std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
+        for (auto const &sublayer: sublayers) {
+            auto vectorSubLayer = std::dynamic_pointer_cast<Tiled2dMapVectorSubLayer>(sublayer);
+            if (vectorSubLayer) {
+                vectorSubLayer->setSelectionDelegate(selectionDelegate);
+            }
+        }
     }
 }

@@ -96,3 +96,8 @@ void Tiled2dMapVectorSubLayer::setMaskingObject(const std::shared_ptr<::MaskingO
 void Tiled2dMapVectorSubLayer::setTilesReadyDelegate(const std::weak_ptr<Tiled2dMapVectorLayerReadyInterface> readyDelegate) {
     this->readyDelegate = readyDelegate;
 }
+
+
+void Tiled2dMapVectorSubLayer::setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate) {
+    this->selectionDelegate = selectionDelegate;
+}

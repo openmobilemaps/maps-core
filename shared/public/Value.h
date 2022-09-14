@@ -102,14 +102,19 @@ public:
 
     vtzero::GeomType geomType;
 
+
+    uint64_t identifier;
+
     FeatureContext() {}
 
     FeatureContext(const FeatureContext &other) :
     propertiesMap(std::move(other.propertiesMap)),
-    geomType(other.geomType) {}
+    geomType(other.geomType),
+    identifier(other.identifier) {}
 
     FeatureContext(vtzero::feature const &feature) {
         geomType = feature.geometry_type();
+        identifier = feature.id();
 
         propertiesMap = vtzero::create_properties_map<mapType, keyType, valueType, property_value_mapping>(feature);
 
@@ -134,11 +139,6 @@ public:
         if(it == propertiesMap.end()) { return std::nullopt; }
 
         auto &variant = it->second;
-
-        // TODO: maybe convert here to color? if string is a color
-        //if (std::holds_alternative<std::string>(variant)) {
-        //    return std::nullopt;
-        //}
 
         return variant;
     }

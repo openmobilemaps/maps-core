@@ -19,7 +19,7 @@
 #include "PolygonMaskObject.h"
 #include "Tiled2dMapVectorLayerReadyInterface.h"
 #include "Tiled2dMapLayerMaskWrapper.h"
-
+#include "Tiled2dMapVectorLayerSelectionInterface.h"
 
 class Tiled2dMapVectorLayer : public Tiled2dMapLayer, public Tiled2dMapVectorLayerInterface, public Tiled2dMapVectorLayerReadyInterface {
 public:
@@ -52,6 +52,8 @@ public:
     virtual void tileIsReady(const Tiled2dMapTileInfo &tile) override;
 
     virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
+
+    void setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate);
 
 private:
     void scheduleStyleJsonLoading();
@@ -99,6 +101,8 @@ private:
 
     std::atomic_bool isLoadingStyleJson = false;
     std::atomic_bool isResumed = false;
+
+    std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate;
 };
 
 
