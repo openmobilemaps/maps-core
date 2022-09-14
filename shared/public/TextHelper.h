@@ -15,7 +15,6 @@
 #include "TextInfoInterface.h"
 #include "TextLayerObject.h"
 #include "Vec2F.h"
-#include "SpriteData.h"
 
 #include <optional>
 
