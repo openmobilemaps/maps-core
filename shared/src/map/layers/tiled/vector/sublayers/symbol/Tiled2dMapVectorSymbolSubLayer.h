@@ -48,7 +48,8 @@ struct Tiled2dMapVectorSymbolFeatureWrapper {
     std::shared_ptr<Quad2dInterface> symbolObject;
     std::shared_ptr<AlphaShaderInterface> symbolShader;
 
-    OBB2D orientedBoundingBox = OBB2D(Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0));
+    OBB2D textOrientedBoundingBox = OBB2D(Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0));
+    OBB2D iconOrientedBoundingBox = OBB2D(Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0));
 
 #ifdef DRAW_TEXT_BOUNDING_BOXES
     std::shared_ptr<Quad2dInterface> boundingBox = nullptr;

@@ -561,17 +561,17 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
                 wrapper.boundingBox->setFrame(Quad2dD(Vec2D(topLeftProj[0], topLeftProj[1]), Vec2D(topRightProj[0], topRightProj[1]), Vec2D(bottomRightProj[0], bottomRightProj[1]), Vec2D(bottomLeftProj[0], bottomLeftProj[1])), RectD(0, 0, 1, 1));
 #endif
 
-                wrapper.orientedBoundingBox = OBB2D(Vec2D(topLeftProj[0], topLeftProj[1]), Vec2D(topRightProj[0], topRightProj[1]),
+                wrapper.textOrientedBoundingBox = OBB2D(Vec2D(topLeftProj[0], topLeftProj[1]), Vec2D(topRightProj[0], topRightProj[1]),
                                   Vec2D(bottomRightProj[0], bottomRightProj[1]), Vec2D(bottomLeftProj[0], bottomLeftProj[1]));
 
                 for ( auto const &otherB: placements ) {
-                    if (otherB.overlaps(wrapper.orientedBoundingBox)) {
+                    if (otherB.overlaps(wrapper.textOrientedBoundingBox)) {
                         wrapper.collides = true;
                         break;
                     }
                 }
                 if (!wrapper.collides) {
-                    placements.push_back(wrapper.orientedBoundingBox);
+                    placements.push_back(wrapper.textOrientedBoundingBox);
                 }
             }
 
@@ -623,6 +623,8 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
                         auto yh = renderPos.y - (spriteInfo.height * densityOffset) / 2;
 
                         Quad2dD quad = Quad2dD(Vec2D(x, yh), Vec2D(xw, yh), Vec2D(xw, y), Vec2D(x, y));
+
+                        wrapper.iconOrientedBoundingBox = OBB2D(quad.topLeft, quad.topRight, quad.bottomRight, quad.bottomLeft);
 
                         auto textureWidth = (double) spriteTexture->getImageWidth();
                         auto textureHeight = (double) spriteTexture->getImageHeight();
@@ -849,7 +851,9 @@ bool Tiled2dMapVectorSymbolSubLayer::onClickConfirmed(const ::Vec2F &posScreen) 
     for (auto &[tile, wrapperVector]: tileTextMap) {
         for (auto &wrapper: wrapperVector) {
             if (wrapper.collides) { continue; }
-            if(wrapper.orientedBoundingBox.overlaps(tinyClickBox) && selectionDelegate->didSelectFeature(wrapper.featureContext, wrapper.textInfo->getCoordinate())) {
+            if (wrapper.textOrientedBoundingBox.overlaps(tinyClickBox) && selectionDelegate->didSelectFeature(wrapper.featureContext, wrapper.textInfo->getCoordinate())) {
+                return true;
+            } else if (wrapper.iconOrientedBoundingBox.overlaps(tinyClickBox) && selectionDelegate->didSelectFeature(wrapper.featureContext, wrapper.textInfo->getCoordinate())) {
                 return true;
             }
         }
