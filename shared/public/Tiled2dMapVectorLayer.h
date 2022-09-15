@@ -70,9 +70,9 @@ private:
 
     void loadSpriteData();
 
-    std::optional<double> dpFactor;
+    const std::optional<double> dpFactor;
 
-    std::string layerName;
+    const std::string layerName;
     std::optional<std::string> styleJsonPath;
     std::optional<std::string> vectorSource;
     std::shared_ptr<VectorMapDescription> mapDescription;
@@ -82,9 +82,12 @@ private:
     const std::shared_ptr<FontLoaderInterface> fontLoader;
 
     const std::vector<std::shared_ptr<::LoaderInterface>> loaders;
+
     std::shared_ptr<Tiled2dMapVectorSource> vectorTileSource;
 
-    std::recursive_mutex updateMutex;
+    std::recursive_mutex tileUpdateMutex;
+
+    std::recursive_mutex tileSetMutex;
     std::unordered_set<Tiled2dMapVectorTileInfo> tileSet;
 
     std::recursive_mutex tilesReadyMutex;
@@ -93,13 +96,16 @@ private:
     std::recursive_mutex tilesReadyCountMutex;
     std::unordered_map<Tiled2dMapTileInfo, int> tilesReadyCount;
 
+    std::recursive_mutex tileMaskMapMutex;
     std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> tileMaskMap;
 
     std::recursive_mutex sublayerMutex;
     std::vector<std::shared_ptr<LayerInterface>> sublayers;
+
+    std::recursive_mutex sourceLayerMapMutex;
     std::unordered_map<std::string, std::vector<std::shared_ptr<Tiled2dMapVectorSubLayer>>> sourceLayerMap;
 
-    std::unordered_set<std::string> usedKeys;
+    //std::unordered_set<std::string> usedKeys;
 
     std::atomic_bool isLoadingStyleJson = false;
     std::atomic_bool isResumed = false;
