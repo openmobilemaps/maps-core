@@ -681,8 +681,7 @@ enum class PropertyCompareType {
 class ValueVariantCompareHelper {
 public:
     static bool compare(const ValueVariant &lhs, const ValueVariant &rhs, PropertyCompareType type) {
-
-        auto fallback = [](const ValueVariant &lhs, const ValueVariant &rhs, PropertyCompareType type) -> bool{
+        auto fallback = [] (const ValueVariant &lhs, const ValueVariant &rhs, PropertyCompareType type) -> bool {
             switch (type) {
                 case PropertyCompareType::EQUAL:
                     return lhs == rhs;
@@ -700,9 +699,9 @@ public:
         };
 
         return std::visit(overloaded {
-            [&](std::string lhsValue){
+            [&](std::string lhsValue) -> bool {
                 return std::visit(overloaded {
-                    [&lhsValue, &type](std::string rhsValue){
+                    [&lhsValue, &type] (std::string rhsValue) -> bool {
                         switch (type) {
                             case PropertyCompareType::EQUAL:
                                 return lhsValue == rhsValue;
@@ -718,35 +717,35 @@ public:
                                 return lhsValue >= rhsValue;
                         }
                     },
-                    [&](double rhsValue){
+                    [&](double rhsValue) -> bool {
                         return fallback(lhs, rhs, type);
                     },
-                    [&](int64_t rhsValue){
+                    [&](int64_t rhsValue) -> bool {
                         return fallback(lhs, rhs, type);
                     },
-                    [&](bool rhsValue){
+                    [&](bool rhsValue) -> bool {
                         return fallback(lhs, rhs, type);
                     },
-                    [&](Color rhsValue){
+                    [&](Color rhsValue) -> bool {
                         return fallback(lhs, rhs, type);
                     },
-                    [&](std::vector<float> rhsValue){
+                    [&](std::vector<float> rhsValue) -> bool {
                         return fallback(lhs, rhs, type);
                     },
-                    [&](std::vector<std::string> rhsValue){
+                    [&](std::vector<std::string> rhsValue) -> bool {
                         return fallback(lhs, rhs, type);
                     },
-                    [&](std::vector<FormattedStringEntry> rhsValue){
+                    [&](std::vector<FormattedStringEntry> rhsValue) -> bool {
                         return fallback(lhs, rhs, type);
                     }
                 }, rhs);
             },
-            [&](double lhsValue){
+            [&](double lhsValue) -> bool {
                 return std::visit(overloaded {
-                    [&](std::string rhsValue){
+                    [&](std::string rhsValue) -> bool {
                         return fallback(lhs, rhs, type);
                     },
-                    [&lhsValue, &type](double rhsValue){
+                    [&lhsValue, &type](double rhsValue) -> bool {
                         switch (type) {
                             case PropertyCompareType::EQUAL:
                                 return lhsValue == rhsValue;
@@ -762,7 +761,7 @@ public:
                                 return lhsValue >= rhsValue;
                         }
                     },
-                    [&lhsValue, &type](int64_t rhsValue){
+                    [&lhsValue, &type](int64_t rhsValue) -> bool {
                         double rhsDoubleValue = rhsValue;
                         switch (type) {
                             case PropertyCompareType::EQUAL:
@@ -779,29 +778,29 @@ public:
                                 return lhsValue >= rhsDoubleValue;
                         }
                     },
-                    [=](bool rhsValue){
+                    [=](bool rhsValue) -> bool {
                         return fallback(lhs, rhs, type);
                     },
-                    [=](Color rhsValue){
+                    [=](Color rhsValue) -> bool {
                         return fallback(lhs, rhs, type);
                     },
-                    [=](std::vector<float> rhsValue){
+                    [=](std::vector<float> rhsValue) -> bool {
                         return fallback(lhs, rhs, type);
                     },
-                    [=](std::vector<std::string> rhsValue){
+                    [=](std::vector<std::string> rhsValue) -> bool {
                         return fallback(lhs, rhs, type);
                     },
-                    [=](std::vector<FormattedStringEntry> rhsValue){
+                    [=](std::vector<FormattedStringEntry> rhsValue) -> bool {
                         return fallback(lhs, rhs, type);
                     }
                 }, rhs);
             },
-            [&](int64_t lhsValue){
+            [&](int64_t lhsValue) -> bool {
                 return std::visit(overloaded {
-                    [&](std::string rhsValue){
+                    [&](std::string rhsValue) -> bool {
                         return fallback(lhs, rhs, type);
                     },
-                    [&lhsValue, &type](double rhsValue){
+                    [&lhsValue, &type](double rhsValue) -> bool {
                         int64_t rhsIntValue = rhsValue;
                         switch (type) {
                             case PropertyCompareType::EQUAL:
@@ -818,7 +817,7 @@ public:
                                 return lhsValue >= rhsIntValue;
                         }
                     },
-                    [&lhsValue, &type](int64_t rhsValue){
+                    [&lhsValue, &type](int64_t rhsValue) -> bool {
                         switch (type) {
                             case PropertyCompareType::EQUAL:
                                 return lhsValue == rhsValue;
@@ -834,35 +833,35 @@ public:
                                 return lhsValue >= rhsValue;
                         }
                     },
-                    [&](bool rhsValue){
+                    [&](bool rhsValue) -> bool {
                         return fallback(lhs, rhs, type);
                     },
-                    [&](Color rhsValue){
+                    [&](Color rhsValue) -> bool {
                         return fallback(lhs, rhs, type);
                     },
-                    [&](std::vector<float> rhsValue){
+                    [&](std::vector<float> rhsValue) -> bool {
                         return fallback(lhs, rhs, type);
                     },
-                    [&](std::vector<std::string> rhsValue){
+                    [&](std::vector<std::string> rhsValue) -> bool {
                         return fallback(lhs, rhs, type);
                     },
-                    [&](std::vector<FormattedStringEntry> rhsValue){
+                    [&](std::vector<FormattedStringEntry> rhsValue) -> bool {
                         return fallback(lhs, rhs, type);
                     }
                 }, rhs);
             },
-            [&](bool lhsValue){
+            [&](bool lhsValue) -> bool {
                 return std::visit(overloaded {
-                    [&](std::string rhsValue){
+                    [&](std::string rhsValue) -> bool {
                         return fallback(lhs, rhs, type);
                     },
-                    [&](double rhsValue){
+                    [&](double rhsValue) -> bool {
                         return fallback(lhs, rhs, type);
                     },
-                    [&](int64_t rhsValue){
+                    [&](int64_t rhsValue) -> bool {
                         return fallback(lhs, rhs, type);
                     },
-                    [&lhsValue, &type](bool rhsValue){
+                    [&lhsValue, &type](bool rhsValue) -> bool {
                         switch (type) {
                             case PropertyCompareType::EQUAL:
                                 return lhsValue == rhsValue;
@@ -878,30 +877,30 @@ public:
                                 return lhsValue >= rhsValue;
                         }
                     },
-                    [&](Color rhsValue){
+                    [&](Color rhsValue) -> bool {
                         return fallback(lhs, rhs, type);
                     },
-                    [&](std::vector<float> rhsValue){
+                    [&](std::vector<float> rhsValue) -> bool {
                         return fallback(lhs, rhs, type);
                     },
-                    [&](std::vector<std::string> rhsValue){
+                    [&](std::vector<std::string> rhsValue) -> bool {
                         return fallback(lhs, rhs, type);
                     },
-                    [&](std::vector<FormattedStringEntry> rhsValue){
+                    [&](std::vector<FormattedStringEntry> rhsValue) -> bool {
                         return fallback(lhs, rhs, type);
                     }
                 }, rhs);
             },
-            [&](Color lhsValue){
+            [&](Color lhsValue) -> bool {
                 return fallback(lhs, rhs, type);
             },
-            [&](std::vector<float> lhsValue){
+            [&](std::vector<float> lhsValue) -> bool {
                 return fallback(lhs, rhs, type);
             },
-            [&](std::vector<std::string> lhsValue){
+            [&](std::vector<std::string> lhsValue) -> bool {
                 return fallback(lhs, rhs, type);
             },
-            [&](std::vector<FormattedStringEntry> lhsValue){
+            [&](std::vector<FormattedStringEntry> lhsValue) -> bool {
                 return fallback(lhs, rhs, type);
             }
         }, lhs);
