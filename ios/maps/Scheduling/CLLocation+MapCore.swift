@@ -26,3 +26,15 @@ public extension CLLocationCoordinate2D {
                 z: 0)
     }
 }
+
+public extension MCCoord {
+    var clLocation: CLLocation? {
+        guard let coord = clLocationCoordinate else { return nil}
+        return CLLocation(latitude: coord.latitude, longitude: coord.longitude)
+    }
+
+    var clLocationCoordinate: CLLocationCoordinate2D? {
+        guard let coord = MCCoordinateConversionHelperInterface.independentInstance()?.convert(MCCoordinateSystemIdentifiers.epsg4326(), coordinate: self) else { return nil }
+        return CLLocationCoordinate2D(latitude: coord.y, longitude: coord.x)
+    }
+}
