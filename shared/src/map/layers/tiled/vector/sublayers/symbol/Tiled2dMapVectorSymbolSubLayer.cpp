@@ -28,6 +28,7 @@
 #include "json.h"
 #include "ColorShaderInterface.h"
 
+
 Tiled2dMapVectorSymbolSubLayer::Tiled2dMapVectorSymbolSubLayer(const std::shared_ptr<FontLoaderInterface> &fontLoader,
                                                                const std::shared_ptr<SymbolVectorLayerDescription> &description)
 : fontLoader(fontLoader),
@@ -36,10 +37,15 @@ Tiled2dMapVectorSymbolSubLayer::Tiled2dMapVectorSymbolSubLayer(const std::shared
 
 void Tiled2dMapVectorSymbolSubLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
     Tiled2dMapVectorSubLayer::onAdded(mapInterface);
+    mapInterface->getTouchHandler()->addListener(shared_from_this());
 }
 
 void Tiled2dMapVectorSymbolSubLayer::onRemoved() {
     Tiled2dMapVectorSubLayer::onRemoved();
+
+    if (mapInterface) {
+        mapInterface->getTouchHandler()->removeListener(shared_from_this());
+    }
 }
 
 void Tiled2dMapVectorSymbolSubLayer::pause() {
@@ -555,17 +561,17 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
                 wrapper.boundingBox->setFrame(Quad2dD(Vec2D(topLeftProj[0], topLeftProj[1]), Vec2D(topRightProj[0], topRightProj[1]), Vec2D(bottomRightProj[0], bottomRightProj[1]), Vec2D(bottomLeftProj[0], bottomLeftProj[1])), RectD(0, 0, 1, 1));
 #endif
 
-                OBB2D orientedBox(Vec2D(topLeftProj[0], topLeftProj[1]), Vec2D(topRightProj[0], topRightProj[1]),
+                wrapper.textOrientedBoundingBox = OBB2D(Vec2D(topLeftProj[0], topLeftProj[1]), Vec2D(topRightProj[0], topRightProj[1]),
                                   Vec2D(bottomRightProj[0], bottomRightProj[1]), Vec2D(bottomLeftProj[0], bottomLeftProj[1]));
 
                 for ( auto const &otherB: placements ) {
-                    if (otherB.overlaps(orientedBox)) {
+                    if (otherB.overlaps(wrapper.textOrientedBoundingBox)) {
                         wrapper.collides = true;
                         break;
                     }
                 }
                 if (!wrapper.collides) {
-                    placements.push_back(orientedBox);
+                    placements.push_back(wrapper.textOrientedBoundingBox);
                 }
             }
 
@@ -584,6 +590,14 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
                         Matrix::translateM(wrapper.iconModelMatrix, 0, renderCoord.x, renderCoord.y, renderCoord.z);
 
                         auto iconSize = description->style.getIconSize(evalContext) * scaleFactor;
+
+
+                        {
+                            std::lock_guard<std::recursive_mutex> lock(selectedFeatureIdentifierMutex);
+                            if (wrapper.featureContext.identifier == selectedFeatureIdentifier) {
+                                iconSize *= 2.0;
+                            }
+                        }
 
                         Matrix::scaleM(wrapper.iconModelMatrix, 0, iconSize, iconSize, 1.0);
                         Matrix::rotateM(wrapper.iconModelMatrix, 0.0, rotation, 0.0, 0.0, 1.0);
@@ -618,6 +632,8 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
 
                         Quad2dD quad = Quad2dD(Vec2D(x, yh), Vec2D(xw, yh), Vec2D(xw, y), Vec2D(x, y));
 
+                        wrapper.iconOrientedBoundingBox = OBB2D(quad.topLeft, quad.topRight, quad.bottomRight, quad.bottomLeft);
+
                         auto textureWidth = (double) spriteTexture->getImageWidth();
                         auto textureHeight = (double) spriteTexture->getImageHeight();
 
@@ -633,7 +649,7 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
                     }
                 }
             }
-#ifdef DRAW_TEXT_BOUNDING_BOXES
+#ifdef DRAW_COLLIDED_TEXT_BOUNDING_BOXES
             else {
                 if (object->getShader()) {
                     object->getShader()->setColor(Color(1.0, 0.0, 0.0, 1.0));
@@ -731,7 +747,7 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorSymbolSubLay
         if (tiles.count(tile) == 0) continue;
         std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
         for (auto const &wrapper : wrapperVector) {
-#ifndef DRAW_TEXT_BOUNDING_BOXES
+#ifndef DRAW_COLLIDED_TEXT_BOUNDING_BOXES
             if (wrapper.collides) {
                 continue;
             }
@@ -815,4 +831,56 @@ void Tiled2dMapVectorSymbolSubLayer::setSprites(std::shared_ptr<TextureHolderInt
 
 void Tiled2dMapVectorSymbolSubLayer::setScissorRect(const std::optional<::RectI> &scissorRect) {
     this->scissorRect = scissorRect;
+}
+
+bool Tiled2dMapVectorSymbolSubLayer::onClickConfirmed(const ::Vec2F &posScreen) {
+
+    auto lockSelfPtr = shared_from_this();
+    auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
+    auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+    auto conversionHelper = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
+    auto selectionDelegate = this->selectionDelegate.lock();
+    if (!camera || !conversionHelper || !selectionDelegate) {
+        return false;
+    }
+
+
+    Coord clickCoords = camera->coordFromScreenPosition(posScreen);
+    Coord clickCoordsRenderCoord = conversionHelper->convertToRenderSystem(clickCoords);
+
+    double clickPadding = camera->mapUnitsFromPixels(10);
+
+    OBB2D tinyClickBox(Vec2D(clickCoordsRenderCoord.x - clickPadding, clickCoordsRenderCoord.y - clickPadding),
+                       Vec2D(clickCoordsRenderCoord.x + clickPadding, clickCoordsRenderCoord.y - clickPadding),
+                       Vec2D(clickCoordsRenderCoord.x + clickPadding, clickCoordsRenderCoord.y + clickPadding),
+                       Vec2D(clickCoordsRenderCoord.x - clickPadding, clickCoordsRenderCoord.y + clickPadding));
+
+    std::optional<FeatureContext> selectedFeatureContext;
+    std::optional<Coord> selectedCoordinate;
+    {
+        std::lock_guard<std::recursive_mutex> lock(symbolMutex);
+        for (auto &[tile, wrapperVector]: tileTextMap) {
+            for (auto &wrapper: wrapperVector) {
+                if (wrapper.collides) { continue; }
+                if (wrapper.textOrientedBoundingBox.overlaps(tinyClickBox)) {
+                    selectedCoordinate = wrapper.textInfo->getCoordinate();
+                    selectedFeatureContext = wrapper.featureContext;
+                    break;
+                } else if (wrapper.iconOrientedBoundingBox.overlaps(tinyClickBox)) {
+                    selectedCoordinate = wrapper.textInfo->getCoordinate();
+                    selectedFeatureContext = wrapper.featureContext;
+                    break;
+                }
+            }
+            if (selectedFeatureContext && selectedCoordinate) {
+                break;
+            }
+        }
+    }
+
+    if (selectedFeatureContext && selectedCoordinate) {
+        return selectionDelegate->didSelectFeature(*selectedFeatureContext, *selectedCoordinate);
+    }
+
+    return false;
 }

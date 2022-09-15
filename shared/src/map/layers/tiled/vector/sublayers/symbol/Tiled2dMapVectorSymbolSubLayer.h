@@ -27,8 +27,10 @@
 #include "SpriteData.h"
 #include "LoaderInterface.h"
 #include "Quad2dInterface.h"
+#include "SimpleTouchInterface.h"
 
 //#define DRAW_TEXT_BOUNDING_BOXES
+//#define DRAW_COLLIDED_TEXT_BOUNDING_BOXES
 
 struct Tiled2dMapVectorSymbolFeatureWrapper {
     FeatureContext featureContext;
@@ -45,6 +47,9 @@ struct Tiled2dMapVectorSymbolFeatureWrapper {
 
     std::shared_ptr<Quad2dInterface> symbolObject;
     std::shared_ptr<AlphaShaderInterface> symbolShader;
+
+    OBB2D textOrientedBoundingBox = OBB2D(Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0));
+    OBB2D iconOrientedBoundingBox = OBB2D(Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0));
 
 #ifdef DRAW_TEXT_BOUNDING_BOXES
     std::shared_ptr<Quad2dInterface> boundingBox = nullptr;
@@ -70,6 +75,7 @@ struct Tiled2dMapVectorSymbolSubLayerPositioningWrapper {
 };
 
 class Tiled2dMapVectorSymbolSubLayer : public Tiled2dMapVectorSubLayer,
+                                     public SimpleTouchInterface,
                                      public std::enable_shared_from_this<Tiled2dMapVectorSymbolSubLayer> {
 public:
     Tiled2dMapVectorSymbolSubLayer(const std::shared_ptr<FontLoaderInterface> &fontLoader, const std::shared_ptr<SymbolVectorLayerDescription> &description);
@@ -101,6 +107,8 @@ public:
     void setSprites(std::shared_ptr<TextureHolderInterface> spriteTexture, std::shared_ptr<SpriteData> spriteData);
 
     virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
+
+    virtual bool onClickConfirmed(const ::Vec2F &posScreen) override;
 
 protected:
     void addTexts(const Tiled2dMapTileInfo &tileInfo,

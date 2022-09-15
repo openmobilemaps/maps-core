@@ -57,8 +57,19 @@ public:
         for (auto&[key, val]: json["sources"].items()) {
             if (val["type"].get<std::string>() == "raster") {
                 std::string url;
+
+                bool adaptScaleToScreen = true;
+                int32_t numDrawPreviousLayers = 4;
+                bool maskTiles = true;
+                double zoomLevelScaleFactor = 0.65;
+
                 if (val["tiles"].is_array()) {
+                    auto str = val.dump();
                     url = val["tiles"].begin()->get<std::string>();
+                    adaptScaleToScreen = val.value("adaptScaleToScreen", adaptScaleToScreen);
+                    numDrawPreviousLayers = val.value("numDrawPreviousLayers", numDrawPreviousLayers);
+                    maskTiles = val.value("maskTiles", maskTiles);
+                    zoomLevelScaleFactor = val.value("zoomLevelScaleFactor", zoomLevelScaleFactor);
                 } else if (val["url"].is_string()) {
                     auto result = LoaderHelper::loadData(val["url"].get<std::string>(), std::nullopt, loaders);
                     if (result.status != LoaderStatus::OK) {
@@ -80,7 +91,10 @@ public:
                                                                                      val.value("minZoom", 0),
                                                                                      val.value("maxZoom", 22),
                                                                                      url,
-                                                                                     true);
+                                                                                     adaptScaleToScreen,
+                                                                                     numDrawPreviousLayers,
+                                                                                     maskTiles,
+                                                                                     zoomLevelScaleFactor);
 
             }
             if (val["type"].get<std::string>() == "vector" && key == vectorSource) {

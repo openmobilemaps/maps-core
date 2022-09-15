@@ -49,6 +49,8 @@ public:
     RasterVectorStyle style;
     bool adaptScaleToScreen = false;
     int32_t numDrawPreviousLayers = 2;
+    bool maskTiles = false;
+    double zoomLevelScaleFactor = 0.65;
 
     RasterVectorLayerDescription(std::string identifier,
                             int minZoom,
@@ -62,9 +64,12 @@ public:
                             int minZoom,
                             int maxZoom,
                             std::string url,
-                            bool adaptScaleToScreen = false):
+                            bool adaptScaleToScreen = false,
+                            int32_t numDrawPreviousLayers = 2,
+                            bool maskTiles = false,
+                            double zoomLevelScaleFactor = 0.65):
     VectorLayerDescription(identifier, "", minZoom, maxZoom, nullptr),
-    style(), url(url), adaptScaleToScreen(adaptScaleToScreen) {};
+    style(), url(url), adaptScaleToScreen(adaptScaleToScreen), numDrawPreviousLayers(numDrawPreviousLayers), maskTiles(maskTiles), zoomLevelScaleFactor(zoomLevelScaleFactor)  {};
 
     virtual std::unordered_set<std::string> getUsedKeys() override {
         std::unordered_set<std::string> usedKeys;

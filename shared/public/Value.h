@@ -28,6 +28,7 @@
 #include "FormattedStringEntry.h"
 #include "LineCapType.h"
 #include "TextTransform.h"
+#include <sstream>
 
 namespace std {
     template <>
@@ -101,16 +102,31 @@ public:
 
     vtzero::GeomType geomType;
 
+
+    uint64_t identifier;
+
     FeatureContext() {}
 
     FeatureContext(const FeatureContext &other) :
     propertiesMap(std::move(other.propertiesMap)),
-    geomType(other.geomType) {}
+    geomType(other.geomType),
+    identifier(other.identifier) {}
 
     FeatureContext(vtzero::feature const &feature) {
         geomType = feature.geometry_type();
 
         propertiesMap = vtzero::create_properties_map<mapType, keyType, valueType, property_value_mapping>(feature);
+
+        if (feature.has_id()) {
+            identifier = feature.id();
+        } else {
+            size_t hash = 0;
+            for(auto const [key, val]: propertiesMap) {
+                std::hash_combine(hash, std::hash<valueType>{}(val));
+            }
+            identifier = hash;
+        }
+
 
         switch (geomType) {
             case vtzero::GeomType::LINESTRING:
@@ -133,11 +149,6 @@ public:
         if(it == propertiesMap.end()) { return std::nullopt; }
 
         auto &variant = it->second;
-
-        // TODO: maybe convert here to color? if string is a color
-        //if (std::holds_alternative<std::string>(variant)) {
-        //    return std::nullopt;
-        //}
 
         return variant;
     }
@@ -406,6 +417,13 @@ public:
 
             return res;
 
+        } else if (std::holds_alternative<std::vector<std::string>>(value)) {
+            std::vector<std::string> res = std::get<std::vector<std::string>>(value);
+            if (!res.empty() && *res.begin() == "zoom" && context.zoomLevel) {
+                return *context.zoomLevel;
+            }
+
+            return value;
         } else {
 
             return value;
@@ -651,6 +669,139 @@ private:
     std::vector<std::tuple<double, std::shared_ptr<Value>>> stops;
 };
 
+enum class PropertyCompareType {
+    EQUAL,
+    NOTEQUAL,
+    LESS,
+    LESSEQUAL,
+    GREATER,
+    GREATEREQUAL
+};
+
+class ValueVariantCompareHelper {
+public:
+    static bool compare(const ValueVariant &lhs, const ValueVariant &rhs, PropertyCompareType type) {
+
+        if (std::holds_alternative<int64_t>(lhs) &&
+            std::holds_alternative<int64_t>(rhs)) {
+            int64_t lhsInt = std::get<int64_t>(lhs);
+            int64_t rhsInt = std::get<int64_t>(rhs);
+            switch (type) {
+                case PropertyCompareType::EQUAL:
+                    return lhsInt == rhsInt;
+                case PropertyCompareType::NOTEQUAL:
+                    return lhsInt != rhsInt;
+                case PropertyCompareType::LESS:
+                    return lhsInt < rhsInt;
+                case PropertyCompareType::LESSEQUAL:
+                    return lhsInt <= rhsInt;
+                case PropertyCompareType::GREATER:
+                    return lhsInt > rhsInt;
+                case PropertyCompareType::GREATEREQUAL:
+                    return lhsInt >= rhsInt;
+            }
+        }
+
+        if (std::holds_alternative<double>(lhs) &&
+            std::holds_alternative<double>(rhs)) {
+            double lhsDouble = std::get<double>(lhs);
+            double rhsDouble = std::get<double>(rhs);
+            switch (type) {
+                case PropertyCompareType::EQUAL:
+                    return lhsDouble == rhsDouble;
+                case PropertyCompareType::NOTEQUAL:
+                    return lhsDouble != rhsDouble;
+                case PropertyCompareType::LESS:
+                    return lhsDouble < rhsDouble;
+                case PropertyCompareType::LESSEQUAL:
+                    return lhsDouble <= rhsDouble;
+                case PropertyCompareType::GREATER:
+                    return lhsDouble > rhsDouble;
+                case PropertyCompareType::GREATEREQUAL:
+                    return lhsDouble >= rhsDouble;
+            }
+        }
+
+        if (std::holds_alternative<int64_t>(lhs) &&
+            std::holds_alternative<double>(rhs)) {
+            double lhsDouble = (double)std::get<int64_t>(lhs);
+            double rhsDouble = std::get<double>(rhs);
+            switch (type) {
+                case PropertyCompareType::EQUAL:
+                    return lhsDouble == rhsDouble;
+                case PropertyCompareType::NOTEQUAL:
+                    return lhsDouble != rhsDouble;
+                case PropertyCompareType::LESS:
+                    return lhsDouble < rhsDouble;
+                case PropertyCompareType::LESSEQUAL:
+                    return lhsDouble <= rhsDouble;
+                case PropertyCompareType::GREATER:
+                    return lhsDouble > rhsDouble;
+                case PropertyCompareType::GREATEREQUAL:
+                    return lhsDouble >= rhsDouble;
+            }
+        }
+
+        if (std::holds_alternative<double>(lhs) &&
+            std::holds_alternative<int64_t>(rhs)) {
+            double lhsDouble = std::get<double>(lhs);
+            double rhsDouble = (double) std::get<int64_t>(rhs);
+            switch (type) {
+                case PropertyCompareType::EQUAL:
+                    return lhsDouble == rhsDouble;
+                case PropertyCompareType::NOTEQUAL:
+                    return lhsDouble != rhsDouble;
+                case PropertyCompareType::LESS:
+                    return lhsDouble < rhsDouble;
+                case PropertyCompareType::LESSEQUAL:
+                    return lhsDouble <= rhsDouble;
+                case PropertyCompareType::GREATER:
+                    return lhsDouble > rhsDouble;
+                case PropertyCompareType::GREATEREQUAL:
+                    return lhsDouble >= rhsDouble;
+            }
+        }
+
+        if (std::holds_alternative<bool>(lhs) &&
+            std::holds_alternative<bool>(rhs)) {
+            bool lhsBool = std::get<bool>(lhs);
+            bool rhsBool = std::get<bool>(rhs);
+            switch (type) {
+                case PropertyCompareType::EQUAL:
+                    return lhsBool == rhsBool;
+                case PropertyCompareType::NOTEQUAL:
+                    return lhsBool != rhsBool;
+                case PropertyCompareType::LESS:
+                    return lhsBool < rhsBool;
+                case PropertyCompareType::LESSEQUAL:
+                    return lhsBool <= rhsBool;
+                case PropertyCompareType::GREATER:
+                    return lhsBool > rhsBool;
+                case PropertyCompareType::GREATEREQUAL:
+                    return lhsBool >= rhsBool;
+            }
+        }
+
+        switch (type) {
+            case PropertyCompareType::EQUAL:
+                return lhs == rhs;
+            case PropertyCompareType::NOTEQUAL:
+                return lhs != rhs;
+            case PropertyCompareType::LESS:
+                return lhs < rhs;
+            case PropertyCompareType::LESSEQUAL:
+                return lhs <= rhs;
+            case PropertyCompareType::GREATER:
+                return lhs > rhs;
+            case PropertyCompareType::GREATEREQUAL:
+                return lhs >= rhs;
+        }
+
+        return false;
+
+    }
+};
+
 class StepValue : public Value {
 public:
     StepValue(const std::shared_ptr<Value> compareValue, const std::vector<std::tuple<std::shared_ptr<Value>, std::shared_ptr<Value>>> stops, std::shared_ptr<Value> defaultValue) : compareValue(compareValue), stops(stops), defaultValue(defaultValue) {}
@@ -668,7 +819,7 @@ public:
         auto compareValue_ = compareValue->evaluate(context);
 
         for (const auto &[stop, value] : stops) {
-            if (stop->evaluate(context) > compareValue_) {
+            if (ValueVariantCompareHelper::compare(stop->evaluate(context), compareValue_, PropertyCompareType::GREATER)) {
                 return value->evaluate(context);
             }
         }
@@ -931,15 +1082,6 @@ private:
     const std::vector<const std::shared_ptr<Value>> values;
 };
 
-enum class PropertyCompareType {
-    EQUAL,
-    NOTEQUAL,
-    LESS,
-    LESSEQUAL,
-    GREATER,
-    GREATEREQUAL
-};
-
 class PropertyCompareValue: public Value {
 public:
     PropertyCompareValue(const std::shared_ptr<Value> lhs, const std::shared_ptr<Value> rhs, const PropertyCompareType type) : lhs(lhs), rhs( rhs), type(type) {
@@ -962,21 +1104,9 @@ public:
  ValueVariant evaluate(const EvaluationContext &context) override {
      auto const lhsValue = lhs->evaluate(context);
      auto const rhsValue = rhs->evaluate(context);
-        switch (type) {
-            case PropertyCompareType::EQUAL:
-                return lhsValue == rhsValue;
-            case PropertyCompareType::NOTEQUAL:
-                return lhsValue != rhsValue;
-            case PropertyCompareType::LESS:
-                return lhsValue < rhsValue;
-            case PropertyCompareType::LESSEQUAL:
-                return lhsValue <= rhsValue;
-            case PropertyCompareType::GREATER:
-                return lhsValue > rhsValue;
-            case PropertyCompareType::GREATEREQUAL:
-                return lhsValue >= rhsValue;
-        }
-    };
+
+     return ValueVariantCompareHelper::compare(lhsValue, rhsValue, type);
+ };
 
 private:
     const std::shared_ptr<Value> lhs;
