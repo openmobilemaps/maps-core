@@ -18,16 +18,32 @@
 #include <unordered_map>
 #include <vector>
 
-using LayerFeatureMapType = std::unordered_map<std::string, std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>>;
+struct IntermediateResult final {
+    std::unordered_map<std::string, DataLoaderResult> results;
+    LoaderStatus status;
+    std::optional<std::string> errorCode;
 
-class Tiled2dMapVectorSource : public Tiled2dMapSource<DataHolderInterface, DataLoaderResult, std::shared_ptr<LayerFeatureMapType>>  {
+    IntermediateResult(std::unordered_map<std::string, DataLoaderResult> results_,
+                     LoaderStatus status_,
+                     std::optional<std::string> errorCode_)
+    : results(std::move(results_))
+    , status(std::move(status_))
+    , errorCode(std::move(errorCode_))
+    {}
+};
+
+
+using FinalResult = std::unordered_map<std::string, std::shared_ptr<std::unordered_map<std::string, std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>>>>;
+
+class Tiled2dMapVectorSource : public Tiled2dMapSource<DataHolderInterface, IntermediateResult, FinalResult>  {
 public:
-    Tiled2dMapVectorSource(const MapConfig &mapConfig, const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
+    Tiled2dMapVectorSource(const MapConfig &mapConfig,
+                           const std::unordered_map<std::string, std::shared_ptr<Tiled2dMapLayerConfig>> &layerConfigs,
                            const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                            const std::shared_ptr<SchedulerInterface> &scheduler,
                            const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
                            const std::shared_ptr<Tiled2dMapSourceListenerInterface> &listener,
-                           const std::unordered_set<std::string> &layersToDecode,
+                           const std::unordered_map<std::string, std::unordered_set<std::string>> &layersToDecode,
                            float screenDensityPpi);
 
     std::unordered_set<Tiled2dMapVectorTileInfo> getCurrentTiles();
@@ -37,11 +53,12 @@ public:
     virtual void resume() override;
 
 protected:
-    virtual DataLoaderResult loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
+    virtual IntermediateResult loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
 
-    virtual std::shared_ptr<LayerFeatureMapType> postLoadingTask(const DataLoaderResult &loadedData, const Tiled2dMapTileInfo &tile) override;
+    virtual FinalResult postLoadingTask(const IntermediateResult &loadedData, const Tiled2dMapTileInfo &tile) override;
 
 private:
     const std::vector<std::shared_ptr<::LoaderInterface>> loaders;
-    const std::unordered_set<std::string> layersToDecode;
+    const std::unordered_map<std::string, std::unordered_set<std::string>> layersToDecode;
+    const std::unordered_map<std::string, std::shared_ptr<Tiled2dMapLayerConfig>> layerConfigs;
 };

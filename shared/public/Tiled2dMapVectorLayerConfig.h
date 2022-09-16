@@ -15,7 +15,7 @@
 
 class Tiled2dMapVectorLayerConfig : public Tiled2dMapLayerConfig {
 public:
-    Tiled2dMapVectorLayerConfig(const std::shared_ptr<VectorMapDescription> &layerDescription)
+    Tiled2dMapVectorLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &layerDescription)
             : description(layerDescription) {}
 
     ~Tiled2dMapVectorLayerConfig() {}
@@ -51,7 +51,7 @@ public:
     }
 
 private:
-    std::shared_ptr<VectorMapDescription> description;
+    std::shared_ptr<VectorMapSourceDescription> description;
 
     const double baseValueZoom = 500000000.0;
     const double baseValueWidth = 40075016.0;

@@ -29,8 +29,8 @@
 
 class Tiled2dMapVectorLayerParserHelper {
 public:
-    static Tiled2dMapVectorLayerParserResult parseStyleJson(const std::string &layerName, const std::string &styleJsonPath,
-                                                            const std::string &vectorSource,
+    static Tiled2dMapVectorLayerParserResult parseStyleJson(const std::string &layerName,
+                                                            const std::string &styleJsonPath,
                                                             const double &dpFactor,
                                                             const std::vector<std::shared_ptr<::LoaderInterface>> &loaders) {
         DataLoaderResult result = LoaderHelper::loadData(styleJsonPath, std::nullopt, loaders);
@@ -53,7 +53,7 @@ public:
 
         std::map<std::string, std::shared_ptr<RasterVectorLayerDescription>> rasterLayerMap;
 
-        nlohmann::json tileJson;
+        std::map<std::string, nlohmann::json> tileJsons;
         for (auto&[key, val]: json["sources"].items()) {
             if (val["type"].get<std::string>() == "raster") {
                 std::string url;
@@ -97,7 +97,7 @@ public:
                                                                                      zoomLevelScaleFactor);
 
             }
-            if (val["type"].get<std::string>() == "vector" && key == vectorSource) {
+            if (val["type"].get<std::string>() == "vector") {
                 auto result = LoaderHelper::loadData(val["url"].get<std::string>(), std::nullopt, loaders);
                 if (result.status != LoaderStatus::OK) {
                     return Tiled2dMapVectorLayerParserResult(nullptr, result.status, result.errorCode);
@@ -107,14 +107,13 @@ public:
                 nlohmann::json json;
 
                 try {
-                    tileJson = nlohmann::json::parse(string);
+                    tileJsons[key] = nlohmann::json::parse(string);
                 }
                 catch (nlohmann::json::parse_error &ex) {
                     return Tiled2dMapVectorLayerParserResult(nullptr, LoaderStatus::ERROR_OTHER, "");
                 }
 
             }
-            //std::cout << "key: " << key << ", value:" << val << '\n';
         }
 
         Tiled2dMapVectorStyleParser parser;
@@ -130,18 +129,15 @@ public:
                 auto layer = rasterLayerMap.at(val["source"]);
                 layer->style = RasterVectorStyle(parser.parseValue(val["paint"]["raster-opacity"]));
                 layers.push_back(layer);
-            }
-            if (val["source"] == vectorSource) {
-                if (val["type"] == "line") {
+            }else if (val["type"] == "line") {
 
                     std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
 
                     auto layerDesc = std::make_shared<LineVectorLayerDescription>(val["id"],
+                                                                                  val["source"],
                                                                                   val["source-layer"],
-                                                                                  val.value("minzoom",
-                                                                                            tileJson["minzoom"].get<int>()),
-                                                                                  val.value("maxzoom",
-                                                                                            tileJson["maxzoom"].get<int>()),
+                                                                                  val.value("minzoom", 0),
+                                                                                  val.value("maxzoom", 24),
                                                                                   filter,
                                                                                   LineVectorStyle(parser.parseValue(
                                                                                                           val["paint"]["line-color"]),
@@ -186,11 +182,10 @@ public:
                     std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
 
                     auto layerDesc = std::make_shared<SymbolVectorLayerDescription>(val["id"],
+                                                                                    val["source"],
                                                                                     val["source-layer"],
-                                                                                    val.value("minzoom",
-                                                                                              tileJson["minzoom"].get<int>()),
-                                                                                    val.value("maxzoom",
-                                                                                              tileJson["maxzoom"].get<int>()),
+                                                                                    val.value("minzoom", 0),
+                                                                                    val.value("maxzoom", 24),
                                                                                     filter,
                                                                                     style);
                     layers.push_back(layerDesc);
@@ -202,24 +197,27 @@ public:
                                              parser.parseValue(val["paint"]["fill-opacity"]));
 
                     auto layerDesc = std::make_shared<PolygonVectorLayerDescription>(val["id"],
+                                                                                     val["source"],
                                                                                      val["source-layer"],
-                                                                                     val.value("minzoom",
-                                                                                               tileJson["minzoom"].get<int>()),
-                                                                                     val.value("maxzoom",
-                                                                                               tileJson["maxzoom"].get<int>()),
+                                                                                     val.value("minzoom", 0),
+                                                                                     val.value("maxzoom", 24),
                                                                                      filter, style);
 
                     layers.push_back(layerDesc);
                 }
+        }
 
-            }
+        std::vector<std::shared_ptr<VectorMapSourceDescription>> sourceDescriptions;
+        for (auto const &[identifier, tileJson]: tileJsons) {
+            sourceDescriptions.push_back(std::make_shared<VectorMapSourceDescription>(identifier,
+                                                                   tileJson["tiles"].begin()->get<std::string>(),
+                                                                   tileJson["minzoom"].get<int>(),
+                                                                                     tileJson["maxzoom"].get<int>()));
         }
 
 
         auto mapDesc = std::make_shared<VectorMapDescription>(layerName,
-                                                              tileJson["tiles"].begin()->get<std::string>(),
-                                                              tileJson["minzoom"].get<int>(),
-                                                              tileJson["maxzoom"].get<int>(),
+                                                              sourceDescriptions,
                                                               layers,
                                                               json["sprite"].get<std::string>());
         return Tiled2dMapVectorLayerParserResult(mapDesc, LoaderStatus::OK, "");

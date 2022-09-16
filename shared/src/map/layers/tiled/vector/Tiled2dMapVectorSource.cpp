@@ -15,62 +15,77 @@
 #include "DataHolderInterface.h"
 
 Tiled2dMapVectorSource::Tiled2dMapVectorSource(const MapConfig &mapConfig,
-                                               const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
+                                               const std::unordered_map<std::string, std::shared_ptr<Tiled2dMapLayerConfig>> &layerConfigs,
                                                const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                                const std::shared_ptr<SchedulerInterface> &scheduler,
                                                const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
                                                const std::shared_ptr<Tiled2dMapSourceListenerInterface> &listener,
-                                               const std::unordered_set<std::string> &layersToDecode,
+                                               const std::unordered_map<std::string, std::unordered_set<std::string>> &layersToDecode,
                                                float screenDensityPpi)
-        : Tiled2dMapSource<DataHolderInterface, DataLoaderResult, std::shared_ptr<LayerFeatureMapType>>(mapConfig, layerConfig, conversionHelper, scheduler,
-                                                                              listener, screenDensityPpi, tileLoaders.size()), loaders(tileLoaders), layersToDecode(layersToDecode) {}
+        : Tiled2dMapSource<DataHolderInterface, IntermediateResult, FinalResult>(mapConfig, layerConfigs.begin()->second, conversionHelper, scheduler,
+                                                                              listener, screenDensityPpi, tileLoaders.size()), loaders(tileLoaders), layersToDecode(layersToDecode), layerConfigs(layerConfigs) {}
 
-DataLoaderResult Tiled2dMapVectorSource::loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) {
-    return loaders[loaderIndex]->loadData(layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier), std::nullopt);
+IntermediateResult Tiled2dMapVectorSource::loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) {
+    std::unordered_map<std::string, DataLoaderResult> results;
+    for(auto const &[source, config]: layerConfigs) {
+        results.insert({source, loaders[loaderIndex]->loadData(config->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier), std::nullopt)});
+        if (results.at(source).status != LoaderStatus::OK) {
+            return IntermediateResult(results, results.at(source).status, results.at(source).errorCode);
+        }
+    }
+    return IntermediateResult(results, LoaderStatus::OK, std::nullopt);
 }
-std::shared_ptr<LayerFeatureMapType> Tiled2dMapVectorSource::postLoadingTask(const DataLoaderResult &loadedData, const Tiled2dMapTileInfo &tile) {
+FinalResult Tiled2dMapVectorSource::postLoadingTask(const IntermediateResult &loadedData, const Tiled2dMapTileInfo &tile) {
+    FinalResult resultMap;
 
-    std::shared_ptr<LayerFeatureMapType> layerFeatureMap = std::make_shared<LayerFeatureMapType>();
+    for(auto const &[source, data_]: loadedData.results) {
+        if (!isTileVisible(tile)) return FinalResult();
 
-    const auto &data = loadedData.data->getData();
-    try {
-        vtzero::vector_tile tileData((char *) data.data(), data.size());
+        auto layerFeatureMap = std::make_shared<std::unordered_map<std::string, std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>>>();
 
-        while (auto layer = tileData.next_layer()) {
-            std::string sourceLayerName = std::string(layer.name());
-            if (layersToDecode.count(sourceLayerName) > 0 && !layer.empty()) {
-                int extent = (int) layer.extent();
-                layerFeatureMap->emplace(sourceLayerName, std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>());
-                layerFeatureMap->at(sourceLayerName).reserve(layer.num_features());
-                while (const auto &feature = layer.next_feature()) {
-                    auto const featureContext = FeatureContext(feature);
-                    try {
-                        VectorTileGeometryHandler geometryHandler = VectorTileGeometryHandler(tile.bounds, extent);
-                        vtzero::decode_geometry(feature.geometry(), geometryHandler);
-                        layerFeatureMap->at(sourceLayerName).push_back({featureContext, geometryHandler});
-                    } catch (vtzero::geometry_exception &geometryException) {
-                        continue;
+        const auto &data = data_.data->getData();
+        try {
+            vtzero::vector_tile tileData((char *) data.data(), data.size());
+
+            while (auto layer = tileData.next_layer()) {
+                std::string sourceLayerName = std::string(layer.name());
+                if (layersToDecode.count(source) != 0 && layersToDecode.at(source).count(sourceLayerName) > 0 && !layer.empty()) {
+                    int extent = (int) layer.extent();
+                    layerFeatureMap->emplace(sourceLayerName, std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>());
+                    layerFeatureMap->at(sourceLayerName).reserve(layer.num_features());
+                    while (const auto &feature = layer.next_feature()) {
+                        auto const featureContext = FeatureContext(feature);
+                        try {
+                            VectorTileGeometryHandler geometryHandler = VectorTileGeometryHandler(tile.bounds, extent);
+                            vtzero::decode_geometry(feature.geometry(), geometryHandler);
+                            layerFeatureMap->at(sourceLayerName).push_back({featureContext, geometryHandler});
+                        } catch (vtzero::geometry_exception &geometryException) {
+                            LogError <<= "geometryException for tile " + std::to_string(tile.zoomIdentifier) + "/" + std::to_string(tile.x) + "/" + std::to_string(tile.y);
+                            continue;
+                        }
+                    }
+                    if (layerFeatureMap->at(sourceLayerName).empty()) {
+                        layerFeatureMap->erase(sourceLayerName);
                     }
                 }
-                if (layerFeatureMap->at(sourceLayerName).empty()) {
-                    layerFeatureMap->erase(sourceLayerName);
-                }
+                if (!isTileVisible(tile)) return FinalResult();
             }
-            if (!isTileVisible(tile)) return std::make_shared<LayerFeatureMapType>();
+
+            if (!isTileVisible(tile)) return FinalResult();
+        }
+        catch (protozero::invalid_tag_exception tagException) {
+            LogError <<= "Invalid tag exception for tile " + std::to_string(tile.zoomIdentifier) + "/" +
+            std::to_string(tile.x) + "/" + std::to_string(tile.y);
+        }
+        catch (protozero::unknown_pbf_wire_type_exception typeException) {
+            LogError <<= "Unknown wire type exception for tile " + std::to_string(tile.zoomIdentifier) + "/" +
+            std::to_string(tile.x) + "/" + std::to_string(tile.y);
         }
 
-        if (!isTileVisible(tile)) return std::make_shared<LayerFeatureMapType>();
-    }
-    catch (protozero::invalid_tag_exception tagException) {
-        LogError <<= "Invalid tag exception for tile " + std::to_string(tile.zoomIdentifier) + "/" +
-                     std::to_string(tile.x) + "/" + std::to_string(tile.y);
-    }
-    catch (protozero::unknown_pbf_wire_type_exception typeException) {
-        LogError <<= "Unknown wire type exception for tile " + std::to_string(tile.zoomIdentifier) + "/" +
-                     std::to_string(tile.x) + "/" + std::to_string(tile.y);
+        resultMap[source] = layerFeatureMap;
     }
 
-    return layerFeatureMap;
+    return resultMap;
 }
 
 std::unordered_set<Tiled2dMapVectorTileInfo> Tiled2dMapVectorSource::getCurrentTiles() {

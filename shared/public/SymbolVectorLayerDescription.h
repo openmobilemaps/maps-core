@@ -224,12 +224,13 @@ public:
     SymbolVectorStyle style;
 
     SymbolVectorLayerDescription(std::string identifier,
-                               std::string sourceId,
+                                 std::string source,
+                                 std::string sourceId,
                                int minZoom,
                                int maxZoom,
                                std::shared_ptr<Value> filter,
                                SymbolVectorStyle style):
-    VectorLayerDescription(identifier, sourceId, minZoom, maxZoom, filter),
+    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, filter),
     style(style) {};
 
 

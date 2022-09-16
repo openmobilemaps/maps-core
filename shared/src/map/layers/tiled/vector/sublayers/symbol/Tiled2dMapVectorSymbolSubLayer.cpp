@@ -162,7 +162,6 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
     std::vector<std::tuple<const FeatureContext, std::shared_ptr<SymbolInfo>>> textInfos;
 
     tileTextPositionMap[tileInfo] = {};
-
     double tilePixelFactor = (0.0254 / camera->getScreenDensityPpi()) * tileInfo.zoomLevel;
 
     for(auto& feature : layerFeatures)
@@ -173,11 +172,6 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
         auto const evalContext = EvaluationContext(tileInfo.zoomIdentifier, context);
 
         if ((description->filter != nullptr && !description->filter->evaluateOr(evalContext, true))) {
-            continue;
-        }
-
-        if(description->minZoom > tileInfo.zoomIdentifier ||
-        description->maxZoom < tileInfo.zoomIdentifier) {
             continue;
         }
 
@@ -740,6 +734,13 @@ void Tiled2dMapVectorSymbolSubLayer::clearTileData(const Tiled2dMapTileInfo &til
 std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorSymbolSubLayer::buildRenderPasses(const std::unordered_set<Tiled2dMapTileInfo> &tiles)
 {
     auto camera = mapInterface->getCamera();
+
+    double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
+
+    if(description->minZoom > zoomIdentifier ||
+       description->maxZoom < zoomIdentifier) {
+        return {};
+    }
 
     std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(maskMutex, symbolMutex);
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;

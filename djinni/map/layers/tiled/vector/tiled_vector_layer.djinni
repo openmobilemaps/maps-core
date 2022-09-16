@@ -5,6 +5,6 @@
 @extern "../../../../yaml/font_loader_interface.yaml"
 
 tiled_2d_map_vector_layer_interface = interface +c {
-    static create_from_style_json(layer_name: string, path: string, vector_source: string, loaders: list<loader_interface>, font_loader: font_loader_interface, dpFactor: f64): tiled_2d_map_vector_layer_interface;
+    static create_from_style_json(layer_name: string, path: string, loaders: list<loader_interface>, font_loader: font_loader_interface, dpFactor: f64): tiled_2d_map_vector_layer_interface;
     asLayerInterface(): layer_interface;
 }
