@@ -133,6 +133,11 @@ private:
 
     std::recursive_mutex symbolMutex;
     std::unordered_map<Tiled2dMapTileInfo, std::vector<Tiled2dMapVectorSymbolFeatureWrapper>> tileTextMap;
+
+
+    double lastZoomIdentifier = 0;
+    bool didUpdateTiles = true;
+
     std::shared_ptr<TextureHolderInterface> spriteTexture;
     std::shared_ptr<SpriteData> spriteData;
 
