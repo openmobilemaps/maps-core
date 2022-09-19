@@ -445,8 +445,8 @@ void Tiled2dMapVectorLayer::onTilesUpdated() {
             {
                 std::lock_guard<std::recursive_mutex> lock(sourceLayerMapMutex);
                 for (auto const &[source, layerFeatureMap]: tile.layerFeatureMaps) {
-                    for (auto const &[sourceLayer, features]: *layerFeatureMap) {
-                        auto sourceLayerMapEntry = sourceLayerMap.at(source).find(sourceLayer);
+                    for (auto it = layerFeatureMap->begin(); it != layerFeatureMap->end(); it++) {
+                        auto sourceLayerMapEntry = sourceLayerMap.at(source).find(it->first);
                         if (sourceLayerMapEntry != sourceLayerMap.at(source).end() && !sourceLayerMapEntry->second.empty()) {
                             for (const auto &subLayer : sourceLayerMapEntry->second) {
                                 {
@@ -456,13 +456,13 @@ void Tiled2dMapVectorLayer::onTilesUpdated() {
 
                                 std::weak_ptr<Tiled2dMapVectorLayer> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
                                 auto const polygonObject = newTileMasks[tile.tileInfo].maskObject->getPolygonObject()->asMaskingObject();
-                                auto const &feat = features;
+                                auto const &features = it->second;
                                 mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
-                                                                                                   TaskConfig("VectorTile_onTilesUpdated_" + sourceLayer, 0, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
-                                                                                                   [weakSelfPtr, subLayer, tile, polygonObject, feat] {
+                                                                                                   TaskConfig("VectorTile_onTilesUpdated_" + it->first, 0, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
+                                                                                                   [weakSelfPtr, subLayer, tile, polygonObject, &features] {
                                                                                                        auto selfPtr = weakSelfPtr.lock();
                                                                                                        if (selfPtr) {
-                                                                                                           subLayer->updateTileData(tile.tileInfo, polygonObject, feat);
+                                                                                                           subLayer->updateTileData(tile.tileInfo, polygonObject, features);
                                                                                                        }
                                                                                                    }));
                             }
