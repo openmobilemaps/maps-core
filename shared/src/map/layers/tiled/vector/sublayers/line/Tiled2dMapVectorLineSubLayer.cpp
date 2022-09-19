@@ -350,3 +350,7 @@ void Tiled2dMapVectorLineSubLayer::setScissorRect(const std::optional<::RectI> &
     this->scissorRect = scissorRect;
     preGenerateRenderPasses();
 }
+
+std::string Tiled2dMapVectorLineSubLayer::getLayerDescriptionIdentifier() {
+    return description->identifier;
+}

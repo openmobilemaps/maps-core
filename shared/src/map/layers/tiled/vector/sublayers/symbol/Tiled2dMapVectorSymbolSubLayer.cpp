@@ -934,3 +934,8 @@ bool Tiled2dMapVectorSymbolSubLayer::onClickConfirmed(const ::Vec2F &posScreen) 
 
     return false;
 }
+
+
+std::string Tiled2dMapVectorSymbolSubLayer::getLayerDescriptionIdentifier() {
+    return description->identifier;
+}

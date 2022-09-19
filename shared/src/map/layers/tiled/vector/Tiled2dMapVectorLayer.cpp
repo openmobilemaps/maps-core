@@ -99,48 +99,48 @@ void Tiled2dMapVectorLayer::loadStyleJson() {
     isLoadingStyleJson = false;
 }
 
+std::shared_ptr<LayerInterface> Tiled2dMapVectorLayer::getLayerForDescription(const std::shared_ptr<VectorLayerDescription> &layerDescription) {
+    switch (layerDescription->getType()) {
+        case VectorLayerType::background: {
+            auto backgroundDesc = std::static_pointer_cast<BackgroundVectorLayerDescription>(layerDescription);
+            return std::make_shared<Tiled2dMapVectorBackgroundSubLayer>(backgroundDesc);
+        }
+        case VectorLayerType::raster: {
+            auto rasterDesc = std::static_pointer_cast<RasterVectorLayerDescription>(layerDescription);
+            return std::make_shared<Tiled2dMapVectorRasterSubLayer>(rasterDesc, loaders);
+        }
+        case VectorLayerType::line: {
+            auto lineDesc = std::static_pointer_cast<LineVectorLayerDescription>(layerDescription);
+            return std::make_shared<Tiled2dMapVectorLineSubLayer>(lineDesc);
+        }
+        case VectorLayerType::polygon: {
+            auto polyDesc = std::static_pointer_cast<PolygonVectorLayerDescription>(layerDescription);
+            return std::make_shared<Tiled2dMapVectorPolygonSubLayer>(polyDesc);
+        }
+        case VectorLayerType::symbol: {
+            auto symbolDesc = std::static_pointer_cast<SymbolVectorLayerDescription>(layerDescription);
+            return std::make_shared<Tiled2dMapVectorSymbolSubLayer>(fontLoader ,symbolDesc);
+        }
+    }
+}
+
 void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription) {
     std::vector<std::shared_ptr<LayerInterface>> newSublayers;
     std::unordered_map<std::string, std::unordered_map<std::string, std::vector<std::shared_ptr<Tiled2dMapVectorSubLayer>>>> newSourceLayerMap;
 
     for (auto const &layerDesc: mapDescription->layers) {
+        std::shared_ptr<LayerInterface> layer = getLayerForDescription(layerDesc);
+        newSublayers.push_back(layer);
         switch (layerDesc->getType()) {
-            case VectorLayerType::background: {
-                auto backgroundDesc = std::static_pointer_cast<BackgroundVectorLayerDescription>(layerDesc);
-                auto layer = std::make_shared<Tiled2dMapVectorBackgroundSubLayer>(backgroundDesc);
-                newSublayers.push_back(layer);
-                break;
-            }
-
+            case VectorLayerType::background:
             case VectorLayerType::raster: {
-                auto rasterDesc = std::static_pointer_cast<RasterVectorLayerDescription>(layerDesc);
-                auto layer = std::make_shared<Tiled2dMapVectorRasterSubLayer>(rasterDesc, loaders);
-                newSublayers.push_back(layer->asLayerInterface());
                 break;
             }
-            case VectorLayerType::line: {
-                auto lineDesc = std::static_pointer_cast<LineVectorLayerDescription>(layerDesc);
-                auto layer = std::make_shared<Tiled2dMapVectorLineSubLayer>(lineDesc);
-                newSublayers.push_back(layer);
-                const auto sourceId = lineDesc->sourceId;
-                newSourceLayerMap[lineDesc->source][sourceId].push_back(layer);
-                break;
-            }
-            case VectorLayerType::polygon: {
-                auto polyDesc = std::static_pointer_cast<PolygonVectorLayerDescription>(layerDesc);
-                auto layer = std::make_shared<Tiled2dMapVectorPolygonSubLayer>(polyDesc);
-                newSublayers.push_back(layer);
-                const auto sourceId = polyDesc->sourceId;
-                newSourceLayerMap[polyDesc->source][sourceId].push_back(layer);
-
-                break;
-            }
+            case VectorLayerType::line:
+            case VectorLayerType::polygon:
             case VectorLayerType::symbol: {
-                auto symbolDesc = std::static_pointer_cast<SymbolVectorLayerDescription>(layerDesc);
-                auto layer = std::make_shared<Tiled2dMapVectorSymbolSubLayer>(fontLoader ,symbolDesc);
-                newSublayers.push_back(layer);
-                const auto sourceId = symbolDesc->sourceId;
-                newSourceLayerMap[symbolDesc->source][sourceId].push_back(layer);
+                auto subLayer = std::dynamic_pointer_cast<Tiled2dMapVectorSubLayer>(layer);
+                newSourceLayerMap[layerDesc->source][layerDesc->sourceId].push_back(subLayer);
                 break;
             }
         }
@@ -696,4 +696,44 @@ void Tiled2dMapVectorLayer::setSelectedFeatureIdentfier(std::optional<int64_t> i
             }
         }
     }
+}
+
+void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription) {
+    auto mapInterface = this->mapInterface;
+    std::shared_ptr<LayerInterface> layer = getLayerForDescription(layerDescription);
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
+        for (auto &sublayer: sublayers) {
+            auto vectorSubLayer = std::dynamic_pointer_cast<Tiled2dMapVectorSubLayer>(sublayer);
+            if (vectorSubLayer && vectorSubLayer->getLayerDescriptionIdentifier() == layerDescription->identifier) {
+                sublayer = layer;
+
+                vectorSubLayer->setTilesReadyDelegate(std::dynamic_pointer_cast<Tiled2dMapVectorLayerReadyInterface>(shared_from_this()));
+                vectorSubLayer->setSelectionDelegate(selectionDelegate);
+            }
+            if (mapInterface) {
+                sublayer->onAdded(mapInterface);
+            }
+        }
+    }
+
+    auto vectorSubLayer = std::dynamic_pointer_cast<Tiled2dMapVectorSubLayer>(layer);
+    if (vectorSubLayer) {
+        std::lock_guard<std::recursive_mutex> lock(sourceLayerMapMutex);
+        for (auto &layer :sourceLayerMap[layerDescription->source][layerDescription->sourceId]){
+            if (layer->getLayerDescriptionIdentifier() == layerDescription->identifier) {
+                layer = vectorSubLayer;
+            }
+        }
+    }
+}
+
+std::shared_ptr<VectorLayerDescription> Tiled2dMapVectorLayer::getLayerDescriptionWithIdentifier(std::string identifier) {
+    for (auto const &layer: mapDescription->layers) {
+        if (layer->identifier == identifier) {
+            return layer;
+        }
+    }
+    return nullptr;
 }

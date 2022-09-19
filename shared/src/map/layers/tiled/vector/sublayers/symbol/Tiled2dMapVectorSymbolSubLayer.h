@@ -111,6 +111,8 @@ public:
 
     virtual bool onClickConfirmed(const ::Vec2F &posScreen) override;
 
+    virtual std::string getLayerDescriptionIdentifier() override;
+
 protected:
     void addTexts(const Tiled2dMapTileInfo &tileInfo,
                   const std::vector< std::tuple<const FeatureContext, std::shared_ptr<SymbolInfo>>> &texts);

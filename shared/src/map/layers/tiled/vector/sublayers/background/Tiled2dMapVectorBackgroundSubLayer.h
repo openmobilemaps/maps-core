@@ -46,6 +46,8 @@ public:
 
     virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
 
+    virtual std::string getLayerDescriptionIdentifier() override;
+
 private:
     std::shared_ptr<BackgroundVectorLayerDescription> description;
 

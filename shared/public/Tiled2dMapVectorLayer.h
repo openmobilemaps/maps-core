@@ -60,6 +60,10 @@ public:
 
     void setSelectedFeatureIdentfier(std::optional<int64_t> identifier);
 
+    std::shared_ptr<VectorLayerDescription> getLayerDescriptionWithIdentifier(std::string identifier);
+
+    void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription);
+
 private:
     void scheduleStyleJsonLoading();
 
@@ -70,6 +74,8 @@ private:
     void initializeVectorLayer(const std::vector<std::shared_ptr<LayerInterface>> &newSublayers);
 
     virtual void updateMaskObjects(const std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> &toSetupMaskObject, const std::vector<const std::shared_ptr<MaskingObjectInterface>> &obsoleteMaskObjects);
+
+    std::shared_ptr<LayerInterface> getLayerForDescription(const std::shared_ptr<VectorLayerDescription> &layerDescription);
 
     void loadSpriteData();
 

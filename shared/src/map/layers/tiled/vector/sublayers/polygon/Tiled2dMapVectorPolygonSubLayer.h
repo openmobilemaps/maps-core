@@ -50,6 +50,8 @@ public:
 
     virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
 
+    virtual std::string getLayerDescriptionIdentifier() override;
+
 protected:
 
     void setupPolygons(const Tiled2dMapTileInfo &tileInfo, const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects);

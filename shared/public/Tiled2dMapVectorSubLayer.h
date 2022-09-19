@@ -51,6 +51,8 @@ public:
 
     virtual void clearTileData(const Tiled2dMapTileInfo &tileInfo);
 
+    virtual std::string getLayerDescriptionIdentifier() { return ""; };
+
     void setTilesReadyDelegate(const std::weak_ptr<Tiled2dMapVectorLayerReadyInterface> readyDelegate);
 
     void setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate);

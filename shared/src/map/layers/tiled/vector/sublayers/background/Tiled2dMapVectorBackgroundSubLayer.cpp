@@ -91,3 +91,7 @@ void Tiled2dMapVectorBackgroundSubLayer::setScissorRect(const std::optional<::Re
         std::dynamic_pointer_cast<RenderPass>(renderPass)->setScissoringRect(scissorRect);
     }
 }
+
+std::string Tiled2dMapVectorBackgroundSubLayer::getLayerDescriptionIdentifier() {
+    return description->identifier;
+}
