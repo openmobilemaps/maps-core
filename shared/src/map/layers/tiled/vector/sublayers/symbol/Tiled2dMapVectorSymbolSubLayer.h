@@ -43,13 +43,14 @@ struct Tiled2dMapVectorSymbolFeatureWrapper {
 
     std::vector<float> iconModelMatrix;
 
-    bool collides = false;
+    bool collides = true;
 
     std::shared_ptr<Quad2dInterface> symbolObject;
     std::shared_ptr<AlphaShaderInterface> symbolShader;
 
-    OBB2D textOrientedBoundingBox = OBB2D(Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0));
-    OBB2D iconOrientedBoundingBox = OBB2D(Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0));
+    OBB2D orientedBoundingBox = OBB2D(Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0));
+
+    std::optional<Quad2dD> projectedTextQuad = std::nullopt;
 
 #ifdef DRAW_TEXT_BOUNDING_BOXES
     std::shared_ptr<Quad2dInterface> boundingBox = nullptr;
@@ -124,6 +125,8 @@ private:
     std::optional<::RectI> scissorRect = std::nullopt;
 
     std::optional<Tiled2dMapVectorSymbolSubLayerPositioningWrapper> getPositioning(std::vector<::Coord>::const_iterator &iterator, const std::vector<::Coord> & collection);
+
+    Quad2dD getProjectedFrame(const RectCoord &boundingBox, const float &padding, const std::vector<float> &modelMatrix) const;
                                          
     const std::shared_ptr<FontLoaderInterface> fontLoader;
     const std::shared_ptr<SymbolVectorLayerDescription> description;
@@ -136,6 +139,7 @@ private:
 
 
     double lastZoomIdentifier = 0;
+    double lastRotation = 0;
     bool didUpdateTiles = true;
 
     std::shared_ptr<TextureHolderInterface> spriteTexture;

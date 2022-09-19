@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "Quad2dD.h"
 #include "Vec2D.h"
 #include "Vec2DHelper.h"
 
@@ -117,6 +118,16 @@ public:
         corner[1] = bottomRight;
         corner[2] = topRight;
         corner[3] = topLeft;
+
+        computeAxes();
+    }
+
+    OBB2D(const Quad2dD& quad)
+    {
+        corner[0] = quad.bottomLeft;
+        corner[1] = quad.bottomRight;
+        corner[2] = quad.topRight;
+        corner[3] = quad.topLeft;
 
         computeAxes();
     }

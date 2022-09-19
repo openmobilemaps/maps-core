@@ -45,6 +45,10 @@ textFragmentShader(VertexOut in [[stage_in]],
 
     float4 mixed = mix(haloColor, glyphColor, alpha);
 
+    if (haloColor.a == 0.0 && dist.x <= 0.5) {
+      discard_fragment();
+    }
+
     float a2 = smoothstep(0.40, 0.5, sqrt(dist.x));
     return float4(mixed.r * a2, mixed.g * a2, mixed.b * a2, a2);
 }
