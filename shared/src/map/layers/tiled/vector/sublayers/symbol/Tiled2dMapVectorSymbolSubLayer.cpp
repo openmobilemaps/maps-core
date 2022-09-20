@@ -392,27 +392,25 @@ void Tiled2dMapVectorSymbolSubLayer::addTexts(const Tiled2dMapTileInfo &tileInfo
         auto fontResult = loadFont(text->getFont());
         if (fontResult.status != LoaderStatus::OK) continue;
 
-        auto fontData = fontResult.fontData;
-
         auto const evalContext = EvaluationContext(zoomIdentifier, context);
 
         auto textOffset = description->style.getTextOffset(evalContext);
 
-        auto textRadialOffset = description->style.getTextRadialOffset(evalContext);
+        auto const textRadialOffset = description->style.getTextRadialOffset(evalContext);
         // TODO: currently only shifting to top right
         textOffset.x += textRadialOffset;
         textOffset.y -= textRadialOffset;
 
-        auto letterSpacing = description->style.getTextLetterSpacing(evalContext);
+        auto const letterSpacing = description->style.getTextLetterSpacing(evalContext);
 
-        auto textObject = textHelper.textLayerObject(text,
-                                                     fontData,
+        auto const textObject = textHelper.textLayerObject(text,
+                                                     fontResult.fontData,
                                                      textOffset,
                                                      description->style.getTextLineHeight(evalContext),
                                                      letterSpacing);
 
         if(textObject) {
-            int64_t symbolSortKey = description->style.getSymbolSortKey(evalContext);
+            int64_t const symbolSortKey = description->style.getSymbolSortKey(evalContext);
             Tiled2dMapVectorSymbolFeatureWrapper wrapper(context, text, textObject, symbolSortKey);
 
 
