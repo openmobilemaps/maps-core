@@ -11,9 +11,10 @@
 #pragma once
 
 #include "Value.h"
+#include "VectorLayerDescription.h"
 #include "Coord.h"
 
 class Tiled2dMapVectorLayerSelectionInterface {
 public:
-    virtual bool didSelectFeature(const FeatureContext &featureContext, const ::Coord &coordinate) = 0;
+    virtual bool didSelectFeature(const FeatureContext &featureContext, const std::shared_ptr<VectorLayerDescription> &layer, const ::Coord &coordinate) = 0;
 };

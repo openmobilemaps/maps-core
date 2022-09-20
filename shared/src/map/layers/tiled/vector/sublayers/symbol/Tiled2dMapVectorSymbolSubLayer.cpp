@@ -913,7 +913,7 @@ bool Tiled2dMapVectorSymbolSubLayer::onClickConfirmed(const ::Vec2F &posScreen) 
     }
 
     if (selectedFeatureContext && selectedCoordinate) {
-        return selectionDelegate->didSelectFeature(*selectedFeatureContext, *selectedCoordinate);
+        return selectionDelegate->didSelectFeature(*selectedFeatureContext, description, *selectedCoordinate);
     }
 
     return false;
