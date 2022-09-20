@@ -799,8 +799,12 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorSymbolSubLay
                 renderPassObjectMap[0].push_back(std::make_shared<RenderObject>(wrapper.symbolObject->asGraphicsObject(), wrapper.iconModelMatrix));
             }
 
+
             if (!configs.empty()) {
-                renderPassObjectMap[configs.front()->getRenderIndex()].push_back(std::make_shared<RenderObject>(configs.front()->getGraphicsObject(), wrapper.modelMatrix));
+                std::lock_guard<std::recursive_mutex> lock(selectedFeatureIdentifierMutex);
+                if (wrapper.featureContext.identifier != selectedFeatureIdentifier) {
+                    renderPassObjectMap[configs.front()->getRenderIndex()].push_back(std::make_shared<RenderObject>(configs.front()->getGraphicsObject(), wrapper.modelMatrix));
+                }
             }
 
             #ifdef DRAW_TEXT_BOUNDING_BOXES
