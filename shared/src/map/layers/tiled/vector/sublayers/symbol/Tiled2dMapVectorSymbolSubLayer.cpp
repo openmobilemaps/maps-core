@@ -450,7 +450,6 @@ void Tiled2dMapVectorSymbolSubLayer::addTexts(const Tiled2dMapTileInfo &tileInfo
     {
         std::lock_guard<std::recursive_mutex> lock(symbolMutex);
         tileTextMap[tileInfo] = textObjects;
-        didUpdateTiles = true;
     }
 
     {
@@ -503,16 +502,6 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
 
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
     double rotation = -camera->getRotation();
-
-    if (zoomIdentifier == lastZoomIdentifier &&
-        rotation == lastRotation &&
-        !didUpdateTiles) {
-        return;
-    }
-
-    lastRotation = rotation;
-    lastZoomIdentifier = zoomIdentifier;
-    didUpdateTiles = false;
 
     auto scaleFactor = camera->mapUnitsFromPixels(1.0);
 
@@ -733,8 +722,6 @@ void Tiled2dMapVectorSymbolSubLayer::setupTexts(const Tiled2dMapTileInfo &tileIn
     if (auto delegate = readyDelegate.lock()) {
         delegate->tileIsReady(tileInfo);
     }
-
-    didUpdateTiles = true;
 }
 
 void Tiled2dMapVectorSymbolSubLayer::update() {}
@@ -760,7 +747,6 @@ void Tiled2dMapVectorSymbolSubLayer::clearTileData(const Tiled2dMapTileInfo &til
                 }
             }
             tileTextMap.erase(tileInfo);
-            didUpdateTiles = true;
         }
     }
 
