@@ -438,6 +438,10 @@ void MapCamera2d::notifyListeners(const int &listenerType) {
     }
 }
 
+bool MapCamera2d::onTouchDown(const ::Vec2F &posScreen) {
+    inertia = std::nullopt;
+}
+
 bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleClick) {
     if (!config.moveEnabled || cameraFrozen)
         return false;
