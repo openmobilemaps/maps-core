@@ -129,14 +129,22 @@ public:
 
 
         switch (geomType) {
-            case vtzero::GeomType::LINESTRING:
+            case vtzero::GeomType::LINESTRING: {
                 propertiesMap.insert({"$type", "LineString"});
-            case vtzero::GeomType::POINT:
+                break;
+            }
+            case vtzero::GeomType::POINT: {
                 propertiesMap.insert({"$type", "Point"});
-            case vtzero::GeomType::POLYGON:
+                break;
+            }
+            case vtzero::GeomType::POLYGON: {
                 propertiesMap.insert({"$type", "Polygon"});
-            case vtzero::GeomType::UNKNOWN:
+                break;
+            }
+            case vtzero::GeomType::UNKNOWN: {
                 propertiesMap.insert({"$type", "Unknown"});
+                break;
+            }
         }
     };
 
