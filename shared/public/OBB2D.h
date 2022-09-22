@@ -17,10 +17,10 @@
 class OBB2D {
 private:
     /** Corners of the box, where 0 is the lower left. */
-    Vec2D corner[4] = { Vec2D(0.0,0.0), Vec2D(0.0,0.0), Vec2D(0.0,0.0), Vec2D(0.0,0.0) };
+    Vec2D corner[4];
 
     /** Two edges of the box extended away from corner[0]. */
-    Vec2D axis[2] = { Vec2D(0.0,0.0), Vec2D(0.0,0.0) };
+    Vec2D axis[2];
 
     /** Circle estimate as approach for fast rejection in overlap */
     float r = 0.0;
@@ -30,7 +30,7 @@ private:
     double origin[2];
 
     /** Returns true if other overlaps one dimension of this. */
-    bool overlaps1Way(const OBB2D& other) const {
+    inline bool overlaps1Way(const OBB2D& other) const {
         for (int a = 0; a < 2; ++a) {
 
             double t = other.corner[0].x * axis[a].x + other.corner[0].y * axis[a].y;
@@ -78,18 +78,22 @@ private:
         return true;
     }
 
-    /** Updates the axes after the corners move.  Assumes the
-     corners actually form a rectangle. */
-    void computeAxes() {
-        axis[0] = corner[1] - corner[0];
-        axis[1] = corner[3] - corner[0];
+    inline bool overlapsCircles(const OBB2D& other) const {
+        auto rs = (r + other.r);
+        auto x = center.x - other.center.x;
+        auto y = center.y - other.center.y;
+        return x*x + y*y < rs*rs;
+    }
 
+public:
+    OBB2D(const Vec2D& topLeft, const Vec2D& topRight, const Vec2D& bottomRight, const Vec2D& bottomLeft) :
+        corner { bottomLeft, bottomRight, topRight, topLeft },
+        axis { corner[1] - corner[0], corner[3] - corner[0] }
+    {
         // Make the length of each axis 1/edge length so we know any
         // dot product must be less than 1 to fall within the edge.
-
         for (int a = 0; a < 2; ++a) {
             axis[a] = axis[a] / Vec2DHelper::squaredLength(axis[a]);
-
             origin[a] = corner[0].x * axis[a].x + corner[0].y * axis[a].y;
         }
 
@@ -105,26 +109,8 @@ private:
         }
     }
 
-    bool overlapsCircles(const OBB2D& other) const {
-        auto rs = (r + other.r);
-        auto x = center.x - other.center.x;
-        auto y = center.y - other.center.y;
-        return x*x + y*y < rs*rs;
-    }
-
-public:
-    OBB2D(const Vec2D& topLeft, const Vec2D& topRight, const Vec2D& bottomRight, const Vec2D& bottomLeft)
-    {
-        corner[0] = bottomLeft;
-        corner[1] = bottomRight;
-        corner[2] = topRight;
-        corner[3] = topLeft;
-
-        computeAxes();
-    }
-
     /** Returns true if the intersection of the boxes is non-empty. */
-    bool overlaps(const OBB2D& other) const {
+    inline bool overlaps(const OBB2D& other) const {
         return overlapsCircles(other) && overlaps1Way(other) && other.overlaps1Way(*this);
     }
 };
