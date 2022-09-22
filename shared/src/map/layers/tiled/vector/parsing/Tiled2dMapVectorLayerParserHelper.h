@@ -97,7 +97,7 @@ public:
                                                                                      zoomLevelScaleFactor);
 
             }
-            if (val["type"].get<std::string>() == "vector") {
+            if (val["type"].get<std::string>() == "vector" && val["url"].is_string()) {
                 auto result = LoaderHelper::loadData(val["url"].get<std::string>(), std::nullopt, loaders);
                 if (result.status != LoaderStatus::OK) {
                     return Tiled2dMapVectorLayerParserResult(nullptr, result.status, result.errorCode);
