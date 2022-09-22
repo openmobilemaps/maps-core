@@ -73,5 +73,7 @@ public:
 
     static std::vector<float> multiply(const std::vector<float> &M, const std::vector<float> &x);
 
+    static void multiply(const std::vector<float> &M, const std::vector<float> &x, std::vector<float> &result);
+
     static std::vector<float> sTemp;
 };
