@@ -33,16 +33,16 @@
 namespace std {
     template <>
     struct hash<Color> {
-        size_t operator()(Color c) const {
+        size_t operator()(const Color &c) const {
             return std::hash<std::tuple<float, float, float, float>>()({c.r, c.g, c.b, c.a});
         }
     };
 
     template <>
     struct hash<std::vector<float>> {
-        size_t operator()(std::vector<float> vector) const {
+        size_t operator()(const std::vector<float> &vector) const {
             size_t hash = 0;
-            for(auto const val: vector) {
+            for(auto const &val: vector) {
                 std::hash_combine(hash, std::hash<float>{}(val));
             }
             return hash;
@@ -51,9 +51,9 @@ namespace std {
 
     template <>
     struct hash<std::vector<std::string>> {
-        size_t operator()(std::vector<std::string> vector) const {
+        size_t operator()(const std::vector<std::string> &vector) const {
             size_t hash = 0;
-            for(auto const val: vector) {
+            for(auto const &val: vector) {
                 std::hash_combine(hash, std::hash<std::string>{}(val));
             }
             return hash;
@@ -62,9 +62,9 @@ namespace std {
 
     template <>
     struct hash<std::vector<FormattedStringEntry>> {
-        size_t operator()(std::vector<FormattedStringEntry> vector) const {
+        size_t operator()(const std::vector<FormattedStringEntry> &vector) const {
             size_t hash = 0;
-            for(auto const val: vector) {
+            for(auto const &val: vector) {
                 std::hash_combine(hash, std::hash<std::string>{}(val.text));
                 std::hash_combine(hash, std::hash<float>{}(val.scale));
             }
@@ -86,7 +86,8 @@ typedef std::variant<std::string,
                      Color,
                      std::vector<float>,
                      std::vector<std::string>,
-                     std::vector<FormattedStringEntry>> ValueVariant;
+                     std::vector<FormattedStringEntry>,
+                     std::monostate> ValueVariant;
 
 struct property_value_mapping : vtzero::property_value_mapping {
     using float_type = double;
@@ -96,14 +97,14 @@ struct property_value_mapping : vtzero::property_value_mapping {
 class FeatureContext {
     using keyType = std::string;
     using valueType = ValueVariant;
-    using mapType = std::unordered_map<keyType, valueType>;
-public:
+    using mapType = std::vector<std::pair<keyType, valueType>>;
+
+private:
     mapType propertiesMap;
 
-    vtzero::GeomType geomType;
-
-
+public:
     uint64_t identifier;
+    vtzero::GeomType geomType;
 
     FeatureContext() {}
 
@@ -115,47 +116,60 @@ public:
     FeatureContext(vtzero::feature const &feature) {
         geomType = feature.geometry_type();
 
-        propertiesMap = vtzero::create_properties_map<mapType, keyType, valueType, property_value_mapping>(feature);
+        feature.for_each_property([this] (const vtzero::property& p) {
+            this->propertiesMap.push_back(std::make_pair(std::string(p.key()), vtzero::convert_property_value<ValueVariant, property_value_mapping>(p.value())));
+            return true;
+        });
 
         if (feature.has_id()) {
             identifier = feature.id();
         } else {
             size_t hash = 0;
-            for(auto const [key, val]: propertiesMap) {
+            for(auto const &[key, val]: propertiesMap) {
                 std::hash_combine(hash, std::hash<valueType>{}(val));
             }
             identifier = hash;
         }
 
-
         switch (geomType) {
-            case vtzero::GeomType::LINESTRING:
-                propertiesMap.insert({"$type", "LineString"});
-            case vtzero::GeomType::POINT:
-                propertiesMap.insert({"$type", "Point"});
-            case vtzero::GeomType::POLYGON:
-                propertiesMap.insert({"$type", "Polygon"});
-            case vtzero::GeomType::UNKNOWN:
-                propertiesMap.insert({"$type", "Unknown"});
+            case vtzero::GeomType::LINESTRING: {
+                propertiesMap.push_back(std::make_pair("$type", "LineString"));
+                break;
+            }
+            case vtzero::GeomType::POINT: {
+                propertiesMap.push_back(std::make_pair("$type", "LineString"));
+                break;
+            }
+            case vtzero::GeomType::POLYGON: {
+                propertiesMap.push_back(std::make_pair("$type", "Polygon"));
+                break;
+            }
+            case vtzero::GeomType::UNKNOWN: {
+                propertiesMap.push_back(std::make_pair("$type", "Unknown"));
+                break;
+            }
         }
     };
 
     bool contains(const std::string &key) const {
-        return propertiesMap.find(key) != propertiesMap.end();
+        for(const auto& p : propertiesMap) {
+            if(p.first == key) { return true; }
+        }
+
+        return false;
     }
 
-    std::optional<ValueVariant> getValue(const std::string &key) const {
-        auto it = propertiesMap.find(key);
-        if(it == propertiesMap.end()) { return std::nullopt; }
+    ValueVariant getValue(const std::string &key) const {
+        for(const auto& p : propertiesMap) {
+            if(p.first == key) { return p.second; }
+        }
 
-        auto &variant = it->second;
-
-        return variant;
+        return std::monostate();
     }
 
     size_t getStyleHash(const std::unordered_set<std::string> &usedKeys) const {
         size_t hash = 0;
-        for(auto const [key, val]: propertiesMap) {
+        for(auto const &[key, val]: propertiesMap) {
             if (usedKeys.count(key) != 0) {
                 std::hash_combine(hash, std::hash<valueType>{}(val));
             }
@@ -185,7 +199,7 @@ public:
 
     template<typename T>
     T evaluateOr(const EvaluationContext &context, const T &alternative) {
-        auto const value = evaluate(context);
+        auto const &value = evaluate(context);
         if (std::holds_alternative<T>(value)) {
             return std::get<T>(value);
         }
@@ -203,12 +217,13 @@ public:
                 return (int64_t)std::get<double>(value);
             }
         }
+
         return alternative;
     }
 
     template<>
     Vec2F evaluateOr(const EvaluationContext &context, const Vec2F &alternative) {
-        auto const value = evaluateOr(context, std::vector<float>{ alternative.x, alternative.y });
+        auto const &value = evaluateOr(context, std::vector<float>{ alternative.x, alternative.y });
         return Vec2F(value[0], value[1]);
     }
 
@@ -246,7 +261,7 @@ public:
 
     template<>
     Anchor evaluateOr(const EvaluationContext &context, const Anchor &alternative) {
-        auto const value = evaluateOr(context, std::string(""));
+        auto const &value = evaluateOr(context, std::string(""));
         auto anchor = anchorFromString(value);
         if (anchor) {
             return *anchor;
@@ -270,7 +285,7 @@ public:
 
     template<>
     LineCapType evaluateOr(const EvaluationContext &context, const LineCapType &alternative) {
-        auto const value = evaluateOr(context, std::string(""));
+        auto const &value = evaluateOr(context, std::string(""));
         auto type = capTypeFromString(value);
         if (type) {
             return *type;
@@ -289,7 +304,7 @@ public:
 
     template<>
     TextTransform evaluateOr(const EvaluationContext &context, const TextTransform &alternative) {
-        auto const value = evaluateOr(context, std::string(""));
+        auto const &value = evaluateOr(context, std::string(""));
         auto type = textTransformFromString(value);
         if (type) {
             return *type;
@@ -299,7 +314,7 @@ public:
 
     template<>
     std::vector<Anchor> evaluateOr(const EvaluationContext &context, const std::vector<Anchor> &alternative) {
-        auto const values = evaluateOr(context, std::vector<std::string>());
+        auto const &values = evaluateOr(context, std::vector<std::string>());
         std::vector<Anchor> result;
         for (auto const &value: values) {
             auto anchor = anchorFromString(value);
@@ -328,10 +343,12 @@ public:
         if (key == "zoom" && context.zoomLevel) {
             return *context.zoomLevel;
         }
-        auto result = context.feature.getValue(key);
-        if (result) {
-            return *result;
+
+        const auto& result = context.feature.getValue(key);
+        if(!std::holds_alternative<std::monostate>(result)) {
+            return result;
         }
+
         return "";
     };
 private:
@@ -350,7 +367,7 @@ public:
 
     ValueVariant evaluate(const EvaluationContext &context) override {
         return std::visit(overloaded {
-            [](std::string val){
+            [](const std::string &val){
                 return val;
             },
             [](double val){
@@ -363,21 +380,24 @@ public:
             [](bool val){
                 return std::string("");
             },
-            [](Color val){
+            [](const Color &val){
                 return std::string("");
             },
-            [](std::vector<float> val){
+            [](const std::vector<float> &val){
                 return std::string("");
             },
-            [](std::vector<std::string> val){
+            [](const std::vector<std::string> &val){
                 return std::string("");
             },
-            [](std::vector<FormattedStringEntry> val){
+            [](const std::vector<FormattedStringEntry> &val){
                 std::string string = "";
                 for(auto const v: val) {
                     string += v.text;
                 }
                 return string;
+            },
+            [](const std::monostate &val) {
+                return std::string("");
             }
         }, value->evaluate(context));
     };
@@ -392,8 +412,8 @@ public:
             std::string res = std::get<std::string>(value);
 
             auto result = context.feature.getValue(res);
-            if (result) {
-                return *result;
+            if(!std::holds_alternative<std::monostate>(result)) {
+                return result;
             }
 
             auto begin = res.find("{");
@@ -458,7 +478,7 @@ public:
 
     ValueVariant evaluate(const EvaluationContext &context) override {
         return std::visit(overloaded {
-            [](std::string val){
+            [](const std::string &val){
                 return 0.0;
             },
             [&](double val){
@@ -473,13 +493,16 @@ public:
             [](Color val){
                 return 0.0;
             },
-            [](std::vector<float> val){
+            [](const std::vector<float> &val){
                 return 0.0;
             },
-            [](std::vector<std::string> val){
+            [](const std::vector<std::string> &val){
                 return 0.0;
             },
-            [](std::vector<FormattedStringEntry> val){
+            [](const std::vector<FormattedStringEntry> &val){
+                return 0.0;
+            },
+            [](const std::monostate &val){
                 return 0.0;
             }
         }, value->evaluate(context));
@@ -522,8 +545,8 @@ public:
             if (nS >= zoom) {
                 const auto &prevStep = steps[i];
                 double pS = std::get<0>(prevStep);
-                ValueVariant pV = std::get<1>(prevStep)->evaluate(context);
-                ValueVariant nV = std::get<1>(nextStep)->evaluate(context);
+                const ValueVariant &pV = std::get<1>(prevStep)->evaluate(context);
+                const ValueVariant &nV = std::get<1>(nextStep)->evaluate(context);
                 return interpolate(ExponentialInterpolation::interpolationFactor(interpolationBase, zoom, pS, nS), pV, nV);
             }
         }
@@ -683,46 +706,6 @@ public:
     static bool compare(const ValueVariant &lhs, const ValueVariant &rhs, PropertyCompareType type) {
 
         if (std::holds_alternative<int64_t>(lhs) &&
-            std::holds_alternative<int64_t>(rhs)) {
-            int64_t lhsInt = std::get<int64_t>(lhs);
-            int64_t rhsInt = std::get<int64_t>(rhs);
-            switch (type) {
-                case PropertyCompareType::EQUAL:
-                    return lhsInt == rhsInt;
-                case PropertyCompareType::NOTEQUAL:
-                    return lhsInt != rhsInt;
-                case PropertyCompareType::LESS:
-                    return lhsInt < rhsInt;
-                case PropertyCompareType::LESSEQUAL:
-                    return lhsInt <= rhsInt;
-                case PropertyCompareType::GREATER:
-                    return lhsInt > rhsInt;
-                case PropertyCompareType::GREATEREQUAL:
-                    return lhsInt >= rhsInt;
-            }
-        }
-
-        if (std::holds_alternative<double>(lhs) &&
-            std::holds_alternative<double>(rhs)) {
-            double lhsDouble = std::get<double>(lhs);
-            double rhsDouble = std::get<double>(rhs);
-            switch (type) {
-                case PropertyCompareType::EQUAL:
-                    return lhsDouble == rhsDouble;
-                case PropertyCompareType::NOTEQUAL:
-                    return lhsDouble != rhsDouble;
-                case PropertyCompareType::LESS:
-                    return lhsDouble < rhsDouble;
-                case PropertyCompareType::LESSEQUAL:
-                    return lhsDouble <= rhsDouble;
-                case PropertyCompareType::GREATER:
-                    return lhsDouble > rhsDouble;
-                case PropertyCompareType::GREATEREQUAL:
-                    return lhsDouble >= rhsDouble;
-            }
-        }
-
-        if (std::holds_alternative<int64_t>(lhs) &&
             std::holds_alternative<double>(rhs)) {
             double lhsDouble = (double)std::get<int64_t>(lhs);
             double rhsDouble = std::get<double>(rhs);
@@ -762,26 +745,6 @@ public:
             }
         }
 
-        if (std::holds_alternative<bool>(lhs) &&
-            std::holds_alternative<bool>(rhs)) {
-            bool lhsBool = std::get<bool>(lhs);
-            bool rhsBool = std::get<bool>(rhs);
-            switch (type) {
-                case PropertyCompareType::EQUAL:
-                    return lhsBool == rhsBool;
-                case PropertyCompareType::NOTEQUAL:
-                    return lhsBool != rhsBool;
-                case PropertyCompareType::LESS:
-                    return lhsBool < rhsBool;
-                case PropertyCompareType::LESSEQUAL:
-                    return lhsBool <= rhsBool;
-                case PropertyCompareType::GREATER:
-                    return lhsBool > rhsBool;
-                case PropertyCompareType::GREATEREQUAL:
-                    return lhsBool >= rhsBool;
-            }
-        }
-
         switch (type) {
             case PropertyCompareType::EQUAL:
                 return lhs == rhs;
@@ -816,7 +779,7 @@ public:
     }
 
     ValueVariant evaluate(const EvaluationContext &context) override {
-        auto compareValue_ = compareValue->evaluate(context);
+        const auto &compareValue_ = compareValue->evaluate(context);
 
         for (const auto &[stop, value] : stops) {
             if (ValueVariantCompareHelper::compare(stop->evaluate(context), compareValue_, PropertyCompareType::GREATER)) {
@@ -875,7 +838,7 @@ public:
 
     ValueVariant evaluate(const EvaluationContext &context) override {
         return std::visit(overloaded {
-            [](std::string val){
+            [](const std::string &val){
                 return std::stod(val);
             },
             [](double val){
@@ -887,16 +850,19 @@ public:
             [](bool val){
                 return 0.0;
             },
-            [](Color val){
+            [](const Color &val){
                 return 0.0;
             },
-            [](std::vector<float> val){
+            [](const std::vector<float> &val){
                 return 0.0;
             },
-            [](std::vector<std::string> val){
+            [](const std::vector<std::string> &val){
                 return 0.0;
             },
-            [](std::vector<FormattedStringEntry> val){
+            [](const std::vector<FormattedStringEntry> &val){
+                return 0.0;
+            },
+            [](const std::monostate &val) {
                 return 0.0;
             }
         }, value->evaluate(context));
@@ -975,9 +941,9 @@ public:
     ValueVariant evaluate(const EvaluationContext &context) override {
         const auto &p = context.feature.getValue(key);
 
-        if (p) {
+        if(!std::holds_alternative<std::monostate>(p)) {
             for(const auto& m : valueMapping) {
-                if(m.first == *p && m.second) {
+                if(m.first == p && m.second) {
                     return m.second->evaluate(context);
                 }
             }
@@ -1070,7 +1036,7 @@ public:
     }
 
     ValueVariant evaluate(const EvaluationContext &context) override {
-        for (auto const value: values) {
+        for (auto const &value: values) {
             if (value->evaluateOr(context, false)) {
                 return true;
             }
@@ -1102,8 +1068,8 @@ public:
     }
 
  ValueVariant evaluate(const EvaluationContext &context) override {
-     auto const lhsValue = lhs->evaluate(context);
-     auto const rhsValue = rhs->evaluate(context);
+     auto const &lhsValue = lhs->evaluate(context);
+     auto const &rhsValue = rhs->evaluate(context);
 
      return ValueVariantCompareHelper::compare(lhsValue, rhsValue, type);
  };
@@ -1126,11 +1092,8 @@ public:
     }
 
  ValueVariant evaluate(const EvaluationContext &context) override {
-        auto const value = context.feature.getValue(key);
-        if (!value) {
-            return false;
-        }
-        return values.count(*value) != 0;
+        auto const &value = context.feature.getValue(key);
+        return values.count(value) != 0;
     };
 };
 
@@ -1146,11 +1109,8 @@ public:
     }
 
  ValueVariant evaluate(const EvaluationContext &context) override {
-        auto const value = context.feature.getValue(key);
-        if (!value) {
-            return true;
-        }
-        return values.count(*value) == 0;
+        auto const &value = context.feature.getValue(key);
+        return values.count(value) == 0;
     };
 };
 
@@ -1250,7 +1210,7 @@ public:
 
     ValueVariant evaluate(const EvaluationContext &context) override {
         return std::visit(overloaded {
-            [](std::string val){
+            [](const std::string &val){
                 return (int64_t) val.size();
             },
             [](double val){
@@ -1262,17 +1222,20 @@ public:
             [](bool val){
                 return (int64_t) 0;
             },
-            [](Color val){
+            [](const Color &val){
                 return (int64_t) 0;
             },
-            [](std::vector<float> val){
+            [](const std::vector<float> &val){
                 return (int64_t) val.size();
             },
-            [](std::vector<std::string> val){
+            [](const std::vector<std::string> &val){
                 return (int64_t) val.size();
             },
-            [](std::vector<FormattedStringEntry> val){
+            [](const std::vector<FormattedStringEntry> &val){
                 return (int64_t) val.size();
+            },
+            [](const std::monostate &val) {
+                return (int64_t)0;
             }
         }, value->evaluate(context));
     };

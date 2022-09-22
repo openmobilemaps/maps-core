@@ -468,7 +468,7 @@ void Tiled2dMapVectorSymbolSubLayer::addTexts(const Tiled2dMapTileInfo &tileInfo
             [selfPtr, tileInfo, textObjects] { if (selfPtr.lock()) selfPtr.lock()->setupTexts(tileInfo, textObjects); }));
 }
 
-Quad2dD Tiled2dMapVectorSymbolSubLayer::getProjectedFrame(const RectCoord &boundingBox, const float &padding, const std::vector<float> &modelMatrix) const {
+Quad2dD Tiled2dMapVectorSymbolSubLayer::getProjectedFrame(const RectCoord &boundingBox, const float &padding, const std::vector<float> &modelMatrix) {
 
     auto topLeft = Vec2D(boundingBox.topLeft.x, boundingBox.topLeft.y);
     auto topRight = Vec2D(boundingBox.bottomRight.x, topLeft.y);
@@ -487,10 +487,10 @@ Quad2dD Tiled2dMapVectorSymbolSubLayer::getProjectedFrame(const RectCoord &bound
     bottomRight.x += padding;
     bottomRight.y += padding;
 
-    auto topLeftProj = Matrix::multiply(modelMatrix, {(float)topLeft.x, (float)topLeft.y, 0.0, 1.0});
-    auto topRightProj = Matrix::multiply(modelMatrix, {(float)topRight.x, (float)topRight.y, 0.0, 1.0});
-    auto bottomRightProj = Matrix::multiply(modelMatrix, {(float)bottomRight.x, (float)bottomRight.y, 0.0, 1.0});
-    auto bottomLeftProj = Matrix::multiply(modelMatrix, {(float)bottomLeft.x, (float)bottomLeft.y, 0.0, 1.0});
+    Matrix::multiply(modelMatrix, std::vector<float>{(float)topLeft.x, (float)topLeft.y, 0.0, 1.0}, topLeftProj);
+    Matrix::multiply(modelMatrix, std::vector<float>{(float)topRight.x, (float)topRight.y, 0.0, 1.0}, topRightProj);
+    Matrix::multiply(modelMatrix, std::vector<float>{(float)bottomRight.x, (float)bottomRight.y, 0.0, 1.0}, bottomRightProj);
+    Matrix::multiply(modelMatrix, std::vector<float>{(float)bottomLeft.x, (float)bottomLeft.y, 0.0, 1.0}, bottomLeftProj);
 
     return Quad2dD(Vec2D(topLeftProj[0], topLeftProj[1]), Vec2D(topRightProj[0], topRightProj[1]), Vec2D(bottomRightProj[0], bottomRightProj[1]), Vec2D(bottomLeftProj[0], bottomLeftProj[1]));
 }
@@ -918,10 +918,10 @@ bool Tiled2dMapVectorSymbolSubLayer::onClickConfirmed(const ::Vec2F &posScreen) 
 
     double clickPadding = camera->mapUnitsFromPixels(10);
 
-    OBB2D tinyClickBox(Vec2D(clickCoordsRenderCoord.x - clickPadding, clickCoordsRenderCoord.y - clickPadding),
-                       Vec2D(clickCoordsRenderCoord.x + clickPadding, clickCoordsRenderCoord.y - clickPadding),
-                       Vec2D(clickCoordsRenderCoord.x + clickPadding, clickCoordsRenderCoord.y + clickPadding),
-                       Vec2D(clickCoordsRenderCoord.x - clickPadding, clickCoordsRenderCoord.y + clickPadding));
+    OBB2D tinyClickBox(Quad2dD(Vec2D(clickCoordsRenderCoord.x - clickPadding, clickCoordsRenderCoord.y - clickPadding),
+                               Vec2D(clickCoordsRenderCoord.x + clickPadding, clickCoordsRenderCoord.y - clickPadding),
+                               Vec2D(clickCoordsRenderCoord.x + clickPadding, clickCoordsRenderCoord.y + clickPadding),
+                               Vec2D(clickCoordsRenderCoord.x - clickPadding, clickCoordsRenderCoord.y + clickPadding)));
 
     std::optional<FeatureContext> selectedFeatureContext;
     std::optional<Coord> selectedCoordinate;

@@ -48,7 +48,7 @@ struct Tiled2dMapVectorSymbolFeatureWrapper {
     std::shared_ptr<Quad2dInterface> symbolObject;
     std::shared_ptr<AlphaShaderInterface> symbolShader;
 
-    OBB2D orientedBoundingBox = OBB2D(Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0));
+    OBB2D orientedBoundingBox = OBB2D(Quad2dD(Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0)));
 
     std::optional<Quad2dD> projectedTextQuad = std::nullopt;
 
@@ -130,7 +130,7 @@ private:
 
     std::optional<Tiled2dMapVectorSymbolSubLayerPositioningWrapper> getPositioning(std::vector<::Coord>::const_iterator &iterator, const std::vector<::Coord> & collection);
 
-    Quad2dD getProjectedFrame(const RectCoord &boundingBox, const float &padding, const std::vector<float> &modelMatrix) const;
+    Quad2dD getProjectedFrame(const RectCoord &boundingBox, const float &padding, const std::vector<float> &modelMatrix);
                                          
     const std::shared_ptr<FontLoaderInterface> fontLoader;
     const std::shared_ptr<SymbolVectorLayerDescription> description;
@@ -151,4 +151,9 @@ private:
     double lastZoom = 0.0;
     double lastRotation = 0.0;
     bool hasFreshData = false;
+
+    std::vector<float> topLeftProj = { 0.0, 0.0, 0.0, 0.0 };
+    std::vector<float> topRightProj = { 0.0, 0.0, 0.0, 0.0 };
+    std::vector<float> bottomRightProj = { 0.0, 0.0, 0.0, 0.0 };
+    std::vector<float> bottomLeftProj = { 0.0, 0.0, 0.0, 0.0 };
 };
