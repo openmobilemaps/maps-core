@@ -230,12 +230,23 @@ std::shared_ptr<::LayerInterface> Tiled2dMapVectorLayer::asLayerInterface() {
 }
 
 void Tiled2dMapVectorLayer::update() {
-    std::vector<OBB2D> placements;
     std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-    for (auto it = sublayers.rbegin(); it != sublayers.rend(); ++it)
-    {
+    bool needsCollisionDetection = false;
+    for (auto it = sublayers.rbegin(); it != sublayers.rend(); ++it) {
         if (auto symbolLayer = std::dynamic_pointer_cast<Tiled2dMapVectorSymbolSubLayer>(*it)) {
-            symbolLayer->collisionDetection(placements);
+            if (symbolLayer->isDirty()) {
+                needsCollisionDetection = true;
+                break;
+            }
+        }
+    }
+    if (needsCollisionDetection) {
+        std::vector<OBB2D> placements;
+        for (auto it = sublayers.rbegin(); it != sublayers.rend(); ++it)
+        {
+            if (auto symbolLayer = std::dynamic_pointer_cast<Tiled2dMapVectorSymbolSubLayer>(*it)) {
+                symbolLayer->collisionDetection(placements);
+            }
         }
     }
     

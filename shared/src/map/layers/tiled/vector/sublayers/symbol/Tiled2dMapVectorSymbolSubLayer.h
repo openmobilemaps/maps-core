@@ -103,6 +103,8 @@ public:
 
     virtual std::vector<std::shared_ptr<RenderPassInterface>> buildRenderPasses(const std::unordered_set<Tiled2dMapTileInfo> &tiles) override;
 
+    bool isDirty();
+
     void collisionDetection(std::vector<OBB2D> &placements);
 
     void setSprites(std::shared_ptr<TextureHolderInterface> spriteTexture, std::shared_ptr<SpriteData> spriteData);
@@ -144,4 +146,9 @@ private:
 
     std::recursive_mutex tileTextPositionMapMutex;
     std::unordered_map<Tiled2dMapTileInfo, std::unordered_map<std::string, std::vector<Coord>>> tileTextPositionMap;
+
+    std::recursive_mutex dirtyMutex;
+    double lastZoom = 0.0;
+    double lastRotation = 0.0;
+    bool hasFreshData = false;
 };

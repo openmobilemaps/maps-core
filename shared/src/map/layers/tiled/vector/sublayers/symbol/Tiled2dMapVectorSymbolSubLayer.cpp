@@ -451,6 +451,10 @@ void Tiled2dMapVectorSymbolSubLayer::addTexts(const Tiled2dMapTileInfo &tileInfo
         std::lock_guard<std::recursive_mutex> lock(symbolMutex);
         tileTextMap[tileInfo] = textObjects;
     }
+    {
+        std::lock_guard<std::recursive_mutex> lock(dirtyMutex);
+        hasFreshData = true;
+    }
 
     {
         std::lock_guard<std::recursive_mutex> lock(tilesInSetupMutex);
@@ -491,6 +495,17 @@ Quad2dD Tiled2dMapVectorSymbolSubLayer::getProjectedFrame(const RectCoord &bound
     return Quad2dD(Vec2D(topLeftProj[0], topLeftProj[1]), Vec2D(topRightProj[0], topRightProj[1]), Vec2D(bottomRightProj[0], bottomRightProj[1]), Vec2D(bottomLeftProj[0], bottomLeftProj[1]));
 }
 
+bool Tiled2dMapVectorSymbolSubLayer::isDirty() {
+    auto mapInterface = this->mapInterface;
+    auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+    if (!camera) {
+        return false;
+    }
+
+    std::lock_guard<std::recursive_mutex> lock(dirtyMutex);
+    return hasFreshData || Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom()) != lastZoom || -camera->getRotation() != lastRotation;
+}
+
 void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &placements) {
     auto mapInterface = this->mapInterface;
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
@@ -505,6 +520,12 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
 
     auto scaleFactor = camera->mapUnitsFromPixels(1.0);
 
+    {
+        std::lock_guard<std::recursive_mutex> lock(dirtyMutex);
+        lastZoom = zoomIdentifier;
+        lastRotation = rotation;
+        hasFreshData = false;
+    }
 
     for (auto &[tile, wrapperVector]: tileTextMap) {
         for (auto &wrapper: wrapperVector) {
@@ -753,6 +774,11 @@ void Tiled2dMapVectorSymbolSubLayer::clearTileData(const Tiled2dMapTileInfo &til
     {
         std::lock_guard<std::recursive_mutex> lock(tileTextPositionMapMutex);
         tileTextPositionMap.erase(tileInfo);
+    }
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(dirtyMutex);
+        hasFreshData = true;
     }
 
     if (objectsToClear.empty()) return;
