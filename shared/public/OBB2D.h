@@ -107,7 +107,9 @@ private:
 
     bool overlapsCircles(const OBB2D& other) const {
         auto rs = (r + other.r);
-        return Vec2DHelper::distanceSquared(center, other.center) < rs*rs;
+        auto x = center.x - other.center.x;
+        auto y = center.y - other.center.y;
+        return x*x + y*y < rs*rs;
     }
 
 public:
