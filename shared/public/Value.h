@@ -33,16 +33,16 @@
 namespace std {
     template <>
     struct hash<Color> {
-        size_t operator()(Color c) const {
+        size_t operator()(const Color &c) const {
             return std::hash<std::tuple<float, float, float, float>>()({c.r, c.g, c.b, c.a});
         }
     };
 
     template <>
     struct hash<std::vector<float>> {
-        size_t operator()(std::vector<float> vector) const {
+        size_t operator()(const std::vector<float> &vector) const {
             size_t hash = 0;
-            for(auto const val: vector) {
+            for(auto const &val: vector) {
                 std::hash_combine(hash, std::hash<float>{}(val));
             }
             return hash;
@@ -51,9 +51,9 @@ namespace std {
 
     template <>
     struct hash<std::vector<std::string>> {
-        size_t operator()(std::vector<std::string> vector) const {
+        size_t operator()(const std::vector<std::string> &vector) const {
             size_t hash = 0;
-            for(auto const val: vector) {
+            for(auto const &val: vector) {
                 std::hash_combine(hash, std::hash<std::string>{}(val));
             }
             return hash;
@@ -62,9 +62,9 @@ namespace std {
 
     template <>
     struct hash<std::vector<FormattedStringEntry>> {
-        size_t operator()(std::vector<FormattedStringEntry> vector) const {
+        size_t operator()(const std::vector<FormattedStringEntry> &vector) const {
             size_t hash = 0;
-            for(auto const val: vector) {
+            for(auto const &val: vector) {
                 std::hash_combine(hash, std::hash<std::string>{}(val.text));
                 std::hash_combine(hash, std::hash<float>{}(val.scale));
             }
