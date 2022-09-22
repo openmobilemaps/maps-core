@@ -481,6 +481,10 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
 
     std::lock_guard<std::recursive_mutex> lock(symbolMutex);
 
+    std::vector<float> topLeftProj = { 0.0, 0.0, 0.0, 0.0 };
+    std::vector<float> topRightProj = { 0.0, 0.0, 0.0, 0.0 };
+    std::vector<float> bottomRightProj = { 0.0, 0.0, 0.0, 0.0 };
+    std::vector<float> bottomLeftProj = { 0.0, 0.0, 0.0, 0.0 };
 
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
     auto scaleFactor = camera->mapUnitsFromPixels(1.0);
@@ -552,10 +556,10 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
                 bottomRight.x += padding;
                 bottomRight.y += padding;
 
-                auto topLeftProj = Matrix::multiply(wrapper.modelMatrix, {(float)topLeft.x, (float)topLeft.y, 0.0, 1.0});
-                auto topRightProj = Matrix::multiply(wrapper.modelMatrix, {(float)topRight.x, (float)topRight.y, 0.0, 1.0});
-                auto bottomRightProj = Matrix::multiply(wrapper.modelMatrix, {(float)bottomRight.x, (float)bottomRight.y, 0.0, 1.0});
-                auto bottomLeftProj = Matrix::multiply(wrapper.modelMatrix, {(float)bottomLeft.x, (float)bottomLeft.y, 0.0, 1.0});
+                Matrix::multiply(wrapper.modelMatrix, {(float)topLeft.x, (float)topLeft.y, 0.0, 1.0}, topLeftProj);
+                Matrix::multiply(wrapper.modelMatrix, {(float)topRight.x, (float)topRight.y, 0.0, 1.0}, topRightProj);
+                Matrix::multiply(wrapper.modelMatrix, {(float)bottomRight.x, (float)bottomRight.y, 0.0, 1.0}, bottomRightProj);
+                Matrix::multiply(wrapper.modelMatrix, {(float)bottomLeft.x, (float)bottomLeft.y, 0.0, 1.0}, bottomLeftProj);
 
 #ifdef DRAW_TEXT_BOUNDING_BOXES
                 wrapper.boundingBox->setFrame(Quad2dD(Vec2D(topLeftProj[0], topLeftProj[1]), Vec2D(topRightProj[0], topRightProj[1]), Vec2D(bottomRightProj[0], bottomRightProj[1]), Vec2D(bottomLeftProj[0], bottomLeftProj[1])), RectD(0, 0, 1, 1));
