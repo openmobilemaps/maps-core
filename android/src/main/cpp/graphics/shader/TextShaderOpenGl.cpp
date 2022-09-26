@@ -92,8 +92,12 @@ std::string TextShaderOpenGl::getFragmentShader() {
                                         varying vec2 vTextCoord;
 
                                         void main() {
-                                            float delta = 0.1;
                                             vec4 dist = texture2D(texture, vTextCoord);
+                                            if (haloColor.a == 0.0 && dist.x <= 0.5) {
+                                                discard;
+                                            }
+
+                                            float delta = 0.1;
                                             float alpha = smoothstep(0.5 - delta, 0.5 + delta, dist.x);
                                             vec4 glyphColor = vec4(color.r, color.g, color.b, color.a * alpha);
                                             vec4 mixed = mix(haloColor, glyphColor, alpha);

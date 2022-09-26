@@ -48,6 +48,8 @@ public:
 
     virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
 
+    virtual std::string getLayerDescriptionIdentifier() override;
+
 protected:
     void addLines(const Tiled2dMapTileInfo &tileInfo, const std::unordered_map<int, std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> &styleIdLinesMap);
 

@@ -23,11 +23,14 @@
 
 class Tiled2dMapVectorLayer : public Tiled2dMapLayer, public Tiled2dMapVectorLayerInterface, public Tiled2dMapVectorLayerReadyInterface {
 public:
-    Tiled2dMapVectorLayer(const std::string &layerName, const std::string &path, const std::string &vectorSource,
+    Tiled2dMapVectorLayer(const std::string &layerName,
+                          const std::string &path,
                           const std::vector <std::shared_ptr<::LoaderInterface>> &loaders,
-                          const std::shared_ptr<::FontLoaderInterface> &fontLoader, double dpFactor);
+                          const std::shared_ptr<::FontLoaderInterface> &fontLoader,
+                          double dpFactor);
 
-    Tiled2dMapVectorLayer(const std::string &layerName, const std::shared_ptr<VectorMapDescription> & mapDescription,
+    Tiled2dMapVectorLayer(const std::string &layerName,
+                          const std::shared_ptr<VectorMapDescription> & mapDescription,
                           const std::vector<std::shared_ptr<::LoaderInterface>> & loaders,
                           const std::shared_ptr<::FontLoaderInterface> & fontLoader);
 
@@ -57,6 +60,10 @@ public:
 
     void setSelectedFeatureIdentfier(std::optional<int64_t> identifier);
 
+    std::shared_ptr<VectorLayerDescription> getLayerDescriptionWithIdentifier(std::string identifier);
+
+    void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription);
+
 private:
     void scheduleStyleJsonLoading();
 
@@ -68,16 +75,17 @@ private:
 
     virtual void updateMaskObjects(const std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> &toSetupMaskObject, const std::vector<const std::shared_ptr<MaskingObjectInterface>> &obsoleteMaskObjects);
 
+    std::shared_ptr<LayerInterface> getLayerForDescription(const std::shared_ptr<VectorLayerDescription> &layerDescription);
+
     void loadSpriteData();
 
     const std::optional<double> dpFactor;
 
     const std::string layerName;
     std::optional<std::string> styleJsonPath;
-    std::optional<std::string> vectorSource;
     std::shared_ptr<VectorMapDescription> mapDescription;
 
-    std::shared_ptr<Tiled2dMapLayerConfig> layerConfig;
+    std::unordered_map<std::string, std::shared_ptr<Tiled2dMapLayerConfig>> layerConfigs;
 
     const std::shared_ptr<FontLoaderInterface> fontLoader;
 
@@ -103,9 +111,7 @@ private:
     std::vector<std::shared_ptr<LayerInterface>> sublayers;
 
     std::recursive_mutex sourceLayerMapMutex;
-    std::unordered_map<std::string, std::vector<std::shared_ptr<Tiled2dMapVectorSubLayer>>> sourceLayerMap;
-
-    //std::unordered_set<std::string> usedKeys;
+    std::unordered_map<std::string, std::unordered_map<std::string, std::vector<std::shared_ptr<Tiled2dMapVectorSubLayer>>>> sourceLayerMap;
 
     std::atomic_bool isLoadingStyleJson = false;
     std::atomic_bool isResumed = false;

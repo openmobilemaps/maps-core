@@ -37,8 +37,12 @@ textFragmentShader(VertexOut in [[stage_in]],
                        texture2d<float> texture0 [[ texture(0)]],
                        sampler textureSampler [[sampler(0)]])
 {
-    float delta = 0.1;
     float4 dist = texture0.sample(textureSampler, in.uv);
+    if (haloColor.a == 0.0 && dist.x <= 0.5) {
+        discard_fragment();
+    }
+
+    float delta = 0.1;
     float alpha = smoothstep(0.5 - delta, 0.5 + delta, dist.x);
 
     float4 glyphColor = float4(color.r, color.g, color.b, color.a * alpha);

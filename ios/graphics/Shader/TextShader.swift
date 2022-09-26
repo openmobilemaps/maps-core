@@ -14,10 +14,10 @@ import Metal
 
 class TextShader: BaseShader {
     private var pipeline: MTLRenderPipelineState?
-    private var referencePoint = MCVec3D()
+    private var referencePoint = SIMD2<Float>([0.0, 0.0])
     private var scaleFactor: Float = 1.0
-    private var color = MCColor(r: 0.0, g: 0.0, b: 0.0, a: 0.0)
-    private var haloColor = MCColor(r: 0.0, g: 0.0, b: 0.0, a: 1.0)
+    private var color = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
+    private var haloColor = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
@@ -30,22 +30,19 @@ class TextShader: BaseShader {
 
         encoder.setRenderPipelineState(pipeline)
 
-        var reference = SIMD2<Float>([referencePoint.x, referencePoint.y])
-        encoder.setVertexBytes(&reference, length: MemoryLayout<SIMD2<Float>>.stride, index: 3)
+        encoder.setVertexBytes(&referencePoint, length: MemoryLayout<SIMD2<Float>>.stride, index: 3)
 
         encoder.setVertexBytes(&scaleFactor, length: MemoryLayout<Float>.stride, index: 2)
 
-        var c = color.simdValues
-        encoder.setFragmentBytes(&c, length: MemoryLayout<SIMD4<Float>>.stride, index: 1)
+        encoder.setFragmentBytes(&color, length: MemoryLayout<SIMD4<Float>>.stride, index: 1)
 
-        var hc = haloColor.simdValues
-        encoder.setFragmentBytes(&hc, length: MemoryLayout<SIMD4<Float>>.stride, index: 2)
+        encoder.setFragmentBytes(&haloColor, length: MemoryLayout<SIMD4<Float>>.stride, index: 2)
     }
 }
 
 extension TextShader: MCTextShaderInterface {
     func setReferencePoint(_ point: MCVec3D) {
-        referencePoint = point
+        referencePoint = SIMD2<Float>([point.x, point.y])
     }
 
     func setScale(_ scale: Float) {
@@ -53,11 +50,11 @@ extension TextShader: MCTextShaderInterface {
     }
 
     func setColor(_ color: MCColor) {
-        self.color = color
+        self.color = color.simdValues
     }
 
     func setHaloColor(_ color: MCColor) {
-        self.haloColor = color
+        self.haloColor = color.simdValues
     }
 
     func asShaderProgram() -> MCShaderProgramInterface? {

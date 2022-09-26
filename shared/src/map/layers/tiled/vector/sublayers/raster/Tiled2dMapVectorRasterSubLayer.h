@@ -19,6 +19,7 @@ public:
                                    const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders);
 
     virtual void update() override;
+
 private:
     const std::shared_ptr<::RasterVectorLayerDescription> description;
 };

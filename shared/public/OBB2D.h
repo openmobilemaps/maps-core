@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "Quad2dD.h"
 #include "Vec2D.h"
 #include "Vec2DHelper.h"
 
@@ -86,8 +87,9 @@ private:
     }
 
 public:
-    OBB2D(const Vec2D& topLeft, const Vec2D& topRight, const Vec2D& bottomRight, const Vec2D& bottomLeft) :
-        corner { bottomLeft, bottomRight, topRight, topLeft },
+
+    OBB2D(const Quad2dD& quad) :
+        corner { quad.bottomLeft, quad.bottomRight, quad.topRight, quad.topLeft },
         axis { corner[1] - corner[0], corner[3] - corner[0] }
     {
         // Make the length of each axis 1/edge length so we know any

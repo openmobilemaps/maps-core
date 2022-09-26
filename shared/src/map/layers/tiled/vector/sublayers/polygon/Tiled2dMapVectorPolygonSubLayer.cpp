@@ -352,3 +352,7 @@ void Tiled2dMapVectorPolygonSubLayer::setScissorRect(const std::optional<::RectI
     this->scissorRect = scissorRect;
     preGenerateRenderPasses();
 }
+
+std::string Tiled2dMapVectorPolygonSubLayer::getLayerDescriptionIdentifier() {
+    return description->identifier;
+}

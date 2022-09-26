@@ -13,21 +13,30 @@
 #include "VectorLayerDescription.h"
 #include "Color.h"
 
-class VectorMapDescription {
+class VectorMapSourceDescription {
 public:
     std::string identifier;
     std::string vectorUrl;
     int minZoom;
     int maxZoom;
+
+    VectorMapSourceDescription(std::string identifier,
+                         std::string vectorUrl,
+                         int minZoom,
+                         int maxZoom):
+    identifier(identifier), vectorUrl(vectorUrl), minZoom(minZoom), maxZoom(maxZoom) {}
+};
+
+class VectorMapDescription {
+public:
+    std::string identifier;
+    std::vector<std::shared_ptr<VectorMapSourceDescription>> vectorSources;
     std::vector<std::shared_ptr<VectorLayerDescription>> layers;
     std::string spriteBaseUrl;
 
-
     VectorMapDescription(std::string identifier,
-                         std::string vectorUrl,
-                         int minZoom,
-                         int maxZoom,
+                         std::vector<std::shared_ptr<VectorMapSourceDescription>> vectorSources,
                          std::vector<std::shared_ptr<VectorLayerDescription>> layers,
                          std::string spriteBaseUrl):
-    identifier(identifier), vectorUrl(vectorUrl), layers(layers), minZoom(minZoom), maxZoom(maxZoom), spriteBaseUrl(spriteBaseUrl) {}
+    identifier(identifier), vectorSources(vectorSources), layers(layers), spriteBaseUrl(spriteBaseUrl) {}
 };

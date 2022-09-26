@@ -20,6 +20,7 @@ enum VectorLayerType {
 class VectorLayerDescription {
 public:
     std::string identifier;
+    std::string source;
     std::string sourceId;
     int minZoom;
     int maxZoom;
@@ -34,11 +35,13 @@ public:
 protected:
 public:
     VectorLayerDescription(std::string identifier,
+                           std::string source,
                            std::string sourceId,
                            int minZoom,
                            int maxZoom,
                            std::shared_ptr<Value> filter):
     identifier(identifier),
+    source(source),
     sourceId(sourceId),
     minZoom(minZoom),
     maxZoom(maxZoom),

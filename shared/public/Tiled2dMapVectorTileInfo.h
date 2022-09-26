@@ -18,14 +18,14 @@
 
 struct Tiled2dMapVectorTileInfo {
     const Tiled2dMapTileInfo tileInfo;
-    const std::shared_ptr<std::unordered_map<std::string, std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>>> layerFeatureMap;
+    std::unordered_map<std::string, std::shared_ptr<std::unordered_map<std::string, std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>>>> layerFeatureMaps;
     std::vector<::PolygonCoord> masks;
 
     Tiled2dMapVectorTileInfo(Tiled2dMapTileInfo tileInfo,
-                             const std::shared_ptr<std::unordered_map<std::string, std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>>> &layerFeatureMap,
+                             const std::unordered_map<std::string, std::shared_ptr<std::unordered_map<std::string, std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>>>> &layerFeatureMaps,
                              const std::vector<::PolygonCoord> &masks)
         : tileInfo(tileInfo)
-        , layerFeatureMap(layerFeatureMap)
+        , layerFeatureMaps(layerFeatureMaps)
         , masks(masks) {}
 
     bool operator==(const Tiled2dMapVectorTileInfo &o) const { return tileInfo == o.tileInfo; }

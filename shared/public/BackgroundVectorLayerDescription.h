@@ -50,7 +50,7 @@ public:
 
     BackgroundVectorLayerDescription(std::string identifier,
                                      BackgroundVectorStyle style):
-    VectorLayerDescription(identifier, "", 0, 0, nullptr),
+    VectorLayerDescription(identifier, "", "", 0, 0, nullptr),
     style(style) {};
 
     virtual std::unordered_set<std::string> getUsedKeys() override {

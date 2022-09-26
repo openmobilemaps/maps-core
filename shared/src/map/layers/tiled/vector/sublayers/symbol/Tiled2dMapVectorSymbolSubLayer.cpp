@@ -162,7 +162,6 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
     std::vector<std::tuple<const FeatureContext, std::shared_ptr<SymbolInfo>>> textInfos;
 
     tileTextPositionMap[tileInfo] = {};
-
     double tilePixelFactor = (0.0254 / camera->getScreenDensityPpi()) * tileInfo.zoomLevel;
 
     for(auto& feature : layerFeatures)
@@ -173,11 +172,6 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
         auto const evalContext = EvaluationContext(tileInfo.zoomIdentifier, context);
 
         if ((description->filter != nullptr && !description->filter->evaluateOr(evalContext, true))) {
-            continue;
-        }
-
-        if(description->minZoom > tileInfo.zoomIdentifier ||
-        description->maxZoom < tileInfo.zoomIdentifier) {
             continue;
         }
 
@@ -334,7 +328,7 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
                 std::optional<double> angle = std::nullopt;
 
 
-                {
+                if (fullText != ""){
                     std::lock_guard<std::recursive_mutex> lock(tileTextPositionMapMutex);
 
                     std::optional<double> minDistance;
@@ -398,27 +392,25 @@ void Tiled2dMapVectorSymbolSubLayer::addTexts(const Tiled2dMapTileInfo &tileInfo
         auto fontResult = loadFont(text->getFont());
         if (fontResult.status != LoaderStatus::OK) continue;
 
-        auto fontData = fontResult.fontData;
-
         auto const evalContext = EvaluationContext(zoomIdentifier, context);
 
         auto textOffset = description->style.getTextOffset(evalContext);
 
-        auto textRadialOffset = description->style.getTextRadialOffset(evalContext);
+        auto const textRadialOffset = description->style.getTextRadialOffset(evalContext);
         // TODO: currently only shifting to top right
         textOffset.x += textRadialOffset;
         textOffset.y -= textRadialOffset;
 
-        auto letterSpacing = description->style.getTextLetterSpacing(evalContext);
+        auto const letterSpacing = description->style.getTextLetterSpacing(evalContext);
 
-        auto textObject = textHelper.textLayerObject(text,
-                                                     fontData,
+        auto const textObject = textHelper.textLayerObject(text,
+                                                     fontResult.fontData,
                                                      textOffset,
                                                      description->style.getTextLineHeight(evalContext),
                                                      letterSpacing);
 
         if(textObject) {
-            int64_t symbolSortKey = description->style.getSymbolSortKey(evalContext);
+            int64_t const symbolSortKey = description->style.getSymbolSortKey(evalContext);
             Tiled2dMapVectorSymbolFeatureWrapper wrapper(context, text, textObject, symbolSortKey);
 
 
@@ -459,6 +451,10 @@ void Tiled2dMapVectorSymbolSubLayer::addTexts(const Tiled2dMapTileInfo &tileInfo
         std::lock_guard<std::recursive_mutex> lock(symbolMutex);
         tileTextMap[tileInfo] = textObjects;
     }
+    {
+        std::lock_guard<std::recursive_mutex> lock(dirtyMutex);
+        hasFreshData = true;
+    }
 
     {
         std::lock_guard<std::recursive_mutex> lock(tilesInSetupMutex);
@@ -472,6 +468,44 @@ void Tiled2dMapVectorSymbolSubLayer::addTexts(const Tiled2dMapTileInfo &tileInfo
             [selfPtr, tileInfo, textObjects] { if (selfPtr.lock()) selfPtr.lock()->setupTexts(tileInfo, textObjects); }));
 }
 
+Quad2dD Tiled2dMapVectorSymbolSubLayer::getProjectedFrame(const RectCoord &boundingBox, const float &padding, const std::vector<float> &modelMatrix) {
+
+    auto topLeft = Vec2D(boundingBox.topLeft.x, boundingBox.topLeft.y);
+    auto topRight = Vec2D(boundingBox.bottomRight.x, topLeft.y);
+    auto bottomRight = Vec2D(boundingBox.bottomRight.x, boundingBox.bottomRight.y);
+    auto bottomLeft = Vec2D(topLeft.x, bottomRight.y);
+
+    topLeft.x -= padding;
+    topLeft.y -= padding;
+
+    topRight.x += padding;
+    topRight.y -= padding;
+
+    bottomLeft.x -= padding;
+    bottomLeft.y += padding;
+
+    bottomRight.x += padding;
+    bottomRight.y += padding;
+
+    Matrix::multiply(modelMatrix, std::vector<float>{(float)topLeft.x, (float)topLeft.y, 0.0, 1.0}, topLeftProj);
+    Matrix::multiply(modelMatrix, std::vector<float>{(float)topRight.x, (float)topRight.y, 0.0, 1.0}, topRightProj);
+    Matrix::multiply(modelMatrix, std::vector<float>{(float)bottomRight.x, (float)bottomRight.y, 0.0, 1.0}, bottomRightProj);
+    Matrix::multiply(modelMatrix, std::vector<float>{(float)bottomLeft.x, (float)bottomLeft.y, 0.0, 1.0}, bottomLeftProj);
+
+    return Quad2dD(Vec2D(topLeftProj[0], topLeftProj[1]), Vec2D(topRightProj[0], topRightProj[1]), Vec2D(bottomRightProj[0], bottomRightProj[1]), Vec2D(bottomLeftProj[0], bottomLeftProj[1]));
+}
+
+bool Tiled2dMapVectorSymbolSubLayer::isDirty() {
+    auto mapInterface = this->mapInterface;
+    auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+    if (!camera) {
+        return false;
+    }
+
+    std::lock_guard<std::recursive_mutex> lock(dirtyMutex);
+    return hasFreshData || Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom()) != lastZoom || -camera->getRotation() != lastRotation;
+}
+
 void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &placements) {
     auto mapInterface = this->mapInterface;
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
@@ -481,14 +515,17 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
 
     std::lock_guard<std::recursive_mutex> lock(symbolMutex);
 
-    std::vector<float> topLeftProj = { 0.0, 0.0, 0.0, 0.0 };
-    std::vector<float> topRightProj = { 0.0, 0.0, 0.0, 0.0 };
-    std::vector<float> bottomRightProj = { 0.0, 0.0, 0.0, 0.0 };
-    std::vector<float> bottomLeftProj = { 0.0, 0.0, 0.0, 0.0 };
-
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
+    double rotation = -camera->getRotation();
+
     auto scaleFactor = camera->mapUnitsFromPixels(1.0);
 
+    {
+        std::lock_guard<std::recursive_mutex> lock(dirtyMutex);
+        lastZoom = zoomIdentifier;
+        lastRotation = rotation;
+        hasFreshData = false;
+    }
 
     for (auto &[tile, wrapperVector]: tileTextMap) {
         for (auto &wrapper: wrapperVector) {
@@ -534,123 +571,135 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
 
             wrapper.collides = false;
 
+
+            std::optional<Quad2dD> combinedQuad;
+
             if (hasText) {
-                auto const &curB = object->boundingBox;
-
-                auto topLeft = Vec2D(curB.topLeft.x, curB.topLeft.y);
-                auto topRight = Vec2D(curB.bottomRight.x, topLeft.y);
-                auto bottomRight = Vec2D(curB.bottomRight.x, curB.bottomRight.y);
-                auto bottomLeft = Vec2D(topLeft.x, bottomRight.y);
-
                 float padding = description->style.getTextPadding(evalContext);
+                auto const &quad = getProjectedFrame(object->boundingBox, padding, wrapper.modelMatrix);
 
-                topLeft.x -= padding;
-                topLeft.y -= padding;
+                combinedQuad = quad;
+            }
 
-                topRight.x += padding;
-                topRight.y -= padding;
 
-                bottomLeft.x -= padding;
-                bottomLeft.y += padding;
+            if (spriteData && spriteTexture) {
+                auto iconImage = description->style.getIconImage(evalContext);
 
-                bottomRight.x += padding;
-                bottomRight.y += padding;
+                if (iconImage != "") {
+                    Matrix::setIdentityM(wrapper.iconModelMatrix, 0);
+                    Matrix::translateM(wrapper.iconModelMatrix, 0, renderCoord.x, renderCoord.y, renderCoord.z);
 
-                Matrix::multiply(wrapper.modelMatrix, {(float)topLeft.x, (float)topLeft.y, 0.0, 1.0}, topLeftProj);
-                Matrix::multiply(wrapper.modelMatrix, {(float)topRight.x, (float)topRight.y, 0.0, 1.0}, topRightProj);
-                Matrix::multiply(wrapper.modelMatrix, {(float)bottomRight.x, (float)bottomRight.y, 0.0, 1.0}, bottomRightProj);
-                Matrix::multiply(wrapper.modelMatrix, {(float)bottomLeft.x, (float)bottomLeft.y, 0.0, 1.0}, bottomLeftProj);
+                    auto iconSize = description->style.getIconSize(evalContext) * scaleFactor;
 
-#ifdef DRAW_TEXT_BOUNDING_BOXES
-                wrapper.boundingBox->setFrame(Quad2dD(Vec2D(topLeftProj[0], topLeftProj[1]), Vec2D(topRightProj[0], topRightProj[1]), Vec2D(bottomRightProj[0], bottomRightProj[1]), Vec2D(bottomLeftProj[0], bottomLeftProj[1])), RectD(0, 0, 1, 1));
-#endif
 
-                wrapper.textOrientedBoundingBox = OBB2D(Vec2D(topLeftProj[0], topLeftProj[1]), Vec2D(topRightProj[0], topRightProj[1]),
-                                  Vec2D(bottomRightProj[0], bottomRightProj[1]), Vec2D(bottomLeftProj[0], bottomLeftProj[1]));
+                    {
+                        std::lock_guard<std::recursive_mutex> lock(selectedFeatureIdentifierMutex);
+                        if (wrapper.featureContext.identifier == selectedFeatureIdentifier) {
+                            iconSize *= 2.0;
+                        }
+                    }
 
-                for ( auto const &otherB: placements ) {
-                    if (otherB.overlaps(wrapper.textOrientedBoundingBox)) {
-                        wrapper.collides = true;
-                        break;
+                    Matrix::scaleM(wrapper.iconModelMatrix, 0, iconSize, iconSize, 1.0);
+                    Matrix::rotateM(wrapper.iconModelMatrix, 0.0, rotation, 0.0, 0.0, 1.0);
+                    Matrix::translateM(wrapper.iconModelMatrix, 0, -renderCoord.x, -renderCoord.y, -renderCoord.z);
+                }
+
+                if (iconImage != "" && object->getCurrentSymbolName() != iconImage && spriteData->sprites.count(iconImage) != 0) {
+                    object->setCurrentSymbolName(iconImage);
+
+                    auto const &spriteInfo = spriteData->sprites.at(iconImage);
+
+                    if (!wrapper.symbolShader) {
+                        wrapper.symbolShader = mapInterface->getShaderFactory()->createAlphaShader();
+                    }
+
+                    if (!wrapper.symbolObject) {
+                        wrapper.symbolObject = mapInterface->getGraphicsObjectFactory()->createQuad(wrapper.symbolShader->asShaderProgramInterface());
+                    }
+
+                    Coord renderPos = mapInterface->getCoordinateConverterHelper()->convertToRenderSystem(wrapper.textInfo->getCoordinate());
+
+                    const double densityOffset = (mapInterface->getCamera()->getScreenDensityPpi() / 160.0) / spriteInfo.pixelRatio;
+
+                    auto iconOffset = description->style.getIconOffset(evalContext);
+                    renderPos.y -= iconOffset.y;
+                    renderPos.x += iconOffset.x;
+
+                    auto x = renderPos.x - (spriteInfo.width * densityOffset) / 2;
+                    auto y = renderPos.y + (spriteInfo.height * densityOffset) / 2;
+                    auto xw = renderPos.x + (spriteInfo.width * densityOffset) / 2;
+                    auto yh = renderPos.y - (spriteInfo.height * densityOffset) / 2;
+
+                    Quad2dD quad = Quad2dD(Vec2D(x, yh), Vec2D(xw, yh), Vec2D(xw, y), Vec2D(x, y));
+
+                    const auto textureWidth = (double) spriteTexture->getImageWidth();
+                    const auto textureHeight = (double) spriteTexture->getImageHeight();
+
+                    wrapper.symbolObject->setFrame(quad, RectD( ((double) spriteInfo.x) / textureWidth,
+                                                               ((double) spriteInfo.y) / textureHeight,
+                                                               ((double) spriteInfo.width) / textureWidth,
+                                                               ((double) spriteInfo.height) / textureHeight));
+
+
+                    wrapper.projectedTextQuad = getProjectedFrame(RectCoord(Coord(renderPos.systemIdentifier, quad.topLeft.x, quad.topLeft.y, renderPos.z),
+                                                                          Coord(renderPos.systemIdentifier, quad.bottomRight.x, quad.bottomRight.y, renderPos.z)),
+                                                                0.0, wrapper.iconModelMatrix);
+
+                    if (spriteTexture) {
+                        wrapper.symbolObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+                        wrapper.symbolObject->loadTexture(mapInterface->getRenderingContext(), spriteTexture);
                     }
                 }
-                if (!wrapper.collides) {
-                    placements.push_back(wrapper.textOrientedBoundingBox);
+            }
+
+            if (combinedQuad && wrapper.projectedTextQuad) {
+                combinedQuad->topLeft.x = std::min(combinedQuad->topLeft.x, wrapper.projectedTextQuad->topLeft.x);
+                combinedQuad->topLeft.y = std::min(combinedQuad->topLeft.y, wrapper.projectedTextQuad->topLeft.y);
+
+                combinedQuad->topRight.x = std::max(combinedQuad->topRight.x, wrapper.projectedTextQuad->topRight.x);
+                combinedQuad->topRight.y = std::min(combinedQuad->topRight.y, wrapper.projectedTextQuad->topRight.y);
+
+                combinedQuad->bottomRight.x = std::max(combinedQuad->bottomRight.x, wrapper.projectedTextQuad->bottomRight.x);
+                combinedQuad->bottomRight.y = std::max(combinedQuad->bottomRight.y, wrapper.projectedTextQuad->bottomRight.y);
+
+                combinedQuad->bottomLeft.x = std::min(combinedQuad->bottomLeft.x, wrapper.projectedTextQuad->bottomLeft.x);
+                combinedQuad->bottomLeft.y = std::max(combinedQuad->bottomLeft.y, wrapper.projectedTextQuad->bottomLeft.y);
+
+            } else if (!combinedQuad) {
+                combinedQuad = wrapper.projectedTextQuad;
+            }
+
+
+            if (!combinedQuad) {
+                // The symbol doesnt have a text nor a icon
+                assert(false);
+                wrapper.collides = true;
+                break;
+            }
+
+            wrapper.orientedBoundingBox = OBB2D(*combinedQuad);
+
+#ifdef DRAW_TEXT_BOUNDING_BOXES
+            wrapper.boundingBox->setFrame(*combinedQuad, RectD(0, 0, 1, 1));
+#endif
+
+
+            for ( auto const &otherB: placements ) {
+                if (otherB.overlaps(wrapper.orientedBoundingBox)) {
+                    wrapper.collides = true;
+                    break;
                 }
             }
+            if (!wrapper.collides) {
+                placements.push_back(wrapper.orientedBoundingBox);
+            }
+
 
             if (!wrapper.collides) {
                 auto const &shader = object->getShader();
                 if (shader) {
                     object->getShader()->setColor(description->style.getTextColor(evalContext));
                     object->getShader()->setHaloColor(description->style.getTextHaloColor(evalContext));
-                }
-
-                if (spriteData && spriteTexture) {
-                    auto iconImage = description->style.getIconImage(evalContext);
-
-                    if (iconImage != "") {
-                        Matrix::setIdentityM(wrapper.iconModelMatrix, 0);
-                        Matrix::translateM(wrapper.iconModelMatrix, 0, renderCoord.x, renderCoord.y, renderCoord.z);
-
-                        auto iconSize = description->style.getIconSize(evalContext) * scaleFactor;
-
-
-                        {
-                            std::lock_guard<std::recursive_mutex> lock(selectedFeatureIdentifierMutex);
-                            if (wrapper.featureContext.identifier == selectedFeatureIdentifier) {
-                                iconSize *= 2.0;
-                            }
-                        }
-
-                        Matrix::scaleM(wrapper.iconModelMatrix, 0, iconSize, iconSize, 1.0);
-                        Matrix::rotateM(wrapper.iconModelMatrix, 0.0, rotation, 0.0, 0.0, 1.0);
-                        Matrix::translateM(wrapper.iconModelMatrix, 0, -renderCoord.x, -renderCoord.y, -renderCoord.z);
-                    }
-
-                    if (iconImage != "" && object->getCurrentSymbolName() != iconImage && spriteData->sprites.count(iconImage) != 0) {
-                        object->setCurrentSymbolName(iconImage);
-
-                        auto const &spriteInfo = spriteData->sprites.at(iconImage);
-
-                        if (!wrapper.symbolShader) {
-                            wrapper.symbolShader = mapInterface->getShaderFactory()->createAlphaShader();
-                        }
-
-                        if (!wrapper.symbolObject) {
-                            wrapper.symbolObject = mapInterface->getGraphicsObjectFactory()->createQuad(wrapper.symbolShader->asShaderProgramInterface());
-                        }
-
-                        Coord renderPos = mapInterface->getCoordinateConverterHelper()->convertToRenderSystem(wrapper.textInfo->getCoordinate());
-
-                        double densityOffset = (mapInterface->getCamera()->getScreenDensityPpi() / 160.0) / spriteInfo.pixelRatio;
-
-                        auto iconOffset = description->style.getIconOffset(evalContext);
-                        renderPos.y -= iconOffset.y;
-                        renderPos.x += iconOffset.x;
-
-                        auto x = renderPos.x - (spriteInfo.width * densityOffset) / 2;
-                        auto y = renderPos.y + (spriteInfo.height * densityOffset) / 2;
-                        auto xw = renderPos.x + (spriteInfo.width * densityOffset) / 2;
-                        auto yh = renderPos.y - (spriteInfo.height * densityOffset) / 2;
-
-                        Quad2dD quad = Quad2dD(Vec2D(x, yh), Vec2D(xw, yh), Vec2D(xw, y), Vec2D(x, y));
-
-                        wrapper.iconOrientedBoundingBox = OBB2D(quad.topLeft, quad.topRight, quad.bottomRight, quad.bottomLeft);
-
-                        auto textureWidth = (double) spriteTexture->getImageWidth();
-                        auto textureHeight = (double) spriteTexture->getImageHeight();
-
-                        wrapper.symbolObject->setFrame(quad, RectD( ((double) spriteInfo.x) / textureWidth,
-                                                                         ((double) spriteInfo.y) / textureHeight,
-                                                                         ((double) spriteInfo.width) / textureWidth,
-                                                                         ((double) spriteInfo.height) / textureHeight));
-
-                        if (spriteTexture) {
-                            wrapper.symbolObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
-                            wrapper.symbolObject->loadTexture(mapInterface->getRenderingContext(), spriteTexture);
-                        }
-                    }
                 }
             }
 #ifdef DRAW_COLLIDED_TEXT_BOUNDING_BOXES
@@ -727,6 +776,11 @@ void Tiled2dMapVectorSymbolSubLayer::clearTileData(const Tiled2dMapTileInfo &til
         tileTextPositionMap.erase(tileInfo);
     }
 
+    {
+        std::lock_guard<std::recursive_mutex> lock(dirtyMutex);
+        hasFreshData = true;
+    }
+
     if (objectsToClear.empty()) return;
 
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
@@ -745,6 +799,13 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorSymbolSubLay
 {
     auto camera = mapInterface->getCamera();
 
+    double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
+
+    if(description->minZoom > zoomIdentifier ||
+       description->maxZoom < zoomIdentifier) {
+        return {};
+    }
+
     std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(maskMutex, symbolMutex);
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
     for (auto const &[tile, wrapperVector] : tileTextMap) {
@@ -761,11 +822,15 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorSymbolSubLay
             const auto &configs = object->getRenderConfig();
 
             if (wrapper.symbolObject) {
-                renderPassObjectMap[0].push_back(std::make_shared<RenderObject>(wrapper.symbolObject->asGraphicsObject(), wrapper.iconModelMatrix));
+                renderPassObjectMap[1].push_back(std::make_shared<RenderObject>(wrapper.symbolObject->asGraphicsObject(), wrapper.iconModelMatrix));
             }
 
+
             if (!configs.empty()) {
-                renderPassObjectMap[configs.front()->getRenderIndex()].push_back(std::make_shared<RenderObject>(configs.front()->getGraphicsObject(), wrapper.modelMatrix));
+                std::lock_guard<std::recursive_mutex> lock(selectedFeatureIdentifierMutex);
+                if (wrapper.featureContext.identifier != selectedFeatureIdentifier) {
+                    renderPassObjectMap[configs.front()->getRenderIndex()].push_back(std::make_shared<RenderObject>(configs.front()->getGraphicsObject(), wrapper.modelMatrix));
+                }
             }
 
             #ifdef DRAW_TEXT_BOUNDING_BOXES
@@ -773,7 +838,6 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorSymbolSubLay
             #endif
         }
 
-        const auto &tileMask = tileMaskMap[tile];
         for (const auto &passEntry : renderPassObjectMap) {
             std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second);
             renderPass->setScissoringRect(scissorRect);
@@ -854,10 +918,10 @@ bool Tiled2dMapVectorSymbolSubLayer::onClickConfirmed(const ::Vec2F &posScreen) 
 
     double clickPadding = camera->mapUnitsFromPixels(10);
 
-    OBB2D tinyClickBox(Vec2D(clickCoordsRenderCoord.x - clickPadding, clickCoordsRenderCoord.y - clickPadding),
-                       Vec2D(clickCoordsRenderCoord.x + clickPadding, clickCoordsRenderCoord.y - clickPadding),
-                       Vec2D(clickCoordsRenderCoord.x + clickPadding, clickCoordsRenderCoord.y + clickPadding),
-                       Vec2D(clickCoordsRenderCoord.x - clickPadding, clickCoordsRenderCoord.y + clickPadding));
+    OBB2D tinyClickBox(Quad2dD(Vec2D(clickCoordsRenderCoord.x - clickPadding, clickCoordsRenderCoord.y - clickPadding),
+                               Vec2D(clickCoordsRenderCoord.x + clickPadding, clickCoordsRenderCoord.y - clickPadding),
+                               Vec2D(clickCoordsRenderCoord.x + clickPadding, clickCoordsRenderCoord.y + clickPadding),
+                               Vec2D(clickCoordsRenderCoord.x - clickPadding, clickCoordsRenderCoord.y + clickPadding)));
 
     std::optional<FeatureContext> selectedFeatureContext;
     std::optional<Coord> selectedCoordinate;
@@ -866,11 +930,7 @@ bool Tiled2dMapVectorSymbolSubLayer::onClickConfirmed(const ::Vec2F &posScreen) 
         for (auto &[tile, wrapperVector]: tileTextMap) {
             for (auto &wrapper: wrapperVector) {
                 if (wrapper.collides) { continue; }
-                if (wrapper.textOrientedBoundingBox.overlaps(tinyClickBox)) {
-                    selectedCoordinate = wrapper.textInfo->getCoordinate();
-                    selectedFeatureContext = wrapper.featureContext;
-                    break;
-                } else if (wrapper.iconOrientedBoundingBox.overlaps(tinyClickBox)) {
+                if (wrapper.orientedBoundingBox.overlaps(tinyClickBox)) {
                     selectedCoordinate = wrapper.textInfo->getCoordinate();
                     selectedFeatureContext = wrapper.featureContext;
                     break;
@@ -883,8 +943,23 @@ bool Tiled2dMapVectorSymbolSubLayer::onClickConfirmed(const ::Vec2F &posScreen) 
     }
 
     if (selectedFeatureContext && selectedCoordinate) {
-        return selectionDelegate->didSelectFeature(*selectedFeatureContext, *selectedCoordinate);
+        return selectionDelegate->didSelectFeature(*selectedFeatureContext, description, *selectedCoordinate);
     }
 
     return false;
 }
+
+
+std::string Tiled2dMapVectorSymbolSubLayer::getLayerDescriptionIdentifier() {
+    return description->identifier;
+}
+
+void Tiled2dMapVectorSymbolSubLayer::setSelectedFeatureIdentfier(std::optional<int64_t> identifier) {
+    Tiled2dMapVectorSubLayer::setSelectedFeatureIdentfier(identifier);
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(dirtyMutex);
+        hasFreshData = true;
+    }
+}
+
