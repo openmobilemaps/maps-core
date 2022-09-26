@@ -119,11 +119,10 @@ void Tiled2dMapRasterLayer::resume() {
 
 void Tiled2dMapRasterLayer::setT(int32_t t) {
     Tiled2dMapLayer::setT(t);
-    onTilesUpdated();
 }
 
 bool Tiled2dMapRasterLayer::shouldLoadTile(const Tiled2dMapTileInfo& tileInfo){
-    return abs(tileInfo.t - curT) < 10;
+    return abs(tileInfo.t - curT) < 100;
 }
 
 void Tiled2dMapRasterLayer::onTilesUpdated() {
@@ -169,7 +168,10 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
                 }
             }
 
-            if (tilesToAdd.empty() && tilesToRemove.empty() && newTileMasks.empty()) return;
+//            if (tilesToAdd.empty() && tilesToRemove.empty() && newTileMasks.empty()) {
+//                generateRenderPasses();
+//                return;
+//            }
 
             if (layerConfig->getZoomInfo().maskTile) {
                 for (const auto &tileEntry : tileObjectMap) {

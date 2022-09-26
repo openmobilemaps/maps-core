@@ -122,6 +122,7 @@ public:
 
     std::recursive_mutex currentZoomLevelMutex;
     int currentZoomLevelIdentifier = 0;
+    int currentTime = 0;
 
     std::recursive_mutex currentVisibleTilesMutex;
     std::unordered_set<Tiled2dMapTileInfo> currentVisibleTiles;

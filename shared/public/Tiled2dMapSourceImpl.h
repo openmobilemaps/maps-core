@@ -95,7 +95,6 @@ bool Tiled2dMapSource<T, L, R>::isTileVisible(const Tiled2dMapTileInfo &tileInfo
 
 template<class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBounds, int curT, double zoom) {
-    std::unordered_set<PrioritizedTiled2dMapTileInfo> visibleTiles;
 
     RectCoord visibleBoundsLayer = conversionHelper->convertRect(layerSystemId, visibleBounds);
 
@@ -136,7 +135,7 @@ void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBou
             continue;
         }
 
-        VisibleTilesLayer curVisibleTiles(i - targetZoomLayer);
+        VisibleTilesLayer curVisibleTiles(i - targetZoomLayer, i);
 
         const double tileWidth = zoomLevelInfo.tileWidthLayerSystemUnits;
 
@@ -172,7 +171,7 @@ void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBou
             for (int y = startTileTop; y <= maxTileTop && y < zoomLevelInfo.numTilesY; y++) {
                 for (int t = 0; t < zoomLevelInfo.numTilesT; t++) {
 
-                    if( t != curT ) {
+                    if( !(t == curT || i == startZoomLayer)) {
                         continue;
                     }
 
@@ -198,9 +197,6 @@ void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBou
                             Tiled2dMapTileInfo(rect, x, y, t, zoomLevelInfo.zoomLevelIdentifier, zoomLevelInfo.zoom),
                             priority));
 
-                    visibleTiles.insert(PrioritizedTiled2dMapTileInfo(
-                            Tiled2dMapTileInfo(rect, x, y, t, zoomLevelInfo.zoomLevelIdentifier, zoomLevelInfo.zoom),
-                            priority));
                 }
             }
         }
@@ -213,6 +209,7 @@ void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBou
     {
         std::lock_guard<std::recursive_mutex> lock(currentZoomLevelMutex);
         currentZoomLevelIdentifier = targetZoomLevelIdentifier;
+        currentTime = curT;
     }
 
     onVisibleTilesChanged(layers);
@@ -229,7 +226,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
 
         // make sure all tiles on the current zoom level are scheduled to load
         for (const auto &layer: pyramid) {
-            if (layer.targetZoomLevelOffset <= 0 && layer.targetZoomLevelOffset >= -zoomInfo.numDrawPreviousLayers){
+            if (layer.targetZoomLevelOffset <= 0 && (layer.targetZoomLevelOffset >= -zoomInfo.numDrawPreviousLayers || layer.zoomLevel == 0)){
                 for (auto const &tileInfo: layer.visibleTiles) {
                     newCurrentVisibleTiles.insert(tileInfo.tileInfo);
 
@@ -282,13 +279,22 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
 					currentTilesLocal.insert(tileEntry);
 				}
             }
+
+
+            const Tiled2dMapZoomLevelInfo &firstZoomLevelInfo = zoomLevelInfos.at(0);
+
             for (const auto &[tileInfo, tileWrapper] : currentTilesLocal) {
                 bool found = false;
 
                 if (tileInfo.zoomIdentifier <= currentZoomLevelIdentifier) {
                     for (const auto &layer: pyramid) {
                         for (auto const &tile: layer.visibleTiles) {
-                            if (tileInfo == tile.tileInfo) {
+                            bool equalEnough =
+                                tileInfo.x == tile.tileInfo.x &&
+                                tileInfo.y == tile.tileInfo.y &&
+                                tileInfo.zoomIdentifier == tile.tileInfo.zoomIdentifier &&
+                                abs(tileInfo.t - tile.tileInfo.t) < 100;
+                            if (equalEnough || tile.tileInfo.zoomIdentifier == firstZoomLevelInfo.zoomLevelIdentifier) {
                                 found = true;
                                 break;
                             }
@@ -672,9 +678,11 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
     std::vector<Tiled2dMapTileInfo> tilesToRemove;
 
     int currentZoomLevelIdentifier = 0;
+    int curT = 0;
     {
         std::lock_guard<std::recursive_mutex> lock(currentZoomLevelMutex);
         currentZoomLevelIdentifier = this->currentZoomLevelIdentifier;
+        curT = this->currentTime;
     }
 
 
@@ -684,6 +692,11 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
 
     for (auto it = currentTiles.rbegin(); it != currentTiles.rend(); it++ ){
         auto &[tileInfo, tileWrapper] = *it;
+
+        if (tileInfo.t != curT) {
+//            tileWrapper.isVisible = false;
+            continue;
+        }
 
         tileWrapper.isVisible = true;
         {
