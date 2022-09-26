@@ -58,12 +58,6 @@ struct Tiled2dMapVectorSymbolFeatureWrapper {
 
     Tiled2dMapVectorSymbolFeatureWrapper() {};
 
-    Tiled2dMapVectorSymbolFeatureWrapper(const Tiled2dMapVectorSymbolFeatureWrapper& a) : featureContext(a.featureContext), textInfo(a.textInfo), textObject(a.textObject), symbolSortKey(a.symbolSortKey), collides(a.collides), modelMatrix(a.modelMatrix), iconModelMatrix(a.iconModelMatrix), symbolObject(a.symbolObject), symbolShader(a.symbolShader)
-#ifdef DRAW_TEXT_BOUNDING_BOXES
-    ,boundingBox(a.boundingBox)
-#endif
-    { };
-
     Tiled2dMapVectorSymbolFeatureWrapper(const FeatureContext &featureContext, const std::shared_ptr<SymbolInfo> &textInfo, const std::shared_ptr<TextLayerObject> &textObject, const int64_t symbolSortKey) : featureContext(featureContext), textInfo(textInfo), textObject(textObject), symbolSortKey(symbolSortKey),  modelMatrix(16, 0), iconModelMatrix(16, 0) { };
 };
 
@@ -122,7 +116,7 @@ protected:
                   const std::vector< std::tuple<const FeatureContext, std::shared_ptr<SymbolInfo>>> &texts);
 
     void setupTexts(const Tiled2dMapTileInfo &tileInfo,
-                    const std::vector<Tiled2dMapVectorSymbolFeatureWrapper> texts);
+                    const std::vector<std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper>> texts);
 
     FontLoaderResult loadFont(const Font &font);
 
@@ -141,7 +135,10 @@ private:
     std::unordered_map<std::string, FontLoaderResult> fontLoaderResults;
 
     std::recursive_mutex symbolMutex;
-    std::unordered_map<Tiled2dMapTileInfo, std::vector<Tiled2dMapVectorSymbolFeatureWrapper>> tileTextMap;
+    std::unordered_map<Tiled2dMapTileInfo, std::vector<std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper>>> tileTextMap;
+
+    std::recursive_mutex selectedTextWrapperMutex;
+    std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> selectedTextWrapper;
 
     std::shared_ptr<TextureHolderInterface> spriteTexture;
     std::shared_ptr<SpriteData> spriteData;

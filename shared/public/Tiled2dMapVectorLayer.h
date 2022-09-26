@@ -64,6 +64,9 @@ public:
 
     void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription);
 
+protected:
+    std::shared_ptr<Tiled2dMapVectorSource> vectorTileSource;
+
 private:
     void scheduleStyleJsonLoading();
 
@@ -90,8 +93,6 @@ private:
     const std::shared_ptr<FontLoaderInterface> fontLoader;
 
     const std::vector<std::shared_ptr<::LoaderInterface>> loaders;
-
-    std::shared_ptr<Tiled2dMapVectorSource> vectorTileSource;
 
     std::recursive_mutex tileUpdateMutex;
 
