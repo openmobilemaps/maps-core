@@ -844,7 +844,7 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorSymbolSubLay
 
     std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
 
-    if (selectedTextWrapper) {
+    if (selectedTextWrapper && selectedTextWrapper->symbolObject) {
         renderPassObjectMap[1].push_back(std::make_shared<RenderObject>(selectedTextWrapper->symbolObject->asGraphicsObject(), selectedTextWrapper->iconModelMatrix));
 
 
