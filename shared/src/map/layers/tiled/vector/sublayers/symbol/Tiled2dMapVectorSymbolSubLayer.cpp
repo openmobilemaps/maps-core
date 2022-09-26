@@ -822,7 +822,7 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorSymbolSubLay
             const auto &configs = object->getRenderConfig();
 
             if (wrapper.symbolObject) {
-                renderPassObjectMap[0].push_back(std::make_shared<RenderObject>(wrapper.symbolObject->asGraphicsObject(), wrapper.iconModelMatrix));
+                renderPassObjectMap[1].push_back(std::make_shared<RenderObject>(wrapper.symbolObject->asGraphicsObject(), wrapper.iconModelMatrix));
             }
 
 
