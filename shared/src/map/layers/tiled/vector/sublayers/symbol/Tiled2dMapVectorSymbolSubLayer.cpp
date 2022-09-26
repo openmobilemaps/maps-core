@@ -953,3 +953,13 @@ bool Tiled2dMapVectorSymbolSubLayer::onClickConfirmed(const ::Vec2F &posScreen) 
 std::string Tiled2dMapVectorSymbolSubLayer::getLayerDescriptionIdentifier() {
     return description->identifier;
 }
+
+void Tiled2dMapVectorSymbolSubLayer::setSelectedFeatureIdentfier(std::optional<int64_t> identifier) {
+    Tiled2dMapVectorSubLayer::setSelectedFeatureIdentfier(identifier);
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(dirtyMutex);
+        hasFreshData = true;
+    }
+}
+

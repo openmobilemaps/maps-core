@@ -115,6 +115,8 @@ public:
 
     virtual std::string getLayerDescriptionIdentifier() override;
 
+    void setSelectedFeatureIdentfier(std::optional<int64_t> identifier) override;
+
 protected:
     void addTexts(const Tiled2dMapTileInfo &tileInfo,
                   const std::vector< std::tuple<const FeatureContext, std::shared_ptr<SymbolInfo>>> &texts);
