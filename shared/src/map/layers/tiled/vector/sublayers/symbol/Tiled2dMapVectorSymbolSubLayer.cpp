@@ -56,12 +56,12 @@ void Tiled2dMapVectorSymbolSubLayer::pause() {
         for (const auto &[tile, wrapperVector] : tileTextMap) {
             tilesInSetup.insert(tile);
             for (auto const &wrapper: wrapperVector) {
-                const auto &object = wrapper.textObject->getTextObject();
+                const auto &object = wrapper->textObject->getTextObject();
                 if (object && object->asGraphicsObject()->isReady()) {
                     object->asGraphicsObject()->clear();
                 }
-                if (wrapper.symbolObject && wrapper.symbolObject->asGraphicsObject()->isReady()) {
-                    wrapper.symbolObject->asGraphicsObject()->clear();
+                if (wrapper->symbolObject && wrapper->symbolObject->asGraphicsObject()->isReady()) {
+                    wrapper->symbolObject->asGraphicsObject()->clear();
                 }
             }
         }
@@ -80,9 +80,9 @@ void Tiled2dMapVectorSymbolSubLayer::resume() {
     const auto &context = mapInterface->getRenderingContext();
     for (const auto &[tile, wrapperVector] : tileTextMap) {
         for (auto const &wrapper: wrapperVector) {
-            const auto &object = wrapper.textObject->getTextObject();
+            const auto &object = wrapper->textObject->getTextObject();
             if (object) {
-                const auto &fontInfo = wrapper.textInfo->getFont();
+                const auto &fontInfo = wrapper->textInfo->getFont();
 
                 auto fontResult = loadFont(fontInfo);
 
@@ -95,7 +95,7 @@ void Tiled2dMapVectorSymbolSubLayer::resume() {
                 }
             }
 
-            auto const &symbolObject = wrapper.symbolObject;
+            auto const &symbolObject = wrapper->symbolObject;
             if (symbolObject) {
                 if (!symbolObject->asGraphicsObject()->isReady()) {
                     symbolObject->asGraphicsObject()->setup(context);
@@ -382,13 +382,26 @@ void Tiled2dMapVectorSymbolSubLayer::addTexts(const Tiled2dMapTileInfo &tileInfo
         return;
     }
 
-    std::vector<Tiled2dMapVectorSymbolFeatureWrapper> textObjects;
+    std::vector<std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper>> textObjects;
 
     auto textHelper = TextHelper(mapInterface);
 
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
 
+    bool containsSelectedText = false;
+    std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> selectedTextWrapper;
+    {
+        std::lock_guard<std::recursive_mutex> lock(selectedTextWrapperMutex);
+        selectedTextWrapper = this->selectedTextWrapper;
+    }
+
     for (auto& [context, text] : texts) {
+
+        if (selectedTextWrapper && context.identifier == selectedTextWrapper->featureContext.identifier) {
+            containsSelectedText = true;
+            continue;
+        }
+
         auto fontResult = loadFont(text->getFont());
         if (fontResult.status != LoaderStatus::OK) continue;
 
@@ -411,7 +424,7 @@ void Tiled2dMapVectorSymbolSubLayer::addTexts(const Tiled2dMapTileInfo &tileInfo
 
         if(textObject) {
             int64_t const symbolSortKey = description->style.getSymbolSortKey(evalContext);
-            Tiled2dMapVectorSymbolFeatureWrapper wrapper(context, text, textObject, symbolSortKey);
+            auto wrapper = std::make_shared<Tiled2dMapVectorSymbolFeatureWrapper>(context, text, textObject, symbolSortKey);
 
 
 #ifdef DRAW_TEXT_BOUNDING_BOXES
@@ -437,18 +450,21 @@ void Tiled2dMapVectorSymbolSubLayer::addTexts(const Tiled2dMapTileInfo &tileInfo
 
             quadObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
 
-            wrapper.boundingBox = quadObject;
+            wrapper->boundingBox = quadObject;
 #endif
             textObjects.push_back(wrapper);
         }
     }
 
-    std::sort(textObjects.begin(), textObjects.end(), [](const Tiled2dMapVectorSymbolFeatureWrapper &a, const Tiled2dMapVectorSymbolFeatureWrapper &b) {
-        return a.symbolSortKey < b.symbolSortKey;
+    std::sort(textObjects.begin(), textObjects.end(), [](const std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> &a, const std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> &b) {
+        return a->symbolSortKey < b->symbolSortKey;
     });
 
     {
         std::lock_guard<std::recursive_mutex> lock(symbolMutex);
+        if (containsSelectedText) {
+            textObjects.push_back(selectedTextWrapper);
+        }
         tileTextMap[tileInfo] = textObjects;
     }
     {
@@ -513,6 +529,13 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
         return;
     }
 
+
+    std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> selectedTextWrapper;
+    {
+        std::lock_guard<std::recursive_mutex> lock(selectedTextWrapperMutex);
+        selectedTextWrapper = this->selectedTextWrapper;
+    }
+
     std::lock_guard<std::recursive_mutex> lock(symbolMutex);
 
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
@@ -527,194 +550,198 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
         hasFreshData = false;
     }
 
-    for (auto &[tile, wrapperVector]: tileTextMap) {
-        for (auto &wrapper: wrapperVector) {
+    auto collisionDetectionLambda = [&](std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> wrapper){
+        auto const evalContext = EvaluationContext(zoomIdentifier, wrapper->featureContext);
 
-            auto const evalContext = EvaluationContext(zoomIdentifier, wrapper.featureContext);
+        const auto &object = wrapper->textObject;
+        auto ref = object->getReferenceSize();
+        const auto& refP = object->getReferencePoint();
+        auto scale = scaleFactor * description->style.getTextSize(evalContext) / ref;
+        if (object->getShader())  {
+            object->getShader()->setScale(1.0);
+        }
 
-            const auto &object = wrapper.textObject;
-            auto ref = object->getReferenceSize();
-            const auto& refP = object->getReferencePoint();
-            auto scale = scaleFactor * description->style.getTextSize(evalContext) / ref;
-            if (object->getShader())  {
-                object->getShader()->setScale(1.0);
-            }
+        const bool hasText = object->getTextObject() != nullptr;
 
-            const bool hasText = object->getTextObject() != nullptr;
+        Coord renderCoord = mapInterface->getCoordinateConverterHelper()->convertToRenderSystem(refP);
 
-            Coord renderCoord = mapInterface->getCoordinateConverterHelper()->convertToRenderSystem(refP);
+        double rotation = -camera->getRotation();
 
-            double rotation = -camera->getRotation();
+        if (hasText) {
+            Matrix::setIdentityM(wrapper->modelMatrix, 0);
+            Matrix::translateM(wrapper->modelMatrix, 0, renderCoord.x, renderCoord.y, renderCoord.z);
 
-            if (hasText) {
-                Matrix::setIdentityM(wrapper.modelMatrix, 0);
-                Matrix::translateM(wrapper.modelMatrix, 0, renderCoord.x, renderCoord.y, renderCoord.z);
+            Matrix::scaleM(wrapper->modelMatrix, 0, scale, scale, 1.0);
 
-                Matrix::scaleM(wrapper.modelMatrix, 0, scale, scale, 1.0);
+            rotation += description->style.getTextRotate(evalContext);
 
-                rotation += description->style.getTextRotate(evalContext);
+            if (wrapper->textInfo->angle) {
 
-                if (wrapper.textInfo->angle) {
-
-                    double rotateSum = fmod(rotation - (*wrapper.textInfo->angle) + 720.0, 360);
-                    if (rotateSum > 270 || rotateSum < 90) {
-                        rotation = *wrapper.textInfo->angle;
-                    } else {
-                        rotation = *wrapper.textInfo->angle + 180;
-                    }
+                double rotateSum = fmod(rotation - (*wrapper->textInfo->angle) + 720.0, 360);
+                if (rotateSum > 270 || rotateSum < 90) {
+                    rotation = *wrapper->textInfo->angle;
+                } else {
+                    rotation = *wrapper->textInfo->angle + 180;
                 }
-                Matrix::rotateM(wrapper.modelMatrix, 0.0, rotation, 0.0, 0.0, 1.0);
-
-                Matrix::translateM(wrapper.modelMatrix, 0, -renderCoord.x, -renderCoord.y, -renderCoord.z);
-
             }
+            Matrix::rotateM(wrapper->modelMatrix, 0.0, rotation, 0.0, 0.0, 1.0);
 
-            wrapper.collides = false;
+            Matrix::translateM(wrapper->modelMatrix, 0, -renderCoord.x, -renderCoord.y, -renderCoord.z);
 
+        }
 
-            std::optional<Quad2dD> combinedQuad;
-
-            if (hasText) {
-                float padding = description->style.getTextPadding(evalContext);
-                auto const &quad = getProjectedFrame(object->boundingBox, padding, wrapper.modelMatrix);
-
-                combinedQuad = quad;
-            }
+        wrapper->collides = false;
 
 
-            if (spriteData && spriteTexture) {
-                auto iconImage = description->style.getIconImage(evalContext);
+        std::optional<Quad2dD> combinedQuad;
 
-                if (iconImage != "") {
-                    Matrix::setIdentityM(wrapper.iconModelMatrix, 0);
-                    Matrix::translateM(wrapper.iconModelMatrix, 0, renderCoord.x, renderCoord.y, renderCoord.z);
+        if (hasText) {
+            float padding = description->style.getTextPadding(evalContext);
+            auto const &quad = getProjectedFrame(object->boundingBox, padding, wrapper->modelMatrix);
 
-                    auto iconSize = description->style.getIconSize(evalContext) * scaleFactor;
+            combinedQuad = quad;
+        }
 
 
-                    {
-                        std::lock_guard<std::recursive_mutex> lock(selectedFeatureIdentifierMutex);
-                        if (wrapper.featureContext.identifier == selectedFeatureIdentifier) {
-                            iconSize *= 2.0;
-                        }
-                    }
+        if (spriteData && spriteTexture) {
+            auto iconImage = description->style.getIconImage(evalContext);
+            if (iconImage != "") {
+                Matrix::setIdentityM(wrapper->iconModelMatrix, 0);
+                Matrix::translateM(wrapper->iconModelMatrix, 0, renderCoord.x, renderCoord.y, renderCoord.z);
 
-                    Matrix::scaleM(wrapper.iconModelMatrix, 0, iconSize, iconSize, 1.0);
-                    Matrix::rotateM(wrapper.iconModelMatrix, 0.0, rotation, 0.0, 0.0, 1.0);
-                    Matrix::translateM(wrapper.iconModelMatrix, 0, -renderCoord.x, -renderCoord.y, -renderCoord.z);
+                auto iconSize = description->style.getIconSize(evalContext) * scaleFactor;
+
+                if (wrapper == selectedTextWrapper) {
+                    iconSize *= 2.0;
                 }
 
-                if (iconImage != "" && object->getCurrentSymbolName() != iconImage && spriteData->sprites.count(iconImage) != 0) {
+                Matrix::scaleM(wrapper->iconModelMatrix, 0, iconSize, iconSize, 1.0);
+                Matrix::rotateM(wrapper->iconModelMatrix, 0.0, rotation, 0.0, 0.0, 1.0);
+                Matrix::translateM(wrapper->iconModelMatrix, 0, -renderCoord.x, -renderCoord.y, -renderCoord.z);
+
+                auto const &spriteInfo = spriteData->sprites.at(iconImage);
+
+                if (!wrapper->symbolShader) {
+                    wrapper->symbolShader = mapInterface->getShaderFactory()->createAlphaShader();
+                }
+
+                if (!wrapper->symbolObject) {
+                    wrapper->symbolObject = mapInterface->getGraphicsObjectFactory()->createQuad(wrapper->symbolShader->asShaderProgramInterface());
+                }
+
+                Coord renderPos = mapInterface->getCoordinateConverterHelper()->convertToRenderSystem(wrapper->textInfo->getCoordinate());
+
+                const double densityOffset = (mapInterface->getCamera()->getScreenDensityPpi() / 160.0) / spriteInfo.pixelRatio;
+
+                auto iconOffset = description->style.getIconOffset(evalContext);
+                renderPos.y -= iconOffset.y;
+                renderPos.x += iconOffset.x;
+
+                auto x = renderPos.x - (spriteInfo.width * densityOffset) / 2;
+                auto y = renderPos.y + (spriteInfo.height * densityOffset) / 2;
+                auto xw = renderPos.x + (spriteInfo.width * densityOffset) / 2;
+                auto yh = renderPos.y - (spriteInfo.height * densityOffset) / 2;
+
+                Quad2dD quad = Quad2dD(Vec2D(x, yh), Vec2D(xw, yh), Vec2D(xw, y), Vec2D(x, y));
+
+                const auto textureWidth = (double) spriteTexture->getImageWidth();
+                const auto textureHeight = (double) spriteTexture->getImageHeight();
+
+                if (object->getCurrentSymbolName() != iconImage && spriteData->sprites.count(iconImage) != 0) {
                     object->setCurrentSymbolName(iconImage);
-
-                    auto const &spriteInfo = spriteData->sprites.at(iconImage);
-
-                    if (!wrapper.symbolShader) {
-                        wrapper.symbolShader = mapInterface->getShaderFactory()->createAlphaShader();
-                    }
-
-                    if (!wrapper.symbolObject) {
-                        wrapper.symbolObject = mapInterface->getGraphicsObjectFactory()->createQuad(wrapper.symbolShader->asShaderProgramInterface());
-                    }
-
-                    Coord renderPos = mapInterface->getCoordinateConverterHelper()->convertToRenderSystem(wrapper.textInfo->getCoordinate());
-
-                    const double densityOffset = (mapInterface->getCamera()->getScreenDensityPpi() / 160.0) / spriteInfo.pixelRatio;
-
-                    auto iconOffset = description->style.getIconOffset(evalContext);
-                    renderPos.y -= iconOffset.y;
-                    renderPos.x += iconOffset.x;
-
-                    auto x = renderPos.x - (spriteInfo.width * densityOffset) / 2;
-                    auto y = renderPos.y + (spriteInfo.height * densityOffset) / 2;
-                    auto xw = renderPos.x + (spriteInfo.width * densityOffset) / 2;
-                    auto yh = renderPos.y - (spriteInfo.height * densityOffset) / 2;
-
-                    Quad2dD quad = Quad2dD(Vec2D(x, yh), Vec2D(xw, yh), Vec2D(xw, y), Vec2D(x, y));
-
-                    const auto textureWidth = (double) spriteTexture->getImageWidth();
-                    const auto textureHeight = (double) spriteTexture->getImageHeight();
-
-                    wrapper.symbolObject->setFrame(quad, RectD( ((double) spriteInfo.x) / textureWidth,
-                                                               ((double) spriteInfo.y) / textureHeight,
-                                                               ((double) spriteInfo.width) / textureWidth,
-                                                               ((double) spriteInfo.height) / textureHeight));
+                    wrapper->symbolObject->setFrame(quad, RectD( ((double) spriteInfo.x) / textureWidth,
+                                                                ((double) spriteInfo.y) / textureHeight,
+                                                                ((double) spriteInfo.width) / textureWidth,
+                                                                ((double) spriteInfo.height) / textureHeight));
+                }
 
 
-                    wrapper.projectedTextQuad = getProjectedFrame(RectCoord(Coord(renderPos.systemIdentifier, quad.topLeft.x, quad.topLeft.y, renderPos.z),
-                                                                          Coord(renderPos.systemIdentifier, quad.bottomRight.x, quad.bottomRight.y, renderPos.z)),
-                                                                0.0, wrapper.iconModelMatrix);
+                wrapper->projectedTextQuad = getProjectedFrame(RectCoord(Coord(renderPos.systemIdentifier, quad.topLeft.x, quad.topLeft.y, renderPos.z),
+                                                                         Coord(renderPos.systemIdentifier, quad.bottomRight.x, quad.bottomRight.y, renderPos.z)),
+                                                               0.0, wrapper->iconModelMatrix);
 
-                    if (spriteTexture) {
-                        wrapper.symbolObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
-                        wrapper.symbolObject->loadTexture(mapInterface->getRenderingContext(), spriteTexture);
-                    }
+                if (spriteTexture && !wrapper->symbolObject->asGraphicsObject()->isReady()) {
+                    wrapper->symbolObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+                    wrapper->symbolObject->loadTexture(mapInterface->getRenderingContext(), spriteTexture);
                 }
             }
+        }
 
-            if (combinedQuad && wrapper.projectedTextQuad) {
-                combinedQuad->topLeft.x = std::min(combinedQuad->topLeft.x, wrapper.projectedTextQuad->topLeft.x);
-                combinedQuad->topLeft.y = std::min(combinedQuad->topLeft.y, wrapper.projectedTextQuad->topLeft.y);
+        if (combinedQuad && wrapper->projectedTextQuad) {
+            combinedQuad->topLeft.x = std::min(combinedQuad->topLeft.x, wrapper->projectedTextQuad->topLeft.x);
+            combinedQuad->topLeft.y = std::min(combinedQuad->topLeft.y, wrapper->projectedTextQuad->topLeft.y);
 
-                combinedQuad->topRight.x = std::max(combinedQuad->topRight.x, wrapper.projectedTextQuad->topRight.x);
-                combinedQuad->topRight.y = std::min(combinedQuad->topRight.y, wrapper.projectedTextQuad->topRight.y);
+            combinedQuad->topRight.x = std::max(combinedQuad->topRight.x, wrapper->projectedTextQuad->topRight.x);
+            combinedQuad->topRight.y = std::min(combinedQuad->topRight.y, wrapper->projectedTextQuad->topRight.y);
 
-                combinedQuad->bottomRight.x = std::max(combinedQuad->bottomRight.x, wrapper.projectedTextQuad->bottomRight.x);
-                combinedQuad->bottomRight.y = std::max(combinedQuad->bottomRight.y, wrapper.projectedTextQuad->bottomRight.y);
+            combinedQuad->bottomRight.x = std::max(combinedQuad->bottomRight.x, wrapper->projectedTextQuad->bottomRight.x);
+            combinedQuad->bottomRight.y = std::max(combinedQuad->bottomRight.y, wrapper->projectedTextQuad->bottomRight.y);
 
-                combinedQuad->bottomLeft.x = std::min(combinedQuad->bottomLeft.x, wrapper.projectedTextQuad->bottomLeft.x);
-                combinedQuad->bottomLeft.y = std::max(combinedQuad->bottomLeft.y, wrapper.projectedTextQuad->bottomLeft.y);
+            combinedQuad->bottomLeft.x = std::min(combinedQuad->bottomLeft.x, wrapper->projectedTextQuad->bottomLeft.x);
+            combinedQuad->bottomLeft.y = std::max(combinedQuad->bottomLeft.y, wrapper->projectedTextQuad->bottomLeft.y);
 
-            } else if (!combinedQuad) {
-                combinedQuad = wrapper.projectedTextQuad;
-            }
+        } else if (!combinedQuad) {
+            combinedQuad = wrapper->projectedTextQuad;
+        }
 
 
-            if (!combinedQuad) {
-                // The symbol doesnt have a text nor a icon
-                assert(false);
-                wrapper.collides = true;
-                break;
-            }
+        if (!combinedQuad) {
+            // The symbol doesnt have a text nor a icon
+            assert(false);
+            wrapper->collides = true;
+        }
 
-            wrapper.orientedBoundingBox = OBB2D(*combinedQuad);
+        wrapper->orientedBoundingBox = OBB2D(*combinedQuad);
 
 #ifdef DRAW_TEXT_BOUNDING_BOXES
-            wrapper.boundingBox->setFrame(*combinedQuad, RectD(0, 0, 1, 1));
+        wrapper->boundingBox->setFrame(*combinedQuad, RectD(0, 0, 1, 1));
 #endif
 
 
-            for ( auto const &otherB: placements ) {
-                if (otherB.overlaps(wrapper.orientedBoundingBox)) {
-                    wrapper.collides = true;
-                    break;
-                }
+        for ( auto const &otherB: placements ) {
+            if (otherB.overlaps(wrapper->orientedBoundingBox)) {
+                wrapper->collides = true;
+                break;
             }
-            if (!wrapper.collides) {
-                placements.push_back(wrapper.orientedBoundingBox);
-            }
+        }
+        if (!wrapper->collides) {
+            placements.push_back(wrapper->orientedBoundingBox);
+        }
 
 
-            if (!wrapper.collides) {
-                auto const &shader = object->getShader();
-                if (shader) {
-                    object->getShader()->setColor(description->style.getTextColor(evalContext));
-                    object->getShader()->setHaloColor(description->style.getTextHaloColor(evalContext));
-                }
+        if (!wrapper->collides) {
+            auto const &shader = object->getShader();
+            if (shader) {
+                object->getShader()->setColor(description->style.getTextColor(evalContext));
+                object->getShader()->setHaloColor(description->style.getTextHaloColor(evalContext));
             }
+        }
 #ifdef DRAW_COLLIDED_TEXT_BOUNDING_BOXES
-            else {
-                if (object->getShader()) {
-                    object->getShader()->setColor(Color(1.0, 0.0, 0.0, 1.0));
-                }
+        else {
+            if (object->getShader()) {
+                object->getShader()->setColor(Color(1.0, 0.0, 0.0, 1.0));
             }
+        }
 #endif
+    };
+
+
+    if (selectedTextWrapper) {
+        collisionDetectionLambda(selectedTextWrapper);
+    }
+
+    for (auto &[tile, wrapperVector]: tileTextMap) {
+        for (auto &wrapper: wrapperVector) {
+            if (wrapper == selectedTextWrapper) {
+                continue;
+            }
+            collisionDetectionLambda(wrapper);
         }
     }
 }
 
 void Tiled2dMapVectorSymbolSubLayer::setupTexts(const Tiled2dMapTileInfo &tileInfo,
-                                                const std::vector<Tiled2dMapVectorSymbolFeatureWrapper> texts) {
+                                                const std::vector<std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper>> texts) {
     {
         std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(tilesInSetupMutex, symbolMutex);
         auto mapInterface = this->mapInterface;
@@ -726,9 +753,9 @@ void Tiled2dMapVectorSymbolSubLayer::setupTexts(const Tiled2dMapTileInfo &tileIn
             return;
         };
         for (auto const &text: texts) {
-            const auto &t = text.textInfo;
+            const auto &t = text->textInfo;
 
-            const auto &textObject = text.textObject->getTextObject();
+            const auto &textObject = text->textObject->getTextObject();
             if (textObject) {
                 textObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
 
@@ -755,16 +782,23 @@ void Tiled2dMapVectorSymbolSubLayer::clearTileData(const Tiled2dMapTileInfo &til
     std::vector<std::shared_ptr<GraphicsObjectInterface>> objectsToClear;
     Tiled2dMapVectorSubLayer::clearTileData(tileInfo);
 
+
+    std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> selectedTextWrapper;
+    {
+        std::lock_guard<std::recursive_mutex> lock(selectedTextWrapperMutex);
+        selectedTextWrapper = this->selectedTextWrapper;
+    }
+
     {
         std::lock_guard<std::recursive_mutex> lock(symbolMutex);
         if (tileTextMap.count(tileInfo) != 0) {
             for (auto const &wrapper: tileTextMap[tileInfo]) {
-                const auto &textObject = wrapper.textObject->getTextObject();
-                if (textObject) {
+                const auto &textObject = wrapper->textObject->getTextObject();
+                if (textObject && wrapper != selectedTextWrapper) {
                     objectsToClear.push_back(textObject->asGraphicsObject());
                 }
-                if(wrapper.symbolObject) {
-                    objectsToClear.push_back(wrapper.symbolObject->asGraphicsObject());
+                if(wrapper->symbolObject && wrapper != selectedTextWrapper) {
+                    objectsToClear.push_back(wrapper->symbolObject->asGraphicsObject());
                 }
             }
             tileTextMap.erase(tileInfo);
@@ -801,50 +835,69 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorSymbolSubLay
 
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
 
-    if(description->minZoom > zoomIdentifier ||
-       description->maxZoom < zoomIdentifier) {
-        return {};
+    std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> selectedTextWrapper;
+    {
+        std::lock_guard<std::recursive_mutex> lock(selectedTextWrapperMutex);
+        selectedTextWrapper = this->selectedTextWrapper;
     }
 
-    std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(maskMutex, symbolMutex);
-    std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
-    for (auto const &[tile, wrapperVector] : tileTextMap) {
-        if (tiles.count(tile) == 0) continue;
-        std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
-        for (auto const &wrapper : wrapperVector) {
-#ifndef DRAW_COLLIDED_TEXT_BOUNDING_BOXES
-            if (wrapper.collides) {
-                continue;
-            }
+
+    std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
+
+    if (selectedTextWrapper) {
+        renderPassObjectMap[1].push_back(std::make_shared<RenderObject>(selectedTextWrapper->symbolObject->asGraphicsObject(), selectedTextWrapper->iconModelMatrix));
+
+
+#ifdef DRAW_TEXT_BOUNDING_BOXES
+        renderPassObjectMap[0].push_back(std::make_shared<RenderObject>(selectedTextWrapper->boundingBox->asGraphicsObject()));
 #endif
-            const auto &object = wrapper.textObject;
-
-            const auto &configs = object->getRenderConfig();
-
-            if (wrapper.symbolObject) {
-                renderPassObjectMap[1].push_back(std::make_shared<RenderObject>(wrapper.symbolObject->asGraphicsObject(), wrapper.iconModelMatrix));
-            }
-
-
-            if (!configs.empty()) {
-                std::lock_guard<std::recursive_mutex> lock(selectedFeatureIdentifierMutex);
-                if (wrapper.featureContext.identifier != selectedFeatureIdentifier) {
-                    renderPassObjectMap[configs.front()->getRenderIndex()].push_back(std::make_shared<RenderObject>(configs.front()->getGraphicsObject(), wrapper.modelMatrix));
-                }
-            }
-
-            #ifdef DRAW_TEXT_BOUNDING_BOXES
-            renderPassObjectMap[0].push_back(std::make_shared<RenderObject>(wrapper.boundingBox->asGraphicsObject()));
-            #endif
-        }
-
-        for (const auto &passEntry : renderPassObjectMap) {
-            std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second);
-            renderPass->setScissoringRect(scissorRect);
-            newRenderPasses.push_back(renderPass);
-        }
     }
 
+
+    if(!(description->minZoom > zoomIdentifier || description->maxZoom < zoomIdentifier)) {
+        std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(maskMutex, symbolMutex);
+        for (auto const &[tile, wrapperVector] : tileTextMap) {
+            if (tiles.count(tile) == 0) continue;
+            for (auto const &wrapper : wrapperVector) {
+                if (wrapper == selectedTextWrapper) {
+                    continue;
+                }
+#ifndef DRAW_COLLIDED_TEXT_BOUNDING_BOXES
+                if (wrapper->collides) {
+                    continue;
+                }
+#endif
+                const auto &object = wrapper->textObject;
+
+                const auto &configs = object->getRenderConfig();
+
+                if (wrapper->symbolObject) {
+                    renderPassObjectMap[1].push_back(std::make_shared<RenderObject>(wrapper->symbolObject->asGraphicsObject(), wrapper->iconModelMatrix));
+                }
+
+
+                if (!configs.empty()) {
+                    std::lock_guard<std::recursive_mutex> lock(selectedFeatureIdentifierMutex);
+                    if (wrapper->featureContext.identifier != selectedFeatureIdentifier) {
+                        renderPassObjectMap[configs.front()->getRenderIndex()].push_back(std::make_shared<RenderObject>(configs.front()->getGraphicsObject(), wrapper->modelMatrix));
+                    }
+                }
+
+#ifdef DRAW_TEXT_BOUNDING_BOXES
+                renderPassObjectMap[0].push_back(std::make_shared<RenderObject>(wrapper->boundingBox->asGraphicsObject()));
+#endif
+            }
+        }
+
+    }
+
+
+    std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
+    for (const auto &passEntry : renderPassObjectMap) {
+        std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second);
+        renderPass->setScissoringRect(scissorRect);
+        newRenderPasses.push_back(renderPass);
+    }
 
     return newRenderPasses;
 }
@@ -882,9 +935,9 @@ void Tiled2dMapVectorSymbolSubLayer::setSprites(std::shared_ptr<TextureHolderInt
                      std::lock_guard<std::recursive_mutex> lock(selfPtr->symbolMutex);
                      for (auto const &[tile, objects]: selfPtr->tileTextMap) {
                          for (auto const &wrapper: objects) {
-                             if (wrapper.symbolObject) {
-                                 wrapper.symbolObject->loadTexture(selfPtr->mapInterface->getRenderingContext(), selfPtr->spriteTexture);
-                                 wrapper.symbolObject->asGraphicsObject()->setup(selfPtr->mapInterface->getRenderingContext());
+                             if (wrapper->symbolObject) {
+                                 wrapper->symbolObject->loadTexture(selfPtr->mapInterface->getRenderingContext(), selfPtr->spriteTexture);
+                                 wrapper->symbolObject->asGraphicsObject()->setup(selfPtr->mapInterface->getRenderingContext());
                              }
                          }
                      }
@@ -916,7 +969,7 @@ bool Tiled2dMapVectorSymbolSubLayer::onClickConfirmed(const ::Vec2F &posScreen) 
     Coord clickCoords = camera->coordFromScreenPosition(posScreen);
     Coord clickCoordsRenderCoord = conversionHelper->convertToRenderSystem(clickCoords);
 
-    double clickPadding = camera->mapUnitsFromPixels(10);
+    double clickPadding = camera->mapUnitsFromPixels(32);
 
     OBB2D tinyClickBox(Quad2dD(Vec2D(clickCoordsRenderCoord.x - clickPadding, clickCoordsRenderCoord.y - clickPadding),
                                Vec2D(clickCoordsRenderCoord.x + clickPadding, clickCoordsRenderCoord.y - clickPadding),
@@ -929,10 +982,10 @@ bool Tiled2dMapVectorSymbolSubLayer::onClickConfirmed(const ::Vec2F &posScreen) 
         std::lock_guard<std::recursive_mutex> lock(symbolMutex);
         for (auto &[tile, wrapperVector]: tileTextMap) {
             for (auto &wrapper: wrapperVector) {
-                if (wrapper.collides) { continue; }
-                if (wrapper.orientedBoundingBox.overlaps(tinyClickBox)) {
-                    selectedCoordinate = wrapper.textInfo->getCoordinate();
-                    selectedFeatureContext = wrapper.featureContext;
+                if (wrapper->collides) { continue; }
+                if (wrapper->orientedBoundingBox.overlaps(tinyClickBox)) {
+                    selectedCoordinate = wrapper->textInfo->getCoordinate();
+                    selectedFeatureContext = wrapper->featureContext;
                     break;
                 }
             }
@@ -956,6 +1009,55 @@ std::string Tiled2dMapVectorSymbolSubLayer::getLayerDescriptionIdentifier() {
 
 void Tiled2dMapVectorSymbolSubLayer::setSelectedFeatureIdentfier(std::optional<int64_t> identifier) {
     Tiled2dMapVectorSubLayer::setSelectedFeatureIdentfier(identifier);
+
+    std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> selectedTextWrapper;
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(symbolMutex);
+        for (auto &[tile, wrapperVector]: tileTextMap) {
+            for (auto &wrapper: wrapperVector) {
+                if (wrapper->featureContext.identifier == identifier) {
+                    selectedTextWrapper = wrapper;
+                }
+            }
+        }
+    }
+
+    std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> previouslySelectedWrapper;
+    {
+        std::lock_guard<std::recursive_mutex> lock(selectedTextWrapperMutex);
+        previouslySelectedWrapper = this->selectedTextWrapper;
+        this->selectedTextWrapper = selectedTextWrapper;
+    }
+
+    if (previouslySelectedWrapper) {
+        bool found = false;
+        {
+            std::lock_guard<std::recursive_mutex> lock(symbolMutex);
+            for (auto &[tile, wrapperVector]: tileTextMap) {
+                for (auto &wrapper: wrapperVector) {
+                    if (wrapper == previouslySelectedWrapper) {
+                        found = true;
+                    }
+                }
+            }
+        }
+
+        // Symbol is no contained in tile map anymore, therefore we have to clear it
+        if (!found) {
+            mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
+                                                                               TaskConfig("LineGroupTile_setSelectedFeatureIdentfier", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+                                                                               [previouslySelectedWrapper] {
+                                                                                   if (previouslySelectedWrapper->textObject->getTextObject()->asGraphicsObject()->isReady()) {
+                                                                                       previouslySelectedWrapper->textObject->getTextObject()->asGraphicsObject()->clear();
+                                                                                   }
+                                                                                   if (previouslySelectedWrapper->symbolObject && previouslySelectedWrapper->symbolObject->asGraphicsObject()->isReady()) {
+                                                                                       previouslySelectedWrapper->symbolObject->asGraphicsObject()->clear();
+                                                                                   }
+                                                                               }));
+        }
+    }
+
 
     {
         std::lock_guard<std::recursive_mutex> lock(dirtyMutex);
