@@ -5,6 +5,7 @@
 #import "MCCoord.h"
 #import "MCFont.h"
 #import "MCFormattedStringEntry.h"
+#import "MCTextJustify.h"
 #import <Foundation/Foundation.h>
 @protocol MCTextInfoInterface;
 
@@ -14,6 +15,7 @@
 + (nullable id<MCTextInfoInterface>)createText:(nonnull NSArray<MCFormattedStringEntry *> *)text
                                     coordinate:(nonnull MCCoord *)coordinate
                                           font:(nonnull MCFont *)font
-                                    textAnchor:(MCAnchor)textAnchor;
+                                    textAnchor:(MCAnchor)textAnchor
+                                   textJustify:(MCTextJustify)textJustify;
 
 @end

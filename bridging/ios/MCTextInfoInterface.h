@@ -5,6 +5,7 @@
 #import "MCCoord.h"
 #import "MCFont.h"
 #import "MCFormattedStringEntry.h"
+#import "MCTextJustify.h"
 #import <Foundation/Foundation.h>
 
 
@@ -17,5 +18,7 @@
 - (nonnull MCFont *)getFont;
 
 - (MCAnchor)getTextAnchor;
+
+- (MCTextJustify)getTextJustify;
 
 @end

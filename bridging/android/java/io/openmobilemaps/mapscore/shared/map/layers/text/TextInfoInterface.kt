@@ -15,6 +15,8 @@ abstract class TextInfoInterface {
 
     abstract fun getTextAnchor(): Anchor
 
+    abstract fun getTextJustify(): TextJustify
+
     private class CppProxy : TextInfoInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -56,5 +58,11 @@ abstract class TextInfoInterface {
             return native_getTextAnchor(this.nativeRef)
         }
         private external fun native_getTextAnchor(_nativeRef: Long): Anchor
+
+        override fun getTextJustify(): TextJustify {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getTextJustify(this.nativeRef)
+        }
+        private external fun native_getTextJustify(_nativeRef: Long): TextJustify
     }
 }

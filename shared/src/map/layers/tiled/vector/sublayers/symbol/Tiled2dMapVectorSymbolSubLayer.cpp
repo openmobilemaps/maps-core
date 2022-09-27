@@ -190,6 +190,7 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
         }
 
         auto anchor = description->style.getTextAnchor(evalContext);
+        auto justify = description->style.getTextJustify(evalContext);
 
         auto variableTextAnchor = description->style.getTextVariableAnchor(evalContext);
         if (!variableTextAnchor.empty()) {
@@ -254,7 +255,8 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
                                                                                    position,
                                                                                    Font(*fontList.begin()),
                                                                                    anchor,
-                                                                                   pos->angle)
+                                                                                   pos->angle,
+                                                                                   justify)
                         });
 
 
@@ -313,7 +315,8 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
                                                                                        position,
                                                                                        Font(*fontList.begin()),
                                                                                        anchor,
-                                                                                       pos->angle)
+                                                                                       pos->angle,
+                                                                                       justify)
                             });
 
 
@@ -354,7 +357,8 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
                                                                            *midP,
                                                                            Font(*fontList.begin()),
                                                                            anchor,
-                                                                           angle)
+                                                                           angle,
+                                                                           justify)
                 });
 
 
