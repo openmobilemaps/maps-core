@@ -332,7 +332,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
                         }
                     }
 
-                    if (found) {
+                    if (!found) {
                         it = loadingQueue.erase(it);
                         if (errorManager)
                             errorManager->removeError(
