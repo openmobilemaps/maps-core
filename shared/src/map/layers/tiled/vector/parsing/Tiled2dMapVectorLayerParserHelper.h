@@ -59,7 +59,7 @@ public:
                 std::string url;
 
                 bool adaptScaleToScreen = true;
-                int32_t numDrawPreviousLayers = 4;
+                int32_t numDrawPreviousLayers = 0;
                 bool maskTiles = true;
                 double zoomLevelScaleFactor = 0.65;
 
