@@ -323,11 +323,15 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
         {
             std::lock_guard<std::recursive_mutex> lock(loadingQueueMutex);
             for(auto &[loaderIndex, loadingQueue]: loadingQueues) {
+                std::vector<PrioritizedTiled2dMapTileInfo> toAddBack;
+
                 for (auto it = loadingQueue.begin(); it != loadingQueue.end();) {
                     bool found = false;
                     for (const auto &layer: pyramid) {
-                        found = layer.visibleTiles.count(*it) != 0;
-                        if (found) {
+                        auto entryIt = layer.visibleTiles.find(*it);
+                        if (entryIt != layer.visibleTiles.end()) {
+                            found = true;
+                            toAddBack.push_back(*entryIt);
                             break;
                         }
                     }
@@ -339,8 +343,12 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
                                                       layerConfig->getTileUrl(it->tileInfo.x, it->tileInfo.y, it->tileInfo.t,
                                                                               it->tileInfo.zoomIdentifier));
                     } else {
-                        ++it;
+                        it = loadingQueue.erase(it);
                     }
+                }
+
+                for(auto const &e: toAddBack) {
+                    loadingQueue.insert(e);
                 }
             }
         }
