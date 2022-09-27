@@ -89,7 +89,7 @@ std::shared_ptr<TextLayerObject> TextHelper::textLayerObject(const std::shared_p
                     lineEndIndices.push_back(glyphs.size() - 1);
                     characterCount = 0;
                     pen.x = 0.0;
-                    pen.y += lineHeight * fontSize * entry.scale;
+                    pen.y += fontSize;
                     break;
                 }
 
@@ -195,7 +195,7 @@ std::shared_ptr<TextLayerObject> TextHelper::textLayerObject(const std::shared_p
                 break;
             case Anchor::BOTTOM:
                 offset.x -= size.x / 2.0 - textOffset.x;
-                offset.y -= size.y - textOffset.y;
+                offset.y -= size.y - textOffset.y + fontSize * 0.5;
                 break;
             case Anchor::TOP_LEFT:
                 offset.x -= -textOffset.x;
