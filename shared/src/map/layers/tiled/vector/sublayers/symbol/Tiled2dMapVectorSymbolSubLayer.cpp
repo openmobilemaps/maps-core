@@ -660,8 +660,9 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
                                                                          Coord(renderPos.systemIdentifier, quad.bottomRight.x, quad.bottomRight.y, renderPos.z)),
                                                                0.0, wrapper->iconModelMatrix);
 
-                if (spriteTexture && !wrapper->symbolObject->asGraphicsObject()->isReady()) {
-                    wrapper->symbolObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+                auto symbolGraphicsObject = wrapper->symbolObject->asGraphicsObject();
+                if (spriteTexture && !symbolGraphicsObject->isReady()) {
+                    symbolGraphicsObject->setup(mapInterface->getRenderingContext());
                     wrapper->symbolObject->loadTexture(mapInterface->getRenderingContext(), spriteTexture);
                 }
             }

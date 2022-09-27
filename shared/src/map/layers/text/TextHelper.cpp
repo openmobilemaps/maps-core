@@ -28,7 +28,11 @@ std::vector<std::string> split_wstring(const std::string &word) {
     std::wstring wword = converter.from_bytes(word);
     std::vector<std::string> characters;
     for (auto iter : wword) {
-        characters.push_back(converter.to_bytes(iter));
+        try {
+            characters.push_back(converter.to_bytes(iter));
+        } // thrown by std::wstring_convert.to_bytes() for emojis
+        catch (const std::range_error & exception)
+        {}
     }
     return characters;
 }
