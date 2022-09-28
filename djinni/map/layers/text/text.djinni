@@ -15,13 +15,19 @@ anchor = enum {
     BOTTOM_RIGHT;
 }
 
+text_justify = enum {
+    LEFT;
+    CENTER;
+    RIGHT;
+}
+
 formatted_string_entry = record {
     text: string;
     scale: f32;
 } deriving (eq, ord)
 
 text_factory = interface +c {
-    static create_text(text: list<formatted_string_entry>, coordinate: coord, font: font, text_anchor: anchor) : text_info_interface;
+    static create_text(text: list<formatted_string_entry>, coordinate: coord, font: font, text_anchor: anchor, text_justify: text_justify) : text_info_interface;
 }
 
 text_layer_interface = interface +c {
@@ -36,5 +42,6 @@ text_info_interface = interface +c +j +o {
     get_coordinate() : coord;
     get_font(): font;
     get_text_anchor(): anchor;
+    get_text_justify(): text_justify;
 }
 

@@ -9,8 +9,8 @@ abstract class TextFactory {
 
     companion object {
         @JvmStatic
-        fun createText(text: ArrayList<FormattedStringEntry>, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, font: io.openmobilemaps.mapscore.shared.map.loader.Font, textAnchor: Anchor): TextInfoInterface {
-            return CppProxy.createText(text, coordinate, font, textAnchor)
+        fun createText(text: ArrayList<FormattedStringEntry>, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, font: io.openmobilemaps.mapscore.shared.map.loader.Font, textAnchor: Anchor, textJustify: TextJustify): TextInfoInterface {
+            return CppProxy.createText(text, coordinate, font, textAnchor, textJustify)
         }
     }
 
@@ -34,7 +34,7 @@ abstract class TextFactory {
 
         companion object {
             @JvmStatic
-            external fun createText(text: ArrayList<FormattedStringEntry>, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, font: io.openmobilemaps.mapscore.shared.map.loader.Font, textAnchor: Anchor): TextInfoInterface
+            external fun createText(text: ArrayList<FormattedStringEntry>, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, font: io.openmobilemaps.mapscore.shared.map.loader.Font, textAnchor: Anchor, textJustify: TextJustify): TextInfoInterface
         }
     }
 }

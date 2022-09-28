@@ -211,17 +211,22 @@ public:
             }
 
             // Example: ["format",["get","name:latin"],{},"\n",{},["get","ele"],{"font-scale":0.75}]
+            // OR [ "format",["get", "name:latin"], "\n", ["get", "ele"], {"font-scale": 0.75} ]
             else if (isExpression(json[0], formatExpression)) {
                 std::vector<FormatValueWrapper> values;
 
-                for (auto it = json.begin() + 1; it != json.end(); it += 2) {
+                for (auto it = json.begin() + 1; it != json.end(); it += 1) {
                     auto const &value = parseValue(*it);
                     float scale = 1.0;
-                    for (auto const &[key, value] : (it + 1)->items()) {
-                        if (key == "font-scale") {
-                            scale = value.get<float>();
+                    if ((it + 1)->is_object()) {
+                        for (auto const &[key, value] : (it + 1)->items()) {
+                            if (key == "font-scale") {
+                                scale = value.get<float>();
+                            }
                         }
+                        it += 1;
                     }
+
 
                     values.push_back({value, scale});
                 }

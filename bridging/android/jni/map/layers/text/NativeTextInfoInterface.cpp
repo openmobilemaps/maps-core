@@ -7,6 +7,7 @@
 #include "NativeCoord.h"
 #include "NativeFont.h"
 #include "NativeFormattedStringEntry.h"
+#include "NativeTextJustify.h"
 
 namespace djinni_generated {
 
@@ -49,6 +50,14 @@ std::vector<::FormattedStringEntry> NativeTextInfoInterface::JavaProxy::getText(
     auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getTextAnchor);
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativeAnchor::toCpp(jniEnv, jret);
+}
+::TextJustify NativeTextInfoInterface::JavaProxy::getTextJustify() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeTextInfoInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getTextJustify);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativeTextJustify::toCpp(jniEnv, jret);
 }
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_text_TextInfoInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
@@ -96,6 +105,16 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tex
         const auto& ref = ::djinni::objectFromHandleAddress<::TextInfoInterface>(nativeRef);
         auto r = ref->getTextAnchor();
         return ::djinni::release(::djinni_generated::NativeAnchor::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_text_TextInfoInterface_00024CppProxy_native_1getTextJustify(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::TextInfoInterface>(nativeRef);
+        auto r = ref->getTextJustify();
+        return ::djinni::release(::djinni_generated::NativeTextJustify::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

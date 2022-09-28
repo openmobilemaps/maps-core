@@ -11,6 +11,7 @@
 #import "MCCoord+Private.h"
 #import "MCFont+Private.h"
 #import "MCFormattedStringEntry+Private.h"
+#import "MCTextJustify+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -63,6 +64,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (MCTextJustify)getTextJustify {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getTextJustify();
+        return ::djinni::Enum<::TextJustify, MCTextJustify>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class TextInfoInterface::ObjcProxy final
@@ -98,6 +106,13 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getTextAnchor];
             return ::djinni::Enum<::Anchor, MCAnchor>::toCpp(objcpp_result_);
+        }
+    }
+    ::TextJustify getTextJustify() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getTextJustify];
+            return ::djinni::Enum<::TextJustify, MCTextJustify>::toCpp(objcpp_result_);
         }
     }
 };

@@ -15,6 +15,7 @@
 #include "Coord.h"
 #include "FontLoaderInterface.h"
 #include "Anchor.h"
+#include "TextJustify.h"
 #include "Vec2F.h"
 #include "Value.h"
 
@@ -24,8 +25,9 @@ public:
                const ::Coord &coordinate,
                const ::Font &font,
                Anchor textAnchor,
-               std::optional<double> angle)
-            : text(text), coordinate(coordinate), font(font), textAnchor(textAnchor), angle(angle) {};
+               std::optional<double> angle,
+               TextJustify textJustify)
+            : text(text), coordinate(coordinate), font(font), textAnchor(textAnchor), angle(angle), textJustify(textJustify) {};
 
     // Text Interface
     virtual ~SymbolInfo() {};
@@ -38,6 +40,8 @@ public:
 
     virtual Anchor getTextAnchor() { return textAnchor; };
 
+    virtual TextJustify getTextJustify() { return textJustify; };
+
     std::optional<double> angle;
 
 private:
@@ -45,4 +49,5 @@ private:
     ::Font font;
     ::Coord coordinate;
     ::Anchor textAnchor;
+    ::TextJustify textJustify;
 };

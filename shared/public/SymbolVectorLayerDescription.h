@@ -15,6 +15,7 @@
 #include "Font.h"
 #include "Vec2F.h"
 #include "Value.h"
+#include "TextJustify.h"
 #include "ColorUtil.h"
 
 
@@ -167,6 +168,11 @@ public:
         return textAnchor ? textAnchor->evaluateOr(context, defaultValue) : defaultValue;
     }
 
+    TextJustify getTextJustify(const EvaluationContext &context) {
+        static const TextJustify defaultValue = TextJustify::CENTER;
+        return textAnchor ? textAnchor->evaluateOr(context, defaultValue) : defaultValue;
+    }
+
     std::vector<Anchor> getTextVariableAnchor(const EvaluationContext &context) {
         static const std::vector<Anchor> defaultValue = {};
         return textVariableAnchor ? textVariableAnchor->evaluateOr(context, defaultValue) : defaultValue;
@@ -207,6 +213,7 @@ private:
     std::shared_ptr<Value> textRotate;
     std::shared_ptr<Value> textLineHeight;
     std::shared_ptr<Value> textLetterSpacing;
+    std::shared_ptr<Value> textJustify;
     std::shared_ptr<Value> symbolSortKey;
     std::shared_ptr<Value> symbolSpacing;
     std::shared_ptr<Value> iconImage;

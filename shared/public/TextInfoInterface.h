@@ -8,6 +8,7 @@
 #include <vector>
 
 enum class Anchor;
+enum class TextJustify;
 struct FormattedStringEntry;
 
 class TextInfoInterface {
@@ -21,4 +22,6 @@ public:
     virtual ::Font getFont() = 0;
 
     virtual Anchor getTextAnchor() = 0;
+
+    virtual TextJustify getTextJustify() = 0;
 };

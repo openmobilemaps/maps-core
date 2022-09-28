@@ -37,6 +37,7 @@ private:
         ::Coord getCoordinate() override;
         ::Font getFont() override;
         ::Anchor getTextAnchor() override;
+        ::TextJustify getTextJustify() override;
 
     private:
         friend ::djinni::JniInterface<::TextInfoInterface, ::djinni_generated::NativeTextInfoInterface>;
@@ -47,6 +48,7 @@ private:
     const jmethodID method_getCoordinate { ::djinni::jniGetMethodID(clazz.get(), "getCoordinate", "()Lio/openmobilemaps/mapscore/shared/map/coordinates/Coord;") };
     const jmethodID method_getFont { ::djinni::jniGetMethodID(clazz.get(), "getFont", "()Lio/openmobilemaps/mapscore/shared/map/loader/Font;") };
     const jmethodID method_getTextAnchor { ::djinni::jniGetMethodID(clazz.get(), "getTextAnchor", "()Lio/openmobilemaps/mapscore/shared/map/layers/text/Anchor;") };
+    const jmethodID method_getTextJustify { ::djinni::jniGetMethodID(clazz.get(), "getTextJustify", "()Lio/openmobilemaps/mapscore/shared/map/layers/text/TextJustify;") };
 };
 
 }  // namespace djinni_generated
