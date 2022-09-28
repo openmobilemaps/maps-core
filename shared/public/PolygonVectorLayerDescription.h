@@ -61,11 +61,12 @@ public:
     PolygonVectorLayerDescription(std::string identifier,
                                   std::string source,
                                   std::string sourceId,
-                               int minZoom,
-                               int maxZoom,
-                               std::shared_ptr<Value> filter,
-                               PolygonVectorStyle style):
-    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, filter),
+                                  int minZoom,
+                                  int maxZoom,
+                                  std::shared_ptr<Value> filter,
+                                  PolygonVectorStyle style,
+                                  std::optional<int32_t> renderPassIndex):
+    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, filter, renderPassIndex),
     style(style) {};
 
     virtual std::unordered_set<std::string> getUsedKeys() override {

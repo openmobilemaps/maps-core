@@ -94,7 +94,8 @@ public:
                                                                                      adaptScaleToScreen,
                                                                                      numDrawPreviousLayers,
                                                                                      maskTiles,
-                                                                                     zoomLevelScaleFactor);
+                                                                                     zoomLevelScaleFactor,
+                                                                                     std::nullopt);
 
             }
             if (val["type"].get<std::string>() == "vector" && val["url"].is_string()) {
@@ -119,10 +120,16 @@ public:
         Tiled2dMapVectorStyleParser parser;
 
         for (auto&[key, val]: json["layers"].items()) {
+            std::optional<int32_t> renderPassIndex;
+            if (val["metadata"].is_object() && val["metadata"]["render-pass-index"].is_number()) {
+                renderPassIndex = val["metadata"].value("render-pass-index", 0);
+            }
+
             if (val["type"] == "background" && !val["paint"]["background-color"].is_null()) {
                 auto layerDesc = std::make_shared<BackgroundVectorLayerDescription>(val["id"],
                                                                                     BackgroundVectorStyle(parser.parseValue(
-                                                                                            val["paint"]["background-color"])));
+                                                                                            val["paint"]["background-color"])),
+                                                                                    renderPassIndex);
                 layers.push_back(layerDesc);
 
             } else if (val["type"] == "raster" && rasterLayerMap.count(val["source"]) != 0) {
@@ -151,7 +158,8 @@ public:
                                                                                                           val["paint"]["line-blur"]),
                                                                                                   parser.parseValue(
                                                                                                           val["layout"]["line-cap"]),
-                                                                                                  dpFactor));
+                                                                                                  dpFactor),
+                                                                                  renderPassIndex);
                     layers.push_back(layerDesc);
 
                     // exclude landcover_pt for now
@@ -187,7 +195,8 @@ public:
                                                                                     val.value("minzoom", 0),
                                                                                     val.value("maxzoom", 24),
                                                                                     filter,
-                                                                                    style);
+                                                                                    style,
+                                                                                    renderPassIndex);
                     layers.push_back(layerDesc);
                 } else if (val["type"] == "fill" && val["paint"]["fill-pattern"].is_null()) {
 
@@ -201,7 +210,9 @@ public:
                                                                                      val["source-layer"],
                                                                                      val.value("minzoom", 0),
                                                                                      val.value("maxzoom", 24),
-                                                                                     filter, style);
+                                                                                     filter,
+                                                                                     style,
+                                                                                     renderPassIndex);
 
                     layers.push_back(layerDesc);
                 }
