@@ -18,7 +18,7 @@ public class RenderingContext: NSObject {
 
     public func encoder(pass: MCRenderPassConfig) -> MTLRenderCommandEncoder? {
         if let targetTexture = pass.renderTargetTexture as? RenderTargetTexture {
-            return targetTexture.encoder
+            return targetTexture.encoder!
         }
         return primaryEncoder
     }
@@ -122,6 +122,19 @@ extension RenderingContext: MCRenderingContextInterface {
     }
 
     public func setupDrawFrame() {
+
+    }
+
+    public func prepareOffscreenEncoders() {
+        for texture in renderTargetTextures {
+            texture.prepareOffscreenEncoder()
+        }
+    }
+
+    public func endOffscreenEncoders() {
+        for texture in renderTargetTextures {
+            texture.endOffscreenEncoder()
+        }
     }
 
     public func onSurfaceCreated() {

@@ -148,6 +148,8 @@ extension MCMapView: MTKViewDelegate {
 
         renderingContext.primaryEncoder = renderEncoder
 
+        renderingContext.prepareOffscreenEncoders()
+
         // Shared lib stuff
         if sizeChanged {
             mapInterface.setViewportSize(view.drawableSize.vec2)
@@ -156,6 +158,8 @@ extension MCMapView: MTKViewDelegate {
         }
 
         mapInterface.drawFrame()
+
+        renderingContext.endOffscreenEncoders()
 
         renderEncoder.endEncoding()
 

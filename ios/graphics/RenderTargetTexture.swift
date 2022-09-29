@@ -20,15 +20,39 @@ open class RenderTargetTexture: Identifiable, Equatable, MCRenderTargetTexture {
     public let id = UUID()
 
     var texture: (any MTLTexture)?
+    var stencilTexture: (any MTLTexture)?
     var holder: TextureHolder?
 
-    public init() {
+    let renderPipelineState: MTLRenderPipelineState
+    let renderPassDescriptor = MTLRenderPassDescriptor()
 
+    public init() {
+        let pipelineStateDescriptor = PipelineDescriptorFactory.pipelineDescriptor(pipeline: .alphaShader)
+        pipelineStateDescriptor.label = "Offscreen Render Pipeline"
+        pipelineStateDescriptor.sampleCount = 1
+        pipelineStateDescriptor.colorAttachments[0]?.pixelFormat = MetalContext.current.colorPixelFormat
+        renderPipelineState = try! MetalContext.current.device.makeRenderPipelineState(descriptor: pipelineStateDescriptor)
+//        renderPipelineState.colorAttachments[0]?
+
+
+
+        renderPassDescriptor.colorAttachments[0]?.loadAction = .clear
+        renderPassDescriptor.colorAttachments[0]?.clearColor = .init(red: 1, green: 1, blue: 1, alpha: 1)
+        renderPassDescriptor.colorAttachments[0]?.storeAction = .store
     }
 
-    public func prepareRender() {
-        let renderPassDescriptor = MTLRenderPassDescriptor()
-        renderPassDescriptor.colorAttachments[0]?.texture = texture
+    public func prepareOffscreenEncoder() {
+
+
+        if let commandBuffer = MetalContext.current.commandQueue.makeCommandBuffer(),
+           let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) {
+            renderEncoder.setRenderPipelineState(renderPipelineState)
+            encoder = renderEncoder
+        }
+    }
+
+    public func endOffscreenEncoder() {
+        encoder?.endEncoding()
     }
 
     private var lastSize: MCVec2I = MCVec2I(x: 0, y: 0)
@@ -41,15 +65,20 @@ open class RenderTargetTexture: Identifiable, Equatable, MCRenderTargetTexture {
 
         let texDescriptor = MTLTextureDescriptor()
         texDescriptor.textureType = .type2D
-        texDescriptor.pixelFormat = .rgba8Unorm
+        texDescriptor.pixelFormat = MetalContext.current.colorPixelFormat
         texDescriptor.usage = [.renderTarget, .shaderRead]
         texDescriptor.width = Int(newSize.x)
         texDescriptor.height = Int(newSize.y)
 
         texture = MetalContext.current.device.makeTexture(descriptor: texDescriptor)
+        renderPassDescriptor.colorAttachments[0]?.texture = texture
         if let texture {
             holder = TextureHolder(texture)
         }
+
+        texDescriptor.pixelFormat = .stencil8
+        stencilTexture = MetalContext.current.device.makeTexture(descriptor: texDescriptor)
+        renderPassDescriptor.stencilAttachment.texture = stencilTexture
     }
 
     public func textureHolder() -> MCTextureHolderInterface? {
