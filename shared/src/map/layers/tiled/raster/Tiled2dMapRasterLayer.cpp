@@ -312,12 +312,24 @@ void Tiled2dMapRasterLayer::setupTiles(
 
 }
 
+std::vector<std::shared_ptr<RenderPassInterface>> Tiled2dMapRasterLayer::combineRenderPasses() {
+    return generateRenderPasses(alpha, curT, nullptr);
+}
+
 void Tiled2dMapRasterLayer::generateRenderPasses() {
+    auto newRenderPasses = combineRenderPasses();
+    {
+        std::lock_guard<std::recursive_mutex> overlayLock(renderPassMutex);
+        renderPasses = newRenderPasses;
+    }
+}
+
+std::vector<std::shared_ptr<RenderPassInterface>> Tiled2dMapRasterLayer::generateRenderPasses(double alpha, int t, std::shared_ptr<RenderTargetTexture> renderTargetTexture) {
 
     auto mapInterface = this->mapInterface;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!renderingContext)
-        return;
+        return {};
 
 
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
@@ -331,6 +343,7 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
             }
             auto const &quadObject = entry.second->getQuadObject();
             auto const renderObject = std::make_shared<RenderObject>(quadObject->asGraphicsObject());
+            entry.second->setAlpha(alpha);
 
 
             if (layerConfig->getZoomInfo().maskTile) {
@@ -338,13 +351,13 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
                 mask->getPolygonObject()->asGraphicsObject()->setup(renderingContext);
 
                 std::shared_ptr<RenderPass> renderPass =
-                std::make_shared<RenderPass>(RenderPassConfig(0),
+                std::make_shared<RenderPass>(RenderPassConfig(0, renderTargetTexture),
                                              std::vector<std::shared_ptr<::RenderObjectInterface>>{renderObject},
                                              mask->getPolygonObject()->asMaskingObject());
                 renderPass->setScissoringRect(scissorRect);
                 newRenderPasses.push_back(renderPass);
             }else{
-                std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(0),
+                std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(0, renderTargetTexture),
                                                                                       std::vector<std::shared_ptr<::RenderObjectInterface>>{
                     renderObject});
                 renderPass->setScissoringRect(scissorRect);
@@ -355,7 +368,7 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
             //TODO: general mask would no longer work now, we would have to merge the tile-mask with the layer-mask
             if (mask) {
                 std::shared_ptr<RenderPass> renderPass =
-                std::make_shared<RenderPass>(RenderPassConfig(0),
+                std::make_shared<RenderPass>(RenderPassConfig(0, renderTargetTexture),
                                              std::vector<std::shared_ptr<::RenderObjectInterface>>{renderObject}, mask);
                 renderPass->setScissoringRect(scissorRect);
                 newRenderPasses.push_back(renderPass);
@@ -364,10 +377,7 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
 
     }
 
-    {
-        std::lock_guard<std::recursive_mutex> overlayLock(renderPassMutex);
-        renderPasses = newRenderPasses;
-    }
+    return newRenderPasses;
 
 }
 

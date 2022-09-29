@@ -10,6 +10,8 @@
 
 #include "Tiled2dMapRasterLayerInterface.h"
 #include "Tiled2dMapRasterLayer.h"
+#include "InterpolatedTiled2dMapRasterLayer.h"
+
 
 std::shared_ptr<Tiled2dMapRasterLayerInterface>
 Tiled2dMapRasterLayerInterface::create(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
@@ -29,4 +31,24 @@ Tiled2dMapRasterLayerInterface::createWithShader(const std::shared_ptr<::Tiled2d
                                                  const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
                                                const std::shared_ptr<::ShaderProgramInterface> &shader) {
     return std::make_shared<Tiled2dMapRasterLayer>(layerConfig, tileLoaders, shader);
+}
+
+std::shared_ptr<Tiled2dMapRasterLayerInterface>
+Tiled2dMapRasterLayerInterface::createInterpolated(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
+                                       const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders) {
+    return std::make_shared<InterpolatedTiled2dMapRasterLayer>(layerConfig, tileLoaders);
+}
+
+std::shared_ptr<Tiled2dMapRasterLayerInterface>
+Tiled2dMapRasterLayerInterface::createWithMaskInterpolated(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
+                                               const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
+                                               const std::shared_ptr<::MaskingObjectInterface> &mask) {
+    return std::make_shared<InterpolatedTiled2dMapRasterLayer>(layerConfig, tileLoaders, mask);
+}
+
+std::shared_ptr<Tiled2dMapRasterLayerInterface>
+Tiled2dMapRasterLayerInterface::createWithShaderInterpolated(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
+                                                 const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
+                                                 const std::shared_ptr<::ShaderProgramInterface> &shader) {
+    return std::make_shared<InterpolatedTiled2dMapRasterLayer>(layerConfig, tileLoaders, shader);
 }

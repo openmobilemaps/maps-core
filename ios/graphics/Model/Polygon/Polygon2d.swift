@@ -29,7 +29,7 @@ class Polygon2d: BaseGraphicsObject {
 
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
-                         renderPass _: MCRenderPassConfig,
+                         renderPass: MCRenderPassConfig,
                          mvpMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
@@ -51,7 +51,7 @@ class Polygon2d: BaseGraphicsObject {
         }
 
         shader.setupProgram(context)
-        shader.preRender(context)
+        shader.preRender(context, pass: renderPass)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {
@@ -86,12 +86,12 @@ class Polygon2d: BaseGraphicsObject {
 
 extension Polygon2d: MCMaskingObjectInterface {
     func render(asMask context: MCRenderingContextInterface?,
-                renderPass _: MCRenderPassConfig,
+                renderPass: MCRenderPassConfig,
                 mvpMatrix: Int64,
                 screenPixelAsRealMeterFactor _: Double) {
         guard isReady(),
               let context = context as? RenderingContext,
-              let encoder = context.encoder else { return }
+              let encoder = context.encoder(pass: renderPass) else { return }
 
         guard let verticesBuffer = verticesBuffer,
               let indicesBuffer = indicesBuffer
@@ -106,7 +106,7 @@ extension Polygon2d: MCMaskingObjectInterface {
 
         // stencil prepare pass
         shader.setupProgram(context)
-        shader.preRender(context)
+        shader.preRender(context, pass: renderPass)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {

@@ -48,7 +48,7 @@ class PolygonGroup2d: BaseGraphicsObject {
 
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
-                         renderPass _: MCRenderPassConfig,
+                         renderPass: MCRenderPassConfig,
                          mvpMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
@@ -66,7 +66,7 @@ class PolygonGroup2d: BaseGraphicsObject {
         }
 
         shader.setupProgram(context)
-        shader.preRender(context)
+        shader.preRender(context, pass: renderPass)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {

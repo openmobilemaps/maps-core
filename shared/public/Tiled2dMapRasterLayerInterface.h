@@ -28,6 +28,15 @@ public:
     /** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
     static std::shared_ptr<Tiled2dMapRasterLayerInterface> create(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::vector<std::shared_ptr<::LoaderInterface>> & loaders);
 
+    /** interpolated version, the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
+    static std::shared_ptr<Tiled2dMapRasterLayerInterface> createWithMaskInterpolated(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::vector<std::shared_ptr<::LoaderInterface>> & loaders, const std::shared_ptr<::MaskingObjectInterface> & mask);
+
+    /** interpolated version, the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
+    static std::shared_ptr<Tiled2dMapRasterLayerInterface> createWithShaderInterpolated(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::vector<std::shared_ptr<::LoaderInterface>> & loaders, const std::shared_ptr<::ShaderProgramInterface> & shader);
+
+    /** interpolated version, the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
+    static std::shared_ptr<Tiled2dMapRasterLayerInterface> createInterpolated(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::vector<std::shared_ptr<::LoaderInterface>> & loaders);
+
     virtual std::shared_ptr<::LayerInterface> asLayerInterface() = 0;
 
     virtual void setCallbackHandler(const std::shared_ptr<Tiled2dMapRasterLayerCallbackInterface> & handler) = 0;

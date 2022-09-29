@@ -64,7 +64,7 @@ class LineGroup2d: BaseGraphicsObject {
 
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
-                         renderPass _: MCRenderPassConfig,
+                         renderPass: MCRenderPassConfig,
                          mvpMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor: Double) {
@@ -91,7 +91,7 @@ class LineGroup2d: BaseGraphicsObject {
         shader.screenPixelAsRealMeterFactor = Float(screenPixelAsRealMeterFactor)
 
         shader.setupProgram(context)
-        shader.preRender(context)
+        shader.preRender(context, pass: renderPass)
 
         encoder.setVertexBuffer(lineVerticesBuffer, offset: 0, index: 0)
         let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix))!
@@ -104,7 +104,7 @@ class LineGroup2d: BaseGraphicsObject {
                                       indexBufferOffset: 0)
 
         if !isMasked {
-            context.clearStencilBuffer()
+            context.clearStencilBuffer(renderPass)
         }
 
         encoder.popDebugGroup()

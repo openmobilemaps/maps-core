@@ -52,6 +52,12 @@ public:
     tilePolygon(std::move(tilePolygon)) {};
 };
 
+enum TileLoadingDecision {
+    ignore = 0,
+    loadNeeded,
+    preload
+};
+
 
 // T is the Object used for loading
 // L is the Loading type
@@ -148,6 +154,8 @@ private:
     void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid);
 
     void updateTileMasks();
+
+    TileLoadingDecision tileLoadingDecision(int tileZ, int curZ, int tileT, int curT);
 
     std::atomic_flag updateFlag = ATOMIC_FLAG_INIT;
     std::atomic_int pendingUpdates = 0;

@@ -1,0 +1,65 @@
+# Helper methods used by various different tests.
+# (Second line of multi-line documentation.
+#   Indented third line of multi-line documentation.)
+test_helpers = interface +c {
+    # Method with documentation
+    static get_set_record(): set_record;
+    # Method with long documentation
+    # (Second line of multi-line documentation.
+    #   Indented third line of multi-line documentation.)
+    static check_set_record(rec: set_record): bool;
+
+    static get_primitive_list(): primitive_list;
+    static check_primitive_list(pl: primitive_list): bool;
+
+    static get_nested_collection(): nested_collection;
+    static check_nested_collection(nc: nested_collection): bool;
+
+    static get_map(): map<string, i64>;
+    static check_map(m: map<string, i64>): bool;
+    static get_empty_map(): map<string, i64>;
+    static check_empty_map(m: map<string, i64>): bool;
+    static get_map_list_record(): map_list_record;
+    static check_map_list_record(m: map_list_record): bool;
+
+    static check_client_interface_ascii(i: client_interface);
+    static check_client_interface_nonascii(i: client_interface);
+    static check_client_interface_args(i: client_interface);
+
+    static check_enum_map(m: map<color, string>);
+    static check_enum(c: color);
+
+    static token_id(t: user_token): user_token;
+    static create_cpp_token(): user_token;
+    static check_cpp_token(t: user_token);
+    static cpp_token_id(t: user_token): i64;
+    static check_token_type(t: user_token, type: string);
+
+    static return_none(): optional<i32>;
+
+    # Ensures that we generate integer translation code
+    static assorted_primitives_id(i: assorted_primitives): assorted_primitives;
+
+    static id_binary(b: binary): binary;
+}
+
+# Empty record
+# (Second line of multi-line documentation.
+#   Indented third line of multi-line documentation.)
+empty_record = record {
+    
+}
+
+# Test for conflict of method name with an interface name.
+# See the comments about scopeSymbols in CppMarshal.scala for more info.
+Conflict = interface +c {
+}
+conflict_user = interface +c {
+    Conflict(): Conflict;
+    conflict_arg(cs: set<Conflict>): bool;
+}
+
+# we need to test optional interface
+# this one will be used
+sample_interface = interface +c {
+}

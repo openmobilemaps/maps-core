@@ -232,7 +232,7 @@ std::vector<std::shared_ptr<::RenderPassInterface>> IconLayer::buildRenderPasses
         std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
         for (const auto &passEntry : currentRenderPassObjectMap) {
             std::shared_ptr<RenderPass> renderPass =
-                std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second, mask);
+                std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, 0), passEntry.second, mask);
             renderPasses.push_back(renderPass);
         }
         return renderPasses;

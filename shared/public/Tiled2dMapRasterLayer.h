@@ -59,7 +59,9 @@ public:
             const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToSetup,
             const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToClean);
 
-    virtual void generateRenderPasses();
+    virtual std::vector<std::shared_ptr<RenderPassInterface>> combineRenderPasses();
+    std::vector<std::shared_ptr<RenderPassInterface>> generateRenderPasses(double alpha, int t, std::shared_ptr<RenderTargetTexture>);
+    void generateRenderPasses();
 
     virtual void setCallbackHandler(const std::shared_ptr<Tiled2dMapRasterLayerCallbackInterface> &handler) override;
 
@@ -92,6 +94,8 @@ public:
     bool shouldLoadTile(const Tiled2dMapTileInfo &tileInfo);
 
     virtual std::shared_ptr<::Tiled2dMapLayerConfig> getConfig() override;
+
+
 
 private:
     virtual void updateMaskObjects(const std::vector<const std::shared_ptr<MaskingObjectInterface>> &newMaskObjects,

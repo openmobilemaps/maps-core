@@ -31,7 +31,7 @@ void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterf
     auto color = description->style.getColor(EvaluationContext(std::nullopt, FeatureContext()));
     shader->setColor(color.r, color.g, color.b, color.a);
     auto renderObject = std::make_shared<RenderObject>(object->asGraphicsObject(), true);
-    auto renderPass = std::make_shared<RenderPass>(RenderPassConfig(0), std::vector<std::shared_ptr<::RenderObjectInterface>> { renderObject } );
+    auto renderPass = std::make_shared<RenderPass>(RenderPassConfig(0, 0), std::vector<std::shared_ptr<::RenderObjectInterface>> { renderObject } );
     renderPasses = {
         renderPass
     };

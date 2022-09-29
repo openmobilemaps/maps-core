@@ -7,6 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
+#import "MCRenderPassConfig+Private.h"
 #import "MCRenderingContextInterface+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -45,9 +46,11 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)preRender:(nullable id<MCRenderingContextInterface>)context {
+- (void)preRender:(nullable id<MCRenderingContextInterface>)context
+             pass:(nonnull MCRenderPassConfig *)pass {
     try {
-        _cppRefHandle.get()->preRender(::djinni_generated::RenderingContextInterface::toCpp(context));
+        _cppRefHandle.get()->preRender(::djinni_generated::RenderingContextInterface::toCpp(context),
+                                       ::djinni_generated::RenderPassConfig::toCpp(pass));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -73,10 +76,11 @@ public:
             [djinni_private_get_proxied_objc_object() setupProgram:(::djinni_generated::RenderingContextInterface::fromCpp(c_context))];
         }
     }
-    void preRender(const std::shared_ptr<::RenderingContextInterface> & c_context) override
+    void preRender(const std::shared_ptr<::RenderingContextInterface> & c_context, const ::RenderPassConfig & c_pass) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() preRender:(::djinni_generated::RenderingContextInterface::fromCpp(c_context))];
+            [djinni_private_get_proxied_objc_object() preRender:(::djinni_generated::RenderingContextInterface::fromCpp(c_context))
+                                                           pass:(::djinni_generated::RenderPassConfig::fromCpp(c_pass))];
         }
     }
 };

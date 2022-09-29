@@ -36,10 +36,10 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
             double factor = camera->getScalingFactor();
             const auto &renderObjects = pass->getRenderObjects();
 
-            renderingContext->applyScissorRect(pass->getScissoringRect());
+            renderingContext->applyScissorRect(pass->getScissoringRect(), pass->getRenderPassConfig());
 
             if (hasMask) {
-                renderingContext->preRenderStencilMask();
+                renderingContext->preRenderStencilMask(pass->getRenderPassConfig());
                 maskObject->renderAsMask(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, factor);
                 //LogDebug << "Has mask and mask is: " <<= (maskObject->asGraphicsObject()->isReady() ? "ready" : "not ready");
             }
@@ -58,7 +58,7 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
             }
 
             if (hasMask) {
-                renderingContext->postRenderStencilMask();
+                renderingContext->postRenderStencilMask(pass->getRenderPassConfig());
             }
         }
     }

@@ -15,7 +15,7 @@ import os
 
 open class MCMapView: MTKView {
     public let mapInterface: MCMapInterface
-    private let renderingContext: RenderingContext
+    public let renderingContext: RenderingContext
 
     private var sizeChanged = false
     private var backgroundDisable = false
@@ -146,7 +146,7 @@ extension MCMapView: MTKViewDelegate {
             return
         }
 
-        renderingContext.encoder = renderEncoder
+        renderingContext.primaryEncoder = renderEncoder
 
         // Shared lib stuff
         if sizeChanged {

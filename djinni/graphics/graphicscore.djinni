@@ -1,0 +1,77 @@
+@extern "../yaml/graphics_object_interface.yaml"
+@extern "../yaml/masking_object_interface.yaml"
+@extern "../yaml/graphics_object_factory_interface.yaml"
+@extern "../yaml/shader_factory_interface.yaml"
+@extern "../yaml/vec_3_d.yaml"
+@extern "../yaml/vec_2_i.yaml"
+@extern "../yaml/rect_i.yaml"
+@extern "../yaml/color.yaml"
+@extern "../yaml/render_target_texture.yaml"
+
+scene_interface = interface +c {
+    static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface, rendering_context: rendering_context_interface) : scene_interface;
+    static createWithOpenGl() : scene_interface;
+    set_callback_handler(callback_interface: scene_callback_interface);
+    set_camera(camera: camera_interface);
+    get_camera() : camera_interface;
+    get_renderer() : renderer_interface;
+    get_rendering_context() : rendering_context_interface;
+    get_graphics_factory(): graphics_object_factory_interface;
+    get_shader_factory(): shader_factory_interface;
+    draw_frame();
+    clear();
+    invalidate();
+}
+
+scene_callback_interface = interface +c +j +o  {
+    invalidate();
+}
+
+rendering_context_interface = interface +c +j +o {
+    # Ensure calling on graphics thread
+    on_surface_created();
+    # Ensure calling on graphics thread
+    set_viewport_size(size: vec_2_i);
+    get_viewport_size() : vec_2_i;
+    set_background_color(color: color);
+    setupDrawFrame();
+    pre_render_stencil_mask(pass: render_pass_config);
+    post_render_stencil_mask(pass: render_pass_config);
+
+    # optional rectangle, remove scissoring when not set
+    apply_scissor_rect(scissor_rect: optional<rect_i>, pass: render_pass_config);
+
+    create_render_target_texture(): render_target_texture;
+}
+
+render_object_interface = interface +c +j +o {
+    get_graphics_object() : graphics_object_interface;
+    has_custom_model_matrix() : bool;
+    is_screen_space_coords() : bool;
+    get_custom_model_matrix() : list<f32>;
+}
+
+render_pass_interface = interface +c +j +o {
+    get_render_objects() : list<render_object_interface>;
+    add_render_object(render_object: render_object_interface);
+    get_render_pass_config() : render_pass_config;
+    get_masking_object(): optional<masking_object_interface>;
+    get_scissoring_rect() : optional<rect_i>;
+}
+
+render_pass_config = record {
+    render_pass_index: i32;
+    render_target_texture: optional<render_target_texture>;
+}
+
+renderer_interface = interface +c +j +o {
+    add_to_render_queue(render_pass: render_pass_interface);
+    # Ensure calling on graphics thread
+    draw_frame(rendering_context: rendering_context_interface, camera: camera_interface);
+}
+
+camera_interface = interface +c +j +o {
+    get_vp_matrix() : list<f32>;
+    get_scaling_factor(): f64;
+    viewport_size_changed();
+}

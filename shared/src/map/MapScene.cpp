@@ -325,3 +325,8 @@ void MapScene::forceReload() {
         layer->forceReload();
     }
 }
+
+std::shared_ptr<RenderTargetTexture> MapScene::createRenderTargetTexture() {
+    auto context = getRenderingContext();
+    return context->createRenderTargetTexture();
+}

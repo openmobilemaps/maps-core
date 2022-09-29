@@ -58,7 +58,7 @@ extension BaseGraphicsObject: MCGraphicsObjectInterface {
     public func render(_ context: MCRenderingContextInterface?, renderPass: MCRenderPassConfig, mvpMatrix: Int64, isMasked: Bool, screenPixelAsRealMeterFactor: Double) {
         guard isReady(),
               let context = context as? RenderingContext,
-              let encoder = context.encoder
+              let encoder = context.encoder(pass: renderPass)
         else { return }
         render(encoder: encoder,
                context: context,
