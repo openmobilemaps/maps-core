@@ -194,7 +194,7 @@ open class MCTextureLoader: MCLoaderInterface {
 
         ctx.cgContext.setStrokeColor(UIColor.black.cgColor)
         ctx.cgContext.setLineWidth(5.0)
-        ctx.cgContext.stroke(.init(origin: .init(), size: size))
+        ctx.cgContext.stroke(.init(origin: .init(), size: size).inset(by: .init(top: 5, left: 5, bottom: 5, right: 5)))
 
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.alignment = .center
@@ -204,7 +204,7 @@ open class MCTextureLoader: MCLoaderInterface {
 
         let byteCountString = ByteCountFormatter().string(fromByteCount: Int64(byteCount))
         let string = url + "\nLoaded at: " + ISO8601DateFormatter().string(from: .init()) + "\nSize: " + byteCountString
-        string.draw(with: .init(origin: .init(x: 0, y: 25), size: size), options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
+        string.draw(with: .init(origin: .init(x: 0, y: 25), size: size).inset(by: .init(top: 5, left: 5, bottom: 5, right: 5)), options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
     }
 }
 
