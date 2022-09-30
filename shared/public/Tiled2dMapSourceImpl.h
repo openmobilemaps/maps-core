@@ -736,7 +736,11 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
 
                 gpc_polygon_clip(GPC_INT, &polygonDiff, &currentViewBoundsPolygon, &resultingMask);
 
-                tileWrapper.masks = gpc_get_polygon_coord(&resultingMask, tileInfo.bounds.topLeft.systemIdentifier);
+                if (resultingMask.contour == NULL) {
+                    tileWrapper.isVisible = false;
+                } else {
+                    tileWrapper.masks = gpc_get_polygon_coord(&polygonDiff, tileInfo.bounds.topLeft.systemIdentifier);
+                }
 
                 gpc_free_polygon(&resultingMask);
             }
