@@ -677,6 +677,10 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
 
     std::lock_guard<std::recursive_mutex> lock(currentTilesMutex);
 
+    if (currentTiles.empty()) {
+        return;
+    }
+
     std::vector<Tiled2dMapTileInfo> tilesToRemove;
 
     int currentZoomLevelIdentifier = 0;
@@ -689,6 +693,18 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
     gpc_polygon currentTileMask;
     currentTileMask.num_contours = 0;
     bool isFirst = true;
+
+    gpc_polygon currentViewBoundsPolygon;
+    gpc_set_polygon({PolygonCoord({
+        currentViewBounds.topLeft,
+        Coord(currentViewBounds.topLeft.systemIdentifier, currentViewBounds.bottomRight.x,
+              currentViewBounds.topLeft.y, 0),
+        currentViewBounds.bottomRight,
+        Coord(currentViewBounds.topLeft.systemIdentifier, currentViewBounds.topLeft.x,
+              currentViewBounds.bottomRight.y, 0),
+        currentViewBounds.topLeft
+    }, {})}, &currentViewBoundsPolygon);
+
 
     for (auto it = currentTiles.rbegin(); it != currentTiles.rend(); it++ ){
         auto &[tileInfo, tileWrapper] = *it;
@@ -716,7 +732,13 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
             if (polygonDiff.contour == NULL) {
                 tileWrapper.isVisible = false;
             } else if (zoomInfo.maskTile) {
-                tileWrapper.masks = gpc_get_polygon_coord(&polygonDiff, tileInfo.bounds.topLeft.systemIdentifier);
+                gpc_polygon resultingMask;
+
+                gpc_polygon_clip(GPC_INT, &polygonDiff, &currentViewBoundsPolygon, &resultingMask);
+
+                tileWrapper.masks = gpc_get_polygon_coord(&resultingMask, tileInfo.bounds.topLeft.systemIdentifier);
+
+                gpc_free_polygon(&resultingMask);
             }
 
             if (freePolygonDiff) {
