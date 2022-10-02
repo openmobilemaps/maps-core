@@ -17,29 +17,16 @@ import UIKit
 public class RenderingContext: NSObject {
 
     public func encoder(pass: MCRenderPassConfig) -> MTLRenderCommandEncoder? {
-        if let targetTexture = pass.renderTargetTexture as? RenderTargetTexture {
-            return targetTexture.encoder!
-        }
-        return primaryEncoder
+        return currentEncoder!
     }
 
-    public weak var primaryEncoder: MTLRenderCommandEncoder?
+    public var currentCommandBuffer: MTLCommandBuffer?
+    public var currentEncoder: MTLRenderCommandEncoder?
     public weak var sceneView: MCMapView?
 
-    private var renderTargetTextures: [RenderTargetTexture] = []
+    public var viewRenderPassDescriptor: MTLRenderPassDescriptor?
 
-    public func addRenderTarget(texture: RenderTargetTexture) {
-        renderTargetTextures.append(texture)
-        texture.context = self
-    }
-
-    func getIndex(of texture: RenderTargetTexture) -> Int32? {
-        if let idx = renderTargetTextures.firstIndex(of: texture) {
-            return Int32(idx) + 1
-        }
-        return nil
-    }
-
+    private var renderTargetTextures = NSHashTable<RenderTargetTexture>.weakObjects()
 
     public lazy var mask: MTLDepthStencilState? = {
         let descriptor = MTLStencilDescriptor()
@@ -109,7 +96,7 @@ extension RenderingContext: MCRenderingContextInterface {
     public func createRenderTargetTexture() -> MCRenderTargetTexture? {
         let texture = RenderTargetTexture()
         texture.setViewportSize(viewportSize)
-        renderTargetTextures.append(texture)
+        renderTargetTextures.add(texture)
         texture.context = self
         return texture
     }
@@ -121,20 +108,20 @@ extension RenderingContext: MCRenderingContextInterface {
         clearStencilBuffer(renderPassConfig)
     }
 
-    public func setupDrawFrame() {
-
-    }
-
-    public func prepareOffscreenEncoders() {
-        for texture in renderTargetTextures {
-            texture.prepareOffscreenEncoder()
+    public func setupDrawFrame(_ renderTargetTexture: MCRenderTargetTexture?) {
+        if let texture = renderTargetTexture as? RenderTargetTexture,
+        let buffer = currentCommandBuffer {
+            currentEncoder = texture.prepareOffscreenEncoder(buffer)
+        }
+        else if let buffer = currentCommandBuffer,
+                    let descriptor = viewRenderPassDescriptor  {
+            currentEncoder = buffer.makeRenderCommandEncoder(descriptor: descriptor)
         }
     }
 
-    public func endOffscreenEncoders() {
-        for texture in renderTargetTextures {
-            texture.endOffscreenEncoder()
-        }
+    public func endDrawFrame(_ renderTargetTexture: MCRenderTargetTexture?) {
+        currentEncoder?.endEncoding()
+        currentEncoder = nil
     }
 
     public func onSurfaceCreated() {
@@ -142,7 +129,7 @@ extension RenderingContext: MCRenderingContextInterface {
 
     public func setViewportSize(_ newSize: MCVec2I) {
         viewportSize = newSize
-        for texture in renderTargetTextures {
+        for texture in renderTargetTextures.allObjects {
             texture.setViewportSize(newSize)
         }
     }

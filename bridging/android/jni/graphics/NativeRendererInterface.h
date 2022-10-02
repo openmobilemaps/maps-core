@@ -34,7 +34,7 @@ private:
         ~JavaProxy();
 
         void addToRenderQueue(const std::shared_ptr<::RenderPassInterface> & renderPass) override;
-        void drawFrame(const std::shared_ptr<::RenderingContextInterface> & renderingContext, const std::shared_ptr<::CameraInterface> & camera) override;
+        void drawFrame(const std::shared_ptr<::RenderingContextInterface> & renderingContext, const std::shared_ptr<::CameraInterface> & camera, const std::vector<std::shared_ptr<::RenderTargetTexture>> & additionalTargets) override;
 
     private:
         friend ::djinni::JniInterface<::RendererInterface, ::djinni_generated::NativeRendererInterface>;
@@ -42,7 +42,7 @@ private:
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/RendererInterface") };
     const jmethodID method_addToRenderQueue { ::djinni::jniGetMethodID(clazz.get(), "addToRenderQueue", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderPassInterface;)V") };
-    const jmethodID method_drawFrame { ::djinni::jniGetMethodID(clazz.get(), "drawFrame", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface;Lio/openmobilemaps/mapscore/shared/graphics/CameraInterface;)V") };
+    const jmethodID method_drawFrame { ::djinni::jniGetMethodID(clazz.get(), "drawFrame", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface;Lio/openmobilemaps/mapscore/shared/graphics/CameraInterface;Ljava/util/ArrayList;)V") };
 };
 
 }  // namespace djinni_generated

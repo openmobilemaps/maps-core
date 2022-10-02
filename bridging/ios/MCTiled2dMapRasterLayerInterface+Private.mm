@@ -6,6 +6,7 @@
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
+#import "MCAlphaShaderInterface+Private.h"
 #import "MCLayerInterface+Private.h"
 #import "MCLoaderInterface+Private.h"
 #import "MCMaskingObjectInterface+Private.h"
@@ -80,11 +81,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 
 + (nullable MCTiled2dMapRasterLayerInterface *)createWithShaderInterpolated:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
                                                                     loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
-                                                                     shader:(nullable id<MCShaderProgramInterface>)shader {
+                                                              combineShader:(nullable id<MCAlphaShaderInterface>)combineShader
+                                                                finalShader:(nullable id<MCShaderProgramInterface>)finalShader {
     try {
         auto objcpp_result_ = ::Tiled2dMapRasterLayerInterface::createWithShaderInterpolated(::djinni_generated::Tiled2dMapLayerConfig::toCpp(layerConfig),
                                                                                              ::djinni::List<::djinni_generated::LoaderInterface>::toCpp(loaders),
-                                                                                             ::djinni_generated::ShaderProgramInterface::toCpp(shader));
+                                                                                             ::djinni_generated::AlphaShaderInterface::toCpp(combineShader),
+                                                                                             ::djinni_generated::ShaderProgramInterface::toCpp(finalShader));
         return ::djinni_generated::Tiled2dMapRasterLayerInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -163,9 +166,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setT:(int32_t)t {
+- (void)setT:(double)t {
     try {
-        _cppRefHandle.get()->setT(::djinni::I32::toCpp(t));
+        _cppRefHandle.get()->setT(::djinni::F64::toCpp(t));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

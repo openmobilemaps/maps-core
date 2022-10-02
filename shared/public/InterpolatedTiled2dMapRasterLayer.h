@@ -38,8 +38,9 @@ public:
                           const std::shared_ptr<::MaskingObjectInterface> &mask);
 
     InterpolatedTiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
-                          const std::vector<std::shared_ptr<::LoaderInterface>> &tileLoader,
-                          const std::shared_ptr<::ShaderProgramInterface> &shader);
+                                      const std::vector<std::shared_ptr<::LoaderInterface>> &tileLoader,
+                                      const std::shared_ptr<::AlphaShaderInterface> &combineShader,
+                                      const std::shared_ptr<::ShaderProgramInterface> &finalShader);
 
     std::vector<std::shared_ptr<RenderPassInterface>> combineRenderPasses() override;
 
@@ -49,6 +50,10 @@ public:
 
     virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom) override;
 
+    virtual std::vector<std::shared_ptr<RenderTargetTexture>> additionalTargets() override;
+
+    virtual void setT(double t) override;
+
 private:
 
 
@@ -57,5 +62,9 @@ protected:
     std::shared_ptr<RenderTargetTexture> renderTargetTexture;
 
     std::shared_ptr<Textured2dLayerObject> mergedTilesLayerObject;
+
+    std::shared_ptr<::ShaderProgramInterface> mergedShader;
+
+    float tFraction = 0;
 
 };

@@ -139,16 +139,13 @@ extension MCMapView: MTKViewDelegate {
 
         framesToRender -= 1
 
-        guard let renderPassDescriptor = view.currentRenderPassDescriptor,
-              let commandBuffer = MetalContext.current.commandQueue.makeCommandBuffer(),
-              let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)
+        guard let commandBuffer = MetalContext.current.commandQueue.makeCommandBuffer()
         else {
             return
         }
 
-        renderingContext.primaryEncoder = renderEncoder
-
-        renderingContext.prepareOffscreenEncoders()
+        renderingContext.currentCommandBuffer = commandBuffer
+        renderingContext.viewRenderPassDescriptor = view.currentRenderPassDescriptor
 
         // Shared lib stuff
         if sizeChanged {
@@ -159,9 +156,6 @@ extension MCMapView: MTKViewDelegate {
 
         mapInterface.drawFrame()
 
-        renderingContext.endOffscreenEncoders()
-
-        renderEncoder.endEncoding()
 
         guard let drawable = view.currentDrawable else {
             return

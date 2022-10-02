@@ -5,9 +5,11 @@
 #import "MCRendererInterface.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
+#import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCCameraInterface+Private.h"
 #import "MCRenderPassInterface+Private.h"
+#import "MCRenderTargetTexture+Private.h"
 #import "MCRenderingContextInterface+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -40,10 +42,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 }
 
 - (void)drawFrame:(nullable id<MCRenderingContextInterface>)renderingContext
-           camera:(nullable id<MCCameraInterface>)camera {
+           camera:(nullable id<MCCameraInterface>)camera
+additionalTargets:(nonnull NSArray<id<MCRenderTargetTexture>> *)additionalTargets {
     try {
         _cppRefHandle.get()->drawFrame(::djinni_generated::RenderingContextInterface::toCpp(renderingContext),
-                                       ::djinni_generated::CameraInterface::toCpp(camera));
+                                       ::djinni_generated::CameraInterface::toCpp(camera),
+                                       ::djinni::List<::djinni_generated::RenderTargetTexture>::toCpp(additionalTargets));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -62,11 +66,12 @@ public:
             [djinni_private_get_proxied_objc_object() addToRenderQueue:(::djinni_generated::RenderPassInterface::fromCpp(c_renderPass))];
         }
     }
-    void drawFrame(const std::shared_ptr<::RenderingContextInterface> & c_renderingContext, const std::shared_ptr<::CameraInterface> & c_camera) override
+    void drawFrame(const std::shared_ptr<::RenderingContextInterface> & c_renderingContext, const std::shared_ptr<::CameraInterface> & c_camera, const std::vector<std::shared_ptr<::RenderTargetTexture>> & c_additionalTargets) override
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() drawFrame:(::djinni_generated::RenderingContextInterface::fromCpp(c_renderingContext))
-                                                         camera:(::djinni_generated::CameraInterface::fromCpp(c_camera))];
+                                                         camera:(::djinni_generated::CameraInterface::fromCpp(c_camera))
+                                              additionalTargets:(::djinni::List<::djinni_generated::RenderTargetTexture>::fromCpp(c_additionalTargets))];
         }
     }
 };

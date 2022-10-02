@@ -69,7 +69,7 @@ class Tiled2dMapLayer : public SimpleLayerInterface,
 
     virtual LayerReadyState isReadyToRenderOffscreen() override;
 
-    virtual void setT(int32_t t);
+    virtual void setT(double t);
 
 protected:
     std::shared_ptr<MapInterface> mapInterface;

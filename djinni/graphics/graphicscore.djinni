@@ -18,7 +18,7 @@ scene_interface = interface +c {
     get_rendering_context() : rendering_context_interface;
     get_graphics_factory(): graphics_object_factory_interface;
     get_shader_factory(): shader_factory_interface;
-    draw_frame();
+    draw_frame(additional_targets: list<render_target_texture>);
     clear();
     invalidate();
 }
@@ -34,7 +34,8 @@ rendering_context_interface = interface +c +j +o {
     set_viewport_size(size: vec_2_i);
     get_viewport_size() : vec_2_i;
     set_background_color(color: color);
-    setupDrawFrame();
+    setup_draw_frame(render_target_texture: optional<render_target_texture>);
+    end_draw_frame(render_target_texture: optional<render_target_texture>);
     pre_render_stencil_mask(pass: render_pass_config);
     post_render_stencil_mask(pass: render_pass_config);
 
@@ -67,7 +68,7 @@ render_pass_config = record {
 renderer_interface = interface +c +j +o {
     add_to_render_queue(render_pass: render_pass_interface);
     # Ensure calling on graphics thread
-    draw_frame(rendering_context: rendering_context_interface, camera: camera_interface);
+    draw_frame(rendering_context: rendering_context_interface, camera: camera_interface, additional_targets: list<render_target_texture>);
 }
 
 camera_interface = interface +c +j +o {

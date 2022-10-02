@@ -21,17 +21,18 @@
 
 InterpolatedTiled2dMapRasterLayer::InterpolatedTiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders)
-: Tiled2dMapRasterLayer(layerConfig, tileLoaders) {}
+: Tiled2dMapRasterLayer(layerConfig, tileLoaders), mergedShader(nullptr) {}
 
 InterpolatedTiled2dMapRasterLayer::InterpolatedTiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
                                              const std::shared_ptr<::MaskingObjectInterface> &mask)
-: Tiled2dMapRasterLayer(layerConfig, tileLoaders, mask) {}
+: Tiled2dMapRasterLayer(layerConfig, tileLoaders, mask), mergedShader(nullptr) {}
 
 InterpolatedTiled2dMapRasterLayer::InterpolatedTiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
-                                             const std::shared_ptr<::ShaderProgramInterface> &shader)
-: Tiled2dMapRasterLayer(layerConfig, tileLoaders, shader) {}
+                                                                     const std::shared_ptr<::AlphaShaderInterface> &combineShader,
+                                                                     const std::shared_ptr<::ShaderProgramInterface> &finalShader)
+: Tiled2dMapRasterLayer(layerConfig, tileLoaders, combineShader), mergedShader(finalShader) {}
 
 void InterpolatedTiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface) {
     Tiled2dMapRasterLayer::onAdded(mapInterface);
@@ -40,13 +41,24 @@ void InterpolatedTiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInter
     auto objectFactory = mapInterface->getGraphicsObjectFactory();
     auto shaderFactory = mapInterface->getShaderFactory();
     auto alphaShader = shaderFactory->createAlphaShader();
-    std::shared_ptr<Quad2dInterface> quad = objectFactory->createQuad(shader);
+    if (!mergedShader) {
+        mergedShader = shaderFactory->createAlphaShader()->asShaderProgramInterface();
+    }
+    std::shared_ptr<Quad2dInterface> quad = objectFactory->createQuad(mergedShader);
     mergedTilesLayerObject = std::make_shared<Textured2dLayerObject>(quad, alphaShader, mapInterface);
+
+    auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
+
+    mergedTilesLayerObject->getQuadObject()->asGraphicsObject()->setup(renderingContext);
 }
 
 void InterpolatedTiled2dMapRasterLayer::onRemoved() {
     Tiled2dMapRasterLayer::onRemoved();
     renderTargetTexture = nullptr;
+}
+
+std::vector<std::shared_ptr<RenderTargetTexture>> InterpolatedTiled2dMapRasterLayer::additionalTargets() {
+    return {renderTargetTexture};
 }
 
 void InterpolatedTiled2dMapRasterLayer::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom) {
@@ -57,11 +69,17 @@ void InterpolatedTiled2dMapRasterLayer::onVisibleBoundsChanged(const ::RectCoord
 
 }
 
+void InterpolatedTiled2dMapRasterLayer::setT(double t) {
+    int curT = t;
+    tFraction = t - (double)curT;
+    Tiled2dMapRasterLayer::setT(curT);
+}
+
 std::vector<std::shared_ptr<RenderPassInterface>>  InterpolatedTiled2dMapRasterLayer::combineRenderPasses() {
 
 
-    auto newRenderPasses = Tiled2dMapRasterLayer::generateRenderPasses(1.0, curT, renderTargetTexture);
-    auto tilesNext = Tiled2dMapRasterLayer::generateRenderPasses(1.0, curT+1, renderTargetTexture);
+    auto newRenderPasses = Tiled2dMapRasterLayer::generateRenderPasses(1.0 - tFraction, curT, renderTargetTexture);
+    auto tilesNext = Tiled2dMapRasterLayer::generateRenderPasses(tFraction, curT+1, renderTargetTexture);
     newRenderPasses.insert(newRenderPasses.end(), tilesNext.begin(), tilesNext.end());
 
     auto texture = renderTargetTexture->textureHolder();

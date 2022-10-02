@@ -13,8 +13,6 @@ import UIKit
 
 open class RenderTargetTexture: Identifiable, Equatable, MCRenderTargetTexture {
 
-    open var encoder: MTLRenderCommandEncoder?
-
     weak var context: RenderingContext?
 
     public let id = UUID()
@@ -37,22 +35,19 @@ open class RenderTargetTexture: Identifiable, Equatable, MCRenderTargetTexture {
 
 
         renderPassDescriptor.colorAttachments[0]?.loadAction = .clear
-        renderPassDescriptor.colorAttachments[0]?.clearColor = .init(red: 1, green: 1, blue: 1, alpha: 1)
+        renderPassDescriptor.colorAttachments[0]?.clearColor = .init(red: 0, green: 0, blue: 0, alpha: 0)
         renderPassDescriptor.colorAttachments[0]?.storeAction = .store
+
     }
 
-    public func prepareOffscreenEncoder() {
+    public func prepareOffscreenEncoder(_ commandBuffer: MTLCommandBuffer) -> MTLRenderCommandEncoder? {
 
-
-        if let commandBuffer = MetalContext.current.commandQueue.makeCommandBuffer(),
-           let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) {
+        if let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) {
             renderEncoder.setRenderPipelineState(renderPipelineState)
-            encoder = renderEncoder
+            return renderEncoder
         }
-    }
 
-    public func endOffscreenEncoder() {
-        encoder?.endEncoding()
+        return nil
     }
 
     private var lastSize: MCVec2I = MCVec2I(x: 0, y: 0)
@@ -82,14 +77,7 @@ open class RenderTargetTexture: Identifiable, Equatable, MCRenderTargetTexture {
     }
 
     public func textureHolder() -> MCTextureHolderInterface? {
-        let image = CIImage(mtlTexture: holder!.texture)!
-        let uiImage = UIImage(ciImage: image)
-        print(uiImage)
         return holder
-    }
-
-    public func getIndex() -> Int32? {
-        context?.getIndex(of: self)
     }
 
     public static func == (lhs: RenderTargetTexture, rhs: RenderTargetTexture) -> Bool {

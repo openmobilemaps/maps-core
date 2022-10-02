@@ -5,8 +5,10 @@
 #import "MCSceneInterface.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
+#import "DJIMarshal+Private.h"
 #import "MCCameraInterface+Private.h"
 #import "MCGraphicsObjectFactoryInterface+Private.h"
+#import "MCRenderTargetTexture+Private.h"
 #import "MCRendererInterface+Private.h"
 #import "MCRenderingContextInterface+Private.h"
 #import "MCSceneCallbackInterface+Private.h"
@@ -100,9 +102,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)drawFrame {
+- (void)drawFrame:(nonnull NSArray<id<MCRenderTargetTexture>> *)additionalTargets {
     try {
-        _cppRefHandle.get()->drawFrame();
+        _cppRefHandle.get()->drawFrame(::djinni::List<::djinni_generated::RenderTargetTexture>::toCpp(additionalTargets));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

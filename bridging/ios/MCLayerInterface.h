@@ -8,6 +8,7 @@
 #import "MCRenderPassInterface.h"
 #import <Foundation/Foundation.h>
 @class MCMapInterface;
+@protocol MCRenderTargetTexture;
 
 
 @protocol MCLayerInterface
@@ -15,6 +16,8 @@
 - (void)setMaskingObject:(nullable id<MCMaskingObjectInterface>)maskingObject;
 
 - (void)update;
+
+- (nonnull NSArray<id<MCRenderTargetTexture>> *)additionalTargets;
 
 - (nonnull NSArray<id<MCRenderPassInterface>> *)buildRenderPasses;
 

@@ -3,7 +3,9 @@
 
 #pragma once
 
+#include "RenderTargetTexture.h"
 #include <memory>
+#include <vector>
 
 class CameraInterface;
 class RenderPassInterface;
@@ -16,5 +18,5 @@ public:
     virtual void addToRenderQueue(const std::shared_ptr<RenderPassInterface> & renderPass) = 0;
 
     /** Ensure calling on graphics thread */
-    virtual void drawFrame(const std::shared_ptr<RenderingContextInterface> & renderingContext, const std::shared_ptr<CameraInterface> & camera) = 0;
+    virtual void drawFrame(const std::shared_ptr<RenderingContextInterface> & renderingContext, const std::shared_ptr<CameraInterface> & camera, const std::vector<std::shared_ptr<::RenderTargetTexture>> & additionalTargets) = 0;
 };

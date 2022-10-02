@@ -49,6 +49,7 @@ Tiled2dMapRasterLayerInterface::createWithMaskInterpolated(const std::shared_ptr
 std::shared_ptr<Tiled2dMapRasterLayerInterface>
 Tiled2dMapRasterLayerInterface::createWithShaderInterpolated(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                                                  const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
-                                                 const std::shared_ptr<::ShaderProgramInterface> &shader) {
-    return std::make_shared<InterpolatedTiled2dMapRasterLayer>(layerConfig, tileLoaders, shader);
+                                                             const std::shared_ptr<::AlphaShaderInterface> &combineShader,
+                                                             const std::shared_ptr<::ShaderProgramInterface> &finalShader) {
+    return std::make_shared<InterpolatedTiled2dMapRasterLayer>(layerConfig, tileLoaders, combineShader, finalShader);
 }

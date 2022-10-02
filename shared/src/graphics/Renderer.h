@@ -28,7 +28,7 @@ class Renderer : public RendererInterface {
 
     /** Ensure calling on graphics thread */
     void drawFrame(const std::shared_ptr<RenderingContextInterface> &renderingContext,
-                   const std::shared_ptr<CameraInterface> &camera);
+                   const std::shared_ptr<CameraInterface> &camera, const std::vector<std::shared_ptr<::RenderTargetTexture>> & additionalTargets);
 
   private:
     std::map<int32_t, std::vector<std::shared_ptr<RenderPassInterface>>> renderQueue;

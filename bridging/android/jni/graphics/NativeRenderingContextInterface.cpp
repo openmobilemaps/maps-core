@@ -50,11 +50,20 @@ void NativeRenderingContextInterface::JavaProxy::setBackgroundColor(const ::Colo
                            ::djinni::get(::djinni_generated::NativeColor::fromCpp(jniEnv, c_color)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
-void NativeRenderingContextInterface::JavaProxy::setupDrawFrame() {
+void NativeRenderingContextInterface::JavaProxy::setupDrawFrame(const std::shared_ptr<::RenderTargetTexture> & c_renderTargetTexture) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeRenderingContextInterface>::get();
-    jniEnv->CallVoidMethod(Handle::get().get(), data.method_setupDrawFrame);
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_setupDrawFrame,
+                           ::djinni::get(::djinni::Optional<std::optional, ::djinni_generated::NativeRenderTargetTexture>::fromCpp(jniEnv, c_renderTargetTexture)));
+    ::djinni::jniExceptionCheck(jniEnv);
+}
+void NativeRenderingContextInterface::JavaProxy::endDrawFrame(const std::shared_ptr<::RenderTargetTexture> & c_renderTargetTexture) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeRenderingContextInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_endDrawFrame,
+                           ::djinni::get(::djinni::Optional<std::optional, ::djinni_generated::NativeRenderTargetTexture>::fromCpp(jniEnv, c_renderTargetTexture)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
 void NativeRenderingContextInterface::JavaProxy::preRenderStencilMask(const ::RenderPassConfig & c_pass) {
@@ -136,12 +145,21 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_Renderin
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderingContextInterface_00024CppProxy_native_1setupDrawFrame(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderingContextInterface_00024CppProxy_native_1setupDrawFrame(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderTargetTexture::Boxed::JniType j_renderTargetTexture)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::RenderingContextInterface>(nativeRef);
-        ref->setupDrawFrame();
+        ref->setupDrawFrame(::djinni::Optional<std::optional, ::djinni_generated::NativeRenderTargetTexture>::toCpp(jniEnv, j_renderTargetTexture));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderingContextInterface_00024CppProxy_native_1endDrawFrame(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderTargetTexture::Boxed::JniType j_renderTargetTexture)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::RenderingContextInterface>(nativeRef);
+        ref->endDrawFrame(::djinni::Optional<std::optional, ::djinni_generated::NativeRenderTargetTexture>::toCpp(jniEnv, j_renderTargetTexture));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

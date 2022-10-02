@@ -11,11 +11,18 @@
 import Metal
 
 public enum PipelineDescriptorFactory {
+
+    public enum BlendMode {
+        case normal
+        case multiply
+        case add
+    }
+
     public static func pipelineDescriptor(vertexDescriptor: MTLVertexDescriptor,
                                           label: String,
                                           vertexShader: String,
                                           fragmentShader: String,
-                                          library: MTLLibrary = MetalContext.current.library) -> MTLRenderPipelineDescriptor {
+                                          library: MTLLibrary = MetalContext.current.library, blendMode: BlendMode = .normal) -> MTLRenderPipelineDescriptor {
         let pipelineDescriptor = MTLRenderPipelineDescriptor()
         pipelineDescriptor.colorAttachments[0].pixelFormat = MetalContext.current.colorPixelFormat
         pipelineDescriptor.vertexDescriptor = vertexDescriptor
@@ -29,6 +36,21 @@ public enum PipelineDescriptorFactory {
         renderbufferAttachment?.sourceAlphaBlendFactor = .one
         renderbufferAttachment?.destinationRGBBlendFactor = .oneMinusSourceAlpha
         renderbufferAttachment?.destinationAlphaBlendFactor = .oneMinusSourceAlpha
+
+        switch blendMode {
+            case .normal: break // keep defaults
+            case .multiply:
+                renderbufferAttachment?.sourceRGBBlendFactor = .zero
+                renderbufferAttachment?.sourceAlphaBlendFactor = .zero
+                renderbufferAttachment?.destinationRGBBlendFactor = .sourceColor
+                renderbufferAttachment?.destinationAlphaBlendFactor = .sourceAlpha
+            case .add:
+                renderbufferAttachment?.sourceRGBBlendFactor = .one
+                renderbufferAttachment?.sourceAlphaBlendFactor = .one
+                renderbufferAttachment?.destinationRGBBlendFactor = .one
+                renderbufferAttachment?.destinationAlphaBlendFactor = .one
+
+        }
 
         pipelineDescriptor.stencilAttachmentPixelFormat = .stencil8
         pipelineDescriptor.label = label

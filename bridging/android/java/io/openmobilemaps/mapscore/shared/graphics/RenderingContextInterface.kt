@@ -17,7 +17,9 @@ abstract class RenderingContextInterface {
 
     abstract fun setBackgroundColor(color: io.openmobilemaps.mapscore.shared.graphics.common.Color)
 
-    abstract fun setupDrawFrame()
+    abstract fun setupDrawFrame(renderTargetTexture: io.openmobilemaps.mapscore.shared.map.RenderTargetTexture?)
+
+    abstract fun endDrawFrame(renderTargetTexture: io.openmobilemaps.mapscore.shared.map.RenderTargetTexture?)
 
     abstract fun preRenderStencilMask(pass: RenderPassConfig)
 
@@ -70,11 +72,17 @@ abstract class RenderingContextInterface {
         }
         private external fun native_setBackgroundColor(_nativeRef: Long, color: io.openmobilemaps.mapscore.shared.graphics.common.Color)
 
-        override fun setupDrawFrame() {
+        override fun setupDrawFrame(renderTargetTexture: io.openmobilemaps.mapscore.shared.map.RenderTargetTexture?) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setupDrawFrame(this.nativeRef)
+            native_setupDrawFrame(this.nativeRef, renderTargetTexture)
         }
-        private external fun native_setupDrawFrame(_nativeRef: Long)
+        private external fun native_setupDrawFrame(_nativeRef: Long, renderTargetTexture: io.openmobilemaps.mapscore.shared.map.RenderTargetTexture?)
+
+        override fun endDrawFrame(renderTargetTexture: io.openmobilemaps.mapscore.shared.map.RenderTargetTexture?) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_endDrawFrame(this.nativeRef, renderTargetTexture)
+        }
+        private external fun native_endDrawFrame(_nativeRef: Long, renderTargetTexture: io.openmobilemaps.mapscore.shared.map.RenderTargetTexture?)
 
         override fun preRenderStencilMask(pass: RenderPassConfig) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

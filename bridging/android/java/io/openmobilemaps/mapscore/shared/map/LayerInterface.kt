@@ -11,6 +11,8 @@ abstract class LayerInterface {
 
     abstract fun update()
 
+    abstract fun additionalTargets(): ArrayList<RenderTargetTexture>
+
     abstract fun buildRenderPasses(): ArrayList<io.openmobilemaps.mapscore.shared.graphics.RenderPassInterface>
 
     abstract fun onAdded(mapInterface: MapInterface)
@@ -65,6 +67,12 @@ abstract class LayerInterface {
             native_update(this.nativeRef)
         }
         private external fun native_update(_nativeRef: Long)
+
+        override fun additionalTargets(): ArrayList<RenderTargetTexture> {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_additionalTargets(this.nativeRef)
+        }
+        private external fun native_additionalTargets(_nativeRef: Long): ArrayList<RenderTargetTexture>
 
         override fun buildRenderPasses(): ArrayList<io.openmobilemaps.mapscore.shared.graphics.RenderPassInterface> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

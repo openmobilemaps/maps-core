@@ -35,6 +35,10 @@ class SimpleLayerInterface : public LayerInterface {
 
     virtual void show() {};
 
+    virtual std::vector<std::shared_ptr<RenderTargetTexture>> additionalTargets() {
+        return {};
+    };
+
     /** optional rectangle, remove scissoring when not set */
     virtual void setScissorRect(const std::optional<::RectI> & scissorRect) {};
 

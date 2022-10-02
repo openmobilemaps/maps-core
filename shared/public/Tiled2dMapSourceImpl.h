@@ -669,7 +669,7 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(size_t loaderIndex) {
 
 template<class T, class L, class R>
 TileLoadingDecision Tiled2dMapSource<T, L, R>::tileLoadingDecision(int tileZ, int curZ, int tileT, int curT) {
-    if (tileZ == curZ && abs(tileT - curT) < 100) {
+    if (tileZ == curZ && abs(tileT - curT) < 10) {
         return TileLoadingDecision::loadNeeded;
     }
 //    else if (tileZ == 0 && abs(tileT - curT) < 50) {

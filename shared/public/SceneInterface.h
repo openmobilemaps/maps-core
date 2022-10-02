@@ -4,8 +4,10 @@
 #pragma once
 
 #include "GraphicsObjectFactoryInterface.h"
+#include "RenderTargetTexture.h"
 #include "ShaderFactoryInterface.h"
 #include <memory>
+#include <vector>
 
 class CameraInterface;
 class RendererInterface;
@@ -34,7 +36,7 @@ public:
 
     virtual std::shared_ptr<::ShaderFactoryInterface> getShaderFactory() = 0;
 
-    virtual void drawFrame() = 0;
+    virtual void drawFrame(const std::vector<std::shared_ptr<::RenderTargetTexture>> & additionalTargets) = 0;
 
     virtual void clear() = 0;
 

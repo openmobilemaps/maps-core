@@ -9,6 +9,7 @@
 #include "NativeMaskingObjectInterface.h"
 #include "NativeRectI.h"
 #include "NativeRenderPassInterface.h"
+#include "NativeRenderTargetTexture.h"
 
 namespace djinni_generated {
 
@@ -34,6 +35,14 @@ void NativeLayerInterface::JavaProxy::update() {
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeLayerInterface>::get();
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_update);
     ::djinni::jniExceptionCheck(jniEnv);
+}
+std::vector<std::shared_ptr<::RenderTargetTexture>> NativeLayerInterface::JavaProxy::additionalTargets() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeLayerInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_additionalTargets);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni::List<::djinni_generated::NativeRenderTargetTexture>::toCpp(jniEnv, jret);
 }
 std::vector<std::shared_ptr<::RenderPassInterface>> NativeLayerInterface::JavaProxy::buildRenderPasses() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
@@ -150,6 +159,16 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInterfac
         const auto& ref = ::djinni::objectFromHandleAddress<::LayerInterface>(nativeRef);
         ref->update();
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInterface_00024CppProxy_native_1additionalTargets(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::LayerInterface>(nativeRef);
+        auto r = ref->additionalTargets();
+        return ::djinni::release(::djinni::List<::djinni_generated::NativeRenderTargetTexture>::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
 CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInterface_00024CppProxy_native_1buildRenderPasses(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)

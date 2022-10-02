@@ -26,7 +26,9 @@ public:
 
     virtual void setBackgroundColor(const ::Color & color) = 0;
 
-    virtual void setupDrawFrame() = 0;
+    virtual void setupDrawFrame(const std::shared_ptr<::RenderTargetTexture> & renderTargetTexture) = 0;
+
+    virtual void endDrawFrame(const std::shared_ptr<::RenderTargetTexture> & renderTargetTexture) = 0;
 
     virtual void preRenderStencilMask(const RenderPassConfig & pass) = 0;
 

@@ -213,11 +213,16 @@ void MapScene::drawFrame() {
         camera->update();
     }
 
+    std::vector<std::shared_ptr<::RenderTargetTexture>> additionalTargets;
+
     {
         std::lock_guard<std::recursive_mutex> lock(layersMutex);
 
         for (const auto &layer : layers) {
             layer.second->update();
+            for (const auto &target : layer.second->additionalTargets()) {
+                additionalTargets.push_back(target);
+            }
         }
 
         for (const auto &layer : layers) {
@@ -227,7 +232,7 @@ void MapScene::drawFrame() {
         }
     }
 
-    scene->drawFrame();
+    scene->drawFrame(additionalTargets);
 }
 
 void MapScene::resume() {

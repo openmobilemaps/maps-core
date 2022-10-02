@@ -38,9 +38,9 @@ std::shared_ptr<RendererInterface> Scene::getRenderer() { return renderer; }
 
 std::shared_ptr<RenderingContextInterface> Scene::getRenderingContext() { return renderingContext; }
 
-void Scene::drawFrame() {
+void Scene::drawFrame(const std::vector<std::shared_ptr<::RenderTargetTexture>> & additionalTargets) {
     if (camera) {
-        renderer->drawFrame(renderingContext, camera);
+        renderer->drawFrame(renderingContext, camera, additionalTargets);
     }
 }
 

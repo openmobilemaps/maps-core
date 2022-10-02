@@ -21,7 +21,9 @@
 
 - (void)setBackgroundColor:(nonnull MCColor *)color;
 
-- (void)setupDrawFrame;
+- (void)setupDrawFrame:(nullable id<MCRenderTargetTexture>)renderTargetTexture;
+
+- (void)endDrawFrame:(nullable id<MCRenderTargetTexture>)renderTargetTexture;
 
 - (void)preRenderStencilMask:(nonnull MCRenderPassConfig *)pass;
 

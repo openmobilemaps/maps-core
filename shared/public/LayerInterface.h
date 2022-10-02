@@ -12,6 +12,7 @@
 #include <vector>
 
 class MapInterface;
+class RenderTargetTexture;
 enum class LayerReadyState;
 
 class LayerInterface {
@@ -21,6 +22,8 @@ public:
     virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) = 0;
 
     virtual void update() = 0;
+
+    virtual std::vector<std::shared_ptr<RenderTargetTexture>> additionalTargets() = 0;
 
     virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() = 0;
 

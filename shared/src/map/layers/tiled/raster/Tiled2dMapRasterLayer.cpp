@@ -33,6 +33,15 @@ Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapL
                                              const std::shared_ptr<::ShaderProgramInterface> &shader)
         : Tiled2dMapLayer(), layerConfig(layerConfig), tileLoaders(tileLoaders), alpha(1.0), shader(shader) {}
 
+Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
+                                             const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
+                                             const std::shared_ptr<::AlphaShaderInterface> &alphaShader)
+: Tiled2dMapLayer(), layerConfig(layerConfig), tileLoaders(tileLoaders), alpha(1.0), alphaShader(alphaShader) {
+    if (shader) {
+        shader = alphaShader->asShaderProgramInterface();
+    }
+}
+
 void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface) {
     rasterSource = std::make_shared<Tiled2dMapRasterSource>(
             mapInterface->getMapConfig(), layerConfig, mapInterface->getCoordinateConverterHelper(), mapInterface->getScheduler(),
@@ -117,7 +126,7 @@ void Tiled2dMapRasterLayer::resume() {
     }
 }
 
-void Tiled2dMapRasterLayer::setT(int32_t t) {
+void Tiled2dMapRasterLayer::setT(double t) {
     Tiled2dMapLayer::setT(t);
 }
 
@@ -194,7 +203,8 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
             for (const auto &tile : tilesToAdd) {
                 std::shared_ptr<Textured2dLayerObject> tileObject;
                 if (shader) {
-                    tileObject = std::make_shared<Textured2dLayerObject>(graphicsFactory->createQuad(shader), nullptr, mapInterface);
+                    auto maybeAlphaShader = alphaShader; // only to make explicit that this is very optional
+                    tileObject = std::make_shared<Textured2dLayerObject>(graphicsFactory->createQuad(shader), maybeAlphaShader, mapInterface);
                 } else {
                     auto alphaShader = shaderFactory->createAlphaShader();
                     tileObject = std::make_shared<Textured2dLayerObject>(
@@ -331,14 +341,13 @@ std::vector<std::shared_ptr<RenderPassInterface>> Tiled2dMapRasterLayer::generat
     if (!renderingContext)
         return {};
 
-
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
 
     {
         std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
 
         for (const auto &entry : tileObjectMap) {
-            if (entry.first.tileInfo.t != curT) {
+            if (entry.first.tileInfo.t != t) {
                 continue;
             }
             auto const &quadObject = entry.second->getQuadObject();

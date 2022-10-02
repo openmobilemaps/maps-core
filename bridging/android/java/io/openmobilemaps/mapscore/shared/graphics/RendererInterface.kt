@@ -10,7 +10,7 @@ abstract class RendererInterface {
     abstract fun addToRenderQueue(renderPass: RenderPassInterface)
 
     /** Ensure calling on graphics thread */
-    abstract fun drawFrame(renderingContext: RenderingContextInterface, camera: CameraInterface)
+    abstract fun drawFrame(renderingContext: RenderingContextInterface, camera: CameraInterface, additionalTargets: ArrayList<io.openmobilemaps.mapscore.shared.map.RenderTargetTexture>)
 
     private class CppProxy : RendererInterface {
         private val nativeRef: Long
@@ -36,10 +36,10 @@ abstract class RendererInterface {
         }
         private external fun native_addToRenderQueue(_nativeRef: Long, renderPass: RenderPassInterface)
 
-        override fun drawFrame(renderingContext: RenderingContextInterface, camera: CameraInterface) {
+        override fun drawFrame(renderingContext: RenderingContextInterface, camera: CameraInterface, additionalTargets: ArrayList<io.openmobilemaps.mapscore.shared.map.RenderTargetTexture>) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_drawFrame(this.nativeRef, renderingContext, camera)
+            native_drawFrame(this.nativeRef, renderingContext, camera, additionalTargets)
         }
-        private external fun native_drawFrame(_nativeRef: Long, renderingContext: RenderingContextInterface, camera: CameraInterface)
+        private external fun native_drawFrame(_nativeRef: Long, renderingContext: RenderingContextInterface, camera: CameraInterface, additionalTargets: ArrayList<io.openmobilemaps.mapscore.shared.map.RenderTargetTexture>)
     }
 }

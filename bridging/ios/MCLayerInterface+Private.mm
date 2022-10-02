@@ -13,6 +13,7 @@
 #import "MCMaskingObjectInterface+Private.h"
 #import "MCRectI+Private.h"
 #import "MCRenderPassInterface+Private.h"
+#import "MCRenderTargetTexture+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -46,6 +47,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)update {
     try {
         _cppRefHandle.get()->update();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nonnull NSArray<id<MCRenderTargetTexture>> *)additionalTargets {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->additionalTargets();
+        return ::djinni::List<::djinni_generated::RenderTargetTexture>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -142,6 +150,13 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() update];
+        }
+    }
+    std::vector<std::shared_ptr<::RenderTargetTexture>> additionalTargets() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() additionalTargets];
+            return ::djinni::List<::djinni_generated::RenderTargetTexture>::toCpp(objcpp_result_);
         }
     }
     std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override

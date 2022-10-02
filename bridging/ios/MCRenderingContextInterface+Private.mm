@@ -61,9 +61,15 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setupDrawFrame {
+- (void)setupDrawFrame:(nullable id<MCRenderTargetTexture>)renderTargetTexture {
     try {
-        _cppRefHandle.get()->setupDrawFrame();
+        _cppRefHandle.get()->setupDrawFrame(::djinni::Optional<std::optional, ::djinni_generated::RenderTargetTexture>::toCpp(renderTargetTexture));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)endDrawFrame:(nullable id<MCRenderTargetTexture>)renderTargetTexture {
+    try {
+        _cppRefHandle.get()->endDrawFrame(::djinni::Optional<std::optional, ::djinni_generated::RenderTargetTexture>::toCpp(renderTargetTexture));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -128,10 +134,16 @@ public:
             [djinni_private_get_proxied_objc_object() setBackgroundColor:(::djinni_generated::Color::fromCpp(c_color))];
         }
     }
-    void setupDrawFrame() override
+    void setupDrawFrame(const std::shared_ptr<::RenderTargetTexture> & c_renderTargetTexture) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setupDrawFrame];
+            [djinni_private_get_proxied_objc_object() setupDrawFrame:(::djinni::Optional<std::optional, ::djinni_generated::RenderTargetTexture>::fromCpp(c_renderTargetTexture))];
+        }
+    }
+    void endDrawFrame(const std::shared_ptr<::RenderTargetTexture> & c_renderTargetTexture) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() endDrawFrame:(::djinni::Optional<std::optional, ::djinni_generated::RenderTargetTexture>::fromCpp(c_renderTargetTexture))];
         }
     }
     void preRenderStencilMask(const ::RenderPassConfig & c_pass) override
