@@ -18,7 +18,7 @@
 
 struct Tiled2dMapVectorTileInfo {
     const Tiled2dMapTileInfo tileInfo;
-    std::unordered_map<std::string, std::shared_ptr<std::unordered_map<std::string, std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>>>> layerFeatureMaps;
+    const std::unordered_map<std::string, std::shared_ptr<std::unordered_map<std::string, std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>>>> layerFeatureMaps;
     std::vector<::PolygonCoord> masks;
 
     Tiled2dMapVectorTileInfo(Tiled2dMapTileInfo tileInfo,

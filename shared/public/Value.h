@@ -25,6 +25,7 @@
 #include "HashedTuple.h"
 #include "Vec2F.h"
 #include "Anchor.h"
+#include "TextJustify.h"
 #include "FormattedStringEntry.h"
 #include "LineCapType.h"
 #include "TextTransform.h"
@@ -259,10 +260,32 @@ public:
         return std::nullopt;
     }
 
+
+    std::optional<::TextJustify> jusitfyFromString(const std::string &value) {
+        if (value == "center") {
+            return TextJustify::CENTER;
+        } else if (value == "left") {
+            return TextJustify::LEFT;
+        } else if (value == "right") {
+            return TextJustify::RIGHT;
+        }
+        return std::nullopt;
+    }
+
     template<>
     Anchor evaluateOr(const EvaluationContext &context, const Anchor &alternative) {
         auto const &value = evaluateOr(context, std::string(""));
         auto anchor = anchorFromString(value);
+        if (anchor) {
+            return *anchor;
+        }
+        return alternative;
+    }
+
+    template<>
+    TextJustify evaluateOr(const EvaluationContext &context, const TextJustify &alternative) {
+        auto const &value = evaluateOr(context, std::string(""));
+        auto anchor = jusitfyFromString(value);
         if (anchor) {
             return *anchor;
         }

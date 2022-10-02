@@ -19,11 +19,12 @@
 
 class TextInfo : public TextInfoInterface {
   public:
-    TextInfo(const std::vector<FormattedStringEntry> &text, const ::Coord &coordinate, const ::Font &font, Anchor textAnchor)
+    TextInfo(const std::vector<FormattedStringEntry> &text, const ::Coord &coordinate, const ::Font &font, Anchor textAnchor, TextJustify textJustify)
         : text(text)
         , coordinate(coordinate)
         , font(font)
-        , textAnchor(textAnchor) {};
+        , textAnchor(textAnchor)
+        , textJustify(textJustify) {};
 
     // Text Interface
     virtual ~TextInfo(){};
@@ -36,9 +37,12 @@ class TextInfo : public TextInfoInterface {
 
     virtual Anchor getTextAnchor() { return textAnchor; };
 
+    virtual TextJustify getTextJustify() { return textJustify; };
+
   private:
     std::vector<FormattedStringEntry> text;
     ::Font font;
     ::Coord coordinate;
     ::Anchor textAnchor;
+    ::TextJustify textJustify;
 };

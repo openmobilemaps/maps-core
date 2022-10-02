@@ -28,7 +28,11 @@ std::vector<std::string> split_wstring(const std::string &word) {
     std::wstring wword = converter.from_bytes(word);
     std::vector<std::string> characters;
     for (auto iter : wword) {
-        characters.push_back(converter.to_bytes(iter));
+        try {
+            characters.push_back(converter.to_bytes(iter));
+        } // thrown by std::wstring_convert.to_bytes() for emojis
+        catch (const std::range_error & exception)
+        {}
     }
     return characters;
 }
@@ -72,6 +76,8 @@ std::shared_ptr<TextLayerObject> TextHelper::textLayerObject(const std::shared_p
     std::optional<BoundingBox> box = std::nullopt;
 
     int characterCount = 0;
+    std::vector<size_t> lineEndIndices;
+
     for (const auto &entry: formattedText) {
         for (const auto &c : split_wstring(entry.text)) {
             for (const auto &d : fontData->glyphs) {
@@ -80,9 +86,10 @@ std::shared_ptr<TextLayerObject> TextHelper::textLayerObject(const std::shared_p
                     characterCount += 1;
                     break;
                 } else if (c == "\n" || c == " ") {
+                    lineEndIndices.push_back(glyphs.size() - 1);
                     characterCount = 0;
                     pen.x = 0.0;
-                    pen.y += lineHeight * fontSize * entry.scale;
+                    pen.y += fontSize;
                     break;
                 }
 
@@ -115,6 +122,7 @@ std::shared_ptr<TextLayerObject> TextHelper::textLayerObject(const std::shared_p
             }
         }
     }
+    lineEndIndices.push_back(glyphs.size() - 1);
 
     if (!glyphs.empty()) {
 
@@ -124,6 +132,43 @@ std::shared_ptr<TextLayerObject> TextHelper::textLayerObject(const std::shared_p
         box = std::nullopt;
 
         Vec2D size((max.x - min.x), (max.y - min.y));
+
+        switch (text->getTextJustify()) {
+            case TextJustify::LEFT:
+                //Nothing to do here
+                break;
+            case TextJustify::CENTER: {
+                size_t lineStart = 0;
+                for (auto const lineEndIndex: lineEndIndices) {
+                    double lineWidth = glyphs[lineEndIndex].frame.topRight.x - glyphs[lineStart].frame.topLeft.x;
+                    double widthDeltaHalfed = (size.x - lineWidth) / 2.0;
+                    for(size_t i = lineStart; i <= lineEndIndex; i++) {
+                        glyphs[i].frame.bottomRight.x += widthDeltaHalfed;
+                        glyphs[i].frame.bottomLeft.x += widthDeltaHalfed;
+                        glyphs[i].frame.topRight.x += widthDeltaHalfed;
+                        glyphs[i].frame.topLeft.x += widthDeltaHalfed;
+                    }
+                    lineStart = lineEndIndex + 1;
+                }
+                break;
+            }
+
+            case TextJustify::RIGHT:{
+                size_t lineStart = 0;
+                for (auto const lineEndIndex: lineEndIndices) {
+                    double lineWidth = glyphs[lineEndIndex].frame.topRight.x - glyphs[lineStart].frame.topLeft.x;
+                    double widthDelta = (size.x - lineWidth);
+                    for(size_t i = lineStart; i <= lineEndIndex; i++) {
+                        glyphs[i].frame.bottomRight.x += widthDelta;
+                        glyphs[i].frame.bottomLeft.x += widthDelta;
+                        glyphs[i].frame.topRight.x += widthDelta;
+                        glyphs[i].frame.topLeft.x += widthDelta;
+                    }
+                    lineStart = lineEndIndex + 1;
+                }
+                break;
+            }
+        }
 
         double offsetMultiplier = fontSize + fontData->info.ascender + fontData->info.descender;
 
@@ -150,7 +195,7 @@ std::shared_ptr<TextLayerObject> TextHelper::textLayerObject(const std::shared_p
                 break;
             case Anchor::BOTTOM:
                 offset.x -= size.x / 2.0 - textOffset.x;
-                offset.y -= size.y - textOffset.y;
+                offset.y -= size.y - textOffset.y + fontSize * 0.5;
                 break;
             case Anchor::TOP_LEFT:
                 offset.x -= -textOffset.x;

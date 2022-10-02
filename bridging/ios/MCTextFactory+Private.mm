@@ -11,6 +11,7 @@
 #import "MCFont+Private.h"
 #import "MCFormattedStringEntry+Private.h"
 #import "MCTextInfoInterface+Private.h"
+#import "MCTextJustify+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -38,12 +39,14 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 + (nullable id<MCTextInfoInterface>)createText:(nonnull NSArray<MCFormattedStringEntry *> *)text
                                     coordinate:(nonnull MCCoord *)coordinate
                                           font:(nonnull MCFont *)font
-                                    textAnchor:(MCAnchor)textAnchor {
+                                    textAnchor:(MCAnchor)textAnchor
+                                   textJustify:(MCTextJustify)textJustify {
     try {
         auto objcpp_result_ = ::TextFactory::createText(::djinni::List<::djinni_generated::FormattedStringEntry>::toCpp(text),
                                                         ::djinni_generated::Coord::toCpp(coordinate),
                                                         ::djinni_generated::Font::toCpp(font),
-                                                        ::djinni::Enum<::Anchor, MCAnchor>::toCpp(textAnchor));
+                                                        ::djinni::Enum<::Anchor, MCAnchor>::toCpp(textAnchor),
+                                                        ::djinni::Enum<::TextJustify, MCTextJustify>::toCpp(textJustify));
         return ::djinni_generated::TextInfoInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }

@@ -10,11 +10,12 @@
 
 class TextInfoInterface;
 enum class Anchor;
+enum class TextJustify;
 struct FormattedStringEntry;
 
 class TextFactory {
 public:
     virtual ~TextFactory() {}
 
-    static std::shared_ptr<TextInfoInterface> createText(const std::vector<FormattedStringEntry> & text, const ::Coord & coordinate, const ::Font & font, Anchor textAnchor);
+    static std::shared_ptr<TextInfoInterface> createText(const std::vector<FormattedStringEntry> & text, const ::Coord & coordinate, const ::Font & font, Anchor textAnchor, TextJustify textJustify);
 };
