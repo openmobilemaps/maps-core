@@ -37,7 +37,7 @@ Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapL
                                              const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
                                              const std::shared_ptr<::AlphaShaderInterface> &alphaShader)
 : Tiled2dMapLayer(), layerConfig(layerConfig), tileLoaders(tileLoaders), alpha(1.0), alphaShader(alphaShader) {
-    if (shader) {
+    if (alphaShader) {
         shader = alphaShader->asShaderProgramInterface();
     }
 }
@@ -128,6 +128,7 @@ void Tiled2dMapRasterLayer::resume() {
 
 void Tiled2dMapRasterLayer::setT(double t) {
     Tiled2dMapLayer::setT(t);
+    curTWithFraction = t;
 }
 
 bool Tiled2dMapRasterLayer::shouldLoadTile(const Tiled2dMapTileInfo& tileInfo){
@@ -194,7 +195,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
                 }
             }
 
-            if (tilesToAdd.empty() && tilesToRemove.empty() && newTileMasks.empty()) return;
+            if (tilesToAdd.empty() && tilesToRemove.empty() && newTileMasks.empty() && tLastGeneratedTiles == curTWithFraction) return;
 
             auto const &zoomInfo = layerConfig->getZoomInfo();
             for (const auto &tile : tilesToAdd) {
@@ -328,6 +329,7 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
     {
         std::lock_guard<std::recursive_mutex> overlayLock(renderPassMutex);
         renderPasses = newRenderPasses;
+        tLastGeneratedTiles = curT;
     }
 }
 

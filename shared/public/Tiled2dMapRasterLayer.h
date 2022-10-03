@@ -131,4 +131,6 @@ protected:
 
     double alpha;
     bool animationsEnabled = true;
+    double tLastGeneratedTiles;
+    double curTWithFraction;
 };

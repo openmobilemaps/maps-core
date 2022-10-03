@@ -172,10 +172,6 @@ void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBou
             for (int y = startTileTop; y <= maxTileTop && y < zoomLevelInfo.numTilesY; y++) {
                 for (int t = 0; t < zoomLevelInfo.numTilesT; t++) {
 
-                    if(!tileLoadingDecision(i, targetZoomLevelIdentifier, t, curT)) {
-                        continue;
-                    }
-
                     const Coord minCorner = Coord(layerSystemId, x * tileWidthAdj + boundsLeft, y * tileHeightAdj + boundsTop, 0);
                     const Coord maxCorner = Coord(layerSystemId, minCorner.x + tileWidthAdj, minCorner.y + tileHeightAdj, 0);
                     const RectCoord rect(Coord(layerSystemId,
@@ -690,6 +686,17 @@ TileLoadingDecision Tiled2dMapSource<T, L, R>::tileLoadingDecision(int tileZ, in
 
 template<class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::updateTileMasks() {
+    int curT = 0;
+    {
+        std::lock_guard<std::recursive_mutex> lock(currentZoomLevelMutex);
+        curT = this->currentTime;
+    }
+    updateTileMasks(curT);
+    updateTileMasks(curT+1);
+}
+
+template<class T, class L, class R>
+void Tiled2dMapSource<T, L, R>::updateTileMasks(int localT) {
 
     if (!zoomInfo.maskTile) {
         return;
@@ -704,11 +711,9 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
     std::vector<Tiled2dMapTileInfo> tilesToRemove;
 
     int currentZoomLevelIdentifier = 0;
-    int curT = 0;
     {
         std::lock_guard<std::recursive_mutex> lock(currentZoomLevelMutex);
         currentZoomLevelIdentifier = this->currentZoomLevelIdentifier;
-        curT = this->currentTime;
     }
 
 
@@ -731,7 +736,7 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
     for (auto it = currentTiles.rbegin(); it != currentTiles.rend(); it++ ){
         auto &[tileInfo, tileWrapper] = *it;
 
-        if (tileInfo.t != curT) {
+        if (tileInfo.t != localT) {
 //            tileWrapper.isVisible = false;
             continue;
         }

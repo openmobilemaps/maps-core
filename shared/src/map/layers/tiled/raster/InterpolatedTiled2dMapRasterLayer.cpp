@@ -72,14 +72,14 @@ void InterpolatedTiled2dMapRasterLayer::onVisibleBoundsChanged(const ::RectCoord
 void InterpolatedTiled2dMapRasterLayer::setT(double t) {
     int curT = t;
     tFraction = t - (double)curT;
-    Tiled2dMapRasterLayer::setT(curT);
+    Tiled2dMapRasterLayer::setT(t);
 }
 
 std::vector<std::shared_ptr<RenderPassInterface>>  InterpolatedTiled2dMapRasterLayer::combineRenderPasses() {
 
 
-    auto newRenderPasses = Tiled2dMapRasterLayer::generateRenderPasses(1.0 - tFraction, curT, renderTargetTexture);
-    auto tilesNext = Tiled2dMapRasterLayer::generateRenderPasses(tFraction, curT+1, renderTargetTexture);
+    auto newRenderPasses = Tiled2dMapRasterLayer::generateRenderPasses(tFraction, curT+1, renderTargetTexture);
+    auto tilesNext = Tiled2dMapRasterLayer::generateRenderPasses(1.0 - tFraction, curT , renderTargetTexture);
     newRenderPasses.insert(newRenderPasses.end(), tilesNext.begin(), tilesNext.end());
 
     auto texture = renderTargetTexture->textureHolder();

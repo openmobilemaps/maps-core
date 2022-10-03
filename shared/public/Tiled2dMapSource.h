@@ -154,6 +154,7 @@ private:
     void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid);
 
     void updateTileMasks();
+    void updateTileMasks(int localT);
 
     TileLoadingDecision tileLoadingDecision(int tileZ, int curZ, int tileT, int curT);
 
