@@ -1,3 +1,0 @@
-primitive_list = record {
-    list: list<i64>;
-} deriving (parcelable)

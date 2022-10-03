@@ -1,4 +1,0 @@
-cpp_exception = interface +c {
-    throw_an_exception(): i32;
-    static get(): cpp_exception;
-}

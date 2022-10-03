@@ -1,2 +1,0 @@
-@import "./varnames.djinni"
-@import "../djinni/varnames.djinni"
