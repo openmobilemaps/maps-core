@@ -64,6 +64,8 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
 
     void removeGlBuffers();
 
+    void removeTextureCoordsGlBuffers();
+
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
 
     int programHandle;
