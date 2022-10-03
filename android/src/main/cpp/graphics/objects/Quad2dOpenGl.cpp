@@ -91,6 +91,8 @@ void Quad2dOpenGl::prepareGlData(const std::shared_ptr<OpenGlContext> &openGlCon
 void Quad2dOpenGl::prepareTextureCoordsGlData(const std::shared_ptr<OpenGlContext> &openGlContext, const int &programHandle) {
     glUseProgram(programHandle);
 
+    removeTextureCoordsGlBuffers();
+
     textureCoordinateHandle = glGetAttribLocation(programHandle, "texCoordinate");
     if (textureCoordinateHandle < 0) {
         usesTextureCoords = false;
@@ -106,8 +108,11 @@ void Quad2dOpenGl::prepareTextureCoordsGlData(const std::shared_ptr<OpenGlContex
 
 void Quad2dOpenGl::removeGlBuffers() {
     glDeleteBuffers(1, &vertexBuffer);
-    glDeleteBuffers(1, &textureCoordsBuffer);
     glDeleteBuffers(1, &indexBuffer);
+}
+
+void Quad2dOpenGl::removeTextureCoordsGlBuffers() {
+    glDeleteBuffers(1, &textureCoordsBuffer);
 }
 
 void Quad2dOpenGl::loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
@@ -123,10 +128,7 @@ void Quad2dOpenGl::loadTexture(const std::shared_ptr<::RenderingContextInterface
         std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
         if (ready) {
             prepareTextureCoordsGlData(openGlContext, programHandle);
-        } else {
-            prepareTextureCoordsGlData(openGlContext, openGlContext->getProgram(shaderProgram->getProgramName()));
         }
-
         this->textureHolder = textureHolder;
     }
 }
@@ -171,9 +173,9 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     int mProgram = openGlContext->getProgram(shaderProgram->getProgramName());
     glUseProgram(mProgram);
-    OpenGlHelper::checkGlError("glUseProgram RectangleOpenGl");
+    OpenGlHelper::checkGlError("glUseProgram Quad2dOpenGl");
 
-    if (textureHolder) {
+    if (usesTextureCoords) {
         prepareTextureDraw(openGlContext, programHandle);
 
         glEnableVertexAttribArray(textureCoordinateHandle);
@@ -203,6 +205,7 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     // Draw the triangles
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, nullptr);
+    OpenGlHelper::checkGlError("glDrawElements Quad2dOpenGl");
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
