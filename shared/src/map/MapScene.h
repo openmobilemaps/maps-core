@@ -77,7 +77,7 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public std:
 
     virtual void forceReload() override;
 
-    virtual std::shared_ptr<RenderTargetTexture> createRenderTargetTexture();
+    virtual std::shared_ptr<RenderTargetTexture> createRenderTargetTexture() override;
 
   private:
     LayerReadyState getLayersReadyState();
