@@ -35,7 +35,7 @@ open class RenderTargetTexture: Identifiable, Equatable, MCRenderTargetTexture {
 
 
         renderPassDescriptor.colorAttachments[0]?.loadAction = .clear
-        renderPassDescriptor.colorAttachments[0]?.clearColor = .init(red: 0, green: 0, blue: 0, alpha: 1)
+        renderPassDescriptor.colorAttachments[0]?.clearColor = .init(red: 0, green: 0, blue: 0, alpha: 0)
         renderPassDescriptor.colorAttachments[0]?.storeAction = .store
         renderPassDescriptor.stencilAttachment.storeAction = .dontCare
 
