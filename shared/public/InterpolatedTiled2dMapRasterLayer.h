@@ -39,8 +39,7 @@ public:
 
     InterpolatedTiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                                       const std::vector<std::shared_ptr<::LoaderInterface>> &tileLoader,
-                                      const std::shared_ptr<::AlphaShaderInterface> &combineShader,
-                                      const std::shared_ptr<::ShaderProgramInterface> &finalShader);
+                                      const std::shared_ptr<Tiled2dMapRasterLayerShaderFactory> & shaderFactory);
 
     std::vector<std::shared_ptr<RenderPassInterface>> combineRenderPasses() override;
 

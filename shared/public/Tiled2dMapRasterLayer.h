@@ -43,6 +43,12 @@ public:
                           const std::vector<std::shared_ptr<::LoaderInterface>> &tileLoader,
                           const std::shared_ptr<::ShaderProgramInterface> &shader);
 
+    Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
+                          const std::vector<std::shared_ptr<::LoaderInterface>> &tileLoader,
+                          const std::shared_ptr<Tiled2dMapRasterLayerShaderFactory> & shaderFactory);
+
+
+
     virtual void onAdded(const std::shared_ptr<::MapInterface> &mapInterface) override;
 
     virtual void onRemoved() override;
@@ -118,6 +124,7 @@ protected:
     const std::vector<std::shared_ptr<::LoaderInterface>> tileLoaders;
     std::shared_ptr<ShaderProgramInterface> shader;
     std::shared_ptr<AlphaShaderInterface> alphaShader;
+    std::shared_ptr<Tiled2dMapRasterLayerShaderFactory> shaderFactory;
     std::shared_ptr<Tiled2dMapRasterSource> rasterSource;
 
     std::atomic_flag updateFlag = ATOMIC_FLAG_INIT;

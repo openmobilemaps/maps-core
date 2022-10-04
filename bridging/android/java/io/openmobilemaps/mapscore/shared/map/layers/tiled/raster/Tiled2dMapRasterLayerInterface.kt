@@ -58,8 +58,8 @@ abstract class Tiled2dMapRasterLayerInterface {
 
         /** interpolated version, the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
         @JvmStatic
-        fun createWithShaderInterpolated(layerConfig: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, combineShader: io.openmobilemaps.mapscore.shared.graphics.shader.AlphaShaderInterface, finalShader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Tiled2dMapRasterLayerInterface {
-            return CppProxy.createWithShaderInterpolated(layerConfig, loaders, combineShader, finalShader)
+        fun createWithShaderInterpolated(layerConfig: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, shaderFactory: Tiled2dMapRasterLayerShaderFactory): Tiled2dMapRasterLayerInterface {
+            return CppProxy.createWithShaderInterpolated(layerConfig, loaders, shaderFactory)
         }
 
         /** interpolated version, the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
@@ -173,7 +173,7 @@ abstract class Tiled2dMapRasterLayerInterface {
             external fun createWithMaskInterpolated(layerConfig: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, mask: io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface): Tiled2dMapRasterLayerInterface
 
             @JvmStatic
-            external fun createWithShaderInterpolated(layerConfig: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, combineShader: io.openmobilemaps.mapscore.shared.graphics.shader.AlphaShaderInterface, finalShader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Tiled2dMapRasterLayerInterface
+            external fun createWithShaderInterpolated(layerConfig: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, shaderFactory: Tiled2dMapRasterLayerShaderFactory): Tiled2dMapRasterLayerInterface
 
             @JvmStatic
             external fun createInterpolated(layerConfig: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>): Tiled2dMapRasterLayerInterface

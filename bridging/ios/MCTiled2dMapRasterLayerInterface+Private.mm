@@ -6,13 +6,13 @@
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
-#import "MCAlphaShaderInterface+Private.h"
 #import "MCLayerInterface+Private.h"
 #import "MCLoaderInterface+Private.h"
 #import "MCMaskingObjectInterface+Private.h"
 #import "MCShaderProgramInterface+Private.h"
 #import "MCTiled2dMapLayerConfig+Private.h"
 #import "MCTiled2dMapRasterLayerCallbackInterface+Private.h"
+#import "MCTiled2dMapRasterLayerShaderFactory+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -81,13 +81,11 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 
 + (nullable MCTiled2dMapRasterLayerInterface *)createWithShaderInterpolated:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
                                                                     loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
-                                                              combineShader:(nullable id<MCAlphaShaderInterface>)combineShader
-                                                                finalShader:(nullable id<MCShaderProgramInterface>)finalShader {
+                                                              shaderFactory:(nullable id<MCTiled2dMapRasterLayerShaderFactory>)shaderFactory {
     try {
         auto objcpp_result_ = ::Tiled2dMapRasterLayerInterface::createWithShaderInterpolated(::djinni_generated::Tiled2dMapLayerConfig::toCpp(layerConfig),
                                                                                              ::djinni::List<::djinni_generated::LoaderInterface>::toCpp(loaders),
-                                                                                             ::djinni_generated::AlphaShaderInterface::toCpp(combineShader),
-                                                                                             ::djinni_generated::ShaderProgramInterface::toCpp(finalShader));
+                                                                                             ::djinni_generated::Tiled2dMapRasterLayerShaderFactory::toCpp(shaderFactory));
         return ::djinni_generated::Tiled2dMapRasterLayerInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }

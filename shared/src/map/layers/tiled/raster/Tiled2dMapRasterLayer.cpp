@@ -16,6 +16,7 @@
 #include "RenderObject.h"
 #include "RenderPass.h"
 #include "PolygonCompare.h"
+#include "Tiled2dMapRasterLayerShaderFactory.h"
 #include <Logger.h>
 #include <map>
 
@@ -32,6 +33,13 @@ Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapL
                                              const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
                                              const std::shared_ptr<::ShaderProgramInterface> &shader)
         : Tiled2dMapLayer(), layerConfig(layerConfig), tileLoaders(tileLoaders), alpha(1.0), shader(shader) {}
+
+Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
+                                             const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
+                                             const std::shared_ptr<Tiled2dMapRasterLayerShaderFactory> & shaderFactory)
+: Tiled2dMapLayer(), layerConfig(layerConfig), tileLoaders(tileLoaders), alpha(1.0), shaderFactory(shaderFactory) {}
+
+
 
 Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
@@ -200,7 +208,19 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
             auto const &zoomInfo = layerConfig->getZoomInfo();
             for (const auto &tile : tilesToAdd) {
                 std::shared_ptr<Textured2dLayerObject> tileObject;
-                if (shader) {
+                if (this->shaderFactory) {
+                    auto maybeAlphaShader = this->shaderFactory->combineShader(); // only to make explicit that this is very optional
+                    std::shared_ptr<ShaderProgramInterface> shader;
+                    if (maybeAlphaShader) {
+                        shader = maybeAlphaShader->asShaderProgramInterface();
+                    }
+                    else {
+                        maybeAlphaShader = shaderFactory->createAlphaShader();
+                        shader = maybeAlphaShader->asShaderProgramInterface();
+                    }
+                    tileObject = std::make_shared<Textured2dLayerObject>(graphicsFactory->createQuad(shader), maybeAlphaShader, mapInterface);
+                }
+                else if (shader) {
                     auto maybeAlphaShader = alphaShader; // only to make explicit that this is very optional
                     tileObject = std::make_shared<Textured2dLayerObject>(graphicsFactory->createQuad(shader), maybeAlphaShader, mapInterface);
                 } else {

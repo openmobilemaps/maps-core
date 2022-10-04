@@ -16,6 +16,7 @@
 #include "RenderObject.h"
 #include "RenderPass.h"
 #include "PolygonCompare.h"
+#include "Tiled2dMapRasterLayerShaderFactory.h"
 #include <Logger.h>
 #include <map>
 
@@ -29,20 +30,21 @@ InterpolatedTiled2dMapRasterLayer::InterpolatedTiled2dMapRasterLayer(const std::
 : Tiled2dMapRasterLayer(layerConfig, tileLoaders, mask), mergedShader(nullptr) {}
 
 InterpolatedTiled2dMapRasterLayer::InterpolatedTiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
-                                             const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
-                                                                     const std::shared_ptr<::AlphaShaderInterface> &combineShader,
-                                                                     const std::shared_ptr<::ShaderProgramInterface> &finalShader)
-: Tiled2dMapRasterLayer(layerConfig, tileLoaders, combineShader), mergedShader(finalShader) {}
+                                             const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders, const std::shared_ptr<Tiled2dMapRasterLayerShaderFactory> & shaderFactory)
+: Tiled2dMapRasterLayer(layerConfig, tileLoaders, shaderFactory) {}
 
 void InterpolatedTiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface) {
     Tiled2dMapRasterLayer::onAdded(mapInterface);
     renderTargetTexture = mapInterface->createRenderTargetTexture();
 
     auto objectFactory = mapInterface->getGraphicsObjectFactory();
-    auto shaderFactory = mapInterface->getShaderFactory();
-    auto alphaShader = shaderFactory->createAlphaShader();
+    auto defaultShaderFactory = mapInterface->getShaderFactory();
+    auto alphaShader = defaultShaderFactory->createAlphaShader();
+    if (shaderFactory) {
+        mergedShader = shaderFactory->finalShader();
+    }
     if (!mergedShader) {
-        mergedShader = shaderFactory->createAlphaShader()->asShaderProgramInterface();
+        mergedShader = defaultShaderFactory->createAlphaShader()->asShaderProgramInterface();
     }
     std::shared_ptr<Quad2dInterface> quad = objectFactory->createQuad(mergedShader);
     mergedTilesLayerObject = std::make_shared<Textured2dLayerObject>(quad, alphaShader, mapInterface);

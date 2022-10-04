@@ -6,6 +6,11 @@
 @extern "../../../../yaml/shader_program_interface.yaml"
 @extern "../../../../yaml/alpha_shader_interface.yaml"
 
+tiled_2d_map_raster_layer_shader_factory = interface +c +j +o {
+    combine_shader(): alpha_shader_interface;
+    final_shader(): shader_program_interface;
+}
+
 tiled_2d_map_raster_layer_interface = interface +c {
     # the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on
     static create_with_mask(layer_config: tiled_2d_map_layer_config, loaders: list<loader_interface>, mask: masking_object_interface) : tiled_2d_map_raster_layer_interface;
@@ -17,7 +22,7 @@ tiled_2d_map_raster_layer_interface = interface +c {
      # interpolated version, the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on
     static create_with_mask_interpolated(layer_config: tiled_2d_map_layer_config, loaders: list<loader_interface>, mask: masking_object_interface) : tiled_2d_map_raster_layer_interface;
     # interpolated version, the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on
-    static create_with_shader_interpolated(layer_config: tiled_2d_map_layer_config, loaders: list<loader_interface>, combine_shader: alpha_shader_interface, final_shader: shader_program_interface) : tiled_2d_map_raster_layer_interface;
+    static create_with_shader_interpolated(layer_config: tiled_2d_map_layer_config, loaders: list<loader_interface>, shader_factory: tiled_2d_map_raster_layer_shader_factory) : tiled_2d_map_raster_layer_interface;
     # interpolated version, the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on
     static create_interpolated(layer_config: tiled_2d_map_layer_config, loaders: list<loader_interface>) : tiled_2d_map_raster_layer_interface;
 
