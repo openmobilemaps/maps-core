@@ -173,15 +173,14 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     int mProgram = openGlContext->getProgram(shaderProgram->getProgramName());
     glUseProgram(mProgram);
-    OpenGlHelper::checkGlError("glUseProgram Quad2dOpenGl");
 
     if (usesTextureCoords) {
         prepareTextureDraw(openGlContext, programHandle);
 
         glEnableVertexAttribArray(textureCoordinateHandle);
         glBindBuffer(GL_ARRAY_BUFFER, textureCoordsBuffer);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * textureCoords.size(), &textureCoords[0], GL_STATIC_DRAW);
         glVertexAttribPointer(textureCoordinateHandle, 2, GL_FLOAT, false, 0, nullptr);
-        OpenGlHelper::checkGlError("glEnableVertexAttribArray texCoordinate");
     }
 
     shaderProgram->preRender(context);
@@ -189,14 +188,13 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     // enable vPosition attribs
     glEnableVertexAttribArray(positionHandle);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
     glVertexAttribPointer(positionHandle, 3, GL_FLOAT, false, 0, nullptr);
-    OpenGlHelper::checkGlError("glEnableVertexAttribArray positionHandle");
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // Apply the projection and view transformation
     glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
-    OpenGlHelper::checkGlError("glUniformMatrix4fv");
 
     // Enable blending
     glEnable(GL_BLEND);
@@ -204,8 +202,8 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
 
     // Draw the triangles
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLubyte) * indices.size(), &indices[0], GL_STATIC_DRAW);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, nullptr);
-    OpenGlHelper::checkGlError("glDrawElements Quad2dOpenGl");
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
