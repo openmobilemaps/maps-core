@@ -850,11 +850,11 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorSymbolSubLay
     std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
 
     if (selectedTextWrapper && selectedTextWrapper->symbolObject) {
-        renderPassObjectMap[1].push_back(std::make_shared<RenderObject>(selectedTextWrapper->symbolObject->asGraphicsObject(), selectedTextWrapper->iconModelMatrix));
+        renderPassObjectMap[description->renderPassIndex.value_or(1)].push_back(std::make_shared<RenderObject>(selectedTextWrapper->symbolObject->asGraphicsObject(), selectedTextWrapper->iconModelMatrix));
 
 
 #ifdef DRAW_TEXT_BOUNDING_BOXES
-        renderPassObjectMap[0].push_back(std::make_shared<RenderObject>(selectedTextWrapper->boundingBox->asGraphicsObject()));
+        renderPassObjectMap[description->renderPassIndex.value_or(0)].push_back(std::make_shared<RenderObject>(selectedTextWrapper->boundingBox->asGraphicsObject()));
 #endif
     }
 
@@ -877,19 +877,19 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorSymbolSubLay
                 const auto &configs = object->getRenderConfig();
 
                 if (wrapper->symbolObject) {
-                    renderPassObjectMap[1].push_back(std::make_shared<RenderObject>(wrapper->symbolObject->asGraphicsObject(), wrapper->iconModelMatrix));
+                    renderPassObjectMap[description->renderPassIndex.value_or(1)].push_back(std::make_shared<RenderObject>(wrapper->symbolObject->asGraphicsObject(), wrapper->iconModelMatrix));
                 }
 
 
                 if (!configs.empty()) {
                     std::lock_guard<std::recursive_mutex> lock(selectedFeatureIdentifierMutex);
                     if (wrapper->featureContext.identifier != selectedFeatureIdentifier) {
-                        renderPassObjectMap[configs.front()->getRenderIndex()].push_back(std::make_shared<RenderObject>(configs.front()->getGraphicsObject(), wrapper->modelMatrix));
+                        renderPassObjectMap[description->renderPassIndex.value_or(configs.front()->getRenderIndex())].push_back(std::make_shared<RenderObject>(configs.front()->getGraphicsObject(), wrapper->modelMatrix));
                     }
                 }
 
 #ifdef DRAW_TEXT_BOUNDING_BOXES
-                renderPassObjectMap[0].push_back(std::make_shared<RenderObject>(wrapper->boundingBox->asGraphicsObject()));
+                renderPassObjectMap[description->renderPassIndex.value_or(0)].push_back(std::make_shared<RenderObject>(wrapper->boundingBox->asGraphicsObject()));
 #endif
             }
         }

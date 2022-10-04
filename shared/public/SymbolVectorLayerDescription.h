@@ -236,8 +236,9 @@ public:
                                int minZoom,
                                int maxZoom,
                                std::shared_ptr<Value> filter,
-                               SymbolVectorStyle style):
-    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, filter),
+                                 SymbolVectorStyle style,
+                                 std::optional<int32_t> renderPassIndex):
+    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, filter, renderPassIndex),
     style(style) {};
 
 
