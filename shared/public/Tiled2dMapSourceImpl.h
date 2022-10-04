@@ -229,11 +229,19 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
             curT = this->currentTime;
         }
 
+        int smallestCoveringLevel = 0;
+        for (const auto &layer: pyramid) {
+            if (layer.visibleTiles.size() > 0) {
+                break;
+            }
+            smallestCoveringLevel++;
+        }
+
         // make sure all tiles on the current zoom level are scheduled to load
         for (const auto &layer: pyramid) {
-            if (layer.targetZoomLevelOffset <= 0 && (layer.targetZoomLevelOffset >= -zoomInfo.numDrawPreviousLayers || layer.zoomLevel == 0)){
+            if (layer.targetZoomLevelOffset <= 0) {
                 for (auto const &tileInfo: layer.visibleTiles) {
-                    if (!tileLoadingDecision(tileInfo.tileInfo.zoomIdentifier, currentZoomLevelIdentifier, tileInfo.tileInfo.t, curT)) {
+                    if (!tileLoadingDecision(tileInfo.tileInfo.zoomIdentifier, currentZoomLevelIdentifier, tileInfo.tileInfo.t, curT, layer.zoomLevel, layer.targetZoomLevelOffset, smallestCoveringLevel)) {
                         continue;
                     }
                     newCurrentVisibleTiles.insert(tileInfo.tileInfo);
@@ -672,11 +680,11 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(size_t loaderIndex) {
 }
 
 template<class T, class L, class R>
-TileLoadingDecision Tiled2dMapSource<T, L, R>::tileLoadingDecision(int tileZ, int curZ, int tileT, int curT) {
+TileLoadingDecision Tiled2dMapSource<T, L, R>::tileLoadingDecision(int tileZ, int curZ, int tileT, int curT, int absoluteLevel, int relativeLevel, int smallestCoveringLevel) {
     if (tileZ == curZ && tileT == curT) {
         return TileLoadingDecision::loadNeeded;
     }
-    else if (tileZ == curZ && abs(tileT - curT) < 50) {
+    else if (tileZ == smallestCoveringLevel && abs(tileT - curT) < 20) {
         return TileLoadingDecision::preload;
     }
     else {

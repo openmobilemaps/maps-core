@@ -17,7 +17,7 @@ import UIKit
 public class RenderingContext: NSObject {
 
     public func encoder(pass: MCRenderPassConfig) -> MTLRenderCommandEncoder? {
-        return currentEncoder!
+        return currentEncoder
     }
 
     public var currentCommandBuffer: MTLCommandBuffer?

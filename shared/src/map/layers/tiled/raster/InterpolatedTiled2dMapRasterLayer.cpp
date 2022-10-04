@@ -46,12 +46,13 @@ void InterpolatedTiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInter
     if (!mergedShader) {
         mergedShader = defaultShaderFactory->createAlphaShader()->asShaderProgramInterface();
     }
-    std::shared_ptr<Quad2dInterface> quad = objectFactory->createQuad(mergedShader);
-    mergedTilesLayerObject = std::make_shared<Textured2dLayerObject>(quad, alphaShader, mapInterface);
+    mergedTilesQuad = objectFactory->createQuad(mergedShader);
+
+    mergedTilesQuad->setFrame(Quad2dD(Vec2D(-1, 1), Vec2D(1,1), Vec2D(1,-1), Vec2D(-1,-1)), RectD(0, 0, 1, 1));
 
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
+    mergedTilesQuad->asGraphicsObject()->setup(renderingContext);
 
-    mergedTilesLayerObject->getQuadObject()->asGraphicsObject()->setup(renderingContext);
 }
 
 void InterpolatedTiled2dMapRasterLayer::onRemoved() {
@@ -65,9 +66,9 @@ std::vector<std::shared_ptr<RenderTargetTexture>> InterpolatedTiled2dMapRasterLa
 
 void InterpolatedTiled2dMapRasterLayer::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom) {
     Tiled2dMapRasterLayer::onVisibleBoundsChanged(visibleBounds, zoom);
-    if (mergedTilesLayerObject) {
-        mergedTilesLayerObject->setRectCoord(visibleBounds);
-    }
+//    if (mergedTilesLayerObject) {
+//        mergedTilesLayerObject->setRectCoord(visibleBounds);
+//    }
 
 }
 
@@ -86,10 +87,10 @@ std::vector<std::shared_ptr<RenderPassInterface>>  InterpolatedTiled2dMapRasterL
 
     auto texture = renderTargetTexture->textureHolder();
     if (texture) {
-        mergedTilesLayerObject->getQuadObject()->loadTexture(nullptr, texture);
+        mergedTilesQuad->loadTexture(nullptr, texture);
     }
 
-    auto renderObject = std::make_shared<RenderObject>(mergedTilesLayerObject->getQuadObject()->asGraphicsObject(), false);
+    auto renderObject = std::make_shared<RenderObject>(mergedTilesQuad->asGraphicsObject(), true);
     std::shared_ptr<RenderPass> finalRenderPass = std::make_shared<RenderPass>(RenderPassConfig(0, 0),
                                                                           std::vector<std::shared_ptr<::RenderObjectInterface>> { renderObject });
 

@@ -156,7 +156,7 @@ private:
     void updateTileMasks();
     void updateTileMasks(int localT);
 
-    TileLoadingDecision tileLoadingDecision(int tileZ, int curZ, int tileT, int curT);
+    TileLoadingDecision tileLoadingDecision(int tileZ, int curZ, int tileT, int curT, int absoluteLevel, int relativeLevel, int smallestCoveringLevel);
 
     std::atomic_flag updateFlag = ATOMIC_FLAG_INIT;
     std::atomic_int pendingUpdates = 0;

@@ -37,6 +37,7 @@ open class RenderTargetTexture: Identifiable, Equatable, MCRenderTargetTexture {
         renderPassDescriptor.colorAttachments[0]?.loadAction = .clear
         renderPassDescriptor.colorAttachments[0]?.clearColor = .init(red: 0, green: 0, blue: 0, alpha: 1)
         renderPassDescriptor.colorAttachments[0]?.storeAction = .store
+        renderPassDescriptor.stencilAttachment.storeAction = .dontCare
 
     }
 
@@ -62,6 +63,7 @@ open class RenderTargetTexture: Identifiable, Equatable, MCRenderTargetTexture {
         texDescriptor.textureType = .type2D
         texDescriptor.pixelFormat = MetalContext.current.colorPixelFormat
         texDescriptor.usage = [.renderTarget, .shaderRead]
+        texDescriptor.storageMode = .private
         texDescriptor.width = Int(newSize.x)
         texDescriptor.height = Int(newSize.y)
 

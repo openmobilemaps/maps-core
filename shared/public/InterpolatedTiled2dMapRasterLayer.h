@@ -60,7 +60,7 @@ protected:
 
     std::shared_ptr<RenderTargetTexture> renderTargetTexture;
 
-    std::shared_ptr<Textured2dLayerObject> mergedTilesLayerObject;
+    std::shared_ptr<Quad2dInterface> mergedTilesQuad;
 
     std::shared_ptr<::ShaderProgramInterface> mergedShader;
 
