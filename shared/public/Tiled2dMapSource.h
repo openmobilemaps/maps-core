@@ -33,7 +33,7 @@
 #include <unordered_set>
 #include "gpc.h"
 
-#if(defined __APPLE__ && defined DEBUG)
+#ifdef IOS_SIGNPOST
 #include <os/log.h>
 #include <os/signpost.h>
 #endif
@@ -144,7 +144,7 @@ public:
     std::recursive_mutex tilesReadyMutex;
     std::set<Tiled2dMapTileInfo> readyTiles;
 
-#if(defined __APPLE__ && defined DEBUG)
+#ifdef IOS_SIGNPOST
     os_log_t logHandle;
     os_signpost_id_t tileLoadingSignPost;
     os_signpost_id_t tilePostLoadingSignPost;

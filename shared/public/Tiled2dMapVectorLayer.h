@@ -21,7 +21,7 @@
 #include "Tiled2dMapLayerMaskWrapper.h"
 #include "Tiled2dMapVectorLayerSelectionInterface.h"
 
-#if(defined __APPLE__ && defined DEBUG)
+#ifdef IOS_SIGNPOST
 #include <os/log.h>
 #include <os/signpost.h>
 #endif
@@ -124,7 +124,7 @@ private:
 
     std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate;
 
-#if(defined __APPLE__ && defined DEBUG)
+#ifdef IOS_SIGNPOST
     os_log_t log_handle;
     os_signpost_id_t tileReady;
 #endif

@@ -30,7 +30,7 @@ IntermediateResult Tiled2dMapVectorSource::loadTile(Tiled2dMapTileInfo tile, siz
     for(auto const &[source, config]: layerConfigs) {
         // if the tile is not visible anymore we should stop asap
         if (!isTileVisible(tile)) {
-#if(defined __APPLE__ && defined DEBUG)
+#ifdef IOS_SIGNPOST
             if (__builtin_available(iOS 12.0, *)) {
                 os_signpost_event_emit(logHandle, tileLoadingSignPost, "loading tile return early", "x:%d, y:%d, zoom:%d", tile.x, tile.y, tile.zoomIdentifier);
             }
