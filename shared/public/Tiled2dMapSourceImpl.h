@@ -526,6 +526,16 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(size_t loaderIndex) {
             os_signpost_interval_end(logHandle, tileLoadingSignPost, "loading tile", "x:%d, y:%d, zoom:%d", tile->tileInfo.x, tile->tileInfo.y, tile->tileInfo.zoomIdentifier);
         }
 #endif
+
+        // if the tile is not visible anymore we should stop asap
+        if (!isTileVisible(tile->tileInfo)) {
+            {
+                std::lock_guard<std::recursive_mutex> lock(currentlyLoadingMutex);
+                currentlyLoading.erase(tile->tileInfo);
+            }
+            continue;
+        }
+        
         auto errorManager = this->errorManager;
 
         LoaderStatus status = loaderResult.status;

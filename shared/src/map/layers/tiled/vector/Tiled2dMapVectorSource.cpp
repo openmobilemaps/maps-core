@@ -28,6 +28,16 @@ Tiled2dMapVectorSource::Tiled2dMapVectorSource(const MapConfig &mapConfig,
 IntermediateResult Tiled2dMapVectorSource::loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) {
     std::unordered_map<std::string, DataLoaderResult> results;
     for(auto const &[source, config]: layerConfigs) {
+        // if the tile is not visible anymore we should stop asap
+        if (!isTileVisible(tile)) {
+#if(defined __APPLE__ && defined DEBUG)
+            if (__builtin_available(iOS 12.0, *)) {
+                os_signpost_event_emit(logHandle, tileLoadingSignPost, "loading tile return early", "x:%d, y:%d, zoom:%d", tile.x, tile.y, tile.zoomIdentifier);
+            }
+#endif
+            return IntermediateResult({}, LoaderStatus::NOOP, std::nullopt);
+        }
+
         results.insert({source, loaders[loaderIndex]->loadData(config->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier), std::nullopt)});
         if (results.at(source).status != LoaderStatus::OK) {
             return IntermediateResult(results, results.at(source).status, results.at(source).errorCode);
