@@ -60,8 +60,8 @@ void Tiled2dMapVectorSymbolSubLayer::pause() {
                 if (object && object->asGraphicsObject()->isReady()) {
                     object->asGraphicsObject()->clear();
                 }
-                if (wrapper->symbolObject && wrapper->symbolObject->asGraphicsObject()->isReady()) {
-                    wrapper->symbolObject->asGraphicsObject()->clear();
+                if (wrapper->symbolObject && wrapper->symbolGraphicsObject->isReady()) {
+                    wrapper->symbolGraphicsObject->clear();
                 }
             }
         }
@@ -96,9 +96,10 @@ void Tiled2dMapVectorSymbolSubLayer::resume() {
             }
 
             auto const &symbolObject = wrapper->symbolObject;
-            if (symbolObject) {
-                if (!symbolObject->asGraphicsObject()->isReady()) {
-                    symbolObject->asGraphicsObject()->setup(context);
+            auto const &symbolGraphicsObject = wrapper->symbolGraphicsObject;
+            if (symbolGraphicsObject) {
+                if (!symbolGraphicsObject->isReady()) {
+                    symbolGraphicsObject->setup(context);
                 }
                 if (spriteTexture) {
                     symbolObject->loadTexture(context, spriteTexture);
@@ -631,6 +632,7 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
 
                 if (!wrapper->symbolObject) {
                     wrapper->symbolObject = mapInterface->getGraphicsObjectFactory()->createQuad(wrapper->symbolShader->asShaderProgramInterface());
+                    wrapper->symbolGraphicsObject = wrapper->symbolObject->asGraphicsObject();
                 }
 
                 Coord renderPos = mapInterface->getCoordinateConverterHelper()->convertToRenderSystem(wrapper->textInfo->getCoordinate());
@@ -664,7 +666,7 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
                                                                          Coord(renderPos.systemIdentifier, quad.bottomRight.x, quad.bottomRight.y, renderPos.z)),
                                                                0.0, wrapper->iconModelMatrix);
 
-                auto symbolGraphicsObject = wrapper->symbolObject->asGraphicsObject();
+                auto symbolGraphicsObject = wrapper->symbolGraphicsObject;
                 if (spriteTexture && !symbolGraphicsObject->isReady()) {
                     symbolGraphicsObject->setup(mapInterface->getRenderingContext());
                     wrapper->symbolObject->loadTexture(mapInterface->getRenderingContext(), spriteTexture);
@@ -804,7 +806,7 @@ void Tiled2dMapVectorSymbolSubLayer::clearTileData(const Tiled2dMapTileInfo &til
                     objectsToClear.push_back(textObject->asGraphicsObject());
                 }
                 if(wrapper->symbolObject && wrapper != selectedTextWrapper) {
-                    objectsToClear.push_back(wrapper->symbolObject->asGraphicsObject());
+                    objectsToClear.push_back(wrapper->symbolGraphicsObject);
                 }
             }
             tileTextMap.erase(tileInfo);
@@ -851,7 +853,7 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorSymbolSubLay
     std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
 
     if (selectedTextWrapper && selectedTextWrapper->symbolObject) {
-        renderPassObjectMap[1].push_back(std::make_shared<RenderObject>(selectedTextWrapper->symbolObject->asGraphicsObject(), selectedTextWrapper->iconModelMatrix));
+        renderPassObjectMap[1].push_back(std::make_shared<RenderObject>(selectedTextWrapper->symbolGraphicsObject, selectedTextWrapper->iconModelMatrix));
 
 
 #ifdef DRAW_TEXT_BOUNDING_BOXES
@@ -878,7 +880,7 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorSymbolSubLay
                 const auto &configs = object->getRenderConfig();
 
                 if (wrapper->symbolObject) {
-                    renderPassObjectMap[1].push_back(std::make_shared<RenderObject>(wrapper->symbolObject->asGraphicsObject(), wrapper->iconModelMatrix));
+                    renderPassObjectMap[1].push_back(std::make_shared<RenderObject>(wrapper->symbolGraphicsObject, wrapper->iconModelMatrix));
                 }
 
 
@@ -943,7 +945,7 @@ void Tiled2dMapVectorSymbolSubLayer::setSprites(std::shared_ptr<TextureHolderInt
                          for (auto const &wrapper: objects) {
                              if (wrapper->symbolObject) {
                                  wrapper->symbolObject->loadTexture(selfPtr->mapInterface->getRenderingContext(), selfPtr->spriteTexture);
-                                 wrapper->symbolObject->asGraphicsObject()->setup(selfPtr->mapInterface->getRenderingContext());
+                                 wrapper->symbolGraphicsObject->setup(selfPtr->mapInterface->getRenderingContext());
                              }
                          }
                      }
@@ -1057,8 +1059,8 @@ void Tiled2dMapVectorSymbolSubLayer::setSelectedFeatureIdentfier(std::optional<i
                                                                                    if (previouslySelectedWrapper->textObject->getTextObject()->asGraphicsObject()->isReady()) {
                                                                                        previouslySelectedWrapper->textObject->getTextObject()->asGraphicsObject()->clear();
                                                                                    }
-                                                                                   if (previouslySelectedWrapper->symbolObject && previouslySelectedWrapper->symbolObject->asGraphicsObject()->isReady()) {
-                                                                                       previouslySelectedWrapper->symbolObject->asGraphicsObject()->clear();
+                                                                                   if (previouslySelectedWrapper->symbolObject && previouslySelectedWrapper->symbolGraphicsObject->isReady()) {
+                                                                                       previouslySelectedWrapper->symbolGraphicsObject->clear();
                                                                                    }
                                                                                }));
         }

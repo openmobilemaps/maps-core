@@ -12,7 +12,7 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 
-class LineGroup2d: BaseGraphicsObject {
+final class LineGroup2d: BaseGraphicsObject {
     private var shader: LineGroupShader
 
     private var lineVerticesBuffer: MTLBuffer?
@@ -72,7 +72,12 @@ class LineGroup2d: BaseGraphicsObject {
               let lineIndicesBuffer = lineIndicesBuffer
         else { return }
 
+        #if DEBUG
         encoder.pushDebugGroup("LineGroup2d")
+        defer {
+            encoder.popDebugGroup()
+        }
+        #endif
 
         if stencilState == nil {
             setupStencilBufferDescriptor()
@@ -107,7 +112,6 @@ class LineGroup2d: BaseGraphicsObject {
             context.clearStencilBuffer()
         }
 
-        encoder.popDebugGroup()
     }
 }
 

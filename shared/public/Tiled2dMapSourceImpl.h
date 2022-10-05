@@ -95,7 +95,7 @@ bool Tiled2dMapSource<T, L, R>::isTileVisible(const Tiled2dMapTileInfo &tileInfo
 
 template<class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBounds, int curT, double zoom) {
-    std::unordered_set<PrioritizedTiled2dMapTileInfo> visibleTiles;
+    std::vector<PrioritizedTiled2dMapTileInfo> visibleTilesVec;
 
     RectCoord visibleBoundsLayer = conversionHelper->convertRect(layerSystemId, visibleBounds);
 
@@ -137,6 +137,7 @@ void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBou
         }
 
         VisibleTilesLayer curVisibleTiles(i - targetZoomLayer);
+        std::vector<PrioritizedTiled2dMapTileInfo> curVisibleTilesVec;
 
         const double tileWidth = zoomLevelInfo.tileWidthLayerSystemUnits;
 
@@ -194,19 +195,23 @@ void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBou
                     const int zDis = 1 + std::abs(t - curT);
                     const int priority = std::ceil((tileCenterDis / maxDisCenter) * zPriorityRange)  + zDis * zPriorityRange + zoomInd * zoomPriorityRange;
 
-                    curVisibleTiles.visibleTiles.insert(PrioritizedTiled2dMapTileInfo(
+                    curVisibleTilesVec.push_back(PrioritizedTiled2dMapTileInfo(
                             Tiled2dMapTileInfo(rect, x, y, t, zoomLevelInfo.zoomLevelIdentifier, zoomLevelInfo.zoom),
                             priority));
 
-                    visibleTiles.insert(PrioritizedTiled2dMapTileInfo(
+                    visibleTilesVec.push_back(PrioritizedTiled2dMapTileInfo(
                             Tiled2dMapTileInfo(rect, x, y, t, zoomLevelInfo.zoomLevelIdentifier, zoomLevelInfo.zoom),
                             priority));
                 }
             }
         }
 
+        curVisibleTiles.visibleTiles.insert(curVisibleTilesVec.begin(), curVisibleTilesVec.end());
+
         zoomInd++;
 
+
+        std::unordered_set<PrioritizedTiled2dMapTileInfo> visibleTiles(visibleTilesVec.begin(), visibleTilesVec.end());
         layers.push_back(curVisibleTiles);
     }
 

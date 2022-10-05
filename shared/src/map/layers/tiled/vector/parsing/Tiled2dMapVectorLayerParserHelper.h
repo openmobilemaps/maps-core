@@ -125,7 +125,7 @@ public:
                                                                                             val["paint"]["background-color"])));
                 layers.push_back(layerDesc);
 
-            } else if (val["type"] == "raster" && rasterLayerMap.count(val["source"]) != 0) {
+            } else if (false && val["type"] == "raster" && rasterLayerMap.count(val["source"]) != 0) {
                 auto layer = rasterLayerMap.at(val["source"]);
                 layer->style = RasterVectorStyle(parser.parseValue(val["paint"]["raster-opacity"]));
                 layers.push_back(layer);

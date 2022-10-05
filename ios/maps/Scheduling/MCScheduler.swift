@@ -40,6 +40,11 @@ open class MCScheduler: MCSchedulerInterface {
     public func addTask(_ task: MCTaskInterface?) {
         guard let task = task else { return }
 
+        if task.getConfig().executionEnvironment == .GRAPHICS && task.getConfig().delay == 0 {
+            task.run()
+            return
+        }
+
         let config = task.getConfig()
 
         let delay = TimeInterval(Double(config.delay) / 1000.0)

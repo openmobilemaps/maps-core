@@ -12,8 +12,8 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 
-class Text: BaseGraphicsObject {
-    private var shader: MCShaderProgramInterface
+final class Text: BaseGraphicsObject {
+    private var shader: TextShader
 
     private var verticesBuffer: MTLBuffer?
     private var indicesBuffer: MTLBuffer?
@@ -24,7 +24,7 @@ class Text: BaseGraphicsObject {
     private var stencilState: MTLDepthStencilState?
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
-        self.shader = shader
+        self.shader = shader as! TextShader
         super.init(device: metalContext.device,
                    sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue))
     }
@@ -64,7 +64,12 @@ class Text: BaseGraphicsObject {
             encoder.setDepthStencilState(context.defaultMask)
         }
 
+        #if DEBUG
         encoder.pushDebugGroup("Text")
+        defer {
+            encoder.popDebugGroup()
+        }
+        #endif
 
         shader.setupProgram(context)
         shader.preRender(context)
@@ -86,7 +91,6 @@ class Text: BaseGraphicsObject {
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
 
-        encoder.popDebugGroup()
     }
 }
 
