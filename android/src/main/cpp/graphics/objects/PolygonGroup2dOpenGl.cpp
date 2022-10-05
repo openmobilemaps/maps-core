@@ -50,8 +50,6 @@ void PolygonGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterfa
     int program = openGlContext->getProgram(shaderProgram->getProgramName());
     glUseProgram(program);
 
-    removeGlBuffers();
-
     positionHandle = glGetAttribLocation(program, "vPosition");
     styleIndexHandle = glGetAttribLocation(program, "vStyleIndex");
 
@@ -72,8 +70,10 @@ void PolygonGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterfa
 
 void PolygonGroup2dOpenGl::clear() {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    ready = false;
-    removeGlBuffers();
+    if (ready) {
+        removeGlBuffers();
+        ready = false;
+    }
 }
 
 void PolygonGroup2dOpenGl::removeGlBuffers() {

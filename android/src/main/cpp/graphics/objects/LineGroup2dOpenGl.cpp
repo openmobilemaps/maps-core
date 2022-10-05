@@ -49,8 +49,6 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
     int program = openGlContext->getProgram(shaderProgram->getProgramName());
     glUseProgram(program);
 
-    removeGlBuffers();
-
     positionHandle = glGetAttribLocation(program, "vPosition");
     widthNormalHandle = glGetAttribLocation(program, "vWidthNormal");
     lengthNormalHandle = glGetAttribLocation(program, "vLengthNormal");
@@ -76,8 +74,10 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
 
 void LineGroup2dOpenGl::clear() {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    ready = false;
-    removeGlBuffers();
+    if (ready) {
+        removeGlBuffers();
+        ready = false;
+    }
 }
 
 void LineGroup2dOpenGl::removeGlBuffers() {

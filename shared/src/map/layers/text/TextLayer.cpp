@@ -239,7 +239,7 @@ void TextLayer::setupTextObjects(
 
         auto font = fontLoader->loadFont(text->getFont());
         if (font.imageData) {
-            textObject->loadTexture(font.imageData);
+            textObject->loadTexture(renderingContext, font.imageData);
         }
     }
 
