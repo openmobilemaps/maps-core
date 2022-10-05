@@ -134,19 +134,19 @@ void Line2dOpenGl::drawLineSegments(std::shared_ptr<OpenGlContext> openGlContext
 
     // Prepare the vertex attributes
     size_t floatSize = sizeof(GLfloat);
-    size_t sizeAttribGroup = floatSize * 3;
+    size_t sizeAttribGroup = floatSize * 2;
     size_t stride = sizeAttribGroup * 5 + 2 * floatSize;
     glBindBuffer(GL_ARRAY_BUFFER, vertexAttribBuffer);
     glEnableVertexAttribArray(positionHandle);
-    glVertexAttribPointer(positionHandle, 3, GL_FLOAT, false, stride, nullptr);
+    glVertexAttribPointer(positionHandle, 2, GL_FLOAT, false, stride, nullptr);
     glEnableVertexAttribArray(widthNormalHandle);
-    glVertexAttribPointer(widthNormalHandle, 3, GL_FLOAT, false, stride, (float *)sizeAttribGroup);
+    glVertexAttribPointer(widthNormalHandle, 2, GL_FLOAT, false, stride, (float *)sizeAttribGroup);
     glEnableVertexAttribArray(lengthNormalHandle);
-    glVertexAttribPointer(lengthNormalHandle, 3, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 2));
+    glVertexAttribPointer(lengthNormalHandle, 2, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 2));
     glEnableVertexAttribArray(pointAHandle);
-    glVertexAttribPointer(pointAHandle, 3, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 3));
+    glVertexAttribPointer(pointAHandle, 2, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 3));
     glEnableVertexAttribArray(pointBHandle);
-    glVertexAttribPointer(pointBHandle, 3, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 4));
+    glVertexAttribPointer(pointBHandle, 2, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 4));
     glEnableVertexAttribArray(segmentStartLPosHandle);
     glVertexAttribPointer(segmentStartLPosHandle, 1, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 5));
     glEnableVertexAttribArray(styleInfoHandle);

@@ -56,6 +56,7 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
     pointBHandle = glGetAttribLocation(program, "vPointB");
     segmentStartLPosHandle = glGetAttribLocation(program, "vSegmentStartLPos");
     styleInfoHandle = glGetAttribLocation(program, "vStyleInfo");
+
     glGenBuffers(1, &vertexAttribBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexAttribBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * lineAttributes.size(), &lineAttributes[0], GL_STATIC_DRAW);
@@ -92,6 +93,7 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
 
     if (!ready)
         return;
+
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     if (isMasked) {
         if (isMaskInversed) {
