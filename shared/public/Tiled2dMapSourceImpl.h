@@ -44,6 +44,16 @@ Tiled2dMapSource<T, L, R>::Tiled2dMapSource(const MapConfig &mapConfig, const st
         loadingQueues[i] = {};
         dispatchedTasks[i] = 0;
     }
+
+
+#if(defined __APPLE__ && defined DEBUG)
+    logHandle = os_log_create("io.openmobilemaps.vectorsource", OS_LOG_CATEGORY_POINTS_OF_INTEREST);
+    if (__builtin_available(iOS 12.0, *)) {
+        tileLoadingSignPost = os_signpost_id_generate(logHandle);
+        tilePostLoadingSignPost = os_signpost_id_generate(logHandle);
+        tileReadySignPost = os_signpost_id_generate(logHandle);
+    }
+#endif
 }
 
 template<class T, class L, class R>
@@ -313,6 +323,11 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
                 {
                     std::lock_guard<std::recursive_mutex> lock(tilesReadyMutex);
                     readyTiles.erase(removedTile);
+#if(defined __APPLE__ && defined DEBUG)
+                    if (__builtin_available(iOS 12.0, *)) {
+                        os_signpost_interval_end(logHandle, tileReadySignPost, "tile ready", "x:%d, y:%d, zoom:%d ended in remove", removedTile.x, removedTile.y, removedTile.zoomIdentifier);
+                    }
+#endif
                 }
                 if (errorManager)
                     errorManager->removeError(
@@ -499,8 +514,18 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(size_t loaderIndex) {
             std::lock_guard<std::recursive_mutex> lock(tilesReadyMutex);
             readyTiles.erase(tile->tileInfo);
         }
+#if(defined __APPLE__ && defined DEBUG)
+        if (__builtin_available(iOS 12.0, *)) {
+            os_signpost_interval_begin(logHandle, tileLoadingSignPost, "loading tile", "x:%d, y:%d, zoom:%d", tile->tileInfo.x, tile->tileInfo.y, tile->tileInfo.zoomIdentifier);
+        }
+#endif
 
         auto loaderResult = loadTile(tile->tileInfo, loaderIndex);
+#if(defined __APPLE__ && defined DEBUG)
+        if (__builtin_available(iOS 12.0, *)) {
+            os_signpost_interval_end(logHandle, tileLoadingSignPost, "loading tile", "x:%d, y:%d, zoom:%d", tile->tileInfo.x, tile->tileInfo.y, tile->tileInfo.zoomIdentifier);
+        }
+#endif
         auto errorManager = this->errorManager;
 
         LoaderStatus status = loaderResult.status;
@@ -516,7 +541,18 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(size_t loaderIndex) {
                     isVisible = currentVisibleTiles.count(tile->tileInfo);
                 }
                 if (isVisible) {
+#if(defined __APPLE__ && defined DEBUG)
+                    if (__builtin_available(iOS 12.0, *)) {
+                        os_signpost_interval_begin(logHandle, tilePostLoadingSignPost, "parsing tile", "x:%d, y:%d, zoom:%d", tile->tileInfo.x, tile->tileInfo.y, tile->tileInfo.zoomIdentifier);
+                    }
+#endif
                     R da = postLoadingTask(loaderResult, tile->tileInfo);
+
+#if(defined __APPLE__ && defined DEBUG)
+                    if (__builtin_available(iOS 12.0, *)) {
+                        os_signpost_interval_end(logHandle, tilePostLoadingSignPost, "parsing tile", "x:%d, y:%d, zoom:%d", tile->tileInfo.x, tile->tileInfo.y, tile->tileInfo.zoomIdentifier);
+                    }
+#endif
 
                     PolygonCoord mask({
                                               tile->tileInfo.bounds.topLeft,
@@ -531,6 +567,12 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(size_t loaderIndex) {
 
                     gpc_polygon tilePolygon;
                     gpc_set_polygon({mask}, &tilePolygon);
+
+#if(defined __APPLE__ && defined DEBUG)
+                    if (__builtin_available(iOS 12.0, *)) {
+                        os_signpost_interval_begin(logHandle, tileReadySignPost, "tile ready", "x:%d, y:%d, zoom:%d", tile->tileInfo.x, tile->tileInfo.y, tile->tileInfo.zoomIdentifier);
+                    }
+#endif
 
                     {
                         std::lock_guard<std::recursive_mutex> lock(currentTilesMutex);
@@ -777,6 +819,11 @@ void Tiled2dMapSource<T, L, R>::setTileReady(const Tiled2dMapTileInfo &tile) {
             if (currentTiles.count(tile) != 0){
                 readyTiles.insert(tile);
                 needsUpdate = true;
+#if(defined __APPLE__ && defined DEBUG)
+                if (__builtin_available(iOS 12.0, *)) {
+                    os_signpost_interval_end(logHandle, tileReadySignPost, "tile ready", "x:%d, y:%d, zoom:%d in tileReady", tile.x, tile.y, tile.zoomIdentifier);
+                }
+#endif
             }
         }
     }
@@ -807,6 +854,11 @@ void Tiled2dMapSource<T, L, R>::setTilesReady(const std::vector<const Tiled2dMap
                 if (currentTiles.count(tile) != 0){
                     readyTiles.insert(tile);
                     needsUpdate = true;
+#if(defined __APPLE__ && defined DEBUG)
+                    if (__builtin_available(iOS 12.0, *)) {
+                        os_signpost_interval_end(logHandle, tileReadySignPost, "tile ready", "x:%d, y:%d, zoom:%d in tilesReady", tile.x, tile.y, tile.zoomIdentifier);
+                    }
+#endif
                 }
             }
         }

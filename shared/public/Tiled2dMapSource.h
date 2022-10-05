@@ -33,6 +33,11 @@
 #include <unordered_set>
 #include "gpc.h"
 
+#if(defined __APPLE__ && defined DEBUG)
+#include <os/log.h>
+#include <os/signpost.h>
+#endif
+
 template<class R>
 struct TileWrapper {
 public:
@@ -138,6 +143,13 @@ public:
     float screenDensityPpi;
     std::recursive_mutex tilesReadyMutex;
     std::set<Tiled2dMapTileInfo> readyTiles;
+
+#if(defined __APPLE__ && defined DEBUG)
+    os_log_t logHandle;
+    os_signpost_id_t tileLoadingSignPost;
+    os_signpost_id_t tilePostLoadingSignPost;
+    os_signpost_id_t tileReadySignPost;
+#endif
 
 private:
     void updateCurrentTileset(const ::RectCoord &visibleBounds, int curT, double zoom);

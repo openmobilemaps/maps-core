@@ -49,7 +49,14 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         loaders(loaders),
         fontLoader(fontLoader),
         dpFactor(dpFactor),
-        sublayers() {}
+        sublayers() {
+#if(defined __APPLE__ && defined DEBUG)
+            log_handle = os_log_create("io.openmobilemaps.vectorlayer", OS_LOG_CATEGORY_POINTS_OF_INTEREST);
+            if (__builtin_available(iOS 12.0, *)) {
+                tileReady = os_signpost_id_generate(log_handle);
+            }
+#endif
+        }
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName, const std::shared_ptr<VectorMapDescription> &mapDescription,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,

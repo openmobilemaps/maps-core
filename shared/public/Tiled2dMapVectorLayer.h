@@ -21,6 +21,11 @@
 #include "Tiled2dMapLayerMaskWrapper.h"
 #include "Tiled2dMapVectorLayerSelectionInterface.h"
 
+#if(defined __APPLE__ && defined DEBUG)
+#include <os/log.h>
+#include <os/signpost.h>
+#endif
+
 class Tiled2dMapVectorLayer : public Tiled2dMapLayer, public Tiled2dMapVectorLayerInterface, public Tiled2dMapVectorLayerReadyInterface {
 public:
     Tiled2dMapVectorLayer(const std::string &layerName,
@@ -118,6 +123,11 @@ private:
     std::atomic_bool isResumed = false;
 
     std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate;
+
+#if(defined __APPLE__ && defined DEBUG)
+    os_log_t log_handle;
+    os_signpost_id_t tileReady;
+#endif
 };
 
 
