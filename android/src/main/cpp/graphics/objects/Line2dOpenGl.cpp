@@ -51,8 +51,6 @@ void Line2dOpenGl::prepareGlData(std::shared_ptr<OpenGlContext> openGlContext) {
     int program = openGlContext->getProgram(shaderProgram->getProgramName());
     glUseProgram(program);
 
-    removeGlBuffers();
-
     positionHandle = glGetAttribLocation(program, "vPosition");
     widthNormalHandle = glGetAttribLocation(program, "vWidthNormal");
     lengthNormalHandle = glGetAttribLocation(program, "vLengthNormal");
@@ -77,8 +75,10 @@ void Line2dOpenGl::prepareGlData(std::shared_ptr<OpenGlContext> openGlContext) {
 
 void Line2dOpenGl::clear() {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    ready = false;
-    removeGlBuffers();
+    if (ready) {
+        removeGlBuffers();
+        ready = false;
+    }
 }
 
 void Line2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
