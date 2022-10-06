@@ -127,7 +127,10 @@ Tiled2dMapVectorPolygonSubLayer::updateTileData(const Tiled2dMapTileInfo &tileIn
 #ifdef __APPLE__
                     std::vector<uint32_t> new_indices = mapbox::earcut<uint32_t>(pol);
 #else
+                    // TODO: andorid currently only supports 16bit indices
+                    // more complex polygons may need to be simplified on-device to render them correctly
                     std::vector<uint16_t> new_indices = mapbox::earcut<uint16_t>(pol);
+                    assert(("Too many vertices to use 16bit indices", new_indices >= std::numeric_limits<uint16_t>::max()));
 #endif
 
                     std::size_t posAdded = 0;
