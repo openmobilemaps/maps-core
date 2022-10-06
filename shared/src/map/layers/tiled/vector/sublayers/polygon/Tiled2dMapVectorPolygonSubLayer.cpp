@@ -123,8 +123,12 @@ Tiled2dMapVectorPolygonSubLayer::updateTileData(const Tiled2dMapTileInfo &tileIn
                     for (auto const &hole: polygonHoles[i]) {
                         pol.push_back(hole);
                     }
-                    std::vector<uint16_t> new_indices = mapbox::earcut<uint16_t>(pol);
 
+#ifdef __APPLE__
+                    std::vector<uint32_t> new_indices = mapbox::earcut<uint32_t>(pol);
+#else
+                    std::vector<uint16_t> new_indices = mapbox::earcut<uint16_t>(pol);
+#endif
 
                     std::size_t posAdded = 0;
                     for (auto const &coords: pol) {
@@ -134,11 +138,19 @@ Tiled2dMapVectorPolygonSubLayer::updateTileData(const Tiled2dMapTileInfo &tileIn
 
                     // check overflow
                     size_t new_size = indices_offset + posAdded;
-                    if (new_size >= std::numeric_limits<uint16_t>::max()) {
+#ifdef __APPLE__
+                    if (new_size >= std::numeric_limits<uint32_t>::max()) {
                         objectDescriptions.push_back({{},
-                                                      {}});
+                            {}});
                         indices_offset = 0;
                     }
+#else
+                    if (new_size >= std::numeric_limits<uint16_t>::max()) {
+                        objectDescriptions.push_back({{},
+                            {}});
+                        indices_offset = 0;
+                    }
+#endif
 
                     for (auto const &index: new_indices) {
                         std::get<1>(objectDescriptions.back()).push_back(indices_offset + index);
