@@ -258,21 +258,33 @@ void Tiled2dMapVectorPolygonSubLayer::setupPolygons(const Tiled2dMapTileInfo &ti
         return;
     }
 
+    bool informDelegateAndReturn = false;
+
     {
-        std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(tilesInSetupMutex, polygonMutex);
+        std::lock_guard<std::recursive_mutex> lock(polygonMutex);
         if (tilePolygonMap.count(tileInfo) == 0)
         {
-            if (auto delegate = readyDelegate.lock()) {
-                delegate->tileIsReady(tileInfo);
-            }
-            return;
+            informDelegateAndReturn = true;
         }
+    }
 
-        for (auto const &polygon: newPolygonObjects) {
-            if (!polygon->isReady()) polygon->setup(renderingContext);
+    if (informDelegateAndReturn) {
+        if (auto delegate = readyDelegate.lock()) {
+            delegate->tileIsReady(tileInfo);
         }
+        return;
+    }
+
+
+    for (auto const &polygon: newPolygonObjects) {
+        if (!polygon->isReady()) polygon->setup(renderingContext);
+    }
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(polygonMutex);
         tilesInSetup.erase(tileInfo);
     }
+
     if (auto delegate = readyDelegate.lock()) {
         delegate->tileIsReady(tileInfo);
     }
@@ -331,7 +343,7 @@ void Tiled2dMapVectorPolygonSubLayer::clearTileData(const Tiled2dMapTileInfo &ti
 
 
 void Tiled2dMapVectorPolygonSubLayer::preGenerateRenderPasses() {
-    std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(maskMutex, polygonMutex);
+    std::lock_guard<std::recursive_mutex> lock(polygonMutex);
     std::unordered_map<Tiled2dMapTileInfo, std::vector<std::shared_ptr<RenderPassInterface>>> newRenderPasses;
     for (auto const &tileLineTuple : tilePolygonMap) {
         std::vector<std::shared_ptr<RenderPassInterface>> newTileRenderPasses;
@@ -342,7 +354,13 @@ void Tiled2dMapVectorPolygonSubLayer::preGenerateRenderPasses() {
                         std::make_shared<RenderObject>(config->getGraphicsObject()));
             }
         }
-        const auto &tileMask = tileMaskMap[tileLineTuple.first];
+
+        std::shared_ptr<MaskingObjectInterface> tileMask;
+        {
+            std::lock_guard<std::recursive_mutex> maskLock(maskMutex);
+            tileMask = tileMaskMap[tileLineTuple.first];
+        }
+
         for (const auto &passEntry : renderPassObjectMap) {
             std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first),
                                                                                   passEntry.second,
