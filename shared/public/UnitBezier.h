@@ -10,6 +10,8 @@
 
 #pragma once
 #include <cmath>
+#include <utility>
+#include <tuple>
 
 // https://github.com/mapbox/mapbox-gl-native/blob/b8edc2399b9640498ccbbbb5b8f058c63d070933/include/mbgl/util/unitbezier.hpp
 class UnitBezier {

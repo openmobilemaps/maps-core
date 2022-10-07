@@ -73,7 +73,7 @@ public:
 
     LineCapType getLineCap(const EvaluationContext &context){
         static const LineCapType defaultValue = LineCapType::BUTT;
-        return lineDashArray ? lineDashArray->evaluateOr(context, defaultValue) : defaultValue;
+        return lineCap ? lineCap->evaluateOr(context, defaultValue) : defaultValue;
     }
 
 private:

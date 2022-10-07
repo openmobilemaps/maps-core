@@ -169,8 +169,6 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
                 }
             }
 
-            if (tilesToAdd.empty() && tilesToRemove.empty() && newTileMasks.empty()) return;
-
             if (layerConfig->getZoomInfo().maskTile) {
                 for (const auto &tileEntry : tileObjectMap) {
                     if (tilesToRemove.count(tileEntry.first) == 0) {
@@ -187,6 +185,8 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
                     }
                 }
             }
+
+            if (tilesToAdd.empty() && tilesToRemove.empty() && newTileMasks.empty()) return;
 
             auto const &zoomInfo = layerConfig->getZoomInfo();
             for (const auto &tile : tilesToAdd) {

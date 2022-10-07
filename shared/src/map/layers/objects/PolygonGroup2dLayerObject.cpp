@@ -10,6 +10,7 @@
 
 #include "PolygonGroup2dLayerObject.h"
 #include "RenderVerticesDescription.h"
+#include "Logger.h"
 
 PolygonGroup2dLayerObject::PolygonGroup2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                                      const std::shared_ptr<PolygonGroup2dInterface> &polygon,
@@ -38,14 +39,17 @@ void PolygonGroup2dLayerObject::setVertices(const std::vector<std::tuple<std::ve
             renderVertices.push_back(s);
         }
     }
-
+#ifdef __APPLE__
+    auto i = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(int32_t));
+#else
     std::vector<int16_t> shortIndices;
     for(auto& i : indices) {
         shortIndices.emplace_back(i);
     }
+    auto i = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(int16_t));
+#endif
 
     auto v = SharedBytes((int64_t)renderVertices.data(), (int32_t)renderVertices.size(), (int32_t)sizeof(float));
-    auto i = SharedBytes((int64_t)shortIndices.data(), (int32_t)shortIndices.size(), (int32_t)sizeof(int16_t));
     polygon->setVertices(v, i);
 }
 

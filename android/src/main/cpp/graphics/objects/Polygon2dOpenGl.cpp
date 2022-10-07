@@ -55,8 +55,6 @@ void Polygon2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &
 void Polygon2dOpenGl::prepareGlData(const std::shared_ptr<OpenGlContext> &openGlContext) {
     glUseProgram(programHandle);
 
-    removeGlBuffers();
-
     positionHandle = glGetAttribLocation(programHandle, "vPosition");
     glGenBuffers(1, &vertexBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
@@ -74,8 +72,10 @@ void Polygon2dOpenGl::prepareGlData(const std::shared_ptr<OpenGlContext> &openGl
 
 void Polygon2dOpenGl::clear() {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    ready = false;
-    removeGlBuffers();
+    if (ready) {
+        removeGlBuffers();
+        ready = false;
+    }
 }
 
 void Polygon2dOpenGl::removeGlBuffers() {

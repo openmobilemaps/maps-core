@@ -91,7 +91,7 @@ void Tiled2dMapVectorSymbolSubLayer::resume() {
                 }
 
                 if(fontResult.imageData) {
-                    object->loadTexture(fontResult.imageData);
+                    object->loadTexture(context, fontResult.imageData);
                 }
             }
 
@@ -762,11 +762,12 @@ void Tiled2dMapVectorSymbolSubLayer::setupTexts(const Tiled2dMapTileInfo &tileIn
 
             const auto &textObject = text->textObject->getTextObject();
             if (textObject) {
-                textObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+                auto renderingContext = mapInterface->getRenderingContext();
+                textObject->asGraphicsObject()->setup(renderingContext);
 
                 auto fontResult = loadFont(t->getFont());
                 if(fontResult.imageData) {
-                    textObject->loadTexture(fontResult.imageData);
+                    textObject->loadTexture(renderingContext, fontResult.imageData);
                 }
             }
         }

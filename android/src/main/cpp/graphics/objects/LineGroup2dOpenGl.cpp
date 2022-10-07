@@ -49,8 +49,6 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
     int program = openGlContext->getProgram(shaderProgram->getProgramName());
     glUseProgram(program);
 
-    removeGlBuffers();
-
     positionHandle = glGetAttribLocation(program, "vPosition");
     widthNormalHandle = glGetAttribLocation(program, "vWidthNormal");
     lengthNormalHandle = glGetAttribLocation(program, "vLengthNormal");
@@ -58,6 +56,7 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
     pointBHandle = glGetAttribLocation(program, "vPointB");
     segmentStartLPosHandle = glGetAttribLocation(program, "vSegmentStartLPos");
     styleInfoHandle = glGetAttribLocation(program, "vStyleInfo");
+
     glGenBuffers(1, &vertexAttribBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexAttribBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * lineAttributes.size(), &lineAttributes[0], GL_STATIC_DRAW);
@@ -76,8 +75,10 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
 
 void LineGroup2dOpenGl::clear() {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    ready = false;
-    removeGlBuffers();
+    if (ready) {
+        removeGlBuffers();
+        ready = false;
+    }
 }
 
 void LineGroup2dOpenGl::removeGlBuffers() {
@@ -92,6 +93,7 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
 
     if (!ready)
         return;
+
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     if (isMasked) {
         if (isMaskInversed) {
@@ -116,7 +118,6 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     // Apply the projection and view transformation
     glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
     glUniform1f(scaleFactorHandle, screenPixelAsRealMeterFactor);
-    OpenGlHelper::checkGlError("glUniformMatrix4fv and glUniformM1f");
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);

@@ -37,15 +37,12 @@ void TextShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInte
 
     int program = glCreateProgram();       // create empty OpenGL Program
     glAttachShader(program, vertexShader); // add the vertex shader to program
-    OpenGlHelper::checkGlError("glAttachShader Vertex  Text");
     glDeleteShader(vertexShader);
     glAttachShader(program, fragmentShader); // add the fragment shader to program
-    OpenGlHelper::checkGlError("glAttachShader Fragment Text");
     glDeleteShader(fragmentShader);
     glLinkProgram(program); // create OpenGL program executables
 
     checkGlProgramLinking(program);
-    OpenGlHelper::checkGlError("glLinkProgram Text");
 
     openGlContext->storeProgram(programName, program);
 }
