@@ -127,8 +127,19 @@ public:
 
             } else if (val["type"] == "raster" && rasterLayerMap.count(val["source"]) != 0) {
                 auto layer = rasterLayerMap.at(val["source"]);
-                layer->style = RasterVectorStyle(parser.parseValue(val["paint"]["raster-opacity"]));
-                layers.push_back(layer);
+
+                auto newLayer = std::make_shared<RasterVectorLayerDescription>(val["id"],
+                                                                               layer->minZoom,
+                                                                               layer->maxZoom,
+                                                                               layer->url,
+                                                                               layer->adaptScaleToScreen,
+                                                                               layer->numDrawPreviousLayers,
+                                                                               layer->maskTiles,
+                                                                               layer->zoomLevelScaleFactor);
+
+                newLayer->style = RasterVectorStyle(parser.parseValue(val["paint"]["raster-opacity"]));
+
+                layers.push_back(newLayer);
             }else if (val["type"] == "line") {
 
                     std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
