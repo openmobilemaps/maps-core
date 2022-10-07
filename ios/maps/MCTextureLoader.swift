@@ -209,7 +209,7 @@ open class MCTextureLoader: MCLoaderInterface {
                                                      NSAttributedString.Key.backgroundColor: wasCached ? UIColor.lightGray.cgColor : UIColor.white.cgColor]
 
         let byteCountString = ByteCountFormatter().string(fromByteCount: Int64(byteCount))
-        let loadedString = wasCached ? "Loaded from Cache" : "Loaded from wwww"
+        let loadedString = wasCached ? "Loaded from Cache" : "Loaded from www"
 
         let string = url + "\n" + loadedString + " at: " + ISO8601DateFormatter().string(from: .init()) + "\nSize: " + byteCountString
         string.draw(with: .init(origin: .init(x: 0, y: 25), size: size).inset(by: .init(top: 5, left: 5, bottom: 5, right: 5)), options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
