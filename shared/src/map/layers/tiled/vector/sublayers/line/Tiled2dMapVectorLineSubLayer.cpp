@@ -117,8 +117,8 @@ Tiled2dMapVectorLineSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInfo,
         std::unordered_map<int, std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> styleGroupNewLinesMap;
         std::unordered_map<int, std::vector<std::tuple<std::vector<Coord>, int>>> styleGroupLineSubGroupMap;
 
-        for (const auto &feature : layerFeatures) {
-            const FeatureContext &featureContext = std::get<0>(feature);
+        for (auto featureIt = layerFeatures.rbegin(); featureIt != layerFeatures.rend(); ++featureIt) {
+            const FeatureContext &featureContext = std::get<0>(*featureIt);
             if ((description->filter == nullptr || description->filter->evaluateOr(EvaluationContext(-1, featureContext), true))) {
                 int styleGroupIndex = -1;
                 int styleIndex = -1;
@@ -161,7 +161,7 @@ Tiled2dMapVectorLineSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInfo,
                     subGroupCoordCount[styleGroupIndex] = 0;
                 }
 
-                const VectorTileGeometryHandler &geometryHandler = std::get<1>(feature);
+                const VectorTileGeometryHandler &geometryHandler = std::get<1>(*featureIt);
 
                 for (const auto &lineCoordinates: geometryHandler.getLineCoordinates()) {
                     if (lineCoordinates.empty()) { continue; }
@@ -176,7 +176,7 @@ Tiled2dMapVectorLineSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInfo,
                     }
 
                     styleGroupLineSubGroupMap[styleGroupIndex].push_back({lineCoordinates, std::min(maxStylesPerGroup - 1, styleIndex)});
-                    subGroupCoordCount[styleGroupIndex] = subGroupCoordCount[styleGroupIndex] + numCoords;
+                    subGroupCoordCount[styleGroupIndex] = (int)subGroupCoordCount[styleGroupIndex] + numCoords;
                 }
 
                 featureNum++;
