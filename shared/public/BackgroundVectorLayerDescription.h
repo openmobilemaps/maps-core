@@ -49,8 +49,9 @@ public:
     BackgroundVectorStyle style;
 
     BackgroundVectorLayerDescription(std::string identifier,
-                                     BackgroundVectorStyle style):
-    VectorLayerDescription(identifier, "", "", 0, 0, nullptr),
+                                     BackgroundVectorStyle style,
+                                     std::optional<int32_t> renderPassIndex):
+    VectorLayerDescription(identifier, "", "", 0, 0, nullptr, renderPassIndex),
     style(style) {};
 
     virtual std::unordered_set<std::string> getUsedKeys() override {
