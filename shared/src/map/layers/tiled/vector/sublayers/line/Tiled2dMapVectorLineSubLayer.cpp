@@ -203,7 +203,7 @@ Tiled2dMapVectorLineSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInfo,
                 for (const auto &lineCoordinates: geometryHandler.getLineCoordinates()) {
                     if (lineCoordinates.empty()) { continue; }
 
-                    size_t numCoords = lineCoordinates.size();
+                    int numCoords = (int)lineCoordinates.size();
                     int coordCount = subGroupCoordCount[styleGroupIndex];
                     if (coordCount + numCoords > maxNumLinePoints
                         && !styleGroupLineSubGroupMap[styleGroupIndex].empty()) {
