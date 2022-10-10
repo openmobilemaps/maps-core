@@ -71,6 +71,7 @@ void Tiled2dMapVectorLineSubLayer::resume() {
             for (const auto &line : tileGroup.second) {
                 linesToSetup.push_back(line->getLineObject());
             }
+            tilesToEraseFromSetup.insert(tileGroup.first);
         }
     }
 
