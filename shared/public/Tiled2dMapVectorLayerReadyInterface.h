@@ -14,5 +14,5 @@
 
 class Tiled2dMapVectorLayerReadyInterface {
 public:
-    virtual void tileIsReady(const Tiled2dMapTileInfo &tile) = 0;
+    virtual void tileIsReady(const TileLoadTask &tile) = 0;
 };

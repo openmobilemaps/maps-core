@@ -54,7 +54,7 @@ std::vector<std::shared_ptr<RenderPassInterface>> Tiled2dMapVectorBackgroundSubL
     return renderPasses;
 }
 
-std::vector<std::shared_ptr<RenderPassInterface>> Tiled2dMapVectorBackgroundSubLayer::buildRenderPasses(const std::unordered_set<Tiled2dMapTileInfo> &tiles) {
+std::vector<std::shared_ptr<RenderPassInterface>> Tiled2dMapVectorBackgroundSubLayer::buildRenderPasses(const std::unordered_set<TileLoadTask> &tiles) {
     return renderPasses;
 }
 

@@ -28,7 +28,7 @@ public:
 
     virtual std::vector<std::shared_ptr<RenderPassInterface>> buildRenderPasses() override;
 
-    virtual std::vector<std::shared_ptr<RenderPassInterface>> buildRenderPasses(const std::unordered_set<Tiled2dMapTileInfo> &tiles);
+    virtual std::vector<std::shared_ptr<RenderPassInterface>> buildRenderPasses(const std::unordered_set<TileLoadTask> &tiles);
 
     virtual void onAdded(const std::shared_ptr<MapInterface> &mapInterface) override;
 
@@ -44,12 +44,12 @@ public:
 
     virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> &maskingObject) override;
 
-    virtual void updateTileData(const Tiled2dMapTileInfo &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask,
+    virtual void updateTileData(const TileLoadTask &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask,
                    const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures);
 
-    virtual void updateTileMask(const Tiled2dMapTileInfo &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask);
+    virtual void updateTileMask(const TileLoadTask &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask);
 
-    virtual void clearTileData(const Tiled2dMapTileInfo &tileInfo);
+    virtual void clearTileData(const TileLoadTask &tileInfo);
 
     virtual std::string getLayerDescriptionIdentifier() { return ""; };
 
@@ -61,13 +61,13 @@ public:
 
 protected:
     std::recursive_mutex maskMutex;
-    std::unordered_map<Tiled2dMapTileInfo, std::shared_ptr<MaskingObjectInterface>> tileMaskMap;
+    std::unordered_map<TileLoadTask, std::shared_ptr<MaskingObjectInterface>> tileMaskMap;
     std::recursive_mutex tilesInSetupMutex;
-    std::unordered_set<Tiled2dMapTileInfo> tilesInSetup;
+    std::unordered_set<TileLoadTask> tilesInSetup;
 
     std::shared_ptr<MapInterface> mapInterface;
 
-    std::unordered_map<Tiled2dMapTileInfo, std::vector<std::shared_ptr<RenderPassInterface>>> renderPasses;
+    std::unordered_map<TileLoadTask, std::vector<std::shared_ptr<RenderPassInterface>>> renderPasses;
 
     std::weak_ptr<Tiled2dMapVectorLayerReadyInterface> readyDelegate;
 

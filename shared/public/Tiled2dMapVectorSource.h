@@ -52,10 +52,16 @@ public:
 
     virtual void resume() override;
 
-protected:
-    virtual IntermediateResult loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
 
-    virtual FinalResult postLoadingTask(const IntermediateResult &loadedData, const Tiled2dMapTileInfo &tile) override;
+protected:
+    virtual IntermediateResult loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex, std::string subtask) override;
+
+    virtual std::vector<std::string> loadingSubtasks() override;
+
+    virtual FinalResult postLoadingTask(const IntermediateResult &loadedData, const Tiled2dMapTileInfo &tile,
+                                        const std::string &subtask) override;
+
+    virtual FinalResult mergeLoadingTaskResults(FinalResult previous, FinalResult latest) override;
 
 private:
     const std::vector<std::shared_ptr<::LoaderInterface>> loaders;

@@ -16,11 +16,11 @@
 #include <functional>
 
 struct Tiled2dMapRasterTileInfo {
-    Tiled2dMapTileInfo tileInfo;
+    TileLoadTask tileInfo;
     std::shared_ptr<TextureHolderInterface> textureHolder;
     std::vector<::PolygonCoord> masks;
 
-    Tiled2dMapRasterTileInfo(Tiled2dMapTileInfo tileInfo, const std::shared_ptr<TextureHolderInterface> textureHolder, const std::vector<::PolygonCoord> & masks)
+    Tiled2dMapRasterTileInfo(TileLoadTask tileInfo, const std::shared_ptr<TextureHolderInterface> textureHolder, const std::vector<::PolygonCoord> & masks)
         : tileInfo(tileInfo)
         , textureHolder(textureHolder)
         , masks(masks) {}
@@ -37,7 +37,7 @@ struct Tiled2dMapRasterTileInfo {
 namespace std {
 template <> struct hash<Tiled2dMapRasterTileInfo> {
     inline size_t operator()(const Tiled2dMapRasterTileInfo &tileInfo) const {
-        return std::hash<Tiled2dMapTileInfo>()(tileInfo.tileInfo);
+        return std::hash<TileLoadTask>()(tileInfo.tileInfo);
     }
 };
 } // namespace std

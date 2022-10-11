@@ -88,7 +88,7 @@ void Tiled2dMapVectorPolygonSubLayer::show() {
 }
 
 void
-Tiled2dMapVectorPolygonSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask,
+Tiled2dMapVectorPolygonSubLayer::updateTileData(const TileLoadTask &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask,
                                                 const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) {
     Tiled2dMapVectorSubLayer::updateTileData(tileInfo, tileMask, layerFeatures);
     if (!mapInterface) {
@@ -98,10 +98,10 @@ Tiled2dMapVectorPolygonSubLayer::updateTileData(const Tiled2dMapTileInfo &tileIn
     std::string layerName = description->sourceId;
 
     std::string defIdPrefix =
-            std::to_string(tileInfo.x) + "/" + std::to_string(tileInfo.y) + "_" + layerName + "_";
+            std::to_string(tileInfo.tileInfo.x) + "/" + std::to_string(tileInfo.tileInfo.y) + "_" + layerName + "_";
     if (!layerFeatures.empty() &&
-        description->minZoom <= tileInfo.zoomIdentifier &&
-        description->maxZoom >= tileInfo.zoomIdentifier) {
+        description->minZoom <= tileInfo.tileInfo.zoomIdentifier &&
+        description->maxZoom >= tileInfo.tileInfo.zoomIdentifier) {
 
         std::vector<std::tuple<std::vector<std::tuple<std::vector<Coord>, int>>, std::vector<int32_t>>> objectDescriptions;
         objectDescriptions.push_back({{},{}});
@@ -180,7 +180,7 @@ Tiled2dMapVectorPolygonSubLayer::updateTileData(const Tiled2dMapTileInfo &tileIn
     }
 }
 
-void Tiled2dMapVectorPolygonSubLayer::addPolygons(const Tiled2dMapTileInfo &tileInfo, const std::vector<std::tuple<std::vector<std::tuple<std::vector<Coord>, int>>, std::vector<int32_t>>> &polygons){
+void Tiled2dMapVectorPolygonSubLayer::addPolygons(const TileLoadTask &tileInfo, const std::vector<std::tuple<std::vector<std::tuple<std::vector<Coord>, int>>, std::vector<int32_t>>> &polygons){
 
     if (polygons.empty()) {
         if (auto delegate = readyDelegate.lock()) {
@@ -236,7 +236,7 @@ void Tiled2dMapVectorPolygonSubLayer::addPolygons(const Tiled2dMapTileInfo &tile
             }));
 }
 
-void Tiled2dMapVectorPolygonSubLayer::setupPolygons(const Tiled2dMapTileInfo &tileInfo, const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects) {
+void Tiled2dMapVectorPolygonSubLayer::setupPolygons(const TileLoadTask &tileInfo, const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects) {
     auto mapInterface = this->mapInterface;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!renderingContext) {
@@ -286,7 +286,7 @@ void Tiled2dMapVectorPolygonSubLayer::update() {
     shader->setStyles(s);
 }
 
-void Tiled2dMapVectorPolygonSubLayer::clearTileData(const Tiled2dMapTileInfo &tileInfo) {
+void Tiled2dMapVectorPolygonSubLayer::clearTileData(const TileLoadTask &tileInfo) {
     auto mapInterface = this->mapInterface;
     if (!mapInterface) { return; }
 
@@ -305,8 +305,8 @@ void Tiled2dMapVectorPolygonSubLayer::clearTileData(const Tiled2dMapTileInfo &ti
     if (objectsToClear.empty()) return;
 
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
-            TaskConfig("LineGroupTile_clear_" + std::to_string(tileInfo.zoomIdentifier) + "/" + std::to_string(tileInfo.x) + "/" +
-                       std::to_string(tileInfo.y), 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+            TaskConfig("LineGroupTile_clear_" + std::to_string(tileInfo.tileInfo.zoomIdentifier) + "/" + std::to_string(tileInfo.tileInfo.x) + "/" +
+                       std::to_string(tileInfo.tileInfo.y), 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
             [objectsToClear] {
                 for (const auto &lineObject : objectsToClear) {
                     if (lineObject->isReady()) lineObject->clear();
@@ -317,7 +317,7 @@ void Tiled2dMapVectorPolygonSubLayer::clearTileData(const Tiled2dMapTileInfo &ti
 
 void Tiled2dMapVectorPolygonSubLayer::preGenerateRenderPasses() {
     std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(maskMutex, polygonMutex);
-    std::unordered_map<Tiled2dMapTileInfo, std::vector<std::shared_ptr<RenderPassInterface>>> newRenderPasses;
+    std::unordered_map<TileLoadTask, std::vector<std::shared_ptr<RenderPassInterface>>> newRenderPasses;
     for (auto const &tileLineTuple : tilePolygonMap) {
         std::vector<std::shared_ptr<RenderPassInterface>> newTileRenderPasses;
         std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
@@ -342,7 +342,7 @@ void Tiled2dMapVectorPolygonSubLayer::preGenerateRenderPasses() {
     renderPasses = newRenderPasses;
 }
 
-void Tiled2dMapVectorPolygonSubLayer::updateTileMask(const Tiled2dMapTileInfo &tileInfo,
+void Tiled2dMapVectorPolygonSubLayer::updateTileMask(const TileLoadTask &tileInfo,
                                                      const std::shared_ptr<MaskingObjectInterface> &tileMask) {
     Tiled2dMapVectorSubLayer::updateTileMask(tileInfo, tileMask);
     preGenerateRenderPasses();

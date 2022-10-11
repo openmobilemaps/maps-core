@@ -12,6 +12,8 @@
 
 #include "RectCoord.h"
 #include <stdint.h>
+#include "HashedTuple.h"
+#include "Tiled2dMapTileInfo.h"
 
 struct Tiled2dMapTileInfo {
     RectCoord bounds;
@@ -51,4 +53,30 @@ template <> struct hash<Tiled2dMapTileInfo> {
         return res;
     }
 };
+} // namespace std
+
+struct TileLoadTask {
+    Tiled2dMapTileInfo tileInfo;
+    int subtaskIndex;
+
+    TileLoadTask(Tiled2dMapTileInfo tileInfo, int subtaskIndex) :
+    tileInfo(tileInfo), subtaskIndex(subtaskIndex) {}
+
+    bool operator==(const TileLoadTask &o) const { return tileInfo == o.tileInfo && subtaskIndex == o.subtaskIndex; }
+
+    bool operator!=(const TileLoadTask &o) const { return tileInfo != o.tileInfo || subtaskIndex != o.subtaskIndex;  }
+
+    bool operator<(const TileLoadTask &o) const {
+        return tileInfo < o.tileInfo || subtaskIndex < o.subtaskIndex;
+    }
+};
+
+namespace std {
+    template <> struct hash<TileLoadTask> {
+        inline size_t operator()(const TileLoadTask &k) const {
+            auto h = std::hash<Tiled2dMapTileInfo>()(k.tileInfo);
+            std::hash_combine(h, std::hash<int>{}(k.subtaskIndex));
+            return h;
+        }
+    };
 } // namespace std

@@ -412,7 +412,7 @@ void Tiled2dMapVectorLayer::onTilesUpdated() {
 
 
 
-        std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> newTileMasks;
+        std::unordered_map<TileLoadTask, Tiled2dMapLayerMaskWrapper> newTileMasks;
         for (const auto &tileEntry : tilesToKeep) {
 
             size_t existingPolygonHash;
@@ -438,7 +438,7 @@ void Tiled2dMapVectorLayer::onTilesUpdated() {
 
 
         for (const auto &tile : tilesToAdd) {
-            if (!vectorTileSource->isTileVisible(tile.tileInfo)) continue;
+            if (!vectorTileSource->isTileVisible(tile.tileInfo.tileInfo)) continue;
 
             if (newTileMasks.count(tile.tileInfo) == 0) {
                 const auto &tileMask = std::make_shared<PolygonMaskObject>(graphicsFactory,
@@ -544,7 +544,7 @@ void Tiled2dMapVectorLayer::onTilesUpdated() {
     mapInterface->invalidate();
 }
 
-void Tiled2dMapVectorLayer::updateMaskObjects(const std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> &toSetupMaskObject,
+void Tiled2dMapVectorLayer::updateMaskObjects(const std::unordered_map<TileLoadTask, Tiled2dMapLayerMaskWrapper> &toSetupMaskObject,
                                               const std::vector<const std::shared_ptr<MaskingObjectInterface>> &obsoleteMaskObjects) {
     auto mapInterface = this->mapInterface;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
@@ -575,7 +575,7 @@ void Tiled2dMapVectorLayer::updateMaskObjects(const std::unordered_map<Tiled2dMa
 }
 
 
-void Tiled2dMapVectorLayer::tileIsReady(const Tiled2dMapTileInfo &tile) {
+void Tiled2dMapVectorLayer::tileIsReady(const TileLoadTask &tile) {
     {
         std::lock_guard<std::recursive_mutex> tilesReadyLock(tilesReadyMutex);
         if (tilesReady.count(tile) > 0) return;

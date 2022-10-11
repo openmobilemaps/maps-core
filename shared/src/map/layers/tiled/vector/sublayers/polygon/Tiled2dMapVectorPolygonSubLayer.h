@@ -41,12 +41,12 @@ public:
 
     virtual void show() override;
 
-    virtual void updateTileData(const Tiled2dMapTileInfo &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask,
+    virtual void updateTileData(const TileLoadTask &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask,
                                 const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) override;
 
-    void updateTileMask(const Tiled2dMapTileInfo &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask) override;
+    void updateTileMask(const TileLoadTask &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask) override;
 
-    virtual void clearTileData(const Tiled2dMapTileInfo &tileInfo) override;
+    virtual void clearTileData(const TileLoadTask &tileInfo) override;
 
     virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
 
@@ -54,7 +54,7 @@ public:
 
 protected:
 
-    void setupPolygons(const Tiled2dMapTileInfo &tileInfo, const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects);
+    void setupPolygons(const TileLoadTask &tileInfo, const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects);
 
     void preGenerateRenderPasses();
 
@@ -63,12 +63,12 @@ private:
                                          
     std::shared_ptr<PolygonVectorLayerDescription> description;
 
-    void addPolygons(const Tiled2dMapTileInfo &tileInfo, const std::vector<std::tuple<std::vector<std::tuple<std::vector<Coord>, int>>, std::vector<int32_t>>> &polygons);
+    void addPolygons(const TileLoadTask &tileInfo, const std::vector<std::tuple<std::vector<std::tuple<std::vector<Coord>, int>>, std::vector<int32_t>>> &polygons);
 
     std::shared_ptr<PolygonGroupShaderInterface> shader;
 
     std::recursive_mutex polygonMutex;
-    std::unordered_map<Tiled2dMapTileInfo, std::vector<std::shared_ptr<PolygonGroup2dLayerObject>>> tilePolygonMap;
+    std::unordered_map<TileLoadTask, std::vector<std::shared_ptr<PolygonGroup2dLayerObject>>> tilePolygonMap;
 
     std::recursive_mutex featureGroupsMutex;
     std::vector<std::tuple<size_t, FeatureContext>> featureGroups;

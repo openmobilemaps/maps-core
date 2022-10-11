@@ -52,7 +52,7 @@ public:
 
     virtual void onTilesUpdated() override;
 
-    virtual void tileIsReady(const Tiled2dMapTileInfo &tile) override;
+    virtual void tileIsReady(const TileLoadTask &tile) override;
 
     virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
 
@@ -76,7 +76,7 @@ private:
 
     void initializeVectorLayer(const std::vector<std::shared_ptr<LayerInterface>> &newSublayers);
 
-    virtual void updateMaskObjects(const std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> &toSetupMaskObject, const std::vector<const std::shared_ptr<MaskingObjectInterface>> &obsoleteMaskObjects);
+    virtual void updateMaskObjects(const std::unordered_map<TileLoadTask, Tiled2dMapLayerMaskWrapper> &toSetupMaskObject, const std::vector<const std::shared_ptr<MaskingObjectInterface>> &obsoleteMaskObjects);
 
     std::shared_ptr<LayerInterface> getLayerForDescription(const std::shared_ptr<VectorLayerDescription> &layerDescription);
 
@@ -100,13 +100,13 @@ private:
     std::unordered_set<Tiled2dMapVectorTileInfo> tileSet;
 
     std::recursive_mutex tilesReadyMutex;
-    std::unordered_set<Tiled2dMapTileInfo> tilesReady;
+    std::unordered_set<TileLoadTask> tilesReady;
 
     std::recursive_mutex tilesReadyCountMutex;
-    std::unordered_map<Tiled2dMapTileInfo, int> tilesReadyCount;
+    std::unordered_map<TileLoadTask, int> tilesReadyCount;
 
     std::recursive_mutex tileMaskMapMutex;
-    std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> tileMaskMap;
+    std::unordered_map<TileLoadTask, Tiled2dMapLayerMaskWrapper> tileMaskMap;
 
     std::recursive_mutex sublayerMutex;
     std::vector<std::shared_ptr<LayerInterface>> sublayers;

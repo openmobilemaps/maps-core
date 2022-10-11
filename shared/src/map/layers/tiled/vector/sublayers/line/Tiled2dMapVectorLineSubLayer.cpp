@@ -125,7 +125,7 @@ void Tiled2dMapVectorLineSubLayer::update() {
 }
 
 void
-Tiled2dMapVectorLineSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask,
+Tiled2dMapVectorLineSubLayer::updateTileData(const TileLoadTask &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask,
                                              const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) {
     Tiled2dMapVectorSubLayer::updateTileData(tileInfo, tileMask, layerFeatures);
     auto mapInterface = this->mapInterface;
@@ -138,10 +138,10 @@ Tiled2dMapVectorLineSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInfo,
     std::string layerName = std::string(description->sourceId);
     //LogDebug <<= "    layer: " + layerName + " - v" + std::to_string(data.version()) + " - extent: " +
     //             std::to_string(extent);
-    std::string defIdPrefix = std::to_string(tileInfo.x) + "/" + std::to_string(tileInfo.y) + "_" + layerName + "_";
+    std::string defIdPrefix = std::to_string(tileInfo.tileInfo.x) + "/" + std::to_string(tileInfo.tileInfo.y) + "_" + layerName + "_";
     if (!layerFeatures.empty() &&
-        description->minZoom <= tileInfo.zoomIdentifier &&
-        description->maxZoom >= tileInfo.zoomIdentifier) {
+        description->minZoom <= tileInfo.tileInfo.zoomIdentifier &&
+        description->maxZoom >= tileInfo.tileInfo.zoomIdentifier) {
         //LogDebug <<= "      with " + std::to_string(data.num_features()) + " features";
         int featureNum = 0;
         std::unordered_map<int, int> subGroupCoordCount;
@@ -228,7 +228,7 @@ Tiled2dMapVectorLineSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInfo,
     }
 }
 
-void Tiled2dMapVectorLineSubLayer::clearTileData(const Tiled2dMapTileInfo &tileInfo) {
+void Tiled2dMapVectorLineSubLayer::clearTileData(const TileLoadTask &tileInfo) {
     auto mapInterface = this->mapInterface;
     if (!mapInterface) {
         return;
@@ -249,8 +249,8 @@ void Tiled2dMapVectorLineSubLayer::clearTileData(const Tiled2dMapTileInfo &tileI
     if (objectsToClear.empty()) return;
 
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
-            TaskConfig("LineGroupTile_clear_" + std::to_string(tileInfo.zoomIdentifier) + "/" + std::to_string(tileInfo.x) + "/" +
-                       std::to_string(tileInfo.y), 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+            TaskConfig("LineGroupTile_clear_" + std::to_string(tileInfo.tileInfo.zoomIdentifier) + "/" + std::to_string(tileInfo.tileInfo.x) + "/" +
+                       std::to_string(tileInfo.tileInfo.y), 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
             [objectsToClear] {
                 for (const auto &lineObject : objectsToClear) {
                     if (lineObject->isReady()) lineObject->clear();
@@ -259,7 +259,7 @@ void Tiled2dMapVectorLineSubLayer::clearTileData(const Tiled2dMapTileInfo &tileI
 }
 
 void
-Tiled2dMapVectorLineSubLayer::addLines(const Tiled2dMapTileInfo &tileInfo,
+Tiled2dMapVectorLineSubLayer::addLines(const TileLoadTask &tileInfo,
                                        const std::unordered_map<int, std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> &styleIdLinesMap) {
 
     if (styleIdLinesMap.empty()) {
@@ -315,7 +315,7 @@ Tiled2dMapVectorLineSubLayer::addLines(const Tiled2dMapTileInfo &tileInfo,
             }));
 }
 
-void Tiled2dMapVectorLineSubLayer::setupLines(const Tiled2dMapTileInfo &tileInfo, const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newLineGraphicsObjects) {
+void Tiled2dMapVectorLineSubLayer::setupLines(const TileLoadTask &tileInfo, const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newLineGraphicsObjects) {
     auto mapInterface = this->mapInterface;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!renderingContext)
@@ -346,7 +346,7 @@ void Tiled2dMapVectorLineSubLayer::setupLines(const Tiled2dMapTileInfo &tileInfo
 
 void Tiled2dMapVectorLineSubLayer::preGenerateRenderPasses() {
     std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(maskMutex, lineMutex);
-    std::unordered_map<Tiled2dMapTileInfo, std::vector<std::shared_ptr<RenderPassInterface>>> newRenderPasses;
+    std::unordered_map<TileLoadTask, std::vector<std::shared_ptr<RenderPassInterface>>> newRenderPasses;
     for (auto const &tileLineTuple : tileLinesMap) {
         std::vector<std::shared_ptr<RenderPassInterface>> newTileRenderPasses;
         std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
@@ -371,7 +371,7 @@ void Tiled2dMapVectorLineSubLayer::preGenerateRenderPasses() {
     renderPasses = newRenderPasses;
 }
 
-void Tiled2dMapVectorLineSubLayer::updateTileMask(const Tiled2dMapTileInfo &tileInfo,
+void Tiled2dMapVectorLineSubLayer::updateTileMask(const TileLoadTask &tileInfo,
                                                   const std::shared_ptr<MaskingObjectInterface> &tileMask) {
     Tiled2dMapVectorSubLayer::updateTileMask(tileInfo, tileMask);
     preGenerateRenderPasses();

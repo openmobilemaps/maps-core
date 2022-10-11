@@ -39,21 +39,21 @@ public:
 
     virtual void show() override;
 
-    virtual void updateTileData(const Tiled2dMapTileInfo &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask,
+    virtual void updateTileData(const TileLoadTask &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask,
                                 const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) override;
 
-    void updateTileMask(const Tiled2dMapTileInfo &tileInfo, const std::shared_ptr <MaskingObjectInterface> &tileMask) override;
+    void updateTileMask(const TileLoadTask &tileInfo, const std::shared_ptr <MaskingObjectInterface> &tileMask) override;
 
-    virtual void clearTileData(const Tiled2dMapTileInfo &tileInfo) override;
+    virtual void clearTileData(const TileLoadTask &tileInfo) override;
 
     virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
 
     virtual std::string getLayerDescriptionIdentifier() override;
 
 protected:
-    void addLines(const Tiled2dMapTileInfo &tileInfo, const std::unordered_map<int, std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> &styleIdLinesMap);
+    void addLines(const TileLoadTask &tileInfo, const std::unordered_map<int, std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> &styleIdLinesMap);
 
-    void setupLines(const Tiled2dMapTileInfo &tileInfo, const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newLineGraphicsObjects);
+    void setupLines(const TileLoadTask &tileInfo, const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newLineGraphicsObjects);
 
     void preGenerateRenderPasses();
 
@@ -66,7 +66,7 @@ private:
     std::vector<std::shared_ptr<LineGroupShaderInterface>> shaders;
 
     std::recursive_mutex lineMutex;
-    std::unordered_map<Tiled2dMapTileInfo, std::vector<std::shared_ptr<LineGroup2dLayerObject>>> tileLinesMap;
+    std::unordered_map<TileLoadTask, std::vector<std::shared_ptr<LineGroup2dLayerObject>>> tileLinesMap;
 
     std::recursive_mutex featureGroupsMutex;
     std::vector<std::vector<std::tuple<size_t, FeatureContext>>> featureGroups;

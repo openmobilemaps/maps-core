@@ -15,13 +15,14 @@
 #include "PolygonCoord.h"
 #include "VectorTileGeometryHandler.h"
 #include <functional>
+#include "Tiled2dMapTileInfo.h"
 
 struct Tiled2dMapVectorTileInfo {
-    const Tiled2dMapTileInfo tileInfo;
+    const TileLoadTask tileInfo;
     const std::unordered_map<std::string, std::shared_ptr<std::unordered_map<std::string, std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>>>> layerFeatureMaps;
     std::vector<::PolygonCoord> masks;
 
-    Tiled2dMapVectorTileInfo(Tiled2dMapTileInfo tileInfo,
+    Tiled2dMapVectorTileInfo(TileLoadTask tileInfo,
                              const std::unordered_map<std::string, std::shared_ptr<std::unordered_map<std::string, std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>>>> &layerFeatureMaps,
                              const std::vector<::PolygonCoord> &masks)
         : tileInfo(tileInfo)
@@ -36,7 +37,7 @@ struct Tiled2dMapVectorTileInfo {
 namespace std {
 template <> struct hash<Tiled2dMapVectorTileInfo> {
     inline size_t operator()(const Tiled2dMapVectorTileInfo &tileInfo) const {
-        return std::hash<Tiled2dMapTileInfo>()(tileInfo.tileInfo);
+        return std::hash<Tiled2dMapTileInfo>()(tileInfo.tileInfo.tileInfo);
     }
 };
 } // namespace std

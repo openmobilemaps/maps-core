@@ -92,11 +92,11 @@ public:
 
     virtual void show() override;
 
-    virtual void updateTileData(const Tiled2dMapTileInfo &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask, const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) override;
+    virtual void updateTileData(const TileLoadTask &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask, const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) override;
 
-    virtual void clearTileData(const Tiled2dMapTileInfo &tileInfo) override;
+    virtual void clearTileData(const TileLoadTask &tileInfo) override;
 
-    virtual std::vector<std::shared_ptr<RenderPassInterface>> buildRenderPasses(const std::unordered_set<Tiled2dMapTileInfo> &tiles) override;
+    virtual std::vector<std::shared_ptr<RenderPassInterface>> buildRenderPasses(const std::unordered_set<TileLoadTask> &tiles) override;
 
     bool isDirty();
 
@@ -113,10 +113,10 @@ public:
     void setSelectedFeatureIdentfier(std::optional<int64_t> identifier) override;
 
 protected:
-    void addTexts(const Tiled2dMapTileInfo &tileInfo,
+    void addTexts(const TileLoadTask &tileInfo,
                   const std::vector< std::tuple<const FeatureContext, std::shared_ptr<SymbolInfo>>> &texts);
 
-    void setupTexts(const Tiled2dMapTileInfo &tileInfo,
+    void setupTexts(const TileLoadTask &tileInfo,
                     const std::vector<std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper>> texts);
 
     FontLoaderResult loadFont(const Font &font);
@@ -136,7 +136,7 @@ private:
     std::unordered_map<std::string, FontLoaderResult> fontLoaderResults;
 
     std::recursive_mutex symbolMutex;
-    std::unordered_map<Tiled2dMapTileInfo, std::vector<std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper>>> tileTextMap;
+    std::unordered_map<TileLoadTask, std::vector<std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper>>> tileTextMap;
 
     std::recursive_mutex selectedTextWrapperMutex;
     std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> selectedTextWrapper;
@@ -145,7 +145,7 @@ private:
     std::shared_ptr<SpriteData> spriteData;
 
     std::recursive_mutex tileTextPositionMapMutex;
-    std::unordered_map<Tiled2dMapTileInfo, std::unordered_map<std::string, std::vector<Coord>>> tileTextPositionMap;
+    std::unordered_map<TileLoadTask, std::unordered_map<std::string, std::vector<Coord>>> tileTextPositionMap;
 
     std::recursive_mutex dirtyMutex;
     double lastZoom = 0.0;

@@ -35,14 +35,14 @@ public:
 
     virtual std::vector<std::shared_ptr<RenderPassInterface>> buildRenderPasses() override;
 
-    virtual std::vector<std::shared_ptr<RenderPassInterface>> buildRenderPasses(const std::unordered_set<Tiled2dMapTileInfo> &tiles) override;
+    virtual std::vector<std::shared_ptr<RenderPassInterface>> buildRenderPasses(const std::unordered_set<TileLoadTask> &tiles) override;
 
-    virtual void updateTileData(const Tiled2dMapTileInfo &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask,
+    virtual void updateTileData(const TileLoadTask &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask,
                                 const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) override {};
 
-    void updateTileMask(const Tiled2dMapTileInfo &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask) override {};
+    void updateTileMask(const TileLoadTask &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask) override {};
 
-    virtual void clearTileData(const Tiled2dMapTileInfo &tileInfo) override {};
+    virtual void clearTileData(const TileLoadTask &tileInfo) override {};
 
     virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
 

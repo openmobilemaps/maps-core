@@ -152,7 +152,7 @@ std::optional<Tiled2dMapVectorSymbolSubLayerPositioningWrapper> Tiled2dMapVector
 }
 
 void
-Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask, const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) {
+Tiled2dMapVectorSymbolSubLayer::updateTileData(const TileLoadTask &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask, const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) {
     Tiled2dMapVectorSubLayer::updateTileData(tileInfo, tileMask, layerFeatures);
     auto mapInterface = this->mapInterface;
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
@@ -163,14 +163,14 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
     std::vector<std::tuple<const FeatureContext, std::shared_ptr<SymbolInfo>>> textInfos;
 
     tileTextPositionMap[tileInfo] = {};
-    double tilePixelFactor = (0.0254 / camera->getScreenDensityPpi()) * tileInfo.zoomLevel;
+    double tilePixelFactor = (0.0254 / camera->getScreenDensityPpi()) * tileInfo.tileInfo.zoomLevel;
 
     for(auto& feature : layerFeatures)
     {
         auto& context = std::get<0>(feature);
         auto& geometry = std::get<1>(feature);
 
-        auto const evalContext = EvaluationContext(tileInfo.zoomIdentifier, context);
+        auto const evalContext = EvaluationContext(tileInfo.tileInfo.zoomIdentifier, context);
 
         if ((description->filter != nullptr && !description->filter->evaluateOr(evalContext, true))) {
             continue;
@@ -370,7 +370,7 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
     addTexts(tileInfo, textInfos);
 }
 
-void Tiled2dMapVectorSymbolSubLayer::addTexts(const Tiled2dMapTileInfo &tileInfo,
+void Tiled2dMapVectorSymbolSubLayer::addTexts(const TileLoadTask &tileInfo,
                                               const std::vector<std::tuple<const FeatureContext, std::shared_ptr<SymbolInfo>>> &texts) {
 
     auto mapInterface = this->mapInterface;
@@ -747,7 +747,7 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
     }
 }
 
-void Tiled2dMapVectorSymbolSubLayer::setupTexts(const Tiled2dMapTileInfo &tileInfo,
+void Tiled2dMapVectorSymbolSubLayer::setupTexts(const TileLoadTask &tileInfo,
                                                 const std::vector<std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper>> texts) {
     {
         std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(tilesInSetupMutex, symbolMutex);
@@ -783,7 +783,7 @@ void Tiled2dMapVectorSymbolSubLayer::setupTexts(const Tiled2dMapTileInfo &tileIn
 void Tiled2dMapVectorSymbolSubLayer::update() {}
 
 
-void Tiled2dMapVectorSymbolSubLayer::clearTileData(const Tiled2dMapTileInfo &tileInfo) {
+void Tiled2dMapVectorSymbolSubLayer::clearTileData(const TileLoadTask &tileInfo) {
     auto mapInterface = this->mapInterface;
     if (!mapInterface) { return; }
     
@@ -826,8 +826,8 @@ void Tiled2dMapVectorSymbolSubLayer::clearTileData(const Tiled2dMapTileInfo &til
     if (objectsToClear.empty()) return;
 
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
-            TaskConfig("LineGroupTile_clear_" + std::to_string(tileInfo.zoomIdentifier) + "/" + std::to_string(tileInfo.x) + "/" +
-                       std::to_string(tileInfo.y), 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+            TaskConfig("LineGroupTile_clear_" + std::to_string(tileInfo.tileInfo.zoomIdentifier) + "/" + std::to_string(tileInfo.tileInfo.x) + "/" +
+                       std::to_string(tileInfo.tileInfo.y), 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
             [objectsToClear] {
                 for (const auto &textObject : objectsToClear) {
                     if (textObject->isReady()) {
@@ -837,7 +837,7 @@ void Tiled2dMapVectorSymbolSubLayer::clearTileData(const Tiled2dMapTileInfo &til
             }));
 }
 
-std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorSymbolSubLayer::buildRenderPasses(const std::unordered_set<Tiled2dMapTileInfo> &tiles)
+std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorSymbolSubLayer::buildRenderPasses(const std::unordered_set<TileLoadTask> &tiles)
 {
     auto camera = mapInterface->getCamera();
 

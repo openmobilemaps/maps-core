@@ -25,13 +25,22 @@ Tiled2dMapRasterSource::Tiled2dMapRasterSource(const MapConfig &mapConfig,
           mapConfig, layerConfig, conversionHelper, scheduler, listener, screenDensityPpi, loaders.size())
     , loaders(loaders) {}
 
-TextureLoaderResult Tiled2dMapRasterSource::loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) {
+TextureLoaderResult Tiled2dMapRasterSource::loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex, std::string subtask) {
     return loaders[loaderIndex]->loadTexture(layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier), std::nullopt);
 }
 
+std::vector<std::string> Tiled2dMapRasterSource::loadingSubtasks() {
+    return {""};
+}
+
 std::shared_ptr<::TextureHolderInterface> Tiled2dMapRasterSource::postLoadingTask(const TextureLoaderResult &loadedData,
-                                                                                  const Tiled2dMapTileInfo &tile) {
+                                                                                  const Tiled2dMapTileInfo &tile,
+                                                                                  const std::string &subtask) {
     return loadedData.data;
+}
+
+std::shared_ptr<::TextureHolderInterface> Tiled2dMapRasterSource::mergeLoadingTaskResults(std::shared_ptr<::TextureHolderInterface> previous, std::shared_ptr<::TextureHolderInterface> latest) {
+    return latest;
 }
 
 std::unordered_set<Tiled2dMapRasterTileInfo> Tiled2dMapRasterSource::getCurrentTiles() {
@@ -45,3 +54,4 @@ std::unordered_set<Tiled2dMapRasterTileInfo> Tiled2dMapRasterSource::getCurrentT
     }
     return currentTileInfos;
 }
+

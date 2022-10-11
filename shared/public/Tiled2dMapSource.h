@@ -15,6 +15,7 @@
 #include "LambdaTask.h"
 #include "MapConfig.h"
 #include "PrioritizedTiled2dMapTileInfo.h"
+#include "PrioritizedLoadTask.h"
 #include "SchedulerInterface.h"
 #include "Tiled2dMapLayerConfig.h"
 #include "Tiled2dMapSourceInterface.h"
@@ -92,15 +93,19 @@ public:
 
     virtual void forceReload() override;
 
-    void setTileReady(const Tiled2dMapTileInfo &tile);
+    void setTileReady(const TileLoadTask &tile);
 
-    void setTilesReady(const std::vector<const Tiled2dMapTileInfo> &tiles);
+    void setTilesReady(const std::vector<const TileLoadTask> &tiles);
 
-    virtual L loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) = 0;
+    virtual L loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex, std::string subtask) = 0;
+
+    virtual std::vector<std::string> loadingSubtasks() = 0;
 
   protected:
 
-    virtual R postLoadingTask(const L &loadedData, const Tiled2dMapTileInfo &tile) = 0;
+    virtual R postLoadingTask(const L &loadedData, const Tiled2dMapTileInfo &tile, const std::string &subtask) = 0;
+
+    virtual R mergeLoadingTaskResults(R previous, R latest) = 0;
 
     MapConfig mapConfig;
     std::shared_ptr<Tiled2dMapLayerConfig> layerConfig;
@@ -117,7 +122,7 @@ public:
     std::optional<int32_t> maxZoomLevelIdentifier;
 
     std::recursive_mutex currentTilesMutex;
-    std::map<Tiled2dMapTileInfo, TileWrapper<R>> currentTiles;
+    std::map<TileLoadTask, TileWrapper<R>> currentTiles;
 
 
     std::recursive_mutex currentZoomLevelMutex;
@@ -137,7 +142,7 @@ public:
 
     float screenDensityPpi;
     std::recursive_mutex tilesReadyMutex;
-    std::set<Tiled2dMapTileInfo> readyTiles;
+    std::set<TileLoadTask> readyTiles;
 
 private:
     void updateCurrentTileset(const ::RectCoord &visibleBounds, int curT, double zoom);
@@ -158,14 +163,14 @@ private:
 
     std::recursive_mutex updateTilesetMutex;
     std::recursive_mutex currentlyLoadingMutex;
-    std::unordered_set<Tiled2dMapTileInfo> currentlyLoading;
+    std::unordered_set<TileLoadTask> currentlyLoading;
 
     std::recursive_mutex dispatchedTasksMutex;
     std::unordered_map<size_t, size_t > dispatchedTasks;
 
         // the key of the map is the loader index, if the first loader returns noop the next one will be used
     std::recursive_mutex loadingQueueMutex;
-    std::unordered_map<size_t, std::set<PrioritizedTiled2dMapTileInfo>> loadingQueues;
+    std::unordered_map<size_t, std::set<PrioritizedLoadTask>> loadingQueues;
 
     const int max_parallel_loading_tasks = 8;
     const long long MAX_WAIT_TIME = 32000;
@@ -177,12 +182,12 @@ private:
     };
 
     std::recursive_mutex errorTilesMutex;
-    std::unordered_map<size_t, std::map<PrioritizedTiled2dMapTileInfo, ErrorInfo>> errorTiles;
+    std::unordered_map<size_t, std::map<PrioritizedLoadTask, ErrorInfo>> errorTiles;
 
     std::recursive_mutex notFoundTilesMutex;
     std::unordered_set<Tiled2dMapTileInfo> notFoundTiles;
 
-    std::optional<PrioritizedTiled2dMapTileInfo> dequeueLoadingTask(size_t loaderIndex);
+    std::optional<PrioritizedLoadTask> dequeueLoadingTask(size_t loaderIndex);
 };
 
 #include "Tiled2dMapSourceImpl.h"

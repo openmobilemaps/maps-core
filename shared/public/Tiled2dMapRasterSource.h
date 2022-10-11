@@ -27,11 +27,17 @@ class Tiled2dMapRasterSource
 
     std::unordered_set<Tiled2dMapRasterTileInfo> getCurrentTiles();
 
+
   protected:
-    virtual TextureLoaderResult loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
+    virtual TextureLoaderResult loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex, std::string subtask) override;
+
+    virtual std::vector<std::string> loadingSubtasks() override;
 
     virtual std::shared_ptr<::TextureHolderInterface> postLoadingTask(const TextureLoaderResult &loadedData,
-                                                                      const Tiled2dMapTileInfo &tile) override;
+                                                                      const Tiled2dMapTileInfo &tile,
+                                                                      const std::string &subtask) override;
+
+    virtual std::shared_ptr<::TextureHolderInterface> mergeLoadingTaskResults(std::shared_ptr<::TextureHolderInterface> previous, std::shared_ptr<::TextureHolderInterface> latest) override;
 
   private:
     const std::vector<std::shared_ptr<::LoaderInterface>> loaders;

@@ -25,9 +25,12 @@ Tiled2dMapVectorSource::Tiled2dMapVectorSource(const MapConfig &mapConfig,
         : Tiled2dMapSource<DataHolderInterface, IntermediateResult, FinalResult>(mapConfig, layerConfigs.begin()->second, conversionHelper, scheduler,
                                                                               listener, screenDensityPpi, tileLoaders.size()), loaders(tileLoaders), layersToDecode(layersToDecode), layerConfigs(layerConfigs) {}
 
-IntermediateResult Tiled2dMapVectorSource::loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) {
+IntermediateResult Tiled2dMapVectorSource::loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex, std::string subtask) {
     std::unordered_map<std::string, DataLoaderResult> results;
     for(auto const &[source, config]: layerConfigs) {
+        if (source != subtask) {
+            continue;
+        }
         results.insert({source, loaders[loaderIndex]->loadData(config->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier), std::nullopt)});
         if (results.at(source).status != LoaderStatus::OK) {
             return IntermediateResult(results, results.at(source).status, results.at(source).errorCode);
@@ -35,7 +38,17 @@ IntermediateResult Tiled2dMapVectorSource::loadTile(Tiled2dMapTileInfo tile, siz
     }
     return IntermediateResult(results, LoaderStatus::OK, std::nullopt);
 }
-FinalResult Tiled2dMapVectorSource::postLoadingTask(const IntermediateResult &loadedData, const Tiled2dMapTileInfo &tile) {
+
+std::vector<std::string> Tiled2dMapVectorSource::loadingSubtasks() {
+    std::vector<std::string> subtasks;
+    for(auto const &[source, config]: layerConfigs) {
+        subtasks.push_back(source);
+    }
+    return subtasks;
+}
+
+FinalResult Tiled2dMapVectorSource::postLoadingTask(const IntermediateResult &loadedData, const Tiled2dMapTileInfo &tile,
+                                                    const std::string &subtask) {
     FinalResult resultMap;
 
     for(auto const &[source, data_]: loadedData.results) {
@@ -88,6 +101,8 @@ FinalResult Tiled2dMapVectorSource::postLoadingTask(const IntermediateResult &lo
     return resultMap;
 }
 
+
+
 std::unordered_set<Tiled2dMapVectorTileInfo> Tiled2dMapVectorSource::getCurrentTiles() {
     std::lock_guard<std::recursive_mutex> lock(currentTilesMutex);
     std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos;
@@ -97,6 +112,17 @@ std::unordered_set<Tiled2dMapVectorTileInfo> Tiled2dMapVectorSource::getCurrentT
         }
     }
     return currentTileInfos;
+}
+
+FinalResult Tiled2dMapVectorSource::mergeLoadingTaskResults(FinalResult previous, FinalResult latest) {
+    FinalResult merged;
+    for (const auto &[key, value] : previous) {
+        merged.insert({key, value});
+    }
+    for (const auto &[key, value] : latest) {
+        merged.insert({key, value});
+    }
+    return merged;
 }
 
 void Tiled2dMapVectorSource::pause() {

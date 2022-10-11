@@ -29,7 +29,7 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorSubLayer::bu
 }
 
 std::vector<std::shared_ptr<::RenderPassInterface>>
-Tiled2dMapVectorSubLayer::buildRenderPasses(const std::unordered_set<Tiled2dMapTileInfo> &tiles) {
+Tiled2dMapVectorSubLayer::buildRenderPasses(const std::unordered_set<TileLoadTask> &tiles) {
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
     for (const auto &tilePasses : renderPasses) {
         if (tiles.count(tilePasses.first) > 0) {
@@ -62,7 +62,7 @@ void Tiled2dMapVectorSubLayer::show() {
 }
 
 
-void Tiled2dMapVectorSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask,
+void Tiled2dMapVectorSubLayer::updateTileData(const TileLoadTask &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask,
                             const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) {
     if (!mapInterface) return;
 
@@ -70,14 +70,14 @@ void Tiled2dMapVectorSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInfo
     tileMaskMap[tileInfo] = tileMask;
 }
 
-void Tiled2dMapVectorSubLayer::updateTileMask(const Tiled2dMapTileInfo &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask) {
+void Tiled2dMapVectorSubLayer::updateTileMask(const TileLoadTask &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask) {
     if (!mapInterface) return;
 
     std::lock_guard<std::recursive_mutex> lock(maskMutex);
     tileMaskMap[tileInfo] = tileMask;
 }
 
-void Tiled2dMapVectorSubLayer::clearTileData(const Tiled2dMapTileInfo &tileInfo) {
+void Tiled2dMapVectorSubLayer::clearTileData(const TileLoadTask &tileInfo) {
     {
         std::lock_guard<std::recursive_mutex> lock(maskMutex);
         const auto &maskObject = tileMaskMap[tileInfo];
