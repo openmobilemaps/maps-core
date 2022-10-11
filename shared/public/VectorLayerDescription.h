@@ -14,7 +14,7 @@
 #include <vector>
 
 enum VectorLayerType {
- background, raster, line, polygon, symbol
+ background, raster, line, polygon, symbol, custom
 };
 
 class VectorLayerDescription {
