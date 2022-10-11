@@ -125,6 +125,11 @@ std::shared_ptr<LayerInterface> Tiled2dMapVectorLayer::getLayerForDescription(co
     return nullptr;
 }
 
+std::shared_ptr<Tiled2dMapLayerConfig>
+Tiled2dMapVectorLayer::getLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &source) {
+    return std::make_shared<Tiled2dMapVectorLayerConfig>(source);
+}
+
 void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription) {
     std::vector<std::shared_ptr<LayerInterface>> newSublayers;
     std::unordered_map<std::string, std::unordered_map<std::string, std::vector<std::shared_ptr<Tiled2dMapVectorSubLayer>>>> newSourceLayerMap;
@@ -163,7 +168,7 @@ void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDes
         this->layerConfigs.clear();
 
         for (auto const &source: mapDescription->vectorSources) {
-            layerConfigs[source->identifier] = std::make_shared<Tiled2dMapVectorLayerConfig>(source);
+            layerConfigs[source->identifier] = getLayerConfig(source);
         }
 
         initializeVectorLayer(newSublayers);
