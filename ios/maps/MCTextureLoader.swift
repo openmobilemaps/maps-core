@@ -43,17 +43,35 @@ open class MCTextureLoader: MCLoaderInterface {
         isRasterDebugModeEnabled = UserDefaults.standard.bool(forKey: "io.openmobilemaps.debug.rastertiles.enabled")
     }
 
-    open func loadTexture(_ url: String, etag: String?) -> MCTextureLoaderResult {
-        let urlString = url
-        guard let url = URL(string: urlString) else {
-            preconditionFailure("invalid url: \(urlString)")
-        }
+    open func loadSync(request: URLRequest) -> (Data?, HTTPURLResponse?, NSError?) {
 
         let semaphore = DispatchSemaphore(value: 0)
 
         var result: Data?
         var response: HTTPURLResponse?
         var error: NSError?
+
+        var task = session.dataTask(with: request) { data, response_, error_ in
+            result = data
+            response = response_ as? HTTPURLResponse
+            error = error_ as NSError?
+            semaphore.signal()
+        }
+
+        modifyDataTask(task: &task)
+
+        task.resume()
+        semaphore.wait()
+
+        return (result, response, error)
+
+    }
+
+    open func loadTexture(_ url: String, etag: String?) -> MCTextureLoaderResult {
+        let urlString = url
+        guard let url = URL(string: urlString) else {
+            preconditionFailure("invalid url: \(urlString)")
+        }
 
         var urlRequest = URLRequest(url: url)
 
@@ -65,17 +83,7 @@ open class MCTextureLoader: MCLoaderInterface {
             wasCached = true
         }
 
-        var task = session.dataTask(with: urlRequest) { data, response_, error_ in
-            result = data
-            response = response_ as? HTTPURLResponse
-            error = error_ as NSError?
-            semaphore.signal()
-        }
-
-        modifyDataTask(task: &task)
-
-        task.resume()
-        semaphore.wait()
+        let (result, response, error) = loadSync(request: urlRequest)
 
         if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorTimedOut {
             return .init(data: nil, etag: response?.etag, status: .ERROR_TIMEOUT, errorCode: (error?.code).stringOrNil)
