@@ -20,6 +20,7 @@
 #include "Tiled2dMapRasterLayerCallbackInterface.h"
 #include "PolygonMaskObject.h"
 #include "ShaderProgramInterface.h"
+#include "AlphaShaderInterface.h"
 #include "Tiled2dMapLayerMaskWrapper.h"
 #include "Tiled2dMapLayerConfig.h"
 #include <mutex>
@@ -53,6 +54,8 @@ public:
 
     virtual void setT(double t) override;
 
+    virtual void setAlpha(double alpha) override;
+
 private:
 
 
@@ -63,6 +66,7 @@ protected:
     std::shared_ptr<Quad2dInterface> mergedTilesQuad;
 
     std::shared_ptr<::ShaderProgramInterface> mergedShader;
+    std::shared_ptr<::AlphaShaderInterface> mergedAlphaShader;
 
     float tFraction = 0;
 

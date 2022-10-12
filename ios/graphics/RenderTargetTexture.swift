@@ -28,7 +28,7 @@ open class RenderTargetTexture: Identifiable, Equatable, MCRenderTargetTexture {
         let pipelineStateDescriptor = PipelineDescriptorFactory.pipelineDescriptor(pipeline: .alphaShader)
         pipelineStateDescriptor.label = "Offscreen Render Pipeline"
         pipelineStateDescriptor.sampleCount = 1
-        pipelineStateDescriptor.colorAttachments[0]?.pixelFormat = MetalContext.current.colorPixelFormat
+        pipelineStateDescriptor.colorAttachments[0]?.pixelFormat = MetalContext.colorPixelFormat
         renderPipelineState = try! MetalContext.current.device.makeRenderPipelineState(descriptor: pipelineStateDescriptor)
 //        renderPipelineState.colorAttachments[0]?
 
@@ -61,7 +61,7 @@ open class RenderTargetTexture: Identifiable, Equatable, MCRenderTargetTexture {
 
         let texDescriptor = MTLTextureDescriptor()
         texDescriptor.textureType = .type2D
-        texDescriptor.pixelFormat = MetalContext.current.colorPixelFormat
+        texDescriptor.pixelFormat = MetalContext.colorPixelFormat
         texDescriptor.usage = [.renderTarget, .shaderRead]
         texDescriptor.storageMode = .private
         texDescriptor.width = Int(newSize.x)

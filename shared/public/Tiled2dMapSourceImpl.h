@@ -681,7 +681,7 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(size_t loaderIndex) {
 
 template<class T, class L, class R>
 TileLoadingDecision Tiled2dMapSource<T, L, R>::tileLoadingDecision(int tileZ, int curZ, int tileT, int curT, int absoluteLevel, int relativeLevel, int smallestCoveringLevel) {
-    if (tileZ == curZ && tileT == curT) {
+    if (tileZ == curZ && (tileT == curT || tileT == curT + 1)) {
         return TileLoadingDecision::loadNeeded;
     }
     else if (tileZ == smallestCoveringLevel && abs(tileT - curT) < 20) {

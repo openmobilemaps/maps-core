@@ -34,7 +34,7 @@ private:
         ~JavaProxy();
 
         std::shared_ptr<::AlphaShaderInterface> combineShader() override;
-        std::shared_ptr<::ShaderProgramInterface> finalShader() override;
+        std::shared_ptr<::AlphaShaderInterface> finalShader() override;
 
     private:
         friend ::djinni::JniInterface<::Tiled2dMapRasterLayerShaderFactory, ::djinni_generated::NativeTiled2dMapRasterLayerShaderFactory>;
@@ -42,7 +42,7 @@ private:
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/layers/tiled/raster/Tiled2dMapRasterLayerShaderFactory") };
     const jmethodID method_combineShader { ::djinni::jniGetMethodID(clazz.get(), "combineShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/AlphaShaderInterface;") };
-    const jmethodID method_finalShader { ::djinni::jniGetMethodID(clazz.get(), "finalShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ShaderProgramInterface;") };
+    const jmethodID method_finalShader { ::djinni::jniGetMethodID(clazz.get(), "finalShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/AlphaShaderInterface;") };
 };
 
 }  // namespace djinni_generated

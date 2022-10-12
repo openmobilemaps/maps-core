@@ -8,7 +8,7 @@
 
 tiled_2d_map_raster_layer_shader_factory = interface +c +j +o {
     combine_shader(): alpha_shader_interface;
-    final_shader(): shader_program_interface;
+    final_shader(): alpha_shader_interface;
 }
 
 tiled_2d_map_raster_layer_interface = interface +c {

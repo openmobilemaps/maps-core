@@ -57,7 +57,7 @@ open class MCMapView: MTKView {
 
         device = MetalContext.current.device
 
-        colorPixelFormat = MetalContext.current.colorPixelFormat
+        colorPixelFormat = MetalContext.colorPixelFormat
         framebufferOnly = false
 
         delegate = self
