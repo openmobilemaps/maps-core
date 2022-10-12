@@ -91,7 +91,7 @@ void Tiled2dMapVectorSymbolSubLayer::resume() {
                 }
 
                 if(fontResult.imageData) {
-                    object->loadTexture(fontResult.imageData);
+                    object->loadTexture(context, fontResult.imageData);
                 }
             }
 
@@ -747,31 +747,45 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
 
 void Tiled2dMapVectorSymbolSubLayer::setupTexts(const Tiled2dMapTileInfo &tileInfo,
                                                 const std::vector<std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper>> texts) {
+    auto mapInterface = this->mapInterface;
+    if (!mapInterface) return;
+
+    bool informDelegateAndReturn = false;
+
     {
-        std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(tilesInSetupMutex, symbolMutex);
-        auto mapInterface = this->mapInterface;
-        if (!mapInterface) return;
+        std::lock_guard<std::recursive_mutex> lock(symbolMutex);
         if (tileTextMap.count(tileInfo) == 0) {
-            if (auto delegate = readyDelegate.lock()) {
-                delegate->tileIsReady(tileInfo);
-            }
-            return;
-        };
-        for (auto const &text: texts) {
-            const auto &t = text->textInfo;
+            informDelegateAndReturn = true;
+        }
+    }
 
-            const auto &textObject = text->textObject->getTextObject();
-            if (textObject) {
-                textObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+    if (informDelegateAndReturn) {
+        if (auto delegate = readyDelegate.lock()) {
+            delegate->tileIsReady(tileInfo);
+        }
+        return;
+    }
 
-                auto fontResult = loadFont(t->getFont());
-                if(fontResult.imageData) {
-                    textObject->loadTexture(fontResult.imageData);
-                }
+
+    for (auto const &text: texts) {
+        const auto &t = text->textInfo;
+
+        const auto &textObject = text->textObject->getTextObject();
+        if (textObject) {
+            auto renderingContext = mapInterface->getRenderingContext();
+            textObject->asGraphicsObject()->setup(renderingContext);
+
+            auto fontResult = loadFont(t->getFont());
+            if(fontResult.imageData) {
+                textObject->loadTexture(renderingContext, fontResult.imageData);
             }
         }
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lock(tilesInSetupMutex);
         tilesInSetup.erase(tileInfo);
     }
+
     if (auto delegate = readyDelegate.lock()) {
         delegate->tileIsReady(tileInfo);
     }
@@ -860,7 +874,7 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorSymbolSubLay
 
 
     if(!(description->minZoom > zoomIdentifier || description->maxZoom < zoomIdentifier)) {
-        std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(maskMutex, symbolMutex);
+        std::lock_guard<std::recursive_mutex> lock(symbolMutex);
         for (auto const &[tile, wrapperVector] : tileTextMap) {
             if (tiles.count(tile) == 0) continue;
             for (auto const &wrapper : wrapperVector) {

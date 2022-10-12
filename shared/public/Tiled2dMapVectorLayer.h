@@ -65,6 +65,15 @@ public:
     void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription);
 
 protected:
+    virtual std::shared_ptr<LayerInterface> getLayerForDescription(const std::shared_ptr<VectorLayerDescription> &layerDescription);
+
+    virtual std::shared_ptr<Tiled2dMapLayerConfig> getLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &source);
+
+    void setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription);
+
+    virtual void loadSpriteData();
+
+
     std::shared_ptr<Tiled2dMapVectorSource> vectorTileSource;
 
 private:
@@ -72,15 +81,9 @@ private:
 
     void loadStyleJson();
 
-    void setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription);
-
     void initializeVectorLayer(const std::vector<std::shared_ptr<LayerInterface>> &newSublayers);
 
     virtual void updateMaskObjects(const std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> &toSetupMaskObject, const std::vector<const std::shared_ptr<MaskingObjectInterface>> &obsoleteMaskObjects);
-
-    std::shared_ptr<LayerInterface> getLayerForDescription(const std::shared_ptr<VectorLayerDescription> &layerDescription);
-
-    void loadSpriteData();
 
     const std::optional<double> dpFactor;
 

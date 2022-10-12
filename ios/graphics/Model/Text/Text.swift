@@ -141,7 +141,7 @@ extension Text: MCTextInterface {
         self.indicesBuffer = indicesBuffer
     }
 
-    func loadTexture(_ textureHolder: MCTextureHolderInterface?) {
+    func loadTexture(_ context: MCRenderingContextInterface?, textureHolder: MCTextureHolderInterface?) {
         guard let textureHolder = textureHolder as? TextureHolder else {
             fatalError("unexpected TextureHolder")
         }

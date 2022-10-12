@@ -54,9 +54,9 @@ void Line2dLayerObject::setPositions(const std::vector<Coord> &positions) {
         // SegmentType (0 inner, 1 start, 2 end, 3 single segment) | lineStyleIndex
         // (each one Byte, i.e. up to 256 styles if supported by shader!)
         float lineStyleInfo = 0 + (i == 0 && i == iSecondToLast ? (3 << 8)
-                                                : (i == 0 ? (float) (1 << 8)
-                                                   : (i == iSecondToLast ? (float) (2 << 8)
-                                                      : 0.0)));
+                : (i == 0 ? (float) (1 << 8)
+                : (i == iSecondToLast ? (float) (2 << 8)
+                : 0.0)));
 
         // Vertex 1
         // Position

@@ -122,6 +122,12 @@ std::shared_ptr<LayerInterface> Tiled2dMapVectorLayer::getLayerForDescription(co
             return std::make_shared<Tiled2dMapVectorSymbolSubLayer>(fontLoader, symbolDesc);
         }
     }
+    return nullptr;
+}
+
+std::shared_ptr<Tiled2dMapLayerConfig>
+Tiled2dMapVectorLayer::getLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &source) {
+    return std::make_shared<Tiled2dMapVectorLayerConfig>(source);
 }
 
 void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription) {
@@ -130,6 +136,9 @@ void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDes
 
     for (auto const &layerDesc: mapDescription->layers) {
         std::shared_ptr<LayerInterface> layer = getLayerForDescription(layerDesc);
+        if (!layer) {
+            continue;
+        }
         newSublayers.push_back(layer);
         switch (layerDesc->getType()) {
             case VectorLayerType::background:
@@ -159,7 +168,7 @@ void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDes
         this->layerConfigs.clear();
 
         for (auto const &source: mapDescription->vectorSources) {
-            layerConfigs[source->identifier] = std::make_shared<Tiled2dMapVectorLayerConfig>(source);
+            layerConfigs[source->identifier] = getLayerConfig(source);
         }
 
         initializeVectorLayer(newSublayers);
@@ -712,6 +721,9 @@ void Tiled2dMapVectorLayer::setSelectedFeatureIdentfier(std::optional<int64_t> i
 void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription) {
     auto mapInterface = this->mapInterface;
     std::shared_ptr<LayerInterface> layer = getLayerForDescription(layerDescription);
+    if (!layer) {
+        return;
+    }
 
     auto newVectorSubLayer = std::dynamic_pointer_cast<Tiled2dMapVectorSubLayer>(layer);
 

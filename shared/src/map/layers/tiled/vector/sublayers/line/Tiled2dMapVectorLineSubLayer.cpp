@@ -32,26 +32,63 @@ void Tiled2dMapVectorLineSubLayer::onRemoved() {
 
 void Tiled2dMapVectorLineSubLayer::pause() {
     Tiled2dMapVectorSubLayer::pause();
-    std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(tilesInSetupMutex, lineMutex);
-    for (const auto &tileGroup : tileLinesMap) {
-        tilesInSetup.insert(tileGroup.first);
-        for (const auto &line : tileGroup.second) {
-            line->getLineObject()->clear();
+
+    std::unordered_set<Tiled2dMapTileInfo> tilesToInsertIntoSetup;
+    std::vector<std::shared_ptr<GraphicsObjectInterface>> linesToClear;
+    {
+        std::lock_guard<std::recursive_mutex> lock(lineMutex);
+        for (const auto &tileGroup : tileLinesMap) {
+            tilesToInsertIntoSetup.insert(tileGroup.first);
+            for (const auto &line : tileGroup.second) {
+                linesToClear.push_back(line->getLineObject());
+            }
         }
+    }
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(tilesInSetupMutex);
+        for (const auto &line : tilesToInsertIntoSetup) {
+            tilesInSetup.insert(line);
+        }
+    }
+
+
+    for (const auto &line : linesToClear) {
+        line->clear();
     }
 }
 
 void Tiled2dMapVectorLineSubLayer::resume() {
     Tiled2dMapVectorSubLayer::resume();
-    std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(tilesInSetupMutex, lineMutex);
     const auto &context = mapInterface->getRenderingContext();
-    for (const auto &tileGroup : tileLinesMap) {
-        for (const auto &line : tileGroup.second) {
-            line->getLineObject()->setup(context);
+
+    std::vector<std::shared_ptr<GraphicsObjectInterface>> linesToSetup;
+    std::unordered_set<Tiled2dMapTileInfo> tilesToEraseFromSetup;
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(lineMutex);
+        for (const auto &tileGroup : tileLinesMap) {
+            for (const auto &line : tileGroup.second) {
+                linesToSetup.push_back(line->getLineObject());
+            }
+            tilesToEraseFromSetup.insert(tileGroup.first);
         }
-        tilesInSetup.erase(tileGroup.first);
-        if (auto delegate = readyDelegate.lock()) {
-            delegate->tileIsReady(tileGroup.first);
+    }
+
+    for(auto const &line: linesToSetup) {
+        line->setup(context);
+    }
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(tilesInSetupMutex);
+        for(auto const &line: tilesToEraseFromSetup) {
+            tilesInSetup.erase(line);
+        }
+    }
+
+    if (auto delegate = readyDelegate.lock()) {
+        for(auto const &line: tilesToEraseFromSetup) {
+            delegate->tileIsReady(line);
         }
     }
 }
@@ -117,8 +154,8 @@ Tiled2dMapVectorLineSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInfo,
         std::unordered_map<int, std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> styleGroupNewLinesMap;
         std::unordered_map<int, std::vector<std::tuple<std::vector<Coord>, int>>> styleGroupLineSubGroupMap;
 
-        for (const auto &feature : layerFeatures) {
-            const FeatureContext &featureContext = std::get<0>(feature);
+        for (auto featureIt = layerFeatures.rbegin(); featureIt != layerFeatures.rend(); ++featureIt) {
+            const FeatureContext &featureContext = std::get<0>(*featureIt);
             if ((description->filter == nullptr || description->filter->evaluateOr(EvaluationContext(-1, featureContext), true))) {
                 int styleGroupIndex = -1;
                 int styleIndex = -1;
@@ -161,12 +198,12 @@ Tiled2dMapVectorLineSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInfo,
                     subGroupCoordCount[styleGroupIndex] = 0;
                 }
 
-                const VectorTileGeometryHandler &geometryHandler = std::get<1>(feature);
+                const VectorTileGeometryHandler &geometryHandler = std::get<1>(*featureIt);
 
                 for (const auto &lineCoordinates: geometryHandler.getLineCoordinates()) {
                     if (lineCoordinates.empty()) { continue; }
 
-                    size_t numCoords = lineCoordinates.size();
+                    int numCoords = (int)lineCoordinates.size();
                     int coordCount = subGroupCoordCount[styleGroupIndex];
                     if (coordCount + numCoords > maxNumLinePoints
                         && !styleGroupLineSubGroupMap[styleGroupIndex].empty()) {
@@ -176,7 +213,7 @@ Tiled2dMapVectorLineSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInfo,
                     }
 
                     styleGroupLineSubGroupMap[styleGroupIndex].push_back({lineCoordinates, std::min(maxStylesPerGroup - 1, styleIndex)});
-                    subGroupCoordCount[styleGroupIndex] = subGroupCoordCount[styleGroupIndex] + numCoords;
+                    subGroupCoordCount[styleGroupIndex] = (int)subGroupCoordCount[styleGroupIndex] + numCoords;
                 }
 
                 featureNum++;
@@ -292,19 +329,27 @@ void Tiled2dMapVectorLineSubLayer::setupLines(const Tiled2dMapTileInfo &tileInfo
         return;
     }
 
+    bool shouldReturnAndSetReady = false;
     {
-        std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(tilesInSetupMutex, lineMutex);
+        std::lock_guard<std::recursive_mutex> lock(lineMutex);
         if (tileLinesMap.count(tileInfo) == 0) {
-            if (auto delegate = readyDelegate.lock()) {
-                delegate->tileIsReady(tileInfo);
-            }
-            return;
+            shouldReturnAndSetReady = true;
         }
+    }
 
-        for (const auto &lineGraphicsObject : newLineGraphicsObjects) {
-            if (!lineGraphicsObject->isReady()) lineGraphicsObject->setup(renderingContext);
+    if (shouldReturnAndSetReady) {
+        if (auto delegate = readyDelegate.lock()) {
+            delegate->tileIsReady(tileInfo);
         }
+        return;
+    }
 
+    for (const auto &lineGraphicsObject : newLineGraphicsObjects) {
+        if (!lineGraphicsObject->isReady()) lineGraphicsObject->setup(renderingContext);
+    }
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(tilesInSetupMutex);
         tilesInSetup.erase(tileInfo);
     }
 
@@ -314,7 +359,7 @@ void Tiled2dMapVectorLineSubLayer::setupLines(const Tiled2dMapTileInfo &tileInfo
 }
 
 void Tiled2dMapVectorLineSubLayer::preGenerateRenderPasses() {
-    std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(maskMutex, lineMutex);
+    std::lock_guard<std::recursive_mutex> lock(lineMutex);
     std::unordered_map<Tiled2dMapTileInfo, std::vector<std::shared_ptr<RenderPassInterface>>> newRenderPasses;
     for (auto const &tileLineTuple : tileLinesMap) {
         std::vector<std::shared_ptr<RenderPassInterface>> newTileRenderPasses;
@@ -325,7 +370,11 @@ void Tiled2dMapVectorLineSubLayer::preGenerateRenderPasses() {
                         std::make_shared<RenderObject>(config->getGraphicsObject()));
             }
         }
-        const auto &tileMask = tileMaskMap[tileLineTuple.first];
+        std::shared_ptr<MaskingObjectInterface> tileMask;
+        {
+            std::lock_guard<std::recursive_mutex> maskLock(maskMutex);
+            tileMask = tileMaskMap[tileLineTuple.first];
+        }
         for (const auto &passEntry : renderPassObjectMap) {
             std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex.value_or(passEntry.first), 0),
                                                                                   passEntry.second,

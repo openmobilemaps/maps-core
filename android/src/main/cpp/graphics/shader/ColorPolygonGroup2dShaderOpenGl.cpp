@@ -26,14 +26,11 @@ void ColorPolygonGroup2dShaderOpenGl::setupProgram(const std::shared_ptr<::Rende
 
     int program = glCreateProgram();       // create empty OpenGL Program
     glAttachShader(program, vertexShader); // add the vertex shader to program
-    OpenGlHelper::checkGlError("glAttachShader Vertex  PolygonGroup");
     glDeleteShader(vertexShader);
     glAttachShader(program, fragmentShader); // add the fragment shader to program
-    OpenGlHelper::checkGlError("glAttachShader Fragment PolygonGroup");
     glDeleteShader(fragmentShader);
 
     glLinkProgram(program); // create OpenGL program executables
-    OpenGlHelper::checkGlError("glLinkProgram PolygonGroup");
 
     openGlContext->storeProgram(programName, program);
 }
@@ -46,10 +43,8 @@ void ColorPolygonGroup2dShaderOpenGl::preRender(const std::shared_ptr<::Renderin
         std::lock_guard<std::recursive_mutex> overlayLock(styleMutex);
         int lineStylesHandle = glGetUniformLocation(program, "polygonStyles");
         glUniform1fv(lineStylesHandle, sizeStyleValuesArray, &polygonStyles[0]);
-        OpenGlHelper::checkGlError("glUniform1f polygonStyles");
         int numStylesHandle = glGetUniformLocation(program, "numStyles");
         glUniform1i(numStylesHandle, numStyles);
-        OpenGlHelper::checkGlError("glUniform1f numStyles");
     }
 }
 

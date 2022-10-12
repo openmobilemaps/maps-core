@@ -64,6 +64,8 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
 
     void removeGlBuffers();
 
+    void removeTextureCoordsGlBuffers();
+
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
 
     int programHandle;
@@ -88,6 +90,7 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
     double factorWidth = 1.0;
 
     bool ready = false;
+    bool textureCoordsReady = false;
     std::recursive_mutex dataMutex;
 
     bool isMaskInversed = false;

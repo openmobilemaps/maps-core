@@ -43,14 +43,29 @@ open class MCTextureLoader: MCLoaderInterface {
         isRasterDebugModeEnabled = UserDefaults.standard.bool(forKey: "io.openmobilemaps.debug.rastertiles.enabled")
     }
 
-    open func loadSync(request: URLRequest) -> (Data?, HTTPURLResponse?, NSError?) {
+    open func loadTexture(_ url: String, etag: String?) -> MCTextureLoaderResult {
+        let urlString = url
+        guard let url = URL(string: urlString) else {
+            preconditionFailure("invalid url: \(urlString)")
+        }
+
         let semaphore = DispatchSemaphore(value: 0)
 
         var result: Data?
         var response: HTTPURLResponse?
         var error: NSError?
 
-        var task = session.dataTask(with: request) { data, response_, error_ in
+        var urlRequest = URLRequest(url: url)
+
+        modifyUrlRequest(request: &urlRequest)
+
+        var wasCached = false;
+        if isRasterDebugModeEnabled,
+           session.configuration.urlCache?.cachedResponse(for: urlRequest) != nil {
+            wasCached = true
+        }
+
+        var task = session.dataTask(with: urlRequest) { data, response_, error_ in
             result = data
             response = response_ as? HTTPURLResponse
             error = error_ as NSError?
@@ -61,21 +76,6 @@ open class MCTextureLoader: MCLoaderInterface {
 
         task.resume()
         semaphore.wait()
-
-        return (result, response, error)
-    }
-
-    open func loadTexture(_ url: String, etag: String?) -> MCTextureLoaderResult {
-        let urlString = url
-        guard let url = URL(string: urlString) else {
-            preconditionFailure("invalid url: \(urlString)")
-        }
-
-        var urlRequest = URLRequest(url: url)
-
-        modifyUrlRequest(request: &urlRequest)
-
-        let (data, response, error) = loadSync(request: urlRequest)
 
         if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorTimedOut {
             return .init(data: nil, etag: response?.etag, status: .ERROR_TIMEOUT, errorCode: (error?.code).stringOrNil)
@@ -89,7 +89,7 @@ open class MCTextureLoader: MCLoaderInterface {
             return .init(data: nil, etag: response?.etag, status: .ERROR_NETWORK, errorCode: (response?.statusCode).stringOrNil)
         }
 
-        guard let data else {
+        guard let data = result else {
             return .init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: (response?.statusCode).stringOrNil)
         }
 
@@ -98,7 +98,7 @@ open class MCTextureLoader: MCLoaderInterface {
                 let uiImage = UIImage(data: data) {
                 let renderer = UIGraphicsImageRenderer(size: uiImage.size)
                 let img = renderer.image { ctx in
-                    self.applyDebugWatermark(url: urlString, byteCount: data.count, image: uiImage, ctx: ctx)
+                    self.applyDebugWatermark(url: urlString, byteCount: data.count, image: uiImage, wasCached: wasCached, ctx: ctx)
                 }
                 if let cgImage = img.cgImage,
                       let textureHolder = try? TextureHolder(cgImage) {
@@ -120,7 +120,7 @@ open class MCTextureLoader: MCLoaderInterface {
             let renderer = UIGraphicsImageRenderer(size: uiImage.size)
             let img = renderer.image { ctx in
                 if isRasterDebugModeEnabled {
-                    self.applyDebugWatermark(url: urlString, byteCount: data.count, image: uiImage, ctx: ctx)
+                    self.applyDebugWatermark(url: urlString, byteCount: data.count, image: uiImage, wasCached: wasCached, ctx: ctx)
                 } else {
                     uiImage.draw(in: .init(origin: .init(), size: uiImage.size))
                 }
@@ -188,7 +188,7 @@ open class MCTextureLoader: MCLoaderInterface {
     open func modifyDataTask(task _: inout URLSessionDataTask) {
     }
 
-    func applyDebugWatermark(url: String, byteCount: Int, image: UIImage, ctx: UIGraphicsRendererContext) {
+    func applyDebugWatermark(url: String, byteCount: Int, image: UIImage, wasCached: Bool , ctx: UIGraphicsRendererContext) {
         let size = image.size
 
         image.draw(in: .init(origin: .init(), size: size))
@@ -200,16 +200,18 @@ open class MCTextureLoader: MCLoaderInterface {
 
         ctx.cgContext.setStrokeColor(UIColor.black.cgColor)
         ctx.cgContext.setLineWidth(5.0)
-        ctx.cgContext.stroke(.init(origin: .init(), size: size).inset(by: .init(top: 5, left: 5, bottom: 5, right: 5)))
+        ctx.cgContext.stroke(.init(origin: .init(), size: size).inset(by: .init()))
 
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.alignment = .center
 
         let attrs: [NSAttributedString.Key : Any] = [NSAttributedString.Key.paragraphStyle: paragraphStyle,
-                                                     NSAttributedString.Key.backgroundColor: UIColor.white.cgColor]
+                                                     NSAttributedString.Key.backgroundColor: wasCached ? UIColor.lightGray.cgColor : UIColor.white.cgColor]
 
         let byteCountString = ByteCountFormatter().string(fromByteCount: Int64(byteCount))
-        let string = url + "\nLoaded at: " + ISO8601DateFormatter().string(from: .init()) + "\nSize: " + byteCountString
+        let loadedString = wasCached ? "Loaded from Cache" : "Loaded from www"
+
+        let string = url + "\n" + loadedString + " at: " + ISO8601DateFormatter().string(from: .init()) + "\nSize: " + byteCountString
         string.draw(with: .init(origin: .init(x: 0, y: 25), size: size).inset(by: .init(top: 5, left: 5, bottom: 5, right: 5)), options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
     }
 }
