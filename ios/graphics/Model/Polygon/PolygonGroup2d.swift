@@ -12,7 +12,7 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 
-class PolygonGroup2d: BaseGraphicsObject {
+final class PolygonGroup2d: BaseGraphicsObject {
     private var shader: PolygonGroupShader
 
     private var verticesBuffer: MTLBuffer?
@@ -55,7 +55,12 @@ class PolygonGroup2d: BaseGraphicsObject {
         guard let verticesBuffer = verticesBuffer,
               let indicesBuffer = indicesBuffer else { return }
 
+        #if DEBUG
         encoder.pushDebugGroup("PolygonGroup2d")
+        defer {
+            encoder.popDebugGroup()
+        }
+        #endif
 
         if isMasked {
             if stencilState == nil {
@@ -79,7 +84,6 @@ class PolygonGroup2d: BaseGraphicsObject {
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
 
-        encoder.popDebugGroup()
     }
 }
 

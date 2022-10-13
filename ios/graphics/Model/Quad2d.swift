@@ -13,7 +13,7 @@ import MapCoreSharedModule
 import Metal
 import UIKit
 
-class Quad2d: BaseGraphicsObject {
+final class Quad2d: BaseGraphicsObject {
     private var verticesBuffer: MTLBuffer?
 
     private var indicesBuffer: MTLBuffer?
@@ -76,7 +76,12 @@ class Quad2d: BaseGraphicsObject {
             return
         }
 
+        #if DEBUG
         encoder.pushDebugGroup(label)
+        defer {
+            encoder.popDebugGroup()
+        }
+        #endif
 
         if isMasked {
             if stencilState == nil {
@@ -112,7 +117,6 @@ class Quad2d: BaseGraphicsObject {
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
 
-        encoder.popDebugGroup()
     }
 }
 
