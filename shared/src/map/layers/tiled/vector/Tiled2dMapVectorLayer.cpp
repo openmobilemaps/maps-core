@@ -469,7 +469,7 @@ void Tiled2dMapVectorLayer::onTilesUpdated() {
                                 auto const polygonObject = newTileMasks[tile.tileInfo].maskObject->getPolygonObject()->asMaskingObject();
                                 auto const &features = it->second;
                                 mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
-                                                                                                   TaskConfig("VectorTile_onTilesUpdated_" + it->first, 0, TaskPriority::HIGH, ExecutionEnvironment::COMPUTATION),
+                                                                                                   TaskConfig("VectorTile_onTilesUpdated_" + it->first, 0, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
                                                                                                    [weakSelfPtr, subLayer, tile, polygonObject, &features] {
                                                                                                        auto selfPtr = weakSelfPtr.lock();
                                                                                                        if (selfPtr) {
