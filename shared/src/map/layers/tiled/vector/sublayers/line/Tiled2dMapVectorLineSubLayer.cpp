@@ -111,22 +111,53 @@ void Tiled2dMapVectorLineSubLayer::update() {
     size_t numStyleGroups = featureGroups.size();
     for (int styleGroupId = 0; styleGroupId < numStyleGroups; styleGroupId++) {
         int i = 0;
+        bool needsUpdate = false;
         for (auto const &[key, feature]: featureGroups.at(styleGroupId)) {
             auto const &context = EvaluationContext(zoomIdentifier, feature);
-            auto dashArray = std::vector<float>{};
             auto &style = reusableLineStyles.at(styleGroupId).at(i);
-            style.color.normal = description->style.getLineColor(context);
-            style.opacity = description->style.getLineOpacity(context);
-            style.blur = description->style.getLineBlur(context);
-            style.widthType = SizeType::SCREEN_PIXEL;
-            style.width = description->style.getLineWidth(context);
-            style.dashArray = description->style.getLineDashArray(context);
-            style.lineCap = description->style.getLineCap(context);
+            auto normalColor = description->style.getLineColor(context);
+            if (normalColor != style.color.normal) {
+                style.color.normal = normalColor;
+                needsUpdate = true;
+            }
+            float opacity = description->style.getLineOpacity(context);
+            if (opacity != style.opacity) {
+                style.opacity = opacity;
+                needsUpdate = true;
+            }
+            float blur = description->style.getLineBlur(context);
+            if (blur != style.blur) {
+                style.blur = blur;
+                needsUpdate = true;
+            }
+            auto widthType = SizeType::SCREEN_PIXEL;
+            if (widthType != style.widthType) {
+                style.widthType = widthType;
+                needsUpdate = true;
+            }
+            float width = description->style.getLineWidth(context);
+            if (width != style.width) {
+                style.width = width;
+                needsUpdate = true;
+            }
+            auto dashArray = description->style.getLineDashArray(context);
+            if (dashArray != style.dashArray) {
+                style.dashArray = dashArray;
+                needsUpdate = true;
+            }
+            auto lineCap = description->style.getLineCap(context);
+            if (lineCap != style.lineCap) {
+                style.lineCap = lineCap;
+                needsUpdate = true;
+            }
+
 
             i++;
         }
 
-        shaders.at(styleGroupId)->setStyles(reusableLineStyles.at(styleGroupId));
+        if (needsUpdate) {
+            shaders.at(styleGroupId)->setStyles(reusableLineStyles.at(styleGroupId));
+        }
     }
 }
 

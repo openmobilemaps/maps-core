@@ -95,6 +95,7 @@ bool Tiled2dMapSource<T, L, R>::isTileVisible(const Tiled2dMapTileInfo &tileInfo
 
 template<class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBounds, int curT, double zoom) {
+    std::vector<PrioritizedTiled2dMapTileInfo> visibleTilesVec;
 
     RectCoord visibleBoundsLayer = conversionHelper->convertRect(layerSystemId, visibleBounds);
 
@@ -137,6 +138,7 @@ void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBou
         }
 
         VisibleTilesLayer curVisibleTiles(i - targetZoomLayer, i);
+        std::vector<PrioritizedTiled2dMapTileInfo> curVisibleTilesVec;
 
         const double tileWidth = zoomLevelInfo.tileWidthLayerSystemUnits;
 
@@ -190,16 +192,23 @@ void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBou
                     const int tDis = 1 + std::abs(t - curT);
                     const int priority = std::ceil((tileCenterDis / maxDisCenter) * zPriorityRange)  + tDis * tPriorityRange + zoomInd * zoomPriorityRange;
 
-                    curVisibleTiles.visibleTiles.insert(PrioritizedTiled2dMapTileInfo(
+                    curVisibleTilesVec.push_back(PrioritizedTiled2dMapTileInfo(
                             Tiled2dMapTileInfo(rect, x, y, t, zoomLevelInfo.zoomLevelIdentifier, zoomLevelInfo.zoom),
                             priority));
 
+                    visibleTilesVec.push_back(PrioritizedTiled2dMapTileInfo(
+                            Tiled2dMapTileInfo(rect, x, y, t, zoomLevelInfo.zoomLevelIdentifier, zoomLevelInfo.zoom),
+                            priority));
                 }
             }
         }
 
+        curVisibleTiles.visibleTiles.insert(curVisibleTilesVec.begin(), curVisibleTilesVec.end());
+
         zoomInd++;
 
+
+        std::unordered_set<PrioritizedTiled2dMapTileInfo> visibleTiles(visibleTilesVec.begin(), visibleTilesVec.end());
         layers.push_back(curVisibleTiles);
     }
 
@@ -275,6 +284,12 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
         {
             std::lock_guard<std::recursive_mutex> lock(currentVisibleTilesMutex);
             currentVisibleTiles = newCurrentVisibleTiles;
+        }
+
+        int currentZoomLevelIdentifier = 0;
+        {
+            std::lock_guard<std::recursive_mutex> lock(currentZoomLevelMutex);
+            currentZoomLevelIdentifier = this->currentZoomLevelIdentifier;
         }
 
         // we only remove tiles that are not visible anymore directly
