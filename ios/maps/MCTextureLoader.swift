@@ -25,7 +25,7 @@ public class DataHolder: MCDataHolderInterface {
 
 open class MCTextureLoader: MCLoaderInterface {
 
-    private let session: URLSession
+    public let session: URLSession
 
     public var isRasterDebugModeEnabled: Bool
 
