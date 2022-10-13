@@ -123,8 +123,15 @@ Tiled2dMapVectorPolygonSubLayer::updateTileData(const Tiled2dMapTileInfo &tileIn
                     for (auto const &hole: polygonHoles[i]) {
                         pol.push_back(hole);
                     }
-                    std::vector<uint16_t> new_indices = mapbox::earcut<uint16_t>(pol);
 
+#ifdef __APPLE__
+                    std::vector<uint32_t> new_indices = mapbox::earcut<uint32_t>(pol);
+#else
+                    // TODO: andorid currently only supports 16bit indices
+                    // more complex polygons may need to be simplified on-device to render them correctly
+                    std::vector<uint16_t> new_indices = mapbox::earcut<uint16_t>(pol);
+                    assert(("Too many vertices to use 16bit indices", new_indices.size() >= std::numeric_limits<uint16_t>::max()));
+#endif
 
                     std::size_t posAdded = 0;
                     for (auto const &coords: pol) {
@@ -134,11 +141,19 @@ Tiled2dMapVectorPolygonSubLayer::updateTileData(const Tiled2dMapTileInfo &tileIn
 
                     // check overflow
                     size_t new_size = indices_offset + posAdded;
-                    if (new_size >= std::numeric_limits<uint16_t>::max()) {
+#ifdef __APPLE__
+                    if (new_size >= std::numeric_limits<uint32_t>::max()) {
                         objectDescriptions.push_back({{},
-                                                      {}});
+                            {}});
                         indices_offset = 0;
                     }
+#else
+                    if (new_size >= std::numeric_limits<uint16_t>::max()) {
+                        objectDescriptions.push_back({{},
+                            {}});
+                        indices_offset = 0;
+                    }
+#endif
 
                     for (auto const &index: new_indices) {
                         std::get<1>(objectDescriptions.back()).push_back(indices_offset + index);
@@ -243,21 +258,33 @@ void Tiled2dMapVectorPolygonSubLayer::setupPolygons(const Tiled2dMapTileInfo &ti
         return;
     }
 
+    bool informDelegateAndReturn = false;
+
     {
-        std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(tilesInSetupMutex, polygonMutex);
+        std::lock_guard<std::recursive_mutex> lock(polygonMutex);
         if (tilePolygonMap.count(tileInfo) == 0)
         {
-            if (auto delegate = readyDelegate.lock()) {
-                delegate->tileIsReady(tileInfo);
-            }
-            return;
+            informDelegateAndReturn = true;
         }
+    }
 
-        for (auto const &polygon: newPolygonObjects) {
-            if (!polygon->isReady()) polygon->setup(renderingContext);
+    if (informDelegateAndReturn) {
+        if (auto delegate = readyDelegate.lock()) {
+            delegate->tileIsReady(tileInfo);
         }
+        return;
+    }
+
+
+    for (auto const &polygon: newPolygonObjects) {
+        if (!polygon->isReady()) polygon->setup(renderingContext);
+    }
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(polygonMutex);
         tilesInSetup.erase(tileInfo);
     }
+
     if (auto delegate = readyDelegate.lock()) {
         delegate->tileIsReady(tileInfo);
     }
@@ -316,7 +343,7 @@ void Tiled2dMapVectorPolygonSubLayer::clearTileData(const Tiled2dMapTileInfo &ti
 
 
 void Tiled2dMapVectorPolygonSubLayer::preGenerateRenderPasses() {
-    std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(maskMutex, polygonMutex);
+    std::lock_guard<std::recursive_mutex> lock(polygonMutex);
     std::unordered_map<Tiled2dMapTileInfo, std::vector<std::shared_ptr<RenderPassInterface>>> newRenderPasses;
     for (auto const &tileLineTuple : tilePolygonMap) {
         std::vector<std::shared_ptr<RenderPassInterface>> newTileRenderPasses;
@@ -327,9 +354,15 @@ void Tiled2dMapVectorPolygonSubLayer::preGenerateRenderPasses() {
                         std::make_shared<RenderObject>(config->getGraphicsObject()));
             }
         }
-        const auto &tileMask = tileMaskMap[tileLineTuple.first];
+
+        std::shared_ptr<MaskingObjectInterface> tileMask;
+        {
+            std::lock_guard<std::recursive_mutex> maskLock(maskMutex);
+            tileMask = tileMaskMap[tileLineTuple.first];
+        }
+
         for (const auto &passEntry : renderPassObjectMap) {
-            std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first),
+            std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex.value_or(passEntry.first)),
                                                                                   passEntry.second,
                                                                                   (tileMask
                                                                                    ? tileMask

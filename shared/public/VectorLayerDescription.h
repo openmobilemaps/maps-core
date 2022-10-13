@@ -14,7 +14,7 @@
 #include <vector>
 
 enum VectorLayerType {
- background, raster, line, polygon, symbol
+ background, raster, line, polygon, symbol, custom
 };
 
 class VectorLayerDescription {
@@ -25,6 +25,7 @@ public:
     int minZoom;
     int maxZoom;
     std::shared_ptr<Value> filter;
+    std::optional<int32_t> renderPassIndex;
 
     virtual VectorLayerType getType() = 0;
 
@@ -39,11 +40,13 @@ public:
                            std::string sourceId,
                            int minZoom,
                            int maxZoom,
-                           std::shared_ptr<Value> filter):
+                           std::shared_ptr<Value> filter,
+                           std::optional<int32_t> renderPassIndex):
     identifier(identifier),
     source(source),
     sourceId(sourceId),
     minZoom(minZoom),
     maxZoom(maxZoom),
-    filter(filter) {}
+    filter(filter),
+    renderPassIndex(renderPassIndex) {}
 };

@@ -749,32 +749,45 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
 
 void Tiled2dMapVectorSymbolSubLayer::setupTexts(const Tiled2dMapTileInfo &tileInfo,
                                                 const std::vector<std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper>> texts) {
+    auto mapInterface = this->mapInterface;
+    if (!mapInterface) return;
+
+    bool informDelegateAndReturn = false;
+
     {
-        std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(tilesInSetupMutex, symbolMutex);
-        auto mapInterface = this->mapInterface;
-        if (!mapInterface) return;
+        std::lock_guard<std::recursive_mutex> lock(symbolMutex);
         if (tileTextMap.count(tileInfo) == 0) {
-            if (auto delegate = readyDelegate.lock()) {
-                delegate->tileIsReady(tileInfo);
-            }
-            return;
-        };
-        for (auto const &text: texts) {
-            const auto &t = text->textInfo;
+            informDelegateAndReturn = true;
+        }
+    }
 
-            const auto &textObject = text->textObject->getTextObject();
-            if (textObject) {
-                auto renderingContext = mapInterface->getRenderingContext();
-                textObject->asGraphicsObject()->setup(renderingContext);
+    if (informDelegateAndReturn) {
+        if (auto delegate = readyDelegate.lock()) {
+            delegate->tileIsReady(tileInfo);
+        }
+        return;
+    }
 
-                auto fontResult = loadFont(t->getFont());
-                if(fontResult.imageData) {
-                    textObject->loadTexture(renderingContext, fontResult.imageData);
-                }
+
+    for (auto const &text: texts) {
+        const auto &t = text->textInfo;
+
+        const auto &textObject = text->textObject->getTextObject();
+        if (textObject) {
+            auto renderingContext = mapInterface->getRenderingContext();
+            textObject->asGraphicsObject()->setup(renderingContext);
+
+            auto fontResult = loadFont(t->getFont());
+            if(fontResult.imageData) {
+                textObject->loadTexture(renderingContext, fontResult.imageData);
             }
         }
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lock(tilesInSetupMutex);
         tilesInSetup.erase(tileInfo);
     }
+
     if (auto delegate = readyDelegate.lock()) {
         delegate->tileIsReady(tileInfo);
     }
@@ -852,18 +865,18 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorSymbolSubLay
 
     std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
 
-    if (selectedTextWrapper && selectedTextWrapper->symbolObject) {
-        renderPassObjectMap[1].push_back(std::make_shared<RenderObject>(selectedTextWrapper->symbolGraphicsObject, selectedTextWrapper->iconModelMatrix));
+    if (selectedTextWrapper && selectedTextWrapper->symbolGraphicsObject) {
+        renderPassObjectMap[description->renderPassIndex.value_or(1)].push_back(std::make_shared<RenderObject>(selectedTextWrapper->symbolGraphicsObject, selectedTextWrapper->iconModelMatrix));
 
 
 #ifdef DRAW_TEXT_BOUNDING_BOXES
-        renderPassObjectMap[0].push_back(std::make_shared<RenderObject>(selectedTextWrapper->boundingBox->asGraphicsObject()));
+        renderPassObjectMap[description->renderPassIndex.value_or(0)].push_back(std::make_shared<RenderObject>(selectedTextWrapper->boundingBox->asGraphicsObject()));
 #endif
     }
 
 
     if(!(description->minZoom > zoomIdentifier || description->maxZoom < zoomIdentifier)) {
-        std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(maskMutex, symbolMutex);
+        std::lock_guard<std::recursive_mutex> lock(symbolMutex);
         for (auto const &[tile, wrapperVector] : tileTextMap) {
             if (tiles.count(tile) == 0) continue;
             for (auto const &wrapper : wrapperVector) {
@@ -879,20 +892,20 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorSymbolSubLay
 
                 const auto &configs = object->getRenderConfig();
 
-                if (wrapper->symbolObject) {
-                    renderPassObjectMap[1].push_back(std::make_shared<RenderObject>(wrapper->symbolGraphicsObject, wrapper->iconModelMatrix));
+                if (wrapper->symbolGraphicsObject) {
+                    renderPassObjectMap[description->renderPassIndex.value_or(1)].push_back(std::make_shared<RenderObject>(wrapper->symbolGraphicsObject, wrapper->iconModelMatrix));
                 }
 
 
                 if (!configs.empty()) {
                     std::lock_guard<std::recursive_mutex> lock(selectedFeatureIdentifierMutex);
                     if (wrapper->featureContext.identifier != selectedFeatureIdentifier) {
-                        renderPassObjectMap[configs.front()->getRenderIndex()].push_back(std::make_shared<RenderObject>(configs.front()->getGraphicsObject(), wrapper->modelMatrix));
+                        renderPassObjectMap[description->renderPassIndex.value_or(configs.front()->getRenderIndex())].push_back(std::make_shared<RenderObject>(configs.front()->getGraphicsObject(), wrapper->modelMatrix));
                     }
                 }
 
 #ifdef DRAW_TEXT_BOUNDING_BOXES
-                renderPassObjectMap[0].push_back(std::make_shared<RenderObject>(wrapper->boundingBox->asGraphicsObject()));
+                renderPassObjectMap[description->renderPassIndex.value_or(0)].push_back(std::make_shared<RenderObject>(wrapper->boundingBox->asGraphicsObject()));
 #endif
             }
         }

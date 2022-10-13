@@ -73,7 +73,7 @@ public:
 
     LineCapType getLineCap(const EvaluationContext &context){
         static const LineCapType defaultValue = LineCapType::BUTT;
-        return lineDashArray ? lineDashArray->evaluateOr(context, defaultValue) : defaultValue;
+        return lineCap ? lineCap->evaluateOr(context, defaultValue) : defaultValue;
     }
 
 private:
@@ -97,8 +97,9 @@ public:
                                int minZoom,
                                int maxZoom,
                                std::shared_ptr<Value> filter,
-                               LineVectorStyle style):
-    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, filter),
+                               LineVectorStyle style,
+                               std::optional<int32_t> renderPassIndex):
+    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, filter, renderPassIndex),
     style(style) {};
 
 

@@ -53,22 +53,24 @@ public:
     double zoomLevelScaleFactor = 0.65;
 
     RasterVectorLayerDescription(std::string identifier,
-                            int minZoom,
-                            int maxZoom,
-                            std::string url,
-                           RasterVectorStyle style):
-    VectorLayerDescription(identifier, "", "", minZoom, maxZoom, nullptr),
+                                 int minZoom,
+                                 int maxZoom,
+                                 std::string url,
+                                 RasterVectorStyle style,
+                                 std::optional<int32_t> renderPassIndex):
+    VectorLayerDescription(identifier, "", "", minZoom, maxZoom, nullptr, renderPassIndex),
     style(style), url(url) {};
 
     RasterVectorLayerDescription(std::string identifier,
-                            int minZoom,
-                            int maxZoom,
-                            std::string url,
-                            bool adaptScaleToScreen = false,
-                            int32_t numDrawPreviousLayers = 2,
-                            bool maskTiles = false,
-                            double zoomLevelScaleFactor = 0.65):
-    VectorLayerDescription(identifier, "", "", minZoom, maxZoom, nullptr),
+                                 int minZoom,
+                                 int maxZoom,
+                                 std::string url,
+                                 bool adaptScaleToScreen = false,
+                                 int32_t numDrawPreviousLayers = 2,
+                                 bool maskTiles = false,
+                                 double zoomLevelScaleFactor = 0.65,
+                                 std::optional<int32_t> renderPassIndex = std::nullopt):
+    VectorLayerDescription(identifier, "", "", minZoom, maxZoom, nullptr, renderPassIndex),
     style(), url(url), adaptScaleToScreen(adaptScaleToScreen), numDrawPreviousLayers(numDrawPreviousLayers), maskTiles(maskTiles), zoomLevelScaleFactor(zoomLevelScaleFactor)  {};
 
     virtual std::unordered_set<std::string> getUsedKeys() override {
