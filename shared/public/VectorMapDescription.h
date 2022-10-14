@@ -32,11 +32,11 @@ public:
     std::string identifier;
     std::vector<std::shared_ptr<VectorMapSourceDescription>> vectorSources;
     std::vector<std::shared_ptr<VectorLayerDescription>> layers;
-    std::string spriteBaseUrl;
+    std::optional<std::string> spriteBaseUrl;
 
     VectorMapDescription(std::string identifier,
                          std::vector<std::shared_ptr<VectorMapSourceDescription>> vectorSources,
                          std::vector<std::shared_ptr<VectorLayerDescription>> layers,
-                         std::string spriteBaseUrl):
+                         std::optional<std::string> spriteBaseUrl):
     identifier(identifier), vectorSources(vectorSources), layers(layers), spriteBaseUrl(spriteBaseUrl) {}
 };

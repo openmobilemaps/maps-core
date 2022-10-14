@@ -62,6 +62,16 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName, const
     setMapDescription(mapDescription);
 }
 
+Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
+                                             const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
+                                             const std::shared_ptr<::FontLoaderInterface> &fontLoader) :
+        Tiled2dMapLayer(),
+        layerName(layerName),
+        loaders(loaders),
+        fontLoader(fontLoader),
+        sublayers() {
+}
+
 void Tiled2dMapVectorLayer::scheduleStyleJsonLoading() {
     isLoadingStyleJson = true;
     std::weak_ptr<Tiled2dMapVectorLayer> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
@@ -145,6 +155,7 @@ void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDes
             case VectorLayerType::raster: {
                 break;
             }
+            case VectorLayerType::custom:
             case VectorLayerType::line:
             case VectorLayerType::polygon:
             case VectorLayerType::symbol: {
@@ -205,7 +216,9 @@ void Tiled2dMapVectorLayer::initializeVectorLayer(const std::vector<std::shared_
     Tiled2dMapLayer::onAdded(mapInterface);
     mapInterface->getTouchHandler()->addListener(shared_from_this());
 
-    loadSpriteData();
+    if (mapDescription->spriteBaseUrl) {
+        loadSpriteData();
+    }
 
     {
         std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
@@ -620,10 +633,10 @@ void Tiled2dMapVectorLayer::loadSpriteData() {
 
     bool scale2x = camera->getScreenDensityPpi() >= 320.0;
     std::stringstream ssTexture;
-    ssTexture << mapDescription->spriteBaseUrl << (scale2x ? "@2x" : "") << ".png";
+    ssTexture << *mapDescription->spriteBaseUrl << (scale2x ? "@2x" : "") << ".png";
     std::string urlTexture = ssTexture.str();
     std::stringstream ssData;
-    ssData << mapDescription->spriteBaseUrl << (scale2x ? "@2x" : "") << ".json";
+    ssData << *mapDescription->spriteBaseUrl << (scale2x ? "@2x" : "") << ".json";
     std::string urlData = ssData.str();
 
     std::weak_ptr<Tiled2dMapVectorLayer> weakSelfPtr =
