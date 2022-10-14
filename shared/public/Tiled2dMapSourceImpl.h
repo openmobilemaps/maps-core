@@ -286,12 +286,6 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
             currentVisibleTiles = newCurrentVisibleTiles;
         }
 
-        int currentZoomLevelIdentifier = 0;
-        {
-            std::lock_guard<std::recursive_mutex> lock(currentZoomLevelMutex);
-            currentZoomLevelIdentifier = this->currentZoomLevelIdentifier;
-        }
-
         // we only remove tiles that are not visible anymore directly
         // tile from upper zoom levels will be removed as soon as the correct tiles are loaded
         std::unordered_set<Tiled2dMapTileInfo> toRemove;
