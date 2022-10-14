@@ -34,6 +34,10 @@ public:
                           const std::vector<std::shared_ptr<::LoaderInterface>> & loaders,
                           const std::shared_ptr<::FontLoaderInterface> & fontLoader);
 
+    Tiled2dMapVectorLayer(const std::string &layerName,
+                          const std::vector<std::shared_ptr<::LoaderInterface>> & loaders,
+                          const std::shared_ptr<::FontLoaderInterface> & fontLoader);
+
     virtual std::shared_ptr<::LayerInterface> asLayerInterface() override;
 
     virtual void update() override;
@@ -69,7 +73,7 @@ protected:
 
     virtual std::shared_ptr<Tiled2dMapLayerConfig> getLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &source);
 
-    void setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription);
+    virtual void setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription);
 
     virtual void loadSpriteData();
 
