@@ -100,6 +100,8 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual bool onMoveComplete() override;
 
+    virtual bool onTwoFingerClick(const ::Vec2F &posScreen1, const ::Vec2F &posScreen2) override;
+
     virtual bool onDoubleClick(const ::Vec2F &posScreen) override;
 
     virtual bool onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) override;

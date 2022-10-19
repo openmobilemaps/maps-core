@@ -568,6 +568,34 @@ bool MapCamera2d::onDoubleClick(const ::Vec2F &posScreen) {
     return true;
 }
 
+bool MapCamera2d::onTwoFingerClick(const ::Vec2F &posScreen1, const ::Vec2F &posScreen2) {
+    if (!config.doubleClickZoomEnabled || cameraFrozen)
+        return false;
+
+    inertia = std::nullopt;
+
+    auto targetZoom = zoom * 2;
+
+    targetZoom = std::max(std::min(targetZoom, zoomMin), zoomMax);
+
+    auto position = coordFromScreenPosition(Vec2FHelper::midpoint(posScreen1, posScreen2));
+
+    auto config = mapInterface->getMapConfig();
+    auto bottomRight = bounds.bottomRight;
+    auto topLeft = bounds.topLeft;
+
+    position.x = std::min(position.x, bottomRight.x);
+    position.x = std::max(position.x, topLeft.x);
+
+    position.y = std::max(position.y, bottomRight.y);
+    position.y = std::min(position.y, topLeft.y);
+
+    moveToCenterPositionZoom(position, targetZoom, true);
+
+    notifyListeners(ListenerType::MAP_INTERACTION);
+    return true;
+}
+
 void MapCamera2d::clearTouch() {
     isRotationThreasholdReached = false;
     rotationPossible = true;
