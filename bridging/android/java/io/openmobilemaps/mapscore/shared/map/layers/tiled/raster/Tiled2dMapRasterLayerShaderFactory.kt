@@ -9,7 +9,7 @@ abstract class Tiled2dMapRasterLayerShaderFactory {
 
     abstract fun combineShader(): io.openmobilemaps.mapscore.shared.graphics.shader.AlphaShaderInterface
 
-    abstract fun finalShader(): io.openmobilemaps.mapscore.shared.graphics.shader.AlphaShaderInterface
+    abstract fun finalShader(): io.openmobilemaps.mapscore.shared.graphics.shader.InterpolationShaderInterface
 
     private class CppProxy : Tiled2dMapRasterLayerShaderFactory {
         private val nativeRef: Long
@@ -35,10 +35,10 @@ abstract class Tiled2dMapRasterLayerShaderFactory {
         }
         private external fun native_combineShader(_nativeRef: Long): io.openmobilemaps.mapscore.shared.graphics.shader.AlphaShaderInterface
 
-        override fun finalShader(): io.openmobilemaps.mapscore.shared.graphics.shader.AlphaShaderInterface {
+        override fun finalShader(): io.openmobilemaps.mapscore.shared.graphics.shader.InterpolationShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_finalShader(this.nativeRef)
         }
-        private external fun native_finalShader(_nativeRef: Long): io.openmobilemaps.mapscore.shared.graphics.shader.AlphaShaderInterface
+        private external fun native_finalShader(_nativeRef: Long): io.openmobilemaps.mapscore.shared.graphics.shader.InterpolationShaderInterface
     }
 }

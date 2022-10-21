@@ -7,6 +7,7 @@
 #import "DJIError.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCAlphaShaderInterface+Private.h"
+#import "MCInterpolationShaderInterface+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -38,10 +39,10 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nullable id<MCAlphaShaderInterface>)finalShader {
+- (nullable id<MCInterpolationShaderInterface>)finalShader {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->finalShader();
-        return ::djinni_generated::AlphaShaderInterface::fromCpp(objcpp_result_);
+        return ::djinni_generated::InterpolationShaderInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -61,11 +62,11 @@ public:
             return ::djinni_generated::AlphaShaderInterface::toCpp(objcpp_result_);
         }
     }
-    std::shared_ptr<::AlphaShaderInterface> finalShader() override
+    std::shared_ptr<::InterpolationShaderInterface> finalShader() override
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() finalShader];
-            return ::djinni_generated::AlphaShaderInterface::toCpp(objcpp_result_);
+            return ::djinni_generated::InterpolationShaderInterface::toCpp(objcpp_result_);
         }
     }
 };

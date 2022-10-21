@@ -4,6 +4,7 @@
 #pragma once
 
 #include "AlphaShaderInterface.h"
+#include "InterpolationShaderInterface.h"
 #include <memory>
 
 class Tiled2dMapRasterLayerShaderFactory {
@@ -12,5 +13,5 @@ public:
 
     virtual std::shared_ptr<::AlphaShaderInterface> combineShader() = 0;
 
-    virtual std::shared_ptr<::AlphaShaderInterface> finalShader() = 0;
+    virtual std::shared_ptr<::InterpolationShaderInterface> finalShader() = 0;
 };

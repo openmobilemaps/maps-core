@@ -41,7 +41,10 @@ void InterpolatedTiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInter
     auto defaultShaderFactory = mapInterface->getShaderFactory();
     auto alphaShader = defaultShaderFactory->createAlphaShader();
     if (shaderFactory) {
-        mergedAlphaShader = shaderFactory->finalShader();
+        mergedInterpolationShader = shaderFactory->finalShader();
+        if (mergedInterpolationShader) {
+            mergedAlphaShader = mergedInterpolationShader->asAlphaShaderInterface();
+        }
         if (mergedAlphaShader) {
             mergedShader = mergedAlphaShader->asShaderProgramInterface();
         }
@@ -98,14 +101,17 @@ void InterpolatedTiled2dMapRasterLayer::setAlpha(double alpha) {
 
 std::vector<std::shared_ptr<RenderPassInterface>>  InterpolatedTiled2dMapRasterLayer::combineRenderPasses() {
 
-
-    auto newRenderPasses = Tiled2dMapRasterLayer::generateRenderPasses(tFraction, curT+1, renderTargetTexture);
-    auto tilesNext = Tiled2dMapRasterLayer::generateRenderPasses(1.0 - tFraction, curT , renderTargetTexture);
+    auto newRenderPasses = Tiled2dMapRasterLayer::generateRenderPasses(1.0, curT+1, renderTargetTexture);
+    auto tilesNext = Tiled2dMapRasterLayer::generateRenderPasses(0.0, curT , renderTargetTexture);
     newRenderPasses.insert(newRenderPasses.end(), tilesNext.begin(), tilesNext.end());
 
     auto texture = renderTargetTexture->textureHolder();
     if (texture) {
         mergedTilesQuad->loadTexture(nullptr, texture);
+    }
+
+    if (mergedInterpolationShader) {
+        mergedInterpolationShader->updateFraction(tFraction);
     }
 
     auto renderObject = std::make_shared<RenderObject>(mergedTilesQuad->asGraphicsObject(), true);

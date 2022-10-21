@@ -3,6 +3,7 @@
 
 #include "NativeTiled2dMapRasterLayerShaderFactory.h"  // my header
 #include "NativeAlphaShaderInterface.h"
+#include "NativeInterpolationShaderInterface.h"
 
 namespace djinni_generated {
 
@@ -22,13 +23,13 @@ std::shared_ptr<::AlphaShaderInterface> NativeTiled2dMapRasterLayerShaderFactory
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativeAlphaShaderInterface::toCpp(jniEnv, jret);
 }
-std::shared_ptr<::AlphaShaderInterface> NativeTiled2dMapRasterLayerShaderFactory::JavaProxy::finalShader() {
+std::shared_ptr<::InterpolationShaderInterface> NativeTiled2dMapRasterLayerShaderFactory::JavaProxy::finalShader() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeTiled2dMapRasterLayerShaderFactory>::get();
     auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_finalShader);
     ::djinni::jniExceptionCheck(jniEnv);
-    return ::djinni_generated::NativeAlphaShaderInterface::toCpp(jniEnv, jret);
+    return ::djinni_generated::NativeInterpolationShaderInterface::toCpp(jniEnv, jret);
 }
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerShaderFactory_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
@@ -49,13 +50,13 @@ CJNIEXPORT ::djinni_generated::NativeAlphaShaderInterface::JniType JNICALL Java_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT ::djinni_generated::NativeAlphaShaderInterface::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerShaderFactory_00024CppProxy_native_1finalShader(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT ::djinni_generated::NativeInterpolationShaderInterface::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerShaderFactory_00024CppProxy_native_1finalShader(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapRasterLayerShaderFactory>(nativeRef);
         auto r = ref->finalShader();
-        return ::djinni::release(::djinni_generated::NativeAlphaShaderInterface::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni_generated::NativeInterpolationShaderInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

@@ -21,6 +21,7 @@
 #include "PolygonMaskObject.h"
 #include "ShaderProgramInterface.h"
 #include "AlphaShaderInterface.h"
+#include "InterpolationShaderInterface.h"
 #include "Tiled2dMapLayerMaskWrapper.h"
 #include "Tiled2dMapLayerConfig.h"
 #include <mutex>
@@ -67,6 +68,7 @@ protected:
 
     std::shared_ptr<::ShaderProgramInterface> mergedShader;
     std::shared_ptr<::AlphaShaderInterface> mergedAlphaShader;
+    std::shared_ptr<::InterpolationShaderInterface> mergedInterpolationShader;
 
     float tFraction = 0;
 
