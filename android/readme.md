@@ -164,26 +164,27 @@ val layerConfig = object : Tiled2dMapLayerConfig() {
 			// zoom identifier used for the tile-url (see getTileUrl above)
 			override fun getZoomLevelInfos(): ArrayList<Tiled2dMapZoomLevelInfo> = ArrayList(
 					listOf(
-						Tiled2dMapZoomLevelInfo(500000000.0, 40075016f, 1, 1, 0, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(250000000.0, 20037508f, 2, 2, 1, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(150000000.0, 10018754f, 4, 4, 2, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(70000000.0, 5009377.1f, 8, 8, 3, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(35000000.0, 2504688.5f, 16, 16, 4, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(15000000.0, 1252344.3f, 32, 32, 5, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(10000000.0, 626172.1f, 64, 64, 6, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(4000000.0, 313086.1f, 128, 128, 7, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(2000000.0, 156543f, 256, 256, 8, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(1000000.0, 78271.5f, 512, 512, 9, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(500000.0, 39135.8f, 1024, 1024, 10, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(250000.0, 19567.9f, 2048, 2048, 11, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(150000.0, 9783.94f, 4096, 4096, 12, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(70000.0, 4891.97f, 8192, 8192, 13, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(35000.0, 2445.98f, 16384, 16384, 14, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(15000.0, 1222.99f, 32768, 32768, 15, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(8000.0, 611.496f, 65536, 65536, 16, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(4000.0, 305.748f, 131072, 131072, 17, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(2000.0, 152.874f, 262144, 262144, 18, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(1000.0, 76.437f, 524288, 524288, 19, epsg3857Bounds)
+						Tiled2dMapZoomLevelInfo(559082264.029, 40075016f, 1, 1, 1, 0, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(279541132.015, 20037508f, 2, 2, 1, 1, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(139770566.007, 10018754f, 4, 4, 1, 2, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(69885283.0036, 5009377.1f, 8, 8, 1, 3, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(34942641.5018, 2504688.5f, 16, 16, 1, 4, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(17471320.7509, 1252344.3f, 32, 32, 1, 5, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(8735660.37545, 626172.1f, 64, 64, 1, 6, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(4367830.18773, 313086.1f, 128, 128, 1, 7, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(2183915.09386, 156543f, 256, 256, 1, 8, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(1091957.54693, 78271.5f, 512, 512, 1, 9, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(545978.773466, 39135.8f, 1024, 1024, 1, 10, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(272989.386733, 19567.9f, 2048, 2048, 1, 11, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(136494.693366, 9783.94f, 4096, 4096, 1, 12, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(68247.3466832, 4891.97f, 8192, 8192, 1, 13, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(34123.6733416, 2445.98f, 16384, 16384, 1, 14, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(17061.8366708, 1222.99f, 32768, 32768, 1, 15, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(8530.91833540, 611.496f, 65536, 65536, 1, 16, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(4265.45916770, 305.748f, 131072, 131072, 1, 17, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(2132.72958385, 152.874f, 262144, 262144, 1, 18, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(1066.36479193, 76.437f, 524288, 524288, 1, 19, epsg3857Bounds),
+						Tiled2dMapZoomLevelInfo(533.18239597, 38.2185, 1_048_576, 1_048_576, 1, 19, epsg3857Bounds)
 					)
 				)
 			}
