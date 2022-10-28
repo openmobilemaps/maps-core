@@ -3,18 +3,16 @@
 
 #pragma once
 
-#include <cstdint>
+#include "SharedBytes.h"
 #include <memory>
-#include <vector>
 
 class GraphicsObjectInterface;
-struct RenderVerticesDescription;
 
 class PolygonGroup2dInterface {
 public:
     virtual ~PolygonGroup2dInterface() {}
 
-    virtual void setVertices(const std::vector<RenderVerticesDescription> & vertices, const std::vector<int32_t> & indices) = 0;
+    virtual void setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices) = 0;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() = 0;
 };

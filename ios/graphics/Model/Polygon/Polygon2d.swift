@@ -12,7 +12,7 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 
-class Polygon2d: BaseGraphicsObject {
+final class Polygon2d: BaseGraphicsObject {
     private var shader: MCShaderProgramInterface
 
     private var verticesBuffer: MTLBuffer?
@@ -36,7 +36,12 @@ class Polygon2d: BaseGraphicsObject {
         guard let verticesBuffer = verticesBuffer,
               let indicesBuffer = indicesBuffer else { return }
 
+        #if DEBUG
         encoder.pushDebugGroup("Polygon2d")
+        defer {
+            encoder.popDebugGroup()
+        }
+        #endif
 
         if isMasked {
             if stencilState == nil {
@@ -64,7 +69,6 @@ class Polygon2d: BaseGraphicsObject {
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
 
-        encoder.popDebugGroup()
     }
 
     private func setupStencilStates() {
@@ -97,15 +101,16 @@ extension Polygon2d: MCMaskingObjectInterface {
               let indicesBuffer = indicesBuffer
         else { return }
 
-        encoder.pushDebugGroup("Polygon2d")
-
-        if stencilState == nil {
-            setupStencilStates()
+        #if DEBUG
+        encoder.pushDebugGroup("Polygon2dMask")
+        defer {
+            encoder.popDebugGroup()
         }
+        #endif
 
         if let mask = context.polygonMask {
+            encoder.setStencilReferenceValue(0xFF)
             encoder.setDepthStencilState(mask)
-            encoder.setStencilReferenceValue(0b1000_0000)
         }
 
         // stencil prepare pass
@@ -123,13 +128,12 @@ extension Polygon2d: MCMaskingObjectInterface {
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
 
-        encoder.popDebugGroup()
     }
 }
 
 extension Polygon2d: MCPolygon2dInterface {
     func setVertices(_ vertices: [MCVec2D], indices: [NSNumber]) {
-        guard !vertices.isEmpty else {
+        guard !vertices.isEmpty, !indices.isEmpty else {
             indicesCount = 0
             verticesBuffer = nil
             indicesBuffer = nil

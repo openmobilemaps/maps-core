@@ -438,6 +438,11 @@ void MapCamera2d::notifyListeners(const int &listenerType) {
     }
 }
 
+bool MapCamera2d::onTouchDown(const ::Vec2F &posScreen) {
+    inertia = std::nullopt;
+    return true;
+}
+
 bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleClick) {
     if (!config.moveEnabled || cameraFrozen)
         return false;
@@ -546,6 +551,34 @@ bool MapCamera2d::onDoubleClick(const ::Vec2F &posScreen) {
     targetZoom = std::max(std::min(targetZoom, zoomMin), zoomMax);
 
     auto position = coordFromScreenPosition(posScreen);
+
+    auto config = mapInterface->getMapConfig();
+    auto bottomRight = bounds.bottomRight;
+    auto topLeft = bounds.topLeft;
+
+    position.x = std::min(position.x, bottomRight.x);
+    position.x = std::max(position.x, topLeft.x);
+
+    position.y = std::max(position.y, bottomRight.y);
+    position.y = std::min(position.y, topLeft.y);
+
+    moveToCenterPositionZoom(position, targetZoom, true);
+
+    notifyListeners(ListenerType::MAP_INTERACTION);
+    return true;
+}
+
+bool MapCamera2d::onTwoFingerClick(const ::Vec2F &posScreen1, const ::Vec2F &posScreen2) {
+    if (!config.doubleClickZoomEnabled || cameraFrozen)
+        return false;
+
+    inertia = std::nullopt;
+
+    auto targetZoom = zoom * 2;
+
+    targetZoom = std::max(std::min(targetZoom, zoomMin), zoomMax);
+
+    auto position = coordFromScreenPosition(Vec2FHelper::midpoint(posScreen1, posScreen2));
 
     auto config = mapInterface->getMapConfig();
     auto bottomRight = bounds.bottomRight;
@@ -767,15 +800,17 @@ Coord MapCamera2d::adjustCoordForPadding(const Coord &coords, double targetZoom)
 RectCoord MapCamera2d::getPaddingCorrectedBounds() {
     double const factor = screenPixelAsRealMeterFactor * zoom;
 
-    Vec2D const padVec = Vec2D(0.5 * (paddingRight - paddingLeft) * factor, 0.5 * (paddingTop - paddingBottom) * factor);
+    double const addRight = (mapSystemRtl ? 1.0 : -1.0) * paddingRight * factor;
+    double const addLeft = (mapSystemRtl ? -1.0 : 1.0) * paddingLeft * factor;
+    double const addTop = (mapSystemTtb ? -1.0 : 1.0) * paddingTop * factor;
+    double const addBottom = (mapSystemTtb ? 1.0 : -1.0) * paddingBottom * factor;
 
-    Coord const topLeft(bounds.topLeft.systemIdentifier, bounds.topLeft.x + padVec.x, bounds.topLeft.y + padVec.y,
-                        bounds.topLeft.z);
+    // new top left and bottom right
+    const auto &id = bounds.topLeft.systemIdentifier;
+    Coord tl = Coord(id, bounds.topLeft.x + addLeft, bounds.topLeft.y + addTop, bounds.topLeft.z);
+    Coord br = Coord(id, bounds.bottomRight.x + addRight, bounds.bottomRight.y + addBottom, bounds.bottomRight.z);
 
-    Coord const bottomRight(bounds.bottomRight.systemIdentifier, bounds.bottomRight.x + padVec.x, bounds.bottomRight.y + padVec.y,
-                            bounds.bottomRight.z);
-
-    return RectCoord(topLeft, bottomRight);
+    return RectCoord(tl, br);
 }
 
 void MapCamera2d::clampCenterToPaddingCorrectedBounds() {

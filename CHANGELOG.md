@@ -1,5 +1,12 @@
 # Changelog for Open Mobile Maps
 
+## Version 1.4.1 (16.08.2022)
+- iOS: updates device to ppi mapping
+- iOS: fixes masked line groups
+- iOS: fixes bug that caused the map to be cropped if display zoom is enabled
+- iOS: fixes metal crash when attempting to load empty texture
+- fixes a error in MapCamera2d::getPaddingCorrectedBounds
+
 ## Version 1.4.0 (09.06.2022)
 - includes earcut.hpp dependency for polygon triangulation
 - adds polygon and line group rendering objects which can be used to efficiently render many objects with a limited number of styles

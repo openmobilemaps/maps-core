@@ -12,8 +12,8 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 
-class Text: BaseGraphicsObject {
-    private var shader: MCShaderProgramInterface
+final class Text: BaseGraphicsObject {
+    private var shader: TextShader
 
     private var verticesBuffer: MTLBuffer?
     private var indicesBuffer: MTLBuffer?
@@ -24,7 +24,7 @@ class Text: BaseGraphicsObject {
     private var stencilState: MTLDepthStencilState?
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
-        self.shader = shader
+        self.shader = shader as! TextShader
         super.init(device: metalContext.device,
                    sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue))
     }
@@ -64,7 +64,12 @@ class Text: BaseGraphicsObject {
             encoder.setDepthStencilState(context.defaultMask)
         }
 
+        #if DEBUG
         encoder.pushDebugGroup("Text")
+        defer {
+            encoder.popDebugGroup()
+        }
+        #endif
 
         shader.setupProgram(context)
         shader.preRender(context)
@@ -86,7 +91,6 @@ class Text: BaseGraphicsObject {
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
 
-        encoder.popDebugGroup()
     }
 }
 
@@ -128,6 +132,10 @@ extension Text: MCTextInterface {
             }
         }
 
+        guard !vertices.isEmpty else {
+            return
+        }
+
         guard let verticesBuffer = device.makeBuffer(bytes: vertices, length: MemoryLayout<Vertex>.stride * vertices.count, options: []), let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: []) else {
             fatalError("Cannot allocate buffers")
         }
@@ -137,7 +145,7 @@ extension Text: MCTextInterface {
         self.indicesBuffer = indicesBuffer
     }
 
-    func loadTexture(_ textureHolder: MCTextureHolderInterface?) {
+    func loadTexture(_ context: MCRenderingContextInterface?, textureHolder: MCTextureHolderInterface?) {
         guard let textureHolder = textureHolder as? TextureHolder else {
             fatalError("unexpected TextureHolder")
         }

@@ -20,9 +20,9 @@ private class WeakOperation {
 }
 
 open class MCScheduler: MCSchedulerInterface {
-    private let ioQueue = OperationQueue(concurrentOperations: 20, qos: .userInteractive)
+    private let ioQueue = OperationQueue(concurrentOperations: 64, qos: .userInteractive)
 
-    private let computationQueue = OperationQueue(concurrentOperations: 4, qos: .userInteractive)
+    private let computationQueue = OperationQueue(concurrentOperations: 20, qos: .userInteractive)
 
     private let graphicsQueue = OperationQueue.main
 

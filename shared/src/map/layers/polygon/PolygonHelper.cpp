@@ -10,6 +10,12 @@
 
 #include "PolygonHelper.h"
 
+
+bool PolygonHelper::pointInside(const PolygonCoord &polygon, const Coord &point,
+                        const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper) {
+    return pointInside(point, polygon.positions, polygon.holes, conversionHelper);
+}
+
 bool PolygonHelper::pointInside(const PolygonInfo &polygon, const Coord &point,
                                 const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper) {
     return pointInside(point, polygon.coordinates.positions, polygon.coordinates.holes, conversionHelper);
@@ -62,4 +68,29 @@ bool PolygonHelper::pointInside(const Coord &point, const std::vector<Coord> &po
     }
 
     return c;
+}
+
+std::vector<::PolygonCoord> PolygonHelper::clip(const PolygonCoord &a, const PolygonCoord &b, const ClippingOperation operation) {
+    gpc_polygon a_, b_, result_;
+    gpc_set_polygon(a, &a_);
+    gpc_set_polygon(b, &b_);
+    gpc_polygon_clip(gpcOperationFrom(operation), &a_, &b_, &result_);
+    auto result = gpc_get_polygon_coord(&result_, a.positions.begin()->systemIdentifier);
+    gpc_free_polygon(&a_);
+    gpc_free_polygon(&b_);
+    gpc_free_polygon(&result_);
+    return result;
+}
+
+gpc_op PolygonHelper::gpcOperationFrom(const ClippingOperation operation) {
+    switch (operation) {
+        case Intersection:
+            return GPC_INT;
+        case Difference:
+            return GPC_DIFF;
+        case Union:
+            return GPC_UNION;
+        case XOR:
+            return GPC_XOR;
+    }
 }

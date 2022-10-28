@@ -46,11 +46,19 @@ int32_t NativeTextureHolderInterface::JavaProxy::getTextureHeight() {
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::I32::toCpp(jniEnv, jret);
 }
-void NativeTextureHolderInterface::JavaProxy::attachToGraphics() {
+int32_t NativeTextureHolderInterface::JavaProxy::attachToGraphics() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeTextureHolderInterface>::get();
-    jniEnv->CallVoidMethod(Handle::get().get(), data.method_attachToGraphics);
+    auto jret = jniEnv->CallIntMethod(Handle::get().get(), data.method_attachToGraphics);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni::I32::toCpp(jniEnv, jret);
+}
+void NativeTextureHolderInterface::JavaProxy::clearFromGraphics() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeTextureHolderInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_clearFromGraphics);
     ::djinni::jniExceptionCheck(jniEnv);
 }
 

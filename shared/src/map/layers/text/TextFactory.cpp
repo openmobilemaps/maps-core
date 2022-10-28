@@ -12,6 +12,6 @@
 
 #include "TextInfo.h"
 
-std::shared_ptr<TextInfoInterface> TextFactory::createText(const std::string &text, const ::Coord &coordinate, const ::Font &font) {
-    return std::make_shared<TextInfo>(text, coordinate, font);
+std::shared_ptr<TextInfoInterface> TextFactory::createText(const std::vector<FormattedStringEntry> &text, const ::Coord &coordinate, const ::Font &font, Anchor textAnchor, TextJustify textJustify) {
+    return std::make_shared<TextInfo>(text, coordinate, font, textAnchor, textJustify);
 }

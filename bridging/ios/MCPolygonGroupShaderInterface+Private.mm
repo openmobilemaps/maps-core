@@ -5,10 +5,9 @@
 #import "MCPolygonGroupShaderInterface.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
-#import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
-#import "MCPolygonStyle+Private.h"
 #import "MCShaderProgramInterface+Private.h"
+#import "MCSharedBytes+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -33,9 +32,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (void)setStyles:(nonnull NSArray<MCPolygonStyle *> *)styles {
+- (void)setStyles:(nonnull MCSharedBytes *)styles {
     try {
-        _cppRefHandle.get()->setStyles(::djinni::List<::djinni_generated::PolygonStyle>::toCpp(styles));
+        _cppRefHandle.get()->setStyles(::djinni_generated::SharedBytes::toCpp(styles));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -55,10 +54,10 @@ class PolygonGroupShaderInterface::ObjcProxy final
     friend class ::djinni_generated::PolygonGroupShaderInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void setStyles(const std::vector<::PolygonStyle> & c_styles) override
+    void setStyles(const ::SharedBytes & c_styles) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setStyles:(::djinni::List<::djinni_generated::PolygonStyle>::fromCpp(c_styles))];
+            [djinni_private_get_proxied_objc_object() setStyles:(::djinni_generated::SharedBytes::fromCpp(c_styles))];
         }
     }
     std::shared_ptr<::ShaderProgramInterface> asShaderProgramInterface() override

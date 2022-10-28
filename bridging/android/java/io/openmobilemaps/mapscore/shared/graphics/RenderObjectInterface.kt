@@ -11,6 +11,8 @@ abstract class RenderObjectInterface {
 
     abstract fun hasCustomModelMatrix(): Boolean
 
+    abstract fun isScreenSpaceCoords(): Boolean
+
     abstract fun getCustomModelMatrix(): ArrayList<Float>
 
     private class CppProxy : RenderObjectInterface {
@@ -42,6 +44,12 @@ abstract class RenderObjectInterface {
             return native_hasCustomModelMatrix(this.nativeRef)
         }
         private external fun native_hasCustomModelMatrix(_nativeRef: Long): Boolean
+
+        override fun isScreenSpaceCoords(): Boolean {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_isScreenSpaceCoords(this.nativeRef)
+        }
+        private external fun native_isScreenSpaceCoords(_nativeRef: Long): Boolean
 
         override fun getCustomModelMatrix(): ArrayList<Float> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

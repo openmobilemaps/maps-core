@@ -3,9 +3,12 @@
 
 #include "NativeTextFactory.h"  // my header
 #include "Marshal.hpp"
+#include "NativeAnchor.h"
 #include "NativeCoord.h"
 #include "NativeFont.h"
+#include "NativeFormattedStringEntry.h"
 #include "NativeTextInfoInterface.h"
+#include "NativeTextJustify.h"
 
 namespace djinni_generated {
 
@@ -22,13 +25,15 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_text_T
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_text_TextFactory_00024CppProxy_createText(JNIEnv* jniEnv, jobject /*this*/, jstring j_text, ::djinni_generated::NativeCoord::JniType j_coordinate, ::djinni_generated::NativeFont::JniType j_font)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_text_TextFactory_00024CppProxy_createText(JNIEnv* jniEnv, jobject /*this*/, jobject j_text, ::djinni_generated::NativeCoord::JniType j_coordinate, ::djinni_generated::NativeFont::JniType j_font, jobject j_textAnchor, jobject j_textJustify)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE0(jniEnv);
-        auto r = ::TextFactory::createText(::djinni::String::toCpp(jniEnv, j_text),
+        auto r = ::TextFactory::createText(::djinni::List<::djinni_generated::NativeFormattedStringEntry>::toCpp(jniEnv, j_text),
                                            ::djinni_generated::NativeCoord::toCpp(jniEnv, j_coordinate),
-                                           ::djinni_generated::NativeFont::toCpp(jniEnv, j_font));
+                                           ::djinni_generated::NativeFont::toCpp(jniEnv, j_font),
+                                           ::djinni_generated::NativeAnchor::toCpp(jniEnv, j_textAnchor),
+                                           ::djinni_generated::NativeTextJustify::toCpp(jniEnv, j_textJustify));
         return ::djinni::release(::djinni_generated::NativeTextInfoInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

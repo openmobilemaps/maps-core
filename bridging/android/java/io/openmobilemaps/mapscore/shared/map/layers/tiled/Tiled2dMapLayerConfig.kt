@@ -9,7 +9,7 @@ abstract class Tiled2dMapLayerConfig {
 
     abstract fun getCoordinateSystemIdentifier(): String
 
-    abstract fun getTileUrl(x: Int, y: Int, zoom: Int): String
+    abstract fun getTileUrl(x: Int, y: Int, t: Int, zoom: Int): String
 
     abstract fun getZoomLevelInfos(): ArrayList<Tiled2dMapZoomLevelInfo>
 
@@ -41,11 +41,11 @@ abstract class Tiled2dMapLayerConfig {
         }
         private external fun native_getCoordinateSystemIdentifier(_nativeRef: Long): String
 
-        override fun getTileUrl(x: Int, y: Int, zoom: Int): String {
+        override fun getTileUrl(x: Int, y: Int, t: Int, zoom: Int): String {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_getTileUrl(this.nativeRef, x, y, zoom)
+            return native_getTileUrl(this.nativeRef, x, y, t, zoom)
         }
-        private external fun native_getTileUrl(_nativeRef: Long, x: Int, y: Int, zoom: Int): String
+        private external fun native_getTileUrl(_nativeRef: Long, x: Int, y: Int, t: Int, zoom: Int): String
 
         override fun getZoomLevelInfos(): ArrayList<Tiled2dMapZoomLevelInfo> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

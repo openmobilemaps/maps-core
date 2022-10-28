@@ -34,9 +34,11 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 }
 
 - (void)onVisibleBoundsChanged:(nonnull MCRectCoord *)visibleBounds
+                          curT:(int32_t)curT
                           zoom:(double)zoom {
     try {
         _cppRefHandle.get()->onVisibleBoundsChanged(::djinni_generated::RectCoord::toCpp(visibleBounds),
+                                                    ::djinni::I32::toCpp(curT),
                                                     ::djinni::F64::toCpp(zoom));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }

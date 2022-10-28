@@ -18,9 +18,11 @@ class AlphaShader: BaseShader {
 
     private var pipeline: MTLRenderPipelineState?
 
+    private let shader : Pipeline
     private let buffer: MTLBuffer
 
-    override init() {
+    init(shader : Pipeline = Pipeline.alphaShader) {
+        self.shader = shader
         guard let buffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<Float>.stride, options: []) else { fatalError("Could not create buffer") }
         self.buffer = buffer
         self.alphaContent = self.buffer.contents().bindMemory(to: Float.self, capacity: 1)
@@ -29,7 +31,7 @@ class AlphaShader: BaseShader {
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline.alphaShader.rawValue)
+            pipeline = MetalContext.current.pipelineLibrary.value(shader.rawValue)
         }
     }
 

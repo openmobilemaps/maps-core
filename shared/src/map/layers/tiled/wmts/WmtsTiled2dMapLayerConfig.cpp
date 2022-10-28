@@ -23,7 +23,7 @@ WmtsTiled2dMapLayerConfig::WmtsTiled2dMapLayerConfig(const WmtsLayerDescription 
 
 std::string WmtsTiled2dMapLayerConfig::getCoordinateSystemIdentifier() { return coordinateSystemIdentifier; }
 
-std::string WmtsTiled2dMapLayerConfig::getTileUrl(int32_t x, int32_t y, int32_t zoom) {
+std::string WmtsTiled2dMapLayerConfig::getTileUrl(int32_t x, int32_t y, int32_t t, int32_t zoom) {
     std::string urlFormat = description.resourceTemplate;
 
     if (auto it = urlFormat.find("{TileMatrix}"); it != std::string::npos) {

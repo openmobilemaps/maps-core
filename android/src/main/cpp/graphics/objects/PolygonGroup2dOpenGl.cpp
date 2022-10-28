@@ -18,33 +18,20 @@ std::shared_ptr<GraphicsObjectInterface> PolygonGroup2dOpenGl::asGraphicsObject(
 
 bool PolygonGroup2dOpenGl::isReady() { return ready; }
 
-void PolygonGroup2dOpenGl::setVertices(const std::vector<RenderVerticesDescription> &vertices,
-                                       const std::vector<int32_t> &indices) {
-    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+void
+PolygonGroup2dOpenGl::setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices) {
     ready = false;
     dataReady = false;
 
-    polygonIndices.clear();
-    polygonAttributes.clear();
-
-    int numPolygons = vertices.size();
-    for (int polygonIndex = 0; polygonIndex < numPolygons; polygonIndex++) {
-        int styleIndex = vertices[polygonIndex].styleIndex;
-        int numVertices = (int)vertices[polygonIndex].vertices.size();
-
-        for (int i = 0; i < numVertices; i++) {
-            const Vec2D &p = vertices[polygonIndex].vertices[i];
-            // Position
-            polygonAttributes.push_back(p.x);
-            polygonAttributes.push_back(p.y);
-            // StyleIndex
-            polygonAttributes.push_back(styleIndex);
-        }
+    polygonIndices.resize(indices.elementCount);
+    polygonAttributes.resize(vertices.elementCount);
+    if(indices.elementCount > 0) {
+        std::memcpy(polygonIndices.data(), (void *) indices.address,indices.elementCount * indices.bytesPerElement);
     }
-    // Indices
-    int numIndices = indices.size();
-    for (int i = 0; i < numIndices; i++) {
-        polygonIndices.push_back(indices[i]);
+
+    if(vertices.elementCount > 0) {
+        std::memcpy(polygonAttributes.data(), (void *) vertices.address,
+                    vertices.elementCount * vertices.bytesPerElement);
     }
 
     dataReady = true;
@@ -83,7 +70,13 @@ void PolygonGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterfa
 
 void PolygonGroup2dOpenGl::clear() {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    ready = false;
+    if (ready) {
+        removeGlBuffers();
+        ready = false;
+    }
+}
+
+void PolygonGroup2dOpenGl::removeGlBuffers() {
     glDeleteBuffers(1, &attribBuffer);
     glDeleteBuffers(1, &indexBuffer);
 }

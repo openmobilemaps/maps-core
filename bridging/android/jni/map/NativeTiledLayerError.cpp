@@ -20,7 +20,7 @@ auto NativeTiledLayerError::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinn
                                                            ::djinni::get(::djinni::String::fromCpp(jniEnv, c.layerName)),
                                                            ::djinni::get(::djinni::String::fromCpp(jniEnv, c.url)),
                                                            ::djinni::get(::djinni::Bool::fromCpp(jniEnv, c.isRecoverable)),
-                                                           ::djinni::get(::djinni_generated::NativeRectCoord::fromCpp(jniEnv, c.bounds)))};
+                                                           ::djinni::get(::djinni::Optional<std::optional, ::djinni_generated::NativeRectCoord>::fromCpp(jniEnv, c.bounds)))};
     ::djinni::jniExceptionCheck(jniEnv);
     return r;
 }
@@ -34,7 +34,7 @@ auto NativeTiledLayerError::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
             ::djinni::String::toCpp(jniEnv, (jstring)jniEnv->GetObjectField(j, data.field_layerName)),
             ::djinni::String::toCpp(jniEnv, (jstring)jniEnv->GetObjectField(j, data.field_url)),
             ::djinni::Bool::toCpp(jniEnv, jniEnv->GetBooleanField(j, data.field_isRecoverable)),
-            ::djinni_generated::NativeRectCoord::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_bounds))};
+            ::djinni::Optional<std::optional, ::djinni_generated::NativeRectCoord>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_bounds))};
 }
 
 }  // namespace djinni_generated

@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class LineGroup2dInterface {
 
-    abstract fun setLines(lines: ArrayList<RenderLineDescription>)
+    abstract fun setLines(lines: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
     abstract fun asGraphicsObject(): GraphicsObjectInterface
 
@@ -29,11 +29,11 @@ abstract class LineGroup2dInterface {
             _djinni_private_destroy()
         }
 
-        override fun setLines(lines: ArrayList<RenderLineDescription>) {
+        override fun setLines(lines: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setLines(this.nativeRef, lines)
+            native_setLines(this.nativeRef, lines, indices)
         }
-        private external fun native_setLines(_nativeRef: Long, lines: ArrayList<RenderLineDescription>)
+        private external fun native_setLines(_nativeRef: Long, lines: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
         override fun asGraphicsObject(): GraphicsObjectInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

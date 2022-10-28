@@ -13,8 +13,7 @@ import MetalKit
 
 struct PolygonVertex: Equatable {
     var position: SIMD2<Float>
-
-    var stylingIndex: Int32 = 0
+    var stylingIndex: Float = 0.0
 
     /// Returns the descriptor to use when passed to a metal shader
     static let descriptor: MTLVertexDescriptor = {
@@ -30,17 +29,17 @@ struct PolygonVertex: Equatable {
 
         // Styling Index
         vertexDescriptor.attributes[1].bufferIndex = bufferIndex
-        vertexDescriptor.attributes[1].format = .int
+        vertexDescriptor.attributes[1].format = .float
         vertexDescriptor.attributes[1].offset = offset
-        offset += MemoryLayout<Int>.stride
+        offset += MemoryLayout<Float>.stride
 
-        vertexDescriptor.layouts[0].stride = MemoryLayout<PolygonVertex>.stride
+        vertexDescriptor.layouts[0].stride = offset
         return vertexDescriptor
     }()
 
     init(x: Float,
          y: Float,
-         stylingIndex: Int32 = 0) {
+         stylingIndex: Float = 0.0) {
         position = SIMD2([x, y])
         self.stylingIndex = stylingIndex
     }

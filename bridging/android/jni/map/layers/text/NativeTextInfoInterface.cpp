@@ -3,8 +3,11 @@
 
 #include "NativeTextInfoInterface.h"  // my header
 #include "Marshal.hpp"
+#include "NativeAnchor.h"
 #include "NativeCoord.h"
 #include "NativeFont.h"
+#include "NativeFormattedStringEntry.h"
+#include "NativeTextJustify.h"
 
 namespace djinni_generated {
 
@@ -16,13 +19,13 @@ NativeTextInfoInterface::JavaProxy::JavaProxy(JniType j) : Handle(::djinni::jniG
 
 NativeTextInfoInterface::JavaProxy::~JavaProxy() = default;
 
-std::string NativeTextInfoInterface::JavaProxy::getText() {
+std::vector<::FormattedStringEntry> NativeTextInfoInterface::JavaProxy::getText() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeTextInfoInterface>::get();
-    auto jret = (jstring)jniEnv->CallObjectMethod(Handle::get().get(), data.method_getText);
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getText);
     ::djinni::jniExceptionCheck(jniEnv);
-    return ::djinni::String::toCpp(jniEnv, jret);
+    return ::djinni::List<::djinni_generated::NativeFormattedStringEntry>::toCpp(jniEnv, jret);
 }
 ::Coord NativeTextInfoInterface::JavaProxy::getCoordinate() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
@@ -40,6 +43,22 @@ std::string NativeTextInfoInterface::JavaProxy::getText() {
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativeFont::toCpp(jniEnv, jret);
 }
+::Anchor NativeTextInfoInterface::JavaProxy::getTextAnchor() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeTextInfoInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getTextAnchor);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativeAnchor::toCpp(jniEnv, jret);
+}
+::TextJustify NativeTextInfoInterface::JavaProxy::getTextJustify() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeTextInfoInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getTextJustify);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativeTextJustify::toCpp(jniEnv, jret);
+}
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_text_TextInfoInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
@@ -49,13 +68,13 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_text_T
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jstring JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_text_TextInfoInterface_00024CppProxy_native_1getText(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_text_TextInfoInterface_00024CppProxy_native_1getText(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::TextInfoInterface>(nativeRef);
         auto r = ref->getText();
-        return ::djinni::release(::djinni::String::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni::List<::djinni_generated::NativeFormattedStringEntry>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
@@ -76,6 +95,26 @@ CJNIEXPORT ::djinni_generated::NativeFont::JniType JNICALL Java_io_openmobilemap
         const auto& ref = ::djinni::objectFromHandleAddress<::TextInfoInterface>(nativeRef);
         auto r = ref->getFont();
         return ::djinni::release(::djinni_generated::NativeFont::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_text_TextInfoInterface_00024CppProxy_native_1getTextAnchor(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::TextInfoInterface>(nativeRef);
+        auto r = ref->getTextAnchor();
+        return ::djinni::release(::djinni_generated::NativeAnchor::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_text_TextInfoInterface_00024CppProxy_native_1getTextJustify(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::TextInfoInterface>(nativeRef);
+        auto r = ref->getTextJustify();
+        return ::djinni::release(::djinni_generated::NativeTextJustify::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

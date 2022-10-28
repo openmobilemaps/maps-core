@@ -33,7 +33,7 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        void setLinePositions(const std::vector<::Vec2D> & positions) override;
+        void setLine(const ::SharedBytes & line, const ::SharedBytes & indices) override;
         std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override;
 
     private:
@@ -41,7 +41,7 @@ private:
     };
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/objects/Line2dInterface") };
-    const jmethodID method_setLinePositions { ::djinni::jniGetMethodID(clazz.get(), "setLinePositions", "(Ljava/util/ArrayList;)V") };
+    const jmethodID method_setLine { ::djinni::jniGetMethodID(clazz.get(), "setLine", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
     const jmethodID method_asGraphicsObject { ::djinni::jniGetMethodID(clazz.get(), "asGraphicsObject", "()Lio/openmobilemaps/mapscore/shared/graphics/objects/GraphicsObjectInterface;") };
 };
 

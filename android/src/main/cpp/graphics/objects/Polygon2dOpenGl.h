@@ -50,6 +50,8 @@ class Polygon2dOpenGl : public GraphicsObjectInterface,
   protected:
     void prepareGlData(const std::shared_ptr<OpenGlContext> &openGlContext);
 
+    void removeGlBuffers();
+
     void drawPolygon(std::shared_ptr<OpenGlContext> openGlContext, int program, int64_t mvpMatrix);
 
     std::shared_ptr<ShaderProgramInterface> shaderProgram;

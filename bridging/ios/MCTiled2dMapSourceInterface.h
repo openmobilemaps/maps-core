@@ -10,6 +10,7 @@
 @interface MCTiled2dMapSourceInterface : NSObject
 
 - (void)onVisibleBoundsChanged:(nonnull MCRectCoord *)visibleBounds
+                          curT:(int32_t)curT
                           zoom:(double)zoom;
 
 - (void)setMinZoomLevelIdentifier:(nullable NSNumber *)value;

@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class PolygonGroupShaderInterface {
 
-    abstract fun setStyles(styles: ArrayList<io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonStyle>)
+    abstract fun setStyles(styles: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
     abstract fun asShaderProgramInterface(): ShaderProgramInterface
 
@@ -29,11 +29,11 @@ abstract class PolygonGroupShaderInterface {
             _djinni_private_destroy()
         }
 
-        override fun setStyles(styles: ArrayList<io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonStyle>) {
+        override fun setStyles(styles: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_setStyles(this.nativeRef, styles)
         }
-        private external fun native_setStyles(_nativeRef: Long, styles: ArrayList<io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonStyle>)
+        private external fun native_setStyles(_nativeRef: Long, styles: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
         override fun asShaderProgramInterface(): ShaderProgramInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

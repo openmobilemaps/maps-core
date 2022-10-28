@@ -6,9 +6,12 @@
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
+#import "MCAnchor+Private.h"
 #import "MCCoord+Private.h"
 #import "MCFont+Private.h"
+#import "MCFormattedStringEntry+Private.h"
 #import "MCTextInfoInterface+Private.h"
+#import "MCTextJustify+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -33,13 +36,17 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-+ (nullable id<MCTextInfoInterface>)createText:(nonnull NSString *)text
++ (nullable id<MCTextInfoInterface>)createText:(nonnull NSArray<MCFormattedStringEntry *> *)text
                                     coordinate:(nonnull MCCoord *)coordinate
-                                          font:(nonnull MCFont *)font {
+                                          font:(nonnull MCFont *)font
+                                    textAnchor:(MCAnchor)textAnchor
+                                   textJustify:(MCTextJustify)textJustify {
     try {
-        auto objcpp_result_ = ::TextFactory::createText(::djinni::String::toCpp(text),
+        auto objcpp_result_ = ::TextFactory::createText(::djinni::List<::djinni_generated::FormattedStringEntry>::toCpp(text),
                                                         ::djinni_generated::Coord::toCpp(coordinate),
-                                                        ::djinni_generated::Font::toCpp(font));
+                                                        ::djinni_generated::Font::toCpp(font),
+                                                        ::djinni::Enum<::Anchor, MCAnchor>::toCpp(textAnchor),
+                                                        ::djinni::Enum<::TextJustify, MCTextJustify>::toCpp(textJustify));
         return ::djinni_generated::TextInfoInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }

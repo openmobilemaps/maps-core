@@ -15,12 +15,15 @@ struct Tiled2dMapZoomInfo final {
      * and the screen ppi
      */
     bool adaptScaleToScreen;
+    bool maskTile;
 
     Tiled2dMapZoomInfo(float zoomLevelScaleFactor_,
                        int32_t numDrawPreviousLayers_,
-                       bool adaptScaleToScreen_)
+                       bool adaptScaleToScreen_,
+                       bool maskTile_)
     : zoomLevelScaleFactor(std::move(zoomLevelScaleFactor_))
     , numDrawPreviousLayers(std::move(numDrawPreviousLayers_))
     , adaptScaleToScreen(std::move(adaptScaleToScreen_))
+    , maskTile(std::move(maskTile_))
     {}
 };

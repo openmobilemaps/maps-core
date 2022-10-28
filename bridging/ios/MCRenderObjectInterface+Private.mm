@@ -46,6 +46,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (BOOL)isScreenSpaceCoords {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->isScreenSpaceCoords();
+        return ::djinni::Bool::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nonnull NSArray<NSNumber *> *)getCustomModelMatrix {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getCustomModelMatrix();
@@ -73,6 +80,13 @@ public:
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() hasCustomModelMatrix];
+            return ::djinni::Bool::toCpp(objcpp_result_);
+        }
+    }
+    bool isScreenSpaceCoords() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() isScreenSpaceCoords];
             return ::djinni::Bool::toCpp(objcpp_result_);
         }
     }

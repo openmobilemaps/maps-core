@@ -196,7 +196,7 @@ void TextLayer::addTexts(const std::vector<std::shared_ptr<TextInfoInterface>> &
 
     for (const auto &text : texts) {
         auto fontData = fontLoader->loadFont(text->getFont()).fontData;
-        auto textObject = textHelper.textLayer(text, fontData, Vec2F(0.0, 0.0));
+        auto textObject = textHelper.textLayerObject(text, fontData, Vec2F(0.0, 0.0), 1.2, 0.0);
 
         if (textObject) {
             textObjects.push_back(std::make_tuple(text, textObject));
@@ -210,7 +210,7 @@ void TextLayer::addTexts(const std::vector<std::shared_ptr<TextInfoInterface>> &
 
     std::weak_ptr<TextLayer> weakSelfPtr = std::dynamic_pointer_cast<TextLayer>(shared_from_this());
     std::string taskId =
-        "TextLayer_setup_coll_" + std::get<0>(textObjects.at(0))->getText() + "_[" + std::to_string(textObjects.size()) + "]";
+        "TextLayer_setup_coll_" + std::get<0>(textObjects.at(0))->getText().begin()->text + "_[" + std::to_string(textObjects.size()) + "]";
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
         TaskConfig(taskId, 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [weakSelfPtr, textObjects] {
             auto selfPtr = weakSelfPtr.lock();
@@ -239,7 +239,7 @@ void TextLayer::setupTextObjects(
 
         auto font = fontLoader->loadFont(text->getFont());
         if (font.imageData) {
-            textObject->loadTexture(font.imageData);
+            textObject->loadTexture(renderingContext, font.imageData);
         }
     }
 

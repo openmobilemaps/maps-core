@@ -12,6 +12,7 @@ enum class LoaderStatus : int {
     ERROR_TIMEOUT,
     ERROR_NETWORK,
     ERROR_OTHER,
+    NOOP,
 };
 
 namespace std {

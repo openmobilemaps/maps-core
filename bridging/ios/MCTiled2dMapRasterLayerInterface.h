@@ -4,6 +4,7 @@
 #import "MCLayerInterface.h"
 #import "MCLoaderInterface.h"
 #import "MCMaskingObjectInterface.h"
+#import "MCShaderProgramInterface.h"
 #import "MCTiled2dMapLayerConfig.h"
 #import <Foundation/Foundation.h>
 @class MCTiled2dMapRasterLayerInterface;
@@ -12,12 +13,19 @@
 
 @interface MCTiled2dMapRasterLayerInterface : NSObject
 
+/** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
 + (nullable MCTiled2dMapRasterLayerInterface *)createWithMask:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
-                                                       loader:(nullable id<MCLoaderInterface>)loader
+                                                      loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
                                                          mask:(nullable id<MCMaskingObjectInterface>)mask;
 
+/** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
++ (nullable MCTiled2dMapRasterLayerInterface *)createWithShader:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
+                                                        loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
+                                                         shader:(nullable id<MCShaderProgramInterface>)shader;
+
+/** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
 + (nullable MCTiled2dMapRasterLayerInterface *)create:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
-                                               loader:(nullable id<MCLoaderInterface>)loader;
+                                              loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders;
 
 - (nullable id<MCLayerInterface>)asLayerInterface;
 
@@ -38,5 +46,9 @@
 - (void)setMaxZoomLevelIdentifier:(nullable NSNumber *)value;
 
 - (nullable NSNumber *)getMaxZoomLevelIdentifier;
+
+- (void)setT:(int32_t)t;
+
+- (nullable id<MCTiled2dMapLayerConfig>)getConfig;
 
 @end

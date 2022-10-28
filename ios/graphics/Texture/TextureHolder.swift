@@ -12,6 +12,10 @@ import Foundation
 import MapCoreSharedModule
 import MetalKit
 
+enum TextureHolderError: Error {
+    case emptyData
+}
+
 @objc
 public class TextureHolder: NSObject {
     let texture: MTLTexture
@@ -49,6 +53,9 @@ public class TextureHolder: NSObject {
     }
 
     public convenience init(_ data: Data, textureUsableSize: TextureUsableSize? = nil) throws {
+        guard !data.isEmpty else {
+            throw TextureHolderError.emptyData
+        }
         let options: [MTKTextureLoader.Option: Any] = [
             MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
         ]
@@ -58,6 +65,10 @@ public class TextureHolder: NSObject {
 }
 
 extension TextureHolder: MCTextureHolderInterface {
+    public func clearFromGraphics() {}
+
+    public func attachToGraphics() -> Int32 { 0 }
+
     public func getImageWidth() -> Int32 {
         Int32(texture.width)
     }
@@ -72,9 +83,6 @@ extension TextureHolder: MCTextureHolderInterface {
 
     public func getTextureHeight() -> Int32 {
         Int32(textureUsableSize?.height ?? texture.height)
-    }
-
-    public func attachToGraphics() {
     }
 }
 

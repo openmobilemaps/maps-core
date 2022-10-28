@@ -17,6 +17,7 @@ class BoundingBox
 {
   public:
     BoundingBox(const std::string &systemIdentifier);
+    BoundingBox(const Coord& p);
 
     void addPoint(const double x, const double y, const double z);
     void addPoint(const Coord& p);

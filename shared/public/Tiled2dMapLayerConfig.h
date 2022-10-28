@@ -16,7 +16,7 @@ public:
 
     virtual std::string getCoordinateSystemIdentifier() = 0;
 
-    virtual std::string getTileUrl(int32_t x, int32_t y, int32_t zoom) = 0;
+    virtual std::string getTileUrl(int32_t x, int32_t y, int32_t t, int32_t zoom) = 0;
 
     virtual std::vector<Tiled2dMapZoomLevelInfo> getZoomLevelInfos() = 0;
 

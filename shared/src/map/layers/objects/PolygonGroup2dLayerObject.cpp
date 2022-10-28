@@ -10,6 +10,7 @@
 
 #include "PolygonGroup2dLayerObject.h"
 #include "RenderVerticesDescription.h"
+#include "Logger.h"
 
 PolygonGroup2dLayerObject::PolygonGroup2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                                      const std::shared_ptr<PolygonGroup2dInterface> &polygon,
@@ -23,21 +24,50 @@ void PolygonGroup2dLayerObject::update() {}
 
 std::vector<std::shared_ptr<RenderConfigInterface>> PolygonGroup2dLayerObject::getRenderConfig() { return {renderConfig}; }
 
-void PolygonGroup2dLayerObject::setVertices(const std::vector<std::tuple<std::vector<::Coord>, int>> &vertices,
-                                            const std::vector<int32_t> &indices) {
-    std::vector<RenderVerticesDescription> renderVertices;
-    for (auto const &vertice : vertices) {
-        std::vector<Vec2D> renderCoords;
-        for (auto const &mapCoord : std::get<0>(vertice)) {
-            Coord renderCoord = conversionHelper->convertToRenderSystem(mapCoord);
-            renderCoords.push_back(Vec2D(renderCoord.x, renderCoord.y));
+
+void PolygonGroup2dLayerObject::setVertices(const std::vector<std::tuple<std::vector<::Coord>, int>> & vertices, const std::vector<int32_t> & indices) {
+
+    std::vector<float> renderVertices;
+
+    for (auto const &v: vertices) {
+        float s = (float)std::get<1>(v);
+
+        for (auto const &mapCoord: std::get<0>(v)) {
+            auto renderCoord = conversionHelper->convertToRenderSystem(mapCoord);
+            renderVertices.push_back(renderCoord.x);
+            renderVertices.push_back(renderCoord.y);
+            renderVertices.push_back(s);
         }
-        renderVertices.push_back(RenderVerticesDescription(renderCoords, std::get<1>(vertice)));
     }
-    polygon->setVertices(renderVertices, indices);
+#ifdef __APPLE__
+    auto i = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(int32_t));
+#else
+    std::vector<int16_t> shortIndices;
+    for(auto& i : indices) {
+        shortIndices.emplace_back(i);
+    }
+    auto i = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(int16_t));
+#endif
+
+    auto v = SharedBytes((int64_t)renderVertices.data(), (int32_t)renderVertices.size(), (int32_t)sizeof(float));
+    polygon->setVertices(v, i);
 }
 
-void PolygonGroup2dLayerObject::setStyles(const std::vector<PolygonStyle> &styles) { shader->setStyles(styles); }
+void PolygonGroup2dLayerObject::setStyles(const std::vector<PolygonStyle> &styles) {
+    std::vector<float> shaderStyles;
+
+    for(auto& s : styles) {
+        shaderStyles.push_back(s.color.r);
+        shaderStyles.push_back(s.color.g);
+        shaderStyles.push_back(s.color.b);
+        shaderStyles.push_back(s.color.a);
+        shaderStyles.push_back(s.opacity);
+    }
+
+    auto s = SharedBytes((int64_t)shaderStyles.data(), (int32_t)styles.size(), (int32_t)5 * sizeof(float));
+    shader->setStyles(s);
+}
+
 
 std::shared_ptr<GraphicsObjectInterface> PolygonGroup2dLayerObject::getPolygonObject() { return polygon->asGraphicsObject(); }
 

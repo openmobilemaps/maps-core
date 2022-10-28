@@ -13,7 +13,7 @@ import MapCoreSharedModule
 import Metal
 import UIKit
 
-class Quad2d: BaseGraphicsObject {
+final class Quad2d: BaseGraphicsObject {
     private var verticesBuffer: MTLBuffer?
 
     private var indicesBuffer: MTLBuffer?
@@ -28,7 +28,10 @@ class Quad2d: BaseGraphicsObject {
 
     private var renderAsMask = false
 
-    init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
+    private let label: String
+
+    init(shader: MCShaderProgramInterface, metalContext: MetalContext, label: String = "Quad2d") {
+        self.label = label
         self.shader = shader
         super.init(device: metalContext.device,
                    sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue))
@@ -64,7 +67,8 @@ class Quad2d: BaseGraphicsObject {
                          mvpMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
-        guard let verticesBuffer = verticesBuffer,
+        guard isReady(),
+              let verticesBuffer = verticesBuffer,
               let indicesBuffer = indicesBuffer else { return }
 
         if shader is AlphaShader, texture == nil {
@@ -72,17 +76,22 @@ class Quad2d: BaseGraphicsObject {
             return
         }
 
-        encoder.pushDebugGroup("Quad2d")
+        #if DEBUG
+        encoder.pushDebugGroup(label)
+        defer {
+            encoder.popDebugGroup()
+        }
+        #endif
 
         if isMasked {
             if stencilState == nil {
                 setupStencilStates()
             }
             encoder.setDepthStencilState(stencilState)
-            encoder.setStencilReferenceValue(0b1000_0000)
+            encoder.setStencilReferenceValue(0b1100_0000)
         } else if let mask = context.mask, renderAsMask {
             encoder.setDepthStencilState(mask)
-            encoder.setStencilReferenceValue(0b1000_0000)
+            encoder.setStencilReferenceValue(0b1100_0000)
         } else {
             encoder.setDepthStencilState(context.defaultMask)
         }
@@ -101,13 +110,13 @@ class Quad2d: BaseGraphicsObject {
             encoder.setFragmentTexture(texture, index: 0)
         }
 
+
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,
                                       indexType: .uint16,
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
 
-        encoder.popDebugGroup()
     }
 }
 
@@ -142,10 +151,10 @@ extension Quad2d: MCQuad2dInterface {
          Where A-C are joined to form two triangles
          */
         let vertecies: [Vertex] = [
-            Vertex(position: frame.bottomLeft, textureU: textureCoordinates.xF, textureV: textureCoordinates.heightF), // A
+            Vertex(position: frame.bottomLeft, textureU: textureCoordinates.xF, textureV: textureCoordinates.yF + textureCoordinates.heightF), // A
             Vertex(position: frame.topLeft, textureU: textureCoordinates.xF, textureV: textureCoordinates.yF), // B
-            Vertex(position: frame.topRight, textureU: textureCoordinates.widthF, textureV: textureCoordinates.yF), // C
-            Vertex(position: frame.bottomRight, textureU: textureCoordinates.widthF, textureV: textureCoordinates.heightF), // D
+            Vertex(position: frame.topRight, textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF), // C
+            Vertex(position: frame.bottomRight, textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF + textureCoordinates.heightF), // D
         ]
         let indices: [UInt16] = [
             0, 1, 2, // ABC
@@ -166,13 +175,16 @@ extension Quad2d: MCQuad2dInterface {
             fatalError("unexpected TextureHolder")
         }
         texture = textureHolder.texture
+
     }
 
     func removeTexture() {
         texture = nil
     }
 
-    func asGraphicsObject() -> MCGraphicsObjectInterface? { self }
+    func asGraphicsObject() -> MCGraphicsObjectInterface? {
+        self
+    }
 
     func asMaskingObject() -> MCMaskingObjectInterface? { self }
 }

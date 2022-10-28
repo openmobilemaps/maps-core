@@ -72,9 +72,15 @@ void Polygon2dOpenGl::prepareGlData(const std::shared_ptr<OpenGlContext> &openGl
 
 void Polygon2dOpenGl::clear() {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (ready) {
+        removeGlBuffers();
+        ready = false;
+    }
+}
+
+void Polygon2dOpenGl::removeGlBuffers() {
     glDeleteBuffers(1, &vertexBuffer);
     glDeleteBuffers(1, &indexBuffer);
-    ready = false;
 }
 
 void Polygon2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }

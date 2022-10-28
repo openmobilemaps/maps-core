@@ -28,7 +28,7 @@ class ColorPolygonGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
 
     virtual void preRender(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
-    virtual void setStyles(const std::vector<::PolygonStyle> &styles) override;
+    virtual void setStyles(const ::SharedBytes & styles) override;
 
   protected:
     virtual std::string getVertexShader() override;
@@ -40,6 +40,6 @@ class ColorPolygonGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
     std::vector<GLfloat> polygonStyles;
     GLint numStyles;
 
-    const int sizeStyleValues = 4;
+    const int sizeStyleValues = 5;
     const int sizeStyleValuesArray = sizeStyleValues * 32;
 };

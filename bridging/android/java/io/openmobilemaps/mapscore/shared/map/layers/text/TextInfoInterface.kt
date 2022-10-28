@@ -7,11 +7,15 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class TextInfoInterface {
 
-    abstract fun getText(): String
+    abstract fun getText(): ArrayList<FormattedStringEntry>
 
     abstract fun getCoordinate(): io.openmobilemaps.mapscore.shared.map.coordinates.Coord
 
     abstract fun getFont(): io.openmobilemaps.mapscore.shared.map.loader.Font
+
+    abstract fun getTextAnchor(): Anchor
+
+    abstract fun getTextJustify(): TextJustify
 
     private class CppProxy : TextInfoInterface {
         private val nativeRef: Long
@@ -31,11 +35,11 @@ abstract class TextInfoInterface {
             _djinni_private_destroy()
         }
 
-        override fun getText(): String {
+        override fun getText(): ArrayList<FormattedStringEntry> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_getText(this.nativeRef)
         }
-        private external fun native_getText(_nativeRef: Long): String
+        private external fun native_getText(_nativeRef: Long): ArrayList<FormattedStringEntry>
 
         override fun getCoordinate(): io.openmobilemaps.mapscore.shared.map.coordinates.Coord {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
@@ -48,5 +52,17 @@ abstract class TextInfoInterface {
             return native_getFont(this.nativeRef)
         }
         private external fun native_getFont(_nativeRef: Long): io.openmobilemaps.mapscore.shared.map.loader.Font
+
+        override fun getTextAnchor(): Anchor {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getTextAnchor(this.nativeRef)
+        }
+        private external fun native_getTextAnchor(_nativeRef: Long): Anchor
+
+        override fun getTextJustify(): TextJustify {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getTextJustify(this.nativeRef)
+        }
+        private external fun native_getTextJustify(_nativeRef: Long): TextJustify
     }
 }

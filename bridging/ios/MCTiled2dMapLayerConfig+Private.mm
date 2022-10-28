@@ -42,10 +42,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 
 - (nonnull NSString *)getTileUrl:(int32_t)x
                                y:(int32_t)y
+                               t:(int32_t)t
                             zoom:(int32_t)zoom {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getTileUrl(::djinni::I32::toCpp(x),
                                                               ::djinni::I32::toCpp(y),
+                                                              ::djinni::I32::toCpp(t),
                                                               ::djinni::I32::toCpp(zoom));
         return ::djinni::String::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
@@ -88,11 +90,12 @@ public:
             return ::djinni::String::toCpp(objcpp_result_);
         }
     }
-    std::string getTileUrl(int32_t c_x, int32_t c_y, int32_t c_zoom) override
+    std::string getTileUrl(int32_t c_x, int32_t c_y, int32_t c_t, int32_t c_zoom) override
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getTileUrl:(::djinni::I32::fromCpp(c_x))
                                                                                      y:(::djinni::I32::fromCpp(c_y))
+                                                                                     t:(::djinni::I32::fromCpp(c_t))
                                                                                   zoom:(::djinni::I32::fromCpp(c_zoom))];
             return ::djinni::String::toCpp(objcpp_result_);
         }

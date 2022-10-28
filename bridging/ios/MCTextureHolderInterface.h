@@ -14,6 +14,8 @@
 
 - (int32_t)getTextureHeight;
 
-- (void)attachToGraphics;
+- (int32_t)attachToGraphics;
+
+- (void)clearFromGraphics;
 
 @end

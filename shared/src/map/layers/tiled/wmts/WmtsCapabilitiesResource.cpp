@@ -28,28 +28,37 @@ class WmtsCapabilitiesResourceImpl : public WmtsCapabilitiesResource {
     };
 
     std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayer(const std::string &identifier,
-                                                                  const std::shared_ptr<::LoaderInterface> &tileLoader) override {
-        auto layerConfig = createLayerConfig(identifier);
+                                                                  const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders) override {
+        return createLayerTimed(identifier, tileLoaders, 1);
+    };
+
+    std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayerTimed(const std::string & identifier, 
+                                                                       const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders, 
+                                                                      int32_t numZ) override {
+        auto layerConfig = createLayerConfigTimed(identifier, numZ);
         if (!layerConfig)
             return nullptr;
-        return Tiled2dMapRasterLayerInterface::create(layerConfig, tileLoader);
-    };
+        return Tiled2dMapRasterLayerInterface::create(layerConfig, tileLoaders);
+    }
 
-    std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayerWithZoomInfo(const std::string &identifier,
-                                                                              const std::shared_ptr<::LoaderInterface> &tileLoader,
-                                                                              const ::Tiled2dMapZoomInfo &zoomInfo) override {
-        auto layerConfig = createLayerConfigWithZoomInfo(identifier, zoomInfo);
+
+    std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayerWithZoomInfoTimed(const std::string & identifier, 
+const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders, 
+const ::Tiled2dMapZoomInfo & zoomInfo, 
+int32_t numZ) override {
+        auto layerConfig = createLayerConfigWithZoomInfoTimed(identifier, zoomInfo, numZ);
         if (!layerConfig)
             return nullptr;
-        return Tiled2dMapRasterLayerInterface::create(layerConfig, tileLoader);
-    };
+        return Tiled2dMapRasterLayerInterface::create(layerConfig, tileLoaders);
+    }
 
-    std::shared_ptr<::Tiled2dMapLayerConfig> createLayerConfig(const std::string &identifier) override {
-        return createLayerConfigWithZoomInfo(identifier, Tiled2dMapZoomInfo(1.0, 0, true));
-    };
 
-    std::shared_ptr<::Tiled2dMapLayerConfig> createLayerConfigWithZoomInfo(const std::string &identifier,
-                                                                           const ::Tiled2dMapZoomInfo &zoomInfo) override {
+    std::shared_ptr<::Tiled2dMapLayerConfig> createLayerConfigTimed(const std::string & identifier, int32_t numZ) override {
+        return createLayerConfigWithZoomInfoTimed(identifier, Tiled2dMapZoomInfo(2.25, 2, false, true), numZ);
+    }
+
+
+    std::shared_ptr<::Tiled2dMapLayerConfig> createLayerConfigWithZoomInfoTimed(const std::string & identifier, const ::Tiled2dMapZoomInfo & zoomInfo, int32_t numZ) override {
         if (!layers.count(identifier)) {
             return nullptr;
         }
@@ -76,15 +85,15 @@ class WmtsCapabilitiesResourceImpl : public WmtsCapabilitiesResource {
 
             double magicNumber = 0.00028; // Each pixel is assumed to be 0.28mm – https://gis.stackexchange.com/a/315989
             double right =
-                topLeft.x + matrix.scaleDenominator * (double)matrix.tileWidth * (double)matrix.matrixWidth * magicNumber;
+            topLeft.x + matrix.scaleDenominator * (double)matrix.tileWidth * (double)matrix.matrixWidth * magicNumber;
             double bottom =
-                topLeft.y - matrix.scaleDenominator * (double)matrix.tileHeight * (double)matrix.tileWidth * magicNumber;
+            topLeft.y - matrix.scaleDenominator * (double)matrix.tileHeight * (double)matrix.tileWidth * magicNumber;
             Coord bottomRight = Coord(topLeft.systemIdentifier, right, bottom, 0);
             RectCoord layerBounds = RectCoord(topLeft, bottomRight);
 
             double scaledTileWidth = matrix.scaleDenominator * (double)matrix.tileWidth * magicNumber;
             auto levelInfo = Tiled2dMapZoomLevelInfo(matrix.scaleDenominator, scaledTileWidth, matrix.matrixWidth,
-                                                     matrix.matrixHeight, zoomLevelIdentifier, layerBounds);
+                                                     matrix.matrixHeight, numZ, zoomLevelIdentifier, layerBounds);
             zoomLevels.push_back(levelInfo);
 
             bounds = layerBounds;
@@ -92,6 +101,24 @@ class WmtsCapabilitiesResourceImpl : public WmtsCapabilitiesResource {
 
         return WmtsTiled2dMapLayerConfigFactory::create(description, zoomLevels, zoomInfo, matrixSet.coordinateSystemIdentifier,
                                                         matrixSet.identifier);
+
+    }
+
+
+
+    std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayerWithZoomInfo(const std::string &identifier,
+                                                                              const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
+                                                                              const ::Tiled2dMapZoomInfo &zoomInfo) override {
+        return createLayerWithZoomInfoTimed(identifier, tileLoaders, zoomInfo, 1);
+    };
+
+    std::shared_ptr<::Tiled2dMapLayerConfig> createLayerConfig(const std::string &identifier) override {
+        return createLayerConfigWithZoomInfo(identifier, Tiled2dMapZoomInfo(2.25, 2, false, true));
+    };
+
+    std::shared_ptr<::Tiled2dMapLayerConfig> createLayerConfigWithZoomInfo(const std::string &identifier,
+                                                                           const ::Tiled2dMapZoomInfo &zoomInfo) override {
+        return createLayerConfigWithZoomInfoTimed(identifier, zoomInfo, 1);
     };
 
     std::vector<WmtsLayerDescription> getAllLayers() override {

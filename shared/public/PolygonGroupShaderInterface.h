@@ -3,9 +3,8 @@
 
 #pragma once
 
-#include "PolygonStyle.h"
+#include "SharedBytes.h"
 #include <memory>
-#include <vector>
 
 class ShaderProgramInterface;
 
@@ -13,7 +12,7 @@ class PolygonGroupShaderInterface {
 public:
     virtual ~PolygonGroupShaderInterface() {}
 
-    virtual void setStyles(const std::vector<::PolygonStyle> & styles) = 0;
+    virtual void setStyles(const ::SharedBytes & styles) = 0;
 
     virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() = 0;
 };

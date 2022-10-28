@@ -19,6 +19,7 @@ line_style = record {
     color: color_state_list;
     gap_color: color_state_list;
     opacity: f32;
+    blur: f32;
     width_type: size_type;
     width: f32;
     dash_array: list<f32>;
