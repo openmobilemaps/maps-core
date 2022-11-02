@@ -15,20 +15,20 @@ import kotlinx.coroutines.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.collections.ArrayList
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
 class AndroidScheduler(
 	private val schedulerCallback: AndroidSchedulerCallback,
-	private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
-	private val computationDispatcher: CoroutineDispatcher = Dispatchers.Default,
-	private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
+	private val dispatchers: AndroidSchedulerDispatchers = AndroidSchedulerDispatchers()
 ) : SchedulerInterface() {
 
 	private var isResumed = AtomicBoolean(false)
 	private lateinit var coroutineScope: CoroutineScope
 
 	private val taskQueueMap: ConcurrentHashMap<TaskPriority, ConcurrentLinkedQueue<TaskInterface>> = ConcurrentHashMap()
+	private val runningTasksMap: ConcurrentHashMap<String, Job> = ConcurrentHashMap()
 
 	init {
 		TaskPriority.values().forEach { taskQueueMap.put(it, ConcurrentLinkedQueue()) }
@@ -55,7 +55,7 @@ class AndroidScheduler(
 	private fun handleNewTask(task: TaskInterface) {
 		if (task.getConfig().delay > 0) {
 			val id = task.getConfig().id
-			delayedTaskMap.put(id, coroutineScope.launch(defaultDispatcher) {
+			delayedTaskMap[id] = coroutineScope.launch(dispatchers.defaultDispatcher) {
 				delay(task.getConfig().delay)
 				if (isActive) {
 					if (isResumed.get()) {
@@ -66,27 +66,47 @@ class AndroidScheduler(
 					}
 					delayedTaskMap.remove(id)
 				}
-			})
+			}
 		} else {
 			scheduleTask(task)
 		}
 	}
 
 	private fun scheduleTask(task: TaskInterface) {
-		when (task.getConfig().executionEnvironment) {
-			ExecutionEnvironment.GRAPHICS -> schedulerCallback.scheduleOnGlThread(task)
-			ExecutionEnvironment.IO -> coroutineScope.launch(ioDispatcher) { task.run() }
-			ExecutionEnvironment.COMPUTATION -> coroutineScope.launch(computationDispatcher) { task.run() }
-			else -> coroutineScope.launch(defaultDispatcher) { task.run() }
+		val executionEnvironment = task.getConfig().executionEnvironment
+		if (executionEnvironment == ExecutionEnvironment.GRAPHICS) {
+			schedulerCallback.scheduleOnGlThread(task)
+		} else {
+			val dispatcher = when (executionEnvironment) {
+				ExecutionEnvironment.IO -> dispatchers.ioDispatcher
+				ExecutionEnvironment.COMPUTATION -> dispatchers.computationDispatcher
+				else -> dispatchers.defaultDispatcher
+			}
+			runningTasksMap[task.getConfig().id] = coroutineScope.launch(dispatcher) {
+				if (!isActive) {
+					return@launch
+				}
+				task.run()
+				runningTasksMap.remove(task.getConfig().id)
+			}
 		}
 	}
 
 	override fun removeTask(id: String) {
 		delayedTaskMap.remove(id)?.cancel()
+		runningTasksMap.remove(id)?.cancel()
 	}
 
 	override fun clear() {
 		taskQueueMap.forEach { it.value.clear() }
+
+		val tempDelayedTaskMap = delayedTaskMap
+		delayedTaskMap.clear()
+		tempDelayedTaskMap.values.forEach { it.cancel() }
+
+		val tempRunningTasksMap = runningTasksMap
+		runningTasksMap.clear()
+		tempRunningTasksMap.values.forEach { it.cancel() }
 	}
 
 	override fun pause() {
