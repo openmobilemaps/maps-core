@@ -29,12 +29,11 @@ class AndroidScheduler(
 
 	private val taskQueueMap: ConcurrentHashMap<TaskPriority, ConcurrentLinkedQueue<TaskInterface>> = ConcurrentHashMap()
 	private val runningTasksMap: ConcurrentHashMap<String, Job> = ConcurrentHashMap()
+	private val delayedTaskMap: ConcurrentHashMap<String, Job> = ConcurrentHashMap()
 
 	init {
 		TaskPriority.values().forEach { taskQueueMap.put(it, ConcurrentLinkedQueue()) }
 	}
-
-	private val delayedTaskMap: ConcurrentHashMap<String, Job> = ConcurrentHashMap()
 
 	fun setCoroutineScope(coroutineScope: CoroutineScope) {
 		this.coroutineScope = coroutineScope
@@ -55,7 +54,7 @@ class AndroidScheduler(
 	private fun handleNewTask(task: TaskInterface) {
 		if (task.getConfig().delay > 0) {
 			val id = task.getConfig().id
-			delayedTaskMap[id] = coroutineScope.launch(dispatchers.defaultDispatcher) {
+			delayedTaskMap[id] = coroutineScope.launch(dispatchers.default) {
 				delay(task.getConfig().delay)
 				if (isActive) {
 					if (isResumed.get()) {
@@ -78,9 +77,9 @@ class AndroidScheduler(
 			schedulerCallback.scheduleOnGlThread(task)
 		} else {
 			val dispatcher = when (executionEnvironment) {
-				ExecutionEnvironment.IO -> dispatchers.ioDispatcher
-				ExecutionEnvironment.COMPUTATION -> dispatchers.computationDispatcher
-				else -> dispatchers.defaultDispatcher
+				ExecutionEnvironment.IO -> dispatchers.io
+				ExecutionEnvironment.COMPUTATION -> dispatchers.computation
+				else -> dispatchers.default
 			}
 			runningTasksMap[task.getConfig().id] = coroutineScope.launch(dispatcher) {
 				if (!isActive) {
@@ -100,13 +99,13 @@ class AndroidScheduler(
 	override fun clear() {
 		taskQueueMap.forEach { it.value.clear() }
 
-		val tempDelayedTaskMap = delayedTaskMap
+		val tempDelayedJobs = delayedTaskMap.values.toList()
 		delayedTaskMap.clear()
-		tempDelayedTaskMap.values.forEach { it.cancel() }
+		tempDelayedJobs.forEach { it.cancel() }
 
-		val tempRunningTasksMap = runningTasksMap
+		val tempRunningJobs = runningTasksMap.values.toList()
 		runningTasksMap.clear()
-		tempRunningTasksMap.values.forEach { it.cancel() }
+		tempRunningJobs.forEach { it.cancel() }
 	}
 
 	override fun pause() {

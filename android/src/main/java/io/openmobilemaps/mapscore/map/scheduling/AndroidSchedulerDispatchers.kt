@@ -5,7 +5,7 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import java.util.concurrent.Executors
 
 data class AndroidSchedulerDispatchers(
-	val ioDispatcher: CoroutineDispatcher = Executors.newFixedThreadPool(32).asCoroutineDispatcher(),
-	val computationDispatcher: CoroutineDispatcher = Executors.newFixedThreadPool(16).asCoroutineDispatcher(),
-	val defaultDispatcher: CoroutineDispatcher = Executors.newFixedThreadPool(16).asCoroutineDispatcher()
+	val io: CoroutineDispatcher = Executors.newFixedThreadPool(32).asCoroutineDispatcher(),
+	val computation: CoroutineDispatcher = Executors.newFixedThreadPool(16).asCoroutineDispatcher(),
+	val default: CoroutineDispatcher = Executors.newFixedThreadPool(16).asCoroutineDispatcher()
 )
