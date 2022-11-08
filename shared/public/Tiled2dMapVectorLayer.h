@@ -80,10 +80,12 @@ protected:
 
     std::shared_ptr<Tiled2dMapVectorSource> vectorTileSource;
 
+    const std::vector<std::shared_ptr<::LoaderInterface>> loaders;
+
 private:
     void scheduleStyleJsonLoading();
 
-    void loadStyleJson();
+    virtual void loadStyleJson();
 
     void initializeVectorLayer(const std::vector<std::shared_ptr<LayerInterface>> &newSublayers);
 
@@ -98,8 +100,6 @@ private:
     std::unordered_map<std::string, std::shared_ptr<Tiled2dMapLayerConfig>> layerConfigs;
 
     const std::shared_ptr<FontLoaderInterface> fontLoader;
-
-    const std::vector<std::shared_ptr<::LoaderInterface>> loaders;
 
     std::recursive_mutex tileUpdateMutex;
 

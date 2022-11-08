@@ -81,6 +81,7 @@ void Tiled2dMapVectorLayer::scheduleStyleJsonLoading() {
                 auto selfPtr = weakSelfPtr.lock();
                 if (selfPtr) {
                     selfPtr->loadStyleJson();
+                    selfPtr->isLoadingStyleJson = false;
                 }
             }));
 }
@@ -91,7 +92,7 @@ void Tiled2dMapVectorLayer::loadStyleJson() {
     if (!styleJsonPath.has_value() || !dpFactor.has_value()) {
         return;
     }
-    auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJson(layerName, *styleJsonPath, *dpFactor, loaders);
+    auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromUrl(layerName, *styleJsonPath, *dpFactor, loaders);
     if (parseResult.status == LoaderStatus::OK) {
         if (errorManager) {
             errorManager->removeError(*styleJsonPath);
@@ -106,7 +107,6 @@ void Tiled2dMapVectorLayer::loadStyleJson() {
             errorManager->addTiledLayerError(tiledLayerError);
         }
     }
-    isLoadingStyleJson = false;
 }
 
 std::shared_ptr<LayerInterface> Tiled2dMapVectorLayer::getLayerForDescription(const std::shared_ptr<VectorLayerDescription> &layerDescription) {
