@@ -251,10 +251,15 @@ public:
         }
 
 
+        std::optional<std::string> sprite;
+        if (json["sprite"].is_string()) {
+            sprite = json["sprite"].get<std::string>();
+        }
+
         auto mapDesc = std::make_shared<VectorMapDescription>(layerName,
                                                               sourceDescriptions,
                                                               layers,
-                                                              json["sprite"].get<std::string>());
+                                                              sprite);
         return Tiled2dMapVectorLayerParserResult(mapDesc, LoaderStatus::OK, "");
     }
 };
