@@ -20,6 +20,7 @@
 #include <algorithm>
 #include "MapCamera2dInterface.h"
 #include "Tiled2dMapVectorRasterSubLayerConfig.h"
+#include "PolygonHelper.h"
 
 namespace mapbox {
 namespace util {
@@ -46,10 +47,12 @@ Tiled2dMapVectorPolygonSubLayer::Tiled2dMapVectorPolygonSubLayer(const std::shar
 
 void Tiled2dMapVectorPolygonSubLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
     Tiled2dMapVectorSubLayer::onAdded(mapInterface);
+    mapInterface->getTouchHandler()->addListener(shared_from_this());
     shader = mapInterface->getShaderFactory()->createPolygonGroupShader();
 }
 
 void Tiled2dMapVectorPolygonSubLayer::onRemoved() {
+    mapInterface->getTouchHandler()->removeListener(shared_from_this());
     Tiled2dMapVectorSubLayer::onRemoved();
 }
 
@@ -111,6 +114,8 @@ Tiled2dMapVectorPolygonSubLayer::updateTileData(const Tiled2dMapTileInfo &tileIn
         for (const auto &feature : layerFeatures) {
             const FeatureContext &featureContext = std::get<0>(feature);
 
+            if (featureContext.geomType != vtzero::GeomType::POLYGON) { continue; }
+
             if (description->filter == nullptr || description->filter->evaluateOr(EvaluationContext(-1, featureContext), true)) {
                 const auto &geometryHandler = std::get<1>(feature);
                 const auto &polygonCoordinates = geometryHandler.getPolygonCoordinates();
@@ -160,6 +165,8 @@ Tiled2dMapVectorPolygonSubLayer::updateTileData(const Tiled2dMapTileInfo &tileIn
                     }
 
                     indices_offset += posAdded;
+
+                    hitDetectionPolygonMap[tileInfo].push_back({PolygonCoord(polygonCoordinates[i], polygonHoles[i]), featureContext});
                 }
 
                 int styleIndex = -1;
@@ -290,6 +297,24 @@ void Tiled2dMapVectorPolygonSubLayer::setupPolygons(const Tiled2dMapTileInfo &ti
     }
 }
 
+bool Tiled2dMapVectorPolygonSubLayer::onClickConfirmed(const ::Vec2F &posScreen) {
+    auto point = mapInterface->getCamera()->coordFromScreenPosition(posScreen);
+    auto selectionDelegate = this->selectionDelegate.lock();
+
+    for (auto const &[tileInfo, polygonTuples] : hitDetectionPolygonMap) {
+        for (auto const &[polygon, featureContext]: polygonTuples) {
+            if (PolygonHelper::pointInside(polygon, point, mapInterface->getCoordinateConverterHelper())) {
+                if (selectionDelegate->didSelectFeature(featureContext, description, point)) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+
 void Tiled2dMapVectorPolygonSubLayer::update() {
 
     std::lock_guard<std::recursive_mutex> lock(featureGroupsMutex);
@@ -316,6 +341,8 @@ void Tiled2dMapVectorPolygonSubLayer::update() {
 void Tiled2dMapVectorPolygonSubLayer::clearTileData(const Tiled2dMapTileInfo &tileInfo) {
     auto mapInterface = this->mapInterface;
     if (!mapInterface) { return; }
+
+    hitDetectionPolygonMap.erase(tileInfo);
 
     std::vector<std::shared_ptr<GraphicsObjectInterface>> objectsToClear;
     Tiled2dMapVectorSubLayer::clearTileData(tileInfo);
