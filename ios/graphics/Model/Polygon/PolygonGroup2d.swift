@@ -55,7 +55,7 @@ class PolygonGroup2d: BaseGraphicsObject {
         guard let verticesBuffer = verticesBuffer,
               let indicesBuffer = indicesBuffer else { return }
 
-        encoder.pushDebugGroup("PolygonGroup2d")
+        //encoder.pushDebugGroup("PolygonGroup2d")
 
         if isMasked {
             if stencilState == nil {
@@ -79,7 +79,7 @@ class PolygonGroup2d: BaseGraphicsObject {
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
 
-        encoder.popDebugGroup()
+        //encoder.popDebugGroup()
     }
 }
 

@@ -64,7 +64,7 @@ class Text: BaseGraphicsObject {
             encoder.setDepthStencilState(context.defaultMask)
         }
 
-        encoder.pushDebugGroup("Text")
+        //encoder.pushDebugGroup("Text")
 
         shader.setupProgram(context)
         shader.preRender(context)
@@ -86,7 +86,7 @@ class Text: BaseGraphicsObject {
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
 
-        encoder.popDebugGroup()
+        //encoder.popDebugGroup()
     }
 }
 

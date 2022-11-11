@@ -76,7 +76,7 @@ class Quad2d: BaseGraphicsObject {
             return
         }
 
-        encoder.pushDebugGroup(label)
+       // encoder.pushDebugGroup(label)
 
         if isMasked {
             if stencilState == nil {
@@ -112,7 +112,7 @@ class Quad2d: BaseGraphicsObject {
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
 
-        encoder.popDebugGroup()
+        //encoder.popDebugGroup()
     }
 }
 

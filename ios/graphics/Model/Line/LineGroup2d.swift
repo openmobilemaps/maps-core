@@ -72,7 +72,7 @@ class LineGroup2d: BaseGraphicsObject {
               let lineIndicesBuffer = lineIndicesBuffer
         else { return }
 
-        encoder.pushDebugGroup("LineGroup2d")
+        //encoder.pushDebugGroup("LineGroup2d")
 
         if stencilState == nil {
             setupStencilBufferDescriptor()
@@ -107,7 +107,7 @@ class LineGroup2d: BaseGraphicsObject {
             context.clearStencilBuffer()
         }
 
-        encoder.popDebugGroup()
+        //encoder.popDebugGroup()
     }
 }
 

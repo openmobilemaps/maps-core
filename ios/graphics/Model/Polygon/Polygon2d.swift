@@ -36,7 +36,7 @@ class Polygon2d: BaseGraphicsObject {
         guard let verticesBuffer = verticesBuffer,
               let indicesBuffer = indicesBuffer else { return }
 
-        encoder.pushDebugGroup("Polygon2d")
+        //encoder.pushDebugGroup("Polygon2d")
 
         if isMasked {
             if stencilState == nil {
@@ -46,7 +46,7 @@ class Polygon2d: BaseGraphicsObject {
             if maskInverse {
                 encoder.setStencilReferenceValue(0b0000_0000)
             } else {
-                encoder.setStencilReferenceValue(0b1000_0000)
+                encoder.setStencilReferenceValue(0b1100_0000)
             }
         }
 
@@ -64,7 +64,7 @@ class Polygon2d: BaseGraphicsObject {
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
 
-        encoder.popDebugGroup()
+        //encoder.popDebugGroup()
     }
 
     private func setupStencilStates() {
@@ -73,7 +73,7 @@ class Polygon2d: BaseGraphicsObject {
         ss2.stencilFailureOperation = .zero
         ss2.depthFailureOperation = .keep
         ss2.depthStencilPassOperation = .keep
-        ss2.readMask = 0b1111_1111
+        ss2.readMask = 0b1100_0000
         ss2.writeMask = 0b0000_0000
 
         let s2 = MTLDepthStencilDescriptor()
@@ -97,7 +97,7 @@ extension Polygon2d: MCMaskingObjectInterface {
               let indicesBuffer = indicesBuffer
         else { return }
 
-        encoder.pushDebugGroup("Polygon2dMask")
+        //encoder.pushDebugGroup("Polygon2dMask")
 
         if let mask = context.polygonMask {
             encoder.setStencilReferenceValue(0xFF)
@@ -119,7 +119,7 @@ extension Polygon2d: MCMaskingObjectInterface {
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
 
-        encoder.popDebugGroup()
+        //encoder.popDebugGroup()
     }
 }
 
