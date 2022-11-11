@@ -82,10 +82,11 @@ protected:
 
     const std::vector<std::shared_ptr<::LoaderInterface>> loaders;
 
+    virtual void loadStyleJson();
+
 private:
     void scheduleStyleJsonLoading();
 
-    virtual void loadStyleJson();
 
     void initializeVectorLayer(const std::vector<std::shared_ptr<LayerInterface>> &newSublayers);
 
