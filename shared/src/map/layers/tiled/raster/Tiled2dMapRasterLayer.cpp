@@ -232,6 +232,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
         }
 
         std::weak_ptr<Tiled2dMapRasterLayer> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapRasterLayer>(shared_from_this());
+
         mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
                 TaskConfig("Tiled2dMapRasterLayer_onTilesUpdated", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
                 [weakSelfPtr, tilesToSetup, tilesToClean, newMaskObjects, obsoleteMaskObjects] {
@@ -265,12 +266,19 @@ void Tiled2dMapRasterLayer::setupTiles(
         const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToClean) {
     auto mapInterface = this->mapInterface;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
-    if (!renderingContext)
+    if (!renderingContext) {
         return;
-
+    }
+    
     std::vector<const Tiled2dMapTileInfo> tilesReady;
     {
         std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
+
+        for (const auto &[tile, tileObject] : tilesToClean) {
+            tileObjectMap.erase(tile);
+            tileMaskMap.erase(tile.tileInfo);
+        }
+
         for (const auto &tile : tilesToSetup) {
             const auto &tileInfo = tile.first;
             const auto &tileObject = tile.second;
@@ -278,17 +286,13 @@ void Tiled2dMapRasterLayer::setupTiles(
                 continue;
             }
 
-            tileObject->getQuadObject()->asGraphicsObject()->setup(renderingContext);
+            tileObject->getGraphicsObject()->setup(renderingContext);
 
             if (tileInfo.textureHolder) {
                 tileObject->getQuadObject()->loadTexture(renderingContext, tileInfo.textureHolder);
             }
             // the texture holder can be empty, some tileserver serve 0 byte textures
             tilesReady.push_back(tileInfo.tileInfo);
-        }
-
-        for (const auto &[tile, tileObject] : tilesToClean) {
-            tileObjectMap.erase(tile);
         }
     }
 
@@ -327,18 +331,16 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
             if (entry.first.tileInfo.t != curT) {
                 continue;
             }
-            auto const &quadObject = entry.second->getQuadObject();
-            auto const renderObject = std::make_shared<RenderObject>(quadObject->asGraphicsObject());
 
+            auto const &renderObject = entry.second->getRenderObject();
 
             if (layerConfig->getZoomInfo().maskTile) {
-                const auto &mask = tileMaskMap.at(entry.first.tileInfo).maskObject;
-                mask->getPolygonObject()->asGraphicsObject()->setup(renderingContext);
+                const auto &mask = tileMaskMap.at(entry.first.tileInfo);
 
+                mask.graphicsObject->setup(renderingContext);
                 std::shared_ptr<RenderPass> renderPass =
                 std::make_shared<RenderPass>(RenderPassConfig(0),
-                                             std::vector<std::shared_ptr<::RenderObjectInterface>>{renderObject},
-                                             mask->getPolygonObject()->asMaskingObject());
+                                             std::vector<std::shared_ptr<::RenderObjectInterface>>{renderObject}, mask.graphicsMaskObject);
                 renderPass->setScissoringRect(scissorRect);
                 newRenderPasses.push_back(renderPass);
             }else{
