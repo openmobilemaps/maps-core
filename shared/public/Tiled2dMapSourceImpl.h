@@ -691,6 +691,7 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
 
 
     gpc_polygon currentTileMask;
+    bool freeCurrent = false;
     currentTileMask.num_contours = 0;
     bool isFirst = true;
 
@@ -704,7 +705,6 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
               currentViewBounds.bottomRight.y, 0),
         currentViewBounds.topLeft
     }, {})}, &currentViewBoundsPolygon);
-
 
     for (auto it = currentTiles.rbegin(); it != currentTiles.rend(); it++ ){
         auto &[tileInfo, tileWrapper] = *it;
@@ -764,8 +764,15 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
                 gpc_free_polygon(&currentTileMask);
                 currentTileMask = result;
             }
+
+            freeCurrent = true;
         }
     }
+
+    if(freeCurrent) {
+        gpc_free_polygon(&currentTileMask);
+    }
+    gpc_free_polygon(&currentViewBoundsPolygon);
 }
 
 template<class T, class L, class R>
