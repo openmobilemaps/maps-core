@@ -120,6 +120,9 @@ public:
         Tiled2dMapVectorStyleParser parser;
 
         for (auto&[key, val]: json["layers"].items()) {
+            if (val["layout"].is_object() && val["layout"]["visibility"] == "none") {
+                continue;
+            }
             std::optional<int32_t> renderPassIndex;
             if (val["metadata"].is_object() && val["metadata"]["render-pass-index"].is_number()) {
                 renderPassIndex = val["metadata"].value("render-pass-index", 0);
