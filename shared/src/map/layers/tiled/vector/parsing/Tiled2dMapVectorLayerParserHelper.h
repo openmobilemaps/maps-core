@@ -120,6 +120,10 @@ public:
         Tiled2dMapVectorStyleParser parser;
 
         for (auto&[key, val]: json["layers"].items()) {
+			if (!val["source-layer"].is_string() && val["type"] != "raster") {
+                // layers without a source-layer are currently not supported
+                continue;
+            }
             if (val["layout"].is_object() && val["layout"]["visibility"] == "none") {
                 continue;
             }
