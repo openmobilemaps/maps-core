@@ -721,6 +721,7 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
             if (shader) {
                 object->getShader()->setColor(description->style.getTextColor(evalContext));
                 object->getShader()->setHaloColor(description->style.getTextHaloColor(evalContext));
+                // TODO: Take into account alpha value
             }
         }
 #ifdef DRAW_COLLIDED_TEXT_BOUNDING_BOXES
@@ -1085,4 +1086,3 @@ void Tiled2dMapVectorSymbolSubLayer::setSelectedFeatureIdentfier(std::optional<i
         hasFreshData = true;
     }
 }
-

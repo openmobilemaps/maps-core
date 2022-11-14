@@ -377,7 +377,7 @@ void Tiled2dMapRasterLayer::removeCallbackHandler() { callbackHandler = nullptr;
 
 std::shared_ptr<Tiled2dMapRasterLayerCallbackInterface> Tiled2dMapRasterLayer::getCallbackHandler() { return callbackHandler; }
 
-void Tiled2dMapRasterLayer::setAlpha(double alpha) {
+void Tiled2dMapRasterLayer::setAlpha(float alpha) {
     if (this->alpha == alpha) {
         return;
     }
@@ -393,7 +393,7 @@ void Tiled2dMapRasterLayer::setAlpha(double alpha) {
         mapInterface->invalidate();
 }
 
-double Tiled2dMapRasterLayer::getAlpha() { return alpha; }
+float Tiled2dMapRasterLayer::getAlpha() { return alpha; }
 
 bool Tiled2dMapRasterLayer::onClickConfirmed(const Vec2F &posScreen) {
     auto callbackHandler = this->callbackHandler;

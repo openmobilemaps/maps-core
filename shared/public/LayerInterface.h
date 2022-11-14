@@ -36,6 +36,10 @@ public:
 
     virtual void show() = 0;
 
+    virtual void setAlpha(float alpha) = 0;
+
+    virtual float getAlpha() = 0;
+
     /** optional rectangle, remove scissoring when not set */
     virtual void setScissorRect(const std::optional<::RectI> & scissorRect) = 0;
 

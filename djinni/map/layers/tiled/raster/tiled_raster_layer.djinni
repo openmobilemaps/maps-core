@@ -16,8 +16,8 @@ tiled_2d_map_raster_layer_interface = interface +c {
     set_callback_handler(handler: tiled_2d_map_raster_layer_callback_interface);
     get_callback_handler() : optional<tiled_2d_map_raster_layer_callback_interface>;
     remove_callback_handler();
-    set_alpha(alpha: f64);
-    get_alpha(): f64;
+    set_alpha(alpha: f32);
+    get_alpha(): f32;
 
     set_min_zoom_level_identifier(value: optional<i32>);
     get_min_zoom_level_identifier(): optional<i32>;

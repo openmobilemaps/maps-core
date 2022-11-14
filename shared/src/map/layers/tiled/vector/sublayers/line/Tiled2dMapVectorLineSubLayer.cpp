@@ -122,7 +122,7 @@ void Tiled2dMapVectorLineSubLayer::update() {
             }
             float opacity = description->style.getLineOpacity(context);
             if (opacity != style.opacity) {
-                style.opacity = opacity;
+                style.opacity = opacity * alpha;
                 needsUpdate = true;
             }
             float blur = description->style.getLineBlur(context);
