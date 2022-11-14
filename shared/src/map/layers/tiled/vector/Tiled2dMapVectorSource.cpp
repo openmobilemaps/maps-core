@@ -22,14 +22,18 @@ Tiled2dMapVectorSource::Tiled2dMapVectorSource(const MapConfig &mapConfig,
                                                const std::shared_ptr<Tiled2dMapSourceListenerInterface> &listener,
                                                const std::unordered_map<std::string, std::unordered_set<std::string>> &layersToDecode,
                                                float screenDensityPpi)
-        : Tiled2dMapSource<DataHolderInterface, IntermediateResult, FinalResult>(mapConfig, layerConfigs.begin()->second, conversionHelper, scheduler,
+        : Tiled2dMapSource<DataHolderInterface, IntermediateResult, FinalResult>(mapConfig, std::next(layerConfigs.begin())->second, conversionHelper, scheduler,
                                                                               listener, screenDensityPpi, tileLoaders.size()), loaders(tileLoaders), layersToDecode(layersToDecode), layerConfigs(layerConfigs) {}
 
 IntermediateResult Tiled2dMapVectorSource::loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) {
     std::unordered_map<std::string, DataLoaderResult> results;
     for(auto const &[source, config]: layerConfigs) {
+        if (layersToDecode.count(source) == 0) {
+            continue;
+        }
         results.insert({source, loaders[loaderIndex]->loadData(config->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier), std::nullopt)});
-        if (results.at(source).status != LoaderStatus::OK) {
+
+        if (!(results.at(source).status == LoaderStatus::OK || results.at(source).status == LoaderStatus::ERROR_404)) {
             return IntermediateResult(results, results.at(source).status, results.at(source).errorCode);
         }
     }
@@ -40,6 +44,8 @@ FinalResult Tiled2dMapVectorSource::postLoadingTask(const IntermediateResult &lo
 
     for(auto const &[source, data_]: loadedData.results) {
         if (!isTileVisible(tile)) return FinalResult();
+        
+        if (data_.status == LoaderStatus::ERROR_404) continue;
 
         auto layerFeatureMap = std::make_shared<std::unordered_map<std::string, std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>>>();
 
