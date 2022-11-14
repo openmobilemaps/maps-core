@@ -34,7 +34,6 @@
 #include "DataHolderInterface.h"
 #include "TextureLoaderResult.h"
 #include "PolygonCompare.h"
-#include "TiledLayerError.h"
 #include "LoaderHelper.h"
 
 
@@ -80,32 +79,40 @@ void Tiled2dMapVectorLayer::scheduleStyleJsonLoading() {
             [weakSelfPtr] {
                 auto selfPtr = weakSelfPtr.lock();
                 if (selfPtr) {
-                    selfPtr->loadStyleJson();
+                    auto layerError = selfPtr->loadStyleJson();
+                    if (selfPtr->errorManager) {
+                        if (auto error = layerError) {
+                            selfPtr->errorManager->addTiledLayerError(*error);
+                        } else {
+                            if (selfPtr->styleJsonPath.has_value()) {
+                                selfPtr->errorManager->removeError(*selfPtr->styleJsonPath);
+                            } else {
+                                selfPtr->errorManager->removeError(selfPtr->layerName);
+                            }
+                        }
+                    }
+
                     selfPtr->isLoadingStyleJson = false;
                 }
             }));
 }
 
-void Tiled2dMapVectorLayer::loadStyleJson() {
+std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJson() {
     auto styleJsonPath = this->styleJsonPath;
     auto dpFactor = this->dpFactor;
     if (!styleJsonPath.has_value() || !dpFactor.has_value()) {
-        return;
+        return std::nullopt;
     }
     auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromUrl(layerName, *styleJsonPath, *dpFactor, loaders);
     if (parseResult.status == LoaderStatus::OK) {
-        if (errorManager) {
-            errorManager->removeError(*styleJsonPath);
-        }
         setMapDescription(parseResult.mapDescription);
+        return std::nullopt;
     } else {
-        auto tiledLayerError = TiledLayerError(parseResult.status, parseResult.errorCode, *styleJsonPath,
+        auto tiledLayerError = TiledLayerError(parseResult.status, parseResult.errorCode, layerName,
                                                *styleJsonPath, parseResult.status != LoaderStatus::ERROR_404 ||
                                                                parseResult.status != LoaderStatus::ERROR_400,
                                                std::nullopt);
-        if (errorManager) {
-            errorManager->addTiledLayerError(tiledLayerError);
-        }
+        return tiledLayerError;
     }
 }
 

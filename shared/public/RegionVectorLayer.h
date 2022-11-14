@@ -31,6 +31,16 @@ public:
     styleJsonString(styleJsonString)
     {}
 
+    RegionVectorLayer(std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
+                      const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
+                      std::string styleJsonUrl,
+                      std::string fallbackStyleJsonString)
+    : Tiled2dMapVectorLayer(layerConfig->getLayerName(), styleJsonUrl, loaders, {}, 1.0),
+    regionLayerConfig(layerConfig),
+    styleJsonUrl(styleJsonUrl),
+    styleJsonString(fallbackStyleJsonString)
+    {}
+
 
     void onAdded(const std::shared_ptr<MapInterface> &mapInterface) override {
         Tiled2dMapVectorLayer::onAdded(mapInterface);
@@ -47,26 +57,34 @@ protected:
         return regionLayerConfig;
     }
 
-    void loadStyleJson() override {
-        if (auto styleJson = styleJsonString) {
-            auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(regionLayerConfig->getLayerName(), *styleJson, 1.0, loaders);
-
-            if (parseResult.status == LoaderStatus::OK) {
-                if (errorManager) {
-                    errorManager->removeError(regionLayerConfig->getLayerName());
-                }
-                setMapDescription(parseResult.mapDescription);
+    std::optional<TiledLayerError> loadStyleJson() override {
+        auto error = Tiled2dMapVectorLayer::loadStyleJson();
+        if (error.has_value()) {
+            if (auto json = styleJsonString) {
+                return loadStyleJsonLocally(*json);
             } else {
-                auto tiledLayerError = TiledLayerError(parseResult.status, parseResult.errorCode, regionLayerConfig->getLayerName(),
+                return TiledLayerError(LoaderStatus::ERROR_OTHER, std::nullopt, regionLayerConfig->getLayerName(),
                                                        regionLayerConfig->getLayerName(), false, std::nullopt);
-                if (errorManager) {
-                    errorManager->addTiledLayerError(tiledLayerError);
-                }
             }
         } else {
-            Tiled2dMapVectorLayer::loadStyleJson();
+            return std::nullopt;
         }
     }
+
+    std::optional<TiledLayerError> loadStyleJsonLocally(std::string styleJsonString) {
+        auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(regionLayerConfig->getLayerName(), styleJsonString, 1.0, loaders);
+
+        if (parseResult.status == LoaderStatus::OK) {
+            setMapDescription(parseResult.mapDescription);
+            return std::nullopt;
+        } else {
+            auto tiledLayerError = TiledLayerError(parseResult.status, parseResult.errorCode, regionLayerConfig->getLayerName(),
+                                                   regionLayerConfig->getLayerName(), false, std::nullopt);
+            return tiledLayerError;
+        }
+    }
+
     std::shared_ptr<Tiled2dMapLayerConfig> regionLayerConfig;
+    std::optional<std::string> styleJsonUrl;
     std::optional<std::string> styleJsonString;
 };

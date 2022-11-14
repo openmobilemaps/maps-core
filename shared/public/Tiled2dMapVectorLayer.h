@@ -20,6 +20,7 @@
 #include "Tiled2dMapVectorLayerReadyInterface.h"
 #include "Tiled2dMapLayerMaskWrapper.h"
 #include "Tiled2dMapVectorLayerSelectionInterface.h"
+#include "TiledLayerError.h"
 
 class Tiled2dMapVectorLayer : public Tiled2dMapLayer, public Tiled2dMapVectorLayerInterface, public Tiled2dMapVectorLayerReadyInterface {
 public:
@@ -82,7 +83,7 @@ protected:
 
     const std::vector<std::shared_ptr<::LoaderInterface>> loaders;
 
-    virtual void loadStyleJson();
+    virtual std::optional<TiledLayerError> loadStyleJson();
 
 private:
     void scheduleStyleJsonLoading();

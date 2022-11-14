@@ -15,9 +15,10 @@
 
 class RegionLayerConfig : public Tiled2dMapLayerConfig {
   public:
-    RegionLayerConfig(const std::string &urlTemplate, const std::vector<Tiled2dMapZoomLevelInfo> &zoomLevelInfos, const std::string &coordinateSystemIdentifier)
+    RegionLayerConfig(const RegionLayerType &regionLayerType, const std::string &urlTemplate, const std::vector<Tiled2dMapZoomLevelInfo> &zoomLevelInfos, const std::string &coordinateSystemIdentifier)
         : urlTemplate(urlTemplate),
           zoomLevelInfos(zoomLevelInfos),
+          regionLayerType(regionLayerType),
           coordinateSystemIdentifier(coordinateSystemIdentifier) {}
 
     ~RegionLayerConfig() {}
@@ -44,13 +45,26 @@ class RegionLayerConfig : public Tiled2dMapLayerConfig {
 
     Tiled2dMapZoomInfo getZoomInfo() override { return defaultZoomInfo; }
 
-    std::string getLayerName() override { return urlTemplate; }
+    std::string getLayerName() override {
+        return layerTitleKey(regionLayerType);
+    }
 
   private:
     const std::string urlTemplate;
 
     const std::string coordinateSystemIdentifier;
+    const RegionLayerType regionLayerType;
 
     const Tiled2dMapZoomInfo defaultZoomInfo = Tiled2dMapZoomInfo(0.65, 0, true, true);
     const std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfos;
+
+
+    std::string layerTitleKey(RegionLayerType type) {
+        switch (type) {
+            case RegionLayerType::WILDSCHUTZGEBIETE:
+                return "layer_wildschutz_gebiete";
+            case RegionLayerType::WILDRUHEZONEN:
+                return "layer_wildruhezonen";
+        }
+    }
 };
