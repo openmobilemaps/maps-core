@@ -862,6 +862,9 @@ public:
     ValueVariant evaluate(const EvaluationContext &context) override {
         return std::visit(overloaded {
             [](const std::string &val){
+                if (val.empty()) {
+                    return 0.0;
+                }
                 return std::stod(val);
             },
             [](double val){
@@ -871,7 +874,7 @@ public:
                 return (double)val;
             },
             [](bool val){
-                return 0.0;
+                return val ? 1.0 : 0.0;
             },
             [](const Color &val){
                 return 0.0;
