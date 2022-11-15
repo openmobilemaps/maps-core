@@ -47,7 +47,7 @@ void TextShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInte
     openGlContext->storeProgram(programName, program);
 }
 
-void TextShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
+void TextShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &pass) {
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     int program = openGlContext->getProgram(getProgramName());
 

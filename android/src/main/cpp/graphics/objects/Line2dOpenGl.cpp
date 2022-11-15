@@ -111,14 +111,14 @@ void Line2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
-    drawLineSegments(openGlContext, mvpMatrix, screenPixelAsRealMeterFactor);
+    drawLineSegments(openGlContext, renderPass, mvpMatrix, screenPixelAsRealMeterFactor);
 
     if (!isMasked) {
         glDisable(GL_STENCIL_TEST);
     }
 }
 
-void Line2dOpenGl::drawLineSegments(std::shared_ptr<OpenGlContext> openGlContext, int64_t mvpMatrix, float widthScaleFactor) {
+void Line2dOpenGl::drawLineSegments(std::shared_ptr<OpenGlContext> openGlContext, const RenderPassConfig &renderPass, int64_t mvpMatrix, float widthScaleFactor) {
     // Add program to OpenGL environment
     int program = openGlContext->getProgram(shaderProgram->getProgramName());
     glUseProgram(program);
@@ -130,7 +130,7 @@ void Line2dOpenGl::drawLineSegments(std::shared_ptr<OpenGlContext> openGlContext
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-    shaderProgram->preRender(openGlContext);
+    shaderProgram->preRender(openGlContext, renderPass);
 
     // Prepare the vertex attributes
     size_t floatSize = sizeof(GLfloat);

@@ -64,13 +64,13 @@ void OpenGlContext::setViewportSize(const ::Vec2I &size) {
 
 void OpenGlContext::setBackgroundColor(const Color &color) { backgroundColor = color; }
 
-void OpenGlContext::setupDrawFrame() {
+void OpenGlContext::setupDrawFrame(const std::shared_ptr<::RenderTargetTexture> & renderTargetTexture) {
     glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     glClearStencil(0);
 }
 
-void OpenGlContext::preRenderStencilMask() {
+void OpenGlContext::preRenderStencilMask(const RenderPassConfig & pass) {
     glEnable(GL_STENCIL_TEST);
     glClear(GL_STENCIL_BUFFER_BIT);
     glClearStencil(0);
@@ -78,13 +78,21 @@ void OpenGlContext::preRenderStencilMask() {
     glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 }
 
-void OpenGlContext::postRenderStencilMask() { glDisable(GL_STENCIL_TEST); }
+void OpenGlContext::postRenderStencilMask(const RenderPassConfig & pass) { glDisable(GL_STENCIL_TEST); }
 
-void OpenGlContext::applyScissorRect(const std::optional<::RectI> &scissorRect) {
+void OpenGlContext::applyScissorRect(const std::optional<::RectI> &scissorRect, const RenderPassConfig & pass) {
     if (scissorRect) {
         glEnable(GL_SCISSOR_TEST);
         glScissor(scissorRect->x, scissorRect->y, scissorRect->width, scissorRect->height);
     } else {
         glDisable(GL_SCISSOR_TEST);
     }
+}
+
+void OpenGlContext::endDrawFrame(const std::shared_ptr<::RenderTargetTexture> &renderTargetTexture) {
+    // not used until now
+}
+
+std::shared_ptr<::RenderTargetTexture> OpenGlContext::createRenderTargetTexture() {
+    return nullptr; // TODO: Will see
 }

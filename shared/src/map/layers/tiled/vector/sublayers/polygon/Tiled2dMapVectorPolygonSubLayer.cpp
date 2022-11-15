@@ -124,16 +124,19 @@ Tiled2dMapVectorPolygonSubLayer::updateTileData(const Tiled2dMapTileInfo &tileIn
                         pol.push_back(hole);
                     }
 
-#ifdef __APPLE__
                     std::vector<uint32_t> new_indices = mapbox::earcut<uint32_t>(pol);
-#else
-                    // TODO: andorid currently only supports 16bit indices
+#ifndef __APPLE__
+                    // TODO: android currently only supports 16bit indices
                     // more complex polygons may need to be simplified on-device to render them correctly
-                    std::vector<uint16_t> new_indices = mapbox::earcut<uint16_t>(pol);
-                    assert(("Too many vertices to use 16bit indices", new_indices.size() >= std::numeric_limits<uint16_t>::max()));
+
+                    size_t indicesSize = new_indices.size();
+                    if (indicesSize >= std::numeric_limits<uint16_t>::max()) {
+                        //assert(("Too many vertices to use 16bit indices", indicesSize >= std::numeric_limits<uint16_t>::max()));
+                        continue;
+                    }
 #endif
 
-                    std::size_t posAdded = 0;
+                    size_t posAdded = 0;
                     for (auto const &coords: pol) {
                         positions.insert(positions.end(), coords.begin(), coords.end());
                         posAdded += coords.size();
@@ -141,19 +144,10 @@ Tiled2dMapVectorPolygonSubLayer::updateTileData(const Tiled2dMapTileInfo &tileIn
 
                     // check overflow
                     size_t new_size = indices_offset + posAdded;
-#ifdef __APPLE__
                     if (new_size >= std::numeric_limits<uint32_t>::max()) {
-                        objectDescriptions.push_back({{},
-                            {}});
+                        objectDescriptions.push_back({{},{}});
                         indices_offset = 0;
                     }
-#else
-                    if (new_size >= std::numeric_limits<uint16_t>::max()) {
-                        objectDescriptions.push_back({{},
-                            {}});
-                        indices_offset = 0;
-                    }
-#endif
 
                     for (auto const &index: new_indices) {
                         std::get<1>(objectDescriptions.back()).push_back(indices_offset + index);

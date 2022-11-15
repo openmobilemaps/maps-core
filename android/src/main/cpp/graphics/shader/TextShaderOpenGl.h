@@ -26,7 +26,7 @@ class TextShaderOpenGl : public BaseShaderProgramOpenGl,
 
     virtual void setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
-    virtual void preRender(const std::shared_ptr<::RenderingContextInterface> &context) override;
+    virtual void preRender(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &pass) override;
 
     virtual void setColor(const ::Color & color) override;
 
