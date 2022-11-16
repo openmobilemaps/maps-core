@@ -18,7 +18,7 @@
 #include "Tiled2dMapVectorRasterSubLayerConfig.h"
 #include "MapCamera2dInterface.h"
 #include "LineHelper.h"
-#include "LIneFactory.h"
+
 Tiled2dMapVectorLineSubLayer::Tiled2dMapVectorLineSubLayer(const std::shared_ptr<LineVectorLayerDescription> &description)
         : description(description),
           usedKeys(description->getUsedKeys()) {}
@@ -233,7 +233,7 @@ Tiled2dMapVectorLineSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInfo,
                 }
 
                 const VectorTileGeometryHandler &geometryHandler = std::get<1>(*featureIt);
-                std::vector<std::shared_ptr<LineInfoInterface>> lines;
+                std::vector<std::vector<::Coord>> lineCoordinatesVector;
 
                 int i = 0;
                 for (const auto &lineCoordinates: geometryHandler.getLineCoordinates()) {
@@ -250,12 +250,12 @@ Tiled2dMapVectorLineSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInfo,
 
                     styleGroupLineSubGroupMap[styleGroupIndex].push_back({lineCoordinates, std::min(maxStylesPerGroup - 1, styleIndex)});
                     subGroupCoordCount[styleGroupIndex] = (int)subGroupCoordCount[styleGroupIndex] + numCoords;
-                    lines.push_back(LineFactory::createLine("_lineIdentifier_" + std::to_string(featureContext.identifier) + "_" + std::to_string(i), lineCoordinates, reusableLineStyles.at(styleGroupIndex)[styleIndex]));
+                    lineCoordinatesVector.push_back(lineCoordinates);
                     i++;
                 }
 
 
-                hitDetectionLineMap[tileInfo].push_back({lines, featureContext});
+                hitDetectionLineMap[tileInfo].push_back({lineCoordinatesVector, featureContext});
 
                 featureNum++;
             }
@@ -450,18 +450,18 @@ std::string Tiled2dMapVectorLineSubLayer::getLayerDescriptionIdentifier() {
 bool Tiled2dMapVectorLineSubLayer::onClickConfirmed(const ::Vec2F &posScreen) {
     auto point = mapInterface->getCamera()->coordFromScreenPosition(posScreen);
     auto selectionDelegate = this->selectionDelegate.lock();
+    double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(mapInterface->getCamera()->getZoom());
 
     for (auto const &[tileInfo, lineTuples] : hitDetectionLineMap) {
-        for (auto const &[lineInfos, featureContext]: lineTuples) {
-            for (auto const &lineInfo: lineInfos) {
-                // TODO: Bastian: width is often 0...
-                if (LineHelper::pointWithin(lineInfo, point, /*lineInfo->getStyle().width*/ 15, mapInterface->getCoordinateConverterHelper())) {
+        for (auto const &[lineCoordinateVector, featureContext]: lineTuples) {
+            for (auto const &coordinates: lineCoordinateVector) {
+                auto lineWidth = description->style.getLineWidth(EvaluationContext(zoomIdentifier, featureContext));
+                if (LineHelper::pointWithin(coordinates, point, lineWidth, mapInterface->getCoordinateConverterHelper())) {
                     if (selectionDelegate->didSelectFeature(featureContext, description, point)) {
                         return true;
                     }
                 }
             }
-
         }
     }
 
