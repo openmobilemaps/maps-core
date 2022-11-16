@@ -53,6 +53,10 @@ public:
 
     virtual void resume() override;
 
+    virtual void setAlpha(float alpha) override;
+
+    virtual float getAlpha() override;
+
     void forceReload() override;
 
     virtual void onTilesUpdated() override;
@@ -127,6 +131,8 @@ private:
     std::atomic_bool isResumed = false;
 
     std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate;
+
+    float alpha;
 };
 
 

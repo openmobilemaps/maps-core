@@ -390,6 +390,23 @@ void Tiled2dMapVectorLayer::resume() {
     }
 }
 
+void Tiled2dMapVectorLayer::setAlpha(float alpha) {
+    if (this->alpha == alpha) {
+        return;
+    }
+    this->alpha = alpha;
+    {
+        for (auto const &sublayer: sublayers) {
+            sublayer->setAlpha(alpha);
+        }
+    }
+
+    if (mapInterface)
+        mapInterface->invalidate();
+}
+
+float Tiled2dMapVectorLayer::getAlpha() { return alpha; }
+
 
 void Tiled2dMapVectorLayer::forceReload() {
     if (!isLoadingStyleJson && styleJsonPath.has_value() && !mapDescription && !vectorTileSource) {
