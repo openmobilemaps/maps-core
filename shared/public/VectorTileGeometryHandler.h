@@ -29,7 +29,7 @@ public:
 
     void points_point(const vtzero::point point) {
         double x = minX + tileWidth * (point.x / extent);
-        double y = minY + tileHeight - tileHeight * (point.y / extent);
+        double y = minY +  tileHeight * (point.y / extent);
         Coord newCoord = Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0);
         currentFeature.push_back(newCoord);
     }
@@ -46,7 +46,7 @@ public:
 
     void linestring_point(const vtzero::point point) {
         double x = minX + tileWidth * (point.x / extent);
-        double y = minY + tileHeight - tileHeight * (point.y / extent);
+        double y = minY +  tileHeight * (point.y / extent);
         Coord newCoord = Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0);
         currentFeature.push_back(newCoord);
     }
@@ -63,7 +63,7 @@ public:
 
     void ring_point(vtzero::point point) noexcept {
         double x = minX + tileWidth * (point.x / extent);
-        double y = minY + tileHeight - tileHeight * (point.y / extent);
+        double y = minY + tileHeight * (point.y / extent);
         Coord newCoord = Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0);
         currentFeature.push_back(newCoord);
     }
