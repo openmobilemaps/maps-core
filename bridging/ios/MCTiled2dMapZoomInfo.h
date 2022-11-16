@@ -7,11 +7,15 @@
 - (nonnull instancetype)initWithZoomLevelScaleFactor:(float)zoomLevelScaleFactor
                                numDrawPreviousLayers:(int32_t)numDrawPreviousLayers
                                   adaptScaleToScreen:(BOOL)adaptScaleToScreen
-                                            maskTile:(BOOL)maskTile;
+                                            maskTile:(BOOL)maskTile
+                                           underzoom:(BOOL)underzoom
+                                            overzoom:(BOOL)overzoom;
 + (nonnull instancetype)tiled2dMapZoomInfoWithZoomLevelScaleFactor:(float)zoomLevelScaleFactor
                                              numDrawPreviousLayers:(int32_t)numDrawPreviousLayers
                                                 adaptScaleToScreen:(BOOL)adaptScaleToScreen
-                                                          maskTile:(BOOL)maskTile;
+                                                          maskTile:(BOOL)maskTile
+                                                         underzoom:(BOOL)underzoom
+                                                          overzoom:(BOOL)overzoom;
 
 /** this factor is applied to the the scale */
 @property (nonatomic, readonly) float zoomLevelScaleFactor;
@@ -25,5 +29,9 @@
 @property (nonatomic, readonly) BOOL adaptScaleToScreen;
 
 @property (nonatomic, readonly) BOOL maskTile;
+
+@property (nonatomic, readonly) BOOL underzoom;
+
+@property (nonatomic, readonly) BOOL overzoom;
 
 @end
