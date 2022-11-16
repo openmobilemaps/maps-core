@@ -51,6 +51,8 @@ public:
     int32_t numDrawPreviousLayers = 2;
     bool maskTiles = false;
     double zoomLevelScaleFactor = 0.65;
+    bool underzoom = true;
+    bool overzoom = true;
 
     RasterVectorLayerDescription(std::string identifier,
                                  int minZoom,
@@ -69,9 +71,12 @@ public:
                                  int32_t numDrawPreviousLayers = 2,
                                  bool maskTiles = false,
                                  double zoomLevelScaleFactor = 0.65,
-                                 std::optional<int32_t> renderPassIndex = std::nullopt):
-    VectorLayerDescription(identifier, "", "", minZoom, maxZoom, nullptr, renderPassIndex),
-    style(), url(url), adaptScaleToScreen(adaptScaleToScreen), numDrawPreviousLayers(numDrawPreviousLayers), maskTiles(maskTiles), zoomLevelScaleFactor(zoomLevelScaleFactor)  {};
+                                 std::optional<int32_t> renderPassIndex = std::nullopt,
+                                 bool underzoom = true,
+                                 bool overzoom = true) :
+            VectorLayerDescription(identifier, "", "", minZoom, maxZoom, nullptr, renderPassIndex),
+            style(), url(url), adaptScaleToScreen(adaptScaleToScreen), numDrawPreviousLayers(numDrawPreviousLayers),
+            maskTiles(maskTiles), zoomLevelScaleFactor(zoomLevelScaleFactor), underzoom(underzoom), overzoom(overzoom) {};
 
     virtual std::unordered_set<std::string> getUsedKeys() override {
         std::unordered_set<std::string> usedKeys;
