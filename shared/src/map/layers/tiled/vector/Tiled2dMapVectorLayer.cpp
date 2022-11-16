@@ -823,9 +823,11 @@ void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDe
 }
 
 std::shared_ptr<VectorLayerDescription> Tiled2dMapVectorLayer::getLayerDescriptionWithIdentifier(std::string identifier) {
-    for (auto const &layer: mapDescription->layers) {
-        if (layer->identifier == identifier) {
-            return layer;
+    if (mapDescription) {
+        for (auto const &layer: mapDescription->layers) {
+            if (layer->identifier == identifier) {
+                return layer;
+            }
         }
     }
     return nullptr;
