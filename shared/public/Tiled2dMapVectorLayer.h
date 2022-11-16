@@ -25,10 +25,15 @@
 class Tiled2dMapVectorLayer : public Tiled2dMapLayer, public Tiled2dMapVectorLayerInterface, public Tiled2dMapVectorLayerReadyInterface {
 public:
     Tiled2dMapVectorLayer(const std::string &layerName,
-                          const std::string &path,
+                          const std::string &remoteStyleJsonUrl,
                           const std::vector <std::shared_ptr<::LoaderInterface>> &loaders,
                           const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                           double dpFactor);
+
+    Tiled2dMapVectorLayer(const std::string &layerName,
+                          const std::string &remoteStyleJsonUrl,
+                          const std::string &fallbackStyleJsonString,
+                          const std::vector <std::shared_ptr<::LoaderInterface>> &loaders);
 
     Tiled2dMapVectorLayer(const std::string &layerName,
                           const std::shared_ptr<VectorMapDescription> & mapDescription,
@@ -88,6 +93,8 @@ protected:
     const std::vector<std::shared_ptr<::LoaderInterface>> loaders;
 
     virtual std::optional<TiledLayerError> loadStyleJson();
+    virtual std::optional<TiledLayerError> loadStyleJsonRemotely();
+    virtual std::optional<TiledLayerError> loadStyleJsonLocally(std::string styleJsonString);
 
 private:
     void scheduleStyleJsonLoading();
@@ -100,7 +107,9 @@ private:
     const std::optional<double> dpFactor;
 
     const std::string layerName;
-    std::optional<std::string> styleJsonPath;
+    std::optional<std::string> remoteStyleJsonUrl;
+    std::optional<std::string> fallbackStyleJsonString;
+
     std::shared_ptr<VectorMapDescription> mapDescription;
 
     std::unordered_map<std::string, std::shared_ptr<Tiled2dMapLayerConfig>> layerConfigs;
