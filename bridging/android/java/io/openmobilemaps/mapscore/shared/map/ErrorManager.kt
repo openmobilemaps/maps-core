@@ -11,6 +11,8 @@ abstract class ErrorManager {
 
     abstract fun removeError(url: String)
 
+    abstract fun removeAllErrorsForLayer(layerName: String)
+
     abstract fun clearAllErrors()
 
     abstract fun addErrorListener(listener: ErrorManagerListener)
@@ -53,6 +55,12 @@ abstract class ErrorManager {
             native_removeError(this.nativeRef, url)
         }
         private external fun native_removeError(_nativeRef: Long, url: String)
+
+        override fun removeAllErrorsForLayer(layerName: String) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_removeAllErrorsForLayer(this.nativeRef, layerName)
+        }
+        private external fun native_removeAllErrorsForLayer(_nativeRef: Long, layerName: String)
 
         override fun clearAllErrors() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

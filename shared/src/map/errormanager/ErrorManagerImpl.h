@@ -28,6 +28,8 @@ class ErrorManagerImpl : public ErrorManager, public std::enable_shared_from_thi
 
     virtual void removeError(const std::string &url) override;
 
+    virtual void removeAllErrorsForLayer(const std::string & layerName) override;
+
     virtual void clearAllErrors() override;
 
   private:

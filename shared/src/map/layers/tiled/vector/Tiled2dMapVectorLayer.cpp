@@ -154,7 +154,7 @@ std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJsonLocally(std::
         return std::nullopt;
     } else {
         return TiledLayerError(parseResult.status, parseResult.errorCode, layerName,
-                                               styleJsonString, false, std::nullopt);
+                               layerName, false, std::nullopt);
     }
 }
 

@@ -41,6 +41,24 @@ void ErrorManagerImpl::removeError(const std::string &url) {
     }
 }
 
+void ErrorManagerImpl::removeAllErrorsForLayer(const std::string &layerName) {
+    std::lock_guard<std::recursive_mutex> lock_guard(mutex);
+    bool hasChanges = false;
+    for (auto it = tiledLayerErrors.cbegin(), next_it = it; it != tiledLayerErrors.cend(); it = next_it)
+    {
+        auto const &[url, error] = *it;
+        ++next_it;
+        if (error.layerName == layerName) {
+            tiledLayerErrors.erase(it);
+            hasChanges = true;
+        }
+    }
+
+    if (hasChanges)
+        notifyListeners();
+}
+
+
 void ErrorManagerImpl::clearAllErrors() {
     std::lock_guard<std::recursive_mutex> lock_guard(mutex);
     tiledLayerErrors.clear();
