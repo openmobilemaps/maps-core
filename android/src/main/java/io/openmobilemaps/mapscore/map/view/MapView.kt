@@ -54,12 +54,11 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	private var saveFrameSpec: SaveFrameSpec? = null
 	private var saveFrameCallback: SaveFrameCallback? = null
 
-	open fun setupMap(mapConfig: MapConfig, useMSAA: Boolean = false) {
+	open fun setupMap(mapConfig: MapConfig, scheduler: AndroidScheduler = AndroidScheduler(this), useMSAA: Boolean = false) {
 		val densityExact = resources.displayMetrics.xdpi
 
 		configureGL(useMSAA)
 		setRenderer(this)
-		val scheduler = AndroidScheduler(this)
 		val mapInterface = MapInterface.createWithOpenGl(
 			mapConfig,
 			scheduler,

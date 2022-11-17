@@ -11,6 +11,8 @@
 #pragma once
 
 #include "LoaderInterface.h"
+#include "TextureLoaderResult.h"
+#include "DataLoaderResult.h"
 
 class LoaderHelper {
 public:

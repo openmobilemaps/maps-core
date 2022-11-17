@@ -51,7 +51,7 @@ final class Polygon2d: BaseGraphicsObject {
             if maskInverse {
                 encoder.setStencilReferenceValue(0b0000_0000)
             } else {
-                encoder.setStencilReferenceValue(0b1000_0000)
+                encoder.setStencilReferenceValue(0b1100_0000)
             }
         }
 
@@ -77,7 +77,7 @@ final class Polygon2d: BaseGraphicsObject {
         ss2.stencilFailureOperation = .zero
         ss2.depthFailureOperation = .keep
         ss2.depthStencilPassOperation = .keep
-        ss2.readMask = 0b1111_1111
+        ss2.readMask = 0b1100_0000
         ss2.writeMask = 0b0000_0000
 
         let s2 = MTLDepthStencilDescriptor()

@@ -18,4 +18,4 @@ jobs:
           distribution: zulu
           java-version: 11
       - name: Build with Gradle
-        run: cd android; ./gradlew assembleRelease
+        run: cd android; ./gradlew assembleDebug -P'android.injected.build.abi=arm64-v8a'

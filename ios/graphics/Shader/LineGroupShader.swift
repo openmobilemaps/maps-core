@@ -74,6 +74,7 @@ struct LineGroupStyle: Equatable {
 
 class LineGroupShader: BaseShader {
     private var lineStyleBuffer: MTLBuffer
+    private var lineStyleBufferContents : UnsafeMutablePointer<LineGroupStyle>
 
     let styleBufferSize: Int
 
@@ -93,6 +94,7 @@ class LineGroupShader: BaseShader {
         self.styleBufferSize = styleBufferSize
         guard let buffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<LineGroupStyle>.stride * self.styleBufferSize, options: []) else { fatalError("Could not create buffer") }
         lineStyleBuffer = buffer
+        lineStyleBufferContents = buffer.contents().bindMemory(to: LineGroupStyle.self, capacity: self.styleBufferSize)
     }
 
     override func setupProgram(_: MCRenderingContextInterface?) {
@@ -120,12 +122,10 @@ extension LineGroupShader: MCLineGroupShaderInterface {
     func setStyles(_ styles: [MCLineStyle]) {
         guard styles.count <= self.styleBufferSize else { fatalError("line style error exceeds buffer size") }
 
-        var mappedLineStyles: [LineGroupStyle] = []
-        for l in styles {
-            mappedLineStyles.append(LineGroupStyle(style: l, highlighted: state == .highlighted))
+        currentStyles = styles
+        for (i,l) in styles.enumerated() {
+            lineStyleBufferContents[i] = LineGroupStyle(style: l, highlighted: state == .highlighted)
         }
-
-        lineStyleBuffer.contents().copyMemory(from: mappedLineStyles, byteCount: mappedLineStyles.count * MemoryLayout<LineGroupStyle>.stride)
     }
 
 
