@@ -705,7 +705,7 @@ TileLoadingDecision Tiled2dMapSource<T, L, R>::tileLoadingDecision(int tileZ, in
     if (tileZ == curZ && abs(tileT - curT) < 3) {
         return TileLoadingDecision::loadNeeded;
     }
-    else if (tileZ == smallestCoveringLevel && abs(tileT - curT) < 20) {
+    else if (tileZ == curZ && abs(tileT - curT) < 10) {
         return TileLoadingDecision::preload;
     }
     else {
