@@ -18,4 +18,6 @@
 
 - (nullable id<MCLayerInterface>)asLayerInterface;
 
+- (void)setT:(double)t;
+
 @end

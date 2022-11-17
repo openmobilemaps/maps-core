@@ -45,4 +45,13 @@ CJNIEXPORT ::djinni_generated::NativeLayerInterface::JniType JNICALL Java_io_ope
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_00024CppProxy_native_1setT(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jdouble j_t)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapVectorLayerInterface>(nativeRef);
+        ref->setT(::djinni::F64::toCpp(jniEnv, j_t));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
 }  // namespace djinni_generated

@@ -17,4 +17,6 @@ public:
     static std::shared_ptr<Tiled2dMapVectorLayerInterface> createFromStyleJson(const std::string & layerName, const std::string & path, const std::vector<std::shared_ptr<::LoaderInterface>> & loaders, const std::shared_ptr<::FontLoaderInterface> & fontLoader, double dpFactor);
 
     virtual std::shared_ptr<::LayerInterface> asLayerInterface() = 0;
+
+    virtual void setT(double t) = 0;
 };

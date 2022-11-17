@@ -9,6 +9,8 @@ abstract class Tiled2dMapVectorLayerInterface {
 
     abstract fun asLayerInterface(): io.openmobilemaps.mapscore.shared.map.LayerInterface
 
+    abstract fun setT(t: Double)
+
     companion object {
         @JvmStatic
         fun createFromStyleJson(layerName: String, path: String, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface, dpFactor: Double): Tiled2dMapVectorLayerInterface {
@@ -39,6 +41,12 @@ abstract class Tiled2dMapVectorLayerInterface {
             return native_asLayerInterface(this.nativeRef)
         }
         private external fun native_asLayerInterface(_nativeRef: Long): io.openmobilemaps.mapscore.shared.map.LayerInterface
+
+        override fun setT(t: Double) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setT(this.nativeRef, t)
+        }
+        private external fun native_setT(_nativeRef: Long, t: Double)
 
         companion object {
             @JvmStatic

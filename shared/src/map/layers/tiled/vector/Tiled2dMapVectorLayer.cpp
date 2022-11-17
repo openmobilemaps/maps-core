@@ -383,6 +383,11 @@ void Tiled2dMapVectorLayer::resume() {
     }
 }
 
+void Tiled2dMapVectorLayer::setT(double t) {
+    Tiled2dMapLayer::setT(t);
+    curTWithFraction = t;
+}
+
 
 void Tiled2dMapVectorLayer::forceReload() {
     if (!isLoadingStyleJson && styleJsonPath.has_value() && !mapDescription && !vectorTileSource) {

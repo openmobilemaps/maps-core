@@ -28,9 +28,29 @@ open class MCScheduler: MCSchedulerInterface {
 
     private let internalSchedulerQueue = DispatchQueue(label: "internalSchedulerQueue")
 
+    private var newOperations: [MCTaskInterface] = []
     private var outstandingOperations: [String: WeakOperation] = [:]
 
+    private let semaphore = DispatchSemaphore(value: 0)
+    private let newOperationsSema = DispatchSemaphore(value: 1)
+
     public init() {
+//        for _ in 0 ..< 8 {
+//            Thread.detachNewThread {[weak self] in
+//                while true {
+//                    guard let self = self else { return }
+//                    self.semaphore.wait()
+//                    self.newOperationsSema.wait()
+//                    guard let op = self.newOperations.popLast() else {
+//                        assertionFailure()
+//                        self.newOperationsSema.signal()
+//                        continue
+//                    }
+//                    self.newOperationsSema.signal()
+//                    op.run()
+//                }
+//            }
+//        }
     }
 
     public func addTasks(_ tasks: [MCTaskInterface]) {
@@ -73,8 +93,17 @@ open class MCScheduler: MCSchedulerInterface {
             switch config.executionEnvironment {
                 case .IO:
                     self.ioQueue.addOperation(operation)
+
+//                    self.newOperationsSema.wait()
+//                    self.newOperations.append(task)
+//                    self.newOperationsSema.signal()
+//                    self.semaphore.signal()
                 case .COMPUTATION:
                     self.computationQueue.addOperation(operation)
+//                    self.newOperationsSema.wait()
+//                    self.newOperations.append(task)
+//                    self.newOperationsSema.signal()
+//                    self.semaphore.signal()
                 case .GRAPHICS:
                     self.graphicsQueue.addOperation(operation)
                 @unknown default:

@@ -68,6 +68,8 @@ public:
 
     void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription);
 
+    void setT(double t) override;
+
 protected:
     virtual std::shared_ptr<LayerInterface> getLayerForDescription(const std::shared_ptr<VectorLayerDescription> &layerDescription);
 
@@ -125,6 +127,8 @@ private:
     std::atomic_bool isResumed = false;
 
     std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate;
+
+    double curTWithFraction;
 };
 
 
