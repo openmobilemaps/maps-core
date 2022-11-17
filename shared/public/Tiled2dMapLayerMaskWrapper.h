@@ -14,9 +14,12 @@
 
 struct Tiled2dMapLayerMaskWrapper {
     std::shared_ptr<PolygonMaskObject> maskObject;
+    std::shared_ptr<GraphicsObjectInterface> graphicsObject;
+    std::shared_ptr<MaskingObjectInterface> graphicsMaskObject;
+
     size_t polygonHash;
 
-    Tiled2dMapLayerMaskWrapper(std::shared_ptr<PolygonMaskObject> maskObject, size_t polygonHash): maskObject(maskObject), polygonHash(polygonHash){}
+    Tiled2dMapLayerMaskWrapper(std::shared_ptr<PolygonMaskObject> maskObject, size_t polygonHash): maskObject(maskObject), polygonHash(polygonHash), graphicsObject(maskObject->getPolygonObject()->asGraphicsObject()), graphicsMaskObject(maskObject->getPolygonObject()->asMaskingObject()) {}
 
-    Tiled2dMapLayerMaskWrapper(): maskObject(nullptr), polygonHash(0){}
+    Tiled2dMapLayerMaskWrapper(): maskObject(nullptr), graphicsObject(nullptr), graphicsMaskObject(nullptr), polygonHash(0){}
 };
