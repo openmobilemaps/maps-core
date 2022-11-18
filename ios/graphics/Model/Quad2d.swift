@@ -178,9 +178,7 @@ extension Quad2d: MCQuad2dInterface {
 
     }
 
-    func removeTexture() {
-        texture = nil
-    }
+    func removeTexture() {}
 
     func asGraphicsObject() -> MCGraphicsObjectInterface? {
         self
