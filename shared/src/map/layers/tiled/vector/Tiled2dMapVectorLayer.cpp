@@ -54,13 +54,14 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::string &remoteStyleJsonUrl,
                                              const std::string &fallbackStyleJsonString,
-                                             const std::vector<std::shared_ptr<::LoaderInterface>> &loaders) :
+                                             const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
+                                             double dpFactor) :
         Tiled2dMapLayer(),
         layerName(layerName),
         remoteStyleJsonUrl(remoteStyleJsonUrl),
         fallbackStyleJsonString(fallbackStyleJsonString),
         loaders(loaders),
-        dpFactor(1.0),
+        dpFactor(dpFactor),
         sublayers() {
         }
 
@@ -877,9 +878,26 @@ void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDe
 
 
     }
+}
 
+std::optional<FeatureContext> Tiled2dMapVectorLayer::getFeatureContext(int64_t identifier) {
+    auto const &currentTileInfos = vectorTileSource->getCurrentTiles();
 
-
+    for (auto const &tile: currentTileInfos) {
+        {
+            for (auto const &[source, layerFeatureMap]: tile.layerFeatureMaps) {
+                for (auto it = layerFeatureMap->begin(); it != layerFeatureMap->end(); it++) {
+                    for (auto const &[featureContext, geometry]: it->second) {
+                        if (featureContext.identifier == identifier) {
+                            return featureContext;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    return std::nullopt;
 }
 
 std::shared_ptr<VectorLayerDescription> Tiled2dMapVectorLayer::getLayerDescriptionWithIdentifier(std::string identifier) {

@@ -33,7 +33,8 @@ public:
     Tiled2dMapVectorLayer(const std::string &layerName,
                           const std::string &remoteStyleJsonUrl,
                           const std::string &fallbackStyleJsonString,
-                          const std::vector <std::shared_ptr<::LoaderInterface>> &loaders);
+                          const std::vector <std::shared_ptr<::LoaderInterface>> &loaders,
+                          double dpFactor);
 
     Tiled2dMapVectorLayer(const std::string &layerName,
                           const std::shared_ptr<VectorMapDescription> & mapDescription,
@@ -78,6 +79,7 @@ public:
 
     void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription);
 
+    std::optional<FeatureContext> getFeatureContext(int64_t identifier);
 protected:
     virtual std::shared_ptr<LayerInterface> getLayerForDescription(const std::shared_ptr<VectorLayerDescription> &layerDescription);
 
