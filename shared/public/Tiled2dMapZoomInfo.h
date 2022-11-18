@@ -16,20 +16,14 @@ struct Tiled2dMapZoomInfo final {
      */
     bool adaptScaleToScreen;
     bool maskTile;
-    bool underzoom;
-    bool overzoom;
 
     Tiled2dMapZoomInfo(float zoomLevelScaleFactor_,
                        int32_t numDrawPreviousLayers_,
                        bool adaptScaleToScreen_,
-                       bool maskTile_,
-                       bool underzoom_,
-                       bool overzoom_)
+                       bool maskTile_)
     : zoomLevelScaleFactor(std::move(zoomLevelScaleFactor_))
     , numDrawPreviousLayers(std::move(numDrawPreviousLayers_))
     , adaptScaleToScreen(std::move(adaptScaleToScreen_))
     , maskTile(std::move(maskTile_))
-    , underzoom(std::move(underzoom_))
-    , overzoom(std::move(overzoom_))
     {}
 };

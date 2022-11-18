@@ -29,6 +29,7 @@ icon_type = enum {
 
 icon_layer_callback_interface = interface +c +j +o {
     on_click_confirmed(icons: list<icon_info_interface>) : bool;
+    on_longpress(coordinate: coord, icons: optional<list<icon_info_interface>>) : bool;
 }
 
 icon_layer_interface = interface +c {

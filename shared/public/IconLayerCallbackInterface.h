@@ -3,7 +3,9 @@
 
 #pragma once
 
+#include "Coord.h"
 #include <memory>
+#include <optional>
 #include <vector>
 
 class IconInfoInterface;
@@ -13,4 +15,6 @@ public:
     virtual ~IconLayerCallbackInterface() {}
 
     virtual bool onClickConfirmed(const std::vector<std::shared_ptr<IconInfoInterface>> & icons) = 0;
+
+    virtual bool onLongpress(const ::Coord & coordinate, const std::optional<std::vector<std::shared_ptr<IconInfoInterface>>> & icons) = 0;
 };
