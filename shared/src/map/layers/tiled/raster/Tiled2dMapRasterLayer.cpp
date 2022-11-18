@@ -377,10 +377,6 @@ std::vector<std::shared_ptr<RenderPassInterface>> Tiled2dMapRasterLayer::generat
  			auto const &renderObject = entry.second->getRenderObject();
 			entry.second->setAlpha(alpha);
 
-
-
-            auto const &renderObject = entry.second->getRenderObject();
-
             if (layerConfig->getZoomInfo().maskTile) {
                 const auto &mask = tileMaskMap.at(entry.first.tileInfo);
 
