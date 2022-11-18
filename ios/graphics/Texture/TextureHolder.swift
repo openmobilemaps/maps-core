@@ -36,6 +36,15 @@ public class TextureHolder: NSObject {
         self.init(texture, textureUsableSize: textureUsableSize)
     }
 
+    @available(iOS 13.0.0, *)
+    public convenience init(_ cgImage: CGImage) async throws {
+        let options: [MTKTextureLoader.Option: Any] = [
+            MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
+        ]
+        let texture = try await MetalContext.current.textureLoader.newTexture(cgImage: cgImage, options: options)
+        self.init(texture)
+    }
+
     public convenience init(_ cgImage: CGImage) throws {
         let options: [MTKTextureLoader.Option: Any] = [
             MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
