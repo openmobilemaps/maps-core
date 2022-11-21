@@ -20,7 +20,9 @@ public:
     minX(std::min(tileCoords.topLeft.x, tileCoords.bottomRight.x)),
     minY(std::min(tileCoords.topLeft.y, tileCoords.bottomRight.y)),
     tileWidth(std::abs(tileCoords.bottomRight.x - tileCoords.topLeft.x)),
-    tileHeight(std::abs(tileCoords.bottomRight.y - tileCoords.topLeft.y)) {};
+    tileHeight(std::abs(tileCoords.bottomRight.y - tileCoords.topLeft.y)),
+    topToBottom (tileCoords.topLeft.y < tileCoords.bottomRight.y),
+    leftToRight(tileCoords.topLeft.x < tileCoords.bottomRight.x){};
 
     void points_begin(const uint32_t count) {
         currentFeature = std::vector<::Coord>();
@@ -28,10 +30,9 @@ public:
     }
 
     void points_point(const vtzero::point point) {
-        double x = minX + tileWidth * (point.x / extent);
-        double y = minY + tileHeight - tileHeight * (point.y / extent);
-        Coord newCoord = Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0);
-        currentFeature.push_back(newCoord);
+        const double x = minX + tileWidth * ( leftToRight ?  (point.x / extent) : ( 1 - (point.x / extent)) );
+        const double y = minY + tileHeight * ( topToBottom ?  (point.y / extent) : ( 1 - (point.y / extent)) );
+        currentFeature.emplace_back(Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0));
     }
 
     void points_end() {
@@ -45,10 +46,9 @@ public:
     }
 
     void linestring_point(const vtzero::point point) {
-        double x = minX + tileWidth * (point.x / extent);
-        double y = minY + tileHeight - tileHeight * (point.y / extent);
-        Coord newCoord = Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0);
-        currentFeature.push_back(newCoord);
+        const double x = minX + tileWidth * ( leftToRight ?  (point.x / extent) : ( 1 - (point.x / extent)) );
+        const double y = minY + tileHeight * ( topToBottom ?  (point.y / extent) : ( 1 - (point.y / extent)) ) ;
+        currentFeature.emplace_back(Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0));
     }
 
     void linestring_end() {
@@ -62,10 +62,9 @@ public:
     }
 
     void ring_point(vtzero::point point) noexcept {
-        double x = minX + tileWidth * (point.x / extent);
-        double y = minY + tileHeight - tileHeight * (point.y / extent);
-        Coord newCoord = Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0);
-        currentFeature.push_back(newCoord);
+        const double x = minX + tileWidth * ( leftToRight ?  (point.x / extent) : ( 1 - (point.x / extent)) );
+        const double y = minY + tileHeight * ( topToBottom ?  (point.y / extent) : ( 1 - (point.y / extent)) ) ;
+        currentFeature.emplace_back(Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0));
     }
 
     void ring_end(vtzero::ring_type ringType) noexcept {
@@ -126,4 +125,6 @@ private:
     double tileWidth;
     double tileHeight;
     double extent;
+    bool topToBottom;
+    bool leftToRight;
 };
