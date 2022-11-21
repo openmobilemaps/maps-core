@@ -82,11 +82,11 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	}
 
 	override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
-		requireMapInterface().getRenderingContext().onSurfaceCreated()
+		mapInterface?.getRenderingContext()?.onSurfaceCreated()
 	}
 
 	override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
-		requireMapInterface().setViewportSize(Vec2I(width, height))
+		mapInterface?.setViewportSize(Vec2I(width, height))
 	}
 
 	override fun onDrawFrame(gl: GL10?) {
