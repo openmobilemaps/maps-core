@@ -216,7 +216,7 @@ void Tiled2dMapVectorPolygonSubLayer::addPolygons(const Tiled2dMapTileInfo &tile
     auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
     auto converter = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
 
-    if (!mapInterface || !objectFactory || !scheduler || !converter) {
+    if (!mapInterface || !objectFactory || !scheduler || !converter || !shader) {
         return;
     }
 
@@ -298,6 +298,9 @@ void Tiled2dMapVectorPolygonSubLayer::setupPolygons(const Tiled2dMapTileInfo &ti
 }
 
 bool Tiled2dMapVectorPolygonSubLayer::onClickConfirmed(const ::Vec2F &posScreen) {
+    if (!mapInterface) {
+        return false;
+    }
     auto point = mapInterface->getCamera()->coordFromScreenPosition(posScreen);
     auto selectionDelegate = this->selectionDelegate.lock();
 
