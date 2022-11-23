@@ -140,6 +140,7 @@ void Tiled2dMapLayer::forceReload() {
 }
 
 void Tiled2dMapLayer::setT(double t) {
+
     curT = t;
 
     auto mapInterface = this->mapInterface;

@@ -92,7 +92,7 @@ std::unordered_set<Tiled2dMapVectorTileInfo> Tiled2dMapVectorSource::getCurrentT
     std::lock_guard<std::recursive_mutex> lock(currentTilesMutex);
     std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos;
     for (const auto &[tileInfo, tileWrapper] : currentTiles) {
-        if (tileWrapper.isVisible) {
+        if (tileWrapper.isVisible && tileInfo.t == currentTime) {
             currentTileInfos.insert(Tiled2dMapVectorTileInfo(tileInfo, tileWrapper.result, tileWrapper.masks));
         }
     }

@@ -27,7 +27,8 @@ public:
                           const std::string &path,
                           const std::vector <std::shared_ptr<::LoaderInterface>> &loaders,
                           const std::shared_ptr<::FontLoaderInterface> &fontLoader,
-                          double dpFactor);
+                          double dpFactor,
+                          int numT = 1);
 
     Tiled2dMapVectorLayer(const std::string &layerName,
                           const std::shared_ptr<VectorMapDescription> & mapDescription,
@@ -129,6 +130,8 @@ private:
     std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate;
 
     double curTWithFraction;
+
+    int numT;
 };
 
 

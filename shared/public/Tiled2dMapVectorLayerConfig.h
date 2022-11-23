@@ -15,8 +15,8 @@
 
 class Tiled2dMapVectorLayerConfig : public Tiled2dMapLayerConfig {
 public:
-    Tiled2dMapVectorLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &layerDescription, bool underzoom = true, bool overzoom = true)
-            : description(layerDescription), underzoom(underzoom), overzoom(overzoom) {}
+    Tiled2dMapVectorLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &layerDescription, bool underzoom = true, bool overzoom = true, int numT = 1)
+            : description(layerDescription), underzoom(underzoom), overzoom(overzoom), numT(numT) {}
 
     ~Tiled2dMapVectorLayerConfig() {}
 
@@ -34,7 +34,14 @@ public:
         url = url.replace(xIndex, 3, std::to_string(x));
         size_t yIndex = url.find("{y}", 0);
         if (yIndex == std::string::npos) throw std::invalid_argument("Layer url \'" + url + "\' has no valid format!");
-        return url.replace(yIndex, 3, std::to_string(y));
+        url = url.replace(yIndex, 3, std::to_string(y));
+
+        size_t tIndex = url.find("now", 0);
+        if (tIndex != std::string::npos) {
+            url = url.replace(tIndex, 3, "2022-11-22T"+std::to_string(t)+":45Z");
+        };
+
+        return url;
     }
 
     std::vector<Tiled2dMapZoomLevelInfo> getZoomLevelInfos() override {
@@ -55,6 +62,8 @@ private:
     bool underzoom;
     bool overzoom;
 
+    int numT;
+
     const double baseValueZoom = 500000000.0;
     const double baseValueWidth = 40075016.0;
     const std::string epsg3857Id = CoordinateSystemIdentifiers::EPSG3857();
@@ -70,7 +79,7 @@ private:
             double factor = pow(2, i);
             double zoom = baseValueZoom / factor;
             double width = baseValueWidth / factor;
-            infos.push_back(Tiled2dMapZoomLevelInfo(zoom, width, factor, factor, 1, i, epsg3857Bounds));
+            infos.push_back(Tiled2dMapZoomLevelInfo(zoom, width, factor, factor, numT, i, epsg3857Bounds));
         }
         return infos;
     }

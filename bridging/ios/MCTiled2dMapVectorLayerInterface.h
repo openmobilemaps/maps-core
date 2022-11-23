@@ -16,6 +16,13 @@
                                                         fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
                                                           dpFactor:(double)dpFactor;
 
++ (nullable MCTiled2dMapVectorLayerInterface *)createAnimatableFromStyleJson:(nonnull NSString *)layerName
+                                                                        path:(nonnull NSString *)path
+                                                                     loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
+                                                                  fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
+                                                                    dpFactor:(double)dpFactor
+                                                                        numT:(int64_t)numT;
+
 - (nullable id<MCLayerInterface>)asLayerInterface;
 
 - (void)setT:(double)t;

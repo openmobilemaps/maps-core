@@ -101,9 +101,14 @@ void InterpolatedTiled2dMapRasterLayer::setAlpha(double alpha) {
 
 std::vector<std::shared_ptr<RenderPassInterface>>  InterpolatedTiled2dMapRasterLayer::combineRenderPasses() {
 
+    if (!renderTargetTexture) {
+        return {};
+    }
+
     auto newRenderPasses = Tiled2dMapRasterLayer::generateRenderPasses(1.0, curT+1, renderTargetTexture);
     auto tilesNext = Tiled2dMapRasterLayer::generateRenderPasses(0.0, curT , renderTargetTexture);
     newRenderPasses.insert(newRenderPasses.end(), tilesNext.begin(), tilesNext.end());
+
 
     auto texture = renderTargetTexture->textureHolder();
     if (texture) {

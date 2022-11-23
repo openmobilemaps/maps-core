@@ -42,14 +42,16 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::string &path,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
                                              const std::shared_ptr<::FontLoaderInterface> &fontLoader,
-                                             double dpFactor) :
+                                             double dpFactor,
+                                             int numT) :
         Tiled2dMapLayer(),
         layerName(layerName),
         styleJsonPath(path),
         loaders(loaders),
         fontLoader(fontLoader),
         dpFactor(dpFactor),
-        sublayers() {}
+        sublayers(),
+        numT(numT) {}
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName, const std::shared_ptr<VectorMapDescription> &mapDescription,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
@@ -137,7 +139,7 @@ std::shared_ptr<LayerInterface> Tiled2dMapVectorLayer::getLayerForDescription(co
 
 std::shared_ptr<Tiled2dMapLayerConfig>
 Tiled2dMapVectorLayer::getLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &source) {
-    return std::make_shared<Tiled2dMapVectorLayerConfig>(source);
+    return std::make_shared<Tiled2dMapVectorLayerConfig>(source, true, true, numT);
 }
 
 void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription) {
@@ -384,6 +386,9 @@ void Tiled2dMapVectorLayer::resume() {
 }
 
 void Tiled2dMapVectorLayer::setT(double t) {
+    if (curT == (int)t) {
+        return;
+    }
     Tiled2dMapLayer::setT(t);
     curTWithFraction = t;
 }

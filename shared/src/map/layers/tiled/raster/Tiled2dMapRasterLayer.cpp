@@ -135,6 +135,9 @@ void Tiled2dMapRasterLayer::resume() {
 }
 
 void Tiled2dMapRasterLayer::setT(double t) {
+    if (abs(curTWithFraction - t) < 0.05) {
+        return;
+    }
     Tiled2dMapLayer::setT(t);
     curTWithFraction = t;
 }

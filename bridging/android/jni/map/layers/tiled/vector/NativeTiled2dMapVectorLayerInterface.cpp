@@ -35,6 +35,20 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_til
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_00024CppProxy_createAnimatableFromStyleJson(JNIEnv* jniEnv, jobject /*this*/, jstring j_layerName, jstring j_path, jobject j_loaders, ::djinni_generated::NativeFontLoaderInterface::JniType j_fontLoader, jdouble j_dpFactor, jlong j_numT)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE0(jniEnv);
+        auto r = ::Tiled2dMapVectorLayerInterface::createAnimatableFromStyleJson(::djinni::String::toCpp(jniEnv, j_layerName),
+                                                                                 ::djinni::String::toCpp(jniEnv, j_path),
+                                                                                 ::djinni::List<::djinni_generated::NativeLoaderInterface>::toCpp(jniEnv, j_loaders),
+                                                                                 ::djinni_generated::NativeFontLoaderInterface::toCpp(jniEnv, j_fontLoader),
+                                                                                 ::djinni::F64::toCpp(jniEnv, j_dpFactor),
+                                                                                 ::djinni::I64::toCpp(jniEnv, j_numT));
+        return ::djinni::release(::djinni_generated::NativeTiled2dMapVectorLayerInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 CJNIEXPORT ::djinni_generated::NativeLayerInterface::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_00024CppProxy_native_1asLayerInterface(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {

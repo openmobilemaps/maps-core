@@ -55,6 +55,9 @@ public:
 
         std::map<std::string, nlohmann::json> tileJsons;
         for (auto&[key, val]: json["sources"].items()) {
+            if (!val["type"].is_string()) {
+                continue;
+            }
             if (val["type"].get<std::string>() == "raster") {
                 std::string url;
 
@@ -231,17 +234,24 @@ public:
 
         std::vector<std::shared_ptr<VectorMapSourceDescription>> sourceDescriptions;
         for (auto const &[identifier, tileJson]: tileJsons) {
+            if (!tileJson["tiles"].begin()->is_string() || !tileJson["minzoom"].is_number() || !tileJson["maxzoom"].is_number()) {
+                continue;
+            }
             sourceDescriptions.push_back(std::make_shared<VectorMapSourceDescription>(identifier,
                                                                    tileJson["tiles"].begin()->get<std::string>(),
                                                                    tileJson["minzoom"].get<int>(),
                                                                                      tileJson["maxzoom"].get<int>()));
         }
 
+        std::optional<std::string> spriteBaseUrl = std::nullopt;
+        if (json["sprite"].is_string()) {
+            spriteBaseUrl = json["sprite"].get<std::string>();
+        }
 
         auto mapDesc = std::make_shared<VectorMapDescription>(layerName,
                                                               sourceDescriptions,
                                                               layers,
-                                                              json["sprite"].get<std::string>());
+                                                              spriteBaseUrl);
         return Tiled2dMapVectorLayerParserResult(mapDesc, LoaderStatus::OK, "");
     }
 };

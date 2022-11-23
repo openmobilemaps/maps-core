@@ -162,7 +162,10 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
 
     std::vector<std::tuple<const FeatureContext, std::shared_ptr<SymbolInfo>>> textInfos;
 
-    tileTextPositionMap[tileInfo] = {};
+    {
+        std::lock_guard<std::recursive_mutex> lock(tileTextPositionMapMutex);
+        tileTextPositionMap[tileInfo] = {};
+    }
     double tilePixelFactor = (0.0254 / camera->getScreenDensityPpi()) * tileInfo.zoomLevel;
 
     for(auto& feature : layerFeatures)
@@ -229,6 +232,8 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
                     auto pos = getPositioning(pointIt, points);
 
                     if (distance > symbolSpacingMeters && pos) {
+
+                        std::lock_guard<std::recursive_mutex> lock(tileTextPositionMapMutex);
 
                         auto position = pos->centerPosition;
 
