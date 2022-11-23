@@ -20,6 +20,7 @@ class VectorTileGeometryHandler {
 public:
     VectorTileGeometryHandler(::RectCoord tileCoords, int extent, const std::optional<Tiled2dMapVectorSettings> &vectorSettings)
     : tileCoords(tileCoords),
+      // use standard TOP_LEFT origin, when no vector settings given.
       origin(vectorSettings ? vectorSettings->tileOrigin : Tiled2dMapVectorTileOrigin::TOP_LEFT),
       extent((double)extent)
     {};
