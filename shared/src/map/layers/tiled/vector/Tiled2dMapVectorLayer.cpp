@@ -389,6 +389,7 @@ void Tiled2dMapVectorLayer::setAlpha(float alpha) {
     }
     this->alpha = alpha;
     {
+        std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
         for (auto const &sublayer: sublayers) {
             sublayer->setAlpha(alpha);
         }
