@@ -306,7 +306,7 @@ void Tiled2dMapVectorPolygonSubLayer::update() {
         shaderStyles.push_back(color.g);
         shaderStyles.push_back(color.b);
         shaderStyles.push_back(color.a);
-        shaderStyles.push_back(opacity);
+        shaderStyles.push_back(opacity * alpha);
     }
 
     auto s = SharedBytes((int64_t)shaderStyles.data(), (int32_t)featureGroups.size(), 5 * (int32_t)sizeof(float));
