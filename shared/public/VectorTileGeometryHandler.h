@@ -12,17 +12,17 @@
 #include "Coord.h"
 #include "RectCoord.h"
 #include "RectCoord.h"
+#include "Tiled2dMapVectorSettings.h"
 #include "vtzero/geometry.hpp"
+#include "Logger.h"
 
 class VectorTileGeometryHandler {
 public:
-    VectorTileGeometryHandler(::RectCoord tileCoords, int extent) : tileCoords(tileCoords), extent((double) extent),
-    minX(std::min(tileCoords.topLeft.x, tileCoords.bottomRight.x)),
-    minY(std::min(tileCoords.topLeft.y, tileCoords.bottomRight.y)),
-    tileWidth(std::abs(tileCoords.bottomRight.x - tileCoords.topLeft.x)),
-    tileHeight(std::abs(tileCoords.bottomRight.y - tileCoords.topLeft.y)),
-    topToBottom (tileCoords.topLeft.y < tileCoords.bottomRight.y),
-    leftToRight(tileCoords.topLeft.x < tileCoords.bottomRight.x){};
+    VectorTileGeometryHandler(::RectCoord tileCoords, int extent, const std::optional<Tiled2dMapVectorSettings> &vectorSettings)
+    : tileCoords(tileCoords),
+      origin(vectorSettings ? vectorSettings->tileOrigin : Tiled2dMapVectorTileOrigin::TOP_LEFT),
+      extent((double)extent)
+    {};
 
     void points_begin(const uint32_t count) {
         currentFeature = std::vector<::Coord>();
@@ -30,9 +30,7 @@ public:
     }
 
     void points_point(const vtzero::point point) {
-        const double x = minX + tileWidth * ( leftToRight ?  (point.x / extent) : ( 1 - (point.x / extent)) );
-        const double y = minY + tileHeight * ( topToBottom ?  (point.y / extent) : ( 1 - (point.y / extent)) );
-        currentFeature.emplace_back(Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0));
+        currentFeature.emplace_back(coordinateFromPoint(point));
     }
 
     void points_end() {
@@ -46,9 +44,7 @@ public:
     }
 
     void linestring_point(const vtzero::point point) {
-        const double x = minX + tileWidth * ( leftToRight ?  (point.x / extent) : ( 1 - (point.x / extent)) );
-        const double y = minY + tileHeight * ( topToBottom ?  (point.y / extent) : ( 1 - (point.y / extent)) ) ;
-        currentFeature.emplace_back(Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0));
+        currentFeature.emplace_back(coordinateFromPoint(point));
     }
 
     void linestring_end() {
@@ -62,9 +58,7 @@ public:
     }
 
     void ring_point(vtzero::point point) noexcept {
-        const double x = minX + tileWidth * ( leftToRight ?  (point.x / extent) : ( 1 - (point.x / extent)) );
-        const double y = minY + tileHeight * ( topToBottom ?  (point.y / extent) : ( 1 - (point.y / extent)) ) ;
-        currentFeature.emplace_back(Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0));
+        currentFeature.emplace_back(coordinateFromPoint(point));
     }
 
     void ring_end(vtzero::ring_type ringType) noexcept {
@@ -115,16 +109,37 @@ public:
     }
 
 private:
+    inline Coord coordinateFromPoint(const vtzero::point &point) {
+        auto tx = point.x / extent;
+        auto ty = point.y / extent;
+
+        switch(origin) {
+            case Tiled2dMapVectorTileOrigin::TOP_LEFT: {
+                break;
+            }
+            case Tiled2dMapVectorTileOrigin::BOTTOM_LEFT: {
+                ty = 1.0 - ty; break;
+            }
+            case Tiled2dMapVectorTileOrigin::TOP_RIGHT: {
+                tx = 1.0 - tx; break;
+            }
+            case Tiled2dMapVectorTileOrigin::BOTTOM_RIGHT: {
+                tx = 1.0 - tx; ty = 1.0 - ty; break;
+            }
+        }
+
+        auto x = tileCoords.topLeft.x * (1.0 - tx) + tileCoords.bottomRight.x * tx;
+        auto y = tileCoords.topLeft.y * (1.0 - ty) + tileCoords.bottomRight.y * ty;
+
+        return Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0);
+    }
+
+private:
     std::vector<::Coord> currentFeature;
     std::vector<std::vector<::Coord>> coordinates;
     std::vector<std::vector<std::vector<::Coord>>> holes;
 
+    Tiled2dMapVectorTileOrigin origin;
     RectCoord tileCoords;
-    double minX;
-    double minY;
-    double tileWidth;
-    double tileHeight;
     double extent;
-    bool topToBottom;
-    bool leftToRight;
 };
