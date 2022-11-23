@@ -235,7 +235,6 @@ Tiled2dMapVectorLineSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInfo,
                 const VectorTileGeometryHandler &geometryHandler = std::get<1>(*featureIt);
                 std::vector<std::vector<::Coord>> lineCoordinatesVector;
 
-                int i = 0;
                 for (const auto &lineCoordinates: geometryHandler.getLineCoordinates()) {
                     if (lineCoordinates.empty()) { continue; }
 
@@ -251,7 +250,6 @@ Tiled2dMapVectorLineSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInfo,
                     styleGroupLineSubGroupMap[styleGroupIndex].push_back({lineCoordinates, std::min(maxStylesPerGroup - 1, styleIndex)});
                     subGroupCoordCount[styleGroupIndex] = (int)subGroupCoordCount[styleGroupIndex] + numCoords;
                     lineCoordinatesVector.push_back(lineCoordinates);
-                    i++;
                 }
 
 
