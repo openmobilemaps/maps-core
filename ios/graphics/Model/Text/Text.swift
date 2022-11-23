@@ -153,9 +153,7 @@ extension Text: MCTextInterface {
         texture = textureHolder.texture
     }
 
-    func removeTexture() {
-        texture = nil
-    }
+    func removeTexture() {}
 
     func asGraphicsObject() -> MCGraphicsObjectInterface? {
         self

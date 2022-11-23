@@ -104,8 +104,16 @@ void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBou
 
     size_t numZoomLevels = zoomLevelInfos.size();
     int targetZoomLayer = -1;
+
     // Each pixel is assumed to be 0.28mm – https://gis.stackexchange.com/a/315989
     const float screenScaleFactor = zoomInfo.adaptScaleToScreen ? screenDensityPpi / (0.0254 / 0.00028) : 1.0;
+
+    if (!zoomInfo.underzoom
+        && (zoomLevelInfos.empty() || zoomLevelInfos[0].zoom * zoomInfo.zoomLevelScaleFactor * screenScaleFactor < zoom)) {
+        onVisibleTilesChanged({});
+        return;
+    }
+
     for (int i = 0; i < numZoomLevels; i++) {
         const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(i);
         if (zoomInfo.zoomLevelScaleFactor * screenScaleFactor * zoomLevelInfo.zoom < zoom) {
@@ -114,6 +122,10 @@ void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBou
         }
     }
     if (targetZoomLayer < 0) {
+        if (!zoomInfo.overzoom) {
+            onVisibleTilesChanged({});
+            return;
+        }
         targetZoomLayer = (int) numZoomLevels - 1;
     }
     int targetZoomLevelIdentifier = zoomLevelInfos.at(targetZoomLayer).zoomLevelIdentifier;
@@ -696,6 +708,7 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
 
 
     gpc_polygon currentTileMask;
+    bool freeCurrent = false;
     currentTileMask.num_contours = 0;
     bool isFirst = true;
 
@@ -709,7 +722,6 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
               currentViewBounds.bottomRight.y, 0),
         currentViewBounds.topLeft
     }, {})}, &currentViewBoundsPolygon);
-
 
     for (auto it = currentTiles.rbegin(); it != currentTiles.rend(); it++ ){
         auto &[tileInfo, tileWrapper] = *it;
@@ -769,8 +781,15 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
                 gpc_free_polygon(&currentTileMask);
                 currentTileMask = result;
             }
+
+            freeCurrent = true;
         }
     }
+
+    if(freeCurrent) {
+        gpc_free_polygon(&currentTileMask);
+    }
+    gpc_free_polygon(&currentViewBoundsPolygon);
 }
 
 template<class T, class L, class R>

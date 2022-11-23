@@ -12,11 +12,15 @@
 #include "DateHelper.h"
 #include "DoubleAnimation.h"
 #include <cmath>
+#include "RenderObject.h"
 
 Textured2dLayerObject::Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, std::shared_ptr<AlphaShaderInterface> shader,
                                              const std::shared_ptr<MapInterface> &mapInterface)
         : quad(quad), shader(shader), mapInterface(mapInterface), conversionHelper(mapInterface->getCoordinateConverterHelper()),
-          renderConfig(std::make_shared<RenderConfig>(quad->asGraphicsObject(), 0)) {}
+renderConfig(std::make_shared<RenderConfig>(quad->asGraphicsObject(), 0)), graphicsObject(quad->asGraphicsObject()),
+    renderObject(std::make_shared<RenderObject>(graphicsObject))
+{
+}
 
 void Textured2dLayerObject::setRectCoord(const ::RectCoord &rectCoord) {
     auto width = rectCoord.bottomRight.x - rectCoord.topLeft.x;
@@ -55,6 +59,12 @@ void Textured2dLayerObject::setAlpha(float alpha) {
 }
 
 std::shared_ptr<Quad2dInterface> Textured2dLayerObject::getQuadObject() { return quad; }
+
+std::shared_ptr<GraphicsObjectInterface> Textured2dLayerObject::getGraphicsObject() { return graphicsObject; }
+
+std::shared_ptr<RenderObjectInterface> Textured2dLayerObject::getRenderObject() {
+    return renderObject;
+}
 
 void Textured2dLayerObject::beginAlphaAnimation(double startAlpha, double targetAlpha, long long duration) {
     animation = std::make_shared<DoubleAnimation>(
