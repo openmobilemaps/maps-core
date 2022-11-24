@@ -64,7 +64,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
     pendingUpdates++;
     std::weak_ptr<Tiled2dMapSource> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this());
     scheduler->addTask(std::make_shared<LambdaTask>(
-            TaskConfig("Tiled2dMapSource_Update", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+            TaskConfig("Tiled2dMapSource_Update", 0, TaskPriority::NORMAL, ExecutionEnvironment::IO),
             [weakSelfPtr] {
                 auto selfPtr = weakSelfPtr.lock();
                 if (selfPtr) {

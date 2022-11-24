@@ -279,15 +279,14 @@ void Tiled2dMapVectorLineSubLayer::clearTileData(const Tiled2dMapTileInfo &tileI
                 if (lineObject->getLineObject()) objectsToClear.push_back(lineObject->getLineObject());
             }
             tileLinesMap.erase(tileInfo);
-            //LogDebug <<= "Erased tile " + std::to_string(tileInfo.zoomIdentifier) + "/" + std::to_string(tileInfo.x) + "/" +
-            //             std::to_string(tileInfo.y);
         }
     }
     if (objectsToClear.empty()) return;
 
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
             TaskConfig("LineGroupTile_clear_" + std::to_string(tileInfo.zoomIdentifier) + "/" + std::to_string(tileInfo.x) + "/" +
-                       std::to_string(tileInfo.y), 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+                       std::to_string(tileInfo.y) + "@" +
+                       std::to_string(tileInfo.t), 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
             [objectsToClear] {
                 for (const auto &lineObject : objectsToClear) {
                     if (lineObject->isReady()) lineObject->clear();

@@ -42,6 +42,10 @@ struct Tiled2dMapTileInfo {
                (zoomIdentifier == o.zoomIdentifier && x == o.x && y < o.y) ||
                 (zoomIdentifier == o.zoomIdentifier && x == o.x && y == o.y && t < o.t);
     }
+
+    std::string tileIdString() const {
+        return std::to_string(zoomIdentifier) + "/" + std::to_string(x) + "/" + std::to_string(y) + "@" + std::to_string(t);
+    }
 };
 
 namespace std {

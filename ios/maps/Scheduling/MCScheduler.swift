@@ -28,7 +28,7 @@ open class MCScheduler: MCSchedulerInterface {
 
     private let internalSchedulerQueue = DispatchQueue(label: "internalSchedulerQueue")
 
-    private var outstandingOperations: [String: WeakOperation] = [:]
+    private var pendingOperations: [String: WeakOperation] = [:]
 
      public init() {
     }
@@ -64,13 +64,13 @@ open class MCScheduler: MCSchedulerInterface {
                     fatalError("unknown priority")
             }
 
-            self.outstandingOperations[config.id] = .init(operation)
+            self.pendingOperations[config.id] = .init(operation)
 
             operation.completionBlock = { [weak self] in
                 guard let self = self else { return }
                 self.internalSchedulerQueue.async { [weak self] in
                     guard let self = self else { return }
-                    self.outstandingOperations.removeValue(forKey: config.id)
+                    self.pendingOperations.removeValue(forKey: config.id)
                 }
             }
 
@@ -89,17 +89,17 @@ open class MCScheduler: MCSchedulerInterface {
 
     public func removeTask(_ id: String) {
         internalSchedulerQueue.async {
-            self.outstandingOperations[id]?.operation?.cancel()
-            self.outstandingOperations.removeValue(forKey: id)
+            self.pendingOperations[id]?.operation?.cancel()
+            self.pendingOperations.removeValue(forKey: id)
         }
     }
 
     public func clear() {
         internalSchedulerQueue.async {
-            self.outstandingOperations.forEach {
+            self.pendingOperations.forEach {
                 $1.operation?.cancel()
             }
-            self.outstandingOperations.removeAll()
+            self.pendingOperations.removeAll()
         }
     }
 

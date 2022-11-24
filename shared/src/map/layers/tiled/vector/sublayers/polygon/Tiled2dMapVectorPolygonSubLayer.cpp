@@ -98,7 +98,7 @@ Tiled2dMapVectorPolygonSubLayer::updateTileData(const Tiled2dMapTileInfo &tileIn
     std::string layerName = description->sourceId;
 
     std::string defIdPrefix =
-            std::to_string(tileInfo.x) + "/" + std::to_string(tileInfo.y) + "_" + layerName + "_";
+            std::to_string(tileInfo.x) + "/" + std::to_string(tileInfo.y) + "@" + std::to_string(tileInfo.t) + "_" + layerName + "_";
     if (!layerFeatures.empty() &&
         description->minZoom <= tileInfo.zoomIdentifier &&
         description->maxZoom >= tileInfo.zoomIdentifier) {
@@ -333,7 +333,7 @@ void Tiled2dMapVectorPolygonSubLayer::clearTileData(const Tiled2dMapTileInfo &ti
 
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
             TaskConfig("LineGroupTile_clear_" + std::to_string(tileInfo.zoomIdentifier) + "/" + std::to_string(tileInfo.x) + "/" +
-                       std::to_string(tileInfo.y), 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+                       std::to_string(tileInfo.y) + "@" + std::to_string(tileInfo.y), 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
             [objectsToClear] {
                 for (const auto &lineObject : objectsToClear) {
                     if (lineObject->isReady()) lineObject->clear();

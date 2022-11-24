@@ -845,7 +845,7 @@ void Tiled2dMapVectorSymbolSubLayer::clearTileData(const Tiled2dMapTileInfo &til
 
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
             TaskConfig("LineGroupTile_clear_" + std::to_string(tileInfo.zoomIdentifier) + "/" + std::to_string(tileInfo.x) + "/" +
-                       std::to_string(tileInfo.y), 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+                       std::to_string(tileInfo.y) + "@" + std::to_string(tileInfo.t), 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
             [objectsToClear] {
                 for (const auto &textObject : objectsToClear) {
                     if (textObject->isReady()) {

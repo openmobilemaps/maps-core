@@ -38,7 +38,7 @@ public:
 
         size_t tIndex = url.find("now", 0);
         if (tIndex != std::string::npos) {
-            url = url.replace(tIndex, 3, "2022-11-22T"+std::to_string(t)+":45Z");
+            url = url.replace(tIndex, 3, "2022-11-24T0"+std::to_string(t%10)+":45Z");
         };
 
         return url;
