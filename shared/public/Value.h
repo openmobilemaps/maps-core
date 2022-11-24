@@ -132,6 +132,8 @@ public:
             identifier = hash;
         }
 
+        propertiesMap.push_back(std::make_pair("identifier", int64_t(identifier)));
+
         switch (geomType) {
             case vtzero::GeomType::LINESTRING: {
                 propertiesMap.push_back(std::make_pair("$type", "LineString"));

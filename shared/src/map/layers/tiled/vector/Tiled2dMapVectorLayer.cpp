@@ -34,22 +34,36 @@
 #include "DataHolderInterface.h"
 #include "TextureLoaderResult.h"
 #include "PolygonCompare.h"
-#include "TiledLayerError.h"
 #include "LoaderHelper.h"
 
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
-                                             const std::string &path,
+                                             const std::string &remoteStyleJsonUrl,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
                                              const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                                              double dpFactor) :
         Tiled2dMapLayer(),
         layerName(layerName),
-        styleJsonPath(path),
+        remoteStyleJsonUrl(remoteStyleJsonUrl),
         loaders(loaders),
         fontLoader(fontLoader),
         dpFactor(dpFactor),
         sublayers() {}
+
+
+Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
+                                             const std::string &remoteStyleJsonUrl,
+                                             const std::string &fallbackStyleJsonString,
+                                             const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
+                                             double dpFactor) :
+        Tiled2dMapLayer(),
+        layerName(layerName),
+        remoteStyleJsonUrl(remoteStyleJsonUrl),
+        fallbackStyleJsonString(fallbackStyleJsonString),
+        loaders(loaders),
+        dpFactor(dpFactor),
+        sublayers() {
+        }
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName, const std::shared_ptr<VectorMapDescription> &mapDescription,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
@@ -80,33 +94,69 @@ void Tiled2dMapVectorLayer::scheduleStyleJsonLoading() {
             [weakSelfPtr] {
                 auto selfPtr = weakSelfPtr.lock();
                 if (selfPtr) {
-                    selfPtr->loadStyleJson();
+                    auto layerError = selfPtr->loadStyleJson();
+                    if (selfPtr->errorManager) {
+                        if (auto error = layerError) {
+                            selfPtr->errorManager->addTiledLayerError(*error);
+                        } else {
+                            if (selfPtr->remoteStyleJsonUrl.has_value()) {
+                                selfPtr->errorManager->removeError(*selfPtr->remoteStyleJsonUrl);
+                            } else {
+                                selfPtr->errorManager->removeError(selfPtr->layerName);
+                            }
+                        }
+                    }
+
+                    selfPtr->isLoadingStyleJson = false;
                 }
             }));
 }
 
-void Tiled2dMapVectorLayer::loadStyleJson() {
-    auto styleJsonPath = this->styleJsonPath;
-    auto dpFactor = this->dpFactor;
-    if (!styleJsonPath.has_value() || !dpFactor.has_value()) {
-        return;
-    }
-    auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJson(layerName, *styleJsonPath, *dpFactor, loaders);
-    if (parseResult.status == LoaderStatus::OK) {
-        if (errorManager) {
-            errorManager->removeError(*styleJsonPath);
+std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJson() {
+    auto error = loadStyleJsonRemotely();
+    if (error.has_value()) {
+        if (auto json = fallbackStyleJsonString) {
+            return loadStyleJsonLocally(*json);
+        } else {
+            return error;
         }
-        setMapDescription(parseResult.mapDescription);
     } else {
-        auto tiledLayerError = TiledLayerError(parseResult.status, parseResult.errorCode, *styleJsonPath,
-                                               *styleJsonPath, parseResult.status != LoaderStatus::ERROR_404 ||
-                                                               parseResult.status != LoaderStatus::ERROR_400,
-                                               std::nullopt);
-        if (errorManager) {
-            errorManager->addTiledLayerError(tiledLayerError);
-        }
+        return std::nullopt;
     }
-    isLoadingStyleJson = false;
+}
+
+std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJsonRemotely() {
+    auto remoteStyleJsonUrl = this->remoteStyleJsonUrl;
+    auto dpFactor = this->dpFactor;
+    if (!remoteStyleJsonUrl.has_value() || !dpFactor.has_value()) {
+        return std::nullopt;
+    }
+    auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromUrl(layerName, *remoteStyleJsonUrl, *dpFactor, loaders);
+    if (parseResult.status == LoaderStatus::OK) {
+        setMapDescription(parseResult.mapDescription);
+        return std::nullopt;
+    } else {
+        return TiledLayerError(parseResult.status, parseResult.errorCode, layerName,
+                                               *remoteStyleJsonUrl, parseResult.status != LoaderStatus::ERROR_404 ||
+                                                               parseResult.status != LoaderStatus::ERROR_400, std::nullopt);
+    }
+}
+
+std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJsonLocally(std::string styleJsonString) {
+    auto dpFactor = this->dpFactor;
+    if (!dpFactor.has_value()) {
+        return std::nullopt;
+    }
+
+    auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(layerName, styleJsonString, *dpFactor, loaders);
+
+    if (parseResult.status == LoaderStatus::OK) {
+        setMapDescription(parseResult.mapDescription);
+        return std::nullopt;
+    } else {
+        return TiledLayerError(parseResult.status, parseResult.errorCode, layerName,
+                               layerName, false, std::nullopt);
+    }
 }
 
 std::shared_ptr<LayerInterface> Tiled2dMapVectorLayer::getLayerForDescription(const std::shared_ptr<VectorLayerDescription> &layerDescription) {
@@ -296,6 +346,7 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::build
 
 void Tiled2dMapVectorLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface) {
     this->mapInterface = mapInterface;
+    setSelectionDelegate(std::dynamic_pointer_cast<Tiled2dMapVectorLayerSelectionInterface>(shared_from_this()));
 
     if (layerConfigs.empty()) {
         scheduleStyleJsonLoading();
@@ -403,7 +454,7 @@ float Tiled2dMapVectorLayer::getAlpha() { return alpha; }
 
 
 void Tiled2dMapVectorLayer::forceReload() {
-    if (!isLoadingStyleJson && styleJsonPath.has_value() && !mapDescription && !vectorTileSource) {
+    if (!isLoadingStyleJson && remoteStyleJsonUrl.has_value() && !mapDescription && !vectorTileSource) {
         scheduleStyleJsonLoading();
         return;
     }
@@ -828,15 +879,34 @@ void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDe
 
 
     }
+}
 
+std::optional<FeatureContext> Tiled2dMapVectorLayer::getFeatureContext(int64_t identifier) {
+    auto const &currentTileInfos = vectorTileSource->getCurrentTiles();
 
-
+    for (auto const &tile: currentTileInfos) {
+        {
+            for (auto const &[source, layerFeatureMap]: tile.layerFeatureMaps) {
+                for (auto it = layerFeatureMap->begin(); it != layerFeatureMap->end(); it++) {
+                    for (auto const &[featureContext, geometry]: it->second) {
+                        if (featureContext.identifier == identifier) {
+                            return featureContext;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    return std::nullopt;
 }
 
 std::shared_ptr<VectorLayerDescription> Tiled2dMapVectorLayer::getLayerDescriptionWithIdentifier(std::string identifier) {
-    for (auto const &layer: mapDescription->layers) {
-        if (layer->identifier == identifier) {
-            return layer;
+    if (mapDescription) {
+        for (auto const &layer: mapDescription->layers) {
+            if (layer->identifier == identifier) {
+                return layer;
+            }
         }
     }
     return nullptr;

@@ -14,11 +14,12 @@
 #include "LineVectorLayerDescription.h"
 #include "LineGroup2dLayerObject.h"
 #include "Line2dLayerObject.h"
-#include "LineInfo.h"
 #include "LineGroupShaderInterface.h"
-
+#include "SimpleTouchInterface.h"
+#include "LineInfoInterface.h"
 
 class Tiled2dMapVectorLineSubLayer : public Tiled2dMapVectorSubLayer,
+                                     public SimpleTouchInterface,
                                      public std::enable_shared_from_this<Tiled2dMapVectorLineSubLayer> {
 public:
     Tiled2dMapVectorLineSubLayer(const std::shared_ptr<LineVectorLayerDescription> &description);
@@ -50,6 +51,8 @@ public:
 
     virtual std::string getLayerDescriptionIdentifier() override;
 
+    virtual bool onClickConfirmed(const ::Vec2F &posScreen) override;
+
 protected:
     void addLines(const Tiled2dMapTileInfo &tileInfo, const std::unordered_map<int, std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> &styleIdLinesMap);
 
@@ -68,6 +71,7 @@ private:
     std::recursive_mutex lineMutex;
     std::unordered_map<Tiled2dMapTileInfo, std::vector<std::shared_ptr<LineGroup2dLayerObject>>> tileLinesMap;
 
+    std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<std::vector<std::vector<::Coord>>, FeatureContext>>> hitDetectionLineMap;
     std::recursive_mutex featureGroupsMutex;
     std::vector<std::vector<std::tuple<size_t, FeatureContext>>> featureGroups;
     std::vector<std::vector<LineStyle>> reusableLineStyles;

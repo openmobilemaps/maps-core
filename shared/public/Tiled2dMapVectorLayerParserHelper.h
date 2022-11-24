@@ -29,21 +29,30 @@
 
 class Tiled2dMapVectorLayerParserHelper {
 public:
-    static Tiled2dMapVectorLayerParserResult parseStyleJson(const std::string &layerName,
-                                                            const std::string &styleJsonPath,
+    static Tiled2dMapVectorLayerParserResult parseStyleJsonFromUrl(const std::string &layerName,
+                                                            const std::string &styleJsonUrl,
                                                             const double &dpFactor,
                                                             const std::vector<std::shared_ptr<::LoaderInterface>> &loaders) {
-        DataLoaderResult result = LoaderHelper::loadData(styleJsonPath, std::nullopt, loaders);
+        DataLoaderResult result = LoaderHelper::loadData(styleJsonUrl, std::nullopt, loaders);
         if (result.status != LoaderStatus::OK) {
             return Tiled2dMapVectorLayerParserResult(nullptr, result.status, result.errorCode);
         }
         auto styleJsonData = result.data->getData();
 
         auto string = std::string((char *) styleJsonData.data(), styleJsonData.size());
+
+        return parseStyleJsonFromString(layerName, string, dpFactor, loaders);
+    }
+
+    static Tiled2dMapVectorLayerParserResult parseStyleJsonFromString(const std::string &layerName,
+                                                            const std::string &styleJsonString,
+                                                            const double &dpFactor,
+                                                            const std::vector<std::shared_ptr<::LoaderInterface>> &loaders) {
+
         nlohmann::json json;
 
         try {
-            json = nlohmann::json::parse(string);
+            json = nlohmann::json::parse(styleJsonString);
         }
         catch (nlohmann::json::parse_error &ex) {
             return Tiled2dMapVectorLayerParserResult(nullptr, LoaderStatus::ERROR_OTHER, "");
@@ -85,7 +94,7 @@ public:
                         return Tiled2dMapVectorLayerParserResult(nullptr, LoaderStatus::ERROR_OTHER, "");
                     }
                     url = json["tiles"].begin()->get<std::string>();
-                }
+                    }
 
                 rasterLayerMap[key] = std::make_shared<RasterVectorLayerDescription>(layerName,
                                                                                      val.value("minZoom", 0),
@@ -114,6 +123,10 @@ public:
                     return Tiled2dMapVectorLayerParserResult(nullptr, LoaderStatus::ERROR_OTHER, "");
                 }
 
+            }
+
+            if (val["type"].get<std::string>() == "vector" && val["tiles"].is_array()) {
+                tileJsons[key] = val;
             }
         }
 
@@ -238,10 +251,15 @@ public:
         }
 
 
+        std::optional<std::string> sprite;
+        if (json["sprite"].is_string()) {
+            sprite = json["sprite"].get<std::string>();
+        }
+
         auto mapDesc = std::make_shared<VectorMapDescription>(layerName,
                                                               sourceDescriptions,
                                                               layers,
-                                                              json["sprite"].get<std::string>());
+                                                              sprite);
         return Tiled2dMapVectorLayerParserResult(mapDesc, LoaderStatus::OK, "");
     }
 };

@@ -79,5 +79,5 @@ protected:
 
     std::recursive_mutex selectedFeatureIdentifierMutex;
     std::optional<int64_t> selectedFeatureIdentifier;
-    float alpha;
+    float alpha = 1.0;
 };

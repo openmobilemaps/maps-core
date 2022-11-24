@@ -15,6 +15,8 @@
 
 - (void)removeError:(nonnull NSString *)url;
 
+- (void)removeAllErrorsForLayer:(nonnull NSString *)layerName;
+
 - (void)clearAllErrors;
 
 - (void)addErrorListener:(nullable id<MCErrorManagerListener>)listener;

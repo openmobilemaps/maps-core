@@ -20,13 +20,20 @@
 #include "Tiled2dMapVectorLayerReadyInterface.h"
 #include "Tiled2dMapLayerMaskWrapper.h"
 #include "Tiled2dMapVectorLayerSelectionInterface.h"
+#include "TiledLayerError.h"
 
 class Tiled2dMapVectorLayer : public Tiled2dMapLayer, public Tiled2dMapVectorLayerInterface, public Tiled2dMapVectorLayerReadyInterface {
 public:
     Tiled2dMapVectorLayer(const std::string &layerName,
-                          const std::string &path,
+                          const std::string &remoteStyleJsonUrl,
                           const std::vector <std::shared_ptr<::LoaderInterface>> &loaders,
                           const std::shared_ptr<::FontLoaderInterface> &fontLoader,
+                          double dpFactor);
+
+    Tiled2dMapVectorLayer(const std::string &layerName,
+                          const std::string &remoteStyleJsonUrl,
+                          const std::string &fallbackStyleJsonString,
+                          const std::vector <std::shared_ptr<::LoaderInterface>> &loaders,
                           double dpFactor);
 
     Tiled2dMapVectorLayer(const std::string &layerName,
@@ -72,6 +79,7 @@ public:
 
     void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription);
 
+    std::optional<FeatureContext> getFeatureContext(int64_t identifier);
 protected:
     virtual std::shared_ptr<LayerInterface> getLayerForDescription(const std::shared_ptr<VectorLayerDescription> &layerDescription);
 
@@ -84,10 +92,15 @@ protected:
 
     std::shared_ptr<Tiled2dMapVectorSource> vectorTileSource;
 
+    const std::vector<std::shared_ptr<::LoaderInterface>> loaders;
+
+    virtual std::optional<TiledLayerError> loadStyleJson();
+    virtual std::optional<TiledLayerError> loadStyleJsonRemotely();
+    virtual std::optional<TiledLayerError> loadStyleJsonLocally(std::string styleJsonString);
+
 private:
     void scheduleStyleJsonLoading();
 
-    void loadStyleJson();
 
     void initializeVectorLayer(const std::vector<std::shared_ptr<LayerInterface>> &newSublayers);
 
@@ -96,14 +109,14 @@ private:
     const std::optional<double> dpFactor;
 
     const std::string layerName;
-    std::optional<std::string> styleJsonPath;
+    std::optional<std::string> remoteStyleJsonUrl;
+    std::optional<std::string> fallbackStyleJsonString;
+
     std::shared_ptr<VectorMapDescription> mapDescription;
 
     std::unordered_map<std::string, std::shared_ptr<Tiled2dMapLayerConfig>> layerConfigs;
 
     const std::shared_ptr<FontLoaderInterface> fontLoader;
-
-    const std::vector<std::shared_ptr<::LoaderInterface>> loaders;
 
     std::recursive_mutex tileUpdateMutex;
 

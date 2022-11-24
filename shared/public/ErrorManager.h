@@ -19,6 +19,8 @@ public:
 
     virtual void removeError(const std::string & url) = 0;
 
+    virtual void removeAllErrorsForLayer(const std::string & layerName) = 0;
+
     virtual void clearAllErrors() = 0;
 
     virtual void addErrorListener(const std::shared_ptr<ErrorManagerListener> & listener) = 0;
