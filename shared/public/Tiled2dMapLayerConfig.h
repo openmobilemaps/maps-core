@@ -4,9 +4,11 @@
 #pragma once
 
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <vector>
 
+struct Tiled2dMapVectorSettings;
 struct Tiled2dMapZoomInfo;
 struct Tiled2dMapZoomLevelInfo;
 
@@ -23,4 +25,6 @@ public:
     virtual Tiled2dMapZoomInfo getZoomInfo() = 0;
 
     virtual std::string getLayerName() = 0;
+
+    virtual std::optional<Tiled2dMapVectorSettings> getVectorSettings() = 0;
 };

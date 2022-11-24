@@ -38,6 +38,7 @@ private:
         std::vector<::Tiled2dMapZoomLevelInfo> getZoomLevelInfos() override;
         ::Tiled2dMapZoomInfo getZoomInfo() override;
         std::string getLayerName() override;
+        std::optional<::Tiled2dMapVectorSettings> getVectorSettings() override;
 
     private:
         friend ::djinni::JniInterface<::Tiled2dMapLayerConfig, ::djinni_generated::NativeTiled2dMapLayerConfig>;
@@ -49,6 +50,7 @@ private:
     const jmethodID method_getZoomLevelInfos { ::djinni::jniGetMethodID(clazz.get(), "getZoomLevelInfos", "()Ljava/util/ArrayList;") };
     const jmethodID method_getZoomInfo { ::djinni::jniGetMethodID(clazz.get(), "getZoomInfo", "()Lio/openmobilemaps/mapscore/shared/map/layers/tiled/Tiled2dMapZoomInfo;") };
     const jmethodID method_getLayerName { ::djinni::jniGetMethodID(clazz.get(), "getLayerName", "()Ljava/lang/String;") };
+    const jmethodID method_getVectorSettings { ::djinni::jniGetMethodID(clazz.get(), "getVectorSettings", "()Lio/openmobilemaps/mapscore/shared/map/layers/tiled/Tiled2dMapVectorSettings;") };
 };
 
 }  // namespace djinni_generated

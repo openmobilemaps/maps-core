@@ -9,6 +9,7 @@ tiled_2d_map_layer_config = interface +c +j +o {
     get_zoom_level_infos() : list<tiled_2d_map_zoom_level_info>;
     get_zoom_info(): tiled_2d_map_zoom_info;
     get_layer_name() : string;
+    get_vector_settings(): optional<tiled_2d_map_vector_settings>;
 }
 
 tiled_2d_map_zoom_level_info = record {
@@ -19,6 +20,17 @@ tiled_2d_map_zoom_level_info = record {
 	num_tiles_t: i32;
 	zoom_level_identifier: i32;
     bounds: rect_coord;
+}
+
+tiled_2d_map_vector_settings = record {
+    tile_origin: tiled_2d_map_vector_tile_origin;
+}
+
+tiled_2d_map_vector_tile_origin = enum {
+    top_left;
+    bottom_left;
+    top_right;
+    bottom_right;
 }
 
 tiled_2d_map_zoom_info = record {

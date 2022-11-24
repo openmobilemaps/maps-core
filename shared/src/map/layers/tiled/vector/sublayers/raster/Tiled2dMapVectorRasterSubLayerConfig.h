@@ -16,6 +16,7 @@
 #include "CoordinateSystemIdentifiers.h"
 #include "Tiled2dMapZoomLevelInfo.h"
 #include "Logger.h"
+#include "Tiled2dMapVectorSettings.h"
 
 class Tiled2dMapVectorRasterSubLayerConfig : public Tiled2dMapLayerConfig {
 public:
@@ -61,6 +62,10 @@ public:
     std::string getLayerName() override {
         LogDebug <<= "Tiled2dMap vector raster sublayer config get identifier";
         return description->identifier;
+    }
+
+    std::optional<Tiled2dMapVectorSettings> getVectorSettings() override {
+        return std::nullopt;
     }
 
 private:
