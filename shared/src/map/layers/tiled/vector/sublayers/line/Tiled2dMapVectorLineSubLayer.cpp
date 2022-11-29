@@ -446,15 +446,22 @@ std::string Tiled2dMapVectorLineSubLayer::getLayerDescriptionIdentifier() {
 }
 
 bool Tiled2dMapVectorLineSubLayer::onClickConfirmed(const ::Vec2F &posScreen) {
-    auto point = mapInterface->getCamera()->coordFromScreenPosition(posScreen);
     auto selectionDelegate = this->selectionDelegate.lock();
-    double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(mapInterface->getCamera()->getZoom());
+    auto mapInterface = this->mapInterface;
+    auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+    auto coordinateConverter = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
+    if (!camera || !coordinateConverter || !selectionDelegate) {
+        return false;
+    }
+
+    auto point = camera->coordFromScreenPosition(posScreen);
+    double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
 
     for (auto const &[tileInfo, lineTuples] : hitDetectionLineMap) {
         for (auto const &[lineCoordinateVector, featureContext]: lineTuples) {
             for (auto const &coordinates: lineCoordinateVector) {
                 auto lineWidth = description->style.getLineWidth(EvaluationContext(zoomIdentifier, featureContext));
-                if (LineHelper::pointWithin(coordinates, point, lineWidth, mapInterface->getCoordinateConverterHelper())) {
+                if (LineHelper::pointWithin(coordinates, point, lineWidth, coordinateConverter)) {
                     if (selectionDelegate->didSelectFeature(featureContext, description, point)) {
                         return true;
                     }
