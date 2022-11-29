@@ -9,6 +9,7 @@
  */
 
 #include "OpenGlContext.h"
+#include "OpenGlRenderTargetTexture.h"
 #include "opengl_wrapper.h"
 
 OpenGlContext::OpenGlContext()
@@ -94,5 +95,5 @@ void OpenGlContext::endDrawFrame(const std::shared_ptr<::RenderTargetTexture> &r
 }
 
 std::shared_ptr<::RenderTargetTexture> OpenGlContext::createRenderTargetTexture() {
-    return nullptr; // TODO: Will see
+    return std::make_shared<OpenGlRenderTargetTexture>();
 }

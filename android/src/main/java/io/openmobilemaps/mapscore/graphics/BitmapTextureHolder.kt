@@ -14,15 +14,13 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import android.opengl.GLES20
-import android.opengl.GLES30
 import android.opengl.GLUtils
-import android.util.Log
 import io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface
 import java.nio.IntBuffer
-import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.ReentrantLock
 
 class BitmapTextureHolder(bitmap: Bitmap, val minFilter:Int = GLES20.GL_LINEAR, val magFilter:Int = GLES20.GL_LINEAR) : TextureHolderInterface() {
+
 	val bitmap: Bitmap
 	private var imageWidth = 0
 	private var imageHeight = 0

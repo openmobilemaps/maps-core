@@ -66,7 +66,7 @@ map_interface = interface +c {
     create_render_target_texture(): render_target_texture;
 }
 
-render_target_texture = interface +j +o {
+render_target_texture = interface +c +j +o {
     texture_holder(): texture_holder_interface;
 }
 

@@ -6,7 +6,7 @@
 
 namespace djinni_generated {
 
-NativeTextureHolderInterface::NativeTextureHolderInterface() : ::djinni::JniInterface<::TextureHolderInterface, NativeTextureHolderInterface>() {}
+NativeTextureHolderInterface::NativeTextureHolderInterface() : ::djinni::JniInterface<::TextureHolderInterface, NativeTextureHolderInterface>("io/openmobilemaps/mapscore/shared/graphics/objects/TextureHolderInterface$CppProxy") {}
 
 NativeTextureHolderInterface::~NativeTextureHolderInterface() = default;
 
@@ -60,6 +60,73 @@ void NativeTextureHolderInterface::JavaProxy::clearFromGraphics() {
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeTextureHolderInterface>::get();
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_clearFromGraphics);
     ::djinni::jniExceptionCheck(jniEnv);
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_TextureHolderInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        delete reinterpret_cast<::djinni::CppProxyHandle<::TextureHolderInterface>*>(nativeRef);
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT jint JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_TextureHolderInterface_00024CppProxy_native_1getImageWidth(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::TextureHolderInterface>(nativeRef);
+        auto r = ref->getImageWidth();
+        return ::djinni::release(::djinni::I32::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jint JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_TextureHolderInterface_00024CppProxy_native_1getImageHeight(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::TextureHolderInterface>(nativeRef);
+        auto r = ref->getImageHeight();
+        return ::djinni::release(::djinni::I32::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jint JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_TextureHolderInterface_00024CppProxy_native_1getTextureWidth(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::TextureHolderInterface>(nativeRef);
+        auto r = ref->getTextureWidth();
+        return ::djinni::release(::djinni::I32::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jint JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_TextureHolderInterface_00024CppProxy_native_1getTextureHeight(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::TextureHolderInterface>(nativeRef);
+        auto r = ref->getTextureHeight();
+        return ::djinni::release(::djinni::I32::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jint JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_TextureHolderInterface_00024CppProxy_native_1attachToGraphics(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::TextureHolderInterface>(nativeRef);
+        auto r = ref->attachToGraphics();
+        return ::djinni::release(::djinni::I32::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_TextureHolderInterface_00024CppProxy_native_1clearFromGraphics(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::TextureHolderInterface>(nativeRef);
+        ref->clearFromGraphics();
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
 }  // namespace djinni_generated

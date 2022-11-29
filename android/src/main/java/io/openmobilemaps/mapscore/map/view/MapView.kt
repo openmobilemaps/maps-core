@@ -199,6 +199,9 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 		SaveFrameUtil.saveCurrentFrame(Vec2I(width, height), spec, callback)
 	}
 
-	override fun requireMapInterface(): MapInterface = mapInterface ?: throw IllegalStateException("Map is not setup or already destroyed!")
-	override fun requireScheduler(): AndroidScheduler = scheduler ?: throw IllegalStateException("Map is not setup or already destroyed!")
+	override fun requireMapInterface(): MapInterface =
+		mapInterface ?: throw IllegalStateException("Map is not setup or already destroyed!")
+
+	override fun requireScheduler(): AndroidScheduler =
+		scheduler ?: throw IllegalStateException("Map is not setup or already destroyed!")
 }
