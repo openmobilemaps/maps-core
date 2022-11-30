@@ -13,6 +13,8 @@
 #include "CoordinateSystemIdentifiers.h"
 #include "Logger.h"
 
+#include <ctime>
+
 class Tiled2dMapVectorLayerConfig : public Tiled2dMapLayerConfig {
 public:
     Tiled2dMapVectorLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &layerDescription, bool underzoom = true, bool overzoom = true, int numT = 1)
@@ -37,8 +39,13 @@ public:
         url = url.replace(yIndex, 3, std::to_string(y));
 
         size_t tIndex = url.find("now", 0);
+
+        // current date/time based on current system
+        time_t now = time(0);
+        tm *ltm = localtime(&now);
+
         if (tIndex != std::string::npos) {
-            url = url.replace(tIndex, 3, "2022-11-24T0"+std::to_string(t%10)+":45Z");
+            url = url.replace(tIndex, 3, std::to_string(1900 + ltm->tm_year) + "-" + std::to_string(1 + ltm->tm_mon) + "-" + std::to_string(ltm->tm_mday) + "T0" + std::to_string(t%10) + ":45Z");
         };
 
         return url;
