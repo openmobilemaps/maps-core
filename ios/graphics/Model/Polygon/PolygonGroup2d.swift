@@ -95,13 +95,11 @@ final class PolygonGroup2d: BaseGraphicsObject {
 extension PolygonGroup2d: MCPolygonGroup2dInterface {
     func setVertices(_ vertices: MCSharedBytes, indices: MCSharedBytes) {
         guard vertices.elementCount > 0 else {
-            lock.lock()
-            defer {
-                lock.unlock()
+            lock.withCritical {
+                self.indicesCount = 0
+                verticesBuffer = nil
+                indicesBuffer = nil
             }
-            self.indicesCount = 0
-            verticesBuffer = nil
-            indicesBuffer = nil
             return
         }
 
@@ -110,13 +108,11 @@ extension PolygonGroup2d: MCPolygonGroup2dInterface {
         else {
             fatalError("Cannot allocate buffers for the UBTileModel")
         }
-        lock.lock()
-        defer {
-            lock.unlock()
+        lock.withCritical {
+            self.indicesCount = Int(indices.elementCount)
+            self.verticesBuffer = verticesBuffer
+            self.indicesBuffer = indicesBuffer
         }
-        self.indicesCount = Int(indices.elementCount)
-        self.verticesBuffer = verticesBuffer
-        self.indicesBuffer = indicesBuffer
     }
 
     func asGraphicsObject() -> MCGraphicsObjectInterface? { self }

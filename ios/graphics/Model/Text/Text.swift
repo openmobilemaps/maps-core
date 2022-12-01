@@ -138,28 +138,22 @@ extension Text: MCTextInterface {
         }
 
         guard !vertices.isEmpty else {
-            lock.lock()
-            defer {
-                lock.unlock()
+            lock.withCritical {
+                indicesCount = 0
+                self.verticesBuffer = nil
+                self.indicesBuffer = nil
             }
-
-            indicesCount = 0
-            self.verticesBuffer = nil
-            self.indicesBuffer = nil
             return
         }
 
         guard let verticesBuffer = device.makeBuffer(bytes: vertices, length: MemoryLayout<Vertex>.stride * vertices.count, options: []), let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: []) else {
             fatalError("Cannot allocate buffers")
         }
-        lock.lock()
-        defer {
-            lock.unlock()
+        lock.withCritical {
+            indicesCount = indices.count
+            self.verticesBuffer = verticesBuffer
+            self.indicesBuffer = indicesBuffer
         }
-
-        indicesCount = indices.count
-        self.verticesBuffer = verticesBuffer
-        self.indicesBuffer = indicesBuffer
     }
 
     func loadTexture(_ context: MCRenderingContextInterface?, textureHolder: MCTextureHolderInterface?) {

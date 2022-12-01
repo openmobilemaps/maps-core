@@ -22,10 +22,22 @@ public class OSLock {
         return os_unfair_lock_trylock(oslock)
     }
 
+    func withCritical<Result>(_ section: () throws -> Result) rethrows -> Result {
+        if !os_unfair_lock_trylock(oslock) {
+            os_unfair_lock_lock(oslock)
+        }
+
+        defer {
+            os_unfair_lock_unlock(oslock)
+        }
+
+        return try section()
+    }
+
     let oslock = {
-        let lock1 = UnsafeMutablePointer<os_unfair_lock>.allocate(capacity: 1)
-        lock1.initialize(to: .init())
-        return lock1
+        let lock = os_unfair_lock_t.allocate(capacity: 1)
+        lock.initialize(to: os_unfair_lock_s())
+        return lock
     }()
 
     deinit {

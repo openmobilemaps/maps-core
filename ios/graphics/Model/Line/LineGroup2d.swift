@@ -125,14 +125,12 @@ extension LineGroup2d: MCLineGroup2dInterface {
     func setLines(_ lines: MCSharedBytes, indices: MCSharedBytes) {
         guard lines.elementCount != 0 else {
 
-            lock.lock()
-            defer {
-                lock.unlock()
+            lock.withCritical {
+                lineVerticesBuffer = nil
+                lineIndicesBuffer = nil
+                indicesCount = 0
             }
 
-            lineVerticesBuffer = nil
-            lineIndicesBuffer = nil
-            indicesCount = 0
             return
         }
         guard let verticesBuffer = device.makeBuffer(from: lines),
@@ -144,15 +142,11 @@ extension LineGroup2d: MCLineGroup2dInterface {
         verticesBuffer.label = "LineGroup2d.verticesBuffer"
         indicesBuffer.label = "LineGroup2d.indicesBuffer"
 
-
-        lock.lock()
-        defer {
-            lock.unlock()
+        lock.withCritical {
+            indicesCount = Int(indices.elementCount)
+            lineVerticesBuffer = verticesBuffer
+            lineIndicesBuffer = indicesBuffer
         }
-
-        indicesCount = Int(indices.elementCount)
-        lineVerticesBuffer = verticesBuffer
-        lineIndicesBuffer = indicesBuffer
     }
 
     func asGraphicsObject() -> MCGraphicsObjectInterface? {

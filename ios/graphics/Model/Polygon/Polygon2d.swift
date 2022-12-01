@@ -144,14 +144,11 @@ extension Polygon2d: MCMaskingObjectInterface {
 extension Polygon2d: MCPolygon2dInterface {
     func setVertices(_ vertices: [MCVec2D], indices: [NSNumber]) {
         guard !vertices.isEmpty, !indices.isEmpty else {
-            lock.lock()
-            defer {
-                lock.unlock()
+            lock.withCritical {
+                indicesCount = 0
+                verticesBuffer = nil
+                indicesBuffer = nil
             }
-
-            indicesCount = 0
-            verticesBuffer = nil
-            indicesBuffer = nil
             return
         }
 
@@ -165,14 +162,12 @@ extension Polygon2d: MCPolygon2dInterface {
         else {
             fatalError("Cannot allocate buffers for the UBTileModel")
         }
-        lock.lock()
-        defer {
-            lock.unlock()
-        }
 
-        indicesCount = indices.count
-        self.verticesBuffer = verticesBuffer
-        self.indicesBuffer = indicesBuffer
+        lock.withCritical {
+            indicesCount = indices.count
+            self.verticesBuffer = verticesBuffer
+            self.indicesBuffer = indicesBuffer
+        }
     }
 
     func asGraphicsObject() -> MCGraphicsObjectInterface? { self }

@@ -171,14 +171,11 @@ extension Quad2d: MCQuad2dInterface {
             fatalError("Cannot allocate buffers")
         }
 
-        lock.lock()
-        defer {
-            lock.unlock()
+        lock.withCritical {
+            indicesCount = indices.count
+            self.verticesBuffer = verticesBuffer
+            self.indicesBuffer = indicesBuffer
         }
-
-        indicesCount = indices.count
-        self.verticesBuffer = verticesBuffer
-        self.indicesBuffer = indicesBuffer
     }
 
     func loadTexture(_ context: MCRenderingContextInterface?, textureHolder: MCTextureHolderInterface?) {
