@@ -71,6 +71,12 @@ final class Quad2d: BaseGraphicsObject {
               let verticesBuffer = verticesBuffer,
               let indicesBuffer = indicesBuffer else { return }
 
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
+
+
         if shader is AlphaShader, texture == nil {
             ready = false
             return
@@ -163,6 +169,11 @@ extension Quad2d: MCQuad2dInterface {
 
         guard let verticesBuffer = device.makeBuffer(bytes: vertecies, length: MemoryLayout<Vertex>.stride * vertecies.count, options: []), let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: []) else {
             fatalError("Cannot allocate buffers")
+        }
+
+        lock.lock()
+        defer {
+            lock.unlock()
         }
 
         indicesCount = indices.count
