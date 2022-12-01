@@ -34,7 +34,7 @@ public class OSLock {
         return try section()
     }
 
-    let oslock = {
+    private let oslock: UnsafeMutablePointer<os_unfair_lock_s> = {
         let lock = os_unfair_lock_t.allocate(capacity: 1)
         lock.initialize(to: os_unfair_lock_s())
         return lock
