@@ -72,4 +72,6 @@ protected:
 
     float tFraction = 0;
 
+    int shiftedTimeWithMoreTiles();
+
 };

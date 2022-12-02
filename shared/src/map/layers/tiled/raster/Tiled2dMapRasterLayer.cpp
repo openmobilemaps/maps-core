@@ -138,12 +138,12 @@ void Tiled2dMapRasterLayer::setT(double t) {
     if (abs(curTWithFraction - t) < 0.05) {
         return;
     }
-    Tiled2dMapLayer::setT(t);
     curTWithFraction = t;
+    Tiled2dMapLayer::setT(t);
 }
 
 bool Tiled2dMapRasterLayer::shouldLoadTile(const Tiled2dMapTileInfo& tileInfo){
-    return abs(tileInfo.t - curT) < 100;
+    return abs(tileInfo.t - curT) < 10;
 }
 
 void Tiled2dMapRasterLayer::onTilesUpdated() {
@@ -266,6 +266,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
 
         std::weak_ptr<Tiled2dMapRasterLayer> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapRasterLayer>(shared_from_this());
 
+
         mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
                 TaskConfig("Tiled2dMapRasterLayer_onTilesUpdated", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
                 [weakSelfPtr, tilesToSetup, tilesToClean, newMaskObjects, obsoleteMaskObjects] {
@@ -362,6 +363,8 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
 
 std::vector<std::shared_ptr<RenderPassInterface>> Tiled2dMapRasterLayer::generateRenderPasses(double alpha, int t, std::shared_ptr<RenderTargetTexture> renderTargetTexture) {
 
+    printf("generate render passes t=%d\n", t);
+
     auto mapInterface = this->mapInterface;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!renderingContext)
@@ -372,13 +375,21 @@ std::vector<std::shared_ptr<RenderPassInterface>> Tiled2dMapRasterLayer::generat
     {
         std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
 
+        int c = 0;
+
         for (const auto &entry : tileObjectMap) {
             if (entry.first.tileInfo.t != t) {
                 continue;
             }
 
+            c++;
+
  			auto const &renderObject = entry.second->getRenderObject();
 			entry.second->setAlpha(alpha);
+
+            if (!renderObject || !renderObject->getGraphicsObject()->isReady()) {
+                printf("not ready\n");
+            }
 
             if (layerConfig->getZoomInfo().maskTile) {
                 const auto &mask = tileMaskMap.at(entry.first.tileInfo);
@@ -407,6 +418,8 @@ std::vector<std::shared_ptr<RenderPassInterface>> Tiled2dMapRasterLayer::generat
                 newRenderPasses.push_back(renderPass);
             }
         }
+
+        printf("%d tiles\n", c);
 
     }
 

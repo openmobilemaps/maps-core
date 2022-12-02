@@ -99,14 +99,67 @@ void InterpolatedTiled2dMapRasterLayer::setAlpha(double alpha) {
     }
 }
 
+int InterpolatedTiled2dMapRasterLayer::shiftedTimeWithMoreTiles()  {
+    std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
+
+    auto offsets = {0, -1, -2, 1, -3, 2, -4, 3, -5, 4, 5};
+   
+    for (const int o : offsets) {
+
+
+        auto current = rasterSource->getCurrentVisibleTilesAt(curT + o);
+        auto next = rasterSource->getCurrentVisibleTilesAt(curT + 1 + o);
+
+        if (current.size() == 0) {
+            return 0;
+        }
+
+        int matchedTiles = 0;
+
+        for (const auto &loaded : tileObjectMap) {
+            for (const auto &tile : current) {
+                if (tile == loaded.first.tileInfo && loaded.second->getGraphicsObject()->isReady()) {
+                    matchedTiles++;
+                }
+            }
+            for (const auto &tile : next) {
+                if (tile == loaded.first.tileInfo && loaded.second->getGraphicsObject()->isReady()) {
+                    matchedTiles++;
+                }
+            }
+        }
+
+        if (matchedTiles == current.size() + next.size()) {
+            if (o != 0) {
+                printf("shift: has all for offset %d\n", o);
+            }
+            else {
+                printf("shift: 0 should be ok \n");
+            }
+            return o;
+        }
+
+
+
+    }
+
+    printf("shift: probably not ready\n");
+
+    return 0;
+}
+
 std::vector<std::shared_ptr<RenderPassInterface>>  InterpolatedTiled2dMapRasterLayer::combineRenderPasses() {
 
     if (!renderTargetTexture) {
         return {};
     }
 
-    auto newRenderPasses = Tiled2dMapRasterLayer::generateRenderPasses(1.0, curT+1, renderTargetTexture);
-    auto tilesNext = Tiled2dMapRasterLayer::generateRenderPasses(0.0, curT , renderTargetTexture);
+
+    int tShift = shiftedTimeWithMoreTiles();
+
+
+    auto newRenderPasses = Tiled2dMapRasterLayer::generateRenderPasses(1.0, curT+1 + tShift, renderTargetTexture);
+    auto tilesNext = Tiled2dMapRasterLayer::generateRenderPasses(0.0, curT + tShift , renderTargetTexture);
     newRenderPasses.insert(newRenderPasses.end(), tilesNext.begin(), tilesNext.end());
 
 

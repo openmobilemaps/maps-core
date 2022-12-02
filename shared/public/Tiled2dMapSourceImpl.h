@@ -94,6 +94,18 @@ bool Tiled2dMapSource<T, L, R>::isTileVisible(const Tiled2dMapTileInfo &tileInfo
 }
 
 template<class T, class L, class R>
+std::vector<Tiled2dMapTileInfo> Tiled2dMapSource<T, L, R>::getCurrentVisibleTilesAt(int t) {
+    std::lock_guard<std::recursive_mutex> lock(currentVisibleTilesMutex);
+    std::vector<Tiled2dMapTileInfo> tiles;
+    for (const auto &tile : currentVisibleTiles) {
+        if (tile.t == t) {
+            tiles.push_back(tile);
+        }
+    }
+    return tiles;
+}
+
+template<class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBounds, int curT, double zoom) {
     std::vector<PrioritizedTiled2dMapTileInfo> visibleTilesVec;
 

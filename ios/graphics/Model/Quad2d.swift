@@ -55,7 +55,10 @@ final class Quad2d: BaseGraphicsObject {
 
     override func isReady() -> Bool {
         guard ready else { return false }
-        if shader is AlphaShader {
+        if let baseShader = shader as? BaseShader, baseShader.requiresTexture {
+            if texture == nil {
+                return false
+            }
             return texture != nil
         }
         return true
@@ -71,7 +74,7 @@ final class Quad2d: BaseGraphicsObject {
               let verticesBuffer = verticesBuffer,
               let indicesBuffer = indicesBuffer else { return }
 
-        if shader is AlphaShader, texture == nil {
+        if let baseShader = shader as? BaseShader, baseShader.requiresTexture, texture == nil {
             ready = false
             return
         }

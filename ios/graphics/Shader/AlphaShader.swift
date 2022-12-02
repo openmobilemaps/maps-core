@@ -41,6 +41,10 @@ class AlphaShader: BaseShader {
         encoder.setRenderPipelineState(pipeline)
         encoder.setFragmentBuffer(buffer, offset: 0, index: 1)
     }
+
+    override var requiresTexture: Bool {
+        true
+    }
 }
 
 extension AlphaShader: MCAlphaShaderInterface {

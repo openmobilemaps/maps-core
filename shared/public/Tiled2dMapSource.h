@@ -78,6 +78,8 @@ public:
 
     virtual bool isTileVisible(const Tiled2dMapTileInfo &tileInfo);
 
+    std::vector<Tiled2dMapTileInfo> getCurrentVisibleTilesAt(int t);
+
     virtual void pause() override;
 
     virtual void resume() override;

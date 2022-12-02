@@ -105,11 +105,14 @@ public class TextureHolder: NSObject {
 
 extension TextureHolder: MCTextureHolderInterface {
     public func clearFromGraphics() {
-        texture = nil
+        if textureSource != nil {
+            // only clear texture, if it can be restored
+            texture = nil
+        }
     }
 
     public func attachToGraphics() -> Int32 {
-        if texture == nil {
+        if _texture == nil {
             try! loadDataFromSource()
         }
         return 0

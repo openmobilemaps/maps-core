@@ -33,4 +33,8 @@ open class BaseShader: MCShaderProgramInterface {
     open func preRender(encoder _: MTLRenderCommandEncoder,
                         context _: RenderingContext, pass: MCRenderPassConfig) {
     }
+
+    open var requiresTexture: Bool {
+        false
+    }
 }

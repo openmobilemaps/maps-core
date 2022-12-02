@@ -389,8 +389,8 @@ void Tiled2dMapVectorLayer::setT(double t) {
     if (curT == (int)t) {
         return;
     }
-    Tiled2dMapLayer::setT(t);
     curTWithFraction = t;
+    Tiled2dMapLayer::setT(t);
 }
 
 
