@@ -130,20 +130,12 @@ int InterpolatedTiled2dMapRasterLayer::shiftedTimeWithMoreTiles()  {
         }
 
         if (matchedTiles == current.size() + next.size()) {
-            if (o != 0) {
-                printf("shift: has all for offset %d\n", o);
-            }
-            else {
-                printf("shift: 0 should be ok \n");
-            }
             return o;
         }
 
 
 
     }
-
-    printf("shift: probably not ready\n");
 
     return 0;
 }

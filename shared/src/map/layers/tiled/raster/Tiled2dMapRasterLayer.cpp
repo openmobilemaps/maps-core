@@ -363,8 +363,6 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
 
 std::vector<std::shared_ptr<RenderPassInterface>> Tiled2dMapRasterLayer::generateRenderPasses(double alpha, int t, std::shared_ptr<RenderTargetTexture> renderTargetTexture) {
 
-    printf("generate render passes t=%d\n", t);
-
     auto mapInterface = this->mapInterface;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!renderingContext)
@@ -375,20 +373,15 @@ std::vector<std::shared_ptr<RenderPassInterface>> Tiled2dMapRasterLayer::generat
     {
         std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
 
-        int c = 0;
-
         for (const auto &entry : tileObjectMap) {
             if (entry.first.tileInfo.t != t) {
                 continue;
             }
 
-            c++;
-
  			auto const &renderObject = entry.second->getRenderObject();
 			entry.second->setAlpha(alpha);
 
             if (!renderObject || !renderObject->getGraphicsObject()->isReady()) {
-                printf("not ready\n");
             }
 
             if (layerConfig->getZoomInfo().maskTile) {
@@ -418,8 +411,6 @@ std::vector<std::shared_ptr<RenderPassInterface>> Tiled2dMapRasterLayer::generat
                 newRenderPasses.push_back(renderPass);
             }
         }
-
-        printf("%d tiles\n", c);
 
     }
 
