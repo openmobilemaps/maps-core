@@ -68,6 +68,11 @@ final class LineGroup2d: BaseGraphicsObject {
                          mvpMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor: Double) {
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
+
         guard let lineVerticesBuffer = lineVerticesBuffer,
               let lineIndicesBuffer = lineIndicesBuffer
         else { return }
@@ -78,6 +83,7 @@ final class LineGroup2d: BaseGraphicsObject {
             encoder.popDebugGroup()
         }
         #endif
+
 
         if stencilState == nil {
             setupStencilBufferDescriptor()
@@ -118,9 +124,13 @@ final class LineGroup2d: BaseGraphicsObject {
 extension LineGroup2d: MCLineGroup2dInterface {
     func setLines(_ lines: MCSharedBytes, indices: MCSharedBytes) {
         guard lines.elementCount != 0 else {
-            lineVerticesBuffer = nil
-            lineIndicesBuffer = nil
-            indicesCount = 0
+
+            lock.withCritical {
+                lineVerticesBuffer = nil
+                lineIndicesBuffer = nil
+                indicesCount = 0
+            }
+
             return
         }
         guard let verticesBuffer = device.makeBuffer(from: lines),
@@ -132,9 +142,11 @@ extension LineGroup2d: MCLineGroup2dInterface {
         verticesBuffer.label = "LineGroup2d.verticesBuffer"
         indicesBuffer.label = "LineGroup2d.indicesBuffer"
 
-        indicesCount = Int(indices.elementCount)
-        lineVerticesBuffer = verticesBuffer
-        lineIndicesBuffer = indicesBuffer
+        lock.withCritical {
+            indicesCount = Int(indices.elementCount)
+            lineVerticesBuffer = verticesBuffer
+            lineIndicesBuffer = indicesBuffer
+        }
     }
 
     func asGraphicsObject() -> MCGraphicsObjectInterface? {
