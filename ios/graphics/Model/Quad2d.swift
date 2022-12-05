@@ -71,6 +71,12 @@ final class Quad2d: BaseGraphicsObject {
               let verticesBuffer = verticesBuffer,
               let indicesBuffer = indicesBuffer else { return }
 
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
+
+
         if shader is AlphaShader, texture == nil {
             ready = false
             return
@@ -165,9 +171,11 @@ extension Quad2d: MCQuad2dInterface {
             fatalError("Cannot allocate buffers")
         }
 
-        indicesCount = indices.count
-        self.verticesBuffer = verticesBuffer
-        self.indicesBuffer = indicesBuffer
+        lock.withCritical {
+            indicesCount = indices.count
+            self.verticesBuffer = verticesBuffer
+            self.indicesBuffer = indicesBuffer
+        }
     }
 
     func loadTexture(_ context: MCRenderingContextInterface?, textureHolder: MCTextureHolderInterface?) {
