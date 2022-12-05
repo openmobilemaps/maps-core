@@ -49,7 +49,22 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         loaders(loaders),
         fontLoader(fontLoader),
         dpFactor(dpFactor),
-        sublayers() {}
+        sublayers(),
+        numT(numT) {}
+
+Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
+                                             const std::string &remoteStyleJsonUrl,
+                                             const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
+                                             const std::shared_ptr<::FontLoaderInterface> &fontLoader,
+                                             double dpFactor) :
+Tiled2dMapLayer(),
+layerName(layerName),
+remoteStyleJsonUrl(remoteStyleJsonUrl),
+loaders(loaders),
+fontLoader(fontLoader),
+dpFactor(dpFactor),
+sublayers(),
+numT(1) {}
 
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,

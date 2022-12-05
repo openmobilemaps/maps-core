@@ -220,7 +220,6 @@ void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBou
                     const int tDis = 1 + std::abs(t - curT);
                     const int priority = std::ceil((tileCenterDis / maxDisCenter) * zPriorityRange) + tDis * tPriorityRange + zoomInd * zoomPriorityRange;
 
-                    const RectCoord rect(topLeft, bottomRight);
                     curVisibleTilesVec.push_back(PrioritizedTiled2dMapTileInfo(
                             Tiled2dMapTileInfo(rect, x, y, t, zoomLevelInfo.zoomLevelIdentifier, zoomLevelInfo.zoom),
                             priority));

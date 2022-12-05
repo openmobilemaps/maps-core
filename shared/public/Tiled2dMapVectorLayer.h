@@ -28,12 +28,18 @@ public:
                           const std::string &remoteStyleJsonUrl,
                           const std::vector <std::shared_ptr<::LoaderInterface>> &loaders,
                           const std::shared_ptr<::FontLoaderInterface> &fontLoader,
+                          double dpFactor);
+
+    Tiled2dMapVectorLayer(const std::string &layerName,
+                          const std::string &remoteStyleJsonUrl,
+                          const std::vector <std::shared_ptr<::LoaderInterface>> &loaders,
+                          const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                           double dpFactor,
+                          int numT);
 
     Tiled2dMapVectorLayer(const std::string &layerName,
                           const std::string &remoteStyleJsonUrl,
                           const std::string &fallbackStyleJsonString,
-                          int numT = 1,
                           const std::vector <std::shared_ptr<::LoaderInterface>> &loaders,
                           double dpFactor);
 

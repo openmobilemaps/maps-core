@@ -87,7 +87,7 @@ void InterpolatedTiled2dMapRasterLayer::setT(double t) {
     Tiled2dMapRasterLayer::setT(t);
 }
 
-void InterpolatedTiled2dMapRasterLayer::setAlpha(double alpha) {
+void InterpolatedTiled2dMapRasterLayer::setAlpha(float alpha) {
     if (alpha == this->alpha) {
         return;
     }

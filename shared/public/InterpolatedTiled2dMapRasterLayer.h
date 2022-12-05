@@ -55,7 +55,7 @@ public:
 
     virtual void setT(double t) override;
 
-    virtual void setAlpha(double alpha) override;
+    virtual void setAlpha(float alpha) override;
 
 private:
 
