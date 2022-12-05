@@ -50,9 +50,9 @@
 
 - (void)removeCallbackHandler;
 
-- (void)setAlpha:(double)alpha;
+- (void)setAlpha:(float)alpha;
 
-- (double)getAlpha;
+- (float)getAlpha;
 
 - (void)setMinZoomLevelIdentifier:(nullable NSNumber *)value;
 

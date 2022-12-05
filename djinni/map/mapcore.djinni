@@ -101,6 +101,9 @@ layer_interface = interface +c +j +o {
     hide();
     show();
 
+    set_alpha(alpha: f32);
+    get_alpha(): f32;
+
     # optional rectangle, remove scissoring when not set
     set_scissor_rect(scissor_rect: optional<rect_i>);
 

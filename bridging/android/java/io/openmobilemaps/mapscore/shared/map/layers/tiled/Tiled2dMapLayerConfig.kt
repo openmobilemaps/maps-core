@@ -17,6 +17,8 @@ abstract class Tiled2dMapLayerConfig {
 
     abstract fun getLayerName(): String
 
+    abstract fun getVectorSettings(): Tiled2dMapVectorSettings?
+
     private class CppProxy : Tiled2dMapLayerConfig {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -64,5 +66,11 @@ abstract class Tiled2dMapLayerConfig {
             return native_getLayerName(this.nativeRef)
         }
         private external fun native_getLayerName(_nativeRef: Long): String
+
+        override fun getVectorSettings(): Tiled2dMapVectorSettings? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getVectorSettings(this.nativeRef)
+        }
+        private external fun native_getVectorSettings(_nativeRef: Long): Tiled2dMapVectorSettings?
     }
 }

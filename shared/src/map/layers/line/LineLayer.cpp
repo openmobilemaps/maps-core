@@ -175,9 +175,10 @@ void LineLayer::generateRenderPasses() {
 
 void LineLayer::update() {
     auto mapInterface = this->mapInterface;
-    if (mapInterface && mask) {
-        if (!mask->asGraphicsObject()->isReady())
-            mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+    if (mapInterface && maskGraphicsObject) {
+        if (!maskGraphicsObject->isReady()) {
+            maskGraphicsObject->setup(mapInterface->getRenderingContext());
+        }
     }
 }
 
@@ -231,9 +232,8 @@ void LineLayer::resume() {
     for (const auto &line : lines) {
         line.second->getLineObject()->setup(renderingContext);
     }
-    if (mask) {
-        if (!mask->asGraphicsObject()->isReady())
-            mask->asGraphicsObject()->setup(renderingContext);
+    if (maskGraphicsObject && !maskGraphicsObject->isReady()) {
+        maskGraphicsObject->setup(renderingContext);
     }
 }
 
@@ -307,6 +307,8 @@ void LineLayer::clearTouch() {
 
 void LineLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> &maskingObject) {
     this->mask = maskingObject;
+    maskGraphicsObject = mask ? mask->asGraphicsObject() : nullptr;
+
     generateRenderPasses();
     auto mapInterface = this->mapInterface;
     if (mapInterface) {

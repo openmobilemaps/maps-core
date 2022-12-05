@@ -198,6 +198,10 @@ void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBou
             for (int y = startTileTop; y <= maxTileTop && y < zoomLevelInfo.numTilesY; y++) {
                 for (int t = 0; t < zoomLevelInfo.numTilesT; t++) {
 
+                    if( t != curT ) {
+                        continue;
+                    }
+
                     const Coord minCorner = Coord(layerSystemId, x * tileWidthAdj + boundsLeft, y * tileHeightAdj + boundsTop, 0);
                     const Coord maxCorner = Coord(layerSystemId, minCorner.x + tileWidthAdj, minCorner.y + tileHeightAdj, 0);
                     const RectCoord rect(Coord(layerSystemId,
@@ -214,15 +218,14 @@ void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBou
                     const double tileCenterDis = std::sqrt(std::pow(tileCenterX - centerVisibleX, 2.0) + std::pow(tileCenterY - centerVisibleY, 2.0));
 
                     const int tDis = 1 + std::abs(t - curT);
-                    const int priority = std::ceil((tileCenterDis / maxDisCenter) * zPriorityRange)  + tDis * tPriorityRange + zoomInd * zoomPriorityRange;
+                    const int priority = std::ceil((tileCenterDis / maxDisCenter) * zPriorityRange) + tDis * tPriorityRange + zoomInd * zoomPriorityRange;
 
+                    const RectCoord rect(topLeft, bottomRight);
                     curVisibleTilesVec.push_back(PrioritizedTiled2dMapTileInfo(
                             Tiled2dMapTileInfo(rect, x, y, t, zoomLevelInfo.zoomLevelIdentifier, zoomLevelInfo.zoom),
                             priority));
 
-                    visibleTilesVec.push_back(PrioritizedTiled2dMapTileInfo(
-                            Tiled2dMapTileInfo(rect, x, y, t, zoomLevelInfo.zoomLevelIdentifier, zoomLevelInfo.zoom),
-                            priority));
+                    visibleTilesVec.push_back(curVisibleTilesVec.back());
                 }
             }
         }

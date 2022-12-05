@@ -91,6 +91,7 @@ protected:
     std::recursive_mutex linesMutex;
     std::vector<std::pair<std::shared_ptr<LineInfoInterface>, std::shared_ptr<Line2dLayerObject>>> lines;
     std::shared_ptr<::MaskingObjectInterface> mask = nullptr;
+    std::shared_ptr<GraphicsObjectInterface> maskGraphicsObject = nullptr;
 
     void generateRenderPasses();
     std::recursive_mutex renderPassMutex;

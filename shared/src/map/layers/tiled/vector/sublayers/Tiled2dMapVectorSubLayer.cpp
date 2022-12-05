@@ -112,3 +112,19 @@ void Tiled2dMapVectorSubLayer::setSelectedFeatureIdentfier(std::optional<int64_t
         mapInterface->invalidate();
     }
 }
+
+
+void Tiled2dMapVectorSubLayer::setAlpha(float alpha) {
+    if (this->alpha == alpha) {
+        return;
+    }
+    this->alpha = alpha;
+
+    auto mapInterface = this->mapInterface;
+    if (mapInterface) {
+        mapInterface->invalidate();
+    }
+}
+
+float Tiled2dMapVectorSubLayer::getAlpha() { return alpha; }
+

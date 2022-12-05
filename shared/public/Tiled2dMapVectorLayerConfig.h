@@ -11,6 +11,7 @@
 
 #include "VectorLayerDescription.h"
 #include "CoordinateSystemIdentifiers.h"
+#include "Tiled2dMapVectorSettings.h"
 #include "Logger.h"
 
 #include <ctime>
@@ -62,6 +63,10 @@ public:
     std::string getLayerName() override {
         LogDebug <<= "vector layer config get identifier";
         return description->identifier;
+    }
+
+    std::optional<Tiled2dMapVectorSettings> getVectorSettings() override {
+        return std::nullopt;
     }
 
 private:

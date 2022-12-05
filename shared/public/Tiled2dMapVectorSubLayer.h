@@ -42,6 +42,10 @@ public:
 
     virtual void show() override;
 
+    virtual void setAlpha(float alpha) override;
+
+    virtual float getAlpha() override;
+
     virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> &maskingObject) override;
 
     virtual void updateTileData(const Tiled2dMapTileInfo &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask,
@@ -75,4 +79,5 @@ protected:
 
     std::recursive_mutex selectedFeatureIdentifierMutex;
     std::optional<int64_t> selectedFeatureIdentifier;
+    float alpha = 1.0;
 };

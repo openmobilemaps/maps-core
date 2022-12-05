@@ -33,6 +33,10 @@
 
 - (void)show;
 
+- (void)setAlpha:(float)alpha;
+
+- (float)getAlpha;
+
 /** optional rectangle, remove scissoring when not set */
 - (void)setScissorRect:(nullable MCRectI *)scissorRect;
 

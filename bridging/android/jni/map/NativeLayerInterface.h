@@ -43,6 +43,8 @@ private:
         void resume() override;
         void hide() override;
         void show() override;
+        void setAlpha(float alpha) override;
+        float getAlpha() override;
         void setScissorRect(const std::optional<::RectI> & scissorRect) override;
         ::LayerReadyState isReadyToRenderOffscreen() override;
         void enableAnimations(bool enabled) override;
@@ -64,6 +66,8 @@ private:
     const jmethodID method_resume { ::djinni::jniGetMethodID(clazz.get(), "resume", "()V") };
     const jmethodID method_hide { ::djinni::jniGetMethodID(clazz.get(), "hide", "()V") };
     const jmethodID method_show { ::djinni::jniGetMethodID(clazz.get(), "show", "()V") };
+    const jmethodID method_setAlpha { ::djinni::jniGetMethodID(clazz.get(), "setAlpha", "(F)V") };
+    const jmethodID method_getAlpha { ::djinni::jniGetMethodID(clazz.get(), "getAlpha", "()F") };
     const jmethodID method_setScissorRect { ::djinni::jniGetMethodID(clazz.get(), "setScissorRect", "(Lio/openmobilemaps/mapscore/shared/graphics/common/RectI;)V") };
     const jmethodID method_isReadyToRenderOffscreen { ::djinni::jniGetMethodID(clazz.get(), "isReadyToRenderOffscreen", "()Lio/openmobilemaps/mapscore/shared/map/LayerReadyState;") };
     const jmethodID method_enableAnimations { ::djinni::jniGetMethodID(clazz.get(), "enableAnimations", "(Z)V") };

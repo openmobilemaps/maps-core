@@ -101,7 +101,7 @@ public struct LineVertex: Equatable {
         return vertexDescriptor
     }()
 
-    init(x: Float,
+    public init(x: Float,
          y: Float,
          lineA: MCVec2D,
          lineB: MCVec2D,

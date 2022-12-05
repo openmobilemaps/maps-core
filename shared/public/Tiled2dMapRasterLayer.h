@@ -79,9 +79,9 @@ public:
 
     virtual void removeCallbackHandler() override;
 
-    virtual void setAlpha(double alpha) override;
+    virtual void setAlpha(float alpha) override;
 
-    virtual double getAlpha() override;
+    virtual float getAlpha() override;
 
     virtual void setMinZoomLevelIdentifier(std::optional<int32_t> value) override;
 
@@ -136,7 +136,7 @@ protected:
 
     std::shared_ptr<Tiled2dMapRasterLayerCallbackInterface> callbackHandler;
 
-    double alpha;
+    float alpha;
     bool animationsEnabled = true;
     double tLastGeneratedTiles;
     double curTWithFraction;

@@ -18,10 +18,11 @@
 #include "PolygonGroup2dInterface.h"
 #include "PolygonGroupShaderInterface.h"
 #include "PolygonGroup2dLayerObject.h"
-
+#include "SimpleTouchInterface.h"
 
 class Tiled2dMapVectorPolygonSubLayer : public Tiled2dMapVectorSubLayer,
-                                     public std::enable_shared_from_this<Tiled2dMapVectorPolygonSubLayer> {
+                                        public SimpleTouchInterface,
+                                        public std::enable_shared_from_this<Tiled2dMapVectorPolygonSubLayer> {
 public:
     Tiled2dMapVectorPolygonSubLayer(const std::shared_ptr<PolygonVectorLayerDescription> &description);
 
@@ -52,6 +53,7 @@ public:
 
     virtual std::string getLayerDescriptionIdentifier() override;
 
+    virtual bool onClickConfirmed(const ::Vec2F &posScreen) override;
 protected:
 
     void setupPolygons(const Tiled2dMapTileInfo &tileInfo, const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects);
@@ -74,4 +76,6 @@ private:
     std::vector<std::tuple<size_t, FeatureContext>> featureGroups;
 
     const std::unordered_set<std::string> usedKeys;
+
+    std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<PolygonCoord, FeatureContext>>> hitDetectionPolygonMap;
 };

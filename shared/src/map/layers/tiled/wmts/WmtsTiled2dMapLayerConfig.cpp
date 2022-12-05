@@ -10,6 +10,8 @@
 
 #include "WmtsTiled2dMapLayerConfig.h"
 
+#include "Tiled2dMapVectorSettings.h"
+
 WmtsTiled2dMapLayerConfig::WmtsTiled2dMapLayerConfig(const WmtsLayerDescription &description,
                                                      std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfo,
                                                      const Tiled2dMapZoomInfo &zoomInfo,
@@ -55,3 +57,7 @@ std::string WmtsTiled2dMapLayerConfig::getLayerName() { return description.ident
 std::vector<Tiled2dMapZoomLevelInfo> WmtsTiled2dMapLayerConfig::getZoomLevelInfos() { return zoomLevelInfo; }
 
 Tiled2dMapZoomInfo WmtsTiled2dMapLayerConfig::getZoomInfo() { return zoomInfo; }
+
+std::optional<Tiled2dMapVectorSettings> WmtsTiled2dMapLayerConfig::getVectorSettings() {
+    return std::nullopt;
+}

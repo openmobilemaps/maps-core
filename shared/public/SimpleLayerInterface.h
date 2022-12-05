@@ -35,6 +35,10 @@ class SimpleLayerInterface : public LayerInterface {
 
     virtual void show() {};
 
+    virtual void setAlpha(float alpha) {};
+
+    virtual float getAlpha() { return 1.0; };
+
     virtual std::vector<std::shared_ptr<RenderTargetTexture>> additionalTargets() {
         return {};
     };
