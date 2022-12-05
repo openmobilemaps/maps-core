@@ -202,19 +202,14 @@ void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBou
                         continue;
                     }
 
-                    const Coord minCorner = Coord(layerSystemId, x * tileWidthAdj + boundsLeft, y * tileHeightAdj + boundsTop, 0);
-                    const Coord maxCorner = Coord(layerSystemId, minCorner.x + tileWidthAdj, minCorner.y + tileHeightAdj, 0);
-                    const RectCoord rect(Coord(layerSystemId,
-                                         leftToRight ? minCorner.x : maxCorner.x,
-                                         topToBottom ? minCorner.y : maxCorner.y,
-                                         0.0),
-                                   Coord(layerSystemId,
-                                         leftToRight ? maxCorner.x : minCorner.x,
-                                         topToBottom ? maxCorner.y : minCorner.y,
-                                         0.0));
+                    const Coord topLeft = Coord(layerSystemId, x * tileWidthAdj + boundsLeft, y * tileHeightAdj + boundsTop, 0);
+                    const Coord bottomRight = Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y + tileHeightAdj, 0);
 
-                    const double tileCenterX = minCorner.x + 0.5f * (maxCorner.x - minCorner.x);
-                    const double tileCenterY = minCorner.y + 0.5f * (maxCorner.y - minCorner.y);
+                    const RectCoord rect(topLeft, bottomRight);
+
+                    const double tileCenterX = topLeft.x + 0.5f * tileWidthAdj;
+                    const double tileCenterY = topLeft.y + 0.5f * tileHeightAdj;
+
                     const double tileCenterDis = std::sqrt(std::pow(tileCenterX - centerVisibleX, 2.0) + std::pow(tileCenterY - centerVisibleY, 2.0));
 
                     const int tDis = 1 + std::abs(t - curT);

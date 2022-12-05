@@ -169,7 +169,10 @@ Tiled2dMapVectorPolygonSubLayer::updateTileData(const Tiled2dMapTileInfo &tileIn
 
                     indices_offset += posAdded;
 
-                    hitDetectionPolygonMap[tileInfo].push_back({PolygonCoord(polygonCoordinates[i], polygonHoles[i]), featureContext});
+                    {
+                        std::lock_guard<std::recursive_mutex> lock(hitDetectionMutex);
+                        hitDetectionPolygonMap[tileInfo].push_back({PolygonCoord(polygonCoordinates[i], polygonHoles[i]), featureContext});
+                    }
                 }
 
                 int styleIndex = -1;

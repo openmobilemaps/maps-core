@@ -77,5 +77,6 @@ private:
 
     const std::unordered_set<std::string> usedKeys;
 
+    std::recursive_mutex hitDetectionMutex;
     std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<PolygonCoord, FeatureContext>>> hitDetectionPolygonMap;
 };
