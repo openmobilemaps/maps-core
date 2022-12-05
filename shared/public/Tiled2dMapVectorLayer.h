@@ -102,6 +102,7 @@ protected:
 
     std::shared_ptr<Tiled2dMapVectorSource> vectorTileSource;
 
+    int numT;
     const std::vector<std::shared_ptr<::LoaderInterface>> loaders;
 
     virtual std::optional<TiledLayerError> loadStyleJson();
@@ -156,8 +157,6 @@ private:
     float alpha;
 
     double curTWithFraction;
-
-    int numT;
 };
 
 

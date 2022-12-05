@@ -39,16 +39,6 @@ public:
         if (yIndex == std::string::npos) throw std::invalid_argument("Layer url \'" + url + "\' has no valid format!");
         url = url.replace(yIndex, 3, std::to_string(y));
 
-        size_t tIndex = url.find("now", 0);
-
-        // current date/time based on current system
-        time_t now = time(0);
-        tm *ltm = localtime(&now);
-
-        if (tIndex != std::string::npos) {
-            url = url.replace(tIndex, 3, std::to_string(1900 + ltm->tm_year) + "-" + std::to_string(1 + ltm->tm_mon) + "-" + std::to_string(ltm->tm_mday) + "T0" + std::to_string(t%10) + ":45Z");
-        };
-
         return url;
     }
 
@@ -65,12 +55,14 @@ public:
         return description->identifier;
     }
 
+protected:
+    std::shared_ptr<VectorMapSourceDescription> description;
+
     std::optional<Tiled2dMapVectorSettings> getVectorSettings() override {
         return std::nullopt;
     }
 
 private:
-    std::shared_ptr<VectorMapSourceDescription> description;
     bool underzoom;
     bool overzoom;
 
