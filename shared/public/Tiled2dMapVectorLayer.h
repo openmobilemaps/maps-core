@@ -83,6 +83,8 @@ protected:
 
     std::shared_ptr<Tiled2dMapVectorSource> vectorTileSource;
 
+    int numT;
+
 private:
     void scheduleStyleJsonLoading();
 
@@ -130,8 +132,6 @@ private:
     std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate;
 
     double curTWithFraction;
-
-    int numT;
 };
 
 
