@@ -35,7 +35,11 @@ InterpolatedTiled2dMapRasterLayer::InterpolatedTiled2dMapRasterLayer(const std::
 
 void InterpolatedTiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface) {
     Tiled2dMapRasterLayer::onAdded(mapInterface);
-    renderTargetTexture = mapInterface->createRenderTargetTexture();
+
+    {
+        std::lock_guard<std::recursive_mutex> renderTargetLock(renderTargetMutex);
+        renderTargetTexture = mapInterface->createRenderTargetTexture();
+    }
 
     auto objectFactory = mapInterface->getGraphicsObjectFactory();
     auto defaultShaderFactory = mapInterface->getShaderFactory();
@@ -66,10 +70,13 @@ void InterpolatedTiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInter
 
 void InterpolatedTiled2dMapRasterLayer::onRemoved() {
     Tiled2dMapRasterLayer::onRemoved();
+
+    std::lock_guard<std::recursive_mutex> renderTargetLock(renderTargetMutex);
     renderTargetTexture = nullptr;
 }
 
 std::vector<std::shared_ptr<RenderTargetTexture>> InterpolatedTiled2dMapRasterLayer::additionalTargets() {
+    std::lock_guard<std::recursive_mutex> renderTargetLock(renderTargetMutex);
     return {renderTargetTexture};
 }
 
@@ -141,6 +148,8 @@ int InterpolatedTiled2dMapRasterLayer::shiftedTimeWithMoreTiles()  {
 }
 
 std::vector<std::shared_ptr<RenderPassInterface>>  InterpolatedTiled2dMapRasterLayer::combineRenderPasses() {
+
+    std::lock_guard<std::recursive_mutex> renderTargetLock(renderTargetMutex);
 
     if (!renderTargetTexture) {
         return {};

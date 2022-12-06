@@ -62,6 +62,7 @@ private:
 
 protected:
 
+    std::recursive_mutex renderTargetMutex;
     std::shared_ptr<RenderTargetTexture> renderTargetTexture;
 
     std::shared_ptr<Quad2dInterface> mergedTilesQuad;
