@@ -312,6 +312,9 @@ bool Tiled2dMapVectorPolygonSubLayer::onClickConfirmed(const ::Vec2F &posScreen)
     }
     auto point = camera->coordFromScreenPosition(posScreen);
 
+
+    std::lock_guard<std::recursive_mutex> lock(hitDetectionMutex);
+
     for (auto const &[tileInfo, polygonTuples] : hitDetectionPolygonMap) {
         for (auto const &[polygon, featureContext]: polygonTuples) {
             if (PolygonHelper::pointInside(polygon, point, mapInterface->getCoordinateConverterHelper())) {
@@ -352,6 +355,9 @@ void Tiled2dMapVectorPolygonSubLayer::update() {
 void Tiled2dMapVectorPolygonSubLayer::clearTileData(const Tiled2dMapTileInfo &tileInfo) {
     auto mapInterface = this->mapInterface;
     if (!mapInterface) { return; }
+
+
+    std::lock_guard<std::recursive_mutex> lock(hitDetectionMutex);
 
     hitDetectionPolygonMap.erase(tileInfo);
 
