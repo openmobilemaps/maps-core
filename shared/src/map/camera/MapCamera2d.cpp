@@ -24,6 +24,7 @@
 #define ROTATION_THRESHOLD 20
 #define ROTATION_LOCKING_ANGLE 10
 #define ROTATION_LOCKING_FACTOR 1.5
+#define ZOOM_THRESHOLD 12000000
 
 MapCamera2d::MapCamera2d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi)
     : mapInterface(mapInterface)
@@ -616,8 +617,15 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
 
         double scaleFactor =
             Vec2FHelper::distance(posScreenNew[0], posScreenNew[1]) / Vec2FHelper::distance(posScreenOld[0], posScreenOld[1]);
-        zoom /= scaleFactor;
 
+        double newZoom = zoom / scaleFactor;
+
+        bool isCloseToThreshold = abs(startZoom - ZOOM_THRESHOLD) < 600000;
+        if (!isCloseToThreshold && ((startZoom > ZOOM_THRESHOLD && newZoom <= ZOOM_THRESHOLD) || (startZoom < ZOOM_THRESHOLD && newZoom >= ZOOM_THRESHOLD))) {
+            zoom = ZOOM_THRESHOLD;
+        } else {
+            zoom /= scaleFactor;
+        }
         zoom = std::clamp(zoom, zoomMax, zoomMin);
 
         if (zoom > startZoom * ROTATION_LOCKING_FACTOR || zoom < startZoom / ROTATION_LOCKING_FACTOR) {
