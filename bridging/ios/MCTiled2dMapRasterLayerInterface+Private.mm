@@ -9,6 +9,7 @@
 #import "MCLayerInterface+Private.h"
 #import "MCLoaderInterface+Private.h"
 #import "MCMaskingObjectInterface+Private.h"
+#import "MCRasterShaderStyle+Private.h"
 #import "MCShaderProgramInterface+Private.h"
 #import "MCTiled2dMapLayerConfig+Private.h"
 #import "MCTiled2dMapRasterLayerCallbackInterface+Private.h"
@@ -103,6 +104,19 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getAlpha();
         return ::djinni::F64::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setStyle:(nonnull MCRasterShaderStyle *)style {
+    try {
+        _cppRefHandle.get()->setStyle(::djinni_generated::RasterShaderStyle::toCpp(style));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nonnull MCRasterShaderStyle *)getStyle {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getStyle();
+        return ::djinni_generated::RasterShaderStyle::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

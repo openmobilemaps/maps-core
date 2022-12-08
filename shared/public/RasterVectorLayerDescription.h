@@ -12,16 +12,28 @@
 
 #include "VectorLayerDescription.h"
 #include "Color.h"
+#include "RasterShaderStyle.h"
+
 
 class RasterVectorStyle {
 public:
 
-    RasterVectorStyle(std::shared_ptr<Value> rasterOpacity = nullptr):
-    rasterOpacity(rasterOpacity) {}
+    RasterVectorStyle(std::shared_ptr<Value> rasterOpacity,
+                      std::shared_ptr<Value> rasterBrightnessMin,
+                      std::shared_ptr<Value> rasterBrightnessMax,
+                      std::shared_ptr<Value> rasterContrast,
+                      std::shared_ptr<Value> rasterSaturation):
+    rasterOpacity(rasterOpacity), rasterBrightnessMin(rasterBrightnessMin), rasterBrightnessMax(rasterBrightnessMax), rasterContrast(rasterContrast), rasterSaturation(rasterSaturation) {}
 
     std::unordered_set<std::string> getUsedKeys() {
         std::unordered_set<std::string> usedKeys;
-        std::vector<std::shared_ptr<Value>> values = { rasterOpacity };
+        std::vector<std::shared_ptr<Value>> values = { 
+            rasterOpacity, 
+            rasterBrightnessMin,
+            rasterBrightnessMax,
+            rasterContrast,
+            rasterSaturation 
+        };
 
         for (auto const &value: values) {
             if (!value) continue;
@@ -31,14 +43,48 @@ public:
 
         return usedKeys;
     }
+    
+    RasterShaderStyle getRasterStyle(const EvaluationContext &context) {
+        return {
+            (float) getRasterOpacity(context),
+            (float) getRasterBrightnessMin(context),
+            (float) getRasterBrightnessMax(context),
+            (float) getRasterContrast(context),
+            (float) getRasterSaturation(context)
+        };
+    }
 
-    double getRasterOpacity(const EvaluationContext &context){
+    double getRasterOpacity(const EvaluationContext &context) {
         double defaultValue = 1.0;
         return rasterOpacity ? rasterOpacity->evaluateOr(context, defaultValue) : defaultValue;
     }
     
+    double getRasterBrightnessMin(const EvaluationContext &context) {
+        double defaultValue = 0.0;
+        return rasterBrightnessMin ? rasterBrightnessMin->evaluateOr(context, defaultValue) : defaultValue;
+    }
+    
+    double getRasterBrightnessMax(const EvaluationContext &context) {
+        double defaultValue = 1.0;
+        return rasterBrightnessMax ? rasterBrightnessMax->evaluateOr(context, defaultValue) : defaultValue;
+    }
+    
+    double getRasterContrast(const EvaluationContext &context) {
+        double defaultValue = 0.0;
+        return rasterContrast ? rasterContrast->evaluateOr(context, defaultValue) : defaultValue;
+    }
+    
+    double getRasterSaturation(const EvaluationContext &context) {
+        double defaultValue = 0.0;
+        return rasterSaturation ? rasterSaturation->evaluateOr(context, defaultValue) : defaultValue;
+    }
+    
 private:
     std::shared_ptr<Value> rasterOpacity;
+    std::shared_ptr<Value> rasterBrightnessMin;
+    std::shared_ptr<Value> rasterBrightnessMax;
+    std::shared_ptr<Value> rasterContrast;
+    std::shared_ptr<Value> rasterSaturation;
 };
 
 class RasterVectorLayerDescription: public VectorLayerDescription  {
@@ -47,31 +93,23 @@ public:
 
     std::string url;
     RasterVectorStyle style;
-    bool adaptScaleToScreen = false;
-    int32_t numDrawPreviousLayers = 2;
-    bool maskTiles = false;
-    double zoomLevelScaleFactor = 0.65;
+    bool adaptScaleToScreen;
+    int32_t numDrawPreviousLayers;
+    bool maskTiles;
+    double zoomLevelScaleFactor;
 
     RasterVectorLayerDescription(std::string identifier,
                                  int minZoom,
                                  int maxZoom,
                                  std::string url,
                                  RasterVectorStyle style,
+                                 bool adaptScaleToScreen,
+                                 int32_t numDrawPreviousLayers,
+                                 bool maskTiles,
+                                 double zoomLevelScaleFactor,
                                  std::optional<int32_t> renderPassIndex):
     VectorLayerDescription(identifier, "", "", minZoom, maxZoom, nullptr, renderPassIndex),
-    style(style), url(url) {};
-
-    RasterVectorLayerDescription(std::string identifier,
-                                 int minZoom,
-                                 int maxZoom,
-                                 std::string url,
-                                 bool adaptScaleToScreen = false,
-                                 int32_t numDrawPreviousLayers = 2,
-                                 bool maskTiles = false,
-                                 double zoomLevelScaleFactor = 0.65,
-                                 std::optional<int32_t> renderPassIndex = std::nullopt):
-    VectorLayerDescription(identifier, "", "", minZoom, maxZoom, nullptr, renderPassIndex),
-    style(), url(url), adaptScaleToScreen(adaptScaleToScreen), numDrawPreviousLayers(numDrawPreviousLayers), maskTiles(maskTiles), zoomLevelScaleFactor(zoomLevelScaleFactor)  {};
+    style(style), url(url), adaptScaleToScreen(adaptScaleToScreen), numDrawPreviousLayers(numDrawPreviousLayers), maskTiles(maskTiles), zoomLevelScaleFactor(zoomLevelScaleFactor)  {};
 
     virtual std::unordered_set<std::string> getUsedKeys() override {
         std::unordered_set<std::string> usedKeys;

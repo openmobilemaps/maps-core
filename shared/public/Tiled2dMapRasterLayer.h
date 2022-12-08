@@ -70,6 +70,10 @@ public:
     virtual void setAlpha(double alpha) override;
 
     virtual double getAlpha() override;
+    
+    virtual void setStyle(const ::RasterShaderStyle & style) override;
+    
+    virtual ::RasterShaderStyle getStyle() override;
 
     virtual void setMinZoomLevelIdentifier(std::optional<int32_t> value) override;
 
@@ -120,6 +124,6 @@ protected:
 
     std::shared_ptr<Tiled2dMapRasterLayerCallbackInterface> callbackHandler;
 
-    double alpha;
+    ::RasterShaderStyle style = RasterShaderStyle::DEFAULT_STYLE;
     bool animationsEnabled = true;
 };

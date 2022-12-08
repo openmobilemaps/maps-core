@@ -86,11 +86,12 @@ public:
                     }
                     url = json["tiles"].begin()->get<std::string>();
                 }
-
+                
                 rasterLayerMap[key] = std::make_shared<RasterVectorLayerDescription>(layerName,
                                                                                      val.value("minZoom", 0),
                                                                                      val.value("maxZoom", 22),
                                                                                      url,
+                                                                                     RasterVectorStyle(nullptr, nullptr, nullptr, nullptr, nullptr),
                                                                                      adaptScaleToScreen,
                                                                                      numDrawPreviousLayers,
                                                                                      maskTiles,
@@ -138,21 +139,26 @@ public:
                                                                                             val["paint"]["background-color"])),
                                                                                     renderPassIndex);
                 layers.push_back(layerDesc);
-
+                
             } else if (val["type"] == "raster" && rasterLayerMap.count(val["source"]) != 0) {
                 auto layer = rasterLayerMap.at(val["source"]);
-
+                
                 auto newLayer = std::make_shared<RasterVectorLayerDescription>(val["id"],
-                                                                               layer->minZoom,
-                                                                               layer->maxZoom,
+                                                                               val.value("minzoom", layer->minZoom),
+                                                                               val.value("maxzoom", layer->maxZoom),
                                                                                layer->url,
+                                                                               RasterVectorStyle(parser.parseValue(val["paint"]["raster-opacity"]),
+                                                                                                 parser.parseValue(val["paint"]["raster-brightness-min"]),
+                                                                                                 parser.parseValue(val["paint"]["raster-brightness-max"]),
+                                                                                                 parser.parseValue(val["paint"]["raster-contrast"]),
+                                                                                                 parser.parseValue(val["paint"]["raster-saturation"])),
                                                                                layer->adaptScaleToScreen,
                                                                                layer->numDrawPreviousLayers,
                                                                                layer->maskTiles,
-                                                                               layer->zoomLevelScaleFactor);
-
-                newLayer->style = RasterVectorStyle(parser.parseValue(val["paint"]["raster-opacity"]));
-
+                                                                               layer->zoomLevelScaleFactor,
+                                                                               layer->renderPassIndex);
+                
+                
                 layers.push_back(newLayer);
             }else if (val["type"] == "line") {
 

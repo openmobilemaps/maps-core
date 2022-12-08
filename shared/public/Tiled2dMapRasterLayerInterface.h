@@ -6,6 +6,7 @@
 #include "LayerInterface.h"
 #include "LoaderInterface.h"
 #include "MaskingObjectInterface.h"
+#include "RasterShaderStyle.h"
 #include "ShaderProgramInterface.h"
 #include "Tiled2dMapLayerConfig.h"
 #include <cstdint>
@@ -39,6 +40,10 @@ public:
     virtual void setAlpha(double alpha) = 0;
 
     virtual double getAlpha() = 0;
+
+    virtual void setStyle(const ::RasterShaderStyle & style) = 0;
+
+    virtual ::RasterShaderStyle getStyle() = 0;
 
     virtual void setMinZoomLevelIdentifier(std::optional<int32_t> value) = 0;
 

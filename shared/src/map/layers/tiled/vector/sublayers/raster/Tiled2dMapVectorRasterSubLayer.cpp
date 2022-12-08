@@ -25,7 +25,6 @@ void Tiled2dMapVectorRasterSubLayer::update() {
     }
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
     EvaluationContext evalContext(zoomIdentifier, FeatureContext());
-    double opacity = description->style.getRasterOpacity(evalContext);
-    setAlpha(opacity);
+    setStyle(description->style.getRasterStyle(evalContext));
     Tiled2dMapRasterLayer::update();
 }
