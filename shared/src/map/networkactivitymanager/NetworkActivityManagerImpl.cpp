@@ -8,17 +8,17 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#include "ErrorManagerImpl.h"
+#include "NetworkActivityManagerImpl.h"
 #include "CoordinateConversionHelperInterface.h"
 
-std::shared_ptr<ErrorManager> ErrorManager::create() { return std::make_shared<ErrorManagerImpl>(); }
+std::shared_ptr<NetworkActivityManager> NetworkActivityManager::create() { return std::make_shared<NetworkActivityManagerImpl>(); }
 
-void ErrorManagerImpl::addErrorListener(const std::shared_ptr<ErrorManagerListener> &listener) {
+void NetworkActivityManagerImpl::addNetworkActivityListener(const std::shared_ptr<NetworkActivityListener> &listener) {
     std::lock_guard<std::recursive_mutex> lock(mutex);
     listeners.push_back(listener);
 }
 
-void ErrorManagerImpl::removeErrorListener(const std::shared_ptr<ErrorManagerListener> &listener) {
+void NetworkActivityManagerImpl::removeNetworkActivityListener(const std::shared_ptr<NetworkActivityListener> &listener) {
     std::lock_guard<std::recursive_mutex> lock(mutex);
     auto it = std::find(listeners.begin(), listeners.end(), listener);
     if (it != listeners.end()) {
@@ -26,13 +26,13 @@ void ErrorManagerImpl::removeErrorListener(const std::shared_ptr<ErrorManagerLis
     }
 }
 
-void ErrorManagerImpl::addTiledLayerError(const TiledLayerError &error) {
+void NetworkActivityManagerImpl::addTiledLayerError(const TiledLayerError &error) {
     std::lock_guard<std::recursive_mutex> lock(mutex);
     tiledLayerErrors.insert({error.url, error});
     notifyListeners();
 }
 
-void ErrorManagerImpl::removeError(const std::string &url) {
+void NetworkActivityManagerImpl::removeError(const std::string &url) {
     std::lock_guard<std::recursive_mutex> lock_guard(mutex);
     auto it = tiledLayerErrors.find(url);
     if (it != tiledLayerErrors.end()) {
@@ -41,7 +41,7 @@ void ErrorManagerImpl::removeError(const std::string &url) {
     }
 }
 
-void ErrorManagerImpl::removeAllErrorsForLayer(const std::string &layerName) {
+void NetworkActivityManagerImpl::removeAllErrorsForLayer(const std::string &layerName) {
     std::lock_guard<std::recursive_mutex> lock_guard(mutex);
     bool hasChanges = false;
     for (auto it = tiledLayerErrors.cbegin(), next_it = it; it != tiledLayerErrors.cend(); it = next_it)
@@ -59,13 +59,26 @@ void ErrorManagerImpl::removeAllErrorsForLayer(const std::string &layerName) {
 }
 
 
-void ErrorManagerImpl::clearAllErrors() {
+void NetworkActivityManagerImpl::clearAllErrors() {
     std::lock_guard<std::recursive_mutex> lock_guard(mutex);
     tiledLayerErrors.clear();
     notifyListeners();
 }
 
-void ErrorManagerImpl::notifyListeners() {
+void NetworkActivityManagerImpl::updateRemainingTasks(const std::string &layerName, int32_t taskCount) {
+    std::lock_guard<std::recursive_mutex> lock_guard(mutex);
+    auto it = std::find_if(remainingTasks.begin(), remainingTasks.end(), [&layerName] (const RemainingTasksInfo& i) { return i.layerName == layerName; });
+    if (it != remainingTasks.end()) {
+        it->count = taskCount;
+    } else {
+        remainingTasks.emplace_back(RemainingTasksInfo(layerName, taskCount));
+    }
+    for (const auto &l : listeners) {
+        l->onRemainingTasksChanged(remainingTasks);
+    }
+}
+
+void NetworkActivityManagerImpl::notifyListeners() {
     std::lock_guard<std::recursive_mutex> lock_guard(mutex);
     std::vector<TiledLayerError> errors;
     for (auto const &[url, error] : tiledLayerErrors) {

@@ -50,7 +50,7 @@ class SimpleLayerInterface : public LayerInterface {
 
     virtual void enableAnimations(bool enabled) {}
 
-    virtual void setErrorManager(const std::shared_ptr<::ErrorManager> & errorManager) {}
+    virtual void setNetworkActivityManager(const std::shared_ptr< ::NetworkActivityManager> &networkActivityManager) {}
 
     virtual void forceReload() {}
 };

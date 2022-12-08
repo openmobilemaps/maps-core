@@ -51,7 +51,7 @@ class Tiled2dMapLayer : public SimpleLayerInterface,
 
     virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) override;
 
-    virtual void setErrorManager(const std::shared_ptr< ::ErrorManager> &errorManager) override;
+    virtual void setNetworkActivityManager(const std::shared_ptr< ::NetworkActivityManager> &networkActivityManager) override;
 
     virtual void forceReload() override;
 
@@ -73,7 +73,7 @@ class Tiled2dMapLayer : public SimpleLayerInterface,
 
 protected:
     std::shared_ptr<MapInterface> mapInterface;
-    std::shared_ptr< ::ErrorManager> errorManager;
+    std::shared_ptr< ::NetworkActivityManager> networkActivityManager;
     std::shared_ptr<Tiled2dMapSourceInterface> sourceInterface;
 
     bool isHidden = false;

@@ -96,7 +96,7 @@ public:
 
     virtual ::LayerReadyState isReadyToRenderOffscreen() override;
 
-    virtual void setErrorManager(const std::shared_ptr<::ErrorManager> &errorManager) override;
+    virtual void setNetworkActivityManager(const std::shared_ptr< ::NetworkActivityManager> &networkActivityManager) override;
 
     virtual void forceReload() override;
 
@@ -116,7 +116,7 @@ public:
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
     std::shared_ptr<SchedulerInterface> scheduler;
     std::weak_ptr<Tiled2dMapSourceListenerInterface> listener;
-    std::shared_ptr<::ErrorManager> errorManager;
+    std::shared_ptr<::NetworkActivityManager> networkActivityManager;
 
     std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfos;
     const Tiled2dMapZoomInfo zoomInfo;

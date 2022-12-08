@@ -7,10 +7,10 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
-#import "MCErrorManager+Private.h"
 #import "MCLayerReadyState+Private.h"
 #import "MCMapInterface+Private.h"
 #import "MCMaskingObjectInterface+Private.h"
+#import "MCNetworkActivityManager+Private.h"
 #import "MCRectI+Private.h"
 #import "MCRenderPassInterface+Private.h"
 #import "MCRenderTargetTexture+Private.h"
@@ -132,9 +132,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setErrorManager:(nullable MCErrorManager *)errorManager {
+- (void)setNetworkActivityManager:(nullable MCNetworkActivityManager *)networkActivityManager {
     try {
-        _cppRefHandle.get()->setErrorManager(::djinni_generated::ErrorManager::toCpp(errorManager));
+        _cppRefHandle.get()->setNetworkActivityManager(::djinni_generated::NetworkActivityManager::toCpp(networkActivityManager));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -247,10 +247,10 @@ public:
             [djinni_private_get_proxied_objc_object() enableAnimations:(::djinni::Bool::fromCpp(c_enabled))];
         }
     }
-    void setErrorManager(const std::shared_ptr<::ErrorManager> & c_errorManager) override
+    void setNetworkActivityManager(const std::shared_ptr<::NetworkActivityManager> & c_networkActivityManager) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setErrorManager:(::djinni_generated::ErrorManager::fromCpp(c_errorManager))];
+            [djinni_private_get_proxied_objc_object() setNetworkActivityManager:(::djinni_generated::NetworkActivityManager::fromCpp(c_networkActivityManager))];
         }
     }
     void forceReload() override

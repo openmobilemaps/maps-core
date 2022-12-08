@@ -3,8 +3,8 @@
 
 #include "NativeTiled2dMapSourceInterface.h"  // my header
 #include "Marshal.hpp"
-#include "NativeErrorManager.h"
 #include "NativeLayerReadyState.h"
+#include "NativeNetworkActivityManager.h"
 #include "NativeRectCoord.h"
 
 namespace djinni_generated {
@@ -99,12 +99,12 @@ CJNIEXPORT ::djinni_generated::NativeLayerReadyState::JniType JNICALL Java_io_op
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapSourceInterface_00024CppProxy_native_1setErrorManager(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeErrorManager::JniType j_errorManager)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapSourceInterface_00024CppProxy_native_1setNetworkActivityManager(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeNetworkActivityManager::JniType j_networkActivityManager)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapSourceInterface>(nativeRef);
-        ref->setErrorManager(::djinni_generated::NativeErrorManager::toCpp(jniEnv, j_errorManager));
+        ref->setNetworkActivityManager(::djinni_generated::NativeNetworkActivityManager::toCpp(jniEnv, j_networkActivityManager));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

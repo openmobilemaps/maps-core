@@ -48,7 +48,7 @@ private:
         void setScissorRect(const std::optional<::RectI> & scissorRect) override;
         ::LayerReadyState isReadyToRenderOffscreen() override;
         void enableAnimations(bool enabled) override;
-        void setErrorManager(const std::shared_ptr<::ErrorManager> & errorManager) override;
+        void setNetworkActivityManager(const std::shared_ptr<::NetworkActivityManager> & networkActivityManager) override;
         void forceReload() override;
 
     private:
@@ -71,7 +71,7 @@ private:
     const jmethodID method_setScissorRect { ::djinni::jniGetMethodID(clazz.get(), "setScissorRect", "(Lio/openmobilemaps/mapscore/shared/graphics/common/RectI;)V") };
     const jmethodID method_isReadyToRenderOffscreen { ::djinni::jniGetMethodID(clazz.get(), "isReadyToRenderOffscreen", "()Lio/openmobilemaps/mapscore/shared/map/LayerReadyState;") };
     const jmethodID method_enableAnimations { ::djinni::jniGetMethodID(clazz.get(), "enableAnimations", "(Z)V") };
-    const jmethodID method_setErrorManager { ::djinni::jniGetMethodID(clazz.get(), "setErrorManager", "(Lio/openmobilemaps/mapscore/shared/map/ErrorManager;)V") };
+    const jmethodID method_setNetworkActivityManager { ::djinni::jniGetMethodID(clazz.get(), "setNetworkActivityManager", "(Lio/openmobilemaps/mapscore/shared/map/NetworkActivityManager;)V") };
     const jmethodID method_forceReload { ::djinni::jniGetMethodID(clazz.get(), "forceReload", "()V") };
 };
 
