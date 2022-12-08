@@ -15,9 +15,9 @@ abstract class Tiled2dMapRasterLayerInterface {
 
     abstract fun removeCallbackHandler()
 
-    abstract fun setAlpha(alpha: Double)
+    abstract fun setAlpha(alpha: Float)
 
-    abstract fun getAlpha(): Double
+    abstract fun getAlpha(): Float
 
     abstract fun setStyle(style: io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderStyle)
 
@@ -97,17 +97,17 @@ abstract class Tiled2dMapRasterLayerInterface {
         }
         private external fun native_removeCallbackHandler(_nativeRef: Long)
 
-        override fun setAlpha(alpha: Double) {
+        override fun setAlpha(alpha: Float) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_setAlpha(this.nativeRef, alpha)
         }
-        private external fun native_setAlpha(_nativeRef: Long, alpha: Double)
+        private external fun native_setAlpha(_nativeRef: Long, alpha: Float)
 
-        override fun getAlpha(): Double {
+        override fun getAlpha(): Float {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_getAlpha(this.nativeRef)
         }
-        private external fun native_getAlpha(_nativeRef: Long): Double
+        private external fun native_getAlpha(_nativeRef: Long): Float
 
         override fun setStyle(style: io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderStyle) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

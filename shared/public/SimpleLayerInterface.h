@@ -35,6 +35,10 @@ class SimpleLayerInterface : public LayerInterface {
 
     virtual void show() {};
 
+    virtual void setAlpha(float alpha) {};
+
+    virtual float getAlpha() { return 1.0; };
+
     /** optional rectangle, remove scissoring when not set */
     virtual void setScissorRect(const std::optional<::RectI> & scissorRect) {};
 

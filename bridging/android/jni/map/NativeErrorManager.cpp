@@ -48,6 +48,15 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_ErrorManager_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_ErrorManager_00024CppProxy_native_1removeAllErrorsForLayer(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_layerName)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::ErrorManager>(nativeRef);
+        ref->removeAllErrorsForLayer(::djinni::String::toCpp(jniEnv, j_layerName));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_ErrorManager_00024CppProxy_native_1clearAllErrors(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {

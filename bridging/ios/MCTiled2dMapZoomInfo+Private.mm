@@ -13,7 +13,9 @@ auto Tiled2dMapZoomInfo::toCpp(ObjcType obj) -> CppType
     return {::djinni::F32::toCpp(obj.zoomLevelScaleFactor),
             ::djinni::I32::toCpp(obj.numDrawPreviousLayers),
             ::djinni::Bool::toCpp(obj.adaptScaleToScreen),
-            ::djinni::Bool::toCpp(obj.maskTile)};
+            ::djinni::Bool::toCpp(obj.maskTile),
+            ::djinni::Bool::toCpp(obj.underzoom),
+            ::djinni::Bool::toCpp(obj.overzoom)};
 }
 
 auto Tiled2dMapZoomInfo::fromCpp(const CppType& cpp) -> ObjcType
@@ -21,7 +23,9 @@ auto Tiled2dMapZoomInfo::fromCpp(const CppType& cpp) -> ObjcType
     return [[MCTiled2dMapZoomInfo alloc] initWithZoomLevelScaleFactor:(::djinni::F32::fromCpp(cpp.zoomLevelScaleFactor))
                                                 numDrawPreviousLayers:(::djinni::I32::fromCpp(cpp.numDrawPreviousLayers))
                                                    adaptScaleToScreen:(::djinni::Bool::fromCpp(cpp.adaptScaleToScreen))
-                                                             maskTile:(::djinni::Bool::fromCpp(cpp.maskTile))];
+                                                             maskTile:(::djinni::Bool::fromCpp(cpp.maskTile))
+                                                            underzoom:(::djinni::Bool::fromCpp(cpp.underzoom))
+                                                             overzoom:(::djinni::Bool::fromCpp(cpp.overzoom))];
 }
 
 }  // namespace djinni_generated

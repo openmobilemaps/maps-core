@@ -36,9 +36,9 @@
 
 - (void)removeCallbackHandler;
 
-- (void)setAlpha:(double)alpha;
+- (void)setAlpha:(float)alpha;
 
-- (double)getAlpha;
+- (float)getAlpha;
 
 - (void)setStyle:(nonnull MCRasterShaderStyle *)style;
 

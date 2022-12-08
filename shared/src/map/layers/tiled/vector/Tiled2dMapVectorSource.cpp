@@ -62,7 +62,7 @@ FinalResult Tiled2dMapVectorSource::postLoadingTask(const IntermediateResult &lo
                     while (const auto &feature = layer.next_feature()) {
                         auto const featureContext = FeatureContext(feature);
                         try {
-                            VectorTileGeometryHandler geometryHandler = VectorTileGeometryHandler(tile.bounds, extent);
+                            VectorTileGeometryHandler geometryHandler = VectorTileGeometryHandler(tile.bounds, extent, layerConfig->getVectorSettings());
                             vtzero::decode_geometry(feature.geometry(), geometryHandler);
                             layerFeatureMap->at(sourceLayerName).push_back({featureContext, geometryHandler});
                         } catch (vtzero::geometry_exception &geometryException) {

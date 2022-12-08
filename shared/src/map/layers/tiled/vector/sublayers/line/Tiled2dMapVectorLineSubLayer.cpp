@@ -17,6 +17,7 @@
 #include "VectorTileGeometryHandler.h"
 #include "Tiled2dMapVectorRasterSubLayerConfig.h"
 #include "MapCamera2dInterface.h"
+#include "LineHelper.h"
 
 Tiled2dMapVectorLineSubLayer::Tiled2dMapVectorLineSubLayer(const std::shared_ptr<LineVectorLayerDescription> &description)
         : description(description),
@@ -24,9 +25,11 @@ Tiled2dMapVectorLineSubLayer::Tiled2dMapVectorLineSubLayer(const std::shared_ptr
 
 void Tiled2dMapVectorLineSubLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
     Tiled2dMapVectorSubLayer::onAdded(mapInterface);
+    mapInterface->getTouchHandler()->addListener(shared_from_this());
 }
 
 void Tiled2dMapVectorLineSubLayer::onRemoved() {
+    mapInterface->getTouchHandler()->removeListener(shared_from_this());
     Tiled2dMapVectorSubLayer::onRemoved();
 }
 
@@ -122,7 +125,7 @@ void Tiled2dMapVectorLineSubLayer::update() {
             }
             float opacity = description->style.getLineOpacity(context);
             if (opacity != style.opacity) {
-                style.opacity = opacity;
+                style.opacity = opacity * alpha;
                 needsUpdate = true;
             }
             float blur = description->style.getLineBlur(context);
@@ -230,6 +233,7 @@ Tiled2dMapVectorLineSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInfo,
                 }
 
                 const VectorTileGeometryHandler &geometryHandler = std::get<1>(*featureIt);
+                std::vector<std::vector<::Coord>> lineCoordinatesVector;
 
                 for (const auto &lineCoordinates: geometryHandler.getLineCoordinates()) {
                     if (lineCoordinates.empty()) { continue; }
@@ -245,7 +249,11 @@ Tiled2dMapVectorLineSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInfo,
 
                     styleGroupLineSubGroupMap[styleGroupIndex].push_back({lineCoordinates, std::min(maxStylesPerGroup - 1, styleIndex)});
                     subGroupCoordCount[styleGroupIndex] = (int)subGroupCoordCount[styleGroupIndex] + numCoords;
+                    lineCoordinatesVector.push_back(lineCoordinates);
                 }
+
+
+                hitDetectionLineMap[tileInfo].push_back({lineCoordinatesVector, featureContext});
 
                 featureNum++;
             }
@@ -270,6 +278,8 @@ void Tiled2dMapVectorLineSubLayer::clearTileData(const Tiled2dMapTileInfo &tileI
     if (!mapInterface) {
         return;
     }
+    hitDetectionLineMap.erase(tileInfo);
+
     std::vector<std::shared_ptr<GraphicsObjectInterface>> objectsToClear;
     Tiled2dMapVectorSubLayer::clearTileData(tileInfo);
     {
@@ -433,4 +443,32 @@ void Tiled2dMapVectorLineSubLayer::setScissorRect(const std::optional<::RectI> &
 
 std::string Tiled2dMapVectorLineSubLayer::getLayerDescriptionIdentifier() {
     return description->identifier;
+}
+
+bool Tiled2dMapVectorLineSubLayer::onClickConfirmed(const ::Vec2F &posScreen) {
+    auto selectionDelegate = this->selectionDelegate.lock();
+    auto mapInterface = this->mapInterface;
+    auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+    auto coordinateConverter = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
+    if (!camera || !coordinateConverter || !selectionDelegate) {
+        return false;
+    }
+
+    auto point = camera->coordFromScreenPosition(posScreen);
+    double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
+
+    for (auto const &[tileInfo, lineTuples] : hitDetectionLineMap) {
+        for (auto const &[lineCoordinateVector, featureContext]: lineTuples) {
+            for (auto const &coordinates: lineCoordinateVector) {
+                auto lineWidth = description->style.getLineWidth(EvaluationContext(zoomIdentifier, featureContext));
+                if (LineHelper::pointWithin(coordinates, point, lineWidth, coordinateConverter)) {
+                    if (selectionDelegate->didSelectFeature(featureContext, description, point)) {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+
+    return false;
 }

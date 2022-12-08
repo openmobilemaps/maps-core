@@ -20,24 +20,25 @@
 #include <algorithm>
 #include "MapCamera2dInterface.h"
 #include "Tiled2dMapVectorRasterSubLayerConfig.h"
+#include "PolygonHelper.h"
 
 namespace mapbox {
-namespace util {
+    namespace util {
 
-template <>
-struct nth<0, ::Coord> {
-    inline static auto get(const ::Coord &t) {
-        return t.x;
-    };
-};
-template <>
-struct nth<1, ::Coord> {
-    inline static auto get(const ::Coord &t) {
-        return t.y;
-    };
-};
+        template <>
+        struct nth<0, ::Coord> {
+            inline static auto get(const ::Coord &t) {
+                return t.x;
+            };
+        };
+        template <>
+        struct nth<1, ::Coord> {
+            inline static auto get(const ::Coord &t) {
+                return t.y;
+            };
+        };
 
-} // namespace util
+    } // namespace util
 } // namespace mapbox
 
 
@@ -46,10 +47,12 @@ Tiled2dMapVectorPolygonSubLayer::Tiled2dMapVectorPolygonSubLayer(const std::shar
 
 void Tiled2dMapVectorPolygonSubLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
     Tiled2dMapVectorSubLayer::onAdded(mapInterface);
+    mapInterface->getTouchHandler()->addListener(shared_from_this());
     shader = mapInterface->getShaderFactory()->createPolygonGroupShader();
 }
 
 void Tiled2dMapVectorPolygonSubLayer::onRemoved() {
+    mapInterface->getTouchHandler()->removeListener(shared_from_this());
     Tiled2dMapVectorSubLayer::onRemoved();
 }
 
@@ -111,6 +114,8 @@ Tiled2dMapVectorPolygonSubLayer::updateTileData(const Tiled2dMapTileInfo &tileIn
         for (const auto &feature : layerFeatures) {
             const FeatureContext &featureContext = std::get<0>(feature);
 
+            if (featureContext.geomType != vtzero::GeomType::POLYGON) { continue; }
+
             if (description->filter == nullptr || description->filter->evaluateOr(EvaluationContext(-1, featureContext), true)) {
                 const auto &geometryHandler = std::get<1>(feature);
                 const auto &polygonCoordinates = geometryHandler.getPolygonCoordinates();
@@ -119,21 +124,26 @@ Tiled2dMapVectorPolygonSubLayer::updateTileData(const Tiled2dMapTileInfo &tileIn
                 std::vector<Coord> positions;
 
                 for (int i = 0; i < polygonCoordinates.size(); i++) {
+
+                    size_t verticesCount = polygonCoordinates[i].size();
                     std::vector<std::vector<::Coord>> pol = {polygonCoordinates[i]};
                     for (auto const &hole: polygonHoles[i]) {
+                        verticesCount += polygonHoles[i].size();
                         pol.push_back(hole);
                     }
 
-#ifdef __APPLE__
-                    std::vector<uint32_t> new_indices = mapbox::earcut<uint32_t>(pol);
-#else
-                    // TODO: andorid currently only supports 16bit indices
+#ifndef __APPLE__
+                    // TODO: android currently only supports 16bit indices
                     // more complex polygons may need to be simplified on-device to render them correctly
-                    std::vector<uint16_t> new_indices = mapbox::earcut<uint16_t>(pol);
-                    assert(("Too many vertices to use 16bit indices", new_indices.size() >= std::numeric_limits<uint16_t>::max()));
+                    if (verticesCount >= std::numeric_limits<uint16_t>::max()) {
+                        LogError <<= "Too many vertices to use 16bit indices: " + std::to_string(verticesCount);
+                        continue;
+                    }
 #endif
 
-                    std::size_t posAdded = 0;
+                    std::vector<uint32_t> new_indices = mapbox::earcut<uint32_t>(pol);
+
+                    size_t posAdded = 0;
                     for (auto const &coords: pol) {
                         positions.insert(positions.end(), coords.begin(), coords.end());
                         posAdded += coords.size();
@@ -143,14 +153,12 @@ Tiled2dMapVectorPolygonSubLayer::updateTileData(const Tiled2dMapTileInfo &tileIn
                     size_t new_size = indices_offset + posAdded;
 #ifdef __APPLE__
                     if (new_size >= std::numeric_limits<uint32_t>::max()) {
-                        objectDescriptions.push_back({{},
-                            {}});
+                        objectDescriptions.push_back({{}, {}});
                         indices_offset = 0;
                     }
 #else
                     if (new_size >= std::numeric_limits<uint16_t>::max()) {
-                        objectDescriptions.push_back({{},
-                            {}});
+                        objectDescriptions.push_back({{}, {}});
                         indices_offset = 0;
                     }
 #endif
@@ -160,6 +168,8 @@ Tiled2dMapVectorPolygonSubLayer::updateTileData(const Tiled2dMapTileInfo &tileIn
                     }
 
                     indices_offset += posAdded;
+
+                    hitDetectionPolygonMap[tileInfo].push_back({PolygonCoord(polygonCoordinates[i], polygonHoles[i]), featureContext});
                 }
 
                 int styleIndex = -1;
@@ -209,7 +219,7 @@ void Tiled2dMapVectorPolygonSubLayer::addPolygons(const Tiled2dMapTileInfo &tile
     auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
     auto converter = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
 
-    if (!mapInterface || !objectFactory || !scheduler || !converter) {
+    if (!mapInterface || !objectFactory || !scheduler || !converter || !shader) {
         return;
     }
 
@@ -290,6 +300,29 @@ void Tiled2dMapVectorPolygonSubLayer::setupPolygons(const Tiled2dMapTileInfo &ti
     }
 }
 
+bool Tiled2dMapVectorPolygonSubLayer::onClickConfirmed(const ::Vec2F &posScreen) {
+    auto selectionDelegate = this->selectionDelegate.lock();
+    auto mapInterface = this->mapInterface;
+    auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+    if (!camera || !selectionDelegate) {
+        return false;
+    }
+    auto point = camera->coordFromScreenPosition(posScreen);
+
+    for (auto const &[tileInfo, polygonTuples] : hitDetectionPolygonMap) {
+        for (auto const &[polygon, featureContext]: polygonTuples) {
+            if (PolygonHelper::pointInside(polygon, point, mapInterface->getCoordinateConverterHelper())) {
+                if (selectionDelegate->didSelectFeature(featureContext, description, point)) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+
 void Tiled2dMapVectorPolygonSubLayer::update() {
 
     std::lock_guard<std::recursive_mutex> lock(featureGroupsMutex);
@@ -306,7 +339,7 @@ void Tiled2dMapVectorPolygonSubLayer::update() {
         shaderStyles.push_back(color.g);
         shaderStyles.push_back(color.b);
         shaderStyles.push_back(color.a);
-        shaderStyles.push_back(opacity);
+        shaderStyles.push_back(opacity * alpha);
     }
 
     auto s = SharedBytes((int64_t)shaderStyles.data(), (int32_t)featureGroups.size(), 5 * (int32_t)sizeof(float));
@@ -316,6 +349,8 @@ void Tiled2dMapVectorPolygonSubLayer::update() {
 void Tiled2dMapVectorPolygonSubLayer::clearTileData(const Tiled2dMapTileInfo &tileInfo) {
     auto mapInterface = this->mapInterface;
     if (!mapInterface) { return; }
+
+    hitDetectionPolygonMap.erase(tileInfo);
 
     std::vector<std::shared_ptr<GraphicsObjectInterface>> objectsToClear;
     Tiled2dMapVectorSubLayer::clearTileData(tileInfo);

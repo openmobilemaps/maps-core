@@ -20,6 +20,7 @@
 #include "RectCoord.h"
 #include "RenderConfig.h"
 #include "RenderConfigInterface.h"
+#include "RenderObjectInterface.h"
 #include "Vec2D.h"
 #include <optional>
 #include "RasterShaderInterface.h"
@@ -57,6 +58,10 @@ class Textured2dLayerObject : public LayerObjectInterface {
 
     std::shared_ptr<Quad2dInterface> getQuadObject();
 
+    std::shared_ptr<GraphicsObjectInterface> getGraphicsObject();
+    
+    std::shared_ptr<RenderObjectInterface> getRenderObject();
+
     void beginAlphaAnimation(double startAlpha, double targetAlpha, long long duration);
     
     void beginStyleAnimation(RasterShaderStyle start, RasterShaderStyle target, long long duration);
@@ -67,6 +72,8 @@ class Textured2dLayerObject : public LayerObjectInterface {
   private:
     std::shared_ptr<Quad2dInterface> quad;
     std::shared_ptr<AlphaShaderInterface> shader;
+    std::shared_ptr<GraphicsObjectInterface> graphicsObject;
+    std::shared_ptr<RenderObjectInterface> renderObject;
     std::shared_ptr<RasterShaderInterface> rasterShader;
 
     std::shared_ptr<RenderConfig> renderConfig;

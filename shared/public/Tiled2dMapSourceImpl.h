@@ -104,8 +104,16 @@ void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBou
 
     size_t numZoomLevels = zoomLevelInfos.size();
     int targetZoomLayer = -1;
+
     // Each pixel is assumed to be 0.28mm – https://gis.stackexchange.com/a/315989
     const float screenScaleFactor = zoomInfo.adaptScaleToScreen ? screenDensityPpi / (0.0254 / 0.00028) : 1.0;
+
+    if (!zoomInfo.underzoom
+        && (zoomLevelInfos.empty() || zoomLevelInfos[0].zoom * zoomInfo.zoomLevelScaleFactor * screenScaleFactor < zoom)) {
+        onVisibleTilesChanged({});
+        return;
+    }
+
     for (int i = 0; i < numZoomLevels; i++) {
         const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(i);
         if (zoomInfo.zoomLevelScaleFactor * screenScaleFactor * zoomLevelInfo.zoom < zoom) {
@@ -114,6 +122,10 @@ void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBou
         }
     }
     if (targetZoomLayer < 0) {
+        if (!zoomInfo.overzoom) {
+            onVisibleTilesChanged({});
+            return;
+        }
         targetZoomLayer = (int) numZoomLevels - 1;
     }
     int targetZoomLevelIdentifier = zoomLevelInfos.at(targetZoomLayer).zoomLevelIdentifier;
@@ -177,31 +189,22 @@ void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBou
                         continue;
                     }
 
-                    const Coord minCorner = Coord(layerSystemId, x * tileWidthAdj + boundsLeft, y * tileHeightAdj + boundsTop, 0);
-                    const Coord maxCorner = Coord(layerSystemId, minCorner.x + tileWidthAdj, minCorner.y + tileHeightAdj, 0);
-                    const RectCoord rect(Coord(layerSystemId,
-                                         leftToRight ? minCorner.x : maxCorner.x,
-                                         topToBottom ? minCorner.y : maxCorner.y,
-                                         0.0),
-                                   Coord(layerSystemId,
-                                         leftToRight ? maxCorner.x : minCorner.x,
-                                         topToBottom ? maxCorner.y : minCorner.y,
-                                         0.0));
+                    const Coord topLeft = Coord(layerSystemId, x * tileWidthAdj + boundsLeft, y * tileHeightAdj + boundsTop, 0);
+                    const Coord bottomRight = Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y + tileHeightAdj, 0);
 
-                    const double tileCenterX = minCorner.x + 0.5f * (maxCorner.x - minCorner.x);
-                    const double tileCenterY = minCorner.y + 0.5f * (maxCorner.y - minCorner.y);
+                    const double tileCenterX = topLeft.x + 0.5f * tileWidthAdj;
+                    const double tileCenterY = topLeft.y + 0.5f * tileHeightAdj;
                     const double tileCenterDis = std::sqrt(std::pow(tileCenterX - centerVisibleX, 2.0) + std::pow(tileCenterY - centerVisibleY, 2.0));
 
                     const int zDis = 1 + std::abs(t - curT);
-                    const int priority = std::ceil((tileCenterDis / maxDisCenter) * zPriorityRange)  + zDis * zPriorityRange + zoomInd * zoomPriorityRange;
+                    const int priority = std::ceil((tileCenterDis / maxDisCenter) * zPriorityRange) + zDis * zPriorityRange + zoomInd * zoomPriorityRange;
 
+                    const RectCoord rect(topLeft, bottomRight);
                     curVisibleTilesVec.push_back(PrioritizedTiled2dMapTileInfo(
                             Tiled2dMapTileInfo(rect, x, y, t, zoomLevelInfo.zoomLevelIdentifier, zoomLevelInfo.zoom),
                             priority));
 
-                    visibleTilesVec.push_back(PrioritizedTiled2dMapTileInfo(
-                            Tiled2dMapTileInfo(rect, x, y, t, zoomLevelInfo.zoomLevelIdentifier, zoomLevelInfo.zoom),
-                            priority));
+                    visibleTilesVec.push_back(curVisibleTilesVec.back());
                 }
             }
         }
@@ -696,6 +699,7 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
 
 
     gpc_polygon currentTileMask;
+    bool freeCurrent = false;
     currentTileMask.num_contours = 0;
     bool isFirst = true;
 
@@ -709,7 +713,6 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
               currentViewBounds.bottomRight.y, 0),
         currentViewBounds.topLeft
     }, {})}, &currentViewBoundsPolygon);
-
 
     for (auto it = currentTiles.rbegin(); it != currentTiles.rend(); it++ ){
         auto &[tileInfo, tileWrapper] = *it;
@@ -769,8 +772,15 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
                 gpc_free_polygon(&currentTileMask);
                 currentTileMask = result;
             }
+
+            freeCurrent = true;
         }
     }
+
+    if(freeCurrent) {
+        gpc_free_polygon(&currentTileMask);
+    }
+    gpc_free_polygon(&currentViewBoundsPolygon);
 }
 
 template<class T, class L, class R>

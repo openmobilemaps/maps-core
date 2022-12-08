@@ -33,6 +33,11 @@ final class Polygon2d: BaseGraphicsObject {
                          mvpMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
+        
         guard let verticesBuffer = verticesBuffer,
               let indicesBuffer = indicesBuffer else { return }
 
@@ -97,6 +102,11 @@ extension Polygon2d: MCMaskingObjectInterface {
               let context = context as? RenderingContext,
               let encoder = context.encoder else { return }
 
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
+
         guard let verticesBuffer = verticesBuffer,
               let indicesBuffer = indicesBuffer
         else { return }
@@ -134,9 +144,11 @@ extension Polygon2d: MCMaskingObjectInterface {
 extension Polygon2d: MCPolygon2dInterface {
     func setVertices(_ vertices: [MCVec2D], indices: [NSNumber]) {
         guard !vertices.isEmpty, !indices.isEmpty else {
-            indicesCount = 0
-            verticesBuffer = nil
-            indicesBuffer = nil
+            lock.withCritical {
+                indicesCount = 0
+                verticesBuffer = nil
+                indicesBuffer = nil
+            }
             return
         }
 
@@ -151,9 +163,11 @@ extension Polygon2d: MCPolygon2dInterface {
             fatalError("Cannot allocate buffers for the UBTileModel")
         }
 
-        indicesCount = indices.count
-        self.verticesBuffer = verticesBuffer
-        self.indicesBuffer = indicesBuffer
+        lock.withCritical {
+            indicesCount = indices.count
+            self.verticesBuffer = verticesBuffer
+            self.indicesBuffer = indicesBuffer
+        }
     }
 
     func asGraphicsObject() -> MCGraphicsObjectInterface? { self }

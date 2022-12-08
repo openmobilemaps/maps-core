@@ -92,6 +92,19 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setAlpha:(float)alpha {
+    try {
+        _cppRefHandle.get()->setAlpha(::djinni::F32::toCpp(alpha));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (float)getAlpha {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getAlpha();
+        return ::djinni::F32::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)setScissorRect:(nullable MCRectI *)scissorRect {
     try {
         _cppRefHandle.get()->setScissorRect(::djinni::Optional<std::optional, ::djinni_generated::RectI>::toCpp(scissorRect));
@@ -185,6 +198,19 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() show];
+        }
+    }
+    void setAlpha(float c_alpha) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setAlpha:(::djinni::F32::fromCpp(c_alpha))];
+        }
+    }
+    float getAlpha() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getAlpha];
+            return ::djinni::F32::toCpp(objcpp_result_);
         }
     }
     void setScissorRect(const std::optional<::RectI> & c_scissorRect) override

@@ -14,15 +14,17 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import android.opengl.GLES20
-import android.opengl.GLES30
 import android.opengl.GLUtils
-import android.util.Log
 import io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface
 import java.nio.IntBuffer
-import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.ReentrantLock
 
-class BitmapTextureHolder(bitmap: Bitmap, val minFilter:Int = GLES20.GL_LINEAR, val magFilter:Int = GLES20.GL_LINEAR) : TextureHolderInterface() {
+class BitmapTextureHolder(
+	bitmap: Bitmap,
+	private val minFilter: Int = GLES20.GL_LINEAR,
+	private val magFilter: Int = GLES20.GL_LINEAR,
+) : TextureHolderInterface() {
+
 	val bitmap: Bitmap
 	private var imageWidth = 0
 	private var imageHeight = 0
@@ -33,11 +35,19 @@ class BitmapTextureHolder(bitmap: Bitmap, val minFilter:Int = GLES20.GL_LINEAR, 
 	private var usageCounter = 0
 	private var texturePointer: IntArray = intArrayOf(0)
 
-	constructor(drawable: Drawable) : this(createBitmapFromDrawable(drawable)) {}
-	constructor(drawable: Drawable, targetWidth: Int, targetHeight: Int) : this(
-		createBitmapFromDrawable(drawable, targetWidth, targetHeight)
-	) {
-	}
+	constructor(drawable: Drawable) : this(createBitmapFromDrawable(drawable))
+
+	constructor(
+		drawable: Drawable,
+		targetWidth: Int,
+		targetHeight: Int,
+	) : this(createBitmapFromDrawable(drawable, targetWidth, targetHeight))
+
+	constructor(
+		targetWidth: Int,
+		targetHeight: Int,
+		drawBlock: Canvas.() -> Unit,
+	) : this(drawBitmapOnCanvas(targetWidth, targetHeight, drawBlock))
 
 	override fun getImageWidth(): Int {
 		return imageWidth
@@ -92,10 +102,16 @@ class BitmapTextureHolder(bitmap: Bitmap, val minFilter:Int = GLES20.GL_LINEAR, 
 		}
 
 		private fun createBitmapFromDrawable(drawable: Drawable, targetWidth: Int, targetHeight: Int): Bitmap {
+			return drawBitmapOnCanvas(targetWidth, targetHeight) {
+				drawable.setBounds(0, 0, width, height)
+				drawable.draw(this)
+			}
+		}
+
+		private fun drawBitmapOnCanvas(targetWidth: Int, targetHeight: Int, drawBlock: Canvas.() -> Unit): Bitmap {
 			val bitmap = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.ARGB_8888)
 			val canvas = Canvas(bitmap)
-			drawable.setBounds(0, 0, canvas.width, canvas.height)
-			drawable.draw(canvas)
+			canvas.drawBlock()
 			return bitmap
 		}
 	}

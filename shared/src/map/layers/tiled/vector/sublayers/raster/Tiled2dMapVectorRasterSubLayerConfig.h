@@ -16,6 +16,7 @@
 #include "CoordinateSystemIdentifiers.h"
 #include "Tiled2dMapZoomLevelInfo.h"
 #include "Logger.h"
+#include "Tiled2dMapVectorSettings.h"
 
 class Tiled2dMapVectorRasterSubLayerConfig : public Tiled2dMapLayerConfig {
 public:
@@ -49,7 +50,9 @@ public:
     }
 
     Tiled2dMapZoomInfo getZoomInfo() override {
-        return Tiled2dMapZoomInfo(description->zoomLevelScaleFactor, description->numDrawPreviousLayers, description->adaptScaleToScreen, description->maskTiles);
+        return Tiled2dMapZoomInfo(description->zoomLevelScaleFactor, description->numDrawPreviousLayers,
+                                  description->adaptScaleToScreen, description->maskTiles, description->underzoom,
+                                  description->overzoom);
     }
 
     static double getZoomIdentifier(double zoom) {
@@ -59,6 +62,10 @@ public:
     std::string getLayerName() override {
         LogDebug <<= "Tiled2dMap vector raster sublayer config get identifier";
         return description->identifier;
+    }
+
+    std::optional<Tiled2dMapVectorSettings> getVectorSettings() override {
+        return std::nullopt;
     }
 
 private:

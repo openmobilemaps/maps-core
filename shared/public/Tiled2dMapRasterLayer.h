@@ -67,9 +67,9 @@ public:
 
     virtual void removeCallbackHandler() override;
 
-    virtual void setAlpha(double alpha) override;
-
-    virtual double getAlpha() override;
+    virtual void setAlpha(float alpha) override;
+    
+    virtual float getAlpha() override;
     
     virtual void setStyle(const ::RasterShaderStyle & style) override;
     
