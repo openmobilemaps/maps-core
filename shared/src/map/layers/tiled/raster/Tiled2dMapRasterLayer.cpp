@@ -282,11 +282,16 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
 
 void Tiled2dMapRasterLayer::updateMaskObjects(const std::vector<const std::shared_ptr<MaskingObjectInterface>> &newMaskObjects,
                                               const std::vector<const std::shared_ptr<MaskingObjectInterface>> &obsoleteMaskObjects) {
-    if (!mapInterface) return;
+    auto mapInterface = this->mapInterface;
+    auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
+    if (!renderingContext) {
+        return;
+    }
+
     std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
     for (const auto &mask : newMaskObjects) {
         const auto &object = mask->asGraphicsObject();
-        if (!object->isReady()) object->setup(mapInterface->getRenderingContext());
+        if (!object->isReady()) object->setup(renderingContext);
     }
     for (const auto &mask : obsoleteMaskObjects) {
         const auto &object = mask->asGraphicsObject();
