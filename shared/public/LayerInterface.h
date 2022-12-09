@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "ErrorManager.h"
 #include "MaskingObjectInterface.h"
+#include "NetworkActivityManagerInterface.h"
 #include "RectI.h"
 #include "RenderPassInterface.h"
 #include <memory>
@@ -50,7 +50,7 @@ public:
 
     virtual void enableAnimations(bool enabled) = 0;
 
-    virtual void setErrorManager(const std::shared_ptr<::ErrorManager> & errorManager) = 0;
+    virtual void setNetworkActivityManager(const std::shared_ptr<::NetworkActivityManagerInterface> & networkActivityManager) = 0;
 
     virtual void forceReload() = 0;
 };

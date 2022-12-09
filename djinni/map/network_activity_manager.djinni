@@ -1,0 +1,43 @@
+@extern "../yaml/rect_coord.yaml"
+@extern "../yaml/loader_status.yaml"
+@extern "../yaml/map_camera_2d_interface.yaml"
+
+network_activity_manager_interface = interface +c
+{
+    static create() : network_activity_manager_interface;
+
+    add_tiled_layer_error(error: tiled_layer_error);
+    remove_error(url: string);
+    remove_all_errors_for_layer(layer_name: string);
+
+    clear_all_errors();
+
+    add_network_activity_listener(listener: network_activity_listener_interface);
+    remove_network_activity_listener(listener: network_activity_listener_interface);
+
+    update_remaining_tasks(layer_name: string, task_count: i32);
+}
+
+network_activity_listener_interface = interface +c +j +o
+{
+    on_tiled_layer_error_state_changed(errors: list<tiled_layer_error>);
+    on_tasks_progress_changed(total_progress: f32, tasks_progress_infos: list<tasks_progress_info>);
+}
+
+tasks_progress_info = record
+{
+    layer_name: string;
+    max_count: i32;
+    remaining_count: i32;
+    progress: f32;
+}
+
+tiled_layer_error = record
+{
+    status: loader_status;
+    error_code: optional<string>;
+    layer_name: string;
+    url: string;
+    is_recoverable: bool;
+    bounds: optional<rect_coord>;
+}

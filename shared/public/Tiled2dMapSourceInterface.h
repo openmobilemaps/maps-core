@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "ErrorManager.h"
 #include "LayerReadyState.h"
+#include "NetworkActivityManagerInterface.h"
 #include "RectCoord.h"
 #include <cstdint>
 #include <memory>
@@ -30,7 +30,7 @@ public:
 
     virtual ::LayerReadyState isReadyToRenderOffscreen() = 0;
 
-    virtual void setErrorManager(const std::shared_ptr<::ErrorManager> & errorManager) = 0;
+    virtual void setNetworkActivityManager(const std::shared_ptr<::NetworkActivityManagerInterface> & networkActivityManager) = 0;
 
     virtual void forceReload() = 0;
 };

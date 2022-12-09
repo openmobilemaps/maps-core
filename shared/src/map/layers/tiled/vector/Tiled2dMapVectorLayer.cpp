@@ -111,14 +111,14 @@ void Tiled2dMapVectorLayer::scheduleStyleJsonLoading() {
                 auto selfPtr = weakSelfPtr.lock();
                 if (selfPtr) {
                     auto layerError = selfPtr->loadStyleJson();
-                    if (selfPtr->errorManager) {
+                    if (selfPtr->networkActivityManager) {
                         if (auto error = layerError) {
-                            selfPtr->errorManager->addTiledLayerError(*error);
+                            selfPtr->networkActivityManager->addTiledLayerError(*error);
                         } else {
                             if (selfPtr->remoteStyleJsonUrl.has_value()) {
-                                selfPtr->errorManager->removeError(*selfPtr->remoteStyleJsonUrl);
+                                selfPtr->networkActivityManager->removeError(*selfPtr->remoteStyleJsonUrl);
                             } else {
-                                selfPtr->errorManager->removeError(selfPtr->layerName);
+                                selfPtr->networkActivityManager->removeError(selfPtr->layerName);
                             }
                         }
                     }
