@@ -7,14 +7,14 @@
 #include <memory>
 #include <string>
 
-class NetworkActivityListener;
+class NetworkActivityListenerInterface;
 struct TiledLayerError;
 
-class NetworkActivityManager {
+class NetworkActivityManagerInterface {
 public:
-    virtual ~NetworkActivityManager() {}
+    virtual ~NetworkActivityManagerInterface() {}
 
-    static std::shared_ptr<NetworkActivityManager> create();
+    static std::shared_ptr<NetworkActivityManagerInterface> create();
 
     virtual void addTiledLayerError(const TiledLayerError & error) = 0;
 
@@ -24,9 +24,9 @@ public:
 
     virtual void clearAllErrors() = 0;
 
-    virtual void addNetworkActivityListener(const std::shared_ptr<NetworkActivityListener> & listener) = 0;
+    virtual void addNetworkActivityListener(const std::shared_ptr<NetworkActivityListenerInterface> & listener) = 0;
 
-    virtual void removeNetworkActivityListener(const std::shared_ptr<NetworkActivityListener> & listener) = 0;
+    virtual void removeNetworkActivityListener(const std::shared_ptr<NetworkActivityListenerInterface> & listener) = 0;
 
     virtual void updateRemainingTasks(const std::string & layerName, int32_t taskCount) = 0;
 };

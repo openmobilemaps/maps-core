@@ -4,7 +4,7 @@
 #pragma once
 
 #include "MaskingObjectInterface.h"
-#include "NetworkActivityManager.h"
+#include "NetworkActivityManagerInterface.h"
 #include "RectI.h"
 #include "RenderPassInterface.h"
 #include <memory>
@@ -50,7 +50,7 @@ public:
 
     virtual void enableAnimations(bool enabled) = 0;
 
-    virtual void setNetworkActivityManager(const std::shared_ptr<::NetworkActivityManager> & networkActivityManager) = 0;
+    virtual void setNetworkActivityManager(const std::shared_ptr<::NetworkActivityManagerInterface> & networkActivityManager) = 0;
 
     virtual void forceReload() = 0;
 };

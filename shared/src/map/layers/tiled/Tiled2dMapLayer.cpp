@@ -124,7 +124,7 @@ LayerReadyState Tiled2dMapLayer::isReadyToRenderOffscreen() {
     return LayerReadyState::READY;
 }
 
-void Tiled2dMapLayer::setNetworkActivityManager(const std::shared_ptr<::NetworkActivityManager> &networkActivityManager) {
+void Tiled2dMapLayer::setNetworkActivityManager(const std::shared_ptr<::NetworkActivityManagerInterface> &networkActivityManager) {
     this->networkActivityManager = networkActivityManager;
     auto sourceInterface = this->sourceInterface;
     if (sourceInterface) {

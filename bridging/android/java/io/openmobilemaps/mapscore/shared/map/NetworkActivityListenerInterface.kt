@@ -5,13 +5,13 @@ package io.openmobilemaps.mapscore.shared.map
 
 import java.util.concurrent.atomic.AtomicBoolean
 
-abstract class NetworkActivityListener {
+abstract class NetworkActivityListenerInterface {
 
     abstract fun onTiledLayerErrorStateChanged(errors: ArrayList<TiledLayerError>)
 
     abstract fun onTasksProgressChanged(totalProgress: Float, tasksProgressInfos: ArrayList<TasksProgressInfo>)
 
-    private class CppProxy : NetworkActivityListener {
+    private class CppProxy : NetworkActivityListenerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

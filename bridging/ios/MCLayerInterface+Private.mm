@@ -10,7 +10,7 @@
 #import "MCLayerReadyState+Private.h"
 #import "MCMapInterface+Private.h"
 #import "MCMaskingObjectInterface+Private.h"
-#import "MCNetworkActivityManager+Private.h"
+#import "MCNetworkActivityManagerInterface+Private.h"
 #import "MCRectI+Private.h"
 #import "MCRenderPassInterface+Private.h"
 #import "MCRenderTargetTexture+Private.h"
@@ -132,9 +132,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setNetworkActivityManager:(nullable MCNetworkActivityManager *)networkActivityManager {
+- (void)setNetworkActivityManager:(nullable MCNetworkActivityManagerInterface *)networkActivityManager {
     try {
-        _cppRefHandle.get()->setNetworkActivityManager(::djinni_generated::NetworkActivityManager::toCpp(networkActivityManager));
+        _cppRefHandle.get()->setNetworkActivityManager(::djinni_generated::NetworkActivityManagerInterface::toCpp(networkActivityManager));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -247,10 +247,10 @@ public:
             [djinni_private_get_proxied_objc_object() enableAnimations:(::djinni::Bool::fromCpp(c_enabled))];
         }
     }
-    void setNetworkActivityManager(const std::shared_ptr<::NetworkActivityManager> & c_networkActivityManager) override
+    void setNetworkActivityManager(const std::shared_ptr<::NetworkActivityManagerInterface> & c_networkActivityManager) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setNetworkActivityManager:(::djinni_generated::NetworkActivityManager::fromCpp(c_networkActivityManager))];
+            [djinni_private_get_proxied_objc_object() setNetworkActivityManager:(::djinni_generated::NetworkActivityManagerInterface::fromCpp(c_networkActivityManager))];
         }
     }
     void forceReload() override

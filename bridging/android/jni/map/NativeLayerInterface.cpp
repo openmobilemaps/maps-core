@@ -6,7 +6,7 @@
 #include "NativeLayerReadyState.h"
 #include "NativeMapInterface.h"
 #include "NativeMaskingObjectInterface.h"
-#include "NativeNetworkActivityManager.h"
+#include "NativeNetworkActivityManagerInterface.h"
 #include "NativeRectI.h"
 #include "NativeRenderPassInterface.h"
 #include "NativeRenderTargetTexture.h"
@@ -135,12 +135,12 @@ void NativeLayerInterface::JavaProxy::enableAnimations(bool c_enabled) {
                            ::djinni::get(::djinni::Bool::fromCpp(jniEnv, c_enabled)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
-void NativeLayerInterface::JavaProxy::setNetworkActivityManager(const std::shared_ptr<::NetworkActivityManager> & c_networkActivityManager) {
+void NativeLayerInterface::JavaProxy::setNetworkActivityManager(const std::shared_ptr<::NetworkActivityManagerInterface> & c_networkActivityManager) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeLayerInterface>::get();
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_setNetworkActivityManager,
-                           ::djinni::get(::djinni_generated::NativeNetworkActivityManager::fromCpp(jniEnv, c_networkActivityManager)));
+                           ::djinni::get(::djinni_generated::NativeNetworkActivityManagerInterface::fromCpp(jniEnv, c_networkActivityManager)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
 void NativeLayerInterface::JavaProxy::forceReload() {
@@ -298,12 +298,12 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInterfac
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInterface_00024CppProxy_native_1setNetworkActivityManager(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeNetworkActivityManager::JniType j_networkActivityManager)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInterface_00024CppProxy_native_1setNetworkActivityManager(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeNetworkActivityManagerInterface::JniType j_networkActivityManager)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::LayerInterface>(nativeRef);
-        ref->setNetworkActivityManager(::djinni_generated::NativeNetworkActivityManager::toCpp(jniEnv, j_networkActivityManager));
+        ref->setNetworkActivityManager(::djinni_generated::NativeNetworkActivityManagerInterface::toCpp(jniEnv, j_networkActivityManager));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

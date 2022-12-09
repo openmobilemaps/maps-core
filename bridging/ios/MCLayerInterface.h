@@ -3,7 +3,7 @@
 
 #import "MCLayerReadyState.h"
 #import "MCMaskingObjectInterface.h"
-#import "MCNetworkActivityManager.h"
+#import "MCNetworkActivityManagerInterface.h"
 #import "MCRectI.h"
 #import "MCRenderPassInterface.h"
 #import <Foundation/Foundation.h>
@@ -44,7 +44,7 @@
 
 - (void)enableAnimations:(BOOL)enabled;
 
-- (void)setNetworkActivityManager:(nullable MCNetworkActivityManager *)networkActivityManager;
+- (void)setNetworkActivityManager:(nullable MCNetworkActivityManagerInterface *)networkActivityManager;
 
 - (void)forceReload;
 

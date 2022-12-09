@@ -7,7 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "MCLayerReadyState+Private.h"
-#import "MCNetworkActivityManager+Private.h"
+#import "MCNetworkActivityManagerInterface+Private.h"
 #import "MCRectCoord+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -88,9 +88,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setNetworkActivityManager:(nullable MCNetworkActivityManager *)networkActivityManager {
+- (void)setNetworkActivityManager:(nullable MCNetworkActivityManagerInterface *)networkActivityManager {
     try {
-        _cppRefHandle.get()->setNetworkActivityManager(::djinni_generated::NetworkActivityManager::toCpp(networkActivityManager));
+        _cppRefHandle.get()->setNetworkActivityManager(::djinni_generated::NetworkActivityManagerInterface::toCpp(networkActivityManager));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

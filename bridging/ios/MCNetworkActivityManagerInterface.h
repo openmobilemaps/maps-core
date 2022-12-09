@@ -3,13 +3,13 @@
 
 #import "MCTiledLayerError.h"
 #import <Foundation/Foundation.h>
-@class MCNetworkActivityManager;
-@protocol MCNetworkActivityListener;
+@class MCNetworkActivityManagerInterface;
+@protocol MCNetworkActivityListenerInterface;
 
 
-@interface MCNetworkActivityManager : NSObject
+@interface MCNetworkActivityManagerInterface : NSObject
 
-+ (nullable MCNetworkActivityManager *)create;
++ (nullable MCNetworkActivityManagerInterface *)create;
 
 - (void)addTiledLayerError:(nonnull MCTiledLayerError *)error;
 
@@ -19,9 +19,9 @@
 
 - (void)clearAllErrors;
 
-- (void)addNetworkActivityListener:(nullable id<MCNetworkActivityListener>)listener;
+- (void)addNetworkActivityListener:(nullable id<MCNetworkActivityListenerInterface>)listener;
 
-- (void)removeNetworkActivityListener:(nullable id<MCNetworkActivityListener>)listener;
+- (void)removeNetworkActivityListener:(nullable id<MCNetworkActivityListenerInterface>)listener;
 
 - (void)updateRemainingTasks:(nonnull NSString *)layerName
                    taskCount:(int32_t)taskCount;

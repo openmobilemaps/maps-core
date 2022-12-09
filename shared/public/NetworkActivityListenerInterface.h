@@ -8,9 +8,9 @@
 struct TasksProgressInfo;
 struct TiledLayerError;
 
-class NetworkActivityListener {
+class NetworkActivityListenerInterface {
 public:
-    virtual ~NetworkActivityListener() {}
+    virtual ~NetworkActivityListenerInterface() {}
 
     virtual void onTiledLayerErrorStateChanged(const std::vector<TiledLayerError> & errors) = 0;
 

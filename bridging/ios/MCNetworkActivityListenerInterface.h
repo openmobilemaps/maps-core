@@ -6,7 +6,7 @@
 #import <Foundation/Foundation.h>
 
 
-@protocol MCNetworkActivityListener
+@protocol MCNetworkActivityListenerInterface
 
 - (void)onTiledLayerErrorStateChanged:(nonnull NSArray<MCTiledLayerError *> *)errors;
 

@@ -5,7 +5,7 @@ package io.openmobilemaps.mapscore.shared.map
 
 import java.util.concurrent.atomic.AtomicBoolean
 
-abstract class NetworkActivityManager {
+abstract class NetworkActivityManagerInterface {
 
     abstract fun addTiledLayerError(error: TiledLayerError)
 
@@ -15,20 +15,20 @@ abstract class NetworkActivityManager {
 
     abstract fun clearAllErrors()
 
-    abstract fun addNetworkActivityListener(listener: NetworkActivityListener)
+    abstract fun addNetworkActivityListener(listener: NetworkActivityListenerInterface)
 
-    abstract fun removeNetworkActivityListener(listener: NetworkActivityListener)
+    abstract fun removeNetworkActivityListener(listener: NetworkActivityListenerInterface)
 
     abstract fun updateRemainingTasks(layerName: String, taskCount: Int)
 
     companion object {
         @JvmStatic
-        fun create(): NetworkActivityManager {
+        fun create(): NetworkActivityManagerInterface {
             return CppProxy.create()
         }
     }
 
-    private class CppProxy : NetworkActivityManager {
+    private class CppProxy : NetworkActivityManagerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 
@@ -70,17 +70,17 @@ abstract class NetworkActivityManager {
         }
         private external fun native_clearAllErrors(_nativeRef: Long)
 
-        override fun addNetworkActivityListener(listener: NetworkActivityListener) {
+        override fun addNetworkActivityListener(listener: NetworkActivityListenerInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_addNetworkActivityListener(this.nativeRef, listener)
         }
-        private external fun native_addNetworkActivityListener(_nativeRef: Long, listener: NetworkActivityListener)
+        private external fun native_addNetworkActivityListener(_nativeRef: Long, listener: NetworkActivityListenerInterface)
 
-        override fun removeNetworkActivityListener(listener: NetworkActivityListener) {
+        override fun removeNetworkActivityListener(listener: NetworkActivityListenerInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_removeNetworkActivityListener(this.nativeRef, listener)
         }
-        private external fun native_removeNetworkActivityListener(_nativeRef: Long, listener: NetworkActivityListener)
+        private external fun native_removeNetworkActivityListener(_nativeRef: Long, listener: NetworkActivityListenerInterface)
 
         override fun updateRemainingTasks(layerName: String, taskCount: Int) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
@@ -90,7 +90,7 @@ abstract class NetworkActivityManager {
 
         companion object {
             @JvmStatic
-            external fun create(): NetworkActivityManager
+            external fun create(): NetworkActivityManagerInterface
         }
     }
 }

@@ -1002,7 +1002,7 @@ template<class T, class L, class R>
 }
 
 template<class T, class L, class R>
-void Tiled2dMapSource<T, L, R>::setNetworkActivityManager(const std::shared_ptr<::NetworkActivityManager> &networkActivityManager) {
+void Tiled2dMapSource<T, L, R>::setNetworkActivityManager(const std::shared_ptr<::NetworkActivityManagerInterface> &networkActivityManager) {
     this->networkActivityManager = networkActivityManager;
 }
 

@@ -9,21 +9,21 @@
  */
 #pragma once
 
-#include "NetworkActivityManager.h"
-#include "NetworkActivityListener.h"
+#include "NetworkActivityManagerInterface.h"
+#include "NetworkActivityListenerInterface.h"
 #include "TiledLayerError.h"
 #include <mutex>
 #include <unordered_map>
 #include <vector>
 #include "TasksProgressInfo.h"
 
-class NetworkActivityManagerImpl : public NetworkActivityManager, public std::enable_shared_from_this<NetworkActivityManagerImpl> {
+class NetworkActivityManager : public NetworkActivityManagerInterface, public std::enable_shared_from_this<NetworkActivityManager> {
   public:
-    NetworkActivityManagerImpl(){};
+    NetworkActivityManager(){};
 
-    virtual void addNetworkActivityListener(const std::shared_ptr<NetworkActivityListener> &listener) override;
+    virtual void addNetworkActivityListener(const std::shared_ptr<NetworkActivityListenerInterface> &listener) override;
 
-    virtual void removeNetworkActivityListener(const std::shared_ptr<NetworkActivityListener> &listener) override;
+    virtual void removeNetworkActivityListener(const std::shared_ptr<NetworkActivityListenerInterface> &listener) override;
 
     virtual void addTiledLayerError(const TiledLayerError &error) override;
 
@@ -40,7 +40,7 @@ class NetworkActivityManagerImpl : public NetworkActivityManager, public std::en
     std::unordered_map<std::string, TiledLayerError> tiledLayerErrors;
     std::vector<TasksProgressInfo> progressInfos;
     int32_t currentMaxTasks = 0;
-    std::vector<std::shared_ptr<NetworkActivityListener>> listeners;
+    std::vector<std::shared_ptr<NetworkActivityListenerInterface>> listeners;
 
     bool containsRect(const ::RectCoord &outer, const ::RectCoord &inner);
     void notifyListeners();

@@ -16,7 +16,7 @@
 @extern "../yaml/color.yaml"
 @extern "../yaml/render_pass_interface.yaml"
 @extern "../yaml/masking_object_interface.yaml"
-@extern "../yaml/network_activity_manager.yaml"
+@extern "../yaml/network_activity_manager_interface.yaml"
 @extern "../yaml/texture_holder_interface.yaml"
 
 
@@ -110,7 +110,7 @@ layer_interface = interface +c +j +o {
     is_ready_to_render_offscreen() : layer_ready_state;
     enable_animations(enabled: bool);
 
-    set_network_activity_manager(network_activity_manager: network_activity_manager);
+    set_network_activity_manager(network_activity_manager: network_activity_manager_interface);
     force_reload();
 }
 
