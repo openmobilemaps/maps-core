@@ -67,14 +67,42 @@ void NetworkActivityManagerImpl::clearAllErrors() {
 
 void NetworkActivityManagerImpl::updateRemainingTasks(const std::string &layerName, int32_t taskCount) {
     std::lock_guard<std::recursive_mutex> lock_guard(mutex);
-    auto it = std::find_if(remainingTasks.begin(), remainingTasks.end(), [&layerName] (const RemainingTasksInfo& i) { return i.layerName == layerName; });
-    if (it != remainingTasks.end()) {
-        it->count = taskCount;
+    auto it = std::find_if(progressInfos.begin(), progressInfos.end(), [&layerName] (const TasksProgressInfo& i) { return i.layerName == layerName; });
+    if (it != progressInfos.end()) {
+        it->remainingCount = taskCount;
+        if (taskCount == 0) {
+            it->maxCount = 0;
+            it->progress = 1.0;
+        } else {
+            it->maxCount = std::max(it->maxCount, taskCount);
+            it->progress = (float)(it->maxCount - taskCount) / (float)it->maxCount;
+        }
     } else {
-        remainingTasks.emplace_back(RemainingTasksInfo(layerName, taskCount));
+        if (taskCount == 0) {
+            progressInfos.emplace_back(TasksProgressInfo(layerName, 0, 0, 1.0));
+        } else {
+            progressInfos.emplace_back(TasksProgressInfo(layerName, taskCount, taskCount, 0.0));
+        }
     }
+
+    int32_t totalRemaining = 0;
+    int32_t totalMax = 0;
+    for (const auto &pi: progressInfos) {
+        totalRemaining += pi.remainingCount;
+        totalMax += pi.maxCount;
+    }
+
+    float totalProgress;
+    if (totalMax == 0) {
+        currentMaxTasks = 0;
+        totalProgress = 1;
+    } else {
+        currentMaxTasks = std::max(currentMaxTasks, totalMax);
+        totalProgress = (float)(currentMaxTasks - totalRemaining) / (float)currentMaxTasks;
+    }
+
     for (const auto &l : listeners) {
-        l->onRemainingTasksChanged(remainingTasks);
+        l->onTasksProgressChanged(totalProgress, progressInfos);
     }
 }
 

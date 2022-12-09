@@ -3,7 +3,9 @@
 
 package io.openmobilemaps.mapscore.shared.map
 
-data class RemainingTasksInfo(
+data class TasksProgressInfo(
     var layerName: String,
-    var count: Int,
+    var maxCount: Int,
+    var remainingCount: Int,
+    var progress: Float,
 )

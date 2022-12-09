@@ -3,7 +3,7 @@
 
 #include "NativeNetworkActivityListener.h"  // my header
 #include "Marshal.hpp"
-#include "NativeRemainingTasksInfo.h"
+#include "NativeTasksProgressInfo.h"
 #include "NativeTiledLayerError.h"
 
 namespace djinni_generated {
@@ -24,12 +24,13 @@ void NativeNetworkActivityListener::JavaProxy::onTiledLayerErrorStateChanged(con
                            ::djinni::get(::djinni::List<::djinni_generated::NativeTiledLayerError>::fromCpp(jniEnv, c_errors)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
-void NativeNetworkActivityListener::JavaProxy::onRemainingTasksChanged(const std::vector<::RemainingTasksInfo> & c_remainingTasks) {
+void NativeNetworkActivityListener::JavaProxy::onTasksProgressChanged(float c_totalProgress, const std::vector<::TasksProgressInfo> & c_tasksProgressInfos) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeNetworkActivityListener>::get();
-    jniEnv->CallVoidMethod(Handle::get().get(), data.method_onRemainingTasksChanged,
-                           ::djinni::get(::djinni::List<::djinni_generated::NativeRemainingTasksInfo>::fromCpp(jniEnv, c_remainingTasks)));
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_onTasksProgressChanged,
+                           ::djinni::get(::djinni::F32::fromCpp(jniEnv, c_totalProgress)),
+                           ::djinni::get(::djinni::List<::djinni_generated::NativeTasksProgressInfo>::fromCpp(jniEnv, c_tasksProgressInfos)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
 
@@ -50,12 +51,13 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_NetworkActivi
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_NetworkActivityListener_00024CppProxy_native_1onRemainingTasksChanged(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_remainingTasks)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_NetworkActivityListener_00024CppProxy_native_1onTasksProgressChanged(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jfloat j_totalProgress, jobject j_tasksProgressInfos)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::NetworkActivityListener>(nativeRef);
-        ref->onRemainingTasksChanged(::djinni::List<::djinni_generated::NativeRemainingTasksInfo>::toCpp(jniEnv, j_remainingTasks));
+        ref->onTasksProgressChanged(::djinni::F32::toCpp(jniEnv, j_totalProgress),
+                                    ::djinni::List<::djinni_generated::NativeTasksProgressInfo>::toCpp(jniEnv, j_tasksProgressInfos));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

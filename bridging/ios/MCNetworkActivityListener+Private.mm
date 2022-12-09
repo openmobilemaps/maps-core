@@ -7,7 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
-#import "MCRemainingTasksInfo+Private.h"
+#import "MCTasksProgressInfo+Private.h"
 #import "MCTiledLayerError+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -39,9 +39,11 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)onRemainingTasksChanged:(nonnull NSArray<MCRemainingTasksInfo *> *)remainingTasks {
+- (void)onTasksProgressChanged:(float)totalProgress
+            tasksProgressInfos:(nonnull NSArray<MCTasksProgressInfo *> *)tasksProgressInfos {
     try {
-        _cppRefHandle.get()->onRemainingTasksChanged(::djinni::List<::djinni_generated::RemainingTasksInfo>::toCpp(remainingTasks));
+        _cppRefHandle.get()->onTasksProgressChanged(::djinni::F32::toCpp(totalProgress),
+                                                    ::djinni::List<::djinni_generated::TasksProgressInfo>::toCpp(tasksProgressInfos));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -60,10 +62,11 @@ public:
             [djinni_private_get_proxied_objc_object() onTiledLayerErrorStateChanged:(::djinni::List<::djinni_generated::TiledLayerError>::fromCpp(c_errors))];
         }
     }
-    void onRemainingTasksChanged(const std::vector<::RemainingTasksInfo> & c_remainingTasks) override
+    void onTasksProgressChanged(float c_totalProgress, const std::vector<::TasksProgressInfo> & c_tasksProgressInfos) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() onRemainingTasksChanged:(::djinni::List<::djinni_generated::RemainingTasksInfo>::fromCpp(c_remainingTasks))];
+            [djinni_private_get_proxied_objc_object() onTasksProgressChanged:(::djinni::F32::fromCpp(c_totalProgress))
+                                                          tasksProgressInfos:(::djinni::List<::djinni_generated::TasksProgressInfo>::fromCpp(c_tasksProgressInfos))];
         }
     }
 };

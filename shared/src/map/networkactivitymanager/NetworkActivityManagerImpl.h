@@ -15,7 +15,7 @@
 #include <mutex>
 #include <unordered_map>
 #include <vector>
-#include "RemainingTasksInfo.h"
+#include "TasksProgressInfo.h"
 
 class NetworkActivityManagerImpl : public NetworkActivityManager, public std::enable_shared_from_this<NetworkActivityManagerImpl> {
   public:
@@ -38,7 +38,8 @@ class NetworkActivityManagerImpl : public NetworkActivityManager, public std::en
   private:
     std::recursive_mutex mutex;
     std::unordered_map<std::string, TiledLayerError> tiledLayerErrors;
-    std::vector<RemainingTasksInfo> remainingTasks;
+    std::vector<TasksProgressInfo> progressInfos;
+    int32_t currentMaxTasks = 0;
     std::vector<std::shared_ptr<NetworkActivityListener>> listeners;
 
     bool containsRect(const ::RectCoord &outer, const ::RectCoord &inner);

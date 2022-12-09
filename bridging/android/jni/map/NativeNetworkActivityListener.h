@@ -34,7 +34,7 @@ private:
         ~JavaProxy();
 
         void onTiledLayerErrorStateChanged(const std::vector<::TiledLayerError> & errors) override;
-        void onRemainingTasksChanged(const std::vector<::RemainingTasksInfo> & remainingTasks) override;
+        void onTasksProgressChanged(float totalProgress, const std::vector<::TasksProgressInfo> & tasksProgressInfos) override;
 
     private:
         friend ::djinni::JniInterface<::NetworkActivityListener, ::djinni_generated::NativeNetworkActivityListener>;
@@ -42,7 +42,7 @@ private:
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/NetworkActivityListener") };
     const jmethodID method_onTiledLayerErrorStateChanged { ::djinni::jniGetMethodID(clazz.get(), "onTiledLayerErrorStateChanged", "(Ljava/util/ArrayList;)V") };
-    const jmethodID method_onRemainingTasksChanged { ::djinni::jniGetMethodID(clazz.get(), "onRemainingTasksChanged", "(Ljava/util/ArrayList;)V") };
+    const jmethodID method_onTasksProgressChanged { ::djinni::jniGetMethodID(clazz.get(), "onTasksProgressChanged", "(FLjava/util/ArrayList;)V") };
 };
 
 }  // namespace djinni_generated

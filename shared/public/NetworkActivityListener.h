@@ -5,7 +5,7 @@
 
 #include <vector>
 
-struct RemainingTasksInfo;
+struct TasksProgressInfo;
 struct TiledLayerError;
 
 class NetworkActivityListener {
@@ -14,5 +14,5 @@ public:
 
     virtual void onTiledLayerErrorStateChanged(const std::vector<TiledLayerError> & errors) = 0;
 
-    virtual void onRemainingTasksChanged(const std::vector<RemainingTasksInfo> & remainingTasks) = 0;
+    virtual void onTasksProgressChanged(float totalProgress, const std::vector<TasksProgressInfo> & tasksProgressInfos) = 0;
 };

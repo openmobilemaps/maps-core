@@ -21,13 +21,15 @@ network_activity_manager = interface +c
 network_activity_listener = interface +c +j +o
 {
     on_tiled_layer_error_state_changed(errors: list<tiled_layer_error>);
-    on_remaining_tasks_changed(remaining_tasks: list<remaining_tasks_info>);
+    on_tasks_progress_changed(total_progress: f32, tasks_progress_infos: list<tasks_progress_info>);
 }
 
-remaining_tasks_info = record
+tasks_progress_info = record
 {
     layer_name: string;
-    count: i32;
+    max_count: i32;
+    remaining_count: i32;
+    progress: f32;
 }
 
 tiled_layer_error = record

@@ -9,7 +9,7 @@ abstract class NetworkActivityListener {
 
     abstract fun onTiledLayerErrorStateChanged(errors: ArrayList<TiledLayerError>)
 
-    abstract fun onRemainingTasksChanged(remainingTasks: ArrayList<RemainingTasksInfo>)
+    abstract fun onTasksProgressChanged(totalProgress: Float, tasksProgressInfos: ArrayList<TasksProgressInfo>)
 
     private class CppProxy : NetworkActivityListener {
         private val nativeRef: Long
@@ -35,10 +35,10 @@ abstract class NetworkActivityListener {
         }
         private external fun native_onTiledLayerErrorStateChanged(_nativeRef: Long, errors: ArrayList<TiledLayerError>)
 
-        override fun onRemainingTasksChanged(remainingTasks: ArrayList<RemainingTasksInfo>) {
+        override fun onTasksProgressChanged(totalProgress: Float, tasksProgressInfos: ArrayList<TasksProgressInfo>) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_onRemainingTasksChanged(this.nativeRef, remainingTasks)
+            native_onTasksProgressChanged(this.nativeRef, totalProgress, tasksProgressInfos)
         }
-        private external fun native_onRemainingTasksChanged(_nativeRef: Long, remainingTasks: ArrayList<RemainingTasksInfo>)
+        private external fun native_onTasksProgressChanged(_nativeRef: Long, totalProgress: Float, tasksProgressInfos: ArrayList<TasksProgressInfo>)
     }
 }
