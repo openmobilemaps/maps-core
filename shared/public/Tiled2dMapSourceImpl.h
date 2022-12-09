@@ -13,7 +13,8 @@
 #include "Tiled2dMapSource.h"
 #include "TiledLayerError.h"
 #include <algorithm>
-
+#include <functional>
+#include <numeric>
 #include "PolygonCoord.h"
 #include <iostream>
 #include "gpc.h"
@@ -479,6 +480,10 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
             }
         }
     }
+    
+    if (networkActivityManager) {
+        networkActivityManager->updateRemainingTasks(layerConfig->getLayerName(), getRemainingTasks());
+    }
 
     //if we removed tiles, we potentially need to update the tilemasks - also if no new tile is loaded
     updateTileMasks();
@@ -492,7 +497,6 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
 template<class T, class L, class R>
 std::optional<PrioritizedTiled2dMapTileInfo> Tiled2dMapSource<T, L, R>::dequeueLoadingTask(size_t loaderIndex) {
 
-    int32_t remainingTasks = 0;
     std::optional<PrioritizedTiled2dMapTileInfo> result;
     {
         std::lock_guard<std::recursive_mutex> lock(loadingQueueMutex);
@@ -502,16 +506,8 @@ std::optional<PrioritizedTiled2dMapTileInfo> Tiled2dMapSource<T, L, R>::dequeueL
             result = *tile;
             loadingQueues[loaderIndex].erase(tile);
         }
-
-        for(auto const &[index, loadingQueue]: loadingQueues) {
-            remainingTasks += loadingQueue.size();
-        }
     }
-
-    if (networkActivityManager) {
-        networkActivityManager->updateRemainingTasks(layerConfig->getLayerName(), remainingTasks);
-    }
-
+    
     if (!result.has_value()) {
         std::vector<PrioritizedTiled2dMapTileInfo> readyErrorTiles;
         {
@@ -538,6 +534,10 @@ std::optional<PrioritizedTiled2dMapTileInfo> Tiled2dMapSource<T, L, R>::dequeueL
     {
         std::lock_guard<std::recursive_mutex> lock(currentlyLoadingMutex);
         currentlyLoading.insert(result->tileInfo);
+    }
+
+    if (networkActivityManager) {
+        networkActivityManager->updateRemainingTasks(layerConfig->getLayerName(), getRemainingTasks());
     }
 
     return result;
@@ -642,6 +642,9 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(size_t loaderIndex) {
                         }
                     }
                 }
+                if (networkActivityManager) {
+                    networkActivityManager->updateRemainingTasks(layerConfig->getLayerName(), getRemainingTasks());
+                }
                 break;
             }
             case LoaderStatus::ERROR_400:
@@ -679,7 +682,9 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(size_t loaderIndex) {
                     std::lock_guard<std::recursive_mutex> lock(dispatchedTasksMutex);
                     dispatchedTasks[loaderIndex]++;
                 }
+                
                 if (networkActivityManager) {
+                    networkActivityManager->updateRemainingTasks(layerConfig->getLayerName(), getRemainingTasks());
                     networkActivityManager->addTiledLayerError(TiledLayerError(status,
                                                                      loaderResult.errorCode,
                                                                      layerConfig->getLayerName(),
@@ -1024,5 +1029,18 @@ void Tiled2dMapSource<T, L, R>::forceReload() {
                                                             }));
         }
     }
+}
 
+template<class T, class L, class R>
+int Tiled2dMapSource<T, L, R>::getRemainingTasks() {
+    int32_t remainingTasks = 0;
+    {
+        std::lock_guard<std::recursive_mutex> lock(loadingQueueMutex);
+        remainingTasks = std::accumulate(loadingQueues.begin(), loadingQueues.end(), remainingTasks, [](int cur, auto const &q) { return cur + q.second.size(); } );
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lock(errorTilesMutex);
+        remainingTasks = std::accumulate(errorTiles.begin(), errorTiles.end(), remainingTasks, [](int cur, auto const &q) { return cur + q.second.size(); } );
+    }
+    return remainingTasks;
 }
