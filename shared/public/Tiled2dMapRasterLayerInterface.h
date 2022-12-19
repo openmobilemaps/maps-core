@@ -14,6 +14,7 @@
 #include <vector>
 
 class Tiled2dMapRasterLayerCallbackInterface;
+class Tiled2dMapRasterLayerShaderFactory;
 
 class Tiled2dMapRasterLayerInterface {
 public:
@@ -27,6 +28,15 @@ public:
 
     /** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
     static std::shared_ptr<Tiled2dMapRasterLayerInterface> create(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::vector<std::shared_ptr<::LoaderInterface>> & loaders);
+
+    /** interpolated version, the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
+    static std::shared_ptr<Tiled2dMapRasterLayerInterface> createWithMaskInterpolated(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::vector<std::shared_ptr<::LoaderInterface>> & loaders, const std::shared_ptr<::MaskingObjectInterface> & mask);
+
+    /** interpolated version, the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
+    static std::shared_ptr<Tiled2dMapRasterLayerInterface> createWithShaderInterpolated(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::vector<std::shared_ptr<::LoaderInterface>> & loaders, const std::shared_ptr<Tiled2dMapRasterLayerShaderFactory> & shaderFactory);
+
+    /** interpolated version, the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
+    static std::shared_ptr<Tiled2dMapRasterLayerInterface> createInterpolated(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::vector<std::shared_ptr<::LoaderInterface>> & loaders);
 
     virtual std::shared_ptr<::LayerInterface> asLayerInterface() = 0;
 
@@ -48,7 +58,7 @@ public:
 
     virtual std::optional<int32_t> getMaxZoomLevelIdentifier() = 0;
 
-    virtual void setT(int32_t t) = 0;
+    virtual void setT(double t) = 0;
 
     virtual std::shared_ptr<::Tiled2dMapLayerConfig> getConfig() = 0;
 };

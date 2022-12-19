@@ -20,17 +20,17 @@ private class WeakOperation {
 }
 
 open class MCScheduler: MCSchedulerInterface {
-    private let ioQueue = OperationQueue(concurrentOperations: 64, qos: .userInteractive)
+    private let ioQueue = OperationQueue(concurrentOperations: 64, qos: .userInitiated)
 
-    private let computationQueue = OperationQueue(concurrentOperations: 20, qos: .userInteractive)
+    private let computationQueue = OperationQueue(concurrentOperations: 20, qos: .userInitiated)
 
     private let graphicsQueue = OperationQueue.main
 
-    private let internalSchedulerQueue = DispatchQueue(label: "internalSchedulerQueue")
+    private let internalSchedulerQueue = DispatchQueue(label: "internalSchedulerQueue", qos: .userInitiated)
 
-    private var outstandingOperations: [String: WeakOperation] = [:]
+    private var pendingOperations: [String: WeakOperation] = [:]
 
-    public init() {
+     public init() {
     }
 
     public func addTasks(_ tasks: [MCTaskInterface]) {
@@ -64,15 +64,21 @@ open class MCScheduler: MCSchedulerInterface {
                     fatalError("unknown priority")
             }
 
-            self.outstandingOperations[config.id] = .init(operation)
+            self.pendingOperations[config.id] = .init(operation)
 
             operation.completionBlock = { [weak self] in
                 guard let self = self else { return }
                 self.internalSchedulerQueue.async { [weak self] in
                     guard let self = self else { return }
-                    self.outstandingOperations.removeValue(forKey: config.id)
+                    self.pendingOperations.removeValue(forKey: config.id)
                 }
             }
+
+            #if DEBUG
+            operation.completionBlock = {
+                print("MCScheduler: Queue Count After", self.ioQueue.operations.count, self.computationQueue.operations.count, self.graphicsQueue.operations.count)
+            }
+            #endif
 
             switch config.executionEnvironment {
                 case .IO:
@@ -84,22 +90,26 @@ open class MCScheduler: MCSchedulerInterface {
                 @unknown default:
                     fatalError("unexpected executionEnvironment")
             }
+            
+            #if DEBUG
+            print("queue count before", self.ioQueue.operations.count, self.computationQueue.operations.count, self.graphicsQueue.operations.count)
+            #endif
         }
     }
 
     public func removeTask(_ id: String) {
         internalSchedulerQueue.async {
-            self.outstandingOperations[id]?.operation?.cancel()
-            self.outstandingOperations.removeValue(forKey: id)
+            self.pendingOperations[id]?.operation?.cancel()
+            self.pendingOperations.removeValue(forKey: id)
         }
     }
 
     public func clear() {
         internalSchedulerQueue.async {
-            self.outstandingOperations.forEach {
+            self.pendingOperations.forEach {
                 $1.operation?.cancel()
             }
-            self.outstandingOperations.removeAll()
+            self.pendingOperations.removeAll()
         }
     }
 

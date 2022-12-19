@@ -9,6 +9,7 @@
 #include "NativeShaderProgramInterface.h"
 #include "NativeTiled2dMapLayerConfig.h"
 #include "NativeTiled2dMapRasterLayerCallbackInterface.h"
+#include "NativeTiled2dMapRasterLayerShaderFactory.h"
 
 namespace djinni_generated {
 
@@ -53,6 +54,38 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_til
         DJINNI_FUNCTION_PROLOGUE0(jniEnv);
         auto r = ::Tiled2dMapRasterLayerInterface::create(::djinni_generated::NativeTiled2dMapLayerConfig::toCpp(jniEnv, j_layerConfig),
                                                           ::djinni::List<::djinni_generated::NativeLoaderInterface>::toCpp(jniEnv, j_loaders));
+        return ::djinni::release(::djinni_generated::NativeTiled2dMapRasterLayerInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_createWithMaskInterpolated(JNIEnv* jniEnv, jobject /*this*/, ::djinni_generated::NativeTiled2dMapLayerConfig::JniType j_layerConfig, jobject j_loaders, ::djinni_generated::NativeMaskingObjectInterface::JniType j_mask)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE0(jniEnv);
+        auto r = ::Tiled2dMapRasterLayerInterface::createWithMaskInterpolated(::djinni_generated::NativeTiled2dMapLayerConfig::toCpp(jniEnv, j_layerConfig),
+                                                                              ::djinni::List<::djinni_generated::NativeLoaderInterface>::toCpp(jniEnv, j_loaders),
+                                                                              ::djinni_generated::NativeMaskingObjectInterface::toCpp(jniEnv, j_mask));
+        return ::djinni::release(::djinni_generated::NativeTiled2dMapRasterLayerInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_createWithShaderInterpolated(JNIEnv* jniEnv, jobject /*this*/, ::djinni_generated::NativeTiled2dMapLayerConfig::JniType j_layerConfig, jobject j_loaders, jobject j_shaderFactory)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE0(jniEnv);
+        auto r = ::Tiled2dMapRasterLayerInterface::createWithShaderInterpolated(::djinni_generated::NativeTiled2dMapLayerConfig::toCpp(jniEnv, j_layerConfig),
+                                                                                ::djinni::List<::djinni_generated::NativeLoaderInterface>::toCpp(jniEnv, j_loaders),
+                                                                                ::djinni_generated::NativeTiled2dMapRasterLayerShaderFactory::toCpp(jniEnv, j_shaderFactory));
+        return ::djinni::release(::djinni_generated::NativeTiled2dMapRasterLayerInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_createInterpolated(JNIEnv* jniEnv, jobject /*this*/, ::djinni_generated::NativeTiled2dMapLayerConfig::JniType j_layerConfig, jobject j_loaders)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE0(jniEnv);
+        auto r = ::Tiled2dMapRasterLayerInterface::createInterpolated(::djinni_generated::NativeTiled2dMapLayerConfig::toCpp(jniEnv, j_layerConfig),
+                                                                      ::djinni::List<::djinni_generated::NativeLoaderInterface>::toCpp(jniEnv, j_loaders));
         return ::djinni::release(::djinni_generated::NativeTiled2dMapRasterLayerInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
@@ -152,12 +185,12 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_til
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_native_1setT(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jint j_t)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_native_1setT(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jdouble j_t)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapRasterLayerInterface>(nativeRef);
-        ref->setT(::djinni::I32::toCpp(jniEnv, j_t));
+        ref->setT(::djinni::F64::toCpp(jniEnv, j_t));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

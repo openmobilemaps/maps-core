@@ -52,7 +52,7 @@ class Polygon2dOpenGl : public GraphicsObjectInterface,
 
     void removeGlBuffers();
 
-    void drawPolygon(std::shared_ptr<OpenGlContext> openGlContext, int program, int64_t mvpMatrix);
+    void drawPolygon(std::shared_ptr<OpenGlContext> openGlContext, const ::RenderPassConfig &renderPass, int program, int64_t mvpMatrix);
 
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
 

@@ -39,6 +39,10 @@ class SimpleLayerInterface : public LayerInterface {
 
     virtual float getAlpha() { return 1.0; };
 
+    virtual std::vector<std::shared_ptr<RenderTargetTexture>> additionalTargets() {
+        return {};
+    };
+
     /** optional rectangle, remove scissoring when not set */
     virtual void setScissorRect(const std::optional<::RectI> & scissorRect) {};
 
@@ -46,7 +50,7 @@ class SimpleLayerInterface : public LayerInterface {
 
     virtual void enableAnimations(bool enabled) {}
 
-    virtual void setErrorManager(const std::shared_ptr<::ErrorManager> & errorManager) {}
+    virtual void setNetworkActivityManager(const std::shared_ptr< ::NetworkActivityManagerInterface> &networkActivityManager) {}
 
     virtual void forceReload() {}
 };

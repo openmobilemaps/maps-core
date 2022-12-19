@@ -12,7 +12,7 @@ import MapCoreSharedModule
 import MetalKit
 
 /// A 2D point in the X-Y coordinate system carrying a texture coordinate
-struct Vertex: Equatable {
+public struct Vertex: Equatable {
     /// The 2D position of the vertex in the plane
     var position: SIMD2<Float>
     /// The texture coordinates mapped to the vertex in U-V coordinate space
@@ -26,7 +26,7 @@ struct Vertex: Equatable {
     var lineEnd: SIMD2<Float>
 
     /// Returns the descriptor to use when passed to a metal shader
-    static let descriptor: MTLVertexDescriptor = {
+    public static let descriptor: MTLVertexDescriptor = {
         let vertexDescriptor = MTLVertexDescriptor()
         var offset = 0
         let bufferIndex = 0
@@ -123,7 +123,7 @@ extension Vertex {
 }
 
 extension Vertex: CustomDebugStringConvertible {
-    var debugDescription: String {
+    public var debugDescription: String {
         "<XY: (\(x), \(y)), UV: (\(textureU), \(textureV)), n: (\(normalX), \(normalY))>"
     }
 }

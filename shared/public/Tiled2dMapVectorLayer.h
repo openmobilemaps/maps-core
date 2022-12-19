@@ -32,6 +32,13 @@ public:
 
     Tiled2dMapVectorLayer(const std::string &layerName,
                           const std::string &remoteStyleJsonUrl,
+                          const std::vector <std::shared_ptr<::LoaderInterface>> &loaders,
+                          const std::shared_ptr<::FontLoaderInterface> &fontLoader,
+                          double dpFactor,
+                          int numT);
+
+    Tiled2dMapVectorLayer(const std::string &layerName,
+                          const std::string &remoteStyleJsonUrl,
                           const std::string &fallbackStyleJsonString,
                           const std::vector <std::shared_ptr<::LoaderInterface>> &loaders,
                           double dpFactor);
@@ -80,6 +87,9 @@ public:
     void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription);
 
     std::optional<FeatureContext> getFeatureContext(int64_t identifier);
+
+    void setT(double t) override;
+
 protected:
     virtual std::shared_ptr<LayerInterface> getLayerForDescription(const std::shared_ptr<VectorLayerDescription> &layerDescription);
 
@@ -92,6 +102,7 @@ protected:
 
     std::shared_ptr<Tiled2dMapVectorSource> vectorTileSource;
 
+    int numT;
     const std::vector<std::shared_ptr<::LoaderInterface>> loaders;
 
     virtual std::optional<TiledLayerError> loadStyleJson();
@@ -144,6 +155,8 @@ private:
     std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate;
 
     float alpha;
+
+    double curTWithFraction;
 };
 
 

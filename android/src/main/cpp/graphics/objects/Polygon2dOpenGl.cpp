@@ -102,14 +102,14 @@ void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> 
     glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
-    drawPolygon(openGlContext, programHandle, mvpMatrix);
+    drawPolygon(openGlContext, renderPass, programHandle, mvpMatrix);
 }
 
-void Polygon2dOpenGl::drawPolygon(std::shared_ptr<OpenGlContext> openGlContext, int program, int64_t mvpMatrix) {
+void Polygon2dOpenGl::drawPolygon(std::shared_ptr<OpenGlContext> openGlContext, const ::RenderPassConfig &renderPass, int program, int64_t mvpMatrix) {
     // Add program to OpenGL environment
     glUseProgram(program);
 
-    shaderProgram->preRender(openGlContext);
+    shaderProgram->preRender(openGlContext, renderPass);
 
     glEnableVertexAttribArray(positionHandle);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
@@ -144,6 +144,6 @@ void Polygon2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInter
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
 
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    drawPolygon(openGlContext, programHandle, mvpMatrix);
+    drawPolygon(openGlContext, renderPass, programHandle, mvpMatrix);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }

@@ -52,6 +52,12 @@ public:
     tilePolygon(std::move(tilePolygon)) {};
 };
 
+enum TileLoadingDecision {
+    ignore = 0,
+    loadNeeded,
+    preload
+};
+
 
 // T is the Object used for loading
 // L is the Loading type
@@ -72,6 +78,8 @@ public:
 
     virtual bool isTileVisible(const Tiled2dMapTileInfo &tileInfo);
 
+    std::vector<Tiled2dMapTileInfo> getCurrentVisibleTilesAt(int t);
+
     virtual void pause() override;
 
     virtual void resume() override;
@@ -88,7 +96,7 @@ public:
 
     virtual ::LayerReadyState isReadyToRenderOffscreen() override;
 
-    virtual void setErrorManager(const std::shared_ptr<::ErrorManager> &errorManager) override;
+    virtual void setNetworkActivityManager(const std::shared_ptr< ::NetworkActivityManagerInterface> &networkActivityManager) override;
 
     virtual void forceReload() override;
 
@@ -97,6 +105,8 @@ public:
     void setTilesReady(const std::vector<const Tiled2dMapTileInfo> &tiles);
 
     virtual L loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) = 0;
+            
+    int getRemainingTasks();
 
   protected:
 
@@ -108,7 +118,7 @@ public:
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
     std::shared_ptr<SchedulerInterface> scheduler;
     std::weak_ptr<Tiled2dMapSourceListenerInterface> listener;
-    std::shared_ptr<::ErrorManager> errorManager;
+    std::shared_ptr<::NetworkActivityManagerInterface> networkActivityManager;
 
     std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfos;
     const Tiled2dMapZoomInfo zoomInfo;
@@ -122,6 +132,7 @@ public:
 
     std::recursive_mutex currentZoomLevelMutex;
     int currentZoomLevelIdentifier = 0;
+    int currentTime = 0;
 
     std::recursive_mutex currentVisibleTilesMutex;
     std::unordered_set<Tiled2dMapTileInfo> currentVisibleTiles;
@@ -147,6 +158,9 @@ private:
     void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid);
 
     void updateTileMasks();
+    void updateTileMasks(int localT);
+
+    TileLoadingDecision tileLoadingDecision(int tileZ, int curZ, int tileT, int curT, int absoluteLevel, int relativeLevel, int smallestCoveringLevel);
 
     std::atomic_flag updateFlag = ATOMIC_FLAG_INIT;
     std::atomic_int pendingUpdates = 0;

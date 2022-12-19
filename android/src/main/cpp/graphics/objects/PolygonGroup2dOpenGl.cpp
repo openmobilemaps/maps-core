@@ -102,7 +102,7 @@ void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterf
 
     glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
 
-    shaderProgram->preRender(context);
+    shaderProgram->preRender(context, renderPass);
 
     size_t floatSize = sizeof(GLfloat);
     size_t stride = 3 * floatSize;

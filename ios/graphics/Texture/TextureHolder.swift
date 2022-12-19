@@ -18,71 +18,127 @@ enum TextureHolderError: Error {
 
 @objc
 public class TextureHolder: NSObject {
-    let texture: MTLTexture
 
-    let textureUsableSize: TextureUsableSize?
+    var _texture: MTLTexture?
+    var texture: MTLTexture? {
+        get {
+            if _texture == nil, textureSource != nil {
+                try? loadDataFromSource()
+            }
+            return _texture
+        }
+        set {
+            _texture = newValue
+        }
+    }
+    var textureUsableSize: TextureUsableSize?
+    var textureSource: TextureSource?
+
+    enum TextureSource {
+        case url(URL)
+        case cgImage(CGImage)
+        case name(String, scaleFactor: Double, bundle: Bundle?)
+        case data(Data)
+    }
 
     init(_ texture: MTLTexture, textureUsableSize: TextureUsableSize? = nil) {
-        self.texture = texture
+        self._texture = texture
         self.textureUsableSize = textureUsableSize
         super.init()
     }
 
-    convenience init(_ url: URL, textureUsableSize: TextureUsableSize? = nil) throws {
-        let options: [MTKTextureLoader.Option: Any] = [
-            MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
-        ]
-        let texture = try MetalContext.current.textureLoader.newTexture(URL: url, options: options)
-        self.init(texture, textureUsableSize: textureUsableSize)
+    init(_ url: URL, textureUsableSize: TextureUsableSize? = nil) throws {
+        self.textureUsableSize = textureUsableSize
+        self.textureSource = .url(url)
     }
 
-    public convenience init(_ cgImage: CGImage) throws {
-        let options: [MTKTextureLoader.Option: Any] = [
-            MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
-        ]
-        let texture = try MetalContext.current.textureLoader.newTexture(cgImage: cgImage, options: options)
-        self.init(texture)
+    public init(_ cgImage: CGImage)  {
+        self.textureSource = .cgImage(cgImage)
     }
 
-    public convenience init(name: String, scaleFactor: Double, bundle: Bundle?) throws {
-        let options: [MTKTextureLoader.Option: Any] = [
-            MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
-        ]
-        let texture = try MetalContext.current.textureLoader.newTexture(name: name, scaleFactor: scaleFactor, bundle: bundle, options: options)
-        self.init(texture)
+
+    public init(name: String, scaleFactor: Double, bundle: Bundle?) throws {
+        self.textureSource = .name(name, scaleFactor: scaleFactor, bundle: bundle)
     }
 
-    public convenience init(_ data: Data, textureUsableSize: TextureUsableSize? = nil) throws {
+    public init(_ data: Data, textureUsableSize: TextureUsableSize? = nil) throws {
         guard !data.isEmpty else {
             throw TextureHolderError.emptyData
         }
-        let options: [MTKTextureLoader.Option: Any] = [
-            MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
-        ]
-        let texture = try MetalContext.current.textureLoader.newTexture(data: data, options: options)
-        self.init(texture, textureUsableSize: textureUsableSize)
+        self.textureUsableSize = textureUsableSize
+        self.textureSource = .data(data)
+    }
+
+    private func loadDataFromSource() throws {
+        switch textureSource {
+            case nil: break
+            case .some(.url(let url)):
+                let options: [MTKTextureLoader.Option: Any] = [
+                    MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
+                ]
+                self.texture = try MetalContext.current.textureLoader.newTexture(URL: url, options: options)
+
+            case .some(.cgImage(let cgImage)):
+                let options: [MTKTextureLoader.Option: Any] = [
+                    MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
+                ]
+                self.texture = try MetalContext.current.textureLoader.newTexture(cgImage: cgImage, options: options)
+
+            case .some(.name(let name, scaleFactor: let scaleFactor, bundle: let bundle)):
+                let options: [MTKTextureLoader.Option: Any] = [
+                    MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
+                ]
+                self.texture = try MetalContext.current.textureLoader.newTexture(name: name, scaleFactor: scaleFactor, bundle: bundle, options: options)
+
+            case .some(.data(let data)):
+                guard !data.isEmpty else {
+                    throw TextureHolderError.emptyData
+                }
+                let options: [MTKTextureLoader.Option: Any] = [
+                    MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
+                ]
+                self.texture = try MetalContext.current.textureLoader.newTexture(data: data, options: options)
+
+        }
+    }
+
+    func clearSource(loadTexture: Bool) throws {
+        if loadTexture {
+            try loadDataFromSource()
+        }
+        textureSource = nil
     }
 }
 
 extension TextureHolder: MCTextureHolderInterface {
-    public func clearFromGraphics() {}
+    public func clearFromGraphics() {
+        if textureSource != nil {
+            // only clear texture, if it can be restored
+            texture = nil
+        }
+    }
 
-    public func attachToGraphics() -> Int32 { 0 }
+    public func attachToGraphics() -> Int32 {
+        if _texture == nil {
+            try! loadDataFromSource()
+        }
+        return 0
+    }
 
     public func getImageWidth() -> Int32 {
-        Int32(texture.width)
+        Int32(texture!.width) // TODO: Remove !
     }
 
     public func getImageHeight() -> Int32 {
-        Int32(texture.height)
+        Int32(texture!.height) // TODO: Remove !
     }
 
     public func getTextureWidth() -> Int32 {
-        Int32(textureUsableSize?.width ?? texture.width)
+        Int32(textureUsableSize?.width ?? texture!.width) // TODO: Remove !
     }
 
     public func getTextureHeight() -> Int32 {
-        Int32(textureUsableSize?.height ?? texture.height)
+        Int32(textureUsableSize?.height ?? texture!.height) // TODO: Remove !
     }
 }
 

@@ -3,6 +3,7 @@
 
 #include "NativeIconLayerCallbackInterface.h"  // my header
 #include "Marshal.hpp"
+#include "NativeCoord.h"
 #include "NativeIconInfoInterface.h"
 
 namespace djinni_generated {
@@ -24,6 +25,16 @@ bool NativeIconLayerCallbackInterface::JavaProxy::onClickConfirmed(const std::ve
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::Bool::toCpp(jniEnv, jret);
 }
+bool NativeIconLayerCallbackInterface::JavaProxy::onLongpress(const ::Coord & c_coordinate, const std::optional<std::vector<std::shared_ptr<::IconInfoInterface>>> & c_icons) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeIconLayerCallbackInterface>::get();
+    auto jret = jniEnv->CallBooleanMethod(Handle::get().get(), data.method_onLongpress,
+                                          ::djinni::get(::djinni_generated::NativeCoord::fromCpp(jniEnv, c_coordinate)),
+                                          ::djinni::get(::djinni::Optional<std::optional, ::djinni::List<::djinni_generated::NativeIconInfoInterface>>::fromCpp(jniEnv, c_icons)));
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni::Bool::toCpp(jniEnv, jret);
+}
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icon_IconLayerCallbackInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
@@ -39,6 +50,17 @@ CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_ic
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::IconLayerCallbackInterface>(nativeRef);
         auto r = ref->onClickConfirmed(::djinni::List<::djinni_generated::NativeIconInfoInterface>::toCpp(jniEnv, j_icons));
+        return ::djinni::release(::djinni::Bool::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icon_IconLayerCallbackInterface_00024CppProxy_native_1onLongpress(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeCoord::JniType j_coordinate, jobject j_icons)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::IconLayerCallbackInterface>(nativeRef);
+        auto r = ref->onLongpress(::djinni_generated::NativeCoord::toCpp(jniEnv, j_coordinate),
+                                  ::djinni::Optional<std::optional, ::djinni::List<::djinni_generated::NativeIconInfoInterface>>::toCpp(jniEnv, j_icons));
         return ::djinni::release(::djinni::Bool::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

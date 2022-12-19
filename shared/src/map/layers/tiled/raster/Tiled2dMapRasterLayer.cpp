@@ -16,6 +16,7 @@
 #include "RenderObject.h"
 #include "RenderPass.h"
 #include "PolygonCompare.h"
+#include "Tiled2dMapRasterLayerShaderFactory.h"
 #include <Logger.h>
 #include <map>
 
@@ -32,6 +33,22 @@ Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapL
                                              const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
                                              const std::shared_ptr<::ShaderProgramInterface> &shader)
         : Tiled2dMapLayer(), layerConfig(layerConfig), tileLoaders(tileLoaders), alpha(1.0), shader(shader) {}
+
+Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
+                                             const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
+                                             const std::shared_ptr<Tiled2dMapRasterLayerShaderFactory> & shaderFactory)
+: Tiled2dMapLayer(), layerConfig(layerConfig), tileLoaders(tileLoaders), alpha(1.0), shaderFactory(shaderFactory) {}
+
+
+
+Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
+                                             const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
+                                             const std::shared_ptr<::AlphaShaderInterface> &alphaShader)
+: Tiled2dMapLayer(), layerConfig(layerConfig), tileLoaders(tileLoaders), alpha(1.0), alphaShader(alphaShader) {
+    if (alphaShader) {
+        shader = alphaShader->asShaderProgramInterface();
+    }
+}
 
 void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface) {
     rasterSource = std::make_shared<Tiled2dMapRasterSource>(
@@ -117,9 +134,12 @@ void Tiled2dMapRasterLayer::resume() {
     }
 }
 
-void Tiled2dMapRasterLayer::setT(int32_t t) {
+void Tiled2dMapRasterLayer::setT(double t) {
+    if (abs(curTWithFraction - t) < 0.05) {
+        return;
+    }
+    curTWithFraction = t;
     Tiled2dMapLayer::setT(t);
-    onTilesUpdated();
 }
 
 bool Tiled2dMapRasterLayer::shouldLoadTile(const Tiled2dMapTileInfo& tileInfo){
@@ -186,13 +206,26 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
                 }
             }
 
-            if (tilesToAdd.empty() && tilesToRemove.empty() && newTileMasks.empty()) return;
+            if (tilesToAdd.empty() && tilesToRemove.empty() && newTileMasks.empty() && tLastGeneratedTiles == curTWithFraction) return;
 
             auto const &zoomInfo = layerConfig->getZoomInfo();
             for (const auto &tile : tilesToAdd) {
                 std::shared_ptr<Textured2dLayerObject> tileObject;
-                if (shader) {
-                    tileObject = std::make_shared<Textured2dLayerObject>(graphicsFactory->createQuad(shader), nullptr, mapInterface);
+                if (this->shaderFactory) {
+                    auto maybeAlphaShader = this->shaderFactory->combineShader(); // only to make explicit that this is very optional
+                    std::shared_ptr<ShaderProgramInterface> shader;
+                    if (maybeAlphaShader) {
+                        shader = maybeAlphaShader->asShaderProgramInterface();
+                    }
+                    else {
+                        maybeAlphaShader = shaderFactory->createAlphaShader();
+                        shader = maybeAlphaShader->asShaderProgramInterface();
+                    }
+                    tileObject = std::make_shared<Textured2dLayerObject>(graphicsFactory->createQuad(shader), maybeAlphaShader, mapInterface);
+                }
+                else if (shader) {
+                    auto maybeAlphaShader = alphaShader; // only to make explicit that this is very optional
+                    tileObject = std::make_shared<Textured2dLayerObject>(graphicsFactory->createQuad(shader), maybeAlphaShader, mapInterface);
                 } else {
                     auto alphaShader = shaderFactory->createAlphaShader();
                     tileObject = std::make_shared<Textured2dLayerObject>(
@@ -233,6 +266,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
 
         std::weak_ptr<Tiled2dMapRasterLayer> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapRasterLayer>(shared_from_this());
 
+
         mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
                 TaskConfig("Tiled2dMapRasterLayer_onTilesUpdated", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
                 [weakSelfPtr, tilesToSetup, tilesToClean, newMaskObjects, obsoleteMaskObjects] {
@@ -248,11 +282,16 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
 
 void Tiled2dMapRasterLayer::updateMaskObjects(const std::vector<const std::shared_ptr<MaskingObjectInterface>> &newMaskObjects,
                                               const std::vector<const std::shared_ptr<MaskingObjectInterface>> &obsoleteMaskObjects) {
-    if (!mapInterface) return;
+    auto mapInterface = this->mapInterface;
+    auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
+    if (!renderingContext) {
+        return;
+    }
+
     std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
     for (const auto &mask : newMaskObjects) {
         const auto &object = mask->asGraphicsObject();
-        if (!object->isReady()) object->setup(mapInterface->getRenderingContext());
+        if (!object->isReady()) object->setup(renderingContext);
     }
     for (const auto &mask : obsoleteMaskObjects) {
         const auto &object = mask->asGraphicsObject();
@@ -314,13 +353,25 @@ void Tiled2dMapRasterLayer::setupTiles(
 
 }
 
+std::vector<std::shared_ptr<RenderPassInterface>> Tiled2dMapRasterLayer::combineRenderPasses() {
+    return generateRenderPasses(alpha, curT, nullptr);
+}
+
 void Tiled2dMapRasterLayer::generateRenderPasses() {
+    auto newRenderPasses = combineRenderPasses();
+    {
+        std::lock_guard<std::recursive_mutex> overlayLock(renderPassMutex);
+        renderPasses = newRenderPasses;
+        tLastGeneratedTiles = curT;
+    }
+}
+
+std::vector<std::shared_ptr<RenderPassInterface>> Tiled2dMapRasterLayer::generateRenderPasses(double alpha, int t, std::shared_ptr<RenderTargetTexture> renderTargetTexture) {
 
     auto mapInterface = this->mapInterface;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!renderingContext)
-        return;
-
+        return {};
 
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
 
@@ -328,23 +379,27 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
         std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
 
         for (const auto &entry : tileObjectMap) {
-            if (entry.first.tileInfo.t != curT) {
+            if (entry.first.tileInfo.t != t) {
                 continue;
             }
 
-            auto const &renderObject = entry.second->getRenderObject();
+ 			auto const &renderObject = entry.second->getRenderObject();
+			entry.second->setAlpha(alpha);
+
+            if (!renderObject || !renderObject->getGraphicsObject()->isReady()) {
+            }
 
             if (layerConfig->getZoomInfo().maskTile) {
                 const auto &mask = tileMaskMap.at(entry.first.tileInfo);
 
                 mask.graphicsObject->setup(renderingContext);
                 std::shared_ptr<RenderPass> renderPass =
-                std::make_shared<RenderPass>(RenderPassConfig(0),
+                std::make_shared<RenderPass>(RenderPassConfig(0, renderTargetTexture),
                                              std::vector<std::shared_ptr<::RenderObjectInterface>>{renderObject}, mask.graphicsMaskObject);
                 renderPass->setScissoringRect(scissorRect);
                 newRenderPasses.push_back(renderPass);
             }else{
-                std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(0),
+                std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(0, renderTargetTexture),
                                                                                       std::vector<std::shared_ptr<::RenderObjectInterface>>{
                     renderObject});
                 renderPass->setScissoringRect(scissorRect);
@@ -355,7 +410,7 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
             //TODO: general mask would no longer work now, we would have to merge the tile-mask with the layer-mask
             if (mask) {
                 std::shared_ptr<RenderPass> renderPass =
-                std::make_shared<RenderPass>(RenderPassConfig(0),
+                std::make_shared<RenderPass>(RenderPassConfig(0, renderTargetTexture),
                                              std::vector<std::shared_ptr<::RenderObjectInterface>>{renderObject}, mask);
                 renderPass->setScissoringRect(scissorRect);
                 newRenderPasses.push_back(renderPass);
@@ -364,10 +419,7 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
 
     }
 
-    {
-        std::lock_guard<std::recursive_mutex> overlayLock(renderPassMutex);
-        renderPasses = newRenderPasses;
-    }
+    return newRenderPasses;
 
 }
 

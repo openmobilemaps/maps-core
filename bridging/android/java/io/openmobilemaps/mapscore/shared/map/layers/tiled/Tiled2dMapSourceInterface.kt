@@ -23,7 +23,7 @@ abstract class Tiled2dMapSourceInterface {
 
     abstract fun isReadyToRenderOffscreen(): io.openmobilemaps.mapscore.shared.map.LayerReadyState
 
-    abstract fun setErrorManager(errorManager: io.openmobilemaps.mapscore.shared.map.ErrorManager)
+    abstract fun setNetworkActivityManager(networkActivityManager: io.openmobilemaps.mapscore.shared.map.NetworkActivityManagerInterface)
 
     abstract fun forceReload()
 
@@ -93,11 +93,11 @@ abstract class Tiled2dMapSourceInterface {
         }
         private external fun native_isReadyToRenderOffscreen(_nativeRef: Long): io.openmobilemaps.mapscore.shared.map.LayerReadyState
 
-        override fun setErrorManager(errorManager: io.openmobilemaps.mapscore.shared.map.ErrorManager) {
+        override fun setNetworkActivityManager(networkActivityManager: io.openmobilemaps.mapscore.shared.map.NetworkActivityManagerInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setErrorManager(this.nativeRef, errorManager)
+            native_setNetworkActivityManager(this.nativeRef, networkActivityManager)
         }
-        private external fun native_setErrorManager(_nativeRef: Long, errorManager: io.openmobilemaps.mapscore.shared.map.ErrorManager)
+        private external fun native_setNetworkActivityManager(_nativeRef: Long, networkActivityManager: io.openmobilemaps.mapscore.shared.map.NetworkActivityManagerInterface)
 
         override fun forceReload() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

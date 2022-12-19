@@ -12,6 +12,7 @@
 #import "MCShaderProgramInterface+Private.h"
 #import "MCTiled2dMapLayerConfig+Private.h"
 #import "MCTiled2dMapRasterLayerCallbackInterface+Private.h"
+#import "MCTiled2dMapRasterLayerShaderFactory+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -63,6 +64,37 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = ::Tiled2dMapRasterLayerInterface::create(::djinni_generated::Tiled2dMapLayerConfig::toCpp(layerConfig),
                                                                        ::djinni::List<::djinni_generated::LoaderInterface>::toCpp(loaders));
+        return ::djinni_generated::Tiled2dMapRasterLayerInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
++ (nullable MCTiled2dMapRasterLayerInterface *)createWithMaskInterpolated:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
+                                                                  loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
+                                                                     mask:(nullable id<MCMaskingObjectInterface>)mask {
+    try {
+        auto objcpp_result_ = ::Tiled2dMapRasterLayerInterface::createWithMaskInterpolated(::djinni_generated::Tiled2dMapLayerConfig::toCpp(layerConfig),
+                                                                                           ::djinni::List<::djinni_generated::LoaderInterface>::toCpp(loaders),
+                                                                                           ::djinni_generated::MaskingObjectInterface::toCpp(mask));
+        return ::djinni_generated::Tiled2dMapRasterLayerInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
++ (nullable MCTiled2dMapRasterLayerInterface *)createWithShaderInterpolated:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
+                                                                    loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
+                                                              shaderFactory:(nullable id<MCTiled2dMapRasterLayerShaderFactory>)shaderFactory {
+    try {
+        auto objcpp_result_ = ::Tiled2dMapRasterLayerInterface::createWithShaderInterpolated(::djinni_generated::Tiled2dMapLayerConfig::toCpp(layerConfig),
+                                                                                             ::djinni::List<::djinni_generated::LoaderInterface>::toCpp(loaders),
+                                                                                             ::djinni_generated::Tiled2dMapRasterLayerShaderFactory::toCpp(shaderFactory));
+        return ::djinni_generated::Tiled2dMapRasterLayerInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
++ (nullable MCTiled2dMapRasterLayerInterface *)createInterpolated:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
+                                                          loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders {
+    try {
+        auto objcpp_result_ = ::Tiled2dMapRasterLayerInterface::createInterpolated(::djinni_generated::Tiled2dMapLayerConfig::toCpp(layerConfig),
+                                                                                   ::djinni::List<::djinni_generated::LoaderInterface>::toCpp(loaders));
         return ::djinni_generated::Tiled2dMapRasterLayerInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -132,9 +164,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setT:(int32_t)t {
+- (void)setT:(double)t {
     try {
-        _cppRefHandle.get()->setT(::djinni::I32::toCpp(t));
+        _cppRefHandle.get()->setT(::djinni::F64::toCpp(t));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

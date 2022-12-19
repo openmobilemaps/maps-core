@@ -34,6 +34,7 @@ private:
         ~JavaProxy();
 
         bool onClickConfirmed(const std::vector<std::shared_ptr<::IconInfoInterface>> & icons) override;
+        bool onLongpress(const ::Coord & coordinate, const std::optional<std::vector<std::shared_ptr<::IconInfoInterface>>> & icons) override;
 
     private:
         friend ::djinni::JniInterface<::IconLayerCallbackInterface, ::djinni_generated::NativeIconLayerCallbackInterface>;
@@ -41,6 +42,7 @@ private:
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/layers/icon/IconLayerCallbackInterface") };
     const jmethodID method_onClickConfirmed { ::djinni::jniGetMethodID(clazz.get(), "onClickConfirmed", "(Ljava/util/ArrayList;)Z") };
+    const jmethodID method_onLongpress { ::djinni::jniGetMethodID(clazz.get(), "onLongpress", "(Lio/openmobilemaps/mapscore/shared/map/coordinates/Coord;Ljava/util/ArrayList;)Z") };
 };
 
 }  // namespace djinni_generated

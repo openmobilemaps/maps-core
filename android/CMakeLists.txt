@@ -99,6 +99,7 @@ include_directories(src/main/cpp)
 include_directories(src/main/cpp/graphics)
 include_directories(src/main/cpp/graphics/objects)
 include_directories(src/main/cpp/graphics/shader)
+include_directories(src/main/cpp/graphics/targettexture)
 
 
 # Searches for a specified prebuilt library and stores the path as a

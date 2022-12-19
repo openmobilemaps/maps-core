@@ -3,6 +3,7 @@
 
 #include "NativeShaderProgramInterface.h"  // my header
 #include "Marshal.hpp"
+#include "NativeRenderPassConfig.h"
 #include "NativeRenderingContextInterface.h"
 
 namespace djinni_generated {
@@ -39,12 +40,13 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_S
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderProgramInterface_00024CppProxy_native_1preRender(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderingContextInterface::JniType j_context)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderProgramInterface_00024CppProxy_native_1preRender(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderingContextInterface::JniType j_context, ::djinni_generated::NativeRenderPassConfig::JniType j_pass)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::ShaderProgramInterface>(nativeRef);
-        ref->preRender(::djinni_generated::NativeRenderingContextInterface::toCpp(jniEnv, j_context));
+        ref->preRender(::djinni_generated::NativeRenderingContextInterface::toCpp(jniEnv, j_context),
+                       ::djinni_generated::NativeRenderPassConfig::toCpp(jniEnv, j_pass));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

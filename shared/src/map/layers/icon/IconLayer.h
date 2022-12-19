@@ -72,6 +72,8 @@ class IconLayer : public IconLayerInterface,
 
     virtual bool onClickConfirmed(const ::Vec2F &posScreen) override;
 
+    virtual bool onLongPress(const ::Vec2F &posScreen) override;
+
     void setLayerClickable(bool isLayerClickable) override;
 
   private:
@@ -86,6 +88,8 @@ class IconLayer : public IconLayerInterface,
     std::recursive_mutex iconsMutex;
     std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>> icons;
     std::shared_ptr<MaskingObjectInterface> mask = nullptr;
+
+    std::vector<std::shared_ptr<IconInfoInterface>> iconsAt(const Vec2F &posScreen);
 
     void preGenerateRenderPasses();
     std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;

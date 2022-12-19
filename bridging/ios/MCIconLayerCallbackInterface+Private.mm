@@ -7,6 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
+#import "MCCoord+Private.h"
 #import "MCIconInfoInterface+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -39,6 +40,15 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (BOOL)onLongpress:(nonnull MCCoord *)coordinate
+              icons:(nullable NSArray<MCIconInfoInterface *> *)icons {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->onLongpress(::djinni_generated::Coord::toCpp(coordinate),
+                                                               ::djinni::Optional<std::optional, ::djinni::List<::djinni_generated::IconInfoInterface>>::toCpp(icons));
+        return ::djinni::Bool::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class IconLayerCallbackInterface::ObjcProxy final
@@ -52,6 +62,14 @@ public:
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() onClickConfirmed:(::djinni::List<::djinni_generated::IconInfoInterface>::fromCpp(c_icons))];
+            return ::djinni::Bool::toCpp(objcpp_result_);
+        }
+    }
+    bool onLongpress(const ::Coord & c_coordinate, const std::optional<std::vector<std::shared_ptr<::IconInfoInterface>>> & c_icons) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() onLongpress:(::djinni_generated::Coord::fromCpp(c_coordinate))
+                                                                                  icons:(::djinni::Optional<std::optional, ::djinni::List<::djinni_generated::IconInfoInterface>>::fromCpp(c_icons))];
             return ::djinni::Bool::toCpp(objcpp_result_);
         }
     }

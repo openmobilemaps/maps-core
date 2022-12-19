@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "RenderPassConfig.h"
 #include "RenderingContextInterface.h"
 #include <memory>
 #include <string>
@@ -15,5 +16,5 @@ public:
 
     virtual void setupProgram(const std::shared_ptr<::RenderingContextInterface> & context) = 0;
 
-    virtual void preRender(const std::shared_ptr<::RenderingContextInterface> & context) = 0;
+    virtual void preRender(const std::shared_ptr<::RenderingContextInterface> & context, const ::RenderPassConfig & pass) = 0;
 };

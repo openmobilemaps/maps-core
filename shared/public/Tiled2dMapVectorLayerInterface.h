@@ -6,6 +6,7 @@
 #include "FontLoaderInterface.h"
 #include "LayerInterface.h"
 #include "LoaderInterface.h"
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
@@ -16,5 +17,9 @@ public:
 
     static std::shared_ptr<Tiled2dMapVectorLayerInterface> createFromStyleJson(const std::string & layerName, const std::string & path, const std::vector<std::shared_ptr<::LoaderInterface>> & loaders, const std::shared_ptr<::FontLoaderInterface> & fontLoader, double dpFactor);
 
+    static std::shared_ptr<Tiled2dMapVectorLayerInterface> createAnimatableFromStyleJson(const std::string & layerName, const std::string & path, const std::vector<std::shared_ptr<::LoaderInterface>> & loaders, const std::shared_ptr<::FontLoaderInterface> & fontLoader, double dpFactor, int64_t numT);
+
     virtual std::shared_ptr<::LayerInterface> asLayerInterface() = 0;
+
+    virtual void setT(double t) = 0;
 };

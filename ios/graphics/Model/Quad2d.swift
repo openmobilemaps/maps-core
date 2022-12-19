@@ -55,7 +55,10 @@ final class Quad2d: BaseGraphicsObject {
 
     override func isReady() -> Bool {
         guard ready else { return false }
-        if shader is AlphaShader {
+        if let baseShader = shader as? BaseShader, baseShader.requiresTexture {
+            if texture == nil {
+                return false
+            }
             return texture != nil
         }
         return true
@@ -63,7 +66,7 @@ final class Quad2d: BaseGraphicsObject {
 
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
-                         renderPass _: MCRenderPassConfig,
+                         renderPass: MCRenderPassConfig,
                          mvpMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
@@ -77,7 +80,7 @@ final class Quad2d: BaseGraphicsObject {
         }
 
 
-        if shader is AlphaShader, texture == nil {
+        if let baseShader = shader as? BaseShader, baseShader.requiresTexture, texture == nil {
             ready = false
             return
         }
@@ -103,7 +106,7 @@ final class Quad2d: BaseGraphicsObject {
         }
 
         shader.setupProgram(context)
-        shader.preRender(context)
+        shader.preRender(context, pass: renderPass)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {
@@ -133,7 +136,7 @@ extension Quad2d: MCMaskingObjectInterface {
                 screenPixelAsRealMeterFactor: Double) {
         guard isReady(),
               let context = context as? RenderingContext,
-              let encoder = context.encoder else { return }
+              let encoder = context.encoder(pass: renderPass) else { return }
 
         renderAsMask = true
 
@@ -182,6 +185,7 @@ extension Quad2d: MCQuad2dInterface {
         guard let textureHolder = textureHolder as? TextureHolder else {
             fatalError("unexpected TextureHolder")
         }
+        textureHolder.attachToGraphics()
         texture = textureHolder.texture
 
     }

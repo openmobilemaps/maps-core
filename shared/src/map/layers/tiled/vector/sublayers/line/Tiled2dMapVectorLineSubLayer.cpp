@@ -252,8 +252,10 @@ Tiled2dMapVectorLineSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInfo,
                     lineCoordinatesVector.push_back(lineCoordinates);
                 }
 
-
-                hitDetectionLineMap[tileInfo].push_back({lineCoordinatesVector, featureContext});
+                {
+                    std::lock_guard<std::recursive_mutex> lock(hitDetectionMutex);
+                    hitDetectionLineMap[tileInfo].push_back({lineCoordinatesVector, featureContext});
+                }
 
                 featureNum++;
             }
@@ -278,7 +280,10 @@ void Tiled2dMapVectorLineSubLayer::clearTileData(const Tiled2dMapTileInfo &tileI
     if (!mapInterface) {
         return;
     }
-    hitDetectionLineMap.erase(tileInfo);
+    {
+        std::lock_guard<std::recursive_mutex> lock(hitDetectionMutex);
+        hitDetectionLineMap.erase(tileInfo);
+    }
 
     std::vector<std::shared_ptr<GraphicsObjectInterface>> objectsToClear;
     Tiled2dMapVectorSubLayer::clearTileData(tileInfo);
@@ -289,15 +294,14 @@ void Tiled2dMapVectorLineSubLayer::clearTileData(const Tiled2dMapTileInfo &tileI
                 if (lineObject->getLineObject()) objectsToClear.push_back(lineObject->getLineObject());
             }
             tileLinesMap.erase(tileInfo);
-            //LogDebug <<= "Erased tile " + std::to_string(tileInfo.zoomIdentifier) + "/" + std::to_string(tileInfo.x) + "/" +
-            //             std::to_string(tileInfo.y);
         }
     }
     if (objectsToClear.empty()) return;
 
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
             TaskConfig("LineGroupTile_clear_" + std::to_string(tileInfo.zoomIdentifier) + "/" + std::to_string(tileInfo.x) + "/" +
-                       std::to_string(tileInfo.y), 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+                       std::to_string(tileInfo.y) + "@" +
+                       std::to_string(tileInfo.t), 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
             [objectsToClear] {
                 for (const auto &lineObject : objectsToClear) {
                     if (lineObject->isReady()) lineObject->clear();
@@ -417,7 +421,7 @@ void Tiled2dMapVectorLineSubLayer::preGenerateRenderPasses() {
             tileMask = tileMaskMap[tileLineTuple.first];
         }
         for (const auto &passEntry : renderPassObjectMap) {
-            std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex.value_or(passEntry.first)),
+            std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex.value_or(passEntry.first), 0),
                                                                                   passEntry.second,
                                                                                   (tileMask
                                                                                    ? tileMask
@@ -456,6 +460,8 @@ bool Tiled2dMapVectorLineSubLayer::onClickConfirmed(const ::Vec2F &posScreen) {
 
     auto point = camera->coordFromScreenPosition(posScreen);
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
+
+    std::lock_guard<std::recursive_mutex> lock(hitDetectionMutex);
 
     for (auto const &[tileInfo, lineTuples] : hitDetectionLineMap) {
         for (auto const &[lineCoordinateVector, featureContext]: lineTuples) {

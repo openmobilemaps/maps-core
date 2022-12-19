@@ -117,7 +117,7 @@ let package = Package(
             path: "ios",
             exclude: ["readme.md"],
             resources: [
-                .process("graphics/Shader/Metal/")
+                .process("graphics/Shader/MapSDK_Shaders/")
             ]
         ),
         .target(

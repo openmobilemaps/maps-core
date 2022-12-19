@@ -162,7 +162,10 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
 
     std::vector<std::tuple<const FeatureContext, std::shared_ptr<SymbolInfo>>> textInfos;
 
-    tileTextPositionMap[tileInfo] = {};
+    {
+        std::lock_guard<std::recursive_mutex> lock(tileTextPositionMapMutex);
+        tileTextPositionMap[tileInfo] = {};
+    }
     double tilePixelFactor = (0.0254 / camera->getScreenDensityPpi()) * tileInfo.zoomLevel;
 
     for(auto& feature : layerFeatures)
@@ -229,6 +232,8 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
                     auto pos = getPositioning(pointIt, points);
 
                     if (distance > symbolSpacingMeters && pos) {
+
+                        std::lock_guard<std::recursive_mutex> lock(tileTextPositionMapMutex);
 
                         auto position = pos->centerPosition;
 
@@ -841,7 +846,7 @@ void Tiled2dMapVectorSymbolSubLayer::clearTileData(const Tiled2dMapTileInfo &til
 
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
             TaskConfig("LineGroupTile_clear_" + std::to_string(tileInfo.zoomIdentifier) + "/" + std::to_string(tileInfo.x) + "/" +
-                       std::to_string(tileInfo.y), 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+                       std::to_string(tileInfo.y) + "@" + std::to_string(tileInfo.t), 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
             [objectsToClear] {
                 for (const auto &textObject : objectsToClear) {
                     if (textObject->isReady()) {
@@ -916,7 +921,7 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorSymbolSubLay
 
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
     for (const auto &passEntry : renderPassObjectMap) {
-        std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second);
+        std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, 0), passEntry.second);
         renderPass->setScissoringRect(scissorRect);
         newRenderPasses.push_back(renderPass);
     }

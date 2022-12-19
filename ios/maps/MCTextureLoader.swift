@@ -25,7 +25,7 @@ public class DataHolder: MCDataHolderInterface {
 
 open class MCTextureLoader: MCLoaderInterface {
 
-    private let session: URLSession
+    public let session: URLSession
 
     public var isRasterDebugModeEnabled: Bool
 
@@ -43,17 +43,37 @@ open class MCTextureLoader: MCLoaderInterface {
         isRasterDebugModeEnabled = UserDefaults.standard.bool(forKey: "io.openmobilemaps.debug.rastertiles.enabled")
     }
 
-    open func loadTexture(_ url: String, etag: String?) -> MCTextureLoaderResult {
-        let urlString = url
-        guard let url = URL(string: urlString) else {
-            preconditionFailure("invalid url: \(urlString)")
-        }
+    open func loadSync(request: URLRequest) -> (Data?, HTTPURLResponse?, NSError?) {
 
         let semaphore = DispatchSemaphore(value: 0)
 
         var result: Data?
         var response: HTTPURLResponse?
         var error: NSError?
+
+        var task = session.dataTask(with: request) { data, response_, error_ in
+            result = data
+            response = response_ as? HTTPURLResponse
+            error = error_ as NSError?
+            semaphore.signal()
+        }
+
+        modifyDataTask(task: &task)
+
+        task.resume()
+        semaphore.wait()
+
+        return (result, response, error)
+
+    }
+
+    let debugDrawSemaphore = DispatchSemaphore(value: 1)
+
+    open func loadTexture(_ url: String, etag: String?) -> MCTextureLoaderResult {
+        let urlString = url
+        guard let url = URL(string: urlString) else {
+            preconditionFailure("invalid url: \(urlString)")
+        }
 
         var urlRequest = URLRequest(url: url)
 
@@ -65,17 +85,7 @@ open class MCTextureLoader: MCLoaderInterface {
             wasCached = true
         }
 
-        var task = session.dataTask(with: urlRequest) { data, response_, error_ in
-            result = data
-            response = response_ as? HTTPURLResponse
-            error = error_ as NSError?
-            semaphore.signal()
-        }
-
-        modifyDataTask(task: &task)
-
-        task.resume()
-        semaphore.wait()
+        let (result, response, error) = loadSync(request: urlRequest)
 
         if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorTimedOut {
             return .init(data: nil, etag: response?.etag, status: .ERROR_TIMEOUT, errorCode: (error?.code).stringOrNil)
@@ -94,16 +104,23 @@ open class MCTextureLoader: MCLoaderInterface {
         }
 
         do {
-            if isRasterDebugModeEnabled,
-                let uiImage = UIImage(data: data) {
-                let renderer = UIGraphicsImageRenderer(size: uiImage.size)
-                let img = renderer.image { ctx in
-                    self.applyDebugWatermark(url: urlString, byteCount: data.count, image: uiImage, wasCached: wasCached, ctx: ctx)
+            if isRasterDebugModeEnabled {
+                debugDrawSemaphore.wait()
+                defer {
+                    debugDrawSemaphore.signal()
                 }
-                if let cgImage = img.cgImage,
-                      let textureHolder = try? TextureHolder(cgImage) {
-                    return .init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil)
+                if let uiImage = UIImage(data: data) {
+                    let renderer = UIGraphicsImageRenderer(size: uiImage.size)
+                    let img = renderer.image { ctx in
+                        self.applyDebugWatermark(url: urlString, byteCount: data.count, image: uiImage, wasCached: wasCached, ctx: ctx)
+                    }
+                    if let cgImage = img.cgImage,
+                       let textureHolder = try? TextureHolder(cgImage) {
+                        try? textureHolder.clearSource(loadTexture: true)
+                        return .init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil)
+                    }
                 }
+
             }
 
             let textureHolder = try TextureHolder(data)

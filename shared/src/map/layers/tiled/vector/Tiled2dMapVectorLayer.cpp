@@ -41,14 +41,30 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::string &remoteStyleJsonUrl,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
                                              const std::shared_ptr<::FontLoaderInterface> &fontLoader,
-                                             double dpFactor) :
+                                             double dpFactor,
+                                             int numT) :
         Tiled2dMapLayer(),
         layerName(layerName),
         remoteStyleJsonUrl(remoteStyleJsonUrl),
         loaders(loaders),
         fontLoader(fontLoader),
         dpFactor(dpFactor),
-        sublayers() {}
+        sublayers(),
+        numT(numT) {}
+
+Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
+                                             const std::string &remoteStyleJsonUrl,
+                                             const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
+                                             const std::shared_ptr<::FontLoaderInterface> &fontLoader,
+                                             double dpFactor) :
+Tiled2dMapLayer(),
+layerName(layerName),
+remoteStyleJsonUrl(remoteStyleJsonUrl),
+loaders(loaders),
+fontLoader(fontLoader),
+dpFactor(dpFactor),
+sublayers(),
+numT(1) {}
 
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
@@ -62,8 +78,8 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         fallbackStyleJsonString(fallbackStyleJsonString),
         loaders(loaders),
         dpFactor(dpFactor),
-        sublayers() {
-        }
+        sublayers(),
+        numT(numT) {}
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName, const std::shared_ptr<VectorMapDescription> &mapDescription,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
@@ -95,14 +111,14 @@ void Tiled2dMapVectorLayer::scheduleStyleJsonLoading() {
                 auto selfPtr = weakSelfPtr.lock();
                 if (selfPtr) {
                     auto layerError = selfPtr->loadStyleJson();
-                    if (selfPtr->errorManager) {
+                    if (selfPtr->networkActivityManager) {
                         if (auto error = layerError) {
-                            selfPtr->errorManager->addTiledLayerError(*error);
+                            selfPtr->networkActivityManager->addTiledLayerError(*error);
                         } else {
                             if (selfPtr->remoteStyleJsonUrl.has_value()) {
-                                selfPtr->errorManager->removeError(*selfPtr->remoteStyleJsonUrl);
+                                selfPtr->networkActivityManager->removeError(*selfPtr->remoteStyleJsonUrl);
                             } else {
-                                selfPtr->errorManager->removeError(selfPtr->layerName);
+                                selfPtr->networkActivityManager->removeError(selfPtr->layerName);
                             }
                         }
                     }
@@ -187,7 +203,7 @@ std::shared_ptr<LayerInterface> Tiled2dMapVectorLayer::getLayerForDescription(co
 
 std::shared_ptr<Tiled2dMapLayerConfig>
 Tiled2dMapVectorLayer::getLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &source) {
-    return std::make_shared<Tiled2dMapVectorLayerConfig>(source);
+    return std::make_shared<Tiled2dMapVectorLayerConfig>(source, true, true, numT);
 }
 
 void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription) {
@@ -434,6 +450,14 @@ void Tiled2dMapVectorLayer::resume() {
     }
 }
 
+void Tiled2dMapVectorLayer::setT(double t) {
+    if (curT == (int)t) {
+        return;
+    }
+    curTWithFraction = t;
+    Tiled2dMapLayer::setT(t);
+}
+
 void Tiled2dMapVectorLayer::setAlpha(float alpha) {
     if (this->alpha == alpha) {
         return;
@@ -560,7 +584,7 @@ void Tiled2dMapVectorLayer::onTilesUpdated() {
                                 auto const polygonObject = newTileMasks[tile.tileInfo].maskObject->getPolygonObject()->asMaskingObject();
                                 auto const &features = it->second;
                                 mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
-                                                                                                   TaskConfig("VectorTile_onTilesUpdated_" + it->first, 0, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
+                                                                                                   TaskConfig("VectorTile_onTilesUpdated_" + it->first + "_" + tile.tileInfo.tileIdString(), 0, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
                                                                                                    [weakSelfPtr, subLayer, tile, polygonObject, &features] {
                                                                                                        auto selfPtr = weakSelfPtr.lock();
                                                                                                        if (selfPtr) {

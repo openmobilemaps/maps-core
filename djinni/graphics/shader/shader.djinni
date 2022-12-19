@@ -4,11 +4,12 @@
 @extern "../../yaml/vec_3_d.yaml"
 @extern "../../yaml/shared_bytes.yaml"
 @extern "../../yaml/color.yaml"
+@extern "../../yaml/render_pass_config.yaml"
 
 shader_program_interface = interface +c +o {
     get_program_name() : string;
     setup_program(context: rendering_context_interface);
-    pre_render(context: rendering_context_interface);
+    pre_render(context: rendering_context_interface, pass: render_pass_config);
 }
 
 shader_factory_interface = interface +c +j +o {
@@ -24,6 +25,11 @@ shader_factory_interface = interface +c +j +o {
 alpha_shader_interface = interface +c +o {
     update_alpha(value: f32);
     as_shader_program_interface() : shader_program_interface;
+}
+
+interpolation_shader_interface = interface +c +o {
+    update_fraction(value: f32);
+    as_alpha_shader_interface() : alpha_shader_interface;
 }
 
 color_shader_interface = interface +c +o {

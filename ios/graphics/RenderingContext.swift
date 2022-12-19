@@ -15,8 +15,18 @@ import UIKit
 
 @objc
 public class RenderingContext: NSObject {
-    public weak var encoder: MTLRenderCommandEncoder?
+
+    public func encoder(pass: MCRenderPassConfig) -> MTLRenderCommandEncoder? {
+        return currentEncoder
+    }
+
+    public var currentCommandBuffer: MTLCommandBuffer?
+    public var currentEncoder: MTLRenderCommandEncoder?
     public weak var sceneView: MCMapView?
+
+    public var viewRenderPassDescriptor: MTLRenderPassDescriptor?
+
+    private var renderTargetTextures = NSHashTable<RenderTargetTexture>.weakObjects()
 
     public lazy var mask: MTLDepthStencilState? = {
         let descriptor = MTLStencilDescriptor()
@@ -71,8 +81,8 @@ public class RenderingContext: NSObject {
         return quad
     }()
 
-    public func clearStencilBuffer() {
-        guard let encoder = encoder else { return }
+    public func clearStencilBuffer(_ renderPassConfig: MCRenderPassConfig) {
+        guard let encoder = encoder(pass: renderPassConfig) else { return }
         stencilClearQuad.render(encoder: encoder,
                                 context: self,
                                 renderPass: .init(),
@@ -83,14 +93,35 @@ public class RenderingContext: NSObject {
 }
 
 extension RenderingContext: MCRenderingContextInterface {
-    public func preRenderStencilMask() {
+    public func createRenderTargetTexture() -> MCRenderTargetTexture? {
+        let texture = RenderTargetTexture()
+        texture.setViewportSize(viewportSize)
+        renderTargetTextures.add(texture)
+        texture.context = self
+        return texture
     }
 
-    public func postRenderStencilMask() {
-        clearStencilBuffer()
+    public func preRenderStencilMask(_ renderPassConfig: MCRenderPassConfig) {
     }
 
-    public func setupDrawFrame() {
+    public func postRenderStencilMask(_ renderPassConfig: MCRenderPassConfig) {
+        clearStencilBuffer(renderPassConfig)
+    }
+
+    public func setupDrawFrame(_ renderTargetTexture: MCRenderTargetTexture?) {
+        if let texture = renderTargetTexture as? RenderTargetTexture,
+        let buffer = currentCommandBuffer {
+            currentEncoder = texture.prepareOffscreenEncoder(buffer)
+        }
+        else if let buffer = currentCommandBuffer,
+                    let descriptor = viewRenderPassDescriptor  {
+            currentEncoder = buffer.makeRenderCommandEncoder(descriptor: descriptor)
+        }
+    }
+
+    public func endDrawFrame(_ renderTargetTexture: MCRenderTargetTexture?) {
+        currentEncoder?.endEncoding()
+        currentEncoder = nil
     }
 
     public func onSurfaceCreated() {
@@ -98,6 +129,9 @@ extension RenderingContext: MCRenderingContextInterface {
 
     public func setViewportSize(_ newSize: MCVec2I) {
         viewportSize = newSize
+        for texture in renderTargetTextures.allObjects {
+            texture.setViewportSize(newSize)
+        }
     }
 
     public func getViewportSize() -> MCVec2I { viewportSize }
@@ -106,9 +140,9 @@ extension RenderingContext: MCRenderingContextInterface {
         sceneView?.clearColor = color.metalColor
     }
 
-    public func applyScissorRect(_ scissorRect: MCRectI?) {
+    public func applyScissorRect(_ scissorRect: MCRectI?, pass: MCRenderPassConfig) {
         if let sr = scissorRect {
-            encoder?.setScissorRect(sr.scissorRect)
+            encoder(pass: pass)?.setScissorRect(sr.scissorRect)
             isScissoringDirty = true
         } else if isScissoringDirty {
             var s = self.sceneView?.frame.size ?? CGSize(width: 1.0, height: 1.0)
@@ -119,7 +153,7 @@ extension RenderingContext: MCRenderingContextInterface {
             size.width = min(size.width, Int(s.width))
             size.height = min(size.height, Int(s.height))
 
-            encoder?.setScissorRect(size)
+            encoder(pass: pass)?.setScissorRect(size)
             isScissoringDirty = false
         }
     }

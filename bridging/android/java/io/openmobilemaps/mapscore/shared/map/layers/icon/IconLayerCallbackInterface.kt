@@ -9,6 +9,8 @@ abstract class IconLayerCallbackInterface {
 
     abstract fun onClickConfirmed(icons: ArrayList<IconInfoInterface>): Boolean
 
+    abstract fun onLongpress(coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, icons: ArrayList<IconInfoInterface>?): Boolean
+
     private class CppProxy : IconLayerCallbackInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -32,5 +34,11 @@ abstract class IconLayerCallbackInterface {
             return native_onClickConfirmed(this.nativeRef, icons)
         }
         private external fun native_onClickConfirmed(_nativeRef: Long, icons: ArrayList<IconInfoInterface>): Boolean
+
+        override fun onLongpress(coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, icons: ArrayList<IconInfoInterface>?): Boolean {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_onLongpress(this.nativeRef, coordinate, icons)
+        }
+        private external fun native_onLongpress(_nativeRef: Long, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, icons: ArrayList<IconInfoInterface>?): Boolean
     }
 }

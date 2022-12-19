@@ -15,7 +15,7 @@ import os
 
 open class MCMapView: MTKView {
     public let mapInterface: MCMapInterface
-    private let renderingContext: RenderingContext
+    public let renderingContext: RenderingContext
 
     private var sizeChanged = false
     private var backgroundDisable = false
@@ -57,7 +57,7 @@ open class MCMapView: MTKView {
 
         device = MetalContext.current.device
 
-        colorPixelFormat = MetalContext.current.colorPixelFormat
+        colorPixelFormat = MetalContext.colorPixelFormat
         framebufferOnly = false
 
         delegate = self
@@ -139,14 +139,13 @@ extension MCMapView: MTKViewDelegate {
 
         framesToRender -= 1
 
-        guard let renderPassDescriptor = view.currentRenderPassDescriptor,
-              let commandBuffer = MetalContext.current.commandQueue.makeCommandBuffer(),
-              let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)
+        guard let commandBuffer = MetalContext.current.commandQueue.makeCommandBuffer()
         else {
             return
         }
 
-        renderingContext.encoder = renderEncoder
+        renderingContext.currentCommandBuffer = commandBuffer
+        renderingContext.viewRenderPassDescriptor = view.currentRenderPassDescriptor
 
         // Shared lib stuff
         if sizeChanged {
@@ -157,7 +156,6 @@ extension MCMapView: MTKViewDelegate {
 
         mapInterface.drawFrame()
 
-        renderEncoder.endEncoding()
 
         guard let drawable = view.currentDrawable else {
             return

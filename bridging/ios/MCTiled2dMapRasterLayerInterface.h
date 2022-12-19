@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 @class MCTiled2dMapRasterLayerInterface;
 @protocol MCTiled2dMapRasterLayerCallbackInterface;
+@protocol MCTiled2dMapRasterLayerShaderFactory;
 
 
 @interface MCTiled2dMapRasterLayerInterface : NSObject
@@ -26,6 +27,20 @@
 /** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
 + (nullable MCTiled2dMapRasterLayerInterface *)create:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
                                               loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders;
+
+/** interpolated version, the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
++ (nullable MCTiled2dMapRasterLayerInterface *)createWithMaskInterpolated:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
+                                                                  loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
+                                                                     mask:(nullable id<MCMaskingObjectInterface>)mask;
+
+/** interpolated version, the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
++ (nullable MCTiled2dMapRasterLayerInterface *)createWithShaderInterpolated:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
+                                                                    loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
+                                                              shaderFactory:(nullable id<MCTiled2dMapRasterLayerShaderFactory>)shaderFactory;
+
+/** interpolated version, the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
++ (nullable MCTiled2dMapRasterLayerInterface *)createInterpolated:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
+                                                          loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders;
 
 - (nullable id<MCLayerInterface>)asLayerInterface;
 
@@ -47,7 +62,7 @@
 
 - (nullable NSNumber *)getMaxZoomLevelIdentifier;
 
-- (void)setT:(int32_t)t;
+- (void)setT:(double)t;
 
 - (nullable id<MCTiled2dMapLayerConfig>)getConfig;
 

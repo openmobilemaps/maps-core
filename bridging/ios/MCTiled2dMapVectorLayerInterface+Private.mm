@@ -48,10 +48,33 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
++ (nullable MCTiled2dMapVectorLayerInterface *)createAnimatableFromStyleJson:(nonnull NSString *)layerName
+                                                                        path:(nonnull NSString *)path
+                                                                     loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
+                                                                  fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
+                                                                    dpFactor:(double)dpFactor
+                                                                        numT:(int64_t)numT {
+    try {
+        auto objcpp_result_ = ::Tiled2dMapVectorLayerInterface::createAnimatableFromStyleJson(::djinni::String::toCpp(layerName),
+                                                                                              ::djinni::String::toCpp(path),
+                                                                                              ::djinni::List<::djinni_generated::LoaderInterface>::toCpp(loaders),
+                                                                                              ::djinni_generated::FontLoaderInterface::toCpp(fontLoader),
+                                                                                              ::djinni::F64::toCpp(dpFactor),
+                                                                                              ::djinni::I64::toCpp(numT));
+        return ::djinni_generated::Tiled2dMapVectorLayerInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nullable id<MCLayerInterface>)asLayerInterface {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->asLayerInterface();
         return ::djinni_generated::LayerInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setT:(double)t {
+    try {
+        _cppRefHandle.get()->setT(::djinni::F64::toCpp(t));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

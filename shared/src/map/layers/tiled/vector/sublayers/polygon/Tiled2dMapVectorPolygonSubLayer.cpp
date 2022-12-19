@@ -101,7 +101,7 @@ Tiled2dMapVectorPolygonSubLayer::updateTileData(const Tiled2dMapTileInfo &tileIn
     std::string layerName = description->sourceId;
 
     std::string defIdPrefix =
-            std::to_string(tileInfo.x) + "/" + std::to_string(tileInfo.y) + "_" + layerName + "_";
+            std::to_string(tileInfo.x) + "/" + std::to_string(tileInfo.y) + "@" + std::to_string(tileInfo.t) + "_" + layerName + "_";
     if (!layerFeatures.empty() &&
         description->minZoom <= tileInfo.zoomIdentifier &&
         description->maxZoom >= tileInfo.zoomIdentifier) {
@@ -133,10 +133,10 @@ Tiled2dMapVectorPolygonSubLayer::updateTileData(const Tiled2dMapTileInfo &tileIn
                     }
 
 #ifndef __APPLE__
-                    // TODO: android currently only supports 16bit indices
+                    // TODO: android currently only supports 16bit number of vertices per draw call
                     // more complex polygons may need to be simplified on-device to render them correctly
                     if (verticesCount >= std::numeric_limits<uint16_t>::max()) {
-                        LogError <<= "Too many vertices to use 16bit indices: " + std::to_string(verticesCount);
+                        LogError <<= "Too many vertices in polygon: " + std::to_string(verticesCount);
                         continue;
                     }
 #endif
@@ -169,7 +169,10 @@ Tiled2dMapVectorPolygonSubLayer::updateTileData(const Tiled2dMapTileInfo &tileIn
 
                     indices_offset += posAdded;
 
-                    hitDetectionPolygonMap[tileInfo].push_back({PolygonCoord(polygonCoordinates[i], polygonHoles[i]), featureContext});
+                    {
+                        std::lock_guard<std::recursive_mutex> lock(hitDetectionMutex);
+                        hitDetectionPolygonMap[tileInfo].push_back({PolygonCoord(polygonCoordinates[i], polygonHoles[i]), featureContext});
+                    }
                 }
 
                 int styleIndex = -1;
@@ -309,6 +312,9 @@ bool Tiled2dMapVectorPolygonSubLayer::onClickConfirmed(const ::Vec2F &posScreen)
     }
     auto point = camera->coordFromScreenPosition(posScreen);
 
+
+    std::lock_guard<std::recursive_mutex> lock(hitDetectionMutex);
+
     for (auto const &[tileInfo, polygonTuples] : hitDetectionPolygonMap) {
         for (auto const &[polygon, featureContext]: polygonTuples) {
             if (PolygonHelper::pointInside(polygon, point, mapInterface->getCoordinateConverterHelper())) {
@@ -350,6 +356,9 @@ void Tiled2dMapVectorPolygonSubLayer::clearTileData(const Tiled2dMapTileInfo &ti
     auto mapInterface = this->mapInterface;
     if (!mapInterface) { return; }
 
+
+    std::lock_guard<std::recursive_mutex> lock(hitDetectionMutex);
+
     hitDetectionPolygonMap.erase(tileInfo);
 
     std::vector<std::shared_ptr<GraphicsObjectInterface>> objectsToClear;
@@ -368,7 +377,7 @@ void Tiled2dMapVectorPolygonSubLayer::clearTileData(const Tiled2dMapTileInfo &ti
 
     mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
             TaskConfig("LineGroupTile_clear_" + std::to_string(tileInfo.zoomIdentifier) + "/" + std::to_string(tileInfo.x) + "/" +
-                       std::to_string(tileInfo.y), 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+                       std::to_string(tileInfo.y) + "@" + std::to_string(tileInfo.y), 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
             [objectsToClear] {
                 for (const auto &lineObject : objectsToClear) {
                     if (lineObject->isReady()) lineObject->clear();
@@ -397,7 +406,7 @@ void Tiled2dMapVectorPolygonSubLayer::preGenerateRenderPasses() {
         }
 
         for (const auto &passEntry : renderPassObjectMap) {
-            std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex.value_or(passEntry.first)),
+            std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex.value_or(passEntry.first), 0),
                                                                                   passEntry.second,
                                                                                   (tileMask
                                                                                    ? tileMask

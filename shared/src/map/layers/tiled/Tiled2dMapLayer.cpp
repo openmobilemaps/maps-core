@@ -19,9 +19,9 @@ void Tiled2dMapLayer::setSourceInterface(const std::shared_ptr<Tiled2dMapSourceI
     if (isHidden) {
         sourceInterface->pause();
     }
-    auto errorManager = this->errorManager;
-    if (errorManager) {
-        this->sourceInterface->setErrorManager(errorManager);
+    auto networkActivityManager = this->networkActivityManager;
+    if (networkActivityManager) {
+        this->sourceInterface->setNetworkActivityManager(networkActivityManager);
     }
 }
 
@@ -77,7 +77,9 @@ void Tiled2dMapLayer::show() {
 }
 
 void Tiled2dMapLayer::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom) {
-    sourceInterface->onVisibleBoundsChanged(visibleBounds, curT, zoom);
+    if (sourceInterface) {
+        sourceInterface->onVisibleBoundsChanged(visibleBounds, curT, zoom);
+    }
 }
 
 void Tiled2dMapLayer::onRotationChanged(float angle) {
@@ -122,11 +124,11 @@ LayerReadyState Tiled2dMapLayer::isReadyToRenderOffscreen() {
     return LayerReadyState::READY;
 }
 
-void Tiled2dMapLayer::setErrorManager(const std::shared_ptr<::ErrorManager> &errorManager) {
-    this->errorManager = errorManager;
+void Tiled2dMapLayer::setNetworkActivityManager(const std::shared_ptr<::NetworkActivityManagerInterface> &networkActivityManager) {
+    this->networkActivityManager = networkActivityManager;
     auto sourceInterface = this->sourceInterface;
     if (sourceInterface) {
-        sourceInterface->setErrorManager(errorManager);
+        sourceInterface->setNetworkActivityManager(networkActivityManager);
     }
 }
 
@@ -137,7 +139,8 @@ void Tiled2dMapLayer::forceReload() {
     }
 }
 
-void Tiled2dMapLayer::setT(int t) {
+void Tiled2dMapLayer::setT(double t) {
+
     curT = t;
 
     auto mapInterface = this->mapInterface;
@@ -148,5 +151,4 @@ void Tiled2dMapLayer::setT(int t) {
         }
     }
 
-    onTilesUpdated();
 }

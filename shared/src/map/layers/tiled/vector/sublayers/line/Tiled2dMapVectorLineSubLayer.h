@@ -71,6 +71,7 @@ private:
     std::recursive_mutex lineMutex;
     std::unordered_map<Tiled2dMapTileInfo, std::vector<std::shared_ptr<LineGroup2dLayerObject>>> tileLinesMap;
 
+    std::recursive_mutex hitDetectionMutex;
     std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<std::vector<std::vector<::Coord>>, FeatureContext>>> hitDetectionLineMap;
     std::recursive_mutex featureGroupsMutex;
     std::vector<std::vector<std::tuple<size_t, FeatureContext>>> featureGroups;

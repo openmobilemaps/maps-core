@@ -37,7 +37,17 @@ public:
 
     Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                           const std::vector<std::shared_ptr<::LoaderInterface>> &tileLoader,
+                          const std::shared_ptr<::AlphaShaderInterface> &shader);
+
+    Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
+                          const std::vector<std::shared_ptr<::LoaderInterface>> &tileLoader,
                           const std::shared_ptr<::ShaderProgramInterface> &shader);
+
+    Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
+                          const std::vector<std::shared_ptr<::LoaderInterface>> &tileLoader,
+                          const std::shared_ptr<Tiled2dMapRasterLayerShaderFactory> & shaderFactory);
+
+
 
     virtual void onAdded(const std::shared_ptr<::MapInterface> &mapInterface) override;
 
@@ -59,7 +69,9 @@ public:
             const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToSetup,
             const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToClean);
 
-    virtual void generateRenderPasses();
+    virtual std::vector<std::shared_ptr<RenderPassInterface>> combineRenderPasses();
+    std::vector<std::shared_ptr<RenderPassInterface>> generateRenderPasses(double alpha, int t, std::shared_ptr<RenderTargetTexture>);
+    void generateRenderPasses();
 
     virtual void setCallbackHandler(const std::shared_ptr<Tiled2dMapRasterLayerCallbackInterface> &handler) override;
 
@@ -87,11 +99,13 @@ public:
 
     virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
 
-    virtual void setT(int32_t t) override;
+    virtual void setT(double t) override;
 
     bool shouldLoadTile(const Tiled2dMapTileInfo &tileInfo);
 
     virtual std::shared_ptr<::Tiled2dMapLayerConfig> getConfig() override;
+
+
 
 private:
     virtual void updateMaskObjects(const std::vector<const std::shared_ptr<MaskingObjectInterface>> &newMaskObjects,
@@ -109,6 +123,8 @@ protected:
 
     const std::vector<std::shared_ptr<::LoaderInterface>> tileLoaders;
     std::shared_ptr<ShaderProgramInterface> shader;
+    std::shared_ptr<AlphaShaderInterface> alphaShader;
+    std::shared_ptr<Tiled2dMapRasterLayerShaderFactory> shaderFactory;
     std::shared_ptr<Tiled2dMapRasterSource> rasterSource;
 
     std::atomic_flag updateFlag = ATOMIC_FLAG_INIT;
@@ -122,4 +138,6 @@ protected:
 
     float alpha;
     bool animationsEnabled = true;
+    double tLastGeneratedTiles;
+    double curTWithFraction;
 };
