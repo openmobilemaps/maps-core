@@ -38,7 +38,7 @@ abstract class LayerInterface {
 
     abstract fun enableAnimations(enabled: Boolean)
 
-    abstract fun setErrorManager(errorManager: io.openmobilemaps.mapscore.shared.map.ErrorManager)
+    abstract fun setNetworkActivityManager(networkActivityManager: io.openmobilemaps.mapscore.shared.map.NetworkActivityManagerInterface)
 
     abstract fun forceReload()
 
@@ -150,11 +150,11 @@ abstract class LayerInterface {
         }
         private external fun native_enableAnimations(_nativeRef: Long, enabled: Boolean)
 
-        override fun setErrorManager(errorManager: io.openmobilemaps.mapscore.shared.map.ErrorManager) {
+        override fun setNetworkActivityManager(networkActivityManager: io.openmobilemaps.mapscore.shared.map.NetworkActivityManagerInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setErrorManager(this.nativeRef, errorManager)
+            native_setNetworkActivityManager(this.nativeRef, networkActivityManager)
         }
-        private external fun native_setErrorManager(_nativeRef: Long, errorManager: io.openmobilemaps.mapscore.shared.map.ErrorManager)
+        private external fun native_setNetworkActivityManager(_nativeRef: Long, networkActivityManager: io.openmobilemaps.mapscore.shared.map.NetworkActivityManagerInterface)
 
         override fun forceReload() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

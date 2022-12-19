@@ -9,20 +9,21 @@
  */
 #pragma once
 
-#include "ErrorManager.h"
-#include "ErrorManagerListener.h"
+#include "NetworkActivityManagerInterface.h"
+#include "NetworkActivityListenerInterface.h"
 #include "TiledLayerError.h"
 #include <mutex>
 #include <unordered_map>
 #include <vector>
+#include "TasksProgressInfo.h"
 
-class ErrorManagerImpl : public ErrorManager, public std::enable_shared_from_this<ErrorManagerImpl> {
+class NetworkActivityManager : public NetworkActivityManagerInterface, public std::enable_shared_from_this<NetworkActivityManager> {
   public:
-    ErrorManagerImpl(){};
+    NetworkActivityManager(){};
 
-    virtual void addErrorListener(const std::shared_ptr<ErrorManagerListener> &listener) override;
+    virtual void addNetworkActivityListener(const std::shared_ptr<NetworkActivityListenerInterface> &listener) override;
 
-    virtual void removeErrorListener(const std::shared_ptr<ErrorManagerListener> &listener) override;
+    virtual void removeNetworkActivityListener(const std::shared_ptr<NetworkActivityListenerInterface> &listener) override;
 
     virtual void addTiledLayerError(const TiledLayerError &error) override;
 
@@ -32,10 +33,14 @@ class ErrorManagerImpl : public ErrorManager, public std::enable_shared_from_thi
 
     virtual void clearAllErrors() override;
 
+    virtual void updateRemainingTasks(const std::string & layerName, int32_t taskCount) override;
+
   private:
     std::recursive_mutex mutex;
     std::unordered_map<std::string, TiledLayerError> tiledLayerErrors;
-    std::vector<std::shared_ptr<ErrorManagerListener>> listeners;
+    std::vector<TasksProgressInfo> progressInfos;
+    int32_t currentMaxTasks = 0;
+    std::vector<std::shared_ptr<NetworkActivityListenerInterface>> listeners;
 
     bool containsRect(const ::RectCoord &outer, const ::RectCoord &inner);
     void notifyListeners();

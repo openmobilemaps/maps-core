@@ -13,7 +13,8 @@
 #include "Tiled2dMapSource.h"
 #include "TiledLayerError.h"
 #include <algorithm>
-
+#include <functional>
+#include <numeric>
 #include "PolygonCoord.h"
 #include <iostream>
 #include "gpc.h"
@@ -356,8 +357,8 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
                     std::lock_guard<std::recursive_mutex> lock(tilesReadyMutex);
                     readyTiles.erase(removedTile);
                 }
-                if (errorManager)
-                    errorManager->removeError(
+                if (networkActivityManager)
+                    networkActivityManager->removeError(
                             layerConfig->getTileUrl(removedTile.x, removedTile.y, removedTile.t, removedTile.zoomIdentifier));
             }
         }
@@ -380,8 +381,8 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
 
                     if (!found) {
                         it = loadingQueue.erase(it);
-                        if (errorManager)
-                            errorManager->removeError(
+                        if (networkActivityManager)
+                            networkActivityManager->removeError(
                                                       layerConfig->getTileUrl(it->tileInfo.x, it->tileInfo.y, it->tileInfo.t,
                                                                               it->tileInfo.zoomIdentifier));
                     } else {
@@ -409,7 +410,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
                         }
                     }
                     if (found) {
-                        if (errorManager) errorManager->removeError(layerConfig->getTileUrl(it->first.tileInfo.x, it->first.tileInfo.y, it->first.tileInfo.t, it->first.tileInfo.zoomIdentifier));
+                        if (networkActivityManager) networkActivityManager->removeError(layerConfig->getTileUrl(it->first.tileInfo.x, it->first.tileInfo.y, it->first.tileInfo.t, it->first.tileInfo.zoomIdentifier));
                         it = errors.erase(it);
                     } else {
                         ++it;
@@ -479,6 +480,10 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
             }
         }
     }
+    
+    if (networkActivityManager) {
+        networkActivityManager->updateRemainingTasks(layerConfig->getLayerName(), getRemainingTasks());
+    }
 
     //if we removed tiles, we potentially need to update the tilemasks - also if no new tile is loaded
     updateTileMasks();
@@ -502,7 +507,7 @@ std::optional<PrioritizedTiled2dMapTileInfo> Tiled2dMapSource<T, L, R>::dequeueL
             loadingQueues[loaderIndex].erase(tile);
         }
     }
-
+    
     if (!result.has_value()) {
         std::vector<PrioritizedTiled2dMapTileInfo> readyErrorTiles;
         {
@@ -531,6 +536,10 @@ std::optional<PrioritizedTiled2dMapTileInfo> Tiled2dMapSource<T, L, R>::dequeueL
         currentlyLoading.insert(result->tileInfo);
     }
 
+    if (networkActivityManager) {
+        networkActivityManager->updateRemainingTasks(layerConfig->getLayerName(), getRemainingTasks());
+    }
+
     return result;
 }
 
@@ -543,14 +552,14 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(size_t loaderIndex) {
         }
 
         auto loaderResult = loadTile(tile->tileInfo, loaderIndex);
-        auto errorManager = this->errorManager;
+        auto networkActivityManager = this->networkActivityManager;
 
         LoaderStatus status = loaderResult.status;
 
         switch (status) {
             case LoaderStatus::OK: {
-                if (errorManager) {
-                    errorManager->removeError(layerConfig->getTileUrl(tile->tileInfo.x, tile->tileInfo.y, tile->tileInfo.t, tile->tileInfo.zoomIdentifier));
+                if (networkActivityManager) {
+                    networkActivityManager->removeError(layerConfig->getTileUrl(tile->tileInfo.x, tile->tileInfo.y, tile->tileInfo.t, tile->tileInfo.zoomIdentifier));
                 }
                 bool isVisible;
                 {
@@ -633,6 +642,9 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(size_t loaderIndex) {
                         }
                     }
                 }
+                if (networkActivityManager) {
+                    networkActivityManager->updateRemainingTasks(layerConfig->getLayerName(), getRemainingTasks());
+                }
                 break;
             }
             case LoaderStatus::ERROR_400:
@@ -641,8 +653,8 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(size_t loaderIndex) {
                     std::lock_guard<std::recursive_mutex> lock(notFoundTilesMutex);
                     notFoundTiles.insert(tile->tileInfo);
                 }
-                if (errorManager) {
-                    errorManager->addTiledLayerError(TiledLayerError(status,
+                if (networkActivityManager) {
+                    networkActivityManager->addTiledLayerError(TiledLayerError(status,
                                                                      loaderResult.errorCode,
                                                                      layerConfig->getLayerName(),
                                                                      layerConfig->getTileUrl(tile->tileInfo.x, tile->tileInfo.y, tile->tileInfo.t,tile->tileInfo.zoomIdentifier),
@@ -670,8 +682,10 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(size_t loaderIndex) {
                     std::lock_guard<std::recursive_mutex> lock(dispatchedTasksMutex);
                     dispatchedTasks[loaderIndex]++;
                 }
-                if (errorManager) {
-                    errorManager->addTiledLayerError(TiledLayerError(status,
+                
+                if (networkActivityManager) {
+                    networkActivityManager->updateRemainingTasks(layerConfig->getLayerName(), getRemainingTasks());
+                    networkActivityManager->addTiledLayerError(TiledLayerError(status,
                                                                      loaderResult.errorCode,
                                                                      layerConfig->getLayerName(),
                                                                      layerConfig->getTileUrl(tile->tileInfo.x, tile->tileInfo.y, tile->tileInfo.t, tile->tileInfo.zoomIdentifier),
@@ -988,8 +1002,8 @@ template<class T, class L, class R>
 }
 
 template<class T, class L, class R>
-void Tiled2dMapSource<T, L, R>::setErrorManager(const std::shared_ptr<::ErrorManager> &errorManager) {
-    this->errorManager = errorManager;
+void Tiled2dMapSource<T, L, R>::setNetworkActivityManager(const std::shared_ptr<::NetworkActivityManagerInterface> &networkActivityManager) {
+    this->networkActivityManager = networkActivityManager;
 }
 
 template<class T, class L, class R>
@@ -1015,5 +1029,18 @@ void Tiled2dMapSource<T, L, R>::forceReload() {
                                                             }));
         }
     }
+}
 
+template<class T, class L, class R>
+int Tiled2dMapSource<T, L, R>::getRemainingTasks() {
+    int32_t remainingTasks = 0;
+    {
+        std::lock_guard<std::recursive_mutex> lock(loadingQueueMutex);
+        remainingTasks = std::accumulate(loadingQueues.begin(), loadingQueues.end(), remainingTasks, [](int cur, auto const &q) { return cur + q.second.size(); } );
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lock(errorTilesMutex);
+        remainingTasks = std::accumulate(errorTiles.begin(), errorTiles.end(), remainingTasks, [](int cur, auto const &q) { return cur + q.second.size(); } );
+    }
+    return remainingTasks;
 }

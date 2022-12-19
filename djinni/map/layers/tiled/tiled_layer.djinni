@@ -1,7 +1,7 @@
 @extern "../../../yaml/rect_coord.yaml"
 @extern "../../../yaml/coord.yaml"
 @extern "../../../yaml/layer_ready_state.yaml"
-@extern "../../../yaml/error_manager.yaml"
+@extern "../../../yaml/network_activity_manager_interface.yaml"
 
 tiled_2d_map_layer_config = interface +c +j +o {
     get_coordinate_system_identifier(): string;
@@ -59,7 +59,7 @@ tiled_2d_map_source_interface = interface +c {
 
     is_ready_to_render_offscreen() : layer_ready_state;
 
-    set_error_manager(error_manager: error_manager);
+    set_network_activity_manager(network_activity_manager: network_activity_manager_interface);
     force_reload();
 }
 
