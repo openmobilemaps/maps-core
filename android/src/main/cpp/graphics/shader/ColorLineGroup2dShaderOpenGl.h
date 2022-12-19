@@ -26,7 +26,7 @@ class ColorLineGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
 
     virtual void setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
-    virtual void preRender(const std::shared_ptr<::RenderingContextInterface> &context) override;
+    virtual void preRender(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &pass) override;
 
     virtual void setStyles(const std::vector<::LineStyle> &lineStyles) override;
 

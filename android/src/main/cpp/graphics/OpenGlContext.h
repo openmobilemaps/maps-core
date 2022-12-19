@@ -35,15 +35,19 @@ class OpenGlContext : public RenderingContextInterface, std::enable_shared_from_
 
     virtual void setBackgroundColor(const ::Color &color) override;
 
-    virtual void setupDrawFrame() override;
+    virtual void setupDrawFrame(const std::shared_ptr<::RenderTargetTexture> & renderTargetTexture) override;
 
-    virtual void preRenderStencilMask() override;
+    void endDrawFrame(const std::shared_ptr<::RenderTargetTexture> &renderTargetTexture) override;
 
-    virtual void postRenderStencilMask() override;
+    virtual void preRenderStencilMask(const RenderPassConfig & pass) override;
 
-    virtual void applyScissorRect(const std::optional<::RectI> &scissorRect) override;
+    virtual void postRenderStencilMask(const RenderPassConfig & pass) override;
 
-  protected:
+    virtual void applyScissorRect(const std::optional<::RectI> &scissorRect, const RenderPassConfig & pass) override;
+
+    std::shared_ptr<::RenderTargetTexture> createRenderTargetTexture() override;
+
+protected:
     Color backgroundColor = Color(0, 0, 0, 1);
 
     std::unordered_map<std::string, int> programs;

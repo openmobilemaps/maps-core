@@ -6,7 +6,7 @@
 
 namespace djinni_generated {
 
-NativeRenderTargetTexture::NativeRenderTargetTexture() : ::djinni::JniInterface<::RenderTargetTexture, NativeRenderTargetTexture>() {}
+NativeRenderTargetTexture::NativeRenderTargetTexture() : ::djinni::JniInterface<::RenderTargetTexture, NativeRenderTargetTexture>("io/openmobilemaps/mapscore/shared/map/RenderTargetTexture$CppProxy") {}
 
 NativeRenderTargetTexture::~NativeRenderTargetTexture() = default;
 
@@ -21,6 +21,24 @@ std::shared_ptr<::TextureHolderInterface> NativeRenderTargetTexture::JavaProxy::
     auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_textureHolder);
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativeTextureHolderInterface::toCpp(jniEnv, jret);
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_RenderTargetTexture_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        delete reinterpret_cast<::djinni::CppProxyHandle<::RenderTargetTexture>*>(nativeRef);
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT ::djinni_generated::NativeTextureHolderInterface::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_RenderTargetTexture_00024CppProxy_native_1textureHolder(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::RenderTargetTexture>(nativeRef);
+        auto r = ref->textureHolder();
+        return ::djinni::release(::djinni_generated::NativeTextureHolderInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
 }  // namespace djinni_generated

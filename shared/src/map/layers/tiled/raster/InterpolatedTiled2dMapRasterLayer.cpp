@@ -166,7 +166,8 @@ std::vector<std::shared_ptr<RenderPassInterface>>  InterpolatedTiled2dMapRasterL
 
     auto texture = renderTargetTexture->textureHolder();
     if (texture) {
-        mergedTilesQuad->loadTexture(nullptr, texture);
+        auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
+        mergedTilesQuad->loadTexture(renderingContext, texture);
     }
 
     if (mergedInterpolationShader) {

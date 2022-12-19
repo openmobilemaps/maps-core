@@ -3,11 +3,40 @@
 
 #import "MCRenderTargetTexture+Private.h"
 #import "MCRenderTargetTexture.h"
+#import "DJICppWrapperCache+Private.h"
+#import "DJIError.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCTextureHolderInterface+Private.h"
+#include <exception>
 #include <stdexcept>
+#include <utility>
 
 static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for this file");
+
+@interface MCRenderTargetTextureCppProxy : NSObject<MCRenderTargetTexture>
+
+- (id)initWithCpp:(const std::shared_ptr<::RenderTargetTexture>&)cppRef;
+
+@end
+
+@implementation MCRenderTargetTextureCppProxy {
+    ::djinni::CppProxyCache::Handle<std::shared_ptr<::RenderTargetTexture>> _cppRefHandle;
+}
+
+- (id)initWithCpp:(const std::shared_ptr<::RenderTargetTexture>&)cppRef
+{
+    if (self = [super init]) {
+        _cppRefHandle.assign(cppRef);
+    }
+    return self;
+}
+
+- (nullable id<MCTextureHolderInterface>)textureHolder {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->textureHolder();
+        return ::djinni_generated::TextureHolderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
 
 namespace djinni_generated {
 
@@ -36,6 +65,9 @@ auto RenderTargetTexture::toCpp(ObjcType objc) -> CppType
     if (!objc) {
         return nullptr;
     }
+    if ([(id)objc isKindOfClass:[MCRenderTargetTextureCppProxy class]]) {
+        return ((MCRenderTargetTextureCppProxy*)objc)->_cppRefHandle.get();
+    }
     return ::djinni::get_objc_proxy<ObjcProxy>(objc);
 }
 
@@ -44,7 +76,12 @@ auto RenderTargetTexture::fromCppOpt(const CppOptType& cpp) -> ObjcType
     if (!cpp) {
         return nil;
     }
-    return dynamic_cast<ObjcProxy&>(*cpp).djinni_private_get_proxied_objc_object();
+    if (auto cppPtr = dynamic_cast<ObjcProxy*>(cpp.get())) {
+        return cppPtr->djinni_private_get_proxied_objc_object();
+    }
+    return ::djinni::get_cpp_proxy<MCRenderTargetTextureCppProxy>(cpp);
 }
 
 }  // namespace djinni_generated
+
+@end

@@ -122,7 +122,7 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-    shaderProgram->preRender(openGlContext);
+    shaderProgram->preRender(openGlContext, renderPass);
 
     // Prepare the vertex attributes
     size_t floatSize = sizeof(GLfloat);

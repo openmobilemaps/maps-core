@@ -133,10 +133,10 @@ Tiled2dMapVectorPolygonSubLayer::updateTileData(const Tiled2dMapTileInfo &tileIn
                     }
 
 #ifndef __APPLE__
-                    // TODO: android currently only supports 16bit indices
+                    // TODO: android currently only supports 16bit number of vertices per draw call
                     // more complex polygons may need to be simplified on-device to render them correctly
                     if (verticesCount >= std::numeric_limits<uint16_t>::max()) {
-                        LogError <<= "Too many vertices to use 16bit indices: " + std::to_string(verticesCount);
+                        LogError <<= "Too many vertices in polygon: " + std::to_string(verticesCount);
                         continue;
                     }
 #endif

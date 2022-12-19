@@ -42,7 +42,7 @@ class Line2dOpenGl : public GraphicsObjectInterface,
     virtual void setIsInverseMasked(bool inversed) override;
 
   protected:
-    void drawLineSegments(std::shared_ptr<OpenGlContext> openGlContext, int64_t mvpMatrix, float widthScaleFactor);
+    void drawLineSegments(std::shared_ptr<OpenGlContext> openGlContext, const RenderPassConfig &renderPass, int64_t mvpMatrix, float widthScaleFactor);
 
     void prepareGlData(std::shared_ptr<OpenGlContext> openGlContext);
 

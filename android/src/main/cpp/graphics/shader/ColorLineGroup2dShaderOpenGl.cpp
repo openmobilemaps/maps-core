@@ -34,7 +34,7 @@ void ColorLineGroup2dShaderOpenGl::setupProgram(const std::shared_ptr<::Renderin
     openGlContext->storeProgram(programName, program);
 }
 
-void ColorLineGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
+void ColorLineGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &pass) {
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     int program = openGlContext->getProgram(getProgramName());
 

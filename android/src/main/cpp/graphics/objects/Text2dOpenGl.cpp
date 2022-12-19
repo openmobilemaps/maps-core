@@ -217,7 +217,7 @@ void Text2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
         glVertexAttribPointer(textureCoordinateHandle, 2, GL_FLOAT, false, 0, nullptr);
     }
 
-    shaderProgram->preRender(context);
+    shaderProgram->preRender(context, renderPass);
 
     // enable vPosition attribs
     glEnableVertexAttribArray(positionHandle);
