@@ -101,6 +101,13 @@ public class TextureHolder: NSObject {
 
         }
     }
+
+    func clearSource(loadTexture: Bool) throws {
+        if loadTexture {
+            try loadDataFromSource()
+        }
+        textureSource = nil
+    }
 }
 
 extension TextureHolder: MCTextureHolderInterface {

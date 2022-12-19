@@ -26,7 +26,7 @@ open class MCScheduler: MCSchedulerInterface {
 
     private let graphicsQueue = OperationQueue.main
 
-    private let internalSchedulerQueue = DispatchQueue(label: "internalSchedulerQueue")
+    private let internalSchedulerQueue = DispatchQueue(label: "internalSchedulerQueue", qos: .userInitiated)
 
     private var pendingOperations: [String: WeakOperation] = [:]
 

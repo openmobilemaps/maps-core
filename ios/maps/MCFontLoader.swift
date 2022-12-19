@@ -14,7 +14,7 @@ import UIKit
 open class MCFontLoader: NSObject, MCFontLoaderInterface {
     // MARK: - Font Atlas Dictionary
 
-    private let loadingQueue = DispatchQueue(label: "MCFontLoader")
+    private let loadingQueue = DispatchQueue(label: "MCFontLoader", qos: .userInitiated)
     private var fontAtlasDictionary: [String: TextureHolder] = [:]
     private var fontDataDictionary: [String: MCFontData] = [:]
 

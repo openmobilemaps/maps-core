@@ -67,6 +67,8 @@ open class MCTextureLoader: MCLoaderInterface {
 
     }
 
+    let debugDrawSemaphore = DispatchSemaphore(value: 1)
+
     open func loadTexture(_ url: String, etag: String?) -> MCTextureLoaderResult {
         let urlString = url
         guard let url = URL(string: urlString) else {
@@ -102,16 +104,23 @@ open class MCTextureLoader: MCLoaderInterface {
         }
 
         do {
-            if isRasterDebugModeEnabled,
-                let uiImage = UIImage(data: data) {
-                let renderer = UIGraphicsImageRenderer(size: uiImage.size)
-                let img = renderer.image { ctx in
-                    self.applyDebugWatermark(url: urlString, byteCount: data.count, image: uiImage, wasCached: wasCached, ctx: ctx)
+            if isRasterDebugModeEnabled {
+                debugDrawSemaphore.wait()
+                defer {
+                    debugDrawSemaphore.signal()
                 }
-                if let cgImage = img.cgImage,
-                      let textureHolder = try? TextureHolder(cgImage) {
-                    return .init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil)
+                if let uiImage = UIImage(data: data) {
+                    let renderer = UIGraphicsImageRenderer(size: uiImage.size)
+                    let img = renderer.image { ctx in
+                        self.applyDebugWatermark(url: urlString, byteCount: data.count, image: uiImage, wasCached: wasCached, ctx: ctx)
+                    }
+                    if let cgImage = img.cgImage,
+                       let textureHolder = try? TextureHolder(cgImage) {
+                        try? textureHolder.clearSource(loadTexture: true)
+                        return .init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil)
+                    }
                 }
+
             }
 
             let textureHolder = try TextureHolder(data)
