@@ -79,7 +79,7 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         loaders(loaders),
         dpFactor(dpFactor),
         sublayers(),
-        numT(numT) {}
+        numT(1) {}
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName, const std::shared_ptr<VectorMapDescription> &mapDescription,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,

@@ -19,7 +19,7 @@ class LineHelper {
                             const Coord &point,
                             double pointSystemDistance,
                             const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper) {
-        LineHelper::pointWithin(line->getCoordinates(), point, pointSystemDistance, conversionHelper);
+        return LineHelper::pointWithin(line->getCoordinates(), point, pointSystemDistance, conversionHelper);
     }
 
     static bool pointWithin(const std::vector<::Coord> &coordinates,
