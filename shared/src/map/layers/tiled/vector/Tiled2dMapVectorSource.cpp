@@ -73,6 +73,10 @@ FinalResult Tiled2dMapVectorSource::postLoadingTask(const IntermediateResult &lo
 
             if (!isTileVisible(tile)) return FinalResult();
         }
+        catch (protozero::end_of_buffer_exception endOfBufferException) {
+            LogError <<= "protozero::end_of_buffer_exception for tile " + std::to_string(tile.zoomIdentifier) + "/" +
+            std::to_string(tile.x) + "/" + std::to_string(tile.y);
+        }
         catch (protozero::invalid_tag_exception tagException) {
             LogError <<= "Invalid tag exception for tile " + std::to_string(tile.zoomIdentifier) + "/" +
             std::to_string(tile.x) + "/" + std::to_string(tile.y);
