@@ -17,10 +17,12 @@ import io.openmobilemaps.mapscore.graphics.DataHolder
 import io.openmobilemaps.mapscore.map.loader.networking.RefererInterceptor
 import io.openmobilemaps.mapscore.map.loader.networking.RequestUtils
 import io.openmobilemaps.mapscore.map.loader.networking.UserAgentInterceptor
-import io.openmobilemaps.mapscore.shared.map.loader.*
+import io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult
+import io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface
+import io.openmobilemaps.mapscore.shared.map.loader.LoaderStatus
+import io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult
 import okhttp3.*
 import java.io.File
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 open class DataLoader(
@@ -28,14 +30,14 @@ open class DataLoader(
 	private var cacheDirectory: File,
 	private var cacheSize: Long,
 	private var referrer: String,
-	private var userAgent: String? = null
+	private var userAgent: String? = null,
 ) : LoaderInterface() {
 
 	companion object {
 		private const val HEADER_NAME_ETAG = "etag"
 	}
 
-	protected var okHttpClient = initializeClient()
+	private val okHttpClient by lazy { createClient() }
 
 	protected open fun createClient(): OkHttpClient = OkHttpClient.Builder()
 		.addInterceptor(UserAgentInterceptor(userAgent ?: RequestUtils.getDefaultUserAgent(context)))
@@ -50,13 +52,12 @@ open class DataLoader(
 		cacheDirectory: File? = null,
 		cacheSize: Long? = null,
 		referrer: String? = null,
-		userAgent: String? = null
+		userAgent: String? = null,
 	) {
 		cacheDirectory?.let { this.cacheDirectory = cacheDirectory }
 		cacheSize?.let { this.cacheSize = cacheSize }
 		referrer?.let { this.referrer = it }
 		userAgent?.let { this.userAgent = it }
-		okHttpClient = createClient()
 	}
 
 	override fun loadTexture(url: String, etag: String?): TextureLoaderResult {
@@ -107,5 +108,4 @@ open class DataLoader(
 		}
 	}
 
-	private fun initializeClient() = createClient()
 }
