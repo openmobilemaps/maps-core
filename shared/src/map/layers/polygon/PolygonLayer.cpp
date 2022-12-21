@@ -37,11 +37,13 @@ void PolygonLayer::setPolygons(const std::vector<PolygonInfo> &polygons) {
 std::vector<PolygonInfo> PolygonLayer::getPolygons() {
     std::vector<PolygonInfo> polygons;
     if (!mapInterface) {
+        std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         for (auto const &polygon : addingQueue) {
             polygons.push_back(polygon);
         }
         return polygons;
     }
+    std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
     for (auto const &ps : this->polygons) {
         for (auto &p : ps.second) {
             polygons.push_back(p.first);
