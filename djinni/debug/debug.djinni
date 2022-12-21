@@ -1,0 +1,7 @@
+maps_core_debug_interface = interface +c +j +o {
+   log_message(code: i32, message: string);
+}
+
+maps_core_debug = interface +c {
+    static set_debug_delegate(delegate: maps_core_debug_interface);
+}

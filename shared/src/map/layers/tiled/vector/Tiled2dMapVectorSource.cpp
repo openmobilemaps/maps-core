@@ -13,6 +13,7 @@
 #include "vtzero/vector_tile.hpp"
 #include "Logger.h"
 #include "DataHolderInterface.h"
+#include "MapsCoreDebugImpl.h"
 
 Tiled2dMapVectorSource::Tiled2dMapVectorSource(const MapConfig &mapConfig,
                                                const std::unordered_map<std::string, std::shared_ptr<Tiled2dMapLayerConfig>> &layerConfigs,
@@ -60,7 +61,19 @@ FinalResult Tiled2dMapVectorSource::postLoadingTask(const IntermediateResult &lo
                             vtzero::decode_geometry(feature.geometry(), geometryHandler);
                             layerFeatureMap->at(sourceLayerName).push_back({featureContext, geometryHandler});
                         } catch (vtzero::geometry_exception &geometryException) {
-                            LogError <<= "geometryException for tile " + std::to_string(tile.zoomIdentifier) + "/" + std::to_string(tile.x) + "/" + std::to_string(tile.y);
+                            std::string layerConfigList = "";
+                            
+                            for(auto const &[source, config]: layerConfigs) {
+                                layerConfigList += config->getLayerName() + ", ";
+                            }
+                            
+                            auto errorMsg = "geometryException for tile " + std::to_string(tile.zoomIdentifier) + "/" +
+                            std::to_string(tile.x) + "/" + std::to_string(tile.y) + " for layerConfig in [" + layerConfigList + "]";
+                            
+                            MapsCoreDebugImpl::instance().logMessage(MapsCoreDebugErrorCodes::PROTOBUF_GEOM, errorMsg);
+                            
+                            LogError <<= errorMsg;
+                            
                             continue;
                         }
                     }
@@ -74,16 +87,46 @@ FinalResult Tiled2dMapVectorSource::postLoadingTask(const IntermediateResult &lo
             if (!isTileVisible(tile)) return FinalResult();
         }
         catch (protozero::end_of_buffer_exception endOfBufferException) {
-            LogError <<= "protozero::end_of_buffer_exception for tile " + std::to_string(tile.zoomIdentifier) + "/" +
-            std::to_string(tile.x) + "/" + std::to_string(tile.y);
+            std::string layerConfigList = "";
+            
+            for(auto const &[source, config]: layerConfigs) {
+                layerConfigList += config->getLayerName() + ", ";
+            }
+            
+            auto errorMsg = "protozero::end_of_buffer_exception for tile " + std::to_string(tile.zoomIdentifier) + "/" +
+            std::to_string(tile.x) + "/" + std::to_string(tile.y) + " for layerConfig in [" + layerConfigList + "]";
+            
+            MapsCoreDebugImpl::instance().logMessage(MapsCoreDebugErrorCodes::PROTOBUF_OUT_OF_BOUNDS, errorMsg);
+            
+            LogError <<= errorMsg;
         }
         catch (protozero::invalid_tag_exception tagException) {
-            LogError <<= "Invalid tag exception for tile " + std::to_string(tile.zoomIdentifier) + "/" +
-            std::to_string(tile.x) + "/" + std::to_string(tile.y);
+            std::string layerConfigList = "";
+            
+            for(auto const &[source, config]: layerConfigs) {
+                layerConfigList += config->getLayerName() + ", ";
+            }
+            
+            auto errorMsg = "Invalid tag exception for tile " + std::to_string(tile.zoomIdentifier) + "/" +
+            std::to_string(tile.x) + "/" + std::to_string(tile.y) + " for layerConfig in [" + layerConfigList + "]";
+            
+            MapsCoreDebugImpl::instance().logMessage(MapsCoreDebugErrorCodes::PROTOBUF_INVALID_TAG, errorMsg);
+            
+            LogError <<= errorMsg;
         }
         catch (protozero::unknown_pbf_wire_type_exception typeException) {
-            LogError <<= "Unknown wire type exception for tile " + std::to_string(tile.zoomIdentifier) + "/" +
-            std::to_string(tile.x) + "/" + std::to_string(tile.y);
+            std::string layerConfigList = "";
+            
+            for(auto const &[source, config]: layerConfigs) {
+                layerConfigList += config->getLayerName() + ", ";
+            }
+            
+            auto errorMsg = "Unknown wire type exception for tile " + std::to_string(tile.zoomIdentifier) + "/" +
+            std::to_string(tile.x) + "/" + std::to_string(tile.y) + " for layerConfig in [" + layerConfigList + "]";
+            
+            MapsCoreDebugImpl::instance().logMessage(MapsCoreDebugErrorCodes::PROTOBUF_UNKNOWN_WIRE_TYPE, errorMsg);
+            
+            LogError <<= errorMsg;
         }
 
         resultMap[source] = layerFeatureMap;
