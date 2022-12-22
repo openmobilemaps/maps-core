@@ -19,7 +19,11 @@
 class Tiled2dMapVectorLayerConfig : public Tiled2dMapLayerConfig {
 public:
     Tiled2dMapVectorLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &layerDescription, bool underzoom = true, bool overzoom = true, int numT = 1)
-            : description(layerDescription), underzoom(underzoom), overzoom(overzoom), numT(numT) {}
+            : description(layerDescription), underzoom(underzoom), overzoom(overzoom), numT(numT), defaultZoomInfo(Tiled2dMapZoomInfo(0.4, 1, false, true, underzoom, overzoom)) {}
+    
+    
+    Tiled2dMapVectorLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &layerDescription, int numT, Tiled2dMapZoomInfo zoomInfo)
+    : description(layerDescription), underzoom(underzoom), overzoom(overzoom), numT(numT), defaultZoomInfo(zoomInfo) {}
 
     ~Tiled2dMapVectorLayerConfig() {}
 
@@ -75,7 +79,7 @@ private:
             Coord(epsg3857Id, -20037508.34, 20037508.34, 0.0),
             Coord(epsg3857Id, 20037508.34, -20037508.34, 0.0)
     );
-    const Tiled2dMapZoomInfo defaultZoomInfo = Tiled2dMapZoomInfo(0.4, 1, false, true, underzoom, overzoom);
+    const Tiled2dMapZoomInfo defaultZoomInfo;
 
     virtual std::vector<Tiled2dMapZoomLevelInfo> getDefaultEpsg3857ZoomLevels() {
         std::vector<Tiled2dMapZoomLevelInfo> infos;
