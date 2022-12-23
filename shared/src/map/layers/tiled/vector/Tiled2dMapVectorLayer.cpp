@@ -55,12 +55,15 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::string &remoteStyleJsonUrl,
                                              const std::string &fallbackStyleJsonString,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
+                                             const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                                              double dpFactor) :
         Tiled2dMapLayer(),
         layerName(layerName),
         remoteStyleJsonUrl(remoteStyleJsonUrl),
         fallbackStyleJsonString(fallbackStyleJsonString),
         loaders(loaders),
+        fontLoader(fontLoader),
+
         dpFactor(dpFactor),
         sublayers() {
         }
