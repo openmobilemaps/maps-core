@@ -34,6 +34,7 @@ public:
                           const std::string &remoteStyleJsonUrl,
                           const std::string &fallbackStyleJsonString,
                           const std::vector <std::shared_ptr<::LoaderInterface>> &loaders,
+                          const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                           double dpFactor);
 
     Tiled2dMapVectorLayer(const std::string &layerName,
