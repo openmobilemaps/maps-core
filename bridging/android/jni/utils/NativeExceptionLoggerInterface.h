@@ -27,20 +27,6 @@ private:
     friend ::djinni::JniClass<NativeExceptionLoggerInterface>;
     friend ::djinni::JniInterface<::ExceptionLoggerInterface, NativeExceptionLoggerInterface>;
 
-    class JavaProxy final : ::djinni::JavaProxyHandle<JavaProxy>, public ::ExceptionLoggerInterface
-    {
-    public:
-        JavaProxy(JniType j);
-        ~JavaProxy();
-
-        void logMessage(const std::string & errorDomain, int32_t code, const std::unordered_map<std::string, std::string> & customValues) override;
-
-    private:
-        friend ::djinni::JniInterface<::ExceptionLoggerInterface, ::djinni_generated::NativeExceptionLoggerInterface>;
-    };
-
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/utils/ExceptionLoggerInterface") };
-    const jmethodID method_logMessage { ::djinni::jniGetMethodID(clazz.get(), "logMessage", "(Ljava/lang/String;ILjava/util/HashMap;)V") };
 };
 
 }  // namespace djinni_generated

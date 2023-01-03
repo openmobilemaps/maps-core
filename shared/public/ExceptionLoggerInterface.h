@@ -3,13 +3,13 @@
 
 #pragma once
 
-#include <cstdint>
-#include <string>
-#include <unordered_map>
+#include <memory>
+
+class ExceptionLoggerDelegateInterface;
 
 class ExceptionLoggerInterface {
 public:
     virtual ~ExceptionLoggerInterface() {}
 
-    virtual void logMessage(const std::string & errorDomain, int32_t code, const std::unordered_map<std::string, std::string> & customValues) = 0;
+    static void setLoggerDelegate(const std::shared_ptr<ExceptionLoggerDelegateInterface> & delegate);
 };

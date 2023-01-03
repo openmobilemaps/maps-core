@@ -5,21 +5,20 @@
 #import "MCExceptionLoggerInterface.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
-#import "DJIMarshal+Private.h"
-#import "DJIObjcWrapperCache+Private.h"
+#import "MCExceptionLoggerDelegateInterface+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
 
 static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for this file");
 
-@interface MCExceptionLoggerInterfaceCppProxy : NSObject<MCExceptionLoggerInterface>
+@interface MCExceptionLoggerInterface ()
 
 - (id)initWithCpp:(const std::shared_ptr<::ExceptionLoggerInterface>&)cppRef;
 
 @end
 
-@implementation MCExceptionLoggerInterfaceCppProxy {
+@implementation MCExceptionLoggerInterface {
     ::djinni::CppProxyCache::Handle<std::shared_ptr<::ExceptionLoggerInterface>> _cppRefHandle;
 }
 
@@ -31,36 +30,11 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (void)logMessage:(nonnull NSString *)errorDomain
-              code:(int32_t)code
-      customValues:(nonnull NSDictionary<NSString *, NSString *> *)customValues {
++ (void)setLoggerDelegate:(nullable id<MCExceptionLoggerDelegateInterface>)delegate {
     try {
-        _cppRefHandle.get()->logMessage(::djinni::String::toCpp(errorDomain),
-                                        ::djinni::I32::toCpp(code),
-                                        ::djinni::Map<::djinni::String, ::djinni::String>::toCpp(customValues));
+        ::ExceptionLoggerInterface::setLoggerDelegate(::djinni_generated::ExceptionLoggerDelegateInterface::toCpp(delegate));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
-
-namespace djinni_generated {
-
-class ExceptionLoggerInterface::ObjcProxy final
-: public ::ExceptionLoggerInterface
-, private ::djinni::ObjcProxyBase<ObjcType>
-{
-    friend class ::djinni_generated::ExceptionLoggerInterface;
-public:
-    using ObjcProxyBase::ObjcProxyBase;
-    void logMessage(const std::string & c_errorDomain, int32_t c_code, const std::unordered_map<std::string, std::string> & c_customValues) override
-    {
-        @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() logMessage:(::djinni::String::fromCpp(c_errorDomain))
-                                                            code:(::djinni::I32::fromCpp(c_code))
-                                                    customValues:(::djinni::Map<::djinni::String, ::djinni::String>::fromCpp(c_customValues))];
-        }
-    }
-};
-
-}  // namespace djinni_generated
 
 namespace djinni_generated {
 
@@ -69,10 +43,7 @@ auto ExceptionLoggerInterface::toCpp(ObjcType objc) -> CppType
     if (!objc) {
         return nullptr;
     }
-    if ([(id)objc isKindOfClass:[MCExceptionLoggerInterfaceCppProxy class]]) {
-        return ((MCExceptionLoggerInterfaceCppProxy*)objc)->_cppRefHandle.get();
-    }
-    return ::djinni::get_objc_proxy<ObjcProxy>(objc);
+    return objc->_cppRefHandle.get();
 }
 
 auto ExceptionLoggerInterface::fromCppOpt(const CppOptType& cpp) -> ObjcType
@@ -80,10 +51,7 @@ auto ExceptionLoggerInterface::fromCppOpt(const CppOptType& cpp) -> ObjcType
     if (!cpp) {
         return nil;
     }
-    if (auto cppPtr = dynamic_cast<ObjcProxy*>(cpp.get())) {
-        return cppPtr->djinni_private_get_proxied_objc_object();
-    }
-    return ::djinni::get_cpp_proxy<MCExceptionLoggerInterfaceCppProxy>(cpp);
+    return ::djinni::get_cpp_proxy<MCExceptionLoggerInterface>(cpp);
 }
 
 }  // namespace djinni_generated

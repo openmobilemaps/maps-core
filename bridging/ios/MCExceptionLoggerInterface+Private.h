@@ -7,7 +7,7 @@
 
 static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for this file");
 
-@protocol MCExceptionLoggerInterface;
+@class MCExceptionLoggerInterface;
 
 namespace djinni_generated {
 
@@ -16,7 +16,7 @@ class ExceptionLoggerInterface
 public:
     using CppType = std::shared_ptr<::ExceptionLoggerInterface>;
     using CppOptType = std::shared_ptr<::ExceptionLoggerInterface>;
-    using ObjcType = id<MCExceptionLoggerInterface>;
+    using ObjcType = MCExceptionLoggerInterface*;
 
     using Boxed = ExceptionLoggerInterface;
 

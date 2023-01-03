@@ -5,16 +5,11 @@ package io.openmobilemaps.mapscore.shared.utils
 
 import java.util.concurrent.atomic.AtomicBoolean
 
-abstract class ExceptionLogger {
+abstract class ExceptionLoggerDelegateInterface {
 
-    companion object {
-        @JvmStatic
-        fun setLoggerDelegate(delegate: ExceptionLoggerInterface) {
-            CppProxy.setLoggerDelegate(delegate)
-        }
-    }
+    abstract fun logMessage(errorDomain: String, code: Int, customValues: HashMap<String, String>)
 
-    private class CppProxy : ExceptionLogger {
+    private class CppProxy : ExceptionLoggerDelegateInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 
@@ -32,9 +27,10 @@ abstract class ExceptionLogger {
             _djinni_private_destroy()
         }
 
-        companion object {
-            @JvmStatic
-            external fun setLoggerDelegate(delegate: ExceptionLoggerInterface): Unit
+        override fun logMessage(errorDomain: String, code: Int, customValues: HashMap<String, String>) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_logMessage(this.nativeRef, errorDomain, code, customValues)
         }
+        private external fun native_logMessage(_nativeRef: Long, errorDomain: String, code: Int, customValues: HashMap<String, String>)
     }
 }
