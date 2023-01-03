@@ -378,6 +378,10 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
 void Tiled2dMapVectorSymbolSubLayer::addTexts(const Tiled2dMapTileInfo &tileInfo,
                                               const std::vector<std::tuple<const FeatureContext, std::shared_ptr<SymbolInfo>>> &texts) {
 
+    if (!fontLoader) {
+        return; // ignore texts if no font loader specified
+    }
+
     auto mapInterface = this->mapInterface;
     auto objectFactory = mapInterface ? mapInterface->getGraphicsObjectFactory() : nullptr;
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
