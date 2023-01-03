@@ -1,0 +1,8 @@
+exception_logger_interface = interface +c +j +o {
+   log_message(error_domain: string, code: i32, custom_values: map<string, string>);
+}
+
+exception_logger = interface +c {
+    static set_logger_delegate(delegate: exception_logger_interface);
+}
+
