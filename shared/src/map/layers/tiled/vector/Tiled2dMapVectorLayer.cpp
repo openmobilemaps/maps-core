@@ -226,6 +226,7 @@ void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDes
             case VectorLayerType::polygon:
             case VectorLayerType::symbol: {
                 auto subLayer = std::dynamic_pointer_cast<Tiled2dMapVectorSubLayer>(layer);
+                subLayer->setSelectionDelegate(selectionDelegate);
                 newSourceLayerMap[layerDesc->source][layerDesc->sourceId].push_back(subLayer);
                 break;
             }
