@@ -31,7 +31,7 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface {
     // MARK: - Loader
 
 
-    public func load(_ font: MCFont) -> MCFontLoaderResult {
+    open func load(_ font: MCFont) -> MCFontLoaderResult {
         loadingQueue.sync {
             guard let image = getFontImage(font: font) else {
                 return .init(imageData: nil, fontData: nil, status: .ERROR_OTHER)
