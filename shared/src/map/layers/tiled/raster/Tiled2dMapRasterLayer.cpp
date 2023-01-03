@@ -143,7 +143,7 @@ void Tiled2dMapRasterLayer::setT(double t) {
 }
 
 bool Tiled2dMapRasterLayer::shouldLoadTile(const Tiled2dMapTileInfo& tileInfo){
-    return abs(tileInfo.t - curT) < 10;
+    return abs(tileInfo.t - curT) < 100;
 }
 
 void Tiled2dMapRasterLayer::onTilesUpdated() {
