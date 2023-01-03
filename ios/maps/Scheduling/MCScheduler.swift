@@ -74,12 +74,6 @@ open class MCScheduler: MCSchedulerInterface {
                 }
             }
 
-            #if DEBUG
-            operation.completionBlock = {
-                print("MCScheduler: Queue Count After", self.ioQueue.operations.count, self.computationQueue.operations.count, self.graphicsQueue.operations.count)
-            }
-            #endif
-
             switch config.executionEnvironment {
                 case .IO:
                     self.ioQueue.addOperation(operation)
@@ -91,9 +85,6 @@ open class MCScheduler: MCSchedulerInterface {
                     fatalError("unexpected executionEnvironment")
             }
             
-            #if DEBUG
-            print("queue count before", self.ioQueue.operations.count, self.computationQueue.operations.count, self.graphicsQueue.operations.count)
-            #endif
         }
     }
 
