@@ -62,30 +62,22 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
         return;
     }
 
-    pendingUpdates++;
-    std::weak_ptr<Tiled2dMapSource> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this());
-    scheduler->addTask(std::make_shared<LambdaTask>(
-            TaskConfig("Tiled2dMapSource_Update", 0, TaskPriority::NORMAL, ExecutionEnvironment::IO),
-            [weakSelfPtr] {
-                auto selfPtr = weakSelfPtr.lock();
-                if (selfPtr) {
-                    std::lock_guard<std::recursive_mutex> updateLock(selfPtr->updateTilesetMutex);
-                    std::optional<RectCoord> bounds;
-                    std::optional<int> curT;
-                    std::optional<double> zoom;
-                    {
-                        std::lock_guard<std::recursive_mutex> updateLock(selfPtr->updateMutex);
-                        bounds = selfPtr->updateBounds;
-                        curT = selfPtr->updateT;
-                        zoom = selfPtr->updateZoom;
-                    }
-                    selfPtr->updateFlag.clear();
-                    if (bounds.has_value() && zoom.has_value() && curT.has_value()) {
-                        selfPtr->updateCurrentTileset(*bounds, *curT, *zoom);
-                    }
-                    selfPtr->pendingUpdates--;
-                }
-            }));
+    {
+        std::lock_guard<std::recursive_mutex> updateLock(updateTilesetMutex);
+        std::optional<RectCoord> bounds;
+        std::optional<int> curT;
+        std::optional<double> zoom;
+        {
+            std::lock_guard<std::recursive_mutex> updateLock(updateMutex);
+            bounds = updateBounds;
+            curT = updateT;
+            zoom = updateZoom;
+        }
+        updateFlag.clear();
+        if (bounds.has_value() && zoom.has_value() && curT.has_value()) {
+            updateCurrentTileset(*bounds, *curT, *zoom);
+        }
+    }
 }
 
 template<class T, class L, class R>
@@ -733,7 +725,7 @@ TileLoadingDecision Tiled2dMapSource<T, L, R>::tileLoadingDecision(int tileZ, in
     if (tileZ == curZ && abs(tileT - curT) < 3) {
         return TileLoadingDecision::loadNeeded;
     }
-    else if (tileZ == curZ && abs(tileT - curT) < 20) {
+    else if (tileZ == curZ && abs(tileT - curT) < 500) {
         return TileLoadingDecision::preload;
     }
     else {

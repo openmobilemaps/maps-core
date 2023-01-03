@@ -581,17 +581,8 @@ void Tiled2dMapVectorLayer::onTilesUpdated() {
                                     tilesReadyCount[tile.tileInfo] += 1;
                                 }
 
-                                std::weak_ptr<Tiled2dMapVectorLayer> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
                                 auto const polygonObject = newTileMasks[tile.tileInfo].maskObject->getPolygonObject()->asMaskingObject();
-                                auto const &features = it->second;
-                                mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
-                                                                                                   TaskConfig("VectorTile_onTilesUpdated_" + it->first + "_" + tile.tileInfo.tileIdString(), 0, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
-                                                                                                   [weakSelfPtr, subLayer, tile, polygonObject, &features] {
-                                                                                                       auto selfPtr = weakSelfPtr.lock();
-                                                                                                       if (selfPtr) {
-                                                                                                           subLayer->updateTileData(tile.tileInfo, polygonObject, features);
-                                                                                                       }
-                                                                                                   }));
+                                subLayer->updateTileData(tile.tileInfo, polygonObject, it->second);
                             }
                         }
                     }
