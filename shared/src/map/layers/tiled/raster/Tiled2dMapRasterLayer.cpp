@@ -311,11 +311,13 @@ void Tiled2dMapRasterLayer::setupTiles(
     
     std::vector<const Tiled2dMapTileInfo> tilesReady;
     {
-        std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
+        {
+            std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
 
-        for (const auto &[tile, tileObject] : tilesToClean) {
-            tileObjectMap.erase(tile);
-            tileMaskMap.erase(tile.tileInfo);
+            for (const auto &[tile, tileObject] : tilesToClean) {
+                tileObjectMap.erase(tile);
+                tileMaskMap.erase(tile.tileInfo);
+            }
         }
 
         for (const auto &tile : tilesToSetup) {
@@ -335,7 +337,10 @@ void Tiled2dMapRasterLayer::setupTiles(
         }
     }
 
-    generateRenderPasses();
+    {
+        std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
+        generateRenderPasses();
+    }
 
     // remove the texture after setting the new renderpasses
     // otherwise it could happen, that in the meantime a already existing object gets rendered
@@ -347,7 +352,10 @@ void Tiled2dMapRasterLayer::setupTiles(
         }
     }
 
-    rasterSource->setTilesReady(tilesReady);
+    {
+        rasterSource->setTilesReady(tilesReady);
+        std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
+    }
 
     mapInterface->invalidate();
 
