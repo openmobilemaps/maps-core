@@ -8,6 +8,9 @@
 
 - (void)logMessage:(nonnull NSString *)errorDomain
               code:(int32_t)code
-      customValues:(nonnull NSDictionary<NSString *, NSString *> *)customValues;
+      customValues:(nonnull NSDictionary<NSString *, NSString *> *)customValues
+          function:(nonnull NSString *)function
+              file:(nonnull NSString *)file
+              line:(int32_t)line;
 
 @end

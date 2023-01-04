@@ -14,20 +14,21 @@
 #include "ExceptionLoggerInterface.h"
 #include "ExceptionLoggerDelegateInterface.h"
 
-
 class ExceptionLogger {
 public:
-    static ExceptionLogger& instance() {
-        static ExceptionLogger singelton;
-        return singelton;
-    }
+    static ExceptionLogger& instance();
     
-    void logMessage(const std::string & errorDomain, int32_t code, const std::string & message);
+    void logMessage(const std::string & errorDomain, int32_t code, const std::string & message, const char* function = __builtin_FUNCTION(), const char* file = __builtin_FILE(), const int line = __builtin_LINE());
 
-    void logMessage(const std::string & errorDomain, int32_t code, const std::unordered_map<std::string, std::string> & customValues);
+    void logMessage(const std::string & errorDomain, int32_t code, const std::unordered_map<std::string, std::string> & customValues, const char* function = __builtin_FUNCTION(), const char* file = __builtin_FILE(), const int line = __builtin_LINE());
 
     void setLoggerDelegate(const std::shared_ptr<ExceptionLoggerDelegateInterface> & delegate);
     
+    ExceptionLogger(ExceptionLogger const&) = delete;
+    void operator=(ExceptionLogger const&) = delete;
+    
 private:
     std::shared_ptr<ExceptionLoggerDelegateInterface> delegate;
+    
+    ExceptionLogger(){}
 };
