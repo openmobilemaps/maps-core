@@ -100,8 +100,6 @@ std::vector<Tiled2dMapTileInfo> Tiled2dMapSource<T, L, R>::getCurrentVisibleTile
 
 template<class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBounds, int curT, double zoom) {
-    std::vector<PrioritizedTiled2dMapTileInfo> visibleTilesVec;
-
     RectCoord visibleBoundsLayer = conversionHelper->convertRect(layerSystemId, visibleBounds);
 
     double centerVisibleX = visibleBoundsLayer.topLeft.x + 0.5 * (visibleBoundsLayer.bottomRight.x - visibleBoundsLayer.topLeft.x);
@@ -120,12 +118,13 @@ void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBou
     }
 
     for (int i = 0; i < numZoomLevels; i++) {
-        const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(i);
+        const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos[i];
         if (zoomInfo.zoomLevelScaleFactor * screenScaleFactor * zoomLevelInfo.zoom < zoom) {
             targetZoomLayer = std::max(i - 1, 0);
             break;
         }
     }
+
     if (targetZoomLayer < 0) {
         if (!zoomInfo.overzoom) {
             onVisibleTilesChanged({});
@@ -133,19 +132,20 @@ void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBou
         }
         targetZoomLayer = (int) numZoomLevels - 1;
     }
-    int targetZoomLevelIdentifier = zoomLevelInfos.at(targetZoomLayer).zoomLevelIdentifier;
+
+    int targetZoomLevelIdentifier = zoomLevelInfos[targetZoomLayer].zoomLevelIdentifier;
     int startZoomLayer = 0;
     int endZoomLevel = std::min((int) numZoomLevels - 1, targetZoomLayer + 2);
 
     int zoomInd = 0;
-    int tPriorityRange = 1000 * zoomLevelInfos.at(0).numTilesT;
+    int tPriorityRange = 1000 * zoomLevelInfos[0].numTilesT;
     int zPriorityRange = 100;
     int zoomPriorityRange = 100; // TODO: Was ist der unterschied zu
 
     std::vector<VisibleTilesLayer> layers;
 
     for (int i = startZoomLayer; i <= endZoomLevel; i++) {
-        const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(i);
+        const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos[i];
 
         if (minZoomLevelIdentifier.has_value() && zoomLevelInfo.zoomLevelIdentifier < minZoomLevelIdentifier) {
             continue;
@@ -209,11 +209,7 @@ void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBou
                     const int tDis = 1 + std::abs(t - curT);
                     const int priority = std::ceil((tileCenterDis / maxDisCenter) * zPriorityRange) + tDis * tPriorityRange + zoomInd * zoomPriorityRange;
 
-                    curVisibleTilesVec.push_back(PrioritizedTiled2dMapTileInfo(
-                            Tiled2dMapTileInfo(rect, x, y, t, zoomLevelInfo.zoomLevelIdentifier, zoomLevelInfo.zoom),
-                            priority));
-
-                    visibleTilesVec.push_back(curVisibleTilesVec.back());
+                    curVisibleTilesVec.emplace_back(Tiled2dMapTileInfo(rect, x, y, t, zoomLevelInfo.zoomLevelIdentifier, zoomLevelInfo.zoom), priority);
                 }
             }
         }
@@ -222,8 +218,6 @@ void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBou
 
         zoomInd++;
 
-
-        std::unordered_set<PrioritizedTiled2dMapTileInfo> visibleTiles(visibleTilesVec.begin(), visibleTilesVec.end());
         layers.push_back(curVisibleTiles);
     }
 
@@ -315,13 +309,17 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
             }
 
 
-            const Tiled2dMapZoomLevelInfo &firstZoomLevelInfo = zoomLevelInfos.at(0);
+            const Tiled2dMapZoomLevelInfo &firstZoomLevelInfo = zoomLevelInfos[0];
 
             for (const auto &[tileInfo, tileWrapper] : currentTilesLocal) {
                 bool found = false;
 
                 if (tileInfo.zoomIdentifier <= currentZoomLevelIdentifier) {
                     for (const auto &layer: pyramid) {
+                        if(tileInfo.zoomIdentifier != layer.zoomLevel) {
+                            continue;
+                        }
+
                         for (auto const &tile: layer.visibleTiles) {
                             if (tileInfo == tile.tileInfo) {
                                 found = true;

@@ -155,7 +155,7 @@ public:
                 for (int i = 0; i != countElements; i += 2) {
                     std::set<ValueVariant> values;
                     if (json[2 + i].is_array()) {
-                        for(auto const value: json[2 + i]) {
+                        for(auto const &value: json[2 + i]) {
                             values.insert(getVariant(value));
                         }
                     } else {
