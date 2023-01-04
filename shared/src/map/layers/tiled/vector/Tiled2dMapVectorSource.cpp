@@ -12,7 +12,6 @@
 #include "Tiled2dMapVectorSource.h"
 #include "vtzero/vector_tile.hpp"
 #include "Logger.h"
-#include "DataHolderInterface.h"
 
 Tiled2dMapVectorSource::Tiled2dMapVectorSource(const MapConfig &mapConfig,
                                                const std::unordered_map<std::string, std::shared_ptr<Tiled2dMapLayerConfig>> &layerConfigs,
@@ -22,7 +21,7 @@ Tiled2dMapVectorSource::Tiled2dMapVectorSource(const MapConfig &mapConfig,
                                                const std::shared_ptr<Tiled2dMapSourceListenerInterface> &listener,
                                                const std::unordered_map<std::string, std::unordered_set<std::string>> &layersToDecode,
                                                float screenDensityPpi)
-        : Tiled2dMapSource<DataHolderInterface, IntermediateResult, FinalResult>(mapConfig, layerConfigs.begin()->second, conversionHelper, scheduler,
+        : Tiled2dMapSource<djinni::DataRef, IntermediateResult, FinalResult>(mapConfig, layerConfigs.begin()->second, conversionHelper, scheduler,
                                                                               listener, screenDensityPpi, tileLoaders.size()), loaders(tileLoaders), layersToDecode(layersToDecode), layerConfigs(layerConfigs) {}
 
 IntermediateResult Tiled2dMapVectorSource::loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) {
@@ -43,9 +42,9 @@ FinalResult Tiled2dMapVectorSource::postLoadingTask(const IntermediateResult &lo
 
         auto layerFeatureMap = std::make_shared<std::unordered_map<std::string, std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>>>();
 
-        const auto &data = data_.data->getData();
         try {
-            vtzero::vector_tile tileData((char *) data.data(), data.size());
+            
+            vtzero::vector_tile tileData((char*)data_.data->buf(), data_.data->len());
 
             while (auto layer = tileData.next_layer()) {
                 std::string sourceLayerName = std::string(layer.name());

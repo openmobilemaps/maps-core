@@ -3,7 +3,7 @@
 
 #import "MCDataLoaderResult+Private.h"
 #import "DJIMarshal+Private.h"
-#import "MCDataHolderInterface+Private.h"
+#import "DataRef_objc.hpp"
 #import "MCLoaderStatus+Private.h"
 #include <cassert>
 
@@ -12,7 +12,7 @@ namespace djinni_generated {
 auto DataLoaderResult::toCpp(ObjcType obj) -> CppType
 {
     assert(obj);
-    return {::djinni::Optional<std::optional, ::djinni_generated::DataHolderInterface>::toCpp(obj.data),
+    return {::djinni::Optional<std::optional, ::djinni::NativeDataRef>::toCpp(obj.data),
             ::djinni::Optional<std::optional, ::djinni::String>::toCpp(obj.etag),
             ::djinni::Enum<::LoaderStatus, MCLoaderStatus>::toCpp(obj.status),
             ::djinni::Optional<std::optional, ::djinni::String>::toCpp(obj.errorCode)};
@@ -20,7 +20,7 @@ auto DataLoaderResult::toCpp(ObjcType obj) -> CppType
 
 auto DataLoaderResult::fromCpp(const CppType& cpp) -> ObjcType
 {
-    return [[MCDataLoaderResult alloc] initWithData:(::djinni::Optional<std::optional, ::djinni_generated::DataHolderInterface>::fromCpp(cpp.data))
+    return [[MCDataLoaderResult alloc] initWithData:(::djinni::Optional<std::optional, ::djinni::NativeDataRef>::fromCpp(cpp.data))
                                                etag:(::djinni::Optional<std::optional, ::djinni::String>::fromCpp(cpp.etag))
                                              status:(::djinni::Enum<::LoaderStatus, MCLoaderStatus>::fromCpp(cpp.status))
                                           errorCode:(::djinni::Optional<std::optional, ::djinni::String>::fromCpp(cpp.errorCode))];

@@ -724,8 +724,7 @@ void Tiled2dMapVectorLayer::loadSpriteData() {
                                                             auto dataResult = LoaderHelper::loadData(urlData, std::nullopt, selfPtr->loaders);
                                                             auto textureResult = LoaderHelper::loadTexture(urlTexture, std::nullopt, selfPtr->loaders);
                                                             if (dataResult.status == LoaderStatus::OK && textureResult.status == LoaderStatus::OK) {
-                                                                auto data = dataResult.data->getData();
-                                                                auto string = std::string((char*)data.data(), data.size());
+                                                                auto string = std::string((char*)dataResult.data->buf(), dataResult.data->len());
                                                                 nlohmann::json json;
                                                                 try
                                                                 {

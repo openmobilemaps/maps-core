@@ -4,7 +4,7 @@
 package io.openmobilemaps.mapscore.shared.map.loader
 
 data class DataLoaderResult(
-    var data: DataHolderInterface?,
+    var data: java.nio.ByteBuffer?,
     var etag: String?,
     var status: LoaderStatus,
     var errorCode: String?,

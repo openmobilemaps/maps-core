@@ -17,6 +17,7 @@
 #include "Tiled2dMapVectorTileInfo.h"
 #include <unordered_map>
 #include <vector>
+#include "DataRef.hpp"
 
 struct IntermediateResult final {
     std::unordered_map<std::string, DataLoaderResult> results;
@@ -35,7 +36,7 @@ struct IntermediateResult final {
 
 using FinalResult = std::unordered_map<std::string, std::shared_ptr<std::unordered_map<std::string, std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>>>>;
 
-class Tiled2dMapVectorSource : public Tiled2dMapSource<DataHolderInterface, IntermediateResult, FinalResult>  {
+class Tiled2dMapVectorSource : public Tiled2dMapSource<djinni::DataRef, IntermediateResult, FinalResult>  {
 public:
     Tiled2dMapVectorSource(const MapConfig &mapConfig,
                            const std::unordered_map<std::string, std::shared_ptr<Tiled2dMapLayerConfig>> &layerConfigs,

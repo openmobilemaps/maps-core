@@ -3,21 +3,20 @@
 
 #import "MCLoaderStatus.h"
 #import <Foundation/Foundation.h>
-@protocol MCDataHolderInterface;
 
 @interface MCDataLoaderResult : NSObject
 - (nonnull instancetype)init NS_UNAVAILABLE;
 + (nonnull instancetype)new NS_UNAVAILABLE;
-- (nonnull instancetype)initWithData:(nullable id<MCDataHolderInterface>)data
+- (nonnull instancetype)initWithData:(nullable NSData *)data
                                 etag:(nullable NSString *)etag
                               status:(MCLoaderStatus)status
                            errorCode:(nullable NSString *)errorCode NS_DESIGNATED_INITIALIZER;
-+ (nonnull instancetype)dataLoaderResultWithData:(nullable id<MCDataHolderInterface>)data
++ (nonnull instancetype)dataLoaderResultWithData:(nullable NSData *)data
                                             etag:(nullable NSString *)etag
                                           status:(MCLoaderStatus)status
                                        errorCode:(nullable NSString *)errorCode;
 
-@property (nonatomic, readonly, nullable) id<MCDataHolderInterface> data;
+@property (nonatomic, readonly, nullable) NSData * data;
 
 @property (nonatomic, readonly, nullable) NSString * etag;
 

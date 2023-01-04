@@ -37,9 +37,7 @@ public:
         if (result.status != LoaderStatus::OK) {
             return Tiled2dMapVectorLayerParserResult(nullptr, result.status, result.errorCode);
         }
-        auto styleJsonData = result.data->getData();
-
-        auto string = std::string((char *) styleJsonData.data(), styleJsonData.size());
+        auto string = std::string((char*)result.data->buf(), result.data->len());
 
         return parseStyleJsonFromString(layerName, string, dpFactor, loaders);
     }
@@ -84,8 +82,7 @@ public:
                     if (result.status != LoaderStatus::OK) {
                         return Tiled2dMapVectorLayerParserResult(nullptr, result.status, result.errorCode);
                     }
-                    auto data = result.data->getData();
-                    auto string = std::string((char *) data.data(), data.size());
+                    auto string = std::string((char*)result.data->buf(), result.data->len());
                     nlohmann::json json;
                     try {
                         json = nlohmann::json::parse(string);
@@ -112,8 +109,7 @@ public:
                 if (result.status != LoaderStatus::OK) {
                     return Tiled2dMapVectorLayerParserResult(nullptr, result.status, result.errorCode);
                 }
-                auto data = result.data->getData();
-                auto string = std::string((char *) data.data(), data.size());
+                auto string = std::string((char*)result.data->buf(), result.data->len());
                 nlohmann::json json;
 
                 try {

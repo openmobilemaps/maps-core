@@ -3,21 +3,19 @@
 
 #pragma once
 
+#include "DataRef.hpp"
 #include "LoaderStatus.h"
-#include <memory>
 #include <optional>
 #include <string>
 #include <utility>
 
-class DataHolderInterface;
-
 struct DataLoaderResult final {
-    /*nullable*/ std::shared_ptr<DataHolderInterface> data;
+    std::optional<::djinni::DataRef> data;
     std::optional<std::string> etag;
     LoaderStatus status;
     std::optional<std::string> errorCode;
 
-    DataLoaderResult(/*nullable*/ std::shared_ptr<DataHolderInterface> data_,
+    DataLoaderResult(std::optional<::djinni::DataRef> data_,
                      std::optional<std::string> etag_,
                      LoaderStatus status_,
                      std::optional<std::string> errorCode_)

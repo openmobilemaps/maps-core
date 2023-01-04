@@ -6,7 +6,7 @@
 
 @implementation MCDataLoaderResult
 
-- (nonnull instancetype)initWithData:(nullable id<MCDataHolderInterface>)data
+- (nonnull instancetype)initWithData:(nullable NSData *)data
                                 etag:(nullable NSString *)etag
                               status:(MCLoaderStatus)status
                            errorCode:(nullable NSString *)errorCode
@@ -20,7 +20,7 @@
     return self;
 }
 
-+ (nonnull instancetype)dataLoaderResultWithData:(nullable id<MCDataHolderInterface>)data
++ (nonnull instancetype)dataLoaderResultWithData:(nullable NSData *)data
                                             etag:(nullable NSString *)etag
                                           status:(MCLoaderStatus)status
                                        errorCode:(nullable NSString *)errorCode

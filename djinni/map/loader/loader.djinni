@@ -1,3 +1,4 @@
+@extern "../../../external/djinni/support-lib/dataref.yaml"
 @extern "../../yaml/texture_holder_interface.yaml"
 @extern "../../yaml/vec_2_d.yaml"
 @extern "../../yaml/quad_2d_d.yaml"
@@ -19,12 +20,8 @@ texture_loader_result = record {
     error_code: optional<string>;
 }
 
-data_holder_interface = interface +j +o {
-	get_data(): binary;
-}
-
 data_loader_result = record {
-    data: optional<data_holder_interface>;
+    data: optional<DataRef>;
     etag: optional<string>;
     status: loader_status;
     error_code: optional<string>;

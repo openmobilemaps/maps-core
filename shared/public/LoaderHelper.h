@@ -24,7 +24,7 @@ public:
                 return std::move(result);
             }
         }
-        return DataLoaderResult(nullptr, std::nullopt, LoaderStatus::NOOP, std::nullopt);
+        return DataLoaderResult(std::nullopt, std::nullopt, LoaderStatus::NOOP, std::nullopt);
     }
 
     static TextureLoaderResult loadTexture(const std::string &url, const std::optional<std::string> &etag,

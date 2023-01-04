@@ -11,18 +11,6 @@
 import MapCoreSharedModule
 import UIKit
 
-public class DataHolder: MCDataHolderInterface {
-    private var data: Data
-
-    public init(data: Data) {
-        self.data = data
-    }
-
-    public func getData() -> Data {
-        data
-    }
-}
-
 open class MCTextureLoader: MCLoaderInterface {
 
     private let session: URLSession
@@ -179,7 +167,7 @@ open class MCTextureLoader: MCLoaderInterface {
             return .init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: (response?.statusCode).stringOrNil)
         }
 
-        return .init(data: DataHolder(data: data), etag: response?.etag, status: .OK, errorCode: nil)
+        return .init(data: data, etag: response?.etag, status: .OK, errorCode: nil)
     }
 
     open func modifyUrlRequest(request _: inout URLRequest) {
