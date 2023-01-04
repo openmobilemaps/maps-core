@@ -1033,6 +1033,40 @@ bool Tiled2dMapVectorSymbolSubLayer::onClickConfirmed(const ::Vec2F &posScreen) 
     return false;
 }
 
+std::vector<std::pair<FeatureContext, ::Coord>> Tiled2dMapVectorSymbolSubLayer::getVisibleFeatureContexts() {
+    auto lockSelfPtr = shared_from_this();
+    auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
+    auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+    auto conversionHelper = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
+    if (!camera || !conversionHelper) {
+        return {};
+    }
+
+    auto screenTopLeft = conversionHelper->convertToRenderSystem(camera->getVisibleRect().topLeft);
+    auto screenBottomRight = conversionHelper->convertToRenderSystem(camera->getVisibleRect().bottomRight);
+
+    OBB2D cameraBox(Quad2dD(Vec2D(screenTopLeft.x, screenTopLeft.y),
+                            Vec2D(screenBottomRight.x, screenTopLeft.y),
+                            Vec2D(screenBottomRight.x, screenBottomRight.y),
+                            Vec2D(screenTopLeft.x, screenBottomRight.y)));
+
+    std::vector<std::pair<FeatureContext, ::Coord>> features = {};
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(symbolMutex);
+        for (auto &[tile, wrapperVector]: tileTextMap) {
+            for (auto &wrapper: wrapperVector) {
+                if (wrapper->collides) { continue; }
+                if (wrapper->orientedBoundingBox.overlaps(cameraBox)) {
+                    features.push_back(std::make_pair(wrapper->featureContext, wrapper->textInfo->getCoordinate()));
+                }
+            }
+        }
+    }
+
+    return features;
+}
+
 
 std::string Tiled2dMapVectorSymbolSubLayer::getLayerDescriptionIdentifier() {
     return description->identifier;

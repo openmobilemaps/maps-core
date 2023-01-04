@@ -88,6 +88,8 @@ public:
 
     std::optional<FeatureContext> getFeatureContext(int64_t identifier);
 
+    std::vector<std::pair<FeatureContext, ::Coord>> getVisibleFeatureContexts();
+
     void setT(double t) override;
 
 protected:
@@ -108,6 +110,9 @@ protected:
     virtual std::optional<TiledLayerError> loadStyleJson();
     virtual std::optional<TiledLayerError> loadStyleJsonRemotely();
     virtual std::optional<TiledLayerError> loadStyleJsonLocally(std::string styleJsonString);
+
+    std::recursive_mutex sublayerMutex;
+    std::vector<std::shared_ptr<LayerInterface>> sublayers;
 
 private:
     void scheduleStyleJsonLoading();
@@ -142,9 +147,6 @@ private:
 
     std::recursive_mutex tileMaskMapMutex;
     std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> tileMaskMap;
-
-    std::recursive_mutex sublayerMutex;
-    std::vector<std::shared_ptr<LayerInterface>> sublayers;
 
     std::recursive_mutex sourceLayerMapMutex;
     std::unordered_map<std::string, std::unordered_map<std::string, std::vector<std::shared_ptr<Tiled2dMapVectorSubLayer>>>> sourceLayerMap;

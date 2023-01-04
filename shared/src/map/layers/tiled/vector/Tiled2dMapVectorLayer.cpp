@@ -917,6 +917,26 @@ std::optional<FeatureContext> Tiled2dMapVectorLayer::getFeatureContext(int64_t i
     return std::nullopt;
 }
 
+std::vector<std::pair<FeatureContext, ::Coord>> Tiled2dMapVectorLayer::getVisibleFeatureContexts() {
+    auto const &currentTileInfos = vectorTileSource->getCurrentTiles();
+
+    std::vector<std::pair<FeatureContext, ::Coord>> features = {};
+
+    for (auto const &subLayer : sublayers) {
+        auto symbolSubLayer = std::dynamic_pointer_cast<Tiled2dMapVectorSymbolSubLayer>(subLayer);
+        if (symbolSubLayer) {
+            {
+            auto subVisible = symbolSubLayer->getVisibleFeatureContexts();
+            for (const auto &s : subVisible) {
+                features.push_back(s);
+            }
+            }
+        }
+    }
+
+    return features;
+}
+
 std::shared_ptr<VectorLayerDescription> Tiled2dMapVectorLayer::getLayerDescriptionWithIdentifier(std::string identifier) {
     if (mapDescription) {
         for (auto const &layer: mapDescription->layers) {

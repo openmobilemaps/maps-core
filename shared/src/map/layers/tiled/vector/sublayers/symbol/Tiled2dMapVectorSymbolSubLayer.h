@@ -112,6 +112,8 @@ public:
 
     void setSelectedFeatureIdentfier(std::optional<int64_t> identifier) override;
 
+    std::vector<std::pair<FeatureContext, ::Coord>> getVisibleFeatureContexts();
+
 protected:
     void addTexts(const Tiled2dMapTileInfo &tileInfo,
                   const std::vector< std::tuple<const FeatureContext, std::shared_ptr<SymbolInfo>>> &texts);
