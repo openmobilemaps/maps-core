@@ -17,10 +17,10 @@
 class ExceptionLogger {
 public:
     static ExceptionLogger& instance();
-    
-    void logMessage(const std::string & errorDomain, int32_t code, const std::string & message, const char* function = __builtin_FUNCTION(), const char* file = __builtin_FILE(), const int line = __builtin_LINE());
 
-    void logMessage(const std::string & errorDomain, int32_t code, const std::unordered_map<std::string, std::string> & customValues, const char* function = __builtin_FUNCTION(), const char* file = __builtin_FILE(), const int line = __builtin_LINE());
+    void logMessage(const std::string & errorDomain, int32_t code, const std::string & message, const char* function = __builtin_FUNCTION(), const char* file = reducePath(__builtin_FILE()), const int line = __builtin_LINE());
+
+    void logMessage(const std::string & errorDomain, int32_t code, const std::unordered_map<std::string, std::string> & customValues, const char* function = __builtin_FUNCTION(), const char* file = reducePath(__builtin_FILE()), const int line = __builtin_LINE());
 
     void setLoggerDelegate(const std::shared_ptr<ExceptionLoggerDelegateInterface> & delegate);
     
@@ -28,6 +28,16 @@ public:
     void operator=(ExceptionLogger const&) = delete;
     
 private:
+    static constexpr const char* reducePath(const char* path) {
+        const char* file = path;
+        while (*path) {
+            if (*path++ == '/') {
+                file = path;
+            }
+        }
+        return file;
+    }
+
     std::shared_ptr<ExceptionLoggerDelegateInterface> delegate;
     
     ExceptionLogger(){}
