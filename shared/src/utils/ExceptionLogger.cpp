@@ -15,16 +15,21 @@ void ExceptionLoggerInterface::setLoggerDelegate(const std::shared_ptr<Exception
     ExceptionLogger::instance().setLoggerDelegate(delegate);
 }
 
-void ExceptionLogger::logMessage(const std::string & errorDomain, int32_t code, const std::string & message) {
-    this->logMessage(errorDomain, code, {{"message", message}});
+ExceptionLogger& ExceptionLogger::instance() {
+    static ExceptionLogger singleton;
+    return singleton;
 }
 
-void ExceptionLogger::logMessage(const std::string & errorDomain, int32_t code, const std::unordered_map<std::string, std::string> & customValues) {
+void ExceptionLogger::logMessage(const std::string & errorDomain, int32_t code, const std::string & message, const char* function, const char* file, const int line) {
+    this->logMessage(errorDomain, code, {{"message", message}}, function, file, line);
+}
+
+void ExceptionLogger::logMessage(const std::string & errorDomain, int32_t code, const std::unordered_map<std::string, std::string> & customValues, const char* function, const char* file, const int line) {
     auto delegate = this->delegate;
     if (!delegate) {
         return;
     }
-    delegate->logMessage(errorDomain, code, customValues);
+    delegate->logMessage(errorDomain, code, customValues, function, file, line);
 }
 
 void ExceptionLogger::setLoggerDelegate(const std::shared_ptr<ExceptionLoggerDelegateInterface> & delegate) {

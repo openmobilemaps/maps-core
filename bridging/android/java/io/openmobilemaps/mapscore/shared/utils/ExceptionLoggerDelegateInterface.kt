@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class ExceptionLoggerDelegateInterface {
 
-    abstract fun logMessage(errorDomain: String, code: Int, customValues: HashMap<String, String>)
+    abstract fun logMessage(errorDomain: String, code: Int, customValues: HashMap<String, String>, function: String, file: String, line: Int)
 
     private class CppProxy : ExceptionLoggerDelegateInterface {
         private val nativeRef: Long
@@ -27,10 +27,10 @@ abstract class ExceptionLoggerDelegateInterface {
             _djinni_private_destroy()
         }
 
-        override fun logMessage(errorDomain: String, code: Int, customValues: HashMap<String, String>) {
+        override fun logMessage(errorDomain: String, code: Int, customValues: HashMap<String, String>, function: String, file: String, line: Int) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_logMessage(this.nativeRef, errorDomain, code, customValues)
+            native_logMessage(this.nativeRef, errorDomain, code, customValues, function, file, line)
         }
-        private external fun native_logMessage(_nativeRef: Long, errorDomain: String, code: Int, customValues: HashMap<String, String>)
+        private external fun native_logMessage(_nativeRef: Long, errorDomain: String, code: Int, customValues: HashMap<String, String>, function: String, file: String, line: Int)
     }
 }

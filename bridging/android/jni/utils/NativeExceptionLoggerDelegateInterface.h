@@ -33,14 +33,14 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        void logMessage(const std::string & errorDomain, int32_t code, const std::unordered_map<std::string, std::string> & customValues) override;
+        void logMessage(const std::string & errorDomain, int32_t code, const std::unordered_map<std::string, std::string> & customValues, const std::string & function, const std::string & file, int32_t line) override;
 
     private:
         friend ::djinni::JniInterface<::ExceptionLoggerDelegateInterface, ::djinni_generated::NativeExceptionLoggerDelegateInterface>;
     };
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/utils/ExceptionLoggerDelegateInterface") };
-    const jmethodID method_logMessage { ::djinni::jniGetMethodID(clazz.get(), "logMessage", "(Ljava/lang/String;ILjava/util/HashMap;)V") };
+    const jmethodID method_logMessage { ::djinni::jniGetMethodID(clazz.get(), "logMessage", "(Ljava/lang/String;ILjava/util/HashMap;Ljava/lang/String;Ljava/lang/String;I)V") };
 };
 
 }  // namespace djinni_generated

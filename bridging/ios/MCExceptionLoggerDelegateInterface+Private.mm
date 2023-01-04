@@ -33,11 +33,17 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 
 - (void)logMessage:(nonnull NSString *)errorDomain
               code:(int32_t)code
-      customValues:(nonnull NSDictionary<NSString *, NSString *> *)customValues {
+      customValues:(nonnull NSDictionary<NSString *, NSString *> *)customValues
+          function:(nonnull NSString *)function
+              file:(nonnull NSString *)file
+              line:(int32_t)line {
     try {
         _cppRefHandle.get()->logMessage(::djinni::String::toCpp(errorDomain),
                                         ::djinni::I32::toCpp(code),
-                                        ::djinni::Map<::djinni::String, ::djinni::String>::toCpp(customValues));
+                                        ::djinni::Map<::djinni::String, ::djinni::String>::toCpp(customValues),
+                                        ::djinni::String::toCpp(function),
+                                        ::djinni::String::toCpp(file),
+                                        ::djinni::I32::toCpp(line));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -50,12 +56,15 @@ class ExceptionLoggerDelegateInterface::ObjcProxy final
     friend class ::djinni_generated::ExceptionLoggerDelegateInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void logMessage(const std::string & c_errorDomain, int32_t c_code, const std::unordered_map<std::string, std::string> & c_customValues) override
+    void logMessage(const std::string & c_errorDomain, int32_t c_code, const std::unordered_map<std::string, std::string> & c_customValues, const std::string & c_function, const std::string & c_file, int32_t c_line) override
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() logMessage:(::djinni::String::fromCpp(c_errorDomain))
                                                             code:(::djinni::I32::fromCpp(c_code))
-                                                    customValues:(::djinni::Map<::djinni::String, ::djinni::String>::fromCpp(c_customValues))];
+                                                    customValues:(::djinni::Map<::djinni::String, ::djinni::String>::fromCpp(c_customValues))
+                                                        function:(::djinni::String::fromCpp(c_function))
+                                                            file:(::djinni::String::fromCpp(c_file))
+                                                            line:(::djinni::I32::fromCpp(c_line))];
         }
     }
 };
