@@ -253,7 +253,10 @@ Tiled2dMapVectorLineSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInfo,
                 }
 
 
-                hitDetectionLineMap[tileInfo].push_back({lineCoordinatesVector, featureContext});
+                {
+                    std::lock_guard<std::recursive_mutex> lock(hitDetectionMutex);
+                    hitDetectionLineMap[tileInfo].push_back({lineCoordinatesVector, featureContext});
+                }
 
                 featureNum++;
             }
@@ -278,7 +281,10 @@ void Tiled2dMapVectorLineSubLayer::clearTileData(const Tiled2dMapTileInfo &tileI
     if (!mapInterface) {
         return;
     }
-    hitDetectionLineMap.erase(tileInfo);
+    {
+        std::lock_guard<std::recursive_mutex> lock(hitDetectionMutex);
+        hitDetectionLineMap.erase(tileInfo);
+    }
 
     std::vector<std::shared_ptr<GraphicsObjectInterface>> objectsToClear;
     Tiled2dMapVectorSubLayer::clearTileData(tileInfo);
@@ -457,6 +463,7 @@ bool Tiled2dMapVectorLineSubLayer::onClickConfirmed(const ::Vec2F &posScreen) {
     auto point = camera->coordFromScreenPosition(posScreen);
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
 
+    std::lock_guard<std::recursive_mutex> lock(hitDetectionMutex);
     for (auto const &[tileInfo, lineTuples] : hitDetectionLineMap) {
         for (auto const &[lineCoordinateVector, featureContext]: lineTuples) {
             for (auto const &coordinates: lineCoordinateVector) {
