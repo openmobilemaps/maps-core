@@ -14,7 +14,6 @@
 #include "json.h"
 #include "VectorMapDescription.h"
 #include "DataLoaderResult.h"
-#include "DataHolderInterface.h"
 #include "Tiled2dMapVectorLayer.h"
 #include "LineVectorLayerDescription.h"
 #include "PolygonVectorLayerDescription.h"

@@ -31,7 +31,6 @@
 #include "RenderPass.h"
 #include "OBB2D.h"
 #include "DataLoaderResult.h"
-#include "DataHolderInterface.h"
 #include "TextureLoaderResult.h"
 #include "PolygonCompare.h"
 #include "LoaderHelper.h"
