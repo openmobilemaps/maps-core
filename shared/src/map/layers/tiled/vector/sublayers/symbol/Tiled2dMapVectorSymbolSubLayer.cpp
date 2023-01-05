@@ -326,28 +326,7 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
                 auto midP = p.begin() + p.size() / 2;
                 std::optional<double> angle = std::nullopt;
 
-
-                if (fullText != ""){
-                    std::lock_guard<std::recursive_mutex> lock(tileTextPositionMapMutex);
-
-                    std::optional<double> minDistance;
-                    for (auto const &entry: tileTextPositionMap) {
-                        auto it = entry.second.find(fullText);
-                        if (it != entry.second.end()) {
-                            for (auto const &pos: entry.second.at(fullText)) {
-                                auto distance = Vec2DHelper::distance(Vec2D(pos.x, pos.y), Vec2D(midP->x, midP->y));
-                                if (!minDistance || distance < *minDistance) {
-                                    minDistance = distance;
-                                }
-                            }
-                        }
-                    }
-                    if (minDistance && *minDistance < symbolSpacingMeters) {
-                        continue;
-                    }
-
-                    tileTextPositionMap[tileInfo][fullText].push_back(*midP);
-                }
+                tileTextPositionMap[tileInfo][fullText].push_back(*midP);
 
                 textInfos.push_back({context, std::make_shared<SymbolInfo>(text,
                                                                            *midP,
@@ -403,7 +382,9 @@ void Tiled2dMapVectorSymbolSubLayer::addTexts(const Tiled2dMapTileInfo &tileInfo
         }
 
         auto fontResult = loadFont(text->getFont());
-        if (fontResult.status != LoaderStatus::OK) continue;
+        if (fontResult.status != LoaderStatus::OK) {
+            continue;
+        }
 
         auto const evalContext = EvaluationContext(zoomIdentifier, context);
 
@@ -456,9 +437,6 @@ void Tiled2dMapVectorSymbolSubLayer::addTexts(const Tiled2dMapTileInfo &tileInfo
         }
     }
 
-    std::sort(textObjects.begin(), textObjects.end(), [](const std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> &a, const std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> &b) {
-        return a->symbolSortKey < b->symbolSortKey;
-    });
 
     {
         std::lock_guard<std::recursive_mutex> lock(symbolMutex);
@@ -467,6 +445,14 @@ void Tiled2dMapVectorSymbolSubLayer::addTexts(const Tiled2dMapTileInfo &tileInfo
         }
         tileTextMap[tileInfo] = textObjects;
     }
+    
+    {
+        std::lock_guard<std::recursive_mutex> lock(sortedSymbolMutex);
+        int cbefroe = sortedSymbols.size();
+        std::copy(textObjects.begin(), textObjects.end(), std::inserter(sortedSymbols, sortedSymbols.end()));
+        assert(cbefroe + textObjects.size() == sortedSymbols.size());
+    }
+    
     {
         std::lock_guard<std::recursive_mutex> lock(dirtyMutex);
         hasFreshData = true;
@@ -536,7 +522,7 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
         selectedTextWrapper = this->selectedTextWrapper;
     }
 
-    std::lock_guard<std::recursive_mutex> lock(symbolMutex);
+    std::lock_guard<std::recursive_mutex> lock(sortedSymbolMutex);
 
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
     double rotation = -camera->getRotation();
@@ -733,13 +719,11 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
         collisionDetectionLambda(selectedTextWrapper);
     }
 
-    for (auto &[tile, wrapperVector]: tileTextMap) {
-        for (auto &wrapper: wrapperVector) {
-            if (wrapper == selectedTextWrapper) {
-                continue;
-            }
-            collisionDetectionLambda(wrapper);
+    for (auto &wrapper: sortedSymbols) {
+        if (wrapper == selectedTextWrapper) {
+            continue;
         }
+        collisionDetectionLambda(wrapper);
     }
 }
 
@@ -808,6 +792,7 @@ void Tiled2dMapVectorSymbolSubLayer::clearTileData(const Tiled2dMapTileInfo &til
 
     {
         std::lock_guard<std::recursive_mutex> lock(symbolMutex);
+        std::lock_guard<std::recursive_mutex> symbolLock(sortedSymbolMutex);
         if (tileTextMap.count(tileInfo) != 0) {
             for (auto const &wrapper: tileTextMap[tileInfo]) {
                 const auto &textObject = wrapper->textObject->getTextObject();
@@ -817,6 +802,7 @@ void Tiled2dMapVectorSymbolSubLayer::clearTileData(const Tiled2dMapTileInfo &til
                 if(wrapper->symbolObject && wrapper != selectedTextWrapper) {
                     objectsToClear.push_back(wrapper->symbolGraphicsObject);
                 }
+                sortedSymbols.erase(wrapper);
             }
             tileTextMap.erase(tileInfo);
         }
