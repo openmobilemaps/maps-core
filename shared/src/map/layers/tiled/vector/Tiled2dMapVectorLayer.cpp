@@ -918,6 +918,9 @@ std::optional<FeatureContext> Tiled2dMapVectorLayer::getFeatureContext(int64_t i
 }
 
 std::vector<std::pair<FeatureContext, ::Coord>> Tiled2dMapVectorLayer::getVisibleFeatureContexts() {
+    if(!vectorTileSource) {
+        return {};
+    }
     auto const &currentTileInfos = vectorTileSource->getCurrentTiles();
 
     std::vector<std::pair<FeatureContext, ::Coord>> features = {};

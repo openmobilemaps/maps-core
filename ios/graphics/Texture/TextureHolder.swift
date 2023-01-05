@@ -97,7 +97,22 @@ public class TextureHolder: NSObject {
                 let options: [MTKTextureLoader.Option: Any] = [
                     MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
                 ]
-                self.texture = try MetalContext.current.textureLoader.newTexture(data: data, options: options)
+                do {
+                    self.texture = try MetalContext.current.textureLoader.newTexture(data: data, options: options)
+                }
+                catch {
+                    guard let image = UIImage(data: data) else {
+                        throw error
+                    }
+                    UIGraphicsBeginImageContext(image.size)
+                    defer { UIGraphicsEndImageContext() }
+                    image.draw(at: .zero)
+                    let fixedImage = UIGraphicsGetImageFromCurrentImageContext()
+                    guard let fixedCGImage = fixedImage?.cgImage else {
+                        throw error
+                    }
+                    self.texture = try MetalContext.current.textureLoader.newTexture(cgImage: fixedCGImage, options: nil)
+                }
 
         }
     }
@@ -120,7 +135,12 @@ extension TextureHolder: MCTextureHolderInterface {
 
     public func attachToGraphics() -> Int32 {
         if _texture == nil {
-            try! loadDataFromSource()
+            do {
+                try loadDataFromSource()
+            }
+            catch {
+                assertionFailure(error.localizedDescription)
+            }
         }
         return 0
     }
