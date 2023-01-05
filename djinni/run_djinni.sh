@@ -38,24 +38,13 @@ IDENT_JNI_CLASS="NativeFooBar"
 IDENT_JAVA="fooBar"
 
 
-if [ $# -eq 0 ]; then
-    # Normal build.
-    true
-elif [ $# -eq 1 ]; then
-    command="$1"; shift
-    if [ "$command" != "clean" ]; then
-        echo "Unexpected argument: \"$command\"." 1>&2
-        exit 1
-    fi
-    for dir in "$OBJCPP_OUT" "$OBJC_OUT" "$JNI_OUT" "$JAVA_OUT"; do
+for dir in "$OBJCPP_OUT" "$OBJC_OUT" "$JNI_OUT" "$JAVA_OUT"; do
         if [ -e "$dir" ]; then
             echo "Deleting \"$dir\"..."
             rm -r "$dir"
         fi
-    done
-    exit
-fi
-
+done
+    
 # Build djinni
 "$base_dir/../external/djinni/src/build.sh"
 
@@ -73,7 +62,7 @@ for file in $(find . -name "*.djinni" -type f -print); do
     fi
     
     "$base_dir/../external/djinni/src/run" \
-        --kotlin-out "$JAVA_OUT/$SUB" \
+        --java-out "$JAVA_OUT/$SUB" \
         --java-package "$JAVA_PACKAGE$SUBPOINT" \
         --ident-java-field "$IDENT_JAVA" \
         --ident-java-enum "$IDENT_CPP_ENUM" \
