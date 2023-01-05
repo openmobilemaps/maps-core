@@ -28,6 +28,7 @@
 #include "LoaderInterface.h"
 #include "Quad2dInterface.h"
 #include "SimpleTouchInterface.h"
+#include <set>
 
 //#define DRAW_TEXT_BOUNDING_BOXES
 //#define DRAW_COLLIDED_TEXT_BOUNDING_BOXES
@@ -60,6 +61,15 @@ struct Tiled2dMapVectorSymbolFeatureWrapper {
     Tiled2dMapVectorSymbolFeatureWrapper() {};
 
     Tiled2dMapVectorSymbolFeatureWrapper(const FeatureContext &featureContext, const std::shared_ptr<SymbolInfo> &textInfo, const std::shared_ptr<TextLayerObject> &textObject, const int64_t symbolSortKey) : featureContext(featureContext), textInfo(textInfo), textObject(textObject), symbolSortKey(symbolSortKey),  modelMatrix(16, 0), iconModelMatrix(16, 0) { };
+};
+
+struct WrapperCompare {
+    bool operator() (std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> a, std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> b) const {
+        if (a->symbolSortKey == b->symbolSortKey) {
+            return a < b;
+        }
+        return a->symbolSortKey < b->symbolSortKey;
+    }
 };
 
 
@@ -137,6 +147,9 @@ private:
 
     std::recursive_mutex symbolMutex;
     std::unordered_map<Tiled2dMapTileInfo, std::vector<std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper>>> tileTextMap;
+                                         
+    std::recursive_mutex sortedSymbolMutex;
+    std::set<std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper>, WrapperCompare> sortedSymbols;
 
     std::recursive_mutex selectedTextWrapperMutex;
     std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> selectedTextWrapper;
