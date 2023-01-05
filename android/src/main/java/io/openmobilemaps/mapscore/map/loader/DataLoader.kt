@@ -13,14 +13,13 @@ package io.openmobilemaps.mapscore.map.loader
 import android.content.Context
 import android.graphics.BitmapFactory
 import io.openmobilemaps.mapscore.graphics.BitmapTextureHolder
-import io.openmobilemaps.mapscore.graphics.DataHolder
 import io.openmobilemaps.mapscore.map.loader.networking.RefererInterceptor
 import io.openmobilemaps.mapscore.map.loader.networking.RequestUtils
 import io.openmobilemaps.mapscore.map.loader.networking.UserAgentInterceptor
 import io.openmobilemaps.mapscore.shared.map.loader.*
 import okhttp3.*
 import java.io.File
-import java.util.*
+import java.nio.ByteBuffer
 import java.util.concurrent.TimeUnit
 
 open class DataLoader(
@@ -95,7 +94,7 @@ open class DataLoader(
 			return okHttpClient.newCall(request).execute().use { response ->
 				val bytes: ByteArray? = response.body?.bytes()
 				if (response.isSuccessful && bytes != null) {
-					return@use DataLoaderResult(DataHolder(bytes), response.header(HEADER_NAME_ETAG, null), LoaderStatus.OK, null)
+					return@use DataLoaderResult(ByteBuffer.wrap(bytes), response.header(HEADER_NAME_ETAG, null), LoaderStatus.OK, null)
 				} else if (response.code == 404) {
 					return@use DataLoaderResult(null, null, LoaderStatus.ERROR_404, response.code.toString())
 				} else {

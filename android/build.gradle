@@ -53,6 +53,7 @@ android {
 			java {
 				srcDir 'src/main/java'
 				srcDir '../bridging/android/java'
+				srcDir '../external/djinni/support-lib/java'
 			}
 		}
 	}
