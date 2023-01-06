@@ -30,7 +30,7 @@ public:
 
     virtual std::vector<std::shared_ptr<RenderPassInterface>> buildRenderPasses(const std::unordered_set<Tiled2dMapTileInfo> &tiles);
 
-    virtual void onAdded(const std::shared_ptr<MapInterface> &mapInterface) override;
+    virtual void onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32_t layerIndex) override;
 
     virtual void onRemoved() override;
 

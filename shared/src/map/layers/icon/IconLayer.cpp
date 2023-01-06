@@ -252,7 +252,7 @@ void IconLayer::preGenerateRenderPasses() {
     renderPassObjectMap = newRenderPassObjectMap;
 }
 
-void IconLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
+void IconLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32_t layerIndex) {
     this->mapInterface = mapInterface;
     {
         std::scoped_lock<std::recursive_mutex> lock(addingQueueMutex);
@@ -266,7 +266,7 @@ void IconLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
         }
     }
     if (isLayerClickable) {
-        mapInterface->getTouchHandler()->addListener(shared_from_this());
+        mapInterface->getTouchHandler()->insertListener(shared_from_this(), layerIndex);
     }
 }
 

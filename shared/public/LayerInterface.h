@@ -7,6 +7,7 @@
 #include "MaskingObjectInterface.h"
 #include "RectI.h"
 #include "RenderPassInterface.h"
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <vector>
@@ -24,7 +25,7 @@ public:
 
     virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() = 0;
 
-    virtual void onAdded(const std::shared_ptr<MapInterface> & mapInterface) = 0;
+    virtual void onAdded(const std::shared_ptr<MapInterface> & mapInterface, int32_t layerIndex) = 0;
 
     virtual void onRemoved() = 0;
 

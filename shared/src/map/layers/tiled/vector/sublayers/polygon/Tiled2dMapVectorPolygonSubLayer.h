@@ -30,7 +30,7 @@ public:
 
     virtual void update() override;
 
-    virtual void onAdded(const std::shared_ptr<MapInterface> &mapInterface) override;
+    virtual void onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32_t layerIndex) override;
 
     virtual void onRemoved() override;
 

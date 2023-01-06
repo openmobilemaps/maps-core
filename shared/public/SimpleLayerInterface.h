@@ -23,7 +23,7 @@ class SimpleLayerInterface : public LayerInterface {
         return {};
     };
 
-    virtual void onAdded(const std::shared_ptr<MapInterface> & mapInterface) {};
+    virtual void onAdded(const std::shared_ptr<MapInterface> & mapInterface, int32_t layerIndex) {};
 
     virtual void onRemoved() {};
 

@@ -17,8 +17,8 @@
 #include "SchedulerInterface.h"
 #include "LambdaTask.h"
 
-void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
-    Tiled2dMapVectorSubLayer::onAdded(mapInterface);
+void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32_t layerIndex) {
+    Tiled2dMapVectorSubLayer::onAdded(mapInterface, layerIndex);
     shader = mapInterface->getShaderFactory()->createColorShader();
     object = mapInterface->getGraphicsObjectFactory()->createQuad(shader->asShaderProgramInterface());
 

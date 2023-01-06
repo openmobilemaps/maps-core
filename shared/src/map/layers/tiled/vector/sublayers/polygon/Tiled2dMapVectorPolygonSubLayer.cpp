@@ -45,14 +45,12 @@ namespace mapbox {
 Tiled2dMapVectorPolygonSubLayer::Tiled2dMapVectorPolygonSubLayer(const std::shared_ptr<PolygonVectorLayerDescription> &description)
         : description(description), usedKeys(description->getUsedKeys()) {}
 
-void Tiled2dMapVectorPolygonSubLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
-    Tiled2dMapVectorSubLayer::onAdded(mapInterface);
-    mapInterface->getTouchHandler()->addListener(shared_from_this());
+void Tiled2dMapVectorPolygonSubLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32_t layerIndex) {
+    Tiled2dMapVectorSubLayer::onAdded(mapInterface, layerIndex);
     shader = mapInterface->getShaderFactory()->createPolygonGroupShader();
 }
 
 void Tiled2dMapVectorPolygonSubLayer::onRemoved() {
-    mapInterface->getTouchHandler()->removeListener(shared_from_this());
     Tiled2dMapVectorSubLayer::onRemoved();
 }
 

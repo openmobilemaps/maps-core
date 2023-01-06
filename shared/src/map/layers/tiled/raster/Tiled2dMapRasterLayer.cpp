@@ -20,33 +20,41 @@
 #include <map>
 
 Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
-                                             const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders)
-        : Tiled2dMapLayer(), layerConfig(layerConfig), tileLoaders(tileLoaders), alpha(1.0) {}
+                                             const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
+                                             bool registerToTouchHandler)
+        : Tiled2dMapLayer(), layerConfig(layerConfig), tileLoaders(tileLoaders), alpha(1.0),
+          registerToTouchHandler(registerToTouchHandler) {}
 
 Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
-                                             const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
-                                             const std::shared_ptr<::MaskingObjectInterface> &mask)
-        : Tiled2dMapLayer(), layerConfig(layerConfig), tileLoaders(tileLoaders), alpha(1.0), mask(mask) {}
+                                             const std::vector<std::shared_ptr<::LoaderInterface>> &tileLoaders,
+                                             const std::shared_ptr<::MaskingObjectInterface> &mask,
+                                             bool registerToTouchHandler)
+        : Tiled2dMapLayer(), layerConfig(layerConfig), tileLoaders(tileLoaders), alpha(1.0), mask(mask),
+          registerToTouchHandler(registerToTouchHandler) {}
 
 Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
-                                             const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
-                                             const std::shared_ptr<::ShaderProgramInterface> &shader)
-        : Tiled2dMapLayer(), layerConfig(layerConfig), tileLoaders(tileLoaders), alpha(1.0), shader(shader) {}
+                                             const std::vector<std::shared_ptr<::LoaderInterface>> &tileLoaders,
+                                             const std::shared_ptr<::ShaderProgramInterface> &shader,
+                                             bool registerToTouchHandler)
+        : Tiled2dMapLayer(), layerConfig(layerConfig), tileLoaders(tileLoaders), alpha(1.0), shader(shader),
+          registerToTouchHandler(registerToTouchHandler) {}
 
-void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface) {
+void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface, int32_t layerIndex) {
     rasterSource = std::make_shared<Tiled2dMapRasterSource>(
             mapInterface->getMapConfig(), layerConfig, mapInterface->getCoordinateConverterHelper(), mapInterface->getScheduler(),
                                                             tileLoaders, shared_from_this(), mapInterface->getCamera()->getScreenDensityPpi());
     setSourceInterface(rasterSource);
-    Tiled2dMapLayer::onAdded(mapInterface);
+    Tiled2dMapLayer::onAdded(mapInterface, layerIndex);
 
-    mapInterface->getTouchHandler()->addListener(shared_from_this());
+    if (registerToTouchHandler) {
+        mapInterface->getTouchHandler()->insertListener(std::dynamic_pointer_cast<TouchInterface>(shared_from_this()), layerIndex);
+    }
 }
 
 void Tiled2dMapRasterLayer::onRemoved() {
     auto mapInterface = this->mapInterface;
-    if (mapInterface) {
-        mapInterface->getTouchHandler()->removeListener(shared_from_this());
+    if (mapInterface && registerToTouchHandler) {
+        mapInterface->getTouchHandler()->removeListener(std::dynamic_pointer_cast<TouchInterface>(shared_from_this()));
     }
     pause();
     Tiled2dMapLayer::onRemoved();
