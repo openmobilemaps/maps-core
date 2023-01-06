@@ -28,21 +28,29 @@ DefaultTouchHandler::DefaultTouchHandler(std::shared_ptr<SchedulerInterface> sch
     , oldPointer(Vec2F(0, 0), Vec2F(0, 0)) {}
 
 void DefaultTouchHandler::addListener(const std::shared_ptr<TouchInterface> &listener) {
-    if (listeners.size() > 0) {
-        auto key = listeners.begin()->first;
-        listeners[key + 1] = listener;
+    std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+    if (listeners.empty()) {
+        listeners.push_back({0, listener});
     } else {
-        listeners[0] = listener;
+        auto newIndex = listeners.begin()->index + 1;
+        listeners.push_front({newIndex, listener});
     }
 }
 
 void DefaultTouchHandler::insertListener(const std::shared_ptr<TouchInterface> &listener, int32_t index) {
-    listeners[index] = listener;
+    std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+    for (auto iter = listeners.begin(); iter != listeners.end(); iter++) {
+        if (iter->index <= index) {
+            listeners.insert(iter, {index, listener});
+            break;
+        }
+    }
 }
 
 void DefaultTouchHandler::removeListener(const std::shared_ptr<TouchInterface> &listener) {
+    std::lock_guard<std::recursive_mutex> lock(listenerMutex);
     for (auto it = listeners.begin(); it != listeners.end();) {
-        if (it->second == listener) {
+        if (it->listener == listener) {
             listeners.erase(it++);
         } else {
             ++it;
@@ -155,9 +163,12 @@ void DefaultTouchHandler::handleTouchDown(Vec2F position) {
     scheduler->addTask(std::make_shared<LambdaTask>(
         TaskConfig("LongPressTask", LONG_PRESS_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
         [=] { checkState(); }));
-    for (auto &[index, listener] : listeners) {
-        if (listener->onTouchDown(position)) {
-            break;
+    {
+        std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+        for (auto &[index, listener]: listeners) {
+            if (listener->onTouchDown(position)) {
+                break;
+            }
         }
     }
 }
@@ -181,12 +192,15 @@ void DefaultTouchHandler::handleMove(Vec2F delta) {
         }
         stateTime = DateHelper::currentTimeMillis();
     }
-    for (auto &[index, listener] : listeners) {
-        if (listener->onMove(delta,
-                             state == ONE_FINGER_MOVING,             // confirmed
-                             state == ONE_FINGER_DOUBLE_CLICK_MOVE)) // double click move
-        {
-            break;
+    {
+        std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+        for (auto &[index, listener]: listeners) {
+            if (listener->onMove(delta,
+                                 state == ONE_FINGER_MOVING,             // confirmed
+                                 state == ONE_FINGER_DOUBLE_CLICK_MOVE)) // double click move
+            {
+                break;
+            }
         }
     }
 }
@@ -201,9 +215,12 @@ void DefaultTouchHandler::handleTouchUp() {
 #ifdef ENABLE_TOUCH_LOGGING
         LogDebug <<= "TouchHandler: double click detected";
 #endif
-        for (auto &[index, listener] : listeners) {
-            if (listener->onDoubleClick(touchPosition)) {
-                break;
+        {
+            std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+            for (auto &[index, listener]: listeners) {
+                if (listener->onDoubleClick(touchPosition)) {
+                    break;
+                }
             }
         }
         state = IDLE;
@@ -212,10 +229,13 @@ void DefaultTouchHandler::handleTouchUp() {
         LogDebug <<= "TouchHandler: unconfirmed click detected";
 #endif
         bool clickHandled = false;
-        for (auto &[index, listener] : listeners) {
-            if (listener->onClickUnconfirmed(touchPosition)) {
-                clickHandled = true;
-                break;
+        {
+            std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+            for (auto &[index, listener]: listeners) {
+                if (listener->onClickUnconfirmed(touchPosition)) {
+                    clickHandled = true;
+                    break;
+                }
             }
         }
         if (clickHandled) {
@@ -231,40 +251,56 @@ void DefaultTouchHandler::handleTouchUp() {
 #ifdef ENABLE_TOUCH_LOGGING
         LogDebug <<= "TouchHandler: Two finger click detected";
 #endif
-        for (auto &[index, listener] : listeners) {
-            if (listener->onTwoFingerClick(std::get<0>(oldPointer), std::get<1>(oldPointer))) {
-                break;
+        {
+            std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+            for (auto &[index, listener]: listeners) {
+                if (listener->onTwoFingerClick(std::get<0>(oldPointer), std::get<1>(oldPointer))) {
+                    break;
+                }
             }
         }
+
     } else {
         if (state == ONE_FINGER_MOVING) {
-            for (auto &[index, listener] : listeners) {
-                if (listener->onMoveComplete()) {
-                    break;
+            {
+                std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+                for (auto &[index, listener]: listeners) {
+                    if (listener->onMoveComplete()) {
+                        break;
+                    }
                 }
             }
         }
         state = IDLE;
     }
-    for (auto &[index, listener] : listeners) {
-        listener->clearTouch();
+    {
+        std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+        for (auto &[index, listener]: listeners) {
+            listener->clearTouch();
+        }
     }
     stateTime = DateHelper::currentTimeMillis();
 }
 
 void DefaultTouchHandler::handleTouchCancel() {
     state = IDLE;
-    for (auto &[index, listener] : listeners) {
-        listener->clearTouch();
+    {
+        std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+        for (auto &[index, listener]: listeners) {
+            listener->clearTouch();
+        }
     }
     stateTime = DateHelper::currentTimeMillis();
 }
 
 void DefaultTouchHandler::handleTwoFingerDown() {
     if (state == ONE_FINGER_MOVING) {
-        for (auto &[index, listener] : listeners) {
-            if (listener->onMoveComplete()) {
-                break;
+        {
+            std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+            for (auto &[index, listener]: listeners) {
+                if (listener->onMoveComplete()) {
+                    break;
+                }
             }
         }
     }
@@ -273,16 +309,22 @@ void DefaultTouchHandler::handleTwoFingerDown() {
     scheduler->addTask(std::make_shared<LambdaTask>(
         TaskConfig("LongPressTask", LONG_PRESS_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
         [=] { checkState(); }));
-    for (auto &[index, listener] : listeners) {
-        listener->clearTouch();
+    {
+        std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+        for (auto &[index, listener]: listeners) {
+            listener->clearTouch();
+        }
     }
 }
 
 void DefaultTouchHandler::handleTwoFingerMove(std::tuple<Vec2F, Vec2F> oldPointer, std::tuple<Vec2F, Vec2F> newpointer) {
     if (state == ONE_FINGER_MOVING) {
-        for (auto &[index, listener] : listeners) {
-            if (listener->onMoveComplete()) {
-                break;
+        {
+            std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+            for (auto &[index, listener]: listeners) {
+                if (listener->onMoveComplete()) {
+                    break;
+                }
             }
         }
     }
@@ -290,10 +332,13 @@ void DefaultTouchHandler::handleTwoFingerMove(std::tuple<Vec2F, Vec2F> oldPointe
         state = TWO_FINGER_MOVING;
         stateTime = DateHelper::currentTimeMillis();
     }
-    for (auto &[index, listener] : listeners) {
-        if (listener->onTwoFingerMove({std::get<0>(oldPointer), std::get<1>(oldPointer)},
-                                      {std::get<0>(newpointer), std::get<1>(newpointer)})) {
-            break;
+    {
+        std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+        for (auto &[index, listener]: listeners) {
+            if (listener->onTwoFingerMove({std::get<0>(oldPointer), std::get<1>(oldPointer)},
+                                          {std::get<0>(newpointer), std::get<1>(newpointer)})) {
+                break;
+            }
         }
     }
 }
@@ -302,9 +347,12 @@ void DefaultTouchHandler::handleTwoFingerUp(std::tuple<Vec2F, Vec2F> doubleTouch
     if (state != TWO_FINGER_DOWN) {
         state = IDLE;
         stateTime = DateHelper::currentTimeMillis();
-        for (auto &[index, listener] : listeners) {
-            if (listener->onTwoFingerMoveComplete()) {
-                break;
+        {
+            std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+            for (auto &[index, listener]: listeners) {
+                if (listener->onTwoFingerMoveComplete()) {
+                    break;
+                }
             }
         }
     }
@@ -312,16 +360,22 @@ void DefaultTouchHandler::handleTwoFingerUp(std::tuple<Vec2F, Vec2F> doubleTouch
 
 void DefaultTouchHandler::handleMoreThanTwoFingers() {
     if (state == ONE_FINGER_MOVING) {
-        for (auto &[index, listener] : listeners) {
-            if (listener->onMoveComplete()) {
-                break;
+        {
+            std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+            for (auto &[index, listener]: listeners) {
+                if (listener->onMoveComplete()) {
+                    break;
+                }
             }
         }
     }
     state = IDLE;
     stateTime = DateHelper::currentTimeMillis();
-    for (auto &[index, listener] : listeners) {
-        listener->clearTouch();
+    {
+        std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+        for (auto &[index, listener]: listeners) {
+            listener->clearTouch();
+        }
     }
 }
 
@@ -330,9 +384,12 @@ void DefaultTouchHandler::checkState() {
 #ifdef ENABLE_TOUCH_LOGGING
         LogDebug <<= "TouchHandler: confirmed click detected";
 #endif
-        for (auto &[index, listener] : listeners) {
-            if (listener->onClickConfirmed(touchPosition)) {
-                break;
+        {
+            std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+            for (auto &[index, listener]: listeners) {
+                if (listener->onClickConfirmed(touchPosition)) {
+                    break;
+                }
             }
         }
         state = IDLE;
@@ -341,9 +398,12 @@ void DefaultTouchHandler::checkState() {
 #ifdef ENABLE_TOUCH_LOGGING
         LogDebug <<= "TouchHandler: long press detected";
 #endif
-        for (auto &[index, listener] : listeners) {
-            if (listener->onLongPress(touchPosition)) {
-                break;
+        {
+            std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+            for (auto &[index, listener]: listeners) {
+                if (listener->onLongPress(touchPosition)) {
+                    break;
+                }
             }
         }
         state = ONE_FINGER_MOVING; // prevents further single click and allows to transition from long press to moving

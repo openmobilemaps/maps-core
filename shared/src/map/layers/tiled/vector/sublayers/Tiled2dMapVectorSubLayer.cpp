@@ -39,7 +39,7 @@ Tiled2dMapVectorSubLayer::buildRenderPasses(const std::unordered_set<Tiled2dMapT
     return newRenderPasses;
 }
 
-void Tiled2dMapVectorSubLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
+void Tiled2dMapVectorSubLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32_t layerIndex) {
     this->mapInterface = mapInterface;
 }
 

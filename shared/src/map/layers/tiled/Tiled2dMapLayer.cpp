@@ -25,7 +25,7 @@ void Tiled2dMapLayer::setSourceInterface(const std::shared_ptr<Tiled2dMapSourceI
     }
 }
 
-void Tiled2dMapLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface) {
+void Tiled2dMapLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface, int32_t layerIndex) {
     this->mapInterface = mapInterface;
 
     sourceInterface->setMinZoomLevelIdentifier(minZoomLevelIdentifier);
