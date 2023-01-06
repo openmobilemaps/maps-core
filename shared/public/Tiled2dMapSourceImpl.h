@@ -154,6 +154,7 @@ void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBou
             continue;
         }
 
+
         VisibleTilesLayer curVisibleTiles(i - targetZoomLayer, i);
         std::vector<PrioritizedTiled2dMapTileInfo> curVisibleTilesVec;
 
@@ -161,6 +162,9 @@ void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBou
 
         RectCoord layerBounds = zoomLevelInfo.bounds;
         layerBounds = conversionHelper->convertRect(layerSystemId, layerBounds);
+
+
+        visibleBoundsLayer = layerBounds;
 
         const bool leftToRight = layerBounds.topLeft.x < layerBounds.bottomRight.x;
         const bool topToBottom = layerBounds.topLeft.y < layerBounds.bottomRight.y;
@@ -724,6 +728,7 @@ TileLoadingDecision Tiled2dMapSource<T, L, R>::tileLoadingDecision(int tileZ, in
         return TileLoadingDecision::loadNeeded;
     }
     else if (tileZ == curZ && abs(tileT - curT) < 500) {
+        return TileLoadingDecision::ignore;
         return TileLoadingDecision::preload;
     }
     else {

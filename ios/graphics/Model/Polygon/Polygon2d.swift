@@ -19,13 +19,23 @@ final class Polygon2d: BaseGraphicsObject {
     private var indicesBuffer: MTLBuffer?
     private var indicesCount: Int = 0
 
+    private let timeBuffer: MTLBuffer
+    private var timeBufferContent : UnsafeMutablePointer<Float>
+
     private var stencilState: MTLDepthStencilState?
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader
+        guard let buffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<Float>.stride, options: []) else { fatalError("Could not create buffer") }
+        self.timeBuffer = buffer
+        self.timeBufferContent = self.timeBuffer.contents().bindMemory(to: Float.self, capacity: 1)
+
         super.init(device: metalContext.device,
                    sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue))
     }
+
+    // TODO: Move
+    static let startTime = Date()
 
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
@@ -67,6 +77,9 @@ final class Polygon2d: BaseGraphicsObject {
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
         }
+
+        timeBufferContent[0] = Float(-Self.startTime.timeIntervalSinceNow)
+        encoder.setVertexBuffer(timeBuffer, offset: 0, index: 2)
 
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,
@@ -131,6 +144,9 @@ extension Polygon2d: MCMaskingObjectInterface {
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
         }
+
+        timeBufferContent[0] = Float(-Self.startTime.timeIntervalSinceNow)
+        encoder.setVertexBuffer(timeBuffer, offset: 0, index: 2)
 
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,

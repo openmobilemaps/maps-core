@@ -87,6 +87,7 @@ public enum Pipeline: String, CaseIterable {
     case roundColorShader
     case clearStencilShader
     case textShader
+    case combineLayersShader
 
     var label: String {
         switch self {
@@ -98,6 +99,7 @@ public enum Pipeline: String, CaseIterable {
             case .roundColorShader: return "Round color shader"
             case .clearStencilShader: return "Clear stencil shader"
             case .textShader: return "Text shader"
+            case .combineLayersShader: return "Combine Layers Shader"
         }
     }
 
@@ -111,6 +113,7 @@ public enum Pipeline: String, CaseIterable {
             case .roundColorShader: return "colorVertexShader"
             case .clearStencilShader: return "stencilClearVertexShader"
             case .textShader: return "textVertexShader"
+            case .combineLayersShader: return "flatBaseVertexShader"
         }
     }
 
@@ -124,6 +127,7 @@ public enum Pipeline: String, CaseIterable {
             case .roundColorShader: return "roundColorFragmentShader"
             case .clearStencilShader: return "stencilClearFragmentShader"
             case .textShader: return "textFragmentShader"
+            case .combineLayersShader: return "baseFragmentShader"
         }
     }
 

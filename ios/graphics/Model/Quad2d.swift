@@ -18,6 +18,9 @@ final class Quad2d: BaseGraphicsObject {
 
     private var indicesBuffer: MTLBuffer?
 
+    private let timeBuffer: MTLBuffer
+    private var timeBufferContent : UnsafeMutablePointer<Float>
+
     private var indicesCount: Int = 0
 
     private var texture: MTLTexture?
@@ -33,6 +36,11 @@ final class Quad2d: BaseGraphicsObject {
     init(shader: MCShaderProgramInterface, metalContext: MetalContext, label: String = "Quad2d") {
         self.label = label
         self.shader = shader
+
+        guard let buffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<Float>.stride, options: []) else { fatalError("Could not create buffer") }
+        self.timeBuffer = buffer
+        self.timeBufferContent = self.timeBuffer.contents().bindMemory(to: Float.self, capacity: 1)
+
         super.init(device: metalContext.device,
                    sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue))
     }
@@ -119,6 +127,8 @@ final class Quad2d: BaseGraphicsObject {
             encoder.setFragmentTexture(texture, index: 0)
         }
 
+        timeBufferContent[0] = Float(-Polygon2d.startTime.timeIntervalSinceNow)
+        encoder.setVertexBuffer(timeBuffer, offset: 0, index: 2)
 
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,

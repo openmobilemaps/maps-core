@@ -14,13 +14,42 @@ using namespace metal;
 
 vertex VertexOut
 baseVertexShader(const VertexIn vertexIn [[stage_in]],
-                    constant float4x4 &mvpMatrix [[buffer(1)]])
+                    constant float4x4 &mvpMatrix [[buffer(1)]],
+                    constant float &time [[buffer(2)]])
 {
+    float px = vertexIn.position.x;
+    float py = vertexIn.position.y;
+
+    float R = 6371000;
+    float lambda = px / R;
+    float phi = 2*atan(exp(py / R)) - 0 * 3.1415926 / 2;
+
+    float radius = 1.0;
+    float ratio = 2556.0/1179.0;
+
+    VertexOut out {
+        .position = float4(radius*sin(phi)*cos(lambda+time), radius*cos(phi) / ratio, radius*sin(phi)*sin(lambda+time), 1),
+        .uv = vertexIn.uv
+    };
+
+
+    
+    return out;
+}
+
+vertex VertexOut
+flatBaseVertexShader(const VertexIn vertexIn [[stage_in]],
+                 constant float4x4 &mvpMatrix [[buffer(1)]],
+                 constant float &time [[buffer(2)]])
+{
+
     VertexOut out {
         .position = mvpMatrix * float4(vertexIn.position.xy, 0.0, 1.0),
         .uv = vertexIn.uv
     };
-    
+
+
+
     return out;
 }
 
@@ -77,12 +106,35 @@ pointFragmentShader(VertexOut in [[stage_in]],
 
 vertex VertexOut
 colorVertexShader(const VertexIn vertexIn [[stage_in]],
-                    constant float4x4 &mvpMatrix [[buffer(1)]])
+                    constant float4x4 &mvpMatrix [[buffer(1)]],
+                  constant float &time [[buffer(2)]])
 {
+
+
+    float px = vertexIn.position.x;
+    float py = vertexIn.position.y;
+
+    float R = 6371000;
+    float lambda = px / R;
+    float phi = 2*atan(exp(py / R)) - 0 * 3.1415926 / 2;
+
+    float radius = 1.0;
+    float ratio = 2556.0/1179.0;
+
+     VertexOut out {
+         .position = float4(radius*sin(phi)*cos(lambda+time), radius*cos(phi) / ratio, radius*sin(phi)*sin(lambda+time), 1),
+     .uv = vertexIn.uv
+     };
+
+
+
+    /*
     VertexOut out {
         .position = mvpMatrix * float4(vertexIn.position.xy, 0.0, 1.0),
         .uv = vertexIn.uv
     };
+     */
+
 
     return out;
 }
