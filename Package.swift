@@ -121,8 +121,9 @@ let package = Package(
         .target(
             name: "MapCoreSharedModule",
             dependencies: [
-                           .product(name: "DjinniSupport", package: "djinni"),
-                           "MapCoreSharedModuleCpp"],
+                "MapCoreSharedModuleCpp",
+                .product(name: "DjinniSupport", package: "djinni")
+            ],
             path: "bridging/ios",
             publicHeadersPath: ""
         ),
@@ -131,7 +132,8 @@ let package = Package(
             dependencies: [
                 "vtzero", 
                 "earcut",
-                .product(name: "DjinniSupportCpp", package: "djinni"),],
+                .product(name: "DjinniSupport", package: "djinni")
+            ],
             path: "shared",
             sources: ["src", "public"],
             publicHeadersPath: "public",
