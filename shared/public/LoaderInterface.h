@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Future.hpp"
 #include <optional>
 #include <string>
 
@@ -16,4 +17,10 @@ public:
     virtual TextureLoaderResult loadTexture(const std::string & url, const std::optional<std::string> & etag) = 0;
 
     virtual DataLoaderResult loadData(const std::string & url, const std::optional<std::string> & etag) = 0;
+
+    virtual ::djinni::Future<TextureLoaderResult> loadTextureAsnyc(const std::string & url, const std::optional<std::string> & etag) = 0;
+
+    virtual ::djinni::Future<DataLoaderResult> loadDataAsync(const std::string & url, const std::optional<std::string> & etag) = 0;
+
+    virtual void cancel(const std::string & url) = 0;
 };

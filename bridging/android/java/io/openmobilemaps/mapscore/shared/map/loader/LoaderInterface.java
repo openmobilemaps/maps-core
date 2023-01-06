@@ -11,6 +11,12 @@ public abstract class LoaderInterface {
 
     public abstract DataLoaderResult loadData(String url, String etag);
 
+    public abstract com.snapchat.djinni.Future<TextureLoaderResult> loadTextureAsnyc(String url, String etag);
+
+    public abstract com.snapchat.djinni.Future<DataLoaderResult> loadDataAsync(String url, String etag);
+
+    public abstract void cancel(String url);
+
     public static final class CppProxy extends LoaderInterface
     {
         private final long nativeRef;
@@ -39,5 +45,29 @@ public abstract class LoaderInterface {
             return native_loadData(this.nativeRef, url, etag);
         }
         private native DataLoaderResult native_loadData(long _nativeRef, String url, String etag);
+
+        @Override
+        public com.snapchat.djinni.Future<TextureLoaderResult> loadTextureAsnyc(String url, String etag)
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            return native_loadTextureAsnyc(this.nativeRef, url, etag);
+        }
+        private native com.snapchat.djinni.Future<TextureLoaderResult> native_loadTextureAsnyc(long _nativeRef, String url, String etag);
+
+        @Override
+        public com.snapchat.djinni.Future<DataLoaderResult> loadDataAsync(String url, String etag)
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            return native_loadDataAsync(this.nativeRef, url, etag);
+        }
+        private native com.snapchat.djinni.Future<DataLoaderResult> native_loadDataAsync(long _nativeRef, String url, String etag);
+
+        @Override
+        public void cancel(String url)
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            native_cancel(this.nativeRef, url);
+        }
+        private native void native_cancel(long _nativeRef, String url);
     }
 }

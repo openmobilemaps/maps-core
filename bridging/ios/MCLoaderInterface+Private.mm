@@ -7,6 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
+#import "Future_objc.hpp"
 #import "MCDataLoaderResult+Private.h"
 #import "MCTextureLoaderResult+Private.h"
 #include <exception>
@@ -51,6 +52,30 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nonnull DJFuture<MCTextureLoaderResult *> *)loadTextureAsnyc:(nonnull NSString *)url
+                                                           etag:(nullable NSString *)etag {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->loadTextureAsnyc(::djinni::String::toCpp(url),
+                                                                    ::djinni::Optional<std::optional, ::djinni::String>::toCpp(etag));
+        return ::djinni::FutureAdaptor<::djinni_generated::TextureLoaderResult>::fromCpp(std::move(objcpp_result_));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nonnull DJFuture<MCDataLoaderResult *> *)loadDataAsync:(nonnull NSString *)url
+                                                     etag:(nullable NSString *)etag {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->loadDataAsync(::djinni::String::toCpp(url),
+                                                                 ::djinni::Optional<std::optional, ::djinni::String>::toCpp(etag));
+        return ::djinni::FutureAdaptor<::djinni_generated::DataLoaderResult>::fromCpp(std::move(objcpp_result_));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)cancel:(nonnull NSString *)url {
+    try {
+        _cppRefHandle.get()->cancel(::djinni::String::toCpp(url));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class LoaderInterface::ObjcProxy final
@@ -74,6 +99,28 @@ public:
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() loadData:(::djinni::String::fromCpp(c_url))
                                                                                 etag:(::djinni::Optional<std::optional, ::djinni::String>::fromCpp(c_etag))];
             return ::djinni_generated::DataLoaderResult::toCpp(objcpp_result_);
+        }
+    }
+    ::djinni::Future<::TextureLoaderResult> loadTextureAsnyc(const std::string & c_url, const std::optional<std::string> & c_etag) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() loadTextureAsnyc:(::djinni::String::fromCpp(c_url))
+                                                                                        etag:(::djinni::Optional<std::optional, ::djinni::String>::fromCpp(c_etag))];
+            return ::djinni::FutureAdaptor<::djinni_generated::TextureLoaderResult>::toCpp(objcpp_result_);
+        }
+    }
+    ::djinni::Future<::DataLoaderResult> loadDataAsync(const std::string & c_url, const std::optional<std::string> & c_etag) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() loadDataAsync:(::djinni::String::fromCpp(c_url))
+                                                                                     etag:(::djinni::Optional<std::optional, ::djinni::String>::fromCpp(c_etag))];
+            return ::djinni::FutureAdaptor<::djinni_generated::DataLoaderResult>::toCpp(objcpp_result_);
+        }
+    }
+    void cancel(const std::string & c_url) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() cancel:(::djinni::String::fromCpp(c_url))];
         }
     }
 };

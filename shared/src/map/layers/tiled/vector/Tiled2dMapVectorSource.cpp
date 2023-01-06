@@ -24,6 +24,41 @@ Tiled2dMapVectorSource::Tiled2dMapVectorSource(const MapConfig &mapConfig,
         : Tiled2dMapSource<djinni::DataRef, IntermediateResult, FinalResult>(mapConfig, layerConfigs.begin()->second, conversionHelper, scheduler,
                                                                               listener, screenDensityPpi, tileLoaders.size()), loaders(tileLoaders), layersToDecode(layersToDecode), layerConfigs(layerConfigs) {}
 
+::djinni::Future<IntermediateResult> Tiled2dMapVectorSource::loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) {
+    std::lock_guard<std::recursive_mutex> lock(loadingStateMutex);
+    loadingStates.insert({
+        tile,
+        Tiled2dMapVectorSourceTileState {
+            ::djinni::Promise<IntermediateResult>(),
+            std::unordered_map<std::string, DataLoaderResult>{}
+            
+        }
+    });
+    for(auto const &[source, config]: layerConfigs) {
+        const std::string sourceName = source;
+        auto const url = config->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier);
+        loaders[loaderIndex]->loadDataAsync(url, std::nullopt).then([&, tile, sourceName](::djinni::Future<DataLoaderResult> result) {
+            std::lock_guard<std::recursive_mutex> lock(loadingStateMutex);
+            loadingStates.at(tile).results.insert({sourceName, result.get()});
+            
+            if (loadingStates.at(tile).results.size() == layerConfigs.size()) {
+                //TODO: calculate correct loader status
+                loadingStates.at(tile).promise.setValue(IntermediateResult(loadingStates.at(tile).results, LoaderStatus::OK, std::nullopt));
+                loadingStates.erase(tile);
+            }
+            
+        });
+    }
+    return loadingStates.at(tile).promise.getFuture();
+}
+
+void Tiled2dMapVectorSource::cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) {
+    for(auto const &[source, config]: layerConfigs) {
+        auto const url = config->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier);
+        loaders[loaderIndex]->cancel(url);
+    }
+}
+
 IntermediateResult Tiled2dMapVectorSource::loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) {
     std::unordered_map<std::string, DataLoaderResult> results;
     for(auto const &[source, config]: layerConfigs) {

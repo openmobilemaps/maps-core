@@ -10,12 +10,16 @@
 
 import MapCoreSharedModule
 import UIKit
+import DjinniSupport
 
 open class MCTextureLoader: MCLoaderInterface {
 
     private let session: URLSession
 
     public var isRasterDebugModeEnabled: Bool
+    
+    var taskQueue = DispatchQueue(label: "MCTextureLoader.tasks")
+    var tasks: [String: URLSessionTask] = [:]
 
     public init(urlSession: URLSession? = nil)
     {
@@ -32,142 +36,211 @@ open class MCTextureLoader: MCLoaderInterface {
     }
 
     open func loadTexture(_ url: String, etag: String?) -> MCTextureLoaderResult {
+        let semaphore = DispatchSemaphore(value: 0)
+        var result: MCTextureLoaderResult? = nil
+        loadTextureAsnyc(url, etag: etag).then { future in
+            result = future.get()
+            semaphore.signal()
+            return nil
+        }
+        semaphore.wait()
+        return result!
+    }
+    
+    open func loadTextureAsnyc(_ url: String, etag: String?) -> DJFuture<MCTextureLoaderResult> {
         let urlString = url
+        
         guard let url = URL(string: urlString) else {
             preconditionFailure("invalid url: \(urlString)")
         }
-
-        let semaphore = DispatchSemaphore(value: 0)
-
-        var result: Data?
-        var response: HTTPURLResponse?
-        var error: NSError?
-
+        
         var urlRequest = URLRequest(url: url)
-
+        
         modifyUrlRequest(request: &urlRequest)
-
+        
         var wasCached = false;
         if isRasterDebugModeEnabled,
            session.configuration.urlCache?.cachedResponse(for: urlRequest) != nil {
             wasCached = true
         }
-
-        var task = session.dataTask(with: urlRequest) { data, response_, error_ in
-            result = data
-            response = response_ as? HTTPURLResponse
-            error = error_ as NSError?
-            semaphore.signal()
-        }
-
-        modifyDataTask(task: &task)
-
-        task.resume()
-        semaphore.wait()
-
-        if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorTimedOut {
-            return .init(data: nil, etag: response?.etag, status: .ERROR_TIMEOUT, errorCode: (error?.code).stringOrNil)
-        }
-
-        if response?.statusCode == 404 {
-            return .init(data: nil, etag: response?.etag, status: .ERROR_404, errorCode: (response?.statusCode).stringOrNil)
-        } else if response?.statusCode == 400 {
-            return .init(data: nil, etag: response?.etag, status: .ERROR_400, errorCode: (response?.statusCode).stringOrNil)
-        } else if response?.statusCode != 200 {
-            return .init(data: nil, etag: response?.etag, status: .ERROR_NETWORK, errorCode: (response?.statusCode).stringOrNil)
-        }
-
-        guard let data = result else {
-            return .init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: (response?.statusCode).stringOrNil)
-        }
-
-        do {
-            if isRasterDebugModeEnabled,
-                let uiImage = UIImage(data: data) {
+        
+        let promise = DJPromise<MCTextureLoaderResult>()
+        
+        var task = session.dataTask(with: urlRequest) { [weak self] data, response_, error_ in
+            guard let self = self else { return }
+            
+            self.taskQueue.sync {
+                _ = self.tasks.removeValue(forKey: urlString)
+                
+            }
+            
+            let result: Data? = data
+            let response: HTTPURLResponse? = response_ as? HTTPURLResponse
+            let error: NSError? = error_ as NSError?
+            
+            if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorTimedOut {
+                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_TIMEOUT, errorCode: (error?.code).stringOrNil))
+                return 
+            }
+            
+            if response?.statusCode == 404 {
+                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_404, errorCode: (response?.statusCode).stringOrNil))
+                return
+            } else if response?.statusCode == 400 {
+                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_400, errorCode: (response?.statusCode).stringOrNil))
+                return
+            } else if response?.statusCode != 200 {
+                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_NETWORK, errorCode: (response?.statusCode).stringOrNil))
+                return
+            }
+            
+            guard let data = result else {
+                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: (response?.statusCode).stringOrNil))
+                return
+            }
+            
+            do {
+                if self.isRasterDebugModeEnabled,
+                   let uiImage = UIImage(data: data) {
+                    let renderer = UIGraphicsImageRenderer(size: uiImage.size)
+                    let img = renderer.image { ctx in
+                        self.applyDebugWatermark(url: urlString, byteCount: data.count, image: uiImage, wasCached: wasCached, ctx: ctx)
+                    }
+                    if let cgImage = img.cgImage,
+                       let textureHolder = try? TextureHolder(cgImage) {
+                        promise.setValue(.init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil))
+                        return
+                    }
+                }
+                
+                let textureHolder = try TextureHolder(data)
+                promise.setValue(.init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil))
+                return
+            } catch TextureHolderError.emptyData {
+                promise.setValue(.init(data: nil, etag: response?.etag, status: .OK, errorCode: nil))
+                return
+            } catch {
+                // If metal can not load this image
+                // try workaround to first load it into UIImage context
+                guard let uiImage = UIImage(data: data) else {
+                    promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: "MNL"))
+                    return
+                }
+                
                 let renderer = UIGraphicsImageRenderer(size: uiImage.size)
                 let img = renderer.image { ctx in
-                    self.applyDebugWatermark(url: urlString, byteCount: data.count, image: uiImage, wasCached: wasCached, ctx: ctx)
+                    if self.isRasterDebugModeEnabled {
+                        self.applyDebugWatermark(url: urlString, byteCount: data.count, image: uiImage, wasCached: wasCached, ctx: ctx)
+                    } else {
+                        uiImage.draw(in: .init(origin: .init(), size: uiImage.size))
+                    }
                 }
-                if let cgImage = img.cgImage,
-                      let textureHolder = try? TextureHolder(cgImage) {
-                    return .init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil)
+                
+                guard let cgImage = img.cgImage,
+                      let textureHolder = try? TextureHolder(cgImage) else {
+                    promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: "UINL"))
+                    return
                 }
+                
+                promise.setValue(.init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil))
+                return
             }
-
-            let textureHolder = try TextureHolder(data)
-            return .init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil)
-        } catch TextureHolderError.emptyData {
-            return .init(data: nil, etag: response?.etag, status: .OK, errorCode: nil)
-        } catch {
-            // If metal can not load this image
-            // try workaround to first load it into UIImage context
-            guard let uiImage = UIImage(data: data) else {
-                return .init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: "MNL")
-            }
-
-            let renderer = UIGraphicsImageRenderer(size: uiImage.size)
-            let img = renderer.image { ctx in
-                if isRasterDebugModeEnabled {
-                    self.applyDebugWatermark(url: urlString, byteCount: data.count, image: uiImage, wasCached: wasCached, ctx: ctx)
-                } else {
-                    uiImage.draw(in: .init(origin: .init(), size: uiImage.size))
-                }
-            }
-
-            guard let cgImage = img.cgImage,
-                  let textureHolder = try? TextureHolder(cgImage) else {
-                return .init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: "UINL")
-            }
-
-            return .init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil)
+            
         }
+        
+        taskQueue.sync {
+            tasks[urlString] = task
+            
+        }
+        
+        modifyDataTask(task: &task)
+        
+        task.resume()
+        return promise.getFuture()
     }
 
     open func loadData(_ url: String, etag: String?) -> MCDataLoaderResult {
+        let semaphore = DispatchSemaphore(value: 0)
+        var result: MCDataLoaderResult? = nil
+        loadDataAsync(url, etag: etag).then { future in
+            result = future.get()
+            semaphore.signal()
+            return nil
+        }
+        semaphore.wait()
+        return result!
+    }
+    
+    public func loadDataAsync(_ url: String, etag: String?) -> DJFuture<MCDataLoaderResult> {
         let urlString = url
+        
         guard let url = URL(string: urlString) else {
             preconditionFailure("invalid url: \(urlString)")
         }
-
-        let semaphore = DispatchSemaphore(value: 0)
-
-        var result: Data?
-        var response: HTTPURLResponse?
-        var error: NSError?
-
+        
         var urlRequest = URLRequest(url: url)
-
+        
         modifyUrlRequest(request: &urlRequest)
-
-        var task = session.dataTask(with: urlRequest) { data, response_, error_ in
-            result = data
-            response = response_ as? HTTPURLResponse
-            error = error_ as NSError?
-            semaphore.signal()
+        
+        let promise = DJPromise<MCDataLoaderResult>()
+        
+        var task = session.dataTask(with: urlRequest) { [weak self] data, response_, error_ in
+            guard let self = self else { return }
+            
+            self.taskQueue.sync {
+                _ = self.tasks.removeValue(forKey: urlString)
+                
+            }
+            
+            let result: Data? = data
+            let response: HTTPURLResponse? = response_ as? HTTPURLResponse
+            let error: NSError? = error_ as NSError?
+            
+            if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorTimedOut {
+                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_TIMEOUT, errorCode: (error?.code).stringOrNil))
+                return 
+            }
+            
+            if response?.statusCode == 404 {
+                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_404, errorCode: (response?.statusCode).stringOrNil))
+                return
+            } else if response?.statusCode == 400 {
+                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_400, errorCode: (response?.statusCode).stringOrNil))
+                return
+            } else if response?.statusCode != 200 {
+                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_NETWORK, errorCode: (response?.statusCode).stringOrNil))
+                return
+            }
+            
+            guard let data = result else {
+                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: (response?.statusCode).stringOrNil))
+                return
+            }
+            
+            promise.setValue(.init(data: data, etag: response?.etag, status: .OK, errorCode: nil))
+            return
+            
         }
-
+        
+        taskQueue.sync {
+            tasks[urlString] = task
+            
+        }
+        
         modifyDataTask(task: &task)
-
+        
         task.resume()
-        semaphore.wait()
-
-        if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorTimedOut {
-            return .init(data: nil, etag: response?.etag, status: .ERROR_TIMEOUT, errorCode: (error?.code).stringOrNil)
+        return promise.getFuture()
+    }
+    
+    public func cancel(_ url: String) {
+        self.taskQueue.sync {
+            if let task = self.tasks[url] {
+                task.cancel()
+                print("canceled task!!!! -> \(url)")
+                
+            }
         }
-
-        if response?.statusCode == 404 {
-            return .init(data: nil, etag: response?.etag, status: .ERROR_404, errorCode: (response?.statusCode).stringOrNil)
-        } else if response?.statusCode == 400 {
-            return .init(data: nil, etag: response?.etag, status: .ERROR_400, errorCode: (response?.statusCode).stringOrNil)
-        } else if response?.statusCode != 200 {
-            return .init(data: nil, etag: response?.etag, status: .ERROR_NETWORK, errorCode: (response?.statusCode).stringOrNil)
-        }
-
-        guard let data = result else {
-            return .init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: (response?.statusCode).stringOrNil)
-        }
-
-        return .init(data: data, etag: response?.etag, status: .OK, errorCode: nil)
     }
 
     open func modifyUrlRequest(request _: inout URLRequest) {

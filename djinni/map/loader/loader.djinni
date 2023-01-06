@@ -1,4 +1,5 @@
 @extern "../../../external/djinni/support-lib/dataref.yaml"
+@extern "../../../external/djinni/support-lib/future.yaml"
 @extern "../../yaml/texture_holder_interface.yaml"
 @extern "../../yaml/vec_2_d.yaml"
 @extern "../../yaml/quad_2d_d.yaml"
@@ -30,6 +31,11 @@ data_loader_result = record {
 loader_interface = interface +c +j +o {
     load_texture(url: string, etag: optional<string>): texture_loader_result;
     load_data(url: string, etag: optional<string>): data_loader_result;
+    
+    load_texture_asnyc(url: string, etag: optional<string>): future<texture_loader_result>;
+    load_data_async(url: string, etag: optional<string>): future<data_loader_result>;
+    
+    cancel(url: string);
 }
 
 font = record {

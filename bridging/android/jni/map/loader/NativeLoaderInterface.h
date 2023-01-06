@@ -35,6 +35,9 @@ private:
 
         ::TextureLoaderResult loadTexture(const std::string & url, const std::optional<std::string> & etag) override;
         ::DataLoaderResult loadData(const std::string & url, const std::optional<std::string> & etag) override;
+        ::djinni::Future<::TextureLoaderResult> loadTextureAsnyc(const std::string & url, const std::optional<std::string> & etag) override;
+        ::djinni::Future<::DataLoaderResult> loadDataAsync(const std::string & url, const std::optional<std::string> & etag) override;
+        void cancel(const std::string & url) override;
 
     private:
         friend ::djinni::JniInterface<::LoaderInterface, ::djinni_generated::NativeLoaderInterface>;
@@ -43,6 +46,9 @@ private:
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/loader/LoaderInterface") };
     const jmethodID method_loadTexture { ::djinni::jniGetMethodID(clazz.get(), "loadTexture", "(Ljava/lang/String;Ljava/lang/String;)Lio/openmobilemaps/mapscore/shared/map/loader/TextureLoaderResult;") };
     const jmethodID method_loadData { ::djinni::jniGetMethodID(clazz.get(), "loadData", "(Ljava/lang/String;Ljava/lang/String;)Lio/openmobilemaps/mapscore/shared/map/loader/DataLoaderResult;") };
+    const jmethodID method_loadTextureAsnyc { ::djinni::jniGetMethodID(clazz.get(), "loadTextureAsnyc", "(Ljava/lang/String;Ljava/lang/String;)Lcom/snapchat/djinni/Future;") };
+    const jmethodID method_loadDataAsync { ::djinni::jniGetMethodID(clazz.get(), "loadDataAsync", "(Ljava/lang/String;Ljava/lang/String;)Lcom/snapchat/djinni/Future;") };
+    const jmethodID method_cancel { ::djinni::jniGetMethodID(clazz.get(), "cancel", "(Ljava/lang/String;)V") };
 };
 
 } // namespace djinni_generated

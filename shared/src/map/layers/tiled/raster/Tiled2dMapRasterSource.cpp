@@ -29,6 +29,16 @@ TextureLoaderResult Tiled2dMapRasterSource::loadTile(Tiled2dMapTileInfo tile, si
     return loaders[loaderIndex]->loadTexture(layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier), std::nullopt);
 }
 
+void Tiled2dMapRasterSource::cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) {
+    std::string const url = layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier);
+    loaders[loaderIndex]->cancel(url);
+}
+
+::djinni::Future<TextureLoaderResult> Tiled2dMapRasterSource::loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) {
+    std::string const url = layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier);
+    return loaders[loaderIndex]->loadTextureAsnyc(url, std::nullopt);
+}
+
 std::shared_ptr<::TextureHolderInterface> Tiled2dMapRasterSource::postLoadingTask(const TextureLoaderResult &loadedData,
                                                                                   const Tiled2dMapTileInfo &tile) {
     return loadedData.data;

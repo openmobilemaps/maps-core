@@ -32,6 +32,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include "gpc.h"
+#include "Future.hpp"
 
 template<class R>
 struct TileWrapper {
@@ -95,6 +96,10 @@ public:
     void setTileReady(const Tiled2dMapTileInfo &tile);
 
     void setTilesReady(const std::vector<const Tiled2dMapTileInfo> &tiles);
+            
+    virtual void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) = 0;
+            
+    virtual ::djinni::Future<L> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) = 0;
 
     virtual L loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) = 0;
 
@@ -143,7 +148,9 @@ private:
     void updateCurrentTileset(const ::RectCoord &visibleBounds, int curT, double zoom);
 
     void performLoadingTask(size_t loaderIndex);
-
+            
+    void performLoad(size_t loaderIndex, PrioritizedTiled2dMapTileInfo tile);
+        
     void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid);
 
     void updateTileMasks();
