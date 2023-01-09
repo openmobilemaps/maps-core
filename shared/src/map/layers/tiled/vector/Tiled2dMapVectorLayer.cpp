@@ -920,8 +920,8 @@ std::shared_ptr<VectorLayerDescription> Tiled2dMapVectorLayer::getLayerDescripti
 // Touch Interface
 bool Tiled2dMapVectorLayer::onTouchDown(const Vec2F &posScreen) {
     std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-    for (const auto &sublayer: sublayers) {
-        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(sublayer);
+    for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
+        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
         if (touchInterface) {
             if (touchInterface->onTouchDown(posScreen)) {
                 return true;
@@ -933,8 +933,8 @@ bool Tiled2dMapVectorLayer::onTouchDown(const Vec2F &posScreen) {
 
 bool Tiled2dMapVectorLayer::onClickUnconfirmed(const Vec2F &posScreen) {
     std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-    for (const auto &sublayer: sublayers) {
-        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(sublayer);
+    for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
+        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
         if (touchInterface) {
             if (touchInterface->onClickUnconfirmed(posScreen)) {
                 return true;
@@ -946,8 +946,8 @@ bool Tiled2dMapVectorLayer::onClickUnconfirmed(const Vec2F &posScreen) {
 
 bool Tiled2dMapVectorLayer::onClickConfirmed(const Vec2F &posScreen) {
     std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-    for (const auto &sublayer: sublayers) {
-        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(sublayer);
+    for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
+        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
         if (touchInterface) {
             if (touchInterface->onClickConfirmed(posScreen)) {
                 return true;
@@ -959,8 +959,8 @@ bool Tiled2dMapVectorLayer::onClickConfirmed(const Vec2F &posScreen) {
 
 bool Tiled2dMapVectorLayer::onDoubleClick(const Vec2F &posScreen) {
     std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-    for (const auto &sublayer: sublayers) {
-        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(sublayer);
+    for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
+        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
         if (touchInterface) {
             if (touchInterface->onDoubleClick(posScreen)) {
                 return true;
@@ -972,8 +972,8 @@ bool Tiled2dMapVectorLayer::onDoubleClick(const Vec2F &posScreen) {
 
 bool Tiled2dMapVectorLayer::onLongPress(const Vec2F &posScreen) {
     std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-    for (const auto &sublayer: sublayers) {
-        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(sublayer);
+    for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
+        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
         if (touchInterface) {
             if (touchInterface->onLongPress(posScreen)) {
                 return true;
@@ -985,8 +985,8 @@ bool Tiled2dMapVectorLayer::onLongPress(const Vec2F &posScreen) {
 
 bool Tiled2dMapVectorLayer::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleClick) {
     std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-    for (const auto &sublayer: sublayers) {
-        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(sublayer);
+    for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
+        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
         if (touchInterface) {
             if (touchInterface->onMove(deltaScreen, confirmed, doubleClick)) {
                 return true;
@@ -998,8 +998,8 @@ bool Tiled2dMapVectorLayer::onMove(const Vec2F &deltaScreen, bool confirmed, boo
 
 bool Tiled2dMapVectorLayer::onMoveComplete() {
     std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-    for (const auto &sublayer: sublayers) {
-        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(sublayer);
+    for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
+        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
         if (touchInterface) {
             if (touchInterface->onMoveComplete()) {
                 return true;
@@ -1011,8 +1011,8 @@ bool Tiled2dMapVectorLayer::onMoveComplete() {
 
 bool Tiled2dMapVectorLayer::onTwoFingerClick(const Vec2F &posScreen1, const Vec2F &posScreen2) {
     std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-    for (const auto &sublayer: sublayers) {
-        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(sublayer);
+    for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
+        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
         if (touchInterface) {
             if (touchInterface->onTwoFingerClick(posScreen1, posScreen2)) {
                 return true;
@@ -1024,8 +1024,8 @@ bool Tiled2dMapVectorLayer::onTwoFingerClick(const Vec2F &posScreen1, const Vec2
 
 bool Tiled2dMapVectorLayer::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) {
     std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-    for (const auto &sublayer : sublayers) {
-        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(sublayer);
+    for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
+        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
         if (touchInterface) {
             if (touchInterface->onTwoFingerMove(posScreenOld, posScreenNew)) {
                 return true;
@@ -1037,8 +1037,8 @@ bool Tiled2dMapVectorLayer::onTwoFingerMove(const std::vector<::Vec2F> &posScree
 
 bool Tiled2dMapVectorLayer::onTwoFingerMoveComplete() {
     std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-    for (const auto &sublayer : sublayers) {
-        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(sublayer);
+    for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
+        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
         if (touchInterface) {
             if (touchInterface->onTwoFingerMoveComplete()) {
                 return true;
@@ -1050,8 +1050,8 @@ bool Tiled2dMapVectorLayer::onTwoFingerMoveComplete() {
 
 void Tiled2dMapVectorLayer::clearTouch() {
     std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-    for (const auto &sublayer: sublayers) {
-        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(sublayer);
+    for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
+        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
         if (touchInterface) {
             touchInterface->clearTouch();
         }
