@@ -5,11 +5,10 @@
 #import "MCPolygon2dInterface.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
-#import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCGraphicsObjectInterface+Private.h"
 #import "MCMaskingObjectInterface+Private.h"
-#import "MCVec2D+Private.h"
+#import "MCSharedBytes+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -34,11 +33,11 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (void)setVertices:(nonnull NSArray<MCVec2D *> *)vertices
-            indices:(nonnull NSArray<NSNumber *> *)indices {
+- (void)setVertices:(nonnull MCSharedBytes *)vertices
+            indices:(nonnull MCSharedBytes *)indices {
     try {
-        _cppRefHandle.get()->setVertices(::djinni::List<::djinni_generated::Vec2D>::toCpp(vertices),
-                                         ::djinni::List<::djinni::I32>::toCpp(indices));
+        _cppRefHandle.get()->setVertices(::djinni_generated::SharedBytes::toCpp(vertices),
+                                         ::djinni_generated::SharedBytes::toCpp(indices));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -65,11 +64,11 @@ class Polygon2dInterface::ObjcProxy final
     friend class ::djinni_generated::Polygon2dInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void setVertices(const std::vector<::Vec2D> & c_vertices, const std::vector<int32_t> & c_indices) override
+    void setVertices(const ::SharedBytes & c_vertices, const ::SharedBytes & c_indices) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setVertices:(::djinni::List<::djinni_generated::Vec2D>::fromCpp(c_vertices))
-                                                          indices:(::djinni::List<::djinni::I32>::fromCpp(c_indices))];
+            [djinni_private_get_proxied_objc_object() setVertices:(::djinni_generated::SharedBytes::fromCpp(c_vertices))
+                                                          indices:(::djinni_generated::SharedBytes::fromCpp(c_indices))];
         }
     }
     std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override
