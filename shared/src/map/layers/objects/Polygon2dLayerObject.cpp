@@ -29,8 +29,8 @@ void Polygon2dLayerObject::setPositions(const std::vector<Coord> &positions, con
 void Polygon2dLayerObject::setPolygon(const PolygonCoord &polygon) { setPolygons({polygon}); }
 
 void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons) {
-    std::vector<int32_t> indices;
-    std::vector<Vec2D> vertices;
+    std::vector<uint16_t> indices;
+    std::vector<float> vertices;
     int32_t indexOffset = 0;
 
     for (auto const &polygon : polygons) {
@@ -59,11 +59,24 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
         for (auto const &list : renderCoords) {
             indexOffset += list.size();
 
-            vertices.insert(vertices.end(), list.begin(), list.end());
+            for(auto& i : list) {
+                vertices.push_back(i.x);
+                vertices.push_back(i.y);
+                // fill for android z
+                vertices.push_back(0.0);
+#ifdef __APPLE__
+                // are needed to fill metal vertex property (position, uv, normal)
+                vertices.push_back(0.0);
+                vertices.push_back(0.0);
+                vertices.push_back(0.0);
+#endif
+            }
         }
     }
 
-    polygon->setVertices(vertices, indices);
+    auto attr = SharedBytes((int64_t)vertices.data(), (int32_t)vertices.size(), (int32_t)sizeof(float));
+    auto ind = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(uint16_t));
+    polygon->setVertices(attr, ind);
 }
 
 void Polygon2dLayerObject::setColor(const Color &color) { shader->setColor(color.r, color.g, color.b, color.a); }

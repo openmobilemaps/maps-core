@@ -3,10 +3,8 @@
 
 #pragma once
 
-#include "Vec2D.h"
-#include <cstdint>
+#include "SharedBytes.h"
 #include <memory>
-#include <vector>
 
 class GraphicsObjectInterface;
 class MaskingObjectInterface;
@@ -15,7 +13,7 @@ class Polygon2dInterface {
 public:
     virtual ~Polygon2dInterface() {}
 
-    virtual void setVertices(const std::vector<::Vec2D> & vertices, const std::vector<int32_t> & indices) = 0;
+    virtual void setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices) = 0;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() = 0;
 

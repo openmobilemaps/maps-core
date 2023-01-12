@@ -142,29 +142,22 @@ extension Polygon2d: MCMaskingObjectInterface {
 }
 
 extension Polygon2d: MCPolygon2dInterface {
-    func setVertices(_ vertices: [MCVec2D], indices: [NSNumber]) {
-        guard !vertices.isEmpty, !indices.isEmpty else {
+    func setVertices(_ vertices: MCSharedBytes, indices: MCSharedBytes) {
+        guard let verticesBuffer = device.makeBuffer(from: vertices),
+              let indicesBuffer = device.makeBuffer(from: indices),
+              indices.elementCount > 0
+        else {
             lock.withCritical {
                 indicesCount = 0
                 verticesBuffer = nil
                 indicesBuffer = nil
             }
+
             return
         }
 
-        let polygonVertices: [Vertex] = vertices.map {
-            Vertex(x: $0.xF, y: $0.yF)
-        }
-        let indices: [UInt16] = indices.map(\.uint16Value)
-
-        guard let verticesBuffer = device.makeBuffer(bytes: polygonVertices, length: MemoryLayout<Vertex>.stride * polygonVertices.count, options: []),
-              let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: [])
-        else {
-            fatalError("Cannot allocate buffers for the UBTileModel")
-        }
-
         lock.withCritical {
-            indicesCount = indices.count
+            self.indicesCount = Int(indices.elementCount)
             self.verticesBuffer = verticesBuffer
             self.indicesBuffer = indicesBuffer
         }
