@@ -64,6 +64,7 @@ class Polygon2dOpenGl : public GraphicsObjectInterface,
     GLuint indexBuffer;
     std::vector<GLushort> indices;
 
+    bool dataReady = false;
     bool ready = false;
     std::recursive_mutex dataMutex;
 

@@ -23,6 +23,7 @@ bool Polygon2dOpenGl::isReady() { return ready; }
 void Polygon2dOpenGl::setVertices(const ::SharedBytes & vertices_, const ::SharedBytes & indices_) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     ready = false;
+    dataReady = false;
 
     indices.resize(indices_.elementCount);
     vertices.resize(vertices_.elementCount);
@@ -36,12 +37,12 @@ void Polygon2dOpenGl::setVertices(const ::SharedBytes & vertices_, const ::Share
                     vertices_.elementCount * vertices_.bytesPerElement);
     }
 
-    ready = true;
+    dataReady = true;
 }
 
 void Polygon2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (ready)
+    if (ready || !dataReady)
         return;
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
