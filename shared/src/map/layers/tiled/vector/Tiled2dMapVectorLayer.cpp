@@ -184,8 +184,10 @@ std::shared_ptr<LayerInterface> Tiled2dMapVectorLayer::getLayerForDescription(co
             auto symbolDesc = std::static_pointer_cast<SymbolVectorLayerDescription>(layerDescription);
             return std::make_shared<Tiled2dMapVectorSymbolSubLayer>(fontLoader, symbolDesc);
         }
+        case VectorLayerType::custom: {
+            return nullptr;
+        }
     }
-    return nullptr;
 }
 
 std::shared_ptr<Tiled2dMapLayerConfig>
