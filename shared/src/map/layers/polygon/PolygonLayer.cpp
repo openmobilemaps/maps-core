@@ -262,6 +262,11 @@ void PolygonLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, in
 }
 
 void PolygonLayer::onRemoved() {
+    {
+        std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
+        addingQueue.clear();
+    }
+
     if (mapInterface && isLayerClickable)
         mapInterface->getTouchHandler()->removeListener(shared_from_this());
     mapInterface = nullptr;
