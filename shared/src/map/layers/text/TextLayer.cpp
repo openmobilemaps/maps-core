@@ -84,7 +84,14 @@ void TextLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32
     }
 }
 
-void TextLayer::onRemoved() { pause(); }
+void TextLayer::onRemoved() {
+    {
+        std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
+        addingQueue.clear();
+    }
+
+    pause();
+}
 
 void TextLayer::pause() {
     {

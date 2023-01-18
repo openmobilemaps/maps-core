@@ -271,6 +271,11 @@ void IconLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32
 }
 
 void IconLayer::onRemoved() {
+    {
+        std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
+        addingQueue.clear();
+    }
+
     auto mapInterface = this->mapInterface;
     if (mapInterface && isLayerClickable) {
         mapInterface->getTouchHandler()->removeListener(shared_from_this());
