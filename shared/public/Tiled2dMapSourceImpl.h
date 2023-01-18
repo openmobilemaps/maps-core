@@ -301,6 +301,8 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
                                 break;
                             }
                         }
+
+                        if(found) { break; }
                     }
                 }
 
