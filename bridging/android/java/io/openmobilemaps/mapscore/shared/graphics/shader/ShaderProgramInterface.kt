@@ -13,6 +13,8 @@ abstract class ShaderProgramInterface {
 
     abstract fun preRender(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, pass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig)
 
+    abstract fun usesTessellation(): Boolean
+
     private class CppProxy : ShaderProgramInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -48,5 +50,11 @@ abstract class ShaderProgramInterface {
             native_preRender(this.nativeRef, context, pass)
         }
         private external fun native_preRender(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, pass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig)
+
+        override fun usesTessellation(): Boolean {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_usesTessellation(this.nativeRef)
+        }
+        private external fun native_usesTessellation(_nativeRef: Long): Boolean
     }
 }

@@ -22,6 +22,8 @@ final class Polygon2d: BaseGraphicsObject {
     private let timeBuffer: MTLBuffer
     private var timeBufferContent : UnsafeMutablePointer<Float>
 
+    private var tessellationFactorBuffer: MTLBuffer?
+
     private var stencilState: MTLDepthStencilState?
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
@@ -121,7 +123,8 @@ extension Polygon2d: MCMaskingObjectInterface {
         }
 
         guard let verticesBuffer = verticesBuffer,
-              let indicesBuffer = indicesBuffer
+              let indicesBuffer = indicesBuffer,
+              let tessellationFactorBuffer = tessellationFactorBuffer
         else { return }
 
         #if DEBUG
@@ -148,11 +151,23 @@ extension Polygon2d: MCMaskingObjectInterface {
         timeBufferContent[0] = Float(-Self.startTime.timeIntervalSinceNow)
         encoder.setVertexBuffer(timeBuffer, offset: 0, index: 2)
 
-        encoder.drawIndexedPrimitives(type: .triangle,
-                                      indexCount: indicesCount,
-                                      indexType: .uint16,
-                                      indexBuffer: indicesBuffer,
-                                      indexBufferOffset: 0)
+
+
+
+        if shader.usesTessellation() {
+            encoder.setTessellationFactorBuffer(tessellationFactorBuffer, offset: 0, instanceStride: 0)
+
+            encoder.drawIndexedPatches(numberOfPatchControlPoints: 3, patchStart: 0, patchCount: indicesCount/3, patchIndexBuffer: nil, patchIndexBufferOffset: 0, controlPointIndexBuffer: indicesBuffer, controlPointIndexBufferOffset: 0, instanceCount: 1, baseInstance: 0)
+
+        }
+        else {
+            encoder.drawIndexedPrimitives(type: .triangle,
+                                          indexCount: indicesCount,
+                                          indexType: .uint16,
+                                          indexBuffer: indicesBuffer,
+                                          indexBufferOffset: 0)
+
+        }
 
     }
 }
@@ -184,6 +199,44 @@ extension Polygon2d: MCPolygon2dInterface {
             self.verticesBuffer = verticesBuffer
             self.indicesBuffer = indicesBuffer
         }
+
+        if shader.usesTessellation() {
+            createTessellationFactors(patchCount: indices.count)
+        }
+    }
+
+    func createTessellationFactors(patchCount: Int) {
+        let device = MetalContext.current.device
+        let library = MetalContext.current.library
+
+        guard let tessellationBuffer = device.makeBuffer(length: MemoryLayout<MTLQuadTessellationFactorsHalf>.stride * patchCount, options: .storageModePrivate) else {
+            fatalError("Cannot allocate buffer for Tessellation")
+        }
+
+        lock.withCritical {
+            self.tessellationFactorBuffer = tessellationBuffer
+        }
+
+        guard let computeFunction = library.makeFunction(name: "compute_tess_factors"),
+              let computePipelineState = try? device.makeComputePipelineState(function: computeFunction) else {
+            fatalError("Cannot locate the shaders for UBTileModel")
+        }
+
+        let commandBuffer = MetalContext.current.commandQueue.makeCommandBuffer()
+        guard let computeCommandEncoder = commandBuffer?.makeComputeCommandEncoder() else {
+            fatalError("Cannot locate the shaders for UBTileModel")
+        }
+
+        computeCommandEncoder.setComputePipelineState(computePipelineState)
+        computeCommandEncoder.setBuffer(tessellationFactorBuffer, offset: 0, index: 0)
+
+        let threadgroupSize = MTLSize(width: computePipelineState.threadExecutionWidth, height: 1, depth: 1)
+        let threadCount = MTLSize(width: patchCount, height: 1, depth: 1)
+        computeCommandEncoder.dispatchThreads(threadCount, threadsPerThreadgroup: threadgroupSize)
+
+        computeCommandEncoder.endEncoding()
+
+        commandBuffer?.commit()
     }
 
     func asGraphicsObject() -> MCGraphicsObjectInterface? { self }

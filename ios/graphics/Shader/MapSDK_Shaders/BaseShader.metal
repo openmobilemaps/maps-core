@@ -12,13 +12,29 @@
 #include "DataStructures.metal"
 using namespace metal;
 
+float2 baryinterp(float2 a, float2 b, float2 c, float3 p) {
+    return a * p.x + b * p.y + c * p.z;
+}
+
+[[patch(triangle, 3)]]
 vertex VertexOut
-baseVertexShader(const VertexIn vertexIn [[stage_in]],
+baseVertexShader(const patch_control_point<VertexIn> patch [[stage_in]],
+                 const float3 positionInPatch [[position_in_patch]],
                     constant float4x4 &mvpMatrix [[buffer(1)]],
                     constant float &time [[buffer(2)]])
 {
-    float px = vertexIn.position.x;
-    float py = vertexIn.position.y;
+    float2 p0 = patch[0].position;
+    float2 p1 = patch[1].position;
+    float2 p2 = patch[3].position;
+    float2 pos = baryinterp(p0, p1, p2, positionInPatch);
+
+    float2 uv0 = patch[0].uv;
+    float2 uv1 = patch[1].uv;
+    float2 uv2 = patch[3].uv;
+    float2 uv = baryinterp(uv0, uv1, uv2, positionInPatch);
+
+    float px = pos.x;
+    float py = pos.y;
 
     float R = 6371000;
     float lambda = px / R;
@@ -29,7 +45,7 @@ baseVertexShader(const VertexIn vertexIn [[stage_in]],
 
     VertexOut out {
         .position = float4(radius*sin(phi)*cos(lambda+time), radius*cos(phi) / ratio, radius*sin(phi)*sin(lambda+time), 1),
-        .uv = vertexIn.uv
+        .uv = uv
     };
 
 
@@ -104,15 +120,34 @@ pointFragmentShader(VertexOut in [[stage_in]],
     return float4(color.r * a, color.g * a, color.b * a, a);
 }
 
+
+[[patch(triangle, 3)]]
 vertex VertexOut
-colorVertexShader(const VertexIn vertexIn [[stage_in]],
+colorVertexShader(const patch_control_point<VertexIn> patch [[stage_in]],
+                  const float3 positionInPatch [[position_in_patch]],
                     constant float4x4 &mvpMatrix [[buffer(1)]],
-                  constant float &time [[buffer(2)]])
+                  constant float &time [[buffer(2)]]
+                  )
 {
 
+    float2 p0 = patch[0].position;
+    float2 p1 = patch[1].position;
+    float2 p2 = patch[3].position;
+    float2 pos = baryinterp(p0, p1, p2, positionInPatch);
 
-    float px = vertexIn.position.x;
-    float py = vertexIn.position.y;
+    float2 uv0 = patch[0].uv;
+    float2 uv1 = patch[1].uv;
+    float2 uv2 = patch[3].uv;
+    float2 uv = baryinterp(uv0, uv1, uv2, positionInPatch);
+
+//    float2 pos = patch.position;
+//    float2 uv = patch.uv;
+
+//    float2 pos = patch[0].position;
+//    float2 uv = patch[0].uv;
+
+    float px = pos.x;
+    float py = pos.y;
 
     float R = 6371000;
     float lambda = px / R;
@@ -123,7 +158,7 @@ colorVertexShader(const VertexIn vertexIn [[stage_in]],
 
      VertexOut out {
          .position = float4(radius*sin(phi)*cos(lambda+time), radius*cos(phi) / ratio, radius*sin(phi)*sin(lambda+time), 1),
-     .uv = vertexIn.uv
+         .uv = uv
      };
 
 
@@ -164,3 +199,13 @@ roundColorFragmentShader(VertexOut in [[stage_in]],
 
     return float4(color.r * a, color.g * a, color.b * a, a);
 }
+
+
+kernel void compute_tess_factors(
+         device MTLTriangleTessellationFactorsHalf *factors [[buffer(0)]],
+         uint pid [[thread_position_in_grid]]) {
+     factors[pid].edgeTessellationFactor[0] = 5;
+     factors[pid].edgeTessellationFactor[1] = 5;
+     factors[pid].edgeTessellationFactor[2] = 5;
+     factors[pid].insideTessellationFactor = 5;
+ }

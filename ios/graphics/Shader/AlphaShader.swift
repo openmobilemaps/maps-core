@@ -45,6 +45,10 @@ class AlphaShader: BaseShader {
     override var requiresTexture: Bool {
         true
     }
+
+    override func usesTessellation() -> Bool {
+        true
+    }
 }
 
 extension AlphaShader: MCAlphaShaderInterface {

@@ -10,6 +10,7 @@ shader_program_interface = interface +c +o {
     get_program_name() : string;
     setup_program(context: rendering_context_interface);
     pre_render(context: rendering_context_interface, pass: render_pass_config);
+    uses_tessellation(): bool;
 }
 
 shader_factory_interface = interface +c +j +o {

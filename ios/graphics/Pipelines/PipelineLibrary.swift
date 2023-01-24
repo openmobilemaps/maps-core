@@ -22,7 +22,9 @@ public enum PipelineDescriptorFactory {
                                           label: String,
                                           vertexShader: String,
                                           fragmentShader: String,
-                                          library: MTLLibrary = MetalContext.current.library, blendMode: BlendMode = .normal
+                                          library: MTLLibrary = MetalContext.current.library,
+                                          blendMode: BlendMode = .normal,
+                                          tessellation: Bool = false
     ) -> MTLRenderPipelineDescriptor {
         let pipelineDescriptor = MTLRenderPipelineDescriptor()
         pipelineDescriptor.colorAttachments[0].pixelFormat = MetalContext.colorPixelFormat
@@ -53,6 +55,14 @@ public enum PipelineDescriptorFactory {
 
         }
 
+        if tessellation {
+            pipelineDescriptor.isTessellationFactorScaleEnabled = false
+            pipelineDescriptor.tessellationFactorFormat = .half
+            pipelineDescriptor.tessellationControlPointIndexType = .uint16
+            pipelineDescriptor.tessellationFactorStepFunction = .constant
+            pipelineDescriptor.maxTessellationFactor = 16
+        }
+
         pipelineDescriptor.stencilAttachmentPixelFormat = .stencil8
         pipelineDescriptor.label = label
 
@@ -74,7 +84,8 @@ extension PipelineDescriptorFactory {
         pipelineDescriptor(vertexDescriptor: pipeline.vertexDescriptor,
                            label: pipeline.label,
                            vertexShader: pipeline.vertexShader,
-                           fragmentShader: pipeline.fragmentShader)
+                           fragmentShader: pipeline.fragmentShader,
+                           tessellation: pipeline.tessellation)
     }
 }
 
@@ -131,11 +142,26 @@ public enum Pipeline: String, CaseIterable {
         }
     }
 
+    var tessellation: Bool {
+        switch self {
+            case .colorShader: return true
+            case .alphaShader: return true
+            case .roundColorShader: return true
+            default: return false
+        }
+    }
+
     var vertexDescriptor: MTLVertexDescriptor {
         switch self {
             case .lineGroupShader: return LineVertex.descriptor
             case .polygonGroupShader: return PolygonVertex.descriptor
-            default: return Vertex.descriptor
+            default:
+                if tessellation {
+                    return Vertex.tesselatedDescriptor
+                }
+                else {
+                    return Vertex.descriptor
+                }
         }
     }
 }
@@ -147,7 +173,13 @@ public class PipelineLibrary: StaticMetalLibrary<String, MTLRenderPipelineState>
                 throw LibraryError.invalidKey
             }
             let pipelineDescriptor = PipelineDescriptorFactory.pipelineDescriptor(pipeline: pipeline)
-            return try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
+            do {
+                return try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
+            }
+            catch {
+                print("failed to create Pipeline Descriptor for \(key)", error)
+                throw error
+            }
         }
     }
 }

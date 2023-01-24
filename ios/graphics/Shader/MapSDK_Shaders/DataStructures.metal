@@ -17,6 +17,10 @@ struct VertexIn {
     float2 n [[attribute(2)]];
 };
 
+struct PatchIn {
+    patch_control_point<VertexIn> controlPoints;
+};
+
 struct VertexOut {
     float4 position [[ position ]];
     float2 uv;

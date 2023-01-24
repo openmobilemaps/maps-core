@@ -30,6 +30,10 @@ class ColorShader: BaseShader {
         encoder.setRenderPipelineState(pipeline)
         encoder.setFragmentBytes(&color, length: MemoryLayout<SIMD4<Float>>.stride, index: 1)
     }
+
+    override func usesTessellation() -> Bool {
+        true
+    }
 }
 
 extension ColorShader: MCColorShaderInterface {

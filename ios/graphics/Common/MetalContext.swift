@@ -35,7 +35,15 @@ public class MetalContext {
     public static let colorPixelFormat: MTLPixelFormat = .bgra8Unorm
     let textureLoader: MTKTextureLoader
 
-    public lazy var pipelineLibrary: PipelineLibrary = try! PipelineLibrary(device: self.device)
+    public lazy var pipelineLibrary: PipelineLibrary = {
+        do {
+            return try PipelineLibrary(device: self.device)
+        }
+        catch {
+            fatalError(error.localizedDescription)
+        }
+    }()
+
     public lazy var samplerLibrary: SamplerLibrary = try! SamplerLibrary(device: self.device)
 
     init(device: MTLDevice, commandQueue: MTLCommandQueue, library: MTLLibrary) {

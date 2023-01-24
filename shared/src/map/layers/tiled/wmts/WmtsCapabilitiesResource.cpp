@@ -54,7 +54,7 @@ int32_t numZ) override {
 
 
     std::shared_ptr<::Tiled2dMapLayerConfig> createLayerConfigTimed(const std::string & identifier, int32_t numZ) override {
-        return createLayerConfigWithZoomInfoTimed(identifier, Tiled2dMapZoomInfo(2.25, 2, false, true, true, true), numZ);
+        return createLayerConfigWithZoomInfoTimed(identifier, Tiled2dMapZoomInfo(2.25, 2, false, false, true, true), numZ);
     }
 
 

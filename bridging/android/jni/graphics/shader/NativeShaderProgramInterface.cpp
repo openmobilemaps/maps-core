@@ -50,4 +50,14 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_S
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
+CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderProgramInterface_00024CppProxy_native_1usesTessellation(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::ShaderProgramInterface>(nativeRef);
+        auto r = ref->usesTessellation();
+        return ::djinni::release(::djinni::Bool::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 }  // namespace djinni_generated

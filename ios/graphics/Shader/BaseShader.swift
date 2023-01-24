@@ -37,4 +37,8 @@ open class BaseShader: MCShaderProgramInterface {
     open var requiresTexture: Bool {
         false
     }
+
+    open func usesTessellation() -> Bool {
+        false
+    }
 }

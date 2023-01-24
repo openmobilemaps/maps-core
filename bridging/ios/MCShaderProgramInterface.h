@@ -15,4 +15,6 @@
 - (void)preRender:(nullable id<MCRenderingContextInterface>)context
              pass:(nonnull MCRenderPassConfig *)pass;
 
+- (BOOL)usesTessellation;
+
 @end
