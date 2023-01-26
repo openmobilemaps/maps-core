@@ -88,8 +88,9 @@ void Tiled2dMapRasterLayer::pause() {
     }
     std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
     for (const auto &tileObject : tileObjectMap) {
-        if (tileObject.second && tileObject.second->getQuadObject()->asGraphicsObject()->isReady())
-            tileObject.second->getQuadObject()->asGraphicsObject()->clear();
+        if (tileObject.second && tileObject.second->getGraphicsObject()->isReady()) {
+            tileObject.second->getGraphicsObject()->clear();
+        }
     }
     for (const auto &tileMask : tileMaskMap) {
         if (tileMask.second.maskObject && tileMask.second.maskObject->getPolygonObject()->asGraphicsObject()->isReady())
@@ -112,8 +113,8 @@ void Tiled2dMapRasterLayer::resume() {
     std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
     for (const auto &tileObject : tileObjectMap) {
         if (tileObject.second) {
+            tileObject.second->getGraphicsObject()->setup(renderingContext);
             auto rectangle = tileObject.second->getQuadObject();
-            rectangle->asGraphicsObject()->setup(renderingContext);
             rectangle->loadTexture(renderingContext, tileObject.first.textureHolder);
         }
     }
@@ -194,7 +195,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
                 }
             }
 
-            if (tilesToAdd.empty() && tilesToRemove.empty() && newTileMasks.empty()) return;
+            if (tilesToAdd.empty() && tilesToRemove.empty() && newTileMasks.empty()) { return; }
 
             auto const &zoomInfo = layerConfig->getZoomInfo();
             for (const auto &tile : tilesToAdd) {
@@ -227,10 +228,10 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
 
             for (const auto &newMaskEntry : newTileMasks) {
                 if (tileMaskMap.count(newMaskEntry.first) > 0) {
-                    obsoleteMaskObjects.emplace_back(tileMaskMap.at(newMaskEntry.first).maskObject->getPolygonObject()->asMaskingObject());
+                    obsoleteMaskObjects.emplace_back(tileMaskMap.at(newMaskEntry.first).graphicsMaskObject);
                 }
                 tileMaskMap[newMaskEntry.first] = newMaskEntry.second;
-                newMaskObjects.emplace_back(newMaskEntry.second.maskObject->getPolygonObject()->asMaskingObject());
+                newMaskObjects.emplace_back(newMaskEntry.second.graphicsMaskObject);
             }
 
             for (const auto &tile : tilesToRemove) {
