@@ -163,7 +163,7 @@ void IconLayer::clear() {
         mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
             TaskConfig("IconLayer_clear", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [=] {
                 for (auto &icon : iconsToClear) {
-                    icon.second->getQuadObject()->asGraphicsObject()->clear();
+                    icon.second->getGraphicsObject()->clear();
                 }
             }));
         icons.clear();

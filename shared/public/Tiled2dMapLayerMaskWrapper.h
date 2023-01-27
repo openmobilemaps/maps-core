@@ -12,14 +12,19 @@
 
 #include "PolygonMaskObject.h"
 
-struct Tiled2dMapLayerMaskWrapper {
+class Tiled2dMapLayerMaskWrapper {
+public:
+    Tiled2dMapLayerMaskWrapper(std::shared_ptr<PolygonMaskObject> maskObject, size_t polygonHash): maskObject(maskObject), polygonHash(polygonHash), graphicsObject(maskObject->getPolygonObject()->asGraphicsObject()), graphicsMaskObject(maskObject->getPolygonObject()->asMaskingObject()) {}
+
+    Tiled2dMapLayerMaskWrapper(): maskObject(nullptr), graphicsObject(nullptr), graphicsMaskObject(nullptr), polygonHash(0) {}
+
+    size_t getPolygonHash() const { return polygonHash; }
+    std::shared_ptr<GraphicsObjectInterface> getGraphicsObject() const { return graphicsObject; }
+    std::shared_ptr<MaskingObjectInterface> getGraphicsMaskObject() const { return graphicsMaskObject; }
+
+private:
     std::shared_ptr<PolygonMaskObject> maskObject;
     std::shared_ptr<GraphicsObjectInterface> graphicsObject;
     std::shared_ptr<MaskingObjectInterface> graphicsMaskObject;
-
     size_t polygonHash;
-
-    Tiled2dMapLayerMaskWrapper(std::shared_ptr<PolygonMaskObject> maskObject, size_t polygonHash): maskObject(maskObject), polygonHash(polygonHash), graphicsObject(maskObject->getPolygonObject()->asGraphicsObject()), graphicsMaskObject(maskObject->getPolygonObject()->asMaskingObject()) {}
-
-    Tiled2dMapLayerMaskWrapper(): maskObject(nullptr), graphicsObject(nullptr), graphicsMaskObject(nullptr), polygonHash(0){}
 };
