@@ -93,8 +93,8 @@ void Tiled2dMapRasterLayer::pause() {
         }
     }
     for (const auto &tileMask : tileMaskMap) {
-        if (tileMask.second.maskObject && tileMask.second.maskObject->getPolygonObject()->asGraphicsObject()->isReady())
-            tileMask.second.maskObject->getPolygonObject()->asGraphicsObject()->clear();
+        if (tileMask.second.getGraphicsObject() && tileMask.second.getGraphicsObject()->isReady())
+            tileMask.second.getGraphicsObject()->clear();
     }
 }
 
@@ -119,9 +119,8 @@ void Tiled2dMapRasterLayer::resume() {
         }
     }
     for (const auto &tileMask : tileMaskMap) {
-        if (tileMask.second.maskObject) {
-            auto polygon = tileMask.second.maskObject->getPolygonObject();
-            polygon->asGraphicsObject()->setup(renderingContext);
+        if (tileMask.second.getGraphicsObject()) {
+            tileMask.second.getGraphicsObject()->setup(renderingContext);
         }
     }
 }
@@ -184,7 +183,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
                         const auto &curTile = currentTileInfos.find(tileEntry.first);
                         const size_t hash = std::hash<std::vector<::PolygonCoord>>()(curTile->masks);
 
-                        if (tileMaskMap[tileEntry.first.tileInfo].polygonHash != hash) {
+                        if (tileMaskMap[tileEntry.first.tileInfo].getPolygonHash() != hash) {
                             const auto &tileMask = std::make_shared<PolygonMaskObject>(graphicsFactory,
                                                                                        coordinateConverterHelper);
 
@@ -228,10 +227,10 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
 
             for (const auto &newMaskEntry : newTileMasks) {
                 if (tileMaskMap.count(newMaskEntry.first) > 0) {
-                    obsoleteMaskObjects.emplace_back(tileMaskMap.at(newMaskEntry.first).graphicsMaskObject);
+                    obsoleteMaskObjects.emplace_back(tileMaskMap.at(newMaskEntry.first).getGraphicsMaskObject());
                 }
                 tileMaskMap[newMaskEntry.first] = newMaskEntry.second;
-                newMaskObjects.emplace_back(newMaskEntry.second.graphicsMaskObject);
+                newMaskObjects.emplace_back(newMaskEntry.second.getGraphicsMaskObject());
             }
 
             for (const auto &tile : tilesToRemove) {
@@ -346,10 +345,10 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
             if (layerConfig->getZoomInfo().maskTile) {
                 const auto &mask = tileMaskMap.at(entry.first.tileInfo);
 
-                mask.graphicsObject->setup(renderingContext);
+                mask.getGraphicsObject()->setup(renderingContext);
                 std::shared_ptr<RenderPass> renderPass =
                 std::make_shared<RenderPass>(RenderPassConfig(0),
-                                             std::vector<std::shared_ptr<::RenderObjectInterface>>{renderObject}, mask.graphicsMaskObject);
+                                             std::vector<std::shared_ptr<::RenderObjectInterface>>{renderObject}, mask.getGraphicsMaskObject());
                 renderPass->setScissoringRect(scissorRect);
                 newRenderPasses.push_back(renderPass);
             }else{
@@ -457,7 +456,7 @@ LayerReadyState Tiled2dMapRasterLayer::isReadyToRenderOffscreen() {
     }
 
     for (auto &to : tileObjectMap) {
-        if (!to.second->getQuadObject()->asGraphicsObject()->isReady()) {
+        if (!to.second->getGraphicsObject()->isReady()) {
             return LayerReadyState::NOT_READY;
         }
     }
