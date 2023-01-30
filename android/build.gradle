@@ -1,14 +1,14 @@
 buildscript {
-	ext.kotlin_version = "1.6.21"
+	ext.kotlin_version = "1.8.0"
 	repositories {
 		google()
 		mavenCentral()
 	}
 	dependencies {
-		classpath "com.android.tools.build:gradle:7.1.3"
+		classpath "com.android.tools.build:gradle:7.4.0"
 		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
-		classpath 'com.vanniktech:gradle-maven-publish-plugin:0.13.0'
+		classpath 'com.vanniktech:gradle-maven-publish-plugin:0.24.0'
 		classpath 'org.jetbrains.dokka:dokka-gradle-plugin:1.7.10'
 	}
 }
@@ -23,12 +23,14 @@ apply plugin: 'kotlin-android'
 apply plugin: 'com.vanniktech.maven.publish'
 apply plugin: 'kotlin-kapt'
 
+import com.vanniktech.maven.publish.SonatypeHost
+
 android {
-	compileSdkVersion 31
+	compileSdkVersion 33
 
 	defaultConfig {
 		minSdkVersion 23
-		targetSdkVersion 31
+		targetSdkVersion 33
 		versionName VERSION_NAME
 		versionCode Integer.parseInt(VERSION_CODE)
 
@@ -119,20 +121,38 @@ ext.readPropertyWithDefault = { paramName, defaultValue ->
 	}
 }
 
+publishing {
+	repositories {
+		maven {
+			name = "UbiqueMaven"
+			url = System.getenv('UBIQUE_ARTIFACTORY_URL') ?: ''
+			credentials {
+				username = System.getenv('UBIQUE_ARTIFACTORY_USER') ?: ''
+				password = System.getenv('UBIQUE_ARTIFACTORY_PASS') ?: ''
+			}
+		}
+	}
+}
+
+mavenPublishing {
+	publishToMavenCentral(SonatypeHost.DEFAULT, true)
+	signAllPublications()
+}
+
 dependencies {
 	implementation fileTree(dir: 'libs', include: ['*.jar'])
 	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-	implementation "androidx.annotation:annotation:1.4.0"
+	implementation "androidx.annotation:annotation:1.5.0"
 	implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.5.1"
-	implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1"
+	implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
 
-	implementation("com.squareup.moshi:moshi:1.13.0")
-	kapt "com.squareup.moshi:moshi-kotlin-codegen:1.13.0"
-	implementation 'com.squareup.okhttp3:okhttp:4.9.2'
+	implementation("com.squareup.moshi:moshi:1.14.0")
+	kapt "com.squareup.moshi:moshi-kotlin-codegen:1.14.0"
+	implementation 'com.squareup.okhttp3:okhttp:4.10.0'
 
 	testImplementation 'junit:junit:4.13.2'
-	androidTestImplementation 'androidx.test.ext:junit:1.1.3'
-	androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+	androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+	androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }
 
 clean.doLast {
