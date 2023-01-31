@@ -47,7 +47,6 @@ jobs:
           cd android
           ./gradlew publishAllPublicationsToUbiqueMavenRepository -Psigning.secretKeyRingFile=$GITHUB_WORKSPACE/signingkey.gpg -Psigning.password=$SIGNING_KEY_PASSWORD -Psigning.keyId=$SIGNING_KEY_ID
           echo "### Maven Dependency" >> $GITHUB_STEP_SUMMARY
-          echo "[Ubique Artifactory](io.openmobilemaps/${{ steps.vars.outputs.artifactId }}/${{ steps.vars.outputs.version }}/aar)" >> $GITHUB_STEP_SUMMARY
           echo "| Git Commit | Artifact ID | Maven Version |" >> $GITHUB_STEP_SUMMARY
           echo "| --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
           echo "| $GITHUB_SHA | ${{ steps.vars.outputs.artifactId }} | ${{ steps.vars.outputs.version }} |" >> $GITHUB_STEP_SUMMARY
