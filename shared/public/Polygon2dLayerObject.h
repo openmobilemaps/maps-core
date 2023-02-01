@@ -44,7 +44,9 @@ class Polygon2dLayerObject : public LayerObjectInterface {
 
   private:
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
-    std::shared_ptr<Polygon2dInterface> polygon;
     std::shared_ptr<ColorShaderInterface> shader;
+
+    std::shared_ptr<Polygon2dInterface> polygon;
+    std::shared_ptr<GraphicsObjectInterface> graphicsObject;
     std::shared_ptr<RenderConfig> renderConfig;
 };
