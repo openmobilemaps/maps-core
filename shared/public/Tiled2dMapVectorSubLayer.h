@@ -21,6 +21,7 @@
 #include "VectorLayerDescription.h"
 #include "Tiled2dMapVectorLayerReadyInterface.h"
 #include "Tiled2dMapVectorLayerSelectionInterface.h"
+#include "Textured2dLayerObject.h"
 
 class Tiled2dMapVectorSubLayer : public SimpleLayerInterface {
 public:
@@ -62,6 +63,9 @@ public:
     void setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate);
 
     virtual void setSelectedFeatureIdentfier(std::optional<int64_t> identifier);
+
+protected:
+    void setupGraphicsObject(const std::shared_ptr<Textured2dLayerObject> &object, const std::shared_ptr<TextureHolderInterface> &texture);
 
 protected:
     std::recursive_mutex maskMutex;
