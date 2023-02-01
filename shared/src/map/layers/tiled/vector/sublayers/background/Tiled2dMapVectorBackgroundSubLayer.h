@@ -13,6 +13,7 @@
 #include "Tiled2dMapVectorSubLayer.h"
 #include "BackgroundVectorLayerDescription.h"
 #include "ColorShaderInterface.h"
+#include "RenderObject.h"
 
 class Tiled2dMapVectorBackgroundSubLayer : public Tiled2dMapVectorSubLayer, public std::enable_shared_from_this<Tiled2dMapVectorBackgroundSubLayer> {
 public:
@@ -54,7 +55,7 @@ public:
 private:
     std::shared_ptr<BackgroundVectorLayerDescription> description;
 
-    std::shared_ptr<Quad2dInterface> object;
+    std::shared_ptr<RenderObject> renderObject;
 
     std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
     std::shared_ptr<::ColorShaderInterface> shader;
