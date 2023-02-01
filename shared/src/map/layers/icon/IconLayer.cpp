@@ -51,12 +51,12 @@ void IconLayer::remove(const std::shared_ptr<IconInfoInterface> &icon) {
         std::lock_guard<std::recursive_mutex> lock(iconsMutex);
         for (auto it = icons.begin(); it != icons.end(); it++) {
             if (it->first->getIdentifier() == icon->getIdentifier()) {
-                auto quadObject = it->second->getQuadObject();
+                auto graphicsObject = it->second->getGraphicsObject();
                 icons.erase(it);
                 mapInterface->getScheduler()->addTask(
                     std::make_shared<LambdaTask>(TaskConfig("IconLayer_remove_" + icon->getIdentifier(), 0, TaskPriority::NORMAL,
                                                             ExecutionEnvironment::GRAPHICS),
-                                                 [=] { quadObject->asGraphicsObject()->clear(); }));
+                                                 [=] { graphicsObject->clear(); }));
                 break;
             }
         }
@@ -138,9 +138,11 @@ void IconLayer::setupIconObjects(
 
     for (const auto iconTuple : iconObjects) {
         const auto &icon = std::get<0>(iconTuple);
-        const auto &quadObject = std::get<1>(iconTuple)->getQuadObject();
-        quadObject->asGraphicsObject()->setup(renderingContext);
-        quadObject->loadTexture(renderingContext, icon->getTexture());
+        const auto &iconObject = std::get<1>(iconTuple);
+
+        iconObject->getGraphicsObject()->setup(renderingContext);
+        iconObject->getQuadObject()->loadTexture(renderingContext, icon->getTexture());
+        
         if (mask && !mask->asGraphicsObject()->isReady()) {
             mask->asGraphicsObject()->setup(renderingContext);
         }
