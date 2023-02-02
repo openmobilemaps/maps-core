@@ -22,7 +22,7 @@
 #include "Tiled2dMapVectorLayerSelectionInterface.h"
 #include "TiledLayerError.h"
 
-class Tiled2dMapVectorLayer : public Tiled2dMapLayer, public Tiled2dMapVectorLayerInterface, public Tiled2dMapVectorLayerReadyInterface {
+class Tiled2dMapVectorLayer : public Tiled2dMapLayer, public TouchInterface, public Tiled2dMapVectorLayerInterface, public Tiled2dMapVectorLayerReadyInterface {
 public:
     Tiled2dMapVectorLayer(const std::string &layerName,
                           const std::string &remoteStyleJsonUrl,
@@ -34,6 +34,7 @@ public:
                           const std::string &remoteStyleJsonUrl,
                           const std::string &fallbackStyleJsonString,
                           const std::vector <std::shared_ptr<::LoaderInterface>> &loaders,
+                          const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                           double dpFactor);
 
     Tiled2dMapVectorLayer(const std::string &layerName,
@@ -51,7 +52,7 @@ public:
 
     virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override;
 
-    virtual void onAdded(const std::shared_ptr<::MapInterface> &mapInterface) override;
+    virtual void onAdded(const std::shared_ptr<::MapInterface> &mapInterface, int32_t layerIndex) override;
 
     virtual void onRemoved() override;
 
@@ -80,6 +81,30 @@ public:
     void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription);
 
     std::optional<FeatureContext> getFeatureContext(int64_t identifier);
+
+    // Touch Interface
+    bool onTouchDown(const Vec2F &posScreen) override;
+
+    bool onClickUnconfirmed(const Vec2F &posScreen) override;
+
+    bool onClickConfirmed(const Vec2F &posScreen) override;
+
+    bool onDoubleClick(const Vec2F &posScreen) override;
+
+    bool onLongPress(const Vec2F &posScreen) override;
+
+    bool onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleClick) override;
+
+    bool onMoveComplete() override;
+
+    bool onTwoFingerClick(const Vec2F &posScreen1, const Vec2F &posScreen2) override;
+
+    bool onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) override;
+
+    bool onTwoFingerMoveComplete() override;
+
+    void clearTouch() override;
+
 protected:
     virtual std::shared_ptr<LayerInterface> getLayerForDescription(const std::shared_ptr<VectorLayerDescription> &layerDescription);
 
@@ -105,6 +130,8 @@ private:
     void initializeVectorLayer(const std::vector<std::shared_ptr<LayerInterface>> &newSublayers);
 
     virtual void updateMaskObjects(const std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> &toSetupMaskObject, const std::vector<const std::shared_ptr<MaskingObjectInterface>> &obsoleteMaskObjects);
+
+    int32_t layerIndex = -1;
 
     const std::optional<double> dpFactor;
 

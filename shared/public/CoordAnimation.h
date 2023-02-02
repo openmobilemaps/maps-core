@@ -12,6 +12,7 @@
 
 #include "DefaultAnimator.h"
 #include "Coord.h"
+#include <assert.h>
 
 class CoordAnimation: public DefaultAnimator<Coord> {
 public:

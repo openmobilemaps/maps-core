@@ -23,13 +23,11 @@ Tiled2dMapVectorLineSubLayer::Tiled2dMapVectorLineSubLayer(const std::shared_ptr
         : description(description),
           usedKeys(description->getUsedKeys()) {}
 
-void Tiled2dMapVectorLineSubLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
-    Tiled2dMapVectorSubLayer::onAdded(mapInterface);
-    mapInterface->getTouchHandler()->addListener(shared_from_this());
+void Tiled2dMapVectorLineSubLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32_t layerIndex) {
+    Tiled2dMapVectorSubLayer::onAdded(mapInterface, layerIndex);
 }
 
 void Tiled2dMapVectorLineSubLayer::onRemoved() {
-    mapInterface->getTouchHandler()->removeListener(shared_from_this());
     Tiled2dMapVectorSubLayer::onRemoved();
 }
 

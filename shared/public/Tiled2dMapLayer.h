@@ -22,7 +22,6 @@
 class Tiled2dMapLayer : public SimpleLayerInterface,
                         public Tiled2dMapSourceListenerInterface,
                         public MapCamera2dListenerInterface,
-                        public SimpleTouchInterface,
                         public std::enable_shared_from_this<Tiled2dMapLayer> {
   public:
     Tiled2dMapLayer();
@@ -33,7 +32,7 @@ class Tiled2dMapLayer : public SimpleLayerInterface,
 
     virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override = 0;
 
-    virtual void onAdded(const std::shared_ptr<::MapInterface> &mapInterface) override;
+    virtual void onAdded(const std::shared_ptr<::MapInterface> &mapInterface, int32_t layerIndex) override;
 
     virtual void onRemoved() override;
 

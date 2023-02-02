@@ -30,10 +30,13 @@ public:
 
     virtual std::shared_ptr<Quad2dInterface> getQuadObject();
 
+    virtual std::shared_ptr<GraphicsObjectInterface> getGraphicsObject();
+
 private:
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
-    std::shared_ptr<Quad2dInterface> quad;
     std::shared_ptr<ColorCircleShaderInterface> shader;
+    std::shared_ptr<Quad2dInterface> quad;
+    std::shared_ptr<GraphicsObjectInterface> graphicsObject;
     std::shared_ptr<RenderConfig> renderConfig;
 
     double radius = 0;

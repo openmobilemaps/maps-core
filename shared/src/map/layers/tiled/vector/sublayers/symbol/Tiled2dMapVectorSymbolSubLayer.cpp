@@ -35,17 +35,12 @@ Tiled2dMapVectorSymbolSubLayer::Tiled2dMapVectorSymbolSubLayer(const std::shared
   description(description)
 {}
 
-void Tiled2dMapVectorSymbolSubLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
-    Tiled2dMapVectorSubLayer::onAdded(mapInterface);
-    mapInterface->getTouchHandler()->addListener(shared_from_this());
+void Tiled2dMapVectorSymbolSubLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32_t layerIndex) {
+    Tiled2dMapVectorSubLayer::onAdded(mapInterface, layerIndex);
 }
 
 void Tiled2dMapVectorSymbolSubLayer::onRemoved() {
     Tiled2dMapVectorSubLayer::onRemoved();
-
-    if (mapInterface) {
-        mapInterface->getTouchHandler()->removeListener(shared_from_this());
-    }
 }
 
 void Tiled2dMapVectorSymbolSubLayer::pause() {

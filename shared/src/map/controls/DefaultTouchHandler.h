@@ -13,11 +13,13 @@
 #include "SchedulerInterface.h"
 #include "TouchHandlerInterface.h"
 #include "Vec2F.h"
+#include <list>
 #include <map>
+#include <mutex>
 
 class DefaultTouchHandler : public TouchHandlerInterface {
 
-  public:
+public:
     DefaultTouchHandler(const std::shared_ptr<SchedulerInterface> SchedulerInterface, float density);
 
     virtual void onTouchEvent(const TouchEvent &touchEvent) override;
@@ -28,7 +30,12 @@ class DefaultTouchHandler : public TouchHandlerInterface {
 
     virtual void insertListener(const std::shared_ptr<TouchInterface> &listener, int32_t index) override;
 
-  private:
+private:
+    struct ListenerEntry {
+        int32_t index;
+        std::shared_ptr<TouchInterface> listener;
+    };
+
     enum TouchHandlingState {
         IDLE,
         ONE_FINGER_DOWN,
@@ -66,7 +73,8 @@ class DefaultTouchHandler : public TouchHandlerInterface {
     float density;
     float clickDistancePx;
 
-    std::map<int, std::shared_ptr<TouchInterface>, std::greater<int>> listeners;
+    std::recursive_mutex listenerMutex;
+    std::list<ListenerEntry> listeners; // ordered by the decreasing index
 
     const std::shared_ptr<SchedulerInterface> scheduler;
 

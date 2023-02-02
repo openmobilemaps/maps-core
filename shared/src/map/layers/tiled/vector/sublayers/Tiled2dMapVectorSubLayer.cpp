@@ -39,7 +39,7 @@ Tiled2dMapVectorSubLayer::buildRenderPasses(const std::unordered_set<Tiled2dMapT
     return newRenderPasses;
 }
 
-void Tiled2dMapVectorSubLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
+void Tiled2dMapVectorSubLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32_t layerIndex) {
     this->mapInterface = mapInterface;
 }
 
@@ -128,3 +128,14 @@ void Tiled2dMapVectorSubLayer::setAlpha(float alpha) {
 
 float Tiled2dMapVectorSubLayer::getAlpha() { return alpha; }
 
+void Tiled2dMapVectorSubLayer::setupGraphicsObject(const std::shared_ptr<Textured2dLayerObject> &object, const std::shared_ptr<TextureHolderInterface> &texture) {
+    if (!mapInterface) { return; }
+    auto renderingContext = mapInterface->getRenderingContext();
+    if (!renderingContext) { return; }
+
+    if(object->getGraphicsObject()->isReady()) {
+        object->getGraphicsObject()->setup(renderingContext);
+    }
+
+    object->getQuadObject()->loadTexture(renderingContext, texture);
+}

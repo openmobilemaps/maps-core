@@ -132,9 +132,9 @@ void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBou
     int startZoomLayer = 0;
     int endZoomLevel = std::min((int) numZoomLevels - 1, targetZoomLayer + 2);
 
-    int zoomInd = 0;
-    int zoomPriorityRange = 1000 * zoomLevelInfos.at(0).numTilesT;
-    int zPriorityRange = 100;
+    int distanceWeight = 100;
+    int zoomLevelWeight = 1000 * zoomLevelInfos.at(0).numTilesT;
+    int zDistanceWeight = 1000 * zoomLevelInfos.at(0).numTilesT;
 
     std::vector<VisibleTilesLayer> layers;
 
@@ -152,6 +152,7 @@ void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBou
         std::vector<PrioritizedTiled2dMapTileInfo> curVisibleTilesVec;
 
         const double tileWidth = zoomLevelInfo.tileWidthLayerSystemUnits;
+        int zoomDistanceFactor = std::abs(zoomLevelInfo.zoomLevelIdentifier - targetZoomLevelIdentifier);
 
         RectCoord layerBounds = zoomLevelInfo.bounds;
         layerBounds = conversionHelper->convertRect(layerSystemId, layerBounds);
@@ -197,7 +198,12 @@ void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBou
                     const double tileCenterDis = std::sqrt(std::pow(tileCenterX - centerVisibleX, 2.0) + std::pow(tileCenterY - centerVisibleY, 2.0));
 
                     const int zDis = 1 + std::abs(t - curT);
-                    const int priority = std::ceil((tileCenterDis / maxDisCenter) * zPriorityRange) + zDis * zPriorityRange + zoomInd * zoomPriorityRange;
+
+                    float distanceFactor = (tileCenterDis / maxDisCenter) * distanceWeight;
+                    float zoomlevelFactor = zoomDistanceFactor * zoomLevelWeight;
+                    float zDistanceFactor = std::abs(t - curT) * zDistanceWeight;
+
+                    const int priority = std::ceil(distanceFactor + zoomlevelFactor + zDistanceFactor);
 
                     const RectCoord rect(topLeft, bottomRight);
                     curVisibleTilesVec.push_back(PrioritizedTiled2dMapTileInfo(
@@ -210,9 +216,6 @@ void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBou
         }
 
         curVisibleTiles.visibleTiles.insert(curVisibleTilesVec.begin(), curVisibleTilesVec.end());
-
-        zoomInd++;
-
 
         std::unordered_set<PrioritizedTiled2dMapTileInfo> visibleTiles(visibleTilesVec.begin(), visibleTilesVec.end());
         layers.push_back(curVisibleTiles);
@@ -255,9 +258,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
                     if (currentTilesCount == 0 && currentlyLoadingCount == 0) {
                         toAdd.insert(tileInfo);
                     }
-
                 }
-                continue;
             }
         }
 
@@ -301,6 +302,8 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
                                 break;
                             }
                         }
+
+                        if(found) { break; }
                     }
                 }
 
@@ -523,19 +526,16 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(size_t loaderIndex) {
                     std::lock_guard<std::recursive_mutex> lock(currentVisibleTilesMutex);
                     isVisible = currentVisibleTiles.count(tile->tileInfo);
                 }
+
                 if (isVisible) {
                     R da = postLoadingTask(loaderResult, tile->tileInfo);
 
-                    PolygonCoord mask({
-                                              tile->tileInfo.bounds.topLeft,
-                                              Coord(tile->tileInfo.bounds.topLeft.systemIdentifier, tile->tileInfo.bounds.bottomRight.x,
-                                                    tile->tileInfo.bounds.topLeft.y, 0),
-                                              tile->tileInfo.bounds.bottomRight,
-                                              Coord(tile->tileInfo.bounds.topLeft.systemIdentifier, tile->tileInfo.bounds.topLeft.x,
-                                                    tile->tileInfo.bounds.bottomRight.y, 0),
-                                              tile->tileInfo.bounds.topLeft
-                                      }, {});
-
+                    auto bounds = tile->tileInfo.bounds;
+                    PolygonCoord mask({ bounds.topLeft,
+                                        Coord(bounds.topLeft.systemIdentifier, bounds.bottomRight.x, bounds.topLeft.y, 0),
+                                        bounds.bottomRight,
+                                        Coord(bounds.topLeft.systemIdentifier, bounds.topLeft.x, bounds.bottomRight.y, 0),
+                                        bounds.topLeft }, {});
 
                     gpc_polygon tilePolygon;
                     gpc_set_polygon({mask}, &tilePolygon);
@@ -550,6 +550,7 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(size_t loaderIndex) {
                         errorTiles[loaderIndex].erase(*tile);
                     }
                 }
+
                 break;
             }
             case LoaderStatus::NOOP: {
@@ -714,19 +715,32 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
         currentViewBounds.topLeft
     }, {})}, &currentViewBoundsPolygon);
 
+    bool completeViewBoundsDrawn = false;
+
     for (auto it = currentTiles.rbegin(); it != currentTiles.rend(); it++ ){
         auto &[tileInfo, tileWrapper] = *it;
 
         tileWrapper.isVisible = true;
-        {
-            std::lock_guard<std::recursive_mutex> lock(tilesReadyMutex);
-            if (readyTiles.count(tileInfo) == 0) {
-                continue;
-            }
-        }
-
 
         if (tileInfo.zoomIdentifier != currentZoomLevelIdentifier) {
+
+            if (currentTileMask.num_contours != 0) {
+                if(!completeViewBoundsDrawn) {
+                    gpc_polygon diff;
+                    gpc_polygon_clip(GPC_DIFF, &currentViewBoundsPolygon, &currentTileMask, &diff);
+
+                    if (diff.num_contours == 0) {
+                        completeViewBoundsDrawn = true;
+                    }
+
+                    gpc_free_polygon(&diff);
+                }
+            }
+
+            if(completeViewBoundsDrawn) {
+                tileWrapper.isVisible = false;
+                continue;
+            }
 
             gpc_polygon polygonDiff;
             bool freePolygonDiff = false;
@@ -756,9 +770,15 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
             if (freePolygonDiff) {
                 gpc_free_polygon(&polygonDiff);
             }
-
         } else {
             tileWrapper.masks = { tileWrapper.tileBounds };
+        }
+
+        {
+            std::lock_guard<std::recursive_mutex> lock(tilesReadyMutex);
+            if (readyTiles.count(tileInfo) == 0) {
+                continue;
+            }
         }
 
         // add tileBounds to currentTileMask
@@ -817,7 +837,7 @@ void Tiled2dMapSource<T, L, R>::setTilesReady(const std::vector<const Tiled2dMap
     bool needsUpdate = false;
     {
         std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(currentTilesMutex, tilesReadyMutex);
-        for (auto const tile: tiles) {
+        for (auto const &tile: tiles) {
             if (readyTiles.count(tile) == 0) {
                 if (currentTiles.count(tile) != 0){
                     readyTiles.insert(tile);

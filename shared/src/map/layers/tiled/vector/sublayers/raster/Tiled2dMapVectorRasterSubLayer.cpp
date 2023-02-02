@@ -14,7 +14,7 @@
 
 Tiled2dMapVectorRasterSubLayer::Tiled2dMapVectorRasterSubLayer(const std::shared_ptr<::RasterVectorLayerDescription> &description,
                                                                const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders):
-Tiled2dMapRasterLayer(std::make_shared<Tiled2dMapVectorRasterSubLayerConfig>(description), tileLoaders),
+Tiled2dMapRasterLayer(std::make_shared<Tiled2dMapVectorRasterSubLayerConfig>(description), tileLoaders, false),
 description(description) {}
 
 void Tiled2dMapVectorRasterSubLayer::update() {

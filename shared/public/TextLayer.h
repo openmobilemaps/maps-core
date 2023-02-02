@@ -42,7 +42,7 @@ class TextLayer : public TextLayerInterface, public SimpleLayerInterface, public
 
     virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses();
 
-    virtual void onAdded(const std::shared_ptr<MapInterface> &mapInterface);
+    virtual void onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32_t layerIndex);
 
     virtual void onRemoved();
 

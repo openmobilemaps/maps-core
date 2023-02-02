@@ -26,20 +26,25 @@
 #include <atomic>
 
 
-class Tiled2dMapRasterLayer : public Tiled2dMapLayer, public Tiled2dMapRasterLayerInterface {
+class Tiled2dMapRasterLayer : public Tiled2dMapLayer,
+                              public SimpleTouchInterface,
+                              public Tiled2dMapRasterLayerInterface {
 public:
     Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
-                          const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders);
+                          const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
+                          bool registerToTouchHandler = true);
 
     Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                           const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
-                          const std::shared_ptr<::MaskingObjectInterface> &mask);
+                          const std::shared_ptr<::MaskingObjectInterface> &mask,
+                          bool registerToTouchHandler = true);
 
     Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                           const std::vector<std::shared_ptr<::LoaderInterface>> &tileLoader,
-                          const std::shared_ptr<::ShaderProgramInterface> &shader);
+                          const std::shared_ptr<::ShaderProgramInterface> &shader,
+                          bool registerToTouchHandler = true);
 
-    virtual void onAdded(const std::shared_ptr<::MapInterface> &mapInterface) override;
+    virtual void onAdded(const std::shared_ptr<::MapInterface> &mapInterface, int32_t layerIndex) override;
 
     virtual void onRemoved() override;
 
@@ -126,4 +131,5 @@ protected:
 
     ::RasterShaderStyle style = RasterShaderStyle::DEFAULT_STYLE;
     bool animationsEnabled = true;
+    bool registerToTouchHandler = true;
 };

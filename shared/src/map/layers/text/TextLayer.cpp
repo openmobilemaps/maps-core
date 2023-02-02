@@ -71,7 +71,7 @@ std::vector<std::shared_ptr<::RenderPassInterface>> TextLayer::buildRenderPasses
     }
 }
 
-void TextLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
+void TextLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32_t layerIndex) {
     this->mapInterface = mapInterface;
 
     {
@@ -84,7 +84,14 @@ void TextLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
     }
 }
 
-void TextLayer::onRemoved() { pause(); }
+void TextLayer::onRemoved() {
+    {
+        std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
+        addingQueue.clear();
+    }
+
+    pause();
+}
 
 void TextLayer::pause() {
     {

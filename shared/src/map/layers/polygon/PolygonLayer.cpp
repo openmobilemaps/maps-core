@@ -37,11 +37,13 @@ void PolygonLayer::setPolygons(const std::vector<PolygonInfo> &polygons) {
 std::vector<PolygonInfo> PolygonLayer::getPolygons() {
     std::vector<PolygonInfo> polygons;
     if (!mapInterface) {
+        std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         for (auto const &polygon : addingQueue) {
             polygons.push_back(polygon);
         }
         return polygons;
     }
+    std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
     for (auto const &ps : this->polygons) {
         for (auto &p : ps.second) {
             polygons.push_back(p.first);
@@ -245,7 +247,7 @@ std::vector<std::shared_ptr<::RenderPassInterface>> PolygonLayer::buildRenderPas
     }
 }
 
-void PolygonLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
+void PolygonLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32_t layerIndex) {
     this->mapInterface = mapInterface;
     {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
@@ -255,11 +257,16 @@ void PolygonLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
         addingQueue.clear();
     }
     if (isLayerClickable) {
-        mapInterface->getTouchHandler()->addListener(shared_from_this());
+        mapInterface->getTouchHandler()->insertListener(shared_from_this(), layerIndex);
     }
 }
 
 void PolygonLayer::onRemoved() {
+    {
+        std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
+        addingQueue.clear();
+    }
+
     if (mapInterface && isLayerClickable)
         mapInterface->getTouchHandler()->removeListener(shared_from_this());
     mapInterface = nullptr;

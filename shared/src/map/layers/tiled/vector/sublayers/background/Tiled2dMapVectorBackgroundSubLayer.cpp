@@ -17,11 +17,11 @@
 #include "SchedulerInterface.h"
 #include "LambdaTask.h"
 
-void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
-    Tiled2dMapVectorSubLayer::onAdded(mapInterface);
+void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32_t layerIndex) {
+    Tiled2dMapVectorSubLayer::onAdded(mapInterface, layerIndex);
     shader = mapInterface->getShaderFactory()->createColorShader();
-    object = mapInterface->getGraphicsObjectFactory()->createQuad(shader->asShaderProgramInterface());
-
+    
+    auto object = mapInterface->getGraphicsObjectFactory()->createQuad(shader->asShaderProgramInterface());
     object->setFrame(Quad2dD(Vec2D(-1, 1),
                              Vec2D(1, 1),
                              Vec2D(1, -1),
@@ -30,7 +30,7 @@ void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterf
 
     auto color = description->style.getColor(EvaluationContext(std::nullopt, FeatureContext()));
     shader->setColor(color.r, color.g, color.b, color.a * alpha);
-    auto renderObject = std::make_shared<RenderObject>(object->asGraphicsObject(), true);
+    renderObject = std::make_shared<RenderObject>(object->asGraphicsObject(), true);
     auto renderPass = std::make_shared<RenderPass>(RenderPassConfig(0), std::vector<std::shared_ptr<::RenderObjectInterface>> { renderObject } );
     renderPasses = {
         renderPass
@@ -44,8 +44,8 @@ void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterf
                     return;
                 }
 
-                if (!selfPtr->object->asGraphicsObject()->isReady()) {
-                    selfPtr->object->asGraphicsObject()->setup(selfPtr->mapInterface->getRenderingContext());
+                if (!selfPtr->renderObject->getGraphicsObject()->isReady()) {
+                    selfPtr->renderObject->getGraphicsObject()->setup(selfPtr->mapInterface->getRenderingContext());
                 }
             }));
 }
@@ -65,16 +65,16 @@ void Tiled2dMapVectorBackgroundSubLayer::onRemoved() {
 
 void Tiled2dMapVectorBackgroundSubLayer::pause() {
     Tiled2dMapVectorSubLayer::pause();
-    if (object) {
-        object->asGraphicsObject()->clear();
+    if (renderObject) {
+        renderObject->getGraphicsObject()->clear();
     }
 }
 
 void Tiled2dMapVectorBackgroundSubLayer::resume() {
     Tiled2dMapVectorSubLayer::resume();
 
-    if (object && !object->asGraphicsObject()->isReady()) {
-        object->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+    if (renderObject && !renderObject->getGraphicsObject()->isReady()) {
+        renderObject->getGraphicsObject()->setup(mapInterface->getRenderingContext());
     }
 }
 

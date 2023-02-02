@@ -14,13 +14,11 @@
 
 Circle2dLayerObject::Circle2dLayerObject(const std::shared_ptr<MapInterface> &mapInterface)
     : conversionHelper(mapInterface->getCoordinateConverterHelper())
-    , shader()
-    , quad() {
-    std::shared_ptr<ColorCircleShaderInterface> shader = mapInterface->getShaderFactory()->createColorCircleShader();
-    quad = mapInterface->getGraphicsObjectFactory()->createQuad(shader->asShaderProgramInterface());
-    this->shader = shader;
-    renderConfig = std::make_shared<RenderConfig>(quad->asGraphicsObject(), 0);
-}
+    , shader(mapInterface->getShaderFactory()->createColorCircleShader())
+    , quad(mapInterface->getGraphicsObjectFactory()->createQuad(shader->asShaderProgramInterface()))
+    , graphicsObject(quad->asGraphicsObject())
+    , renderConfig(std::make_shared<RenderConfig>(graphicsObject, 0))
+{}
 
 std::vector<std::shared_ptr<RenderConfigInterface>> Circle2dLayerObject::getRenderConfig() { return {renderConfig}; }
 
@@ -34,3 +32,6 @@ void Circle2dLayerObject::setPosition(Coord position, double radius) {
 }
 
 std::shared_ptr<Quad2dInterface> Circle2dLayerObject::getQuadObject() { return quad; }
+
+std::shared_ptr<GraphicsObjectInterface> Circle2dLayerObject::getGraphicsObject() { return graphicsObject; }
+

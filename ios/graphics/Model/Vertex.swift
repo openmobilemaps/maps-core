@@ -20,11 +20,6 @@ struct Vertex: Equatable {
     /// Normal
     var normal: SIMD2<Float>
 
-    /// Line Start
-    var lineStart: SIMD2<Float>
-    /// Line End
-    var lineEnd: SIMD2<Float>
-
     /// Returns the descriptor to use when passed to a metal shader
     static let descriptor: MTLVertexDescriptor = {
         let vertexDescriptor = MTLVertexDescriptor()
@@ -49,18 +44,6 @@ struct Vertex: Equatable {
         vertexDescriptor.attributes[2].offset = offset
         offset += MemoryLayout<SIMD2<Float>>.stride
 
-        // lineStart
-        vertexDescriptor.attributes[3].bufferIndex = bufferIndex
-        vertexDescriptor.attributes[3].format = .float2
-        vertexDescriptor.attributes[3].offset = offset
-        offset += MemoryLayout<SIMD2<Float>>.stride
-
-        // lineEnd
-        vertexDescriptor.attributes[4].bufferIndex = bufferIndex
-        vertexDescriptor.attributes[4].format = .float2
-        vertexDescriptor.attributes[4].offset = offset
-        offset += MemoryLayout<SIMD2<Float>>.stride
-
         vertexDescriptor.layouts[0].stride = MemoryLayout<Vertex>.stride
         return vertexDescriptor
     }()
@@ -69,8 +52,6 @@ struct Vertex: Equatable {
         position = SIMD2([x, y])
         normal = SIMD2([0.0, 0.0])
         textureCoordinate = SIMD2([0.0, 0.0])
-        lineStart = SIMD2([0.0, 0.0])
-        lineEnd = SIMD2([0.0, 0.0])
     }
 
     /// Initializes a Vertex
@@ -83,28 +64,16 @@ struct Vertex: Equatable {
         position = SIMD2([x, y])
         normal = SIMD2([0.0, 0.0])
         textureCoordinate = SIMD2([textureU, textureV])
-        lineStart = SIMD2([0.0, 0.0])
-        lineEnd = SIMD2([0.0, 0.0])
     }
 
     init(x: Float, y: Float, normalX: Float, normalY: Float) {
         position = SIMD2([x, y])
         normal = SIMD2([normalX, normalY])
         textureCoordinate = SIMD2([0.0, 0.0])
-        lineStart = SIMD2([0.0, 0.0])
-        lineEnd = SIMD2([0.0, 0.0])
     }
 
     init(position: MCVec2D, textureU: Float, textureV: Float) {
         self.init(x: position.xF, y: position.yF, textureU: textureU, textureV: textureV)
-    }
-
-    init(x: Float, y: Float, lineStart: MCVec2D, lineEnd: MCVec2D) {
-        position = SIMD2([x, y])
-        normal = SIMD2([0.0, 0.0])
-        textureCoordinate = SIMD2([0.0, 0.0])
-        self.lineStart = SIMD2([lineStart.xF, lineStart.yF])
-        self.lineEnd = SIMD2([lineEnd.xF, lineEnd.yF])
     }
 }
 
