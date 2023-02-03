@@ -212,7 +212,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
                     auto startStyle = style;
                     startStyle.opacity = 0.0;
                     
-                    tileObject->beginStyleAnimation(startStyle, style, 1500);
+                    tileObject->beginStyleAnimation(startStyle, style, 150);
                 }
                 tileObject->setRectCoord(tile.tileInfo.bounds);
                 tilesToSetup.emplace_back(std::make_pair(tile, tileObject));
