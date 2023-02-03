@@ -38,7 +38,7 @@ using FinalResult = std::unordered_map<std::string, std::shared_ptr<std::unorder
 class Tiled2dMapVectorSource : public Tiled2dMapSource<DataHolderInterface, IntermediateResult, FinalResult>  {
 public:
     Tiled2dMapVectorSource(const MapConfig &mapConfig,
-                           const std::unordered_map<std::string, std::shared_ptr<Tiled2dMapLayerConfig>> &layerConfigs,
+                           const std::vector<std::tuple<std::string, std::shared_ptr<Tiled2dMapLayerConfig>>> &layerConfigs,
                            const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                            const std::shared_ptr<SchedulerInterface> &scheduler,
                            const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
@@ -60,5 +60,5 @@ protected:
 private:
     const std::vector<std::shared_ptr<::LoaderInterface>> loaders;
     const std::unordered_map<std::string, std::unordered_set<std::string>> layersToDecode;
-    const std::unordered_map<std::string, std::shared_ptr<Tiled2dMapLayerConfig>> layerConfigs;
+    const std::vector<std::tuple<std::string, std::shared_ptr<Tiled2dMapLayerConfig>>> layerConfigs;
 };
