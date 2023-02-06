@@ -133,7 +133,7 @@ void Tiled2dMapVectorSubLayer::setupGraphicsObject(const std::shared_ptr<Texture
     auto renderingContext = mapInterface->getRenderingContext();
     if (!renderingContext) { return; }
 
-    if(object->getGraphicsObject()->isReady()) {
+    if(!object->getGraphicsObject()->isReady()) {
         object->getGraphicsObject()->setup(renderingContext);
     }
 
