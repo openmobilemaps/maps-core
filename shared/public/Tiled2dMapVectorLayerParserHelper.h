@@ -227,6 +227,7 @@ public:
                                             parser.parseValue(val["layout"]["icon-size"]),
                                             parser.parseValue(val["layout"]["text-line-height"]),
                                             parser.parseValue(val["layout"]["text-letter-spacing"]),
+                                            parser.parseValue(val["layout"]["text-max-width"]),
                                             dpFactor);
 
                     std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);

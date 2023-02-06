@@ -401,7 +401,8 @@ void Tiled2dMapVectorSymbolSubLayer::addTexts(const Tiled2dMapTileInfo &tileInfo
                                                      fontResult.fontData,
                                                      textOffset,
                                                      description->style.getTextLineHeight(evalContext),
-                                                     letterSpacing);
+                                                     letterSpacing,
+                                                     description->style.getTextMaxWidth(evalContext));
 
         if(textObject) {
             int64_t const symbolSortKey = description->style.getSymbolSortKey(evalContext);
