@@ -12,6 +12,7 @@
 
 #include "QuadCoord.h"
 #include "CoordinateConversionHelperInterface.h"
+#include <assert.h>
 
 namespace coordsutil {
 
