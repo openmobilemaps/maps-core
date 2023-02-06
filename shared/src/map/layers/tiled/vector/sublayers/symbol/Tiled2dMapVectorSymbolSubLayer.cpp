@@ -173,7 +173,7 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
 
         std::vector<FormattedStringEntry> text = description->style.getTextField(evalContext);
 
-        if(description->style.getTextTransform(evalContext) == TextTransform::UPPERCASE && text.size() > 2) {
+        if(description->style.getTextTransform(evalContext) == TextTransform::UPPERCASE) {
             for(auto &e: text) {
                 e.text = TextHelper::uppercase(e.text);
             }
