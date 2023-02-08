@@ -167,7 +167,10 @@ Tiled2dMapVectorPolygonSubLayer::updateTileData(const Tiled2dMapTileInfo &tileIn
 
                     indices_offset += posAdded;
 
-                    hitDetectionPolygonMap[tileInfo].push_back({PolygonCoord(polygonCoordinates[i], polygonHoles[i]), featureContext});
+                    {
+                        std::lock_guard<std::recursive_mutex> lock(hitDetectionMutex);
+                        hitDetectionPolygonMap[tileInfo].push_back({PolygonCoord(polygonCoordinates[i], polygonHoles[i]), featureContext});
+                    }
                 }
 
                 int styleIndex = -1;
@@ -307,6 +310,7 @@ bool Tiled2dMapVectorPolygonSubLayer::onClickConfirmed(const ::Vec2F &posScreen)
     }
     auto point = camera->coordFromScreenPosition(posScreen);
 
+    std::lock_guard<std::recursive_mutex> lock(hitDetectionMutex);
     for (auto const &[tileInfo, polygonTuples] : hitDetectionPolygonMap) {
         for (auto const &[polygon, featureContext]: polygonTuples) {
             if (PolygonHelper::pointInside(polygon, point, mapInterface->getCoordinateConverterHelper())) {
@@ -348,7 +352,10 @@ void Tiled2dMapVectorPolygonSubLayer::clearTileData(const Tiled2dMapTileInfo &ti
     auto mapInterface = this->mapInterface;
     if (!mapInterface) { return; }
 
-    hitDetectionPolygonMap.erase(tileInfo);
+    {
+        std::lock_guard<std::recursive_mutex> lock(hitDetectionMutex);
+        hitDetectionPolygonMap.erase(tileInfo);
+    }
 
     std::vector<std::shared_ptr<GraphicsObjectInterface>> objectsToClear;
     Tiled2dMapVectorSubLayer::clearTileData(tileInfo);
