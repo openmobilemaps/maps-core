@@ -216,6 +216,10 @@ void MapScene::drawFrame() {
     if (!isResumed)
         return;
 
+    if (scheduler && scheduler->hasSeparateGraphicsInvocation()) {
+        scheduler->runGraphicsTasks();
+    }
+
     auto const camera = this->camera;
     if (camera) {
         camera->update();
@@ -223,7 +227,6 @@ void MapScene::drawFrame() {
 
     {
         std::lock_guard<std::recursive_mutex> lock(layersMutex);
-
         for (const auto &layer : layers) {
             layer.second->update();
         }
@@ -234,6 +237,8 @@ void MapScene::drawFrame() {
             }
         }
     }
+
+    auto startRealDraw = std::chrono::steady_clock::now();
 
     scene->drawFrame();
 }

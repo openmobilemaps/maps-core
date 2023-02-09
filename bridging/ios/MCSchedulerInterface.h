@@ -19,4 +19,8 @@
 
 - (void)resume;
 
+- (BOOL)hasSeparateGraphicsInvocation;
+
+- (void)runGraphicsTasks;
+
 @end

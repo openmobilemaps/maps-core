@@ -47,12 +47,11 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterfa
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_createWithOpenGl(JNIEnv* jniEnv, jobject /*this*/, jobject j_mapConfig, ::djinni_generated::NativeSchedulerInterface::JniType j_scheduler, jfloat j_pixelDensity)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_createWithOpenGl(JNIEnv* jniEnv, jobject /*this*/, jobject j_mapConfig, jfloat j_pixelDensity)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE0(jniEnv);
         auto r = ::MapInterface::createWithOpenGl(::djinni_generated::NativeMapConfig::toCpp(jniEnv, j_mapConfig),
-                                                  ::djinni_generated::NativeSchedulerInterface::toCpp(jniEnv, j_scheduler),
                                                   ::djinni::F32::toCpp(jniEnv, j_pixelDensity));
         return ::djinni::release(::djinni_generated::NativeMapInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)

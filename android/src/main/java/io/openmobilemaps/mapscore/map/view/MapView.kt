@@ -17,9 +17,7 @@ import android.view.MotionEvent
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
-import androidx.lifecycle.coroutineScope
 import io.openmobilemaps.mapscore.graphics.GlTextureView
-import io.openmobilemaps.mapscore.map.scheduling.AndroidScheduler
 import io.openmobilemaps.mapscore.map.scheduling.AndroidSchedulerCallback
 import io.openmobilemaps.mapscore.map.util.MapViewInterface
 import io.openmobilemaps.mapscore.map.util.SaveFrameCallback
@@ -44,8 +42,6 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
 	var mapInterface: MapInterface? = null
 		private set
-	protected var scheduler: AndroidScheduler? = null
-		private set
 
 	private var touchHandler: TouchHandlerInterface? = null
 	private var touchDisabled = false
@@ -54,29 +50,26 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	private var saveFrameSpec: SaveFrameSpec? = null
 	private var saveFrameCallback: SaveFrameCallback? = null
 
-	open fun setupMap(mapConfig: MapConfig, scheduler: AndroidScheduler = AndroidScheduler(this), useMSAA: Boolean = false) {
+	open fun setupMap(mapConfig: MapConfig, useMSAA: Boolean = false) {
 		val densityExact = resources.displayMetrics.xdpi
 
 		configureGL(useMSAA)
 		setRenderer(this)
 		val mapInterface = MapInterface.createWithOpenGl(
 			mapConfig,
-			scheduler,
 			densityExact
 		)
 		mapInterface.setCallbackHandler(object : MapCallbackInterface() {
 			override fun invalidate() {
-				scheduler.launchCoroutine { requestRender() }
+				requestRender()
 			}
 		})
 		mapInterface.setBackgroundColor(Color(1f, 1f, 1f, 1f))
 		touchHandler = mapInterface.getTouchHandler()
 		this.mapInterface = mapInterface
-		this.scheduler = scheduler
 	}
 
 	fun registerLifecycle(lifecycle: Lifecycle) {
-		requireScheduler().setCoroutineScope(lifecycle.coroutineScope)
 		lifecycle.addObserver(this)
 	}
 
@@ -99,11 +92,6 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 		queueEvent { task.run() }
 	}
 
-	@OnLifecycleEvent(Lifecycle.Event.ON_START)
-	open fun onStart() {
-		requireScheduler().resume()
-	}
-
 	@OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
 	open fun onResume() {
 		requireMapInterface().resume()
@@ -114,16 +102,10 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 		requireMapInterface().pause()
 	}
 
-	@OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-	open fun onStop() {
-		requireScheduler().pause()
-	}
-
 	@OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 	open fun onDestroy() {
 		setRenderer(null)
 		mapInterface = null
-		scheduler = null
 		touchHandler = null
 	}
 
@@ -199,5 +181,4 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	}
 
 	override fun requireMapInterface(): MapInterface = mapInterface ?: throw IllegalStateException("Map is not setup or already destroyed!")
-	override fun requireScheduler(): AndroidScheduler = scheduler ?: throw IllegalStateException("Map is not setup or already destroyed!")
 }

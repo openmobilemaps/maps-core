@@ -21,29 +21,23 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 
 	var mapInterface: MapInterface? = null
 		private set
-	protected var scheduler: AndroidScheduler? = null
-		private set
 
 	private val saveFrame: AtomicBoolean = AtomicBoolean(false)
 	private var saveFrameSpec: SaveFrameSpec? = null
 	private var saveFrameCallback: SaveFrameCallback? = null
 
 	open fun setupMap(coroutineScope: CoroutineScope, mapConfig: MapConfig, useMSAA: Boolean = false) {
-		val scheduler = AndroidScheduler(this)
-		scheduler.setCoroutineScope(coroutineScope)
 		val mapInterface = MapInterface.createWithOpenGl(
 			mapConfig,
-			scheduler,
 			density
 		)
 		mapInterface.setCallbackHandler(object : MapCallbackInterface() {
 			override fun invalidate() {
-				scheduler.launchCoroutine { glThread.requestRender() }
+				glThread.requestRender()
 			}
 		})
 		mapInterface.setBackgroundColor(Color(1f, 1f, 1f, 1f))
 		this.mapInterface = mapInterface
-		this.scheduler = scheduler
 
 		glThread = GLThread().apply {
 			this.useMSAA = useMSAA
@@ -79,17 +73,14 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 	}
 
 	fun resume() {
-		requireScheduler().resume()
 		requireMapInterface().resume()
 	}
 
 	fun destroy() {
 		requireMapInterface().pause()
-		requireScheduler().pause()
 		glThread.finish()
 		glThread.renderer = null
 		mapInterface = null
-		scheduler = null
 	}
 
 	override fun setBackgroundColor(color: Color) {
@@ -135,5 +126,4 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 	}
 
 	override fun requireMapInterface(): MapInterface = mapInterface ?: throw IllegalStateException("Map is not setup or already destroyed!")
-	override fun requireScheduler(): AndroidScheduler = scheduler ?: throw IllegalStateException("Map is not setup or already destroyed!")
 }

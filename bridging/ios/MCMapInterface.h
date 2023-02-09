@@ -29,7 +29,6 @@
                        pixelDensity:(float)pixelDensity;
 
 + (nullable MCMapInterface *)createWithOpenGl:(nonnull MCMapConfig *)mapConfig
-                                    scheduler:(nullable id<MCSchedulerInterface>)scheduler
                                  pixelDensity:(float)pixelDensity;
 
 - (void)setCallbackHandler:(nullable id<MCMapCallbackInterface>)callbackInterface;

@@ -68,8 +68,8 @@ abstract class MapInterface {
         }
 
         @JvmStatic
-        fun createWithOpenGl(mapConfig: MapConfig, scheduler: io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerInterface, pixelDensity: Float): MapInterface {
-            return CppProxy.createWithOpenGl(mapConfig, scheduler, pixelDensity)
+        fun createWithOpenGl(mapConfig: MapConfig, pixelDensity: Float): MapInterface {
+            return CppProxy.createWithOpenGl(mapConfig, pixelDensity)
         }
     }
 
@@ -246,7 +246,7 @@ abstract class MapInterface {
             external fun create(graphicsFactory: io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface, shaderFactory: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderFactoryInterface, renderingContext: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, mapConfig: MapConfig, scheduler: io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerInterface, pixelDensity: Float): MapInterface
 
             @JvmStatic
-            external fun createWithOpenGl(mapConfig: MapConfig, scheduler: io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerInterface, pixelDensity: Float): MapInterface
+            external fun createWithOpenGl(mapConfig: MapConfig, pixelDensity: Float): MapInterface
         }
     }
 }

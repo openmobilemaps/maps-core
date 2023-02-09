@@ -68,6 +68,19 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (BOOL)hasSeparateGraphicsInvocation {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->hasSeparateGraphicsInvocation();
+        return ::djinni::Bool::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)runGraphicsTasks {
+    try {
+        _cppRefHandle.get()->runGraphicsTasks();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class SchedulerInterface::ObjcProxy final
@@ -111,6 +124,19 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() resume];
+        }
+    }
+    bool hasSeparateGraphicsInvocation() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() hasSeparateGraphicsInvocation];
+            return ::djinni::Bool::toCpp(objcpp_result_);
+        }
+    }
+    void runGraphicsTasks() override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() runGraphicsTasks];
         }
     }
 };

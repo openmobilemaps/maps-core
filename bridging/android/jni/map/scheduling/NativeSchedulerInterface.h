@@ -39,6 +39,8 @@ private:
         void clear() override;
         void pause() override;
         void resume() override;
+        bool hasSeparateGraphicsInvocation() override;
+        void runGraphicsTasks() override;
 
     private:
         friend ::djinni::JniInterface<::SchedulerInterface, ::djinni_generated::NativeSchedulerInterface>;
@@ -51,6 +53,8 @@ private:
     const jmethodID method_clear { ::djinni::jniGetMethodID(clazz.get(), "clear", "()V") };
     const jmethodID method_pause { ::djinni::jniGetMethodID(clazz.get(), "pause", "()V") };
     const jmethodID method_resume { ::djinni::jniGetMethodID(clazz.get(), "resume", "()V") };
+    const jmethodID method_hasSeparateGraphicsInvocation { ::djinni::jniGetMethodID(clazz.get(), "hasSeparateGraphicsInvocation", "()Z") };
+    const jmethodID method_runGraphicsTasks { ::djinni::jniGetMethodID(clazz.get(), "runGraphicsTasks", "()V") };
 };
 
 }  // namespace djinni_generated

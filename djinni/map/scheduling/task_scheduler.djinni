@@ -5,6 +5,8 @@ scheduler_interface = interface +c +j +o {
     clear();
     pause();
     resume();
+    has_separate_graphics_invocation(): bool;
+    run_graphics_tasks();
 }
 
 task_interface = interface +c +j +o {

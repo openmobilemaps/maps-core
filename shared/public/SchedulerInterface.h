@@ -24,4 +24,8 @@ public:
     virtual void pause() = 0;
 
     virtual void resume() = 0;
+
+    virtual bool hasSeparateGraphicsInvocation() = 0;
+
+    virtual void runGraphicsTasks() = 0;
 };

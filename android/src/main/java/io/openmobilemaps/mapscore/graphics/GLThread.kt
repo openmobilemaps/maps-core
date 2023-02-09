@@ -122,7 +122,7 @@ class GLThread constructor(
 
 			onDrawCallback?.invoke()
 
-			//Log.d("RENDER_TIME", "${(System.nanoTime() - renderStart) / 1000000}ms")
+			//Log.d("UBCM: RENDER_TIME", "${(System.nanoTime() - renderStart) / 1000000}ms")
 			if (targetFrameRate > 0) {
 				val renderTime = (System.nanoTime() - timestampStartRender) / 1000000
 				try {

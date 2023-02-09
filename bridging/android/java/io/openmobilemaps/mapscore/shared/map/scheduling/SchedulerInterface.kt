@@ -19,6 +19,10 @@ abstract class SchedulerInterface {
 
     abstract fun resume()
 
+    abstract fun hasSeparateGraphicsInvocation(): Boolean
+
+    abstract fun runGraphicsTasks()
+
     private class CppProxy : SchedulerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -72,5 +76,17 @@ abstract class SchedulerInterface {
             native_resume(this.nativeRef)
         }
         private external fun native_resume(_nativeRef: Long)
+
+        override fun hasSeparateGraphicsInvocation(): Boolean {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_hasSeparateGraphicsInvocation(this.nativeRef)
+        }
+        private external fun native_hasSeparateGraphicsInvocation(_nativeRef: Long): Boolean
+
+        override fun runGraphicsTasks() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_runGraphicsTasks(this.nativeRef)
+        }
+        private external fun native_runGraphicsTasks(_nativeRef: Long)
     }
 }

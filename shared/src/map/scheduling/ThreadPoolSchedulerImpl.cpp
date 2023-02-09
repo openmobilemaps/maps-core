@@ -6,23 +6,30 @@
 //
 
 #include "ThreadPoolSchedulerImpl.h"
+#include "Logger.h"
+#include <chrono>
+#include <cassert>
 
-std::shared_ptr<SchedulerInterface> ThreadPoolScheduler::create(const std::shared_ptr<ThreadPoolCallbacks> & callbacks) {
-    return std::make_shared<ThreadPoolSchedulerImpl>(callbacks);
+std::shared_ptr<SchedulerInterface> ThreadPoolScheduler::create(const std::shared_ptr<ThreadPoolCallbacks> &callbacks) {
+    return std::make_shared<ThreadPoolSchedulerImpl>(callbacks, false);
 }
 
-ThreadPoolSchedulerImpl::ThreadPoolSchedulerImpl(const std::shared_ptr<ThreadPoolCallbacks> & callbacks): callbacks(callbacks) {
-    for (std::size_t i = 0u; i < threads.max_size(); ++i) {
-        threads[i] = makeSchedulerThread(i, TaskPriority::NORMAL);
+ThreadPoolSchedulerImpl::ThreadPoolSchedulerImpl(const std::shared_ptr<ThreadPoolCallbacks> &callbacks,
+                                                 bool separateGraphicsQueue)
+        : callbacks(callbacks), separateGraphicsQueue(separateGraphicsQueue) {
+    unsigned int maxNumThreads = floor(std::thread::hardware_concurrency() * 0.75);
+    if (maxNumThreads < 1) maxNumThreads = DEFAULT_MAX_NUM_THREADS;
+    for (std::size_t i = 0u; i < maxNumThreads; ++i) {
+        threads.emplace_back(makeSchedulerThread(i, TaskPriority::NORMAL));
     }
 }
 
 ThreadPoolSchedulerImpl::~ThreadPoolSchedulerImpl() {
     {
-        std::lock_guard<std::mutex> lock(mutex);
+        std::lock_guard<std::mutex> lock(defaultMutex);
         terminated = true;
     }
-    cv.notify_all();
+    defaultCv.notify_all();
     
     for (auto& thread : threads) {
         if (std::this_thread::get_id() != thread.get_id()) {
@@ -33,12 +40,14 @@ ThreadPoolSchedulerImpl::~ThreadPoolSchedulerImpl() {
 
 void ThreadPoolSchedulerImpl::addTask(const std::shared_ptr<TaskInterface> & task) {
     assert(task);
-    {
-        std::lock_guard<std::mutex> lock(mutex);
-        queue.push_back(std::move(task));
+    if (separateGraphicsQueue && task->getConfig().executionEnvironment == ExecutionEnvironment::GRAPHICS) {
+        std::lock_guard<std::mutex> lock(graphicsMutex);
+        graphicsQueue.push_back(task);
+    } else {
+        std::lock_guard<std::mutex> lock(defaultMutex);
+        defaultQueue.push_back(task);
+        defaultCv.notify_one();
     }
-    
-    cv.notify_one();
 }
 
 void ThreadPoolSchedulerImpl::addTasks(const std::vector<std::shared_ptr<TaskInterface>> & tasks) {
@@ -48,16 +57,35 @@ void ThreadPoolSchedulerImpl::addTasks(const std::vector<std::shared_ptr<TaskInt
 }
 
 void ThreadPoolSchedulerImpl::removeTask(const std::string & id) {
-    std::lock_guard<std::mutex> lock(mutex);
-    auto it = std::find_if(queue.begin(), queue.end(), [&] (const std::shared_ptr<TaskInterface> &task) { return task->getConfig().id == id; });
-    if( it != queue.end() ) {
-        queue.erase(it);
+    {
+        std::lock_guard<std::mutex> lock(defaultMutex);
+        auto it = std::find_if(defaultQueue.begin(), defaultQueue.end(),
+                               [&](const std::shared_ptr<TaskInterface> &task) { return task->getConfig().id == id; });
+        if (it != defaultQueue.end()) {
+            defaultQueue.erase(it);
+            return;
+        }
+    }
+    if (separateGraphicsQueue) {
+        std::lock_guard<std::mutex> lock(graphicsMutex);
+        auto it = std::find_if(graphicsQueue.begin(), graphicsQueue.end(),
+                               [&](const std::shared_ptr<TaskInterface> &task) { return task->getConfig().id == id; });
+        if (it != graphicsQueue.end()) {
+            graphicsQueue.erase(it);
+            return;
+        }
     }
 }
 
 void ThreadPoolSchedulerImpl::clear() {
-    std::lock_guard<std::mutex> lock(mutex);
-    queue.clear();
+    {
+        std::lock_guard<std::mutex> lock(defaultMutex);
+        defaultQueue.clear();
+    }
+    {
+        std::lock_guard<std::mutex> lock(graphicsMutex);
+        graphicsQueue.clear();
+    }
 }
 
 void ThreadPoolSchedulerImpl::pause() {
@@ -74,19 +102,46 @@ std::thread ThreadPoolSchedulerImpl::makeSchedulerThread(size_t index, TaskPrior
         callbacks->attachThread();
         
         while (true) {
-            std::unique_lock<std::mutex> lock(mutex);
+            std::unique_lock<std::mutex> lock(defaultMutex);
             
-            cv.wait(lock, [this] { return !queue.empty() || terminated; });
+            defaultCv.wait(lock, [this] { return !defaultQueue.empty() || terminated; });
             
             if (terminated) {
                 callbacks->detachThread();
                 return;
             }
             
-            auto task = std::move(queue.front());
-            queue.pop_front();
+            auto task = std::move(defaultQueue.front());
+            defaultQueue.pop_front();
             lock.unlock();
             if (task) task->run();
         }
     });
+}
+
+bool ThreadPoolSchedulerImpl::hasSeparateGraphicsInvocation() {
+    return separateGraphicsQueue;
+}
+
+std::chrono::time_point<std::chrono::steady_clock> lastEnd;
+void ThreadPoolSchedulerImpl::runGraphicsTasks() {
+    auto start = std::chrono::steady_clock::now();
+    int i;
+    for (i = 0; i < MAX_NUM_GRAPHICS_TASKS; i++) {
+        {
+            std::unique_lock<std::mutex> lock(graphicsMutex);
+            if (graphicsQueue.empty()) {
+                break;
+            } else {
+                auto task = std::move(graphicsQueue.front());
+                graphicsQueue.pop_front();
+                lock.unlock();
+                if (task) task->run();
+            }
+        }
+        auto cwtMs = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start);
+        if (cwtMs.count() >= MAX_TIME_GRAPHICS_TASKS_MS) {
+            break;
+        }
+    }
 }
