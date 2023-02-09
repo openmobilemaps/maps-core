@@ -23,7 +23,7 @@ template<class T, class L, class R>
 Tiled2dMapSource<T, L, R>::Tiled2dMapSource(const MapConfig &mapConfig, const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
                                          const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                          const std::shared_ptr<SchedulerInterface> &scheduler,
-                                         const std::shared_ptr<Tiled2dMapSourceListenerInterface> &listener,
+                                         const WeakActor<Tiled2dMapSourceListenerInterface> &listener,
                                          float screenDensityPpi,
                                          size_t loaderCount)
     : mapConfig(mapConfig)
@@ -451,11 +451,8 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
 
     //if we removed tiles, we potentially need to update the tilemasks - also if no new tile is loaded
     updateTileMasks();
-
-    auto listenerPtr = listener.lock();
-    if (listenerPtr) {
-        listenerPtr->onTilesUpdated();
-    }
+    
+    listener.message(&Tiled2dMapSourceListenerInterface::onTilesUpdated);
 }
 
 template<class T, class L, class R>
@@ -665,10 +662,7 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(size_t loaderIndex) {
 
         updateTileMasks();
 
-        auto listenerPtr = listener.lock();
-        if (listenerPtr) {
-            listenerPtr->onTilesUpdated();
-        }
+        listener.message(&Tiled2dMapSourceListenerInterface::onTilesUpdated);
     }
 
     {
@@ -825,10 +819,7 @@ void Tiled2dMapSource<T, L, R>::setTileReady(const Tiled2dMapTileInfo &tile) {
                 auto selfPtr = weakSelfPtr.lock();
                 if (!selfPtr) return;
                 selfPtr->updateTileMasks();
-                auto listenerPtr = selfPtr->listener.lock();
-                if (listenerPtr) {
-                    listenerPtr->onTilesUpdated();
-                }
+                selfPtr->listener.message(&Tiled2dMapSourceListenerInterface::onTilesUpdated);
             }));
 }
 
@@ -856,10 +847,7 @@ void Tiled2dMapSource<T, L, R>::setTilesReady(const std::vector<const Tiled2dMap
                 auto selfPtr = weakSelfPtr.lock();
                 if (!selfPtr) return;
                 selfPtr->updateTileMasks();
-                auto listenerPtr = selfPtr->listener.lock();
-                if (listenerPtr) {
-                    listenerPtr->onTilesUpdated();
-                }
+                selfPtr->listener.message(&Tiled2dMapSourceListenerInterface::onTilesUpdated);
             }));
 }
 

@@ -19,7 +19,7 @@ Tiled2dMapRasterSource::Tiled2dMapRasterSource(const MapConfig &mapConfig,
                                                const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                                const std::shared_ptr<SchedulerInterface> &scheduler,
                                                const std::vector<std::shared_ptr<::LoaderInterface>> & loaders,
-                                               const std::shared_ptr<Tiled2dMapSourceListenerInterface> &listener,
+                                               const WeakActor<Tiled2dMapSourceListenerInterface> &listener,
                                                float screenDensityPpi)
     : Tiled2dMapSource<TextureHolderInterface, TextureLoaderResult, std::shared_ptr<::TextureHolderInterface>>(
           mapConfig, layerConfig, conversionHelper, scheduler, listener, screenDensityPpi, loaders.size())

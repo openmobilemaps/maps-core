@@ -32,6 +32,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include "gpc.h"
+#include "Actor.h"
 
 template<class R>
 struct TileWrapper {
@@ -64,7 +65,7 @@ public:
     Tiled2dMapSource(const MapConfig &mapConfig, const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
                      const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                      const std::shared_ptr<SchedulerInterface> &scheduler,
-                     const std::shared_ptr<Tiled2dMapSourceListenerInterface> &listener,
+                     const WeakActor<Tiled2dMapSourceListenerInterface> &listener,
                      float screenDensityPpi,
                      size_t loaderCount);
 
@@ -107,7 +108,7 @@ public:
     std::string layerSystemId;
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
     std::shared_ptr<SchedulerInterface> scheduler;
-    std::weak_ptr<Tiled2dMapSourceListenerInterface> listener;
+    WeakActor<Tiled2dMapSourceListenerInterface> listener;
     std::shared_ptr<::ErrorManager> errorManager;
 
     std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfos;

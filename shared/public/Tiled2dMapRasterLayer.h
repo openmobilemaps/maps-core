@@ -24,6 +24,7 @@
 #include <unordered_map>
 #include <map>
 #include <atomic>
+#include "Actor.h"
 
 
 class Tiled2dMapRasterLayer : public Tiled2dMapLayer,
@@ -114,8 +115,9 @@ protected:
 
     const std::vector<std::shared_ptr<::LoaderInterface>> tileLoaders;
     std::shared_ptr<ShaderProgramInterface> shader;
-    std::shared_ptr<Tiled2dMapRasterSource> rasterSource;
 
+    Actor<Tiled2dMapRasterSource> rasterSource;
+                                  
     std::atomic_flag updateFlag = ATOMIC_FLAG_INIT;
     std::recursive_mutex updateMutex;
     std::map<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>> tileObjectMap;

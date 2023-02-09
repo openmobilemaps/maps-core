@@ -258,16 +258,16 @@ void Tiled2dMapVectorLayer::initializeVectorLayer(const std::vector<std::shared_
         }
     }
 
-    vectorTileSource = std::make_shared<Tiled2dMapVectorSource>(mapInterface->getMapConfig(),
+    /*vectorTileSource = std::make_shared<Tiled2dMapVectorSource>(mapInterface->getMapConfig(),
                                                                 layerConfigs,
                                                                 mapInterface->getCoordinateConverterHelper(),
                                                                 mapInterface->getScheduler(),
                                                                 loaders,
                                                                 shared_from_this(),
                                                                 layersToDecode,
-                                                                mapInterface->getCamera()->getScreenDensityPpi());
+                                                                mapInterface->getCamera()->getScreenDensityPpi());*/
 
-    setSourceInterface(vectorTileSource);
+    //setSourceInterface(vectorTileSource);
     Tiled2dMapLayer::onAdded(mapInterface, layerIndex);
     mapInterface->getTouchHandler()->insertListener(std::dynamic_pointer_cast<TouchInterface>(shared_from_this()), layerIndex);
 

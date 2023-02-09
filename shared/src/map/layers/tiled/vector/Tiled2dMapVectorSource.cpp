@@ -19,7 +19,7 @@ Tiled2dMapVectorSource::Tiled2dMapVectorSource(const MapConfig &mapConfig,
                                                const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                                const std::shared_ptr<SchedulerInterface> &scheduler,
                                                const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
-                                               const std::shared_ptr<Tiled2dMapSourceListenerInterface> &listener,
+                                               const WeakActor<Tiled2dMapSourceListenerInterface> &listener,
                                                const std::unordered_map<std::string, std::unordered_set<std::string>> &layersToDecode,
                                                float screenDensityPpi)
         : Tiled2dMapSource<DataHolderInterface, IntermediateResult, FinalResult>(mapConfig, layerConfigs.begin()->second, conversionHelper, scheduler,

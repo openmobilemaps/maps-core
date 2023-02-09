@@ -14,22 +14,22 @@
 Tiled2dMapLayer::Tiled2dMapLayer()
     : curT(0) {}
 
-void Tiled2dMapLayer::setSourceInterface(const std::shared_ptr<Tiled2dMapSourceInterface> &sourceInterface) {
+void Tiled2dMapLayer::setSourceInterface(const WeakActor<Tiled2dMapSourceInterface> &sourceInterface) {
     this->sourceInterface = sourceInterface;
     if (isHidden) {
-        sourceInterface->pause();
+        sourceInterface.message(&Tiled2dMapSourceInterface::pause);
     }
     auto errorManager = this->errorManager;
     if (errorManager) {
-        this->sourceInterface->setErrorManager(errorManager);
+        sourceInterface.message(&Tiled2dMapSourceInterface::setErrorManager, errorManager);
     }
 }
 
 void Tiled2dMapLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface, int32_t layerIndex) {
     this->mapInterface = mapInterface;
 
-    sourceInterface->setMinZoomLevelIdentifier(minZoomLevelIdentifier);
-    sourceInterface->setMaxZoomLevelIdentifier(maxZoomLevelIdentifier);
+    sourceInterface.message(&Tiled2dMapSourceInterface::setMinZoomLevelIdentifier, minZoomLevelIdentifier);
+    sourceInterface.message(&Tiled2dMapSourceInterface::setMaxZoomLevelIdentifier, maxZoomLevelIdentifier);
 
     auto camera = std::dynamic_pointer_cast<MapCamera2dInterface>(mapInterface->getCamera());
     if (camera) {
@@ -48,18 +48,20 @@ void Tiled2dMapLayer::onRemoved() {
     mapInterface = nullptr;
 }
 
-void Tiled2dMapLayer::pause() { sourceInterface->pause(); }
+void Tiled2dMapLayer::pause() {
+    sourceInterface.message(&Tiled2dMapSourceInterface::pause);
+}
 
 void Tiled2dMapLayer::resume() {
     if (!isHidden) {
-        sourceInterface->resume();
+        sourceInterface.message(&Tiled2dMapSourceInterface::resume);
     }
 }
 
 void Tiled2dMapLayer::hide() {
     isHidden = true;
     if (sourceInterface) {
-        sourceInterface->pause();
+        sourceInterface.message(&Tiled2dMapSourceInterface::pause);
     }
     if (mapInterface) {
         mapInterface->invalidate();
@@ -69,7 +71,7 @@ void Tiled2dMapLayer::hide() {
 void Tiled2dMapLayer::show() {
     isHidden = false;
     if (sourceInterface) {
-        sourceInterface->resume();
+        sourceInterface.message(&Tiled2dMapSourceInterface::resume);
     }
     if (mapInterface) {
         mapInterface->invalidate();
@@ -77,7 +79,7 @@ void Tiled2dMapLayer::show() {
 }
 
 void Tiled2dMapLayer::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom) {
-    sourceInterface->onVisibleBoundsChanged(visibleBounds, curT, zoom);
+    sourceInterface.message(&Tiled2dMapSourceInterface::onVisibleBoundsChanged, visibleBounds, curT, zoom);
 }
 
 void Tiled2dMapLayer::onRotationChanged(float angle) {
@@ -93,31 +95,31 @@ void Tiled2dMapLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInte
 void Tiled2dMapLayer::setMinZoomLevelIdentifier(std::optional<int32_t> value) {
     minZoomLevelIdentifier = value;
     if (sourceInterface)
-        sourceInterface->setMinZoomLevelIdentifier(value);
+        sourceInterface.message(&Tiled2dMapSourceInterface::setMinZoomLevelIdentifier, value);
 }
 
 std::optional<int32_t> Tiled2dMapLayer::getMinZoomLevelIdentifier() {
     if (sourceInterface)
-        return sourceInterface->getMinZoomLevelIdentifier();
+        //return sourceInterface->getMinZoomLevelIdentifier();
     return std::nullopt;
 }
 
 void Tiled2dMapLayer::setMaxZoomLevelIdentifier(std::optional<int32_t> value) {
     maxZoomLevelIdentifier = value;
     if (sourceInterface)
-        sourceInterface->setMaxZoomLevelIdentifier(value);
+        sourceInterface.message(&Tiled2dMapSourceInterface::setMaxZoomLevelIdentifier, value);
 }
 
 std::optional<int32_t> Tiled2dMapLayer::getMaxZoomLevelIdentifier() {
-    if (sourceInterface)
-        return sourceInterface->getMaxZoomLevelIdentifier();
+    //if (sourceInterface)
+//        return sourceInterface->getMaxZoomLevelIdentifier();
     return std::nullopt;
 }
 
 LayerReadyState Tiled2dMapLayer::isReadyToRenderOffscreen() {
-    if (sourceInterface) {
-        return sourceInterface->isReadyToRenderOffscreen();
-    }
+    //if (sourceInterface) {
+      //  return sourceInterface->isReadyToRenderOffscreen();
+    //}
 
     return LayerReadyState::READY;
 }
@@ -126,14 +128,14 @@ void Tiled2dMapLayer::setErrorManager(const std::shared_ptr<::ErrorManager> &err
     this->errorManager = errorManager;
     auto sourceInterface = this->sourceInterface;
     if (sourceInterface) {
-        sourceInterface->setErrorManager(errorManager);
+        sourceInterface.message(&Tiled2dMapSourceInterface::setErrorManager, errorManager);
     }
 }
 
 void Tiled2dMapLayer::forceReload() {
     auto sourceInterface = this->sourceInterface;
     if (sourceInterface) {
-        sourceInterface->forceReload();
+        sourceInterface.message(&Tiled2dMapSourceInterface::forceReload);
     }
 }
 

@@ -18,6 +18,7 @@
 #include "Tiled2dMapSourceInterface.h"
 #include "Tiled2dMapSourceListenerInterface.h"
 #include "SimpleTouchInterface.h"
+#include "Actor.h"
 
 class Tiled2dMapLayer : public SimpleLayerInterface,
                         public Tiled2dMapSourceListenerInterface,
@@ -26,7 +27,7 @@ class Tiled2dMapLayer : public SimpleLayerInterface,
   public:
     Tiled2dMapLayer();
 
-    void setSourceInterface(const std::shared_ptr<Tiled2dMapSourceInterface> &sourceInterface);
+    void setSourceInterface(const WeakActor<Tiled2dMapSourceInterface> &sourceInterface);
 
     virtual void update() override = 0;
 
@@ -73,7 +74,7 @@ class Tiled2dMapLayer : public SimpleLayerInterface,
 protected:
     std::shared_ptr<MapInterface> mapInterface;
     std::shared_ptr< ::ErrorManager> errorManager;
-    std::shared_ptr<Tiled2dMapSourceInterface> sourceInterface;
+    WeakActor<Tiled2dMapSourceInterface> sourceInterface;
 
     bool isHidden = false;
 

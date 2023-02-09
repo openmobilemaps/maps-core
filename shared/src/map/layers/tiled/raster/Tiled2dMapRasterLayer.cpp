@@ -40,10 +40,19 @@ Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapL
           registerToTouchHandler(registerToTouchHandler) {}
 
 void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface, int32_t layerIndex) {
-    rasterSource = std::make_shared<Tiled2dMapRasterSource>(
-            mapInterface->getMapConfig(), layerConfig, mapInterface->getCoordinateConverterHelper(), mapInterface->getScheduler(),
-                                                            tileLoaders, shared_from_this(), mapInterface->getCamera()->getScreenDensityPpi());
-    setSourceInterface(rasterSource);
+    
+    
+    auto selfMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+    auto castedMe = std::static_pointer_cast<Tiled2dMapSourceListenerInterface>(shared_from_this());
+    auto selfActor = WeakActor<Tiled2dMapSourceListenerInterface>(selfMailbox, castedMe);
+    
+    auto mailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+    rasterSource.emplaceObject(mailbox, mapInterface->getMapConfig(), layerConfig, mapInterface->getCoordinateConverterHelper(), mapInterface->getScheduler(), tileLoaders, selfActor, mapInterface->getCamera()->getScreenDensityPpi());
+    
+    
+    
+    setSourceInterface(rasterSource.weakActor<Tiled2dMapSourceInterface>());
+    
     Tiled2dMapLayer::onAdded(mapInterface, layerIndex);
 
     if (registerToTouchHandler) {
@@ -148,8 +157,11 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
         if (updateFlag.test_and_set()) {
             return;
         }
-
-        auto currentTileInfos = rasterSource->getCurrentTiles();
+        
+        auto currentTileInfosPromise = rasterSource.converse(&Tiled2dMapRasterSource::getCurrentTiles);
+        
+        auto currentTileInfos = currentTileInfosPromise.get();
+        
         std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> tilesToSetup, tilesToClean;
         std::vector<const std::shared_ptr<MaskingObjectInterface>> newMaskObjects;
         std::vector<const std::shared_ptr<MaskingObjectInterface>> obsoleteMaskObjects;
@@ -315,8 +327,8 @@ void Tiled2dMapRasterLayer::setupTiles(
             tileObject->getQuadObject()->removeTexture();
         }
     }
-
-    rasterSource->setTilesReady(tilesReady);
+    
+    rasterSource.message(&Tiled2dMapRasterSource::setTilesReady, tilesReady);
 
     mapInterface->invalidate();
 
