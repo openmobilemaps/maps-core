@@ -44,7 +44,8 @@ std::shared_ptr<TextLayerObject> TextHelper::textLayerObject(const std::shared_p
                                                              std::optional<FontData> fontData,
                                                              Vec2F offset,
                                                              double lineHeight,
-                                                             double letterSpacing) {
+                                                             double letterSpacing,
+                                                             int64_t maxCharacterWidth) {
 
     if (!fontData) {
         return nullptr;
@@ -75,13 +76,13 @@ std::shared_ptr<TextLayerObject> TextHelper::textLayerObject(const std::shared_p
 
     std::optional<BoundingBox> box = std::nullopt;
 
-    int characterCount = 0;
+    int64_t characterCount = 0;
     std::vector<size_t> lineEndIndices;
 
     for (const auto &entry: formattedText) {
         for (const auto &c : split_wstring(entry.text)) {
             for (const auto &d : fontData->glyphs) {
-                if (c == " " && characterCount < 15) {
+                if (c == " " && characterCount < maxCharacterWidth) {
                     pen.x += fontData->info.spaceAdvance * fontSize * entry.scale;
                     characterCount += 1;
                     break;
@@ -117,6 +118,13 @@ std::shared_ptr<TextLayerObject> TextHelper::textLayerObject(const std::shared_p
                     glyphs.push_back(GlyphDescription(quad, d.uv));
                     pen.x += advance.x * (1.0 + letterSpacing);
                     characterCount += 1;
+                    
+                    if (c == "/" && characterCount >= maxCharacterWidth) {
+                        lineEndIndices.push_back(glyphs.size() - 1);
+                        characterCount = 0;
+                        pen.x = 0.0;
+                        pen.y += fontSize;
+                    }
                     break;
                 }
             }

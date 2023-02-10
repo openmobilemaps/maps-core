@@ -73,8 +73,12 @@ public:
     virtual void removeCallbackHandler() override;
 
     virtual void setAlpha(float alpha) override;
-
+    
     virtual float getAlpha() override;
+    
+    virtual void setStyle(const ::RasterShaderStyle & style) override;
+    
+    virtual ::RasterShaderStyle getStyle() override;
 
     virtual void setMinZoomLevelIdentifier(std::optional<int32_t> value) override;
 
@@ -125,7 +129,7 @@ protected:
 
     std::shared_ptr<Tiled2dMapRasterLayerCallbackInterface> callbackHandler;
 
-    float alpha;
+    ::RasterShaderStyle style = RasterShaderStyle::DEFAULT_STYLE;
     bool animationsEnabled = true;
     bool registerToTouchHandler = true;
 };

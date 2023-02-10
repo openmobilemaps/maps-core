@@ -4,6 +4,7 @@
 #import "MCLayerInterface.h"
 #import "MCLoaderInterface.h"
 #import "MCMaskingObjectInterface.h"
+#import "MCRasterShaderStyle.h"
 #import "MCShaderProgramInterface.h"
 #import "MCTiled2dMapLayerConfig.h"
 #import <Foundation/Foundation.h>
@@ -38,6 +39,10 @@
 - (void)setAlpha:(float)alpha;
 
 - (float)getAlpha;
+
+- (void)setStyle:(nonnull MCRasterShaderStyle *)style;
+
+- (nonnull MCRasterShaderStyle *)getStyle;
 
 - (void)setMinZoomLevelIdentifier:(nullable NSNumber *)value;
 

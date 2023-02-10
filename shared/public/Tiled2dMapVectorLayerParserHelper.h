@@ -71,6 +71,9 @@ public:
                 int32_t numDrawPreviousLayers = 0;
                 bool maskTiles = true;
                 double zoomLevelScaleFactor = 0.65;
+                
+                bool overzoom = true;
+                bool underzoom = true;
 
                 if (val["tiles"].is_array()) {
                     auto str = val.dump();
@@ -94,17 +97,18 @@ public:
                         return Tiled2dMapVectorLayerParserResult(nullptr, LoaderStatus::ERROR_OTHER, "");
                     }
                     url = json["tiles"].begin()->get<std::string>();
-                    }
-
+                }
+                
                 rasterLayerMap[key] = std::make_shared<RasterVectorLayerDescription>(layerName,
                                                                                      val.value("minZoom", 0),
                                                                                      val.value("maxZoom", 22),
                                                                                      url,
+                                                                                     RasterVectorStyle(nullptr, nullptr, nullptr, nullptr, nullptr),
                                                                                      adaptScaleToScreen,
                                                                                      numDrawPreviousLayers,
                                                                                      maskTiles,
                                                                                      zoomLevelScaleFactor,
-                                                                                     std::nullopt);
+                                                                                     std::nullopt, overzoom, underzoom);
 
             }
             if (val["type"].get<std::string>() == "vector" && val["url"].is_string()) {
@@ -133,6 +137,13 @@ public:
         Tiled2dMapVectorStyleParser parser;
 
         for (auto&[key, val]: json["layers"].items()) {
+			if (!val["source-layer"].is_string() && val["type"] != "raster") {
+                // layers without a source-layer are currently not supported
+                continue;
+            }
+            if (val["layout"].is_object() && val["layout"]["visibility"] == "none") {
+                continue;
+            }
             std::optional<int32_t> renderPassIndex;
             if (val["metadata"].is_object() && val["metadata"]["render-pass-index"].is_number()) {
                 renderPassIndex = val["metadata"].value("render-pass-index", 0);
@@ -144,21 +155,28 @@ public:
                                                                                             val["paint"]["background-color"])),
                                                                                     renderPassIndex);
                 layers.push_back(layerDesc);
-
+                
             } else if (val["type"] == "raster" && rasterLayerMap.count(val["source"]) != 0) {
                 auto layer = rasterLayerMap.at(val["source"]);
-
+                
                 auto newLayer = std::make_shared<RasterVectorLayerDescription>(val["id"],
-                                                                               layer->minZoom,
-                                                                               layer->maxZoom,
+                                                                               val.value("minzoom", layer->minZoom),
+                                                                               val.value("maxzoom", layer->maxZoom),
                                                                                layer->url,
+                                                                               RasterVectorStyle(parser.parseValue(val["paint"]["raster-opacity"]),
+                                                                                                 parser.parseValue(val["paint"]["raster-brightness-min"]),
+                                                                                                 parser.parseValue(val["paint"]["raster-brightness-max"]),
+                                                                                                 parser.parseValue(val["paint"]["raster-contrast"]),
+                                                                                                 parser.parseValue(val["paint"]["raster-saturation"])),
                                                                                layer->adaptScaleToScreen,
                                                                                layer->numDrawPreviousLayers,
                                                                                layer->maskTiles,
-                                                                               layer->zoomLevelScaleFactor);
-
-                newLayer->style = RasterVectorStyle(parser.parseValue(val["paint"]["raster-opacity"]));
-
+                                                                               layer->zoomLevelScaleFactor,
+                                                                               layer->renderPassIndex,
+                                                                               layer->overzoom,
+                                                                               layer->underzoom);
+                
+                
                 layers.push_back(newLayer);
             }else if (val["type"] == "line") {
 
@@ -209,6 +227,7 @@ public:
                                             parser.parseValue(val["layout"]["icon-size"]),
                                             parser.parseValue(val["layout"]["text-line-height"]),
                                             parser.parseValue(val["layout"]["text-letter-spacing"]),
+                                            parser.parseValue(val["layout"]["text-max-width"]),
                                             dpFactor);
 
                     std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);

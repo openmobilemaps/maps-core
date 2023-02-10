@@ -22,21 +22,21 @@
 Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
                                              bool registerToTouchHandler)
-        : Tiled2dMapLayer(), layerConfig(layerConfig), tileLoaders(tileLoaders), alpha(1.0),
+        : Tiled2dMapLayer(), layerConfig(layerConfig), tileLoaders(tileLoaders),
           registerToTouchHandler(registerToTouchHandler) {}
 
 Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &tileLoaders,
                                              const std::shared_ptr<::MaskingObjectInterface> &mask,
                                              bool registerToTouchHandler)
-        : Tiled2dMapLayer(), layerConfig(layerConfig), tileLoaders(tileLoaders), alpha(1.0), mask(mask),
+        : Tiled2dMapLayer(), layerConfig(layerConfig), tileLoaders(tileLoaders), mask(mask),
           registerToTouchHandler(registerToTouchHandler) {}
 
 Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &tileLoaders,
                                              const std::shared_ptr<::ShaderProgramInterface> &shader,
                                              bool registerToTouchHandler)
-        : Tiled2dMapLayer(), layerConfig(layerConfig), tileLoaders(tileLoaders), alpha(1.0), shader(shader),
+        : Tiled2dMapLayer(), layerConfig(layerConfig), tileLoaders(tileLoaders), shader(shader),
           registerToTouchHandler(registerToTouchHandler) {}
 
 void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface, int32_t layerIndex) {
@@ -200,16 +200,19 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
             for (const auto &tile : tilesToAdd) {
                 std::shared_ptr<Textured2dLayerObject> tileObject;
                 if (shader) {
-                    tileObject = std::make_shared<Textured2dLayerObject>(graphicsFactory->createQuad(shader), nullptr, mapInterface);
+                    tileObject = std::make_shared<Textured2dLayerObject>(graphicsFactory->createQuad(shader), mapInterface);
                 } else {
-                    auto alphaShader = shaderFactory->createAlphaShader();
+                    auto rasterShader = shaderFactory->createRasterShader();
                     tileObject = std::make_shared<Textured2dLayerObject>(
-                            graphicsFactory->createQuad(alphaShader->asShaderProgramInterface()), alphaShader, mapInterface);
+                            graphicsFactory->createQuad(rasterShader->asShaderProgramInterface()), rasterShader, mapInterface);
                 }
                 if (zoomInfo.numDrawPreviousLayers == 0 || !animationsEnabled || zoomInfo.maskTile) {
-                    tileObject->setAlpha(alpha);
+                    tileObject->setStyle(style);
                 } else {
-                    tileObject->beginAlphaAnimation(0.0, alpha, 150);
+                    auto startStyle = style;
+                    startStyle.opacity = 0.0;
+                    
+                    tileObject->beginStyleAnimation(startStyle, style, 150);
                 }
                 tileObject->setRectCoord(tile.tileInfo.bounds);
                 tilesToSetup.emplace_back(std::make_pair(tile, tileObject));
@@ -388,14 +391,24 @@ void Tiled2dMapRasterLayer::removeCallbackHandler() { callbackHandler = nullptr;
 std::shared_ptr<Tiled2dMapRasterLayerCallbackInterface> Tiled2dMapRasterLayer::getCallbackHandler() { return callbackHandler; }
 
 void Tiled2dMapRasterLayer::setAlpha(float alpha) {
-    if (this->alpha == alpha) {
+    if (style.opacity == alpha) {
         return;
     }
-    this->alpha = alpha;
+    style.opacity = alpha;
+    setStyle(style);
+    
+    if (mapInterface)
+        mapInterface->invalidate();
+}
+
+float Tiled2dMapRasterLayer::getAlpha() { return style.opacity; }
+
+void Tiled2dMapRasterLayer::setStyle(const ::RasterShaderStyle & style) {
+    this->style = style; 
     {
         std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
         for (const auto &tileObject : tileObjectMap) {
-            tileObject.second->setAlpha(alpha);
+            tileObject.second->setStyle(style);
         }
     }
 
@@ -403,7 +416,9 @@ void Tiled2dMapRasterLayer::setAlpha(float alpha) {
         mapInterface->invalidate();
 }
 
-float Tiled2dMapRasterLayer::getAlpha() { return alpha; }
+::RasterShaderStyle Tiled2dMapRasterLayer::getStyle() {
+    return this->style;
+}
 
 bool Tiled2dMapRasterLayer::onClickConfirmed(const Vec2F &posScreen) {
     auto callbackHandler = this->callbackHandler;

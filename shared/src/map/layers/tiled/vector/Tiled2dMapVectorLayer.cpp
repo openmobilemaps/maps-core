@@ -234,7 +234,7 @@ void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDes
         this->layerConfigs.clear();
 
         for (auto const &source: mapDescription->vectorSources) {
-            layerConfigs[source->identifier] = getLayerConfig(source);
+            layerConfigs.push_back({source->identifier, getLayerConfig(source)});
         }
 
         initializeVectorLayer(newSublayers);
@@ -694,7 +694,19 @@ void Tiled2dMapVectorLayer::tileIsReady(const Tiled2dMapTileInfo &tile) {
     if (isCompletelyReady) {
         vectorTileSource->setTileReady(tile);
     }
+}
 
+std::string Tiled2dMapVectorLayer::getSpriteUrl(std::string baseUrl, bool is2x, bool isPng) {
+    std::string extension = std::string(is2x ? "@2x" : "") + std::string(isPng ? ".png" : ".json");
+    
+    // if the url contains query parameters we have to insert the extension before the parameters
+    std::size_t found = baseUrl.find("?");
+    if (found == std::string::npos) {
+        return baseUrl + extension;
+    }
+    auto url = baseUrl;
+    url.insert(found, extension);
+    return url;
 }
 
 void Tiled2dMapVectorLayer::loadSpriteData() {
@@ -702,17 +714,13 @@ void Tiled2dMapVectorLayer::loadSpriteData() {
     auto mapInterface = this->mapInterface;
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
     auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
-    if (!camera || !scheduler) {
+    if (!camera || !scheduler || !mapDescription->spriteBaseUrl) {
         return;
     }
-
+    
     bool scale2x = camera->getScreenDensityPpi() >= 320.0;
-    std::stringstream ssTexture;
-    ssTexture << *mapDescription->spriteBaseUrl << (scale2x ? "@2x" : "") << ".png";
-    std::string urlTexture = ssTexture.str();
-    std::stringstream ssData;
-    ssData << *mapDescription->spriteBaseUrl << (scale2x ? "@2x" : "") << ".json";
-    std::string urlData = ssData.str();
+    std::string urlTexture = getSpriteUrl(*mapDescription->spriteBaseUrl, scale2x, true);
+    std::string urlData = getSpriteUrl(*mapDescription->spriteBaseUrl, scale2x, false);
 
     std::weak_ptr<Tiled2dMapVectorLayer> weakSelfPtr =
     std::dynamic_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());

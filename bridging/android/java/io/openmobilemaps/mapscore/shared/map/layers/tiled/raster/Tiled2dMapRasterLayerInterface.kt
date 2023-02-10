@@ -19,6 +19,10 @@ abstract class Tiled2dMapRasterLayerInterface {
 
     abstract fun getAlpha(): Float
 
+    abstract fun setStyle(style: io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderStyle)
+
+    abstract fun getStyle(): io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderStyle
+
     abstract fun setMinZoomLevelIdentifier(value: Int?)
 
     abstract fun getMinZoomLevelIdentifier(): Int?
@@ -104,6 +108,18 @@ abstract class Tiled2dMapRasterLayerInterface {
             return native_getAlpha(this.nativeRef)
         }
         private external fun native_getAlpha(_nativeRef: Long): Float
+
+        override fun setStyle(style: io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderStyle) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setStyle(this.nativeRef, style)
+        }
+        private external fun native_setStyle(_nativeRef: Long, style: io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderStyle)
+
+        override fun getStyle(): io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderStyle {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getStyle(this.nativeRef)
+        }
+        private external fun native_getStyle(_nativeRef: Long): io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderStyle
 
         override fun setMinZoomLevelIdentifier(value: Int?) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

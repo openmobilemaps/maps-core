@@ -39,4 +39,8 @@ class ShaderFactory: MCShaderFactoryInterface {
     func createColorShader() -> MCColorShaderInterface? {
         ColorShader()
     }
+    
+    func createRasterShader() -> MCRasterShaderInterface? {
+        RasterShader()
+    }
 }

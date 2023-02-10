@@ -113,6 +113,8 @@ protected:
     virtual void setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription);
 
     virtual void loadSpriteData();
+    
+    std::string getSpriteUrl(std::string baseUrl, bool is2x, bool isPng);
 
 
     std::shared_ptr<Tiled2dMapVectorSource> vectorTileSource;
@@ -141,7 +143,7 @@ private:
 
     std::shared_ptr<VectorMapDescription> mapDescription;
 
-    std::unordered_map<std::string, std::shared_ptr<Tiled2dMapLayerConfig>> layerConfigs;
+    std::vector<std::tuple<std::string, std::shared_ptr<Tiled2dMapLayerConfig>>> layerConfigs;
 
     const std::shared_ptr<FontLoaderInterface> fontLoader;
 

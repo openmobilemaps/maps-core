@@ -55,7 +55,7 @@ final class Quad2d: BaseGraphicsObject {
 
     override func isReady() -> Bool {
         guard ready else { return false }
-        if shader is AlphaShader {
+        if shader is AlphaShader || shader is RasterShader {
             return texture != nil
         }
         return true
@@ -75,9 +75,7 @@ final class Quad2d: BaseGraphicsObject {
         defer {
             lock.unlock()
         }
-
-
-        if shader is AlphaShader, texture == nil {
+        if (shader is AlphaShader || shader is RasterShader), texture == nil {
             ready = false
             return
         }

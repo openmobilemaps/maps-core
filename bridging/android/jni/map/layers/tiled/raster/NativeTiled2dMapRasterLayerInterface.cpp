@@ -6,6 +6,7 @@
 #include "NativeLayerInterface.h"
 #include "NativeLoaderInterface.h"
 #include "NativeMaskingObjectInterface.h"
+#include "NativeRasterShaderStyle.h"
 #include "NativeShaderProgramInterface.h"
 #include "NativeTiled2dMapLayerConfig.h"
 #include "NativeTiled2dMapRasterLayerCallbackInterface.h"
@@ -111,6 +112,25 @@ CJNIEXPORT jfloat JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tile
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapRasterLayerInterface>(nativeRef);
         auto r = ref->getAlpha();
         return ::djinni::release(::djinni::F32::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_native_1setStyle(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRasterShaderStyle::JniType j_style)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapRasterLayerInterface>(nativeRef);
+        ref->setStyle(::djinni_generated::NativeRasterShaderStyle::toCpp(jniEnv, j_style));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT ::djinni_generated::NativeRasterShaderStyle::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_native_1getStyle(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapRasterLayerInterface>(nativeRef);
+        auto r = ref->getStyle();
+        return ::djinni::release(::djinni_generated::NativeRasterShaderStyle::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

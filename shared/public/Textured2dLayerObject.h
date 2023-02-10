@@ -23,12 +23,21 @@
 #include "RenderObjectInterface.h"
 #include "Vec2D.h"
 #include <optional>
-
+#include "RasterShaderInterface.h"
 #include "AnimationInterface.h"
+#include "RasterShaderStyle.h"
 
 class Textured2dLayerObject : public LayerObjectInterface {
   public:
-    Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, std::shared_ptr<AlphaShaderInterface> shader,
+    Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad,
+                          const std::shared_ptr<AlphaShaderInterface> &shader,
+                          const std::shared_ptr<MapInterface> &mapInterface);
+    
+    Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, 
+                          const std::shared_ptr<RasterShaderInterface> &rasterShader,
+                          const std::shared_ptr<MapInterface> &mapInterface);
+    
+    Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, 
                           const std::shared_ptr<MapInterface> &mapInterface);
 
     virtual ~Textured2dLayerObject() override {}
@@ -44,14 +53,18 @@ class Textured2dLayerObject : public LayerObjectInterface {
     void setRectCoord(const ::RectCoord &rectCoord);
 
     void setAlpha(float alpha);
+    
+    void setStyle(const RasterShaderStyle &style);
 
     std::shared_ptr<Quad2dInterface> getQuadObject();
 
     std::shared_ptr<GraphicsObjectInterface> getGraphicsObject();
-
+    
     std::shared_ptr<RenderObjectInterface> getRenderObject();
 
     void beginAlphaAnimation(double startAlpha, double targetAlpha, long long duration);
+    
+    void beginStyleAnimation(RasterShaderStyle start, RasterShaderStyle target, long long duration);
 
   protected:
     void setFrame(const ::Quad2dD &frame);
@@ -61,6 +74,7 @@ class Textured2dLayerObject : public LayerObjectInterface {
     std::shared_ptr<AlphaShaderInterface> shader;
     std::shared_ptr<GraphicsObjectInterface> graphicsObject;
     std::shared_ptr<RenderObjectInterface> renderObject;
+    std::shared_ptr<RasterShaderInterface> rasterShader;
 
     std::shared_ptr<RenderConfig> renderConfig;
 

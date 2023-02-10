@@ -41,6 +41,7 @@ public:
                       std::shared_ptr<Value> iconSize,
                       std::shared_ptr<Value> textLineHeight,
                       std::shared_ptr<Value> textLetterSpacing,
+                      std::shared_ptr<Value> textMaxWidth,
                       double dpFactor):
     textSize(textSize),
     textFont(textFont),
@@ -61,6 +62,7 @@ public:
     symbolSpacing(symbolSpacing),
     iconSize(iconSize),
     textLetterSpacing(textLetterSpacing),
+    textMaxWidth(textMaxWidth),
     dpFactor(dpFactor) {}
 
 
@@ -197,6 +199,11 @@ public:
         static const double defaultValue = 1.2;
         return textLineHeight ? textLineHeight->evaluateOr(context, defaultValue) : defaultValue;
     }
+    
+    int64_t getTextMaxWidth(const EvaluationContext &context) {
+        static const int64_t defaultValue = 10;
+        return textMaxWidth ? textMaxWidth->evaluateOr(context, defaultValue) : defaultValue;
+    }
 
 private:
     std::shared_ptr<Value> textSize;
@@ -214,6 +221,7 @@ private:
     std::shared_ptr<Value> textLineHeight;
     std::shared_ptr<Value> textLetterSpacing;
     std::shared_ptr<Value> textJustify;
+    std::shared_ptr<Value> textMaxWidth;
     std::shared_ptr<Value> symbolSortKey;
     std::shared_ptr<Value> symbolSpacing;
     std::shared_ptr<Value> iconImage;
