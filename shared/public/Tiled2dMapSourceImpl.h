@@ -532,17 +532,10 @@ void Tiled2dMapSource<T, L, R>::setTileReady(const Tiled2dMapTileInfo &tile) {
     }
     
     if (!needsUpdate) { return; }
-
-    auto taskIdentifier = "Tiled2dMapSource_setTileReady";
-
-    std::weak_ptr<Tiled2dMapSource> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this());
-    scheduler->addTask(std::make_shared<LambdaTask>(
-            TaskConfig(taskIdentifier, 0, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION), [weakSelfPtr] {
-                auto selfPtr = weakSelfPtr.lock();
-                if (!selfPtr) return;
-                selfPtr->updateTileMasks();
-                selfPtr->notifyTilesUpdates();
-            }));
+    
+    updateTileMasks();
+    
+    notifyTilesUpdates();
 }
 
 template<class T, class L, class R>
@@ -560,16 +553,8 @@ void Tiled2dMapSource<T, L, R>::setTilesReady(const std::vector<const Tiled2dMap
     
     if (!needsUpdate) { return; }
 
-    auto taskIdentifier = "Tiled2dMapSource_setTilesReady";
-
-    std::weak_ptr<Tiled2dMapSource> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this());
-    scheduler->addTask(std::make_shared<LambdaTask>(
-            TaskConfig(taskIdentifier, 0, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION), [weakSelfPtr] {
-                auto selfPtr = weakSelfPtr.lock();
-                if (!selfPtr) return;
-                selfPtr->updateTileMasks();
-                selfPtr->notifyTilesUpdates();
-            }));
+    updateTileMasks();
+    notifyTilesUpdates();
 }
 
 template<class T, class L, class R>
