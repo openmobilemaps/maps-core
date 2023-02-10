@@ -12,7 +12,6 @@
 #include "Tiled2dMapVectorSource.h"
 #include "vtzero/vector_tile.hpp"
 #include "Logger.h"
-#include "DataHolderInterface.h"
 
 Tiled2dMapVectorSource::Tiled2dMapVectorSource(const MapConfig &mapConfig,
                                                const std::unordered_map<std::string, std::shared_ptr<Tiled2dMapLayerConfig>> &layerConfigs,
@@ -22,8 +21,43 @@ Tiled2dMapVectorSource::Tiled2dMapVectorSource(const MapConfig &mapConfig,
                                                const WeakActor<Tiled2dMapSourceListenerInterface> &listener,
                                                const std::unordered_map<std::string, std::unordered_set<std::string>> &layersToDecode,
                                                float screenDensityPpi)
-        : Tiled2dMapSource<DataHolderInterface, IntermediateResult, FinalResult>(mapConfig, layerConfigs.begin()->second, conversionHelper, scheduler,
+        : Tiled2dMapSource<djinni::DataRef, IntermediateResult, FinalResult>(mapConfig, layerConfigs.begin()->second, conversionHelper, scheduler,
                                                                               listener, screenDensityPpi, tileLoaders.size()), loaders(tileLoaders), layersToDecode(layersToDecode), layerConfigs(layerConfigs) {}
+
+::djinni::Future<IntermediateResult> Tiled2dMapVectorSource::loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) {
+    std::lock_guard<std::recursive_mutex> lock(loadingStateMutex);
+    loadingStates.insert({
+        tile,
+        Tiled2dMapVectorSourceTileState {
+            ::djinni::Promise<IntermediateResult>(),
+            std::unordered_map<std::string, DataLoaderResult>{}
+            
+        }
+    });
+    for(auto const &[source, config]: layerConfigs) {
+        const std::string sourceName = source;
+        auto const url = config->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier);
+        loaders[loaderIndex]->loadDataAsync(url, std::nullopt).then([&, tile, sourceName](::djinni::Future<DataLoaderResult> result) {
+            std::lock_guard<std::recursive_mutex> lock(loadingStateMutex);
+            loadingStates.at(tile).results.insert({sourceName, result.get()});
+            
+            if (loadingStates.at(tile).results.size() == layerConfigs.size()) {
+                //TODO: calculate correct loader status
+                loadingStates.at(tile).promise.setValue(IntermediateResult(loadingStates.at(tile).results, LoaderStatus::OK, std::nullopt));
+                loadingStates.erase(tile);
+            }
+            
+        });
+    }
+    return loadingStates.at(tile).promise.getFuture();
+}
+
+void Tiled2dMapVectorSource::cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) {
+    for(auto const &[source, config]: layerConfigs) {
+        auto const url = config->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier);
+        loaders[loaderIndex]->cancel(url);
+    }
+}
 
 IntermediateResult Tiled2dMapVectorSource::loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) {
     std::unordered_map<std::string, DataLoaderResult> results;
@@ -43,9 +77,9 @@ FinalResult Tiled2dMapVectorSource::postLoadingTask(const IntermediateResult &lo
 
         auto layerFeatureMap = std::make_shared<std::unordered_map<std::string, std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>>>();
 
-        const auto &data = data_.data->getData();
         try {
-            vtzero::vector_tile tileData((char *) data.data(), data.size());
+            
+            vtzero::vector_tile tileData((char*)data_.data->buf(), data_.data->len());
 
             while (auto layer = tileData.next_layer()) {
                 std::string sourceLayerName = std::string(layer.name());

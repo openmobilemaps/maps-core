@@ -32,6 +32,10 @@ class Tiled2dMapRasterSource
     std::unordered_set<Tiled2dMapRasterTileInfo> getCurrentTiles();
 
   protected:
+    virtual void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
+        
+    virtual ::djinni::Future<TextureLoaderResult> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
+        
     virtual TextureLoaderResult loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
 
     virtual std::shared_ptr<::TextureHolderInterface> postLoadingTask(const TextureLoaderResult &loadedData,

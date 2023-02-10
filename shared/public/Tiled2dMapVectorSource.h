@@ -17,6 +17,7 @@
 #include "Tiled2dMapVectorTileInfo.h"
 #include <unordered_map>
 #include <vector>
+#include "DataRef.hpp"
 
 struct IntermediateResult final {
     std::unordered_map<std::string, DataLoaderResult> results;
@@ -32,10 +33,15 @@ struct IntermediateResult final {
     {}
 };
 
+struct Tiled2dMapVectorSourceTileState final {
+    ::djinni::Promise<IntermediateResult> promise;
+    std::unordered_map<std::string, DataLoaderResult> results;
+};
+
 
 using FinalResult = std::unordered_map<std::string, std::shared_ptr<std::unordered_map<std::string, std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>>>>;
 
-class Tiled2dMapVectorSource : public Tiled2dMapSource<DataHolderInterface, IntermediateResult, FinalResult>  {
+class Tiled2dMapVectorSource : public Tiled2dMapSource<djinni::DataRef, IntermediateResult, FinalResult>  {
 public:
     Tiled2dMapVectorSource(const MapConfig &mapConfig,
                            const std::unordered_map<std::string, std::shared_ptr<Tiled2dMapLayerConfig>> &layerConfigs,
@@ -53,6 +59,11 @@ public:
     virtual void resume() override;
 
 protected:
+    
+    virtual void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
+    
+    virtual ::djinni::Future<IntermediateResult> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
+    
     virtual IntermediateResult loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
 
     virtual FinalResult postLoadingTask(const IntermediateResult &loadedData, const Tiled2dMapTileInfo &tile) override;
@@ -63,4 +74,7 @@ private:
     const std::vector<std::shared_ptr<::LoaderInterface>> loaders;
     const std::unordered_map<std::string, std::unordered_set<std::string>> layersToDecode;
     const std::unordered_map<std::string, std::shared_ptr<Tiled2dMapLayerConfig>> layerConfigs;
+    
+    std::recursive_mutex loadingStateMutex;
+    std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapVectorSourceTileState> loadingStates;
 };

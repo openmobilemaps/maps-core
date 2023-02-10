@@ -97,6 +97,10 @@ public:
     void setTileReady(const Tiled2dMapTileInfo &tile);
 
     void setTilesReady(const std::vector<const Tiled2dMapTileInfo> &tiles);
+            
+    virtual void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) = 0;
+            
+    virtual ::djinni::Future<L> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) = 0;
 
     virtual L loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) = 0;
             

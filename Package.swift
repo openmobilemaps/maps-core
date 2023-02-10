@@ -23,9 +23,7 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(name: "DjinniSupport",
-                 url: "https://github.com/UbiqueInnovation/djinni.git",
-                 .upToNextMajor(from: "1.0.0")),
+        .package(url: "https://github.com/UbiqueInnovation/djinni.git", branch: "feature/snapchat-merge")
     ],
     targets: [
         .target(
@@ -122,14 +120,20 @@ let package = Package(
         ),
         .target(
             name: "MapCoreSharedModule",
-            dependencies: ["DjinniSupport",
-                           "MapCoreSharedModuleCpp"],
+            dependencies: [
+                "MapCoreSharedModuleCpp",
+                .product(name: "DjinniSupport", package: "djinni")
+            ],
             path: "bridging/ios",
             publicHeadersPath: ""
         ),
         .target(
             name: "MapCoreSharedModuleCpp",
-            dependencies: ["vtzero", "earcut"],
+            dependencies: [
+                "vtzero", 
+                "earcut",
+                .product(name: "DjinniSupport", package: "djinni")
+            ],
             path: "shared",
             sources: ["src", "public"],
             publicHeadersPath: "public",

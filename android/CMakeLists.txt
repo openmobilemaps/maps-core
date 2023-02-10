@@ -25,9 +25,12 @@ file(GLOB_RECURSE cpp_SRC
         "../shared/*.hpp"
         "src/main/cpp/*.h"
         "src/main/cpp/*.cpp"
-        "../external/djinni/support-lib/*.h"
-        "../external/djinni/support-lib/*.hpp"
-        "../external/djinni/support-lib/*.cpp"
+        "../external/djinni/support-lib/cpp/*.h"
+        "../external/djinni/support-lib/cpp/*.hpp"
+        "../external/djinni/support-lib/cpp/*.cpp"
+        "../external/djinni/support-lib/jni/*.h"
+        "../external/djinni/support-lib/jni/*.hpp"
+        "../external/djinni/support-lib/jni/*.cpp"
         "../external/protozero/protozero/include/*.hpp"
         "../external/vtzero/vtzero/include/*.hpp"
         "../external/earcut/earcut/include/*.hpp"
@@ -41,7 +44,8 @@ add_library( # Sets the name of the library.
 
         ${cpp_SRC})
 
-include_directories(../external/djinni/support-lib)
+include_directories(../external/djinni/support-lib/)
+include_directories(../external/djinni/support-lib/cpp)
 include_directories(../external/djinni/support-lib/jni)
 include_directories(../external/protozero/protozero/include/)
 include_directories(../external/vtzero/vtzero/include/)
