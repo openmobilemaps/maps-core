@@ -29,12 +29,12 @@
 
 class Textured2dLayerObject : public LayerObjectInterface {
   public:
-    Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, 
-                          std::shared_ptr<AlphaShaderInterface> shader,
+    Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad,
+                          const std::shared_ptr<AlphaShaderInterface> &shader,
                           const std::shared_ptr<MapInterface> &mapInterface);
     
     Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, 
-                          std::shared_ptr<RasterShaderInterface> rasterShader,
+                          const std::shared_ptr<RasterShaderInterface> &rasterShader,
                           const std::shared_ptr<MapInterface> &mapInterface);
     
     Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, 

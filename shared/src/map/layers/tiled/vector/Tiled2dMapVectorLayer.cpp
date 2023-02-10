@@ -169,7 +169,6 @@ std::shared_ptr<LayerInterface> Tiled2dMapVectorLayer::getLayerForDescription(co
             return std::make_shared<Tiled2dMapVectorBackgroundSubLayer>(backgroundDesc);
         }
         case VectorLayerType::raster: {
-            return nullptr;
             auto rasterDesc = std::static_pointer_cast<RasterVectorLayerDescription>(layerDescription);
             return std::make_shared<Tiled2dMapVectorRasterSubLayer>(rasterDesc, loaders);
         }

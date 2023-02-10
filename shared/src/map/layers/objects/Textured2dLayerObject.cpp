@@ -12,18 +12,19 @@
 #include "DateHelper.h"
 #include "DoubleAnimation.h"
 #include "RasterStyleAnimation.h"
-#include <cmath>
 #include "RenderObject.h"
+#include <cmath>
+#include <cassert>
 
-Textured2dLayerObject::Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, std::shared_ptr<AlphaShaderInterface> shader,
+Textured2dLayerObject::Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, const std::shared_ptr<AlphaShaderInterface> &shader,
                                              const std::shared_ptr<MapInterface> &mapInterface)
-        : quad(quad), shader(shader), rasterShader(rasterShader), mapInterface(mapInterface), conversionHelper(mapInterface->getCoordinateConverterHelper()),
+        : quad(quad), shader(shader), rasterShader(nullptr), mapInterface(mapInterface), conversionHelper(mapInterface->getCoordinateConverterHelper()),
 renderConfig(std::make_shared<RenderConfig>(quad->asGraphicsObject(), 0)), graphicsObject(quad->asGraphicsObject()), renderObject(std::make_shared<RenderObject>(graphicsObject))
  {}
 
 
 Textured2dLayerObject::Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, 
-                      std::shared_ptr<RasterShaderInterface> rasterShader,
+                      const std::shared_ptr<RasterShaderInterface> &rasterShader,
                       const std::shared_ptr<MapInterface> &mapInterface)
 : quad(quad), shader(nullptr), rasterShader(rasterShader), mapInterface(mapInterface), conversionHelper(mapInterface->getCoordinateConverterHelper()),
 renderConfig(std::make_shared<RenderConfig>(quad->asGraphicsObject(), 0)), graphicsObject(quad->asGraphicsObject()), renderObject(std::make_shared<RenderObject>(graphicsObject))
@@ -32,7 +33,7 @@ renderConfig(std::make_shared<RenderConfig>(quad->asGraphicsObject(), 0)), graph
 
 Textured2dLayerObject::Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, 
                                              const std::shared_ptr<MapInterface> &mapInterface) 
-: quad(quad), rasterShader(rasterShader), mapInterface(mapInterface), conversionHelper(mapInterface->getCoordinateConverterHelper()),
+: quad(quad), shader(nullptr), rasterShader(nullptr), mapInterface(mapInterface), conversionHelper(mapInterface->getCoordinateConverterHelper()),
 renderConfig(std::make_shared<RenderConfig>(quad->asGraphicsObject(), 0)), graphicsObject(quad->asGraphicsObject()), renderObject(std::make_shared<RenderObject>(graphicsObject))
  {}
 
