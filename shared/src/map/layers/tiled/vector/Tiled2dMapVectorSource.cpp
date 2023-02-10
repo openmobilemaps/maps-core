@@ -88,8 +88,11 @@ FinalResult Tiled2dMapVectorSource::postLoadingTask(const IntermediateResult &lo
     return resultMap;
 }
 
+void Tiled2dMapVectorSource::notifyTilesUpdates() {
+    
+};
+
 std::unordered_set<Tiled2dMapVectorTileInfo> Tiled2dMapVectorSource::getCurrentTiles() {
-    std::lock_guard<std::recursive_mutex> lock(currentTilesMutex);
     std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos;
     for (const auto &[tileInfo, tileWrapper] : currentTiles) {
         if (tileWrapper.isVisible) {

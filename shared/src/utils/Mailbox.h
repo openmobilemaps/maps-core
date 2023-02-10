@@ -12,6 +12,8 @@
 #include <mutex>
 #include <queue>
 #include <future>
+#include "Logger.h"
+#include "assert.h"
 
 class MailboxMessage {
 public:
@@ -76,6 +78,7 @@ public:
         std::lock_guard<std::mutex> queueLock(queueMutex);
         bool wasEmpty = queue.empty();
         queue.push(std::move(message));
+        LogDebug << this <<= " " + std::to_string(queue.size());
         if (wasEmpty) {
             scheduler->addTask(makeTask(shared_from_this()));
         }
@@ -93,6 +96,7 @@ public:
             message = std::move(queue.front());
             queue.pop();
             wasEmpty = queue.empty();
+            LogDebug << this <<= " " + std::to_string(queue.size());
         }
         
         (*message)();

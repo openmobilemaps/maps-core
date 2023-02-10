@@ -60,7 +60,8 @@ public:
 template<class T, class L, class R>
 class Tiled2dMapSource :
         public Tiled2dMapSourceInterface,
-        public std::enable_shared_from_this<Tiled2dMapSourceInterface> {
+        public std::enable_shared_from_this<Tiled2dMapSourceInterface>,
+        public ActorObject {
 public:
     Tiled2dMapSource(const MapConfig &mapConfig, const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
                      const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
@@ -98,10 +99,14 @@ public:
     void setTilesReady(const std::vector<const Tiled2dMapTileInfo> &tiles);
 
     virtual L loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) = 0;
+            
+    void didLoad(Tiled2dMapTileInfo tile, size_t loaderIndex, const L &loaderResult);
 
   protected:
 
     virtual R postLoadingTask(const L &loadedData, const Tiled2dMapTileInfo &tile) = 0;
+            
+    virtual void notifyTilesUpdates() = 0;
 
     MapConfig mapConfig;
     std::shared_ptr<Tiled2dMapLayerConfig> layerConfig;
@@ -117,17 +122,12 @@ public:
     std::optional<int32_t> minZoomLevelIdentifier;
     std::optional<int32_t> maxZoomLevelIdentifier;
 
-    std::recursive_mutex currentTilesMutex;
     std::map<Tiled2dMapTileInfo, TileWrapper<R>> currentTiles;
 
-
-    std::recursive_mutex currentZoomLevelMutex;
     int currentZoomLevelIdentifier = 0;
 
-    std::recursive_mutex currentVisibleTilesMutex;
     std::unordered_set<Tiled2dMapTileInfo> currentVisibleTiles;
 
-    std::recursive_mutex currentPyramidMutex;
     std::vector<VisibleTilesLayer> currentPyramid;
 
     RectCoord currentViewBounds = RectCoord(Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0),
@@ -137,38 +137,19 @@ public:
     std::atomic<bool> isPaused;
 
     float screenDensityPpi;
-    std::recursive_mutex tilesReadyMutex;
     std::set<Tiled2dMapTileInfo> readyTiles;
 
 private:
     void updateCurrentTileset(const ::RectCoord &visibleBounds, int curT, double zoom);
 
-    void performLoadingTask(size_t loaderIndex);
+    void performLoadingTask(Tiled2dMapTileInfo tile, size_t loaderIndex);
 
     void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid);
 
     void updateTileMasks();
 
-    std::atomic_flag updateFlag = ATOMIC_FLAG_INIT;
-    std::atomic_int pendingUpdates = 0;
-    std::recursive_mutex updateMutex;
-    std::optional<RectCoord> updateBounds;
-    std::optional<int> updateT;
-    std::optional<double> updateZoom;
-
-
-    std::recursive_mutex updateTilesetMutex;
-    std::recursive_mutex currentlyLoadingMutex;
     std::unordered_set<Tiled2dMapTileInfo> currentlyLoading;
 
-    std::recursive_mutex dispatchedTasksMutex;
-    std::unordered_map<size_t, size_t > dispatchedTasks;
-
-        // the key of the map is the loader index, if the first loader returns noop the next one will be used
-    std::recursive_mutex loadingQueueMutex;
-    std::unordered_map<size_t, std::set<PrioritizedTiled2dMapTileInfo>> loadingQueues;
-
-    const int max_parallel_loading_tasks = 8;
     const long long MAX_WAIT_TIME = 32000;
     const long long MIN_WAIT_TIME = 1000;
 
@@ -177,10 +158,8 @@ private:
         long long delay;
     };
 
-    std::recursive_mutex errorTilesMutex;
     std::unordered_map<size_t, std::map<PrioritizedTiled2dMapTileInfo, ErrorInfo>> errorTiles;
 
-    std::recursive_mutex notFoundTilesMutex;
     std::unordered_set<Tiled2dMapTileInfo> notFoundTiles;
 
     std::optional<PrioritizedTiled2dMapTileInfo> dequeueLoadingTask(size_t loaderIndex);

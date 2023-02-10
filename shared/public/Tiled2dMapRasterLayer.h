@@ -98,7 +98,8 @@ public:
     bool shouldLoadTile(const Tiled2dMapTileInfo &tileInfo);
 
     virtual std::shared_ptr<::Tiled2dMapLayerConfig> getConfig() override;
-
+                                  
+    void onTilesUpdatedNew(std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos);
 private:
     virtual void updateMaskObjects(const std::vector<const std::shared_ptr<MaskingObjectInterface>> &newMaskObjects,
                                    const std::vector<const std::shared_ptr<MaskingObjectInterface>> &obsoleteMaskObjects);

@@ -56,6 +56,8 @@ protected:
     virtual IntermediateResult loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
 
     virtual FinalResult postLoadingTask(const IntermediateResult &loadedData, const Tiled2dMapTileInfo &tile) override;
+    
+    virtual void notifyTilesUpdates() override;
 
 private:
     const std::vector<std::shared_ptr<::LoaderInterface>> loaders;

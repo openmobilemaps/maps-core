@@ -22,7 +22,9 @@ protected:
         return *this;
     }
 
+public:
     std::shared_ptr<Mailbox> mailbox;
+    
 };
 
 template <class Object, class MemberFn, class... Args>
@@ -66,6 +68,12 @@ public:
         return future;
     }
     
+    template <class CastObject>
+    WeakActor<CastObject> weakActor() const {
+        auto casted = std::static_pointer_cast<CastObject>(object.lock());
+        return WeakActor<CastObject>(receivingMailbox, casted);
+    }
+    
     inline std::shared_ptr<Object>& unsafe() {
         return object.lock();
     }
@@ -102,8 +110,9 @@ public:
         this->receivingMailbox = mailbox;
         object = std::make_shared<Object>(std::forward<Args>(args)...);
         
-        if constexpr (std::is_same_v<Object, ActorObject>) {
-            object.mailbox = mailbox;
+        
+        if (auto actorObject = std::dynamic_pointer_cast<ActorObject>(object)) {
+            actorObject->mailbox = mailbox;
         }
     }
     

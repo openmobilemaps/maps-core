@@ -9,6 +9,7 @@
  */
 
 #include "Tiled2dMapRasterSource.h"
+#include "Tiled2dMapRasterLayer.h"
 #include "LambdaTask.h"
 #include <algorithm>
 #include <cmath>
@@ -19,14 +20,22 @@ Tiled2dMapRasterSource::Tiled2dMapRasterSource(const MapConfig &mapConfig,
                                                const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                                const std::shared_ptr<SchedulerInterface> &scheduler,
                                                const std::vector<std::shared_ptr<::LoaderInterface>> & loaders,
-                                               const WeakActor<Tiled2dMapSourceListenerInterface> &listener,
+                                               const WeakActor<Tiled2dMapRasterLayer> &listener,
                                                float screenDensityPpi)
     : Tiled2dMapSource<TextureHolderInterface, TextureLoaderResult, std::shared_ptr<::TextureHolderInterface>>(
-          mapConfig, layerConfig, conversionHelper, scheduler, listener, screenDensityPpi, loaders.size())
-    , loaders(loaders) {}
+          mapConfig, layerConfig, conversionHelper, scheduler, listener.weakActor<Tiled2dMapSourceListenerInterface>(), screenDensityPpi, loaders.size())
+, loaders(loaders)
+, rasterLayerActor(listener){}
 
 TextureLoaderResult Tiled2dMapRasterSource::loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) {
-    return loaders[loaderIndex]->loadTexture(layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier), std::nullopt);
+    std::weak_ptr<Tiled2dMapSource> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapRasterSource>(shared_from_this());
+    
+    auto weakActor = WeakActor<Tiled2dMapRasterSource>(mailbox, std::static_pointer_cast<Tiled2dMapRasterSource>(shared_from_this()));
+    scheduler->addTask(std::make_shared<LambdaTask>(TaskConfig("", 0, TaskPriority::NORMAL, ExecutionEnvironment::IO), [&, weakActor, tile, loaderIndex] {
+        auto result = loaders[loaderIndex]->loadTexture(layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier), std::nullopt);
+        weakActor.message(&Tiled2dMapRasterSource::didLoad, tile, loaderIndex, result);
+    }));
+    return TextureLoaderResult(nullptr, std::nullopt, LoaderStatus::OK, std::nullopt);
 }
 
 std::shared_ptr<::TextureHolderInterface> Tiled2dMapRasterSource::postLoadingTask(const TextureLoaderResult &loadedData,
@@ -34,8 +43,11 @@ std::shared_ptr<::TextureHolderInterface> Tiled2dMapRasterSource::postLoadingTas
     return loadedData.data;
 }
 
+void Tiled2dMapRasterSource::notifyTilesUpdates() {
+    rasterLayerActor.message(&Tiled2dMapRasterLayer::onTilesUpdatedNew, getCurrentTiles());
+}
+
 std::unordered_set<Tiled2dMapRasterTileInfo> Tiled2dMapRasterSource::getCurrentTiles() {
-    std::lock_guard<std::recursive_mutex> lock(currentTilesMutex);
     std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos;
     for (auto it = currentTiles.rbegin(); it != currentTiles.rend(); it++ ) {
         auto &[tileInfo, tileWrapper] = *it;

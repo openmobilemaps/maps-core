@@ -18,6 +18,7 @@
 #include "PolygonCompare.h"
 #include <Logger.h>
 #include <map>
+#include <chrono>
 
 Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
@@ -43,8 +44,8 @@ void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapIn
     
     
     auto selfMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
-    auto castedMe = std::static_pointer_cast<Tiled2dMapSourceListenerInterface>(shared_from_this());
-    auto selfActor = WeakActor<Tiled2dMapSourceListenerInterface>(selfMailbox, castedMe);
+    auto castedMe = std::static_pointer_cast<Tiled2dMapRasterLayer>(shared_from_this());
+    auto selfActor = WeakActor<Tiled2dMapRasterLayer>(selfMailbox, castedMe);
     
     auto mailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
     rasterSource.emplaceObject(mailbox, mapInterface->getMapConfig(), layerConfig, mapInterface->getCoordinateConverterHelper(), mapInterface->getScheduler(), tileLoaders, selfActor, mapInterface->getCamera()->getScreenDensityPpi());
@@ -143,7 +144,13 @@ bool Tiled2dMapRasterLayer::shouldLoadTile(const Tiled2dMapTileInfo& tileInfo){
     return abs(tileInfo.t - curT) < 10;
 }
 
+
+
 void Tiled2dMapRasterLayer::onTilesUpdated() {
+}
+
+
+void Tiled2dMapRasterLayer::onTilesUpdatedNew(std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) {
     auto lockSelfPtr = std::static_pointer_cast<Tiled2dMapRasterLayer>(shared_from_this());
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
     auto graphicsFactory = mapInterface ? mapInterface->getGraphicsObjectFactory() : nullptr;
@@ -157,10 +164,6 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
         if (updateFlag.test_and_set()) {
             return;
         }
-        
-        auto currentTileInfosPromise = rasterSource.converse(&Tiled2dMapRasterSource::getCurrentTiles);
-        
-        auto currentTileInfos = currentTileInfosPromise.get();
         
         std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> tilesToSetup, tilesToClean;
         std::vector<const std::shared_ptr<MaskingObjectInterface>> newMaskObjects;
