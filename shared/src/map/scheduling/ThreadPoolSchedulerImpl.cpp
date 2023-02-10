@@ -9,6 +9,7 @@
 #include "Logger.h"
 #include <chrono>
 #include <cassert>
+#include <cmath>
 
 std::shared_ptr<SchedulerInterface> ThreadPoolScheduler::create(const std::shared_ptr<ThreadPoolCallbacks> &callbacks) {
     return std::make_shared<ThreadPoolSchedulerImpl>(callbacks, false);
@@ -17,7 +18,7 @@ std::shared_ptr<SchedulerInterface> ThreadPoolScheduler::create(const std::share
 ThreadPoolSchedulerImpl::ThreadPoolSchedulerImpl(const std::shared_ptr<ThreadPoolCallbacks> &callbacks,
                                                  bool separateGraphicsQueue)
         : callbacks(callbacks), separateGraphicsQueue(separateGraphicsQueue) {
-    unsigned int maxNumThreads = floor(std::thread::hardware_concurrency() * 0.75);
+    unsigned int maxNumThreads = std::floorf(std::thread::hardware_concurrency() * 0.75f);
     if (maxNumThreads < 1) maxNumThreads = DEFAULT_MAX_NUM_THREADS;
     for (std::size_t i = 0u; i < maxNumThreads; ++i) {
         threads.emplace_back(makeSchedulerThread(i, TaskPriority::NORMAL));
@@ -98,7 +99,7 @@ void ThreadPoolSchedulerImpl::resume() {
 
 std::thread ThreadPoolSchedulerImpl::makeSchedulerThread(size_t index, TaskPriority priority) {
     return std::thread([this, index, priority] {
-        callbacks->setCurrentThreadName(std::string{"Worker_"} + std::to_string(index) + "_" + std::to_string((int)priority));
+        callbacks->setCurrentThreadName(std::string{"MapSDK"} + std::to_string(index) + "_" + std::to_string((int)priority));
         callbacks->attachThread();
         
         while (true) {
