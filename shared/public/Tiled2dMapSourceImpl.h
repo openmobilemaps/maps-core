@@ -23,14 +23,12 @@ template<class T, class L, class R>
 Tiled2dMapSource<T, L, R>::Tiled2dMapSource(const MapConfig &mapConfig, const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
                                          const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                          const std::shared_ptr<SchedulerInterface> &scheduler,
-                                         const WeakActor<Tiled2dMapSourceListenerInterface> &listener,
                                          float screenDensityPpi,
                                          size_t loaderCount)
     : mapConfig(mapConfig)
     , layerConfig(layerConfig)
     , conversionHelper(conversionHelper)
     , scheduler(scheduler)
-    , listener(listener)
     , zoomLevelInfos(layerConfig->getZoomLevelInfos())
     , zoomInfo(layerConfig->getZoomInfo())
     , layerSystemId(layerConfig->getCoordinateSystemIdentifier())
@@ -302,7 +300,13 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(Tiled2dMapTileInfo tile, size
     
     currentlyLoading.insert(tile);
     readyTiles.erase(tile);
-    loadTile(tile, loaderIndex);
+    
+    std::weak_ptr<Tiled2dMapSource> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this());
+    auto weakActor = WeakActor<Tiled2dMapSource>(mailbox, std::static_pointer_cast<Tiled2dMapSource>(shared_from_this()));
+    
+    loadDataAsync(tile, loaderIndex).then([weakActor, loaderIndex, tile](::djinni::Future<L> result) {
+        weakActor.message(&Tiled2dMapSource::didLoad, tile, loaderIndex, result.get());
+    });
 }
 
 template<class T, class L, class R>

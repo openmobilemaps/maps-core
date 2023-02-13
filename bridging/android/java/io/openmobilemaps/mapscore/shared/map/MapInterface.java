@@ -64,7 +64,7 @@ public abstract class MapInterface {
 
     public static native MapInterface create(io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface graphicsFactory, io.openmobilemaps.mapscore.shared.graphics.shader.ShaderFactoryInterface shaderFactory, io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface renderingContext, MapConfig mapConfig, io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerInterface scheduler, float pixelDensity);
 
-    public static native MapInterface createWithOpenGl(MapConfig mapConfig, io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerInterface scheduler, float pixelDensity);
+    public static native MapInterface createWithOpenGl(MapConfig mapConfig, float pixelDensity);
 
     public static final class CppProxy extends MapInterface
     {

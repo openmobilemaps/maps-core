@@ -29,7 +29,7 @@ public:
         memberFn(memberFn_),
         argsTuple(std::move(argsTuple_)) {
     }
-
+    
     void operator()() override {
         invoke(std::make_index_sequence<std::tuple_size_v<ArgsTuple>>());
     }

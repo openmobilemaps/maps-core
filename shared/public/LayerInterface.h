@@ -25,7 +25,7 @@ public:
 
     virtual std::vector</*not-null*/ std::shared_ptr<::RenderPassInterface>> buildRenderPasses() = 0;
 
-    virtual void onAdded(const /*not-null*/ std::shared_ptr<MapInterface> & mapInterface) = 0;
+    virtual void onAdded(const /*not-null*/ std::shared_ptr<MapInterface> & mapInterface, int32_t layerIndex) = 0;
 
     virtual void onRemoved() = 0;
 

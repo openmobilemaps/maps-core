@@ -14,7 +14,7 @@ public abstract class LayerInterface {
 
     public abstract ArrayList<io.openmobilemaps.mapscore.shared.graphics.RenderPassInterface> buildRenderPasses();
 
-    public abstract void onAdded(MapInterface mapInterface);
+    public abstract void onAdded(MapInterface mapInterface, int layerIndex);
 
     public abstract void onRemoved();
 
@@ -79,12 +79,12 @@ public abstract class LayerInterface {
         private native ArrayList<io.openmobilemaps.mapscore.shared.graphics.RenderPassInterface> native_buildRenderPasses(long _nativeRef);
 
         @Override
-        public void onAdded(MapInterface mapInterface)
+        public void onAdded(MapInterface mapInterface, int layerIndex)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
-            native_onAdded(this.nativeRef, mapInterface);
+            native_onAdded(this.nativeRef, mapInterface, layerIndex);
         }
-        private native void native_onAdded(long _nativeRef, MapInterface mapInterface);
+        private native void native_onAdded(long _nativeRef, MapInterface mapInterface, int layerIndex);
 
         @Override
         public void onRemoved()

@@ -56,9 +56,11 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)onAdded:(nullable MCMapInterface *)mapInterface {
+- (void)onAdded:(nullable MCMapInterface *)mapInterface
+     layerIndex:(int32_t)layerIndex {
     try {
-        _cppRefHandle.get()->onAdded(::djinni_generated::MapInterface::toCpp(mapInterface));
+        _cppRefHandle.get()->onAdded(::djinni_generated::MapInterface::toCpp(mapInterface),
+                                     ::djinni::I32::toCpp(layerIndex));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -164,10 +166,11 @@ public:
             return ::djinni::List<::djinni_generated::RenderPassInterface>::toCpp(objcpp_result_);
         }
     }
-    void onAdded(const /*not-null*/ std::shared_ptr<::MapInterface> & c_mapInterface) override
+    void onAdded(const /*not-null*/ std::shared_ptr<::MapInterface> & c_mapInterface, int32_t c_layerIndex) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() onAdded:(::djinni_generated::MapInterface::fromCpp(c_mapInterface))];
+            [djinni_private_get_proxied_objc_object() onAdded:(::djinni_generated::MapInterface::fromCpp(c_mapInterface))
+                                                   layerIndex:(::djinni::I32::fromCpp(c_layerIndex))];
         }
     }
     void onRemoved() override

@@ -4,11 +4,10 @@
 package io.openmobilemaps.mapscore.shared.graphics.objects;
 
 import com.snapchat.djinni.NativeObjectManager;
-import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class Polygon2dInterface {
-    public abstract void setVertices(ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2D> vertices, ArrayList<Integer> indices);
+    public abstract void setVertices(io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes vertices, io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes indices);
 
     public abstract GraphicsObjectInterface asGraphicsObject();
 
@@ -28,12 +27,12 @@ public abstract class Polygon2dInterface {
         public static native void nativeDestroy(long nativeRef);
 
         @Override
-        public void setVertices(ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2D> vertices, ArrayList<Integer> indices)
+        public void setVertices(io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes vertices, io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes indices)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
             native_setVertices(this.nativeRef, vertices, indices);
         }
-        private native void native_setVertices(long _nativeRef, ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2D> vertices, ArrayList<Integer> indices);
+        private native void native_setVertices(long _nativeRef, io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes vertices, io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes indices);
 
         @Override
         public GraphicsObjectInterface asGraphicsObject()

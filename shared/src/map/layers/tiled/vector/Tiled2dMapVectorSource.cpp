@@ -10,6 +10,7 @@
 
 
 #include "Tiled2dMapVectorSource.h"
+#include "Tiled2dMapVectorLayer.h"
 #include "vtzero/vector_tile.hpp"
 #include "Logger.h"
 
@@ -18,11 +19,11 @@ Tiled2dMapVectorSource::Tiled2dMapVectorSource(const MapConfig &mapConfig,
                                                const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                                const std::shared_ptr<SchedulerInterface> &scheduler,
                                                const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
-                                               const WeakActor<Tiled2dMapSourceListenerInterface> &listener,
+                                               const WeakActor<Tiled2dMapVectorLayer> &listener,
                                                const std::unordered_map<std::string, std::unordered_set<std::string>> &layersToDecode,
                                                float screenDensityPpi)
-        : Tiled2dMapSource<djinni::DataRef, IntermediateResult, FinalResult>(mapConfig, layerConfigs.begin()->second, conversionHelper, scheduler,
-                                                                              listener, screenDensityPpi, tileLoaders.size()), loaders(tileLoaders), layersToDecode(layersToDecode), layerConfigs(layerConfigs) {}
+        : Tiled2dMapSource<djinni::DataRef, IntermediateResult, FinalResult>(mapConfig, layerConfigs.begin()->second, conversionHelper, scheduler, screenDensityPpi, tileLoaders.size()),
+loaders(tileLoaders), layersToDecode(layersToDecode), layerConfigs(layerConfigs), listener(listener) {}
 
 ::djinni::Future<IntermediateResult> Tiled2dMapVectorSource::loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) {
     std::lock_guard<std::recursive_mutex> lock(loadingStateMutex);
@@ -59,21 +60,11 @@ void Tiled2dMapVectorSource::cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIn
     }
 }
 
-IntermediateResult Tiled2dMapVectorSource::loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) {
-    std::unordered_map<std::string, DataLoaderResult> results;
-    for(auto const &[source, config]: layerConfigs) {
-        results.insert({source, loaders[loaderIndex]->loadData(config->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier), std::nullopt)});
-        if (results.at(source).status != LoaderStatus::OK) {
-            return IntermediateResult(results, results.at(source).status, results.at(source).errorCode);
-        }
-    }
-    return IntermediateResult(results, LoaderStatus::OK, std::nullopt);
-}
 FinalResult Tiled2dMapVectorSource::postLoadingTask(const IntermediateResult &loadedData, const Tiled2dMapTileInfo &tile) {
     FinalResult resultMap;
 
     for(auto const &[source, data_]: loadedData.results) {
-        if (!isTileVisible(tile)) return FinalResult();
+        //if (!isTileVisible(tile)) return FinalResult();
 
         auto layerFeatureMap = std::make_shared<std::unordered_map<std::string, std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>>>();
 
@@ -123,7 +114,7 @@ FinalResult Tiled2dMapVectorSource::postLoadingTask(const IntermediateResult &lo
 }
 
 void Tiled2dMapVectorSource::notifyTilesUpdates() {
-    
+    listener.message(&Tiled2dMapVectorLayer::onTilesUpdated, getCurrentTiles());
 };
 
 std::unordered_set<Tiled2dMapVectorTileInfo> Tiled2dMapVectorSource::getCurrentTiles() {

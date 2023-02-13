@@ -23,20 +23,9 @@ Tiled2dMapRasterSource::Tiled2dMapRasterSource(const MapConfig &mapConfig,
                                                const WeakActor<Tiled2dMapRasterLayer> &listener,
                                                float screenDensityPpi)
     : Tiled2dMapSource<TextureHolderInterface, TextureLoaderResult, std::shared_ptr<::TextureHolderInterface>>(
-          mapConfig, layerConfig, conversionHelper, scheduler, listener.weakActor<Tiled2dMapSourceListenerInterface>(), screenDensityPpi, loaders.size())
+          mapConfig, layerConfig, conversionHelper, scheduler, screenDensityPpi, loaders.size())
 , loaders(loaders)
 , rasterLayerActor(listener){}
-
-TextureLoaderResult Tiled2dMapRasterSource::loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) {
-    std::weak_ptr<Tiled2dMapSource> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapRasterSource>(shared_from_this());
-    
-    auto weakActor = WeakActor<Tiled2dMapRasterSource>(mailbox, std::static_pointer_cast<Tiled2dMapRasterSource>(shared_from_this()));
-    scheduler->addTask(std::make_shared<LambdaTask>(TaskConfig("", 0, TaskPriority::NORMAL, ExecutionEnvironment::IO), [&, weakActor, tile, loaderIndex] {
-        auto result = loaders[loaderIndex]->loadTexture(layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier), std::nullopt);
-        weakActor.message(&Tiled2dMapRasterSource::didLoad, tile, loaderIndex, result);
-    }));
-    return TextureLoaderResult(nullptr, std::nullopt, LoaderStatus::OK, std::nullopt);
-}
 
 void Tiled2dMapRasterSource::cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) {
     std::string const url = layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier);
@@ -54,7 +43,7 @@ std::shared_ptr<::TextureHolderInterface> Tiled2dMapRasterSource::postLoadingTas
 }
 
 void Tiled2dMapRasterSource::notifyTilesUpdates() {
-    rasterLayerActor.message(&Tiled2dMapRasterLayer::onTilesUpdatedNew, getCurrentTiles());
+    rasterLayerActor.message(&Tiled2dMapRasterLayer::onTilesUpdated, getCurrentTiles());
 }
 
 std::unordered_set<Tiled2dMapRasterTileInfo> Tiled2dMapRasterSource::getCurrentTiles() {

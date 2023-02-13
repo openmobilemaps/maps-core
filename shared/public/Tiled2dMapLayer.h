@@ -16,12 +16,10 @@
 #include "RenderPassInterface.h"
 #include "Tiled2dMapLayerConfig.h"
 #include "Tiled2dMapSourceInterface.h"
-#include "Tiled2dMapSourceListenerInterface.h"
 #include "SimpleTouchInterface.h"
 #include "Actor.h"
 
 class Tiled2dMapLayer : public SimpleLayerInterface,
-                        public Tiled2dMapSourceListenerInterface,
                         public MapCamera2dListenerInterface,
                         public std::enable_shared_from_this<Tiled2dMapLayer> {
   public:
@@ -44,8 +42,6 @@ class Tiled2dMapLayer : public SimpleLayerInterface,
     virtual void hide() override;
 
     virtual void show() override;
-
-    virtual void onTilesUpdated() override = 0;
 
     virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom) override;
 

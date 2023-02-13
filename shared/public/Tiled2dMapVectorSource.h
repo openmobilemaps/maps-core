@@ -19,6 +19,8 @@
 #include <vector>
 #include "DataRef.hpp"
 
+class Tiled2dMapVectorLayer;
+
 struct IntermediateResult final {
     std::unordered_map<std::string, DataLoaderResult> results;
     LoaderStatus status;
@@ -48,7 +50,7 @@ public:
                            const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                            const std::shared_ptr<SchedulerInterface> &scheduler,
                            const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
-                           const WeakActor<Tiled2dMapSourceListenerInterface> &listener,
+                           const WeakActor<Tiled2dMapVectorLayer> &listener,
                            const std::unordered_map<std::string, std::unordered_set<std::string>> &layersToDecode,
                            float screenDensityPpi);
 
@@ -64,8 +66,6 @@ protected:
     
     virtual ::djinni::Future<IntermediateResult> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
     
-    virtual IntermediateResult loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
-
     virtual FinalResult postLoadingTask(const IntermediateResult &loadedData, const Tiled2dMapTileInfo &tile) override;
     
     virtual void notifyTilesUpdates() override;
@@ -77,4 +77,6 @@ private:
     
     std::recursive_mutex loadingStateMutex;
     std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapVectorSourceTileState> loadingStates;
+    
+    const WeakActor<Tiled2dMapVectorLayer> listener;
 };

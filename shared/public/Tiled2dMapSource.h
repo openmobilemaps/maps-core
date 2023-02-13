@@ -18,7 +18,6 @@
 #include "SchedulerInterface.h"
 #include "Tiled2dMapLayerConfig.h"
 #include "Tiled2dMapSourceInterface.h"
-#include "Tiled2dMapSourceListenerInterface.h"
 #include "Tiled2dMapZoomInfo.h"
 #include "Tiled2dMapZoomLevelInfo.h"
 #include "QuadCoord.h"
@@ -33,6 +32,7 @@
 #include <unordered_set>
 #include "gpc.h"
 #include "Actor.h"
+#include "Future.hpp"
 
 template<class R>
 struct TileWrapper {
@@ -66,7 +66,6 @@ public:
     Tiled2dMapSource(const MapConfig &mapConfig, const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
                      const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                      const std::shared_ptr<SchedulerInterface> &scheduler,
-                     const WeakActor<Tiled2dMapSourceListenerInterface> &listener,
                      float screenDensityPpi,
                      size_t loaderCount);
 
@@ -101,8 +100,6 @@ public:
     virtual void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) = 0;
             
     virtual ::djinni::Future<L> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) = 0;
-
-    virtual L loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) = 0;
             
     void didLoad(Tiled2dMapTileInfo tile, size_t loaderIndex, const L &loaderResult);
 
@@ -117,7 +114,6 @@ public:
     std::string layerSystemId;
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
     std::shared_ptr<SchedulerInterface> scheduler;
-    WeakActor<Tiled2dMapSourceListenerInterface> listener;
     std::shared_ptr<::ErrorManager> errorManager;
 
     std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfos;

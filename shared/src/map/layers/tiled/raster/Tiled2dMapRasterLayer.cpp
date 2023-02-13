@@ -137,20 +137,14 @@ void Tiled2dMapRasterLayer::resume() {
 
 void Tiled2dMapRasterLayer::setT(int32_t t) {
     Tiled2dMapLayer::setT(t);
-    onTilesUpdated();
+    //onTilesUpdated();
 }
 
 bool Tiled2dMapRasterLayer::shouldLoadTile(const Tiled2dMapTileInfo& tileInfo){
     return abs(tileInfo.t - curT) < 10;
 }
 
-
-
-void Tiled2dMapRasterLayer::onTilesUpdated() {
-}
-
-
-void Tiled2dMapRasterLayer::onTilesUpdatedNew(std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) {
+void Tiled2dMapRasterLayer::onTilesUpdated(std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) {
     auto lockSelfPtr = std::static_pointer_cast<Tiled2dMapRasterLayer>(shared_from_this());
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
     auto graphicsFactory = mapInterface ? mapInterface->getGraphicsObjectFactory() : nullptr;

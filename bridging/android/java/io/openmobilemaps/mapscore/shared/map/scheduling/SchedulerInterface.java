@@ -20,6 +20,10 @@ public abstract class SchedulerInterface {
 
     public abstract void resume();
 
+    public abstract boolean hasSeparateGraphicsInvocation();
+
+    public abstract void runGraphicsTasks();
+
     public static final class CppProxy extends SchedulerInterface
     {
         private final long nativeRef;
@@ -80,5 +84,21 @@ public abstract class SchedulerInterface {
             native_resume(this.nativeRef);
         }
         private native void native_resume(long _nativeRef);
+
+        @Override
+        public boolean hasSeparateGraphicsInvocation()
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            return native_hasSeparateGraphicsInvocation(this.nativeRef);
+        }
+        private native boolean native_hasSeparateGraphicsInvocation(long _nativeRef);
+
+        @Override
+        public void runGraphicsTasks()
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            native_runGraphicsTasks(this.nativeRef);
+        }
+        private native void native_runGraphicsTasks(long _nativeRef);
     }
 }

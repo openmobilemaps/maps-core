@@ -21,6 +21,7 @@
 #include "Tiled2dMapLayerMaskWrapper.h"
 #include "Tiled2dMapVectorLayerSelectionInterface.h"
 #include "TiledLayerError.h"
+#include "Actor.h"
 
 class Tiled2dMapVectorLayer : public Tiled2dMapLayer, public TouchInterface, public Tiled2dMapVectorLayerInterface, public Tiled2dMapVectorLayerReadyInterface {
 public:
@@ -66,7 +67,7 @@ public:
 
     void forceReload() override;
 
-    virtual void onTilesUpdated() override;
+    void onTilesUpdated(std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos);
 
     virtual void tileIsReady(const Tiled2dMapTileInfo &tile) override;
 
@@ -115,7 +116,7 @@ protected:
     virtual void loadSpriteData();
 
 
-    std::shared_ptr<Tiled2dMapVectorSource> vectorTileSource;
+    Actor<Tiled2dMapVectorSource> vectorTileSource;
 
     const std::vector<std::shared_ptr<::LoaderInterface>> loaders;
 
