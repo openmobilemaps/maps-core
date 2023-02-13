@@ -60,7 +60,7 @@ class AndroidScheduler(
 					if (isResumed.get()) {
 						scheduleTask(task)
 					} else {
-						val newTaskConfig = task.config.let { TaskConfig(it.id, 0L, it.priority, it.executionEnvironment) }
+						val newTaskConfig = task.getConfig().let { TaskConfig(it.id, 0L, it.priority, it.executionEnvironment) }
 						val newTask = object : TaskInterface() {
 							override fun getConfig(): TaskConfig = newTaskConfig
 							override fun run() { task.run() }

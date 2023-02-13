@@ -24,7 +24,7 @@ OBJC_OUT="$DJINNI_OUT_DIR/ios"
 OBJC_PREFIX="$PROJECT_PREFIX"
 OBJCPP_OUT="$DJINNI_OUT_DIR/ios"
 
-JAVA_OUT="$DJINNI_OUT_DIR/android/java/io/openmobilemaps/mapscore/shared"
+KOTLIN_OUT="$DJINNI_OUT_DIR/android/java/io/openmobilemaps/mapscore/shared"
 JNI_OUT="$DJINNI_OUT_DIR/android/jni"
 
 CPP_OUT="../shared/public"
@@ -37,7 +37,7 @@ IDENT_CPP_METHOD="fooBar"
 IDENT_JNI_CLASS="NativeFooBar"
 IDENT_JAVA="fooBar"
 
-for dir in "$OBJCPP_OUT" "$OBJC_OUT" "$JNI_OUT" "$JAVA_OUT"; do
+for dir in "$OBJCPP_OUT" "$OBJC_OUT" "$JNI_OUT" "$KOTLIN_OUT"; do
         if [ -e "$dir" ]; then
             echo "Deleting \"$dir\"..."
             rm -r "$dir"
@@ -70,7 +70,7 @@ for file in $(find . -name "*.djinni" -type f -print); do
     fi
     
     "$base_dir/../external/djinni/src/run" \
-        --java-out "$JAVA_OUT/$SUB" \
+        --kotlin-out "$KOTLIN_OUT/$SUB" \
         --java-package "$JAVA_PACKAGE$SUBPOINT" \
         --ident-java-field "$IDENT_JAVA" \
         --ident-java-enum "$IDENT_CPP_ENUM" \
