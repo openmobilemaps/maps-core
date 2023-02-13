@@ -79,7 +79,7 @@ void Tiled2dMapLayer::show() {
 }
 
 void Tiled2dMapLayer::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom) {
-    sourceInterface.message(&Tiled2dMapSourceInterface::onVisibleBoundsChanged, visibleBounds, curT, zoom);
+    sourceInterface.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapSourceInterface::onVisibleBoundsChanged, visibleBounds, curT, zoom);
 }
 
 void Tiled2dMapLayer::onRotationChanged(float angle) {

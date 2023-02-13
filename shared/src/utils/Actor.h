@@ -28,15 +28,15 @@ public:
 };
 
 template <class Object, class MemberFn, class... Args>
-inline std::unique_ptr<MailboxMessage> makeMessage(Object& object, MemberFn memberFn, Args&&... args) {
+inline std::unique_ptr<MailboxMessage> makeMessage(const MailboxDuplicationStrategy &strategy, Object& object, MemberFn memberFn, Args&&... args) {
     auto tuple = std::make_tuple(std::forward<Args>(args)...);
-    return std::make_unique<MailboxMessageImpl<Object, MemberFn, decltype(tuple)>>(object, memberFn, std::move(tuple));
+    return std::make_unique<MailboxMessageImpl<Object, MemberFn, decltype(tuple)>>(object, memberFn, strategy, std::move(tuple));
 }
 
 template <class ResultType, class Object, class MemberFn, class... Args>
-std::unique_ptr<MailboxMessage> makeMessage(std::promise<ResultType>&& promise, Object& object, MemberFn memberFn, Args&&... args) {
+std::unique_ptr<MailboxMessage> makeMessage(const MailboxDuplicationStrategy &strategy, std::promise<ResultType>&& promise, Object& object, MemberFn memberFn, Args&&... args) {
     auto tuple = std::make_tuple(std::forward<Args>(args)...);
-    return std::make_unique<AskMessageImpl<ResultType, Object, MemberFn, decltype(tuple)>>(std::move(promise), object, memberFn, std::move(tuple));
+    return std::make_unique<AskMessageImpl<ResultType, Object, MemberFn, decltype(tuple)>>(std::move(promise), object, memberFn, strategy, std::move(tuple));
 }
 
 template <class Object>
@@ -51,12 +51,21 @@ public:
     }
     
     template <typename Fn, class... Args>
+    inline void message(const MailboxDuplicationStrategy &strategy, Fn fn, Args&&... args) const {
+        auto strongObject = object.lock();
+        if (strongObject) {
+            receivingMailbox->push(makeMessage(strategy, strongObject, fn, std::forward<Args>(args)...));
+        }
+    }
+    
+    template <typename Fn, class... Args>
     inline void message(Fn fn, Args&&... args) const {
         auto strongObject = object.lock();
         if (strongObject) {
-            receivingMailbox->push(makeMessage(strongObject, fn, std::forward<Args>(args)...));
+            receivingMailbox->push(makeMessage(MailboxDuplicationStrategy::none, strongObject, fn, std::forward<Args>(args)...));
         }
     }
+    
     
     template <typename Fn, class... Args>
     auto converse(Fn fn, Args&&... args) const {
@@ -64,7 +73,7 @@ public:
         
         std::promise<ResultType> promise;
         auto future = promise.get_future();
-        receivingMailbox->push(makeMessage(std::move(promise), *object, fn, std::forward<Args>(args)...));
+        receivingMailbox->push(makeMessage(MailboxDuplicationStrategy::none, std::move(promise), *object, fn, std::forward<Args>(args)...));
         return future;
     }
     
@@ -130,7 +139,16 @@ public:
         if(!receivingMailbox || !object) {
             return;
         }
-        receivingMailbox->push(makeMessage(object, fn, std::forward<Args>(args)...));
+        receivingMailbox->push(makeMessage(MailboxDuplicationStrategy::none, object, fn, std::forward<Args>(args)...));
+    }
+    
+    
+    template <typename Fn, class... Args>
+    inline void message(Fn fn, const MailboxDuplicationStrategy &strategy, Args&&... args) const {
+        if(!receivingMailbox || !object) {
+            return;
+        }
+        receivingMailbox->push(makeMessage(strategy, object, fn, std::forward<Args>(args)...));
     }
     
     template <typename Fn, class... Args>
@@ -139,7 +157,7 @@ public:
         
         std::promise<ResultType> promise;
         auto future = promise.get_future();
-        receivingMailbox->push(makeMessage(std::move(promise), object, fn, std::forward<Args>(args)...));
+        receivingMailbox->push(makeMessage(MailboxDuplicationStrategy::none, std::move(promise), object, fn, std::forward<Args>(args)...));
         return future;
     }
     

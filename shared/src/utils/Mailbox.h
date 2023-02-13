@@ -10,22 +10,40 @@
 #include "SchedulerInterface.h"
 #include "LambdaTask.h"
 #include <mutex>
-#include <queue>
+#include <deque>
 #include <future>
 #include "Logger.h"
 #include "assert.h"
 
+
+enum class MailboxDuplicationStrategy {
+    none = 0,
+    replaceNewest = 1
+};
+
 class MailboxMessage {
 public:
+    MailboxMessage(const MailboxDuplicationStrategy &strategy, void* identifier) : strategy(strategy), identifier(identifier) {}
     virtual ~MailboxMessage() = default;
     virtual void operator()() = 0;
+    
+    const MailboxDuplicationStrategy strategy;
+    const void* identifier;
 };
 
 template <class Object, class MemberFn, class ArgsTuple>
 class MailboxMessageImpl: public MailboxMessage {
 public:
     MailboxMessageImpl(Object object_, MemberFn memberFn_, ArgsTuple argsTuple_)
-      : object(object_),
+      : MailboxMessage(MailboxDuplicationStrategy::none, (void*&) memberFn),
+        object(object_),
+        memberFn(memberFn_),
+        argsTuple(std::move(argsTuple_)) {
+    }
+    
+    MailboxMessageImpl(Object object_, MemberFn memberFn_, const MailboxDuplicationStrategy &strategy, ArgsTuple argsTuple_)
+      : MailboxMessage(strategy, (void*&) memberFn),
+        object(object_),
         memberFn(memberFn_),
         argsTuple(std::move(argsTuple_)) {
     }
@@ -47,8 +65,17 @@ public:
 template <class ResultType, class Object, class MemberFn, class ArgsTuple>
 class AskMessageImpl : public MailboxMessage {
 public:
-    AskMessageImpl(std::promise<ResultType> promise_, Object object_, MemberFn memberFn_, ArgsTuple argsTuple_)
-        : object(object_),
+    AskMessageImpl(std::promise<ResultType> promise_, Object object_, MemberFn memberFn_, ArgsTuple argsTuple_, const MailboxDuplicationStrategy &strategy)
+        : MailboxMessage(MailboxDuplicationStrategy::none, (void*&) memberFn),
+          object(object_),
+          memberFn(memberFn_),
+          argsTuple(std::move(argsTuple_)),
+          promise(std::move(promise_)) {
+    }
+
+    AskMessageImpl(std::promise<ResultType> promise_, Object object_, MemberFn memberFn_, const MailboxDuplicationStrategy &strategy, ArgsTuple argsTuple_)
+        : MailboxMessage(strategy, (void*&) memberFn),
+          object(object_),
           memberFn(memberFn_),
           argsTuple(std::move(argsTuple_)),
           promise(std::move(promise_)) {
@@ -77,7 +104,22 @@ public:
         std::lock_guard<std::mutex> pushingLock(pushingMutex);
         std::lock_guard<std::mutex> queueLock(queueMutex);
         bool wasEmpty = queue.empty();
-        queue.push(std::move(message));
+        
+        bool didReplace = false;
+        if (message->strategy == MailboxDuplicationStrategy::replaceNewest) {
+            for (auto it = queue.begin(); it != queue.end(); it++) {
+                if ((*it)->identifier == message->identifier) {
+                    auto const newIt = queue.erase (it);
+                    queue.insert(newIt, std::move(message));
+                    LogDebug << this <<= " didReplace Message🚀";
+                    didReplace = true;
+                    break;
+                }
+            }
+        }
+        if (!didReplace) {
+            queue.push_back(std::move(message));
+        }
         LogDebug << this <<= " " + std::to_string(queue.size());
         if (wasEmpty) {
             scheduler->addTask(makeTask(shared_from_this()));
@@ -94,10 +136,11 @@ public:
             std::lock_guard<std::mutex> queueLock(queueMutex);
             assert(!queue.empty());
             message = std::move(queue.front());
-            queue.pop();
+            queue.pop_front();
             wasEmpty = queue.empty();
             LogDebug << this <<= " " + std::to_string(queue.size());
         }
+        
         
         (*message)();
         
@@ -124,5 +167,5 @@ private:
     std::mutex pushingMutex;
 
     std::mutex queueMutex;
-    std::queue<std::unique_ptr<MailboxMessage>> queue;
+    std::deque<std::unique_ptr<MailboxMessage>> queue;
 };
