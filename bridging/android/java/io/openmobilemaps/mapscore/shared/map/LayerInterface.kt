@@ -14,7 +14,7 @@ abstract class LayerInterface {
 
     abstract fun buildRenderPasses(): ArrayList<io.openmobilemaps.mapscore.shared.graphics.RenderPassInterface>
 
-    abstract fun onAdded(mapInterface: MapInterface)
+    abstract fun onAdded(mapInterface: MapInterface, layerIndex: Int)
 
     abstract fun onRemoved()
 
@@ -71,11 +71,11 @@ abstract class LayerInterface {
         }
         private external fun native_buildRenderPasses(_nativeRef: Long): ArrayList<io.openmobilemaps.mapscore.shared.graphics.RenderPassInterface>
 
-        override fun onAdded(mapInterface: MapInterface) {
+        override fun onAdded(mapInterface: MapInterface, layerIndex: Int) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_onAdded(this.nativeRef, mapInterface)
+            native_onAdded(this.nativeRef, mapInterface, layerIndex)
         }
-        private external fun native_onAdded(_nativeRef: Long, mapInterface: MapInterface)
+        private external fun native_onAdded(_nativeRef: Long, mapInterface: MapInterface, layerIndex: Int)
 
         override fun onRemoved() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

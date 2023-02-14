@@ -3,13 +3,14 @@
 
 #import <Foundation/Foundation.h>
 
+/** Ordered by severity */
 typedef NS_ENUM(NSInteger, MCLoaderStatus)
 {
     MCLoaderStatusOK = 0,
-    MCLoaderStatusERROR_400 = 1,
-    MCLoaderStatusERROR_404 = 2,
-    MCLoaderStatusERROR_TIMEOUT = 3,
-    MCLoaderStatusERROR_NETWORK = 4,
-    MCLoaderStatusERROR_OTHER = 5,
-    MCLoaderStatusNOOP = 6,
+    MCLoaderStatusNOOP = 1,
+    MCLoaderStatusERROR_TIMEOUT = 2,
+    MCLoaderStatusERROR_NETWORK = 3,
+    MCLoaderStatusERROR_OTHER = 4,
+    MCLoaderStatusERROR_400 = 5,
+    MCLoaderStatusERROR_404 = 6,
 };

@@ -7,23 +7,23 @@
 
 enum class LoaderStatus : int {
     OK = 0,
-    ERROR_400 = 1,
-    ERROR_404 = 2,
-    ERROR_TIMEOUT = 3,
-    ERROR_NETWORK = 4,
-    ERROR_OTHER = 5,
-    NOOP = 6,
+    NOOP = 1,
+    ERROR_TIMEOUT = 2,
+    ERROR_NETWORK = 3,
+    ERROR_OTHER = 4,
+    ERROR_400 = 5,
+    ERROR_404 = 6,
 };
 
 constexpr const char* toString(LoaderStatus e) noexcept {
     constexpr const char* names[] = {
         "ok",
-        "error_400",
-        "error_404",
+        "noop",
         "error_timeout",
         "error_network",
         "error_other",
-        "noop",
+        "error_400",
+        "error_404",
     };
     return names[static_cast<int>(e)];
 }

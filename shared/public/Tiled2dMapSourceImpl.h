@@ -39,21 +39,17 @@ Tiled2dMapSource<T, L, R>::Tiled2dMapSource(const MapConfig &mapConfig, const st
 }
 
 template<class T, class L, class R>
-void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, int curT, double zoom) {
-    if (isPaused) {
-        return;
-    }
-    updateCurrentTileset(visibleBounds, curT, zoom);
-}
-
-template<class T, class L, class R>
 bool Tiled2dMapSource<T, L, R>::isTileVisible(const Tiled2dMapTileInfo &tileInfo) {
     // unsafe
     return currentVisibleTiles.count(tileInfo) > 0;
 }
 
 template<class T, class L, class R>
-void Tiled2dMapSource<T, L, R>::updateCurrentTileset(const RectCoord &visibleBounds, int curT, double zoom) {
+void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, int curT, double zoom) {
+    if (isPaused) {
+        return;
+    }
+
     std::vector<PrioritizedTiled2dMapTileInfo> visibleTilesVec;
 
     RectCoord visibleBoundsLayer = conversionHelper->convertRect(layerSystemId, visibleBounds);
@@ -214,15 +210,12 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
 
         currentPyramid = pyramid;
         currentVisibleTiles = newCurrentVisibleTiles;
-        
-        int currentZoomLevelIdentifier = 0;
-        
-        currentZoomLevelIdentifier = this->currentZoomLevelIdentifier;
-        
+
         // we only remove tiles that are not visible anymore directly
         // tile from upper zoom levels will be removed as soon as the correct tiles are loaded
         std::unordered_set<Tiled2dMapTileInfo> toRemove;
-        
+
+        int currentZoomLevelIdentifier = this->currentZoomLevelIdentifier;
         for (const auto &[tileInfo, tileWrapper] : currentTiles) {
             bool found = false;
 

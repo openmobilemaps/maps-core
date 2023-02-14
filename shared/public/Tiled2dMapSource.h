@@ -140,8 +140,6 @@ public:
     std::set<Tiled2dMapTileInfo> readyTiles;
 
 private:
-    void updateCurrentTileset(const ::RectCoord &visibleBounds, int curT, double zoom);
-
     void performLoadingTask(Tiled2dMapTileInfo tile, size_t loaderIndex);
 
     void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid);

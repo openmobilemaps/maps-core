@@ -4,14 +4,15 @@
 @extern "../../yaml/vec_2_d.yaml"
 @extern "../../yaml/quad_2d_d.yaml"
 
+# Ordered by severity
 loader_status = enum {
     ok;
-    error_400;
-    error_404;
+    noop;
     error_timeout;
     error_network;
     error_other;
-    noop;
+    error_400;
+    error_404;
 }
 
 texture_loader_result = record {

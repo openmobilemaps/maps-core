@@ -70,6 +70,8 @@ protected:
     
     virtual void notifyTilesUpdates() override;
 
+    virtual std::tuple<LoaderStatus, std::optional<std::string>> mergeLoaderStatus(const Tiled2dMapVectorSourceTileState &tileStates);
+
 private:
     const std::vector<std::shared_ptr<::LoaderInterface>> loaders;
     const std::unordered_map<std::string, std::unordered_set<std::string>> layersToDecode;

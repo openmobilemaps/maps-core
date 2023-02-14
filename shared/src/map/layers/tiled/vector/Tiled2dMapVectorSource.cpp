@@ -26,11 +26,12 @@ Tiled2dMapVectorSource::Tiled2dMapVectorSource(const MapConfig &mapConfig,
 loaders(tileLoaders), layersToDecode(layersToDecode), layerConfigs(layerConfigs), listener(listener) {}
 
 ::djinni::Future<IntermediateResult> Tiled2dMapVectorSource::loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) {
+    auto promise = ::djinni::Promise<IntermediateResult>();
     std::lock_guard<std::recursive_mutex> lock(loadingStateMutex);
     loadingStates.insert({
         tile,
         Tiled2dMapVectorSourceTileState {
-            ::djinni::Promise<IntermediateResult>(),
+            promise,
             std::unordered_map<std::string, DataLoaderResult>{}
             
         }
@@ -38,19 +39,25 @@ loaders(tileLoaders), layersToDecode(layersToDecode), layerConfigs(layerConfigs)
     for(auto const &[source, config]: layerConfigs) {
         const std::string sourceName = source;
         auto const url = config->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier);
-        loaders[loaderIndex]->loadDataAsync(url, std::nullopt).then([&, tile, sourceName](::djinni::Future<DataLoaderResult> result) {
-            std::lock_guard<std::recursive_mutex> lock(loadingStateMutex);
-            loadingStates.at(tile).results.insert({sourceName, result.get()});
+        std::weak_ptr<Tiled2dMapVectorSource> weakRef = std::static_pointer_cast<Tiled2dMapVectorSource>(shared_from_this());
+        loaders[loaderIndex]->loadDataAsync(url, std::nullopt).then([weakRef, tile, sourceName](::djinni::Future<DataLoaderResult> result) {
+            auto ref = weakRef.lock();
+            if (!ref) {
+
+                return;
+            }
+            std::lock_guard<std::recursive_mutex> lock(ref->loadingStateMutex);
+            ref->loadingStates.at(tile).results.insert({sourceName, result.get()});
             
-            if (loadingStates.at(tile).results.size() == layerConfigs.size()) {
-                //TODO: calculate correct loader status
-                loadingStates.at(tile).promise.setValue(IntermediateResult(loadingStates.at(tile).results, LoaderStatus::OK, std::nullopt));
-                loadingStates.erase(tile);
+            if (ref->loadingStates.at(tile).results.size() == ref->layerConfigs.size()) {
+                auto [mergedStatus, mergedErrorCode] = ref->mergeLoaderStatus(ref->loadingStates.at(tile));
+                ref->loadingStates.at(tile).promise.setValue(IntermediateResult(ref->loadingStates.at(tile).results, mergedStatus, mergedErrorCode));
+                ref->loadingStates.erase(tile);
             }
             
         });
     }
-    return loadingStates.at(tile).promise.getFuture();
+    return promise.getFuture();
 }
 
 void Tiled2dMapVectorSource::cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) {
@@ -133,4 +140,17 @@ void Tiled2dMapVectorSource::pause() {
 
 void Tiled2dMapVectorSource::resume() {
     // TODO: Reload textures of current tiles
+}
+
+std::tuple<LoaderStatus, std::optional<std::string>> Tiled2dMapVectorSource::mergeLoaderStatus(const Tiled2dMapVectorSourceTileState &tileStates) {
+    LoaderStatus status = LoaderStatus::OK;
+    std::optional<std::string> errorCode = std::nullopt;
+    for (const auto &[source, result] : tileStates.results) {
+        const LoaderStatus &tileStatus = result.status;
+        if (tileStatus > status) {
+            status = tileStatus;
+            errorCode = result.errorCode;
+        }
+    }
+    return std::make_tuple(status, errorCode);
 }

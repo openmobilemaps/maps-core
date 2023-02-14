@@ -3,12 +3,13 @@
 
 package io.openmobilemaps.mapscore.shared.map.loader
 
+/** Ordered by severity */
 enum class LoaderStatus {
     OK,
-    ERROR_400,
-    ERROR_404,
+    NOOP,
     ERROR_TIMEOUT,
     ERROR_NETWORK,
     ERROR_OTHER,
-    NOOP,
+    ERROR_400,
+    ERROR_404,
 }
