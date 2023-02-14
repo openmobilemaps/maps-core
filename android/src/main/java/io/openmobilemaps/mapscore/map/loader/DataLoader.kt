@@ -94,7 +94,7 @@ open class DataLoader(
 			return okHttpClient.newCall(request).execute().use { response ->
 				val bytes: ByteArray? = response.body?.bytes()
 				if (response.isSuccessful && bytes != null) {
-					return@use DataLoaderResult(ByteBuffer.wrap(bytes), response.header(HEADER_NAME_ETAG, null), LoaderStatus.OK, null)
+					return@use DataLoaderResult(ByteBuffer.allocateDirect(bytes.size).put(bytes), response.header(HEADER_NAME_ETAG, null), LoaderStatus.OK, null)
 				} else if (response.code == 404) {
 					return@use DataLoaderResult(null, null, LoaderStatus.ERROR_404, response.code.toString())
 				} else {
