@@ -146,7 +146,7 @@ private:
 
     void updateTileMasks();
 
-    std::unordered_set<Tiled2dMapTileInfo> currentlyLoading;
+    std::unordered_map<Tiled2dMapTileInfo, int> currentlyLoading;
 
     const long long MAX_WAIT_TIME = 32000;
     const long long MIN_WAIT_TIME = 1000;

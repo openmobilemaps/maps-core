@@ -70,8 +70,10 @@ open class MCTextureLoader: MCLoaderInterface {
             guard let self = self else { return }
             
             self.taskQueue.sync {
-                _ = self.tasks.removeValue(forKey: urlString)
-                
+                // if we don't have the task in the queue anymore we dont't have to process the response
+                if self.tasks.removeValue(forKey: urlString) == nil {
+                    return
+                }
             }
             
             let result: Data? = data
@@ -188,8 +190,10 @@ open class MCTextureLoader: MCLoaderInterface {
             guard let self = self else { return }
             
             self.taskQueue.sync {
-                _ = self.tasks.removeValue(forKey: urlString)
-                
+                // if we don't have the task in the queue anymore we dont't have to process the response
+                if self.tasks.removeValue(forKey: urlString) == nil {
+                    return
+                }
             }
             
             let result: Data? = data

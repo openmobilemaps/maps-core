@@ -186,96 +186,112 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
 
 template<class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid) {
-    std::unordered_map<size_t, size_t> tasksToAdd;
-    {
-        std::unordered_set<Tiled2dMapTileInfo> newCurrentVisibleTiles;
 
-        std::unordered_set<PrioritizedTiled2dMapTileInfo> toAdd;
+    currentVisibleTiles.clear();
 
-        // make sure all tiles on the current zoom level are scheduled to load
-        for (const auto &layer: pyramid) {
-            if (layer.targetZoomLevelOffset <= 0 && layer.targetZoomLevelOffset >= -zoomInfo.numDrawPreviousLayers){
-                for (auto const &tileInfo: layer.visibleTiles) {
-                    newCurrentVisibleTiles.insert(tileInfo.tileInfo);
+    std::vector<PrioritizedTiled2dMapTileInfo> toAdd;
 
-                    size_t currentTilesCount = currentTiles.count(tileInfo.tileInfo);;
-                    size_t currentlyLoadingCount = currentlyLoading.count(tileInfo.tileInfo);
-                    
-                    if (currentTilesCount == 0 && currentlyLoadingCount == 0) {
-                        toAdd.insert(tileInfo);
-                    }
+    // make sure all tiles on the current zoom level are scheduled to load
+    for (const auto &layer: pyramid) {
+        if (layer.targetZoomLevelOffset <= 0 && layer.targetZoomLevelOffset >= -zoomInfo.numDrawPreviousLayers){
+            for (auto const &tileInfo: layer.visibleTiles) {
+                currentVisibleTiles.insert(tileInfo.tileInfo);
+
+                size_t currentTilesCount = currentTiles.count(tileInfo.tileInfo);
+                size_t currentlyLoadingCount = currentlyLoading.count(tileInfo.tileInfo);
+
+                if (currentTilesCount == 0 && currentlyLoadingCount == 0) {
+                    toAdd.push_back(tileInfo);
                 }
             }
         }
+    }
 
-        currentPyramid = pyramid;
-        currentVisibleTiles = newCurrentVisibleTiles;
+    currentPyramid = pyramid;
 
-        // we only remove tiles that are not visible anymore directly
-        // tile from upper zoom levels will be removed as soon as the correct tiles are loaded
-        std::unordered_set<Tiled2dMapTileInfo> toRemove;
+    // we only remove tiles that are not visible anymore directly
+    // tile from upper zoom levels will be removed as soon as the correct tiles are loaded
+    std::vector<Tiled2dMapTileInfo> toRemove;
 
-        int currentZoomLevelIdentifier = this->currentZoomLevelIdentifier;
-        for (const auto &[tileInfo, tileWrapper] : currentTiles) {
-            bool found = false;
+    int currentZoomLevelIdentifier = this->currentZoomLevelIdentifier;
+    for (const auto &[tileInfo, tileWrapper] : currentTiles) {
+        bool found = false;
 
-            if (tileInfo.zoomIdentifier <= currentZoomLevelIdentifier) {
-                for (const auto &layer: pyramid) {
-                    for (auto const &tile: layer.visibleTiles) {
-                        if (tileInfo == tile.tileInfo) {
-                            found = true;
-                            break;
-                        }
-                    }
-
-                    if(found) { break; }
-                }
-            }
-
-            if (!found) {
-                toRemove.insert(tileInfo);
-            }
-        }
-
-
-        {
-            for (const auto &removedTile : toRemove) {
-                gpc_free_polygon(&currentTiles.at(removedTile).tilePolygon);
-                currentTiles.erase(removedTile);
-                
-                readyTiles.erase(removedTile);
-                
-                if (errorManager)
-                    errorManager->removeError(
-                            layerConfig->getTileUrl(removedTile.x, removedTile.y, removedTile.t, removedTile.zoomIdentifier));
-            }
-        }
-
-        for (auto &[loaderIndex, errors]: errorTiles) {
-            for (auto it = errors.begin(); it != errors.end();) {
-                bool found = false;
-                for (const auto &layer: pyramid) {
-                    auto visibleTile = layer.visibleTiles.find({it->first.tileInfo, 0});
-                    if (visibleTile == layer.visibleTiles.end()) {
+        if (tileInfo.zoomIdentifier <= currentZoomLevelIdentifier) {
+            for (const auto &layer: pyramid) {
+                for (auto const &tile: layer.visibleTiles) {
+                    if (tileInfo == tile.tileInfo) {
                         found = true;
                         break;
                     }
                 }
-                if (found) {
-                    if (errorManager) errorManager->removeError(layerConfig->getTileUrl(it->first.tileInfo.x, it->first.tileInfo.y, it->first.tileInfo.t, it->first.tileInfo.zoomIdentifier));
-                    it = errors.erase(it);
-                } else {
-                    ++it;
-                }
+
+                if(found) { break; }
             }
         }
 
-        for (const auto &addedTile : toAdd) {
-            performLoadingTask(addedTile.tileInfo, 0);
+        if (!found) {
+            toRemove.push_back(tileInfo);
         }
-
     }
 
+    for (const auto &removedTile : toRemove) {
+        gpc_free_polygon(&currentTiles.at(removedTile).tilePolygon);
+        currentTiles.erase(removedTile);
+        currentlyLoading.erase(removedTile);
+
+        readyTiles.erase(removedTile);
+
+        if (errorManager)
+            errorManager->removeError(
+                    layerConfig->getTileUrl(removedTile.x, removedTile.y, removedTile.t, removedTile.zoomIdentifier));
+    }
+
+    for (auto it = currentlyLoading.begin(); it != currentlyLoading.end();) {
+        bool found = false;
+        if (it->first.zoomIdentifier <= currentZoomLevelIdentifier) {
+            for (const auto &layer: pyramid) {
+                for (auto const &tile: layer.visibleTiles) {
+                    if (it->first == tile.tileInfo) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if(found) { break; }
+            }
+        }
+
+       if(!found) {
+          cancelLoad(it->first, it->second);
+          it = currentlyLoading.erase(it);
+       }
+       else
+          it++;
+    }
+
+    for (auto &[loaderIndex, errors]: errorTiles) {
+        for (auto it = errors.begin(); it != errors.end();) {
+            bool found = false;
+            for (const auto &layer: pyramid) {
+                auto visibleTile = layer.visibleTiles.find({it->first.tileInfo, 0});
+                if (visibleTile == layer.visibleTiles.end()) {
+                    found = true;
+                    break;
+                }
+            }
+            if (found) {
+                if (errorManager) errorManager->removeError(layerConfig->getTileUrl(it->first.tileInfo.x, it->first.tileInfo.y, it->first.tileInfo.t, it->first.tileInfo.zoomIdentifier));
+                it = errors.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+
+    for (const auto &addedTile : toAdd) {
+        performLoadingTask(addedTile.tileInfo, 0);
+    }
     //if we removed tiles, we potentially need to update the tilemasks - also if no new tile is loaded
     updateTileMasks();
     
@@ -291,7 +307,7 @@ template<class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::performLoadingTask(Tiled2dMapTileInfo tile, size_t loaderIndex) {
     if (currentlyLoading.count(tile) != 0) return;
     
-    currentlyLoading.insert(tile);
+    currentlyLoading.insert({tile, loaderIndex});
     readyTiles.erase(tile);
     
     std::weak_ptr<Tiled2dMapSource> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this());
@@ -304,6 +320,8 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(Tiled2dMapTileInfo tile, size
 
 template<class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::didLoad(Tiled2dMapTileInfo tile, size_t loaderIndex, const L &loaderResult) {
+    currentlyLoading.erase(tile);
+
     auto errorManager = this->errorManager;
     
     LoaderStatus status = loaderResult.status;
@@ -392,9 +410,7 @@ void Tiled2dMapSource<T, L, R>::didLoad(Tiled2dMapTileInfo tile, size_t loaderIn
             break;
         }
     }
-    
-    currentlyLoading.erase(tile);
-    
+
     updateTileMasks();
     
     notifyTilesUpdates();
