@@ -15,6 +15,7 @@
 #include <condition_variable>
 #include <mutex>
 #include <deque>
+#include <chrono>
 #include <thread>
 #include <array>
 
@@ -41,6 +42,10 @@ public:
 
     void runGraphicsTasks() override;
 
+    void delayedTasksThread();
+
+    void addTaskIgnoringDelay(const std::shared_ptr<TaskInterface> & task);
+
 private:
     std::thread makeSchedulerThread(size_t index, TaskPriority priority);
     
@@ -58,6 +63,14 @@ private:
     std::deque<std::shared_ptr<TaskInterface>> graphicsQueue;
     static const uint8_t DEFAULT_MAX_NUM_THREADS = 4;
     std::vector<std::thread> threads;
+
+    using TimeStamp = std::chrono::time_point<std::chrono::system_clock>;
+    std::thread delayedTaskThread;
+    std::mutex delayedTasksMutex;
+    TimeStamp nextWakeup;
+    std::condition_variable delayedTasksCv;
+    //contains the tasks and the timestamp at which they were added to the list
+    std::vector<std::pair<std::shared_ptr<TaskInterface>, TimeStamp>> delayedTasks;
 
     bool terminated{false};
 };

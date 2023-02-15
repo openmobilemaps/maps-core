@@ -17,7 +17,7 @@ std::shared_ptr<SchedulerInterface> ThreadPoolScheduler::create(const std::share
 
 ThreadPoolSchedulerImpl::ThreadPoolSchedulerImpl(const std::shared_ptr<ThreadPoolCallbacks> &callbacks,
                                                  bool separateGraphicsQueue)
-        : callbacks(callbacks), separateGraphicsQueue(separateGraphicsQueue) {
+        : callbacks(callbacks), separateGraphicsQueue(separateGraphicsQueue), delayedTaskThread(&ThreadPoolSchedulerImpl::delayedTasksThread, this), nextWakeup(std::chrono::system_clock::now() + std::chrono::seconds(1)) {
     unsigned int maxNumThreads = std::floorf(std::thread::hardware_concurrency() * 0.75f);
     if (maxNumThreads < 1) maxNumThreads = DEFAULT_MAX_NUM_THREADS;
     for (std::size_t i = 0u; i < maxNumThreads; ++i) {
@@ -31,6 +31,8 @@ ThreadPoolSchedulerImpl::~ThreadPoolSchedulerImpl() {
         terminated = true;
     }
     defaultCv.notify_all();
+    delayedTasksCv.notify_all();
+    delayedTaskThread.join();
     
     for (auto& thread : threads) {
         if (std::this_thread::get_id() != thread.get_id()) {
@@ -41,7 +43,21 @@ ThreadPoolSchedulerImpl::~ThreadPoolSchedulerImpl() {
 
 void ThreadPoolSchedulerImpl::addTask(const std::shared_ptr<TaskInterface> & task) {
     assert(task);
-    if (separateGraphicsQueue && task->getConfig().executionEnvironment == ExecutionEnvironment::GRAPHICS) {
+    auto const &config = task->getConfig();
+
+    if (config.delay != 0) {
+        std::lock_guard<std::mutex> lock(delayedTasksMutex);
+        delayedTasks.push_back({task,  std::chrono::system_clock::now() + std::chrono::milliseconds(config.delay)});
+        delayedTasksCv.notify_one();
+    } else {
+        addTaskIgnoringDelay(task);
+    }
+}
+
+void ThreadPoolSchedulerImpl::addTaskIgnoringDelay(const std::shared_ptr<TaskInterface> & task) {
+    auto const &config = task->getConfig();
+
+    if (separateGraphicsQueue && config.executionEnvironment == ExecutionEnvironment::GRAPHICS) {
         std::lock_guard<std::mutex> lock(graphicsMutex);
         graphicsQueue.push_back(task);
     } else {
@@ -143,6 +159,34 @@ void ThreadPoolSchedulerImpl::runGraphicsTasks() {
         auto cwtMs = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start);
         if (cwtMs.count() >= MAX_TIME_GRAPHICS_TASKS_MS) {
             break;
+        }
+    }
+}
+
+void ThreadPoolSchedulerImpl::delayedTasksThread() {
+    callbacks->setCurrentThreadName(std::string{"MapSDK_delayed_tasks"});
+
+    while (true) {
+        std::unique_lock<std::mutex> lock(delayedTasksMutex);
+        delayedTasksCv.wait_until(lock, nextWakeup);
+
+        if (terminated) {
+            return;
+        }
+
+        auto now = std::chrono::system_clock::now();
+
+        nextWakeup = TimeStamp::max();
+
+        for (auto it = delayedTasks.begin(); it != delayedTasks.end();) {
+            // lets schedule this task
+            if(it->second <= now) {
+                addTaskIgnoringDelay(it->first);
+                it = delayedTasks.erase(it);
+            } else {
+                nextWakeup = std::min(nextWakeup, it->second);
+                it++;
+            }
         }
     }
 }
