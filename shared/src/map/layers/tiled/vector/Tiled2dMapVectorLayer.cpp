@@ -472,6 +472,10 @@ void Tiled2dMapVectorLayer::onTilesUpdated() {
 
     auto lockSelfPtr = std::static_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
+    auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
+
+    if(!scheduler) { return; }
+
     {
 
         auto graphicsFactory = mapInterface ? mapInterface->getGraphicsObjectFactory() : nullptr;
@@ -548,8 +552,6 @@ void Tiled2dMapVectorLayer::onTilesUpdated() {
                 newTileMasks[tile.tileInfo] = Tiled2dMapLayerMaskWrapper(tileMask, hash);
             }
 
-
-
             {
                 std::lock_guard<std::recursive_mutex> lock(sourceLayerMapMutex);
                 for (auto const &[source, layerFeatureMap]: tile.layerFeatureMaps) {
@@ -564,15 +566,14 @@ void Tiled2dMapVectorLayer::onTilesUpdated() {
 
                                 std::weak_ptr<Tiled2dMapVectorLayer> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
                                 auto const polygonObject = newTileMasks[tile.tileInfo].getGraphicsMaskObject();
-                                auto const &features = it->second;
-                                mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
-                                                                                                   TaskConfig("VectorTile_onTilesUpdated_" + it->first, 0, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
-                                                                                                   [weakSelfPtr, subLayer, tile, polygonObject, &features] {
-                                                                                                       auto selfPtr = weakSelfPtr.lock();
-                                                                                                       if (selfPtr) {
-                                                                                                           subLayer->updateTileData(tile.tileInfo, polygonObject, features);
-                                                                                                       }
-                                                                                                   }));
+                                auto const features = it->second;
+                                scheduler->addTask(std::make_shared<LambdaTask>(
+                                    TaskConfig("VectorTile_onTilesUpdated_" + it->first, 0, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION), [weakSelfPtr, subLayer, tile, polygonObject, features] {
+                                            auto selfPtr = weakSelfPtr.lock();
+                                            if (selfPtr) {
+                                                subLayer->updateTileData(tile.tileInfo, polygonObject, features);
+                                            }
+                                }));
                             }
                         }
                     }

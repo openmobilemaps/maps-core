@@ -8,6 +8,7 @@
 #include "NativeFont.h"
 #include "NativeFormattedStringEntry.h"
 #include "NativeTextJustify.h"
+#include "NativeTextSymbolPlacement.h"
 
 namespace djinni_generated {
 
@@ -58,6 +59,22 @@ std::vector<::FormattedStringEntry> NativeTextInfoInterface::JavaProxy::getText(
     auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getTextJustify);
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativeTextJustify::toCpp(jniEnv, jret);
+}
+::TextSymbolPlacement NativeTextInfoInterface::JavaProxy::getSymbolPlacement() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeTextInfoInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getSymbolPlacement);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativeTextSymbolPlacement::toCpp(jniEnv, jret);
+}
+std::optional<std::vector<::Coord>> NativeTextInfoInterface::JavaProxy::getLineCoordinates() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeTextInfoInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getLineCoordinates);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni::Optional<std::optional, ::djinni::List<::djinni_generated::NativeCoord>>::toCpp(jniEnv, jret);
 }
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_text_TextInfoInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
@@ -115,6 +132,26 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tex
         const auto& ref = ::djinni::objectFromHandleAddress<::TextInfoInterface>(nativeRef);
         auto r = ref->getTextJustify();
         return ::djinni::release(::djinni_generated::NativeTextJustify::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_text_TextInfoInterface_00024CppProxy_native_1getSymbolPlacement(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::TextInfoInterface>(nativeRef);
+        auto r = ref->getSymbolPlacement();
+        return ::djinni::release(::djinni_generated::NativeTextSymbolPlacement::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_text_TextInfoInterface_00024CppProxy_native_1getLineCoordinates(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::TextInfoInterface>(nativeRef);
+        auto r = ref->getLineCoordinates();
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni::List<::djinni_generated::NativeCoord>>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

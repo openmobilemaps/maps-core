@@ -15,6 +15,7 @@
 #include "TextInfoInterface.h"
 #include "TextLayerObject.h"
 #include "Vec2F.h"
+#include "Quad2dD.h"
 
 #include <optional>
 
@@ -29,6 +30,10 @@ class TextHelper {
                                                              double letterSpacing);
 
     static std::string uppercase(const std::string &string);
+
+    static Quad2dD rotateQuad2d(const Quad2dD &quad, const Vec2D &aroundPoint, double angleDegrees);
+
+    static std::vector<std::string> splitWstring(const std::string &word);
 
   private:
     std::shared_ptr<MapInterface> mapInterface;

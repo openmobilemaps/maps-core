@@ -17,6 +17,10 @@ abstract class TextInfoInterface {
 
     abstract fun getTextJustify(): TextJustify
 
+    abstract fun getSymbolPlacement(): TextSymbolPlacement
+
+    abstract fun getLineCoordinates(): ArrayList<io.openmobilemaps.mapscore.shared.map.coordinates.Coord>?
+
     private class CppProxy : TextInfoInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -64,5 +68,17 @@ abstract class TextInfoInterface {
             return native_getTextJustify(this.nativeRef)
         }
         private external fun native_getTextJustify(_nativeRef: Long): TextJustify
+
+        override fun getSymbolPlacement(): TextSymbolPlacement {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getSymbolPlacement(this.nativeRef)
+        }
+        private external fun native_getSymbolPlacement(_nativeRef: Long): TextSymbolPlacement
+
+        override fun getLineCoordinates(): ArrayList<io.openmobilemaps.mapscore.shared.map.coordinates.Coord>? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getLineCoordinates(this.nativeRef)
+        }
+        private external fun native_getLineCoordinates(_nativeRef: Long): ArrayList<io.openmobilemaps.mapscore.shared.map.coordinates.Coord>?
     }
 }

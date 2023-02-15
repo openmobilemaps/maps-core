@@ -10,6 +10,10 @@
 
 #pragma once
 
+//#define DRAW_TEXT_BOUNDING_BOXES
+//#define DRAW_COLLIDED_TEXT_BOUNDING_BOXES
+//#define DRAW_TEXT_LINES
+
 #include "Tiled2dMapVectorSubLayer.h"
 #include "SymbolVectorLayerDescription.h"
 #include "RenderVerticesDescription.h"
@@ -28,10 +32,8 @@
 #include "LoaderInterface.h"
 #include "Quad2dInterface.h"
 #include "SimpleTouchInterface.h"
+#include "Line2dLayerObject.h"
 #include <set>
-
-//#define DRAW_TEXT_BOUNDING_BOXES
-//#define DRAW_COLLIDED_TEXT_BOUNDING_BOXES
 
 struct Tiled2dMapVectorSymbolFeatureWrapper {
     FeatureContext featureContext;
@@ -56,6 +58,10 @@ struct Tiled2dMapVectorSymbolFeatureWrapper {
 
 #ifdef DRAW_TEXT_BOUNDING_BOXES
     std::shared_ptr<Quad2dInterface> boundingBox = nullptr;
+#endif
+
+#ifdef DRAW_TEXT_LINES
+    std::shared_ptr<Line2dLayerObject> lineObject = nullptr;
 #endif
 
     Tiled2dMapVectorSymbolFeatureWrapper() {};
