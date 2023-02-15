@@ -70,10 +70,7 @@ open class MCTextureLoader: MCLoaderInterface {
             guard let self = self else { return }
             
             self.taskQueue.sync {
-                // if we don't have the task in the queue anymore we dont't have to process the response
-                if self.tasks.removeValue(forKey: urlString) == nil {
-                    return
-                }
+                _ = self.tasks.removeValue(forKey: urlString) == nil
             }
             
             let result: Data? = data
@@ -190,12 +187,9 @@ open class MCTextureLoader: MCLoaderInterface {
             guard let self = self else { return }
             
             self.taskQueue.sync {
-                // if we don't have the task in the queue anymore we dont't have to process the response
-                if self.tasks.removeValue(forKey: urlString) == nil {
-                    return
-                }
+                _ = self.tasks.removeValue(forKey: urlString) == nil
             }
-            
+
             let result: Data? = data
             let response: HTTPURLResponse? = response_ as? HTTPURLResponse
             let error: NSError? = error_ as NSError?
@@ -241,8 +235,6 @@ open class MCTextureLoader: MCLoaderInterface {
         self.taskQueue.sync {
             if let task = self.tasks[url] {
                 task.cancel()
-                print("canceled task!!!! -> \(url)")
-                
             }
         }
     }

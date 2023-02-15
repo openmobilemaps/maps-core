@@ -156,11 +156,9 @@ private:
         long long delay;
     };
 
-    std::unordered_map<size_t, std::map<PrioritizedTiled2dMapTileInfo, ErrorInfo>> errorTiles;
+    std::unordered_map<size_t, std::map<Tiled2dMapTileInfo, ErrorInfo>> errorTiles;
 
     std::unordered_set<Tiled2dMapTileInfo> notFoundTiles;
-
-    std::optional<PrioritizedTiled2dMapTileInfo> dequeueLoadingTask(size_t loaderIndex);
 };
 
 #include "Tiled2dMapSourceImpl.h"

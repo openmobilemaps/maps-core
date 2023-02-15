@@ -35,14 +35,14 @@ template <class Object, class MemberFn, class ArgsTuple>
 class MailboxMessageImpl: public MailboxMessage {
 public:
     MailboxMessageImpl(Object object_, MemberFn memberFn_, ArgsTuple argsTuple_)
-      : MailboxMessage(MailboxDuplicationStrategy::none, (void*&) memberFn),
+      : MailboxMessage(MailboxDuplicationStrategy::none, (void*&) memberFn_),
         object(object_),
         memberFn(memberFn_),
         argsTuple(std::move(argsTuple_)) {
     }
     
     MailboxMessageImpl(Object object_, MemberFn memberFn_, const MailboxDuplicationStrategy &strategy, ArgsTuple argsTuple_)
-      : MailboxMessage(strategy, (void*&) memberFn),
+      : MailboxMessage(strategy, (void*&) memberFn_),
         object(object_),
         memberFn(memberFn_),
         argsTuple(std::move(argsTuple_)) {
@@ -66,7 +66,7 @@ template <class ResultType, class Object, class MemberFn, class ArgsTuple>
 class AskMessageImpl : public MailboxMessage {
 public:
     AskMessageImpl(std::promise<ResultType> promise_, Object object_, MemberFn memberFn_, ArgsTuple argsTuple_, const MailboxDuplicationStrategy &strategy)
-        : MailboxMessage(MailboxDuplicationStrategy::none, (void*&) memberFn),
+        : MailboxMessage(MailboxDuplicationStrategy::none, (void*&) memberFn_),
           object(object_),
           memberFn(memberFn_),
           argsTuple(std::move(argsTuple_)),
@@ -74,7 +74,7 @@ public:
     }
 
     AskMessageImpl(std::promise<ResultType> promise_, Object object_, MemberFn memberFn_, const MailboxDuplicationStrategy &strategy, ArgsTuple argsTuple_)
-        : MailboxMessage(strategy, (void*&) memberFn),
+        : MailboxMessage(strategy, (void*&) memberFn_),
           object(object_),
           memberFn(memberFn_),
           argsTuple(std::move(argsTuple_)),
@@ -109,9 +109,9 @@ public:
         if (message->strategy == MailboxDuplicationStrategy::replaceNewest) {
             for (auto it = queue.begin(); it != queue.end(); it++) {
                 if ((*it)->identifier == message->identifier) {
+                    assert((*it)->strategy == MailboxDuplicationStrategy::replaceNewest);
                     auto const newIt = queue.erase (it);
                     queue.insert(newIt, std::move(message));
-                    LogDebug << this <<= " didReplace Message🚀";
                     didReplace = true;
                     break;
                 }
@@ -120,7 +120,6 @@ public:
         if (!didReplace) {
             queue.push_back(std::move(message));
         }
-        LogDebug << this <<= " " + std::to_string(queue.size());
         if (wasEmpty) {
             scheduler->addTask(makeTask(shared_from_this()));
         }
@@ -138,7 +137,6 @@ public:
             message = std::move(queue.front());
             queue.pop_front();
             wasEmpty = queue.empty();
-            LogDebug << this <<= " " + std::to_string(queue.size());
         }
         
         

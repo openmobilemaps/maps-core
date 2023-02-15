@@ -13,6 +13,7 @@
 #include <mutex>
 #include <queue>
 #include <future>
+#include "Logger.h"
 
 class ActorObject {
 protected:
@@ -55,6 +56,8 @@ public:
         auto strongObject = object.lock();
         if (strongObject) {
             receivingMailbox->push(makeMessage(strategy, strongObject, fn, std::forward<Args>(args)...));
+        } else {
+            LogError <<= "WeakActor holds nullptr";
         }
     }
     
@@ -63,6 +66,8 @@ public:
         auto strongObject = object.lock();
         if (strongObject) {
             receivingMailbox->push(makeMessage(MailboxDuplicationStrategy::none, strongObject, fn, std::forward<Args>(args)...));
+        } else {
+            LogError <<= "WeakActor holds nullptr";
         }
     }
     

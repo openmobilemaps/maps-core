@@ -199,8 +199,9 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
 
                 size_t currentTilesCount = currentTiles.count(tileInfo.tileInfo);
                 size_t currentlyLoadingCount = currentlyLoading.count(tileInfo.tileInfo);
+                size_t notFoundCount = notFoundTiles.count(tileInfo.tileInfo);
 
-                if (currentTilesCount == 0 && currentlyLoadingCount == 0) {
+                if (currentTilesCount == 0 && currentlyLoadingCount == 0 && notFoundCount == 0) {
                     toAdd.push_back(tileInfo);
                 }
             }
@@ -210,14 +211,21 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
     currentPyramid = pyramid;
 
     // we only remove tiles that are not visible anymore directly
-    // tile from upper zoom levels will be removed as soon as the correct tiles are loaded
+    // tile from upper zoom levels will be removed as soon as the correct tiles are loaded if mask tiles is enabled
     std::vector<Tiled2dMapTileInfo> toRemove;
 
     int currentZoomLevelIdentifier = this->currentZoomLevelIdentifier;
     for (const auto &[tileInfo, tileWrapper] : currentTiles) {
         bool found = false;
 
-        if (tileInfo.zoomIdentifier <= currentZoomLevelIdentifier) {
+        bool includeThisZoomLevel = false;
+        if (zoomInfo.maskTile) {
+            includeThisZoomLevel = tileInfo.zoomIdentifier <= currentZoomLevelIdentifier;
+        } else {
+            includeThisZoomLevel = tileInfo.zoomIdentifier <= currentZoomLevelIdentifier && tileInfo.zoomIdentifier >= currentZoomLevelIdentifier - zoomInfo.numDrawPreviousLayers;
+        }
+
+        if (tileInfo.zoomIdentifier == currentZoomLevelIdentifier) {
             for (const auto &layer: pyramid) {
                 for (auto const &tile: layer.visibleTiles) {
                     if (tileInfo == tile.tileInfo) {
@@ -274,20 +282,22 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
         for (auto it = errors.begin(); it != errors.end();) {
             bool found = false;
             for (const auto &layer: pyramid) {
-                auto visibleTile = layer.visibleTiles.find({it->first.tileInfo, 0});
+                auto visibleTile = layer.visibleTiles.find({it->first, 0});
                 if (visibleTile == layer.visibleTiles.end()) {
                     found = true;
                     break;
                 }
             }
             if (found) {
-                if (errorManager) errorManager->removeError(layerConfig->getTileUrl(it->first.tileInfo.x, it->first.tileInfo.y, it->first.tileInfo.t, it->first.tileInfo.zoomIdentifier));
+                if (errorManager) errorManager->removeError(layerConfig->getTileUrl(it->first.x, it->first.y, it->first.t, it->first.zoomIdentifier));
                 it = errors.erase(it);
             } else {
                 ++it;
             }
         }
     }
+
+    std::sort(toAdd.begin(), toAdd.end());
 
     for (const auto &addedTile : toAdd) {
         performLoadingTask(addedTile.tileInfo, 0);
@@ -299,21 +309,21 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
 }
 
 template<class T, class L, class R>
-std::optional<PrioritizedTiled2dMapTileInfo> Tiled2dMapSource<T, L, R>::dequeueLoadingTask(size_t loaderIndex) {
-    return std::nullopt;
-}
-
-template<class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::performLoadingTask(Tiled2dMapTileInfo tile, size_t loaderIndex) {
     if (currentlyLoading.count(tile) != 0) return;
-    
+
+    if (currentVisibleTiles.count(tile) == 0) {
+        errorTiles[loaderIndex].erase(tile);
+        return;
+    };
+
     currentlyLoading.insert({tile, loaderIndex});
     readyTiles.erase(tile);
     
     std::weak_ptr<Tiled2dMapSource> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this());
     auto weakActor = WeakActor<Tiled2dMapSource>(mailbox, std::static_pointer_cast<Tiled2dMapSource>(shared_from_this()));
     
-    loadDataAsync(tile, loaderIndex).then([weakActor, loaderIndex, tile](::djinni::Future<L> result) {
+     loadDataAsync(tile, loaderIndex).then([weakActor, loaderIndex, tile](::djinni::Future<L> result) {
         weakActor.message(&Tiled2dMapSource::didLoad, tile, loaderIndex, result.get());
     });
 }
@@ -322,8 +332,14 @@ template<class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::didLoad(Tiled2dMapTileInfo tile, size_t loaderIndex, const L &loaderResult) {
     currentlyLoading.erase(tile);
 
+    const bool isVisible = currentVisibleTiles.count(tile);
+    if (!isVisible) {
+        errorTiles[loaderIndex].erase(tile);
+        return;
+    }
+
     auto errorManager = this->errorManager;
-    
+
     LoaderStatus status = loaderResult.status;
     
     switch (status) {
@@ -331,30 +347,27 @@ void Tiled2dMapSource<T, L, R>::didLoad(Tiled2dMapTileInfo tile, size_t loaderIn
             if (errorManager) {
                 errorManager->removeError(layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier));
             }
-            bool isVisible = currentVisibleTiles.count(tile);
-            
-            if (isVisible) {
-                R da = postLoadingTask(loaderResult, tile);
-                
-                auto bounds = tile.bounds;
-                PolygonCoord mask({ bounds.topLeft,
-                    Coord(bounds.topLeft.systemIdentifier, bounds.bottomRight.x, bounds.topLeft.y, 0),
-                    bounds.bottomRight,
-                    Coord(bounds.topLeft.systemIdentifier, bounds.topLeft.x, bounds.bottomRight.y, 0),
-                    bounds.topLeft }, {});
-                
-                gpc_polygon tilePolygon;
-                gpc_set_polygon({mask}, &tilePolygon);
-                
-                currentTiles.insert({tile, TileWrapper<R>(da, std::vector<::PolygonCoord>{  }, mask, tilePolygon)});
-                
-                errorTiles[loaderIndex].erase(PrioritizedTiled2dMapTileInfo(tile, 0));
-            }
+
+            R da = postLoadingTask(loaderResult, tile);
+
+            auto bounds = tile.bounds;
+            PolygonCoord mask({ bounds.topLeft,
+                Coord(bounds.topLeft.systemIdentifier, bounds.bottomRight.x, bounds.topLeft.y, 0),
+                bounds.bottomRight,
+                Coord(bounds.topLeft.systemIdentifier, bounds.topLeft.x, bounds.bottomRight.y, 0),
+                bounds.topLeft }, {});
+
+            gpc_polygon tilePolygon;
+            gpc_set_polygon({mask}, &tilePolygon);
+
+            currentTiles.insert({tile, TileWrapper<R>(da, std::vector<::PolygonCoord>{  }, mask, tilePolygon)});
+
+            errorTiles[loaderIndex].erase(tile);
             
             break;
         }
         case LoaderStatus::NOOP: {
-            std::unordered_map<size_t, size_t> tasksToAdd;
+            errorTiles[loaderIndex].erase(tile);
             
             auto newLoaderIndex = loaderIndex + 1;
             performLoadingTask(tile, newLoaderIndex);
@@ -364,7 +377,9 @@ void Tiled2dMapSource<T, L, R>::didLoad(Tiled2dMapTileInfo tile, size_t loaderIn
         case LoaderStatus::ERROR_400:
         case LoaderStatus::ERROR_404: {
             notFoundTiles.insert(tile);
-            
+
+            errorTiles[loaderIndex].erase(tile);
+
             if (errorManager) {
                 errorManager->addTiledLayerError(TiledLayerError(status,
                                                                  loaderResult.errorCode,
@@ -380,13 +395,13 @@ void Tiled2dMapSource<T, L, R>::didLoad(Tiled2dMapTileInfo tile, size_t loaderIn
         case LoaderStatus::ERROR_OTHER:
         case LoaderStatus::ERROR_NETWORK: {
             int64_t delay = 0;
-            if (errorTiles[loaderIndex].count(PrioritizedTiled2dMapTileInfo(tile, 0)) != 0) {
-                errorTiles[loaderIndex][PrioritizedTiled2dMapTileInfo(tile, 0)].lastLoad = DateHelper::currentTimeMillis();
-                errorTiles[loaderIndex][PrioritizedTiled2dMapTileInfo(tile, 0)].delay = std::min(2 * errorTiles[loaderIndex][PrioritizedTiled2dMapTileInfo(tile, 0)].delay, MAX_WAIT_TIME);
+            if (errorTiles[loaderIndex].count(tile) != 0) {
+                errorTiles[loaderIndex].at(tile).lastLoad = DateHelper::currentTimeMillis();
+                errorTiles[loaderIndex].at(tile).delay = std::min(2 * errorTiles[loaderIndex].at(tile).delay, MAX_WAIT_TIME);
             } else {
-                errorTiles[loaderIndex][PrioritizedTiled2dMapTileInfo(tile, 0)] = {DateHelper::currentTimeMillis(), MIN_WAIT_TIME};
+                errorTiles[loaderIndex][tile] = {DateHelper::currentTimeMillis(), MIN_WAIT_TIME};
             }
-            delay = errorTiles[loaderIndex][PrioritizedTiled2dMapTileInfo(tile, 0)].delay;
+            delay = errorTiles[loaderIndex].at(tile).delay;
            
             
             if (errorManager) {
@@ -397,16 +412,15 @@ void Tiled2dMapSource<T, L, R>::didLoad(Tiled2dMapTileInfo tile, size_t loaderIn
                                                                  true,
                                                                  tile.bounds));
             }
-            /*
+
             auto taskIdentifier = "Tiled2dMapSource_loadingErrorTask";
-            
-            std::weak_ptr<Tiled2dMapSource> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this());
-            scheduler->addTask(std::make_shared<LambdaTask>(
-                                                            TaskConfig(taskIdentifier, delay, TaskPriority::NORMAL, ExecutionEnvironment::IO), [weakSelfPtr, loaderIndex] {
-                                                                auto selfPtr = weakSelfPtr.lock();
-                                                                if (selfPtr) selfPtr->performLoadingTask(tile, loaderIndex);
-                                                            }));
-             */
+
+
+            auto weakActor = WeakActor<Tiled2dMapSource>(mailbox, std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this()));
+            scheduler->addTask(std::make_shared<LambdaTask>(TaskConfig(taskIdentifier, delay, TaskPriority::NORMAL, ExecutionEnvironment::IO), [weakActor, tile, loaderIndex] {
+                weakActor.message(&Tiled2dMapSource::performLoadingTask, tile, loaderIndex);
+            }));
+
             break;
         }
     }
@@ -486,7 +500,7 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
 
             if (polygonDiff.contour == NULL) {
                 tileWrapper.isVisible = false;
-            } else if (zoomInfo.maskTile) {
+            } else {
                 gpc_polygon resultingMask;
 
                 gpc_polygon_clip(GPC_INT, &polygonDiff, &currentViewBoundsPolygon, &resultingMask);
@@ -642,7 +656,7 @@ void Tiled2dMapSource<T, L, R>::forceReload() {
     for (auto &[loaderIndex, errors]: errorTiles) {
         for(auto &[tile, errorInfo]: errors) {
             errorInfo.delay = 1;
-            performLoadingTask(tile.tileInfo, loaderIndex);
+            performLoadingTask(tile, loaderIndex);
         }
     }
 
