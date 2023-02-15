@@ -121,7 +121,7 @@ FinalResult Tiled2dMapVectorSource::postLoadingTask(const IntermediateResult &lo
 }
 
 void Tiled2dMapVectorSource::notifyTilesUpdates() {
-    listener.message(&Tiled2dMapVectorLayer::onTilesUpdated, getCurrentTiles());
+    listener.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorLayer::onTilesUpdated, getCurrentTiles());
 };
 
 std::unordered_set<Tiled2dMapVectorTileInfo> Tiled2dMapVectorSource::getCurrentTiles() {
