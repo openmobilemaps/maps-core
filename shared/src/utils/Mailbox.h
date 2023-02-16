@@ -35,14 +35,14 @@ template <class Object, class MemberFn, class ArgsTuple>
 class MailboxMessageImpl: public MailboxMessage {
 public:
     MailboxMessageImpl(Object object_, MemberFn memberFn_, ArgsTuple argsTuple_)
-      : MailboxMessage(MailboxDuplicationStrategy::none, (void*&) memberFn_),
+      : MailboxMessage(MailboxDuplicationStrategy::none, (void*)(void*&) memberFn_),
         object(object_),
         memberFn(memberFn_),
         argsTuple(std::move(argsTuple_)) {
     }
     
     MailboxMessageImpl(Object object_, MemberFn memberFn_, const MailboxDuplicationStrategy &strategy, ArgsTuple argsTuple_)
-      : MailboxMessage(strategy, (void*&) memberFn_),
+      : MailboxMessage(strategy, (void*)(void*&) memberFn_),
         object(object_),
         memberFn(memberFn_),
         argsTuple(std::move(argsTuple_)) {
@@ -66,7 +66,7 @@ template <class ResultType, class Object, class MemberFn, class ArgsTuple>
 class AskMessageImpl : public MailboxMessage {
 public:
     AskMessageImpl(std::promise<ResultType> promise_, Object object_, MemberFn memberFn_, ArgsTuple argsTuple_, const MailboxDuplicationStrategy &strategy)
-        : MailboxMessage(MailboxDuplicationStrategy::none, (void*&) memberFn_),
+        : MailboxMessage(MailboxDuplicationStrategy::none, (void*)(void*&) memberFn_),
           object(object_),
           memberFn(memberFn_),
           argsTuple(std::move(argsTuple_)),
@@ -74,7 +74,7 @@ public:
     }
 
     AskMessageImpl(std::promise<ResultType> promise_, Object object_, MemberFn memberFn_, const MailboxDuplicationStrategy &strategy, ArgsTuple argsTuple_)
-        : MailboxMessage(strategy, (void*&) memberFn_),
+        : MailboxMessage(strategy, (void*)(void*&) memberFn_),
           object(object_),
           memberFn(memberFn_),
           argsTuple(std::move(argsTuple_)),
