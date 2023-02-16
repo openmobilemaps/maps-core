@@ -59,13 +59,13 @@ class TextLayerObject : public LayerObjectInterface {
     std::optional<std::string> getCurrentSymbolName() { return symbolName; }
     void setCurrentSymbolName(std::optional<std::string> symbolName) { this->symbolName = symbolName; }
 
-//#ifdef DRAW_TEXT_LETTER_BOXES
-        std::vector<Quad2dD> getLetterBoxes();
-//#endif
+#ifdef DRAW_TEXT_LETTER_BOXES
+    std::vector<Quad2dD> getLetterBoxes();
+#endif
 
   private:
     void layoutPoint(float scale);
-    void layoutLine(float scale);
+    float layoutLine(float scale);
 
     std::pair<int, double> findReferencePointIndices();
     Coord pointAtIndex(const std::pair<int, double> &index);
@@ -100,4 +100,6 @@ class TextLayerObject : public LayerObjectInterface {
 #ifdef DRAW_TEXT_LETTER_BOXES
     std::vector<Quad2dD> letterBoxes;
 #endif
+
+    bool rotated = false;
 };

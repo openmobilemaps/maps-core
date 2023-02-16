@@ -62,7 +62,13 @@ void TextLayerObject::update(float scale) {
 
         case TextSymbolPlacement::LINE:
         case TextSymbolPlacement::LINE_CENTER: {
-            layoutLine(scale);
+            auto rotatedFactor = layoutLine(scale);
+
+            if(rotatedFactor > 0.5 && lineCoordinates && !rotated) {
+                std::reverse((*lineCoordinates).begin(), (*lineCoordinates).end());
+                layoutLine(scale);
+                rotated = true;
+            }
             break;
         }
     }
@@ -255,9 +261,9 @@ std::vector<Quad2dD> TextLayerObject::getLetterBoxes() {
 }
 #endif
 
-void TextLayerObject::layoutLine(float scale) {
+float TextLayerObject::layoutLine(float scale) {
     if(lineCoordinates == std::nullopt) {
-        return;
+        return 0;
     }
 
 #ifdef DRAW_TEXT_LETTER_BOXES
@@ -292,6 +298,9 @@ void TextLayerObject::layoutLine(float scale) {
 
     currentIndex = indexAtDistance(currentIndex, -size * 0.5);
 
+    int total = 0;
+    int rotated = 0;
+
     for (const auto &entry: textInfo->getText()) {
         for (const auto &c : TextHelper::splitWstring(entry.text)) {
             for (const auto &d : fontData.glyphs) {
@@ -316,6 +325,9 @@ void TextLayerObject::layoutLine(float scale) {
 
                     auto x = p.x + bearing.x;
                     auto y = p.y - bearing.y;
+
+                    rotated += (angle > 90 || angle < -90) ? 1 : 0;
+                    total++;
 
                     auto xw = x + size.x;
                     auto yh = y + size.y;
@@ -386,6 +398,8 @@ void TextLayerObject::layoutLine(float scale) {
     }
 
     boundingBox = box ? RectCoord(box->min, box->max) : RectCoord(referencePoint, referencePoint);
+
+    return (double)rotated / (double)total;
 }
 
 std::pair<int, double> TextLayerObject::findReferencePointIndices() {
