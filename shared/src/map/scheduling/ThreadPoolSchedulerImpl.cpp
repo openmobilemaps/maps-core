@@ -115,7 +115,7 @@ void ThreadPoolSchedulerImpl::resume() {
 
 std::thread ThreadPoolSchedulerImpl::makeSchedulerThread(size_t index, TaskPriority priority) {
     return std::thread([this, index, priority] {
-        callbacks->setCurrentThreadName(std::string{"MapSDK"} + std::to_string(index) + "_" + std::to_string((int)priority));
+        callbacks->setCurrentThreadName(std::string{"MapSDK_"} + std::to_string(index) + "_" + std::string(toString(priority)));
         callbacks->attachThread();
         
         while (true) {

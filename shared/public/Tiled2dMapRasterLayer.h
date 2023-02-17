@@ -29,7 +29,8 @@
 
 class Tiled2dMapRasterLayer : public Tiled2dMapLayer,
                               public SimpleTouchInterface,
-                              public Tiled2dMapRasterLayerInterface {
+                              public Tiled2dMapRasterLayerInterface,
+                              public ActorObject {
 public:
     Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                           const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
