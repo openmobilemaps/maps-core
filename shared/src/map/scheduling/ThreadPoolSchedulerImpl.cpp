@@ -127,11 +127,15 @@ std::thread ThreadPoolSchedulerImpl::makeSchedulerThread(size_t index, TaskPrior
                 callbacks->detachThread();
                 return;
             }
-            
-            auto task = std::move(defaultQueue.front());
-            defaultQueue.pop_front();
-            lock.unlock();
-            if (task) task->run();
+
+            // execute tasks as long as there are tasks
+            while(!defaultQueue.empty()) {
+                auto task = std::move(defaultQueue.front());
+                defaultQueue.pop_front();
+                lock.unlock();
+                if (task) task->run();
+                lock.lock();
+            }
         }
     });
 }
