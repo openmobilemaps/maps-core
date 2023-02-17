@@ -15,7 +15,6 @@
 #include "Logger.h"
 #include "assert.h"
 
-
 enum class MailboxDuplicationStrategy {
     none = 0,
     replaceNewest = 1
@@ -148,8 +147,7 @@ public:
     }
     
     static inline std::shared_ptr<LambdaTask> makeTask(std::weak_ptr<Mailbox> mailbox){
-        return std::make_shared<LambdaTask>(
-                                            TaskConfig("", 0, TaskPriority::NORMAL, ExecutionEnvironment::IO),
+        return std::make_shared<LambdaTask>(TaskConfig("", 0, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
                                             [mailbox = std::move(mailbox)] {
                                                 auto selfPtr = mailbox.lock();
                                                 if (selfPtr) {

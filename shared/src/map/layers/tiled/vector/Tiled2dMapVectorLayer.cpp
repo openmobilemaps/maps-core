@@ -843,8 +843,7 @@ void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDe
         },  newVectorSubLayer);
 
         std::lock_guard<std::recursive_mutex> updateLock(tileUpdateMutex);
-        
-        // fixme
+
         auto const &currentTileInfos = vectorTileSource.converse(&Tiled2dMapVectorSource::getCurrentTiles).get();
 
         for (auto const &tile: currentTileInfos) {
@@ -889,7 +888,6 @@ void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDe
 }
 
 std::optional<FeatureContext> Tiled2dMapVectorLayer::getFeatureContext(int64_t identifier) {
-    // fixme
     auto const &currentTileInfos = vectorTileSource.converse(&Tiled2dMapVectorSource::getCurrentTiles).get();
 
     for (auto const &tile: currentTileInfos) {

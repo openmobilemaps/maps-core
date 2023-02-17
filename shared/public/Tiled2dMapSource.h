@@ -103,7 +103,7 @@ public:
             
     void didLoad(Tiled2dMapTileInfo tile, size_t loaderIndex, const L &loaderResult);
 
-    virtual void notifyTilesUpdates() = 0;
+    virtual void notifyTilesUpdates() override;
 
   protected:
 

@@ -40,7 +40,6 @@ Tiled2dMapSource<T, L, R>::Tiled2dMapSource(const MapConfig &mapConfig, const st
 
 template<class T, class L, class R>
 bool Tiled2dMapSource<T, L, R>::isTileVisible(const Tiled2dMapTileInfo &tileInfo) {
-    // unsafe
     return currentVisibleTiles.count(tileInfo) > 0;
 }
 
