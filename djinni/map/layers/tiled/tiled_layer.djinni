@@ -61,5 +61,7 @@ tiled_2d_map_source_interface = interface +c {
 
     set_error_manager(error_manager: error_manager);
     force_reload();
+
+    notify_tiles_updates();
 }
 

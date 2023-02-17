@@ -31,4 +31,6 @@
 
 - (void)forceReload;
 
+- (void)notifyTilesUpdates;
+
 @end

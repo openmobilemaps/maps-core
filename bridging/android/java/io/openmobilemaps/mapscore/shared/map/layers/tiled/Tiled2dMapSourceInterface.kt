@@ -28,6 +28,8 @@ abstract class Tiled2dMapSourceInterface {
 
     abstract fun forceReload()
 
+    abstract fun notifyTilesUpdates()
+
     private class CppProxy : Tiled2dMapSourceInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -99,5 +101,11 @@ abstract class Tiled2dMapSourceInterface {
             native_forceReload(this.nativeRef)
         }
         private external fun native_forceReload(_nativeRef: Long)
+
+        override fun notifyTilesUpdates() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_notifyTilesUpdates(this.nativeRef)
+        }
+        private external fun native_notifyTilesUpdates(_nativeRef: Long)
     }
 }

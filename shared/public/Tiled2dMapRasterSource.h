@@ -31,6 +31,8 @@ class Tiled2dMapRasterSource
 
     std::unordered_set<Tiled2dMapRasterTileInfo> getCurrentTiles();
 
+    virtual void notifyTilesUpdates() override;
+        
   protected:
     virtual void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
         
@@ -38,8 +40,7 @@ class Tiled2dMapRasterSource
 
     virtual std::shared_ptr<::TextureHolderInterface> postLoadingTask(const TextureLoaderResult &loadedData,
                                                                       const Tiled2dMapTileInfo &tile) override;
-        
-    virtual void notifyTilesUpdates() override;
+
 
   private:
     const std::vector<std::shared_ptr<::LoaderInterface>> loaders;

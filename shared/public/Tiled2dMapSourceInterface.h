@@ -33,4 +33,6 @@ public:
     virtual void setErrorManager(const /*not-null*/ std::shared_ptr<::ErrorManager> & errorManager) = 0;
 
     virtual void forceReload() = 0;
+
+    virtual void notifyTilesUpdates() = 0;
 };

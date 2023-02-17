@@ -103,11 +103,11 @@ public:
             
     void didLoad(Tiled2dMapTileInfo tile, size_t loaderIndex, const L &loaderResult);
 
+    virtual void notifyTilesUpdates() = 0;
+
   protected:
 
     virtual R postLoadingTask(const L &loadedData, const Tiled2dMapTileInfo &tile) = 0;
-            
-    virtual void notifyTilesUpdates() = 0;
 
     MapConfig mapConfig;
     std::shared_ptr<Tiled2dMapLayerConfig> layerConfig;

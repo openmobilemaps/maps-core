@@ -49,9 +49,7 @@ void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapIn
     
     auto mailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
     rasterSource.emplaceObject(mailbox, mapInterface->getMapConfig(), layerConfig, mapInterface->getCoordinateConverterHelper(), mapInterface->getScheduler(), tileLoaders, selfActor, mapInterface->getCamera()->getScreenDensityPpi());
-    
-    
-    
+
     setSourceInterface(rasterSource.weakActor<Tiled2dMapSourceInterface>());
     
     Tiled2dMapLayer::onAdded(mapInterface, layerIndex);
@@ -137,7 +135,7 @@ void Tiled2dMapRasterLayer::resume() {
 
 void Tiled2dMapRasterLayer::setT(int32_t t) {
     Tiled2dMapLayer::setT(t);
-    //onTilesUpdated();
+    sourceInterface.message(&Tiled2dMapSourceInterface::notifyTilesUpdates);
 }
 
 bool Tiled2dMapRasterLayer::shouldLoadTile(const Tiled2dMapTileInfo& tileInfo){

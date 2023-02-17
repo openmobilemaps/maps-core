@@ -60,6 +60,7 @@ public:
 
     virtual void resume() override;
 
+    virtual void notifyTilesUpdates() override;
 protected:
     
     virtual void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
@@ -67,8 +68,6 @@ protected:
     virtual ::djinni::Future<IntermediateResult> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
     
     virtual FinalResult postLoadingTask(const IntermediateResult &loadedData, const Tiled2dMapTileInfo &tile) override;
-    
-    virtual void notifyTilesUpdates() override;
 
     virtual std::tuple<LoaderStatus, std::optional<std::string>> mergeLoaderStatus(const Tiled2dMapVectorSourceTileState &tileStates);
 
