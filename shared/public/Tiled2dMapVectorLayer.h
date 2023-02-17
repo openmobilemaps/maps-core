@@ -23,7 +23,7 @@
 #include "TiledLayerError.h"
 #include "Actor.h"
 
-class Tiled2dMapVectorLayer : public Tiled2dMapLayer, public TouchInterface, public Tiled2dMapVectorLayerInterface, public Tiled2dMapVectorLayerReadyInterface {
+class Tiled2dMapVectorLayer : public Tiled2dMapLayer, public TouchInterface, public Tiled2dMapVectorLayerInterface, public Tiled2dMapVectorLayerReadyInterface, public ActorObject {
 public:
     Tiled2dMapVectorLayer(const std::string &layerName,
                           const std::string &remoteStyleJsonUrl,

@@ -54,7 +54,7 @@ public:
                 casted->mailbox = receivingMailbox.lock();
             }
 
-            assert(casted->mailbox == receivingMailbox);
+            assert(casted->mailbox == receivingMailbox.lock());
         }
     }
     
@@ -181,6 +181,16 @@ public:
 
         assert(object->mailbox == mailbox);
     }
+
+
+    template <typename Fn, class... Args>
+    inline void message(const MailboxDuplicationStrategy &strategy, Fn fn, Args&&... args) const {
+        if(!receivingMailbox || !object) {
+            return;
+        }
+        receivingMailbox->push(makeMessage(strategy, object, fn, std::forward<Args>(args)...));
+    }
+
     
     template <typename Fn, class... Args>
     inline void message(Fn fn, Args&&... args) const {
@@ -189,16 +199,7 @@ public:
         }
         receivingMailbox->push(makeMessage(MailboxDuplicationStrategy::none, object, fn, std::forward<Args>(args)...));
     }
-    
-    
-    template <typename Fn, class... Args>
-    inline void message(Fn fn, const MailboxDuplicationStrategy &strategy, Args&&... args) const {
-        if(!receivingMailbox || !object) {
-            return;
-        }
-        receivingMailbox->push(makeMessage(strategy, object, fn, std::forward<Args>(args)...));
-    }
-    
+
     template <typename Fn, class... Args>
     auto converse(Fn fn, Args&&... args) const {
         using ResultType = std::invoke_result_t<decltype(fn), Object, Args...>;
