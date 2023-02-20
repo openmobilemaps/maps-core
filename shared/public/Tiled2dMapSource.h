@@ -103,8 +103,6 @@ public:
             
     void didLoad(Tiled2dMapTileInfo tile, size_t loaderIndex, const L &loaderResult);
 
-    virtual void notifyTilesUpdates() override;
-
   protected:
 
     virtual R postLoadingTask(const L &loadedData, const Tiled2dMapTileInfo &tile) = 0;
