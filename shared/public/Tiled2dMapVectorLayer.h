@@ -14,6 +14,7 @@
 #include "Tiled2dMapVectorLayerInterface.h"
 #include "Tiled2dMapVectorSource.h"
 #include "Tiled2dMapVectorSubLayer.h"
+#include "Tiled2dMapVectorTile.h"
 #include "VectorMapDescription.h"
 #include "FontLoaderInterface.h"
 #include "PolygonMaskObject.h"
@@ -107,8 +108,6 @@ public:
     void clearTouch() override;
 
 protected:
-    virtual std::shared_ptr<LayerInterface> getLayerForDescription(const std::shared_ptr<VectorLayerDescription> &layerDescription);
-
     virtual std::shared_ptr<Tiled2dMapLayerConfig> getLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &source);
 
     virtual void setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription);
@@ -128,7 +127,7 @@ private:
     void scheduleStyleJsonLoading();
 
 
-    void initializeVectorLayer(const std::vector<std::shared_ptr<LayerInterface>> &newSublayers);
+    void initializeVectorLayer();
 
     virtual void updateMaskObjects(const std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> &toSetupMaskObject, const std::vector<const std::shared_ptr<MaskingObjectInterface>> &obsoleteMaskObjects);
 
@@ -148,6 +147,7 @@ private:
 
     std::recursive_mutex tileUpdateMutex;
 
+    // TODO: Still needed?
     std::recursive_mutex tileSetMutex;
     std::unordered_set<Tiled2dMapVectorTileInfo> tileSet;
 
@@ -160,11 +160,12 @@ private:
     std::recursive_mutex tileMaskMapMutex;
     std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> tileMaskMap;
 
-    std::recursive_mutex sublayerMutex;
-    std::vector<std::shared_ptr<LayerInterface>> sublayers;
+//LEGACY
+/*std::recursive_mutex sublayerMutex;
+std::vector<std::shared_ptr<LayerInterface>> sublayers;*/
 
-    std::recursive_mutex sourceLayerMapMutex;
-    std::unordered_map<std::string, std::unordered_map<std::string, std::vector<std::shared_ptr<Tiled2dMapVectorSubLayer>>>> sourceLayerMap;
+    std::recursive_mutex tilesMutex;
+    std::unordered_map<Tiled2dMapTileInfo, std::vector<Actor<Tiled2dMapVectorTile>>> tiles;
 
     std::atomic_bool isLoadingStyleJson = false;
     std::atomic_bool isResumed = false;

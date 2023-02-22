@@ -126,7 +126,7 @@ public:
         return WeakActor<CastObject>(receivingMailbox, casted);
     }
     
-    inline std::shared_ptr<Object>& unsafe() {
+    inline std::shared_ptr<Object>& unsafe() const {
         return object.lock();
     }
     
@@ -210,7 +210,7 @@ public:
         return future;
     }
     
-    inline std::shared_ptr<Object>& unsafe() {
+    inline std::shared_ptr<Object>& unsafe() const {
         return object;
     }
     

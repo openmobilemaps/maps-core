@@ -47,7 +47,7 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         loaders(loaders),
         fontLoader(fontLoader),
         dpFactor(dpFactor),
-        sublayers() {}
+        tiles() {}
 
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
@@ -64,7 +64,7 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         fontLoader(fontLoader),
 
         dpFactor(dpFactor),
-        sublayers() {
+        tiles() {
         }
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName, const std::shared_ptr<VectorMapDescription> &mapDescription,
@@ -74,7 +74,7 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName, const
         layerName(layerName),
         loaders(loaders),
         fontLoader(fontLoader),
-        sublayers() {
+        tiles() {
     setMapDescription(mapDescription);
 }
 
@@ -85,7 +85,7 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         layerName(layerName),
         loaders(loaders),
         fontLoader(fontLoader),
-        sublayers() {
+        tiles() {
 }
 
 void Tiled2dMapVectorLayer::scheduleStyleJsonLoading() {
@@ -161,73 +161,12 @@ std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJsonLocally(std::
     }
 }
 
-std::shared_ptr<LayerInterface> Tiled2dMapVectorLayer::getLayerForDescription(const std::shared_ptr<VectorLayerDescription> &layerDescription) {
-    switch (layerDescription->getType()) {
-        case VectorLayerType::background: {
-            auto backgroundDesc = std::static_pointer_cast<BackgroundVectorLayerDescription>(layerDescription);
-            return std::make_shared<Tiled2dMapVectorBackgroundSubLayer>(backgroundDesc);
-        }
-        case VectorLayerType::raster: {
-            auto rasterDesc = std::static_pointer_cast<RasterVectorLayerDescription>(layerDescription);
-            return std::make_shared<Tiled2dMapVectorRasterSubLayer>(rasterDesc, loaders);
-        }
-        case VectorLayerType::line: {
-            auto lineDesc = std::static_pointer_cast<LineVectorLayerDescription>(layerDescription);
-            return std::make_shared<Tiled2dMapVectorLineSubLayer>(lineDesc);
-        }
-        case VectorLayerType::polygon: {
-            auto polyDesc = std::static_pointer_cast<PolygonVectorLayerDescription>(layerDescription);
-            return std::make_shared<Tiled2dMapVectorPolygonSubLayer>(polyDesc);
-        }
-        case VectorLayerType::symbol: {
-            auto symbolDesc = std::static_pointer_cast<SymbolVectorLayerDescription>(layerDescription);
-            return std::make_shared<Tiled2dMapVectorSymbolSubLayer>(fontLoader, symbolDesc);
-        }
-        case VectorLayerType::custom: {
-            return nullptr;
-        }
-    }
-}
-
 std::shared_ptr<Tiled2dMapLayerConfig>
 Tiled2dMapVectorLayer::getLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &source) {
     return std::make_shared<Tiled2dMapVectorLayerConfig>(source);
 }
 
 void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription) {
-    std::vector<std::shared_ptr<LayerInterface>> newSublayers;
-    std::unordered_map<std::string, std::unordered_map<std::string, std::vector<std::shared_ptr<Tiled2dMapVectorSubLayer>>>> newSourceLayerMap;
-
-    for (auto const &layerDesc: mapDescription->layers) {
-        std::shared_ptr<LayerInterface> layer = getLayerForDescription(layerDesc);
-        if (!layer) {
-            continue;
-        }
-        newSublayers.push_back(layer);
-        switch (layerDesc->getType()) {
-            case VectorLayerType::background:
-            case VectorLayerType::raster: {
-                break;
-            }
-            case VectorLayerType::custom:
-            case VectorLayerType::line:
-            case VectorLayerType::polygon:
-            case VectorLayerType::symbol: {
-                auto subLayer = std::dynamic_pointer_cast<Tiled2dMapVectorSubLayer>(layer);
-                newSourceLayerMap[layerDesc->source][layerDesc->sourceId].push_back(subLayer);
-                break;
-            }
-        }
-    }
-
-    sourceLayerMap = newSourceLayerMap;
-    {
-        std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-        std::vector<std::shared_ptr<LayerInterface>> oldSublayers = sublayers;
-        sublayers.clear();
-        for (const auto &layer: oldSublayers) {
-            layer->onRemoved();
-        }
 
         this->mapDescription = mapDescription;
         this->layerConfigs.clear();
@@ -235,13 +174,10 @@ void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDes
         for (auto const &source: mapDescription->vectorSources) {
             layerConfigs[source->identifier] = getLayerConfig(source);
         }
-
-        initializeVectorLayer(newSublayers);
-        sublayers = newSublayers;
-    }
+        initializeVectorLayer();
 }
 
-void Tiled2dMapVectorLayer::initializeVectorLayer(const std::vector<std::shared_ptr<LayerInterface>> &newSublayers) {
+void Tiled2dMapVectorLayer::initializeVectorLayer() {
     auto mapInterface = this->mapInterface;
     if (!mapInterface) {
         return;
@@ -249,12 +185,9 @@ void Tiled2dMapVectorLayer::initializeVectorLayer(const std::vector<std::shared_
 
     std::unordered_map<std::string, std::unordered_set<std::string>> layersToDecode;
 
-    for (auto const& [source, map] : sourceLayerMap)
+    for (auto const& layerDesc : mapDescription->layers)
     {
-        for (auto const& [sourceLayer, layer] : map)
-        {
-            layersToDecode[source].insert(sourceLayer);
-        }
+        layersToDecode[layerDesc->source].insert(layerDesc->sourceId);
     }
     
     auto selfMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
@@ -280,29 +213,8 @@ void Tiled2dMapVectorLayer::initializeVectorLayer(const std::vector<std::shared_
         loadSpriteData();
     }
 
-    {
-        std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-        for (auto const &layer: sublayers) {
-            layer->onAdded(mapInterface, layerIndex);
-            auto vectorSubLayer = std::dynamic_pointer_cast<Tiled2dMapVectorSubLayer>(layer);
-            if (vectorSubLayer) {
-                vectorSubLayer->setTilesReadyDelegate(
-                        std::dynamic_pointer_cast<Tiled2dMapVectorLayerReadyInterface>(shared_from_this()));
-            }
-        }
-    }
-    for (const auto &newLayer : newSublayers) {
-        newLayer->onAdded(mapInterface, layerIndex);
-        auto vectorSubLayer = std::dynamic_pointer_cast<Tiled2dMapVectorSubLayer>(newLayer);
-        if (vectorSubLayer) {
-            vectorSubLayer->setTilesReadyDelegate(
-                    std::dynamic_pointer_cast<Tiled2dMapVectorLayerReadyInterface>(shared_from_this()));
-            vectorSubLayer->setSelectionDelegate(selectionDelegate);
-        }
-    }
-
     if (isResumed) {
-        resume();
+        vectorTileSource.message(&Tiled2dMapVectorSource::resume);
     }
 
 }
@@ -312,7 +224,8 @@ std::shared_ptr<::LayerInterface> Tiled2dMapVectorLayer::asLayerInterface() {
 }
 
 void Tiled2dMapVectorLayer::update() {
-    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
+    // TODO: update tiles
+/*    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
     bool needsCollisionDetection = false;
     for (auto it = sublayers.rbegin(); it != sublayers.rend(); ++it) {
         if (auto symbolLayer = std::dynamic_pointer_cast<Tiled2dMapVectorSymbolSubLayer>(*it)) {
@@ -334,13 +247,14 @@ void Tiled2dMapVectorLayer::update() {
     
     for (auto const &layer: sublayers) {
         layer->update();
-    }
+    }*/
 }
 
 std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::buildRenderPasses() {
-    std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(tilesReadyMutex, sublayerMutex);
+    //std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(tilesReadyMutex, sublayerMutex);
     std::vector<std::shared_ptr<RenderPassInterface>> newPasses;
-    for (const auto &layer: sublayers) {
+    // TODO: get render objects from tiles
+/*    for (const auto &layer: sublayers) {
         std::vector<std::shared_ptr<RenderPassInterface>> sublayerPasses;
         auto const &castedPtr = std::dynamic_pointer_cast<Tiled2dMapVectorSubLayer>(layer);
         if (castedPtr != nullptr) {
@@ -349,7 +263,7 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::build
             sublayerPasses = layer->buildRenderPasses();
         }
         newPasses.insert(newPasses.end(), sublayerPasses.begin(), sublayerPasses.end());
-    }
+    }*/
 
     return newPasses;
 }
@@ -364,7 +278,8 @@ void Tiled2dMapVectorLayer::onAdded(const std::shared_ptr<::MapInterface> &mapIn
         return;
     }
 
-    initializeVectorLayer({});
+    // TODO: really necessary?
+    //initializeVectorLayer();
 }
 
 void Tiled2dMapVectorLayer::onRemoved() {
@@ -375,10 +290,8 @@ void Tiled2dMapVectorLayer::onRemoved() {
     Tiled2dMapLayer::onRemoved();
     pause();
 
-    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-    for (auto const &layer: sublayers) {
-        layer->onRemoved();
-    }
+    // TODO: clear tiles
+
     this->layerIndex = -1;
 }
 
@@ -398,12 +311,8 @@ void Tiled2dMapVectorLayer::pause() {
             }
         }
     }
-    {
-        std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-        for (auto const &layer: sublayers) {
-            layer->pause();
-        }
-    }
+
+    // TODO: pause tiles
 
     {
         std::lock_guard<std::recursive_mutex> tilesReadyLock(tilesReadyMutex);
@@ -437,12 +346,7 @@ void Tiled2dMapVectorLayer::resume() {
         }
     }
 
-    {
-        std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-        for (auto const &layer: sublayers) {
-            layer->resume();
-        }
-    }
+    // TODO: Resume tiles
 }
 
 void Tiled2dMapVectorLayer::setAlpha(float alpha) {
@@ -451,9 +355,11 @@ void Tiled2dMapVectorLayer::setAlpha(float alpha) {
     }
     this->alpha = alpha;
     {
-        std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-        for (auto const &sublayer: sublayers) {
-            sublayer->setAlpha(alpha);
+        std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+        for (auto const &[tileInfo, subTiles]: tiles) {
+            for (const auto &tile: subTiles) {
+                tile.unsafe()->setAlpha(alpha);
+            }
         }
     }
 
@@ -601,28 +507,27 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
             tileMaskMap[newMaskEntry.first] = newMaskEntry.second;
         }
 
-        for (const auto &tile : tilesToRemove) {
-            for (const auto &[source, sourceLayersMap] : sourceLayerMap) {
-                for (const auto &sourceSubLayerPair : sourceLayersMap) {
-                    for (const auto &subLayer : sourceSubLayerPair.second) {
-                        subLayer->clearTileData(tile.tileInfo);
-                    }
+        for (const auto &vectorTile : tilesToRemove) {
+            {
+                std::lock_guard<std::recursive_mutex> tilesReadyLock(tileSetMutex);
+                for (const auto &tile: tiles.at(vectorTile.tileInfo)) {
+                    tile.unsafe()->clear();
                 }
+                tiles.erase(vectorTile.tileInfo);
             }
-            auto maskIt = tileMaskMap.find(tile.tileInfo);
+            auto maskIt = tileMaskMap.find(vectorTile.tileInfo);
             if (maskIt != tileMaskMap.end() && maskIt->second.getGraphicsMaskObject()) {
                 toClearMaskObjects.emplace_back(maskIt->second.getGraphicsMaskObject());
-                tileMaskMap.erase(tile.tileInfo);
+                tileMaskMap.erase(vectorTile.tileInfo);
             }
             {
                 std::lock_guard<std::recursive_mutex> tilesReadyLock(tilesReadyMutex);
-                tilesReady.erase(tile.tileInfo);
+                tilesReady.erase(vectorTile.tileInfo);
             }
             {
                 std::lock_guard<std::recursive_mutex> tilesReadyCountLock(tilesReadyCountMutex);
-                tilesReadyCount.erase(tile.tileInfo);
+                tilesReadyCount.erase(vectorTile.tileInfo);
             }
-            tileSet.erase(tile);
         }
 
         if (!(newTileMasks.empty() && toClearMaskObjects.empty())) {
@@ -655,10 +560,10 @@ void Tiled2dMapVectorLayer::updateMaskObjects(const std::unordered_map<Tiled2dMa
         }
 
         {
-            std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-            for (auto const &layer: sublayers) {
-                if (auto subLayer = std::dynamic_pointer_cast<Tiled2dMapVectorSubLayer>(layer)) {
-                    subLayer->updateTileMask(tileInfo, wrapper.getGraphicsMaskObject());
+            std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+            for (auto const &[tileInfo, subTiles] : tiles) {
+                for (const auto &tile : subTiles) {
+                    tile.unsafe()->updateTileMask(wrapper.getGraphicsMaskObject());
                 }
             }
         }
@@ -750,13 +655,15 @@ void Tiled2dMapVectorLayer::loadSpriteData() {
                                                                 auto spriteTexture = textureResult.data;
 
                                                                 {
-                                                                    std::lock_guard<std::recursive_mutex> lock(selfPtr->sublayerMutex);
-                                                                    for (auto const &layer: selfPtr->sublayers) {
-                                                                        if (auto symbolLayer = std::dynamic_pointer_cast<Tiled2dMapVectorSymbolSubLayer>(
-                                                                                layer)) {
-                                                                            symbolLayer->setSprites(spriteTexture, spriteData);
+                                                                    // TODO: readd when SymbolTile available
+                                                                    /*std::lock_guard<std::recursive_mutex> lock(selfPtr->tilesMutex);
+                                                                    for (const auto &[tileInfo, subTiles]: selfPtr->tiles) {
+                                                                        for (const auto &tile: subTiles) {
+                                                                            if (auto symbolTile = std::dynamic_pointer_cast<Tiled2dMapVectorSymbolTile>(tile)) {
+                                                                                symbolTile->setSprites(spriteTexture, spriteData);
+                                                                            }
                                                                         }
-                                                                    }
+                                                                    }*/
                                                                 }
 
                                                             } else {
@@ -770,9 +677,11 @@ void Tiled2dMapVectorLayer::loadSpriteData() {
 
 void Tiled2dMapVectorLayer::setScissorRect(const std::optional<::RectI> &scissorRect) {
     {
-        std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-        for (auto const &sublayer: sublayers) {
-            sublayer->setScissorRect(scissorRect);
+        std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+        for (const auto &[tileInfo, subTiles]: tiles) {
+            for (const auto &tile: subTiles) {
+                tile.unsafe()->setScissorRect(scissorRect);
+            }
         }
     }
     auto mapInterface = this->mapInterface;
@@ -784,29 +693,33 @@ void Tiled2dMapVectorLayer::setScissorRect(const std::optional<::RectI> &scissor
 void Tiled2dMapVectorLayer::setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate) {
     this->selectionDelegate = selectionDelegate;
     {
-        std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
+        // TODO
+        /*        std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
         for (auto const &sublayer: sublayers) {
             auto vectorSubLayer = std::dynamic_pointer_cast<Tiled2dMapVectorSubLayer>(sublayer);
             if (vectorSubLayer) {
                 vectorSubLayer->setSelectionDelegate(selectionDelegate);
             }
-        }
+        }*/
     }
 }
 
 void Tiled2dMapVectorLayer::setSelectedFeatureIdentfier(std::optional<int64_t> identifier) {
     {
-        std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
+        // TODO
+/*        std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
         for (auto const &sublayer: sublayers) {
             auto vectorSubLayer = std::dynamic_pointer_cast<Tiled2dMapVectorSubLayer>(sublayer);
             if (vectorSubLayer) {
                 vectorSubLayer->setSelectedFeatureIdentfier(identifier);
             }
-        }
+        }*/
     }
 }
 
 void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription) {
+    // TODO
+/*
     auto mapInterface = this->mapInterface;
     std::shared_ptr<LayerInterface> layer = getLayerForDescription(layerDescription);
     if (!layer) {
@@ -885,6 +798,7 @@ void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDe
 
 
     }
+*/
 }
 
 std::optional<FeatureContext> Tiled2dMapVectorLayer::getFeatureContext(int64_t identifier) {
@@ -920,7 +834,8 @@ std::shared_ptr<VectorLayerDescription> Tiled2dMapVectorLayer::getLayerDescripti
 
 // Touch Interface
 bool Tiled2dMapVectorLayer::onTouchDown(const Vec2F &posScreen) {
-    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
+    // TODO
+/*    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
     for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
         const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
         if (touchInterface) {
@@ -929,11 +844,12 @@ bool Tiled2dMapVectorLayer::onTouchDown(const Vec2F &posScreen) {
             }
         }
     }
-    return false;
+    return false;*/
 }
 
 bool Tiled2dMapVectorLayer::onClickUnconfirmed(const Vec2F &posScreen) {
-    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
+    // TODO
+/*    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
     for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
         const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
         if (touchInterface) {
@@ -942,11 +858,12 @@ bool Tiled2dMapVectorLayer::onClickUnconfirmed(const Vec2F &posScreen) {
             }
         }
     }
-    return false;
+    return false;*/
 }
 
 bool Tiled2dMapVectorLayer::onClickConfirmed(const Vec2F &posScreen) {
-    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
+    // TODO
+/*    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
     for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
         const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
         if (touchInterface) {
@@ -955,11 +872,12 @@ bool Tiled2dMapVectorLayer::onClickConfirmed(const Vec2F &posScreen) {
             }
         }
     }
-    return false;
+    return false;*/
 }
 
 bool Tiled2dMapVectorLayer::onDoubleClick(const Vec2F &posScreen) {
-    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
+    // TODO
+/*    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
     for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
         const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
         if (touchInterface) {
@@ -968,11 +886,12 @@ bool Tiled2dMapVectorLayer::onDoubleClick(const Vec2F &posScreen) {
             }
         }
     }
-    return false;
+    return false;*/
 }
 
 bool Tiled2dMapVectorLayer::onLongPress(const Vec2F &posScreen) {
-    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
+    // TODO
+/*    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
     for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
         const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
         if (touchInterface) {
@@ -981,11 +900,12 @@ bool Tiled2dMapVectorLayer::onLongPress(const Vec2F &posScreen) {
             }
         }
     }
-    return false;
+    return false;*/
 }
 
 bool Tiled2dMapVectorLayer::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleClick) {
-    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
+    // TODO
+/*    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
     for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
         const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
         if (touchInterface) {
@@ -994,11 +914,12 @@ bool Tiled2dMapVectorLayer::onMove(const Vec2F &deltaScreen, bool confirmed, boo
             }
         }
     }
-    return false;
+    return false;*/
 }
 
 bool Tiled2dMapVectorLayer::onMoveComplete() {
-    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
+    // TODO
+/*    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
     for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
         const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
         if (touchInterface) {
@@ -1007,11 +928,12 @@ bool Tiled2dMapVectorLayer::onMoveComplete() {
             }
         }
     }
-    return false;
+    return false;*/
 }
 
 bool Tiled2dMapVectorLayer::onTwoFingerClick(const Vec2F &posScreen1, const Vec2F &posScreen2) {
-    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
+    // TODO
+/*    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
     for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
         const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
         if (touchInterface) {
@@ -1020,11 +942,12 @@ bool Tiled2dMapVectorLayer::onTwoFingerClick(const Vec2F &posScreen1, const Vec2
             }
         }
     }
-    return false;
+    return false;*/
 }
 
 bool Tiled2dMapVectorLayer::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) {
-    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
+    // TODO
+/*    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
     for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
         const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
         if (touchInterface) {
@@ -1033,11 +956,12 @@ bool Tiled2dMapVectorLayer::onTwoFingerMove(const std::vector<::Vec2F> &posScree
             }
         }
     }
-    return false;
+    return false;*/
 }
 
 bool Tiled2dMapVectorLayer::onTwoFingerMoveComplete() {
-    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
+    // TODO
+/*    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
     for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
         const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
         if (touchInterface) {
@@ -1046,15 +970,16 @@ bool Tiled2dMapVectorLayer::onTwoFingerMoveComplete() {
             }
         }
     }
-    return false;
+    return false;*/
 }
 
 void Tiled2dMapVectorLayer::clearTouch() {
-    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
+    // TODO
+/*    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
     for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
         const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
         if (touchInterface) {
             touchInterface->clearTouch();
         }
-    }
+    }*/
 }
