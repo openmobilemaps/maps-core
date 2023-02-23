@@ -76,6 +76,8 @@ class IconLayer : public IconLayerInterface,
 
     virtual void setAlpha(float alpha) override;
 
+    virtual float getAlpha() override;
+
   private:
     void
     setupIconObjects(const std::vector<std::tuple<const std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>>

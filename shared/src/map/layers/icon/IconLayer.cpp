@@ -420,3 +420,6 @@ void IconLayer::setAlpha(float alpha) {
     this->alpha = alpha;
 }
 
+float IconLayer::getAlpha() {
+    return alpha;
+}
