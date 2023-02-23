@@ -410,3 +410,11 @@ void IconLayer::setLayerClickable(bool isLayerClickable) {
         }
     }
 }
+
+void IconLayer::setAlpha(float alpha) {
+    std::lock_guard<std::recursive_mutex> lock(iconsMutex);
+    for (auto const &icon : this->icons) {
+        icon.second->setAlpha(alpha);
+    }
+}
+
