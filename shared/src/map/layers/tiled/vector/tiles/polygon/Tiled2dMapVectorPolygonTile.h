@@ -14,6 +14,24 @@
 
 class Tiled2dMapVectorPolygonTile : public Tiled2dMapVectorTile {
 public:
+    using Tiled2dMapVectorTile::Tiled2dMapVectorTile;
+
+    virtual std::vector<std::shared_ptr<RenderPassInterface>> buildRenderPasses() override;
+
+    virtual void clear() override;
+
+    virtual void setup() override;
+
+    virtual void setAlpha(float alpha) override;
+
+    virtual float getAlpha() override;
+
+    virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
+
+    virtual void setTileData(const std::shared_ptr<MaskingObjectInterface> &tileMask,
+                             const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) override;
+
+    virtual void updateTileMask(const std::shared_ptr<MaskingObjectInterface> &tileMask) override;
 
 private:
 };

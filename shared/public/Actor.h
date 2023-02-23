@@ -126,7 +126,7 @@ public:
         return WeakActor<CastObject>(receivingMailbox, casted);
     }
     
-    inline std::shared_ptr<Object>& unsafe() const {
+    inline const std::shared_ptr<Object>& unsafe() const {
         return object.lock();
     }
     
@@ -210,14 +210,20 @@ public:
         return future;
     }
     
-    inline std::shared_ptr<Object>& unsafe() const {
+    inline const std::shared_ptr<Object>& unsafe() const {
         return object;
     }
-    
+
     template <class CastObject>
     WeakActor<CastObject> weakActor() {
         auto casted = std::static_pointer_cast<CastObject>(object);
         return WeakActor<CastObject>(receivingMailbox, casted);
+    }
+
+    template <class CastObject>
+    Actor<CastObject> strongActor() {
+        auto casted = std::static_pointer_cast<CastObject>(object);
+        return Actor<CastObject>(receivingMailbox, casted);
     }
     
 private:

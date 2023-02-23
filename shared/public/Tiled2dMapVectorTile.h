@@ -36,4 +36,7 @@ public:
                              const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) = 0;
 
     virtual void updateTileMask(const std::shared_ptr<MaskingObjectInterface> &tileMask) = 0;
+
+protected:
+    const Tiled2dMapTileInfo tileInfo;
 };

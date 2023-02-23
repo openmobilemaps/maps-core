@@ -9,3 +9,5 @@
  */
 
 #include "Tiled2dMapVectorTile.h"
+
+Tiled2dMapVectorTile::Tiled2dMapVectorTile(const Tiled2dMapTileInfo &tileInfo): tileInfo(tileInfo) {}
