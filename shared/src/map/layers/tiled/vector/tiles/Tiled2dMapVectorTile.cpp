@@ -10,4 +10,4 @@
 
 #include "Tiled2dMapVectorTile.h"
 
-Tiled2dMapVectorTile::Tiled2dMapVectorTile(const Tiled2dMapTileInfo &tileInfo): tileInfo(tileInfo) {}
+Tiled2dMapVectorTile::Tiled2dMapVectorTile(const Tiled2dMapTileInfo &tileInfo, const WeakActor<Tiled2dMapVectorLayer> &vectorLayer): tileInfo(tileInfo), vectorLayer(vectorLayer) {}

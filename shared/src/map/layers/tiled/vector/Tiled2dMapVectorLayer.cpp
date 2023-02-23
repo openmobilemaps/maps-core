@@ -459,6 +459,9 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
                 newTileMasks[tile.tileInfo] = Tiled2dMapLayerMaskWrapper(tileMask, hash);
             }
 
+            auto castedMe = std::static_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
+            auto selfActor = WeakActor<Tiled2dMapVectorLayer>(mailbox, castedMe);
+
             for (auto const &layer: mapDescription->layers) {
                 if (!(layer->minZoom <= tile.tileInfo.zoomIdentifier && layer->maxZoom >= tile.tileInfo.zoomIdentifier)) {
                     continue;
@@ -476,7 +479,9 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
                         }
                         case VectorLayerType::polygon: {
                             auto mailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
-                            auto actor = Actor<Tiled2dMapVectorPolygonTile>(mailbox, tile.tileInfo);
+
+                            auto actor = Actor<Tiled2dMapVectorPolygonTile>(mailbox, tile.tileInfo, selfActor);
+
                             auto const polygonObject = newTileMasks[tile.tileInfo].getGraphicsMaskObject();
 
                             tiles[tile.tileInfo].push_back(actor.strongActor<Tiled2dMapVectorTile>());

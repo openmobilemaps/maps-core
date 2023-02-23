@@ -16,9 +16,11 @@
 #include "VectorTileGeometryHandler.h"
 #include "RenderPassInterface.h"
 
+class Tiled2dMapVectorLayer;
+
 class Tiled2dMapVectorTile : public ActorObject{
 public:
-    Tiled2dMapVectorTile(const Tiled2dMapTileInfo &tileInfo);
+    Tiled2dMapVectorTile(const Tiled2dMapTileInfo &tileInfo, const WeakActor<Tiled2dMapVectorLayer> &vectorLayer);
 
     virtual std::vector<std::shared_ptr<RenderPassInterface>> buildRenderPasses() = 0;
 
@@ -39,4 +41,5 @@ public:
 
 protected:
     const Tiled2dMapTileInfo tileInfo;
+    const WeakActor<Tiled2dMapVectorLayer> vectorLayer;
 };

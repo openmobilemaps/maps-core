@@ -38,6 +38,8 @@ void Tiled2dMapVectorPolygonTile::setScissorRect(const std::optional<::RectI> &s
 void Tiled2dMapVectorPolygonTile::setTileData(const std::shared_ptr<MaskingObjectInterface> &tileMask,
                  const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) {
     LogDebug << "Received: " <<= layerFeatures.size();
+
+    //TODO: create some object and send some messages
 }
 
 void Tiled2dMapVectorPolygonTile::updateTileMask(const std::shared_ptr<MaskingObjectInterface> &tileMask) {
