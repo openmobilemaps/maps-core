@@ -12,10 +12,13 @@
 
 #include <optional>
 #include "RectCoord.h"
+#include "BoundingBoxInterface.h"
 
-class BoundingBox
+class BoundingBox: public BoundingBoxInterface, public std::enable_shared_from_this<BoundingBox>
 {
   public:
+    BoundingBox();
+
     BoundingBox(const std::string &systemIdentifier);
     BoundingBox(const Coord& p);
 
@@ -25,8 +28,12 @@ class BoundingBox
 
     RectCoord asRectCoord();
 
-    Coord center() const;
+    Coord getCenter();
+    Coord getMin();
+    Coord getMax();
+    std::string getSystemIdentifier();
 
+    Coord center() const;
     Coord min;
     Coord max;
     std::string systemIdentifier;
