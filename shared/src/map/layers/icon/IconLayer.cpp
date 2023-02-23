@@ -67,7 +67,10 @@ void IconLayer::remove(const std::shared_ptr<IconInfoInterface> &icon) {
         mapInterface->invalidate();
 }
 
-void IconLayer::add(const std::shared_ptr<IconInfoInterface> &icon) { addIcons({icon}); }
+void IconLayer::add(const std::shared_ptr<IconInfoInterface> &icon) {
+    addIcons({icon});
+    setAlpha(this->alpha);
+}
 
 void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &icons) {
     if (icons.empty()) {
