@@ -97,4 +97,5 @@ class IconLayer : public IconLayerInterface,
 
     std::atomic<bool> isHidden;
     std::atomic<bool> isLayerClickable = true;
+    float alpha = 1.0;
 };

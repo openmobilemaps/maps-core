@@ -22,6 +22,7 @@ IconLayer::IconLayer()
 void IconLayer::setIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &icons) {
     clear();
     addIcons(icons);
+    setAlpha(this->alpha);
 }
 
 std::vector<std::shared_ptr<IconInfoInterface>> IconLayer::getIcons() {
@@ -416,5 +417,6 @@ void IconLayer::setAlpha(float alpha) {
     for (auto const &icon : this->icons) {
         icon.second->setAlpha(alpha);
     }
+    this->alpha = alpha;
 }
 
