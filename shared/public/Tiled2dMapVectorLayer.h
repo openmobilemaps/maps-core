@@ -147,10 +147,6 @@ private:
 
     std::recursive_mutex tileUpdateMutex;
 
-    // TODO: Still needed?
-    std::recursive_mutex tileSetMutex;
-    std::unordered_set<Tiled2dMapVectorTileInfo> tileSet;
-
     std::recursive_mutex tilesReadyMutex;
     std::unordered_set<Tiled2dMapTileInfo> tilesReady;
 

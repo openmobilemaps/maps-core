@@ -363,9 +363,9 @@ void Tiled2dMapVectorLayer::resume() {
 
     {
         std::lock_guard<std::recursive_mutex> tilesReadyCountLock(tilesReadyMutex);
-        for (const auto &tile: tileSet) {
-            tilesReady.insert(tile.tileInfo);
-            vectorTileSource.message(&Tiled2dMapVectorSource::setTileReady, tile.tileInfo);
+        for (const auto &[tileInfo, _]: tiles) {
+            tilesReady.insert(tileInfo);
+            vectorTileSource.message(&Tiled2dMapVectorSource::setTileReady, tileInfo);
         }
     }
 
@@ -425,25 +425,28 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
         std::unordered_set<Tiled2dMapVectorTileInfo> tilesToAdd;
         std::unordered_set<Tiled2dMapVectorTileInfo> tilesToKeep;
 
-        std::unordered_set<Tiled2dMapVectorTileInfo> tilesToRemove;
+        std::unordered_set<Tiled2dMapTileInfo> tilesToRemove;
 
-        {
-            std::lock_guard<std::recursive_mutex> overlayLock(tileSetMutex);
-            for (const auto &vectorTileInfo : currentTileInfos) {
-                if (tileSet.count(vectorTileInfo) == 0) {
-                    tilesToAdd.insert(vectorTileInfo);
-                } else {
-                    tilesToKeep.insert(vectorTileInfo);
-                }
-            }
-
-            for (const auto &tileEntry : tileSet) {
-                if (currentTileInfos.count(tileEntry) == 0)
-                    tilesToRemove.insert(tileEntry);
+        for (const auto &vectorTileInfo: currentTileInfos) {
+            if (tiles.count(vectorTileInfo.tileInfo) == 0) {
+                tilesToAdd.insert(vectorTileInfo);
+            } else {
+                tilesToKeep.insert(vectorTileInfo);
             }
         }
 
-
+        for (const auto &[tileInfo, _]: tiles) {
+            bool found = false;
+            for (const auto &currentTile: currentTileInfos) {
+                if (tileInfo == currentTile.tileInfo) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                tilesToRemove.insert(tileInfo);
+            }
+        }
 
         std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> newTileMasks;
         for (const auto &tileEntry : tilesToKeep) {
@@ -557,13 +560,6 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
 //                    }
 //                }
 //            }
-
-            {
-
-                std::lock_guard<std::recursive_mutex> lock(tileSetMutex);
-                tileSet.insert(tile);
-
-            }
         }
 
         std::vector<const std::shared_ptr<MaskingObjectInterface>> toClearMaskObjects;
@@ -577,29 +573,27 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
             tileMaskMap[newMaskEntry.first] = newMaskEntry.second;
         }
 
-        for (const auto &vectorTile : tilesToRemove) {
-            {
-                std::lock_guard<std::recursive_mutex> tilesReadyLock(tileSetMutex);
-                auto tilesVectorIt = tiles.find(vectorTile.tileInfo);
-                if (tilesVectorIt != tiles.end()) {
-                    for (const auto &tile: tiles.at(vectorTile.tileInfo)) {
-                        tile.unsafe()->clear();
-                    }
-                    tiles.erase(tilesVectorIt);
+        for (const auto &tileToRemove: tilesToRemove) {
+            auto tilesVectorIt = tiles.find(tileToRemove);
+            if (tilesVectorIt != tiles.end()) {
+                for (const auto &tile: tiles.at(tileToRemove)) {
+                    tile.unsafe()->clear();
                 }
             }
-            auto maskIt = tileMaskMap.find(vectorTile.tileInfo);
+            tiles.erase(tileToRemove);
+
+            auto maskIt = tileMaskMap.find(tileToRemove);
             if (maskIt != tileMaskMap.end() && maskIt->second.getGraphicsMaskObject()) {
                 toClearMaskObjects.emplace_back(maskIt->second.getGraphicsMaskObject());
-                tileMaskMap.erase(vectorTile.tileInfo);
+                tileMaskMap.erase(tileToRemove);
             }
             {
                 std::lock_guard<std::recursive_mutex> tilesReadyLock(tilesReadyMutex);
-                tilesReady.erase(vectorTile.tileInfo);
+                tilesReady.erase(tileToRemove);
             }
             {
                 std::lock_guard<std::recursive_mutex> tilesReadyCountLock(tilesReadyCountMutex);
-                tilesReadyCount.erase(vectorTile.tileInfo);
+                tilesReadyCount.erase(tileToRemove);
             }
         }
 
@@ -918,6 +912,7 @@ bool Tiled2dMapVectorLayer::onTouchDown(const Vec2F &posScreen) {
         }
     }
     return false;*/
+    return false;
 }
 
 bool Tiled2dMapVectorLayer::onClickUnconfirmed(const Vec2F &posScreen) {
@@ -932,6 +927,7 @@ bool Tiled2dMapVectorLayer::onClickUnconfirmed(const Vec2F &posScreen) {
         }
     }
     return false;*/
+    return false;
 }
 
 bool Tiled2dMapVectorLayer::onClickConfirmed(const Vec2F &posScreen) {
@@ -946,6 +942,7 @@ bool Tiled2dMapVectorLayer::onClickConfirmed(const Vec2F &posScreen) {
         }
     }
     return false;*/
+    return false;
 }
 
 bool Tiled2dMapVectorLayer::onDoubleClick(const Vec2F &posScreen) {
@@ -960,6 +957,7 @@ bool Tiled2dMapVectorLayer::onDoubleClick(const Vec2F &posScreen) {
         }
     }
     return false;*/
+    return false;
 }
 
 bool Tiled2dMapVectorLayer::onLongPress(const Vec2F &posScreen) {
@@ -974,6 +972,7 @@ bool Tiled2dMapVectorLayer::onLongPress(const Vec2F &posScreen) {
         }
     }
     return false;*/
+    return false;
 }
 
 bool Tiled2dMapVectorLayer::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleClick) {
@@ -988,6 +987,7 @@ bool Tiled2dMapVectorLayer::onMove(const Vec2F &deltaScreen, bool confirmed, boo
         }
     }
     return false;*/
+    return false;
 }
 
 bool Tiled2dMapVectorLayer::onMoveComplete() {
@@ -1002,6 +1002,7 @@ bool Tiled2dMapVectorLayer::onMoveComplete() {
         }
     }
     return false;*/
+    return false;
 }
 
 bool Tiled2dMapVectorLayer::onTwoFingerClick(const Vec2F &posScreen1, const Vec2F &posScreen2) {
@@ -1016,6 +1017,7 @@ bool Tiled2dMapVectorLayer::onTwoFingerClick(const Vec2F &posScreen1, const Vec2
         }
     }
     return false;*/
+    return false;
 }
 
 bool Tiled2dMapVectorLayer::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) {
@@ -1030,6 +1032,7 @@ bool Tiled2dMapVectorLayer::onTwoFingerMove(const std::vector<::Vec2F> &posScree
         }
     }
     return false;*/
+    return false;
 }
 
 bool Tiled2dMapVectorLayer::onTwoFingerMoveComplete() {
@@ -1044,6 +1047,7 @@ bool Tiled2dMapVectorLayer::onTwoFingerMoveComplete() {
         }
     }
     return false;*/
+    return false;
 }
 
 void Tiled2dMapVectorLayer::clearTouch() {

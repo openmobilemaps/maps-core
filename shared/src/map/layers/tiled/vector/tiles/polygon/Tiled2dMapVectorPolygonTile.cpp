@@ -17,6 +17,25 @@
 #include "earcut.hpp"
 #include "Logger.h"
 
+namespace mapbox {
+    namespace util {
+
+        template <>
+        struct nth<0, ::Coord> {
+            inline static auto get(const ::Coord &t) {
+                return t.x;
+            };
+        };
+        template <>
+        struct nth<1, ::Coord> {
+            inline static auto get(const ::Coord &t) {
+                return t.y;
+            };
+        };
+
+    } // namespace util
+} // namespace mapbox
+
 Tiled2dMapVectorPolygonTile::Tiled2dMapVectorPolygonTile(const std::weak_ptr<MapInterface> &mapInterface,
                                                          const Tiled2dMapTileInfo &tileInfo,
                                                          const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
