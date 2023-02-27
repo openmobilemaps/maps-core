@@ -39,12 +39,13 @@ public:
 
     virtual void updateTileMask(const std::shared_ptr<MaskingObjectInterface> &tileMask) override;
 
+protected:
+    virtual void preGenerateRenderPasses() override;
+
 private:
     void addPolygons(const std::vector<std::tuple<std::vector<std::tuple<std::vector<Coord>, int>>, std::vector<int32_t>>> &polygons);
 
     void setupPolygons(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects);
-
-    void preGenerateRenderPasses();
 
     PolygonVectorLayerDescription description;
 

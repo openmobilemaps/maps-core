@@ -156,10 +156,6 @@ private:
     std::recursive_mutex tileMaskMapMutex;
     std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> tileMaskMap;
 
-//LEGACY
-/*std::recursive_mutex sublayerMutex;
-std::vector<std::shared_ptr<LayerInterface>> sublayers;*/
-
     std::recursive_mutex tilesMutex;
     std::unordered_map<Tiled2dMapTileInfo, std::vector<Actor<Tiled2dMapVectorTile>>> tiles;
 

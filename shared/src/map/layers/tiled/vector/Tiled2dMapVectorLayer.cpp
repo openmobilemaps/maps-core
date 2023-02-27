@@ -261,7 +261,6 @@ void Tiled2dMapVectorLayer::update() {
 std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::buildRenderPasses() {
     //std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(tilesReadyMutex, sublayerMutex);
     std::vector<std::shared_ptr<RenderPassInterface>> newPasses;
-    // TODO: get render objects from tiles
 /*    for (const auto &layer: sublayers) {
         std::vector<std::shared_ptr<RenderPassInterface>> sublayerPasses;
         auto const &castedPtr = std::dynamic_pointer_cast<Tiled2dMapVectorSubLayer>(layer);
@@ -512,6 +511,9 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
 
                             auto const polygonObject = newTileMasks[tile.tileInfo].getGraphicsMaskObject();
 
+                            // TODO: deduplicate when other subtiles are created
+                            tilesReadyCount[tile.tileInfo] += 1;
+
                             tiles[tile.tileInfo].push_back(actor.strongActor<Tiled2dMapVectorTile>());
 
                             actor.message(&Tiled2dMapVectorTile::setTileData, polygonObject, dataIt->second);
@@ -527,6 +529,7 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
                             break;
                         }
                     }
+
                 }
             }
 
@@ -628,8 +631,9 @@ void Tiled2dMapVectorLayer::updateMaskObjects(const std::unordered_map<Tiled2dMa
 
         {
             std::lock_guard<std::recursive_mutex> lock(tilesMutex);
-            for (auto const &[tileInfo, subTiles] : tiles) {
-                for (const auto &tile : subTiles) {
+            auto subTiles = tiles.find(tileInfo);
+            if (subTiles != tiles.end()) {
+                for (auto const &tile: subTiles->second) {
                     tile.unsafe()->updateTileMask(wrapper.getGraphicsMaskObject());
                 }
             }

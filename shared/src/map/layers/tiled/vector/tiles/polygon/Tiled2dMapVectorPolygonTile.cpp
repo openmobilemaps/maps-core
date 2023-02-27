@@ -102,7 +102,6 @@ void Tiled2dMapVectorPolygonTile::setScissorRect(const std::optional<::RectI> &s
 
 void Tiled2dMapVectorPolygonTile::setTileData(const std::shared_ptr<MaskingObjectInterface> &tileMask,
                  const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) {
-    LogDebug << "Received: " <<= layerFeatures.size();
 
     if (!mapInterface.lock()) {
         return;
@@ -219,6 +218,7 @@ void Tiled2dMapVectorPolygonTile::setTileData(const std::shared_ptr<MaskingObjec
 
 void Tiled2dMapVectorPolygonTile::updateTileMask(const std::shared_ptr<MaskingObjectInterface> &tileMask) {
     this->tileMask = tileMask;
+    preGenerateRenderPasses();
 }
 
 void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::tuple<std::vector<std::tuple<std::vector<Coord>, int>>, std::vector<int32_t>>> &polygons) {
@@ -254,7 +254,7 @@ void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::tuple<std::
 
     std::weak_ptr<Tiled2dMapVectorPolygonTile> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapVectorPolygonTile>(shared_from_this());
     scheduler->addTask(std::make_shared<LambdaTask>(
-            TaskConfig("Tiled2dMapVectorPolygonSubLayer_setup", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+            TaskConfig("Tiled2dMapVectorPolygonTile_setup", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
             [weakSelfPtr, newGraphicObjects] {
                 auto selfPtr = weakSelfPtr.lock();
                 if (selfPtr) {
@@ -296,5 +296,9 @@ void Tiled2dMapVectorPolygonTile::preGenerateRenderPasses() {
         renderPass->setScissoringRect(scissorRect);
         newRenderPasses.push_back(renderPass);
     }
+
+    Tiled2dMapVectorTile::preGenerateRenderPasses();
+    newRenderPasses.insert(newRenderPasses.end(), debugRenderPasses.begin(), debugRenderPasses.end());
+
     renderPasses = newRenderPasses;
 }
