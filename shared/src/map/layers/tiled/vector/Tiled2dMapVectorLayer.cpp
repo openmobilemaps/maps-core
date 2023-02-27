@@ -250,6 +250,12 @@ void Tiled2dMapVectorLayer::update() {
     for (auto const &layer: sublayers) {
         layer->update();
     }*/
+
+    for (const auto &[tileInfo, subTiles] : tiles) {
+        for (const auto &tile: subTiles) {
+            tile.unsafe()->update();
+        }
+    }
 }
 
 std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::buildRenderPasses() {
@@ -267,6 +273,12 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::build
         newPasses.insert(newPasses.end(), sublayerPasses.begin(), sublayerPasses.end());
     }*/
 
+    for (const auto &[tileInfo, subTiles] : tiles) {
+        for (const auto &tile: subTiles) {
+            const auto &tilePasses = tile.unsafe()->buildRenderPasses();
+            newPasses.insert(newPasses.end(), tilePasses.begin(), tilePasses.end());
+        }
+    }
     return newPasses;
 }
 
@@ -292,7 +304,12 @@ void Tiled2dMapVectorLayer::onRemoved() {
     Tiled2dMapLayer::onRemoved();
     pause();
 
-    // TODO: clear tiles
+    for (const auto &[tileInfo, subTiles] : tiles) {
+        for (const auto &tile: subTiles) {
+            tile.unsafe()->clear();
+        }
+    }
+    tiles.clear();
 
     this->layerIndex = -1;
 }
@@ -314,7 +331,11 @@ void Tiled2dMapVectorLayer::pause() {
         }
     }
 
-    // TODO: pause tiles
+    for (const auto &[tileInfo, subTiles] : tiles) {
+        for (const auto &tile: subTiles) {
+            tile.unsafe()->clear();
+        }
+    }
 
     {
         std::lock_guard<std::recursive_mutex> tilesReadyLock(tilesReadyMutex);
@@ -348,7 +369,12 @@ void Tiled2dMapVectorLayer::resume() {
         }
     }
 
-    // TODO: Resume tiles
+    for (const auto &[tileInfo, subTiles] : tiles) {
+        for (const auto &tile: subTiles) {
+            tile.unsafe()->setup();
+        }
+    }
+
 }
 
 void Tiled2dMapVectorLayer::setAlpha(float alpha) {
@@ -386,7 +412,6 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
     auto lockSelfPtr = std::static_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
     {
-
         auto graphicsFactory = mapInterface ? mapInterface->getGraphicsObjectFactory() : nullptr;
         auto coordinateConverterHelper = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
         auto shaderFactory = mapInterface ? mapInterface->getShaderFactory() : nullptr;
@@ -480,7 +505,7 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
                         case VectorLayerType::polygon: {
                             auto mailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
 
-                            auto actor = Actor<Tiled2dMapVectorPolygonTile>(mailbox, tile.tileInfo, selfActor);
+                            auto actor = Actor<Tiled2dMapVectorPolygonTile>(mailbox, (std::weak_ptr<MapInterface>) mapInterface, tile.tileInfo, selfActor, *std::static_pointer_cast<PolygonVectorLayerDescription>(layer));
 
                             auto const polygonObject = newTileMasks[tile.tileInfo].getGraphicsMaskObject();
 

@@ -10,4 +10,22 @@
 
 #include "Tiled2dMapVectorTile.h"
 
-Tiled2dMapVectorTile::Tiled2dMapVectorTile(const Tiled2dMapTileInfo &tileInfo, const WeakActor<Tiled2dMapVectorLayer> &vectorLayer): tileInfo(tileInfo), vectorLayer(vectorLayer) {}
+Tiled2dMapVectorTile::Tiled2dMapVectorTile(const std::weak_ptr<MapInterface> &mapInterface, const Tiled2dMapTileInfo &tileInfo,
+                                           const WeakActor<Tiled2dMapVectorLayer> &vectorLayer)
+        : mapInterface(mapInterface), tileInfo(tileInfo), vectorLayer(vectorLayer) {}
+
+void Tiled2dMapVectorTile::setAlpha(float alpha) {
+    if (this->alpha == alpha) {
+        return;
+    }
+
+    this->alpha = alpha;
+    auto mapInterface = this->mapInterface.lock();
+    if (mapInterface) {
+        mapInterface->invalidate();
+    }
+}
+
+float Tiled2dMapVectorTile::getAlpha() {
+    return alpha;
+}

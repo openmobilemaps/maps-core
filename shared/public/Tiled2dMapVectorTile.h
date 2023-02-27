@@ -13,6 +13,7 @@
 #include "Actor.h"
 #include "Tiled2dMapTileInfo.h"
 #include "Value.h"
+#include "MapInterface.h"
 #include "VectorTileGeometryHandler.h"
 #include "RenderPassInterface.h"
 
@@ -20,7 +21,9 @@ class Tiled2dMapVectorLayer;
 
 class Tiled2dMapVectorTile : public ActorObject{
 public:
-    Tiled2dMapVectorTile(const Tiled2dMapTileInfo &tileInfo, const WeakActor<Tiled2dMapVectorLayer> &vectorLayer);
+    Tiled2dMapVectorTile(const std::weak_ptr<MapInterface> &mapInterface, const Tiled2dMapTileInfo &tileInfo, const WeakActor<Tiled2dMapVectorLayer> &vectorLayer);
+
+    virtual void update() = 0;
 
     virtual std::vector<std::shared_ptr<RenderPassInterface>> buildRenderPasses() = 0;
 
@@ -28,9 +31,9 @@ public:
 
     virtual void setup() = 0;
 
-    virtual void setAlpha(float alpha) = 0;
+    virtual void setAlpha(float alpha);
 
-    virtual float getAlpha() = 0;
+    virtual float getAlpha();
 
     virtual void setScissorRect(const std::optional<::RectI> &scissorRect) = 0;
 
@@ -40,6 +43,9 @@ public:
     virtual void updateTileMask(const std::shared_ptr<MaskingObjectInterface> &tileMask) = 0;
 
 protected:
+    const std::weak_ptr<MapInterface> mapInterface;
     const Tiled2dMapTileInfo tileInfo;
     const WeakActor<Tiled2dMapVectorLayer> vectorLayer;
+
+    float alpha = 1.0;
 };
