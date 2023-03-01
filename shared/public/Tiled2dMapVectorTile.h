@@ -21,7 +21,7 @@
 
 class Tiled2dMapVectorLayer;
 
-class Tiled2dMapVectorTile : public ActorObject{
+class Tiled2dMapVectorTile : public ActorObject {
 public:
     Tiled2dMapVectorTile(const std::weak_ptr<MapInterface> &mapInterface, const Tiled2dMapTileInfo &tileInfo, const WeakActor<Tiled2dMapVectorLayer> &vectorLayer);
 

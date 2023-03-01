@@ -254,6 +254,7 @@ void Tiled2dMapVectorLayer::update() {
     for (const auto &[tileInfo, subTiles] : tiles) {
         for (const auto &tile: subTiles) {
             tile.unsafe()->update();
+            //tile.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorTile::update);
         }
     }
 }
@@ -292,7 +293,7 @@ void Tiled2dMapVectorLayer::onAdded(const std::shared_ptr<::MapInterface> &mapIn
     }
 
     // TODO: really necessary?
-    //initializeVectorLayer();
+    //s();
 }
 
 void Tiled2dMapVectorLayer::onRemoved() {
@@ -305,7 +306,7 @@ void Tiled2dMapVectorLayer::onRemoved() {
 
     for (const auto &[tileInfo, subTiles] : tiles) {
         for (const auto &tile: subTiles) {
-            tile.unsafe()->clear();
+            tile.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorTile::clear);
         }
     }
     tiles.clear();
@@ -332,7 +333,7 @@ void Tiled2dMapVectorLayer::pause() {
 
     for (const auto &[tileInfo, subTiles] : tiles) {
         for (const auto &tile: subTiles) {
-            tile.unsafe()->clear();
+            tile.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorTile::clear);
         }
     }
 
@@ -370,7 +371,7 @@ void Tiled2dMapVectorLayer::resume() {
 
     for (const auto &[tileInfo, subTiles] : tiles) {
         for (const auto &tile: subTiles) {
-            tile.unsafe()->setup();
+            tile.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorTile::setup);
         }
     }
 
@@ -385,7 +386,7 @@ void Tiled2dMapVectorLayer::setAlpha(float alpha) {
         std::lock_guard<std::recursive_mutex> lock(tilesMutex);
         for (auto const &[tileInfo, subTiles]: tiles) {
             for (const auto &tile: subTiles) {
-                tile.unsafe()->setAlpha(alpha);
+                tile.message(&Tiled2dMapVectorTile::setAlpha, alpha);
             }
         }
     }
@@ -580,7 +581,7 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
             auto tilesVectorIt = tiles.find(tileToRemove);
             if (tilesVectorIt != tiles.end()) {
                 for (const auto &tile: tiles.at(tileToRemove)) {
-                    tile.unsafe()->clear();
+                    tile.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorTile::clear);
                 }
             }
             tiles.erase(tileToRemove);
@@ -601,7 +602,7 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
         }
 
         if (!(newTileMasks.empty() && toClearMaskObjects.empty())) {
-            std::weak_ptr<Tiled2dMapVectorLayer> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
+/*            std::weak_ptr<Tiled2dMapVectorLayer> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
             mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
                     TaskConfig("VectorTile_masks_update", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
                     [weakSelfPtr, newTileMasks, toClearMaskObjects] {
@@ -609,7 +610,10 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
                         if (selfPtr) {
                             selfPtr->updateMaskObjects(newTileMasks, toClearMaskObjects);
                         }
-                    }));
+                    }));*/
+            auto castedMe = std::static_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
+            auto selfActor = WeakActor<Tiled2dMapVectorLayer>(mailbox, castedMe);
+            selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorLayer::updateMaskObjects, newTileMasks, toClearMaskObjects);
         }
 
     }
@@ -634,7 +638,8 @@ void Tiled2dMapVectorLayer::updateMaskObjects(const std::unordered_map<Tiled2dMa
             auto subTiles = tiles.find(tileInfo);
             if (subTiles != tiles.end()) {
                 for (auto const &tile: subTiles->second) {
-                    tile.unsafe()->updateTileMask(wrapper.getGraphicsMaskObject());
+                    //tile.unsafe()->updateTileMask(wrapper.getGraphicsMaskObject());
+                    tile.message(&Tiled2dMapVectorTile::updateTileMask, wrapper.getGraphicsMaskObject());
                 }
             }
         }
@@ -751,7 +756,7 @@ void Tiled2dMapVectorLayer::setScissorRect(const std::optional<::RectI> &scissor
         std::lock_guard<std::recursive_mutex> lock(tilesMutex);
         for (const auto &[tileInfo, subTiles]: tiles) {
             for (const auto &tile: subTiles) {
-                tile.unsafe()->setScissorRect(scissorRect);
+                tile.message(&Tiled2dMapVectorTile::setScissorRect, scissorRect);
             }
         }
     }

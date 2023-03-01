@@ -99,8 +99,8 @@ void Tiled2dMapLayer::setMinZoomLevelIdentifier(std::optional<int32_t> value) {
 }
 
 std::optional<int32_t> Tiled2dMapLayer::getMinZoomLevelIdentifier() {
-    if (sourceInterface)
-        //return sourceInterface->getMinZoomLevelIdentifier();
+/*    if (sourceInterface)
+        return sourceInterface->getMinZoomLevelIdentifier();*/
     return std::nullopt;
 }
 

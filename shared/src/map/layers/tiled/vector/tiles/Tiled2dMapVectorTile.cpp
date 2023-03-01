@@ -29,8 +29,8 @@ Tiled2dMapVectorTile::Tiled2dMapVectorTile(const std::weak_ptr<MapInterface> &ma
                                               tileInfo.bounds.topLeft.y, 0.0),
                                         tileInfo.bounds.bottomRight,
                                         Coord(tileInfo.bounds.topLeft.systemIdentifier,
-                                              tileInfo.bounds.bottomRight.x,
-                                              tileInfo.bounds.topLeft.y, 0.0)));
+                                              tileInfo.bounds.topLeft.x,
+                                              tileInfo.bounds.bottomRight.y, 0.0)));
         debugQuad->setFrame(Quad2dD(Vec2D(rendQuad.topLeft.x, rendQuad.topLeft.y),
                                     Vec2D(rendQuad.topRight.x, rendQuad.topRight.y),
                                     Vec2D(rendQuad.bottomRight.x, rendQuad.bottomRight.y),
