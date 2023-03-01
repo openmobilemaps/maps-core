@@ -39,9 +39,10 @@ namespace mapbox {
 Tiled2dMapVectorPolygonTile::Tiled2dMapVectorPolygonTile(const std::weak_ptr<MapInterface> &mapInterface,
                                                          const Tiled2dMapTileInfo &tileInfo,
                                                          const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
-                                                         PolygonVectorLayerDescription description)
+                                                         const PolygonVectorLayerDescription &description)
         : Tiled2dMapVectorTile(mapInterface, tileInfo, vectorLayer),
         description(std::move(description)) {
+    usedKeys = std::move(description.getUsedKeys());
     auto pMapInterface = mapInterface.lock();
     if (pMapInterface) {
         shader = pMapInterface->getShaderFactory()->createPolygonGroupShader();

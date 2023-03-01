@@ -64,7 +64,7 @@ public:
     dpFactor(dpFactor) {}
 
 
-    std::unordered_set<std::string> getUsedKeys() {
+    std::unordered_set<std::string> getUsedKeys() const {
 
         std::unordered_set<std::string> usedKeys;
         std::vector<std::shared_ptr<Value>> values = {
@@ -242,7 +242,7 @@ public:
     style(style) {};
 
 
-    virtual std::unordered_set<std::string> getUsedKeys() override {
+    virtual std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
 
         auto parentKeys = VectorLayerDescription::getUsedKeys();

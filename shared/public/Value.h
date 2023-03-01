@@ -196,7 +196,7 @@ public:
 class Value {
 public:
     Value() {};
-    virtual std::unordered_set<std::string> getUsedKeys() { return {}; };
+    virtual std::unordered_set<std::string> getUsedKeys() const { return {}; };
     virtual ValueVariant evaluate(const EvaluationContext &context) = 0;
 
 
@@ -360,7 +360,7 @@ class GetPropertyValue : public Value {
 public:
     GetPropertyValue(const std::string key) : key(key) {};
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unordered_set<std::string> getUsedKeys() const override {
         return { key };
     }
 
@@ -386,7 +386,7 @@ class ToStringValue: public Value {
 public:
     ToStringValue(const std::shared_ptr<Value> value): value(value) {}
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unordered_set<std::string> getUsedKeys() const override {
         return value->getUsedKeys();
     }
 
@@ -483,7 +483,7 @@ class HasPropertyValue : public Value {
 public:
     HasPropertyValue(const std::string key) : key(key) {};
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unordered_set<std::string> getUsedKeys() const override {
         return { key };
     }
 
@@ -499,7 +499,7 @@ class ScaleValue : public Value {
 public:
     ScaleValue(const std::shared_ptr<Value> value, const double scale) : value(value), scale(scale) {};
 
-    std::unordered_set<std::string> getUsedKeys() override { return value->getUsedKeys(); }
+    std::unordered_set<std::string> getUsedKeys() const override { return value->getUsedKeys(); }
 
     ValueVariant evaluate(const EvaluationContext &context) override {
         return std::visit(overloaded {
@@ -552,7 +552,7 @@ public:
     InterpolatedValue(double interpolationBase, const std::vector<std::tuple<double, std::shared_ptr<Value>>> steps)
     : interpolationBase(interpolationBase), steps(steps) {}
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
         for (auto const &step: steps) {
             auto const setKeys = std::get<1>(step)->getUsedKeys();
@@ -631,7 +631,7 @@ public:
     BezierInterpolatedValue(double x1, double y1, double x2, double y2, const std::vector<std::tuple<double, std::shared_ptr<Value>>> steps)
             : bezier(x1, y1, x2, y2), steps(steps) {}
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
         for (auto const &step: steps) {
             auto const setKeys = std::get<1>(step)->getUsedKeys();
@@ -693,7 +693,7 @@ class StopValue : public Value {
 public:
     StopValue(const std::vector<std::tuple<double, std::shared_ptr<Value>>> stops) : stops(stops) {}
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
         for (auto const &stop: stops) {
             auto const setKeys = std::get<1>(stop)->getUsedKeys();
@@ -794,7 +794,7 @@ class StepValue : public Value {
 public:
     StepValue(const std::shared_ptr<Value> compareValue, const std::vector<std::tuple<std::shared_ptr<Value>, std::shared_ptr<Value>>> stops, std::shared_ptr<Value> defaultValue) : compareValue(compareValue), stops(stops), defaultValue(defaultValue) {}
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
         for (auto const &stop: stops) {
             auto const setKeys = std::get<1>(stop)->getUsedKeys();
@@ -823,7 +823,7 @@ class CaseValue : public Value {
 public:
     CaseValue(const std::vector<std::tuple<std::shared_ptr<Value>, std::shared_ptr<Value>>> cases, std::shared_ptr<Value> defaultValue) : cases(cases), defaultValue(defaultValue) {}
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
         for (auto const &[condition, value]: cases) {
             if (condition) {
@@ -857,7 +857,7 @@ class ToNumberValue: public Value {
 public:
     ToNumberValue(const std::shared_ptr<Value> value): value(value) {}
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unordered_set<std::string> getUsedKeys() const override {
         return value->getUsedKeys();
     }
 
@@ -911,7 +911,7 @@ public:
         }
     }
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
 
         auto const compareValueKeys = compareValue->getUsedKeys();
@@ -959,7 +959,7 @@ public:
         }
     }
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unordered_set<std::string> getUsedKeys() const override {
         return { key };
     }
 
@@ -990,7 +990,7 @@ class LogOpValue : public Value {
 public:
     LogOpValue(const LogOpType &logOpType, const std::shared_ptr<Value> &lhs, const std::shared_ptr<Value> &rhs = nullptr) : logOpType(logOpType), lhs(lhs), rhs(rhs) {}
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
 
         auto const lhsKeys = lhs->getUsedKeys();
@@ -1025,7 +1025,7 @@ class AllValue: public Value {
 public:
     AllValue(const std::vector<const std::shared_ptr<Value>> values) : values(values) {}
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
         for (auto const &value: values) {
             auto const setKeys = value->getUsedKeys();
@@ -1051,7 +1051,7 @@ class AnyValue: public Value {
 public:
     AnyValue(const std::vector<const std::shared_ptr<Value>> values) : values(values) {}
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
         for (auto const &value: values) {
             auto const setKeys = value->getUsedKeys();
@@ -1080,7 +1080,7 @@ public:
         assert(rhs);
     }
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
 
         auto const lhsKeys = lhs->getUsedKeys();
@@ -1112,7 +1112,7 @@ private:
 public:
     InFilter(const std::string &key, const std::unordered_set<ValueVariant> values) :values(values), key(key) {}
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unordered_set<std::string> getUsedKeys() const override {
         return { key };
     }
 
@@ -1129,7 +1129,7 @@ private:
 public:
     NotInFilter(const std::string &key, const std::unordered_set<ValueVariant> values) :values(values), key(key) {}
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unordered_set<std::string> getUsedKeys() const override {
         return { key };
     }
 
@@ -1148,7 +1148,7 @@ class FormatValue : public Value {
 public:
     FormatValue(const std::vector<FormatValueWrapper> values) : values(values) {};
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
         for (auto const &wrapper: values) {
             auto const setKeys = wrapper.value->getUsedKeys();
@@ -1186,7 +1186,7 @@ public:
         assert(rhs);
     }
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
 
         auto const lhsKeys = lhs->getUsedKeys();
@@ -1229,7 +1229,7 @@ class LenghtValue: public Value {
 public:
     LenghtValue(const std::shared_ptr<Value> value): value(value) {}
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unordered_set<std::string> getUsedKeys() const override {
         return value->getUsedKeys();
     }
 

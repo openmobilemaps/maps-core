@@ -22,7 +22,7 @@ public:
     Tiled2dMapVectorPolygonTile(const std::weak_ptr<MapInterface> &mapInterface,
                                 const Tiled2dMapTileInfo &tileInfo,
                                 const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
-                                PolygonVectorLayerDescription description);
+                                const PolygonVectorLayerDescription &description);
 
     void update() override;
 
@@ -53,7 +53,7 @@ private:
 
     std::vector<std::shared_ptr<PolygonGroup2dLayerObject>> polygons;
     std::vector<std::tuple<size_t, FeatureContext>> featureGroups;
-    const std::unordered_set<std::string> usedKeys;
+    std::unordered_set<std::string> usedKeys;
 
     std::shared_ptr<MaskingObjectInterface> tileMask;
     std::optional<::RectI> scissorRect = std::nullopt;

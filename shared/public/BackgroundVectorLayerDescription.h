@@ -18,7 +18,7 @@ class BackgroundVectorStyle {
 public:
     BackgroundVectorStyle(std::shared_ptr<Value> color): color(color) {}
 
-    std::unordered_set<std::string> getUsedKeys() {
+    std::unordered_set<std::string> getUsedKeys() const {
 
         std::unordered_set<std::string> usedKeys;
         std::vector<std::shared_ptr<Value>> values = {
@@ -54,7 +54,7 @@ public:
     VectorLayerDescription(identifier, "", "", 0, 0, nullptr, renderPassIndex),
     style(style) {};
 
-    virtual std::unordered_set<std::string> getUsedKeys() override {
+    virtual std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
 
         auto parentKeys = VectorLayerDescription::getUsedKeys();

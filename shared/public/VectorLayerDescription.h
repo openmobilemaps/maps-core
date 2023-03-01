@@ -29,7 +29,7 @@ public:
 
     virtual VectorLayerType getType() = 0;
 
-    virtual std::unordered_set<std::string> getUsedKeys() {
+    virtual std::unordered_set<std::string> getUsedKeys() const {
         return filter ? filter->getUsedKeys() : std::unordered_set<std::string>();
     };
 

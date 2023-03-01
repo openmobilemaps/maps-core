@@ -19,7 +19,7 @@ public:
     RasterVectorStyle(std::shared_ptr<Value> rasterOpacity = nullptr):
     rasterOpacity(rasterOpacity) {}
 
-    std::unordered_set<std::string> getUsedKeys() {
+    std::unordered_set<std::string> getUsedKeys() const {
         std::unordered_set<std::string> usedKeys;
         std::vector<std::shared_ptr<Value>> values = { rasterOpacity };
 
@@ -78,7 +78,7 @@ public:
             style(), url(url), adaptScaleToScreen(adaptScaleToScreen), numDrawPreviousLayers(numDrawPreviousLayers),
             maskTiles(maskTiles), zoomLevelScaleFactor(zoomLevelScaleFactor), underzoom(underzoom), overzoom(overzoom) {};
 
-    virtual std::unordered_set<std::string> getUsedKeys() override {
+    virtual std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
 
         auto parentKeys = VectorLayerDescription::getUsedKeys();
