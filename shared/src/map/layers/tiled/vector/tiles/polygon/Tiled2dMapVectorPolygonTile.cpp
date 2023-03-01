@@ -221,7 +221,6 @@ void Tiled2dMapVectorPolygonTile::updateTileMask(const std::shared_ptr<MaskingOb
 }
 
 void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::tuple<std::vector<std::tuple<std::vector<Coord>, int>>, std::vector<int32_t>>> &polygons) {
-    debugShader->setColor(0.0, 0.0, 0.5, 0.5);
     if (polygons.empty()) {
         vectorLayer.message(&Tiled2dMapVectorLayer::tileIsReady, tileInfo);
         return;
@@ -252,16 +251,6 @@ void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::tuple<std::
         newGraphicObjects.push_back(polygonObject->asGraphicsObject());
     }
 
-/*    std::weak_ptr<Tiled2dMapVectorPolygonTile> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapVectorPolygonTile>(shared_from_this());
-    scheduler->addTask(std::make_shared<LambdaTask>(
-            TaskConfig("Tiled2dMapVectorPolygonTile_setup", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
-            [weakSelfPtr, newGraphicObjects] {
-                auto selfPtr = weakSelfPtr.lock();
-                if (selfPtr) {
-                    selfPtr->setupPolygons(newGraphicObjects);
-                }
-            }));*/
-
     auto selfActor = WeakActor(mailbox, shared_from_this()->weak_from_this());
     selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorPolygonTile::setupPolygons, newGraphicObjects);
 }
@@ -278,14 +267,10 @@ void Tiled2dMapVectorPolygonTile::setupPolygons(const std::vector<std::shared_pt
     }
 
     vectorLayer.message(&Tiled2dMapVectorLayer::tileIsReady, tileInfo);
-    debugShader->setColor(0.0, 0.5, 0.0, 0.25);
 }
 
 void Tiled2dMapVectorPolygonTile::preGenerateRenderPasses() {
-    Tiled2dMapVectorTile::preGenerateRenderPasses();
-
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
-    //newRenderPasses.insert(newRenderPasses.end(), debugRenderPasses.begin(), debugRenderPasses.end());
 
     if (!tileMask) {
         renderPasses = newRenderPasses;

@@ -40,7 +40,7 @@ public:
     virtual void updateTileMask(const std::shared_ptr<MaskingObjectInterface> &tileMask) override;
 
 protected:
-    virtual void preGenerateRenderPasses() override;
+    virtual void preGenerateRenderPasses();
 
 private:
     void addPolygons(const std::vector<std::tuple<std::vector<std::tuple<std::vector<Coord>, int>>, std::vector<int32_t>>> &polygons);
@@ -58,6 +58,4 @@ private:
     std::shared_ptr<MaskingObjectInterface> tileMask;
     std::optional<::RectI> scissorRect = std::nullopt;
     std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
-
-    float alpha = 1.0;
 };

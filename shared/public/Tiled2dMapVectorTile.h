@@ -29,9 +29,9 @@ public:
 
     virtual std::vector<std::shared_ptr<RenderPassInterface>> buildRenderPasses() = 0;
 
-    virtual void clear();
+    virtual void clear() = 0;
 
-    virtual void setup();
+    virtual void setup() = 0;
 
     virtual void setAlpha(float alpha);
 
@@ -45,15 +45,10 @@ public:
     virtual void updateTileMask(const std::shared_ptr<MaskingObjectInterface> &tileMask) = 0;
 
 protected:
-    virtual void preGenerateRenderPasses();
 
     const std::weak_ptr<MapInterface> mapInterface;
     const Tiled2dMapTileInfo tileInfo;
     const WeakActor<Tiled2dMapVectorLayer> vectorLayer;
 
     float alpha = 1.0;
-
-    std::vector<std::shared_ptr<RenderPassInterface>> debugRenderPasses;
-    std::shared_ptr<ColorShaderInterface> debugShader;
-    std::shared_ptr<Quad2dInterface> debugQuad;
 };
