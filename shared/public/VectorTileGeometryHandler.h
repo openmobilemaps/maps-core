@@ -16,14 +16,6 @@
 #include "vtzero/geometry.hpp"
 #include "Logger.h"
 
-class Test {
-public:
-    Test(int x): x(x) {}
-private:
-    int x;
-};
-
-
 class VectorTileGeometryHandler {
 public:
     VectorTileGeometryHandler(::RectCoord tileCoords, int extent, const std::optional<Tiled2dMapVectorSettings> &vectorSettings)
@@ -39,12 +31,6 @@ public:
     }
 
     void points_point(const vtzero::point point) {
-        
-        std::vector<Test> list;
-        Test x(42);
-        list.emplace_back(x);
-        list.emplace_back(32);
-        
         currentFeature.emplace_back(coordinateFromPoint(point));
     }
 

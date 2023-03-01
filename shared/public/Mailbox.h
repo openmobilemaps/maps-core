@@ -176,11 +176,11 @@ public:
                                                 }
                                             });
     }
-    
+
+    std::recursive_mutex receivingMutex;
 private:
     std::shared_ptr<SchedulerInterface> scheduler;
-    
-    std::recursive_mutex receivingMutex;
+
     std::mutex pushingMutex;
 
     std::mutex computationQueueMutex;

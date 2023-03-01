@@ -251,9 +251,13 @@ void Tiled2dMapVectorLayer::update() {
         layer->update();
     }*/
 
+    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
     for (const auto &[tileInfo, subTiles] : tiles) {
         for (const auto &tile: subTiles) {
-            tile.unsafe()->update();
+            tile.syncAccess([](auto tile) {
+                tile->update();
+            });
+
             //tile.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorTile::update);
         }
     }
@@ -272,7 +276,7 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::build
         }
         newPasses.insert(newPasses.end(), sublayerPasses.begin(), sublayerPasses.end());
     }*/
-
+    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
     for (const auto &[tileInfo, subTiles] : tiles) {
         for (const auto &tile: subTiles) {
             const auto &tilePasses = tile.unsafe()->buildRenderPasses();
@@ -303,13 +307,15 @@ void Tiled2dMapVectorLayer::onRemoved() {
     }
     Tiled2dMapLayer::onRemoved();
     pause();
-
-    for (const auto &[tileInfo, subTiles] : tiles) {
-        for (const auto &tile: subTiles) {
-            tile.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorTile::clear);
+    {
+        std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+        for (const auto &[tileInfo, subTiles] : tiles) {
+            for (const auto &tile: subTiles) {
+                tile.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorTile::clear);
+            }
         }
+        tiles.clear();
     }
-    tiles.clear();
 
     this->layerIndex = -1;
 }
@@ -330,10 +336,12 @@ void Tiled2dMapVectorLayer::pause() {
             }
         }
     }
-
-    for (const auto &[tileInfo, subTiles] : tiles) {
-        for (const auto &tile: subTiles) {
-            tile.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorTile::clear);
+    {
+        std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+        for (const auto &[tileInfo, subTiles] : tiles) {
+            for (const auto &tile: subTiles) {
+                tile.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorTile::clear);
+            }
         }
     }
 
@@ -368,10 +376,12 @@ void Tiled2dMapVectorLayer::resume() {
             vectorTileSource.message(&Tiled2dMapVectorSource::setTileReady, tileInfo);
         }
     }
-
-    for (const auto &[tileInfo, subTiles] : tiles) {
-        for (const auto &tile: subTiles) {
-            tile.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorTile::setup);
+    {
+        std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+        for (const auto &[tileInfo, subTiles] : tiles) {
+            for (const auto &tile: subTiles) {
+                tile.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorTile::setup);
+            }
         }
     }
 
@@ -427,24 +437,29 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
 
         std::unordered_set<Tiled2dMapTileInfo> tilesToRemove;
 
-        for (const auto &vectorTileInfo: currentTileInfos) {
-            if (tiles.count(vectorTileInfo.tileInfo) == 0) {
-                tilesToAdd.insert(vectorTileInfo);
-            } else {
-                tilesToKeep.insert(vectorTileInfo);
-            }
-        }
 
-        for (const auto &[tileInfo, _]: tiles) {
-            bool found = false;
-            for (const auto &currentTile: currentTileInfos) {
-                if (tileInfo == currentTile.tileInfo) {
-                    found = true;
-                    break;
+        {
+            std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+
+            for (const auto &vectorTileInfo: currentTileInfos) {
+                if (tiles.count(vectorTileInfo.tileInfo) == 0) {
+                    tilesToAdd.insert(vectorTileInfo);
+                } else {
+                    tilesToKeep.insert(vectorTileInfo);
                 }
             }
-            if (!found) {
-                tilesToRemove.insert(tileInfo);
+
+            for (const auto &[tileInfo, _]: tiles) {
+                bool found = false;
+                for (const auto &currentTile: currentTileInfos) {
+                    if (tileInfo == currentTile.tileInfo) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    tilesToRemove.insert(tileInfo);
+                }
             }
         }
 
@@ -487,6 +502,11 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
                 newTileMasks[tile.tileInfo] = Tiled2dMapLayerMaskWrapper(tileMask, hash);
             }
 
+            {
+                std::lock_guard<std::recursive_mutex> tilesReadyCountLock(tilesReadyCountMutex);
+                tilesReadyCount[tile.tileInfo] = 0;
+            }
+
             auto castedMe = std::static_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
             auto selfActor = WeakActor<Tiled2dMapVectorLayer>(mailbox, castedMe);
 
@@ -497,7 +517,7 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
                 auto const mapIt = tile.layerFeatureMaps.find(layer->source);
                 if (mapIt == tile.layerFeatureMaps.end()) { continue; }
                 auto const dataIt = mapIt->second->find(layer->sourceId);
-                if (dataIt != mapIt->second->end()) {
+                if (dataIt != mapIt->second->end() && layer->identifier == "land") {
                     switch (layer->getType()) {
                         case VectorLayerType::background: {
                             break;
@@ -513,9 +533,15 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
                             auto const polygonObject = newTileMasks[tile.tileInfo].getGraphicsMaskObject();
 
                             // TODO: deduplicate when other subtiles are created
-                            tilesReadyCount[tile.tileInfo] += 1;
+                            {
+                                tilesReadyCount[tile.tileInfo] += 1;
+                                std::lock_guard<std::recursive_mutex> tilesReadyCountLock(tilesReadyCountMutex);
+                            }
 
-                            tiles[tile.tileInfo].push_back(actor.strongActor<Tiled2dMapVectorTile>());
+                            {
+                                std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+                                tiles[tile.tileInfo].push_back(actor.strongActor<Tiled2dMapVectorTile>());
+                            }
 
                             actor.message(&Tiled2dMapVectorTile::setTileData, polygonObject, dataIt->second);
                             break;
@@ -531,6 +557,13 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
                         }
                     }
 
+                }
+            }
+
+            {
+                std::lock_guard<std::recursive_mutex> tilesReadyCountLock(tilesReadyCountMutex);
+                if (tilesReadyCount[tile.tileInfo] == 0) {
+                    tileIsReady(tile.tileInfo);
                 }
             }
 
@@ -578,13 +611,16 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
         }
 
         for (const auto &tileToRemove: tilesToRemove) {
-            auto tilesVectorIt = tiles.find(tileToRemove);
-            if (tilesVectorIt != tiles.end()) {
-                for (const auto &tile: tiles.at(tileToRemove)) {
-                    tile.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorTile::clear);
+            {
+                std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+                auto tilesVectorIt = tiles.find(tileToRemove);
+                if (tilesVectorIt != tiles.end()) {
+                    for (const auto &tile: tiles.at(tileToRemove)) {
+                        tile.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorTile::clear);
+                    }
                 }
+                tiles.erase(tileToRemove);
             }
-            tiles.erase(tileToRemove);
 
             auto maskIt = tileMaskMap.find(tileToRemove);
             if (maskIt != tileMaskMap.end() && maskIt->second.getGraphicsMaskObject()) {

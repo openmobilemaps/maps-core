@@ -163,6 +163,21 @@ public:
         auto casted = std::static_pointer_cast<CastObject>(object.lock());
         return WeakActor<CastObject>(receivingMailbox, casted);
     }
+
+    template <typename RetValue>
+    RetValue syncAccess(std::function<RetValue(std::weak_ptr<Object>)> lambda) const {
+        auto strongMailbox = receivingMailbox.lock();
+        if (!strongMailbox) {
+            return lambda(object);
+        }
+
+        std::lock_guard<std::recursive_mutex> lock(strongMailbox->receivingMutex);
+        return lambda(object);
+    }
+
+    void syncAccess(std::function<void(std::weak_ptr<Object>)> lambda) const {
+        syncAccess<void>(lambda);
+    }
     
     inline const std::shared_ptr<Object>& unsafe() const {
         return object.lock();
@@ -278,6 +293,16 @@ public:
     
     inline const std::shared_ptr<Object>& unsafe() const {
         return object;
+    }
+
+    template <typename RetValue>
+    RetValue syncAccess(std::function<RetValue(std::shared_ptr<Object>)> lambda) const {
+        std::lock_guard<std::recursive_mutex> lock(receivingMailbox->receivingMutex);
+        return lambda(object);
+    }
+
+    void syncAccess(std::function<void(std::shared_ptr<Object>)> lambda) const {
+        syncAccess<void>(lambda);
     }
 
     template <class CastObject>

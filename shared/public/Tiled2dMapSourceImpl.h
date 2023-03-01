@@ -436,7 +436,7 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
 
     std::vector<Tiled2dMapTileInfo> tilesToRemove;
 
-    int currentZoomLevelIdentifier = this->currentZoomLevelIdentifier;;
+    int currentZoomLevelIdentifier = this->currentZoomLevelIdentifier;
     
     gpc_polygon currentTileMask;
     bool freeCurrent = false;
@@ -478,6 +478,8 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
 
             if(completeViewBoundsDrawn) {
                 tileWrapper.isVisible = false;
+                it = decltype(it){currentTiles.erase( std::next(it).base() )};
+                it = std::prev(it);
                 continue;
             }
 
@@ -492,6 +494,8 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
 
             if (polygonDiff.contour == NULL) {
                 tileWrapper.isVisible = false;
+                it = decltype(it){currentTiles.erase( std::next(it).base() )};
+                it = std::prev(it);
             } else {
                 gpc_polygon resultingMask;
 
@@ -499,6 +503,8 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
 
                 if (resultingMask.contour == NULL) {
                     tileWrapper.isVisible = false;
+                    it = decltype(it){currentTiles.erase( std::next(it).base() )};
+                    it = std::prev(it);
                 } else {
                     tileWrapper.masks = gpc_get_polygon_coord(&polygonDiff, tileInfo.bounds.topLeft.systemIdentifier);
                 }
