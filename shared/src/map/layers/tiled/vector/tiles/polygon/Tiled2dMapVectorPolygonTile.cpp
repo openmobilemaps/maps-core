@@ -66,7 +66,7 @@ void Tiled2dMapVectorPolygonTile::update() {
         shaderStyles.push_back(color.g);
         shaderStyles.push_back(color.b);
         shaderStyles.push_back(color.a);
-        shaderStyles.push_back(opacity * alpha);
+        shaderStyles.push_back(opacity * alpha * 0.5);
     }
 
     auto s = SharedBytes((int64_t)shaderStyles.data(), (int32_t)featureGroups.size(), 5 * (int32_t)sizeof(float));
@@ -286,7 +286,12 @@ void Tiled2dMapVectorPolygonTile::preGenerateRenderPasses() {
     Tiled2dMapVectorTile::preGenerateRenderPasses();
 
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
-    newRenderPasses.insert(newRenderPasses.end(), debugRenderPasses.begin(), debugRenderPasses.end());
+    //newRenderPasses.insert(newRenderPasses.end(), debugRenderPasses.begin(), debugRenderPasses.end());
+
+    if (!tileMask) {
+        renderPasses = newRenderPasses;
+        return;
+    }
 
     std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
     for (auto const &object : polygons) {
@@ -299,8 +304,7 @@ void Tiled2dMapVectorPolygonTile::preGenerateRenderPasses() {
     for (const auto &passEntry : renderPassObjectMap) {
         std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(
                 RenderPassConfig(description.renderPassIndex.value_or(passEntry.first)),
-                passEntry.second,
-                (tileMask ? tileMask : nullptr));
+                passEntry.second, tileMask);
         renderPass->setScissoringRect(scissorRect);
         newRenderPasses.push_back(renderPass);
     }
