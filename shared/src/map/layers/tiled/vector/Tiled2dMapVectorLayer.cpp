@@ -279,7 +279,9 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::build
     std::lock_guard<std::recursive_mutex> lock(tilesMutex);
     for (const auto &[tileInfo, subTiles] : tiles) {
         for (const auto &tile: subTiles) {
-            const auto &tilePasses = tile.unsafe()->buildRenderPasses();
+            const auto &tilePasses = tile.syncAccess([](auto tile) {
+                return tile->buildRenderPasses();
+            });
             newPasses.insert(newPasses.end(), tilePasses.begin(), tilePasses.end());
         }
     }
@@ -674,7 +676,6 @@ void Tiled2dMapVectorLayer::updateMaskObjects(const std::unordered_map<Tiled2dMa
             auto subTiles = tiles.find(tileInfo);
             if (subTiles != tiles.end()) {
                 for (auto const &tile: subTiles->second) {
-                    //tile.unsafe()->updateTileMask(wrapper.getGraphicsMaskObject());
                     tile.message(&Tiled2dMapVectorTile::updateTileMask, wrapper.getGraphicsMaskObject());
                 }
             }
