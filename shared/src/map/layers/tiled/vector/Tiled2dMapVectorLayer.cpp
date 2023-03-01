@@ -489,9 +489,12 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
         if (tilesToAdd.empty() && tilesToRemove.empty() && newTileMasks.empty()) return;
 
 
-
         for (const auto &tile : tilesToAdd) {
             //if (!vectorTileSource->isTileVisible(tile.tileInfo)) continue;
+
+            if (tile.tileInfo.zoomIdentifier == 4 && tile.tileInfo.x == 6 && tile.tileInfo.y == 5) {
+                int i = 0;
+            }
 
             if (newTileMasks.count(tile.tileInfo) == 0) {
                 const auto &tileMask = std::make_shared<PolygonMaskObject>(graphicsFactory,
@@ -509,6 +512,11 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
                 tilesReadyCount[tile.tileInfo] = 0;
             }
 
+            {
+                std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+                tiles[tile.tileInfo] = {};
+            }
+
             auto castedMe = std::static_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
             auto selfActor = WeakActor<Tiled2dMapVectorLayer>(mailbox, castedMe);
 
@@ -517,9 +525,11 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
                     continue;
                 }
                 auto const mapIt = tile.layerFeatureMaps.find(layer->source);
-                if (mapIt == tile.layerFeatureMaps.end()) { continue; }
+                if (mapIt == tile.layerFeatureMaps.end()) {
+                    continue;
+                }
                 auto const dataIt = mapIt->second->find(layer->sourceId);
-                if (dataIt != mapIt->second->end() && layer->identifier == "land") {
+                if (dataIt != mapIt->second->end()) {
                     switch (layer->getType()) {
                         case VectorLayerType::background: {
                             break;
@@ -559,14 +569,18 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
                         }
                     }
 
+                } else {
+                    int i = 0;
                 }
             }
 
+            bool isAlreadyReady = false;
             {
                 std::lock_guard<std::recursive_mutex> tilesReadyCountLock(tilesReadyCountMutex);
-                if (tilesReadyCount[tile.tileInfo] == 0) {
-                    tileIsReady(tile.tileInfo);
-                }
+                isAlreadyReady = tilesReadyCount[tile.tileInfo] == 0;
+            }
+            if (isAlreadyReady) {
+                vectorTileSource.message(&Tiled2dMapVectorSource::setTileReady, tile.tileInfo);
             }
 
 
