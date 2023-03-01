@@ -461,6 +461,10 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
 
         tileWrapper.isVisible = true;
 
+        if (readyTiles.count(tileInfo) == 0) {
+            continue;
+        }
+
         if (tileInfo.zoomIdentifier != currentZoomLevelIdentifier) {
 
             if (currentTileMask.num_contours != 0) {
@@ -517,10 +521,6 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
             }
         } else {
             tileWrapper.masks = { tileWrapper.tileBounds };
-        }
-
-        if (readyTiles.count(tileInfo) == 0) {
-            continue;
         }
 
         // add tileBounds to currentTileMask

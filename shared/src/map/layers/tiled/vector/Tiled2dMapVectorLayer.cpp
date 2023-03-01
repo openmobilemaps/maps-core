@@ -570,7 +570,6 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
             selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorLayer::updateMaskObjects, newTileMasks, tilesToRemove);
         }
     }
-
     mapInterface->invalidate();
 }
 
@@ -642,6 +641,7 @@ void Tiled2dMapVectorLayer::updateMaskObjects(const std::unordered_map<Tiled2dMa
             tilesReadyCount.erase(tileToRemove);
         }
     }
+    mapInterface->invalidate();
 }
 
 

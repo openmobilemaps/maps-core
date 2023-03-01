@@ -66,7 +66,7 @@ void Tiled2dMapVectorPolygonTile::update() {
         shaderStyles.push_back(color.g);
         shaderStyles.push_back(color.b);
         shaderStyles.push_back(color.a);
-        shaderStyles.push_back(opacity * alpha * 0.5);
+        shaderStyles.push_back(opacity * alpha);
     }
 
     auto s = SharedBytes((int64_t)shaderStyles.data(), (int32_t)featureGroups.size(), 5 * (int32_t)sizeof(float));
@@ -209,8 +209,6 @@ void Tiled2dMapVectorPolygonTile::setTileData(const std::shared_ptr<MaskingObjec
         }
 
         addPolygons(objectDescriptions);
-
-        preGenerateRenderPasses();
     } else {
         vectorLayer.message(&Tiled2dMapVectorLayer::tileIsReady, tileInfo);
     }

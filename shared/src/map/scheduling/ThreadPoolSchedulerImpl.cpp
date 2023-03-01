@@ -12,7 +12,7 @@
 #include <cmath>
 
 std::shared_ptr<SchedulerInterface> ThreadPoolScheduler::create(const std::shared_ptr<ThreadPoolCallbacks> &callbacks) {
-    return std::make_shared<ThreadPoolSchedulerImpl>(callbacks, false);
+    return std::make_shared<ThreadPoolSchedulerImpl>(callbacks, true);
 }
 
 ThreadPoolSchedulerImpl::ThreadPoolSchedulerImpl(const std::shared_ptr<ThreadPoolCallbacks> &callbacks,
