@@ -468,9 +468,8 @@ bool Tiled2dMapVectorLineSubLayer::onClickConfirmed(const ::Vec2F &posScreen) {
             for (auto const &coordinates: lineCoordinateVector) {
                 auto lineWidth = description->style.getLineWidth(EvaluationContext(zoomIdentifier, featureContext));
                 if (LineHelper::pointWithin(coordinates, point, lineWidth, coordinateConverter)) {
-                    if (selectionDelegate->didSelectFeature(featureContext, description, point)) {
-                        return true;
-                    }
+                    selectionDelegate->didSelectFeature(featureContext, description, point);
+                    return true;
                 }
             }
         }

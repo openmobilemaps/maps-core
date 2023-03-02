@@ -314,9 +314,8 @@ bool Tiled2dMapVectorPolygonSubLayer::onClickConfirmed(const ::Vec2F &posScreen)
     for (auto const &[tileInfo, polygonTuples] : hitDetectionPolygonMap) {
         for (auto const &[polygon, featureContext]: polygonTuples) {
             if (PolygonHelper::pointInside(polygon, point, mapInterface->getCoordinateConverterHelper())) {
-                if (selectionDelegate->didSelectFeature(featureContext, description, point)) {
-                    return true;
-                }
+                selectionDelegate->didSelectFeature(featureContext, description, point);
+                return true;
             }
         }
     }
