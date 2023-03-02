@@ -74,7 +74,7 @@ public:
 
     virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
 
-    void setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate);
+    void setSelectionDelegate(const WeakActor<Tiled2dMapVectorLayerSelectionInterface> &selectionDelegate);
 
     void setSelectedFeatureIdentifier(std::optional<int64_t> identifier);
 
@@ -162,7 +162,7 @@ private:
     std::atomic_bool isLoadingStyleJson = false;
     std::atomic_bool isResumed = false;
 
-    std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate;
+    WeakActor<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate;
 
     float alpha;
 };

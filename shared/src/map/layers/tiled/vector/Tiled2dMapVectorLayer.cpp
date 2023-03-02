@@ -509,7 +509,7 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
                             auto mailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
 
                             auto actor = Actor<Tiled2dMapVectorPolygonTile>(mailbox, (std::weak_ptr<MapInterface>) mapInterface, tile.tileInfo, selfActor, std::static_pointer_cast<PolygonVectorLayerDescription>(layer));
-                            if (selectionDelegate.lock()) {
+                            if (selectionDelegate) {
                                 actor.message(&Tiled2dMapVectorTile::setSelectionDelegate, selectionDelegate);
                             }
 
@@ -743,7 +743,7 @@ void Tiled2dMapVectorLayer::setScissorRect(const std::optional<::RectI> &scissor
     }
 }
 
-void Tiled2dMapVectorLayer::setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate) {
+void Tiled2dMapVectorLayer::setSelectionDelegate(const WeakActor<Tiled2dMapVectorLayerSelectionInterface> &selectionDelegate) {
     this->selectionDelegate = selectionDelegate;
     {
         std::lock_guard<std::recursive_mutex> lock(tilesMutex);
