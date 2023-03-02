@@ -167,7 +167,7 @@ private:
 
     WeakActor<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate;
 
-    float alpha;
+    float alpha = 1.0;
 };
 
 

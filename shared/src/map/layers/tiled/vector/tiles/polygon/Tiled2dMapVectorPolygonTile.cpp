@@ -302,7 +302,7 @@ void Tiled2dMapVectorPolygonTile::preGenerateRenderPasses() {
 bool Tiled2dMapVectorPolygonTile::onClickConfirmed(const Vec2F &posScreen) {
     auto mapInterface = this->mapInterface.lock();
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
-    if (!camera || selectionDelegate) {
+    if (!camera || !selectionDelegate) {
         return false;
     }
     auto point = camera->coordFromScreenPosition(posScreen);
