@@ -14,6 +14,7 @@
 #include "MapInterface.h"
 #include "PolygonVectorLayerDescription.h"
 #include "PolygonGroup2dLayerObject.h"
+#include "PolygonCoord.h"
 
 class Tiled2dMapVectorPolygonTile : public Tiled2dMapVectorTile, public std::enable_shared_from_this<Tiled2dMapVectorPolygonTile> {
 public:
@@ -22,7 +23,7 @@ public:
     Tiled2dMapVectorPolygonTile(const std::weak_ptr<MapInterface> &mapInterface,
                                 const Tiled2dMapTileInfo &tileInfo,
                                 const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
-                                const PolygonVectorLayerDescription &description);
+                                const std::shared_ptr<PolygonVectorLayerDescription> &description);
 
     void update() override;
 
@@ -39,6 +40,8 @@ public:
 
     virtual void updateTileMask(const std::shared_ptr<MaskingObjectInterface> &tileMask) override;
 
+    bool onClickConfirmed(const Vec2F &posScreen) override;
+
 protected:
     virtual void preGenerateRenderPasses();
 
@@ -47,13 +50,15 @@ private:
 
     void setupPolygons(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects);
 
-    PolygonVectorLayerDescription description;
+    std::shared_ptr<PolygonVectorLayerDescription> description;
 
     std::shared_ptr<PolygonGroupShaderInterface> shader;
 
     std::vector<std::shared_ptr<PolygonGroup2dLayerObject>> polygons;
     std::vector<std::tuple<size_t, FeatureContext>> featureGroups;
     std::unordered_set<std::string> usedKeys;
+
+    std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<PolygonCoord, FeatureContext>>> hitDetectionPolygonMap;
 
     std::shared_ptr<MaskingObjectInterface> tileMask;
     std::optional<::RectI> scissorRect = std::nullopt;

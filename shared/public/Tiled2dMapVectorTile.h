@@ -18,10 +18,13 @@
 #include "RenderPassInterface.h"
 #include "Quad2dInterface.h"
 #include "ColorShaderInterface.h"
+#include "Tiled2dMapVectorLayerSelectionInterface.h"
+#include "SimpleTouchInterface.h"
 
 class Tiled2dMapVectorLayer;
 
-class Tiled2dMapVectorTile : public ActorObject {
+class Tiled2dMapVectorTile : public ActorObject,
+                             public SimpleTouchInterface {
 public:
     Tiled2dMapVectorTile(const std::weak_ptr<MapInterface> &mapInterface, const Tiled2dMapTileInfo &tileInfo, const WeakActor<Tiled2dMapVectorLayer> &vectorLayer);
 
@@ -44,6 +47,10 @@ public:
 
     virtual void updateTileMask(const std::shared_ptr<MaskingObjectInterface> &tileMask) = 0;
 
+    void setSelectionDelegate(const WeakActor<Tiled2dMapVectorLayerSelectionInterface> &selectionDelegate);
+
+    void setSelectedFeatureIdentifier(std::optional<int64_t> identifier);
+
 protected:
 
     const std::weak_ptr<MapInterface> mapInterface;
@@ -51,4 +58,7 @@ protected:
     const WeakActor<Tiled2dMapVectorLayer> vectorLayer;
 
     float alpha = 1.0;
+
+    WeakActor<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate;
+    std::optional<int64_t> selectedFeatureIdentifier;
 };

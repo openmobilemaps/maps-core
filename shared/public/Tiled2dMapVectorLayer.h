@@ -76,7 +76,7 @@ public:
 
     void setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate);
 
-    void setSelectedFeatureIdentfier(std::optional<int64_t> identifier);
+    void setSelectedFeatureIdentifier(std::optional<int64_t> identifier);
 
     std::shared_ptr<VectorLayerDescription> getLayerDescriptionWithIdentifier(std::string identifier);
 

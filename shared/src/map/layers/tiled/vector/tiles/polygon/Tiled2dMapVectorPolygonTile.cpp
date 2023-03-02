@@ -16,6 +16,7 @@
 #include "MapCamera2dInterface.h"
 #include "earcut.hpp"
 #include "Logger.h"
+#include "PolygonHelper.h"
 
 namespace mapbox {
     namespace util {
@@ -39,10 +40,9 @@ namespace mapbox {
 Tiled2dMapVectorPolygonTile::Tiled2dMapVectorPolygonTile(const std::weak_ptr<MapInterface> &mapInterface,
                                                          const Tiled2dMapTileInfo &tileInfo,
                                                          const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
-                                                         const PolygonVectorLayerDescription &description)
-        : Tiled2dMapVectorTile(mapInterface, tileInfo, vectorLayer),
-        description(std::move(description)) {
-    usedKeys = std::move(description.getUsedKeys());
+                                                         const std::shared_ptr<PolygonVectorLayerDescription> &description)
+        : Tiled2dMapVectorTile(mapInterface, tileInfo, vectorLayer), description(description) {
+    usedKeys = std::move(description->getUsedKeys());
     auto pMapInterface = mapInterface.lock();
     if (pMapInterface) {
         shader = pMapInterface->getShaderFactory()->createPolygonGroupShader();
@@ -60,8 +60,8 @@ void Tiled2dMapVectorPolygonTile::update() {
 
     for (auto const &[hash, feature]: featureGroups) {
         const auto& ec = EvaluationContext(zoomIdentifier, feature);
-        const auto& color = description.style.getFillColor(ec);
-        const auto& opacity = description.style.getFillOpacity(ec);
+        const auto& color = description->style.getFillColor(ec);
+        const auto& opacity = description->style.getFillOpacity(ec);
 
         shaderStyles.push_back(color.r);
         shaderStyles.push_back(color.g);
@@ -110,13 +110,13 @@ void Tiled2dMapVectorPolygonTile::setTileData(const std::shared_ptr<MaskingObjec
 
     this->tileMask = tileMask;
 
-    std::string layerName = description.sourceId;
+    std::string layerName = description->sourceId;
 
     std::string defIdPrefix =
             std::to_string(tileInfo.x) + "/" + std::to_string(tileInfo.y) + "_" + layerName + "_";
     if (!layerFeatures.empty() &&
-        description.minZoom <= tileInfo.zoomIdentifier &&
-        description.maxZoom >= tileInfo.zoomIdentifier) {
+        description->minZoom <= tileInfo.zoomIdentifier &&
+        description->maxZoom >= tileInfo.zoomIdentifier) {
 
         std::vector<std::tuple<std::vector<std::tuple<std::vector<Coord>, int>>, std::vector<int32_t>>> objectDescriptions;
         objectDescriptions.push_back({{},{}});
@@ -128,7 +128,7 @@ void Tiled2dMapVectorPolygonTile::setTileData(const std::shared_ptr<MaskingObjec
 
             if (featureContext.geomType != vtzero::GeomType::POLYGON) { continue; }
 
-            if (description.filter == nullptr || description.filter->evaluateOr(EvaluationContext(-1, featureContext), true)) {
+            if (description->filter == nullptr || description->filter->evaluateOr(EvaluationContext(-1, featureContext), true)) {
                 const auto &geometryHandler = std::get<1>(feature);
                 const auto &polygonCoordinates = geometryHandler.getPolygonCoordinates();
                 const auto &polygonHoles = geometryHandler.getHoleCoordinates();
@@ -181,10 +181,7 @@ void Tiled2dMapVectorPolygonTile::setTileData(const std::shared_ptr<MaskingObjec
 
                     indices_offset += posAdded;
 
-/*                    {
-                        std::lock_guard<std::recursive_mutex> lock(hitDetectionMutex);
-                        hitDetectionPolygonMap[tileInfo].push_back({PolygonCoord(polygonCoordinates[i], polygonHoles[i]), featureContext});
-                    }*/
+                    hitDetectionPolygonMap[tileInfo].push_back({PolygonCoord(polygonCoordinates[i], polygonHoles[i]), featureContext});
                 }
 
                 int styleIndex = -1;
@@ -287,11 +284,31 @@ void Tiled2dMapVectorPolygonTile::preGenerateRenderPasses() {
 
     for (const auto &passEntry : renderPassObjectMap) {
         std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(
-                RenderPassConfig(description.renderPassIndex.value_or(passEntry.first)),
+                RenderPassConfig(description->renderPassIndex.value_or(passEntry.first)),
                 passEntry.second, tileMask);
         renderPass->setScissoringRect(scissorRect);
         newRenderPasses.push_back(renderPass);
     }
 
     renderPasses = newRenderPasses;
+}
+
+bool Tiled2dMapVectorPolygonTile::onClickConfirmed(const Vec2F &posScreen) {
+    auto mapInterface = this->mapInterface.lock();
+    auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+    if (!camera || selectionDelegate) {
+        return false;
+    }
+    auto point = camera->coordFromScreenPosition(posScreen);
+
+    for (auto const &[tileInfo, polygonTuples] : hitDetectionPolygonMap) {
+        for (auto const &[polygon, featureContext]: polygonTuples) {
+            if (PolygonHelper::pointInside(polygon, point, mapInterface->getCoordinateConverterHelper())) {
+                selectionDelegate.message(&Tiled2dMapVectorLayerSelectionInterface::didSelectFeature, featureContext, description, point);
+                return true;
+            }
+        }
+    }
+
+    return false;
 }

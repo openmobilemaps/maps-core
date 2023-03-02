@@ -246,10 +246,7 @@ void Tiled2dMapVectorLayer::update() {
             }
         }
     }
-    
-    for (auto const &layer: sublayers) {
-        layer->update();
-    }*/
+}*/
 
     std::lock_guard<std::recursive_mutex> lock(tilesMutex);
     for (const auto &[tileInfo, subTiles] : tiles) {
@@ -257,25 +254,12 @@ void Tiled2dMapVectorLayer::update() {
             tile.syncAccess([](auto tile) {
                 tile->update();
             });
-
-            //tile.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorTile::update);
         }
     }
 }
 
 std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::buildRenderPasses() {
-    //std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(tilesReadyMutex, sublayerMutex);
     std::vector<std::shared_ptr<RenderPassInterface>> newPasses;
-/*    for (const auto &layer: sublayers) {
-        std::vector<std::shared_ptr<RenderPassInterface>> sublayerPasses;
-        auto const &castedPtr = std::dynamic_pointer_cast<Tiled2dMapVectorSubLayer>(layer);
-        if (castedPtr != nullptr) {
-            sublayerPasses = castedPtr->buildRenderPasses(tilesReady);
-        } else {
-            sublayerPasses = layer->buildRenderPasses();
-        }
-        newPasses.insert(newPasses.end(), sublayerPasses.begin(), sublayerPasses.end());
-    }*/
     std::lock_guard<std::recursive_mutex> lock(tilesMutex);
     for (const auto &[tileInfo, subTiles] : tiles) {
         for (const auto &tile: subTiles) {
@@ -291,7 +275,6 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::build
 void Tiled2dMapVectorLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface, int32_t layerIndex) {
     this->mapInterface = mapInterface;
     this->layerIndex = layerIndex;
-    setSelectionDelegate(std::dynamic_pointer_cast<Tiled2dMapVectorLayerSelectionInterface>(shared_from_this()));
 
     if (layerConfigs.empty()) {
         scheduleStyleJsonLoading();
@@ -299,7 +282,7 @@ void Tiled2dMapVectorLayer::onAdded(const std::shared_ptr<::MapInterface> &mapIn
     }
 
     // TODO: really necessary?
-    //s();
+    //initializeVectorLayer();
 }
 
 void Tiled2dMapVectorLayer::onRemoved() {
@@ -525,7 +508,10 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
                         case VectorLayerType::polygon: {
                             auto mailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
 
-                            auto actor = Actor<Tiled2dMapVectorPolygonTile>(mailbox, (std::weak_ptr<MapInterface>) mapInterface, tile.tileInfo, selfActor, *std::static_pointer_cast<PolygonVectorLayerDescription>(layer));
+                            auto actor = Actor<Tiled2dMapVectorPolygonTile>(mailbox, (std::weak_ptr<MapInterface>) mapInterface, tile.tileInfo, selfActor, std::static_pointer_cast<PolygonVectorLayerDescription>(layer));
+                            if (selectionDelegate.lock()) {
+                                actor.message(&Tiled2dMapVectorTile::setSelectionDelegate, selectionDelegate);
+                            }
 
                             // TODO: deduplicate when other subtiles are created
                             {
@@ -760,27 +746,27 @@ void Tiled2dMapVectorLayer::setScissorRect(const std::optional<::RectI> &scissor
 void Tiled2dMapVectorLayer::setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate) {
     this->selectionDelegate = selectionDelegate;
     {
-        // TODO
-        /*        std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-        for (auto const &sublayer: sublayers) {
-            auto vectorSubLayer = std::dynamic_pointer_cast<Tiled2dMapVectorSubLayer>(sublayer);
-            if (vectorSubLayer) {
-                vectorSubLayer->setSelectionDelegate(selectionDelegate);
+        std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+        for (const auto &[tileInfo, subTiles]: tiles) {
+            for (const auto &tile: subTiles) {
+                tile.message(&Tiled2dMapVectorTile::setSelectionDelegate, selectionDelegate);
             }
-        }*/
+        }
     }
 }
 
-void Tiled2dMapVectorLayer::setSelectedFeatureIdentfier(std::optional<int64_t> identifier) {
+void Tiled2dMapVectorLayer::setSelectedFeatureIdentifier(std::optional<int64_t> identifier) {
     {
-        // TODO
-/*        std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-        for (auto const &sublayer: sublayers) {
-            auto vectorSubLayer = std::dynamic_pointer_cast<Tiled2dMapVectorSubLayer>(sublayer);
-            if (vectorSubLayer) {
-                vectorSubLayer->setSelectedFeatureIdentfier(identifier);
+       std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+        for (auto const &[tileInfo, subTiles]: tiles) {
+            for (const auto &tile: subTiles) {
+                tile.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorTile::setSelectedFeatureIdentifier, identifier);
             }
-        }*/
+        }
+    }
+    auto mapInterface = this->mapInterface;
+    if (mapInterface) {
+        mapInterface->invalidate();
     }
 }
 
@@ -901,162 +887,173 @@ std::shared_ptr<VectorLayerDescription> Tiled2dMapVectorLayer::getLayerDescripti
 
 // Touch Interface
 bool Tiled2dMapVectorLayer::onTouchDown(const Vec2F &posScreen) {
-    // TODO
-/*    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-    for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
-        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
-        if (touchInterface) {
-            if (touchInterface->onTouchDown(posScreen)) {
+    // TODO: query ordering on tile borders?
+    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+    for (const auto &[tileInfo, subTiles]: tiles) {
+        for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
+            bool hit = rIter->syncAccess([posScreen](auto tile) {
+                return tile->onTouchDown(posScreen);
+            });
+            if (hit) {
                 return true;
             }
         }
     }
-    return false;*/
     return false;
 }
 
 bool Tiled2dMapVectorLayer::onClickUnconfirmed(const Vec2F &posScreen) {
-    // TODO
-/*    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-    for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
-        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
-        if (touchInterface) {
-            if (touchInterface->onClickUnconfirmed(posScreen)) {
+// TODO: query ordering on tile borders?
+    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+    for (const auto &[tileInfo, subTiles]: tiles) {
+        for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
+            bool hit = rIter->syncAccess([posScreen](auto tile) {
+                return tile->onClickUnconfirmed(posScreen);
+            });
+            if (hit) {
                 return true;
             }
         }
     }
-    return false;*/
     return false;
 }
 
 bool Tiled2dMapVectorLayer::onClickConfirmed(const Vec2F &posScreen) {
-    // TODO
-/*    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-    for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
-        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
-        if (touchInterface) {
-            if (touchInterface->onClickConfirmed(posScreen)) {
+// TODO: query ordering on tile borders?
+    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+    for (const auto &[tileInfo, subTiles]: tiles) {
+        for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
+            bool hit = rIter->syncAccess([posScreen](auto tile) {
+                return tile->onClickConfirmed(posScreen);
+            });
+            if (hit) {
                 return true;
             }
         }
     }
-    return false;*/
     return false;
 }
 
 bool Tiled2dMapVectorLayer::onDoubleClick(const Vec2F &posScreen) {
-    // TODO
-/*    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-    for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
-        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
-        if (touchInterface) {
-            if (touchInterface->onDoubleClick(posScreen)) {
+// TODO: query ordering on tile borders?
+    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+    for (const auto &[tileInfo, subTiles]: tiles) {
+        for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
+            bool hit = rIter->syncAccess([posScreen](auto tile) {
+                return tile->onDoubleClick(posScreen);
+            });
+            if (hit) {
                 return true;
             }
         }
     }
-    return false;*/
     return false;
 }
 
 bool Tiled2dMapVectorLayer::onLongPress(const Vec2F &posScreen) {
-    // TODO
-/*    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-    for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
-        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
-        if (touchInterface) {
-            if (touchInterface->onLongPress(posScreen)) {
+// TODO: query ordering on tile borders?
+    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+    for (const auto &[tileInfo, subTiles]: tiles) {
+        for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
+            bool hit = rIter->syncAccess([posScreen](auto tile) {
+                return tile->onLongPress(posScreen);
+            });
+            if (hit) {
                 return true;
             }
         }
     }
-    return false;*/
     return false;
 }
 
 bool Tiled2dMapVectorLayer::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleClick) {
-    // TODO
-/*    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-    for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
-        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
-        if (touchInterface) {
-            if (touchInterface->onMove(deltaScreen, confirmed, doubleClick)) {
+// TODO: query ordering on tile borders?
+    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+    for (const auto &[tileInfo, subTiles]: tiles) {
+        for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
+            bool hit = rIter->syncAccess([deltaScreen, confirmed, doubleClick](auto tile) {
+                return tile->onMove(deltaScreen, confirmed, doubleClick);
+            });
+            if (hit) {
                 return true;
             }
         }
     }
-    return false;*/
     return false;
 }
 
 bool Tiled2dMapVectorLayer::onMoveComplete() {
-    // TODO
-/*    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-    for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
-        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
-        if (touchInterface) {
-            if (touchInterface->onMoveComplete()) {
+// TODO: query ordering on tile borders?
+    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+    for (const auto &[tileInfo, subTiles]: tiles) {
+        for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
+            bool hit = rIter->syncAccess([](auto tile) {
+                return tile->onMoveComplete();
+            });
+            if (hit) {
                 return true;
             }
         }
     }
-    return false;*/
     return false;
 }
 
 bool Tiled2dMapVectorLayer::onTwoFingerClick(const Vec2F &posScreen1, const Vec2F &posScreen2) {
-    // TODO
-/*    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-    for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
-        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
-        if (touchInterface) {
-            if (touchInterface->onTwoFingerClick(posScreen1, posScreen2)) {
+// TODO: query ordering on tile borders?
+    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+    for (const auto &[tileInfo, subTiles]: tiles) {
+        for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
+            bool hit = rIter->syncAccess([posScreen1, posScreen2](auto tile) {
+                return tile->onTwoFingerClick(posScreen1, posScreen2);
+            });
+            if (hit) {
                 return true;
             }
         }
     }
-    return false;*/
     return false;
 }
 
 bool Tiled2dMapVectorLayer::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) {
-    // TODO
-/*    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-    for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
-        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
-        if (touchInterface) {
-            if (touchInterface->onTwoFingerMove(posScreenOld, posScreenNew)) {
+// TODO: query ordering on tile borders?
+    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+    for (const auto &[tileInfo, subTiles]: tiles) {
+        for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
+            bool hit = rIter->syncAccess([posScreenOld, posScreenNew](auto tile) {
+                return tile->onTwoFingerMove(posScreenOld, posScreenNew);
+            });
+            if (hit) {
                 return true;
             }
         }
     }
-    return false;*/
     return false;
 }
 
 bool Tiled2dMapVectorLayer::onTwoFingerMoveComplete() {
-    // TODO
-/*    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-    for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
-        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
-        if (touchInterface) {
-            if (touchInterface->onTwoFingerMoveComplete()) {
+// TODO: query ordering on tile borders?
+    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+    for (const auto &[tileInfo, subTiles]: tiles) {
+        for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
+            bool hit = rIter->syncAccess([](auto tile) {
+                return tile->onTwoFingerMoveComplete();
+            });
+            if (hit) {
                 return true;
             }
         }
     }
-    return false;*/
     return false;
 }
 
 void Tiled2dMapVectorLayer::clearTouch() {
-    // TODO
-/*    std::lock_guard<std::recursive_mutex> lock(sublayerMutex);
-    for (auto rIter = sublayers.rbegin(); rIter != sublayers.rend(); rIter++) {
-        const auto &touchInterface = std::dynamic_pointer_cast<TouchInterface>(*rIter);
-        if (touchInterface) {
-            touchInterface->clearTouch();
+// TODO: query ordering on tile borders?
+    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+    for (const auto &[tileInfo, subTiles]: tiles) {
+        for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
+            rIter->syncAccess([](auto tile) {
+                return tile->clearTouch();
+            });
         }
-    }*/
+    }
 }

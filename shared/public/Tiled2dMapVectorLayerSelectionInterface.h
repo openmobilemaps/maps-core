@@ -16,5 +16,5 @@
 
 class Tiled2dMapVectorLayerSelectionInterface {
 public:
-    virtual bool didSelectFeature(const FeatureContext &featureContext, const std::shared_ptr<VectorLayerDescription> &layer, const ::Coord &coordinate) = 0;
+    virtual void didSelectFeature(const FeatureContext &featureContext, const std::shared_ptr<VectorLayerDescription> &layer, const ::Coord &coordinate) = 0;
 };
