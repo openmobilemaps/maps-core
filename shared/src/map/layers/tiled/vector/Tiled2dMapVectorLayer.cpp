@@ -36,6 +36,7 @@
 #include "LoaderHelper.h"
 
 #include "Tiled2dMapVectorPolygonTile.h"
+#include "Tiled2dMapVectorLineTile.h"
 
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
@@ -498,33 +499,27 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
                 }
                 auto const dataIt = mapIt->second->find(layer->sourceId);
                 if (dataIt != mapIt->second->end()) {
+
+                    Actor<Tiled2dMapVectorTile> actor;
+
                     switch (layer->getType()) {
                         case VectorLayerType::background: {
                             break;
                         }
                         case VectorLayerType::line: {
+                            auto mailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+
+                            auto lineActor = Actor<Tiled2dMapVectorLineTile>(mailbox, (std::weak_ptr<MapInterface>) mapInterface, tile.tileInfo, selfActor, std::static_pointer_cast<LineVectorLayerDescription>(layer));
+
+                            actor = lineActor.strongActor<Tiled2dMapVectorTile>();
                             break;
                         }
                         case VectorLayerType::polygon: {
                             auto mailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
 
-                            auto actor = Actor<Tiled2dMapVectorPolygonTile>(mailbox, (std::weak_ptr<MapInterface>) mapInterface, tile.tileInfo, selfActor, std::static_pointer_cast<PolygonVectorLayerDescription>(layer));
-                            if (selectionDelegate) {
-                                actor.message(&Tiled2dMapVectorTile::setSelectionDelegate, selectionDelegate);
-                            }
+                            auto polygonActor = Actor<Tiled2dMapVectorPolygonTile>(mailbox, (std::weak_ptr<MapInterface>) mapInterface, tile.tileInfo, selfActor, std::static_pointer_cast<PolygonVectorLayerDescription>(layer));
 
-                            // TODO: deduplicate when other subtiles are created
-                            {
-                                tilesReadyCount[tile.tileInfo] += 1;
-                                std::lock_guard<std::recursive_mutex> tilesReadyCountLock(tilesReadyCountMutex);
-                            }
-
-                            {
-                                std::lock_guard<std::recursive_mutex> lock(tilesMutex);
-                                tiles[tile.tileInfo].push_back(actor.strongActor<Tiled2dMapVectorTile>());
-                            }
-
-                            actor.message(&Tiled2dMapVectorTile::setTileData, nullptr, dataIt->second);
+                            actor = polygonActor.strongActor<Tiled2dMapVectorTile>();
                             break;
                         }
                         case VectorLayerType::symbol: {
@@ -536,6 +531,24 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
                         case VectorLayerType::custom: {
                             break;
                         }
+                    }
+
+                    if (actor) {
+                        if (selectionDelegate) {
+                            actor.message(&Tiled2dMapVectorTile::setSelectionDelegate, selectionDelegate);
+                        }
+
+                        {
+                            tilesReadyCount[tile.tileInfo] += 1;
+                            std::lock_guard<std::recursive_mutex> tilesReadyCountLock(tilesReadyCountMutex);
+                        }
+
+                        {
+                            std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+                            tiles[tile.tileInfo].push_back(actor.strongActor<Tiled2dMapVectorTile>());
+                        }
+
+                        actor.message(&Tiled2dMapVectorTile::setTileData, nullptr, dataIt->second);
                     }
                 }
             }
