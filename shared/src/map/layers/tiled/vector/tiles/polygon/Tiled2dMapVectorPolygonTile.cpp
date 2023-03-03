@@ -248,8 +248,14 @@ void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::tuple<std::
         newGraphicObjects.push_back(polygonObject->asGraphicsObject());
     }
 
+#ifdef __APPLE__
+    setupPolygons(newGraphicObjects);
+#else
     auto selfActor = WeakActor(mailbox, shared_from_this()->weak_from_this());
     selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorPolygonTile::setupPolygons, newGraphicObjects);
+#endif
+    
+    preGenerateRenderPasses();
 }
 
 void Tiled2dMapVectorPolygonTile::setupPolygons(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects) {

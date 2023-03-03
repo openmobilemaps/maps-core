@@ -17,8 +17,6 @@
 
 class Tiled2dMapVectorLineTile : public Tiled2dMapVectorTile, public std::enable_shared_from_this<Tiled2dMapVectorLineTile> {
 public:
-    using Tiled2dMapVectorTile::Tiled2dMapVectorTile;
-
     Tiled2dMapVectorLineTile(const std::weak_ptr<MapInterface> &mapInterface,
                                 const Tiled2dMapTileInfo &tileInfo,
                                 const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,

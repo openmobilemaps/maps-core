@@ -197,11 +197,12 @@ class Value {
 public:
     Value() {};
     virtual std::unordered_set<std::string> getUsedKeys() const { return {}; };
-    virtual ValueVariant evaluate(const EvaluationContext &context) = 0;
+
+    virtual ValueVariant evaluate(const EvaluationContext &context) const = 0;
 
 
     template<typename T>
-    T evaluateOr(const EvaluationContext &context, const T &alternative) {
+    T evaluateOr(const EvaluationContext &context, const T &alternative) const {
         auto const &value = evaluate(context);
         if (std::holds_alternative<T>(value)) {
             return std::get<T>(value);
@@ -225,12 +226,12 @@ public:
     }
 
     template<>
-    Vec2F evaluateOr(const EvaluationContext &context, const Vec2F &alternative) {
+    Vec2F evaluateOr(const EvaluationContext &context, const Vec2F &alternative) const {
         auto const &value = evaluateOr(context, std::vector<float>{ alternative.x, alternative.y });
         return Vec2F(value[0], value[1]);
     }
 
-    std::optional<::Anchor> anchorFromString(const std::string &value) {
+    std::optional<::Anchor> anchorFromString(const std::string &value) const {
         if (value == "center") {
             return Anchor::CENTER;
 
@@ -263,7 +264,7 @@ public:
     }
 
 
-    std::optional<::TextJustify> jusitfyFromString(const std::string &value) {
+    std::optional<::TextJustify> jusitfyFromString(const std::string &value) const {
         if (value == "center") {
             return TextJustify::CENTER;
         } else if (value == "left") {
@@ -275,7 +276,7 @@ public:
     }
 
     template<>
-    Anchor evaluateOr(const EvaluationContext &context, const Anchor &alternative) {
+    Anchor evaluateOr(const EvaluationContext &context, const Anchor &alternative) const {
         auto const &value = evaluateOr(context, std::string(""));
         auto anchor = anchorFromString(value);
         if (anchor) {
@@ -285,7 +286,7 @@ public:
     }
 
     template<>
-    TextJustify evaluateOr(const EvaluationContext &context, const TextJustify &alternative) {
+    TextJustify evaluateOr(const EvaluationContext &context, const TextJustify &alternative) const {
         auto const &value = evaluateOr(context, std::string(""));
         auto anchor = jusitfyFromString(value);
         if (anchor) {
@@ -294,7 +295,7 @@ public:
         return alternative;
     }
 
-    std::optional<LineCapType> capTypeFromString(const std::string &value) {
+    std::optional<LineCapType> capTypeFromString(const std::string &value) const {
         if (value == "butt") {
             return LineCapType::BUTT;
 
@@ -309,7 +310,7 @@ public:
     }
 
     template<>
-    LineCapType evaluateOr(const EvaluationContext &context, const LineCapType &alternative) {
+    LineCapType evaluateOr(const EvaluationContext &context, const LineCapType &alternative) const {
         auto const &value = evaluateOr(context, std::string(""));
         auto type = capTypeFromString(value);
         if (type) {
@@ -318,7 +319,7 @@ public:
         return alternative;
     }
 
-    std::optional<TextTransform> textTransformFromString(const std::string &value) {
+    std::optional<TextTransform> textTransformFromString(const std::string &value) const {
         if (value == "none") {
             return TextTransform::NONE;
         } else if (value == "uppercase") {
@@ -328,7 +329,7 @@ public:
     }
 
     template<>
-    TextTransform evaluateOr(const EvaluationContext &context, const TextTransform &alternative) {
+    TextTransform evaluateOr(const EvaluationContext &context, const TextTransform &alternative) const {
         auto const &value = evaluateOr(context, std::string(""));
         auto type = textTransformFromString(value);
         if (type) {
@@ -338,7 +339,7 @@ public:
     }
 
     template<>
-    std::vector<Anchor> evaluateOr(const EvaluationContext &context, const std::vector<Anchor> &alternative) {
+    std::vector<Anchor> evaluateOr(const EvaluationContext &context, const std::vector<Anchor> &alternative) const {
         auto const &values = evaluateOr(context, std::vector<std::string>());
         std::vector<Anchor> result;
         for (auto const &value: values) {
@@ -364,7 +365,7 @@ public:
         return { key };
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         if (key == "zoom" && context.zoomLevel) {
             return *context.zoomLevel;
         }
@@ -390,7 +391,7 @@ public:
         return value->getUsedKeys();
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         return std::visit(overloaded {
             [](const std::string &val){
                 return val;
@@ -432,7 +433,7 @@ class StaticValue : public Value {
 public:
     StaticValue(const ValueVariant value) : value(value) {};
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         if (std::holds_alternative<std::string>(value)) {
             std::string res = std::get<std::string>(value);
 
@@ -487,7 +488,7 @@ public:
         return { key };
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         return context.feature.contains(key);
     };
 private:
@@ -501,7 +502,7 @@ public:
 
     std::unordered_set<std::string> getUsedKeys() const override { return value->getUsedKeys(); }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         return std::visit(overloaded {
             [](const std::string &val){
                 return 0.0;
@@ -561,7 +562,7 @@ public:
         return usedKeys;
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         double zoom = context.zoomLevel.has_value() ? context.zoomLevel.value() : 0.0;
         int maxStepInd = (int)steps.size() - 1;
         for (int i = 0; i < maxStepInd; i++) {
@@ -579,7 +580,7 @@ public:
         return last->evaluate(context);
     }
 
-    ValueVariant interpolate(const double &interpolationFactor, const ValueVariant &yBase, const ValueVariant &yTop) {
+    ValueVariant interpolate(const double &interpolationFactor, const ValueVariant &yBase, const ValueVariant &yTop) const {
 
         if (std::holds_alternative<int64_t>(yBase) && std::holds_alternative<int64_t>(yTop)) {
             return std::get<int64_t>(yBase) + (std::get<int64_t>(yTop) - std::get<int64_t>(yBase)) * interpolationFactor;
@@ -640,7 +641,7 @@ public:
         return usedKeys;
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         double zoom = context.zoomLevel.has_value() ? context.zoomLevel.value() : 0.0;
         int maxStepInd = (int)steps.size() - 1;
         for (int i = 0; i < maxStepInd; i++) {
@@ -661,7 +662,7 @@ public:
         const auto step = std::get<1>(steps[index]);
         return step->evaluate(context);
     }
-    ValueVariant interpolate(const double &interpolationFactor, const ValueVariant &yBase, const ValueVariant &yTop) {
+    ValueVariant interpolate(const double &interpolationFactor, const ValueVariant &yBase, const ValueVariant &yTop) const {
 
         if (std::holds_alternative<int64_t>(yBase) && std::holds_alternative<int64_t>(yTop)) {
             return std::get<int64_t>(yBase) + (std::get<int64_t>(yTop) - std::get<int64_t>(yBase)) * interpolationFactor;
@@ -702,7 +703,7 @@ public:
         return usedKeys;
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         double zoom = context.zoomLevel.has_value() ? context.zoomLevel.value() : 0.0;
         for (const auto &stop : stops) {
             double stopZoom = std::get<0>(stop);
@@ -803,7 +804,7 @@ public:
         return usedKeys;
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         const auto &compareValue_ = compareValue->evaluate(context);
 
         for (const auto &[stop, value] : stops) {
@@ -837,7 +838,7 @@ public:
         return usedKeys;
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         for (auto const &[condition, value]: cases) {
             if (condition && condition->evaluateOr(context, false)) {
                 return value->evaluate(context);
@@ -861,7 +862,7 @@ public:
         return value->getUsedKeys();
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         return std::visit(overloaded {
             [](const std::string &val){
                 return std::stod(val);
@@ -928,7 +929,7 @@ public:
         return usedKeys;
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         const auto &value = compareValue->evaluate(context);
 
         for(const auto& i : valueMapping) {
@@ -963,7 +964,7 @@ public:
         return { key };
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         const auto &p = context.feature.getValue(key);
 
         if(!std::holds_alternative<std::monostate>(p)) {
@@ -1004,7 +1005,7 @@ public:
         return usedKeys;
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         switch (logOpType) {
             case LogOpType::AND:
                 return lhs->evaluateOr(context, false) && rhs && rhs->evaluateOr(context, false);
@@ -1034,7 +1035,7 @@ public:
         return usedKeys;
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         for (auto const value: values) {
             if (!value->evaluateOr(context, false)) {
                 return false;
@@ -1060,7 +1061,7 @@ public:
         return usedKeys;
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         for (auto const &value: values) {
             if (value->evaluateOr(context, false)) {
                 return true;
@@ -1092,7 +1093,7 @@ public:
         return usedKeys;
     }
 
- ValueVariant evaluate(const EvaluationContext &context) override {
+ ValueVariant evaluate(const EvaluationContext &context) const override {
      auto const &lhsValue = lhs->evaluate(context);
      auto const &rhsValue = rhs->evaluate(context);
 
@@ -1116,7 +1117,7 @@ public:
         return { key };
     }
 
- ValueVariant evaluate(const EvaluationContext &context) override {
+ ValueVariant evaluate(const EvaluationContext &context) const override {
         auto const &value = context.feature.getValue(key);
         return values.count(value) != 0;
     };
@@ -1133,7 +1134,7 @@ public:
         return { key };
     }
 
- ValueVariant evaluate(const EvaluationContext &context) override {
+ ValueVariant evaluate(const EvaluationContext &context) const override {
         auto const &value = context.feature.getValue(key);
         return values.count(value) == 0;
     };
@@ -1157,7 +1158,7 @@ public:
         return usedKeys;
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         std::vector<FormattedStringEntry> result;
         for (auto const &wrapper: values) {
             auto const evaluatedValue = ToStringValue(wrapper.value).evaluateOr(context, std::string());
@@ -1198,7 +1199,7 @@ public:
         return usedKeys;
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         auto const lhsValue = lhs->evaluateOr(context, (int64_t) 0);
         auto const rhsValue = rhs->evaluateOr(context, (int64_t) 0);
         switch (operation) {
@@ -1233,7 +1234,7 @@ public:
         return value->getUsedKeys();
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         return std::visit(overloaded {
             [](const std::string &val){
                 return (int64_t) val.size();

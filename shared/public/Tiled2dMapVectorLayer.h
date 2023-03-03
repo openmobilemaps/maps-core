@@ -23,6 +23,7 @@
 #include "Tiled2dMapVectorLayerSelectionInterface.h"
 #include "TiledLayerError.h"
 #include "Actor.h"
+#include "Tiled2dMapVectorBackgroundSubLayer.h"
 
 class Tiled2dMapVectorLayer : public Tiled2dMapLayer, public TouchInterface, public Tiled2dMapVectorLayerInterface, public Tiled2dMapVectorLayerReadyInterface, public ActorObject {
 public:
@@ -140,6 +141,8 @@ private:
     std::optional<std::string> fallbackStyleJsonString;
 
     std::shared_ptr<VectorMapDescription> mapDescription;
+
+    std::shared_ptr<Tiled2dMapVectorBackgroundSubLayer> backgroundLayer;
 
     std::unordered_map<std::string, std::shared_ptr<Tiled2dMapLayerConfig>> layerConfigs;
 

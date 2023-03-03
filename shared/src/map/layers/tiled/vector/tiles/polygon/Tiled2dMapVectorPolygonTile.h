@@ -18,8 +18,6 @@
 
 class Tiled2dMapVectorPolygonTile : public Tiled2dMapVectorTile, public std::enable_shared_from_this<Tiled2dMapVectorPolygonTile> {
 public:
-    using Tiled2dMapVectorTile::Tiled2dMapVectorTile;
-
     Tiled2dMapVectorPolygonTile(const std::weak_ptr<MapInterface> &mapInterface,
                                 const Tiled2dMapTileInfo &tileInfo,
                                 const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,

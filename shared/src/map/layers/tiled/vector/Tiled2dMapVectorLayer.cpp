@@ -216,6 +216,14 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
         loadSpriteData();
     }
 
+    auto backgroundLayerDesc = std::find_if(mapDescription->layers.begin(), mapDescription->layers.end(), [](auto const &layer){
+        return layer->getType() == VectorLayerType::background;
+    });
+    if (backgroundLayerDesc != mapDescription->layers.end()) {
+        backgroundLayer = std::make_shared<Tiled2dMapVectorBackgroundSubLayer>(std::static_pointer_cast<BackgroundVectorLayerDescription>(*backgroundLayerDesc));
+        backgroundLayer->onAdded(mapInterface, layerIndex);
+    }
+
     if (isResumed) {
         vectorTileSource.message(&Tiled2dMapVectorSource::resume);
     }
@@ -261,6 +269,12 @@ void Tiled2dMapVectorLayer::update() {
 
 std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::buildRenderPasses() {
     std::vector<std::shared_ptr<RenderPassInterface>> newPasses;
+
+    if (backgroundLayer) {
+        auto backgroundLayerPasses = backgroundLayer->buildRenderPasses();
+        newPasses.insert(newPasses.end(), backgroundLayerPasses.begin(), backgroundLayerPasses.end());
+    }
+
     std::lock_guard<std::recursive_mutex> lock(tilesMutex);
     for (const auto &[tileInfo, subTiles] : tiles) {
         for (const auto &tile: subTiles) {
@@ -303,6 +317,10 @@ void Tiled2dMapVectorLayer::onRemoved() {
         tiles.clear();
     }
 
+    if (backgroundLayer) {
+        backgroundLayer->onRemoved();
+    }
+
     this->layerIndex = -1;
 }
 
@@ -329,6 +347,10 @@ void Tiled2dMapVectorLayer::pause() {
                 tile.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorTile::clear);
             }
         }
+    }
+
+    if (backgroundLayer) {
+        backgroundLayer->pause();
     }
 
     {
@@ -362,6 +384,11 @@ void Tiled2dMapVectorLayer::resume() {
             vectorTileSource.message(&Tiled2dMapVectorSource::setTileReady, tileInfo);
         }
     }
+
+    if (backgroundLayer) {
+        backgroundLayer->resume();
+    }
+
     {
         std::lock_guard<std::recursive_mutex> lock(tilesMutex);
         for (const auto &[tileInfo, subTiles] : tiles) {
