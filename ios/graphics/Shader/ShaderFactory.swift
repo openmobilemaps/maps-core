@@ -28,6 +28,10 @@ class ShaderFactory: MCShaderFactoryInterface {
         AlphaShader()
     }
 
+    func createSphereProjectionShader() -> MCSphereProjectionShaderInterface? {
+        SphereProjectionShader()
+    }
+
     func createColorLineShader() -> MCColorLineShaderInterface? {
         LineGroupShader(styleBufferSize: 1)
     }

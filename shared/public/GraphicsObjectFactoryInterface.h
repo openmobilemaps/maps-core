@@ -11,6 +11,7 @@ class LineGroup2dInterface;
 class Polygon2dInterface;
 class PolygonGroup2dInterface;
 class Quad2dInterface;
+class Quad3dInterface;
 class TextInterface;
 
 class GraphicsObjectFactoryInterface {
@@ -18,6 +19,8 @@ public:
     virtual ~GraphicsObjectFactoryInterface() = default;
 
     virtual /*not-null*/ std::shared_ptr<Quad2dInterface> createQuad(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
+
+    virtual /*not-null*/ std::shared_ptr<Quad3dInterface> createQuad3d(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
 
     virtual /*not-null*/ std::shared_ptr<Line2dInterface> createLine(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
 

@@ -11,7 +11,7 @@
 #pragma once
 
 #include "LayerInterface.h"
-#include "Textured2dLayerObject.h"
+#include "Textured3dLayerObject.h"
 #include "Tiled2dMapLayer.h"
 #include "Tiled2dMapRasterLayerCallbackInterface.h"
 #include "Tiled2dMapRasterLayerInterface.h"
@@ -61,8 +61,8 @@ public:
     virtual void resume() override;
 
     virtual void setupTiles(
-            const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToSetup,
-            const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToClean);
+            const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured3dLayerObject>>> &tilesToSetup,
+            const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured3dLayerObject>>> &tilesToClean);
 
     virtual void generateRenderPasses();
 
@@ -120,7 +120,7 @@ protected:
                                   
     std::atomic_flag updateFlag = ATOMIC_FLAG_INIT;
     std::recursive_mutex updateMutex;
-    std::map<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>> tileObjectMap;
+    std::map<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured3dLayerObject>> tileObjectMap;
     std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> tileMaskMap;
     std::recursive_mutex renderPassMutex;
     std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
