@@ -35,7 +35,7 @@ public enum PipelineDescriptorFactory {
         if tessellation {
             pipelineDescriptor.isTessellationFactorScaleEnabled = false
             pipelineDescriptor.tessellationFactorFormat = .half
-            pipelineDescriptor.tessellationControlPointIndexType = .none
+            pipelineDescriptor.tessellationControlPointIndexType = .uint16
             pipelineDescriptor.tessellationFactorStepFunction = .constant
             pipelineDescriptor.maxTessellationFactor = 16
         }
