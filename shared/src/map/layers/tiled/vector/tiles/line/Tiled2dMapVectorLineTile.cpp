@@ -215,6 +215,7 @@ void Tiled2dMapVectorLineTile::setTileData(const std::shared_ptr<MaskingObjectIn
             if (!lineSubGroup.empty() && subGroupCoordCount[groupIndex] > 0) styleGroupNewLinesMap[groupIndex].push_back(lineSubGroup);
         }
 
+        this->tileMask = tileMask;
         addLines(styleGroupNewLinesMap);
     } else {
         vectorLayer.message(&Tiled2dMapVectorLayer::tileIsReady, tileInfo);
