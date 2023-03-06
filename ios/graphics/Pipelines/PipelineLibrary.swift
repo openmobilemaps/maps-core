@@ -15,7 +15,9 @@ public enum PipelineDescriptorFactory {
                                           label: String,
                                           vertexShader: String,
                                           fragmentShader: String,
-                                          library: MTLLibrary = MetalContext.current.library) -> MTLRenderPipelineDescriptor {
+                                          library: MTLLibrary = MetalContext.current.library,
+                                          tessellation: Bool = false
+    ) -> MTLRenderPipelineDescriptor {
         let pipelineDescriptor = MTLRenderPipelineDescriptor()
         pipelineDescriptor.colorAttachments[0].pixelFormat = MetalContext.colorPixelFormat
         pipelineDescriptor.vertexDescriptor = vertexDescriptor
@@ -29,6 +31,14 @@ public enum PipelineDescriptorFactory {
         renderbufferAttachment?.sourceAlphaBlendFactor = .one
         renderbufferAttachment?.destinationRGBBlendFactor = .oneMinusSourceAlpha
         renderbufferAttachment?.destinationAlphaBlendFactor = .oneMinusSourceAlpha
+
+        if tessellation {
+            pipelineDescriptor.isTessellationFactorScaleEnabled = false
+            pipelineDescriptor.tessellationFactorFormat = .half
+            pipelineDescriptor.tessellationControlPointIndexType = .uint16
+            pipelineDescriptor.tessellationFactorStepFunction = .constant
+            pipelineDescriptor.maxTessellationFactor = 16
+        }
 
         pipelineDescriptor.stencilAttachmentPixelFormat = .stencil8
         pipelineDescriptor.label = label
@@ -51,7 +61,8 @@ extension PipelineDescriptorFactory {
         pipelineDescriptor(vertexDescriptor: pipeline.vertexDescriptor,
                            label: pipeline.label,
                            vertexShader: pipeline.vertexShader,
-                           fragmentShader: pipeline.fragmentShader)
+                           fragmentShader: pipeline.fragmentShader,
+                           tessellation: pipeline.isTesselated)
     }
 }
 
@@ -64,6 +75,7 @@ public enum Pipeline: String, CaseIterable {
     case roundColorShader
     case clearStencilShader
     case textShader
+    case sphereProjectionShader
 
     var label: String {
         switch self {
@@ -75,6 +87,7 @@ public enum Pipeline: String, CaseIterable {
             case .roundColorShader: return "Round color shader"
             case .clearStencilShader: return "Clear stencil shader"
             case .textShader: return "Text shader"
+            case .sphereProjectionShader: return "Sphere projection shader"
         }
     }
 
@@ -88,6 +101,7 @@ public enum Pipeline: String, CaseIterable {
             case .roundColorShader: return "colorVertexShader"
             case .clearStencilShader: return "stencilClearVertexShader"
             case .textShader: return "textVertexShader"
+            case .sphereProjectionShader: return "sphereProjectionVertexShader"
         }
     }
 
@@ -101,6 +115,7 @@ public enum Pipeline: String, CaseIterable {
             case .roundColorShader: return "roundColorFragmentShader"
             case .clearStencilShader: return "stencilClearFragmentShader"
             case .textShader: return "textFragmentShader"
+            case .sphereProjectionShader: return "baseFragmentShader"
         }
     }
 
@@ -108,7 +123,15 @@ public enum Pipeline: String, CaseIterable {
         switch self {
             case .lineGroupShader: return LineVertex.descriptor
             case .polygonGroupShader: return PolygonVertex.descriptor
+            case .sphereProjectionShader: return Vertex.tesselatedDescriptor
             default: return Vertex.descriptor
+        }
+    }
+
+    var isTesselated: Bool {
+        switch self {
+            case .sphereProjectionShader: return true
+            default: return false
         }
     }
 }

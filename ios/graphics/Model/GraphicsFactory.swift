@@ -26,6 +26,11 @@ class GraphicsFactory: MCGraphicsObjectFactoryInterface {
         return Quad2d(shader: shader, metalContext: .current)
     }
 
+    func createQuad3d(_ shader: MCShaderProgramInterface?) -> MCQuad3dInterface? {
+        guard let shader = shader else { fatalError("No Shader provided") }
+        return Quad3d(shader: shader, metalContext: .current)
+    }
+
     func createLine(_ shader: MCShaderProgramInterface?) -> MCLine2dInterface? {
         guard let shader = shader else { fatalError("No Shader provided") }
         return LineGroup2d(shader: shader, metalContext: .current)

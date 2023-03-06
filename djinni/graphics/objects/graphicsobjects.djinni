@@ -29,6 +29,7 @@ masking_object_interface = interface +c +j +o {
 
 graphics_object_factory_interface = interface +c +j +o {
     create_quad(shader: shader_program_interface) : quad_2d_interface;
+    create_quad_3d(shader: shader_program_interface) : quad_3d_interface;
     create_line(shader: shader_program_interface) : line_2d_interface;
     create_polygon(shader: shader_program_interface) : polygon_2d_interface;
 
@@ -44,6 +45,14 @@ graphics_object_factory_interface = interface +c +j +o {
 }
 
 quad_2d_interface = interface +c +j +o {
+    set_frame(frame: quad_2d_d, texture_coordinates: rect_d);
+    load_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
+    remove_texture();
+    as_graphics_object(): graphics_object_interface;
+    as_masking_object(): masking_object_interface;
+}
+
+quad_3d_interface = interface +c +j +o {
     set_frame(frame: quad_2d_d, texture_coordinates: rect_d);
     load_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
     remove_texture();

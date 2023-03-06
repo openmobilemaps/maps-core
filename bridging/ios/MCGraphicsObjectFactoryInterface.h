@@ -10,12 +10,15 @@
 @protocol MCPolygon2dInterface;
 @protocol MCPolygonGroup2dInterface;
 @protocol MCQuad2dInterface;
+@protocol MCQuad3dInterface;
 @protocol MCTextInterface;
 
 
 @protocol MCGraphicsObjectFactoryInterface
 
 - (nullable id<MCQuad2dInterface>)createQuad:(nullable id<MCShaderProgramInterface>)shader;
+
+- (nullable id<MCQuad3dInterface>)createQuad3d:(nullable id<MCShaderProgramInterface>)shader;
 
 - (nullable id<MCLine2dInterface>)createLine:(nullable id<MCShaderProgramInterface>)shader;
 

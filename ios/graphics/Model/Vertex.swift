@@ -48,6 +48,48 @@ struct Vertex: Equatable {
         return vertexDescriptor
     }()
 
+    public static let tesselatedDescriptor: MTLVertexDescriptor = {
+        let vertexDescriptor = MTLVertexDescriptor()
+        var offset = 0
+        let bufferIndex = 0
+
+        // Position
+        vertexDescriptor.attributes[0].bufferIndex = bufferIndex
+        vertexDescriptor.attributes[0].format = .float2
+        vertexDescriptor.attributes[0].offset = offset
+        offset += MemoryLayout<SIMD2<Float>>.stride
+
+        // UV
+        vertexDescriptor.attributes[1].bufferIndex = bufferIndex
+        vertexDescriptor.attributes[1].format = .float2
+        vertexDescriptor.attributes[1].offset = offset
+        offset += MemoryLayout<SIMD2<Float>>.stride
+
+        // Normal
+        vertexDescriptor.attributes[2].bufferIndex = bufferIndex
+        vertexDescriptor.attributes[2].format = .float2
+        vertexDescriptor.attributes[2].offset = offset
+        offset += MemoryLayout<SIMD2<Float>>.stride
+
+        // lineStart
+        vertexDescriptor.attributes[3].bufferIndex = bufferIndex
+        vertexDescriptor.attributes[3].format = .float2
+        vertexDescriptor.attributes[3].offset = offset
+        offset += MemoryLayout<SIMD2<Float>>.stride
+
+        // lineEnd
+        vertexDescriptor.attributes[4].bufferIndex = bufferIndex
+        vertexDescriptor.attributes[4].format = .float2
+        vertexDescriptor.attributes[4].offset = offset
+        offset += MemoryLayout<SIMD2<Float>>.stride
+
+        vertexDescriptor.layouts[0].stride = MemoryLayout<Vertex>.stride
+        vertexDescriptor.layouts[0].stepFunction = .perPatchControlPoint
+        vertexDescriptor.layouts[0].stepRate = 1
+
+        return vertexDescriptor
+    }()
+
     init(x: Float, y: Float) {
         position = SIMD2([x, y])
         normal = SIMD2([0.0, 0.0])

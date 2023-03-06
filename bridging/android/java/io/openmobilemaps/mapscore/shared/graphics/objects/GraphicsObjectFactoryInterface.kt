@@ -10,6 +10,8 @@ abstract class GraphicsObjectFactoryInterface {
 
     abstract fun createQuad(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Quad2dInterface
 
+    abstract fun createQuad3d(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Quad3dInterface
+
     abstract fun createLine(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Line2dInterface
 
     abstract fun createPolygon(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Polygon2dInterface
@@ -43,6 +45,12 @@ abstract class GraphicsObjectFactoryInterface {
             return native_createQuad(this.nativeRef, shader)
         }
         private external fun native_createQuad(_nativeRef: Long, shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Quad2dInterface
+
+        override fun createQuad3d(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Quad3dInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createQuad3d(this.nativeRef, shader)
+        }
+        private external fun native_createQuad3d(_nativeRef: Long, shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Quad3dInterface
 
         override fun createLine(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Line2dInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

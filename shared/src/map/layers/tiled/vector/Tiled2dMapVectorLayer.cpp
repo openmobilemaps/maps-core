@@ -517,8 +517,9 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
 
             auto targetTexture = mapInterface->getGraphicsObjectFactory()->createRenderTargetTexture(Vec2I(512, 512));
 
-            auto alphaShader = mapInterface->getShaderFactory()->createAlphaShader();
-            auto tileTextureObject = std::make_shared<Textured2dLayerObject>(mapInterface->getGraphicsObjectFactory()->createQuad(alphaShader->asShaderProgramInterface()), alphaShader, mapInterface);
+
+            auto alphaShader = mapInterface->getShaderFactory()->createSphereProjectionShader();
+            auto tileTextureObject = std::make_shared<Textured3dLayerObject>(mapInterface->getGraphicsObjectFactory()->createQuad3d(alphaShader->asShaderProgramInterface()), alphaShader, mapInterface);
             tileTextureObject->getQuadObject()->loadTexture(mapInterface->getRenderingContext(), targetTexture->textureHolder());
             tileTextureObject->setRectCoord(tile.tileInfo.bounds);
             tileTextureObject->getGraphicsObject()->setup(mapInterface->getRenderingContext());
