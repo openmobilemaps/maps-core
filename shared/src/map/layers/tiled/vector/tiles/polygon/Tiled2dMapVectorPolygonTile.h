@@ -23,6 +23,9 @@ public:
                                 const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
                                 const std::shared_ptr<PolygonVectorLayerDescription> &description);
 
+    void updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
+                                const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) override;
+
     void update() override;
 
     virtual std::vector<std::shared_ptr<RenderPassInterface>> buildRenderPasses() override;
@@ -46,9 +49,9 @@ protected:
 private:
     void addPolygons(const std::vector<std::tuple<std::vector<std::tuple<std::vector<Coord>, int>>, std::vector<int32_t>>> &polygons);
 
-    void setupPolygons(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects);
+    void setupPolygons(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects,
+                       const std::vector<std::shared_ptr<GraphicsObjectInterface>> &oldPolygonObjects);
 
-    std::shared_ptr<PolygonVectorLayerDescription> description;
 
     std::shared_ptr<PolygonGroupShaderInterface> shader;
 

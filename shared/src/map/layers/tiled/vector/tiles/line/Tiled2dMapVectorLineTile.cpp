@@ -20,8 +20,19 @@ Tiled2dMapVectorLineTile::Tiled2dMapVectorLineTile(const std::weak_ptr<MapInterf
                                                          const Tiled2dMapTileInfo &tileInfo,
                                                          const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
                                                          const std::shared_ptr<LineVectorLayerDescription> &description)
-        : Tiled2dMapVectorTile(mapInterface, tileInfo, vectorLayer), description(description) {
+        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, vectorLayer) {
     usedKeys = std::move(description->getUsedKeys());
+}
+
+void Tiled2dMapVectorLineTile::updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
+                                                      const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) {
+    Tiled2dMapVectorTile::updateLayerDescription(description, layerFeatures);
+    featureGroups.clear();
+    reusableLineStyles.clear();
+    styleHashToGroupMap.clear();
+    hitDetection.clear();
+    usedKeys = std::move(description->getUsedKeys());
+    setTileData(tileMask, layerFeatures);
 }
 
 void Tiled2dMapVectorLineTile::update() {
@@ -36,6 +47,8 @@ void Tiled2dMapVectorLineTile::update() {
 
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(mapInterface->getCamera()->getZoom());
 
+    auto lineDescription = std::static_pointer_cast<LineVectorLayerDescription>(description);
+
     size_t numStyleGroups = featureGroups.size();
     for (int styleGroupId = 0; styleGroupId < numStyleGroups; styleGroupId++) {
         int i = 0;
@@ -43,17 +56,17 @@ void Tiled2dMapVectorLineTile::update() {
         for (auto const &[key, feature]: featureGroups.at(styleGroupId)) {
             auto const &context = EvaluationContext(zoomIdentifier, feature);
             auto &style = reusableLineStyles.at(styleGroupId).at(i);
-            auto normalColor = description->style.getLineColor(context);
+            auto normalColor = lineDescription->style.getLineColor(context);
             if (normalColor != style.color.normal) {
                 style.color.normal = normalColor;
                 needsUpdate = true;
             }
-            float opacity = description->style.getLineOpacity(context);
+            float opacity = lineDescription->style.getLineOpacity(context);
             if (opacity != style.opacity) {
                 style.opacity = opacity * alpha;
                 needsUpdate = true;
             }
-            float blur = description->style.getLineBlur(context);
+            float blur = lineDescription->style.getLineBlur(context);
             if (blur != style.blur) {
                 style.blur = blur;
                 needsUpdate = true;
@@ -63,17 +76,17 @@ void Tiled2dMapVectorLineTile::update() {
                 style.widthType = widthType;
                 needsUpdate = true;
             }
-            float width = description->style.getLineWidth(context);
+            float width = lineDescription->style.getLineWidth(context);
             if (width != style.width) {
                 style.width = width;
                 needsUpdate = true;
             }
-            auto dashArray = description->style.getLineDashArray(context);
+            auto dashArray = lineDescription->style.getLineDashArray(context);
             if (dashArray != style.dashArray) {
                 style.dashArray = dashArray;
                 needsUpdate = true;
             }
-            auto lineCap = description->style.getLineCap(context);
+            auto lineCap = lineDescription->style.getLineCap(context);
             if (lineCap != style.lineCap) {
                 style.lineCap = lineCap;
                 needsUpdate = true;
@@ -215,8 +228,12 @@ void Tiled2dMapVectorLineTile::updateTileMask(const std::shared_ptr<MaskingObjec
 
 
 void Tiled2dMapVectorLineTile::addLines(const std::unordered_map<int, std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> &styleIdLinesMap) {
+    std::vector<std::shared_ptr<GraphicsObjectInterface>> oldGraphicsObjects;
+    for (const auto &polygon : this->lines) {
+        oldGraphicsObjects.push_back(polygon->getLineObject());
+    }
 
-    if (styleIdLinesMap.empty()) {
+    if (styleIdLinesMap.empty() && oldGraphicsObjects.empty()) {
         vectorLayer.message(&Tiled2dMapVectorLayer::tileIsReady, tileInfo);
         return;
     }
@@ -248,16 +265,21 @@ void Tiled2dMapVectorLineTile::addLines(const std::unordered_map<int, std::vecto
     lines = lineGroupObjects;
 
 #ifdef __APPLE__
-    setupLines(newGraphicObjects);
+    setupLines(newGraphicObjects, oldGraphicsObjects);
 #else
     auto selfActor = WeakActor(mailbox, weak_from_this());
-    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorLineTile::setupLines, newGraphicObjects);
+    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorLineTile::setupLines, newGraphicObjects, oldGraphicsObjects);
 #endif
 
     preGenerateRenderPasses();
 }
 
-void Tiled2dMapVectorLineTile::setupLines(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newLineGraphicsObjects) {
+void Tiled2dMapVectorLineTile::setupLines(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newLineGraphicsObjects,
+                                          const std::vector<std::shared_ptr<GraphicsObjectInterface>> &oldLineGraphicsObjects) {
+    for (const auto &line : oldLineGraphicsObjects) {
+        if (line->isReady()) line->clear();
+    }
+
     auto mapInterface = this->mapInterface.lock();
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!renderingContext) {
@@ -310,10 +332,11 @@ bool Tiled2dMapVectorLineTile::onClickConfirmed(const Vec2F &posScreen) {
     auto point = camera->coordFromScreenPosition(posScreen);
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
 
+    auto lineDescription = std::static_pointer_cast<LineVectorLayerDescription>(description);
 
     for (auto const &[lineCoordinateVector, featureContext]: hitDetection) {
         for (auto const &coordinates: lineCoordinateVector) {
-            auto lineWidth = description->style.getLineWidth(EvaluationContext(zoomIdentifier, featureContext));
+            auto lineWidth = lineDescription->style.getLineWidth(EvaluationContext(zoomIdentifier, featureContext));
             if (LineHelper::pointWithin(coordinates, point, lineWidth, coordinateConverter)) {
                 selectionDelegate.message(&Tiled2dMapVectorLayerSelectionInterface::didSelectFeature, featureContext, description, point);
                 return true;

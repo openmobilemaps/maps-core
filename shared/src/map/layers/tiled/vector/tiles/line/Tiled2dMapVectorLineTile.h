@@ -22,6 +22,9 @@ public:
                                 const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
                                 const std::shared_ptr<LineVectorLayerDescription> &description);
 
+    void updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
+                                const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) override;
+
     void update() override;
 
     virtual std::vector<std::shared_ptr<RenderPassInterface>> buildRenderPasses() override;
@@ -45,13 +48,12 @@ private:
     
     void addLines(const std::unordered_map<int, std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> &styleIdLinesMap);
 
-    void setupLines(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newLineGraphicsObjects);
+    void setupLines(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newLineGraphicsObjects,
+                    const std::vector<std::shared_ptr<GraphicsObjectInterface>> &oldLineGraphicsObjects);
 
 
     static const int maxNumLinePoints = std::numeric_limits<uint16_t>::max() / 4 + 1; // 4 vertices per line coord, only 2 at the start/end
     static const int maxStylesPerGroup = 48;
-
-    std::shared_ptr<LineVectorLayerDescription> description;
 
     std::vector<std::shared_ptr<LineGroupShaderInterface>> shaders;
 

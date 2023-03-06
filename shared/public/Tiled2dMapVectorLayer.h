@@ -71,6 +71,9 @@ public:
 
     void onTilesUpdated(std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos);
 
+    Actor<Tiled2dMapVectorTile> createTileActor(const Tiled2dMapTileInfo &tileInfo,
+                                                const std::shared_ptr<VectorLayerDescription> &layerDescription);
+
     virtual void tileIsReady(const Tiled2dMapTileInfo &tile) override;
 
     virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
@@ -160,7 +163,7 @@ private:
     std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> tileMaskMap;
 
     std::recursive_mutex tilesMutex;
-    std::unordered_map<Tiled2dMapTileInfo, std::vector<Actor<Tiled2dMapVectorTile>>> tiles;
+    std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<int32_t, std::string, Actor<Tiled2dMapVectorTile>>>> tiles;
 
     std::atomic_bool isLoadingStyleJson = false;
     std::atomic_bool isResumed = false;

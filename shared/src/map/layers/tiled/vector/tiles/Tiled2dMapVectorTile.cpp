@@ -14,9 +14,16 @@
 #include "RenderPass.h"
 #include "RenderObject.h"
 
-Tiled2dMapVectorTile::Tiled2dMapVectorTile(const std::weak_ptr<MapInterface> &mapInterface, const Tiled2dMapTileInfo &tileInfo,
+Tiled2dMapVectorTile::Tiled2dMapVectorTile(const std::weak_ptr<MapInterface> &mapInterface,
+                                           const Tiled2dMapTileInfo &tileInfo,
+                                           const std::shared_ptr<VectorLayerDescription> &description,
                                            const WeakActor<Tiled2dMapVectorLayer> &vectorLayer)
-        : mapInterface(mapInterface), tileInfo(tileInfo), vectorLayer(vectorLayer) {}
+        : mapInterface(mapInterface), tileInfo(tileInfo), vectorLayer(vectorLayer), description(description) {}
+
+void Tiled2dMapVectorTile::updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
+                                                  const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) {
+    this->description = description;
+}
 
 void Tiled2dMapVectorTile::setAlpha(float alpha) {
     if (this->alpha == alpha) {

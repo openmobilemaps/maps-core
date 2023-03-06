@@ -20,13 +20,20 @@
 #include "ColorShaderInterface.h"
 #include "Tiled2dMapVectorLayerSelectionInterface.h"
 #include "SimpleTouchInterface.h"
+#include "VectorLayerDescription.h"
 
 class Tiled2dMapVectorLayer;
 
 class Tiled2dMapVectorTile : public ActorObject,
                              public SimpleTouchInterface {
 public:
-    Tiled2dMapVectorTile(const std::weak_ptr<MapInterface> &mapInterface, const Tiled2dMapTileInfo &tileInfo, const WeakActor<Tiled2dMapVectorLayer> &vectorLayer);
+    Tiled2dMapVectorTile(const std::weak_ptr<MapInterface> &mapInterface,
+                         const Tiled2dMapTileInfo &tileInfo,
+                         const std::shared_ptr<VectorLayerDescription> &description,
+                         const WeakActor<Tiled2dMapVectorLayer> &vectorLayer);
+
+    virtual void updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
+                                        const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures);
 
     virtual void update() = 0;
 
@@ -52,9 +59,9 @@ public:
     void setSelectedFeatureIdentifier(std::optional<int64_t> identifier);
 
 protected:
-
     const std::weak_ptr<MapInterface> mapInterface;
     const Tiled2dMapTileInfo tileInfo;
+    std::shared_ptr<VectorLayerDescription> description;
     const WeakActor<Tiled2dMapVectorLayer> vectorLayer;
 
     float alpha = 1.0;

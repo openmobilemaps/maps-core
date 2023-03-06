@@ -41,12 +41,21 @@ Tiled2dMapVectorPolygonTile::Tiled2dMapVectorPolygonTile(const std::weak_ptr<Map
                                                          const Tiled2dMapTileInfo &tileInfo,
                                                          const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
                                                          const std::shared_ptr<PolygonVectorLayerDescription> &description)
-        : Tiled2dMapVectorTile(mapInterface, tileInfo, vectorLayer), description(description) {
+        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, vectorLayer) {
     usedKeys = std::move(description->getUsedKeys());
     auto pMapInterface = mapInterface.lock();
     if (pMapInterface) {
         shader = pMapInterface->getShaderFactory()->createPolygonGroupShader();
     }
+}
+
+void Tiled2dMapVectorPolygonTile::updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
+                                                         const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) {
+    Tiled2dMapVectorTile::updateLayerDescription(description, layerFeatures);
+    featureGroups.clear();
+    hitDetectionPolygonMap.clear();
+    usedKeys = std::move(description->getUsedKeys());
+    setTileData(tileMask, layerFeatures);
 }
 
 void Tiled2dMapVectorPolygonTile::update() {
@@ -57,11 +66,11 @@ void Tiled2dMapVectorPolygonTile::update() {
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(mapInterface->getCamera()->getZoom());
 
     std::vector<float> shaderStyles;
-
+    auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
     for (auto const &[hash, feature]: featureGroups) {
         const auto& ec = EvaluationContext(zoomIdentifier, feature);
-        const auto& color = description->style.getFillColor(ec);
-        const auto& opacity = description->style.getFillOpacity(ec);
+        const auto& color = polygonDescription->style.getFillColor(ec);
+        const auto& opacity = polygonDescription->style.getFillOpacity(ec);
 
         shaderStyles.push_back(color.r);
         shaderStyles.push_back(color.g);
@@ -218,7 +227,12 @@ void Tiled2dMapVectorPolygonTile::updateTileMask(const std::shared_ptr<MaskingOb
 }
 
 void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::tuple<std::vector<std::tuple<std::vector<Coord>, int>>, std::vector<int32_t>>> &polygons) {
-    if (polygons.empty()) {
+    std::vector<std::shared_ptr<GraphicsObjectInterface>> oldGraphicsObjects;
+    for (const auto &polygon : this->polygons) {
+        oldGraphicsObjects.push_back(polygon->getPolygonObject());
+    }
+
+    if (polygons.empty() && oldGraphicsObjects.empty()) {
         vectorLayer.message(&Tiled2dMapVectorLayer::tileIsReady, tileInfo);
         return;
     }
@@ -249,16 +263,21 @@ void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::tuple<std::
     }
 
 #ifdef __APPLE__
-    setupPolygons(newGraphicObjects);
+    setupPolygons(newGraphicObjects, oldGraphicsObjects);
 #else
     auto selfActor = WeakActor(mailbox, shared_from_this()->weak_from_this());
-    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorPolygonTile::setupPolygons, newGraphicObjects);
+    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorPolygonTile::setupPolygons, newGraphicObjects, oldGraphicsObjects);
 #endif
-    
+
     preGenerateRenderPasses();
 }
 
-void Tiled2dMapVectorPolygonTile::setupPolygons(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects) {
+void Tiled2dMapVectorPolygonTile::setupPolygons(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects,
+                                                const std::vector<std::shared_ptr<GraphicsObjectInterface>> &oldPolygonObjects) {
+    for (const auto &polygon : oldPolygonObjects) {
+        if (polygon->isReady()) polygon->clear();
+    }
+
     auto mapInterface = this->mapInterface.lock();
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!renderingContext) {
