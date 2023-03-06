@@ -22,7 +22,8 @@
 class PolygonGroup2dLayerObject : public LayerObjectInterface {
   public:
     PolygonGroup2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
-                      const std::shared_ptr<PolygonGroup2dInterface> &polygon, const std::shared_ptr<PolygonGroupShaderInterface> &shader);
+                      const std::shared_ptr<PolygonGroup2dInterface> &polygon,
+                              const std::shared_ptr<PolygonGroupShaderInterface> &shader);
 
     ~PolygonGroup2dLayerObject(){};
 

@@ -32,7 +32,8 @@ class PolygonGroupShader: BaseShader {
         }
     }
 
-    override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
+    override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext,
+                            pass: MCRenderPassConfig) {
         guard let encoder = context.encoder,
               let pipeline = pipeline else { return }
 

@@ -23,13 +23,14 @@ open class BaseShader: MCShaderProgramInterface {
     open func setupProgram(_: MCRenderingContextInterface?) {
     }
 
-    open func preRender(_ context: MCRenderingContextInterface?) {
+    open func preRender(_ context: MCRenderingContextInterface?, pass: MCRenderPassConfig) {
         guard let context = context as? RenderingContext,
               let encoder = context.encoder else { return }
-        preRender(encoder: encoder, context: context)
+        preRender(encoder: encoder, context: context, pass: pass)
     }
 
     open func preRender(encoder _: MTLRenderCommandEncoder,
-                        context _: RenderingContext) {
+                        context _: RenderingContext,
+                        pass: MCRenderPassConfig) {
     }
 }

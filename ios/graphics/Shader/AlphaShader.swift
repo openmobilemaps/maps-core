@@ -35,7 +35,8 @@ class AlphaShader: BaseShader {
         }
     }
 
-    override func preRender(encoder: MTLRenderCommandEncoder, context _: RenderingContext) {
+    override func preRender(encoder: MTLRenderCommandEncoder, context _: RenderingContext,
+                            pass: MCRenderPassConfig) {
         guard let pipeline = pipeline else { return }
 
         encoder.setRenderPipelineState(pipeline)

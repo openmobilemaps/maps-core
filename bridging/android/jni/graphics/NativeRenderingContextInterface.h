@@ -37,9 +37,10 @@ private:
         void setViewportSize(const ::Vec2I & size) override;
         ::Vec2I getViewportSize() override;
         void setBackgroundColor(const ::Color & color) override;
-        void setupDrawFrame() override;
-        void preRenderStencilMask() override;
-        void postRenderStencilMask() override;
+        void setupDrawFrame(const ::RenderPassConfig & pass) override;
+        void endDrawFrame() override;
+        void preRenderStencilMask(const ::RenderPassConfig & pass) override;
+        void postRenderStencilMask(const ::RenderPassConfig & pass) override;
         void applyScissorRect(const std::optional<::RectI> & scissorRect) override;
 
     private:
@@ -51,9 +52,10 @@ private:
     const jmethodID method_setViewportSize { ::djinni::jniGetMethodID(clazz.get(), "setViewportSize", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2I;)V") };
     const jmethodID method_getViewportSize { ::djinni::jniGetMethodID(clazz.get(), "getViewportSize", "()Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2I;") };
     const jmethodID method_setBackgroundColor { ::djinni::jniGetMethodID(clazz.get(), "setBackgroundColor", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Color;)V") };
-    const jmethodID method_setupDrawFrame { ::djinni::jniGetMethodID(clazz.get(), "setupDrawFrame", "()V") };
-    const jmethodID method_preRenderStencilMask { ::djinni::jniGetMethodID(clazz.get(), "preRenderStencilMask", "()V") };
-    const jmethodID method_postRenderStencilMask { ::djinni::jniGetMethodID(clazz.get(), "postRenderStencilMask", "()V") };
+    const jmethodID method_setupDrawFrame { ::djinni::jniGetMethodID(clazz.get(), "setupDrawFrame", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderPassConfig;)V") };
+    const jmethodID method_endDrawFrame { ::djinni::jniGetMethodID(clazz.get(), "endDrawFrame", "()V") };
+    const jmethodID method_preRenderStencilMask { ::djinni::jniGetMethodID(clazz.get(), "preRenderStencilMask", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderPassConfig;)V") };
+    const jmethodID method_postRenderStencilMask { ::djinni::jniGetMethodID(clazz.get(), "postRenderStencilMask", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderPassConfig;)V") };
     const jmethodID method_applyScissorRect { ::djinni::jniGetMethodID(clazz.get(), "applyScissorRect", "(Lio/openmobilemaps/mapscore/shared/graphics/common/RectI;)V") };
 };
 

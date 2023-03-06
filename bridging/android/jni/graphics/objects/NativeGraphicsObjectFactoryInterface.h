@@ -41,6 +41,7 @@ private:
         /*not-null*/ std::shared_ptr<::Quad2dInterface> createQuadMask() override;
         /*not-null*/ std::shared_ptr<::Polygon2dInterface> createPolygonMask() override;
         /*not-null*/ std::shared_ptr<::TextInterface> createText(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) override;
+        /*not-null*/ std::shared_ptr<::RenderTargetTexture> createRenderTargetTexture(const ::Vec2I & size) override;
 
     private:
         friend ::djinni::JniInterface<::GraphicsObjectFactoryInterface, ::djinni_generated::NativeGraphicsObjectFactoryInterface>;
@@ -55,6 +56,7 @@ private:
     const jmethodID method_createQuadMask { ::djinni::jniGetMethodID(clazz.get(), "createQuadMask", "()Lio/openmobilemaps/mapscore/shared/graphics/objects/Quad2dInterface;") };
     const jmethodID method_createPolygonMask { ::djinni::jniGetMethodID(clazz.get(), "createPolygonMask", "()Lio/openmobilemaps/mapscore/shared/graphics/objects/Polygon2dInterface;") };
     const jmethodID method_createText { ::djinni::jniGetMethodID(clazz.get(), "createText", "(Lio/openmobilemaps/mapscore/shared/graphics/shader/ShaderProgramInterface;)Lio/openmobilemaps/mapscore/shared/graphics/objects/TextInterface;") };
+    const jmethodID method_createRenderTargetTexture { ::djinni::jniGetMethodID(clazz.get(), "createRenderTargetTexture", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2I;)Lio/openmobilemaps/mapscore/shared/graphics/RenderTargetTexture;") };
 };
 
 } // namespace djinni_generated

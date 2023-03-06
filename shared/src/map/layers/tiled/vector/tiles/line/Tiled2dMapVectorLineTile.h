@@ -27,7 +27,7 @@ public:
 
     void update() override;
 
-    virtual std::vector<std::shared_ptr<RenderPassInterface>> buildRenderPasses() override;
+    virtual std::vector<std::shared_ptr<::RenderObjectInterface>> getRenderObjects() override;
 
     virtual void clear() override;
 
@@ -43,7 +43,7 @@ public:
     bool onClickConfirmed(const Vec2F &posScreen) override;
 
 protected:
-    virtual void preGenerateRenderPasses();
+    virtual void preGenerateRenderObjects();
 private:
     
     void addLines(const std::unordered_map<int, std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> &styleIdLinesMap);
@@ -72,5 +72,6 @@ private:
     std::unordered_map<size_t, std::pair<int, int>> styleHashToGroupMap;
 
     std::optional<::RectI> scissorRect = std::nullopt;
-    std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
+    
+    std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;
 };

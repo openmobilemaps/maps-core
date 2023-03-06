@@ -15,7 +15,13 @@ import UIKit
 
 @objc
 public class RenderingContext: NSObject {
-    public weak var encoder: MTLRenderCommandEncoder?
+
+    public var encoder: MTLRenderCommandEncoder?
+
+    public var currentMainEncoder: MTLRenderCommandEncoder?
+    public var currentCommandBuffer: MTLCommandBuffer?
+    public var viewRenderPassDescriptor: MTLRenderPassDescriptor?
+
     public weak var sceneView: MCMapView?
 
     public lazy var mask: MTLDepthStencilState? = {
@@ -72,10 +78,11 @@ public class RenderingContext: NSObject {
     }()
 
     public func clearStencilBuffer() {
+        let pass =  MCRenderPassConfig(renderPass: 0, target: nil)
         guard let encoder = encoder else { return }
         stencilClearQuad.render(encoder: encoder,
                                 context: self,
-                                renderPass: .init(renderPass: 0),
+                                renderPass: pass,
                                 mvpMatrix: 0,
                                 isMasked: false,
                                 screenPixelAsRealMeterFactor: 1)
@@ -83,14 +90,37 @@ public class RenderingContext: NSObject {
 }
 
 extension RenderingContext: MCRenderingContextInterface {
-    public func preRenderStencilMask() {
+
+    public func preRenderStencilMask(_ pass: MCRenderPassConfig) {
     }
 
-    public func postRenderStencilMask() {
+    public func postRenderStencilMask(_ pass: MCRenderPassConfig) {
         clearStencilBuffer()
     }
 
-    public func setupDrawFrame() {
+    public func setupDrawFrame(_ pass: MCRenderPassConfig) {
+        if let offScreenTexture = pass.target as? RenderTargetTexture {
+            if encoder != nil {
+                currentMainEncoder = nil
+                encoder?.endEncoding()
+                encoder = nil
+            }
+            encoder = offScreenTexture.prepareOffscreenEncoder(currentCommandBuffer)
+        } else if let currentMainEncoder = currentMainEncoder {
+            encoder = currentMainEncoder
+        } else if let buffer = currentCommandBuffer,
+                 let descriptor = viewRenderPassDescriptor  {
+            encoder = buffer.makeRenderCommandEncoder(descriptor: descriptor)
+            currentMainEncoder = encoder
+            encoder?.label = "MainEncoder"
+        }
+    }
+
+    public func endDrawFrame() {
+        if (encoder?.hash != currentMainEncoder?.hash) {
+            encoder?.endEncoding()
+            encoder = nil
+        }
     }
 
     public func onSurfaceCreated() {

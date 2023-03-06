@@ -4,7 +4,9 @@
 @extern "../../yaml/rect_d.yaml"
 @extern "../../yaml/quad_2d_d.yaml"
 @extern "../../yaml/vec_2_d.yaml"
+@extern "../../yaml/vec_2_i.yaml"
 @extern "../../yaml/shared_bytes.yaml"
+@extern "../../yaml/render_target_texture.yaml"
 
 graphics_object_interface = interface +c +j +o {
     # Returns true, if graphics object is ready to be drawn
@@ -37,6 +39,8 @@ graphics_object_factory_interface = interface +c +j +o {
     create_polygon_mask() : polygon_2d_interface;
 
     create_text(shader: shader_program_interface) : text_interface;
+
+    create_render_target_texture(size: vec_2_i): render_target_texture;
 }
 
 quad_2d_interface = interface +c +j +o {

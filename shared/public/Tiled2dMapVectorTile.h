@@ -37,7 +37,7 @@ public:
 
     virtual void update() = 0;
 
-    virtual std::vector<std::shared_ptr<RenderPassInterface>> buildRenderPasses() = 0;
+    virtual std::vector<std::shared_ptr<::RenderObjectInterface>> getRenderObjects() = 0;
 
     virtual void clear() = 0;
 
@@ -67,5 +67,6 @@ protected:
     float alpha = 1.0;
 
     WeakActor<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate;
+
     std::optional<int64_t> selectedFeatureIdentifier;
 };

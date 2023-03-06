@@ -12,7 +12,7 @@ abstract class ShaderProgramInterface {
 
     abstract fun setupProgram(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface)
 
-    abstract fun preRender(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface)
+    abstract fun preRender(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, pass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig)
 
     private class CppProxy : ShaderProgramInterface {
         private val nativeRef: Long
@@ -38,10 +38,10 @@ abstract class ShaderProgramInterface {
         }
         private external fun native_setupProgram(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface)
 
-        override fun preRender(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface) {
+        override fun preRender(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, pass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_preRender(this.nativeRef, context)
+            native_preRender(this.nativeRef, context, pass)
         }
-        private external fun native_preRender(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface)
+        private external fun native_preRender(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, pass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig)
     }
 }

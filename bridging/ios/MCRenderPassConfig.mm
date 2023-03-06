@@ -7,22 +7,26 @@
 @implementation MCRenderPassConfig
 
 - (nonnull instancetype)initWithRenderPassIndex:(int32_t)renderPassIndex
+                                         target:(nullable id<MCRenderTargetTexture>)target
 {
     if (self = [super init]) {
         _renderPassIndex = renderPassIndex;
+        _target = target;
     }
     return self;
 }
 
 + (nonnull instancetype)renderPassConfigWithRenderPassIndex:(int32_t)renderPassIndex
+                                                     target:(nullable id<MCRenderTargetTexture>)target
 {
-    return [[self alloc] initWithRenderPassIndex:renderPassIndex];
+    return [[self alloc] initWithRenderPassIndex:renderPassIndex
+                                          target:target];
 }
 
 #ifndef DJINNI_DISABLE_DESCRIPTION_METHODS
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p renderPassIndex:%@>", self.class, (void *)self, @(self.renderPassIndex)];
+    return [NSString stringWithFormat:@"<%@ %p renderPassIndex:%@ target:%@>", self.class, (void *)self, @(self.renderPassIndex), self.target];
 }
 
 #endif

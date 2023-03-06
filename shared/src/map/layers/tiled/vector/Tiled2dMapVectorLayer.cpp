@@ -277,11 +277,18 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::build
 
     std::lock_guard<std::recursive_mutex> lock(tilesMutex);
     for (const auto &[tileInfo, subTiles] : tiles) {
-        for (const auto &[index, identifier, tile]: subTiles) {
-            const auto &tilePasses = tile.syncAccess([](auto tile) {
-                return tile->buildRenderPasses();
+        std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;
+
+		for (const auto &[index, identifier, tile]: subTiles) {
+            const auto &addRenderObjects = tile.syncAccess([](auto tile) {
+                return tile->getRenderObjects();
             });
-            newPasses.insert(newPasses.end(), tilePasses.begin(), tilePasses.end());
+            renderObjects.insert(renderObjects.end(), addRenderObjects.begin(), addRenderObjects.end());
+        }
+
+        if (!renderObjects.empty()) {
+            newPasses.push_back(std::make_shared<RenderPass>(tilesRenderPassConfig.at(tileInfo), renderObjects));
+            newPasses.push_back(std::make_shared<RenderPass>(RenderPassConfig(1, nullptr), std::vector<std::shared_ptr<::RenderObjectInterface>>{ std::make_shared<RenderObject>(tileTextureObjects.at(tileInfo)->getGraphicsObject()) }));
         }
     }
     return newPasses;
@@ -508,13 +515,26 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
                 tilesReadyCount[tile.tileInfo] = 0;
             }
 
+            auto targetTexture = mapInterface->getGraphicsObjectFactory()->createRenderTargetTexture(Vec2I(512, 512));
+
+            auto alphaShader = mapInterface->getShaderFactory()->createAlphaShader();
+            auto tileTextureObject = std::make_shared<Textured2dLayerObject>(mapInterface->getGraphicsObjectFactory()->createQuad(alphaShader->asShaderProgramInterface()), alphaShader, mapInterface);
+            tileTextureObject->getQuadObject()->loadTexture(mapInterface->getRenderingContext(), targetTexture->textureHolder());
+            tileTextureObject->setRectCoord(tile.tileInfo.bounds);
+            tileTextureObject->getGraphicsObject()->setup(mapInterface->getRenderingContext());
+
             {
                 std::lock_guard<std::recursive_mutex> lock(tilesMutex);
                 tiles[tile.tileInfo] = {};
+                tilesRenderPassConfig.insert({tile.tileInfo, {0, targetTexture}});
+                tileTextureObjects.insert({tile.tileInfo, tileTextureObject});
             }
 
+            auto castedMe = std::static_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
+            auto selfActor = WeakActor<Tiled2dMapVectorLayer>(mailbox, castedMe);
             for (int32_t index = 0; index < mapDescription->layers.size(); index++) {
-                auto const &layer= mapDescription->layers.at(index);
+                auto const &layer = mapDescription->layers.at(index);
+
                 if (!(layer->minZoom <= tile.tileInfo.zoomIdentifier && layer->maxZoom >= tile.tileInfo.zoomIdentifier)) {
                     continue;
                 }
@@ -525,7 +545,6 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
                 auto const dataIt = mapIt->second->find(layer->sourceId);
                 if (dataIt != mapIt->second->end()) {
 
-                    std::string identifier = layer->identifier;
                     Actor<Tiled2dMapVectorTile> actor = createTileActor(tile.tileInfo, layer);
 
                     if (actor) {
@@ -537,7 +556,7 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
                             std::lock_guard<std::recursive_mutex> tilesReadyCountLock(tilesReadyCountMutex);
                             tilesReadyCount[tile.tileInfo] += 1;
                         }
-
+                        std::string identifier = layer->identifier;
                         {
                             std::lock_guard<std::recursive_mutex> lock(tilesMutex);
                             tiles[tile.tileInfo].push_back({index, identifier, actor.strongActor<Tiled2dMapVectorTile>()});
@@ -579,13 +598,13 @@ Actor<Tiled2dMapVectorTile> Tiled2dMapVectorLayer::createTileActor(const Tiled2d
             break;
         }
         case VectorLayerType::line: {
-            auto mailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
-
-            auto lineActor = Actor<Tiled2dMapVectorLineTile>(mailbox, (std::weak_ptr<MapInterface>) mapInterface, tileInfo,
-                                                             selfActor, std::static_pointer_cast<LineVectorLayerDescription>(
-                            layerDescription));
-
-            actor = lineActor.strongActor<Tiled2dMapVectorTile>();
+//            auto mailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+//
+//            auto lineActor = Actor<Tiled2dMapVectorLineTile>(mailbox, (std::weak_ptr<MapInterface>) mapInterface, tileInfo,
+//                                                             selfActor, std::static_pointer_cast<LineVectorLayerDescription>(
+//                            layerDescription));
+//
+//            actor = lineActor.strongActor<Tiled2dMapVectorTile>();
             break;
         }
         case VectorLayerType::polygon: {
@@ -660,6 +679,8 @@ void Tiled2dMapVectorLayer::updateMaskObjects(const std::unordered_map<Tiled2dMa
                 }
             }
             tiles.erase(tileToRemove);
+            tilesRenderPassConfig.erase(tileToRemove);
+            tileTextureObjects.erase(tileToRemove);
         }
 
         {

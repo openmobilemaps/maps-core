@@ -2,6 +2,7 @@
 @extern "../yaml/masking_object_interface.yaml"
 @extern "../yaml/graphics_object_factory_interface.yaml"
 @extern "../yaml/shader_factory_interface.yaml"
+@extern "../yaml/texture_holder_interface.yaml"
 @extern "../yaml/vec_3_d.yaml"
 @extern "../yaml/vec_2_i.yaml"
 @extern "../yaml/rect_i.yaml"
@@ -33,9 +34,12 @@ rendering_context_interface = interface +c +j +o {
     set_viewport_size(size: vec_2_i);
     get_viewport_size() : vec_2_i;
     set_background_color(color: color);
-    setupDrawFrame();
-    pre_render_stencil_mask();
-    post_render_stencil_mask();
+    
+    setup_draw_frame(pass: render_pass_config);
+    end_draw_frame();
+
+    pre_render_stencil_mask(pass: render_pass_config);
+    post_render_stencil_mask(pass: render_pass_config);
 
     # optional rectangle, remove scissoring when not set
     apply_scissor_rect(scissor_rect: optional<rect_i>);
@@ -56,8 +60,13 @@ render_pass_interface = interface +c +j +o {
     get_scissoring_rect() : optional<rect_i>;
 }
 
+render_target_texture = interface +c +j +o {
+    texture_holder(): texture_holder_interface;
+}
+
 render_pass_config = record {
     render_pass_index: i32;
+    target: optional<render_target_texture>;
 }
 
 renderer_interface = interface +c +j +o {

@@ -12,6 +12,10 @@ import Foundation
 import MapCoreSharedModule
 
 class GraphicsFactory: MCGraphicsObjectFactoryInterface {
+    func createRenderTargetTexture(_ size: MCVec2I) -> MCRenderTargetTexture? {
+        RenderTargetTexture(size)
+    }
+
     func createPolygonGroup(_ shader: MCShaderProgramInterface?) -> MCPolygonGroup2dInterface? {
         guard let shader = shader else { fatalError("No Shader provided") }
         return PolygonGroup2d(shader: shader, metalContext: .current)

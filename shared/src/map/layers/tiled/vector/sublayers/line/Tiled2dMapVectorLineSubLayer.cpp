@@ -421,7 +421,7 @@ void Tiled2dMapVectorLineSubLayer::preGenerateRenderPasses() {
             tileMask = tileMaskMap[tileLineTuple.first];
         }
         for (const auto &passEntry : renderPassObjectMap) {
-            std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex.value_or(passEntry.first)),
+            std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex.value_or(passEntry.first), nullptr),
                                                                                   passEntry.second,
                                                                                   (tileMask
                                                                                    ? tileMask

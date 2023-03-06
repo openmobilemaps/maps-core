@@ -57,17 +57,13 @@ open class MCMapView: MTKView {
 
         device = MetalContext.current.device
 
-        colorPixelFormat = MetalContext.current.colorPixelFormat
+        colorPixelFormat = MetalContext.colorPixelFormat
         framebufferOnly = false
 
         delegate = self
 
         depthStencilPixelFormat = .stencil8
         
-        //if #available(iOS 16.0, *) {
-        //   depthStencilStorageMode = .private
-        //}
-
         isMultipleTouchEnabled = true
 
         preferredFramesPerSecond = 120
@@ -139,14 +135,12 @@ extension MCMapView: MTKViewDelegate {
 
         framesToRender -= 1
 
-        guard let renderPassDescriptor = view.currentRenderPassDescriptor,
-              let commandBuffer = MetalContext.current.commandQueue.makeCommandBuffer(),
-              let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)
+        guard let commandBuffer = MetalContext.current.commandQueue.makeCommandBuffer()
         else {
             return
         }
-
-        renderingContext.encoder = renderEncoder
+        renderingContext.currentCommandBuffer = commandBuffer
+        renderingContext.viewRenderPassDescriptor = view.currentRenderPassDescriptor
 
         // Shared lib stuff
         if sizeChanged {
@@ -157,7 +151,8 @@ extension MCMapView: MTKViewDelegate {
 
         mapInterface.drawFrame()
 
-        renderEncoder.endEncoding()
+        renderingContext.currentMainEncoder?.endEncoding()
+        renderingContext.currentMainEncoder = nil
 
         guard let drawable = view.currentDrawable else {
             return

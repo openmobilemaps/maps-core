@@ -24,6 +24,7 @@
 #include "TiledLayerError.h"
 #include "Actor.h"
 #include "Tiled2dMapVectorBackgroundSubLayer.h"
+#include "Textured2dLayerObject.h"
 
 class Tiled2dMapVectorLayer : public Tiled2dMapLayer, public TouchInterface, public Tiled2dMapVectorLayerInterface, public Tiled2dMapVectorLayerReadyInterface, public ActorObject {
 public:
@@ -163,6 +164,8 @@ private:
     std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> tileMaskMap;
 
     std::recursive_mutex tilesMutex;
+    std::unordered_map<Tiled2dMapTileInfo, std::shared_ptr<Textured2dLayerObject>> tileTextureObjects;
+    std::unordered_map<Tiled2dMapTileInfo, RenderPassConfig> tilesRenderPassConfig;
     std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<int32_t, std::string, Actor<Tiled2dMapVectorTile>>>> tiles;
 
     std::atomic_bool isLoadingStyleJson = false;

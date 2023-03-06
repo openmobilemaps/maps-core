@@ -8,6 +8,8 @@
 #include "Vec2I.h"
 #include <optional>
 
+struct RenderPassConfig;
+
 class RenderingContextInterface {
 public:
     virtual ~RenderingContextInterface() = default;
@@ -22,11 +24,13 @@ public:
 
     virtual void setBackgroundColor(const ::Color & color) = 0;
 
-    virtual void setupDrawFrame() = 0;
+    virtual void setupDrawFrame(const RenderPassConfig & pass) = 0;
 
-    virtual void preRenderStencilMask() = 0;
+    virtual void endDrawFrame() = 0;
 
-    virtual void postRenderStencilMask() = 0;
+    virtual void preRenderStencilMask(const RenderPassConfig & pass) = 0;
+
+    virtual void postRenderStencilMask(const RenderPassConfig & pass) = 0;
 
     /** optional rectangle, remove scissoring when not set */
     virtual void applyScissorRect(const std::optional<::RectI> & scissorRect) = 0;

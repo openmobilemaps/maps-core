@@ -32,7 +32,7 @@ public class MetalContext {
     let commandQueue: MTLCommandQueue
     public let library: MTLLibrary
 
-    let colorPixelFormat: MTLPixelFormat = .bgra8Unorm
+    static let colorPixelFormat: MTLPixelFormat = .bgra8Unorm
     let textureLoader: MTKTextureLoader
 
     public lazy var pipelineLibrary: PipelineLibrary = try! PipelineLibrary(device: self.device)

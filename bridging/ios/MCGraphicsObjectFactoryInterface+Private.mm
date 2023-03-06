@@ -11,8 +11,10 @@
 #import "MCPolygon2dInterface+Private.h"
 #import "MCPolygonGroup2dInterface+Private.h"
 #import "MCQuad2dInterface+Private.h"
+#import "MCRenderTargetTexture+Private.h"
 #import "MCShaderProgramInterface+Private.h"
 #import "MCTextInterface+Private.h"
+#import "MCVec2I+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -93,6 +95,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable id<MCRenderTargetTexture>)createRenderTargetTexture:(nonnull MCVec2I *)size {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createRenderTargetTexture(::djinni_generated::Vec2I::toCpp(size));
+        return ::djinni_generated::RenderTargetTexture::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class GraphicsObjectFactoryInterface::ObjcProxy final
@@ -156,6 +165,13 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createText:(::djinni_generated::ShaderProgramInterface::fromCpp(c_shader))];
             return ::djinni_generated::TextInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::RenderTargetTexture> createRenderTargetTexture(const ::Vec2I & c_size) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createRenderTargetTexture:(::djinni_generated::Vec2I::fromCpp(c_size))];
+            return ::djinni_generated::RenderTargetTexture::toCpp(objcpp_result_);
         }
     }
 };

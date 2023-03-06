@@ -9,6 +9,7 @@
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCColor+Private.h"
 #import "MCRectI+Private.h"
+#import "MCRenderPassConfig+Private.h"
 #import "MCVec2I+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -59,21 +60,27 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setupDrawFrame {
+- (void)setupDrawFrame:(nonnull MCRenderPassConfig *)pass {
     try {
-        _cppRefHandle.get()->setupDrawFrame();
+        _cppRefHandle.get()->setupDrawFrame(::djinni_generated::RenderPassConfig::toCpp(pass));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)preRenderStencilMask {
+- (void)endDrawFrame {
     try {
-        _cppRefHandle.get()->preRenderStencilMask();
+        _cppRefHandle.get()->endDrawFrame();
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)postRenderStencilMask {
+- (void)preRenderStencilMask:(nonnull MCRenderPassConfig *)pass {
     try {
-        _cppRefHandle.get()->postRenderStencilMask();
+        _cppRefHandle.get()->preRenderStencilMask(::djinni_generated::RenderPassConfig::toCpp(pass));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)postRenderStencilMask:(nonnull MCRenderPassConfig *)pass {
+    try {
+        _cppRefHandle.get()->postRenderStencilMask(::djinni_generated::RenderPassConfig::toCpp(pass));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -117,22 +124,28 @@ public:
             [djinni_private_get_proxied_objc_object() setBackgroundColor:(::djinni_generated::Color::fromCpp(c_color))];
         }
     }
-    void setupDrawFrame() override
+    void setupDrawFrame(const ::RenderPassConfig & c_pass) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setupDrawFrame];
+            [djinni_private_get_proxied_objc_object() setupDrawFrame:(::djinni_generated::RenderPassConfig::fromCpp(c_pass))];
         }
     }
-    void preRenderStencilMask() override
+    void endDrawFrame() override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() preRenderStencilMask];
+            [djinni_private_get_proxied_objc_object() endDrawFrame];
         }
     }
-    void postRenderStencilMask() override
+    void preRenderStencilMask(const ::RenderPassConfig & c_pass) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() postRenderStencilMask];
+            [djinni_private_get_proxied_objc_object() preRenderStencilMask:(::djinni_generated::RenderPassConfig::fromCpp(c_pass))];
+        }
+    }
+    void postRenderStencilMask(const ::RenderPassConfig & c_pass) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() postRenderStencilMask:(::djinni_generated::RenderPassConfig::fromCpp(c_pass))];
         }
     }
     void applyScissorRect(const std::optional<::RectI> & c_scissorRect) override

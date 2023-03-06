@@ -102,8 +102,8 @@ void Tiled2dMapVectorLineTile::update() {
     }
 }
 
-std::vector<std::shared_ptr<RenderPassInterface>> Tiled2dMapVectorLineTile::buildRenderPasses() {
-    return renderPasses;
+std::vector<std::shared_ptr<::RenderObjectInterface>> Tiled2dMapVectorLineTile::getRenderObjects() {
+    return renderObjects;
 }
 
 void Tiled2dMapVectorLineTile::clear() {
@@ -127,7 +127,7 @@ void Tiled2dMapVectorLineTile::setup() {
 
 void Tiled2dMapVectorLineTile::setScissorRect(const std::optional<::RectI> &scissorRect) {
     this->scissorRect = scissorRect;
-    preGenerateRenderPasses();
+    preGenerateRenderObjects();
 }
 
 void Tiled2dMapVectorLineTile::setTileData(const std::shared_ptr<MaskingObjectInterface> &tileMask,
@@ -223,7 +223,7 @@ void Tiled2dMapVectorLineTile::setTileData(const std::shared_ptr<MaskingObjectIn
 
 void Tiled2dMapVectorLineTile::updateTileMask(const std::shared_ptr<MaskingObjectInterface> &tileMask) {
     this->tileMask = tileMask;
-    preGenerateRenderPasses();
+    preGenerateRenderObjects();
 }
 
 
@@ -271,7 +271,7 @@ void Tiled2dMapVectorLineTile::addLines(const std::unordered_map<int, std::vecto
     selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorLineTile::setupLines, newGraphicObjects, oldGraphicsObjects);
 #endif
 
-    preGenerateRenderPasses();
+    preGenerateRenderObjects();
 }
 
 void Tiled2dMapVectorLineTile::setupLines(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newLineGraphicsObjects,
@@ -294,31 +294,16 @@ void Tiled2dMapVectorLineTile::setupLines(const std::vector<std::shared_ptr<Grap
 }
 
 
-void Tiled2dMapVectorLineTile::preGenerateRenderPasses() {
-    std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
+void Tiled2dMapVectorLineTile::preGenerateRenderObjects() {
+    std::vector<std::shared_ptr<::RenderObjectInterface>> newRenderObjects;
 
-    if (!tileMask) {
-        renderPasses = newRenderPasses;
-        return;
-    }
-
-    std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
     for (auto const &object : lines) {
         for (const auto &config : object->getRenderConfig()) {
-            renderPassObjectMap[config->getRenderIndex()].push_back(
-                    std::make_shared<RenderObject>(config->getGraphicsObject()));
+            newRenderObjects.push_back(std::make_shared<RenderObject>(config->getGraphicsObject(), true));
         }
     }
 
-    for (const auto &passEntry : renderPassObjectMap) {
-        std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(
-                RenderPassConfig(description->renderPassIndex.value_or(passEntry.first)),
-                passEntry.second, tileMask);
-        renderPass->setScissoringRect(scissorRect);
-        newRenderPasses.push_back(renderPass);
-    }
-
-    renderPasses = newRenderPasses;
+    renderObjects = newRenderObjects;
 }
 
 bool Tiled2dMapVectorLineTile::onClickConfirmed(const Vec2F &posScreen) {

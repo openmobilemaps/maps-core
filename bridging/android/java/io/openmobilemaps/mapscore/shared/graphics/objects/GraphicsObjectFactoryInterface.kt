@@ -24,6 +24,8 @@ abstract class GraphicsObjectFactoryInterface {
 
     abstract fun createText(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): TextInterface
 
+    abstract fun createRenderTargetTexture(size: io.openmobilemaps.mapscore.shared.graphics.common.Vec2I): io.openmobilemaps.mapscore.shared.graphics.RenderTargetTexture
+
     private class CppProxy : GraphicsObjectFactoryInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -83,5 +85,11 @@ abstract class GraphicsObjectFactoryInterface {
             return native_createText(this.nativeRef, shader)
         }
         private external fun native_createText(_nativeRef: Long, shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): TextInterface
+
+        override fun createRenderTargetTexture(size: io.openmobilemaps.mapscore.shared.graphics.common.Vec2I): io.openmobilemaps.mapscore.shared.graphics.RenderTargetTexture {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createRenderTargetTexture(this.nativeRef, size)
+        }
+        private external fun native_createRenderTargetTexture(_nativeRef: Long, size: io.openmobilemaps.mapscore.shared.graphics.common.Vec2I): io.openmobilemaps.mapscore.shared.graphics.RenderTargetTexture
     }
 }

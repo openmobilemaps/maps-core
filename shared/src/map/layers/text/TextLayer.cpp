@@ -174,7 +174,7 @@ void TextLayer::generateRenderPasses() {
 
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
     for (const auto &passEntry : renderPassObjectMap) {
-        std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second);
+        std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, nullptr), passEntry.second);
         newRenderPasses.push_back(renderPass);
     }
 

@@ -7,8 +7,10 @@
 #include "NativePolygon2dInterface.h"
 #include "NativePolygonGroup2dInterface.h"
 #include "NativeQuad2dInterface.h"
+#include "NativeRenderTargetTexture.h"
 #include "NativeShaderProgramInterface.h"
 #include "NativeTextInterface.h"
+#include "NativeVec2I.h"
 
 namespace djinni_generated {
 
@@ -90,6 +92,15 @@ NativeGraphicsObjectFactoryInterface::JavaProxy::~JavaProxy() = default;
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativeTextInterface::toCpp(jniEnv, jret);
 }
+/*not-null*/ std::shared_ptr<::RenderTargetTexture> NativeGraphicsObjectFactoryInterface::JavaProxy::createRenderTargetTexture(const ::Vec2I & c_size) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeGraphicsObjectFactoryInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_createRenderTargetTexture,
+                                         ::djinni::get(::djinni_generated::NativeVec2I::fromCpp(jniEnv, c_size)));
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativeRenderTargetTexture::toCpp(jniEnv, jret);
+}
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_GraphicsObjectFactoryInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
@@ -167,6 +178,15 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objec
         const auto& ref = ::djinni::objectFromHandleAddress<::GraphicsObjectFactoryInterface>(nativeRef);
         auto r = ref->createText(::djinni_generated::NativeShaderProgramInterface::toCpp(jniEnv, j_shader));
         return ::djinni::release(::djinni_generated::NativeTextInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT ::djinni_generated::NativeRenderTargetTexture::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_GraphicsObjectFactoryInterface_00024CppProxy_native_1createRenderTargetTexture(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec2I::JniType j_size)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::GraphicsObjectFactoryInterface>(nativeRef);
+        auto r = ref->createRenderTargetTexture(::djinni_generated::NativeVec2I::toCpp(jniEnv, j_size));
+        return ::djinni::release(::djinni_generated::NativeRenderTargetTexture::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

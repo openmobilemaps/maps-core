@@ -3,6 +3,7 @@
 
 #import "MCColor.h"
 #import "MCRectI.h"
+#import "MCRenderPassConfig.h"
 #import "MCVec2I.h"
 #import <Foundation/Foundation.h>
 
@@ -19,11 +20,13 @@
 
 - (void)setBackgroundColor:(nonnull MCColor *)color;
 
-- (void)setupDrawFrame;
+- (void)setupDrawFrame:(nonnull MCRenderPassConfig *)pass;
 
-- (void)preRenderStencilMask;
+- (void)endDrawFrame;
 
-- (void)postRenderStencilMask;
+- (void)preRenderStencilMask:(nonnull MCRenderPassConfig *)pass;
+
+- (void)postRenderStencilMask:(nonnull MCRenderPassConfig *)pass;
 
 /** optional rectangle, remove scissoring when not set */
 - (void)applyScissorRect:(nullable MCRectI *)scissorRect;

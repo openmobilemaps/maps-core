@@ -17,11 +17,11 @@ public enum PipelineDescriptorFactory {
                                           fragmentShader: String,
                                           library: MTLLibrary = MetalContext.current.library) -> MTLRenderPipelineDescriptor {
         let pipelineDescriptor = MTLRenderPipelineDescriptor()
-        pipelineDescriptor.colorAttachments[0].pixelFormat = MetalContext.current.colorPixelFormat
+        pipelineDescriptor.colorAttachments[0].pixelFormat = MetalContext.colorPixelFormat
         pipelineDescriptor.vertexDescriptor = vertexDescriptor
 
         let renderbufferAttachment = pipelineDescriptor.colorAttachments[0]
-        renderbufferAttachment?.pixelFormat = MetalContext.current.colorPixelFormat
+        renderbufferAttachment?.pixelFormat = MetalContext.colorPixelFormat
         renderbufferAttachment?.isBlendingEnabled = true
         renderbufferAttachment?.rgbBlendOperation = .add
         renderbufferAttachment?.alphaBlendOperation = .add

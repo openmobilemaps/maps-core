@@ -13,6 +13,7 @@
 #include "QuadCoord.h"
 #include "RenderPass.h"
 #include "RenderObject.h"
+#include "RenderConfig.h"
 
 Tiled2dMapVectorTile::Tiled2dMapVectorTile(const std::weak_ptr<MapInterface> &mapInterface,
                                            const Tiled2dMapTileInfo &tileInfo,

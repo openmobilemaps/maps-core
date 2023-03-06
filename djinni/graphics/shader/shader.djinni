@@ -4,11 +4,12 @@
 @extern "../../yaml/vec_3_d.yaml"
 @extern "../../yaml/shared_bytes.yaml"
 @extern "../../yaml/color.yaml"
+@extern "../../yaml/render_pass_config.yaml"
 
 shader_program_interface = interface +c +o {
     get_program_name() : string;
     setup_program(context: rendering_context_interface);
-    pre_render(context: rendering_context_interface);
+    pre_render(context: rendering_context_interface, pass: render_pass_config);
 }
 
 shader_factory_interface = interface +c +j +o {
