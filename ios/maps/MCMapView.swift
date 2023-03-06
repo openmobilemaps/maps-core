@@ -152,6 +152,7 @@ extension MCMapView: MTKViewDelegate {
         mapInterface.drawFrame()
 
         renderingContext.currentMainEncoder?.endEncoding()
+        renderingContext.encoder = nil
         renderingContext.currentMainEncoder = nil
 
         guard let drawable = view.currentDrawable else {

@@ -146,8 +146,6 @@ private:
 
     std::shared_ptr<VectorMapDescription> mapDescription;
 
-    std::shared_ptr<Tiled2dMapVectorBackgroundSubLayer> backgroundLayer;
-
     std::unordered_map<std::string, std::shared_ptr<Tiled2dMapLayerConfig>> layerConfigs;
 
     const std::shared_ptr<FontLoaderInterface> fontLoader;

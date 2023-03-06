@@ -22,7 +22,6 @@
 #include "Tiled2dMapVectorPolygonSubLayer.h"
 #include "VectorTileGeometryHandler.h"
 #include "Tiled2dMapVectorSymbolSubLayer.h"
-#include "Tiled2dMapVectorBackgroundSubLayer.h"
 #include "Polygon2dInterface.h"
 #include "MapCamera2dInterface.h"
 #include "QuadMaskObject.h"
@@ -37,6 +36,7 @@
 
 #include "Tiled2dMapVectorPolygonTile.h"
 #include "Tiled2dMapVectorLineTile.h"
+#include "Tiled2dMapVectorBackgroundTile.h"
 
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
@@ -216,14 +216,6 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
         loadSpriteData();
     }
 
-    auto backgroundLayerDesc = std::find_if(mapDescription->layers.begin(), mapDescription->layers.end(), [](auto const &layer){
-        return layer->getType() == VectorLayerType::background;
-    });
-    if (backgroundLayerDesc != mapDescription->layers.end()) {
-        backgroundLayer = std::make_shared<Tiled2dMapVectorBackgroundSubLayer>(std::static_pointer_cast<BackgroundVectorLayerDescription>(*backgroundLayerDesc));
-        backgroundLayer->onAdded(mapInterface, layerIndex);
-    }
-
     if (isResumed) {
         vectorTileSource.message(&Tiled2dMapVectorSource::resume);
     }
@@ -269,11 +261,6 @@ void Tiled2dMapVectorLayer::update() {
 
 std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::buildRenderPasses() {
     std::vector<std::shared_ptr<RenderPassInterface>> newPasses;
-
-    if (backgroundLayer) {
-        auto backgroundLayerPasses = backgroundLayer->buildRenderPasses();
-        newPasses.insert(newPasses.end(), backgroundLayerPasses.begin(), backgroundLayerPasses.end());
-    }
 
     std::lock_guard<std::recursive_mutex> lock(tilesMutex);
     for (const auto &[tileInfo, subTiles] : tiles) {
@@ -323,11 +310,6 @@ void Tiled2dMapVectorLayer::onRemoved() {
         }
         tiles.clear();
     }
-
-    if (backgroundLayer) {
-        backgroundLayer->onRemoved();
-    }
-
     this->layerIndex = -1;
 }
 
@@ -354,10 +336,6 @@ void Tiled2dMapVectorLayer::pause() {
                 tile.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorTile::clear);
             }
         }
-    }
-
-    if (backgroundLayer) {
-        backgroundLayer->pause();
     }
 
     {
@@ -390,10 +368,6 @@ void Tiled2dMapVectorLayer::resume() {
             tilesReady.insert(tileInfo);
             vectorTileSource.message(&Tiled2dMapVectorSource::setTileReady, tileInfo);
         }
-    }
-
-    if (backgroundLayer) {
-        backgroundLayer->resume();
     }
 
     {
@@ -536,6 +510,23 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
             for (int32_t index = 0; index < mapDescription->layers.size(); index++) {
                 auto const &layer = mapDescription->layers.at(index);
 
+                if (layer->getType() == VectorLayerType::background) {
+                    Actor<Tiled2dMapVectorTile> actor = createTileActor(tile.tileInfo, layer);
+                    if (selectionDelegate) {
+                        actor.message(&Tiled2dMapVectorTile::setSelectionDelegate, selectionDelegate);
+                    }
+
+                    std::string identifier = layer->identifier;
+                    {
+                        std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+                        tiles[tile.tileInfo].push_back({index, identifier, actor.strongActor<Tiled2dMapVectorTile>()});
+                    }
+
+                    actor.message(&Tiled2dMapVectorTile::setTileData, nullptr, std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>{});
+
+                    continue;
+                }
+
                 if (!(layer->minZoom <= tile.tileInfo.zoomIdentifier && layer->maxZoom >= tile.tileInfo.zoomIdentifier)) {
                     continue;
                 }
@@ -596,6 +587,14 @@ Actor<Tiled2dMapVectorTile> Tiled2dMapVectorLayer::createTileActor(const Tiled2d
 
     switch (layerDescription->getType()) {
         case VectorLayerType::background: {
+            auto mailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+
+            auto backgroundActor = Actor<Tiled2dMapVectorBackgroundTile>(mailbox, (std::weak_ptr<MapInterface>) mapInterface,
+                                                                   tileInfo, selfActor,
+                                                                   std::static_pointer_cast<BackgroundVectorLayerDescription>(
+                                                                           layerDescription));
+
+            actor = backgroundActor.strongActor<Tiled2dMapVectorTile>();
             break;
         }
         case VectorLayerType::line: {
