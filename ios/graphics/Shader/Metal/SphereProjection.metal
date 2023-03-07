@@ -16,10 +16,10 @@ float2 baryinterp(float2 a, float2 b, float2 c, float3 p) {
 kernel void compute_tess_factors(
    device MTLTriangleTessellationFactorsHalf *factors [[buffer(0)]],
    uint pid [[thread_position_in_grid]]) {
-     factors[pid].edgeTessellationFactor[0] = 8;
-     factors[pid].edgeTessellationFactor[1] = 8;
-     factors[pid].edgeTessellationFactor[2] = 8;
-     factors[pid].insideTessellationFactor = 8;
+     factors[pid].edgeTessellationFactor[0] = 64;
+     factors[pid].edgeTessellationFactor[1] = 64;
+     factors[pid].edgeTessellationFactor[2] = 64;
+     factors[pid].insideTessellationFactor = 64;
    }
 
 [[patch(triangle, 3)]]
