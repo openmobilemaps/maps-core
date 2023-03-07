@@ -39,6 +39,14 @@ bool NativeRenderObjectInterface::JavaProxy::isScreenSpaceCoords() {
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::Bool::toCpp(jniEnv, jret);
 }
+float NativeRenderObjectInterface::JavaProxy::getScreenSpaceScalingFactor() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeRenderObjectInterface>::get();
+    auto jret = jniEnv->CallFloatMethod(Handle::get().get(), data.method_getScreenSpaceScalingFactor);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni::F32::toCpp(jniEnv, jret);
+}
 std::vector<float> NativeRenderObjectInterface::JavaProxy::getCustomModelMatrix() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -79,6 +87,15 @@ CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_Rend
         const auto& ref = ::djinni::objectFromHandleAddress<::RenderObjectInterface>(nativeRef);
         auto r = ref->isScreenSpaceCoords();
         return ::djinni::release(::djinni::Bool::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jfloat JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderObjectInterface_00024CppProxy_native_1getScreenSpaceScalingFactor(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::RenderObjectInterface>(nativeRef);
+        auto r = ref->getScreenSpaceScalingFactor();
+        return ::djinni::release(::djinni::F32::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

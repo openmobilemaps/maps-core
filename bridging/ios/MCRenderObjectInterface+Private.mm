@@ -53,6 +53,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (float)getScreenSpaceScalingFactor {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getScreenSpaceScalingFactor();
+        return ::djinni::F32::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nonnull NSArray<NSNumber *> *)getCustomModelMatrix {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getCustomModelMatrix();
@@ -88,6 +95,13 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() isScreenSpaceCoords];
             return ::djinni::Bool::toCpp(objcpp_result_);
+        }
+    }
+    float getScreenSpaceScalingFactor() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getScreenSpaceScalingFactor];
+            return ::djinni::F32::toCpp(objcpp_result_);
         }
     }
     std::vector<float> getCustomModelMatrix() override

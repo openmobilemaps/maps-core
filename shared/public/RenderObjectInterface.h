@@ -17,5 +17,7 @@ public:
 
     virtual bool isScreenSpaceCoords() = 0;
 
+    virtual float getScreenSpaceScalingFactor() = 0;
+
     virtual std::vector<float> getCustomModelMatrix() = 0;
 };

@@ -13,7 +13,7 @@
 RenderObject::RenderObject(std::shared_ptr<::GraphicsObjectInterface> graphicsObject)
     : graphicsObject(graphicsObject) {}
 
-RenderObject::RenderObject(const std::shared_ptr<::GraphicsObjectInterface> graphicsObject, bool isScreenSpace): graphicsObject(graphicsObject), screenSpaceCoords(isScreenSpace) {}
+RenderObject::RenderObject(const std::shared_ptr<::GraphicsObjectInterface> graphicsObject, bool isScreenSpace, float screenSpaceScalingFactorValue): graphicsObject(graphicsObject), screenSpaceCoords(isScreenSpace), screenSpaceScalingFactorValue(screenSpaceScalingFactorValue) {}
 
 RenderObject::RenderObject(std::shared_ptr<::GraphicsObjectInterface> graphicsObject, std::vector<float> modelMatrix)
     : graphicsObject(graphicsObject)
@@ -27,3 +27,7 @@ bool RenderObject::hasCustomModelMatrix() { return setCustomModelMatrix; }
 std::vector<float> RenderObject::getCustomModelMatrix() { return modelMatrix; }
 
 bool RenderObject::isScreenSpaceCoords() { return screenSpaceCoords; }
+
+float RenderObject::getScreenSpaceScalingFactor() {
+    return screenSpaceScalingFactorValue;
+}

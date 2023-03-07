@@ -297,9 +297,11 @@ void Tiled2dMapVectorLineTile::setupLines(const std::vector<std::shared_ptr<Grap
 void Tiled2dMapVectorLineTile::preGenerateRenderObjects() {
     std::vector<std::shared_ptr<::RenderObjectInterface>> newRenderObjects;
 
+    const float scaleFactor = 40075016.0 / pow(2, tileInfo.zoomIdentifier);
+
     for (auto const &object : lines) {
         for (const auto &config : object->getRenderConfig()) {
-            newRenderObjects.push_back(std::make_shared<RenderObject>(config->getGraphicsObject(), true));
+            newRenderObjects.push_back(std::make_shared<RenderObject>(config->getGraphicsObject(), true, scaleFactor));
         }
     }
 

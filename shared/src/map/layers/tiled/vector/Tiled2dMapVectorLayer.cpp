@@ -598,13 +598,13 @@ Actor<Tiled2dMapVectorTile> Tiled2dMapVectorLayer::createTileActor(const Tiled2d
             break;
         }
         case VectorLayerType::line: {
-//            auto mailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
-//
-//            auto lineActor = Actor<Tiled2dMapVectorLineTile>(mailbox, (std::weak_ptr<MapInterface>) mapInterface, tileInfo,
-//                                                             selfActor, std::static_pointer_cast<LineVectorLayerDescription>(
-//                            layerDescription));
-//
-//            actor = lineActor.strongActor<Tiled2dMapVectorTile>();
+            auto mailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+
+            auto lineActor = Actor<Tiled2dMapVectorLineTile>(mailbox, (std::weak_ptr<MapInterface>) mapInterface, tileInfo,
+                                                             selfActor, std::static_pointer_cast<LineVectorLayerDescription>(
+                            layerDescription));
+
+            actor = lineActor.strongActor<Tiled2dMapVectorTile>();
             break;
         }
         case VectorLayerType::polygon: {

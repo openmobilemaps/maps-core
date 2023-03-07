@@ -49,6 +49,7 @@ render_object_interface = interface +c +j +o {
     get_graphics_object() : graphics_object_interface;
     has_custom_model_matrix() : bool;
     is_screen_space_coords() : bool;
+    get_screen_space_scaling_factor(): f32;
     get_custom_model_matrix() : list<f32>;
 }
 

@@ -14,6 +14,8 @@ abstract class RenderObjectInterface {
 
     abstract fun isScreenSpaceCoords(): Boolean
 
+    abstract fun getScreenSpaceScalingFactor(): Float
+
     abstract fun getCustomModelMatrix(): ArrayList<Float>
 
     private class CppProxy : RenderObjectInterface {
@@ -45,6 +47,12 @@ abstract class RenderObjectInterface {
             return native_isScreenSpaceCoords(this.nativeRef)
         }
         private external fun native_isScreenSpaceCoords(_nativeRef: Long): Boolean
+
+        override fun getScreenSpaceScalingFactor(): Float {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getScreenSpaceScalingFactor(this.nativeRef)
+        }
+        private external fun native_getScreenSpaceScalingFactor(_nativeRef: Long): Float
 
         override fun getCustomModelMatrix(): ArrayList<Float> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

@@ -13,6 +13,8 @@
 
 - (BOOL)isScreenSpaceCoords;
 
+- (float)getScreenSpaceScalingFactor;
+
 - (nonnull NSArray<NSNumber *> *)getCustomModelMatrix;
 
 @end

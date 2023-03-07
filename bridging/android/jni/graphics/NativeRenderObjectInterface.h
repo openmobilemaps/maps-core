@@ -36,6 +36,7 @@ private:
         /*not-null*/ std::shared_ptr<::GraphicsObjectInterface> getGraphicsObject() override;
         bool hasCustomModelMatrix() override;
         bool isScreenSpaceCoords() override;
+        float getScreenSpaceScalingFactor() override;
         std::vector<float> getCustomModelMatrix() override;
 
     private:
@@ -46,6 +47,7 @@ private:
     const jmethodID method_getGraphicsObject { ::djinni::jniGetMethodID(clazz.get(), "getGraphicsObject", "()Lio/openmobilemaps/mapscore/shared/graphics/objects/GraphicsObjectInterface;") };
     const jmethodID method_hasCustomModelMatrix { ::djinni::jniGetMethodID(clazz.get(), "hasCustomModelMatrix", "()Z") };
     const jmethodID method_isScreenSpaceCoords { ::djinni::jniGetMethodID(clazz.get(), "isScreenSpaceCoords", "()Z") };
+    const jmethodID method_getScreenSpaceScalingFactor { ::djinni::jniGetMethodID(clazz.get(), "getScreenSpaceScalingFactor", "()F") };
     const jmethodID method_getCustomModelMatrix { ::djinni::jniGetMethodID(clazz.get(), "getCustomModelMatrix", "()Ljava/util/ArrayList;") };
 };
 

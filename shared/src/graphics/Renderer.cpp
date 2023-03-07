@@ -49,7 +49,7 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
             for (const auto &renderObject : renderObjects) {
                 const auto &graphicsObject = renderObject->getGraphicsObject();
                 if (renderObject->isScreenSpaceCoords()) {
-                    graphicsObject->render(renderingContext, config, (int64_t) identityMatrix.data(), hasMask, factor);
+                    graphicsObject->render(renderingContext, config, (int64_t) identityMatrix.data(), hasMask, factor / renderObject->getScreenSpaceScalingFactor());
                 } else if (renderObject->hasCustomModelMatrix()) {
                     Matrix::multiplyMMC(tempMvpMatrix, 0, vpMatrix, 0, renderObject->getCustomModelMatrix(), 0);
                     graphicsObject->render(renderingContext, config, (int64_t)tempMvpMatrix.data(), hasMask,
