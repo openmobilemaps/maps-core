@@ -16,6 +16,8 @@ abstract class GraphicsObjectFactoryInterface {
 
     abstract fun createPolygon(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Polygon2dInterface
 
+    abstract fun createPolygon3d(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Polygon3dInterface
+
     abstract fun createLineGroup(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): LineGroup2dInterface
 
     abstract fun createPolygonGroup(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): PolygonGroup2dInterface
@@ -63,6 +65,12 @@ abstract class GraphicsObjectFactoryInterface {
             return native_createPolygon(this.nativeRef, shader)
         }
         private external fun native_createPolygon(_nativeRef: Long, shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Polygon2dInterface
+
+        override fun createPolygon3d(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Polygon3dInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createPolygon3d(this.nativeRef, shader)
+        }
+        private external fun native_createPolygon3d(_nativeRef: Long, shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Polygon3dInterface
 
         override fun createLineGroup(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): LineGroup2dInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

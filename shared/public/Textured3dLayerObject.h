@@ -21,7 +21,6 @@
 #include "RenderConfig.h"
 #include "RenderConfigInterface.h"
 #include "RenderObjectInterface.h"
-#include "Vec3d.h"
 #include <optional>
 
 #include "AnimationInterface.h"

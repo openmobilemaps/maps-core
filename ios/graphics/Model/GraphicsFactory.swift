@@ -16,6 +16,16 @@ class GraphicsFactory: MCGraphicsObjectFactoryInterface {
         RenderTargetTexture(size)
     }
 
+    func createPolygon(_ shader: MCShaderProgramInterface?) -> MCPolygon2dInterface? {
+        guard let shader = shader else { fatalError("No Shader provided") }
+        return Polygon2d(shader: shader, metalContext: .current)
+    }
+
+    func createPolygon3d(_ shader: MCShaderProgramInterface?) -> MCPolygon3dInterface? {
+        guard let shader = shader else { fatalError("No Shader provided") }
+        return Polygon3d(shader: shader, metalContext: .current)
+    }
+
     func createPolygonGroup(_ shader: MCShaderProgramInterface?) -> MCPolygonGroup2dInterface? {
         guard let shader = shader else { fatalError("No Shader provided") }
         return PolygonGroup2d(shader: shader, metalContext: .current)
@@ -39,11 +49,6 @@ class GraphicsFactory: MCGraphicsObjectFactoryInterface {
     func createLineGroup(_ shader: MCShaderProgramInterface?) -> MCLineGroup2dInterface? {
         guard let shader = shader else { fatalError("No Shader provided") }
         return LineGroup2d(shader: shader, metalContext: .current)
-    }
-
-    func createPolygon(_ shader: MCShaderProgramInterface?) -> MCPolygon2dInterface? {
-        guard let shader = shader else { fatalError("No Shader provided") }
-        return Polygon2d(shader: shader, metalContext: .current)
     }
 
     func createQuadMask() -> MCQuad2dInterface? {

@@ -53,7 +53,9 @@ extension BaseGraphicsObject: MCGraphicsObjectInterface {
         self.ready = false
     }
 
-    public func isReady() -> Bool { ready }
+    public func isReady() -> Bool {
+        ready
+    }
 
     public func setIsInverseMasked(_ inversed: Bool) {
         maskInverse = inversed

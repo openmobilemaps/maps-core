@@ -8,6 +8,7 @@
 @protocol MCLine2dInterface;
 @protocol MCLineGroup2dInterface;
 @protocol MCPolygon2dInterface;
+@protocol MCPolygon3dInterface;
 @protocol MCPolygonGroup2dInterface;
 @protocol MCQuad2dInterface;
 @protocol MCQuad3dInterface;
@@ -23,6 +24,8 @@
 - (nullable id<MCLine2dInterface>)createLine:(nullable id<MCShaderProgramInterface>)shader;
 
 - (nullable id<MCPolygon2dInterface>)createPolygon:(nullable id<MCShaderProgramInterface>)shader;
+
+- (nullable id<MCPolygon3dInterface>)createPolygon3d:(nullable id<MCShaderProgramInterface>)shader;
 
 - (nullable id<MCLineGroup2dInterface>)createLineGroup:(nullable id<MCShaderProgramInterface>)shader;
 

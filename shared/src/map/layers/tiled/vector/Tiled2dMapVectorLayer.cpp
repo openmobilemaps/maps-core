@@ -477,6 +477,9 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
                 tileMask->setPolygons(tileEntry.masks);
 
                 newTileMasks[tileEntry.tileInfo] = Tiled2dMapLayerMaskWrapper(tileMask, hash);
+
+                tileTextureObjects.at(tileEntry.tileInfo)->setTilePolygons(tileEntry.masks, tileEntry.tileInfo.bounds);
+                tileTextureObjects.at(tileEntry.tileInfo)->getGraphicsObject()->setup(mapInterface->getRenderingContext());
             }
         }
 
@@ -492,11 +495,13 @@ void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTi
             auto targetTexture = mapInterface->getGraphicsObjectFactory()->createRenderTargetTexture(Vec2I(512, 512));
 
 
-            auto alphaShader = mapInterface->getShaderFactory()->createSphereProjectionShader();
-            auto tileTextureObject = std::make_shared<Textured3dLayerObject>(mapInterface->getGraphicsObjectFactory()->createQuad3d(alphaShader->asShaderProgramInterface()), alphaShader, mapInterface);
-            tileTextureObject->getQuadObject()->loadTexture(mapInterface->getRenderingContext(), targetTexture->textureHolder());
-            tileTextureObject->setRectCoord(tile.tileInfo.bounds);
-            tileTextureObject->getGraphicsObject()->setup(mapInterface->getRenderingContext());
+            auto sphereShader = mapInterface->getShaderFactory()->createSphereProjectionShader();
+
+
+            auto tileTextureObject = std::make_shared<Polygon3dLayerObject>(mapInterface->getCoordinateConverterHelper(), mapInterface->getGraphicsObjectFactory()->createPolygon3d(sphereShader->asShaderProgramInterface()), sphereShader);
+            tileTextureObject->getPolygonObject()->loadTexture(mapInterface->getRenderingContext(), targetTexture->textureHolder());
+//            tileTextureObject->setTilePolygons(tile.masks, tile.tileInfo.bounds);
+//            tileTextureObject->getGraphicsObject()->setup(mapInterface->getRenderingContext());
 
             {
                 std::lock_guard<std::recursive_mutex> lock(tilesMutex);

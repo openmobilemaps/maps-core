@@ -37,7 +37,7 @@ final class Quad3d: BaseGraphicsObject {
 
     private static let renderStartTime = Date()
 
-    init(shader: MCShaderProgramInterface, metalContext: MetalContext, label: String = "Quad2d") {
+    init(shader: MCShaderProgramInterface, metalContext: MetalContext, label: String = "Quad3d") {
         self.label = label
         self.shader = shader
 
