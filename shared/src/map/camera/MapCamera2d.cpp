@@ -19,6 +19,7 @@
 #include "Vec2D.h"
 #include "Vec2DHelper.h"
 #include "Vec2FHelper.h"
+#include "CoordinateSystemIdentifiers.h"
 
 #define DEFAULT_ANIM_LENGTH 300
 #define ROTATION_THRESHOLD 20
@@ -303,6 +304,7 @@ void MapCamera2d::removeListener(const std::shared_ptr<MapCamera2dListenerInterf
 
 std::shared_ptr<::CameraInterface> MapCamera2d::asCameraInterface() { return shared_from_this(); }
 
+
 std::vector<float> MapCamera2d::getVpMatrix() {
     {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
@@ -320,20 +322,52 @@ std::vector<float> MapCamera2d::getVpMatrix() {
     double zoomFactor = screenPixelAsRealMeterFactor * currentZoom;
     RectCoord viewBounds = getRectFromViewport(sizeViewport, centerPosition);
 
-    Coord renderCoordCenter = conversionHelper->convertToRenderSystem(centerPosition);
+    Coord renderCoordCenter = conversionHelper->convert(CoordinateSystemIdentifiers::EPSG3857(), centerPosition);
+
+
+    float px = renderCoordCenter.x;
+    float py = renderCoordCenter.y;
+    float R = 6371000;
+    float lambda = px / R;
+    float phi = 2*atan(exp(py / R)) - 3.1415926 / 2;
+
+    float radius = 1.0;
+
+    std::vector<float> pos3d = {radius*sin(phi)*cos(-lambda),
+        radius*cos(phi),
+        radius*sin(phi)*sin(-lambda)};
 
     Matrix::setIdentityM(newVpMatrix, 0);
 
-    Matrix::orthoM(newVpMatrix, 0, renderCoordCenter.x - 0.5 * sizeViewport.x, renderCoordCenter.x + 0.5 * sizeViewport.x,
-                   renderCoordCenter.y + 0.5 * sizeViewport.y, renderCoordCenter.y - 0.5 * sizeViewport.y, -1, 1);
+//    Matrix::orthoM(newVpMatrix, 0, -1, 1,
+//                   -1, 1, 0, 2);
 
-    Matrix::translateM(newVpMatrix, 0, renderCoordCenter.x, renderCoordCenter.y, 0);
+    float vpr = (float)sizeViewport.y / (float)sizeViewport.x;
+    Matrix::frustumM(newVpMatrix, 0, -1, 1, -1.0 * vpr, 1.0 * vpr, 3, 10);
 
-    Matrix::scaleM(newVpMatrix, 0, 1 / zoomFactor, 1 / zoomFactor, 1);
 
-    Matrix::rotateM(newVpMatrix, 0.0, currentRotation, 0.0, 0.0, 1.0);
+    Matrix::translateM(newVpMatrix, 0, 0, 0, -5.0);
 
-    Matrix::translateM(newVpMatrix, 0, -renderCoordCenter.x, -renderCoordCenter.y, 0);
+//    Matrix::translateM(newVpMatrix, 0, pos3d[0], pos3d[1], pos3d[2]);
+
+//    Matrix::scaleM(newVpMatrix, 0, 0.7, 0.7, 0.7);
+
+    Matrix::translateM(newVpMatrix, 0, pos3d[0], pos3d[1], pos3d[2]);
+
+    // TODO: Why 45?
+    Matrix::rotateM(newVpMatrix, 0.0, lambda * 45, 0.0, 1.0, 0.0);
+    Matrix::rotateM(newVpMatrix, 0.0, phi * 45, 1.0, 0.0, 0.0);
+
+
+
+
+//    Matrix::translateM(newVpMatrix, 0, renderCoordCenter.x, renderCoordCenter.y, 0);
+//
+//    Matrix::scaleM(newVpMatrix, 0, 1 / zoomFactor, 1 / zoomFactor, 1);
+//
+
+//
+//    Matrix::translateM(newVpMatrix, 0, -renderCoordCenter.x, -renderCoordCenter.y, 0);
 
     std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
     lastVpBounds = viewBounds;

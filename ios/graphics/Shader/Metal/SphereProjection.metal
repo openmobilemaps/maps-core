@@ -47,15 +47,18 @@ sphereProjectionVertexShader(const patch_control_point<VertexIn> patch [[stage_i
   float px = pos.x;
   float py = pos.y;
   float R = 6371000;
+
+  // longitude [0, 2pi]
   float lambda = px / R;
-  float phi = 2*atan(exp(py / R));
+
+  // latitude, [0, pi] statt [-90, 90]
+  float phi = atan(sinh(py / R)) + 3.1415926 / 2;
 
   float radius = 1.0;
-  float ratio = 2556.0/1179.0;
 
-  float4 pos3d = float4(radius*sin(phi)*cos(-lambda+time*0.5),
-                           radius*cos(phi) / ratio,
-                           radius*sin(phi)*sin(-lambda+time*0.5),
+  float4 pos3d = float4(radius*sin(phi)*cos(-lambda+time*0.2),
+                           radius*cos(phi),
+                           radius*sin(phi)*sin(-lambda+time*0.2),
                            1);
 
   // projection to screen
@@ -64,7 +67,7 @@ sphereProjectionVertexShader(const patch_control_point<VertexIn> patch [[stage_i
   float4 position = pos3d; // TODO: Apply mvpMatrix
 
   VertexOut out {
-    .position = position,
+    .position = mvpMatrix * position,
     .uv = uv
   };
 

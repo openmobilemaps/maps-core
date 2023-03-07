@@ -119,6 +119,8 @@ final class Quad3d: BaseGraphicsObject {
         shader.setupProgram(context)
         shader.preRender(context, pass: renderPass)
 
+        encoder.setCullMode(.back)
+
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
