@@ -196,6 +196,9 @@ public:
 class Value {
 public:
     Value() {};
+
+    virtual std::unique_ptr<Value> clone() = 0;
+
     virtual std::unordered_set<std::string> getUsedKeys() const { return {}; };
 
     virtual ValueVariant evaluate(const EvaluationContext &context) const = 0;
@@ -361,6 +364,10 @@ class GetPropertyValue : public Value {
 public:
     GetPropertyValue(const std::string key) : key(key) {};
 
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<GetPropertyValue>(key);
+    }
+
     std::unordered_set<std::string> getUsedKeys() const override {
         return { key };
     }
@@ -386,6 +393,10 @@ class ToStringValue: public Value {
 
 public:
     ToStringValue(const std::shared_ptr<Value> value): value(value) {}
+
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<ToStringValue>(value->clone());
+    }
 
     std::unordered_set<std::string> getUsedKeys() const override {
         return value->getUsedKeys();
@@ -432,6 +443,10 @@ public:
 class StaticValue : public Value {
 public:
     StaticValue(const ValueVariant value) : value(value) {};
+
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<StaticValue>(value);
+    }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
         if (std::holds_alternative<std::string>(value)) {
@@ -484,6 +499,10 @@ class HasPropertyValue : public Value {
 public:
     HasPropertyValue(const std::string key) : key(key) {};
 
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<HasPropertyValue>(key);
+    }
+
     std::unordered_set<std::string> getUsedKeys() const override {
         return { key };
     }
@@ -499,6 +518,10 @@ private:
 class ScaleValue : public Value {
 public:
     ScaleValue(const std::shared_ptr<Value> value, const double scale) : value(value), scale(scale) {};
+
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<ScaleValue>(value->clone(), scale);
+    }
 
     std::unordered_set<std::string> getUsedKeys() const override { return value->getUsedKeys(); }
 
@@ -550,8 +573,16 @@ public:
 
 class InterpolatedValue : public Value {
 public:
-    InterpolatedValue(double interpolationBase, const std::vector<std::tuple<double, std::shared_ptr<Value>>> steps)
+    InterpolatedValue(double interpolationBase, const std::vector<std::tuple<double, std::shared_ptr<Value>>> &steps)
     : interpolationBase(interpolationBase), steps(steps) {}
+
+    std::unique_ptr<Value> clone() override {
+        std::vector<std::tuple<double, std::shared_ptr<Value>>> clonedSteps;
+        for (const auto &[step, value] : steps) {
+            clonedSteps.emplace_back(step, value->clone());
+        }
+        return std::make_unique<InterpolatedValue>(interpolationBase, std::move(clonedSteps));
+    }
 
     std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
@@ -629,8 +660,19 @@ private:
 
 class BezierInterpolatedValue : public Value {
 public:
-    BezierInterpolatedValue(double x1, double y1, double x2, double y2, const std::vector<std::tuple<double, std::shared_ptr<Value>>> steps)
+    BezierInterpolatedValue(double x1, double y1, double x2, double y2, const std::vector<std::tuple<double, std::shared_ptr<Value>>> &steps)
             : bezier(x1, y1, x2, y2), steps(steps) {}
+
+    BezierInterpolatedValue(const UnitBezier &bezier, const std::vector<std::tuple<double, std::shared_ptr<Value>>> &steps)
+            : bezier(bezier), steps(steps) {}
+
+    std::unique_ptr<Value> clone() override {
+        std::vector<std::tuple<double, std::shared_ptr<Value>>> clonedSteps;
+        for (const auto &[step, value] : steps) {
+            clonedSteps.emplace_back(step, value->clone());
+        }
+        return std::make_unique<BezierInterpolatedValue>(bezier, std::move(clonedSteps));
+    }
 
     std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
@@ -693,6 +735,14 @@ private:
 class StopValue : public Value {
 public:
     StopValue(const std::vector<std::tuple<double, std::shared_ptr<Value>>> stops) : stops(stops) {}
+
+    std::unique_ptr<Value> clone() override {
+        std::vector<std::tuple<double, std::shared_ptr<Value>>> clonedStops;
+        for (const auto &[stop, value] : stops) {
+            clonedStops.emplace_back(stop, value->clone());
+        }
+        return std::make_unique<StopValue>(std::move(clonedStops));
+    }
 
     std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
@@ -793,7 +843,17 @@ public:
 
 class StepValue : public Value {
 public:
-    StepValue(const std::shared_ptr<Value> compareValue, const std::vector<std::tuple<std::shared_ptr<Value>, std::shared_ptr<Value>>> stops, std::shared_ptr<Value> defaultValue) : compareValue(compareValue), stops(stops), defaultValue(defaultValue) {}
+    StepValue(const std::shared_ptr<Value> compareValue,
+              const std::vector<std::tuple<std::shared_ptr<Value>, std::shared_ptr<Value>>> stops,
+              std::shared_ptr<Value> defaultValue) : compareValue(compareValue), stops(stops), defaultValue(defaultValue) {}
+
+    std::unique_ptr<Value> clone() override {
+        std::vector<std::tuple<std::shared_ptr<Value>, std::shared_ptr<Value>>> clonedStops;
+        for (const auto &[v1, v2] : stops) {
+            clonedStops.emplace_back(v1->clone(), v2->clone());
+        }
+        return std::make_unique<StepValue>(compareValue->clone(), std::move(clonedStops), defaultValue->clone());
+    }
 
     std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
@@ -823,6 +883,14 @@ private:
 class CaseValue : public Value {
 public:
     CaseValue(const std::vector<std::tuple<std::shared_ptr<Value>, std::shared_ptr<Value>>> cases, std::shared_ptr<Value> defaultValue) : cases(cases), defaultValue(defaultValue) {}
+
+    std::unique_ptr<Value> clone() override {
+        std::vector<std::tuple<std::shared_ptr<Value>, std::shared_ptr<Value>>> clonedCases;
+        for (const auto &[v1, v2] : cases) {
+            clonedCases.emplace_back(v1->clone(), v2->clone());
+        }
+        return std::make_unique<CaseValue>(std::move(clonedCases), defaultValue->clone());
+    }
 
     std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
@@ -857,6 +925,10 @@ class ToNumberValue: public Value {
 
 public:
     ToNumberValue(const std::shared_ptr<Value> value): value(value) {}
+
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<ToNumberValue>(value->clone());
+    }
 
     std::unordered_set<std::string> getUsedKeys() const override {
         return value->getUsedKeys();
@@ -912,6 +984,20 @@ public:
         }
     }
 
+    MatchValue(const std::shared_ptr<Value> compareValue,
+               const std::vector<std::pair<ValueVariant, std::shared_ptr<Value>>> &mapping,
+               const std::shared_ptr<Value> defaultValue)
+            : compareValue(compareValue), valueMapping(mapping), defaultValue(defaultValue) {}
+
+
+    std::unique_ptr<Value> clone() override {
+        std::vector<std::pair<ValueVariant, std::shared_ptr<Value>>> clonedMapping;
+        for (const auto &[variant, value] : valueMapping) {
+            clonedMapping.emplace_back(variant, value->clone());
+        }
+        return std::make_unique<MatchValue>(compareValue->clone(), std::move(clonedMapping), defaultValue->clone());
+    }
+
     std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
 
@@ -960,6 +1046,18 @@ public:
         }
     }
 
+    PropertyFilter(const std::vector<std::pair<ValueVariant, std::shared_ptr<Value>>> &mapping,
+                const std::shared_ptr<Value> defaultValue, const std::string &key)
+                : defaultValue(defaultValue), valueMapping(mapping), key(key) {}
+
+    std::unique_ptr<Value> clone() override {
+        std::vector<std::pair<ValueVariant , std::shared_ptr<Value>>> clonedMapping;
+        for (const auto &[variant, value] : valueMapping) {
+            clonedMapping.emplace_back(variant, value->clone());
+        }
+        return std::make_unique<PropertyFilter>(std::move(clonedMapping), defaultValue->clone(), key);
+    }
+
     std::unordered_set<std::string> getUsedKeys() const override {
         return { key };
     }
@@ -990,6 +1088,10 @@ enum class LogOpType {
 class LogOpValue : public Value {
 public:
     LogOpValue(const LogOpType &logOpType, const std::shared_ptr<Value> &lhs, const std::shared_ptr<Value> &rhs = nullptr) : logOpType(logOpType), lhs(lhs), rhs(rhs) {}
+
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<LogOpValue>(logOpType, lhs->clone(), rhs->clone());
+    }
 
     std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
@@ -1026,6 +1128,14 @@ class AllValue: public Value {
 public:
     AllValue(const std::vector<const std::shared_ptr<Value>> values) : values(values) {}
 
+    std::unique_ptr<Value> clone() override {
+        std::vector<const std::shared_ptr<Value>> clonedValues;
+        for (const auto &value : values) {
+            clonedValues.push_back(value->clone());
+        }
+        return std::make_unique<AllValue>(std::move(clonedValues));
+    }
+
     std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
         for (auto const &value: values) {
@@ -1051,6 +1161,14 @@ private:
 class AnyValue: public Value {
 public:
     AnyValue(const std::vector<const std::shared_ptr<Value>> values) : values(values) {}
+
+    std::unique_ptr<Value> clone() override {
+        std::vector<const std::shared_ptr<Value>> clonedValues;
+        for (const auto &value : values) {
+            clonedValues.push_back(value->clone());
+        }
+        return std::make_unique<AnyValue>(std::move(clonedValues));
+    }
 
     std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
@@ -1079,6 +1197,10 @@ public:
     PropertyCompareValue(const std::shared_ptr<Value> lhs, const std::shared_ptr<Value> rhs, const PropertyCompareType type) : lhs(lhs), rhs( rhs), type(type) {
         assert(lhs);
         assert(rhs);
+    }
+
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<PropertyCompareValue>(lhs->clone(), rhs->clone(), type);
     }
 
     std::unordered_set<std::string> getUsedKeys() const override {
@@ -1113,6 +1235,10 @@ private:
 public:
     InFilter(const std::string &key, const std::unordered_set<ValueVariant> values) :values(values), key(key) {}
 
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<InFilter>(key, values);
+    }
+
     std::unordered_set<std::string> getUsedKeys() const override {
         return { key };
     }
@@ -1130,6 +1256,10 @@ private:
 public:
     NotInFilter(const std::string &key, const std::unordered_set<ValueVariant> values) :values(values), key(key) {}
 
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<NotInFilter>(key, values);
+    }
+
     std::unordered_set<std::string> getUsedKeys() const override {
         return { key };
     }
@@ -1141,6 +1271,7 @@ public:
 };
 
 struct FormatValueWrapper {
+    FormatValueWrapper(const std::shared_ptr<Value> value, float scale) : value(value), scale(scale) {}
     std::shared_ptr<Value> value;
     float scale;
 };
@@ -1148,6 +1279,14 @@ struct FormatValueWrapper {
 class FormatValue : public Value {
 public:
     FormatValue(const std::vector<FormatValueWrapper> values) : values(values) {};
+
+    std::unique_ptr<Value> clone() override {
+        std::vector<FormatValueWrapper> clonedValues;
+        for (const auto &value : values) {
+            clonedValues.emplace_back(value.value->clone(), value.scale);
+        }
+        return std::make_unique<FormatValue>(std::move(values));
+    }
 
     std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
@@ -1185,6 +1324,10 @@ public:
     MathValue(const std::shared_ptr<Value> lhs, const std::shared_ptr<Value> rhs, const MathOperation operation) : lhs(lhs), rhs( rhs), operation(operation) {
         assert(lhs);
         assert(rhs);
+    }
+
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<MathValue>(lhs->clone(), rhs->clone(), operation);
     }
 
     std::unordered_set<std::string> getUsedKeys() const override {
@@ -1229,6 +1372,10 @@ class LenghtValue: public Value {
 
 public:
     LenghtValue(const std::shared_ptr<Value> value): value(value) {}
+
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<LenghtValue>(value->clone());
+    }
 
     std::unordered_set<std::string> getUsedKeys() const override {
         return value->getUsedKeys();

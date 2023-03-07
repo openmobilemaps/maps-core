@@ -102,6 +102,10 @@ public:
     VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, filter, renderPassIndex),
     style(style) {};
 
+    std::unique_ptr<VectorLayerDescription> clone() override {
+        return std::make_unique<LineVectorLayerDescription>(identifier, source, sourceId, minZoom, maxZoom,
+                                                            filter ? filter->clone() : nullptr, style, renderPassIndex);
+    }
 
     virtual std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;

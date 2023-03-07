@@ -961,7 +961,7 @@ std::shared_ptr<VectorLayerDescription> Tiled2dMapVectorLayer::getLayerDescripti
     if (mapDescription) {
         for (auto const &layer: mapDescription->layers) {
             if (layer->identifier == identifier) {
-                return layer;
+                return layer->clone();
             }
         }
     }
