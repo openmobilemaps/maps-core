@@ -49,4 +49,6 @@ public:
     maxZoom(maxZoom),
     filter(filter),
     renderPassIndex(renderPassIndex) {}
+
+    virtual std::unique_ptr<VectorLayerDescription> clone() = 0;
 };

@@ -218,6 +218,7 @@ void Tiled2dMapVectorPolygonTile::setTileData(const std::shared_ptr<MaskingObjec
             }
         }
 
+        this->tileMask = tileMask;
         addPolygons(objectDescriptions);
     } else {
         vectorLayer.message(&Tiled2dMapVectorLayer::tileIsReady, tileInfo);

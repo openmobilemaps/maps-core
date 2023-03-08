@@ -54,6 +54,10 @@ public:
     VectorLayerDescription(identifier, "", "", 0, 0, nullptr, renderPassIndex),
     style(style) {};
 
+    std::unique_ptr<VectorLayerDescription> clone() override {
+        return std::make_unique<BackgroundVectorLayerDescription>(identifier, style, renderPassIndex);
+    }
+
     virtual std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
 

@@ -78,6 +78,12 @@ public:
             style(), url(url), adaptScaleToScreen(adaptScaleToScreen), numDrawPreviousLayers(numDrawPreviousLayers),
             maskTiles(maskTiles), zoomLevelScaleFactor(zoomLevelScaleFactor), underzoom(underzoom), overzoom(overzoom) {};
 
+    std::unique_ptr<VectorLayerDescription> clone() override {
+        return std::make_unique<RasterVectorLayerDescription>(identifier, minZoom, maxZoom, url, adaptScaleToScreen,
+                                                              numDrawPreviousLayers, maskTiles, zoomLevelScaleFactor,
+                                                              renderPassIndex, underzoom, overzoom);
+    }
+
     virtual std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
 

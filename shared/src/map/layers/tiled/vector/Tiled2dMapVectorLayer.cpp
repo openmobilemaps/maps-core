@@ -928,10 +928,14 @@ void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDe
                         actor.message(&Tiled2dMapVectorTile::setSelectionDelegate, selectionDelegate);
                     }
 
-                    for (auto subTileIter = subTiles->second.begin(); subTileIter != subTiles->second.end(); subTileIter++) {
-                        if (std::get<0>(*subTileIter) > legacyIndex) {
-                            subTiles->second.insert(subTileIter - 1, {legacyIndex, layerDescription->identifier, actor.strongActor<Tiled2dMapVectorTile>()});
-                            break;
+                    if (subTiles->second.empty()) {
+                        subTiles->second.push_back({legacyIndex, layerDescription->identifier, actor.strongActor<Tiled2dMapVectorTile>()});
+                    } else {
+                        for (auto subTileIter = subTiles->second.begin(); subTileIter != subTiles->second.end(); subTileIter++) {
+                            if (std::get<0>(*subTileIter) > legacyIndex) {
+                                subTiles->second.insert(subTileIter - 1, {legacyIndex, layerDescription->identifier, actor.strongActor<Tiled2dMapVectorTile>()});
+                                break;
+                            }
                         }
                     }
 
@@ -983,7 +987,7 @@ std::shared_ptr<VectorLayerDescription> Tiled2dMapVectorLayer::getLayerDescripti
     if (mapDescription) {
         for (auto const &layer: mapDescription->layers) {
             if (layer->identifier == identifier) {
-                return layer;
+                return layer->clone();
             }
         }
     }
