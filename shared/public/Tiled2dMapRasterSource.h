@@ -15,8 +15,7 @@
 #include "TextureLoaderResult.h"
 #include "Tiled2dMapRasterTileInfo.h"
 #include "Tiled2dMapSource.h"
-
-class Tiled2dMapRasterLayer;
+#include "Tiled2dMapRasterSourceListener.h"
 
 class Tiled2dMapRasterSource
     : public Tiled2dMapSource<TextureHolderInterface, TextureLoaderResult, std::shared_ptr<::TextureHolderInterface>> {
@@ -26,7 +25,7 @@ class Tiled2dMapRasterSource
                            const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                            const std::shared_ptr<SchedulerInterface> &scheduler,
                            const std::vector<std::shared_ptr<::LoaderInterface>> & loaders,
-                           const WeakActor<Tiled2dMapRasterLayer> &listener,
+                           const WeakActor<Tiled2dMapRasterSourceListener> &listener,
                            float screenDensityPpi);
 
     std::unordered_set<Tiled2dMapRasterTileInfo> getCurrentTiles();
@@ -45,5 +44,5 @@ class Tiled2dMapRasterSource
   private:
     const std::vector<std::shared_ptr<::LoaderInterface>> loaders;
         
-    const WeakActor<Tiled2dMapRasterLayer> rasterLayerActor;
+    const WeakActor<Tiled2dMapRasterSourceListener> rasterLayerActor;
 };

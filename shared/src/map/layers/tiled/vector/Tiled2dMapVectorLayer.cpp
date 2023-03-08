@@ -23,6 +23,7 @@
 #include "VectorTileGeometryHandler.h"
 #include "Tiled2dMapVectorSymbolSubLayer.h"
 #include "Tiled2dMapVectorBackgroundSubLayer.h"
+#include "Tiled2dMapVectorRasterSubLayerConfig.h"
 #include "Polygon2dInterface.h"
 #include "MapCamera2dInterface.h"
 #include "QuadMaskObject.h"
@@ -34,9 +35,9 @@
 #include "TextureLoaderResult.h"
 #include "PolygonCompare.h"
 #include "LoaderHelper.h"
-
 #include "Tiled2dMapVectorPolygonTile.h"
 #include "Tiled2dMapVectorLineTile.h"
+#include "Tiled2dMapVectorRasterTile.h"
 
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
@@ -185,29 +186,58 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     if (!mapInterface) {
         return;
     }
-
-    std::unordered_map<std::string, std::unordered_set<std::string>> layersToDecode;
-
-    for (auto const& layerDesc : mapDescription->layers)
-    {
-        layersToDecode[layerDesc->source].insert(layerDesc->sourceId);
-    }
     
     auto selfMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
     auto castedMe = std::static_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
-    auto selfActor = WeakActor<Tiled2dMapVectorLayer>(selfMailbox, castedMe);
+    auto selfRasterActor = WeakActor<Tiled2dMapRasterSourceListener>(selfMailbox, castedMe);
+    auto selfVectorActor = WeakActor<Tiled2dMapVectorSourceListener>(selfMailbox, castedMe);
 
-    auto mailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
-    vectorTileSource.emplaceObject(mailbox, mapInterface->getMapConfig(),
+    std::unordered_map<std::string, std::unordered_set<std::string>> layersToDecode;
+    std::vector<Actor<Tiled2dMapRasterSource>> rasterSources;
+    for (auto const& layerDesc : mapDescription->layers)
+    {
+        switch (layerDesc->getType()) {
+            case background: {
+                // nothing
+                break;
+            }
+            case raster: {
+                auto sourceMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+                rasterSources.emplace_back(mailbox, mapInterface->getMapConfig(),
+                                           std::static_pointer_cast<Tiled2dMapLayerConfig>(
+                                                   std::make_shared<Tiled2dMapVectorRasterSubLayerConfig>(
+                                                           std::static_pointer_cast<RasterVectorLayerDescription>(
+                                                                   layerDesc))),
+                                           mapInterface->getCoordinateConverterHelper(),
+                                           mapInterface->getScheduler(), loaders,
+                                           selfRasterActor,
+                                           mapInterface->getCamera()->getScreenDensityPpi());
+                break;
+            }
+            case line:
+            case polygon:
+            case symbol:
+            case custom: {
+                layersToDecode[layerDesc->source].insert(layerDesc->sourceId);
+                break;
+            }
+        }
+    }
+
+    std::vector<WeakActor<Tiled2dMapSourceInterface>> sourceInterfaces;
+
+    auto sourceMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+    vectorTileSource.emplaceObject(sourceMailbox, mapInterface->getMapConfig(),
                                    layerConfigs,
                                    mapInterface->getCoordinateConverterHelper(),
                                    mapInterface->getScheduler(),
                                    loaders,
-                                   selfActor,
+                                   selfVectorActor,
                                    layersToDecode,
                                    mapInterface->getCamera()->getScreenDensityPpi());
+    sourceInterfaces.push_back(vectorTileSource.weakActor<Tiled2dMapSourceInterface>());
 
-    setSourceInterface(vectorTileSource.weakActor<Tiled2dMapSourceInterface>());
+    setSourceInterfaces(sourceInterfaces);
 
     Tiled2dMapLayer::onAdded(mapInterface, layerIndex);
     mapInterface->getTouchHandler()->insertListener(std::dynamic_pointer_cast<TouchInterface>(shared_from_this()), layerIndex);
@@ -429,8 +459,11 @@ void Tiled2dMapVectorLayer::forceReload() {
     Tiled2dMapLayer::forceReload();
 }
 
+void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) {
 
-void Tiled2dMapVectorLayer::onTilesUpdated(std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) {
+}
+
+void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) {
 
     auto lockSelfPtr = std::static_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;

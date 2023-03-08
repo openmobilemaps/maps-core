@@ -10,7 +10,6 @@
 
 
 #include "Tiled2dMapVectorSource.h"
-#include "Tiled2dMapVectorLayer.h"
 #include "vtzero/vector_tile.hpp"
 #include "Logger.h"
 
@@ -19,7 +18,7 @@ Tiled2dMapVectorSource::Tiled2dMapVectorSource(const MapConfig &mapConfig,
                                                const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                                const std::shared_ptr<SchedulerInterface> &scheduler,
                                                const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
-                                               const WeakActor<Tiled2dMapVectorLayer> &listener,
+                                               const WeakActor<Tiled2dMapVectorSourceListener> &listener,
                                                const std::unordered_map<std::string, std::unordered_set<std::string>> &layersToDecode,
                                                float screenDensityPpi)
         : Tiled2dMapSource<djinni::DataRef, IntermediateResult, FinalResult>(mapConfig, layerConfigs.begin()->second, conversionHelper, scheduler, screenDensityPpi, tileLoaders.size()),
@@ -121,7 +120,7 @@ FinalResult Tiled2dMapVectorSource::postLoadingTask(const IntermediateResult &lo
 }
 
 void Tiled2dMapVectorSource::notifyTilesUpdates() {
-    listener.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorLayer::onTilesUpdated, getCurrentTiles());
+    listener.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceListener::onTilesUpdated, "testSourceId" /* TODO */, getCurrentTiles());
 };
 
 std::unordered_set<Tiled2dMapVectorTileInfo> Tiled2dMapVectorSource::getCurrentTiles() {

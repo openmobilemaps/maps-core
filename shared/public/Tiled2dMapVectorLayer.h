@@ -11,8 +11,11 @@
 #pragma once
 
 #include "Tiled2dMapLayer.h"
+#include "Tiled2dMapRasterSource.h"
+#include "Tiled2dMapRasterSourceListener.h"
 #include "Tiled2dMapVectorLayerInterface.h"
 #include "Tiled2dMapVectorSource.h"
+#include "Tiled2dMapVectorSourceListener.h"
 #include "Tiled2dMapVectorSubLayer.h"
 #include "Tiled2dMapVectorTile.h"
 #include "VectorMapDescription.h"
@@ -24,8 +27,16 @@
 #include "TiledLayerError.h"
 #include "Actor.h"
 #include "Tiled2dMapVectorBackgroundSubLayer.h"
+#include <unordered_map>
 
-class Tiled2dMapVectorLayer : public Tiled2dMapLayer, public TouchInterface, public Tiled2dMapVectorLayerInterface, public Tiled2dMapVectorLayerReadyInterface, public ActorObject {
+class Tiled2dMapVectorLayer
+        : public Tiled2dMapLayer,
+          public TouchInterface,
+          public Tiled2dMapVectorLayerInterface,
+          public Tiled2dMapVectorLayerReadyInterface,
+          public ActorObject,
+          public Tiled2dMapRasterSourceListener,
+          public Tiled2dMapVectorSourceListener {
 public:
     Tiled2dMapVectorLayer(const std::string &layerName,
                           const std::string &remoteStyleJsonUrl,
@@ -69,7 +80,9 @@ public:
 
     void forceReload() override;
 
-    void onTilesUpdated(std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos);
+    void onTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) override;
+
+    void onTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) override;
 
     Actor<Tiled2dMapVectorTile> createTileActor(const Tiled2dMapTileInfo &tileInfo,
                                                 const std::shared_ptr<VectorLayerDescription> &layerDescription);
@@ -120,6 +133,7 @@ protected:
 
 
     Actor<Tiled2dMapVectorSource> vectorTileSource;
+    std::vector<Actor<Tiled2dMapRasterSource>> rasterTileSources;
 
     const std::vector<std::shared_ptr<::LoaderInterface>> loaders;
 

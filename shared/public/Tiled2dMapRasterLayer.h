@@ -16,6 +16,7 @@
 #include "Tiled2dMapRasterLayerCallbackInterface.h"
 #include "Tiled2dMapRasterLayerInterface.h"
 #include "Tiled2dMapRasterSource.h"
+#include "Tiled2dMapRasterSourceListener.h"
 #include "Tiled2dMapRasterLayerCallbackInterface.h"
 #include "PolygonMaskObject.h"
 #include "ShaderProgramInterface.h"
@@ -30,7 +31,8 @@
 class Tiled2dMapRasterLayer : public Tiled2dMapLayer,
                               public SimpleTouchInterface,
                               public Tiled2dMapRasterLayerInterface,
-                              public ActorObject {
+                              public ActorObject,
+                              public Tiled2dMapRasterSourceListener {
 public:
     Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                           const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
@@ -98,7 +100,7 @@ public:
 
     virtual std::shared_ptr<::Tiled2dMapLayerConfig> getConfig() override;
                                   
-    void onTilesUpdated(std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos);
+    void onTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) override;
 private:
     virtual void updateMaskObjects(const std::vector<const std::shared_ptr<MaskingObjectInterface>> &newMaskObjects,
                                    const std::vector<const std::shared_ptr<MaskingObjectInterface>> &obsoleteMaskObjects);

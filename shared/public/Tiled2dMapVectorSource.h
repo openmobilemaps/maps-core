@@ -15,11 +15,11 @@
 #include "DataLoaderResult.h"
 #include "LoaderInterface.h"
 #include "Tiled2dMapVectorTileInfo.h"
+#include "Tiled2dMapVectorSourceListener.h"
 #include <unordered_map>
 #include <vector>
 #include "DataRef.hpp"
 
-class Tiled2dMapVectorLayer;
 
 struct IntermediateResult final {
     std::unordered_map<std::string, DataLoaderResult> results;
@@ -50,7 +50,7 @@ public:
                            const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                            const std::shared_ptr<SchedulerInterface> &scheduler,
                            const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
-                           const WeakActor<Tiled2dMapVectorLayer> &listener,
+                           const WeakActor<Tiled2dMapVectorSourceListener> &listener,
                            const std::unordered_map<std::string, std::unordered_set<std::string>> &layersToDecode,
                            float screenDensityPpi);
 
@@ -79,5 +79,5 @@ private:
     std::recursive_mutex loadingStateMutex;
     std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapVectorSourceTileState> loadingStates;
     
-    const WeakActor<Tiled2dMapVectorLayer> listener;
+    const WeakActor<Tiled2dMapVectorSourceListener> listener;
 };
