@@ -21,7 +21,7 @@ Tiled2dMapVectorTile::Tiled2dMapVectorTile(const std::weak_ptr<MapInterface> &ma
         : mapInterface(mapInterface), tileInfo(tileInfo), vectorLayer(vectorLayer), description(description) {}
 
 void Tiled2dMapVectorTile::updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
-                                                  const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) {
+                                                  const Tiled2dMapVectorTileDataVariant &layerFeatures) {
     this->description = description;
 }
 

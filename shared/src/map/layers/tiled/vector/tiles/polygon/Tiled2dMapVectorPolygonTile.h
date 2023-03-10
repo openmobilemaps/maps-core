@@ -16,7 +16,9 @@
 #include "PolygonGroup2dLayerObject.h"
 #include "PolygonCoord.h"
 
-class Tiled2dMapVectorPolygonTile : public Tiled2dMapVectorTile, public std::enable_shared_from_this<Tiled2dMapVectorPolygonTile> {
+class Tiled2dMapVectorPolygonTile
+        : public Tiled2dMapVectorTile,
+          public std::enable_shared_from_this<Tiled2dMapVectorPolygonTile> {
 public:
     Tiled2dMapVectorPolygonTile(const std::weak_ptr<MapInterface> &mapInterface,
                                 const Tiled2dMapTileInfo &tileInfo,
@@ -24,7 +26,7 @@ public:
                                 const std::shared_ptr<PolygonVectorLayerDescription> &description);
 
     void updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
-                                const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) override;
+                                const Tiled2dMapVectorTileDataVariant &layerFeatures) override;
 
     void update() override;
 
@@ -37,7 +39,7 @@ public:
     virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
 
     virtual void setTileData(const std::shared_ptr<MaskingObjectInterface> &tileMask,
-                             const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) override;
+                             const Tiled2dMapVectorTileDataVariant &tileData) override;
 
     virtual void updateTileMask(const std::shared_ptr<MaskingObjectInterface> &tileMask) override;
 

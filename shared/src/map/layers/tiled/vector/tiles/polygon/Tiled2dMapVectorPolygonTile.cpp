@@ -50,12 +50,12 @@ Tiled2dMapVectorPolygonTile::Tiled2dMapVectorPolygonTile(const std::weak_ptr<Map
 }
 
 void Tiled2dMapVectorPolygonTile::updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
-                                                         const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) {
-    Tiled2dMapVectorTile::updateLayerDescription(description, layerFeatures);
+                                                         const Tiled2dMapVectorTileDataVariant &tileData) {
+    Tiled2dMapVectorTile::updateLayerDescription(description, tileData);
     featureGroups.clear();
     hitDetectionPolygonMap.clear();
     usedKeys = std::move(description->getUsedKeys());
-    setTileData(tileMask, layerFeatures);
+    setTileData(tileMask, tileData);
 }
 
 void Tiled2dMapVectorPolygonTile::update() {
@@ -111,7 +111,10 @@ void Tiled2dMapVectorPolygonTile::setScissorRect(const std::optional<::RectI> &s
 }
 
 void Tiled2dMapVectorPolygonTile::setTileData(const std::shared_ptr<MaskingObjectInterface> &tileMask,
-                 const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) {
+                 const Tiled2dMapVectorTileDataVariant &tileData) {
+
+    Tiled2dMapVectorTileDataVector data = std::holds_alternative<Tiled2dMapVectorTileDataVector>(tileData)
+                                          ? std::get<Tiled2dMapVectorTileDataVector>(tileData) : Tiled2dMapVectorTileDataVector();
 
     if (!mapInterface.lock()) {
         return;
@@ -123,7 +126,7 @@ void Tiled2dMapVectorPolygonTile::setTileData(const std::shared_ptr<MaskingObjec
 
     std::string defIdPrefix =
             std::to_string(tileInfo.x) + "/" + std::to_string(tileInfo.y) + "_" + layerName + "_";
-    if (!layerFeatures.empty() &&
+    if (!data.empty() &&
         description->minZoom <= tileInfo.zoomIdentifier &&
         description->maxZoom >= tileInfo.zoomIdentifier) {
 
@@ -132,7 +135,7 @@ void Tiled2dMapVectorPolygonTile::setTileData(const std::shared_ptr<MaskingObjec
 
         std::vector<int32_t> indices;
         std::int32_t indices_offset = 0;
-        for (const auto &feature : layerFeatures) {
+        for (const auto &feature : data) {
             const FeatureContext &featureContext = std::get<0>(feature);
 
             if (featureContext.geomType != vtzero::GeomType::POLYGON) { continue; }

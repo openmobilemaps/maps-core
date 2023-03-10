@@ -15,7 +15,9 @@
 #include "LineVectorLayerDescription.h"
 #include "LineGroup2dLayerObject.h"
 
-class Tiled2dMapVectorLineTile : public Tiled2dMapVectorTile, public std::enable_shared_from_this<Tiled2dMapVectorLineTile> {
+class Tiled2dMapVectorLineTile
+        : public Tiled2dMapVectorTile,
+          public std::enable_shared_from_this<Tiled2dMapVectorLineTile> {
 public:
     Tiled2dMapVectorLineTile(const std::weak_ptr<MapInterface> &mapInterface,
                                 const Tiled2dMapTileInfo &tileInfo,
@@ -23,7 +25,7 @@ public:
                                 const std::shared_ptr<LineVectorLayerDescription> &description);
 
     void updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
-                                const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) override;
+                                const Tiled2dMapVectorTileDataVariant &tileData) override;
 
     void update() override;
 
@@ -36,7 +38,7 @@ public:
     virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
 
     virtual void setTileData(const std::shared_ptr<MaskingObjectInterface> &tileMask,
-                             const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) override;
+                             const Tiled2dMapVectorTileDataVariant &tileData) override;
 
     virtual void updateTileMask(const std::shared_ptr<MaskingObjectInterface> &tileMask) override;
 

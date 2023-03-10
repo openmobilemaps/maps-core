@@ -25,14 +25,14 @@ Tiled2dMapVectorLineTile::Tiled2dMapVectorLineTile(const std::weak_ptr<MapInterf
 }
 
 void Tiled2dMapVectorLineTile::updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
-                                                      const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) {
-    Tiled2dMapVectorTile::updateLayerDescription(description, layerFeatures);
+                                                      const Tiled2dMapVectorTileDataVariant &tileData) {
+    Tiled2dMapVectorTile::updateLayerDescription(description, tileData);
     featureGroups.clear();
     reusableLineStyles.clear();
     styleHashToGroupMap.clear();
     hitDetection.clear();
     usedKeys = std::move(description->getUsedKeys());
-    setTileData(tileMask, layerFeatures);
+    setTileData(tileMask, tileData);
 }
 
 void Tiled2dMapVectorLineTile::update() {
@@ -131,7 +131,10 @@ void Tiled2dMapVectorLineTile::setScissorRect(const std::optional<::RectI> &scis
 }
 
 void Tiled2dMapVectorLineTile::setTileData(const std::shared_ptr<MaskingObjectInterface> &tileMask,
-                 const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) {
+                 const Tiled2dMapVectorTileDataVariant &tileData) {
+
+    Tiled2dMapVectorTileDataVector data = std::holds_alternative<Tiled2dMapVectorTileDataVector>(tileData)
+                                          ? std::get<Tiled2dMapVectorTileDataVector>(tileData) : Tiled2dMapVectorTileDataVector();
 
     auto mapInterface = this->mapInterface.lock();
     const auto &shaderFactory = mapInterface ? mapInterface->getShaderFactory() : nullptr;
@@ -139,12 +142,12 @@ void Tiled2dMapVectorLineTile::setTileData(const std::shared_ptr<MaskingObjectIn
         return;
     }
 
-    if (!layerFeatures.empty()) {
+    if (!data.empty()) {
         std::unordered_map<int, int> subGroupCoordCount;
         std::unordered_map<int, std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> styleGroupNewLinesMap;
         std::unordered_map<int, std::vector<std::tuple<std::vector<Coord>, int>>> styleGroupLineSubGroupMap;
 
-        for (auto featureIt = layerFeatures.rbegin(); featureIt != layerFeatures.rend(); ++featureIt) {
+        for (auto featureIt = data.rbegin(); featureIt != data.rend(); ++featureIt) {
             const FeatureContext &featureContext = std::get<0>(*featureIt);
             if ((description->filter == nullptr || description->filter->evaluateOr(EvaluationContext(-1, featureContext), true))) {
                 int styleGroupIndex = -1;

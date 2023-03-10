@@ -24,6 +24,10 @@
 
 class Tiled2dMapVectorLayer;
 
+typedef std::shared_ptr<TextureHolderInterface> Tiled2dMapVectorTileDataRaster;
+typedef std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> Tiled2dMapVectorTileDataVector;
+typedef std::variant<Tiled2dMapVectorTileDataRaster, Tiled2dMapVectorTileDataVector> Tiled2dMapVectorTileDataVariant;
+
 class Tiled2dMapVectorTile : public ActorObject,
                              public SimpleTouchInterface {
 public:
@@ -33,7 +37,7 @@ public:
                          const WeakActor<Tiled2dMapVectorLayer> &vectorLayer);
 
     virtual void updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
-                                        const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures);
+                                        const Tiled2dMapVectorTileDataVariant &layerData);
 
     virtual void update() = 0;
 
@@ -50,7 +54,7 @@ public:
     virtual void setScissorRect(const std::optional<::RectI> &scissorRect) = 0;
 
     virtual void setTileData(const std::shared_ptr<MaskingObjectInterface> &tileMask,
-                             const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) = 0;
+                             const Tiled2dMapVectorTileDataVariant &tileData) = 0;
 
     virtual void updateTileMask(const std::shared_ptr<MaskingObjectInterface> &tileMask) = 0;
 
