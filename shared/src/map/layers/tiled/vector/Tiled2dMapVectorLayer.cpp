@@ -462,6 +462,7 @@ void Tiled2dMapVectorLayer::forceReload() {
 }
 
 void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) {
+    return; // TODO UBCM: Remove
     auto lockSelfPtr = std::static_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
     {
@@ -598,8 +599,6 @@ void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &layerName, std::un
 }
 
 void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) {
-    return;
-
     auto lockSelfPtr = std::static_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
     {
@@ -745,17 +744,17 @@ Actor<Tiled2dMapVectorTile> Tiled2dMapVectorLayer::createTileActor(const Tiled2d
             break;
         }
         case VectorLayerType::line: {
-/*            auto mailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+            auto mailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
 
             auto lineActor = Actor<Tiled2dMapVectorLineTile>(mailbox, (std::weak_ptr<MapInterface>) mapInterface, tileInfo,
                                                              selfActor, std::static_pointer_cast<LineVectorLayerDescription>(
                             layerDescription));
 
             actor = lineActor.strongActor<Tiled2dMapVectorTile>();
-            break;*/
+            break;
         }
         case VectorLayerType::polygon: {
-/*            auto mailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+            auto mailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
 
             auto polygonActor = Actor<Tiled2dMapVectorPolygonTile>(mailbox, (std::weak_ptr<MapInterface>) mapInterface,
                                                                    tileInfo, selfActor,
@@ -763,7 +762,7 @@ Actor<Tiled2dMapVectorTile> Tiled2dMapVectorLayer::createTileActor(const Tiled2d
                                                                            layerDescription));
 
             actor = polygonActor.strongActor<Tiled2dMapVectorTile>();
-            break;*/
+            break;
         }
         case VectorLayerType::symbol: {
             break;

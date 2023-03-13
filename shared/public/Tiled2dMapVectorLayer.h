@@ -27,6 +27,7 @@
 #include "TiledLayerError.h"
 #include "Actor.h"
 #include "Tiled2dMapVectorBackgroundSubLayer.h"
+#include "Tiled2dMapVectorSourceDataManager.h"
 #include <unordered_map>
 
 class Tiled2dMapVectorLayer
@@ -176,6 +177,7 @@ private:
     std::recursive_mutex tileMaskMapMutex;
     std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> tileMaskMap;
 
+    std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceDataManager>> tileManagers;
     std::recursive_mutex tilesMutex;
     std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<int32_t, std::string, Actor<Tiled2dMapVectorTile>>>> tiles;
 
