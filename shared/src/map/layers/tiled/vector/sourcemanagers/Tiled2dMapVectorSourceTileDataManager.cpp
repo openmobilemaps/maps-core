@@ -17,8 +17,18 @@
 Tiled2dMapVectorSourceTileDataManager::Tiled2dMapVectorSourceTileDataManager(const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
                                                                              const std::shared_ptr<VectorMapDescription> &mapDescription,
                                                                              const std::string &source)
-        : Tiled2dMapVectorSourceDataManager(vectorLayer, mapDescription, source) {
+        : vectorLayer(vectorLayer),
+          mapDescription(mapDescription),
+          source(source) {
 
+}
+
+void Tiled2dMapVectorSourceTileDataManager::onAdded(const std::weak_ptr<::MapInterface> &mapInterface) {
+    this->mapInterface = mapInterface;
+}
+
+void Tiled2dMapVectorSourceTileDataManager::onRemoved() {
+    this->mapInterface = std::weak_ptr<MapInterface>();
 }
 
 void Tiled2dMapVectorSourceTileDataManager::update() {
@@ -95,87 +105,68 @@ void Tiled2dMapVectorSourceTileDataManager::setAlpha(float alpha) {
 
 void Tiled2dMapVectorSourceTileDataManager::setSelectionDelegate(
         const WeakActor<Tiled2dMapVectorLayerSelectionInterface> &selectionDelegate) {
-    Tiled2dMapVectorSourceDataManager::setSelectionDelegate(selectionDelegate);
+    this->selectionDelegate = selectionDelegate;
+    // TODO: Update tiles
 }
 
 void Tiled2dMapVectorSourceTileDataManager::setSelectedFeatureIdentifier(std::optional<int64_t> identifier) {
-
+    // TODO: Update Tiles
 }
 
 void Tiled2dMapVectorSourceTileDataManager::updateMaskObjects(
         const std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> toSetupMaskObject,
         const std::unordered_set<Tiled2dMapTileInfo> tilesToRemove) {
-    // TODO
-    /*
-        auto mapInterface = this->mapInterface;
+    auto mapInterface = this->mapInterface.lock();
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!renderingContext) return;
 
     for (const auto &[tileInfo, wrapper] : toSetupMaskObject) {
-
         wrapper.getGraphicsObject()->setup(renderingContext);
 
         std::shared_ptr<GraphicsObjectInterface> toClear;
-        {
-            std::lock_guard<std::recursive_mutex> lock(tileMaskMapMutex);
-            auto it = tileMaskMap.find(tileInfo);
-            if (it != tileMaskMap.end() && it->second.getGraphicsMaskObject()) {
-                toClear = it->second.getGraphicsMaskObject()->asGraphicsObject();
-            }
-            tileMaskMap[tileInfo] = wrapper;
+        auto it = tileMaskMap.find(tileInfo);
+        if (it != tileMaskMap.end() && it->second.getGraphicsMaskObject()) {
+            toClear = it->second.getGraphicsMaskObject()->asGraphicsObject();
         }
+        tileMaskMap[tileInfo] = wrapper;
+
         if (toClear) {
             toClear->clear();
         }
 
-        {
-            std::lock_guard<std::recursive_mutex> lock(tilesMutex);
-            auto subTiles = tiles.find(tileInfo);
-            if (subTiles != tiles.end()) {
-                for (auto const &[index, identifier, tile]: subTiles->second) {
-                    tile.syncAccess([tileI = tileInfo, maskObject = wrapper.getGraphicsMaskObject()](auto tile){
-                        tile->updateTileMask(maskObject);
-                    });
-                }
+        auto subTiles = tiles.find(tileInfo);
+        if (subTiles != tiles.end()) {
+            for (auto const &[index, identifier, tile]: subTiles->second) {
+                tile.syncAccess([tileI = tileInfo, maskObject = wrapper.getGraphicsMaskObject()](auto tile){
+                    tile->updateTileMask(maskObject);
+                });
             }
         }
     }
 
     for (const auto &tileToRemove: tilesToRemove) {
-        {
-            std::lock_guard<std::recursive_mutex> lock(tilesMutex);
-            auto tilesVectorIt = tiles.find(tileToRemove);
-            if (tilesVectorIt != tiles.end()) {
-                for (const auto &[index, identifier, tile]: tiles.at(tileToRemove)) {
-                    tile.syncAccess([](auto tile){
-                        tile->clear();
-                    });
-                }
-            }
-            tiles.erase(tileToRemove);
-        }
-
-        {
-            std::lock_guard<std::recursive_mutex> lock(tileMaskMapMutex);
-            auto maskIt = tileMaskMap.find(tileToRemove);
-            if (maskIt != tileMaskMap.end()) {
-                const auto &object = maskIt->second.getGraphicsMaskObject()->asGraphicsObject();
-                if (object->isReady()) object->clear();
-
-                tileMaskMap.erase(tileToRemove);
+        auto tilesVectorIt = tiles.find(tileToRemove);
+        if (tilesVectorIt != tiles.end()) {
+            for (const auto &[index, identifier, tile]: tiles.at(tileToRemove)) {
+                tile.syncAccess([](auto tile){
+                    tile->clear();
+                });
             }
         }
-        {
-            std::lock_guard<std::recursive_mutex> tilesReadyLock(tilesReadyMutex);
-            tilesReady.erase(tileToRemove);
+        tiles.erase(tileToRemove);
+
+        auto maskIt = tileMaskMap.find(tileToRemove);
+        if (maskIt != tileMaskMap.end()) {
+            const auto &object = maskIt->second.getGraphicsMaskObject()->asGraphicsObject();
+            if (object->isReady()) object->clear();
+
+            tileMaskMap.erase(tileToRemove);
         }
-        {
-            std::lock_guard<std::recursive_mutex> tilesReadyCountLock(tilesReadyCountMutex);
-            tilesReadyCount.erase(tileToRemove);
-        }
+
+        tilesReady.erase(tileToRemove);
+        tilesReadyCount.erase(tileToRemove);
     }
     mapInterface->invalidate();
-     */
 }
 
 Actor<Tiled2dMapVectorTile> Tiled2dMapVectorSourceTileDataManager::createTileActor(const Tiled2dMapTileInfo &tileInfo,

@@ -24,8 +24,6 @@ Tiled2dMapVectorSourceVectorTileDataManager::Tiled2dMapVectorSourceVectorTileDat
 
 void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std::string &sourceName,
                                                                        std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) {
-    // TODO
-    return;
     auto mapInterface = this->mapInterface.lock();
     {
         auto graphicsFactory = mapInterface ? mapInterface->getGraphicsObjectFactory() : nullptr;

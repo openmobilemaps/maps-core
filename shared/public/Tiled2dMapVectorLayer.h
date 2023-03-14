@@ -27,7 +27,7 @@
 #include "TiledLayerError.h"
 #include "Actor.h"
 #include "Tiled2dMapVectorBackgroundSubLayer.h"
-#include "Tiled2dMapVectorSourceDataManager.h"
+#include "Tiled2dMapVectorSourceTileDataManager.h"
 #include "Tiled2dMapVectorSourceRasterTileDataManager.h"
 #include "Tiled2dMapVectorSourceVectorTileDataManager.h"
 #include <unordered_map>
@@ -161,7 +161,7 @@ private:
     const std::shared_ptr<FontLoaderInterface> fontLoader;
 
     std::recursive_mutex dataManagerMutex;
-    std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceDataManager>> sourceDataManagers;
+    std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceTileDataManager>> sourceDataManagers;
 
     std::atomic_bool isLoadingStyleJson = false;
     std::atomic_bool isResumed = false;

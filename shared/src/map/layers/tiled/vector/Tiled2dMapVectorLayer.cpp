@@ -362,7 +362,7 @@ void Tiled2dMapVectorLayer::pause() {
     {
         std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
         for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-            sourceDataManager.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceDataManager::pause);
+            sourceDataManager.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceTileDataManager::pause);
         }
     }
 
@@ -388,7 +388,7 @@ void Tiled2dMapVectorLayer::resume() {
     {
         std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
         for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-            sourceDataManager.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceDataManager::resume);
+            sourceDataManager.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceTileDataManager::resume);
         }
     }
 
@@ -402,7 +402,7 @@ void Tiled2dMapVectorLayer::setAlpha(float alpha) {
     {
         std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
         for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-            sourceDataManager.message(&Tiled2dMapVectorSourceDataManager::setAlpha, alpha);
+            sourceDataManager.message(&Tiled2dMapVectorSourceTileDataManager::setAlpha, alpha);
         }
     }
 
@@ -424,14 +424,14 @@ void Tiled2dMapVectorLayer::forceReload() {
 void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) {
     std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-        sourceDataManager.message(&Tiled2dMapVectorSourceDataManager::onRasterTilesUpdated, layerName, currentTileInfos);
+        sourceDataManager.message(&Tiled2dMapVectorSourceTileDataManager::onRasterTilesUpdated, layerName, currentTileInfos);
     }
 }
 
 void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) {
     std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-        sourceDataManager.message(&Tiled2dMapVectorSourceDataManager::onVectorTilesUpdated, sourceName, currentTileInfos);
+        sourceDataManager.message(&Tiled2dMapVectorSourceTileDataManager::onVectorTilesUpdated, sourceName, currentTileInfos);
     }
 }
 
@@ -518,7 +518,7 @@ void Tiled2dMapVectorLayer::setScissorRect(const std::optional<::RectI> &scissor
 void Tiled2dMapVectorLayer::setSelectionDelegate(const WeakActor<Tiled2dMapVectorLayerSelectionInterface> &selectionDelegate) {
     std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-        sourceDataManager.message(&Tiled2dMapVectorSourceDataManager::setSelectionDelegate, selectionDelegate);
+        sourceDataManager.message(&Tiled2dMapVectorSourceTileDataManager::setSelectionDelegate, selectionDelegate);
     }
 }
 
@@ -526,7 +526,7 @@ void Tiled2dMapVectorLayer::setSelectedFeatureIdentifier(std::optional<int64_t> 
     {
         std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
         for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-            sourceDataManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceDataManager::setSelectedFeatureIdentifier, identifier);
+            sourceDataManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::setSelectedFeatureIdentifier, identifier);
         }
     }
     auto mapInterface = this->mapInterface;
@@ -538,7 +538,7 @@ void Tiled2dMapVectorLayer::setSelectedFeatureIdentifier(std::optional<int64_t> 
 void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription) {
     std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-        sourceDataManager.message(&Tiled2dMapVectorSourceDataManager::updateLayerDescription, layerDescription);
+        sourceDataManager.message(&Tiled2dMapVectorSourceTileDataManager::updateLayerDescription, layerDescription);
     }
 }
 
