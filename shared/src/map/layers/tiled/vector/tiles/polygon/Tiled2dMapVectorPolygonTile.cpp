@@ -9,7 +9,6 @@
  */
 
 #include "Tiled2dMapVectorPolygonTile.h"
-#include "Tiled2dMapVectorLayer.h"
 #include "Tiled2dMapVectorRasterSubLayerConfig.h"
 #include "RenderObject.h"
 #include "RenderPass.h"
@@ -39,9 +38,9 @@ namespace mapbox {
 
 Tiled2dMapVectorPolygonTile::Tiled2dMapVectorPolygonTile(const std::weak_ptr<MapInterface> &mapInterface,
                                                          const Tiled2dMapTileInfo &tileInfo,
-                                                         const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
+                                                         const WeakActor<Tiled2dMapVectorLayerReadyInterface> &tileReadyInterface,
                                                          const std::shared_ptr<PolygonVectorLayerDescription> &description)
-        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, vectorLayer) {
+        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, tileReadyInterface) {
     usedKeys = std::move(description->getUsedKeys());
     auto pMapInterface = mapInterface.lock();
     if (pMapInterface) {
@@ -102,7 +101,7 @@ void Tiled2dMapVectorPolygonTile::setup() {
     for (auto const &polygon: polygons) {
         if (!polygon->getPolygonObject()->isReady()) polygon->getPolygonObject()->setup(context);
     }
-    vectorLayer.message(&Tiled2dMapVectorLayer::tileIsReady, tileInfo);
+    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo);
 }
 
 void Tiled2dMapVectorPolygonTile::setScissorRect(const std::optional<::RectI> &scissorRect) {
@@ -221,7 +220,7 @@ void Tiled2dMapVectorPolygonTile::setTileData(const std::shared_ptr<MaskingObjec
         this->tileMask = tileMask;
         addPolygons(objectDescriptions);
     } else {
-        vectorLayer.message(&Tiled2dMapVectorLayer::tileIsReady, tileInfo);
+        tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo);
     }
 }
 
@@ -237,7 +236,7 @@ void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::tuple<std::
     }
 
     if (polygons.empty() && oldGraphicsObjects.empty()) {
-        vectorLayer.message(&Tiled2dMapVectorLayer::tileIsReady, tileInfo);
+        tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo);
         return;
     }
 
@@ -292,7 +291,7 @@ void Tiled2dMapVectorPolygonTile::setupPolygons(const std::vector<std::shared_pt
         if (!polygon->isReady()) polygon->setup(renderingContext);
     }
 
-    vectorLayer.message(&Tiled2dMapVectorLayer::tileIsReady, tileInfo);
+    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo);
 }
 
 void Tiled2dMapVectorPolygonTile::preGenerateRenderPasses() {

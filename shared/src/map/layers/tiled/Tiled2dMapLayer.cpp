@@ -181,5 +181,5 @@ void Tiled2dMapLayer::setT(int t) {
         }
     }
 
-    //onTilesUpdated();
+    //onRasterTilesUpdated();
 }

@@ -9,7 +9,6 @@
  */
 
 #include "Tiled2dMapVectorLineTile.h"
-#include "Tiled2dMapVectorLayer.h"
 #include "RenderPass.h"
 #include "MapCamera2dInterface.h"
 #include "RenderObject.h"
@@ -18,9 +17,9 @@
 
 Tiled2dMapVectorLineTile::Tiled2dMapVectorLineTile(const std::weak_ptr<MapInterface> &mapInterface,
                                                          const Tiled2dMapTileInfo &tileInfo,
-                                                         const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
+                                                         const WeakActor<Tiled2dMapVectorLayerReadyInterface> &tileReadyInterface,
                                                          const std::shared_ptr<LineVectorLayerDescription> &description)
-        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, vectorLayer) {
+        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, tileReadyInterface) {
     usedKeys = std::move(description->getUsedKeys());
 }
 
@@ -122,7 +121,7 @@ void Tiled2dMapVectorLineTile::setup() {
         auto const &lineObject = line->getLineObject();
         if (!lineObject->isReady()) lineObject->setup(context);
     }
-    vectorLayer.message(&Tiled2dMapVectorLayer::tileIsReady, tileInfo);
+    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo);
 }
 
 void Tiled2dMapVectorLineTile::setScissorRect(const std::optional<::RectI> &scissorRect) {
@@ -221,7 +220,7 @@ void Tiled2dMapVectorLineTile::setTileData(const std::shared_ptr<MaskingObjectIn
         this->tileMask = tileMask;
         addLines(styleGroupNewLinesMap);
     } else {
-        vectorLayer.message(&Tiled2dMapVectorLayer::tileIsReady, tileInfo);
+        tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo);
     }
 }
 
@@ -238,7 +237,7 @@ void Tiled2dMapVectorLineTile::addLines(const std::unordered_map<int, std::vecto
     }
 
     if (styleIdLinesMap.empty() && oldGraphicsObjects.empty()) {
-        vectorLayer.message(&Tiled2dMapVectorLayer::tileIsReady, tileInfo);
+        tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo);
         return;
     }
 
@@ -294,7 +293,7 @@ void Tiled2dMapVectorLineTile::setupLines(const std::vector<std::shared_ptr<Grap
         if (!line->isReady()) line->setup(renderingContext);
     }
 
-    vectorLayer.message(&Tiled2dMapVectorLayer::tileIsReady, tileInfo);
+    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo);
 }
 
 

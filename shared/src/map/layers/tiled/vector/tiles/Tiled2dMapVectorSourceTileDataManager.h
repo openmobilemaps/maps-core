@@ -10,27 +10,23 @@
 
 #pragma once
 
-#include "Tiled2dMapTileInfo.h"
-#include "Tiled2dMapVectorLayer.h"
 #include "Tiled2dMapVectorSourceDataManager.h"
-#include "Actor.h"
-#include <unordered_set>
+#include "Tiled2dMapLayerMaskWrapper.h"
+#include "Tiled2dMapVectorLayerReadyInterface.h"
 
-class Tiled2dMapVectorSourceTileDataManager : Tiled2dMapVectorSourceDataManager {
+class Tiled2dMapVectorTile;
+
+class Tiled2dMapVectorSourceTileDataManager : public Tiled2dMapVectorSourceDataManager,
+                                              public Tiled2dMapVectorLayerReadyInterface,
+                                              public std::enable_shared_from_this<Tiled2dMapVectorSourceTileDataManager> {
 public:
-    Tiled2dMapVectorSourceTileDataManager(const WeakActor<Tiled2dMapVectorLayer> &vectorLayer);
+    Tiled2dMapVectorSourceTileDataManager(const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
+                                          const std::shared_ptr<VectorMapDescription> &mapDescription,
+                                          const std::string &source);
 
     virtual void update() override;
 
-    virtual std::vector<std::tuple<int32_t, std::vector<std::shared_ptr<RenderObjectInterface>>>> getRenderObjects() override;
-
-    virtual void onTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) override;
-
-    virtual void onTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) override;
-
-    virtual void onAdded(const std::weak_ptr<::MapInterface> &mapInterface) override;
-
-    virtual void onRemoved() override;
+    virtual std::vector<std::tuple<int32_t, std::vector<std::shared_ptr<RenderPassInterface>>>> buildRenderPasses() override;
 
     virtual void pause() override;
 
@@ -42,10 +38,25 @@ public:
 
     virtual void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription) override;
 
-private:
-    void updateMaskObjects(const std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> toSetupMaskObject, const std::unordered_set<Tiled2dMapTileInfo> tilesToRemove);
+    void setSelectionDelegate(const WeakActor<Tiled2dMapVectorLayerSelectionInterface> &selectionDelegate) override;
 
-    const WeakActor<Tiled2dMapVectorLayer> vectorLayer;
+    void setSelectedFeatureIdentifier(std::optional<int64_t> identifier) override;
+
+    virtual void onRasterTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) override {};
+
+    virtual void onVectorTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) override {};
+
+    void updateMaskObjects(const std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> toSetupMaskObject,
+                           const std::unordered_set<Tiled2dMapTileInfo> tilesToRemove);
+
+protected:
+    Actor<Tiled2dMapVectorTile> createTileActor(const Tiled2dMapTileInfo &tileInfo,
+                                                const std::shared_ptr<VectorLayerDescription> &layerDescription);
+
+    virtual void onTileCompletelyReady(const Tiled2dMapTileInfo tileInfo) = 0;
 
     std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<int32_t, std::string, Actor<Tiled2dMapVectorTile>>>> tiles;
+    std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> tileMaskMap;
+    std::unordered_set<Tiled2dMapTileInfo> tilesReady;
+    std::unordered_map<Tiled2dMapTileInfo, int> tilesReadyCount;
 };

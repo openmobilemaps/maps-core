@@ -21,7 +21,7 @@ class Tiled2dMapVectorLineTile
 public:
     Tiled2dMapVectorLineTile(const std::weak_ptr<MapInterface> &mapInterface,
                                 const Tiled2dMapTileInfo &tileInfo,
-                                const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
+                                const WeakActor<Tiled2dMapVectorLayerReadyInterface> &tileReadyInterface,
                                 const std::shared_ptr<LineVectorLayerDescription> &description);
 
     void updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,

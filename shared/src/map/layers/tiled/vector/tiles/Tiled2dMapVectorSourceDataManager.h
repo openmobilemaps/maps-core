@@ -11,21 +11,30 @@
 #pragma once
 
 #include "Tiled2dMapTileInfo.h"
-#include "Tiled2dMapVectorLayer.h"
+#include "VectorMapDescription.h"
+#include "RenderPassInterface.h"
+#include "Tiled2dMapRasterTileInfo.h"
+#include "Tiled2dMapVectorTileInfo.h"
+#include "MapInterface.h"
+#include "Tiled2dMapVectorLayerSelectionInterface.h"
 #include "Actor.h"
 #include <unordered_set>
 
-class Tiled2dMapVectorSourceDataManager {
+class Tiled2dMapVectorLayer;
+
+class Tiled2dMapVectorSourceDataManager : public ActorObject {
 public:
-    Tiled2dMapVectorSourceDataManager(const WeakActor<Tiled2dMapVectorLayer> &vectorLayer);
+    Tiled2dMapVectorSourceDataManager(const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
+                                      const std::shared_ptr<VectorMapDescription> &mapDescription,
+                                      const std::string &source);
 
     virtual void update() = 0;
 
-    virtual std::vector<std::tuple<int32_t, std::vector<std::shared_ptr<RenderObjectInterface>>>> getRenderObjects() = 0;
+    virtual std::vector<std::tuple<int32_t, std::vector<std::shared_ptr<RenderPassInterface>>>> buildRenderPasses() = 0;
 
-    virtual void onTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) = 0;
+    virtual void onRasterTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) = 0;
 
-    virtual void onTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) = 0;
+    virtual void onVectorTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) = 0;
 
     virtual void onAdded(const std::weak_ptr<::MapInterface> &mapInterface);
 
@@ -35,13 +44,18 @@ public:
 
     virtual void resume() = 0;
 
-    virtual void setAlpha(float alpha) = 0;
+    virtual void setSelectionDelegate(const WeakActor<Tiled2dMapVectorLayerSelectionInterface> &selectionDelegate);
 
-    virtual void tileIsReady(const Tiled2dMapTileInfo &tile) = 0;
+    virtual void setSelectedFeatureIdentifier(std::optional<int64_t> identifier) = 0;
+
+    virtual void setAlpha(float alpha) = 0;
 
     virtual void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription) = 0;
 
-private:
-    const WeakActor<Tiled2dMapVectorLayer> vectorLayer;
+protected:
     std::weak_ptr<MapInterface> mapInterface;
+    const WeakActor<Tiled2dMapVectorLayer> vectorLayer;
+    const std::shared_ptr<VectorMapDescription> mapDescription;
+    const std::string source;
+    WeakActor<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate;
 };

@@ -9,7 +9,6 @@
  */
 
 #include "Tiled2dMapVectorRasterTile.h"
-#include "Tiled2dMapVectorLayer.h"
 #include "MapCamera2dInterface.h"
 #include "Tiled2dMapVectorRasterSubLayerConfig.h"
 #include "AlphaShaderInterface.h"
@@ -17,9 +16,9 @@
 
 Tiled2dMapVectorRasterTile::Tiled2dMapVectorRasterTile(const std::weak_ptr<MapInterface> &mapInterface,
                                                        const Tiled2dMapTileInfo &tileInfo,
-                                                       const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
+                                                       const WeakActor<Tiled2dMapVectorLayerReadyInterface> &tileReadyInterface,
                                                        const std::shared_ptr<RasterVectorLayerDescription> &description)
-                                                       : Tiled2dMapVectorTile(mapInterface, tileInfo, description, vectorLayer){
+                                                       : Tiled2dMapVectorTile(mapInterface, tileInfo, description, tileReadyInterface){
     auto pMapInterface = mapInterface.lock();
     if (pMapInterface) {
         auto shader = pMapInterface->getShaderFactory()->createAlphaShader();
@@ -64,7 +63,7 @@ void Tiled2dMapVectorRasterTile::setup() {
     }
     tileObject->getGraphicsObject()->setup(renderingContext);
     tileObject->getQuadObject()->loadTexture(renderingContext, tileData);
-    vectorLayer.message(&Tiled2dMapVectorLayer::tileIsReady, tileInfo);
+    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo);
 }
 
 void Tiled2dMapVectorRasterTile::setAlpha(float alpha) {
@@ -120,7 +119,7 @@ void Tiled2dMapVectorRasterTile::setupTile(const Tiled2dMapVectorTileDataRaster 
 
     tileObject->getQuadObject()->loadTexture(renderingContext, tileData);
 
-    vectorLayer.message(&Tiled2dMapVectorLayer::tileIsReady, tileInfo);
+    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo);
 }
 
 

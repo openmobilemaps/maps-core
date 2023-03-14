@@ -28,13 +28,14 @@
 #include "Actor.h"
 #include "Tiled2dMapVectorBackgroundSubLayer.h"
 #include "Tiled2dMapVectorSourceDataManager.h"
+#include "Tiled2dMapVectorSourceRasterTileDataManager.h"
+#include "Tiled2dMapVectorSourceVectorTileDataManager.h"
 #include <unordered_map>
 
 class Tiled2dMapVectorLayer
         : public Tiled2dMapLayer,
           public TouchInterface,
           public Tiled2dMapVectorLayerInterface,
-          public Tiled2dMapVectorLayerReadyInterface,
           public ActorObject,
           public Tiled2dMapRasterSourceListener,
           public Tiled2dMapVectorSourceListener {
@@ -84,11 +85,6 @@ public:
     void onTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) override;
 
     void onTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) override;
-
-    Actor<Tiled2dMapVectorTile> createTileActor(const Tiled2dMapTileInfo &tileInfo,
-                                                const std::shared_ptr<VectorLayerDescription> &layerDescription);
-
-    virtual void tileIsReady(const Tiled2dMapTileInfo &tile) override;
 
     virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
 
@@ -148,8 +144,6 @@ private:
 
     void initializeVectorLayer();
 
-    void updateMaskObjects(const std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> toSetupMaskObject, const std::unordered_set<Tiled2dMapTileInfo> tilesToRemove);
-
     int32_t layerIndex = -1;
 
     const std::optional<double> dpFactor;
@@ -166,20 +160,8 @@ private:
 
     const std::shared_ptr<FontLoaderInterface> fontLoader;
 
-    std::recursive_mutex tileUpdateMutex;
-
-    std::recursive_mutex tilesReadyMutex;
-    std::unordered_set<Tiled2dMapTileInfo> tilesReady;
-
-    std::recursive_mutex tilesReadyCountMutex;
-    std::unordered_map<Tiled2dMapTileInfo, int> tilesReadyCount;
-
-    std::recursive_mutex tileMaskMapMutex;
-    std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> tileMaskMap;
-
-    std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceDataManager>> tileManagers;
-    std::recursive_mutex tilesMutex;
-    std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<int32_t, std::string, Actor<Tiled2dMapVectorTile>>>> tiles;
+    std::recursive_mutex dataManagerMutex;
+    std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceDataManager>> sourceDataManagers;
 
     std::atomic_bool isLoadingStyleJson = false;
     std::atomic_bool isResumed = false;
@@ -187,6 +169,7 @@ private:
     WeakActor<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate;
 
     float alpha = 1.0;
+    std::optional<::RectI> scissorRect = std::nullopt;
 };
 
 

@@ -21,8 +21,7 @@
 #include "Tiled2dMapVectorLayerSelectionInterface.h"
 #include "SimpleTouchInterface.h"
 #include "VectorLayerDescription.h"
-
-class Tiled2dMapVectorLayer;
+#include "Tiled2dMapVectorLayerReadyInterface.h"
 
 typedef std::shared_ptr<TextureHolderInterface> Tiled2dMapVectorTileDataRaster;
 typedef std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> Tiled2dMapVectorTileDataVector;
@@ -34,7 +33,7 @@ public:
     Tiled2dMapVectorTile(const std::weak_ptr<MapInterface> &mapInterface,
                          const Tiled2dMapTileInfo &tileInfo,
                          const std::shared_ptr<VectorLayerDescription> &description,
-                         const WeakActor<Tiled2dMapVectorLayer> &vectorLayer);
+                         const WeakActor<Tiled2dMapVectorLayerReadyInterface> &tileReadyInterface);
 
     virtual void updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                         const Tiled2dMapVectorTileDataVariant &layerData);
@@ -66,7 +65,7 @@ protected:
     const std::weak_ptr<MapInterface> mapInterface;
     const Tiled2dMapTileInfo tileInfo;
     std::shared_ptr<VectorLayerDescription> description;
-    const WeakActor<Tiled2dMapVectorLayer> vectorLayer;
+    const WeakActor<Tiled2dMapVectorLayerReadyInterface> tileReadyInterface;
 
     float alpha = 1.0;
 
