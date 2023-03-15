@@ -22,8 +22,6 @@ Tiled2dMapVectorSourceRasterTileDataManager::Tiled2dMapVectorSourceRasterTileDat
 
 void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std::string &layerName,
                                                                        std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) {
-    // TODO
-    //return;
     auto mapInterface = this->mapInterface.lock();
     {
         auto graphicsFactory = mapInterface ? mapInterface->getGraphicsObjectFactory() : nullptr;
@@ -38,43 +36,34 @@ void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std
 
         std::unordered_set<Tiled2dMapTileInfo> tilesToRemove;
 
-        {
-            // TODO: Remove: std::lock_guard<std::recursive_mutex> lock(tilesMutex);
+        for (const auto &rasterTileInfo: currentTileInfos) {
+            if (tiles.count(rasterTileInfo.tileInfo) == 0) {
+                tilesToAdd.insert(rasterTileInfo);
+            } else {
+                tilesToKeep.insert(rasterTileInfo);
+            }
+        }
 
-            for (const auto &rasterTileInfo: currentTileInfos) {
-                if (tiles.count(rasterTileInfo.tileInfo) == 0) {
-                    tilesToAdd.insert(rasterTileInfo);
-                    //LogDebug <<= "UBCM: Raster to add " + std::to_string(rasterTileInfo.tileInfo.x) + "/" + std::to_string(rasterTileInfo.tileInfo.y);
-                } else {
-                    tilesToKeep.insert(rasterTileInfo);
+        for (const auto &[tileInfo, _]: tiles) {
+            bool found = false;
+            for (const auto &currentTile: currentTileInfos) {
+                if (tileInfo == currentTile.tileInfo) {
+                    found = true;
+                    break;
                 }
             }
-
-            for (const auto &[tileInfo, _]: tiles) {
-                bool found = false;
-                for (const auto &currentTile: currentTileInfos) {
-                    if (tileInfo == currentTile.tileInfo) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    tilesToRemove.insert(tileInfo);
-                    //LogDebug <<= "UBCM: Raster to remove " + std::to_string(tileInfo.x) + "/" + std::to_string(tileInfo.y);
-                }
+            if (!found) {
+                tilesToRemove.insert(tileInfo);
             }
         }
 
         std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> newTileMasks;
         for (const auto &tileEntry : tilesToKeep) {
 
-            size_t existingPolygonHash;
-            {
-                // TODO: Remove: std::lock_guard<std::recursive_mutex> lock(tileMaskMapMutex);
-                auto it = tileMaskMap.find(tileEntry.tileInfo);
-                if (it != tileMaskMap.end()) {
-                    existingPolygonHash = it->second.getPolygonHash();
-                }
+            size_t existingPolygonHash = 0;
+            auto it = tileMaskMap.find(tileEntry.tileInfo);
+            if (it != tileMaskMap.end()) {
+                existingPolygonHash = it->second.getPolygonHash();
             }
             const size_t hash = std::hash<std::vector<::PolygonCoord>>()(tileEntry.masks);
 
@@ -93,15 +82,9 @@ void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std
 
         for (const auto &tile : tilesToAdd) {
 
-            {
-                // TODO: Remove: std::lock_guard<std::recursive_mutex> tilesReadyCountLock(tilesReadyCountMutex);
-                tilesReadyCount[tile.tileInfo] = 0; // TODO: UBCM - set to number of subtiles
-            }
+            tilesReadyCount[tile.tileInfo] = 0;
 
-            {
-                // TODO: Remove: std::lock_guard<std::recursive_mutex> lock(tilesMutex);
-                tiles[tile.tileInfo] = {};
-            }
+            tiles[tile.tileInfo] = {};
 
             for (int32_t index = 0; index < mapDescription->layers.size(); index++) {
                 auto const &layer= mapDescription->layers.at(index);
@@ -123,28 +106,17 @@ void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std
                             actor.message(&Tiled2dMapVectorTile::setSelectionDelegate, selectionDelegate);
                         }
 
-                        {
-                            // TODO: Remove: std::lock_guard<std::recursive_mutex> tilesReadyCountLock(tilesReadyCountMutex);
-                            tilesReadyCount[tile.tileInfo] += 1; // TODO: UBCM remove
-                        }
+                        tilesReadyCount[tile.tileInfo] += 1;
 
+                        tiles[tile.tileInfo].push_back({index, identifier, actor.strongActor<Tiled2dMapVectorTile>()});
 
-                        {
-                            // TODO: Remove: std::lock_guard<std::recursive_mutex> lock(tilesMutex);
-                            tiles[tile.tileInfo].push_back({index, identifier, actor.strongActor<Tiled2dMapVectorTile>()});
-                        }
-
-                        actor.message(&Tiled2dMapVectorTile::setTileData, nullptr, data);
+                        // Safe call, because not externally available yet
+                        actor.unsafe()->setTileData(nullptr, data);
                     }
                 }
             }
 
-            bool isAlreadyReady = false;
-            {
-                // TODO: Remove: std::lock_guard<std::recursive_mutex> tilesReadyCountLock(tilesReadyCountMutex);
-                isAlreadyReady = tilesReadyCount[tile.tileInfo] == 0;
-            }
-            if (isAlreadyReady) {
+            if (tilesReadyCount[tile.tileInfo]) {
                 rasterSource.message(&Tiled2dMapRasterSource::setTileReady, tile.tileInfo);
             }
         }
