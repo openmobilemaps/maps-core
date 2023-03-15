@@ -81,7 +81,7 @@ void Tiled2dMapVectorRasterTile::setTileData(const Tiled2dMapVectorTileDataVaria
     this->tileData = data;
 
 #ifdef __APPLE__
-    setupTile(tileData);
+    setupTile(data);
 #else
     auto selfActor = WeakActor(mailbox, shared_from_this()->weak_from_this());
     selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorRasterTile::setupTile, data);
