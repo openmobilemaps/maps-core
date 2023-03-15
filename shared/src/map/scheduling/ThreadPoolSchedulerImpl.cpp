@@ -150,13 +150,13 @@ void ThreadPoolSchedulerImpl::runGraphicsTasks() {
     int i;
     for (i = 0; i < MAX_NUM_GRAPHICS_TASKS; i++) {
         {
-            std::unique_lock<std::mutex> lock(graphicsMutex);
+            if (!graphicsMutex.try_lock()) return;
             if (graphicsQueue.empty()) {
                 break;
             } else {
                 auto task = std::move(graphicsQueue.front());
                 graphicsQueue.pop_front();
-                lock.unlock();
+                graphicsMutex.unlock();
                 if (task) task->run();
             }
         }
