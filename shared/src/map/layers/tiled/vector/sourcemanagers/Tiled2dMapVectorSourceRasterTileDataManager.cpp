@@ -23,7 +23,7 @@ Tiled2dMapVectorSourceRasterTileDataManager::Tiled2dMapVectorSourceRasterTileDat
 void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std::string &layerName,
                                                                        std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) {
     // TODO
-    return;
+    //return;
     auto mapInterface = this->mapInterface.lock();
     {
         auto graphicsFactory = mapInterface ? mapInterface->getGraphicsObjectFactory() : nullptr;

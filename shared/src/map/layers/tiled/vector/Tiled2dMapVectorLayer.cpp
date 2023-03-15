@@ -185,11 +185,13 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     
     auto selfMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
     auto castedMe = std::static_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
+    auto selfActor = WeakActor<Tiled2dMapVectorLayer>(selfMailbox, castedMe);
     auto selfRasterActor = WeakActor<Tiled2dMapRasterSourceListener>(selfMailbox, castedMe);
     auto selfVectorActor = WeakActor<Tiled2dMapVectorSourceListener>(selfMailbox, castedMe);
 
     std::vector<WeakActor<Tiled2dMapSourceInterface>> sourceInterfaces;
     std::vector<Actor<Tiled2dMapRasterSource>> rasterSources;
+    std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceTileDataManager>> sourceTileManagers;
     std::unordered_map<std::string, std::unordered_set<std::string>> layersToDecode;
 
     for (auto const& layerDesc : mapDescription->layers)
@@ -201,16 +203,24 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
             }
             case raster: {
                 auto sourceMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
-                auto rasterSource = std::make_shared<Tiled2dMapRasterSource>(mapInterface->getMapConfig(),
-                                                                             std::make_shared<Tiled2dMapVectorRasterSubLayerConfig>(
-                                                                                     std::static_pointer_cast<RasterVectorLayerDescription>(
-                                                                                             layerDesc)),
-                                                                             mapInterface->getCoordinateConverterHelper(),
-                                                                             mapInterface->getScheduler(), loaders,
-                                                                             selfRasterActor,
-                                                                             mapInterface->getCamera()->getScreenDensityPpi());
-                rasterSources.emplace_back(Actor<Tiled2dMapRasterSource>(mailbox, rasterSource));
-                sourceInterfaces.emplace_back(WeakActor<Tiled2dMapSourceInterface>(mailbox, rasterSource));
+                auto sourceActor = Actor<Tiled2dMapRasterSource>(sourceMailbox,
+                                                                 mapInterface->getMapConfig(),
+                                                                 std::make_shared<Tiled2dMapVectorRasterSubLayerConfig>(
+                                                                         std::static_pointer_cast<RasterVectorLayerDescription>(
+                                                                                 layerDesc)),
+                                                                 mapInterface->getCoordinateConverterHelper(),
+                                                                 mapInterface->getScheduler(), loaders,
+                                                                 selfRasterActor,
+                                                                 mapInterface->getCamera()->getScreenDensityPpi());
+                rasterSources.push_back(sourceActor);
+                auto sourceDataManagerMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+                auto sourceManagerActor = Actor<Tiled2dMapVectorSourceRasterTileDataManager>(sourceDataManagerMailbox,
+                                                                                             selfActor,
+                                                                                             mapDescription,
+                                                                                             layerDesc->source,
+                                                                                             sourceActor.weakActor<Tiled2dMapRasterSource>());
+                sourceTileManagers[layerDesc->source] = sourceManagerActor.strongActor<Tiled2dMapVectorSourceTileDataManager>();
+                sourceInterfaces.push_back(sourceActor.weakActor<Tiled2dMapSourceInterface>());
                 break;
             }
             case line:
@@ -222,23 +232,38 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
             }
         }
     }
-    this->rasterTileSources = rasterSources;
 
     auto sourceMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
-    vectorTileSource.emplaceObject(sourceMailbox, mapInterface->getMapConfig(),
-                                   layerConfigs,
-                                   mapInterface->getCoordinateConverterHelper(),
-                                   mapInterface->getScheduler(),
-                                   loaders,
-                                   selfVectorActor,
-                                   layersToDecode,
-                                   mapInterface->getCamera()->getScreenDensityPpi());
-    sourceInterfaces.push_back(vectorTileSource.weakActor<Tiled2dMapSourceInterface>());
+    auto vectorSource = Actor<Tiled2dMapVectorSource>(sourceMailbox,
+                                                      mapInterface->getMapConfig(),
+                                                      layerConfigs,
+                                                      mapInterface->getCoordinateConverterHelper(),
+                                                      mapInterface->getScheduler(),
+                                                      loaders,
+                                                      selfVectorActor,
+                                                      layersToDecode,
+                                                      mapInterface->getCamera()->getScreenDensityPpi());
+    sourceInterfaces.push_back(vectorSource.weakActor<Tiled2dMapSourceInterface>());
+    auto sourceDataManagerMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+    auto sourceManagerActor = Actor<Tiled2dMapVectorSourceVectorTileDataManager>(sourceDataManagerMailbox,
+                                                                                 selfActor,
+                                                                                 mapDescription,
+                                                                                 layersToDecode.begin()->first,
+                                                                                 vectorSource.weakActor<Tiled2dMapVectorSource>());
+    sourceTileManagers[layersToDecode.begin()->first] = sourceManagerActor.strongActor<Tiled2dMapVectorSourceTileDataManager>();
+
+    this->rasterTileSources = rasterSources;
+    vectorTileSource = vectorSource;
+    sourceDataManagers = sourceTileManagers;
 
     setSourceInterfaces(sourceInterfaces);
 
     Tiled2dMapLayer::onAdded(mapInterface, layerIndex);
     mapInterface->getTouchHandler()->insertListener(std::dynamic_pointer_cast<TouchInterface>(shared_from_this()), layerIndex);
+
+    for (const auto &sourceTileManager : sourceTileManagers) {
+        sourceTileManager.second.message(&Tiled2dMapVectorSourceTileDataManager::onAdded, mapInterface);
+    }
 
     if (mapDescription->spriteBaseUrl) {
         loadSpriteData();
@@ -254,6 +279,9 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
 
     if (isResumed) {
         vectorTileSource.message(&Tiled2dMapVectorSource::resume);
+        for (const auto &rasterSource : rasterSources) {
+            rasterSource.message(&Tiled2dMapRasterSource::resume);
+        }
     }
 
 }
@@ -352,13 +380,6 @@ void Tiled2dMapVectorLayer::onRemoved() {
 void Tiled2dMapVectorLayer::pause() {
     isResumed = false;
 
-    if (vectorTileSource) {
-        vectorTileSource.message(&Tiled2dMapVectorSource::pause);
-    }
-    for (const auto &rasterSource : rasterTileSources) {
-        rasterSource.message(&Tiled2dMapRasterSource::pause);
-    }
-
     {
         std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
         for (const auto &[source, sourceDataManager]: sourceDataManagers) {
@@ -373,13 +394,6 @@ void Tiled2dMapVectorLayer::pause() {
 
 void Tiled2dMapVectorLayer::resume() {
     isResumed = true;
-
-    if (vectorTileSource) {
-        vectorTileSource.message(&Tiled2dMapVectorSource::resume);
-    }
-    for (const auto &rasterSource : rasterTileSources) {
-        rasterSource.message(&Tiled2dMapRasterSource::resume);
-    }
 
     if (backgroundLayer) {
         backgroundLayer->resume();
