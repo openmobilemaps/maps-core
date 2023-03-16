@@ -39,8 +39,6 @@ public:
 
     virtual void update();
 
-    virtual std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> buildRenderPasses();
-
     virtual void pause();
 
     virtual void resume();
@@ -81,8 +79,6 @@ protected:
 
     std::optional<::RectI> scissorRect = std::nullopt;
 
-    std::recursive_mutex renderPassMutex;
-    std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> currentRenderPasses;
     std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<int32_t, std::vector<std::shared_ptr<RenderObjectInterface>>>>> tileRenderObjectsMap;
     std::unordered_map<std::string, int32_t> layerNameIndexMap;
     std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<int32_t, std::string, Actor<Tiled2dMapVectorTile>>>> tiles;

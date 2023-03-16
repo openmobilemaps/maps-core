@@ -48,11 +48,6 @@ void Tiled2dMapVectorSourceTileDataManager::update() {
     }
 }
 
-std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> Tiled2dMapVectorSourceTileDataManager::buildRenderPasses() {
-    std::lock_guard<std::recursive_mutex> lock(renderPassMutex);
-    return currentRenderPasses;
-}
-
 void Tiled2dMapVectorSourceTileDataManager::pregenerateRenderPasses() {
     std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> renderPasses;
     for (const auto &[tile, subTiles] : tileRenderObjectsMap) {
@@ -66,11 +61,7 @@ void Tiled2dMapVectorSourceTileDataManager::pregenerateRenderPasses() {
             }
         }
     }
-
-    {
-        std::lock_guard<std::recursive_mutex> lock(renderPassMutex);
-        currentRenderPasses = renderPasses;
-    }
+    vectorLayer.message(&Tiled2dMapVectorLayer::onRenderPassUpdate, source, renderPasses);
 }
 
 void Tiled2dMapVectorSourceTileDataManager::pause() {

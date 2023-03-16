@@ -323,7 +323,14 @@ void Tiled2dMapVectorLayer::update() {
 }
 
 std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::buildRenderPasses() {
+    std::lock_guard<std::recursive_mutex> lock(renderPassMutex);
+    return currentRenderPasses;
+}
+
+void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, const std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> &renderPasses) {
     std::vector<std::shared_ptr<RenderPassInterface>> newPasses;
+
+    sourceRenderPassesMap[source] = renderPasses;
 
     if (backgroundLayer) {
         auto backgroundLayerPasses = backgroundLayer->buildRenderPasses();
@@ -332,11 +339,8 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::build
 
     std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> orderedPasses;
     std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
-    for (const auto &[source, sourceDataManager] : sourceDataManagers) {
-        const auto &passes = sourceDataManager.syncAccess([](auto manager) {
-            return manager->buildRenderPasses();
-        });
-        orderedPasses.insert(orderedPasses.end(), passes.begin(), passes.end());
+    for (const auto &[source, indexPasses] : sourceRenderPassesMap) {
+        orderedPasses.insert(orderedPasses.end(), indexPasses.begin(), indexPasses.end());
     }
 
     std::sort(orderedPasses.begin(), orderedPasses.end(), [](const auto &lhs, const auto &rhs) {
@@ -347,7 +351,10 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::build
         newPasses.push_back(pass);
     }
 
-    return newPasses;
+    {
+        std::lock_guard<std::recursive_mutex> lock(renderPassMutex);
+        currentRenderPasses = newPasses;
+    }
 }
 
 void Tiled2dMapVectorLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface, int32_t layerIndex) {

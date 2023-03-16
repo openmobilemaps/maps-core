@@ -68,6 +68,8 @@ public:
 
     virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override;
 
+    virtual void onRenderPassUpdate(const std::string &source, const std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> &renderPasses);
+
     virtual void onAdded(const std::shared_ptr<::MapInterface> &mapInterface, int32_t layerIndex) override;
 
     virtual void onRemoved() override;
@@ -162,6 +164,10 @@ private:
 
     std::recursive_mutex dataManagerMutex;
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceTileDataManager>> sourceDataManagers;
+
+    std::recursive_mutex renderPassMutex;
+    std::vector<std::shared_ptr<RenderPassInterface>> currentRenderPasses;
+    std::unordered_map<std::string, std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>>> sourceRenderPassesMap;
 
     std::atomic_bool isLoadingStyleJson = false;
     std::atomic_bool isResumed = false;
