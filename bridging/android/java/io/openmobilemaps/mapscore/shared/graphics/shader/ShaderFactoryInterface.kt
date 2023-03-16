@@ -22,6 +22,8 @@ abstract class ShaderFactoryInterface {
 
     abstract fun createTextShader(): TextShaderInterface
 
+    abstract fun createSphereProjectionShader(): SphereProjectionShaderInterface
+
     private class CppProxy : ShaderFactoryInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -75,5 +77,11 @@ abstract class ShaderFactoryInterface {
             return native_createTextShader(this.nativeRef)
         }
         private external fun native_createTextShader(_nativeRef: Long): TextShaderInterface
+
+        override fun createSphereProjectionShader(): SphereProjectionShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createSphereProjectionShader(this.nativeRef)
+        }
+        private external fun native_createSphereProjectionShader(_nativeRef: Long): SphereProjectionShaderInterface
     }
 }

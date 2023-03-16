@@ -16,6 +16,7 @@
 #include "RenderObject.h"
 #include "RenderPass.h"
 #include "PolygonCompare.h"
+#include "SphereProjectionShaderInterface.h"
 #include <Logger.h>
 #include <map>
 #include <chrono>
@@ -160,7 +161,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
             return;
         }
         
-        std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> tilesToSetup, tilesToClean;
+        std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured3dLayerObject>>> tilesToSetup, tilesToClean;
         std::vector<const std::shared_ptr<MaskingObjectInterface>> newMaskObjects;
         std::vector<const std::shared_ptr<MaskingObjectInterface>> obsoleteMaskObjects;
 
@@ -208,13 +209,13 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
 
             auto const &zoomInfo = layerConfig->getZoomInfo();
             for (const auto &tile : tilesToAdd) {
-                std::shared_ptr<Textured2dLayerObject> tileObject;
+                std::shared_ptr<Textured3dLayerObject> tileObject;
                 if (shader) {
-                    tileObject = std::make_shared<Textured2dLayerObject>(graphicsFactory->createQuad(shader), nullptr, mapInterface);
+                    tileObject = std::make_shared<Textured3dLayerObject>(graphicsFactory->createQuad3d(shader), nullptr, mapInterface);
                 } else {
-                    auto alphaShader = shaderFactory->createAlphaShader();
-                    tileObject = std::make_shared<Textured2dLayerObject>(
-                            graphicsFactory->createQuad(alphaShader->asShaderProgramInterface()), alphaShader, mapInterface);
+                    auto alphaShader = shaderFactory->createSphereProjectionShader();
+                    tileObject = std::make_shared<Textured3dLayerObject>(
+                            graphicsFactory->createQuad3d(alphaShader->asShaderProgramInterface()), alphaShader, mapInterface);
                 }
                 if (zoomInfo.numDrawPreviousLayers == 0 || !animationsEnabled || zoomInfo.maskTile) {
                     tileObject->setAlpha(alpha);
@@ -280,8 +281,8 @@ void Tiled2dMapRasterLayer::updateMaskObjects(const std::vector<const std::share
 
 
 void Tiled2dMapRasterLayer::setupTiles(
-        const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToSetup,
-        const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToClean) {
+        const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured3dLayerObject>>> &tilesToSetup,
+        const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured3dLayerObject>>> &tilesToClean) {
     auto mapInterface = this->mapInterface;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!renderingContext) {
