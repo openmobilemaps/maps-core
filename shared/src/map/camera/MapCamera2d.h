@@ -158,6 +158,13 @@ class MapCamera2d : public MapCamera2dInterface,
     double zoomMin = -1;
     double zoomMax = 200.0;
 
+                        Coord focusPointPosition;
+                        double focusPointAltitude;
+                        double cameraDistance;
+                        double cameraPitch; // looking up or down
+                        double cameraRoll;
+                        double cameraYaw;
+
     RectCoord bounds;
 
     std::recursive_mutex vpDataMutex;
