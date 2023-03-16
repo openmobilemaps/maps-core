@@ -130,46 +130,32 @@ public:
     };
     
     void receive(const MailboxExecutionEnvironment &environment) {
+        std::lock_guard<std::recursive_mutex> receivingLock(receivingMutex);
         std::unique_ptr<MailboxMessage> message;
-        bool wasEmpty = false;
+        bool wasEmpty;
+
+
+        auto receiveLambda = [&message, &wasEmpty](std::mutex& mutex, std::deque<std::unique_ptr<MailboxMessage>> &queue) {
+            std::lock_guard<std::mutex> queueLock(mutex);
+            assert(!queue.empty());
+            message = std::move(queue.front());
+            queue.pop_front();
+            wasEmpty = queue.empty();
+        };
 
         switch (environment) {
             case MailboxExecutionEnvironment::computation:
-            {
-                receivingMutex.lock();
-                std::lock_guard<std::mutex> queueLock(computationQueueMutex);
-                assert(!computationQueue.empty());
-                message = std::move(computationQueue.front());
-                computationQueue.pop_front();
-                wasEmpty = computationQueue.empty();
+                receiveLambda(computationQueueMutex, computationQueue);
                 break;
-            }
             case MailboxExecutionEnvironment::graphics:
-            {
-                if (receivingMutex.try_lock()) {
-                    scheduler->addTask(makeTask(shared_from_this(), environment));
-                    return;
-                }
-                if (!graphicsQueueMutex.try_lock()) {
-                    receivingMutex.unlock();
-                    scheduler->addTask(makeTask(shared_from_this(), environment));
-                    return;
-                }
-                assert(!graphicsQueue.empty());
-                message = std::move(graphicsQueue.front());
-                graphicsQueue.pop_front();
-                wasEmpty = graphicsQueue.empty();
-                graphicsQueueMutex.unlock();
+                receiveLambda(graphicsQueueMutex, graphicsQueue);
                 break;
-            }
         }
-        
         (*message)();
         
         if (!wasEmpty) {
             scheduler->addTask(makeTask(shared_from_this(), environment));
         }
-        receivingMutex.unlock();
     }
     
     static inline std::shared_ptr<LambdaTask> makeTask(std::weak_ptr<Mailbox> mailbox, MailboxExecutionEnvironment environment){
