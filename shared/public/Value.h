@@ -30,6 +30,7 @@
 #include "LineCapType.h"
 #include "TextTransform.h"
 #include <sstream>
+#include "ColorUtil.h"
 
 namespace std {
     template <>
@@ -205,6 +206,15 @@ public:
         auto const &value = evaluate(context);
         if (std::holds_alternative<T>(value)) {
             return std::get<T>(value);
+        }
+
+        // if a color is requested and we got a string we try to convert the string to a color
+        if constexpr (std::is_same<T, Color>::value) {
+            if (std::holds_alternative<std::string>(value)) {
+                if (auto color = ColorUtil::fromString(std::get<std::string>(value))) {
+                    return *color;
+                }
+            }
         }
 
         // convert int to double
