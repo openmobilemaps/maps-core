@@ -56,9 +56,9 @@ sphereProjectionVertexShader(const patch_control_point<VertexIn> patch [[stage_i
 
   float radius = 1.0;
 
-  float4 pos3d = float4(radius*sin(phi)*cos(-lambda+time*0.2),
-                           radius*cos(phi),
-                           radius*sin(phi)*sin(-lambda+time*0.2),
+  float4 pos3d = float4(radius*sin(phi)*cos(lambda+time*0.0),
+                           radius*cos(-phi),
+                           radius*sin(-phi)*sin(lambda+time*0.0),
                            1);
 
   // projection to screen

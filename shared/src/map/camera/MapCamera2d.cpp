@@ -342,13 +342,14 @@ std::vector<float> MapCamera2d::getVpMatrix() {
 //    Matrix::orthoM(newVpMatrix, 0, -1, 1,
 //                   -1, 1, 0, 2);
 
-    float fov = zoom / 9002800;
+    float fov = 40; // zoom / 9002800;
+    float d = zoom / 90028000;
 
     float vpr = (float)sizeViewport.x / (float)sizeViewport.y;
-    Matrix::perspectiveM(newVpMatrix, 0, fov, vpr, 3, 10);
+    Matrix::perspectiveM(newVpMatrix, 0, fov, vpr, 0.001, 100);
 
 
-    Matrix::translateM(newVpMatrix, 0, 0, 0, -8.0);
+    Matrix::translateM(newVpMatrix, 0, 0, 0, -d);
 
 //    Matrix::translateM(newVpMatrix, 0, pos3d[0], pos3d[1], pos3d[2]);
 
@@ -357,8 +358,8 @@ std::vector<float> MapCamera2d::getVpMatrix() {
 //    Matrix::translateM(newVpMatrix, 0, pos3d[0], pos3d[1], pos3d[2]);
 
     // TODO: Why 45?
-    Matrix::rotateM(newVpMatrix, 0.0, -phi * 45, 1.0, 0.0, 0.0);
-    Matrix::rotateM(newVpMatrix, 0.0, lambda * 45, 0.0, 1.0, 0.0);
+    Matrix::rotateM(newVpMatrix, 0.0, phi * 45, 1.0, 0.0, 0.0);
+    Matrix::rotateM(newVpMatrix, 0.0, -lambda * 45 - 90, 0.0, 1.0, 0.0);
 
 
 
