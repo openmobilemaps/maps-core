@@ -245,7 +245,7 @@ void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::tuple<std::
 
     auto renderObjects = generateRenderObjects();
 #ifdef __APPLE__
-    setupPolygons(newGraphicObjects, oldGraphicsObjects);
+    setupPolygons(newGraphicObjects, oldGraphicsObjects, renderObjects);
 #else
     auto selfActor = WeakActor(mailbox, shared_from_this()->weak_from_this());
     selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorPolygonTile::setupPolygons, newGraphicObjects, oldGraphicsObjects, renderObjects);

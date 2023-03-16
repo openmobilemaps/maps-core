@@ -36,8 +36,7 @@ public:
 
     float getAlpha() override;
 
-    virtual void setTileData(const std::shared_ptr<MaskingObjectInterface> &tileMask,
-                              const Tiled2dMapVectorTileDataRaster &tileData) override;
+    virtual void setTileData(const Tiled2dMapVectorTileDataRaster &tileData) override;
 
     void setupTile(const Tiled2dMapVectorTileDataRaster tileData);
 

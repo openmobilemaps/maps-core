@@ -52,11 +52,9 @@ public:
 
     virtual float getAlpha();
 
-    virtual void setTileData(const std::shared_ptr<MaskingObjectInterface> &tileMask,
-                             const Tiled2dMapVectorTileDataVector &tileData) {};
+    virtual void setTileData(const Tiled2dMapVectorTileDataVector &tileData) {};
 
-    virtual void setTileData(const std::shared_ptr<MaskingObjectInterface> &tileMask,
-                              const Tiled2dMapVectorTileDataRaster &tileData) {};
+    virtual void setTileData(const Tiled2dMapVectorTileDataRaster &tileData) {};
 
     void setSelectionDelegate(const WeakActor<Tiled2dMapVectorLayerSelectionInterface> &selectionDelegate);
 

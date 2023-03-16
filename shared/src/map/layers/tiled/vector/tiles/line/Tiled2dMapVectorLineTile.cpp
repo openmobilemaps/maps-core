@@ -119,8 +119,7 @@ void Tiled2dMapVectorLineTile::setup() {
     tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, std::vector<std::shared_ptr<RenderObjectInterface>>{});
 }
 
-void Tiled2dMapVectorLineTile::setTileData(const std::shared_ptr<MaskingObjectInterface> &tileMask,
-                 const Tiled2dMapVectorTileDataVector &tileData) {
+void Tiled2dMapVectorLineTile::setTileData(const Tiled2dMapVectorTileDataVector &tileData) {
 
     auto mapInterface = this->mapInterface.lock();
     const auto &shaderFactory = mapInterface ? mapInterface->getShaderFactory() : nullptr;
@@ -250,7 +249,7 @@ void Tiled2dMapVectorLineTile::addLines(const std::unordered_map<int, std::vecto
 
     auto renderObjects = generateRenderObjects();
 #ifdef __APPLE__
-    setupLines(newGraphicObjects, oldGraphicsObjects);
+    setupLines(newGraphicObjects, oldGraphicsObjects, renderObjects);
 #else
     auto selfActor = WeakActor(mailbox, weak_from_this());
     selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorLineTile::setupLines, newGraphicObjects, oldGraphicsObjects, renderObjects);
