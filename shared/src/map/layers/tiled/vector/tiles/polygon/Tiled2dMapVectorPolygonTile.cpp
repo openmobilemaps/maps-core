@@ -109,7 +109,7 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
 
     std::string defIdPrefix =
             std::to_string(tileInfo.x) + "/" + std::to_string(tileInfo.y) + "_" + layerName + "_";
-    if (!tileData.empty() &&
+    if (!tileData->empty() &&
         description->minZoom <= tileInfo.zoomIdentifier &&
         description->maxZoom >= tileInfo.zoomIdentifier) {
 
@@ -118,13 +118,12 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
 
         std::vector<int32_t> indices;
         std::int32_t indices_offset = 0;
-        for (const auto &feature : tileData) {
-            const FeatureContext &featureContext = std::get<0>(feature);
+        for(auto featureIt = tileData->begin(); featureIt != tileData->end(); featureIt++) {
+            const auto &[featureContext, geometryHandler] = *featureIt;
 
             if (featureContext.geomType != vtzero::GeomType::POLYGON) { continue; }
 
             if (description->filter == nullptr || description->filter->evaluateOr(EvaluationContext(-1, featureContext), true)) {
-                const auto &geometryHandler = std::get<1>(feature);
                 const auto &polygonCoordinates = geometryHandler.getPolygonCoordinates();
                 const auto &polygonHoles = geometryHandler.getHoleCoordinates();
 

@@ -127,12 +127,12 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
         return;
     }
 
-    if (!tileData.empty()) {
+    if (!tileData->empty()) {
         std::unordered_map<int, int> subGroupCoordCount;
         std::unordered_map<int, std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> styleGroupNewLinesMap;
         std::unordered_map<int, std::vector<std::tuple<std::vector<Coord>, int>>> styleGroupLineSubGroupMap;
 
-        for (auto featureIt = tileData.rbegin(); featureIt != tileData.rend(); ++featureIt) {
+        for (auto featureIt = tileData->rbegin(); featureIt != tileData->rend(); ++featureIt) {
             const FeatureContext &featureContext = std::get<0>(*featureIt);
             if ((description->filter == nullptr || description->filter->evaluateOr(EvaluationContext(-1, featureContext), true))) {
                 int styleGroupIndex = -1;

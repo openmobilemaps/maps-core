@@ -24,7 +24,7 @@
 #include "Tiled2dMapVectorLayerReadyInterface.h"
 
 typedef std::shared_ptr<TextureHolderInterface> Tiled2dMapVectorTileDataRaster;
-typedef std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> Tiled2dMapVectorTileDataVector;
+typedef std::shared_ptr<std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>> Tiled2dMapVectorTileDataVector;
 
 class Tiled2dMapVectorTile : public ActorObject,
                              public SimpleTouchInterface {
