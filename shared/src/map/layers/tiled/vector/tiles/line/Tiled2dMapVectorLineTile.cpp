@@ -30,7 +30,7 @@ void Tiled2dMapVectorLineTile::updateLayerDescription(const std::shared_ptr<Vect
     styleHashToGroupMap.clear();
     hitDetection.clear();
     usedKeys = std::move(description->getUsedKeys());
-    setTileData(tileData);
+    setVectorTileData(tileData);
 }
 
 void Tiled2dMapVectorLineTile::update() {
@@ -119,7 +119,7 @@ void Tiled2dMapVectorLineTile::setup() {
     tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, std::vector<std::shared_ptr<RenderObjectInterface>>{});
 }
 
-void Tiled2dMapVectorLineTile::setTileData(const Tiled2dMapVectorTileDataVector &tileData) {
+void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataVector &tileData) {
 
     auto mapInterface = this->mapInterface.lock();
     const auto &shaderFactory = mapInterface ? mapInterface->getShaderFactory() : nullptr;

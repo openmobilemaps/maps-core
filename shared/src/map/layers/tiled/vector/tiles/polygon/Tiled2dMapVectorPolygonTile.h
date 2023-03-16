@@ -36,7 +36,7 @@ public:
 
     virtual void setup() override;
 
-    virtual void setTileData(const Tiled2dMapVectorTileDataVector &tileData) override;
+    virtual void setVectorTileData(const Tiled2dMapVectorTileDataVector &tileData) override;
 
     bool onClickConfirmed(const Vec2F &posScreen) override;
 

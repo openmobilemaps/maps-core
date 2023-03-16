@@ -31,7 +31,7 @@ Tiled2dMapVectorRasterTile::Tiled2dMapVectorRasterTile(const std::weak_ptr<MapIn
 void Tiled2dMapVectorRasterTile::updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                                         const Tiled2dMapVectorTileDataRaster &tileData) {
     Tiled2dMapVectorTile::updateLayerDescription(description, tileData);
-    setTileData(tileData);
+    setRasterTileData(tileData);
 }
 
 void Tiled2dMapVectorRasterTile::update() {
@@ -69,7 +69,7 @@ float Tiled2dMapVectorRasterTile::getAlpha() {
     return Tiled2dMapVectorTile::getAlpha();
 }
 
-void Tiled2dMapVectorRasterTile::setTileData(const Tiled2dMapVectorTileDataRaster &tileData) {
+void Tiled2dMapVectorRasterTile::setRasterTileData(const Tiled2dMapVectorTileDataRaster &tileData) {
 
     if (!mapInterface.lock()) {
         return;

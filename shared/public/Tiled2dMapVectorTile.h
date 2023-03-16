@@ -52,9 +52,9 @@ public:
 
     virtual float getAlpha();
 
-    virtual void setTileData(const Tiled2dMapVectorTileDataVector &tileData) {};
+    virtual void setVectorTileData(const Tiled2dMapVectorTileDataVector &tileData) {};
 
-    virtual void setTileData(const Tiled2dMapVectorTileDataRaster &tileData) {};
+    virtual void setRasterTileData(const Tiled2dMapVectorTileDataRaster &tileData) {};
 
     void setSelectionDelegate(const WeakActor<Tiled2dMapVectorLayerSelectionInterface> &selectionDelegate);
 

@@ -53,7 +53,7 @@ void Tiled2dMapVectorPolygonTile::updateLayerDescription(const std::shared_ptr<V
     featureGroups.clear();
     hitDetectionPolygonMap.clear();
     usedKeys = std::move(description->getUsedKeys());
-    setTileData(tileData);
+    setVectorTileData(tileData);
 }
 
 void Tiled2dMapVectorPolygonTile::update() {
@@ -99,7 +99,7 @@ void Tiled2dMapVectorPolygonTile::setup() {
     tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, std::vector<std::shared_ptr<RenderObjectInterface>>{});
 }
 
-void Tiled2dMapVectorPolygonTile::setTileData(const Tiled2dMapVectorTileDataVector &tileData) {
+void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDataVector &tileData) {
 
     if (!mapInterface.lock()) {
         return;

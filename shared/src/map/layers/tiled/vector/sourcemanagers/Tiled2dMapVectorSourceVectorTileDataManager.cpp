@@ -112,8 +112,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
                         tilesReadyCount[tile->tileInfo] += 1;
                         tiles[tile->tileInfo].push_back({index, identifier, actor.strongActor<Tiled2dMapVectorTile>()});
 
-                        // Safe call, because not externally available yet
-                        actor.unsafe()->setTileData(dataIt->second);
+                        actor.message(&Tiled2dMapVectorTile::setVectorTileData, dataIt->second);
                     }
                 }
             }
