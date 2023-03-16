@@ -586,7 +586,9 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
             float padding = description->style.getTextPadding(evalContext);
             auto const &quad = getProjectedFrame(object->boundingBox, padding, wrapper->modelMatrix);
 
-            combinedQuad = quad;
+            if (!description->style.getTextAllowOverlap(evalContext) ) {
+                combinedQuad = quad;
+            }
         }
 
 
@@ -694,43 +696,41 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
             }
         }
 
-        if (combinedQuad && wrapper->projectedTextQuad) {
-            combinedQuad->topLeft.x = std::min(combinedQuad->topLeft.x, wrapper->projectedTextQuad->topLeft.x);
-            combinedQuad->topLeft.y = std::min(combinedQuad->topLeft.y, wrapper->projectedTextQuad->topLeft.y);
+        if (!description->style.getIconAllowOverlap(evalContext) ) {
+            if (combinedQuad && wrapper->projectedTextQuad) {
+                combinedQuad->topLeft.x = std::min(combinedQuad->topLeft.x, wrapper->projectedTextQuad->topLeft.x);
+                combinedQuad->topLeft.y = std::min(combinedQuad->topLeft.y, wrapper->projectedTextQuad->topLeft.y);
 
-            combinedQuad->topRight.x = std::max(combinedQuad->topRight.x, wrapper->projectedTextQuad->topRight.x);
-            combinedQuad->topRight.y = std::min(combinedQuad->topRight.y, wrapper->projectedTextQuad->topRight.y);
+                combinedQuad->topRight.x = std::max(combinedQuad->topRight.x, wrapper->projectedTextQuad->topRight.x);
+                combinedQuad->topRight.y = std::min(combinedQuad->topRight.y, wrapper->projectedTextQuad->topRight.y);
 
-            combinedQuad->bottomRight.x = std::max(combinedQuad->bottomRight.x, wrapper->projectedTextQuad->bottomRight.x);
-            combinedQuad->bottomRight.y = std::max(combinedQuad->bottomRight.y, wrapper->projectedTextQuad->bottomRight.y);
+                combinedQuad->bottomRight.x = std::max(combinedQuad->bottomRight.x, wrapper->projectedTextQuad->bottomRight.x);
+                combinedQuad->bottomRight.y = std::max(combinedQuad->bottomRight.y, wrapper->projectedTextQuad->bottomRight.y);
 
-            combinedQuad->bottomLeft.x = std::min(combinedQuad->bottomLeft.x, wrapper->projectedTextQuad->bottomLeft.x);
-            combinedQuad->bottomLeft.y = std::max(combinedQuad->bottomLeft.y, wrapper->projectedTextQuad->bottomLeft.y);
+                combinedQuad->bottomLeft.x = std::min(combinedQuad->bottomLeft.x, wrapper->projectedTextQuad->bottomLeft.x);
+                combinedQuad->bottomLeft.y = std::max(combinedQuad->bottomLeft.y, wrapper->projectedTextQuad->bottomLeft.y);
 
-        } else if (!combinedQuad) {
-            combinedQuad = wrapper->projectedTextQuad;
-        }
-
-
-        if (!combinedQuad) {
-            // The symbol doesnt have a text nor a icon
-            assert(false);
-            wrapper->collides = true;
-        }
-
-        wrapper->orientedBoundingBox = OBB2D(*combinedQuad);
-
-#ifdef DRAW_TEXT_BOUNDING_BOXES
-        wrapper->boundingBox->setFrame(*combinedQuad, RectD(0, 0, 1, 1));
-#endif
-
-
-        for ( auto const &otherB: placements ) {
-            if (otherB.overlaps(wrapper->orientedBoundingBox)) {
-                wrapper->collides = true;
-                break;
+            } else if (!combinedQuad) {
+                combinedQuad = wrapper->projectedTextQuad;
             }
         }
+
+        if (combinedQuad) {
+            wrapper->orientedBoundingBox = OBB2D(*combinedQuad);
+
+    #ifdef DRAW_TEXT_BOUNDING_BOXES
+            wrapper->boundingBox->setFrame(*combinedQuad, RectD(0, 0, 1, 1));
+    #endif
+
+            for ( auto const &otherB: placements ) {
+                if (otherB.overlaps(wrapper->orientedBoundingBox)) {
+                    wrapper->collides = true;
+                    break;
+                }
+            }
+        }
+
+
         if (!wrapper->collides) {
             placements.push_back(wrapper->orientedBoundingBox);
         }
