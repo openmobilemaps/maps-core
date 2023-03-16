@@ -621,16 +621,54 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
 
                 const double densityOffset = (mapInterface->getCamera()->getScreenDensityPpi() / 160.0) / spriteInfo.pixelRatio;
 
-                auto iconOffset = description->style.getIconOffset(evalContext);
-                renderPos.y -= iconOffset.y;
-                renderPos.x += iconOffset.x;
+                const auto iconOffset = description->style.getIconOffset(evalContext);
 
-                auto x = renderPos.x - (spriteInfo.width * densityOffset) / 2;
-                auto y = renderPos.y + (spriteInfo.height * densityOffset) / 2;
-                auto xw = renderPos.x + (spriteInfo.width * densityOffset) / 2;
-                auto yh = renderPos.y - (spriteInfo.height * densityOffset) / 2;
+                Vec2D spritePos( renderPos.x, renderPos.y);
 
-                Quad2dD quad = Quad2dD(Vec2D(x, yh), Vec2D(xw, yh), Vec2D(xw, y), Vec2D(x, y));
+                const Vec2D spriteSize(spriteInfo.width * densityOffset, spriteInfo.height * densityOffset);
+
+                switch (description->style.getIconAnchor(evalContext)) {
+                    case Anchor::CENTER:
+                        spritePos.x -= spriteSize.x / 2 - iconOffset.y;
+                        spritePos.y -= spriteSize.y / 2 - iconOffset.y;
+                        break;
+                    case Anchor::LEFT:
+                        spritePos.x += iconOffset.x;
+                        spritePos.y -= spriteSize.y / 2.0 - iconOffset.y;
+                        break;
+                    case Anchor::RIGHT:
+                        spritePos.x -= spriteSize.x - iconOffset.x;
+                        spritePos.y -= spriteSize.y / 2.0 - iconOffset.y;
+                        break;
+                    case Anchor::TOP:
+                        spritePos.x -= spriteSize.x / 2.0 - iconOffset.x;
+                        spritePos.y -= -iconOffset.y;
+                        break;
+                    case Anchor::BOTTOM:
+                        spritePos.x -= spriteSize.x / 2.0 - iconOffset.x;
+                        spritePos.y -= spriteSize.y - iconOffset.y;
+                        break;
+                    case Anchor::TOP_LEFT:
+                        spritePos.x -= -iconOffset.x;
+                        spritePos.y -= -iconOffset.y;
+                        break;
+                    case Anchor::TOP_RIGHT:
+                        spritePos.x -= spriteSize.x -iconOffset.x;
+                        spritePos.y -= -iconOffset.y;
+                        break;
+                    case Anchor::BOTTOM_LEFT:
+                        spritePos.x -= -iconOffset.x;
+                        spritePos.y -= spriteSize.y - iconOffset.y;
+                        break;
+                    case Anchor::BOTTOM_RIGHT:
+                        spritePos.x -= spriteSize.x -iconOffset.x;
+                        spritePos.y -= spriteSize.y - iconOffset.y;
+                        break;
+                    default:
+                        break;
+                }
+
+                Quad2dD quad = Quad2dD(spritePos, Vec2D(spritePos.x + spriteSize.x, spritePos.y), Vec2D(spritePos.x + spriteSize.x, spritePos.y + spriteSize.y), Vec2D(spritePos.x, spritePos.y + spriteSize.y));
 
                 const auto textureWidth = (double) spriteTexture->getImageWidth();
                 const auto textureHeight = (double) spriteTexture->getImageHeight();
