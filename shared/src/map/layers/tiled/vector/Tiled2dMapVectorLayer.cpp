@@ -568,8 +568,8 @@ std::optional<FeatureContext> Tiled2dMapVectorLayer::getFeatureContext(int64_t i
 
     for (auto const &tile: currentTileInfos) {
         {
-            for (auto const &[source, layerFeatureMap]: tile.layerFeatureMaps) {
-                for (auto it = layerFeatureMap->begin(); it != layerFeatureMap->end(); it++) {
+            for (auto const &[source, layerFeatureMap]: *tile.layerFeatureMaps) {
+                for (auto it = layerFeatureMap.begin(); it != layerFeatureMap.end(); it++) {
                     for (auto const &[featureContext, geometry]: it->second) {
                         if (featureContext.identifier == identifier) {
                             return featureContext;

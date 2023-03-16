@@ -48,7 +48,7 @@ Tiled2dMapVectorPolygonTile::Tiled2dMapVectorPolygonTile(const std::weak_ptr<Map
 }
 
 void Tiled2dMapVectorPolygonTile::updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
-                                                         const Tiled2dMapVectorTileDataVariant &tileData) {
+                                                         const Tiled2dMapVectorTileDataVector &tileData) {
     Tiled2dMapVectorTile::updateLayerDescription(description, tileData);
     featureGroups.clear();
     hitDetectionPolygonMap.clear();
@@ -99,10 +99,7 @@ void Tiled2dMapVectorPolygonTile::setup() {
     tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, std::vector<std::shared_ptr<RenderObjectInterface>>{});
 }
 
-void Tiled2dMapVectorPolygonTile::setTileData(const Tiled2dMapVectorTileDataVariant &tileData) {
-
-    Tiled2dMapVectorTileDataVector data = std::holds_alternative<Tiled2dMapVectorTileDataVector>(tileData)
-                                          ? std::get<Tiled2dMapVectorTileDataVector>(tileData) : Tiled2dMapVectorTileDataVector();
+void Tiled2dMapVectorPolygonTile::setTileData(const Tiled2dMapVectorTileDataVector &tileData) {
 
     if (!mapInterface.lock()) {
         return;
@@ -112,7 +109,7 @@ void Tiled2dMapVectorPolygonTile::setTileData(const Tiled2dMapVectorTileDataVari
 
     std::string defIdPrefix =
             std::to_string(tileInfo.x) + "/" + std::to_string(tileInfo.y) + "_" + layerName + "_";
-    if (!data.empty() &&
+    if (!tileData.empty() &&
         description->minZoom <= tileInfo.zoomIdentifier &&
         description->maxZoom >= tileInfo.zoomIdentifier) {
 
@@ -121,7 +118,7 @@ void Tiled2dMapVectorPolygonTile::setTileData(const Tiled2dMapVectorTileDataVari
 
         std::vector<int32_t> indices;
         std::int32_t indices_offset = 0;
-        for (const auto &feature : data) {
+        for (const auto &feature : tileData) {
             const FeatureContext &featureContext = std::get<0>(feature);
 
             if (featureContext.geomType != vtzero::GeomType::POLYGON) { continue; }
@@ -179,7 +176,7 @@ void Tiled2dMapVectorPolygonTile::setTileData(const Tiled2dMapVectorTileDataVari
 
                     indices_offset += posAdded;
 
-                    //hitDetectionPolygonMap[tileInfo].push_back({PolygonCoord(polygonCoordinates[i], polygonHoles[i]), featureContext});
+//                    hitDetectionPolygonMap[tileInfo].push_back({PolygonCoord(polygonCoordinates[i], polygonHoles[i]), featureContext});
                 }
 
                 int styleIndex = -1;

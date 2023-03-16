@@ -29,7 +29,7 @@ Tiled2dMapVectorRasterTile::Tiled2dMapVectorRasterTile(const std::weak_ptr<MapIn
 }
 
 void Tiled2dMapVectorRasterTile::updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
-                                                        const Tiled2dMapVectorTileDataVariant &tileData) {
+                                                        const Tiled2dMapVectorTileDataRaster &tileData) {
     Tiled2dMapVectorTile::updateLayerDescription(description, tileData);
     setTileData(tileData);
 }
@@ -69,22 +69,19 @@ float Tiled2dMapVectorRasterTile::getAlpha() {
     return Tiled2dMapVectorTile::getAlpha();
 }
 
-void Tiled2dMapVectorRasterTile::setTileData(const Tiled2dMapVectorTileDataVariant &tileData) {
-
-    Tiled2dMapVectorTileDataRaster data = std::holds_alternative<Tiled2dMapVectorTileDataRaster>(tileData)
-                                          ? std::get<Tiled2dMapVectorTileDataRaster>(tileData) : nullptr;
+void Tiled2dMapVectorRasterTile::setTileData(const Tiled2dMapVectorTileDataRaster &tileData) {
 
     if (!mapInterface.lock()) {
         return;
     }
 
-    this->tileData = data;
+    this->tileData = tileData;
 
 #ifdef __APPLE__
-    setupTile(data);
+    setupTile(tileData);
 #else
     auto selfActor = WeakActor(mailbox, shared_from_this()->weak_from_this());
-    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorRasterTile::setupTile, data);
+    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorRasterTile::setupTile, tileData);
 #endif
 }
 

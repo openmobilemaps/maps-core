@@ -156,7 +156,9 @@ public:
 
     bool contains(const std::string &key) const {
         for(const auto& p : propertiesMap) {
-            if(p.first == key) { return true; }
+            if(p.first == key) {
+                return true;
+            }
         }
 
         return false;
@@ -164,7 +166,9 @@ public:
 
     ValueVariant getValue(const std::string &key) const {
         for(const auto& p : propertiesMap) {
-            if(p.first == key) { return p.second; }
+            if(p.first == key) {
+                return std::move(p.second);
+            }
         }
 
         return std::monostate();
@@ -452,7 +456,8 @@ public:
         if (std::holds_alternative<std::string>(value)) {
             std::string res = std::get<std::string>(value);
 
-            auto result = context.feature.getValue(res);
+            const auto &result = context.feature.getValue(res);
+
             if(!std::holds_alternative<std::monostate>(result)) {
                 return result;
             }

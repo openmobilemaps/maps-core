@@ -33,16 +33,17 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
             return;
         }
 
-        std::unordered_set<Tiled2dMapVectorTileInfo> tilesToAdd;
-        std::unordered_set<Tiled2dMapVectorTileInfo> tilesToKeep;
+        // Just insert pointers here since we will only access the objects inside this method where we know that currentTileInfos is retained
+        std::vector<const Tiled2dMapVectorTileInfo*> tilesToAdd;
+        std::vector<const Tiled2dMapVectorTileInfo*> tilesToKeep;
 
         std::unordered_set<Tiled2dMapTileInfo> tilesToRemove;
 
         for (const auto &vectorTileInfo: currentTileInfos) {
             if (tiles.count(vectorTileInfo.tileInfo) == 0) {
-                tilesToAdd.insert(vectorTileInfo);
+                tilesToAdd.push_back(&vectorTileInfo);
             } else {
-                tilesToKeep.insert(vectorTileInfo);
+                tilesToKeep.push_back(&vectorTileInfo);
             }
         }
 
@@ -63,21 +64,21 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
         for (const auto &tileEntry : tilesToKeep) {
 
             size_t existingPolygonHash = 0;
-            auto it = tileMaskMap.find(tileEntry.tileInfo);
+            auto it = tileMaskMap.find(tileEntry->tileInfo);
             if (it != tileMaskMap.end()) {
                 existingPolygonHash = it->second.getPolygonHash();
             }
 
-            const size_t hash = std::hash<std::vector<::PolygonCoord>>()(tileEntry.masks);
+            const size_t hash = std::hash<std::vector<::PolygonCoord>>()(tileEntry->masks);
 
             if (hash != existingPolygonHash) {
 
                 const auto &tileMask = std::make_shared<PolygonMaskObject>(graphicsFactory,
                                                                            coordinateConverterHelper);
 
-                tileMask->setPolygons(tileEntry.masks);
+                tileMask->setPolygons(tileEntry->masks);
 
-                newTileMasks[tileEntry.tileInfo] = Tiled2dMapLayerMaskWrapper(tileMask, hash);
+                newTileMasks[tileEntry->tileInfo] = Tiled2dMapLayerMaskWrapper(tileMask, hash);
             }
         }
 
@@ -85,31 +86,31 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
 
         for (const auto &tile : tilesToAdd) {
 
-            tilesReadyCount[tile.tileInfo] = 0;
-            tiles[tile.tileInfo] = {};
+            tilesReadyCount[tile->tileInfo] = 0;
+            tiles[tile->tileInfo] = {};
 
             for (int32_t index = 0; index < mapDescription->layers.size(); index++) {
                 auto const &layer= mapDescription->layers.at(index);
-                if (!(layer->minZoom <= tile.tileInfo.zoomIdentifier && layer->maxZoom >= tile.tileInfo.zoomIdentifier)) {
+                if (!(layer->minZoom <= tile->tileInfo.zoomIdentifier && layer->maxZoom >= tile->tileInfo.zoomIdentifier)) {
                     continue;
                 }
-                auto const mapIt = tile.layerFeatureMaps.find(layer->source);
-                if (mapIt == tile.layerFeatureMaps.end()) {
+                auto const mapIt = tile->layerFeatureMaps->find(layer->source);
+                if (mapIt == tile->layerFeatureMaps->end()) {
                     continue;
                 }
-                auto const dataIt = mapIt->second->find(layer->sourceId);
-                if (dataIt != mapIt->second->end()) {
+                auto const dataIt = mapIt->second.find(layer->sourceId);
+                if (dataIt != mapIt->second.end()) {
 
                     std::string identifier = layer->identifier;
-                    Actor<Tiled2dMapVectorTile> actor = createTileActor(tile.tileInfo, layer);
+                    Actor<Tiled2dMapVectorTile> actor = createTileActor(tile->tileInfo, layer);
 
                     if (actor) {
                         if (selectionDelegate) {
                             actor.message(&Tiled2dMapVectorTile::setSelectionDelegate, selectionDelegate);
                         }
 
-                        tilesReadyCount[tile.tileInfo] += 1;
-                        tiles[tile.tileInfo].push_back({index, identifier, actor.strongActor<Tiled2dMapVectorTile>()});
+                        tilesReadyCount[tile->tileInfo] += 1;
+                        tiles[tile->tileInfo].push_back({index, identifier, actor.strongActor<Tiled2dMapVectorTile>()});
 
                         // Safe call, because not externally available yet
                         actor.unsafe()->setTileData(dataIt->second);
@@ -117,8 +118,8 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
                 }
             }
 
-            if (tilesReadyCount[tile.tileInfo] == 0) {
-                vectorSource.message(&Tiled2dMapVectorSource::setTileReady, tile.tileInfo);
+            if (tilesReadyCount[tile->tileInfo] == 0) {
+                vectorSource.message(&Tiled2dMapVectorSource::setTileReady, tile->tileInfo);
             }
         }
 

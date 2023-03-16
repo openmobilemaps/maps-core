@@ -25,7 +25,6 @@
 
 typedef std::shared_ptr<TextureHolderInterface> Tiled2dMapVectorTileDataRaster;
 typedef std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> Tiled2dMapVectorTileDataVector;
-typedef std::variant<Tiled2dMapVectorTileDataRaster, Tiled2dMapVectorTileDataVector> Tiled2dMapVectorTileDataVariant;
 
 class Tiled2dMapVectorTile : public ActorObject,
                              public SimpleTouchInterface {
@@ -36,7 +35,10 @@ public:
                          const WeakActor<Tiled2dMapVectorLayerReadyInterface> &tileReadyInterface);
 
     virtual void updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
-                                        const Tiled2dMapVectorTileDataVariant &layerData);
+                                        const Tiled2dMapVectorTileDataVector &layerData);
+
+    virtual void updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
+                                         const Tiled2dMapVectorTileDataRaster &layerData);
 
     virtual void update() = 0;
 
@@ -50,7 +52,11 @@ public:
 
     virtual float getAlpha();
 
-    virtual void setTileData(const Tiled2dMapVectorTileDataVariant &tileData) = 0;
+    virtual void setTileData(const std::shared_ptr<MaskingObjectInterface> &tileMask,
+                             const Tiled2dMapVectorTileDataVector &tileData) {};
+
+    virtual void setTileData(const std::shared_ptr<MaskingObjectInterface> &tileMask,
+                              const Tiled2dMapVectorTileDataRaster &tileData) {};
 
     void setSelectionDelegate(const WeakActor<Tiled2dMapVectorLayerSelectionInterface> &selectionDelegate);
 

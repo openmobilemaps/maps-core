@@ -23,7 +23,7 @@ Tiled2dMapVectorLineTile::Tiled2dMapVectorLineTile(const std::weak_ptr<MapInterf
 }
 
 void Tiled2dMapVectorLineTile::updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
-                                                      const Tiled2dMapVectorTileDataVariant &tileData) {
+                                                      const Tiled2dMapVectorTileDataVector &tileData) {
     Tiled2dMapVectorTile::updateLayerDescription(description, tileData);
     featureGroups.clear();
     reusableLineStyles.clear();
@@ -119,10 +119,8 @@ void Tiled2dMapVectorLineTile::setup() {
     tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, std::vector<std::shared_ptr<RenderObjectInterface>>{});
 }
 
-void Tiled2dMapVectorLineTile::setTileData(const Tiled2dMapVectorTileDataVariant &tileData) {
-
-    Tiled2dMapVectorTileDataVector data = std::holds_alternative<Tiled2dMapVectorTileDataVector>(tileData)
-                                          ? std::get<Tiled2dMapVectorTileDataVector>(tileData) : Tiled2dMapVectorTileDataVector();
+void Tiled2dMapVectorLineTile::setTileData(const std::shared_ptr<MaskingObjectInterface> &tileMask,
+                 const Tiled2dMapVectorTileDataVector &tileData) {
 
     auto mapInterface = this->mapInterface.lock();
     const auto &shaderFactory = mapInterface ? mapInterface->getShaderFactory() : nullptr;
@@ -130,12 +128,12 @@ void Tiled2dMapVectorLineTile::setTileData(const Tiled2dMapVectorTileDataVariant
         return;
     }
 
-    if (!data.empty()) {
+    if (!tileData.empty()) {
         std::unordered_map<int, int> subGroupCoordCount;
         std::unordered_map<int, std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> styleGroupNewLinesMap;
         std::unordered_map<int, std::vector<std::tuple<std::vector<Coord>, int>>> styleGroupLineSubGroupMap;
 
-        for (auto featureIt = data.rbegin(); featureIt != data.rend(); ++featureIt) {
+        for (auto featureIt = tileData.rbegin(); featureIt != tileData.rend(); ++featureIt) {
             const FeatureContext &featureContext = std::get<0>(*featureIt);
             if ((description->filter == nullptr || description->filter->evaluateOr(EvaluationContext(-1, featureContext), true))) {
                 int styleGroupIndex = -1;
@@ -198,7 +196,7 @@ void Tiled2dMapVectorLineTile::setTileData(const Tiled2dMapVectorTileDataVariant
                     lineCoordinatesVector.push_back(lineCoordinates);
                 }
 
-                //hitDetection.push_back({lineCoordinatesVector, featureContext});
+//                hitDetection.push_back({lineCoordinatesVector, featureContext});
             }
         }
 

@@ -40,10 +40,7 @@ struct Tiled2dMapVectorSourceTileState final {
     std::unordered_map<std::string, DataLoaderResult> results;
 };
 
-
-using FinalResult = std::unordered_map<std::string, std::shared_ptr<std::unordered_map<std::string, std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>>>>;
-
-class Tiled2dMapVectorSource : public Tiled2dMapSource<djinni::DataRef, IntermediateResult, FinalResult>  {
+class Tiled2dMapVectorSource : public Tiled2dMapSource<djinni::DataRef, IntermediateResult, Tiled2dMapVectorTileInfo::FeatureMap>  {
 public:
     Tiled2dMapVectorSource(const MapConfig &mapConfig,
                            const std::unordered_map<std::string, std::shared_ptr<Tiled2dMapLayerConfig>> &layerConfigs,
@@ -67,7 +64,7 @@ protected:
     
     virtual ::djinni::Future<IntermediateResult> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
     
-    virtual FinalResult postLoadingTask(const IntermediateResult &loadedData, const Tiled2dMapTileInfo &tile) override;
+    virtual Tiled2dMapVectorTileInfo::FeatureMap postLoadingTask(const IntermediateResult &loadedData, const Tiled2dMapTileInfo &tile) override;
 
     virtual std::tuple<LoaderStatus, std::optional<std::string>> mergeLoaderStatus(const Tiled2dMapVectorSourceTileState &tileStates);
 

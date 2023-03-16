@@ -25,7 +25,7 @@ public:
                                 const std::shared_ptr<LineVectorLayerDescription> &description);
 
     void updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
-                                const Tiled2dMapVectorTileDataVariant &tileData) override;
+                                const Tiled2dMapVectorTileDataVector &tileData) override;
 
     void update() override;
 
@@ -35,7 +35,8 @@ public:
 
     virtual void setup() override;
 
-    virtual void setTileData(const Tiled2dMapVectorTileDataVariant &tileData) override;
+    virtual void setTileData(const std::shared_ptr<MaskingObjectInterface> &tileMask,
+                             const Tiled2dMapVectorTileDataVector &tileData) override;
 
     bool onClickConfirmed(const Vec2F &posScreen) override;
 

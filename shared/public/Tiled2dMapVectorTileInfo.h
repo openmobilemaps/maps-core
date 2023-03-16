@@ -17,12 +17,14 @@
 #include <functional>
 
 struct Tiled2dMapVectorTileInfo {
+    using FeatureMap = std::shared_ptr<std::unordered_map<std::string, std::unordered_map<std::string, std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>>>>;
+
     const Tiled2dMapTileInfo tileInfo;
-    const std::unordered_map<std::string, std::shared_ptr<std::unordered_map<std::string, std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>>>> layerFeatureMaps;
-    std::vector<::PolygonCoord> masks;
+    const FeatureMap layerFeatureMaps;
+    const std::vector<::PolygonCoord> masks;
 
     Tiled2dMapVectorTileInfo(Tiled2dMapTileInfo tileInfo,
-                             const std::unordered_map<std::string, std::shared_ptr<std::unordered_map<std::string, std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>>>> &layerFeatureMaps,
+                             const FeatureMap &layerFeatureMaps,
                              const std::vector<::PolygonCoord> &masks)
         : tileInfo(tileInfo)
         , layerFeatureMaps(layerFeatureMaps)

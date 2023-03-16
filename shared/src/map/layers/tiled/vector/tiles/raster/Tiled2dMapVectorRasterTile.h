@@ -22,7 +22,7 @@ public:
                                 const std::shared_ptr<RasterVectorLayerDescription> &description);
 
     void updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
-                                const Tiled2dMapVectorTileDataVariant &tileData) override;
+                                const Tiled2dMapVectorTileDataRaster &tileData) override;
 
     void update() override;
 
@@ -36,7 +36,8 @@ public:
 
     float getAlpha() override;
 
-    void setTileData(const Tiled2dMapVectorTileDataVariant &tileData) override;
+    virtual void setTileData(const std::shared_ptr<MaskingObjectInterface> &tileMask,
+                              const Tiled2dMapVectorTileDataRaster &tileData) override;
 
     void setupTile(const Tiled2dMapVectorTileDataRaster tileData);
 
