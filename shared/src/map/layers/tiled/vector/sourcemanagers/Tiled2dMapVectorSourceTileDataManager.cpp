@@ -83,7 +83,7 @@ void Tiled2dMapVectorSourceTileDataManager::pause() {
     }
 
     tilesReady.clear();
-    tilesReadyCount.clear();
+    tilesReadyControlSet.clear();
 }
 
 void Tiled2dMapVectorSourceTileDataManager::resume() {
@@ -171,7 +171,7 @@ void Tiled2dMapVectorSourceTileDataManager::updateMaskObjects(
         }
 
         tilesReady.erase(tileToRemove);
-        tilesReadyCount.erase(tileToRemove);
+        tilesReadyControlSet.erase(tileToRemove);
         tileRenderObjectsMap.erase(tileToRemove);
     }
 
@@ -244,17 +244,19 @@ void Tiled2dMapVectorSourceTileDataManager::tileIsReady(const Tiled2dMapTileInfo
     {
         if (tilesReady.count(tile) > 0) return;
     }
+
+    int32_t layerIndex = layerNameIndexMap.at(layerIdentifier);
+
     bool isCompletelyReady = false;
     {
-        if (tilesReadyCount.count(tile) == 0) {
+        const auto &tileControlSet = tilesReadyControlSet.find(tile);
+        if (tileControlSet == tilesReadyControlSet.end()) {
             return;
         }
-        tilesReadyCount[tile] -= 1;
-        if (tilesReadyCount.at(tile) == 0) {
-            tilesReadyCount.erase(tile);
-            {
-                tilesReady.insert(tile);
-            }
+        tileControlSet->second.erase(layerIndex);
+        if (tileControlSet->second.empty()) {
+            tilesReadyControlSet.erase(tile);
+            tilesReady.insert(tile);
             isCompletelyReady = true;
         }
     }
@@ -264,7 +266,7 @@ void Tiled2dMapVectorSourceTileDataManager::tileIsReady(const Tiled2dMapTileInfo
         pregenerateRenderPasses();
     }
 
-    tileRenderObjectsMap[tile].emplace_back(layerNameIndexMap.at(layerIdentifier), renderObjects);
+    tileRenderObjectsMap[tile].emplace_back(layerIndex, renderObjects);
 }
 
 void Tiled2dMapVectorSourceTileDataManager::updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription) {

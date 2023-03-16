@@ -86,7 +86,8 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
 
         for (const auto &tile : tilesToAdd) {
 
-            tilesReadyCount[tile->tileInfo] = 0;
+            std::unordered_set<int32_t> indexControlSet;
+
             tiles[tile->tileInfo] = {};
 
             for (int32_t index = 0; index < mapDescription->layers.size(); index++) {
@@ -109,7 +110,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
                             actor.message(&Tiled2dMapVectorTile::setSelectionDelegate, selectionDelegate);
                         }
 
-                        tilesReadyCount[tile->tileInfo] += 1;
+                        indexControlSet.insert(index);
                         tiles[tile->tileInfo].push_back({index, identifier, actor.strongActor<Tiled2dMapVectorTile>()});
 
                         actor.message(&Tiled2dMapVectorTile::setVectorTileData, dataIt->second);
@@ -117,8 +118,10 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
                 }
             }
 
-            if (tilesReadyCount[tile->tileInfo] == 0) {
+            if (indexControlSet.empty()) {
                 vectorSource.message(&Tiled2dMapVectorSource::setTileReady, tile->tileInfo);
+            } else {
+                tilesReadyControlSet[tile->tileInfo] = indexControlSet;
             }
         }
 
