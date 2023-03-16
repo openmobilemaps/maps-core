@@ -61,7 +61,11 @@ void Tiled2dMapVectorSourceTileDataManager::pregenerateRenderPasses() {
             }
         }
     }
-    vectorLayer.message(&Tiled2dMapVectorLayer::onRenderPassUpdate, source, renderPasses);
+    vectorLayer.syncAccess([source = this->source, &renderPasses](const auto &layer){
+        if(auto strong = layer.lock()) {
+            strong->onRenderPassUpdate(source, renderPasses);
+        }
+    });
 }
 
 void Tiled2dMapVectorSourceTileDataManager::pause() {

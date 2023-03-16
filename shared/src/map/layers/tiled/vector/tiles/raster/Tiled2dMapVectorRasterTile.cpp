@@ -58,7 +58,7 @@ void Tiled2dMapVectorRasterTile::setup() {
     }
     tileObject->getGraphicsObject()->setup(renderingContext);
     tileObject->getQuadObject()->loadTexture(renderingContext, tileData);
-    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, std::vector<std::shared_ptr<RenderObjectInterface>>{});
+    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, generateRenderObjects());
 }
 
 void Tiled2dMapVectorRasterTile::setAlpha(float alpha) {
