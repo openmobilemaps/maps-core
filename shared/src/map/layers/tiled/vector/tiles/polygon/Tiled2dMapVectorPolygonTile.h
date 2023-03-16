@@ -30,29 +30,22 @@ public:
 
     void update() override;
 
-    virtual std::vector<std::shared_ptr<RenderPassInterface>> buildRenderPasses() override;
+    virtual std::vector<std::shared_ptr<RenderObjectInterface>> generateRenderObjects() override;
 
     virtual void clear() override;
 
     virtual void setup() override;
 
-    virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
-
-    virtual void setTileData(const std::shared_ptr<MaskingObjectInterface> &tileMask,
-                             const Tiled2dMapVectorTileDataVariant &tileData) override;
-
-    virtual void updateTileMask(const std::shared_ptr<MaskingObjectInterface> &tileMask) override;
+    virtual void setTileData(const Tiled2dMapVectorTileDataVariant &tileData) override;
 
     bool onClickConfirmed(const Vec2F &posScreen) override;
-
-protected:
-    virtual void preGenerateRenderPasses();
 
 private:
     void addPolygons(const std::vector<std::tuple<std::vector<std::tuple<std::vector<Coord>, int>>, std::vector<int32_t>>> &polygons);
 
     void setupPolygons(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects,
-                       const std::vector<std::shared_ptr<GraphicsObjectInterface>> &oldPolygonObjects);
+                       const std::vector<std::shared_ptr<GraphicsObjectInterface>> &oldPolygonObjects,
+                       const std::vector<std::shared_ptr<RenderObjectInterface>> &renderObjects);
 
 
     std::shared_ptr<PolygonGroupShaderInterface> shader;
@@ -62,8 +55,4 @@ private:
     std::unordered_set<std::string> usedKeys;
 
     std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<PolygonCoord, FeatureContext>>> hitDetectionPolygonMap;
-
-    std::shared_ptr<MaskingObjectInterface> tileMask;
-    std::optional<::RectI> scissorRect = std::nullopt;
-    std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
 };

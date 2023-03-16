@@ -25,14 +25,13 @@ Tiled2dMapVectorRasterTile::Tiled2dMapVectorRasterTile(const std::weak_ptr<MapIn
         auto quad = pMapInterface->getGraphicsObjectFactory()->createQuad(shader->asShaderProgramInterface());
         tileObject = std::make_shared<Textured2dLayerObject>(quad, shader, pMapInterface);
         tileObject->setRectCoord(tileInfo.bounds);
-        //LogDebug <<= "UBCM: Raster tile created " + std::to_string(tileInfo.x) + "/" + std::to_string(tileInfo.y);
     }
 }
 
 void Tiled2dMapVectorRasterTile::updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                                         const Tiled2dMapVectorTileDataVariant &tileData) {
     Tiled2dMapVectorTile::updateLayerDescription(description, tileData);
-    setTileData(tileMask, tileData);
+    setTileData(tileData);
 }
 
 void Tiled2dMapVectorRasterTile::update() {
@@ -47,10 +46,6 @@ void Tiled2dMapVectorRasterTile::update() {
     tileObject->setAlpha(opacity);
 }
 
-std::vector<std::shared_ptr<RenderPassInterface>> Tiled2dMapVectorRasterTile::buildRenderPasses() {
-    return renderPasses;
-}
-
 void Tiled2dMapVectorRasterTile::clear() {
     tileObject->getGraphicsObject()->clear();
 }
@@ -63,7 +58,7 @@ void Tiled2dMapVectorRasterTile::setup() {
     }
     tileObject->getGraphicsObject()->setup(renderingContext);
     tileObject->getQuadObject()->loadTexture(renderingContext, tileData);
-    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo);
+    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, std::vector<std::shared_ptr<RenderObjectInterface>>{});
 }
 
 void Tiled2dMapVectorRasterTile::setAlpha(float alpha) {
@@ -74,13 +69,7 @@ float Tiled2dMapVectorRasterTile::getAlpha() {
     return Tiled2dMapVectorTile::getAlpha();
 }
 
-void Tiled2dMapVectorRasterTile::setScissorRect(const std::optional<::RectI> &scissorRect) {
-    this->scissorRect = scissorRect;
-    preGenerateRenderPasses();
-}
-
-void Tiled2dMapVectorRasterTile::setTileData(const std::shared_ptr <MaskingObjectInterface> &tileMask,
-                                             const Tiled2dMapVectorTileDataVariant &tileData) {
+void Tiled2dMapVectorRasterTile::setTileData(const Tiled2dMapVectorTileDataVariant &tileData) {
 
     Tiled2dMapVectorTileDataRaster data = std::holds_alternative<Tiled2dMapVectorTileDataRaster>(tileData)
                                           ? std::get<Tiled2dMapVectorTileDataRaster>(tileData) : nullptr;
@@ -89,7 +78,6 @@ void Tiled2dMapVectorRasterTile::setTileData(const std::shared_ptr <MaskingObjec
         return;
     }
 
-    this->tileMask = tileMask;
     this->tileData = data;
 
 #ifdef __APPLE__
@@ -98,8 +86,6 @@ void Tiled2dMapVectorRasterTile::setTileData(const std::shared_ptr <MaskingObjec
     auto selfActor = WeakActor(mailbox, shared_from_this()->weak_from_this());
     selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorRasterTile::setupTile, data);
 #endif
-
-    preGenerateRenderPasses();
 }
 
 
@@ -119,25 +105,9 @@ void Tiled2dMapVectorRasterTile::setupTile(const Tiled2dMapVectorTileDataRaster 
 
     tileObject->getQuadObject()->loadTexture(renderingContext, tileData);
 
-    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo);
+    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, generateRenderObjects());
 }
 
-
-void Tiled2dMapVectorRasterTile::updateTileMask(const std::shared_ptr<MaskingObjectInterface> &tileMask) {
-    this->tileMask = tileMask;
-    preGenerateRenderPasses();
-}
-
-void Tiled2dMapVectorRasterTile::preGenerateRenderPasses() {
-    if (!tileMask) {
-        renderPasses = {};
-        return;
-    }
-
-    std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(
-            RenderPassConfig(description->renderPassIndex.value_or(0)),
-            std::vector<std::shared_ptr<::RenderObjectInterface>>{tileObject->getRenderObject()},
-            tileMask);
-    renderPass->setScissoringRect(scissorRect);
-    renderPasses = {renderPass};
+std::vector<std::shared_ptr<RenderObjectInterface>> Tiled2dMapVectorRasterTile::generateRenderObjects() {
+    return {tileObject->getRenderObject()};
 }

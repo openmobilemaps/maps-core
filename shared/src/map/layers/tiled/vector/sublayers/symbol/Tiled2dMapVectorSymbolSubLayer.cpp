@@ -103,7 +103,7 @@ void Tiled2dMapVectorSymbolSubLayer::resume() {
         }
         tilesInSetup.erase(tile);
         if (auto delegate = readyDelegate.lock()) {
-            delegate->tileIsReady(tile);
+            delegate->tileIsReady(tile, "", std::vector<std::shared_ptr<RenderObjectInterface>>{});
         }
     }
 }
@@ -377,7 +377,7 @@ void Tiled2dMapVectorSymbolSubLayer::addTexts(const Tiled2dMapTileInfo &tileInfo
 
     if (texts.empty()) {
         if (auto delegate = readyDelegate.lock()) {
-            delegate->tileIsReady(tileInfo);
+            delegate->tileIsReady(tileInfo, "", std::vector<std::shared_ptr<RenderObjectInterface>>{});
         }
         return;
     }
@@ -759,7 +759,7 @@ void Tiled2dMapVectorSymbolSubLayer::setupTexts(const Tiled2dMapTileInfo &tileIn
 
     if (informDelegateAndReturn) {
         if (auto delegate = readyDelegate.lock()) {
-            delegate->tileIsReady(tileInfo);
+            delegate->tileIsReady(tileInfo, "", std::vector<std::shared_ptr<RenderObjectInterface>>{});
         }
         return;
     }
@@ -785,7 +785,7 @@ void Tiled2dMapVectorSymbolSubLayer::setupTexts(const Tiled2dMapTileInfo &tileIn
     }
 
     if (auto delegate = readyDelegate.lock()) {
-        delegate->tileIsReady(tileInfo);
+        delegate->tileIsReady(tileInfo, "", std::vector<std::shared_ptr<RenderObjectInterface>>{});
     }
 }
 

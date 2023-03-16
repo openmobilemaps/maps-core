@@ -111,7 +111,7 @@ void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std
                         tiles[tile.tileInfo].push_back({index, identifier, actor.strongActor<Tiled2dMapVectorTile>()});
 
                         // Safe call, because not externally available yet
-                        actor.unsafe()->setTileData(nullptr, data);
+                        actor.unsafe()->setTileData(data);
                     }
                 }
             }

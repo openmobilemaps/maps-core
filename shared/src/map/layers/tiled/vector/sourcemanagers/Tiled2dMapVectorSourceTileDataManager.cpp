@@ -13,6 +13,7 @@
 #include "Tiled2dMapVectorPolygonTile.h"
 #include "Tiled2dMapVectorLineTile.h"
 #include "Tiled2dMapVectorLayer.h"
+#include "RenderPass.h"
 
 Tiled2dMapVectorSourceTileDataManager::Tiled2dMapVectorSourceTileDataManager(const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
                                                                              const std::shared_ptr<VectorMapDescription> &mapDescription,
@@ -20,7 +21,12 @@ Tiled2dMapVectorSourceTileDataManager::Tiled2dMapVectorSourceTileDataManager(con
         : vectorLayer(vectorLayer),
           mapDescription(mapDescription),
           source(source) {
-
+    for (int32_t index = 0; index < mapDescription->layers.size(); index++) {
+        const auto &layerDescription = mapDescription->layers.at(index);
+        if (layerDescription->source == source) {
+            layerNameIndexMap[layerDescription->identifier] = index;
+        }
+    }
 }
 
 void Tiled2dMapVectorSourceTileDataManager::onAdded(const std::weak_ptr<::MapInterface> &mapInterface) {
@@ -34,25 +40,37 @@ void Tiled2dMapVectorSourceTileDataManager::onRemoved() {
 void Tiled2dMapVectorSourceTileDataManager::update() {
     for (const auto &[tileInfo, subTiles] : tiles) {
         for (const auto &[index, identifier, tile]: subTiles) {
-            tile.syncAccess([](auto t) {
+            /*tile.syncAccess([](auto t) {
                 t->update();
-            });
+            });*/ //TODO: EXPERIMENTAL
+            tile.message(&Tiled2dMapVectorTile::update);
         }
     }
 }
 
-std::vector<std::tuple<int32_t, std::vector<std::shared_ptr<RenderPassInterface>>>>
-Tiled2dMapVectorSourceTileDataManager::buildRenderPasses() {
-    std::vector<std::tuple<int32_t, std::vector<std::shared_ptr<RenderPassInterface>>>> renderPasses;
-    for (const auto &[tileInfo, subTiles]: tiles) {
-        for (const auto &[index, identifier, tile]: subTiles) {
-            auto tilePasses = tile.syncAccess([](auto t) {
-                return t->buildRenderPasses();
-            });
-            renderPasses.emplace_back(index, std::move(tilePasses));
+std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> Tiled2dMapVectorSourceTileDataManager::buildRenderPasses() {
+    std::lock_guard<std::recursive_mutex> lock(renderPassMutex);
+    return currentRenderPasses;
+}
+
+void Tiled2dMapVectorSourceTileDataManager::pregenerateRenderPasses() {
+    std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> renderPasses;
+    for (const auto &[tile, subTiles] : tileRenderObjectsMap) {
+        const auto tileMaskWrapper = tileMaskMap.find(tile);
+        if (tilesReady.count(tile) > 0 && tileMaskWrapper != tileMaskMap.end()) {
+            const auto &mask = tileMaskWrapper->second.getGraphicsMaskObject();
+            for (const auto &[layerIndex, renderObjects]: subTiles) {
+                renderPasses.emplace_back(layerIndex, std::make_shared<RenderPass>(RenderPassConfig(0),
+                                                                                   renderObjects,
+                                                                                   mask));
+            }
         }
     }
-    return renderPasses;
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(renderPassMutex);
+        currentRenderPasses = renderPasses;
+    }
 }
 
 void Tiled2dMapVectorSourceTileDataManager::pause() {
@@ -103,6 +121,11 @@ void Tiled2dMapVectorSourceTileDataManager::setAlpha(float alpha) {
     }
 }
 
+void Tiled2dMapVectorSourceTileDataManager::setScissorRect(const std::optional<RectI> &scissorRect) {
+    this->scissorRect = scissorRect;
+    pregenerateRenderPasses();
+}
+
 void Tiled2dMapVectorSourceTileDataManager::setSelectionDelegate(
         const WeakActor<Tiled2dMapVectorLayerSelectionInterface> &selectionDelegate) {
     this->selectionDelegate = selectionDelegate;
@@ -133,24 +156,13 @@ void Tiled2dMapVectorSourceTileDataManager::updateMaskObjects(
         if (toClear) {
             toClear->clear();
         }
-
-        auto subTiles = tiles.find(tileInfo);
-        if (subTiles != tiles.end()) {
-            for (auto const &[index, identifier, tile]: subTiles->second) {
-                tile.syncAccess([tileI = tileInfo, maskObject = wrapper.getGraphicsMaskObject()](auto tile){
-                    tile->updateTileMask(maskObject);
-                });
-            }
-        }
     }
 
     for (const auto &tileToRemove: tilesToRemove) {
         auto tilesVectorIt = tiles.find(tileToRemove);
         if (tilesVectorIt != tiles.end()) {
             for (const auto &[index, identifier, tile]: tiles.at(tileToRemove)) {
-                tile.syncAccess([](auto tile){
-                    tile->clear();
-                });
+                tile.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorTile::clear);
             }
         }
         tiles.erase(tileToRemove);
@@ -165,7 +177,11 @@ void Tiled2dMapVectorSourceTileDataManager::updateMaskObjects(
 
         tilesReady.erase(tileToRemove);
         tilesReadyCount.erase(tileToRemove);
+        tileRenderObjectsMap.erase(tileToRemove);
     }
+
+    pregenerateRenderPasses();
+
     mapInterface->invalidate();
 }
 
@@ -227,14 +243,14 @@ Actor<Tiled2dMapVectorTile> Tiled2dMapVectorSourceTileDataManager::createTileAct
     return std::move(actor);
 }
 
-void Tiled2dMapVectorSourceTileDataManager::tileIsReady(const Tiled2dMapTileInfo &tile) {
+void Tiled2dMapVectorSourceTileDataManager::tileIsReady(const Tiled2dMapTileInfo &tile,
+                                                        const std::string &layerIdentifier,
+                                                        const std::vector<std::shared_ptr<RenderObjectInterface>> renderObjects) {
     {
-        // TODO: Remove: std::lock_guard<std::recursive_mutex> tilesReadyLock(tilesReadyMutex);
         if (tilesReady.count(tile) > 0) return;
     }
     bool isCompletelyReady = false;
     {
-        // TODO: Remove: std::lock_guard<std::recursive_mutex> tilesReadyCountLock(tilesReadyCountMutex);
         if (tilesReadyCount.count(tile) == 0) {
             return;
         }
@@ -242,7 +258,6 @@ void Tiled2dMapVectorSourceTileDataManager::tileIsReady(const Tiled2dMapTileInfo
         if (tilesReadyCount.at(tile) == 0) {
             tilesReadyCount.erase(tile);
             {
-                // TODO: Remove: std::lock_guard<std::recursive_mutex> tilesReadyLock(tilesReadyMutex);
                 tilesReady.insert(tile);
             }
             isCompletelyReady = true;
@@ -251,7 +266,11 @@ void Tiled2dMapVectorSourceTileDataManager::tileIsReady(const Tiled2dMapTileInfo
 
     if (isCompletelyReady) {
         onTileCompletelyReady(tile);
-    }}
+        pregenerateRenderPasses();
+    }
+
+    tileRenderObjectsMap[tile].emplace_back(layerNameIndexMap.at(layerIdentifier), renderObjects);
+}
 
 void Tiled2dMapVectorSourceTileDataManager::updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription) {
     auto mapInterface = this->mapInterface.lock();

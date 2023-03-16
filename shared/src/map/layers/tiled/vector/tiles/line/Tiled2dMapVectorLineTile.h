@@ -29,29 +29,22 @@ public:
 
     void update() override;
 
-    virtual std::vector<std::shared_ptr<RenderPassInterface>> buildRenderPasses() override;
+    virtual std::vector<std::shared_ptr<RenderObjectInterface>> generateRenderObjects() override;
 
     virtual void clear() override;
 
     virtual void setup() override;
 
-    virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
-
-    virtual void setTileData(const std::shared_ptr<MaskingObjectInterface> &tileMask,
-                             const Tiled2dMapVectorTileDataVariant &tileData) override;
-
-    virtual void updateTileMask(const std::shared_ptr<MaskingObjectInterface> &tileMask) override;
+    virtual void setTileData(const Tiled2dMapVectorTileDataVariant &tileData) override;
 
     bool onClickConfirmed(const Vec2F &posScreen) override;
 
-protected:
-    virtual void preGenerateRenderPasses();
 private:
-    
     void addLines(const std::unordered_map<int, std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> &styleIdLinesMap);
 
     void setupLines(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newLineGraphicsObjects,
-                    const std::vector<std::shared_ptr<GraphicsObjectInterface>> &oldLineGraphicsObjects);
+                    const std::vector<std::shared_ptr<GraphicsObjectInterface>> &oldLineGraphicsObjects,
+                    const std::vector<std::shared_ptr<RenderObjectInterface>> &renderObjects);
 
 
     static const int maxNumLinePoints = std::numeric_limits<uint16_t>::max() / 4 + 1; // 4 vertices per line coord, only 2 at the start/end
@@ -67,12 +60,6 @@ private:
 
     std::unordered_set<std::string> usedKeys;
 
-    std::shared_ptr<MaskingObjectInterface> tileMask;
-
-
     std::vector<std::vector<LineStyle>> reusableLineStyles;
     std::unordered_map<size_t, std::pair<int, int>> styleHashToGroupMap;
-
-    std::optional<::RectI> scissorRect = std::nullopt;
-    std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
 };

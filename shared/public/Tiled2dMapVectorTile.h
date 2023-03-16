@@ -15,7 +15,7 @@
 #include "Value.h"
 #include "MapInterface.h"
 #include "VectorTileGeometryHandler.h"
-#include "RenderPassInterface.h"
+#include "RenderObjectInterface.h"
 #include "Quad2dInterface.h"
 #include "ColorShaderInterface.h"
 #include "Tiled2dMapVectorLayerSelectionInterface.h"
@@ -40,7 +40,7 @@ public:
 
     virtual void update() = 0;
 
-    virtual std::vector<std::shared_ptr<RenderPassInterface>> buildRenderPasses() = 0;
+    virtual std::vector<std::shared_ptr<RenderObjectInterface>> generateRenderObjects() = 0;
 
     virtual void clear() = 0;
 
@@ -50,12 +50,7 @@ public:
 
     virtual float getAlpha();
 
-    virtual void setScissorRect(const std::optional<::RectI> &scissorRect) = 0;
-
-    virtual void setTileData(const std::shared_ptr<MaskingObjectInterface> &tileMask,
-                             const Tiled2dMapVectorTileDataVariant &tileData) = 0;
-
-    virtual void updateTileMask(const std::shared_ptr<MaskingObjectInterface> &tileMask) = 0;
+    virtual void setTileData(const Tiled2dMapVectorTileDataVariant &tileData) = 0;
 
     void setSelectionDelegate(const WeakActor<Tiled2dMapVectorLayerSelectionInterface> &selectionDelegate);
 

@@ -11,7 +11,6 @@
 #include "Tiled2dMapVectorPolygonTile.h"
 #include "Tiled2dMapVectorRasterSubLayerConfig.h"
 #include "RenderObject.h"
-#include "RenderPass.h"
 #include "MapCamera2dInterface.h"
 #include "earcut.hpp"
 #include "Logger.h"
@@ -54,7 +53,7 @@ void Tiled2dMapVectorPolygonTile::updateLayerDescription(const std::shared_ptr<V
     featureGroups.clear();
     hitDetectionPolygonMap.clear();
     usedKeys = std::move(description->getUsedKeys());
-    setTileData(tileMask, tileData);
+    setTileData(tileData);
 }
 
 void Tiled2dMapVectorPolygonTile::update() {
@@ -82,10 +81,6 @@ void Tiled2dMapVectorPolygonTile::update() {
     shader->setStyles(s);
 }
 
-std::vector<std::shared_ptr<RenderPassInterface>> Tiled2dMapVectorPolygonTile::buildRenderPasses() {
-    return renderPasses;
-}
-
 void Tiled2dMapVectorPolygonTile::clear() {
     for (auto const &polygon: polygons) {
         if (polygon->getPolygonObject()->isReady()) polygon->getPolygonObject()->clear();
@@ -101,16 +96,10 @@ void Tiled2dMapVectorPolygonTile::setup() {
     for (auto const &polygon: polygons) {
         if (!polygon->getPolygonObject()->isReady()) polygon->getPolygonObject()->setup(context);
     }
-    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo);
+    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, std::vector<std::shared_ptr<RenderObjectInterface>>{});
 }
 
-void Tiled2dMapVectorPolygonTile::setScissorRect(const std::optional<::RectI> &scissorRect) {
-    this->scissorRect = scissorRect;
-    preGenerateRenderPasses();
-}
-
-void Tiled2dMapVectorPolygonTile::setTileData(const std::shared_ptr<MaskingObjectInterface> &tileMask,
-                 const Tiled2dMapVectorTileDataVariant &tileData) {
+void Tiled2dMapVectorPolygonTile::setTileData(const Tiled2dMapVectorTileDataVariant &tileData) {
 
     Tiled2dMapVectorTileDataVector data = std::holds_alternative<Tiled2dMapVectorTileDataVector>(tileData)
                                           ? std::get<Tiled2dMapVectorTileDataVector>(tileData) : Tiled2dMapVectorTileDataVector();
@@ -118,8 +107,6 @@ void Tiled2dMapVectorPolygonTile::setTileData(const std::shared_ptr<MaskingObjec
     if (!mapInterface.lock()) {
         return;
     }
-
-    this->tileMask = tileMask;
 
     std::string layerName = description->sourceId;
 
@@ -192,7 +179,7 @@ void Tiled2dMapVectorPolygonTile::setTileData(const std::shared_ptr<MaskingObjec
 
                     indices_offset += posAdded;
 
-                    hitDetectionPolygonMap[tileInfo].push_back({PolygonCoord(polygonCoordinates[i], polygonHoles[i]), featureContext});
+                    //hitDetectionPolygonMap[tileInfo].push_back({PolygonCoord(polygonCoordinates[i], polygonHoles[i]), featureContext});
                 }
 
                 int styleIndex = -1;
@@ -217,16 +204,10 @@ void Tiled2dMapVectorPolygonTile::setTileData(const std::shared_ptr<MaskingObjec
             }
         }
 
-        this->tileMask = tileMask;
         addPolygons(objectDescriptions);
     } else {
-        tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo);
+        tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, std::vector<std::shared_ptr<RenderObjectInterface>>{});
     }
-}
-
-void Tiled2dMapVectorPolygonTile::updateTileMask(const std::shared_ptr<MaskingObjectInterface> &tileMask) {
-    this->tileMask = tileMask;
-    preGenerateRenderPasses();
 }
 
 void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::tuple<std::vector<std::tuple<std::vector<Coord>, int>>, std::vector<int32_t>>> &polygons) {
@@ -236,7 +217,7 @@ void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::tuple<std::
     }
 
     if (polygons.empty() && oldGraphicsObjects.empty()) {
-        tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo);
+        tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, std::vector<std::shared_ptr<RenderObjectInterface>>{});
         return;
     }
 
@@ -265,18 +246,19 @@ void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::tuple<std::
         newGraphicObjects.push_back(polygonObject->asGraphicsObject());
     }
 
+    auto renderObjects = generateRenderObjects();
 #ifdef __APPLE__
     setupPolygons(newGraphicObjects, oldGraphicsObjects);
 #else
     auto selfActor = WeakActor(mailbox, shared_from_this()->weak_from_this());
-    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorPolygonTile::setupPolygons, newGraphicObjects, oldGraphicsObjects);
+    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorPolygonTile::setupPolygons, newGraphicObjects, oldGraphicsObjects, renderObjects);
 #endif
 
-    preGenerateRenderPasses();
 }
 
 void Tiled2dMapVectorPolygonTile::setupPolygons(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects,
-                                                const std::vector<std::shared_ptr<GraphicsObjectInterface>> &oldPolygonObjects) {
+                                                const std::vector<std::shared_ptr<GraphicsObjectInterface>> &oldPolygonObjects,
+                                                const std::vector<std::shared_ptr<RenderObjectInterface>> &renderObjects) {
     for (const auto &polygon : oldPolygonObjects) {
         if (polygon->isReady()) polygon->clear();
     }
@@ -291,34 +273,18 @@ void Tiled2dMapVectorPolygonTile::setupPolygons(const std::vector<std::shared_pt
         if (!polygon->isReady()) polygon->setup(renderingContext);
     }
 
-    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo);
+    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, renderObjects);
 }
 
-void Tiled2dMapVectorPolygonTile::preGenerateRenderPasses() {
-    std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
-
-    if (!tileMask) {
-        renderPasses = newRenderPasses;
-        return;
-    }
-
-    std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
+std::vector<std::shared_ptr<RenderObjectInterface>> Tiled2dMapVectorPolygonTile::generateRenderObjects() {
+    std::vector<std::shared_ptr<RenderObjectInterface>> newRenderObjects;
     for (auto const &object : polygons) {
         for (const auto &config : object->getRenderConfig()) {
-            renderPassObjectMap[config->getRenderIndex()].push_back(
-                    std::make_shared<RenderObject>(config->getGraphicsObject()));
+            newRenderObjects.push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
         }
     }
 
-    for (const auto &passEntry : renderPassObjectMap) {
-        std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(
-                RenderPassConfig(description->renderPassIndex.value_or(passEntry.first)),
-                passEntry.second, tileMask);
-        renderPass->setScissoringRect(scissorRect);
-        newRenderPasses.push_back(renderPass);
-    }
-
-    renderPasses = newRenderPasses;
+    return std::move(newRenderObjects);
 }
 
 bool Tiled2dMapVectorPolygonTile::onClickConfirmed(const Vec2F &posScreen) {

@@ -39,7 +39,7 @@ public:
 
     virtual void update();
 
-    virtual std::vector<std::tuple<int32_t, std::vector<std::shared_ptr<RenderPassInterface>>>> buildRenderPasses();
+    virtual std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> buildRenderPasses();
 
     virtual void pause();
 
@@ -47,7 +47,10 @@ public:
 
     virtual void setAlpha(float alpha);
 
-    virtual void tileIsReady(const Tiled2dMapTileInfo &tile);
+    virtual void setScissorRect(const std::optional<RectI> &scissorRect);
+
+    virtual void tileIsReady(const Tiled2dMapTileInfo &tile, const std::string &layerIdentifier,
+                             const std::vector<std::shared_ptr<RenderObjectInterface>> renderObjects) override;
 
     virtual void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription);
 
@@ -66,6 +69,8 @@ protected:
     Actor<Tiled2dMapVectorTile> createTileActor(const Tiled2dMapTileInfo &tileInfo,
                                                 const std::shared_ptr<VectorLayerDescription> &layerDescription);
 
+    virtual void pregenerateRenderPasses();
+
     virtual void onTileCompletelyReady(const Tiled2dMapTileInfo tileInfo) = 0;
 
     std::weak_ptr<MapInterface> mapInterface;
@@ -74,6 +79,12 @@ protected:
     const std::string source;
     WeakActor<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate;
 
+    std::optional<::RectI> scissorRect = std::nullopt;
+
+    std::recursive_mutex renderPassMutex;
+    std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> currentRenderPasses;
+    std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<int32_t, std::vector<std::shared_ptr<RenderObjectInterface>>>>> tileRenderObjectsMap;
+    std::unordered_map<std::string, int32_t> layerNameIndexMap;
     std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<int32_t, std::string, Actor<Tiled2dMapVectorTile>>>> tiles;
     std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> tileMaskMap;
     std::unordered_set<Tiled2dMapTileInfo> tilesReady;

@@ -26,7 +26,7 @@ public:
 
     void update() override;
 
-    std::vector<std::shared_ptr<RenderPassInterface>> buildRenderPasses() override;
+    virtual std::vector<std::shared_ptr<RenderObjectInterface>> generateRenderObjects() override;
 
     void clear() override;
 
@@ -36,23 +36,11 @@ public:
 
     float getAlpha() override;
 
-    void setScissorRect(const std::optional<::RectI> &scissorRect) override;
-
-    void setTileData(const std::shared_ptr <MaskingObjectInterface> &tileMask,
-                     const Tiled2dMapVectorTileDataVariant &tileData) override;
+    void setTileData(const Tiled2dMapVectorTileDataVariant &tileData) override;
 
     void setupTile(const Tiled2dMapVectorTileDataRaster tileData);
-
-    void updateTileMask(const std::shared_ptr <MaskingObjectInterface> &tileMask) override;
-
-protected:
-    virtual void preGenerateRenderPasses();
 
 private:
     std::shared_ptr<Textured2dLayerObject> tileObject;
     std::shared_ptr<TextureHolderInterface> tileData;
-
-    std::shared_ptr<MaskingObjectInterface> tileMask;
-    std::optional<::RectI> scissorRect = std::nullopt;
-    std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
 };

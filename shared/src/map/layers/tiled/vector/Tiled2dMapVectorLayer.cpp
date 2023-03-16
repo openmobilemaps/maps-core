@@ -315,9 +315,10 @@ void Tiled2dMapVectorLayer::update() {
 
     std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-        sourceDataManager.syncAccess([](auto manager) {
+/*        sourceDataManager.syncAccess([](auto manager) {
             manager->update();
-        });
+        });*/ // TODO: EXPERIMENTAL
+        sourceDataManager.message(&Tiled2dMapVectorSourceTileDataManager::update);
     }
 }
 
@@ -329,10 +330,10 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::build
         newPasses.insert(newPasses.end(), backgroundLayerPasses.begin(), backgroundLayerPasses.end());
     }
 
-    std::vector<std::tuple<int32_t, std::vector<std::shared_ptr<RenderPassInterface>>>> orderedPasses;
+    std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> orderedPasses;
     std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
     for (const auto &[source, sourceDataManager] : sourceDataManagers) {
-        auto passes = sourceDataManager.syncAccess([](auto manager) {
+        const auto &passes = sourceDataManager.syncAccess([](auto manager) {
             return manager->buildRenderPasses();
         });
         orderedPasses.insert(orderedPasses.end(), passes.begin(), passes.end());
@@ -342,8 +343,8 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::build
         return std::get<0>(lhs) < std::get<0>(rhs);
     });
 
-    for (const auto &[index, passes] : orderedPasses) {
-        newPasses.insert(newPasses.end(), passes.begin(), passes.end());
+    for (const auto &[index, pass] : orderedPasses) {
+        newPasses.push_back(pass);
     }
 
     return newPasses;
@@ -523,6 +524,12 @@ void Tiled2dMapVectorLayer::loadSpriteData() {
 
 void Tiled2dMapVectorLayer::setScissorRect(const std::optional<::RectI> &scissorRect) {
     this->scissorRect = scissorRect;
+    {
+        std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
+        for (const auto &[source, sourceDataManager]: sourceDataManagers) {
+            sourceDataManager.message(&Tiled2dMapVectorSourceTileDataManager::setScissorRect, scissorRect);
+        }
+    }
     auto mapInterface = this->mapInterface;
     if (mapInterface) {
         mapInterface->invalidate();

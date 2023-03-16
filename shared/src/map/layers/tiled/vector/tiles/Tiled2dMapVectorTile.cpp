@@ -11,7 +11,6 @@
 #include "Tiled2dMapVectorTile.h"
 #include "CoordinateSystemIdentifiers.h"
 #include "QuadCoord.h"
-#include "RenderPass.h"
 #include "RenderObject.h"
 
 Tiled2dMapVectorTile::Tiled2dMapVectorTile(const std::weak_ptr<MapInterface> &mapInterface,

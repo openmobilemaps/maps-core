@@ -14,5 +14,6 @@
 
 class Tiled2dMapVectorLayerReadyInterface {
 public:
-    virtual void tileIsReady(const Tiled2dMapTileInfo &tile) = 0;
+    virtual void tileIsReady(const Tiled2dMapTileInfo &tile, const std::string &layerIdentifier,
+                             const std::vector<std::shared_ptr<RenderObjectInterface>> renderObjects) = 0;
 };
