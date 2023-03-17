@@ -156,8 +156,11 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
     }
 
     std::vector<std::tuple<const FeatureContext, std::shared_ptr<SymbolInfo>>> textInfos;
+    {
+        std::lock_guard<std::recursive_mutex> lock(tileTextPositionMapMutex);
+        tileTextPositionMap[tileInfo] = {};
+    }
 
-    tileTextPositionMap[tileInfo] = {};
     double tilePixelFactor = (0.0254 / camera->getScreenDensityPpi()) * tileInfo.zoomLevel;
 
     for(auto& feature : layerFeatures)
@@ -228,23 +231,28 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
                         auto position = pos->centerPosition;
 
                         std::optional<double> minDistance;
-                        for (auto const &entry: tileTextPositionMap) {
-                            auto it = entry.second.find(fullText);
-                            if (it != entry.second.end()) {
-                                for (auto const &pos: entry.second.at(fullText)) {
-                                    auto distance = Vec2DHelper::distance(Vec2D(pos.x, pos.y), Vec2D(position.x, position.y));
-                                    if (!minDistance || distance < *minDistance) {
-                                        minDistance = distance;
+                        {
+                            std::lock_guard<std::recursive_mutex> lock(tileTextPositionMapMutex);
+                            if (fullText.empty()) {
+                                for (auto const &entry: tileTextPositionMap) {
+                                    auto it = entry.second.find(fullText);
+                                    if (it != entry.second.end()) {
+                                        for (auto const &pos: entry.second.at(fullText)) {
+                                            auto distance = Vec2DHelper::distance(Vec2D(pos.x, pos.y), Vec2D(position.x, position.y));
+                                            if (!minDistance || distance < *minDistance) {
+                                                minDistance = distance;
+                                            }
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        if (minDistance && *minDistance < symbolSpacingMeters) {
-                            continue;
-                        }
+                            if (minDistance && *minDistance < symbolSpacingMeters) {
+                                continue;
+                            }
 
-                        tileTextPositionMap[tileInfo][fullText].push_back(position);
+                            tileTextPositionMap[tileInfo][fullText].push_back(position);
+                        }
 
                         wasPlaced = true;
                         textInfos.push_back({context, std::make_shared<SymbolInfo>(text,
@@ -326,7 +334,10 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
                 auto midP = p.begin() + p.size() / 2;
                 std::optional<double> angle = std::nullopt;
 
-                tileTextPositionMap[tileInfo][fullText].push_back(*midP);
+                {
+                    std::lock_guard<std::recursive_mutex> lock(tileTextPositionMapMutex);
+                    tileTextPositionMap[tileInfo][fullText].push_back(*midP);
+                }
 
                 textInfos.push_back({context, std::make_shared<SymbolInfo>(text,
                                                                            *midP,
@@ -449,7 +460,7 @@ void Tiled2dMapVectorSymbolSubLayer::addTexts(const Tiled2dMapTileInfo &tileInfo
     
     {
         std::lock_guard<std::recursive_mutex> lock(sortedSymbolMutex);
-        int cbefroe = sortedSymbols.size();
+        int cbefroe = (int)sortedSymbols.size();
         std::copy(textObjects.begin(), textObjects.end(), std::inserter(sortedSymbols, sortedSymbols.end()));
         assert(cbefroe + textObjects.size() == sortedSymbols.size());
     }
@@ -576,9 +587,6 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
             Matrix::translateM(wrapper->modelMatrix, 0, -renderCoord.x, -renderCoord.y, -renderCoord.z);
 
         }
-
-        wrapper->collides = false;
-
 
         std::optional<Quad2dD> combinedQuad;
 
@@ -715,6 +723,8 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
             }
         }
 
+        wrapper->collides = false;
+
         if (combinedQuad) {
             wrapper->orientedBoundingBox = OBB2D(*combinedQuad);
 
@@ -728,13 +738,12 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
                     break;
                 }
             }
+
+            if (!wrapper->collides) {
+                placements.push_back(wrapper->orientedBoundingBox);
+            }
+
         }
-
-
-        if (!wrapper->collides) {
-            placements.push_back(wrapper->orientedBoundingBox);
-        }
-
 
         if (!wrapper->collides) {
             auto const &shader = object->getShader();
