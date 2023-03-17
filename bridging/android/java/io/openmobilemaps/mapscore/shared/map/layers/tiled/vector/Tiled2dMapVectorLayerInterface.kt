@@ -14,6 +14,11 @@ abstract class Tiled2dMapVectorLayerInterface {
         fun createFromStyleJson(layerName: String, path: String, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface, dpFactor: Double): Tiled2dMapVectorLayerInterface {
             return CppProxy.createFromStyleJson(layerName, path, loaders, fontLoader, dpFactor)
         }
+
+        @JvmStatic
+        fun createFromLocalStyleJson(layerName: String, styleJson: String, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface, dpFactor: Double): Tiled2dMapVectorLayerInterface {
+            return CppProxy.createFromLocalStyleJson(layerName, styleJson, loaders, fontLoader, dpFactor)
+        }
     }
 
     private class CppProxy : Tiled2dMapVectorLayerInterface {
@@ -43,6 +48,9 @@ abstract class Tiled2dMapVectorLayerInterface {
         companion object {
             @JvmStatic
             external fun createFromStyleJson(layerName: String, path: String, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface, dpFactor: Double): Tiled2dMapVectorLayerInterface
+
+            @JvmStatic
+            external fun createFromLocalStyleJson(layerName: String, styleJson: String, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface, dpFactor: Double): Tiled2dMapVectorLayerInterface
         }
     }
 }
