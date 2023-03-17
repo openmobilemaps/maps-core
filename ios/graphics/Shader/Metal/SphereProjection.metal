@@ -27,7 +27,10 @@ vertex VertexOut
 sphereProjectionVertexShader(const patch_control_point<VertexIn> patch [[stage_in]],
                  const float3 positionInPatch [[position_in_patch]],
                  constant float4x4 &mvpMatrix [[buffer(1)]],
-                 constant float &time [[buffer(2)]])
+                 constant float &time [[buffer(2)]],
+                 texture2d<float> texture0 [[ texture(0)]],
+                 sampler textureSampler [[sampler(0)]]
+                 )
 {
   // Compute tesselated xy + uv
 
@@ -42,6 +45,9 @@ sphereProjectionVertexShader(const patch_control_point<VertexIn> patch [[stage_i
   float2 uv = baryinterp(uv0, uv1, uv2, positionInPatch);
 
 
+  float4 color = texture0.sample(textureSampler, uv);
+  float height = -10000 + ((color.r * 256 * 256 + color.g * 256 + color.b) * 0.1);
+
   // xy -> xyz (globe)
 
   float px = pos.x;
@@ -52,9 +58,9 @@ sphereProjectionVertexShader(const patch_control_point<VertexIn> patch [[stage_i
   float lambda = px / R;
 
   // latitude, [0, pi] statt [-90, 90]
-  float phi = atan(sinh(py / R)) + 3.1415926 / 2;
+  float phi = atan(sinh(py / R)) + 3.1415926 / 2.0;
 
-  float radius = 1.0;
+  float radius = 1.0 + (height / R) * 0.0;
 
   float4 pos3d = float4(radius*sin(phi)*cos(lambda+time*0.0),
                            radius*cos(-phi),
