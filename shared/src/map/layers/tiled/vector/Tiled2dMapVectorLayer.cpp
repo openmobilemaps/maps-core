@@ -21,7 +21,6 @@
 #include "Tiled2dMapVectorLineSubLayer.h"
 #include "Tiled2dMapVectorPolygonSubLayer.h"
 #include "VectorTileGeometryHandler.h"
-#include "Tiled2dMapVectorSymbolSubLayer.h"
 #include "Tiled2dMapVectorBackgroundSubLayer.h"
 #include "Tiled2dMapVectorRasterSubLayerConfig.h"
 #include "Polygon2dInterface.h"
@@ -38,7 +37,7 @@
 #include "Tiled2dMapVectorPolygonTile.h"
 #include "Tiled2dMapVectorLineTile.h"
 #include "Tiled2dMapVectorRasterTile.h"
-
+#include "SpriteData.h"
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::string &remoteStyleJsonUrl,

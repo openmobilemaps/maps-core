@@ -8,21 +8,17 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#include "Tiled2dMapVectorSourceVectorTileDataManager.h"
-#include "PolygonCompare.h"
+#include "Tiled2dMapVectorSourceSymbolDataManager.h"
 #include "Tiled2dMapVectorLayer.h"
 
-Tiled2dMapVectorSourceVectorTileDataManager::Tiled2dMapVectorSourceVectorTileDataManager(
+Tiled2dMapVectorSourceSymbolDataManager::Tiled2dMapVectorSourceSymbolDataManager(
         const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
         const std::shared_ptr<VectorMapDescription> &mapDescription,
-        const std::string &source,
-        const WeakActor<Tiled2dMapVectorSource> &vectorSource)
-        : Tiled2dMapVectorSourceTileDataManager(vectorLayer, mapDescription, source),
-          vectorSource(vectorSource) {
-
+        const std::string &source)
+        : Tiled2dMapVectorSourceTileDataManager(vectorLayer, mapDescription, source){
 }
 
-void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std::string &sourceName,
+void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::string &sourceName,
                                                                        std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) {
     auto mapInterface = this->mapInterface.lock();
     {
@@ -60,29 +56,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
             }
         }
 
-        std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> newTileMasks;
-        for (const auto &tileEntry : tilesToKeep) {
-
-            size_t existingPolygonHash = 0;
-            auto it = tileMaskMap.find(tileEntry->tileInfo);
-            if (it != tileMaskMap.end()) {
-                existingPolygonHash = it->second.getPolygonHash();
-            }
-
-            const size_t hash = std::hash<std::vector<::PolygonCoord>>()(tileEntry->masks);
-
-            if (hash != existingPolygonHash) {
-
-                const auto &tileMask = std::make_shared<PolygonMaskObject>(graphicsFactory,
-                                                                           coordinateConverterHelper);
-
-                tileMask->setPolygons(tileEntry->masks);
-
-                newTileMasks[tileEntry->tileInfo] = Tiled2dMapLayerMaskWrapper(tileMask, hash);
-            }
-        }
-
-        if (tilesToAdd.empty() && tilesToRemove.empty() && newTileMasks.empty()) return;
+        if (tilesToAdd.empty() && tilesToRemove.empty()) return;
 
         for (const auto &tile : tilesToAdd) {
 
@@ -117,28 +91,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
                     }
                 }
             }
-
-            if (indexControlSet.empty()) {
-                vectorSource.message(&Tiled2dMapVectorSource::setTileReady, tile->tileInfo);
-            } else {
-                tilesReadyControlSet[tile->tileInfo] = indexControlSet;
-            }
-        }
-
-        if (!(newTileMasks.empty() && tilesToRemove.empty())) {
-            auto castedMe = std::static_pointer_cast<Tiled2dMapVectorSourceTileDataManager>(shared_from_this());
-            auto selfActor = WeakActor<Tiled2dMapVectorSourceTileDataManager>(mailbox, castedMe);
-            selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceTileDataManager::updateMaskObjects, newTileMasks, tilesToRemove);
         }
     }
     mapInterface->invalidate();
-}
-
-
-void Tiled2dMapVectorSourceVectorTileDataManager::onTileCompletelyReady(const Tiled2dMapTileInfo tileInfo) {
-    vectorSource.message(&Tiled2dMapVectorSource::setTileReady, tileInfo);
-    auto mapInterface = this->mapInterface.lock();
-    if (mapInterface) {
-        mapInterface->invalidate();
-    }
 }

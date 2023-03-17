@@ -30,6 +30,7 @@
 #include "Tiled2dMapVectorSourceTileDataManager.h"
 #include "Tiled2dMapVectorSourceRasterTileDataManager.h"
 #include "Tiled2dMapVectorSourceVectorTileDataManager.h"
+#include "Tiled2dMapVectorSourceSymbolDataManager.h"
 #include <unordered_map>
 
 class Tiled2dMapVectorLayer
@@ -164,6 +165,7 @@ private:
 
     std::recursive_mutex dataManagerMutex;
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceTileDataManager>> sourceDataManagers;
+    std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceSymbolDataManager>> symbolSourceDataManagers;
 
     std::recursive_mutex renderPassMutex;
     std::vector<std::shared_ptr<RenderPassInterface>> currentRenderPasses;
