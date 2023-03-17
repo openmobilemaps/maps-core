@@ -52,3 +52,7 @@ double operator*( const ::Vec2D& left, const ::Vec2D& right ) {
 Vec2D operator/( const ::Vec2D& left, const double& val ) {
     return Vec2D(left.x / val, left.y / val);
 }
+
+Vec2D Vec2DHelper::normalize(const ::Vec2D &vector) {
+    return vector / std::sqrt(Vec2DHelper::squaredLength(vector));
+}

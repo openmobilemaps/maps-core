@@ -160,6 +160,12 @@ void TextLayer::clear() {
     mapInterface->invalidate();
 }
 
+void TextLayer::update() {
+    for (auto const &textTuple : texts) {
+        textTuple.second->update();
+    }
+}
+
 void TextLayer::generateRenderPasses() {
     std::lock_guard<std::recursive_mutex> lock(textMutex);
 

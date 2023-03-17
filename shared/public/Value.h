@@ -29,6 +29,7 @@
 #include "FormattedStringEntry.h"
 #include "LineCapType.h"
 #include "TextTransform.h"
+#include "TextSymbolPlacement.h"
 #include <sstream>
 
 namespace std {
@@ -282,6 +283,13 @@ public:
         return std::nullopt;
     }
 
+    std::optional<::TextSymbolPlacement> textSymbolPlacementFromString(const std::string &value) const {
+        if(value == "point") { return TextSymbolPlacement::POINT; }
+        if(value == "line") { return TextSymbolPlacement::LINE; }
+        if(value == "line-center") { return TextSymbolPlacement::LINE_CENTER; }
+        return std::nullopt;
+    }
+
     template<>
     Anchor evaluateOr(const EvaluationContext &context, const Anchor &alternative) const {
         auto const &value = evaluateOr(context, std::string(""));
@@ -298,6 +306,16 @@ public:
         auto anchor = jusitfyFromString(value);
         if (anchor) {
             return *anchor;
+        }
+        return alternative;
+    }
+
+    template<>
+    TextSymbolPlacement evaluateOr(const EvaluationContext &context, const TextSymbolPlacement &alternative) const {
+        auto const &value = evaluateOr(context, std::string(""));
+        auto placement = textSymbolPlacementFromString(value);
+        if (placement) {
+            return *placement;
         }
         return alternative;
     }

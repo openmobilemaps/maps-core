@@ -21,6 +21,8 @@ class Vec2DHelper {
     static ::Vec2D rotate(const ::Vec2D &p, const ::Vec2D &origin, double angleDegree);
 
     static double squaredLength(const ::Vec2D &vector);
+
+    static ::Vec2D normalize(const ::Vec2D &vector);
 };
 
 Vec2D operator+( const ::Vec2D& left, const ::Vec2D& right );

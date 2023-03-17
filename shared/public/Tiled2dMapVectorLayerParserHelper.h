@@ -198,6 +198,7 @@ public:
                                             parser.parseValue(val["layout"]["text-rotate"]),
                                             parser.parseValue(val["layout"]["symbol-sort-key"]),
                                             parser.parseValue(val["layout"]["symbol-spacing"]),
+                                            parser.parseValue(val["layout"]["symbol-placement"]),
                                             parser.parseValue(val["layout"]["icon-image"]),
                                             parser.parseValue(val["layout"]["icon-anchor"]),
                                             parser.parseValue(val["layout"]["icon-offset"]),

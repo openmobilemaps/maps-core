@@ -27,7 +27,7 @@
 #include "Matrix.h"
 #include "json.h"
 #include "ColorShaderInterface.h"
-
+#include "LineFactory.h"
 
 Tiled2dMapVectorSymbolSubLayer::Tiled2dMapVectorSymbolSubLayer(const std::shared_ptr<FontLoaderInterface> &fontLoader,
                                                                const std::shared_ptr<SymbolVectorLayerDescription> &description)
@@ -187,6 +187,7 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
 
         auto anchor = description->style.getTextAnchor(evalContext);
         auto justify = description->style.getTextJustify(evalContext);
+        auto placement = description->style.getTextSymbolPlacement(evalContext);
 
         auto variableTextAnchor = description->style.getTextVariableAnchor(evalContext);
         if (!variableTextAnchor.empty()) {
@@ -198,15 +199,23 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
         auto fontList = description->style.getTextFont(evalContext);
 
         double symbolSpacingPx = description->style.getSymbolSpacing(evalContext);
-
-        double symbolSpacingMeters =  symbolSpacingPx * tilePixelFactor;
+        double symbolSpacingMeters = symbolSpacingPx * tilePixelFactor;
 
         if(context.geomType != vtzero::GeomType::POINT) {
 
-            double distance = symbolSpacingMeters / 2.0;
+            // TODO: find meaningful way
+            // to distribute along line
+            double distance = 0;
             double totalDistance = 0;
 
             bool wasPlaced = false;
+
+            std::vector<Coord> line = {};
+            for (const auto &points: geometry.getPointCoordinates()) {
+                for(auto& p : points) {
+                    line.push_back(p);
+                }
+            }
 
             for (const auto &points: geometry.getPointCoordinates()) {
 
@@ -227,32 +236,17 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
 
                         auto position = pos->centerPosition;
 
-                        std::optional<double> minDistance;
-                        for (auto const &entry: tileTextPositionMap) {
-                            auto it = entry.second.find(fullText);
-                            if (it != entry.second.end()) {
-                                for (auto const &pos: entry.second.at(fullText)) {
-                                    auto distance = Vec2DHelper::distance(Vec2D(pos.x, pos.y), Vec2D(position.x, position.y));
-                                    if (!minDistance || distance < *minDistance) {
-                                        minDistance = distance;
-                                    }
-                                }
-                            }
-                        }
-
-                        if (minDistance && *minDistance < symbolSpacingMeters) {
-                            continue;
-                        }
-
                         tileTextPositionMap[tileInfo][fullText].push_back(position);
 
                         wasPlaced = true;
                         textInfos.push_back({context, std::make_shared<SymbolInfo>(text,
                                                                                    position,
+                                                                                   line,
                                                                                    Font(*fontList.begin()),
                                                                                    anchor,
                                                                                    pos->angle,
-                                                                                   justify)
+                                                                                   justify,
+                                                                                   placement)
                         });
 
 
@@ -261,7 +255,7 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
                 }
             }
 
-            // if no label was placed place it in the middle of the line
+            // if no label was placed, place it in the middle of the line
             if (!wasPlaced) {
                 distance = 0;
                 for (const auto &points: geometry.getPointCoordinates()) {
@@ -287,20 +281,20 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
 
                                 std::optional<double> minDistance;
 
-                                for (auto const &entry: tileTextPositionMap) {
-                                    auto it = entry.second.find(fullText);
-                                    if (it != entry.second.end()) {
-                                        for (auto const &pos: entry.second.at(fullText)) {
-                                            auto distance = Vec2DHelper::distance(Vec2D(pos.x, pos.y), Vec2D(position.x, position.y));
-                                            if (!minDistance || distance < *minDistance) {
-                                                minDistance = distance;
-                                            }
-                                        }
-                                    }
-                                }
-                                if (minDistance && *minDistance < symbolSpacingMeters) {
-                                    continue;
-                                }
+//                                for (auto const &entry: tileTextPositionMap) {
+//                                    auto it = entry.second.find(fullText);
+//                                    if (it != entry.second.end()) {
+//                                        for (auto const &pos: entry.second.at(fullText)) {
+//                                            auto distance = Vec2DHelper::distance(Vec2D(pos.x, pos.y), Vec2D(position.x, position.y));
+//                                            if (!minDistance || distance < *minDistance) {
+//                                                minDistance = distance;
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                                if (minDistance && *minDistance < symbolSpacingMeters) {
+//                                    continue;
+//                                }
 
                                 tileTextPositionMap[tileInfo][fullText].push_back(position);
 
@@ -309,10 +303,12 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
                             wasPlaced = true;
                             textInfos.push_back({context, std::make_shared<SymbolInfo>(text,
                                                                                        position,
+                                                                                       std::nullopt,
                                                                                        Font(*fontList.begin()),
                                                                                        anchor,
                                                                                        pos->angle,
-                                                                                       justify)
+                                                                                       justify,
+                                                                                       placement)
                             });
 
 
@@ -326,38 +322,17 @@ Tiled2dMapVectorSymbolSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInf
                 auto midP = p.begin() + p.size() / 2;
                 std::optional<double> angle = std::nullopt;
 
-
-                if (fullText != ""){
-                    std::lock_guard<std::recursive_mutex> lock(tileTextPositionMapMutex);
-
-                    std::optional<double> minDistance;
-                    for (auto const &entry: tileTextPositionMap) {
-                        auto it = entry.second.find(fullText);
-                        if (it != entry.second.end()) {
-                            for (auto const &pos: entry.second.at(fullText)) {
-                                auto distance = Vec2DHelper::distance(Vec2D(pos.x, pos.y), Vec2D(midP->x, midP->y));
-                                if (!minDistance || distance < *minDistance) {
-                                    minDistance = distance;
-                                }
-                            }
-                        }
-                    }
-                    if (minDistance && *minDistance < symbolSpacingMeters) {
-                        continue;
-                    }
-
-                    tileTextPositionMap[tileInfo][fullText].push_back(*midP);
-                }
+                tileTextPositionMap[tileInfo][fullText].push_back(*midP);
 
                 textInfos.push_back({context, std::make_shared<SymbolInfo>(text,
                                                                            *midP,
+                                                                           std::nullopt,
                                                                            Font(*fontList.begin()),
                                                                            anchor,
                                                                            angle,
-                                                                           justify)
+                                                                           justify,
+                                                                           placement)
                 });
-
-
             }
         }
     }
@@ -403,7 +378,9 @@ void Tiled2dMapVectorSymbolSubLayer::addTexts(const Tiled2dMapTileInfo &tileInfo
         }
 
         auto fontResult = loadFont(text->getFont());
-        if (fontResult.status != LoaderStatus::OK) continue;
+        if (fontResult.status != LoaderStatus::OK) {
+            continue;
+        }
 
         auto const evalContext = EvaluationContext(zoomIdentifier, context);
 
@@ -426,39 +403,42 @@ void Tiled2dMapVectorSymbolSubLayer::addTexts(const Tiled2dMapTileInfo &tileInfo
             int64_t const symbolSortKey = description->style.getSymbolSortKey(evalContext);
             auto wrapper = std::make_shared<Tiled2dMapVectorSymbolFeatureWrapper>(context, text, textObject, symbolSortKey);
 
-
 #ifdef DRAW_TEXT_BOUNDING_BOXES
             auto colorShader = mapInterface->getShaderFactory()->createColorShader();
             colorShader->setColor(0.0, 1.0, 0.0, 0.5);
             std::shared_ptr<Quad2dInterface> quadObject = mapInterface->getGraphicsObjectFactory()->createQuad(colorShader->asShaderProgramInterface());
-            auto rectCoord = textObject->boundingBox;
-            auto coord = rectCoord.topLeft;
-            auto width = rectCoord.bottomRight.x - rectCoord.topLeft.x;
-            auto height = rectCoord.bottomRight.y - rectCoord.topLeft.y;
-
-            auto coords = QuadCoord(coord, Coord(coord.systemIdentifier, coord.x + width, coord.y, coord.z),
-                      Coord(coord.systemIdentifier, coord.x + width, coord.y + height, coord.z),
-                                    Coord(coord.systemIdentifier, coord.x, coord.y + height, coord.z));
-
-            QuadCoord renderCoords = mapInterface->getCoordinateConverterHelper()->convertQuadToRenderSystem(coords);
-
-            auto quad = Quad2dD(Vec2D(renderCoords.topLeft.x, renderCoords.topLeft.y), Vec2D(renderCoords.topRight.x, renderCoords.topRight.y),
-                    Vec2D(renderCoords.bottomRight.x, renderCoords.bottomRight.y),
-                                Vec2D(renderCoords.bottomLeft.x, renderCoords.bottomLeft.y));
-
-            quadObject->setFrame(quad, RectD(0.0, 0.0, 1.0, 1.0));
-
             quadObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
 
             wrapper->boundingBox = quadObject;
 #endif
+
+#ifdef DRAW_TEXT_LINES
+            if(text->getLineCoordinates()) {
+                auto list = ColorStateList(Color(0.0, 1.0, 0.0, 1.0), Color(0.0, 1.0, 0.0, 1.0));
+
+                std::shared_ptr<LineInfoInterface> lineInfo = LineFactory::createLine("draw_text_lines", *text->getLineCoordinates(), LineStyle(list, list, 1.0, 1.0, SizeType::SCREEN_PIXEL, 3.0, {}, LineCapType::ROUND));
+
+                auto objectFactory = mapInterface->getGraphicsObjectFactory();
+                auto shaderFactory = mapInterface->getShaderFactory();
+
+                auto shader = shaderFactory->createColorLineShader();
+                auto lineGraphicsObject = objectFactory->createLine(shader->asShaderProgramInterface());
+
+
+                auto lineObject = std::make_shared<Line2dLayerObject>(mapInterface->getCoordinateConverterHelper(), lineGraphicsObject, shader);
+
+                lineObject->setStyle(lineInfo->getStyle());
+                lineObject->setPositions(lineInfo->getCoordinates());
+                lineObject->getLineObject()->setup(mapInterface->getRenderingContext());
+
+                wrapper->lineObject = lineObject;
+            }
+#endif
+            
             textObjects.push_back(wrapper);
         }
     }
 
-    std::sort(textObjects.begin(), textObjects.end(), [](const std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> &a, const std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> &b) {
-        return a->symbolSortKey < b->symbolSortKey;
-    });
 
     {
         std::lock_guard<std::recursive_mutex> lock(symbolMutex);
@@ -467,6 +447,14 @@ void Tiled2dMapVectorSymbolSubLayer::addTexts(const Tiled2dMapTileInfo &tileInfo
         }
         tileTextMap[tileInfo] = textObjects;
     }
+    
+    {
+        std::lock_guard<std::recursive_mutex> lock(sortedSymbolMutex);
+        auto cbefroe = sortedSymbols.size();
+        std::copy(textObjects.begin(), textObjects.end(), std::inserter(sortedSymbols, sortedSymbols.end()));
+        assert(cbefroe + textObjects.size() == sortedSymbols.size());
+    }
+    
     {
         std::lock_guard<std::recursive_mutex> lock(dirtyMutex);
         hasFreshData = true;
@@ -529,14 +517,13 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
         return;
     }
 
-
     std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> selectedTextWrapper;
     {
         std::lock_guard<std::recursive_mutex> lock(selectedTextWrapperMutex);
         selectedTextWrapper = this->selectedTextWrapper;
     }
 
-    std::lock_guard<std::recursive_mutex> lock(symbolMutex);
+    std::lock_guard<std::recursive_mutex> lock(sortedSymbolMutex);
 
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
     double rotation = -camera->getRotation();
@@ -571,37 +558,32 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
             Matrix::setIdentityM(wrapper->modelMatrix, 0);
             Matrix::translateM(wrapper->modelMatrix, 0, renderCoord.x, renderCoord.y, renderCoord.z);
 
-            Matrix::scaleM(wrapper->modelMatrix, 0, scale, scale, 1.0);
-
             rotation += description->style.getTextRotate(evalContext);
 
-            if (wrapper->textInfo->angle) {
-
-                double rotateSum = fmod(rotation - (*wrapper->textInfo->angle) + 720.0, 360);
-                if (rotateSum > 270 || rotateSum < 90) {
-                    rotation = *wrapper->textInfo->angle;
-                } else {
-                    rotation = *wrapper->textInfo->angle + 180;
+            if(wrapper->textInfo->getSymbolPlacement() == TextSymbolPlacement::POINT) {
+                if (wrapper->textInfo->angle) {
+                    double rotateSum = fmod(rotation - (*wrapper->textInfo->angle) + 720.0, 360);
+                    if (rotateSum > 270 || rotateSum < 90) {
+                        rotation = *wrapper->textInfo->angle;
+                    } else {
+                        rotation = *wrapper->textInfo->angle + 180;
+                    }
                 }
+
+                Matrix::rotateM(wrapper->modelMatrix, 0.0, rotation, 0.0, 0.0, 1.0);
             }
-            Matrix::rotateM(wrapper->modelMatrix, 0.0, rotation, 0.0, 0.0, 1.0);
 
             Matrix::translateM(wrapper->modelMatrix, 0, -renderCoord.x, -renderCoord.y, -renderCoord.z);
-
         }
 
         wrapper->collides = false;
-
 
         std::optional<Quad2dD> combinedQuad;
 
         if (hasText) {
             float padding = description->style.getTextPadding(evalContext);
-            auto const &quad = getProjectedFrame(object->boundingBox, padding, wrapper->modelMatrix);
-
-            combinedQuad = quad;
+            combinedQuad = getProjectedFrame(object->boundingBox, padding, wrapper->modelMatrix);
         }
-
 
         if (spriteData && spriteTexture) {
             auto iconImage = description->style.getIconImage(evalContext);
@@ -699,7 +681,6 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
         wrapper->boundingBox->setFrame(*combinedQuad, RectD(0, 0, 1, 1));
 #endif
 
-
         for ( auto const &otherB: placements ) {
             if (otherB.overlaps(wrapper->orientedBoundingBox)) {
                 wrapper->collides = true;
@@ -728,18 +709,15 @@ void Tiled2dMapVectorSymbolSubLayer::collisionDetection(std::vector<OBB2D> &plac
 #endif
     };
 
-
     if (selectedTextWrapper) {
         collisionDetectionLambda(selectedTextWrapper);
     }
 
-    for (auto &[tile, wrapperVector]: tileTextMap) {
-        for (auto &wrapper: wrapperVector) {
-            if (wrapper == selectedTextWrapper) {
-                continue;
-            }
-            collisionDetectionLambda(wrapper);
+    for (auto &wrapper: sortedSymbols) {
+        if (wrapper == selectedTextWrapper) {
+            continue;
         }
+        collisionDetectionLambda(wrapper);
     }
 }
 
@@ -789,8 +767,28 @@ void Tiled2dMapVectorSymbolSubLayer::setupTexts(const Tiled2dMapTileInfo &tileIn
     }
 }
 
-void Tiled2dMapVectorSymbolSubLayer::update() {}
+void Tiled2dMapVectorSymbolSubLayer::update() {
+    auto mapInterface = this->mapInterface;
+    auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+    if (!mapInterface || !camera) {
+        return;
+    }
 
+    std::lock_guard<std::recursive_mutex> lock(symbolMutex);
+
+    double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
+    auto scaleFactor = camera->mapUnitsFromPixels(1.0);
+
+    for (auto &wrapper: sortedSymbols) {
+        auto const evalContext = EvaluationContext(zoomIdentifier, wrapper->featureContext);
+
+        const auto &object = wrapper->textObject;
+        auto ref = object->getReferenceSize();
+        auto scale = scaleFactor * description->style.getTextSize(evalContext) / ref;
+
+        wrapper->textObject->update(scale);
+    }
+}
 
 void Tiled2dMapVectorSymbolSubLayer::clearTileData(const Tiled2dMapTileInfo &tileInfo) {
     auto mapInterface = this->mapInterface;
@@ -808,6 +806,7 @@ void Tiled2dMapVectorSymbolSubLayer::clearTileData(const Tiled2dMapTileInfo &til
 
     {
         std::lock_guard<std::recursive_mutex> lock(symbolMutex);
+        std::lock_guard<std::recursive_mutex> symbolLock(sortedSymbolMutex);
         if (tileTextMap.count(tileInfo) != 0) {
             for (auto const &wrapper: tileTextMap[tileInfo]) {
                 const auto &textObject = wrapper->textObject->getTextObject();
@@ -817,6 +816,7 @@ void Tiled2dMapVectorSymbolSubLayer::clearTileData(const Tiled2dMapTileInfo &til
                 if(wrapper->symbolObject && wrapper != selectedTextWrapper) {
                     objectsToClear.push_back(wrapper->symbolGraphicsObject);
                 }
+                sortedSymbols.erase(wrapper);
             }
             tileTextMap.erase(tileInfo);
         }
@@ -858,7 +858,6 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorSymbolSubLay
         selectedTextWrapper = this->selectedTextWrapper;
     }
 
-
     std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
 
     if (selectedTextWrapper && selectedTextWrapper->symbolGraphicsObject) {
@@ -868,8 +867,13 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorSymbolSubLay
 #ifdef DRAW_TEXT_BOUNDING_BOXES
         renderPassObjectMap[description->renderPassIndex.value_or(0)].push_back(std::make_shared<RenderObject>(selectedTextWrapper->boundingBox->asGraphicsObject()));
 #endif
-    }
 
+#ifdef DRAW_TEXT_LINES
+        if(selectedTextWrapper->lineObject) {
+            renderPassObjectMap[description->renderPassIndex.value_or(0)].push_back(std::make_shared<RenderObject>(selectedTextWrapper->lineObject->getLineObject()));
+        }
+#endif
+    }
 
     if(!(description->minZoom > zoomIdentifier || description->maxZoom < zoomIdentifier)) {
         std::lock_guard<std::recursive_mutex> lock(symbolMutex);
@@ -903,7 +907,31 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorSymbolSubLay
 #ifdef DRAW_TEXT_BOUNDING_BOXES
                 renderPassObjectMap[description->renderPassIndex.value_or(0)].push_back(std::make_shared<RenderObject>(wrapper->boundingBox->asGraphicsObject()));
 #endif
+
+#ifdef DRAW_TEXT_LINES
+                if(wrapper->lineObject) {
+                    renderPassObjectMap[description->renderPassIndex.value_or(0)].push_back(std::make_shared<RenderObject>(wrapper->lineObject->getLineObject()));
+                }
+#endif
+
+#ifdef DRAW_TEXT_LETTER_BOXES
+                if(wrapper->textObject) {
+                    auto boxes = wrapper->textObject->getLetterBoxes();
+
+                    for(auto& b : boxes) {
+                        auto cs = mapInterface->getShaderFactory()->createColorShader();
+                        cs->setColor(0.0, 0.0, 1.0, 0.5);
+                        std::shared_ptr<Quad2dInterface> quadObject = mapInterface->getGraphicsObjectFactory()->createQuad(cs->asShaderProgramInterface());
+                        quadObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+                        quadObject->setFrame(b, RectD(0.0, 0.0, 1.0, 1.0));
+
+                        renderPassObjectMap[description->renderPassIndex.value_or(0)].push_back(std::make_shared<RenderObject>(quadObject->asGraphicsObject()));
+                    }
+                }
+#endif
             }
+
+            
         }
 
     }
