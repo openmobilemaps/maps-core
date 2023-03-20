@@ -254,9 +254,6 @@ void Tiled2dMapVectorSourceTileDataManager::tileIsReady(const Tiled2dMapTileInfo
     }
 
     if (tilesReady.count(tile) > 0) {
-        LogDebug <<= "UBCM: Tried to set subtile ready for ready tile (layer: " + layerIdentifier + ")"
-                     + " - " + std::to_string(tile.zoomIdentifier) +
-                     "/" + std::to_string(tile.x) + "/" + std::to_string(tile.y);;
         return;
     }
 
@@ -267,12 +264,6 @@ void Tiled2dMapVectorSourceTileDataManager::tileIsReady(const Tiled2dMapTileInfo
         const auto &tileControlSet = tilesReadyControlSet.find(tile);
         if (tileControlSet == tilesReadyControlSet.end()) {
             return;
-        }
-        if (tileControlSet->second.count(layerIndex) == 0) {
-            LogDebug <<= "UBCM: Tried to remove subtile index from set, but already ready (layer: " + layerIdentifier +
-                         "). Was empty: " + (tileControlSet->second.empty() ? "true" : "false")
-                         + " - " + std::to_string(tile.zoomIdentifier) +
-                         "/" + std::to_string(tile.x) + "/" + std::to_string(tile.y);
         }
         tileControlSet->second.erase(layerIndex);
         if (tileControlSet->second.empty()) {
