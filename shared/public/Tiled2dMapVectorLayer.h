@@ -132,7 +132,7 @@ protected:
     virtual void loadSpriteData();
 
 
-    Actor<Tiled2dMapVectorSource> vectorTileSource;
+    std::unordered_map<std::string, Actor<Tiled2dMapVectorSource>> vectorTileSources;
     std::vector<Actor<Tiled2dMapRasterSource>> rasterTileSources;
 
     const std::vector<std::shared_ptr<::LoaderInterface>> loaders;

@@ -13,12 +13,17 @@
 #include "Tiled2dMapVectorSourceTileDataManager.h"
 #include "Tiled2dMapVectorSource.h"
 #include "Tiled2dMapVectorSymbolFeatureWrapper.h"
+#include "Tiled2dMapVectorSourceDataManager.h"
 
-class Tiled2dMapVectorSourceSymbolDataManager : public Tiled2dMapVectorSourceTileDataManager {
+class Tiled2dMapVectorSourceSymbolDataManager: public Tiled2dMapVectorSourceDataManager {
 public:
-    Tiled2dMapVectorSourceSymbolDataManager(const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
-                                                const std::shared_ptr<VectorMapDescription> &mapDescription,
-                                                const std::string &source);
+    using Tiled2dMapVectorSourceDataManager::Tiled2dMapVectorSourceDataManager;
 
     void onVectorTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) override;
+
+    //cached locked unsafe renderpasses
+
+//    void collisionDetection(LayerIdentifier, &std::vector<Placements>)
+//
+//    std::map<TileInfo, std::map<LayerIdentifier, std::vector<Symbols>>>
 };

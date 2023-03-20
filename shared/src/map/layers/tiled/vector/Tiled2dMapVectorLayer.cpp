@@ -190,8 +190,10 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
 
     std::vector<WeakActor<Tiled2dMapSourceInterface>> sourceInterfaces;
     std::vector<Actor<Tiled2dMapRasterSource>> rasterSources;
+    std::unordered_map<std::string, Actor<Tiled2dMapVectorSource>> vectorTileSource;
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceTileDataManager>> sourceTileManagers;
     std::unordered_map<std::string, std::unordered_set<std::string>> layersToDecode;
+    std::unordered_set<std::string> symbolSources;
 
     for (auto const& layerDesc : mapDescription->layers)
     {
@@ -222,9 +224,11 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                 sourceInterfaces.push_back(sourceActor.weakActor<Tiled2dMapSourceInterface>());
                 break;
             }
+            case symbol: {
+                symbolSources.insert(layerDesc->source);
+            }
             case line:
             case polygon:
-            case symbol:
             case custom: {
                 layersToDecode[layerDesc->source].insert(layerDesc->sourceId);
                 break;
@@ -232,27 +236,32 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
         }
     }
 
-    auto sourceMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
-    auto vectorSource = Actor<Tiled2dMapVectorSource>(sourceMailbox,
-                                                      mapInterface->getMapConfig(),
-                                                      layerConfigs,
-                                                      mapInterface->getCoordinateConverterHelper(),
-                                                      mapInterface->getScheduler(),
-                                                      loaders,
-                                                      selfVectorActor,
-                                                      layersToDecode,
-                                                      mapInterface->getCamera()->getScreenDensityPpi());
-    sourceInterfaces.push_back(vectorSource.weakActor<Tiled2dMapSourceInterface>());
-    auto sourceDataManagerMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
-    auto sourceManagerActor = Actor<Tiled2dMapVectorSourceVectorTileDataManager>(sourceDataManagerMailbox,
-                                                                                 selfActor,
-                                                                                 mapDescription,
-                                                                                 layersToDecode.begin()->first,
-                                                                                 vectorSource.weakActor<Tiled2dMapVectorSource>());
-    sourceTileManagers[layersToDecode.begin()->first] = sourceManagerActor.strongActor<Tiled2dMapVectorSourceTileDataManager>();
+    for (auto const &[source, layers]: layersToDecode) {
+        auto sourceMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+        auto vectorSource = Actor<Tiled2dMapVectorSource>(sourceMailbox,
+                                                          mapInterface->getMapConfig(),
+                                                          layerConfigs[source],
+                                                          mapInterface->getCoordinateConverterHelper(),
+                                                          mapInterface->getScheduler(),
+                                                          loaders,
+                                                          selfVectorActor,
+                                                          layers,
+                                                          source,
+                                                          mapInterface->getCamera()->getScreenDensityPpi());
+        vectorTileSource[source] = vectorSource;
+        sourceInterfaces.push_back(vectorSource.weakActor<Tiled2dMapSourceInterface>());
+        auto sourceDataManagerMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+        auto sourceManagerActor = Actor<Tiled2dMapVectorSourceVectorTileDataManager>(sourceDataManagerMailbox,
+                                                                                     selfActor,
+                                                                                     mapDescription,
+                                                                                     source,
+                                                                                     vectorSource.weakActor<Tiled2dMapVectorSource>());
+        sourceTileManagers[source] = sourceManagerActor.strongActor<Tiled2dMapVectorSourceTileDataManager>();
+    }
 
     this->rasterTileSources = rasterSources;
-    vectorTileSource = vectorSource;
+    this->vectorTileSources = vectorTileSource;
+    
     sourceDataManagers = sourceTileManagers;
 
     setSourceInterfaces(sourceInterfaces);
@@ -277,7 +286,10 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     }
 
     if (isResumed) {
-        vectorTileSource.message(&Tiled2dMapVectorSource::resume);
+        for (const auto &[source, vectorTileSource] : vectorTileSources) {
+            vectorTileSource.message(&Tiled2dMapVectorSource::resume);
+        }
+
         for (const auto &rasterSource : rasterSources) {
             rasterSource.message(&Tiled2dMapRasterSource::resume);
         }
@@ -435,7 +447,7 @@ float Tiled2dMapVectorLayer::getAlpha() { return alpha; }
 
 
 void Tiled2dMapVectorLayer::forceReload() {
-    if (!isLoadingStyleJson && remoteStyleJsonUrl.has_value() && !mapDescription && !vectorTileSource) {
+    if (!isLoadingStyleJson && remoteStyleJsonUrl.has_value() && !mapDescription && !vectorTileSources.empty()) {
         scheduleStyleJsonLoading();
         return;
     }
@@ -452,6 +464,7 @@ void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &layerName, std::un
 void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) {
     std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
+        if (source != sourceName) { continue; }
         sourceDataManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::onVectorTilesUpdated, sourceName, currentTileInfos);
     }
 }
@@ -570,16 +583,14 @@ void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDe
 }
 
 std::optional<FeatureContext> Tiled2dMapVectorLayer::getFeatureContext(int64_t identifier) {
-    auto const &currentTileInfos = vectorTileSource.converse(&Tiled2dMapVectorSource::getCurrentTiles).get();
+    for (const auto &[source, vectorTileSource] : vectorTileSources) {
+        auto const &currentTileInfos = vectorTileSource.converse(&Tiled2dMapVectorSource::getCurrentTiles).get();
 
-    for (auto const &tile: currentTileInfos) {
-        {
-            for (auto const &[source, layerFeatureMap]: *tile.layerFeatureMaps) {
-                for (auto it = layerFeatureMap.begin(); it != layerFeatureMap.end(); it++) {
-                    for (auto const &[featureContext, geometry]: *it->second) {
-                        if (featureContext.identifier == identifier) {
-                            return featureContext;
-                        }
+        for (auto const &tile: currentTileInfos) {
+            for (auto it = tile.layerFeatureMaps->begin(); it != tile.layerFeatureMaps->end(); it++) {
+                for (auto const &[featureContext, geometry]: *it->second) {
+                    if (featureContext.identifier == identifier) {
+                        return featureContext;
                     }
                 }
             }

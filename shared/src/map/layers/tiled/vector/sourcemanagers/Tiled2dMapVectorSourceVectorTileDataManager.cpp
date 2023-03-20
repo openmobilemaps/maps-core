@@ -92,29 +92,29 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
 
             for (int32_t index = 0; index < mapDescription->layers.size(); index++) {
                 auto const &layer= mapDescription->layers.at(index);
+                if (layer->source != sourceName) {
+                    continue;
+                }
                 if (!(layer->minZoom <= tile->tileInfo.zoomIdentifier && layer->maxZoom >= tile->tileInfo.zoomIdentifier)) {
                     continue;
                 }
-                auto const mapIt = tile->layerFeatureMaps->find(layer->source);
+                auto const mapIt = tile->layerFeatureMaps->find(layer->sourceId);
                 if (mapIt == tile->layerFeatureMaps->end()) {
                     continue;
                 }
-                auto const dataIt = mapIt->second.find(layer->sourceId);
-                if (dataIt != mapIt->second.end()) {
 
-                    std::string identifier = layer->identifier;
-                    Actor<Tiled2dMapVectorTile> actor = createTileActor(tile->tileInfo, layer);
+                std::string identifier = layer->identifier;
+                Actor<Tiled2dMapVectorTile> actor = createTileActor(tile->tileInfo, layer);
 
-                    if (actor) {
-                        if (selectionDelegate) {
-                            actor.message(&Tiled2dMapVectorTile::setSelectionDelegate, selectionDelegate);
-                        }
-
-                        indexControlSet.insert(index);
-                        tiles[tile->tileInfo].push_back({index, identifier, actor.strongActor<Tiled2dMapVectorTile>()});
-
-                        actor.message(&Tiled2dMapVectorTile::setVectorTileData, dataIt->second);
+                if (actor) {
+                    if (selectionDelegate) {
+                        actor.message(&Tiled2dMapVectorTile::setSelectionDelegate, selectionDelegate);
                     }
+
+                    indexControlSet.insert(index);
+                    tiles[tile->tileInfo].push_back({index, identifier, actor.strongActor<Tiled2dMapVectorTile>()});
+
+                    actor.message(&Tiled2dMapVectorTile::setVectorTileData, mapIt->second);
                 }
             }
 
