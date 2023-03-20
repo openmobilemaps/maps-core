@@ -117,7 +117,7 @@ void Tiled2dMapVectorLineTile::setup() {
         auto const &lineObject = line->getLineObject();
         if (!lineObject->isReady()) lineObject->setup(context);
     }
-    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, std::vector<std::shared_ptr<RenderObjectInterface>>{});
+    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, generateRenderObjects());
 }
 
 void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataVector &tileData) {

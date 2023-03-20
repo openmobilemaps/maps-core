@@ -41,6 +41,9 @@ void ColorPolygonGroup2dShaderOpenGl::preRender(const std::shared_ptr<::Renderin
 
     {
         std::lock_guard<std::recursive_mutex> overlayLock(styleMutex);
+        if (numStyles == 0) {
+            return;
+        }
         int lineStylesHandle = glGetUniformLocation(program, "polygonStyles");
         glUniform1fv(lineStylesHandle, sizeStyleValuesArray, &polygonStyles[0]);
         int numStylesHandle = glGetUniformLocation(program, "numStyles");

@@ -69,6 +69,7 @@ void Tiled2dMapVectorSourceTileDataManager::pregenerateRenderPasses() {
 }
 
 void Tiled2dMapVectorSourceTileDataManager::pause() {
+    isPaused = true;
     for (const auto &tileMask: tileMaskMap) {
         if (tileMask.second.getGraphicsObject() &&
             tileMask.second.getGraphicsObject()->isReady()) {
@@ -100,12 +101,19 @@ void Tiled2dMapVectorSourceTileDataManager::resume() {
     }
 
     for (const auto &[tileInfo, subTiles] : tiles) {
+        if (tilesReadyControlSet.count(tileInfo) > 0 || tilesReady.count(tileInfo) > 0) {
+            continue;
+        }
+
+        std::unordered_set<int32_t> controlSet = {};
         for (const auto &[index, identifier, tile]: subTiles) {
+            controlSet.insert(index);
             tile.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorTile::setup);
         }
-        tilesReady.insert(tileInfo);
-        onTileCompletelyReady(tileInfo);
+
+        tilesReadyControlSet[tileInfo] = controlSet;
     }
+    isPaused = false;
 }
 
 void Tiled2dMapVectorSourceTileDataManager::setAlpha(float alpha) {
@@ -241,8 +249,15 @@ Actor<Tiled2dMapVectorTile> Tiled2dMapVectorSourceTileDataManager::createTileAct
 void Tiled2dMapVectorSourceTileDataManager::tileIsReady(const Tiled2dMapTileInfo &tile,
                                                         const std::string &layerIdentifier,
                                                         const std::vector<std::shared_ptr<RenderObjectInterface>> renderObjects) {
-    {
-        if (tilesReady.count(tile) > 0) return;
+    if (isPaused) {
+        return;
+    }
+
+    if (tilesReady.count(tile) > 0) {
+        LogDebug <<= "UBCM: Tried to set subtile ready for ready tile (layer: " + layerIdentifier + ")"
+                     + " - " + std::to_string(tile.zoomIdentifier) +
+                     "/" + std::to_string(tile.x) + "/" + std::to_string(tile.y);;
+        return;
     }
 
     int32_t layerIndex = layerNameIndexMap.at(layerIdentifier);
@@ -252,6 +267,12 @@ void Tiled2dMapVectorSourceTileDataManager::tileIsReady(const Tiled2dMapTileInfo
         const auto &tileControlSet = tilesReadyControlSet.find(tile);
         if (tileControlSet == tilesReadyControlSet.end()) {
             return;
+        }
+        if (tileControlSet->second.count(layerIndex) == 0) {
+            LogDebug <<= "UBCM: Tried to remove subtile index from set, but already ready (layer: " + layerIdentifier +
+                         "). Was empty: " + (tileControlSet->second.empty() ? "true" : "false")
+                         + " - " + std::to_string(tile.zoomIdentifier) +
+                         "/" + std::to_string(tile.x) + "/" + std::to_string(tile.y);
         }
         tileControlSet->second.erase(layerIndex);
         if (tileControlSet->second.empty()) {
