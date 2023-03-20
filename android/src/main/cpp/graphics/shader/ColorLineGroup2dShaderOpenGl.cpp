@@ -40,6 +40,9 @@ void ColorLineGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingCo
 
     {
         std::lock_guard<std::recursive_mutex> lock(styleMutex);
+        if (numStyles == 0) {
+            return;
+        }
         int lineStylesHandle = glGetUniformLocation(program, "lineStyles");
         glUniform1fv(lineStylesHandle, sizeStyleValuesArray, &lineStyles[0]);
         int lineColorsHandle = glGetUniformLocation(program, "lineColors");

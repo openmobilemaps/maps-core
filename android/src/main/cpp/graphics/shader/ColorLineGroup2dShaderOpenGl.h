@@ -41,7 +41,7 @@ class ColorLineGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
     std::vector<GLfloat> lineColors;
     std::vector<GLfloat> lineGapColors;
     std::vector<GLfloat> lineDashValues;
-    GLint numStyles;
+    GLint numStyles = 0;
 
     const int maxNumStyles = 48;
     const int sizeStyleValues = 3;

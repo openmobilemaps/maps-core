@@ -85,4 +85,6 @@ protected:
     std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> tileMaskMap;
     std::unordered_set<Tiled2dMapTileInfo> tilesReady;
     std::unordered_map<Tiled2dMapTileInfo, std::unordered_set<int32_t>> tilesReadyControlSet;
+
+    std::atomic_bool isPaused = true;
 };

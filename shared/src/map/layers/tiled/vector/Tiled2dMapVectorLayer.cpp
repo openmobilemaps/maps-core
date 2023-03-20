@@ -445,14 +445,14 @@ void Tiled2dMapVectorLayer::forceReload() {
 void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) {
     std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-        sourceDataManager.message(&Tiled2dMapVectorSourceTileDataManager::onRasterTilesUpdated, layerName, currentTileInfos);
+        sourceDataManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::onRasterTilesUpdated, layerName, currentTileInfos);
     }
 }
 
 void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) {
     std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-        sourceDataManager.message(&Tiled2dMapVectorSourceTileDataManager::onVectorTilesUpdated, sourceName, currentTileInfos);
+        sourceDataManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::onVectorTilesUpdated, sourceName, currentTileInfos);
     }
 }
 

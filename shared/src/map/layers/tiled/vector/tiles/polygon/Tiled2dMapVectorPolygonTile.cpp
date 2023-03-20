@@ -62,6 +62,7 @@ void Tiled2dMapVectorPolygonTile::update() {
         return;
     }
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(mapInterface->getCamera()->getZoom());
+    zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.zoomIdentifier);
 
     std::vector<float> shaderStyles;
     auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
@@ -96,7 +97,7 @@ void Tiled2dMapVectorPolygonTile::setup() {
     for (auto const &polygon: polygons) {
         if (!polygon->getPolygonObject()->isReady()) polygon->getPolygonObject()->setup(context);
     }
-    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, std::vector<std::shared_ptr<RenderObjectInterface>>{});
+    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, generateRenderObjects());
 }
 
 void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDataVector &tileData) {
