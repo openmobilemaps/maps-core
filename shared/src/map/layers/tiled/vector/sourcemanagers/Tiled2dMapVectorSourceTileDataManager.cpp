@@ -69,7 +69,7 @@ void Tiled2dMapVectorSourceTileDataManager::pregenerateRenderPasses() {
 }
 
 void Tiled2dMapVectorSourceTileDataManager::pause() {
-    isPaused = true;
+    LogDebug <<= "UBCM: pause called!";
     for (const auto &tileMask: tileMaskMap) {
         if (tileMask.second.getGraphicsObject() &&
             tileMask.second.getGraphicsObject()->isReady()) {
@@ -88,6 +88,7 @@ void Tiled2dMapVectorSourceTileDataManager::pause() {
 }
 
 void Tiled2dMapVectorSourceTileDataManager::resume() {
+    LogDebug <<= "UBCM: resume called!";
     auto mapInterface = this->mapInterface.lock();
     if (!mapInterface) {
         return;
@@ -113,7 +114,6 @@ void Tiled2dMapVectorSourceTileDataManager::resume() {
 
         tilesReadyControlSet[tileInfo] = controlSet;
     }
-    isPaused = false;
 }
 
 void Tiled2dMapVectorSourceTileDataManager::setAlpha(float alpha) {
@@ -249,10 +249,6 @@ Actor<Tiled2dMapVectorTile> Tiled2dMapVectorSourceTileDataManager::createTileAct
 void Tiled2dMapVectorSourceTileDataManager::tileIsReady(const Tiled2dMapTileInfo &tile,
                                                         const std::string &layerIdentifier,
                                                         const std::vector<std::shared_ptr<RenderObjectInterface>> renderObjects) {
-    if (isPaused) {
-        return;
-    }
-
     if (tilesReady.count(tile) > 0) {
         return;
     }

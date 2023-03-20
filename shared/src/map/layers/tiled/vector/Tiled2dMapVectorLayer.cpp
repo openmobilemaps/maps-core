@@ -391,7 +391,9 @@ void Tiled2dMapVectorLayer::pause() {
     {
         std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
         for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-            sourceDataManager.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceTileDataManager::pause);
+            sourceDataManager.syncAccess([](const auto &manager){
+                manager->pause();
+            });
         }
     }
 
