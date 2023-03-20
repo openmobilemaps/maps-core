@@ -21,6 +21,7 @@
 
 - (BOOL)hasSeparateGraphicsInvocation;
 
-- (void)runGraphicsTasks;
+/** Execute added graphics tasks. Returns true, if there are unprocessed tasks in the queue after the execution. */
+- (BOOL)runGraphicsTasks;
 
 @end

@@ -22,7 +22,8 @@ abstract class SchedulerInterface {
 
     abstract fun hasSeparateGraphicsInvocation(): Boolean
 
-    abstract fun runGraphicsTasks()
+    /** Execute added graphics tasks. Returns true, if there are unprocessed tasks in the queue after the execution. */
+    abstract fun runGraphicsTasks(): Boolean
 
     private class CppProxy : SchedulerInterface {
         private val nativeRef: Long
@@ -78,10 +79,10 @@ abstract class SchedulerInterface {
         }
         private external fun native_hasSeparateGraphicsInvocation(_nativeRef: Long): Boolean
 
-        override fun runGraphicsTasks() {
+        override fun runGraphicsTasks(): Boolean {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_runGraphicsTasks(this.nativeRef)
+            return native_runGraphicsTasks(this.nativeRef)
         }
-        private external fun native_runGraphicsTasks(_nativeRef: Long)
+        private external fun native_runGraphicsTasks(_nativeRef: Long): Boolean
     }
 }

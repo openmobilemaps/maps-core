@@ -213,12 +213,14 @@ void MapScene::invalidate() {
 void MapScene::drawFrame() {
     isInvalidated.clear();
 
+    if (scheduler && scheduler->hasSeparateGraphicsInvocation()) {
+        if (scheduler->runGraphicsTasks()) {
+            invalidate();
+        }
+    }
+
     if (!isResumed)
         return;
-
-    if (scheduler && scheduler->hasSeparateGraphicsInvocation()) {
-        scheduler->runGraphicsTasks();
-    }
 
     auto const camera = this->camera;
     if (camera) {

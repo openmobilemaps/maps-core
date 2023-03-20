@@ -75,9 +75,10 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)runGraphicsTasks {
+- (BOOL)runGraphicsTasks {
     try {
-        _cppRefHandle.get()->runGraphicsTasks();
+        auto objcpp_result_ = _cppRefHandle.get()->runGraphicsTasks();
+        return ::djinni::Bool::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -133,10 +134,11 @@ public:
             return ::djinni::Bool::toCpp(objcpp_result_);
         }
     }
-    void runGraphicsTasks() override
+    bool runGraphicsTasks() override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() runGraphicsTasks];
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() runGraphicsTasks];
+            return ::djinni::Bool::toCpp(objcpp_result_);
         }
     }
 };

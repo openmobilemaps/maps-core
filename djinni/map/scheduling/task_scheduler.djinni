@@ -6,7 +6,8 @@ scheduler_interface = interface +c +j +o {
     pause();
     resume();
     has_separate_graphics_invocation(): bool;
-    run_graphics_tasks();
+    # Execute added graphics tasks. Returns true, if there are unprocessed tasks in the queue after the execution.
+    run_graphics_tasks(): bool;
 }
 
 task_interface = interface +c +j +o {

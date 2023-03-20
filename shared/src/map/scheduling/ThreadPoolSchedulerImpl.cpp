@@ -145,26 +145,34 @@ bool ThreadPoolSchedulerImpl::hasSeparateGraphicsInvocation() {
 }
 
 std::chrono::time_point<std::chrono::steady_clock> lastEnd;
-void ThreadPoolSchedulerImpl::runGraphicsTasks() {
+bool ThreadPoolSchedulerImpl::runGraphicsTasks() {
+    bool noTasksLeft;
     auto start = std::chrono::steady_clock::now();
     int i;
     for (i = 0; i < MAX_NUM_GRAPHICS_TASKS; i++) {
         {
             std::unique_lock<std::mutex> lock(graphicsMutex);
             if (graphicsQueue.empty()) {
+                noTasksLeft = true;
                 break;
             } else {
                 auto task = std::move(graphicsQueue.front());
                 graphicsQueue.pop_front();
                 lock.unlock();
                 if (task) task->run();
+                noTasksLeft = graphicsQueue.empty();
             }
         }
         auto cwtMs = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start);
         if (cwtMs.count() >= MAX_TIME_GRAPHICS_TASKS_MS) {
+            {
+                std::unique_lock<std::mutex> lock(graphicsMutex);
+                noTasksLeft = graphicsQueue.empty();
+            }
             break;
         }
     }
+    return !noTasksLeft;
 }
 
 void ThreadPoolSchedulerImpl::delayedTasksThread() {
