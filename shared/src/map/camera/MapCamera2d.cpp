@@ -363,7 +363,7 @@ std::vector<float> MapCamera2d::getVpMatrix() {
     float fov = 40; // zoom / 9002800;
 
     float vpr = (float)sizeViewport.x / (float)sizeViewport.y;
-    Matrix::perspectiveM(newVpMatrix, 0, fov, vpr, 0.0, 100);
+    Matrix::perspectiveM(newVpMatrix, 0, fov, vpr, 0.0001, 10.0);
 
 
     cameraPitch = 70;

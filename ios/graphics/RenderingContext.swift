@@ -34,6 +34,8 @@ public class RenderingContext: NSObject {
         let depthStencilDescriptor = MTLDepthStencilDescriptor()
         depthStencilDescriptor.frontFaceStencil = descriptor
         depthStencilDescriptor.backFaceStencil = descriptor
+        depthStencilDescriptor.depthCompareFunction = .lessEqual
+        depthStencilDescriptor.isDepthWriteEnabled = true
         return MetalContext.current.device.makeDepthStencilState(descriptor: depthStencilDescriptor)
     }()
 
@@ -47,6 +49,8 @@ public class RenderingContext: NSObject {
         let depthStencilDescriptor = MTLDepthStencilDescriptor()
         depthStencilDescriptor.frontFaceStencil = descriptor
         depthStencilDescriptor.backFaceStencil = descriptor
+        depthStencilDescriptor.depthCompareFunction = .lessEqual
+        depthStencilDescriptor.isDepthWriteEnabled = true
         return MetalContext.current.device.makeDepthStencilState(descriptor: depthStencilDescriptor)
     }()
 
@@ -57,6 +61,8 @@ public class RenderingContext: NSObject {
         let depthStencilDescriptor = MTLDepthStencilDescriptor()
         depthStencilDescriptor.frontFaceStencil = descriptor
         depthStencilDescriptor.backFaceStencil = descriptor
+        depthStencilDescriptor.depthCompareFunction = .lessEqual
+        depthStencilDescriptor.isDepthWriteEnabled = true
         return MetalContext.current.device.makeDepthStencilState(descriptor: depthStencilDescriptor)
     }()
 
@@ -128,6 +134,22 @@ extension RenderingContext: MCRenderingContextInterface {
 
     public func setViewportSize(_ newSize: MCVec2I) {
         viewportSize = newSize
+
+////        let depthStencilDescriptor = MTLDepthStencilDescriptor()
+////        depthStencilDescriptor.depthCompareFunction = .less
+////        depthStencilDescriptor.isDepthWriteEnabled = true
+////        depthStencilState = MetalContext.current.device.makeDepthStencilState(descriptor: depthStencilDescriptor)!
+//
+//        let depthTextureDescriptor = MTLTextureDescriptor.texture2DDescriptor(
+//            pixelFormat: .depth32Float,
+//            width: Int(newSize.x),
+//            height: Int(newSize.y),
+//            mipmapped: false
+//        )
+//        depthTextureDescriptor.usage = .renderTarget
+//        depthTextureDescriptor.storageMode = .private
+//        depthTextureDescriptor.resourceOptions = .storageModePrivate
+//        mask.
     }
 
     public func getViewportSize() -> MCVec2I { viewportSize }

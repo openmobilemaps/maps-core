@@ -38,9 +38,11 @@ public enum PipelineDescriptorFactory {
             pipelineDescriptor.tessellationControlPointIndexType = .uint16
             pipelineDescriptor.tessellationFactorStepFunction = .constant
             pipelineDescriptor.maxTessellationFactor = 16
+
+            pipelineDescriptor.depthAttachmentPixelFormat = .depth32Float_stencil8
         }
 
-        pipelineDescriptor.stencilAttachmentPixelFormat = .stencil8
+        pipelineDescriptor.stencilAttachmentPixelFormat = .depth32Float_stencil8
         pipelineDescriptor.label = label
 
         guard let vertexFunction = library.makeFunction(name: vertexShader),
