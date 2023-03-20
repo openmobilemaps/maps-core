@@ -41,6 +41,8 @@ void Tiled2dMapVectorRasterTile::update() {
         return;
     }
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
+    zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.zoomIdentifier);
+
     EvaluationContext evalContext(zoomIdentifier, FeatureContext());
     double opacity = std::static_pointer_cast<RasterVectorLayerDescription>(description)->style.getRasterOpacity(evalContext);
     tileObject->setAlpha(opacity);

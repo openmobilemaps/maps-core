@@ -62,6 +62,7 @@ void Tiled2dMapVectorPolygonTile::update() {
         return;
     }
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(mapInterface->getCamera()->getZoom());
+    zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.zoomIdentifier);
 
     std::vector<float> shaderStyles;
     auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);

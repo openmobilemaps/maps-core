@@ -44,6 +44,7 @@ void Tiled2dMapVectorLineTile::update() {
     }
 
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(mapInterface->getCamera()->getZoom());
+    zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.zoomIdentifier);
 
     auto lineDescription = std::static_pointer_cast<LineVectorLayerDescription>(description);
 
