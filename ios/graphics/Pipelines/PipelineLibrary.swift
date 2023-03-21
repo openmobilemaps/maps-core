@@ -65,13 +65,13 @@ public enum PipelineDescriptorFactory {
 }
 
 extension PipelineDescriptorFactory {
-    static func pipelineDescriptor(pipeline: Pipeline) -> MTLRenderPipelineDescriptor {
+    static func pipelineDescriptor(pipeline: Pipeline, depth: Bool) -> MTLRenderPipelineDescriptor {
         pipelineDescriptor(vertexDescriptor: pipeline.vertexDescriptor,
                            label: pipeline.label,
                            vertexShader: pipeline.vertexShader,
                            fragmentShader: pipeline.fragmentShader,
                            tessellation: pipeline.isTesselated,
-                           depthBuffer: pipeline.depthBuffer)
+                           depthBuffer: depth)
     }
 }
 
@@ -85,6 +85,7 @@ public enum Pipeline: String, CaseIterable {
     case clearStencilShader
     case textShader
     case sphereProjectionShader
+    case sphereColorShader
 
     var label: String {
         switch self {
@@ -97,6 +98,7 @@ public enum Pipeline: String, CaseIterable {
             case .clearStencilShader: return "Clear stencil shader"
             case .textShader: return "Text shader"
             case .sphereProjectionShader: return "Sphere projection shader"
+            case .sphereColorShader: return "Sphere Mask Shader"
         }
     }
 
@@ -111,6 +113,7 @@ public enum Pipeline: String, CaseIterable {
             case .clearStencilShader: return "stencilClearVertexShader"
             case .textShader: return "textVertexShader"
             case .sphereProjectionShader: return "sphereProjectionVertexShader"
+            case .sphereColorShader: return "sphereColorVertexShader"
         }
     }
 
@@ -125,6 +128,7 @@ public enum Pipeline: String, CaseIterable {
             case .clearStencilShader: return "stencilClearFragmentShader"
             case .textShader: return "textFragmentShader"
             case .sphereProjectionShader: return "baseFragmentShader"
+            case .sphereColorShader: return "colorFragmentShader"
         }
     }
 
@@ -133,6 +137,7 @@ public enum Pipeline: String, CaseIterable {
             case .lineGroupShader: return LineVertex.descriptor
             case .polygonGroupShader: return PolygonVertex.descriptor
             case .sphereProjectionShader: return Vertex.tesselatedDescriptor
+            case .sphereColorShader: return Vertex.tesselatedDescriptor
             default: return Vertex.descriptor
         }
     }
@@ -140,26 +145,20 @@ public enum Pipeline: String, CaseIterable {
     var isTesselated: Bool {
         switch self {
             case .sphereProjectionShader: return true
+            case .sphereColorShader: return true
             default: return false
         }
     }
 
-    var depthBuffer: Bool {
-        switch self {
-            case .sphereProjectionShader: return true
-            case .clearStencilShader: return true
-            default: return false
-        }
-    }
 }
 
 public class PipelineLibrary: StaticMetalLibrary<String, MTLRenderPipelineState> {
-    init(device: MTLDevice) throws {
+    init(device: MTLDevice, depth: Bool) throws {
         try super.init(Pipeline.allCases.map(\.rawValue)) { key -> MTLRenderPipelineState in
             guard let pipeline = Pipeline(rawValue: key) else {
                 throw LibraryError.invalidKey
             }
-            let pipelineDescriptor = PipelineDescriptorFactory.pipelineDescriptor(pipeline: pipeline)
+            let pipelineDescriptor = PipelineDescriptorFactory.pipelineDescriptor(pipeline: pipeline, depth: depth)
             return try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
         }
     }

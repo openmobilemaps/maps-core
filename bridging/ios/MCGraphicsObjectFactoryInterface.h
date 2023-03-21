@@ -35,6 +35,8 @@
 
 - (nullable id<MCPolygon2dInterface>)createPolygonMask;
 
+- (nullable id<MCPolygon3dInterface>)createPolygonMask3d;
+
 - (nullable id<MCTextInterface>)createText:(nullable id<MCShaderProgramInterface>)shader;
 
 - (nullable id<MCRenderTargetTexture>)createRenderTargetTexture:(nonnull MCVec2I *)size;

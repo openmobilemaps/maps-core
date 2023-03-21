@@ -176,7 +176,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated(std::unordered_set<Tiled2dMapRasterTi
                 }
             }
 
-            std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> newTileMasks;
+            std::unordered_map<Tiled2dMapTileInfo, Tiled3dMapLayerMaskWrapper> newTileMasks;
 
             std::unordered_set<Tiled2dMapRasterTileInfo> tilesToRemove;
             for (const auto &tileEntry : tileObjectMap) {
@@ -192,11 +192,11 @@ void Tiled2dMapRasterLayer::onTilesUpdated(std::unordered_set<Tiled2dMapRasterTi
                         const size_t hash = std::hash<std::vector<::PolygonCoord>>()(curTile->masks);
 
                         if (tileMaskMap[tileEntry.first.tileInfo].getPolygonHash() != hash) {
-                            const auto &tileMask = std::make_shared<PolygonMaskObject>(graphicsFactory,
+                            const auto &tileMask = std::make_shared<PolygonMask3dObject>(graphicsFactory,
                                                                                        coordinateConverterHelper);
 
                             tileMask->setPolygons(curTile->masks);
-                            newTileMasks[tileEntry.first.tileInfo] = Tiled2dMapLayerMaskWrapper(tileMask, hash);
+                            newTileMasks[tileEntry.first.tileInfo] = Tiled3dMapLayerMaskWrapper(tileMask, hash);
                         }
                     }
                 }
@@ -225,11 +225,11 @@ void Tiled2dMapRasterLayer::onTilesUpdated(std::unordered_set<Tiled2dMapRasterTi
                 tileObjectMap[tile] = tileObject;
 
                 if (newTileMasks.count(tile.tileInfo) == 0 && layerConfig->getZoomInfo().maskTile) {
-                    const auto &tileMask = std::make_shared<PolygonMaskObject>(graphicsFactory,
+                    const auto &tileMask = std::make_shared<PolygonMask3dObject>(graphicsFactory,
                                                                                coordinateConverterHelper);
                     const size_t hash = std::hash<std::vector<::PolygonCoord>>()(tile.masks);
                     tileMask->setPolygons(tile.masks);
-                    newTileMasks[tile.tileInfo] = Tiled2dMapLayerMaskWrapper(tileMask, hash);
+                    newTileMasks[tile.tileInfo] = Tiled3dMapLayerMaskWrapper(tileMask, hash);
                 }
             }
 

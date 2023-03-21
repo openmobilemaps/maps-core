@@ -26,6 +26,8 @@ abstract class GraphicsObjectFactoryInterface {
 
     abstract fun createPolygonMask(): Polygon2dInterface
 
+    abstract fun createPolygonMask3d(): Polygon3dInterface
+
     abstract fun createText(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): TextInterface
 
     abstract fun createRenderTargetTexture(size: io.openmobilemaps.mapscore.shared.graphics.common.Vec2I): io.openmobilemaps.mapscore.shared.graphics.RenderTargetTexture
@@ -95,6 +97,12 @@ abstract class GraphicsObjectFactoryInterface {
             return native_createPolygonMask(this.nativeRef)
         }
         private external fun native_createPolygonMask(_nativeRef: Long): Polygon2dInterface
+
+        override fun createPolygonMask3d(): Polygon3dInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createPolygonMask3d(this.nativeRef)
+        }
+        private external fun native_createPolygonMask3d(_nativeRef: Long): Polygon3dInterface
 
         override fun createText(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): TextInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

@@ -170,7 +170,54 @@ extension Polygon3d: MCMaskingObjectInterface {
     func render(asMask context: MCRenderingContextInterface?,
                 renderPass: MCRenderPassConfig,
                 mvpMatrix: Int64,
-                screenPixelAsRealMeterFactor _: Double) { }
+                screenPixelAsRealMeterFactor _: Double) {
+        guard isReady(),
+              let context = context as? RenderingContext,
+              let encoder = context.encoder else { return }
+
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
+
+        guard let verticesBuffer = verticesBuffer,
+              let indicesBuffer = indicesBuffer,
+              let tessellationFactorBuffer = tessellationFactorBuffer
+        else { return }
+
+#if DEBUG
+        encoder.pushDebugGroup("Polygon3dMask")
+        defer {
+            encoder.popDebugGroup()
+        }
+#endif
+
+        if let mask = context.polygonMask3d {
+            encoder.setStencilReferenceValue(0xFF)
+            encoder.setDepthStencilState(mask)
+        }
+
+        // stencil prepare pass
+        shader.setupProgram(context)
+        shader.preRender(context, pass: renderPass)
+
+        encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {
+            encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+        }
+
+        timeBufferContent[0] = Float(-Self.renderStartTime.timeIntervalSinceNow)
+        encoder.setVertexBuffer(timeBuffer, offset: 0, index: 2)
+
+
+        encoder.setTessellationFactorBuffer(tessellationFactorBuffer, offset: 0, instanceStride: 0)
+
+        encoder.setFragmentSamplerState(sampler, index: 0)
+        encoder.setVertexSamplerState(sampler, index: 0)
+
+        encoder.drawIndexedPatches(numberOfPatchControlPoints: 3, patchStart: 0, patchCount: 2, patchIndexBuffer: nil, patchIndexBufferOffset: 0, controlPointIndexBuffer: indicesBuffer, controlPointIndexBufferOffset: 0, instanceCount: 1, baseInstance: 0)
+
+    }
 }
 
 extension Polygon3d: MCPolygon3dInterface {

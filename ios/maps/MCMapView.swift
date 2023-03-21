@@ -64,6 +64,7 @@ open class MCMapView: MTKView {
 
         depthStencilPixelFormat = .depth32Float_stencil8
         clearDepth = 1.0
+//        clearStencil = 0b1111_1111
         
         isMultipleTouchEnabled = true
 

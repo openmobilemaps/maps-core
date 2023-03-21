@@ -12,33 +12,30 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 
-class ColorCircleShader: BaseShader {
+class SphereColorShader: BaseShader {
     private var color = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
-
-    private var miter: Float = 0.0
 
     private var pipeline: MTLRenderPipelineState?
 
+    private let shader : Pipeline
+
+    init(shader : Pipeline = Pipeline.sphereColorShader) {
+        self.shader = shader
+    }
+
     override func setupProgram(_ context: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary(context).value(Pipeline.roundColorShader.rawValue)
+            pipeline = MetalContext.current.pipelineLibrary(context).value(shader.rawValue)
+
+
         }
     }
 
-    override func preRender(encoder: MTLRenderCommandEncoder, context _: RenderingContext,
-                            pass: MCRenderPassConfig) {
+    override func preRender(encoder: MTLRenderCommandEncoder, context _: RenderingContext, pass: MCRenderPassConfig) {
         guard let pipeline = pipeline else { return }
+
         encoder.setRenderPipelineState(pipeline)
         encoder.setFragmentBytes(&color, length: MemoryLayout<SIMD4<Float>>.stride, index: 1)
     }
 }
 
-extension ColorCircleShader: MCColorCircleShaderInterface {
-    func setColor(_ red: Float, green: Float, blue: Float, alpha: Float) {
-        color = [red, green, blue, alpha]
-    }
-
-    func asShaderProgram() -> MCShaderProgramInterface? {
-        self
-    }
-}

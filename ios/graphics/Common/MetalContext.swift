@@ -35,7 +35,18 @@ public class MetalContext {
     static let colorPixelFormat: MTLPixelFormat = .bgra8Unorm
     let textureLoader: MTKTextureLoader
 
-    public lazy var pipelineLibrary: PipelineLibrary = try! PipelineLibrary(device: self.device)
+    public func pipelineLibrary(_ context: MCRenderingContextInterface?) -> PipelineLibrary {
+        if let context = context as? RenderingContext,
+           context.encoderUsesDepthBuffer {
+            return depthPipelineLibrary
+        }
+        else {
+            return flatPipelineLibrary
+        }
+    }
+
+    public lazy var flatPipelineLibrary: PipelineLibrary = try! PipelineLibrary(device: self.device, depth: false)
+    public lazy var depthPipelineLibrary: PipelineLibrary = try! PipelineLibrary(device: self.device, depth: true)
     public lazy var samplerLibrary: SamplerLibrary = try! SamplerLibrary(device: self.device)
 
     init(device: MTLDevice, commandQueue: MTLCommandQueue, library: MTLLibrary) {

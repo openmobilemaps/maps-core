@@ -19,9 +19,9 @@ class TextShader: BaseShader {
     private var color = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
     private var haloColor = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
 
-    override func setupProgram(_: MCRenderingContextInterface?) {
+    override func setupProgram(_ context: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline.textShader.rawValue)
+            pipeline = MetalContext.current.pipelineLibrary(context).value(Pipeline.textShader.rawValue)
         }
     }
 

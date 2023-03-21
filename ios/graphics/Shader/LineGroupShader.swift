@@ -97,9 +97,9 @@ class LineGroupShader: BaseShader {
         lineStyleBufferContents = buffer.contents().bindMemory(to: LineGroupStyle.self, capacity: self.styleBufferSize)
     }
 
-    override func setupProgram(_: MCRenderingContextInterface?) {
+    override func setupProgram(_ context: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline.lineGroupShader.rawValue)
+            pipeline = MetalContext.current.pipelineLibrary(context).value(Pipeline.lineGroupShader.rawValue)
         }
     }
 

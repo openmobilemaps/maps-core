@@ -104,6 +104,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable id<MCPolygon3dInterface>)createPolygonMask3d {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createPolygonMask3d();
+        return ::djinni_generated::Polygon3dInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nullable id<MCTextInterface>)createText:(nullable id<MCShaderProgramInterface>)shader {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createText(::djinni_generated::ShaderProgramInterface::toCpp(shader));
@@ -188,6 +195,13 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygonMask];
             return ::djinni_generated::Polygon2dInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::Polygon3dInterface> createPolygonMask3d() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygonMask3d];
+            return ::djinni_generated::Polygon3dInterface::toCpp(objcpp_result_);
         }
     }
     /*not-null*/ std::shared_ptr<::TextInterface> createText(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & c_shader) override

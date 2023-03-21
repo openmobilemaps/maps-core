@@ -59,6 +59,10 @@ class GraphicsFactory: MCGraphicsObjectFactoryInterface {
         Polygon2d(shader: ColorShader(), metalContext: .current)
     }
 
+    func createPolygonMask3d() -> MCPolygon3dInterface? {
+        Polygon3d(shader: SphereColorShader(), metalContext: .current)
+    }
+
     func createText(_ shader: MCShaderProgramInterface?) -> MCTextInterface? {
         guard let shader = shader else { fatalError("No Shader provided") }
         return Text(shader: shader, metalContext: .current)

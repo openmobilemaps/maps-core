@@ -18,8 +18,10 @@
 #include "Tiled2dMapRasterSource.h"
 #include "Tiled2dMapRasterLayerCallbackInterface.h"
 #include "PolygonMaskObject.h"
+#include "PolygonMask3dObject.h"
 #include "ShaderProgramInterface.h"
 #include "Tiled2dMapLayerMaskWrapper.h"
+#include "Tiled3dMapLayerMaskWrapper.h"
 #include <mutex>
 #include <unordered_map>
 #include <map>
@@ -121,7 +123,7 @@ protected:
     std::atomic_flag updateFlag = ATOMIC_FLAG_INIT;
     std::recursive_mutex updateMutex;
     std::map<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured3dLayerObject>> tileObjectMap;
-    std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> tileMaskMap;
+    std::unordered_map<Tiled2dMapTileInfo, Tiled3dMapLayerMaskWrapper> tileMaskMap;
     std::recursive_mutex renderPassMutex;
     std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
 

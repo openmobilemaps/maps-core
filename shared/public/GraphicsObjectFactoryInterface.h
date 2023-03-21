@@ -39,6 +39,8 @@ public:
 
     virtual /*not-null*/ std::shared_ptr<Polygon2dInterface> createPolygonMask() = 0;
 
+    virtual /*not-null*/ std::shared_ptr<Polygon3dInterface> createPolygonMask3d() = 0;
+
     virtual /*not-null*/ std::shared_ptr<TextInterface> createText(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
 
     virtual /*not-null*/ std::shared_ptr<::RenderTargetTexture> createRenderTargetTexture(const ::Vec2I & size) = 0;

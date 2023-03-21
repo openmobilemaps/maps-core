@@ -26,9 +26,9 @@ class PolygonGroupShader: BaseShader {
         polygonStyleBuffer = buffer
     }
 
-    override func setupProgram(_: MCRenderingContextInterface?) {
+    override func setupProgram(_ context: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline.polygonGroupShader.rawValue)
+            pipeline = MetalContext.current.pipelineLibrary(context).value(Pipeline.polygonGroupShader.rawValue)
         }
     }
 

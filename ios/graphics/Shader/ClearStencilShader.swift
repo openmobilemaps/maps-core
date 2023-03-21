@@ -27,9 +27,9 @@ class ClearStencilShader: BaseShader {
         return MetalContext.current.device.makeDepthStencilState(descriptor: depthStencilDescriptor)
     }()
 
-    override func setupProgram(_: MCRenderingContextInterface?) {
+    override func setupProgram(_ context: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline.clearStencilShader.rawValue)
+            pipeline = MetalContext.current.pipelineLibrary(context).value(Pipeline.clearStencilShader.rawValue)
         }
     }
 

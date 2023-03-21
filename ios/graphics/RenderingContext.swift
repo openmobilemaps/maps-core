@@ -24,6 +24,8 @@ public class RenderingContext: NSObject {
 
     public weak var sceneView: MCMapView?
 
+    private(set) var encoderUsesDepthBuffer: Bool!
+
     public lazy var mask: MTLDepthStencilState? = {
         let descriptor = MTLStencilDescriptor()
         descriptor.stencilCompareFunction = .always
@@ -54,6 +56,7 @@ public class RenderingContext: NSObject {
         let descriptor = MTLStencilDescriptor()
         descriptor.stencilCompareFunction = .always
         descriptor.depthStencilPassOperation = .keep
+        descriptor.writeMask = 0b1111_1111
         let depthStencilDescriptor = MTLDepthStencilDescriptor()
         depthStencilDescriptor.frontFaceStencil = descriptor
         depthStencilDescriptor.backFaceStencil = descriptor
@@ -85,7 +88,7 @@ public class RenderingContext: NSObject {
         let depthStencilDescriptor = MTLDepthStencilDescriptor()
         depthStencilDescriptor.frontFaceStencil = descriptor
         depthStencilDescriptor.backFaceStencil = descriptor
-        depthStencilDescriptor.depthCompareFunction = .lessEqual
+        depthStencilDescriptor.depthCompareFunction = .always
         depthStencilDescriptor.isDepthWriteEnabled = true
         return MetalContext.current.device.makeDepthStencilState(descriptor: depthStencilDescriptor)
     }()
@@ -148,12 +151,15 @@ extension RenderingContext: MCRenderingContextInterface {
                 encoder = nil
             }
             encoder = offScreenTexture.prepareOffscreenEncoder(currentCommandBuffer)
+            encoderUsesDepthBuffer = false
         } else if let currentMainEncoder = currentMainEncoder {
             encoder = currentMainEncoder
+            encoderUsesDepthBuffer = true
         } else if let buffer = currentCommandBuffer,
                  let descriptor = viewRenderPassDescriptor  {
             encoder = buffer.makeRenderCommandEncoder(descriptor: descriptor)
             currentMainEncoder = encoder
+            encoderUsesDepthBuffer = true
             encoder?.label = "MainEncoder"
         }
     }

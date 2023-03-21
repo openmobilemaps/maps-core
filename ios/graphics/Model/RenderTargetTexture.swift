@@ -22,7 +22,7 @@ open class RenderTargetTexture: Identifiable, Equatable, MCRenderTargetTexture {
     let renderPassDescriptor = MTLRenderPassDescriptor()
 
     public init(_ size: MCVec2I) {
-        let pipelineStateDescriptor = PipelineDescriptorFactory.pipelineDescriptor(pipeline: .alphaShader)
+        let pipelineStateDescriptor = PipelineDescriptorFactory.pipelineDescriptor(pipeline: .alphaShader, depth: false)
         pipelineStateDescriptor.label = "Offscreen Render Pipeline"
         pipelineStateDescriptor.sampleCount = 1
         pipelineStateDescriptor.colorAttachments[0]?.pixelFormat = MetalContext.colorPixelFormat
@@ -40,6 +40,7 @@ open class RenderTargetTexture: Identifiable, Equatable, MCRenderTargetTexture {
 
         if let renderEncoder = commandBuffer?.makeRenderCommandEncoder(descriptor: renderPassDescriptor) {
             renderEncoder.setRenderPipelineState(renderPipelineState)
+            renderEncoder.label = "Offscreen Enconder"
             return renderEncoder
         }
 

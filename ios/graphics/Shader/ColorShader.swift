@@ -19,10 +19,11 @@ class ColorShader: BaseShader {
 
     private var stencilState: MTLDepthStencilState?
 
-    override func setupProgram(_: MCRenderingContextInterface?) {
+    override func setupProgram(_ context: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline.colorShader.rawValue)
+            pipeline = MetalContext.current.pipelineLibrary(context).value(Pipeline.colorShader.rawValue)
         }
+
     }
 
     override func preRender(encoder: MTLRenderCommandEncoder, context _: RenderingContext,

@@ -29,9 +29,9 @@ class SphereProjectionShader: BaseShader {
         self.alphaContent[0] = alpha
     }
 
-    override func setupProgram(_: MCRenderingContextInterface?) {
+    override func setupProgram(_ context: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(shader.rawValue)
+            pipeline = MetalContext.current.pipelineLibrary(context).value(shader.rawValue)
 
 
         }
