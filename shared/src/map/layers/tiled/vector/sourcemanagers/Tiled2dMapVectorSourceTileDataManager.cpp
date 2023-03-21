@@ -47,7 +47,6 @@ void Tiled2dMapVectorSourceTileDataManager::pregenerateRenderPasses() {
 }
 
 void Tiled2dMapVectorSourceTileDataManager::pause() {
-    LogDebug <<= "UBCM: pause called!";
     for (const auto &tileMask: tileMaskMap) {
         if (tileMask.second.getGraphicsObject() &&
             tileMask.second.getGraphicsObject()->isReady()) {
@@ -57,7 +56,9 @@ void Tiled2dMapVectorSourceTileDataManager::pause() {
 
     for (const auto &[tileInfo, subTiles] : tiles) {
         for (const auto &[index, identifier, tile]: subTiles) {
-            tile.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorTile::clear);
+            tile.syncAccess([](const auto &t){
+                t->clear();
+            });
         }
     }
 
@@ -66,7 +67,6 @@ void Tiled2dMapVectorSourceTileDataManager::pause() {
 }
 
 void Tiled2dMapVectorSourceTileDataManager::resume() {
-    LogDebug <<= "UBCM: resume called!";
     auto mapInterface = this->mapInterface.lock();
     if (!mapInterface) {
         return;
