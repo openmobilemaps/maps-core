@@ -97,7 +97,9 @@ void Tiled2dMapVectorPolygonTile::setup() {
     for (auto const &polygon: polygons) {
         if (!polygon->getPolygonObject()->isReady()) polygon->getPolygonObject()->setup(context);
     }
-    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, generateRenderObjects());
+
+    auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
+    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, selfActor);
 }
 
 void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDataVector &tileData) {
@@ -203,7 +205,8 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
 
         addPolygons(objectDescriptions);
     } else {
-        tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, std::vector<std::shared_ptr<RenderObjectInterface>>{});
+        auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
+        tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, selfActor);
     }
 }
 
@@ -214,7 +217,8 @@ void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::tuple<std::
     }
 
     if (polygons.empty() && oldGraphicsObjects.empty()) {
-        tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, std::vector<std::shared_ptr<RenderObjectInterface>>{});
+        auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
+        tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, selfActor);
         return;
     }
 
@@ -243,19 +247,16 @@ void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::tuple<std::
         newGraphicObjects.push_back(polygonObject->asGraphicsObject());
     }
 
-    auto renderObjects = generateRenderObjects();
 #ifdef __APPLE__
     setupPolygons(newGraphicObjects, oldGraphicsObjects, renderObjects);
 #else
     auto selfActor = WeakActor(mailbox, shared_from_this()->weak_from_this());
-    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorPolygonTile::setupPolygons, newGraphicObjects, oldGraphicsObjects, renderObjects);
+    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorPolygonTile::setupPolygons, newGraphicObjects, oldGraphicsObjects);
 #endif
-
 }
 
 void Tiled2dMapVectorPolygonTile::setupPolygons(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects,
-                                                const std::vector<std::shared_ptr<GraphicsObjectInterface>> &oldPolygonObjects,
-                                                const std::vector<std::shared_ptr<RenderObjectInterface>> &renderObjects) {
+                                                const std::vector<std::shared_ptr<GraphicsObjectInterface>> &oldPolygonObjects) {
     for (const auto &polygon : oldPolygonObjects) {
         if (polygon->isReady()) polygon->clear();
     }
@@ -270,7 +271,8 @@ void Tiled2dMapVectorPolygonTile::setupPolygons(const std::vector<std::shared_pt
         if (!polygon->isReady()) polygon->setup(renderingContext);
     }
 
-    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, renderObjects);
+    auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
+    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, selfActor);
 }
 
 std::vector<std::shared_ptr<RenderObjectInterface>> Tiled2dMapVectorPolygonTile::generateRenderObjects() {

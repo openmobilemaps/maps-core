@@ -30,8 +30,9 @@ public:
 
     virtual void setScissorRect(const std::optional<RectI> &scissorRect) override;
 
-    virtual void tileIsReady(const Tiled2dMapTileInfo &tile, const std::string &layerIdentifier,
-                             const std::vector<std::shared_ptr<RenderObjectInterface>> renderObjects) override;
+    virtual void tileIsReady(const Tiled2dMapTileInfo &tile,
+                             const std::string &layerIdentifier,
+                             const WeakActor<Tiled2dMapVectorTile> &tileActor) override;
 
     virtual void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription) override;
 
@@ -39,8 +40,8 @@ public:
 
     void setSelectedFeatureIdentifier(std::optional<int64_t> identifier) override;
 
-    void updateMaskObjects(const std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> toSetupMaskObject,
-                           const std::unordered_set<Tiled2dMapTileInfo> tilesToRemove);
+    void updateMaskObjects(const std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> &toSetupMaskObject,
+                           const std::unordered_set<Tiled2dMapTileInfo> &tilesToRemove);
 
 protected:
     Actor<Tiled2dMapVectorTile> createTileActor(const Tiled2dMapTileInfo &tileInfo,

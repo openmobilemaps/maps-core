@@ -75,7 +75,7 @@ void Tiled2dMapVectorPolygonSubLayer::resume() {
         }
         tilesInSetup.erase(tileGroup.first);
         if (auto delegate = readyDelegate.lock()) {
-            delegate->tileIsReady(tileGroup.first, "", std::vector<std::shared_ptr<RenderObjectInterface>>{});
+            //delegate->tileIsReady(tileGroup.first, "", std::vector<std::shared_ptr<RenderObjectInterface>>{});
         }
     }
 }
@@ -201,7 +201,7 @@ Tiled2dMapVectorPolygonSubLayer::updateTileData(const Tiled2dMapTileInfo &tileIn
         preGenerateRenderPasses();
     } else {
         if (auto delegate = readyDelegate.lock()) {
-            delegate->tileIsReady(tileInfo, "", std::vector<std::shared_ptr<RenderObjectInterface>>{});
+            //delegate->tileIsReady(tileInfo, "", std::vector<std::shared_ptr<RenderObjectInterface>>{});
         }
     }
 }
@@ -210,7 +210,7 @@ void Tiled2dMapVectorPolygonSubLayer::addPolygons(const Tiled2dMapTileInfo &tile
 
     if (polygons.empty()) {
         if (auto delegate = readyDelegate.lock()) {
-            delegate->tileIsReady(tileInfo, "", std::vector<std::shared_ptr<RenderObjectInterface>>{});
+            //delegate->tileIsReady(tileInfo, "", std::vector<std::shared_ptr<RenderObjectInterface>>{});
         }
         return;
     }
@@ -281,7 +281,7 @@ void Tiled2dMapVectorPolygonSubLayer::setupPolygons(const Tiled2dMapTileInfo &ti
 
     if (informDelegateAndReturn) {
         if (auto delegate = readyDelegate.lock()) {
-            delegate->tileIsReady(tileInfo, "", std::vector<std::shared_ptr<RenderObjectInterface>>{});
+            //delegate->tileIsReady(tileInfo, "", std::vector<std::shared_ptr<RenderObjectInterface>>{});
         }
         return;
     }
@@ -297,7 +297,7 @@ void Tiled2dMapVectorPolygonSubLayer::setupPolygons(const Tiled2dMapTileInfo &ti
     }
 
     if (auto delegate = readyDelegate.lock()) {
-        delegate->tileIsReady(tileInfo, "", std::vector<std::shared_ptr<RenderObjectInterface>>{});
+        //delegate->tileIsReady(tileInfo, "", std::vector<std::shared_ptr<RenderObjectInterface>>{});
     }
 }
 

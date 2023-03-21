@@ -117,7 +117,8 @@ void Tiled2dMapVectorLineTile::setup() {
         auto const &lineObject = line->getLineObject();
         if (!lineObject->isReady()) lineObject->setup(context);
     }
-    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, generateRenderObjects());
+    auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
+    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, selfActor);
 }
 
 void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataVector &tileData) {
@@ -206,7 +207,8 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
 
         addLines(styleGroupNewLinesMap);
     } else {
-        tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, std::vector<std::shared_ptr<RenderObjectInterface>>{});
+        auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
+        tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, selfActor);
     }
 }
 
@@ -218,7 +220,8 @@ void Tiled2dMapVectorLineTile::addLines(const std::unordered_map<int, std::vecto
     }
 
     if (styleIdLinesMap.empty() && oldGraphicsObjects.empty()) {
-        tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, std::vector<std::shared_ptr<RenderObjectInterface>>{});
+        auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
+        tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, selfActor);
         return;
     }
 
@@ -248,19 +251,17 @@ void Tiled2dMapVectorLineTile::addLines(const std::unordered_map<int, std::vecto
 
     lines = lineGroupObjects;
 
-    auto renderObjects = generateRenderObjects();
 #ifdef __APPLE__
     setupLines(newGraphicObjects, oldGraphicsObjects, renderObjects);
 #else
     auto selfActor = WeakActor(mailbox, weak_from_this());
-    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorLineTile::setupLines, newGraphicObjects, oldGraphicsObjects, renderObjects);
+    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorLineTile::setupLines, newGraphicObjects, oldGraphicsObjects);
 #endif
 
 }
 
 void Tiled2dMapVectorLineTile::setupLines(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newLineGraphicsObjects,
-                                          const std::vector<std::shared_ptr<GraphicsObjectInterface>> &oldLineGraphicsObjects,
-                                          const std::vector<std::shared_ptr<RenderObjectInterface>> &renderObjects) {
+                                          const std::vector<std::shared_ptr<GraphicsObjectInterface>> &oldLineGraphicsObjects) {
     for (const auto &line : oldLineGraphicsObjects) {
         if (line->isReady()) line->clear();
     }
@@ -275,7 +276,9 @@ void Tiled2dMapVectorLineTile::setupLines(const std::vector<std::shared_ptr<Grap
         if (!line->isReady()) line->setup(renderingContext);
     }
 
-    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, renderObjects);
+
+    auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
+    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, selfActor);
 }
 
 

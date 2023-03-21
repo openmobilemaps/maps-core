@@ -43,8 +43,7 @@ private:
     void addLines(const std::unordered_map<int, std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> &styleIdLinesMap);
 
     void setupLines(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newLineGraphicsObjects,
-                    const std::vector<std::shared_ptr<GraphicsObjectInterface>> &oldLineGraphicsObjects,
-                    const std::vector<std::shared_ptr<RenderObjectInterface>> &renderObjects);
+                    const std::vector<std::shared_ptr<GraphicsObjectInterface>> &oldLineGraphicsObjects);
 
 
     static const int maxNumLinePoints = std::numeric_limits<uint16_t>::max() / 4 + 1; // 4 vertices per line coord, only 2 at the start/end

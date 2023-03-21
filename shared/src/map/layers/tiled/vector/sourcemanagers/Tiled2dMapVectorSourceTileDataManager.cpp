@@ -118,8 +118,8 @@ void Tiled2dMapVectorSourceTileDataManager::setSelectedFeatureIdentifier(std::op
 }
 
 void Tiled2dMapVectorSourceTileDataManager::updateMaskObjects(
-        const std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> toSetupMaskObject,
-        const std::unordered_set<Tiled2dMapTileInfo> tilesToRemove) {
+        const std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> &toSetupMaskObject,
+        const std::unordered_set<Tiled2dMapTileInfo> &tilesToRemove) {
     auto mapInterface = this->mapInterface.lock();
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!renderingContext) return;
@@ -226,7 +226,18 @@ Actor<Tiled2dMapVectorTile> Tiled2dMapVectorSourceTileDataManager::createTileAct
 
 void Tiled2dMapVectorSourceTileDataManager::tileIsReady(const Tiled2dMapTileInfo &tile,
                                                         const std::string &layerIdentifier,
-                                                        const std::vector<std::shared_ptr<RenderObjectInterface>> renderObjects) {
+                                                        const WeakActor<Tiled2dMapVectorTile> &tileActor) {
+    if (!tileActor) {
+        return;
+    }
+    const auto &renderObjects = tileActor.syncAccess([](const auto &t){
+        if (auto strongT = t.lock()) {
+            return strongT->generateRenderObjects();
+        } else {
+            return std::vector<std::shared_ptr<RenderObjectInterface>>{};
+        }
+    });
+
     if (tilesReady.count(tile) > 0) {
         return;
     }
