@@ -125,6 +125,8 @@ final class Polygon3d: BaseGraphicsObject {
         let s2 = MTLDepthStencilDescriptor()
         s2.frontFaceStencil = ss2
         s2.backFaceStencil = ss2
+        s2.depthCompareFunction = .lessEqual
+        s2.isDepthWriteEnabled = true
 
         stencilState = device.makeDepthStencilState(descriptor: s2)
     }

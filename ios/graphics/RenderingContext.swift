@@ -34,12 +34,33 @@ public class RenderingContext: NSObject {
         let depthStencilDescriptor = MTLDepthStencilDescriptor()
         depthStencilDescriptor.frontFaceStencil = descriptor
         depthStencilDescriptor.backFaceStencil = descriptor
-        depthStencilDescriptor.depthCompareFunction = .lessEqual
-        depthStencilDescriptor.isDepthWriteEnabled = true
         return MetalContext.current.device.makeDepthStencilState(descriptor: depthStencilDescriptor)
     }()
 
     public lazy var polygonMask: MTLDepthStencilState? = {
+        let descriptor = MTLStencilDescriptor()
+        descriptor.stencilCompareFunction = .always
+        descriptor.stencilFailureOperation = .keep
+        descriptor.depthFailureOperation = .keep
+        descriptor.depthStencilPassOperation = .replace
+        descriptor.writeMask = 0b1100_0000
+        let depthStencilDescriptor = MTLDepthStencilDescriptor()
+        depthStencilDescriptor.frontFaceStencil = descriptor
+        depthStencilDescriptor.backFaceStencil = descriptor
+        return MetalContext.current.device.makeDepthStencilState(descriptor: depthStencilDescriptor)
+    }()
+
+    public lazy var defaultMask: MTLDepthStencilState? = {
+        let descriptor = MTLStencilDescriptor()
+        descriptor.stencilCompareFunction = .always
+        descriptor.depthStencilPassOperation = .keep
+        let depthStencilDescriptor = MTLDepthStencilDescriptor()
+        depthStencilDescriptor.frontFaceStencil = descriptor
+        depthStencilDescriptor.backFaceStencil = descriptor
+        return MetalContext.current.device.makeDepthStencilState(descriptor: depthStencilDescriptor)
+    }()
+
+    public lazy var mask3d: MTLDepthStencilState? = {
         let descriptor = MTLStencilDescriptor()
         descriptor.stencilCompareFunction = .always
         descriptor.stencilFailureOperation = .keep
@@ -54,7 +75,22 @@ public class RenderingContext: NSObject {
         return MetalContext.current.device.makeDepthStencilState(descriptor: depthStencilDescriptor)
     }()
 
-    public lazy var defaultMask: MTLDepthStencilState? = {
+    public lazy var polygonMask3d: MTLDepthStencilState? = {
+        let descriptor = MTLStencilDescriptor()
+        descriptor.stencilCompareFunction = .always
+        descriptor.stencilFailureOperation = .keep
+        descriptor.depthFailureOperation = .keep
+        descriptor.depthStencilPassOperation = .replace
+        descriptor.writeMask = 0b1100_0000
+        let depthStencilDescriptor = MTLDepthStencilDescriptor()
+        depthStencilDescriptor.frontFaceStencil = descriptor
+        depthStencilDescriptor.backFaceStencil = descriptor
+        depthStencilDescriptor.depthCompareFunction = .lessEqual
+        depthStencilDescriptor.isDepthWriteEnabled = true
+        return MetalContext.current.device.makeDepthStencilState(descriptor: depthStencilDescriptor)
+    }()
+
+    public lazy var defaultMask3d: MTLDepthStencilState? = {
         let descriptor = MTLStencilDescriptor()
         descriptor.stencilCompareFunction = .always
         descriptor.depthStencilPassOperation = .keep

@@ -61,6 +61,8 @@ final class Quad3d: BaseGraphicsObject {
         let s2 = MTLDepthStencilDescriptor()
         s2.frontFaceStencil = ss2
         s2.backFaceStencil = ss2
+        s2.depthCompareFunction = .lessEqual
+        s2.isDepthWriteEnabled = true
 
         stencilState = device.makeDepthStencilState(descriptor: s2)
     }
@@ -109,11 +111,11 @@ final class Quad3d: BaseGraphicsObject {
             }
             encoder.setDepthStencilState(stencilState)
             encoder.setStencilReferenceValue(0b1100_0000)
-        } else if let mask = context.mask, renderAsMask {
+        } else if let mask = context.mask3d, renderAsMask {
             encoder.setDepthStencilState(mask)
             encoder.setStencilReferenceValue(0b1100_0000)
         } else {
-            encoder.setDepthStencilState(context.defaultMask)
+            encoder.setDepthStencilState(context.defaultMask3d)
         }
 
         shader.setupProgram(context)

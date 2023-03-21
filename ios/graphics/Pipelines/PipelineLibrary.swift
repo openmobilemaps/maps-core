@@ -16,7 +16,8 @@ public enum PipelineDescriptorFactory {
                                           vertexShader: String,
                                           fragmentShader: String,
                                           library: MTLLibrary = MetalContext.current.library,
-                                          tessellation: Bool = false
+                                          tessellation: Bool,
+                                          depthBuffer: Bool
     ) -> MTLRenderPipelineDescriptor {
         let pipelineDescriptor = MTLRenderPipelineDescriptor()
         pipelineDescriptor.colorAttachments[0].pixelFormat = MetalContext.colorPixelFormat
@@ -38,11 +39,16 @@ public enum PipelineDescriptorFactory {
             pipelineDescriptor.tessellationControlPointIndexType = .uint16
             pipelineDescriptor.tessellationFactorStepFunction = .constant
             pipelineDescriptor.maxTessellationFactor = 16
-
+        }
+        if depthBuffer {
             pipelineDescriptor.depthAttachmentPixelFormat = .depth32Float_stencil8
+            pipelineDescriptor.stencilAttachmentPixelFormat = .depth32Float_stencil8
+        }
+        else {
+            pipelineDescriptor.stencilAttachmentPixelFormat = .stencil8
+            pipelineDescriptor.depthAttachmentPixelFormat = .invalid
         }
 
-        pipelineDescriptor.stencilAttachmentPixelFormat = .depth32Float_stencil8
         pipelineDescriptor.label = label
 
         guard let vertexFunction = library.makeFunction(name: vertexShader),
@@ -64,7 +70,8 @@ extension PipelineDescriptorFactory {
                            label: pipeline.label,
                            vertexShader: pipeline.vertexShader,
                            fragmentShader: pipeline.fragmentShader,
-                           tessellation: pipeline.isTesselated)
+                           tessellation: pipeline.isTesselated,
+                           depthBuffer: pipeline.depthBuffer)
     }
 }
 
@@ -133,6 +140,14 @@ public enum Pipeline: String, CaseIterable {
     var isTesselated: Bool {
         switch self {
             case .sphereProjectionShader: return true
+            default: return false
+        }
+    }
+
+    var depthBuffer: Bool {
+        switch self {
+            case .sphereProjectionShader: return true
+            case .clearStencilShader: return true
             default: return false
         }
     }
