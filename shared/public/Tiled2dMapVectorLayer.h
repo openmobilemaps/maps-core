@@ -31,6 +31,7 @@
 #include "Tiled2dMapVectorSourceRasterTileDataManager.h"
 #include "Tiled2dMapVectorSourceVectorTileDataManager.h"
 #include "Tiled2dMapVectorSourceSymbolDataManager.h"
+#include "Tiled2dMapVectorSourceSymbolCollisionManager.h"
 #include <unordered_map>
 
 class Tiled2dMapVectorLayer
@@ -69,7 +70,7 @@ public:
 
     virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override;
 
-    virtual void onRenderPassUpdate(const std::string &source, const std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> &renderPasses);
+    virtual void onRenderPassUpdate(const std::string &source, bool isSymbol, const std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> &renderPasses);
 
     virtual void onAdded(const std::shared_ptr<::MapInterface> &mapInterface, int32_t layerIndex) override;
 
@@ -131,6 +132,7 @@ protected:
 
     virtual void loadSpriteData();
 
+    virtual void didLoadSpriteData(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<::TextureHolderInterface> spriteTexture);
 
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSource>> vectorTileSources;
     std::vector<Actor<Tiled2dMapRasterSource>> rasterTileSources;
@@ -141,9 +143,9 @@ protected:
     virtual std::optional<TiledLayerError> loadStyleJsonRemotely();
     virtual std::optional<TiledLayerError> loadStyleJsonLocally(std::string styleJsonString);
 
+
 private:
     void scheduleStyleJsonLoading();
-
 
     void initializeVectorLayer();
 
@@ -167,9 +169,17 @@ private:
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceTileDataManager>> sourceDataManagers;
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceSymbolDataManager>> symbolSourceDataManagers;
 
+    Actor<Tiled2dMapVectorSourceSymbolCollisionManager> collisionManager;
+
     std::recursive_mutex renderPassMutex;
     std::vector<std::shared_ptr<RenderPassInterface>> currentRenderPasses;
-    std::unordered_map<std::string, std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>>> sourceRenderPassesMap;
+
+    struct SourceRenderPasses {
+        std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> renderPasses;
+        std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> symbolRenderPasses;
+    };
+
+    std::unordered_map<std::string, SourceRenderPasses> sourceRenderPassesMap;
 
     std::atomic_bool isLoadingStyleJson = false;
     std::atomic_bool isResumed = false;
@@ -178,6 +188,9 @@ private:
 
     float alpha = 1.0;
     std::optional<::RectI> scissorRect = std::nullopt;
+
+    std::shared_ptr<SpriteData> spriteData;
+    std::shared_ptr<::TextureHolderInterface> spriteTexture;
 };
 
 

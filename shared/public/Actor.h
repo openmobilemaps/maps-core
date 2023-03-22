@@ -298,13 +298,13 @@ public:
     }
 
     template <class CastObject>
-    WeakActor<CastObject> weakActor() {
+    WeakActor<CastObject> weakActor() const {
         auto casted = std::static_pointer_cast<CastObject>(object);
         return WeakActor<CastObject>(receivingMailbox, casted);
     }
 
     template <class CastObject>
-    Actor<CastObject> strongActor() {
+    Actor<CastObject> strongActor() const {
         auto casted = std::static_pointer_cast<CastObject>(object);
         return Actor<CastObject>(receivingMailbox, casted);
     }

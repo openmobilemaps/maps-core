@@ -15,7 +15,8 @@
 class Tiled2dMapVectorLayer;
 class Tiled2dMapVectorTile;
 
-class Tiled2dMapVectorSourceTileDataManager : public Tiled2dMapVectorSourceDataManager,
+class Tiled2dMapVectorSourceTileDataManager : public Tiled2dMapVectorLayerReadyInterface,
+                                               public Tiled2dMapVectorSourceDataManager,
                                               public std::enable_shared_from_this<Tiled2dMapVectorSourceTileDataManager> {
 public:
     using Tiled2dMapVectorSourceDataManager::Tiled2dMapVectorSourceDataManager;

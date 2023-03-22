@@ -960,7 +960,13 @@ public:
     ValueVariant evaluate(const EvaluationContext &context) const override {
         return std::visit(overloaded {
             [](const std::string &val){
-                return std::stod(val);
+                try {
+                    return std::stod(val);
+                } catch (const std::invalid_argument&) {
+                    return 0.0;
+                } catch (const std::out_of_range&) {
+                    return 0.0;
+                }
             },
             [](double val){
                 return val;

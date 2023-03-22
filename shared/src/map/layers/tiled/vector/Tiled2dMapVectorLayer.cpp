@@ -190,9 +190,14 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
 
     std::vector<WeakActor<Tiled2dMapSourceInterface>> sourceInterfaces;
     std::vector<Actor<Tiled2dMapRasterSource>> rasterSources;
+
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSource>> vectorTileSource;
+
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceTileDataManager>> sourceTileManagers;
+    std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceSymbolDataManager>> symbolSourceDataManagers;
+
     std::unordered_map<std::string, std::unordered_set<std::string>> layersToDecode;
+
     std::unordered_set<std::string> symbolSources;
 
     for (auto const& layerDesc : mapDescription->layers)
@@ -257,10 +262,30 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                                      source,
                                                                                      vectorSource.weakActor<Tiled2dMapVectorSource>());
         sourceTileManagers[source] = sourceManagerActor.strongActor<Tiled2dMapVectorSourceTileDataManager>();
+
+        if (symbolSources.count(source) != 0) {
+            auto symbolSourceDataManagerMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+            symbolSourceDataManagers[source] = Actor<Tiled2dMapVectorSourceSymbolDataManager>(symbolSourceDataManagerMailbox,
+                                                                                              selfActor,
+                                                                                              mapDescription,
+                                                                                              source,
+                                                                                              fontLoader);
+        }
+    }
+
+    std::unordered_map<std::string, WeakActor<Tiled2dMapVectorSourceSymbolDataManager>> weakSymbolSourceDataManagers;
+    for (const auto &sourceTileManager : symbolSourceDataManagers) {
+        weakSymbolSourceDataManagers[sourceTileManager.first] = sourceTileManager.second.weakActor<Tiled2dMapVectorSourceSymbolDataManager>();
+    }
+
+    if(!weakSymbolSourceDataManagers.empty()) {
+        auto collisionManagerMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+        collisionManager.emplaceObject(collisionManagerMailbox, weakSymbolSourceDataManagers, mapDescription);
     }
 
     this->rasterTileSources = rasterSources;
     this->vectorTileSources = vectorTileSource;
+    this->symbolSourceDataManagers = symbolSourceDataManagers;
     
     sourceDataManagers = sourceTileManagers;
 
@@ -270,6 +295,9 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     mapInterface->getTouchHandler()->insertListener(std::dynamic_pointer_cast<TouchInterface>(shared_from_this()), layerIndex);
 
     for (const auto &sourceTileManager : sourceTileManagers) {
+        sourceTileManager.second.message(&Tiled2dMapVectorSourceTileDataManager::onAdded, mapInterface);
+    }
+    for (const auto &sourceTileManager : symbolSourceDataManagers) {
         sourceTileManager.second.message(&Tiled2dMapVectorSourceTileDataManager::onAdded, mapInterface);
     }
 
@@ -331,6 +359,11 @@ void Tiled2dMapVectorLayer::update() {
         });*/ // TODO: EXPERIMENTAL
         sourceDataManager.message(&Tiled2dMapVectorSourceTileDataManager::update);
     }
+
+
+    if (collisionManager) {
+        collisionManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceSymbolCollisionManager::collisionDetection);
+    }
 }
 
 std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::buildRenderPasses() {
@@ -338,10 +371,15 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::build
     return currentRenderPasses;
 }
 
-void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, const std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> &renderPasses) {
+void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, bool isSymbol, const std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> &renderPasses) {
     std::vector<std::shared_ptr<RenderPassInterface>> newPasses;
 
-    sourceRenderPassesMap[source] = renderPasses;
+    if (isSymbol) {
+        sourceRenderPassesMap[source].symbolRenderPasses = renderPasses;
+    } else {
+        sourceRenderPassesMap[source].renderPasses = renderPasses;
+    }
+
 
     if (backgroundLayer) {
         auto backgroundLayerPasses = backgroundLayer->buildRenderPasses();
@@ -351,7 +389,8 @@ void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, const 
     std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> orderedPasses;
     std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
     for (const auto &[source, indexPasses] : sourceRenderPassesMap) {
-        orderedPasses.insert(orderedPasses.end(), indexPasses.begin(), indexPasses.end());
+        orderedPasses.insert(orderedPasses.end(), indexPasses.renderPasses.begin(), indexPasses.renderPasses.end());
+        orderedPasses.insert(orderedPasses.end(), indexPasses.symbolRenderPasses.begin(), indexPasses.symbolRenderPasses.end());
     }
 
     std::sort(orderedPasses.begin(), orderedPasses.end(), [](const auto &lhs, const auto &rhs) {
@@ -461,13 +500,21 @@ void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &layerName, std::un
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
         sourceDataManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::onRasterTilesUpdated, layerName, currentTileInfos);
     }
+
+
 }
 
 void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) {
     std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
-    for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-        if (source != sourceName) { continue; }
-        sourceDataManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::onVectorTilesUpdated, sourceName, currentTileInfos);
+
+    auto sourceManager = sourceDataManagers.find(sourceName);
+    if (sourceManager != sourceDataManagers.end()) {
+        sourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::onVectorTilesUpdated, sourceName, currentTileInfos);
+    }
+
+    auto symbolSourceManager = symbolSourceDataManagers.find(sourceName);
+    if (symbolSourceManager != symbolSourceDataManagers.end()) {
+        symbolSourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::onVectorTilesUpdated, sourceName, currentTileInfos);
     }
 }
 
@@ -488,59 +535,70 @@ void Tiled2dMapVectorLayer::loadSpriteData() {
     ssData << *mapDescription->spriteBaseUrl << (scale2x ? "@2x" : "") << ".json";
     std::string urlData = ssData.str();
 
-    std::weak_ptr<Tiled2dMapVectorLayer> weakSelfPtr =
-    std::dynamic_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
-    scheduler->addTask(std::make_shared<LambdaTask>(
-                                                    TaskConfig("Tiled2dMapVectorLayer_loadSpriteData",
-                                                               0,
-                                                               TaskPriority::NORMAL,
-                                                               ExecutionEnvironment::IO),
-                                                    [weakSelfPtr, urlTexture, urlData] {
-                                                        auto selfPtr = weakSelfPtr.lock();
-                                                        if (selfPtr) {
-                                                            auto dataResult = LoaderHelper::loadData(urlData, std::nullopt, selfPtr->loaders);
-                                                            auto textureResult = LoaderHelper::loadTexture(urlTexture, std::nullopt, selfPtr->loaders);
-                                                            if (dataResult.status == LoaderStatus::OK && textureResult.status == LoaderStatus::OK) {
-                                                                auto string = std::string((char*)dataResult.data->buf(), dataResult.data->len());
-                                                                nlohmann::json json;
-                                                                try
-                                                                {
-                                                                    json = nlohmann::json::parse(string);
-                                                                }
-                                                                catch (nlohmann::json::parse_error& ex)
-                                                                {
-                                                                    return;
-                                                                }
+    struct Context {
+        std::atomic<size_t> counter;
 
-                                                                std::unordered_map<std::string, SpriteDesc> sprites;
+        std::shared_ptr<SpriteData> spriteData;
+        std::shared_ptr<::TextureHolderInterface> spriteTexture;
 
-                                                                for (auto& [key, val] : json.items())
-                                                                {
-                                                                    sprites.insert({key, val.get<::SpriteDesc>()});
-                                                                }
+        djinni::Promise<void> promise;
+        Context(size_t c) : counter(c) {}
+    };
 
-                                                                auto spriteData = std::make_shared<SpriteData>(sprites);
-                                                                auto spriteTexture = textureResult.data;
+    auto context = std::make_shared<Context>(2);
 
-                                                                {
-                                                                    // TODO: readd when SymbolTile available
-                                                                    /*std::lock_guard<std::recursive_mutex> lock(selfPtr->tilesMutex);
-                                                                    for (const auto &[tileInfo, subTiles]: selfPtr->tiles) {
-                                                                        for (const auto &tile: subTiles) {
-                                                                            if (auto symbolTile = std::dynamic_pointer_cast<Tiled2dMapVectorSymbolTile>(tile)) {
-                                                                                symbolTile->setSprites(spriteTexture, spriteData);
-                                                                            }
-                                                                        }
-                                                                    }*/
-                                                                }
+    LoaderHelper::loadDataAsync(urlData, std::nullopt, loaders).then([context] (auto result) {
+        auto dataResult = result.get();
+        if (dataResult.status == LoaderStatus::OK) {
+            auto string = std::string((char*)dataResult.data->buf(), dataResult.data->len());
+            nlohmann::json json;
+            try
+            {
+                json = nlohmann::json::parse(string);
 
-                                                            } else {
-                                                                //TODO: Error handling
-                                                            }
-                                                        }
-                                                    }
-                                                    )
-                       );
+                std::unordered_map<std::string, SpriteDesc> sprites;
+
+                for (auto& [key, val] : json.items())
+                {
+                    sprites.insert({key, val.get<::SpriteDesc>()});
+                }
+
+                context->spriteData = std::make_shared<SpriteData>(sprites);
+            }
+            catch (nlohmann::json::parse_error& ex)
+            {}
+        }
+
+        if (--(context->counter) == 0) {
+            context->promise.setValue();
+        }
+    });
+
+    LoaderHelper::loadTextureAsync(urlTexture, std::nullopt, loaders).then([context] (auto result) {
+        auto textureResult = result.get();
+        if (textureResult.status == LoaderStatus::OK) {
+            context->spriteTexture = textureResult.data;
+        }
+
+        if (--(context->counter) == 0) {
+            context->promise.setValue();
+        }
+    });
+
+    auto castedMe = std::static_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
+    auto selfActor = WeakActor<Tiled2dMapVectorLayer>(mailbox, castedMe);
+    context->promise.getFuture().then([context, selfActor] (auto result) {
+        selfActor.message(&Tiled2dMapVectorLayer::didLoadSpriteData, context->spriteData, context->spriteTexture);
+    });
+}
+
+void Tiled2dMapVectorLayer::didLoadSpriteData(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<::TextureHolderInterface> spriteTexture) {
+    this->spriteData = spriteData;
+    this->spriteTexture = spriteTexture;
+
+    for (const auto &[source, manager] : symbolSourceDataManagers) {
+        manager.message(&Tiled2dMapVectorSourceSymbolDataManager::setSprites, spriteData, spriteTexture);
+    }
 }
 
 void Tiled2dMapVectorLayer::setScissorRect(const std::optional<::RectI> &scissorRect) {

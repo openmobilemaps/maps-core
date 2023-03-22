@@ -41,6 +41,10 @@ std::vector<std::string> TextHelper::splitWstring(const std::string &word) {
 TextHelper::TextHelper(const std::shared_ptr<MapInterface> &mapInterface)
     : mapInterface(mapInterface) {}
 
+void TextHelper::setMapInterface(const std::weak_ptr< ::MapInterface> &mapInterface) {
+    this->mapInterface = mapInterface;
+}
+
 std::shared_ptr<TextLayerObject> TextHelper::textLayerObject(const std::shared_ptr<TextInfoInterface> &text,
                                                              std::optional<FontData> fontData,
                                                              Vec2F offset,
@@ -48,6 +52,11 @@ std::shared_ptr<TextLayerObject> TextHelper::textLayerObject(const std::shared_p
                                                              double letterSpacing) {
     
     if (!fontData) {
+        return nullptr;
+    }
+
+    auto mapInterface = this->mapInterface.lock();
+    if (!mapInterface) {
         return nullptr;
     }
     

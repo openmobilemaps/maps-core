@@ -25,8 +25,7 @@
 class Tiled2dMapVectorLayer;
 class Tiled2dMapVectorTile;
 
-class Tiled2dMapVectorSourceDataManager : public Tiled2dMapVectorLayerReadyInterface,
-                                              public ActorObject {
+class Tiled2dMapVectorSourceDataManager : public ActorObject {
 public:
     Tiled2dMapVectorSourceDataManager(const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
                                           const std::shared_ptr<VectorMapDescription> &mapDescription,

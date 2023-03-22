@@ -21,7 +21,10 @@
 
 class TextHelper {
   public:
+    TextHelper() {};
     TextHelper(const std::shared_ptr<MapInterface> &mapInterface);
+
+    void setMapInterface(const std::weak_ptr< ::MapInterface> &mapInterface);
 
     virtual std::shared_ptr<TextLayerObject> textLayerObject(const std::shared_ptr<TextInfoInterface> &text,
                                                              std::optional<FontData> fontData,
@@ -36,5 +39,5 @@ class TextHelper {
     static std::vector<std::string> splitWstring(const std::string &word);
 
   private:
-    std::shared_ptr<MapInterface> mapInterface;
+    std::weak_ptr<MapInterface> mapInterface;
 };
