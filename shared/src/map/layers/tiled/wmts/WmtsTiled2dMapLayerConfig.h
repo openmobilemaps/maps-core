@@ -15,6 +15,10 @@
 #include "Tiled2dMapZoomLevelInfo.h"
 #include "WmtsLayerDescription.h"
 
+#if defined __LINUX_BUILD__
+#include <cstring>
+#endif
+
 class WmtsTiled2dMapLayerConfig : public Tiled2dMapLayerConfig {
   public:
     WmtsTiled2dMapLayerConfig(const WmtsLayerDescription &description, std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfo,

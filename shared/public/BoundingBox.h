@@ -13,6 +13,9 @@
 #include <optional>
 #include "RectCoord.h"
 #include "BoundingBoxInterface.h"
+#if defined __LINUX_BUILD__
+#include <cmath>
+#endif
 
 class BoundingBox: public BoundingBoxInterface, public std::enable_shared_from_this<BoundingBox>
 {

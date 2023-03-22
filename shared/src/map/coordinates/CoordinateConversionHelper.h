@@ -21,6 +21,10 @@
 #include <unordered_map>
 #include <vector>
 
+#if defined __LINUX_BUILD__
+#include <cmath>
+#endif
+
 class CoordinateConversionHelper : public CoordinateConversionHelperInterface {
   public:
     CoordinateConversionHelper(MapCoordinateSystem mapCoordinateSystem);

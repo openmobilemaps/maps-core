@@ -21,6 +21,10 @@
 #include <mutex>
 #include <unordered_map>
 #include <unordered_set>
+#if defined __LINUX_BUILD__
+#include <atomic>
+#include <cmath>
+#endif
 
 class IconLayer : public IconLayerInterface,
                   public SimpleLayerInterface,

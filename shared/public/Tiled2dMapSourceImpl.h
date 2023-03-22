@@ -833,7 +833,7 @@ void Tiled2dMapSource<T, L, R>::setTileReady(const Tiled2dMapTileInfo &tile) {
 }
 
 template<class T, class L, class R>
-void Tiled2dMapSource<T, L, R>::setTilesReady(const std::vector<const Tiled2dMapTileInfo> &tiles) {
+void Tiled2dMapSource<T, L, R>::setTilesReady(const std::vector< Tiled2dMapTileInfo> &tiles) {
     bool needsUpdate = false;
     {
         std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(currentTilesMutex, tilesReadyMutex);

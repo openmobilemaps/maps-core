@@ -8,7 +8,7 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#ifdef __ANDROID__
+#if defined __ANDROID__  || defined __OPENGL__
 
 #include "GraphicsObjectFactoryOpenGl.h"
 #include "OpenGlContext.h"
@@ -25,7 +25,7 @@ std::shared_ptr<SceneInterface> SceneInterface::create(const std::shared_ptr<::G
 }
 
 std::shared_ptr<SceneInterface> SceneInterface::createWithOpenGl() {
-#ifdef __ANDROID__
+#if defined __ANDROID || defined __OPENGL__
     auto scene = std::static_pointer_cast<SceneInterface>(std::make_shared<Scene>(std::make_shared<GraphicsObjectFactoryOpenGl>(),
                                                                                   std::make_shared<ShaderFactoryOpenGl>(),
                                                                                   std::make_shared<OpenGlContext>()));

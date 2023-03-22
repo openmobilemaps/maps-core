@@ -61,8 +61,8 @@ public:
     virtual void onTilesUpdated() override;
 
     virtual void setupTiles(
-            const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToSetup,
-            const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToClean);
+            const std::vector< std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToSetup,
+            const std::vector< std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToClean);
 
     virtual void generateRenderPasses();
 
@@ -103,8 +103,8 @@ public:
     virtual std::shared_ptr<::Tiled2dMapLayerConfig> getConfig() override;
 
 private:
-    virtual void updateMaskObjects(const std::vector<const std::shared_ptr<MaskingObjectInterface>> &newMaskObjects,
-                                   const std::vector<const std::shared_ptr<MaskingObjectInterface>> &obsoleteMaskObjects);
+    virtual void updateMaskObjects(const std::vector< std::shared_ptr<MaskingObjectInterface>> &newMaskObjects,
+                                   const std::vector< std::shared_ptr<MaskingObjectInterface>> &obsoleteMaskObjects);
 
     virtual void enableAnimations(bool enabled) override;
 

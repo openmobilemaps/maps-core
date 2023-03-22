@@ -150,9 +150,9 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
         }
 
         auto currentTileInfos = rasterSource->getCurrentTiles();
-        std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> tilesToSetup, tilesToClean;
-        std::vector<const std::shared_ptr<MaskingObjectInterface>> newMaskObjects;
-        std::vector<const std::shared_ptr<MaskingObjectInterface>> obsoleteMaskObjects;
+        std::vector< std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> tilesToSetup, tilesToClean;
+        std::vector< std::shared_ptr<MaskingObjectInterface>> newMaskObjects;
+        std::vector< std::shared_ptr<MaskingObjectInterface>> obsoleteMaskObjects;
 
         {
             std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
@@ -257,8 +257,8 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
 }
 
 
-void Tiled2dMapRasterLayer::updateMaskObjects(const std::vector<const std::shared_ptr<MaskingObjectInterface>> &newMaskObjects,
-                                              const std::vector<const std::shared_ptr<MaskingObjectInterface>> &obsoleteMaskObjects) {
+void Tiled2dMapRasterLayer::updateMaskObjects(const std::vector< std::shared_ptr<MaskingObjectInterface>> &newMaskObjects,
+                                              const std::vector< std::shared_ptr<MaskingObjectInterface>> &obsoleteMaskObjects) {
     if (!mapInterface) return;
     std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
     for (const auto &mask : newMaskObjects) {
@@ -273,15 +273,15 @@ void Tiled2dMapRasterLayer::updateMaskObjects(const std::vector<const std::share
 
 
 void Tiled2dMapRasterLayer::setupTiles(
-        const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToSetup,
-        const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToClean) {
+        const std::vector< std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToSetup,
+        const std::vector< std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToClean) {
     auto mapInterface = this->mapInterface;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!renderingContext) {
         return;
     }
     
-    std::vector<const Tiled2dMapTileInfo> tilesReady;
+    std::vector< Tiled2dMapTileInfo> tilesReady;
     {
         std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
 

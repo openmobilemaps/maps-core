@@ -587,7 +587,7 @@ void Tiled2dMapVectorLayer::onTilesUpdated() {
             }
         }
 
-        std::vector<const std::shared_ptr<MaskingObjectInterface>> toClearMaskObjects;
+        std::vector< std::shared_ptr<MaskingObjectInterface>> toClearMaskObjects;
 
 
         for (const auto &newMaskEntry : newTileMasks) {
@@ -642,7 +642,7 @@ void Tiled2dMapVectorLayer::onTilesUpdated() {
 }
 
 void Tiled2dMapVectorLayer::updateMaskObjects(const std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> &toSetupMaskObject,
-                                              const std::vector<const std::shared_ptr<MaskingObjectInterface>> &obsoleteMaskObjects) {
+                                              const std::vector< std::shared_ptr<MaskingObjectInterface>> &obsoleteMaskObjects) {
     auto mapInterface = this->mapInterface;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!renderingContext) return;
