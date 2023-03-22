@@ -51,6 +51,7 @@ Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(con
                     try {
                         VectorTileGeometryHandler geometryHandler = VectorTileGeometryHandler(tile.bounds, extent, layerConfig->getVectorSettings());
                         vtzero::decode_geometry(feature.geometry(), geometryHandler);
+                        geometryHandler.limitHoles(500);
                         layerFeatureMap->at(sourceLayerName)->push_back({featureContext, geometryHandler});
                     } catch (vtzero::geometry_exception &geometryException) {
                         LogError <<= "geometryException for tile " + std::to_string(tile.zoomIdentifier) + "/" + std::to_string(tile.x) + "/" + std::to_string(tile.y);
