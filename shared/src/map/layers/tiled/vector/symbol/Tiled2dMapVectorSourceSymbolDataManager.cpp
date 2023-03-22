@@ -126,8 +126,8 @@ std::vector<std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper>> Tiled2dMapVec
     }
 
     auto mapInterface = this->mapInterface.lock();
-
-    if (!mapInterface) {
+    auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+    if (!mapInterface || !camera) {
         return symbols;
     }
 
@@ -159,7 +159,7 @@ std::vector<std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper>> Tiled2dMapVec
     const auto &fontList = description->style.getTextFont(evalContext);
 
     const double symbolSpacingPx = description->style.getSymbolSpacing(evalContext);
-    const double tilePixelFactor = (0.0254 / mapInterface->getCamera()->getScreenDensityPpi()) * tileInfo.zoomLevel;
+    const double tilePixelFactor = (0.0254 / camera->getScreenDensityPpi()) * tileInfo.zoomLevel;
     const double symbolSpacingMeters = symbolSpacingPx * tilePixelFactor;
 
 
@@ -497,8 +497,9 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite() {
 void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::unordered_set<std::string> layerIdentifiers, std::shared_ptr<std::vector<OBB2D>> placements){
     auto mapInterface = this->mapInterface.lock();
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+    auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     auto converter = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
-    if (!camera || !converter) {
+    if (!camera || !converter || !renderingContext) {
         return;
     }
 
@@ -588,7 +589,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::unordered_
 
                 Coord renderPos = converter->convertToRenderSystem(wrapper->textInfo->getCoordinate());
 
-                const double densityOffset = (mapInterface->getCamera()->getScreenDensityPpi() / 160.0) / spriteInfo.pixelRatio;
+                const double densityOffset = (camera->getScreenDensityPpi() / 160.0) / spriteInfo.pixelRatio;
 
                 auto iconOffset = description->style.getIconOffset(evalContext);
                 renderPos.y -= iconOffset.y;
@@ -619,8 +620,8 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::unordered_
 
                 auto symbolGraphicsObject = wrapper->symbolGraphicsObject;
                 if (spriteTexture && !symbolGraphicsObject->isReady()) {
-                    symbolGraphicsObject->setup(mapInterface->getRenderingContext());
-                    wrapper->symbolObject->loadTexture(mapInterface->getRenderingContext(), spriteTexture);
+                    symbolGraphicsObject->setup(renderingContext);
+                    wrapper->symbolObject->loadTexture(renderingContext, spriteTexture);
                 }
             }
         }

@@ -58,10 +58,11 @@ void Tiled2dMapVectorPolygonTile::updateLayerDescription(const std::shared_ptr<V
 
 void Tiled2dMapVectorPolygonTile::update() {
     auto mapInterface = this->mapInterface.lock();
-    if (!mapInterface) {
+    auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+    if (!mapInterface || !camera) {
         return;
     }
-    double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(mapInterface->getCamera()->getZoom());
+    double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
     zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.zoomIdentifier);
 
     std::vector<float> shaderStyles;
