@@ -99,10 +99,10 @@ void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::st
     //TODO: remove tiles to remove
 
 #ifdef __APPLE__
-    setupTexts(toSetup);
+    setupTexts(toSetup, tilesToRemove);
 #else
     auto selfActor = WeakActor(mailbox, weak_from_this());
-    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceSymbolDataManager::setupTexts, toSetup);
+    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceSymbolDataManager::setupTexts, toSetup, tilesToRemove);
 #endif
 
 
@@ -369,9 +369,13 @@ std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> Tiled2dMapVectorSourceSymb
 }
 
 
-void Tiled2dMapVectorSourceSymbolDataManager::setupTexts(const std::vector<std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper>> &toSetup) {
+void Tiled2dMapVectorSourceSymbolDataManager::setupTexts(const std::vector<std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper>> toSetup, const std::unordered_set<Tiled2dMapTileInfo> tilesToRemove) {
     auto mapInterface = this->mapInterface.lock();
     if (!mapInterface) { return; }
+
+    for (const auto &tile: tilesToRemove) {
+        tileSymbolMap.erase(tile);
+    }
 
     for (const auto &symbol: toSetup) {
         const auto &textInfo = symbol->textInfo;

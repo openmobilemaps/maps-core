@@ -252,7 +252,7 @@ void Tiled2dMapVectorLineTile::addLines(const std::unordered_map<int, std::vecto
     lines = lineGroupObjects;
 
 #ifdef __APPLE__
-    setupLines(newGraphicObjects, oldGraphicsObjects, renderObjects);
+    setupLines(newGraphicObjects, oldGraphicsObjects);
 #else
     auto selfActor = WeakActor(mailbox, weak_from_this());
     selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorLineTile::setupLines, newGraphicObjects, oldGraphicsObjects);
