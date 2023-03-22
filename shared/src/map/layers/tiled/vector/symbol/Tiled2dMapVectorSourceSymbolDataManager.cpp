@@ -96,8 +96,6 @@ void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::st
         }
     }
 
-    //TODO: remove tiles to remove
-
 #ifdef __APPLE__
     setupTexts(toSetup, tilesToRemove);
 #else
