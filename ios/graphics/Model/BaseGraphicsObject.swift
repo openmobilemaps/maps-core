@@ -13,7 +13,7 @@ import MapCoreSharedModule
 import Metal
 
 open class BaseGraphicsObject {
-    private var context: MCRenderingContextInterface!
+    private weak var context: MCRenderingContextInterface!
 
     public let device: MTLDevice
 
