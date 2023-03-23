@@ -84,9 +84,9 @@ void Tiled2dMapRasterLayer::update() {
     }
 }
 
-std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapRasterLayer::buildRenderPasses() {
+std::vector<::RenderTask> Tiled2dMapRasterLayer::getRenderTasks() {
     std::lock_guard<std::recursive_mutex> overlayLock(renderPassMutex);
-    return renderPasses;
+    return std::vector<::RenderTask>{RenderTask(nullptr, renderPasses)};
 }
 
 void Tiled2dMapRasterLayer::pause() {
@@ -358,12 +358,12 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
 
                 mask.getGraphicsObject()->setup(renderingContext);
                 std::shared_ptr<RenderPass> renderPass =
-                std::make_shared<RenderPass>(RenderPassConfig(0, nullptr),
+                std::make_shared<RenderPass>(RenderPassConfig(0),
                                              std::vector<std::shared_ptr<::RenderObjectInterface>>{renderObject}, mask.getGraphicsMaskObject());
                 renderPass->setScissoringRect(scissorRect);
                 newRenderPasses.push_back(renderPass);
             }else{
-                std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(0, nullptr),
+                std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(0),
                                                                                       std::vector<std::shared_ptr<::RenderObjectInterface>>{
                     renderObject});
                 renderPass->setScissoringRect(scissorRect);
@@ -374,7 +374,7 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
             //TODO: general mask would no longer work now, we would have to merge the tile-mask with the layer-mask
             if (mask) {
                 std::shared_ptr<RenderPass> renderPass =
-                std::make_shared<RenderPass>(RenderPassConfig(0, nullptr),
+                std::make_shared<RenderPass>(RenderPassConfig(0),
                                              std::vector<std::shared_ptr<::RenderObjectInterface>>{renderObject}, mask);
                 renderPass->setScissoringRect(scissorRect);
                 newRenderPasses.push_back(renderPass);

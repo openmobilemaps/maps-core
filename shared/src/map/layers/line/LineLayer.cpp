@@ -164,7 +164,7 @@ void LineLayer::generateRenderPasses() {
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
     for (const auto &passEntry : renderPassObjectMap) {
         std::shared_ptr<RenderPass> renderPass =
-            std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, nullptr), passEntry.second, mask);
+            std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second, mask);
         newRenderPasses.push_back(renderPass);
     }
     {
@@ -182,12 +182,12 @@ void LineLayer::update() {
     }
 }
 
-std::vector<std::shared_ptr<::RenderPassInterface>> LineLayer::buildRenderPasses() {
+std::vector<::RenderTask> LineLayer::getRenderTasks() {
     if (isHidden) {
         return {};
     } else {
         std::lock_guard<std::recursive_mutex> overlayLock(renderPassMutex);
-        return renderPasses;
+        return std::vector<::RenderTask>{RenderTask(nullptr, renderPasses)};;
     }
 }
 

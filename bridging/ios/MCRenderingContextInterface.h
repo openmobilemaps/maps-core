@@ -3,9 +3,9 @@
 
 #import "MCColor.h"
 #import "MCRectI.h"
-#import "MCRenderPassConfig.h"
 #import "MCVec2I.h"
 #import <Foundation/Foundation.h>
+@protocol MCRenderTargetTexture;
 
 
 @protocol MCRenderingContextInterface
@@ -20,13 +20,13 @@
 
 - (void)setBackgroundColor:(nonnull MCColor *)color;
 
-- (void)setupDrawFrame:(nonnull MCRenderPassConfig *)pass;
+- (void)setupDrawFrame:(nullable id<MCRenderTargetTexture>)target;
 
-- (void)endDrawFrame;
+- (void)endDrawFrame:(nullable id<MCRenderTargetTexture>)target;
 
-- (void)preRenderStencilMask:(nonnull MCRenderPassConfig *)pass;
+- (void)preRenderStencilMask:(nullable id<MCRenderTargetTexture>)target;
 
-- (void)postRenderStencilMask:(nonnull MCRenderPassConfig *)pass;
+- (void)postRenderStencilMask:(nullable id<MCRenderTargetTexture>)target;
 
 /** optional rectangle, remove scissoring when not set */
 - (void)applyScissorRect:(nullable MCRectI *)scissorRect;

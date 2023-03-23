@@ -3,7 +3,6 @@
 
 #include "NativeRenderPassConfig.h"  // my header
 #include "Marshal.hpp"
-#include "NativeRenderTargetTexture.h"
 
 namespace djinni_generated {
 
@@ -14,18 +13,16 @@ NativeRenderPassConfig::~NativeRenderPassConfig() = default;
 auto NativeRenderPassConfig::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinni::LocalRef<JniType> {
     const auto& data = ::djinni::JniClass<NativeRenderPassConfig>::get();
     auto r = ::djinni::LocalRef<JniType>{jniEnv->NewObject(data.clazz.get(), data.jconstructor,
-                                                           ::djinni::get(::djinni::I32::fromCpp(jniEnv, c.renderPassIndex)),
-                                                           ::djinni::get(::djinni::Optional<std::optional, ::djinni_generated::NativeRenderTargetTexture>::fromCpp(jniEnv, c.target)))};
+                                                           ::djinni::get(::djinni::I32::fromCpp(jniEnv, c.renderPassIndex)))};
     ::djinni::jniExceptionCheck(jniEnv);
     return r;
 }
 
 auto NativeRenderPassConfig::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
-    ::djinni::JniLocalScope jscope(jniEnv, 3);
+    ::djinni::JniLocalScope jscope(jniEnv, 2);
     assert(j != nullptr);
     const auto& data = ::djinni::JniClass<NativeRenderPassConfig>::get();
-    return {::djinni::I32::toCpp(jniEnv, jniEnv->GetIntField(j, data.field_renderPassIndex)),
-            ::djinni::Optional<std::optional, ::djinni_generated::NativeRenderTargetTexture>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_target))};
+    return {::djinni::I32::toCpp(jniEnv, jniEnv->GetIntField(j, data.field_renderPassIndex))};
 }
 
 } // namespace djinni_generated

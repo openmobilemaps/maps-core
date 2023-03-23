@@ -3,6 +3,7 @@
 
 package io.openmobilemaps.mapscore.shared.graphics
 
-data class RenderPassConfig(
-    var renderPassIndex: Int,
+data class RenderTask(
+    var target: RenderTargetTexture?,
+    var renderPasses: ArrayList<RenderPassInterface>,
 )

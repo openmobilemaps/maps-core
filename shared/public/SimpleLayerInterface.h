@@ -19,7 +19,7 @@ class SimpleLayerInterface : public LayerInterface {
 
     virtual void update() {};
 
-    virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() {
+    virtual std::vector<::RenderTask> getRenderTasks() {
         return {};
     };
 

@@ -68,7 +68,7 @@ public:
 
     virtual void update() override;
 
-    virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override;
+    virtual std::vector<::RenderTask> getRenderTasks() override;
 
     virtual void onRenderPassUpdate(const std::string &source, bool isSymbol, const std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> &renderPasses);
 
@@ -172,7 +172,7 @@ private:
     Actor<Tiled2dMapVectorSourceSymbolCollisionManager> collisionManager;
 
     std::recursive_mutex renderPassMutex;
-    std::vector<std::shared_ptr<RenderPassInterface>> currentRenderPasses;
+    std::vector<RenderTask> currentRenderTasks;
 
     struct SourceRenderPasses {
         std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> renderPasses;
@@ -191,6 +191,8 @@ private:
 
     std::shared_ptr<SpriteData> spriteData;
     std::shared_ptr<::TextureHolderInterface> spriteTexture;
+
+    bool enableOffscreenRendering = true;
 };
 
 

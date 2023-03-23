@@ -4,19 +4,13 @@
 #pragma once
 
 #include <cstdint>
-#include <memory>
-#include <optional>
 #include <utility>
-
-class RenderTargetTexture;
 
 struct RenderPassConfig final {
     int32_t renderPassIndex;
-    /*nullable*/ std::shared_ptr<RenderTargetTexture> target;
 
-    RenderPassConfig(int32_t renderPassIndex_,
-                     /*nullable*/ std::shared_ptr<RenderTargetTexture> target_)
+    //NOLINTNEXTLINE(google-explicit-constructor)
+    RenderPassConfig(int32_t renderPassIndex_)
     : renderPassIndex(std::move(renderPassIndex_))
-    , target(std::move(target_))
     {}
 };

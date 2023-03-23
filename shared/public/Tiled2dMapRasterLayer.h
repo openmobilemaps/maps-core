@@ -58,7 +58,7 @@ public:
 
     virtual void update() override;
 
-    virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override;
+    virtual std::vector<::RenderTask> getRenderTasks() override;
 
     virtual void pause() override;
 

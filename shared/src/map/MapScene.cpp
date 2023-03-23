@@ -234,9 +234,7 @@ void MapScene::drawFrame() {
         }
 
         for (const auto &layer : layers) {
-            for (const auto &renderPass : layer.second->buildRenderPasses()) {
-                scene->getRenderer()->addToRenderQueue(renderPass);
-            }
+            scene->getRenderer()->addToRenderQueue(layer.second->getRenderTasks());
         }
     }
 

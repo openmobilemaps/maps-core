@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class RendererInterface {
 
-    abstract fun addToRenderQueue(renderPass: RenderPassInterface)
+    abstract fun addToRenderQueue(tasks: ArrayList<RenderTask>)
 
     /** Ensure calling on graphics thread */
     abstract fun drawFrame(renderingContext: RenderingContextInterface, camera: CameraInterface)
@@ -25,11 +25,11 @@ abstract class RendererInterface {
 
         external fun nativeDestroy(nativeRef: Long)
 
-        override fun addToRenderQueue(renderPass: RenderPassInterface) {
+        override fun addToRenderQueue(tasks: ArrayList<RenderTask>) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_addToRenderQueue(this.nativeRef, renderPass)
+            native_addToRenderQueue(this.nativeRef, tasks)
         }
-        private external fun native_addToRenderQueue(_nativeRef: Long, renderPass: RenderPassInterface)
+        private external fun native_addToRenderQueue(_nativeRef: Long, tasks: ArrayList<RenderTask>)
 
         override fun drawFrame(renderingContext: RenderingContextInterface, camera: CameraInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

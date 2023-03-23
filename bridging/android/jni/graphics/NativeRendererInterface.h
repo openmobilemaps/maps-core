@@ -33,7 +33,7 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        void addToRenderQueue(const /*not-null*/ std::shared_ptr<::RenderPassInterface> & renderPass) override;
+        void addToRenderQueue(const std::vector<::RenderTask> & tasks) override;
         void drawFrame(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & renderingContext, const /*not-null*/ std::shared_ptr<::CameraInterface> & camera) override;
 
     private:
@@ -41,7 +41,7 @@ private:
     };
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/RendererInterface") };
-    const jmethodID method_addToRenderQueue { ::djinni::jniGetMethodID(clazz.get(), "addToRenderQueue", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderPassInterface;)V") };
+    const jmethodID method_addToRenderQueue { ::djinni::jniGetMethodID(clazz.get(), "addToRenderQueue", "(Ljava/util/ArrayList;)V") };
     const jmethodID method_drawFrame { ::djinni::jniGetMethodID(clazz.get(), "drawFrame", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface;Lio/openmobilemaps/mapscore/shared/graphics/CameraInterface;)V") };
 };
 

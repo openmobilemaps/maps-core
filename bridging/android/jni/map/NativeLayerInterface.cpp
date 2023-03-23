@@ -8,7 +8,7 @@
 #include "NativeMapInterface.h"
 #include "NativeMaskingObjectInterface.h"
 #include "NativeRectI.h"
-#include "NativeRenderPassInterface.h"
+#include "NativeRenderTask.h"
 
 namespace djinni_generated {
 
@@ -35,13 +35,13 @@ void NativeLayerInterface::JavaProxy::update() {
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_update);
     ::djinni::jniExceptionCheck(jniEnv);
 }
-std::vector</*not-null*/ std::shared_ptr<::RenderPassInterface>> NativeLayerInterface::JavaProxy::buildRenderPasses() {
+std::vector<::RenderTask> NativeLayerInterface::JavaProxy::getRenderTasks() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeLayerInterface>::get();
-    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_buildRenderPasses);
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getRenderTasks);
     ::djinni::jniExceptionCheck(jniEnv);
-    return ::djinni::List<::djinni_generated::NativeRenderPassInterface>::toCpp(jniEnv, jret);
+    return ::djinni::List<::djinni_generated::NativeRenderTask>::toCpp(jniEnv, jret);
 }
 void NativeLayerInterface::JavaProxy::onAdded(const /*not-null*/ std::shared_ptr<::MapInterface> & c_mapInterface, int32_t c_layerIndex) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
@@ -166,12 +166,12 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInterfac
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInterface_00024CppProxy_native_1buildRenderPasses(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInterface_00024CppProxy_native_1getRenderTasks(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::LayerInterface>(nativeRef);
-        auto r = ref->buildRenderPasses();
-        return ::djinni::release(::djinni::List<::djinni_generated::NativeRenderPassInterface>::fromCpp(jniEnv, r));
+        auto r = ref->getRenderTasks();
+        return ::djinni::release(::djinni::List<::djinni_generated::NativeRenderTask>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

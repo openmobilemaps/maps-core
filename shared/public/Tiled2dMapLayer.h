@@ -30,7 +30,7 @@ class Tiled2dMapLayer : public SimpleLayerInterface,
 
     virtual void update() override = 0;
 
-    virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override = 0;
+    virtual std::vector<::RenderTask> getRenderTasks() override = 0;
 
     virtual void onAdded(const std::shared_ptr<::MapInterface> &mapInterface, int32_t layerIndex) override;
 

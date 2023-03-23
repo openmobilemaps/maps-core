@@ -6,9 +6,10 @@
 #include "Color.h"
 #include "RectI.h"
 #include "Vec2I.h"
+#include <memory>
 #include <optional>
 
-struct RenderPassConfig;
+class RenderTargetTexture;
 
 class RenderingContextInterface {
 public:
@@ -24,13 +25,13 @@ public:
 
     virtual void setBackgroundColor(const ::Color & color) = 0;
 
-    virtual void setupDrawFrame(const RenderPassConfig & pass) = 0;
+    virtual void setupDrawFrame(const /*nullable*/ std::shared_ptr<RenderTargetTexture> & target) = 0;
 
-    virtual void endDrawFrame() = 0;
+    virtual void endDrawFrame(const /*nullable*/ std::shared_ptr<RenderTargetTexture> & target) = 0;
 
-    virtual void preRenderStencilMask(const RenderPassConfig & pass) = 0;
+    virtual void preRenderStencilMask(const /*nullable*/ std::shared_ptr<RenderTargetTexture> & target) = 0;
 
-    virtual void postRenderStencilMask(const RenderPassConfig & pass) = 0;
+    virtual void postRenderStencilMask(const /*nullable*/ std::shared_ptr<RenderTargetTexture> & target) = 0;
 
     /** optional rectangle, remove scissoring when not set */
     virtual void applyScissorRect(const std::optional<::RectI> & scissorRect) = 0;
