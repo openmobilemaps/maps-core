@@ -209,7 +209,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
 
     currentPyramid = pyramid;
 
-    // we only remove tiles that are not visible anymore directly
+    // we only remove tiles that are not visible anymore directly OR mask is not enabled
     // tile from upper zoom levels will be removed as soon as the correct tiles are loaded if mask tiles is enabled
     std::vector<Tiled2dMapTileInfo> toRemove;
 
@@ -217,7 +217,17 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
     for (const auto &[tileInfo, tileWrapper] : currentTiles) {
         bool found = false;
 
-        if (tileInfo.zoomIdentifier <= currentZoomLevelIdentifier) {
+        bool allowZoomLevel;
+        if (zoomInfo.maskTile) {
+            // keep all upper zoom levels until masking
+            allowZoomLevel = tileInfo.zoomIdentifier <= currentZoomLevelIdentifier;
+        }
+        else {
+            // only keep current zoom level
+            allowZoomLevel = tileInfo.zoomIdentifier == currentZoomLevelIdentifier;
+        }
+
+        if (allowZoomLevel) {
             for (const auto &layer: pyramid) {
                 for (auto const &tile: layer.visibleTiles) {
                     if (tileInfo == tile.tileInfo) {
