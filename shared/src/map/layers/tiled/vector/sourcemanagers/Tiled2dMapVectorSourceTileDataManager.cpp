@@ -27,13 +27,13 @@ void Tiled2dMapVectorSourceTileDataManager::update() {
 }
 
 void Tiled2dMapVectorSourceTileDataManager::pregenerateRenderPasses() {
-    std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> renderPasses;
+    std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>>> renderPasses;
     for (const auto &[tile, subTiles] : tileRenderObjectsMap) {
         const auto tileMaskWrapper = tileMaskMap.find(tile);
         if (tilesReady.count(tile) > 0 && tileMaskWrapper != tileMaskMap.end()) {
             const auto &mask = tileMaskWrapper->second.getGraphicsMaskObject();
             for (const auto &[layerIndex, renderObjects]: subTiles) {
-                renderPasses.emplace_back(layerIndex, std::make_shared<RenderPass>(RenderPassConfig(0),
+                renderPasses[tile].emplace_back(layerIndex, std::make_shared<RenderPass>(RenderPassConfig(0),
                                                                                    renderObjects,
                                                                                    mask));
             }

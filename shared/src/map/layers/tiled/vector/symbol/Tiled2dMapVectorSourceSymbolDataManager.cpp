@@ -697,7 +697,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::unordered_
 
 void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
 
-    std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> renderPasses;
+    std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>>> renderPasses;
 
     for (const auto &[tile, layers]: tileSymbolMap) {
         for (const auto &[layerIdentifier, objects]: layers) {
@@ -716,7 +716,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
                     }
                 }
             }
-            renderPasses.emplace_back(index, std::make_shared<RenderPass>(RenderPassConfig(0), renderObjects));
+            renderPasses[tile].emplace_back(index, std::make_shared<RenderPass>(RenderPassConfig(0), renderObjects));
         }
     }
 

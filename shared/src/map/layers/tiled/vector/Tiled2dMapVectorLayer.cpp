@@ -371,7 +371,7 @@ std::vector<::RenderTask> Tiled2dMapVectorLayer::getRenderTasks() {
     return currentRenderTasks;
 }
 
-void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, bool isSymbol, const std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> &renderPasses) {
+void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, bool isSymbol, const std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>>> &renderPasses) {
     std::vector<std::shared_ptr<RenderPassInterface>> newPasses;
 
     if (isSymbol) {
@@ -390,9 +390,13 @@ void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, bool i
 
         std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> orderedPasses;
         std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
-        for (const auto &[source, indexPasses] : sourceRenderPassesMap) {
-            orderedPasses.insert(orderedPasses.end(), indexPasses.renderPasses.begin(), indexPasses.renderPasses.end());
-            orderedPasses.insert(orderedPasses.end(), indexPasses.symbolRenderPasses.begin(), indexPasses.symbolRenderPasses.end());
+        for (const auto &[source, tilePassesMap] : sourceRenderPassesMap) {
+            for(const auto &[tile, tilePassesMap]: tilePassesMap.renderPasses) {
+                orderedPasses.insert(orderedPasses.end(), tilePassesMap.begin(), tilePassesMap.end());
+            }
+            for(const auto &[tile, tilePassesMap]: tilePassesMap.symbolRenderPasses) {
+                orderedPasses.insert(orderedPasses.end(), tilePassesMap.begin(), tilePassesMap.end());
+            }
         }
 
         std::sort(orderedPasses.begin(), orderedPasses.end(), [](const auto &lhs, const auto &rhs) {
@@ -408,8 +412,6 @@ void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, bool i
             currentRenderTasks = std::vector<::RenderTask>{RenderTask(nullptr, newPasses)};
         }
     }
-
-
 }
 
 void Tiled2dMapVectorLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface, int32_t layerIndex) {

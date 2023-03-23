@@ -70,7 +70,7 @@ public:
 
     virtual std::vector<::RenderTask> getRenderTasks() override;
 
-    virtual void onRenderPassUpdate(const std::string &source, bool isSymbol, const std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> &renderPasses);
+    virtual void onRenderPassUpdate(const std::string &source, bool isSymbol, const std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>>> &renderPasses);
 
     virtual void onAdded(const std::shared_ptr<::MapInterface> &mapInterface, int32_t layerIndex) override;
 
@@ -175,8 +175,8 @@ private:
     std::vector<RenderTask> currentRenderTasks;
 
     struct SourceRenderPasses {
-        std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> renderPasses;
-        std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> symbolRenderPasses;
+        std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>>> renderPasses;
+        std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>>> symbolRenderPasses;
     };
 
     std::unordered_map<std::string, SourceRenderPasses> sourceRenderPassesMap;
@@ -192,7 +192,7 @@ private:
     std::shared_ptr<SpriteData> spriteData;
     std::shared_ptr<::TextureHolderInterface> spriteTexture;
 
-    bool enableOffscreenRendering = true;
+    bool enableOffscreenRendering = false;
 };
 
 

@@ -15,7 +15,19 @@
 #include <Logger.h>
 
 void Renderer::addToRenderQueue(const std::vector<RenderTask> & tasks) {
-    renderQueue.insert(renderQueue.end(), tasks.begin(), tasks.end());
+    for (const auto &task: tasks) {
+        bool didMerge = false;
+        for (auto &entry: renderQueue) {
+            if (entry.target == task.target) {
+                didMerge = true;
+                entry.renderPasses.insert(entry.renderPasses.begin(), task.renderPasses.begin(), task.renderPasses.end());
+                break;
+            }
+        }
+        if (!didMerge) {
+            renderQueue.push_back(task);
+        }
+    }
 }
 
 /** Ensure calling on graphics thread */
