@@ -382,7 +382,11 @@ void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, bool i
     }
 
     if (enableOffscreenRendering) {
-
+        // TODO: group all renderpasses of sources and create a render Task for each group
+        // create a target Texture for each Tile
+        // auto targetTexture = mapInterface->getGraphicsObjectFactory()->createRenderTargetTexture(Vec2I(512, 512));
+        // and create a polygon3dObject wich renders the created texture as a second task
+        // make sure, that the background renderpass is added to each render task
     } else {
         if (backgroundLayer) {
             auto backgroundLayerPasses = backgroundLayer->buildRenderPasses();
