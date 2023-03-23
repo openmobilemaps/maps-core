@@ -4,7 +4,7 @@
 - implements vector icon anchor
 - evaluate color from feature context 
 - expose bounding box in djinni
-- fixes touch Propagation in VectorLayer
+- fixes touch propagation in VectorLayer
 - iOS: fixes graphics object race conditions  
 - fixes vector tile origin 
 - adds option to enable/disable underzoom and overzoom
