@@ -5,10 +5,12 @@
 
 #include "Coord.h"
 #include "Font.h"
+#include <optional>
 #include <vector>
 
 enum class Anchor;
 enum class TextJustify;
+enum class TextSymbolPlacement;
 struct FormattedStringEntry;
 
 class TextInfoInterface {
@@ -24,4 +26,8 @@ public:
     virtual Anchor getTextAnchor() = 0;
 
     virtual TextJustify getTextJustify() = 0;
+
+    virtual TextSymbolPlacement getSymbolPlacement() = 0;
+
+    virtual std::optional<std::vector<::Coord>> getLineCoordinates() = 0;
 };

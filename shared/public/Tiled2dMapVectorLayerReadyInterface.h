@@ -11,8 +11,13 @@
 #pragma once
 
 #include "Tiled2dMapTileInfo.h"
+#include "Actor.h"
+
+class Tiled2dMapVectorTile;
 
 class Tiled2dMapVectorLayerReadyInterface {
 public:
-    virtual void tileIsReady(const Tiled2dMapTileInfo &tile) = 0;
+    virtual void tileIsReady(const Tiled2dMapTileInfo &tile,
+                             const std::string &layerIdentifier,
+                             const WeakActor<Tiled2dMapVectorTile> &tileActor) = 0;
 };

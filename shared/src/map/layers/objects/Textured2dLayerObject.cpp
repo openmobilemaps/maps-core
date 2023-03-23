@@ -52,6 +52,10 @@ void Textured2dLayerObject::update() {
 std::vector<std::shared_ptr<RenderConfigInterface>> Textured2dLayerObject::getRenderConfig() { return {renderConfig}; }
 
 void Textured2dLayerObject::setAlpha(float alpha) {
+    if (this->alpha == alpha) {
+        return;
+    }
+    this->alpha = alpha;
     if (shader) {
         shader->updateAlpha(alpha);
     }

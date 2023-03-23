@@ -68,4 +68,6 @@ class Textured2dLayerObject : public LayerObjectInterface {
     const std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
 
     std::shared_ptr<AnimationInterface> animation;
+
+    float alpha = 1.0;
 };

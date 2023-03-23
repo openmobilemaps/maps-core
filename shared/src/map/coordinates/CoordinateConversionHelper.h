@@ -55,7 +55,7 @@ class CoordinateConversionHelper : public CoordinateConversionHelperInterface {
 
     std::shared_ptr<CoordinateConverterInterface> renderSystemConverter;
 
-    std::string mapCoordinateSystemIdentier;
+    std::string mapCoordinateSystemIdentifier;
 
     std::recursive_mutex converterMutex;
 

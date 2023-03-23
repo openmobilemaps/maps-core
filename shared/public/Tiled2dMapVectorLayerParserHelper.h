@@ -181,8 +181,7 @@ public:
                                                                                   renderPassIndex);
                     layers.push_back(layerDesc);
 
-                    // exclude landcover_pt for now
-                } else if (val["type"] == "symbol" && val["id"] != "landcover_pt") {
+                } else if (val["type"] == "symbol") {
 
                     SymbolVectorStyle style(parser.parseValue(val["layout"]["text-size"]),
                                             parser.parseValue(val["paint"]["text-color"]),
@@ -198,6 +197,7 @@ public:
                                             parser.parseValue(val["layout"]["text-rotate"]),
                                             parser.parseValue(val["layout"]["symbol-sort-key"]),
                                             parser.parseValue(val["layout"]["symbol-spacing"]),
+                                            parser.parseValue(val["layout"]["symbol-placement"]),
                                             parser.parseValue(val["layout"]["icon-image"]),
                                             parser.parseValue(val["layout"]["icon-anchor"]),
                                             parser.parseValue(val["layout"]["icon-offset"]),

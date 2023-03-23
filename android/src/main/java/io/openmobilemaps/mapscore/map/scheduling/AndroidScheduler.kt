@@ -130,9 +130,7 @@ class AndroidScheduler(
 
 	override fun hasSeparateGraphicsInvocation(): Boolean = false
 
-	override fun runGraphicsTasks() {
-		// unused
-	}
+	override fun runGraphicsTasks(): Boolean = false // unused
 
 	fun launchCoroutine(
 		context: CoroutineContext = EmptyCoroutineContext,

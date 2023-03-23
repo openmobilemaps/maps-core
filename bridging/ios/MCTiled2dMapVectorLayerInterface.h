@@ -16,6 +16,12 @@
                                                         fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
                                                           dpFactor:(double)dpFactor;
 
++ (nullable MCTiled2dMapVectorLayerInterface *)createFromLocalStyleJson:(nonnull NSString *)layerName
+                                                              styleJson:(nonnull NSString *)styleJson
+                                                                loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
+                                                             fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
+                                                               dpFactor:(double)dpFactor;
+
 - (nullable id<MCLayerInterface>)asLayerInterface;
 
 @end

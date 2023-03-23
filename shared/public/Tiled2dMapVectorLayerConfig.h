@@ -67,7 +67,8 @@ private:
             Coord(epsg3857Id, -20037508.34, 20037508.34, 0.0),
             Coord(epsg3857Id, 20037508.34, -20037508.34, 0.0)
     );
-    const Tiled2dMapZoomInfo defaultZoomInfo = Tiled2dMapZoomInfo(1.0, 1, false, true, underzoom, overzoom);
+    
+    const Tiled2dMapZoomInfo defaultZoomInfo = Tiled2dMapZoomInfo(1.0,  0, false, true, underzoom, overzoom);
 
     virtual std::vector<Tiled2dMapZoomLevelInfo> getDefaultEpsg3857ZoomLevels() {
         std::vector<Tiled2dMapZoomLevelInfo> infos;

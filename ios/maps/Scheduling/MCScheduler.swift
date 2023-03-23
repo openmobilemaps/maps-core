@@ -126,7 +126,7 @@ open class MCScheduler: MCSchedulerInterface {
     
     public func hasSeparateGraphicsInvocation() -> Bool { false }
     
-    public func runGraphicsTasks() { }
+    public func runGraphicsTasks() -> Bool { false }
     
 }
 

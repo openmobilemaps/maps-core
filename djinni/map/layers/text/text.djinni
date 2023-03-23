@@ -21,6 +21,12 @@ text_justify = enum {
     RIGHT;
 }
 
+text_symbol_placement = enum {
+    POINT;
+    LINE;
+    LINE_CENTER;
+}
+
 formatted_string_entry = record {
     text: string;
     scale: f32;
@@ -43,5 +49,7 @@ text_info_interface = interface +c +j +o {
     get_font(): font;
     get_text_anchor(): anchor;
     get_text_justify(): text_justify;
+    get_symbol_placement(): text_symbol_placement;
+    get_line_coordinates(): optional<list<coord>>;
 }
 

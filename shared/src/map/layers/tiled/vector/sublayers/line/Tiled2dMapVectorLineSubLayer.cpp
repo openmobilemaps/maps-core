@@ -89,7 +89,7 @@ void Tiled2dMapVectorLineSubLayer::resume() {
 
     if (auto delegate = readyDelegate.lock()) {
         for(auto const &line: tilesToEraseFromSetup) {
-            delegate->tileIsReady(line);
+            // delegate->tileIsReady(line, "", std::vector<std::shared_ptr<RenderObjectInterface>>{});
         }
     }
 }
@@ -269,7 +269,7 @@ Tiled2dMapVectorLineSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInfo,
         preGenerateRenderPasses();
     } else {
         if (auto delegate = readyDelegate.lock()) {
-            delegate->tileIsReady(tileInfo);
+            // delegate->tileIsReady(tileInfo, "", std::vector<std::shared_ptr<RenderObjectInterface>>{});
         }
     }
 }
@@ -315,7 +315,7 @@ Tiled2dMapVectorLineSubLayer::addLines(const Tiled2dMapTileInfo &tileInfo,
 
     if (styleIdLinesMap.empty()) {
         if (auto delegate = readyDelegate.lock()) {
-            delegate->tileIsReady(tileInfo);
+            // delegate->tileIsReady(tileInfo, "", std::vector<std::shared_ptr<RenderObjectInterface>>{});
         }
         return;
     }
@@ -384,7 +384,7 @@ void Tiled2dMapVectorLineSubLayer::setupLines(const Tiled2dMapTileInfo &tileInfo
 
     if (shouldReturnAndSetReady) {
         if (auto delegate = readyDelegate.lock()) {
-            delegate->tileIsReady(tileInfo);
+            // delegate->tileIsReady(tileInfo, "", std::vector<std::shared_ptr<RenderObjectInterface>>{});
         }
         return;
     }
@@ -399,7 +399,7 @@ void Tiled2dMapVectorLineSubLayer::setupLines(const Tiled2dMapTileInfo &tileInfo
     }
 
     if (auto delegate = readyDelegate.lock()) {
-        delegate->tileIsReady(tileInfo);
+        // delegate->tileIsReady(tileInfo, "", std::vector<std::shared_ptr<RenderObjectInterface>>{});
     }
 }
 

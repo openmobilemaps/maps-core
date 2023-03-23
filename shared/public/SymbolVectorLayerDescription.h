@@ -16,8 +16,8 @@
 #include "Vec2F.h"
 #include "Value.h"
 #include "TextJustify.h"
+#include "TextSymbolPlacement.h"
 #include "ColorUtil.h"
-
 
 class SymbolVectorStyle {
 public:
@@ -35,6 +35,7 @@ public:
                       std::shared_ptr<Value> textRotate,
                       std::shared_ptr<Value> symbolSortKey,
                       std::shared_ptr<Value> symbolSpacing,
+                      std::shared_ptr<Value> symbolPlacement,
                       std::shared_ptr<Value> iconImage,
                       std::shared_ptr<Value> iconAnchor,
                       std::shared_ptr<Value> iconOffset,
@@ -52,6 +53,7 @@ public:
     textHaloColor(textHaloColor),
     textPadding(textPadding),
     symbolSortKey(symbolSortKey),
+    symbolPlacement(symbolPlacement),
     iconImage(iconImage),
     iconAnchor(iconAnchor),
     iconOffset(iconOffset),
@@ -61,7 +63,8 @@ public:
     symbolSpacing(symbolSpacing),
     iconSize(iconSize),
     textLetterSpacing(textLetterSpacing),
-    dpFactor(dpFactor) {}
+    dpFactor(dpFactor) {
+    }
 
 
     std::unordered_set<std::string> getUsedKeys() const {
@@ -69,7 +72,7 @@ public:
         std::unordered_set<std::string> usedKeys;
         std::vector<std::shared_ptr<Value>> values = {
             textSize, textFont, textField, textTransform, textOffset, textRadialOffset,
-            textColor, textHaloColor, textPadding, symbolSortKey, iconImage,
+            textColor, textHaloColor, textPadding, symbolSortKey, symbolPlacement, iconImage,
             iconAnchor, iconOffset, textAnchor, textVariableAnchor, textRotate, symbolSpacing,
             iconSize, textLineHeight, textLetterSpacing
         };
@@ -173,6 +176,11 @@ public:
         return textAnchor ? textAnchor->evaluateOr(context, defaultValue) : defaultValue;
     }
 
+    TextSymbolPlacement getTextSymbolPlacement(const EvaluationContext &context) {
+        static const auto defaultValue = TextSymbolPlacement::POINT;
+        return symbolPlacement ? symbolPlacement->evaluateOr(context, defaultValue) : defaultValue;
+    }
+
     std::vector<Anchor> getTextVariableAnchor(const EvaluationContext &context) {
         static const std::vector<Anchor> defaultValue = {};
         return textVariableAnchor ? textVariableAnchor->evaluateOr(context, defaultValue) : defaultValue;
@@ -216,6 +224,7 @@ private:
     std::shared_ptr<Value> textJustify;
     std::shared_ptr<Value> symbolSortKey;
     std::shared_ptr<Value> symbolSpacing;
+    std::shared_ptr<Value> symbolPlacement;
     std::shared_ptr<Value> iconImage;
     std::shared_ptr<Value> iconAnchor;
     std::shared_ptr<Value> iconOffset;

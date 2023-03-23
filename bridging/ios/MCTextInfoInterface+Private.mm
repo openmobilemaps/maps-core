@@ -12,6 +12,7 @@
 #import "MCFont+Private.h"
 #import "MCFormattedStringEntry+Private.h"
 #import "MCTextJustify+Private.h"
+#import "MCTextSymbolPlacement+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -71,6 +72,20 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (MCTextSymbolPlacement)getSymbolPlacement {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getSymbolPlacement();
+        return ::djinni::Enum<::TextSymbolPlacement, MCTextSymbolPlacement>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable NSArray<MCCoord *> *)getLineCoordinates {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getLineCoordinates();
+        return ::djinni::Optional<std::optional, ::djinni::List<::djinni_generated::Coord>>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class TextInfoInterface::ObjcProxy final
@@ -113,6 +128,20 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getTextJustify];
             return ::djinni::Enum<::TextJustify, MCTextJustify>::toCpp(objcpp_result_);
+        }
+    }
+    ::TextSymbolPlacement getSymbolPlacement() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getSymbolPlacement];
+            return ::djinni::Enum<::TextSymbolPlacement, MCTextSymbolPlacement>::toCpp(objcpp_result_);
+        }
+    }
+    std::optional<std::vector<::Coord>> getLineCoordinates() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getLineCoordinates];
+            return ::djinni::Optional<std::optional, ::djinni::List<::djinni_generated::Coord>>::toCpp(objcpp_result_);
         }
     }
 };

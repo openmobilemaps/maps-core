@@ -87,14 +87,17 @@ include_directories(../shared/src/map/layers/tiled/raster)
 include_directories(../shared/src/map/layers/tiled/wmts)
 include_directories(../shared/src/map/layers/tiled/vector)
 include_directories(../shared/src/map/layers/tiled/vector/tiles)
+include_directories(../shared/src/map/layers/tiled/vector/tiles/raster)
 include_directories(../shared/src/map/layers/tiled/vector/tiles/polygon)
 include_directories(../shared/src/map/layers/tiled/vector/tiles/line)
+include_directories(../shared/src/map/layers/tiled/vector/sourcemanagers)
 include_directories(../shared/src/map/layers/tiled/vector/sublayers)
 include_directories(../shared/src/map/layers/tiled/vector/sublayers/raster)
 include_directories(../shared/src/map/layers/tiled/vector/sublayers/line)
 include_directories(../shared/src/map/layers/tiled/vector/sublayers/polygon)
 include_directories(../shared/src/map/layers/tiled/vector/sublayers/symbol)
 include_directories(../shared/src/map/layers/tiled/vector/sublayers/background)
+include_directories(../shared/src/map/layers/tiled/vector/symbol)
 include_directories(../shared/src/map/layers/tiled/vector/description)
 include_directories(../shared/src/map/layers/tiled/vector/parsing)
 include_directories(../shared/src/map/layers/polygon)
@@ -113,7 +116,7 @@ include_directories(src/main/cpp/scheduling)
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
 # default, you only need to specify the name of the public NDK library
-# you want to add. CMake verifies that the library exists before
+# you want to add. CMake verifies that the library exists beforeDann
 # completing its build.
 
 find_library( # Sets the name of the path variable.

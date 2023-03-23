@@ -95,6 +95,20 @@ public:
         return coordinates;
     }
 
+    void limitHoles(uint32_t maxHoles) {
+        for (auto &polygonHoles: holes) {
+            if (polygonHoles.size() > maxHoles) {
+                std::nth_element(polygonHoles.begin(),
+                                 polygonHoles.begin() + maxHoles,
+                                 polygonHoles.end(),
+                                 [](const auto &a, const auto &b) {
+                                     return std::fabs(signedArea(a)) > std::fabs(signedArea(b));
+                                 });
+                polygonHoles.resize(maxHoles);
+            }
+        }
+    }
+
     const std::vector<std::vector<std::vector<::Coord>>> getHoleCoordinates() const {
         return holes;
     }
@@ -137,6 +151,16 @@ private:
         auto y = -1 * (1.0 - ty) + 1 * ty;
 
         return Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0);
+    }
+
+    static double signedArea(const std::vector<::Coord>& hole) {
+        double sum = 0;
+        for (std::size_t i = 0, len = hole.size(), j = len - 1; i < len; j = i++) {
+            const ::Coord& p1 = hole[i];
+            const ::Coord& p2 = hole[j];
+            sum += (p2.x - p1.x) * (p1.y + p2.y);
+        }
+        return sum;
     }
 
 private:

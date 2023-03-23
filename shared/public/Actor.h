@@ -59,7 +59,7 @@ public:
     
     WeakActor(): object(), receivingMailbox() {}
     
-    constexpr explicit operator bool() noexcept {
+    constexpr explicit operator bool() const noexcept {
         return receivingMailbox.lock() && object.lock();
     }
 
@@ -111,7 +111,7 @@ public:
     }
 
     template <typename Fn, class... Args>
-    inline void message(const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, Fn fn, Args&&... args) const {
+    inline void messagePrecisely(const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, Fn fn, Args&&... args) const {
         auto strongObject = object.lock();
         auto strongMailbox = receivingMailbox.lock();
         if (strongObject && strongMailbox) {
@@ -298,13 +298,13 @@ public:
     }
 
     template <class CastObject>
-    WeakActor<CastObject> weakActor() {
+    WeakActor<CastObject> weakActor() const {
         auto casted = std::static_pointer_cast<CastObject>(object);
         return WeakActor<CastObject>(receivingMailbox, casted);
     }
 
     template <class CastObject>
-    Actor<CastObject> strongActor() {
+    Actor<CastObject> strongActor() const {
         auto casted = std::static_pointer_cast<CastObject>(object);
         return Actor<CastObject>(receivingMailbox, casted);
     }

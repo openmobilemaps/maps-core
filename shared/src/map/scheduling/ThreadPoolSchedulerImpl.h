@@ -40,7 +40,7 @@ public:
 
     bool hasSeparateGraphicsInvocation() override;
 
-    void runGraphicsTasks() override;
+    bool runGraphicsTasks() override;
 
     void delayedTasksThread();
 

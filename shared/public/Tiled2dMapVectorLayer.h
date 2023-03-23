@@ -11,8 +11,11 @@
 #pragma once
 
 #include "Tiled2dMapLayer.h"
+#include "Tiled2dMapRasterSource.h"
+#include "Tiled2dMapRasterSourceListener.h"
 #include "Tiled2dMapVectorLayerInterface.h"
 #include "Tiled2dMapVectorSource.h"
+#include "Tiled2dMapVectorSourceListener.h"
 #include "Tiled2dMapVectorSubLayer.h"
 #include "Tiled2dMapVectorTile.h"
 #include "VectorMapDescription.h"
@@ -24,9 +27,20 @@
 #include "TiledLayerError.h"
 #include "Actor.h"
 #include "Tiled2dMapVectorBackgroundSubLayer.h"
-#include "Polygon3dLayerObject.h"
+#include "Tiled2dMapVectorSourceTileDataManager.h"
+#include "Tiled2dMapVectorSourceRasterTileDataManager.h"
+#include "Tiled2dMapVectorSourceVectorTileDataManager.h"
+#include "Tiled2dMapVectorSourceSymbolDataManager.h"
+#include "Tiled2dMapVectorSourceSymbolCollisionManager.h"
+#include <unordered_map>
 
-class Tiled2dMapVectorLayer : public Tiled2dMapLayer, public TouchInterface, public Tiled2dMapVectorLayerInterface, public Tiled2dMapVectorLayerReadyInterface, public ActorObject {
+class Tiled2dMapVectorLayer
+        : public Tiled2dMapLayer,
+          public TouchInterface,
+          public Tiled2dMapVectorLayerInterface,
+          public ActorObject,
+          public Tiled2dMapRasterSourceListener,
+          public Tiled2dMapVectorSourceListener {
 public:
     Tiled2dMapVectorLayer(const std::string &layerName,
                           const std::string &remoteStyleJsonUrl,
@@ -56,6 +70,8 @@ public:
 
     virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override;
 
+    virtual void onRenderPassUpdate(const std::string &source, bool isSymbol, const std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> &renderPasses);
+
     virtual void onAdded(const std::shared_ptr<::MapInterface> &mapInterface, int32_t layerIndex) override;
 
     virtual void onRemoved() override;
@@ -70,12 +86,9 @@ public:
 
     void forceReload() override;
 
-    void onTilesUpdated(std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos);
+    void onTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) override;
 
-    Actor<Tiled2dMapVectorTile> createTileActor(const Tiled2dMapTileInfo &tileInfo,
-                                                const std::shared_ptr<VectorLayerDescription> &layerDescription);
-
-    virtual void tileIsReady(const Tiled2dMapTileInfo &tile) override;
+    void onTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) override;
 
     virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
 
@@ -119,8 +132,10 @@ protected:
 
     virtual void loadSpriteData();
 
+    virtual void didLoadSpriteData(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<::TextureHolderInterface> spriteTexture);
 
-    Actor<Tiled2dMapVectorSource> vectorTileSource;
+    std::unordered_map<std::string, Actor<Tiled2dMapVectorSource>> vectorTileSources;
+    std::vector<Actor<Tiled2dMapRasterSource>> rasterTileSources;
 
     const std::vector<std::shared_ptr<::LoaderInterface>> loaders;
 
@@ -128,13 +143,11 @@ protected:
     virtual std::optional<TiledLayerError> loadStyleJsonRemotely();
     virtual std::optional<TiledLayerError> loadStyleJsonLocally(std::string styleJsonString);
 
+
 private:
     void scheduleStyleJsonLoading();
 
-
     void initializeVectorLayer();
-
-    void updateMaskObjects(const std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> toSetupMaskObject, const std::unordered_set<Tiled2dMapTileInfo> tilesToRemove);
 
     int32_t layerIndex = -1;
 
@@ -146,25 +159,27 @@ private:
 
     std::shared_ptr<VectorMapDescription> mapDescription;
 
+    std::shared_ptr<Tiled2dMapVectorBackgroundSubLayer> backgroundLayer;
+
     std::unordered_map<std::string, std::shared_ptr<Tiled2dMapLayerConfig>> layerConfigs;
 
     const std::shared_ptr<FontLoaderInterface> fontLoader;
 
-    std::recursive_mutex tileUpdateMutex;
+    std::recursive_mutex dataManagerMutex;
+    std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceTileDataManager>> sourceDataManagers;
+    std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceSymbolDataManager>> symbolSourceDataManagers;
 
-    std::recursive_mutex tilesReadyMutex;
-    std::unordered_set<Tiled2dMapTileInfo> tilesReady;
+    Actor<Tiled2dMapVectorSourceSymbolCollisionManager> collisionManager;
 
-    std::recursive_mutex tilesReadyCountMutex;
-    std::unordered_map<Tiled2dMapTileInfo, int> tilesReadyCount;
+    std::recursive_mutex renderPassMutex;
+    std::vector<std::shared_ptr<RenderPassInterface>> currentRenderPasses;
 
-    std::recursive_mutex tileMaskMapMutex;
-    std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> tileMaskMap;
+    struct SourceRenderPasses {
+        std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> renderPasses;
+        std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> symbolRenderPasses;
+    };
 
-    std::recursive_mutex tilesMutex;
-    std::unordered_map<Tiled2dMapTileInfo, std::shared_ptr<Polygon3dLayerObject>> tileTextureObjects;
-    std::unordered_map<Tiled2dMapTileInfo, RenderPassConfig> tilesRenderPassConfig;
-    std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<int32_t, std::string, Actor<Tiled2dMapVectorTile>>>> tiles;
+    std::unordered_map<std::string, SourceRenderPasses> sourceRenderPassesMap;
 
     std::atomic_bool isLoadingStyleJson = false;
     std::atomic_bool isResumed = false;
@@ -172,6 +187,10 @@ private:
     WeakActor<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate;
 
     float alpha = 1.0;
+    std::optional<::RectI> scissorRect = std::nullopt;
+
+    std::shared_ptr<SpriteData> spriteData;
+    std::shared_ptr<::TextureHolderInterface> spriteTexture;
 };
 
 

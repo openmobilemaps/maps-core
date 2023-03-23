@@ -15,37 +15,31 @@
 #include "LineVectorLayerDescription.h"
 #include "LineGroup2dLayerObject.h"
 
-class Tiled2dMapVectorLineTile : public Tiled2dMapVectorTile, public std::enable_shared_from_this<Tiled2dMapVectorLineTile> {
+class Tiled2dMapVectorLineTile
+        : public Tiled2dMapVectorTile,
+          public std::enable_shared_from_this<Tiled2dMapVectorLineTile> {
 public:
     Tiled2dMapVectorLineTile(const std::weak_ptr<MapInterface> &mapInterface,
                                 const Tiled2dMapTileInfo &tileInfo,
-                                const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
+                                const WeakActor<Tiled2dMapVectorLayerReadyInterface> &tileReadyInterface,
                                 const std::shared_ptr<LineVectorLayerDescription> &description);
 
     void updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
-                                const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) override;
+                                const Tiled2dMapVectorTileDataVector &tileData) override;
 
     void update() override;
 
-    virtual std::vector<std::shared_ptr<::RenderObjectInterface>> getRenderObjects() override;
+    virtual std::vector<std::shared_ptr<RenderObjectInterface>> generateRenderObjects() override;
 
     virtual void clear() override;
 
     virtual void setup() override;
 
-    virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
-
-    virtual void setTileData(const std::shared_ptr<MaskingObjectInterface> &tileMask,
-                             const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) override;
-
-    virtual void updateTileMask(const std::shared_ptr<MaskingObjectInterface> &tileMask) override;
+    virtual void setVectorTileData(const Tiled2dMapVectorTileDataVector &tileData) override;
 
     bool onClickConfirmed(const Vec2F &posScreen) override;
 
-protected:
-    virtual void preGenerateRenderObjects();
 private:
-    
     void addLines(const std::unordered_map<int, std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> &styleIdLinesMap);
 
     void setupLines(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newLineGraphicsObjects,
@@ -65,13 +59,6 @@ private:
 
     std::unordered_set<std::string> usedKeys;
 
-    std::shared_ptr<MaskingObjectInterface> tileMask;
-
-
     std::vector<std::vector<LineStyle>> reusableLineStyles;
     std::unordered_map<size_t, std::pair<int, int>> styleHashToGroupMap;
-
-    std::optional<::RectI> scissorRect = std::nullopt;
-    
-    std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;
 };
