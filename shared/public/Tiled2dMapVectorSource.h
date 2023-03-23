@@ -30,7 +30,8 @@ public:
                            const WeakActor<Tiled2dMapVectorSourceListener> &listener,
                            const std::unordered_set<std::string> &layersToDecode,
                            const std::string &sourceName,
-                           float screenDensityPpi);
+                           float screenDensityPpi,
+                           bool tileBasedRendering);
 
     std::unordered_set<Tiled2dMapVectorTileInfo> getCurrentTiles();
 
@@ -54,4 +55,6 @@ private:
     const WeakActor<Tiled2dMapVectorSourceListener> listener;
     
     const std::string sourceName;
+
+    const bool tileBasedRendering;
 };

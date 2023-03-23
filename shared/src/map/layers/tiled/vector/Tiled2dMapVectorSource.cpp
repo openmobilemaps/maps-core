@@ -21,9 +21,10 @@ Tiled2dMapVectorSource::Tiled2dMapVectorSource(const MapConfig &mapConfig,
                                                const WeakActor<Tiled2dMapVectorSourceListener> &listener,
                                                const std::unordered_set<std::string> &layersToDecode,
                                                const std::string &sourceName,
-                                               float screenDensityPpi)
+                                               float screenDensityPpi,
+                                               bool tileBasedRendering)
         : Tiled2dMapSource<djinni::DataRef, DataLoaderResult, Tiled2dMapVectorTileInfo::FeatureMap>(mapConfig, layerConfig, conversionHelper, scheduler, screenDensityPpi, tileLoaders.size()),
-loaders(tileLoaders), layersToDecode(layersToDecode), listener(listener), sourceName(sourceName) {}
+loaders(tileLoaders), layersToDecode(layersToDecode), listener(listener), sourceName(sourceName), tileBasedRendering(tileBasedRendering) {}
 
 ::djinni::Future<DataLoaderResult> Tiled2dMapVectorSource::loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) {
     auto const url = layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier);
@@ -49,7 +50,7 @@ Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(con
                 while (const auto &feature = layer.next_feature()) {
                     auto const featureContext = FeatureContext(feature);
                     try {
-                        VectorTileGeometryHandler geometryHandler = VectorTileGeometryHandler(tile.bounds, extent, layerConfig->getVectorSettings());
+                        VectorTileGeometryHandler geometryHandler = VectorTileGeometryHandler(tile.bounds, extent, layerConfig->getVectorSettings(), tileBasedRendering);
                         vtzero::decode_geometry(feature.geometry(), geometryHandler);
                         geometryHandler.limitHoles(500);
                         layerFeatureMap->at(sourceLayerName)->push_back({featureContext, geometryHandler});

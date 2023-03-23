@@ -18,8 +18,8 @@
 
 class VectorTileGeometryHandler {
 public:
-    VectorTileGeometryHandler(::RectCoord tileCoords, int extent, const std::optional<Tiled2dMapVectorSettings> &vectorSettings)
-    : tileCoords(tileCoords),
+    VectorTileGeometryHandler(::RectCoord tileCoords, int extent, const std::optional<Tiled2dMapVectorSettings> &vectorSettings, bool tileBasedRendering)
+    : tileCoords(tileCoords), tileBasedRendering(tileBasedRendering),
       // use standard TOP_LEFT origin, when no vector settings given.
       origin(vectorSettings ? vectorSettings->tileOrigin : Tiled2dMapVectorTileOrigin::TOP_LEFT),
       extent((double)extent)
@@ -142,15 +142,18 @@ private:
                 tx = 1.0 - tx; ty = 1.0 - ty; break;
             }
         }
-//
-//        auto x = tileCoords.topLeft.x * (1.0 - tx) + tileCoords.bottomRight.x * tx;
-//        auto y = tileCoords.topLeft.y * (1.0 - ty) + tileCoords.bottomRight.y * ty;
 
+        if (tileBasedRendering) {
+            auto x = -1 * (1.0 - tx) + 1 * tx;
+            auto y = -1 * (1.0 - ty) + 1 * ty;
 
-        auto x = -1 * (1.0 - tx) + 1 * tx;
-        auto y = -1 * (1.0 - ty) + 1 * ty;
+            return Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0);
+        } else {
+            auto x = tileCoords.topLeft.x * (1.0 - tx) + tileCoords.bottomRight.x * tx;
+            auto y = tileCoords.topLeft.y * (1.0 - ty) + tileCoords.bottomRight.y * ty;
 
-        return Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0);
+            return Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0);
+        }
     }
 
     static double signedArea(const std::vector<::Coord>& hole) {
@@ -171,4 +174,5 @@ private:
     Tiled2dMapVectorTileOrigin origin;
     RectCoord tileCoords;
     double extent;
+    const bool tileBasedRendering;
 };

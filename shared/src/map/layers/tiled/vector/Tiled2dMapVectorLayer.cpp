@@ -252,7 +252,8 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                           selfVectorActor,
                                                           layers,
                                                           source,
-                                                          mapInterface->getCamera()->getScreenDensityPpi());
+                                                          mapInterface->getCamera()->getScreenDensityPpi(),
+                                                          enableOffscreenRendering);
         vectorTileSource[source] = vectorSource;
         sourceInterfaces.push_back(vectorSource.weakActor<Tiled2dMapSourceInterface>());
         auto sourceDataManagerMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
