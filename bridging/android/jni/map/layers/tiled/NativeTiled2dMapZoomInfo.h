@@ -25,10 +25,13 @@ private:
     friend ::djinni::JniClass<NativeTiled2dMapZoomInfo>;
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/layers/tiled/Tiled2dMapZoomInfo") };
-    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(FIZ)V") };
+    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(FIZZZZ)V") };
     const jfieldID field_zoomLevelScaleFactor { ::djinni::jniGetFieldID(clazz.get(), "zoomLevelScaleFactor", "F") };
     const jfieldID field_numDrawPreviousLayers { ::djinni::jniGetFieldID(clazz.get(), "numDrawPreviousLayers", "I") };
     const jfieldID field_adaptScaleToScreen { ::djinni::jniGetFieldID(clazz.get(), "adaptScaleToScreen", "Z") };
+    const jfieldID field_maskTile { ::djinni::jniGetFieldID(clazz.get(), "maskTile", "Z") };
+    const jfieldID field_underzoom { ::djinni::jniGetFieldID(clazz.get(), "underzoom", "Z") };
+    const jfieldID field_overzoom { ::djinni::jniGetFieldID(clazz.get(), "overzoom", "Z") };
 };
 
 }  // namespace djinni_generated

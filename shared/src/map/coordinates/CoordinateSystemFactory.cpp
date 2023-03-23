@@ -23,8 +23,8 @@
 
 ::MapCoordinateSystem CoordinateSystemFactory::getEpsg3857System() {
     return MapCoordinateSystem(CoordinateSystemIdentifiers::EPSG3857(),
-                               RectCoord(Coord(CoordinateSystemIdentifiers::EPSG3857(), -20026376.39, 20048966.10, 0),
-                                         Coord(CoordinateSystemIdentifiers::EPSG3857(), 20026376.39, -20048966.10, 0)),
+                               RectCoord(Coord(CoordinateSystemIdentifiers::EPSG3857(), -20037508.34, 20037508.34, 0),
+                                         Coord(CoordinateSystemIdentifiers::EPSG3857(), 20037508.34, -20037508.34, 0)),
                                1.0);
 }
 

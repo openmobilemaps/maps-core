@@ -9,6 +9,7 @@ loader_status = enum {
     error_timeout;
     error_network;
     error_other;
+    noop;
 }
 
 texture_loader_result = record {

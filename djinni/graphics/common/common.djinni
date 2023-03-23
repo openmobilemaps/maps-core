@@ -64,4 +64,10 @@ color = record {
     g: f32;
     b: f32;
     a: f32;
+} deriving (eq, ord)
+
+shared_bytes = record {
+    address: i64;
+    element_count: i32;
+    bytes_per_element: i32;
 }

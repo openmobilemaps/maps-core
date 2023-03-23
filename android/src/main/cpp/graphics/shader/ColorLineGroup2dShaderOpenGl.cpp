@@ -22,11 +22,13 @@ void ColorLineGroup2dShaderOpenGl::setupProgram(const std::shared_ptr<::Renderin
     // prepare shaders and OpenGL program
     int vertexShader = loadShader(GL_VERTEX_SHADER, getVertexShader());
     int fragmentShader = loadShader(GL_FRAGMENT_SHADER, getFragmentShader());
+
     int program = glCreateProgram();       // create empty OpenGL Program
     glAttachShader(program, vertexShader); // add the vertex shader to program
     glDeleteShader(vertexShader);
     glAttachShader(program, fragmentShader); // add the fragment shader to program
     glDeleteShader(fragmentShader);
+
     glLinkProgram(program); // create OpenGL program executables
 
     openGlContext->storeProgram(programName, program);
@@ -56,8 +58,8 @@ void ColorLineGroup2dShaderOpenGl::setStyles(const std::vector<::LineStyle> &lin
     std::vector<float> colorValues(sizeColorValuesArray, 0.0);
     std::vector<float> gapColorValues(sizeGapColorValuesArray, 0.0);
     std::vector<float> dashValues(sizeDashValuesArray, 0.0);
-    int numStyles = lineStyles.size();
-    for (int i = 0; i < lineStyles.size(); i++) {
+    int numStyles = std::min((int) lineStyles.size(), maxNumStyles);
+    for (int i = 0; i < numStyles; i++) {
         const auto &style = lineStyles[i];
         styleValues[sizeStyleValues * i] = style.width;
         styleValues[sizeStyleValues * i + 1] = style.widthType == SizeType::SCREEN_PIXEL ? 1.0f : 0.0f;
@@ -96,11 +98,12 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
         uniform mat4 uMVPMatrix; attribute vec2 vPosition; attribute vec2 vWidthNormal; attribute vec2 vLengthNormal;
         attribute vec2 vPointA; attribute vec2 vPointB; attribute float vSegmentStartLPos; attribute float vStyleInfo;
         // lineStyles: {float width, float isScaled, int capType} -> stride = 3
-        uniform float lineStyles[3 * 32];
+        uniform float lineStyles[3 * ) + std::to_string(maxNumStyles) + UBRendererShaderCode(];
         // lineStyles: {vec4 color} -> stride = 4
-        uniform float lineColors[4 * 32];
+        uniform float lineColors[4 * ) + std::to_string(maxNumStyles) + UBRendererShaderCode(];
         // lineStyles: {vec4 gapColor} -> stride = 4
-        uniform float lineGapColors[4 * 32]; uniform int numStyles; uniform float scaleFactor;
+        uniform float lineGapColors[4 * ) + std::to_string(maxNumStyles) + UBRendererShaderCode(];
+        uniform int numStyles; uniform float scaleFactor;
 
         varying float fLineIndex; varying float radius; varying float segmentStartLPos; varying float fSegmentType;
         varying vec2 pointDeltaA; varying vec2 pointBDeltaA; varying vec4 color; varying vec4 gapColor; varying float capType;
@@ -146,7 +149,7 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
     return UBRendererShaderCode(precision highp float;
 
                                 // lineDashValues: {int numDashInfo, vec4 dashArray} -> stride = 5
-                                uniform float lineDashValues[5 * 32];
+                                uniform float lineDashValues[5 * ) + std::to_string(maxNumStyles) + UBRendererShaderCode(];
 
                                 varying float fLineIndex; varying float radius; varying float segmentStartLPos;
                                 varying float fSegmentType; // 0: inner segment, 1: line start segment (i.e. A is first point in

@@ -2,6 +2,8 @@
 @extern "../../yaml/line_style.yaml"
 @extern "../../yaml/polygon_style.yaml"
 @extern "../../yaml/vec_3_d.yaml"
+@extern "../../yaml/shared_bytes.yaml"
+@extern "../../yaml/color.yaml"
 
 shader_program_interface = interface +c +o {
     get_program_name() : string;
@@ -17,6 +19,28 @@ shader_factory_interface = interface +c +j +o {
     create_color_circle_shader() : color_circle_shader_interface;
     create_polygon_group_shader(): polygon_group_shader_interface;
     create_text_shader() : text_shader_interface;
+    create_raster_shader() : raster_shader_interface; 
+}
+
+raster_shader_style = record {
+    opacity: f32;
+    brightness_min: f32;
+    brightness_max: f32;
+    contrast: f32;
+    saturation: f32;
+
+    const default_style: raster_shader_style = {
+        opacity = 1.0,
+        brightness_min = 0.0,
+        brightness_max = 1.0,
+        contrast = 0.0,
+        saturation = 0.0
+    };
+}
+
+raster_shader_interface = interface +c +o {
+    set_style(style: raster_shader_style);
+    as_shader_program_interface() : shader_program_interface;
 }
 
 alpha_shader_interface = interface +c +o {
@@ -36,7 +60,7 @@ color_line_shader_interface = interface +c +o {
 }
 
 line_group_shader_interface = interface +c +o {
-    set_styles(line_styles: list<line_style>);
+    set_styles(styles: list<line_style>);
     as_shader_program_interface() : shader_program_interface;
 }
 
@@ -46,12 +70,13 @@ color_circle_shader_interface = interface +c +o {
 }
 
 polygon_group_shader_interface = interface +c +o {
-    set_styles(styles: list<polygon_style>);
+    set_styles(styles: shared_bytes);
     as_shader_program_interface() : shader_program_interface;
 }
 
 text_shader_interface = interface +c +o {
-    set_color(red: f32, green: f32, blue: f32, alpha: f32);
+    set_color(color: color);
+    set_halo_color(color: color);
     set_scale(scale: f32);
     set_reference_point(point: vec_3_d);
     as_shader_program_interface() : shader_program_interface;

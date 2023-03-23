@@ -95,14 +95,22 @@ std::string ColorLineShaderOpenGl::getVertexShader() {
     return UBRendererShaderCode(
             precision highp float;
 
-            uniform mat4 uMVPMatrix; attribute vec2 vPosition; attribute vec2 vWidthNormal; attribute vec2 vLengthNormal;
-            attribute vec2 vPointA; attribute vec2 vPointB; attribute float vSegmentStartLPos; attribute float vStyleInfo;
+            uniform mat4 uMVPMatrix;
+            attribute vec2 vPosition;
+            attribute vec2 vWidthNormal;
+            attribute vec2 vLengthNormal;
+            attribute vec2 vPointA;
+            attribute vec2 vPointB;
+            attribute float vSegmentStartLPos;
+            attribute float vStyleInfo;
             // lineStyles: {float width, float isScaled, int capType} -> stride = 3
             uniform float lineStyles[3];
             // lineStyles: {vec4 color} -> stride = 4
             uniform float lineColors[4];
             // lineStyles: {vec4 gapColor} -> stride = 4
-            uniform float lineGapColors[4]; uniform int numStyles; uniform float scaleFactor;
+            uniform float lineGapColors[4];
+            uniform int numStyles;
+            uniform float scaleFactor;
 
             varying float radius; varying float segmentStartLPos; varying float fSegmentType;
             varying vec2 pointDeltaA; varying vec2 pointBDeltaA; varying vec4 color; varying vec4 gapColor; varying float capType;

@@ -23,7 +23,7 @@ class SimpleLayerInterface : public LayerInterface {
         return {};
     };
 
-    virtual void onAdded(const std::shared_ptr<MapInterface> & mapInterface) {};
+    virtual void onAdded(const std::shared_ptr<MapInterface> & mapInterface, int32_t layerIndex) {};
 
     virtual void onRemoved() {};
 
@@ -34,6 +34,10 @@ class SimpleLayerInterface : public LayerInterface {
     virtual void hide() {};
 
     virtual void show() {};
+
+    virtual void setAlpha(float alpha) {};
+
+    virtual float getAlpha() { return 1.0; };
 
     /** optional rectangle, remove scissoring when not set */
     virtual void setScissorRect(const std::optional<::RectI> & scissorRect) {};

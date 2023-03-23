@@ -13,17 +13,17 @@ using namespace metal;
 
 struct PolygonGroupVertexIn {
     float2 position [[attribute(0)]];
-    int stylingIndex [[attribute(1)]];
+    float stylingIndex [[attribute(1)]];
 };
 
 struct PolygonGroupVertexOut {
     float4 position [[ position ]];
-    int stylingIndex;
+    float stylingIndex;
 };
 
 
 struct PolygonGroupStyling {
-    float4 color;
+    float color[4];
     float opacity;
 };
 
@@ -45,10 +45,6 @@ fragment float4
 polygonGroupFragmentShader(PolygonGroupVertexOut in [[stage_in]],
                         constant PolygonGroupStyling *styling [[buffer(1)]])
 {
-    PolygonGroupStyling style = styling[in.stylingIndex];
-    float a = style.color.a * style.opacity;
-    if (a == 0) {
-        discard_fragment();
-    }
-    return style.color * style.opacity;
+    PolygonGroupStyling s = styling[int(in.stylingIndex)];
+    return float4(s.color[0], s.color[1], s.color[2], s.color[3]) * s.opacity;
 }

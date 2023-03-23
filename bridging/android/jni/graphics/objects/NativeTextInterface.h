@@ -34,7 +34,7 @@ private:
         ~JavaProxy();
 
         void setTexts(const std::vector<::TextDescription> & texts) override;
-        void loadTexture(const std::shared_ptr<::TextureHolderInterface> & textureHolder) override;
+        void loadTexture(const std::shared_ptr<::RenderingContextInterface> & context, const std::shared_ptr<::TextureHolderInterface> & textureHolder) override;
         void removeTexture() override;
         std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override;
 
@@ -44,7 +44,7 @@ private:
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/objects/TextInterface") };
     const jmethodID method_setTexts { ::djinni::jniGetMethodID(clazz.get(), "setTexts", "(Ljava/util/ArrayList;)V") };
-    const jmethodID method_loadTexture { ::djinni::jniGetMethodID(clazz.get(), "loadTexture", "(Lio/openmobilemaps/mapscore/shared/graphics/objects/TextureHolderInterface;)V") };
+    const jmethodID method_loadTexture { ::djinni::jniGetMethodID(clazz.get(), "loadTexture", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface;Lio/openmobilemaps/mapscore/shared/graphics/objects/TextureHolderInterface;)V") };
     const jmethodID method_removeTexture { ::djinni::jniGetMethodID(clazz.get(), "removeTexture", "()V") };
     const jmethodID method_asGraphicsObject { ::djinni::jniGetMethodID(clazz.get(), "asGraphicsObject", "()Lio/openmobilemaps/mapscore/shared/graphics/objects/GraphicsObjectInterface;") };
 };

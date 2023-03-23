@@ -7,6 +7,7 @@ data class LineStyle(
     var color: io.openmobilemaps.mapscore.shared.map.layers.ColorStateList,
     var gapColor: io.openmobilemaps.mapscore.shared.map.layers.ColorStateList,
     var opacity: Float,
+    var blur: Float,
     var widthType: io.openmobilemaps.mapscore.shared.map.layers.SizeType,
     var width: Float,
     var dashArray: ArrayList<Float>,

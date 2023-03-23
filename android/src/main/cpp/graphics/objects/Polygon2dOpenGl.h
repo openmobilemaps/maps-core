@@ -39,7 +39,7 @@ class Polygon2dOpenGl : public GraphicsObjectInterface,
     virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
                               int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
 
-    virtual void setVertices(const std::vector<::Vec2D> &vertices, const std::vector<int32_t> &indices) override;
+    virtual void setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices) override;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() override;
 
@@ -49,6 +49,8 @@ class Polygon2dOpenGl : public GraphicsObjectInterface,
 
   protected:
     void prepareGlData(const std::shared_ptr<OpenGlContext> &openGlContext);
+
+    void removeGlBuffers();
 
     void drawPolygon(std::shared_ptr<OpenGlContext> openGlContext, int program, int64_t mvpMatrix);
 
@@ -62,6 +64,7 @@ class Polygon2dOpenGl : public GraphicsObjectInterface,
     GLuint indexBuffer;
     std::vector<GLushort> indices;
 
+    bool dataReady = false;
     bool ready = false;
     std::recursive_mutex dataMutex;
 

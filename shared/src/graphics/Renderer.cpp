@@ -41,11 +41,14 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
             if (hasMask) {
                 renderingContext->preRenderStencilMask();
                 maskObject->renderAsMask(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, factor);
+                //LogDebug << "Has mask and mask is: " <<= (maskObject->asGraphicsObject()->isReady() ? "ready" : "not ready");
             }
 
             for (const auto &renderObject : renderObjects) {
                 const auto &graphicsObject = renderObject->getGraphicsObject();
-                if (renderObject->hasCustomModelMatrix()) {
+                if (renderObject->isScreenSpaceCoords()) {
+                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(), (int64_t) identityMatrix.data(), hasMask, factor);
+                } else if (renderObject->hasCustomModelMatrix()) {
                     Matrix::multiplyMMC(tempMvpMatrix, 0, vpMatrix, 0, renderObject->getCustomModelMatrix(), 0);
                     graphicsObject->render(renderingContext, pass->getRenderPassConfig(), (int64_t)tempMvpMatrix.data(), hasMask,
                                            factor);

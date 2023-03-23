@@ -85,12 +85,15 @@ layer_interface = interface +c +j +o {
     set_masking_object(masking_object: optional<masking_object_interface>);
     update();
     build_render_passes(): list<render_pass_interface>;
-    onAdded(map_interface: map_interface);
+    onAdded(map_interface: map_interface, layer_index: i32);
     onRemoved();
     pause();
     resume();
     hide();
     show();
+
+    set_alpha(alpha: f32);
+    get_alpha(): f32;
 
     # optional rectangle, remove scissoring when not set
     set_scissor_rect(scissor_rect: optional<rect_i>);

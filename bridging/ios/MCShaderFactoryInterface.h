@@ -8,6 +8,7 @@
 @protocol MCColorShaderInterface;
 @protocol MCLineGroupShaderInterface;
 @protocol MCPolygonGroupShaderInterface;
+@protocol MCRasterShaderInterface;
 @protocol MCTextShaderInterface;
 
 
@@ -26,5 +27,7 @@
 - (nullable id<MCPolygonGroupShaderInterface>)createPolygonGroupShader;
 
 - (nullable id<MCTextShaderInterface>)createTextShader;
+
+- (nullable id<MCRasterShaderInterface>)createRasterShader;
 
 @end

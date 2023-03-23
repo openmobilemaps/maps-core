@@ -175,9 +175,10 @@ void LineLayer::generateRenderPasses() {
 
 void LineLayer::update() {
     auto mapInterface = this->mapInterface;
-    if (mapInterface && mask) {
-        if (!mask->asGraphicsObject()->isReady())
-            mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+    if (mapInterface && maskGraphicsObject) {
+        if (!maskGraphicsObject->isReady()) {
+            maskGraphicsObject->setup(mapInterface->getRenderingContext());
+        }
     }
 }
 
@@ -190,7 +191,7 @@ std::vector<std::shared_ptr<::RenderPassInterface>> LineLayer::buildRenderPasses
     }
 }
 
-void LineLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
+void LineLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32_t layerIndex) {
     this->mapInterface = mapInterface;
     {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
@@ -200,11 +201,16 @@ void LineLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface) {
         addingQueue.clear();
     }
     if (isLayerClickable) {
-        mapInterface->getTouchHandler()->addListener(shared_from_this());
+        mapInterface->getTouchHandler()->insertListener(shared_from_this(), layerIndex);
     }
 }
 
 void LineLayer::onRemoved() {
+    {
+        std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
+        addingQueue.clear();
+    }
+
     if (mapInterface && isLayerClickable)
         mapInterface->getTouchHandler()->removeListener(shared_from_this());
     mapInterface = nullptr;
@@ -231,9 +237,8 @@ void LineLayer::resume() {
     for (const auto &line : lines) {
         line.second->getLineObject()->setup(renderingContext);
     }
-    if (mask) {
-        if (!mask->asGraphicsObject()->isReady())
-            mask->asGraphicsObject()->setup(renderingContext);
+    if (maskGraphicsObject && !maskGraphicsObject->isReady()) {
+        maskGraphicsObject->setup(renderingContext);
     }
 }
 
@@ -307,6 +312,8 @@ void LineLayer::clearTouch() {
 
 void LineLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> &maskingObject) {
     this->mask = maskingObject;
+    maskGraphicsObject = mask ? mask->asGraphicsObject() : nullptr;
+
     generateRenderPasses();
     auto mapInterface = this->mapInterface;
     if (mapInterface) {

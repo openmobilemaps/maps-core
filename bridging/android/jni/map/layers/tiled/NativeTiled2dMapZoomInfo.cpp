@@ -15,18 +15,24 @@ auto NativeTiled2dMapZoomInfo::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::dj
     auto r = ::djinni::LocalRef<JniType>{jniEnv->NewObject(data.clazz.get(), data.jconstructor,
                                                            ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.zoomLevelScaleFactor)),
                                                            ::djinni::get(::djinni::I32::fromCpp(jniEnv, c.numDrawPreviousLayers)),
-                                                           ::djinni::get(::djinni::Bool::fromCpp(jniEnv, c.adaptScaleToScreen)))};
+                                                           ::djinni::get(::djinni::Bool::fromCpp(jniEnv, c.adaptScaleToScreen)),
+                                                           ::djinni::get(::djinni::Bool::fromCpp(jniEnv, c.maskTile)),
+                                                           ::djinni::get(::djinni::Bool::fromCpp(jniEnv, c.underzoom)),
+                                                           ::djinni::get(::djinni::Bool::fromCpp(jniEnv, c.overzoom)))};
     ::djinni::jniExceptionCheck(jniEnv);
     return r;
 }
 
 auto NativeTiled2dMapZoomInfo::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
-    ::djinni::JniLocalScope jscope(jniEnv, 4);
+    ::djinni::JniLocalScope jscope(jniEnv, 7);
     assert(j != nullptr);
     const auto& data = ::djinni::JniClass<NativeTiled2dMapZoomInfo>::get();
     return {::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_zoomLevelScaleFactor)),
             ::djinni::I32::toCpp(jniEnv, jniEnv->GetIntField(j, data.field_numDrawPreviousLayers)),
-            ::djinni::Bool::toCpp(jniEnv, jniEnv->GetBooleanField(j, data.field_adaptScaleToScreen))};
+            ::djinni::Bool::toCpp(jniEnv, jniEnv->GetBooleanField(j, data.field_adaptScaleToScreen)),
+            ::djinni::Bool::toCpp(jniEnv, jniEnv->GetBooleanField(j, data.field_maskTile)),
+            ::djinni::Bool::toCpp(jniEnv, jniEnv->GetBooleanField(j, data.field_underzoom)),
+            ::djinni::Bool::toCpp(jniEnv, jniEnv->GetBooleanField(j, data.field_overzoom))};
 }
 
 }  // namespace djinni_generated

@@ -18,6 +18,8 @@ class RenderObject : public RenderObjectInterface {
 public:
     RenderObject(const std::shared_ptr<::GraphicsObjectInterface> graphicsObject);
 
+    RenderObject(const std::shared_ptr<::GraphicsObjectInterface> graphicsObject, bool isScreenSpace);
+
     RenderObject(const std::shared_ptr<::GraphicsObjectInterface> graphicsObject, std::vector<float> modelMatrix);
 
     virtual std::shared_ptr<::GraphicsObjectInterface> getGraphicsObject() override;
@@ -25,9 +27,12 @@ public:
     virtual bool hasCustomModelMatrix() override;
 
     virtual std::vector<float> getCustomModelMatrix() override;
+
+    virtual bool isScreenSpaceCoords() override;
     
 private:
     std::shared_ptr<GraphicsObjectInterface> graphicsObject;
     bool setCustomModelMatrix = false;
+    bool screenSpaceCoords = false;
     std::vector<float> modelMatrix;
 };

@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class Polygon2dInterface {
 
-    abstract fun setVertices(vertices: ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2D>, indices: ArrayList<Int>)
+    abstract fun setVertices(vertices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
     abstract fun asGraphicsObject(): GraphicsObjectInterface
 
@@ -31,11 +31,11 @@ abstract class Polygon2dInterface {
             _djinni_private_destroy()
         }
 
-        override fun setVertices(vertices: ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2D>, indices: ArrayList<Int>) {
+        override fun setVertices(vertices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_setVertices(this.nativeRef, vertices, indices)
         }
-        private external fun native_setVertices(_nativeRef: Long, vertices: ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2D>, indices: ArrayList<Int>)
+        private external fun native_setVertices(_nativeRef: Long, vertices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
         override fun asGraphicsObject(): GraphicsObjectInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

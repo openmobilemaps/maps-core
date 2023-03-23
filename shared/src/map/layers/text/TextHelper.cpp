@@ -14,7 +14,8 @@
 #include "MapCamera2dInterface.h"
 #include "Quad2dD.h"
 #include "TextDescription.h"
-
+#include "BoundingBox.h"
+#include "SymbolInfo.h"
 #include <codecvt>
 #include <iosfwd>
 #include <locale>
@@ -27,7 +28,11 @@ std::vector<std::string> split_wstring(const std::string &word) {
     std::wstring wword = converter.from_bytes(word);
     std::vector<std::string> characters;
     for (auto iter : wword) {
-        characters.push_back(converter.to_bytes(iter));
+        try {
+            characters.push_back(converter.to_bytes(iter));
+        } // thrown by std::wstring_convert.to_bytes() for emojis
+        catch (const std::range_error & exception)
+        {}
     }
     return characters;
 }
@@ -35,69 +40,222 @@ std::vector<std::string> split_wstring(const std::string &word) {
 TextHelper::TextHelper(const std::shared_ptr<MapInterface> &mapInterface)
     : mapInterface(mapInterface) {}
 
-std::shared_ptr<TextLayerObject> TextHelper::textLayer(const std::shared_ptr<TextInfoInterface> &text,
-                                                       std::optional<FontData> fontData, Vec2F offset) {
+std::shared_ptr<TextLayerObject> TextHelper::textLayerObject(const std::shared_ptr<TextInfoInterface> &text,
+                                                             std::optional<FontData> fontData,
+                                                             Vec2F offset,
+                                                             double lineHeight,
+                                                             double letterSpacing,
+                                                             int64_t maxCharacterWidth) {
 
     if (!fontData) {
         return nullptr;
     }
 
-    const auto &objectFactory = mapInterface->getGraphicsObjectFactory();
-    const auto &shaderFactory = mapInterface->getShaderFactory();
+    auto const &formattedText = text->getText();
 
-    auto shader = shaderFactory->createTextShader();
-    auto factoryObject = objectFactory->createText(shader->asShaderProgramInterface());
+
+    std::shared_ptr<::TextShaderInterface> shader;
+    std::shared_ptr<::TextInterface> factoryObject;
+
+
+    if (!formattedText.empty() && !(formattedText.size() == 1 && formattedText.at(0).text.empty())) {
+        const auto &objectFactory = mapInterface->getGraphicsObjectFactory();
+        const auto &shaderFactory = mapInterface->getShaderFactory();
+
+        shader = shaderFactory->createTextShader();
+        factoryObject = objectFactory->createText(shader->asShaderProgramInterface());
+    }
+
 
     Coord renderPos = mapInterface->getCoordinateConverterHelper()->convertToRenderSystem(text->getCoordinate());
 
-    auto textObject = std::make_shared<TextLayerObject>(factoryObject, shader, renderPos, fontData->info.size);
-
     float fontSize = fontData->info.size;
-    auto pen = Vec2D(offset.x * fontSize, -offset.y * fontSize);
+    auto pen = Vec2D(0.0, 0.0);
 
     std::vector<GlyphDescription> glyphs = {};
 
-    for (const auto &d : fontData->glyphs) {
-        if ("•" == d.charCode) {
-            auto size = Vec2D(d.boundingBoxSize.x * fontSize, d.boundingBoxSize.y * fontSize);
+    std::optional<BoundingBox> box = std::nullopt;
 
-            auto x = renderPos.x - 0.5 * size.x;
-            auto y = renderPos.y - 0.5 * size.y;
-            auto xw = renderPos.x + 0.5 * size.x;
-            auto yh = renderPos.y + 0.5 * size.y;
+    int64_t characterCount = 0;
+    std::vector<size_t> lineEndIndices;
 
-            Quad2dD quad = Quad2dD(Vec2D(x, yh), Vec2D(xw, yh), Vec2D(xw, y), Vec2D(x, y));
-            glyphs.push_back(GlyphDescription(quad, d.uv));
+    for (const auto &entry: formattedText) {
+        for (const auto &c : split_wstring(entry.text)) {
+            for (const auto &d : fontData->glyphs) {
+                if (c == " " && characterCount < maxCharacterWidth) {
+                    pen.x += fontData->info.spaceAdvance * fontSize * entry.scale;
+                    characterCount += 1;
+                    break;
+                } else if (c == "\n" || c == " ") {
+                    lineEndIndices.push_back(glyphs.size() - 1);
+                    characterCount = 0;
+                    pen.x = 0.0;
+                    pen.y += fontSize;
+                    break;
+                }
+
+                if (c == d.charCode) {
+                    auto size = Vec2D(d.boundingBoxSize.x * fontSize * entry.scale, d.boundingBoxSize.y * fontSize * entry.scale);
+                    auto bearing = Vec2D(d.bearing.x * fontSize * entry.scale, d.bearing.y * fontSize * entry.scale);
+                    auto advance = Vec2D(d.advance.x * fontSize * entry.scale, d.advance.y * fontSize * entry.scale);
+
+                    auto x = pen.x + bearing.x;
+                    auto y = pen.y - bearing.y;
+                    auto xw = x + size.x;
+                    auto yh = y + size.y;
+
+                    Quad2dD quad = Quad2dD(Vec2D(x, yh), Vec2D(xw, yh), Vec2D(xw, y), Vec2D(x, y));
+
+                    if (!box) {
+                        box = BoundingBox(Coord(renderPos.systemIdentifier, quad.topLeft.x, quad.topLeft.y, renderPos.z));
+                    }
+
+                    box->addPoint(quad.topLeft.x, quad.topLeft.y, renderPos.z);
+                    box->addPoint(quad.topRight.x, quad.topRight.y, renderPos.z);
+                    box->addPoint(quad.bottomLeft.x, quad.bottomLeft.y, renderPos.z);
+                    box->addPoint(quad.bottomRight.x, quad.bottomRight.y, renderPos.z);
+
+                    glyphs.push_back(GlyphDescription(quad, d.uv));
+                    pen.x += advance.x * (1.0 + letterSpacing);
+                    characterCount += 1;
+                    
+                    if (c == "/" && characterCount >= maxCharacterWidth) {
+                        lineEndIndices.push_back(glyphs.size() - 1);
+                        characterCount = 0;
+                        pen.x = 0.0;
+                        pen.y += fontSize;
+                    }
+                    break;
+                }
+            }
         }
     }
+    lineEndIndices.push_back(glyphs.size() - 1);
 
-    for (const auto &c : split_wstring(text->getText())) {
-        for (const auto &d : fontData->glyphs) {
-            if (c == " ") {
-                pen.x += fontData->info.spaceAdvance * fontSize;
+    if (!glyphs.empty()) {
+
+        Vec2D min(box->min.x, box->min.y);
+        Vec2D max(box->max.x, box->max.y);
+
+        box = std::nullopt;
+
+        Vec2D size((max.x - min.x), (max.y - min.y));
+
+        switch (text->getTextJustify()) {
+            case TextJustify::LEFT:
+                //Nothing to do here
+                break;
+            case TextJustify::CENTER: {
+                size_t lineStart = 0;
+                for (auto const lineEndIndex: lineEndIndices) {
+                    double lineWidth = glyphs[lineEndIndex].frame.topRight.x - glyphs[lineStart].frame.topLeft.x;
+                    double widthDeltaHalfed = (size.x - lineWidth) / 2.0;
+                    for(size_t i = lineStart; i <= lineEndIndex; i++) {
+                        glyphs[i].frame.bottomRight.x += widthDeltaHalfed;
+                        glyphs[i].frame.bottomLeft.x += widthDeltaHalfed;
+                        glyphs[i].frame.topRight.x += widthDeltaHalfed;
+                        glyphs[i].frame.topLeft.x += widthDeltaHalfed;
+                    }
+                    lineStart = lineEndIndex + 1;
+                }
                 break;
             }
 
-            if (c == d.charCode) {
-                auto size = Vec2D(d.boundingBoxSize.x * fontSize, d.boundingBoxSize.y * fontSize);
-                auto bearing = Vec2D(d.bearing.x * fontSize, d.bearing.y * fontSize);
-                auto advance = Vec2D(d.advance.x * fontSize, d.advance.y * fontSize);
-
-                auto x = renderPos.x + pen.x + bearing.x;
-                auto y = renderPos.y + pen.y - bearing.y;
-                auto xw = x + size.x;
-                auto yh = y + size.y;
-
-                Quad2dD quad = Quad2dD(Vec2D(x, yh), Vec2D(xw, yh), Vec2D(xw, y), Vec2D(x, y));
-
-                glyphs.push_back(GlyphDescription(quad, d.uv));
-                pen.x += advance.x;
+            case TextJustify::RIGHT:{
+                size_t lineStart = 0;
+                for (auto const lineEndIndex: lineEndIndices) {
+                    double lineWidth = glyphs[lineEndIndex].frame.topRight.x - glyphs[lineStart].frame.topLeft.x;
+                    double widthDelta = (size.x - lineWidth);
+                    for(size_t i = lineStart; i <= lineEndIndex; i++) {
+                        glyphs[i].frame.bottomRight.x += widthDelta;
+                        glyphs[i].frame.bottomLeft.x += widthDelta;
+                        glyphs[i].frame.topRight.x += widthDelta;
+                        glyphs[i].frame.topLeft.x += widthDelta;
+                    }
+                    lineStart = lineEndIndex + 1;
+                }
                 break;
             }
         }
+
+        double offsetMultiplier = fontSize + fontData->info.ascender + fontData->info.descender;
+
+        Vec2D textOffset(offset.x * offsetMultiplier, offset.y * offsetMultiplier);
+
+        Vec2D offset(0.0, 0.0);
+
+        switch (text->getTextAnchor()) {
+            case Anchor::CENTER:
+                offset.x -= size.x / 2.0 - textOffset.x;
+                offset.y -= size.y / 2.0 - textOffset.y;
+                break;
+            case Anchor::LEFT:
+                offset.x += textOffset.x;
+                offset.y -= size.y / 2.0 - textOffset.y;
+                break;
+            case Anchor::RIGHT:
+                offset.x -= size.x - textOffset.x;
+                offset.y -= size.y / 2.0 - textOffset.y;
+                break;
+            case Anchor::TOP:
+                offset.x -= size.x / 2.0 - textOffset.x;
+                offset.y -= -textOffset.y;
+                break;
+            case Anchor::BOTTOM:
+                offset.x -= size.x / 2.0 - textOffset.x;
+                offset.y -= size.y - textOffset.y + fontSize * 0.5;
+                break;
+            case Anchor::TOP_LEFT:
+                offset.x -= -textOffset.x;
+                offset.y -= -textOffset.y;
+                break;
+            case Anchor::TOP_RIGHT:
+                offset.x -= size.x -textOffset.x;
+                offset.y -= -textOffset.y;
+                break;
+            case Anchor::BOTTOM_LEFT:
+                offset.x -= -textOffset.x;
+                offset.y -= size.y - textOffset.y;
+                break;
+            case Anchor::BOTTOM_RIGHT:
+                offset.x -= size.x -textOffset.x;
+                offset.y -= size.y - textOffset.y;
+                break;
+            default:
+                break;
+        }
+
+        for (auto &glyph: glyphs) {
+            glyph.frame.bottomRight.x += renderPos.x + offset.x - min.x;
+            glyph.frame.bottomLeft.x += renderPos.x + offset.x - min.x;
+            glyph.frame.topRight.x += renderPos.x + offset.x - min.x;
+            glyph.frame.topLeft.x += renderPos.x + offset.x - min.x;
+
+            glyph.frame.bottomRight.y += renderPos.y + offset.y - min.y;
+            glyph.frame.bottomLeft.y += renderPos.y + offset.y - min.y;
+            glyph.frame.topRight.y += renderPos.y + offset.y - min.y;
+            glyph.frame.topLeft.y += renderPos.y + offset.y - min.y;
+
+            if (!box) {
+                box = BoundingBox(Coord(renderPos.systemIdentifier, glyph.frame.topLeft.x, glyph.frame.topLeft.y, renderPos.z));
+            }
+
+            box->addPoint(glyph.frame.topLeft.x, glyph.frame.topLeft.y, renderPos.z);
+            box->addPoint(glyph.frame.topRight.x, glyph.frame.topRight.y, renderPos.z);
+            box->addPoint(glyph.frame.bottomLeft.x, glyph.frame.bottomLeft.y, renderPos.z);
+            box->addPoint(glyph.frame.bottomRight.x, glyph.frame.bottomRight.y, renderPos.z);
+
+        }
+
+        if (factoryObject) {
+            factoryObject->setTexts({TextDescription(glyphs)});
+        }
     }
 
-    factoryObject->setTexts({TextDescription(glyphs)});
+
+    RectCoord boundingBox = box ? RectCoord(box->min, box->max) : RectCoord(renderPos, renderPos) ;
+
+    auto textObject = std::make_shared<TextLayerObject>(factoryObject, shader, renderPos, fontSize, boundingBox);
 
     return textObject;
 }

@@ -58,7 +58,7 @@ class IconLayer : public IconLayerInterface,
 
     virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override;
 
-    virtual void onAdded(const std::shared_ptr<MapInterface> &mapInterface) override;
+    virtual void onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32_t layerIndex) override;
 
     virtual void onRemoved() override;
 
@@ -73,6 +73,10 @@ class IconLayer : public IconLayerInterface,
     virtual bool onClickConfirmed(const ::Vec2F &posScreen) override;
 
     void setLayerClickable(bool isLayerClickable) override;
+
+    virtual void setAlpha(float alpha) override;
+
+    virtual float getAlpha() override;
 
   private:
     void
@@ -95,4 +99,5 @@ class IconLayer : public IconLayerInterface,
 
     std::atomic<bool> isHidden;
     std::atomic<bool> isLayerClickable = true;
+    float alpha = 1.0;
 };

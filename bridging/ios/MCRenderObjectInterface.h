@@ -11,6 +11,8 @@
 
 - (BOOL)hasCustomModelMatrix;
 
+- (BOOL)isScreenSpaceCoords;
+
 - (nonnull NSArray<NSNumber *> *)getCustomModelMatrix;
 
 @end

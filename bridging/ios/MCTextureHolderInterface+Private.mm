@@ -46,10 +46,17 @@ public:
             return ::djinni::I32::toCpp(objcpp_result_);
         }
     }
-    void attachToGraphics() override
+    int32_t attachToGraphics() override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() attachToGraphics];
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() attachToGraphics];
+            return ::djinni::I32::toCpp(objcpp_result_);
+        }
+    }
+    void clearFromGraphics() override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() clearFromGraphics];
         }
     }
 };

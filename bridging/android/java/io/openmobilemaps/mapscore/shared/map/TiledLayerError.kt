@@ -9,5 +9,5 @@ data class TiledLayerError(
     var layerName: String,
     var url: String,
     var isRecoverable: Boolean,
-    var bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord,
+    var bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord?,
 )

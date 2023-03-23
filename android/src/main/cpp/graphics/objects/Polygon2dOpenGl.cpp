@@ -20,26 +20,29 @@ std::shared_ptr<MaskingObjectInterface> Polygon2dOpenGl::asMaskingObject() { ret
 
 bool Polygon2dOpenGl::isReady() { return ready; }
 
-void Polygon2dOpenGl::setVertices(const std::vector<::Vec2D> &vertices, const std::vector<int32_t> &indices) {
+void Polygon2dOpenGl::setVertices(const ::SharedBytes & vertices_, const ::SharedBytes & indices_) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     ready = false;
-    this->vertices.clear();
-    this->indices.clear();
+    dataReady = false;
 
-    for (auto &p : vertices) {
-        this->vertices.push_back(p.x);
-        this->vertices.push_back(p.y);
-        this->vertices.push_back(0.0);
+    indices.resize(indices_.elementCount);
+    vertices.resize(vertices_.elementCount);
+
+    if(indices_.elementCount > 0) {
+        std::memcpy(indices.data(), (void *)indices_.address, indices_.elementCount * indices_.bytesPerElement);
     }
 
-    for (auto &i : indices) {
-        this->indices.push_back(i);
+    if(vertices_.elementCount > 0) {
+        std::memcpy(vertices.data(), (void *)vertices_.address,
+                    vertices_.elementCount * vertices_.bytesPerElement);
     }
+
+    dataReady = true;
 }
 
 void Polygon2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (ready)
+    if (ready || !dataReady)
         return;
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
@@ -72,9 +75,15 @@ void Polygon2dOpenGl::prepareGlData(const std::shared_ptr<OpenGlContext> &openGl
 
 void Polygon2dOpenGl::clear() {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (ready) {
+        removeGlBuffers();
+        ready = false;
+    }
+}
+
+void Polygon2dOpenGl::removeGlBuffers() {
     glDeleteBuffers(1, &vertexBuffer);
     glDeleteBuffers(1, &indexBuffer);
-    ready = false;
 }
 
 void Polygon2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }

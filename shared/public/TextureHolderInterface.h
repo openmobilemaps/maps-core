@@ -17,5 +17,7 @@ public:
 
     virtual int32_t getTextureHeight() = 0;
 
-    virtual void attachToGraphics() = 0;
+    virtual int32_t attachToGraphics() = 0;
+
+    virtual void clearFromGraphics() = 0;
 };

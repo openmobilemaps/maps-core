@@ -43,12 +43,13 @@ std::vector<std::shared_ptr<::RenderPassInterface>> NativeLayerInterface::JavaPr
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::List<::djinni_generated::NativeRenderPassInterface>::toCpp(jniEnv, jret);
 }
-void NativeLayerInterface::JavaProxy::onAdded(const std::shared_ptr<::MapInterface> & c_mapInterface) {
+void NativeLayerInterface::JavaProxy::onAdded(const std::shared_ptr<::MapInterface> & c_mapInterface, int32_t c_layerIndex) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeLayerInterface>::get();
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_onAdded,
-                           ::djinni::get(::djinni_generated::NativeMapInterface::fromCpp(jniEnv, c_mapInterface)));
+                           ::djinni::get(::djinni_generated::NativeMapInterface::fromCpp(jniEnv, c_mapInterface)),
+                           ::djinni::get(::djinni::I32::fromCpp(jniEnv, c_layerIndex)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
 void NativeLayerInterface::JavaProxy::onRemoved() {
@@ -85,6 +86,22 @@ void NativeLayerInterface::JavaProxy::show() {
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeLayerInterface>::get();
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_show);
     ::djinni::jniExceptionCheck(jniEnv);
+}
+void NativeLayerInterface::JavaProxy::setAlpha(float c_alpha) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeLayerInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_setAlpha,
+                           ::djinni::get(::djinni::F32::fromCpp(jniEnv, c_alpha)));
+    ::djinni::jniExceptionCheck(jniEnv);
+}
+float NativeLayerInterface::JavaProxy::getAlpha() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeLayerInterface>::get();
+    auto jret = jniEnv->CallFloatMethod(Handle::get().get(), data.method_getAlpha);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni::F32::toCpp(jniEnv, jret);
 }
 void NativeLayerInterface::JavaProxy::setScissorRect(const std::optional<::RectI> & c_scissorRect) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
@@ -162,12 +179,13 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInter
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInterface_00024CppProxy_native_1onAdded(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_mapInterface)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInterface_00024CppProxy_native_1onAdded(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_mapInterface, jint j_layerIndex)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::LayerInterface>(nativeRef);
-        ref->onAdded(::djinni_generated::NativeMapInterface::toCpp(jniEnv, j_mapInterface));
+        ref->onAdded(::djinni_generated::NativeMapInterface::toCpp(jniEnv, j_mapInterface),
+                     ::djinni::I32::toCpp(jniEnv, j_layerIndex));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
@@ -214,6 +232,25 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInterfac
         const auto& ref = ::djinni::objectFromHandleAddress<::LayerInterface>(nativeRef);
         ref->show();
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInterface_00024CppProxy_native_1setAlpha(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jfloat j_alpha)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::LayerInterface>(nativeRef);
+        ref->setAlpha(::djinni::F32::toCpp(jniEnv, j_alpha));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT jfloat JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInterface_00024CppProxy_native_1getAlpha(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::LayerInterface>(nativeRef);
+        auto r = ref->getAlpha();
+        return ::djinni::release(::djinni::F32::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInterface_00024CppProxy_native_1setScissorRect(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRectI::Boxed::JniType j_scissorRect)

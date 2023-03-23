@@ -7,7 +7,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class TextShaderInterface {
 
-    abstract fun setColor(red: Float, green: Float, blue: Float, alpha: Float)
+    abstract fun setColor(color: io.openmobilemaps.mapscore.shared.graphics.common.Color)
+
+    abstract fun setHaloColor(color: io.openmobilemaps.mapscore.shared.graphics.common.Color)
 
     abstract fun setScale(scale: Float)
 
@@ -33,11 +35,17 @@ abstract class TextShaderInterface {
             _djinni_private_destroy()
         }
 
-        override fun setColor(red: Float, green: Float, blue: Float, alpha: Float) {
+        override fun setColor(color: io.openmobilemaps.mapscore.shared.graphics.common.Color) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setColor(this.nativeRef, red, green, blue, alpha)
+            native_setColor(this.nativeRef, color)
         }
-        private external fun native_setColor(_nativeRef: Long, red: Float, green: Float, blue: Float, alpha: Float)
+        private external fun native_setColor(_nativeRef: Long, color: io.openmobilemaps.mapscore.shared.graphics.common.Color)
+
+        override fun setHaloColor(color: io.openmobilemaps.mapscore.shared.graphics.common.Color) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setHaloColor(this.nativeRef, color)
+        }
+        private external fun native_setHaloColor(_nativeRef: Long, color: io.openmobilemaps.mapscore.shared.graphics.common.Color)
 
         override fun setScale(scale: Float) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

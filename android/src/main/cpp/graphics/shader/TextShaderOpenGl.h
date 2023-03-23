@@ -28,7 +28,9 @@ class TextShaderOpenGl : public BaseShaderProgramOpenGl,
 
     virtual void preRender(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
-    virtual void setColor(float red, float green, float blue, float alpha) override;
+    virtual void setColor(const ::Color & color) override;
+
+    virtual void setHaloColor(const ::Color & color) override;
 
     virtual void setScale(float scale) override;
 
@@ -43,6 +45,7 @@ class TextShaderOpenGl : public BaseShaderProgramOpenGl,
 
   private:
     std::vector<float> color = {0.0, 0.0, 0.0, 1.0};
+    std::vector<float> haloColor = {0.0, 0.0, 0.0, 1.0};
     std::vector<float> referencePoint = {0.0, 0.0, 0.0};
     float scale = 0.0;
 };

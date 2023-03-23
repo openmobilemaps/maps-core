@@ -8,6 +8,7 @@
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCGraphicsObjectInterface+Private.h"
+#import "MCRenderingContextInterface+Private.h"
 #import "MCTextDescription+Private.h"
 #import "MCTextureHolderInterface+Private.h"
 #include <exception>
@@ -40,9 +41,11 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)loadTexture:(nullable id<MCTextureHolderInterface>)textureHolder {
+- (void)loadTexture:(nullable id<MCRenderingContextInterface>)context
+      textureHolder:(nullable id<MCTextureHolderInterface>)textureHolder {
     try {
-        _cppRefHandle.get()->loadTexture(::djinni_generated::TextureHolderInterface::toCpp(textureHolder));
+        _cppRefHandle.get()->loadTexture(::djinni_generated::RenderingContextInterface::toCpp(context),
+                                         ::djinni_generated::TextureHolderInterface::toCpp(textureHolder));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -74,10 +77,11 @@ public:
             [djinni_private_get_proxied_objc_object() setTexts:(::djinni::List<::djinni_generated::TextDescription>::fromCpp(c_texts))];
         }
     }
-    void loadTexture(const std::shared_ptr<::TextureHolderInterface> & c_textureHolder) override
+    void loadTexture(const std::shared_ptr<::RenderingContextInterface> & c_context, const std::shared_ptr<::TextureHolderInterface> & c_textureHolder) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() loadTexture:(::djinni_generated::TextureHolderInterface::fromCpp(c_textureHolder))];
+            [djinni_private_get_proxied_objc_object() loadTexture:(::djinni_generated::RenderingContextInterface::fromCpp(c_context))
+                                                    textureHolder:(::djinni_generated::TextureHolderInterface::fromCpp(c_textureHolder))];
         }
     }
     void removeTexture() override

@@ -11,15 +11,31 @@
 #include "Textured2dLayerObject.h"
 #include "DateHelper.h"
 #include "DoubleAnimation.h"
+#include "RasterStyleAnimation.h"
+#include "RenderObject.h"
 #include <cmath>
+#include <cassert>
 
-Textured2dLayerObject::Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, std::shared_ptr<AlphaShaderInterface> shader,
+Textured2dLayerObject::Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, const std::shared_ptr<AlphaShaderInterface> &shader,
                                              const std::shared_ptr<MapInterface> &mapInterface)
-    : quad(quad)
-    , shader(shader)
-    , mapInterface(mapInterface)
-    , conversionHelper(mapInterface->getCoordinateConverterHelper())
-    , renderConfig(std::make_shared<RenderConfig>(quad->asGraphicsObject(), 0)) {}
+        : quad(quad), shader(shader), rasterShader(nullptr), mapInterface(mapInterface), conversionHelper(mapInterface->getCoordinateConverterHelper()),
+renderConfig(std::make_shared<RenderConfig>(quad->asGraphicsObject(), 0)), graphicsObject(quad->asGraphicsObject()), renderObject(std::make_shared<RenderObject>(graphicsObject))
+ {}
+
+
+Textured2dLayerObject::Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, 
+                      const std::shared_ptr<RasterShaderInterface> &rasterShader,
+                      const std::shared_ptr<MapInterface> &mapInterface)
+: quad(quad), shader(nullptr), rasterShader(rasterShader), mapInterface(mapInterface), conversionHelper(mapInterface->getCoordinateConverterHelper()),
+renderConfig(std::make_shared<RenderConfig>(quad->asGraphicsObject(), 0)), graphicsObject(quad->asGraphicsObject()), renderObject(std::make_shared<RenderObject>(graphicsObject))
+ {}
+
+
+Textured2dLayerObject::Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, 
+                                             const std::shared_ptr<MapInterface> &mapInterface) 
+: quad(quad), shader(nullptr), rasterShader(nullptr), mapInterface(mapInterface), conversionHelper(mapInterface->getCoordinateConverterHelper()),
+renderConfig(std::make_shared<RenderConfig>(quad->asGraphicsObject(), 0)), graphicsObject(quad->asGraphicsObject()), renderObject(std::make_shared<RenderObject>(graphicsObject))
+ {}
 
 void Textured2dLayerObject::setRectCoord(const ::RectCoord &rectCoord) {
     auto width = rectCoord.bottomRight.x - rectCoord.topLeft.x;
@@ -51,19 +67,53 @@ void Textured2dLayerObject::update() {
 std::vector<std::shared_ptr<RenderConfigInterface>> Textured2dLayerObject::getRenderConfig() { return {renderConfig}; }
 
 void Textured2dLayerObject::setAlpha(float alpha) {
-    shader->updateAlpha(alpha);
+    // setAlpha only works for AlphaShaders
+    // use setStyle for RasterShader
+    assert(shader != nullptr);
+    if (shader) {
+        shader->updateAlpha(alpha);
+    }
+    mapInterface->invalidate();
+}
+
+void Textured2dLayerObject::setStyle(const RasterShaderStyle &style) {
+    // setStyle only works for RasterShaders
+    // use setAlpha for AlphaShader
+    assert(rasterShader != nullptr);
+    if (rasterShader) {
+        rasterShader->setStyle(style);
+    }
     mapInterface->invalidate();
 }
 
 std::shared_ptr<Quad2dInterface> Textured2dLayerObject::getQuadObject() { return quad; }
 
+std::shared_ptr<GraphicsObjectInterface> Textured2dLayerObject::getGraphicsObject() { return graphicsObject; }
+
+std::shared_ptr<RenderObjectInterface> Textured2dLayerObject::getRenderObject() {
+    return renderObject;
+}
+
 void Textured2dLayerObject::beginAlphaAnimation(double startAlpha, double targetAlpha, long long duration) {
+    assert(shader != nullptr);
     animation = std::make_shared<DoubleAnimation>(
-        duration, startAlpha, targetAlpha, InterpolatorFunction::EaseIn, [=](double alpha) { this->setAlpha(alpha); },
-        [=] {
-            this->setAlpha(targetAlpha);
-            this->animation = nullptr;
-        });
+            duration, startAlpha, targetAlpha, InterpolatorFunction::EaseIn, [=](double alpha) { this->setAlpha(alpha); },
+            [=] {
+                this->setAlpha(targetAlpha);
+                this->animation = nullptr;
+            });
+    animation->start();
+    mapInterface->invalidate();
+}
+
+void Textured2dLayerObject::beginStyleAnimation(RasterShaderStyle start, RasterShaderStyle target, long long duration) {
+    assert(rasterShader != nullptr);
+    animation = std::make_shared<RasterStyleAnimation>(
+                                                  duration, start, target, InterpolatorFunction::EaseIn, [=](RasterShaderStyle style) { this->setStyle(style); },
+                                                  [=] {
+                                                      this->setStyle(target);
+                                                      this->animation = nullptr;
+                                                  });
     animation->start();
     mapInterface->invalidate();
 }

@@ -572,3 +572,12 @@ std::vector<float> Matrix::multiply(const std::vector<float> &M, const std::vect
 
     return result;
 }
+
+void Matrix::multiply(const std::vector<float> &M, const std::vector<float> &x, std::vector<float> &result) {
+    for (int i = 0; i < 4; i++) {
+        result[i] = 0.0;
+        for (int j = 0; j < 4; j++) {
+            result[i] += M[I(j, i)] * x[j];
+        }
+    }
+}

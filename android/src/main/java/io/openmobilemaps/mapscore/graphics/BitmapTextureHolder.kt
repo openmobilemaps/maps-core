@@ -16,19 +16,38 @@ import android.graphics.drawable.Drawable
 import android.opengl.GLES20
 import android.opengl.GLUtils
 import io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface
+import java.nio.IntBuffer
+import java.util.concurrent.locks.ReentrantLock
 
-class BitmapTextureHolder(bitmap: Bitmap) : TextureHolderInterface() {
+class BitmapTextureHolder(
+	bitmap: Bitmap,
+	private val minFilter: Int = GLES20.GL_LINEAR,
+	private val magFilter: Int = GLES20.GL_LINEAR,
+) : TextureHolderInterface() {
+
 	val bitmap: Bitmap
 	private var imageWidth = 0
 	private var imageHeight = 0
 	private var textureWidth = 0
 	private var textureHeight = 0
 
-	constructor(drawable: Drawable) : this(createBitmapFromDrawable(drawable)) {}
-	constructor(drawable: Drawable, targetWidth: Int, targetHeight: Int) : this(
-		createBitmapFromDrawable(drawable, targetWidth, targetHeight)
-	) {
-	}
+	private val dataMutex = ReentrantLock()
+	private var usageCounter = 0
+	private var texturePointer: IntArray = intArrayOf(0)
+
+	constructor(drawable: Drawable) : this(createBitmapFromDrawable(drawable))
+
+	constructor(
+		drawable: Drawable,
+		targetWidth: Int,
+		targetHeight: Int,
+	) : this(createBitmapFromDrawable(drawable, targetWidth, targetHeight))
+
+	constructor(
+		targetWidth: Int,
+		targetHeight: Int,
+		drawBlock: Canvas.() -> Unit,
+	) : this(drawBitmapOnCanvas(targetWidth, targetHeight, drawBlock))
 
 	override fun getImageWidth(): Int {
 		return imageWidth
@@ -46,8 +65,35 @@ class BitmapTextureHolder(bitmap: Bitmap) : TextureHolderInterface() {
 		return textureHeight
 	}
 
-	override fun attachToGraphics() {
-		GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0)
+	override fun attachToGraphics(): Int {
+		dataMutex.lock()
+		try {
+			if (usageCounter++ == 0) {
+				val texture = IntArray(1)
+				GLES20.glGenTextures(1, texture, 0)
+				GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture[0])
+				GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, minFilter)
+				GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, magFilter)
+				GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE)
+				GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE)
+				GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0)
+				texturePointer = texture
+			}
+		} finally {
+			dataMutex.unlock()
+		}
+		return texturePointer[0]
+	}
+
+	override fun clearFromGraphics() {
+		dataMutex.lock()
+		try {
+			if (--usageCounter == 0) {
+				GLES20.glDeleteTextures(1, IntBuffer.wrap(texturePointer))
+			}
+		} finally {
+			dataMutex.unlock()
+		}
 	}
 
 	companion object {
@@ -56,10 +102,16 @@ class BitmapTextureHolder(bitmap: Bitmap) : TextureHolderInterface() {
 		}
 
 		private fun createBitmapFromDrawable(drawable: Drawable, targetWidth: Int, targetHeight: Int): Bitmap {
+			return drawBitmapOnCanvas(targetWidth, targetHeight) {
+				drawable.setBounds(0, 0, width, height)
+				drawable.draw(this)
+			}
+		}
+
+		private fun drawBitmapOnCanvas(targetWidth: Int, targetHeight: Int, drawBlock: Canvas.() -> Unit): Bitmap {
 			val bitmap = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.ARGB_8888)
 			val canvas = Canvas(bitmap)
-			drawable.setBounds(0, 0, canvas.width, canvas.height)
-			drawable.draw(canvas)
+			canvas.drawBlock()
 			return bitmap
 		}
 	}

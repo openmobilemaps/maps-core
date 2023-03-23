@@ -79,7 +79,7 @@ std::string BaseShaderProgramOpenGl::getVertexShader() {
 }
 
 std::string BaseShaderProgramOpenGl::getFragmentShader() {
-    return UBRendererShaderCode(precision mediump float; uniform sampler2D u_texture; varying vec2 v_texcoord;
+    return UBRendererShaderCode(precision mediump float; uniform sampler2D texture; varying vec2 v_texcoord;
 
-                                void main() { gl_FragColor = texture2D(u_texture, v_texcoord); });
+                                void main() { gl_FragColor = texture2D(texture, v_texcoord); });
 }

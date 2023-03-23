@@ -31,6 +31,14 @@ bool NativeRenderObjectInterface::JavaProxy::hasCustomModelMatrix() {
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::Bool::toCpp(jniEnv, jret);
 }
+bool NativeRenderObjectInterface::JavaProxy::isScreenSpaceCoords() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeRenderObjectInterface>::get();
+    auto jret = jniEnv->CallBooleanMethod(Handle::get().get(), data.method_isScreenSpaceCoords);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni::Bool::toCpp(jniEnv, jret);
+}
 std::vector<float> NativeRenderObjectInterface::JavaProxy::getCustomModelMatrix() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -64,6 +72,16 @@ CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_Rend
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::RenderObjectInterface>(nativeRef);
         auto r = ref->hasCustomModelMatrix();
+        return ::djinni::release(::djinni::Bool::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderObjectInterface_00024CppProxy_native_1isScreenSpaceCoords(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::RenderObjectInterface>(nativeRef);
+        auto r = ref->isScreenSpaceCoords();
         return ::djinni::release(::djinni::Bool::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

@@ -10,6 +10,8 @@
 
 #include "WmtsTiled2dMapLayerConfig.h"
 
+#include "Tiled2dMapVectorSettings.h"
+
 WmtsTiled2dMapLayerConfig::WmtsTiled2dMapLayerConfig(const WmtsLayerDescription &description,
                                                      std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfo,
                                                      const Tiled2dMapZoomInfo &zoomInfo,
@@ -23,7 +25,7 @@ WmtsTiled2dMapLayerConfig::WmtsTiled2dMapLayerConfig(const WmtsLayerDescription 
 
 std::string WmtsTiled2dMapLayerConfig::getCoordinateSystemIdentifier() { return coordinateSystemIdentifier; }
 
-std::string WmtsTiled2dMapLayerConfig::getTileUrl(int32_t x, int32_t y, int32_t zoom) {
+std::string WmtsTiled2dMapLayerConfig::getTileUrl(int32_t x, int32_t y, int32_t t, int32_t zoom) {
     std::string urlFormat = description.resourceTemplate;
 
     if (auto it = urlFormat.find("{TileMatrix}"); it != std::string::npos) {
@@ -55,3 +57,7 @@ std::string WmtsTiled2dMapLayerConfig::getLayerName() { return description.ident
 std::vector<Tiled2dMapZoomLevelInfo> WmtsTiled2dMapLayerConfig::getZoomLevelInfos() { return zoomLevelInfo; }
 
 Tiled2dMapZoomInfo WmtsTiled2dMapLayerConfig::getZoomInfo() { return zoomInfo; }
+
+std::optional<Tiled2dMapVectorSettings> WmtsTiled2dMapLayerConfig::getVectorSettings() {
+    return std::nullopt;
+}

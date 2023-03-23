@@ -94,9 +94,13 @@ class MapCamera2d : public MapCamera2dInterface,
     virtual std::vector<float> getInvariantModelMatrix(const ::Coord &coordinate, bool scaleInvariant,
                                                        bool rotationInvariant) override;
 
+    virtual bool onTouchDown(const ::Vec2F &posScreen) override;
+
     virtual bool onMove(const ::Vec2F &deltaScreen, bool confirmed, bool doubleClick) override;
 
     virtual bool onMoveComplete() override;
+
+    virtual bool onTwoFingerClick(const ::Vec2F &posScreen1, const ::Vec2F &posScreen2) override;
 
     virtual bool onDoubleClick(const ::Vec2F &posScreen) override;
 

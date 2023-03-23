@@ -9,7 +9,7 @@ abstract class TextInterface {
 
     abstract fun setTexts(texts: ArrayList<TextDescription>)
 
-    abstract fun loadTexture(textureHolder: TextureHolderInterface)
+    abstract fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
 
     abstract fun removeTexture()
 
@@ -39,11 +39,11 @@ abstract class TextInterface {
         }
         private external fun native_setTexts(_nativeRef: Long, texts: ArrayList<TextDescription>)
 
-        override fun loadTexture(textureHolder: TextureHolderInterface) {
+        override fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_loadTexture(this.nativeRef, textureHolder)
+            native_loadTexture(this.nativeRef, context, textureHolder)
         }
-        private external fun native_loadTexture(_nativeRef: Long, textureHolder: TextureHolderInterface)
+        private external fun native_loadTexture(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
 
         override fun removeTexture() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

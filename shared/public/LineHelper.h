@@ -19,11 +19,18 @@ class LineHelper {
                             const Coord &point,
                             double pointSystemDistance,
                             const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper) {
+        return LineHelper::pointWithin(line->getCoordinates(), point, pointSystemDistance, conversionHelper);
+    }
+
+    static bool pointWithin(const std::vector<::Coord> &coordinates,
+                            const Coord &point,
+                            double pointSystemDistance,
+                            const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper) {
 
         auto pointInRenderSystem = conversionHelper->convertToRenderSystem(point);
 
         std::optional<Coord> lastPoint = std::nullopt;
-        for (auto const &coord: line->getCoordinates()) {
+        for (auto const &coord: coordinates) {
             auto linePointInRenderSystem = conversionHelper->convertToRenderSystem(coord);
 
             if (lastPoint.has_value()) {
@@ -37,6 +44,7 @@ class LineHelper {
         }
         return false;
     }
+
 
 private:
     static float distanceSquared(const Coord& pt, const Coord &p1, const Coord &p2)

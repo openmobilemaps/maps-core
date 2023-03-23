@@ -18,7 +18,8 @@
 
 - (nonnull NSArray<id<MCRenderPassInterface>> *)buildRenderPasses;
 
-- (void)onAdded:(nullable MCMapInterface *)mapInterface;
+- (void)onAdded:(nullable MCMapInterface *)mapInterface
+     layerIndex:(int32_t)layerIndex;
 
 - (void)onRemoved;
 
@@ -29,6 +30,10 @@
 - (void)hide;
 
 - (void)show;
+
+- (void)setAlpha:(float)alpha;
+
+- (float)getAlpha;
 
 /** optional rectangle, remove scissoring when not set */
 - (void)setScissorRect:(nullable MCRectI *)scissorRect;

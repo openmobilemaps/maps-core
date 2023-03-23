@@ -15,5 +15,7 @@ public:
 
     virtual bool hasCustomModelMatrix() = 0;
 
+    virtual bool isScreenSpaceCoords() = 0;
+
     virtual std::vector<float> getCustomModelMatrix() = 0;
 };

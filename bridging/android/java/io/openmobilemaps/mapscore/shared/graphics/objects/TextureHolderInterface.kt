@@ -13,5 +13,7 @@ abstract class TextureHolderInterface {
 
     abstract fun getTextureHeight(): Int
 
-    abstract fun attachToGraphics()
+    abstract fun attachToGraphics(): Int
+
+    abstract fun clearFromGraphics()
 }

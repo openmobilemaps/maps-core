@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Color.h"
 #include "Vec3D.h"
 #include <memory>
 
@@ -12,7 +13,9 @@ class TextShaderInterface {
 public:
     virtual ~TextShaderInterface() {}
 
-    virtual void setColor(float red, float green, float blue, float alpha) = 0;
+    virtual void setColor(const ::Color & color) = 0;
+
+    virtual void setHaloColor(const ::Color & color) = 0;
 
     virtual void setScale(float scale) = 0;
 

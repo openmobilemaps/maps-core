@@ -12,7 +12,7 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 
-class Polygon2d: BaseGraphicsObject {
+final class Polygon2d: BaseGraphicsObject {
     private var shader: MCShaderProgramInterface
 
     private var verticesBuffer: MTLBuffer?
@@ -33,10 +33,20 @@ class Polygon2d: BaseGraphicsObject {
                          mvpMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
+        
         guard let verticesBuffer = verticesBuffer,
               let indicesBuffer = indicesBuffer else { return }
 
+        #if DEBUG
         encoder.pushDebugGroup("Polygon2d")
+        defer {
+            encoder.popDebugGroup()
+        }
+        #endif
 
         if isMasked {
             if stencilState == nil {
@@ -46,7 +56,7 @@ class Polygon2d: BaseGraphicsObject {
             if maskInverse {
                 encoder.setStencilReferenceValue(0b0000_0000)
             } else {
-                encoder.setStencilReferenceValue(0b1000_0000)
+                encoder.setStencilReferenceValue(0b1100_0000)
             }
         }
 
@@ -64,7 +74,6 @@ class Polygon2d: BaseGraphicsObject {
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
 
-        encoder.popDebugGroup()
     }
 
     private func setupStencilStates() {
@@ -73,7 +82,7 @@ class Polygon2d: BaseGraphicsObject {
         ss2.stencilFailureOperation = .zero
         ss2.depthFailureOperation = .keep
         ss2.depthStencilPassOperation = .keep
-        ss2.readMask = 0b1111_1111
+        ss2.readMask = 0b1100_0000
         ss2.writeMask = 0b0000_0000
 
         let s2 = MTLDepthStencilDescriptor()
@@ -93,19 +102,25 @@ extension Polygon2d: MCMaskingObjectInterface {
               let context = context as? RenderingContext,
               let encoder = context.encoder else { return }
 
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
+
         guard let verticesBuffer = verticesBuffer,
               let indicesBuffer = indicesBuffer
         else { return }
 
-        encoder.pushDebugGroup("Polygon2d")
-
-        if stencilState == nil {
-            setupStencilStates()
+        #if DEBUG
+        encoder.pushDebugGroup("Polygon2dMask")
+        defer {
+            encoder.popDebugGroup()
         }
+        #endif
 
         if let mask = context.polygonMask {
+            encoder.setStencilReferenceValue(0xFF)
             encoder.setDepthStencilState(mask)
-            encoder.setStencilReferenceValue(0b1000_0000)
         }
 
         // stencil prepare pass
@@ -123,33 +138,29 @@ extension Polygon2d: MCMaskingObjectInterface {
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
 
-        encoder.popDebugGroup()
     }
 }
 
 extension Polygon2d: MCPolygon2dInterface {
-    func setVertices(_ vertices: [MCVec2D], indices: [NSNumber]) {
-        guard !vertices.isEmpty else {
-            indicesCount = 0
-            verticesBuffer = nil
-            indicesBuffer = nil
+    func setVertices(_ vertices: MCSharedBytes, indices: MCSharedBytes) {
+        guard let verticesBuffer = device.makeBuffer(from: vertices),
+              let indicesBuffer = device.makeBuffer(from: indices),
+              indices.elementCount > 0
+        else {
+            lock.withCritical {
+                indicesCount = 0
+                verticesBuffer = nil
+                indicesBuffer = nil
+            }
+
             return
         }
 
-        let polygonVertices: [Vertex] = vertices.map {
-            Vertex(x: $0.xF, y: $0.yF)
+        lock.withCritical {
+            self.indicesCount = Int(indices.elementCount)
+            self.verticesBuffer = verticesBuffer
+            self.indicesBuffer = indicesBuffer
         }
-        let indices: [UInt16] = indices.map(\.uint16Value)
-
-        guard let verticesBuffer = device.makeBuffer(bytes: polygonVertices, length: MemoryLayout<Vertex>.stride * polygonVertices.count, options: []),
-              let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: [])
-        else {
-            fatalError("Cannot allocate buffers for the UBTileModel")
-        }
-
-        indicesCount = indices.count
-        self.verticesBuffer = verticesBuffer
-        self.indicesBuffer = indicesBuffer
     }
 
     func asGraphicsObject() -> MCGraphicsObjectInterface? { self }

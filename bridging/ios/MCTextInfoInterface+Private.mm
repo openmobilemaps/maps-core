@@ -7,8 +7,11 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
+#import "MCAnchor+Private.h"
 #import "MCCoord+Private.h"
 #import "MCFont+Private.h"
+#import "MCFormattedStringEntry+Private.h"
+#import "MCTextJustify+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -33,10 +36,10 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (nonnull NSString *)getText {
+- (nonnull NSArray<MCFormattedStringEntry *> *)getText {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getText();
-        return ::djinni::String::fromCpp(objcpp_result_);
+        return ::djinni::List<::djinni_generated::FormattedStringEntry>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -54,6 +57,20 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (MCAnchor)getTextAnchor {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getTextAnchor();
+        return ::djinni::Enum<::Anchor, MCAnchor>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (MCTextJustify)getTextJustify {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getTextJustify();
+        return ::djinni::Enum<::TextJustify, MCTextJustify>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class TextInfoInterface::ObjcProxy final
@@ -63,11 +80,11 @@ class TextInfoInterface::ObjcProxy final
     friend class ::djinni_generated::TextInfoInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    std::string getText() override
+    std::vector<::FormattedStringEntry> getText() override
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getText];
-            return ::djinni::String::toCpp(objcpp_result_);
+            return ::djinni::List<::djinni_generated::FormattedStringEntry>::toCpp(objcpp_result_);
         }
     }
     ::Coord getCoordinate() override
@@ -82,6 +99,20 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getFont];
             return ::djinni_generated::Font::toCpp(objcpp_result_);
+        }
+    }
+    ::Anchor getTextAnchor() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getTextAnchor];
+            return ::djinni::Enum<::Anchor, MCAnchor>::toCpp(objcpp_result_);
+        }
+    }
+    ::TextJustify getTextJustify() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getTextJustify];
+            return ::djinni::Enum<::TextJustify, MCTextJustify>::toCpp(objcpp_result_);
         }
     }
 };

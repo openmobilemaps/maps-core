@@ -10,6 +10,7 @@
 
 #include "LineGroup2dOpenGl.h"
 #include <cmath>
+#include <string>
 
 LineGroup2dOpenGl::LineGroup2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
     : shaderProgram(shader) {}
@@ -18,136 +19,20 @@ std::shared_ptr<GraphicsObjectInterface> LineGroup2dOpenGl::asGraphicsObject() {
 
 bool LineGroup2dOpenGl::isReady() { return ready; }
 
-void LineGroup2dOpenGl::setLines(const std::vector<RenderLineDescription> &lines) {
-    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+
+void LineGroup2dOpenGl::setLines(const ::SharedBytes & lines, const ::SharedBytes & indices) {
     ready = false;
     dataReady = false;
 
-    lineIndices.clear();
-    lineAttributes.clear();
-
-    int numLines = (int)lines.size();
-    int lineIndexOffset = 0;
-    for (int lineIndex = 0; lineIndex < numLines; lineIndex++) {
-        int lineStyleIndex = lines[lineIndex].styleIndex;
-        int pointCount = (int)lines[lineIndex].positions.size();
-
-        float prefixTotalLineLength = 0.0;
-
-        int iSecondToLast = pointCount - 2;
-        for (int i = 0; i <= iSecondToLast; i++) {
-            const Vec2D &p = lines[lineIndex].positions[i];
-            const Vec2D &pNext = lines[lineIndex].positions[i + 1];
-
-            float lengthNormalX = pNext.x - p.x;
-            float lengthNormalY = pNext.y - p.y;
-            float lineLength = std::sqrt(lengthNormalX * lengthNormalX + lengthNormalY * lengthNormalY);
-            lengthNormalX = lengthNormalX / lineLength;
-            lengthNormalY = lengthNormalY / lineLength;
-            float widthNormalX = -lengthNormalY;
-            float widthNormalY = lengthNormalX;
-
-            // SegmentType (0 inner, 1 start, 2 end, 3 single segment) | lineStyleIndex
-            // (each one Byte, i.e. up to 256 styles if supported by shader!)
-            float lineStyleInfo =
-                lineStyleIndex + (i == 0 && i == iSecondToLast
-                                      ? (3 << 8)
-                                      : (i == 0 ? (float)(1 << 8) : (i == iSecondToLast ? (float)(2 << 8) : 0.0)));
-
-            // Vertex 1
-            // Position
-            lineAttributes.push_back(p.x);
-            lineAttributes.push_back(p.y);
-
-            // Width normal
-            lineAttributes.push_back(-widthNormalX);
-            lineAttributes.push_back(-widthNormalY);
-
-            // Length normal
-            lineAttributes.push_back(-lengthNormalX);
-            lineAttributes.push_back(-lengthNormalY);
-
-            // Position pointA and pointB
-            lineAttributes.push_back(p.x);
-            lineAttributes.push_back(p.y);
-            lineAttributes.push_back(pNext.x);
-            lineAttributes.push_back(pNext.y);
-
-            // Segment Start Length Position (length prefix sum)
-            lineAttributes.push_back(prefixTotalLineLength);
-
-            // Style Info
-            lineAttributes.push_back(lineStyleInfo);
-
-            // Vertex 2
-            lineAttributes.push_back(p.x);
-            lineAttributes.push_back(p.y);
-
-            lineAttributes.push_back(widthNormalX);
-            lineAttributes.push_back(widthNormalY);
-
-            lineAttributes.push_back(-lengthNormalX);
-            lineAttributes.push_back(-lengthNormalY);
-
-            lineAttributes.push_back(p.x);
-            lineAttributes.push_back(p.y);
-            lineAttributes.push_back(pNext.x);
-            lineAttributes.push_back(pNext.y);
-
-            lineAttributes.push_back(prefixTotalLineLength);
-
-            lineAttributes.push_back(lineStyleInfo);
-
-            // Vertex 3
-            lineAttributes.push_back(pNext.x);
-            lineAttributes.push_back(pNext.y);
-
-            lineAttributes.push_back(widthNormalX);
-            lineAttributes.push_back(widthNormalY);
-
-            lineAttributes.push_back(lengthNormalX);
-            lineAttributes.push_back(lengthNormalY);
-
-            lineAttributes.push_back(p.x);
-            lineAttributes.push_back(p.y);
-            lineAttributes.push_back(pNext.x);
-            lineAttributes.push_back(pNext.y);
-            lineAttributes.push_back(prefixTotalLineLength);
-
-            lineAttributes.push_back(lineStyleInfo);
-
-            // Vertex 4
-            lineAttributes.push_back(pNext.x);
-            lineAttributes.push_back(pNext.y);
-
-            lineAttributes.push_back(-widthNormalX);
-            lineAttributes.push_back(-widthNormalY);
-
-            lineAttributes.push_back(lengthNormalX);
-            lineAttributes.push_back(lengthNormalY);
-
-            lineAttributes.push_back(p.x);
-            lineAttributes.push_back(p.y);
-            lineAttributes.push_back(pNext.x);
-            lineAttributes.push_back(pNext.y);
-
-            lineAttributes.push_back(prefixTotalLineLength);
-
-            lineAttributes.push_back(lineStyleInfo);
-
-            // Vertex indices
-            lineIndices.push_back(lineIndexOffset + 4 * i);
-            lineIndices.push_back(lineIndexOffset + 4 * i + 1);
-            lineIndices.push_back(lineIndexOffset + 4 * i + 2);
-
-            lineIndices.push_back(lineIndexOffset + 4 * i);
-            lineIndices.push_back(lineIndexOffset + 4 * i + 2);
-            lineIndices.push_back(lineIndexOffset + 4 * i + 3);
-
-            prefixTotalLineLength += lineLength;
-        }
-        lineIndexOffset += ((pointCount - 1) * 4);
+    lineIndices.resize(indices.elementCount);
+    lineAttributes.resize(lines.elementCount);
+    if (indices.elementCount > 0) {
+        std::memcpy(lineIndices.data(), (void *) indices.address, indices.elementCount * indices.bytesPerElement);
     }
+    if (lines.elementCount > 0) {
+        std::memcpy(lineAttributes.data(), (void *) lines.address, lines.elementCount * lines.bytesPerElement);
+    }
+
     dataReady = true;
 }
 
@@ -171,6 +56,7 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
     pointBHandle = glGetAttribLocation(program, "vPointB");
     segmentStartLPosHandle = glGetAttribLocation(program, "vSegmentStartLPos");
     styleInfoHandle = glGetAttribLocation(program, "vStyleInfo");
+
     glGenBuffers(1, &vertexAttribBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexAttribBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * lineAttributes.size(), &lineAttributes[0], GL_STATIC_DRAW);
@@ -178,7 +64,7 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
 
     glGenBuffers(1, &indexBuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * lineIndices.size(), &lineIndices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * lineIndices.size(), &lineIndices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     mvpMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
@@ -189,7 +75,13 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
 
 void LineGroup2dOpenGl::clear() {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    ready = false;
+    if (ready) {
+        removeGlBuffers();
+        ready = false;
+    }
+}
+
+void LineGroup2dOpenGl::removeGlBuffers() {
     glDeleteBuffers(1, &vertexAttribBuffer);
     glDeleteBuffers(1, &indexBuffer);
 }
@@ -201,6 +93,7 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
 
     if (!ready)
         return;
+
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     if (isMasked) {
         if (isMaskInversed) {
@@ -254,7 +147,8 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
 
     // Draw the triangle
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-    glDrawElements(GL_TRIANGLES, lineIndices.size(), GL_UNSIGNED_SHORT, nullptr);
+    glDrawElements(GL_TRIANGLES, lineIndices.size(), GL_UNSIGNED_INT, nullptr);
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     // Disable vertex array
@@ -267,5 +161,7 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     glDisableVertexAttribArray(styleInfoHandle);
 
     glDisable(GL_BLEND);
-    glDisable(GL_STENCIL_TEST);
+    if (!isMasked) {
+        glDisable(GL_STENCIL_TEST);
+    }
 }

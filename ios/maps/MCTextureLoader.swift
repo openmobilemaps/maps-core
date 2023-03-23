@@ -24,9 +24,13 @@ public class DataHolder: MCDataHolderInterface {
 }
 
 open class MCTextureLoader: MCLoaderInterface {
+
     private let session: URLSession
 
-    public init(urlSession: URLSession? = nil) {
+    public var isRasterDebugModeEnabled: Bool
+
+    public init(urlSession: URLSession? = nil)
+    {
         if let urlSession = urlSession {
             session = urlSession
         } else {
@@ -35,6 +39,8 @@ open class MCTextureLoader: MCLoaderInterface {
             sessionConfig.networkServiceType = .responsiveData
             session = .init(configuration: sessionConfig)
         }
+
+        isRasterDebugModeEnabled = UserDefaults.standard.bool(forKey: "io.openmobilemaps.debug.rastertiles.enabled")
     }
 
     open func loadTexture(_ url: String, etag: String?) -> MCTextureLoaderResult {
@@ -52,6 +58,12 @@ open class MCTextureLoader: MCLoaderInterface {
         var urlRequest = URLRequest(url: url)
 
         modifyUrlRequest(request: &urlRequest)
+
+        var wasCached = false;
+        if isRasterDebugModeEnabled,
+           session.configuration.urlCache?.cachedResponse(for: urlRequest) != nil {
+            wasCached = true
+        }
 
         var task = session.dataTask(with: urlRequest) { data, response_, error_ in
             result = data
@@ -82,6 +94,18 @@ open class MCTextureLoader: MCLoaderInterface {
         }
 
         do {
+            if isRasterDebugModeEnabled,
+                let uiImage = UIImage(data: data) {
+                let renderer = UIGraphicsImageRenderer(size: uiImage.size)
+                let img = renderer.image { ctx in
+                    self.applyDebugWatermark(url: urlString, byteCount: data.count, image: uiImage, wasCached: wasCached, ctx: ctx)
+                }
+                if let cgImage = img.cgImage,
+                      let textureHolder = try? TextureHolder(cgImage) {
+                    return .init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil)
+                }
+            }
+
             let textureHolder = try TextureHolder(data)
             return .init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil)
         } catch TextureHolderError.emptyData {
@@ -94,8 +118,12 @@ open class MCTextureLoader: MCLoaderInterface {
             }
 
             let renderer = UIGraphicsImageRenderer(size: uiImage.size)
-            let img = renderer.image { _ in
-                uiImage.draw(in: .init(origin: .init(), size: uiImage.size))
+            let img = renderer.image { ctx in
+                if isRasterDebugModeEnabled {
+                    self.applyDebugWatermark(url: urlString, byteCount: data.count, image: uiImage, wasCached: wasCached, ctx: ctx)
+                } else {
+                    uiImage.draw(in: .init(origin: .init(), size: uiImage.size))
+                }
             }
 
             guard let cgImage = img.cgImage,
@@ -158,6 +186,33 @@ open class MCTextureLoader: MCLoaderInterface {
     }
 
     open func modifyDataTask(task _: inout URLSessionDataTask) {
+    }
+
+    func applyDebugWatermark(url: String, byteCount: Int, image: UIImage, wasCached: Bool , ctx: UIGraphicsRendererContext) {
+        let size = image.size
+
+        image.draw(in: .init(origin: .init(), size: size))
+
+        guard isRasterDebugModeEnabled else { return }
+
+        ctx.cgContext.setFillColor(gray: 0.1, alpha: 0.2)
+        ctx.fill( .init(origin: .init(), size: size), blendMode: .normal)
+
+        ctx.cgContext.setStrokeColor(UIColor.black.cgColor)
+        ctx.cgContext.setLineWidth(5.0)
+        ctx.cgContext.stroke(.init(origin: .init(), size: size).inset(by: .init()))
+
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.alignment = .center
+
+        let attrs: [NSAttributedString.Key : Any] = [NSAttributedString.Key.paragraphStyle: paragraphStyle,
+                                                     NSAttributedString.Key.backgroundColor: wasCached ? UIColor.lightGray.cgColor : UIColor.white.cgColor]
+
+        let byteCountString = ByteCountFormatter().string(fromByteCount: Int64(byteCount))
+        let loadedString = wasCached ? "Loaded from Cache" : "Loaded from www"
+
+        let string = url + "\n" + loadedString + " at: " + ISO8601DateFormatter().string(from: .init()) + "\nSize: " + byteCountString
+        string.draw(with: .init(origin: .init(x: 0, y: 25), size: size).inset(by: .init(top: 5, left: 5, bottom: 5, right: 5)), options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
     }
 }
 

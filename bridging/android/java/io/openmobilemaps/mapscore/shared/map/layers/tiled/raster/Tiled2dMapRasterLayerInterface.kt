@@ -15,9 +15,13 @@ abstract class Tiled2dMapRasterLayerInterface {
 
     abstract fun removeCallbackHandler()
 
-    abstract fun setAlpha(alpha: Double)
+    abstract fun setAlpha(alpha: Float)
 
-    abstract fun getAlpha(): Double
+    abstract fun getAlpha(): Float
+
+    abstract fun setStyle(style: io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderStyle)
+
+    abstract fun getStyle(): io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderStyle
 
     abstract fun setMinZoomLevelIdentifier(value: Int?)
 
@@ -27,15 +31,27 @@ abstract class Tiled2dMapRasterLayerInterface {
 
     abstract fun getMaxZoomLevelIdentifier(): Int?
 
+    abstract fun setT(t: Int)
+
+    abstract fun getConfig(): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig
+
     companion object {
+        /** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
         @JvmStatic
-        fun createWithMask(layerConfig: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, loader: io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface, mask: io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface): Tiled2dMapRasterLayerInterface {
-            return CppProxy.createWithMask(layerConfig, loader, mask)
+        fun createWithMask(layerConfig: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, mask: io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface): Tiled2dMapRasterLayerInterface {
+            return CppProxy.createWithMask(layerConfig, loaders, mask)
         }
 
+        /** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
         @JvmStatic
-        fun create(layerConfig: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, loader: io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface): Tiled2dMapRasterLayerInterface {
-            return CppProxy.create(layerConfig, loader)
+        fun createWithShader(layerConfig: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Tiled2dMapRasterLayerInterface {
+            return CppProxy.createWithShader(layerConfig, loaders, shader)
+        }
+
+        /** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
+        @JvmStatic
+        fun create(layerConfig: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>): Tiled2dMapRasterLayerInterface {
+            return CppProxy.create(layerConfig, loaders)
         }
     }
 
@@ -81,17 +97,29 @@ abstract class Tiled2dMapRasterLayerInterface {
         }
         private external fun native_removeCallbackHandler(_nativeRef: Long)
 
-        override fun setAlpha(alpha: Double) {
+        override fun setAlpha(alpha: Float) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_setAlpha(this.nativeRef, alpha)
         }
-        private external fun native_setAlpha(_nativeRef: Long, alpha: Double)
+        private external fun native_setAlpha(_nativeRef: Long, alpha: Float)
 
-        override fun getAlpha(): Double {
+        override fun getAlpha(): Float {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_getAlpha(this.nativeRef)
         }
-        private external fun native_getAlpha(_nativeRef: Long): Double
+        private external fun native_getAlpha(_nativeRef: Long): Float
+
+        override fun setStyle(style: io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderStyle) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setStyle(this.nativeRef, style)
+        }
+        private external fun native_setStyle(_nativeRef: Long, style: io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderStyle)
+
+        override fun getStyle(): io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderStyle {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getStyle(this.nativeRef)
+        }
+        private external fun native_getStyle(_nativeRef: Long): io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderStyle
 
         override fun setMinZoomLevelIdentifier(value: Int?) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
@@ -117,12 +145,27 @@ abstract class Tiled2dMapRasterLayerInterface {
         }
         private external fun native_getMaxZoomLevelIdentifier(_nativeRef: Long): Int?
 
+        override fun setT(t: Int) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setT(this.nativeRef, t)
+        }
+        private external fun native_setT(_nativeRef: Long, t: Int)
+
+        override fun getConfig(): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getConfig(this.nativeRef)
+        }
+        private external fun native_getConfig(_nativeRef: Long): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig
+
         companion object {
             @JvmStatic
-            external fun createWithMask(layerConfig: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, loader: io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface, mask: io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface): Tiled2dMapRasterLayerInterface
+            external fun createWithMask(layerConfig: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, mask: io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface): Tiled2dMapRasterLayerInterface
 
             @JvmStatic
-            external fun create(layerConfig: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, loader: io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface): Tiled2dMapRasterLayerInterface
+            external fun createWithShader(layerConfig: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Tiled2dMapRasterLayerInterface
+
+            @JvmStatic
+            external fun create(layerConfig: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>): Tiled2dMapRasterLayerInterface
         }
     }
 }

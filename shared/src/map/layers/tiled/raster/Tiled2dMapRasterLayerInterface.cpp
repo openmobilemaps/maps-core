@@ -13,13 +13,20 @@
 
 std::shared_ptr<Tiled2dMapRasterLayerInterface>
 Tiled2dMapRasterLayerInterface::create(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
-                                       const std::shared_ptr<::LoaderInterface> &tileLoader) {
-    return std::make_shared<Tiled2dMapRasterLayer>(layerConfig, tileLoader);
+                                        const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders) {
+    return std::make_shared<Tiled2dMapRasterLayer>(layerConfig, tileLoaders);
 }
 
 std::shared_ptr<Tiled2dMapRasterLayerInterface>
 Tiled2dMapRasterLayerInterface::createWithMask(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
-                                               const std::shared_ptr<::LoaderInterface> &tileLoader,
+                                               const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
                                                const std::shared_ptr<::MaskingObjectInterface> &mask) {
-    return std::make_shared<Tiled2dMapRasterLayer>(layerConfig, tileLoader, mask);
+    return std::make_shared<Tiled2dMapRasterLayer>(layerConfig, tileLoaders, mask);
+}
+
+std::shared_ptr<Tiled2dMapRasterLayerInterface>
+Tiled2dMapRasterLayerInterface::createWithShader(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
+                                                 const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
+                                               const std::shared_ptr<::ShaderProgramInterface> &shader) {
+    return std::make_shared<Tiled2dMapRasterLayer>(layerConfig, tileLoaders, shader);
 }

@@ -12,9 +12,11 @@ package io.openmobilemaps.mapscore.graphics
 
 import android.graphics.SurfaceTexture
 import android.opengl.EGL14
+import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.opengl.GLUtils
 import android.util.Log
+import io.openmobilemaps.mapscore.BuildConfig
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.microedition.khronos.egl.*
@@ -104,6 +106,13 @@ class GLThread constructor(
 			val renderStart = System.nanoTime()
 
 			renderer.onDrawFrame(gl10)
+			if (BuildConfig.DEBUG) {
+				GLES20.glGetError().let {
+					if (it != GLES20.GL_NO_ERROR) {
+						Log.e(TAG, "OpenGL Render Error: $it")
+					}
+				}
+			}
 
 			if (surface != null) {
 				if (egl?.eglSwapBuffers(eglDisplay, eglSurface) != true) {

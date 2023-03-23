@@ -11,4 +11,5 @@ typedef NS_ENUM(NSInteger, MCLoaderStatus)
     MCLoaderStatusERROR_TIMEOUT,
     MCLoaderStatusERROR_NETWORK,
     MCLoaderStatusERROR_OTHER,
+    MCLoaderStatusNOOP,
 };

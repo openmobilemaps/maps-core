@@ -23,13 +23,15 @@ class WmtsTiled2dMapLayerConfig : public Tiled2dMapLayerConfig {
 
     virtual std::string getCoordinateSystemIdentifier() override;
 
-    virtual std::string getTileUrl(int32_t x, int32_t y, int32_t zoom) override;
+    virtual std::string getTileUrl(int32_t x, int32_t y, int32_t t, int32_t zoom) override;
 
     virtual std::string getLayerName() override;
 
     virtual std::vector<Tiled2dMapZoomLevelInfo> getZoomLevelInfos() override;
 
     virtual Tiled2dMapZoomInfo getZoomInfo() override;
+
+    virtual std::optional<Tiled2dMapVectorSettings> getVectorSettings() override;
 
   private:
     const WmtsLayerDescription description;

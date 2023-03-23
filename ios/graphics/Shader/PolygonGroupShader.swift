@@ -13,25 +13,16 @@ import MapCoreSharedModule
 import Metal
 import UIKit
 
-struct PolygonStyle: Equatable {
-    var color: SIMD4<Float>
-    var opacity: Float
-
-    init(style: MCPolygonStyle) {
-        color = SIMD4<Float>(style.color.simdValues)
-        opacity = style.opacity
-    }
-}
-
 class PolygonGroupShader: BaseShader {
     private var polygonStyleBuffer: MTLBuffer
 
     static let styleBufferSize: Int = 32
+    static let polygonStyleSize : Int = 5
 
     private var pipeline: MTLRenderPipelineState?
 
     override init() {
-        guard let buffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<PolygonStyle>.stride * Self.styleBufferSize, options: []) else { fatalError("Could not create buffer") }
+        guard let buffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<Float>.stride * Self.styleBufferSize * Self.polygonStyleSize, options: []) else { fatalError("Could not create buffer") }
         polygonStyleBuffer = buffer
     }
 
@@ -52,12 +43,10 @@ class PolygonGroupShader: BaseShader {
 }
 
 extension PolygonGroupShader: MCPolygonGroupShaderInterface {
-    func setStyles(_ styles: [MCPolygonStyle]) {
-        guard styles.count < Self.styleBufferSize else { fatalError("line style error exceeds buffer size") }
+    func setStyles(_ styles: MCSharedBytes) {
+        guard styles.elementCount < Self.styleBufferSize else { fatalError("polygon style error exceeds buffer size") }
 
-        let mappedPolygonStyles = styles.map(PolygonStyle.init(style:))
-
-        polygonStyleBuffer.contents().copyMemory(from: mappedPolygonStyles, byteCount: mappedPolygonStyles.count * MemoryLayout<PolygonStyle>.stride)
+        polygonStyleBuffer.copyMemory(from: styles)
     }
 
     func asShaderProgram() -> MCShaderProgramInterface? {

@@ -9,12 +9,14 @@
            tileWidthLayerSystemUnits:(float)tileWidthLayerSystemUnits
                            numTilesX:(int32_t)numTilesX
                            numTilesY:(int32_t)numTilesY
+                           numTilesT:(int32_t)numTilesT
                  zoomLevelIdentifier:(int32_t)zoomLevelIdentifier
                               bounds:(nonnull MCRectCoord *)bounds;
 + (nonnull instancetype)tiled2dMapZoomLevelInfoWithZoom:(double)zoom
                               tileWidthLayerSystemUnits:(float)tileWidthLayerSystemUnits
                                               numTilesX:(int32_t)numTilesX
                                               numTilesY:(int32_t)numTilesY
+                                              numTilesT:(int32_t)numTilesT
                                     zoomLevelIdentifier:(int32_t)zoomLevelIdentifier
                                                  bounds:(nonnull MCRectCoord *)bounds;
 
@@ -25,6 +27,8 @@
 @property (nonatomic, readonly) int32_t numTilesX;
 
 @property (nonatomic, readonly) int32_t numTilesY;
+
+@property (nonatomic, readonly) int32_t numTilesT;
 
 @property (nonatomic, readonly) int32_t zoomLevelIdentifier;
 

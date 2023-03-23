@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "RenderingContextInterface.h"
 #include <memory>
 #include <vector>
 
@@ -16,7 +17,7 @@ public:
 
     virtual void setTexts(const std::vector<TextDescription> & texts) = 0;
 
-    virtual void loadTexture(const std::shared_ptr<TextureHolderInterface> & textureHolder) = 0;
+    virtual void loadTexture(const std::shared_ptr<::RenderingContextInterface> & context, const std::shared_ptr<TextureHolderInterface> & textureHolder) = 0;
 
     virtual void removeTexture() = 0;
 

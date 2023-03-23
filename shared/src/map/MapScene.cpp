@@ -101,12 +101,13 @@ std::vector<std::shared_ptr<LayerInterface>> MapScene::getLayers() {
 
 void MapScene::addLayer(const std::shared_ptr<::LayerInterface> &layer) {
     removeLayer(layer);
-    layer->onAdded(shared_from_this());
     std::lock_guard<std::recursive_mutex> lock(layersMutex);
     int topIndex = -1;
     if (!layers.empty())
         topIndex = layers.rbegin()->first;
-    layers[topIndex + 1] = layer;
+    int atIndex = topIndex + 1;
+    layers[atIndex] = layer;
+    layer->onAdded(shared_from_this(), atIndex);
 }
 
 void MapScene::insertLayerAt(const std::shared_ptr<LayerInterface> &layer, int32_t atIndex) {
@@ -117,7 +118,7 @@ void MapScene::insertLayerAt(const std::shared_ptr<LayerInterface> &layer, int32
         }
     }
     removeLayer(layer);
-    layer->onAdded(shared_from_this());
+    layer->onAdded(shared_from_this(), atIndex);
     std::lock_guard<std::recursive_mutex> lock(layersMutex);
     if (layers.count(atIndex) > 0) {
         layers[atIndex]->onRemoved();
@@ -127,46 +128,53 @@ void MapScene::insertLayerAt(const std::shared_ptr<LayerInterface> &layer, int32
 
 void MapScene::insertLayerAbove(const std::shared_ptr<LayerInterface> &layer, const std::shared_ptr<LayerInterface> &above) {
     removeLayer(layer);
-    layer->onAdded(shared_from_this());
-    std::lock_guard<std::recursive_mutex> lock(layersMutex);
-    int targetIndex = -1;
-    for (const auto &[i, l] : layers) {
-        if (l == above) {
-            targetIndex = i;
-            break;
+    int atIndex;
+    {
+        std::lock_guard<std::recursive_mutex> lock(layersMutex);
+        int targetIndex = -1;
+        for (const auto &[i, l]: layers) {
+            if (l == above) {
+                targetIndex = i;
+                break;
+            }
         }
+        if (targetIndex < 0) {
+            throw std::invalid_argument("MapScene does not contain above layer");
+        }
+        std::map<int, std::shared_ptr<LayerInterface>> newLayers;
+        for (auto iter = layers.rbegin(); iter != layers.rend(); iter++) {
+            newLayers[iter->first > targetIndex ? iter->first + 1 : iter->first] = iter->second;
+        }
+        atIndex = targetIndex + 1;
+        newLayers[atIndex] = layer;
+        layers = newLayers;
     }
-    if (targetIndex < 0) {
-        throw std::invalid_argument("MapScene does not contain above layer");
-    }
-    std::map<int, std::shared_ptr<LayerInterface>> newLayers;
-    for (auto iter = layers.rbegin(); iter != layers.rend(); iter++) {
-        newLayers[iter->first > targetIndex ? iter->first + 1 : iter->first] = iter->second;
-    }
-    newLayers[targetIndex + 1] = layer;
-    layers = newLayers;
+    layer->onAdded(shared_from_this(), atIndex);
 };
 
 void MapScene::insertLayerBelow(const std::shared_ptr<LayerInterface> &layer, const std::shared_ptr<LayerInterface> &below) {
     removeLayer(layer);
-    layer->onAdded(shared_from_this());
-    std::lock_guard<std::recursive_mutex> lock(layersMutex);
-    int targetIndex = -1;
-    for (const auto &[i, l] : layers) {
-        if (l == below) {
-            targetIndex = i;
-            break;
+    int atIndex;
+    {
+        std::lock_guard<std::recursive_mutex> lock(layersMutex);
+        int targetIndex = -1;
+        for (const auto &[i, l]: layers) {
+            if (l == below) {
+                targetIndex = i;
+                break;
+            }
         }
+        if (targetIndex < 0) {
+            throw std::invalid_argument("MapScene does not contain below layer");
+        }
+        std::map<int, std::shared_ptr<LayerInterface>> newLayers;
+        for (auto iter = layers.rbegin(); iter != layers.rend(); iter++) {
+            newLayers[iter->first >= targetIndex ? iter->first + 1 : iter->first] = iter->second;
+        }
+        newLayers[targetIndex] = layer;
+        layers = newLayers;
     }
-    if (targetIndex < 0) {
-        throw std::invalid_argument("MapScene does not contain below layer");
-    }
-    std::map<int, std::shared_ptr<LayerInterface>> newLayers;
-    for (auto iter = layers.rbegin(); iter != layers.rend(); iter++) {
-        newLayers[iter->first >= targetIndex ? iter->first + 1 : iter->first] = iter->second;
-    }
-    newLayers[targetIndex] = layer;
-    layers = newLayers;
+    layer->onAdded(shared_from_this(), atIndex);
 };
 
 void MapScene::removeLayer(const std::shared_ptr<::LayerInterface> &layer) {

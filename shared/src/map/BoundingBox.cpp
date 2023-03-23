@@ -13,11 +13,27 @@
 #include "CoordinateConversionHelperInterface.h"
 #include "CoordinateSystemIdentifiers.h"
 
+std::shared_ptr<BoundingBoxInterface> BoundingBoxInterface::create(const std::string & systemIdentifier) {
+    return std::make_shared<BoundingBox>(systemIdentifier);
+}
+
+BoundingBox::BoundingBox()
+    : systemIdentifier(CoordinateSystemIdentifiers::RENDERSYSTEM())
+    , min(systemIdentifier, std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max())
+    , max(systemIdentifier, std::numeric_limits<float>::min(), std::numeric_limits<float>::min(),
+      std::numeric_limits<float>::min()) {}
+
 BoundingBox::BoundingBox(const std::string &systemIdentifier)
     : systemIdentifier(systemIdentifier)
     , min(systemIdentifier, std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max())
     , max(systemIdentifier, std::numeric_limits<float>::min(), std::numeric_limits<float>::min(),
           std::numeric_limits<float>::min()) {}
+
+
+BoundingBox::BoundingBox(const Coord& p):
+    systemIdentifier(p.systemIdentifier),
+    min(p),
+    max(p) {}
 
 void BoundingBox::addPoint(const Coord &p) {
     auto const &conv = CoordinateConversionHelperInterface::independentInstance()->convert(systemIdentifier, p);
@@ -51,4 +67,20 @@ RectCoord BoundingBox::asRectCoord() {
     auto maxCoord = Coord(systemIdentifier, max.x, max.y, max.z);
 
     return RectCoord(minCoord, maxCoord);
+}
+
+Coord BoundingBox::getCenter() {
+    return center();
+}
+
+Coord BoundingBox::getMin() {
+    return min;
+}
+
+Coord BoundingBox::getMax() {
+    return min;
+}
+
+std::string BoundingBox::getSystemIdentifier() {
+    return systemIdentifier;
 }

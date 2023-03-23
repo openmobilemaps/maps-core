@@ -13,7 +13,7 @@ abstract class LayerInterface {
 
     abstract fun buildRenderPasses(): ArrayList<io.openmobilemaps.mapscore.shared.graphics.RenderPassInterface>
 
-    abstract fun onAdded(mapInterface: MapInterface)
+    abstract fun onAdded(mapInterface: MapInterface, layerIndex: Int)
 
     abstract fun onRemoved()
 
@@ -24,6 +24,10 @@ abstract class LayerInterface {
     abstract fun hide()
 
     abstract fun show()
+
+    abstract fun setAlpha(alpha: Float)
+
+    abstract fun getAlpha(): Float
 
     /** optional rectangle, remove scissoring when not set */
     abstract fun setScissorRect(scissorRect: io.openmobilemaps.mapscore.shared.graphics.common.RectI?)
@@ -72,11 +76,11 @@ abstract class LayerInterface {
         }
         private external fun native_buildRenderPasses(_nativeRef: Long): ArrayList<io.openmobilemaps.mapscore.shared.graphics.RenderPassInterface>
 
-        override fun onAdded(mapInterface: MapInterface) {
+        override fun onAdded(mapInterface: MapInterface, layerIndex: Int) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_onAdded(this.nativeRef, mapInterface)
+            native_onAdded(this.nativeRef, mapInterface, layerIndex)
         }
-        private external fun native_onAdded(_nativeRef: Long, mapInterface: MapInterface)
+        private external fun native_onAdded(_nativeRef: Long, mapInterface: MapInterface, layerIndex: Int)
 
         override fun onRemoved() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
@@ -107,6 +111,18 @@ abstract class LayerInterface {
             native_show(this.nativeRef)
         }
         private external fun native_show(_nativeRef: Long)
+
+        override fun setAlpha(alpha: Float) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setAlpha(this.nativeRef, alpha)
+        }
+        private external fun native_setAlpha(_nativeRef: Long, alpha: Float)
+
+        override fun getAlpha(): Float {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getAlpha(this.nativeRef)
+        }
+        private external fun native_getAlpha(_nativeRef: Long): Float
 
         override fun setScissorRect(scissorRect: io.openmobilemaps.mapscore.shared.graphics.common.RectI?) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

@@ -6,10 +6,13 @@
 #include "LayerInterface.h"
 #include "LoaderInterface.h"
 #include "MaskingObjectInterface.h"
+#include "RasterShaderStyle.h"
+#include "ShaderProgramInterface.h"
 #include "Tiled2dMapLayerConfig.h"
 #include <cstdint>
 #include <memory>
 #include <optional>
+#include <vector>
 
 class Tiled2dMapRasterLayerCallbackInterface;
 
@@ -17,9 +20,14 @@ class Tiled2dMapRasterLayerInterface {
 public:
     virtual ~Tiled2dMapRasterLayerInterface() {}
 
-    static std::shared_ptr<Tiled2dMapRasterLayerInterface> createWithMask(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::shared_ptr<::LoaderInterface> & loader, const std::shared_ptr<::MaskingObjectInterface> & mask);
+    /** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
+    static std::shared_ptr<Tiled2dMapRasterLayerInterface> createWithMask(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::vector<std::shared_ptr<::LoaderInterface>> & loaders, const std::shared_ptr<::MaskingObjectInterface> & mask);
 
-    static std::shared_ptr<Tiled2dMapRasterLayerInterface> create(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::shared_ptr<::LoaderInterface> & loader);
+    /** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
+    static std::shared_ptr<Tiled2dMapRasterLayerInterface> createWithShader(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::vector<std::shared_ptr<::LoaderInterface>> & loaders, const std::shared_ptr<::ShaderProgramInterface> & shader);
+
+    /** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
+    static std::shared_ptr<Tiled2dMapRasterLayerInterface> create(const std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::vector<std::shared_ptr<::LoaderInterface>> & loaders);
 
     virtual std::shared_ptr<::LayerInterface> asLayerInterface() = 0;
 
@@ -29,9 +37,13 @@ public:
 
     virtual void removeCallbackHandler() = 0;
 
-    virtual void setAlpha(double alpha) = 0;
+    virtual void setAlpha(float alpha) = 0;
 
-    virtual double getAlpha() = 0;
+    virtual float getAlpha() = 0;
+
+    virtual void setStyle(const ::RasterShaderStyle & style) = 0;
+
+    virtual ::RasterShaderStyle getStyle() = 0;
 
     virtual void setMinZoomLevelIdentifier(std::optional<int32_t> value) = 0;
 
@@ -40,4 +52,8 @@ public:
     virtual void setMaxZoomLevelIdentifier(std::optional<int32_t> value) = 0;
 
     virtual std::optional<int32_t> getMaxZoomLevelIdentifier() = 0;
+
+    virtual void setT(int32_t t) = 0;
+
+    virtual std::shared_ptr<::Tiled2dMapLayerConfig> getConfig() = 0;
 };

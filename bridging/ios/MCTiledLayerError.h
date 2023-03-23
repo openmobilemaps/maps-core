@@ -11,13 +11,13 @@
                              layerName:(nonnull NSString *)layerName
                                    url:(nonnull NSString *)url
                          isRecoverable:(BOOL)isRecoverable
-                                bounds:(nonnull MCRectCoord *)bounds;
+                                bounds:(nullable MCRectCoord *)bounds;
 + (nonnull instancetype)tiledLayerErrorWithStatus:(MCLoaderStatus)status
                                         errorCode:(nullable NSString *)errorCode
                                         layerName:(nonnull NSString *)layerName
                                               url:(nonnull NSString *)url
                                     isRecoverable:(BOOL)isRecoverable
-                                           bounds:(nonnull MCRectCoord *)bounds;
+                                           bounds:(nullable MCRectCoord *)bounds;
 
 @property (nonatomic, readonly) MCLoaderStatus status;
 
@@ -29,6 +29,6 @@
 
 @property (nonatomic, readonly) BOOL isRecoverable;
 
-@property (nonatomic, readonly, nonnull) MCRectCoord * bounds;
+@property (nonatomic, readonly, nullable) MCRectCoord * bounds;
 
 @end

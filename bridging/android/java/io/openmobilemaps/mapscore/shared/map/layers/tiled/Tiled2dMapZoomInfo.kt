@@ -7,4 +7,7 @@ data class Tiled2dMapZoomInfo(
     var zoomLevelScaleFactor: Float,
     var numDrawPreviousLayers: Int,
     var adaptScaleToScreen: Boolean,
+    var maskTile: Boolean,
+    var underzoom: Boolean,
+    var overzoom: Boolean,
 )

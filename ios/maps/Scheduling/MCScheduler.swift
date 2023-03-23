@@ -20,9 +20,9 @@ private class WeakOperation {
 }
 
 open class MCScheduler: MCSchedulerInterface {
-    private let ioQueue = OperationQueue(concurrentOperations: 20, qos: .userInteractive)
+    private let ioQueue = OperationQueue(concurrentOperations: 64, qos: .userInteractive)
 
-    private let computationQueue = OperationQueue(concurrentOperations: 4, qos: .userInteractive)
+    private let computationQueue = OperationQueue(concurrentOperations: 20, qos: .userInteractive)
 
     private let graphicsQueue = OperationQueue.main
 
@@ -41,8 +41,12 @@ open class MCScheduler: MCSchedulerInterface {
         guard let task = task else { return }
 
         let config = task.getConfig()
-
         let delay = TimeInterval(Double(config.delay) / 1000.0)
+
+        if config.executionEnvironment == .GRAPHICS && delay == 0.0 {
+            task.run()
+            return
+        }
 
         internalSchedulerQueue.asyncAfter(deadline: .now() + delay) { [weak self] in
             guard let self = self else { return }

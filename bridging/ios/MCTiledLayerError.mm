@@ -11,7 +11,7 @@
                              layerName:(nonnull NSString *)layerName
                                    url:(nonnull NSString *)url
                          isRecoverable:(BOOL)isRecoverable
-                                bounds:(nonnull MCRectCoord *)bounds
+                                bounds:(nullable MCRectCoord *)bounds
 {
     if (self = [super init]) {
         _status = status;
@@ -29,7 +29,7 @@
                                         layerName:(nonnull NSString *)layerName
                                               url:(nonnull NSString *)url
                                     isRecoverable:(BOOL)isRecoverable
-                                           bounds:(nonnull MCRectCoord *)bounds
+                                           bounds:(nullable MCRectCoord *)bounds
 {
     return [(MCTiledLayerError*)[self alloc] initWithStatus:status
                                                   errorCode:errorCode

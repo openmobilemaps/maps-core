@@ -22,6 +22,12 @@ open class BaseGraphicsObject {
     var maskInverse = false
     var ready = false
 
+    var isReadyFlag = false
+
+    // this lock is locked in the rendering cycle when accessing properties of graphics object
+    // therefore it has to be held for the shortest time possible
+    public let lock = OSLock()
+
     public init(device: MTLDevice, sampler: MTLSamplerState) {
         self.device = device
         self.sampler = sampler

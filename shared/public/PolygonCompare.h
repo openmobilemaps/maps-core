@@ -12,6 +12,7 @@
 
 #include "PolygonInfo.h"
 #include "Coord.h"
+#include "HashedTuple.h"
 #include <cmath>
 #include <limits>
 
@@ -33,3 +34,29 @@ template <> struct equal_to<PolygonInfo> {
     }
 };
 }; // namespace std
+
+
+namespace std {
+template <> struct hash<std::vector<::PolygonCoord>> {
+    inline size_t operator()(const std::vector<::PolygonCoord> &polygons) const {
+        size_t hash = 0;
+        for(auto const polygon: polygons) {
+            for(auto const pos: polygon.positions) {
+                std::hash_combine(hash, std::hash<double>{}(pos.x));
+                std::hash_combine(hash, std::hash<double>{}(pos.y));
+                std::hash_combine(hash, std::hash<double>{}(pos.z));
+            }
+            std::hash_combine(hash, std::hash<double>{}(0));
+            for(auto const hole: polygon.holes) {
+                for(auto const pos: hole) {
+                    std::hash_combine(hash, std::hash<double>{}(pos.x));
+                    std::hash_combine(hash, std::hash<double>{}(pos.y));
+                    std::hash_combine(hash, std::hash<double>{}(pos.z));
+                }
+            }
+            std::hash_combine(hash, std::hash<double>{}(0));
+        }
+        return hash;
+    }
+};
+} // namespace std

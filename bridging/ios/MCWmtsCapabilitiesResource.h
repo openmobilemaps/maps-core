@@ -15,16 +15,32 @@
 + (nullable MCWmtsCapabilitiesResource *)create:(nonnull NSString *)xml;
 
 - (nullable MCTiled2dMapRasterLayerInterface *)createLayer:(nonnull NSString *)identifier
-                                                tileLoader:(nullable id<MCLoaderInterface>)tileLoader;
+                                               tileLoaders:(nonnull NSArray<id<MCLoaderInterface>> *)tileLoaders;
+
+- (nullable MCTiled2dMapRasterLayerInterface *)createLayerTimed:(nonnull NSString *)identifier
+                                                    tileLoaders:(nonnull NSArray<id<MCLoaderInterface>> *)tileLoaders
+                                                           numT:(int32_t)numT;
 
 - (nullable MCTiled2dMapRasterLayerInterface *)createLayerWithZoomInfo:(nonnull NSString *)identifier
-                                                            tileLoader:(nullable id<MCLoaderInterface>)tileLoader
+                                                           tileLoaders:(nonnull NSArray<id<MCLoaderInterface>> *)tileLoaders
                                                               zoomInfo:(nonnull MCTiled2dMapZoomInfo *)zoomInfo;
+
+- (nullable MCTiled2dMapRasterLayerInterface *)createLayerWithZoomInfoTimed:(nonnull NSString *)identifier
+                                                                tileLoaders:(nonnull NSArray<id<MCLoaderInterface>> *)tileLoaders
+                                                                   zoomInfo:(nonnull MCTiled2dMapZoomInfo *)zoomInfo
+                                                                       numT:(int32_t)numT;
 
 - (nullable id<MCTiled2dMapLayerConfig>)createLayerConfig:(nonnull NSString *)identifier;
 
+- (nullable id<MCTiled2dMapLayerConfig>)createLayerConfigTimed:(nonnull NSString *)identifier
+                                                          numT:(int32_t)numT;
+
 - (nullable id<MCTiled2dMapLayerConfig>)createLayerConfigWithZoomInfo:(nonnull NSString *)identifier
                                                              zoomInfo:(nonnull MCTiled2dMapZoomInfo *)zoomInfo;
+
+- (nullable id<MCTiled2dMapLayerConfig>)createLayerConfigWithZoomInfoTimed:(nonnull NSString *)identifier
+                                                                  zoomInfo:(nonnull MCTiled2dMapZoomInfo *)zoomInfo
+                                                                      numT:(int32_t)numT;
 
 - (nonnull NSArray<MCWmtsLayerDescription *> *)getAllLayers;
 
