@@ -181,8 +181,7 @@ public:
                                                                                   renderPassIndex);
                     layers.push_back(layerDesc);
 
-                    // exclude landcover_pt for now
-                } else if (val["type"] == "symbol" && val["id"] != "landcover_pt") {
+                } else if (val["type"] == "symbol") {
 
                     SymbolVectorStyle style(parser.parseValue(val["layout"]["text-size"]),
                                             parser.parseValue(val["paint"]["text-color"]),

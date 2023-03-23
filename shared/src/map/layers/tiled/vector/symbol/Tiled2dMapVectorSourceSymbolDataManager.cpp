@@ -706,7 +706,10 @@ void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
             std::vector<std::shared_ptr< ::RenderObjectInterface>> renderObjects;
             for (const auto &wrapper: objects) {
                 if (!wrapper->collides) {
-                    renderObjects.push_back(std::make_shared<RenderObject>(wrapper->textObject->getTextObject()->asGraphicsObject(), wrapper->modelMatrix));
+                    const auto & textObject = wrapper->textObject->getTextObject();
+                    if (textObject) {
+                        renderObjects.push_back(std::make_shared<RenderObject>(textObject->asGraphicsObject(), wrapper->modelMatrix));
+                    }
 
                     if (wrapper->symbolGraphicsObject) {
                         renderObjects.push_back(std::make_shared<RenderObject>(wrapper->symbolGraphicsObject, wrapper->iconModelMatrix));

@@ -249,6 +249,7 @@ void TextLayerObject::layoutPoint(float scale) {
 
         if (text) {
             text->setTexts({TextDescription(glyphs)});
+            //TODO: we have to setup the textObject for android at some point after calling setTexts
         }
     }
 
@@ -394,6 +395,7 @@ float TextLayerObject::layoutLine(float scale) {
 
         if (text) {
             text->setTexts({TextDescription(glyphs)});
+            //TODO: we have to setup the textObject for android at some point after calling setTexts
         }
     }
 
