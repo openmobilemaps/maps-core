@@ -129,6 +129,14 @@ public:
         Tiled2dMapVectorStyleParser parser;
 
         for (auto&[key, val]: json["layers"].items()) {
+			if (!val["source-layer"].is_string() && !(val["type"] == "raster" || val["type"] == "background") ) {
+                // layers without a source-layer are currently not supported
+                continue;
+            }
+            if (val["layout"].is_object() && val["layout"]["visibility"] == "none") {
+                continue;
+            }
+
             std::optional<int32_t> renderPassIndex;
             std::shared_ptr<Value> interactable;
             if (val["metadata"].is_object()) {
