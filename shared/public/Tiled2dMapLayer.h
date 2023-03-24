@@ -26,6 +26,7 @@ class Tiled2dMapLayer : public SimpleLayerInterface,
     Tiled2dMapLayer();
 
     void setSourceInterface(const WeakActor<Tiled2dMapSourceInterface> &sourceInterface);
+    void setHeightMapSourceInterface(const WeakActor<Tiled2dMapSourceInterface> &sourceInterface);
 
     virtual void update() override = 0;
 
@@ -71,6 +72,7 @@ protected:
     std::shared_ptr<MapInterface> mapInterface;
     std::shared_ptr< ::ErrorManager> errorManager;
     WeakActor<Tiled2dMapSourceInterface> sourceInterface;
+    WeakActor<Tiled2dMapSourceInterface> heightMapSourceInterface;
 
     bool isHidden = false;
 

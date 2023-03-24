@@ -22,6 +22,7 @@ final class Polygon3d: BaseGraphicsObject {
     private var stencilState: MTLDepthStencilState?
 
     private var texture: MTLTexture?
+    private var heightTexture: MTLTexture?
     
     private let timeBuffer: MTLBuffer
     private var timeBufferContent : UnsafeMutablePointer<Float>
@@ -98,9 +99,11 @@ final class Polygon3d: BaseGraphicsObject {
         encoder.setFragmentSamplerState(sampler, index: 0)
         encoder.setVertexSamplerState(sampler, index: 0)
 
-        if let texture = texture {
+        if let texture {
             encoder.setFragmentTexture(texture, index: 0)
-            encoder.setVertexTexture(texture, index: 0)
+        }
+        if let heightTexture {
+            encoder.setVertexTexture(heightTexture, index: 0)
         }
 
         timeBufferContent[0] = Float(-Self.renderStartTime.timeIntervalSinceNow)
@@ -215,7 +218,7 @@ extension Polygon3d: MCMaskingObjectInterface {
         encoder.setFragmentSamplerState(sampler, index: 0)
         encoder.setVertexSamplerState(sampler, index: 0)
 
-        encoder.drawIndexedPatches(numberOfPatchControlPoints: 3, patchStart: 0, patchCount: 2, patchIndexBuffer: nil, patchIndexBufferOffset: 0, controlPointIndexBuffer: indicesBuffer, controlPointIndexBufferOffset: 0, instanceCount: 1, baseInstance: 0)
+        encoder.drawIndexedPatches(numberOfPatchControlPoints: 3, patchStart: 0, patchCount: self.indicesCount / 3, patchIndexBuffer: nil, patchIndexBufferOffset: 0, controlPointIndexBuffer: indicesBuffer, controlPointIndexBufferOffset: 0, instanceCount: 1, baseInstance: 0)
 
     }
 }
@@ -253,6 +256,13 @@ extension Polygon3d: MCPolygon3dInterface {
             fatalError("unexpected TextureHolder")
         }
         texture = textureHolder.texture
+    }
+
+    func loadHeightTexture(_ context: MCRenderingContextInterface?, textureHolder: MCTextureHolderInterface?) {
+        guard let textureHolder = textureHolder as? TextureHolder else {
+            fatalError("unexpected TextureHolder")
+        }
+        heightTexture = textureHolder.texture
     }
 
     func removeTexture() {}

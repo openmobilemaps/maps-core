@@ -21,6 +21,7 @@ final class Quad3d: BaseGraphicsObject {
     private var indicesCount: Int = 0
 
     private var texture: MTLTexture?
+    private var heightTexture: MTLTexture?
 
     private var shader: MCShaderProgramInterface
 
@@ -131,9 +132,11 @@ final class Quad3d: BaseGraphicsObject {
         encoder.setFragmentSamplerState(sampler, index: 0)
         encoder.setVertexSamplerState(sampler, index: 0)
 
-        if let texture = texture {
+        if let texture {
             encoder.setFragmentTexture(texture, index: 0)
-            encoder.setVertexTexture(texture, index: 0)
+        }
+        if let heightTexture {
+            encoder.setVertexTexture(heightTexture, index: 0)
         }
 
         timeBufferContent[0] = Float(-Self.renderStartTime.timeIntervalSinceNow)
@@ -142,7 +145,7 @@ final class Quad3d: BaseGraphicsObject {
 
         encoder.setTessellationFactorBuffer(tessellationFactorBuffer, offset: 0, instanceStride: 0)
 
-        encoder.drawIndexedPatches(numberOfPatchControlPoints: 3, patchStart: 0, patchCount: 2, patchIndexBuffer: nil, patchIndexBufferOffset: 0, controlPointIndexBuffer: indicesBuffer, controlPointIndexBufferOffset: 0, instanceCount: 1, baseInstance: 0)
+        encoder.drawIndexedPatches(numberOfPatchControlPoints: 3, patchStart: 0, patchCount: self.indicesCount / 3, patchIndexBuffer: nil, patchIndexBufferOffset: 0, controlPointIndexBuffer: indicesBuffer, controlPointIndexBufferOffset: 0, instanceCount: 1, baseInstance: 0)
 
     }
 }
@@ -241,6 +244,14 @@ extension Quad3d: MCQuad3dInterface {
             fatalError("unexpected TextureHolder")
         }
         texture = textureHolder.texture
+
+    }
+
+    func loadHeightTexture(_ context: MCRenderingContextInterface?, textureHolder: MCTextureHolderInterface?) {
+        guard let textureHolder = textureHolder as? TextureHolder else {
+            fatalError("unexpected TextureHolder")
+        }
+        heightTexture = textureHolder.texture
 
     }
 

@@ -67,6 +67,14 @@ void Tiled2dMapVectorSource::cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIn
     }
 }
 
+LoaderStatus Tiled2dMapVectorSource::getLoaderStatus(const IntermediateResult &loaderResult) {
+    return loaderResult.status;
+}
+
+std::optional<std::string> Tiled2dMapVectorSource::getErrorCode(const IntermediateResult &loaderResult) {
+    return loaderResult.errorCode;
+}
+
 FinalResult Tiled2dMapVectorSource::postLoadingTask(const IntermediateResult &loadedData, const Tiled2dMapTileInfo &tile) {
     FinalResult resultMap;
 

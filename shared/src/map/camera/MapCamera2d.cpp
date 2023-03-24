@@ -340,11 +340,10 @@ std::vector<float> MapCamera2d::getVpMatrix() {
     double zoomFactor = screenPixelAsRealMeterFactor * currentZoom;
     RectCoord viewBounds = getRectFromViewport(sizeViewport, centerPosition);
 
+
     Coord renderCoordCenter = conversionHelper->convert(CoordinateSystemIdentifiers::EPSG3857(), centerPosition);
 
 
-    float px = renderCoordCenter.x;
-    float py = renderCoordCenter.y;
     float R = 6371000;
     float lambda = focusPointPosition.x; //  px / R;
     float phi = focusPointPosition.y; // 2*atan(exp(py / R)) - 3.1415926 / 2;
@@ -366,7 +365,7 @@ std::vector<float> MapCamera2d::getVpMatrix() {
     Matrix::perspectiveM(newVpMatrix, 0, fov, vpr, 0.0001, 10.0);
 
 
-    cameraPitch = 70;
+    cameraPitch = 0 * 70;
     focusPointAltitude = 0.0;
 
 //    Matrix::translateM(newVpMatrix, 0, 0, -cameraDistance * sin(cameraPitch / 180 * M_PI), -cameraDistance * cos(cameraPitch / 180 * M_PI));

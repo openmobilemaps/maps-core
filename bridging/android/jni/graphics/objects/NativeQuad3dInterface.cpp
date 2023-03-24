@@ -37,6 +37,15 @@ void NativeQuad3dInterface::JavaProxy::loadTexture(const /*not-null*/ std::share
                            ::djinni::get(::djinni_generated::NativeTextureHolderInterface::fromCpp(jniEnv, c_textureHolder)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
+void NativeQuad3dInterface::JavaProxy::loadHeightTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & c_textureHolder) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeQuad3dInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_loadHeightTexture,
+                           ::djinni::get(::djinni_generated::NativeRenderingContextInterface::fromCpp(jniEnv, c_context)),
+                           ::djinni::get(::djinni_generated::NativeTextureHolderInterface::fromCpp(jniEnv, c_textureHolder)));
+    ::djinni::jniExceptionCheck(jniEnv);
+}
 void NativeQuad3dInterface::JavaProxy::removeTexture() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -83,6 +92,15 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_
         const auto& ref = ::djinni::objectFromHandleAddress<::Quad3dInterface>(nativeRef);
         ref->loadTexture(::djinni_generated::NativeRenderingContextInterface::toCpp(jniEnv, j_context),
                          ::djinni_generated::NativeTextureHolderInterface::toCpp(jniEnv, j_textureHolder));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_Quad3dInterface_00024CppProxy_native_1loadHeightTexture(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderingContextInterface::JniType j_context, jobject j_textureHolder)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Quad3dInterface>(nativeRef);
+        ref->loadHeightTexture(::djinni_generated::NativeRenderingContextInterface::toCpp(jniEnv, j_context),
+                               ::djinni_generated::NativeTextureHolderInterface::toCpp(jniEnv, j_textureHolder));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

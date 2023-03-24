@@ -61,6 +61,11 @@ public:
     virtual void resume() override;
 
     virtual void notifyTilesUpdates() override;
+
+    LoaderStatus getLoaderStatus(const IntermediateResult &loaderResult) override;
+
+    std::optional<std::string> getErrorCode(const IntermediateResult &loaderResult) override;
+
 protected:
     
     virtual void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) override;

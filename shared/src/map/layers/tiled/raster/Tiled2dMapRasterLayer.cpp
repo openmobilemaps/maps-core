@@ -23,23 +23,26 @@
 
 Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
-                                             bool registerToTouchHandler)
+                                             bool registerToTouchHandler,
+                                             const std::shared_ptr<::Tiled2dMapLayerConfig> &heightLayerConfig)
         : Tiled2dMapLayer(), layerConfig(layerConfig), tileLoaders(tileLoaders), alpha(1.0),
-          registerToTouchHandler(registerToTouchHandler) {}
+          registerToTouchHandler(registerToTouchHandler), heightLayerConfig(heightLayerConfig) {}
 
 Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &tileLoaders,
                                              const std::shared_ptr<::MaskingObjectInterface> &mask,
-                                             bool registerToTouchHandler)
+                                             bool registerToTouchHandler,
+                                             const std::shared_ptr<::Tiled2dMapLayerConfig> &heightLayerConfig)
         : Tiled2dMapLayer(), layerConfig(layerConfig), tileLoaders(tileLoaders), alpha(1.0), mask(mask),
-          registerToTouchHandler(registerToTouchHandler) {}
+          registerToTouchHandler(registerToTouchHandler), heightLayerConfig(heightLayerConfig) {}
 
 Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &tileLoaders,
                                              const std::shared_ptr<::ShaderProgramInterface> &shader,
-                                             bool registerToTouchHandler)
+                                             bool registerToTouchHandler,
+                                             const std::shared_ptr<::Tiled2dMapLayerConfig> &heightLayerConfig)
         : Tiled2dMapLayer(), layerConfig(layerConfig), tileLoaders(tileLoaders), alpha(1.0), shader(shader),
-          registerToTouchHandler(registerToTouchHandler) {}
+          registerToTouchHandler(registerToTouchHandler), heightLayerConfig(heightLayerConfig) {}
 
 void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface, int32_t layerIndex) {
     
@@ -49,15 +52,19 @@ void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapIn
     auto selfActor = WeakActor<Tiled2dMapRasterLayer>(selfMailbox, castedMe);
     
     auto mailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
-    rasterSource.emplaceObject(mailbox, mapInterface->getMapConfig(), layerConfig, mapInterface->getCoordinateConverterHelper(), mapInterface->getScheduler(), tileLoaders, selfActor, mapInterface->getCamera()->getScreenDensityPpi());
+    rasterSource.emplaceObject(mailbox, mapInterface->getMapConfig(), layerConfig, mapInterface->getCoordinateConverterHelper(), mapInterface->getScheduler(), tileLoaders, selfActor, mapInterface->getCamera()->getScreenDensityPpi(), heightLayerConfig);
 
     setSourceInterface(rasterSource.weakActor<Tiled2dMapSourceInterface>());
-    
+
+
     Tiled2dMapLayer::onAdded(mapInterface, layerIndex);
 
     if (registerToTouchHandler) {
         mapInterface->getTouchHandler()->insertListener(std::dynamic_pointer_cast<TouchInterface>(shared_from_this()), layerIndex);
     }
+
+
+
 }
 
 void Tiled2dMapRasterLayer::onRemoved() {
@@ -125,6 +132,9 @@ void Tiled2dMapRasterLayer::resume() {
             tileObject.second->getGraphicsObject()->setup(renderingContext);
             auto rectangle = tileObject.second->getQuadObject();
             rectangle->loadTexture(renderingContext, tileObject.first.textureHolder);
+            if (tileObject.first.heightTextureHolder) {
+                rectangle->loadHeightTexture(renderingContext, tileObject.first.textureHolder);
+            }
         }
     }
     for (const auto &tileMask : tileMaskMap) {
@@ -142,6 +152,7 @@ void Tiled2dMapRasterLayer::setT(int32_t t) {
 bool Tiled2dMapRasterLayer::shouldLoadTile(const Tiled2dMapTileInfo& tileInfo){
     return abs(tileInfo.t - curT) < 10;
 }
+
 
 void Tiled2dMapRasterLayer::onTilesUpdated(std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) {
     auto lockSelfPtr = std::static_pointer_cast<Tiled2dMapRasterLayer>(shared_from_this());
@@ -306,6 +317,9 @@ void Tiled2dMapRasterLayer::setupTiles(
 
             if (tileInfo.textureHolder) {
                 tileObject->getQuadObject()->loadTexture(renderingContext, tileInfo.textureHolder);
+            }
+            if (tileInfo.heightTextureHolder) {
+                tileObject->getQuadObject()->loadHeightTexture(renderingContext, tileInfo.heightTextureHolder);
             }
             // the texture holder can be empty, some tileserver serve 0 byte textures
             tilesReady.push_back(tileInfo.tileInfo);

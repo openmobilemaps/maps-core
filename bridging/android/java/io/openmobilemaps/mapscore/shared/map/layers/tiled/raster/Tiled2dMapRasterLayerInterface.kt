@@ -17,6 +17,9 @@ abstract class Tiled2dMapRasterLayerInterface {
 
         @JvmStatic
         external fun create(layerConfig: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>): Tiled2dMapRasterLayerInterface
+
+        @JvmStatic
+        external fun createWithHeightMap(layerConfig: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, heightMapConfig: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig?): Tiled2dMapRasterLayerInterface
     }
 
     abstract fun asLayerInterface(): io.openmobilemaps.mapscore.shared.map.LayerInterface

@@ -60,7 +60,7 @@ sphereProjectionVertexShader(const patch_control_point<VertexIn> patch [[stage_i
   // latitude, [0, pi] statt [-90, 90]
   float phi = atan(sinh(py / R)) + 3.1415926 / 2.0;
 
-  float radius = 1.0 + (height / R) * 0.0;
+  float radius = 1.0 + (height / R) * 1.0;
 
   float4 pos3d = float4(radius*sin(phi)*cos(lambda+time*0.0),
                            radius*cos(-phi),
@@ -117,7 +117,7 @@ sphereColorVertexShader(const patch_control_point<VertexIn> patch [[stage_in]],
   // latitude, [0, pi] statt [-90, 90]
   float phi = atan(sinh(py / R)) + 3.1415926 / 2.0;
 
-  float radius = 1.0 + (height / R) * 0.0;
+  float radius = 1.0 + (height / R) * 1.0;
 
   float4 pos3d = float4(radius*sin(phi)*cos(lambda+time*0.0),
                         radius*cos(-phi),

@@ -36,17 +36,20 @@ class Tiled2dMapRasterLayer : public Tiled2dMapLayer,
 public:
     Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                           const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
-                          bool registerToTouchHandler = true);
+                          bool registerToTouchHandler = true,
+                          const std::shared_ptr<::Tiled2dMapLayerConfig> &heightLayerConfig = nullptr);
 
     Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                           const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
                           const std::shared_ptr<::MaskingObjectInterface> &mask,
-                          bool registerToTouchHandler = true);
+                          bool registerToTouchHandler = true,
+                          const std::shared_ptr<::Tiled2dMapLayerConfig> &heightLayerConfig = nullptr);
 
     Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                           const std::vector<std::shared_ptr<::LoaderInterface>> &tileLoader,
                           const std::shared_ptr<::ShaderProgramInterface> &shader,
-                          bool registerToTouchHandler = true);
+                          bool registerToTouchHandler = true,
+                          const std::shared_ptr<::Tiled2dMapLayerConfig> &heightLayerConfig = nullptr);
 
     virtual void onAdded(const std::shared_ptr<::MapInterface> &mapInterface, int32_t layerIndex) override;
 
@@ -111,6 +114,7 @@ private:
 
 protected:
     const std::shared_ptr<Tiled2dMapLayerConfig> layerConfig;
+    const std::shared_ptr<Tiled2dMapLayerConfig> heightLayerConfig;
 
     std::optional<::RectI> scissorRect = std::nullopt;
     std::shared_ptr<::MaskingObjectInterface> mask;

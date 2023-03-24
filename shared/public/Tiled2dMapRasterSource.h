@@ -19,7 +19,11 @@
 class Tiled2dMapRasterLayer;
 
 class Tiled2dMapRasterSource
-    : public Tiled2dMapSource<TextureHolderInterface, TextureLoaderResult, std::shared_ptr<::TextureHolderInterface>> {
+    : public Tiled2dMapSource<
+TextureHolderInterface,
+std::pair<TextureLoaderResult, std::optional<TextureLoaderResult>>,
+std::pair<std::shared_ptr<::TextureHolderInterface>, std::shared_ptr<::TextureHolderInterface>>
+> {
   public:
     Tiled2dMapRasterSource(const MapConfig &mapConfig,
                            const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
@@ -27,18 +31,22 @@ class Tiled2dMapRasterSource
                            const std::shared_ptr<SchedulerInterface> &scheduler,
                            const std::vector<std::shared_ptr<::LoaderInterface>> & loaders,
                            const WeakActor<Tiled2dMapRasterLayer> &listener,
-                           float screenDensityPpi);
+                           float screenDensityPpi,
+                           const std::shared_ptr<Tiled2dMapLayerConfig> &heightLayerConfig);
 
     std::unordered_set<Tiled2dMapRasterTileInfo> getCurrentTiles();
 
     virtual void notifyTilesUpdates() override;
+
+    LoaderStatus getLoaderStatus(const std::pair<TextureLoaderResult, std::optional<TextureLoaderResult>> &loaderResult) override;
+    std::optional<std::string> getErrorCode(const std::pair<TextureLoaderResult, std::optional<TextureLoaderResult>> &loaderResult) override;
         
   protected:
     virtual void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
         
-    virtual ::djinni::Future<TextureLoaderResult> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
+    virtual ::djinni::Future<std::pair<TextureLoaderResult, std::optional<TextureLoaderResult>>> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
 
-    virtual std::shared_ptr<::TextureHolderInterface> postLoadingTask(const TextureLoaderResult &loadedData,
+    virtual std::pair<std::shared_ptr<::TextureHolderInterface>, std::shared_ptr<::TextureHolderInterface>> postLoadingTask(const std::pair<TextureLoaderResult, std::optional<TextureLoaderResult>> &loadedData,
                                                                       const Tiled2dMapTileInfo &tile) override;
 
 
@@ -46,4 +54,6 @@ class Tiled2dMapRasterSource
     const std::vector<std::shared_ptr<::LoaderInterface>> loaders;
         
     const WeakActor<Tiled2dMapRasterLayer> rasterLayerActor;
+
+    const std::shared_ptr<Tiled2dMapLayerConfig> heightLayerConfig;
 };

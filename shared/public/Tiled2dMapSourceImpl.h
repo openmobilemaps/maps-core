@@ -342,7 +342,8 @@ void Tiled2dMapSource<T, L, R>::didLoad(Tiled2dMapTileInfo tile, size_t loaderIn
 
     auto errorManager = this->errorManager;
 
-    LoaderStatus status = loaderResult.status;
+    LoaderStatus status = getLoaderStatus(loaderResult);
+    std::optional<std::string> code = getErrorCode(loaderResult);
     
     switch (status) {
         case LoaderStatus::OK: {
@@ -384,7 +385,7 @@ void Tiled2dMapSource<T, L, R>::didLoad(Tiled2dMapTileInfo tile, size_t loaderIn
 
             if (errorManager) {
                 errorManager->addTiledLayerError(TiledLayerError(status,
-                                                                 loaderResult.errorCode,
+                                                                 code,
                                                                  layerConfig->getLayerName(),
                                                                  layerConfig->getTileUrl(tile.x, tile.y, tile.t,tile.zoomIdentifier),
                                                                  false,
@@ -408,7 +409,7 @@ void Tiled2dMapSource<T, L, R>::didLoad(Tiled2dMapTileInfo tile, size_t loaderIn
             
             if (errorManager) {
                 errorManager->addTiledLayerError(TiledLayerError(status,
-                                                                 loaderResult.errorCode,
+                                                                 code,
                                                                  layerConfig->getLayerName(),
                                                                  layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier),
                                                                  true,

@@ -130,12 +130,12 @@ extension MCMapView: MTKViewDelegate {
             return // don't execute metal calls in background
         }
 
-//        guard framesToRender != 0 else {
-//            isPaused = true
-//            return
-//        }
+        guard framesToRender != 0 else {
+            isPaused = true
+            return
+        }
 
-//        framesToRender -= 1
+        framesToRender -= 1
 
         guard let commandBuffer = MetalContext.current.commandQueue.makeCommandBuffer()
         else {

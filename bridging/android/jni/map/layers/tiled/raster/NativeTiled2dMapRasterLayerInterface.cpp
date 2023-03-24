@@ -53,6 +53,16 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_til
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_createWithHeightMap(JNIEnv* jniEnv, jobject /*this*/, ::djinni_generated::NativeTiled2dMapLayerConfig::JniType j_layerConfig, jobject j_loaders, ::djinni_generated::NativeTiled2dMapLayerConfig::Boxed::JniType j_heightMapConfig)
+{
+    try {
+        auto r = ::Tiled2dMapRasterLayerInterface::createWithHeightMap(::djinni_generated::NativeTiled2dMapLayerConfig::toCpp(jniEnv, j_layerConfig),
+                                                                       ::djinni::List<::djinni_generated::NativeLoaderInterface>::toCpp(jniEnv, j_loaders),
+                                                                       ::djinni::Optional<std::optional, ::djinni_generated::NativeTiled2dMapLayerConfig>::toCpp(jniEnv, j_heightMapConfig));
+        return ::djinni::release(::djinni_generated::NativeTiled2dMapRasterLayerInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 CJNIEXPORT ::djinni_generated::NativeLayerInterface::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_native_1asLayerInterface(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {

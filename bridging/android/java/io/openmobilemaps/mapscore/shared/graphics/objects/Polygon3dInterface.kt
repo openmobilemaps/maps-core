@@ -12,6 +12,8 @@ abstract class Polygon3dInterface {
 
     abstract fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
 
+    abstract fun loadHeightTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
+
     abstract fun removeTexture()
 
     abstract fun asGraphicsObject(): GraphicsObjectInterface
@@ -41,6 +43,12 @@ abstract class Polygon3dInterface {
             native_loadTexture(this.nativeRef, context, textureHolder)
         }
         private external fun native_loadTexture(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
+
+        override fun loadHeightTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_loadHeightTexture(this.nativeRef, context, textureHolder)
+        }
+        private external fun native_loadHeightTexture(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
 
         override fun removeTexture() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

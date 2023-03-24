@@ -33,6 +33,7 @@
 #include "gpc.h"
 #include "Actor.h"
 #include "Future.hpp"
+#include "LoaderStatus.h"
 
 template<class R>
 struct TileWrapper {
@@ -102,6 +103,9 @@ public:
     virtual ::djinni::Future<L> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) = 0;
             
     void didLoad(Tiled2dMapTileInfo tile, size_t loaderIndex, const L &loaderResult);
+
+    virtual LoaderStatus getLoaderStatus(const L &loaderResult) = 0;
+    virtual std::optional<std::string> getErrorCode(const L &loaderResult) = 0;
 
   protected:
 

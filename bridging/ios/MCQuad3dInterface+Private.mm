@@ -52,6 +52,14 @@ textureCoordinates:(nonnull MCRectD *)textureCoordinates {
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)loadHeightTexture:(nullable id<MCRenderingContextInterface>)context
+            textureHolder:(nullable id<MCTextureHolderInterface>)textureHolder {
+    try {
+        _cppRefHandle.get()->loadHeightTexture(::djinni_generated::RenderingContextInterface::toCpp(context),
+                                               ::djinni_generated::TextureHolderInterface::toCpp(textureHolder));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)removeTexture {
     try {
         _cppRefHandle.get()->removeTexture();
@@ -93,6 +101,13 @@ public:
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() loadTexture:(::djinni_generated::RenderingContextInterface::fromCpp(c_context))
                                                     textureHolder:(::djinni_generated::TextureHolderInterface::fromCpp(c_textureHolder))];
+        }
+    }
+    void loadHeightTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & c_textureHolder) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() loadHeightTexture:(::djinni_generated::RenderingContextInterface::fromCpp(c_context))
+                                                          textureHolder:(::djinni_generated::TextureHolderInterface::fromCpp(c_textureHolder))];
         }
     }
     void removeTexture() override

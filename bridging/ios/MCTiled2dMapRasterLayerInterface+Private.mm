@@ -67,6 +67,17 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
++ (nullable MCTiled2dMapRasterLayerInterface *)createWithHeightMap:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
+                                                           loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
+                                                   heightMapConfig:(nullable id<MCTiled2dMapLayerConfig>)heightMapConfig {
+    try {
+        auto objcpp_result_ = ::Tiled2dMapRasterLayerInterface::createWithHeightMap(::djinni_generated::Tiled2dMapLayerConfig::toCpp(layerConfig),
+                                                                                    ::djinni::List<::djinni_generated::LoaderInterface>::toCpp(loaders),
+                                                                                    ::djinni::Optional<std::optional, ::djinni_generated::Tiled2dMapLayerConfig>::toCpp(heightMapConfig));
+        return ::djinni_generated::Tiled2dMapRasterLayerInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nullable id<MCLayerInterface>)asLayerInterface {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->asLayerInterface();

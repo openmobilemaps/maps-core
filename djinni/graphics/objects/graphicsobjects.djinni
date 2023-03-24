@@ -59,6 +59,7 @@ quad_2d_interface = interface +c +j +o {
 quad_3d_interface = interface +c +j +o {
     set_frame(frame: quad_2d_d, texture_coordinates: rect_d);
     load_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
+    load_height_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
     remove_texture();
     as_graphics_object(): graphics_object_interface;
     as_masking_object(): masking_object_interface;
@@ -90,6 +91,7 @@ polygon_3d_interface = interface +c +j +o {
     set_vertices(vertices: shared_bytes, indices: shared_bytes);
 
     load_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
+    load_height_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
     remove_texture();
 
     as_graphics_object(): graphics_object_interface;
