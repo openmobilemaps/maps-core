@@ -16,9 +16,9 @@
 
 Tiled2dMapVectorRasterTile::Tiled2dMapVectorRasterTile(const std::weak_ptr<MapInterface> &mapInterface,
                                                        const Tiled2dMapTileInfo &tileInfo,
-                                                       const WeakActor<Tiled2dMapVectorLayerReadyInterface> &tileReadyInterface,
+                                                       const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
                                                        const std::shared_ptr<RasterVectorLayerDescription> &description)
-                                                       : Tiled2dMapVectorTile(mapInterface, tileInfo, description, tileReadyInterface){
+                                                       : Tiled2dMapVectorTile(mapInterface, tileInfo, description, tileCallbackInterface){
     auto pMapInterface = mapInterface.lock();
     if (pMapInterface) {
         auto shader = pMapInterface->getShaderFactory()->createAlphaShader();
@@ -62,7 +62,7 @@ void Tiled2dMapVectorRasterTile::setup() {
     tileObject->getQuadObject()->loadTexture(renderingContext, tileData);
 
     auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
-    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, selfActor);
+    tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
 }
 
 void Tiled2dMapVectorRasterTile::setAlpha(float alpha) {
@@ -107,7 +107,7 @@ void Tiled2dMapVectorRasterTile::setupTile(const Tiled2dMapVectorTileDataRaster 
     tileObject->getQuadObject()->loadTexture(renderingContext, tileData);
 
     auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
-    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, selfActor);
+    tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
 }
 
 std::vector<std::shared_ptr<RenderObjectInterface>> Tiled2dMapVectorRasterTile::generateRenderObjects() {

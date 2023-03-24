@@ -31,6 +31,12 @@ public:
 
     void onAdded(const std::weak_ptr< ::MapInterface> &mapInterface) override;
 
+    virtual void pause() override;
+
+    virtual void resume() override;
+
+    virtual void setAlpha(float alpha) override;
+
     void onVectorTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) override;
 
     void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription) override {};
@@ -38,6 +44,18 @@ public:
     void collisionDetection(std::unordered_set<std::string> layerIdentifiers, std::shared_ptr<std::vector<OBB2D>> placements);
 
     void setSprites(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture);
+
+    bool onClickUnconfirmed(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) override;
+
+    bool onClickConfirmed(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) override;
+
+    bool onDoubleClick(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) override;
+
+    bool onLongPress(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) override;
+
+    bool onTwoFingerClick(const std::unordered_set<std::string> &layers, const Vec2F &posScreen1, const Vec2F &posScreen2) override;
+
+    void clearTouch() override;
 
 private:
 

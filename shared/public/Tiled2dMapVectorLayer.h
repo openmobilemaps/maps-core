@@ -21,7 +21,7 @@
 #include "VectorMapDescription.h"
 #include "FontLoaderInterface.h"
 #include "PolygonMaskObject.h"
-#include "Tiled2dMapVectorLayerReadyInterface.h"
+#include "Tiled2dMapVectorLayerTileCallbackInterface.h"
 #include "Tiled2dMapLayerMaskWrapper.h"
 #include "Tiled2dMapVectorLayerSelectionInterface.h"
 #include "TiledLayerError.h"
@@ -32,6 +32,7 @@
 #include "Tiled2dMapVectorSourceVectorTileDataManager.h"
 #include "Tiled2dMapVectorSourceSymbolDataManager.h"
 #include "Tiled2dMapVectorSourceSymbolCollisionManager.h"
+#include "Tiled2dMapVectorInteractionManager.h"
 #include <unordered_map>
 
 class Tiled2dMapVectorLayer
@@ -165,11 +166,10 @@ private:
 
     const std::shared_ptr<FontLoaderInterface> fontLoader;
 
-    std::recursive_mutex dataManagerMutex;
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceTileDataManager>> sourceDataManagers;
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceSymbolDataManager>> symbolSourceDataManagers;
-
     Actor<Tiled2dMapVectorSourceSymbolCollisionManager> collisionManager;
+    std::unique_ptr<Tiled2dMapVectorInteractionManager> interactionManager;
 
     std::recursive_mutex renderPassMutex;
     std::vector<std::shared_ptr<RenderPassInterface>> currentRenderPasses;

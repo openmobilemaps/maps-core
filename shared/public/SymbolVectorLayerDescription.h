@@ -246,13 +246,15 @@ public:
                                int maxZoom,
                                std::shared_ptr<Value> filter,
                                  SymbolVectorStyle style,
-                                 std::optional<int32_t> renderPassIndex):
-    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, filter, renderPassIndex),
+                                 std::optional<int32_t> renderPassIndex,
+                                 std::shared_ptr<Value> interactable):
+    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, filter, renderPassIndex, interactable),
     style(style) {};
 
     std::unique_ptr<VectorLayerDescription> clone() override {
         return std::make_unique<SymbolVectorLayerDescription>(identifier, source, sourceId, minZoom, maxZoom,
-                                                              filter ? filter->clone() : nullptr, style, renderPassIndex);
+                                                              filter ? filter->clone() : nullptr, style, renderPassIndex,
+                                                              interactable ? interactable : nullptr);
     }
 
     virtual std::unordered_set<std::string> getUsedKeys() const override {

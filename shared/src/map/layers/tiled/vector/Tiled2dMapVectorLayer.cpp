@@ -195,6 +195,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
 
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceTileDataManager>> sourceTileManagers;
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceSymbolDataManager>> symbolSourceDataManagers;
+    std::unordered_map<std::string, WeakActor<Tiled2dMapVectorSourceDataManager>> interactionDataManagers;
 
     std::unordered_map<std::string, std::unordered_set<std::string>> layersToDecode;
 
@@ -227,6 +228,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                                              sourceActor.weakActor<Tiled2dMapRasterSource>());
                 sourceTileManagers[layerDesc->source] = sourceManagerActor.strongActor<Tiled2dMapVectorSourceTileDataManager>();
                 sourceInterfaces.push_back(sourceActor.weakActor<Tiled2dMapSourceInterface>());
+                interactionDataManagers[layerDesc->source] = sourceManagerActor.weakActor<Tiled2dMapVectorSourceDataManager>();
                 break;
             }
             case symbol: {
@@ -262,6 +264,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                                      source,
                                                                                      vectorSource.weakActor<Tiled2dMapVectorSource>());
         sourceTileManagers[source] = sourceManagerActor.strongActor<Tiled2dMapVectorSourceTileDataManager>();
+        interactionDataManagers[source] = sourceManagerActor.weakActor<Tiled2dMapVectorSourceDataManager>();
 
         if (symbolSources.count(source) != 0) {
             auto symbolSourceDataManagerMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
@@ -283,11 +286,12 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
         collisionManager.emplaceObject(collisionManagerMailbox, weakSymbolSourceDataManagers, mapDescription);
     }
 
+    interactionManager = std::make_unique<Tiled2dMapVectorInteractionManager>(interactionDataManagers, mapDescription);
+
     this->rasterTileSources = rasterSources;
     this->vectorTileSources = vectorTileSource;
     this->symbolSourceDataManagers = symbolSourceDataManagers;
-    
-    sourceDataManagers = sourceTileManagers;
+    this->sourceDataManagers = sourceTileManagers;
 
     setSourceInterfaces(sourceInterfaces);
 
@@ -352,7 +356,6 @@ void Tiled2dMapVectorLayer::update() {
     }
 }*/
 
-    std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
 /*        sourceDataManager.syncAccess([](auto manager) {
             manager->update();
@@ -387,7 +390,6 @@ void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, bool i
     }
 
     std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> orderedPasses;
-    std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
     for (const auto &[source, indexPasses] : sourceRenderPassesMap) {
         orderedPasses.insert(orderedPasses.end(), indexPasses.renderPasses.begin(), indexPasses.renderPasses.end());
         orderedPasses.insert(orderedPasses.end(), indexPasses.symbolRenderPasses.begin(), indexPasses.symbolRenderPasses.end());
@@ -438,13 +440,15 @@ void Tiled2dMapVectorLayer::onRemoved() {
 void Tiled2dMapVectorLayer::pause() {
     isResumed = false;
 
-    {
-        std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
-        for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-            sourceDataManager.syncAccess([](const auto &manager){
-                manager->pause();
-            });
-        }
+    for (const auto &[source, sourceDataManager]: sourceDataManagers) {
+        sourceDataManager.syncAccess([](const auto &manager){
+            manager->pause();
+        });
+    }
+    for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
+        sourceDataManager.syncAccess([](const auto &manager){
+            manager->pause();
+        });
     }
 
     if (backgroundLayer) {
@@ -459,13 +463,12 @@ void Tiled2dMapVectorLayer::resume() {
         backgroundLayer->resume();
     }
 
-    {
-        std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
-        for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-            sourceDataManager.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceTileDataManager::resume);
-        }
+    for (const auto &[source, sourceDataManager]: sourceDataManagers) {
+        sourceDataManager.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceTileDataManager::resume);
     }
-
+    for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
+        sourceDataManager.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceSymbolDataManager::resume);
+    }
 }
 
 void Tiled2dMapVectorLayer::setAlpha(float alpha) {
@@ -473,11 +476,11 @@ void Tiled2dMapVectorLayer::setAlpha(float alpha) {
         return;
     }
     this->alpha = alpha;
-    {
-        std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
-        for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-            sourceDataManager.message(&Tiled2dMapVectorSourceTileDataManager::setAlpha, alpha);
-        }
+    for (const auto &[source, sourceDataManager]: sourceDataManagers) {
+        sourceDataManager.message(&Tiled2dMapVectorSourceTileDataManager::setAlpha, alpha);
+    }
+    for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
+        sourceDataManager.message(&Tiled2dMapVectorSourceSymbolDataManager::setAlpha, alpha);
     }
 
     if (mapInterface)
@@ -496,22 +499,16 @@ void Tiled2dMapVectorLayer::forceReload() {
 }
 
 void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) {
-    std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
         sourceDataManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::onRasterTilesUpdated, layerName, currentTileInfos);
     }
-
-
 }
 
 void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) {
-    std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
-
     auto sourceManager = sourceDataManagers.find(sourceName);
     if (sourceManager != sourceDataManagers.end()) {
         sourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::onVectorTilesUpdated, sourceName, currentTileInfos);
     }
-
     auto symbolSourceManager = symbolSourceDataManagers.find(sourceName);
     if (symbolSourceManager != symbolSourceDataManagers.end()) {
         symbolSourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::onVectorTilesUpdated, sourceName, currentTileInfos);
@@ -603,11 +600,11 @@ void Tiled2dMapVectorLayer::didLoadSpriteData(std::shared_ptr<SpriteData> sprite
 
 void Tiled2dMapVectorLayer::setScissorRect(const std::optional<::RectI> &scissorRect) {
     this->scissorRect = scissorRect;
-    {
-        std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
-        for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-            sourceDataManager.message(&Tiled2dMapVectorSourceTileDataManager::setScissorRect, scissorRect);
-        }
+    for (const auto &[source, sourceDataManager]: sourceDataManagers) {
+        sourceDataManager.message(&Tiled2dMapVectorSourceDataManager::setScissorRect, scissorRect);
+    }
+    for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
+        sourceDataManager.message(&Tiled2dMapVectorSourceDataManager::setScissorRect, scissorRect);
     }
     auto mapInterface = this->mapInterface;
     if (mapInterface) {
@@ -616,18 +613,20 @@ void Tiled2dMapVectorLayer::setScissorRect(const std::optional<::RectI> &scissor
 }
 
 void Tiled2dMapVectorLayer::setSelectionDelegate(const WeakActor<Tiled2dMapVectorLayerSelectionInterface> &selectionDelegate) {
-    std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
         sourceDataManager.message(&Tiled2dMapVectorSourceTileDataManager::setSelectionDelegate, selectionDelegate);
+    }
+    for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
+        sourceDataManager.message(&Tiled2dMapVectorSourceSymbolDataManager::setSelectionDelegate, selectionDelegate);
     }
 }
 
 void Tiled2dMapVectorLayer::setSelectedFeatureIdentifier(std::optional<int64_t> identifier) {
-    {
-        std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
-        for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-            sourceDataManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::setSelectedFeatureIdentifier, identifier);
-        }
+    for (const auto &[source, sourceDataManager]: sourceDataManagers) {
+        sourceDataManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::setSelectedFeatureIdentifier, identifier);
+    }
+    for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
+        sourceDataManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceSymbolDataManager::setSelectedFeatureIdentifier, identifier);
     }
     auto mapInterface = this->mapInterface;
     if (mapInterface) {
@@ -636,9 +635,11 @@ void Tiled2dMapVectorLayer::setSelectedFeatureIdentifier(std::optional<int64_t> 
 }
 
 void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription) {
-    std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-        sourceDataManager.message(&Tiled2dMapVectorSourceTileDataManager::updateLayerDescription, layerDescription);
+        sourceDataManager.message(&Tiled2dMapVectorSourceDataManager::updateLayerDescription, layerDescription);
+    }
+    for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
+        sourceDataManager.message(&Tiled2dMapVectorSourceDataManager::updateLayerDescription, layerDescription);
     }
 }
 
@@ -673,173 +674,45 @@ std::shared_ptr<VectorLayerDescription> Tiled2dMapVectorLayer::getLayerDescripti
 
 // Touch Interface
 bool Tiled2dMapVectorLayer::onTouchDown(const Vec2F &posScreen) {
-/*    // TODO: query ordering on tile borders?
-    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
-    for (const auto &[tileInfo, subTiles]: tiles) {
-        for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
-            bool hit = std::get<2>(*rIter).syncAccess([posScreen](auto tile) {
-                return tile->onTouchDown(posScreen);
-            });
-            if (hit) {
-                return true;
-            }
-        }
-    }*/
-    return false;
+    return interactionManager->onTouchDown(posScreen);
 }
 
 bool Tiled2dMapVectorLayer::onClickUnconfirmed(const Vec2F &posScreen) {
-/*// TODO: query ordering on tile borders?
-    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
-    for (const auto &[tileInfo, subTiles]: tiles) {
-        for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
-            bool hit = std::get<2>(*rIter).syncAccess([posScreen](auto tile) {
-                return tile->onClickUnconfirmed(posScreen);
-            });
-            if (hit) {
-                return true;
-            }
-        }
-    }*/
-    return false;
+    return interactionManager->onClickUnconfirmed(posScreen);
 }
 
 bool Tiled2dMapVectorLayer::onClickConfirmed(const Vec2F &posScreen) {
-/*// TODO: query ordering on tile borders?
-    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
-    for (const auto &[tileInfo, subTiles]: tiles) {
-        for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
-            bool hit = std::get<2>(*rIter).syncAccess([posScreen](auto tile) {
-                return tile->onClickConfirmed(posScreen);
-            });
-            if (hit) {
-                return true;
-            }
-        }
-    }*/
-    return false;
+    return interactionManager->onClickConfirmed(posScreen);
 }
 
 bool Tiled2dMapVectorLayer::onDoubleClick(const Vec2F &posScreen) {
-/*// TODO: query ordering on tile borders?
-    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
-    for (const auto &[tileInfo, subTiles]: tiles) {
-        for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
-            bool hit = std::get<2>(*rIter).syncAccess([posScreen](auto tile) {
-                return tile->onDoubleClick(posScreen);
-            });
-            if (hit) {
-                return true;
-            }
-        }
-    }*/
-    return false;
+    return interactionManager->onDoubleClick(posScreen);
 }
 
 bool Tiled2dMapVectorLayer::onLongPress(const Vec2F &posScreen) {
-/*// TODO: query ordering on tile borders?
-    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
-    for (const auto &[tileInfo, subTiles]: tiles) {
-        for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
-            bool hit = std::get<2>(*rIter).syncAccess([posScreen](auto tile) {
-                return tile->onLongPress(posScreen);
-            });
-            if (hit) {
-                return true;
-            }
-        }
-    }*/
-    return false;
+    return interactionManager->onLongPress(posScreen);
 }
 
 bool Tiled2dMapVectorLayer::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleClick) {
-/*// TODO: query ordering on tile borders?
-    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
-    for (const auto &[tileInfo, subTiles]: tiles) {
-        for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
-            bool hit = std::get<2>(*rIter).syncAccess([deltaScreen, confirmed, doubleClick](auto tile) {
-                return tile->onMove(deltaScreen, confirmed, doubleClick);
-            });
-            if (hit) {
-                return true;
-            }
-        }
-    }*/
-    return false;
+    return interactionManager->onMove(deltaScreen, confirmed, doubleClick);
 }
 
 bool Tiled2dMapVectorLayer::onMoveComplete() {
-/*// TODO: query ordering on tile borders?
-    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
-    for (const auto &[tileInfo, subTiles]: tiles) {
-        for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
-            bool hit = std::get<2>(*rIter).syncAccess([](auto tile) {
-                return tile->onMoveComplete();
-            });
-            if (hit) {
-                return true;
-            }
-        }
-    }*/
-    return false;
+    return interactionManager->onMoveComplete();
 }
 
 bool Tiled2dMapVectorLayer::onTwoFingerClick(const Vec2F &posScreen1, const Vec2F &posScreen2) {
-/*// TODO: query ordering on tile borders?
-    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
-    for (const auto &[tileInfo, subTiles]: tiles) {
-        for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
-            bool hit = std::get<2>(*rIter).syncAccess([posScreen1, posScreen2](auto tile) {
-                return tile->onTwoFingerClick(posScreen1, posScreen2);
-            });
-            if (hit) {
-                return true;
-            }
-        }
-    }*/
-    return false;
+    return interactionManager->onTwoFingerClick(posScreen1, posScreen2);
 }
 
 bool Tiled2dMapVectorLayer::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) {
-/*// TODO: query ordering on tile borders?
-    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
-    for (const auto &[tileInfo, subTiles]: tiles) {
-        for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
-            bool hit = std::get<2>(*rIter).syncAccess([posScreenOld, posScreenNew](auto tile) {
-                return tile->onTwoFingerMove(posScreenOld, posScreenNew);
-            });
-            if (hit) {
-                return true;
-            }
-        }
-    }*/
-    return false;
+    return interactionManager->onTwoFingerMove(posScreenOld, posScreenNew);
 }
 
 bool Tiled2dMapVectorLayer::onTwoFingerMoveComplete() {
-/*// TODO: query ordering on tile borders?
-    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
-    for (const auto &[tileInfo, subTiles]: tiles) {
-        for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
-            bool hit = std::get<2>(*rIter).syncAccess([](auto tile) {
-                return tile->onTwoFingerMoveComplete();
-            });
-            if (hit) {
-                return true;
-            }
-        }
-    }*/
-    return false;
+    return interactionManager->onTwoFingerMoveComplete();
 }
 
 void Tiled2dMapVectorLayer::clearTouch() {
-/*// TODO: query ordering on tile borders?
-    std::lock_guard<std::recursive_mutex> lock(tilesMutex);
-    for (const auto &[tileInfo, subTiles]: tiles) {
-        for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
-            std::get<2>(*rIter).syncAccess([](auto tile) {
-                return tile->clearTouch();
-            });
-        }
-    }*/
+    return interactionManager->clearTouch();
 }

@@ -59,8 +59,9 @@ public:
                                  int maxZoom,
                                  std::string url,
                                  RasterVectorStyle style,
-                                 std::optional<int32_t> renderPassIndex):
-    VectorLayerDescription(identifier, "", "", minZoom, maxZoom, nullptr, renderPassIndex),
+                                 std::optional<int32_t> renderPassIndex,
+                                 std::shared_ptr<Value> interactable):
+    VectorLayerDescription(identifier, identifier, "", minZoom, maxZoom, nullptr, renderPassIndex, interactable),
     style(style), url(url) {};
 
     RasterVectorLayerDescription(std::string identifier,
@@ -71,16 +72,18 @@ public:
                                  int32_t numDrawPreviousLayers = 2,
                                  bool maskTiles = false,
                                  double zoomLevelScaleFactor = 0.65,
+                                 std::shared_ptr<Value> interactable = nullptr,
                                  std::optional<int32_t> renderPassIndex = std::nullopt,
                                  bool underzoom = true,
                                  bool overzoom = true) :
-            VectorLayerDescription(identifier, "", "", minZoom, maxZoom, nullptr, renderPassIndex),
+            VectorLayerDescription(identifier, identifier, "", minZoom, maxZoom, nullptr, renderPassIndex, interactable),
             style(), url(url), adaptScaleToScreen(adaptScaleToScreen), numDrawPreviousLayers(numDrawPreviousLayers),
             maskTiles(maskTiles), zoomLevelScaleFactor(zoomLevelScaleFactor), underzoom(underzoom), overzoom(overzoom) {};
 
     std::unique_ptr<VectorLayerDescription> clone() override {
         return std::make_unique<RasterVectorLayerDescription>(identifier, minZoom, maxZoom, url, adaptScaleToScreen,
                                                               numDrawPreviousLayers, maskTiles, zoomLevelScaleFactor,
+                                                              interactable ? interactable->clone() : nullptr,
                                                               renderPassIndex, underzoom, overzoom);
     }
 

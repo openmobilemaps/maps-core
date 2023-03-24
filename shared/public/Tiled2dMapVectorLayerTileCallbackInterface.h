@@ -15,9 +15,11 @@
 
 class Tiled2dMapVectorTile;
 
-class Tiled2dMapVectorLayerReadyInterface {
+class Tiled2dMapVectorLayerTileCallbackInterface {
 public:
     virtual void tileIsReady(const Tiled2dMapTileInfo &tile,
                              const std::string &layerIdentifier,
                              const WeakActor<Tiled2dMapVectorTile> &tileActor) = 0;
+
+    virtual void tileIsInteractable(const std::string &layerIdentifier) = 0;
 };

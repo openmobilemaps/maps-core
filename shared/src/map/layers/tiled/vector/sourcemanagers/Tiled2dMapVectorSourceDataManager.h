@@ -17,7 +17,7 @@
 #include "Tiled2dMapRasterTileInfo.h"
 #include "Tiled2dMapVectorTileInfo.h"
 #include "Tiled2dMapVectorLayerSelectionInterface.h"
-#include "Tiled2dMapVectorLayerReadyInterface.h"
+#include "Tiled2dMapVectorLayerTileCallbackInterface.h"
 #include "Tiled2dMapLayerMaskWrapper.h"
 #include "Actor.h"
 #include <unordered_set>
@@ -35,6 +35,12 @@ public:
 
     virtual void onRemoved();
 
+    virtual void pause() = 0;
+
+    virtual void resume() = 0;
+
+    virtual void setAlpha(float alpha) = 0;
+
     virtual void setScissorRect(const std::optional<RectI> &scissorRect);
 
     virtual void setSelectionDelegate(const WeakActor<Tiled2dMapVectorLayerSelectionInterface> &selectionDelegate);
@@ -46,6 +52,18 @@ public:
     virtual void onVectorTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) {};
 
     virtual void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription) = 0;
+
+    virtual bool onClickUnconfirmed(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) = 0;
+
+    virtual bool onClickConfirmed(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) = 0;
+
+    virtual bool onDoubleClick(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) = 0;
+
+    virtual bool onLongPress(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) = 0;
+
+    virtual bool onTwoFingerClick(const std::unordered_set<std::string> &layers, const Vec2F &posScreen1, const Vec2F &posScreen2) = 0;
+
+    virtual void clearTouch() = 0;
 
 protected:
     std::weak_ptr<MapInterface> mapInterface;

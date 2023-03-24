@@ -19,7 +19,7 @@
 #include "QuadMaskObject.h"
 #include "VectorTileGeometryHandler.h"
 #include "VectorLayerDescription.h"
-#include "Tiled2dMapVectorLayerReadyInterface.h"
+#include "Tiled2dMapVectorLayerTileCallbackInterface.h"
 #include "Tiled2dMapVectorLayerSelectionInterface.h"
 #include "Textured2dLayerObject.h"
 
@@ -58,7 +58,7 @@ public:
 
     virtual std::string getLayerDescriptionIdentifier() { return ""; };
 
-    void setTilesReadyDelegate(const std::weak_ptr<Tiled2dMapVectorLayerReadyInterface> readyDelegate);
+    void setTilesReadyDelegate(const std::weak_ptr<Tiled2dMapVectorLayerTileCallbackInterface> readyDelegate);
 
     void setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate);
 
@@ -77,7 +77,7 @@ protected:
 
     std::unordered_map<Tiled2dMapTileInfo, std::vector<std::shared_ptr<RenderPassInterface>>> renderPasses;
 
-    std::weak_ptr<Tiled2dMapVectorLayerReadyInterface> readyDelegate;
+    std::weak_ptr<Tiled2dMapVectorLayerTileCallbackInterface> readyDelegate;
 
     std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate;
 

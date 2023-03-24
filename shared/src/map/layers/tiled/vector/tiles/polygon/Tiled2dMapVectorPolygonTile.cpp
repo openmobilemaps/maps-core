@@ -37,9 +37,9 @@ namespace mapbox {
 
 Tiled2dMapVectorPolygonTile::Tiled2dMapVectorPolygonTile(const std::weak_ptr<MapInterface> &mapInterface,
                                                          const Tiled2dMapTileInfo &tileInfo,
-                                                         const WeakActor<Tiled2dMapVectorLayerReadyInterface> &tileReadyInterface,
+                                                         const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
                                                          const std::shared_ptr<PolygonVectorLayerDescription> &description)
-        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, tileReadyInterface) {
+        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, tileCallbackInterface) {
     usedKeys = std::move(description->getUsedKeys());
     auto pMapInterface = mapInterface.lock();
     if (pMapInterface) {
@@ -100,7 +100,7 @@ void Tiled2dMapVectorPolygonTile::setup() {
     }
 
     auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
-    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, selfActor);
+    tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
 }
 
 void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDataVector &tileData) {
@@ -117,6 +117,8 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
         description->minZoom <= tileInfo.zoomIdentifier &&
         description->maxZoom >= tileInfo.zoomIdentifier) {
 
+        bool anyInteractable = false;
+
         std::vector<std::tuple<std::vector<std::tuple<std::vector<Coord>, int>>, std::vector<int32_t>>> objectDescriptions;
         objectDescriptions.push_back({{},{}});
 
@@ -131,12 +133,14 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
 
             if (featureContext.geomType != vtzero::GeomType::POLYGON) { continue; }
 
-            if (description->filter == nullptr || description->filter->evaluateOr(EvaluationContext(-1, featureContext), true)) {
+            EvaluationContext evalContext = EvaluationContext(tileInfo.zoomIdentifier, featureContext);
+            if (description->filter == nullptr || description->filter->evaluateOr(evalContext, true)) {
                 const auto &polygonCoordinates = geometryHandler.getPolygonCoordinates();
                 const auto &polygonHoles = geometryHandler.getHoleCoordinates();
 
                 std::vector<Coord> positions;
 
+                bool interactable = description->isInteractable(evalContext);
                 for (int i = 0; i < polygonCoordinates.size(); i++) {
 
                     size_t verticesCount = polygonCoordinates[i].size();
@@ -188,7 +192,11 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
 
                     indices_offset += posAdded;
 
-//                    hitDetectionPolygonMap[tileInfo].push_back({PolygonCoord(polygonCoordinates[i], polygonHoles[i]), featureContext});
+                    if (interactable) {
+                        anyInteractable = true;
+                        hitDetectionPolygonMap[tileInfo].push_back(
+                                {PolygonCoord(polygonCoordinates[i], polygonHoles[i]), featureContext});
+                    }
                 }
 
                 int styleIndex = -1;
@@ -213,10 +221,14 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
             }
         }
 
+        if (anyInteractable) {
+            tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsInteractable, description->identifier);
+        }
+
         addPolygons(objectDescriptions);
     } else {
         auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
-        tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, selfActor);
+        tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
     }
 }
 
@@ -228,7 +240,7 @@ void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::tuple<std::
 
     if (polygons.empty() && oldGraphicsObjects.empty()) {
         auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
-        tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, selfActor);
+        tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
         return;
     }
 
@@ -282,7 +294,7 @@ void Tiled2dMapVectorPolygonTile::setupPolygons(const std::vector<std::shared_pt
     }
 
     auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
-    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, selfActor);
+    tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
 }
 
 std::vector<std::shared_ptr<RenderObjectInterface>> Tiled2dMapVectorPolygonTile::generateRenderObjects() {

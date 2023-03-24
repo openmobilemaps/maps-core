@@ -16,8 +16,8 @@
 Tiled2dMapVectorTile::Tiled2dMapVectorTile(const std::weak_ptr<MapInterface> &mapInterface,
                                            const Tiled2dMapTileInfo &tileInfo,
                                            const std::shared_ptr<VectorLayerDescription> &description,
-                                           const WeakActor<Tiled2dMapVectorLayerReadyInterface> &tileReadyInterface)
-        : mapInterface(mapInterface), tileInfo(tileInfo), tileReadyInterface(tileReadyInterface), description(description) {}
+                                           const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileReadyInterface)
+        : mapInterface(mapInterface), tileInfo(tileInfo), tileCallbackInterface(tileReadyInterface), description(description) {}
 
 void Tiled2dMapVectorTile::updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                                   const Tiled2dMapVectorTileDataVector &layerData) {

@@ -81,7 +81,7 @@ public:
                     if (result.status != LoaderStatus::OK) {
                         return Tiled2dMapVectorLayerParserResult(nullptr, result.status, result.errorCode);
                     }
-                    auto string = std::string((char*)result.data->buf(), result.data->len());
+                    auto string = std::string((char *) result.data->buf(), result.data->len());
                     nlohmann::json json;
                     try {
                         json = nlohmann::json::parse(string);
@@ -90,7 +90,7 @@ public:
                         return Tiled2dMapVectorLayerParserResult(nullptr, LoaderStatus::ERROR_OTHER, "");
                     }
                     url = json["tiles"].begin()->get<std::string>();
-                    }
+                }
 
                 rasterLayerMap[key] = std::make_shared<RasterVectorLayerDescription>(layerName,
                                                                                      val.value("minZoom", 0),
@@ -100,6 +100,7 @@ public:
                                                                                      numDrawPreviousLayers,
                                                                                      maskTiles,
                                                                                      zoomLevelScaleFactor,
+                                                                                     nullptr,
                                                                                      std::nullopt);
 
             }
@@ -129,15 +130,22 @@ public:
 
         for (auto&[key, val]: json["layers"].items()) {
             std::optional<int32_t> renderPassIndex;
-            if (val["metadata"].is_object() && val["metadata"]["render-pass-index"].is_number()) {
-                renderPassIndex = val["metadata"].value("render-pass-index", 0);
+            std::shared_ptr<Value> interactable;
+            if (val["metadata"].is_object()) {
+                if (val["metadata"]["render-pass-index"].is_number()) {
+                    renderPassIndex = val["metadata"].value("render-pass-index", 0);
+                }
+                if (!val["metadata"]["interactable"].is_null()) {
+                    interactable = parser.parseValue(val["metadata"]["render-pass-index"]);
+                }
             }
 
             if (val["type"] == "background" && !val["paint"]["background-color"].is_null()) {
                 auto layerDesc = std::make_shared<BackgroundVectorLayerDescription>(val["id"],
                                                                                     BackgroundVectorStyle(parser.parseValue(
                                                                                             val["paint"]["background-color"])),
-                                                                                    renderPassIndex);
+                                                                                    renderPassIndex,
+                                                                                    interactable);
                 layers.push_back(layerDesc);
 
             } else if (val["type"] == "raster" && rasterLayerMap.count(val["source"]) != 0) {
@@ -150,7 +158,8 @@ public:
                                                                                layer->adaptScaleToScreen,
                                                                                layer->numDrawPreviousLayers,
                                                                                layer->maskTiles,
-                                                                               layer->zoomLevelScaleFactor);
+                                                                               layer->zoomLevelScaleFactor,
+                                                                               interactable);
 
                 newLayer->style = RasterVectorStyle(parser.parseValue(val["paint"]["raster-opacity"]));
 
@@ -178,7 +187,8 @@ public:
                                                                                                   parser.parseValue(
                                                                                                           val["layout"]["line-cap"]),
                                                                                                   dpFactor),
-                                                                                  renderPassIndex);
+                                                                                  renderPassIndex,
+                                                                                  interactable);
                     layers.push_back(layerDesc);
 
                 } else if (val["type"] == "symbol") {
@@ -215,7 +225,8 @@ public:
                                                                                     val.value("maxzoom", 24),
                                                                                     filter,
                                                                                     style,
-                                                                                    renderPassIndex);
+                                                                                    renderPassIndex,
+                                                                                    interactable);
                     layers.push_back(layerDesc);
                 } else if (val["type"] == "fill" && val["paint"]["fill-pattern"].is_null()) {
 
@@ -231,7 +242,8 @@ public:
                                                                                      val.value("maxzoom", 24),
                                                                                      filter,
                                                                                      style,
-                                                                                     renderPassIndex);
+                                                                                     renderPassIndex,
+                                                                                     interactable);
 
                     layers.push_back(layerDesc);
                 }

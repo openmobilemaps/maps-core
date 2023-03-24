@@ -32,6 +32,18 @@ void Tiled2dMapVectorSourceSymbolDataManager::onAdded(const std::weak_ptr< ::Map
     textHelper.setMapInterface(mapInterface);
 }
 
+void Tiled2dMapVectorSourceSymbolDataManager::pause() {
+    // TODO: clear graphics objects
+}
+
+void Tiled2dMapVectorSourceSymbolDataManager::resume() {
+    // TODO: resetup graphics objects
+}
+
+void Tiled2dMapVectorSourceSymbolDataManager::setAlpha(float alpha) {
+    // TODO: set alpha of graphics objects
+}
+
 void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::string &sourceName,
                                                                    std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) {
 
@@ -725,4 +737,29 @@ void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
             strong->onRenderPassUpdate(source, true, renderPasses);
         }
     });
+}
+
+bool Tiled2dMapVectorSourceSymbolDataManager::onClickUnconfirmed(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) {
+    return false; // TODO
+}
+
+bool Tiled2dMapVectorSourceSymbolDataManager::onClickConfirmed(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) {
+    return false; // TODO
+}
+
+bool Tiled2dMapVectorSourceSymbolDataManager::onDoubleClick(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) {
+    return false; // TODO
+}
+
+bool Tiled2dMapVectorSourceSymbolDataManager::onLongPress(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) {
+    return false; // TODO
+}
+
+bool Tiled2dMapVectorSourceSymbolDataManager::onTwoFingerClick(const std::unordered_set<std::string> &layers, const Vec2F &posScreen1,
+                                                          const Vec2F &posScreen2) {
+    return false; // TODO
+}
+
+void Tiled2dMapVectorSourceSymbolDataManager::clearTouch() {
+
 }

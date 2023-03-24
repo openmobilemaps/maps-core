@@ -16,9 +16,9 @@
 
 Tiled2dMapVectorLineTile::Tiled2dMapVectorLineTile(const std::weak_ptr<MapInterface> &mapInterface,
                                                          const Tiled2dMapTileInfo &tileInfo,
-                                                         const WeakActor<Tiled2dMapVectorLayerReadyInterface> &tileReadyInterface,
+                                                         const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
                                                          const std::shared_ptr<LineVectorLayerDescription> &description)
-        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, tileReadyInterface) {
+        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, tileCallbackInterface) {
     usedKeys = std::move(description->getUsedKeys());
 }
 
@@ -118,7 +118,7 @@ void Tiled2dMapVectorLineTile::setup() {
         if (!lineObject->isReady()) lineObject->setup(context);
     }
     auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
-    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, selfActor);
+    tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
 }
 
 void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataVector &tileData) {
@@ -134,9 +134,12 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
         std::unordered_map<int, std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> styleGroupNewLinesMap;
         std::unordered_map<int, std::vector<std::tuple<std::vector<Coord>, int>>> styleGroupLineSubGroupMap;
 
+        bool anyInteractable = false;
+
         for (auto featureIt = tileData->rbegin(); featureIt != tileData->rend(); ++featureIt) {
             const FeatureContext &featureContext = std::get<0>(*featureIt);
-            if ((description->filter == nullptr || description->filter->evaluateOr(EvaluationContext(-1, featureContext), true))) {
+            EvaluationContext evalContext = EvaluationContext(tileInfo.zoomIdentifier, featureContext);
+            if ((description->filter == nullptr || description->filter->evaluateOr(evalContext, true))) {
                 int styleGroupIndex = -1;
                 int styleIndex = -1;
                 {
@@ -197,7 +200,10 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                     lineCoordinatesVector.push_back(lineCoordinates);
                 }
 
-//                hitDetection.push_back({lineCoordinatesVector, featureContext});
+                if (description->isInteractable(evalContext)) {
+                    anyInteractable = true;
+                    hitDetection.push_back({lineCoordinatesVector, featureContext});;
+                }
             }
         }
 
@@ -205,10 +211,14 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
             if (!lineSubGroup.empty() && subGroupCoordCount[groupIndex] > 0) styleGroupNewLinesMap[groupIndex].push_back(lineSubGroup);
         }
 
+        if (anyInteractable) {
+            tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsInteractable, description->identifier);
+        }
+
         addLines(styleGroupNewLinesMap);
     } else {
         auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
-        tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, selfActor);
+        tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
     }
 }
 
@@ -221,7 +231,7 @@ void Tiled2dMapVectorLineTile::addLines(const std::unordered_map<int, std::vecto
 
     if (styleIdLinesMap.empty() && oldGraphicsObjects.empty()) {
         auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
-        tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, selfActor);
+        tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
         return;
     }
 
@@ -278,7 +288,7 @@ void Tiled2dMapVectorLineTile::setupLines(const std::vector<std::shared_ptr<Grap
 
 
     auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
-    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, selfActor);
+    tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
 }
 
 

@@ -18,7 +18,7 @@ class Tiled2dMapVectorRasterTile : public Tiled2dMapVectorTile, public std::enab
 public:
     Tiled2dMapVectorRasterTile(const std::weak_ptr<MapInterface> &mapInterface,
                                 const Tiled2dMapTileInfo &tileInfo,
-                                const WeakActor<Tiled2dMapVectorLayerReadyInterface> &tileReadyInterface,
+                                const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
                                 const std::shared_ptr<RasterVectorLayerDescription> &description);
 
     void updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
