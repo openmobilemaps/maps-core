@@ -9,10 +9,8 @@
  */
 
 #include "Tiled2dMapVectorPolygonTile.h"
-#include "Tiled2dMapVectorLayer.h"
 #include "Tiled2dMapVectorRasterSubLayerConfig.h"
 #include "RenderObject.h"
-#include "RenderPass.h"
 #include "MapCamera2dInterface.h"
 #include "earcut.hpp"
 #include "Logger.h"
@@ -39,9 +37,9 @@ namespace mapbox {
 
 Tiled2dMapVectorPolygonTile::Tiled2dMapVectorPolygonTile(const std::weak_ptr<MapInterface> &mapInterface,
                                                          const Tiled2dMapTileInfo &tileInfo,
-                                                         const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
+                                                         const WeakActor<Tiled2dMapVectorLayerReadyInterface> &tileReadyInterface,
                                                          const std::shared_ptr<PolygonVectorLayerDescription> &description)
-        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, vectorLayer) {
+        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, tileReadyInterface) {
     usedKeys = std::move(description->getUsedKeys());
     auto pMapInterface = mapInterface.lock();
     if (pMapInterface) {
@@ -49,17 +47,26 @@ Tiled2dMapVectorPolygonTile::Tiled2dMapVectorPolygonTile(const std::weak_ptr<Map
     }
 }
 
+void Tiled2dMapVectorPolygonTile::updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
+                                                         const Tiled2dMapVectorTileDataVector &tileData) {
+    Tiled2dMapVectorTile::updateLayerDescription(description, tileData);
+    featureGroups.clear();
+    hitDetectionPolygonMap.clear();
+    usedKeys = std::move(description->getUsedKeys());
+    setVectorTileData(tileData);
+}
+
 void Tiled2dMapVectorPolygonTile::update() {
     auto mapInterface = this->mapInterface.lock();
-    if (!mapInterface) {
+    auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+    if (!mapInterface || !camera) {
         return;
     }
-    double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(mapInterface->getCamera()->getZoom());
+    double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
+    zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.zoomIdentifier);
 
     std::vector<float> shaderStyles;
-
     auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
-
     for (auto const &[hash, feature]: featureGroups) {
         const auto& ec = EvaluationContext(zoomIdentifier, feature);
         const auto& color = polygonDescription->style.getFillColor(ec);
@@ -74,20 +81,6 @@ void Tiled2dMapVectorPolygonTile::update() {
 
     auto s = SharedBytes((int64_t)shaderStyles.data(), (int32_t)featureGroups.size(), 5 * (int32_t)sizeof(float));
     shader->setStyles(s);
-}
-
-void Tiled2dMapVectorPolygonTile::updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
-                                                         const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) {
-    Tiled2dMapVectorTile::updateLayerDescription(description, layerFeatures);
-    featureGroups.clear();
-    hitDetectionPolygonMap.clear();
-    usedKeys = std::move(description->getUsedKeys());
-    setTileData(tileMask, layerFeatures);
-}
-
-
-std::vector<std::shared_ptr<::RenderObjectInterface>> Tiled2dMapVectorPolygonTile::getRenderObjects() {
-    return renderObjects;
 }
 
 void Tiled2dMapVectorPolygonTile::clear() {
@@ -105,28 +98,22 @@ void Tiled2dMapVectorPolygonTile::setup() {
     for (auto const &polygon: polygons) {
         if (!polygon->getPolygonObject()->isReady()) polygon->getPolygonObject()->setup(context);
     }
-    vectorLayer.message(&Tiled2dMapVectorLayer::tileIsReady, tileInfo);
+
+    auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
+    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, selfActor);
 }
 
-void Tiled2dMapVectorPolygonTile::setScissorRect(const std::optional<::RectI> &scissorRect) {
-    this->scissorRect = scissorRect;
-    preGenerateRenderObjects();
-}
-
-void Tiled2dMapVectorPolygonTile::setTileData(const std::shared_ptr<MaskingObjectInterface> &tileMask,
-                 const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) {
+void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDataVector &tileData) {
 
     if (!mapInterface.lock()) {
         return;
     }
 
-    this->tileMask = tileMask;
-
     std::string layerName = description->sourceId;
 
     std::string defIdPrefix =
             std::to_string(tileInfo.x) + "/" + std::to_string(tileInfo.y) + "_" + layerName + "_";
-    if (!layerFeatures.empty() &&
+    if (!tileData->empty() &&
         description->minZoom <= tileInfo.zoomIdentifier &&
         description->maxZoom >= tileInfo.zoomIdentifier) {
 
@@ -135,13 +122,16 @@ void Tiled2dMapVectorPolygonTile::setTileData(const std::shared_ptr<MaskingObjec
 
         std::vector<int32_t> indices;
         std::int32_t indices_offset = 0;
-        for (const auto &feature : layerFeatures) {
-            const FeatureContext &featureContext = std::get<0>(feature);
+#ifndef __APPLE__
+        for (auto featureIt = tileData->rbegin(); featureIt != tileData->rend(); featureIt++) {
+#else
+        for(auto featureIt = tileData->begin(); featureIt != tileData->end(); featureIt++) {
+#endif
+            const auto &[featureContext, geometryHandler] = *featureIt;
 
             if (featureContext.geomType != vtzero::GeomType::POLYGON) { continue; }
 
             if (description->filter == nullptr || description->filter->evaluateOr(EvaluationContext(-1, featureContext), true)) {
-                const auto &geometryHandler = std::get<1>(feature);
                 const auto &polygonCoordinates = geometryHandler.getPolygonCoordinates();
                 const auto &polygonHoles = geometryHandler.getHoleCoordinates();
 
@@ -150,20 +140,25 @@ void Tiled2dMapVectorPolygonTile::setTileData(const std::shared_ptr<MaskingObjec
                 for (int i = 0; i < polygonCoordinates.size(); i++) {
 
                     size_t verticesCount = polygonCoordinates[i].size();
-                    std::vector<std::vector<::Coord>> pol = {polygonCoordinates[i]};
-                    for (auto const &hole: polygonHoles[i]) {
-                        verticesCount += polygonHoles[i].size();
-                        pol.push_back(hole);
-                    }
-
 #ifndef __APPLE__
-                    // TODO: android currently only supports 16bit indices
+                    // TODO: Android currently only supports 16bit indices
                     // more complex polygons may need to be simplified on-device to render them correctly
                     if (verticesCount >= std::numeric_limits<uint16_t>::max()) {
-                        LogError <<= "Too many vertices to use 16bit indices: " + std::to_string(verticesCount);
+                        LogError <<= "Too many vertices in a polygon to use 16bit indices: " + std::to_string(verticesCount);
                         continue;
                     }
 #endif
+                    std::vector<std::vector<::Coord>> pol = {polygonCoordinates[i]};
+                    for (auto const &hole: polygonHoles[i]) {
+#ifndef __APPLE__
+                        if (verticesCount + polygonHoles[i].size() >= std::numeric_limits<uint16_t>::max()) {
+                            LogError <<= "Too many vertices by polygon holes to use 16bit indices - remaining holes are dropped";
+                            break;
+                        }
+#endif
+                        verticesCount += polygonHoles[i].size();
+                        pol.push_back(hole);
+                    }
 
                     std::vector<uint32_t> new_indices = mapbox::earcut<uint32_t>(pol);
 
@@ -193,7 +188,7 @@ void Tiled2dMapVectorPolygonTile::setTileData(const std::shared_ptr<MaskingObjec
 
                     indices_offset += posAdded;
 
-                    hitDetectionPolygonMap[tileInfo].push_back({PolygonCoord(polygonCoordinates[i], polygonHoles[i]), featureContext});
+//                    hitDetectionPolygonMap[tileInfo].push_back({PolygonCoord(polygonCoordinates[i], polygonHoles[i]), featureContext});
                 }
 
                 int styleIndex = -1;
@@ -218,16 +213,11 @@ void Tiled2dMapVectorPolygonTile::setTileData(const std::shared_ptr<MaskingObjec
             }
         }
 
-        this->tileMask = tileMask;
         addPolygons(objectDescriptions);
     } else {
-        vectorLayer.message(&Tiled2dMapVectorLayer::tileIsReady, tileInfo);
+        auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
+        tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, selfActor);
     }
-}
-
-void Tiled2dMapVectorPolygonTile::updateTileMask(const std::shared_ptr<MaskingObjectInterface> &tileMask) {
-    this->tileMask = tileMask;
-    preGenerateRenderObjects();
 }
 
 void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::tuple<std::vector<std::tuple<std::vector<Coord>, int>>, std::vector<int32_t>>> &polygons) {
@@ -237,7 +227,8 @@ void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::tuple<std::
     }
 
     if (polygons.empty() && oldGraphicsObjects.empty()) {
-        vectorLayer.message(&Tiled2dMapVectorLayer::tileIsReady, tileInfo);
+        auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
+        tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, selfActor);
         return;
     }
 
@@ -272,16 +263,14 @@ void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::tuple<std::
     auto selfActor = WeakActor(mailbox, shared_from_this()->weak_from_this());
     selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorPolygonTile::setupPolygons, newGraphicObjects, oldGraphicsObjects);
 #endif
-    
-    preGenerateRenderObjects();
 }
 
 void Tiled2dMapVectorPolygonTile::setupPolygons(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects,
                                                 const std::vector<std::shared_ptr<GraphicsObjectInterface>> &oldPolygonObjects) {
     for (const auto &polygon : oldPolygonObjects) {
-           if (polygon->isReady()) polygon->clear();
-       }
-    
+        if (polygon->isReady()) polygon->clear();
+    }
+
     auto mapInterface = this->mapInterface.lock();
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!renderingContext) {
@@ -292,25 +281,25 @@ void Tiled2dMapVectorPolygonTile::setupPolygons(const std::vector<std::shared_pt
         if (!polygon->isReady()) polygon->setup(renderingContext);
     }
 
-    vectorLayer.message(&Tiled2dMapVectorLayer::tileIsReady, tileInfo);
+    auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
+    tileReadyInterface.message(&Tiled2dMapVectorLayerReadyInterface::tileIsReady, tileInfo, description->identifier, selfActor);
 }
 
-void Tiled2dMapVectorPolygonTile::preGenerateRenderObjects() {
+std::vector<std::shared_ptr<RenderObjectInterface>> Tiled2dMapVectorPolygonTile::generateRenderObjects() {
     std::vector<std::shared_ptr<RenderObjectInterface>> newRenderObjects;
-
     for (auto const &object : polygons) {
         for (const auto &config : object->getRenderConfig()) {
-            newRenderObjects.push_back(std::make_shared<RenderObject>(config->getGraphicsObject(), true));
+            newRenderObjects.push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
         }
     }
 
-    renderObjects = newRenderObjects;
+    return std::move(newRenderObjects);
 }
 
 bool Tiled2dMapVectorPolygonTile::onClickConfirmed(const Vec2F &posScreen) {
     auto mapInterface = this->mapInterface.lock();
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
-    if (!camera || selectionDelegate) {
+    if (!camera || !selectionDelegate) {
         return false;
     }
     auto point = camera->coordFromScreenPosition(posScreen);

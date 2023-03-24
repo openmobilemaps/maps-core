@@ -60,7 +60,6 @@ public:
     }
 
     std::string getLayerName() override {
-        LogDebug <<= "Tiled2dMap vector raster sublayer config get identifier";
         return description->identifier;
     }
 

@@ -9,7 +9,6 @@
  */
 
 #include "Tiled2dMapRasterSource.h"
-#include "Tiled2dMapRasterLayer.h"
 #include "LambdaTask.h"
 #include <algorithm>
 #include <cmath>
@@ -20,8 +19,8 @@ Tiled2dMapRasterSource::Tiled2dMapRasterSource(const MapConfig &mapConfig,
                                                const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                                const std::shared_ptr<SchedulerInterface> &scheduler,
                                                const std::vector<std::shared_ptr<::LoaderInterface>> & loaders,
-                                               const WeakActor<Tiled2dMapRasterLayer> &listener,
-                                               float screenDensityPpi,
+                                               const WeakActor<Tiled2dMapRasterSourceListener> &listener,
+                                               float screenDensityPpi, 
                                                const std::shared_ptr<Tiled2dMapLayerConfig> &heightLayerConfig)
     : Tiled2dMapSource<TextureHolderInterface, std::pair<TextureLoaderResult, std::optional<TextureLoaderResult>>, std::pair<std::shared_ptr<::TextureHolderInterface>, std::shared_ptr<::TextureHolderInterface>>>(
           mapConfig, layerConfig, conversionHelper, scheduler, screenDensityPpi, loaders.size())
@@ -112,7 +111,8 @@ std::pair<std::shared_ptr<::TextureHolderInterface>, std::shared_ptr<::TextureHo
 }
 
 void Tiled2dMapRasterSource::notifyTilesUpdates() {
-    rasterLayerActor.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapRasterLayer::onTilesUpdated, getCurrentTiles());
+    rasterLayerActor.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapRasterSourceListener::onTilesUpdated,
+                             layerConfig->getLayerName(), getCurrentTiles());
 }
 
 std::unordered_set<Tiled2dMapRasterTileInfo> Tiled2dMapRasterSource::getCurrentTiles() {

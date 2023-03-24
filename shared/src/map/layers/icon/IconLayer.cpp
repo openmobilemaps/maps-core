@@ -193,7 +193,7 @@ void IconLayer::update() {
     }
 }
 
-std::vector<std::shared_ptr<::RenderPassInterface>> IconLayer::buildRenderPasses() {
+std::vector<::RenderTask> IconLayer::getRenderTasks() {
     auto lockSelfPtr = shared_from_this();
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
@@ -234,10 +234,10 @@ std::vector<std::shared_ptr<::RenderPassInterface>> IconLayer::buildRenderPasses
         std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
         for (const auto &passEntry : currentRenderPassObjectMap) {
             std::shared_ptr<RenderPass> renderPass =
-                std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, nullptr), passEntry.second, mask);
+                std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second, mask);
             renderPasses.push_back(renderPass);
         }
-        return renderPasses;
+        return std::vector<::RenderTask>{RenderTask(nullptr, renderPasses)};;
     }
 }
 

@@ -27,7 +27,7 @@ class Tiled2dMapVectorSubLayer : public SimpleLayerInterface {
 public:
     virtual void update() override;
 
-    virtual std::vector<std::shared_ptr<RenderPassInterface>> buildRenderPasses() override;
+    virtual std::vector<std::shared_ptr<RenderPassInterface>> buildRenderPasses();
 
     virtual std::vector<std::shared_ptr<RenderPassInterface>> buildRenderPasses(const std::unordered_set<Tiled2dMapTileInfo> &tiles);
 

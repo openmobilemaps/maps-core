@@ -62,12 +62,12 @@ void TextLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface>
     // TODO.
 }
 
-std::vector<std::shared_ptr<::RenderPassInterface>> TextLayer::buildRenderPasses() {
+std::vector<::RenderTask> TextLayer::getRenderTasks() {
     if (isHidden) {
         return {};
     } else {
         std::lock_guard<std::recursive_mutex> overlayLock(renderPassMutex);
-        return renderPasses;
+        return std::vector<::RenderTask>{RenderTask(nullptr, renderPasses)};
     }
 }
 
@@ -160,6 +160,12 @@ void TextLayer::clear() {
     mapInterface->invalidate();
 }
 
+void TextLayer::update() {
+    for (auto const &textTuple : texts) {
+        textTuple.second->update();
+    }
+}
+
 void TextLayer::generateRenderPasses() {
     std::lock_guard<std::recursive_mutex> lock(textMutex);
 
@@ -174,7 +180,7 @@ void TextLayer::generateRenderPasses() {
 
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
     for (const auto &passEntry : renderPassObjectMap) {
-        std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, nullptr), passEntry.second);
+        std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second);
         newRenderPasses.push_back(renderPass);
     }
 

@@ -16,35 +16,29 @@
 #include "PolygonGroup2dLayerObject.h"
 #include "PolygonCoord.h"
 
-class Tiled2dMapVectorPolygonTile : public Tiled2dMapVectorTile, public std::enable_shared_from_this<Tiled2dMapVectorPolygonTile> {
+class Tiled2dMapVectorPolygonTile
+        : public Tiled2dMapVectorTile,
+          public std::enable_shared_from_this<Tiled2dMapVectorPolygonTile> {
 public:
     Tiled2dMapVectorPolygonTile(const std::weak_ptr<MapInterface> &mapInterface,
                                 const Tiled2dMapTileInfo &tileInfo,
-                                const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
+                                const WeakActor<Tiled2dMapVectorLayerReadyInterface> &tileReadyInterface,
                                 const std::shared_ptr<PolygonVectorLayerDescription> &description);
 
     void updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
-                                const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) override;
+                                const Tiled2dMapVectorTileDataVector &layerFeatures) override;
 
     void update() override;
 
-    virtual std::vector<std::shared_ptr<::RenderObjectInterface>> getRenderObjects() override;
+    virtual std::vector<std::shared_ptr<RenderObjectInterface>> generateRenderObjects() override;
 
     virtual void clear() override;
 
     virtual void setup() override;
 
-    virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
-
-    virtual void setTileData(const std::shared_ptr<MaskingObjectInterface> &tileMask,
-                             const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) override;
-
-    virtual void updateTileMask(const std::shared_ptr<MaskingObjectInterface> &tileMask) override;
+    virtual void setVectorTileData(const Tiled2dMapVectorTileDataVector &tileData) override;
 
     bool onClickConfirmed(const Vec2F &posScreen) override;
-
-protected:
-    virtual void preGenerateRenderObjects();
 
 private:
     void addPolygons(const std::vector<std::tuple<std::vector<std::tuple<std::vector<Coord>, int>>, std::vector<int32_t>>> &polygons);
@@ -60,9 +54,4 @@ private:
     std::unordered_set<std::string> usedKeys;
 
     std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<PolygonCoord, FeatureContext>>> hitDetectionPolygonMap;
-
-    std::shared_ptr<MaskingObjectInterface> tileMask;
-    std::optional<::RectI> scissorRect = std::nullopt;
-
-    std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;
 };

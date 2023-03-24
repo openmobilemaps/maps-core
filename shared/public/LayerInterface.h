@@ -6,7 +6,7 @@
 #include "ErrorManager.h"
 #include "MaskingObjectInterface.h"
 #include "RectI.h"
-#include "RenderPassInterface.h"
+#include "RenderTask.h"
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -23,7 +23,7 @@ public:
 
     virtual void update() = 0;
 
-    virtual std::vector</*not-null*/ std::shared_ptr<::RenderPassInterface>> buildRenderPasses() = 0;
+    virtual std::vector<::RenderTask> getRenderTasks() = 0;
 
     virtual void onAdded(const /*not-null*/ std::shared_ptr<MapInterface> & mapInterface, int32_t layerIndex) = 0;
 

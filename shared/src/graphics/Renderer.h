@@ -12,6 +12,7 @@
 
 #include "RenderPassInterface.h"
 #include "RendererInterface.h"
+#include "RenderTask.h"
 #include <map>
 #include <queue>
 #include <vector>
@@ -24,14 +25,14 @@ struct RenderPassInterfaceCompare {
 
 class Renderer : public RendererInterface {
   public:
-    void addToRenderQueue(const std::shared_ptr<RenderPassInterface> &renderPass);
+    void addToRenderQueue(const std::vector<RenderTask> & tasks);
 
     /** Ensure calling on graphics thread */
     void drawFrame(const std::shared_ptr<RenderingContextInterface> &renderingContext,
                    const std::shared_ptr<CameraInterface> &camera);
 
   private:
-    std::map<int32_t, std::vector<std::shared_ptr<RenderPassInterface>>> renderQueue;
+    std::vector<RenderTask> renderQueue;
 
     std::vector<float> tempMvpMatrix = std::vector<float>(16, 0.0);
 

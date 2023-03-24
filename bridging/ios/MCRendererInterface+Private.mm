@@ -5,9 +5,10 @@
 #import "MCRendererInterface.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
+#import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCCameraInterface+Private.h"
-#import "MCRenderPassInterface+Private.h"
+#import "MCRenderTask+Private.h"
 #import "MCRenderingContextInterface+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -33,9 +34,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (void)addToRenderQueue:(nullable id<MCRenderPassInterface>)renderPass {
+- (void)addToRenderQueue:(nonnull NSArray<MCRenderTask *> *)tasks {
     try {
-        _cppRefHandle.get()->addToRenderQueue(::djinni_generated::RenderPassInterface::toCpp(renderPass));
+        _cppRefHandle.get()->addToRenderQueue(::djinni::List<::djinni_generated::RenderTask>::toCpp(tasks));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -56,10 +57,10 @@ class RendererInterface::ObjcProxy final
     friend class ::djinni_generated::RendererInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void addToRenderQueue(const /*not-null*/ std::shared_ptr<::RenderPassInterface> & c_renderPass) override
+    void addToRenderQueue(const std::vector<::RenderTask> & c_tasks) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() addToRenderQueue:(::djinni_generated::RenderPassInterface::fromCpp(c_renderPass))];
+            [djinni_private_get_proxied_objc_object() addToRenderQueue:(::djinni::List<::djinni_generated::RenderTask>::fromCpp(c_tasks))];
         }
     }
     void drawFrame(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_renderingContext, const /*not-null*/ std::shared_ptr<::CameraInterface> & c_camera) override

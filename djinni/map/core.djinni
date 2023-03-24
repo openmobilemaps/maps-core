@@ -17,6 +17,7 @@
 @extern "../yaml/render_pass_interface.yaml"
 @extern "../yaml/masking_object_interface.yaml"
 @extern "../yaml/error_manager.yaml"
+@extern "../yaml/render_task.yaml"
 
 map_interface = interface +c {
     static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface, rendering_context: rendering_context_interface, map_config: map_config, scheduler: scheduler_interface, pixel_density: f32) : map_interface;
@@ -84,7 +85,7 @@ map_config = record {
 layer_interface = interface +c +j +o {
     set_masking_object(masking_object: optional<masking_object_interface>);
     update();
-    build_render_passes(): list<render_pass_interface>;
+    get_render_tasks(): list<render_task>;
     onAdded(map_interface: map_interface, layer_index: i32);
     onRemoved();
     pause();

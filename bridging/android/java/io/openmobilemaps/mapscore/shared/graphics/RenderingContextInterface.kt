@@ -18,13 +18,13 @@ abstract class RenderingContextInterface {
 
     abstract fun setBackgroundColor(color: io.openmobilemaps.mapscore.shared.graphics.common.Color)
 
-    abstract fun setupDrawFrame(pass: RenderPassConfig)
+    abstract fun setupDrawFrame(target: RenderTargetTexture?)
 
-    abstract fun endDrawFrame()
+    abstract fun endDrawFrame(target: RenderTargetTexture?)
 
-    abstract fun preRenderStencilMask(pass: RenderPassConfig)
+    abstract fun preRenderStencilMask(target: RenderTargetTexture?)
 
-    abstract fun postRenderStencilMask(pass: RenderPassConfig)
+    abstract fun postRenderStencilMask(target: RenderTargetTexture?)
 
     /** optional rectangle, remove scissoring when not set */
     abstract fun applyScissorRect(scissorRect: io.openmobilemaps.mapscore.shared.graphics.common.RectI?)
@@ -65,29 +65,29 @@ abstract class RenderingContextInterface {
         }
         private external fun native_setBackgroundColor(_nativeRef: Long, color: io.openmobilemaps.mapscore.shared.graphics.common.Color)
 
-        override fun setupDrawFrame(pass: RenderPassConfig) {
+        override fun setupDrawFrame(target: RenderTargetTexture?) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setupDrawFrame(this.nativeRef, pass)
+            native_setupDrawFrame(this.nativeRef, target)
         }
-        private external fun native_setupDrawFrame(_nativeRef: Long, pass: RenderPassConfig)
+        private external fun native_setupDrawFrame(_nativeRef: Long, target: RenderTargetTexture?)
 
-        override fun endDrawFrame() {
+        override fun endDrawFrame(target: RenderTargetTexture?) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_endDrawFrame(this.nativeRef)
+            native_endDrawFrame(this.nativeRef, target)
         }
-        private external fun native_endDrawFrame(_nativeRef: Long)
+        private external fun native_endDrawFrame(_nativeRef: Long, target: RenderTargetTexture?)
 
-        override fun preRenderStencilMask(pass: RenderPassConfig) {
+        override fun preRenderStencilMask(target: RenderTargetTexture?) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_preRenderStencilMask(this.nativeRef, pass)
+            native_preRenderStencilMask(this.nativeRef, target)
         }
-        private external fun native_preRenderStencilMask(_nativeRef: Long, pass: RenderPassConfig)
+        private external fun native_preRenderStencilMask(_nativeRef: Long, target: RenderTargetTexture?)
 
-        override fun postRenderStencilMask(pass: RenderPassConfig) {
+        override fun postRenderStencilMask(target: RenderTargetTexture?) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_postRenderStencilMask(this.nativeRef, pass)
+            native_postRenderStencilMask(this.nativeRef, target)
         }
-        private external fun native_postRenderStencilMask(_nativeRef: Long, pass: RenderPassConfig)
+        private external fun native_postRenderStencilMask(_nativeRef: Long, target: RenderTargetTexture?)
 
         override fun applyScissorRect(scissorRect: io.openmobilemaps.mapscore.shared.graphics.common.RectI?) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

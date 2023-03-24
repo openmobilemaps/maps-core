@@ -49,12 +49,12 @@ void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapIn
     
     auto selfMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
     auto castedMe = std::static_pointer_cast<Tiled2dMapRasterLayer>(shared_from_this());
-    auto selfActor = WeakActor<Tiled2dMapRasterLayer>(selfMailbox, castedMe);
+    auto selfActor = WeakActor<Tiled2dMapRasterSourceListener>(selfMailbox, castedMe);
     
     auto mailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
     rasterSource.emplaceObject(mailbox, mapInterface->getMapConfig(), layerConfig, mapInterface->getCoordinateConverterHelper(), mapInterface->getScheduler(), tileLoaders, selfActor, mapInterface->getCamera()->getScreenDensityPpi(), heightLayerConfig);
 
-    setSourceInterface(rasterSource.weakActor<Tiled2dMapSourceInterface>());
+    setSourceInterfaces({rasterSource.weakActor<Tiled2dMapSourceInterface>()});
 
 
     Tiled2dMapLayer::onAdded(mapInterface, layerIndex);
@@ -91,9 +91,9 @@ void Tiled2dMapRasterLayer::update() {
     }
 }
 
-std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapRasterLayer::buildRenderPasses() {
+std::vector<::RenderTask> Tiled2dMapRasterLayer::getRenderTasks() {
     std::lock_guard<std::recursive_mutex> overlayLock(renderPassMutex);
-    return renderPasses;
+    return std::vector<::RenderTask>{RenderTask(nullptr, renderPasses)};
 }
 
 void Tiled2dMapRasterLayer::pause() {
@@ -146,7 +146,10 @@ void Tiled2dMapRasterLayer::resume() {
 
 void Tiled2dMapRasterLayer::setT(int32_t t) {
     Tiled2dMapLayer::setT(t);
-    sourceInterface.message(&Tiled2dMapSourceInterface::notifyTilesUpdates);
+    std::lock_guard<std::recursive_mutex> lock(sourcesMutex);
+    for (const auto &sourceInterface : sourceInterfaces) {
+        sourceInterface.message(&Tiled2dMapSourceInterface::notifyTilesUpdates);
+    }
 }
 
 bool Tiled2dMapRasterLayer::shouldLoadTile(const Tiled2dMapTileInfo& tileInfo){
@@ -154,7 +157,7 @@ bool Tiled2dMapRasterLayer::shouldLoadTile(const Tiled2dMapTileInfo& tileInfo){
 }
 
 
-void Tiled2dMapRasterLayer::onTilesUpdated(std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) {
+void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) {
     auto lockSelfPtr = std::static_pointer_cast<Tiled2dMapRasterLayer>(shared_from_this());
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
     auto graphicsFactory = mapInterface ? mapInterface->getGraphicsObjectFactory() : nullptr;
@@ -369,12 +372,12 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
 
                 mask.getGraphicsObject()->setup(renderingContext);
                 std::shared_ptr<RenderPass> renderPass =
-                std::make_shared<RenderPass>(RenderPassConfig(0, nullptr),
+                std::make_shared<RenderPass>(RenderPassConfig(0),
                                              std::vector<std::shared_ptr<::RenderObjectInterface>>{renderObject}, mask.getGraphicsMaskObject());
                 renderPass->setScissoringRect(scissorRect);
                 newRenderPasses.push_back(renderPass);
             }else{
-                std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(0, nullptr),
+                std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(0),
                                                                                       std::vector<std::shared_ptr<::RenderObjectInterface>>{
                     renderObject});
                 renderPass->setScissoringRect(scissorRect);
@@ -385,7 +388,7 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
             //TODO: general mask would no longer work now, we would have to merge the tile-mask with the layer-mask
             if (mask) {
                 std::shared_ptr<RenderPass> renderPass =
-                std::make_shared<RenderPass>(RenderPassConfig(0, nullptr),
+                std::make_shared<RenderPass>(RenderPassConfig(0),
                                              std::vector<std::shared_ptr<::RenderObjectInterface>>{renderObject}, mask);
                 renderPass->setScissoringRect(scissorRect);
                 newRenderPasses.push_back(renderPass);

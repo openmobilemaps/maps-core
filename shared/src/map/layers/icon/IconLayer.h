@@ -56,7 +56,7 @@ class IconLayer : public IconLayerInterface,
 
     virtual void update() override;
 
-    virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override;
+    virtual std::vector<::RenderTask> getRenderTasks() override;
 
     virtual void onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32_t layerIndex) override;
 

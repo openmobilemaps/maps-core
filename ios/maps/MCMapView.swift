@@ -117,6 +117,12 @@ open class MCMapView: MTKView {
         isPaused = false
         framesToRender = framesToRenderAfterInvalidate
     }
+
+    public var continuousRendering: Bool = false {
+        didSet {
+            invalidate()
+        }
+    }
 }
 
 extension MCMapView: MTKViewDelegate {
@@ -130,12 +136,14 @@ extension MCMapView: MTKViewDelegate {
             return // don't execute metal calls in background
         }
 
-        guard framesToRender != 0 else {
+        guard framesToRender != 0 || continuousRendering else {
             isPaused = true
             return
         }
 
-        framesToRender -= 1
+        if !continuousRendering {
+            framesToRender -= 1
+        }
 
         guard let commandBuffer = MetalContext.current.commandQueue.makeCommandBuffer()
         else {

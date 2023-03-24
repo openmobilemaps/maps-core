@@ -35,7 +35,7 @@ private:
 
         void setMaskingObject(const /*nullable*/ std::shared_ptr<::MaskingObjectInterface> & maskingObject) override;
         void update() override;
-        std::vector</*not-null*/ std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override;
+        std::vector<::RenderTask> getRenderTasks() override;
         void onAdded(const /*not-null*/ std::shared_ptr<::MapInterface> & mapInterface, int32_t layerIndex) override;
         void onRemoved() override;
         void pause() override;
@@ -57,7 +57,7 @@ private:
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/LayerInterface") };
     const jmethodID method_setMaskingObject { ::djinni::jniGetMethodID(clazz.get(), "setMaskingObject", "(Lio/openmobilemaps/mapscore/shared/graphics/objects/MaskingObjectInterface;)V") };
     const jmethodID method_update { ::djinni::jniGetMethodID(clazz.get(), "update", "()V") };
-    const jmethodID method_buildRenderPasses { ::djinni::jniGetMethodID(clazz.get(), "buildRenderPasses", "()Ljava/util/ArrayList;") };
+    const jmethodID method_getRenderTasks { ::djinni::jniGetMethodID(clazz.get(), "getRenderTasks", "()Ljava/util/ArrayList;") };
     const jmethodID method_onAdded { ::djinni::jniGetMethodID(clazz.get(), "onAdded", "(Lio/openmobilemaps/mapscore/shared/map/MapInterface;I)V") };
     const jmethodID method_onRemoved { ::djinni::jniGetMethodID(clazz.get(), "onRemoved", "()V") };
     const jmethodID method_pause { ::djinni::jniGetMethodID(clazz.get(), "pause", "()V") };

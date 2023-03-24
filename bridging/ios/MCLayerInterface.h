@@ -5,7 +5,7 @@
 #import "MCLayerReadyState.h"
 #import "MCMaskingObjectInterface.h"
 #import "MCRectI.h"
-#import "MCRenderPassInterface.h"
+#import "MCRenderTask.h"
 #import <Foundation/Foundation.h>
 @class MCMapInterface;
 
@@ -16,7 +16,7 @@
 
 - (void)update;
 
-- (nonnull NSArray<id<MCRenderPassInterface>> *)buildRenderPasses;
+- (nonnull NSArray<MCRenderTask *> *)getRenderTasks;
 
 - (void)onAdded:(nullable MCMapInterface *)mapInterface
      layerIndex:(int32_t)layerIndex;

@@ -12,7 +12,7 @@
 #import "MCMapInterface+Private.h"
 #import "MCMaskingObjectInterface+Private.h"
 #import "MCRectI+Private.h"
-#import "MCRenderPassInterface+Private.h"
+#import "MCRenderTask+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -49,10 +49,10 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nonnull NSArray<id<MCRenderPassInterface>> *)buildRenderPasses {
+- (nonnull NSArray<MCRenderTask *> *)getRenderTasks {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->buildRenderPasses();
-        return ::djinni::List<::djinni_generated::RenderPassInterface>::fromCpp(objcpp_result_);
+        auto objcpp_result_ = _cppRefHandle.get()->getRenderTasks();
+        return ::djinni::List<::djinni_generated::RenderTask>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -159,11 +159,11 @@ public:
             [djinni_private_get_proxied_objc_object() update];
         }
     }
-    std::vector</*not-null*/ std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override
+    std::vector<::RenderTask> getRenderTasks() override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() buildRenderPasses];
-            return ::djinni::List<::djinni_generated::RenderPassInterface>::toCpp(objcpp_result_);
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getRenderTasks];
+            return ::djinni::List<::djinni_generated::RenderTask>::toCpp(objcpp_result_);
         }
     }
     void onAdded(const /*not-null*/ std::shared_ptr<::MapInterface> & c_mapInterface, int32_t c_layerIndex) override

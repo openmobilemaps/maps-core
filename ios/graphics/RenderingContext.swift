@@ -123,7 +123,7 @@ public class RenderingContext: NSObject {
     }()
 
     public func clearStencilBuffer() {
-        let pass =  MCRenderPassConfig(renderPass: 0, target: nil)
+        let pass =  MCRenderPassConfig(renderPass: 0)
         guard let encoder = encoder else { return }
         stencilClearQuad.render(encoder: encoder,
                                 context: self,
@@ -136,15 +136,15 @@ public class RenderingContext: NSObject {
 
 extension RenderingContext: MCRenderingContextInterface {
 
-    public func preRenderStencilMask(_ pass: MCRenderPassConfig) {
+    public func preRenderStencilMask(_ target: MCRenderTargetTexture?) {
     }
 
-    public func postRenderStencilMask(_ pass: MCRenderPassConfig) {
+    public func postRenderStencilMask(_ target: MCRenderTargetTexture?) {
         clearStencilBuffer()
     }
 
-    public func setupDrawFrame(_ pass: MCRenderPassConfig) {
-        if let offScreenTexture = pass.target as? RenderTargetTexture {
+    public func setupDrawFrame(_ target: MCRenderTargetTexture?) {
+        if let offScreenTexture = target as? RenderTargetTexture {
             if encoder != nil {
                 currentMainEncoder = nil
                 encoder?.endEncoding()
@@ -164,7 +164,7 @@ extension RenderingContext: MCRenderingContextInterface {
         }
     }
 
-    public func endDrawFrame() {
+    public func endDrawFrame(_ target: MCRenderTargetTexture?) {
         if (encoder?.hash != currentMainEncoder?.hash) {
             encoder?.endEncoding()
             encoder = nil

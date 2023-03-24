@@ -5,5 +5,4 @@ package io.openmobilemaps.mapscore.shared.graphics
 
 data class RenderPassConfig(
     var renderPassIndex: Int,
-    var target: RenderTargetTexture?,
 )

@@ -35,11 +35,11 @@ rendering_context_interface = interface +c +j +o {
     get_viewport_size() : vec_2_i;
     set_background_color(color: color);
     
-    setup_draw_frame(pass: render_pass_config);
-    end_draw_frame();
+    setup_draw_frame(target: optional<render_target_texture>);
+    end_draw_frame(target: optional<render_target_texture>);
 
-    pre_render_stencil_mask(pass: render_pass_config);
-    post_render_stencil_mask(pass: render_pass_config);
+    pre_render_stencil_mask(target: optional<render_target_texture>);
+    post_render_stencil_mask(target: optional<render_target_texture>);
 
     # optional rectangle, remove scissoring when not set
     apply_scissor_rect(scissor_rect: optional<rect_i>);
@@ -67,11 +67,15 @@ render_target_texture = interface +c +j +o {
 
 render_pass_config = record {
     render_pass_index: i32;
+}
+
+render_task = record  {
     target: optional<render_target_texture>;
+    render_passes: list<render_pass_interface>;
 }
 
 renderer_interface = interface +c +j +o {
-    add_to_render_queue(render_pass: render_pass_interface);
+    add_to_render_queue(tasks: list<render_task>);
     # Ensure calling on graphics thread
     draw_frame(rendering_context: rendering_context_interface, camera: camera_interface);
 }

@@ -9,7 +9,7 @@
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCColor+Private.h"
 #import "MCRectI+Private.h"
-#import "MCRenderPassConfig+Private.h"
+#import "MCRenderTargetTexture+Private.h"
 #import "MCVec2I+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -60,27 +60,27 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setupDrawFrame:(nonnull MCRenderPassConfig *)pass {
+- (void)setupDrawFrame:(nullable id<MCRenderTargetTexture>)target {
     try {
-        _cppRefHandle.get()->setupDrawFrame(::djinni_generated::RenderPassConfig::toCpp(pass));
+        _cppRefHandle.get()->setupDrawFrame(::djinni::Optional<std::optional, ::djinni_generated::RenderTargetTexture>::toCpp(target));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)endDrawFrame {
+- (void)endDrawFrame:(nullable id<MCRenderTargetTexture>)target {
     try {
-        _cppRefHandle.get()->endDrawFrame();
+        _cppRefHandle.get()->endDrawFrame(::djinni::Optional<std::optional, ::djinni_generated::RenderTargetTexture>::toCpp(target));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)preRenderStencilMask:(nonnull MCRenderPassConfig *)pass {
+- (void)preRenderStencilMask:(nullable id<MCRenderTargetTexture>)target {
     try {
-        _cppRefHandle.get()->preRenderStencilMask(::djinni_generated::RenderPassConfig::toCpp(pass));
+        _cppRefHandle.get()->preRenderStencilMask(::djinni::Optional<std::optional, ::djinni_generated::RenderTargetTexture>::toCpp(target));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)postRenderStencilMask:(nonnull MCRenderPassConfig *)pass {
+- (void)postRenderStencilMask:(nullable id<MCRenderTargetTexture>)target {
     try {
-        _cppRefHandle.get()->postRenderStencilMask(::djinni_generated::RenderPassConfig::toCpp(pass));
+        _cppRefHandle.get()->postRenderStencilMask(::djinni::Optional<std::optional, ::djinni_generated::RenderTargetTexture>::toCpp(target));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -124,28 +124,28 @@ public:
             [djinni_private_get_proxied_objc_object() setBackgroundColor:(::djinni_generated::Color::fromCpp(c_color))];
         }
     }
-    void setupDrawFrame(const ::RenderPassConfig & c_pass) override
+    void setupDrawFrame(const /*nullable*/ std::shared_ptr<::RenderTargetTexture> & c_target) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setupDrawFrame:(::djinni_generated::RenderPassConfig::fromCpp(c_pass))];
+            [djinni_private_get_proxied_objc_object() setupDrawFrame:(::djinni::Optional<std::optional, ::djinni_generated::RenderTargetTexture>::fromCpp(c_target))];
         }
     }
-    void endDrawFrame() override
+    void endDrawFrame(const /*nullable*/ std::shared_ptr<::RenderTargetTexture> & c_target) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() endDrawFrame];
+            [djinni_private_get_proxied_objc_object() endDrawFrame:(::djinni::Optional<std::optional, ::djinni_generated::RenderTargetTexture>::fromCpp(c_target))];
         }
     }
-    void preRenderStencilMask(const ::RenderPassConfig & c_pass) override
+    void preRenderStencilMask(const /*nullable*/ std::shared_ptr<::RenderTargetTexture> & c_target) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() preRenderStencilMask:(::djinni_generated::RenderPassConfig::fromCpp(c_pass))];
+            [djinni_private_get_proxied_objc_object() preRenderStencilMask:(::djinni::Optional<std::optional, ::djinni_generated::RenderTargetTexture>::fromCpp(c_target))];
         }
     }
-    void postRenderStencilMask(const ::RenderPassConfig & c_pass) override
+    void postRenderStencilMask(const /*nullable*/ std::shared_ptr<::RenderTargetTexture> & c_target) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() postRenderStencilMask:(::djinni_generated::RenderPassConfig::fromCpp(c_pass))];
+            [djinni_private_get_proxied_objc_object() postRenderStencilMask:(::djinni::Optional<std::optional, ::djinni_generated::RenderTargetTexture>::fromCpp(c_target))];
         }
     }
     void applyScissorRect(const std::optional<::RectI> & c_scissorRect) override

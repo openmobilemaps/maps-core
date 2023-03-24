@@ -6,6 +6,7 @@
 #import "MCFont.h"
 #import "MCFormattedStringEntry.h"
 #import "MCTextJustify.h"
+#import "MCTextSymbolPlacement.h"
 #import <Foundation/Foundation.h>
 
 
@@ -20,5 +21,9 @@
 - (MCAnchor)getTextAnchor;
 
 - (MCTextJustify)getTextJustify;
+
+- (MCTextSymbolPlacement)getSymbolPlacement;
+
+- (nullable NSArray<MCCoord *> *)getLineCoordinates;
 
 @end

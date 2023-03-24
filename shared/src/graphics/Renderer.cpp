@@ -14,9 +14,20 @@
 #include "RenderObjectInterface.h"
 #include <Logger.h>
 
-void Renderer::addToRenderQueue(const std::shared_ptr<RenderPassInterface> &renderPass) {
-    int32_t renderPassIndex = renderPass->getRenderPassConfig().renderPassIndex;
-    renderQueue[renderPassIndex].push_back(renderPass);
+void Renderer::addToRenderQueue(const std::vector<RenderTask> & tasks) {
+    for (const auto &task: tasks) {
+        bool didMerge = false;
+        for (auto &entry: renderQueue) {
+            if (entry.target == task.target) {
+                didMerge = true;
+                entry.renderPasses.insert(entry.renderPasses.begin(), task.renderPasses.begin(), task.renderPasses.end());
+                break;
+            }
+        }
+        if (!didMerge) {
+            renderQueue.push_back(task);
+        }
+    }
 }
 
 /** Ensure calling on graphics thread */
@@ -26,45 +37,51 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
     auto vpMatrix = camera->getVpMatrix();
     auto vpMatrixPointer = (int64_t)vpMatrix.data();
 
-    for (const auto &[index, passes] : renderQueue) {
-        for (const auto &pass : passes) {
-            const auto &maskObject = pass->getMaskingObject();
-            const bool hasMask = maskObject != nullptr;
 
-            double factor = camera->getScalingFactor();
-            const auto &renderObjects = pass->getRenderObjects();
+    for (auto const &task: renderQueue) {
 
-            const auto &config = pass->getRenderPassConfig();
+        renderingContext->setupDrawFrame(task.target);
 
-            renderingContext->setupDrawFrame(config);
+        for (const auto &[index, passes] : renderQueue) {
+            for (const auto &pass : passes) {
+                const auto &maskObject = pass->getMaskingObject();
+                const bool hasMask = maskObject != nullptr;
 
-            renderingContext->applyScissorRect(pass->getScissoringRect());
+                double factor = camera->getScalingFactor();
+                const auto &renderObjects = pass->getRenderObjects();
 
-            if (hasMask) {
-                renderingContext->preRenderStencilMask(config);
-                maskObject->renderAsMask(renderingContext, config, vpMatrixPointer, factor);
-                //LogDebug << "Has mask and mask is: " <<= (maskObject->asGraphicsObject()->isReady() ? "ready" : "not ready");
-            }
+                const auto &config = pass->getRenderPassConfig();
 
-            for (const auto &renderObject : renderObjects) {
-                const auto &graphicsObject = renderObject->getGraphicsObject();
-                if (renderObject->isScreenSpaceCoords()) {
-                    graphicsObject->render(renderingContext, config, (int64_t) identityMatrix.data(), hasMask, factor / renderObject->getScreenSpaceScalingFactor());
-                } else if (renderObject->hasCustomModelMatrix()) {
-                    Matrix::multiplyMMC(tempMvpMatrix, 0, vpMatrix, 0, renderObject->getCustomModelMatrix(), 0);
-                    graphicsObject->render(renderingContext, config, (int64_t)tempMvpMatrix.data(), hasMask,
-                                           factor);
-                } else {
-                    graphicsObject->render(renderingContext, config, vpMatrixPointer, hasMask, factor);
+                renderingContext->applyScissorRect(pass->getScissoringRect());
+
+                if (hasMask) {
+                    renderingContext->preRenderStencilMask(task.target);
+                    maskObject->renderAsMask(renderingContext, config, vpMatrixPointer, factor);
+                    //LogDebug << "Has mask and mask is: " <<= (maskObject->asGraphicsObject()->isReady() ? "ready" : "not ready");
+                }
+
+                for (const auto &renderObject : renderObjects) {
+                    const auto &graphicsObject = renderObject->getGraphicsObject();
+                    if (renderObject->isScreenSpaceCoords()) {
+                        graphicsObject->render(renderingContext, config, (int64_t) identityMatrix.data(), hasMask, factor / renderObject->getScreenSpaceScalingFactor());
+                    } else if (renderObject->hasCustomModelMatrix()) {
+                        Matrix::multiplyMMC(tempMvpMatrix, 0, vpMatrix, 0, renderObject->getCustomModelMatrix(), 0);
+                        graphicsObject->render(renderingContext, config, (int64_t)tempMvpMatrix.data(), hasMask,
+                                               factor);
+                    } else {
+                        graphicsObject->render(renderingContext, config, vpMatrixPointer, hasMask, factor);
+                    }
+                }
+
+                if (hasMask) {
+                    renderingContext->postRenderStencilMask(task.target);
                 }
             }
-
-            if (hasMask) {
-                renderingContext->postRenderStencilMask(config);
-            }
-
-            renderingContext->endDrawFrame();
         }
+
+        renderingContext->endDrawFrame(task.target);
     }
+
+
     renderQueue.clear();
 }
