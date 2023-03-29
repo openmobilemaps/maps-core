@@ -41,6 +41,26 @@ baseFragmentShader(VertexOut in [[stage_in]],
     return float4(color.r * a, color.g * a, color.b * a, a);
 }
 
+fragment float4
+shadedFragmentShader(VertexOut in [[stage_in]],
+                   constant float &alpha [[buffer(1)]],
+                   texture2d<float> texture0 [[ texture(0)]],
+                   sampler textureSampler [[sampler(0)]])
+{
+  float4 color = texture0.sample(textureSampler, in.uv);
+
+  float s = in.n.x * 0.5 + in.n.y * 0.5 + in.n.z * 0.3;
+  s = s * 0.2 + 0.8;
+
+  float a = color.a * alpha;
+
+  if (a == 0) {
+    discard_fragment();
+  }
+
+  return float4(color.r * a * s, color.g * a * s, color.b * a * s, a);
+}
+
 vertex VertexOut
 pointVertexShader(const VertexIn vertexIn [[stage_in]],
                   constant float4x4 &mvpMatrix [[buffer(1)]],

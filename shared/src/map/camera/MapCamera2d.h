@@ -128,6 +128,8 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual float getScreenDensityPpi() override;
 
+    virtual ::Vec2D project(const ::Coord & position) override;
+
   protected:
     virtual void setupInertia();
 
@@ -142,7 +144,6 @@ class MapCamera2d : public MapCamera2dInterface,
     float screenDensityPpi;
     double screenPixelAsRealMeterFactor;
 
-    Coord centerPosition;
     double zoom = 0;
     double angle = 0;
     double tempAngle = 0;
@@ -207,7 +208,7 @@ class MapCamera2d : public MapCamera2dInterface,
 
     CameraConfiguration config;
 
-    enum ListenerType { BOUNDS = 1, ROTATION = 1 << 1, MAP_INTERACTION = 1 << 2 };
+    enum ListenerType { BOUNDS = 1, ROTATION = 1 << 1, MAP_INTERACTION = 1 << 2, CAMERA = 1 << 3 };
 
     void notifyListeners(const int &listenerType);
 

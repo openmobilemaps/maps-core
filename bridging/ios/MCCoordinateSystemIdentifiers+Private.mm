@@ -37,6 +37,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
++ (nonnull NSString *)UNITSPHERE {
+    try {
+        auto objcpp_result_ = ::CoordinateSystemIdentifiers::UNITSPHERE();
+        return ::djinni::String::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 + (nonnull NSString *)EPSG3857 {
     try {
         auto objcpp_result_ = ::CoordinateSystemIdentifiers::EPSG3857();

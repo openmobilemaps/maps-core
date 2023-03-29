@@ -36,6 +36,7 @@ private:
         std::vector<float> getVpMatrix() override;
         double getScalingFactor() override;
         void viewportSizeChanged() override;
+        ::Vec2D project(const ::Coord & position) override;
 
     private:
         friend ::djinni::JniInterface<::CameraInterface, ::djinni_generated::NativeCameraInterface>;
@@ -45,6 +46,7 @@ private:
     const jmethodID method_getVpMatrix { ::djinni::jniGetMethodID(clazz.get(), "getVpMatrix", "()Ljava/util/ArrayList;") };
     const jmethodID method_getScalingFactor { ::djinni::jniGetMethodID(clazz.get(), "getScalingFactor", "()D") };
     const jmethodID method_viewportSizeChanged { ::djinni::jniGetMethodID(clazz.get(), "viewportSizeChanged", "()V") };
+    const jmethodID method_project { ::djinni::jniGetMethodID(clazz.get(), "project", "(Lio/openmobilemaps/mapscore/shared/map/coordinates/Coord;)Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2D;") };
 };
 
 } // namespace djinni_generated

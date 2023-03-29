@@ -6,6 +6,7 @@
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
+#import "MCCameraInterface+Private.h"
 #import "MCErrorManager+Private.h"
 #import "MCLayerReadyState+Private.h"
 #import "MCRectCoord+Private.h"
@@ -40,6 +41,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
         _cppRefHandle.get()->onVisibleBoundsChanged(::djinni_generated::RectCoord::toCpp(visibleBounds),
                                                     ::djinni::I32::toCpp(curT),
                                                     ::djinni::F64::toCpp(zoom));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)onCameraChange:(nullable id<MCCameraInterface>)camera {
+    try {
+        _cppRefHandle.get()->onCameraChange(::djinni_generated::CameraInterface::toCpp(camera));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

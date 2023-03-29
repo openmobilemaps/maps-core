@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "CameraInterface.h"
 #include "ErrorManager.h"
 #include "LayerReadyState.h"
 #include "RectCoord.h"
@@ -15,6 +16,8 @@ public:
     virtual ~Tiled2dMapSourceInterface() = default;
 
     virtual void onVisibleBoundsChanged(const ::RectCoord & visibleBounds, int32_t curT, double zoom) = 0;
+
+    virtual void onCameraChange(const /*not-null*/ std::shared_ptr<::CameraInterface> & camera) = 0;
 
     virtual void setMinZoomLevelIdentifier(std::optional<int32_t> value) = 0;
 

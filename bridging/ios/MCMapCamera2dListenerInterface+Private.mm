@@ -7,6 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
+#import "MCCameraInterface+Private.h"
 #import "MCRectCoord+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -52,6 +53,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)onCameraChange:(nullable id<MCCameraInterface>)camera {
+    try {
+        _cppRefHandle.get()->onCameraChange(::djinni_generated::CameraInterface::toCpp(camera));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class MapCamera2dListenerInterface::ObjcProxy final
@@ -78,6 +85,12 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() onMapInteraction];
+        }
+    }
+    void onCameraChange(const /*not-null*/ std::shared_ptr<::CameraInterface> & c_camera) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() onCameraChange:(::djinni_generated::CameraInterface::fromCpp(c_camera))];
         }
     }
 };

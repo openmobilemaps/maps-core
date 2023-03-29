@@ -9,8 +9,12 @@
 #include "DataStructures.metal"
 using namespace metal;
 
-float2 baryinterp(float2 a, float2 b, float2 c, float3 p) {
+float2 baryinterp2(float2 a, float2 b, float2 c, float3 p) {
   return a * p.x + b * p.y + c * p.z;
+}
+
+float3 baryinterp3(float3 a, float3 b, float3 c, float3 p) {
+    return a * p.x + b * p.y + c * p.z;
 }
 
 kernel void compute_tess_factors(
@@ -24,7 +28,7 @@ kernel void compute_tess_factors(
 
 [[patch(triangle, 3)]]
 vertex VertexOut
-sphereProjectionVertexShader(const patch_control_point<VertexIn> patch [[stage_in]],
+sphereProjectionVertexShader(const patch_control_point<VertexIn3D> patch [[stage_in]],
                  const float3 positionInPatch [[position_in_patch]],
                  constant float4x4 &mvpMatrix [[buffer(1)]],
                  constant float &time [[buffer(2)]],
@@ -32,48 +36,36 @@ sphereProjectionVertexShader(const patch_control_point<VertexIn> patch [[stage_i
                  sampler textureSampler [[sampler(0)]]
                  )
 {
-  // Compute tesselated xy + uv
+    // Compute tesselated xy + uv
 
-  float2 p0 = patch[0].position;
-  float2 p1 = patch[1].position;
-  float2 p2 = patch[2].position;
-  float2 pos = baryinterp(p0, p1, p2, positionInPatch);
+    float3 p0 = patch[0].position;
+    float3 p1 = patch[1].position;
+    float3 p2 = patch[2].position;
+    float3 pos = baryinterp3(p0, p1, p2, positionInPatch);
 
-  float2 uv0 = patch[0].uv;
-  float2 uv1 = patch[1].uv;
-  float2 uv2 = patch[2].uv;
-  float2 uv = baryinterp(uv0, uv1, uv2, positionInPatch);
+    float2 uv0 = patch[0].uv;
+    float2 uv1 = patch[1].uv;
+    float2 uv2 = patch[2].uv;
+    float2 uv = baryinterp2(uv0, uv1, uv2, positionInPatch);
 
 
-  float4 color = texture0.sample(textureSampler, uv);
-  float height = -10000 + ((color.r * 256 * 256 * 256 + color.g * 256 * 256 + color.b * 256) * 0.1);
+    float4 color = texture0.sample(textureSampler, uv);
+    float height = -10000 + ((color.r * 256 * 256 * 256 + color.g * 256 * 256 + color.b * 256) * 0.1);
 
-  // xy -> xyz (globe)
 
-  float px = pos.x;
-  float py = pos.y;
-  float R = 6371000;
+    float R = 6371000;
+    float radius = 1.0 + (height / R) * 50.0;
 
-  // longitude [0, 2pi]
-  float lambda = px / R;
+    float3 n = pos / length(pos);
+    float3 pos3d = n * radius;
 
-  // latitude, [0, pi] statt [-90, 90]
-  float phi = atan(sinh(py / R)) + 3.1415926 / 2.0;
 
-  float radius = 1.0 + (height / R) * 1.0;
-
-  float4 pos3d = float4(radius*sin(phi)*cos(lambda+time*0.0),
-                           radius*cos(-phi),
-                           radius*sin(-phi)*sin(lambda+time*0.0),
-                           1);
-
-  // projection to screen
-
-  float4 position = mvpMatrix * pos3d;
+  float4 position = mvpMatrix * float4(pos3d, 1.0);
 
   VertexOut out {
     .position = position,
-    .uv = uv
+    .uv = uv,
+    .n = n
   };
 
   return out;
@@ -81,7 +73,7 @@ sphereProjectionVertexShader(const patch_control_point<VertexIn> patch [[stage_i
 
 [[patch(triangle, 3)]]
 vertex VertexOut
-sphereColorVertexShader(const patch_control_point<VertexIn> patch [[stage_in]],
+sphereColorVertexShader(const patch_control_point<VertexIn3D> patch [[stage_in]],
                              const float3 positionInPatch [[position_in_patch]],
                              constant float4x4 &mvpMatrix [[buffer(1)]],
                              constant float &time [[buffer(2)]],
@@ -89,44 +81,31 @@ sphereColorVertexShader(const patch_control_point<VertexIn> patch [[stage_in]],
                              sampler textureSampler [[sampler(0)]]
                              )
 {
-  // Compute tesselated xy + uv
+    // Compute tesselated xy + uv
 
-  float2 p0 = patch[0].position;
-  float2 p1 = patch[1].position;
-  float2 p2 = patch[2].position;
-  float2 pos = baryinterp(p0, p1, p2, positionInPatch);
+    float3 p0 = patch[0].position;
+    float3 p1 = patch[1].position;
+    float3 p2 = patch[2].position;
+    float3 pos = baryinterp3(p0, p1, p2, positionInPatch);
 
-  float2 uv0 = patch[0].uv;
-  float2 uv1 = patch[1].uv;
-  float2 uv2 = patch[2].uv;
-  float2 uv = baryinterp(uv0, uv1, uv2, positionInPatch);
+    float2 uv0 = patch[0].uv;
+    float2 uv1 = patch[1].uv;
+    float2 uv2 = patch[2].uv;
+    float2 uv = baryinterp2(uv0, uv1, uv2, positionInPatch);
 
 
-  float4 color = texture0.sample(textureSampler, uv);
-  float height = -10000 + ((color.r * 256 * 256 * 256 + color.g * 256 * 256 + color.b * 256) * 0.1);
+    float4 color = texture0.sample(textureSampler, uv);
+    float height = -10000 + ((color.r * 256 * 256 * 256 + color.g * 256 * 256 + color.b * 256) * 0.1);
 
-  // xy -> xyz (globe)
 
-  float px = pos.x;
-  float py = pos.y;
-  float R = 6371000;
+    float R = 6371000;
+    float radius = 1.0 + (height / R) * 1.0;
 
-  // longitude [0, 2pi]
-  float lambda = px / R;
-
-  // latitude, [0, pi] statt [-90, 90]
-  float phi = atan(sinh(py / R)) + 3.1415926 / 2.0;
-
-  float radius = 1.0 + (height / R) * 1.0;
-
-  float4 pos3d = float4(radius*sin(phi)*cos(lambda+time*0.0),
-                        radius*cos(-phi),
-                        radius*sin(-phi)*sin(lambda+time*0.0),
-                        1);
+    float3 pos3d = pos / length(pos); // * radius;
 
   // projection to screen
 
-  float4 position = mvpMatrix * pos3d;
+  float4 position = mvpMatrix * float4(pos3d, 1.0);
 
   VertexOut out {
 

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Quad2dD.h"
+#include "Quad3dD.h"
 #include "RectD.h"
 #include "RenderingContextInterface.h"
 #include <memory>
@@ -16,7 +16,7 @@ class Quad3dInterface {
 public:
     virtual ~Quad3dInterface() = default;
 
-    virtual void setFrame(const ::Quad2dD & frame, const ::RectD & textureCoordinates) = 0;
+    virtual void setFrame(const ::Quad3dD & frame, const ::RectD & textureCoordinates) = 0;
 
     virtual void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const /*not-null*/ std::shared_ptr<TextureHolderInterface> & textureHolder) = 0;
 

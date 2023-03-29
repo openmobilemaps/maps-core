@@ -14,13 +14,17 @@ using namespace metal;
 struct VertexIn {
     float2 position [[attribute(0)]];
     float2 uv [[attribute(1)]];
-    float2 n [[attribute(2)]];
+};
+
+struct VertexIn3D {
+  float3 position [[attribute(0)]];
+  float2 uv [[attribute(1)]];
 };
 
 struct VertexOut {
     float4 position [[ position ]];
     float2 uv;
-    float2 n;
+    float3 n;
     float pointsize [[ point_size ]];
 };
 

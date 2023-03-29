@@ -127,7 +127,7 @@ public enum Pipeline: String, CaseIterable {
             case .roundColorShader: return "roundColorFragmentShader"
             case .clearStencilShader: return "stencilClearFragmentShader"
             case .textShader: return "textFragmentShader"
-            case .sphereProjectionShader: return "baseFragmentShader"
+            case .sphereProjectionShader: return "shadedFragmentShader"
             case .sphereColorShader: return "colorFragmentShader"
         }
     }
@@ -136,8 +136,8 @@ public enum Pipeline: String, CaseIterable {
         switch self {
             case .lineGroupShader: return LineVertex.descriptor
             case .polygonGroupShader: return PolygonVertex.descriptor
-            case .sphereProjectionShader: return Vertex.tesselatedDescriptor
-            case .sphereColorShader: return Vertex.tesselatedDescriptor
+            case .sphereProjectionShader: return Vertex3D.tesselatedDescriptor
+            case .sphereColorShader: return Vertex3D.tesselatedDescriptor
             default: return Vertex.descriptor
         }
     }

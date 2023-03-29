@@ -20,3 +20,17 @@ public extension MCVec2D {
         Float(y)
     }
 }
+
+public extension MCVec3D {
+    var xF: Float {
+        Float(x)
+    }
+
+    var yF: Float {
+        Float(y)
+    }
+
+    var zF: Float {
+        Float(z)
+    }
+}

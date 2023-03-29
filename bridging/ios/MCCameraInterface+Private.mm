@@ -7,6 +7,8 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
+#import "MCCoord+Private.h"
+#import "MCVec2D+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -51,6 +53,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nonnull MCVec2D *)project:(nonnull MCCoord *)position {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->project(::djinni_generated::Coord::toCpp(position));
+        return ::djinni_generated::Vec2D::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class CameraInterface::ObjcProxy final
@@ -78,6 +87,13 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() viewportSizeChanged];
+        }
+    }
+    ::Vec2D project(const ::Coord & c_position) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() project:(::djinni_generated::Coord::fromCpp(c_position))];
+            return ::djinni_generated::Vec2D::toCpp(objcpp_result_);
         }
     }
 };

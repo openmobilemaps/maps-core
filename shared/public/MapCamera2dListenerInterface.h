@@ -3,7 +3,9 @@
 
 #pragma once
 
+#include "CameraInterface.h"
 #include "RectCoord.h"
+#include <memory>
 
 class MapCamera2dListenerInterface {
 public:
@@ -14,4 +16,6 @@ public:
     virtual void onRotationChanged(float angle) = 0;
 
     virtual void onMapInteraction() = 0;
+
+    virtual void onCameraChange(const /*not-null*/ std::shared_ptr<::CameraInterface> & camera) = 0;
 };

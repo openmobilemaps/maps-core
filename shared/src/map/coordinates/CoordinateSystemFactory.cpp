@@ -34,3 +34,10 @@
                                          Coord(CoordinateSystemIdentifiers::EPSG21781(), 840000.0, 70000.0, 0)),
                                1.0);
 }
+
+::MapCoordinateSystem CoordinateSystemFactory::getUnitSphereSystem() {
+    return MapCoordinateSystem(CoordinateSystemIdentifiers::UNITSPHERE(),
+                               RectCoord(Coord(CoordinateSystemIdentifiers::UNITSPHERE(), -1, -1, -1),
+                                         Coord(CoordinateSystemIdentifiers::UNITSPHERE(), 1, 1, 1)),
+                               1.0);
+}

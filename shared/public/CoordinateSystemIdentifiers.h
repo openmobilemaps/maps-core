@@ -11,6 +11,8 @@ public:
 
     static std::string RENDERSYSTEM();
 
+    static std::string UNITSPHERE();
+
     /**
      * WGS 84 / Pseudo-Mercator
      * https://epsg.io/3857

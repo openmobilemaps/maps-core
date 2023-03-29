@@ -8,6 +8,8 @@
 
 + (nonnull NSString *)RENDERSYSTEM;
 
++ (nonnull NSString *)UNITSPHERE;
+
 /**
  * WGS 84 / Pseudo-Mercator
  * https://epsg.io/3857

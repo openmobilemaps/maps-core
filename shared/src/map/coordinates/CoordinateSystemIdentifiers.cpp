@@ -12,6 +12,8 @@
 
 std::string CoordinateSystemIdentifiers::RENDERSYSTEM() { return "render_system"; };
 
+std::string CoordinateSystemIdentifiers::UNITSPHERE() { return "unit_sphere"; };
+
 // WGS 84 / Pseudo-Mercator
 // https://epsg.io/3857
 std::string CoordinateSystemIdentifiers::EPSG3857() { return "EPSG:3857"; };

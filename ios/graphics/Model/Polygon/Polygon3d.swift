@@ -89,7 +89,7 @@ final class Polygon3d: BaseGraphicsObject {
 
         shader.setupProgram(context)
         shader.preRender(context, pass: renderPass)
-        encoder.setCullMode(.front)
+        encoder.setCullMode(.none)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {

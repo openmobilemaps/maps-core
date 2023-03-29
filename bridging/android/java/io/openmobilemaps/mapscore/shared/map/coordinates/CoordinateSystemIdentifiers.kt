@@ -13,6 +13,9 @@ abstract class CoordinateSystemIdentifiers {
         external fun RENDERSYSTEM(): String
 
         @JvmStatic
+        external fun UNITSPHERE(): String
+
+        @JvmStatic
         external fun EPSG3857(): String
 
         @JvmStatic

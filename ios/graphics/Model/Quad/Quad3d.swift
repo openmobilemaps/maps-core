@@ -61,7 +61,7 @@ final class Quad3d: BaseGraphicsObject {
 
         let s2 = MTLDepthStencilDescriptor()
         s2.frontFaceStencil = ss2
-        s2.backFaceStencil = ss2
+        s2.backFaceStencil = nil
         s2.depthCompareFunction = .lessEqual
         s2.isDepthWriteEnabled = true
 
@@ -122,7 +122,7 @@ final class Quad3d: BaseGraphicsObject {
         shader.setupProgram(context)
         shader.preRender(context, pass: renderPass)
 
-        encoder.setCullMode(.front)
+        encoder.setCullMode(.back)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {
@@ -172,7 +172,7 @@ extension Quad3d: MCMaskingObjectInterface {
 }
 
 extension Quad3d: MCQuad3dInterface {
-    func setFrame(_ frame: MCQuad2dD, textureCoordinates: MCRectD) {
+    func setFrame(_ frame: MCQuad3dD, textureCoordinates: MCRectD) {
         /*
          The quad is made out of 4 vertices as following
          B----C
@@ -181,18 +181,18 @@ extension Quad3d: MCQuad3dInterface {
          A----D
          Where A-C are joined to form two triangles
          */
-        let vertecies: [Vertex] = [
-            Vertex(position: frame.bottomLeft, textureU: textureCoordinates.xF, textureV: textureCoordinates.yF + textureCoordinates.heightF), // A
-            Vertex(position: frame.topLeft, textureU: textureCoordinates.xF, textureV: textureCoordinates.yF), // B
-            Vertex(position: frame.topRight, textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF), // C
-            Vertex(position: frame.bottomRight, textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF + textureCoordinates.heightF), // D
+        let vertecies: [Vertex3D] = [
+            Vertex3D(position: frame.bottomLeft, textureU: textureCoordinates.xF, textureV: textureCoordinates.yF + textureCoordinates.heightF), // A
+            Vertex3D(position: frame.topLeft, textureU: textureCoordinates.xF, textureV: textureCoordinates.yF), // B
+            Vertex3D(position: frame.topRight, textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF), // C
+            Vertex3D(position: frame.bottomRight, textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF + textureCoordinates.heightF), // D
         ]
         let indices: [UInt16] = [
             0, 1, 2, // ABC
             0, 2, 3, // ACD
         ]
 
-        guard let verticesBuffer = device.makeBuffer(bytes: vertecies, length: MemoryLayout<Vertex>.stride * vertecies.count, options: []), let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: []) else {
+        guard let verticesBuffer = device.makeBuffer(bytes: vertecies, length: MemoryLayout<Vertex3D>.stride * vertecies.count, options: []), let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: []) else {
             fatalError("Cannot allocate buffers")
         }
 

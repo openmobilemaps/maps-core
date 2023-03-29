@@ -20,6 +20,8 @@ coordinate_converter_interface = interface +c +j +o {
 coordinate_system_identifiers = interface +c {
     static RENDERSYSTEM(): string;
 
+    static UNIT_SPHERE(): string;
+
     # WGS 84 / Pseudo-Mercator
     # https://epsg.io/3857
     static EPSG3857(): string;
@@ -50,6 +52,7 @@ coordinate_system_factory = interface +c {
     static get_epsg_2056_system() : map_coordinate_system;
     static get_epsg_3857_system() : map_coordinate_system;
     static get_epsg_21781_system() : map_coordinate_system;
+    static get_unit_sphere_system() : map_coordinate_system;
 }
 
 coord = record {

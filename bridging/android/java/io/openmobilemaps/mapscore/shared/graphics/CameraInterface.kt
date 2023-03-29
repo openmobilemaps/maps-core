@@ -14,6 +14,8 @@ abstract class CameraInterface {
 
     abstract fun viewportSizeChanged()
 
+    abstract fun project(position: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): io.openmobilemaps.mapscore.shared.graphics.common.Vec2D
+
     private class CppProxy : CameraInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -43,5 +45,11 @@ abstract class CameraInterface {
             native_viewportSizeChanged(this.nativeRef)
         }
         private external fun native_viewportSizeChanged(_nativeRef: Long)
+
+        override fun project(position: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): io.openmobilemaps.mapscore.shared.graphics.common.Vec2D {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_project(this.nativeRef, position)
+        }
+        private external fun native_project(_nativeRef: Long, position: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): io.openmobilemaps.mapscore.shared.graphics.common.Vec2D
     }
 }

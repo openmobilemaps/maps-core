@@ -3,6 +3,8 @@
 
 #include "NativeCameraInterface.h"  // my header
 #include "Marshal.hpp"
+#include "NativeCoord.h"
+#include "NativeVec2D.h"
 
 namespace djinni_generated {
 
@@ -37,6 +39,15 @@ void NativeCameraInterface::JavaProxy::viewportSizeChanged() {
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_viewportSizeChanged);
     ::djinni::jniExceptionCheck(jniEnv);
 }
+::Vec2D NativeCameraInterface::JavaProxy::project(const ::Coord & c_position) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeCameraInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_project,
+                                         ::djinni::get(::djinni_generated::NativeCoord::fromCpp(jniEnv, c_position)));
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativeVec2D::toCpp(jniEnv, jret);
+}
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_CameraInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
@@ -69,6 +80,15 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_CameraIn
         const auto& ref = ::djinni::objectFromHandleAddress<::CameraInterface>(nativeRef);
         ref->viewportSizeChanged();
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT ::djinni_generated::NativeVec2D::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_CameraInterface_00024CppProxy_native_1project(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeCoord::JniType j_position)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::CameraInterface>(nativeRef);
+        auto r = ref->project(::djinni_generated::NativeCoord::toCpp(jniEnv, j_position));
+        return ::djinni::release(::djinni_generated::NativeVec2D::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
 } // namespace djinni_generated

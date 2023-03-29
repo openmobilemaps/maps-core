@@ -14,6 +14,7 @@
 #include "earcut.hpp"
 #include "EarcutVec2D.h"
 #include <cstdint>
+#include "CoordinateSystemIdentifiers.h"
 
 Polygon3dLayerObject::Polygon3dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                                      const std::shared_ptr<Polygon3dInterface> &polygon,
@@ -34,23 +35,32 @@ void Polygon3dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
     int32_t indexOffset = 0;
 
     for (auto const &polygon : polygons) {
-        std::vector<std::vector<Vec2D>> renderCoords;
-        std::vector<Vec2D> polygonCoords;
+        std::vector<std::vector<Vec3D>> renderCoords;
+        std::vector<Vec3D> polygonCoords;
+        std::vector<std::vector<Vec2D>> renderCoords2d;
+        std::vector<Vec2D> polygonCoords2d;
         for (const Coord &mapCoord : polygon.positions) {
             Coord renderCoord = conversionHelper->convertToRenderSystem(mapCoord);
-            polygonCoords.push_back(Vec2D(renderCoord.x, renderCoord.y));
+            polygonCoords.push_back(Vec3D(renderCoord.x, renderCoord.y, renderCoord.z));
+            Coord renderCoord2d = conversionHelper->convert(CoordinateSystemIdentifiers::EPSG3857(), mapCoord);
+            polygonCoords2d.push_back(Vec2D(renderCoord2d.x, renderCoord2d.y));
         }
         renderCoords.push_back(polygonCoords);
+        renderCoords2d.push_back(polygonCoords2d);
 
         for (const auto &hole : polygon.holes) {
-            std::vector<::Vec2D> holeCoords;
+            std::vector<::Vec3D> holeCoords;
+            std::vector<::Vec2D> holeCoords2d;
             for (const Coord &coord : hole) {
                 Coord renderCoord = conversionHelper->convertToRenderSystem(coord);
-                holeCoords.push_back(Vec2D(renderCoord.x, renderCoord.y));
+                holeCoords.push_back(Vec3D(renderCoord.x, renderCoord.y, renderCoord.z));
+                Coord renderCoord2d = conversionHelper->convert(CoordinateSystemIdentifiers::EPSG3857(), coord);
+                holeCoords2d.push_back(Vec2D(renderCoord2d.x, renderCoord2d.y));
             }
             renderCoords.push_back(holeCoords);
+            renderCoords2d.push_back(holeCoords2d);
         }
-        std::vector<int32_t> curIndices = mapbox::earcut<int32_t>(renderCoords);
+        std::vector<int32_t> curIndices = mapbox::earcut<int32_t>(renderCoords2d);
 
         for (auto const &index : curIndices) {
             indices.push_back(indexOffset + index);
@@ -62,14 +72,13 @@ void Polygon3dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
             for(auto& i : list) {
                 vertices.push_back(i.x);
                 vertices.push_back(i.y);
-                // fill for android z
-                vertices.push_back(0.0);
+                vertices.push_back(i.z);
 
                 // are needed to fill metal vertex property (position, uv, normal)
                 vertices.push_back(0.0);
                 vertices.push_back(0.0);
 
-                vertices.push_back(0.0);
+//                vertices.push_back(0.0);
             }
         }
     }

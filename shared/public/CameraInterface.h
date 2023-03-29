@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "Coord.h"
+#include "Vec2D.h"
 #include <vector>
 
 class CameraInterface {
@@ -14,4 +16,6 @@ public:
     virtual double getScalingFactor() = 0;
 
     virtual void viewportSizeChanged() = 0;
+
+    virtual ::Vec2D project(const ::Coord & position) = 0;
 };

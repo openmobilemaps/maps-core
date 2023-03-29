@@ -42,4 +42,12 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinate
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateSystemFactory_getUnitSphereSystem(JNIEnv* jniEnv, jobject /*this*/)
+{
+    try {
+        auto r = ::CoordinateSystemFactory::getUnitSphereSystem();
+        return ::djinni::release(::djinni_generated::NativeMapCoordinateSystem::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 } // namespace djinni_generated

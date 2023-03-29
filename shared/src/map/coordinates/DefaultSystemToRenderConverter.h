@@ -22,16 +22,20 @@ class DefaultSystemToRenderConverter : public CoordinateConverterInterface {
         : mapCoordinateSystemIdentifier(mapCoordinateSystem.identifier) {
         boundsLeft = mapCoordinateSystem.bounds.topLeft.x;
         boundsTop = mapCoordinateSystem.bounds.topLeft.y;
+        boundsFar = mapCoordinateSystem.bounds.topLeft.z;
         boundsRight = mapCoordinateSystem.bounds.bottomRight.x;
         boundsBottom = mapCoordinateSystem.bounds.bottomRight.y;
+        boundsNear = mapCoordinateSystem.bounds.bottomRight.z;
         halfWidth = 0.5 * (boundsRight - boundsLeft);
         halfHeight = 0.5 * (boundsBottom - boundsTop);
+        halfDepth = 0.5 * (boundsNear - boundsFar);
     }
 
     virtual Coord convert(const Coord &coordinate) override {
         double x = (boundsRight < boundsLeft) ? -coordinate.x + boundsRight : (coordinate.x - boundsLeft);
         double y = (boundsBottom < boundsTop) ? -coordinate.y + boundsBottom : (coordinate.y - boundsTop);
-        return Coord(getTo(), x - halfWidth, y - halfHeight, coordinate.z);
+        double z = (boundsNear < boundsFar) ? -coordinate.z + boundsNear : (coordinate.y - boundsFar);
+        return Coord(getTo(), x - halfWidth, y - halfHeight, z - halfDepth);
     }
 
     virtual std::string getFrom() override { return mapCoordinateSystemIdentifier; }
@@ -43,8 +47,11 @@ class DefaultSystemToRenderConverter : public CoordinateConverterInterface {
     double boundsTop;
     double boundsRight;
     double boundsBottom;
+    double boundsNear;
+    double boundsFar;
     double halfWidth;
     double halfHeight;
+    double halfDepth;
 
     std::string mapCoordinateSystemIdentifier;
 };

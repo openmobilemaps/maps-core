@@ -14,6 +14,8 @@ abstract class MapCamera2dListenerInterface {
 
     abstract fun onMapInteraction()
 
+    abstract fun onCameraChange(camera: io.openmobilemaps.mapscore.shared.graphics.CameraInterface)
+
     private class CppProxy : MapCamera2dListenerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -43,5 +45,11 @@ abstract class MapCamera2dListenerInterface {
             native_onMapInteraction(this.nativeRef)
         }
         private external fun native_onMapInteraction(_nativeRef: Long)
+
+        override fun onCameraChange(camera: io.openmobilemaps.mapscore.shared.graphics.CameraInterface) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_onCameraChange(this.nativeRef, camera)
+        }
+        private external fun native_onCameraChange(_nativeRef: Long, camera: io.openmobilemaps.mapscore.shared.graphics.CameraInterface)
     }
 }

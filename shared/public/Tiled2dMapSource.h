@@ -72,6 +72,8 @@ public:
 
     virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, int curT, double zoom) override;
 
+    virtual void onCameraChange(const /*not-null*/ std::shared_ptr<::CameraInterface> & camera) override;
+
     virtual bool isTileVisible(const Tiled2dMapTileInfo &tileInfo);
 
     virtual void pause() override;
@@ -125,8 +127,6 @@ public:
     std::optional<int32_t> maxZoomLevelIdentifier;
 
     std::map<Tiled2dMapTileInfo, TileWrapper<R>> currentTiles;
-
-    int currentZoomLevelIdentifier = 0;
 
     std::unordered_set<Tiled2dMapTileInfo> currentVisibleTiles;
 
