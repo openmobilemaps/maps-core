@@ -34,10 +34,10 @@ public:
                          const std::shared_ptr<VectorLayerDescription> &description,
                          const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileReadyInterface);
 
-    virtual void updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
+    virtual void updateVectorLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                         const Tiled2dMapVectorTileDataVector &layerData);
 
-    virtual void updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
+    virtual void updateRasterLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                          const Tiled2dMapVectorTileDataRaster &layerData);
 
     virtual void update() = 0;

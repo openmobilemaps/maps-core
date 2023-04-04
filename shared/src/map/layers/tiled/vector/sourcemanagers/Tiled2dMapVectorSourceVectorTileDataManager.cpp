@@ -142,3 +142,93 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onTileCompletelyReady(const Ti
         mapInterface->invalidate();
     }
 }
+
+void Tiled2dMapVectorSourceVectorTileDataManager::updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription,
+                                                                   int32_t legacyIndex,
+                                                                   bool needsTileReplace) {
+    auto mapInterface = this->mapInterface.lock();
+    if (!mapInterface) {
+        return;
+    }
+
+    auto const &currentTileInfos = vectorSource.converse(&Tiled2dMapVectorSource::getCurrentTiles).get();
+
+    for (const auto &tileData: currentTileInfos) {
+        auto subTiles = tiles.find(tileData.tileInfo);
+        if (subTiles == tiles.end()) {
+            continue;
+        }
+
+        if (needsTileReplace) {
+            // Remove invalid legacy tile (only one - identifier is unique)
+            subTiles->second.erase(std::remove_if(subTiles->second.begin(), subTiles->second.end(),
+                                                  [&identifier = layerDescription->identifier]
+                                                          (const std::tuple<int32_t, std::string, Actor<Tiled2dMapVectorTile>> &subTile) {
+                                                      return std::get<1>(subTile) == identifier;
+                                                  }));
+
+            // If new source of layer is not handled by this manager, continue
+            if (layerDescription->source != source) {
+                continue;
+            }
+
+            // Re-evaluate criteria for the tile creation of this specific sublayer
+            if (!(layerDescription->minZoom <= tileData.tileInfo.zoomIdentifier && layerDescription->maxZoom >= tileData.tileInfo.zoomIdentifier)) {
+                continue;
+            }
+            auto const mapIt = tileData.layerFeatureMaps->find(layerDescription->sourceId);
+            if (mapIt == tileData.layerFeatureMaps->end()) {
+                continue;
+            }
+
+            Actor<Tiled2dMapVectorTile> actor = createTileActor(tileData.tileInfo, layerDescription);
+            if (actor) {
+                if (selectionDelegate) {
+                    actor.message(&Tiled2dMapVectorTile::setSelectionDelegate, selectionDelegate);
+                }
+
+                if (subTiles->second.empty()) {
+                    subTiles->second.push_back({legacyIndex, layerDescription->identifier, actor.strongActor<Tiled2dMapVectorTile>()});
+                } else {
+                    for (auto subTileIter = subTiles->second.begin(); subTileIter != subTiles->second.end(); subTileIter++) {
+                        if (std::get<0>(*subTileIter) > legacyIndex) {
+                            subTiles->second.insert(subTileIter, {legacyIndex, layerDescription->identifier, actor.strongActor<Tiled2dMapVectorTile>()});
+                            break;
+                        }
+                    }
+                }
+
+                auto controlSetEntry = tilesReadyControlSet.find(tileData.tileInfo);
+                if (controlSetEntry == tilesReadyControlSet.end()) {
+                    tilesReadyControlSet[tileData.tileInfo] = {legacyIndex};
+                } else {
+                    controlSetEntry->second.insert(legacyIndex);
+                }
+                tilesReady.erase(tileData.tileInfo);
+
+                actor.message(&Tiled2dMapVectorTile::setVectorTileData, mapIt->second);
+            }
+
+        } else {
+            for (auto &[index, identifier, tile]  : subTiles->second) {
+                if (identifier == layerDescription->identifier) {
+                    auto const mapIt = tileData.layerFeatureMaps->find(layerDescription->sourceId);
+                    if (mapIt == tileData.layerFeatureMaps->end()) {
+                        break;
+                    }
+
+                    auto controlSetEntry = tilesReadyControlSet.find(tileData.tileInfo);
+                    if (controlSetEntry == tilesReadyControlSet.end()) {
+                        tilesReadyControlSet[tileData.tileInfo] = {legacyIndex};
+                    } else {
+                        controlSetEntry->second.insert(legacyIndex);
+                    }
+                    tilesReady.erase(tileData.tileInfo);
+
+                    tile.message(&Tiled2dMapVectorTile::updateVectorLayerDescription, layerDescription, mapIt->second);
+                    break;
+                }
+            }
+        }
+    }
+}

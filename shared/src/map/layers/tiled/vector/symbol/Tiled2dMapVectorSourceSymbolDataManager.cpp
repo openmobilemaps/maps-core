@@ -44,6 +44,12 @@ void Tiled2dMapVectorSourceSymbolDataManager::setAlpha(float alpha) {
     // TODO: set alpha of graphics objects
 }
 
+void Tiled2dMapVectorSourceSymbolDataManager::updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription,
+                                                                     int32_t legacyIndex,
+                                                                     bool needsTileReplace) {
+    // TODO: update layer description of symbols
+}
+
 void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::string &sourceName,
                                                                    std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) {
 

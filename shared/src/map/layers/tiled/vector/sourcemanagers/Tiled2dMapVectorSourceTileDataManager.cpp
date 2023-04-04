@@ -64,6 +64,7 @@ void Tiled2dMapVectorSourceTileDataManager::pause() {
 
     tilesReady.clear();
     tilesReadyControlSet.clear();
+    tileRenderObjectsMap.clear();
 }
 
 void Tiled2dMapVectorSourceTileDataManager::resume() {
@@ -267,130 +268,28 @@ void Tiled2dMapVectorSourceTileDataManager::tileIsReady(const Tiled2dMapTileInfo
         }
     }
 
+    auto tileRenderObjects = tileRenderObjectsMap.find(tile);
+    if (tileRenderObjects != tileRenderObjectsMap.end() && !tileRenderObjects->second.empty()) {
+        // Remove invalid legacy tile (only one - identifier is unique)
+        for (auto renderObjIter = tileRenderObjects->second.begin(); renderObjIter != tileRenderObjects->second.end(); renderObjIter++) {
+            if (std::get<0>(*renderObjIter) == layerIndex) {
+                tileRenderObjects->second.erase(renderObjIter);
+                break;
+            }
+        }
+        tileRenderObjectsMap[tile].emplace_back(layerIndex, renderObjects);
+    } else {
+        tileRenderObjectsMap[tile].emplace_back(layerIndex, renderObjects);
+    }
+
     if (isCompletelyReady) {
         onTileCompletelyReady(tile);
         pregenerateRenderPasses();
     }
-
-    tileRenderObjectsMap[tile].emplace_back(layerIndex, renderObjects);
 }
 
 void Tiled2dMapVectorSourceTileDataManager::tileIsInteractable(const std::string &layerIdentifier) {
     interactableLayers.insert(layerIdentifier);
-}
-
-void Tiled2dMapVectorSourceTileDataManager::updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription) {
-    auto mapInterface = this->mapInterface.lock();
-    if (!mapInterface) {
-        return;
-    }
-
-    std::shared_ptr<VectorLayerDescription> legacyDescription;
-    int32_t legacyIndex = -1;
-    size_t numLayers = mapDescription->layers.size();
-    for (int index = 0; index < numLayers; index++) {
-        if (mapDescription->layers[index]->identifier == layerDescription->identifier) {
-            legacyDescription = mapDescription->layers[index];
-            legacyIndex = index;
-            mapDescription->layers[index] = layerDescription;
-            break;
-        }
-    }
-
-    if (legacyIndex < 0) {
-        return;
-    }
-
-    // Evaluate if a complete replacement of the tiles is needed (source/zoom adjustments may lead to a different set of created tiles)
-    bool needsTileReplace = legacyDescription->source != layerDescription->source
-                            || legacyDescription->sourceId != layerDescription->sourceId
-                            || legacyDescription->minZoom != layerDescription->minZoom
-                            || legacyDescription->maxZoom != layerDescription->maxZoom;
-
-    // TODO: Adjust for multi-source case
-    /*auto const &currentTileInfos = vectorTileSource.converse(&Tiled2dMapVectorSource::getCurrentTiles).get();
-
-    {
-        auto castedMe = std::static_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
-        auto selfActor = WeakActor<Tiled2dMapVectorLayer>(mailbox, castedMe);
-
-        for (const auto &tileData: currentTileInfos) {
-
-            std::shared_ptr<MaskingObjectInterface> tileMask;
-            {
-                // TODO: Remove: std::lock_guard<std::recursive_mutex> lock(tileMaskMapMutex);
-                auto tileMaskIter = tileMaskMap.find(tileData.tileInfo);
-                if (tileMaskIter != tileMaskMap.end()) {
-                    tileMask = tileMaskIter->second.getGraphicsMaskObject();
-                }
-            }
-
-            // TODO: Remove: std::lock_guard<std::recursive_mutex> lock(tilesMutex);
-            auto subTiles = tiles.find(tileData.tileInfo);
-            if (subTiles == tiles.end()) {
-                continue;
-            }
-
-            if (needsTileReplace) {
-                // Remove invalid legacy tile (only one - identifier is unique)
-                subTiles->second.erase(std::remove_if(subTiles->second.begin(), subTiles->second.end(),
-                                                      [&identifier = layerDescription->identifier]
-                                                              (const std::tuple<int32_t, std::string, Actor<Tiled2dMapVectorTile>> &subTile) {
-                                                          return std::get<1>(subTile) == identifier;
-                                                      }));
-
-                // Re-evaluate criteria for the tile creation of this specific sublayer
-                if (!(layerDescription->minZoom <= tileData.tileInfo.zoomIdentifier && layerDescription->maxZoom >= tileData.tileInfo.zoomIdentifier)) {
-                    continue;
-                }
-                auto const mapIt = tileData.layerFeatureMaps.find(layerDescription->source);
-                if (mapIt == tileData.layerFeatureMaps.end()) {
-                    continue;
-                }
-                auto const dataIt = mapIt->second->find(layerDescription->sourceId);
-                if (dataIt == mapIt->second->end()) {
-                    continue;
-                }
-
-                Actor<Tiled2dMapVectorTile> actor = createTileActor(tileData.tileInfo, layerDescription);
-                if (actor) {
-                    if (selectionDelegate) {
-                        actor.message(&Tiled2dMapVectorTile::setSelectionDelegate, selectionDelegate);
-                    }
-
-                    if (subTiles->second.empty()) {
-                        subTiles->second.push_back({legacyIndex, layerDescription->identifier, actor.strongActor<Tiled2dMapVectorTile>()});
-                    } else {
-                        for (auto subTileIter = subTiles->second.begin(); subTileIter != subTiles->second.end(); subTileIter++) {
-                            if (std::get<0>(*subTileIter) > legacyIndex) {
-                                subTiles->second.insert(subTileIter - 1, {legacyIndex, layerDescription->identifier, actor.strongActor<Tiled2dMapVectorTile>()});
-                                break;
-                            }
-                        }
-                    }
-
-                    actor.message(&Tiled2dMapVectorTile::setTileData, tileMask, dataIt->second);
-                }
-
-            } else {
-                for (auto &[index, identifier, tile]  : subTiles->second) {
-                    if (identifier == layerDescription->identifier) {
-                        auto const mapIt = tileData.layerFeatureMaps.find(layerDescription->source);
-                        if (mapIt == tileData.layerFeatureMaps.end()) {
-                            break;
-                        }
-                        auto const dataIt = mapIt->second->find(layerDescription->sourceId);
-                        if (dataIt == mapIt->second->end()) {
-                            break;
-                        }
-                        //tile.message(&Tiled2dMapVectorTile::updateLayerDescription, layerDescription, dataIt->second);
-                        break;
-                    }
-                }
-            }
-
-        }
-    }*/
 }
 
 bool

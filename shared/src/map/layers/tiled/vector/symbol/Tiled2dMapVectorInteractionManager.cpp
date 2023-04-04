@@ -112,7 +112,8 @@ bool Tiled2dMapVectorInteractionManager::callInReverseOrder(F&& managerLambda) {
         if (layer->source != currentSource) {
             if (!currentSource.empty()) {
                 auto reducedLambda = std::bind(managerLambda, layers, std::placeholders::_1);
-                if (sourceDataManagers.at(currentSource).syncAccess(reducedLambda)) {
+                auto sourceDataManager = sourceDataManagers.find(currentSource);
+                if (sourceDataManager != sourceDataManagers.end() && sourceDataManager->second.syncAccess(reducedLambda)) {
                     return true;
                 }
             }
@@ -123,7 +124,10 @@ bool Tiled2dMapVectorInteractionManager::callInReverseOrder(F&& managerLambda) {
     }
     if (!currentSource.empty()) {
         auto reducedLambda = std::bind(managerLambda, layers, std::placeholders::_1);
-        return sourceDataManagers.at(currentSource).syncAccess(reducedLambda);
+        auto sourceDataManager = sourceDataManagers.find(currentSource);
+        if (sourceDataManager != sourceDataManagers.end()) {
+            return sourceDataManager->second.syncAccess(reducedLambda);
+        }
     }
     return false;
 }

@@ -22,9 +22,9 @@ Tiled2dMapVectorLineTile::Tiled2dMapVectorLineTile(const std::weak_ptr<MapInterf
     usedKeys = std::move(description->getUsedKeys());
 }
 
-void Tiled2dMapVectorLineTile::updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
+void Tiled2dMapVectorLineTile::updateVectorLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                                       const Tiled2dMapVectorTileDataVector &tileData) {
-    Tiled2dMapVectorTile::updateLayerDescription(description, tileData);
+    Tiled2dMapVectorTile::updateVectorLayerDescription(description, tileData);
     featureGroups.clear();
     reusableLineStyles.clear();
     styleHashToGroupMap.clear();

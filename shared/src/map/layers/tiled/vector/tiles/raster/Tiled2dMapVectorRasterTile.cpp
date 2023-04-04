@@ -28,9 +28,9 @@ Tiled2dMapVectorRasterTile::Tiled2dMapVectorRasterTile(const std::weak_ptr<MapIn
     }
 }
 
-void Tiled2dMapVectorRasterTile::updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
+void Tiled2dMapVectorRasterTile::updateRasterLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                                         const Tiled2dMapVectorTileDataRaster &tileData) {
-    Tiled2dMapVectorTile::updateLayerDescription(description, tileData);
+    Tiled2dMapVectorTile::updateRasterLayerDescription(description, tileData);
     setRasterTileData(tileData);
 }
 

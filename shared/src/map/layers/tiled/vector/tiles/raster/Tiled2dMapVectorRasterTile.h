@@ -21,7 +21,7 @@ public:
                                 const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
                                 const std::shared_ptr<RasterVectorLayerDescription> &description);
 
-    void updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
+    void updateRasterLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                 const Tiled2dMapVectorTileDataRaster &tileData) override;
 
     void update() override;

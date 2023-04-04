@@ -39,7 +39,9 @@ public:
 
     void onVectorTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) override;
 
-    void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription) override {};
+    void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription,
+                                int32_t legacyIndex,
+                                bool needsTileReplace) override;
 
     void collisionDetection(std::unordered_set<std::string> layerIdentifiers, std::shared_ptr<std::vector<OBB2D>> placements);
 

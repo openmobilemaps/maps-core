@@ -22,6 +22,10 @@ public:
 
     void onRasterTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) override;
 
+    virtual void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription,
+                                        int32_t legacyIndex,
+                                        bool needsTileReplace) override;
+
 protected:
     void onTileCompletelyReady(const Tiled2dMapTileInfo tileInfo) override;
 

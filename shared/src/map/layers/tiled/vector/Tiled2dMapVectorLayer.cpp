@@ -635,11 +635,42 @@ void Tiled2dMapVectorLayer::setSelectedFeatureIdentifier(std::optional<int64_t> 
 }
 
 void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription) {
+    std::shared_ptr<VectorLayerDescription> legacyDescription;
+    int32_t legacyIndex = -1;
+    size_t numLayers = mapDescription->layers.size();
+    for (int index = 0; index < numLayers; index++) {
+        if (mapDescription->layers[index]->identifier == layerDescription->identifier) {
+            legacyDescription = mapDescription->layers[index];
+            legacyIndex = index;
+            mapDescription->layers[index] = layerDescription;
+            break;
+        }
+    }
+
+    if (legacyIndex < 0) {
+        return;
+    }
+
+    auto legacySource = legacyDescription->source;
+    auto newSource = layerDescription->source;
+
+    // Evaluate if a complete replacement of the tiles is needed (source/zoom adjustments may lead to a different set of created tiles)
+    bool needsTileReplace = legacyDescription->source != layerDescription->source
+                            || legacyDescription->sourceId != layerDescription->sourceId
+                            || legacyDescription->minZoom != layerDescription->minZoom
+                            || legacyDescription->maxZoom != layerDescription->maxZoom;
+
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-        sourceDataManager.message(&Tiled2dMapVectorSourceDataManager::updateLayerDescription, layerDescription);
+        if (legacySource == source || newSource == source) {
+            sourceDataManager.message(&Tiled2dMapVectorSourceDataManager::updateLayerDescription, layerDescription, legacyIndex,
+                                      needsTileReplace);
+        }
     }
     for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
-        sourceDataManager.message(&Tiled2dMapVectorSourceDataManager::updateLayerDescription, layerDescription);
+        if (legacySource == source || newSource == source) {
+            sourceDataManager.message(&Tiled2dMapVectorSourceDataManager::updateLayerDescription, layerDescription, legacyIndex,
+                                      needsTileReplace);
+        }
     }
 }
 

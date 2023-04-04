@@ -135,3 +135,87 @@ void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std
 void Tiled2dMapVectorSourceRasterTileDataManager::onTileCompletelyReady(const Tiled2dMapTileInfo tileInfo) {
     rasterSource.message(&Tiled2dMapRasterSource::setTileReady, tileInfo);
 }
+
+void Tiled2dMapVectorSourceRasterTileDataManager::updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription,
+                                                                     int32_t legacyIndex, bool needsTileReplace) {
+    auto mapInterface = this->mapInterface.lock();
+    if (!mapInterface) {
+        return;
+    }
+
+    auto const &currentTileInfos = rasterSource.converse(&Tiled2dMapRasterSource::getCurrentTiles).get();
+
+    for (const auto &tileData: currentTileInfos) {
+        auto subTiles = tiles.find(tileData.tileInfo);
+        if (subTiles == tiles.end()) {
+            continue;
+        }
+
+        if (needsTileReplace) {
+            // Remove invalid legacy tile (only one - identifier is unique)
+            subTiles->second.erase(std::remove_if(subTiles->second.begin(), subTiles->second.end(),
+                                                  [&identifier = layerDescription->identifier]
+                                                          (const std::tuple<int32_t, std::string, Actor<Tiled2dMapVectorTile>> &subTile) {
+                                                      return std::get<1>(subTile) == identifier;
+                                                  }));
+
+            // If new source of layer is not handled by this manager, continue
+            if (layerDescription->source != source) {
+                continue;
+            }
+
+            // Re-evaluate criteria for the tile creation of this specific sublayer
+            if (!(layerDescription->minZoom <= tileData.tileInfo.zoomIdentifier && layerDescription->maxZoom >= tileData.tileInfo.zoomIdentifier)) {
+                continue;
+            }
+
+            Actor<Tiled2dMapVectorTile> actor = createTileActor(tileData.tileInfo, layerDescription);
+            if (actor) {
+                if (selectionDelegate) {
+                    actor.message(&Tiled2dMapVectorTile::setSelectionDelegate, selectionDelegate);
+                }
+
+                if (subTiles->second.empty()) {
+                    subTiles->second.push_back(
+                            {legacyIndex, layerDescription->identifier, actor.strongActor<Tiled2dMapVectorTile>()});
+                } else {
+                    for (auto subTileIter = subTiles->second.begin(); subTileIter != subTiles->second.end(); subTileIter++) {
+                        if (std::get<0>(*subTileIter) > legacyIndex) {
+                            subTiles->second.insert(subTileIter - 1,
+                                                    {legacyIndex, layerDescription->identifier,
+                                                     actor.strongActor<Tiled2dMapVectorTile>()});
+                            break;
+                        }
+                    }
+                }
+
+                auto indexControlSet = tilesReadyControlSet.find(tileData.tileInfo);
+                if (indexControlSet == tilesReadyControlSet.end()) {
+                    tilesReadyControlSet[tileData.tileInfo] = {legacyIndex};
+                } else {
+                    indexControlSet->second.insert(legacyIndex);
+                }
+                tilesReady.erase(tileData.tileInfo);
+
+                actor.message(&Tiled2dMapVectorTile::setRasterTileData, tileData.textureHolder);
+            }
+        } else {
+            for (auto &[index, identifier, tile]  : subTiles->second) {
+
+                auto indexControlSet = tilesReadyControlSet.find(tileData.tileInfo);
+                if (indexControlSet == tilesReadyControlSet.end()) {
+                    tilesReadyControlSet[tileData.tileInfo] = {legacyIndex};
+                } else {
+                    indexControlSet->second.insert(legacyIndex);
+                }
+                tilesReady.erase(tileData.tileInfo);
+
+                if (identifier == layerDescription->identifier) {
+                    tile.message(&Tiled2dMapVectorTile::updateRasterLayerDescription, layerDescription, tileData.textureHolder);
+                    break;
+                }
+            }
+        }
+
+    }
+}

@@ -22,6 +22,11 @@ public:
 
     void onVectorTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) override;
 
+    virtual void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription,
+                                        int32_t legacyIndex,
+                                        bool needsTileReplace) override;
+
+
 protected:
     void onTileCompletelyReady(const Tiled2dMapTileInfo tileInfo) override;
 

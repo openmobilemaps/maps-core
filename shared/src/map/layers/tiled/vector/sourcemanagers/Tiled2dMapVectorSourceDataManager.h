@@ -51,7 +51,9 @@ public:
 
     virtual void onVectorTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) {};
 
-    virtual void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription) = 0;
+    virtual void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription,
+                                        int32_t legacyIndex,
+                                        bool needsTileReplace) = 0;
 
     virtual bool onClickUnconfirmed(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) = 0;
 

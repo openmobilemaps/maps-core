@@ -37,8 +37,6 @@ public:
 
     void tileIsInteractable(const std::string &layerIdentifier) override;
 
-    virtual void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription) override;
-
     virtual void setSelectionDelegate(const WeakActor<Tiled2dMapVectorLayerSelectionInterface> &selectionDelegate) override;
 
     void setSelectedFeatureIdentifier(std::optional<int64_t> identifier) override;

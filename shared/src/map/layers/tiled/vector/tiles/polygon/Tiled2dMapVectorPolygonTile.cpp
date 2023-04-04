@@ -47,9 +47,9 @@ Tiled2dMapVectorPolygonTile::Tiled2dMapVectorPolygonTile(const std::weak_ptr<Map
     }
 }
 
-void Tiled2dMapVectorPolygonTile::updateLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
+void Tiled2dMapVectorPolygonTile::updateVectorLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                                          const Tiled2dMapVectorTileDataVector &tileData) {
-    Tiled2dMapVectorTile::updateLayerDescription(description, tileData);
+    Tiled2dMapVectorTile::updateVectorLayerDescription(description, tileData);
     featureGroups.clear();
     hitDetectionPolygonMap.clear();
     usedKeys = std::move(description->getUsedKeys());
