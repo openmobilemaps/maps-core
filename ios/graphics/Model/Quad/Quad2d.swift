@@ -156,7 +156,7 @@ extension Quad2d: MCQuad2dInterface {
          A----D
          Where A-C are joined to form two triangles
          */
-        let vertecies: [Vertex] = [
+        let vertices: [Vertex] = [
             Vertex(position: frame.bottomLeft, textureU: textureCoordinates.xF, textureV: textureCoordinates.yF + textureCoordinates.heightF), // A
             Vertex(position: frame.topLeft, textureU: textureCoordinates.xF, textureV: textureCoordinates.yF), // B
             Vertex(position: frame.topRight, textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF), // C
@@ -167,7 +167,7 @@ extension Quad2d: MCQuad2dInterface {
             0, 2, 3, // ACD
         ]
 
-        guard let verticesBuffer = device.makeBuffer(bytes: vertecies, length: MemoryLayout<Vertex>.stride * vertecies.count, options: []), let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: []) else {
+        guard let verticesBuffer = device.makeBuffer(bytes: vertices, length: MemoryLayout<Vertex>.stride * vertices.count, options: []), let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: []) else {
             fatalError("Cannot allocate buffers")
         }
 

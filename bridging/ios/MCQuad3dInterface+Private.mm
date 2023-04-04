@@ -8,7 +8,7 @@
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCGraphicsObjectInterface+Private.h"
 #import "MCMaskingObjectInterface+Private.h"
-#import "MCQuad3dD+Private.h"
+#import "MCQuad2dD+Private.h"
 #import "MCRectD+Private.h"
 #import "MCRenderingContextInterface+Private.h"
 #import "MCTextureHolderInterface+Private.h"
@@ -36,10 +36,10 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (void)setFrame:(nonnull MCQuad3dD *)frame
+- (void)setFrame:(nonnull MCQuad2dD *)frame
 textureCoordinates:(nonnull MCRectD *)textureCoordinates {
     try {
-        _cppRefHandle.get()->setFrame(::djinni_generated::Quad3dD::toCpp(frame),
+        _cppRefHandle.get()->setFrame(::djinni_generated::Quad2dD::toCpp(frame),
                                       ::djinni_generated::RectD::toCpp(textureCoordinates));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -89,10 +89,10 @@ class Quad3dInterface::ObjcProxy final
     friend class ::djinni_generated::Quad3dInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void setFrame(const ::Quad3dD & c_frame, const ::RectD & c_textureCoordinates) override
+    void setFrame(const ::Quad2dD & c_frame, const ::RectD & c_textureCoordinates) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setFrame:(::djinni_generated::Quad3dD::fromCpp(c_frame))
+            [djinni_private_get_proxied_objc_object() setFrame:(::djinni_generated::Quad2dD::fromCpp(c_frame))
                                             textureCoordinates:(::djinni_generated::RectD::fromCpp(c_textureCoordinates))];
         }
     }

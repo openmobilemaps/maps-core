@@ -4,7 +4,7 @@
 #include "NativeQuad3dInterface.h"  // my header
 #include "NativeGraphicsObjectInterface.h"
 #include "NativeMaskingObjectInterface.h"
-#include "NativeQuad3dD.h"
+#include "NativeQuad2dD.h"
 #include "NativeRectD.h"
 #include "NativeRenderingContextInterface.h"
 #include "NativeTextureHolderInterface.h"
@@ -19,12 +19,12 @@ NativeQuad3dInterface::JavaProxy::JavaProxy(JniType j) : Handle(::djinni::jniGet
 
 NativeQuad3dInterface::JavaProxy::~JavaProxy() = default;
 
-void NativeQuad3dInterface::JavaProxy::setFrame(const ::Quad3dD & c_frame, const ::RectD & c_textureCoordinates) {
+void NativeQuad3dInterface::JavaProxy::setFrame(const ::Quad2dD & c_frame, const ::RectD & c_textureCoordinates) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeQuad3dInterface>::get();
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_setFrame,
-                           ::djinni::get(::djinni_generated::NativeQuad3dD::fromCpp(jniEnv, c_frame)),
+                           ::djinni::get(::djinni_generated::NativeQuad2dD::fromCpp(jniEnv, c_frame)),
                            ::djinni::get(::djinni_generated::NativeRectD::fromCpp(jniEnv, c_textureCoordinates)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
@@ -77,11 +77,11 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_Quad3dInterface_00024CppProxy_native_1setFrame(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeQuad3dD::JniType j_frame, ::djinni_generated::NativeRectD::JniType j_textureCoordinates)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_Quad3dInterface_00024CppProxy_native_1setFrame(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeQuad2dD::JniType j_frame, ::djinni_generated::NativeRectD::JniType j_textureCoordinates)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::Quad3dInterface>(nativeRef);
-        ref->setFrame(::djinni_generated::NativeQuad3dD::toCpp(jniEnv, j_frame),
+        ref->setFrame(::djinni_generated::NativeQuad2dD::toCpp(jniEnv, j_frame),
                       ::djinni_generated::NativeRectD::toCpp(jniEnv, j_textureCoordinates));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }

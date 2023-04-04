@@ -365,16 +365,17 @@ std::vector<float> MapCamera2d::getVpMatrix() {
     else {
 
         float R = 6371000;
-        float lambda = focusPointPosition.x; //  px / R;
-        float phi = focusPointPosition.y; // 2*atan(exp(py / R)) - 3.1415926 / 2;
+        float longitude = focusPointPosition.x; //  px / R;
+        float latitude = focusPointPosition.y; // 2*atan(exp(py / R)) - 3.1415926 / 2;
 
         focusPointPosition.y += 0.1;
+        focusPointPosition.x += 0.15;
 
         float radius = 1.0;
 
-        std::vector<float> pos3d = {radius*sin(phi)*cos(-lambda),
-            radius*cos(phi),
-            radius*sin(phi)*sin(-lambda)};
+//        std::vector<float> pos3d = {radius*sin(latitude)*cos(-longitude),
+//            radius*cos(latitude),
+//            radius*sin(latitude)*sin(-longitude)};
 
         Matrix::setIdentityM(vpMatrix, 0);
 
@@ -384,10 +385,10 @@ std::vector<float> MapCamera2d::getVpMatrix() {
         if (sizeViewport.y == 0) {
             vpr = 1.0;
         }
-        Matrix::perspectiveM(vpMatrix, 0, fov, vpr, 0.1, 20.0);
+        Matrix::perspectiveM(vpMatrix, 0, fov, vpr, 0.001, 20.0);
 
 
-        cameraPitch = 20;
+        cameraPitch = 50;
         focusPointAltitude = 0.0;
 
 
@@ -400,8 +401,10 @@ std::vector<float> MapCamera2d::getVpMatrix() {
         Matrix::translateM(vpMatrix, 0, 0, 0, -1 - focusPointAltitude / R);
 
 
-        Matrix::rotateM(vpMatrix, 0.0, lambda, 0.0, 1.0, 0.0);
-        Matrix::rotateM(vpMatrix, 0.0, phi, 1.0, 0.0, 0.0);
+        Matrix::rotateM(vpMatrix, 0.0, -latitude, 1.0, 0.0, 0.0);
+        Matrix::rotateM(vpMatrix, 0.0, -(longitude+90), 0.0, 0.0, 1.0);
+
+//        printf("%f, %f\n", latitude, longitude);
 
     }
 

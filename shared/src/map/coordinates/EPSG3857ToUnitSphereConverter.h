@@ -53,8 +53,8 @@ public:
 
 
         // Calculate latitude and longitude in radians
-        double longitude = x / EarthRadius + M_PI_2 * 0;
-        double latitude = 2 * atan(sinh(y / EarthRadius)) + M_PI_2;
+        double longitude = x / EarthRadius;
+        double latitude = 2 * atan(exp(y / EarthRadius)) - M_PI_2;
 
 //        double xx = (coordinate.x * 180 / 20037508.34) / 180 * M_2_PI;
 //        double yy = (atan(exp(coordinate.y * M_PI / 20037508.34)) * 360 / M_PI - 90) / 180 * M_2_PI;
@@ -70,7 +70,7 @@ public:
 
         double x3D = cosLat * cosLon;
         double y3D = cosLat * sinLon;
-        double z3D = -sinLat;
+        double z3D = sinLat;
 
 
         return Coord(CoordinateSystemIdentifiers::UNITSPHERE(),

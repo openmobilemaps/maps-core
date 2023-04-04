@@ -53,7 +53,7 @@ public:
     void beginAlphaAnimation(double startAlpha, double targetAlpha, long long duration);
 
 protected:
-    void setFrame(const ::Quad3dD &frame);
+    void setFrame(const ::Quad2dD &frame);
 
 private:
     std::shared_ptr<Quad3dInterface> quad;

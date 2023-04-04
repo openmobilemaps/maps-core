@@ -41,15 +41,15 @@ void Textured3dLayerObject::setPosition(const ::Coord &coord, double width, doub
 }
 
 void Textured3dLayerObject::setPositions(const ::QuadCoord &coords) {
-    QuadCoord renderCoords = conversionHelper->convertQuad(CoordinateSystemIdentifiers::UNITSPHERE(), coords);
-    setFrame(Quad3dD(
-     Vec3D(renderCoords.topLeft.x, renderCoords.topLeft.y, renderCoords.topLeft.z),
-     Vec3D(renderCoords.topRight.x, renderCoords.topRight.y, renderCoords.topRight.z),
-     Vec3D(renderCoords.bottomRight.x, renderCoords.bottomRight.y, renderCoords.bottomRight.z),
-     Vec3D(renderCoords.bottomLeft.x, renderCoords.bottomLeft.y, renderCoords.bottomLeft.z)));
+    QuadCoord renderCoords = conversionHelper->convertQuad(CoordinateSystemIdentifiers::EPSG4326(), coords);
+    setFrame(Quad2dD(
+     Vec2D(renderCoords.topLeft.x, renderCoords.topLeft.y),
+     Vec2D(renderCoords.topRight.x, renderCoords.topRight.y),
+     Vec2D(renderCoords.bottomRight.x, renderCoords.bottomRight.y),
+     Vec2D(renderCoords.bottomLeft.x, renderCoords.bottomLeft.y)));
 }
 
-void Textured3dLayerObject::setFrame(const ::Quad3dD &frame) { quad->setFrame(frame, RectD(0, 0, 1, 1)); }
+void Textured3dLayerObject::setFrame(const ::Quad2dD &frame) { quad->setFrame(frame, RectD(0, 0, 1, 1)); }
 
 void Textured3dLayerObject::update() {
     if (animation) {

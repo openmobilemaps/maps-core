@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class Quad3dInterface {
 
-    abstract fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad3dD, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.RectD)
+    abstract fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.RectD)
 
     abstract fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
 
@@ -32,11 +32,11 @@ abstract class Quad3dInterface {
 
         external fun nativeDestroy(nativeRef: Long)
 
-        override fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad3dD, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.RectD) {
+        override fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.RectD) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_setFrame(this.nativeRef, frame, textureCoordinates)
         }
-        private external fun native_setFrame(_nativeRef: Long, frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad3dD, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.RectD)
+        private external fun native_setFrame(_nativeRef: Long, frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.RectD)
 
         override fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

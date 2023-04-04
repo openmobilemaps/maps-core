@@ -136,8 +136,8 @@ public enum Pipeline: String, CaseIterable {
         switch self {
             case .lineGroupShader: return LineVertex.descriptor
             case .polygonGroupShader: return PolygonVertex.descriptor
-            case .sphereProjectionShader: return Vertex3D.tesselatedDescriptor
-            case .sphereColorShader: return Vertex3D.tesselatedDescriptor
+            case .sphereProjectionShader: return Vertex.tesselatedDescriptor
+            case .sphereColorShader: return Vertex.tesselatedDescriptor
             default: return Vertex.descriptor
         }
     }

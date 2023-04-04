@@ -144,7 +144,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const /*not-null*/ std::shared_pt
         bool preciseEnough = topLengthPx <= maxLength && bottomLengthPx <= maxLength && leftLengthPx <= maxLength && rightLengthPx <= maxLength;
         if (preciseEnough || true) {
 
-            const RectCoord rect(bottomLeft, topRight);
+            const RectCoord rect(topRight, bottomLeft);
             int t = 0;
             double priority = 1.0;
             visibleTilesVec.push_back(PrioritizedTiled2dMapTileInfo(
