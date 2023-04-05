@@ -10,7 +10,8 @@
 
 #pragma once
 
-#define UBRendererShaderCode(...) std::string(#__VA_ARGS__)
+#define OMMShaderCode(...) std::string(#__VA_ARGS__)
+#define OMMVersionedGlesShaderCode(version, ...) std::string("#version " #version "\n" #__VA_ARGS__)
 
 #include "Logger.h"
 #include "ShaderProgramInterface.h"

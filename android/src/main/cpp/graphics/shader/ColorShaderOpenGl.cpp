@@ -45,18 +45,24 @@ void ColorShaderOpenGl::setColor(float red, float green, float blue, float alpha
 }
 
 std::string ColorShaderOpenGl::getVertexShader() {
-    return UBRendererShaderCode(precision highp float; uniform mat4 uMVPMatrix; attribute vec4 vPosition;
+    return OMMVersionedGlesShaderCode(320 es,
+                                      precision highp float;
+                                      uniform mat4 uMVPMatrix;
+                                      in vec4 vPosition;
 
-                                void main() { gl_Position = uMVPMatrix * vPosition; });
+                                      void main() { gl_Position = uMVPMatrix * vPosition; });
 }
 
 std::string ColorShaderOpenGl::getFragmentShader() {
-    return UBRendererShaderCode(precision mediump float; uniform vec4 vColor;
+    return OMMVersionedGlesShaderCode(320 es,
+                                precision mediump float;
+                                uniform vec4 vColor;
+                                out vec4 fragmentColor;
 
                                 void main() {
-                                    gl_FragColor = vColor;
-                                    gl_FragColor.a = 1.0;
-                                    gl_FragColor *= vColor.a;
+                                    fragmentColor = vColor;
+                                    fragmentColor.a = 1.0;
+                                    fragmentColor *= vColor.a;
                                 });
 }
 

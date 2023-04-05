@@ -9,4 +9,6 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="io.openmobilemaps.mapscore" />
+	package="io.openmobilemaps.mapscore">
+	<uses-feature android:glEsVersion="0x00030002" android:required="true" />
+</manifest>

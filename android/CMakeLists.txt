@@ -116,7 +116,7 @@ include_directories(src/main/cpp/scheduling)
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
 # default, you only need to specify the name of the public NDK library
-# you want to add. CMake verifies that the library exists beforeDann
+# you want to add. CMake verifies that the library exists before
 # completing its build.
 
 find_library( # Sets the name of the path variable.
@@ -137,8 +137,5 @@ target_link_libraries( # Specifies the target library.
         # included in the NDK.
         ${log-lib})
 
-find_library(opengl-lib
-        GLESv2)
-
-target_link_libraries(mapscore
-        ${opengl-lib})
+find_library(opengl-lib GLESv3)
+target_link_libraries(mapscore ${opengl-lib})

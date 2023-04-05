@@ -45,20 +45,25 @@ void ColorCircleShaderOpenGl::setColor(float red, float green, float blue, float
 }
 
 std::string ColorCircleShaderOpenGl::getFragmentShader() {
-    return UBRendererShaderCode(precision mediump float; uniform vec4 vColor; varying vec2 v_texcoord;
+    return OMMVersionedGlesShaderCode(320 es,
+                                      precision mediump float;
+                                      uniform vec4 vColor;
+                                      in vec2 v_texcoord;
+                                      out vec4 fragmentColor;
 
-                                void main() {
-                                    highp vec2 circleCenter = vec2(0.5, 0.5);
-                                    highp float dist = distance(v_texcoord, circleCenter);
+                                      void main() {
+                                          highp
+                                          vec2 circleCenter = vec2(0.5, 0.5);
+                                          highp float dist = distance(v_texcoord, circleCenter);
 
-                                    if (dist > 0.5) {
-                                        discard;
-                                    }
+                                          if (dist > 0.5) {
+                                              discard;
+                                          }
 
-                                    gl_FragColor = vColor;
-                                    gl_FragColor.a = 1.0;
-                                    gl_FragColor *= vColor.a;
-                                });
+                                          fragmentColor = vColor;
+                                          fragmentColor.a = 1.0;
+                                          fragmentColor *= vColor.a;
+                                      });
 }
 
 std::shared_ptr<ShaderProgramInterface> ColorCircleShaderOpenGl::asShaderProgramInterface() { return shared_from_this(); }

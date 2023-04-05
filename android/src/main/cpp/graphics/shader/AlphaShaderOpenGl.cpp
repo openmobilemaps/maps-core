@@ -42,13 +42,18 @@ void AlphaShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInt
 }
 
 std::string AlphaShaderOpenGl::getFragmentShader() {
-    return UBRendererShaderCode(precision mediump float; uniform sampler2D texture; varying vec2 v_texcoord;
-                                uniform highp float alpha;
+    return OMMVersionedGlesShaderCode(320 es,
+                                      precision mediump float;
+                                      uniform sampler2D textureSampler;
+                                      uniform highp float alpha;
+                                      in vec2 v_texcoord;
+                                      out vec4 fragmentColor;
 
-                                void main() {
-                                    vec4 c = texture2D(texture, v_texcoord);
-                                    gl_FragColor = c * alpha;
-                                });
+                                      void main() {
+                                          vec4 c = texture(textureSampler, v_texcoord);
+                                          fragmentColor = c * alpha;
+                                      }
+    );
 }
 
 std::shared_ptr<ShaderProgramInterface> AlphaShaderOpenGl::asShaderProgramInterface() { return shared_from_this(); }
