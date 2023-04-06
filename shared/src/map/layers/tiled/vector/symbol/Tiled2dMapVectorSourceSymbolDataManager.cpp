@@ -547,7 +547,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::unordered_
             object->getShader()->setScale(1.0);
         }
 
-        wrapper->textObject->update(scale);
+        wrapper->textObject->layout(scale);
 
         const bool hasText = object->getTextObject() != nullptr;
 

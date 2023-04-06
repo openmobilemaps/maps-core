@@ -9,7 +9,7 @@
 class CoordinateConverterInterface;
 struct Coord;
 struct QuadCoord;
- struct RectCoord;
+struct RectCoord;
 
 class CoordinateConversionHelperInterface {
 public:
