@@ -54,6 +54,7 @@ std::vector<std::shared_ptr<RenderConfigInterface>> TextLayerObject::getRenderCo
 }
 
 void TextLayerObject::update(float scale) {
+
     switch(textInfo->getSymbolPlacement()) {
         case TextSymbolPlacement::POINT: {
             layoutPoint(scale);
@@ -304,71 +305,73 @@ float TextLayerObject::layoutLine(float scale) {
 
     for (const auto &entry: textInfo->getText()) {
         for (const auto &c : TextHelper::splitWstring(entry.text)) {
-            for (const auto &d : fontData.glyphs) {
-                if (c == " " || c == "\n") {
-                    currentIndex = indexAtDistance(currentIndex, fontData.info.spaceAdvance * fontSize * entry.scale);
-                    characterCount += 1;
-                    break;
-                } else if (c == d.charCode) {
-                    auto size = Vec2D(d.boundingBoxSize.x * fontSize * entry.scale, d.boundingBoxSize.y * fontSize * entry.scale);
-                    auto bearing = Vec2D(d.bearing.x * fontSize * entry.scale, d.bearing.y * fontSize * entry.scale);
-                    auto advance = Vec2D(d.advance.x * fontSize * entry.scale, d.advance.y * fontSize * entry.scale);
+            if(c == " " || c == "\n") {
+                currentIndex = indexAtDistance(currentIndex, fontData.info.spaceAdvance * fontSize * entry.scale);
+                characterCount += 1;
+                break;
+            } else {
+                for (const auto &d : fontData.glyphs) {
+                    if (c == d.charCode) {
+                        auto size = Vec2D(d.boundingBoxSize.x * fontSize * entry.scale, d.boundingBoxSize.y * fontSize * entry.scale);
+                        auto bearing = Vec2D(d.bearing.x * fontSize * entry.scale, d.bearing.y * fontSize * entry.scale);
+                        auto advance = Vec2D(d.advance.x * fontSize * entry.scale, d.advance.y * fontSize * entry.scale);
 
-                    // Punkt auf Linie
-                    auto p = converter->convertToRenderSystem(pointAtIndex(currentIndex));
+                        // Punkt auf Linie
+                        auto p = converter->convertToRenderSystem(pointAtIndex(currentIndex));
 
-                    // get before and after to calculate angle
-                    auto before = pointAtIndex(indexAtDistance(currentIndex, -size.x * 0.5));
-                    auto after = pointAtIndex(indexAtDistance(currentIndex, size.x * 0.5));
+                        // get before and after to calculate angle
+                        auto before = pointAtIndex(indexAtDistance(currentIndex, -size.x * 0.5));
+                        auto after = pointAtIndex(indexAtDistance(currentIndex, size.x * 0.5));
 
-                    double angle = atan2((before.y - after.y), -(before.x - after.x));
-                    angle *= (180.0 / M_PI);
+                        double angle = atan2((before.y - after.y), -(before.x - after.x));
+                        angle *= (180.0 / M_PI);
 
-                    auto x = p.x + bearing.x;
-                    auto y = p.y - bearing.y;
+                        auto x = p.x + bearing.x;
+                        auto y = p.y - bearing.y;
 
-                    rotated += (angle > 90 || angle < -90) ? 1 : 0;
-                    total++;
+                        rotated += (angle > 90 || angle < -90) ? 1 : 0;
+                        total++;
 
-                    auto xw = x + size.x;
-                    auto yh = y + size.y;
+                        auto xw = x + size.x;
+                        auto yh = y + size.y;
 
-                    currentIndex = indexAtDistance(currentIndex, advance.x * (1.0 + letterSpacing));
+                        currentIndex = indexAtDistance(currentIndex, advance.x * (1.0 + letterSpacing));
 
-                    auto tl = Vec2D(x, yh);
-                    auto tr = Vec2D(xw, yh);
-                    auto bl = Vec2D(x, y);
-                    auto br = Vec2D(xw, y);
+                        auto tl = Vec2D(x, yh);
+                        auto tr = Vec2D(xw, yh);
+                        auto bl = Vec2D(x, y);
+                        auto br = Vec2D(xw, y);
 
-                    Quad2dD quad = Quad2dD(tl, tr, br, bl);
-                    quad = TextHelper::rotateQuad2d(quad, Vec2D(p.x, p.y), angle);
+                        Quad2dD quad = Quad2dD(tl, tr, br, bl);
+                        quad = TextHelper::rotateQuad2d(quad, Vec2D(p.x, p.y), angle);
 
-                    auto dy = Vec2DHelper::normalize(Vec2D(quad.bottomLeft.x - quad.topLeft.x, quad.bottomLeft.y - quad.topLeft.y));
-                    // TODO: 0.3 looks good, is there a better value?
-                    dy.x *= 0.3 * fontSize;
-                    dy.y *= 0.3 * fontSize;
+                        auto dy = Vec2DHelper::normalize(Vec2D(quad.bottomLeft.x - quad.topLeft.x, quad.bottomLeft.y - quad.topLeft.y));
+                        // TODO: 0.3 looks good, is there a better value?
+                        dy.x *= 0.3 * fontSize;
+                        dy.y *= 0.3 * fontSize;
 
-                    quad.topLeft = quad.topLeft - dy;
-                    quad.bottomLeft = quad.bottomLeft - dy;
-                    quad.topRight = quad.topRight - dy;
-                    quad.bottomRight = quad.bottomRight - dy;
+                        quad.topLeft = quad.topLeft - dy;
+                        quad.bottomLeft = quad.bottomLeft - dy;
+                        quad.topRight = quad.topRight - dy;
+                        quad.bottomRight = quad.bottomRight - dy;
 
-                    if (!box) {
-                        box = BoundingBox(Coord(referencePoint.systemIdentifier, quad.topLeft.x, quad.topLeft.y, referencePoint.z));
-                    }
+                        if (!box) {
+                            box = BoundingBox(Coord(referencePoint.systemIdentifier, quad.topLeft.x, quad.topLeft.y, referencePoint.z));
+                        }
 
-                    box->addPoint(quad.topLeft.x, quad.topLeft.y, referencePoint.z);
-                    box->addPoint(quad.topRight.x, quad.topRight.y, referencePoint.z);
-                    box->addPoint(quad.bottomLeft.x, quad.bottomLeft.y, referencePoint.z);
-                    box->addPoint(quad.bottomRight.x, quad.bottomRight.y, referencePoint.z);
+                        box->addPoint(quad.topLeft.x, quad.topLeft.y, referencePoint.z);
+                        box->addPoint(quad.topRight.x, quad.topRight.y, referencePoint.z);
+                        box->addPoint(quad.bottomLeft.x, quad.bottomLeft.y, referencePoint.z);
+                        box->addPoint(quad.bottomRight.x, quad.bottomRight.y, referencePoint.z);
 
-                    glyphs.push_back(GlyphDescription(quad, d.uv));
-                    characterCount += 1;
+                        glyphs.push_back(GlyphDescription(quad, d.uv));
+                        characterCount += 1;
 
 #ifdef DRAW_TEXT_LETTER_BOXES
-                    letterBoxes.push_back(quad);
+                        letterBoxes.push_back(quad);
 #endif
-                    break;
+                        break;
+                    }
                 }
             }
         }

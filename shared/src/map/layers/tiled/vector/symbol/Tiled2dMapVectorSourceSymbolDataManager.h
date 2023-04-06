@@ -45,6 +45,8 @@ public:
 
     void collisionDetection(std::unordered_set<std::string> layerIdentifiers, std::shared_ptr<std::vector<OBB2D>> placements);
 
+    void update();
+
     void setSprites(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture);
 
     bool onClickUnconfirmed(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) override;

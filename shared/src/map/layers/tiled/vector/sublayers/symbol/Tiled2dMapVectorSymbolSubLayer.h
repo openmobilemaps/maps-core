@@ -54,8 +54,6 @@ struct Tiled2dMapVectorSymbolFeatureWrapper {
 
     OBB2D orientedBoundingBox = OBB2D(Quad2dD(Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0)));
 
-    std::optional<Quad2dD> projectedTextQuad = std::nullopt;
-
 #ifdef DRAW_TEXT_BOUNDING_BOXES
     std::shared_ptr<Quad2dInterface> boundingBox = nullptr;
 #endif
