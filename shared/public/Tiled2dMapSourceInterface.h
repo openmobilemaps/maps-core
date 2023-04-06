@@ -3,13 +3,13 @@
 
 #pragma once
 
-#include "CameraInterface.h"
 #include "ErrorManager.h"
 #include "LayerReadyState.h"
 #include "RectCoord.h"
 #include <cstdint>
 #include <memory>
 #include <optional>
+#include <vector>
 
 class Tiled2dMapSourceInterface {
 public:
@@ -17,7 +17,7 @@ public:
 
     virtual void onVisibleBoundsChanged(const ::RectCoord & visibleBounds, int32_t curT, double zoom) = 0;
 
-    virtual void onCameraChange(const /*not-null*/ std::shared_ptr<::CameraInterface> & camera) = 0;
+    virtual void onCameraChange(const std::vector<float> & vpMatrix) = 0;
 
     virtual void setMinZoomLevelIdentifier(std::optional<int32_t> value) = 0;
 

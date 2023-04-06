@@ -3,7 +3,6 @@
 
 #include "NativeTiled2dMapSourceInterface.h"  // my header
 #include "Marshal.hpp"
-#include "NativeCameraInterface.h"
 #include "NativeErrorManager.h"
 #include "NativeLayerReadyState.h"
 #include "NativeRectCoord.h"
@@ -32,11 +31,11 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapSourceInterface_00024CppProxy_native_1onCameraChange(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeCameraInterface::JniType j_camera)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapSourceInterface_00024CppProxy_native_1onCameraChange(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_vpMatrix)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapSourceInterface>(nativeRef);
-        ref->onCameraChange(::djinni_generated::NativeCameraInterface::toCpp(jniEnv, j_camera));
+        ref->onCameraChange(::djinni::List<::djinni::F32>::toCpp(jniEnv, j_vpMatrix));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

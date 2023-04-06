@@ -6,7 +6,6 @@
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
-#import "MCCameraInterface+Private.h"
 #import "MCErrorManager+Private.h"
 #import "MCLayerReadyState+Private.h"
 #import "MCRectCoord+Private.h"
@@ -44,9 +43,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)onCameraChange:(nullable id<MCCameraInterface>)camera {
+- (void)onCameraChange:(nonnull NSArray<NSNumber *> *)vpMatrix {
     try {
-        _cppRefHandle.get()->onCameraChange(::djinni_generated::CameraInterface::toCpp(camera));
+        _cppRefHandle.get()->onCameraChange(::djinni::List<::djinni::F32>::toCpp(vpMatrix));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

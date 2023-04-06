@@ -7,7 +7,6 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
-#import "MCCameraInterface+Private.h"
 #import "MCRectCoord+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -53,9 +52,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)onCameraChange:(nullable id<MCCameraInterface>)camera {
+- (void)onCameraChange:(nonnull NSArray<NSNumber *> *)vpMatrix {
     try {
-        _cppRefHandle.get()->onCameraChange(::djinni_generated::CameraInterface::toCpp(camera));
+        _cppRefHandle.get()->onCameraChange(::djinni::List<::djinni::F32>::toCpp(vpMatrix));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -87,10 +86,10 @@ public:
             [djinni_private_get_proxied_objc_object() onMapInteraction];
         }
     }
-    void onCameraChange(const /*not-null*/ std::shared_ptr<::CameraInterface> & c_camera) override
+    void onCameraChange(const std::vector<float> & c_vpMatrix) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() onCameraChange:(::djinni_generated::CameraInterface::fromCpp(c_camera))];
+            [djinni_private_get_proxied_objc_object() onCameraChange:(::djinni::List<::djinni::F32>::fromCpp(c_vpMatrix))];
         }
     }
 };

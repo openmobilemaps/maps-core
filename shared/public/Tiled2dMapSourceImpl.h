@@ -19,6 +19,8 @@
 #include "gpc.h"
 #include "Logger.h"
 #include "Vec2DHelper.h"
+#include "MapCamera2d.h"
+#include "Matrix.h"
 
 template<class T, class L, class R>
 Tiled2dMapSource<T, L, R>::Tiled2dMapSource(const MapConfig &mapConfig, const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
@@ -45,7 +47,7 @@ bool Tiled2dMapSource<T, L, R>::isTileVisible(const Tiled2dMapTileInfo &tileInfo
 }
 
 template<class T, class L, class R>
-void Tiled2dMapSource<T, L, R>::onCameraChange(const /*not-null*/ std::shared_ptr<::CameraInterface> & camera) {
+void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & vpMatrix) {
 
     if (isPaused) {
         return;
@@ -56,7 +58,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const /*not-null*/ std::shared_pt
         int levelIndex;
     };
     std::queue<VisibleTileCandidate> candidates;
-    int initialLevel = 4;
+    int initialLevel = 0;
     const Tiled2dMapZoomLevelInfo &zoomLevelInfo0 = zoomLevelInfos.at(initialLevel);
     for (int x = 0; x < zoomLevelInfo0.numTilesX; x++) {
         for (int y = 0; y < zoomLevelInfo0.numTilesY; y++) {
@@ -68,8 +70,11 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const /*not-null*/ std::shared_pt
         }
     }
 
+//    printf("\n\nfind tiles\n");
 
     std::vector<PrioritizedTiled2dMapTileInfo> visibleTilesVec;
+
+    int maxLevel = 0;
 
     while (candidates.size() > 0) {
         VisibleTileCandidate candidate = candidates.front();
@@ -78,6 +83,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const /*not-null*/ std::shared_pt
         if (candidate.levelIndex >= zoomLevelInfos.size()) {
             continue;
         }
+
 
 
         const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(candidate.levelIndex);
@@ -100,33 +106,51 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const /*not-null*/ std::shared_pt
         const Coord bottomLeft = Coord(layerSystemId, topLeft.x, topLeft.y + tileHeightAdj, 0);
         const Coord bottomRight = Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y + tileHeightAdj, 0);
 
-        auto topLeftScreen = camera->project(topLeft);
-        auto topRightScreen = camera->project(topRight);
-        auto bottomLeftScreen = camera->project(bottomLeft);
-        auto bottomRightScreen = camera->project(bottomRight);
+        auto topLeftScreen = project(topLeft, vpMatrix);
+        auto topRightScreen = project(topRight, vpMatrix);
+        auto bottomLeftScreen = project(bottomLeft, vpMatrix);
+        auto bottomRightScreen = project(bottomRight, vpMatrix);
 
-//        printf("%d|%d|%d -> (%f|%f), (%f|%f), (%f|%f), (%f|%f)\n", zoomLevelInfo.zoomLevelIdentifier, candidate.x, candidate.y,
-//               topLeftScreen.x, topLeftScreen.y,
-//               topRightScreen.x, topRightScreen.y,
-//               bottomLeftScreen.x, bottomLeftScreen.y,
-//               bottomRightScreen.x, bottomRightScreen.y
-//               );
 
-//        if (topLeftScreen.x < -1 && topRightScreen.x < -1 && bottomLeftScreen.x < -1 && bottomRightScreen.x < -1) {
-//            continue;
-//        }
-//        if (topLeftScreen.y < -1 && topRightScreen.y < -1 && bottomLeftScreen.y < -1 && bottomRightScreen.y < -1) {
-//            continue;
-//        }
-//        if (topLeftScreen.x > 1 && topRightScreen.x > 1 && bottomLeftScreen.x > 1 && bottomRightScreen.x > 1) {
-//            continue;
-//        }
-//        if (topLeftScreen.y > 1 && topRightScreen.y > 1 && bottomLeftScreen.y > 1 && bottomRightScreen.y > 1) {
-//            continue;
-//        }
 
-        double screenWidth = 500;
-        double screenHeight = 500;
+        if (topLeftScreen.x < -1 && topRightScreen.x < -1 && bottomLeftScreen.x < -1 && bottomRightScreen.x < -1) {
+            continue;
+        }
+        if (topLeftScreen.y < -1 && topRightScreen.y < -1 && bottomLeftScreen.y < -1 && bottomRightScreen.y < -1) {
+            continue;
+        }
+        if (topLeftScreen.x > 1 && topRightScreen.x > 1 && bottomLeftScreen.x > 1 && bottomRightScreen.x > 1) {
+            continue;
+        }
+        if (topLeftScreen.y > 1 && topRightScreen.y > 1 && bottomLeftScreen.y > 1 && bottomRightScreen.y > 1) {
+            continue;
+        }
+
+        // Berechnen der Fläche mit der Shoelace-Formel
+        double minX = std::min(std::min(topLeftScreen.x, bottomLeftScreen.x), std::min(topRightScreen.x, bottomRightScreen.x));
+        double minY = std::min(std::min(topLeftScreen.y, bottomLeftScreen.y), std::min(topRightScreen.y, bottomRightScreen.y));
+        double area1 = 0;
+        area1 += (topLeftScreen.x-minX) * (bottomLeftScreen.y-minY) - (bottomLeftScreen.x-minX) * (topLeftScreen.y-minY);
+        area1 += (bottomLeftScreen.x-minX) * (topRightScreen.y-minY) - (topRightScreen.x-minX) * (bottomLeftScreen.y-minY);
+        area1 += (topRightScreen.x-minX) * (topLeftScreen.y-minY) - (topLeftScreen.x-minX) * (topRightScreen.y-minY);
+        double area2 = 0;
+        area2 += (bottomLeftScreen.x-minX) * (bottomRightScreen.y-minY) - (bottomRightScreen.x-minX) * (bottomLeftScreen.y-minY);
+        area2 += (bottomRightScreen.x-minX) * (topRightScreen.y-minY) - (topRightScreen.x-minX) * (bottomRightScreen.y-minY);
+        area2 += (topRightScreen.x-minX) * (bottomLeftScreen.y-minY) - (bottomLeftScreen.x-minX) * (topRightScreen.y-minY);
+        if (area1 < 0 && area2 < 0) {
+            // both triangles are facing backwards
+//            continue;
+        }
+
+        printf("%d|%d|%d -> (%f|%f), (%f|%f), (%f|%f), (%f|%f)\n", zoomLevelInfo.zoomLevelIdentifier, candidate.x, candidate.y,
+               topLeftScreen.x, topLeftScreen.y,
+               topRightScreen.x, topRightScreen.y,
+               bottomLeftScreen.x, bottomLeftScreen.y,
+               bottomRightScreen.x, bottomRightScreen.y
+               );
+
+        double screenWidth = 1000;
+        double screenHeight = 1000;
 
         Vec2D topLeftScreenPx(topLeftScreen.x * (screenWidth / 2.0), topLeftScreen.y * (screenHeight / 2.0));
         Vec2D topRightScreenPx(topRightScreen.x * (screenWidth / 2.0), topRightScreen.y * (screenHeight / 2.0));
@@ -142,7 +166,8 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const /*not-null*/ std::shared_pt
 
 
         bool preciseEnough = topLengthPx <= maxLength && bottomLengthPx <= maxLength && leftLengthPx <= maxLength && rightLengthPx <= maxLength;
-        if (preciseEnough || true) {
+        bool lastLevel = candidate.levelIndex == zoomLevelInfos.size() - 1;
+        if (preciseEnough || lastLevel) {
 
             const RectCoord rect(topRight, bottomLeft);
             int t = 0;
@@ -150,6 +175,8 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const /*not-null*/ std::shared_pt
             visibleTilesVec.push_back(PrioritizedTiled2dMapTileInfo(
                    Tiled2dMapTileInfo(rect, candidate.x, candidate.y, t, zoomLevelInfo.zoomLevelIdentifier, zoomLevelInfo.zoom),
                    priority));
+
+            maxLevel = std::max(maxLevel, zoomLevelInfo.zoomLevelIdentifier);
 
 //            printf("%d|%d|%d @ %f -> %f, %f, %f, %f\n", zoomLevelInfo.zoomLevelIdentifier, candidate.x, candidate.y, tileWidth, topLengthPx, bottomLengthPx, leftLengthPx, rightLengthPx);
 
@@ -201,8 +228,27 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const /*not-null*/ std::shared_pt
 
     onVisibleTilesChanged(layers);
 
+    printf("maxlevel: %d\n", maxLevel);
 
 
+
+}
+
+template<class T, class L, class R>
+::Vec2D Tiled2dMapSource<T, L, R>::project(const ::Coord & position, const std::vector<float> & vpMatrix) {
+    //    auto matrix = getVpMatrix();
+    auto mapCoord = conversionHelper->convert(CoordinateSystemIdentifiers::UNITSPHERE(), position);
+    std::vector<float> inVec = {(float)mapCoord.x, (float)mapCoord.y, (float)mapCoord.z, 1.0}; // TODO: Performance, how to build a vec
+//    inVec.push_back(mapCoord.x);
+//    inVec.push_back(mapCoord.y);
+//    inVec.push_back(mapCoord.z);
+//    inVec.push_back(1.0);
+    std::vector<float> outVec = {0, 0, 0, 0};
+
+    Matrix::multiply(vpMatrix, inVec, outVec);
+
+    //    printf("%f, %f, %f -> %f, %f\n", position.x, position.y, position.z, outVec[0], outVec[1]);
+    return Vec2D(outVec[0] / outVec[3], outVec[1] / outVec[3]);
 }
 
 template<class T, class L, class R>

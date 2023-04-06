@@ -61,17 +61,17 @@ sphereProjectionVertexShader(const patch_control_point<VertexIn> patch [[stage_i
 
     float pi = 3.14159;
 
-    float longitude = pos.x / 180.0 * pi;
-    float latitude = pos.y / 90.0 * pi;
+    float longitude = pos.x / 180.0 * pi + pi; // [0, 2pi]
+    float latitude = pos.y / 90.0 * pi - pi; // [-2pi, 0]
 
-    float sinLatH = sin(latitude / 2);
-    float cosLatH = cos(latitude / 2);
-    float sinLon = sin(longitude);
-    float cosLon = cos(longitude);
+    float sinLon = sin(longitude);     // [0, 1, 0, -1, 0]
+    float cosLon = cos(longitude);     // [1, 0, -1, 0, 1]
+    float sinLatH = sin(latitude / 2); // [0, 1, 0, -1, 0]
+    float cosLatH = cos(latitude / 2); // [1, 0, -1, 0, 1]
 
-    float x3D = cosLon * cosLatH;
-    float y3D = sinLon * cosLatH;
-    float z3D = sinLatH;
+    float x3D = sinLon * sinLatH;
+    float y3D = cosLatH;
+    float z3D = cosLon * sinLatH;
     float3 n = float3(x3D, y3D, z3D);
     float3 pos3d = n * radius;
 

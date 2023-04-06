@@ -3,9 +3,8 @@
 
 #pragma once
 
-#include "CameraInterface.h"
 #include "RectCoord.h"
-#include <memory>
+#include <vector>
 
 class MapCamera2dListenerInterface {
 public:
@@ -17,5 +16,5 @@ public:
 
     virtual void onMapInteraction() = 0;
 
-    virtual void onCameraChange(const /*not-null*/ std::shared_ptr<::CameraInterface> & camera) = 0;
+    virtual void onCameraChange(const std::vector<float> & vpMatrix) = 0;
 };

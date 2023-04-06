@@ -314,16 +314,20 @@ std::shared_ptr<::CameraInterface> MapCamera2d::asCameraInterface() { return sha
 
 
 ::Vec2D MapCamera2d::project(const ::Coord & position) {
-    auto matrix = getVpMatrix();
-    auto mapCoord = mapInterface->getCoordinateConverterHelper()->convert(mapInterface->getMapConfig().mapCoordinateSystem.identifier, position);
+//    auto matrix = getVpMatrix();
+    auto mapCoord = mapInterface->getCoordinateConverterHelper()->convert(CoordinateSystemIdentifiers::UNITSPHERE(), position);
     std::vector<float> inVec; // TODO: Performance, how to build a vec
     inVec.push_back(mapCoord.x);
     inVec.push_back(mapCoord.y);
     inVec.push_back(mapCoord.z);
     inVec.push_back(1.0);
     std::vector<float> outVec = {0, 0, 0, 0};
-    Matrix::multiply(matrix, inVec, outVec);
-    return Vec2D(outVec[0], outVec[1]);
+
+    std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
+    Matrix::multiply(newVpMatrix, inVec, outVec);
+
+//    printf("%f, %f, %f -> %f, %f\n", position.x, position.y, position.z, outVec[0], outVec[1]);
+    return Vec2D(outVec[0] / outVec[3], outVec[1] / outVec[3]);
 }
 
 std::vector<float> MapCamera2d::getVpMatrix() {
@@ -367,15 +371,12 @@ std::vector<float> MapCamera2d::getVpMatrix() {
         float R = 6371000;
         float longitude = focusPointPosition.x; //  px / R;
         float latitude = focusPointPosition.y; // 2*atan(exp(py / R)) - 3.1415926 / 2;
-
-        focusPointPosition.y += 0.1;
-        focusPointPosition.x += 0.15;
+//
+//        focusPointPosition.x -= 0.1;
+//        focusPointPosition.y += 0.15;
 
         float radius = 1.0;
 
-//        std::vector<float> pos3d = {radius*sin(latitude)*cos(-longitude),
-//            radius*cos(latitude),
-//            radius*sin(latitude)*sin(-longitude)};
 
         Matrix::setIdentityM(vpMatrix, 0);
 
@@ -401,8 +402,8 @@ std::vector<float> MapCamera2d::getVpMatrix() {
         Matrix::translateM(vpMatrix, 0, 0, 0, -1 - focusPointAltitude / R);
 
 
-        Matrix::rotateM(vpMatrix, 0.0, -latitude, 1.0, 0.0, 0.0);
-        Matrix::rotateM(vpMatrix, 0.0, -(longitude+90), 0.0, 0.0, 1.0);
+        Matrix::rotateM(vpMatrix, 0.0, longitude, 1.0, 0.0, 0.0);
+        Matrix::rotateM(vpMatrix, 0.0, -latitude , 0.0, 1.0, 0.0);
 
 //        printf("%f, %f\n", latitude, longitude);
 
@@ -412,9 +413,9 @@ std::vector<float> MapCamera2d::getVpMatrix() {
     lastVpBounds = viewBounds;
     lastVpRotation = currentRotation;
     lastVpZoom = currentZoom;
-    return vpMatrix;
-//    newVpMatrix = vpMatrix;
-//    return newVpMatrix;
+//    return vpMatrix;
+    newVpMatrix = vpMatrix;
+    return newVpMatrix;
 }
 
 std::optional<::RectCoord> MapCamera2d::getLastVpMatrixViewBounds() {
@@ -512,7 +513,8 @@ void MapCamera2d::notifyListeners(const int &listenerType) {
         }
 
         if (listenerType & ListenerType::CAMERA) {
-            listener->onCameraChange(shared_from_this());
+            auto vpMatrix = getVpMatrix();
+            listener->onCameraChange(vpMatrix);
         }
     }
 }
@@ -551,8 +553,8 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     float xDiffMap = xDiff * zoom * screenPixelAsRealMeterFactor * (mapSystemRtl ? -1 : 1);
     float yDiffMap = yDiff * zoom * screenPixelAsRealMeterFactor * (mapSystemTtb ? -1 : 1);
 
-    focusPointPosition.x += xDiffMap;
-    focusPointPosition.y += yDiffMap;
+    focusPointPosition.y += xDiffMap;
+    focusPointPosition.x -= yDiffMap;
 //    focusPointPosition = conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), focusPointPosition);
 
     clampCenterToPaddingCorrectedBounds();
@@ -612,8 +614,8 @@ void MapCamera2d::inertiaStep() {
     float yDiffMap = (inertia->velocity.y) * factor * deltaPrev;
     inertia->timestampUpdate = now;
 
-    focusPointPosition.x += xDiffMap;
-    focusPointPosition.y += yDiffMap;
+    focusPointPosition.y += xDiffMap;
+    focusPointPosition.x -= yDiffMap;
 //    focusPointPosition = conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), focusPointPosition);
 
     clampCenterToPaddingCorrectedBounds();
@@ -724,8 +726,8 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
         double diffCenterX = -leftDiff * zoom * screenPixelAsRealMeterFactor;
         double diffCenterY = topDiff * zoom * screenPixelAsRealMeterFactor;
 
-        focusPointPosition.x += diffCenterX;
-        focusPointPosition.y += diffCenterY;
+        focusPointPosition.y += diffCenterX;
+        focusPointPosition.x -= diffCenterY;
 //        focusPointPosition = conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), focusPointPosition);
 
         if (config.rotationEnabled) {
@@ -741,8 +743,8 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
                                      (centerScreen.x - midpoint.x) * sin(newa - olda) + midpoint.y - centerScreen.y;
                 double rotDiffX = (cosAngle * centerXDiff - sinAngle * centerYDiff);
                 double rotDiffY = (cosAngle * centerYDiff + sinAngle * centerXDiff);
-                focusPointPosition.x += rotDiffX * zoom * screenPixelAsRealMeterFactor;
-                focusPointPosition.y += rotDiffY * zoom * screenPixelAsRealMeterFactor;
+                focusPointPosition.y += rotDiffX * zoom * screenPixelAsRealMeterFactor;
+                focusPointPosition.x -= rotDiffY * zoom * screenPixelAsRealMeterFactor;
 //                focusPointPosition = conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), focusPointPosition);
 
                 listenerType |= ListenerType::ROTATION;

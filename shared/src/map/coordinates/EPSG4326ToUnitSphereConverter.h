@@ -17,20 +17,17 @@
 #include "MapCoordinateSystem.h"
 
 /// Convert WGS 84  to Unit Sphere
-/// https://epsg.io/3857 to Unit Sphere x,y,z in [-1, 1]
-class EPSG3857ToUnitSphereConverter : public CoordinateConverterInterface {
+/// https://epsg.io/4326 to Unit Sphere x,y,z in [-1, 1]
+class EPSG4326ToUnitSphereConverter : public CoordinateConverterInterface {
 public:
-    EPSG3857ToUnitSphereConverter() {}
+    EPSG4326ToUnitSphereConverter() {}
 
     virtual Coord convert(const Coord &coordinate) override {
 
         const double EarthRadius = 6378137.0; // Earth's radius in meters (EPSG:3857 uses this value)
 
-        double x = coordinate.x * 180 / 20037508.34;
-        double y = atan(exp(coordinate.y * M_PI / 20037508.34)) * 360 / M_PI - 90;
-
-        float longitude = x / 180.0 * M_PI + M_PI; // [0, 2pi]
-        float latitude = y / 90.0 * M_PI - M_PI; // [-2pi, 0]
+        float longitude = coordinate.x / 180.0 * M_PI + M_PI; // [0, 2pi]
+        float latitude = coordinate.y / 90.0 * M_PI - M_PI; // [-2pi, 0]
 
         float sinLon = sin(longitude);     // [0, 1, 0, -1, 0]
         float cosLon = cos(longitude);     // [1, 0, -1, 0, 1]
@@ -47,7 +44,7 @@ public:
 
     }
 
-    virtual std::string getFrom() override { return CoordinateSystemIdentifiers::EPSG3857(); }
+    virtual std::string getFrom() override { return CoordinateSystemIdentifiers::EPSG4326(); }
 
     virtual std::string getTo() override { return CoordinateSystemIdentifiers::UNITSPHERE(); }
 };

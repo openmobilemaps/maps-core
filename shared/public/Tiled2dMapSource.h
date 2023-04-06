@@ -34,6 +34,7 @@
 #include "Actor.h"
 #include "Future.hpp"
 #include "LoaderStatus.h"
+#include "Vec2D.h"
 
 template<class R>
 struct TileWrapper {
@@ -72,7 +73,9 @@ public:
 
     virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, int curT, double zoom) override;
 
-    virtual void onCameraChange(const /*not-null*/ std::shared_ptr<::CameraInterface> & camera) override;
+    virtual void onCameraChange(const std::vector<float> & vpMatrix) override;
+
+    ::Vec2D project(const ::Coord & position, const std::vector<float> & vpMatrix);
 
     virtual bool isTileVisible(const Tiled2dMapTileInfo &tileInfo);
 

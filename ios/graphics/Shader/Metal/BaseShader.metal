@@ -49,6 +49,10 @@ shadedFragmentShader(VertexOut in [[stage_in]],
 {
   float4 color = texture0.sample(textureSampler, in.uv);
 
+  if (in.uv.x < 0.01 || in.uv.y < 0.01 || in.uv.x > 0.99 || in.uv.y > 0.99) {
+    return float4(1, 0, 0, 1);
+  }
+
   float s = in.n.x * 0.5 + in.n.y * 0.5 + in.n.z * 0.3;
   s = s * 0.2 + 0.8;
 
