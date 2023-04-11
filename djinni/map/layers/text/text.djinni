@@ -39,6 +39,7 @@ text_factory = interface +c {
 text_layer_interface = interface +c {
     static create(font_loader: font_loader_interface) : text_layer_interface;
     set_texts(texts: list<text_info_interface>);
+
     asLayerInterface(): layer_interface;
     invalidate();
 }

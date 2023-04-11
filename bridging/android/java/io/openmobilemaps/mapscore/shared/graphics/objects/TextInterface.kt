@@ -10,6 +10,8 @@ abstract class TextInterface {
 
     abstract fun setTexts(texts: ArrayList<TextDescription>)
 
+    abstract fun setTextsShared(vertices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
+
     abstract fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
 
     abstract fun removeTexture()
@@ -33,6 +35,12 @@ abstract class TextInterface {
             native_setTexts(this.nativeRef, texts)
         }
         private external fun native_setTexts(_nativeRef: Long, texts: ArrayList<TextDescription>)
+
+        override fun setTextsShared(vertices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setTextsShared(this.nativeRef, vertices, indices)
+        }
+        private external fun native_setTextsShared(_nativeRef: Long, vertices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
         override fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

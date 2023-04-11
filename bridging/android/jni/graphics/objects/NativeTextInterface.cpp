@@ -5,6 +5,7 @@
 #include "Marshal.hpp"
 #include "NativeGraphicsObjectInterface.h"
 #include "NativeRenderingContextInterface.h"
+#include "NativeSharedBytes.h"
 #include "NativeTextDescription.h"
 #include "NativeTextureHolderInterface.h"
 
@@ -24,6 +25,15 @@ void NativeTextInterface::JavaProxy::setTexts(const std::vector<::TextDescriptio
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeTextInterface>::get();
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_setTexts,
                            ::djinni::get(::djinni::List<::djinni_generated::NativeTextDescription>::fromCpp(jniEnv, c_texts)));
+    ::djinni::jniExceptionCheck(jniEnv);
+}
+void NativeTextInterface::JavaProxy::setTextsShared(const ::SharedBytes & c_vertices, const ::SharedBytes & c_indices) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeTextInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_setTextsShared,
+                           ::djinni::get(::djinni_generated::NativeSharedBytes::fromCpp(jniEnv, c_vertices)),
+                           ::djinni::get(::djinni_generated::NativeSharedBytes::fromCpp(jniEnv, c_indices)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
 void NativeTextInterface::JavaProxy::loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & c_textureHolder) {
@@ -63,6 +73,15 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::TextInterface>(nativeRef);
         ref->setTexts(::djinni::List<::djinni_generated::NativeTextDescription>::toCpp(jniEnv, j_texts));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_TextInterface_00024CppProxy_native_1setTextsShared(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeSharedBytes::JniType j_vertices, ::djinni_generated::NativeSharedBytes::JniType j_indices)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::TextInterface>(nativeRef);
+        ref->setTextsShared(::djinni_generated::NativeSharedBytes::toCpp(jniEnv, j_vertices),
+                            ::djinni_generated::NativeSharedBytes::toCpp(jniEnv, j_indices));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

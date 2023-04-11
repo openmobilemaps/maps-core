@@ -17,6 +17,11 @@
 #include "OBB2D.h"
 #include "Line2dLayerObject.h"
 
+#include "Logger.h"
+
+#include <mutex>
+#include <unordered_map>
+
 struct Tiled2dMapVectorSymbolFeatureWrapper {
     FeatureContext featureContext;
     std::shared_ptr<SymbolInfo> textInfo;
@@ -28,6 +33,29 @@ struct Tiled2dMapVectorSymbolFeatureWrapper {
 
     std::vector<float> iconModelMatrix;
 
+    void setCollisionAt(float zoom, bool isCollision) {
+        collisionMap[zoom] = isCollision;
+    }
+
+    bool hasCollision(float zoom) {
+        // TODO: make better.
+        float minDiff = std::numeric_limits<float>::max();
+        float min = std::numeric_limits<float>::max();
+
+        bool collides = true;
+
+        for(auto& cm : collisionMap) {
+            float d = abs(zoom - cm.first);
+
+            if(d < minDiff && d < min) {
+                min = d;
+                collides = cm.second;
+            }
+        }
+
+        return collides;
+    }
+
     bool collides = true;
 
     std::shared_ptr<Quad2dInterface> symbolObject;
@@ -35,8 +63,6 @@ struct Tiled2dMapVectorSymbolFeatureWrapper {
     std::shared_ptr<AlphaShaderInterface> symbolShader;
 
     OBB2D orientedBoundingBox = OBB2D(Quad2dD(Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0)));
-
-    std::optional<Quad2dD> projectedTextQuad = std::nullopt;
 
 #ifdef DRAW_TEXT_BOUNDING_BOXES
     std::shared_ptr<Quad2dInterface> boundingBox = nullptr;
@@ -46,9 +72,14 @@ struct Tiled2dMapVectorSymbolFeatureWrapper {
     std::shared_ptr<Line2dLayerObject> lineObject = nullptr;
 #endif
 
-    Tiled2dMapVectorSymbolFeatureWrapper() {};
+    Tiled2dMapVectorSymbolFeatureWrapper() { };
 
-    Tiled2dMapVectorSymbolFeatureWrapper(const FeatureContext &featureContext, const std::shared_ptr<SymbolInfo> &textInfo, const std::shared_ptr<TextLayerObject> &textObject, const int64_t symbolSortKey) : featureContext(featureContext), textInfo(textInfo), textObject(textObject), symbolSortKey(symbolSortKey),  modelMatrix(16, 0), iconModelMatrix(16, 0) { };
+    Tiled2dMapVectorSymbolFeatureWrapper(const FeatureContext &featureContext, const std::shared_ptr<SymbolInfo> &textInfo, const std::shared_ptr<TextLayerObject> &textObject, const int64_t &symbolSortKey)
+    : featureContext(featureContext), textInfo(textInfo), textObject(textObject), symbolSortKey(symbolSortKey), modelMatrix(16, 0), iconModelMatrix(16, 0)
+    {
+    };
+
+    std::map<float, bool> collisionMap = {};
 };
 
 struct WrapperCompare {

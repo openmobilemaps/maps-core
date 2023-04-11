@@ -22,8 +22,9 @@ void Tiled2dMapVectorSourceSymbolCollisionManager::collisionDetection() {
         }
     };
 
-    //TODO: reverse
-    for (const auto &layer: mapDescription->layers) {
+    for(auto it = mapDescription->layers.rbegin(); it != mapDescription->layers.rend(); ++it) {
+        auto& layer = *it;
+
         if (layer->getType() != VectorLayerType::symbol) {
             continue;
         }
@@ -36,7 +37,26 @@ void Tiled2dMapVectorSourceSymbolCollisionManager::collisionDetection() {
         }
         layers.insert(layer->identifier);
     }
+    
     if (!currentSource.empty()) {
         symbolSourceDataManagers.at(currentSource).syncAccess(lambda);
+    }
+}
+
+void Tiled2dMapVectorSourceSymbolCollisionManager::update() {
+    const auto lambda = [](auto manager){
+        if (auto strongManager = manager.lock()) {
+            strongManager->update();
+        }
+    };
+
+    for(auto it = mapDescription->layers.rbegin(); it != mapDescription->layers.rend(); ++it) {
+        auto& layer = *it;
+
+        if (layer->getType() != VectorLayerType::symbol) {
+            continue;
+        }
+
+        symbolSourceDataManagers.at(layer->source).syncAccess(lambda);
     }
 }

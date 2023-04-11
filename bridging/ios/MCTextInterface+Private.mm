@@ -9,6 +9,7 @@
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCGraphicsObjectInterface+Private.h"
 #import "MCRenderingContextInterface+Private.h"
+#import "MCSharedBytes+Private.h"
 #import "MCTextDescription+Private.h"
 #import "MCTextureHolderInterface+Private.h"
 #include <exception>
@@ -38,6 +39,14 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)setTexts:(nonnull NSArray<MCTextDescription *> *)texts {
     try {
         _cppRefHandle.get()->setTexts(::djinni::List<::djinni_generated::TextDescription>::toCpp(texts));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setTextsShared:(nonnull MCSharedBytes *)vertices
+               indices:(nonnull MCSharedBytes *)indices {
+    try {
+        _cppRefHandle.get()->setTextsShared(::djinni_generated::SharedBytes::toCpp(vertices),
+                                            ::djinni_generated::SharedBytes::toCpp(indices));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -75,6 +84,13 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() setTexts:(::djinni::List<::djinni_generated::TextDescription>::fromCpp(c_texts))];
+        }
+    }
+    void setTextsShared(const ::SharedBytes & c_vertices, const ::SharedBytes & c_indices) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setTextsShared:(::djinni_generated::SharedBytes::fromCpp(c_vertices))
+                                                             indices:(::djinni_generated::SharedBytes::fromCpp(c_indices))];
         }
     }
     void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & c_textureHolder) override

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "RenderingContextInterface.h"
+#include "SharedBytes.h"
 #include <memory>
 #include <vector>
 
@@ -16,6 +17,8 @@ public:
     virtual ~TextInterface() = default;
 
     virtual void setTexts(const std::vector<TextDescription> & texts) = 0;
+
+    virtual void setTextsShared(const ::SharedBytes & vertices, const ::SharedBytes & indices) = 0;
 
     virtual void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const /*not-null*/ std::shared_ptr<TextureHolderInterface> & textureHolder) = 0;
 

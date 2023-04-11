@@ -44,6 +44,7 @@ class TextLayerObject : public LayerObjectInterface {
 
     virtual void update() {};
 
+    virtual void layout(float scale);
     virtual void update(float scale);
 
     virtual std::vector<std::shared_ptr<RenderConfigInterface>> getRenderConfig();
@@ -64,11 +65,12 @@ class TextLayerObject : public LayerObjectInterface {
 #endif
 
   private:
-    void layoutPoint(float scale);
-    float layoutLine(float scale);
+    void update(float scale, bool updateTextObject);
+    void layoutPoint(float scale, bool updateTextObject);
+    float layoutLine(float scale, bool updateTextObject);
 
     std::pair<int, double> findReferencePointIndices();
-    Coord pointAtIndex(const std::pair<int, double> &index);
+    Coord pointAtIndex(const std::pair<int, double> &index, bool useRender = true);
     std::pair<int, double> indexAtDistance(const std::pair<int, double> &index, double distance);
 
   private:
@@ -96,10 +98,20 @@ class TextLayerObject : public LayerObjectInterface {
     std::shared_ptr<CoordinateConversionHelperInterface> converter;
     std::shared_ptr<MapCamera2dInterface> camera;
     std::optional<std::vector<::Coord>> lineCoordinates;
+    std::vector<::Coord> renderLineCoordinates;
+
 
 #ifdef DRAW_TEXT_LETTER_BOXES
     std::vector<Quad2dD> letterBoxes;
 #endif
 
     bool rotated = false;
+
+    struct SplitInfo {
+        SplitInfo(int g, float s) : glyphIndex(g), scale(s) {};
+        int glyphIndex;
+        float scale;
+    };
+
+    std::vector<SplitInfo> splittedTextInfo;
 };
