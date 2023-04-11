@@ -75,5 +75,45 @@ public:
 
     static void multiply(const std::vector<float> &M, const std::vector<float> &x, std::vector<float> &result);
 
-    static std::vector<float> sTemp;
+public:
+    static void transposeM(std::vector<double> &mTrans, int mTransOffset, std::vector<double> &m, int mOffset);
+
+    static bool invertM(std::vector<double> &mInv, int mInvOffset, std::vector<double> &m, int mOffset);
+
+    static void orthoM(std::vector<double> &m, int mOffset, double left, double right, double bottom, double top, double near, double far);
+
+    static void frustumM(std::vector<double> &m, int offset, double left, double right, double bottom, double top, double near,
+                         double far);
+
+    static void perspectiveM(std::vector<double> &m, int offset, double fovy, double aspect, double zNear, double zFar);
+
+    static double length(double x, double y, double z);
+
+    static void setIdentityM(std::vector<double> &sm, int smOffset);
+
+    static void setLookAtM(std::vector<double> &rm, int rmOffset, double eyeX, double eyeY, double eyeZ, double centerX, double centerY,
+                           double centerZ, double upX, double upY, double upZ);
+
+    static void scaleM(std::vector<double> &sm, int smOffset, std::vector<double> &m, int mOffset, double x, double y, double z);
+
+    static void scaleM(std::vector<double> &m, int mOffset, double x, double y, double z);
+
+    static void translateM(std::vector<double> &tm, int tmOffset, std::vector<double> &m, int mOffset, double x, double y, double z);
+
+    static void translateM(std::vector<double> &m, int mOffset, double x, double y, double z);
+
+    static void rotateM(std::vector<double> &m, int mOffset, double a, double x, double y, double z);
+
+    static void setRotateM(std::vector<double> &rm, int rmOffset, double a, double x, double y, double z);
+
+    static void multiplyMM(std::vector<double> &r, int resultOffset, std::vector<double> &lhs, int lhsOffset, std::vector<double> &rhs,
+                           int rhsOffset);
+
+    static void multiplyMMC(std::vector<double> &r, int resultOffset, const std::vector<double> &lhs, int lhsOffset,
+                            const std::vector<double> &rhs, int rhsOffset);
+
+    static std::vector<double> multiply(const std::vector<double> &M, const std::vector<double> &x);
+
+    static void multiply(const std::vector<double> &M, const std::vector<double> &x, std::vector<double> &result);
+
 };

@@ -428,7 +428,6 @@ void Matrix::setLookAtM(std::vector<float> &rm, int rmOffset, float eyeX, float 
     Matrix::translateM(rm, rmOffset, -eyeX, -eyeY, -eyeZ);
 }
 
-std::vector<float> Matrix::sTemp = std::vector<float>(32, 0);
 
 /**
  * Rotates matrix m in place by angle a (in degrees)
@@ -442,6 +441,7 @@ std::vector<float> Matrix::sTemp = std::vector<float>(32, 0);
  * @param z Z axis component
  */
 void Matrix::rotateM(std::vector<float> &m, int mOffset, float a, float x, float y, float z) {
+    std::vector<float> sTemp = std::vector<float>(32, 0);
     setRotateM(sTemp, 0, a, x, y, z);
     multiplyMM(sTemp, 16, m, mOffset, sTemp, 0);
     for (int i = 0; i < 16; i++) {

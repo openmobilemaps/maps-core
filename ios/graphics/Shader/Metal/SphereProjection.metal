@@ -54,7 +54,7 @@ sphereProjectionVertexShader(const patch_control_point<VertexIn> patch [[stage_i
     height *= color.a;
 
     float R = 6371000;
-    float radius = 1.0 + (height / R) * 10.0;
+    float radius = 1.0 + (height / R) * 1.2;
 
 //    float3 n = pos / length(pos);
 
