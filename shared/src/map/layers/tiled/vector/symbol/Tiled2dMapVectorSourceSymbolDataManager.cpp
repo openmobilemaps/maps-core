@@ -434,11 +434,13 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupTexts(const std::vector<std::
         if (tileIt != tileSymbolMap.end()) {
             for (const auto &[s, wrappers] : tileIt->second) {
                 for (const auto &wrapper : wrappers) {
-                    if (wrapper->symbolObject) {
-                        wrapper->symbolObject->asGraphicsObject()->clear();
+                    auto symbolObject = wrapper->symbolObject;
+                    if (symbolObject) {
+                        symbolObject->asGraphicsObject()->clear();
                     }
-                    if (wrapper->textObject) {
-                        wrapper->textObject->getTextObject()->asGraphicsObject()->clear();
+                    auto textObject = wrapper->textObject ? wrapper->textObject->getTextObject() : nullptr;
+                    if (textObject) {
+                        textObject->asGraphicsObject()->clear();
                     }
                 }
             }
