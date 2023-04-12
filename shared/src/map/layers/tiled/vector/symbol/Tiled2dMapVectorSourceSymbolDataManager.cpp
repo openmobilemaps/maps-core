@@ -564,7 +564,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite() {
     }
 }
 
-void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::unordered_set<std::string> layerIdentifiers, std::shared_ptr<std::vector<OBB2D>> placements){
+void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::unordered_set<std::string> layerIdentifiers, std::shared_ptr<std::vector<OBB2D>> placements) {
     auto mapInterface = this->mapInterface.lock();
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
@@ -764,8 +764,6 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::unordered_
             }
         }
     }
-
-    mapInterface->invalidate();
 }
 
 void Tiled2dMapVectorSourceSymbolDataManager::update() {
@@ -954,15 +952,20 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
                 #endif
 
                 #ifdef __ANDROID__
-                    object->getTextObject()->asGraphicsObject()->setup(renderingContext);
+                if (hasText) {
+                    const auto &graphicsObject = object->getTextObject()->asGraphicsObject();
+                    graphicsObject->setup(renderingContext);
+                }
+                if (wrapper->symbolObject) {
+                    const auto &graphicsObject = wrapper->symbolObject->asGraphicsObject();
+                    graphicsObject->setup(renderingContext);
+                }
                 #endif
             }
         }
     }
 
     pregenerateRenderPasses();
-
-    mapInterface->invalidate();
 }
 
 void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {

@@ -125,8 +125,13 @@ void TextLayerObject::layoutPoint(float scale, bool updateObject) {
 
     std::optional<BoundingBox> box = std::nullopt;
 
+    auto numGlyphs = splittedTextInfo.size();
     std::vector<float> vertices;
+    vertices.reserve(numGlyphs * 24);
     std::vector<int16_t> indices;
+    indices.reserve(numGlyphs * 6);
+
+    std::chrono::time_point<std::chrono::steady_clock> startFill = std::chrono::high_resolution_clock::now();
 
     int indicesStart = 0;
 
@@ -327,8 +332,11 @@ float TextLayerObject::layoutLine(float scale, bool updateObject) {
 
     std::optional<BoundingBox> box = std::nullopt;
 
+    auto numGlyphs = splittedTextInfo.size();
     std::vector<float> vertices;
+    vertices.reserve(numGlyphs * 24);
     std::vector<int16_t> indices;
+    indices.reserve(numGlyphs * 6);
 
     int characterCount = 0;
     std::vector<size_t> lineEndIndices;
@@ -462,7 +470,6 @@ float TextLayerObject::layoutLine(float scale, bool updateObject) {
         if (text && updateObject) {
             text->setTextsShared(SharedBytes((int64_t)vertices.data(), (int32_t)vertices.size(), (int32_t)sizeof(float)),
                                  SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(int16_t)));
-            // TODO: we have to setup the textObject for android at some point after calling setTexts
         }
     }
 

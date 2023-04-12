@@ -111,7 +111,7 @@ void Text2dOpenGl::setTexts(const std::vector<TextDescription> &texts) {
 
 void Text2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (!dataReady) {
+    if (ready || !dataReady) {
         return;
     }
 
