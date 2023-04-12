@@ -69,10 +69,10 @@ void Tiled2dMapVectorSourceTileDataManager::pause() {
 
 void Tiled2dMapVectorSourceTileDataManager::resume() {
     auto mapInterface = this->mapInterface.lock();
-    if (!mapInterface) {
+    const auto &context = mapInterface ? mapInterface->getRenderingContext() : nullptr;
+    if (!context) {
         return;
     }
-    const auto &context = mapInterface->getRenderingContext();
 
     for (const auto &tileMask: tileMaskMap) {
         if (tileMask.second.getGraphicsObject() && !tileMask.second.getGraphicsObject()->isReady()) {

@@ -370,9 +370,12 @@ void Tiled2dMapVectorLayer::update() {
 //    }
 
     if (collisionManager) {
-        collisionManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceSymbolCollisionManager::collisionDetection);
-
-        collisionManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceSymbolCollisionManager::update);
+        collisionManager.syncAccess([](auto manager) {
+            manager->collisionDetection();
+            manager->update();
+        });
+/*        collisionManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceSymbolCollisionManager::collisionDetection);
+        collisionManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceSymbolCollisionManager::update);*/
     }
 }
 

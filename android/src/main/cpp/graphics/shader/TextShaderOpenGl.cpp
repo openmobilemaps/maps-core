@@ -67,10 +67,11 @@ void TextShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterfa
 std::string TextShaderOpenGl::getVertexShader() {
     return OMMVersionedGlesShaderCode(320 es,
                                       uniform mat4 uMVPMatrix;
-                                      in vec2 vPosition;
-                                      in vec2 texCoordinate;
                                       uniform vec3 referencePoint;
                                       uniform float scale;
+                                      uniform vec2 textureCoordScaleFactor;
+                                      in vec2 vPosition;
+                                      in vec2 texCoordinate;
                                       out vec2 vTextCoord;
 
                                       void main() {
@@ -78,21 +79,21 @@ std::string TextShaderOpenGl::getVertexShader() {
                                           vec2 ref = (uMVPMatrix * vec4(referencePoint.xy, 0.0, 1.0)).xy;
                                           pos = ref.xy + (pos.xy - ref.xy) * scale;
                                           gl_Position = vec4(pos.xy, 0.0, 1.0);
-                                          vTextCoord = texCoordinate;
+                                          vTextCoord = textureCoordScaleFactor * texCoordinate;
                                       });
 }
 
 std::string TextShaderOpenGl::getFragmentShader() {
     return OMMVersionedGlesShaderCode(320 es,
                                       precision highp float;
-                                      uniform sampler2D texture;
+                                      uniform sampler2D textureSampler;
                                       uniform vec4 color;
                                       uniform vec4 haloColor;
                                       in vec2 vTextCoord;
                                       out vec4 fragmentColor;
 
                                       void main() {
-                                          vec4 dist = texture2D(texture, vTextCoord);
+                                          vec4 dist = texture(textureSampler, vTextCoord);
                                           if (haloColor.a == 0.0 && dist.x <= 0.5) {
                                               discard;
                                           }

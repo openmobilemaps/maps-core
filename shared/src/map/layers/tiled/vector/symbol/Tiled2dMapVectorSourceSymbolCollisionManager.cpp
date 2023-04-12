@@ -50,13 +50,7 @@ void Tiled2dMapVectorSourceSymbolCollisionManager::update() {
         }
     };
 
-    for(auto it = mapDescription->layers.rbegin(); it != mapDescription->layers.rend(); ++it) {
-        auto& layer = *it;
-
-        if (layer->getType() != VectorLayerType::symbol) {
-            continue;
-        }
-
-        symbolSourceDataManagers.at(layer->source).syncAccess(lambda);
+    for(const auto &[source, symbolManager] : symbolSourceDataManagers) {
+        symbolManager.syncAccess(lambda);
     }
 }

@@ -300,7 +300,8 @@ void TextLayerObject::layoutPoint(float scale, bool updateObject) {
         }
 
         if (text && updateObject) {
-            text->setTextsShared(SharedBytes((int64_t)vertices.data(), (int32_t)vertices.size(), (int32_t)sizeof(float)), SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(int16_t)));
+            text->setTextsShared(SharedBytes((int64_t) vertices.data(), (int32_t) vertices.size(), (int32_t) sizeof(float)),
+                                 SharedBytes((int64_t) indices.data(), (int32_t) indices.size(), (int32_t) sizeof(int16_t)));
         }
     }
 
@@ -459,7 +460,8 @@ float TextLayerObject::layoutLine(float scale, bool updateObject) {
         }
 
         if (text && updateObject) {
-            text->setTextsShared(SharedBytes((int64_t)vertices.data(), (int32_t)vertices.size(), (int32_t)sizeof(float)), SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(int16_t)));
+            text->setTextsShared(SharedBytes((int64_t)vertices.data(), (int32_t)vertices.size(), (int32_t)sizeof(float)),
+                                 SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(int16_t)));
             // TODO: we have to setup the textObject for android at some point after calling setTexts
         }
     }

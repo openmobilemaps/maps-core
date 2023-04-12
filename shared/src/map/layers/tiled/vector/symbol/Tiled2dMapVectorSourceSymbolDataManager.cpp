@@ -33,11 +33,47 @@ void Tiled2dMapVectorSourceSymbolDataManager::onAdded(const std::weak_ptr< ::Map
 }
 
 void Tiled2dMapVectorSourceSymbolDataManager::pause() {
-    // TODO: clear graphics objects
+    for (const auto &[tileInfo, tileSymbols]: tileSymbolMap) {
+        for (const auto &[s, wrappers]: tileSymbols) {
+            for (const auto &wrapper: wrappers) {
+                if (wrapper->symbolObject) {
+                    wrapper->symbolObject->asGraphicsObject()->clear();
+                }
+                if (wrapper->textObject) {
+                    wrapper->textObject->getTextObject()->asGraphicsObject()->clear();
+                }
+            }
+        }
+    }
 }
 
 void Tiled2dMapVectorSourceSymbolDataManager::resume() {
-    // TODO: resetup graphics objects
+    auto mapInterface = this->mapInterface.lock();
+    const auto &context = mapInterface ? mapInterface->getRenderingContext() : nullptr;
+    if (!context) {
+        return;
+    }
+
+    for (const auto &[tileInfo, tileSymbols]: tileSymbolMap) {
+        for (const auto &[s, wrappers]: tileSymbols) {
+            for (const auto &wrapper: wrappers) {
+                if (wrapper->symbolObject && !wrapper->symbolObject->asGraphicsObject()->isReady()) {
+                    wrapper->symbolObject->asGraphicsObject()->setup(context);
+                    wrapper->symbolObject->loadTexture(mapInterface->getRenderingContext(), spriteTexture);
+                }
+                if (wrapper->textObject) {
+                    const auto &textObject = wrapper->textObject->getTextObject();
+                    if (!textObject->asGraphicsObject()->isReady()) {
+                        textObject->asGraphicsObject()->setup(context);
+                        auto fontResult = loadFont(wrapper->textInfo->getFont());
+                        if (fontResult.imageData) {
+                            textObject->loadTexture(context, fontResult.imageData);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 void Tiled2dMapVectorSourceSymbolDataManager::setAlpha(float alpha) {
@@ -394,7 +430,20 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupTexts(const std::vector<std::
     if (!mapInterface) { return; }
 
     for (const auto &tile: tilesToRemove) {
-        tileSymbolMap.erase(tile);
+        auto tileIt = tileSymbolMap.find(tile);
+        if (tileIt != tileSymbolMap.end()) {
+            for (const auto &[s, wrappers] : tileIt->second) {
+                for (const auto &wrapper : wrappers) {
+                    if (wrapper->symbolObject) {
+                        wrapper->symbolObject->asGraphicsObject()->clear();
+                    }
+                    if (wrapper->textObject) {
+                        wrapper->textObject->getTextObject()->asGraphicsObject()->clear();
+                    }
+                }
+            }
+            tileSymbolMap.erase(tileIt);
+        }
     }
 
     for (const auto &symbol: toSetup) {
@@ -759,7 +808,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
                     object->getShader()->setScale(1.0);
                 }
 
-                wrapper->textObject->update(scale);
+                object->update(scale);
 
                 const bool hasText = object->getTextObject() != nullptr;
 
@@ -883,9 +932,9 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
 
                 wrapper->orientedBoundingBox = OBB2D(*combinedQuad);
 
-        #ifdef DRAW_TEXT_BOUNDING_BOXES
-                wrapper->boundingBox->setFrame(*combinedQuad, RectD(0, 0, 1, 1));
-        #endif
+                #ifdef DRAW_TEXT_BOUNDING_BOXES
+                    wrapper->boundingBox->setFrame(*combinedQuad, RectD(0, 0, 1, 1));
+                #endif
 
                 if (!wrapper->collides) {
                     const auto &shader = object->getShader();
@@ -895,13 +944,18 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
                         // TODO: Take into account alpha value
                     }
                 }
-        #ifdef DRAW_COLLIDED_TEXT_BOUNDING_BOXES
-                else {
-                    if (object->getShader()) {
-                        object->getShader()->setColor(Color(1.0, 0.0, 0.0, 1.0));
+
+                #ifdef DRAW_COLLIDED_TEXT_BOUNDING_BOXES
+                    else {
+                        if (object->getShader()) {
+                            object->getShader()->setColor(Color(1.0, 0.0, 0.0, 1.0));
+                        }
                     }
-                }
-        #endif
+                #endif
+
+                #ifdef __ANDROID__
+                    object->getTextObject()->asGraphicsObject()->setup(renderingContext);
+                #endif
             }
         }
     }
