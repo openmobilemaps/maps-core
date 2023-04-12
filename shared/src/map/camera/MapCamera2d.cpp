@@ -372,24 +372,23 @@ std::vector<float> MapCamera2d::getVpMatrix() {
         float longitude = focusPointPosition.x; //  px / R;
         float latitude = focusPointPosition.y; // 2*atan(exp(py / R)) - 3.1415926 / 2;
 //
-//        focusPointPosition.x -= 0.1;
-//        focusPointPosition.y += 0.15;
+//        focusPointPosition.x -= 0.001;
+//        focusPointPosition.y += 0.0015;
 
         float radius = 1.0;
 
 
         Matrix::setIdentityM(vpMatrix, 0);
 
-        float fov = 20; // zoom / 90800;
+        float fov = 80; // zoom / 90800;
 
         float vpr = (float)sizeViewport.x / (float)sizeViewport.y;
         if (sizeViewport.y == 0) {
             vpr = 1.0;
         }
-        Matrix::perspectiveM(vpMatrix, 0, fov, vpr, 0.0001, 5.0);
+        Matrix::perspectiveM(vpMatrix, 0, fov, vpr, 0.000000001, 5.0);
 
-
-        cameraPitch = 80;
+        cameraPitch = 70;
         focusPointAltitude = 0.0;
 
 
