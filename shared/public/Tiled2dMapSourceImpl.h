@@ -114,25 +114,25 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & vpMatr
         auto bottomLeftScreen = project(bottomLeft, vpMatrix);
         auto bottomRightScreen = project(bottomRight, vpMatrix);
 
-
-
-        if (topLeftScreen.x < -1 && topRightScreen.x < -1 && bottomLeftScreen.x < -1 && bottomRightScreen.x < -1) {
-            continue;
-        }
-        if (topLeftScreen.y < -1 && topRightScreen.y < -1 && bottomLeftScreen.y < -1 && bottomRightScreen.y < -1) {
-            continue;
-        }
-        if (topLeftScreen.z < -1 && topRightScreen.z < -1 && bottomLeftScreen.z < -1 && bottomRightScreen.z < -1) {
-            continue;
-        }
-        if (topLeftScreen.x > 1 && topRightScreen.x > 1 && bottomLeftScreen.x > 1 && bottomRightScreen.x > 1) {
-            continue;
-        }
-        if (topLeftScreen.y > 1 && topRightScreen.y > 1 && bottomLeftScreen.y > 1 && bottomRightScreen.y > 1) {
-            continue;
-        }
-        if (topLeftScreen.z > 1 && topRightScreen.z > 1 && bottomLeftScreen.z > 1 && bottomRightScreen.z > 1) {
-            continue;
+        if (candidate.levelIndex > 2) {
+            if (topLeftScreen.x < -1 && topRightScreen.x < -1 && bottomLeftScreen.x < -1 && bottomRightScreen.x < -1) {
+                continue;
+            }
+            if (topLeftScreen.y < -1 && topRightScreen.y < -1 && bottomLeftScreen.y < -1 && bottomRightScreen.y < -1) {
+                continue;
+            }
+            if (topLeftScreen.z < -1 && topRightScreen.z < -1 && bottomLeftScreen.z < -1 && bottomRightScreen.z < -1) {
+                continue;
+            }
+            if (topLeftScreen.x > 1 && topRightScreen.x > 1 && bottomLeftScreen.x > 1 && bottomRightScreen.x > 1) {
+                continue;
+            }
+            if (topLeftScreen.y > 1 && topRightScreen.y > 1 && bottomLeftScreen.y > 1 && bottomRightScreen.y > 1) {
+                continue;
+            }
+            if (topLeftScreen.z > 1 && topRightScreen.z > 1 && bottomLeftScreen.z > 1 && bottomRightScreen.z > 1) {
+                continue;
+            }
         }
 
 
@@ -192,7 +192,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & vpMatr
 
             maxLevel = std::max(maxLevel, zoomLevelInfo.zoomLevelIdentifier);
 
-            printf("%d|%d|%d @ %f -> %f, %f, %f, %f\n", zoomLevelInfo.zoomLevelIdentifier, candidate.x, candidate.y, tileWidth, topLengthPx, bottomLengthPx, leftLengthPx, rightLengthPx);
+//            printf("%d|%d|%d @ %f -> %f, %f, %f, %f\n", zoomLevelInfo.zoomLevelIdentifier, candidate.x, candidate.y, tileWidth, topLengthPx, bottomLengthPx, leftLengthPx, rightLengthPx);
 
         }
         else {
@@ -242,7 +242,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & vpMatr
 
     onVisibleTilesChanged(layers);
 
-    printf("maxlevel: %d\n", maxLevel);
+//    printf("maxlevel: %d\n", maxLevel);
 
 
 

@@ -386,7 +386,7 @@ std::vector<float> MapCamera2d::getVpMatrix() {
         if (sizeViewport.y == 0) {
             vpr = 1.0;
         }
-        Matrix::perspectiveM(vpMatrix, 0, fov, vpr, 0.00001, 10.0);
+        Matrix::perspectiveM(vpMatrix, 0, fov, vpr, 0.0001, 5.0);
 
 
         cameraPitch = 80;
@@ -415,6 +415,7 @@ std::vector<float> MapCamera2d::getVpMatrix() {
     lastVpZoom = currentZoom;
 //    return vpMatrix;
     newVpMatrix = vpMatrix;
+    validVpMatrix = true;
     return newVpMatrix;
 }
 
@@ -500,6 +501,17 @@ void MapCamera2d::notifyListeners(const int &listenerType) {
         (listenerType & ListenerType::BOUNDS) ? std::optional<RectCoord>(getVisibleRect()) : std::nullopt;
     double angle = this->angle;
     double zoom = this->zoom;
+    std::vector<float> vpMatrix;
+    bool validVpMatrix;
+    {
+        std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
+        vpMatrix = newVpMatrix;
+        validVpMatrix = this->validVpMatrix;
+    }
+    if (!validVpMatrix) {
+        vpMatrix = getVpMatrix();
+    }
+
     std::lock_guard<std::recursive_mutex> lock(listenerMutex);
     for (auto listener : listeners) {
         if (listenerType & ListenerType::BOUNDS) {
@@ -513,7 +525,6 @@ void MapCamera2d::notifyListeners(const int &listenerType) {
         }
 
         if (listenerType & ListenerType::CAMERA) {
-            auto vpMatrix = getVpMatrix();
             listener->onCameraChange(vpMatrix);
         }
     }
