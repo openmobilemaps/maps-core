@@ -9,6 +9,7 @@
  */
 
 #include "PolygonHelper.h"
+#include "RectCoord.h"
 
 
 bool PolygonHelper::pointInside(const PolygonCoord &polygon, const Coord &point,
@@ -93,4 +94,16 @@ gpc_op PolygonHelper::gpcOperationFrom(const ClippingOperation operation) {
         case XOR:
             return GPC_XOR;
     }
+}
+
+PolygonCoord PolygonHelper::coordsFromRect(const RectCoord &rect) {
+    return std::move(PolygonCoord(
+            {rect.topLeft,
+             Coord(rect.topLeft.systemIdentifier, rect.bottomRight.x,
+                   rect.topLeft.y, 0),
+             rect.bottomRight,
+             Coord(rect.topLeft.systemIdentifier, rect.topLeft.x,
+                   rect.bottomRight.y, 0),
+             rect.topLeft},
+            {}));
 }
