@@ -47,7 +47,7 @@ bool Tiled2dMapSource<T, L, R>::isTileVisible(const Tiled2dMapTileInfo &tileInfo
 }
 
 template<class T, class L, class R>
-void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & vpMatrix) {
+void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & vpMatrix, float width, float height) {
 
     if (isPaused) {
         return;
@@ -136,29 +136,25 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & vpMatr
         }
 
 
-//        printf("%d|%d|%d -> (%f|%f), (%f|%f), (%f|%f), (%f|%f)\n", zoomLevelInfo.zoomLevelIdentifier, candidate.x, candidate.y,
-//               topLeftScreen.x, topLeftScreen.y,
-//               topRightScreen.x, topRightScreen.y,
-//               bottomLeftScreen.x, bottomLeftScreen.y,
-//               bottomRightScreen.x, bottomRightScreen.y
-//               );
-
-        double screenWidth = 1000;
-        double screenHeight = 1000;
-
-        Vec2D topLeftScreenPx(topLeftScreen.x * (screenWidth / 2.0), topLeftScreen.y * (screenHeight / 2.0));
-        Vec2D topRightScreenPx(topRightScreen.x * (screenWidth / 2.0), topRightScreen.y * (screenHeight / 2.0));
-        Vec2D bottomLeftScreenPx(bottomLeftScreen.x * (screenWidth / 2.0), bottomLeftScreen.y * (screenHeight / 2.0));
-        Vec2D bottomRightScreenPx(bottomRightScreen.x * (screenWidth / 2.0), bottomRightScreen.y * (screenHeight / 2.0));
+        Vec2D topLeftScreenPx(topLeftScreen.x * (width / 2.0), topLeftScreen.y * (height / 2.0));
+        Vec2D topRightScreenPx(topRightScreen.x * (width / 2.0), topRightScreen.y * (height / 2.0));
+        Vec2D bottomLeftScreenPx(bottomLeftScreen.x * (width / 2.0), bottomLeftScreen.y * (height / 2.0));
+        Vec2D bottomRightScreenPx(bottomRightScreen.x * (width / 2.0), bottomRightScreen.y * (height / 2.0));
 
         double topLengthPx = Vec2DHelper::distance(topLeftScreenPx, topRightScreenPx);
         double bottomLengthPx = Vec2DHelper::distance(bottomLeftScreenPx, bottomRightScreenPx);
         double leftLengthPx = Vec2DHelper::distance(topLeftScreenPx, bottomLeftScreenPx);
         double rightLengthPx = Vec2DHelper::distance(topRightScreenPx, bottomRightScreenPx);
 
-        const double maxLength = 256;
+        const double maxLength = 512;
 
         if (candidate.levelIndex >= 7 && std::max(std::max(topLengthPx, bottomLengthPx), std::max(leftLengthPx, rightLengthPx)) > 10000) {
+        printf("INVALID TILE PROJECTION %d|%d|%d -> (%f|%f), (%f|%f), (%f|%f), (%f|%f)\n", zoomLevelInfo.zoomLevelIdentifier, candidate.x, candidate.y,
+               topLeftScreen.x, topLeftScreen.y,
+               topRightScreen.x, topRightScreen.y,
+               bottomLeftScreen.x, bottomLeftScreen.y,
+               bottomRightScreen.x, bottomRightScreen.y
+               );
             continue;
         }
 
@@ -684,7 +680,8 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
             continue;
         }
 
-        int currentZoomLevelIdentifier = -1; // TODO – FIXME
+#warning
+        int currentZoomLevelIdentifier = 13; // TODO – FIXME
         if (tileInfo.zoomIdentifier != currentZoomLevelIdentifier) {
 
             if (currentTileMask.num_contours != 0) {

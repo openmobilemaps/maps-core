@@ -14,6 +14,8 @@
 
 - (void)onMapInteraction;
 
-- (void)onCameraChange:(nonnull NSArray<NSNumber *> *)vpMatrix;
+- (void)onCameraChange:(nonnull NSArray<NSNumber *> *)vpMatrix
+                 width:(float)width
+                height:(float)height;
 
 @end

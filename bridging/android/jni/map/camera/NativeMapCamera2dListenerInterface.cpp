@@ -39,12 +39,14 @@ void NativeMapCamera2dListenerInterface::JavaProxy::onMapInteraction() {
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_onMapInteraction);
     ::djinni::jniExceptionCheck(jniEnv);
 }
-void NativeMapCamera2dListenerInterface::JavaProxy::onCameraChange(const std::vector<float> & c_vpMatrix) {
+void NativeMapCamera2dListenerInterface::JavaProxy::onCameraChange(const std::vector<float> & c_vpMatrix, float c_width, float c_height) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeMapCamera2dListenerInterface>::get();
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_onCameraChange,
-                           ::djinni::get(::djinni::List<::djinni::F32>::fromCpp(jniEnv, c_vpMatrix)));
+                           ::djinni::get(::djinni::List<::djinni::F32>::fromCpp(jniEnv, c_vpMatrix)),
+                           ::djinni::get(::djinni::F32::fromCpp(jniEnv, c_width)),
+                           ::djinni::get(::djinni::F32::fromCpp(jniEnv, c_height)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
 
@@ -80,11 +82,13 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_camera_MapCam
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_camera_MapCamera2dListenerInterface_00024CppProxy_native_1onCameraChange(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_vpMatrix)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_camera_MapCamera2dListenerInterface_00024CppProxy_native_1onCameraChange(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_vpMatrix, jfloat j_width, jfloat j_height)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dListenerInterface>(nativeRef);
-        ref->onCameraChange(::djinni::List<::djinni::F32>::toCpp(jniEnv, j_vpMatrix));
+        ref->onCameraChange(::djinni::List<::djinni::F32>::toCpp(jniEnv, j_vpMatrix),
+                            ::djinni::F32::toCpp(jniEnv, j_width),
+                            ::djinni::F32::toCpp(jniEnv, j_height));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

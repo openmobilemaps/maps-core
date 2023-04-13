@@ -47,7 +47,7 @@ class Tiled2dMapLayer : public SimpleLayerInterface,
 
     virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom) override;
 
-    virtual void onCameraChange(const std::vector<float> & vpMatrix) override;
+    virtual void onCameraChange(const std::vector<float> & vpMatrix, float width, float height) override;
 
     virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) override;
 

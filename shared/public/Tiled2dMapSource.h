@@ -73,7 +73,7 @@ public:
 
     virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, int curT, double zoom) override;
 
-    virtual void onCameraChange(const std::vector<float> & vpMatrix) override;
+    virtual void onCameraChange(const std::vector<float> & vpMatrix, float width, float height) override;
 
     ::Vec3D project(const ::Coord & position, const std::vector<float> & vpMatrix);
 

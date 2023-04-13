@@ -106,12 +106,12 @@ void Tiled2dMapLayer::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, d
     }
 }
 
-void Tiled2dMapLayer::onCameraChange(const std::vector<float> & vpMatrix) {
+void Tiled2dMapLayer::onCameraChange(const std::vector<float> & vpMatrix, float width, float height) {
     std::lock_guard<std::recursive_mutex> lock(sourcesMutex);
     for (const auto &sourceInterface : sourceInterfaces) {
         // TODO: Maybe should not send camera as message?
         sourceInterface.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapSourceInterface::onCameraChange,
-                                vpMatrix);
+                                vpMatrix, width, height);
     }
 }
 

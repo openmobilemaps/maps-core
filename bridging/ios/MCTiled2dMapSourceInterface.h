@@ -13,7 +13,9 @@
                           curT:(int32_t)curT
                           zoom:(double)zoom;
 
-- (void)onCameraChange:(nonnull NSArray<NSNumber *> *)vpMatrix;
+- (void)onCameraChange:(nonnull NSArray<NSNumber *> *)vpMatrix
+                 width:(float)width
+                height:(float)height;
 
 - (void)setMinZoomLevelIdentifier:(nullable NSNumber *)value;
 

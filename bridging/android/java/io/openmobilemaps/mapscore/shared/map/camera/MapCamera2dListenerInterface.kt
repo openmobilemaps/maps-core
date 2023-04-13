@@ -14,7 +14,7 @@ abstract class MapCamera2dListenerInterface {
 
     abstract fun onMapInteraction()
 
-    abstract fun onCameraChange(vpMatrix: ArrayList<Float>)
+    abstract fun onCameraChange(vpMatrix: ArrayList<Float>, width: Float, height: Float)
 
     private class CppProxy : MapCamera2dListenerInterface {
         private val nativeRef: Long
@@ -46,10 +46,10 @@ abstract class MapCamera2dListenerInterface {
         }
         private external fun native_onMapInteraction(_nativeRef: Long)
 
-        override fun onCameraChange(vpMatrix: ArrayList<Float>) {
+        override fun onCameraChange(vpMatrix: ArrayList<Float>, width: Float, height: Float) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_onCameraChange(this.nativeRef, vpMatrix)
+            native_onCameraChange(this.nativeRef, vpMatrix, width, height)
         }
-        private external fun native_onCameraChange(_nativeRef: Long, vpMatrix: ArrayList<Float>)
+        private external fun native_onCameraChange(_nativeRef: Long, vpMatrix: ArrayList<Float>, width: Float, height: Float)
     }
 }

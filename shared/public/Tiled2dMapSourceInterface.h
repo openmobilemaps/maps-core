@@ -17,7 +17,7 @@ public:
 
     virtual void onVisibleBoundsChanged(const ::RectCoord & visibleBounds, int32_t curT, double zoom) = 0;
 
-    virtual void onCameraChange(const std::vector<float> & vpMatrix) = 0;
+    virtual void onCameraChange(const std::vector<float> & vpMatrix, float width, float height) = 0;
 
     virtual void setMinZoomLevelIdentifier(std::optional<int32_t> value) = 0;
 

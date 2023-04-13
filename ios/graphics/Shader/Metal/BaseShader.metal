@@ -51,7 +51,7 @@ shadedFragmentShader(VertexOut in [[stage_in]],
 
   float r = 1.0;
   if (in.uv.x < 0.01 || in.uv.y < 0.01 || in.uv.x > 0.99 || in.uv.y > 0.99) {
-    r = 0.3;
+    r = 1.5;
   }
 
   float s = in.n.x * 0.5 + in.n.y * 0.5 + in.n.z * 0.3;
@@ -63,7 +63,7 @@ shadedFragmentShader(VertexOut in [[stage_in]],
     discard_fragment();
   }
 
-  return float4(color.r * a * s, color.g * a * s * r, color.b * a * s * r, a);
+  return float4(color.r * a * s * r, color.g * a * s * r, color.b * a * s * r, a);
 }
 
 vertex VertexOut

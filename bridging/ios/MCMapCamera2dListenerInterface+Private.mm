@@ -52,9 +52,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)onCameraChange:(nonnull NSArray<NSNumber *> *)vpMatrix {
+- (void)onCameraChange:(nonnull NSArray<NSNumber *> *)vpMatrix
+                 width:(float)width
+                height:(float)height {
     try {
-        _cppRefHandle.get()->onCameraChange(::djinni::List<::djinni::F32>::toCpp(vpMatrix));
+        _cppRefHandle.get()->onCameraChange(::djinni::List<::djinni::F32>::toCpp(vpMatrix),
+                                            ::djinni::F32::toCpp(width),
+                                            ::djinni::F32::toCpp(height));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -86,10 +90,12 @@ public:
             [djinni_private_get_proxied_objc_object() onMapInteraction];
         }
     }
-    void onCameraChange(const std::vector<float> & c_vpMatrix) override
+    void onCameraChange(const std::vector<float> & c_vpMatrix, float c_width, float c_height) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() onCameraChange:(::djinni::List<::djinni::F32>::fromCpp(c_vpMatrix))];
+            [djinni_private_get_proxied_objc_object() onCameraChange:(::djinni::List<::djinni::F32>::fromCpp(c_vpMatrix))
+                                                               width:(::djinni::F32::fromCpp(c_width))
+                                                              height:(::djinni::F32::fromCpp(c_height))];
         }
     }
 };

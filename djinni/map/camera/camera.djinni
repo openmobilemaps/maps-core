@@ -7,5 +7,5 @@ map_camera_2d_listener_interface = interface +c +j +o {
     on_visible_bounds_changed(visible_bounds: rect_coord, zoom: f64);
     on_rotation_changed(angle: f32);
     on_map_interaction();
-    on_camera_change(vp_matrix: list<f32>);
+    on_camera_change(vp_matrix: list<f32>, width: f32, height: f32);
 }

@@ -380,13 +380,16 @@ std::vector<float> MapCamera2d::getVpMatrix() {
 
         Matrix::setIdentityM(vpMatrix, 0);
 
-        float fov = 80; // zoom / 90800;
+        float fov = 60; // zoom / 90800;
 
         float vpr = (float)sizeViewport.x / (float)sizeViewport.y;
         if (sizeViewport.y == 0) {
             vpr = 1.0;
         }
-        Matrix::perspectiveM(vpMatrix, 0, fov, vpr, 0.000000001, 5.0);
+
+//        Matrix::translateM(vpMatrix, 0, 0.0, -2.0, 0.0);
+
+        Matrix::perspectiveM(vpMatrix, 0, fov, vpr, 0.0001, 5.0);
 
         cameraPitch = 70;
         focusPointAltitude = 0.0;
@@ -501,15 +504,24 @@ void MapCamera2d::notifyListeners(const int &listenerType) {
     double angle = this->angle;
     double zoom = this->zoom;
     std::vector<float> vpMatrix;
-    bool validVpMatrix;
-    {
-        std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
-        vpMatrix = newVpMatrix;
-        validVpMatrix = this->validVpMatrix;
+    float width;
+    float height;
+    if (listenerType & ListenerType::CAMERA) {
+        bool validVpMatrix;
+        {
+            std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
+            vpMatrix = newVpMatrix;
+            validVpMatrix = this->validVpMatrix;
+        }
+        if (!validVpMatrix) {
+            vpMatrix = getVpMatrix();
+        }
+
+        Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
+        width = sizeViewport.x;
+        height = sizeViewport.y;
     }
-    if (!validVpMatrix) {
-        vpMatrix = getVpMatrix();
-    }
+
 
     std::lock_guard<std::recursive_mutex> lock(listenerMutex);
     for (auto listener : listeners) {
@@ -524,7 +536,7 @@ void MapCamera2d::notifyListeners(const int &listenerType) {
         }
 
         if (listenerType & ListenerType::CAMERA) {
-            listener->onCameraChange(vpMatrix);
+            listener->onCameraChange(vpMatrix, width, height);
         }
     }
 }
