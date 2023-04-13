@@ -22,7 +22,8 @@
 #include <mutex>
 #include <unordered_map>
 
-struct Tiled2dMapVectorSymbolFeatureWrapper {
+class Tiled2dMapVectorSymbolFeatureWrapper {
+public:
     FeatureContext featureContext;
     std::shared_ptr<SymbolInfo> textInfo;
     std::shared_ptr<TextLayerObject> textObject;
