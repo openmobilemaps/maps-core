@@ -982,7 +982,16 @@ void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
 
             std::vector<std::shared_ptr< ::RenderObjectInterface>> renderObjects;
             for (const auto &wrapper: objects) {
-                if (!wrapper->collides) {
+                if (
+#ifdef DRAW_COLLIDED_TEXT_BOUNDING_BOXES
+                    true
+#else
+                    !wrapper->collides
+#endif
+                    ) {
+#ifdef DRAW_TEXT_BOUNDING_BOXES
+                    renderObjects.push_back(std::make_shared<RenderObject>(wrapper->boundingBox->asGraphicsObject(), wrapper->modelMatrix));
+#endif
                     const auto & textObject = wrapper->textObject->getTextObject();
                     if (textObject) {
                         renderObjects.push_back(std::make_shared<RenderObject>(textObject->asGraphicsObject(), wrapper->modelMatrix));

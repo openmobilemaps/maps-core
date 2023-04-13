@@ -22,6 +22,9 @@
 #include <mutex>
 #include <unordered_map>
 
+//#define DRAW_TEXT_BOUNDING_BOXES
+//#define DRAW_COLLIDED_TEXT_BOUNDING_BOXES
+
 class Tiled2dMapVectorSymbolFeatureWrapper {
 public:
     FeatureContext featureContext;
