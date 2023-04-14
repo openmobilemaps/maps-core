@@ -123,194 +123,198 @@ void TextLayerObject::layoutPoint(float scale, bool updateObject) {
     float fontSize = fontData.info.size * scale;
     auto pen = Vec2D(0.0, 0.0);
 
-    std::optional<BoundingBox> box = std::nullopt;
+    if (scale != lastScale) {
+        std::optional<BoundingBox> box = std::nullopt;
 
-    auto numGlyphs = splittedTextInfo.size();
-    std::vector<float> vertices;
-    vertices.reserve(numGlyphs * 24);
-    std::vector<int16_t> indices;
-    indices.reserve(numGlyphs * 6);
+        auto numGlyphs = splittedTextInfo.size();
 
-    std::chrono::time_point<std::chrono::steady_clock> startFill = std::chrono::high_resolution_clock::now();
+        vertices.clear();
+        vertices.reserve(numGlyphs * 24);
+        indices.clear();
+        indices.reserve(numGlyphs * 6);
 
-    int indicesStart = 0;
+        std::chrono::time_point<std::chrono::steady_clock> startFill = std::chrono::high_resolution_clock::now();
 
-    int characterCount = 0;
-    std::vector<size_t> lineEndIndices;
+        int indicesStart = 0;
 
-    for(auto& i : splittedTextInfo) {
-        if(i.glyphIndex > 0) {
-            auto &d = fontData.glyphs[i.glyphIndex];
-            auto size = Vec2D(d.boundingBoxSize.x * fontSize * i.scale, d.boundingBoxSize.y * fontSize * i.scale);
-            auto bearing = Vec2D(d.bearing.x * fontSize * i.scale, d.bearing.y * fontSize * i.scale);
-            auto advance = Vec2D(d.advance.x * fontSize * i.scale, d.advance.y * fontSize * i.scale);
+        int characterCount = 0;
+        std::vector<size_t> lineEndIndices;
 
-            auto x = pen.x + bearing.x;
-            auto y = pen.y - bearing.y;
-            auto xw = x + size.x;
-            auto yh = y + size.y;
+        for(auto& i : splittedTextInfo) {
+            if(i.glyphIndex > 0) {
+                auto &d = fontData.glyphs[i.glyphIndex];
+                auto size = Vec2D(d.boundingBoxSize.x * fontSize * i.scale, d.boundingBoxSize.y * fontSize * i.scale);
+                auto bearing = Vec2D(d.bearing.x * fontSize * i.scale, d.bearing.y * fontSize * i.scale);
+                auto advance = Vec2D(d.advance.x * fontSize * i.scale, d.advance.y * fontSize * i.scale);
 
-            Quad2dD quad = Quad2dD(Vec2D(x, yh), Vec2D(xw, yh), Vec2D(xw, y), Vec2D(x, y));
+                auto x = pen.x + bearing.x;
+                auto y = pen.y - bearing.y;
+                auto xw = x + size.x;
+                auto yh = y + size.y;
 
-            if (!box) {
-                box = BoundingBox(Coord(referencePoint.systemIdentifier, quad.topLeft.x, quad.topLeft.y, referencePoint.z));
-            }
+                Quad2dD quad = Quad2dD(Vec2D(x, yh), Vec2D(xw, yh), Vec2D(xw, y), Vec2D(x, y));
 
-            box->addPoint(quad.topLeft.x, quad.topLeft.y, referencePoint.z);
-            box->addPoint(quad.topRight.x, quad.topRight.y, referencePoint.z);
-            box->addPoint(quad.bottomLeft.x, quad.bottomLeft.y, referencePoint.z);
-            box->addPoint(quad.bottomRight.x, quad.bottomRight.y, referencePoint.z);
-
-            vertices.push_back(quad.bottomLeft.x);
-            vertices.push_back(quad.bottomLeft.y);
-            vertices.push_back(d.uv.bottomLeft.x);
-            vertices.push_back(d.uv.bottomLeft.y);
-            vertices.push_back(0.0);
-            vertices.push_back(0.0);
-
-            vertices.push_back(quad.topLeft.x);
-            vertices.push_back(quad.topLeft.y);
-            vertices.push_back(d.uv.topLeft.x);
-            vertices.push_back(d.uv.topLeft.y);
-            vertices.push_back(0.0);
-            vertices.push_back(0.0);
-
-            vertices.push_back(quad.topRight.x);
-            vertices.push_back(quad.topRight.y);
-            vertices.push_back(d.uv.topRight.x);
-            vertices.push_back(d.uv.topRight.y);
-            vertices.push_back(0.0);
-            vertices.push_back(0.0);
-
-            vertices.push_back(quad.bottomRight.x);
-            vertices.push_back(quad.bottomRight.y);
-            vertices.push_back(d.uv.bottomRight.x);
-            vertices.push_back(d.uv.bottomRight.y);
-            vertices.push_back(0.0);
-            vertices.push_back(0.0);
-
-            indices.push_back(0 + indicesStart);
-            indices.push_back(1 + indicesStart);
-            indices.push_back(2 + indicesStart);
-            indices.push_back(0 + indicesStart);
-            indices.push_back(2 + indicesStart);
-            indices.push_back(3 + indicesStart);
-
-            indicesStart += 4;
-
-            pen.x += advance.x * (1.0 + letterSpacing);
-            characterCount += 1;
-        } else if(i.glyphIndex == -1) {
-            pen.x += fontData.info.spaceAdvance * fontSize * i.scale;
-            characterCount += 1;
-        } else if(i.glyphIndex == -2) {
-            lineEndIndices.push_back((vertices.size() / 24) - 1);
-            characterCount = 0;
-            pen.x = 0.0;
-            pen.y += fontSize;
-        }
-    }
-
-    lineEndIndices.push_back((vertices.size() / 24) - 1);
-
-    if (!vertices.empty()) {
-        Vec2D min(box->min.x, box->min.y);
-        Vec2D max(box->max.x, box->max.y);
-        Vec2D size((max.x - min.x), (max.y - min.y));
-
-        switch (textInfo->getTextJustify()) {
-            case TextJustify::LEFT:
-                //Nothing to do here
-                break;
-            case TextJustify::RIGHT:
-            case TextJustify::CENTER: {
-                size_t lineStart = 0;
-
-                for (auto const lineEndIndex: lineEndIndices) {
-                    double lineWidth = vertices[lineEndIndex * 24 + 2 * 6] - vertices[lineStart * 24 + 6];
-                    auto factor = textInfo->getTextJustify() == TextJustify::CENTER ? 2.0 : 1.0;
-                    double delta = (size.x - lineWidth) / factor;
-
-                    for(size_t i = lineStart; i <= lineEndIndex; i++) {
-                        vertices[i * 24] += delta;
-                        vertices[i * 24 + 6] += delta;
-                        vertices[i * 24 + 12] += delta;
-                        vertices[i * 24 + 18] += delta;
-                    }
-
-                    lineStart = lineEndIndex + 1;
+                if (!box) {
+                    box = BoundingBox(Coord(referencePoint.systemIdentifier, quad.topLeft.x, quad.topLeft.y, referencePoint.z));
                 }
 
-                break;
+                box->addPoint(quad.topLeft.x, quad.topLeft.y, referencePoint.z);
+                box->addPoint(quad.topRight.x, quad.topRight.y, referencePoint.z);
+                box->addPoint(quad.bottomLeft.x, quad.bottomLeft.y, referencePoint.z);
+                box->addPoint(quad.bottomRight.x, quad.bottomRight.y, referencePoint.z);
+
+                vertices.push_back(quad.bottomLeft.x);
+                vertices.push_back(quad.bottomLeft.y);
+                vertices.push_back(d.uv.bottomLeft.x);
+                vertices.push_back(d.uv.bottomLeft.y);
+                vertices.push_back(0.0);
+                vertices.push_back(0.0);
+
+                vertices.push_back(quad.topLeft.x);
+                vertices.push_back(quad.topLeft.y);
+                vertices.push_back(d.uv.topLeft.x);
+                vertices.push_back(d.uv.topLeft.y);
+                vertices.push_back(0.0);
+                vertices.push_back(0.0);
+
+                vertices.push_back(quad.topRight.x);
+                vertices.push_back(quad.topRight.y);
+                vertices.push_back(d.uv.topRight.x);
+                vertices.push_back(d.uv.topRight.y);
+                vertices.push_back(0.0);
+                vertices.push_back(0.0);
+
+                vertices.push_back(quad.bottomRight.x);
+                vertices.push_back(quad.bottomRight.y);
+                vertices.push_back(d.uv.bottomRight.x);
+                vertices.push_back(d.uv.bottomRight.y);
+                vertices.push_back(0.0);
+                vertices.push_back(0.0);
+
+                indices.push_back(0 + indicesStart);
+                indices.push_back(1 + indicesStart);
+                indices.push_back(2 + indicesStart);
+                indices.push_back(0 + indicesStart);
+                indices.push_back(2 + indicesStart);
+                indices.push_back(3 + indicesStart);
+
+                indicesStart += 4;
+
+                pen.x += advance.x * (1.0 + letterSpacing);
+                characterCount += 1;
+            } else if(i.glyphIndex == -1) {
+                pen.x += fontData.info.spaceAdvance * fontSize * i.scale;
+                characterCount += 1;
+            } else if(i.glyphIndex == -2) {
+                lineEndIndices.push_back((vertices.size() / 24) - 1);
+                characterCount = 0;
+                pen.x = 0.0;
+                pen.y += fontSize;
             }
         }
 
-        double offsetMultiplier = fontSize + fontData.info.ascender + fontData.info.descender;
+        lineEndIndices.push_back((vertices.size() / 24) - 1);
 
-        Vec2D textOffset(offset.x * offsetMultiplier, offset.y * offsetMultiplier);
+        if (!vertices.empty()) {
+            Vec2D min(box->min.x, box->min.y);
+            Vec2D max(box->max.x, box->max.y);
+            Vec2D size((max.x - min.x), (max.y - min.y));
 
-        Vec2D offset(0.0, 0.0);
+            switch (textInfo->getTextJustify()) {
+                case TextJustify::LEFT:
+                    //Nothing to do here
+                    break;
+                case TextJustify::RIGHT:
+                case TextJustify::CENTER: {
+                    size_t lineStart = 0;
 
-        switch (textInfo->getTextAnchor()) {
-            case Anchor::CENTER:
-                offset.x -= size.x / 2.0 - textOffset.x;
-                offset.y -= size.y / 2.0 - textOffset.y;
-                break;
-            case Anchor::LEFT:
-                offset.x += textOffset.x;
-                offset.y -= size.y / 2.0 - textOffset.y;
-                break;
-            case Anchor::RIGHT:
-                offset.x -= size.x - textOffset.x;
-                offset.y -= size.y / 2.0 - textOffset.y;
-                break;
-            case Anchor::TOP:
-                offset.x -= size.x / 2.0 - textOffset.x;
-                offset.y -= -textOffset.y;
-                break;
-            case Anchor::BOTTOM:
-                offset.x -= size.x / 2.0 - textOffset.x;
-                offset.y -= size.y - textOffset.y + fontSize * 0.5;
-                break;
-            case Anchor::TOP_LEFT:
-                offset.x -= -textOffset.x;
-                offset.y -= -textOffset.y;
-                break;
-            case Anchor::TOP_RIGHT:
-                offset.x -= size.x -textOffset.x;
-                offset.y -= -textOffset.y;
-                break;
-            case Anchor::BOTTOM_LEFT:
-                offset.x -= -textOffset.x;
-                offset.y -= size.y - textOffset.y;
-                break;
-            case Anchor::BOTTOM_RIGHT:
-                offset.x -= size.x -textOffset.x;
-                offset.y -= size.y - textOffset.y;
-                break;
-            default:
-                break;
+                    for (auto const lineEndIndex: lineEndIndices) {
+                        double lineWidth = vertices[lineEndIndex * 24 + 2 * 6] - vertices[lineStart * 24 + 6];
+                        auto factor = textInfo->getTextJustify() == TextJustify::CENTER ? 2.0 : 1.0;
+                        double delta = (size.x - lineWidth) / factor;
+
+                        for(size_t i = lineStart; i <= lineEndIndex; i++) {
+                            vertices[i * 24] += delta;
+                            vertices[i * 24 + 6] += delta;
+                            vertices[i * 24 + 12] += delta;
+                            vertices[i * 24 + 18] += delta;
+                        }
+
+                        lineStart = lineEndIndex + 1;
+                    }
+
+                    break;
+                }
+            }
+
+            double offsetMultiplier = fontSize + fontData.info.ascender + fontData.info.descender;
+
+            Vec2D textOffset(offset.x * offsetMultiplier, offset.y * offsetMultiplier);
+
+            Vec2D offset(0.0, 0.0);
+
+            switch (textInfo->getTextAnchor()) {
+                case Anchor::CENTER:
+                    offset.x -= size.x / 2.0 - textOffset.x;
+                    offset.y -= size.y / 2.0 - textOffset.y;
+                    break;
+                case Anchor::LEFT:
+                    offset.x += textOffset.x;
+                    offset.y -= size.y / 2.0 - textOffset.y;
+                    break;
+                case Anchor::RIGHT:
+                    offset.x -= size.x - textOffset.x;
+                    offset.y -= size.y / 2.0 - textOffset.y;
+                    break;
+                case Anchor::TOP:
+                    offset.x -= size.x / 2.0 - textOffset.x;
+                    offset.y -= -textOffset.y;
+                    break;
+                case Anchor::BOTTOM:
+                    offset.x -= size.x / 2.0 - textOffset.x;
+                    offset.y -= size.y - textOffset.y + fontSize * 0.5;
+                    break;
+                case Anchor::TOP_LEFT:
+                    offset.x -= -textOffset.x;
+                    offset.y -= -textOffset.y;
+                    break;
+                case Anchor::TOP_RIGHT:
+                    offset.x -= size.x -textOffset.x;
+                    offset.y -= -textOffset.y;
+                    break;
+                case Anchor::BOTTOM_LEFT:
+                    offset.x -= -textOffset.x;
+                    offset.y -= size.y - textOffset.y;
+                    break;
+                case Anchor::BOTTOM_RIGHT:
+                    offset.x -= size.x -textOffset.x;
+                    offset.y -= size.y - textOffset.y;
+                    break;
+                default:
+                    break;
+            }
+
+            box = BoundingBox(referencePoint.systemIdentifier);
+
+            auto dx = referencePoint.x + offset.x - min.x;
+            auto dy = referencePoint.y + offset.y - min.y;
+
+            for(auto i=0; i<vertices.size(); i+=6) {
+                vertices[i] += dx;
+                vertices[i+1] += dy;
+
+                box->addPoint(vertices[i], vertices[i+1], referencePoint.z);
+            }
         }
 
-        box = BoundingBox(referencePoint.systemIdentifier);
+        boundingBox = box ? RectCoord(box->min, box->max) : RectCoord(referencePoint, referencePoint);
 
-        auto dx = referencePoint.x + offset.x - min.x;
-        auto dy = referencePoint.y + offset.y - min.y;
-
-        for(auto i=0; i<vertices.size(); i+=6) {
-            vertices[i] += dx;
-            vertices[i+1] += dy;
-
-            box->addPoint(vertices[i], vertices[i+1], referencePoint.z);
-        }
-
-        if (text && updateObject) {
-            text->setTextsShared(SharedBytes((int64_t) vertices.data(), (int32_t) vertices.size(), (int32_t) sizeof(float)),
-                                 SharedBytes((int64_t) indices.data(), (int32_t) indices.size(), (int32_t) sizeof(int16_t)));
-        }
+        lastScale = scale;
     }
-
-    boundingBox = box ? RectCoord(box->min, box->max) : RectCoord(referencePoint, referencePoint);
+    if (text && updateObject) {
+        text->setTextsShared(SharedBytes((int64_t) vertices.data(), (int32_t) vertices.size(), (int32_t) sizeof(float)),
+                             SharedBytes((int64_t) indices.data(), (int32_t) indices.size(), (int32_t) sizeof(int16_t)));
+    }
 }
 
 #ifdef DRAW_TEXT_LETTER_BOXES

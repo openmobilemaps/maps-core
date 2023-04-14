@@ -114,4 +114,8 @@ class TextLayerObject : public LayerObjectInterface {
     };
 
     std::vector<SplitInfo> splittedTextInfo;
+
+    std::optional<float> lastScale;
+    std::vector<float> vertices;
+    std::vector<int16_t> indices;
 };
