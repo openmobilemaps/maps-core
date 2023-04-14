@@ -30,7 +30,8 @@ class TextHelper {
                                                              std::optional<FontData> fontData,
                                                              Vec2F offset,
                                                              double lineHeight,
-                                                             double letterSpacing);
+                                                             double letterSpacing,
+                                                             int64_t maxCharacterWidth);
 
     static std::string uppercase(const std::string &string);
 

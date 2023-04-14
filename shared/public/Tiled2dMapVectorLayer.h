@@ -132,6 +132,8 @@ protected:
     virtual void setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription);
 
     virtual void loadSpriteData();
+    
+    std::string getSpriteUrl(std::string baseUrl, bool is2x, bool isPng);
 
     virtual void didLoadSpriteData(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<::TextureHolderInterface> spriteTexture);
 

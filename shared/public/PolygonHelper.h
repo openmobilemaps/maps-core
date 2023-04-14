@@ -32,6 +32,8 @@ private:
     static bool pointInside(const Coord &point, const std::vector<Coord> &positions,
                             const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper);
 
+    static PolygonCoord coordsFromRect(const RectCoord &rect);
+
 private:
     static gpc_op gpcOperationFrom(const ClippingOperation operation);
 };

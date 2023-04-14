@@ -11,7 +11,7 @@
 #include "Tiled2dMapVectorRasterTile.h"
 #include "MapCamera2dInterface.h"
 #include "Tiled2dMapVectorRasterSubLayerConfig.h"
-#include "AlphaShaderInterface.h"
+#include "RasterShaderInterface.h"
 #include "RenderPass.h"
 
 Tiled2dMapVectorRasterTile::Tiled2dMapVectorRasterTile(const std::weak_ptr<MapInterface> &mapInterface,
@@ -21,7 +21,7 @@ Tiled2dMapVectorRasterTile::Tiled2dMapVectorRasterTile(const std::weak_ptr<MapIn
                                                        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, tileCallbackInterface){
     auto pMapInterface = mapInterface.lock();
     if (pMapInterface) {
-        auto shader = pMapInterface->getShaderFactory()->createAlphaShader();
+        auto shader = pMapInterface->getShaderFactory()->createRasterShader();
         auto quad = pMapInterface->getGraphicsObjectFactory()->createQuad(shader->asShaderProgramInterface());
         tileObject = std::make_shared<Textured2dLayerObject>(quad, shader, pMapInterface);
         tileObject->setRectCoord(tileInfo.bounds);
@@ -41,11 +41,12 @@ void Tiled2dMapVectorRasterTile::update() {
         return;
     }
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
+
     zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.zoomIdentifier);
 
-    EvaluationContext evalContext(zoomIdentifier, FeatureContext());
-    double opacity = std::static_pointer_cast<RasterVectorLayerDescription>(description)->style.getRasterOpacity(evalContext);
-    tileObject->setAlpha(opacity);
+    const EvaluationContext evalContext(zoomIdentifier, FeatureContext());
+    const auto rasterStyle = std::static_pointer_cast<RasterVectorLayerDescription>(description)->style.getRasterStyle(evalContext);
+    tileObject->setStyle(rasterStyle);
 }
 
 void Tiled2dMapVectorRasterTile::clear() {

@@ -68,6 +68,12 @@ public:
                 int32_t numDrawPreviousLayers = 0;
                 bool maskTiles = true;
                 double zoomLevelScaleFactor = 0.65;
+                
+                bool overzoom = true;
+                bool underzoom = true;
+
+                int minZoom = val.value("minzoom", 0);
+                int maxZoom = val.value("maxzoom", 22);
 
                 if (val["tiles"].is_array()) {
                     auto str = val.dump();
@@ -90,18 +96,24 @@ public:
                         return Tiled2dMapVectorLayerParserResult(nullptr, LoaderStatus::ERROR_OTHER, "");
                     }
                     url = json["tiles"].begin()->get<std::string>();
+
+                    minZoom = json.value("minzoom", 0);
+                    maxZoom = json.value("maxzoom", 22);
                 }
 
                 rasterLayerMap[key] = std::make_shared<RasterVectorLayerDescription>(layerName,
-                                                                                     val.value("minZoom", 0),
-                                                                                     val.value("maxZoom", 22),
+                                                                                     minZoom,
+                                                                                     maxZoom,
                                                                                      url,
+                                                                                     RasterVectorStyle(nullptr, nullptr, nullptr, nullptr, nullptr),
                                                                                      adaptScaleToScreen,
                                                                                      numDrawPreviousLayers,
                                                                                      maskTiles,
                                                                                      zoomLevelScaleFactor,
+                                                                                     std::nullopt,
                                                                                      nullptr,
-                                                                                     std::nullopt);
+                                                                                     underzoom,
+                                                                                     overzoom);
 
             }
             if (val["type"].get<std::string>() == "vector" && val["url"].is_string()) {
@@ -155,22 +167,28 @@ public:
                                                                                     renderPassIndex,
                                                                                     interactable);
                 layers.push_back(layerDesc);
-
+                
             } else if (val["type"] == "raster" && rasterLayerMap.count(val["source"]) != 0) {
                 auto layer = rasterLayerMap.at(val["source"]);
 
                 auto newLayer = std::make_shared<RasterVectorLayerDescription>(val["id"],
-                                                                               layer->minZoom,
-                                                                               layer->maxZoom,
-                                                                               layer->url,
-                                                                               layer->adaptScaleToScreen,
-                                                                               layer->numDrawPreviousLayers,
-                                                                               layer->maskTiles,
-                                                                               layer->zoomLevelScaleFactor,
-                                                                               interactable);
-
-                newLayer->style = RasterVectorStyle(parser.parseValue(val["paint"]["raster-opacity"]));
-
+                                             val.value("minzoom", layer->minZoom),
+                                             val.value("maxzoom", layer->maxZoom),
+                                             layer->url,
+                                             RasterVectorStyle(parser.parseValue(val["paint"]["raster-opacity"]),
+                                                                           parser.parseValue(val["paint"]["raster-brightness-min"]),
+                                                                           parser.parseValue(val["paint"]["raster-brightness-max"]),
+                                                                           parser.parseValue(val["paint"]["raster-contrast"]),
+                                                                           parser.parseValue(val["paint"]["raster-saturation"])),
+                                             layer->adaptScaleToScreen,
+                                             layer->numDrawPreviousLayers,
+                                             layer->maskTiles,
+                                             layer->zoomLevelScaleFactor,
+                                             layer->renderPassIndex,
+                                             interactable,
+                                             layer->underzoom,
+                                             layer->overzoom);
+                
                 layers.push_back(newLayer);
             }else if (val["type"] == "line") {
 
@@ -213,6 +231,7 @@ public:
                                             parser.parseValue(val["layout"]["text-anchor"]),
                                             parser.parseValue(val["layout"]["text-variable-anchor"]),
                                             parser.parseValue(val["layout"]["text-rotate"]),
+                                            parser.parseValue(val["layout"]["text-allow-overlap"]),
                                             parser.parseValue(val["layout"]["symbol-sort-key"]),
                                             parser.parseValue(val["layout"]["symbol-spacing"]),
                                             parser.parseValue(val["layout"]["symbol-placement"]),
@@ -220,8 +239,10 @@ public:
                                             parser.parseValue(val["layout"]["icon-anchor"]),
                                             parser.parseValue(val["layout"]["icon-offset"]),
                                             parser.parseValue(val["layout"]["icon-size"]),
+                                            parser.parseValue(val["layout"]["icon-allow-overlap"]),
                                             parser.parseValue(val["layout"]["text-line-height"]),
                                             parser.parseValue(val["layout"]["text-letter-spacing"]),
+                                            parser.parseValue(val["layout"]["text-max-width"]),
                                             dpFactor);
 
                     std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);

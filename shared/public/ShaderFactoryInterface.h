@@ -11,6 +11,7 @@ class ColorLineShaderInterface;
 class ColorShaderInterface;
 class LineGroupShaderInterface;
 class PolygonGroupShaderInterface;
+class RasterShaderInterface;
 class TextShaderInterface;
 
 class ShaderFactoryInterface {
@@ -30,4 +31,6 @@ public:
     virtual /*not-null*/ std::shared_ptr<PolygonGroupShaderInterface> createPolygonGroupShader() = 0;
 
     virtual /*not-null*/ std::shared_ptr<TextShaderInterface> createTextShader() = 0;
+
+    virtual /*not-null*/ std::shared_ptr<RasterShaderInterface> createRasterShader() = 0;
 };

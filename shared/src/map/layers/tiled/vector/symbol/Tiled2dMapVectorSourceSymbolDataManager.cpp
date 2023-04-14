@@ -40,7 +40,10 @@ void Tiled2dMapVectorSourceSymbolDataManager::pause() {
                     wrapper->symbolObject->asGraphicsObject()->clear();
                 }
                 if (wrapper->textObject) {
-                    wrapper->textObject->getTextObject()->asGraphicsObject()->clear();
+                    const auto textObject = wrapper->textObject->getTextObject();
+                    if (textObject) {
+                        textObject->asGraphicsObject()->clear();
+                    }
                 }
             }
         }
@@ -384,7 +387,8 @@ std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> Tiled2dMapVectorSourceSymb
                                                        fontResult.fontData,
                                                        textOffset,
                                                        description->style.getTextLineHeight(evalContext),
-                                                       letterSpacing);
+                                                       letterSpacing,
+                                                       description->style.getTextMaxWidth(evalContext));
 
     if(textObject) {
         int64_t const symbolSortKey = description->style.getSymbolSortKey(evalContext);
@@ -718,7 +722,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::unordered_
 
         if (!combinedQuad) {
             // The symbol doesnt have a text nor a icon
-            assert(false);
+            //assert(false);
             collides = true;
         }
 

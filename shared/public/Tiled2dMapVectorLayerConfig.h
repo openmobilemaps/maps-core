@@ -16,7 +16,7 @@
 
 class Tiled2dMapVectorLayerConfig : public Tiled2dMapLayerConfig {
 public:
-    Tiled2dMapVectorLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &layerDescription, bool underzoom = true, bool overzoom = true)
+    Tiled2dMapVectorLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &layerDescription, bool underzoom = false, bool overzoom = true)
             : description(layerDescription), underzoom(underzoom), overzoom(overzoom) {}
 
     ~Tiled2dMapVectorLayerConfig() {}

@@ -22,6 +22,7 @@ IconLayer::IconLayer()
 void IconLayer::setIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &icons) {
     clear();
     addIcons(icons);
+    setAlpha(this->alpha);
 }
 
 std::vector<std::shared_ptr<IconInfoInterface>> IconLayer::getIcons() {
@@ -66,7 +67,10 @@ void IconLayer::remove(const std::shared_ptr<IconInfoInterface> &icon) {
         mapInterface->invalidate();
 }
 
-void IconLayer::add(const std::shared_ptr<IconInfoInterface> &icon) { addIcons({icon}); }
+void IconLayer::add(const std::shared_ptr<IconInfoInterface> &icon) {
+    addIcons({icon});
+    setAlpha(this->alpha);
+}
 
 void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &icons) {
     if (icons.empty()) {
@@ -409,4 +413,16 @@ void IconLayer::setLayerClickable(bool isLayerClickable) {
             mapInterface->getTouchHandler()->removeListener(shared_from_this());
         }
     }
+}
+
+void IconLayer::setAlpha(float alpha) {
+    std::lock_guard<std::recursive_mutex> lock(iconsMutex);
+    for (auto const &icon : this->icons) {
+        icon.second->setAlpha(alpha);
+    }
+    this->alpha = alpha;
+}
+
+float IconLayer::getAlpha() {
+    return alpha;
 }

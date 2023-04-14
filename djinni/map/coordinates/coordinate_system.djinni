@@ -17,6 +17,16 @@ coordinate_converter_interface = interface +c +j +o {
     get_to() : string;
 }
 
+bounding_box_interface = interface +c {
+    static create(system_identifier: string) : bounding_box_interface;
+    add_point(p: coord);
+    as_rect_coord() : rect_coord;
+    get_center() : coord;
+    get_min() : coord;
+    get_max() : coord;
+    get_system_identifier() : string;
+}
+
 coordinate_system_identifiers = interface +c {
     static RENDERSYSTEM(): string;
 

@@ -49,8 +49,9 @@ std::shared_ptr<TextLayerObject> TextHelper::textLayerObject(const std::shared_p
                                                              std::optional<FontData> fontData,
                                                              Vec2F offset,
                                                              double lineHeight,
-                                                             double letterSpacing) {
-    
+                                                             double letterSpacing,
+                                                             int64_t maxCharacterWidth) {
+
     if (!fontData) {
         return nullptr;
     }
@@ -64,9 +65,9 @@ std::shared_ptr<TextLayerObject> TextHelper::textLayerObject(const std::shared_p
     
     std::shared_ptr<::TextShaderInterface> shader;
     std::shared_ptr<::TextInterface> factoryObject;
-    
-    
-    if (!formattedText.empty()) {
+
+
+    if (!formattedText.empty() && !(formattedText.size() == 1 && formattedText.at(0).text.empty())) {
         const auto &objectFactory = mapInterface->getGraphicsObjectFactory();
         const auto &shaderFactory = mapInterface->getShaderFactory();
         

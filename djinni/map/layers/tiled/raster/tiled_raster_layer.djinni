@@ -4,6 +4,7 @@
 @extern "../../../../yaml/coord.yaml"
 @extern "../../../../yaml/masking_object_interface.yaml"
 @extern "../../../../yaml/shader_program_interface.yaml"
+@extern "../../../../yaml/raster_shader_style.yaml"
 
 tiled_2d_map_raster_layer_interface = interface +c {
     # the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on
@@ -16,8 +17,13 @@ tiled_2d_map_raster_layer_interface = interface +c {
     set_callback_handler(handler: tiled_2d_map_raster_layer_callback_interface);
     get_callback_handler() : optional<tiled_2d_map_raster_layer_callback_interface>;
     remove_callback_handler();
+    
     set_alpha(alpha: f32);
     get_alpha(): f32;
+    
+    set_style(style: raster_shader_style);
+    get_style(): raster_shader_style;
+
 
     set_min_zoom_level_identifier(value: optional<i32>);
     get_min_zoom_level_identifier(): optional<i32>;

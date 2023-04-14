@@ -33,6 +33,7 @@ public:
                       std::shared_ptr<Value> textAnchor,
                       std::shared_ptr<Value> textVariableAnchor,
                       std::shared_ptr<Value> textRotate,
+                      std::shared_ptr<Value> textAllowOverlap,
                       std::shared_ptr<Value> symbolSortKey,
                       std::shared_ptr<Value> symbolSpacing,
                       std::shared_ptr<Value> symbolPlacement,
@@ -40,8 +41,10 @@ public:
                       std::shared_ptr<Value> iconAnchor,
                       std::shared_ptr<Value> iconOffset,
                       std::shared_ptr<Value> iconSize,
+                      std::shared_ptr<Value> iconAllowOverlap,
                       std::shared_ptr<Value> textLineHeight,
                       std::shared_ptr<Value> textLetterSpacing,
+                      std::shared_ptr<Value> textMaxWidth,
                       double dpFactor):
     textSize(textSize),
     textFont(textFont),
@@ -63,8 +66,10 @@ public:
     symbolSpacing(symbolSpacing),
     iconSize(iconSize),
     textLetterSpacing(textLetterSpacing),
-    dpFactor(dpFactor) {
-    }
+    textAllowOverlap(textAllowOverlap),
+    textMaxWidth(textMaxWidth),
+    iconAllowOverlap(iconAllowOverlap),
+    dpFactor(dpFactor) {}
 
 
     std::unordered_set<std::string> getUsedKeys() const {
@@ -74,7 +79,7 @@ public:
             textSize, textFont, textField, textTransform, textOffset, textRadialOffset,
             textColor, textHaloColor, textPadding, symbolSortKey, symbolPlacement, iconImage,
             iconAnchor, iconOffset, textAnchor, textVariableAnchor, textRotate, symbolSpacing,
-            iconSize, textLineHeight, textLetterSpacing
+            iconSize, textLineHeight, textLetterSpacing, textAllowOverlap, iconAllowOverlap
         };
 
         for (auto const &value: values) {
@@ -146,6 +151,11 @@ public:
         return textLetterSpacing ? textLetterSpacing->evaluateOr(context, defaultValue) : defaultValue;
     }
 
+    bool getTextAllowOverlap(const EvaluationContext &context) {
+        static const bool defaultValue = false;
+        return textAllowOverlap ? textAllowOverlap->evaluateOr(context, defaultValue) : defaultValue;
+    }
+
     int64_t getSymbolSortKey(const EvaluationContext &context) {
         static const int64_t defaultValue = 0.0;
         return symbolSortKey ? symbolSortKey->evaluateOr(context, defaultValue) : defaultValue;
@@ -201,9 +211,19 @@ public:
         return iconSize ? iconSize->evaluateOr(context, defaultValue) : defaultValue;
     }
 
+    bool getIconAllowOverlap(const EvaluationContext &context) {
+        static const bool defaultValue = false;
+        return iconAllowOverlap ? iconAllowOverlap->evaluateOr(context, defaultValue) : defaultValue;
+    }
+
     double getTextLineHeight(const EvaluationContext &context) {
         static const double defaultValue = 1.2;
         return textLineHeight ? textLineHeight->evaluateOr(context, defaultValue) : defaultValue;
+    }
+    
+    int64_t getTextMaxWidth(const EvaluationContext &context) {
+        static const int64_t defaultValue = 10;
+        return textMaxWidth ? textMaxWidth->evaluateOr(context, defaultValue) : defaultValue;
     }
 
 private:
@@ -219,9 +239,11 @@ private:
     std::shared_ptr<Value> textAnchor;
     std::shared_ptr<Value> textVariableAnchor;
     std::shared_ptr<Value> textRotate;
+    std::shared_ptr<Value> textAllowOverlap;
     std::shared_ptr<Value> textLineHeight;
     std::shared_ptr<Value> textLetterSpacing;
     std::shared_ptr<Value> textJustify;
+    std::shared_ptr<Value> textMaxWidth;
     std::shared_ptr<Value> symbolSortKey;
     std::shared_ptr<Value> symbolSpacing;
     std::shared_ptr<Value> symbolPlacement;
@@ -229,6 +251,7 @@ private:
     std::shared_ptr<Value> iconAnchor;
     std::shared_ptr<Value> iconOffset;
     std::shared_ptr<Value> iconSize;
+    std::shared_ptr<Value> iconAllowOverlap;
     double dpFactor;
 
 
