@@ -52,6 +52,7 @@ jobs:
           SONATYPE_NEXUS_USERNAME: ${{secrets.SONATYPE_NEXUS_USERNAME}}
           SONATYPE_NEXUS_PASSWORD: ${{secrets.SONATYPE_NEXUS_PASSWORD}}
         run: |
+          cd android
           echo "### Maven Dependency - Maven Central" >> $GITHUB_STEP_SUMMARY
           ./gradlew publishAllPublicationsToMavenCentral -Psigning.secretKeyRingFile=$GITHUB_WORKSPACE/signingkey.gpg -Psigning.password=$SIGNING_KEY_PASSWORD -Psigning.keyId=$SIGNING_KEY_ID -PmavenCentralUsername=$SONATYPE_NEXUS_USERNAME -PmavenCentralPassword=$SONATYPE_NEXUS_PASSWORD
               echo "[Maven Central](https://search.maven.org/artifact/io.openmobilemaps/${{ steps.vars.outputs.artifactId }}/${{ steps.vars.outputs.version }}/aar)" >> $GITHUB_STEP_SUMMARY
