@@ -131,7 +131,7 @@ private:
 
     void initializeVectorLayer(const std::vector<std::shared_ptr<LayerInterface>> &newSublayers);
 
-    virtual void updateMaskObjects(const std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> &toSetupMaskObject, const std::vector<const std::shared_ptr<MaskingObjectInterface>> &obsoleteMaskObjects);
+    virtual void updateMaskObjects(const std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> &toSetupMaskObject, const std::vector< std::shared_ptr<MaskingObjectInterface>> &obsoleteMaskObjects);
 
     int32_t layerIndex = -1;
 

@@ -10,6 +10,10 @@
 
 #pragma once
 
+#if defined __LINUX_BUILD__
+#include <cmath>
+#endif
+
 #include "CoordinateConversionHelperInterface.h"
 #include "LineInfoInterface.h"
 

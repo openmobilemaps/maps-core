@@ -28,6 +28,11 @@ int __android_log_print(int prio, const char *tag, const char *fmt, ...);
 #include <os/log.h>
 #endif
 
+#if defined __OPENGL__
+#include "cxxgen.h"
+#include <string>
+#endif
+
 Logger::Logger(int p){
     priority = p;
 }
@@ -67,6 +72,16 @@ void Logger::log(int prio, const char *tag, const char *fmt, ...) const {
     va_start(args, fmt);
     __android_log_print(androidPrio, tag, fmt, args);
     va_end(args);
+#endif
+
+#if defined __OPENGL__
+    char buffer[1024];
+    va_list args;
+    va_start(args, fmt);
+    vsprintf(buffer, fmt, args);
+    va_end(args);
+
+    log_rs(std::string(buffer));
 #endif
 
 #if (defined(__APPLE__) && !defined(BANDIT_TESTING)) || defined(_WIN32)

@@ -1036,7 +1036,7 @@ private:
 
 class AllValue: public Value {
 public:
-    AllValue(const std::vector<const std::shared_ptr<Value>> values) : values(values) {}
+    AllValue(const std::vector< std::shared_ptr<Value>> values) : values(values) {}
 
     std::unordered_set<std::string> getUsedKeys() override {
         std::unordered_set<std::string> usedKeys;
@@ -1057,12 +1057,12 @@ public:
     };
 
 private:
-    const std::vector<const std::shared_ptr<Value>> values;
+    const std::vector< std::shared_ptr<Value>> values;
 };
 
 class AnyValue: public Value {
 public:
-    AnyValue(const std::vector<const std::shared_ptr<Value>> values) : values(values) {}
+    AnyValue(const std::vector< std::shared_ptr<Value>> values) : values(values) {}
 
     std::unordered_set<std::string> getUsedKeys() override {
         std::unordered_set<std::string> usedKeys;
@@ -1083,7 +1083,7 @@ public:
     };
 
 private:
-    const std::vector<const std::shared_ptr<Value>> values;
+    const std::vector< std::shared_ptr<Value>> values;
 };
 
 class PropertyCompareValue: public Value {

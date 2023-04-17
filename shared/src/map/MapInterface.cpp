@@ -22,7 +22,7 @@ std::shared_ptr<MapInterface> MapInterface::create(const std::shared_ptr<::Graph
 std::shared_ptr<MapInterface> MapInterface::createWithOpenGl(const MapConfig &mapConfig,
                                                              const std::shared_ptr<::SchedulerInterface> &scheduler,
                                                              float pixelDensity) {
-#ifdef __ANDROID__
+#if defined __ANDROID__ || defined __OPENGL__
     return std::make_shared<MapScene>(SceneInterface::createWithOpenGl(), mapConfig, scheduler, pixelDensity);
 #else
     return nullptr;
