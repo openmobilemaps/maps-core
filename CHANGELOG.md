@@ -1,5 +1,9 @@
 # Changelog for Open Mobile Maps
 
+## Version 1.5.1 (14.04.2022)
+- Fix for XCode 14.3.0
+- Convenience function for RectCoord to PolygonCoord conversion
+
 ## Version 1.5.0 (23.03.2022)
 - implements vector icon anchor
 - evaluate color from feature context 
