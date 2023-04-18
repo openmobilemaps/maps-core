@@ -24,6 +24,7 @@ public:
     SymbolVectorStyle(std::shared_ptr<Value> textSize,
                       std::shared_ptr<Value> textColor,
                       std::shared_ptr<Value> textHaloColor,
+                      std::shared_ptr<Value> textOpacity,
                       std::shared_ptr<Value> textFont,
                       std::shared_ptr<Value> textField,
                       std::shared_ptr<Value> textTransform,
@@ -64,6 +65,7 @@ public:
     textAnchor(textAnchor),
     textVariableAnchor(textVariableAnchor),
     textRotate(textRotate),
+    textOpacity(textOpacity),
     symbolSpacing(symbolSpacing),
     iconSize(iconSize),
     textLetterSpacing(textLetterSpacing),
@@ -82,7 +84,7 @@ public:
             textColor, textHaloColor, textPadding, symbolSortKey, symbolPlacement, iconImage,
             iconAnchor, iconOffset, textAnchor, textVariableAnchor, textRotate, symbolSpacing,
             iconSize, textLineHeight, textLetterSpacing, textAllowOverlap, iconAllowOverlap,
-            iconPadding
+            iconPadding, textOpacity
         };
 
         for (auto const &value: values) {
@@ -158,6 +160,11 @@ public:
     double getTextLetterSpacing(const EvaluationContext &context) {
         static const double defaultValue = 0.0;
         return textLetterSpacing ? textLetterSpacing->evaluateOr(context, defaultValue) : defaultValue;
+    }
+
+    double getTextOpacity(const EvaluationContext &context) {
+        static const double defaultValue = 1.0;
+        return textOpacity ? textOpacity->evaluateOr(context, defaultValue) : defaultValue;
     }
 
     bool getTextAllowOverlap(const EvaluationContext &context) {
@@ -253,6 +260,7 @@ private:
     std::shared_ptr<Value> textLetterSpacing;
     std::shared_ptr<Value> textJustify;
     std::shared_ptr<Value> textMaxWidth;
+    std::shared_ptr<Value> textOpacity;
     std::shared_ptr<Value> symbolSortKey;
     std::shared_ptr<Value> symbolSpacing;
     std::shared_ptr<Value> symbolPlacement;

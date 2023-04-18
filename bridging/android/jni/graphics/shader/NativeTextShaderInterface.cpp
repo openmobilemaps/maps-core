@@ -5,7 +5,6 @@
 #include "Marshal.hpp"
 #include "NativeColor.h"
 #include "NativeShaderProgramInterface.h"
-#include "NativeVec3D.h"
 
 namespace djinni_generated {
 
@@ -29,27 +28,19 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_T
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_TextShaderInterface_00024CppProxy_native_1setOpacity(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jfloat j_opacity)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::TextShaderInterface>(nativeRef);
+        ref->setOpacity(::djinni::F32::toCpp(jniEnv, j_opacity));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_TextShaderInterface_00024CppProxy_native_1setHaloColor(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeColor::JniType j_color)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::TextShaderInterface>(nativeRef);
         ref->setHaloColor(::djinni_generated::NativeColor::toCpp(jniEnv, j_color));
-    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
-}
-
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_TextShaderInterface_00024CppProxy_native_1setScale(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jfloat j_scale)
-{
-    try {
-        const auto& ref = ::djinni::objectFromHandleAddress<::TextShaderInterface>(nativeRef);
-        ref->setScale(::djinni::F32::toCpp(jniEnv, j_scale));
-    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
-}
-
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_TextShaderInterface_00024CppProxy_native_1setReferencePoint(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec3D::JniType j_point)
-{
-    try {
-        const auto& ref = ::djinni::objectFromHandleAddress<::TextShaderInterface>(nativeRef);
-        ref->setReferencePoint(::djinni_generated::NativeVec3D::toCpp(jniEnv, j_point));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

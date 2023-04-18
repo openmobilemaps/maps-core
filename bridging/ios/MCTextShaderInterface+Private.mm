@@ -9,7 +9,6 @@
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCColor+Private.h"
 #import "MCShaderProgramInterface+Private.h"
-#import "MCVec3D+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -40,21 +39,15 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setOpacity:(float)opacity {
+    try {
+        _cppRefHandle.get()->setOpacity(::djinni::F32::toCpp(opacity));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)setHaloColor:(nonnull MCColor *)color {
     try {
         _cppRefHandle.get()->setHaloColor(::djinni_generated::Color::toCpp(color));
-    } DJINNI_TRANSLATE_EXCEPTIONS()
-}
-
-- (void)setScale:(float)scale {
-    try {
-        _cppRefHandle.get()->setScale(::djinni::F32::toCpp(scale));
-    } DJINNI_TRANSLATE_EXCEPTIONS()
-}
-
-- (void)setReferencePoint:(nonnull MCVec3D *)point {
-    try {
-        _cppRefHandle.get()->setReferencePoint(::djinni_generated::Vec3D::toCpp(point));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -80,22 +73,16 @@ public:
             [djinni_private_get_proxied_objc_object() setColor:(::djinni_generated::Color::fromCpp(c_color))];
         }
     }
+    void setOpacity(float c_opacity) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setOpacity:(::djinni::F32::fromCpp(c_opacity))];
+        }
+    }
     void setHaloColor(const ::Color & c_color) override
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() setHaloColor:(::djinni_generated::Color::fromCpp(c_color))];
-        }
-    }
-    void setScale(float c_scale) override
-    {
-        @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setScale:(::djinni::F32::fromCpp(c_scale))];
-        }
-    }
-    void setReferencePoint(const ::Vec3D & c_point) override
-    {
-        @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setReferencePoint:(::djinni_generated::Vec3D::fromCpp(c_point))];
         }
     }
     /*not-null*/ std::shared_ptr<::ShaderProgramInterface> asShaderProgramInterface() override

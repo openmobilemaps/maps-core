@@ -23,7 +23,7 @@
 
 #include <cmath>
 
-TextLayerObject::TextLayerObject(const std::shared_ptr<TextInterface> &text, const std::shared_ptr<TextInfoInterface> &textInfo,const std::shared_ptr<TextShaderInterface> &shader, const std::shared_ptr<MapInterface> &mapInterface, const FontData& fontData, const Vec2F &offset, double lineHeight, double letterSpacing)
+TextLayerObject::TextLayerObject(const std::shared_ptr<TextInterface> &text, const std::shared_ptr<TextInfoInterface> &textInfo,const std::shared_ptr<TextShaderInterface> &shader, const std::shared_ptr<MapInterface> &mapInterface, const FontData& fontData, const Vec2F &offset, double lineHeight, double letterSpacing,int64_t maxCharacterWidth)
 : text(text),
   textInfo(textInfo),
   lineCoordinates(textInfo->getLineCoordinates()),
@@ -44,10 +44,6 @@ TextLayerObject::TextLayerObject(const std::shared_ptr<TextInterface> &text, con
     referencePoint = converter->convertToRenderSystem(textInfo->getCoordinate());
     referenceSize = fontData.info.size;
 
-    if (shader) {
-        shader->setReferencePoint(Vec3D(referencePoint.x, referencePoint.y, referencePoint.z));
-    }
-
     int characterCount = 0;
     for (const auto &entry: textInfo->getText()) {
         for (const auto &c : TextHelper::splitWstring(entry.text)) {
@@ -55,7 +51,7 @@ TextLayerObject::TextLayerObject(const std::shared_ptr<TextInterface> &text, con
             int index = -1;
 
             if(textInfo->getSymbolPlacement() == TextSymbolPlacement::POINT) {
-                if (c == " " && characterCount < 15) {
+                if (c == " " && characterCount < maxCharacterWidth) {
                     characterCount += 1;
                 } else if (c == "\n" || c == " ") {
                     characterCount = 0;
@@ -73,7 +69,16 @@ TextLayerObject::TextLayerObject(const std::shared_ptr<TextInterface> &text, con
                 ++i;
             }
 
+            characterCount += 1;
             splittedTextInfo.emplace_back(index, entry.scale);
+
+            if(textInfo->getSymbolPlacement() == TextSymbolPlacement::POINT) {
+                if (c == "/" && characterCount >= maxCharacterWidth) {
+                    characterCount = 0;
+                    index = -2;
+                    splittedTextInfo.emplace_back(index, entry.scale);
+                }
+            }
         }
     }
 

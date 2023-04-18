@@ -4,7 +4,6 @@
 #pragma once
 
 #include "Color.h"
-#include "Vec3D.h"
 #include <memory>
 
 class ShaderProgramInterface;
@@ -15,11 +14,9 @@ public:
 
     virtual void setColor(const ::Color & color) = 0;
 
+    virtual void setOpacity(float opacity) = 0;
+
     virtual void setHaloColor(const ::Color & color) = 0;
-
-    virtual void setScale(float scale) = 0;
-
-    virtual void setReferencePoint(const ::Vec3D & point) = 0;
 
     virtual /*not-null*/ std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() = 0;
 };

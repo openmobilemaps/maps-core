@@ -222,6 +222,7 @@ public:
                     SymbolVectorStyle style(parser.parseValue(val["layout"]["text-size"]),
                                             parser.parseValue(val["paint"]["text-color"]),
                                             parser.parseValue(val["paint"]["text-halo-color"]),
+                                            parser.parseValue(val["paint"]["text-opacity"]),
                                             parser.parseValue(val["layout"]["text-font"]),
                                             parser.parseValue(val["layout"]["text-field"]),
                                             parser.parseValue(val["layout"]["text-transform"]),

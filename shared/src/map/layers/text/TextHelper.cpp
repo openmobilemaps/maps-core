@@ -75,7 +75,7 @@ std::shared_ptr<TextLayerObject> TextHelper::textLayerObject(const std::shared_p
         factoryObject = objectFactory->createText(shader->asShaderProgramInterface());
     }
     
-    auto textObject = std::make_shared<TextLayerObject>(factoryObject, text, shader, mapInterface, *fontData, offset, lineHeight, letterSpacing);
+    auto textObject = std::make_shared<TextLayerObject>(factoryObject, text, shader, mapInterface, *fontData, offset, lineHeight, letterSpacing, maxCharacterWidth);
     return textObject;
 }
 

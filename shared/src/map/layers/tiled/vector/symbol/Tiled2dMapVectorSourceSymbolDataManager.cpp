@@ -588,6 +588,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
 
     double zoom = camera->getZoom();
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(zoom);
+    LogDebug << "Zoom: " <<= zoomIdentifier;
     double rotation = -camera->getRotation();
 
     auto scaleFactor = camera->mapUnitsFromPixels(1.0);
@@ -604,10 +605,6 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
         const auto &description = layerDescriptions.at(layerIdentifier);
 
         auto scale = scaleFactor * description->style.getTextSize(evalContext) / ref;
-
-        if (object->getShader())  {
-            object->getShader()->setScale(1.0);
-        }
 
         wrapper->textObject->layout(scale);
 
@@ -743,9 +740,9 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
         if (!collides) {
             const auto &shader = object->getShader();
             if (shader) {
+                object->getShader()->setOpacity(description->style.getTextOpacity(evalContext));
                 object->getShader()->setColor(description->style.getTextColor(evalContext));
                 object->getShader()->setHaloColor(description->style.getTextHaloColor(evalContext));
-                // TODO: Take into account alpha value
             }
 #ifdef DRAW_TEXT_BOUNDING_BOXES
                 wrapper->boundingBoxShader->setColor(0.0, 1.0, 0.0, 0.5);
@@ -812,10 +809,6 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
                 const auto &description = layerDescriptions.at(layerIdentifier);
 
                 const auto scale = scaleFactor * description->style.getTextSize(evalContext) / ref;
-
-                if (object->getShader())  {
-                    object->getShader()->setScale(1.0);
-                }
 
                 object->update(scale);
 

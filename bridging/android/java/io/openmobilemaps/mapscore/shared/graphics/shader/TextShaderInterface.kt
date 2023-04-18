@@ -10,11 +10,9 @@ abstract class TextShaderInterface {
 
     abstract fun setColor(color: io.openmobilemaps.mapscore.shared.graphics.common.Color)
 
+    abstract fun setOpacity(opacity: Float)
+
     abstract fun setHaloColor(color: io.openmobilemaps.mapscore.shared.graphics.common.Color)
-
-    abstract fun setScale(scale: Float)
-
-    abstract fun setReferencePoint(point: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D)
 
     abstract fun asShaderProgramInterface(): ShaderProgramInterface
 
@@ -36,23 +34,17 @@ abstract class TextShaderInterface {
         }
         private external fun native_setColor(_nativeRef: Long, color: io.openmobilemaps.mapscore.shared.graphics.common.Color)
 
+        override fun setOpacity(opacity: Float) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setOpacity(this.nativeRef, opacity)
+        }
+        private external fun native_setOpacity(_nativeRef: Long, opacity: Float)
+
         override fun setHaloColor(color: io.openmobilemaps.mapscore.shared.graphics.common.Color) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_setHaloColor(this.nativeRef, color)
         }
         private external fun native_setHaloColor(_nativeRef: Long, color: io.openmobilemaps.mapscore.shared.graphics.common.Color)
-
-        override fun setScale(scale: Float) {
-            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setScale(this.nativeRef, scale)
-        }
-        private external fun native_setScale(_nativeRef: Long, scale: Float)
-
-        override fun setReferencePoint(point: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D) {
-            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setReferencePoint(this.nativeRef, point)
-        }
-        private external fun native_setReferencePoint(_nativeRef: Long, point: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D)
 
         override fun asShaderProgramInterface(): ShaderProgramInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

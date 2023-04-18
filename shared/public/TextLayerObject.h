@@ -38,7 +38,11 @@ class TextLayerObject : public LayerObjectInterface {
                     const std::shared_ptr<TextInfoInterface> &textInfo,
                     const std::shared_ptr<TextShaderInterface> &shader,
                     const std::shared_ptr<MapInterface> &mapInterface,
-                    const FontData& fontData, const Vec2F &offset, double lineHeight, double letterSpacing);
+                    const FontData& fontData,
+                    const Vec2F &offset,
+                    double lineHeight,
+                    double letterSpacing,
+                    int64_t maxCharacterWidth);
 
     virtual ~TextLayerObject(){};
 
