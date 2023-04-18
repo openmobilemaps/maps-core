@@ -66,7 +66,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::resume() {
                 }
                 if (wrapper->textObject) {
                     const auto &textObject = wrapper->textObject->getTextObject();
-                    if (!textObject->asGraphicsObject()->isReady()) {
+                    if (textObject && !textObject->asGraphicsObject()->isReady()) {
                         textObject->asGraphicsObject()->setup(context);
                         auto fontResult = loadFont(wrapper->textInfo->getFont());
                         if (fontResult.imageData) {
