@@ -901,7 +901,7 @@ public:
         const auto &compareValue_ = compareValue->evaluate(context);
 
         for (const auto &[stop, value] : stops) {
-            if (ValueVariantCompareHelper::compare(stop->evaluate(context), compareValue_, PropertyCompareType::GREATER)) {
+            if (ValueVariantCompareHelper::compare(stop->evaluate(context), compareValue_, PropertyCompareType::LESS)) {
                 return value->evaluate(context);
             }
         }

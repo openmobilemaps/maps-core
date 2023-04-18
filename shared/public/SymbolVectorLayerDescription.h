@@ -44,6 +44,7 @@ public:
                       std::shared_ptr<Value> iconSize,
                       std::shared_ptr<Value> iconAllowOverlap,
                       std::shared_ptr<Value> iconPadding,
+                      std::shared_ptr<Value> iconOpacity,
                       std::shared_ptr<Value> textLineHeight,
                       std::shared_ptr<Value> textLetterSpacing,
                       std::shared_ptr<Value> textMaxWidth,
@@ -73,6 +74,7 @@ public:
     textMaxWidth(textMaxWidth),
     iconAllowOverlap(iconAllowOverlap),
     iconPadding(iconPadding),
+    iconOpacity(iconOpacity),
     dpFactor(dpFactor) {}
 
 
@@ -84,7 +86,7 @@ public:
             textColor, textHaloColor, textPadding, symbolSortKey, symbolPlacement, iconImage,
             iconAnchor, iconOffset, textAnchor, textVariableAnchor, textRotate, symbolSpacing,
             iconSize, textLineHeight, textLetterSpacing, textAllowOverlap, iconAllowOverlap,
-            iconPadding, textOpacity
+            iconPadding, textOpacity, iconOpacity
         };
 
         for (auto const &value: values) {
@@ -165,6 +167,11 @@ public:
     double getTextOpacity(const EvaluationContext &context) {
         static const double defaultValue = 1.0;
         return textOpacity ? textOpacity->evaluateOr(context, defaultValue) : defaultValue;
+    }
+
+    double getIconOpacity(const EvaluationContext &context) {
+        static const double defaultValue = 1.0;
+        return iconOpacity ? iconOpacity->evaluateOr(context, defaultValue) : defaultValue;
     }
 
     bool getTextAllowOverlap(const EvaluationContext &context) {
@@ -270,6 +277,7 @@ private:
     std::shared_ptr<Value> iconSize;
     std::shared_ptr<Value> iconAllowOverlap;
     std::shared_ptr<Value> iconPadding;
+    std::shared_ptr<Value> iconOpacity;
     double dpFactor;
 
 

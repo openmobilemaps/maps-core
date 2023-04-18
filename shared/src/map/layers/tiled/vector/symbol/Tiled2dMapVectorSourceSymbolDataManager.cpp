@@ -152,7 +152,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::st
 
             if (dataIt != tile->layerFeatureMaps->end()) {
                 for (const auto feature: *dataIt->second) {
-                    // there is somethind in this layer to display
+                    // there is something in this layer to display
                     const auto &newSymbols = createSymbols(tile->tileInfo, layerIdentifier, feature);
                     if(!newSymbols.empty()) {
                         tileSymbolMap.at(tile->tileInfo)[layerIdentifier].insert(tileSymbolMap.at(tile->tileInfo)[layerIdentifier].end(), newSymbols.begin(), newSymbols.end());
@@ -588,7 +588,6 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
 
     double zoom = camera->getZoom();
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(zoom);
-    LogDebug << "Zoom: " <<= zoomIdentifier;
     double rotation = -camera->getRotation();
 
     auto scaleFactor = camera->mapUnitsFromPixels(1.0);
@@ -723,10 +722,6 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
 
         wrapper->orientedBoundingBox = OBB2D(*combinedQuad);
 
-#ifdef DRAW_TEXT_BOUNDING_BOXES
-        wrapper->boundingBox->setFrame(*combinedQuad, RectD(0, 0, 1, 1));
-#endif
-
         for ( const auto &otherB: *placements ) {
             if (otherB.overlaps(wrapper->orientedBoundingBox)) {
                 collides = true;
@@ -736,33 +731,15 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
         if (!collides) {
             placements->push_back(wrapper->orientedBoundingBox);
         }
-
-        if (!collides) {
-            const auto &shader = object->getShader();
-            if (shader) {
-                object->getShader()->setOpacity(description->style.getTextOpacity(evalContext));
-                object->getShader()->setColor(description->style.getTextColor(evalContext));
-                object->getShader()->setHaloColor(description->style.getTextHaloColor(evalContext));
-            }
-#ifdef DRAW_TEXT_BOUNDING_BOXES
-                wrapper->boundingBoxShader->setColor(0.0, 1.0, 0.0, 0.5);
-#endif
-        }
-#ifdef DRAW_COLLIDED_TEXT_BOUNDING_BOXES
-        else {
-            if (object->getShader()) {
-                object->getShader()->setColor(Color(1.0, 0.0, 0.0, 1.0));
-            }
-#ifdef DRAW_TEXT_BOUNDING_BOXES
-                wrapper->boundingBoxShader->setColor(1.0, 0.0, 0.0, 0.5);
-#endif
-        }
-#endif
-
         wrapper->setCollisionAt(zoom, collides);
     };
 
     for (const auto layerIdentifier: layerIdentifiers) {
+        const auto &description = layerDescriptions.at(layerIdentifier);
+        if (!(description->minZoom <= zoomIdentifier &&
+              description->maxZoom >= zoomIdentifier)) {
+            continue;
+        }
         for (const auto &[tile, layers]: tileSymbolMap) {
             const auto objectsIt = layers.find(layerIdentifier);
             if (objectsIt != layers.end()) {
@@ -791,6 +768,11 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
 
     for (const auto &[tile, layers]: tileSymbolMap) {
         for (const auto &[layerIdentifier, objects]: layers) {
+            const auto &description = layerDescriptions.at(layerIdentifier);
+            if (!(description->minZoom <= zoomIdentifier &&
+                  description->maxZoom >= zoomIdentifier)) {
+                continue;
+            }
             for (auto &wrapper: objects) {
 
                 const auto evalContext = EvaluationContext(zoomIdentifier, wrapper->featureContext);
@@ -805,8 +787,6 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
                 const auto ref = object->getReferenceSize();
 
                 const auto &refP = object->getReferencePoint();
-
-                const auto &description = layerDescriptions.at(layerIdentifier);
 
                 const auto scale = scaleFactor * description->style.getTextSize(evalContext) / ref;
 
@@ -935,12 +915,15 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
                 if (!wrapper->collides) {
                     const auto &shader = object->getShader();
                     if (shader) {
+                        object->getShader()->setOpacity(description->style.getTextOpacity(evalContext));
                         object->getShader()->setColor(description->style.getTextColor(evalContext));
                         object->getShader()->setHaloColor(description->style.getTextHaloColor(evalContext));
-                        // TODO: Take into account alpha value
+                    }
+                    if (wrapper->symbolShader) {
+                        wrapper->symbolShader->updateAlpha(description->style.getIconOpacity(evalContext));
                     }
 #ifdef DRAW_TEXT_BOUNDING_BOXES
-                wrapper->boundingBoxShader->setColor(0.0, 1.0, 0.0, 0.5);
+                    wrapper->boundingBoxShader->setColor(0.0, 1.0, 0.0, 0.5);
 #endif
                 }
 
@@ -973,13 +956,25 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
 }
 
 void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
+    auto mapInterface = this->mapInterface.lock();
+    auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+    if (!camera) {
+        return ;
+    }
 
     std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> renderPasses;
 
-
+    double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
 
     for (const auto &[tile, layers]: tileSymbolMap) {
         for (const auto &[layerIdentifier, objects]: layers) {
+
+            const auto &description = layerDescriptions.at(layerIdentifier);
+            if (!(description->minZoom <= zoomIdentifier &&
+                  description->maxZoom >= zoomIdentifier)) {
+                continue;
+            }
+
             const auto index = layerNameIndexMap.at(layerIdentifier);
 
             std::vector<std::shared_ptr< ::RenderObjectInterface>> renderObjects;
