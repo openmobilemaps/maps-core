@@ -426,6 +426,7 @@ std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> Tiled2dMapVectorSourceSymb
 #endif
         return wrapper;
     }
+    return nullptr;
 }
 
 
@@ -606,9 +607,14 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::unordered_
 
         const bool hasText = object->getTextObject() != nullptr;
 
-        Coord renderCoord = converter->convertToRenderSystem(refP);
+        const Coord renderCoord = converter->convertToRenderSystem(refP);
 
         double rotation = -camera->getRotation();
+
+        bool collides = false;
+
+        std::optional<Quad2dD> projectedTextQuad;
+        std::optional<Quad2dD> projectedSymbolQuad;
 
         if (hasText) {
             Matrix::setIdentityM(wrapper->modelMatrix, 0);
@@ -625,20 +631,12 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::unordered_
                         rotation = *wrapper->textInfo->angle + 180;
                     }
                 }
-
                 Matrix::rotateM(wrapper->modelMatrix, 0.0, rotation, 0.0, 0.0, 1.0);
             }
 
             Matrix::translateM(wrapper->modelMatrix, 0, -renderCoord.x, -renderCoord.y, -renderCoord.z);
-        }
 
-        bool collides = false;
-
-        std::optional<Quad2dD> projectedTextQuad;
-        std::optional<Quad2dD> projectedSymbolQuad;
-
-        if (hasText) {
-            float padding = description->style.getTextPadding(evalContext);
+            const float padding = description->style.getTextPadding(evalContext);
             projectedTextQuad = getProjectedFrame(object->boundingBox, padding, wrapper->modelMatrix);
         }
 
@@ -708,9 +706,9 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::unordered_
                                    Vec2D(std::max(projectedTextQuad->topRight.x, projectedSymbolQuad->topRight.x), std::min(projectedTextQuad->topRight.y, projectedSymbolQuad->topRight.y)),
                                    Vec2D(std::max(projectedTextQuad->bottomRight.x, projectedSymbolQuad->bottomRight.x), std::max(projectedTextQuad->bottomRight.y, projectedSymbolQuad->bottomRight.y)),
                                    Vec2D(std::min(projectedTextQuad->bottomLeft.x, projectedSymbolQuad->bottomLeft.x), std::max(projectedTextQuad->bottomLeft.y, projectedSymbolQuad->bottomLeft.y)));
-        } else if (!projectedTextQuad) {
-            combinedQuad = projectedSymbolQuad;
-        } else if (!projectedSymbolQuad) {
+        } else if (projectedTextQuad) {
+            combinedQuad = projectedTextQuad;
+        } else if (projectedSymbolQuad) {
             combinedQuad = projectedSymbolQuad;
         }
 
@@ -775,11 +773,11 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
         return;
     }
 
-    double zoom = camera->getZoom();
-    double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(zoom);
-    double rotation = -camera->getRotation();
+    const double zoom = camera->getZoom();
+    const double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(zoom);
+    const double rotation = -camera->getRotation();
 
-    auto scaleFactor = camera->mapUnitsFromPixels(1.0);
+    const auto scaleFactor = camera->mapUnitsFromPixels(1.0);
 
     for (const auto &[tile, layers]: tileSymbolMap) {
         for (const auto &[layerIdentifier, objects]: layers) {
@@ -794,13 +792,13 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
                     continue;
                 }
 
-                auto ref = object->getReferenceSize();
+                const auto ref = object->getReferenceSize();
 
-                const auto& refP = object->getReferencePoint();
+                const auto &refP = object->getReferencePoint();
 
                 const auto &description = layerDescriptions.at(layerIdentifier);
 
-                auto scale = scaleFactor * description->style.getTextSize(evalContext) / ref;
+                const auto scale = scaleFactor * description->style.getTextSize(evalContext) / ref;
 
                 if (object->getShader())  {
                     object->getShader()->setScale(1.0);
@@ -810,9 +808,12 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
 
                 const bool hasText = object->getTextObject() != nullptr;
 
-                Coord renderCoord = converter->convertToRenderSystem(refP);
+                const Coord renderCoord = converter->convertToRenderSystem(refP);
 
                 double rotation = -camera->getRotation();
+
+                std::optional<Quad2dD> projectedTextQuad;
+                std::optional<Quad2dD> projectedSymbolQuad;
 
                 if (hasText) {
                     Matrix::setIdentityM(wrapper->modelMatrix, 0);
@@ -834,13 +835,8 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
                     }
 
                     Matrix::translateM(wrapper->modelMatrix, 0, -renderCoord.x, -renderCoord.y, -renderCoord.z);
-                }
 
-                std::optional<Quad2dD> projectedTextQuad;
-                std::optional<Quad2dD> projectedSymbolQuad;
-
-                if (hasText) {
-                    float padding = description->style.getTextPadding(evalContext);
+                    const float padding = description->style.getTextPadding(evalContext);
                     projectedTextQuad = getProjectedFrame(object->boundingBox, padding, wrapper->modelMatrix);
                 }
 
@@ -897,7 +893,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
                         const double iconPadding = description->style.getIconPadding(evalContext);
                         projectedSymbolQuad = getProjectedFrame(RectCoord(Coord(renderPos.systemIdentifier, quad.topLeft.x, quad.topLeft.y, renderPos.z), Coord(renderPos.systemIdentifier, quad.bottomRight.x, quad.bottomRight.y, renderPos.z)), iconPadding, wrapper->iconModelMatrix);
 
-                        auto symbolGraphicsObject = wrapper->symbolGraphicsObject;
+                        const auto symbolGraphicsObject = wrapper->symbolGraphicsObject;
                         if (spriteTexture && !symbolGraphicsObject->isReady()) {
                             symbolGraphicsObject->setup(renderingContext);
                             wrapper->symbolObject->loadTexture(renderingContext, spriteTexture);
@@ -911,9 +907,9 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
                                            Vec2D(std::max(projectedTextQuad->topRight.x, projectedSymbolQuad->topRight.x), std::min(projectedTextQuad->topRight.y, projectedSymbolQuad->topRight.y)),
                                            Vec2D(std::max(projectedTextQuad->bottomRight.x, projectedSymbolQuad->bottomRight.x), std::max(projectedTextQuad->bottomRight.y, projectedSymbolQuad->bottomRight.y)),
                                            Vec2D(std::min(projectedTextQuad->bottomLeft.x, projectedSymbolQuad->bottomLeft.x), std::max(projectedTextQuad->bottomLeft.y, projectedSymbolQuad->bottomLeft.y)));
-                } else if (!projectedTextQuad) {
-                    combinedQuad = projectedSymbolQuad;
-                } else if (!projectedSymbolQuad) {
+                } else if (projectedTextQuad) {
+                    combinedQuad = projectedTextQuad;
+                } else if (projectedSymbolQuad) {
                     combinedQuad = projectedSymbolQuad;
                 }
 
@@ -983,12 +979,16 @@ void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
                     !wrapper->collides
 #endif
                     ) {
-#ifdef DRAW_TEXT_BOUNDING_BOXES
-                    renderObjects.push_back(std::make_shared<RenderObject>(wrapper->boundingBox->asGraphicsObject(), wrapper->modelMatrix));
-#endif
                     const auto & textObject = wrapper->textObject->getTextObject();
                     if (textObject) {
                         renderObjects.push_back(std::make_shared<RenderObject>(textObject->asGraphicsObject(), wrapper->modelMatrix));
+#ifdef DRAW_TEXT_BOUNDING_BOXES
+                    renderObjects.push_back(std::make_shared<RenderObject>(wrapper->boundingBox->asGraphicsObject(), wrapper->modelMatrix));
+#endif
+                    } else {
+#ifdef DRAW_TEXT_BOUNDING_BOXES
+                    renderObjects.push_back(std::make_shared<RenderObject>(wrapper->boundingBox->asGraphicsObject(), wrapper->iconModelMatrix));
+#endif
                     }
 
                     if (wrapper->symbolGraphicsObject) {
