@@ -14,6 +14,7 @@
 #include "Quad2dInterface.h"
 #include "GraphicsObjectInterface.h"
 #include "AlphaShaderInterface.h"
+#include "ColorShaderInterface.h"
 #include "OBB2D.h"
 #include "Line2dLayerObject.h"
 
@@ -69,6 +70,7 @@ public:
     OBB2D orientedBoundingBox = OBB2D(Quad2dD(Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0)));
 
 #ifdef DRAW_TEXT_BOUNDING_BOXES
+    std::shared_ptr<ColorShaderInterface> boundingBoxShader = nullptr;
     std::shared_ptr<Quad2dInterface> boundingBox = nullptr;
 #endif
 

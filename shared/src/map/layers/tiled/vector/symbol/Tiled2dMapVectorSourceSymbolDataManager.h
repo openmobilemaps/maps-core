@@ -43,7 +43,7 @@ public:
                                 int32_t legacyIndex,
                                 bool needsTileReplace) override;
 
-    void collisionDetection(std::unordered_set<std::string> layerIdentifiers, std::shared_ptr<std::vector<OBB2D>> placements);
+    void collisionDetection(std::vector<std::string> layerIdentifiers, std::shared_ptr<std::vector<OBB2D>> placements);
 
     void update();
 

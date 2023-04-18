@@ -401,9 +401,9 @@ std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> Tiled2dMapVectorSourceSymb
         std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> wrapper = std::make_shared<Tiled2dMapVectorSymbolFeatureWrapper>(context, symbol, textObject, symbolSortKey);
 
 #ifdef DRAW_TEXT_BOUNDING_BOXES
-        auto colorShader = mapInterface->getShaderFactory()->createColorShader();
-        colorShader->setColor(0.0, 1.0, 0.0, 0.5);
-        std::shared_ptr<Quad2dInterface> quadObject = mapInterface->getGraphicsObjectFactory()->createQuad(colorShader->asShaderProgramInterface());
+        wrapper->boundingBoxShader = mapInterface->getShaderFactory()->createColorShader();
+        wrapper->boundingBoxShader->setColor(0.0, 1.0, 0.0, 0.5);
+        std::shared_ptr<Quad2dInterface> quadObject = mapInterface->getGraphicsObjectFactory()->createQuad(wrapper->boundingBoxShader->asShaderProgramInterface());
         quadObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
 
         wrapper->boundingBox = quadObject;
@@ -577,7 +577,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite() {
     }
 }
 
-void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::unordered_set<std::string> layerIdentifiers, std::shared_ptr<std::vector<OBB2D>> placements) {
+void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std::string> layerIdentifiers, std::shared_ptr<std::vector<OBB2D>> placements) {
     auto mapInterface = this->mapInterface.lock();
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
@@ -747,22 +747,29 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::unordered_
                 object->getShader()->setHaloColor(description->style.getTextHaloColor(evalContext));
                 // TODO: Take into account alpha value
             }
+#ifdef DRAW_TEXT_BOUNDING_BOXES
+                wrapper->boundingBoxShader->setColor(0.0, 1.0, 0.0, 0.5);
+#endif
         }
 #ifdef DRAW_COLLIDED_TEXT_BOUNDING_BOXES
         else {
             if (object->getShader()) {
                 object->getShader()->setColor(Color(1.0, 0.0, 0.0, 1.0));
             }
+#ifdef DRAW_TEXT_BOUNDING_BOXES
+                wrapper->boundingBoxShader->setColor(1.0, 0.0, 0.0, 0.5);
+#endif
         }
 #endif
 
         wrapper->setCollisionAt(zoom, collides);
     };
 
-    for (const auto &[tile, layers]: tileSymbolMap) {
-        for (const auto &[layerIdentifier, objects]: layers) {
-            if (layerIdentifiers.count(layerIdentifier) != 0) {
-                for (auto &wrapper: objects) {
+    for (const auto layerIdentifier: layerIdentifiers) {
+        for (const auto &[tile, layers]: tileSymbolMap) {
+            const auto objectsIt = layers.find(layerIdentifier);
+            if (objectsIt != layers.end()) {
+                for (auto &wrapper: objectsIt->second) {
                     collisionDetectionLambda(wrapper, layerIdentifier);
                 }
             }
@@ -939,6 +946,9 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
                         object->getShader()->setHaloColor(description->style.getTextHaloColor(evalContext));
                         // TODO: Take into account alpha value
                     }
+#ifdef DRAW_TEXT_BOUNDING_BOXES
+                wrapper->boundingBoxShader->setColor(0.0, 1.0, 0.0, 0.5);
+#endif
                 }
 
                 #ifdef DRAW_COLLIDED_TEXT_BOUNDING_BOXES
@@ -946,6 +956,9 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
                         if (object->getShader()) {
                             object->getShader()->setColor(Color(1.0, 0.0, 0.0, 1.0));
                         }
+#ifdef DRAW_TEXT_BOUNDING_BOXES
+                        wrapper->boundingBoxShader->setColor(1.0, 0.0, 0.0, 0.5);
+#endif
                     }
                 #endif
 

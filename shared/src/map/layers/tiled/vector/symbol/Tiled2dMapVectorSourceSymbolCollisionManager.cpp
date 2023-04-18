@@ -11,7 +11,7 @@
 #include "Tiled2dMapVectorSourceSymbolCollisionManager.h"
 
 void Tiled2dMapVectorSourceSymbolCollisionManager::collisionDetection() {
-    std::unordered_set<std::string> layers;
+    std::vector<std::string> layers;
     std::string currentSource;
 
     std::shared_ptr<std::vector<OBB2D>> placements = std::make_shared<std::vector<OBB2D>>();
@@ -35,7 +35,7 @@ void Tiled2dMapVectorSourceSymbolCollisionManager::collisionDetection() {
             layers.clear();
             currentSource = layer->source;
         }
-        layers.insert(layer->identifier);
+        layers.push_back(layer->identifier);
     }
     
     if (!currentSource.empty()) {
