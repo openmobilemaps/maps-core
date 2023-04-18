@@ -240,6 +240,7 @@ public:
                                             parser.parseValue(val["layout"]["icon-offset"]),
                                             parser.parseValue(val["layout"]["icon-size"]),
                                             parser.parseValue(val["layout"]["icon-allow-overlap"]),
+                                            parser.parseValue(val["layout"]["icon-padding"]),
                                             parser.parseValue(val["layout"]["text-line-height"]),
                                             parser.parseValue(val["layout"]["text-letter-spacing"]),
                                             parser.parseValue(val["layout"]["text-max-width"]),

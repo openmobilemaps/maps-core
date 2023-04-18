@@ -634,12 +634,12 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::unordered_
 
         bool collides = false;
 
-        std::optional<Quad2dD> combinedQuad;
-        std::optional<Quad2dD> projectedTextQuad = std::nullopt;
+        std::optional<Quad2dD> projectedTextQuad;
+        std::optional<Quad2dD> projectedSymbolQuad;
 
         if (hasText) {
             float padding = description->style.getTextPadding(evalContext);
-            combinedQuad = getProjectedFrame(object->boundingBox, padding, wrapper->modelMatrix);
+            projectedTextQuad = getProjectedFrame(object->boundingBox, padding, wrapper->modelMatrix);
         }
 
         if (spriteData && spriteTexture) {
@@ -691,8 +691,8 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::unordered_
                                                                 ((double) spriteInfo.height) / textureHeight));
                 }
 
-
-                projectedTextQuad = getProjectedFrame(RectCoord(Coord(renderPos.systemIdentifier, quad.topLeft.x, quad.topLeft.y, renderPos.z), Coord(renderPos.systemIdentifier, quad.bottomRight.x, quad.bottomRight.y, renderPos.z)), 0.0, wrapper->iconModelMatrix);
+                const double iconPadding = description->style.getIconPadding(evalContext);
+                projectedSymbolQuad = getProjectedFrame(RectCoord(Coord(renderPos.systemIdentifier, quad.topLeft.x, quad.topLeft.y, renderPos.z), Coord(renderPos.systemIdentifier, quad.bottomRight.x, quad.bottomRight.y, renderPos.z)), iconPadding, wrapper->iconModelMatrix);
 
                 auto symbolGraphicsObject = wrapper->symbolGraphicsObject;
                 if (spriteTexture && !symbolGraphicsObject->isReady()) {
@@ -702,23 +702,17 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::unordered_
             }
         }
 
-        if (combinedQuad && projectedTextQuad) {
-            combinedQuad->topLeft.x = std::min(combinedQuad->topLeft.x, projectedTextQuad->topLeft.x);
-            combinedQuad->topLeft.y = std::min(combinedQuad->topLeft.y, projectedTextQuad->topLeft.y);
-
-            combinedQuad->topRight.x = std::max(combinedQuad->topRight.x, projectedTextQuad->topRight.x);
-            combinedQuad->topRight.y = std::min(combinedQuad->topRight.y, projectedTextQuad->topRight.y);
-
-            combinedQuad->bottomRight.x = std::max(combinedQuad->bottomRight.x, projectedTextQuad->bottomRight.x);
-            combinedQuad->bottomRight.y = std::max(combinedQuad->bottomRight.y, projectedTextQuad->bottomRight.y);
-
-            combinedQuad->bottomLeft.x = std::min(combinedQuad->bottomLeft.x, projectedTextQuad->bottomLeft.x);
-            combinedQuad->bottomLeft.y = std::max(combinedQuad->bottomLeft.y, projectedTextQuad->bottomLeft.y);
-
-        } else if (!combinedQuad) {
-            combinedQuad = projectedTextQuad;
+        std::optional<Quad2dD> combinedQuad;
+        if (projectedTextQuad && projectedSymbolQuad) {
+            combinedQuad = Quad2dD(Vec2D(std::min(projectedTextQuad->topLeft.x, projectedSymbolQuad->topLeft.x), std::min(projectedTextQuad->topLeft.y, projectedSymbolQuad->topLeft.y)),
+                                   Vec2D(std::max(projectedTextQuad->topRight.x, projectedSymbolQuad->topRight.x), std::min(projectedTextQuad->topRight.y, projectedSymbolQuad->topRight.y)),
+                                   Vec2D(std::max(projectedTextQuad->bottomRight.x, projectedSymbolQuad->bottomRight.x), std::max(projectedTextQuad->bottomRight.y, projectedSymbolQuad->bottomRight.y)),
+                                   Vec2D(std::min(projectedTextQuad->bottomLeft.x, projectedSymbolQuad->bottomLeft.x), std::max(projectedTextQuad->bottomLeft.y, projectedSymbolQuad->bottomLeft.y)));
+        } else if (!projectedTextQuad) {
+            combinedQuad = projectedSymbolQuad;
+        } else if (!projectedSymbolQuad) {
+            combinedQuad = projectedSymbolQuad;
         }
-
 
         if (!combinedQuad) {
             // The symbol doesnt have a text nor a icon
@@ -842,12 +836,12 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
                     Matrix::translateM(wrapper->modelMatrix, 0, -renderCoord.x, -renderCoord.y, -renderCoord.z);
                 }
 
-                std::optional<Quad2dD> combinedQuad;
-                std::optional<Quad2dD> projectedTextQuad = std::nullopt;
+                std::optional<Quad2dD> projectedTextQuad;
+                std::optional<Quad2dD> projectedSymbolQuad;
 
                 if (hasText) {
                     float padding = description->style.getTextPadding(evalContext);
-                    combinedQuad = getProjectedFrame(object->boundingBox, padding, wrapper->modelMatrix);
+                    projectedTextQuad = getProjectedFrame(object->boundingBox, padding, wrapper->modelMatrix);
                 }
 
                 if (spriteData && spriteTexture) {
@@ -900,7 +894,8 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
                         }
 
 
-                        projectedTextQuad = getProjectedFrame(RectCoord(Coord(renderPos.systemIdentifier, quad.topLeft.x, quad.topLeft.y, renderPos.z), Coord(renderPos.systemIdentifier, quad.bottomRight.x, quad.bottomRight.y, renderPos.z)), 0.0, wrapper->iconModelMatrix);
+                        const double iconPadding = description->style.getIconPadding(evalContext);
+                        projectedSymbolQuad = getProjectedFrame(RectCoord(Coord(renderPos.systemIdentifier, quad.topLeft.x, quad.topLeft.y, renderPos.z), Coord(renderPos.systemIdentifier, quad.bottomRight.x, quad.bottomRight.y, renderPos.z)), iconPadding, wrapper->iconModelMatrix);
 
                         auto symbolGraphicsObject = wrapper->symbolGraphicsObject;
                         if (spriteTexture && !symbolGraphicsObject->isReady()) {
@@ -910,21 +905,16 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
                     }
                 }
 
-                if (combinedQuad && projectedTextQuad) {
-                    combinedQuad->topLeft.x = std::min(combinedQuad->topLeft.x, projectedTextQuad->topLeft.x);
-                    combinedQuad->topLeft.y = std::min(combinedQuad->topLeft.y, projectedTextQuad->topLeft.y);
-
-                    combinedQuad->topRight.x = std::max(combinedQuad->topRight.x, projectedTextQuad->topRight.x);
-                    combinedQuad->topRight.y = std::min(combinedQuad->topRight.y, projectedTextQuad->topRight.y);
-
-                    combinedQuad->bottomRight.x = std::max(combinedQuad->bottomRight.x, projectedTextQuad->bottomRight.x);
-                    combinedQuad->bottomRight.y = std::max(combinedQuad->bottomRight.y, projectedTextQuad->bottomRight.y);
-
-                    combinedQuad->bottomLeft.x = std::min(combinedQuad->bottomLeft.x, projectedTextQuad->bottomLeft.x);
-                    combinedQuad->bottomLeft.y = std::max(combinedQuad->bottomLeft.y, projectedTextQuad->bottomLeft.y);
-
-                } else if (!combinedQuad) {
-                    combinedQuad = projectedTextQuad;
+                std::optional<Quad2dD> combinedQuad;
+                if (projectedTextQuad && projectedSymbolQuad) {
+                    combinedQuad = Quad2dD(Vec2D(std::min(projectedTextQuad->topLeft.x, projectedSymbolQuad->topLeft.x), std::min(projectedTextQuad->topLeft.y, projectedSymbolQuad->topLeft.y)),
+                                           Vec2D(std::max(projectedTextQuad->topRight.x, projectedSymbolQuad->topRight.x), std::min(projectedTextQuad->topRight.y, projectedSymbolQuad->topRight.y)),
+                                           Vec2D(std::max(projectedTextQuad->bottomRight.x, projectedSymbolQuad->bottomRight.x), std::max(projectedTextQuad->bottomRight.y, projectedSymbolQuad->bottomRight.y)),
+                                           Vec2D(std::min(projectedTextQuad->bottomLeft.x, projectedSymbolQuad->bottomLeft.x), std::max(projectedTextQuad->bottomLeft.y, projectedSymbolQuad->bottomLeft.y)));
+                } else if (!projectedTextQuad) {
+                    combinedQuad = projectedSymbolQuad;
+                } else if (!projectedSymbolQuad) {
+                    combinedQuad = projectedSymbolQuad;
                 }
 
                 if (!combinedQuad) {

@@ -42,6 +42,7 @@ public:
                       std::shared_ptr<Value> iconOffset,
                       std::shared_ptr<Value> iconSize,
                       std::shared_ptr<Value> iconAllowOverlap,
+                      std::shared_ptr<Value> iconPadding,
                       std::shared_ptr<Value> textLineHeight,
                       std::shared_ptr<Value> textLetterSpacing,
                       std::shared_ptr<Value> textMaxWidth,
@@ -69,6 +70,7 @@ public:
     textAllowOverlap(textAllowOverlap),
     textMaxWidth(textMaxWidth),
     iconAllowOverlap(iconAllowOverlap),
+    iconPadding(iconPadding),
     dpFactor(dpFactor) {}
 
 
@@ -79,7 +81,8 @@ public:
             textSize, textFont, textField, textTransform, textOffset, textRadialOffset,
             textColor, textHaloColor, textPadding, symbolSortKey, symbolPlacement, iconImage,
             iconAnchor, iconOffset, textAnchor, textVariableAnchor, textRotate, symbolSpacing,
-            iconSize, textLineHeight, textLetterSpacing, textAllowOverlap, iconAllowOverlap
+            iconSize, textLineHeight, textLetterSpacing, textAllowOverlap, iconAllowOverlap,
+            iconPadding
         };
 
         for (auto const &value: values) {
@@ -143,6 +146,12 @@ public:
     double getTextPadding(const EvaluationContext &context) {
         static const double defaultValue = 2.0;
         double value = textPadding ? textPadding->evaluateOr(context, defaultValue) : defaultValue;
+        return value * dpFactor;
+    }
+
+    double getIconPadding(const EvaluationContext &context) {
+        static const double defaultValue = 2.0;
+        double value = iconPadding ? iconPadding->evaluateOr(context, defaultValue) : defaultValue;
         return value * dpFactor;
     }
 
@@ -252,6 +261,7 @@ private:
     std::shared_ptr<Value> iconOffset;
     std::shared_ptr<Value> iconSize;
     std::shared_ptr<Value> iconAllowOverlap;
+    std::shared_ptr<Value> iconPadding;
     double dpFactor;
 
 
