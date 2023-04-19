@@ -900,12 +900,16 @@ public:
     ValueVariant evaluate(const EvaluationContext &context) const override {
         const auto &compareValue_ = compareValue->evaluate(context);
 
-        for (const auto &[stop, value] : stops) {
-            if (ValueVariantCompareHelper::compare(stop->evaluate(context), compareValue_, PropertyCompareType::LESS)) {
-                return value->evaluate(context);
+        for (auto it = stops.begin(); it != stops.end(); it++) {
+            if (ValueVariantCompareHelper::compare(std::get<0>(*it)->evaluate(context), compareValue_, PropertyCompareType::GREATER)) {
+                if (it != stops.begin()) {
+                    return std::get<1>(*std::prev(it))->evaluate(context);
+                } else {
+                    return defaultValue->evaluate(context);
+                }
             }
         }
-        return defaultValue->evaluate(context);
+        return std::get<1>(*stops.rbegin())->evaluate(context);
     }
 private:
     const std::shared_ptr<Value> compareValue;
