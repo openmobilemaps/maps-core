@@ -23,7 +23,6 @@
 #include "PolygonMaskObject.h"
 #include "Tiled2dMapVectorLayerTileCallbackInterface.h"
 #include "Tiled2dMapLayerMaskWrapper.h"
-#include "Tiled2dMapVectorLayerSelectionInterface.h"
 #include "TiledLayerError.h"
 #include "Actor.h"
 #include "Tiled2dMapVectorBackgroundSubLayer.h"
@@ -93,7 +92,7 @@ public:
 
     virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
 
-    void setSelectionDelegate(const WeakActor<Tiled2dMapVectorLayerSelectionInterface> &selectionDelegate);
+    void setSelectionDelegate(const std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate) override;
 
     void setSelectedFeatureIdentifier(std::optional<int64_t> identifier);
 
@@ -173,6 +172,9 @@ private:
     Actor<Tiled2dMapVectorSourceSymbolCollisionManager> collisionManager;
     std::unique_ptr<Tiled2dMapVectorInteractionManager> interactionManager;
 
+    std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> selectionDelegate;
+    std::optional<int64_t> selectedFeatureIdentifier;
+
     std::recursive_mutex renderPassMutex;
     std::vector<std::shared_ptr<RenderPassInterface>> currentRenderPasses;
 
@@ -185,8 +187,6 @@ private:
 
     std::atomic_bool isLoadingStyleJson = false;
     std::atomic_bool isResumed = false;
-
-    WeakActor<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate;
 
     float alpha = 1.0;
     std::optional<::RectI> scissorRect = std::nullopt;

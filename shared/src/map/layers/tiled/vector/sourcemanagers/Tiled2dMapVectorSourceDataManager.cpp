@@ -41,8 +41,7 @@ void Tiled2dMapVectorSourceDataManager::setScissorRect(const std::optional<RectI
     this->scissorRect = scissorRect;
 }
 
-void Tiled2dMapVectorSourceDataManager::setSelectionDelegate(
-        const WeakActor<Tiled2dMapVectorLayerSelectionInterface> &selectionDelegate) {
+void Tiled2dMapVectorSourceDataManager::setSelectionDelegate(const std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate) {
     this->selectionDelegate = selectionDelegate;
 }
 

@@ -80,7 +80,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::resume() {
 }
 
 void Tiled2dMapVectorSourceSymbolDataManager::setAlpha(float alpha) {
-    // TODO: set alpha of graphics objects
+    this->alpha = alpha;
 }
 
 void Tiled2dMapVectorSourceSymbolDataManager::updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription,
@@ -430,6 +430,10 @@ std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> Tiled2dMapVectorSourceSymb
             wrapper->lineObject = lineObject;
         }
 #endif
+        if (description->isInteractable(evalContext)) {
+            interactableSet.insert({wrapper, identifier});
+        }
+        
         return wrapper;
     }
     return nullptr;
@@ -453,6 +457,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupTexts(const std::vector<std::
                     if (textObject) {
                         textObject->asGraphicsObject()->clear();
                     }
+                    interactableSet.erase(wrapper);
                 }
             }
             tileSymbolMap.erase(tileIt);
@@ -915,12 +920,12 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
                 if (!wrapper->collides) {
                     const auto &shader = object->getShader();
                     if (shader) {
-                        object->getShader()->setOpacity(description->style.getTextOpacity(evalContext));
+                        object->getShader()->setOpacity(description->style.getTextOpacity(evalContext) * alpha);
                         object->getShader()->setColor(description->style.getTextColor(evalContext));
                         object->getShader()->setHaloColor(description->style.getTextHaloColor(evalContext));
                     }
                     if (wrapper->symbolShader) {
-                        wrapper->symbolShader->updateAlpha(description->style.getIconOpacity(evalContext));
+                        wrapper->symbolShader->updateAlpha(description->style.getIconOpacity(evalContext) * alpha);
                     }
 #ifdef DRAW_TEXT_BOUNDING_BOXES
                     wrapper->boundingBoxShader->setColor(0.0, 1.0, 0.0, 0.5);
@@ -1015,24 +1020,51 @@ void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
 }
 
 bool Tiled2dMapVectorSourceSymbolDataManager::onClickUnconfirmed(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) {
-    return false; // TODO
+    return false;
 }
 
 bool Tiled2dMapVectorSourceSymbolDataManager::onClickConfirmed(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) {
-    return false; // TODO
+    auto lockSelfPtr = shared_from_this();
+    auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface.lock() : nullptr;
+    auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+    auto conversionHelper = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
+    
+    if (!camera || !conversionHelper || !selectionDelegate) {
+        return false;
+    }
+
+    Coord clickCoords = camera->coordFromScreenPosition(posScreen);
+    Coord clickCoordsRenderCoord = conversionHelper->convertToRenderSystem(clickCoords);
+
+    double clickPadding = camera->mapUnitsFromPixels(16);
+
+    OBB2D tinyClickBox(Quad2dD(Vec2D(clickCoordsRenderCoord.x - clickPadding, clickCoordsRenderCoord.y - clickPadding),
+                               Vec2D(clickCoordsRenderCoord.x + clickPadding, clickCoordsRenderCoord.y - clickPadding),
+                               Vec2D(clickCoordsRenderCoord.x + clickPadding, clickCoordsRenderCoord.y + clickPadding),
+                               Vec2D(clickCoordsRenderCoord.x - clickPadding, clickCoordsRenderCoord.y + clickPadding)));
+
+    for(auto const &[wrapper, layerIndentifier]: interactableSet) {
+        if (wrapper->collides) { continue; }
+        if (wrapper->orientedBoundingBox.overlaps(tinyClickBox)) {
+            selectionDelegate->didSelectFeature(wrapper->featureContext.getFeatureInfo(), layerIndentifier, wrapper->textInfo->getCoordinate());
+            return true;
+        }
+    }
+    return false;
+
 }
 
 bool Tiled2dMapVectorSourceSymbolDataManager::onDoubleClick(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) {
-    return false; // TODO
+    return false;
 }
 
 bool Tiled2dMapVectorSourceSymbolDataManager::onLongPress(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) {
-    return false; // TODO
+    return false;
 }
 
 bool Tiled2dMapVectorSourceSymbolDataManager::onTwoFingerClick(const std::unordered_set<std::string> &layers, const Vec2F &posScreen1,
                                                           const Vec2F &posScreen2) {
-    return false; // TODO
+    return false;
 }
 
 void Tiled2dMapVectorSourceSymbolDataManager::clearTouch() {

@@ -97,11 +97,6 @@ void Tiled2dMapVectorSubLayer::setTilesReadyDelegate(const std::weak_ptr<Tiled2d
     this->readyDelegate = readyDelegate;
 }
 
-
-void Tiled2dMapVectorSubLayer::setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate) {
-    this->selectionDelegate = selectionDelegate;
-}
-
 void Tiled2dMapVectorSubLayer::setSelectedFeatureIdentfier(std::optional<int64_t> identifier) {
     {
         std::lock_guard<std::recursive_mutex> lock(selectedFeatureIdentifierMutex);

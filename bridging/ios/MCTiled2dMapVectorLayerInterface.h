@@ -6,6 +6,7 @@
 #import "MCLoaderInterface.h"
 #import <Foundation/Foundation.h>
 @class MCTiled2dMapVectorLayerInterface;
+@protocol MCTiled2dMapVectorLayerSelectionCallbackInterface;
 
 
 @interface MCTiled2dMapVectorLayerInterface : NSObject
@@ -21,6 +22,8 @@
                                                                 loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
                                                              fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
                                                                dpFactor:(double)dpFactor;
+
+- (void)setSelectionDelegate:(nullable id<MCTiled2dMapVectorLayerSelectionCallbackInterface>)selectionDelegate;
 
 - (nullable id<MCLayerInterface>)asLayerInterface;
 

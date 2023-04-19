@@ -32,6 +32,8 @@
 #include "TextSymbolPlacement.h"
 #include <sstream>
 #include "ColorUtil.h"
+#include <string>
+#include "VectorLayerFeatureInfo.h"
 
 namespace std {
     template <>
@@ -184,6 +186,50 @@ public:
             }
         }
         return hash;
+    }
+
+    VectorLayerFeatureInfo getFeatureInfo() const {
+        std::string identifier = std::to_string(this->identifier);
+        std::unordered_map<std::string, VectorLayerFeatureInfoValue> properties;
+        for(const auto &[key, val]: propertiesMap) {
+            properties.insert({
+                key,
+                std::visit(overloaded {
+                    [](const std::string &val){
+                        return VectorLayerFeatureInfoValue(val, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+                    },
+                    [](double val){
+                        return VectorLayerFeatureInfoValue(std::nullopt, val, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+                    },
+                    [](int64_t val){
+                        return VectorLayerFeatureInfoValue(std::nullopt, std::nullopt, val, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+                    },
+                    [](bool val){
+                        return VectorLayerFeatureInfoValue(std::nullopt, std::nullopt, std::nullopt, val, std::nullopt, std::nullopt, std::nullopt);
+                    },
+                    [](const Color &val){
+                        return VectorLayerFeatureInfoValue(std::nullopt, std::nullopt, std::nullopt, std::nullopt, val, std::nullopt, std::nullopt);
+                    },
+                    [](const std::vector<float> &val){
+                        return VectorLayerFeatureInfoValue(std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, val, std::nullopt);
+                    },
+                    [](const std::vector<std::string> &val){
+                        return VectorLayerFeatureInfoValue(std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,  std::nullopt, val);
+                    },
+                    [](const std::vector<FormattedStringEntry> &val){
+                        std::vector<std::string> strings;
+                        for (const auto &string: val) {
+                            strings.push_back(string.text);
+                        }
+                        return VectorLayerFeatureInfoValue( std::nullopt,  std::nullopt,  std::nullopt,  std::nullopt,  std::nullopt,  std::nullopt,  strings);
+                    },
+                    [](const std::monostate &val) {
+                        return VectorLayerFeatureInfoValue( std::nullopt,  std::nullopt,  std::nullopt,  std::nullopt,  std::nullopt,  std::nullopt,  std::nullopt);
+                    }
+                }, val)
+            });
+        }
+        return VectorLayerFeatureInfo(identifier, properties);
     }
 
     bool operator==(const FeatureContext &o) const { return propertiesMap == o.propertiesMap; }

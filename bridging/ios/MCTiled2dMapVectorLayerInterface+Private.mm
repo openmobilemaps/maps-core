@@ -9,6 +9,7 @@
 #import "MCFontLoaderInterface+Private.h"
 #import "MCLayerInterface+Private.h"
 #import "MCLoaderInterface+Private.h"
+#import "MCTiled2dMapVectorLayerSelectionCallbackInterface+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -60,6 +61,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
                                                                                          ::djinni_generated::FontLoaderInterface::toCpp(fontLoader),
                                                                                          ::djinni::F64::toCpp(dpFactor));
         return ::djinni_generated::Tiled2dMapVectorLayerInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setSelectionDelegate:(nullable id<MCTiled2dMapVectorLayerSelectionCallbackInterface>)selectionDelegate {
+    try {
+        _cppRefHandle.get()->setSelectionDelegate(::djinni_generated::Tiled2dMapVectorLayerSelectionCallbackInterface::toCpp(selectionDelegate));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

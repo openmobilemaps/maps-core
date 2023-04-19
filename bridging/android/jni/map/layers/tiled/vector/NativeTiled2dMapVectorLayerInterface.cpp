@@ -6,6 +6,7 @@
 #include "NativeFontLoaderInterface.h"
 #include "NativeLayerInterface.h"
 #include "NativeLoaderInterface.h"
+#include "NativeTiled2dMapVectorLayerSelectionCallbackInterface.h"
 
 namespace djinni_generated {
 
@@ -43,6 +44,14 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_til
                                                                             ::djinni::F64::toCpp(jniEnv, j_dpFactor));
         return ::djinni::release(::djinni_generated::NativeTiled2dMapVectorLayerInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_00024CppProxy_native_1setSelectionDelegate(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_selectionDelegate)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapVectorLayerInterface>(nativeRef);
+        ref->setSelectionDelegate(::djinni_generated::NativeTiled2dMapVectorLayerSelectionCallbackInterface::toCpp(jniEnv, j_selectionDelegate));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
 CJNIEXPORT ::djinni_generated::NativeLayerInterface::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_00024CppProxy_native_1asLayerInterface(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)

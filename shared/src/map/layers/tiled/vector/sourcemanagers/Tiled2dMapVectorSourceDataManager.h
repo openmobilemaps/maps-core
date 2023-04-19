@@ -16,9 +16,9 @@
 #include "RenderPassInterface.h"
 #include "Tiled2dMapRasterTileInfo.h"
 #include "Tiled2dMapVectorTileInfo.h"
-#include "Tiled2dMapVectorLayerSelectionInterface.h"
 #include "Tiled2dMapVectorLayerTileCallbackInterface.h"
 #include "Tiled2dMapLayerMaskWrapper.h"
+#include "Tiled2dMapVectorLayerSelectionCallbackInterface.h"
 #include "Actor.h"
 #include <unordered_set>
 
@@ -43,7 +43,7 @@ public:
 
     virtual void setScissorRect(const std::optional<RectI> &scissorRect);
 
-    virtual void setSelectionDelegate(const WeakActor<Tiled2dMapVectorLayerSelectionInterface> &selectionDelegate);
+    virtual void setSelectionDelegate(const std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate);
 
     virtual void setSelectedFeatureIdentifier(std::optional<int64_t> identifier);
 
@@ -72,7 +72,7 @@ protected:
     const WeakActor<Tiled2dMapVectorLayer> vectorLayer;
     const std::shared_ptr<VectorMapDescription> mapDescription;
     const std::string source;
-    WeakActor<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate;
+    std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> selectionDelegate;
 
     std::unordered_map<std::string, int32_t> layerNameIndexMap;
 

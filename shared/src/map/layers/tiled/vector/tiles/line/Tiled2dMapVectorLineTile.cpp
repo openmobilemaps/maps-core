@@ -321,7 +321,7 @@ bool Tiled2dMapVectorLineTile::onClickConfirmed(const Vec2F &posScreen) {
         for (auto const &coordinates: lineCoordinateVector) {
             auto lineWidth = lineDescription->style.getLineWidth(EvaluationContext(zoomIdentifier, featureContext));
             if (LineHelper::pointWithin(coordinates, point, lineWidth, coordinateConverter)) {
-                selectionDelegate.message(&Tiled2dMapVectorLayerSelectionInterface::didSelectFeature, featureContext, description, point);
+                selectionDelegate->didSelectFeature(featureContext.getFeatureInfo(), description->identifier, point);
                 return true;
             }
         }

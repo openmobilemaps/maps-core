@@ -100,5 +100,9 @@ private:
     std::vector<float> bottomRightProj = { 0.0, 0.0, 0.0, 0.0 };
     std::vector<float> bottomLeftProj = { 0.0, 0.0, 0.0, 0.0 };
 
+    std::unordered_map<std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper>, LayerIndentifier> interactableSet;
+
+    float alpha = 1.0;
+
     //cached locked unsafe renderpasses
 };

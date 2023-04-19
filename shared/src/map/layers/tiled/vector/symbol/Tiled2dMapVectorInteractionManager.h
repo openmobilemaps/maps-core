@@ -17,7 +17,7 @@
 
 class Tiled2dMapVectorInteractionManager : public TouchInterface {
 public:
-    Tiled2dMapVectorInteractionManager(const std::unordered_map<std::string, WeakActor<Tiled2dMapVectorSourceDataManager>> &sourceDataManagers,
+    Tiled2dMapVectorInteractionManager(const std::unordered_map<std::string, std::vector<WeakActor<Tiled2dMapVectorSourceDataManager>>> &sourceDataManagers,
                                        const std::shared_ptr<VectorMapDescription> &mapDescription);
     Tiled2dMapVectorInteractionManager() = default;
 
@@ -47,6 +47,6 @@ private:
     template<typename F>
     inline bool callInReverseOrder(F&& managerLambda);
 
-    std::unordered_map<std::string, WeakActor<Tiled2dMapVectorSourceDataManager>> sourceDataManagers;
+    std::unordered_map<std::string, std::vector<WeakActor<Tiled2dMapVectorSourceDataManager>>> sourceDataManagersMap;
     std::shared_ptr<VectorMapDescription> mapDescription;
 };

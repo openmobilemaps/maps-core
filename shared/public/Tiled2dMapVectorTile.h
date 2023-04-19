@@ -18,10 +18,10 @@
 #include "RenderObjectInterface.h"
 #include "Quad2dInterface.h"
 #include "ColorShaderInterface.h"
-#include "Tiled2dMapVectorLayerSelectionInterface.h"
 #include "SimpleTouchInterface.h"
 #include "VectorLayerDescription.h"
 #include "Tiled2dMapVectorLayerTileCallbackInterface.h"
+#include "Tiled2dMapVectorLayerSelectionCallbackInterface.h"
 
 typedef std::shared_ptr<TextureHolderInterface> Tiled2dMapVectorTileDataRaster;
 typedef std::shared_ptr<std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>> Tiled2dMapVectorTileDataVector;
@@ -56,7 +56,7 @@ public:
 
     virtual void setRasterTileData(const Tiled2dMapVectorTileDataRaster &tileData) {};
 
-    void setSelectionDelegate(const WeakActor<Tiled2dMapVectorLayerSelectionInterface> &selectionDelegate);
+    void setSelectionDelegate(const std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate);
 
     void setSelectedFeatureIdentifier(std::optional<int64_t> identifier);
 
@@ -68,6 +68,6 @@ protected:
 
     float alpha = 1.0;
 
-    WeakActor<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate;
+    std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> selectionDelegate;
     std::optional<int64_t> selectedFeatureIdentifier;
 };

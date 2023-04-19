@@ -11,10 +11,9 @@
 #include "Tiled2dMapVectorInteractionManager.h"
 #include <functional>
 
-Tiled2dMapVectorInteractionManager::Tiled2dMapVectorInteractionManager(
-        const std::unordered_map<std::string, WeakActor<Tiled2dMapVectorSourceDataManager>> &sourceDataManagers,
-        const std::shared_ptr<VectorMapDescription> &mapDescription)
-        : sourceDataManagers(sourceDataManagers), mapDescription(mapDescription) {
+Tiled2dMapVectorInteractionManager::Tiled2dMapVectorInteractionManager(const std::unordered_map<std::string, std::vector<WeakActor<Tiled2dMapVectorSourceDataManager>>> &sourceDataManagers,
+                                                                       const std::shared_ptr<VectorMapDescription> &mapDescription)
+        : sourceDataManagersMap(sourceDataManagers), mapDescription(mapDescription) {
 }
 
 bool Tiled2dMapVectorInteractionManager::onTouchDown(const Vec2F &posScreen) {
@@ -90,12 +89,14 @@ bool Tiled2dMapVectorInteractionManager::onTwoFingerMoveComplete() {
 }
 
 void Tiled2dMapVectorInteractionManager::clearTouch() {
-    for (const auto &[source, sourceDataManager] : sourceDataManagers) {
-        sourceDataManager.syncAccess([](auto &manager){
-            if (auto strongManager = manager.lock()) {
-                strongManager->clearTouch();
-            }
-        });
+    for (const auto &[source, sourceDataManagers] : sourceDataManagersMap) {
+        for (auto const &sourceDataManager: sourceDataManagers) {
+            sourceDataManager.syncAccess([](auto &manager){
+                if (auto strongManager = manager.lock()) {
+                    strongManager->clearTouch();
+                }
+            });
+        }
     }
 }
 
@@ -112,9 +113,13 @@ bool Tiled2dMapVectorInteractionManager::callInReverseOrder(F&& managerLambda) {
         if (layer->source != currentSource) {
             if (!currentSource.empty()) {
                 auto reducedLambda = std::bind(managerLambda, layers, std::placeholders::_1);
-                auto sourceDataManager = sourceDataManagers.find(currentSource);
-                if (sourceDataManager != sourceDataManagers.end() && sourceDataManager->second.syncAccess(reducedLambda)) {
-                    return true;
+                auto sourceDataManagers = sourceDataManagersMap.find(currentSource);
+                if (sourceDataManagers != sourceDataManagersMap.end()) {
+                    for(auto const &sourceDataManager: sourceDataManagers->second) {
+                        if (sourceDataManager.syncAccess(reducedLambda)) {
+                            return true;
+                        }
+                    }
                 }
             }
             layers.clear();
@@ -124,9 +129,11 @@ bool Tiled2dMapVectorInteractionManager::callInReverseOrder(F&& managerLambda) {
     }
     if (!currentSource.empty()) {
         auto reducedLambda = std::bind(managerLambda, layers, std::placeholders::_1);
-        auto sourceDataManager = sourceDataManagers.find(currentSource);
-        if (sourceDataManager != sourceDataManagers.end()) {
-            return sourceDataManager->second.syncAccess(reducedLambda);
+        auto sourceDataManagers = sourceDataManagersMap.find(currentSource);
+        if (sourceDataManagers != sourceDataManagersMap.end()) {
+            for(auto const &sourceDataManager: sourceDataManagers->second) {
+                return sourceDataManager.syncAccess(reducedLambda);
+            }
         }
     }
     return false;

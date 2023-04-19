@@ -42,7 +42,7 @@ public:
         return usedKeys;
     }
 
-    bool isInteractable(const EvaluationContext &context){
+    bool isInteractable(const EvaluationContext &context) {
         static const bool defaultValue = false;
         return interactable && interactable->evaluateOr(context, defaultValue);
     }

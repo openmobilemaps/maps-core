@@ -20,7 +20,6 @@
 #include "VectorTileGeometryHandler.h"
 #include "VectorLayerDescription.h"
 #include "Tiled2dMapVectorLayerTileCallbackInterface.h"
-#include "Tiled2dMapVectorLayerSelectionInterface.h"
 #include "Textured2dLayerObject.h"
 
 class Tiled2dMapVectorSubLayer : public SimpleLayerInterface {
@@ -60,8 +59,6 @@ public:
 
     void setTilesReadyDelegate(const std::weak_ptr<Tiled2dMapVectorLayerTileCallbackInterface> readyDelegate);
 
-    void setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate);
-
     virtual void setSelectedFeatureIdentfier(std::optional<int64_t> identifier);
 
 protected:
@@ -78,8 +75,6 @@ protected:
     std::unordered_map<Tiled2dMapTileInfo, std::vector<std::shared_ptr<RenderPassInterface>>> renderPasses;
 
     std::weak_ptr<Tiled2dMapVectorLayerTileCallbackInterface> readyDelegate;
-
-    std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate;
 
     std::recursive_mutex selectedFeatureIdentifierMutex;
     std::optional<int64_t> selectedFeatureIdentifier;

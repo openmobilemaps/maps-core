@@ -10,6 +10,8 @@
 #include <string>
 #include <vector>
 
+class Tiled2dMapVectorLayerSelectionCallbackInterface;
+
 class Tiled2dMapVectorLayerInterface {
 public:
     virtual ~Tiled2dMapVectorLayerInterface() = default;
@@ -17,6 +19,8 @@ public:
     static /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerInterface> createFromStyleJson(const std::string & layerName, const std::string & path, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & loaders, const /*not-null*/ std::shared_ptr<::FontLoaderInterface> & fontLoader, double dpFactor);
 
     static /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerInterface> createFromLocalStyleJson(const std::string & layerName, const std::string & styleJson, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & loaders, const /*not-null*/ std::shared_ptr<::FontLoaderInterface> & fontLoader, double dpFactor);
+
+    virtual void setSelectionDelegate(const /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> & selectionDelegate) = 0;
 
     virtual /*not-null*/ std::shared_ptr<::LayerInterface> asLayerInterface() = 0;
 };

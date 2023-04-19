@@ -192,7 +192,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
 
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceTileDataManager>> sourceTileManagers;
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceSymbolDataManager>> symbolSourceDataManagers;
-    std::unordered_map<std::string, WeakActor<Tiled2dMapVectorSourceDataManager>> interactionDataManagers;
+    std::unordered_map<std::string, std::vector<WeakActor<Tiled2dMapVectorSourceDataManager>>> interactionDataManagers;
 
     std::unordered_map<std::string, std::unordered_set<std::string>> layersToDecode;
 
@@ -225,7 +225,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                                              sourceActor.weakActor<Tiled2dMapRasterSource>());
                 sourceTileManagers[layerDesc->source] = sourceManagerActor.strongActor<Tiled2dMapVectorSourceTileDataManager>();
                 sourceInterfaces.push_back(sourceActor.weakActor<Tiled2dMapSourceInterface>());
-                interactionDataManagers[layerDesc->source] = sourceManagerActor.weakActor<Tiled2dMapVectorSourceDataManager>();
+                interactionDataManagers[layerDesc->source].push_back(sourceManagerActor.weakActor<Tiled2dMapVectorSourceDataManager>());
                 break;
             }
             case symbol: {
@@ -261,15 +261,17 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                                      source,
                                                                                      vectorSource.weakActor<Tiled2dMapVectorSource>());
         sourceTileManagers[source] = sourceManagerActor.strongActor<Tiled2dMapVectorSourceTileDataManager>();
-        interactionDataManagers[source] = sourceManagerActor.weakActor<Tiled2dMapVectorSourceDataManager>();
+        interactionDataManagers[source].push_back(sourceManagerActor.weakActor<Tiled2dMapVectorSourceDataManager>());
 
         if (symbolSources.count(source) != 0) {
             auto symbolSourceDataManagerMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
-            symbolSourceDataManagers[source] = Actor<Tiled2dMapVectorSourceSymbolDataManager>(symbolSourceDataManagerMailbox,
-                                                                                              selfActor,
-                                                                                              mapDescription,
-                                                                                              source,
-                                                                                              fontLoader);
+            auto actor = Actor<Tiled2dMapVectorSourceSymbolDataManager>(symbolSourceDataManagerMailbox,
+                                                                        selfActor,
+                                                                        mapDescription,
+                                                                        source,
+                                                                        fontLoader);
+            symbolSourceDataManagers[source] = actor;
+            interactionDataManagers[source].push_back(actor.weakActor<Tiled2dMapVectorSourceDataManager>());
         }
     }
 
@@ -289,6 +291,14 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     this->vectorTileSources = vectorTileSource;
     this->symbolSourceDataManagers = symbolSourceDataManagers;
     this->sourceDataManagers = sourceTileManagers;
+
+    if (selectionDelegate) {
+        setSelectionDelegate(selectionDelegate);
+    }
+
+    if (selectedFeatureIdentifier) {
+        setSelectedFeatureIdentifier(selectedFeatureIdentifier);
+    }
 
     setSourceInterfaces(sourceInterfaces);
 
@@ -323,7 +333,6 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
             rasterSource.message(&Tiled2dMapRasterSource::resume);
         }
     }
-
 }
 
 std::shared_ptr<::LayerInterface> Tiled2dMapVectorLayer::asLayerInterface() {
@@ -619,7 +628,9 @@ void Tiled2dMapVectorLayer::setScissorRect(const std::optional<::RectI> &scissor
     }
 }
 
-void Tiled2dMapVectorLayer::setSelectionDelegate(const WeakActor<Tiled2dMapVectorLayerSelectionInterface> &selectionDelegate) {
+void Tiled2dMapVectorLayer::setSelectionDelegate(const std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate) {
+    this->selectionDelegate = selectionDelegate;
+
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
         sourceDataManager.message(&Tiled2dMapVectorSourceTileDataManager::setSelectionDelegate, selectionDelegate);
     }
@@ -629,6 +640,7 @@ void Tiled2dMapVectorLayer::setSelectionDelegate(const WeakActor<Tiled2dMapVecto
 }
 
 void Tiled2dMapVectorLayer::setSelectedFeatureIdentifier(std::optional<int64_t> identifier) {
+    this->selectedFeatureIdentifier = identifier;
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
         sourceDataManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::setSelectedFeatureIdentifier, identifier);
     }
