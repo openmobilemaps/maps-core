@@ -573,13 +573,15 @@ void Tiled2dMapVectorLayer::loadSpriteData() {
 
                 for (auto& [key, val] : json.items())
                 {
-                    sprites.insert({key, val.get<::SpriteDesc>()});
+                    sprites.insert({key, val.get<SpriteDesc>()});
                 }
 
                 context->spriteData = std::make_shared<SpriteData>(sprites);
             }
             catch (nlohmann::json::parse_error& ex)
-            {}
+            {
+                LogError <<= ex.what();
+            }
         }
 
         if (--(context->counter) == 0) {

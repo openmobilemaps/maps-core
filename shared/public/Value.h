@@ -34,6 +34,8 @@
 #include "ColorUtil.h"
 #include <string>
 #include "VectorLayerFeatureInfo.h"
+#include "SymbolAlignment.h"
+#include "iconTextFit.h"
 
 namespace std {
     template <>
@@ -328,6 +330,31 @@ public:
     }
 
 
+    std::optional<::SymbolAlignment> alignmentFromString(const std::string &value) const {
+        if (value == "auto") {
+            return SymbolAlignment::AUTO;
+        } else if (value == "map") {
+            return SymbolAlignment::MAP;
+        } else if (value == "viewport") {
+            return SymbolAlignment::VIEWPORT;
+        }
+        return std::nullopt;
+    }
+
+    std::optional<::IconTextFit> iconTextFitFromString(const std::string &value) const {
+        if (value == "none") {
+            return IconTextFit::NONE;
+        } else if (value == "width") {
+            return IconTextFit::WIDTH;
+        } else if (value == "height") {
+            return IconTextFit::HEIGHT;
+        } else if (value == "both") {
+            return IconTextFit::BOTH;
+        }
+        return std::nullopt;
+    }
+
+
     std::optional<::TextJustify> jusitfyFromString(const std::string &value) const {
         if (value == "center") {
             return TextJustify::CENTER;
@@ -352,6 +379,26 @@ public:
         auto anchor = anchorFromString(value);
         if (anchor) {
             return *anchor;
+        }
+        return alternative;
+    }
+
+    template<>
+    SymbolAlignment evaluateOr(const EvaluationContext &context, const SymbolAlignment &alternative) const {
+        auto const &value = evaluateOr(context, std::string(""));
+        auto alignment = alignmentFromString(value);
+        if (alignment) {
+            return *alignment;
+        }
+        return alternative;
+    }
+
+    template<>
+    IconTextFit evaluateOr(const EvaluationContext &context, const IconTextFit &alternative) const {
+        auto const &value = evaluateOr(context, std::string(""));
+        auto textFit = iconTextFitFromString(value);
+        if (textFit) {
+            return *textFit;
         }
         return alternative;
     }

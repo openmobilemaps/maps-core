@@ -50,7 +50,8 @@ std::shared_ptr<TextLayerObject> TextHelper::textLayerObject(const std::shared_p
                                                              Vec2F offset,
                                                              double lineHeight,
                                                              double letterSpacing,
-                                                             int64_t maxCharacterWidth) {
+                                                             int64_t maxCharacterWidth,
+                                                             SymbolAlignment rotationAlignment) {
 
     if (!fontData) {
         return nullptr;
@@ -75,7 +76,7 @@ std::shared_ptr<TextLayerObject> TextHelper::textLayerObject(const std::shared_p
         factoryObject = objectFactory->createText(shader->asShaderProgramInterface());
     }
     
-    auto textObject = std::make_shared<TextLayerObject>(factoryObject, text, shader, mapInterface, *fontData, offset, lineHeight, letterSpacing, maxCharacterWidth);
+    auto textObject = std::make_shared<TextLayerObject>(factoryObject, text, shader, mapInterface, *fontData, offset, lineHeight, letterSpacing, maxCharacterWidth, rotationAlignment);
     return textObject;
 }
 

@@ -23,7 +23,7 @@
 
 #include <cmath>
 
-TextLayerObject::TextLayerObject(const std::shared_ptr<TextInterface> &text, const std::shared_ptr<TextInfoInterface> &textInfo,const std::shared_ptr<TextShaderInterface> &shader, const std::shared_ptr<MapInterface> &mapInterface, const FontData& fontData, const Vec2F &offset, double lineHeight, double letterSpacing,int64_t maxCharacterWidth)
+TextLayerObject::TextLayerObject(const std::shared_ptr<TextInterface> &text, const std::shared_ptr<TextInfoInterface> &textInfo,const std::shared_ptr<TextShaderInterface> &shader, const std::shared_ptr<MapInterface> &mapInterface, const FontData& fontData, const Vec2F &offset, double lineHeight, double letterSpacing,int64_t maxCharacterWidth, SymbolAlignment rotationAlignment)
 : text(text),
   textInfo(textInfo),
   lineCoordinates(textInfo->getLineCoordinates()),
@@ -35,7 +35,7 @@ TextLayerObject::TextLayerObject(const std::shared_ptr<TextInterface> &text, con
   offset(offset),
   lineHeight(lineHeight),
   letterSpacing(letterSpacing),
-  boundingBox(Coord("", 0.0, 0.0, 0.0), Coord("", 0.0, 0.0, 0.0))
+  boundingBox(Coord("", 0.0, 0.0, 0.0), Coord("", 0.0, 0.0, 0.0)), rotationAlignment(rotationAlignment)
 {
     if (text) {
         renderConfig = { std::make_shared<RenderConfig>(text->asGraphicsObject(), 1) };
@@ -108,17 +108,27 @@ void TextLayerObject::update(float scale, bool updateObject) {
             break;
         }
 
-        case TextSymbolPlacement::LINE:
         case TextSymbolPlacement::LINE_CENTER: {
-            auto rotatedFactor = layoutLine(scale, updateObject);
+            layoutPoint(scale, updateObject);
+            break;
+        }
 
-            if(rotatedFactor > 0.5 && lineCoordinates && !rotated) {
-                std::reverse((*lineCoordinates).begin(), (*lineCoordinates).end());
-                std::reverse(renderLineCoordinates.begin(), renderLineCoordinates.end());
+        case TextSymbolPlacement::LINE: {
 
-                layoutLine(scale, updateObject);
-                rotated = true;
+            if (rotationAlignment == SymbolAlignment::VIEWPORT) {
+                layoutPoint(scale, updateObject);
+            } else {
+                auto rotatedFactor = layoutLine(scale, updateObject);
+
+                if(rotatedFactor > 0.5 && lineCoordinates && !rotated) {
+                    std::reverse((*lineCoordinates).begin(), (*lineCoordinates).end());
+                    std::reverse(renderLineCoordinates.begin(), renderLineCoordinates.end());
+
+                    layoutLine(scale, updateObject);
+                    rotated = true;
+                }
             }
+
             break;
         }
     }

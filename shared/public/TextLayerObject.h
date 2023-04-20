@@ -31,6 +31,7 @@
 #include "FontData.h"
 #include "MapCamera2dInterface.h"
 #include "Quad2dD.h"
+#include "SymbolAlignment.h"
 
 class TextLayerObject : public LayerObjectInterface {
   public:
@@ -42,7 +43,8 @@ class TextLayerObject : public LayerObjectInterface {
                     const Vec2F &offset,
                     double lineHeight,
                     double letterSpacing,
-                    int64_t maxCharacterWidth);
+                    int64_t maxCharacterWidth,
+                    SymbolAlignment rotationAlignment);
 
     virtual ~TextLayerObject(){};
 
@@ -104,6 +106,7 @@ class TextLayerObject : public LayerObjectInterface {
     std::optional<std::vector<::Coord>> lineCoordinates;
     std::vector<::Coord> renderLineCoordinates;
 
+    SymbolAlignment rotationAlignment;
 
 #ifdef DRAW_TEXT_LETTER_BOXES
     std::vector<Quad2dD> letterBoxes;

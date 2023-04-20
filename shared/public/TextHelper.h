@@ -16,6 +16,7 @@
 #include "TextLayerObject.h"
 #include "Vec2F.h"
 #include "Quad2dD.h"
+#include "SymbolAlignment.h"
 
 #include <optional>
 
@@ -31,7 +32,8 @@ class TextHelper {
                                                              Vec2F offset,
                                                              double lineHeight,
                                                              double letterSpacing,
-                                                             int64_t maxCharacterWidth);
+                                                             int64_t maxCharacterWidth,
+                                                             SymbolAlignment rotationAlignment);
 
     static std::string uppercase(const std::string &string);
 

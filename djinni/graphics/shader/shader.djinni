@@ -2,6 +2,7 @@
 @extern "../../yaml/line_style.yaml"
 @extern "../../yaml/polygon_style.yaml"
 @extern "../../yaml/vec_3_d.yaml"
+@extern "../../yaml/rect_d.yaml"
 @extern "../../yaml/shared_bytes.yaml"
 @extern "../../yaml/color.yaml"
 
@@ -19,7 +20,8 @@ shader_factory_interface = interface +c +j +o {
     create_color_circle_shader() : color_circle_shader_interface;
     create_polygon_group_shader(): polygon_group_shader_interface;
     create_text_shader() : text_shader_interface;
-    create_raster_shader() : raster_shader_interface; 
+    create_raster_shader() : raster_shader_interface;
+    create_stretch_shader(): stretch_shader_interface;
 }
 
 raster_shader_style = record {
@@ -45,6 +47,31 @@ raster_shader_interface = interface +c +o {
 
 alpha_shader_interface = interface +c +o {
     update_alpha(value: f32);
+    as_shader_program_interface() : shader_program_interface;
+}
+
+stretch_shader_info = record {
+    scaleX: f32;
+    
+    # all stretch infos are between 0 and 1
+    stretchX0Begin: f32;
+    stretchX0End: f32;
+    stretchX1Begin: f32;
+    stretchX1End: f32;
+
+    scaleY: f32;
+    # all stretch infos are between 0 and 1
+    stretchY0Begin: f32;
+    stretchY0End: f32;
+    stretchY1Begin: f32;
+    stretchY1End: f32;
+
+    uv: rect_d;
+}
+
+stretch_shader_interface = interface +c +o {
+    update_alpha(value: f32);
+    update_stretch_info(info: stretch_shader_info);
     as_shader_program_interface() : shader_program_interface;
 }
 

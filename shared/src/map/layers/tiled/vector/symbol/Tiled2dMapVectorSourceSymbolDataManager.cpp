@@ -13,6 +13,7 @@
 #include "Tiled2dMapVectorRasterSubLayerConfig.h"
 #include "RenderPass.h"
 #include "Matrix.h"
+#include "StretchShaderInfo.h"
 
 Tiled2dMapVectorSourceSymbolDataManager::Tiled2dMapVectorSourceSymbolDataManager(const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
                                                                                  const std::shared_ptr<VectorMapDescription> &mapDescription,
@@ -394,7 +395,8 @@ std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> Tiled2dMapVectorSourceSymb
                                                        textOffset,
                                                        description->style.getTextLineHeight(evalContext),
                                                        letterSpacing,
-                                                       description->style.getTextMaxWidth(evalContext));
+                                                       description->style.getTextMaxWidth(evalContext),
+                                                       description->style.getTextRotationAlignment(evalContext));
 
     if(textObject) {
         int64_t const symbolSortKey = description->style.getSymbolSortKey(evalContext);
@@ -629,7 +631,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
 
             rotation += description->style.getTextRotate(evalContext);
 
-            if(wrapper->textInfo->getSymbolPlacement() == TextSymbolPlacement::POINT) {
+            if(true) {
                 if (wrapper->textInfo->angle) {
                     double rotateSum = fmod(rotation - (*wrapper->textInfo->angle) + 720.0, 360);
                     if (rotateSum > 270 || rotateSum < 90) {
@@ -662,7 +664,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
                 const auto &spriteInfo = spriteData->sprites.at(iconImage);
 
                 if (!wrapper->symbolShader) {
-                    wrapper->symbolShader = mapInterface->getShaderFactory()->createAlphaShader();
+                    wrapper->symbolShader = mapInterface->getShaderFactory()->createStretchShader();
                 }
 
                 if (!wrapper->symbolObject) {
@@ -678,23 +680,47 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
                 renderPos.y -= iconOffset.y;
                 renderPos.x += iconOffset.x;
 
-                auto x = renderPos.x - (spriteInfo.width * densityOffset) / 2;
-                auto y = renderPos.y + (spriteInfo.height * densityOffset) / 2;
-                auto xw = renderPos.x + (spriteInfo.width * densityOffset) / 2;
-                auto yh = renderPos.y - (spriteInfo.height * densityOffset) / 2;
-
-                Quad2dD quad = Quad2dD(Vec2D(x, yh), Vec2D(xw, yh), Vec2D(xw, y), Vec2D(x, y));
-
                 const auto textureWidth = (double) spriteTexture->getImageWidth();
                 const auto textureHeight = (double) spriteTexture->getImageHeight();
 
-                if (object->getCurrentSymbolName() != iconImage && spriteData->sprites.count(iconImage) != 0) {
-                    object->setCurrentSymbolName(iconImage);
-                    wrapper->symbolObject->setFrame(quad, RectD( ((double) spriteInfo.x) / textureWidth,
-                                                                ((double) spriteInfo.y) / textureHeight,
-                                                                ((double) spriteInfo.width) / textureWidth,
-                                                                ((double) spriteInfo.height) / textureHeight));
+                auto spriteWidth = spriteInfo.width * densityOffset;
+                auto spriteHeight = spriteInfo.height * densityOffset;
+
+                float leftPadding = 0;
+                float rightPadding = 0;
+                if (spriteInfo.stretchX.size() >= 1) {
+                    leftPadding = std::get<0>(spriteInfo.stretchX[0]);
+                    rightPadding = spriteInfo.width - std::get<1>(spriteInfo.stretchX[0]);
                 }
+                if (spriteInfo.stretchX.size() >= 2) {
+                    rightPadding = spriteInfo.width - std::get<1>(spriteInfo.stretchX[1]);
+                }
+
+                const auto textWidth = (leftPadding + rightPadding) * densityOffset + (object->boundingBox.bottomRight.x - object->boundingBox.topLeft.x) / scaleFactor;
+                const auto textHeight = (object->boundingBox.bottomRight.y - object->boundingBox.topLeft.y) / scaleFactor;
+
+                auto scaleX = std::max(1.0, textWidth / spriteWidth);
+                auto scaleY = std::max(1.0, textHeight / spriteHeight);
+
+                auto textFit = description->style.getIconTextFit(evalContext);
+                if (textFit == IconTextFit::NONE) {
+                    scaleX = 1;
+                    scaleY = 1;
+                } else if (textFit == IconTextFit::WIDTH) {
+                    scaleY = 1;
+                } else if (textFit == IconTextFit::HEIGHT) {
+                    scaleX = 1;
+                }
+
+                spriteWidth *= scaleX;
+                spriteHeight *= scaleY;
+
+                auto x = renderPos.x - spriteWidth / 2;
+                auto y = renderPos.y + spriteHeight / 2;
+                auto xw = renderPos.x + spriteWidth / 2;
+                auto yh = renderPos.y - spriteHeight / 2;
+
+                Quad2dD quad = Quad2dD(Vec2D(x, yh), Vec2D(xw, yh), Vec2D(xw, y), Vec2D(x, y));
 
                 const double iconPadding = description->style.getIconPadding(evalContext);
                 projectedSymbolQuad = getProjectedFrame(RectCoord(Coord(renderPos.systemIdentifier, quad.topLeft.x, quad.topLeft.y, renderPos.z), Coord(renderPos.systemIdentifier, quad.bottomRight.x, quad.bottomRight.y, renderPos.z)), iconPadding, wrapper->iconModelMatrix);
@@ -846,7 +872,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
                         const auto &spriteInfo = spriteData->sprites.at(iconImage);
 
                         if (!wrapper->symbolShader) {
-                            wrapper->symbolShader = mapInterface->getShaderFactory()->createAlphaShader();
+                            wrapper->symbolShader = mapInterface->getShaderFactory()->createStretchShader();
                         }
 
                         if (!wrapper->symbolObject) {
@@ -862,22 +888,93 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
                         renderPos.y -= iconOffset.y;
                         renderPos.x += iconOffset.x;
 
-                        auto x = renderPos.x - (spriteInfo.width * densityOffset) / 2;
-                        auto y = renderPos.y + (spriteInfo.height * densityOffset) / 2;
-                        auto xw = renderPos.x + (spriteInfo.width * densityOffset) / 2;
-                        auto yh = renderPos.y - (spriteInfo.height * densityOffset) / 2;
-
-                        Quad2dD quad = Quad2dD(Vec2D(x, yh), Vec2D(xw, yh), Vec2D(xw, y), Vec2D(x, y));
-
                         const auto textureWidth = (double) spriteTexture->getImageWidth();
                         const auto textureHeight = (double) spriteTexture->getImageHeight();
 
+                        auto spriteWidth = spriteInfo.width * densityOffset;
+                        auto spriteHeight = spriteInfo.height * densityOffset;
+
+                        float leftPadding = 0;
+                        float rightPadding = 0;
+                        if (spriteInfo.stretchX.size() >= 1) {
+                            leftPadding = std::get<0>(spriteInfo.stretchX[0]);
+                            rightPadding = spriteInfo.width - std::get<1>(spriteInfo.stretchX[0]);
+                        }
+                        if (spriteInfo.stretchX.size() >= 2) {
+                            rightPadding = spriteInfo.width - std::get<1>(spriteInfo.stretchX[1]);
+                        }
+
+                        const auto textWidth = (leftPadding + rightPadding) * densityOffset + (object->boundingBox.bottomRight.x - object->boundingBox.topLeft.x) / scaleFactor;
+                        const auto textHeight = (object->boundingBox.bottomRight.y - object->boundingBox.topLeft.y) / scaleFactor;
+
+                        auto scaleX = std::max(1.0, textWidth / spriteWidth);
+                        auto scaleY = std::max(1.0, textHeight / spriteHeight);
+
+                        auto textFit = description->style.getIconTextFit(evalContext);
+                        if (textFit == IconTextFit::NONE) {
+                            scaleX = 1;
+                            scaleY = 1;
+                        } else if (textFit == IconTextFit::WIDTH) {
+                            scaleY = 1;
+                        } else if (textFit == IconTextFit::HEIGHT) {
+                            scaleX = 1;
+                        }
+
+                        spriteWidth *= scaleX;
+                        spriteHeight *= scaleY;
+
+                        auto x = renderPos.x - spriteWidth / 2;
+                        auto y = renderPos.y + spriteHeight / 2;
+                        auto xw = renderPos.x + spriteWidth / 2;
+                        auto yh = renderPos.y - spriteHeight / 2;
+
+                        Quad2dD quad = Quad2dD(Vec2D(x, yh), Vec2D(xw, yh), Vec2D(xw, y), Vec2D(x, y));
+
+
                         if (object->getCurrentSymbolName() != iconImage && spriteData->sprites.count(iconImage) != 0) {
+                            auto uvRect = RectD( ((double) spriteInfo.x) / textureWidth,
+                                                ((double) spriteInfo.y) / textureHeight,
+                                                ((double) spriteInfo.width) / textureWidth,
+                                                ((double) spriteInfo.height) / textureHeight);
+
+                            auto stretchinfo = StretchShaderInfo(scaleX, 1, 1, 1, 1, scaleY, 1, 1, 1, 1, uvRect);
+
+                            if (spriteInfo.stretchX.size() >= 1) {
+                                auto [begin, end] = spriteInfo.stretchX[0];
+                                stretchinfo.stretchX0Begin = (begin / spriteInfo.width);
+                                stretchinfo.stretchX0End = (end / spriteInfo.width) ;
+
+                                if (spriteInfo.stretchX.size() >= 2) {
+                                    auto [begin, end] = spriteInfo.stretchX[1];
+                                    stretchinfo.stretchX1Begin = (begin / spriteInfo.width);
+                                    stretchinfo.stretchX1End = (end / spriteInfo.width);
+                                } else {
+                                    stretchinfo.stretchX1Begin = stretchinfo.stretchX0End;
+                                    stretchinfo.stretchX1End = stretchinfo.stretchX0End;
+                                }
+                            }
+
+
+                            if (spriteInfo.stretchY.size() >= 1) {
+                                auto [begin, end] = spriteInfo.stretchY[0];
+                                stretchinfo.stretchY0Begin = (begin / spriteInfo.height);
+                                stretchinfo.stretchY0End = (end / spriteInfo.height);
+
+                                if (spriteInfo.stretchY.size() >= 2) {
+                                    auto [begin, end] = spriteInfo.stretchY[1];
+                                    stretchinfo.stretchY1Begin = (begin / spriteInfo.height);
+                                    stretchinfo.stretchY1End = (end / spriteInfo.height);
+                                } else {
+                                    stretchinfo.stretchY1Begin = stretchinfo.stretchY0End;
+                                    stretchinfo.stretchY1End = stretchinfo.stretchY0End;
+                                }
+                            }
+
+
+                            wrapper->symbolShader->updateStretchInfo(stretchinfo);
+
                             object->setCurrentSymbolName(iconImage);
-                            wrapper->symbolObject->setFrame(quad, RectD( ((double) spriteInfo.x) / textureWidth,
-                                                                        ((double) spriteInfo.y) / textureHeight,
-                                                                        ((double) spriteInfo.width) / textureWidth,
-                                                                        ((double) spriteInfo.height) / textureHeight));
+                            wrapper->symbolObject->setFrame(quad, uvRect);
                         }
 
 
@@ -991,6 +1088,11 @@ void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
                     !wrapper->collides
 #endif
                     ) {
+
+                    if (wrapper->symbolGraphicsObject) {
+                        renderObjects.push_back(std::make_shared<RenderObject>(wrapper->symbolGraphicsObject, wrapper->iconModelMatrix));
+                    }
+
                     const auto & textObject = wrapper->textObject->getTextObject();
                     if (textObject) {
                         renderObjects.push_back(std::make_shared<RenderObject>(textObject->asGraphicsObject(), wrapper->modelMatrix));
@@ -1001,10 +1103,6 @@ void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
 #ifdef DRAW_TEXT_BOUNDING_BOXES
                     renderObjects.push_back(std::make_shared<RenderObject>(wrapper->boundingBox->asGraphicsObject(), wrapper->iconModelMatrix));
 #endif
-                    }
-
-                    if (wrapper->symbolGraphicsObject) {
-                        renderObjects.push_back(std::make_shared<RenderObject>(wrapper->symbolGraphicsObject, wrapper->iconModelMatrix));
                     }
                 }
             }

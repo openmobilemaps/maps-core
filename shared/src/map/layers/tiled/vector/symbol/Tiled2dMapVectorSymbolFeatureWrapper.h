@@ -13,7 +13,7 @@
 #include "TextLayerObject.h"
 #include "Quad2dInterface.h"
 #include "GraphicsObjectInterface.h"
-#include "AlphaShaderInterface.h"
+#include "StretchShaderInterface.h"
 #include "ColorShaderInterface.h"
 #include "OBB2D.h"
 #include "Line2dLayerObject.h"
@@ -65,7 +65,7 @@ public:
 
     std::shared_ptr<Quad2dInterface> symbolObject;
     std::shared_ptr<GraphicsObjectInterface> symbolGraphicsObject;
-    std::shared_ptr<AlphaShaderInterface> symbolShader;
+    std::shared_ptr<StretchShaderInterface> symbolShader;
 
     OBB2D orientedBoundingBox = OBB2D(Quad2dD(Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0)));
 

@@ -27,6 +27,19 @@ text_symbol_placement = enum {
     LINE_CENTER;
 }
 
+symbol_alignment = enum {
+    MAP;
+    VIEWPORT;
+    AUTO;
+}
+
+icon_text_fit = enum {
+    NONE;
+    WIDTH;
+    HEIGHT;
+    BOTH;
+}
+
 formatted_string_entry = record {
     text: string;
     scale: f32;

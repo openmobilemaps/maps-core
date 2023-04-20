@@ -17,7 +17,9 @@
 #include "Value.h"
 #include "TextJustify.h"
 #include "TextSymbolPlacement.h"
+#include "SymbolAlignment.h"
 #include "ColorUtil.h"
+#include "IconTextFit.h"
 
 class SymbolVectorStyle {
 public:
@@ -35,15 +37,18 @@ public:
                       std::shared_ptr<Value> textVariableAnchor,
                       std::shared_ptr<Value> textRotate,
                       std::shared_ptr<Value> textAllowOverlap,
+                      std::shared_ptr<Value> textRotationAlignment,
                       std::shared_ptr<Value> symbolSortKey,
                       std::shared_ptr<Value> symbolSpacing,
                       std::shared_ptr<Value> symbolPlacement,
+                      std::shared_ptr<Value> iconRotationAlignment,
                       std::shared_ptr<Value> iconImage,
                       std::shared_ptr<Value> iconAnchor,
                       std::shared_ptr<Value> iconOffset,
                       std::shared_ptr<Value> iconSize,
                       std::shared_ptr<Value> iconAllowOverlap,
                       std::shared_ptr<Value> iconPadding,
+                      std::shared_ptr<Value> iconTextFit,
                       std::shared_ptr<Value> iconOpacity,
                       std::shared_ptr<Value> textLineHeight,
                       std::shared_ptr<Value> textLetterSpacing,
@@ -74,7 +79,10 @@ public:
     textMaxWidth(textMaxWidth),
     iconAllowOverlap(iconAllowOverlap),
     iconPadding(iconPadding),
+    iconTextFit(iconTextFit),
     iconOpacity(iconOpacity),
+    textRotationAlignment(textRotationAlignment),
+    iconRotationAlignment(iconRotationAlignment),
     dpFactor(dpFactor) {}
 
 
@@ -86,7 +94,8 @@ public:
             textColor, textHaloColor, textPadding, symbolSortKey, symbolPlacement, iconImage,
             iconAnchor, iconOffset, textAnchor, textVariableAnchor, textRotate, symbolSpacing,
             iconSize, textLineHeight, textLetterSpacing, textAllowOverlap, iconAllowOverlap,
-            iconPadding, textOpacity, iconOpacity
+            iconPadding, textOpacity, iconOpacity, iconRotationAlignment, textRotationAlignment,
+            iconTextFit
         };
 
         for (auto const &value: values) {
@@ -243,10 +252,25 @@ public:
         static const double defaultValue = 1.2;
         return textLineHeight ? textLineHeight->evaluateOr(context, defaultValue) : defaultValue;
     }
-    
+
     int64_t getTextMaxWidth(const EvaluationContext &context) {
         static const int64_t defaultValue = 10;
         return textMaxWidth ? textMaxWidth->evaluateOr(context, defaultValue) : defaultValue;
+    }
+
+    SymbolAlignment getTextRotationAlignment(const EvaluationContext &context) {
+        static const SymbolAlignment defaultValue = SymbolAlignment::AUTO;
+        return textRotationAlignment ? textRotationAlignment->evaluateOr(context, defaultValue) : defaultValue;
+    }
+
+    SymbolAlignment getIconRotationAlignment(const EvaluationContext &context) {
+        static const SymbolAlignment defaultValue = SymbolAlignment::AUTO;
+        return iconRotationAlignment ? iconRotationAlignment->evaluateOr(context, defaultValue) : defaultValue;
+    }
+
+    IconTextFit getIconTextFit(const EvaluationContext &context) {
+        static const IconTextFit defaultValue = IconTextFit::NONE;
+        return iconTextFit ? iconTextFit->evaluateOr(context, defaultValue) : defaultValue;
     }
 
 private:
@@ -277,7 +301,10 @@ private:
     std::shared_ptr<Value> iconSize;
     std::shared_ptr<Value> iconAllowOverlap;
     std::shared_ptr<Value> iconPadding;
+    std::shared_ptr<Value> iconTextFit;
     std::shared_ptr<Value> iconOpacity;
+    std::shared_ptr<Value> textRotationAlignment;
+    std::shared_ptr<Value> iconRotationAlignment;
     double dpFactor;
 
 

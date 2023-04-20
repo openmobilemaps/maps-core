@@ -36,7 +36,7 @@ public enum PipelineDescriptorFactory {
         guard let vertexFunction = library.makeFunction(name: vertexShader),
               let fragmentFunction = library.makeFunction(name: fragmentShader)
         else {
-            fatalError("Cannot locate the shaders for UBTileModel")
+            fatalError("Cannot locate the shaders for \(label)")
         }
 
         pipelineDescriptor.vertexFunction = vertexFunction
@@ -65,6 +65,7 @@ public enum Pipeline: String, CaseIterable {
     case clearStencilShader
     case textShader
     case rasterShader
+    case stretchShader
 
     var label: String {
         switch self {
@@ -77,6 +78,7 @@ public enum Pipeline: String, CaseIterable {
             case .clearStencilShader: return "Clear stencil shader"
             case .textShader: return "Text shader"
             case .rasterShader: return "Raster shader"
+            case .stretchShader: return "Stretch shader"
         }
     }
 
@@ -91,6 +93,7 @@ public enum Pipeline: String, CaseIterable {
             case .clearStencilShader: return "stencilClearVertexShader"
             case .textShader: return "textVertexShader"
             case .rasterShader: return "rasterVertexShader"
+            case .stretchShader: return "stretchVertexShader"
         }
     }
 
@@ -105,6 +108,7 @@ public enum Pipeline: String, CaseIterable {
             case .clearStencilShader: return "stencilClearFragmentShader"
             case .textShader: return "textFragmentShader"
             case .rasterShader: return "rasterFragmentShader"
+            case .stretchShader: return "stretchFragmentShader"
         }
     }
 

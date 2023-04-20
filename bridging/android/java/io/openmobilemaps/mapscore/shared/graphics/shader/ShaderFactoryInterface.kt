@@ -24,6 +24,8 @@ abstract class ShaderFactoryInterface {
 
     abstract fun createRasterShader(): RasterShaderInterface
 
+    abstract fun createStretchShader(): StretchShaderInterface
+
     private class CppProxy : ShaderFactoryInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -83,5 +85,11 @@ abstract class ShaderFactoryInterface {
             return native_createRasterShader(this.nativeRef)
         }
         private external fun native_createRasterShader(_nativeRef: Long): RasterShaderInterface
+
+        override fun createStretchShader(): StretchShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createStretchShader(this.nativeRef)
+        }
+        private external fun native_createStretchShader(_nativeRef: Long): StretchShaderInterface
     }
 }
