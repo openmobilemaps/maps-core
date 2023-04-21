@@ -21,7 +21,7 @@ stretchVertexShader(const VertexIn vertexIn [[stage_in]],
         .position = mvpMatrix * float4(vertexIn.position.xy, 0.0, 1.0),
         .uv = vertexIn.uv
     };
-    
+
     return out;
 }
 

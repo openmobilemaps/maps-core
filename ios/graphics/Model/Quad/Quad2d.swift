@@ -114,7 +114,6 @@ final class Quad2d: BaseGraphicsObject {
             encoder.setFragmentTexture(texture, index: 0)
         }
 
-
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,
                                       indexType: .uint16,
