@@ -686,18 +686,15 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
                 auto spriteWidth = spriteInfo.width * densityOffset;
                 auto spriteHeight = spriteInfo.height * densityOffset;
 
-                float leftPadding = 0;
-                float rightPadding = 0;
-                if (spriteInfo.stretchX.size() >= 1) {
-                    leftPadding = std::get<0>(spriteInfo.stretchX[0]);
-                    rightPadding = spriteInfo.width - std::get<1>(spriteInfo.stretchX[0]);
-                }
-                if (spriteInfo.stretchX.size() >= 2) {
-                    rightPadding = spriteInfo.width - std::get<1>(spriteInfo.stretchX[1]);
-                }
+                auto padding = description->style.getIconTextFitPadding(evalContext);
 
-                const auto textWidth = (leftPadding + rightPadding) * densityOffset + (object->boundingBox.bottomRight.x - object->boundingBox.topLeft.x) / scaleFactor;
-                const auto textHeight = (object->boundingBox.bottomRight.y - object->boundingBox.topLeft.y) / scaleFactor;
+                const float topPadding = padding[0];
+                const float rightPadding = padding[1];
+                const float bottomPadding = padding[2];
+                const float leftPadding = padding[3];
+
+                const auto textWidth = (leftPadding + rightPadding) * scaleFactor + (object->boundingBox.bottomRight.x - object->boundingBox.topLeft.x) / scaleFactor;
+                const auto textHeight = (topPadding + bottomPadding) * scaleFactor + (object->boundingBox.bottomRight.y - object->boundingBox.topLeft.y) / scaleFactor;
 
                 auto scaleX = std::max(1.0, textWidth / spriteWidth);
                 auto scaleY = std::max(1.0, textHeight / spriteHeight);
@@ -894,42 +891,37 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
                         auto spriteWidth = spriteInfo.width * densityOffset;
                         auto spriteHeight = spriteInfo.height * densityOffset;
 
-                        float leftPadding = 0;
-                        float rightPadding = 0;
-                        if (spriteInfo.stretchX.size() >= 1) {
-                            leftPadding = std::get<0>(spriteInfo.stretchX[0]);
-                            rightPadding = spriteInfo.width - std::get<1>(spriteInfo.stretchX[0]);
-                        }
-                        if (spriteInfo.stretchX.size() >= 2) {
-                            rightPadding = spriteInfo.width - std::get<1>(spriteInfo.stretchX[1]);
-                        }
+                        auto padding = description->style.getIconTextFitPadding(evalContext);
 
-                        const auto textWidth = (leftPadding + rightPadding) * densityOffset + (object->boundingBox.bottomRight.x - object->boundingBox.topLeft.x) / scaleFactor;
-                        const auto textHeight = (object->boundingBox.bottomRight.y - object->boundingBox.topLeft.y) / scaleFactor;
+                        const float topPadding = padding[0] * spriteInfo.pixelRatio * densityOffset;
+                        const float rightPadding = padding[1] * spriteInfo.pixelRatio * densityOffset;
+                        const float bottomPadding = padding[2] * spriteInfo.pixelRatio * densityOffset;
+                        const float leftPadding = padding[3] * spriteInfo.pixelRatio * densityOffset;
+
+                        auto textWidth = (object->boundingBox.bottomRight.x - object->boundingBox.topLeft.x) / scaleFactor;
+                        textWidth += (leftPadding + rightPadding);
+
+                        auto textHeight = (object->boundingBox.bottomRight.y - object->boundingBox.topLeft.y) / scaleFactor;
+                        textHeight+= (topPadding + bottomPadding);
 
                         auto scaleX = std::max(1.0, textWidth / spriteWidth);
                         auto scaleY = std::max(1.0, textHeight / spriteHeight);
 
                         auto textFit = description->style.getIconTextFit(evalContext);
-                        if (textFit == IconTextFit::NONE) {
-                            scaleX = 1;
-                            scaleY = 1;
-                        } else if (textFit == IconTextFit::WIDTH) {
-                            scaleY = 1;
-                        } else if (textFit == IconTextFit::HEIGHT) {
-                            scaleX = 1;
+
+                        if (textFit == IconTextFit::WIDTH || textFit == IconTextFit::BOTH) {
+                            spriteWidth *= scaleX;
+                        }
+                        if (textFit == IconTextFit::HEIGHT || textFit == IconTextFit::BOTH) {
+                            spriteHeight *= scaleY;
                         }
 
-                        spriteWidth *= scaleX;
-                        spriteHeight *= scaleY;
-
-                        auto x = renderPos.x - spriteWidth / 2;
-                        auto y = renderPos.y + spriteHeight / 2;
-                        auto xw = renderPos.x + spriteWidth / 2;
-                        auto yh = renderPos.y - spriteHeight / 2;
+                        auto x = renderPos.x - (leftPadding + (spriteWidth - leftPadding - rightPadding) / 2);
+                        auto y = renderPos.y + (topPadding + (spriteHeight - topPadding - bottomPadding) / 2);
+                        auto xw = x + spriteWidth;
+                        auto yh = y - spriteHeight;
 
                         Quad2dD quad = Quad2dD(Vec2D(x, yh), Vec2D(xw, yh), Vec2D(xw, y), Vec2D(x, y));
-
 
                         if (object->getCurrentSymbolName() != iconImage && spriteData->sprites.count(iconImage) != 0) {
                             auto uvRect = RectD( ((double) spriteInfo.x) / textureWidth,
@@ -954,7 +946,6 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
                                 }
                             }
 
-
                             if (spriteInfo.stretchY.size() >= 1) {
                                 auto [begin, end] = spriteInfo.stretchY[0];
                                 stretchinfo.stretchY0Begin = (begin / spriteInfo.height);
@@ -969,8 +960,6 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
                                     stretchinfo.stretchY1End = stretchinfo.stretchY0End;
                                 }
                             }
-
-
                             wrapper->symbolShader->updateStretchInfo(stretchinfo);
 
                             object->setCurrentSymbolName(iconImage);

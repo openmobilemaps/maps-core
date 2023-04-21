@@ -245,6 +245,7 @@ public:
                                             parser.parseValue(val["layout"]["icon-allow-overlap"]),
                                             parser.parseValue(val["layout"]["icon-padding"]),
                                             parser.parseValue(val["layout"]["icon-text-fit"]),
+                                            parser.parseValue(val["layout"]["icon-text-fit-padding"]),
                                             parser.parseValue(val["paint"]["icon-opacity"]),
                                             parser.parseValue(val["layout"]["text-line-height"]),
                                             parser.parseValue(val["layout"]["text-letter-spacing"]),

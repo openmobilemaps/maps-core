@@ -49,6 +49,7 @@ public:
                       std::shared_ptr<Value> iconAllowOverlap,
                       std::shared_ptr<Value> iconPadding,
                       std::shared_ptr<Value> iconTextFit,
+                      std::shared_ptr<Value> iconTextFitPadding,
                       std::shared_ptr<Value> iconOpacity,
                       std::shared_ptr<Value> textLineHeight,
                       std::shared_ptr<Value> textLetterSpacing,
@@ -80,6 +81,7 @@ public:
     iconAllowOverlap(iconAllowOverlap),
     iconPadding(iconPadding),
     iconTextFit(iconTextFit),
+    iconTextFitPadding(iconTextFitPadding),
     iconOpacity(iconOpacity),
     textRotationAlignment(textRotationAlignment),
     iconRotationAlignment(iconRotationAlignment),
@@ -95,7 +97,7 @@ public:
             iconAnchor, iconOffset, textAnchor, textVariableAnchor, textRotate, symbolSpacing,
             iconSize, textLineHeight, textLetterSpacing, textAllowOverlap, iconAllowOverlap,
             iconPadding, textOpacity, iconOpacity, iconRotationAlignment, textRotationAlignment,
-            iconTextFit
+            iconTextFit, iconTextFitPadding
         };
 
         for (auto const &value: values) {
@@ -273,6 +275,12 @@ public:
         return iconTextFit ? iconTextFit->evaluateOr(context, defaultValue) : defaultValue;
     }
 
+    //top, right, bottom, left
+    std::vector<float> getIconTextFitPadding(const EvaluationContext &context) {
+        static const std::vector<float> defaultValue{0.0, 0.0, 0.0, 0.0};
+        return iconTextFitPadding ? iconTextFitPadding->evaluateOr(context, defaultValue) : defaultValue;
+    }
+
 private:
     std::shared_ptr<Value> textSize;
     std::shared_ptr<Value> textFont;
@@ -302,6 +310,7 @@ private:
     std::shared_ptr<Value> iconAllowOverlap;
     std::shared_ptr<Value> iconPadding;
     std::shared_ptr<Value> iconTextFit;
+    std::shared_ptr<Value> iconTextFitPadding;
     std::shared_ptr<Value> iconOpacity;
     std::shared_ptr<Value> textRotationAlignment;
     std::shared_ptr<Value> iconRotationAlignment;
