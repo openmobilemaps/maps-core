@@ -23,7 +23,7 @@
 
 #include <cmath>
 
-TextLayerObject::TextLayerObject(const std::shared_ptr<TextInterface> &text, const std::shared_ptr<TextInfoInterface> &textInfo,const std::shared_ptr<TextShaderInterface> &shader, const std::shared_ptr<MapInterface> &mapInterface, const FontData& fontData, const Vec2F &offset, double lineHeight, double letterSpacing,int64_t maxCharacterWidth, SymbolAlignment rotationAlignment)
+TextLayerObject::TextLayerObject(const std::shared_ptr<TextInterface> &text, const std::shared_ptr<TextInfoInterface> &textInfo,const std::shared_ptr<TextShaderInterface> &shader, const std::shared_ptr<MapInterface> &mapInterface, const FontData& fontData, const Vec2F &offset, double lineHeight, double letterSpacing, int64_t maxCharacterWidth, double maxCharacterAngle, SymbolAlignment rotationAlignment)
 : text(text),
   textInfo(textInfo),
   lineCoordinates(textInfo->getLineCoordinates()),
@@ -35,6 +35,7 @@ TextLayerObject::TextLayerObject(const std::shared_ptr<TextInterface> &text, con
   offset(offset),
   lineHeight(lineHeight),
   letterSpacing(letterSpacing),
+  maxCharacterAngle(maxCharacterAngle),
   boundingBox(Coord("", 0.0, 0.0, 0.0), Coord("", 0.0, 0.0, 0.0)), rotationAlignment(rotationAlignment)
 {
     if (text) {
@@ -380,11 +381,16 @@ float TextLayerObject::layoutLine(float scale, bool updateObject) {
     int rotated = 0;
 
     int indicesStart = 0;
+    int index = 0;
+    double lastAngle = 0.0;
 
     for(auto &i : splittedTextInfo) {
         if(i.glyphIndex < 0) {
             currentIndex = indexAtDistance(currentIndex, fontData.info.spaceAdvance * fontSize * i.scale);
             characterCount += 1;
+
+            lastAngle = 0;
+            index = 0;
         } else {
             auto& d = fontData.glyphs[i.glyphIndex];
             auto size = Vec2D(d.boundingBoxSize.x * fontSize * i.scale, d.boundingBoxSize.y * fontSize * i.scale);
@@ -400,6 +406,18 @@ float TextLayerObject::layoutLine(float scale, bool updateObject) {
 
             double angle = atan2((before.y - after.y), -(before.x - after.x));
             angle *= (180.0 / M_PI);
+
+            if(index > 1) {
+                auto diff = fabs(lastAngle - angle);
+                auto min = std::min(360.0 - diff, diff);
+
+                if(min > maxCharacterAngle) {
+                    vertices.clear();
+                    break;
+                }
+            }
+
+            lastAngle = angle;
 
             auto x = p.x + bearing.x;
             auto y = p.y - bearing.y;
@@ -466,6 +484,7 @@ float TextLayerObject::layoutLine(float scale, bool updateObject) {
             indices.push_back(3 + indicesStart);
 
             indicesStart += 4;
+            index += 1;
 
             characterCount += 1;
 

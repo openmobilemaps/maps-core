@@ -44,6 +44,7 @@ class TextLayerObject : public LayerObjectInterface {
                     double lineHeight,
                     double letterSpacing,
                     int64_t maxCharacterWidth,
+                    double maxCharacterAngle,
                     SymbolAlignment rotationAlignment);
 
     virtual ~TextLayerObject(){};
@@ -101,6 +102,7 @@ class TextLayerObject : public LayerObjectInterface {
     Vec2F offset;
     double lineHeight;
     double letterSpacing;
+    double maxCharacterAngle;
     std::shared_ptr<CoordinateConversionHelperInterface> converter;
     std::shared_ptr<MapCamera2dInterface> camera;
     std::optional<std::vector<::Coord>> lineCoordinates;
