@@ -62,7 +62,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & viewMa
         int levelIndex;
     };
     std::queue<VisibleTileCandidate> candidates;
-    int initialLevel = 5;
+    int initialLevel = 3;
     const Tiled2dMapZoomLevelInfo &zoomLevelInfo0 = zoomLevelInfos.at(initialLevel);
     for (int x = 0; x < zoomLevelInfo0.numTilesX; x++) {
         for (int y = 0; y < zoomLevelInfo0.numTilesY; y++) {
@@ -78,7 +78,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & viewMa
 
     std::vector<PrioritizedTiled2dMapTileInfo> visibleTilesVec;
 
-    int maxLevel = 0;
+    int maxLevel = initialLevel;
 
 //    auto chPos = project(Coord(CoordinateSystemIdentifiers::EPSG4326(), 9.402924, 47.010226, 0), vpMatrix);
 //    printf("chpos: %f, %f\n", chPos.x, chPos.y);
@@ -118,20 +118,6 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & viewMa
         auto bottomLeftView = transformToView(bottomLeft, viewMatrix);
         auto bottomRightView = transformToView(bottomRight, viewMatrix);
 
-//        if (topLeftView.z < 0 && topRightView.z < 0 && bottomLeftView.z < 0 && bottomRightView.z < 0) {
-//            continue; // behind camera
-//        }
-
-        /*
-        float topLeftVA = acos(topLeftView.x / (sqrt(topLeftView.x*topLeftView.x+topLeftView.z*topLeftView.z))) / M_PI * 180.0;
-        float topLeftHA = acos(topLeftView.y / (sqrt(topLeftView.y*topLeftView.y+topLeftView.z*topLeftView.z))) / M_PI * 180.0;
-        float topRightVA = acos(topRightView.x / (sqrt(topRightView.x*topRightView.x+topRightView.z*topRightView.z))) / M_PI * 180.0;
-        float topRightHA = acos(topRightView.y / (sqrt(topRightView.y*topRightView.y+topRightView.z*topRightView.z))) / M_PI * 180.0;
-        float bottomRightVA = acos(bottomRightView.x / (sqrt(bottomRightView.x*bottomRightView.x+bottomRightView.z*bottomRightView.z))) / M_PI * 180.0;
-        float bottomRightHA = acos(bottomRightView.y / (sqrt(bottomRightView.y*bottomRightView.y+bottomRightView.z*bottomRightView.z))) / M_PI * 180.0;
-        float bottomLeftVA = acos(bottomLeftView.x / (sqrt(bottomLeftView.x*bottomLeftView.x+bottomLeftView.z*bottomLeftView.z))) / M_PI * 180.0;
-        float bottomLeftHA = acos(bottomLeftView.y / (sqrt(bottomLeftView.y*bottomLeftView.y+bottomLeftView.z*bottomLeftView.z))) / M_PI * 180.0;
-         */
 
         // v(0,0,+1) = unit-vector out of screen
         float topLeftVA = 180.0 / M_PI * atan2(topLeftView.x, -topLeftView.z);
@@ -171,9 +157,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & viewMa
         double leftLengthPx = Vec2DHelper::distance(topLeftScreenPx, bottomLeftScreenPx);
         double rightLengthPx = Vec2DHelper::distance(topRightScreenPx, bottomRightScreenPx);
 
-        const double maxLength = 512 * 3;
-
-
+        const double maxLength = 512 * 5;
 
 
         bool preciseEnough = topLengthPx <= maxLength && bottomLengthPx <= maxLength && leftLengthPx <= maxLength && rightLengthPx <= maxLength;
@@ -261,7 +245,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & viewMa
 
     onVisibleTilesChanged(layers);
 
-//    printf("maxlevel: %d\n", maxLevel);
+    printf("%ld visible tiles\n", visibleTilesVec.size());
 
 
 

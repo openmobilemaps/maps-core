@@ -135,8 +135,14 @@ final class Quad3d: BaseGraphicsObject {
         if let texture {
             encoder.setFragmentTexture(texture, index: 0)
         }
+        else {
+            encoder.setFragmentTexture(nil, index: 0)
+        }
         if let heightTexture {
             encoder.setVertexTexture(heightTexture, index: 0)
+        }
+        else {
+            encoder.setVertexTexture(nil, index: 0)
         }
 
         timeBufferContent[0] = Float(-Self.renderStartTime.timeIntervalSinceNow)

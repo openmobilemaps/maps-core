@@ -417,7 +417,7 @@ std::vector<float> MapCamera2d::getVpMatrix() {
         Matrix::setIdentityM(newViewMatrix, 0);
 
 
-        Matrix::translateM(newViewMatrix, 0, 0.0, -2.0, 0.0);
+//        Matrix::translateM(newViewMatrix, 0, 0.0, -2.0, 0.0);
 
         cameraPitch = 70;
         focusPointAltitude = 0.0;
