@@ -62,14 +62,14 @@ alphaInstancedFragmentShader(InstancedVertexOut in [[stage_in]],
                              texture2d<float> texture0 [[ texture(0)]],
                              sampler textureSampler [[sampler(0)]])
 {
+  if (in.alpha == 0) {
+    discard_fragment();
+  }
+
   const float2 uv = in.uvOrig + in.uvSize * float2(in.uv.x, 1 - in.uv.y);
   const float4 color = texture0.sample(textureSampler, uv);
 
   const float a = color.a * in.alpha;
-
-  if (a == 0) {
-    discard_fragment();
-  }
 
   return float4(color.r * a, color.g * a, color.b * a, a);
 }
