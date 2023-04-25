@@ -91,6 +91,11 @@ void Tiled2dMapVectorLineTile::update() {
                 needsUpdate = true;
             }
 
+            auto offset = lineDescription->style.getLineOffset(context);
+            if(offset != style.offset) {
+                style.offset = offset;
+                needsUpdate = true;
+            }
 
             i++;
         }
@@ -159,7 +164,8 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                                           SizeType::MAP_UNIT,
                                           0.0,
                                           {},
-                                          LineCapType::BUTT);
+                                          LineCapType::BUTT,
+                                          0.0f);
                         if (!featureGroups.empty() && featureGroups.back().size() < maxStylesPerGroup) {
                             styleGroupIndex = (int) featureGroups.size() - 1;
                             styleIndex = (int) featureGroups.back().size();

@@ -73,18 +73,17 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<C
             lineAttributes.push_back(p.y);
 
             // Width normal
-            lineAttributes.push_back(-widthNormalX);
-            lineAttributes.push_back(-widthNormalY);
-
-            // Length normal
-            lineAttributes.push_back(-lengthNormalX);
-            lineAttributes.push_back(-lengthNormalY);
+            lineAttributes.push_back(widthNormalX);
+            lineAttributes.push_back(widthNormalY);
 
             // Position pointA and pointB
             lineAttributes.push_back(p.x);
             lineAttributes.push_back(p.y);
             lineAttributes.push_back(pNext.x);
             lineAttributes.push_back(pNext.y);
+
+            // Vertex Index
+            lineAttributes.push_back(0);
 
             // Segment Start Length Position (length prefix sum)
             lineAttributes.push_back(prefixTotalLineLength);
@@ -99,16 +98,13 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<C
             lineAttributes.push_back(widthNormalX);
             lineAttributes.push_back(widthNormalY);
 
-            lineAttributes.push_back(-lengthNormalX);
-            lineAttributes.push_back(-lengthNormalY);
-
             lineAttributes.push_back(p.x);
             lineAttributes.push_back(p.y);
             lineAttributes.push_back(pNext.x);
             lineAttributes.push_back(pNext.y);
 
+            lineAttributes.push_back(1);
             lineAttributes.push_back(prefixTotalLineLength);
-
             lineAttributes.push_back(lineStyleInfo);
 
             // Vertex 3
@@ -118,35 +114,31 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<C
             lineAttributes.push_back(widthNormalX);
             lineAttributes.push_back(widthNormalY);
 
-            lineAttributes.push_back(lengthNormalX);
-            lineAttributes.push_back(lengthNormalY);
-
             lineAttributes.push_back(p.x);
             lineAttributes.push_back(p.y);
             lineAttributes.push_back(pNext.x);
             lineAttributes.push_back(pNext.y);
-            lineAttributes.push_back(prefixTotalLineLength);
 
+            lineAttributes.push_back(2);
+            lineAttributes.push_back(prefixTotalLineLength);
             lineAttributes.push_back(lineStyleInfo);
 
             // Vertex 4
             lineAttributes.push_back(pNext.x);
             lineAttributes.push_back(pNext.y);
 
-            lineAttributes.push_back(-widthNormalX);
-            lineAttributes.push_back(-widthNormalY);
-
-            lineAttributes.push_back(lengthNormalX);
-            lineAttributes.push_back(lengthNormalY);
+            lineAttributes.push_back(widthNormalX);
+            lineAttributes.push_back(widthNormalY);
 
             lineAttributes.push_back(p.x);
             lineAttributes.push_back(p.y);
             lineAttributes.push_back(pNext.x);
             lineAttributes.push_back(pNext.y);
 
+            lineAttributes.push_back(3);
             lineAttributes.push_back(prefixTotalLineLength);
-
             lineAttributes.push_back(lineStyleInfo);
+
 
             // Vertex indices
             lineIndices.push_back(lineIndexOffset + 4 * i);

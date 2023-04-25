@@ -11,12 +11,24 @@
 #include <metal_stdlib>
 using namespace metal;
 
+/*
+                                              ^
+               position                       | widthNormal
+              +-------------------------------+-------------------------------+
+              |                                                               |
+        <---  |  + lineA                                             lineB +  | -->
+              |                                                               |
+ lengthNormal +-------------------------------+-------------------------------+ lengthNormal
+                                              |
+                                              v  widthNormal
+  */
+
 struct LineVertexIn {
     float2 position [[attribute(0)]];
     float2 widthNormal [[attribute(1)]];
-    float2 lenghtNormal [[attribute(2)]];
-    float2 lineA [[attribute(3)]];
-    float2 lineB [[attribute(4)]];
+    float2 lineA [[attribute(2)]];
+    float2 lineB [[attribute(3)]];
+    float vertexIndex [[attribute(4)]];
     float lenghtPrefix [[attribute(5)]];
     float stylingIndex [[attribute(6)]];
 };
@@ -43,6 +55,7 @@ struct LineStyling {
   char capType;
   char numDashValues;
   float dashArray[4];
+  float offset;
 };
 
 
@@ -63,20 +76,40 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
 
     // extend position in width direction and in lenght direction by width / 2.0
     float width = styling[style].width / 2.0;
+
     if (styling[style].widthAsPixels > 0.0) {
         width *= scalingFactor;
     }
 
-    float4 extendedPosition = float4(vertexIn.position.xy, 0.0, 1.0) + float4((vertexIn.lenghtNormal + vertexIn.widthNormal).xy, 0.0,0.0)
-            * float4(width, width, width, 0.0);
+    float2 widthNormal = vertexIn.widthNormal;
+    float2 lengthNormal = float2(widthNormal.y, -widthNormal.x);
+
+    int index = int(vertexIn.vertexIndex);
+    if(index == 0) {
+      lengthNormal *= -1.0;
+      widthNormal *= -1.0;
+    } else if(index == 1) {
+      lengthNormal *= -1.0;
+    } else if(index == 2) {
+      // all fine
+    } else if(index == 3) {
+      widthNormal *= -1.0;
+    }
+
+    float o = styling[style].offset * scalingFactor;
+    float4 offset = float4(vertexIn.widthNormal.x * o, vertexIn.widthNormal.y * o, 0.0, 0.0);
+
+    float4 extendedPosition = float4(vertexIn.position.xy, 0.0, 1.0) +
+                              float4((lengthNormal + widthNormal).xy, 0.0,0.0)
+                              * float4(width, width, width, 0.0) + offset;
 
     int segmentType = int(vertexIn.stylingIndex) >> 8;
 
     LineVertexOut out {
         .position = mvpMatrix * extendedPosition,
         .uv = extendedPosition.xy,
-        .lineA = (extendedPosition.xy - vertexIn.lineA),
-        .lineB = vertexIn.lineB - vertexIn.lineA,
+        .lineA = extendedPosition.xy - (vertexIn.lineA + offset.xy),
+        .lineB = (vertexIn.lineB + offset.xy) - (vertexIn.lineA + offset.xy),
         .stylingIndex = style,
         .width = width,
         .segmentType = segmentType,
@@ -86,7 +119,6 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
 
     return out;
 }
-
 
 fragment float4
 lineGroupFragmentShader(LineVertexOut in [[stage_in]],

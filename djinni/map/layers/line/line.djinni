@@ -24,6 +24,7 @@ line_style = record {
     width: f32;
     dash_array: list<f32>;
     line_cap: line_cap_type;
+    offset: f32;
 }
 
 line_info_interface = interface +c {

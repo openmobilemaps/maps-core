@@ -20,7 +20,8 @@ auto LineStyle::toCpp(ObjcType obj) -> CppType
             ::djinni::Enum<::SizeType, MCSizeType>::toCpp(obj.widthType),
             ::djinni::F32::toCpp(obj.width),
             ::djinni::List<::djinni::F32>::toCpp(obj.dashArray),
-            ::djinni::Enum<::LineCapType, MCLineCapType>::toCpp(obj.lineCap)};
+            ::djinni::Enum<::LineCapType, MCLineCapType>::toCpp(obj.lineCap),
+            ::djinni::F32::toCpp(obj.offset)};
 }
 
 auto LineStyle::fromCpp(const CppType& cpp) -> ObjcType
@@ -32,7 +33,8 @@ auto LineStyle::fromCpp(const CppType& cpp) -> ObjcType
                                     widthType:(::djinni::Enum<::SizeType, MCSizeType>::fromCpp(cpp.widthType))
                                         width:(::djinni::F32::fromCpp(cpp.width))
                                     dashArray:(::djinni::List<::djinni::F32>::fromCpp(cpp.dashArray))
-                                      lineCap:(::djinni::Enum<::LineCapType, MCLineCapType>::fromCpp(cpp.lineCap))];
+                                      lineCap:(::djinni::Enum<::LineCapType, MCLineCapType>::fromCpp(cpp.lineCap))
+                                       offset:(::djinni::F32::fromCpp(cpp.offset))];
 }
 
 } // namespace djinni_generated

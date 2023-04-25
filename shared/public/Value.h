@@ -35,7 +35,7 @@
 #include <string>
 #include "VectorLayerFeatureInfo.h"
 #include "SymbolAlignment.h"
-#include "iconTextFit.h"
+#include "IconTextFit.h"
 
 namespace std {
     template <>

@@ -23,6 +23,7 @@ public:
                     std::shared_ptr<Value> lineDashArray = nullptr,
                     std::shared_ptr<Value> lineBlur = nullptr,
                     std::shared_ptr<Value> lineCap = nullptr,
+                    std::shared_ptr<Value> lineOffset = nullptr,
                     double dpFactor = 1.0):
     lineColor(lineColor),
     lineOpacity(lineOpacity),
@@ -30,6 +31,7 @@ public:
     lineDashArray(lineDashArray),
     lineBlur(lineBlur),
     lineCap(lineCap),
+    lineOffset(lineOffset),
     dpFactor(dpFactor) {}
 
     std::unordered_set<std::string> getUsedKeys() const {
@@ -76,6 +78,12 @@ public:
         return lineCap ? lineCap->evaluateOr(context, defaultValue) : defaultValue;
     }
 
+    double getLineOffset(const EvaluationContext &context) {
+        static const double defaultValue = 0.0;
+        double offset = lineOffset ? lineOffset->evaluateOr(context, defaultValue) : defaultValue;
+        return std::min(offset * dpFactor, getLineWidth(context) * 0.5);
+    }
+
 private:
     std::shared_ptr<Value> lineColor;
     std::shared_ptr<Value> lineOpacity;
@@ -83,6 +91,7 @@ private:
     std::shared_ptr<Value> lineWidth;
     std::shared_ptr<Value> lineDashArray;
     std::shared_ptr<Value> lineCap;
+    std::shared_ptr<Value> lineOffset;
     double dpFactor;
 };
 

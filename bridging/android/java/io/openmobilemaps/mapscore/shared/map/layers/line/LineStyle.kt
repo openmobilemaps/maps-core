@@ -12,4 +12,5 @@ data class LineStyle(
     var width: Float,
     var dashArray: ArrayList<Float>,
     var lineCap: LineCapType,
+    var offset: Float,
 )

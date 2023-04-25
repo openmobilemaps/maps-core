@@ -16,7 +16,8 @@
                             widthType:(MCSizeType)widthType
                                 width:(float)width
                             dashArray:(nonnull NSArray<NSNumber *> *)dashArray
-                              lineCap:(MCLineCapType)lineCap NS_DESIGNATED_INITIALIZER;
+                              lineCap:(MCLineCapType)lineCap
+                               offset:(float)offset NS_DESIGNATED_INITIALIZER;
 + (nonnull instancetype)lineStyleWithColor:(nonnull MCColorStateList *)color
                                   gapColor:(nonnull MCColorStateList *)gapColor
                                    opacity:(float)opacity
@@ -24,7 +25,8 @@
                                  widthType:(MCSizeType)widthType
                                      width:(float)width
                                  dashArray:(nonnull NSArray<NSNumber *> *)dashArray
-                                   lineCap:(MCLineCapType)lineCap;
+                                   lineCap:(MCLineCapType)lineCap
+                                    offset:(float)offset;
 
 @property (nonatomic, readonly, nonnull) MCColorStateList * color;
 
@@ -41,5 +43,7 @@
 @property (nonatomic, readonly, nonnull) NSArray<NSNumber *> * dashArray;
 
 @property (nonatomic, readonly) MCLineCapType lineCap;
+
+@property (nonatomic, readonly) float offset;
 
 @end

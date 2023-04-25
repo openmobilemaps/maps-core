@@ -34,6 +34,8 @@ struct LineGroupStyle: Equatable {
     var dashValue2: Float = 0
     var dashValue3: Float = 0
 
+    var offset: Float = 0
+
     init(style: MCLineStyle, highlighted: Bool) {
         width = style.width
         if highlighted {
@@ -50,6 +52,8 @@ struct LineGroupStyle: Equatable {
         blur = style.blur
 
         numDashValues = Int8(style.dashArray.count)
+
+        offset = style.offset
 
         // if you think, you can do this faster with a loop, you can try, but we need
         // a proof from the profiler
@@ -127,7 +131,6 @@ extension LineGroupShader: MCLineGroupShaderInterface {
             lineStyleBufferContents[i] = LineGroupStyle(style: l, highlighted: state == .highlighted)
         }
     }
-
 
     func setStyles(_ styles: MCSharedBytes) {
         guard styles.elementCount < self.styleBufferSize else { fatalError("line style error exceeds buffer size") }

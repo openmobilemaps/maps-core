@@ -194,27 +194,26 @@ public:
 
                     std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
 
-                    auto layerDesc = std::make_shared<LineVectorLayerDescription>(val["id"],
-                                                                                  val["source"],
-                                                                                  val["source-layer"],
-                                                                                  val.value("minzoom", 0),
-                                                                                  val.value("maxzoom", 24),
-                                                                                  filter,
-                                                                                  LineVectorStyle(parser.parseValue(
-                                                                                                          val["paint"]["line-color"]),
-                                                                                                  parser.parseValue(
-                                                                                                          val["paint"]["line-opacity"]),
-                                                                                                  parser.parseValue(
-                                                                                                          val["paint"]["line-width"]),
-                                                                                                  parser.parseValue(
-                                                                                                          val["paint"]["line-dasharray"]),
-                                                                                                  parser.parseValue(
-                                                                                                          val["paint"]["line-blur"]),
-                                                                                                  parser.parseValue(
-                                                                                                          val["layout"]["line-cap"]),
-                                                                                                  dpFactor),
-                                                                                  renderPassIndex,
-                                                                                  interactable);
+                    auto layerDesc = std::make_shared<LineVectorLayerDescription>(
+                        val["id"],
+                        val["source"],
+                        val["source-layer"],
+                        val.value("minzoom", 0),
+                        val.value("maxzoom", 24),
+                        filter,
+                        LineVectorStyle(
+                            parser.parseValue(val["paint"]["line-color"]),
+                            parser.parseValue(val["paint"]["line-opacity"]),
+                            parser.parseValue(val["paint"]["line-width"]),
+                            parser.parseValue(val["paint"]["line-dasharray"]),
+                            parser.parseValue(val["paint"]["line-blur"]),
+                            parser.parseValue(val["layout"]["line-cap"]),
+                            parser.parseValue(val["paint"]["line-offset"]),
+                            dpFactor
+                        ),
+                        renderPassIndex,
+                        interactable);
+
                     layers.push_back(layerDesc);
 
                 } else if (val["type"] == "symbol") {

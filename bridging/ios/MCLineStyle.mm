@@ -14,6 +14,7 @@
                                 width:(float)width
                             dashArray:(nonnull NSArray<NSNumber *> *)dashArray
                               lineCap:(MCLineCapType)lineCap
+                               offset:(float)offset
 {
     if (self = [super init]) {
         _color = color;
@@ -24,6 +25,7 @@
         _width = width;
         _dashArray = [dashArray copy];
         _lineCap = lineCap;
+        _offset = offset;
     }
     return self;
 }
@@ -36,6 +38,7 @@
                                      width:(float)width
                                  dashArray:(nonnull NSArray<NSNumber *> *)dashArray
                                    lineCap:(MCLineCapType)lineCap
+                                    offset:(float)offset
 {
     return [[self alloc] initWithColor:color
                               gapColor:gapColor
@@ -44,13 +47,14 @@
                              widthType:widthType
                                  width:width
                              dashArray:dashArray
-                               lineCap:lineCap];
+                               lineCap:lineCap
+                                offset:offset];
 }
 
 #ifndef DJINNI_DISABLE_DESCRIPTION_METHODS
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p color:%@ gapColor:%@ opacity:%@ blur:%@ widthType:%@ width:%@ dashArray:%@ lineCap:%@>", self.class, (void *)self, self.color, self.gapColor, @(self.opacity), @(self.blur), @(self.widthType), @(self.width), self.dashArray, @(self.lineCap)];
+    return [NSString stringWithFormat:@"<%@ %p color:%@ gapColor:%@ opacity:%@ blur:%@ widthType:%@ width:%@ dashArray:%@ lineCap:%@ offset:%@>", self.class, (void *)self, self.color, self.gapColor, @(self.opacity), @(self.blur), @(self.widthType), @(self.width), self.dashArray, @(self.lineCap), @(self.offset)];
 }
 
 #endif
