@@ -33,6 +33,7 @@ class TextHelper {
                                                              double lineHeight,
                                                              double letterSpacing,
                                                              int64_t maxCharacterWidth,
+                                                             double maxCharacterAngle,
                                                              SymbolAlignment rotationAlignment);
 
     static std::string uppercase(const std::string &string);

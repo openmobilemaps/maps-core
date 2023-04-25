@@ -29,5 +29,8 @@ class ShaderFactoryOpenGl : public ShaderFactoryInterface {
     virtual std::shared_ptr<TextShaderInterface> createTextShader() override;
 
 public:
+    std::shared_ptr<StretchShaderInterface> createStretchShader() override;
+
+public:
     std::shared_ptr<RasterShaderInterface> createRasterShader() override;
 };

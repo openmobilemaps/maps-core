@@ -54,6 +54,7 @@ public:
                       std::shared_ptr<Value> textLineHeight,
                       std::shared_ptr<Value> textLetterSpacing,
                       std::shared_ptr<Value> textMaxWidth,
+                      std::shared_ptr<Value> textMaxAngle,
                       double dpFactor):
     textSize(textSize),
     textFont(textFont),
@@ -78,6 +79,7 @@ public:
     textLetterSpacing(textLetterSpacing),
     textAllowOverlap(textAllowOverlap),
     textMaxWidth(textMaxWidth),
+    textMaxAngle(textMaxAngle),
     iconAllowOverlap(iconAllowOverlap),
     iconPadding(iconPadding),
     iconTextFit(iconTextFit),
@@ -97,7 +99,7 @@ public:
             iconAnchor, iconOffset, textAnchor, textVariableAnchor, textRotate, symbolSpacing,
             iconSize, textLineHeight, textLetterSpacing, textAllowOverlap, iconAllowOverlap,
             iconPadding, textOpacity, iconOpacity, iconRotationAlignment, textRotationAlignment,
-            iconTextFit, iconTextFitPadding
+            iconTextFit, iconTextFitPadding, textMaxWidth, textMaxAngle
         };
 
         for (auto const &value: values) {
@@ -260,6 +262,11 @@ public:
         return textMaxWidth ? textMaxWidth->evaluateOr(context, defaultValue) : defaultValue;
     }
 
+    double getTextMaxAngle(const EvaluationContext &context) {
+        static const double defaultValue = 45.0f;
+        return textMaxWidth ? textMaxWidth->evaluateOr(context, defaultValue) : defaultValue;
+    }
+
     SymbolAlignment getTextRotationAlignment(const EvaluationContext &context) {
         static const SymbolAlignment defaultValue = SymbolAlignment::AUTO;
         return textRotationAlignment ? textRotationAlignment->evaluateOr(context, defaultValue) : defaultValue;
@@ -299,6 +306,7 @@ private:
     std::shared_ptr<Value> textLetterSpacing;
     std::shared_ptr<Value> textJustify;
     std::shared_ptr<Value> textMaxWidth;
+    std::shared_ptr<Value> textMaxAngle;
     std::shared_ptr<Value> textOpacity;
     std::shared_ptr<Value> symbolSortKey;
     std::shared_ptr<Value> symbolSpacing;

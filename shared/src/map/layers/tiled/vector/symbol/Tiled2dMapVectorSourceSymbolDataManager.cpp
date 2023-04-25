@@ -396,6 +396,7 @@ std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> Tiled2dMapVectorSourceSymb
                                                        description->style.getTextLineHeight(evalContext),
                                                        letterSpacing,
                                                        description->style.getTextMaxWidth(evalContext),
+                                                       description->style.getTextMaxAngle(evalContext),
                                                        description->style.getTextRotationAlignment(evalContext));
 
     if(textObject) {
