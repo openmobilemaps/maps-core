@@ -428,7 +428,14 @@ float TextLayerObject::layoutLine(float scale, bool updateObject) {
             auto xw = x + size.x;
             auto yh = y + size.y;
 
+            auto lastIndex = currentIndex;
             currentIndex = indexAtDistance(currentIndex, advance.x * (1.0 + letterSpacing));
+
+            // if we are at the end, and we were at the end (lastIndex), then clear and skip
+            if(currentIndex.first == renderLineCoordinates.size() - 1 && lastIndex.first == currentIndex.first && (lastIndex.second == currentIndex.second)) {
+                vertices.clear();
+                break;
+            }
 
             auto tl = Vec2D(x, yh);
             auto tr = Vec2D(xw, yh);
