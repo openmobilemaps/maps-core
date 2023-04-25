@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "SharedBytes.h"
 #include <memory>
 
 class ShaderProgramInterface;
@@ -11,8 +10,6 @@ class ShaderProgramInterface;
 class AlphaInstancedShaderInterface {
 public:
     virtual ~AlphaInstancedShaderInterface() = default;
-
-    virtual void updateAlphas(const ::SharedBytes & values) = 0;
 
     virtual /*not-null*/ std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() = 0;
 };

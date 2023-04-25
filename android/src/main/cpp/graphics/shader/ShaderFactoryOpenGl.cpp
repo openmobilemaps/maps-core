@@ -18,6 +18,7 @@
 #include "TextShaderOpenGl.h"
 #include "RasterShaderOpenGl.h"
 #include "StretchShaderOpenGl.h"
+#include "AlphaInstancedShaderOpenGl.h"
 
 std::shared_ptr<AlphaShaderInterface> ShaderFactoryOpenGl::createAlphaShader() {
     return std::make_shared<AlphaShaderOpenGl>();
@@ -53,4 +54,8 @@ std::shared_ptr<TextShaderInterface> ShaderFactoryOpenGl::createTextShader() {
 
 std::shared_ptr<StretchShaderInterface> ShaderFactoryOpenGl::createStretchShader() {
     return std::make_shared<StretchShaderOpenGl>();
+}
+
+std::shared_ptr<AlphaInstancedShaderInterface> ShaderFactoryOpenGl::createAlphaInstancedShader() {
+    return std::make_shared<AlphaInstancedShaderOpenGl>();
 }

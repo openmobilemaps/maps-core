@@ -52,7 +52,6 @@ alpha_shader_interface = interface +c +o {
 }
 
 alpha_instanced_shader_interface = interface +c +o {
-    update_alphas(values: shared_bytes);
     as_shader_program_interface() : shader_program_interface;
 }
 

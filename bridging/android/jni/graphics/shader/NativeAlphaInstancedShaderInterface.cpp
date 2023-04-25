@@ -3,7 +3,6 @@
 
 #include "NativeAlphaInstancedShaderInterface.h"  // my header
 #include "NativeShaderProgramInterface.h"
-#include "NativeSharedBytes.h"
 
 namespace djinni_generated {
 
@@ -16,14 +15,6 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_A
 {
     try {
         delete reinterpret_cast<::djinni::CppProxyHandle<::AlphaInstancedShaderInterface>*>(nativeRef);
-    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
-}
-
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_AlphaInstancedShaderInterface_00024CppProxy_native_1updateAlphas(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeSharedBytes::JniType j_values)
-{
-    try {
-        const auto& ref = ::djinni::objectFromHandleAddress<::AlphaInstancedShaderInterface>(nativeRef);
-        ref->updateAlphas(::djinni_generated::NativeSharedBytes::toCpp(jniEnv, j_values));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

@@ -18,6 +18,8 @@ abstract class Quad2dInstancedInterface {
 
     abstract fun setRotations(rotations: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
+    abstract fun setAlphas(values: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
+
     abstract fun setTexureCoordinates(textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
     abstract fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
@@ -69,6 +71,12 @@ abstract class Quad2dInstancedInterface {
             native_setRotations(this.nativeRef, rotations)
         }
         private external fun native_setRotations(_nativeRef: Long, rotations: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
+
+        override fun setAlphas(values: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setAlphas(this.nativeRef, values)
+        }
+        private external fun native_setAlphas(_nativeRef: Long, values: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
         override fun setTexureCoordinates(textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

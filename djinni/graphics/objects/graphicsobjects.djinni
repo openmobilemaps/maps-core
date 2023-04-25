@@ -55,6 +55,7 @@ quad_2d_instanced_interface = interface +c +j +o {
     set_positions(positions: shared_bytes);
     set_scales(scales: shared_bytes);
     set_rotations(rotations: shared_bytes);
+    set_alphas(values: shared_bytes);
 
     set_texure_coordinates(textureCoordinates: shared_bytes);
 

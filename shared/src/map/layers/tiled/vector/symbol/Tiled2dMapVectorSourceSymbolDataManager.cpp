@@ -31,6 +31,19 @@ Tiled2dMapVectorSourceDataManager(vectorLayer, mapDescription, source), fontLoad
 void Tiled2dMapVectorSourceSymbolDataManager::onAdded(const std::weak_ptr< ::MapInterface> &mapInterface) {
     Tiled2dMapVectorSourceDataManager::onAdded(mapInterface);
     textHelper.setMapInterface(mapInterface);
+
+    auto mapInterfaceS = this->mapInterface.lock();
+    auto graphicsFactory = mapInterfaceS ? mapInterfaceS->getGraphicsObjectFactory() : nullptr;
+    auto shaderFactory = mapInterfaceS ? mapInterfaceS->getShaderFactory() : nullptr;
+    const auto &context = mapInterfaceS ? mapInterfaceS->getRenderingContext() : nullptr;
+    if (!graphicsFactory || !shaderFactory) {
+        return;
+    }
+
+    instancedShader = shaderFactory->createAlphaInstancedShader();
+    instancedObject = graphicsFactory->createQuadInstanced(instancedShader->asShaderProgramInterface());
+
+    instancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)));
 }
 
 void Tiled2dMapVectorSourceSymbolDataManager::pause() {
@@ -375,7 +388,8 @@ std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> Tiled2dMapVectorSourceSymb
     const auto &[context, symbol] = symbolInfo;
 
     auto fontResult = loadFont(symbol->getFont());
-    if (fontResult.status != LoaderStatus::OK) {
+    bool hasText = !symbol->getText().empty();
+    if (hasText && fontResult.status != LoaderStatus::OK) {
         return nullptr;
     }
 
@@ -560,10 +574,9 @@ void Tiled2dMapVectorSourceSymbolDataManager::setSprites(std::shared_ptr<SpriteD
     this->spriteData = spriteData;
     this->spriteTexture = spriteTexture;
 
-    if (!tileSymbolMap.empty()) {
-        auto selfActor = WeakActor(mailbox, weak_from_this());
-        selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite);
-    }
+
+    auto selfActor = WeakActor(mailbox, weak_from_this());
+    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite);
 }
 
 void Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite() {
@@ -572,6 +585,9 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite() {
     if (!mapInterface) {
         return;
     }
+
+    instancedObject->loadTexture(mapInterface->getRenderingContext(), spriteTexture);
+    instancedObject->asGraphicsObject()->setup(mapInterface->getRenderingContext());
 
     for (const auto &[tile, layers]: tileSymbolMap) {
         for (const auto &[layerIdentifier, objects]: layers) {
@@ -669,7 +685,8 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
                 }
 
                 if (!wrapper->symbolObject) {
-                    wrapper->symbolObject = mapInterface->getGraphicsObjectFactory()->createQuad(wrapper->symbolShader->asShaderProgramInterface());
+                    const auto &spi = wrapper->symbolShader->asShaderProgramInterface();
+                    wrapper->symbolObject = mapInterface->getGraphicsObjectFactory()->createQuad(spi);
                     wrapper->symbolGraphicsObject = wrapper->symbolObject->asGraphicsObject();
                 }
 
@@ -795,6 +812,12 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
 
     const auto scaleFactor = camera->mapUnitsFromPixels(1.0);
 
+    std::vector<float> textureCoordinates;
+    std::vector<float> alphas;
+    std::vector<float> positions;
+    std::vector<float> scales;
+    std::vector<float> rotations;
+
     for (const auto &[tile, layers]: tileSymbolMap) {
         for (const auto &[layerIdentifier, objects]: layers) {
             const auto &description = layerDescriptions.at(layerIdentifier);
@@ -858,14 +881,6 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
                 if (spriteData && spriteTexture) {
                     auto iconImage = description->style.getIconImage(evalContext);
                     if (iconImage != "") {
-                        Matrix::setIdentityM(wrapper->iconModelMatrix, 0);
-                        Matrix::translateM(wrapper->iconModelMatrix, 0, renderCoord.x, renderCoord.y, renderCoord.z);
-
-                        auto iconSize = description->style.getIconSize(evalContext) * scaleFactor;
-
-                        Matrix::scaleM(wrapper->iconModelMatrix, 0, iconSize, iconSize, 1.0);
-                        Matrix::rotateM(wrapper->iconModelMatrix, 0.0, rotation, 0.0, 0.0, 1.0);
-                        Matrix::translateM(wrapper->iconModelMatrix, 0, -renderCoord.x, -renderCoord.y, -renderCoord.z);
 
                         const auto &spriteInfo = spriteData->sprites.at(iconImage);
 
@@ -910,11 +925,18 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
 
                         auto textFit = description->style.getIconTextFit(evalContext);
 
+                        auto uvRect = RectD( ((double) spriteInfo.x) / textureWidth,
+                                            ((double) spriteInfo.y) / textureHeight,
+                                            ((double) spriteInfo.width) / textureWidth,
+                                            ((double) spriteInfo.height) / textureHeight);
+
+
                         if (textFit == IconTextFit::WIDTH || textFit == IconTextFit::BOTH) {
                             spriteWidth *= scaleX;
-                        }
-                        if (textFit == IconTextFit::HEIGHT || textFit == IconTextFit::BOTH) {
+                        } else if (textFit == IconTextFit::HEIGHT || textFit == IconTextFit::BOTH) {
                             spriteHeight *= scaleY;
+                        } else {
+                            wrapper->isInstanceRenderable = true;
                         }
 
                         auto x = renderPos.x - (leftPadding + (spriteWidth - leftPadding - rightPadding) / 2);
@@ -922,14 +944,28 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
                         auto xw = x + spriteWidth;
                         auto yh = y - spriteHeight;
 
+                        auto iconSize = description->style.getIconSize(evalContext) * scaleFactor;
+
+                        if (wrapper->isInstanceRenderable) {
+                            textureCoordinates.push_back(uvRect.x);
+                            textureCoordinates.push_back(uvRect.y);
+                            textureCoordinates.push_back(uvRect.width);
+                            textureCoordinates.push_back(uvRect.height);
+
+                            positions.push_back(renderPos.x);
+                            positions.push_back(renderPos.y);
+
+                            rotations.push_back(rotation);
+
+                            scales.push_back(spriteWidth * iconSize);
+                            scales.push_back(spriteHeight * iconSize);
+
+                            alphas.push_back(description->style.getIconOpacity(evalContext) * alpha);
+                        }
+
                         Quad2dD quad = Quad2dD(Vec2D(x, yh), Vec2D(xw, yh), Vec2D(xw, y), Vec2D(x, y));
 
                         if (object->getCurrentSymbolName() != iconImage && spriteData->sprites.count(iconImage) != 0) {
-                            auto uvRect = RectD( ((double) spriteInfo.x) / textureWidth,
-                                                ((double) spriteInfo.y) / textureHeight,
-                                                ((double) spriteInfo.width) / textureWidth,
-                                                ((double) spriteInfo.height) / textureHeight);
-
                             auto stretchinfo = StretchShaderInfo(scaleX, 1, 1, 1, 1, scaleY, 1, 1, 1, 1, uvRect);
 
                             if (spriteInfo.stretchX.size() >= 1) {
@@ -1044,6 +1080,17 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
         }
     }
 
+    if (!alphas.empty()) {
+        instancedObject->setAlphas(SharedBytes((int64_t)alphas.data(), (int32_t)alphas.size(), (int32_t)sizeof(float)));
+
+        instancedObject->setTexureCoordinates(SharedBytes((int64_t)textureCoordinates.data(), (int32_t)alphas.size(), 4 * (int32_t)sizeof(float)));
+        instancedObject->setPositions(SharedBytes((int64_t)positions.data(), (int32_t)alphas.size(), 2 * (int32_t)sizeof(float)));
+        instancedObject->setScales(SharedBytes((int64_t)scales.data(), (int32_t)alphas.size(), 2 * (int32_t)sizeof(float)));
+        instancedObject->setRotations(SharedBytes((int64_t)rotations.data(), (int32_t)alphas.size(), 1 * (int32_t)sizeof(float)));
+
+        instancedObject->setInstanceCount((int32_t)alphas.size());
+    }
+
     pregenerateRenderPasses();
 }
 
@@ -1055,6 +1102,12 @@ void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
     }
 
     std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> renderPasses;
+
+    {
+        std::vector<std::shared_ptr< ::RenderObjectInterface>> renderObjects;
+        renderObjects.push_back(std::make_shared<RenderObject>(instancedObject->asGraphicsObject()));
+        renderPasses.emplace_back(99, std::make_shared<RenderPass>(RenderPassConfig(99), renderObjects));
+    }
 
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
 
@@ -1079,9 +1132,9 @@ void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
 #endif
                     ) {
 
-                    if (wrapper->symbolGraphicsObject) {
-                        renderObjects.push_back(std::make_shared<RenderObject>(wrapper->symbolGraphicsObject, wrapper->iconModelMatrix));
-                    }
+//                    if (wrapper->symbolGraphicsObject && !wrapper->isInstanceRenderable) {
+//                        renderObjects.push_back(std::make_shared<RenderObject>(wrapper->symbolGraphicsObject, wrapper->iconModelMatrix));
+//                    }
 
                     const auto & textObject = wrapper->textObject->getTextObject();
                     if (textObject) {

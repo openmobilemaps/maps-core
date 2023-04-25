@@ -67,6 +67,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setAlphas:(nonnull MCSharedBytes *)values {
+    try {
+        _cppRefHandle.get()->setAlphas(::djinni_generated::SharedBytes::toCpp(values));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)setTexureCoordinates:(nonnull MCSharedBytes *)textureCoordinates {
     try {
         _cppRefHandle.get()->setTexureCoordinates(::djinni_generated::SharedBytes::toCpp(textureCoordinates));
@@ -138,6 +144,12 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() setRotations:(::djinni_generated::SharedBytes::fromCpp(c_rotations))];
+        }
+    }
+    void setAlphas(const ::SharedBytes & c_values) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setAlphas:(::djinni_generated::SharedBytes::fromCpp(c_values))];
         }
     }
     void setTexureCoordinates(const ::SharedBytes & c_textureCoordinates) override

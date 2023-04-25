@@ -7,7 +7,6 @@
 #import "DJIError.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCShaderProgramInterface+Private.h"
-#import "MCSharedBytes+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -32,12 +31,6 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (void)updateAlphas:(nonnull MCSharedBytes *)values {
-    try {
-        _cppRefHandle.get()->updateAlphas(::djinni_generated::SharedBytes::toCpp(values));
-    } DJINNI_TRANSLATE_EXCEPTIONS()
-}
-
 - (nullable id<MCShaderProgramInterface>)asShaderProgramInterface {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->asShaderProgramInterface();
@@ -54,12 +47,6 @@ class AlphaInstancedShaderInterface::ObjcProxy final
     friend class ::djinni_generated::AlphaInstancedShaderInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void updateAlphas(const ::SharedBytes & c_values) override
-    {
-        @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() updateAlphas:(::djinni_generated::SharedBytes::fromCpp(c_values))];
-        }
-    }
     /*not-null*/ std::shared_ptr<::ShaderProgramInterface> asShaderProgramInterface() override
     {
         @autoreleasepool {

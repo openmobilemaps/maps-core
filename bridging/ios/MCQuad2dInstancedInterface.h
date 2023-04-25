@@ -22,6 +22,8 @@
 
 - (void)setRotations:(nonnull MCSharedBytes *)rotations;
 
+- (void)setAlphas:(nonnull MCSharedBytes *)values;
+
 - (void)setTexureCoordinates:(nonnull MCSharedBytes *)textureCoordinates;
 
 - (void)loadTexture:(nullable id<MCRenderingContextInterface>)context

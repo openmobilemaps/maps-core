@@ -16,7 +16,6 @@ class AlphaInstancedShader: BaseShader {
     private var pipeline: MTLRenderPipelineState?
 
     private let shader : Pipeline
-    private var buffer: MTLBuffer?
 
     init(shader : Pipeline = Pipeline.alphaInstancedShader) {
         self.shader = shader
@@ -32,15 +31,10 @@ class AlphaInstancedShader: BaseShader {
         guard let pipeline = pipeline else { return }
 
         encoder.setRenderPipelineState(pipeline)
-        encoder.setVertexBuffer(buffer, offset: 0, index: 6)
     }
 }
 
 extension AlphaInstancedShader: MCAlphaInstancedShaderInterface {
-    func updateAlphas(_ values: MCSharedBytes) {
-        buffer = MetalContext.current.device.makeBuffer(from: values)
-    }
-
     func asShaderProgram() -> MCShaderProgramInterface? {
         self
     }

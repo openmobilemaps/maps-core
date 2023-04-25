@@ -23,6 +23,7 @@ final class Quad2dInstanced: BaseGraphicsObject {
     private var positionsBuffer: MTLBuffer?
     private var scalesBuffer: MTLBuffer?
     private var rotationsBuffer: MTLBuffer?
+    private var alphaBuffer: MTLBuffer?
 
     private var textureCoordinatesBuffer: MTLBuffer?
 
@@ -124,6 +125,8 @@ final class Quad2dInstanced: BaseGraphicsObject {
 
         encoder.setVertexBuffer(textureCoordinatesBuffer, offset: 0, index: 5)
 
+        encoder.setVertexBuffer(alphaBuffer, offset: 0, index: 6)
+
         encoder.setFragmentSamplerState(sampler, index: 0)
 
         if let texture = texture {
@@ -218,6 +221,10 @@ extension Quad2dInstanced: MCQuad2dInstancedInterface {
         lock.withCritical {
             textureCoordinatesBuffer = device.makeBuffer(from: textureCoordinates)
         }
+    }
+
+    func setAlphas(_ values: MCSharedBytes) {
+        alphaBuffer = MetalContext.current.device.makeBuffer(from: values)
     }
 
     func loadTexture(_ context: MCRenderingContextInterface?, textureHolder: MCTextureHolderInterface?) {
