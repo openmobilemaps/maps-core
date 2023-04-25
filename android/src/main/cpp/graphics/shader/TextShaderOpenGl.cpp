@@ -24,10 +24,6 @@ void TextShaderOpenGl::setHaloColor(const ::Color & color) {
 
 void TextShaderOpenGl::setOpacity(float opacity) { this->opacity = opacity; }
 
-void TextShaderOpenGl::setReferencePoint(const Vec3D &point) {
-    this->referencePoint = {(float)point.x, (float)point.y, (float)point.z};
-}
-
 void TextShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     std::string programName = getProgramName();
@@ -70,7 +66,7 @@ std::string TextShaderOpenGl::getVertexShader() {
                                       out vec2 vTextCoord;
 
                                       void main() {
-                                          gl_Position = (uMVPMatrix * vec4(vPosition.xy, 0.0, 1.0)).xy;
+                                          gl_Position = vec4((uMVPMatrix * vec4(vPosition.xy, 0.0, 1.0)).xy, 0.0, 1.0);
                                           vTextCoord = textureCoordScaleFactor * texCoordinate;
                                       });
 }
