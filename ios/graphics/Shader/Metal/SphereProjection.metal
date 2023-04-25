@@ -41,6 +41,26 @@ sphereProjectionVertexShader(const patch_control_point<VertexIn> patch [[stage_i
     float2 p0 = patch[0].position;
     float2 p1 = patch[1].position;
     float2 p2 = patch[2].position;
+
+    if (p0.y >= 85.04) {
+        p0.y = 90;
+    }
+    else if (p0.y <= -85.04) {
+        p0.y = -90;
+    }
+    if (p1.y >= 85.04) {
+        p1.y = 90;
+    }
+    else if (p1.y <= -85.04) {
+        p1.y = -90;
+    }
+    if (p2.y >= 85.04) {
+        p2.y = 90;
+    }
+    else if (p2.y <= -85.04) {
+        p2.y = -90;
+    }
+
     float2 pos = baryinterp2(p0, p1, p2, positionInPatch);
 
     float2 uv0 = patch[0].uv;
@@ -61,8 +81,10 @@ sphereProjectionVertexShader(const patch_control_point<VertexIn> patch [[stage_i
 
     float pi = 3.14159;
 
+
     float longitude = pos.x / 180.0 * pi + pi; // [0, 2pi]
     float latitude = pos.y / 90.0 * pi - pi; // [-2pi, 0]
+
 
     float sinLon = sin(longitude);     // [0, 1, 0, -1, 0]
     float cosLon = cos(longitude);     // [1, 0, -1, 0, 1]

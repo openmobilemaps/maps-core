@@ -227,6 +227,10 @@ class MapCamera2d : public MapCamera2dInterface,
 
     RectCoord getRectFromViewport(const Vec2I &sizeViewport, const Coord &center);
 
-    std::vector<float> newVpMatrix = std::vector<float>(16, 0.0);
+    std::vector<float> vpMatrix = std::vector<float>(16, 0.0);
+    std::vector<float> viewMatrix = std::vector<float>(16, 0.0);
+    std::vector<float> projectionMatrix = std::vector<float>(16, 0.0);
+    float verticalFov;
+    float horizontalFov;
     bool validVpMatrix = false;
 };

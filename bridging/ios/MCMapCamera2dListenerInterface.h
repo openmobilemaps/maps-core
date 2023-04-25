@@ -14,7 +14,10 @@
 
 - (void)onMapInteraction;
 
-- (void)onCameraChange:(nonnull NSArray<NSNumber *> *)vpMatrix
+- (void)onCameraChange:(nonnull NSArray<NSNumber *> *)viewMatrix
+      projectionMatrix:(nonnull NSArray<NSNumber *> *)projectionMatrix
+           verticalFov:(float)verticalFov
+         horizontalFov:(float)horizontalFov
                  width:(float)width
                 height:(float)height;
 

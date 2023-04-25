@@ -47,9 +47,13 @@ bool Tiled2dMapSource<T, L, R>::isTileVisible(const Tiled2dMapTileInfo &tileInfo
 }
 
 template<class T, class L, class R>
-void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & vpMatrix, float width, float height) {
+void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & viewMatrix, const std::vector<float> & projectionMatrix, float verticalFov, float horizontalFov, float width, float height) {
 
     if (isPaused) {
+        return;
+    }
+
+    if (width <= 0 || height <= 0) {
         return;
     }
 
@@ -58,7 +62,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & vpMatr
         int levelIndex;
     };
     std::queue<VisibleTileCandidate> candidates;
-    int initialLevel = 0;
+    int initialLevel = 5;
     const Tiled2dMapZoomLevelInfo &zoomLevelInfo0 = zoomLevelInfos.at(initialLevel);
     for (int x = 0; x < zoomLevelInfo0.numTilesX; x++) {
         for (int y = 0; y < zoomLevelInfo0.numTilesY; y++) {
@@ -109,32 +113,53 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & vpMatr
         const Coord bottomLeft = Coord(layerSystemId, topLeft.x, topLeft.y + tileHeightAdj, 0);
         const Coord bottomRight = Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y + tileHeightAdj, 0);
 
-        auto topLeftScreen = project(topLeft, vpMatrix);
-        auto topRightScreen = project(topRight, vpMatrix);
-        auto bottomLeftScreen = project(bottomLeft, vpMatrix);
-        auto bottomRightScreen = project(bottomRight, vpMatrix);
+        auto topLeftView = transformToView(topLeft, viewMatrix);
+        auto topRightView = transformToView(topRight, viewMatrix);
+        auto bottomLeftView = transformToView(bottomLeft, viewMatrix);
+        auto bottomRightView = transformToView(bottomRight, viewMatrix);
 
-        if (candidate.levelIndex > 2) {
-            if (topLeftScreen.x < -1 && topRightScreen.x < -1 && bottomLeftScreen.x < -1 && bottomRightScreen.x < -1) {
-                continue;
-            }
-            if (topLeftScreen.y < -1 && topRightScreen.y < -1 && bottomLeftScreen.y < -1 && bottomRightScreen.y < -1) {
-                continue;
-            }
-            if (topLeftScreen.z < -1 && topRightScreen.z < -1 && bottomLeftScreen.z < -1 && bottomRightScreen.z < -1) {
-                continue;
-            }
-            if (topLeftScreen.x > 1 && topRightScreen.x > 1 && bottomLeftScreen.x > 1 && bottomRightScreen.x > 1) {
-                continue;
-            }
-            if (topLeftScreen.y > 1 && topRightScreen.y > 1 && bottomLeftScreen.y > 1 && bottomRightScreen.y > 1) {
-                continue;
-            }
-            if (topLeftScreen.z > 1 && topRightScreen.z > 1 && bottomLeftScreen.z > 1 && bottomRightScreen.z > 1) {
-                continue;
-            }
+//        if (topLeftView.z < 0 && topRightView.z < 0 && bottomLeftView.z < 0 && bottomRightView.z < 0) {
+//            continue; // behind camera
+//        }
+
+        /*
+        float topLeftVA = acos(topLeftView.x / (sqrt(topLeftView.x*topLeftView.x+topLeftView.z*topLeftView.z))) / M_PI * 180.0;
+        float topLeftHA = acos(topLeftView.y / (sqrt(topLeftView.y*topLeftView.y+topLeftView.z*topLeftView.z))) / M_PI * 180.0;
+        float topRightVA = acos(topRightView.x / (sqrt(topRightView.x*topRightView.x+topRightView.z*topRightView.z))) / M_PI * 180.0;
+        float topRightHA = acos(topRightView.y / (sqrt(topRightView.y*topRightView.y+topRightView.z*topRightView.z))) / M_PI * 180.0;
+        float bottomRightVA = acos(bottomRightView.x / (sqrt(bottomRightView.x*bottomRightView.x+bottomRightView.z*bottomRightView.z))) / M_PI * 180.0;
+        float bottomRightHA = acos(bottomRightView.y / (sqrt(bottomRightView.y*bottomRightView.y+bottomRightView.z*bottomRightView.z))) / M_PI * 180.0;
+        float bottomLeftVA = acos(bottomLeftView.x / (sqrt(bottomLeftView.x*bottomLeftView.x+bottomLeftView.z*bottomLeftView.z))) / M_PI * 180.0;
+        float bottomLeftHA = acos(bottomLeftView.y / (sqrt(bottomLeftView.y*bottomLeftView.y+bottomLeftView.z*bottomLeftView.z))) / M_PI * 180.0;
+         */
+
+        // v(0,0,+1) = unit-vector out of screen
+        float topLeftVA = 180.0 / M_PI * atan2(topLeftView.x, -topLeftView.z);
+        float topLeftHA = 180.0 / M_PI * atan2(topLeftView.y, -topLeftView.z);
+        float topRightVA = 180.0 / M_PI * atan2(topRightView.x, -topRightView.z);
+        float topRightHA = 180.0 / M_PI * atan2(topRightView.y, -topRightView.z);
+        float bottomLeftVA = 180.0 / M_PI * atan2(bottomLeftView.x, -bottomLeftView.z);
+        float bottomLeftHA = 180.0 / M_PI * atan2(bottomLeftView.y, -bottomLeftView.z);
+        float bottomRightVA = 180.0 / M_PI * atan2(bottomRightView.x, -bottomRightView.z);
+        float bottomRightHA = 180.0 / M_PI * atan2(bottomRightView.y, -bottomRightView.z);
+
+        if (topLeftVA < -verticalFov  && topRightVA < -verticalFov  && bottomLeftVA < -verticalFov  && bottomRightVA < -verticalFov ) {
+            continue;
+        }
+        if (topLeftHA < -horizontalFov  && topRightHA < -horizontalFov  && bottomLeftHA < -horizontalFov  && bottomRightHA < -horizontalFov ) {
+            continue;
+        }
+        if (topLeftVA > verticalFov  && topRightVA > verticalFov  && bottomLeftVA > verticalFov  && bottomRightVA > verticalFov ) {
+            continue;
+        }
+        if (topLeftHA > horizontalFov  && topRightHA > horizontalFov  && bottomLeftHA > horizontalFov  && bottomRightHA > horizontalFov ) {
+            continue;
         }
 
+        auto topLeftScreen = projectToScreen(topLeftView, projectionMatrix);
+        auto topRightScreen = projectToScreen(topRightView, projectionMatrix);
+        auto bottomLeftScreen = projectToScreen(bottomLeftView, projectionMatrix);
+        auto bottomRightScreen = projectToScreen(bottomRightView, projectionMatrix);
 
         Vec2D topLeftScreenPx(topLeftScreen.x * (width / 2.0), topLeftScreen.y * (height / 2.0));
         Vec2D topRightScreenPx(topRightScreen.x * (width / 2.0), topRightScreen.y * (height / 2.0));
@@ -146,17 +171,9 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & vpMatr
         double leftLengthPx = Vec2DHelper::distance(topLeftScreenPx, bottomLeftScreenPx);
         double rightLengthPx = Vec2DHelper::distance(topRightScreenPx, bottomRightScreenPx);
 
-        const double maxLength = 512;
+        const double maxLength = 512 * 3;
 
-        if (candidate.levelIndex >= 7 && std::max(std::max(topLengthPx, bottomLengthPx), std::max(leftLengthPx, rightLengthPx)) > 10000) {
-        printf("INVALID TILE PROJECTION %d|%d|%d -> (%f|%f), (%f|%f), (%f|%f), (%f|%f)\n", zoomLevelInfo.zoomLevelIdentifier, candidate.x, candidate.y,
-               topLeftScreen.x, topLeftScreen.y,
-               topRightScreen.x, topRightScreen.y,
-               bottomLeftScreen.x, bottomLeftScreen.y,
-               bottomRightScreen.x, bottomRightScreen.y
-               );
-            continue;
-        }
+
 
 
         bool preciseEnough = topLengthPx <= maxLength && bottomLengthPx <= maxLength && leftLengthPx <= maxLength && rightLengthPx <= maxLength;
@@ -188,6 +205,12 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & vpMatr
 
             maxLevel = std::max(maxLevel, zoomLevelInfo.zoomLevelIdentifier);
 
+//            printf("USE TILE %d|%d|%d:\n%f|%f|%f -> %f|%f -> %f, %f\n%f|%f|%f -> %f|%f -> %f, %f\n%f|%f|%f -> %f|%f -> %f, %f\n%f|%f|%f -> %f|%f -> %f, %f\n\n", zoomLevelInfo.zoomLevelIdentifier, candidate.x, candidate.y,
+//                   topLeftView.x, topLeftView.y, topLeftView.z, topLeftScreen.x, topLeftScreen.y, topLeftVA, topLeftHA,
+//                   topRightView.x, topRightView.y, topRightView.z, topRightScreen.x, topRightScreen.y, topRightVA, topRightHA,
+//                   bottomLeftView.x, bottomLeftView.y, bottomLeftView.z,bottomLeftScreen.x, bottomLeftScreen.y, bottomLeftVA, bottomLeftHA,
+//                   bottomRightView.x, bottomRightView.y, bottomRightView.z,bottomRightScreen.x, bottomRightScreen.y, bottomRightVA, bottomRightHA);
+//
 //            printf("%d|%d|%d @ %f -> %f, %f, %f, %f\n", zoomLevelInfo.zoomLevelIdentifier, candidate.x, candidate.y, tileWidth, topLengthPx, bottomLengthPx, leftLengthPx, rightLengthPx);
 
         }
@@ -245,18 +268,24 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & vpMatr
 }
 
 template<class T, class L, class R>
-::Vec3D Tiled2dMapSource<T, L, R>::project(const ::Coord & position, const std::vector<float> & vpMatrix) {
-    //    auto matrix = getVpMatrix();
+::Vec3D Tiled2dMapSource<T, L, R>::transformToView(const ::Coord & position, const std::vector<float> & vpMatrix) {
     auto mapCoord = conversionHelper->convert(CoordinateSystemIdentifiers::UNITSPHERE(), position);
     std::vector<float> inVec = {(float)mapCoord.x, (float)mapCoord.y, (float)mapCoord.z, 1.0};
     std::vector<float> outVec = {0, 0, 0, 0};
 
-//    printf("%f, %f, %f, %f\n%f, %f, %f, %f\n%f, %f, %f, %f\n%f, %f, %f, %f\n\n", vpMatrix[0], vpMatrix[1], vpMatrix[2], vpMatrix[3],
-//           vpMatrix[4], vpMatrix[5], vpMatrix[6], vpMatrix[7], vpMatrix[8], vpMatrix[9], vpMatrix[10],vpMatrix[11],vpMatrix[12],vpMatrix[13],vpMatrix[14],vpMatrix[15]      );
+    Matrix::multiply(vpMatrix, inVec, outVec);
+
+    auto point2d = Vec3D(outVec[0] / outVec[3], outVec[1] / outVec[3], outVec[2] / outVec[3]);
+    return point2d;
+}
+
+template<class T, class L, class R>
+::Vec3D Tiled2dMapSource<T, L, R>::projectToScreen(const ::Vec3D & position, const std::vector<float> & vpMatrix) {
+    std::vector<float> inVec = {(float)position.x, (float)position.y, (float)position.z, 1.0};
+    std::vector<float> outVec = {0, 0, 0, 0};
 
     Matrix::multiply(vpMatrix, inVec, outVec);
 
-    //    printf("%f, %f, %f -> %f, %f\n", position.x, position.y, position.z, outVec[0], outVec[1]);
     auto point2d = Vec3D(outVec[0] / outVec[3], outVec[1] / outVec[3], outVec[2] / outVec[3]);
     return point2d;
 }

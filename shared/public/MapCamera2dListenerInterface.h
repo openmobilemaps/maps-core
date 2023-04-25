@@ -16,5 +16,5 @@ public:
 
     virtual void onMapInteraction() = 0;
 
-    virtual void onCameraChange(const std::vector<float> & vpMatrix, float width, float height) = 0;
+    virtual void onCameraChange(const std::vector<float> & viewMatrix, const std::vector<float> & projectionMatrix, float verticalFov, float horizontalFov, float width, float height) = 0;
 };

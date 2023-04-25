@@ -324,7 +324,7 @@ std::shared_ptr<::CameraInterface> MapCamera2d::asCameraInterface() { return sha
     std::vector<float> outVec = {0, 0, 0, 0};
 
     std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
-    Matrix::multiply(newVpMatrix, inVec, outVec);
+    Matrix::multiply(vpMatrix, inVec, outVec);
 
 //    printf("%f, %f, %f -> %f, %f\n", position.x, position.y, position.z, outVec[0], outVec[1]);
     return Vec2D(outVec[0] / outVec[3], outVec[1] / outVec[3]);
@@ -347,26 +347,49 @@ std::vector<float> MapCamera2d::getVpMatrix() {
     double zoomFactor = screenPixelAsRealMeterFactor * currentZoom;
     RectCoord viewBounds = getRectFromViewport(sizeViewport, focusPointPosition);
 
-    std::vector<float> vpMatrix(16, 0.0);
-
 
     if (mapInterface->getMapConfig().mapCoordinateSystem.identifier != CoordinateSystemIdentifiers::UNITSPHERE()) {
+
+        std::vector<float> newViewMatrix(16, 0.0);
+        std::vector<float> newProjectionMatrix(16, 0.0);
+
         Coord renderCoordCenter = conversionHelper->convertToRenderSystem(focusPointPosition);
 
-        Matrix::setIdentityM(vpMatrix, 0);
+        Matrix::setIdentityM(newProjectionMatrix, 0);
 
-        Matrix::orthoM(vpMatrix, 0, renderCoordCenter.x - 0.5 * sizeViewport.x, renderCoordCenter.x + 0.5 * sizeViewport.x,
+        Matrix::orthoM(newProjectionMatrix, 0, renderCoordCenter.x - 0.5 * sizeViewport.x, renderCoordCenter.x + 0.5 * sizeViewport.x,
                        renderCoordCenter.y + 0.5 * sizeViewport.y, renderCoordCenter.y - 0.5 * sizeViewport.y, -1, 1);
 
-        Matrix::translateM(vpMatrix, 0, renderCoordCenter.x, renderCoordCenter.y, 0);
 
-        Matrix::scaleM(vpMatrix, 0, 1 / zoomFactor, 1 / zoomFactor, 1);
+        Matrix::setIdentityM(newViewMatrix, 0);
 
-        Matrix::rotateM(vpMatrix, 0.0, currentRotation, 0.0, 0.0, 1.0);
+        Matrix::translateM(newViewMatrix, 0, renderCoordCenter.x, renderCoordCenter.y, 0);
 
-        Matrix::translateM(vpMatrix, 0, -renderCoordCenter.x, -renderCoordCenter.y, 0);
+        Matrix::scaleM(newViewMatrix, 0, 1 / zoomFactor, 1 / zoomFactor, 1);
+
+        Matrix::rotateM(newViewMatrix, 0.0, currentRotation, 0.0, 0.0, 1.0);
+
+        Matrix::translateM(newViewMatrix, 0, -renderCoordCenter.x, -renderCoordCenter.y, 0);
+
+        std::vector<float> newVpMatrix(16, 0.0);
+        Matrix::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
+
+        std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
+        lastVpBounds = viewBounds;
+        lastVpRotation = currentRotation;
+        lastVpZoom = currentZoom;
+        vpMatrix = newVpMatrix;
+        viewMatrix = newViewMatrix;
+        projectionMatrix = newProjectionMatrix;
+        verticalFov = 0;
+        horizontalFov = 0;
+        validVpMatrix = true;
+        return newVpMatrix;
     }
     else {
+
+        std::vector<float> newViewMatrix(16, 0.0);
+        std::vector<float> newProjectionMatrix(16, 0.0);
 
         float R = 6371000;
         float longitude = focusPointPosition.x; //  px / R;
@@ -378,7 +401,7 @@ std::vector<float> MapCamera2d::getVpMatrix() {
         float radius = 1.0;
 
 
-        Matrix::setIdentityM(vpMatrix, 0);
+        Matrix::setIdentityM(newProjectionMatrix, 0);
 
         float fov = 60; // zoom / 90800;
 
@@ -387,38 +410,49 @@ std::vector<float> MapCamera2d::getVpMatrix() {
             vpr = 1.0;
         }
 
-//        Matrix::translateM(vpMatrix, 0, 0.0, -2.0, 0.0);
 
-        Matrix::perspectiveM(vpMatrix, 0, fov, vpr, 0.0001, 5.0);
+        Matrix::perspectiveM(newProjectionMatrix, 0, fov, vpr, 0.00001, 5.0);
+
+
+        Matrix::setIdentityM(newViewMatrix, 0);
+
+
+        Matrix::translateM(newViewMatrix, 0, 0.0, -2.0, 0.0);
 
         cameraPitch = 70;
         focusPointAltitude = 0.0;
 
 
-        Matrix::translateM(vpMatrix, 0, 0, 0, -cameraDistance);
+        Matrix::translateM(newViewMatrix, 0, 0, 0, -cameraDistance);
 
-        Matrix::rotateM(vpMatrix, 0, -cameraPitch, 1.0, 0.0, 0.0);
-        Matrix::rotateM(vpMatrix, 0, -angle, 0, 0, 1);
-
-
-        Matrix::translateM(vpMatrix, 0, 0, 0, -1 - focusPointAltitude / R);
+        Matrix::rotateM(newViewMatrix, 0, -cameraPitch, 1.0, 0.0, 0.0);
+        Matrix::rotateM(newViewMatrix, 0, -angle, 0, 0, 1);
 
 
-        Matrix::rotateM(vpMatrix, 0.0, longitude, 1.0, 0.0, 0.0);
-        Matrix::rotateM(vpMatrix, 0.0, -latitude , 0.0, 1.0, 0.0);
+        Matrix::translateM(newViewMatrix, 0, 0, 0, -1 - focusPointAltitude / R);
 
-//        printf("%f, %f\n", latitude, longitude);
+
+        Matrix::rotateM(newViewMatrix, 0.0, longitude, 1.0, 0.0, 0.0);
+        Matrix::rotateM(newViewMatrix, 0.0, -latitude , 0.0, 1.0, 0.0);
+
+        std::vector<float> newVpMatrix(16, 0.0);
+        Matrix::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
+
+        std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
+        lastVpBounds = viewBounds;
+        lastVpRotation = currentRotation;
+        lastVpZoom = currentZoom;
+        vpMatrix = newVpMatrix;
+        viewMatrix = newViewMatrix;
+        projectionMatrix = newProjectionMatrix;
+        verticalFov = fov;
+        horizontalFov = fov * vpr;
+        validVpMatrix = true;
+        return newVpMatrix;
 
     }
 
-    std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
-    lastVpBounds = viewBounds;
-    lastVpRotation = currentRotation;
-    lastVpZoom = currentZoom;
-//    return vpMatrix;
-    newVpMatrix = vpMatrix;
-    validVpMatrix = true;
-    return newVpMatrix;
+
 }
 
 std::optional<::RectCoord> MapCamera2d::getLastVpMatrixViewBounds() {
@@ -503,19 +537,30 @@ void MapCamera2d::notifyListeners(const int &listenerType) {
         (listenerType & ListenerType::BOUNDS) ? std::optional<RectCoord>(getVisibleRect()) : std::nullopt;
     double angle = this->angle;
     double zoom = this->zoom;
-    std::vector<float> vpMatrix;
+    std::vector<float> viewMatrix;
+    std::vector<float> projectionMatrix;
     float width;
     float height;
+    float horizontalFov;
+    float verticalFov;
     if (listenerType & ListenerType::CAMERA) {
         bool validVpMatrix;
         {
             std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
-            vpMatrix = newVpMatrix;
             validVpMatrix = this->validVpMatrix;
         }
         if (!validVpMatrix) {
-            vpMatrix = getVpMatrix();
+            getVpMatrix(); // update matrices
         }
+        {
+            std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
+            
+            viewMatrix = this->viewMatrix;
+            projectionMatrix = this->projectionMatrix;
+            horizontalFov = this->horizontalFov;
+            verticalFov = this->verticalFov;
+        }
+
 
         Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
         width = sizeViewport.x;
@@ -536,7 +581,7 @@ void MapCamera2d::notifyListeners(const int &listenerType) {
         }
 
         if (listenerType & ListenerType::CAMERA) {
-            listener->onCameraChange(vpMatrix, width, height);
+            listener->onCameraChange(viewMatrix, projectionMatrix, verticalFov, horizontalFov, width, height);
         }
     }
 }

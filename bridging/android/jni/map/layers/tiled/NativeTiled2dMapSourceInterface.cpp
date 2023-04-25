@@ -31,11 +31,14 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapSourceInterface_00024CppProxy_native_1onCameraChange(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_vpMatrix, jfloat j_width, jfloat j_height)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapSourceInterface_00024CppProxy_native_1onCameraChange(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_viewMatrix, jobject j_projectionMatrix, jfloat j_verticalFov, jfloat j_horizontalFov, jfloat j_width, jfloat j_height)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapSourceInterface>(nativeRef);
-        ref->onCameraChange(::djinni::List<::djinni::F32>::toCpp(jniEnv, j_vpMatrix),
+        ref->onCameraChange(::djinni::List<::djinni::F32>::toCpp(jniEnv, j_viewMatrix),
+                            ::djinni::List<::djinni::F32>::toCpp(jniEnv, j_projectionMatrix),
+                            ::djinni::F32::toCpp(jniEnv, j_verticalFov),
+                            ::djinni::F32::toCpp(jniEnv, j_horizontalFov),
                             ::djinni::F32::toCpp(jniEnv, j_width),
                             ::djinni::F32::toCpp(jniEnv, j_height));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
