@@ -19,8 +19,6 @@
 #include "TextHelper.h"
 #include "SpriteData.h"
 #include "FontLoaderResult.h"
-#include "AlphaInstancedShaderInterface.h"
-#include "Quad2dInstancedInterface.h"
 
 class Tiled2dMapVectorSourceSymbolDataManager: public Tiled2dMapVectorSourceDataManager,  public std::enable_shared_from_this<Tiled2dMapVectorSourceSymbolDataManager> {
 public:
@@ -105,9 +103,6 @@ private:
     std::unordered_map<std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper>, LayerIndentifier> interactableSet;
 
     float alpha = 1.0;
-
-    std::shared_ptr<Quad2dInstancedInterface> instancedObject;
-    std::shared_ptr<AlphaInstancedShaderInterface> instancedShader;
 
     //cached locked unsafe renderpasses
 };
