@@ -30,6 +30,7 @@ graphics_object_factory_interface = interface +c +j +o {
     create_line(shader: shader_program_interface) : line_2d_interface;
     create_polygon(shader: shader_program_interface) : polygon_2d_interface;
 
+    create_quad_instanced(shader: shader_program_interface): quad_2d_instanced_interface;
     create_line_group(shader: shader_program_interface): line_group_2d_interface;
     create_polygon_group(shader: shader_program_interface): polygon_group_2d_interface;
 
@@ -43,6 +44,24 @@ quad_2d_interface = interface +c +j +o {
     set_frame(frame: quad_2d_d, texture_coordinates: rect_d);
     load_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
     remove_texture();
+    as_graphics_object(): graphics_object_interface;
+    as_masking_object(): masking_object_interface;
+}
+
+quad_2d_instanced_interface = interface +c +j +o {
+    set_frame(frame: quad_2d_d);
+
+    set_instance_count(count: i32);
+    set_positions(positions: shared_bytes);
+    set_scales(scales: shared_bytes);
+    set_rotations(rotations: shared_bytes);
+    set_alphas(values: shared_bytes);
+
+    set_texure_coordinates(textureCoordinates: shared_bytes);
+
+    load_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
+    remove_texture();
+
     as_graphics_object(): graphics_object_interface;
     as_masking_object(): masking_object_interface;
 }

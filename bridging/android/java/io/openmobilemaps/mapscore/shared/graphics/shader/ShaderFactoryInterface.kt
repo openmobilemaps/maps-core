@@ -10,6 +10,8 @@ abstract class ShaderFactoryInterface {
 
     abstract fun createAlphaShader(): AlphaShaderInterface
 
+    abstract fun createAlphaInstancedShader(): AlphaInstancedShaderInterface
+
     abstract fun createColorLineShader(): ColorLineShaderInterface
 
     abstract fun createLineGroupShader(): LineGroupShaderInterface
@@ -43,6 +45,12 @@ abstract class ShaderFactoryInterface {
             return native_createAlphaShader(this.nativeRef)
         }
         private external fun native_createAlphaShader(_nativeRef: Long): AlphaShaderInterface
+
+        override fun createAlphaInstancedShader(): AlphaInstancedShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createAlphaInstancedShader(this.nativeRef)
+        }
+        private external fun native_createAlphaInstancedShader(_nativeRef: Long): AlphaInstancedShaderInterface
 
         override fun createColorLineShader(): ColorLineShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

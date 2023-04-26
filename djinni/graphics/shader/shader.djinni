@@ -14,6 +14,7 @@ shader_program_interface = interface +c +o {
 
 shader_factory_interface = interface +c +j +o {
     create_alpha_shader() : alpha_shader_interface;
+    create_alpha_instanced_shader(): alpha_instanced_shader_interface;
     create_color_line_shader() : color_line_shader_interface;
     create_line_group_shader(): line_group_shader_interface;
     create_color_shader() : color_shader_interface;
@@ -47,6 +48,10 @@ raster_shader_interface = interface +c +o {
 
 alpha_shader_interface = interface +c +o {
     update_alpha(value: f32);
+    as_shader_program_interface() : shader_program_interface;
+}
+
+alpha_instanced_shader_interface = interface +c +o {
     as_shader_program_interface() : shader_program_interface;
 }
 

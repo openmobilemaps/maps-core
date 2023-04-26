@@ -13,12 +13,21 @@ import MapCoreSharedModule
 import Metal
 import UIKit
 
-final class Quad2d: BaseGraphicsObject {
+final class Quad2dInstanced: BaseGraphicsObject {
     private var verticesBuffer: MTLBuffer?
 
     private var indicesBuffer: MTLBuffer?
 
     private var indicesCount: Int = 0
+
+    private var positionsBuffer: MTLBuffer?
+    private var scalesBuffer: MTLBuffer?
+    private var rotationsBuffer: MTLBuffer?
+    private var alphaBuffer: MTLBuffer?
+
+    private var textureCoordinatesBuffer: MTLBuffer?
+
+    private var instanceCount: Int = 0
 
     private var texture: MTLTexture?
 
@@ -30,7 +39,7 @@ final class Quad2d: BaseGraphicsObject {
 
     private let label: String
 
-    init(shader: MCShaderProgramInterface, metalContext: MetalContext, label: String = "Quad2d") {
+    init(shader: MCShaderProgramInterface, metalContext: MetalContext, label: String = "Quad2dInstanced") {
         self.label = label
         self.shader = shader
         super.init(device: metalContext.device,
@@ -55,7 +64,7 @@ final class Quad2d: BaseGraphicsObject {
 
     override func isReady() -> Bool {
         guard ready else { return false }
-        if shader is AlphaShader || shader is RasterShader {
+        if shader is AlphaInstancedShader {
             return texture != nil
         }
         return true
@@ -67,15 +76,17 @@ final class Quad2d: BaseGraphicsObject {
                          mvpMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
-        guard isReady(),
-              let verticesBuffer = verticesBuffer,
-              let indicesBuffer = indicesBuffer else { return }
+        guard let verticesBuffer = verticesBuffer,
+              let indicesBuffer = indicesBuffer,
+            instanceCount != 0 else {
+            return
+        }
 
         lock.lock()
         defer {
             lock.unlock()
         }
-        if (shader is AlphaShader || shader is RasterShader), texture == nil {
+        if (shader is AlphaInstancedShader), texture == nil {
             ready = false
             return
         }
@@ -108,23 +119,31 @@ final class Quad2d: BaseGraphicsObject {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
         }
 
+        encoder.setVertexBuffer(positionsBuffer, offset: 0, index: 2)
+        encoder.setVertexBuffer(scalesBuffer, offset: 0, index: 3)
+        encoder.setVertexBuffer(rotationsBuffer, offset: 0, index: 4)
+
+        encoder.setVertexBuffer(textureCoordinatesBuffer, offset: 0, index: 5)
+
+        encoder.setVertexBuffer(alphaBuffer, offset: 0, index: 6)
+
         encoder.setFragmentSamplerState(sampler, index: 0)
 
         if let texture = texture {
             encoder.setFragmentTexture(texture, index: 0)
         }
 
-
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,
                                       indexType: .uint16,
                                       indexBuffer: indicesBuffer,
-                                      indexBufferOffset: 0)
+                                      indexBufferOffset: 0,
+                                      instanceCount: instanceCount)
 
     }
 }
 
-extension Quad2d: MCMaskingObjectInterface {
+extension Quad2dInstanced: MCMaskingObjectInterface {
     func render(asMask context: MCRenderingContextInterface?,
                 renderPass: MCRenderPassConfig,
                 mvpMatrix: Int64,
@@ -144,8 +163,8 @@ extension Quad2d: MCMaskingObjectInterface {
     }
 }
 
-extension Quad2d: MCQuad2dInterface {
-    func setFrame(_ frame: MCQuad2dD, textureCoordinates: MCRectD) {
+extension Quad2dInstanced: MCQuad2dInstancedInterface {
+    func setFrame(_ frame: MCQuad2dD) {
         /*
          The quad is made out of 4 vertices as following
          B----C
@@ -155,10 +174,10 @@ extension Quad2d: MCQuad2dInterface {
          Where A-C are joined to form two triangles
          */
         let vertecies: [Vertex] = [
-            Vertex(position: frame.bottomLeft, textureU: textureCoordinates.xF, textureV: textureCoordinates.yF + textureCoordinates.heightF), // A
-            Vertex(position: frame.topLeft, textureU: textureCoordinates.xF, textureV: textureCoordinates.yF), // B
-            Vertex(position: frame.topRight, textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF), // C
-            Vertex(position: frame.bottomRight, textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF + textureCoordinates.heightF), // D
+            Vertex(position: frame.bottomLeft, textureU: 0, textureV: 1), // A
+            Vertex(position: frame.topLeft, textureU: 0, textureV: 0), // B
+            Vertex(position: frame.topRight, textureU: 1, textureV: 0), // C
+            Vertex(position: frame.bottomRight, textureU: 1, textureV: 1), // D
         ]
         let indices: [UInt16] = [
             0, 1, 2, // ABC
@@ -176,12 +195,46 @@ extension Quad2d: MCQuad2dInterface {
         }
     }
 
+    func setInstanceCount(_ count: Int32) {
+        instanceCount = Int(count)
+    }
+
+    func setPositions(_ positions: MCSharedBytes) {
+        lock.withCritical {
+            positionsBuffer = device.makeBuffer(from: positions)
+        }
+    }
+
+    func setScales(_ scales: MCSharedBytes) {
+        lock.withCritical {
+            scalesBuffer = device.makeBuffer(from: scales)
+        }
+    }
+
+    func setRotations(_ rotations: MCSharedBytes) {
+        lock.withCritical {
+            rotationsBuffer = device.makeBuffer(from: rotations)
+        }
+    }
+
+    func setTexureCoordinates(_ textureCoordinates: MCSharedBytes) {
+        lock.withCritical {
+            textureCoordinatesBuffer = device.makeBuffer(from: textureCoordinates)
+        }
+    }
+
+    func setAlphas(_ values: MCSharedBytes) {
+        alphaBuffer = MetalContext.current.device.makeBuffer(from: values)
+    }
+
     func loadTexture(_ context: MCRenderingContextInterface?, textureHolder: MCTextureHolderInterface?) {
         guard let textureHolder = textureHolder as? TextureHolder else {
             fatalError("unexpected TextureHolder")
         }
-        texture = textureHolder.texture
-
+        lock.withCritical {
+            texture = textureHolder.texture
+            ready = true
+        }
     }
 
     func removeTexture() {}

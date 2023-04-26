@@ -34,6 +34,7 @@ private:
         ~JavaProxy();
 
         /*not-null*/ std::shared_ptr<::AlphaShaderInterface> createAlphaShader() override;
+        /*not-null*/ std::shared_ptr<::AlphaInstancedShaderInterface> createAlphaInstancedShader() override;
         /*not-null*/ std::shared_ptr<::ColorLineShaderInterface> createColorLineShader() override;
         /*not-null*/ std::shared_ptr<::LineGroupShaderInterface> createLineGroupShader() override;
         /*not-null*/ std::shared_ptr<::ColorShaderInterface> createColorShader() override;
@@ -49,6 +50,7 @@ private:
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/shader/ShaderFactoryInterface") };
     const jmethodID method_createAlphaShader { ::djinni::jniGetMethodID(clazz.get(), "createAlphaShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/AlphaShaderInterface;") };
+    const jmethodID method_createAlphaInstancedShader { ::djinni::jniGetMethodID(clazz.get(), "createAlphaInstancedShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/AlphaInstancedShaderInterface;") };
     const jmethodID method_createColorLineShader { ::djinni::jniGetMethodID(clazz.get(), "createColorLineShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ColorLineShaderInterface;") };
     const jmethodID method_createLineGroupShader { ::djinni::jniGetMethodID(clazz.get(), "createLineGroupShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/LineGroupShaderInterface;") };
     const jmethodID method_createColorShader { ::djinni::jniGetMethodID(clazz.get(), "createColorShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ColorShaderInterface;") };
