@@ -250,13 +250,13 @@ public:
 class Value {
 public:
     Value() {};
+    virtual ~Value() = default;
 
     virtual std::unique_ptr<Value> clone() = 0;
 
     virtual std::unordered_set<std::string> getUsedKeys() const { return {}; };
 
     virtual ValueVariant evaluate(const EvaluationContext &context) const = 0;
-
 
     template<typename T>
     T evaluateOr(const EvaluationContext &context, const T &alternative) const {

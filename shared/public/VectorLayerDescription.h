@@ -68,5 +68,7 @@ public:
     renderPassIndex(renderPassIndex),
     interactable(interactable) {}
 
+    virtual ~VectorLayerDescription() = default;
+
     virtual std::unique_ptr<VectorLayerDescription> clone() = 0;
 };
