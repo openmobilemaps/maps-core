@@ -331,6 +331,11 @@ void Quad2dInstancedOpenGl::setAlphas(const SharedBytes &values) {
 }
 
 void Quad2dInstancedOpenGl::writeToBuffer(const ::SharedBytes &data, GLuint target) {
+    if(!ready){
+        LogError <<= "🥴 Writing to buffer before it was created.";
+        return;
+    }
+
     glBindBuffer(GL_ARRAY_BUFFER, target);
     glBufferData(GL_ARRAY_BUFFER, data.elementCount * data.bytesPerElement, (void *) data.address, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
