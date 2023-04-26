@@ -23,11 +23,17 @@ void ColorPolygonGroup2dShaderOpenGl::setupProgram(const std::shared_ptr<::Rende
     // prepare shaders and OpenGL program
     int vertexShader = loadShader(GL_VERTEX_SHADER, getVertexShader());
     int fragmentShader = loadShader(GL_FRAGMENT_SHADER, getFragmentShader());
+    OpenGlHelper::checkGlError("ColorPolygonGroup2dShaderOpenGl::setupProgram loadShader");
 
     int program = glCreateProgram();       // create empty OpenGL Program
+
+    OpenGlHelper::checkGlError("ColorPolygonGroup2dShaderOpenGl::setupProgram glCreateProgram");
     glAttachShader(program, vertexShader); // add the vertex shader to program
+
+    OpenGlHelper::checkGlError("ColorPolygonGroup2dShaderOpenGl::setupProgram glAttachShader vertex");
     glDeleteShader(vertexShader);
     glAttachShader(program, fragmentShader); // add the fragment shader to program
+    OpenGlHelper::checkGlError("ColorPolygonGroup2dShaderOpenGl::setupProgram glAttachShader fragment");
     glDeleteShader(fragmentShader);
 
     glLinkProgram(program); // create OpenGL program executables

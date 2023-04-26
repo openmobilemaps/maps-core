@@ -51,9 +51,9 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
 
     positionHandle = glGetAttribLocation(program, "vPosition");
     widthNormalHandle = glGetAttribLocation(program, "vWidthNormal");
-    lengthNormalHandle = glGetAttribLocation(program, "vLengthNormal");
     pointAHandle = glGetAttribLocation(program, "vPointA");
     pointBHandle = glGetAttribLocation(program, "vPointB");
+    vertexIndexHandle = glGetAttribLocation(program, "vVertexIndex");
     segmentStartLPosHandle = glGetAttribLocation(program, "vSegmentStartLPos");
     styleInfoHandle = glGetAttribLocation(program, "vStyleInfo");
 
@@ -127,36 +127,37 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     // Prepare the vertex attributes
     size_t floatSize = sizeof(GLfloat);
     size_t sizeAttribGroup = floatSize * 2;
-    size_t stride = sizeAttribGroup * 5 + 2 * floatSize;
+    size_t stride = sizeAttribGroup * 4 + 3 * floatSize;
     glBindBuffer(GL_ARRAY_BUFFER, vertexAttribBuffer);
     glEnableVertexAttribArray(positionHandle);
     glVertexAttribPointer(positionHandle, 2, GL_FLOAT, false, stride, nullptr);
     glEnableVertexAttribArray(widthNormalHandle);
     glVertexAttribPointer(widthNormalHandle, 2, GL_FLOAT, false, stride, (float *)sizeAttribGroup);
-    glEnableVertexAttribArray(lengthNormalHandle);
-    glVertexAttribPointer(lengthNormalHandle, 2, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 2));
     glEnableVertexAttribArray(pointAHandle);
-    glVertexAttribPointer(pointAHandle, 2, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 3));
+    glVertexAttribPointer(pointAHandle, 2, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 2));
     glEnableVertexAttribArray(pointBHandle);
-    glVertexAttribPointer(pointBHandle, 2, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 4));
+    glVertexAttribPointer(pointBHandle, 2, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 3));
+    glEnableVertexAttribArray(vertexIndexHandle);
+    glVertexAttribPointer(vertexIndexHandle, 1, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 4));
     glEnableVertexAttribArray(segmentStartLPosHandle);
-    glVertexAttribPointer(segmentStartLPosHandle, 1, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 5));
+    glVertexAttribPointer(segmentStartLPosHandle, 1, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 4 + floatSize));
     glEnableVertexAttribArray(styleInfoHandle);
-    glVertexAttribPointer(styleInfoHandle, 1, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 5 + floatSize));
+    glVertexAttribPointer(styleInfoHandle, 1, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 4 + 2 * floatSize));
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // Draw the triangle
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glDrawElements(GL_TRIANGLES, lineIndices.size(), GL_UNSIGNED_INT, nullptr);
 
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     // Disable vertex array
     glDisableVertexAttribArray(positionHandle);
     glDisableVertexAttribArray(widthNormalHandle);
-    glDisableVertexAttribArray(lengthNormalHandle);
     glDisableVertexAttribArray(pointAHandle);
     glDisableVertexAttribArray(pointBHandle);
+    glDisableVertexAttribArray(vertexIndexHandle);
     glDisableVertexAttribArray(segmentStartLPosHandle);
     glDisableVertexAttribArray(styleInfoHandle);
 

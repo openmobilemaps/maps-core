@@ -67,11 +67,12 @@ void ColorLineGroup2dShaderOpenGl::setStyles(const std::vector<::LineStyle> &lin
         lineValues[sizeLineValues * i + 9] = style.gapColor.normal.b;
         lineValues[sizeLineValues * i + 10] = style.gapColor.normal.a * style.opacity;
         int numDashInfo = std::min((int)style.dashArray.size(), maxNumDashValues); // Max num dash infos: 4 (2 dash/gap lengths)
-        lineValues[sizeLineValues * i + 11] = numDashInfo;
+        lineValues[sizeLineValues * i + 11] = style.offset;
+        lineValues[sizeLineValues * i + 12] = numDashInfo;
         float sum = 0.0;
         for (int iDash = 0; iDash < numDashInfo; iDash++) {
             sum += style.dashArray.at(iDash);
-            lineValues[sizeLineValues * i + 12 + iDash] = sum;
+            lineValues[sizeLineValues * i + 13 + iDash] = sum;
         }
     }
 
@@ -85,8 +86,14 @@ void ColorLineGroup2dShaderOpenGl::setStyles(const std::vector<::LineStyle> &lin
 std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
     return OMMVersionedGlesShaderCode(320 es,
                                       precision highp float;
-                                      uniform mat4 uMVPMatrix; in vec2 vPosition; in vec2 vWidthNormal; in vec2 vLengthNormal;
-                                      in vec2 vPointA; in vec2 vPointB; in float vSegmentStartLPos; in float vStyleInfo;
+                                      uniform mat4 uMVPMatrix;
+                                      in vec2 vPosition;
+                                      in vec2 vWidthNormal;
+                                      in vec2 vPointA;
+                                      in vec2 vPointB;
+                                      in float vVertexIndex;
+                                      in float vSegmentStartLPos;
+                                      in float vStyleInfo;
                                       // lineValues:
                                       // {float width (0),
                                       // float isScaled (1),
@@ -94,8 +101,10 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                                       // vec4 color (3),
                                       // vec4 gapColor (7),
                                       // int numDashInfo (11),
-                                      // vec4 dashArray (12)}
-                                      // -> stride = 16
+                                      // float offset (12)
+                                      // vec4 dashArray (13)
+                                      // }
+                                      // -> stride = 17
                                       uniform float lineValues[) + std::to_string(sizeLineValuesArray) + OMMShaderCode(];
                                       uniform int numStyles; uniform float scaleFactor;
                                       out float fStyleIndexBase; out float radius; out float segmentStartLPos; out float fSegmentType;
@@ -119,12 +128,29 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                                        fStyleIndexBase = float(styleIndexBase);
                                        fSegmentType = vStyleInfo / 256.0;
 
+                                       vec2 widthNormal = vWidthNormal;
+                                       vec2 lengthNormal = vec2(widthNormal.y, -widthNormal.x);
+
+                                       if(vVertexIndex == 0.0) {
+                                           lengthNormal *= -1.0;
+                                           widthNormal *= -1.0;
+                                       } else if(vVertexIndex == 1.0) {
+                                           lengthNormal *= -1.0;
+                                       } else if(vVertexIndex == 2.0) {
+                                           // all fine
+                                       } else if(vVertexIndex == 3.0) {
+                                           widthNormal *= -1.0;
+                                       }
+
+                                       float offsetFloat = lineValues[styleIndexBase + 11] * scaleFactor;
+                                       vec4 offset = vec4(vWidthNormal.x * offsetFloat, vWidthNormal.y * offsetFloat, 0.0, 0.0);
+
                                        float scaledWidth = width * 0.5;
                                        if (isScaled > 0.0) {
-                                       scaledWidth = scaledWidth * scaleFactor;
+                                        scaledWidth = scaledWidth * scaleFactor;
                                        }
                                                vec4 trfPosition = uMVPMatrix * vec4(vPosition.xy, 0.0, 1.0);
-                                               vec4 displ = vec4((vLengthNormal + vWidthNormal).xy, 0.0, 0.0) * vec4(scaledWidth, scaledWidth, 0.0, 0.0);
+                                               vec4 displ = vec4((lengthNormal + widthNormal).xy, 0.0, 0.0) * vec4(scaledWidth, scaledWidth, 0.0, 0.0) + offset;
                                                vec4 trfDispl = uMVPMatrix * displ;
                                                vec4 extendedPosition = vec4(vPosition.xy, 0.0, 1.0) + displ;
                                                radius = scaledWidth;
@@ -174,7 +200,7 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
 
                                            vec4 fragColor = color;
 
-                                           int dashBase = int(fStyleIndexBase) + 3 + 4 + 4;
+                                           int dashBase = int(fStyleIndexBase) + 3 + 4 + 4 + 1;
                                            // dash values: {int numDashInfo, vec4 dashArray} -> stride = 5
                                            int numDashInfos = int(floor(lineValues[dashBase] + 0.5));
                                            if (numDashInfos > 0) {
