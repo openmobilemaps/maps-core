@@ -19,6 +19,7 @@
            verticalFov:(float)verticalFov
          horizontalFov:(float)horizontalFov
                  width:(float)width
-                height:(float)height;
+                height:(float)height
+    focusPointAltitude:(float)focusPointAltitude;
 
 @end

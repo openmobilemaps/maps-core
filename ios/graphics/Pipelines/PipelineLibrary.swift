@@ -38,7 +38,7 @@ public enum PipelineDescriptorFactory {
             pipelineDescriptor.tessellationFactorFormat = .half
             pipelineDescriptor.tessellationControlPointIndexType = .uint16
             pipelineDescriptor.tessellationFactorStepFunction = .constant
-            pipelineDescriptor.maxTessellationFactor = 16
+            pipelineDescriptor.maxTessellationFactor = 64
         }
         if depthBuffer {
             pipelineDescriptor.depthAttachmentPixelFormat = .depth32Float_stencil8

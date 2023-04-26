@@ -23,13 +23,17 @@ Tiled2dMapRasterSource::Tiled2dMapRasterSource(const MapConfig &mapConfig,
                                                float screenDensityPpi, 
                                                const std::shared_ptr<Tiled2dMapLayerConfig> &heightLayerConfig)
     : Tiled2dMapSource<TextureHolderInterface, std::pair<TextureLoaderResult, std::optional<TextureLoaderResult>>, std::pair<std::shared_ptr<::TextureHolderInterface>, std::shared_ptr<::TextureHolderInterface>>>(
-          mapConfig, layerConfig, conversionHelper, scheduler, screenDensityPpi, loaders.size())
+          mapConfig, layerConfig, heightLayerConfig, conversionHelper, scheduler, screenDensityPpi, loaders.size())
 , loaders(loaders)
 , rasterLayerActor(listener), heightLayerConfig(heightLayerConfig) {}
 
 void Tiled2dMapRasterSource::cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) {
     std::string const url = layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier);
     loaders[loaderIndex]->cancel(url);
+    if (heightLayerConfig) {
+        std::string const heightUrl = heightLayerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier);
+        loaders[loaderIndex]->cancel(heightUrl);
+    }
 }
 
 LoaderStatus Tiled2dMapRasterSource::getLoaderStatus(const std::pair<TextureLoaderResult, std::optional<TextureLoaderResult>> &loaderResult) {

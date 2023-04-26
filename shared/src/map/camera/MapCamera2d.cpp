@@ -44,9 +44,9 @@ MapCamera2d::MapCamera2d(const std::shared_ptr<MapInterface> &mapInterface, floa
     mapCoordinateSystem = mapConfig.mapCoordinateSystem;
     mapSystemRtl = mapCoordinateSystem.bounds.bottomRight.x > mapCoordinateSystem.bounds.topLeft.x;
     mapSystemTtb = mapCoordinateSystem.bounds.bottomRight.y > mapCoordinateSystem.bounds.topLeft.y;
-    focusPointPosition = Coord(CoordinateSystemIdentifiers::EPSG4326(), 47.3769, 8.5417, 0);
+    focusPointPosition = Coord(CoordinateSystemIdentifiers::EPSG4326(), 46.5326, 8.0447, 0);
     zoom = zoomMax;
-    cameraDistance = zoom / 90;
+    cameraDistance = zoom / 50;
 }
 
 void MapCamera2d::viewportSizeChanged() {
@@ -58,8 +58,9 @@ void MapCamera2d::viewportSizeChanged() {
         double heightDeviceM = screenPixelAsRealMeterFactor * viewportSize.y;
         zoomMin = std::max(boundsHeightM / heightDeviceM, boundsWidthM / widthDeviceM);
         zoom = std::clamp(zoom, zoomMax, zoomMin);
-        cameraDistance = zoom / 90;
+        cameraDistance = zoom / 70;
     }
+    // this->validVpMatrix = false;
 
     notifyListeners(ListenerType::BOUNDS | ListenerType::CAMERA);
 }
@@ -85,18 +86,20 @@ void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
     inertia = std::nullopt;
     // TODO: bounds correction
 //    Coord positionMapSystem = getBoundsCorrectedCoords(adjustCoordForPadding(focusPointPosition, zoom));
-    Coord focusPosition = mapInterface->getCoordinateConverterHelper()->convert(CoordinateSystemIdentifiers::EPSG4326(), focusPointPosition);
+    Coord focusPosition = mapInterface->getCoordinateConverterHelper()->convert(CoordinateSystemIdentifiers::EPSG4326(), centerPosition);
     if (animated) {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         coordAnimation = std::make_shared<CoordAnimation>(
             DEFAULT_ANIM_LENGTH, currentFocusPointPosition, focusPosition, std::nullopt, InterpolatorFunction::EaseInOut,
             [=](Coord focusPosition) {
                 this->focusPointPosition = focusPosition;
+                // this->validVpMatrix = false;
                 notifyListeners(ListenerType::BOUNDS | ListenerType::CAMERA);
                 mapInterface->invalidate();
             },
             [=] {
                 this->focusPointPosition = focusPosition;
+                // this->validVpMatrix = false;
                 notifyListeners(ListenerType::BOUNDS | ListenerType::CAMERA);
                 mapInterface->invalidate();
                 this->coordAnimation = nullptr;
@@ -107,6 +110,7 @@ void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
     } else {
         this->focusPointPosition = focusPosition;
         setZoom(zoom, false);
+        // this->validVpMatrix = false;
         notifyListeners(ListenerType::BOUNDS | ListenerType::CAMERA);
         mapInterface->invalidate();
     }
@@ -126,11 +130,13 @@ void MapCamera2d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
             DEFAULT_ANIM_LENGTH, currentFocusPointPosition, focusPosition, std::nullopt, InterpolatorFunction::EaseInOut,
             [=](Coord focusPosition) {
                 this->focusPointPosition = focusPosition;
+                // this->validVpMatrix = false;
                 notifyListeners(ListenerType::BOUNDS | ListenerType::CAMERA);
                 mapInterface->invalidate();
             },
             [=] {
                 this->focusPointPosition = focusPosition;
+                // this->validVpMatrix = false;
                 notifyListeners(ListenerType::BOUNDS | ListenerType::CAMERA);
                 mapInterface->invalidate();
                 this->coordAnimation = nullptr;
@@ -139,6 +145,7 @@ void MapCamera2d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
         mapInterface->invalidate();
     } else {
         this->focusPointPosition = focusPosition;
+        // this->validVpMatrix = false;
         notifyListeners(ListenerType::BOUNDS | ListenerType::CAMERA);
         mapInterface->invalidate();
     }
@@ -214,7 +221,8 @@ void MapCamera2d::setZoom(double zoom, bool animated) {
         mapInterface->invalidate();
     } else {
         this->zoom = targetZoom;
-        this->cameraDistance = this->zoom / 90;
+        this->cameraDistance = this->zoom / 70;
+        // this->validVpMatrix = false;
         notifyListeners(ListenerType::BOUNDS | ListenerType::CAMERA);
         mapInterface->invalidate();
     }
@@ -253,6 +261,7 @@ void MapCamera2d::setRotation(float angle, bool animated) {
         focusPointPosition.y = realCenter.y + rotatedDiff.y;
 
         this->angle = newAngle;
+        // this->validVpMatrix = false;
         notifyListeners(ListenerType::ROTATION | ListenerType::BOUNDS | ListenerType::CAMERA);
         mapInterface->invalidate();
     }
@@ -403,7 +412,7 @@ std::vector<float> MapCamera2d::getVpMatrix() {
 
         Matrix::setIdentityM(newProjectionMatrix, 0);
 
-        float fov = 60; // zoom / 90800;
+        float fov = 90; // zoom / 70800;
 
         float vpr = (float)sizeViewport.x / (float)sizeViewport.y;
         if (sizeViewport.y == 0) {
@@ -416,11 +425,13 @@ std::vector<float> MapCamera2d::getVpMatrix() {
 
         Matrix::setIdentityM(newViewMatrix, 0);
 
+        //angle += 3;
 
-//        Matrix::translateM(newViewMatrix, 0, 0.0, -2.0, 0.0);
 
-        cameraPitch = 70;
-        focusPointAltitude = 0.0;
+//        Matrix::translateM(newViewMatrix, 0, 0.0, -0.0, 0.0);
+
+        cameraPitch = 40;
+        focusPointAltitude = 2000.0;
 
 
         Matrix::translateM(newViewMatrix, 0, 0, 0, -cameraDistance);
@@ -543,6 +554,7 @@ void MapCamera2d::notifyListeners(const int &listenerType) {
     float height;
     float horizontalFov;
     float verticalFov;
+    float focusPointAltitude;
     if (listenerType & ListenerType::CAMERA) {
         bool validVpMatrix;
         {
@@ -559,6 +571,7 @@ void MapCamera2d::notifyListeners(const int &listenerType) {
             projectionMatrix = this->projectionMatrix;
             horizontalFov = this->horizontalFov;
             verticalFov = this->verticalFov;
+            focusPointAltitude = this->focusPointAltitude;
         }
 
 
@@ -581,7 +594,7 @@ void MapCamera2d::notifyListeners(const int &listenerType) {
         }
 
         if (listenerType & ListenerType::CAMERA) {
-            listener->onCameraChange(viewMatrix, projectionMatrix, verticalFov, horizontalFov, width, height);
+            listener->onCameraChange(viewMatrix, projectionMatrix, verticalFov, horizontalFov, width, height, focusPointAltitude);
         }
     }
 }
@@ -601,7 +614,8 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
         double newZoom = zoom * (1.0 - (deltaScreen.y * 0.003));
 
         zoom = std::max(std::min(newZoom, zoomMin), zoomMax);
-        cameraDistance = zoom / 90;
+        cameraDistance = zoom / 70;
+        // this->validVpMatrix = false;
 
         notifyListeners(ListenerType::BOUNDS | ListenerType::MAP_INTERACTION | ListenerType::CAMERA);
         mapInterface->invalidate();
@@ -620,8 +634,8 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     float xDiffMap = xDiff * zoom * screenPixelAsRealMeterFactor * (mapSystemRtl ? -1 : 1);
     float yDiffMap = yDiff * zoom * screenPixelAsRealMeterFactor * (mapSystemTtb ? -1 : 1);
 
-    focusPointPosition.y += xDiffMap;
-    focusPointPosition.x -= yDiffMap;
+    focusPointPosition.y += xDiffMap * 5;
+    focusPointPosition.x -= yDiffMap * 5;
 //    focusPointPosition = conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), focusPointPosition);
 
     clampCenterToPaddingCorrectedBounds();
@@ -638,6 +652,7 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
         currentDragVelocity.y = (1 - averageFactor) * currentDragVelocity.y + averageFactor * yDiffMap / (deltaMcs / 16000.0);
         currentDragTimestamp = newTimestamp;
     }
+    // this->validVpMatrix = false;
 
     notifyListeners(ListenerType::BOUNDS | ListenerType::MAP_INTERACTION | ListenerType::CAMERA);
     mapInterface->invalidate();
@@ -686,6 +701,7 @@ void MapCamera2d::inertiaStep() {
 //    focusPointPosition = conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), focusPointPosition);
 
     clampCenterToPaddingCorrectedBounds();
+    // this->validVpMatrix = false;
 
     notifyListeners(ListenerType::BOUNDS | ListenerType::CAMERA);
     mapInterface->invalidate();
@@ -770,7 +786,7 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
         zoom /= scaleFactor;
 
         zoom = std::clamp(zoom, zoomMax, zoomMin);
-        cameraDistance = zoom / 90;
+        cameraDistance = zoom / 70;
 
         if (zoom > startZoom * ROTATION_LOCKING_FACTOR || zoom < startZoom / ROTATION_LOCKING_FACTOR) {
             rotationPossible = false;
@@ -841,12 +857,14 @@ bool MapCamera2d::onTwoFingerMoveComplete() {
             DEFAULT_ANIM_LENGTH, this->angle, angle < ROTATION_LOCKING_ANGLE ? 0 : 360, InterpolatorFunction::EaseInOut,
             [=](double angle) {
                 this->angle = angle;
+                // this->validVpMatrix = false;
                 mapInterface->invalidate();
                 notifyListeners(ListenerType::ROTATION | ListenerType::BOUNDS | ListenerType::CAMERA);
             },
             [=] {
                 this->angle = 0;
                 this->rotationAnimation = nullptr;
+                // this->validVpMatrix = false;
                 mapInterface->invalidate();
                 notifyListeners(ListenerType::ROTATION | ListenerType::BOUNDS | ListenerType::CAMERA);
             });
@@ -883,7 +901,7 @@ void MapCamera2d::setMinZoom(double zoomMin) {
     this->zoomMin = zoomMin;
     if (zoom > zoomMin) {
         zoom = zoomMin;
-        cameraDistance = zoom / 90;
+        cameraDistance = zoom / 70;
     }
     mapInterface->invalidate();
 }
@@ -892,7 +910,7 @@ void MapCamera2d::setMaxZoom(double zoomMax) {
     this->zoomMax = zoomMax;
     if (zoom < zoomMax) {
         zoom = zoomMax;
-        cameraDistance = zoom / 90;
+        cameraDistance = zoom / 70;
     }
     mapInterface->invalidate();
 }

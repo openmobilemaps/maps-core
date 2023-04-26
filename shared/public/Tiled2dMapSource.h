@@ -65,7 +65,7 @@ class Tiled2dMapSource :
         public std::enable_shared_from_this<Tiled2dMapSourceInterface>,
         public ActorObject {
 public:
-    Tiled2dMapSource(const MapConfig &mapConfig, const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
+    Tiled2dMapSource(const MapConfig &mapConfig, const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig, const std::shared_ptr<Tiled2dMapLayerConfig> &heightLayerConfig,
                      const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                      const std::shared_ptr<SchedulerInterface> &scheduler,
                      float screenDensityPpi,
@@ -73,7 +73,7 @@ public:
 
     virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, int curT, double zoom) override;
 
-    virtual void onCameraChange(const std::vector<float> & viewMatrix, const std::vector<float> & projectionMatrix, float verticalFov, float horizontalFov, float width, float height) override;
+    virtual void onCameraChange(const std::vector<float> & viewMatrix, const std::vector<float> & projectionMatrix, float verticalFov, float horizontalFov, float width, float height, float focusPointAltitude) override;
 
     ::Vec3D transformToView(const ::Coord & position, const std::vector<float> & vpMatrix);
     ::Vec3D projectToScreen(const ::Vec3D & point, const std::vector<float> & vpMatrix);
@@ -125,6 +125,7 @@ public:
     std::shared_ptr<::ErrorManager> errorManager;
 
     std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfos;
+    std::vector<Tiled2dMapZoomLevelInfo> heightZoomLevelInfos;
     const Tiled2dMapZoomInfo zoomInfo;
 
     std::optional<int32_t> minZoomLevelIdentifier;

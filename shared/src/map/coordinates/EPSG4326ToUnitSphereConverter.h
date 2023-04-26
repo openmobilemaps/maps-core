@@ -34,10 +34,12 @@ public:
         float sinLatH = sin(latitude / 2); // [0, 1, 0, -1, 0]
         float cosLatH = cos(latitude / 2); // [1, 0, -1, 0, 1]
 
-        float x3D = sinLon * sinLatH;
-        float y3D = cosLatH;
-        float z3D = cosLon * sinLatH;
+        // scale by altitude, 0 = on unit sphere
+        float alt = 1.0 + coordinate.z / EarthRadius;
 
+        float x3D = sinLon * sinLatH * alt;
+        float y3D = cosLatH * alt;
+        float z3D = cosLon * sinLatH * alt;
 
         return Coord(CoordinateSystemIdentifiers::UNITSPHERE(),
                      x3D, y3D, z3D);

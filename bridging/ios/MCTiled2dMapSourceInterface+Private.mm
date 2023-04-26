@@ -48,14 +48,16 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
            verticalFov:(float)verticalFov
          horizontalFov:(float)horizontalFov
                  width:(float)width
-                height:(float)height {
+                height:(float)height
+    focusPointAltitude:(float)focusPointAltitude {
     try {
         _cppRefHandle.get()->onCameraChange(::djinni::List<::djinni::F32>::toCpp(viewMatrix),
                                             ::djinni::List<::djinni::F32>::toCpp(projectionMatrix),
                                             ::djinni::F32::toCpp(verticalFov),
                                             ::djinni::F32::toCpp(horizontalFov),
                                             ::djinni::F32::toCpp(width),
-                                            ::djinni::F32::toCpp(height));
+                                            ::djinni::F32::toCpp(height),
+                                            ::djinni::F32::toCpp(focusPointAltitude));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

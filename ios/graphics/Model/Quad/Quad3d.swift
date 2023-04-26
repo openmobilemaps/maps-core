@@ -23,6 +23,8 @@ final class Quad3d: BaseGraphicsObject {
     private var texture: MTLTexture?
     private var heightTexture: MTLTexture?
 
+    public let heightSampler: MTLSamplerState
+
     private var shader: MCShaderProgramInterface
 
     private var stencilState: MTLDepthStencilState?
@@ -45,6 +47,8 @@ final class Quad3d: BaseGraphicsObject {
         guard let timeBuffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<Float>.stride, options: []) else { fatalError("Could not create buffer") }
         self.timeBuffer = timeBuffer
         self.timeBufferContent = self.timeBuffer.contents().bindMemory(to: Float.self, capacity: 1)
+
+        self.heightSampler = metalContext.samplerLibrary.value(Sampler.magNearest.rawValue)
 
         super.init(device: metalContext.device,
                    sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue))
@@ -130,20 +134,12 @@ final class Quad3d: BaseGraphicsObject {
         }
 
         encoder.setFragmentSamplerState(sampler, index: 0)
-        encoder.setVertexSamplerState(sampler, index: 0)
+        encoder.setVertexSamplerState(heightSampler, index: 0)
 
-        if let texture {
-            encoder.setFragmentTexture(texture, index: 0)
-        }
-        else {
-            encoder.setFragmentTexture(nil, index: 0)
-        }
-        if let heightTexture {
-            encoder.setVertexTexture(heightTexture, index: 0)
-        }
-        else {
-            encoder.setVertexTexture(nil, index: 0)
-        }
+
+        encoder.setFragmentTexture(texture, index: 0)
+
+        encoder.setVertexTexture(heightTexture, index: 0)
 
         timeBufferContent[0] = Float(-Self.renderStartTime.timeIntervalSinceNow)
         encoder.setVertexBuffer(timeBuffer, offset: 0, index: 2)

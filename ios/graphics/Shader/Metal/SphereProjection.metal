@@ -20,10 +20,10 @@ float3 baryinterp3(float3 a, float3 b, float3 c, float3 p) {
 kernel void compute_tess_factors(
    device MTLTriangleTessellationFactorsHalf *factors [[buffer(0)]],
    uint pid [[thread_position_in_grid]]) {
-     factors[pid].edgeTessellationFactor[0] = 128;
-     factors[pid].edgeTessellationFactor[1] = 128;
-     factors[pid].edgeTessellationFactor[2] = 128;
-     factors[pid].insideTessellationFactor = 128;
+     factors[pid].edgeTessellationFactor[0] = 64;
+     factors[pid].edgeTessellationFactor[1] = 64;
+     factors[pid].edgeTessellationFactor[2] = 64;
+     factors[pid].insideTessellationFactor = 64;
    }
 
 [[patch(triangle, 3)]]
@@ -74,7 +74,7 @@ sphereProjectionVertexShader(const patch_control_point<VertexIn> patch [[stage_i
     height *= color.a;
 
     float R = 6371000;
-    float radius = 1.0 + (height / R) * 1.2;
+    float radius = 1.0 + (height / R) * 1.0;
 
 //    float3 n = pos / length(pos);
 
