@@ -91,24 +91,10 @@ void Quad2dInstancedOpenGl::prepareGlData(const std::shared_ptr<OpenGlContext> &
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     glGenBuffers(1, &positionsBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, positionsBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
     glGenBuffers(1, &scalesBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, scalesBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
     glGenBuffers(1, &rotationsBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, rotationsBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
     glGenBuffers(1, &textureCoordinatesListBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, textureCoordinatesListBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
     glGenBuffers(1, &alphasBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, alphasBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     mvpMatrixHandle = glGetUniformLocation(programHandle, "uMVPMatrix");
 }
