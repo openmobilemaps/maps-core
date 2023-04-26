@@ -888,6 +888,10 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
 
                         const auto textureWidth = (double) spriteTexture->getImageWidth();
                         const auto textureHeight = (double) spriteTexture->getImageHeight();
+#ifdef __ANDROID__
+                        const auto textureWidthFactor = (double) spriteTexture->getImageWidth() / spriteTexture->getTextureWidth();
+                        const auto textureHeightFactor = (double) spriteTexture->getImageHeight() / spriteTexture->getTextureHeight();
+#endif
 
                         auto spriteWidth = spriteInfo.width * densityOffset;
                         auto spriteHeight = spriteInfo.height * densityOffset;
@@ -931,6 +935,12 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
                                                 ((double) spriteInfo.height) / textureHeight);
 
                             auto stretchinfo = StretchShaderInfo(scaleX, 1, 1, 1, 1, scaleY, 1, 1, 1, 1, uvRect);
+#ifdef __ANDROID__
+                            stretchinfo.uv.y -= stretchinfo.uv.height; // OpenGL uv coordinates are bottom to top
+                            stretchinfo.uv.width *= textureWidthFactor; // Android textures are scaled to the size of a power of 2
+                            stretchinfo.uv.height *= textureHeightFactor;
+#endif
+
 
                             if (spriteInfo.stretchX.size() >= 1) {
                                 auto [begin, end] = spriteInfo.stretchX[0];
@@ -945,6 +955,19 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
                                     stretchinfo.stretchX1Begin = stretchinfo.stretchX0End;
                                     stretchinfo.stretchX1End = stretchinfo.stretchX0End;
                                 }
+
+                                const float sumStretchedX = (stretchinfo.stretchX0End - stretchinfo.stretchX0Begin) + (stretchinfo.stretchX1End - stretchinfo.stretchX1Begin);
+                                const float sumUnstretchedX = 1.0f - sumStretchedX;
+                                const float scaleStretchX = (scaleX - sumUnstretchedX) / sumStretchedX;
+
+                                const float sX0 = stretchinfo.stretchX0Begin / scaleX;
+                                const float eX0 = sX0 + scaleStretchX / scaleX * (stretchinfo.stretchX0End - stretchinfo.stretchX0Begin);
+                                const float sX1 = eX0 + (stretchinfo.stretchX1Begin - stretchinfo.stretchX0End) / scaleX;
+                                const float eX1 = sX1 + scaleStretchX / scaleX * (stretchinfo.stretchX1End - stretchinfo.stretchX1Begin);
+                                stretchinfo.stretchX0Begin = sX0;
+                                stretchinfo.stretchX0End = eX0;
+                                stretchinfo.stretchX1Begin = sX1;
+                                stretchinfo.stretchX1End = eX1;
                             }
 
                             if (spriteInfo.stretchY.size() >= 1) {
@@ -960,6 +983,19 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
                                     stretchinfo.stretchY1Begin = stretchinfo.stretchY0End;
                                     stretchinfo.stretchY1End = stretchinfo.stretchY0End;
                                 }
+
+                                const float sumStretchedY = (stretchinfo.stretchY0End - stretchinfo.stretchY0Begin) + (stretchinfo.stretchY1End - stretchinfo.stretchY1Begin);
+                                const float sumUnstretchedY = 1.0f - sumStretchedY;
+                                const float scaleStretchY = (scaleY - sumUnstretchedY) / sumStretchedY;
+
+                                const float sY0 = stretchinfo.stretchY0Begin / scaleY;
+                                const float eY0 = sY0 + scaleStretchY / scaleY * (stretchinfo.stretchY0End - stretchinfo.stretchY0Begin);
+                                const float sY1 = eY0 + (stretchinfo.stretchY1Begin - stretchinfo.stretchY0End) / scaleY;
+                                const float eY1 = sY1 + scaleStretchY / scaleY * (stretchinfo.stretchY1End - stretchinfo.stretchY1Begin);
+                                stretchinfo.stretchY0Begin = sY0;
+                                stretchinfo.stretchY0End = eY0;
+                                stretchinfo.stretchY1Begin = sY1;
+                                stretchinfo.stretchY1End = eY1;
                             }
                             wrapper->symbolShader->updateStretchInfo(stretchinfo);
 

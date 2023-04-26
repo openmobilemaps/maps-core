@@ -18,14 +18,14 @@ void StretchShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInte
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     int alphaLocation = glGetUniformLocation(openGlContext->getProgram(getProgramName()), "alpha");
     glUniform1f(alphaLocation, alpha);
-    int uvSpriteLocation = glGetUniformLocation(openGlContext->getProgram(getProgramName()), "uvSprite");
+    int uvSpriteLocation = glGetUniformLocation(openGlContext->getProgram(getProgramName()), "uvSprite"); // we receive the texture/uv-values upside down, the Quad already compensates for that
     glUniform4f(uvSpriteLocation, (float) stretchShaderInfo.uv.x, (float) stretchShaderInfo.uv.y, (float) stretchShaderInfo.uv.width, (float) stretchShaderInfo.uv.height);
     int scalesLocation = glGetUniformLocation(openGlContext->getProgram(getProgramName()), "scales");
     glUniform2f(scalesLocation, stretchShaderInfo.scaleX, stretchShaderInfo.scaleY);
     int stretchXLocation = glGetUniformLocation(openGlContext->getProgram(getProgramName()), "stretchX");
     glUniform4f(stretchXLocation, stretchShaderInfo.stretchX0Begin, stretchShaderInfo.stretchX0End, stretchShaderInfo.stretchX1Begin, stretchShaderInfo.stretchX1End);
     int stretchYLocation = glGetUniformLocation(openGlContext->getProgram(getProgramName()), "stretchY");
-    glUniform4f(stretchYLocation, stretchShaderInfo.stretchX0Begin, stretchShaderInfo.stretchX0End, stretchShaderInfo.stretchX1Begin, stretchShaderInfo.stretchX1End);
+    glUniform4f(stretchYLocation, stretchShaderInfo.stretchY0Begin, stretchShaderInfo.stretchY0End, stretchShaderInfo.stretchY1Begin, stretchShaderInfo.stretchY1End);
 }
 
 void StretchShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) {
@@ -70,71 +70,40 @@ std::string StretchShaderOpenGl::getFragmentShader() {
                                       out vec4 fragmentColor;
 
                                       void main() {
-                                          vec2 normalizedUV = (v_texcoord - uvSprite.xy) / uvSprite.zw * vec2(scales.x, scales.y);
-
-                                          vec2 mappedUV = v_texcoord;
-
-                                          float countRegionX = float(stretchX.x != stretchX.y) + float(stretchX.z != stretchX.w);
-                                          float countRegionY = float(stretchY.x != stretchY.y) + float(stretchY.z != stretchY.w);
+                                          // All computed in normalized uv space of this single sprite
+                                          vec2 texCoordNorm = (v_texcoord - uvSprite.xy) / uvSprite.zw;
+                                          vec2 texCoordNorm2 = (v_texcoord - uvSprite.xy) / uvSprite.zw;
 
                                           // X
-                                          if (countRegionX > 0.0) {
-                                              float stretchedRegionX = stretchX.y - stretchX.x + stretchX.w - stretchX.z;
+                                          if (stretchX.x != stretchX.y) {
+                                              float sumStretchedX = (stretchX.y - stretchX.x) + (stretchX.w - stretchX.z);
+                                              float scaleStretchX = (sumStretchedX * scales.x) / (1.0 - (scales.x - sumStretchedX * scales.x));
 
-                                              float notStretchedRegionX = 1.0 - stretchedRegionX;
-
-                                              float overflowRegion0X = (scales.x - notStretchedRegionX) / countRegionX;
-                                              float overflowRegion1X = countRegionX == 2.0 ? overflowRegion0X : 0.0;
-
-                                              float startXRegion0 = stretchX.x;
-                                              float endXRegion0 = startXRegion0 + overflowRegion0X;
-                                              float startXRegion1 = endXRegion0 + (stretchX.z - stretchX.y);
-                                              float endXRegion1 = startXRegion1 + overflowRegion1X;
-                                              float endX = scales.x;
-
-                                              if (normalizedUV.x < startXRegion0) {;
-                                                  mappedUV.x = (normalizedUV.x / startXRegion0) * stretchX.x * uvSprite.z + uvSprite.x;
-                                              } else if (normalizedUV.x >= startXRegion0 && normalizedUV.x < endXRegion0) {
-                                                  mappedUV.x = ((((normalizedUV.x - startXRegion0)  / (endXRegion0 - startXRegion0)) * (stretchX.y - stretchX.y)) + stretchX.y) * uvSprite.z + uvSprite.x;
-                                              } else if (normalizedUV.x >= endXRegion0 && normalizedUV.x < startXRegion1) {
-                                                  mappedUV.x = ((((normalizedUV.x - startXRegion1)  / (endXRegion1 - startXRegion1)) * (1.0 - stretchX.w)) + stretchX.w) * uvSprite.z + uvSprite.x;
-                                              } else if (normalizedUV.x >= startXRegion1 && normalizedUV.x < endXRegion1) {
-                                                  mappedUV.x = ((((normalizedUV.x - startXRegion1)  / (endXRegion1 - startXRegion1)) * (stretchX.w - stretchX.w)) + stretchX.w) * uvSprite.z + uvSprite.x;
-                                              } else {
-                                                  mappedUV.x = ((((normalizedUV.x - endXRegion1)  / (endX - endXRegion1)) * (1.0 - stretchX.w)) + stretchX.w) * uvSprite.z + uvSprite.x;
-                                              }
+                                              float totalOffset = min(texCoordNorm.x, stretchX.x) // offsetPre0Unstretched
+                                                      + (clamp(texCoordNorm.x, stretchX.x, stretchX.y) - stretchX.x) / scaleStretchX // offset0Stretched
+                                                      + (clamp(texCoordNorm.x, stretchX.y, stretchX.z) - stretchX.y) // offsetPre1Unstretched
+                                                      + (clamp(texCoordNorm.x, stretchX.z, stretchX.w) - stretchX.z) / scaleStretchX // offset1Stretched
+                                                      + (clamp(texCoordNorm.x, stretchX.w, 1.0) - stretchX.w); // offsetPost1Unstretched
+                                              texCoordNorm.x = totalOffset * scales.x;
                                           }
-
 
                                           // Y
-                                          if (countRegionY > 0.0) {
-                                              float stretchedRegionY = stretchY.y - stretchY.x + stretchY.w - stretchY.z;
+                                          if (stretchY.x != stretchY.y) {
+                                              float sumStretchedY = (stretchY.y - stretchY.x) + (stretchY.w - stretchY.z);
+                                              float scaleStretchY = (sumStretchedY * scales.y) / (1.0 - (scales.y - sumStretchedY * scales.y));
 
-                                              float notStretchedRegionY = 1.0 - stretchedRegionY;
-
-                                              float overflowRegion0Y = (scales.y - notStretchedRegionY) / countRegionY;
-                                              float overflowRegion1Y = countRegionY == 2.0 ? overflowRegion0Y : 0.0;
-
-                                              float startYRegion0 = stretchY.x;
-                                              float endYRegion0 = startYRegion0 + overflowRegion0Y;
-                                              float startYRegion1 = endYRegion0 + (stretchY.z - stretchY.y);
-                                              float endYRegion1 = startYRegion1 + overflowRegion1Y;
-                                              float endY = scales.y;
-
-                                              if (normalizedUV.y < startYRegion0) {
-                                                  mappedUV.y = (normalizedUV.y / startYRegion0) * stretchY.x * uvSprite.w + uvSprite.y;
-                                              } else if (normalizedUV.y >= startYRegion0 && normalizedUV.y < endYRegion0) {
-                                                  mappedUV.y = ((((normalizedUV.y - startYRegion0)  / (endYRegion0 - startYRegion0)) * (stretchY.y - stretchY.y)) + stretchY.y) * uvSprite.w + uvSprite.y;
-                                              } else if (normalizedUV.y >= endYRegion0 && normalizedUV.y < startYRegion1) {
-                                                  mappedUV.y = ((((normalizedUV.y - startYRegion1)  / (endYRegion1 - startYRegion1)) * (1.0 - stretchY.w)) + stretchY.w) * uvSprite.w + uvSprite.y;
-                                              } else if (normalizedUV.y >= startYRegion1 && normalizedUV.y < endYRegion1) {
-                                                  mappedUV.y = ((((normalizedUV.y - startYRegion1)  / (endYRegion1 - startYRegion1)) * (stretchY.w - stretchY.w)) + stretchY.w) * uvSprite.w + uvSprite.y;
-                                              } else {
-                                                  mappedUV.y = ((((normalizedUV.y - endYRegion1)  / (endY - endYRegion1)) * (1.0 - stretchY.w)) + stretchY.w) * uvSprite.w + uvSprite.y;
-                                              }
+                                              float totalOffset = min(texCoordNorm.y, stretchY.x) // offsetPre0Unstretched
+                                                      + (clamp(texCoordNorm.y, stretchY.x, stretchY.y) - stretchY.x) / scaleStretchY // offset0Stretched
+                                                      + (clamp(texCoordNorm.y, stretchY.y, stretchY.z) - stretchY.y) // offsetPre1Unstretched
+                                                      + (clamp(texCoordNorm.y, stretchY.z, stretchY.w) - stretchY.z) / scaleStretchY // offset1Stretched
+                                                      + (clamp(texCoordNorm.y, stretchY.w, 1.0) - stretchY.w); // offsetPost1Unstretched
+                                              texCoordNorm.y = totalOffset * scales.y;
                                           }
 
-                                          vec4 color = texture(textureSampler, mappedUV);
+                                          // remap final normalized uv to sprite atlas coordinates
+                                          texCoordNorm = texCoordNorm * uvSprite.zw + uvSprite.xy;
+
+                                          vec4 color = texture(textureSampler, texCoordNorm);
                                           float a = color.a * alpha;
                                           fragmentColor = vec4(color.rgb * a, a);
                                       }

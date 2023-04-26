@@ -53,77 +53,42 @@ stretchFragmentShader(VertexOut in [[stage_in]],
 {
     const StretchShaderInfo info = stretchInfo[0];
 
-    const float2 normalizedUV = (in.uv - info.uvOrig) / info.uvSize * float2(info.scaleX, info.scaleY);
+    // All computed in normalized uv space of this single sprite
+    float2 texCoordNorm = (in.uv - info.uvOrig) / info.uvSize;
 
-    float2 mappedUV = in.uv;
+    // X
+    if (info.stretchX0Begin != info.stretchX0End) {
+        const float sumStretchedX = (info.stretchX0End - info.stretchX0Begin) + (info.stretchX1End - info.stretchX1Begin);
+        const float scaleStretchX = (sumStretchedX * info.scaleX) / (1.0 - (info.scaleX - sumStretchedX * info.scaleX));
 
-    const float countRegionX = float(info.stretchX0Begin != info.stretchX0End) + float(info.stretchX1Begin != info.stretchX1End);
-    const float countRegionY = float(info.stretchY0Begin != info.stretchY0End) + float(info.stretchY1Begin != info.stretchY1End);
-
-    //X
-    if (countRegionX != 0) {
-        const float strechedRegionX = info.stretchX0End - info.stretchX0Begin + info.stretchX1End - info.stretchX1Begin;
-
-        const float notStrechedRegionX = 1 - strechedRegionX;
-
-        const float overflowRegion0X = (info.scaleX - notStrechedRegionX) / countRegionX;
-        const float overflowRegion1X = countRegionX == 2.0 ? overflowRegion0X : 0;
-
-        const float startXRegion0 = info.stretchX0Begin;
-        const float endXRegion0 = startXRegion0 + overflowRegion0X;
-        const float startXRegion1 = endXRegion0 + (info.stretchX1Begin - info.stretchX0End);
-        const float endXRegion1 = startXRegion1 + overflowRegion1X;
-        const float endX = info.scaleX;
-
-        if (normalizedUV.x < startXRegion0) {;
-            mappedUV.x = (normalizedUV.x / startXRegion0) * info.stretchX0Begin * info.uvSize.x + info.uvOrig.x;
-        } else if (normalizedUV.x >= startXRegion0 && normalizedUV.x < endXRegion0) {
-            mappedUV.x = ((((normalizedUV.x - startXRegion0)  / (endXRegion0 - startXRegion0)) * (info.stretchX0End - info.stretchX0End)) + info.stretchX0End) * info.uvSize.x + info.uvOrig.x;
-        } else if (normalizedUV.x >= endXRegion0 && normalizedUV.x < startXRegion1) {
-            mappedUV.x = ((((normalizedUV.x - startXRegion1)  / (endXRegion1 - startXRegion1)) * (1 - info.stretchX1End)) + info.stretchX1End) * info.uvSize.x + info.uvOrig.x;
-        } else if (normalizedUV.x >= startXRegion1 && normalizedUV.x < endXRegion1) {
-            mappedUV.x = ((((normalizedUV.x - startXRegion1)  / (endXRegion1 - startXRegion1)) * (info.stretchX1End - info.stretchX1End)) + info.stretchX1End) * info.uvSize.x + info.uvOrig.x;
-        } else {
-            mappedUV.x = ((((normalizedUV.x - endXRegion1)  / (endX - endXRegion1)) * (1 - info.stretchX1End)) + info.stretchX1End) * info.uvSize.x + info.uvOrig.x;
-        }
+        const float totalOffset = min(texCoordNorm.x, info.stretchX0Begin) // offsetPre0Unstretched
+                            + (clamp(texCoordNorm.x, info.stretchX0Begin, info.stretchX0End) - info.stretchX0Begin) / scaleStretchX // offset0Stretched
+                            + (clamp(texCoordNorm.x, info.stretchX0End, info.stretchX1Begin) - info.stretchX0End) // offsetPre1Unstretched
+                            + (clamp(texCoordNorm.x, info.stretchX1Begin, info.stretchX1End) - info.stretchX1Begin) / scaleStretchX // offset1Stretched
+                            + (clamp(texCoordNorm.x, info.stretchX1End, 1.0) - info.stretchX1End); // offsetPost1Unstretched
+        texCoordNorm.x = totalOffset * info.scaleX;
     }
 
+    // Y
+    if (info.stretchY0Begin != info.stretchY0End) {
+        const float sumStretchedY = (info.stretchY0End - info.stretchY0Begin) + (info.stretchY1End - info.stretchY1Begin);
+        const float scaleStretchY = (sumStretchedY * info.scaleY) / (1.0 - (info.scaleY - sumStretchedY * info.scaleY));
 
-    //Y
-    if (countRegionY != 0) {
-        const float strechedRegionY = info.stretchY0End - info.stretchY0Begin + info.stretchY1End - info.stretchY1Begin;
-
-        const float notStrechedRegionY = 1 - strechedRegionY;
-
-        const float overflowRegion0Y = (info.scaleY - notStrechedRegionY) / countRegionY;
-        const float overflowRegion1Y = countRegionY == 2.0 ? overflowRegion0Y : 0;
-
-        const float startYRegion0 = info.stretchY0Begin;
-        const float endYRegion0 = startYRegion0 + overflowRegion0Y;
-        const float startYRegion1 = endYRegion0 + (info.stretchY1Begin - info.stretchY0End);
-        const float endYRegion1 = startYRegion1 + overflowRegion1Y;
-        const float endY = info.scaleY;
-
-        if (normalizedUV.y < startYRegion0) {
-            mappedUV.y = (normalizedUV.y / startYRegion0) * info.stretchY0Begin * info.uvSize.y + info.uvOrig.y;
-        } else if (normalizedUV.y >= startYRegion0 && normalizedUV.y < endYRegion0) {
-            mappedUV.y = ((((normalizedUV.y - startYRegion0)  / (endYRegion0 - startYRegion0)) * (info.stretchY0End - info.stretchY0End)) + info.stretchY0End) * info.uvSize.y + info.uvOrig.y;
-        } else if (normalizedUV.y >= endYRegion0 && normalizedUV.y < startYRegion1) {
-            mappedUV.y = ((((normalizedUV.y - startYRegion1)  / (endYRegion1 - startYRegion1)) * (1 - info.stretchY1End)) + info.stretchY1End) * info.uvSize.y + info.uvOrig.y;
-        } else if (normalizedUV.y >= startYRegion1 && normalizedUV.y < endYRegion1) {
-            mappedUV.y = ((((normalizedUV.y - startYRegion1)  / (endYRegion1 - startYRegion1)) * (info.stretchY1End - info.stretchY1End)) + info.stretchY1End) * info.uvSize.y + info.uvOrig.y;
-        } else {
-            mappedUV.y = ((((normalizedUV.y - endYRegion1)  / (endY - endYRegion1)) * (1 - info.stretchY1End)) + info.stretchY1End) * info.uvSize.y + info.uvOrig.y;
-        }
+        const float totalOffset = min(texCoordNorm.y, info.stretchY0Begin) // offsetPre0Unstretched
+                            + (clamp(texCoordNorm.y, info.stretchY0Begin, info.stretchY0End) - info.stretchY0Begin) / scaleStretchY // offset0Stretched
+                            + (clamp(texCoordNorm.y, info.stretchY0End, info.stretchY1Begin) - info.stretchY0End) // offsetPre1Unstretched
+                            + (clamp(texCoordNorm.y, info.stretchY1Begin, info.stretchY1End) - info.stretchY1Begin) / scaleStretchY // offset1Stretched
+                            + (clamp(texCoordNorm.y, info.stretchY1End, 1.0) - info.stretchY1End); // offsetPost1Unstretched
+        texCoordNorm.y = totalOffset * info.scaleY;
     }
 
-    const float4 color = texture0.sample(textureSampler, mappedUV);
-    
+    // remap final normalized uv to sprite atlas coordinates
+    texCoordNorm = texCoordNorm * info.uvSize + info.uvOrig;
+
+    const float4 color = texture0.sample(textureSampler, texCoordNorm);
     const float a = color.a * alpha;
-
     if (a == 0) {
         discard_fragment();
     }
-
     return float4(color.r * a, color.g * a, color.b * a, a);
 }
