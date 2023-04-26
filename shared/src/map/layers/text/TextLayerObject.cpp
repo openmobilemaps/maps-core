@@ -45,20 +45,23 @@ TextLayerObject::TextLayerObject(const std::shared_ptr<TextInterface> &text, con
     referencePoint = converter->convertToRenderSystem(textInfo->getCoordinate());
     referenceSize = fontData.info.size;
 
-    int characterCount = 0;
+    std::vector<BreakResult> breaks = {};
+    if(textInfo->getSymbolPlacement() == TextSymbolPlacement::POINT) {
+        std::vector<std::string> letters;
+        for (const auto &entry: textInfo->getText()) {
+            for (const auto &c : TextHelper::splitWstring(entry.text)) {
+                letters.push_back(c);
+            }
+        }
+
+        breaks = TextHelper::bestBreakIndices(letters, maxCharacterWidth);
+    }
+
+    int currentLetterIndex = 0;
     for (const auto &entry: textInfo->getText()) {
         for (const auto &c : TextHelper::splitWstring(entry.text)) {
             // precompute indices in font-data, we use -1 for space-case, -2 for newline-case
             int index = -1;
-
-            if(textInfo->getSymbolPlacement() == TextSymbolPlacement::POINT) {
-                if (c == " " && characterCount < maxCharacterWidth) {
-                    characterCount += 1;
-                } else if (c == "\n" || c == " ") {
-                    characterCount = 0;
-                    index = -2;
-                }
-            }
 
             int i = 0;
             for (const auto &d : fontData.glyphs) {
@@ -70,16 +73,25 @@ TextLayerObject::TextLayerObject(const std::shared_ptr<TextInterface> &text, con
                 ++i;
             }
 
-            characterCount += 1;
-            splittedTextInfo.emplace_back(index, entry.scale);
-
             if(textInfo->getSymbolPlacement() == TextSymbolPlacement::POINT) {
-                if (c == "/" && characterCount >= maxCharacterWidth) {
-                    characterCount = 0;
-                    index = -2;
+                // check for line breaks in point texts
+                auto it = std::find_if(breaks.begin(), breaks.end(), [&](const auto& v) { return v.index == currentLetterIndex; });
+                if(it != breaks.end()) {
+                    // add line break
+                    if(it->keepLetter) {
+                        splittedTextInfo.emplace_back(index, entry.scale);
+                    }
+                    splittedTextInfo.emplace_back(-2, entry.scale);
+                } else {
+                    // just add it
                     splittedTextInfo.emplace_back(index, entry.scale);
                 }
+            } else {
+                // non-point symbols: just add it, no line breaks possible
+                splittedTextInfo.emplace_back(index, entry.scale);
             }
+
+            currentLetterIndex++;
         }
     }
 
@@ -157,7 +169,7 @@ void TextLayerObject::layoutPoint(float scale, bool updateObject) {
         std::vector<size_t> lineEndIndices;
 
         for(auto& i : splittedTextInfo) {
-            if(i.glyphIndex > 0) {
+            if(i.glyphIndex >= 0) {
                 auto &d = fontData.glyphs[i.glyphIndex];
                 auto size = Vec2D(d.boundingBoxSize.x * fontSize * i.scale, d.boundingBoxSize.y * fontSize * i.scale);
                 auto bearing = Vec2D(d.bearing.x * fontSize * i.scale, d.bearing.y * fontSize * i.scale);
@@ -327,6 +339,7 @@ void TextLayerObject::layoutPoint(float scale, bool updateObject) {
 
         lastScale = scale;
     }
+
     if (text && updateObject) {
         text->setTextsShared(SharedBytes((int64_t) vertices.data(), (int32_t) vertices.size(), (int32_t) sizeof(float)),
                              SharedBytes((int64_t) indices.data(), (int32_t) indices.size(), (int32_t) sizeof(int16_t)));
