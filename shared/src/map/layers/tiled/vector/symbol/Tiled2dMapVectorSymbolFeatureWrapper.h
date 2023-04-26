@@ -63,8 +63,6 @@ public:
 
     bool collides = true;
 
-    bool isInstanceRenderable = false;
-
     std::shared_ptr<Quad2dInterface> symbolObject;
     std::shared_ptr<GraphicsObjectInterface> symbolGraphicsObject;
     std::shared_ptr<StretchShaderInterface> symbolShader;
