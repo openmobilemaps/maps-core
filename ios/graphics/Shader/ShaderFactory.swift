@@ -43,4 +43,8 @@ class ShaderFactory: MCShaderFactoryInterface {
     func createRasterShader() -> MCRasterShaderInterface? {
         RasterShader()
     }
+
+    func createStretchShader() -> MCStretchShaderInterface? {
+        StretchShader()
+    }
 }

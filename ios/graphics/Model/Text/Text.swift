@@ -150,7 +150,28 @@ extension Text: MCTextInterface {
             fatalError("Cannot allocate buffers")
         }
         lock.withCritical {
-            indicesCount = indices.count
+            self.indicesCount = indices.count
+            self.verticesBuffer = verticesBuffer
+            self.indicesBuffer = indicesBuffer
+        }
+    }
+
+    func setTextsShared(_ vertices: MCSharedBytes, indices: MCSharedBytes) {
+        guard let verticesBuffer = device.makeBuffer(from: vertices),
+              let indicesBuffer = device.makeBuffer(from: indices),
+              indices.elementCount > 0
+        else {
+            lock.withCritical {
+                indicesCount = 0
+                verticesBuffer = nil
+                indicesBuffer = nil
+            }
+
+            return
+        }
+
+        lock.withCritical {
+            self.indicesCount = Int(indices.elementCount)
             self.verticesBuffer = verticesBuffer
             self.indicesBuffer = indicesBuffer
         }

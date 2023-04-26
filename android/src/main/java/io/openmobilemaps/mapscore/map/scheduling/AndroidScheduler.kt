@@ -60,8 +60,12 @@ class AndroidScheduler(
 					if (isResumed.get()) {
 						scheduleTask(task)
 					} else {
-						task.getConfig().delay = 0
-						taskQueueMap[task.getConfig().priority]!!.offer(task)
+						val newTaskConfig = task.getConfig().let { TaskConfig(it.id, 0L, it.priority, it.executionEnvironment) }
+						val newTask = object : TaskInterface() {
+							override fun getConfig(): TaskConfig = newTaskConfig
+							override fun run() { task.run() }
+						}
+						taskQueueMap[task.getConfig().priority]!!.offer(newTask)
 					}
 					delayedTaskMap.remove(id)
 				}
@@ -123,6 +127,10 @@ class AndroidScheduler(
 			}
 		}
 	}
+
+	override fun hasSeparateGraphicsInvocation(): Boolean = false
+
+	override fun runGraphicsTasks(): Boolean = false // unused
 
 	fun launchCoroutine(
 		context: CoroutineContext = EmptyCoroutineContext,

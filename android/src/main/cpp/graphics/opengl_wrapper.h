@@ -9,8 +9,8 @@
  */
 
 #ifdef __ANDROID__
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
+#include <GLES3/gl32.h>
+#include <GLES3/gl3ext.h>
 #endif
 
 #if defined(__APPLE__) && !defined(BANDIT_TESTING)

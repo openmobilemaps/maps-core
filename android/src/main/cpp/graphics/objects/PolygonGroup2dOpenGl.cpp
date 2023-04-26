@@ -122,4 +122,6 @@ void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterf
     // Disable vertex array
     glDisableVertexAttribArray(positionHandle);
     glDisableVertexAttribArray(styleIndexHandle);
+
+    glDisable(GL_BLEND);
 }

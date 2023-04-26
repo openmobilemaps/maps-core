@@ -43,8 +43,9 @@ void PolygonGroup2dLayerObject::setVertices(const std::vector<std::tuple<std::ve
     auto i = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(int32_t));
 #else
     std::vector<int16_t> shortIndices;
+    shortIndices.reserve(indices.size());
     for(auto& i : indices) {
-        shortIndices.emplace_back(i);
+        shortIndices.push_back(i);
     }
     auto i = SharedBytes((int64_t)shortIndices.data(), (int32_t)shortIndices.size(), (int32_t)sizeof(int16_t));
 #endif

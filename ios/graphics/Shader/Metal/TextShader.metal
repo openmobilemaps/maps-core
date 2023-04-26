@@ -14,16 +14,10 @@ using namespace metal;
 
 vertex VertexOut
 textVertexShader(const VertexIn vertexIn [[stage_in]],
-                 constant float4x4 &mvpMatrix [[buffer(1)]],
-                 constant float &scale [[buffer(2)]],
-                 constant float2 &reference [[buffer(3)]])
+                 constant float4x4 &mvpMatrix [[buffer(1)]])
 {
-    float2 pos = (mvpMatrix * float4(vertexIn.position.xy, 0.0, 1.0)).xy;
-    float2 ref = (mvpMatrix * float4(reference.xy, 0.0, 1.0)).xy;
-    pos = ref.xy + (pos.xy - ref.xy) * scale;
-
     VertexOut out {
-        .position = float4(pos.xy, 0.0, 1.0),
+        .position = float4((mvpMatrix * float4(vertexIn.position.xy, 0.0, 1.0)).xy, 0.0, 1.0),
         .uv = vertexIn.uv
     };
 
@@ -34,11 +28,12 @@ fragment float4
 textFragmentShader(VertexOut in [[stage_in]],
                        constant float4 &color [[buffer(1)]],
                        constant float4 &haloColor [[buffer(2)]],
+                       constant float &opacity [[buffer(3)]],
                        texture2d<float> texture0 [[ texture(0)]],
                        sampler textureSampler [[sampler(0)]])
 {
     float4 dist = texture0.sample(textureSampler, in.uv);
-    if (haloColor.a == 0.0 && dist.x <= 0.5) {
+    if (opacity == 0 || (haloColor.a == 0.0 && dist.x <= 0.5)) {
         discard_fragment();
     }
 
@@ -49,6 +44,6 @@ textFragmentShader(VertexOut in [[stage_in]],
 
     float4 mixed = mix(haloColor, glyphColor, alpha);
 
-    float a2 = smoothstep(0.40, 0.5, sqrt(dist.x));
+    float a2 = smoothstep(0.40, 0.5, sqrt(dist.x)) * opacity;
     return float4(mixed.r * a2, mixed.g * a2, mixed.b * a2, a2);
 }

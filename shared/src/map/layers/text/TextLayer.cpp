@@ -160,6 +160,12 @@ void TextLayer::clear() {
     mapInterface->invalidate();
 }
 
+void TextLayer::update() {
+    for (auto const &textTuple : texts) {
+        textTuple.second->update();
+    }
+}
+
 void TextLayer::generateRenderPasses() {
     std::lock_guard<std::recursive_mutex> lock(textMutex);
 
@@ -203,7 +209,7 @@ void TextLayer::addTexts(const std::vector<std::shared_ptr<TextInfoInterface>> &
 
     for (const auto &text : texts) {
         auto fontData = fontLoader->loadFont(text->getFont()).fontData;
-        auto textObject = textHelper.textLayerObject(text, fontData, Vec2F(0.0, 0.0), 1.2, 0.0, 15);
+        auto textObject = textHelper.textLayerObject(text, fontData, Vec2F(0.0, 0.0), 1.2, 0.0, 15, 45.0, SymbolAlignment::AUTO);
 
         if (textObject) {
             textObjects.push_back(std::make_tuple(text, textObject));

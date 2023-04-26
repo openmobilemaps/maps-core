@@ -12,16 +12,20 @@ package io.openmobilemaps.mapscore.map.loader
 
 import android.content.Context
 import android.graphics.BitmapFactory
+import com.snapchat.djinni.Future
+import com.snapchat.djinni.Promise
 import io.openmobilemaps.mapscore.graphics.BitmapTextureHolder
-import io.openmobilemaps.mapscore.graphics.DataHolder
 import io.openmobilemaps.mapscore.map.loader.networking.RefererInterceptor
 import io.openmobilemaps.mapscore.map.loader.networking.RequestUtils
 import io.openmobilemaps.mapscore.map.loader.networking.UserAgentInterceptor
 import io.openmobilemaps.mapscore.shared.map.loader.*
 import okhttp3.*
 import java.io.File
-import java.util.*
+import java.io.IOException
+import java.nio.ByteBuffer
+import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 open class DataLoader(
 	private val context: Context,
@@ -33,6 +37,9 @@ open class DataLoader(
 
 	companion object {
 		private const val HEADER_NAME_ETAG = "etag"
+
+        private const val TIMEOUT_DUR = 20L
+        private val TIMEOUT_UNIT = TimeUnit.SECONDS
 	}
 
 	protected var okHttpClient = initializeClient()
@@ -43,7 +50,7 @@ open class DataLoader(
 		.connectionPool(ConnectionPool(8, 5000L, TimeUnit.MILLISECONDS))
 		.cache(Cache(cacheDirectory, cacheSize))
 		.dispatcher(Dispatcher().apply { maxRequestsPerHost = 8 })
-		.readTimeout(20, TimeUnit.SECONDS)
+		.readTimeout(TIMEOUT_DUR, TIMEOUT_UNIT)
 		.build()
 
 	fun adjustClientSettings(
@@ -60,51 +67,103 @@ open class DataLoader(
 	}
 
 	override fun loadTexture(url: String, etag: String?): TextureLoaderResult {
-		val request = Request.Builder()
-			.url(url)
-			.build()
+        val resFuture = loadTextureAsnyc(url, etag)
+        return try {
+            resFuture.get(TIMEOUT_DUR, TIMEOUT_UNIT)
+        } catch (e: Exception) {
+            val status = when (e) {
+                is InterruptedException, is ExecutionException -> LoaderStatus.ERROR_OTHER
+                is TimeoutException -> LoaderStatus.ERROR_TIMEOUT
+                else -> throw e
+            }
+            TextureLoaderResult(null, null, status, null)
+        }
+	}
 
-		try {
-			return okHttpClient.newCall(request).execute().use { response ->
-				val bytes: ByteArray? = response.body?.bytes()
-				if (response.isSuccessful && bytes != null) {
-					val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-					return@use TextureLoaderResult(
-						BitmapTextureHolder(bitmap),
-						response.header(HEADER_NAME_ETAG, null),
-						LoaderStatus.OK,
-						null
-					)
-				} else if (response.code == 404) {
-					return@use TextureLoaderResult(null, null, LoaderStatus.ERROR_404, response.code.toString())
-				} else {
-					return@use TextureLoaderResult(null, null, LoaderStatus.ERROR_OTHER, response.code.toString())
-				}
+    override fun loadTextureAsnyc(url: String, etag: String?): Future<TextureLoaderResult> {
+        val request = Request.Builder()
+            .url(url)
+            .tag(url)
+            .build()
+
+        val result = Promise<TextureLoaderResult>()
+
+        okHttpClient.newCall(request).enqueue(object : Callback {
+            override fun onResponse(call: Call, response: Response) {
+                val bytes: ByteArray? = response.body?.bytes()
+                if (response.isSuccessful && bytes != null) {
+                    val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                    result.setValue(
+                        TextureLoaderResult(
+                            BitmapTextureHolder(bitmap),
+                            response.header(HEADER_NAME_ETAG, null),
+                            LoaderStatus.OK,
+                            null
+                        )
+                    )
+                } else if (response.code == 404) {
+                    result.setValue(TextureLoaderResult(null, null, LoaderStatus.ERROR_404, response.code.toString()))
+                } else {
+                    result.setValue(TextureLoaderResult(null, null, LoaderStatus.ERROR_OTHER, response.code.toString()))
+                }
+            }
+
+			override fun onFailure(call: Call, e: IOException) {
+				result.setValue(TextureLoaderResult(null, null, LoaderStatus.ERROR_NETWORK, null))
 			}
-		} catch (e: Exception) {
-			return TextureLoaderResult(null, null, LoaderStatus.ERROR_NETWORK, null)
-		}
+		})
+		return result.future
 	}
 
 	override fun loadData(url: String, etag: String?): DataLoaderResult {
+		val resFuture = loadDataAsync(url, etag)
+		return try {
+			resFuture.get(TIMEOUT_DUR, TIMEOUT_UNIT)
+		} catch (e: Exception) {
+			val status = when (e) {
+				is InterruptedException, is ExecutionException -> LoaderStatus.ERROR_OTHER
+				is TimeoutException -> LoaderStatus.ERROR_TIMEOUT
+				else -> throw e
+			}
+			DataLoaderResult(null, null, status, null)
+		}
+	}
+
+	override fun loadDataAsync(url: String, etag: String?): Future<DataLoaderResult> {
 		val request = Request.Builder()
 			.url(url)
+			.tag(url)
 			.build()
+		val result = Promise<DataLoaderResult>()
+		okHttpClient.newCall(request).enqueue(object : Callback {
+			override fun onFailure(call: Call, e: IOException) {
+				result.setValue(DataLoaderResult(null, null, LoaderStatus.ERROR_NETWORK, null))
+			}
 
-		try {
-			return okHttpClient.newCall(request).execute().use { response ->
+			override fun onResponse(call: Call, response: Response) {
 				val bytes: ByteArray? = response.body?.bytes()
 				if (response.isSuccessful && bytes != null) {
-					return@use DataLoaderResult(DataHolder(bytes), response.header(HEADER_NAME_ETAG, null), LoaderStatus.OK, null)
+					result.setValue(
+						DataLoaderResult(
+							ByteBuffer.allocateDirect(bytes.size).put(bytes),
+							response.header(HEADER_NAME_ETAG, null),
+							LoaderStatus.OK,
+							null
+						)
+					)
 				} else if (response.code == 404) {
-					return@use DataLoaderResult(null, null, LoaderStatus.ERROR_404, response.code.toString())
+					result.setValue(DataLoaderResult(null, null, LoaderStatus.ERROR_404, response.code.toString()))
 				} else {
-					return@use DataLoaderResult(null, null, LoaderStatus.ERROR_OTHER, response.code.toString())
+					result.setValue(DataLoaderResult(null, null, LoaderStatus.ERROR_OTHER, response.code.toString()))
 				}
 			}
-		} catch (e: Exception) {
-			return DataLoaderResult(null, null, LoaderStatus.ERROR_NETWORK, null)
-		}
+		})
+        return result.future
+	}
+
+	override fun cancel(url: String) {
+		okHttpClient.dispatcher.queuedCalls().filter { it.request().tag() == url }.forEach { it.cancel() }
+		okHttpClient.dispatcher.runningCalls().filter { it.request().tag() == url }.forEach { it.cancel() }
 	}
 
 	private fun initializeClient() = createClient()

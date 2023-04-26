@@ -19,8 +19,7 @@
 #include "QuadMaskObject.h"
 #include "VectorTileGeometryHandler.h"
 #include "VectorLayerDescription.h"
-#include "Tiled2dMapVectorLayerReadyInterface.h"
-#include "Tiled2dMapVectorLayerSelectionInterface.h"
+#include "Tiled2dMapVectorLayerTileCallbackInterface.h"
 #include "Textured2dLayerObject.h"
 
 class Tiled2dMapVectorSubLayer : public SimpleLayerInterface {
@@ -58,9 +57,7 @@ public:
 
     virtual std::string getLayerDescriptionIdentifier() { return ""; };
 
-    void setTilesReadyDelegate(const std::weak_ptr<Tiled2dMapVectorLayerReadyInterface> readyDelegate);
-
-    void setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate);
+    void setTilesReadyDelegate(const std::weak_ptr<Tiled2dMapVectorLayerTileCallbackInterface> readyDelegate);
 
     virtual void setSelectedFeatureIdentfier(std::optional<int64_t> identifier);
 
@@ -77,9 +74,7 @@ protected:
 
     std::unordered_map<Tiled2dMapTileInfo, std::vector<std::shared_ptr<RenderPassInterface>>> renderPasses;
 
-    std::weak_ptr<Tiled2dMapVectorLayerReadyInterface> readyDelegate;
-
-    std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate;
+    std::weak_ptr<Tiled2dMapVectorLayerTileCallbackInterface> readyDelegate;
 
     std::recursive_mutex selectedFeatureIdentifierMutex;
     std::optional<int64_t> selectedFeatureIdentifier;

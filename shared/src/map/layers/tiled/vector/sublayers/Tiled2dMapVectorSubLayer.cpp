@@ -93,13 +93,8 @@ void Tiled2dMapVectorSubLayer::clearTileData(const Tiled2dMapTileInfo &tileInfo)
 
 void Tiled2dMapVectorSubLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) {}
 
-void Tiled2dMapVectorSubLayer::setTilesReadyDelegate(const std::weak_ptr<Tiled2dMapVectorLayerReadyInterface> readyDelegate) {
+void Tiled2dMapVectorSubLayer::setTilesReadyDelegate(const std::weak_ptr<Tiled2dMapVectorLayerTileCallbackInterface> readyDelegate) {
     this->readyDelegate = readyDelegate;
-}
-
-
-void Tiled2dMapVectorSubLayer::setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate) {
-    this->selectionDelegate = selectionDelegate;
 }
 
 void Tiled2dMapVectorSubLayer::setSelectedFeatureIdentfier(std::optional<int64_t> identifier) {

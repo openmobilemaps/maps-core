@@ -38,7 +38,7 @@ class ColorPolygonGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
   private:
     std::recursive_mutex styleMutex;
     std::vector<GLfloat> polygonStyles;
-    GLint numStyles;
+    GLint numStyles = 0;
 
     const int sizeStyleValues = 5;
     const int sizeStyleValuesArray = sizeStyleValues * 32;

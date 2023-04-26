@@ -36,7 +36,7 @@ open class MCMapView: MTKView {
                                                        shaderFactory: ShaderFactory(),
                                                        renderingContext: renderingContext,
                                                        mapConfig: mapConfig,
-                                                       scheduler: MCScheduler(),
+                                                       scheduler: MCThreadPoolScheduler.create(),
                                                        pixelDensity: pixelsPerInch ?? Float(UIScreen.pixelsPerInch)) else {
             fatalError("Can't create MCMapInterface")
         }

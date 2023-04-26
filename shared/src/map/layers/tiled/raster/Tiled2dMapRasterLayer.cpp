@@ -18,6 +18,7 @@
 #include "PolygonCompare.h"
 #include <Logger.h>
 #include <map>
+#include <chrono>
 
 Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
@@ -40,10 +41,17 @@ Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapL
           registerToTouchHandler(registerToTouchHandler) {}
 
 void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface, int32_t layerIndex) {
-    rasterSource = std::make_shared<Tiled2dMapRasterSource>(
-            mapInterface->getMapConfig(), layerConfig, mapInterface->getCoordinateConverterHelper(), mapInterface->getScheduler(),
-                                                            tileLoaders, shared_from_this(), mapInterface->getCamera()->getScreenDensityPpi());
-    setSourceInterface(rasterSource);
+    
+    
+    auto selfMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+    auto castedMe = std::static_pointer_cast<Tiled2dMapRasterLayer>(shared_from_this());
+    auto selfActor = WeakActor<Tiled2dMapRasterSourceListener>(selfMailbox, castedMe);
+    
+    auto mailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+    rasterSource.emplaceObject(mailbox, mapInterface->getMapConfig(), layerConfig, mapInterface->getCoordinateConverterHelper(), mapInterface->getScheduler(), tileLoaders, selfActor, mapInterface->getCamera()->getScreenDensityPpi());
+
+    setSourceInterfaces({rasterSource.weakActor<Tiled2dMapSourceInterface>()});
+    
     Tiled2dMapLayer::onAdded(mapInterface, layerIndex);
 
     if (registerToTouchHandler) {
@@ -127,14 +135,17 @@ void Tiled2dMapRasterLayer::resume() {
 
 void Tiled2dMapRasterLayer::setT(int32_t t) {
     Tiled2dMapLayer::setT(t);
-    onTilesUpdated();
+    std::lock_guard<std::recursive_mutex> lock(sourcesMutex);
+    for (const auto &sourceInterface : sourceInterfaces) {
+        sourceInterface.message(&Tiled2dMapSourceInterface::notifyTilesUpdates);
+    }
 }
 
 bool Tiled2dMapRasterLayer::shouldLoadTile(const Tiled2dMapTileInfo& tileInfo){
     return abs(tileInfo.t - curT) < 10;
 }
 
-void Tiled2dMapRasterLayer::onTilesUpdated() {
+void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) {
     auto lockSelfPtr = std::static_pointer_cast<Tiled2dMapRasterLayer>(shared_from_this());
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
     auto graphicsFactory = mapInterface ? mapInterface->getGraphicsObjectFactory() : nullptr;
@@ -148,8 +159,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated() {
         if (updateFlag.test_and_set()) {
             return;
         }
-
-        auto currentTileInfos = rasterSource->getCurrentTiles();
+        
         std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> tilesToSetup, tilesToClean;
         std::vector<const std::shared_ptr<MaskingObjectInterface>> newMaskObjects;
         std::vector<const std::shared_ptr<MaskingObjectInterface>> obsoleteMaskObjects;
@@ -318,8 +328,8 @@ void Tiled2dMapRasterLayer::setupTiles(
             tileObject->getQuadObject()->removeTexture();
         }
     }
-
-    rasterSource->setTilesReady(tilesReady);
+    
+    rasterSource.message(&Tiled2dMapRasterSource::setTilesReady, tilesReady);
 
     mapInterface->invalidate();
 

@@ -14,8 +14,7 @@ import Metal
 
 class TextShader: BaseShader {
     private var pipeline: MTLRenderPipelineState?
-    private var referencePoint = SIMD2<Float>([0.0, 0.0])
-    private var scaleFactor: Float = 1.0
+    private var opacity: Float = 1.0
     private var color = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
     private var haloColor = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
 
@@ -30,23 +29,17 @@ class TextShader: BaseShader {
 
         encoder.setRenderPipelineState(pipeline)
 
-        encoder.setVertexBytes(&referencePoint, length: MemoryLayout<SIMD2<Float>>.stride, index: 3)
-
-        encoder.setVertexBytes(&scaleFactor, length: MemoryLayout<Float>.stride, index: 2)
-
         encoder.setFragmentBytes(&color, length: MemoryLayout<SIMD4<Float>>.stride, index: 1)
 
         encoder.setFragmentBytes(&haloColor, length: MemoryLayout<SIMD4<Float>>.stride, index: 2)
+
+        encoder.setFragmentBytes(&opacity, length: MemoryLayout<Float>.stride, index: 3)
     }
 }
 
 extension TextShader: MCTextShaderInterface {
-    func setReferencePoint(_ point: MCVec3D) {
-        referencePoint = SIMD2<Float>([point.x, point.y])
-    }
-
-    func setScale(_ scale: Float) {
-        scaleFactor = scale
+    func setOpacity(_ opacity: Float) {
+        self.opacity = opacity
     }
 
     func setColor(_ color: MCColor) {

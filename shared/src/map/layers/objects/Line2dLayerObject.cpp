@@ -28,6 +28,8 @@ void Line2dLayerObject::setPositions(const std::vector<Coord> &positions) {
     std::vector<uint32_t> lineIndices;
     std::vector<float> lineAttributes;
 
+    return;
+
     std::vector<Vec2D> renderCoords;
     for (auto const &mapCoord : positions) {
         Coord renderCoord = conversionHelper->convertToRenderSystem(mapCoord);
@@ -64,12 +66,11 @@ void Line2dLayerObject::setPositions(const std::vector<Coord> &positions) {
         lineAttributes.push_back(p.y);
 
         // Width normal
-        lineAttributes.push_back(-widthNormalX);
-        lineAttributes.push_back(-widthNormalY);
+        lineAttributes.push_back(widthNormalX);
+        lineAttributes.push_back(widthNormalY);
 
-        // Length normal
-        lineAttributes.push_back(-lengthNormalX);
-        lineAttributes.push_back(-lengthNormalY);
+        // Index
+        lineAttributes.push_back(0.0);
 
         // Position pointA and pointB
         lineAttributes.push_back(p.x);
@@ -90,8 +91,7 @@ void Line2dLayerObject::setPositions(const std::vector<Coord> &positions) {
         lineAttributes.push_back(widthNormalX);
         lineAttributes.push_back(widthNormalY);
 
-        lineAttributes.push_back(-lengthNormalX);
-        lineAttributes.push_back(-lengthNormalY);
+        lineAttributes.push_back(1.0);
 
         lineAttributes.push_back(p.x);
         lineAttributes.push_back(p.y);
@@ -109,8 +109,7 @@ void Line2dLayerObject::setPositions(const std::vector<Coord> &positions) {
         lineAttributes.push_back(widthNormalX);
         lineAttributes.push_back(widthNormalY);
 
-        lineAttributes.push_back(lengthNormalX);
-        lineAttributes.push_back(lengthNormalY);
+        lineAttributes.push_back(2.0);
 
         lineAttributes.push_back(p.x);
         lineAttributes.push_back(p.y);
@@ -124,11 +123,10 @@ void Line2dLayerObject::setPositions(const std::vector<Coord> &positions) {
         lineAttributes.push_back(pNext.x);
         lineAttributes.push_back(pNext.y);
 
-        lineAttributes.push_back(-widthNormalX);
-        lineAttributes.push_back(-widthNormalY);
+        lineAttributes.push_back(widthNormalX);
+        lineAttributes.push_back(widthNormalY);
 
-        lineAttributes.push_back(lengthNormalX);
-        lineAttributes.push_back(lengthNormalY);
+        lineAttributes.push_back(3.0);
 
         lineAttributes.push_back(p.x);
         lineAttributes.push_back(p.y);

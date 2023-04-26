@@ -23,9 +23,7 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(name: "DjinniSupport",
-                 url: "https://github.com/UbiqueInnovation/djinni.git",
-                 .upToNextMajor(from: "1.0.0")),
+        .package(url: "https://github.com/UbiqueInnovation/djinni.git", branch: "feature/snapchat-merge")
     ],
     targets: [
         .target(
@@ -122,14 +120,20 @@ let package = Package(
         ),
         .target(
             name: "MapCoreSharedModule",
-            dependencies: ["DjinniSupport",
-                           "MapCoreSharedModuleCpp"],
+            dependencies: [
+                "MapCoreSharedModuleCpp",
+                .product(name: "DjinniSupport", package: "djinni")
+            ],
             path: "bridging/ios",
             publicHeadersPath: ""
         ),
         .target(
             name: "MapCoreSharedModuleCpp",
-            dependencies: ["vtzero", "earcut"],
+            dependencies: [
+                "vtzero", 
+                "earcut",
+                .product(name: "DjinniSupport", package: "djinni")
+            ],
             path: "shared",
             sources: ["src", "public"],
             publicHeadersPath: "public",
@@ -150,12 +154,13 @@ let package = Package(
                 .headerSearchPath("src/map/layers/tiled/raster"),
                 .headerSearchPath("src/map/layers/tiled/wmts"),
                 .headerSearchPath("src/map/layers/tiled/vector"),
-                .headerSearchPath("src/map/layers/tiled/vector/parsing"),
+                .headerSearchPath("src/map/layers/tiled/vector/sourcemanagers"),
+                .headerSearchPath("src/map/layers/tiled/vector/tiles"),
+                .headerSearchPath("src/map/layers/tiled/vector/tiles/line"),
+                .headerSearchPath("src/map/layers/tiled/vector/tiles/polygon"),
+                .headerSearchPath("src/map/layers/tiled/vector/tiles/raster"),
+                .headerSearchPath("src/map/layers/tiled/vector/symbol"),
                 .headerSearchPath("src/map/layers/tiled/vector/sublayers"),
-                .headerSearchPath("src/map/layers/tiled/vector/sublayers/raster"),
-                .headerSearchPath("src/map/layers/tiled/vector/sublayers/line"),
-                .headerSearchPath("src/map/layers/tiled/vector/sublayers/polygon"),
-                .headerSearchPath("src/map/layers/tiled/vector/sublayers/symbol"),
                 .headerSearchPath("src/map/layers/tiled/vector/sublayers/background"),
                 .headerSearchPath("src/map/scheduling"),
                 .headerSearchPath("src/map"),

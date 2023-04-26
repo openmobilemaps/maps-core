@@ -22,7 +22,7 @@ public:
     fillColor(fillColor),
     fillOpacity(fillOpacity) {}
 
-    std::unordered_set<std::string> getUsedKeys() {
+    std::unordered_set<std::string> getUsedKeys() const {
 
         std::unordered_set<std::string> usedKeys;
         std::vector<std::shared_ptr<Value>> values = {
@@ -65,11 +65,18 @@ public:
                                   int maxZoom,
                                   std::shared_ptr<Value> filter,
                                   PolygonVectorStyle style,
-                                  std::optional<int32_t> renderPassIndex):
-    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, filter, renderPassIndex),
+                                  std::optional<int32_t> renderPassIndex,
+                                  std::shared_ptr<Value> interactable):
+    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, filter, renderPassIndex, interactable),
     style(style) {};
 
-    virtual std::unordered_set<std::string> getUsedKeys() override {
+    std::unique_ptr<VectorLayerDescription> clone() override {
+        return std::make_unique<PolygonVectorLayerDescription>(identifier, source, sourceId, minZoom, maxZoom,
+                                                               filter ? filter->clone() : nullptr, style, renderPassIndex,
+                                                               interactable ? interactable->clone() : nullptr);
+    }
+
+    virtual std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
 
         auto parentKeys = VectorLayerDescription::getUsedKeys();

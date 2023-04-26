@@ -15,5 +15,4 @@ interface MapViewInterface {
 	fun removeLayer(layer: LayerInterface)
 	fun getCamera(): MapCamera2dInterface
 	fun requireMapInterface(): MapInterface
-	fun requireScheduler(): AndroidScheduler
 }

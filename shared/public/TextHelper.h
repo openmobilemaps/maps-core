@@ -15,22 +15,33 @@
 #include "TextInfoInterface.h"
 #include "TextLayerObject.h"
 #include "Vec2F.h"
+#include "Quad2dD.h"
+#include "SymbolAlignment.h"
 
 #include <optional>
 
 class TextHelper {
   public:
+    TextHelper() {};
     TextHelper(const std::shared_ptr<MapInterface> &mapInterface);
+
+    void setMapInterface(const std::weak_ptr< ::MapInterface> &mapInterface);
 
     virtual std::shared_ptr<TextLayerObject> textLayerObject(const std::shared_ptr<TextInfoInterface> &text,
                                                              std::optional<FontData> fontData,
                                                              Vec2F offset,
                                                              double lineHeight,
                                                              double letterSpacing,
-                                                             int64_t maxCharacterWidth);
+                                                             int64_t maxCharacterWidth,
+                                                             double maxCharacterAngle,
+                                                             SymbolAlignment rotationAlignment);
 
     static std::string uppercase(const std::string &string);
 
+    static Quad2dD rotateQuad2d(const Quad2dD &quad, const Vec2D &aroundPoint, double angleDegrees);
+
+    static std::vector<std::string> splitWstring(const std::string &word);
+
   private:
-    std::shared_ptr<MapInterface> mapInterface;
+    std::weak_ptr<MapInterface> mapInterface;
 };

@@ -38,10 +38,10 @@ open class FontLoader(context: Context, private val dpFactor: Float) : FontLoade
                 Vec2D(glyphJson.bbox_width, glyphJson.bbox_height),
                 Vec2D(glyphJson.bearing_x, glyphJson.bearing_y),
                 Quad2dD(
-                    Vec2D(glyphJson.s0, 1.0 - glyphJson.t0),
-                    Vec2D(glyphJson.s1, 1.0 - glyphJson.t0),
+                    Vec2D(glyphJson.s0, 1.0 - glyphJson.t1),
                     Vec2D(glyphJson.s1, 1.0 - glyphJson.t1),
-                    Vec2D(glyphJson.s0, 1.0 - glyphJson.t1)
+                    Vec2D(glyphJson.s1, 1.0 - glyphJson.t0),
+                    Vec2D(glyphJson.s0, 1.0 - glyphJson.t0)
                 )
             )
         }.toCollection(ArrayList())

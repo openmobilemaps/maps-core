@@ -16,17 +16,17 @@
 #include "RenderPassInterface.h"
 #include "Tiled2dMapLayerConfig.h"
 #include "Tiled2dMapSourceInterface.h"
-#include "Tiled2dMapSourceListenerInterface.h"
 #include "SimpleTouchInterface.h"
+#include "Actor.h"
+#include <mutex>
 
 class Tiled2dMapLayer : public SimpleLayerInterface,
-                        public Tiled2dMapSourceListenerInterface,
                         public MapCamera2dListenerInterface,
                         public std::enable_shared_from_this<Tiled2dMapLayer> {
   public:
     Tiled2dMapLayer();
 
-    void setSourceInterface(const std::shared_ptr<Tiled2dMapSourceInterface> &sourceInterface);
+    void setSourceInterfaces(const std::vector<WeakActor<Tiled2dMapSourceInterface>> &sourceInterfaces);
 
     virtual void update() override = 0;
 
@@ -43,8 +43,6 @@ class Tiled2dMapLayer : public SimpleLayerInterface,
     virtual void hide() override;
 
     virtual void show() override;
-
-    virtual void onTilesUpdated() override = 0;
 
     virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom) override;
 
@@ -73,7 +71,8 @@ class Tiled2dMapLayer : public SimpleLayerInterface,
 protected:
     std::shared_ptr<MapInterface> mapInterface;
     std::shared_ptr< ::ErrorManager> errorManager;
-    std::shared_ptr<Tiled2dMapSourceInterface> sourceInterface;
+    std::recursive_mutex sourcesMutex;
+    std::vector<WeakActor<Tiled2dMapSourceInterface>> sourceInterfaces;
 
     bool isHidden = false;
 
