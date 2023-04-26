@@ -90,10 +90,15 @@ void Quad2dInstancedOpenGl::prepareGlData(const std::shared_ptr<OpenGlContext> &
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLubyte) * indices.size(), &indices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
+    instPositionsHandle = glGetAttribLocation(programHandle, "aPosition");
     glGenBuffers(1, &positionsBuffer);
-    glGenBuffers(1, &scalesBuffer);
-    glGenBuffers(1, &rotationsBuffer);
+    instTextureCoordinatesHandle = glGetAttribLocation(programHandle, "aTexCoordinate");
     glGenBuffers(1, &textureCoordinatesListBuffer);
+    instScalesHandle = glGetAttribLocation(programHandle, "aScale");
+    glGenBuffers(1, &scalesBuffer);
+    instRotationsHandle = glGetAttribLocation(programHandle, "aRotation");
+    glGenBuffers(1, &rotationsBuffer);
+    instAlphasHandle = glGetAttribLocation(programHandle, "aAlpha");
     glGenBuffers(1, &alphasBuffer);
 
     mvpMatrixHandle = glGetUniformLocation(programHandle, "uMVPMatrix");
@@ -213,29 +218,29 @@ void Quad2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, positionsBuffer);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-    glEnableVertexAttribArray(2);
-    glVertexAttribDivisor(2, 1);
+    glVertexAttribPointer(instPositionsHandle, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+    glEnableVertexAttribArray(instPositionsHandle);
+    glVertexAttribDivisor(instPositionsHandle, 1);
 
     glBindBuffer(GL_ARRAY_BUFFER, textureCoordinatesListBuffer);
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 0, NULL);
-    glEnableVertexAttribArray(3);
-    glVertexAttribDivisor(3, 1);
+    glVertexAttribPointer(instTextureCoordinatesHandle, 4, GL_FLOAT, GL_FALSE, 0, NULL);
+    glEnableVertexAttribArray(instTextureCoordinatesHandle);
+    glVertexAttribDivisor(instTextureCoordinatesHandle, 1);
 
     glBindBuffer(GL_ARRAY_BUFFER, scalesBuffer);
-    glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-    glEnableVertexAttribArray(4);
-    glVertexAttribDivisor(4, 1);
+    glVertexAttribPointer(instScalesHandle, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+    glEnableVertexAttribArray(instScalesHandle);
+    glVertexAttribDivisor(instScalesHandle, 1);
 
     glBindBuffer(GL_ARRAY_BUFFER, rotationsBuffer);
-    glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, 0, NULL);
-    glEnableVertexAttribArray(5);
-    glVertexAttribDivisor(5, 1);
+    glVertexAttribPointer(instRotationsHandle, 1, GL_FLOAT, GL_FALSE, 0, NULL);
+    glEnableVertexAttribArray(instRotationsHandle);
+    glVertexAttribDivisor(instRotationsHandle, 1);
 
     glBindBuffer(GL_ARRAY_BUFFER, alphasBuffer);
-    glVertexAttribPointer(6, 1, GL_FLOAT, GL_FALSE, 0, NULL);
-    glEnableVertexAttribArray(6);
-    glVertexAttribDivisor(6, 1);
+    glVertexAttribPointer(instAlphasHandle, 1, GL_FLOAT, GL_FALSE, 0, NULL);
+    glEnableVertexAttribArray(instAlphasHandle);
+    glVertexAttribDivisor(instAlphasHandle, 1);
 
 
     shaderProgram->preRender(context);
@@ -260,18 +265,22 @@ void Quad2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    glVertexAttribDivisor(2, 0);
-    glVertexAttribDivisor(3, 0);
-    glVertexAttribDivisor(4, 0);
-    glVertexAttribDivisor(5, 0);
-    glVertexAttribDivisor(6, 0);
+    glVertexAttribDivisor(instPositionsHandle, 0);
+    glVertexAttribDivisor(instTextureCoordinatesHandle, 0);
+    glVertexAttribDivisor(instScalesHandle, 0);
+    glVertexAttribDivisor(instRotationsHandle, 0);
+    glVertexAttribDivisor(instAlphasHandle, 0);
 
     // Disable vertex array
     glDisableVertexAttribArray(positionHandle);
-
     if (textureHolder) {
         glDisableVertexAttribArray(textureCoordinateHandle);
     }
+    glDisableVertexAttribArray(instPositionsHandle);
+    glDisableVertexAttribArray(instTextureCoordinatesHandle);
+    glDisableVertexAttribArray(instScalesHandle);
+    glDisableVertexAttribArray(instRotationsHandle);
+    glDisableVertexAttribArray(instAlphasHandle);
 
     glDisable(GL_BLEND);
 }

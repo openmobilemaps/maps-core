@@ -110,10 +110,15 @@ class Quad2dInstancedOpenGl : public GraphicsObjectInterface,
 
     int instanceCount = 0;
 
+    int instPositionsHandle;
     GLuint positionsBuffer;
+    int instRotationsHandle;
     GLuint rotationsBuffer;
+    int instScalesHandle;
     GLuint scalesBuffer;
+    int instAlphasHandle;
     GLuint alphasBuffer;
+    int instTextureCoordinatesHandle;
     GLuint textureCoordinatesListBuffer;
 
 private:

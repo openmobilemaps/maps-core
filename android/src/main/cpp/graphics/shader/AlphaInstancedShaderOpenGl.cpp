@@ -39,14 +39,14 @@ std::string AlphaInstancedShaderOpenGl::getVertexShader() {
     return OMMVersionedGlesShaderCode(320 es,
                                       uniform mat4 uMVPMatrix;
 
-                                      layout (location = 0) in vec4 vPosition;
-                                      layout (location = 1) in vec2 texCoordinate;
+                                      in vec4 vPosition;
+                                      in vec2 texCoordinate;
 
-                                      layout (location = 2) in vec2 aPosition;
-                                      layout (location = 3) in vec4 aTexCoordinate;
-                                      layout (location = 4) in vec2 aScale;
-                                      layout (location = 5) in float aRotation;
-                                      layout (location = 6) in float aAlpha;
+                                      in vec2 aPosition;
+                                      in vec4 aTexCoordinate;
+                                      in vec2 aScale;
+                                      in float aRotation;
+                                      in float aAlpha;
 
                                       out vec2 v_texcoord;
                                       out vec4 v_texcoordInstance;
