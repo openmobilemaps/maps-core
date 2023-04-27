@@ -54,4 +54,9 @@ class GraphicsFactory: MCGraphicsObjectFactoryInterface {
         guard let shader = shader else { fatalError("No Shader provided") }
         return Text(shader: shader, metalContext: .current)
     }
+
+    func createTextInstanced(_ shader: MCShaderProgramInterface?) -> MCTextInstancedInterface? {
+        guard let shader = shader else { fatalError("No Shader provided") }
+        return TextInstanced(shader: shader, metalContext: .current)
+    }
 }

@@ -13,6 +13,7 @@
 #import "MCQuad2dInstancedInterface+Private.h"
 #import "MCQuad2dInterface+Private.h"
 #import "MCShaderProgramInterface+Private.h"
+#import "MCTextInstancedInterface+Private.h"
 #import "MCTextInterface+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -101,6 +102,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable id<MCTextInstancedInterface>)createTextInstanced:(nullable id<MCShaderProgramInterface>)shader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createTextInstanced(::djinni_generated::ShaderProgramInterface::toCpp(shader));
+        return ::djinni_generated::TextInstancedInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class GraphicsObjectFactoryInterface::ObjcProxy final
@@ -171,6 +179,13 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createText:(::djinni_generated::ShaderProgramInterface::fromCpp(c_shader))];
             return ::djinni_generated::TextInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::TextInstancedInterface> createTextInstanced(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & c_shader) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createTextInstanced:(::djinni_generated::ShaderProgramInterface::fromCpp(c_shader))];
+            return ::djinni_generated::TextInstancedInterface::toCpp(objcpp_result_);
         }
     }
 };

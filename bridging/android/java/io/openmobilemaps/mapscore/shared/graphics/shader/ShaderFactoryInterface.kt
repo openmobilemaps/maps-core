@@ -24,6 +24,8 @@ abstract class ShaderFactoryInterface {
 
     abstract fun createTextShader(): TextShaderInterface
 
+    abstract fun createTextInstancedShader(): TextInstancedShaderInterface
+
     abstract fun createRasterShader(): RasterShaderInterface
 
     abstract fun createStretchShader(): StretchShaderInterface
@@ -87,6 +89,12 @@ abstract class ShaderFactoryInterface {
             return native_createTextShader(this.nativeRef)
         }
         private external fun native_createTextShader(_nativeRef: Long): TextShaderInterface
+
+        override fun createTextInstancedShader(): TextInstancedShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createTextInstancedShader(this.nativeRef)
+        }
+        private external fun native_createTextInstancedShader(_nativeRef: Long): TextInstancedShaderInterface
 
         override fun createRasterShader(): RasterShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

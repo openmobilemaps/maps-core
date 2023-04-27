@@ -20,7 +20,10 @@ shader_factory_interface = interface +c +j +o {
     create_color_shader() : color_shader_interface;
     create_color_circle_shader() : color_circle_shader_interface;
     create_polygon_group_shader(): polygon_group_shader_interface;
+
     create_text_shader() : text_shader_interface;
+    create_text_instanced_shader(): text_instanced_shader_interface;
+
     create_raster_shader() : raster_shader_interface;
     create_stretch_shader(): stretch_shader_interface;
 }
@@ -110,5 +113,9 @@ text_shader_interface = interface +c +o {
     set_color(color: color);
     set_opacity(opacity: f32);
     set_halo_color(color: color);
+    as_shader_program_interface() : shader_program_interface;
+}
+
+text_instanced_shader_interface = interface +c +o {
     as_shader_program_interface() : shader_program_interface;
 }

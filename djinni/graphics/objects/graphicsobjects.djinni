@@ -38,6 +38,8 @@ graphics_object_factory_interface = interface +c +j +o {
     create_polygon_mask() : polygon_2d_interface;
 
     create_text(shader: shader_program_interface) : text_interface;
+
+    create_text_instanced(shader: shader_program_interface): text_instanced_interface;
 }
 
 quad_2d_interface = interface +c +j +o {
@@ -110,6 +112,38 @@ texture_holder_interface = interface +j +o {
 text_interface = interface +c +j +o {
     set_texts(texts: list<text_description>);
     set_texts_shared(vertices: shared_bytes, indices: shared_bytes);
+
+    load_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
+    remove_texture();
+    as_graphics_object(): graphics_object_interface;
+}
+
+text_instanced_interface = interface +c +j +o {
+    # set the frame of the root object
+    set_frame(frame: quad_2d_d);
+
+    set_instance_count(count: i32);
+
+    # 2 floats (x and y) for each instance
+    set_positions(positions: shared_bytes);
+
+    # 4 floats (x, y, width and height) for each instanced
+    set_texure_coordinates(textureCoordinates: shared_bytes);
+
+    # 2 floats for width and height scale for each instance
+    set_scales(scales: shared_bytes);
+
+    # one float for each instance in degree
+    set_rotations(rotations: shared_bytes);
+
+    # one uint16 for each instance
+    set_style_indices(indices: shared_bytes);
+
+    # a style contains of:
+    # color RGBA
+    # halo-color RGBA
+    # so a total of 8 floats for each style
+    set_styles(values: shared_bytes);
 
     load_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
     remove_texture();

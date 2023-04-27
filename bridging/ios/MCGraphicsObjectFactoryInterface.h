@@ -9,6 +9,7 @@
 @protocol MCPolygonGroup2dInterface;
 @protocol MCQuad2dInstancedInterface;
 @protocol MCQuad2dInterface;
+@protocol MCTextInstancedInterface;
 @protocol MCTextInterface;
 
 
@@ -31,5 +32,7 @@
 - (nullable id<MCPolygon2dInterface>)createPolygonMask;
 
 - (nullable id<MCTextInterface>)createText:(nullable id<MCShaderProgramInterface>)shader;
+
+- (nullable id<MCTextInstancedInterface>)createTextInstanced:(nullable id<MCShaderProgramInterface>)shader;
 
 @end

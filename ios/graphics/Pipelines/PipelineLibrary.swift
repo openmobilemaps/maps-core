@@ -64,6 +64,7 @@ public enum Pipeline: String, CaseIterable {
     case roundColorShader
     case clearStencilShader
     case textShader
+    case textInstancedShader
     case rasterShader
     case stretchShader
 
@@ -77,6 +78,7 @@ public enum Pipeline: String, CaseIterable {
             case .roundColorShader: return "Round color shader"
             case .clearStencilShader: return "Clear stencil shader"
             case .textShader: return "Text shader"
+            case .textInstancedShader: return "Text Instanced shader"
             case .rasterShader: return "Raster shader"
             case .stretchShader: return "Stretch shader"
         }
@@ -92,6 +94,7 @@ public enum Pipeline: String, CaseIterable {
             case .roundColorShader: return "colorVertexShader"
             case .clearStencilShader: return "stencilClearVertexShader"
             case .textShader: return "textVertexShader"
+            case .textInstancedShader: return "textInstancedVertexShader"
             case .rasterShader: return "rasterVertexShader"
             case .stretchShader: return "stretchVertexShader"
         }
@@ -107,6 +110,7 @@ public enum Pipeline: String, CaseIterable {
             case .roundColorShader: return "roundColorFragmentShader"
             case .clearStencilShader: return "stencilClearFragmentShader"
             case .textShader: return "textFragmentShader"
+            case .textInstancedShader: return "textInstancedFragmentShader"
             case .rasterShader: return "rasterFragmentShader"
             case .stretchShader: return "stretchFragmentShader"
         }
