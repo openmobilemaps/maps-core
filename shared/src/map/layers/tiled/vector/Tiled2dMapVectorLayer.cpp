@@ -38,6 +38,7 @@
 #include "Tiled2dMapVectorLineTile.h"
 #include "Tiled2dMapVectorRasterTile.h"
 #include "SpriteData.h"
+#include "Textured3dLayerObject.h"
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::string &remoteStyleJsonUrl,
@@ -374,7 +375,6 @@ std::vector<::RenderTask> Tiled2dMapVectorLayer::getRenderTasks() {
 }
 
 void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, bool isSymbol, const std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>>> &renderPasses) {
-    std::vector<std::shared_ptr<RenderPassInterface>> newPasses;
 
     if (isSymbol) {
         sourceRenderPassesMap[source].symbolRenderPasses = renderPasses;
@@ -382,42 +382,101 @@ void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, bool i
         sourceRenderPassesMap[source].renderPasses = renderPasses;
     }
 
-    if (enableOffscreenRendering) {
-        // TODO: group all renderpasses of sources and create a render Task for each group
-        // create a target Texture for each Tile
-        // auto targetTexture = mapInterface->getGraphicsObjectFactory()->createRenderTargetTexture(Vec2I(512, 512));
-        // and create a polygon3dObject wich renders the created texture as a second task
-        // make sure, that the background renderpass is added to each render task
-    } else {
-        if (backgroundLayer) {
-            auto backgroundLayerPasses = backgroundLayer->buildRenderPasses();
-            newPasses.insert(newPasses.end(), backgroundLayerPasses.begin(), backgroundLayerPasses.end());
-        }
 
-        std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> orderedPasses;
-        std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
-        for (const auto &[source, tilePassesMap] : sourceRenderPassesMap) {
-            for(const auto &[tile, tilePassesMap]: tilePassesMap.renderPasses) {
-                orderedPasses.insert(orderedPasses.end(), tilePassesMap.begin(), tilePassesMap.end());
+
+
+    std::map<std::optional<Tiled2dMapTileInfo>, std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>>> orderedPasses;
+    orderedPasses[std::nullopt] = std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>>();
+
+    std::lock_guard<std::recursive_mutex> lock(dataManagerMutex);
+    for (const auto &[source, tilePassesMap] : sourceRenderPassesMap) {
+        for(const auto &[tile, tilePassesMap]: tilePassesMap.renderPasses) {
+            auto targetTile = std::optional<Tiled2dMapTileInfo>();
+            if (enableOffscreenRendering) {
+                targetTile = tile;
             }
-            for(const auto &[tile, tilePassesMap]: tilePassesMap.symbolRenderPasses) {
-                orderedPasses.insert(orderedPasses.end(), tilePassesMap.begin(), tilePassesMap.end());
+            if (orderedPasses.find(targetTile) == orderedPasses.end()) {
+                orderedPasses[targetTile] = std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>>();
             }
+            orderedPasses[targetTile].insert(orderedPasses[targetTile].end(), tilePassesMap.begin(), tilePassesMap.end());
         }
-
-        std::sort(orderedPasses.begin(), orderedPasses.end(), [](const auto &lhs, const auto &rhs) {
-            return std::get<0>(lhs) < std::get<0>(rhs);
-        });
-
-        for (const auto &[index, pass] : orderedPasses) {
-            newPasses.push_back(pass);
-        }
-
-        {
-            std::lock_guard<std::recursive_mutex> lock(renderPassMutex);
-            currentRenderTasks = std::vector<::RenderTask>{RenderTask(nullptr, newPasses)};
+        for(const auto &[tile, tilePassesMap]: tilePassesMap.symbolRenderPasses) {
+            auto targetTile = std::optional<Tiled2dMapTileInfo>();
+            if (enableOffscreenRendering) {
+                targetTile = tile;
+            }
+            if (orderedPasses.find(targetTile) == orderedPasses.end()) {
+                orderedPasses[targetTile] = std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>>();
+            }
+            orderedPasses[targetTile].insert(orderedPasses[targetTile].end(), tilePassesMap.begin(), tilePassesMap.end());
         }
     }
+
+    auto renderTasks = std::vector<::RenderTask>();
+
+    auto graphicsFactory = mapInterface->getGraphicsObjectFactory();
+    auto shaderFactory = mapInterface->getShaderFactory();
+    auto context = mapInterface->getRenderingContext();
+
+    std::vector<std::shared_ptr<::RenderObjectInterface>> textureRenderObjects;
+
+    for (auto &[targetTile, passes] : orderedPasses) {
+
+        std::vector<std::shared_ptr<RenderPassInterface>> newPasses;
+
+        std::shared_ptr<::RenderTargetTexture> targetTexture;
+
+        if (targetTile) {
+            targetTexture = graphicsFactory->createRenderTargetTexture(Vec2I(512, 512));
+            auto alphaShader = shaderFactory->createAlphaShader();
+            auto tileObject = std::make_shared<Textured2dLayerObject>(
+                                                                 graphicsFactory->createQuad(alphaShader->asShaderProgramInterface()), alphaShader, mapInterface);
+            tileObject->getGraphicsObject()->setup(context);
+            tileObject->setRectCoord(targetTile->bounds);
+            tileObject->getQuadObject()->loadTexture(context, targetTexture->textureHolder());
+            auto renderObject = tileObject->getRenderObject();
+            textureRenderObjects.push_back(renderObject);
+
+            std::sort(passes.begin(), passes.end(), [](const auto &lhs, const auto &rhs) {
+                return std::get<0>(lhs) < std::get<0>(rhs);
+            });
+
+            for (const auto &[index, pass] : passes) {
+                newPasses.push_back(pass);
+            }
+            renderTasks.push_back(RenderTask(targetTexture, newPasses));
+        }
+
+    }
+
+
+    std::vector<std::shared_ptr<RenderPassInterface>> newPasses;
+
+    if (backgroundLayer) {
+        auto backgroundLayerPasses = backgroundLayer->buildRenderPasses();
+        newPasses.insert(newPasses.end(), backgroundLayerPasses.begin(), backgroundLayerPasses.end());
+    }
+
+
+    auto texturesRenderPass = std::make_shared<RenderPass>(RenderPassConfig(0),
+                                                           textureRenderObjects, nullptr);
+    newPasses.push_back(texturesRenderPass);
+
+    auto passes = orderedPasses[std::nullopt];
+    std::sort(passes.begin(), passes.end(), [](const auto &lhs, const auto &rhs) {
+        return std::get<0>(lhs) < std::get<0>(rhs);
+    });
+    for (const auto &[index, pass] : passes) {
+        newPasses.push_back(pass);
+    }
+
+    renderTasks.push_back(RenderTask(nullptr, newPasses));
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(renderPassMutex);
+        currentRenderTasks = renderTasks;
+    }
+
 }
 
 void Tiled2dMapVectorLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface, int32_t layerIndex) {

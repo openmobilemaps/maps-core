@@ -192,7 +192,7 @@ private:
     std::shared_ptr<SpriteData> spriteData;
     std::shared_ptr<::TextureHolderInterface> spriteTexture;
 
-    bool enableOffscreenRendering = false;
+    bool enableOffscreenRendering = true;
 };
 
 

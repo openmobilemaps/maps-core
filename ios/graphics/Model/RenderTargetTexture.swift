@@ -40,7 +40,7 @@ open class RenderTargetTexture: Identifiable, Equatable, MCRenderTargetTexture {
 
         if let renderEncoder = commandBuffer?.makeRenderCommandEncoder(descriptor: renderPassDescriptor) {
             renderEncoder.setRenderPipelineState(renderPipelineState)
-            renderEncoder.label = "Offscreen Enconder"
+            renderEncoder.label = "Offscreen Encoder"
             return renderEncoder
         }
 

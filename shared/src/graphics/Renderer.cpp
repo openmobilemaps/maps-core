@@ -37,12 +37,17 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
     auto vpMatrix = camera->getVpMatrix();
     auto vpMatrixPointer = (int64_t)vpMatrix.data();
 
+    auto identityMatrix = std::vector<float>(16, 0.0);
+    Matrix::setIdentityM(identityMatrix, 0);
+    auto identityMatrixPointer = (int64_t)identityMatrix.data();
+
 
     for (auto const &task: renderQueue) {
 
         renderingContext->setupDrawFrame(task.target);
+        const auto &passes = task.renderPasses;
 
-        for (const auto &[index, passes] : renderQueue) {
+        // for (const auto &[index, passes] : renderQueue) {
             for (const auto &pass : passes) {
                 const auto &maskObject = pass->getMaskingObject();
                 const bool hasMask = maskObject != nullptr;
@@ -68,6 +73,8 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
                         Matrix::multiplyMMC(tempMvpMatrix, 0, vpMatrix, 0, renderObject->getCustomModelMatrix(), 0);
                         graphicsObject->render(renderingContext, config, (int64_t)tempMvpMatrix.data(), hasMask,
                                                factor);
+                    } else if (task.target) {
+                        graphicsObject->render(renderingContext, config, identityMatrixPointer, hasMask, factor);
                     } else {
                         graphicsObject->render(renderingContext, config, vpMatrixPointer, hasMask, factor);
                     }
@@ -77,7 +84,7 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
                     renderingContext->postRenderStencilMask(task.target);
                 }
             }
-        }
+        // }
 
         renderingContext->endDrawFrame(task.target);
     }
