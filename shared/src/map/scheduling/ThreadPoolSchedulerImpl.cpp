@@ -33,12 +33,16 @@ ThreadPoolSchedulerImpl::~ThreadPoolSchedulerImpl() {
     defaultCv.notify_all();
     delayedTasksCv.notify_all();
     delayedTaskThread.join();
+
+    delayedTasks.clear();
     
     for (auto& thread : threads) {
         if (std::this_thread::get_id() != thread.get_id()) {
             thread.join();
         }
     }
+
+    threads.clear();
 }
 
 void ThreadPoolSchedulerImpl::addTask(const std::shared_ptr<TaskInterface> & task) {

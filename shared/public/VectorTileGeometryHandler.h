@@ -21,7 +21,7 @@ public:
     VectorTileGeometryHandler(::RectCoord tileCoords, int extent, const std::optional<Tiled2dMapVectorSettings> &vectorSettings, bool tileBasedRendering)
     : tileCoords(tileCoords), tileBasedRendering(tileBasedRendering),
       // use standard TOP_LEFT origin, when no vector settings given.
-      origin(vectorSettings ? vectorSettings->tileOrigin : Tiled2dMapVectorTileOrigin::TOP_LEFT),
+      origin(vectorSettings ? vectorSettings->tileOrigin : tileBasedRendering ? Tiled2dMapVectorTileOrigin::BOTTOM_LEFT : Tiled2dMapVectorTileOrigin::TOP_LEFT),
       extent((double)extent)
     {};
 
@@ -147,7 +147,7 @@ private:
             auto x = -1 * (1.0 - tx) + 1 * tx;
             auto y = -1 * (1.0 - ty) + 1 * ty;
 
-            return Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0);
+            return Coord("unit-tile", x, y, 0.0);
         } else {
             auto x = tileCoords.topLeft.x * (1.0 - tx) + tileCoords.bottomRight.x * tx;
             auto y = tileCoords.topLeft.y * (1.0 - ty) + tileCoords.bottomRight.y * ty;

@@ -193,6 +193,8 @@ private:
     std::shared_ptr<::TextureHolderInterface> spriteTexture;
 
     bool enableOffscreenRendering = true;
+
+    std::map<Tiled2dMapTileInfo, std::pair<std::shared_ptr<RenderTargetTexture>, std::shared_ptr<RenderObjectInterface>>> cachedTargetTextures;
 };
 
 

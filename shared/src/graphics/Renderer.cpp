@@ -53,15 +53,25 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
                 const bool hasMask = maskObject != nullptr;
 
                 double factor = camera->getScalingFactor();
+
+                if (task.target) {
+                    factor = 0.001;
+                }
+
                 const auto &renderObjects = pass->getRenderObjects();
 
                 const auto &config = pass->getRenderPassConfig();
 
                 renderingContext->applyScissorRect(pass->getScissoringRect());
 
-                if (hasMask) {
+                if (hasMask && !task.target) {
                     renderingContext->preRenderStencilMask(task.target);
-                    maskObject->renderAsMask(renderingContext, config, vpMatrixPointer, factor);
+                    if (task.target) {
+                        maskObject->renderAsMask(renderingContext, config, identityMatrixPointer, factor);
+                    }
+                    else {
+                        maskObject->renderAsMask(renderingContext, config, vpMatrixPointer, factor);
+                    }
                     //LogDebug << "Has mask and mask is: " <<= (maskObject->asGraphicsObject()->isReady() ? "ready" : "not ready");
                 }
 
@@ -74,13 +84,13 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
                         graphicsObject->render(renderingContext, config, (int64_t)tempMvpMatrix.data(), hasMask,
                                                factor);
                     } else if (task.target) {
-                        graphicsObject->render(renderingContext, config, identityMatrixPointer, hasMask, factor);
+                        graphicsObject->render(renderingContext, config, identityMatrixPointer, false, factor);
                     } else {
                         graphicsObject->render(renderingContext, config, vpMatrixPointer, hasMask, factor);
                     }
                 }
 
-                if (hasMask) {
+                if (hasMask && !task.target) {
                     renderingContext->postRenderStencilMask(task.target);
                 }
             }

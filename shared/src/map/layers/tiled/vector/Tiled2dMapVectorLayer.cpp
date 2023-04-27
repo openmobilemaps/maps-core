@@ -420,6 +420,8 @@ void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, bool i
 
     std::vector<std::shared_ptr<::RenderObjectInterface>> textureRenderObjects;
 
+    
+
     for (auto &[targetTile, passes] : orderedPasses) {
 
         std::vector<std::shared_ptr<RenderPassInterface>> newPasses;
@@ -427,15 +429,36 @@ void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, bool i
         std::shared_ptr<::RenderTargetTexture> targetTexture;
 
         if (targetTile) {
-            targetTexture = graphicsFactory->createRenderTargetTexture(Vec2I(512, 512));
-            auto alphaShader = shaderFactory->createAlphaShader();
-            auto tileObject = std::make_shared<Textured2dLayerObject>(
-                                                                 graphicsFactory->createQuad(alphaShader->asShaderProgramInterface()), alphaShader, mapInterface);
-            tileObject->getGraphicsObject()->setup(context);
-            tileObject->setRectCoord(targetTile->bounds);
-            tileObject->getQuadObject()->loadTexture(context, targetTexture->textureHolder());
-            auto renderObject = tileObject->getRenderObject();
-            textureRenderObjects.push_back(renderObject);
+
+            if (cachedTargetTextures.find(targetTile.value()) == cachedTargetTextures.end()) {
+                targetTexture = graphicsFactory->createRenderTargetTexture(Vec2I(512, 512));
+                if (mapInterface->getMapConfig().mapCoordinateSystem.identifier == CoordinateSystemIdentifiers::UNITSPHERE()) {
+                    auto alphaShader = shaderFactory->createSphereProjectionShader();
+                    auto tileObject = std::make_shared<Textured3dLayerObject>(
+                                                                              graphicsFactory->createQuad3d(alphaShader->asShaderProgramInterface()), alphaShader, mapInterface);
+                    tileObject->getGraphicsObject()->setup(context);
+                    tileObject->setRectCoord(targetTile->bounds);
+                    tileObject->getQuadObject()->loadTexture(context, targetTexture->textureHolder());
+                    auto renderObject = tileObject->getRenderObject();
+
+                    cachedTargetTextures[targetTile.value()] = std::make_pair(targetTexture, renderObject);
+                }
+                else {
+                    auto alphaShader = shaderFactory->createAlphaShader();
+                    auto tileObject = std::make_shared<Textured2dLayerObject>(
+                                                                              graphicsFactory->createQuad(alphaShader->asShaderProgramInterface()), alphaShader, mapInterface);
+                    tileObject->getGraphicsObject()->setup(context);
+                    tileObject->setRectCoord(targetTile->bounds);
+                    tileObject->getQuadObject()->loadTexture(context, targetTexture->textureHolder());
+                    auto renderObject = tileObject->getRenderObject();
+
+                    cachedTargetTextures[targetTile.value()] = std::make_pair(targetTexture, renderObject);
+                }
+
+            }
+
+            targetTexture = cachedTargetTextures[targetTile.value()].first;
+            textureRenderObjects.push_back(cachedTargetTextures[targetTile.value()].second);
 
             std::sort(passes.begin(), passes.end(), [](const auto &lhs, const auto &rhs) {
                 return std::get<0>(lhs) < std::get<0>(rhs);

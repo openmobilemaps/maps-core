@@ -107,6 +107,9 @@ RectCoord CoordinateConversionHelper::convertRectToRenderSystem(const RectCoord 
 }
 
 Coord CoordinateConversionHelper::convertToRenderSystem(const Coord &coordinate) {
+    if (coordinate.systemIdentifier == "unit-tile") {
+        return coordinate;
+    }
     if (coordinate.systemIdentifier == mapCoordinateSystemIdentifier) {
         return renderSystemConverter->convert(coordinate);
     } else {
