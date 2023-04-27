@@ -31,6 +31,17 @@ Tiled2dMapVectorSourceDataManager(vectorLayer, mapDescription, source), fontLoad
 void Tiled2dMapVectorSourceSymbolDataManager::onAdded(const std::weak_ptr< ::MapInterface> &mapInterface) {
     Tiled2dMapVectorSourceDataManager::onAdded(mapInterface);
     textHelper.setMapInterface(mapInterface);
+
+    auto mapInterfaceS = this->mapInterface.lock();
+    auto graphicsFactory = mapInterfaceS ? mapInterfaceS->getGraphicsObjectFactory() : nullptr;
+    auto shaderFactory = mapInterfaceS ? mapInterfaceS->getShaderFactory() : nullptr;
+    const auto &context = mapInterfaceS ? mapInterfaceS->getRenderingContext() : nullptr;
+    if (!graphicsFactory || !shaderFactory) {
+        return;
+    }
+
+    instancedShader = shaderFactory->createTextInstancedShader();
+    instancedObject = graphicsFactory->createTextInstanced(instancedShader->asShaderProgramInterface());
 }
 
 void Tiled2dMapVectorSourceSymbolDataManager::pause() {
@@ -478,6 +489,13 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupTexts(const std::vector<std::
 
             auto fontResult = loadFont(textInfo->getFont());
             if(fontResult.imageData) {
+                if (!instanceFontName) {
+                    instanceFontName = fontResult.fontData->info.name;
+                    instancedObject->loadTexture(renderingContext, fontResult.imageData);
+
+                    instancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)));
+                    instancedObject->asGraphicsObject()->setup(renderingContext);
+                }
                 textObject->loadTexture(renderingContext, fontResult.imageData);
             }
         }
@@ -795,6 +813,13 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
 
     const auto scaleFactor = camera->mapUnitsFromPixels(1.0);
 
+    std::vector<float> positions;
+    std::vector<float> scales;
+    std::vector<float> textureCoordinates;
+    std::vector<float> rotations;
+    std::vector<uint16_t> stylesIndex;
+    std::vector<float> styles;
+
     for (const auto &[tile, layers]: tileSymbolMap) {
         for (const auto &[layerIdentifier, objects]: layers) {
             const auto &description = layerDescriptions.at(layerIdentifier);
@@ -853,6 +878,31 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
 
                     const float padding = description->style.getTextPadding(evalContext);
                     projectedTextQuad = getProjectedFrame(object->boundingBox, padding, wrapper->modelMatrix);
+
+
+                    if (object->fontData.info.name == instanceFontName){
+                        positions.insert(positions.begin(), object->positions.begin(), object->positions.end());
+                        scales.insert(scales.begin(), object->scales.begin(), object->scales.end());
+                        textureCoordinates.insert(textureCoordinates.begin(), object->textureCoordinates.begin(), object->textureCoordinates.end());
+                        rotations.insert(rotations.begin(), object->rotations.begin(), object->rotations.end());
+                        uint16_t styleIndex = (uint16_t)(styles.size() / 8.0);
+                        for(int i = 0; i != object->rotations.size(); i++) {
+                            stylesIndex.push_back(styleIndex);
+                        }
+                        auto opacity = description->style.getTextOpacity(evalContext) * alpha;
+                        auto textColor = description->style.getTextColor(evalContext);
+                        auto haloColor = description->style.getTextHaloColor(evalContext);
+
+                        styles.push_back(textColor.r); //R
+                        styles.push_back(textColor.g); //G
+                        styles.push_back(textColor.b); //B
+                        styles.push_back(textColor.a * opacity); //A
+
+                        styles.push_back(haloColor.r); //R
+                        styles.push_back(haloColor.g); //G
+                        styles.push_back(haloColor.b); //B
+                        styles.push_back(haloColor.a * opacity); //A
+                    }
                 }
 
                 if (spriteData && spriteTexture) {
@@ -1080,6 +1130,17 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
         }
     }
 
+    if(rotations.size() != 0) {
+        instancedObject->setInstanceCount(rotations.size());
+        instancedObject->setPositions(SharedBytes((int64_t)positions.data(), (int32_t)rotations.size(), 2 * (int32_t)sizeof(float)));
+        instancedObject->setTexureCoordinates(SharedBytes((int64_t)textureCoordinates.data(), (int32_t)rotations.size(), 4 * (int32_t)sizeof(float)));
+        instancedObject->setScales(SharedBytes((int64_t)scales.data(), (int32_t)rotations.size(), 2 * (int32_t)sizeof(float)));
+        instancedObject->setRotations(SharedBytes((int64_t)rotations.data(), (int32_t)rotations.size(), 1 * (int32_t)sizeof(float)));
+
+        instancedObject->setStyleIndices(SharedBytes((int64_t)stylesIndex.data(), (int32_t)stylesIndex.size(), 1 * (int32_t)sizeof(uint16_t)));
+        instancedObject->setStyles(SharedBytes((int64_t)styles.data(), (int32_t)styles.size() / 8, 8 * (int32_t)sizeof(float)));
+ }
+
     pregenerateRenderPasses();
 }
 
@@ -1093,6 +1154,12 @@ void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
     std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> renderPasses;
 
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
+
+    {
+        std::vector<std::shared_ptr< ::RenderObjectInterface>> renderObjects;
+        renderObjects.push_back(std::make_shared<RenderObject>(instancedObject->asGraphicsObject()));
+        renderPasses.emplace_back(99, std::make_shared<RenderPass>(RenderPassConfig(99), renderObjects));
+    }
 
     for (const auto &[tile, layers]: tileSymbolMap) {
         for (const auto &[layerIdentifier, objects]: layers) {
@@ -1121,7 +1188,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
 
                     const auto & textObject = wrapper->textObject->getTextObject();
                     if (textObject) {
-                        renderObjects.push_back(std::make_shared<RenderObject>(textObject->asGraphicsObject(), wrapper->modelMatrix));
+//                        renderObjects.push_back(std::make_shared<RenderObject>(textObject->asGraphicsObject(), wrapper->modelMatrix));
 #ifdef DRAW_TEXT_BOUNDING_BOXES
                     renderObjects.push_back(std::make_shared<RenderObject>(wrapper->boundingBox->asGraphicsObject(), wrapper->modelMatrix));
 #endif

@@ -156,8 +156,14 @@ void TextLayerObject::layoutPoint(float scale, bool updateObject) {
         int characterCount = 0;
         std::vector<size_t> lineEndIndices;
 
+        positions.clear();
+        scales.clear();
+        textureCoordinates.clear();
+        textureCoordinates.clear();
+        rotations.clear();
+
         for(auto& i : splittedTextInfo) {
-            if(i.glyphIndex > 0) {
+            if(i.glyphIndex >= 0) {
                 auto &d = fontData.glyphs[i.glyphIndex];
                 auto size = Vec2D(d.boundingBoxSize.x * fontSize * i.scale, d.boundingBoxSize.y * fontSize * i.scale);
                 auto bearing = Vec2D(d.bearing.x * fontSize * i.scale, d.bearing.y * fontSize * i.scale);
@@ -169,6 +175,16 @@ void TextLayerObject::layoutPoint(float scale, bool updateObject) {
                 auto yh = y + size.y;
 
                 Quad2dD quad = Quad2dD(Vec2D(x, yh), Vec2D(xw, yh), Vec2D(xw, y), Vec2D(x, y));
+
+                positions.push_back(x + size.x / 2);
+                positions.push_back(y + size.y / 2);
+                scales.push_back(size.x);
+                scales.push_back(size.y);
+                textureCoordinates.push_back(d.uv.topLeft.x);
+                textureCoordinates.push_back(d.uv.bottomRight.y);
+                textureCoordinates.push_back(d.uv.bottomRight.x - d.uv.topLeft.x);
+                textureCoordinates.push_back(d.uv.topLeft.y - d.uv.bottomLeft.y);
+                rotations.push_back(0.0);
 
                 if (!box) {
                     box = BoundingBox(Coord(referencePoint.systemIdentifier, quad.topLeft.x, quad.topLeft.y, referencePoint.z));
@@ -315,6 +331,11 @@ void TextLayerObject::layoutPoint(float scale, bool updateObject) {
             auto dx = referencePoint.x + offset.x - min.x;
             auto dy = referencePoint.y + offset.y - min.y;
 
+            for(auto i=0; i < positions.size(); i+=2) {
+                positions[i] += dx;
+                positions[i+1] += dy;
+            }
+
             for(auto i=0; i<vertices.size(); i+=6) {
                 vertices[i] += dx;
                 vertices[i+1] += dy;
@@ -384,6 +405,12 @@ float TextLayerObject::layoutLine(float scale, bool updateObject) {
     int index = 0;
     double lastAngle = 0.0;
 
+    positions.clear();
+    scales.clear();
+    textureCoordinates.clear();
+    textureCoordinates.clear();
+    rotations.clear();
+
     for(auto &i : splittedTextInfo) {
         if(i.glyphIndex < 0) {
             currentIndex = indexAtDistance(currentIndex, fontData.info.spaceAdvance * fontSize * i.scale);
@@ -444,6 +471,17 @@ float TextLayerObject::layoutLine(float scale, bool updateObject) {
 
             Quad2dD quad = Quad2dD(tl, tr, br, bl);
             quad = TextHelper::rotateQuad2d(quad, Vec2D(p.x, p.y), angle);
+
+            positions.push_back(quad.topLeft.x + (quad.topRight.x - quad.topLeft.x) / 2);
+            positions.push_back(quad.bottomLeft.y + (quad.bottomRight.y - quad.bottomLeft.y) / 2);
+            scales.push_back(size.x);
+            scales.push_back(size.y);
+            textureCoordinates.push_back(d.uv.topLeft.x);
+            textureCoordinates.push_back(d.uv.bottomRight.y);
+            textureCoordinates.push_back(d.uv.bottomRight.x - d.uv.topLeft.x);
+            textureCoordinates.push_back(d.uv.topLeft.y - d.uv.bottomLeft.y);
+            rotations.push_back(-angle);
+
 
             auto dy = Vec2DHelper::normalize(Vec2D(quad.bottomLeft.x - quad.topLeft.x, quad.bottomLeft.y - quad.topLeft.y));
             // TODO: 0.3 looks good, is there a better value?
