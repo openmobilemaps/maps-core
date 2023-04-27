@@ -104,9 +104,17 @@ void Tiled2dMapRasterLayer::pause() {
     }
     std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
     for (const auto &tileObject : tileObjectMap) {
-        if (tileObject.second && tileObject.second->getGraphicsObject()->isReady()) {
-            tileObject.second->getGraphicsObject()->clear();
+        if (auto quad2d = std::dynamic_pointer_cast<Textured2dLayerObject>(tileObject.second)) {
+            if (quad2d && quad2d->getGraphicsObject()->isReady()) {
+                quad2d->getGraphicsObject()->clear();
+            }
         }
+        else if (auto quad3d = std::dynamic_pointer_cast<Textured3dLayerObject>(tileObject.second)) {
+            if (quad3d && quad3d->getGraphicsObject()->isReady()) {
+                quad3d->getGraphicsObject()->clear();
+            }
+        }
+
     }
     for (const auto &tileMask : tileMaskMap) {
         if (tileMask.second.getGraphicsObject() && tileMask.second.getGraphicsObject()->isReady())
@@ -129,11 +137,18 @@ void Tiled2dMapRasterLayer::resume() {
     std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
     for (const auto &tileObject : tileObjectMap) {
         if (tileObject.second) {
-            tileObject.second->getGraphicsObject()->setup(renderingContext);
-            auto rectangle = tileObject.second->getQuadObject();
-            rectangle->loadTexture(renderingContext, tileObject.first.textureHolder);
-            if (tileObject.first.heightTextureHolder) {
-                rectangle->loadHeightTexture(renderingContext, tileObject.first.textureHolder);
+            if (auto quad2d = std::dynamic_pointer_cast<Textured2dLayerObject>(tileObject.second)) {
+                quad2d->getGraphicsObject()->setup(renderingContext);
+                auto rectangle = quad2d->getQuadObject();
+                rectangle->loadTexture(renderingContext, tileObject.first.textureHolder);
+            }
+            else if (auto quad3d = std::dynamic_pointer_cast<Textured3dLayerObject>(tileObject.second)) {
+                quad3d->getGraphicsObject()->setup(renderingContext);
+                auto rectangle = quad3d->getQuadObject();
+                rectangle->loadTexture(renderingContext, tileObject.first.textureHolder);
+                if (tileObject.first.heightTextureHolder) {
+                    rectangle->loadHeightTexture(renderingContext, tileObject.first.textureHolder);
+                }
             }
         }
     }
@@ -172,7 +187,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
             return;
         }
         
-        std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured3dLayerObject>>> tilesToSetup, tilesToClean;
+        std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<LayerObjectInterface>>> tilesToSetup, tilesToClean;
         std::vector<const std::shared_ptr<MaskingObjectInterface>> newMaskObjects;
         std::vector<const std::shared_ptr<MaskingObjectInterface>> obsoleteMaskObjects;
 
@@ -219,31 +234,62 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
             if (tilesToAdd.empty() && tilesToRemove.empty() && newTileMasks.empty()) { return; }
 
             auto const &zoomInfo = layerConfig->getZoomInfo();
-            for (const auto &tile : tilesToAdd) {
-                std::shared_ptr<Textured3dLayerObject> tileObject;
-                if (shader) {
-                    tileObject = std::make_shared<Textured3dLayerObject>(graphicsFactory->createQuad3d(shader), nullptr, mapInterface);
-                } else {
-                    auto alphaShader = shaderFactory->createSphereProjectionShader();
-                    tileObject = std::make_shared<Textured3dLayerObject>(
-                            graphicsFactory->createQuad3d(alphaShader->asShaderProgramInterface()), alphaShader, mapInterface);
-                }
-                if (zoomInfo.numDrawPreviousLayers == 0 || !animationsEnabled || zoomInfo.maskTile) {
-                    tileObject->setAlpha(alpha);
-                } else {
-                    tileObject->beginAlphaAnimation(0.0, alpha, 150);
-                }
-                tileObject->setRectCoord(tile.tileInfo.bounds);
-                tilesToSetup.emplace_back(std::make_pair(tile, tileObject));
+            if (mapInterface->getMapConfig().mapCoordinateSystem.identifier == CoordinateSystemIdentifiers::UNITSPHERE()) {
+                for (const auto &tile : tilesToAdd) {
+                    std::shared_ptr<Textured3dLayerObject> tileObject;
+                    if (shader) {
+                        tileObject = std::make_shared<Textured3dLayerObject>(graphicsFactory->createQuad3d(shader), nullptr, mapInterface);
+                    } else {
+                        auto alphaShader = shaderFactory->createSphereProjectionShader();
+                        tileObject = std::make_shared<Textured3dLayerObject>(
+                                                                             graphicsFactory->createQuad3d(alphaShader->asShaderProgramInterface()), alphaShader, mapInterface);
+                    }
+                    if (zoomInfo.numDrawPreviousLayers == 0 || !animationsEnabled || zoomInfo.maskTile) {
+                        tileObject->setAlpha(alpha);
+                    } else {
+                        tileObject->beginAlphaAnimation(0.0, alpha, 150);
+                    }
+                    tileObject->setRectCoord(tile.tileInfo.bounds);
+                    tilesToSetup.emplace_back(std::make_pair(tile, tileObject));
 
-                tileObjectMap[tile] = tileObject;
+                    tileObjectMap[tile] = tileObject;
 
-                if (newTileMasks.count(tile.tileInfo) == 0 && layerConfig->getZoomInfo().maskTile) {
-                    const auto &tileMask = std::make_shared<PolygonMask3dObject>(graphicsFactory,
-                                                                               coordinateConverterHelper);
-                    const size_t hash = std::hash<std::vector<::PolygonCoord>>()(tile.masks);
-                    tileMask->setPolygons(tile.masks);
-                    newTileMasks[tile.tileInfo] = Tiled3dMapLayerMaskWrapper(tileMask, hash);
+                    if (newTileMasks.count(tile.tileInfo) == 0 && layerConfig->getZoomInfo().maskTile) {
+                        const auto &tileMask = std::make_shared<PolygonMask3dObject>(graphicsFactory,
+                                                                                     coordinateConverterHelper);
+                        const size_t hash = std::hash<std::vector<::PolygonCoord>>()(tile.masks);
+                        tileMask->setPolygons(tile.masks);
+                        newTileMasks[tile.tileInfo] = Tiled3dMapLayerMaskWrapper(tileMask, hash);
+                    }
+                }
+            }
+            else {
+                for (const auto &tile : tilesToAdd) {
+                    std::shared_ptr<Textured2dLayerObject> tileObject;
+                    if (shader) {
+                        tileObject = std::make_shared<Textured2dLayerObject>(graphicsFactory->createQuad(shader), nullptr, mapInterface);
+                    } else {
+                        auto alphaShader = shaderFactory->createAlphaShader();
+                        tileObject = std::make_shared<Textured2dLayerObject>(
+                                                                             graphicsFactory->createQuad(alphaShader->asShaderProgramInterface()), alphaShader, mapInterface);
+                    }
+                    if (zoomInfo.numDrawPreviousLayers == 0 || !animationsEnabled || zoomInfo.maskTile) {
+                        tileObject->setAlpha(alpha);
+                    } else {
+                        tileObject->beginAlphaAnimation(0.0, alpha, 150);
+                    }
+                    tileObject->setRectCoord(tile.tileInfo.bounds);
+                    tilesToSetup.emplace_back(std::make_pair(tile, tileObject));
+
+                    tileObjectMap[tile] = tileObject;
+
+                    if (newTileMasks.count(tile.tileInfo) == 0 && layerConfig->getZoomInfo().maskTile) {
+                        const auto &tileMask = std::make_shared<PolygonMask3dObject>(graphicsFactory,
+                                                                                     coordinateConverterHelper);
+                        const size_t hash = std::hash<std::vector<::PolygonCoord>>()(tile.masks);
+                        tileMask->setPolygons(tile.masks);
+                        newTileMasks[tile.tileInfo] = Tiled3dMapLayerMaskWrapper(tileMask, hash);
+                    }
                 }
             }
 
@@ -292,8 +338,8 @@ void Tiled2dMapRasterLayer::updateMaskObjects(const std::vector<const std::share
 
 
 void Tiled2dMapRasterLayer::setupTiles(
-        const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured3dLayerObject>>> &tilesToSetup,
-        const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured3dLayerObject>>> &tilesToClean) {
+        const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<LayerObjectInterface>>> &tilesToSetup,
+        const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<LayerObjectInterface>>> &tilesToClean) {
     auto mapInterface = this->mapInterface;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!renderingContext) {
@@ -316,14 +362,25 @@ void Tiled2dMapRasterLayer::setupTiles(
                 continue;
             }
 
-            tileObject->getGraphicsObject()->setup(renderingContext);
+            if (auto quad2d = std::dynamic_pointer_cast<Textured2dLayerObject>(tileObject)) {
+                quad2d->getGraphicsObject()->setup(renderingContext);
 
-            if (tileInfo.textureHolder) {
-                tileObject->getQuadObject()->loadTexture(renderingContext, tileInfo.textureHolder);
+                if (tileInfo.textureHolder) {
+                    quad2d->getQuadObject()->loadTexture(renderingContext, tileInfo.textureHolder);
+                }
             }
-            if (tileInfo.heightTextureHolder) {
-                tileObject->getQuadObject()->loadHeightTexture(renderingContext, tileInfo.heightTextureHolder);
+            else if (auto quad3d = std::dynamic_pointer_cast<Textured3dLayerObject>(tileObject)) {
+                quad3d->getGraphicsObject()->setup(renderingContext);
+
+                if (tileInfo.textureHolder) {
+                    quad3d->getQuadObject()->loadTexture(renderingContext, tileInfo.textureHolder);
+                }
+                if (tileInfo.heightTextureHolder) {
+                    quad3d->getQuadObject()->loadHeightTexture(renderingContext, tileInfo.heightTextureHolder);
+                }
             }
+
+
             // the texture holder can be empty, some tileserver serve 0 byte textures
             tilesReady.push_back(tileInfo.tileInfo);
         }
@@ -337,7 +394,14 @@ void Tiled2dMapRasterLayer::setupTiles(
         std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
         for (const auto &[tile, tileObject] : tilesToClean) {
             if (!tileObject) continue;
-            tileObject->getQuadObject()->removeTexture();
+            if (auto quad2d = std::dynamic_pointer_cast<Textured2dLayerObject>(tileObject)) {
+                quad2d->getQuadObject()->removeTexture();
+            }
+            else if (auto quad3d = std::dynamic_pointer_cast<Textured3dLayerObject>(tileObject)) {
+                quad3d->getQuadObject()->removeTexture();
+            }
+
+
         }
     }
     
@@ -365,7 +429,13 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
                 continue;
             }
 
-            auto const &renderObject = entry.second->getRenderObject();
+            std::shared_ptr<RenderObjectInterface> renderObject;
+            if (auto quad2d = std::dynamic_pointer_cast<Textured2dLayerObject>(entry.second)) {
+                renderObject = quad2d->getRenderObject();
+            }
+            else if (auto quad3d = std::dynamic_pointer_cast<Textured3dLayerObject>(entry.second)) {
+                renderObject = quad3d->getRenderObject();
+            }
 
             if (layerConfig->getZoomInfo().maskTile) {
                 const auto &mask = tileMaskMap.at(entry.first.tileInfo);
@@ -420,7 +490,12 @@ void Tiled2dMapRasterLayer::setAlpha(float alpha) {
     {
         std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
         for (const auto &tileObject : tileObjectMap) {
-            tileObject.second->setAlpha(alpha);
+            if (auto quad2d = std::dynamic_pointer_cast<Textured2dLayerObject>(tileObject.second)) {
+                quad2d->setAlpha(alpha);
+            }
+            else if (auto quad3d = std::dynamic_pointer_cast<Textured3dLayerObject>(tileObject.second)) {
+                quad3d->setAlpha(alpha);
+            }
         }
     }
 
@@ -481,9 +556,17 @@ LayerReadyState Tiled2dMapRasterLayer::isReadyToRenderOffscreen() {
     }
 
     for (auto &to : tileObjectMap) {
-        if (!to.second->getGraphicsObject()->isReady()) {
-            return LayerReadyState::NOT_READY;
+        if (auto quad2d = std::dynamic_pointer_cast<Textured2dLayerObject>(to.second)) {
+            if (!quad2d->getGraphicsObject()->isReady()) {
+                return LayerReadyState::NOT_READY;
+            }
         }
+        else if (auto quad3d = std::dynamic_pointer_cast<Textured3dLayerObject>(to.second)) {
+            if (!quad3d->getGraphicsObject()->isReady()) {
+                return LayerReadyState::NOT_READY;
+            }
+        }
+
     }
 
     return LayerReadyState::READY;

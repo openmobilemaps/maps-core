@@ -364,15 +364,15 @@ std::vector<float> MapCamera2d::getVpMatrix() {
 
         Coord renderCoordCenter = conversionHelper->convertToRenderSystem(focusPointPosition);
 
-        Matrix::setIdentityM(newProjectionMatrix, 0);
+        Matrix::orthoM(newProjectionMatrix, 0, - 0.5 * sizeViewport.x,  0.5 * sizeViewport.x,
+                        0.5 * sizeViewport.y, - 0.5 * sizeViewport.y, -1, 1);
 
-        Matrix::orthoM(newProjectionMatrix, 0, renderCoordCenter.x - 0.5 * sizeViewport.x, renderCoordCenter.x + 0.5 * sizeViewport.x,
-                       renderCoordCenter.y + 0.5 * sizeViewport.y, renderCoordCenter.y - 0.5 * sizeViewport.y, -1, 1);
-
+//        Matrix::orthoM(newViewMatrix, 0, renderCoordCenter.x - 0.5 * sizeViewport.x, renderCoordCenter.x + 0.5 * sizeViewport.x,
+//                       renderCoordCenter.y + 0.5 * sizeViewport.y, renderCoordCenter.y - 0.5 * sizeViewport.y, -1, 1);
 
         Matrix::setIdentityM(newViewMatrix, 0);
 
-        Matrix::translateM(newViewMatrix, 0, renderCoordCenter.x, renderCoordCenter.y, 0);
+//        Matrix::translateM(newViewMatrix, 0, renderCoordCenter.x, renderCoordCenter.y, 0);
 
         Matrix::scaleM(newViewMatrix, 0, 1 / zoomFactor, 1 / zoomFactor, 1);
 
@@ -415,9 +415,7 @@ std::vector<float> MapCamera2d::getVpMatrix() {
         float fov = 90; // zoom / 70800;
 
         float vpr = (float)sizeViewport.x / (float)sizeViewport.y;
-        if (sizeViewport.y == 0) {
-            vpr = 1.0;
-        }
+
 
 
         Matrix::perspectiveM(newProjectionMatrix, 0, fov, vpr, 0.00001, 5.0);
@@ -555,6 +553,14 @@ void MapCamera2d::notifyListeners(const int &listenerType) {
     float horizontalFov;
     float verticalFov;
     float focusPointAltitude;
+
+    Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
+    width = sizeViewport.x;
+    height = sizeViewport.y;
+    if (width == 0 || height == 0) {
+        return;
+    }
+
     if (listenerType & ListenerType::CAMERA) {
         bool validVpMatrix;
         {
@@ -575,9 +581,6 @@ void MapCamera2d::notifyListeners(const int &listenerType) {
         }
 
 
-        Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
-        width = sizeViewport.x;
-        height = sizeViewport.y;
     }
 
 
@@ -634,8 +637,8 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     float xDiffMap = xDiff * zoom * screenPixelAsRealMeterFactor * (mapSystemRtl ? -1 : 1);
     float yDiffMap = yDiff * zoom * screenPixelAsRealMeterFactor * (mapSystemTtb ? -1 : 1);
 
-    focusPointPosition.y += xDiffMap * 5;
-    focusPointPosition.x -= yDiffMap * 5;
+    focusPointPosition.y += xDiffMap * 5 * 0.0000001;
+    focusPointPosition.x -= yDiffMap * 5 * 0.0000001;
 //    focusPointPosition = conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), focusPointPosition);
 
     clampCenterToPaddingCorrectedBounds();

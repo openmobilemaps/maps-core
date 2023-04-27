@@ -34,7 +34,7 @@ class DefaultSystemToRenderConverter : public CoordinateConverterInterface {
     virtual Coord convert(const Coord &coordinate) override {
         double x = (boundsRight < boundsLeft) ? -coordinate.x + boundsRight : (coordinate.x - boundsLeft);
         double y = (boundsBottom < boundsTop) ? -coordinate.y + boundsBottom : (coordinate.y - boundsTop);
-        double z = (boundsNear < boundsFar) ? -coordinate.z + boundsNear : (coordinate.y - boundsFar);
+        double z = (boundsNear < boundsFar) ? -coordinate.z + boundsNear : (coordinate.z - boundsFar);
         return Coord(getTo(), x - halfWidth, y - halfHeight, z - halfDepth);
     }
 

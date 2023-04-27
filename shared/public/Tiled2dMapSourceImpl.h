@@ -104,7 +104,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & viewMa
     std::vector<PrioritizedTiled2dMapTileInfo> visibleTilesVec;
 
     int maxLevel = initialLevel;
-    int maxLevelAvailable = zoomLevelInfos.size() - 1;
+    auto maxLevelAvailable = zoomLevelInfos.size() - 1;
     if (heightZoomLevelInfos.size() > 0 &&  heightZoomLevelInfos.size() - 1 < maxLevelAvailable ) {
         maxLevelAvailable = heightZoomLevelInfos.size() - 1;
     }
@@ -148,29 +148,45 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & viewMa
         auto bottomLeftView = transformToView(bottomLeft, viewMatrix);
         auto bottomRightView = transformToView(bottomRight, viewMatrix);
 
+        if (mapConfig.mapCoordinateSystem.identifier == CoordinateSystemIdentifiers::UNITSPHERE()) {
+            // v(0,0,+1) = unit-vector out of screen
+            float topLeftHA = 180.0 / M_PI * atan2(topLeftView.x, -topLeftView.z);
+            float topLeftVA = 180.0 / M_PI * atan2(topLeftView.y, -topLeftView.z);
+            float topRightHA = 180.0 / M_PI * atan2(topRightView.x, -topRightView.z);
+            float topRightVA = 180.0 / M_PI * atan2(topRightView.y, -topRightView.z);
+            float bottomLeftHA = 180.0 / M_PI * atan2(bottomLeftView.x, -bottomLeftView.z);
+            float bottomLeftVA = 180.0 / M_PI * atan2(bottomLeftView.y, -bottomLeftView.z);
+            float bottomRightHA = 180.0 / M_PI * atan2(bottomRightView.x, -bottomRightView.z);
+            float bottomRightVA = 180.0 / M_PI * atan2(bottomRightView.y, -bottomRightView.z);
 
-        // v(0,0,+1) = unit-vector out of screen
-        float topLeftHA = 180.0 / M_PI * atan2(topLeftView.x, -topLeftView.z);
-        float topLeftVA = 180.0 / M_PI * atan2(topLeftView.y, -topLeftView.z);
-        float topRightHA = 180.0 / M_PI * atan2(topRightView.x, -topRightView.z);
-        float topRightVA = 180.0 / M_PI * atan2(topRightView.y, -topRightView.z);
-        float bottomLeftHA = 180.0 / M_PI * atan2(bottomLeftView.x, -bottomLeftView.z);
-        float bottomLeftVA = 180.0 / M_PI * atan2(bottomLeftView.y, -bottomLeftView.z);
-        float bottomRightHA = 180.0 / M_PI * atan2(bottomRightView.x, -bottomRightView.z);
-        float bottomRightVA = 180.0 / M_PI * atan2(bottomRightView.y, -bottomRightView.z);
+            if (topLeftVA < -verticalFov / 2.0 && topRightVA < -verticalFov / 2.0 && bottomLeftVA < -verticalFov / 2.0 && bottomRightVA < -verticalFov / 2.0) {
+                continue;
+            }
+            if (topLeftHA < -horizontalFov / 2.0 && topRightHA < -horizontalFov / 2.0 && bottomLeftHA < -horizontalFov / 2.0 && bottomRightHA < -horizontalFov / 2.0) {
+                continue;
+            }
+            if (topLeftVA > verticalFov / 2.0 && topRightVA > verticalFov / 2.0 && bottomLeftVA > verticalFov / 2.0 && bottomRightVA > verticalFov / 2.0) {
+                continue;
+            }
+            if (topLeftHA > horizontalFov / 2.0 && topRightHA > horizontalFov / 2.0 && bottomLeftHA > horizontalFov / 2.0 && bottomRightHA > horizontalFov / 2.0) {
+                continue;
+            }
+        }
+        else {
+            if (topLeftView.x < -width / 2.0 && topRightView.x < -width / 2.0 && bottomLeftView.x < -width / 2.0 && bottomRightView.x < -width / 2.0) {
+                continue;
+            }
+            if (topLeftView.y < -height / 2.0 && topRightView.y < -height / 2.0 && bottomLeftView.y < -height / 2.0 && bottomRightView.y < -height / 2.0) {
+                continue;
+            }
+            if (topLeftView.x > width / 2.0 && topRightView.x > width / 2.0 && bottomLeftView.x > width / 2.0 && bottomRightView.x > width / 2.0) {
+                continue;
+            }
+            if (topLeftView.y > height / 2.0 && topRightView.y > height / 2.0 && bottomLeftView.y > height / 2.0 && bottomRightView.y > height / 2.0) {
+                continue;
+            }
+        }
 
-        if (topLeftVA < -verticalFov / 2.0 && topRightVA < -verticalFov / 2.0 && bottomLeftVA < -verticalFov / 2.0 && bottomRightVA < -verticalFov / 2.0) {
-            continue;
-        }
-        if (topLeftHA < -horizontalFov / 2.0 && topRightHA < -horizontalFov / 2.0 && bottomLeftHA < -horizontalFov / 2.0 && bottomRightHA < -horizontalFov / 2.0) {
-            continue;
-        }
-        if (topLeftVA > verticalFov / 2.0 && topRightVA > verticalFov / 2.0 && bottomLeftVA > verticalFov / 2.0 && bottomRightVA > verticalFov / 2.0) {
-            continue;
-        }
-        if (topLeftHA > horizontalFov / 2.0 && topRightHA > horizontalFov / 2.0 && bottomLeftHA > horizontalFov / 2.0 && bottomRightHA > horizontalFov / 2.0) {
-            continue;
-        }
 
         auto topLeftScreen = projectToScreen(topLeftView, projectionMatrix);
         auto topRightScreen = projectToScreen(topRightView, projectionMatrix);
@@ -307,23 +323,29 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & viewMa
 }
 
 template<class T, class L, class R>
-::Vec3D Tiled2dMapSource<T, L, R>::transformToView(const ::Coord & position, const std::vector<float> & vpMatrix) {
-    auto mapCoord = conversionHelper->convert(CoordinateSystemIdentifiers::UNITSPHERE(), position);
+::Vec3D Tiled2dMapSource<T, L, R>::transformToView(const ::Coord & position, const std::vector<float> & viewMatrix) {
+    Coord mapCoord("", 0,0,0);
+    if (mapConfig.mapCoordinateSystem.identifier == CoordinateSystemIdentifiers::UNITSPHERE()) {
+        mapCoord = conversionHelper->convert(mapConfig.mapCoordinateSystem.identifier, position);
+    }
+    else {
+        mapCoord = conversionHelper->convertToRenderSystem(position);
+    }
     std::vector<float> inVec = {(float)mapCoord.x, (float)mapCoord.y, (float)mapCoord.z, 1.0};
     std::vector<float> outVec = {0, 0, 0, 0};
 
-    Matrix::multiply(vpMatrix, inVec, outVec);
+    Matrix::multiply(viewMatrix, inVec, outVec);
 
     auto point2d = Vec3D(outVec[0] / outVec[3], outVec[1] / outVec[3], outVec[2] / outVec[3]);
     return point2d;
 }
 
 template<class T, class L, class R>
-::Vec3D Tiled2dMapSource<T, L, R>::projectToScreen(const ::Vec3D & position, const std::vector<float> & vpMatrix) {
+::Vec3D Tiled2dMapSource<T, L, R>::projectToScreen(const ::Vec3D & position, const std::vector<float> & projectionMatrix) {
     std::vector<float> inVec = {(float)position.x, (float)position.y, (float)position.z, 1.0};
     std::vector<float> outVec = {0, 0, 0, 0};
 
-    Matrix::multiply(vpMatrix, inVec, outVec);
+    Matrix::multiply(projectionMatrix, inVec, outVec);
 
     auto point2d = Vec3D(outVec[0] / outVec[3], outVec[1] / outVec[3], outVec[2] / outVec[3]);
     return point2d;
