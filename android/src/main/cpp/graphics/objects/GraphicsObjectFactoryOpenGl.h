@@ -31,5 +31,8 @@ class GraphicsObjectFactoryOpenGl : public GraphicsObjectFactoryInterface {
 
     virtual std::shared_ptr<TextInterface> createText(const std::shared_ptr<::ShaderProgramInterface> &shader) override;
 
+    virtual std::shared_ptr<TextInstancedInterface> createTextInstanced(const std::shared_ptr<::ShaderProgramInterface> & shader) override;
+
     virtual std::shared_ptr<Quad2dInstancedInterface> createQuadInstanced(const std::shared_ptr< ::ShaderProgramInterface> &shader) override;
+
 };

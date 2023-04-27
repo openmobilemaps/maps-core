@@ -16,6 +16,7 @@
 #include "ColorPolygonGroup2dShaderOpenGl.h"
 #include "ColorShaderOpenGl.h"
 #include "TextShaderOpenGl.h"
+#include "TextInstancedShaderOpenGl.h"
 #include "RasterShaderOpenGl.h"
 #include "StretchShaderOpenGl.h"
 #include "AlphaInstancedShaderOpenGl.h"
@@ -50,6 +51,10 @@ std::shared_ptr<PolygonGroupShaderInterface> ShaderFactoryOpenGl::createPolygonG
 
 std::shared_ptr<TextShaderInterface> ShaderFactoryOpenGl::createTextShader() {
     return std::make_shared<TextShaderOpenGl>();
+}
+
+std::shared_ptr<TextInstancedShaderInterface> ShaderFactoryOpenGl::createTextInstancedShader() {
+    return std::make_shared<TextInstancedShaderOpenGl>();
 }
 
 std::shared_ptr<StretchShaderInterface> ShaderFactoryOpenGl::createStretchShader() {

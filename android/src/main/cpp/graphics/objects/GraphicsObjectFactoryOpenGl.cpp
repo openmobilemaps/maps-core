@@ -17,6 +17,7 @@
 #include "Quad2dInstancedOpenGl.h"
 #include "Quad2dOpenGl.h"
 #include "Text2dOpenGl.h"
+#include "Text2dInstancedOpenGl.h"
 
 std::shared_ptr<Quad2dInterface> GraphicsObjectFactoryOpenGl::createQuad(const std::shared_ptr<::ShaderProgramInterface> &shader) {
     return std::make_shared<Quad2dOpenGl>(shader);
@@ -58,4 +59,8 @@ std::shared_ptr<TextInterface> GraphicsObjectFactoryOpenGl::createText(const std
 std::shared_ptr<Quad2dInstancedInterface> GraphicsObjectFactoryOpenGl::createQuadInstanced(
         const std::shared_ptr<::ShaderProgramInterface> &shader) {
     return std::make_shared<Quad2dInstancedOpenGl>(shader);
+}
+
+std::shared_ptr<TextInstancedInterface> GraphicsObjectFactoryOpenGl::createTextInstanced(const std::shared_ptr<::ShaderProgramInterface> & shader) {
+    return std::make_shared<Text2dInstancedOpenGl>(shader);
 }

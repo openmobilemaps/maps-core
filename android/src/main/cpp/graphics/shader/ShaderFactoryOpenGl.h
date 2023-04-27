@@ -28,6 +28,8 @@ class ShaderFactoryOpenGl : public ShaderFactoryInterface {
 
     virtual std::shared_ptr<TextShaderInterface> createTextShader() override;
 
+    virtual std::shared_ptr<TextInstancedShaderInterface> createTextInstancedShader() override;
+
     virtual std::shared_ptr<AlphaInstancedShaderInterface> createAlphaInstancedShader() override;
 
 public:
