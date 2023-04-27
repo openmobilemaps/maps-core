@@ -226,7 +226,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & viewMa
                 continue;
             }
 
-            const RectCoord rect(topRight, bottomLeft);
+            const RectCoord rect(topLeft, bottomRight);
             int t = 0;
             double priority = 1.0 / (0.1 + abs(topLeftScreen.x)+abs(topLeftScreen.y));
             visibleTilesVec.push_back(PrioritizedTiled2dMapTileInfo(
@@ -772,7 +772,7 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
 
 #warning
         int currentZoomLevelIdentifier = 13; // TODO – FIXME
-        if (tileInfo.zoomIdentifier != currentZoomLevelIdentifier) {
+        if (tileInfo.zoomIdentifier != currentZoomLevelIdentifier && false) {
 
             if (currentTileMask.num_contours != 0) {
                 if(!completeViewBoundsDrawn) {
