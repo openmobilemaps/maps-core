@@ -640,8 +640,16 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     float xDiffMap = xDiff * zoom * screenPixelAsRealMeterFactor * (mapSystemRtl ? -1 : 1);
     float yDiffMap = yDiff * zoom * screenPixelAsRealMeterFactor * (mapSystemTtb ? -1 : 1);
 
-    focusPointPosition.y += xDiffMap * 5 * 0.0000001;
-    focusPointPosition.x -= yDiffMap * 5 * 0.0000001;
+    if (mapInterface->getMapConfig().mapCoordinateSystem.identifier != CoordinateSystemIdentifiers::UNITSPHERE()) {
+        focusPointPosition.x += xDiffMap * 5 * 0.000001;
+        focusPointPosition.y += yDiffMap * 5 * 0.000001;
+    }
+    else {
+        focusPointPosition.y += xDiffMap * 5;
+        focusPointPosition.x -= yDiffMap * 5;
+    }
+
+
 //    focusPointPosition = conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), focusPointPosition);
 
     clampCenterToPaddingCorrectedBounds();
@@ -702,8 +710,14 @@ void MapCamera2d::inertiaStep() {
     float yDiffMap = (inertia->velocity.y) * factor * deltaPrev;
     inertia->timestampUpdate = now;
 
-    focusPointPosition.y += xDiffMap;
-    focusPointPosition.x -= yDiffMap;
+    if (mapInterface->getMapConfig().mapCoordinateSystem.identifier != CoordinateSystemIdentifiers::UNITSPHERE()) {
+        focusPointPosition.x += xDiffMap * 5 * 0.0000001;
+        focusPointPosition.y += yDiffMap * 5 * 0.0000001;
+    }
+    else {
+        focusPointPosition.y += xDiffMap * 5;
+        focusPointPosition.x -= yDiffMap * 5;
+    }
 //    focusPointPosition = conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), focusPointPosition);
 
     clampCenterToPaddingCorrectedBounds();
@@ -816,7 +830,7 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
         double diffCenterY = topDiff * zoom * screenPixelAsRealMeterFactor;
 
         focusPointPosition.y += diffCenterX;
-        focusPointPosition.x -= diffCenterY;
+        focusPointPosition.x += diffCenterY;
 //        focusPointPosition = conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), focusPointPosition);
 
         if (config.rotationEnabled) {
@@ -833,7 +847,7 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
                 double rotDiffX = (cosAngle * centerXDiff - sinAngle * centerYDiff);
                 double rotDiffY = (cosAngle * centerYDiff + sinAngle * centerXDiff);
                 focusPointPosition.y += rotDiffX * zoom * screenPixelAsRealMeterFactor;
-                focusPointPosition.x -= rotDiffY * zoom * screenPixelAsRealMeterFactor;
+                focusPointPosition.x += rotDiffY * zoom * screenPixelAsRealMeterFactor;
 //                focusPointPosition = conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), focusPointPosition);
 
                 listenerType |= ListenerType::ROTATION;

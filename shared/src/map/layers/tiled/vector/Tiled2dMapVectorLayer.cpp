@@ -431,7 +431,7 @@ void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, bool i
         if (targetTile) {
 
             if (cachedTargetTextures.find(targetTile.value()) == cachedTargetTextures.end()) {
-                targetTexture = graphicsFactory->createRenderTargetTexture(Vec2I(512, 512));
+                targetTexture = graphicsFactory->createRenderTargetTexture(Vec2I(1024, 1024));
                 if (mapInterface->getMapConfig().mapCoordinateSystem.identifier == CoordinateSystemIdentifiers::UNITSPHERE()) {
                     auto alphaShader = shaderFactory->createSphereProjectionShader();
                     auto tileObject = std::make_shared<Textured3dLayerObject>(
