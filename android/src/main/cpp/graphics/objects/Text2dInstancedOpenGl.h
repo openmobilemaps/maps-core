@@ -113,6 +113,8 @@ protected:
     GLuint scalesBuffer;
     int instStyleIndicesHandle;
     GLuint styleIndicesBuffer;
+    int styleBufferHandle;
+    GLuint styleBuffer;
     int instTextureCoordinatesHandle;
     GLuint textureCoordinatesListBuffer;
 

@@ -90,20 +90,16 @@ void Text2dInstancedOpenGl::prepareGlData(const std::shared_ptr<OpenGlContext> &
 
     instPositionsHandle = glGetAttribLocation(programHandle, "aPosition");
     glGenBuffers(1, &positionsBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, positionsBuffer);
     instTextureCoordinatesHandle = glGetAttribLocation(programHandle, "aTexCoordinate");
     glGenBuffers(1, &textureCoordinatesListBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, textureCoordinatesListBuffer);
     instScalesHandle = glGetAttribLocation(programHandle, "aScale");
     glGenBuffers(1, &scalesBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, scalesBuffer);
     instRotationsHandle = glGetAttribLocation(programHandle, "aRotation");
     glGenBuffers(1, &rotationsBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, rotationsBuffer);
     instStyleIndicesHandle = glGetAttribLocation(programHandle, "aStyleIndex");
     glGenBuffers(1, &styleIndicesBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, styleIndicesBuffer);
-    OpenGlHelper::checkGlError("styleIndicesBuffer");
+    styleBufferHandle = glGetProgramResourceIndex(programHandle, GL_SHADER_STORAGE_BLOCK, "textInstancedStyleBuffer");
+    glGenBuffers(1, &styleBuffer);
 
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -141,6 +137,7 @@ void Text2dInstancedOpenGl::removeGlBuffers() {
     glDeleteBuffers(1, &scalesBuffer);
     glDeleteBuffers(1, &textureCoordinatesListBuffer);
     glDeleteBuffers(1, &rotationsBuffer);
+    glDeleteBuffers(1, &styleBuffer);
 }
 
 void Text2dInstancedOpenGl::removeTextureCoordsGlBuffers() {
@@ -194,7 +191,7 @@ void Text2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
                                    int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
     if (!ready || (usesTextureCoords && !textureCoordsReady) || instanceCount == 0)
         return;
-return;
+
     glUseProgram(programHandle);
 
     if (isMasked) {
@@ -238,10 +235,12 @@ return;
     glVertexAttribDivisor(instRotationsHandle, 1);
 
     glBindBuffer(GL_ARRAY_BUFFER, styleIndicesBuffer);
-    glVertexAttribPointer(instStyleIndicesHandle, 1, GL_UNSIGNED_SHORT, GL_FALSE, 0, NULL);
+    glVertexAttribIPointer(instStyleIndicesHandle, 1, GL_UNSIGNED_SHORT, 0, NULL);
     glEnableVertexAttribArray(instStyleIndicesHandle);
     glVertexAttribDivisor(instStyleIndicesHandle, 1);
 
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, styleBuffer);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, styleBufferHandle, styleBuffer);
 
     shaderProgram->preRender(context);
 
@@ -250,7 +249,6 @@ return;
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     glVertexAttribPointer(positionHandle, 3, GL_FLOAT, false, 0, nullptr);
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // Apply the projection and view transformation
     glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
@@ -263,7 +261,9 @@ return;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glDrawElementsInstanced(GL_TRIANGLES,6, GL_UNSIGNED_BYTE, nullptr, instanceCount);
 
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
     glVertexAttribDivisor(instPositionsHandle, 0);
     glVertexAttribDivisor(instTextureCoordinatesHandle, 0);
@@ -290,8 +290,6 @@ void Text2dInstancedOpenGl::prepareTextureDraw(std::shared_ptr<OpenGlContext> &o
         return;
     }
 
-    return;
-
     // Set the active texture unit to texture unit 0.
     glActiveTexture(GL_TEXTURE0);
 
@@ -301,8 +299,6 @@ void Text2dInstancedOpenGl::prepareTextureDraw(std::shared_ptr<OpenGlContext> &o
     // Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0.
     int textureUniformHandle = glGetUniformLocation(programHandle, "textureSampler");
     glUniform1i(textureUniformHandle, 0);
-
-    OpenGlHelper::checkGlError("prepareTextureDraw");
 }
 
 void Text2dInstancedOpenGl::setInstanceCount(int count) {
@@ -330,7 +326,10 @@ void Text2dInstancedOpenGl::setStyleIndices(const ::SharedBytes &indices) {
 }
 
 void Text2dInstancedOpenGl::setStyles(const ::SharedBytes &values) {
-
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, styleBuffer);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, values.elementCount * values.bytesPerElement, (void *) values.address, GL_DYNAMIC_DRAW);
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
 void Text2dInstancedOpenGl::writeToBuffer(const ::SharedBytes &data, GLuint target) {
@@ -339,10 +338,7 @@ void Text2dInstancedOpenGl::writeToBuffer(const ::SharedBytes &data, GLuint targ
         return;
     }
 
-    return;
-
     glBindBuffer(GL_ARRAY_BUFFER, target);
-    glBufferData(GL_ARRAY_BUFFER, data.elementCount * data.bytesPerElement, (void *) data.address, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, data.elementCount * data.bytesPerElement, (void *) data.address, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    OpenGlHelper::checkGlError("writeToBuffer");
 }
