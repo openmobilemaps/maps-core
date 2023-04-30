@@ -42,6 +42,8 @@ public:
 
     void setRectCoord(const ::RectCoord &rectCoord);
 
+    void setTileInfo(const int32_t x, const int32_t y, const int32_t z, const int32_t offset);
+
     void setAlpha(float alpha);
 
     std::shared_ptr<Quad3dInterface> getQuadObject();

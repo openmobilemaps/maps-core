@@ -202,6 +202,12 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
                     if (it == tileObjectMap.end()) {
                         tilesToAdd.insert(rasterTileInfo);
                     }
+                    else {
+                        if (auto quad3d = std::dynamic_pointer_cast<Textured3dLayerObject>(it->second)) {
+                            // TODO: Maybe check if zoomLevelOffset has actually changed?
+                            quad3d->setTileInfo(rasterTileInfo.tileInfo.x, rasterTileInfo.tileInfo.y, rasterTileInfo.tileInfo.zoomIdentifier, rasterTileInfo.targetZoomLevelOffset);
+                        }
+                    }
                 }
             }
 
@@ -209,8 +215,14 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
 
             std::unordered_set<Tiled2dMapRasterTileInfo> tilesToRemove;
             for (const auto &tileEntry : tileObjectMap) {
-                if (currentTileInfos.count(tileEntry.first) == 0 || !shouldLoadTile(tileEntry.first.tileInfo)){
+                auto it = currentTileInfos.find(tileEntry.first);
+                if (it == currentTileInfos.end() || !shouldLoadTile(tileEntry.first.tileInfo)){
                     tilesToRemove.insert(tileEntry.first);
+                }
+                else if (auto quad3d = std::dynamic_pointer_cast<Textured3dLayerObject>(tileEntry.second)) {
+                    // TODO: Maybe check if zoomLevelOffset has actually changed?
+                    auto rasterTileInfo = *it;
+                    quad3d->setTileInfo(rasterTileInfo.tileInfo.x, rasterTileInfo.tileInfo.y, rasterTileInfo.tileInfo.zoomIdentifier, rasterTileInfo.targetZoomLevelOffset);
                 }
             }
 
@@ -250,6 +262,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
                         tileObject->beginAlphaAnimation(0.0, alpha, 150);
                     }
                     tileObject->setRectCoord(tile.tileInfo.bounds);
+                    tileObject->setTileInfo(tile.tileInfo.x, tile.tileInfo.y, tile.tileInfo.zoomIdentifier, tile.targetZoomLevelOffset);
                     tilesToSetup.emplace_back(std::make_pair(tile, tileObject));
 
                     tileObjectMap[tile] = tileObject;

@@ -32,6 +32,7 @@ sphereProjectionVertexShader(const patch_control_point<VertexIn> patch [[stage_i
                  const float3 positionInPatch [[position_in_patch]],
                  constant float4x4 &mvpMatrix [[buffer(1)]],
                  constant float &time [[buffer(2)]],
+                 constant float &layerOffset [[buffer(3)]],
                  texture2d<float> texture0 [[ texture(0)]],
                  sampler textureSampler [[sampler(0)]]
                  )
@@ -99,6 +100,21 @@ sphereProjectionVertexShader(const patch_control_point<VertexIn> patch [[stage_i
 
 
   float4 position = mvpMatrix * float4(pos3d, 1.0);
+    float z = position.z / position.w;
+    if (z > 1.0) {
+        z = 1.0;
+    }
+    else if (z < 0.0) {
+        z = 0.0;
+    }
+
+    z = z * 0.3 + layerOffset * -0.2;
+//    z = z * 0.5 + layerOffset * -100.1;
+
+    position.z = z * position.w;
+
+//    position.z = position.z * 0.8 - 0.00010 + layerOffset * -0.01;
+
 
   VertexOut out {
     .position = position,

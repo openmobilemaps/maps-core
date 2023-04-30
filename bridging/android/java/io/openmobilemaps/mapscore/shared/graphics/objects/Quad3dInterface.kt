@@ -10,6 +10,8 @@ abstract class Quad3dInterface {
 
     abstract fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.RectD)
 
+    abstract fun setTileInfo(x: Int, y: Int, z: Int, offset: Int)
+
     abstract fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
 
     abstract fun loadHeightTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
@@ -37,6 +39,12 @@ abstract class Quad3dInterface {
             native_setFrame(this.nativeRef, frame, textureCoordinates)
         }
         private external fun native_setFrame(_nativeRef: Long, frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.RectD)
+
+        override fun setTileInfo(x: Int, y: Int, z: Int, offset: Int) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setTileInfo(this.nativeRef, x, y, z, offset)
+        }
+        private external fun native_setTileInfo(_nativeRef: Long, x: Int, y: Int, z: Int, offset: Int)
 
         override fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

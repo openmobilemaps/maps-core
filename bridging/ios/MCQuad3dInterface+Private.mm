@@ -5,6 +5,7 @@
 #import "MCQuad3dInterface.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
+#import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCGraphicsObjectInterface+Private.h"
 #import "MCMaskingObjectInterface+Private.h"
@@ -41,6 +42,18 @@ textureCoordinates:(nonnull MCRectD *)textureCoordinates {
     try {
         _cppRefHandle.get()->setFrame(::djinni_generated::Quad2dD::toCpp(frame),
                                       ::djinni_generated::RectD::toCpp(textureCoordinates));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setTileInfo:(int32_t)x
+                  y:(int32_t)y
+                  z:(int32_t)z
+             offset:(int32_t)offset {
+    try {
+        _cppRefHandle.get()->setTileInfo(::djinni::I32::toCpp(x),
+                                         ::djinni::I32::toCpp(y),
+                                         ::djinni::I32::toCpp(z),
+                                         ::djinni::I32::toCpp(offset));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -94,6 +107,15 @@ public:
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() setFrame:(::djinni_generated::Quad2dD::fromCpp(c_frame))
                                             textureCoordinates:(::djinni_generated::RectD::fromCpp(c_textureCoordinates))];
+        }
+    }
+    void setTileInfo(int32_t c_x, int32_t c_y, int32_t c_z, int32_t c_offset) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setTileInfo:(::djinni::I32::fromCpp(c_x))
+                                                                y:(::djinni::I32::fromCpp(c_y))
+                                                                z:(::djinni::I32::fromCpp(c_z))
+                                                           offset:(::djinni::I32::fromCpp(c_offset))];
         }
     }
     void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & c_textureHolder) override

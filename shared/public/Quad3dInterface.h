@@ -6,6 +6,7 @@
 #include "Quad2dD.h"
 #include "RectD.h"
 #include "RenderingContextInterface.h"
+#include <cstdint>
 #include <memory>
 
 class GraphicsObjectInterface;
@@ -17,6 +18,8 @@ public:
     virtual ~Quad3dInterface() = default;
 
     virtual void setFrame(const ::Quad2dD & frame, const ::RectD & textureCoordinates) = 0;
+
+    virtual void setTileInfo(int32_t x, int32_t y, int32_t z, int32_t offset) = 0;
 
     virtual void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const /*not-null*/ std::shared_ptr<TextureHolderInterface> & textureHolder) = 0;
 

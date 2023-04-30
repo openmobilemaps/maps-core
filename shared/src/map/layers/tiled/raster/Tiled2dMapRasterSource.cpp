@@ -124,7 +124,7 @@ std::unordered_set<Tiled2dMapRasterTileInfo> Tiled2dMapRasterSource::getCurrentT
     for (auto it = currentTiles.rbegin(); it != currentTiles.rend(); it++ ) {
         auto &[tileInfo, tileWrapper] = *it;
         if (tileWrapper.isVisible) {
-            currentTileInfos.insert(Tiled2dMapRasterTileInfo(tileInfo, tileWrapper.result.first, tileWrapper.result.second, tileWrapper.masks));
+            currentTileInfos.insert(Tiled2dMapRasterTileInfo(tileInfo, tileWrapper.result.first, tileWrapper.result.second, tileWrapper.masks, tileWrapper.targetZoomLevelOffset));
         }
     }
     return currentTileInfos;

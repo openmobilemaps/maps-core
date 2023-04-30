@@ -31,7 +31,7 @@ final class Quad3d: BaseGraphicsObject {
 
     private var renderAsMask = false
 
-    private let label: String
+    private var label: String
 
     private let timeBuffer: MTLBuffer
     private var timeBufferContent : UnsafeMutablePointer<Float>
@@ -39,6 +39,8 @@ final class Quad3d: BaseGraphicsObject {
     private var tessellationFactorBuffer: MTLBuffer?
 
     private static let renderStartTime = Date()
+
+    fileprivate var layerOffset: Float = 0
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext, label: String = "Quad3d") {
         self.label = label
@@ -123,6 +125,7 @@ final class Quad3d: BaseGraphicsObject {
             encoder.setDepthStencilState(context.defaultMask3d)
         }
 
+
         shader.setupProgram(context)
         shader.preRender(context, pass: renderPass)
 
@@ -143,6 +146,9 @@ final class Quad3d: BaseGraphicsObject {
 
         timeBufferContent[0] = Float(-Self.renderStartTime.timeIntervalSinceNow)
         encoder.setVertexBuffer(timeBuffer, offset: 0, index: 2)
+
+        encoder.setVertexBytes(&layerOffset, length: MemoryLayout<Int32>.stride, index: 3)
+//        encoder.setDepthBias(Float(layerOffset) * -100000.0, slopeScale: 0.0, clamp: 100000.0)
 
 
         encoder.setTessellationFactorBuffer(tessellationFactorBuffer, offset: 0, instanceStride: 0)
@@ -174,6 +180,12 @@ extension Quad3d: MCMaskingObjectInterface {
 }
 
 extension Quad3d: MCQuad3dInterface {
+    func setTileInfo(_ x: Int32, y: Int32, z: Int32, offset: Int32) {
+        self.layerOffset = Float(offset)
+        #if DEBUG
+        label = "Quad3d (\(z)/\(x)/\(y), \(offset))"
+        #endif
+    }
     func setFrame(_ frame: MCQuad2dD, textureCoordinates: MCRectD) {
         /*
          The quad is made out of 4 vertices as following

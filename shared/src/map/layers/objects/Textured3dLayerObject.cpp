@@ -23,6 +23,10 @@ renderObject(std::make_shared<RenderObject>(graphicsObject))
 {
 }
 
+void Textured3dLayerObject::setTileInfo(const int32_t x, const int32_t y, const int32_t z, const int32_t offset) {
+    quad->setTileInfo(x, y, z, offset);
+}
+
 void Textured3dLayerObject::setRectCoord(const ::RectCoord &rectCoord) {
 //    auto width = rectCoord.bottomRight.x - rectCoord.topLeft.x;
 //    auto height = rectCoord.topLeft.y - rectCoord.bottomRight.y;

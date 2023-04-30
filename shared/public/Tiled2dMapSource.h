@@ -44,15 +44,18 @@ public:
     const PolygonCoord tileBounds;
     gpc_polygon tilePolygon;
     bool isVisible = true;
+    int targetZoomLevelOffset;
 
     TileWrapper(const R &result,
                 const std::vector<::PolygonCoord> & masks,
                 const PolygonCoord & tileBounds,
-                const gpc_polygon &tilePolygon) :
+                const gpc_polygon &tilePolygon,
+                const int targetZoomLevelOffset) :
     result(std::move(result)),
     masks(std::move(masks)),
     tileBounds(std::move(tileBounds)),
-    tilePolygon(std::move(tilePolygon)) {};
+    tilePolygon(std::move(tilePolygon)),
+    targetZoomLevelOffset(targetZoomLevelOffset) {};
 };
 
 

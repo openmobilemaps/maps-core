@@ -20,12 +20,14 @@ struct Tiled2dMapRasterTileInfo {
     std::shared_ptr<TextureHolderInterface> textureHolder;
     std::shared_ptr<TextureHolderInterface> heightTextureHolder;
     std::vector<::PolygonCoord> masks;
+    int targetZoomLevelOffset;
 
-    Tiled2dMapRasterTileInfo(Tiled2dMapTileInfo tileInfo, const std::shared_ptr<TextureHolderInterface> textureHolder, const std::shared_ptr<TextureHolderInterface> heightTextureHolder, const std::vector<::PolygonCoord> masks)
+    Tiled2dMapRasterTileInfo(Tiled2dMapTileInfo tileInfo, const std::shared_ptr<TextureHolderInterface> textureHolder, const std::shared_ptr<TextureHolderInterface> heightTextureHolder, const std::vector<::PolygonCoord> masks, int targetZoomLevelOffset)
         : tileInfo(tileInfo)
         , textureHolder(textureHolder)
         , heightTextureHolder(heightTextureHolder)
-        , masks(masks) {}
+        , masks(masks)
+        , targetZoomLevelOffset(targetZoomLevelOffset) {}
 
     void updateMasks(const std::vector<::PolygonCoord> & masks){
         this->masks = masks;
