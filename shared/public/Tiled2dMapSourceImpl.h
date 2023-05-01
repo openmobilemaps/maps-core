@@ -718,13 +718,14 @@ void Tiled2dMapSource<T, L, R>::didLoad(Tiled2dMapTileInfo tile, size_t loaderIn
             gpc_polygon tilePolygon;
             gpc_set_polygon({mask}, &tilePolygon);
 
-            int targetZoomLevelOffset = 0;
+            int targetZoomLevelOffset = -99;
             for (const auto & layer : currentPyramid) {
                 // priority doesn't matter for find
                 PrioritizedTiled2dMapTileInfo searchTile(tile, 0);
-                if (layer.visibleTiles.find(searchTile) != layer.visibleTiles.end())
+                if (layer.visibleTiles.find(searchTile) != layer.visibleTiles.end()) {
                     targetZoomLevelOffset = layer.targetZoomLevelOffset;
-                break;
+                    break;
+                }
             }
 
             currentTiles.insert({tile, TileWrapper<R>(da, std::vector<::PolygonCoord>{  }, mask, tilePolygon, targetZoomLevelOffset)});

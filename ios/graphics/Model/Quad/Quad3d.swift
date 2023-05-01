@@ -181,9 +181,12 @@ extension Quad3d: MCMaskingObjectInterface {
 
 extension Quad3d: MCQuad3dInterface {
     func setTileInfo(_ x: Int32, y: Int32, z: Int32, offset: Int32) {
+
         self.layerOffset = Float(offset)
         #if DEBUG
-        label = "Quad3d (\(z)/\(x)/\(y), \(offset))"
+        lock.withCritical {
+            label = "Quad3d (\(z)/\(x)/\(y), \(offset))"
+        }
         #endif
     }
     func setFrame(_ frame: MCQuad2dD, textureCoordinates: MCRectD) {
