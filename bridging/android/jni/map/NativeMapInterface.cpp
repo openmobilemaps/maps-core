@@ -63,7 +63,7 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_
     try {
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
-        ref->setCallbackHandler(::djinni_generated::NativeMapCallbackInterface::toCpp(jniEnv, j_callbackInterface));
+        ref->setCallbackHandler(::djinni::Optional<std::optional, ::djinni_generated::NativeMapCallbackInterface>::toCpp(jniEnv, j_callbackInterface));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class MapInterface {
 
-    abstract fun setCallbackHandler(callbackInterface: MapCallbackInterface)
+    abstract fun setCallbackHandler(callbackInterface: MapCallbackInterface?)
 
     abstract fun getGraphicsObjectFactory(): io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface
 
@@ -91,11 +91,11 @@ abstract class MapInterface {
             _djinni_private_destroy()
         }
 
-        override fun setCallbackHandler(callbackInterface: MapCallbackInterface) {
+        override fun setCallbackHandler(callbackInterface: MapCallbackInterface?) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_setCallbackHandler(this.nativeRef, callbackInterface)
         }
-        private external fun native_setCallbackHandler(_nativeRef: Long, callbackInterface: MapCallbackInterface)
+        private external fun native_setCallbackHandler(_nativeRef: Long, callbackInterface: MapCallbackInterface?)
 
         override fun getGraphicsObjectFactory(): io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

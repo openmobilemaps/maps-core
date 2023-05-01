@@ -269,6 +269,8 @@ void MapScene::pause() {
         }));
 }
 
+
+
 void MapScene::drawReadyFrame(const ::RectCoord &bounds, float timeout,
                               const std::shared_ptr<MapReadyCallbackInterface> &callbacks) {
 

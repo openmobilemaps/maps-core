@@ -14,6 +14,7 @@
 #include "Vec2I.h"
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <vector>
 
 class LayerInterface;
