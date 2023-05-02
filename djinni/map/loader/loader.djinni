@@ -50,9 +50,8 @@ font_data = record {
 
 font_wrapper = record {
     name: string;
-    ascender: f64;
-    descender: f64;
-    space_advance: f64;
+    line_height: f64;
+    base: f64;
     bitmap_size: vec_2_d;
 
     # font size rendered in bitmap multiplied by dpFactor

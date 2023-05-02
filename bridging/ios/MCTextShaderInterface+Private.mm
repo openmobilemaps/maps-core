@@ -45,9 +45,11 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setHaloColor:(nonnull MCColor *)color {
+- (void)setHaloColor:(nonnull MCColor *)color
+               width:(double)width {
     try {
-        _cppRefHandle.get()->setHaloColor(::djinni_generated::Color::toCpp(color));
+        _cppRefHandle.get()->setHaloColor(::djinni_generated::Color::toCpp(color),
+                                          ::djinni::F64::toCpp(width));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -79,10 +81,11 @@ public:
             [djinni_private_get_proxied_objc_object() setOpacity:(::djinni::F32::fromCpp(c_opacity))];
         }
     }
-    void setHaloColor(const ::Color & c_color) override
+    void setHaloColor(const ::Color & c_color, double c_width) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setHaloColor:(::djinni_generated::Color::fromCpp(c_color))];
+            [djinni_private_get_proxied_objc_object() setHaloColor:(::djinni_generated::Color::fromCpp(c_color))
+                                                             width:(::djinni::F64::fromCpp(c_width))];
         }
     }
     /*not-null*/ std::shared_ptr<::ShaderProgramInterface> asShaderProgramInterface() override

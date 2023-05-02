@@ -103,6 +103,7 @@ class TextLayerObject : public LayerObjectInterface {
     double lineHeight;
     double letterSpacing;
     double maxCharacterAngle;
+    float spaceAdvance = 0.0f;
     std::shared_ptr<CoordinateConversionHelperInterface> converter;
     std::shared_ptr<MapCamera2dInterface> camera;
     std::optional<std::vector<::Coord>> lineCoordinates;
@@ -127,4 +128,5 @@ class TextLayerObject : public LayerObjectInterface {
     std::optional<float> lastScale;
     std::vector<float> vertices;
     std::vector<int16_t> indices;
+
 };

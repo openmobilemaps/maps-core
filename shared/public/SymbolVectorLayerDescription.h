@@ -26,6 +26,7 @@ public:
     SymbolVectorStyle(std::shared_ptr<Value> textSize,
                       std::shared_ptr<Value> textColor,
                       std::shared_ptr<Value> textHaloColor,
+                      std::shared_ptr<Value> textHaloWidth,
                       std::shared_ptr<Value> textOpacity,
                       std::shared_ptr<Value> textFont,
                       std::shared_ptr<Value> textField,
@@ -64,6 +65,7 @@ public:
     textRadialOffset(textRadialOffset),
     textColor(textColor),
     textHaloColor(textHaloColor),
+    textHaloWidth(textHaloWidth),
     textPadding(textPadding),
     symbolSortKey(symbolSortKey),
     symbolPlacement(symbolPlacement),
@@ -156,8 +158,22 @@ public:
     }
 
     Color getTextHaloColor(const EvaluationContext &context){
-        static const Color defaultValue = ColorUtil::c(0, 0, 0, 0.0);
+        static const Color defaultValue = ColorUtil::c(0.0, 0.0, 0.0, 0.0);
         return textHaloColor ? textHaloColor->evaluateOr(context, defaultValue) : defaultValue;
+    }
+
+    double getTextHaloWidth(const EvaluationContext &context) {
+        static double defaultValue = 0.0;
+        double width = (textHaloWidth ? textHaloWidth->evaluateOr(context, defaultValue) : defaultValue) * dpFactor;
+
+        double size = getTextSize(context);
+
+        // in a font of size 41pt, we can show around 7pt of halo
+        // (due to generation of font atlasses)
+        double relativeMax = 7.0 / 41.0;
+        double relative = width / size;
+
+        return std::max(0.0, std::min(1.0, relative / relativeMax));
     }
 
     double getTextPadding(const EvaluationContext &context) {
@@ -297,6 +313,7 @@ private:
     std::shared_ptr<Value> textRadialOffset;
     std::shared_ptr<Value> textColor;
     std::shared_ptr<Value> textHaloColor;
+    std::shared_ptr<Value> textHaloWidth;
     std::shared_ptr<Value> textPadding;
     std::shared_ptr<Value> textAnchor;
     std::shared_ptr<Value> textVariableAnchor;

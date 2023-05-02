@@ -12,9 +12,8 @@ auto FontWrapper::toCpp(ObjcType obj) -> CppType
 {
     assert(obj);
     return {::djinni::String::toCpp(obj.name),
-            ::djinni::F64::toCpp(obj.ascender),
-            ::djinni::F64::toCpp(obj.descender),
-            ::djinni::F64::toCpp(obj.spaceAdvance),
+            ::djinni::F64::toCpp(obj.lineHeight),
+            ::djinni::F64::toCpp(obj.base),
             ::djinni_generated::Vec2D::toCpp(obj.bitmapSize),
             ::djinni::F64::toCpp(obj.size)};
 }
@@ -22,9 +21,8 @@ auto FontWrapper::toCpp(ObjcType obj) -> CppType
 auto FontWrapper::fromCpp(const CppType& cpp) -> ObjcType
 {
     return [[MCFontWrapper alloc] initWithName:(::djinni::String::fromCpp(cpp.name))
-                                      ascender:(::djinni::F64::fromCpp(cpp.ascender))
-                                     descender:(::djinni::F64::fromCpp(cpp.descender))
-                                  spaceAdvance:(::djinni::F64::fromCpp(cpp.spaceAdvance))
+                                    lineHeight:(::djinni::F64::fromCpp(cpp.lineHeight))
+                                          base:(::djinni::F64::fromCpp(cpp.base))
                                     bitmapSize:(::djinni_generated::Vec2D::fromCpp(cpp.bitmapSize))
                                           size:(::djinni::F64::fromCpp(cpp.size))];
 }

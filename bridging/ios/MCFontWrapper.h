@@ -8,25 +8,21 @@
 - (nonnull instancetype)init NS_UNAVAILABLE;
 + (nonnull instancetype)new NS_UNAVAILABLE;
 - (nonnull instancetype)initWithName:(nonnull NSString *)name
-                            ascender:(double)ascender
-                           descender:(double)descender
-                        spaceAdvance:(double)spaceAdvance
+                          lineHeight:(double)lineHeight
+                                base:(double)base
                           bitmapSize:(nonnull MCVec2D *)bitmapSize
                                 size:(double)size NS_DESIGNATED_INITIALIZER;
 + (nonnull instancetype)fontWrapperWithName:(nonnull NSString *)name
-                                   ascender:(double)ascender
-                                  descender:(double)descender
-                               spaceAdvance:(double)spaceAdvance
+                                 lineHeight:(double)lineHeight
+                                       base:(double)base
                                  bitmapSize:(nonnull MCVec2D *)bitmapSize
                                        size:(double)size;
 
 @property (nonatomic, readonly, nonnull) NSString * name;
 
-@property (nonatomic, readonly) double ascender;
+@property (nonatomic, readonly) double lineHeight;
 
-@property (nonatomic, readonly) double descender;
-
-@property (nonatomic, readonly) double spaceAdvance;
+@property (nonatomic, readonly) double base;
 
 @property (nonatomic, readonly, nonnull) MCVec2D * bitmapSize;
 

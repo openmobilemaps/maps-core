@@ -17,6 +17,7 @@ class TextShader: BaseShader {
     private var opacity: Float = 1.0
     private var color = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
     private var haloColor = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
+    private var haloWidth: Float = 0.0
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
@@ -34,6 +35,7 @@ class TextShader: BaseShader {
         encoder.setFragmentBytes(&haloColor, length: MemoryLayout<SIMD4<Float>>.stride, index: 2)
 
         encoder.setFragmentBytes(&opacity, length: MemoryLayout<Float>.stride, index: 3)
+        encoder.setFragmentBytes(&haloWidth, length: MemoryLayout<Float>.stride, index: 4)
     }
 }
 
@@ -46,8 +48,9 @@ extension TextShader: MCTextShaderInterface {
         self.color = color.simdValues
     }
 
-    func setHaloColor(_ color: MCColor) {
+    func setHaloColor(_ color: MCColor, width: Double) {
         self.haloColor = color.simdValues
+        self.haloWidth = Float(width)
     }
 
     func asShaderProgram() -> MCShaderProgramInterface? {

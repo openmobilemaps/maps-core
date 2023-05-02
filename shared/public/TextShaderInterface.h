@@ -16,7 +16,7 @@ public:
 
     virtual void setOpacity(float opacity) = 0;
 
-    virtual void setHaloColor(const ::Color & color) = 0;
+    virtual void setHaloColor(const ::Color & color, double width) = 0;
 
     virtual /*not-null*/ std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() = 0;
 };

@@ -45,6 +45,13 @@ TextLayerObject::TextLayerObject(const std::shared_ptr<TextInterface> &text, con
     referencePoint = converter->convertToRenderSystem(textInfo->getCoordinate());
     referenceSize = fontData.info.size;
 
+    for (const auto &d : fontData.glyphs) {
+        if(d.charCode == " ") {
+            spaceAdvance = d.advance.x;
+            break;
+        }
+    }
+
     std::vector<BreakResult> breaks = {};
     if(textInfo->getSymbolPlacement() == TextSymbolPlacement::POINT) {
         std::vector<std::string> letters;
@@ -60,7 +67,6 @@ TextLayerObject::TextLayerObject(const std::shared_ptr<TextInterface> &text, con
     int currentLetterIndex = 0;
     for (const auto &entry: textInfo->getText()) {
         for (const auto &c : TextHelper::splitWstring(entry.text)) {
-            // precompute indices in font-data, we use -1 for space-case, -2 for newline-case
             int index = -1;
 
             int i = 0;
@@ -73,6 +79,12 @@ TextLayerObject::TextLayerObject(const std::shared_ptr<TextInterface> &text, con
                 ++i;
             }
 
+            // no letter found
+            if(index == -1) {
+                currentLetterIndex++;
+                continue;
+            }
+
             if(textInfo->getSymbolPlacement() == TextSymbolPlacement::POINT) {
                 // check for line breaks in point texts
                 auto it = std::find_if(breaks.begin(), breaks.end(), [&](const auto& v) { return v.index == currentLetterIndex; });
@@ -81,7 +93,8 @@ TextLayerObject::TextLayerObject(const std::shared_ptr<TextInterface> &text, con
                     if(it->keepLetter) {
                         splittedTextInfo.emplace_back(index, entry.scale);
                     }
-                    splittedTextInfo.emplace_back(-2, entry.scale);
+                    // use -1 as line break
+                    splittedTextInfo.emplace_back(-1, entry.scale);
                 } else {
                     // just add it
                     splittedTextInfo.emplace_back(index, entry.scale);
@@ -175,67 +188,64 @@ void TextLayerObject::layoutPoint(float scale, bool updateObject) {
                 auto bearing = Vec2D(d.bearing.x * fontSize * i.scale, d.bearing.y * fontSize * i.scale);
                 auto advance = Vec2D(d.advance.x * fontSize * i.scale, d.advance.y * fontSize * i.scale);
 
-                auto x = pen.x + bearing.x;
-                auto y = pen.y - bearing.y;
-                auto xw = x + size.x;
-                auto yh = y + size.y;
+                if(d.charCode != " ") {
+                    auto x = pen.x + bearing.x;
+                    auto y = pen.y - bearing.y;
+                    auto xw = x + size.x;
+                    auto yh = y + size.y;
 
-                Quad2dD quad = Quad2dD(Vec2D(x, yh), Vec2D(xw, yh), Vec2D(xw, y), Vec2D(x, y));
+                    Quad2dD quad = Quad2dD(Vec2D(x, yh), Vec2D(xw, yh), Vec2D(xw, y), Vec2D(x, y));
 
-                if (!box) {
-                    box = BoundingBox(Coord(referencePoint.systemIdentifier, quad.topLeft.x, quad.topLeft.y, referencePoint.z));
+                    if (!box) {
+                        box = BoundingBox(Coord(referencePoint.systemIdentifier, quad.topLeft.x, quad.topLeft.y, referencePoint.z));
+                    }
+
+                    box->addPoint(quad.topLeft.x, quad.topLeft.y, referencePoint.z);
+                    box->addPoint(quad.topRight.x, quad.topRight.y, referencePoint.z);
+                    box->addPoint(quad.bottomLeft.x, quad.bottomLeft.y, referencePoint.z);
+                    box->addPoint(quad.bottomRight.x, quad.bottomRight.y, referencePoint.z);
+
+                    vertices.push_back(quad.bottomLeft.x);
+                    vertices.push_back(quad.bottomLeft.y);
+                    vertices.push_back(d.uv.bottomLeft.x);
+                    vertices.push_back(d.uv.bottomLeft.y);
+                    vertices.push_back(0.0);
+                    vertices.push_back(0.0);
+
+                    vertices.push_back(quad.topLeft.x);
+                    vertices.push_back(quad.topLeft.y);
+                    vertices.push_back(d.uv.topLeft.x);
+                    vertices.push_back(d.uv.topLeft.y);
+                    vertices.push_back(0.0);
+                    vertices.push_back(0.0);
+
+                    vertices.push_back(quad.topRight.x);
+                    vertices.push_back(quad.topRight.y);
+                    vertices.push_back(d.uv.topRight.x);
+                    vertices.push_back(d.uv.topRight.y);
+                    vertices.push_back(0.0);
+                    vertices.push_back(0.0);
+
+                    vertices.push_back(quad.bottomRight.x);
+                    vertices.push_back(quad.bottomRight.y);
+                    vertices.push_back(d.uv.bottomRight.x);
+                    vertices.push_back(d.uv.bottomRight.y);
+                    vertices.push_back(0.0);
+                    vertices.push_back(0.0);
+
+                    indices.push_back(0 + indicesStart);
+                    indices.push_back(1 + indicesStart);
+                    indices.push_back(2 + indicesStart);
+                    indices.push_back(0 + indicesStart);
+                    indices.push_back(2 + indicesStart);
+                    indices.push_back(3 + indicesStart);
+
+                    indicesStart += 4;
                 }
 
-                box->addPoint(quad.topLeft.x, quad.topLeft.y, referencePoint.z);
-                box->addPoint(quad.topRight.x, quad.topRight.y, referencePoint.z);
-                box->addPoint(quad.bottomLeft.x, quad.bottomLeft.y, referencePoint.z);
-                box->addPoint(quad.bottomRight.x, quad.bottomRight.y, referencePoint.z);
-
-                vertices.push_back(quad.bottomLeft.x);
-                vertices.push_back(quad.bottomLeft.y);
-                vertices.push_back(d.uv.bottomLeft.x);
-                vertices.push_back(d.uv.bottomLeft.y);
-                vertices.push_back(0.0);
-                vertices.push_back(0.0);
-
-                vertices.push_back(quad.topLeft.x);
-                vertices.push_back(quad.topLeft.y);
-                vertices.push_back(d.uv.topLeft.x);
-                vertices.push_back(d.uv.topLeft.y);
-                vertices.push_back(0.0);
-                vertices.push_back(0.0);
-
-                vertices.push_back(quad.topRight.x);
-                vertices.push_back(quad.topRight.y);
-                vertices.push_back(d.uv.topRight.x);
-                vertices.push_back(d.uv.topRight.y);
-                vertices.push_back(0.0);
-                vertices.push_back(0.0);
-
-                vertices.push_back(quad.bottomRight.x);
-                vertices.push_back(quad.bottomRight.y);
-                vertices.push_back(d.uv.bottomRight.x);
-                vertices.push_back(d.uv.bottomRight.y);
-                vertices.push_back(0.0);
-                vertices.push_back(0.0);
-
-                indices.push_back(0 + indicesStart);
-                indices.push_back(1 + indicesStart);
-                indices.push_back(2 + indicesStart);
-                indices.push_back(0 + indicesStart);
-                indices.push_back(2 + indicesStart);
-                indices.push_back(3 + indicesStart);
-
-                indicesStart += 4;
-
                 pen.x += advance.x * (1.0 + letterSpacing);
-                characterCount += 1;
             } else if(i.glyphIndex == -1) {
-                pen.x += fontData.info.spaceAdvance * fontSize * i.scale;
-                characterCount += 1;
-            } else if(i.glyphIndex == -2) {
                 lineEndIndices.push_back((vertices.size() / 24) - 1);
-                characterCount = 0;
                 pen.x = 0.0;
                 pen.y += fontSize;
             }
@@ -275,7 +285,7 @@ void TextLayerObject::layoutPoint(float scale, bool updateObject) {
                 }
             }
 
-            double offsetMultiplier = fontSize + fontData.info.ascender + fontData.info.descender;
+            double offsetMultiplier = fontSize;
 
             Vec2D textOffset(offset.x * offsetMultiplier, offset.y * offsetMultiplier);
 
@@ -371,7 +381,6 @@ float TextLayerObject::layoutLine(float scale, bool updateObject) {
     std::vector<int16_t> indices;
     indices.reserve(numGlyphs * 6);
 
-    int characterCount = 0;
     std::vector<size_t> lineEndIndices;
 
     auto currentIndex = findReferencePointIndices();
@@ -380,7 +389,7 @@ float TextLayerObject::layoutLine(float scale, bool updateObject) {
 
     for(auto& i : splittedTextInfo) {
         if(i.glyphIndex < 0) {
-            size += fontData.info.spaceAdvance * fontSize * i.scale;
+            size += spaceAdvance * fontSize * i.scale;
         } else {
             auto &d = fontData.glyphs[i.glyphIndex];
             auto advance = Vec2D(d.advance.x * fontSize * i.scale, d.advance.y * fontSize * i.scale);
@@ -397,11 +406,11 @@ float TextLayerObject::layoutLine(float scale, bool updateObject) {
     int index = 0;
     double lastAngle = 0.0;
 
+    double lineCenteringParameter = -fontData.info.base / fontData.info.lineHeight;
+
     for(auto &i : splittedTextInfo) {
         if(i.glyphIndex < 0) {
-            currentIndex = indexAtDistance(currentIndex, fontData.info.spaceAdvance * fontSize * i.scale);
-            characterCount += 1;
-
+            currentIndex = indexAtDistance(currentIndex, spaceAdvance * fontSize * i.scale);
             lastAngle = 0;
             index = 0;
         } else {
@@ -459,9 +468,8 @@ float TextLayerObject::layoutLine(float scale, bool updateObject) {
             quad = TextHelper::rotateQuad2d(quad, Vec2D(p.x, p.y), angle);
 
             auto dy = Vec2DHelper::normalize(Vec2D(quad.bottomLeft.x - quad.topLeft.x, quad.bottomLeft.y - quad.topLeft.y));
-            // TODO: 0.3 looks good, is there a better value?
-            dy.x *= 0.3 * fontSize;
-            dy.y *= 0.3 * fontSize;
+            dy.x *= lineCenteringParameter * fontSize;
+            dy.y *= lineCenteringParameter * fontSize;
 
             quad.topLeft = quad.topLeft - dy;
             quad.bottomLeft = quad.bottomLeft - dy;
@@ -505,8 +513,6 @@ float TextLayerObject::layoutLine(float scale, bool updateObject) {
 
             indicesStart += 4;
             index += 1;
-
-            characterCount += 1;
 
 #ifdef DRAW_TEXT_LETTER_BOXES
             letterBoxes.push_back(quad);
