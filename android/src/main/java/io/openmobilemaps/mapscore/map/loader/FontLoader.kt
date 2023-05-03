@@ -25,7 +25,7 @@ open class FontLoader(context: Context, private val dpFactor: Float) : FontLoade
 		val size = fontJson.info.size.toDouble()
 
         val fontWrapper = FontWrapper(
-            fontJson.info.name,
+            fontJson.info.face,
             fontJson.common.lineHeight.toDouble(),
             fontJson.common.base.toDouble(),
             Vec2D(imageSize, imageSize),
@@ -60,7 +60,7 @@ open class FontLoader(context: Context, private val dpFactor: Float) : FontLoade
                 )
             )
         }.toCollection(ArrayList())
-        fontMap[fontJson.name] = FontDataHolder(BitmapTextureHolder(fontAtlas), FontData(fontWrapper, glyphs))
+        fontMap[fontJson.info.face] = FontDataHolder(BitmapTextureHolder(fontAtlas), FontData(fontWrapper, glyphs))
     }
 
     fun addFont(fontData: FontData, fontAtlas: BitmapTextureHolder) {
@@ -77,10 +77,10 @@ open class FontLoader(context: Context, private val dpFactor: Float) : FontLoade
 
     @JsonClass(generateAdapter = true)
     data class FontDataJson(
-        val chars: List<FontGlyphJsonData>;
-		val pages: List<String>; // unused
-		val info: FontInfoData;
-		val common: FontCommonData;
+        val chars: List<FontGlyphJsonData>,
+		val pages: List<String>, // unused
+		val info: FontInfoData,
+		val common: FontCommonData
     )
 
     @JsonClass(generateAdapter = true)
