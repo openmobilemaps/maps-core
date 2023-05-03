@@ -42,7 +42,7 @@ Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(con
 
         while (auto layer = tileData.next_layer()) {
             std::string sourceLayerName = std::string(layer.name());
-            if ((layersToDecode.count(sourceLayerName) > 0 && !layer.empty())) {
+            if ((layersToDecode.empty() || layersToDecode.count(sourceLayerName) > 0) && !layer.empty()) {
                 int extent = (int) layer.extent();
                 layerFeatureMap->emplace(sourceLayerName, std::make_shared<std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>>());
                 layerFeatureMap->at(sourceLayerName)->reserve(layer.num_features());
