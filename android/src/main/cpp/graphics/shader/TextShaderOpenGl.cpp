@@ -18,8 +18,9 @@ void TextShaderOpenGl::setColor(const ::Color & color) {
     this->color = std::vector<float>{color.r, color.g, color.b, color.a};
 }
 
-void TextShaderOpenGl::setHaloColor(const ::Color & color) {
+void TextShaderOpenGl::setHaloColor(const ::Color & color, double width) {
     this->haloColor = std::vector<float>{color.r, color.g, color.b, color.a};
+    this->haloWidth = width;
 }
 
 void TextShaderOpenGl::setOpacity(float opacity) { this->opacity = opacity; }
@@ -53,6 +54,9 @@ void TextShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterfa
     int haloColorHandle = glGetUniformLocation(program, "haloColor");
     glUniform4fv(haloColorHandle, 1, &haloColor[0]);
 
+    int haloWidthHandle = glGetUniformLocation(program, "haloWidth");
+    glUniform1f(haloWidthHandle, haloWidth);
+
     int opacityHandle = glGetUniformLocation(program, "opacity");
     glUniform1f(opacityHandle, opacity);
 }
@@ -78,23 +82,33 @@ std::string TextShaderOpenGl::getFragmentShader() {
                                       uniform vec4 color;
                                       uniform vec4 haloColor;
                                       uniform float opacity;
+                                      uniform float haloWidth;
                                       in vec2 vTextCoord;
                                       out vec4 fragmentColor;
 
                                       void main() {
                                           vec4 dist = texture(textureSampler, vTextCoord);
-                                          if (haloColor.a == 0.0 && dist.x <= 0.5) {
+
+                                          if(opacity == 0.0) {
                                               discard;
                                           }
 
-                                          float delta = 0.1;
-                                          float alpha = smoothstep(0.5 - delta, 0.5 + delta, dist.x);
-                                          vec4 glyphColor = vec4(color.r, color.g, color.b, color.a * alpha);
+                                          float median = max(min(dist.r, dist.g), min(max(dist.r, dist.g), dist.b)) / dist.a;
+                                          float w = fwidth(median);
+                                          float alpha = smoothstep(0.5 - w, 0.5 + w, median);
+
                                           vec4 mixed = mix(haloColor, glyphColor, alpha);
-                                          float a2 = smoothstep(0.40, 0.5, sqrt(dist.x)) * opacity;
-                                          fragmentColor = mixed;
-                                          fragmentColor.a = 1.0;
-                                          fragmentColor *= a2;
+
+                                          if(haloWidth > 0) {
+                                              float start = (0.0 + 0.5 * (1.0 - haloWidth)) - w;
+                                              float end = start + w;
+                                              float a2 = smoothstep(start, end, median) * opacity;
+                                              fragmentColor = mixed;
+                                              fragmentColor.a = 1.0;
+                                              fragmentColor *= a2;
+                                          } else {
+                                              fragmentColor = mixed;
+                                          }
                                       });
 }
 
