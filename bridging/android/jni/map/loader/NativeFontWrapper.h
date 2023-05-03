@@ -25,11 +25,10 @@ private:
     friend ::djinni::JniClass<NativeFontWrapper>;
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/loader/FontWrapper") };
-    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Ljava/lang/String;DDDLio/openmobilemaps/mapscore/shared/graphics/common/Vec2D;D)V") };
+    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Ljava/lang/String;DDLio/openmobilemaps/mapscore/shared/graphics/common/Vec2D;D)V") };
     const jfieldID field_name { ::djinni::jniGetFieldID(clazz.get(), "name", "Ljava/lang/String;") };
-    const jfieldID field_ascender { ::djinni::jniGetFieldID(clazz.get(), "ascender", "D") };
-    const jfieldID field_descender { ::djinni::jniGetFieldID(clazz.get(), "descender", "D") };
-    const jfieldID field_spaceAdvance { ::djinni::jniGetFieldID(clazz.get(), "spaceAdvance", "D") };
+    const jfieldID field_lineHeight { ::djinni::jniGetFieldID(clazz.get(), "lineHeight", "D") };
+    const jfieldID field_base { ::djinni::jniGetFieldID(clazz.get(), "base", "D") };
     const jfieldID field_bitmapSize { ::djinni::jniGetFieldID(clazz.get(), "bitmapSize", "Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2D;") };
     const jfieldID field_size { ::djinni::jniGetFieldID(clazz.get(), "size", "D") };
 };

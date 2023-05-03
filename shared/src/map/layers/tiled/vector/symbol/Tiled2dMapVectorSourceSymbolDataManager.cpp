@@ -1045,7 +1045,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
                     if (shader) {
                         object->getShader()->setOpacity(description->style.getTextOpacity(evalContext) * alpha);
                         object->getShader()->setColor(description->style.getTextColor(evalContext));
-                        object->getShader()->setHaloColor(description->style.getTextHaloColor(evalContext));
+                        object->getShader()->setHaloColor(description->style.getTextHaloColor(evalContext), description->style.getTextHaloWidth(evalContext));
                     }
                     if (wrapper->symbolShader) {
                         wrapper->symbolShader->updateAlpha(description->style.getIconOpacity(evalContext) * alpha);

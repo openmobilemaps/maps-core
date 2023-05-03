@@ -7,17 +7,15 @@
 @implementation MCFontWrapper
 
 - (nonnull instancetype)initWithName:(nonnull NSString *)name
-                            ascender:(double)ascender
-                           descender:(double)descender
-                        spaceAdvance:(double)spaceAdvance
+                          lineHeight:(double)lineHeight
+                                base:(double)base
                           bitmapSize:(nonnull MCVec2D *)bitmapSize
                                 size:(double)size
 {
     if (self = [super init]) {
         _name = [name copy];
-        _ascender = ascender;
-        _descender = descender;
-        _spaceAdvance = spaceAdvance;
+        _lineHeight = lineHeight;
+        _base = base;
         _bitmapSize = bitmapSize;
         _size = size;
     }
@@ -25,16 +23,14 @@
 }
 
 + (nonnull instancetype)fontWrapperWithName:(nonnull NSString *)name
-                                   ascender:(double)ascender
-                                  descender:(double)descender
-                               spaceAdvance:(double)spaceAdvance
+                                 lineHeight:(double)lineHeight
+                                       base:(double)base
                                  bitmapSize:(nonnull MCVec2D *)bitmapSize
                                        size:(double)size
 {
     return [[self alloc] initWithName:name
-                             ascender:ascender
-                            descender:descender
-                         spaceAdvance:spaceAdvance
+                           lineHeight:lineHeight
+                                 base:base
                            bitmapSize:bitmapSize
                                  size:size];
 }
@@ -42,7 +38,7 @@
 #ifndef DJINNI_DISABLE_DESCRIPTION_METHODS
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p name:%@ ascender:%@ descender:%@ spaceAdvance:%@ bitmapSize:%@ size:%@>", self.class, (void *)self, self.name, @(self.ascender), @(self.descender), @(self.spaceAdvance), self.bitmapSize, @(self.size)];
+    return [NSString stringWithFormat:@"<%@ %p name:%@ lineHeight:%@ base:%@ bitmapSize:%@ size:%@>", self.class, (void *)self, self.name, @(self.lineHeight), @(self.base), self.bitmapSize, @(self.size)];
 }
 
 #endif

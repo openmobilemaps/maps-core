@@ -9,23 +9,20 @@
 
 struct FontWrapper final {
     std::string name;
-    double ascender;
-    double descender;
-    double spaceAdvance;
+    double lineHeight;
+    double base;
     ::Vec2D bitmapSize;
     /** font size rendered in bitmap multiplied by dpFactor */
     double size;
 
     FontWrapper(std::string name_,
-                double ascender_,
-                double descender_,
-                double spaceAdvance_,
+                double lineHeight_,
+                double base_,
                 ::Vec2D bitmapSize_,
                 double size_)
     : name(std::move(name_))
-    , ascender(std::move(ascender_))
-    , descender(std::move(descender_))
-    , spaceAdvance(std::move(spaceAdvance_))
+    , lineHeight(std::move(lineHeight_))
+    , base(std::move(base_))
     , bitmapSize(std::move(bitmapSize_))
     , size(std::move(size_))
     {}

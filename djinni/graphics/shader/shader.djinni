@@ -109,6 +109,6 @@ polygon_group_shader_interface = interface +c +o {
 text_shader_interface = interface +c +o {
     set_color(color: color);
     set_opacity(opacity: f32);
-    set_halo_color(color: color);
+    set_halo_color(color: color, width: f64);
     as_shader_program_interface() : shader_program_interface;
 }

@@ -757,3 +757,100 @@ Quad2dD TextHelper::rotateQuad2d(const Quad2dD &quad, const Vec2D &aroundPoint, 
     auto newBottomRight = Vec2DHelper::rotate(quad.bottomRight, midPoint, angleDegrees);
     return Quad2dD(newTopLeft, newTopRight, newBottomRight, newBottomLeft);
 }
+
+// MARK: - Line Breaks
+
+bool isSpecialCharacter(const std::string &c) {
+    return c == "-" || c == "/";
+}
+
+bool isLineBreak(const std::string &c) {
+    return c == "\n";
+}
+
+bool allowsLineBreak(const std::string &c) {
+    return isSpecialCharacter(c) || isLineBreak(c) || c == " ";
+}
+
+class Break {
+  public:
+    Break(int index, const std::shared_ptr<Break>& prior, float cost)
+    : index(index), prior(prior), cost(cost)
+    {}
+
+    int index;
+    std::shared_ptr<Break> prior;
+    float cost;
+};
+
+float calculateCost(float lineWidth, float targetWidth, float additionalCost, bool isLast) {
+    float cost = std::pow(lineWidth - targetWidth, 2.0);
+
+    if(isLast) {
+        return cost * ((lineWidth < targetWidth) ? 0.5 : 2.0);
+    }
+
+    if (additionalCost < 0) {
+        return cost - additionalCost * additionalCost;
+    }
+
+    return cost + additionalCost * additionalCost;
+}
+
+std::shared_ptr<Break> evaluate(int nextIndex, float targetWidth, const std::vector<std::shared_ptr<Break>> &potentials, int additionalCost, bool isLast) {
+
+    std::shared_ptr<Break> bestPrior = nullptr;
+    float bestCost = calculateCost(nextIndex, targetWidth, additionalCost, isLast);
+
+    for (const auto& potential : potentials) {
+        float lineWidth = nextIndex - potential->index;
+        float cost = calculateCost(lineWidth, targetWidth, additionalCost, isLast) + potential->cost;
+        if(cost <= bestCost) {
+            bestPrior = potential;
+            bestCost = cost;
+        }
+    }
+
+    return std::make_shared<Break>(nextIndex, bestPrior, bestCost);
+}
+
+std::vector<BreakResult> TextHelper::bestBreakIndices(std::vector<std::string> &letters, int64_t maxCharacterWidth) {
+    if(letters.size() == 0) {
+        return {};
+    }
+
+    float targetBreakCount = std::ceil(letters.size() / (float)maxCharacterWidth);
+    float targetWidth = (float)letters.size() / targetBreakCount;
+
+    std::vector<std::shared_ptr<Break>> potentials;
+
+    for(int i=0; i<letters.size(); ++i) {
+        auto &l = letters[i];
+
+        if(i < letters.size() - 1 && allowsLineBreak(l)) {
+            float additionalCost = 0;
+            if (isLineBreak(l)) {
+                additionalCost = -100000;
+            }
+
+            if (isSpecialCharacter(l)) {
+                additionalCost = 100;
+            }
+
+            auto b = evaluate(i+1, targetWidth, potentials, additionalCost, false);
+            potentials.push_back(b);
+        }
+    }
+
+    auto last = evaluate((int)letters.size(), targetWidth, potentials, 0, true);
+
+    std::vector<BreakResult> leastBads;
+    auto prior = last->prior;
+    while (prior) {
+        auto b = BreakResult(prior->index - 1, isSpecialCharacter(letters[prior->index]));
+        leastBads.push_back(b);
+        prior = prior->prior;
+    }
+
+    return leastBads;
+}

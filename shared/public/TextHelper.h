@@ -20,6 +20,12 @@
 
 #include <optional>
 
+struct BreakResult {
+    BreakResult(int index, bool keepLetter) : index(index), keepLetter(keepLetter) {};
+    int index;
+    bool keepLetter;
+};
+
 class TextHelper {
   public:
     TextHelper() {};
@@ -41,6 +47,8 @@ class TextHelper {
     static Quad2dD rotateQuad2d(const Quad2dD &quad, const Vec2D &aroundPoint, double angleDegrees);
 
     static std::vector<std::string> splitWstring(const std::string &word);
+
+    static std::vector<BreakResult> bestBreakIndices(std::vector<std::string> &letters, int64_t maxCharacterWidth);
 
   private:
     std::weak_ptr<MapInterface> mapInterface;

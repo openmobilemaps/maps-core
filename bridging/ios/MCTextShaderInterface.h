@@ -12,7 +12,8 @@
 
 - (void)setOpacity:(float)opacity;
 
-- (void)setHaloColor:(nonnull MCColor *)color;
+- (void)setHaloColor:(nonnull MCColor *)color
+               width:(double)width;
 
 - (nullable id<MCShaderProgramInterface>)asShaderProgramInterface;
 
