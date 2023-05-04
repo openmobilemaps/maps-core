@@ -53,10 +53,10 @@ open class FontLoader(context: Context, private val dpFactor: Float) : FontLoade
                 bbox,
                 bearing,
                 Quad2dD(
-                    Vec2D(s0, 1.0 - t1),
-                    Vec2D(s1, 1.0 - t1),
-                    Vec2D(s1, 1.0 - t0),
-                    Vec2D(s0, 1.0 - t0)
+                    Vec2D(s0, t1),
+                    Vec2D(s1, t1),
+                    Vec2D(s1, t0),
+                    Vec2D(s0, t0)
                 )
             )
         }.toCollection(ArrayList())
@@ -125,8 +125,8 @@ open class FontLoader(context: Context, private val dpFactor: Float) : FontLoade
 		val redChnl: Int, // unused
 		val blueChnl: Int, // unused
 		val greenChnl: Int, // unused
-		val distanceField: DistanceFieldData, // unused
-		val kernings: List<Int>
+		val distanceField: DistanceFieldData? = null, // unused
+		val kernings: List<Int>? = null // unused
 	)
 
 	@JsonClass(generateAdapter = true)

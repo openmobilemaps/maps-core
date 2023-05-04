@@ -94,12 +94,13 @@ std::string TextShaderOpenGl::getFragmentShader() {
                                           }
 
                                           float median = max(min(dist.r, dist.g), min(max(dist.r, dist.g), dist.b)) / dist.a;
+
                                           float w = fwidth(median);
                                           float alpha = smoothstep(0.5 - w, 0.5 + w, median);
 
-                                          vec4 mixed = mix(haloColor, glyphColor, alpha);
+                                          vec4 mixed = mix(haloColor, color, alpha);
 
-                                          if(haloWidth > 0) {
+                                          if(haloWidth > 0.0) {
                                               float start = (0.0 + 0.5 * (1.0 - haloWidth)) - w;
                                               float end = start + w;
                                               float a2 = smoothstep(start, end, median) * opacity;
