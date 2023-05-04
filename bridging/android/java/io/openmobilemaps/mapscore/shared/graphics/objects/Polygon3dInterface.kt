@@ -10,6 +10,8 @@ abstract class Polygon3dInterface {
 
     abstract fun setVertices(vertices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
+    abstract fun setTileInfo(x: Int, y: Int, z: Int, offset: Int)
+
     abstract fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
 
     abstract fun loadHeightTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
@@ -37,6 +39,12 @@ abstract class Polygon3dInterface {
             native_setVertices(this.nativeRef, vertices, indices)
         }
         private external fun native_setVertices(_nativeRef: Long, vertices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
+
+        override fun setTileInfo(x: Int, y: Int, z: Int, offset: Int) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setTileInfo(this.nativeRef, x, y, z, offset)
+        }
+        private external fun native_setTileInfo(_nativeRef: Long, x: Int, y: Int, z: Int, offset: Int)
 
         override fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

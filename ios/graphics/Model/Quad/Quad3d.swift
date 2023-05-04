@@ -31,7 +31,9 @@ final class Quad3d: BaseGraphicsObject {
 
     private var renderAsMask = false
 
+    #if DEBUG
     private var label: String
+    #endif
 
     private let timeBuffer: MTLBuffer
     private var timeBufferContent : UnsafeMutablePointer<Float>
@@ -43,7 +45,9 @@ final class Quad3d: BaseGraphicsObject {
     fileprivate var layerOffset: Float = 0
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext, label: String = "Quad3d") {
+        #if DEBUG
         self.label = label
+        #endif
         self.shader = shader
 
         guard let timeBuffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<Float>.stride, options: []) else { fatalError("Could not create buffer") }
@@ -192,21 +196,41 @@ extension Quad3d: MCQuad3dInterface {
     func setFrame(_ frame: MCQuad2dD, textureCoordinates: MCRectD) {
         /*
          The quad is made out of 4 vertices as following
-         B----C
-         |    |
-         |    |
-         A----D
+         B--F--C        1--5--2
+         |     |        |     |
+         E  I  G   OR   4  8  6
+         |     |        |     |
+         A--H--D        0--7--3
          Where A-C are joined to form two triangles
          */
+        let centerLeft = MCVec2D(x: (frame.topLeft.x+frame.bottomLeft.x)/2, y: (frame.topLeft.y+frame.bottomLeft.y)/2) // E
+        let centerTop = MCVec2D(x: (frame.topLeft.x+frame.topRight.x)/2, y: (frame.topLeft.y+frame.topRight.y)/2) // F
+        let centerRight = MCVec2D(x: (frame.topRight.x+frame.bottomRight.x)/2, y: (frame.topRight.y+frame.bottomRight.y)/2) // G
+        let centerBottom = MCVec2D(x: (frame.bottomLeft.x+frame.bottomRight.x)/2, y: (frame.bottomLeft.y+frame.bottomRight.y)/2) // H
+        let centerMiddle = MCVec2D(x: (frame.topLeft.x+frame.bottomRight.x)/2, y: (frame.topLeft.y+frame.bottomRight.y)/2) // I
+
         let vertices: [Vertex] = [
             Vertex(position: frame.bottomLeft, textureU: textureCoordinates.xF, textureV: textureCoordinates.yF), // A
             Vertex(position: frame.topLeft, textureU: textureCoordinates.xF, textureV: textureCoordinates.yF + textureCoordinates.heightF), // B
             Vertex(position: frame.topRight, textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF + textureCoordinates.heightF), // C
             Vertex(position: frame.bottomRight, textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF), // D
+            Vertex(position: centerLeft, textureU: textureCoordinates.xF, textureV: textureCoordinates.yF + textureCoordinates.heightF / 2.0), // E
+            Vertex(position: centerTop, textureU: textureCoordinates.xF + textureCoordinates.widthF / 2.0, textureV: textureCoordinates.yF + textureCoordinates.heightF), // F
+            Vertex(position: centerRight, textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF + textureCoordinates.heightF / 2.0), // G
+            Vertex(position: centerBottom, textureU: textureCoordinates.xF + textureCoordinates.widthF / 2.0, textureV: textureCoordinates.yF), // H
+            Vertex(position: centerMiddle, textureU: textureCoordinates.xF + textureCoordinates.widthF / 2.0, textureV: textureCoordinates.yF + textureCoordinates.heightF / 2.0), // I
         ]
         let indices: [UInt16] = [
-            0, 1, 2, // ABC
-            0, 2, 3, // ACD
+//            0, 1, 2, // ABC
+//            0, 2, 3, // ACD
+            0, 4, 8, // AEI
+            0, 8, 7, // AIH
+            4, 1, 5, // EBF
+            4, 5, 8, // AFI
+            8, 5, 2, // IFC
+            8, 2, 6, // ICG
+            7, 8, 6, // HIG
+            7, 6, 3, // HGD
         ]
 
         guard let verticesBuffer = device.makeBuffer(bytes: vertices, length: MemoryLayout<Vertex3D>.stride * vertices.count, options: []), let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: []) else {

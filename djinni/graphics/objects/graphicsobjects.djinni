@@ -93,6 +93,8 @@ polygon_2d_interface = interface +c +j +o {
 polygon_3d_interface = interface +c +j +o {
     set_vertices(vertices: shared_bytes, indices: shared_bytes);
 
+    set_tile_info(x: i32, y: i32, z: i32, offset: i32);
+
     load_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
     load_height_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
     remove_texture();

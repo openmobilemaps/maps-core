@@ -90,6 +90,10 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & viewMa
     std::queue<VisibleTileCandidate> candidates;
     std::unordered_set<VisibleTileCandidate> candidatesSet;
 
+    Coord viewBoundsTopLeft("", 0, 0, 0);
+    Coord viewBoundsBottomRight("", 0, 0, 0);
+    bool validViewBounds = false;
+
     int initialLevel = 0;
     const Tiled2dMapZoomLevelInfo &zoomLevelInfo0 = zoomLevelInfos.at(initialLevel);
     for (int x = 0; x < zoomLevelInfo0.numTilesX; x++) {
@@ -185,6 +189,46 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & viewMa
             }
             if (topLeftView.y > height / 2.0 && topRightView.y > height / 2.0 && bottomLeftView.y > height / 2.0 && bottomRightView.y > height / 2.0) {
                 continue;
+            }
+        }
+
+        if (!validViewBounds) {
+            viewBoundsTopLeft = topLeft;
+            viewBoundsBottomRight = bottomRight;
+            validViewBounds = true;
+        }
+
+        if (leftToRight) {
+            if (topLeft.x < viewBoundsTopLeft.x) {
+                viewBoundsTopLeft.x = topLeft.x;
+            }
+            if (bottomRight.x > viewBoundsBottomRight.x) {
+                viewBoundsBottomRight.x = bottomRight.x;
+            }
+        }
+        else {
+            if (topLeft.x > viewBoundsTopLeft.x) {
+                viewBoundsTopLeft.x = topLeft.x;
+            }
+            if (bottomRight.x < viewBoundsBottomRight.x) {
+                viewBoundsBottomRight.x = bottomRight.x;
+            }
+        }
+        if (topToBottom) {
+            if (topLeft.y > viewBoundsTopLeft.y) {
+                viewBoundsTopLeft.y = topLeft.y;
+            }
+            if (bottomRight.y < viewBoundsBottomRight.y) {
+                viewBoundsBottomRight.y = bottomRight.y;
+            }
+        }
+        else {
+
+            if (topLeft.y < viewBoundsTopLeft.y) {
+                viewBoundsTopLeft.y = topLeft.y;
+            }
+            if (bottomRight.y > viewBoundsBottomRight.y) {
+                viewBoundsBottomRight.y = bottomRight.y;
             }
         }
 
@@ -309,6 +353,12 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & viewMa
 
         }
     }
+
+    if (!validViewBounds) {
+        printf("ERROR: No valid ViewBounds, this can't happen\n");
+        return;
+    }
+    currentViewBounds = RectCoord(viewBoundsTopLeft, viewBoundsBottomRight);
 
 //    printf("%d checks at %.0fx%.0f, %ld visible, max %d (of %d), edge %.0fpx\n", candidateChecks, width, height, visibleTilesVec.size(), maxLevel, maxLevelAvailable, longestEdge);
 
@@ -584,11 +634,11 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
         bool found = false;
 
         for (const auto &layer: pyramid) {
-            if (zoomInfo.maskTile || layer.targetZoomLevelOffset == 0 || true) {
+            if (true) {
                 for (auto const &tile: layer.visibleTiles) {
                     if (tileInfo == tile.tileInfo) {
                         found = true;
-                        tileWrapper.targetZoomLevelOffset = layer.targetZoomLevelOffset;
+//                        tileWrapper.targetZoomLevelOffset = layer.targetZoomLevelOffset;
                         break;
                     }
                 }
@@ -806,6 +856,7 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
     }
 
 
+
     if (currentTiles.empty()) {
         return;
     }
@@ -830,88 +881,119 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
 
     bool completeViewBoundsDrawn = false;
 
-    for (auto it = currentTiles.rbegin(); it != currentTiles.rend(); it++ ){
-        auto &[tileInfo, tileWrapper] = *it;
+    for (int targetOffset = 0; targetOffset >= -zoomInfo.numDrawPreviousLayers; targetOffset--) {
 
-        tileWrapper.isVisible = true;
+        for (auto it = currentTiles.rbegin(); it != currentTiles.rend(); it++ ){
+            auto &[tileInfo, tileWrapper] = *it;
 
-        if (readyTiles.count(tileInfo) == 0) {
-            continue;
-        }
+            tileWrapper.isVisible = true;
 
-        if (tileWrapper.targetZoomLevelOffset < 0) {
-
-            if (currentTileMask.num_contours != 0) {
-                if(!completeViewBoundsDrawn) {
-                    gpc_polygon diff;
-                    gpc_polygon_clip(GPC_DIFF, &currentViewBoundsPolygon, &currentTileMask, &diff);
-
-                    if (diff.num_contours == 0) {
-                        completeViewBoundsDrawn = true;
-                    }
-
-                    gpc_free_polygon(&diff);
-                }
-            }
-
-            if(completeViewBoundsDrawn) {
-                tileWrapper.isVisible = false;
-                it = decltype(it){currentTiles.erase( std::next(it).base() )};
-                it = std::prev(it);
+            if (readyTiles.count(tileInfo) == 0) {
                 continue;
             }
 
-            gpc_polygon polygonDiff;
-            bool freePolygonDiff = false;
-            if (currentTileMask.num_contours != 0) {
-                freePolygonDiff = true;
-                gpc_polygon_clip(GPC_DIFF, &tileWrapper.tilePolygon, &currentTileMask, &polygonDiff);
-            } else {
-                polygonDiff = tileWrapper.tilePolygon;
+            int newTargetZoomLevelOffset = 0;
+            bool found = false;
+            for (const auto &layer: currentPyramid) {
+                for (auto const &tile: layer.visibleTiles) {
+                    if (tileInfo == tile.tileInfo) {
+                        found = true;
+                        newTargetZoomLevelOffset = layer.targetZoomLevelOffset;
+                        break;
+                    }
+                }
+
+                if(found) { break; }
             }
 
-            if (polygonDiff.contour == NULL) {
-                tileWrapper.isVisible = false;
-                it = decltype(it){currentTiles.erase( std::next(it).base() )};
-                it = std::prev(it);
-            } else {
-                gpc_polygon resultingMask;
+            if (newTargetZoomLevelOffset != targetOffset) {
+                continue;
+            }
 
-                gpc_polygon_clip(GPC_INT, &polygonDiff, &currentViewBoundsPolygon, &resultingMask);
+            if (newTargetZoomLevelOffset < 0) {
 
-                if (resultingMask.contour == NULL) {
+                if (currentTileMask.num_contours != 0) {
+                    if(!completeViewBoundsDrawn) {
+                        gpc_polygon diff;
+                        gpc_polygon_clip(GPC_DIFF, &currentViewBoundsPolygon, &currentTileMask, &diff);
+
+                        if (diff.num_contours == 0) {
+                            completeViewBoundsDrawn = true;
+                        }
+
+                        gpc_free_polygon(&diff);
+                    }
+                }
+
+                if(completeViewBoundsDrawn) {
                     tileWrapper.isVisible = false;
                     it = decltype(it){currentTiles.erase( std::next(it).base() )};
                     it = std::prev(it);
-                } else {
-                    tileWrapper.masks = gpc_get_polygon_coord(&polygonDiff, tileInfo.bounds.topLeft.systemIdentifier);
+                    continue;
                 }
 
-                gpc_free_polygon(&resultingMask);
-            }
+                gpc_polygon polygonDiff;
+                bool freePolygonDiff = false;
+                if (currentTileMask.num_contours != 0) {
+                    freePolygonDiff = true;
+                    gpc_polygon_clip(GPC_DIFF, &tileWrapper.tilePolygon, &currentTileMask, &polygonDiff);
+                } else {
+                    polygonDiff = tileWrapper.tilePolygon;
+                }
 
-            if (freePolygonDiff) {
-                gpc_free_polygon(&polygonDiff);
-            }
-        } else {
-            tileWrapper.masks = { tileWrapper.tileBounds };
-        }
+                if (polygonDiff.contour == NULL) {
+                    tileWrapper.isVisible = false;
+                    it = decltype(it){currentTiles.erase( std::next(it).base() )};
+                    if (it != currentTiles.rbegin()) {
+                        // TODO: Why does it crash without the if
+                        it = std::prev(it);
+                    }
+                } else {
+                    gpc_polygon resultingMask;
 
-        // add tileBounds to currentTileMask
-        if (tileWrapper.isVisible) {
-            if (isFirst) {
-                gpc_set_polygon({ tileWrapper.tileBounds }, &currentTileMask);
-                isFirst = false;
+                    gpc_polygon_clip(GPC_INT, &polygonDiff, &currentViewBoundsPolygon, &resultingMask);
+
+                    if (resultingMask.contour == NULL) {
+                        tileWrapper.isVisible = false;
+                        it = decltype(it){currentTiles.erase( std::next(it).base() )};
+                        if (it != currentTiles.rbegin()) {
+                            // TODO: Why does it crash without the if
+                            it = std::prev(it);
+                        }
+
+                    } else {
+                        tileWrapper.masks = gpc_get_polygon_coord(&polygonDiff, tileInfo.bounds.topLeft.systemIdentifier);
+                    }
+
+                    gpc_free_polygon(&resultingMask);
+                }
+
+                if (freePolygonDiff) {
+                    gpc_free_polygon(&polygonDiff);
+                }
             } else {
-                gpc_polygon result;
-                gpc_polygon_clip(GPC_UNION, &currentTileMask, &tileWrapper.tilePolygon, &result);
-                gpc_free_polygon(&currentTileMask);
-                currentTileMask = result;
+                tileWrapper.masks = { tileWrapper.tileBounds };
             }
 
-            freeCurrent = true;
+            // add tileBounds to currentTileMask
+            if (tileWrapper.isVisible) {
+                if (isFirst) {
+                    gpc_set_polygon({ tileWrapper.tileBounds }, &currentTileMask);
+                    isFirst = false;
+                } else {
+                    gpc_polygon result;
+                    gpc_polygon_clip(GPC_UNION, &currentTileMask, &tileWrapper.tilePolygon, &result);
+                    gpc_free_polygon(&currentTileMask);
+                    currentTileMask = result;
+                }
+
+                freeCurrent = true;
+            }
         }
+
     }
+
+
 
     if(freeCurrent) {
         gpc_free_polygon(&currentTileMask);

@@ -5,6 +5,7 @@
 #import "MCPolygon3dInterface.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
+#import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCGraphicsObjectInterface+Private.h"
 #import "MCMaskingObjectInterface+Private.h"
@@ -40,6 +41,18 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         _cppRefHandle.get()->setVertices(::djinni_generated::SharedBytes::toCpp(vertices),
                                          ::djinni_generated::SharedBytes::toCpp(indices));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setTileInfo:(int32_t)x
+                  y:(int32_t)y
+                  z:(int32_t)z
+             offset:(int32_t)offset {
+    try {
+        _cppRefHandle.get()->setTileInfo(::djinni::I32::toCpp(x),
+                                         ::djinni::I32::toCpp(y),
+                                         ::djinni::I32::toCpp(z),
+                                         ::djinni::I32::toCpp(offset));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -93,6 +106,15 @@ public:
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() setVertices:(::djinni_generated::SharedBytes::fromCpp(c_vertices))
                                                           indices:(::djinni_generated::SharedBytes::fromCpp(c_indices))];
+        }
+    }
+    void setTileInfo(int32_t c_x, int32_t c_y, int32_t c_z, int32_t c_offset) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setTileInfo:(::djinni::I32::fromCpp(c_x))
+                                                                y:(::djinni::I32::fromCpp(c_y))
+                                                                z:(::djinni::I32::fromCpp(c_z))
+                                                           offset:(::djinni::I32::fromCpp(c_offset))];
         }
     }
     void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & c_textureHolder) override

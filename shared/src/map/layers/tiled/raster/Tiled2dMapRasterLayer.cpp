@@ -17,6 +17,7 @@
 #include "RenderPass.h"
 #include "PolygonCompare.h"
 #include "SphereProjectionShaderInterface.h"
+#include "TexturedPolygon3dLayerObject.h"
 #include <Logger.h>
 #include <map>
 #include <chrono>
@@ -114,6 +115,11 @@ void Tiled2dMapRasterLayer::pause() {
                 quad3d->getGraphicsObject()->clear();
             }
         }
+        else if (auto polygon = std::dynamic_pointer_cast<TexturedPolygon3dLayerObject>(tileObject.second)) {
+            if (polygon && polygon->getGraphicsObject()->isReady()) {
+                polygon->getGraphicsObject()->clear();
+            }
+        }
 
     }
     for (const auto &tileMask : tileMaskMap) {
@@ -148,6 +154,14 @@ void Tiled2dMapRasterLayer::resume() {
                 rectangle->loadTexture(renderingContext, tileObject.first.textureHolder);
                 if (tileObject.first.heightTextureHolder) {
                     rectangle->loadHeightTexture(renderingContext, tileObject.first.textureHolder);
+                }
+            }
+            else if (auto polygon = std::dynamic_pointer_cast<TexturedPolygon3dLayerObject>(tileObject.second)) {
+                polygon->getGraphicsObject()->setup(renderingContext);
+                auto polygonObject = polygon->getPolygonObject();
+                polygonObject->loadTexture(renderingContext, tileObject.first.textureHolder);
+                if (tileObject.first.heightTextureHolder) {
+                    polygonObject->loadHeightTexture(renderingContext, tileObject.first.textureHolder);
                 }
             }
         }
@@ -224,6 +238,11 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
                     auto rasterTileInfo = *it;
                     quad3d->setTileInfo(rasterTileInfo.tileInfo.x, rasterTileInfo.tileInfo.y, rasterTileInfo.tileInfo.zoomIdentifier, rasterTileInfo.targetZoomLevelOffset);
                 }
+                else if (auto quad3d = std::dynamic_pointer_cast<TexturedPolygon3dLayerObject>(tileEntry.second)) {
+                    // TODO: Maybe check if zoomLevelOffset has actually changed?
+                    auto rasterTileInfo = *it;
+                    quad3d->setTileInfo(rasterTileInfo.tileInfo.x, rasterTileInfo.tileInfo.y, rasterTileInfo.tileInfo.zoomIdentifier, rasterTileInfo.targetZoomLevelOffset);
+                }
             }
 
             if (layerConfig->getZoomInfo().maskTile) {
@@ -238,6 +257,11 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
 
                             tileMask->setPolygons(curTile->masks);
                             newTileMasks[tileEntry.first.tileInfo] = Tiled3dMapLayerMaskWrapper(tileMask, hash);
+
+                            if (auto quad3d = std::dynamic_pointer_cast<TexturedPolygon3dLayerObject>(tileEntry.second)) {
+                                // TODO: Maybe check if zoomLevelOffset has actually changed?
+                                quad3d->setPolygons(curTile->masks);
+                            }
                         }
                     }
                 }
@@ -248,20 +272,21 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
             auto const &zoomInfo = layerConfig->getZoomInfo();
             if (mapInterface->getMapConfig().mapCoordinateSystem.identifier == CoordinateSystemIdentifiers::UNITSPHERE()) {
                 for (const auto &tile : tilesToAdd) {
-                    std::shared_ptr<Textured3dLayerObject> tileObject;
+                    std::shared_ptr<TexturedPolygon3dLayerObject> tileObject;
                     if (shader) {
-                        tileObject = std::make_shared<Textured3dLayerObject>(graphicsFactory->createQuad3d(shader), nullptr, mapInterface);
+                        tileObject = std::make_shared<TexturedPolygon3dLayerObject>(graphicsFactory->createPolygon3d(shader), nullptr, mapInterface);
                     } else {
                         auto alphaShader = shaderFactory->createSphereProjectionShader();
-                        tileObject = std::make_shared<Textured3dLayerObject>(
-                                                                             graphicsFactory->createQuad3d(alphaShader->asShaderProgramInterface()), alphaShader, mapInterface);
+                        tileObject = std::make_shared<TexturedPolygon3dLayerObject>(
+                                                                             graphicsFactory->createPolygon3d(alphaShader->asShaderProgramInterface()), alphaShader, mapInterface);
                     }
                     if (zoomInfo.numDrawPreviousLayers == 0 || !animationsEnabled || zoomInfo.maskTile) {
                         tileObject->setAlpha(alpha);
                     } else {
                         tileObject->beginAlphaAnimation(0.0, alpha, 150);
                     }
-                    tileObject->setRectCoord(tile.tileInfo.bounds);
+//                    tileObject->setRectCoord(tile.tileInfo.bounds);
+                    tileObject->setPolygons(tile.masks);
                     tileObject->setTileInfo(tile.tileInfo.x, tile.tileInfo.y, tile.tileInfo.zoomIdentifier, tile.targetZoomLevelOffset);
                     tilesToSetup.emplace_back(std::make_pair(tile, tileObject));
 
@@ -327,7 +352,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
                 [weakSelfPtr, tilesToSetup, tilesToClean, newMaskObjects, obsoleteMaskObjects] {
                     auto selfPtr = weakSelfPtr.lock();
                     if (selfPtr) {
-                        selfPtr->updateMaskObjects(newMaskObjects, obsoleteMaskObjects);
+//                        selfPtr->updateMaskObjects(newMaskObjects, obsoleteMaskObjects);
                         selfPtr->setupTiles(tilesToSetup, tilesToClean);
                     }
                 }));
@@ -392,6 +417,16 @@ void Tiled2dMapRasterLayer::setupTiles(
                     quad3d->getQuadObject()->loadHeightTexture(renderingContext, tileInfo.heightTextureHolder);
                 }
             }
+            else if (auto polygon = std::dynamic_pointer_cast<TexturedPolygon3dLayerObject>(tileObject)) {
+                polygon->getGraphicsObject()->setup(renderingContext);
+
+                if (tileInfo.textureHolder) {
+                    polygon->getPolygonObject()->loadTexture(renderingContext, tileInfo.textureHolder);
+                }
+                if (tileInfo.heightTextureHolder) {
+                    polygon->getPolygonObject()->loadHeightTexture(renderingContext, tileInfo.heightTextureHolder);
+                }
+            }
 
 
             // the texture holder can be empty, some tileserver serve 0 byte textures
@@ -449,8 +484,12 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
             else if (auto quad3d = std::dynamic_pointer_cast<Textured3dLayerObject>(entry.second)) {
                 renderObject = quad3d->getRenderObject();
             }
+            else if (auto polygon = std::dynamic_pointer_cast<TexturedPolygon3dLayerObject>(entry.second)) {
+                renderObject = polygon->getRenderObject();
+            }
 
-            if (layerConfig->getZoomInfo().maskTile) {
+
+            if (layerConfig->getZoomInfo().maskTile && false) {
                 const auto &mask = tileMaskMap.at(entry.first.tileInfo);
 
                 mask.getGraphicsObject()->setup(renderingContext);
@@ -469,7 +508,7 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
             }
 
             //TODO: general mask would no longer work now, we would have to merge the tile-mask with the layer-mask
-            if (mask) {
+            if (mask && false) {
                 std::shared_ptr<RenderPass> renderPass =
                 std::make_shared<RenderPass>(RenderPassConfig(0),
                                              std::vector<std::shared_ptr<::RenderObjectInterface>>{renderObject}, mask);
@@ -507,6 +546,9 @@ void Tiled2dMapRasterLayer::setAlpha(float alpha) {
                 quad2d->setAlpha(alpha);
             }
             else if (auto quad3d = std::dynamic_pointer_cast<Textured3dLayerObject>(tileObject.second)) {
+                quad3d->setAlpha(alpha);
+            }
+            else if (auto polygon = std::dynamic_pointer_cast<TexturedPolygon3dLayerObject>(tileObject.second)) {
                 quad3d->setAlpha(alpha);
             }
         }
@@ -576,6 +618,11 @@ LayerReadyState Tiled2dMapRasterLayer::isReadyToRenderOffscreen() {
         }
         else if (auto quad3d = std::dynamic_pointer_cast<Textured3dLayerObject>(to.second)) {
             if (!quad3d->getGraphicsObject()->isReady()) {
+                return LayerReadyState::NOT_READY;
+            }
+        }
+        else if (auto polygon = std::dynamic_pointer_cast<TexturedPolygon3dLayerObject>(to.second)) {
+            if (!polygon->getGraphicsObject()->isReady()) {
                 return LayerReadyState::NOT_READY;
             }
         }

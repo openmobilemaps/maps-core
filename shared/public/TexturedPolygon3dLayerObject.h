@@ -1,0 +1,71 @@
+/*
+ * Copyright (c) 2021 Ubique Innovation AG <https://www.ubique.ch>
+ *
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ *  SPDX-License-Identifier: MPL-2.0
+ */
+
+#pragma once
+
+#include "SphereProjectionShaderInterface.h"
+#include "Coord.h"
+#include "PolygonCoord.h"
+#include "CoordinateConversionHelperInterface.h"
+#include "LayerObjectInterface.h"
+#include "MapInterface.h"
+#include "Polygon3dInterface.h"
+#include "QuadCoord.h"
+#include "RectCoord.h"
+#include "RenderConfig.h"
+#include "RenderConfigInterface.h"
+#include "RenderObjectInterface.h"
+#include <optional>
+
+#include "AnimationInterface.h"
+
+class TexturedPolygon3dLayerObject : public LayerObjectInterface {
+public:
+    TexturedPolygon3dLayerObject(std::shared_ptr<Polygon3dInterface> polygon, std::shared_ptr<SphereProjectionShaderInterface> shader,
+                          const std::shared_ptr<MapInterface> &mapInterface);
+
+    virtual ~TexturedPolygon3dLayerObject() override {}
+
+    virtual void update() override;
+
+    virtual std::vector<std::shared_ptr<RenderConfigInterface>> getRenderConfig() override;
+
+    virtual void setPolygons(const std::vector<::PolygonCoord> & polygons);
+
+    virtual void setPolygon(const ::PolygonCoord & polygon);
+
+    void setPositions(const std::vector<Coord> &positions, const std::vector<std::vector<Coord>> &holes);
+
+    void setTileInfo(const int32_t x, const int32_t y, const int32_t z, const int32_t offset);
+
+    void setAlpha(float alpha);
+
+    std::shared_ptr<::Polygon3dInterface> getPolygonObject() ;
+
+    std::shared_ptr<GraphicsObjectInterface> getGraphicsObject();
+
+    std::shared_ptr<RenderObjectInterface> getRenderObject();
+
+    void beginAlphaAnimation(double startAlpha, double targetAlpha, long long duration);
+
+
+private:
+    std::shared_ptr<Polygon3dInterface> polygon;
+    std::shared_ptr<SphereProjectionShaderInterface> shader;
+    std::shared_ptr<GraphicsObjectInterface> graphicsObject;
+    std::shared_ptr<RenderObjectInterface> renderObject;
+
+    std::shared_ptr<RenderConfig> renderConfig;
+
+    const std::shared_ptr<MapInterface> mapInterface;
+    const std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
+
+    std::shared_ptr<AnimationInterface> animation;
+};

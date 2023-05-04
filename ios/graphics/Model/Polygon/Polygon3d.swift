@@ -23,6 +23,7 @@ final class Polygon3d: BaseGraphicsObject {
 
     private var texture: MTLTexture?
     private var heightTexture: MTLTexture?
+    public let heightSampler: MTLSamplerState
     
     private let timeBuffer: MTLBuffer
     private var timeBufferContent : UnsafeMutablePointer<Float>
@@ -31,12 +32,23 @@ final class Polygon3d: BaseGraphicsObject {
     
     private static let renderStartTime = Date()
 
-    init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
+    fileprivate var layerOffset: Float = 0
+
+    #if DEBUG
+        private var label: String
+    #endif
+
+    init(shader: MCShaderProgramInterface, metalContext: MetalContext, label: String = "Polygon3d") {
+#if DEBUG
+        self.label = label
+#endif
         self.shader = shader
 
         guard let timeBuffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<Float>.stride, options: []) else { fatalError("Could not create buffer") }
         self.timeBuffer = timeBuffer
         self.timeBufferContent = self.timeBuffer.contents().bindMemory(to: Float.self, capacity: 1)
+
+        self.heightSampler = metalContext.samplerLibrary.value(Sampler.magNearest.rawValue)
 
 
         super.init(device: metalContext.device,
@@ -69,7 +81,7 @@ final class Polygon3d: BaseGraphicsObject {
         }
 
 #if DEBUG
-        encoder.pushDebugGroup("Polygon3d")
+        encoder.pushDebugGroup(label)
         defer {
             encoder.popDebugGroup()
         }
@@ -85,6 +97,8 @@ final class Polygon3d: BaseGraphicsObject {
             } else {
                 encoder.setStencilReferenceValue(0b1100_0000)
             }
+        }else {
+            encoder.setDepthStencilState(context.defaultMask3d)
         }
 
         shader.setupProgram(context)
@@ -97,22 +111,19 @@ final class Polygon3d: BaseGraphicsObject {
         }
 
         encoder.setFragmentSamplerState(sampler, index: 0)
-        encoder.setVertexSamplerState(sampler, index: 0)
+        encoder.setVertexSamplerState(heightSampler, index: 0)
 
-        if let texture {
-            encoder.setFragmentTexture(texture, index: 0)
-        }
-        if let heightTexture {
-            encoder.setVertexTexture(heightTexture, index: 0)
-        }
+        encoder.setFragmentTexture(texture, index: 0)
+        encoder.setVertexTexture(heightTexture, index: 0)
 
         timeBufferContent[0] = Float(-Self.renderStartTime.timeIntervalSinceNow)
         encoder.setVertexBuffer(timeBuffer, offset: 0, index: 2)
+        encoder.setVertexBytes(&layerOffset, length: MemoryLayout<Int32>.stride, index: 3)
 
 
         encoder.setTessellationFactorBuffer(tessellationFactorBuffer, offset: 0, instanceStride: 0)
 
-        encoder.drawIndexedPatches(numberOfPatchControlPoints: 3, patchStart: 0, patchCount: 2, patchIndexBuffer: nil, patchIndexBufferOffset: 0, controlPointIndexBuffer: indicesBuffer, controlPointIndexBufferOffset: 0, instanceCount: 1, baseInstance: 0)
+        encoder.drawIndexedPatches(numberOfPatchControlPoints: 3, patchStart: 0, patchCount: self.indicesCount / 3, patchIndexBuffer: nil, patchIndexBufferOffset: 0, controlPointIndexBuffer: indicesBuffer, controlPointIndexBufferOffset: 0, instanceCount: 1, baseInstance: 0)
 
     }
 
@@ -170,6 +181,14 @@ final class Polygon3d: BaseGraphicsObject {
 }
 
 extension Polygon3d: MCMaskingObjectInterface {
+    func setTileInfo(_ x: Int32, y: Int32, z: Int32, offset: Int32) {
+        self.layerOffset = Float(offset)
+#if DEBUG
+        lock.withCritical {
+            label = "Polygon3d (\(z)/\(x)/\(y), \(offset))"
+        }
+#endif
+    }
     func render(asMask context: MCRenderingContextInterface?,
                 renderPass: MCRenderPassConfig,
                 mvpMatrix: Int64,

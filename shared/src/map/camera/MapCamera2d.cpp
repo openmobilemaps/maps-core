@@ -421,15 +421,19 @@ std::vector<float> MapCamera2d::getVpMatrix() {
 
 
 
-        Matrix::perspectiveM(newProjectionMatrix, 0, fov, vpr, 0.00001, 5.0);
+        Matrix::perspectiveM(newProjectionMatrix, 0, fov, vpr, 0.0000001, 5.0);
+
+
 
 
         Matrix::setIdentityM(newViewMatrix, 0);
 
+
+//        Matrix::translateM(newViewMatrix, 0, 0.0, +0.3, 0.0);
+
 //        angle += 0.1;
 
 
-//        Matrix::translateM(newViewMatrix, 0, 0.0, -0.0, 0.0);
 
         cameraPitch = 40;
         focusPointAltitude = 2000.0;

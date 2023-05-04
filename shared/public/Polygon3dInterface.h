@@ -5,6 +5,7 @@
 
 #include "RenderingContextInterface.h"
 #include "SharedBytes.h"
+#include <cstdint>
 #include <memory>
 
 class GraphicsObjectInterface;
@@ -16,6 +17,8 @@ public:
     virtual ~Polygon3dInterface() = default;
 
     virtual void setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices) = 0;
+
+    virtual void setTileInfo(int32_t x, int32_t y, int32_t z, int32_t offset) = 0;
 
     virtual void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const /*not-null*/ std::shared_ptr<TextureHolderInterface> & textureHolder) = 0;
 

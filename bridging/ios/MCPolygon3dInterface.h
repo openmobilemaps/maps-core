@@ -14,6 +14,11 @@
 - (void)setVertices:(nonnull MCSharedBytes *)vertices
             indices:(nonnull MCSharedBytes *)indices;
 
+- (void)setTileInfo:(int32_t)x
+                  y:(int32_t)y
+                  z:(int32_t)z
+             offset:(int32_t)offset;
+
 - (void)loadTexture:(nullable id<MCRenderingContextInterface>)context
       textureHolder:(nullable id<MCTextureHolderInterface>)textureHolder;
 
