@@ -37,13 +37,14 @@ void Tiled2dMapVectorSourceSymbolDataManager::pause() {
     for (const auto &[tileInfo, tileSymbols]: tileSymbolMap) {
         for (const auto &[s, wrappers]: tileSymbols) {
             for (const auto &wrapper: wrappers) {
-                if (wrapper->symbolObject) {
-                    wrapper->symbolObject->asGraphicsObject()->clear();
+                if (wrapper->symbolGraphicsObject) {
+                    wrapper->symbolGraphicsObject->clear();
                 }
+
                 if (wrapper->textObject) {
-                    const auto textObject = wrapper->textObject->getTextObject();
+                    const auto textObject = wrapper->textObject->getTextGraphicsObject();
                     if (textObject) {
-                        textObject->asGraphicsObject()->clear();
+                        textObject->clear();
                     }
                 }
             }
@@ -61,14 +62,16 @@ void Tiled2dMapVectorSourceSymbolDataManager::resume() {
     for (const auto &[tileInfo, tileSymbols]: tileSymbolMap) {
         for (const auto &[s, wrappers]: tileSymbols) {
             for (const auto &wrapper: wrappers) {
-                if (wrapper->symbolObject && !wrapper->symbolObject->asGraphicsObject()->isReady()) {
-                    wrapper->symbolObject->asGraphicsObject()->setup(context);
+                if (wrapper->symbolObject && !wrapper->symbolGraphicsObject->isReady()) {
+                    wrapper->symbolGraphicsObject->setup(context);
                     wrapper->symbolObject->loadTexture(mapInterface->getRenderingContext(), spriteTexture);
                 }
                 if (wrapper->textObject) {
                     const auto &textObject = wrapper->textObject->getTextObject();
-                    if (textObject && !textObject->asGraphicsObject()->isReady()) {
-                        textObject->asGraphicsObject()->setup(context);
+                    const auto &textGraphicsObject = wrapper->textObject->getTextGraphicsObject();
+
+                    if (textGraphicsObject && !textGraphicsObject->isReady()) {
+                        textGraphicsObject->setup(context);
                         auto fontResult = loadFont(wrapper->textInfo->getFont());
                         if (fontResult.imageData) {
                             textObject->loadTexture(context, fontResult.imageData);
@@ -456,9 +459,9 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupTexts(const std::vector<std::
                     if (symbolObject) {
                         symbolObject->asGraphicsObject()->clear();
                     }
-                    auto textObject = wrapper->textObject ? wrapper->textObject->getTextObject() : nullptr;
-                    if (textObject) {
-                        textObject->asGraphicsObject()->clear();
+                    auto textGraphicsObject = wrapper->textObject ? wrapper->textObject->getTextGraphicsObject() : nullptr;
+                    if (textGraphicsObject) {
+                        textGraphicsObject->clear();
                     }
                     interactableSet.erase(wrapper);
                 }
@@ -471,10 +474,11 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupTexts(const std::vector<std::
         const auto &textInfo = symbol->textInfo;
 
         const auto &textObject = symbol->textObject->getTextObject();
+        const auto &textGraphicsObject = symbol->textObject->getTextGraphicsObject();
 
-        if (textObject) {
+        if (textGraphicsObject) {
             auto renderingContext = mapInterface->getRenderingContext();
-            textObject->asGraphicsObject()->setup(renderingContext);
+            textGraphicsObject->setup(renderingContext);
 
             auto fontResult = loadFont(textInfo->getFont());
             if(fontResult.imageData) {
@@ -1119,9 +1123,9 @@ void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
                         renderObjects.push_back(std::make_shared<RenderObject>(wrapper->symbolGraphicsObject, wrapper->iconModelMatrix));
                     }
 
-                    const auto & textObject = wrapper->textObject->getTextObject();
-                    if (textObject) {
-                        renderObjects.push_back(std::make_shared<RenderObject>(textObject->asGraphicsObject(), wrapper->modelMatrix));
+                    const auto & textGraphicsObject = wrapper->textObject->getTextGraphicsObject();
+                    if (textGraphicsObject) {
+                        renderObjects.push_back(std::make_shared<RenderObject>(textGraphicsObject, wrapper->modelMatrix));
 #ifdef DRAW_TEXT_BOUNDING_BOXES
                     renderObjects.push_back(std::make_shared<RenderObject>(wrapper->boundingBox->asGraphicsObject(), wrapper->modelMatrix));
 #endif
