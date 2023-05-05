@@ -25,6 +25,7 @@
 
 TextLayerObject::TextLayerObject(const std::shared_ptr<TextInterface> &text, const std::shared_ptr<TextInfoInterface> &textInfo,const std::shared_ptr<TextShaderInterface> &shader, const std::shared_ptr<MapInterface> &mapInterface, const FontData& fontData, const Vec2F &offset, double lineHeight, double letterSpacing, int64_t maxCharacterWidth, double maxCharacterAngle, SymbolAlignment rotationAlignment)
 : text(text),
+  textGraphicsObject(text ? text->asGraphicsObject() : nullptr),
   textInfo(textInfo),
   lineCoordinates(textInfo->getLineCoordinates()),
   converter(mapInterface->getCoordinateConverterHelper()),

@@ -57,6 +57,7 @@ class TextLayerObject : public LayerObjectInterface {
     virtual std::vector<std::shared_ptr<RenderConfigInterface>> getRenderConfig();
 
     virtual std::shared_ptr<TextInterface> getTextObject() { return text; }
+    virtual std::shared_ptr<GraphicsObjectInterface> getTextGraphicsObject() { return textGraphicsObject; }
     virtual std::shared_ptr<TextShaderInterface> getShader() { return shader; }
 
     virtual float getReferenceSize() { return referenceSize; }
@@ -83,6 +84,7 @@ class TextLayerObject : public LayerObjectInterface {
   private:
     std::shared_ptr<TextInterface> text;
     std::shared_ptr<TextInfoInterface> textInfo;
+    std::shared_ptr<::GraphicsObjectInterface> textGraphicsObject;
 
     std::shared_ptr<TextShaderInterface> shader;
 

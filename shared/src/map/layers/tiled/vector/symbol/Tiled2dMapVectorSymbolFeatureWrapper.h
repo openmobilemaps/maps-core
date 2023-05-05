@@ -43,19 +43,25 @@ public:
     }
 
     bool hasCollision(float zoom) {
-        // TODO: make better.
-        float minDiff = std::numeric_limits<float>::max();
-        float min = std::numeric_limits<float>::max();
-
         bool collides = true;
 
-        for(auto& cm : collisionMap) {
-            float d = abs(zoom - cm.first);
+        if(collisionMap.size() == 0) {
+            return collides;
+        }
 
-            if(d < minDiff && d < min) {
-                min = d;
-                collides = cm.second;
+        auto low = collisionMap.lower_bound(zoom);
+
+        if(low == collisionMap.end()) {
+            auto prev = std::prev(low);
+            collides = prev->second;
+        } else if(low == collisionMap.begin()) {
+            collides = low->second;
+        } else {
+            auto prev = std::prev(low);
+            if (std::fabs(zoom - prev->first) < std::fabs(zoom - low->first)) {
+                low = prev;
             }
+            collides = low->second;
         }
 
         return collides;
@@ -85,6 +91,7 @@ public:
     {
     };
 
+    // needs to be ordered for detection.
     std::map<float, bool> collisionMap = {};
 };
 
