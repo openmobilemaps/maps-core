@@ -1,5 +1,8 @@
 # Changelog for Open Mobile Maps
 
+## Version 1.5.2 (02.05.2022)
+- Fix for Android context memory leak
+
 ## Version 1.5.1 (14.04.2022)
 - Fix for XCode 14.3.0
 - Convenience function for RectCoord to PolygonCoord conversion
