@@ -72,7 +72,7 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 
 - (void)setCallbackHandler:(nullable id<MCMapCallbackInterface>)callbackInterface {
     try {
-        _cppRefHandle.get()->setCallbackHandler(::djinni_generated::MapCallbackInterface::toCpp(callbackInterface));
+        _cppRefHandle.get()->setCallbackHandler(::djinni::Optional<std::optional, ::djinni_generated::MapCallbackInterface>::toCpp(callbackInterface));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
