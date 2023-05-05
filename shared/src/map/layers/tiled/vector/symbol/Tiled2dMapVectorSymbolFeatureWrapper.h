@@ -8,6 +8,8 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
+#pragma once
+
 #include "Value.h"
 #include "SymbolInfo.h"
 #include "TextLayerObject.h"

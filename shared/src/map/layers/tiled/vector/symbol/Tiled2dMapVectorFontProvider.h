@@ -10,11 +10,9 @@
 
 #pragma once
 
-#include "Coord.h"
+#include "FontLoaderResult.h"
+#include "Font.h"
 
-struct Tiled2dMapVectorSymbolSubLayerPositioningWrapper {
-    double angle;
-    ::Coord centerPosition;
-
-    Tiled2dMapVectorSymbolSubLayerPositioningWrapper(double angle, ::Coord centerPosition): angle(angle), centerPosition(centerPosition) {}
+class Tiled2dMapVectorFontProvider {
+    virtual FontLoaderResult loadFont(const Font &font) = 0;
 };

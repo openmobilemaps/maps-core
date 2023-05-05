@@ -11,12 +11,12 @@
 #pragma once
 
 #include "Actor.h"
-#include "Tiled2dMapVectorSourceSymbolDataManager.h"
+#include "Tiled2dMapVectorSourceSymbolDataManagerNew.h"
 
 class Tiled2dMapVectorSourceSymbolCollisionManager: public ActorObject {
 
 public:
-    Tiled2dMapVectorSourceSymbolCollisionManager(const std::unordered_map<std::string, WeakActor<Tiled2dMapVectorSourceSymbolDataManager>> symbolSourceDataManagers,
+    Tiled2dMapVectorSourceSymbolCollisionManager(const std::unordered_map<std::string, WeakActor<Tiled2dMapVectorSourceSymbolDataManagerNew>> symbolSourceDataManagers,
                                                  std::shared_ptr<VectorMapDescription> mapDescription): symbolSourceDataManagers(symbolSourceDataManagers), mapDescription(mapDescription)  {};
 
     void collisionDetection();
@@ -24,6 +24,6 @@ public:
     void update();
     
 private:
-    std::unordered_map<std::string, WeakActor<Tiled2dMapVectorSourceSymbolDataManager>> symbolSourceDataManagers;
+    std::unordered_map<std::string, WeakActor<Tiled2dMapVectorSourceSymbolDataManagerNew>> symbolSourceDataManagers;
     std::shared_ptr<VectorMapDescription> mapDescription;
 };
