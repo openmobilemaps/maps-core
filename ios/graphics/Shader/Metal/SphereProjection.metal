@@ -87,6 +87,19 @@ sphereProjectionVertexShader(const patch_control_point<VertexIn> patch [[stage_i
     float latitude = pos.y / 90.0 * pi - pi; // [-2pi, 0]
 
 
+//    if (uv.x == 0) {
+//        longitude -= 0.00001;
+//    }
+//    else if (uv.x == 1) {
+//        longitude += 0.00001;
+//    }
+//    if (uv.y == 0) {
+//        latitude += 0.00001;
+//    }
+//    else if (uv.y == 1) {
+//        latitude -= 0.00001;
+//    }
+
     float sinLon = sin(longitude);     // [0, 1, 0, -1, 0]
     float cosLon = cos(longitude);     // [1, 0, -1, 0, 1]
     float sinLatH = sin(latitude / 2); // [0, 1, 0, -1, 0]

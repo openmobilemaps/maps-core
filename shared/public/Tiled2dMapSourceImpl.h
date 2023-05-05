@@ -778,7 +778,7 @@ void Tiled2dMapSource<T, L, R>::didLoad(Tiled2dMapTileInfo tile, size_t loaderIn
                 }
             }
 
-            currentTiles.insert({tile, TileWrapper<R>(da, std::vector<::PolygonCoord>{  }, mask, tilePolygon, targetZoomLevelOffset)});
+            currentTiles.insert({tile, TileWrapper<R>(da, std::vector<::PolygonCoord>{ mask }, mask, tilePolygon, targetZoomLevelOffset)});
 
             errorTiles[loaderIndex].erase(tile);
             
