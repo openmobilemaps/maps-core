@@ -29,7 +29,10 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
 
     const auto &[context, symbol] = symbolInfo;
 
-    auto fontResult = loadFont(symbol->getFont());
+    auto fontResult = fontProvider.syncAccess([font = symbol->getFont()] (auto provider) {
+        return provider->loadFont(font);
+    });
+
     if (fontResult.status != LoaderStatus::OK) {
         return nullptr;
     }

@@ -5,12 +5,10 @@
 #import "MCTextInterface.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
-#import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCGraphicsObjectInterface+Private.h"
 #import "MCRenderingContextInterface+Private.h"
 #import "MCSharedBytes+Private.h"
-#import "MCTextDescription+Private.h"
 #import "MCTextureHolderInterface+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -34,12 +32,6 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
         _cppRefHandle.assign(cppRef);
     }
     return self;
-}
-
-- (void)setTexts:(nonnull NSArray<MCTextDescription *> *)texts {
-    try {
-        _cppRefHandle.get()->setTexts(::djinni::List<::djinni_generated::TextDescription>::toCpp(texts));
-    } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
 - (void)setTextsShared:(nonnull MCSharedBytes *)vertices
@@ -80,12 +72,6 @@ class TextInterface::ObjcProxy final
     friend class ::djinni_generated::TextInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void setTexts(const std::vector<::TextDescription> & c_texts) override
-    {
-        @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setTexts:(::djinni::List<::djinni_generated::TextDescription>::fromCpp(c_texts))];
-        }
-    }
     void setTextsShared(const ::SharedBytes & c_vertices, const ::SharedBytes & c_indices) override
     {
         @autoreleasepool {

@@ -14,5 +14,6 @@
 #include "Font.h"
 
 class Tiled2dMapVectorFontProvider {
+public:
     virtual FontLoaderResult loadFont(const Font &font) = 0;
 };

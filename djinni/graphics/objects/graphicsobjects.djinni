@@ -108,7 +108,6 @@ texture_holder_interface = interface +j +o {
 }
 
 text_interface = interface +c +j +o {
-    set_texts(texts: list<text_description>);
     set_texts_shared(vertices: shared_bytes, indices: shared_bytes);
 
     load_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
