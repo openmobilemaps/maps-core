@@ -41,7 +41,7 @@ public:
     bool onClickConfirmed(const Vec2F &posScreen) override;
 
 private:
-    void addPolygons(const std::vector<std::tuple<std::vector<std::tuple<std::vector<Coord>, int>>, std::vector<int32_t>>> &polygons);
+    void addPolygons(const std::vector<std::tuple<std::vector<std::tuple<std::vector<Coord>, int>>, std::vector<uint16_t>>> &polygons);
 
     void setupPolygons(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects,
                        const std::vector<std::shared_ptr<GraphicsObjectInterface>> &oldPolygonObjects);

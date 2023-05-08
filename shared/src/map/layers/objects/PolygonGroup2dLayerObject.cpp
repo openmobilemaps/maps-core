@@ -25,7 +25,7 @@ void PolygonGroup2dLayerObject::update() {}
 std::vector<std::shared_ptr<RenderConfigInterface>> PolygonGroup2dLayerObject::getRenderConfig() { return {renderConfig}; }
 
 
-void PolygonGroup2dLayerObject::setVertices(const std::vector<std::tuple<std::vector<::Coord>, int>> & vertices, const std::vector<int32_t> & indices) {
+void PolygonGroup2dLayerObject::setVertices(const std::vector<std::tuple<std::vector<::Coord>, int>> & vertices, const std::vector<uint16_t> & indices) {
 
     std::vector<float> renderVertices;
 
@@ -39,18 +39,10 @@ void PolygonGroup2dLayerObject::setVertices(const std::vector<std::tuple<std::ve
             renderVertices.push_back(s);
         }
     }
-#ifdef __APPLE__
-    auto i = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(int32_t));
-#else
-    std::vector<int16_t> shortIndices;
-    shortIndices.reserve(indices.size());
-    for(auto& i : indices) {
-        shortIndices.push_back(i);
-    }
-    auto i = SharedBytes((int64_t)shortIndices.data(), (int32_t)shortIndices.size(), (int32_t)sizeof(int16_t));
-#endif
 
+    auto i = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(uint16_t));
     auto v = SharedBytes((int64_t)renderVertices.data(), (int32_t)renderVertices.size(), (int32_t)sizeof(float));
+    
     polygon->setVertices(v, i);
 }
 
