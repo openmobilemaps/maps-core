@@ -25,6 +25,7 @@
 
 TextLayerObject::TextLayerObject(const std::shared_ptr<TextInterface> &text, const std::shared_ptr<TextInfoInterface> &textInfo,const std::shared_ptr<TextShaderInterface> &shader, const std::shared_ptr<MapInterface> &mapInterface, const FontData& fontData, const Vec2F &offset, double lineHeight, double letterSpacing, int64_t maxCharacterWidth, double maxCharacterAngle, SymbolAlignment rotationAlignment)
 : text(text),
+  textGraphicsObject(text ? text->asGraphicsObject() : nullptr),
   textInfo(textInfo),
   lineCoordinates(textInfo->getLineCoordinates()),
   converter(mapInterface->getCoordinateConverterHelper()),
@@ -55,6 +56,7 @@ TextLayerObject::TextLayerObject(const std::shared_ptr<TextInterface> &text, con
     std::vector<BreakResult> breaks = {};
     if(textInfo->getSymbolPlacement() == TextSymbolPlacement::POINT) {
         std::vector<std::string> letters;
+
         for (const auto &entry: textInfo->getText()) {
             for (const auto &c : TextHelper::splitWstring(entry.text)) {
                 letters.push_back(c);
@@ -68,40 +70,42 @@ TextLayerObject::TextLayerObject(const std::shared_ptr<TextInterface> &text, con
     for (const auto &entry: textInfo->getText()) {
         for (const auto &c : TextHelper::splitWstring(entry.text)) {
             int index = -1;
+            bool found = false;
 
             int i = 0;
             for (const auto &d : fontData.glyphs) {
                 if(c == d.charCode) {
                     index = i;
+                    found = true;
                     break;
                 }
 
                 ++i;
             }
 
-            // no letter found
-            if(index == -1) {
-                currentLetterIndex++;
-                continue;
-            }
+
 
             if(textInfo->getSymbolPlacement() == TextSymbolPlacement::POINT) {
                 // check for line breaks in point texts
                 auto it = std::find_if(breaks.begin(), breaks.end(), [&](const auto& v) { return v.index == currentLetterIndex; });
                 if(it != breaks.end()) {
                     // add line break
-                    if(it->keepLetter) {
+                    if(it->keepLetter && found) {
                         splittedTextInfo.emplace_back(index, entry.scale);
                     }
                     // use -1 as line break
                     splittedTextInfo.emplace_back(-1, entry.scale);
                 } else {
                     // just add it
-                    splittedTextInfo.emplace_back(index, entry.scale);
+                    if(found) {
+                        splittedTextInfo.emplace_back(index, entry.scale);
+                    }
                 }
             } else {
-                // non-point symbols: just add it, no line breaks possible
-                splittedTextInfo.emplace_back(index, entry.scale);
+                // non-point symbols: just add it if found, no line breaks possible
+                if(found) {
+                    splittedTextInfo.emplace_back(index, entry.scale);
+                }
             }
 
             currentLetterIndex++;
