@@ -12,6 +12,7 @@ class Polygon2dInterface;
 class PolygonGroup2dInterface;
 class Quad2dInstancedInterface;
 class Quad2dInterface;
+class TextInstancedInterface;
 class TextInterface;
 
 class GraphicsObjectFactoryInterface {
@@ -35,4 +36,6 @@ public:
     virtual /*not-null*/ std::shared_ptr<Polygon2dInterface> createPolygonMask() = 0;
 
     virtual /*not-null*/ std::shared_ptr<TextInterface> createText(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
+
+    virtual /*not-null*/ std::shared_ptr<TextInstancedInterface> createTextInstanced(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
 };

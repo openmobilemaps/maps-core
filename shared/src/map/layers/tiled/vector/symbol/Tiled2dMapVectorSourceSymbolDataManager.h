@@ -19,6 +19,8 @@
 #include "TextHelper.h"
 #include "SpriteData.h"
 #include "FontLoaderResult.h"
+#include "TextInstancedInterface.h"
+#include "TextInstancedShaderInterface.h"
 
 class Tiled2dMapVectorSourceSymbolDataManager: public Tiled2dMapVectorSourceDataManager,  public std::enable_shared_from_this<Tiled2dMapVectorSourceSymbolDataManager> {
 public:
@@ -104,5 +106,8 @@ private:
 
     float alpha = 1.0;
 
+    std::optional<std::string> instanceFontName;
+    std::shared_ptr<TextInstancedInterface> instancedObject;
+    std::shared_ptr<TextInstancedShaderInterface> instancedShader;
     //cached locked unsafe renderpasses
 };

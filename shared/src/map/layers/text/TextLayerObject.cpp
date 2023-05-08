@@ -181,6 +181,12 @@ void TextLayerObject::layoutPoint(float scale, bool updateObject) {
         int characterCount = 0;
         std::vector<size_t> lineEndIndices;
 
+        positions.clear();
+        scales.clear();
+        textureCoordinates.clear();
+        textureCoordinates.clear();
+        rotations.clear();
+
         for(auto& i : splittedTextInfo) {
             if(i.glyphIndex >= 0) {
                 auto &d = fontData.glyphs[i.glyphIndex];
@@ -196,51 +202,18 @@ void TextLayerObject::layoutPoint(float scale, bool updateObject) {
 
                     Quad2dD quad = Quad2dD(Vec2D(x, yh), Vec2D(xw, yh), Vec2D(xw, y), Vec2D(x, y));
 
-                    if (!box) {
-                        box = BoundingBox(Coord(referencePoint.systemIdentifier, quad.topLeft.x, quad.topLeft.y, referencePoint.z));
-                    }
+                positions.push_back(x + size.x / 2);
+                positions.push_back(y + size.y / 2);
+                scales.push_back(size.x);
+                scales.push_back(size.y);
+                textureCoordinates.push_back(d.uv.topLeft.x);
+                textureCoordinates.push_back(d.uv.bottomRight.y);
+                textureCoordinates.push_back(d.uv.bottomRight.x - d.uv.topLeft.x);
+                textureCoordinates.push_back(d.uv.topLeft.y - d.uv.bottomLeft.y);
+                rotations.push_back(0.0);
 
-                    box->addPoint(quad.topLeft.x, quad.topLeft.y, referencePoint.z);
-                    box->addPoint(quad.topRight.x, quad.topRight.y, referencePoint.z);
-                    box->addPoint(quad.bottomLeft.x, quad.bottomLeft.y, referencePoint.z);
-                    box->addPoint(quad.bottomRight.x, quad.bottomRight.y, referencePoint.z);
-
-                    vertices.push_back(quad.bottomLeft.x);
-                    vertices.push_back(quad.bottomLeft.y);
-                    vertices.push_back(d.uv.bottomLeft.x);
-                    vertices.push_back(d.uv.bottomLeft.y);
-                    vertices.push_back(0.0);
-                    vertices.push_back(0.0);
-
-                    vertices.push_back(quad.topLeft.x);
-                    vertices.push_back(quad.topLeft.y);
-                    vertices.push_back(d.uv.topLeft.x);
-                    vertices.push_back(d.uv.topLeft.y);
-                    vertices.push_back(0.0);
-                    vertices.push_back(0.0);
-
-                    vertices.push_back(quad.topRight.x);
-                    vertices.push_back(quad.topRight.y);
-                    vertices.push_back(d.uv.topRight.x);
-                    vertices.push_back(d.uv.topRight.y);
-                    vertices.push_back(0.0);
-                    vertices.push_back(0.0);
-
-                    vertices.push_back(quad.bottomRight.x);
-                    vertices.push_back(quad.bottomRight.y);
-                    vertices.push_back(d.uv.bottomRight.x);
-                    vertices.push_back(d.uv.bottomRight.y);
-                    vertices.push_back(0.0);
-                    vertices.push_back(0.0);
-
-                    indices.push_back(0 + indicesStart);
-                    indices.push_back(1 + indicesStart);
-                    indices.push_back(2 + indicesStart);
-                    indices.push_back(0 + indicesStart);
-                    indices.push_back(2 + indicesStart);
-                    indices.push_back(3 + indicesStart);
-
-                    indicesStart += 4;
+                if (!box) {
+                    box = BoundingBox(Coord(referencePoint.systemIdentifier, quad.topLeft.x, quad.topLeft.y, referencePoint.z));
                 }
 
                 pen.x += advance.x * (1.0 + letterSpacing);
@@ -337,6 +310,11 @@ void TextLayerObject::layoutPoint(float scale, bool updateObject) {
             auto dx = referencePoint.x + offset.x - min.x;
             auto dy = referencePoint.y + offset.y - min.y;
 
+            for(auto i=0; i < positions.size(); i+=2) {
+                positions[i] += dx;
+                positions[i+1] += dy;
+            }
+
             for(auto i=0; i<vertices.size(); i+=6) {
                 vertices[i] += dx;
                 vertices[i+1] += dy;
@@ -406,7 +384,11 @@ float TextLayerObject::layoutLine(float scale, bool updateObject) {
     int index = 0;
     double lastAngle = 0.0;
 
-    double lineCenteringParameter = -fontData.info.base / fontData.info.lineHeight;
+    positions.clear();
+    scales.clear();
+    textureCoordinates.clear();
+    textureCoordinates.clear();
+    rotations.clear();
 
     for(auto &i : splittedTextInfo) {
         if(i.glyphIndex < 0) {
@@ -466,6 +448,17 @@ float TextLayerObject::layoutLine(float scale, bool updateObject) {
 
             Quad2dD quad = Quad2dD(tl, tr, br, bl);
             quad = TextHelper::rotateQuad2d(quad, Vec2D(p.x, p.y), angle);
+
+            positions.push_back(quad.topLeft.x + (quad.topRight.x - quad.topLeft.x) / 2);
+            positions.push_back(quad.bottomLeft.y + (quad.bottomRight.y - quad.bottomLeft.y) / 2);
+            scales.push_back(size.x);
+            scales.push_back(size.y);
+            textureCoordinates.push_back(d.uv.topLeft.x);
+            textureCoordinates.push_back(d.uv.bottomRight.y);
+            textureCoordinates.push_back(d.uv.bottomRight.x - d.uv.topLeft.x);
+            textureCoordinates.push_back(d.uv.topLeft.y - d.uv.bottomLeft.y);
+            rotations.push_back(-angle);
+
 
             auto dy = Vec2DHelper::normalize(Vec2D(quad.bottomLeft.x - quad.topLeft.x, quad.bottomLeft.y - quad.topLeft.y));
             dy.x *= lineCenteringParameter * fontSize;
