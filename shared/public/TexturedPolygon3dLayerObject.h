@@ -37,11 +37,11 @@ public:
 
     virtual std::vector<std::shared_ptr<RenderConfigInterface>> getRenderConfig() override;
 
-    virtual void setPolygons(const std::vector<::PolygonCoord> & polygons);
+    virtual void setPolygons(const std::vector<::PolygonCoord> & polygons, const ::RectCoord &coords);
 
-    virtual void setPolygon(const ::PolygonCoord & polygon);
+    virtual void setPolygon(const ::PolygonCoord & polygon, const ::RectCoord &coords);
 
-    void setPositions(const std::vector<Coord> &positions, const std::vector<std::vector<Coord>> &holes);
+    void setPositions(const std::vector<Coord> &positions, const std::vector<std::vector<Coord>> &holes, const ::RectCoord &coords);
 
     void setTileInfo(const int32_t x, const int32_t y, const int32_t z, const int32_t offset);
 

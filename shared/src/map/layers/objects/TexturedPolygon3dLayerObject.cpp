@@ -25,13 +25,13 @@ renderObject(std::make_shared<RenderObject>(graphicsObject))
 {
 }
 
-void TexturedPolygon3dLayerObject::setPositions(const std::vector<Coord> &positions, const std::vector<std::vector<Coord>> &holes) {
-    setPolygon({positions, holes});
+void TexturedPolygon3dLayerObject::setPositions(const std::vector<Coord> &positions, const std::vector<std::vector<Coord>> &holes, const ::RectCoord &bounds) {
+    setPolygon({positions, holes}, bounds);
 }
 
-void TexturedPolygon3dLayerObject::setPolygon(const ::PolygonCoord &polygon) { setPolygons({polygon}); }
+void TexturedPolygon3dLayerObject::setPolygon(const ::PolygonCoord &polygon, const ::RectCoord &bounds) { setPolygons({polygon}, bounds); }
 
-void TexturedPolygon3dLayerObject::setPolygons(const std::vector<::PolygonCoord> &polygons) {
+void TexturedPolygon3dLayerObject::setPolygons(const std::vector<::PolygonCoord> &polygons, const ::RectCoord &bounds) {
     std::vector<uint16_t> indices;
     std::vector<float> vertices;
     int32_t indexOffset = 0;
@@ -39,10 +39,18 @@ void TexturedPolygon3dLayerObject::setPolygons(const std::vector<::PolygonCoord>
     if (polygons.size() == 0 || polygons[0].positions.size() == 0) {
         return;
     }
-    double minX = polygons[0].positions[0].x;
-    double minY = polygons[0].positions[0].y;
-    double maxX = polygons[0].positions[0].x;
-    double maxY = polygons[0].positions[0].y;
+    double minX = bounds.topLeft.x;
+    double minY = bounds.topLeft.y;
+    double maxX = bounds.bottomRight.x;
+    double maxY = bounds.bottomRight.y;
+    if (minX > maxX) {
+        minX = bounds.bottomRight.x;
+        maxX = bounds.topLeft.x;
+    }
+    if (minY > maxY) {
+        minY = bounds.bottomRight.y;
+        maxY = bounds.topLeft.y;
+    }
 
     for (auto const &polygon : polygons) {
         std::vector<std::vector<Vec2D>> renderCoords;
@@ -53,18 +61,6 @@ void TexturedPolygon3dLayerObject::setPolygons(const std::vector<::PolygonCoord>
             Coord renderCoord = conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), mapCoord);
             polygonCoords.push_back(Vec2D(renderCoord.x, renderCoord.y));
             polygonUV.push_back(Vec2D(mapCoord.x, mapCoord.y));
-            if (minX > mapCoord.x) {
-                minX = mapCoord.x;
-            }
-            if (maxX < mapCoord.x) {
-                maxX = mapCoord.x;
-            }
-            if (minY > mapCoord.y) {
-                minY = mapCoord.y;
-            }
-            if (maxY < mapCoord.y) {
-                maxY = mapCoord.y;
-            }
         }
         renderCoords.push_back(polygonCoords);
         renderUV.push_back(polygonUV);

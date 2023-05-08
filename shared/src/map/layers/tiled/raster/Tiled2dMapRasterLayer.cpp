@@ -260,7 +260,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
 
                             if (auto quad3d = std::dynamic_pointer_cast<TexturedPolygon3dLayerObject>(tileEntry.second)) {
                                 // TODO: Maybe check if zoomLevelOffset has actually changed?
-                                quad3d->setPolygons(curTile->masks);
+                                quad3d->setPolygons(curTile->masks, curTile->tileInfo.bounds);
                             }
                         }
                     }
@@ -286,7 +286,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
                         tileObject->beginAlphaAnimation(0.0, alpha, 150);
                     }
 //                    tileObject->setRectCoord(tile.tileInfo.bounds);
-                    tileObject->setPolygons(tile.masks);
+                    tileObject->setPolygons(tile.masks, tile.tileInfo.bounds);
                     tileObject->setTileInfo(tile.tileInfo.x, tile.tileInfo.y, tile.tileInfo.zoomIdentifier, tile.targetZoomLevelOffset);
                     tilesToSetup.emplace_back(std::make_pair(tile, tileObject));
 
