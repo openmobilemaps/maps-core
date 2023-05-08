@@ -71,12 +71,6 @@ class TextLayerObject : public LayerObjectInterface {
     std::vector<Quad2dD> getLetterBoxes();
 #endif
 
-
-    std::vector<float> positions;
-    std::vector<float> scales;
-    std::vector<float> textureCoordinates;
-    std::vector<float> rotations;
-
   private:
     void update(float scale, bool updateTextObject);
     void layoutPoint(float scale, bool updateTextObject);
@@ -103,7 +97,7 @@ class TextLayerObject : public LayerObjectInterface {
     float referenceSize;
 
     std::optional<std::string> symbolName;
-public:
+
     FontData fontData;
     Vec2F offset;
     double lineHeight;
