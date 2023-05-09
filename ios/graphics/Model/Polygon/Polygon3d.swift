@@ -25,9 +25,6 @@ final class Polygon3d: BaseGraphicsObject {
     private var heightTexture: MTLTexture?
     public let heightSampler: MTLSamplerState
     
-    private let timeBuffer: MTLBuffer
-    private var timeBufferContent : UnsafeMutablePointer<Float>
-
     private var tessellationFactorBuffer: MTLBuffer?
     
     private static let renderStartTime = Date()
@@ -43,10 +40,6 @@ final class Polygon3d: BaseGraphicsObject {
         self.label = label
 #endif
         self.shader = shader
-
-        guard let timeBuffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<Float>.stride, options: []) else { fatalError("Could not create buffer") }
-        self.timeBuffer = timeBuffer
-        self.timeBufferContent = self.timeBuffer.contents().bindMemory(to: Float.self, capacity: 1)
 
         self.heightSampler = metalContext.samplerLibrary.value(Sampler.magNearest.rawValue)
 
@@ -116,8 +109,8 @@ final class Polygon3d: BaseGraphicsObject {
         encoder.setFragmentTexture(texture, index: 0)
         encoder.setVertexTexture(heightTexture, index: 0)
 
-        timeBufferContent[0] = Float(-Self.renderStartTime.timeIntervalSinceNow)
-        encoder.setVertexBuffer(timeBuffer, offset: 0, index: 2)
+        var time = Float(-Self.renderStartTime.timeIntervalSinceNow)
+        encoder.setVertexBytes(&time, length: MemoryLayout<Float>.stride, index: 2)
         encoder.setVertexBytes(&layerOffset, length: MemoryLayout<Int32>.stride, index: 3)
 
 
@@ -228,8 +221,8 @@ extension Polygon3d: MCMaskingObjectInterface {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
         }
 
-        timeBufferContent[0] = Float(-Self.renderStartTime.timeIntervalSinceNow)
-        encoder.setVertexBuffer(timeBuffer, offset: 0, index: 2)
+        var time = Float(-Self.renderStartTime.timeIntervalSinceNow)
+        encoder.setVertexBytes(&time, length: MemoryLayout<Float>.stride, index: 2)
 
 
         encoder.setTessellationFactorBuffer(tessellationFactorBuffer, offset: 0, instanceStride: 0)

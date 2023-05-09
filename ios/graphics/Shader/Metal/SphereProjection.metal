@@ -75,7 +75,7 @@ sphereProjectionVertexShader(const patch_control_point<VertexIn> patch [[stage_i
     height *= color.a;
 
     float R = 6371000;
-    float radius = 1.0 + (height / R) * 1.0;
+    float radius = 1.0 + (height / R) * (1.0 + sin(time+pos.x*10)*0.0);
 
 //    float3 n = pos / length(pos);
 
@@ -113,7 +113,7 @@ sphereProjectionVertexShader(const patch_control_point<VertexIn> patch [[stage_i
 
 
   float4 position = mvpMatrix * float4(pos3d, 1.0);
-    float s = 0.1;
+    float s = 0.2;
     float z = position.z / position.w * s;
     if (z > s) {
         z = s;
@@ -122,13 +122,9 @@ sphereProjectionVertexShader(const patch_control_point<VertexIn> patch [[stage_i
         z = 0.0;
     }
 
-    z = z + layerOffset * -0.1;
-//    z = z  + layerOffset * -1.0;
-
+    z = z + layerOffset * -s;
 
     position.z = z * position.w;
-
-//    position.z = position.z * 0.8 - 0.00010 + layerOffset * -0.01;
 
 
   VertexOut out {

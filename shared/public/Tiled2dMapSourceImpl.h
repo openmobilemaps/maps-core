@@ -153,6 +153,8 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & viewMa
         auto bottomLeftView = transformToView(bottomLeft, viewMatrix);
         auto bottomRightView = transformToView(bottomRight, viewMatrix);
 
+        float centerZ = (topLeftView.z + topRightView.z + bottomLeftView.z + bottomRightView.z) / 4.0;
+
         if (mapConfig.mapCoordinateSystem.identifier == CoordinateSystemIdentifiers::UNITSPHERE()) {
             // v(0,0,+1) = unit-vector out of screen
             float topLeftHA = 180.0 / M_PI * atan2(topLeftView.x, -topLeftView.z);
@@ -248,7 +250,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & viewMa
         double leftLengthPx = Vec2DHelper::distance(topLeftScreenPx, bottomLeftScreenPx);
         double rightLengthPx = Vec2DHelper::distance(topRightScreenPx, bottomRightScreenPx);
 
-        const double maxLength = 512 * 2;
+        const double maxLength = 512 * 1.5;
 
 
         bool preciseEnough = topLengthPx <= maxLength && bottomLengthPx <= maxLength && leftLengthPx <= maxLength && rightLengthPx <= maxLength;
@@ -273,7 +275,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & viewMa
 
             const RectCoord rect(topLeft, bottomRight);
             int t = 0;
-            double priority = 1.0 / (0.1 + abs(topLeftScreen.x)+abs(topLeftScreen.y));
+            double priority = 1.0 / centerZ;
             visibleTilesVec.push_back(std::make_pair(candidate, PrioritizedTiled2dMapTileInfo(
                                                                                               Tiled2dMapTileInfo(rect, candidate.x, candidate.y, t, zoomLevelInfo.zoomLevelIdentifier, zoomLevelInfo.zoom),
                                                                                               priority)));
@@ -338,7 +340,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & viewMa
                         candidatesSet.insert(cNext);
                         const RectCoord rect(topLeft, bottomRight);
                         int t = 0;
-                        double priority = 1.0 / (0.1 + abs(topLeftScreen.x)+abs(topLeftScreen.y));
+                        double priority = 1.0 / centerZ;
 //                        parentTiles[cNext] = PrioritizedTiled2dMapTileInfo(
 //                                                                           Tiled2dMapTileInfo(rect, candidate.x, candidate.y, t, zoomLevelInfo.zoomLevelIdentifier, zoomLevelInfo.zoom),
 //                                                                           priority);
@@ -905,6 +907,9 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
 
                 if(found) { break; }
             }
+            if (!found) {
+                continue;
+            }
 
             if (newTargetZoomLevelOffset != targetOffset) {
                 continue;
@@ -942,27 +947,32 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
                 }
 
                 if (polygonDiff.contour == NULL) {
-                    tileWrapper.isVisible = false;
-                    it = decltype(it){currentTiles.erase( std::next(it).base() )};
-                    if (it != currentTiles.rbegin()) {
-                        // TODO: Why does it crash without the if
-                        it = std::prev(it);
-                    }
+                    tileWrapper.masks = { tileWrapper.tileBounds };
+                    tileWrapper.targetZoomLevelOffset = newTargetZoomLevelOffset;
+//                    tileWrapper.isVisible = false;
+//                    it = decltype(it){currentTiles.erase( std::next(it).base() )};
+//                    if (it != currentTiles.rbegin()) {
+//                        // TODO: Why does it crash without the if
+//                        it = std::prev(it);
+//                    }
                 } else {
                     gpc_polygon resultingMask;
 
                     gpc_polygon_clip(GPC_INT, &polygonDiff, &currentViewBoundsPolygon, &resultingMask);
 
                     if (resultingMask.contour == NULL) {
-                        tileWrapper.isVisible = false;
-                        it = decltype(it){currentTiles.erase( std::next(it).base() )};
-                        if (it != currentTiles.rbegin()) {
-                            // TODO: Why does it crash without the if
-                            it = std::prev(it);
-                        }
+                        tileWrapper.masks = { tileWrapper.tileBounds };
+                        tileWrapper.targetZoomLevelOffset = newTargetZoomLevelOffset;
+//                        tileWrapper.isVisible = false;
+//                        it = decltype(it){currentTiles.erase( std::next(it).base() )};
+//                        if (it != currentTiles.rbegin()) {
+//                            // TODO: Why does it crash without the if
+//                            it = std::prev(it);
+//                        }
 
                     } else {
                         tileWrapper.masks = gpc_get_polygon_coord(&polygonDiff, tileInfo.bounds.topLeft.systemIdentifier);
+                        tileWrapper.targetZoomLevelOffset = std::max(tileWrapper.targetZoomLevelOffset, newTargetZoomLevelOffset);
                     }
 
                     gpc_free_polygon(&resultingMask);
@@ -973,6 +983,7 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
                 }
             } else {
                 tileWrapper.masks = { tileWrapper.tileBounds };
+                tileWrapper.targetZoomLevelOffset = newTargetZoomLevelOffset;
             }
 
             // add tileBounds to currentTileMask
