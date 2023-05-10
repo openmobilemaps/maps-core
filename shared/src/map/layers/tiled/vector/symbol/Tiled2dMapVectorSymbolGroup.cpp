@@ -206,10 +206,8 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
         iconTextureCoordinates.resize(instanceCounts.icons * 4, 0.0);
     }
 
-
     if (instanceCounts.textCharacters != 0) {
         textInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createTextInstanced(strongMapInterface->getShaderFactory()->createTextInstancedShader()->asShaderProgramInterface());
-
         textInstancedObject->setInstanceCount(instanceCounts.textCharacters);
 
         textStyles.resize(textStyleCount * 9, 0.0);
@@ -219,8 +217,6 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
         textPositions.resize(instanceCounts.textCharacters * 2, 0.0);
         textTextureCoordinates.resize(instanceCounts.textCharacters * 4, 0.0);
     }
-
-
 
     setupObjects();
 
@@ -276,13 +272,11 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
         }
 
         if (textInstancedObject) {
-
             textInstancedObject->setPositions(SharedBytes((int64_t)textPositions.data(), (int32_t)textRotations.size(), 2 * (int32_t)sizeof(float)));
             textInstancedObject->setStyles(SharedBytes((int64_t)textStyles.data(), (int32_t)textStyles.size() / 9, 9 * (int32_t)sizeof(float)));
             textInstancedObject->setScales(SharedBytes((int64_t)textScales.data(), (int32_t)textRotations.size(), 2 * (int32_t)sizeof(float)));
             textInstancedObject->setRotations(SharedBytes((int64_t)textRotations.data(), (int32_t)textRotations.size(), 1 * (int32_t)sizeof(float)));
         }
-
     }
 }
 

@@ -138,8 +138,8 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
     Coord renderPos = converter->convertToRenderSystem(coordinate);
 
     auto iconOffset = description->style.getIconOffset(evalContext);
-//    renderPos.y -= iconOffset.y;
-//    renderPos.x += iconOffset.x;
+    renderPos.y -= iconOffset.y;
+    renderPos.x += iconOffset.x;
 
     positions[2 * countOffset] = renderPos.x;
     positions[2 * countOffset + 1] = renderPos.y;
@@ -181,7 +181,7 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &scal
     alphas[countOffset] = description->style.getIconOpacity(evalContext);
 
     //TODO: rotations
-    rotations[countOffset] = 0;
+    rotations[countOffset] = 0.0;
 
     auto iconSize = description->style.getIconSize(evalContext) * scaleFactor;
     scales[2 * countOffset] = spriteSize.x * iconSize;
@@ -195,7 +195,6 @@ void Tiled2dMapVectorSymbolObject::setupTextProperties(std::vector<float> &textu
     if (instanceCounts.textCharacters ==  0 || !labelObject) {
         return;
     }
-
 
     labelObject->setupProperties(textureCoordinates, styleIndices, countOffset, styleOffset, zoomIdentifier);
 }

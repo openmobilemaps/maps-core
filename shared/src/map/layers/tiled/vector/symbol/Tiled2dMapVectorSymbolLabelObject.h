@@ -56,7 +56,11 @@ public:
 private:
 
     void updatePropertiesPoint(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor);
-    void updatePropertiesLine(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor);
+    double updatePropertiesLine(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor);
+
+    std::pair<int, double> findReferencePointIndices();
+    Coord pointAtIndex(const std::pair<int, double> &index, bool useRender);
+    std::pair<int, double> indexAtDistance(const std::pair<int, double> &index, double distance);
 
     const std::shared_ptr<SymbolVectorLayerDescription> description;
     const FeatureContext featureContext;
@@ -65,6 +69,8 @@ private:
     const TextJustify textJustify;
     const Anchor textAnchor;
     const Vec2F offset;
+
+    float spaceAdvance = 0.0f;
 
     const double lineHeight;
     const double letterSpacing;
@@ -89,5 +95,8 @@ private:
 
     const std::string fullText;
 
+    bool rotated = false;
+
     std::vector<Coord> renderLineCoordinates;
+    std::optional<std::vector<Coord>> lineCoordinates;
 };

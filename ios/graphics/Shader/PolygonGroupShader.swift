@@ -14,7 +14,7 @@ import Metal
 import UIKit
 
 class PolygonGroupShader: BaseShader {
-    private var polygonStyleBuffer: MTLBuffer?
+    var polygonStyleBuffer: MTLBuffer?
 
     private var pipeline: MTLRenderPipelineState?
 
