@@ -16,6 +16,8 @@ abstract class GraphicsObjectFactoryInterface {
 
     abstract fun createQuadInstanced(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Quad2dInstancedInterface
 
+    abstract fun createQuadStretchedInstanced(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Quad2dStretchedInstancedInterface
+
     abstract fun createLineGroup(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): LineGroup2dInterface
 
     abstract fun createPolygonGroup(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): PolygonGroup2dInterface
@@ -63,6 +65,12 @@ abstract class GraphicsObjectFactoryInterface {
             return native_createQuadInstanced(this.nativeRef, shader)
         }
         private external fun native_createQuadInstanced(_nativeRef: Long, shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Quad2dInstancedInterface
+
+        override fun createQuadStretchedInstanced(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Quad2dStretchedInstancedInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createQuadStretchedInstanced(this.nativeRef, shader)
+        }
+        private external fun native_createQuadStretchedInstanced(_nativeRef: Long, shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Quad2dStretchedInstancedInterface
 
         override fun createLineGroup(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): LineGroup2dInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

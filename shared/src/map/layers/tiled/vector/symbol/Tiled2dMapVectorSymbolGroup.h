@@ -20,6 +20,7 @@
 #include "SpriteData.h"
 #include "Actor.h"
 #include "TextInstancedInterface.h"
+#include "Quad2dStretchedInstancedInterface.h"
 
 class Tiled2dMapVectorSymbolGroup : public ActorObject {
 public:
@@ -59,6 +60,7 @@ private:
 
 public:
     std::shared_ptr<Quad2dInstancedInterface> iconInstancedObject;
+    std::shared_ptr<Quad2dStretchedInstancedInterface> stretchedInstancedObject;
     std::shared_ptr<TextInstancedInterface> textInstancedObject;
 
 
@@ -85,4 +87,12 @@ public:
     std::vector<uint16_t> textStyleIndices;
     std::vector<float> textStyles;
     std::vector<float> textTextureCoordinates;
+
+    std::vector<float> stretchedIconPositions;
+    std::vector<float> stretchedIconScales;
+    std::vector<float> stretchedIconRotations;
+    std::vector<float> stretchedIconAlphas;
+    std::vector<float> stretchedIconStretchInfos;
+    std::vector<float> stretchedIconTextureCoordinates;
+
 };

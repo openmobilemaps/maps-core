@@ -10,6 +10,7 @@
 @protocol MCLineGroupShaderInterface;
 @protocol MCPolygonGroupShaderInterface;
 @protocol MCRasterShaderInterface;
+@protocol MCStretchInstancedShaderInterface;
 @protocol MCStretchShaderInterface;
 @protocol MCTextInstancedShaderInterface;
 @protocol MCTextShaderInterface;
@@ -38,5 +39,7 @@
 - (nullable id<MCRasterShaderInterface>)createRasterShader;
 
 - (nullable id<MCStretchShaderInterface>)createStretchShader;
+
+- (nullable id<MCStretchInstancedShaderInterface>)createStretchInstancedShader;
 
 @end

@@ -67,6 +67,7 @@ public enum Pipeline: String, CaseIterable {
     case textInstancedShader
     case rasterShader
     case stretchShader
+    case stretchInstancedShader
 
     var label: String {
         switch self {
@@ -81,6 +82,7 @@ public enum Pipeline: String, CaseIterable {
             case .textInstancedShader: return "Text Instanced shader"
             case .rasterShader: return "Raster shader"
             case .stretchShader: return "Stretch shader"
+            case .stretchInstancedShader: return "Stretch Instanced shader"
         }
     }
 
@@ -97,6 +99,7 @@ public enum Pipeline: String, CaseIterable {
             case .textInstancedShader: return "textInstancedVertexShader"
             case .rasterShader: return "rasterVertexShader"
             case .stretchShader: return "stretchVertexShader"
+            case .stretchInstancedShader: return "stretchInstancedVertexShader"
         }
     }
 
@@ -113,6 +116,7 @@ public enum Pipeline: String, CaseIterable {
             case .textInstancedShader: return "textInstancedFragmentShader"
             case .rasterShader: return "rasterFragmentShader"
             case .stretchShader: return "stretchFragmentShader"
+            case .stretchInstancedShader: return "stretchInstancedFragmentShader"
         }
     }
 

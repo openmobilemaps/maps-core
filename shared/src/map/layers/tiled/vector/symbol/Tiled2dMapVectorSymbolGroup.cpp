@@ -14,6 +14,7 @@
 #include "AlphaInstancedShaderInterface.h"
 #include "TextInstancedShaderInterface.h"
 #include "Quad2dInstancedInterface.h"
+#include "StretchInstancedShaderInterface.h"
 
 Tiled2dMapVectorSymbolGroup::Tiled2dMapVectorSymbolGroup(const std::weak_ptr<MapInterface> &mapInterface,
                                                          const WeakActor<Tiled2dMapVectorFontProvider> &fontProvider,
@@ -180,7 +181,8 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
     // TODO: make filtering based on collision at zoomLevel tileInfo.zoomIdentifier + 1
 
-
+    // TODO: group texts into fewer styles using styleHash like polygons
+    
     Tiled2dMapVectorSymbolObject::SymbolObjectInstanceCounts instanceCounts {0,0,0};
     int textStyleCount = 0;
     for(auto const object: symbolObjects){
@@ -191,7 +193,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
         if(counts.textCharacters != 0 && !fontResult) {
             fontResult = object->getFont();
         }
-        instanceCounts.strechedIcons += counts.strechedIcons;
+        instanceCounts.stretchedIcons += counts.stretchedIcons;
     }
 
     if (instanceCounts.icons != 0) {
@@ -204,6 +206,20 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
         iconScales.resize(instanceCounts.icons * 2, 0.0);
         iconPositions.resize(instanceCounts.icons * 2, 0.0);
         iconTextureCoordinates.resize(instanceCounts.icons * 4, 0.0);
+    }
+
+
+    if (instanceCounts.stretchedIcons != 0) {
+        stretchedInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createQuadStretchedInstanced(strongMapInterface->getShaderFactory()->createStretchInstancedShader()->asShaderProgramInterface());
+
+        stretchedInstancedObject->setInstanceCount(instanceCounts.stretchedIcons);
+
+        stretchedIconAlphas.resize(instanceCounts.stretchedIcons, 0.0);
+        stretchedIconRotations.resize(instanceCounts.stretchedIcons, 0.0);
+        stretchedIconScales.resize(instanceCounts.stretchedIcons * 2, 0.0);
+        stretchedIconPositions.resize(instanceCounts.stretchedIcons * 2, 0.0);
+        stretchedIconStretchInfos.resize(instanceCounts.stretchedIcons * 10, 1.0);
+        stretchedIconTextureCoordinates.resize(instanceCounts.stretchedIcons * 4, 0.0);
     }
 
     if (instanceCounts.textCharacters != 0) {
@@ -227,11 +243,13 @@ void Tiled2dMapVectorSymbolGroup::setupObjects() {
     const auto context = mapInterface.lock()->getRenderingContext();
 
     int iconOffset = 0;
+    int stretchedIconOffset = 0;
     int textOffset = 0;
     uint16_t textStyleOffset = 0;
 
     for(auto const object: symbolObjects) {
         object->setupIconProperties(iconPositions, iconTextureCoordinates, iconOffset, tileInfo.zoomIdentifier, spriteTexture, spriteData);
+        object->setupStretchIconProperties(stretchedIconPositions, stretchedIconTextureCoordinates, stretchedIconOffset, tileInfo.zoomIdentifier, spriteTexture, spriteData);
         object->setupTextProperties(textTextureCoordinates, textStyleIndices, textOffset, textStyleOffset, tileInfo.zoomIdentifier);
     }
 
@@ -241,6 +259,14 @@ void Tiled2dMapVectorSymbolGroup::setupObjects() {
         iconInstancedObject->setTextureCoordinates(SharedBytes((int64_t)iconTextureCoordinates.data(), (int32_t)iconAlphas.size(), 4 * (int32_t)sizeof(float)));
         iconInstancedObject->loadTexture(context, spriteTexture);
         iconInstancedObject->asGraphicsObject()->setup(context);
+    }
+
+    if (spriteTexture && spriteData && stretchedInstancedObject) {
+        stretchedInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)));
+        stretchedInstancedObject->setPositions(SharedBytes((int64_t)stretchedIconPositions.data(), (int32_t)stretchedIconAlphas.size(), 2 * (int32_t)sizeof(float)));
+        stretchedInstancedObject->setTextureCoordinates(SharedBytes((int64_t)stretchedIconTextureCoordinates.data(), (int32_t)stretchedIconAlphas.size(), 4 * (int32_t)sizeof(float)));
+        stretchedInstancedObject->loadTexture(context, spriteTexture);
+        stretchedInstancedObject->asGraphicsObject()->setup(context);
     }
 
     if (textInstancedObject) {
@@ -257,11 +283,13 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
     if (!symbolObjects.empty()) {
 
         int iconOffset = 0;
+        int stretchedIconOffset = 0;
         int textOffset = 0;
         uint16_t textStyleOffset = 0;
 
         for(auto const object: symbolObjects) {
             object->updateIconProperties(iconScales, iconRotations, iconAlphas, iconOffset, zoomIdentifier, scaleFactor);
+            object->updateStretchIconProperties(stretchedIconScales, stretchedIconRotations, stretchedIconAlphas, stretchedIconStretchInfos, stretchedIconOffset, zoomIdentifier, scaleFactor);
             object->updateTextProperties(textPositions, textScales, textRotations, textStyles, textOffset, textStyleOffset, zoomIdentifier, scaleFactor);
         }
 
@@ -269,6 +297,13 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
             iconInstancedObject->setAlphas(SharedBytes((int64_t)iconAlphas.data(), (int32_t)iconAlphas.size(), (int32_t)sizeof(float)));
             iconInstancedObject->setScales(SharedBytes((int64_t)iconScales.data(), (int32_t)iconAlphas.size(), 2 * (int32_t)sizeof(float)));
             iconInstancedObject->setRotations(SharedBytes((int64_t)iconRotations.data(), (int32_t)iconAlphas.size(), 1 * (int32_t)sizeof(float)));
+        }
+
+        if (stretchedInstancedObject) {
+            stretchedInstancedObject->setAlphas(SharedBytes((int64_t)stretchedIconAlphas.data(), (int32_t)stretchedIconAlphas.size(), (int32_t)sizeof(float)));
+            stretchedInstancedObject->setScales(SharedBytes((int64_t)stretchedIconScales.data(), (int32_t)stretchedIconAlphas.size(), 2 * (int32_t)sizeof(float)));
+            stretchedInstancedObject->setRotations(SharedBytes((int64_t)stretchedIconRotations.data(), (int32_t)stretchedIconAlphas.size(), 1 * (int32_t)sizeof(float)));
+            stretchedInstancedObject->setStretchInfos(SharedBytes((int64_t)stretchedIconStretchInfos.data(), (int32_t)stretchedIconAlphas.size(), 10 * (int32_t)sizeof(float)));
         }
 
         if (textInstancedObject) {

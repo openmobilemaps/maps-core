@@ -525,6 +525,10 @@ void Tiled2dMapVectorSourceSymbolDataManagerNew::pregenerateRenderPasses() {
                     if (iconObject) {
                         renderObjects.push_back(std::make_shared<RenderObject>(iconObject->asGraphicsObject()));
                     }
+                    auto stretchIconObject = group->stretchedInstancedObject;
+                    if (stretchIconObject) {
+                        renderObjects.push_back(std::make_shared<RenderObject>(stretchIconObject->asGraphicsObject()));
+                    }
                     auto textObject = group->textInstancedObject;
                     if (textObject) {
                         renderObjects.push_back(std::make_shared<RenderObject>(textObject->asGraphicsObject()));

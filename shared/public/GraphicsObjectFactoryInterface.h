@@ -12,6 +12,7 @@ class Polygon2dInterface;
 class PolygonGroup2dInterface;
 class Quad2dInstancedInterface;
 class Quad2dInterface;
+class Quad2dStretchedInstancedInterface;
 class TextInstancedInterface;
 class TextInterface;
 
@@ -26,6 +27,8 @@ public:
     virtual /*not-null*/ std::shared_ptr<Polygon2dInterface> createPolygon(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
 
     virtual /*not-null*/ std::shared_ptr<Quad2dInstancedInterface> createQuadInstanced(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
+
+    virtual /*not-null*/ std::shared_ptr<Quad2dStretchedInstancedInterface> createQuadStretchedInstanced(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
 
     virtual /*not-null*/ std::shared_ptr<LineGroup2dInterface> createLineGroup(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
 

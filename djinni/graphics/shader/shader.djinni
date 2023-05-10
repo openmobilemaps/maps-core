@@ -26,6 +26,8 @@ shader_factory_interface = interface +c +j +o {
 
     create_raster_shader() : raster_shader_interface;
     create_stretch_shader(): stretch_shader_interface;
+
+    create_stretch_instanced_shader(): stretch_instanced_shader_interface;
 }
 
 raster_shader_style = record {
@@ -80,6 +82,10 @@ stretch_shader_info = record {
 stretch_shader_interface = interface +c +o {
     update_alpha(value: f32);
     update_stretch_info(info: stretch_shader_info);
+    as_shader_program_interface() : shader_program_interface;
+}
+
+stretch_instanced_shader_interface = interface +c +o {
     as_shader_program_interface() : shader_program_interface;
 }
 

@@ -55,4 +55,8 @@ class ShaderFactory: MCShaderFactoryInterface {
     func createTextInstancedShader() -> MCTextInstancedShaderInterface? {
         TextInstancedShader()
     }
+
+    func createStretchInstancedShader() -> MCStretchInstancedShaderInterface? {
+        StretchInstancedShader()
+    }
 }

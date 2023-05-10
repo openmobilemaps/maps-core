@@ -53,6 +53,8 @@ public:
     std::shared_ptr<FontLoaderResult> getFont() {
         return fontResult;
     }
+    
+    RectCoord boundingBox;
 private:
 
     void updatePropertiesPoint(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor);
@@ -81,7 +83,7 @@ private:
     Coord referencePoint = Coord("",0,0,0);
     float referenceSize;
 
-    RectCoord boundingBox;
+
     std::vector<Vec2D> centerPositions;
 
     struct SplitInfo {

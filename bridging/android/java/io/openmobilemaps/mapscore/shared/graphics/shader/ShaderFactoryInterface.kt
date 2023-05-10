@@ -30,6 +30,8 @@ abstract class ShaderFactoryInterface {
 
     abstract fun createStretchShader(): StretchShaderInterface
 
+    abstract fun createStretchInstancedShader(): StretchInstancedShaderInterface
+
     private class CppProxy : ShaderFactoryInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -107,5 +109,11 @@ abstract class ShaderFactoryInterface {
             return native_createStretchShader(this.nativeRef)
         }
         private external fun native_createStretchShader(_nativeRef: Long): StretchShaderInterface
+
+        override fun createStretchInstancedShader(): StretchInstancedShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createStretchInstancedShader(this.nativeRef)
+        }
+        private external fun native_createStretchInstancedShader(_nativeRef: Long): StretchInstancedShaderInterface
     }
 }

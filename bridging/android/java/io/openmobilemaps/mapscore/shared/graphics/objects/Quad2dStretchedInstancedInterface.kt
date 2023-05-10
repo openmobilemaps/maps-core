@@ -6,36 +6,38 @@ package io.openmobilemaps.mapscore.shared.graphics.objects
 import com.snapchat.djinni.NativeObjectManager
 import java.util.concurrent.atomic.AtomicBoolean
 
-abstract class TextInstancedInterface {
+abstract class Quad2dStretchedInstancedInterface {
 
-    /** set the frame of the root object */
     abstract fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD)
 
     abstract fun setInstanceCount(count: Int)
 
-    /** 2 floats (x and y) for each instance */
     abstract fun setPositions(positions: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
-    /** 4 floats (x, y, width and height) for each instanced */
-    abstract fun setTextureCoordinates(textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
-
-    /** 2 floats for width and height scale for each instance */
     abstract fun setScales(scales: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
-    /** one float for each instance in degree */
     abstract fun setRotations(rotations: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
-    /** one uint16 for each instance */
-    abstract fun setStyleIndices(indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
+    abstract fun setAlphas(values: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
     /**
-     * a style contains of:
-     * color RGBA
-     * halo-color RGBA
-     * halo=width
-     * so a total of 9 floats for each style
+     * stretch infos consists of:
+     * scaleX: f32;
+     *  all stretch infos are between 0 and 1
+     * stretchX0Begin: f32;
+     * stretchX0End: f32;
+     * stretchX1Begin: f32;
+     * stretchX1End: f32;
+     * scaleY: f32;
+     * stretchY0Begin: f32;
+     * stretchY0End: f32;
+     * stretchY1Begin: f32;
+     * stretchY1End: f32;
+     * so a total of 10 floats for each instance
      */
-    abstract fun setStyles(values: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
+    abstract fun setStretchInfos(values: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
+
+    abstract fun setTextureCoordinates(textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
     abstract fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
 
@@ -43,7 +45,9 @@ abstract class TextInstancedInterface {
 
     abstract fun asGraphicsObject(): GraphicsObjectInterface
 
-    private class CppProxy : TextInstancedInterface {
+    abstract fun asMaskingObject(): MaskingObjectInterface
+
+    private class CppProxy : Quad2dStretchedInstancedInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 
@@ -73,12 +77,6 @@ abstract class TextInstancedInterface {
         }
         private external fun native_setPositions(_nativeRef: Long, positions: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
-        override fun setTextureCoordinates(textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
-            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setTextureCoordinates(this.nativeRef, textureCoordinates)
-        }
-        private external fun native_setTextureCoordinates(_nativeRef: Long, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
-
         override fun setScales(scales: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_setScales(this.nativeRef, scales)
@@ -91,17 +89,23 @@ abstract class TextInstancedInterface {
         }
         private external fun native_setRotations(_nativeRef: Long, rotations: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
-        override fun setStyleIndices(indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
+        override fun setAlphas(values: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setStyleIndices(this.nativeRef, indices)
+            native_setAlphas(this.nativeRef, values)
         }
-        private external fun native_setStyleIndices(_nativeRef: Long, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
+        private external fun native_setAlphas(_nativeRef: Long, values: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
-        override fun setStyles(values: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
+        override fun setStretchInfos(values: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setStyles(this.nativeRef, values)
+            native_setStretchInfos(this.nativeRef, values)
         }
-        private external fun native_setStyles(_nativeRef: Long, values: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
+        private external fun native_setStretchInfos(_nativeRef: Long, values: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
+
+        override fun setTextureCoordinates(textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setTextureCoordinates(this.nativeRef, textureCoordinates)
+        }
+        private external fun native_setTextureCoordinates(_nativeRef: Long, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
         override fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
@@ -120,5 +124,11 @@ abstract class TextInstancedInterface {
             return native_asGraphicsObject(this.nativeRef)
         }
         private external fun native_asGraphicsObject(_nativeRef: Long): GraphicsObjectInterface
+
+        override fun asMaskingObject(): MaskingObjectInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_asMaskingObject(this.nativeRef)
+        }
+        private external fun native_asMaskingObject(_nativeRef: Long): MaskingObjectInterface
     }
 }

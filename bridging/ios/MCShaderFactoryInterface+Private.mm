@@ -14,6 +14,7 @@
 #import "MCLineGroupShaderInterface+Private.h"
 #import "MCPolygonGroupShaderInterface+Private.h"
 #import "MCRasterShaderInterface+Private.h"
+#import "MCStretchInstancedShaderInterface+Private.h"
 #import "MCStretchShaderInterface+Private.h"
 #import "MCTextInstancedShaderInterface+Private.h"
 #import "MCTextShaderInterface+Private.h"
@@ -118,6 +119,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable id<MCStretchInstancedShaderInterface>)createStretchInstancedShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createStretchInstancedShader();
+        return ::djinni_generated::StretchInstancedShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class ShaderFactoryInterface::ObjcProxy final
@@ -202,6 +210,13 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createStretchShader];
             return ::djinni_generated::StretchShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::StretchInstancedShaderInterface> createStretchInstancedShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createStretchInstancedShader];
+            return ::djinni_generated::StretchInstancedShaderInterface::toCpp(objcpp_result_);
         }
     }
 };

@@ -6,39 +6,42 @@
 #import "MCSharedBytes.h"
 #import <Foundation/Foundation.h>
 @protocol MCGraphicsObjectInterface;
+@protocol MCMaskingObjectInterface;
 @protocol MCTextureHolderInterface;
 
 
-@protocol MCTextInstancedInterface
+@protocol MCQuad2dStretchedInstancedInterface
 
-/** set the frame of the root object */
 - (void)setFrame:(nonnull MCQuad2dD *)frame;
 
 - (void)setInstanceCount:(int32_t)count;
 
-/** 2 floats (x and y) for each instance */
 - (void)setPositions:(nonnull MCSharedBytes *)positions;
 
-/** 4 floats (x, y, width and height) for each instanced */
-- (void)setTextureCoordinates:(nonnull MCSharedBytes *)textureCoordinates;
-
-/** 2 floats for width and height scale for each instance */
 - (void)setScales:(nonnull MCSharedBytes *)scales;
 
-/** one float for each instance in degree */
 - (void)setRotations:(nonnull MCSharedBytes *)rotations;
 
-/** one uint16 for each instance */
-- (void)setStyleIndices:(nonnull MCSharedBytes *)indices;
+- (void)setAlphas:(nonnull MCSharedBytes *)values;
 
 /**
- * a style contains of:
- * color RGBA
- * halo-color RGBA
- * halo=width
- * so a total of 9 floats for each style
+ * stretch infos consists of:
+ * scaleX: f32;
+ *  all stretch infos are between 0 and 1
+ * stretchX0Begin: f32;
+ * stretchX0End: f32;
+ * stretchX1Begin: f32;
+ * stretchX1End: f32;
+ * scaleY: f32;
+ * stretchY0Begin: f32;
+ * stretchY0End: f32;
+ * stretchY1Begin: f32;
+ * stretchY1End: f32;
+ * so a total of 10 floats for each instance
  */
-- (void)setStyles:(nonnull MCSharedBytes *)values;
+- (void)setStretchInfos:(nonnull MCSharedBytes *)values;
+
+- (void)setTextureCoordinates:(nonnull MCSharedBytes *)textureCoordinates;
 
 - (void)loadTexture:(nullable id<MCRenderingContextInterface>)context
       textureHolder:(nullable id<MCTextureHolderInterface>)textureHolder;
@@ -46,5 +49,7 @@
 - (void)removeTexture;
 
 - (nullable id<MCGraphicsObjectInterface>)asGraphicsObject;
+
+- (nullable id<MCMaskingObjectInterface>)asMaskingObject;
 
 @end

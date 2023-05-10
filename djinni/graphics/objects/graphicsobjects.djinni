@@ -31,6 +31,7 @@ graphics_object_factory_interface = interface +c +j +o {
     create_polygon(shader: shader_program_interface) : polygon_2d_interface;
 
     create_quad_instanced(shader: shader_program_interface): quad_2d_instanced_interface;
+    create_quad_stretched_instanced(shader: shader_program_interface): quad_2d_stretched_instanced_interface;
     create_line_group(shader: shader_program_interface): line_group_2d_interface;
     create_polygon_group(shader: shader_program_interface): polygon_group_2d_interface;
 
@@ -58,6 +59,39 @@ quad_2d_instanced_interface = interface +c +j +o {
     set_scales(scales: shared_bytes);
     set_rotations(rotations: shared_bytes);
     set_alphas(values: shared_bytes);
+
+    set_texture_coordinates(textureCoordinates: shared_bytes);
+
+    load_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
+    remove_texture();
+
+    as_graphics_object(): graphics_object_interface;
+    as_masking_object(): masking_object_interface;
+}
+
+    quad_2d_stretched_instanced_interface = interface +c +j +o {
+    set_frame(frame: quad_2d_d);
+
+    set_instance_count(count: i32);
+    set_positions(positions: shared_bytes);
+    set_scales(scales: shared_bytes);
+    set_rotations(rotations: shared_bytes);
+    set_alphas(values: shared_bytes);
+
+    # stretch infos consists of:
+    # scaleX: f32;
+    #  all stretch infos are between 0 and 1
+    # stretchX0Begin: f32;
+    # stretchX0End: f32;
+    # stretchX1Begin: f32;
+    # stretchX1End: f32;
+    # scaleY: f32;
+    # stretchY0Begin: f32;
+    # stretchY0End: f32;
+    # stretchY1Begin: f32;
+    # stretchY1End: f32;
+    # so a total of 10 floats for each instance
+    set_stretch_infos(values: shared_bytes);
 
     set_texture_coordinates(textureCoordinates: shared_bytes);
 
@@ -141,7 +175,8 @@ text_instanced_interface = interface +c +j +o {
     # a style contains of:
     # color RGBA
     # halo-color RGBA
-    # so a total of 8 floats for each style
+    # halo=width
+    # so a total of 9 floats for each style
     set_styles(values: shared_bytes);
 
     load_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
