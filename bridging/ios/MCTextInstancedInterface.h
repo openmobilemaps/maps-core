@@ -20,7 +20,7 @@
 - (void)setPositions:(nonnull MCSharedBytes *)positions;
 
 /** 4 floats (x, y, width and height) for each instanced */
-- (void)setTexureCoordinates:(nonnull MCSharedBytes *)textureCoordinates;
+- (void)setTextureCoordinates:(nonnull MCSharedBytes *)textureCoordinates;
 
 /** 2 floats for width and height scale for each instance */
 - (void)setScales:(nonnull MCSharedBytes *)scales;

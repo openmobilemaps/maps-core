@@ -25,7 +25,7 @@ public:
     virtual void setPositions(const ::SharedBytes & positions) = 0;
 
     /** 4 floats (x, y, width and height) for each instanced */
-    virtual void setTexureCoordinates(const ::SharedBytes & textureCoordinates) = 0;
+    virtual void setTextureCoordinates(const ::SharedBytes & textureCoordinates) = 0;
 
     /** 2 floats for width and height scale for each instance */
     virtual void setScales(const ::SharedBytes & scales) = 0;

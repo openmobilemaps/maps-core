@@ -218,6 +218,10 @@ public:
         return iconImage ? iconImage->evaluateOr(context, defaultValue) : defaultValue;
     }
 
+    bool hasIconImagePotentially() {
+        return iconImage ? true : false;
+    }
+
     Anchor getIconAnchor(const EvaluationContext &context) {
         static const Anchor defaultValue = Anchor::CENTER;
         return iconAnchor ? iconAnchor->evaluateOr(context, defaultValue) : defaultValue;

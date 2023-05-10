@@ -15,5 +15,5 @@
 
 class Tiled2dMapVectorFontProvider {
 public:
-    virtual FontLoaderResult loadFont(const Font &font) = 0;
+    virtual std::shared_ptr<FontLoaderResult> loadFont(const std::string &fontName) = 0;
 };

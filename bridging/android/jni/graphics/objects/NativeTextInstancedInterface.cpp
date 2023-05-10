@@ -43,11 +43,11 @@ void NativeTextInstancedInterface::JavaProxy::setPositions(const ::SharedBytes &
                            ::djinni::get(::djinni_generated::NativeSharedBytes::fromCpp(jniEnv, c_positions)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
-void NativeTextInstancedInterface::JavaProxy::setTexureCoordinates(const ::SharedBytes & c_textureCoordinates) {
+void NativeTextInstancedInterface::JavaProxy::setTextureCoordinates(const ::SharedBytes & c_textureCoordinates) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeTextInstancedInterface>::get();
-    jniEnv->CallVoidMethod(Handle::get().get(), data.method_setTexureCoordinates,
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_setTextureCoordinates,
                            ::djinni::get(::djinni_generated::NativeSharedBytes::fromCpp(jniEnv, c_textureCoordinates)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
@@ -139,11 +139,11 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_TextInstancedInterface_00024CppProxy_native_1setTexureCoordinates(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeSharedBytes::JniType j_textureCoordinates)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_TextInstancedInterface_00024CppProxy_native_1setTextureCoordinates(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeSharedBytes::JniType j_textureCoordinates)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::TextInstancedInterface>(nativeRef);
-        ref->setTexureCoordinates(::djinni_generated::NativeSharedBytes::toCpp(jniEnv, j_textureCoordinates));
+        ref->setTextureCoordinates(::djinni_generated::NativeSharedBytes::toCpp(jniEnv, j_textureCoordinates));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

@@ -20,7 +20,7 @@ abstract class Quad2dInstancedInterface {
 
     abstract fun setAlphas(values: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
-    abstract fun setTexureCoordinates(textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
+    abstract fun setTextureCoordinates(textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
     abstract fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
 
@@ -78,11 +78,11 @@ abstract class Quad2dInstancedInterface {
         }
         private external fun native_setAlphas(_nativeRef: Long, values: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
-        override fun setTexureCoordinates(textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
+        override fun setTextureCoordinates(textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setTexureCoordinates(this.nativeRef, textureCoordinates)
+            native_setTextureCoordinates(this.nativeRef, textureCoordinates)
         }
-        private external fun native_setTexureCoordinates(_nativeRef: Long, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
+        private external fun native_setTextureCoordinates(_nativeRef: Long, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
         override fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

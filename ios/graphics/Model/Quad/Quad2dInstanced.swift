@@ -201,30 +201,32 @@ extension Quad2dInstanced: MCQuad2dInstancedInterface {
 
     func setPositions(_ positions: MCSharedBytes) {
         lock.withCritical {
-            positionsBuffer = device.makeBuffer(from: positions)
+            positionsBuffer.copyOrCreate(from: positions, device: device)
         }
     }
 
     func setScales(_ scales: MCSharedBytes) {
         lock.withCritical {
-            scalesBuffer = device.makeBuffer(from: scales)
+            scalesBuffer.copyOrCreate(from: scales, device: device)
         }
     }
 
     func setRotations(_ rotations: MCSharedBytes) {
         lock.withCritical {
-            rotationsBuffer = device.makeBuffer(from: rotations)
+            rotationsBuffer.copyOrCreate(from: rotations, device: device)
         }
     }
 
-    func setTexureCoordinates(_ textureCoordinates: MCSharedBytes) {
+    func setTextureCoordinates(_ textureCoordinates: MCSharedBytes) {
         lock.withCritical {
-            textureCoordinatesBuffer = device.makeBuffer(from: textureCoordinates)
+            textureCoordinatesBuffer.copyOrCreate(from: textureCoordinates, device: device)
         }
     }
 
     func setAlphas(_ values: MCSharedBytes) {
-        alphaBuffer = MetalContext.current.device.makeBuffer(from: values)
+        lock.withCritical {
+            alphaBuffer.copyOrCreate(from: values, device: device)
+        }
     }
 
     func loadTexture(_ context: MCRenderingContextInterface?, textureHolder: MCTextureHolderInterface?) {

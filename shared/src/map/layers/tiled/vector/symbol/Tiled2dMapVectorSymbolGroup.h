@@ -17,26 +17,72 @@
 #include "Tiled2dMapVectorTileInfo.h"
 #include "Tiled2dMapVectorSymbolSubLayerPositioningWrapper.h"
 #include "SymbolInfo.h"
+#include "SpriteData.h"
 #include "Actor.h"
+#include "TextInstancedInterface.h"
 
 class Tiled2dMapVectorSymbolGroup : public ActorObject {
 public:
     Tiled2dMapVectorSymbolGroup(const std::weak_ptr<MapInterface> &mapInterface,
-                                const Actor<Tiled2dMapVectorFontProvider> &fontProvider,
+                                const WeakActor<Tiled2dMapVectorFontProvider> &fontProvider,
                                 const Tiled2dMapTileInfo &tileInfo,
                                 const std::string &layerIdentifier,
-                                const std::shared_ptr<SymbolVectorLayerDescription> &layerDescription);
+                                const std::shared_ptr<SymbolVectorLayerDescription> &layerDescription,
+                                const std::shared_ptr<SpriteData> &spriteData,
+                                const std::shared_ptr<TextureHolderInterface> &spriteTexture);
 
-    bool initialize(const Tiled2dMapVectorTileInfo::FeatureTuple &feature);
+    bool initialize(const std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features);
+
+
+    void update(const double zoomIdentifier, const double scaleFactor);
+
+    void setupObjects();
 
 private:
+
     inline std::optional<Tiled2dMapVectorSymbolSubLayerPositioningWrapper> getPositioning(std::vector<::Coord>::const_iterator &iterator, const std::vector<::Coord> & collection);
 
-    std::shared_ptr<Tiled2dMapVectorSymbolObject> createSymbolObject(const Tiled2dMapTileInfo &tileInfo, const std::string &layerIdentifier, const std::shared_ptr<SymbolVectorLayerDescription> &description, const std::tuple<const FeatureContext, std::shared_ptr<SymbolInfo>> &symbolInfo);
+    inline std::shared_ptr<Tiled2dMapVectorSymbolObject> createSymbolObject(const Tiled2dMapTileInfo &tileInfo,
+                                                                     const std::string &layerIdentifier,
+                                                                     const std::shared_ptr<SymbolVectorLayerDescription> &description,
+                                                                     const FeatureContext &featureContext,
+                                                                     const std::vector<FormattedStringEntry> &text,
+                                                                     const std::string &fullText,
+                                                                     const ::Coord &coordinate,
+                                                                     const std::optional<std::vector<Coord>> &lineCoordinates,
+                                                                     const std::vector<std::string> &fontList,
+                                                                     const Anchor &textAnchor,
+                                                                     const std::optional<double> &angle,
+                                                                     const TextJustify &textJustify,
+                                                                     const TextSymbolPlacement &textSymbolPlacement);
+
+
+public:
+    std::shared_ptr<Quad2dInstancedInterface> iconInstancedObject;
+    std::shared_ptr<TextInstancedInterface> textInstancedObject;
+
 
     const std::weak_ptr<MapInterface> mapInterface;
     const Tiled2dMapTileInfo tileInfo;
     const std::string layerIdentifier;
     std::shared_ptr<SymbolVectorLayerDescription> layerDescription;
     std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>> symbolObjects;
+    const WeakActor<Tiled2dMapVectorFontProvider> fontProvider;
+
+    std::shared_ptr<TextureHolderInterface> spriteTexture;
+    std::shared_ptr<SpriteData> spriteData;
+
+    std::vector<float> iconPositions;
+    std::vector<float> iconScales;
+    std::vector<float> iconRotations;
+    std::vector<float> iconAlphas;
+    std::vector<float> iconTextureCoordinates;
+
+    std::shared_ptr<FontLoaderResult> fontResult;
+    std::vector<float> textPositions;
+    std::vector<float> textScales;
+    std::vector<float> textRotations;
+    std::vector<uint16_t> textStyleIndices;
+    std::vector<float> textStyles;
+    std::vector<float> textTextureCoordinates;
 };

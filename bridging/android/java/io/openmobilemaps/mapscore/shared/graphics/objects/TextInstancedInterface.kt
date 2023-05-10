@@ -17,7 +17,7 @@ abstract class TextInstancedInterface {
     abstract fun setPositions(positions: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
     /** 4 floats (x, y, width and height) for each instanced */
-    abstract fun setTexureCoordinates(textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
+    abstract fun setTextureCoordinates(textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
     /** 2 floats for width and height scale for each instance */
     abstract fun setScales(scales: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
@@ -72,11 +72,11 @@ abstract class TextInstancedInterface {
         }
         private external fun native_setPositions(_nativeRef: Long, positions: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
-        override fun setTexureCoordinates(textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
+        override fun setTextureCoordinates(textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setTexureCoordinates(this.nativeRef, textureCoordinates)
+            native_setTextureCoordinates(this.nativeRef, textureCoordinates)
         }
-        private external fun native_setTexureCoordinates(_nativeRef: Long, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
+        private external fun native_setTextureCoordinates(_nativeRef: Long, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
         override fun setScales(scales: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

@@ -12,11 +12,6 @@
 #include "DataStructures.metal"
 using namespace metal;
 
-struct TextInstanceStyle {
-    float4 color;
-    float4 haloColor;
-};
-
 struct TextInstancedVertexOut {
   float4 position [[ position ]];
   float2 uv;
@@ -60,27 +55,44 @@ textInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
     return out;
 }
 
+//struct TextInstanceStyle {
+//    float4 color;
+//    float4 haloColor;
+//    float haloWidth;
+//};
+
 fragment float4
 textInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
-                       constant TextInstanceStyle *styles [[buffer(1)]],
+                       constant float *styles [[buffer(1)]],
                        texture2d<float> texture0 [[ texture(0)]],
                        sampler textureSampler [[sampler(0)]])
 {
     const float2 uv = in.texureCoordinates.xy + in.texureCoordinates.zw * float2(in.uv.x, 1 - in.uv.y);
+    const int styleOffset = in.styleIndex * 9;
+    const float4 color = float4(styles[styleOffset + 0], styles[styleOffset + 1], styles[styleOffset + 2], styles[styleOffset + 3]);
+    const float4 haloColor = float4(styles[styleOffset + 4], styles[styleOffset + 5], styles[styleOffset + 6], styles[styleOffset + 7]);
+    const float haloWidth = styles[styleOffset + 8];
 
-    const TextInstanceStyle style = styles[in.styleIndex];
-
-    float4 dist = texture0.sample(textureSampler, uv);
-
-    if (style.color.a == 0 || (style.haloColor.a == 0.0 && dist.x <= 0.5)) {
+    if (color.a == 0 || haloColor.a == 0.0) {
         discard_fragment();
     }
 
-    float delta = 0.1;
-    float alpha = smoothstep(0.5 - delta, 0.5 + delta, dist.x);
+    float4 dist = texture0.sample(textureSampler, uv);
 
-    float4 mixed = mix(style.haloColor, style.color, alpha);
+    float median = max(min(dist.r, dist.g), min(max(dist.r, dist.g), dist.b)) / dist.a;
+    float w = fwidth(median);
+    float alpha = smoothstep(0.5 - w, 0.5 + w, median);
 
-    float a2 = smoothstep(0.40, 0.5, sqrt(dist.x));
-    return float4(mixed.r * a2, mixed.g * a2, mixed.b * a2, a2);
+    float4 mixed = mix(haloColor, color, alpha);
+
+    if(haloWidth > 0) {
+      float start = (0.0 + 0.5 * (1.0 - haloWidth)) - w;
+      float end = start + w;
+      float a2 = smoothstep(start, end, median) * color.a;
+      return float4(mixed.r * a2, mixed.g * a2, mixed.b * a2, a2);
+    } else {
+      return mixed;
+    }
+
+    return mixed;
 }

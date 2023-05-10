@@ -24,7 +24,7 @@
 
 - (void)setAlphas:(nonnull MCSharedBytes *)values;
 
-- (void)setTexureCoordinates:(nonnull MCSharedBytes *)textureCoordinates;
+- (void)setTextureCoordinates:(nonnull MCSharedBytes *)textureCoordinates;
 
 - (void)loadTexture:(nullable id<MCRenderingContextInterface>)context
       textureHolder:(nullable id<MCTextureHolderInterface>)textureHolder;

@@ -14,6 +14,7 @@
 #include "RenderPass.h"
 #include "Matrix.h"
 #include "StretchShaderInfo.h"
+#include "Quad2dInstancedInterface.h"
 
 Tiled2dMapVectorSourceSymbolDataManagerNew::Tiled2dMapVectorSourceSymbolDataManagerNew(const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
                                                                                  const std::shared_ptr<VectorMapDescription> &mapDescription,
@@ -42,7 +43,8 @@ void Tiled2dMapVectorSourceSymbolDataManagerNew::pause() {
     for (const auto &[tileInfo, tileSymbolGroups]: tileSymbolGroupMap) {
         for (const auto &[s, symbolGroups]: tileSymbolGroups) {
             for (const auto &symbolGroup: symbolGroups) {
-                symbolGroup->clear();
+//TODO: implement me
+//                symbolGroup->clear();
             }
         }
     }
@@ -58,7 +60,8 @@ void Tiled2dMapVectorSourceSymbolDataManagerNew::resume() {
     for (const auto &[tileInfo, tileSymbolGroups]: tileSymbolGroupMap) {
         for (const auto &[s, symbolGroups]: tileSymbolGroups) {
             for (const auto &symbolGroup: symbolGroups) {
-                symbolGroup->setup();
+//TODO: implement me
+//                symbolGroup->setup();
             }
         }
     }
@@ -119,7 +122,7 @@ void Tiled2dMapVectorSourceSymbolDataManagerNew::onVectorTilesUpdated(const std:
         return;
     }
 
-    std::vector<std::shared_ptr<Tiled2dMapVectorSymbolGroup>> toSetup;
+    std::vector<Actor<Tiled2dMapVectorSymbolGroup>> toSetup;
 
     for (const auto &tile : tilesToAdd) {
         tileSymbolGroupMap[tile->tileInfo] = {};
@@ -136,11 +139,11 @@ void Tiled2dMapVectorSourceSymbolDataManagerNew::onVectorTilesUpdated(const std:
             std::vector<std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper>> layerSymbols;
 
             if (dataIt != tile->layerFeatureMaps->end()) {
-                for (const auto feature: *dataIt->second) {
-                    // there is something in this layer to display
-                    const auto &newSymbolGroup = createSymbolGroup(tile->tileInfo, layerIdentifier, feature);
-                    tileSymbolGroupMap.at(tile->tileInfo)[layerIdentifier].push_back(newSymbolGroup);
-                    toSetup.push_back(newSymbolGroup);
+                // there is something in this layer to display
+                const auto &newSymbolGroup = createSymbolGroup(tile->tileInfo, layerIdentifier, dataIt->second);
+                if (newSymbolGroup) {
+                    tileSymbolGroupMap.at(tile->tileInfo)[layerIdentifier].push_back(*newSymbolGroup);
+                    toSetup.push_back(*newSymbolGroup);
                 }
             }
         }
@@ -158,17 +161,18 @@ void Tiled2dMapVectorSourceSymbolDataManagerNew::onVectorTilesUpdated(const std:
 }
 
 std::optional<Actor<Tiled2dMapVectorSymbolGroup>> Tiled2dMapVectorSourceSymbolDataManagerNew::createSymbolGroup(const Tiled2dMapTileInfo &tileInfo,
-                                                                                                                                 const std::string &layerIdentifier,
-                                                                                                                                 const std::shared_ptr<SymbolVectorLayerDescription> &layerDescription,
-                                                                                                                                 const Tiled2dMapVectorTileInfo::FeatureTuple &feature) {
+                                                                                                                   const std::string &layerIdentifier,
+                                                                                                                   const std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features) {
 
-    Actor<Tiled2dMapVectorSymbolGroup> symbolGroupActor = Actor<Tiled2dMapVectorSymbolGroup>(mapInterface, selfFontProvider, layerIdentifier, layerDescription);
-    bool success = symbolGroupActor.unsafe()->initialize(feature);
-    return success ? symbolGroupActor : std::nullopt;
+    const auto fontProvider = WeakActor(mailbox, weak_from_this()).weakActor<Tiled2dMapVectorFontProvider>();
+    auto mailbox = std::make_shared<Mailbox>(mapInterface.lock()->getScheduler());
+    Actor<Tiled2dMapVectorSymbolGroup> symbolGroupActor = Actor<Tiled2dMapVectorSymbolGroup>(mailbox, mapInterface, fontProvider, tileInfo, layerIdentifier, layerDescriptions.at(layerIdentifier), spriteData, spriteTexture);
+    bool success = symbolGroupActor.unsafe()->initialize(features);
+    return success ? symbolGroupActor : std::optional<Actor<Tiled2dMapVectorSymbolGroup>>();
 }
 
 
-void Tiled2dMapVectorSourceSymbolDataManagerNew::setupSymbolGroups(const std::vector<std::shared_ptr<Tiled2dMapVectorSymbolGroup>> toSetup, const std::unordered_set<Tiled2dMapTileInfo> tilesToRemove) {
+void Tiled2dMapVectorSourceSymbolDataManagerNew::setupSymbolGroups(const std::vector<Actor<Tiled2dMapVectorSymbolGroup>> toSetup, const std::unordered_set<Tiled2dMapTileInfo> tilesToRemove) {
     auto mapInterface = this->mapInterface.lock();
     auto context = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!context) { return; }
@@ -178,7 +182,8 @@ void Tiled2dMapVectorSourceSymbolDataManagerNew::setupSymbolGroups(const std::ve
         if (tileIt != tileSymbolGroupMap.end()) {
             for (const auto &[s, symbolGroups] : tileIt->second) {
                 for (const auto &symbolGroup : symbolGroups) {
-                    symbolGroup->clear();
+                    //TODO: implement me
+//                    symbolGroup->clear();
                 }
             }
             tileSymbolGroupMap.erase(tileIt);
@@ -186,19 +191,20 @@ void Tiled2dMapVectorSourceSymbolDataManagerNew::setupSymbolGroups(const std::ve
     }
 
     for (const auto &symbolGroup: toSetup) {
-        symbolGroup->setup();
+        //TODO: implement me
+//        symbolGroup->setup();
     }
     
     pregenerateRenderPasses();
 }
 
-FontLoaderResult Tiled2dMapVectorSourceSymbolDataManagerNew::loadFont(const Font &font) {
-    if (fontLoaderResults.count(font.name) > 0) {
-        return fontLoaderResults.at(font.name);
+std::shared_ptr<FontLoaderResult> Tiled2dMapVectorSourceSymbolDataManagerNew::loadFont(const std::string &fontName) {
+    if (fontLoaderResults.count(fontName) > 0) {
+        return fontLoaderResults.at(fontName);
     } else {
-        auto fontResult = fontLoader->loadFont(font);
-        if (fontResult.status == LoaderStatus::OK && fontResult.fontData && fontResult.imageData) {
-            fontLoaderResults.insert({font.name, fontResult});
+        auto fontResult = std::make_shared<FontLoaderResult>(fontLoader->loadFont(Font(fontName)));
+        if (fontResult->status == LoaderStatus::OK && fontResult->fontData && fontResult->imageData) {
+            fontLoaderResults.insert({fontName, fontResult});
         }
         return fontResult;
     }
@@ -250,14 +256,17 @@ void Tiled2dMapVectorSourceSymbolDataManagerNew::setupExistingSymbolWithSprite()
         return;
     }
 
-    for (const auto &[tile, symbolGroups]: tileSymbolGroupMap) {
-        for (const auto &[layerIdentifier, symbolGroup]: symbolGroups) {
-            symbolGroup->updateWithSprites(mapInterface->getRenderingContext(), spriteTexture);
+    for (const auto &[tile, symbolGroupMap]: tileSymbolGroupMap) {
+        for (const auto &[layerIdentifier, symbolGroups]: symbolGroupMap) {
+            for (auto &symbolGroup: symbolGroups) {
+                symbolGroup.unsafe()->setupObjects();
+            }
         }
     }
 }
 
 void Tiled2dMapVectorSourceSymbolDataManagerNew::collisionDetection(std::vector<std::string> layerIdentifiers, std::shared_ptr<std::vector<OBB2D>> placements) {
+    return;
     auto mapInterface = this->mapInterface.lock();
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
@@ -446,7 +455,7 @@ void Tiled2dMapVectorSourceSymbolDataManagerNew::collisionDetection(std::vector<
             if (objectsIt != symbolGroupsMap.end()) {
                 for (auto &symbolGroup: objectsIt->second) {
                     // TODO: collision detection in SymbolGroups (needs inter-group coordination)
-                    symbolGroup->collisionDetection();
+//                    symbolGroup->collisionDetection();
                 }
             }
         }
@@ -476,8 +485,10 @@ void Tiled2dMapVectorSourceSymbolDataManagerNew::update() {
                 continue;
             }
             for (auto &symbolGroup: symbolGroups) {
-                // TODO: Update symbol groups
-                symbolGroup.update();
+                symbolGroup.syncAccess([&zoomIdentifier, &scaleFactor](auto group){
+                    group->update(zoomIdentifier, scaleFactor);
+                });
+
             }
         }
     }
@@ -508,34 +519,45 @@ void Tiled2dMapVectorSourceSymbolDataManagerNew::pregenerateRenderPasses() {
             const auto index = layerNameIndexMap.at(layerIdentifier);
 
             std::vector<std::shared_ptr< ::RenderObjectInterface>> renderObjects;
-            for (const auto &wrapper: symbolGroups) {
-                // TODO: get renderpasses from SymbolGroups
-
-                if (
-#ifdef DRAW_COLLIDED_TEXT_BOUNDING_BOXES
-                    true
-#else
-                    !wrapper->collides
-#endif
-                    ) {
-
-                    if (wrapper->symbolGraphicsObject) {
-                        renderObjects.push_back(std::make_shared<RenderObject>(wrapper->symbolGraphicsObject, wrapper->iconModelMatrix));
+            for (const auto &group: symbolGroups) {
+                group.syncAccess([&renderObjects](auto group){
+                    auto iconObject = group->iconInstancedObject;
+                    if (iconObject) {
+                        renderObjects.push_back(std::make_shared<RenderObject>(iconObject->asGraphicsObject()));
                     }
-
-                    const auto & textObject = wrapper->textObject->getTextObject();
+                    auto textObject = group->textInstancedObject;
                     if (textObject) {
-                        renderObjects.push_back(std::make_shared<RenderObject>(textObject->asGraphicsObject(), wrapper->modelMatrix));
-#ifdef DRAW_TEXT_BOUNDING_BOXES
-                    renderObjects.push_back(std::make_shared<RenderObject>(wrapper->boundingBox->asGraphicsObject(), wrapper->modelMatrix));
-#endif
-                    } else {
-#ifdef DRAW_TEXT_BOUNDING_BOXES
-                    renderObjects.push_back(std::make_shared<RenderObject>(wrapper->boundingBox->asGraphicsObject(), wrapper->iconModelMatrix));
-#endif
+                        renderObjects.push_back(std::make_shared<RenderObject>(textObject->asGraphicsObject()));
                     }
-                }
+                });
             }
+//                // TODO: get renderpasses from SymbolGroups
+//
+//                if (
+//#ifdef DRAW_COLLIDED_TEXT_BOUNDING_BOXES
+//                    true
+//#else
+//                    !wrapper->collides
+//#endif
+//                    ) {
+//
+//                    if (wrapper->symbolGraphicsObject) {
+//                        renderObjects.push_back(std::make_shared<RenderObject>(wrapper->symbolGraphicsObject, wrapper->iconModelMatrix));
+//                    }
+//
+//                    const auto & textObject = wrapper->textObject->getTextObject();
+//                    if (textObject) {
+//                        renderObjects.push_back(std::make_shared<RenderObject>(textObject->asGraphicsObject(), wrapper->modelMatrix));
+//#ifdef DRAW_TEXT_BOUNDING_BOXES
+//                    renderObjects.push_back(std::make_shared<RenderObject>(wrapper->boundingBox->asGraphicsObject(), wrapper->modelMatrix));
+//#endif
+//                    } else {
+//#ifdef DRAW_TEXT_BOUNDING_BOXES
+//                    renderObjects.push_back(std::make_shared<RenderObject>(wrapper->boundingBox->asGraphicsObject(), wrapper->iconModelMatrix));
+//#endif
+//                    }
+//                }
+//            }
             renderPasses.emplace_back(index, std::make_shared<RenderPass>(RenderPassConfig(0), renderObjects));
         }
     }
@@ -575,12 +597,12 @@ bool Tiled2dMapVectorSourceSymbolDataManagerNew::onClickConfirmed(const std::uno
         for (const auto &[layerIdentifier, symbolGroups] : symbolGroupsMap) {
             for (const auto &symbolGroup : symbolGroups) {
                 // TODO: execute hit detection in the symbol groups
-                const auto &featureInfoCoordsTuple = symbolGroup->onClickConfirmed(tinyClickBox);
-                if (featureInfoCoordsTuple) {
-                    const &[featureInfo, coordinates] = *featureInfoCoordsTuple;
-                    selectionDelegate->didSelectFeature(featureInfo, symbolGroup->layerIdentifier, coordinates);
-                    return true;
-                }
+//                const auto &featureInfoCoordsTuple = symbolGroup->onClickConfirmed(tinyClickBox);
+//                if (featureInfoCoordsTuple) {
+//                    const &[featureInfo, coordinates] = *featureInfoCoordsTuple;
+//                    selectionDelegate->didSelectFeature(featureInfo, symbolGroup->layerIdentifier, coordinates);
+//                    return true;
+//                }
             }
         }
     }

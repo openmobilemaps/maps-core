@@ -168,41 +168,37 @@ extension TextInstanced: MCTextInstancedInterface {
 
     func setPositions(_ positions: MCSharedBytes) {
         lock.withCritical {
-            positionsBuffer = device.makeBuffer(from: positions)
+            positionsBuffer.copyOrCreate(from: positions, device: device)
         }
     }
 
-    func setTexureCoordinates(_ textureCoordinates: MCSharedBytes) {
+    func setTextureCoordinates(_ textureCoordinates: MCSharedBytes) {
         lock.withCritical {
-            textureCoordinatesBuffer = device.makeBuffer(from: textureCoordinates)
+            textureCoordinatesBuffer.copyOrCreate(from: textureCoordinates, device: device)
         }
     }
 
     func setScales(_ scales: MCSharedBytes) {
         lock.withCritical {
-            scalesBuffer = device.makeBuffer(from: scales)
+            scalesBuffer.copyOrCreate(from: scales, device: device)
         }
     }
 
     func setRotations(_ rotations: MCSharedBytes) {
         lock.withCritical {
-            rotationsBuffer = device.makeBuffer(from: rotations)
+            rotationsBuffer.copyOrCreate(from: rotations, device: device)
         }
     }
 
     func setStyleIndices(_ indices: MCSharedBytes) {
         lock.withCritical {
-            styleIndicesBuffer = device.makeBuffer(from: indices)
+            styleIndicesBuffer.copyOrCreate(from: indices, device: device)
         }
     }
 
     func setStyles(_ values: MCSharedBytes) {
         lock.withCritical {
-            if ((styleBuffer != nil) && styleBuffer?.length == Int(values.bytesPerElement * values.elementCount)) {
-                styleBuffer?.copyMemory(from: values)
-            } else {
-                styleBuffer = device.makeBuffer(from: values)
-            }
+            styleBuffer.copyOrCreate(from: values, device: device)
         }
     }
 

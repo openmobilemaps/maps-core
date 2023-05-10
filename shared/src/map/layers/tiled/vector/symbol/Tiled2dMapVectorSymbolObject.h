@@ -18,59 +18,77 @@
 #include "OBB2D.h"
 #include "MapInterface.h"
 #include "Tiled2dMapVectorFontProvider.h"
+#include "Tiled2dMapVectorSymbolLabelObject.h"
 #include "Actor.h"
+#include "SpriteData.h"
 #include "TextLayerObject.h" // TODO: remove usage of TextLayerObject (and File)
 
 class Tiled2dMapVectorSymbolObject {
 public:
     Tiled2dMapVectorSymbolObject(const std::weak_ptr<MapInterface> &mapInterface,
-                                 const Actor<Tiled2dMapVectorFontProvider> &fontProvider,
+                                 const WeakActor<Tiled2dMapVectorFontProvider> &fontProvider,
                                  const Tiled2dMapTileInfo &tileInfo,
                                  const std::string &layerIdentifier,
                                  const std::shared_ptr<SymbolVectorLayerDescription> &description,
-                                 const std::tuple<const FeatureContext, std::shared_ptr<SymbolInfo>> &symbolInfo);
+                                 const FeatureContext &featureContext,
+                                 const std::vector<FormattedStringEntry> &text,
+                                 const std::string &fullText,
+                                 const ::Coord &coordinate,
+                                 const std::optional<std::vector<Coord>> &lineCoordinates,
+                                 const std::vector<std::string> &fontList,
+                                 const Anchor &textAnchor,
+                                 const std::optional<double> &angle,
+                                 const TextJustify &textJustify,
+                                 const TextSymbolPlacement &textSymbolPlacement);
+
+    struct SymbolObjectInstanceCounts { int icons, textCharacters, strechedIcons; };
+
+    const SymbolObjectInstanceCounts getInstanceCounts() const;
+
+    void setupIconProperties(std::vector<float> &positions, std::vector<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData);
+    void updateIconProperties(std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, int &countOffset, const double zoomIdentifier, const double scaleFactor);
+
+    void setupTextProperties(std::vector<float> &textureCoordinates, std::vector<uint16_t> &styleIndices, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier);
+    void updateTextProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor);
 
     // TODO: Provide collision computation interface. But handle pre-computation/caching in SymbolGroup
     void setCollisionAt(float zoom, bool isCollision);
 
     bool hasCollision(float zoom);
 
-    FeatureContext featureContext;
+    std::shared_ptr<FontLoaderResult> getFont() {
+        if (labelObject) {
+            return labelObject->getFont();
+        }
+        return nullptr;
+    }
+
+private:
+
+    const FeatureContext featureContext;
     std::shared_ptr<SymbolInfo> textInfo;
     int64_t symbolSortKey;
 
     bool isInteractable = false;
 
-    // TODO: Move to instanced objects in SymbolGroup
-    std::shared_ptr<TextLayerObject> textObject;
-    std::shared_ptr<Quad2dInterface> symbolObject;
-    std::shared_ptr<GraphicsObjectInterface> symbolGraphicsObject;
-    std::shared_ptr<StretchShaderInterface> symbolShader;
-
     OBB2D orientedBoundingBox = OBB2D(Quad2dD(Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0)));
+
     bool collides = true;
+
     std::map<float, bool> collisionMap = {};
 
     std::vector<float> modelMatrix;
     std::vector<float> iconModelMatrix;
 
+    const std::weak_ptr<MapInterface> mapInterface;
 
-#ifdef DRAW_TEXT_BOUNDING_BOXES
-    std::shared_ptr<ColorShaderInterface> boundingBoxShader = nullptr;
-    std::shared_ptr<Quad2dInterface> boundingBox = nullptr;
-#endif
+    const std::shared_ptr<SymbolVectorLayerDescription> description;
 
-#ifdef DRAW_TEXT_LINES
-    std::shared_ptr<Line2dLayerObject> lineObject = nullptr;
-#endif
+    const ::Coord coordinate;
 
-    struct ObjectCompare {
-        bool operator() (std::shared_ptr<Tiled2dMapVectorSymbolObject> a, std::shared_ptr<Tiled2dMapVectorSymbolObject> b) const {
-            if (a->symbolSortKey == b->symbolSortKey) {
-                return a < b;
-            }
-            return a->symbolSortKey < b->symbolSortKey;
-        }
-    };
+    SymbolObjectInstanceCounts instanceCounts = {0,0,0};
 
+    Vec2D spriteSize = Vec2D(0.0, 0.0);
+
+    std::shared_ptr<Tiled2dMapVectorSymbolLabelObject> labelObject;
 };

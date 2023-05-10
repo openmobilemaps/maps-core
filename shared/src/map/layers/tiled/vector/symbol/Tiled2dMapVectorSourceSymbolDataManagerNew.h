@@ -19,6 +19,7 @@
 #include "SpriteData.h"
 #include "FontLoaderResult.h"
 #include "Tiled2dMapVectorSymbolGroup.h"
+#include "TextInstancedInterface.h"
 #include "Tiled2dMapVectorFontProvider.h"
 
 class Tiled2dMapVectorSourceSymbolDataManagerNew:
@@ -65,24 +66,23 @@ public:
 
     void clearTouch() override;
 
-    FontLoaderResult loadFont(const Font &font) override;
+    std::shared_ptr<FontLoaderResult> loadFont(const std::string &fontName) override;
 
 private:
 
-    std::optional<Actor<Tiled2dMapVectorSymbolGroup>> createSymbolGroup(const Tiled2dMapTileInfo &tileInfo, const std::string &layerIdentifier, const std::shared_ptr<SymbolVectorLayerDescription> &layerDescription, const Tiled2dMapVectorTileInfo::FeatureTuple &feature);
+    std::optional<Actor<Tiled2dMapVectorSymbolGroup>> createSymbolGroup(const Tiled2dMapTileInfo &tileInfo, const std::string &layerIdentifier, const std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features);
 
-    void setupSymbolGroups(const std::vector<std::shared_ptr<Tiled2dMapVectorSymbolGroup>> toSetup, const std::unordered_set<Tiled2dMapTileInfo> tilesToRemove);
-
+    void setupSymbolGroups(const std::vector<Actor<Tiled2dMapVectorSymbolGroup>> toSetup, const std::unordered_set<Tiled2dMapTileInfo> tilesToRemove);
 
     void setupExistingSymbolWithSprite();
 
     void pregenerateRenderPasses();
     
-    std::unordered_map<std::string, FontLoaderResult> fontLoaderResults;
+    std::unordered_map<std::string, std::shared_ptr<FontLoaderResult>> fontLoaderResults;
 
     inline Quad2dD getProjectedFrame(const RectCoord &boundingBox, const float &padding, const std::vector<float> &modelMatrix);
 
-    std::unordered_map<Tiled2dMapTileInfo, std::unordered_map<std::string, std::vector<std::shared_ptr<Tiled2dMapVectorSymbolGroup>>>> tileSymbolGroupMap;
+    std::unordered_map<Tiled2dMapTileInfo, std::unordered_map<std::string, std::vector<Actor<Tiled2dMapVectorSymbolGroup>>>> tileSymbolGroupMap;
 
     std::unordered_map<std::string, std::shared_ptr<SymbolVectorLayerDescription>> layerDescriptions;
 

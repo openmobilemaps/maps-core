@@ -59,7 +59,7 @@ quad_2d_instanced_interface = interface +c +j +o {
     set_rotations(rotations: shared_bytes);
     set_alphas(values: shared_bytes);
 
-    set_texure_coordinates(textureCoordinates: shared_bytes);
+    set_texture_coordinates(textureCoordinates: shared_bytes);
 
     load_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
     remove_texture();
@@ -127,7 +127,7 @@ text_instanced_interface = interface +c +j +o {
     set_positions(positions: shared_bytes);
 
     # 4 floats (x, y, width and height) for each instanced
-    set_texure_coordinates(textureCoordinates: shared_bytes);
+    set_texture_coordinates(textureCoordinates: shared_bytes);
 
     # 2 floats for width and height scale for each instance
     set_scales(scales: shared_bytes);

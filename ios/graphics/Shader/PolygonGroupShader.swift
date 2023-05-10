@@ -14,17 +14,11 @@ import Metal
 import UIKit
 
 class PolygonGroupShader: BaseShader {
-    private var polygonStyleBuffer: MTLBuffer
-
-    static let styleBufferSize: Int = 32
-    static let polygonStyleSize : Int = 5
+    private var polygonStyleBuffer: MTLBuffer?
 
     private var pipeline: MTLRenderPipelineState?
 
-    override init() {
-        guard let buffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<Float>.stride * Self.styleBufferSize * Self.polygonStyleSize, options: []) else { fatalError("Could not create buffer") }
-        polygonStyleBuffer = buffer
-    }
+    override init() {}
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
@@ -44,9 +38,7 @@ class PolygonGroupShader: BaseShader {
 
 extension PolygonGroupShader: MCPolygonGroupShaderInterface {
     func setStyles(_ styles: MCSharedBytes) {
-        guard styles.elementCount < Self.styleBufferSize else { fatalError("polygon style error exceeds buffer size") }
-
-        polygonStyleBuffer.copyMemory(from: styles)
+        polygonStyleBuffer.copyOrCreate(from: styles, device: MetalContext.current.device)
     }
 
     func asShaderProgram() -> MCShaderProgramInterface? {

@@ -31,7 +31,7 @@ public:
 
     static /*not-null*/ std::shared_ptr<MapInterface> createWithOpenGl(const MapConfig & mapConfig, float pixelDensity);
 
-    virtual void setCallbackHandler(const /*not-null*/ std::shared_ptr<MapCallbackInterface> & callbackInterface) = 0;
+    virtual void setCallbackHandler(const /*nullable*/ std::shared_ptr<MapCallbackInterface> & callbackInterface) = 0;
 
     virtual /*not-null*/ std::shared_ptr<::GraphicsObjectFactoryInterface> getGraphicsObjectFactory() = 0;
 

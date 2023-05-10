@@ -186,7 +186,7 @@ void TextLayerObject::layoutPoint(float scale, bool updateObject) {
         std::vector<size_t> lineEndIndices;
 
         for(auto& i : splittedTextInfo) {
-            if(i.glyphIndex > 0) {
+            if(i.glyphIndex >= 0) {
                 auto &d = fontData.glyphs[i.glyphIndex];
                 auto size = Vec2D(d.boundingBoxSize.x * fontSize * i.scale, d.boundingBoxSize.y * fontSize * i.scale);
                 auto bearing = Vec2D(d.bearing.x * fontSize * i.scale, d.bearing.y * fontSize * i.scale);
@@ -200,8 +200,51 @@ void TextLayerObject::layoutPoint(float scale, bool updateObject) {
 
                     Quad2dD quad = Quad2dD(Vec2D(x, yh), Vec2D(xw, yh), Vec2D(xw, y), Vec2D(x, y));
 
-                if (!box) {
-                    box = BoundingBox(Coord(referencePoint.systemIdentifier, quad.topLeft.x, quad.topLeft.y, referencePoint.z));
+                    if (!box) {
+                        box = BoundingBox(Coord(referencePoint.systemIdentifier, quad.topLeft.x, quad.topLeft.y, referencePoint.z));
+                    }
+
+                    box->addPoint(quad.topLeft.x, quad.topLeft.y, referencePoint.z);
+                    box->addPoint(quad.topRight.x, quad.topRight.y, referencePoint.z);
+                    box->addPoint(quad.bottomLeft.x, quad.bottomLeft.y, referencePoint.z);
+                    box->addPoint(quad.bottomRight.x, quad.bottomRight.y, referencePoint.z);
+
+                    vertices.push_back(quad.bottomLeft.x);
+                    vertices.push_back(quad.bottomLeft.y);
+                    vertices.push_back(d.uv.bottomLeft.x);
+                    vertices.push_back(d.uv.bottomLeft.y);
+                    vertices.push_back(0.0);
+                    vertices.push_back(0.0);
+
+                    vertices.push_back(quad.topLeft.x);
+                    vertices.push_back(quad.topLeft.y);
+                    vertices.push_back(d.uv.topLeft.x);
+                    vertices.push_back(d.uv.topLeft.y);
+                    vertices.push_back(0.0);
+                    vertices.push_back(0.0);
+
+                    vertices.push_back(quad.topRight.x);
+                    vertices.push_back(quad.topRight.y);
+                    vertices.push_back(d.uv.topRight.x);
+                    vertices.push_back(d.uv.topRight.y);
+                    vertices.push_back(0.0);
+                    vertices.push_back(0.0);
+
+                    vertices.push_back(quad.bottomRight.x);
+                    vertices.push_back(quad.bottomRight.y);
+                    vertices.push_back(d.uv.bottomRight.x);
+                    vertices.push_back(d.uv.bottomRight.y);
+                    vertices.push_back(0.0);
+                    vertices.push_back(0.0);
+
+                    indices.push_back(0 + indicesStart);
+                    indices.push_back(1 + indicesStart);
+                    indices.push_back(2 + indicesStart);
+                    indices.push_back(0 + indicesStart);
+                    indices.push_back(2 + indicesStart);
+                    indices.push_back(3 + indicesStart);
+
+                    indicesStart += 4;
                 }
 
                 pen.x += advance.x * (1.0 + letterSpacing);
@@ -366,6 +409,8 @@ float TextLayerObject::layoutLine(float scale, bool updateObject) {
     int indicesStart = 0;
     int index = 0;
     double lastAngle = 0.0;
+
+    double lineCenteringParameter = -fontData.info.base / fontData.info.lineHeight;
 
     for(auto &i : splittedTextInfo) {
         if(i.glyphIndex < 0) {
