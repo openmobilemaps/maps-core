@@ -144,14 +144,18 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & viewMa
         const double boundsTop = layerBounds.topLeft.y;
         const Coord topLeft = Coord(layerSystemId, candidate.x * tileWidthAdj + boundsLeft, candidate.y * tileHeightAdj + boundsTop, focusPointAltitude);
 
-        const Coord topRight = Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y, focusPointAltitude);
-        const Coord bottomLeft = Coord(layerSystemId, topLeft.x, topLeft.y + tileHeightAdj, focusPointAltitude);
-        const Coord bottomRight = Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y + tileHeightAdj, focusPointAltitude);
+        const double heightRange = 500;
+
+        const Coord topRight = Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y, focusPointAltitude - heightRange / 2.0);
+        const Coord bottomLeft = Coord(layerSystemId, topLeft.x, topLeft.y + tileHeightAdj, focusPointAltitude- heightRange / 2.0);
+        const Coord bottomRight = Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y + tileHeightAdj, focusPointAltitude- heightRange / 2.0);
+        const Coord centerPeak = Coord(layerSystemId, topLeft.x + tileWidthAdj * 0.5, topLeft.y + tileHeightAdj * 0.5, focusPointAltitude + heightRange / 2.0);
 
         auto topLeftView = transformToView(topLeft, viewMatrix);
         auto topRightView = transformToView(topRight, viewMatrix);
         auto bottomLeftView = transformToView(bottomLeft, viewMatrix);
         auto bottomRightView = transformToView(bottomRight, viewMatrix);
+        auto centerPeakView = transformToView(centerPeak, viewMatrix);
 
         float centerZ = (topLeftView.z + topRightView.z + bottomLeftView.z + bottomRightView.z) / 4.0;
 
@@ -165,17 +169,23 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & viewMa
             float bottomLeftVA = 180.0 / M_PI * atan2(bottomLeftView.y, -bottomLeftView.z);
             float bottomRightHA = 180.0 / M_PI * atan2(bottomRightView.x, -bottomRightView.z);
             float bottomRightVA = 180.0 / M_PI * atan2(bottomRightView.y, -bottomRightView.z);
+            float centerPeakHA = 180.0 / M_PI * atan2(centerPeakView.x, -centerPeakView.z);
+            float centerPeakVA = 180.0 / M_PI * atan2(centerPeakView.y, -centerPeakView.z);
 
-            if (topLeftVA < -verticalFov / 2.0 && topRightVA < -verticalFov / 2.0 && bottomLeftVA < -verticalFov / 2.0 && bottomRightVA < -verticalFov / 2.0) {
+            // 0.5: half of view on each side of center
+            // 1.02: increase angle with padding
+            float fovFactor = 0.5 * 1.02;
+
+            if (topLeftVA < -verticalFov * fovFactor && topRightVA < -verticalFov * fovFactor && bottomLeftVA < -verticalFov * fovFactor && bottomRightVA < -verticalFov * fovFactor && centerPeakVA < -verticalFov * fovFactor) {
                 continue;
             }
-            if (topLeftHA < -horizontalFov / 2.0 && topRightHA < -horizontalFov / 2.0 && bottomLeftHA < -horizontalFov / 2.0 && bottomRightHA < -horizontalFov / 2.0) {
+            if (topLeftHA < -horizontalFov * fovFactor && topRightHA < -horizontalFov * fovFactor && bottomLeftHA < -horizontalFov * fovFactor && bottomRightHA < -horizontalFov * fovFactor && centerPeakHA < -horizontalFov * fovFactor) {
                 continue;
             }
-            if (topLeftVA > verticalFov / 2.0 && topRightVA > verticalFov / 2.0 && bottomLeftVA > verticalFov / 2.0 && bottomRightVA > verticalFov / 2.0) {
+            if (topLeftVA > verticalFov * fovFactor && topRightVA > verticalFov * fovFactor && bottomLeftVA > verticalFov * fovFactor && bottomRightVA > verticalFov * fovFactor && centerPeakVA > verticalFov * fovFactor) {
                 continue;
             }
-            if (topLeftHA > horizontalFov / 2.0 && topRightHA > horizontalFov / 2.0 && bottomLeftHA > horizontalFov / 2.0 && bottomRightHA > horizontalFov / 2.0) {
+            if (topLeftHA > horizontalFov * fovFactor && topRightHA > horizontalFov * fovFactor && bottomLeftHA > horizontalFov * fovFactor && bottomRightHA > horizontalFov * fovFactor && centerPeakHA > horizontalFov * fovFactor) {
                 continue;
             }
         }
@@ -275,7 +285,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & viewMa
 
             const RectCoord rect(topLeft, bottomRight);
             int t = 0;
-            double priority = 1.0 / centerZ;
+            double priority = -centerZ * 100000;
             visibleTilesVec.push_back(std::make_pair(candidate, PrioritizedTiled2dMapTileInfo(
                                                                                               Tiled2dMapTileInfo(rect, candidate.x, candidate.y, t, zoomLevelInfo.zoomLevelIdentifier, zoomLevelInfo.zoom),
                                                                                               priority)));
@@ -338,12 +348,6 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & viewMa
                     if (candidatesSet.find(cNext) == candidatesSet.end()) {
                         candidates.push(cNext);
                         candidatesSet.insert(cNext);
-                        const RectCoord rect(topLeft, bottomRight);
-                        int t = 0;
-                        double priority = 1.0 / centerZ;
-//                        parentTiles[cNext] = PrioritizedTiled2dMapTileInfo(
-//                                                                           Tiled2dMapTileInfo(rect, candidate.x, candidate.y, t, zoomLevelInfo.zoomLevelIdentifier, zoomLevelInfo.zoom),
-//                                                                           priority);
                     }
 
 //                    printf("%d|%d|%d, ", cNext.levelIndex, cNext.x, cNext.y);
@@ -366,7 +370,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & viewMa
 
 
 
-    VisibleTilesLayer nextVisibleTiles(-1);
+//    VisibleTilesLayer nextVisibleTiles(-1);
 
     std::vector<VisibleTilesLayer> layers;
 
@@ -406,7 +410,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & viewMa
 
                 const RectCoord rect(topLeft, bottomRight);
                 int t = 0;
-                double priority = 0.3;
+                double priority = previousLayerOffset * 100000 + tile.second.priority;
                 nextVisibleTilesVec.push_back(std::make_pair(parent, PrioritizedTiled2dMapTileInfo(
                                                                                               Tiled2dMapTileInfo(rect, parent.x, parent.y, t, zoomLevelInfo.zoomLevelIdentifier, zoomLevelInfo.zoom),
                                                                                                    priority)));
@@ -908,6 +912,9 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
                 if(found) { break; }
             }
             if (!found) {
+                tileWrapper.isVisible = false;
+                it = decltype(it){currentTiles.erase( std::next(it).base() )};
+                it = std::prev(it);
                 continue;
             }
 

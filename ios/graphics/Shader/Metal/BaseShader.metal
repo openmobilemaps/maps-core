@@ -51,11 +51,12 @@ shadedFragmentShader(VertexOut in [[stage_in]],
 
   float r = 1.0;
   if (in.uv.x < 0.01 || in.uv.y < 0.01 || in.uv.x > 0.99 || in.uv.y > 0.99) {
-    r = 1.5;
+//    r = 1.5;
   }
 
   float s = in.n.x * 0.5 + in.n.y * 0.5 + in.n.z * 0.3;
-  s = s * 0.2 + 0.8;
+//  s = s * 0.5 + 0.5;
+  s = 1.0;
 
   float a = color.a * alpha;
 

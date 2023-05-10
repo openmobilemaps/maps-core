@@ -116,7 +116,7 @@ final class Polygon3d: BaseGraphicsObject {
 
         encoder.setTessellationFactorBuffer(tessellationFactorBuffer, offset: 0, instanceStride: 0)
 
-        encoder.drawIndexedPatches(numberOfPatchControlPoints: 3, patchStart: 0, patchCount: self.indicesCount / 3, patchIndexBuffer: nil, patchIndexBufferOffset: 0, controlPointIndexBuffer: indicesBuffer, controlPointIndexBufferOffset: 0, instanceCount: 1, baseInstance: 0)
+        encoder.drawIndexedPatches(numberOfPatchControlPoints: 3, patchStart: 0, patchCount: indicesBuffer.length / 6, patchIndexBuffer: nil, patchIndexBufferOffset: 0, controlPointIndexBuffer: indicesBuffer, controlPointIndexBufferOffset: 0, instanceCount: 1, baseInstance: 0)
 
     }
 
@@ -254,6 +254,7 @@ extension Polygon3d: MCPolygon3dInterface {
             self.indicesCount = Int(indices.elementCount)
             self.verticesBuffer = verticesBuffer
             self.indicesBuffer = indicesBuffer
+            assert(self.indicesCount == indicesBuffer.length / 2)
         }
 
         createTessellationFactors(patchCount: Int(indices.elementCount))

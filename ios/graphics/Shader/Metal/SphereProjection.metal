@@ -113,7 +113,7 @@ sphereProjectionVertexShader(const patch_control_point<VertexIn> patch [[stage_i
 
 
   float4 position = mvpMatrix * float4(pos3d, 1.0);
-    float s = 0.2;
+    float s = 0.5;
     float z = position.z / position.w * s;
     if (z > s) {
         z = s;
