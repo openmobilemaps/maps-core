@@ -27,7 +27,7 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                                                            const std::optional<double> &angle,
                                                            const TextJustify &textJustify,
                                                            const TextSymbolPlacement &textSymbolPlacement) :
-    description(description), coordinate(coordinate), mapInterface(mapInterface) {
+    description(description), coordinate(coordinate), mapInterface(mapInterface), featureContext(featureContext) {
     auto strongMapInterface = mapInterface.lock();
     auto objectFactory = strongMapInterface ? strongMapInterface->getGraphicsObjectFactory() : nullptr;
     auto camera = strongMapInterface ? strongMapInterface->getCamera() : nullptr;
@@ -243,16 +243,16 @@ void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(std::vector<float>
     countOffset += instanceCounts.stretchedIcons;
 }
 
-void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, std::vector<float> &stretchInfos, int &countOffset, const double zoomIdentifier, const double scaleFactor) {
+void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, std::vector<float> &stretchInfos, int &countOffset, const double zoomIdentifier, const double scaleFactor) {
     if (instanceCounts.stretchedIcons == 0) {
         return;
     }
 
-
     auto strongMapInterface = mapInterface.lock();
+    auto converter = strongMapInterface ? strongMapInterface->getCoordinateConverterHelper() : nullptr;
     auto camera = strongMapInterface ? strongMapInterface->getCamera() : nullptr;
 
-    if (!camera) {
+    if (!converter || !camera) {
         return;
     }
 
@@ -263,36 +263,49 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     //TODO: rotations
     rotations[countOffset] = 0.0;
 
-    auto iconSize = description->style.getIconSize(evalContext) * scaleFactor;
-    scales[2 * countOffset] = stretchSpriteSize.x * iconSize;
-    scales[2 * countOffset + 1] = stretchSpriteSize.y * iconSize;
-
     auto padding = description->style.getIconTextFitPadding(evalContext);
 
     const double densityOffset = (camera->getScreenDensityPpi() / 160.0) / stretchSpriteInfo->pixelRatio;
 
-    const float topPadding = padding[0] * stretchSpriteInfo->pixelRatio * densityOffset;
-    const float rightPadding = padding[1] * stretchSpriteInfo->pixelRatio * densityOffset;
-    const float bottomPadding = padding[2] * stretchSpriteInfo->pixelRatio * densityOffset;
-    const float leftPadding = padding[3] * stretchSpriteInfo->pixelRatio * densityOffset;
+    auto spriteWidth = stretchSpriteInfo->width * scaleFactor;
+    auto spriteHeight = stretchSpriteInfo->height * scaleFactor;
 
-    auto textWidth = (labelObject->boundingBox.bottomRight.x - labelObject->boundingBox.topLeft.x) / scaleFactor;
+    const float topPadding = padding[0] * stretchSpriteInfo->pixelRatio * densityOffset * scaleFactor;
+    const float rightPadding = padding[1] * stretchSpriteInfo->pixelRatio * densityOffset * scaleFactor;
+    const float bottomPadding = padding[2] * stretchSpriteInfo->pixelRatio * densityOffset * scaleFactor;
+    const float leftPadding = padding[3] * stretchSpriteInfo->pixelRatio * densityOffset * scaleFactor;
+
+    auto iconSize = description->style.getIconSize(evalContext);
+
+    auto textWidth = (labelObject->boundingBox.bottomRight.x - labelObject->boundingBox.topLeft.x);
     textWidth += (leftPadding + rightPadding);
 
-    auto textHeight = (labelObject->boundingBox.bottomRight.y - labelObject->boundingBox.topLeft.y) / scaleFactor;
+    auto textHeight = (labelObject->boundingBox.bottomRight.y - labelObject->boundingBox.topLeft.y);
     textHeight+= (topPadding + bottomPadding);
 
-    auto scaleX = std::max(1.0, textWidth / scales[2 * countOffset]);
-    auto scaleY = std::max(1.0, textHeight / scales[2 * countOffset + 1]);
+    auto scaleX = std::max(1.0, textWidth / (spriteWidth * iconSize));
+    auto scaleY = std::max(1.0, textHeight / (spriteHeight * iconSize));
 
     auto textFit = description->style.getIconTextFit(evalContext);
 
     if (textFit == IconTextFit::WIDTH || textFit == IconTextFit::BOTH) {
-        scales[2 * countOffset] *= scaleX;
+        spriteWidth *= scaleX;
     }
     if (textFit == IconTextFit::HEIGHT || textFit == IconTextFit::BOTH) {
-        scales[2 * countOffset + 1] *= scaleY;
+        spriteHeight *= scaleY;
     }
+
+    scales[2 * countOffset] = spriteWidth;
+    scales[2 * countOffset + 1] = spriteHeight;
+
+    Coord renderPos = converter->convertToRenderSystem(coordinate);
+
+    auto iconOffset = description->style.getIconOffset(evalContext);
+    renderPos.y -= iconOffset.y * scaleFactor;
+    renderPos.x += iconOffset.x * scaleFactor;
+
+    positions[2 * countOffset] = renderPos.x - leftPadding * 0.5 + rightPadding * 0.5;
+    positions[2 * countOffset + 1] = renderPos.y - topPadding * 0.5 + bottomPadding * 0.5;
 
     const int infoOffset = countOffset * 10;
 

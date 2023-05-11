@@ -289,7 +289,7 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
 
         for(auto const object: symbolObjects) {
             object->updateIconProperties(iconScales, iconRotations, iconAlphas, iconOffset, zoomIdentifier, scaleFactor);
-            object->updateStretchIconProperties(stretchedIconScales, stretchedIconRotations, stretchedIconAlphas, stretchedIconStretchInfos, stretchedIconOffset, zoomIdentifier, scaleFactor);
+            object->updateStretchIconProperties(stretchedIconPositions,stretchedIconScales, stretchedIconRotations, stretchedIconAlphas, stretchedIconStretchInfos, stretchedIconOffset, zoomIdentifier, scaleFactor);
             object->updateTextProperties(textPositions, textScales, textRotations, textStyles, textOffset, textStyleOffset, zoomIdentifier, scaleFactor);
         }
 
@@ -300,6 +300,7 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
         }
 
         if (stretchedInstancedObject) {
+            stretchedInstancedObject->setPositions(SharedBytes((int64_t)stretchedIconPositions.data(), (int32_t)stretchedIconAlphas.size(), 2 * (int32_t)sizeof(float)));
             stretchedInstancedObject->setAlphas(SharedBytes((int64_t)stretchedIconAlphas.data(), (int32_t)stretchedIconAlphas.size(), (int32_t)sizeof(float)));
             stretchedInstancedObject->setScales(SharedBytes((int64_t)stretchedIconScales.data(), (int32_t)stretchedIconAlphas.size(), 2 * (int32_t)sizeof(float)));
             stretchedInstancedObject->setRotations(SharedBytes((int64_t)stretchedIconRotations.data(), (int32_t)stretchedIconAlphas.size(), 1 * (int32_t)sizeof(float)));

@@ -109,9 +109,8 @@ stretchInstancedFragmentShader(StretchedInstancedVertexOut in [[stage_in]],
     }
 
     // remap final normalized uv to sprite atlas coordinates
-    texCoordNorm = texCoordNorm * in.texureCoordinates.zw + in.texureCoordinates.xy;
 
-    const float4 color = texture0.sample(textureSampler, texCoordNorm);
+    const float4 color = texture0.sample(textureSampler, in.texureCoordinates.xy + in.texureCoordinates.zw * float2(texCoordNorm.x, 1 - texCoordNorm.y));
     const float a = color.a * in.alpha;
     if (a == 0) {
         discard_fragment();

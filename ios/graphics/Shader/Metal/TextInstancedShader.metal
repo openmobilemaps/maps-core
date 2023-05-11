@@ -73,7 +73,7 @@ textInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
     const float4 haloColor = float4(styles[styleOffset + 4], styles[styleOffset + 5], styles[styleOffset + 6], styles[styleOffset + 7]);
     const float haloWidth = styles[styleOffset + 8];
 
-    if (color.a == 0 || haloColor.a == 0.0) {
+    if (color.a == 0 && haloColor.a == 0.0) {
         discard_fragment();
     }
 
