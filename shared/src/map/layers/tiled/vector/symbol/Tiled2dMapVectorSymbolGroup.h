@@ -21,6 +21,9 @@
 #include "Actor.h"
 #include "TextInstancedInterface.h"
 #include "Quad2dStretchedInstancedInterface.h"
+#include "PolygonGroup2dLayerObject.h"
+
+#define DRAW_TEXT_BOUNDING_BOX
 
 class Tiled2dMapVectorSymbolGroup : public ActorObject {
 public:
@@ -38,7 +41,12 @@ public:
     void update(const double zoomIdentifier, const double scaleFactor);
 
     void setupObjects();
+    
+    std::shared_ptr<Quad2dInstancedInterface> iconInstancedObject;
+    std::shared_ptr<Quad2dStretchedInstancedInterface> stretchedInstancedObject;
+    std::shared_ptr<TextInstancedInterface> textInstancedObject;
 
+    std::shared_ptr<PolygonGroup2dLayerObject> boundingBoxLayerObject;
 private:
 
     inline std::optional<Tiled2dMapVectorSymbolSubLayerPositioningWrapper> getPositioning(std::vector<::Coord>::const_iterator &iterator, const std::vector<::Coord> & collection);
@@ -57,18 +65,15 @@ private:
                                                                      const TextJustify &textJustify,
                                                                      const TextSymbolPlacement &textSymbolPlacement);
 
+private:
+    std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>> symbolObjects;
 
-public:
-    std::shared_ptr<Quad2dInstancedInterface> iconInstancedObject;
-    std::shared_ptr<Quad2dStretchedInstancedInterface> stretchedInstancedObject;
-    std::shared_ptr<TextInstancedInterface> textInstancedObject;
 
 
     const std::weak_ptr<MapInterface> mapInterface;
     const Tiled2dMapTileInfo tileInfo;
     const std::string layerIdentifier;
     std::shared_ptr<SymbolVectorLayerDescription> layerDescription;
-    std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>> symbolObjects;
     const WeakActor<Tiled2dMapVectorFontProvider> fontProvider;
 
     std::shared_ptr<TextureHolderInterface> spriteTexture;
@@ -94,5 +99,4 @@ public:
     std::vector<float> stretchedIconAlphas;
     std::vector<float> stretchedIconStretchInfos;
     std::vector<float> stretchedIconTextureCoordinates;
-
 };

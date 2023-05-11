@@ -238,7 +238,6 @@ Quad2dD Tiled2dMapVectorSourceSymbolDataManagerNew::getProjectedFrame(const Rect
     return Quad2dD(Vec2D(topLeftProj[0], topLeftProj[1]), Vec2D(topRightProj[0], topRightProj[1]), Vec2D(bottomRightProj[0], bottomRightProj[1]), Vec2D(bottomLeftProj[0], bottomLeftProj[1]));
 }
 
-
 void Tiled2dMapVectorSourceSymbolDataManagerNew::setSprites(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) {
     this->spriteData = spriteData;
     this->spriteTexture = spriteTexture;
@@ -532,6 +531,11 @@ void Tiled2dMapVectorSourceSymbolDataManagerNew::pregenerateRenderPasses() {
                     auto textObject = group->textInstancedObject;
                     if (textObject) {
                         renderObjects.push_back(std::make_shared<RenderObject>(textObject->asGraphicsObject()));
+                    }
+
+                    auto boundingBoxLayerObject = group->boundingBoxLayerObject;
+                    if (boundingBoxLayerObject) {
+                        renderObjects.push_back(std::make_shared<RenderObject>(boundingBoxLayerObject->getPolygonObject()));
                     }
                 });
             }

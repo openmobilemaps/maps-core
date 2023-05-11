@@ -66,11 +66,14 @@ public:
         return nullptr;
     }
 
-private:
-
-    const FeatureContext featureContext;
-    std::shared_ptr<SymbolInfo> textInfo;
     int64_t symbolSortKey;
+
+
+    std::shared_ptr<Tiled2dMapVectorSymbolLabelObject> labelObject;
+private:
+    const FeatureContext featureContext;
+
+    std::shared_ptr<SymbolInfo> textInfo;
 
     bool isInteractable = false;
 
@@ -95,6 +98,4 @@ private:
 
     Vec2D stretchSpriteSize = Vec2D(0.0, 0.0);
     std::optional<SpriteDesc> stretchSpriteInfo;
-
-    std::shared_ptr<Tiled2dMapVectorSymbolLabelObject> labelObject;
 };

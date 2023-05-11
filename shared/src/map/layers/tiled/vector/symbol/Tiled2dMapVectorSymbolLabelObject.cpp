@@ -200,56 +200,61 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
 }
 
 void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor) {
-
+    
     auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
 
+    if (description->style.getTextOpacity(evalContext) == 0) {
+        boundingBox = RectCoord(referencePoint, referencePoint);
+        return;
+    }
+    
     float fontSize = scaleFactor * description->style.getTextSize(evalContext);
-
+    
     auto pen = Vec2D(0.0, 0.0);
-
+    
     std::optional<BoundingBox> box = std::nullopt;
-
+    
     auto numGlyphs = splittedTextInfo.size();
-
+    
     centerPositions.clear();
     centerPositions.reserve(characterCount);
-
+    
     std::vector<size_t> lineEndIndices;
-
+    
     for(auto& i : splittedTextInfo) {
         if(i.glyphIndex >= 0) {
             auto &d = fontResult->fontData->glyphs[i.glyphIndex];
             auto size = Vec2D(d.boundingBoxSize.x * fontSize * i.scale, d.boundingBoxSize.y * fontSize * i.scale);
             auto bearing = Vec2D(d.bearing.x * fontSize * i.scale, d.bearing.y * fontSize * i.scale);
             auto advance = Vec2D(d.advance.x * fontSize * i.scale, d.advance.y * fontSize * i.scale);
-
+            
             if(d.charCode != " ") {
                 auto x = pen.x + bearing.x;
                 auto y = pen.y - bearing.y;
                 auto xw = x + size.x;
                 auto yh = y + size.y;
-
+                
                 Quad2dD quad = Quad2dD(Vec2D(x, yh), Vec2D(xw, yh), Vec2D(xw, y), Vec2D(x, y));
-
+                
                 if (!box) {
-                    box = BoundingBox(Coord(referencePoint.systemIdentifier, quad.topLeft.x, quad.topLeft.y, referencePoint.z));
+                    box = BoundingBox(referencePoint.systemIdentifier);
                 }
-
+                
                 box->addPoint(quad.topLeft.x, quad.topLeft.y, referencePoint.z);
                 box->addPoint(quad.topRight.x, quad.topRight.y, referencePoint.z);
                 box->addPoint(quad.bottomLeft.x, quad.bottomLeft.y, referencePoint.z);
                 box->addPoint(quad.bottomRight.x, quad.bottomRight.y, referencePoint.z);
-
+                
                 scales[2 * (countOffset + centerPositions.size()) + 0] = size.x;
                 scales[2 * (countOffset + centerPositions.size()) + 1] = size.y;
                 rotations[countOffset + centerPositions.size()] = 0.0;
-
+                
                 centerPositions.push_back(Vec2D(x + size.x / 2,
-                                                 y + size.y / 2));
-
-
+                                                y + size.y / 2));
+                
+                
             }
-
+            
             pen.x += advance.x * (1.0 + letterSpacing);
         } else if(i.glyphIndex == -1) {
             lineEndIndices.push_back(centerPositions.size() - 1);
@@ -257,14 +262,14 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
             pen.y += fontSize;
         }
     }
-
+    
     lineEndIndices.push_back(centerPositions.size() - 1);
-
+    
     if (!centerPositions.empty()) {
         Vec2D min(box->min.x, box->min.y);
         Vec2D max(box->max.x, box->max.y);
         Vec2D size((max.x - min.x), (max.y - min.y));
-
+        
         switch (textJustify) {
             case TextJustify::LEFT:
                 //Nothing to do here
@@ -272,29 +277,29 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
             case TextJustify::RIGHT:
             case TextJustify::CENTER: {
                 size_t lineStart = 0;
-
+                
                 for (auto const lineEndIndex: lineEndIndices) {
                     double lineWidth = centerPositions[lineEndIndex].x - centerPositions[lineStart].x;
                     auto factor = textJustify == TextJustify::CENTER ? 2.0 : 1.0;
                     double delta = (size.x - lineWidth) / factor;
-
+                    
                     for(size_t i = lineStart; i <= lineEndIndex; i++) {
                         centerPositions[i].x += delta;
                     }
-
+                    
                     lineStart = lineEndIndex + 1;
                 }
-
+                
                 break;
             }
         }
-
+        
         double offsetMultiplier = fontSize;
-
+        
         Vec2D textOffset(offset.x * offsetMultiplier, offset.y * offsetMultiplier);
-
+        
         Vec2D offset(0.0, 0.0);
-
+        
         switch (textAnchor) {
             case Anchor::CENTER:
                 offset.x -= size.x / 2.0 - textOffset.x;
@@ -335,24 +340,38 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
             default:
                 break;
         }
-
+        
         box = BoundingBox(referencePoint.systemIdentifier);
-
+        
         auto dx = referencePoint.x + offset.x - min.x;
         auto dy = referencePoint.y + offset.y - min.y;
-
+        
         assert(centerPositions.size() == characterCount);
-
+        
         for(auto const centerPosition: centerPositions) {
             positions[2 * countOffset + 0] = centerPosition.x + dx;
             positions[2 * countOffset + 1] = centerPosition.y + dy;
 
-            box->addPoint(centerPosition.x, centerPosition.y, referencePoint.z);
+            const float scaleXH = scales[2 * countOffset + 0] / 2.0;
+            const float scaleYH = scales[2 * countOffset + 1] / 2.0;
 
+            box->addPoint(dx + centerPosition.x - scaleXH, dy + centerPosition.y - scaleYH, referencePoint.z);
+            box->addPoint(dx + centerPosition.x + scaleXH, dy + centerPosition.y - scaleYH, referencePoint.z);
+            box->addPoint(dx + centerPosition.x - scaleXH, dy + centerPosition.y + scaleYH, referencePoint.z);
+            box->addPoint(dx + centerPosition.x + scaleXH, dy + centerPosition.y + scaleYH, referencePoint.z);
+            
             countOffset += 1;
         }
     }
     boundingBox = box ? RectCoord(box->min, box->max) : RectCoord(referencePoint, referencePoint);
+    
+    const float padding = description->style.getTextPadding(evalContext) * scaleFactor;
+
+    boundingBox.topLeft.x -= padding;
+    boundingBox.topLeft.y -= padding;
+
+    boundingBox.bottomRight.x += padding;
+    boundingBox.bottomRight.y += padding;
 }
 
 double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor) {
@@ -473,13 +492,20 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
                                                  (quad.bottomLeft.y + quad.topLeft.y ) / 2));
             }
 
+
+            if (!box) {
+                box = BoundingBox(Coord(referencePoint.systemIdentifier, quad.topLeft.x, quad.topRight.y, referencePoint.z));
+            }
+
+            box->addPoint(quad.topLeft.x, quad.topLeft.y, referencePoint.z);
+            box->addPoint(quad.topRight.x, quad.topRight.y, referencePoint.z);
+            box->addPoint(quad.bottomLeft.x, quad.bottomLeft.y, referencePoint.z);
+            box->addPoint(quad.bottomRight.x, quad.bottomRight.y, referencePoint.z);
         }
     }
 
     int countBefore = countOffset;
     if (!centerPositions.empty()) {
-        box = std::nullopt;
-
         assert(centerPositions.size() == characterCount);
 
         for (auto const &centerPosition: centerPositions) {
@@ -487,20 +513,23 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             positions[(2 * countOffset) + 1] = centerPosition.y;
 
             countOffset += 1;
-
-            if (!box) {
-                box = BoundingBox(Coord(referencePoint.systemIdentifier, centerPosition.x, centerPosition.y, referencePoint.z));
-            }
-
-            box->addPoint(centerPosition.x, centerPosition.y, referencePoint.z);
         }
     } else {
+        box = std::nullopt;
         countOffset += characterCount;
     }
 
     assert(countOffset == countBefore + characterCount);
 
-    boundingBox = box ? RectCoord(box->min, box->max) : RectCoord(referencePoint, referencePoint);
+    if (box) {
+        const float padding = description->style.getTextPadding(evalContext) * scaleFactor;
+        const auto min = box->min;
+        const auto max = box->max;
+        boundingBox = RectCoord(Coord(min.systemIdentifier, min.x - padding, min.y - padding, min.z),
+                                Coord(min.systemIdentifier, max.x + padding, max.y + padding, min.z));
+    } else {
+        boundingBox = RectCoord(referencePoint, referencePoint);
+    }
 
     return (double)rotated / (double)total;
 }

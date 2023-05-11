@@ -41,8 +41,6 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
     const double tilePixelFactor = (0.0254 / camera->getScreenDensityPpi()) * tileInfo.zoomLevel;
 
-//    std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>> symbolObjects;
-
     for (auto const &[context, geometry]: *features) {
 
         const auto evalContext = EvaluationContext(tileInfo.zoomIdentifier, context);
@@ -179,6 +177,11 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
         return false;
     }
 
+    std::sort(symbolObjects.begin(), symbolObjects.end(),
+              [](const auto &a, const auto &b) -> bool {
+        return a->symbolSortKey < b->symbolSortKey;
+    });
+
     // TODO: make filtering based on collision at zoomLevel tileInfo.zoomIdentifier + 1
 
     // TODO: group texts into fewer styles using styleHash like polygons
@@ -234,6 +237,17 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
         textTextureCoordinates.resize(instanceCounts.textCharacters * 4, 0.0);
     }
 
+#ifdef DRAW_TEXT_BOUNDING_BOX
+    if (instanceCounts.icons + instanceCounts.stretchedIcons + instanceCounts.textCharacters > 0) {
+        auto shader = strongMapInterface->getShaderFactory()->createPolygonGroupShader();
+        auto object = strongMapInterface->getGraphicsObjectFactory()->createPolygonGroup(shader->asShaderProgramInterface());
+        boundingBoxLayerObject = std::make_shared<PolygonGroup2dLayerObject>(strongMapInterface->getCoordinateConverterHelper(), object, shader);
+        boundingBoxLayerObject->setStyles({
+            PolygonStyle(Color(1,0,0,0.25), 1.0)
+        });
+    }
+#endif
+
     setupObjects();
 
     return true;
@@ -252,6 +266,12 @@ void Tiled2dMapVectorSymbolGroup::setupObjects() {
         object->setupStretchIconProperties(stretchedIconPositions, stretchedIconTextureCoordinates, stretchedIconOffset, tileInfo.zoomIdentifier, spriteTexture, spriteData);
         object->setupTextProperties(textTextureCoordinates, textStyleIndices, textOffset, textStyleOffset, tileInfo.zoomIdentifier);
     }
+
+#ifdef DRAW_TEXT_BOUNDING_BOX
+    if (boundingBoxLayerObject) {
+        boundingBoxLayerObject->getPolygonObject()->setup(mapInterface.lock()->getRenderingContext());
+    }
+#endif
 
     if (spriteTexture && spriteData && iconInstancedObject) {
         iconInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)));
@@ -313,6 +333,41 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
             textInstancedObject->setScales(SharedBytes((int64_t)textScales.data(), (int32_t)textRotations.size(), 2 * (int32_t)sizeof(float)));
             textInstancedObject->setRotations(SharedBytes((int64_t)textRotations.data(), (int32_t)textRotations.size(), 1 * (int32_t)sizeof(float)));
         }
+
+#ifdef DRAW_TEXT_BOUNDING_BOX
+
+        if (boundingBoxLayerObject) {
+            std::vector<std::tuple<std::vector<::Coord>, int>> vertices;
+            std::vector<int32_t> indices;
+
+            int32_t currentVerticeIndex = 0;
+            for (const auto &object: symbolObjects) {
+                if (object->labelObject && !object->labelObject->boundingBox.topLeft.systemIdentifier.empty()) {
+                    vertices.push_back({
+                        std::vector<::Coord> {
+                            object->labelObject->boundingBox.topLeft,
+                            Coord(object->labelObject->boundingBox.topLeft.systemIdentifier, object->labelObject->boundingBox.bottomRight.x, object->labelObject->boundingBox.topLeft.y, 0),
+                            object->labelObject->boundingBox.bottomRight,
+                            Coord(object->labelObject->boundingBox.topLeft.systemIdentifier, object->labelObject->boundingBox.topLeft.x, object->labelObject->boundingBox.bottomRight.y, 0)
+                        },
+                        0
+                    });
+                    indices.push_back(currentVerticeIndex);
+                    indices.push_back(currentVerticeIndex + 1);
+                    indices.push_back(currentVerticeIndex + 2);
+
+
+                    indices.push_back(currentVerticeIndex);
+                    indices.push_back(currentVerticeIndex + 3);
+                    indices.push_back(currentVerticeIndex + 2);
+
+                    currentVerticeIndex += 4;
+                }
+            }
+
+            boundingBoxLayerObject->setVertices(vertices, indices);
+        }
+#endif
     }
 }
 

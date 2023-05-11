@@ -87,7 +87,7 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
 
     }
 
-    // expose int64_t const symbolSortKey = description->style.getSymbolSortKey(evalContext);
+    symbolSortKey = description->style.getSymbolSortKey(evalContext);
 }
 
 void Tiled2dMapVectorSymbolObject::setCollisionAt(float zoom, bool isCollision) {
@@ -176,12 +176,21 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &scal
         return;
     }
 
+    auto strongMapInterface = mapInterface.lock();
+    auto converter = strongMapInterface ? strongMapInterface->getCoordinateConverterHelper() : nullptr;
+    auto camera = strongMapInterface ? strongMapInterface->getCamera() : nullptr;
+
     const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
 
     alphas[countOffset] = description->style.getIconOpacity(evalContext);
 
-    //TODO: rotations
-    rotations[countOffset] = 0.0;
+    const auto iconAlignment = description->style.getIconRotationAlignment(evalContext);
+
+    if (iconAlignment == SymbolAlignment::MAP) {
+        rotations[countOffset] = -description->style.getIconRotate(evalContext);
+    } else {
+        rotations[countOffset] = camera->getRotation();
+    }
 
     auto iconSize = description->style.getIconSize(evalContext) * scaleFactor;
     scales[2 * countOffset] = spriteSize.x * iconSize;
@@ -275,13 +284,10 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     const float bottomPadding = padding[2] * stretchSpriteInfo->pixelRatio * densityOffset * scaleFactor;
     const float leftPadding = padding[3] * stretchSpriteInfo->pixelRatio * densityOffset * scaleFactor;
 
-    auto iconSize = description->style.getIconSize(evalContext);
+    const auto iconSize = description->style.getIconSize(evalContext);
 
-    auto textWidth = (labelObject->boundingBox.bottomRight.x - labelObject->boundingBox.topLeft.x);
-    textWidth += (leftPadding + rightPadding);
-
-    auto textHeight = (labelObject->boundingBox.bottomRight.y - labelObject->boundingBox.topLeft.y);
-    textHeight+= (topPadding + bottomPadding);
+    const auto textWidth = (labelObject->boundingBox.bottomRight.x - labelObject->boundingBox.topLeft.x) + (leftPadding + rightPadding);
+    const auto textHeight = (labelObject->boundingBox.bottomRight.y - labelObject->boundingBox.topLeft.y) + (topPadding + bottomPadding);
 
     auto scaleX = std::max(1.0, textWidth / (spriteWidth * iconSize));
     auto scaleY = std::max(1.0, textHeight / (spriteHeight * iconSize));
@@ -304,8 +310,8 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     renderPos.y -= iconOffset.y * scaleFactor;
     renderPos.x += iconOffset.x * scaleFactor;
 
-    positions[2 * countOffset] = renderPos.x - leftPadding * 0.5 + rightPadding * 0.5;
-    positions[2 * countOffset + 1] = renderPos.y - topPadding * 0.5 + bottomPadding * 0.5;
+    positions[2 * countOffset] = renderPos.x - leftPadding * 0.25 + rightPadding * 0.25;
+    positions[2 * countOffset + 1] = renderPos.y + topPadding * 0.25 + bottomPadding * 0.25;
 
     const int infoOffset = countOffset * 10;
 
