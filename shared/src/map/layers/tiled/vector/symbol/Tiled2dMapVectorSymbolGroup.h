@@ -23,7 +23,7 @@
 #include "Quad2dStretchedInstancedInterface.h"
 #include "PolygonGroup2dLayerObject.h"
 
-#define DRAW_TEXT_BOUNDING_BOX
+//#define DRAW_TEXT_BOUNDING_BOX
 
 class Tiled2dMapVectorSymbolGroup : public ActorObject {
 public:
