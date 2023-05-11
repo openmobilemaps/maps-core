@@ -27,7 +27,9 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                                                            const std::optional<double> &angle,
                                                            const TextJustify &textJustify,
                                                            const TextSymbolPlacement &textSymbolPlacement) :
-    description(description), coordinate(coordinate), mapInterface(mapInterface), featureContext(featureContext) {
+    description(description), coordinate(coordinate), mapInterface(mapInterface), featureContext(featureContext),
+    iconBoundingBox(Coord("", 0.0, 0.0, 0.0), Coord("", 0.0, 0.0, 0.0)),
+    stretchIconBoundingBox(Coord("", 0.0, 0.0, 0.0), Coord("", 0.0, 0.0, 0.0)){
     auto strongMapInterface = mapInterface.lock();
     auto objectFactory = strongMapInterface ? strongMapInterface->getGraphicsObjectFactory() : nullptr;
     auto camera = strongMapInterface ? strongMapInterface->getCamera() : nullptr;
@@ -42,6 +44,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
 
     const bool hasIcon = description->style.hasIconImagePotentially();
+
+    renderCoordinate = converter->convertToRenderSystem(coordinate);
 
     if (hasIcon) {
         if (description->style.getIconTextFit(evalContext) == IconTextFit::NONE) {
@@ -135,14 +139,12 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
 
     const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
 
-    Coord renderPos = converter->convertToRenderSystem(coordinate);
-
     auto iconOffset = description->style.getIconOffset(evalContext);
-    renderPos.y -= iconOffset.y;
-    renderPos.x += iconOffset.x;
+    renderCoordinate.y -= iconOffset.y;
+    renderCoordinate.x += iconOffset.x;
 
-    positions[2 * countOffset] = renderPos.x;
-    positions[2 * countOffset + 1] = renderPos.y;
+    positions[2 * countOffset] = renderCoordinate.x;
+    positions[2 * countOffset + 1] = renderCoordinate.y;
 
     auto iconImage = description->style.getIconImage(evalContext);
 
@@ -196,6 +198,10 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &scal
     scales[2 * countOffset] = spriteSize.x * iconSize;
     scales[2 * countOffset + 1] = spriteSize.y * iconSize;
 
+    iconBoundingBox = RectCoord(Coord(renderCoordinate.systemIdentifier, renderCoordinate.x - spriteSize.x * iconSize * 0.5,
+                                                                           renderCoordinate.y - spriteSize.y * iconSize * 0.5, renderCoordinate.z),
+                                Coord(renderCoordinate.systemIdentifier,  renderCoordinate.x + spriteSize.x * iconSize * 0.5,
+                                                                           renderCoordinate.y + spriteSize.y * iconSize * 0.5, renderCoordinate.z));
     countOffset += instanceCounts.icons;
 }
 
@@ -215,14 +221,12 @@ void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(std::vector<float>
 
     const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
 
-    Coord renderPos = converter->convertToRenderSystem(coordinate);
-
     auto iconOffset = description->style.getIconOffset(evalContext);
-    renderPos.y -= iconOffset.y;
-    renderPos.x += iconOffset.x;
+    renderCoordinate.y -= iconOffset.y;
+    renderCoordinate.x += iconOffset.x;
 
-    positions[2 * countOffset] = renderPos.x;
-    positions[2 * countOffset + 1] = renderPos.y;
+    positions[2 * countOffset] = renderCoordinate.x;
+    positions[2 * countOffset + 1] = renderCoordinate.y;
 
     auto iconImage = description->style.getIconImage(evalContext);
 
@@ -304,14 +308,18 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     scales[2 * countOffset] = spriteWidth;
     scales[2 * countOffset + 1] = spriteHeight;
 
-    Coord renderPos = converter->convertToRenderSystem(coordinate);
-
+    Coord renderPos = renderCoordinate;
     auto iconOffset = description->style.getIconOffset(evalContext);
     renderPos.y -= iconOffset.y * scaleFactor;
     renderPos.x += iconOffset.x * scaleFactor;
 
-    positions[2 * countOffset] = renderPos.x - leftPadding * 0.25 + rightPadding * 0.25;
-    positions[2 * countOffset + 1] = renderPos.y + topPadding * 0.25 + bottomPadding * 0.25;
+    positions[2 * countOffset] = renderCoordinate.x - leftPadding * 0.25 + rightPadding * 0.25;
+    positions[2 * countOffset + 1] = renderCoordinate.y + topPadding * 0.25 + bottomPadding * 0.25;
+
+    stretchIconBoundingBox = RectCoord(Coord(renderCoordinate.systemIdentifier, positions[2 * countOffset] - spriteWidth * 0.5,
+                                                                                  positions[2 * countOffset + 1] - spriteHeight * 0.5, renderCoordinate.z),
+                                       Coord(renderCoordinate.systemIdentifier,  positions[2 * countOffset] + spriteWidth * 0.5,
+                                                                                  positions[2 * countOffset + 1] + spriteHeight * 0.5, renderCoordinate.z));
 
     const int infoOffset = countOffset * 10;
 
@@ -407,4 +415,34 @@ void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &posi
         return;
     }
     labelObject->updateProperties(positions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor);
+}
+
+std::optional<RectCoord> Tiled2dMapVectorSymbolObject::getCombinedBoundingBox() {
+    std::optional<RectCoord> combined;
+
+    std::vector<RectCoord*> boxes;
+    if (labelObject && !labelObject->boundingBox.topLeft.systemIdentifier.empty()) {
+        boxes.push_back(&labelObject->boundingBox);
+    }
+    if (!iconBoundingBox.topLeft.systemIdentifier.empty()){
+        boxes.push_back(&iconBoundingBox);
+    }
+    if (!stretchIconBoundingBox.topLeft.systemIdentifier.empty()){
+        boxes.push_back(&stretchIconBoundingBox);
+    }
+
+    if (boxes.empty()) {
+        return std::nullopt;
+    }
+
+    combined = *(*boxes.rbegin());
+    boxes.pop_back();
+
+    while (!boxes.empty()) {
+        combined = RectCoord(Coord(combined->topLeft.systemIdentifier,std::min( combined->topLeft.x, (*boxes.rbegin())->topLeft.x), std::min(combined->topLeft.y, (*boxes.rbegin())->topLeft.y), combined->topLeft.z),
+                             Coord(combined->topLeft.systemIdentifier, std::max(combined->bottomRight.x,  (*boxes.rbegin())->bottomRight.x), std::max(combined->bottomRight.y,  (*boxes.rbegin())->bottomRight.y), combined->topLeft.z));
+        boxes.pop_back();
+    }
+
+    return combined;
 }

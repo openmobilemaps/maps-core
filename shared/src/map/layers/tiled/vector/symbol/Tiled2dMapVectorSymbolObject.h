@@ -68,16 +68,17 @@ public:
 
     int64_t symbolSortKey;
 
+    std::optional<RectCoord> getCombinedBoundingBox();
+
+private:
 
     std::shared_ptr<Tiled2dMapVectorSymbolLabelObject> labelObject;
-private:
+    
     const FeatureContext featureContext;
 
     std::shared_ptr<SymbolInfo> textInfo;
 
     bool isInteractable = false;
-
-    OBB2D orientedBoundingBox = OBB2D(Quad2dD(Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0)));
 
     bool collides = true;
 
@@ -91,6 +92,7 @@ private:
     const std::shared_ptr<SymbolVectorLayerDescription> description;
 
     const ::Coord coordinate;
+    ::Coord renderCoordinate = Coord("", 0, 0, 0);
 
     SymbolObjectInstanceCounts instanceCounts = {0,0,0};
 
@@ -98,4 +100,7 @@ private:
 
     Vec2D stretchSpriteSize = Vec2D(0.0, 0.0);
     std::optional<SpriteDesc> stretchSpriteInfo;
+
+    RectCoord iconBoundingBox;
+    RectCoord stretchIconBoundingBox;
 };

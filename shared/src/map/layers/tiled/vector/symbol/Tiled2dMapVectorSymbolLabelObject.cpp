@@ -149,6 +149,30 @@ void Tiled2dMapVectorSymbolLabelObject::setupProperties(std::vector<float> &text
 }
 
 void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor) {
+    auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
+
+    auto opacity = description->style.getTextOpacity(evalContext);
+    auto textColor = description->style.getTextColor(evalContext);
+    auto haloColor = description->style.getTextHaloColor(evalContext);
+    auto haloWidth = description->style.getTextHaloWidth(evalContext);
+
+    styles[(9 * styleOffset) + 0] = textColor.r; //R
+    styles[(9 * styleOffset) + 1] = textColor.g; //G
+    styles[(9 * styleOffset) + 2] = textColor.b; //B
+    styles[(9 * styleOffset) + 3] = textColor.a * opacity; //A
+    styles[(9 * styleOffset) + 4] = haloColor.r; //R
+    styles[(9 * styleOffset) + 5] = haloColor.g; //G
+    styles[(9 * styleOffset) + 6] = haloColor.b; //B
+    styles[(9 * styleOffset) + 7] = haloColor.a * opacity; //A
+    styles[(9 * styleOffset) + 8] = haloWidth;
+
+    styleOffset += 1;
+
+    if (opacity == 0.0) {
+        countOffset += characterCount;
+        return;
+    }
+
     switch(textSymbolPlacement) {
         case TextSymbolPlacement::LINE_CENTER:
         case TextSymbolPlacement::POINT: {
@@ -177,36 +201,11 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
             break;
         }
     }
-
-    auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
-
-    auto opacity = description->style.getTextOpacity(evalContext);
-    auto textColor = description->style.getTextColor(evalContext);
-    auto haloColor = description->style.getTextHaloColor(evalContext);
-    auto haloWidth = description->style.getTextHaloWidth(evalContext);
-
-    styles[(9 * styleOffset) + 0] = textColor.r; //R
-    styles[(9 * styleOffset) + 1] = textColor.g; //G
-    styles[(9 * styleOffset) + 2] = textColor.b; //B
-    styles[(9 * styleOffset) + 3] = textColor.a * opacity; //A
-    styles[(9 * styleOffset) + 4] = haloColor.r; //R
-    styles[(9 * styleOffset) + 5] = haloColor.g; //G
-    styles[(9 * styleOffset) + 6] = haloColor.b; //B
-    styles[(9 * styleOffset) + 7] = haloColor.a * opacity; //A
-    styles[(9 * styleOffset) + 8] = haloWidth;
-
-    styleOffset += 1;
-
 }
 
 void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor) {
     
     auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
-
-    if (description->style.getTextOpacity(evalContext) == 0) {
-        boundingBox = RectCoord(referencePoint, referencePoint);
-        return;
-    }
     
     float fontSize = scaleFactor * description->style.getTextSize(evalContext);
     
@@ -264,105 +263,104 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
     }
     
     lineEndIndices.push_back(centerPositions.size() - 1);
-    
-    if (!centerPositions.empty()) {
-        Vec2D min(box->min.x, box->min.y);
-        Vec2D max(box->max.x, box->max.y);
-        Vec2D size((max.x - min.x), (max.y - min.y));
-        
-        switch (textJustify) {
-            case TextJustify::LEFT:
-                //Nothing to do here
-                break;
-            case TextJustify::RIGHT:
-            case TextJustify::CENTER: {
-                size_t lineStart = 0;
-                
-                for (auto const lineEndIndex: lineEndIndices) {
-                    double lineWidth = centerPositions[lineEndIndex].x - centerPositions[lineStart].x;
-                    auto factor = textJustify == TextJustify::CENTER ? 2.0 : 1.0;
-                    double delta = (size.x - lineWidth) / factor;
-                    
-                    for(size_t i = lineStart; i <= lineEndIndex; i++) {
-                        centerPositions[i].x += delta;
-                    }
-                    
-                    lineStart = lineEndIndex + 1;
+
+    Vec2D min(box->min.x, box->min.y);
+    Vec2D max(box->max.x, box->max.y);
+    Vec2D size((max.x - min.x), (max.y - min.y));
+
+    switch (textJustify) {
+        case TextJustify::LEFT:
+            //Nothing to do here
+            break;
+        case TextJustify::RIGHT:
+        case TextJustify::CENTER: {
+            size_t lineStart = 0;
+
+            for (auto const lineEndIndex: lineEndIndices) {
+                double lineWidth = centerPositions[lineEndIndex].x - centerPositions[lineStart].x;
+                auto factor = textJustify == TextJustify::CENTER ? 2.0 : 1.0;
+                double delta = (size.x - lineWidth) / factor;
+
+                for(size_t i = lineStart; i <= lineEndIndex; i++) {
+                    centerPositions[i].x += delta;
                 }
-                
-                break;
+
+                lineStart = lineEndIndex + 1;
             }
-        }
-        
-        double offsetMultiplier = fontSize;
-        
-        Vec2D textOffset(offset.x * offsetMultiplier, offset.y * offsetMultiplier);
-        
-        Vec2D offset(0.0, 0.0);
-        
-        switch (textAnchor) {
-            case Anchor::CENTER:
-                offset.x -= size.x / 2.0 - textOffset.x;
-                offset.y -= size.y / 2.0 - textOffset.y;
-                break;
-            case Anchor::LEFT:
-                offset.x += textOffset.x;
-                offset.y -= size.y / 2.0 - textOffset.y;
-                break;
-            case Anchor::RIGHT:
-                offset.x -= size.x - textOffset.x;
-                offset.y -= size.y / 2.0 - textOffset.y;
-                break;
-            case Anchor::TOP:
-                offset.x -= size.x / 2.0 - textOffset.x;
-                offset.y -= -textOffset.y;
-                break;
-            case Anchor::BOTTOM:
-                offset.x -= size.x / 2.0 - textOffset.x;
-                offset.y -= size.y - textOffset.y + fontSize * 0.5;
-                break;
-            case Anchor::TOP_LEFT:
-                offset.x -= -textOffset.x;
-                offset.y -= -textOffset.y;
-                break;
-            case Anchor::TOP_RIGHT:
-                offset.x -= size.x -textOffset.x;
-                offset.y -= -textOffset.y;
-                break;
-            case Anchor::BOTTOM_LEFT:
-                offset.x -= -textOffset.x;
-                offset.y -= size.y - textOffset.y;
-                break;
-            case Anchor::BOTTOM_RIGHT:
-                offset.x -= size.x -textOffset.x;
-                offset.y -= size.y - textOffset.y;
-                break;
-            default:
-                break;
-        }
-        
-        box = BoundingBox(referencePoint.systemIdentifier);
-        
-        auto dx = referencePoint.x + offset.x - min.x;
-        auto dy = referencePoint.y + offset.y - min.y;
-        
-        assert(centerPositions.size() == characterCount);
-        
-        for(auto const centerPosition: centerPositions) {
-            positions[2 * countOffset + 0] = centerPosition.x + dx;
-            positions[2 * countOffset + 1] = centerPosition.y + dy;
 
-            const float scaleXH = scales[2 * countOffset + 0] / 2.0;
-            const float scaleYH = scales[2 * countOffset + 1] / 2.0;
-
-            box->addPoint(dx + centerPosition.x - scaleXH, dy + centerPosition.y - scaleYH, referencePoint.z);
-            box->addPoint(dx + centerPosition.x + scaleXH, dy + centerPosition.y - scaleYH, referencePoint.z);
-            box->addPoint(dx + centerPosition.x - scaleXH, dy + centerPosition.y + scaleYH, referencePoint.z);
-            box->addPoint(dx + centerPosition.x + scaleXH, dy + centerPosition.y + scaleYH, referencePoint.z);
-            
-            countOffset += 1;
+            break;
         }
     }
+
+    double offsetMultiplier = fontSize;
+
+    Vec2D textOffset(offset.x * offsetMultiplier, offset.y * offsetMultiplier);
+
+    Vec2D offset(0.0, 0.0);
+
+    switch (textAnchor) {
+        case Anchor::CENTER:
+            offset.x -= size.x / 2.0 - textOffset.x;
+            offset.y -= size.y / 2.0 - textOffset.y;
+            break;
+        case Anchor::LEFT:
+            offset.x += textOffset.x;
+            offset.y -= size.y / 2.0 - textOffset.y;
+            break;
+        case Anchor::RIGHT:
+            offset.x -= size.x - textOffset.x;
+            offset.y -= size.y / 2.0 - textOffset.y;
+            break;
+        case Anchor::TOP:
+            offset.x -= size.x / 2.0 - textOffset.x;
+            offset.y -= -textOffset.y;
+            break;
+        case Anchor::BOTTOM:
+            offset.x -= size.x / 2.0 - textOffset.x;
+            offset.y -= size.y - textOffset.y + fontSize * 0.5;
+            break;
+        case Anchor::TOP_LEFT:
+            offset.x -= -textOffset.x;
+            offset.y -= -textOffset.y;
+            break;
+        case Anchor::TOP_RIGHT:
+            offset.x -= size.x -textOffset.x;
+            offset.y -= -textOffset.y;
+            break;
+        case Anchor::BOTTOM_LEFT:
+            offset.x -= -textOffset.x;
+            offset.y -= size.y - textOffset.y;
+            break;
+        case Anchor::BOTTOM_RIGHT:
+            offset.x -= size.x -textOffset.x;
+            offset.y -= size.y - textOffset.y;
+            break;
+        default:
+            break;
+    }
+
+    box = BoundingBox(referencePoint.systemIdentifier);
+
+    auto dx = referencePoint.x + offset.x - min.x;
+    auto dy = referencePoint.y + offset.y - min.y;
+
+    assert(centerPositions.size() == characterCount);
+
+    for(auto const centerPosition: centerPositions) {
+        positions[2 * countOffset + 0] = centerPosition.x + dx;
+        positions[2 * countOffset + 1] = centerPosition.y + dy;
+
+        const float scaleXH = scales[2 * countOffset + 0] / 2.0;
+        const float scaleYH = scales[2 * countOffset + 1] / 2.0;
+
+        box->addPoint(dx + centerPosition.x - scaleXH, dy + centerPosition.y - scaleYH, referencePoint.z);
+        box->addPoint(dx + centerPosition.x + scaleXH, dy + centerPosition.y - scaleYH, referencePoint.z);
+        box->addPoint(dx + centerPosition.x - scaleXH, dy + centerPosition.y + scaleYH, referencePoint.z);
+        box->addPoint(dx + centerPosition.x + scaleXH, dy + centerPosition.y + scaleYH, referencePoint.z);
+
+        countOffset += 1;
+    }
+
     boundingBox = box ? RectCoord(box->min, box->max) : RectCoord(referencePoint, referencePoint);
     
     const float padding = description->style.getTextPadding(evalContext) * scaleFactor;
@@ -515,8 +513,14 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             countOffset += 1;
         }
     } else {
+        for (int i = 0; i != characterCount; i++) {
+            positions[(2 * countOffset) + 0] = 0;
+            positions[(2 * countOffset) + 1] = 0;
+            scales[2 * (countOffset) + 0] = 0;
+            scales[2 * (countOffset) + 1] = 0;
+            countOffset += 1;
+        }
         box = std::nullopt;
-        countOffset += characterCount;
     }
 
     assert(countOffset == countBefore + characterCount);

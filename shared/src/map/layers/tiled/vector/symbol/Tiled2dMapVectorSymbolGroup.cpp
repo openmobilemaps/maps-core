@@ -61,7 +61,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
         for (const auto &textEntry: text) {
             fullText += textEntry.text;
         }
-
+        
         auto anchor = layerDescription->style.getTextAnchor(evalContext);
         const auto &justify = layerDescription->style.getTextJustify(evalContext);
         const auto &placement = layerDescription->style.getTextSymbolPlacement(evalContext);
@@ -342,13 +342,14 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
 
             int32_t currentVerticeIndex = 0;
             for (const auto &object: symbolObjects) {
-                if (object->labelObject && !object->labelObject->boundingBox.topLeft.systemIdentifier.empty()) {
+                const auto &combinedBox = object->getCombinedBoundingBox();
+                if (combinedBox) {
                     vertices.push_back({
                         std::vector<::Coord> {
-                            object->labelObject->boundingBox.topLeft,
-                            Coord(object->labelObject->boundingBox.topLeft.systemIdentifier, object->labelObject->boundingBox.bottomRight.x, object->labelObject->boundingBox.topLeft.y, 0),
-                            object->labelObject->boundingBox.bottomRight,
-                            Coord(object->labelObject->boundingBox.topLeft.systemIdentifier, object->labelObject->boundingBox.topLeft.x, object->labelObject->boundingBox.bottomRight.y, 0)
+                            combinedBox->topLeft,
+                            Coord(combinedBox->topLeft.systemIdentifier, combinedBox->bottomRight.x, combinedBox->topLeft.y, 0),
+                            combinedBox->bottomRight,
+                            Coord(combinedBox->topLeft.systemIdentifier, combinedBox->topLeft.x, combinedBox->bottomRight.y, 0)
                         },
                         0
                     });
