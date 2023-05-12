@@ -148,7 +148,7 @@ void Tiled2dMapVectorSymbolLabelObject::setupProperties(std::vector<float> &text
     styleOffset += 1;
 }
 
-void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const bool collides) {
+void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const bool collides, const double rotation) {
     auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
 
     if (collides) {
@@ -190,16 +190,16 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
     switch(textSymbolPlacement) {
         case TextSymbolPlacement::LINE_CENTER:
         case TextSymbolPlacement::POINT: {
-            updatePropertiesPoint(positions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor);
+            updatePropertiesPoint(positions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, rotation);
             break;
         }
 
         case TextSymbolPlacement::LINE: {
 
             if (rotationAlignment == SymbolAlignment::VIEWPORT) {
-                updatePropertiesPoint(positions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor);
+                updatePropertiesPoint(positions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, rotation);
             } else {
-                auto rotatedFactor = updatePropertiesLine(positions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor);
+                auto rotatedFactor = updatePropertiesLine(positions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, rotation);
 
                 if(rotatedFactor > 0.5 && lineCoordinates && !rotated) {
                     std::reverse((*lineCoordinates).begin(), (*lineCoordinates).end());
@@ -207,7 +207,7 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
 
                     countOffset -= characterCount;
 
-                    updatePropertiesLine(positions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor);
+                    updatePropertiesLine(positions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, rotation);
                     rotated = true;
                 }
             }
@@ -217,7 +217,7 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
     }
 }
 
-void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor) {
+void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation) {
     
     auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
     
@@ -233,6 +233,15 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
     centerPositions.reserve(characterCount);
     
     std::vector<size_t> lineEndIndices;
+
+    const auto textAlignment = description->style.getTextRotationAlignment(evalContext);
+
+    float angle;
+    if (textAlignment == SymbolAlignment::MAP) {
+        angle = -description->style.getTextRotate(evalContext);
+    } else {
+        angle = -rotation;
+    }
     
     for(auto& i : splittedTextInfo) {
         if(i.glyphIndex >= 0) {
@@ -248,7 +257,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
                 auto yh = y + size.y;
                 
                 Quad2dD quad = Quad2dD(Vec2D(x, yh), Vec2D(xw, yh), Vec2D(xw, y), Vec2D(x, y));
-                
+
                 if (!box) {
                     box = BoundingBox(referencePoint.systemIdentifier);
                 }
@@ -260,14 +269,14 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
                 
                 scales[2 * (countOffset + centerPositions.size()) + 0] = size.x;
                 scales[2 * (countOffset + centerPositions.size()) + 1] = size.y;
-                rotations[countOffset + centerPositions.size()] = 0.0;
-                
+                rotations[countOffset + centerPositions.size()] = -angle;
+
                 centerPositions.push_back(Vec2D(x + size.x / 2,
                                                 y + size.y / 2));
-                
-                
+
+
             }
-            
+
             pen.x += advance.x * (1.0 + letterSpacing);
         } else if(i.glyphIndex == -1) {
             lineEndIndices.push_back(centerPositions.size() - 1);
@@ -355,22 +364,26 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
     box = BoundingBox(referencePoint.systemIdentifier);
 
+    offset = Vec2DHelper::rotate(offset, Vec2D(0, 0), angle);
+
     auto dx = referencePoint.x + offset.x - min.x;
     auto dy = referencePoint.y + offset.y - min.y;
 
     assert(centerPositions.size() == characterCount);
 
     for(auto const centerPosition: centerPositions) {
-        positions[2 * countOffset + 0] = centerPosition.x + dx;
-        positions[2 * countOffset + 1] = centerPosition.y + dy;
+        auto rotated = Vec2DHelper::rotate(centerPosition, Vec2D(0, 0), angle);
+
+        positions[2 * countOffset + 0] = rotated.x + dx;
+        positions[2 * countOffset + 1] = rotated.y + dy;
 
         const float scaleXH = scales[2 * countOffset + 0] / 2.0;
         const float scaleYH = scales[2 * countOffset + 1] / 2.0;
 
-        box->addPoint(dx + centerPosition.x - scaleXH, dy + centerPosition.y - scaleYH, referencePoint.z);
-        box->addPoint(dx + centerPosition.x + scaleXH, dy + centerPosition.y - scaleYH, referencePoint.z);
-        box->addPoint(dx + centerPosition.x - scaleXH, dy + centerPosition.y + scaleYH, referencePoint.z);
-        box->addPoint(dx + centerPosition.x + scaleXH, dy + centerPosition.y + scaleYH, referencePoint.z);
+        box->addPoint(dx + rotated.x - scaleXH, dy + rotated.y - scaleYH, referencePoint.z);
+        box->addPoint(dx + rotated.x + scaleXH, dy + rotated.y - scaleYH, referencePoint.z);
+        box->addPoint(dx + rotated.x - scaleXH, dy + rotated.y + scaleYH, referencePoint.z);
+        box->addPoint(dx + rotated.x + scaleXH, dy + rotated.y + scaleYH, referencePoint.z);
 
         countOffset += 1;
     }
@@ -386,7 +399,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
     boundingBox.bottomRight.y += padding;
 }
 
-double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor) {
+double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation) {
     if(lineCoordinates == std::nullopt) {
         countOffset += characterCount;
         return 0;

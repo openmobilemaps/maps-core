@@ -297,7 +297,7 @@ void Tiled2dMapVectorSymbolGroup::setupObjects() {
     }
 }
 
-void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const double scaleFactor) {
+void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const double rotation, const double scaleFactor) {
     // icons
     if (!symbolObjects.empty()) {
 
@@ -307,9 +307,9 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
         uint16_t textStyleOffset = 0;
 
         for(auto const object: symbolObjects) {
-            object->updateIconProperties(iconScales, iconRotations, iconAlphas, iconOffset, zoomIdentifier, scaleFactor);
-            object->updateStretchIconProperties(stretchedIconPositions,stretchedIconScales, stretchedIconRotations, stretchedIconAlphas, stretchedIconStretchInfos, stretchedIconOffset, zoomIdentifier, scaleFactor);
-            object->updateTextProperties(textPositions, textScales, textRotations, textStyles, textOffset, textStyleOffset, zoomIdentifier, scaleFactor);
+            object->updateIconProperties(iconScales, iconRotations, iconAlphas, iconOffset, zoomIdentifier, scaleFactor, rotation);
+            object->updateStretchIconProperties(stretchedIconPositions,stretchedIconScales, stretchedIconRotations, stretchedIconAlphas, stretchedIconStretchInfos, stretchedIconOffset, zoomIdentifier, scaleFactor, rotation);
+            object->updateTextProperties(textPositions, textScales, textRotations, textStyles, textOffset, textStyleOffset, zoomIdentifier, scaleFactor, rotation);
         }
 
         if (iconInstancedObject) {

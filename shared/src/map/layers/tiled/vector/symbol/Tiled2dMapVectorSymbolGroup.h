@@ -38,7 +38,7 @@ public:
     bool initialize(const std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features);
 
 
-    void update(const double zoomIdentifier, const double scaleFactor);
+    void update(const double zoomIdentifier, const double rotation, const double scaleFactor);
 
     void setupObjects();
     

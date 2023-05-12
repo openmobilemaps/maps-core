@@ -306,9 +306,8 @@ void Tiled2dMapVectorSourceSymbolDataManagerNew::update() {
         return;
     }
 
-    const double zoom = camera->getZoom();
-    const double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(zoom);
-    const double rotation = -camera->getRotation();
+    const double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
+    const double rotation = camera->getRotation();
 
     const auto scaleFactor = camera->mapUnitsFromPixels(1.0);
 
@@ -320,14 +319,15 @@ void Tiled2dMapVectorSourceSymbolDataManagerNew::update() {
                 continue;
             }
             for (auto &symbolGroup: symbolGroups) {
-                symbolGroup.syncAccess([&zoomIdentifier, &scaleFactor](auto group){
-                    group->update(zoomIdentifier, scaleFactor);
+                symbolGroup.syncAccess([&zoomIdentifier, &rotation, &scaleFactor](auto group){
+                    group->update(zoomIdentifier, rotation, scaleFactor);
                 });
 
             }
         }
     }
 
+    //TODO: this only has to be done after a tile has been added
     pregenerateRenderPasses();
 }
 
