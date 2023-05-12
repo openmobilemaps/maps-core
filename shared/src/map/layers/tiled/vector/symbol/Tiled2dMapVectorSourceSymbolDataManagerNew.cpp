@@ -265,7 +265,6 @@ void Tiled2dMapVectorSourceSymbolDataManagerNew::setupExistingSymbolWithSprite()
 }
 
 void Tiled2dMapVectorSourceSymbolDataManagerNew::collisionDetection(std::vector<std::string> layerIdentifiers, std::shared_ptr<std::vector<OBB2D>> placements) {
-    return;
     auto mapInterface = this->mapInterface.lock();
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
@@ -277,171 +276,7 @@ void Tiled2dMapVectorSourceSymbolDataManagerNew::collisionDetection(std::vector<
     double zoom = camera->getZoom();
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(zoom);
     double rotation = -camera->getRotation();
-
     auto scaleFactor = camera->mapUnitsFromPixels(1.0);
-
-    auto collisionDetectionLambda = [&](std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> wrapper, const std::string &layerIdentifier){
-        const auto evalContext = EvaluationContext(zoomIdentifier, wrapper->featureContext);
-
-        const auto &object = wrapper->textObject;
-
-        auto ref = object->getReferenceSize();
-
-        const auto& refP = object->getReferencePoint();
-
-        const auto &description = layerDescriptions.at(layerIdentifier);
-
-        auto scale = scaleFactor * description->style.getTextSize(evalContext) / ref;
-
-        wrapper->textObject->layout(scale);
-
-        const bool hasText = object->getTextObject() != nullptr;
-
-        const Coord renderCoord = converter->convertToRenderSystem(refP);
-
-        double rotation = -camera->getRotation();
-
-        bool collides = false;
-
-        std::optional<Quad2dD> projectedTextQuad;
-        std::optional<Quad2dD> projectedSymbolQuad;
-
-        if (hasText) {
-            Matrix::setIdentityM(wrapper->modelMatrix, 0);
-            Matrix::translateM(wrapper->modelMatrix, 0, renderCoord.x, renderCoord.y, renderCoord.z);
-
-            rotation += description->style.getTextRotate(evalContext);
-
-            if(true) {
-                if (wrapper->textInfo->angle) {
-                    double rotateSum = fmod(rotation - (*wrapper->textInfo->angle) + 720.0, 360);
-                    if (rotateSum > 270 || rotateSum < 90) {
-                        rotation = *wrapper->textInfo->angle;
-                    } else {
-                        rotation = *wrapper->textInfo->angle + 180;
-                    }
-                }
-                Matrix::rotateM(wrapper->modelMatrix, 0.0, rotation, 0.0, 0.0, 1.0);
-            }
-
-            Matrix::translateM(wrapper->modelMatrix, 0, -renderCoord.x, -renderCoord.y, -renderCoord.z);
-
-            const float padding = description->style.getTextPadding(evalContext);
-            projectedTextQuad = getProjectedFrame(object->boundingBox, padding, wrapper->modelMatrix);
-        }
-
-        if (spriteData && spriteTexture) {
-            auto iconImage = description->style.getIconImage(evalContext);
-            if (iconImage != "") {
-                Matrix::setIdentityM(wrapper->iconModelMatrix, 0);
-                Matrix::translateM(wrapper->iconModelMatrix, 0, renderCoord.x, renderCoord.y, renderCoord.z);
-
-                auto iconSize = description->style.getIconSize(evalContext) * scaleFactor;
-
-                Matrix::scaleM(wrapper->iconModelMatrix, 0, iconSize, iconSize, 1.0);
-                Matrix::rotateM(wrapper->iconModelMatrix, 0.0, rotation, 0.0, 0.0, 1.0);
-                Matrix::translateM(wrapper->iconModelMatrix, 0, -renderCoord.x, -renderCoord.y, -renderCoord.z);
-
-                const auto &spriteInfo = spriteData->sprites.at(iconImage);
-
-                if (!wrapper->symbolShader) {
-                    wrapper->symbolShader = mapInterface->getShaderFactory()->createStretchShader();
-                }
-
-                if (!wrapper->symbolObject) {
-                    wrapper->symbolObject = mapInterface->getGraphicsObjectFactory()->createQuad(wrapper->symbolShader->asShaderProgramInterface());
-                    wrapper->symbolGraphicsObject = wrapper->symbolObject->asGraphicsObject();
-                }
-
-                Coord renderPos = converter->convertToRenderSystem(wrapper->textInfo->getCoordinate());
-
-                const double densityOffset = (camera->getScreenDensityPpi() / 160.0) / spriteInfo.pixelRatio;
-
-                auto iconOffset = description->style.getIconOffset(evalContext);
-                renderPos.y -= iconOffset.y;
-                renderPos.x += iconOffset.x;
-
-                const auto textureWidth = (double) spriteTexture->getImageWidth();
-                const auto textureHeight = (double) spriteTexture->getImageHeight();
-
-                auto spriteWidth = spriteInfo.width * densityOffset;
-                auto spriteHeight = spriteInfo.height * densityOffset;
-
-                auto padding = description->style.getIconTextFitPadding(evalContext);
-
-                const float topPadding = padding[0];
-                const float rightPadding = padding[1];
-                const float bottomPadding = padding[2];
-                const float leftPadding = padding[3];
-
-                const auto textWidth = (leftPadding + rightPadding) * scaleFactor + (object->boundingBox.bottomRight.x - object->boundingBox.topLeft.x) / scaleFactor;
-                const auto textHeight = (topPadding + bottomPadding) * scaleFactor + (object->boundingBox.bottomRight.y - object->boundingBox.topLeft.y) / scaleFactor;
-
-                auto scaleX = std::max(1.0, textWidth / spriteWidth);
-                auto scaleY = std::max(1.0, textHeight / spriteHeight);
-
-                auto textFit = description->style.getIconTextFit(evalContext);
-                if (textFit == IconTextFit::NONE) {
-                    scaleX = 1;
-                    scaleY = 1;
-                } else if (textFit == IconTextFit::WIDTH) {
-                    scaleY = 1;
-                } else if (textFit == IconTextFit::HEIGHT) {
-                    scaleX = 1;
-                }
-
-                spriteWidth *= scaleX;
-                spriteHeight *= scaleY;
-
-                auto x = renderPos.x - spriteWidth / 2;
-                auto y = renderPos.y + spriteHeight / 2;
-                auto xw = renderPos.x + spriteWidth / 2;
-                auto yh = renderPos.y - spriteHeight / 2;
-
-                Quad2dD quad = Quad2dD(Vec2D(x, yh), Vec2D(xw, yh), Vec2D(xw, y), Vec2D(x, y));
-
-                const double iconPadding = description->style.getIconPadding(evalContext);
-                projectedSymbolQuad = getProjectedFrame(RectCoord(Coord(renderPos.systemIdentifier, quad.topLeft.x, quad.topLeft.y, renderPos.z), Coord(renderPos.systemIdentifier, quad.bottomRight.x, quad.bottomRight.y, renderPos.z)), iconPadding, wrapper->iconModelMatrix);
-
-                auto symbolGraphicsObject = wrapper->symbolGraphicsObject;
-                if (spriteTexture && !symbolGraphicsObject->isReady()) {
-                    symbolGraphicsObject->setup(renderingContext);
-                    wrapper->symbolObject->loadTexture(renderingContext, spriteTexture);
-                }
-            }
-        }
-
-        std::optional<Quad2dD> combinedQuad;
-        if (projectedTextQuad && projectedSymbolQuad) {
-            combinedQuad = Quad2dD(Vec2D(std::min(projectedTextQuad->topLeft.x, projectedSymbolQuad->topLeft.x), std::min(projectedTextQuad->topLeft.y, projectedSymbolQuad->topLeft.y)),
-                                   Vec2D(std::max(projectedTextQuad->topRight.x, projectedSymbolQuad->topRight.x), std::min(projectedTextQuad->topRight.y, projectedSymbolQuad->topRight.y)),
-                                   Vec2D(std::max(projectedTextQuad->bottomRight.x, projectedSymbolQuad->bottomRight.x), std::max(projectedTextQuad->bottomRight.y, projectedSymbolQuad->bottomRight.y)),
-                                   Vec2D(std::min(projectedTextQuad->bottomLeft.x, projectedSymbolQuad->bottomLeft.x), std::max(projectedTextQuad->bottomLeft.y, projectedSymbolQuad->bottomLeft.y)));
-        } else if (projectedTextQuad) {
-            combinedQuad = projectedTextQuad;
-        } else if (projectedSymbolQuad) {
-            combinedQuad = projectedSymbolQuad;
-        }
-
-        if (!combinedQuad) {
-            // The symbol doesnt have a text nor a icon
-            //assert(false);
-            collides = true;
-        }
-
-        wrapper->orientedBoundingBox = OBB2D(*combinedQuad);
-
-        for ( const auto &otherB: *placements ) {
-            if (otherB.overlaps(wrapper->orientedBoundingBox)) {
-                collides = true;
-                break;
-            }
-        }
-        if (!collides) {
-            placements->push_back(wrapper->orientedBoundingBox);
-        }
-        wrapper->setCollisionAt(zoom, collides);
-    };
 
     for (const auto layerIdentifier: layerIdentifiers) {
         const auto &description = layerDescriptions.at(layerIdentifier);
@@ -453,8 +288,9 @@ void Tiled2dMapVectorSourceSymbolDataManagerNew::collisionDetection(std::vector<
             const auto objectsIt = symbolGroupsMap.find(layerIdentifier);
             if (objectsIt != symbolGroupsMap.end()) {
                 for (auto &symbolGroup: objectsIt->second) {
-                    // TODO: collision detection in SymbolGroups (needs inter-group coordination)
-//                    symbolGroup->collisionDetection();
+                    symbolGroup.syncAccess([&zoomIdentifier, &rotation, &scaleFactor, &placements](auto group){
+                        group->collisionDetection(zoomIdentifier, rotation, scaleFactor, placements);
+                    });
                 }
             }
         }

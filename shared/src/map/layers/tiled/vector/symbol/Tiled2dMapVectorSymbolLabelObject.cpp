@@ -148,8 +148,22 @@ void Tiled2dMapVectorSymbolLabelObject::setupProperties(std::vector<float> &text
     styleOffset += 1;
 }
 
-void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor) {
+void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const bool collides) {
     auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
+
+    if (collides) {
+        styles[(9 * styleOffset) + 3] = 0;
+        styles[(9 * styleOffset) + 7] = 0;
+        for (int i = 0; i != characterCount; i++) {
+            positions[(2 * countOffset) + 0] = 0;
+            positions[(2 * countOffset) + 1] = 0;
+            scales[2 * (countOffset) + 0] = 0;
+            scales[2 * (countOffset) + 1] = 0;
+            countOffset += 1;
+        }
+        styleOffset += 1;
+        return;
+    }
 
     auto opacity = description->style.getTextOpacity(evalContext);
     auto textColor = description->style.getTextColor(evalContext);

@@ -98,25 +98,34 @@ void Tiled2dMapVectorSymbolObject::setCollisionAt(float zoom, bool isCollision) 
     collisionMap[zoom] = isCollision;
 }
 
-bool Tiled2dMapVectorSymbolObject::hasCollision(float zoom) {
-    {
-        // TODO: make better.
-        float minDiff = std::numeric_limits<float>::max();
-        float min = std::numeric_limits<float>::max();
+std::optional<bool> Tiled2dMapVectorSymbolObject::hasCollision(float zoom) {
 
-        bool collides = true;
-
-        for(auto& cm : collisionMap) {
-            float d = abs(zoom - cm.first);
-
-            if(d < minDiff && d < min) {
-                min = d;
-                collides = cm.second;
-            }
-        }
-
-        return collides;
+    if(collisionMap.size() == 0) {
+        return std::nullopt;
     }
+
+    auto low = collisionMap.lower_bound(zoom);
+
+    if(low == collisionMap.end()) {
+        auto prev = std::prev(low);
+        if (std::fabs(prev->first - zoom) < 0.1) {
+            return prev->second;
+        }
+    } else if(low == collisionMap.begin()) {
+        if (std::fabs(low->first - zoom) < 0.1) {
+            return low->second;
+        }
+    } else {
+        auto prev = std::prev(low);
+        if (std::fabs(zoom - prev->first) < std::fabs(zoom - low->first)) {
+            low = prev;
+        }
+        if (std::fabs(low->first - zoom) < 0.1) {
+            return low->second;
+        }
+    }
+
+    return std::nullopt;
 }
 
 const Tiled2dMapVectorSymbolObject::SymbolObjectInstanceCounts Tiled2dMapVectorSymbolObject::getInstanceCounts() const {
@@ -173,8 +182,22 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
 }
 
 void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, int &countOffset, const double zoomIdentifier, const double scaleFactor) {
+    if (lastIconUpdateZoomIdentifier == zoomIdentifier) {
+        return;
+    }
+    lastIconUpdateZoomIdentifier = zoomIdentifier;
+
+    double lastUpdateRotation;
 
     if (instanceCounts.icons == 0) {
+        return;
+    }
+
+    if (collides) {
+        alphas[countOffset] = 0;
+        scales[2 * countOffset] = 0;
+        scales[2 * countOffset + 1] = 0;
+        countOffset += instanceCounts.icons;
         return;
     }
 
@@ -257,7 +280,22 @@ void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(std::vector<float>
 }
 
 void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, std::vector<float> &stretchInfos, int &countOffset, const double zoomIdentifier, const double scaleFactor) {
+    if (lastStretchIconUpdateZoomIdentifier == zoomIdentifier) {
+        return;
+    }
+    lastStretchIconUpdateZoomIdentifier = zoomIdentifier;
+
     if (instanceCounts.stretchedIcons == 0) {
+        return;
+    }
+    
+    if (collides) {
+        alphas[countOffset] = 0;
+        scales[2 * countOffset] = 0;
+        scales[2 * countOffset + 1] = 0;
+        positions[2 * countOffset] = 0;
+        positions[2 * countOffset + 1] = 0;
+        countOffset += instanceCounts.stretchedIcons;
         return;
     }
 
@@ -411,10 +449,15 @@ void Tiled2dMapVectorSymbolObject::setupTextProperties(std::vector<float> &textu
 }
 
 void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor) {
+    if (lastTextUpdateZoomIdentifier == zoomIdentifier) {
+        return;
+    }
+    lastTextUpdateZoomIdentifier = zoomIdentifier;
+
     if (instanceCounts.textCharacters ==  0 || !labelObject) {
         return;
     }
-    labelObject->updateProperties(positions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor);
+    labelObject->updateProperties(positions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, collides);
 }
 
 std::optional<RectCoord> Tiled2dMapVectorSymbolObject::getCombinedBoundingBox() {
@@ -445,4 +488,57 @@ std::optional<RectCoord> Tiled2dMapVectorSymbolObject::getCombinedBoundingBox() 
     }
 
     return combined;
+}
+
+void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<std::vector<OBB2D>> placements) {
+    if(instanceCounts.textCharacters == 0) {
+        this->collides = false;
+        return;
+    }
+
+    auto const cachedCollision = hasCollision(zoomIdentifier);
+    if(cachedCollision) {
+        if (this->collides != *cachedCollision) {
+            lastIconUpdateZoomIdentifier = -1;
+            lastStretchIconUpdateZoomIdentifier = -1;
+            lastTextUpdateZoomIdentifier = -1;
+        }
+        this->collides = *cachedCollision;
+        if (!this->collides){
+            auto combinedBox = getCombinedBoundingBox();
+            OBB2D orientedBox = OBB2D(Quad2dD(Vec2D(combinedBox->topLeft.x, combinedBox->topLeft.y),
+                                              Vec2D(combinedBox->bottomRight.x, combinedBox->topLeft.y),
+                                              Vec2D(combinedBox->bottomRight.x, combinedBox->bottomRight.y),
+                                              Vec2D(combinedBox->topLeft.x, combinedBox->bottomRight.y)));
+            placements->push_back(orientedBox);
+        }
+        return;
+    }
+
+    auto combinedBox = getCombinedBoundingBox();
+    OBB2D orientedBox = OBB2D(Quad2dD(Vec2D(combinedBox->topLeft.x, combinedBox->topLeft.y),
+                                      Vec2D(combinedBox->bottomRight.x, combinedBox->topLeft.y),
+                                      Vec2D(combinedBox->bottomRight.x, combinedBox->bottomRight.y),
+                                      Vec2D(combinedBox->topLeft.x, combinedBox->bottomRight.y)));
+
+    for(auto it = placements->begin(); it != placements->end(); it++) {
+        if (it->overlaps(orientedBox)) {
+            setCollisionAt(zoomIdentifier, true);
+            if (this->collides == false) {
+                lastIconUpdateZoomIdentifier = -1;
+                lastStretchIconUpdateZoomIdentifier = -1;
+                lastTextUpdateZoomIdentifier = -1;
+            }
+            this->collides = true;
+            return;
+        }
+    }
+    setCollisionAt(zoomIdentifier, false);
+    if (this->collides == true) {
+        lastIconUpdateZoomIdentifier = -1;
+        lastStretchIconUpdateZoomIdentifier = -1;
+        lastTextUpdateZoomIdentifier = -1;
+    }
+    this->collides = false;
+    placements->push_back(orientedBox);
 }

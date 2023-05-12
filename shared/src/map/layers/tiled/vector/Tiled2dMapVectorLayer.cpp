@@ -377,11 +377,11 @@ void Tiled2dMapVectorLayer::update() {
 
     if (collisionManager) {
         collisionManager.syncAccess([](auto manager) {
-            manager->collisionDetection();
+//            manager->collisionDetection();
             manager->update();
         });
-/*        collisionManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceSymbolCollisionManager::collisionDetection);
-        collisionManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceSymbolCollisionManager::update);*/
+        collisionManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceSymbolCollisionManager::collisionDetection);
+//        collisionManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceSymbolCollisionManager::update);
     }
 }
 

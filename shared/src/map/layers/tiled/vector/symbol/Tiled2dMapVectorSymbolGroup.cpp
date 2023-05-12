@@ -184,8 +184,6 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
     // TODO: make filtering based on collision at zoomLevel tileInfo.zoomIdentifier + 1
 
-    // TODO: group texts into fewer styles using styleHash like polygons
-    
     Tiled2dMapVectorSymbolObject::SymbolObjectInstanceCounts instanceCounts {0,0,0};
     int textStyleCount = 0;
     for(auto const object: symbolObjects){
@@ -243,7 +241,8 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
         auto object = strongMapInterface->getGraphicsObjectFactory()->createPolygonGroup(shader->asShaderProgramInterface());
         boundingBoxLayerObject = std::make_shared<PolygonGroup2dLayerObject>(strongMapInterface->getCoordinateConverterHelper(), object, shader);
         boundingBoxLayerObject->setStyles({
-            PolygonStyle(Color(1,0,0,0.25), 1.0)
+            PolygonStyle(Color(0,0,0,0.3), 0.3),
+            PolygonStyle(Color(1,0,0,0.1), 1.0)
         });
     }
 #endif
@@ -351,7 +350,7 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                             combinedBox->bottomRight,
                             Coord(combinedBox->topLeft.systemIdentifier, combinedBox->topLeft.x, combinedBox->bottomRight.y, 0)
                         },
-                        0
+                        object->collides ? 1 : 0
                     });
                     indices.push_back(currentVerticeIndex);
                     indices.push_back(currentVerticeIndex + 1);
@@ -416,4 +415,10 @@ Tiled2dMapVectorSymbolGroup::createSymbolObject(const Tiled2dMapTileInfo &tileIn
                                                 const TextJustify &textJustify,
                                                 const TextSymbolPlacement &textSymbolPlacement) {
     return std::make_shared<Tiled2dMapVectorSymbolObject>(mapInterface, fontProvider, tileInfo, layerIdentifier, description, featureContext, text, fullText, coordinate, lineCoordinates, fontList, textAnchor, angle, textJustify, textSymbolPlacement);
+}
+
+void Tiled2dMapVectorSymbolGroup::collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<std::vector<OBB2D>> placements) {
+    for(auto const object: symbolObjects) {
+        object->collisionDetection(zoomIdentifier, rotation, scaleFactor, placements);
+    }
 }

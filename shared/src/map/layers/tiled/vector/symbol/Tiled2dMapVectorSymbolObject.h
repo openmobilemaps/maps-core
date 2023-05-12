@@ -22,6 +22,7 @@
 #include "Actor.h"
 #include "SpriteData.h"
 #include "TextLayerObject.h" // TODO: remove usage of TextLayerObject (and File)
+#include "OBB2D.h"
 
 class Tiled2dMapVectorSymbolObject {
 public:
@@ -57,7 +58,7 @@ public:
     // TODO: Provide collision computation interface. But handle pre-computation/caching in SymbolGroup
     void setCollisionAt(float zoom, bool isCollision);
 
-    bool hasCollision(float zoom);
+    std::optional<bool> hasCollision(float zoom);
 
     std::shared_ptr<FontLoaderResult> getFont() {
         if (labelObject) {
@@ -70,6 +71,9 @@ public:
 
     std::optional<RectCoord> getCombinedBoundingBox();
 
+    bool collides = false;
+
+    void collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<std::vector<OBB2D>> placements);
 private:
 
     std::shared_ptr<Tiled2dMapVectorSymbolLabelObject> labelObject;
@@ -79,8 +83,6 @@ private:
     std::shared_ptr<SymbolInfo> textInfo;
 
     bool isInteractable = false;
-
-    bool collides = true;
 
     std::map<float, bool> collisionMap = {};
 
@@ -103,4 +105,8 @@ private:
 
     RectCoord iconBoundingBox;
     RectCoord stretchIconBoundingBox;
+
+    double lastIconUpdateZoomIdentifier = -1;
+    double lastStretchIconUpdateZoomIdentifier = -1;
+    double lastTextUpdateZoomIdentifier = -1;
 };

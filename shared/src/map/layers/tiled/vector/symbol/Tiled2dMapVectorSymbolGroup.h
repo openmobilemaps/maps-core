@@ -46,6 +46,8 @@ public:
     std::shared_ptr<Quad2dStretchedInstancedInterface> stretchedInstancedObject;
     std::shared_ptr<TextInstancedInterface> textInstancedObject;
 
+    void collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<std::vector<OBB2D>> placements);
+
     std::shared_ptr<PolygonGroup2dLayerObject> boundingBoxLayerObject;
 private:
 
