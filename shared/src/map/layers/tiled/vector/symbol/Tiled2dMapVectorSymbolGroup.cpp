@@ -20,16 +20,12 @@ Tiled2dMapVectorSymbolGroup::Tiled2dMapVectorSymbolGroup(const std::weak_ptr<Map
                                                          const WeakActor<Tiled2dMapVectorFontProvider> &fontProvider,
                                                          const Tiled2dMapTileInfo &tileInfo,
                                                          const std::string &layerIdentifier,
-                                                         const std::shared_ptr<SymbolVectorLayerDescription> &layerDescription,
-                                                         const std::shared_ptr<SpriteData> &spriteData,
-                                                         const std::shared_ptr<TextureHolderInterface> &spriteTexture)
+                                                         const std::shared_ptr<SymbolVectorLayerDescription> &layerDescription)
 : mapInterface(mapInterface),
 tileInfo(tileInfo),
 layerIdentifier(layerIdentifier),
 layerDescription(layerDescription),
-fontProvider(fontProvider),
-spriteData(spriteData),
-spriteTexture(spriteTexture){}
+fontProvider(fontProvider){}
 
 bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features) {
 
@@ -246,13 +242,10 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
         });
     }
 #endif
-
-    setupObjects();
-
     return true;
 }
 
-void Tiled2dMapVectorSymbolGroup::setupObjects() {
+void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData> &spriteData, const std::shared_ptr<TextureHolderInterface> &spriteTexture) {
     const auto context = mapInterface.lock()->getRenderingContext();
 
     int iconOffset = 0;

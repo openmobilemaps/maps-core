@@ -80,8 +80,6 @@ private:
     
     std::unordered_map<std::string, std::shared_ptr<FontLoaderResult>> fontLoaderResults;
 
-    inline Quad2dD getProjectedFrame(const RectCoord &boundingBox, const float &padding, const std::vector<float> &modelMatrix);
-
     std::unordered_map<Tiled2dMapTileInfo, std::unordered_map<std::string, std::vector<Actor<Tiled2dMapVectorSymbolGroup>>>> tileSymbolGroupMap;
 
     std::unordered_map<std::string, std::shared_ptr<SymbolVectorLayerDescription>> layerDescriptions;
@@ -94,12 +92,5 @@ private:
 
     std::shared_ptr<SpriteData> spriteData;
 
-    std::vector<float> topLeftProj = { 0.0, 0.0, 0.0, 0.0 };
-    std::vector<float> topRightProj = { 0.0, 0.0, 0.0, 0.0 };
-    std::vector<float> bottomRightProj = { 0.0, 0.0, 0.0, 0.0 };
-    std::vector<float> bottomLeftProj = { 0.0, 0.0, 0.0, 0.0 };
-
     float alpha = 1.0;
-
-    //cached locked unsafe renderpasses
 };
