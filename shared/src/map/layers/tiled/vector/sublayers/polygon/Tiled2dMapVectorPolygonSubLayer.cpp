@@ -350,7 +350,8 @@ void Tiled2dMapVectorPolygonSubLayer::update() {
 
 void Tiled2dMapVectorPolygonSubLayer::clearTileData(const Tiled2dMapTileInfo &tileInfo) {
     auto mapInterface = this->mapInterface;
-    if (!mapInterface) { return; }
+    auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
+    if (!scheduler) { return; }
 
     {
         std::lock_guard<std::recursive_mutex> lock(hitDetectionMutex);
@@ -371,7 +372,7 @@ void Tiled2dMapVectorPolygonSubLayer::clearTileData(const Tiled2dMapTileInfo &ti
     }
     if (objectsToClear.empty()) return;
 
-    mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
+    scheduler->addTask(std::make_shared<LambdaTask>(
             TaskConfig("LineGroupTile_clear_" + std::to_string(tileInfo.zoomIdentifier) + "/" + std::to_string(tileInfo.x) + "/" +
                        std::to_string(tileInfo.y), 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
             [objectsToClear] {

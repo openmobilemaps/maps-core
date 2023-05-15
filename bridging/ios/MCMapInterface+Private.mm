@@ -225,6 +225,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)destroy {
+    try {
+        _cppRefHandle.get()->destroy();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)drawReadyFrame:(nonnull MCRectCoord *)bounds
                timeout:(float)timeout
              callbacks:(nullable id<MCMapReadyCallbackInterface>)callbacks {

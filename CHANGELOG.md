@@ -1,13 +1,16 @@
 # Changelog for Open Mobile Maps
 
-## Version 1.5.2 (02.05.2022)
+## Version 1.5.3 (16.05.2023)
+- Improved MapInterface teardown
+
+## Version 1.5.2 (02.05.2023)
 - Fix for Android context memory leak
 
-## Version 1.5.1 (14.04.2022)
+## Version 1.5.1 (14.04.2023)
 - Fix for XCode 14.3.0
 - Convenience function for RectCoord to PolygonCoord conversion
 
-## Version 1.5.0 (23.03.2022)
+## Version 1.5.0 (23.03.2023)
 - implements vector icon anchor
 - evaluate color from feature context 
 - expose bounding box in djinni

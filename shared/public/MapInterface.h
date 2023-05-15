@@ -77,6 +77,8 @@ public:
 
     virtual void pause() = 0;
 
+    virtual void destroy() = 0;
+
     /**
      * changes bounds to bounds, checks all layers for readiness, and updates callbacks, timeout in
      * seconds, always draw the frame when state is updated in the ready callbacks

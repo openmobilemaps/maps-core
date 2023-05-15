@@ -19,6 +19,8 @@ abstract class SchedulerInterface {
 
     abstract fun resume()
 
+    abstract fun destroy()
+
     private class CppProxy : SchedulerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -72,5 +74,11 @@ abstract class SchedulerInterface {
             native_resume(this.nativeRef)
         }
         private external fun native_resume(_nativeRef: Long)
+
+        override fun destroy() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_destroy(this.nativeRef)
+        }
+        private external fun native_destroy(_nativeRef: Long)
     }
 }

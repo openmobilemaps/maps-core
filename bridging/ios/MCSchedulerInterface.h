@@ -19,4 +19,6 @@
 
 - (void)resume;
 
+- (void)destroy;
+
 @end

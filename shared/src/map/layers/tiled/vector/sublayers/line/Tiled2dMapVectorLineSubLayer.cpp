@@ -276,7 +276,8 @@ Tiled2dMapVectorLineSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInfo,
 
 void Tiled2dMapVectorLineSubLayer::clearTileData(const Tiled2dMapTileInfo &tileInfo) {
     auto mapInterface = this->mapInterface;
-    if (!mapInterface) {
+    auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
+    if (!scheduler) {
         return;
     }
     {
@@ -299,7 +300,7 @@ void Tiled2dMapVectorLineSubLayer::clearTileData(const Tiled2dMapTileInfo &tileI
     }
     if (objectsToClear.empty()) return;
 
-    mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
+    scheduler->addTask(std::make_shared<LambdaTask>(
             TaskConfig("LineGroupTile_clear_" + std::to_string(tileInfo.zoomIdentifier) + "/" + std::to_string(tileInfo.x) + "/" +
                        std::to_string(tileInfo.y), 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
             [objectsToClear] {
@@ -323,7 +324,8 @@ Tiled2dMapVectorLineSubLayer::addLines(const Tiled2dMapTileInfo &tileInfo,
     auto mapInterface = this->mapInterface;
     const auto &objectFactory = mapInterface ? mapInterface->getGraphicsObjectFactory() : nullptr;
     const auto &coordinateConverterHelper = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
-    if (!objectFactory || !coordinateConverterHelper) {
+    auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
+    if (!objectFactory || !coordinateConverterHelper || !scheduler) {
         return;
     }
 
@@ -358,7 +360,7 @@ Tiled2dMapVectorLineSubLayer::addLines(const Tiled2dMapTileInfo &tileInfo,
 
     std::weak_ptr<Tiled2dMapVectorLineSubLayer> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapVectorLineSubLayer>(
             shared_from_this());
-    mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
+    scheduler->addTask(std::make_shared<LambdaTask>(
             TaskConfig("LineLayer_setup", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
             [weakSelfPtr, tileInfo, newGraphicObjects] {
                 auto selfPtr = weakSelfPtr.lock();
