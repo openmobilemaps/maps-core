@@ -280,7 +280,7 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
     uint16_t textStyleOffset = 0;
 
     for(auto const object: symbolObjects) {
-        object->setupIconProperties(iconPositions, iconTextureCoordinates, iconOffset, tileInfo.zoomIdentifier, spriteTexture, spriteData);
+        object->setupIconProperties(iconPositions, iconRotations, iconTextureCoordinates, iconOffset, tileInfo.zoomIdentifier, spriteTexture, spriteData);
         object->setupStretchIconProperties(stretchedIconPositions, stretchedIconTextureCoordinates, stretchedIconOffset, tileInfo.zoomIdentifier, spriteTexture, spriteData);
         object->setupTextProperties(textTextureCoordinates, textStyleIndices, textOffset, textStyleOffset, tileInfo.zoomIdentifier);
     }

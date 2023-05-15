@@ -13,6 +13,7 @@
 
 #include "Quad2dD.h"
 #include "Vec2D.h"
+#include "RectCoord.h"
 #include "Vec2DHelper.h"
 
 class OBB2D {
@@ -86,12 +87,7 @@ private:
         return x*x + y*y < rs*rs;
     }
 
-public:
-
-    OBB2D(const Quad2dD& quad) :
-        corner { quad.bottomLeft, quad.bottomRight, quad.topRight, quad.topLeft },
-        axis { corner[1] - corner[0], corner[3] - corner[0] }
-    {
+    void initialize() {
         // Make the length of each axis 1/edge length so we know any
         // dot product must be less than 1 to fall within the edge.
         for (int a = 0; a < 2; ++a) {
@@ -109,6 +105,57 @@ public:
             center = Vec2DHelper::midpoint(corner[3], corner[1]);
             r = b * 0.5;
         }
+    }
+
+public:
+
+    OBB2D() :
+        corner { Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0) },
+        axis { corner[1] - corner[0], corner[3] - corner[0] }
+    {
+        initialize();
+    }
+
+    OBB2D(const Quad2dD& quad) :
+        corner { quad.bottomLeft, quad.bottomRight, quad.topRight, quad.topLeft },
+        axis { corner[1] - corner[0], corner[3] - corner[0] }
+    {
+        initialize();
+    }
+
+    OBB2D(const RectCoord& rect) :
+        corner { Vec2D(rect.topLeft.x, rect.bottomRight.y),
+                Vec2D(rect.bottomRight.x, rect.bottomRight.y),
+                Vec2D(rect.bottomRight.x, rect.topLeft.y),
+                Vec2D(rect.topLeft.x, rect.topLeft.y)
+        },
+        axis { corner[1] - corner[0], corner[3] - corner[0] }
+    {
+        initialize();
+    }
+
+    void update(const Quad2dD& quad) {
+        corner[0] = quad.bottomLeft;
+        corner[1] = quad.bottomRight;
+        corner[2] = quad.topRight;
+        corner[3] = quad.topLeft;
+
+        axis[0] = corner[1] - corner[0];
+        axis[1] = corner[3] - corner[0];
+
+        initialize();
+    }
+
+    void update(const RectCoord& rect) {
+        corner[0] = Vec2D(rect.topLeft.x, rect.bottomRight.y);
+        corner[1] = Vec2D(rect.bottomRight.x, rect.bottomRight.y);
+        corner[2] = Vec2D(rect.bottomRight.x, rect.topLeft.y);
+        corner[3] = Vec2D(rect.topLeft.x, rect.topLeft.y);
+
+        axis[0] = corner[1] - corner[0];
+        axis[1] = corner[3] - corner[0];
+
+        initialize();
     }
 
     /** Returns true if the intersection of the boxes is non-empty. */

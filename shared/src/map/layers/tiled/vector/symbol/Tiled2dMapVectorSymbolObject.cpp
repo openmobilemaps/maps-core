@@ -132,7 +132,7 @@ const Tiled2dMapVectorSymbolObject::SymbolObjectInstanceCounts Tiled2dMapVectorS
     return instanceCounts;
 }
 
-void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &positions, std::vector<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData) {
+void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &positions, std::vector<float> &rotations, std::vector<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData) {
 
     if (instanceCounts.icons == 0) {
         return;
@@ -178,6 +178,12 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
 
     }
 
+    iconRotationAlignment = description->style.getIconRotationAlignment(evalContext);
+
+    if (iconRotationAlignment == SymbolAlignment::MAP) {
+        rotations[countOffset] = -description->style.getIconRotate(evalContext);
+    }
+
     countOffset += instanceCounts.icons;
 }
 
@@ -186,8 +192,6 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &scal
         countOffset += instanceCounts.icons;
         return;
     }
-    lastIconUpdateRotation = scaleFactor;
-    lastIconUpdateRotation = rotation;
 
     double lastUpdateRotation;
 
@@ -211,11 +215,7 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &scal
 
     alphas[countOffset] = description->style.getIconOpacity(evalContext);
 
-    const auto iconAlignment = description->style.getIconRotationAlignment(evalContext);
-
-    if (iconAlignment == SymbolAlignment::MAP) {
-        rotations[countOffset] = -description->style.getIconRotate(evalContext);
-    } else {
+    if (lastIconUpdateRotation != rotation && iconRotationAlignment != SymbolAlignment::MAP) {
         rotations[countOffset] = rotation;
     }
 
@@ -223,11 +223,15 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &scal
     scales[2 * countOffset] = spriteSize.x * iconSize;
     scales[2 * countOffset + 1] = spriteSize.y * iconSize;
 
-    iconBoundingBox = RectCoord(Coord(renderCoordinate.systemIdentifier, renderCoordinate.x - spriteSize.x * iconSize * 0.5,
-                                                                           renderCoordinate.y - spriteSize.y * iconSize * 0.5, renderCoordinate.z),
-                                Coord(renderCoordinate.systemIdentifier,  renderCoordinate.x + spriteSize.x * iconSize * 0.5,
-                                                                           renderCoordinate.y + spriteSize.y * iconSize * 0.5, renderCoordinate.z));
+    iconBoundingBox.topLeft.x = renderCoordinate.x - spriteSize.x * iconSize * 0.5;
+    iconBoundingBox.topLeft.y = renderCoordinate.y - spriteSize.y * iconSize * 0.5;
+    iconBoundingBox.bottomRight.x = renderCoordinate.x + spriteSize.x * iconSize * 0.5;
+    iconBoundingBox.bottomRight.x = renderCoordinate.y + spriteSize.y * iconSize * 0.5;
+
     countOffset += instanceCounts.icons;
+
+    lastIconUpdateRotation = scaleFactor;
+    lastIconUpdateRotation = rotation;
 }
 
 
@@ -361,10 +365,10 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     positions[2 * countOffset] = renderCoordinate.x - leftPadding * 0.25 + rightPadding * 0.25;
     positions[2 * countOffset + 1] = renderCoordinate.y + topPadding * 0.25 + bottomPadding * 0.25;
 
-    stretchIconBoundingBox = RectCoord(Coord(renderCoordinate.systemIdentifier, positions[2 * countOffset] - spriteWidth * 0.5,
-                                                                                  positions[2 * countOffset + 1] - spriteHeight * 0.5, renderCoordinate.z),
-                                       Coord(renderCoordinate.systemIdentifier,  positions[2 * countOffset] + spriteWidth * 0.5,
-                                                                                  positions[2 * countOffset + 1] + spriteHeight * 0.5, renderCoordinate.z));
+    stretchIconBoundingBox.topLeft.x = positions[2 * countOffset] - spriteWidth * 0.5;
+    stretchIconBoundingBox.topLeft.y = positions[2 * countOffset + 1] - spriteHeight * 0.5, renderCoordinate.z;
+    stretchIconBoundingBox.bottomRight.x = positions[2 * countOffset] + spriteWidth * 0.5;
+    stretchIconBoundingBox.bottomRight.y = positions[2 * countOffset + 1] + spriteHeight * 0.5, renderCoordinate.z;
 
     const float textPadding = description->style.getTextPadding(evalContext) * scaleFactor;
     stretchIconBoundingBox.topLeft.x -= textPadding;
@@ -521,20 +525,14 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
         this->collides = *cachedCollision;
         if (!this->collides){
             auto combinedBox = getCombinedBoundingBox();
-            OBB2D orientedBox = OBB2D(Quad2dD(Vec2D(combinedBox->topLeft.x, combinedBox->topLeft.y),
-                                              Vec2D(combinedBox->bottomRight.x, combinedBox->topLeft.y),
-                                              Vec2D(combinedBox->bottomRight.x, combinedBox->bottomRight.y),
-                                              Vec2D(combinedBox->topLeft.x, combinedBox->bottomRight.y)));
+            orientedBox.update(*combinedBox);
             placements->push_back(orientedBox);
         }
         return;
     }
 
     auto combinedBox = getCombinedBoundingBox();
-    OBB2D orientedBox = OBB2D(Quad2dD(Vec2D(combinedBox->topLeft.x, combinedBox->topLeft.y),
-                                      Vec2D(combinedBox->bottomRight.x, combinedBox->topLeft.y),
-                                      Vec2D(combinedBox->bottomRight.x, combinedBox->bottomRight.y),
-                                      Vec2D(combinedBox->topLeft.x, combinedBox->bottomRight.y)));
+    orientedBox.update(*combinedBox);
 
     for(auto it = placements->begin(); it != placements->end(); it++) {
         if (it->overlaps(orientedBox)) {

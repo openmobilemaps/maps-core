@@ -46,7 +46,7 @@ public:
 
     const SymbolObjectInstanceCounts getInstanceCounts() const;
 
-    void setupIconProperties(std::vector<float> &positions, std::vector<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData);
+    void setupIconProperties(std::vector<float> &positions, std::vector<float> &rotations, std::vector<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData);
     void updateIconProperties(std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation);
 
     void setupTextProperties(std::vector<float> &textureCoordinates, std::vector<uint16_t> &styleIndices, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier);
@@ -105,6 +105,10 @@ private:
 
     RectCoord iconBoundingBox;
     RectCoord stretchIconBoundingBox;
+
+    OBB2D orientedBox;
+
+    SymbolAlignment iconRotationAlignment = SymbolAlignment::AUTO;
 
     std::optional<double> lastIconUpdateScaleFactor;
     std::optional<double> lastIconUpdateRotation;
