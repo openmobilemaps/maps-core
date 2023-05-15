@@ -511,11 +511,6 @@ std::optional<RectCoord> Tiled2dMapVectorSymbolObject::getCombinedBoundingBox() 
 }
 
 void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<std::vector<OBB2D>> placements) {
-    if(instanceCounts.textCharacters == 0) {
-        this->collides = false;
-        return;
-    }
-
     auto const cachedCollision = hasCollision(zoomIdentifier);
     if(cachedCollision) {
         if (this->collides != *cachedCollision) {

@@ -18,10 +18,9 @@
 void Tiled2dMapVectorSourceTileDataManager::update() {
     for (const auto &[tileInfo, subTiles] : tiles) {
         for (const auto &[index, identifier, tile]: subTiles) {
-            /*tile.syncAccess([](auto t) {
+            tile.syncAccess([](auto t) {
                 t->update();
-            });*/ //TODO: EXPERIMENTAL
-            tile.message(&Tiled2dMapVectorTile::update);
+            });
         }
     }
 }
