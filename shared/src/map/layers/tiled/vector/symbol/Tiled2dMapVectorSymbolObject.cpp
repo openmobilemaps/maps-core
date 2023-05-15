@@ -366,6 +366,12 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
                                        Coord(renderCoordinate.systemIdentifier,  positions[2 * countOffset] + spriteWidth * 0.5,
                                                                                   positions[2 * countOffset + 1] + spriteHeight * 0.5, renderCoordinate.z));
 
+    const float textPadding = description->style.getTextPadding(evalContext) * scaleFactor;
+    stretchIconBoundingBox.topLeft.x -= textPadding;
+    stretchIconBoundingBox.topLeft.y -= textPadding;
+    stretchIconBoundingBox.bottomRight.x += textPadding;
+    stretchIconBoundingBox.bottomRight.y += textPadding;
+
     const int infoOffset = countOffset * 10;
 
     // TODO: maybe most of this can be done in setup?

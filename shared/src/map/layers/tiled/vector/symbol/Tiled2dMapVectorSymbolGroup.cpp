@@ -37,6 +37,8 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
     const double tilePixelFactor = (0.0254 / camera->getScreenDensityPpi()) * tileInfo.zoomLevel;
 
+    std::unordered_map<std::string, std::vector<Coord>> textPositionMap;
+
     for (auto const &[context, geometry]: *features) {
 
         const auto evalContext = EvaluationContext(tileInfo.zoomIdentifier, context);
@@ -94,7 +96,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                 for (auto pointIt = points.begin(); pointIt != points.end(); pointIt++) {
                     auto point = *pointIt;
 
-                    if (pointIt != points.begin()) {
+                    if (pointIt != points.begin() && !fullText.empty()) {
                         auto last = std::prev(pointIt);
                         double addDistance = Vec2DHelper::distance(Vec2D(last->x, last->y), Vec2D(point.x, point.y));
                         distance += addDistance;
@@ -126,7 +128,6 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
             if (!wasPlaced) {
                 distance = 0;
                 for (const auto &points: geometry.getPointCoordinates()) {
-
                     for (auto pointIt = points.begin(); pointIt != points.end(); pointIt++) {
                         auto point = *pointIt;
 
@@ -138,17 +139,27 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
                         auto pos = getPositioning(pointIt, points);
 
-                        if (distance > (totalDistance / 2.0) && !wasPlaced && pos) {
+                        std::optional<double> closestOther;
+                        auto existingPositionsIt = textPositionMap.find(fullText);
+                        if (existingPositionsIt != textPositionMap.end() && !fullText.empty()) {
+                            for (const auto existingPosition: existingPositionsIt->second) {
+                                closestOther = std::min(Vec2DHelper::distance(Vec2D(pos->centerPosition.x, pos->centerPosition.y), Vec2D(existingPosition.x, existingPosition.y)), closestOther.value_or(std::numeric_limits<double>::max()));
+                                if (closestOther <= symbolSpacingMeters) {
+                                    continue;
+                                }
+                            }
+                        }
+
+                        if (distance > (totalDistance / 2.0) && !wasPlaced && pos && (!closestOther && *closestOther > symbolSpacingMeters)) {
 
                             auto position = pos->centerPosition;
 
                             wasPlaced = true;
                             const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, context, text, fullText, position, std::nullopt, fontList, anchor, pos->angle, justify, placement);
                             if (symbolObject) {
+                                textPositionMap[fullText].push_back(position);
                                 symbolObjects.push_back(symbolObject);
                             }
-
-
                             distance = 0;
                         }
                     }
@@ -159,10 +170,25 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                 auto midP = p.begin() + p.size() / 2;
                 std::optional<double> angle = std::nullopt;
 
+                auto minDistance = std::numeric_limits<double>::max();
+                auto existingPositionsIt = textPositionMap.find(fullText);
+                if (existingPositionsIt != textPositionMap.end() && !fullText.empty()) {
+                    for (const auto existingPosition: existingPositionsIt->second) {
+                        minDistance = std::min(Vec2DHelper::distance(Vec2D(midP->x, midP->y), Vec2D(existingPosition.x, existingPosition.y)), minDistance);
+                        if (minDistance <= symbolSpacingMeters) {
+                            continue;
+                        }
+                    }
+                }
+                if (minDistance <= symbolSpacingMeters) {
+                    continue;
+                }
+
                 const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, context, text, fullText, *midP, std::nullopt, fontList, anchor, angle, justify, placement);
 
                 if (symbolObject) {
                     symbolObjects.push_back(symbolObject);
+                    textPositionMap[fullText].push_back(*midP);
                 }
 
             }
@@ -237,8 +263,8 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
         auto object = strongMapInterface->getGraphicsObjectFactory()->createPolygonGroup(shader->asShaderProgramInterface());
         boundingBoxLayerObject = std::make_shared<PolygonGroup2dLayerObject>(strongMapInterface->getCoordinateConverterHelper(), object, shader);
         boundingBoxLayerObject->setStyles({
-            PolygonStyle(Color(0,0,0,0.3), 0.3),
-            PolygonStyle(Color(1,0,0,0.1), 1.0)
+            PolygonStyle(Color(0,1,0,0.3), 0.3),
+            PolygonStyle(Color(1,0,0,0.3), 1.0)
         });
     }
 #endif
