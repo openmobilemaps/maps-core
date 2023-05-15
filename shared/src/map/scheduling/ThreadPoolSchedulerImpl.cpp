@@ -30,6 +30,14 @@ ThreadPoolSchedulerImpl::~ThreadPoolSchedulerImpl() {
         std::lock_guard<std::mutex> lock(defaultMutex);
         terminated = true;
     }
+    {
+        std::lock_guard<std::mutex> lock(graphicsMutex);
+        graphicsQueue.clear();
+    }
+    {
+        std::lock_guard<std::mutex> lock(defaultMutex);
+        defaultQueue.clear();
+    }
     defaultCv.notify_all();
     delayedTasksCv.notify_all();
     delayedTaskThread.join();
