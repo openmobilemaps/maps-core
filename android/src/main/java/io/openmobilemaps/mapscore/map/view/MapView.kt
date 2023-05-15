@@ -122,7 +122,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	@OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 	open fun onDestroy() {
 		setRenderer(null)
-		mapInterface?.setCallbackHandler(null)
+		mapInterface?.destroy()
 		mapInterface = null
 		scheduler = null
 		touchHandler = null

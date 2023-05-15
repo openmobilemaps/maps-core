@@ -37,7 +37,11 @@ void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterf
     };
 
     std::weak_ptr<Tiled2dMapVectorBackgroundSubLayer> weakSelfPtr = weak_from_this();
-    mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
+    auto scheduler = mapInterface->getScheduler();
+    if (!scheduler) {
+        return;
+    }
+    scheduler->addTask(std::make_shared<LambdaTask>(
            TaskConfig("Tiled2dMapVectorBackgroundSubLayer setup", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [weakSelfPtr] {
                 auto selfPtr = weakSelfPtr.lock();
                 if (!selfPtr) {

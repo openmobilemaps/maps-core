@@ -361,7 +361,8 @@ void Tiled2dMapVectorSymbolSubLayer::addTexts(const Tiled2dMapTileInfo &tileInfo
     auto mapInterface = this->mapInterface;
     auto objectFactory = mapInterface ? mapInterface->getGraphicsObjectFactory() : nullptr;
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
-    if (!objectFactory || !camera) {
+    auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
+    if (!objectFactory || !camera || !scheduler) {
         return;
     }
 
@@ -477,7 +478,7 @@ void Tiled2dMapVectorSymbolSubLayer::addTexts(const Tiled2dMapTileInfo &tileInfo
 
     std::weak_ptr<Tiled2dMapVectorSymbolSubLayer> selfPtr =
             std::dynamic_pointer_cast<Tiled2dMapVectorSymbolSubLayer>(shared_from_this());
-    mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
+    scheduler->addTask(std::make_shared<LambdaTask>(
             TaskConfig("Tiled2dMapVectorPolygonSubLayer_setup", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
             [selfPtr, tileInfo, textObjects] { if (selfPtr.lock()) selfPtr.lock()->setupTexts(tileInfo, textObjects); }));
 }
@@ -826,7 +827,8 @@ void Tiled2dMapVectorSymbolSubLayer::update() {}
 
 void Tiled2dMapVectorSymbolSubLayer::clearTileData(const Tiled2dMapTileInfo &tileInfo) {
     auto mapInterface = this->mapInterface;
-    if (!mapInterface) { return; }
+    auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
+    if (!scheduler) { return; }
     
     std::vector<std::shared_ptr<GraphicsObjectInterface>> objectsToClear;
     Tiled2dMapVectorSubLayer::clearTileData(tileInfo);
@@ -868,7 +870,7 @@ void Tiled2dMapVectorSymbolSubLayer::clearTileData(const Tiled2dMapTileInfo &til
 
     if (objectsToClear.empty()) return;
 
-    mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
+    scheduler->addTask(std::make_shared<LambdaTask>(
             TaskConfig("LineGroupTile_clear_" + std::to_string(tileInfo.zoomIdentifier) + "/" + std::to_string(tileInfo.x) + "/" +
                        std::to_string(tileInfo.y), 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
             [objectsToClear] {
@@ -971,11 +973,12 @@ void Tiled2dMapVectorSymbolSubLayer::setSprites(std::shared_ptr<TextureHolderInt
     this->spriteTexture = spriteTexture;
 
     auto mapInterface = this->mapInterface;
-    if (!mapInterface) return;
+    auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
+    if (!scheduler) return;
     
     std::weak_ptr<Tiled2dMapVectorSymbolSubLayer> weakSelfPtr =
     std::dynamic_pointer_cast<Tiled2dMapVectorSymbolSubLayer>(shared_from_this());
-    mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(TaskConfig("Tiled2dMapVectorSymbolSubLayer_setSprites",
+    scheduler->addTask(std::make_shared<LambdaTask>(TaskConfig("Tiled2dMapVectorSymbolSubLayer_setSprites",
                                                                                            0,
                                                                                            TaskPriority::NORMAL,
                                                                                            ExecutionEnvironment::GRAPHICS),
@@ -1096,16 +1099,22 @@ void Tiled2dMapVectorSymbolSubLayer::setSelectedFeatureIdentfier(std::optional<i
 
         // Symbol is no contained in tile map anymore, therefore we have to clear it
         if (!found) {
-            mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
-                                                                               TaskConfig("LineGroupTile_setSelectedFeatureIdentfier", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
-                                                                               [previouslySelectedWrapper] {
-                                                                                   if (previouslySelectedWrapper->textObject->getTextObject()->asGraphicsObject()->isReady()) {
-                                                                                       previouslySelectedWrapper->textObject->getTextObject()->asGraphicsObject()->clear();
-                                                                                   }
-                                                                                   if (previouslySelectedWrapper->symbolObject && previouslySelectedWrapper->symbolGraphicsObject->isReady()) {
-                                                                                       previouslySelectedWrapper->symbolGraphicsObject->clear();
-                                                                                   }
-                                                                               }));
+            auto mapInterface = this->mapInterface;
+            auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
+            if (scheduler) {
+                scheduler->addTask(std::make_shared<LambdaTask>(
+                        TaskConfig("LineGroupTile_setSelectedFeatureIdentifier", 0, TaskPriority::NORMAL,
+                                   ExecutionEnvironment::GRAPHICS),
+                        [previouslySelectedWrapper] {
+                            if (previouslySelectedWrapper->textObject->getTextObject()->asGraphicsObject()->isReady()) {
+                                previouslySelectedWrapper->textObject->getTextObject()->asGraphicsObject()->clear();
+                            }
+                            if (previouslySelectedWrapper->symbolObject &&
+                                previouslySelectedWrapper->symbolGraphicsObject->isReady()) {
+                                previouslySelectedWrapper->symbolGraphicsObject->clear();
+                            }
+                        }));
+            }
         }
     }
 

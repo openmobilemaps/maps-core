@@ -71,14 +71,14 @@ void LineLayer::remove(const std::shared_ptr<LineInfoInterface> &line) {
 void LineLayer::add(const std::shared_ptr<LineInfoInterface> &line) {
     auto lockSelfPtr = shared_from_this();
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
-    if (!mapInterface) {
+    auto objectFactory = mapInterface ? mapInterface->getGraphicsObjectFactory() : nullptr;
+    auto shaderFactory = mapInterface ? mapInterface->getShaderFactory() : nullptr;
+    auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
+    if (!objectFactory || !shaderFactory || !scheduler) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         addingQueue.push_back(line);
         return;
     }
-
-    auto objectFactory = mapInterface->getGraphicsObjectFactory();
-    auto shaderFactory = mapInterface->getShaderFactory();
 
     auto shader = shaderFactory->createColorLineShader();
     auto lineGraphicsObject = objectFactory->createLine(shader->asShaderProgramInterface());
@@ -90,7 +90,7 @@ void LineLayer::add(const std::shared_ptr<LineInfoInterface> &line) {
     lineObject->setPositions(line->getCoordinates());
 
     std::weak_ptr<LineLayer> weakSelfPtr = std::dynamic_pointer_cast<LineLayer>(shared_from_this());
-    mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
+    scheduler->addTask(std::make_shared<LambdaTask>(
         TaskConfig("LineLayer_setup_" + line->getIdentifier(), 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
         [weakSelfPtr, lineGraphicsObject] {
             auto selfPtr = weakSelfPtr.lock();
