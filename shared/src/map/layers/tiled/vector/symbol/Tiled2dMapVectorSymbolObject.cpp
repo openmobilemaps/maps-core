@@ -182,10 +182,12 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
 }
 
 void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation) {
-    if (lastIconUpdateZoomIdentifier == zoomIdentifier) {
+    if (lastIconUpdateScaleFactor == scaleFactor && lastIconUpdateRotation == rotation) {
+        countOffset += instanceCounts.icons;
         return;
     }
-    lastIconUpdateZoomIdentifier = zoomIdentifier;
+    lastIconUpdateRotation = scaleFactor;
+    lastIconUpdateRotation = rotation;
 
     double lastUpdateRotation;
 
@@ -277,18 +279,23 @@ void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(std::vector<float>
     }
 
     countOffset += instanceCounts.stretchedIcons;
+
+    lastStretchIconUpdateScaleFactor = std::nullopt;
 }
 
 void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, std::vector<float> &stretchInfos, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation) {
-    if (lastStretchIconUpdateZoomIdentifier == zoomIdentifier) {
-        return;
-    }
-    lastStretchIconUpdateZoomIdentifier = zoomIdentifier;
 
     if (instanceCounts.stretchedIcons == 0) {
         return;
     }
-    
+
+    if (lastStretchIconUpdateScaleFactor == zoomIdentifier && lastStretchIconUpdateRotation == rotation) {
+        countOffset += instanceCounts.stretchedIcons;
+        return;
+    }
+    lastStretchIconUpdateScaleFactor = zoomIdentifier;
+    lastStretchIconUpdateRotation = rotation;
+
     if (collides) {
         alphas[countOffset] = 0;
         scales[2 * countOffset] = 0;
@@ -362,17 +369,17 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     const int infoOffset = countOffset * 10;
 
     // TODO: maybe most of this can be done in setup?
-    
+//
     stretchInfos[infoOffset + 0] = scaleX;
-    stretchInfos[infoOffset + 1] = 1;
-    stretchInfos[infoOffset + 2] = 1;
-    stretchInfos[infoOffset + 3] = 1;
-    stretchInfos[infoOffset + 4] = 1;
+//    stretchInfos[infoOffset + 1] = 1;
+//    stretchInfos[infoOffset + 2] = 1;
+//    stretchInfos[infoOffset + 3] = 1;
+//    stretchInfos[infoOffset + 4] = 1;
     stretchInfos[infoOffset + 5] = scaleY;
-    stretchInfos[infoOffset + 6] = 1;
-    stretchInfos[infoOffset + 7] = 1;
-    stretchInfos[infoOffset + 8] = 1;
-    stretchInfos[infoOffset + 9] = 1;
+//    stretchInfos[infoOffset + 6] = 1;
+//    stretchInfos[infoOffset + 7] = 1;
+//    stretchInfos[infoOffset + 8] = 1;
+//    stretchInfos[infoOffset + 9] = 1;
 
 //TODO: fixme on Android
 //#ifdef __ANDROID__
@@ -449,15 +456,22 @@ void Tiled2dMapVectorSymbolObject::setupTextProperties(std::vector<float> &textu
 }
 
 void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation) {
-//    if (lastTextUpdateZoomIdentifier == zoomIdentifier) {
-//        return;
-//    }
-//    lastTextUpdateZoomIdentifier = zoomIdentifier;
+    if (lastTextUpdateScaleFactor == scaleFactor && lastTextUpdateRotation == rotation) {
+        styleOffset += instanceCounts.textCharacters == 0 ? 0 : 1;
+        countOffset += instanceCounts.textCharacters;
+        return;
+    }
+    lastTextUpdateScaleFactor = scaleFactor;
+    lastTextUpdateRotation = rotation;
 
     if (instanceCounts.textCharacters ==  0 || !labelObject) {
+        styleOffset += instanceCounts.textCharacters == 0 ? 0 : 1;
+        countOffset += instanceCounts.textCharacters;
         return;
     }
     labelObject->updateProperties(positions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, collides, rotation);
+
+    lastStretchIconUpdateScaleFactor = std::nullopt;
 }
 
 std::optional<RectCoord> Tiled2dMapVectorSymbolObject::getCombinedBoundingBox() {
@@ -499,9 +513,9 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
     auto const cachedCollision = hasCollision(zoomIdentifier);
     if(cachedCollision) {
         if (this->collides != *cachedCollision) {
-            lastIconUpdateZoomIdentifier = -1;
-            lastStretchIconUpdateZoomIdentifier = -1;
-            lastTextUpdateZoomIdentifier = -1;
+            lastIconUpdateScaleFactor = std::nullopt;
+            lastStretchIconUpdateScaleFactor = std::nullopt;
+            lastTextUpdateScaleFactor = std::nullopt;
         }
         this->collides = *cachedCollision;
         if (!this->collides){
@@ -525,9 +539,9 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
         if (it->overlaps(orientedBox)) {
             setCollisionAt(zoomIdentifier, true);
             if (this->collides == false) {
-                lastIconUpdateZoomIdentifier = -1;
-                lastStretchIconUpdateZoomIdentifier = -1;
-                lastTextUpdateZoomIdentifier = -1;
+                lastIconUpdateScaleFactor = std::nullopt;
+                lastStretchIconUpdateScaleFactor = std::nullopt;
+                lastTextUpdateScaleFactor = std::nullopt;
             }
             this->collides = true;
             return;
@@ -535,9 +549,9 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
     }
     setCollisionAt(zoomIdentifier, false);
     if (this->collides == true) {
-        lastIconUpdateZoomIdentifier = -1;
-        lastStretchIconUpdateZoomIdentifier = -1;
-        lastTextUpdateZoomIdentifier = -1;
+        lastIconUpdateScaleFactor = std::nullopt;
+        lastStretchIconUpdateScaleFactor = std::nullopt;
+        lastTextUpdateScaleFactor = std::nullopt;
     }
     this->collides = false;
     placements->push_back(orientedBox);

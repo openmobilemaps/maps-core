@@ -106,7 +106,12 @@ private:
     RectCoord iconBoundingBox;
     RectCoord stretchIconBoundingBox;
 
-    double lastIconUpdateZoomIdentifier = -1;
-    double lastStretchIconUpdateZoomIdentifier = -1;
-    double lastTextUpdateZoomIdentifier = -1;
+    std::optional<double> lastIconUpdateScaleFactor;
+    std::optional<double> lastIconUpdateRotation;
+
+    std::optional<double> lastStretchIconUpdateScaleFactor;
+    std::optional<double> lastStretchIconUpdateRotation;
+
+    std::optional<double> lastTextUpdateScaleFactor;
+    std::optional<double> lastTextUpdateRotation;
 };
