@@ -7,6 +7,7 @@
 #include "NativeColorCircleShaderInterface.h"
 #include "NativeColorLineShaderInterface.h"
 #include "NativeColorShaderInterface.h"
+#include "NativeLineGroupInstancedShaderInterface.h"
 #include "NativeLineGroupShaderInterface.h"
 #include "NativePolygonGroupShaderInterface.h"
 #include "NativeRasterShaderInterface.h"
@@ -54,6 +55,14 @@ NativeShaderFactoryInterface::JavaProxy::~JavaProxy() = default;
     auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_createLineGroupShader);
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativeLineGroupShaderInterface::toCpp(jniEnv, jret);
+}
+/*not-null*/ std::shared_ptr<::LineGroupInstancedShaderInterface> NativeShaderFactoryInterface::JavaProxy::createLineGroupInstancedShader() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeShaderFactoryInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_createLineGroupInstancedShader);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativeLineGroupInstancedShaderInterface::toCpp(jniEnv, jret);
 }
 /*not-null*/ std::shared_ptr<::ColorShaderInterface> NativeShaderFactoryInterface::JavaProxy::createColorShader() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
@@ -144,6 +153,15 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shade
         const auto& ref = ::djinni::objectFromHandleAddress<::ShaderFactoryInterface>(nativeRef);
         auto r = ref->createLineGroupShader();
         return ::djinni::release(::djinni_generated::NativeLineGroupShaderInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderFactoryInterface_00024CppProxy_native_1createLineGroupInstancedShader(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::ShaderFactoryInterface>(nativeRef);
+        auto r = ref->createLineGroupInstancedShader();
+        return ::djinni::release(::djinni_generated::NativeLineGroupInstancedShaderInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

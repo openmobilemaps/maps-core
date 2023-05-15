@@ -112,11 +112,8 @@ class LineGroupShader: BaseShader {
               let pipeline = pipeline else { return }
 
         encoder.setRenderPipelineState(pipeline)
-
         encoder.setVertexBytes(&screenPixelAsRealMeterFactor, length: MemoryLayout<Float>.stride, index: 2)
-
         encoder.setVertexBuffer(lineStyleBuffer, offset: 0, index: 3)
-
         encoder.setFragmentBuffer(lineStyleBuffer, offset: 0, index: 1)
     }
 }

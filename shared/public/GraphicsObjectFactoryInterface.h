@@ -6,6 +6,7 @@
 #include "ShaderProgramInterface.h"
 #include <memory>
 
+class Line2dInstancedInterface;
 class Line2dInterface;
 class LineGroup2dInterface;
 class Polygon2dInterface;
@@ -35,4 +36,6 @@ public:
     virtual /*not-null*/ std::shared_ptr<Polygon2dInterface> createPolygonMask() = 0;
 
     virtual /*not-null*/ std::shared_ptr<TextInterface> createText(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
+
+    virtual /*not-null*/ std::shared_ptr<Line2dInstancedInterface> createLineInstanced(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
 };

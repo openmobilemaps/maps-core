@@ -3,6 +3,7 @@
 
 #import "MCShaderProgramInterface.h"
 #import <Foundation/Foundation.h>
+@protocol MCLine2dInstancedInterface;
 @protocol MCLine2dInterface;
 @protocol MCLineGroup2dInterface;
 @protocol MCPolygon2dInterface;
@@ -31,5 +32,7 @@
 - (nullable id<MCPolygon2dInterface>)createPolygonMask;
 
 - (nullable id<MCTextInterface>)createText:(nullable id<MCShaderProgramInterface>)shader;
+
+- (nullable id<MCLine2dInstancedInterface>)createLineInstanced:(nullable id<MCShaderProgramInterface>)shader;
 
 @end

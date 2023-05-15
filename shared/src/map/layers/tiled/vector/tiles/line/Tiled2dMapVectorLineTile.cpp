@@ -174,7 +174,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                         } else {
                             styleGroupIndex = (int) featureGroups.size();
                             styleIndex = 0;
-                            shaders.push_back(shaderFactory->createLineGroupShader());
+                            shaders.push_back(shaderFactory->createLineGroupInstancedShader());
                             reusableLineStyles.push_back(std::vector<LineStyle>{reusableStyle});
                             featureGroups.push_back(std::vector<std::tuple<size_t, FeatureContext>>{{hash, featureContext}});
                         }
@@ -253,7 +253,7 @@ void Tiled2dMapVectorLineTile::addLines(const std::unordered_map<int, std::vecto
 
     for (const auto &[styleGroupIndex, lines] : styleIdLinesMap) {
         for (const auto &lineSubGroup: lines) {
-            auto lineGroupGraphicsObject = objectFactory->createLineGroup(shaders.at(styleGroupIndex)->asShaderProgramInterface());
+            auto lineGroupGraphicsObject = objectFactory->createLineInstanced(shaders.at(styleGroupIndex)->asShaderProgramInterface());
 
             auto lineGroupObject = std::make_shared<LineGroup2dLayerObject>(coordinateConverterHelper,
                                                                             lineGroupGraphicsObject,

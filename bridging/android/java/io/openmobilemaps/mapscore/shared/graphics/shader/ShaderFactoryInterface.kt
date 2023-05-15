@@ -16,6 +16,8 @@ abstract class ShaderFactoryInterface {
 
     abstract fun createLineGroupShader(): LineGroupShaderInterface
 
+    abstract fun createLineGroupInstancedShader(): LineGroupInstancedShaderInterface
+
     abstract fun createColorShader(): ColorShaderInterface
 
     abstract fun createColorCircleShader(): ColorCircleShaderInterface
@@ -63,6 +65,12 @@ abstract class ShaderFactoryInterface {
             return native_createLineGroupShader(this.nativeRef)
         }
         private external fun native_createLineGroupShader(_nativeRef: Long): LineGroupShaderInterface
+
+        override fun createLineGroupInstancedShader(): LineGroupInstancedShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createLineGroupInstancedShader(this.nativeRef)
+        }
+        private external fun native_createLineGroupInstancedShader(_nativeRef: Long): LineGroupInstancedShaderInterface
 
         override fun createColorShader(): ColorShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

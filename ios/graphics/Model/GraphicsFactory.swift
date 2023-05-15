@@ -54,4 +54,9 @@ class GraphicsFactory: MCGraphicsObjectFactoryInterface {
         guard let shader = shader else { fatalError("No Shader provided") }
         return Text(shader: shader, metalContext: .current)
     }
+
+    func createLineInstanced(_ shader: MCShaderProgramInterface?) -> MCLine2dInstancedInterface? {
+        guard let shader = shader else { fatalError("No shader provided") }
+        return LineGroupInstanced2d(shader: shader, metalContext: .current)
+    }
 }

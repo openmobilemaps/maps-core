@@ -11,6 +11,7 @@
 #import "MCColorCircleShaderInterface+Private.h"
 #import "MCColorLineShaderInterface+Private.h"
 #import "MCColorShaderInterface+Private.h"
+#import "MCLineGroupInstancedShaderInterface+Private.h"
 #import "MCLineGroupShaderInterface+Private.h"
 #import "MCPolygonGroupShaderInterface+Private.h"
 #import "MCRasterShaderInterface+Private.h"
@@ -65,6 +66,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createLineGroupShader();
         return ::djinni_generated::LineGroupShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCLineGroupInstancedShaderInterface>)createLineGroupInstancedShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createLineGroupInstancedShader();
+        return ::djinni_generated::LineGroupInstancedShaderInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -145,6 +153,13 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createLineGroupShader];
             return ::djinni_generated::LineGroupShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::LineGroupInstancedShaderInterface> createLineGroupInstancedShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createLineGroupInstancedShader];
+            return ::djinni_generated::LineGroupInstancedShaderInterface::toCpp(objcpp_result_);
         }
     }
     /*not-null*/ std::shared_ptr<::ColorShaderInterface> createColorShader() override

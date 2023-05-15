@@ -51,4 +51,8 @@ class ShaderFactory: MCShaderFactoryInterface {
     func createStretchShader() -> MCStretchShaderInterface? {
         StretchShader()
     }
+
+    func createLineGroupInstancedShader() -> MCLineGroupInstancedShaderInterface {
+        LineGroupInstancedShader()
+    }
 }

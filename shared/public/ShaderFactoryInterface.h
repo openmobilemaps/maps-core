@@ -10,6 +10,7 @@ class AlphaShaderInterface;
 class ColorCircleShaderInterface;
 class ColorLineShaderInterface;
 class ColorShaderInterface;
+class LineGroupInstancedShaderInterface;
 class LineGroupShaderInterface;
 class PolygonGroupShaderInterface;
 class RasterShaderInterface;
@@ -27,6 +28,8 @@ public:
     virtual /*not-null*/ std::shared_ptr<ColorLineShaderInterface> createColorLineShader() = 0;
 
     virtual /*not-null*/ std::shared_ptr<LineGroupShaderInterface> createLineGroupShader() = 0;
+
+    virtual /*not-null*/ std::shared_ptr<LineGroupInstancedShaderInterface> createLineGroupInstancedShader() = 0;
 
     virtual /*not-null*/ std::shared_ptr<ColorShaderInterface> createColorShader() = 0;
 

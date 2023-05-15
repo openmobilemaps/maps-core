@@ -11,18 +11,20 @@
 #pragma once
 
 #include "LineGroupShaderInterface.h"
+#include "LineGroupInstancedShaderInterface.h"
 #include "Coord.h"
 #include "LineStyle.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "LayerObjectInterface.h"
 #include "LineGroup2dInterface.h"
+#include "Line2dInstancedInterface.h"
 #include "RenderConfig.h"
 #include "Vec2D.h"
 
 class LineGroup2dLayerObject : public LayerObjectInterface {
   public:
     LineGroup2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
-                      const std::shared_ptr<LineGroup2dInterface> &line, const std::shared_ptr<LineGroupShaderInterface> &shader);
+                      const std::shared_ptr<Line2dInstancedInterface> &line, const std::shared_ptr<LineGroupInstancedShaderInterface> &shader);
 
     ~LineGroup2dLayerObject(){};
 
@@ -40,7 +42,7 @@ class LineGroup2dLayerObject : public LayerObjectInterface {
 
   private:
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
-    std::shared_ptr<LineGroup2dInterface> line;
-    std::shared_ptr<LineGroupShaderInterface> shader;
+    std::shared_ptr<Line2dInstancedInterface> line;
+    std::shared_ptr<LineGroupInstancedShaderInterface> shader;
     std::shared_ptr<RenderConfigInterface> renderConfig;
 };

@@ -59,6 +59,7 @@ public enum Pipeline: String, CaseIterable {
     case alphaShader
     case alphaInstancedShader
     case lineGroupShader
+    case lineGroupInstancedShader
     case polygonGroupShader
     case colorShader
     case roundColorShader
@@ -72,6 +73,7 @@ public enum Pipeline: String, CaseIterable {
             case .alphaShader: return "Alpha shader with texture"
             case .alphaInstancedShader: return "Alpha instanced shader with texture"
             case .lineGroupShader: return "Line Group shader"
+            case .lineGroupInstancedShader: return "Line Group Instanced shader"
             case .polygonGroupShader: return "Polygon Group shader"
             case .colorShader: return "Color shader"
             case .roundColorShader: return "Round color shader"
@@ -87,6 +89,7 @@ public enum Pipeline: String, CaseIterable {
             case .alphaShader: return "baseVertexShader"
             case .alphaInstancedShader: return "alphaInstancedVertexShader"
             case .lineGroupShader: return "lineGroupVertexShader"
+            case .lineGroupInstancedShader: return "lineGroupInstancedVertexShader"
             case .polygonGroupShader: return "polygonGroupVertexShader"
             case .colorShader: return "colorVertexShader"
             case .roundColorShader: return "colorVertexShader"
@@ -102,6 +105,7 @@ public enum Pipeline: String, CaseIterable {
             case .alphaShader: return "baseFragmentShader"
             case .alphaInstancedShader: return "alphaInstancedFragmentShader"
             case .lineGroupShader: return "lineGroupFragmentShader"
+            case .lineGroupInstancedShader: return "lineGroupInstancedFragmentShader"
             case .polygonGroupShader: return "polygonGroupFragmentShader"
             case .colorShader: return "colorFragmentShader"
             case .roundColorShader: return "roundColorFragmentShader"
