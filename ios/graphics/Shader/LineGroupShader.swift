@@ -111,7 +111,7 @@ class LineGroupShader: BaseShader {
         guard let encoder = context.encoder,
               let pipeline = pipeline else { return }
 
-        encoder.setRenderPipelineState(pipeline)
+        context.setRenderPipelineStateIfNeeded(pipeline)
 
         encoder.setVertexBytes(&screenPixelAsRealMeterFactor, length: MemoryLayout<Float>.stride, index: 2)
 

@@ -30,7 +30,7 @@ class PolygonGroupShader: BaseShader {
         guard let encoder = context.encoder,
               let pipeline = pipeline else { return }
 
-        encoder.setRenderPipelineState(pipeline)
+        context.setRenderPipelineStateIfNeeded(pipeline)
 
         encoder.setFragmentBuffer(polygonStyleBuffer, offset: 0, index: 1)
     }

@@ -85,6 +85,7 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject {
               let textureCoordinatesBuffer,
               let alphaBuffer,
               let stretchInfoBuffer,
+              let texture,
               instanceCount != 0 else {
             return
         }
@@ -92,10 +93,6 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject {
         lock.lock()
         defer {
             lock.unlock()
-        }
-        if (shader is AlphaInstancedShader), texture == nil {
-            ready = false
-            return
         }
 
         #if DEBUG
@@ -138,9 +135,7 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject {
 
         encoder.setFragmentSamplerState(sampler, index: 0)
 
-        if let texture = texture {
-            encoder.setFragmentTexture(texture, index: 0)
-        }
+        encoder.setFragmentTexture(texture, index: 0)
 
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,

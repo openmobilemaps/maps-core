@@ -28,7 +28,7 @@ class PolygonPatternGroupShader: BaseShader {
         guard let encoder = context.encoder,
               let pipeline = pipeline else { return }
 
-        encoder.setRenderPipelineState(pipeline)
+        context.setRenderPipelineStateIfNeeded(pipeline)
     }
 }
 
