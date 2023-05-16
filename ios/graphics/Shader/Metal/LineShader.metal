@@ -29,7 +29,7 @@ struct LineVertexIn {
     float2 lineA [[attribute(2)]];
     float2 lineB [[attribute(3)]];
     float vertexIndex [[attribute(4)]];
-    float lenghtPrefix [[attribute(5)]];
+    float lengthPrefix [[attribute(5)]];
     float stylingIndex [[attribute(6)]];
 };
 
@@ -41,8 +41,9 @@ struct LineVertexOut {
     int stylingIndex;
     float width;
     int segmentType;
-    float lenghtPrefix;
+    float lengthPrefix;
     float scalingFactor;
+    float dashingSize;
 };
 
 struct LineStyling {
@@ -70,16 +71,19 @@ vertex LineVertexOut
 lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
                       constant float4x4 &mvpMatrix [[buffer(1)]],
                       constant float &scalingFactor [[buffer(2)]],
-                      constant LineStyling *styling [[buffer(3)]])
+                      constant float &dashingScalingFactor [[buffer(3)]],
+                      constant LineStyling *styling [[buffer(4)]])
 {
     int style = int(vertexIn.stylingIndex) & 0xFF;
 
-    // extend position in width direction and in lenght direction by width / 2.0
+    // extend position in width direction and in length direction by width / 2.0
     float width = styling[style].width / 2.0;
 
     if (styling[style].widthAsPixels > 0.0) {
         width *= scalingFactor;
     }
+
+    float dashingSize = styling[style].width * dashingScalingFactor;
 
     float2 widthNormal = vertexIn.widthNormal;
     float2 lengthNormal = float2(widthNormal.y, -widthNormal.x);
@@ -113,8 +117,9 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
         .stylingIndex = style,
         .width = width,
         .segmentType = segmentType,
-        .lenghtPrefix = vertexIn.lenghtPrefix,
-        .scalingFactor = scalingFactor
+        .lengthPrefix = vertexIn.lengthPrefix,
+        .scalingFactor = dashingScalingFactor,
+        .dashingSize = dashingSize
     };
 
     return out;
@@ -167,9 +172,9 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
 
 
   if (style.numDashValues > 0) {
-    float factorToT = (in.width * 2) / lineLength;
+    float factorToT = (in.dashingSize * 2) / lineLength;
     float dashTotal = style.dashArray[3] * factorToT;
-    float startOffsetSegment = fmod(in.lenghtPrefix / lineLength, dashTotal);
+    float startOffsetSegment = fmod(in.lengthPrefix / lineLength, dashTotal);
     float intraDashPos = fmod(t + startOffsetSegment, dashTotal);
 
     if ((intraDashPos > style.dashArray[0] * factorToT && intraDashPos < style.dashArray[1] * factorToT) ||

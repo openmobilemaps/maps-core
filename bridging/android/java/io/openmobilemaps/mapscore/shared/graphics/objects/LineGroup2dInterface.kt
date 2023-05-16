@@ -10,6 +10,8 @@ abstract class LineGroup2dInterface {
 
     abstract fun setLines(lines: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
+    abstract fun setScalingFactor(factor: Float)
+
     abstract fun asGraphicsObject(): GraphicsObjectInterface
 
     private class CppProxy : LineGroup2dInterface {
@@ -29,6 +31,12 @@ abstract class LineGroup2dInterface {
             native_setLines(this.nativeRef, lines, indices)
         }
         private external fun native_setLines(_nativeRef: Long, lines: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
+
+        override fun setScalingFactor(factor: Float) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setScalingFactor(this.nativeRef, factor)
+        }
+        private external fun native_setScalingFactor(_nativeRef: Long, factor: Float)
 
         override fun asGraphicsObject(): GraphicsObjectInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

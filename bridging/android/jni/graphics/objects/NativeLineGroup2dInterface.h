@@ -34,6 +34,7 @@ private:
         ~JavaProxy();
 
         void setLines(const ::SharedBytes & lines, const ::SharedBytes & indices) override;
+        void setScalingFactor(float factor) override;
         /*not-null*/ std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override;
 
     private:
@@ -42,6 +43,7 @@ private:
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/objects/LineGroup2dInterface") };
     const jmethodID method_setLines { ::djinni::jniGetMethodID(clazz.get(), "setLines", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
+    const jmethodID method_setScalingFactor { ::djinni::jniGetMethodID(clazz.get(), "setScalingFactor", "(F)V") };
     const jmethodID method_asGraphicsObject { ::djinni::jniGetMethodID(clazz.get(), "asGraphicsObject", "()Lio/openmobilemaps/mapscore/shared/graphics/objects/GraphicsObjectInterface;") };
 };
 

@@ -39,12 +39,22 @@ void Tiled2dMapVectorLineTile::update() {
     }
     
     auto mapInterface = this->mapInterface.lock();
-    if (!mapInterface) {
+    auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+    if (!mapInterface || !camera) {
         return;
     }
-
-    double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(mapInterface->getCamera()->getZoom());
+    const double cameraZoom = camera->getZoom();
+     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(cameraZoom);
     zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.zoomIdentifier);
+
+    const auto zoom = Tiled2dMapVectorRasterSubLayerConfig::getZoomFactorAtIdentifier(floor(zoomIdentifier));
+    const auto cameraScalingFactor = camera->asCameraInterface()->getScalingFactor();
+    const auto scalingFactor = (cameraScalingFactor / cameraZoom) * zoom;
+
+    LogDebug <<= scalingFactor;
+    for (auto const &line: lines) {
+        line->setScalingFactor(scalingFactor);
+    }
 
     auto lineDescription = std::static_pointer_cast<LineVectorLayerDescription>(description);
 
@@ -104,6 +114,8 @@ void Tiled2dMapVectorLineTile::update() {
             shaders.at(styleGroupId)->setStyles(reusableLineStyles.at(styleGroupId));
         }
     }
+
+
 }
 
 void Tiled2dMapVectorLineTile::clear() {

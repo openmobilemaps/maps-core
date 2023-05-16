@@ -11,6 +11,8 @@
 - (void)setLines:(nonnull MCSharedBytes *)lines
          indices:(nonnull MCSharedBytes *)indices;
 
+- (void)setScalingFactor:(float)factor;
+
 - (nullable id<MCGraphicsObjectInterface>)asGraphicsObject;
 
 @end

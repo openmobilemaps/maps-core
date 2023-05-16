@@ -34,6 +34,8 @@ class LineGroup2dLayerObject : public LayerObjectInterface {
 
     void setStyles(const std::vector<LineStyle> &styles);
 
+    void setScalingFactor(float factor);
+
     std::shared_ptr<GraphicsObjectInterface> getLineObject();
 
     std::shared_ptr<ShaderProgramInterface> getShaderProgram();

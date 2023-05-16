@@ -115,7 +115,7 @@ class LineGroupShader: BaseShader {
 
         encoder.setVertexBytes(&screenPixelAsRealMeterFactor, length: MemoryLayout<Float>.stride, index: 2)
 
-        encoder.setVertexBuffer(lineStyleBuffer, offset: 0, index: 3)
+        encoder.setVertexBuffer(lineStyleBuffer, offset: 0, index: 4)
 
         encoder.setFragmentBuffer(lineStyleBuffer, offset: 0, index: 1)
     }

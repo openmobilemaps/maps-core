@@ -14,5 +14,7 @@ public:
 
     virtual void setLines(const ::SharedBytes & lines, const ::SharedBytes & indices) = 0;
 
+    virtual void setScalingFactor(float factor) = 0;
+
     virtual /*not-null*/ std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() = 0;
 };
