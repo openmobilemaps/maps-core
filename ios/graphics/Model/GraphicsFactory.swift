@@ -17,6 +17,11 @@ class GraphicsFactory: MCGraphicsObjectFactoryInterface {
         return PolygonGroup2d(shader: shader, metalContext: .current)
     }
 
+    func createPolygonPatternGroup(_ shader: MCShaderProgramInterface?) -> MCPolygonPatternGroup2dInterface? {
+        guard let shader = shader else { fatalError("No Shader provided") }
+        return PolygonPatternGroup2d(shader: shader, metalContext: .current)
+    }
+
     func createQuad(_ shader: MCShaderProgramInterface?) -> MCQuad2dInterface? {
         guard let shader = shader else { fatalError("No Shader provided") }
         return Quad2d(shader: shader, metalContext: .current)

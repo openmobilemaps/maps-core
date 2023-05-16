@@ -265,12 +265,13 @@ public:
                                                                                     renderPassIndex,
                                                                                     interactable);
                     layers.push_back(layerDesc);
-                } else if (val["type"] == "fill" && val["paint"]["fill-pattern"].is_null()) {
+                } else if (val["type"] == "fill") {
 
                     std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
 
                     PolygonVectorStyle style(parser.parseValue(val["paint"]["fill-color"]),
-                                             parser.parseValue(val["paint"]["fill-opacity"]));
+                                             parser.parseValue(val["paint"]["fill-opacity"]),
+                                             parser.parseValue(val["paint"]["fill-pattern"]));
 
                     auto layerDesc = std::make_shared<PolygonVectorLayerDescription>(val["id"],
                                                                                      val["source"],

@@ -20,6 +20,8 @@ abstract class GraphicsObjectFactoryInterface {
 
     abstract fun createPolygonGroup(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): PolygonGroup2dInterface
 
+    abstract fun createPolygonPatternGroup(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): PolygonPatternGroup2dInterface
+
     abstract fun createQuadMask(): Quad2dInterface
 
     abstract fun createPolygonMask(): Polygon2dInterface
@@ -73,6 +75,12 @@ abstract class GraphicsObjectFactoryInterface {
             return native_createPolygonGroup(this.nativeRef, shader)
         }
         private external fun native_createPolygonGroup(_nativeRef: Long, shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): PolygonGroup2dInterface
+
+        override fun createPolygonPatternGroup(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): PolygonPatternGroup2dInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createPolygonPatternGroup(this.nativeRef, shader)
+        }
+        private external fun native_createPolygonPatternGroup(_nativeRef: Long, shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): PolygonPatternGroup2dInterface
 
         override fun createQuadMask(): Quad2dInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

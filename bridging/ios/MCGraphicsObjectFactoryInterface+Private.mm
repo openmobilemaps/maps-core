@@ -10,6 +10,7 @@
 #import "MCLineGroup2dInterface+Private.h"
 #import "MCPolygon2dInterface+Private.h"
 #import "MCPolygonGroup2dInterface+Private.h"
+#import "MCPolygonPatternGroup2dInterface+Private.h"
 #import "MCQuad2dInstancedInterface+Private.h"
 #import "MCQuad2dInterface+Private.h"
 #import "MCShaderProgramInterface+Private.h"
@@ -77,6 +78,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createPolygonGroup(::djinni_generated::ShaderProgramInterface::toCpp(shader));
         return ::djinni_generated::PolygonGroup2dInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCPolygonPatternGroup2dInterface>)createPolygonPatternGroup:(nullable id<MCShaderProgramInterface>)shader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createPolygonPatternGroup(::djinni_generated::ShaderProgramInterface::toCpp(shader));
+        return ::djinni_generated::PolygonPatternGroup2dInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -150,6 +158,13 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygonGroup:(::djinni_generated::ShaderProgramInterface::fromCpp(c_shader))];
             return ::djinni_generated::PolygonGroup2dInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::PolygonPatternGroup2dInterface> createPolygonPatternGroup(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & c_shader) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygonPatternGroup:(::djinni_generated::ShaderProgramInterface::fromCpp(c_shader))];
+            return ::djinni_generated::PolygonPatternGroup2dInterface::toCpp(objcpp_result_);
         }
     }
     /*not-null*/ std::shared_ptr<::Quad2dInterface> createQuadMask() override

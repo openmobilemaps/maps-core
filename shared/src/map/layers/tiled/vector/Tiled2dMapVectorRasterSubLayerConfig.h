@@ -67,6 +67,11 @@ public:
         return std::nullopt;
     }
 
+    static constexpr double getZoomFactorAtIdentifier(double zoomIdentifier) {
+        double factor = pow(2, zoomIdentifier);
+        return Tiled2dMapVectorRasterSubLayerConfig::baseValueZoom / factor;
+    }
+
 private:
     std::shared_ptr<RasterVectorLayerDescription> description;
 

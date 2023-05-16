@@ -614,6 +614,10 @@ void Tiled2dMapVectorLayer::didLoadSpriteData(std::shared_ptr<SpriteData> sprite
     for (const auto &[source, manager] : symbolSourceDataManagers) {
         manager.message(&Tiled2dMapVectorSourceSymbolDataManager::setSprites, spriteData, spriteTexture);
     }
+
+    for (const auto &[source, manager] : sourceDataManagers) {
+        manager.message(&Tiled2dMapVectorSourceTileDataManager::setSprites, spriteData, spriteTexture);
+    }
 }
 
 void Tiled2dMapVectorLayer::setScissorRect(const std::optional<::RectI> &scissorRect) {

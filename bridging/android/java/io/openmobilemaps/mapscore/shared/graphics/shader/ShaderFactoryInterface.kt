@@ -22,6 +22,8 @@ abstract class ShaderFactoryInterface {
 
     abstract fun createPolygonGroupShader(): PolygonGroupShaderInterface
 
+    abstract fun createPolygonPatternGroupShader(): PolygonPatternGroupShaderInterface
+
     abstract fun createTextShader(): TextShaderInterface
 
     abstract fun createRasterShader(): RasterShaderInterface
@@ -81,6 +83,12 @@ abstract class ShaderFactoryInterface {
             return native_createPolygonGroupShader(this.nativeRef)
         }
         private external fun native_createPolygonGroupShader(_nativeRef: Long): PolygonGroupShaderInterface
+
+        override fun createPolygonPatternGroupShader(): PolygonPatternGroupShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createPolygonPatternGroupShader(this.nativeRef)
+        }
+        private external fun native_createPolygonPatternGroupShader(_nativeRef: Long): PolygonPatternGroupShaderInterface
 
         override fun createTextShader(): TextShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

@@ -17,16 +17,18 @@
 class PolygonVectorStyle {
 public:
 
-    PolygonVectorStyle(std::shared_ptr<Value> fillColor = nullptr,
-                       std::shared_ptr<Value> fillOpacity = nullptr):
+    PolygonVectorStyle(std::shared_ptr<Value> fillColor,
+                       std::shared_ptr<Value> fillOpacity,
+                       std::shared_ptr<Value> fillPattern):
     fillColor(fillColor),
-    fillOpacity(fillOpacity) {}
+    fillOpacity(fillOpacity),
+    fillPattern(fillPattern) {}
 
     std::unordered_set<std::string> getUsedKeys() const {
 
         std::unordered_set<std::string> usedKeys;
         std::vector<std::shared_ptr<Value>> values = {
-            fillColor, fillOpacity
+            fillColor, fillOpacity, fillPattern
         };
 
         for (auto const &value: values) {
@@ -38,19 +40,30 @@ public:
         return usedKeys;
     };
 
-    Color getFillColor(const EvaluationContext &context){
+    Color getFillColor(const EvaluationContext &context) const {
         static const Color defaultValue = ColorUtil::c(0, 0, 0, 1.0);
         return fillColor ? fillColor->evaluateOr(context, defaultValue) : defaultValue;
     }
 
-    double getFillOpacity(const EvaluationContext &context){
+    double getFillOpacity(const EvaluationContext &context) const {
         static const double defaultValue = 1.0;
         return fillOpacity ? fillOpacity->evaluateOr(context, defaultValue) : defaultValue;
     }
 
+    std::string getFillPattern(const EvaluationContext &context) const {
+        static const std::string defaultValue = "";
+        return fillPattern ? fillPattern->evaluateOr(context, defaultValue) : defaultValue;
+    }
+
+    bool hasPatternPotentially() {
+        return fillPattern ? true : false;
+    }
+
+
 private:
     std::shared_ptr<Value> fillColor;
     std::shared_ptr<Value> fillOpacity;
+    std::shared_ptr<Value> fillPattern;
 };
 
 class PolygonVectorLayerDescription: public VectorLayerDescription {

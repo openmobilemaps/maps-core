@@ -11,6 +11,7 @@
 #include "Tiled2dMapVectorSourceTileDataManager.h"
 #include "Tiled2dMapVectorRasterTile.h"
 #include "Tiled2dMapVectorPolygonTile.h"
+#include "Tiled2dMapVectorPolygonPatternTile.h"
 #include "Tiled2dMapVectorLineTile.h"
 #include "Tiled2dMapVectorLayer.h"
 #include "RenderPass.h"
@@ -204,12 +205,21 @@ Actor<Tiled2dMapVectorTile> Tiled2dMapVectorSourceTileDataManager::createTileAct
         case VectorLayerType::polygon: {
             auto mailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
 
-            auto polygonActor = Actor<Tiled2dMapVectorPolygonTile>(mailbox, (std::weak_ptr<MapInterface>) mapInterface,
-                                                                   tileInfo, selfActor,
-                                                                   std::static_pointer_cast<PolygonVectorLayerDescription>(
-                                                                           layerDescription));
+            auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(layerDescription);
 
-            actor = polygonActor.strongActor<Tiled2dMapVectorTile>();
+            if (polygonDescription->style.hasPatternPotentially()) {
+                auto polygonActor = Actor<Tiled2dMapVectorPolygonPatternTile>(mailbox, (std::weak_ptr<MapInterface>) mapInterface,
+                                                                           tileInfo, selfActor,
+                                                                           polygonDescription,
+                                                                              spriteData, spriteTexture);
+                actor = polygonActor.strongActor<Tiled2dMapVectorTile>();
+            } else {
+                auto polygonActor = Actor<Tiled2dMapVectorPolygonTile>(mailbox, (std::weak_ptr<MapInterface>) mapInterface,
+                                                                       tileInfo, selfActor,
+                                                                       polygonDescription);
+                actor = polygonActor.strongActor<Tiled2dMapVectorTile>();
+            }
+
             break;
         }
         case VectorLayerType::symbol: {
@@ -385,4 +395,24 @@ void Tiled2dMapVectorSourceTileDataManager::clearTouch() {
             std::get<2>(*rIter).message(&Tiled2dMapVectorTile::clearTouch);
         }
     }
+}
+
+void Tiled2dMapVectorSourceTileDataManager::setSprites(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) {
+    this->spriteData = spriteData;
+    this->spriteTexture = spriteTexture;
+
+    if (!tiles.empty()) {
+        auto selfActor = WeakActor(mailbox, weak_from_this());
+        selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceTileDataManager::setupExistingTilesWithSprite);
+    }
+}
+
+void Tiled2dMapVectorSourceTileDataManager::setupExistingTilesWithSprite() {
+    for (const auto &[tile, subTiles] : tiles) {
+        for (const auto &[index, string, actor]: subTiles) {
+            actor.message(&Tiled2dMapVectorTile::setSpriteData, spriteData, spriteTexture);
+        }
+    }
+
+    pregenerateRenderPasses();
 }

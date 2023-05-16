@@ -12,6 +12,7 @@ class ColorLineShaderInterface;
 class ColorShaderInterface;
 class LineGroupShaderInterface;
 class PolygonGroupShaderInterface;
+class PolygonPatternGroupShaderInterface;
 class RasterShaderInterface;
 class StretchShaderInterface;
 class TextShaderInterface;
@@ -33,6 +34,8 @@ public:
     virtual /*not-null*/ std::shared_ptr<ColorCircleShaderInterface> createColorCircleShader() = 0;
 
     virtual /*not-null*/ std::shared_ptr<PolygonGroupShaderInterface> createPolygonGroupShader() = 0;
+
+    virtual /*not-null*/ std::shared_ptr<PolygonPatternGroupShaderInterface> createPolygonPatternGroupShader() = 0;
 
     virtual /*not-null*/ std::shared_ptr<TextShaderInterface> createTextShader() = 0;
 
