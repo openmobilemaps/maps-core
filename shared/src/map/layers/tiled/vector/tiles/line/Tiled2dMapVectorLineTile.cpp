@@ -51,7 +51,6 @@ void Tiled2dMapVectorLineTile::update() {
     const auto cameraScalingFactor = camera->asCameraInterface()->getScalingFactor();
     const auto scalingFactor = (cameraScalingFactor / cameraZoom) * zoom;
 
-    LogDebug <<= scalingFactor;
     for (auto const &line: lines) {
         line->setScalingFactor(scalingFactor);
     }

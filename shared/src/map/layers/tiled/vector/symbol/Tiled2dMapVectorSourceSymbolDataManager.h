@@ -14,22 +14,26 @@
 #include "Tiled2dMapVectorSource.h"
 #include "Tiled2dMapVectorSourceDataManager.h"
 #include "SymbolVectorLayerDescription.h"
-#include "Tiled2dMapVectorSymbolSubLayerPositioningWrapper.h"
-#include "Tiled2dMapVectorSymbolFeatureWrapper.h"
 #include "TextHelper.h"
 #include "SpriteData.h"
 #include "FontLoaderResult.h"
+#include "Tiled2dMapVectorSymbolGroup.h"
+#include "TextInstancedInterface.h"
+#include "Tiled2dMapVectorFontProvider.h"
 
-class Tiled2dMapVectorSourceSymbolDataManager: public Tiled2dMapVectorSourceDataManager,  public std::enable_shared_from_this<Tiled2dMapVectorSourceSymbolDataManager> {
+class Tiled2dMapVectorSourceSymbolDataManager:
+        public Tiled2dMapVectorSourceDataManager,
+        public std::enable_shared_from_this<Tiled2dMapVectorSourceSymbolDataManager>,
+        public Tiled2dMapVectorFontProvider {
 public:
     Tiled2dMapVectorSourceSymbolDataManager(const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
                                           const std::shared_ptr<VectorMapDescription> &mapDescription,
                                           const std::string &source,
                                           const std::shared_ptr<FontLoaderInterface> &fontLoader);
 
-    using LayerIndentifier = std::string;
-
     void onAdded(const std::weak_ptr< ::MapInterface> &mapInterface) override;
+
+    void onRemoved() override;
 
     virtual void pause() override;
 
@@ -61,31 +65,23 @@ public:
 
     void clearTouch() override;
 
+    std::shared_ptr<FontLoaderResult> loadFont(const std::string &fontName) override;
+
 private:
 
-    std::vector<std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper>> createSymbols(const Tiled2dMapTileInfo &tileInfo, const LayerIndentifier &identifier, const Tiled2dMapVectorTileInfo::FeatureTuple &feature);
+    std::optional<Actor<Tiled2dMapVectorSymbolGroup>> createSymbolGroup(const Tiled2dMapTileInfo &tileInfo, const std::string &layerIdentifier, const std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features);
 
-    std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> createSymbolWrapper(const Tiled2dMapTileInfo &tileInfo, const LayerIndentifier &identifier, const std::shared_ptr<SymbolVectorLayerDescription> &description, const std::tuple<const FeatureContext, std::shared_ptr<SymbolInfo>> &symbolInfo);
-
-    void setupTexts(const std::vector<std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper>> toSetup, const std::unordered_set<Tiled2dMapTileInfo> tilesToRemove);
-
-    FontLoaderResult loadFont(const Font &font);
+    void setupSymbolGroups(const std::vector<Actor<Tiled2dMapVectorSymbolGroup>> toSetup, const std::unordered_set<Tiled2dMapTileInfo> tilesToRemove);
 
     void setupExistingSymbolWithSprite();
 
     void pregenerateRenderPasses();
     
-    std::unordered_map<std::string, FontLoaderResult> fontLoaderResults;
+    std::unordered_map<std::string, std::shared_ptr<FontLoaderResult>> fontLoaderResults;
 
-    inline std::optional<Tiled2dMapVectorSymbolSubLayerPositioningWrapper> getPositioning(std::vector<::Coord>::const_iterator &iterator, const std::vector<::Coord> & collection);
+    std::unordered_map<Tiled2dMapTileInfo, std::unordered_map<std::string, std::vector<Actor<Tiled2dMapVectorSymbolGroup>>>> tileSymbolGroupMap;
 
-    inline Quad2dD getProjectedFrame(const RectCoord &boundingBox, const float &padding, const std::vector<float> &modelMatrix);
-
-    std::unordered_map<Tiled2dMapTileInfo, std::unordered_map<LayerIndentifier, std::vector<std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper>>>> tileSymbolMap;
-
-    std::unordered_map<Tiled2dMapTileInfo, std::unordered_map<std::string, std::vector<Coord>>> tileTextPositionMap;
-
-    std::unordered_map<LayerIndentifier, std::shared_ptr<SymbolVectorLayerDescription>> layerDescriptions;
+    std::unordered_map<std::string, std::shared_ptr<SymbolVectorLayerDescription>> layerDescriptions;
 
     TextHelper textHelper;
 
@@ -95,14 +91,5 @@ private:
 
     std::shared_ptr<SpriteData> spriteData;
 
-    std::vector<float> topLeftProj = { 0.0, 0.0, 0.0, 0.0 };
-    std::vector<float> topRightProj = { 0.0, 0.0, 0.0, 0.0 };
-    std::vector<float> bottomRightProj = { 0.0, 0.0, 0.0, 0.0 };
-    std::vector<float> bottomLeftProj = { 0.0, 0.0, 0.0, 0.0 };
-
-    std::unordered_map<std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper>, LayerIndentifier> interactableSet;
-
     float alpha = 1.0;
-
-    //cached locked unsafe renderpasses
 };

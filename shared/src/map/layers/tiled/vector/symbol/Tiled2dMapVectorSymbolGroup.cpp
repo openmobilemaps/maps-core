@@ -356,7 +356,7 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
 
         if (boundingBoxLayerObject) {
             std::vector<std::tuple<std::vector<::Coord>, int>> vertices;
-            std::vector<int32_t> indices;
+            std::vector<uint16_t> indices;
 
             int32_t currentVerticeIndex = 0;
             for (const auto &object: symbolObjects) {

@@ -11,6 +11,8 @@
 #include "Tiled2dMapVectorSymbolObject.h"
 #include "Tiled2dMapVectorRasterSubLayerConfig.h"
 #include "CoordinateConversionHelperInterface.h"
+#include "CoordinateSystemIdentifiers.h"
+
 
 Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<MapInterface> &mapInterface,
                                                            const WeakActor<Tiled2dMapVectorFontProvider> &fontProvider,
@@ -28,8 +30,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                                                            const TextJustify &textJustify,
                                                            const TextSymbolPlacement &textSymbolPlacement) :
     description(description), coordinate(coordinate), mapInterface(mapInterface), featureContext(featureContext),
-    iconBoundingBox(Coord("", 0.0, 0.0, 0.0), Coord("", 0.0, 0.0, 0.0)),
-    stretchIconBoundingBox(Coord("", 0.0, 0.0, 0.0), Coord("", 0.0, 0.0, 0.0)){
+    iconBoundingBox(Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0), Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0)),
+    stretchIconBoundingBox(Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0), Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0)){
     auto strongMapInterface = mapInterface.lock();
     auto objectFactory = strongMapInterface ? strongMapInterface->getGraphicsObjectFactory() : nullptr;
     auto camera = strongMapInterface ? strongMapInterface->getCamera() : nullptr;
@@ -226,7 +228,7 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &scal
     iconBoundingBox.topLeft.x = renderCoordinate.x - spriteSize.x * iconSize * 0.5;
     iconBoundingBox.topLeft.y = renderCoordinate.y - spriteSize.y * iconSize * 0.5;
     iconBoundingBox.bottomRight.x = renderCoordinate.x + spriteSize.x * iconSize * 0.5;
-    iconBoundingBox.bottomRight.x = renderCoordinate.y + spriteSize.y * iconSize * 0.5;
+    iconBoundingBox.bottomRight.y = renderCoordinate.y + spriteSize.y * iconSize * 0.5;
 
     countOffset += instanceCounts.icons;
 
@@ -366,9 +368,9 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     positions[2 * countOffset + 1] = renderCoordinate.y + topPadding * 0.25 + bottomPadding * 0.25;
 
     stretchIconBoundingBox.topLeft.x = positions[2 * countOffset] - spriteWidth * 0.5;
-    stretchIconBoundingBox.topLeft.y = positions[2 * countOffset + 1] - spriteHeight * 0.5, renderCoordinate.z;
+    stretchIconBoundingBox.topLeft.y = positions[2 * countOffset + 1] - spriteHeight * 0.5;
     stretchIconBoundingBox.bottomRight.x = positions[2 * countOffset] + spriteWidth * 0.5;
-    stretchIconBoundingBox.bottomRight.y = positions[2 * countOffset + 1] + spriteHeight * 0.5, renderCoordinate.z;
+    stretchIconBoundingBox.bottomRight.y = positions[2 * countOffset + 1] + spriteHeight * 0.5;
 
     const float textPadding = description->style.getTextPadding(evalContext) * scaleFactor;
     stretchIconBoundingBox.topLeft.x -= textPadding;
@@ -379,17 +381,8 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     const int infoOffset = countOffset * 10;
 
     // TODO: maybe most of this can be done in setup?
-//
     stretchInfos[infoOffset + 0] = scaleX;
-//    stretchInfos[infoOffset + 1] = 1;
-//    stretchInfos[infoOffset + 2] = 1;
-//    stretchInfos[infoOffset + 3] = 1;
-//    stretchInfos[infoOffset + 4] = 1;
     stretchInfos[infoOffset + 5] = scaleY;
-//    stretchInfos[infoOffset + 6] = 1;
-//    stretchInfos[infoOffset + 7] = 1;
-//    stretchInfos[infoOffset + 8] = 1;
-//    stretchInfos[infoOffset + 9] = 1;
 
 //TODO: fixme on Android
 //#ifdef __ANDROID__
@@ -488,13 +481,13 @@ std::optional<RectCoord> Tiled2dMapVectorSymbolObject::getCombinedBoundingBox() 
     std::optional<RectCoord> combined;
 
     std::vector<RectCoord*> boxes;
-    if (labelObject && !labelObject->boundingBox.topLeft.systemIdentifier.empty()) {
+    if (labelObject && labelObject->boundingBox.topLeft.x != 0) {
         boxes.push_back(&labelObject->boundingBox);
     }
-    if (!iconBoundingBox.topLeft.systemIdentifier.empty()){
+    if (iconBoundingBox.topLeft.x != 0){
         boxes.push_back(&iconBoundingBox);
     }
-    if (!stretchIconBoundingBox.topLeft.systemIdentifier.empty()){
+    if (stretchIconBoundingBox.topLeft.x != 0){
         boxes.push_back(&stretchIconBoundingBox);
     }
 
@@ -506,7 +499,7 @@ std::optional<RectCoord> Tiled2dMapVectorSymbolObject::getCombinedBoundingBox() 
     boxes.pop_back();
 
     while (!boxes.empty()) {
-        combined = RectCoord(Coord(combined->topLeft.systemIdentifier,std::min( combined->topLeft.x, (*boxes.rbegin())->topLeft.x), std::min(combined->topLeft.y, (*boxes.rbegin())->topLeft.y), combined->topLeft.z),
+        combined = RectCoord(Coord(combined->topLeft.systemIdentifier,std::min(combined->topLeft.x, (*boxes.rbegin())->topLeft.x), std::min(combined->topLeft.y, (*boxes.rbegin())->topLeft.y), combined->topLeft.z),
                              Coord(combined->topLeft.systemIdentifier, std::max(combined->bottomRight.x,  (*boxes.rbegin())->bottomRight.x), std::max(combined->bottomRight.y,  (*boxes.rbegin())->bottomRight.y), combined->topLeft.z));
         boxes.pop_back();
     }

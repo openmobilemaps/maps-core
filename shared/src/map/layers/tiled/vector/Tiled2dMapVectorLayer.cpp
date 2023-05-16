@@ -191,7 +191,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSource>> vectorTileSource;
 
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceTileDataManager>> sourceTileManagers;
-    std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceSymbolDataManagerNew>> symbolSourceDataManagers;
+    std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceSymbolDataManager>> symbolSourceDataManagers;
     std::unordered_map<std::string, std::vector<WeakActor<Tiled2dMapVectorSourceDataManager>>> interactionDataManagers;
 
     std::unordered_map<std::string, std::unordered_set<std::string>> layersToDecode;
@@ -265,7 +265,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
 
         if (symbolSources.count(source) != 0) {
             auto symbolSourceDataManagerMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
-            auto actor = Actor<Tiled2dMapVectorSourceSymbolDataManagerNew>(symbolSourceDataManagerMailbox,
+            auto actor = Actor<Tiled2dMapVectorSourceSymbolDataManager>(symbolSourceDataManagerMailbox,
                                                                         selfActor,
                                                                         mapDescription,
                                                                         source,
@@ -275,9 +275,9 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
         }
     }
 
-    std::unordered_map<std::string, WeakActor<Tiled2dMapVectorSourceSymbolDataManagerNew>> weakSymbolSourceDataManagers;
+    std::unordered_map<std::string, WeakActor<Tiled2dMapVectorSourceSymbolDataManager>> weakSymbolSourceDataManagers;
     for (const auto &sourceTileManager : symbolSourceDataManagers) {
-        weakSymbolSourceDataManagers[sourceTileManager.first] = sourceTileManager.second.weakActor<Tiled2dMapVectorSourceSymbolDataManagerNew>();
+        weakSymbolSourceDataManagers[sourceTileManager.first] = sourceTileManager.second.weakActor<Tiled2dMapVectorSourceSymbolDataManager>();
     }
 
     if(!weakSymbolSourceDataManagers.empty()) {
@@ -372,7 +372,7 @@ void Tiled2dMapVectorLayer::update() {
     }
 //
 //    for (const auto  &[source, sourceDataManager] : symbolSourceDataManagers) {
-//        sourceDataManager.message(&Tiled2dMapVectorSourceSymbolDataManagerNew::update);
+//        sourceDataManager.message(&Tiled2dMapVectorSourceSymbolDataManager::update);
 //    }
 
     if (collisionManager) {
@@ -483,7 +483,7 @@ void Tiled2dMapVectorLayer::resume() {
         sourceDataManager.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceTileDataManager::resume);
     }
     for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
-        sourceDataManager.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceSymbolDataManagerNew::resume);
+        sourceDataManager.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceSymbolDataManager::resume);
     }
 }
 
@@ -496,7 +496,7 @@ void Tiled2dMapVectorLayer::setAlpha(float alpha) {
         sourceDataManager.message(&Tiled2dMapVectorSourceTileDataManager::setAlpha, alpha);
     }
     for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
-        sourceDataManager.message(&Tiled2dMapVectorSourceSymbolDataManagerNew::setAlpha, alpha);
+        sourceDataManager.message(&Tiled2dMapVectorSourceSymbolDataManager::setAlpha, alpha);
     }
 
     if (mapInterface)
@@ -612,7 +612,7 @@ void Tiled2dMapVectorLayer::didLoadSpriteData(std::shared_ptr<SpriteData> sprite
     this->spriteTexture = spriteTexture;
 
     for (const auto &[source, manager] : symbolSourceDataManagers) {
-        manager.message(&Tiled2dMapVectorSourceSymbolDataManagerNew::setSprites, spriteData, spriteTexture);
+        manager.message(&Tiled2dMapVectorSourceSymbolDataManager::setSprites, spriteData, spriteTexture);
     }
 }
 
@@ -637,7 +637,7 @@ void Tiled2dMapVectorLayer::setSelectionDelegate(const std::shared_ptr<Tiled2dMa
         sourceDataManager.message(&Tiled2dMapVectorSourceTileDataManager::setSelectionDelegate, selectionDelegate);
     }
     for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
-        sourceDataManager.message(&Tiled2dMapVectorSourceSymbolDataManagerNew::setSelectionDelegate, selectionDelegate);
+        sourceDataManager.message(&Tiled2dMapVectorSourceSymbolDataManager::setSelectionDelegate, selectionDelegate);
     }
 }
 
@@ -647,7 +647,7 @@ void Tiled2dMapVectorLayer::setSelectedFeatureIdentifier(std::optional<int64_t> 
         sourceDataManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::setSelectedFeatureIdentifier, identifier);
     }
     for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
-        sourceDataManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceSymbolDataManagerNew::setSelectedFeatureIdentifier, identifier);
+        sourceDataManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceSymbolDataManager::setSelectedFeatureIdentifier, identifier);
     }
     auto mapInterface = this->mapInterface;
     if (mapInterface) {

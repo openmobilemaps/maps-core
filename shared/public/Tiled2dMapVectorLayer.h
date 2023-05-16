@@ -30,7 +30,6 @@
 #include "Tiled2dMapVectorSourceRasterTileDataManager.h"
 #include "Tiled2dMapVectorSourceVectorTileDataManager.h"
 #include "Tiled2dMapVectorSourceSymbolDataManager.h"
-#include "Tiled2dMapVectorSourceSymbolDataManagerNew.h"
 #include "Tiled2dMapVectorSourceSymbolCollisionManager.h"
 #include "Tiled2dMapVectorInteractionManager.h"
 #include <unordered_map>
@@ -169,7 +168,7 @@ private:
     const std::shared_ptr<FontLoaderInterface> fontLoader;
 
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceTileDataManager>> sourceDataManagers;
-    std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceSymbolDataManagerNew>> symbolSourceDataManagers;
+    std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceSymbolDataManager>> symbolSourceDataManagers;
     Actor<Tiled2dMapVectorSourceSymbolCollisionManager> collisionManager;
     std::unique_ptr<Tiled2dMapVectorInteractionManager> interactionManager;
 
