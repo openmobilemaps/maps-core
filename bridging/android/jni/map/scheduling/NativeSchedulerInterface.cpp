@@ -60,6 +60,13 @@ void NativeSchedulerInterface::JavaProxy::resume() {
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_resume);
     ::djinni::jniExceptionCheck(jniEnv);
 }
+void NativeSchedulerInterface::JavaProxy::destroy() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeSchedulerInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_destroy);
+    ::djinni::jniExceptionCheck(jniEnv);
+}
 bool NativeSchedulerInterface::JavaProxy::hasSeparateGraphicsInvocation() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -129,6 +136,14 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_scheduling_Sc
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::SchedulerInterface>(nativeRef);
         ref->resume();
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_scheduling_SchedulerInterface_00024CppProxy_native_1destroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::SchedulerInterface>(nativeRef);
+        ref->destroy();
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

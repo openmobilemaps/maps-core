@@ -151,7 +151,8 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
     auto graphicsFactory = mapInterface ? mapInterface->getGraphicsObjectFactory() : nullptr;
     auto coordinateConverterHelper = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
     auto shaderFactory = mapInterface ? mapInterface->getShaderFactory() : nullptr;
-    if (!graphicsFactory || !shaderFactory) {
+    auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
+    if (!graphicsFactory || !shaderFactory || !scheduler) {
         return;
     }
 
@@ -254,7 +255,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
 
         std::weak_ptr<Tiled2dMapRasterLayer> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapRasterLayer>(shared_from_this());
 
-        mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
+        scheduler->addTask(std::make_shared<LambdaTask>(
                 TaskConfig("Tiled2dMapRasterLayer_onTilesUpdated", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
                 [weakSelfPtr, tilesToSetup, tilesToClean, newMaskObjects, obsoleteMaskObjects] {
                     auto selfPtr = weakSelfPtr.lock();

@@ -25,6 +25,8 @@ public:
 
     virtual void resume() = 0;
 
+    virtual void destroy() = 0;
+
     virtual bool hasSeparateGraphicsInvocation() = 0;
 
     /** Execute added graphics tasks. Returns true, if there are unprocessed tasks in the queue after the execution. */

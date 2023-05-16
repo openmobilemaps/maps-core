@@ -31,7 +31,7 @@ public:
 
     static /*not-null*/ std::shared_ptr<MapInterface> createWithOpenGl(const MapConfig & mapConfig, float pixelDensity);
 
-    virtual void setCallbackHandler(const /*not-null*/ std::shared_ptr<MapCallbackInterface> & callbackInterface) = 0;
+    virtual void setCallbackHandler(const /*nullable*/ std::shared_ptr<MapCallbackInterface> & callbackInterface) = 0;
 
     virtual /*not-null*/ std::shared_ptr<::GraphicsObjectFactoryInterface> getGraphicsObjectFactory() = 0;
 
@@ -76,6 +76,8 @@ public:
     virtual void resume() = 0;
 
     virtual void pause() = 0;
+
+    virtual void destroy() = 0;
 
     /**
      * changes bounds to bounds, checks all layers for readiness, and updates callbacks, timeout in
