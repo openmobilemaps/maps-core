@@ -24,6 +24,7 @@
 
 class Tiled2dMapVectorLayer;
 class Tiled2dMapVectorTile;
+class SpriteData;
 
 class Tiled2dMapVectorSourceDataManager : public ActorObject {
 public:
@@ -66,6 +67,8 @@ public:
     virtual bool onTwoFingerClick(const std::unordered_set<std::string> &layers, const Vec2F &posScreen1, const Vec2F &posScreen2) = 0;
 
     virtual void clearTouch() = 0;
+
+    virtual void setSprites(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) {}
 
 protected:
     std::weak_ptr<MapInterface> mapInterface;

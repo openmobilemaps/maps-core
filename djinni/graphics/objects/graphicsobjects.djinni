@@ -34,6 +34,7 @@ graphics_object_factory_interface = interface +c +j +o {
     create_quad_stretched_instanced(shader: shader_program_interface): quad_2d_stretched_instanced_interface;
     create_line_group(shader: shader_program_interface): line_group_2d_interface;
     create_polygon_group(shader: shader_program_interface): polygon_group_2d_interface;
+    create_polygon_pattern_group(shader: shader_program_interface): polygon_pattern_group_2d_interface;
 
     create_quad_mask() : quad_2d_interface;
     create_polygon_mask() : polygon_2d_interface;
@@ -132,6 +133,17 @@ render_vertices_description = record {
 
 polygon_group_2d_interface = interface +c +j +o {
     set_vertices(vertices: shared_bytes, indices: shared_bytes);
+    as_graphics_object(): graphics_object_interface;
+}
+
+polygon_pattern_group_2d_interface = interface +c +j +o {
+    set_vertices(vertices: shared_bytes, indices: shared_bytes);
+    set_opacities(values: shared_bytes);
+    # 4 floats (x, y, width and height) in uv space and 2 uint_16 values for the pixel with and height for each instanced
+    set_texture_coordinates(values: shared_bytes);
+    set_scaling_factor(factor: f32);
+    load_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
+    remove_texture();
     as_graphics_object(): graphics_object_interface;
 }
 

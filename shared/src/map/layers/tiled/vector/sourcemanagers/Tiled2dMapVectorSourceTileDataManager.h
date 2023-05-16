@@ -11,6 +11,7 @@
 #pragma once
 
 #include "Tiled2dMapVectorSourceDataManager.h"
+#include "SpriteData.h"
 
 class Tiled2dMapVectorLayer;
 class Tiled2dMapVectorTile;
@@ -56,9 +57,14 @@ public:
 
     void clearTouch() override;
 
+    void setSprites(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) override;
+
+
 protected:
     Actor<Tiled2dMapVectorTile> createTileActor(const Tiled2dMapTileInfo &tileInfo,
                                                 const std::shared_ptr<VectorLayerDescription> &layerDescription);
+
+    void setupExistingTilesWithSprite();
 
     virtual void pregenerateRenderPasses();
 
@@ -71,4 +77,7 @@ protected:
     std::unordered_map<Tiled2dMapTileInfo, std::unordered_set<int32_t>> tilesReadyControlSet;
 
     std::unordered_set<std::string> interactableLayers;
+
+    std::shared_ptr<SpriteData> spriteData;
+    std::shared_ptr<TextureHolderInterface> spriteTexture;
 };

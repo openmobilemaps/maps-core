@@ -9,6 +9,7 @@
 @protocol MCColorShaderInterface;
 @protocol MCLineGroupShaderInterface;
 @protocol MCPolygonGroupShaderInterface;
+@protocol MCPolygonPatternGroupShaderInterface;
 @protocol MCRasterShaderInterface;
 @protocol MCStretchInstancedShaderInterface;
 @protocol MCStretchShaderInterface;
@@ -31,6 +32,8 @@
 - (nullable id<MCColorCircleShaderInterface>)createColorCircleShader;
 
 - (nullable id<MCPolygonGroupShaderInterface>)createPolygonGroupShader;
+
+- (nullable id<MCPolygonPatternGroupShaderInterface>)createPolygonPatternGroupShader;
 
 - (nullable id<MCTextShaderInterface>)createTextShader;
 

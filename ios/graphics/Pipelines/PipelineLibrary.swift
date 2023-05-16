@@ -60,6 +60,7 @@ public enum Pipeline: String, CaseIterable {
     case alphaInstancedShader
     case lineGroupShader
     case polygonGroupShader
+    case polygonPatternGroupShader
     case colorShader
     case roundColorShader
     case clearStencilShader
@@ -75,6 +76,7 @@ public enum Pipeline: String, CaseIterable {
             case .alphaInstancedShader: return "Alpha instanced shader with texture"
             case .lineGroupShader: return "Line Group shader"
             case .polygonGroupShader: return "Polygon Group shader"
+            case .polygonPatternGroupShader: return "Polygon Group Pattern shader"
             case .colorShader: return "Color shader"
             case .roundColorShader: return "Round color shader"
             case .clearStencilShader: return "Clear stencil shader"
@@ -92,6 +94,7 @@ public enum Pipeline: String, CaseIterable {
             case .alphaInstancedShader: return "alphaInstancedVertexShader"
             case .lineGroupShader: return "lineGroupVertexShader"
             case .polygonGroupShader: return "polygonGroupVertexShader"
+            case .polygonPatternGroupShader: return "polygonPatternGroupVertexShader"
             case .colorShader: return "colorVertexShader"
             case .roundColorShader: return "colorVertexShader"
             case .clearStencilShader: return "stencilClearVertexShader"
@@ -109,6 +112,7 @@ public enum Pipeline: String, CaseIterable {
             case .alphaInstancedShader: return "alphaInstancedFragmentShader"
             case .lineGroupShader: return "lineGroupFragmentShader"
             case .polygonGroupShader: return "polygonGroupFragmentShader"
+            case .polygonPatternGroupShader: return "polygonPatternGroupFragmentShader"
             case .colorShader: return "colorFragmentShader"
             case .roundColorShader: return "roundColorFragmentShader"
             case .clearStencilShader: return "stencilClearFragmentShader"
@@ -123,7 +127,7 @@ public enum Pipeline: String, CaseIterable {
     var vertexDescriptor: MTLVertexDescriptor {
         switch self {
             case .lineGroupShader: return LineVertex.descriptor
-            case .polygonGroupShader: return PolygonVertex.descriptor
+            case .polygonGroupShader, .polygonPatternGroupShader: return PolygonVertex.descriptor
             default: return Vertex.descriptor
         }
     }

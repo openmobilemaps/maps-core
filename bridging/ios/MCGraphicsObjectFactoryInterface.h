@@ -7,6 +7,7 @@
 @protocol MCLineGroup2dInterface;
 @protocol MCPolygon2dInterface;
 @protocol MCPolygonGroup2dInterface;
+@protocol MCPolygonPatternGroup2dInterface;
 @protocol MCQuad2dInstancedInterface;
 @protocol MCQuad2dInterface;
 @protocol MCQuad2dStretchedInstancedInterface;
@@ -29,6 +30,8 @@
 - (nullable id<MCLineGroup2dInterface>)createLineGroup:(nullable id<MCShaderProgramInterface>)shader;
 
 - (nullable id<MCPolygonGroup2dInterface>)createPolygonGroup:(nullable id<MCShaderProgramInterface>)shader;
+
+- (nullable id<MCPolygonPatternGroup2dInterface>)createPolygonPatternGroup:(nullable id<MCShaderProgramInterface>)shader;
 
 - (nullable id<MCQuad2dInterface>)createQuadMask;
 
