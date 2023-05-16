@@ -68,6 +68,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)destroy {
+    try {
+        _cppRefHandle.get()->destroy();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (BOOL)hasSeparateGraphicsInvocation {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->hasSeparateGraphicsInvocation();
@@ -125,6 +131,12 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() resume];
+        }
+    }
+    void destroy() override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() destroy];
         }
     }
     bool hasSeparateGraphicsInvocation() override

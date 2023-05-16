@@ -19,6 +19,8 @@
 
 - (void)resume;
 
+- (void)destroy;
+
 - (BOOL)hasSeparateGraphicsInvocation;
 
 /** Execute added graphics tasks. Returns true, if there are unprocessed tasks in the queue after the execution. */

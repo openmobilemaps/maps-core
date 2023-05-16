@@ -39,6 +39,7 @@ private:
         void clear() override;
         void pause() override;
         void resume() override;
+        void destroy() override;
         bool hasSeparateGraphicsInvocation() override;
         bool runGraphicsTasks() override;
 
@@ -53,6 +54,7 @@ private:
     const jmethodID method_clear { ::djinni::jniGetMethodID(clazz.get(), "clear", "()V") };
     const jmethodID method_pause { ::djinni::jniGetMethodID(clazz.get(), "pause", "()V") };
     const jmethodID method_resume { ::djinni::jniGetMethodID(clazz.get(), "resume", "()V") };
+    const jmethodID method_destroy { ::djinni::jniGetMethodID(clazz.get(), "destroy", "()V") };
     const jmethodID method_hasSeparateGraphicsInvocation { ::djinni::jniGetMethodID(clazz.get(), "hasSeparateGraphicsInvocation", "()Z") };
     const jmethodID method_runGraphicsTasks { ::djinni::jniGetMethodID(clazz.get(), "runGraphicsTasks", "()Z") };
 };

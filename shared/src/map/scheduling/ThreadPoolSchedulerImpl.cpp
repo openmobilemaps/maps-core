@@ -113,8 +113,17 @@ void ThreadPoolSchedulerImpl::resume() {
     
 }
 
+
+void ThreadPoolSchedulerImpl::destroy() {
+    callbacks = nullptr;
+}
+
 std::thread ThreadPoolSchedulerImpl::makeSchedulerThread(size_t index, TaskPriority priority) {
     return std::thread([this, index, priority] {
+        auto callbacks = this->callbacks;
+        if (!callbacks) {
+            return;
+        }
         callbacks->setCurrentThreadName(std::string{"MapSDK_"} + std::to_string(index) + "_" + std::string(toString(priority)));
         callbacks->attachThread();
         
@@ -176,7 +185,10 @@ bool ThreadPoolSchedulerImpl::runGraphicsTasks() {
 }
 
 void ThreadPoolSchedulerImpl::delayedTasksThread() {
-    callbacks->setCurrentThreadName(std::string{"MapSDK_delayed_tasks"});
+    auto callbacks = this->callbacks;
+    if (callbacks) {
+        callbacks->setCurrentThreadName(std::string{"MapSDK_delayed_tasks"});
+    }
 
     while (true) {
         std::unique_lock<std::mutex> lock(delayedTasksMutex);

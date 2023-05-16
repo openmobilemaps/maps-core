@@ -86,8 +86,13 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
 
 void Tiled2dMapVectorLayer::scheduleStyleJsonLoading() {
     isLoadingStyleJson = true;
+    auto mapInterface = this->mapInterface;
+    auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
+    if (!scheduler) {
+        return;
+    }
     std::weak_ptr<Tiled2dMapVectorLayer> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
-    mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
+    scheduler->addTask(std::make_shared<LambdaTask>(
             TaskConfig("VectorTile_loadStyleJson", 0, TaskPriority::NORMAL, ExecutionEnvironment::IO),
             [weakSelfPtr] {
                 auto selfPtr = weakSelfPtr.lock();

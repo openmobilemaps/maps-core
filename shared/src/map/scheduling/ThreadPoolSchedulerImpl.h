@@ -38,6 +38,8 @@ public:
 
     virtual void resume() override;
 
+    void destroy() override;
+
     bool hasSeparateGraphicsInvocation() override;
 
     bool runGraphicsTasks() override;
@@ -49,7 +51,7 @@ public:
 private:
     std::thread makeSchedulerThread(size_t index, TaskPriority priority);
     
-    const std::shared_ptr<ThreadPoolCallbacks> callbacks;
+    std::shared_ptr<ThreadPoolCallbacks> callbacks;
 
     std::mutex defaultMutex;
     std::deque<std::shared_ptr<TaskInterface>> defaultQueue;

@@ -20,6 +20,8 @@ abstract class SchedulerInterface {
 
     abstract fun resume()
 
+    abstract fun destroy()
+
     abstract fun hasSeparateGraphicsInvocation(): Boolean
 
     /** Execute added graphics tasks. Returns true, if there are unprocessed tasks in the queue after the execution. */
@@ -72,6 +74,12 @@ abstract class SchedulerInterface {
             native_resume(this.nativeRef)
         }
         private external fun native_resume(_nativeRef: Long)
+
+        override fun destroy() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_destroy(this.nativeRef)
+        }
+        private external fun native_destroy(_nativeRef: Long)
 
         override fun hasSeparateGraphicsInvocation(): Boolean {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

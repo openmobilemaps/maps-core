@@ -62,6 +62,8 @@ abstract class MapInterface {
 
     abstract fun pause()
 
+    abstract fun destroy()
+
     /**
      * changes bounds to bounds, checks all layers for readiness, and updates callbacks, timeout in
      * seconds, always draw the frame when state is updated in the ready callbacks
@@ -219,6 +221,12 @@ abstract class MapInterface {
             native_pause(this.nativeRef)
         }
         private external fun native_pause(_nativeRef: Long)
+
+        override fun destroy() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_destroy(this.nativeRef)
+        }
+        private external fun native_destroy(_nativeRef: Long)
 
         override fun drawReadyFrame(bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, timeout: Float, callbacks: MapReadyCallbackInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

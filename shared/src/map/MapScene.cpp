@@ -276,7 +276,11 @@ void MapScene::pause() {
         }));
 }
 
-
+void MapScene::destroy() {
+    scheduler->destroy();
+    scheduler = nullptr;
+    callbackHandler = nullptr;
+}
 
 void MapScene::drawReadyFrame(const ::RectCoord &bounds, float timeout,
                               const std::shared_ptr<MapReadyCallbackInterface> &callbacks) {
