@@ -122,10 +122,14 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
         std::vector<std::tuple<std::vector<std::tuple<std::vector<Coord>, int>>, std::vector<uint16_t>>> objectDescriptions;
         objectDescriptions.push_back({{},{}});
 
-        std::vector<int32_t> indices;
+        std::vector<uint16_t> indices;
         std::int32_t indices_offset = 0;
 
+#ifndef __APPLE__
         for (auto featureIt = tileData->rbegin(); featureIt != tileData->rend(); featureIt++) {
+#else
+        for (auto featureIt = tileData->begin(); featureIt != tileData->end(); featureIt++) {
+#endif
 
             const auto &[featureContext, geometryHandler] = *featureIt;
 
