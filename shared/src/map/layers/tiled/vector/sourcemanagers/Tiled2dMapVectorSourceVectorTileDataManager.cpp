@@ -95,9 +95,6 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
                 if (layer->source != sourceName) {
                     continue;
                 }
-                if (!(layer->minZoom <= tile->tileInfo.zoomIdentifier && layer->maxZoom >= tile->tileInfo.zoomIdentifier)) {
-                    continue;
-                }
                 auto const mapIt = tile->layerFeatureMaps->find(layer->sourceId);
                 if (mapIt == tile->layerFeatureMaps->end()) {
                     continue;
