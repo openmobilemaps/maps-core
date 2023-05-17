@@ -15,6 +15,7 @@
 #include "earcut.hpp"
 #include "Logger.h"
 #include "PolygonHelper.h"
+#include "CoordinateSystemIdentifiers.h"
 
 namespace mapbox {
     namespace util {
@@ -304,7 +305,8 @@ std::vector<std::shared_ptr<RenderObjectInterface>> Tiled2dMapVectorPolygonTile:
 bool Tiled2dMapVectorPolygonTile::onClickConfirmed(const Vec2F &posScreen) {
     auto mapInterface = this->mapInterface.lock();
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
-    if (!camera || !selectionDelegate) {
+    auto converter = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
+    if (!camera || !selectionDelegate || !converter) {
         return false;
     }
     auto point = camera->coordFromScreenPosition(posScreen);
@@ -312,7 +314,7 @@ bool Tiled2dMapVectorPolygonTile::onClickConfirmed(const Vec2F &posScreen) {
     for (auto const &[tileInfo, polygonTuples] : hitDetectionPolygonMap) {
         for (auto const &[polygon, featureContext]: polygonTuples) {
             if (PolygonHelper::pointInside(polygon, point, mapInterface->getCoordinateConverterHelper())) {
-                selectionDelegate->didSelectFeature(featureContext.getFeatureInfo(), description->identifier, point);
+                selectionDelegate->didSelectFeature(featureContext.getFeatureInfo(), description->identifier, converter->convert(CoordinateSystemIdentifiers::EPSG4326(), point));
                 return true;
             }
         }

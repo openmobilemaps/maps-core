@@ -92,4 +92,6 @@ private:
     std::shared_ptr<SpriteData> spriteData;
 
     float alpha = 1.0;
+
+    std::unordered_set<std::string> interactableLayers;
 };

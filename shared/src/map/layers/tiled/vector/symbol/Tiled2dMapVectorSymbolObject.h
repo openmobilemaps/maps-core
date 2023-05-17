@@ -74,10 +74,12 @@ public:
     bool collides = false;
 
     void collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<std::vector<OBB2D>> placements);
+
+    std::optional<VectorLayerFeatureInfo> onClickConfirmed(const OBB2D &tinyClickBox);
 private:
 
     std::shared_ptr<Tiled2dMapVectorSymbolLabelObject> labelObject;
-    
+
     const FeatureContext featureContext;
 
     std::shared_ptr<SymbolInfo> textInfo;

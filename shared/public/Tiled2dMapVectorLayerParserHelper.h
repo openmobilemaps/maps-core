@@ -156,7 +156,7 @@ public:
                     renderPassIndex = val["metadata"].value("render-pass-index", 0);
                 }
                 if (!val["metadata"]["interactable"].is_null()) {
-                    interactable = parser.parseValue(val["metadata"]["render-pass-index"]);
+                    interactable = parser.parseValue(val["metadata"]["interactable"]);
                 }
             }
 

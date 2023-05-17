@@ -302,6 +302,9 @@ void Tiled2dMapVectorSourceTileDataManager::tileIsInteractable(const std::string
 
 bool
 Tiled2dMapVectorSourceTileDataManager::onClickUnconfirmed(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) {
+    if (interactableLayers.empty()) {
+        return false;
+    }
     for (const auto &[tileInfo, subTiles]: tiles) {
         for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
             if (interactableLayers.count(std::get<1>(*rIter)) == 0 || layers.count(std::get<1>(*rIter)) == 0) {
@@ -320,6 +323,9 @@ Tiled2dMapVectorSourceTileDataManager::onClickUnconfirmed(const std::unordered_s
 
 bool
 Tiled2dMapVectorSourceTileDataManager::onClickConfirmed(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) {
+    if (interactableLayers.empty()) {
+        return false;
+    }
     for (const auto &[tileInfo, subTiles]: tiles) {
         for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
             if (interactableLayers.count(std::get<1>(*rIter)) == 0 || layers.count(std::get<1>(*rIter)) == 0) {
@@ -337,6 +343,9 @@ Tiled2dMapVectorSourceTileDataManager::onClickConfirmed(const std::unordered_set
 }
 
 bool Tiled2dMapVectorSourceTileDataManager::onDoubleClick(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) {
+    if (interactableLayers.empty()) {
+        return false;
+    }
     for (const auto &[tileInfo, subTiles]: tiles) {
         for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
             if (interactableLayers.count(std::get<1>(*rIter)) == 0 || layers.count(std::get<1>(*rIter)) == 0) {
@@ -354,6 +363,9 @@ bool Tiled2dMapVectorSourceTileDataManager::onDoubleClick(const std::unordered_s
 }
 
 bool Tiled2dMapVectorSourceTileDataManager::onLongPress(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) {
+    if (interactableLayers.empty()) {
+        return false;
+    }
     for (const auto &[tileInfo, subTiles]: tiles) {
         for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
             if (interactableLayers.count(std::get<1>(*rIter)) == 0 || layers.count(std::get<1>(*rIter)) == 0) {
@@ -372,6 +384,9 @@ bool Tiled2dMapVectorSourceTileDataManager::onLongPress(const std::unordered_set
 
 bool Tiled2dMapVectorSourceTileDataManager::onTwoFingerClick(const std::unordered_set<std::string> &layers, const Vec2F &posScreen1,
                                                              const Vec2F &posScreen2) {
+    if (interactableLayers.empty()) {
+        return false;
+    }
     for (const auto &[tileInfo, subTiles]: tiles) {
         for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
             if (interactableLayers.count(std::get<1>(*rIter)) == 0 || layers.count(std::get<1>(*rIter)) == 0) {
@@ -389,6 +404,9 @@ bool Tiled2dMapVectorSourceTileDataManager::onTwoFingerClick(const std::unordere
 }
 
 void Tiled2dMapVectorSourceTileDataManager::clearTouch() {
+    if (interactableLayers.empty()) {
+        return;
+    }
     for (const auto &[tileInfo, subTiles]: tiles) {
         for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
             std::get<2>(*rIter).message(&Tiled2dMapVectorTile::clearTouch);

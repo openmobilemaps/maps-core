@@ -25,6 +25,9 @@ Tiled2dMapVectorSourceDataManager(vectorLayer, mapDescription, source), fontLoad
     for (const auto &layer: mapDescription->layers) {
         if (layer->getType() == VectorLayerType::symbol && layer->source == source) {
             layerDescriptions.insert({layer->identifier, std::static_pointer_cast<SymbolVectorLayerDescription>(layer)});
+            if (layer->isInteractable(EvaluationContext(std::nullopt, FeatureContext()))) {
+                interactableLayers.insert(layer->identifier);
+            }
         }
     }
 }
@@ -383,14 +386,17 @@ bool Tiled2dMapVectorSourceSymbolDataManager::onClickConfirmed(const std::unorde
 
     for(const auto &[tile, symbolGroupsMap]: tileSymbolGroupMap) {
         for (const auto &[layerIdentifier, symbolGroups] : symbolGroupsMap) {
+            if (interactableLayers.count(layerIdentifier) == 0) {
+                continue;
+            }
             for (const auto &symbolGroup : symbolGroups) {
-                // TODO: execute hit detection in the symbol groups
-//                const auto &featureInfoCoordsTuple = symbolGroup->onClickConfirmed(tinyClickBox);
-//                if (featureInfoCoordsTuple) {
-//                    const &[featureInfo, coordinates] = *featureInfoCoordsTuple;
-//                    selectionDelegate->didSelectFeature(featureInfo, symbolGroup->layerIdentifier, coordinates);
-//                    return true;
-//                }
+                auto result = symbolGroup.syncAccess([&tinyClickBox](auto group){
+                    return group->onClickConfirmed(tinyClickBox);
+                });
+                if (result) {
+                    selectionDelegate->didSelectFeature(*result, layerIdentifier, conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), clickCoords));
+                    return true;
+                }
             }
         }
     }

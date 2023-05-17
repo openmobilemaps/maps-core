@@ -548,3 +548,18 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
     this->collides = false;
     placements->push_back(orientedBox);
 }
+
+std::optional<VectorLayerFeatureInfo> Tiled2dMapVectorSymbolObject::onClickConfirmed(const OBB2D &tinyClickBox) {
+    if (collides) {
+        return std::nullopt;
+    }
+
+    auto combinedBox = getCombinedBoundingBox();
+    orientedBox.update(*combinedBox);
+
+    if (orientedBox.overlaps(tinyClickBox)) {
+        return featureContext.getFeatureInfo();
+    }
+    
+    return std::nullopt;
+}

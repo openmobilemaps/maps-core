@@ -35,6 +35,8 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
         return false;
     }
 
+    bool anyInteractable = false;
+
     const double tilePixelFactor = (0.0254 / camera->getScreenDensityPpi()) * tileInfo.zoomLevel;
 
     std::unordered_map<std::string, std::vector<Coord>> textPositionMap;
@@ -45,6 +47,10 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
         if ((layerDescription->filter != nullptr && !layerDescription->filter->evaluateOr(evalContext, true))) {
             continue;
+        }
+
+        if (!anyInteractable && layerDescription->isInteractable(evalContext)) {
+            anyInteractable = true;
         }
 
         std::vector<FormattedStringEntry> text = layerDescription->style.getTextField(evalContext);
@@ -197,6 +203,10 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
     if (symbolObjects.empty()) {
         return false;
+    }
+
+    if (anyInteractable) {
+        
     }
 
     std::sort(symbolObjects.begin(), symbolObjects.end(),
@@ -440,4 +450,14 @@ void Tiled2dMapVectorSymbolGroup::collisionDetection(const double zoomIdentifier
     for(auto const object: symbolObjects) {
         object->collisionDetection(zoomIdentifier, rotation, scaleFactor, placements);
     }
+}
+
+std::optional<VectorLayerFeatureInfo> Tiled2dMapVectorSymbolGroup::onClickConfirmed(const OBB2D &tinyClickBox) {
+    for (const auto object: symbolObjects) {
+        const auto result = object->onClickConfirmed(tinyClickBox);
+        if (result) {
+            return result;
+        }
+    }
+    return std::nullopt;
 }
