@@ -127,12 +127,6 @@ void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::st
         tileSymbolGroupMap[tile->tileInfo] = {};
 
         for (const auto &[layerIdentifier, layer]: layerDescriptions) {
-
-            if (!(layerDescriptions[layerIdentifier]->minZoom <= tile->tileInfo.zoomIdentifier &&
-                  layerDescriptions[layerIdentifier]->maxZoom >= tile->tileInfo.zoomIdentifier)) {
-                continue;
-            }
-
             const auto &dataIt = tile->layerFeatureMaps->find(layer->sourceId);
 
             if (dataIt != tile->layerFeatureMaps->end()) {
