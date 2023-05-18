@@ -26,22 +26,22 @@ void Tiled2dMapVectorSourceTileDataManager::update() {
     }
 }
 
+
 void Tiled2dMapVectorSourceTileDataManager::pregenerateRenderPasses() {
-    std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> renderPasses;
+    std::vector<std::shared_ptr<Tiled2dMapVectorLayer::TileRenderDescription>> renderDescriptions;
     for (const auto &[tile, subTiles] : tileRenderObjectsMap) {
         const auto tileMaskWrapper = tileMaskMap.find(tile);
         if (tilesReady.count(tile) > 0 && tileMaskWrapper != tileMaskMap.end()) {
             const auto &mask = tileMaskWrapper->second.getGraphicsMaskObject();
             for (const auto &[layerIndex, renderObjects]: subTiles) {
-                renderPasses.emplace_back(layerIndex, std::make_shared<RenderPass>(RenderPassConfig(0),
-                                                                                   renderObjects,
-                                                                                   mask));
+                const bool modifiesMask = modifyingMaskLayers.find(layerIndex) != modifyingMaskLayers.end();
+                renderDescriptions.push_back(std::make_shared<Tiled2dMapVectorLayer::TileRenderDescription>(Tiled2dMapVectorLayer::TileRenderDescription{layerIndex, renderObjects, mask, modifiesMask}));
             }
         }
     }
-    vectorLayer.syncAccess([source = this->source, &renderPasses](const auto &layer){
+    vectorLayer.syncAccess([source = this->source, &renderDescriptions](const auto &layer){
         if(auto strong = layer.lock()) {
-            strong->onRenderPassUpdate(source, false, renderPasses);
+            strong->onRenderPassUpdate(source, false, renderDescriptions);
         }
     });
 }

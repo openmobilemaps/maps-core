@@ -354,33 +354,56 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::build
     return currentRenderPasses;
 }
 
-void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, bool isSymbol, const std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> &renderPasses) {
+void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, bool isSymbol, const std::vector<std::shared_ptr<TileRenderDescription>> &renderDescription) {
     std::vector<std::shared_ptr<RenderPassInterface>> newPasses;
 
     if (isSymbol) {
-        sourceRenderPassesMap[source].symbolRenderPasses = renderPasses;
+        sourceRenderDescriptionMap[source].symbolRenderDescriptions = renderDescription;
     } else {
-        sourceRenderPassesMap[source].renderPasses = renderPasses;
+        sourceRenderDescriptionMap[source].renderDescriptions = renderDescription;
     }
-
 
     if (backgroundLayer) {
         auto backgroundLayerPasses = backgroundLayer->buildRenderPasses();
         newPasses.insert(newPasses.end(), backgroundLayerPasses.begin(), backgroundLayerPasses.end());
     }
 
-    std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> orderedPasses;
-    for (const auto &[source, indexPasses] : sourceRenderPassesMap) {
-        orderedPasses.insert(orderedPasses.end(), indexPasses.renderPasses.begin(), indexPasses.renderPasses.end());
-        orderedPasses.insert(orderedPasses.end(), indexPasses.symbolRenderPasses.begin(), indexPasses.symbolRenderPasses.end());
+    std::vector<std::shared_ptr<TileRenderDescription>> orderedRenderDescriptions;
+    for (const auto &[source, indexPasses] : sourceRenderDescriptionMap) {
+        orderedRenderDescriptions.insert(orderedRenderDescriptions.end(), indexPasses.renderDescriptions.begin(), indexPasses.renderDescriptions.end());
+        orderedRenderDescriptions.insert(orderedRenderDescriptions.end(), indexPasses.symbolRenderDescriptions.begin(), indexPasses.symbolRenderDescriptions.end());
     }
 
-    std::sort(orderedPasses.begin(), orderedPasses.end(), [](const auto &lhs, const auto &rhs) {
-        return std::get<0>(lhs) < std::get<0>(rhs);
+    std::sort(orderedRenderDescriptions.begin(), orderedRenderDescriptions.end(), [](const auto &lhs, const auto &rhs) {
+        return lhs->layerIndex < rhs->layerIndex;
     });
 
-    for (const auto &[index, pass] : orderedPasses) {
-        newPasses.push_back(pass);
+    std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;
+    std::shared_ptr<MaskingObjectInterface> lastMask = nullptr;
+
+    for (const auto &description : orderedRenderDescriptions) {
+        if (description->maskingObject != lastMask && !renderObjects.empty()) {
+            newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(0), renderObjects, lastMask));
+            renderObjects.clear();
+            lastMask = nullptr;
+        }
+
+        if (description->isModifyingMask) {
+            if (!renderObjects.empty()) {
+                newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(0), renderObjects, lastMask));
+            }
+            renderObjects.clear();
+            lastMask = nullptr;
+            newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(0), description->renderObjects, description->maskingObject));
+        } else {
+            renderObjects.insert(renderObjects.end(), description->renderObjects.begin(), description->renderObjects.end());
+            lastMask = description->maskingObject;
+        }
+    }
+    if (!renderObjects.empty()) {
+        newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(0), renderObjects, lastMask));
+        renderObjects.clear();
+        lastMask = nullptr;
     }
 
     {

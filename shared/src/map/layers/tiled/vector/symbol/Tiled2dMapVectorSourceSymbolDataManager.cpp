@@ -308,7 +308,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
         return ;
     }
 
-    std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> renderPasses;
+    std::vector<std::shared_ptr<Tiled2dMapVectorLayer::TileRenderDescription>> renderDescriptions;
 
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
 
@@ -321,7 +321,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
                 continue;
             }
 
-            const auto index = layerNameIndexMap.at(layerIdentifier);
+            const int32_t index = layerNameIndexMap.at(layerIdentifier);
 
             std::vector<std::shared_ptr< ::RenderObjectInterface>> renderObjects;
             for (const auto &group: symbolGroups) {
@@ -345,13 +345,14 @@ void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
                     }
                 });
             }
-            renderPasses.emplace_back(index, std::make_shared<RenderPass>(RenderPassConfig(0), renderObjects));
+            renderDescriptions.push_back(std::make_shared<Tiled2dMapVectorLayer::TileRenderDescription>(Tiled2dMapVectorLayer::TileRenderDescription{index, renderObjects, nullptr, false}));
         }
     }
 
-    vectorLayer.syncAccess([source = this->source, &renderPasses](const auto &layer){
+    //TODO: message this
+    vectorLayer.syncAccess([source = this->source, &renderDescriptions](const auto &layer){
         if(auto strong = layer.lock()) {
-            strong->onRenderPassUpdate(source, true, renderPasses);
+            strong->onRenderPassUpdate(source, true, renderDescriptions);
         }
     });
 }

@@ -78,6 +78,7 @@ protected:
     std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> selectionDelegate;
 
     std::unordered_map<std::string, int32_t> layerNameIndexMap;
+    std::unordered_set<int32_t> modifyingMaskLayers;
 
     std::optional<::RectI> scissorRect = std::nullopt;
 };
