@@ -40,8 +40,7 @@ Tiled2dMapVectorPolygonTile::Tiled2dMapVectorPolygonTile(const std::weak_ptr<Map
                                                          const Tiled2dMapTileInfo &tileInfo,
                                                          const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
                                                          const std::shared_ptr<PolygonVectorLayerDescription> &description)
-        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, tileCallbackInterface) {
-    usedKeys = std::move(description->getUsedKeys());
+        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, tileCallbackInterface), usedKeys(std::move(description->getUsedKeys())) {
     auto pMapInterface = mapInterface.lock();
     if (pMapInterface) {
         shader = pMapInterface->getShaderFactory()->createPolygonGroupShader();
@@ -230,12 +229,8 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
 }
 
 void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<ObjectDescriptions> &polygons) {
-    std::vector<std::shared_ptr<GraphicsObjectInterface>> oldGraphicsObjects;
-    for (const auto &polygon : this->polygons) {
-        oldGraphicsObjects.push_back(polygon->getPolygonObject());
-    }
 
-    if (polygons.empty() && oldGraphicsObjects.empty()) {
+    if (polygons.empty()) {
         auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
         tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
         return;
@@ -250,7 +245,6 @@ void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<ObjectDescriptio
         return;
     }
 
-    std::vector<std::shared_ptr<PolygonGroup2dLayerObject>> polygonObjects;
     std::vector<std::shared_ptr<GraphicsObjectInterface>> newGraphicObjects;
 
     for (auto const& polygon: polygons) {
@@ -264,18 +258,14 @@ void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<ObjectDescriptio
     }
 
 #ifdef __APPLE__
-    setupPolygons(newGraphicObjects, oldGraphicsObjects);
+    setupPolygons(newGraphicObjects);
 #else
     auto selfActor = WeakActor(mailbox, shared_from_this()->weak_from_this());
-    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorPolygonTile::setupPolygons, newGraphicObjects, oldGraphicsObjects);
+    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorPolygonTile::setupPolygons, newGraphicObjects);
 #endif
 }
 
-void Tiled2dMapVectorPolygonTile::setupPolygons(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects,
-                                                const std::vector<std::shared_ptr<GraphicsObjectInterface>> &oldPolygonObjects) {
-    for (const auto &polygon : oldPolygonObjects) {
-        if (polygon->isReady()) polygon->clear();
-    }
+void Tiled2dMapVectorPolygonTile::setupPolygons(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects) {
 
     auto mapInterface = this->mapInterface.lock();
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
@@ -299,7 +289,7 @@ std::vector<std::shared_ptr<RenderObjectInterface>> Tiled2dMapVectorPolygonTile:
         }
     }
 
-    return std::move(newRenderObjects);
+    return newRenderObjects;
 }
 
 bool Tiled2dMapVectorPolygonTile::onClickConfirmed(const Vec2F &posScreen) {

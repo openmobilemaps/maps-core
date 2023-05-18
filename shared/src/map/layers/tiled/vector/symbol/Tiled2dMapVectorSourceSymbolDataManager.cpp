@@ -90,10 +90,6 @@ void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::st
         return;
     }
 
-    std::thread::id this_id = std::this_thread::get_id();
-
-  //  LogError << "thread " << this_id <<= " sleeping...\n";
-
     // Just insert pointers here since we will only access the objects inside this method where we know that currentTileInfos is retained
     std::vector<const Tiled2dMapVectorTileInfo*> tilesToAdd;
     std::vector<const Tiled2dMapVectorTileInfo*> tilesToKeep;
@@ -173,7 +169,7 @@ std::optional<Actor<Tiled2dMapVectorSymbolGroup>> Tiled2dMapVectorSourceSymbolDa
 }
 
 
-void Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups(const std::vector<Actor<Tiled2dMapVectorSymbolGroup>> toSetup, const std::unordered_set<Tiled2dMapTileInfo> tilesToRemove) {
+void Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups(const std::vector<Actor<Tiled2dMapVectorSymbolGroup>> &toSetup, const std::unordered_set<Tiled2dMapTileInfo> &tilesToRemove) {
     auto mapInterface = this->mapInterface.lock();
     auto context = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!context) { return; }

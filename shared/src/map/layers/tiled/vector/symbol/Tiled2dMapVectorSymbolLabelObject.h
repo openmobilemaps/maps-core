@@ -97,7 +97,7 @@ private:
 
     const std::string fullText;
 
-    bool rotated = false;
+    bool wasRotated = false;
 
     std::vector<Coord> renderLineCoordinates;
     std::optional<std::vector<Coord>> lineCoordinates;

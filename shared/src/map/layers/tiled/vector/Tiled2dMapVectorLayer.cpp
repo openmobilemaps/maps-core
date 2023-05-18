@@ -188,7 +188,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     std::vector<WeakActor<Tiled2dMapSourceInterface>> sourceInterfaces;
     std::vector<Actor<Tiled2dMapRasterSource>> rasterSources;
 
-    std::unordered_map<std::string, Actor<Tiled2dMapVectorSource>> vectorTileSource;
+    std::unordered_map<std::string, Actor<Tiled2dMapVectorSource>> vectorTileSources;
 
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceTileDataManager>> sourceTileManagers;
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceSymbolDataManager>> symbolSourceDataManagers;
@@ -252,7 +252,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                           layers,
                                                           source,
                                                           mapInterface->getCamera()->getScreenDensityPpi());
-        vectorTileSource[source] = vectorSource;
+        vectorTileSources[source] = vectorSource;
         sourceInterfaces.push_back(vectorSource.weakActor<Tiled2dMapSourceInterface>());
         auto sourceDataManagerMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
         auto sourceManagerActor = Actor<Tiled2dMapVectorSourceVectorTileDataManager>(sourceDataManagerMailbox,
@@ -288,7 +288,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     interactionManager = std::make_unique<Tiled2dMapVectorInteractionManager>(interactionDataManagers, mapDescription);
 
     this->rasterTileSources = rasterSources;
-    this->vectorTileSources = vectorTileSource;
+    this->vectorTileSources = vectorTileSources;
     this->symbolSourceDataManagers = symbolSourceDataManagers;
     this->sourceDataManagers = sourceTileManagers;
 
@@ -683,10 +683,13 @@ std::optional<FeatureContext> Tiled2dMapVectorLayer::getFeatureContext(int64_t i
 
 std::shared_ptr<VectorLayerDescription> Tiled2dMapVectorLayer::getLayerDescriptionWithIdentifier(std::string identifier) {
     if (mapDescription) {
-        for (auto const &layer: mapDescription->layers) {
-            if (layer->identifier == identifier) {
-                return layer->clone();
-            }
+        auto it = std::find_if(mapDescription->layers.begin(), mapDescription->layers.end(),
+            [&identifier](const auto& layer) {
+                return layer->identifier == identifier;
+            });
+
+        if (it != mapDescription->layers.end()) {
+            return (*it)->clone();
         }
     }
     return nullptr;

@@ -239,7 +239,7 @@ Actor<Tiled2dMapVectorTile> Tiled2dMapVectorSourceTileDataManager::createTileAct
             break;
         }
     }
-    return std::move(actor);
+    return actor;
 }
 
 void Tiled2dMapVectorSourceTileDataManager::tileIsReady(const Tiled2dMapTileInfo &tile,

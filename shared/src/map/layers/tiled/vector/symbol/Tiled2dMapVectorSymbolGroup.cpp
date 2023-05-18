@@ -92,9 +92,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
             std::vector<Coord> line = {};
             for (const auto &points: geometry.getPointCoordinates()) {
-                for (auto &p: points) {
-                    line.push_back(p);
-                }
+                line.insert(line.end(), points.begin(), points.end());
             }
 
             for (const auto &points: geometry.getPointCoordinates()) {

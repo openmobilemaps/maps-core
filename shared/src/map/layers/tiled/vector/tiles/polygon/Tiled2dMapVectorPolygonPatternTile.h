@@ -53,8 +53,7 @@ private:
 
     void addPolygons(const std::vector<ObjectDescriptions> &polygons);
 
-    void setupPolygons(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects,
-                       const std::vector<std::shared_ptr<GraphicsObjectInterface>> &oldPolygonObjects);
+    void setupPolygons(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects);
 
     void setupTextureCoordinates();
 

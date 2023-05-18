@@ -44,8 +44,7 @@ Tiled2dMapVectorPolygonPatternTile::Tiled2dMapVectorPolygonPatternTile(const std
                                                          const std::shared_ptr<PolygonVectorLayerDescription> &description,
                                                          const std::shared_ptr<SpriteData> &spriteData,
                                                         const std::shared_ptr<TextureHolderInterface> &spriteTexture)
-        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, tileCallbackInterface), spriteData(spriteData), spriteTexture(spriteTexture) {
-    usedKeys = std::move(description->getUsedKeys());
+        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, tileCallbackInterface), spriteData(spriteData), spriteTexture(spriteTexture), usedKeys(description->getUsedKeys()) {
     auto pMapInterface = mapInterface.lock();
     if (pMapInterface) {
         shader = pMapInterface->getShaderFactory()->createPolygonPatternGroupShader();
@@ -235,12 +234,8 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
 }
 
 void Tiled2dMapVectorPolygonPatternTile::addPolygons(const std::vector<ObjectDescriptions> &polygons) {
-    std::vector<std::shared_ptr<GraphicsObjectInterface>> oldGraphicsObjects;
-    for (const auto &polygon : this->polygons) {
-        oldGraphicsObjects.push_back(polygon->getPolygonObject());
-    }
 
-    if (polygons.empty() && oldGraphicsObjects.empty()) {
+    if (polygons.empty()) {
         auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
         tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
         return;
@@ -255,7 +250,6 @@ void Tiled2dMapVectorPolygonPatternTile::addPolygons(const std::vector<ObjectDes
         return;
     }
 
-    std::vector<std::shared_ptr<PolygonPatternGroup2dLayerObject>> polygonObjects;
     std::vector<std::shared_ptr<GraphicsObjectInterface>> newGraphicObjects;
 
     for (auto const& polygon: polygons) {
@@ -269,19 +263,14 @@ void Tiled2dMapVectorPolygonPatternTile::addPolygons(const std::vector<ObjectDes
     }
 
 #ifdef __APPLE__
-    setupPolygons(newGraphicObjects, oldGraphicsObjects);
+    setupPolygons(newGraphicObjects);
 #else
     auto selfActor = WeakActor(mailbox, shared_from_this()->weak_from_this());
-    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorPolygonPatternTile::setupPolygons, newGraphicObjects, oldGraphicsObjects);
+    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorPolygonPatternTile::setupPolygons, newGraphicObjects);
 #endif
 }
 
-void Tiled2dMapVectorPolygonPatternTile::setupPolygons(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects,
-                                                const std::vector<std::shared_ptr<GraphicsObjectInterface>> &oldPolygonObjects) {
-    for (const auto &polygon : oldPolygonObjects) {
-        if (polygon->isReady()) polygon->clear();
-    }
-
+void Tiled2dMapVectorPolygonPatternTile::setupPolygons(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects) {
     auto mapInterface = this->mapInterface.lock();
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!renderingContext) {
@@ -306,7 +295,7 @@ std::vector<std::shared_ptr<RenderObjectInterface>> Tiled2dMapVectorPolygonPatte
         }
     }
 
-    return std::move(newRenderObjects);
+    return newRenderObjects;
 }
 
 void Tiled2dMapVectorPolygonPatternTile::setSpriteData(const std::shared_ptr<SpriteData> &spriteData,
@@ -333,7 +322,6 @@ void Tiled2dMapVectorPolygonPatternTile::setupTextureCoordinates() {
     zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.zoomIdentifier);
 
     auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
-    std::vector<float> textureCoordinates;
     textureCoordinates.resize(featureGroups.size() * 5, 1.0);
 
     int index = 0;
@@ -344,7 +332,6 @@ void Tiled2dMapVectorPolygonPatternTile::setupTextureCoordinates() {
 
         const auto spriteIt = spriteData->sprites.find(patternName);
         if (spriteIt != spriteData->sprites.end()) {
-            const double densityOffset = (camera->getScreenDensityPpi() / 160.0) / spriteIt->second.pixelRatio;
 
             int offset = index * 5;
 

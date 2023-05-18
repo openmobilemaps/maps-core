@@ -51,7 +51,7 @@ public:
 
     void update();
 
-    void setSprites(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture);
+    void setSprites(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) override;
 
     bool onClickUnconfirmed(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) override;
 
@@ -71,7 +71,7 @@ private:
 
     std::optional<Actor<Tiled2dMapVectorSymbolGroup>> createSymbolGroup(const Tiled2dMapTileInfo &tileInfo, const std::string &layerIdentifier, const std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features);
 
-    void setupSymbolGroups(const std::vector<Actor<Tiled2dMapVectorSymbolGroup>> toSetup, const std::unordered_set<Tiled2dMapTileInfo> tilesToRemove);
+    void setupSymbolGroups(const std::vector<Actor<Tiled2dMapVectorSymbolGroup>> &toSetup, const std::unordered_set<Tiled2dMapTileInfo> &tilesToRemove);
 
     void setupExistingSymbolWithSprite();
 

@@ -101,7 +101,6 @@ void Tiled2dMapVectorSymbolObject::setCollisionAt(float zoom, bool isCollision) 
 }
 
 std::optional<bool> Tiled2dMapVectorSymbolObject::hasCollision(float zoom) {
-
     if(collisionMap.size() == 0) {
         return std::nullopt;
     }
@@ -197,14 +196,13 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
 }
 
 void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation) {
-    if (lastIconUpdateScaleFactor == scaleFactor && lastIconUpdateRotation == rotation) {
-        countOffset += instanceCounts.icons;
+
+    if (instanceCounts.icons == 0) {
         return;
     }
 
-    double lastUpdateRotation;
-
-    if (instanceCounts.icons == 0) {
+    if (lastIconUpdateScaleFactor == scaleFactor && lastIconUpdateRotation == rotation) {
+        countOffset += instanceCounts.icons;
         return;
     }
 
@@ -213,6 +211,9 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &scal
         scales[2 * countOffset] = 0;
         scales[2 * countOffset + 1] = 0;
         countOffset += instanceCounts.icons;
+
+        lastIconUpdateScaleFactor = scaleFactor;
+        lastIconUpdateRotation = rotation;
         return;
     }
 
@@ -239,7 +240,7 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &scal
 
     countOffset += instanceCounts.icons;
 
-    lastIconUpdateRotation = scaleFactor;
+    lastIconUpdateScaleFactor = scaleFactor;
     lastIconUpdateRotation = rotation;
 }
 
@@ -411,9 +412,9 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
         stretchInfos[infoOffset + 2] = (end / stretchSpriteInfo->width) ;
 
         if (stretchSpriteInfo->stretchX.size() >= 2) {
-            auto [begin, end] = stretchSpriteInfo->stretchX[1];
-            stretchInfos[infoOffset + 3] = (begin / stretchSpriteInfo->width);
-            stretchInfos[infoOffset + 4] = (end / stretchSpriteInfo->width);
+            auto [begin1, end1] = stretchSpriteInfo->stretchX[1];
+            stretchInfos[infoOffset + 3] = (begin1 / stretchSpriteInfo->width);
+            stretchInfos[infoOffset + 4] = (end1 / stretchSpriteInfo->width);
         } else {
             stretchInfos[infoOffset + 3] = stretchInfos[infoOffset + 2];
             stretchInfos[infoOffset + 4] = stretchInfos[infoOffset + 2];
@@ -439,9 +440,9 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
         stretchInfos[infoOffset + 7] = (end / stretchSpriteInfo->height);
 
         if (stretchSpriteInfo->stretchY.size() >= 2) {
-            auto [begin, end] = stretchSpriteInfo->stretchY[1];
-            stretchInfos[infoOffset + 8] = (begin / stretchSpriteInfo->height);
-            stretchInfos[infoOffset + 9] = (end / stretchSpriteInfo->height);
+            auto [begin1, end1] = stretchSpriteInfo->stretchY[1];
+            stretchInfos[infoOffset + 8] = (begin1 / stretchSpriteInfo->height);
+            stretchInfos[infoOffset + 9] = (end1 / stretchSpriteInfo->height);
         } else {
             stretchInfos[infoOffset + 8] = stretchInfos[infoOffset + 7];
             stretchInfos[infoOffset + 9] = stretchInfos[infoOffset + 7];
