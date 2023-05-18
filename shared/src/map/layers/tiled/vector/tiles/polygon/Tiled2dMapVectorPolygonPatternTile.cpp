@@ -342,18 +342,21 @@ void Tiled2dMapVectorPolygonPatternTile::setupTextureCoordinates() {
         const auto& ec = EvaluationContext(zoomIdentifier, feature);
         const auto& patternName = polygonDescription->style.getFillPattern(ec);
 
-        const auto &spriteInfo = spriteData->sprites.at(patternName);
+        const auto spriteIt = spriteData->sprites.find(patternName);
+        if (spriteIt != spriteData->sprites.end()) {
+            const double densityOffset = (camera->getScreenDensityPpi() / 160.0) / spriteIt->second.pixelRatio;
 
-        const double densityOffset = (camera->getScreenDensityPpi() / 160.0) / spriteInfo.pixelRatio;
+            int offset = index * 5;
 
-        int offset = index * 5;
+            textureCoordinates[offset + 0] = ((float) spriteIt->second.x) / spriteTexture->getImageWidth();
+            textureCoordinates[offset + 1] = ((float) spriteIt->second.y) / spriteTexture->getImageHeight();
+            textureCoordinates[offset + 2] = ((float) spriteIt->second.width) / spriteTexture->getImageWidth();
+            textureCoordinates[offset + 3] = ((float) spriteIt->second.height) / spriteTexture->getImageHeight();
+            textureCoordinates[offset + 4] = spriteIt->second.width + (spriteIt->second.height << 16);
 
-        textureCoordinates[offset + 0] = ((float) spriteInfo.x) / spriteTexture->getImageWidth();
-        textureCoordinates[offset + 1] = ((float) spriteInfo.y) / spriteTexture->getImageHeight();
-        textureCoordinates[offset + 2] = ((float) spriteInfo.width) / spriteTexture->getImageWidth();
-        textureCoordinates[offset + 3] = ((float) spriteInfo.height) / spriteTexture->getImageHeight();
-        textureCoordinates[offset + 4] = spriteInfo.width + (spriteInfo.height << 16);
-
+        } else {
+            LogError << "Unable to find sprite " << patternName;
+        }
         index++;
     }
     auto context = mapInterface->getRenderingContext();

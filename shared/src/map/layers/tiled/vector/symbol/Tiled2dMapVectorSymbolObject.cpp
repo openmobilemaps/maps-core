@@ -166,17 +166,24 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
         const auto textureWidth = (double) spriteTexture->getImageWidth();
         const auto textureHeight = (double) spriteTexture->getImageHeight();
 
-        const auto &spriteInfo = spriteData->sprites.at(iconImage);
+        const auto spriteIt = spriteData->sprites.find(iconImage);
+        if (spriteIt == spriteData->sprites.end()) {
+            LogError << "Unable to find sprite " << iconImage;
+            positions[2 * countOffset] = 0;
+            positions[2 * countOffset + 1] = 0;
+            countOffset += instanceCounts.icons;
+            return;
+        }
 
-        const double densityOffset = (camera->getScreenDensityPpi() / 160.0) / spriteInfo.pixelRatio;
+        const double densityOffset = (camera->getScreenDensityPpi() / 160.0) / spriteIt->second.pixelRatio;
 
-        spriteSize.x = spriteInfo.width * densityOffset;
-        spriteSize.y = spriteInfo.height * densityOffset;
+        spriteSize.x = spriteIt->second.width * densityOffset;
+        spriteSize.y = spriteIt->second.height * densityOffset;
 
-        textureCoordinates[4 * countOffset + 0] = ((double) spriteInfo.x) / textureWidth;
-        textureCoordinates[4 * countOffset + 1] = ((double) spriteInfo.y) / textureHeight;
-        textureCoordinates[4 * countOffset + 2] = ((double) spriteInfo.width) / textureWidth;
-        textureCoordinates[4 * countOffset + 3] = ((double) spriteInfo.height) / textureHeight;
+        textureCoordinates[4 * countOffset + 0] = ((double) spriteIt->second.x) / textureWidth;
+        textureCoordinates[4 * countOffset + 1] = ((double) spriteIt->second.y) / textureHeight;
+        textureCoordinates[4 * countOffset + 2] = ((double) spriteIt->second.width) / textureWidth;
+        textureCoordinates[4 * countOffset + 3] = ((double) spriteIt->second.height) / textureHeight;
 
     }
 
@@ -268,19 +275,26 @@ void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(std::vector<float>
         const auto textureWidth = (double) spriteTexture->getImageWidth();
         const auto textureHeight = (double) spriteTexture->getImageHeight();
 
-        const auto &spriteInfo = spriteData->sprites.at(iconImage);
+        const auto spriteIt = spriteData->sprites.find(iconImage);
+        if (spriteIt == spriteData->sprites.end()) {
+            LogError << "Unable to find sprite " << iconImage;
+            positions[2 * countOffset] = 0;
+            positions[2 * countOffset + 1] = 0;
+            countOffset += instanceCounts.stretchedIcons;
+            return;
+        }
 
-        const double densityOffset = (camera->getScreenDensityPpi() / 160.0) / spriteInfo.pixelRatio;
+        const double densityOffset = (camera->getScreenDensityPpi() / 160.0) / spriteIt->second.pixelRatio;
 
-        stretchSpriteSize.x = spriteInfo.width * densityOffset;
-        stretchSpriteSize.y = spriteInfo.height * densityOffset;
+        stretchSpriteSize.x = spriteIt->second.width * densityOffset;
+        stretchSpriteSize.y = spriteIt->second.height * densityOffset;
 
-        stretchSpriteInfo = spriteInfo;
+        stretchSpriteInfo = spriteIt->second;
 
-        textureCoordinates[4 * countOffset + 0] = ((double) spriteInfo.x) / textureWidth;
-        textureCoordinates[4 * countOffset + 1] = ((double) spriteInfo.y) / textureHeight;
-        textureCoordinates[4 * countOffset + 2] = ((double) spriteInfo.width) / textureWidth;
-        textureCoordinates[4 * countOffset + 3] = ((double) spriteInfo.height) / textureHeight;
+        textureCoordinates[4 * countOffset + 0] = ((double) spriteIt->second.x) / textureWidth;
+        textureCoordinates[4 * countOffset + 1] = ((double) spriteIt->second.y) / textureHeight;
+        textureCoordinates[4 * countOffset + 2] = ((double) spriteIt->second.width) / textureWidth;
+        textureCoordinates[4 * countOffset + 3] = ((double) spriteIt->second.height) / textureHeight;
 
     }
 
