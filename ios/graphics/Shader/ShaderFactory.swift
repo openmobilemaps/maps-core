@@ -43,4 +43,9 @@ class ShaderFactory: MCShaderFactoryInterface {
     func createColorShader() -> MCColorShaderInterface? {
         ColorShader()
     }
+
+    func createSkyboxShader() -> MCShaderProgramInterface? {
+        SkyboxShader()
+    }
+
 }

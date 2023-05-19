@@ -21,6 +21,7 @@ shader_factory_interface = interface +c +j +o {
     create_polygon_group_shader(): polygon_group_shader_interface;
     create_text_shader() : text_shader_interface;
     create_sphere_projection_shader() : sphere_projection_shader_interface;
+    create_skybox_shader(): shader_program_interface;
 }
 
 alpha_shader_interface = interface +c +o {

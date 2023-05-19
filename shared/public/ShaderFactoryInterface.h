@@ -11,6 +11,7 @@ class ColorLineShaderInterface;
 class ColorShaderInterface;
 class LineGroupShaderInterface;
 class PolygonGroupShaderInterface;
+class ShaderProgramInterface;
 class SphereProjectionShaderInterface;
 class TextShaderInterface;
 
@@ -33,4 +34,6 @@ public:
     virtual /*not-null*/ std::shared_ptr<TextShaderInterface> createTextShader() = 0;
 
     virtual /*not-null*/ std::shared_ptr<SphereProjectionShaderInterface> createSphereProjectionShader() = 0;
+
+    virtual /*not-null*/ std::shared_ptr<ShaderProgramInterface> createSkyboxShader() = 0;
 };

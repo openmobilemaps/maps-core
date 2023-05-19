@@ -41,6 +41,7 @@ private:
         /*not-null*/ std::shared_ptr<::PolygonGroupShaderInterface> createPolygonGroupShader() override;
         /*not-null*/ std::shared_ptr<::TextShaderInterface> createTextShader() override;
         /*not-null*/ std::shared_ptr<::SphereProjectionShaderInterface> createSphereProjectionShader() override;
+        /*not-null*/ std::shared_ptr<::ShaderProgramInterface> createSkyboxShader() override;
 
     private:
         friend ::djinni::JniInterface<::ShaderFactoryInterface, ::djinni_generated::NativeShaderFactoryInterface>;
@@ -55,6 +56,7 @@ private:
     const jmethodID method_createPolygonGroupShader { ::djinni::jniGetMethodID(clazz.get(), "createPolygonGroupShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/PolygonGroupShaderInterface;") };
     const jmethodID method_createTextShader { ::djinni::jniGetMethodID(clazz.get(), "createTextShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/TextShaderInterface;") };
     const jmethodID method_createSphereProjectionShader { ::djinni::jniGetMethodID(clazz.get(), "createSphereProjectionShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/SphereProjectionShaderInterface;") };
+    const jmethodID method_createSkyboxShader { ::djinni::jniGetMethodID(clazz.get(), "createSkyboxShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ShaderProgramInterface;") };
 };
 
 } // namespace djinni_generated

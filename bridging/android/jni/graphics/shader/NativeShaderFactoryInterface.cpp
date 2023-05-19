@@ -8,6 +8,7 @@
 #include "NativeColorShaderInterface.h"
 #include "NativeLineGroupShaderInterface.h"
 #include "NativePolygonGroupShaderInterface.h"
+#include "NativeShaderProgramInterface.h"
 #include "NativeSphereProjectionShaderInterface.h"
 #include "NativeTextShaderInterface.h"
 
@@ -84,6 +85,14 @@ NativeShaderFactoryInterface::JavaProxy::~JavaProxy() = default;
     auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_createSphereProjectionShader);
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativeSphereProjectionShaderInterface::toCpp(jniEnv, jret);
+}
+/*not-null*/ std::shared_ptr<::ShaderProgramInterface> NativeShaderFactoryInterface::JavaProxy::createSkyboxShader() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeShaderFactoryInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_createSkyboxShader);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativeShaderProgramInterface::toCpp(jniEnv, jret);
 }
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderFactoryInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
@@ -162,6 +171,15 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shade
         const auto& ref = ::djinni::objectFromHandleAddress<::ShaderFactoryInterface>(nativeRef);
         auto r = ref->createSphereProjectionShader();
         return ::djinni::release(::djinni_generated::NativeSphereProjectionShaderInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderFactoryInterface_00024CppProxy_native_1createSkyboxShader(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::ShaderFactoryInterface>(nativeRef);
+        auto r = ref->createSkyboxShader();
+        return ::djinni::release(::djinni_generated::NativeShaderProgramInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

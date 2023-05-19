@@ -8,6 +8,7 @@
 @protocol MCColorShaderInterface;
 @protocol MCLineGroupShaderInterface;
 @protocol MCPolygonGroupShaderInterface;
+@protocol MCShaderProgramInterface;
 @protocol MCSphereProjectionShaderInterface;
 @protocol MCTextShaderInterface;
 
@@ -29,5 +30,7 @@
 - (nullable id<MCTextShaderInterface>)createTextShader;
 
 - (nullable id<MCSphereProjectionShaderInterface>)createSphereProjectionShader;
+
+- (nullable id<MCShaderProgramInterface>)createSkyboxShader;
 
 @end

@@ -1,0 +1,10 @@
+@extern "../../../yaml/layer_interface.yaml"
+@extern "../../../yaml/coord.yaml"
+@extern "../../../yaml/texture_holder_interface.yaml"
+@extern "../../../yaml/shader_program_interface.yaml"
+@extern "../../../yaml/vec_2_f.yaml"
+
+skybox_layer_interface = interface +c {
+    static create() : skybox_layer_interface;
+    asLayerInterface(): layer_interface;
+}

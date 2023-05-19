@@ -86,6 +86,7 @@ public enum Pipeline: String, CaseIterable {
     case textShader
     case sphereProjectionShader
     case sphereColorShader
+    case skyboxShader
 
     var label: String {
         switch self {
@@ -99,6 +100,7 @@ public enum Pipeline: String, CaseIterable {
             case .textShader: return "Text shader"
             case .sphereProjectionShader: return "Sphere projection shader"
             case .sphereColorShader: return "Sphere Mask Shader"
+            case .skyboxShader: return "Skybox Shader"
         }
     }
 
@@ -114,6 +116,7 @@ public enum Pipeline: String, CaseIterable {
             case .textShader: return "textVertexShader"
             case .sphereProjectionShader: return "sphereProjectionVertexShader"
             case .sphereColorShader: return "sphereColorVertexShader"
+            case .skyboxShader: return "baseVertexShader"
         }
     }
 
@@ -129,6 +132,7 @@ public enum Pipeline: String, CaseIterable {
             case .textShader: return "textFragmentShader"
             case .sphereProjectionShader: return "shadedFragmentShader"
             case .sphereColorShader: return "colorFragmentShader"
+            case .skyboxShader: return "skyboxFragmentShader"
         }
     }
 

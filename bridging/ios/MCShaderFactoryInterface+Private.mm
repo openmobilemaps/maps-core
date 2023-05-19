@@ -12,6 +12,7 @@
 #import "MCColorShaderInterface+Private.h"
 #import "MCLineGroupShaderInterface+Private.h"
 #import "MCPolygonGroupShaderInterface+Private.h"
+#import "MCShaderProgramInterface+Private.h"
 #import "MCSphereProjectionShaderInterface+Private.h"
 #import "MCTextShaderInterface+Private.h"
 #include <exception>
@@ -94,6 +95,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable id<MCShaderProgramInterface>)createSkyboxShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createSkyboxShader();
+        return ::djinni_generated::ShaderProgramInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class ShaderFactoryInterface::ObjcProxy final
@@ -157,6 +165,13 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createSphereProjectionShader];
             return ::djinni_generated::SphereProjectionShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::ShaderProgramInterface> createSkyboxShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createSkyboxShader];
+            return ::djinni_generated::ShaderProgramInterface::toCpp(objcpp_result_);
         }
     }
 };
