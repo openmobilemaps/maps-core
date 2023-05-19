@@ -82,8 +82,10 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
 
         const auto textRadialOffset = description->style.getTextRadialOffset(evalContext);
         // TODO: currently only shifting to top right
-        textOffset.x += textRadialOffset;
-        textOffset.y -= textRadialOffset;
+        if (textRadialOffset != 0) {
+            textOffset.x += textRadialOffset;
+            textOffset.y += textRadialOffset;
+        }
 
         const auto letterSpacing = description->style.getTextLetterSpacing(evalContext);
 
@@ -379,8 +381,8 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     renderPos.y -= iconOffset.y * scaleFactor;
     renderPos.x += iconOffset.x * scaleFactor;
 
-    positions[2 * countOffset] = renderCoordinate.x - leftPadding * 0.25 + rightPadding * 0.25;
-    positions[2 * countOffset + 1] = renderCoordinate.y + topPadding * 0.25 + bottomPadding * 0.25;
+    positions[2 * countOffset] = renderPos.x - leftPadding * 0.5 + rightPadding * 0.5;
+    positions[2 * countOffset + 1] = renderPos.y + topPadding * 0.5 - bottomPadding * 0.5;
 
     stretchIconBoundingBox.topLeft.x = positions[2 * countOffset] - spriteWidth * 0.5;
     stretchIconBoundingBox.topLeft.y = positions[2 * countOffset + 1] - spriteHeight * 0.5;
@@ -499,12 +501,12 @@ std::optional<RectCoord> Tiled2dMapVectorSymbolObject::getCombinedBoundingBox() 
     if (labelObject && labelObject->boundingBox.topLeft.x != 0) {
         boxes.push_back(&labelObject->boundingBox);
     }
-    if (iconBoundingBox.topLeft.x != 0){
-        boxes.push_back(&iconBoundingBox);
-    }
-    if (stretchIconBoundingBox.topLeft.x != 0){
-        boxes.push_back(&stretchIconBoundingBox);
-    }
+//    if (iconBoundingBox.topLeft.x != 0){
+//        boxes.push_back(&iconBoundingBox);
+//    }
+//    if (stretchIconBoundingBox.topLeft.x != 0){
+//        boxes.push_back(&stretchIconBoundingBox);
+//    }
 
     if (boxes.empty()) {
         return std::nullopt;

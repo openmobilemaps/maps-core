@@ -224,6 +224,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
     auto pen = Vec2D(0.0, 0.0);
     
     std::optional<BoundingBox> box = std::nullopt;
+    std::optional<BoundingBox> centerPosBox = std::nullopt;
 
     centerPositions.clear();
     centerPositions.reserve(characterCount);
@@ -256,6 +257,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
                 if (!box) {
                     box = BoundingBox(referencePoint.systemIdentifier);
+                    centerPosBox = BoundingBox(referencePoint.systemIdentifier);
                 }
                 
                 box->addPoint(quad.topLeft.x, quad.topLeft.y, referencePoint.z);
@@ -267,6 +269,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
                 scales[2 * (countOffset + centerPositions.size()) + 1] = size.y;
                 rotations[countOffset + centerPositions.size()] = -angle;
 
+                centerPosBox->addPoint(x + size.x / 2, y + size.y / 2, referencePoint.z);
                 centerPositions.push_back(Vec2D(x + size.x / 2,
                                                 y + size.y / 2));
 
@@ -287,6 +290,10 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
     Vec2D max(box->max.x, box->max.y);
     Vec2D size((max.x - min.x), (max.y - min.y));
 
+    Vec2D centerMin(centerPosBox->min.x, centerPosBox->min.y);
+    Vec2D centerMax(centerPosBox->max.x, centerPosBox->max.y);
+    Vec2D centerSize((centerMax.x - centerMin.x), (centerMax.y - centerMin.y));
+
     switch (textJustify) {
         case TextJustify::LEFT:
             //Nothing to do here
@@ -298,7 +305,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
             for (auto const lineEndIndex: lineEndIndices) {
                 double lineWidth = centerPositions[lineEndIndex].x - centerPositions[lineStart].x;
                 auto factor = textJustify == TextJustify::CENTER ? 2.0 : 1.0;
-                double delta = (size.x - lineWidth) / factor;
+                double delta = (centerSize.x - lineWidth) / factor;
 
                 for(size_t i = lineStart; i <= lineEndIndex; i++) {
                     centerPositions[i].x += delta;
@@ -320,39 +327,39 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
     switch (textAnchor) {
         case Anchor::CENTER:
             anchorOffset.x -= size.x / 2.0 - textOffset.x;
-            anchorOffset.y -= size.y / 2.0 - textOffset.y;
+            anchorOffset.y -= size.y / 2.0 + textOffset.y;
             break;
         case Anchor::LEFT:
             anchorOffset.x += textOffset.x;
-            anchorOffset.y -= size.y / 2.0 - textOffset.y;
+            anchorOffset.y -= size.y / 2.0 + textOffset.y * 1000;
             break;
         case Anchor::RIGHT:
             anchorOffset.x -= size.x - textOffset.x;
-            anchorOffset.y -= size.y / 2.0 - textOffset.y;
+            anchorOffset.y -= size.y / 2.0 + textOffset.y;
             break;
         case Anchor::TOP:
             anchorOffset.x -= size.x / 2.0 - textOffset.x;
-            anchorOffset.y -= -textOffset.y;
+            anchorOffset.y -= textOffset.y;
             break;
         case Anchor::BOTTOM:
             anchorOffset.x -= size.x / 2.0 - textOffset.x;
-            anchorOffset.y -= size.y - textOffset.y + fontSize * 0.5;
+            anchorOffset.y -= size.y + textOffset.y + fontSize * 0.5;
             break;
         case Anchor::TOP_LEFT:
             anchorOffset.x -= -textOffset.x;
-            anchorOffset.y -= -textOffset.y;
+            anchorOffset.y -= textOffset.y;
             break;
         case Anchor::TOP_RIGHT:
             anchorOffset.x -= size.x -textOffset.x;
-            anchorOffset.y -= -textOffset.y;
+            anchorOffset.y -= textOffset.y;
             break;
         case Anchor::BOTTOM_LEFT:
             anchorOffset.x -= -textOffset.x;
-            anchorOffset.y -= size.y - textOffset.y;
+            anchorOffset.y -= size.y + textOffset.y;
             break;
         case Anchor::BOTTOM_RIGHT:
             anchorOffset.x -= size.x -textOffset.x;
-            anchorOffset.y -= size.y - textOffset.y;
+            anchorOffset.y -= size.y + textOffset.y;
             break;
         default:
             break;
