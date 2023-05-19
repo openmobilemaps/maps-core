@@ -92,7 +92,7 @@ color_line_shader_interface = interface +c +o {
 }
 
 line_group_shader_interface = interface +c +o {
-    set_styles(styles: list<line_style>);
+    set_styles(styles: shared_bytes);
     as_shader_program_interface() : shader_program_interface;
 }
 

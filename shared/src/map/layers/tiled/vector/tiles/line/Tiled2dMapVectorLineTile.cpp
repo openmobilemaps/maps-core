@@ -55,42 +55,80 @@ void Tiled2dMapVectorLineTile::update() {
         for (auto const &[key, feature]: featureGroups.at(styleGroupId)) {
             auto const &context = EvaluationContext(zoomIdentifier, feature);
             auto &style = reusableLineStyles.at(styleGroupId).at(i);
-            auto normalColor = lineDescription->style.getLineColor(context);
-            if (normalColor != style.color.normal) {
-                style.color.normal = normalColor;
+
+            // color
+            auto color = lineDescription->style.getLineColor(context);
+            if (color.r != style.colorR || color.g != style.colorG || color.b != style.colorB || color.a != style.colorA) {
+                style.colorR = color.r;
+                style.colorG = color.g;
+                style.colorB = color.b;
+                style.colorA = color.a;
                 needsUpdate = true;
             }
+
+            // opacity
             float opacity = lineDescription->style.getLineOpacity(context);
             if (opacity != style.opacity) {
                 style.opacity = opacity * alpha;
                 needsUpdate = true;
             }
+
+            // blue
             float blur = lineDescription->style.getLineBlur(context);
             if (blur != style.blur) {
                 style.blur = blur;
                 needsUpdate = true;
             }
+
+            // width type
             auto widthType = SizeType::SCREEN_PIXEL;
-            if (widthType != style.widthType) {
-                style.widthType = widthType;
+            auto widthAsPixel = (widthType == SizeType::SCREEN_PIXEL ? 1 : 0);
+            if (widthAsPixel != style.widthAsPixel) {
+                style.widthAsPixel = widthAsPixel;
                 needsUpdate = true;
             }
+
+            // width
             float width = lineDescription->style.getLineWidth(context);
             if (width != style.width) {
                 style.width = width;
                 needsUpdate = true;
             }
+
+            // dashes
             auto dashArray = lineDescription->style.getLineDashArray(context);
-            if (dashArray != style.dashArray) {
-                style.dashArray = dashArray;
-                needsUpdate = true;
-            }
-            auto lineCap = lineDescription->style.getLineCap(context);
-            if (lineCap != style.lineCap) {
-                style.lineCap = lineCap;
+            auto dn = dashArray.size();
+            auto dValue0 = dn > 0 ? dashArray[0] : 0.0;
+            auto dValue1 = (dn > 1 ? dashArray[1] : 0.0) + dValue0;
+            auto dValue2 = (dn > 2 ? dashArray[2] : 0.0) + dValue1;
+            auto dValue3 = (dn > 3 ? dashArray[3] : 0.0) + dValue2;
+
+            if (style.numDashValue != dn || dValue0 != style.dashValue0 || dValue1 != style.dashValue1 || dValue2 != style.dashValue2 || dValue3 != style.dashValue3) {
+                style.numDashValue = dn;
+                style.dashValue0 = dValue0;
+                style.dashValue1 = dValue1;
+                style.dashValue2 = dValue2;
+                style.dashValue3 = dValue3;
                 needsUpdate = true;
             }
 
+            // line caps
+            auto lineCap = lineDescription->style.getLineCap(context);
+
+            auto cap = 1;
+            switch(lineCap){
+                case LineCapType::BUTT: { cap = 0; break; }
+                case LineCapType::ROUND: { cap = 1; break; }
+                case LineCapType::SQUARE: { cap = 2; break; }
+                default: { cap = 1; }
+            }
+
+            if (cap != style.lineCap) {
+                style.lineCap = cap;
+                needsUpdate = true;
+            }
+
+            // offset
             auto offset = lineDescription->style.getLineOffset(context);
             if(offset != style.offset) {
                 style.offset = offset;
@@ -101,7 +139,9 @@ void Tiled2dMapVectorLineTile::update() {
         }
 
         if (needsUpdate) {
-            shaders.at(styleGroupId)->setStyles(reusableLineStyles.at(styleGroupId));
+            auto &styles = reusableLineStyles[styleGroupId];
+            auto buffer = SharedBytes((int64_t)styles.data(), (int)styles.size(), 19 * sizeof(float));;
+            shaders[styleGroupId]->setStyles(buffer);
         }
     }
 }
@@ -157,15 +197,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                     }
 
                     if (styleIndex == -1) {
-                        auto reusableStyle = LineStyle(ColorStateList(Color(0.0, 0.0, 0.0, 0.0), Color(0.0, 0.0, 0.0, 0.0)),
-                                          ColorStateList(Color(0.0, 0.0, 0.0, 0.0), Color(0.0, 0.0, 0.0, 0.0)),
-                                          0.0,
-                                          0.0,
-                                          SizeType::MAP_UNIT,
-                                          0.0,
-                                          {},
-                                          LineCapType::BUTT,
-                                          0.0f);
+                        auto reusableStyle = ShaderLineStyle(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
                         if (!featureGroups.empty() && featureGroups.back().size() < maxStylesPerGroup) {
                             styleGroupIndex = (int) featureGroups.size() - 1;
                             styleIndex = (int) featureGroups.back().size();
@@ -175,7 +207,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                             styleGroupIndex = (int) featureGroups.size();
                             styleIndex = 0;
                             shaders.push_back(shaderFactory->createLineGroupShader());
-                            reusableLineStyles.push_back(std::vector<LineStyle>{reusableStyle});
+                            reusableLineStyles.push_back({ reusableStyle });
                             featureGroups.push_back(std::vector<std::tuple<size_t, FeatureContext>>{{hash, featureContext}});
                         }
                         styleHashToGroupMap.insert({hash, {styleGroupIndex, styleIndex}});

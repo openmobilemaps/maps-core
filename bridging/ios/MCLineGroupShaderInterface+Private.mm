@@ -5,10 +5,9 @@
 #import "MCLineGroupShaderInterface.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
-#import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
-#import "MCLineStyle+Private.h"
 #import "MCShaderProgramInterface+Private.h"
+#import "MCSharedBytes+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -33,9 +32,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (void)setStyles:(nonnull NSArray<MCLineStyle *> *)styles {
+- (void)setStyles:(nonnull MCSharedBytes *)styles {
     try {
-        _cppRefHandle.get()->setStyles(::djinni::List<::djinni_generated::LineStyle>::toCpp(styles));
+        _cppRefHandle.get()->setStyles(::djinni_generated::SharedBytes::toCpp(styles));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -55,10 +54,10 @@ class LineGroupShaderInterface::ObjcProxy final
     friend class ::djinni_generated::LineGroupShaderInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void setStyles(const std::vector<::LineStyle> & c_styles) override
+    void setStyles(const ::SharedBytes & c_styles) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setStyles:(::djinni::List<::djinni_generated::LineStyle>::fromCpp(c_styles))];
+            [djinni_private_get_proxied_objc_object() setStyles:(::djinni_generated::SharedBytes::fromCpp(c_styles))];
         }
     }
     /*not-null*/ std::shared_ptr<::ShaderProgramInterface> asShaderProgramInterface() override

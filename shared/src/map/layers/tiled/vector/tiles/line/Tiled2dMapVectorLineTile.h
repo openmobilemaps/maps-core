@@ -14,6 +14,7 @@
 #include "MapInterface.h"
 #include "LineVectorLayerDescription.h"
 #include "LineGroup2dLayerObject.h"
+#include "ShaderLineStyle.h"
 
 class Tiled2dMapVectorLineTile
         : public Tiled2dMapVectorTile,
@@ -59,6 +60,6 @@ private:
 
     std::unordered_set<std::string> usedKeys;
 
-    std::vector<std::vector<LineStyle>> reusableLineStyles;
+    std::vector<std::vector<ShaderLineStyle>> reusableLineStyles;
     std::unordered_map<size_t, std::pair<int, int>> styleHashToGroupMap;
 };

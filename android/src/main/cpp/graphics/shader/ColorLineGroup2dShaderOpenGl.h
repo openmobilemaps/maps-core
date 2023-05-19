@@ -28,7 +28,7 @@ class ColorLineGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
 
     virtual void preRender(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
-    virtual void setStyles(const std::vector<::LineStyle> &lineStyles) override;
+    virtual void setStyles(const ::SharedBytes & styles) override;
 
   protected:
     virtual std::string getVertexShader() override;
@@ -41,11 +41,11 @@ class ColorLineGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
     GLint numStyles = 0;
 
     const int maxNumStyles = 48;
-    const int sizeStyleValues = 3;
-    const int sizeColorValues = 4;
-    const int sizeGapColorValues = 4;
-    const int maxNumDashValues = 4;
-    const int sizeDashValues = maxNumDashValues + 1;
-    const int sizeLineValues = sizeStyleValues + sizeColorValues + sizeGapColorValues + sizeDashValues + 1;
+    //const int sizeStyleValues = 3;
+    //const int sizeColorValues = 4;
+    //const int sizeGapColorValues = 4;
+    //const int maxNumDashValues = 4;
+   // const int sizeDashValues = maxNumDashValues + 1;
+    const int sizeLineValues = 19;//sizeStyleValues + sizeColorValues + sizeGapColorValues + sizeDashValues + 1;
     const int sizeLineValuesArray = sizeLineValues * maxNumStyles;
 };
