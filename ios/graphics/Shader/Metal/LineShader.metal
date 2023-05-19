@@ -78,12 +78,12 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
 
     // extend position in width direction and in length direction by width / 2.0
     float width = styling[style].width / 2.0;
+    float dashingSize = styling[style].width;
 
     if (styling[style].widthAsPixels > 0.0) {
         width *= scalingFactor;
+        dashingSize *= dashingScalingFactor;
     }
-
-    float dashingSize = styling[style].width * dashingScalingFactor;
 
     float2 widthNormal = vertexIn.widthNormal;
     float2 lengthNormal = float2(widthNormal.y, -widthNormal.x);
@@ -172,7 +172,7 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
 
 
   if (style.numDashValues > 0) {
-    float factorToT = (in.dashingSize * 2) / lineLength;
+    float factorToT = in.dashingSize / lineLength;
     float dashTotal = style.dashArray[3] * factorToT;
     float startOffsetSegment = fmod(in.lengthPrefix / lineLength, dashTotal);
     float intraDashPos = fmod(t + startOffsetSegment, dashTotal);

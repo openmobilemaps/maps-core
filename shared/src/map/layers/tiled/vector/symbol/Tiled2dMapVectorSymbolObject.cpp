@@ -31,7 +31,7 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                                                            const TextSymbolPlacement &textSymbolPlacement) :
     description(description), coordinate(coordinate), mapInterface(mapInterface), featureContext(featureContext),
     iconBoundingBox(Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0), Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0)),
-    stretchIconBoundingBox(Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0), Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0)){
+    stretchIconBoundingBox(Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0), Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0)) {
     auto strongMapInterface = mapInterface.lock();
     auto objectFactory = strongMapInterface ? strongMapInterface->getGraphicsObjectFactory() : nullptr;
     auto camera = strongMapInterface ? strongMapInterface->getCamera() : nullptr;
@@ -206,7 +206,7 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &scal
         return;
     }
 
-    if (collides) {
+    if (collides || !(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier)) {
         alphas[countOffset] = 0;
         scales[2 * countOffset] = 0;
         scales[2 * countOffset + 1] = 0;
@@ -317,7 +317,7 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     lastStretchIconUpdateScaleFactor = zoomIdentifier;
     lastStretchIconUpdateRotation = rotation;
 
-    if (collides) {
+    if (collides || !(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier)) {
         alphas[countOffset] = 0;
         scales[2 * countOffset] = 0;
         scales[2 * countOffset + 1] = 0;
@@ -523,6 +523,26 @@ std::optional<RectCoord> Tiled2dMapVectorSymbolObject::getCombinedBoundingBox() 
 }
 
 void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<std::vector<OBB2D>> placements) {
+    if (!(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier)) {
+        iconBoundingBox.topLeft.x = 0.0;
+        iconBoundingBox.topLeft.y = 0.0;
+        iconBoundingBox.bottomRight.x = 0.0;
+        iconBoundingBox.bottomRight.y = 0.0;
+
+        stretchIconBoundingBox.topLeft.x = 0.0;
+        stretchIconBoundingBox.topLeft.y = 0.0;
+        stretchIconBoundingBox.bottomRight.x = 0.0;
+        stretchIconBoundingBox.bottomRight.y = 0.0;
+
+        if (labelObject) {
+            labelObject->boundingBox.topLeft.x = 0.0;
+            labelObject->boundingBox.topLeft.y = 0.0;
+            labelObject->boundingBox.bottomRight.x = 0.0;
+            labelObject->boundingBox.bottomRight.y = 0.0;
+        }
+        return;
+    }
+
     auto const cachedCollision = hasCollision(zoomIdentifier);
     if(cachedCollision) {
         if (this->collides != *cachedCollision) {

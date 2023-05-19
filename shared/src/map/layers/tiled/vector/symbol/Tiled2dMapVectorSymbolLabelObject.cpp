@@ -149,7 +149,7 @@ void Tiled2dMapVectorSymbolLabelObject::setupProperties(std::vector<float> &text
 void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const bool collides, const double rotation) {
     auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
 
-    if (collides) {
+    if (collides || !(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier)) {
         styles[(9 * styleOffset) + 3] = 0;
         styles[(9 * styleOffset) + 7] = 0;
         for (int i = 0; i != characterCount; i++) {

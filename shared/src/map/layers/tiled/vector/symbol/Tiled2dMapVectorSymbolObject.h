@@ -88,9 +88,6 @@ private:
 
     std::map<float, bool> collisionMap = {};
 
-    std::vector<float> modelMatrix;
-    std::vector<float> iconModelMatrix;
-
     const std::weak_ptr<MapInterface> mapInterface;
 
     const std::shared_ptr<SymbolVectorLayerDescription> description;

@@ -118,9 +118,7 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
     const std::string layerName = description->sourceId;
     const auto indicesLimit = std::numeric_limits<uint16_t>::max();
 
-    if (!tileData->empty() &&
-        description->minZoom <= tileInfo.zoomIdentifier &&
-        description->maxZoom >= tileInfo.zoomIdentifier) {
+    if (!tileData->empty()) {
 
         bool anyInteractable = false;
 

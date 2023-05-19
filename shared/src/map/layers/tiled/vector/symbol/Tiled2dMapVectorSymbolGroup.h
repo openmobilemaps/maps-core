@@ -101,4 +101,6 @@ private:
     std::vector<float> stretchedIconAlphas;
     std::vector<float> stretchedIconStretchInfos;
     std::vector<float> stretchedIconTextureCoordinates;
+
+    bool anyInteractable = false;
 };

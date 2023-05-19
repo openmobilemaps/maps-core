@@ -247,11 +247,6 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
     auto scaleFactor = camera->mapUnitsFromPixels(1.0);
 
     for (const auto layerIdentifier: layerIdentifiers) {
-        const auto &description = layerDescriptions.at(layerIdentifier);
-        if (!(description->minZoom <= zoomIdentifier &&
-              description->maxZoom >= zoomIdentifier)) {
-            continue;
-        }
         for (const auto &[tile, symbolGroupsMap]: tileSymbolGroupMap) {
             const auto objectsIt = symbolGroupsMap.find(layerIdentifier);
             if (objectsIt != symbolGroupsMap.end()) {
@@ -282,10 +277,6 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
     for (const auto &[tile, symbolGroupsMap]: tileSymbolGroupMap) {
         for (const auto &[layerIdentifier, symbolGroups]: symbolGroupsMap) {
             const auto &description = layerDescriptions.at(layerIdentifier);
-            if (!(description->minZoom <= zoomIdentifier &&
-                  description->maxZoom >= zoomIdentifier)) {
-                continue;
-            }
             for (auto &symbolGroup: symbolGroups) {
                 symbolGroup.syncAccess([&zoomIdentifier, &rotation, &scaleFactor](auto group){
                     group->update(zoomIdentifier, rotation, scaleFactor);
@@ -308,13 +299,6 @@ void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
 
     for (const auto &[tile, symbolGroupsMap]: tileSymbolGroupMap) {
         for (const auto &[layerIdentifier, symbolGroups]: symbolGroupsMap) {
-
-            const auto &description = layerDescriptions.at(layerIdentifier);
-            if (!(description->minZoom <= zoomIdentifier &&
-                  description->maxZoom >= zoomIdentifier)) {
-                continue;
-            }
-
             const int32_t index = layerNameIndexMap.at(layerIdentifier);
 
             std::vector<std::shared_ptr< ::RenderObjectInterface>> renderObjects;

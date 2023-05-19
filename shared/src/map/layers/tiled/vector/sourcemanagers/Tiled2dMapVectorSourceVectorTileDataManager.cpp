@@ -169,10 +169,6 @@ void Tiled2dMapVectorSourceVectorTileDataManager::updateLayerDescription(std::sh
                 continue;
             }
 
-            // Re-evaluate criteria for the tile creation of this specific sublayer
-            if (!(layerDescription->minZoom <= tileData.tileInfo.zoomIdentifier && layerDescription->maxZoom >= tileData.tileInfo.zoomIdentifier)) {
-                continue;
-            }
             auto const mapIt = tileData.layerFeatureMaps->find(layerDescription->sourceId);
             if (mapIt == tileData.layerFeatureMaps->end()) {
                 continue;
