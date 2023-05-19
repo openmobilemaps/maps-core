@@ -112,8 +112,6 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
                         auto position = pos->centerPosition;
 
-                        wasPlaced = true;
-
                         const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, context, text, fullText, position, line, fontList, anchor, pos->angle, justify, placement);
 
                         if (symbolObject) {
@@ -121,6 +119,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                             if (counts.icons + counts.stretchedIcons + counts.textCharacters != 0) {
                                 symbolObjects.push_back(symbolObject);
                                 textPositionMap[fullText].push_back(position);
+                                wasPlaced = true;
                             }
                         }
 
@@ -156,7 +155,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                         }
 
 
-                        if (distance > (totalDistance / 2.0) && !wasPlaced && pos && (!closestOther && *closestOther > symbolSpacingMeters)) {
+                        if (distance > (totalDistance / 2.0) && !wasPlaced && pos && (!closestOther || *closestOther > symbolSpacingMeters)) {
 
                             auto position = pos->centerPosition;
 
@@ -194,10 +193,6 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
     if (symbolObjects.empty()) {
         return false;
-    }
-
-    if (anyInteractable) {
-        
     }
 
     std::sort(symbolObjects.begin(), symbolObjects.end(),
