@@ -21,6 +21,8 @@ class SphereProjectionShader: BaseShader {
     private let shader : Pipeline
     private let buffer: MTLBuffer
 
+    private static let renderStartTime = Date()
+
     init(shader : Pipeline = Pipeline.sphereProjectionShader) {
         self.shader = shader
         guard let buffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<Float>.stride, options: []) else { fatalError("Could not create buffer") }
@@ -42,6 +44,9 @@ class SphereProjectionShader: BaseShader {
 
         encoder.setRenderPipelineState(pipeline)
         encoder.setFragmentBuffer(buffer, offset: 0, index: 1)
+
+        var time = Float(-Self.renderStartTime.timeIntervalSinceNow)
+        encoder.setFragmentBytes(&time, length: MemoryLayout<Float>.stride, index: 2)
     }
 }
 

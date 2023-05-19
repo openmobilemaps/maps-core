@@ -45,7 +45,8 @@ fragment float4
 shadedFragmentShader(VertexOut in [[stage_in]],
                    constant float &alpha [[buffer(1)]],
                    texture2d<float> texture0 [[ texture(0)]],
-                   sampler textureSampler [[sampler(0)]])
+                   sampler textureSampler [[sampler(0)]],
+                    constant float &time [[buffer(2)]])
 {
   float4 color = texture0.sample(textureSampler, in.uv);
 
@@ -56,7 +57,7 @@ shadedFragmentShader(VertexOut in [[stage_in]],
 
   float s = in.n.x * 0.5 + in.n.y * 0.5 + in.n.z * 0.3;
 //  s = s * 0.5 + 0.5;
-  s = 1.0;
+  s = 0.7 + 0.3 * sin(time*0.1+3.14/2.0);
 
   float a = color.a * alpha;
 
