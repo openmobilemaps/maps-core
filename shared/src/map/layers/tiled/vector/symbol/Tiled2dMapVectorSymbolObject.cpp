@@ -207,8 +207,7 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &scal
         countOffset += instanceCounts.icons;
         return;
     }
-
-    if (collides || !(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier)) {
+    if (!(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier)) {
         alphas[countOffset] = 0;
         scales[2 * countOffset] = 0;
         scales[2 * countOffset + 1] = 0;
@@ -219,13 +218,12 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &scal
         return;
     }
 
+
     auto strongMapInterface = mapInterface.lock();
     auto converter = strongMapInterface ? strongMapInterface->getCoordinateConverterHelper() : nullptr;
     auto camera = strongMapInterface ? strongMapInterface->getCamera() : nullptr;
 
     const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
-
-    alphas[countOffset] = description->style.getIconOpacity(evalContext);
 
     if (lastIconUpdateRotation != rotation && iconRotationAlignment != SymbolAlignment::MAP) {
         rotations[countOffset] = rotation;
@@ -239,6 +237,19 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &scal
     iconBoundingBox.topLeft.y = renderCoordinate.y - spriteSize.y * iconSize * 0.5;
     iconBoundingBox.bottomRight.x = renderCoordinate.x + spriteSize.x * iconSize * 0.5;
     iconBoundingBox.bottomRight.y = renderCoordinate.y + spriteSize.y * iconSize * 0.5;
+
+    if (collides) {
+        alphas[countOffset] = 0;
+        scales[2 * countOffset] = 0;
+        scales[2 * countOffset + 1] = 0;
+        countOffset += instanceCounts.icons;
+
+        lastIconUpdateScaleFactor = scaleFactor;
+        lastIconUpdateRotation = rotation;
+        return;
+    }
+
+    alphas[countOffset] = description->style.getIconOpacity(evalContext);
 
     countOffset += instanceCounts.icons;
 
@@ -501,12 +512,12 @@ std::optional<RectCoord> Tiled2dMapVectorSymbolObject::getCombinedBoundingBox() 
     if (labelObject && labelObject->boundingBox.topLeft.x != 0) {
         boxes.push_back(&labelObject->boundingBox);
     }
-//    if (iconBoundingBox.topLeft.x != 0){
-//        boxes.push_back(&iconBoundingBox);
-//    }
-//    if (stretchIconBoundingBox.topLeft.x != 0){
-//        boxes.push_back(&stretchIconBoundingBox);
-//    }
+    if (iconBoundingBox.topLeft.x != 0){
+        boxes.push_back(&iconBoundingBox);
+    }
+    if (stretchIconBoundingBox.topLeft.x != 0){
+        boxes.push_back(&stretchIconBoundingBox);
+    }
 
     if (boxes.empty()) {
         return std::nullopt;
