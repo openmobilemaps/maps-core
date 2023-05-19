@@ -159,7 +159,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
                             auto position = pos->centerPosition;
 
-                            const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, context, text, fullText, position, std::nullopt, fontList, anchor, pos->angle, justify, placement);
+                            const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, context, text, fullText, position, line, fontList, anchor, pos->angle, justify, placement);
                             if (symbolObject) {
                                 const auto counts = symbolObject->getInstanceCounts();
                                 if (counts.icons + counts.stretchedIcons + counts.textCharacters != 0) {
