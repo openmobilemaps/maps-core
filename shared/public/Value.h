@@ -146,7 +146,7 @@ public:
                 break;
             }
             case vtzero::GeomType::POINT: {
-                propertiesMap.push_back(std::make_pair("$type", "LineString"));
+                propertiesMap.push_back(std::make_pair("$type", "Point"));
                 break;
             }
             case vtzero::GeomType::POLYGON: {
