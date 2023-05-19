@@ -331,7 +331,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
             break;
         case Anchor::LEFT:
             anchorOffset.x += textOffset.x;
-            anchorOffset.y -= size.y / 2.0 + textOffset.y * 1000;
+            anchorOffset.y -= size.y / 2.0 + textOffset.y;
             break;
         case Anchor::RIGHT:
             anchorOffset.x -= size.x - textOffset.x;
