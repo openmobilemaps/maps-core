@@ -5,7 +5,6 @@
 @protocol MCAlphaInstancedShaderInterface;
 @protocol MCAlphaShaderInterface;
 @protocol MCColorCircleShaderInterface;
-@protocol MCColorLineShaderInterface;
 @protocol MCColorShaderInterface;
 @protocol MCLineGroupShaderInterface;
 @protocol MCPolygonGroupShaderInterface;
@@ -19,8 +18,6 @@
 - (nullable id<MCAlphaShaderInterface>)createAlphaShader;
 
 - (nullable id<MCAlphaInstancedShaderInterface>)createAlphaInstancedShader;
-
-- (nullable id<MCColorLineShaderInterface>)createColorLineShader;
 
 - (nullable id<MCLineGroupShaderInterface>)createLineGroupShader;
 

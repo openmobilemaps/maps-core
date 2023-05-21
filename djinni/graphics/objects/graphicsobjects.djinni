@@ -27,7 +27,6 @@ masking_object_interface = interface +c +j +o {
 
 graphics_object_factory_interface = interface +c +j +o {
     create_quad(shader: shader_program_interface) : quad_2d_interface;
-    create_line(shader: shader_program_interface) : line_2d_interface;
     create_polygon(shader: shader_program_interface) : polygon_2d_interface;
 
     create_quad_instanced(shader: shader_program_interface): quad_2d_instanced_interface;
@@ -64,11 +63,6 @@ quad_2d_instanced_interface = interface +c +j +o {
 
     as_graphics_object(): graphics_object_interface;
     as_masking_object(): masking_object_interface;
-}
-
-line_2d_interface = interface +c +j +o {
-    set_line(line: shared_bytes, indices: shared_bytes);
-    as_graphics_object(): graphics_object_interface;
 }
 
 render_line_description = record {

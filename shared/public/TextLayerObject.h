@@ -15,7 +15,6 @@
 #include "Coord.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "LayerObjectInterface.h"
-#include "Line2dInterface.h"
 #include "LineStyle.h"
 #include "RenderConfig.h"
 #include "TextInterface.h"

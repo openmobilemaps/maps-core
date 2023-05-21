@@ -425,7 +425,7 @@ std::shared_ptr<Tiled2dMapVectorSymbolFeatureWrapper> Tiled2dMapVectorSourceSymb
             auto shaderFactory = mapInterface->getShaderFactory();
 
             auto shader = shaderFactory->createColorLineShader();
-            auto lineGraphicsObject = objectFactory->createLine(shader->asShaderProgramInterface());
+            auto lineGraphicsObject = objectFactory->createLineGroup(shader->asShaderProgramInterface());
 
             auto lineObject = std::make_shared<Line2dLayerObject>(mapInterface->getCoordinateConverterHelper(), lineGraphicsObject, shader);
 

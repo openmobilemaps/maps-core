@@ -82,15 +82,6 @@ class LineGroupShader: BaseShader {
 
 extension LineGroupShader: MCLineGroupShaderInterface {
 
-//    func setStyles(_ styles: [MCLineStyle]) {
-//        guard styles.count <= self.styleBufferSize else { fatalError("line style error exceeds buffer size") }
-//
-////        currentStyles = styles
-////        for (i,l) in styles.enumerated() {
-////            lineStyleBufferContents[i] = LineGroupStyle(style: l, highlighted: state == .highlighted)
-////        }
-//    }
-
     func setStyles(_ styles: MCSharedBytes) {
         guard styles.elementCount < self.styleBufferSize else { fatalError("line style error exceeds buffer size") }
         lineStyleBuffer.copyMemory(from: styles)
@@ -98,22 +89,5 @@ extension LineGroupShader: MCLineGroupShaderInterface {
 
     func asShaderProgram() -> MCShaderProgramInterface? {
         self
-    }
-}
-
-extension LineGroupShader: MCColorLineShaderInterface {
-    func setStyle(_ lineStyle: MCLineStyle) {
-       // setStyles([lineStyle])
-    }
-
-    func setHighlighted(_ highlighted: Bool) {
-//        if highlighted {
-//            state = .highlighted
-//        } else if state == .highlighted {
-//            state = .normal
-//        }
-//        let styles = currentStyles
-//        currentStyles.removeAll()
-//        setStyles(styles)
     }
 }

@@ -153,9 +153,3 @@ extension LineGroup2d: MCLineGroup2dInterface {
         self
     }
 }
-
-extension LineGroup2d: MCLine2dInterface {
-    func setLine(_ line: MCSharedBytes, indices: MCSharedBytes) {
-        setLines(line, indices: indices)
-    }
-}

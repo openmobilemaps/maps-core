@@ -10,19 +10,20 @@
 
 #pragma once
 
-#include "ColorLineShaderInterface.h"
 #include "Coord.h"
 #include "LineStyle.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "LayerObjectInterface.h"
-#include "Line2dInterface.h"
 #include "RenderConfig.h"
 #include "Vec2D.h"
+#include "LineGroupShaderInterface.h"
+#include "LineGroup2dLayerObject.h"
+#include "ShaderLineStyle.h"
 
 class Line2dLayerObject : public LayerObjectInterface {
   public:
     Line2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
-                      const std::shared_ptr<Line2dInterface> &line, const std::shared_ptr<ColorLineShaderInterface> &shader);
+                      const std::shared_ptr<LineGroup2dInterface> &line, const std::shared_ptr<LineGroupShaderInterface> &shader);
 
     ~Line2dLayerObject(){};
 
@@ -40,9 +41,15 @@ class Line2dLayerObject : public LayerObjectInterface {
 
     std::shared_ptr<ShaderProgramInterface> getShaderProgram();
 
+private:
+    void setStyle(const LineStyle &style, bool highlighted);
+
   private:
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
-    std::shared_ptr<Line2dInterface> line;
-    std::shared_ptr<ColorLineShaderInterface> shader;
+    std::shared_ptr<LineGroup2dInterface> line;
+    std::shared_ptr<LineGroupShaderInterface> shader;
     std::vector<std::shared_ptr<RenderConfigInterface>> renderConfig;
+
+    LineStyle style;
+    bool highlighted;
 };
