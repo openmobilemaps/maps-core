@@ -10,7 +10,6 @@
 
 #include "GraphicsObjectFactoryOpenGl.h"
 #include "ColorShaderOpenGl.h"
-#include "Line2dOpenGl.h"
 #include "LineGroup2dOpenGl.h"
 #include "Polygon2dOpenGl.h"
 #include "PolygonGroup2dOpenGl.h"
@@ -20,10 +19,6 @@
 
 std::shared_ptr<Quad2dInterface> GraphicsObjectFactoryOpenGl::createQuad(const std::shared_ptr<::ShaderProgramInterface> &shader) {
     return std::make_shared<Quad2dOpenGl>(shader);
-}
-
-std::shared_ptr<Line2dInterface> GraphicsObjectFactoryOpenGl::createLine(const std::shared_ptr<::ShaderProgramInterface> &Shader) {
-    return std::make_shared<Line2dOpenGl>(Shader);
 }
 
 std::shared_ptr<Polygon2dInterface>
