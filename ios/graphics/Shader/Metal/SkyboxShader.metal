@@ -38,21 +38,78 @@ float fbm(float3 p)
   return f;
 }
 
+vertex VertexOut
+skyboxVertexShader(const VertexIn3D vertexIn [[stage_in]],
+                 constant float4x4 &mvpMatrix [[buffer(1)]])
+{
+  float4 p = mvpMatrix * float4(vertexIn.position.xyz, 1.0);
+  p.z = p.w;
+  VertexOut out {
+    .position = p,
+    .uv = vertexIn.uv,
+    .n = vertexIn.position.xyz,
+    .pointsize = 0
+  };
+
+  return out;
+}
+
+float3 calculateSunPosition(int day, float time) {
+  float M, L, RA, dec;
+
+  // Step 2: Calculate the mean anomaly (M)
+  M = (0.9856 * day) - 3.289;
+
+  // Step 3: Calculate the true longitude (L) of the sun
+  L = M + (1.916 * sin(M * 0.01745)) + (0.020 * sin(2 * M * 0.01745)) + 282.634;
+
+  // Step 4: Calculate the right ascension (RA)
+  RA = atan(0.91764 * tan(L * 0.01745)) * 57.2958;
+
+  // Step 5: Convert right ascension (RA) to hours
+  RA = RA / 15;
+
+  // Step 6: Calculate the declination (dec)
+  dec = asin(0.39782 * sin(L * 0.01745)) * 57.2958;
+
+  // Convert RA and dec to radians
+  RA = RA * 0.01745;
+  dec = dec * 0.01745;
+
+  // Adjust RA based on the time of day
+  RA = RA + (time / 24.0) * 2 * 3.14159;
+
+  // Calculate the sun's position in Cartesian coordinates
+  float cosDec = cos(dec);
+  float3 sunPosition;
+  sunPosition.x = cos(RA) * cosDec;
+  sunPosition.y = sin(RA) * cosDec;
+  sunPosition.z = sin(dec);
+
+  return sunPosition;
+}
+
 fragment float4
 skyboxFragmentShader(const VertexOut vertexIn [[stage_in]],
-                     constant float4x4 &matrix [[buffer(0)]],
-                     constant float &time [[buffer(1)]])
+      constant float &time [[buffer(1)]])
 {
 
 
-  float3 fsun = normalize(float3(sin(time*0.1), cos(time*0.1), 1.0));
+  float3 fsun = calculateSunPosition(120, time);
+
+//  float4 unprojected1 = inverseMvpMatrix * float4(vertexIn.uv.xy, 0.8, 1.0);
+//  unprojected1 /= unprojected1.w;
+//  float4 unprojected2 = inverseMvpMatrix * float4(vertexIn.uv.xy, 0.2, 1.0);
+//  unprojected2 /= unprojected2.w;
+  //return float4(-unprojected.xyz / unprojected.w, 1.0);
 
   // Compute the normalized direction vector from the texture coordinates
-  float verticalFactor = vertexIn.uv.y;
-  float3 pos = float3(vertexIn.uv.x * 2.0 - 1.0, verticalFactor, sqrt(1.0 - verticalFactor * verticalFactor));
-  pos = normalize(pos);
+//  float verticalFactor = vertexIn.uv.y;
+//  float3 pos = float3(vertexIn.uv.x * 2.0 - 1.0, verticalFactor, sqrt(1.0 - verticalFactor * verticalFactor));
+  float3 pos = normalize(vertexIn.n);
+//  return float4(abs(pos.z), 0, 0, 1.0);
 
-  float cirrus = 0.7;
+  float cirrus = 0.4;
   float cumulus = 0.1;
 
   const float Br = 0.0025;

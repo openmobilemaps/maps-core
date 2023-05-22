@@ -342,6 +342,7 @@ std::shared_ptr<::CameraInterface> MapCamera2d::asCameraInterface() { return sha
     return Vec2D(outVec[0] / outVec[3], outVec[1] / outVec[3]);
 }
 
+
 std::vector<float> MapCamera2d::getVpMatrix() {
     {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
@@ -396,6 +397,7 @@ std::vector<float> MapCamera2d::getVpMatrix() {
         verticalFov = 0;
         horizontalFov = 0;
         validVpMatrix = true;
+
         return newVpMatrix;
     }
     else {
@@ -464,6 +466,7 @@ std::vector<float> MapCamera2d::getVpMatrix() {
         verticalFov = fov;
         horizontalFov = fov * vpr;
         validVpMatrix = true;
+
         return newVpMatrix;
 
     }

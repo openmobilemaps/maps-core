@@ -57,8 +57,7 @@ final class Polygon3d: BaseGraphicsObject {
 
         guard isReady(),
               let verticesBuffer = verticesBuffer,
-              let indicesBuffer = indicesBuffer,
-              let tessellationFactorBuffer = tessellationFactorBuffer
+              let indicesBuffer = indicesBuffer
         else {
             return
         }
@@ -95,8 +94,10 @@ final class Polygon3d: BaseGraphicsObject {
         }
 
         shader.setupProgram(context)
-        shader.preRender(context, pass: renderPass)
+
         encoder.setCullMode(.back)
+        
+        shader.preRender(context, pass: renderPass)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {
@@ -114,9 +115,21 @@ final class Polygon3d: BaseGraphicsObject {
         encoder.setVertexBytes(&layerOffset, length: MemoryLayout<Int32>.stride, index: 3)
 
 
-        encoder.setTessellationFactorBuffer(tessellationFactorBuffer, offset: 0, instanceStride: 0)
+        if shader is SphereProjectionShader, let tessellationFactorBuffer = tessellationFactorBuffer {
 
-        encoder.drawIndexedPatches(numberOfPatchControlPoints: 3, patchStart: 0, patchCount: indicesBuffer.length / 6, patchIndexBuffer: nil, patchIndexBufferOffset: 0, controlPointIndexBuffer: indicesBuffer, controlPointIndexBufferOffset: 0, instanceCount: 1, baseInstance: 0)
+            encoder.setTessellationFactorBuffer(tessellationFactorBuffer, offset: 0, instanceStride: 0)
+
+            encoder.drawIndexedPatches(numberOfPatchControlPoints: 3, patchStart: 0, patchCount: indicesBuffer.length / 6, patchIndexBuffer: nil, patchIndexBufferOffset: 0, controlPointIndexBuffer: indicesBuffer, controlPointIndexBufferOffset: 0, instanceCount: 1, baseInstance: 0)
+        }
+        else {
+            encoder.drawIndexedPrimitives(type: .triangle,
+                                          indexCount: indicesCount,
+                                          indexType: .uint16,
+                                          indexBuffer: indicesBuffer,
+                                          indexBufferOffset: 0)
+        }
+
+
 
     }
 
@@ -224,13 +237,22 @@ extension Polygon3d: MCMaskingObjectInterface {
         var time = Float(-Self.renderStartTime.timeIntervalSinceNow)
         encoder.setVertexBytes(&time, length: MemoryLayout<Float>.stride, index: 2)
 
-
-        encoder.setTessellationFactorBuffer(tessellationFactorBuffer, offset: 0, instanceStride: 0)
-
-        encoder.setFragmentSamplerState(sampler, index: 0)
-        encoder.setVertexSamplerState(sampler, index: 0)
-
-        encoder.drawIndexedPatches(numberOfPatchControlPoints: 3, patchStart: 0, patchCount: self.indicesCount / 3, patchIndexBuffer: nil, patchIndexBufferOffset: 0, controlPointIndexBuffer: indicesBuffer, controlPointIndexBufferOffset: 0, instanceCount: 1, baseInstance: 0)
+        if shader is SphereProjectionShader {
+            
+            encoder.setTessellationFactorBuffer(tessellationFactorBuffer, offset: 0, instanceStride: 0)
+            
+            encoder.setFragmentSamplerState(sampler, index: 0)
+            encoder.setVertexSamplerState(sampler, index: 0)
+            
+            encoder.drawIndexedPatches(numberOfPatchControlPoints: 3, patchStart: 0, patchCount: self.indicesCount / 3, patchIndexBuffer: nil, patchIndexBufferOffset: 0, controlPointIndexBuffer: indicesBuffer, controlPointIndexBufferOffset: 0, instanceCount: 1, baseInstance: 0)
+        }
+        else {
+            encoder.drawIndexedPrimitives(type: .triangle,
+                                          indexCount: indicesCount,
+                                          indexType: .uint16,
+                                          indexBuffer: indicesBuffer,
+                                          indexBufferOffset: 0)
+        }
 
     }
 }
@@ -257,7 +279,9 @@ extension Polygon3d: MCPolygon3dInterface {
             assert(self.indicesCount == indicesBuffer.length / 2)
         }
 
-        createTessellationFactors(patchCount: Int(indices.elementCount))
+        if shader is SphereProjectionShader {
+            createTessellationFactors(patchCount: Int(indices.elementCount))
+        }
     }
 
     func asGraphicsObject() -> MCGraphicsObjectInterface? { self }

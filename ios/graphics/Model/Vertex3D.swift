@@ -14,7 +14,7 @@ import MetalKit
 /// A 3D point in the X-Y-Z coordinate system carrying a texture coordinate
 struct Vertex3D: Equatable {
     /// The 3D position of the vertex in the plane
-    var position: SIMD3<Float>
+    var position: SIMD4<Float>
     /// The texture coordinates mapped to the vertex in U-V coordinate space
     var textureCoordinate: SIMD2<Float>
     /// Normal
@@ -30,13 +30,15 @@ struct Vertex3D: Equatable {
         vertexDescriptor.attributes[0].bufferIndex = bufferIndex
         vertexDescriptor.attributes[0].format = .float3
         vertexDescriptor.attributes[0].offset = offset
-        offset += MemoryLayout<SIMD3<Float>>.stride
+        assert(MemoryLayout<SIMD4<Float>>.stride == 16)
+        offset += 16
 
         // UV
         vertexDescriptor.attributes[1].bufferIndex = bufferIndex
         vertexDescriptor.attributes[1].format = .float2
         vertexDescriptor.attributes[1].offset = offset
-        offset += MemoryLayout<SIMD2<Float>>.stride
+        assert(MemoryLayout<SIMD2<Float>>.stride == 8)
+        offset += 8
 
         // Normal
 //        vertexDescriptor.attributes[2].bufferIndex = bufferIndex
@@ -44,7 +46,9 @@ struct Vertex3D: Equatable {
 //        vertexDescriptor.attributes[2].offset = offset
 //        offset += MemoryLayout<SIMD2<Float>>.stride
 
-        vertexDescriptor.layouts[0].stride = MemoryLayout<Vertex3D>.stride
+        // TODO: Size or stride?
+        assert(MemoryLayout<Vertex3D>.stride == 32)
+        vertexDescriptor.layouts[0].stride = 32
         return vertexDescriptor
     }()
 
@@ -91,7 +95,7 @@ struct Vertex3D: Equatable {
     }()
 
     init(x: Float, y: Float, z: Float) {
-        position = SIMD3([x, y, z])
+        position = SIMD4([x, y, z, 1.0])
 //        normal = SIMD3([0.0, 0.0, 0.0])
         textureCoordinate = SIMD2([0.0, 0.0])
     }
@@ -103,7 +107,7 @@ struct Vertex3D: Equatable {
     ///   - textureU: The texture U-coordinate mapping
     ///   - textureV: The texture V-coordinate mapping
     init(x: Float, y: Float, z: Float, textureU: Float, textureV: Float) {
-        position = SIMD3([x, y, z])
+        position = SIMD4([x, y, z, 1.0])
 //        normal = SIMD3([0.0, 0.0, 0.0])
         textureCoordinate = SIMD2([textureU, textureV])
     }
@@ -115,13 +119,13 @@ struct Vertex3D: Equatable {
     ///   - textureU: The texture U-coordinate mapping
     ///   - textureV: The texture V-coordinate mapping
     init(x: Float, y: Float, z: Float, normalX: Float, normalY: Float, normalZ: Float, textureU: Float, textureV: Float) {
-        position = SIMD3([x, y, z])
+        position = SIMD4([x, y, z, 1.0])
 //        normal = SIMD3([normalX, normalY, normalZ])
         textureCoordinate = SIMD2([textureU, textureV])
     }
 
     init(x: Float, y: Float, z: Float, normalX: Float, normalY: Float, normalZ: Float) {
-        position = SIMD3([x, y, z])
+        position = SIMD4([x, y, z, 1.0])
 //        normal = SIMD3([normalX, normalY, normalZ])
         textureCoordinate = SIMD2([0.0, 0.0])
     }

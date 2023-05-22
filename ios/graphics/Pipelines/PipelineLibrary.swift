@@ -116,7 +116,7 @@ public enum Pipeline: String, CaseIterable {
             case .textShader: return "textVertexShader"
             case .sphereProjectionShader: return "sphereProjectionVertexShader"
             case .sphereColorShader: return "sphereColorVertexShader"
-            case .skyboxShader: return "baseVertexShader"
+            case .skyboxShader: return "skyboxVertexShader"
         }
     }
 
@@ -142,6 +142,7 @@ public enum Pipeline: String, CaseIterable {
             case .polygonGroupShader: return PolygonVertex.descriptor
             case .sphereProjectionShader: return Vertex.tesselatedDescriptor
             case .sphereColorShader: return Vertex.tesselatedDescriptor
+            case .skyboxShader: return Vertex3D.descriptor
             default: return Vertex.descriptor
         }
     }

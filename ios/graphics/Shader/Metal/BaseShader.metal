@@ -57,7 +57,7 @@ shadedFragmentShader(VertexOut in [[stage_in]],
 
   float s = in.n.x * 0.5 + in.n.y * 0.5 + in.n.z * 0.3;
 //  s = s * 0.5 + 0.5;
-  s = 0.7 + 0.3 * sin(time*0.1+3.14/2.0);
+  s = 0.7 + 0.3 * sin(time*0.3+3.14/2.0);
 
   float a = color.a * alpha;
 

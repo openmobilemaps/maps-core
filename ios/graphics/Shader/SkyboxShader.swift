@@ -17,14 +17,11 @@ public class SkyboxShader: BaseShader {
     private var pipeline: MTLRenderPipelineState?
 
     private let shader : Pipeline
-    private let buffer: MTLBuffer
 
     private static let renderStartTime = Date()
 
     public init(shader : Pipeline = Pipeline.skyboxShader) {
         self.shader = shader
-        guard let buffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<Float>.stride, options: []) else { fatalError("Could not create buffer") }
-        self.buffer = buffer
     }
 
     override public func setupProgram(_ context: MCRenderingContextInterface?) {
@@ -38,10 +35,11 @@ public class SkyboxShader: BaseShader {
         guard let pipeline = pipeline else { return }
 
         encoder.setRenderPipelineState(pipeline)
-        encoder.setFragmentBuffer(buffer, offset: 0, index: 1)
 
         var time = Float(-Self.renderStartTime.timeIntervalSinceNow)
         encoder.setFragmentBytes(&time, length: MemoryLayout<Float>.stride, index: 1)
+
+        encoder.setCullMode(.front)
     }
 }
 

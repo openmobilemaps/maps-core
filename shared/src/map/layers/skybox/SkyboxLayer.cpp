@@ -15,6 +15,7 @@
 #include "RenderObject.h"
 #include "RenderPass.h"
 #include "ColorShaderInterface.h"
+#include "Polygon3dInterface.h"
 
 SkyboxLayer::SkyboxLayer()
    : isHidden(false) {
@@ -53,10 +54,37 @@ void SkyboxLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, int
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
 
     auto shader = mapInterface->getShaderFactory()->createSkyboxShader();
-    auto quad = mapInterface->getGraphicsObjectFactory()->createQuad(shader);
-    quad->setFrame(Quad2dD(Vec2D(-1, -1), Vec2D(1, -1), Vec2D(1, 1), Vec2D(-1, 1)), RectD(0, 0, 1, 1));
-    quad->asGraphicsObject()->setup(renderingContext);
-    auto renderObject = std::make_shared<RenderObject>(quad->asGraphicsObject(), true);
+    auto polygon = mapInterface->getGraphicsObjectFactory()->createPolygon3d(shader);
+    std::vector<float> vertices = {
+        -10.0f, -10.0f, -10.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f, // V0
+        10.0f, -10.0f, -10.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f,  // V1
+        10.0f, 10.0f, -10.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f,   // V2
+        -10.0f, 10.0f, -10.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f,  // V3
+        -10.0f, -10.0f, 10.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f,  // V4
+        10.0f, -10.0f, 10.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f,   // V5
+        10.0f, 10.0f, 10.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f,    // V6
+        -10.0f, 10.0f, 10.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f    // V7
+    };
+
+    std::vector<uint16_t> indices = {
+        0, 1, 3, // Triangle 1
+        1, 2, 3, // Triangle 2
+        1, 5, 2, // Triangle 3
+        5, 6, 2, // Triangle 4
+        5, 4, 6, // Triangle 5
+        4, 7, 6, // Triangle 6
+        4, 0, 7, // Triangle 7
+        0, 3, 7, // Triangle 8
+        3, 2, 7, // Triangle 9
+        2, 6, 7, // Triangle 10
+        0, 4, 1, // Triangle 11
+        4, 5, 1  // Triangle 12
+    };
+    auto attr = SharedBytes((int64_t)vertices.data(), (int32_t)vertices.size(), (int32_t)sizeof(float));
+    auto ind = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(uint16_t));
+    polygon->setVertices(attr, ind);
+    polygon->asGraphicsObject()->setup(renderingContext);
+    auto renderObject = std::make_shared<RenderObject>(polygon->asGraphicsObject());
     auto renderPass = std::make_shared<RenderPass>(RenderPassConfig(0), std::vector<std::shared_ptr<::RenderObjectInterface>> { renderObject });
     renderPasses.push_back(renderPass);
 
