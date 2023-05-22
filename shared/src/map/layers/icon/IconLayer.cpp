@@ -333,58 +333,64 @@ void IconLayer::show() {
         mapInterface->invalidate();
 }
 
-bool IconLayer::onClickConfirmed(const Vec2F &posScreen) {
+std::vector<std::shared_ptr<IconInfoInterface>> IconLayer::getIconsAtPosition(const ::Vec2F &posScreen) {
     auto lockSelfPtr = shared_from_this();
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
     auto conversionHelper = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
     if (!camera || !conversionHelper) {
-        return false;
+        return {};
     }
 
-    if (callbackHandler) {
-        std::vector<std::shared_ptr<IconInfoInterface>> iconsHit;
+    std::vector<std::shared_ptr<IconInfoInterface>> iconsHit;
 
-        Coord clickCoords = camera->coordFromScreenPosition(posScreen);
+    Coord clickCoords = camera->coordFromScreenPosition(posScreen);
 
-        double angle = -(camera->getRotation() * M_PI / 180.0);
-        double sinAng = std::sin(angle);
-        double cosAng = std::cos(angle);
+    double angle = -(camera->getRotation() * M_PI / 180.0);
+    double sinAng = std::sin(angle);
+    double cosAng = std::cos(angle);
 
-        {
-            std::lock_guard<std::recursive_mutex> lock(iconsMutex);
-            for (const auto &iconTuple : icons) {
-                std::shared_ptr<IconInfoInterface> icon = iconTuple.first;
+    {
+        std::lock_guard<std::recursive_mutex> lock(iconsMutex);
+        for (const auto &iconTuple : icons) {
+            std::shared_ptr<IconInfoInterface> icon = iconTuple.first;
 
-                const Vec2F &anchor = icon->getIconAnchor();
-                float ratioLeftRight = std::clamp(anchor.x, 0.0f, 1.0f);
-                float ratioTopBottom = std::clamp(anchor.y, 0.0f, 1.0f);
-                float leftW = icon->getIconSize().x * ratioLeftRight;
-                float topH = icon->getIconSize().y * ratioTopBottom;
-                float rightW = icon->getIconSize().x * (1.0f - ratioLeftRight);
-                float bottomH = icon->getIconSize().y * (1.0f - ratioTopBottom);
+            const Vec2F &anchor = icon->getIconAnchor();
+            float ratioLeftRight = std::clamp(anchor.x, 0.0f, 1.0f);
+            float ratioTopBottom = std::clamp(anchor.y, 0.0f, 1.0f);
+            float leftW = icon->getIconSize().x * ratioLeftRight;
+            float topH = icon->getIconSize().y * ratioTopBottom;
+            float rightW = icon->getIconSize().x * (1.0f - ratioLeftRight);
+            float bottomH = icon->getIconSize().y * (1.0f - ratioTopBottom);
 
-                Coord iconPos = conversionHelper->convert(clickCoords.systemIdentifier, icon->getCoordinate());
-                IconType type = icon->getType();
-                if (type == IconType::INVARIANT || type == IconType::SCALE_INVARIANT) {
-                    leftW = camera->mapUnitsFromPixels(leftW);
-                    topH = camera->mapUnitsFromPixels(topH);
-                    rightW = camera->mapUnitsFromPixels(rightW);
-                    bottomH = camera->mapUnitsFromPixels(bottomH);
-                }
+            Coord iconPos = conversionHelper->convert(clickCoords.systemIdentifier, icon->getCoordinate());
+            IconType type = icon->getType();
+            if (type == IconType::INVARIANT || type == IconType::SCALE_INVARIANT) {
+                leftW = camera->mapUnitsFromPixels(leftW);
+                topH = camera->mapUnitsFromPixels(topH);
+                rightW = camera->mapUnitsFromPixels(rightW);
+                bottomH = camera->mapUnitsFromPixels(bottomH);
+            }
 
-                Vec2D clickPos = Vec2D(clickCoords.x - iconPos.x, clickCoords.y - iconPos.y);
-                if (type == IconType::INVARIANT || type == IconType::ROTATION_INVARIANT) {
-                    float newX = cosAng * clickPos.x - sinAng * clickPos.y;
-                    float newY = sinAng * clickPos.x + cosAng * clickPos.y;
-                    clickPos.x = newX;
-                    clickPos.y = newY;
-                }
-                if (clickPos.x > -leftW && clickPos.x < rightW && clickPos.y < topH && clickPos.y > -bottomH) {
-                    iconsHit.push_back(icon);
-                }
+            Vec2D clickPos = Vec2D(clickCoords.x - iconPos.x, clickCoords.y - iconPos.y);
+            if (type == IconType::INVARIANT || type == IconType::ROTATION_INVARIANT) {
+                float newX = cosAng * clickPos.x - sinAng * clickPos.y;
+                float newY = sinAng * clickPos.x + cosAng * clickPos.y;
+                clickPos.x = newX;
+                clickPos.y = newY;
+            }
+            if (clickPos.x > -leftW && clickPos.x < rightW && clickPos.y < topH && clickPos.y > -bottomH) {
+                iconsHit.push_back(icon);
             }
         }
+
+        return iconsHit;
+    }
+}
+
+bool IconLayer::onClickConfirmed(const Vec2F &posScreen) {
+    if (callbackHandler) {
+        auto iconsHit = getIconsAtPosition(posScreen);
 
         if (!iconsHit.empty()) {
             return callbackHandler->onClickConfirmed(iconsHit);
@@ -392,6 +398,20 @@ bool IconLayer::onClickConfirmed(const Vec2F &posScreen) {
     }
     return false;
 }
+
+
+bool IconLayer::onLongPress(const Vec2F &posScreen) {
+    if (callbackHandler) {
+        auto iconsHit = getIconsAtPosition(posScreen);
+
+        if (!iconsHit.empty()) {
+            return callbackHandler->onLongPress(iconsHit);
+        }
+    }
+    return false;
+}
+
+
 
 void IconLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> &maskingObject) {
     this->mask = maskingObject;

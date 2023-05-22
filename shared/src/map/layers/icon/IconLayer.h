@@ -72,6 +72,8 @@ class IconLayer : public IconLayerInterface,
 
     virtual bool onClickConfirmed(const ::Vec2F &posScreen) override;
 
+    virtual bool onLongPress(const ::Vec2F &posScreen) override;
+
     void setLayerClickable(bool isLayerClickable) override;
 
     virtual void setAlpha(float alpha) override;
@@ -82,6 +84,8 @@ class IconLayer : public IconLayerInterface,
     void
     setupIconObjects(const std::vector<std::tuple<const std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>>
                          &iconObjects);
+
+    std::vector<std::shared_ptr<IconInfoInterface>> getIconsAtPosition(const ::Vec2F &posScreen);
 
     std::shared_ptr<MapInterface> mapInterface;
 

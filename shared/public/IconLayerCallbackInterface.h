@@ -13,4 +13,6 @@ public:
     virtual ~IconLayerCallbackInterface() {}
 
     virtual bool onClickConfirmed(const std::vector<std::shared_ptr<IconInfoInterface>> & icons) = 0;
+
+    virtual bool onLongPress(const std::vector<std::shared_ptr<IconInfoInterface>> & icons) = 0;
 };
