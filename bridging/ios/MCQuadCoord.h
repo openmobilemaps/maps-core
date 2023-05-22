@@ -24,4 +24,6 @@
 
 @property (nonatomic, readonly, nonnull) MCCoord * bottomLeft;
 
+- (NSComparisonResult)compare:(nonnull MCQuadCoord *)other;
+
 @end

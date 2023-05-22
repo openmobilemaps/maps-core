@@ -23,4 +23,6 @@
 
 @property (nonatomic, readonly) double z;
 
+- (NSComparisonResult)compare:(nonnull MCCoord *)other;
+
 @end

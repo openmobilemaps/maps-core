@@ -12,6 +12,15 @@ struct Coord final {
     double y;
     double z;
 
+    friend bool operator==(const Coord& lhs, const Coord& rhs);
+    friend bool operator!=(const Coord& lhs, const Coord& rhs);
+
+    friend bool operator<(const Coord& lhs, const Coord& rhs);
+    friend bool operator>(const Coord& lhs, const Coord& rhs);
+
+    friend bool operator<=(const Coord& lhs, const Coord& rhs);
+    friend bool operator>=(const Coord& lhs, const Coord& rhs);
+
     Coord(std::string systemIdentifier_,
           double x_,
           double y_,
