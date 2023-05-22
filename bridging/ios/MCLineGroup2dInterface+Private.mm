@@ -5,7 +5,6 @@
 #import "MCLineGroup2dInterface.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
-#import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCGraphicsObjectInterface+Private.h"
 #import "MCSharedBytes+Private.h"
@@ -41,12 +40,6 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setScalingFactor:(float)factor {
-    try {
-        _cppRefHandle.get()->setScalingFactor(::djinni::F32::toCpp(factor));
-    } DJINNI_TRANSLATE_EXCEPTIONS()
-}
-
 - (nullable id<MCGraphicsObjectInterface>)asGraphicsObject {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->asGraphicsObject();
@@ -68,12 +61,6 @@ public:
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() setLines:(::djinni_generated::SharedBytes::fromCpp(c_lines))
                                                        indices:(::djinni_generated::SharedBytes::fromCpp(c_indices))];
-        }
-    }
-    void setScalingFactor(float c_factor) override
-    {
-        @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setScalingFactor:(::djinni::F32::fromCpp(c_factor))];
         }
     }
     /*not-null*/ std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override

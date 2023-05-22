@@ -62,7 +62,7 @@ class Quad2dInstancedOpenGl : public GraphicsObjectInterface,
 
     virtual void setScales(const ::SharedBytes &scales) override;
 
-    virtual void setTexureCoordinates(const ::SharedBytes &textureCoordinates) override;
+    virtual void setTextureCoordinates(const ::SharedBytes &textureCoordinates) override;
 
     virtual void setAlphas(const ::SharedBytes &values) override;
 
@@ -103,6 +103,7 @@ class Quad2dInstancedOpenGl : public GraphicsObjectInterface,
     double factorWidth = 1.0;
 
     bool ready = false;
+    uint8_t buffersNotReady = 0b00011111;
     bool textureCoordsReady = false;
     std::recursive_mutex dataMutex;
 
@@ -122,6 +123,6 @@ class Quad2dInstancedOpenGl : public GraphicsObjectInterface,
     GLuint textureCoordinatesListBuffer;
 
 private:
-    void writeToBuffer(const ::SharedBytes &data, GLuint target);
+    bool writeToBuffer(const ::SharedBytes &data, GLuint target);
 
 };

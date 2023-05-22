@@ -216,7 +216,7 @@ public:
 
                     layers.push_back(layerDesc);
 
-            } else if (val["type"] == "symbol") {
+            } else if (val["type"] == "symbol" && val["id"] == "landcover_pt") {
 
                     SymbolVectorStyle style(parser.parseValue(val["layout"]["text-size"]),
                                             parser.parseValue(val["paint"]["text-color"]),
@@ -266,7 +266,7 @@ public:
                                                                                     renderPassIndex,
                                                                                     interactable);
                     layers.push_back(layerDesc);
-                } else if (val["type"] == "fill") {
+                } else if (val["type"] == "fill" && val["paint"]["fill-pattern"].is_null()) {
 
                     std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
 

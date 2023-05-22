@@ -317,7 +317,7 @@ void Text2dInstancedOpenGl::setScales(const SharedBytes &scales) {
     writeToBuffer(scales, scalesBuffer);
 }
 
-void Text2dInstancedOpenGl::setTexureCoordinates(const SharedBytes &textureCoordinates) {
+void Text2dInstancedOpenGl::setTextureCoordinates(const SharedBytes &textureCoordinates) {
     writeToBuffer(textureCoordinates, textureCoordinatesListBuffer);
 }
 

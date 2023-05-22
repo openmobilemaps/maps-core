@@ -53,6 +53,4 @@ void Tiled2dMapVectorSourceSymbolCollisionManager::update() {
     for(const auto &[source, symbolManager] : symbolSourceDataManagers) {
         symbolManager.syncAccess(lambda);
     }
-
-    collisionDetection();
 }

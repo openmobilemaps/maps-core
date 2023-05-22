@@ -163,7 +163,6 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
     if (iconImage.empty() || !spriteTexture) {
         // TODO: make sure icon is not rendered
     } else {
-
         const auto textureWidth = (double) spriteTexture->getImageWidth();
         const auto textureHeight = (double) spriteTexture->getImageHeight();
 
@@ -186,6 +185,8 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
         textureCoordinates[4 * countOffset + 2] = ((double) spriteIt->second.width) / textureWidth;
         textureCoordinates[4 * countOffset + 3] = ((double) spriteIt->second.height) / textureHeight;
 
+        lastIconUpdateScaleFactor = -1.0;
+        lastIconUpdateRotation = -1.0;
     }
 
     iconRotationAlignment = description->style.getIconRotationAlignment(evalContext);
@@ -330,7 +331,7 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     lastStretchIconUpdateScaleFactor = zoomIdentifier;
     lastStretchIconUpdateRotation = rotation;
 
-    if (collides || !(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier)) {
+    if (collides || !(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier) || !stretchSpriteInfo) {
         alphas[countOffset] = 0;
         scales[2 * countOffset] = 0;
         scales[2 * countOffset + 1] = 0;

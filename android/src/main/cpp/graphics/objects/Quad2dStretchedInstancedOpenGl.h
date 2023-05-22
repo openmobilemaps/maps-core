@@ -11,27 +11,32 @@
 #pragma once
 
 #include "GraphicsObjectInterface.h"
+#include "MaskingObjectInterface.h"
 #include "OpenGlContext.h"
-#include "TextInstancedInterface.h"
+#include "Quad2dStretchedInstancedInterface.h"
 #include "ShaderProgramInterface.h"
 #include "opengl_wrapper.h"
 #include <mutex>
 #include <vector>
 #include <RectD.h>
 
-class Text2dInstancedOpenGl : public GraphicsObjectInterface,
-                              public TextInstancedInterface,
-                              public std::enable_shared_from_this<Text2dInstancedOpenGl> {
-public:
-    Text2dInstancedOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader);
+class Quad2dStretchedInstancedOpenGl : public GraphicsObjectInterface,
+                     public MaskingObjectInterface,
+                     public Quad2dStretchedInstancedInterface,
+                     public std::enable_shared_from_this<Quad2dStretchedInstancedOpenGl> {
+  public:
+    Quad2dStretchedInstancedOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader);
 
-    ~Text2dInstancedOpenGl(){};
+    ~Quad2dStretchedInstancedOpenGl(){};
 
     virtual bool isReady() override;
 
     virtual void setup(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
     virtual void clear() override;
+
+    virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
+                              int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
                         int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
@@ -45,6 +50,8 @@ public:
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() override;
 
+    virtual std::shared_ptr<MaskingObjectInterface> asMaskingObject() override;
+
     virtual void setIsInverseMasked(bool inversed) override;
 
     virtual void setInstanceCount(int32_t count) override;
@@ -55,13 +62,13 @@ public:
 
     virtual void setScales(const ::SharedBytes &scales) override;
 
-    void setTextureCoordinates(const SharedBytes &textureCoordinates) override;
+    virtual void setTextureCoordinates(const ::SharedBytes &textureCoordinates) override;
 
-    virtual void setStyleIndices(const ::SharedBytes &indices) override;
+    virtual void setAlphas(const ::SharedBytes &values) override;
 
-    virtual void setStyles(const ::SharedBytes &values) override;
+    virtual void setStretchInfos(const SharedBytes &values) override;
 
-protected:
+  protected:
     virtual void adjustTextureCoordinates();
 
     virtual void prepareTextureDraw(std::shared_ptr<OpenGlContext> &openGLContext, int mProgram);
@@ -111,10 +118,12 @@ protected:
     GLuint rotationsBuffer;
     int instScalesHandle;
     GLuint scalesBuffer;
-    int instStyleIndicesHandle;
-    GLuint styleIndicesBuffer;
-    int styleBufferHandle;
-    GLuint styleBuffer;
+    int instAlphasHandle;
+    GLuint alphasBuffer;
+    int instStretchScalesHandle;
+    int instStretchXsHandle;
+    int instStretchYsHandle;
+    GLuint stretchInfoBuffer;
     int instTextureCoordinatesHandle;
     GLuint textureCoordinatesListBuffer;
 

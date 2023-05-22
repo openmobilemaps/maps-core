@@ -44,7 +44,7 @@ class Text2dOpenGl : public GraphicsObjectInterface,
 
     void setTextsShared(const SharedBytes &vertices, const SharedBytes &indices) override;
 
-    virtual void setTexts(const std::vector<TextDescription> &texts) override;
+    virtual void setTextsLegacy(const std::vector<TextDescription> &texts);
 
     virtual void loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
                              const std::shared_ptr<TextureHolderInterface> &textureHolder) override;

@@ -30,7 +30,9 @@ class ColorLineGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
 
     virtual void setStyles(const std::vector<::LineStyle> &lineStyles) override;
 
-  protected:
+    void setDashingScaleFactor(float factor) override;
+
+protected:
     virtual std::string getVertexShader() override;
 
     virtual std::string getFragmentShader() override;
@@ -39,6 +41,8 @@ class ColorLineGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
     std::recursive_mutex styleMutex;
     std::vector<GLfloat> lineValues;
     GLint numStyles = 0;
+
+    float dashingScaleFactor = 1.0;
 
     const int maxNumStyles = 48;
     const int sizeStyleValues = 3;

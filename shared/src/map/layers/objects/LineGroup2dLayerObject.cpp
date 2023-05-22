@@ -164,7 +164,7 @@ void LineGroup2dLayerObject::setStyles(const std::vector<LineStyle> &styles) {
 }
 
 void LineGroup2dLayerObject::setScalingFactor(float factor) {
-    line->setScalingFactor(factor);
+    shader->setDashingScaleFactor(factor);
 }
 
 std::shared_ptr<GraphicsObjectInterface> LineGroup2dLayerObject::getLineObject() { return line->asGraphicsObject(); }

@@ -20,10 +20,10 @@ public:
                                                  std::shared_ptr<VectorMapDescription> mapDescription): symbolSourceDataManagers(symbolSourceDataManagers), mapDescription(mapDescription)  {};
 
     void update();
-    
-private:
+
     void collisionDetection();
 
+private:
     std::unordered_map<std::string, WeakActor<Tiled2dMapVectorSourceSymbolDataManager>> symbolSourceDataManagers;
     std::shared_ptr<VectorMapDescription> mapDescription;
 };

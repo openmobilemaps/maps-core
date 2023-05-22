@@ -115,7 +115,6 @@ render_line_description = record {
 
 line_group_2d_interface = interface +c +j +o {
     set_lines(lines: shared_bytes, indices: shared_bytes);
-    set_scaling_factor(factor: f32);
     as_graphics_object(): graphics_object_interface;
 }
 

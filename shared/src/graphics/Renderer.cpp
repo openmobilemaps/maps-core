@@ -12,6 +12,7 @@
 #include "CameraInterface.h"
 #include "Matrix.h"
 #include "RenderObjectInterface.h"
+#include "OpenGlHelper.h"
 #include <Logger.h>
 
 void Renderer::addToRenderQueue(const std::shared_ptr<RenderPassInterface> &renderPass) {
@@ -37,23 +38,34 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
             const auto &renderObjects = pass->getRenderObjects();
 
             renderingContext->applyScissorRect(pass->getScissoringRect());
+            OpenGlHelper::checkGlError("UBCM: CHECKCHECK 0");
 
             if (hasMask) {
                 renderingContext->preRenderStencilMask();
                 maskObject->renderAsMask(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, factor);
-                //LogDebug << "Has mask and mask is: " <<= (maskObject->asGraphicsObject()->isReady() ? "ready" : "not ready");
+                OpenGlHelper::checkGlError("UBCM: CHECKCHECK MASK");
             }
 
             for (const auto &renderObject : renderObjects) {
+                OpenGlHelper::checkGlError("UBCM: CHECKCHECK 1");
                 const auto &graphicsObject = renderObject->getGraphicsObject();
                 if (renderObject->isScreenSpaceCoords()) {
                     graphicsObject->render(renderingContext, pass->getRenderPassConfig(), (int64_t) identityMatrix.data(), hasMask, factor);
                 } else if (renderObject->hasCustomModelMatrix()) {
+                    std::stringstream ss1;
+                    ss1 << "UBCM: CHECKCHECK " << graphicsObject.get();
+                    OpenGlHelper::checkGlError(ss1.str());
                     Matrix::multiplyMMC(tempMvpMatrix, 0, vpMatrix, 0, renderObject->getCustomModelMatrix(), 0);
                     graphicsObject->render(renderingContext, pass->getRenderPassConfig(), (int64_t)tempMvpMatrix.data(), hasMask,
                                            factor);
                 } else {
+                    std::stringstream ss1;
+                    ss1 << "UBCM: CHECKCHECK " << graphicsObject.get();
+                    OpenGlHelper::checkGlError(ss1.str());
                     graphicsObject->render(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, hasMask, factor);
+                    std::stringstream ss;
+                    ss << "UBCM: CHECKCHECK END " << graphicsObject.get();
+                    OpenGlHelper::checkGlError(ss.str());
                 }
             }
 

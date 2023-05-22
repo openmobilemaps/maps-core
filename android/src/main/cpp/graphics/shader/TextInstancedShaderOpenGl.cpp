@@ -79,6 +79,7 @@ std::string TextInstancedShaderOpenGl::getFragmentShader() {
                                               struct TextInstancedStyle {
                                                   vec4 color;
                                                   vec4 haloColor;
+                                                  float haloWidth;
                                               };
 
                                               layout(std430, binding = 0) buffer textInstancedStyleBuffer {

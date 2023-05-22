@@ -39,34 +39,33 @@ std::string AlphaInstancedShaderOpenGl::getVertexShader() {
     return OMMVersionedGlesShaderCode(320 es,
                                       uniform mat4 uMVPMatrix;
 
-                                      in vec4 vPosition;
-                                      in vec2 texCoordinate;
+                                      in vec3 vPosition;
+                                      in vec2 vTexCoordinate;
 
                                       in vec2 aPosition;
+                                      in float aRotation;
                                       in vec4 aTexCoordinate;
                                       in vec2 aScale;
-                                      in float aRotation;
                                       in float aAlpha;
 
-                                      out vec2 v_texcoord;
+                                      out vec2 v_texCoord;
                                       out vec4 v_texcoordInstance;
                                       out float v_alpha;
 
                                       void main() {
                                           float angle = aRotation * 3.14159265 / 180.0;
-
                                           mat4 model_matrix = mat4(
-                                                  vec4(cos(angle) * aScale.x, -sin(angle) * aScale.x, 0, 0),
-                                                  vec4(sin(angle) * aScale.y, cos(angle) * aScale.y, 0, 0),
-                                                  vec4(0, 0, 1, 0),
+                                                  vec4(cos(angle) * aScale.x, -sin(angle) * aScale.x, 0.0, 0.0),
+                                                  vec4(sin(angle) * aScale.y, cos(angle) * aScale.y, 0.0, 0.0),
+                                                  vec4(0.0, 0.0, 1.0, 0.0),
                                                   vec4(aPosition.x, aPosition.y, 1.0, 1)
                                           );
 
                                           mat4 matrix = uMVPMatrix * model_matrix;
 
-                                          gl_Position = matrix * vPosition;
+                                          gl_Position = matrix * vec4(vPosition, 1.0);
                                           v_texcoordInstance = aTexCoordinate;
-                                          v_texcoord = texCoordinate;
+                                          v_texCoord = vTexCoordinate;
                                           v_alpha = aAlpha;
                                       }
     );
@@ -75,21 +74,22 @@ std::string AlphaInstancedShaderOpenGl::getVertexShader() {
 
 std::string AlphaInstancedShaderOpenGl::getFragmentShader() {
     return OMMVersionedGlesShaderCode(320 es,
-                                      precision mediump float;
+                                      precision highp float;
                                       uniform sampler2D textureSampler;
 
                                       uniform vec2 textureFactor;
 
-                                      in vec2 v_texcoord;
+                                      in vec2 v_texCoord;
                                       in vec4 v_texcoordInstance;
                                       in float v_alpha;
 
                                       out vec4 fragmentColor;
 
                                       void main() {
-                                          vec2 uv = (v_texcoordInstance.xy + v_texcoordInstance.zw * vec2(v_texcoord.x, (1.0 - v_texcoord.y))) * textureFactor;
+                                          vec2 uv = (v_texcoordInstance.xy + v_texcoordInstance.zw * vec2(v_texCoord.x, (1.0 - v_texCoord.y))) * textureFactor;
                                           vec4 c = texture(textureSampler, uv);
-                                          fragmentColor = c * v_alpha;
+                                          float alpha = c.a * v_alpha;
+                                          fragmentColor = vec4(c.rgb * alpha, alpha);
                                       }
     );
 }

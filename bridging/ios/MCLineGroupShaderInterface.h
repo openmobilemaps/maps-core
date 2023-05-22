@@ -10,6 +10,8 @@
 
 - (void)setStyles:(nonnull NSArray<MCLineStyle *> *)styles;
 
+- (void)setDashingScaleFactor:(float)factor;
+
 - (nullable id<MCShaderProgramInterface>)asShaderProgramInterface;
 
 @end

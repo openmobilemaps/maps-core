@@ -281,34 +281,28 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
         object->setupTextProperties(textTextureCoordinates, textStyleIndices, textOffset, textStyleOffset, tileInfo.zoomIdentifier);
     }
 
-#ifdef DRAW_TEXT_BOUNDING_BOX
-    if (boundingBoxLayerObject) {
-        boundingBoxLayerObject->getPolygonObject()->setup(mapInterface.lock()->getRenderingContext());
-    }
-#endif
-
     if (spriteTexture && spriteData && iconInstancedObject) {
         iconInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)));
-        iconInstancedObject->setPositions(SharedBytes((int64_t)iconPositions.data(), (int32_t)iconAlphas.size(), 2 * (int32_t)sizeof(float)));
-        iconInstancedObject->setTextureCoordinates(SharedBytes((int64_t)iconTextureCoordinates.data(), (int32_t)iconAlphas.size(), 4 * (int32_t)sizeof(float)));
         iconInstancedObject->loadTexture(context, spriteTexture);
         iconInstancedObject->asGraphicsObject()->setup(context);
+        iconInstancedObject->setPositions(SharedBytes((int64_t)iconPositions.data(), (int32_t)iconAlphas.size(), 2 * (int32_t)sizeof(float)));
+        iconInstancedObject->setTextureCoordinates(SharedBytes((int64_t)iconTextureCoordinates.data(), (int32_t)iconAlphas.size(), 4 * (int32_t)sizeof(float)));
     }
 
     if (spriteTexture && spriteData && stretchedInstancedObject) {
         stretchedInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)));
-        stretchedInstancedObject->setPositions(SharedBytes((int64_t)stretchedIconPositions.data(), (int32_t)stretchedIconAlphas.size(), 2 * (int32_t)sizeof(float)));
-        stretchedInstancedObject->setTextureCoordinates(SharedBytes((int64_t)stretchedIconTextureCoordinates.data(), (int32_t)stretchedIconAlphas.size(), 4 * (int32_t)sizeof(float)));
         stretchedInstancedObject->loadTexture(context, spriteTexture);
         stretchedInstancedObject->asGraphicsObject()->setup(context);
+        stretchedInstancedObject->setPositions(SharedBytes((int64_t)stretchedIconPositions.data(), (int32_t)stretchedIconAlphas.size(), 2 * (int32_t)sizeof(float)));
+        stretchedInstancedObject->setTextureCoordinates(SharedBytes((int64_t)stretchedIconTextureCoordinates.data(), (int32_t)stretchedIconAlphas.size(), 4 * (int32_t)sizeof(float)));
     }
 
     if (textInstancedObject) {
+        textInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)));
         textInstancedObject->loadTexture(context, fontResult->imageData);
+        textInstancedObject->asGraphicsObject()->setup(context);
         textInstancedObject->setTextureCoordinates(SharedBytes((int64_t)textTextureCoordinates.data(), (int32_t)textRotations.size(), 4 * (int32_t)sizeof(float)));
         textInstancedObject->setStyleIndices(SharedBytes((int64_t)textStyleIndices.data(), (int32_t)textStyleIndices.size(), 1 * (int32_t)sizeof(uint16_t)));
-        textInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)));
-        textInstancedObject->asGraphicsObject()->setup(context);
     }
 }
 
@@ -381,6 +375,7 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
             }
 
             boundingBoxLayerObject->setVertices(vertices, indices);
+            boundingBoxLayerObject->getPolygonObject()->setup(mapInterface.lock()->getRenderingContext());
         }
 #endif
     }

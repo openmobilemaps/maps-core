@@ -20,9 +20,14 @@
 #include "RasterShaderOpenGl.h"
 #include "StretchShaderOpenGl.h"
 #include "AlphaInstancedShaderOpenGl.h"
+#include "StretchInstancedShaderOpenGl.h"
 
 std::shared_ptr<AlphaShaderInterface> ShaderFactoryOpenGl::createAlphaShader() {
     return std::make_shared<AlphaShaderOpenGl>();
+}
+
+std::shared_ptr<AlphaInstancedShaderInterface> ShaderFactoryOpenGl::createAlphaInstancedShader() {
+    return std::make_shared<AlphaInstancedShaderOpenGl>();
 }
 
 std::shared_ptr<RasterShaderInterface> ShaderFactoryOpenGl::createRasterShader() {
@@ -49,6 +54,10 @@ std::shared_ptr<PolygonGroupShaderInterface> ShaderFactoryOpenGl::createPolygonG
     return std::make_shared<ColorPolygonGroup2dShaderOpenGl>();
 }
 
+std::shared_ptr<PolygonPatternGroupShaderInterface> ShaderFactoryOpenGl::createPolygonPatternGroupShader() {
+    return std::shared_ptr<PolygonPatternGroupShaderInterface>(); // TODO: UBCM
+}
+
 std::shared_ptr<TextShaderInterface> ShaderFactoryOpenGl::createTextShader() {
     return std::make_shared<TextShaderOpenGl>();
 }
@@ -61,6 +70,6 @@ std::shared_ptr<StretchShaderInterface> ShaderFactoryOpenGl::createStretchShader
     return std::make_shared<StretchShaderOpenGl>();
 }
 
-std::shared_ptr<AlphaInstancedShaderInterface> ShaderFactoryOpenGl::createAlphaInstancedShader() {
-    return std::make_shared<AlphaInstancedShaderOpenGl>();
+std::shared_ptr<StretchInstancedShaderInterface> ShaderFactoryOpenGl::createStretchInstancedShader() {
+    return std::make_shared<StretchInstancedShaderOpenGl>();
 }
