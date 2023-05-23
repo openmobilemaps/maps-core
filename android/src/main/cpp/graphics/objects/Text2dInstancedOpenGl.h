@@ -98,6 +98,7 @@ protected:
     double factorWidth = 1.0;
 
     bool ready = false;
+    uint8_t buffersNotReady = 0b00111111;
     bool textureCoordsReady = false;
     std::recursive_mutex dataMutex;
 
@@ -119,6 +120,6 @@ protected:
     GLuint textureCoordinatesListBuffer;
 
 private:
-    void writeToBuffer(const ::SharedBytes &data, GLuint target);
+    bool writeToBuffer(const ::SharedBytes &data, GLuint target);
 
 };

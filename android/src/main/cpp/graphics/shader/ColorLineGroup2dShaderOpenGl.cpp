@@ -155,9 +155,12 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                                            vec4 offset = vec4(vWidthNormal.x * offsetFloat, vWidthNormal.y * offsetFloat, 0.0, 0.0);
 
                                            float scaledWidth = width * 0.5;
+                                           dashingSize = width;
                                            if (isScaled > 0.0) {
-                                            scaledWidth = scaledWidth * scaleFactor;
+                                               scaledWidth = scaledWidth * scaleFactor;
+                                               dashingSize *= dashingScaleFactor;
                                            }
+
                                            vec4 trfPosition = uMVPMatrix * vec4(vPosition.xy, 0.0, 1.0);
                                            vec4 displ = vec4((lengthNormal + widthNormal).xy, 0.0, 0.0) * vec4(scaledWidth, scaledWidth, 0.0, 0.0) + offset;
                                            vec4 trfDispl = uMVPMatrix * displ;

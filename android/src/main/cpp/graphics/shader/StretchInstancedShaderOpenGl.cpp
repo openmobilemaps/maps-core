@@ -131,7 +131,7 @@ std::string StretchInstancedShaderOpenGl::getFragmentShader() {
                                           texCoordNorm = adjTexCoordIns.xy + adjTexCoordIns.zw * texCoordNorm;
                                           vec4 color = texture(textureSampler, texCoordNorm);
                                           float a = color.a * v_alpha;
-                                          fragmentColor = vec4(v_texCoord, 0.0, 1.0) * 0.25 + 0.75 * vec4(color.rgb * a, a);
+                                          fragmentColor = vec4(color.rgb * a, a);
                                       }
     );
 }

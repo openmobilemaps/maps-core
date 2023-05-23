@@ -341,7 +341,7 @@ void Quad2dInstancedOpenGl::setAlphas(const SharedBytes &values) {
 
 bool Quad2dInstancedOpenGl::writeToBuffer(const ::SharedBytes &data, GLuint target) {
     if(!ready){
-        LogWarning <<= "🥴 Writing to buffer before it was created.";
+        // Writing to buffer before it was created
         return false;
     }
     glBindBuffer(GL_ARRAY_BUFFER, target);

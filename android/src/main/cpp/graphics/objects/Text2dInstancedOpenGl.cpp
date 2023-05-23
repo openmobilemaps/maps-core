@@ -189,8 +189,10 @@ void Text2dInstancedOpenGl::adjustTextureCoordinates() {
 
 void Text2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                                    int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
-    if (!ready || (usesTextureCoords && !textureCoordsReady) || instanceCount == 0)
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (!ready || (usesTextureCoords && !textureCoordsReady) || instanceCount == 0 || buffersNotReady) {
         return;
+    }
 
     glUseProgram(programHandle);
 
@@ -198,7 +200,6 @@ void Text2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
         glStencilFunc(GL_EQUAL, isMaskInversed ? 0 : 128, 128);
         glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
     }
-
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     int mProgram = openGlContext->getProgram(shaderProgram->getProgramName());
     glUseProgram(mProgram);
@@ -213,29 +214,28 @@ void Text2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
         auto textureFactorHandle = glGetUniformLocation(programHandle, "textureFactor");
         glUniform2f(textureFactorHandle, factorWidth, factorHeight);
     }
-
     glBindBuffer(GL_ARRAY_BUFFER, positionsBuffer);
-    glVertexAttribPointer(instPositionsHandle, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+    glVertexAttribPointer(instPositionsHandle, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(instPositionsHandle);
     glVertexAttribDivisor(instPositionsHandle, 1);
 
     glBindBuffer(GL_ARRAY_BUFFER, textureCoordinatesListBuffer);
-    glVertexAttribPointer(instTextureCoordinatesHandle, 4, GL_FLOAT, GL_FALSE, 0, NULL);
+    glVertexAttribPointer(instTextureCoordinatesHandle, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(instTextureCoordinatesHandle);
     glVertexAttribDivisor(instTextureCoordinatesHandle, 1);
 
     glBindBuffer(GL_ARRAY_BUFFER, scalesBuffer);
-    glVertexAttribPointer(instScalesHandle, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+    glVertexAttribPointer(instScalesHandle, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(instScalesHandle);
     glVertexAttribDivisor(instScalesHandle, 1);
 
     glBindBuffer(GL_ARRAY_BUFFER, rotationsBuffer);
-    glVertexAttribPointer(instRotationsHandle, 1, GL_FLOAT, GL_FALSE, 0, NULL);
+    glVertexAttribPointer(instRotationsHandle, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(instRotationsHandle);
     glVertexAttribDivisor(instRotationsHandle, 1);
 
     glBindBuffer(GL_ARRAY_BUFFER, styleIndicesBuffer);
-    glVertexAttribIPointer(instStyleIndicesHandle, 1, GL_UNSIGNED_SHORT, 0, NULL);
+    glVertexAttribIPointer(instStyleIndicesHandle, 1, GL_UNSIGNED_SHORT, 0, nullptr);
     glEnableVertexAttribArray(instStyleIndicesHandle);
     glVertexAttribDivisor(instStyleIndicesHandle, 1);
 
@@ -306,39 +306,60 @@ void Text2dInstancedOpenGl::setInstanceCount(int count) {
 }
 
 void Text2dInstancedOpenGl::setPositions(const SharedBytes &positions) {
-    writeToBuffer(positions, positionsBuffer);
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (writeToBuffer(positions, positionsBuffer)) {
+        buffersNotReady &= ~(1);
+    }
 }
 
 void Text2dInstancedOpenGl::setRotations(const SharedBytes &rotations) {
-    writeToBuffer(rotations, rotationsBuffer);
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (writeToBuffer(rotations, rotationsBuffer)) {
+        buffersNotReady &= ~(1 << 1);
+    }
 }
 
 void Text2dInstancedOpenGl::setScales(const SharedBytes &scales) {
-    writeToBuffer(scales, scalesBuffer);
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (writeToBuffer(scales, scalesBuffer)) {
+        buffersNotReady &= ~(1 << 2);
+    }
 }
 
 void Text2dInstancedOpenGl::setTextureCoordinates(const SharedBytes &textureCoordinates) {
-    writeToBuffer(textureCoordinates, textureCoordinatesListBuffer);
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (writeToBuffer(textureCoordinates, textureCoordinatesListBuffer)) {
+        buffersNotReady &= ~(1 << 3);
+    }
 }
 
 void Text2dInstancedOpenGl::setStyleIndices(const ::SharedBytes &indices) {
-    writeToBuffer(indices, styleIndicesBuffer);
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (writeToBuffer(indices, styleIndicesBuffer)) {
+        buffersNotReady &= ~(1 << 4);
+    }
 }
 
 void Text2dInstancedOpenGl::setStyles(const ::SharedBytes &values) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (!ready) {
+        return;
+    }
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, styleBuffer);
     glBufferData(GL_SHADER_STORAGE_BUFFER, values.elementCount * values.bytesPerElement, (void *) values.address, GL_DYNAMIC_DRAW);
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    buffersNotReady &= ~(1 << 5);
 }
 
-void Text2dInstancedOpenGl::writeToBuffer(const ::SharedBytes &data, GLuint target) {
+bool Text2dInstancedOpenGl::writeToBuffer(const ::SharedBytes &data, GLuint target) {
     if(!ready){
-        LogError <<= "🥴 Writing to buffer before it was created.";
-        return;
+        // Writing to buffer before it was created
+        return false;
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, target);
     glBufferData(GL_ARRAY_BUFFER, data.elementCount * data.bytesPerElement, (void *) data.address, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    return true;
 }

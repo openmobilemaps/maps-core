@@ -379,7 +379,7 @@ void Quad2dStretchedInstancedOpenGl::setStretchInfos(const ::SharedBytes &values
 
 bool Quad2dStretchedInstancedOpenGl::writeToBuffer(const ::SharedBytes &data, GLuint target) {
     if(!ready){
-        LogWarning <<= "🥴 Writing to buffer before it was created.";
+        // Writing to buffer before it was created
         return false;
     }
 

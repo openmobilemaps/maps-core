@@ -48,8 +48,8 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
                                               in float aRotation;
                                               in uint aStyleIndex;
 
-                                              out vec2 v_texcoord;
-                                              out vec4 v_texcoordInstance;
+                                              out vec2 v_texCoord;
+                                              out vec4 v_texCoordInstance;
                                               out flat uint vStyleIndex;
 
                                               void main() {
@@ -65,8 +65,8 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
                                                   mat4 matrix = uMVPMatrix * model_matrix;
 
                                                   gl_Position = matrix * vPosition;
-                                                  v_texcoordInstance = aTexCoordinate;
-                                                  v_texcoord = texCoordinate;
+                                                  v_texCoordInstance = aTexCoordinate;
+                                                  v_texCoord = texCoordinate;
                                                   vStyleIndex = aStyleIndex;
                                               }
     );
@@ -75,43 +75,48 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
 std::string TextInstancedShaderOpenGl::getFragmentShader() {
     return OMMVersionedGlesShaderCode(320 es,
                                       precision highp float;
-
-                                              struct TextInstancedStyle {
-                                                  vec4 color;
-                                                  vec4 haloColor;
-                                                  float haloWidth;
-                                              };
-
                                               layout(std430, binding = 0) buffer textInstancedStyleBuffer {
-                                                  TextInstancedStyle styles[];
+                                                  float styles[]; // vec4 color; vec4 haloColor; float haloWidth;
                                               };
 
                                               uniform sampler2D textureSampler;
                                               uniform vec2 textureFactor;
 
-                                              in vec2 v_texcoord;
-                                              in vec4 v_texcoordInstance;
+                                              in vec2 v_texCoord;
+                                              in vec4 v_texCoordInstance;
                                               in flat uint vStyleIndex;
 
                                               out vec4 fragmentColor;
 
                                               void main() {
-                                                  vec2 uv = (v_texcoordInstance.xy + v_texcoordInstance.zw * vec2(v_texcoord.x, (1.0 - v_texcoord.y))) * textureFactor;
-                                                  vec4 dist = texture(textureSampler, uv);
+                                                  int styleOffset = int(vStyleIndex) * 9;
+                                                  vec4 color = vec4(styles[styleOffset + 0], styles[styleOffset + 1], styles[styleOffset + 2], styles[styleOffset + 3]);
+                                                  vec4 haloColor = vec4(styles[styleOffset + 4], styles[styleOffset + 5], styles[styleOffset + 6], styles[styleOffset + 7]);
+                                                  float haloWidth = styles[styleOffset + 8];
 
-                                                  TextInstancedStyle style = styles[vStyleIndex];
-
-                                                  if (style.color.a == 0.0 || (style.haloColor.a == 0.0 && dist.x <= 0.5)) {
+                                                  if (color.a == 0.0 && haloColor.a == 0.0) {
                                                       discard;
                                                   }
 
-                                                  float delta = 0.1;
-                                                  float alpha = smoothstep(0.5 - delta, 0.5 + delta, dist.x);
+                                                  vec2 uv = (v_texCoordInstance.xy + v_texCoordInstance.zw * vec2(v_texCoord.x, (1.0 - v_texCoord.y))) * textureFactor;
+                                                  vec4 dist = texture(textureSampler, uv);
 
-                                                  vec4 mixed = mix(style.haloColor, style.color, alpha);
+                                                  float median = max(min(dist.r, dist.g), min(max(dist.r, dist.g), dist.b)) / dist.a;
+                                                  float w = fwidth(median);
+                                                  float alpha = smoothstep(0.5 - w, 0.5 + w, median);
 
-                                                  float a2 = smoothstep(0.40, 0.5, sqrt(dist.x));
-                                                  fragmentColor = vec4(mixed.r * a2, mixed.g * a2, mixed.b * a2, a2);
+                                                  vec4 mixed = mix(haloColor, color, alpha);
+
+                                                  if(haloWidth > 0.0) {
+                                                      float start = (0.0 + 0.5 * (1.0 - haloWidth)) - w;
+                                                      float end = start + w;
+                                                      float a2 = smoothstep(start, end, median) * color.a;
+                                                      fragmentColor = mixed;
+                                                      fragmentColor.a = 1.0;
+                                                      fragmentColor *= a2;
+                                                  } else {
+                                                      fragmentColor = mixed;
+                                                  }
                                               }
     );
 }
