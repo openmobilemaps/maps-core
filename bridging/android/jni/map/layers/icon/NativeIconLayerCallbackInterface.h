@@ -34,7 +34,7 @@ private:
         ~JavaProxy();
 
         bool onClickConfirmed(const std::vector</*not-null*/ std::shared_ptr<::IconInfoInterface>> & icons) override;
-        bool onLongPress(const std::vector<std::shared_ptr<::IconInfoInterface>> & icons) override;
+        bool onLongPress(const std::vector</*not-null*/ std::shared_ptr<::IconInfoInterface>> & icons) override;
 
     private:
         friend ::djinni::JniInterface<::IconLayerCallbackInterface, ::djinni_generated::NativeIconLayerCallbackInterface>;

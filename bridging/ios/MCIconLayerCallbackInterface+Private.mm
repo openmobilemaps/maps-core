@@ -62,7 +62,7 @@ public:
             return ::djinni::Bool::toCpp(objcpp_result_);
         }
     }
-    bool onLongPress(const std::vector<std::shared_ptr<::IconInfoInterface>> & c_icons) override
+    bool onLongPress(const std::vector</*not-null*/ std::shared_ptr<::IconInfoInterface>> & c_icons) override
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() onLongPress:(::djinni::List<::djinni_generated::IconInfoInterface>::fromCpp(c_icons))];

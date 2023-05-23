@@ -24,7 +24,7 @@ bool NativeIconLayerCallbackInterface::JavaProxy::onClickConfirmed(const std::ve
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::Bool::toCpp(jniEnv, jret);
 }
-bool NativeIconLayerCallbackInterface::JavaProxy::onLongPress(const std::vector<std::shared_ptr<::IconInfoInterface>> & c_icons) {
+bool NativeIconLayerCallbackInterface::JavaProxy::onLongPress(const std::vector</*not-null*/ std::shared_ptr<::IconInfoInterface>> & c_icons) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeIconLayerCallbackInterface>::get();
@@ -53,11 +53,10 @@ CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_ic
 CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icon_IconLayerCallbackInterface_00024CppProxy_native_1onLongPress(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_icons)
 {
     try {
-        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::IconLayerCallbackInterface>(nativeRef);
         auto r = ref->onLongPress(::djinni::List<::djinni_generated::NativeIconInfoInterface>::toCpp(jniEnv, j_icons));
         return ::djinni::release(::djinni::Bool::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-}  // namespace djinni_generated
+} // namespace djinni_generated
