@@ -138,6 +138,10 @@ extension LineGroupShader: MCLineGroupShaderInterface {
         lineStyleBuffer.copyMemory(from: styles)
     }
 
+    func setDashingScaleFactor(_ factor: Float) {
+        
+    }
+
     func asShaderProgram() -> MCShaderProgramInterface? {
         self
     }
