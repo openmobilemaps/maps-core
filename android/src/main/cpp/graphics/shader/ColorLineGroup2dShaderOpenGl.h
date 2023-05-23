@@ -37,20 +37,15 @@ class ColorLineGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
 
   private:
     std::recursive_mutex styleMutex;
-    std::vector<GLfloat> lineStyles;
-    std::vector<GLfloat> lineColors;
-    std::vector<GLfloat> lineGapColors;
-    std::vector<GLfloat> lineDashValues;
-    GLint numStyles;
+    std::vector<GLfloat> lineValues;
+    GLint numStyles = 0;
 
     const int maxNumStyles = 48;
     const int sizeStyleValues = 3;
-    const int sizeStyleValuesArray = sizeStyleValues * maxNumStyles;
     const int sizeColorValues = 4;
-    const int sizeColorValuesArray = sizeColorValues * maxNumStyles;
     const int sizeGapColorValues = 4;
-    const int sizeGapColorValuesArray = sizeGapColorValues * maxNumStyles;
     const int maxNumDashValues = 4;
     const int sizeDashValues = maxNumDashValues + 1;
-    const int sizeDashValuesArray = sizeDashValues * maxNumStyles;
+    const int sizeLineValues = sizeStyleValues + sizeColorValues + sizeGapColorValues + sizeDashValues + 1;
+    const int sizeLineValuesArray = sizeLineValues * maxNumStyles;
 };

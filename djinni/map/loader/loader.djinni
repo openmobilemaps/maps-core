@@ -1,15 +1,18 @@
+@extern "../../../external/djinni/support-lib/dataref.yaml"
+@extern "../../../external/djinni/support-lib/future.yaml"
 @extern "../../yaml/texture_holder_interface.yaml"
 @extern "../../yaml/vec_2_d.yaml"
 @extern "../../yaml/quad_2d_d.yaml"
 
+# Ordered by severity
 loader_status = enum {
     ok;
-    error_400;
-    error_404;
+    noop;
     error_timeout;
     error_network;
     error_other;
-    noop;
+    error_400;
+    error_404;
 }
 
 texture_loader_result = record {
@@ -19,12 +22,8 @@ texture_loader_result = record {
     error_code: optional<string>;
 }
 
-data_holder_interface = interface +j +o {
-	get_data(): binary;
-}
-
 data_loader_result = record {
-    data: optional<data_holder_interface>;
+    data: optional<DataRef>;
     etag: optional<string>;
     status: loader_status;
     error_code: optional<string>;
@@ -33,6 +32,11 @@ data_loader_result = record {
 loader_interface = interface +c +j +o {
     load_texture(url: string, etag: optional<string>): texture_loader_result;
     load_data(url: string, etag: optional<string>): data_loader_result;
+    
+    load_texture_asnyc(url: string, etag: optional<string>): future<texture_loader_result>;
+    load_data_async(url: string, etag: optional<string>): future<data_loader_result>;
+    
+    cancel(url: string);
 }
 
 font = record {
@@ -46,9 +50,8 @@ font_data = record {
 
 font_wrapper = record {
     name: string;
-    ascender: f64;
-    descender: f64;
-    space_advance: f64;
+    line_height: f64;
+    base: f64;
     bitmap_size: vec_2_d;
 
     # font size rendered in bitmap multiplied by dpFactor

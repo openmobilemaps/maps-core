@@ -43,7 +43,8 @@ std::vector<std::shared_ptr<IconInfoInterface>> IconLayer::getIcons() {
 void IconLayer::remove(const std::shared_ptr<IconInfoInterface> &icon) {
     auto lockSelfPtr = shared_from_this();
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
-    if (!mapInterface) {
+    auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
+    if (!scheduler) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         addingQueue.erase(std::remove(addingQueue.begin(), addingQueue.end(), icon), addingQueue.end());
         return;
@@ -54,7 +55,7 @@ void IconLayer::remove(const std::shared_ptr<IconInfoInterface> &icon) {
             if (it->first->getIdentifier() == icon->getIdentifier()) {
                 auto graphicsObject = it->second->getGraphicsObject();
                 icons.erase(it);
-                mapInterface->getScheduler()->addTask(
+                scheduler->addTask(
                     std::make_shared<LambdaTask>(TaskConfig("IconLayer_remove_" + icon->getIdentifier(), 0, TaskPriority::NORMAL,
                                                             ExecutionEnvironment::GRAPHICS),
                                                  [=] { graphicsObject->clear(); }));
@@ -79,7 +80,11 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
 
     auto lockSelfPtr = shared_from_this();
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
-    if (!mapInterface) {
+    auto objectFactory = mapInterface ? mapInterface->getGraphicsObjectFactory() : nullptr;
+    auto shaderFactory = mapInterface ? mapInterface->getShaderFactory() : nullptr;
+    auto converstionHelper = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
+    auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
+    if (!objectFactory || !shaderFactory || !scheduler) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         for (const auto &icon : icons) {
             addingQueue.push_back(icon);
@@ -90,15 +95,12 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
     std::vector<std::tuple<const std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>> iconObjects;
 
     for (const auto &icon : icons) {
-        auto objectFactory = mapInterface->getGraphicsObjectFactory();
-        auto shaderFactory = mapInterface->getShaderFactory();
-
         auto shader = shaderFactory->createAlphaShader();
         auto quadObject = objectFactory->createQuad(shader->asShaderProgramInterface());
 
         auto iconObject = std::make_shared<Textured2dLayerObject>(quadObject, shader, mapInterface);
 
-        Coord iconPosRender = mapInterface->getCoordinateConverterHelper()->convertToRenderSystem(icon->getCoordinate());
+        Coord iconPosRender = converstionHelper->convertToRenderSystem(icon->getCoordinate());
         const Vec2F &anchor = icon->getIconAnchor();
         float ratioLeftRight = std::clamp(anchor.x, 0.0f, 1.0f);
         float ratioTopBottom = std::clamp(anchor.y, 0.0f, 1.0f);
@@ -120,7 +122,7 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
     std::weak_ptr<IconLayer> weakSelfPtr = std::dynamic_pointer_cast<IconLayer>(shared_from_this());
     std::string taskId =
         "IconLayer_setup_coll_" + std::get<0>(iconObjects.at(0))->getIdentifier() + "_[" + std::to_string(iconObjects.size()) + "]";
-    mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
+    scheduler->addTask(std::make_shared<LambdaTask>(
         TaskConfig(taskId, 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [weakSelfPtr, iconObjects] {
             auto selfPtr = weakSelfPtr.lock();
             if (selfPtr)
@@ -158,7 +160,8 @@ void IconLayer::setupIconObjects(
 void IconLayer::clear() {
     auto lockSelfPtr = shared_from_this();
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
-    if (!mapInterface) {
+    auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
+    if (!scheduler) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         addingQueue.clear();
         return;
@@ -166,7 +169,7 @@ void IconLayer::clear() {
     {
         std::lock_guard<std::recursive_mutex> lock(iconsMutex);
         auto iconsToClear = icons;
-        mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
+        scheduler->addTask(std::make_shared<LambdaTask>(
             TaskConfig("IconLayer_clear", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [=] {
                 for (auto &icon : iconsToClear) {
                     icon.second->getGraphicsObject()->clear();

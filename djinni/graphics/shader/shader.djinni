@@ -2,6 +2,7 @@
 @extern "../../yaml/line_style.yaml"
 @extern "../../yaml/polygon_style.yaml"
 @extern "../../yaml/vec_3_d.yaml"
+@extern "../../yaml/rect_d.yaml"
 @extern "../../yaml/shared_bytes.yaml"
 @extern "../../yaml/color.yaml"
 
@@ -13,13 +14,15 @@ shader_program_interface = interface +c +o {
 
 shader_factory_interface = interface +c +j +o {
     create_alpha_shader() : alpha_shader_interface;
+    create_alpha_instanced_shader(): alpha_instanced_shader_interface;
     create_color_line_shader() : color_line_shader_interface;
     create_line_group_shader(): line_group_shader_interface;
     create_color_shader() : color_shader_interface;
     create_color_circle_shader() : color_circle_shader_interface;
     create_polygon_group_shader(): polygon_group_shader_interface;
     create_text_shader() : text_shader_interface;
-    create_raster_shader() : raster_shader_interface; 
+    create_raster_shader() : raster_shader_interface;
+    create_stretch_shader(): stretch_shader_interface;
 }
 
 raster_shader_style = record {
@@ -45,6 +48,35 @@ raster_shader_interface = interface +c +o {
 
 alpha_shader_interface = interface +c +o {
     update_alpha(value: f32);
+    as_shader_program_interface() : shader_program_interface;
+}
+
+alpha_instanced_shader_interface = interface +c +o {
+    as_shader_program_interface() : shader_program_interface;
+}
+
+stretch_shader_info = record {
+    scaleX: f32;
+    
+    # all stretch infos are between 0 and 1
+    stretchX0Begin: f32;
+    stretchX0End: f32;
+    stretchX1Begin: f32;
+    stretchX1End: f32;
+
+    scaleY: f32;
+    # all stretch infos are between 0 and 1
+    stretchY0Begin: f32;
+    stretchY0End: f32;
+    stretchY1Begin: f32;
+    stretchY1End: f32;
+
+    uv: rect_d;
+}
+
+stretch_shader_interface = interface +c +o {
+    update_alpha(value: f32);
+    update_stretch_info(info: stretch_shader_info);
     as_shader_program_interface() : shader_program_interface;
 }
 
@@ -76,8 +108,7 @@ polygon_group_shader_interface = interface +c +o {
 
 text_shader_interface = interface +c +o {
     set_color(color: color);
-    set_halo_color(color: color);
-    set_scale(scale: f32);
-    set_reference_point(point: vec_3_d);
+    set_opacity(opacity: f32);
+    set_halo_color(color: color, width: f64);
     as_shader_program_interface() : shader_program_interface;
 }

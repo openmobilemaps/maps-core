@@ -85,7 +85,7 @@ final class PolygonGroup2d: BaseGraphicsObject {
 
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,
-                                      indexType: .uint32,
+                                      indexType: .uint16,
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
 

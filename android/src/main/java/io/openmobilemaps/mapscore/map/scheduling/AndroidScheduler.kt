@@ -20,7 +20,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
 class AndroidScheduler(
-	private val schedulerCallback: AndroidSchedulerCallback,
+	schedulerCallback: AndroidSchedulerCallback,
 	private val dispatchers: AndroidSchedulerDispatchers = AndroidSchedulerDispatchers()
 ) : SchedulerInterface() {
 
@@ -30,6 +30,8 @@ class AndroidScheduler(
 	private val taskQueueMap: ConcurrentHashMap<TaskPriority, ConcurrentLinkedQueue<TaskInterface>> = ConcurrentHashMap()
 	private val runningTasksMap: ConcurrentHashMap<String, Job> = ConcurrentHashMap()
 	private val delayedTaskMap: ConcurrentHashMap<String, Job> = ConcurrentHashMap()
+
+	private var schedulerCallback: AndroidSchedulerCallback? = schedulerCallback
 
 	init {
 		TaskPriority.values().forEach { taskQueueMap.put(it, ConcurrentLinkedQueue()) }
@@ -60,8 +62,12 @@ class AndroidScheduler(
 					if (isResumed.get()) {
 						scheduleTask(task)
 					} else {
-						task.getConfig().delay = 0
-						taskQueueMap[task.getConfig().priority]!!.offer(task)
+						val newTaskConfig = task.getConfig().let { TaskConfig(it.id, 0L, it.priority, it.executionEnvironment) }
+						val newTask = object : TaskInterface() {
+							override fun getConfig(): TaskConfig = newTaskConfig
+							override fun run() { task.run() }
+						}
+						taskQueueMap[task.getConfig().priority]!!.offer(newTask)
 					}
 					delayedTaskMap.remove(id)
 				}
@@ -74,7 +80,7 @@ class AndroidScheduler(
 	private fun scheduleTask(task: TaskInterface) {
 		val executionEnvironment = task.getConfig().executionEnvironment
 		if (executionEnvironment == ExecutionEnvironment.GRAPHICS) {
-			schedulerCallback.scheduleOnGlThread(task)
+			schedulerCallback?.scheduleOnGlThread(task)
 		} else {
 			val dispatcher = when (executionEnvironment) {
 				ExecutionEnvironment.IO -> dispatchers.io
@@ -123,6 +129,14 @@ class AndroidScheduler(
 			}
 		}
 	}
+
+	override fun destroy() {
+		schedulerCallback = null
+	}
+
+	override fun hasSeparateGraphicsInvocation(): Boolean = false
+
+	override fun runGraphicsTasks(): Boolean = false // unused
 
 	fun launchCoroutine(
 		context: CoroutineContext = EmptyCoroutineContext,

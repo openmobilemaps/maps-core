@@ -29,8 +29,13 @@
 #include "FormattedStringEntry.h"
 #include "LineCapType.h"
 #include "TextTransform.h"
+#include "TextSymbolPlacement.h"
 #include <sstream>
 #include "ColorUtil.h"
+#include <string>
+#include "VectorLayerFeatureInfo.h"
+#include "SymbolAlignment.h"
+#include "IconTextFit.h"
 
 namespace std {
     template <>
@@ -157,7 +162,9 @@ public:
 
     bool contains(const std::string &key) const {
         for(const auto& p : propertiesMap) {
-            if(p.first == key) { return true; }
+            if(p.first == key) {
+                return true;
+            }
         }
 
         return false;
@@ -165,7 +172,9 @@ public:
 
     ValueVariant getValue(const std::string &key) const {
         for(const auto& p : propertiesMap) {
-            if(p.first == key) { return p.second; }
+            if(p.first == key) {
+                return std::move(p.second);
+            }
         }
 
         return std::monostate();
@@ -179,6 +188,50 @@ public:
             }
         }
         return hash;
+    }
+
+    VectorLayerFeatureInfo getFeatureInfo() const {
+        std::string identifier = std::to_string(this->identifier);
+        std::unordered_map<std::string, VectorLayerFeatureInfoValue> properties;
+        for(const auto &[key, val]: propertiesMap) {
+            properties.insert({
+                key,
+                std::visit(overloaded {
+                    [](const std::string &val){
+                        return VectorLayerFeatureInfoValue(val, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+                    },
+                    [](double val){
+                        return VectorLayerFeatureInfoValue(std::nullopt, val, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+                    },
+                    [](int64_t val){
+                        return VectorLayerFeatureInfoValue(std::nullopt, std::nullopt, val, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+                    },
+                    [](bool val){
+                        return VectorLayerFeatureInfoValue(std::nullopt, std::nullopt, std::nullopt, val, std::nullopt, std::nullopt, std::nullopt);
+                    },
+                    [](const Color &val){
+                        return VectorLayerFeatureInfoValue(std::nullopt, std::nullopt, std::nullopt, std::nullopt, val, std::nullopt, std::nullopt);
+                    },
+                    [](const std::vector<float> &val){
+                        return VectorLayerFeatureInfoValue(std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, val, std::nullopt);
+                    },
+                    [](const std::vector<std::string> &val){
+                        return VectorLayerFeatureInfoValue(std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,  std::nullopt, val);
+                    },
+                    [](const std::vector<FormattedStringEntry> &val){
+                        std::vector<std::string> strings;
+                        for (const auto &string: val) {
+                            strings.push_back(string.text);
+                        }
+                        return VectorLayerFeatureInfoValue( std::nullopt,  std::nullopt,  std::nullopt,  std::nullopt,  std::nullopt,  std::nullopt,  strings);
+                    },
+                    [](const std::monostate &val) {
+                        return VectorLayerFeatureInfoValue( std::nullopt,  std::nullopt,  std::nullopt,  std::nullopt,  std::nullopt,  std::nullopt,  std::nullopt);
+                    }
+                }, val)
+            });
+        }
+        return VectorLayerFeatureInfo(identifier, properties);
     }
 
     bool operator==(const FeatureContext &o) const { return propertiesMap == o.propertiesMap; }
@@ -197,12 +250,16 @@ public:
 class Value {
 public:
     Value() {};
-    virtual std::unordered_set<std::string> getUsedKeys() { return {}; };
-    virtual ValueVariant evaluate(const EvaluationContext &context) = 0;
+    virtual ~Value() = default;
 
+    virtual std::unique_ptr<Value> clone() = 0;
+
+    virtual std::unordered_set<std::string> getUsedKeys() const { return {}; };
+
+    virtual ValueVariant evaluate(const EvaluationContext &context) const = 0;
 
     template<typename T>
-    T evaluateOr(const EvaluationContext &context, const T &alternative) {
+    T evaluateOr(const EvaluationContext &context, const T &alternative) const {
         auto const &value = evaluate(context);
         if (std::holds_alternative<T>(value)) {
             return std::get<T>(value);
@@ -235,12 +292,12 @@ public:
     }
 
     template<>
-    Vec2F evaluateOr(const EvaluationContext &context, const Vec2F &alternative) {
+    Vec2F evaluateOr(const EvaluationContext &context, const Vec2F &alternative) const {
         auto const &value = evaluateOr(context, std::vector<float>{ alternative.x, alternative.y });
         return Vec2F(value[0], value[1]);
     }
 
-    std::optional<::Anchor> anchorFromString(const std::string &value) {
+    std::optional<::Anchor> anchorFromString(const std::string &value) const {
         if (value == "center") {
             return Anchor::CENTER;
 
@@ -273,7 +330,32 @@ public:
     }
 
 
-    std::optional<::TextJustify> jusitfyFromString(const std::string &value) {
+    std::optional<::SymbolAlignment> alignmentFromString(const std::string &value) const {
+        if (value == "auto") {
+            return SymbolAlignment::AUTO;
+        } else if (value == "map") {
+            return SymbolAlignment::MAP;
+        } else if (value == "viewport") {
+            return SymbolAlignment::VIEWPORT;
+        }
+        return std::nullopt;
+    }
+
+    std::optional<::IconTextFit> iconTextFitFromString(const std::string &value) const {
+        if (value == "none") {
+            return IconTextFit::NONE;
+        } else if (value == "width") {
+            return IconTextFit::WIDTH;
+        } else if (value == "height") {
+            return IconTextFit::HEIGHT;
+        } else if (value == "both") {
+            return IconTextFit::BOTH;
+        }
+        return std::nullopt;
+    }
+
+
+    std::optional<::TextJustify> jusitfyFromString(const std::string &value) const {
         if (value == "center") {
             return TextJustify::CENTER;
         } else if (value == "left") {
@@ -284,8 +366,15 @@ public:
         return std::nullopt;
     }
 
+    std::optional<::TextSymbolPlacement> textSymbolPlacementFromString(const std::string &value) const {
+        if(value == "point") { return TextSymbolPlacement::POINT; }
+        if(value == "line") { return TextSymbolPlacement::LINE; }
+        if(value == "line-center") { return TextSymbolPlacement::LINE_CENTER; }
+        return std::nullopt;
+    }
+
     template<>
-    Anchor evaluateOr(const EvaluationContext &context, const Anchor &alternative) {
+    Anchor evaluateOr(const EvaluationContext &context, const Anchor &alternative) const {
         auto const &value = evaluateOr(context, std::string(""));
         auto anchor = anchorFromString(value);
         if (anchor) {
@@ -295,7 +384,27 @@ public:
     }
 
     template<>
-    TextJustify evaluateOr(const EvaluationContext &context, const TextJustify &alternative) {
+    SymbolAlignment evaluateOr(const EvaluationContext &context, const SymbolAlignment &alternative) const {
+        auto const &value = evaluateOr(context, std::string(""));
+        auto alignment = alignmentFromString(value);
+        if (alignment) {
+            return *alignment;
+        }
+        return alternative;
+    }
+
+    template<>
+    IconTextFit evaluateOr(const EvaluationContext &context, const IconTextFit &alternative) const {
+        auto const &value = evaluateOr(context, std::string(""));
+        auto textFit = iconTextFitFromString(value);
+        if (textFit) {
+            return *textFit;
+        }
+        return alternative;
+    }
+
+    template<>
+    TextJustify evaluateOr(const EvaluationContext &context, const TextJustify &alternative) const {
         auto const &value = evaluateOr(context, std::string(""));
         auto anchor = jusitfyFromString(value);
         if (anchor) {
@@ -304,7 +413,17 @@ public:
         return alternative;
     }
 
-    std::optional<LineCapType> capTypeFromString(const std::string &value) {
+    template<>
+    TextSymbolPlacement evaluateOr(const EvaluationContext &context, const TextSymbolPlacement &alternative) const {
+        auto const &value = evaluateOr(context, std::string(""));
+        auto placement = textSymbolPlacementFromString(value);
+        if (placement) {
+            return *placement;
+        }
+        return alternative;
+    }
+
+    std::optional<LineCapType> capTypeFromString(const std::string &value) const {
         if (value == "butt") {
             return LineCapType::BUTT;
 
@@ -319,7 +438,7 @@ public:
     }
 
     template<>
-    LineCapType evaluateOr(const EvaluationContext &context, const LineCapType &alternative) {
+    LineCapType evaluateOr(const EvaluationContext &context, const LineCapType &alternative) const {
         auto const &value = evaluateOr(context, std::string(""));
         auto type = capTypeFromString(value);
         if (type) {
@@ -328,7 +447,7 @@ public:
         return alternative;
     }
 
-    std::optional<TextTransform> textTransformFromString(const std::string &value) {
+    std::optional<TextTransform> textTransformFromString(const std::string &value) const {
         if (value == "none") {
             return TextTransform::NONE;
         } else if (value == "uppercase") {
@@ -338,7 +457,7 @@ public:
     }
 
     template<>
-    TextTransform evaluateOr(const EvaluationContext &context, const TextTransform &alternative) {
+    TextTransform evaluateOr(const EvaluationContext &context, const TextTransform &alternative) const {
         auto const &value = evaluateOr(context, std::string(""));
         auto type = textTransformFromString(value);
         if (type) {
@@ -348,7 +467,7 @@ public:
     }
 
     template<>
-    std::vector<Anchor> evaluateOr(const EvaluationContext &context, const std::vector<Anchor> &alternative) {
+    std::vector<Anchor> evaluateOr(const EvaluationContext &context, const std::vector<Anchor> &alternative) const {
         auto const &values = evaluateOr(context, std::vector<std::string>());
         std::vector<Anchor> result;
         for (auto const &value: values) {
@@ -370,11 +489,15 @@ class GetPropertyValue : public Value {
 public:
     GetPropertyValue(const std::string key) : key(key) {};
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<GetPropertyValue>(key);
+    }
+
+    std::unordered_set<std::string> getUsedKeys() const override {
         return { key };
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         if (key == "zoom" && context.zoomLevel) {
             return *context.zoomLevel;
         }
@@ -396,11 +519,15 @@ class ToStringValue: public Value {
 public:
     ToStringValue(const std::shared_ptr<Value> value): value(value) {}
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<ToStringValue>(value->clone());
+    }
+
+    std::unordered_set<std::string> getUsedKeys() const override {
         return value->getUsedKeys();
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         return std::visit(overloaded {
             [](const std::string &val){
                 return val;
@@ -442,11 +569,16 @@ class StaticValue : public Value {
 public:
     StaticValue(const ValueVariant value) : value(value) {};
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<StaticValue>(value);
+    }
+
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         if (std::holds_alternative<std::string>(value)) {
             std::string res = std::get<std::string>(value);
 
-            auto result = context.feature.getValue(res);
+            const auto &result = context.feature.getValue(res);
+
             if(!std::holds_alternative<std::monostate>(result)) {
                 return result;
             }
@@ -493,11 +625,15 @@ class HasPropertyValue : public Value {
 public:
     HasPropertyValue(const std::string key) : key(key) {};
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<HasPropertyValue>(key);
+    }
+
+    std::unordered_set<std::string> getUsedKeys() const override {
         return { key };
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         return context.feature.contains(key);
     };
 private:
@@ -509,9 +645,13 @@ class ScaleValue : public Value {
 public:
     ScaleValue(const std::shared_ptr<Value> value, const double scale) : value(value), scale(scale) {};
 
-    std::unordered_set<std::string> getUsedKeys() override { return value->getUsedKeys(); }
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<ScaleValue>(value->clone(), scale);
+    }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    std::unordered_set<std::string> getUsedKeys() const override { return value->getUsedKeys(); }
+
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         return std::visit(overloaded {
             [](const std::string &val){
                 return 0.0;
@@ -559,10 +699,18 @@ public:
 
 class InterpolatedValue : public Value {
 public:
-    InterpolatedValue(double interpolationBase, const std::vector<std::tuple<double, std::shared_ptr<Value>>> steps)
+    InterpolatedValue(double interpolationBase, const std::vector<std::tuple<double, std::shared_ptr<Value>>> &steps)
     : interpolationBase(interpolationBase), steps(steps) {}
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unique_ptr<Value> clone() override {
+        std::vector<std::tuple<double, std::shared_ptr<Value>>> clonedSteps;
+        for (const auto &[step, value] : steps) {
+            clonedSteps.emplace_back(step, value->clone());
+        }
+        return std::make_unique<InterpolatedValue>(interpolationBase, std::move(clonedSteps));
+    }
+
+    std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
         for (auto const &step: steps) {
             auto const setKeys = std::get<1>(step)->getUsedKeys();
@@ -571,7 +719,7 @@ public:
         return usedKeys;
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         double zoom = context.zoomLevel.has_value() ? context.zoomLevel.value() : 0.0;
         int maxStepInd = (int)steps.size() - 1;
         for (int i = 0; i < maxStepInd; i++) {
@@ -589,7 +737,7 @@ public:
         return last->evaluate(context);
     }
 
-    ValueVariant interpolate(const double &interpolationFactor, const ValueVariant &yBase, const ValueVariant &yTop) {
+    ValueVariant interpolate(const double &interpolationFactor, const ValueVariant &yBase, const ValueVariant &yTop) const {
 
         if (std::holds_alternative<int64_t>(yBase) && std::holds_alternative<int64_t>(yTop)) {
             return std::get<int64_t>(yBase) + (std::get<int64_t>(yTop) - std::get<int64_t>(yBase)) * interpolationFactor;
@@ -638,10 +786,21 @@ private:
 
 class BezierInterpolatedValue : public Value {
 public:
-    BezierInterpolatedValue(double x1, double y1, double x2, double y2, const std::vector<std::tuple<double, std::shared_ptr<Value>>> steps)
+    BezierInterpolatedValue(double x1, double y1, double x2, double y2, const std::vector<std::tuple<double, std::shared_ptr<Value>>> &steps)
             : bezier(x1, y1, x2, y2), steps(steps) {}
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    BezierInterpolatedValue(const UnitBezier &bezier, const std::vector<std::tuple<double, std::shared_ptr<Value>>> &steps)
+            : bezier(bezier), steps(steps) {}
+
+    std::unique_ptr<Value> clone() override {
+        std::vector<std::tuple<double, std::shared_ptr<Value>>> clonedSteps;
+        for (const auto &[step, value] : steps) {
+            clonedSteps.emplace_back(step, value->clone());
+        }
+        return std::make_unique<BezierInterpolatedValue>(bezier, std::move(clonedSteps));
+    }
+
+    std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
         for (auto const &step: steps) {
             auto const setKeys = std::get<1>(step)->getUsedKeys();
@@ -650,7 +809,7 @@ public:
         return usedKeys;
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         double zoom = context.zoomLevel.has_value() ? context.zoomLevel.value() : 0.0;
         int maxStepInd = (int)steps.size() - 1;
         for (int i = 0; i < maxStepInd; i++) {
@@ -671,7 +830,7 @@ public:
         const auto step = std::get<1>(steps[index]);
         return step->evaluate(context);
     }
-    ValueVariant interpolate(const double &interpolationFactor, const ValueVariant &yBase, const ValueVariant &yTop) {
+    ValueVariant interpolate(const double &interpolationFactor, const ValueVariant &yBase, const ValueVariant &yTop) const {
 
         if (std::holds_alternative<int64_t>(yBase) && std::holds_alternative<int64_t>(yTop)) {
             return std::get<int64_t>(yBase) + (std::get<int64_t>(yTop) - std::get<int64_t>(yBase)) * interpolationFactor;
@@ -703,7 +862,15 @@ class StopValue : public Value {
 public:
     StopValue(const std::vector<std::tuple<double, std::shared_ptr<Value>>> stops) : stops(stops) {}
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unique_ptr<Value> clone() override {
+        std::vector<std::tuple<double, std::shared_ptr<Value>>> clonedStops;
+        for (const auto &[stop, value] : stops) {
+            clonedStops.emplace_back(stop, value->clone());
+        }
+        return std::make_unique<StopValue>(std::move(clonedStops));
+    }
+
+    std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
         for (auto const &stop: stops) {
             auto const setKeys = std::get<1>(stop)->getUsedKeys();
@@ -712,7 +879,7 @@ public:
         return usedKeys;
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         double zoom = context.zoomLevel.has_value() ? context.zoomLevel.value() : 0.0;
         for (const auto &stop : stops) {
             double stopZoom = std::get<0>(stop);
@@ -802,9 +969,19 @@ public:
 
 class StepValue : public Value {
 public:
-    StepValue(const std::shared_ptr<Value> compareValue, const std::vector<std::tuple<std::shared_ptr<Value>, std::shared_ptr<Value>>> stops, std::shared_ptr<Value> defaultValue) : compareValue(compareValue), stops(stops), defaultValue(defaultValue) {}
+    StepValue(const std::shared_ptr<Value> compareValue,
+              const std::vector<std::tuple<std::shared_ptr<Value>, std::shared_ptr<Value>>> stops,
+              std::shared_ptr<Value> defaultValue) : compareValue(compareValue), stops(stops), defaultValue(defaultValue) {}
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unique_ptr<Value> clone() override {
+        std::vector<std::tuple<std::shared_ptr<Value>, std::shared_ptr<Value>>> clonedStops;
+        for (const auto &[v1, v2] : stops) {
+            clonedStops.emplace_back(v1->clone(), v2->clone());
+        }
+        return std::make_unique<StepValue>(compareValue->clone(), std::move(clonedStops), defaultValue->clone());
+    }
+
+    std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
         for (auto const &stop: stops) {
             auto const setKeys = std::get<1>(stop)->getUsedKeys();
@@ -813,15 +990,19 @@ public:
         return usedKeys;
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         const auto &compareValue_ = compareValue->evaluate(context);
 
-        for (const auto &[stop, value] : stops) {
-            if (ValueVariantCompareHelper::compare(stop->evaluate(context), compareValue_, PropertyCompareType::GREATER)) {
-                return value->evaluate(context);
+        for (auto it = stops.begin(); it != stops.end(); it++) {
+            if (ValueVariantCompareHelper::compare(std::get<0>(*it)->evaluate(context), compareValue_, PropertyCompareType::GREATER)) {
+                if (it != stops.begin()) {
+                    return std::get<1>(*std::prev(it))->evaluate(context);
+                } else {
+                    return defaultValue->evaluate(context);
+                }
             }
         }
-        return defaultValue->evaluate(context);
+        return std::get<1>(*stops.rbegin())->evaluate(context);
     }
 private:
     const std::shared_ptr<Value> compareValue;
@@ -833,7 +1014,15 @@ class CaseValue : public Value {
 public:
     CaseValue(const std::vector<std::tuple<std::shared_ptr<Value>, std::shared_ptr<Value>>> cases, std::shared_ptr<Value> defaultValue) : cases(cases), defaultValue(defaultValue) {}
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unique_ptr<Value> clone() override {
+        std::vector<std::tuple<std::shared_ptr<Value>, std::shared_ptr<Value>>> clonedCases;
+        for (const auto &[v1, v2] : cases) {
+            clonedCases.emplace_back(v1->clone(), v2->clone());
+        }
+        return std::make_unique<CaseValue>(std::move(clonedCases), defaultValue->clone());
+    }
+
+    std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
         for (auto const &[condition, value]: cases) {
             if (condition) {
@@ -847,7 +1036,7 @@ public:
         return usedKeys;
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         for (auto const &[condition, value]: cases) {
             if (condition && condition->evaluateOr(context, false)) {
                 return value->evaluate(context);
@@ -867,17 +1056,24 @@ class ToNumberValue: public Value {
 public:
     ToNumberValue(const std::shared_ptr<Value> value): value(value) {}
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<ToNumberValue>(value->clone());
+    }
+
+    std::unordered_set<std::string> getUsedKeys() const override {
         return value->getUsedKeys();
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         return std::visit(overloaded {
             [](const std::string &val){
-                if (val.empty()) {
+                try {
+                    return std::stod(val);
+                } catch (const std::invalid_argument&) {
+                    return 0.0;
+                } catch (const std::out_of_range&) {
                     return 0.0;
                 }
-                return std::stod(val);
             },
             [](double val){
                 return val;
@@ -924,7 +1120,21 @@ public:
         }
     }
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    MatchValue(const std::shared_ptr<Value> compareValue,
+               const std::vector<std::pair<ValueVariant, std::shared_ptr<Value>>> &mapping,
+               const std::shared_ptr<Value> defaultValue)
+            : compareValue(compareValue), valueMapping(mapping), defaultValue(defaultValue) {}
+
+
+    std::unique_ptr<Value> clone() override {
+        std::vector<std::pair<ValueVariant, std::shared_ptr<Value>>> clonedMapping;
+        for (const auto &[variant, value] : valueMapping) {
+            clonedMapping.emplace_back(variant, value->clone());
+        }
+        return std::make_unique<MatchValue>(compareValue->clone(), std::move(clonedMapping), defaultValue->clone());
+    }
+
+    std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
 
         auto const compareValueKeys = compareValue->getUsedKeys();
@@ -941,7 +1151,7 @@ public:
         return usedKeys;
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         const auto &value = compareValue->evaluate(context);
 
         for(const auto& i : valueMapping) {
@@ -972,11 +1182,23 @@ public:
         }
     }
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    PropertyFilter(const std::vector<std::pair<ValueVariant, std::shared_ptr<Value>>> &mapping,
+                const std::shared_ptr<Value> defaultValue, const std::string &key)
+                : defaultValue(defaultValue), valueMapping(mapping), key(key) {}
+
+    std::unique_ptr<Value> clone() override {
+        std::vector<std::pair<ValueVariant , std::shared_ptr<Value>>> clonedMapping;
+        for (const auto &[variant, value] : valueMapping) {
+            clonedMapping.emplace_back(variant, value->clone());
+        }
+        return std::make_unique<PropertyFilter>(std::move(clonedMapping), defaultValue->clone(), key);
+    }
+
+    std::unordered_set<std::string> getUsedKeys() const override {
         return { key };
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         const auto &p = context.feature.getValue(key);
 
         if(!std::holds_alternative<std::monostate>(p)) {
@@ -1003,7 +1225,11 @@ class LogOpValue : public Value {
 public:
     LogOpValue(const LogOpType &logOpType, const std::shared_ptr<Value> &lhs, const std::shared_ptr<Value> &rhs = nullptr) : logOpType(logOpType), lhs(lhs), rhs(rhs) {}
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<LogOpValue>(logOpType, lhs->clone(), rhs->clone());
+    }
+
+    std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
 
         auto const lhsKeys = lhs->getUsedKeys();
@@ -1017,7 +1243,7 @@ public:
         return usedKeys;
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         switch (logOpType) {
             case LogOpType::AND:
                 return lhs->evaluateOr(context, false) && rhs && rhs->evaluateOr(context, false);
@@ -1038,7 +1264,15 @@ class AllValue: public Value {
 public:
     AllValue(const std::vector<const std::shared_ptr<Value>> values) : values(values) {}
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unique_ptr<Value> clone() override {
+        std::vector<const std::shared_ptr<Value>> clonedValues;
+        for (const auto &value : values) {
+            clonedValues.push_back(value->clone());
+        }
+        return std::make_unique<AllValue>(std::move(clonedValues));
+    }
+
+    std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
         for (auto const &value: values) {
             auto const setKeys = value->getUsedKeys();
@@ -1047,7 +1281,7 @@ public:
         return usedKeys;
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         for (auto const value: values) {
             if (!value->evaluateOr(context, false)) {
                 return false;
@@ -1064,7 +1298,15 @@ class AnyValue: public Value {
 public:
     AnyValue(const std::vector<const std::shared_ptr<Value>> values) : values(values) {}
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unique_ptr<Value> clone() override {
+        std::vector<const std::shared_ptr<Value>> clonedValues;
+        for (const auto &value : values) {
+            clonedValues.push_back(value->clone());
+        }
+        return std::make_unique<AnyValue>(std::move(clonedValues));
+    }
+
+    std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
         for (auto const &value: values) {
             auto const setKeys = value->getUsedKeys();
@@ -1073,7 +1315,7 @@ public:
         return usedKeys;
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         for (auto const &value: values) {
             if (value->evaluateOr(context, false)) {
                 return true;
@@ -1093,7 +1335,11 @@ public:
         assert(rhs);
     }
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<PropertyCompareValue>(lhs->clone(), rhs->clone(), type);
+    }
+
+    std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
 
         auto const lhsKeys = lhs->getUsedKeys();
@@ -1105,7 +1351,7 @@ public:
         return usedKeys;
     }
 
- ValueVariant evaluate(const EvaluationContext &context) override {
+ ValueVariant evaluate(const EvaluationContext &context) const override {
      auto const &lhsValue = lhs->evaluate(context);
      auto const &rhsValue = rhs->evaluate(context);
 
@@ -1125,11 +1371,15 @@ private:
 public:
     InFilter(const std::string &key, const std::unordered_set<ValueVariant> values) :values(values), key(key) {}
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<InFilter>(key, values);
+    }
+
+    std::unordered_set<std::string> getUsedKeys() const override {
         return { key };
     }
 
- ValueVariant evaluate(const EvaluationContext &context) override {
+ ValueVariant evaluate(const EvaluationContext &context) const override {
         auto const &value = context.feature.getValue(key);
         return values.count(value) != 0;
     };
@@ -1142,17 +1392,22 @@ private:
 public:
     NotInFilter(const std::string &key, const std::unordered_set<ValueVariant> values) :values(values), key(key) {}
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<NotInFilter>(key, values);
+    }
+
+    std::unordered_set<std::string> getUsedKeys() const override {
         return { key };
     }
 
- ValueVariant evaluate(const EvaluationContext &context) override {
+ ValueVariant evaluate(const EvaluationContext &context) const override {
         auto const &value = context.feature.getValue(key);
         return values.count(value) == 0;
     };
 };
 
 struct FormatValueWrapper {
+    FormatValueWrapper(const std::shared_ptr<Value> value, float scale) : value(value), scale(scale) {}
     std::shared_ptr<Value> value;
     float scale;
 };
@@ -1161,7 +1416,15 @@ class FormatValue : public Value {
 public:
     FormatValue(const std::vector<FormatValueWrapper> values) : values(values) {};
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unique_ptr<Value> clone() override {
+        std::vector<FormatValueWrapper> clonedValues;
+        for (const auto &value : values) {
+            clonedValues.emplace_back(value.value->clone(), value.scale);
+        }
+        return std::make_unique<FormatValue>(std::move(values));
+    }
+
+    std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
         for (auto const &wrapper: values) {
             auto const setKeys = wrapper.value->getUsedKeys();
@@ -1170,7 +1433,7 @@ public:
         return usedKeys;
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         std::vector<FormattedStringEntry> result;
         for (auto const &wrapper: values) {
             auto const evaluatedValue = ToStringValue(wrapper.value).evaluateOr(context, std::string());
@@ -1199,7 +1462,11 @@ public:
         assert(rhs);
     }
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<MathValue>(lhs->clone(), rhs->clone(), operation);
+    }
+
+    std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
 
         auto const lhsKeys = lhs->getUsedKeys();
@@ -1211,7 +1478,7 @@ public:
         return usedKeys;
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         auto const lhsValue = lhs->evaluateOr(context, (int64_t) 0);
         auto const rhsValue = rhs->evaluateOr(context, (int64_t) 0);
         switch (operation) {
@@ -1242,11 +1509,15 @@ class LenghtValue: public Value {
 public:
     LenghtValue(const std::shared_ptr<Value> value): value(value) {}
 
-    std::unordered_set<std::string> getUsedKeys() override {
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<LenghtValue>(value->clone());
+    }
+
+    std::unordered_set<std::string> getUsedKeys() const override {
         return value->getUsedKeys();
     }
 
-    ValueVariant evaluate(const EvaluationContext &context) override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         return std::visit(overloaded {
             [](const std::string &val){
                 return (int64_t) val.size();

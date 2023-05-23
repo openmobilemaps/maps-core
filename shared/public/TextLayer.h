@@ -38,8 +38,8 @@ class TextLayer : public TextLayerInterface, public SimpleLayerInterface, public
 
     virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> &maskingObject);
 
-    virtual void update(){};
-
+    virtual void update();
+    
     virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses();
 
     virtual void onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32_t layerIndex);

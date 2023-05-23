@@ -39,7 +39,9 @@ public class TextureHolder: NSObject {
     public convenience init(_ cgImage: CGImage) throws {
         let options: [MTKTextureLoader.Option: Any] = [
             MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
+            MTKTextureLoader.Option.textureStorageMode: MTLStorageMode.shared.rawValue
         ]
+
         let texture = try MetalContext.current.textureLoader.newTexture(cgImage: cgImage, options: options)
         self.init(texture)
     }

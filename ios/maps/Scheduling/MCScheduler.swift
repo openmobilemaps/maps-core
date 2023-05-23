@@ -20,6 +20,7 @@ private class WeakOperation {
 }
 
 open class MCScheduler: MCSchedulerInterface {
+
     private let ioQueue = OperationQueue(concurrentOperations: 64, qos: .userInteractive)
 
     private let computationQueue = OperationQueue(concurrentOperations: 20, qos: .userInteractive)
@@ -122,6 +123,15 @@ open class MCScheduler: MCSchedulerInterface {
             self.graphicsQueue.isSuspended = false
         }
     }
+
+    public func destroy() {
+        // not used
+    }
+
+    public func hasSeparateGraphicsInvocation() -> Bool { false }
+
+    public func runGraphicsTasks() -> Bool { false }
+
 }
 
 private extension OperationQueue {

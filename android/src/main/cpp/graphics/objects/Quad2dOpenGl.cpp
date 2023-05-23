@@ -219,8 +219,6 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
     // Disable vertex array
     glDisableVertexAttribArray(positionHandle);
 
@@ -243,6 +241,6 @@ void Quad2dOpenGl::prepareTextureDraw(std::shared_ptr<OpenGlContext> &openGLCont
     glBindTexture(GL_TEXTURE_2D, (unsigned int)texturePointer);
 
     // Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0.
-    int textureUniformHandle = glGetUniformLocation(programHandle, "texture");
+    int textureUniformHandle = glGetUniformLocation(programHandle, "textureSampler");
     glUniform1i(textureUniformHandle, 0);
 }

@@ -135,7 +135,8 @@ void TextLayer::show() {
 void TextLayer::clear() {
     auto lockSelfPtr = shared_from_this();
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
-    if (!mapInterface) {
+    auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
+    if (!scheduler) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         addingQueue.clear();
         return;
@@ -144,7 +145,7 @@ void TextLayer::clear() {
     {
         std::lock_guard<std::recursive_mutex> lock(textMutex);
         auto textsToClear = texts;
-        mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
+        scheduler->addTask(std::make_shared<LambdaTask>(
             TaskConfig("TextLayer_clear", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [=] {
                 for (auto &text : textsToClear) {
                     text.second->getTextObject()->asGraphicsObject()->clear();
@@ -158,6 +159,12 @@ void TextLayer::clear() {
     }
 
     mapInterface->invalidate();
+}
+
+void TextLayer::update() {
+    for (auto const &textTuple : texts) {
+        textTuple.second->update();
+    }
 }
 
 void TextLayer::generateRenderPasses() {
@@ -189,7 +196,8 @@ void TextLayer::add(const std::shared_ptr<TextInfoInterface> &text) { addTexts({
 void TextLayer::addTexts(const std::vector<std::shared_ptr<TextInfoInterface>> &texts) {
     auto lockSelfPtr = shared_from_this();
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
-    if (!mapInterface) {
+    auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
+    if (!scheduler) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         for (const auto &text : texts) {
             addingQueue.insert(text);
@@ -203,7 +211,7 @@ void TextLayer::addTexts(const std::vector<std::shared_ptr<TextInfoInterface>> &
 
     for (const auto &text : texts) {
         auto fontData = fontLoader->loadFont(text->getFont()).fontData;
-        auto textObject = textHelper.textLayerObject(text, fontData, Vec2F(0.0, 0.0), 1.2, 0.0, 15);
+        auto textObject = textHelper.textLayerObject(text, fontData, Vec2F(0.0, 0.0), 1.2, 0.0, 15, 45.0, SymbolAlignment::AUTO);
 
         if (textObject) {
             textObjects.push_back(std::make_tuple(text, textObject));
@@ -218,7 +226,7 @@ void TextLayer::addTexts(const std::vector<std::shared_ptr<TextInfoInterface>> &
     std::weak_ptr<TextLayer> weakSelfPtr = std::dynamic_pointer_cast<TextLayer>(shared_from_this());
     std::string taskId =
         "TextLayer_setup_coll_" + std::get<0>(textObjects.at(0))->getText().begin()->text + "_[" + std::to_string(textObjects.size()) + "]";
-    mapInterface->getScheduler()->addTask(std::make_shared<LambdaTask>(
+    scheduler->addTask(std::make_shared<LambdaTask>(
         TaskConfig(taskId, 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [weakSelfPtr, textObjects] {
             auto selfPtr = weakSelfPtr.lock();
             if (selfPtr)

@@ -26,8 +26,8 @@ BoundingBox::BoundingBox()
 BoundingBox::BoundingBox(const std::string &systemIdentifier)
     : systemIdentifier(systemIdentifier)
     , min(systemIdentifier, std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max())
-    , max(systemIdentifier, std::numeric_limits<float>::min(), std::numeric_limits<float>::min(),
-          std::numeric_limits<float>::min()) {}
+    , max(systemIdentifier, std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(),
+          std::numeric_limits<float>::lowest()) {}
 
 
 BoundingBox::BoundingBox(const Coord& p):

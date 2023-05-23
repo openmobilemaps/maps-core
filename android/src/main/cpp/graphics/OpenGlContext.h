@@ -23,8 +23,6 @@ class OpenGlContext : public RenderingContextInterface, std::enable_shared_from_
 
     void storeProgram(const std::string &name, int program);
 
-    std::vector<unsigned int> &getTexturePointerArray(const std::string &name, int capacity);
-
     void cleanAll();
 
     virtual void onSurfaceCreated() override;
@@ -47,7 +45,6 @@ class OpenGlContext : public RenderingContextInterface, std::enable_shared_from_
     Color backgroundColor = Color(0, 0, 0, 1);
 
     std::unordered_map<std::string, int> programs;
-    std::unordered_map<std::string, std::vector<unsigned int>> texturePointers;
 
     Vec2I viewportSize = Vec2I(0, 0);
 };

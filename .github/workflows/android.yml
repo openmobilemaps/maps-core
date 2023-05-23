@@ -18,4 +18,8 @@ jobs:
           distribution: zulu
           java-version: 11
       - name: Build with Gradle
+        env:
+          UBIQUE_ARTIFACTORY_URL: ${{secrets.UBIQUE_ARTIFACTORY_URL}}
+          UBIQUE_ARTIFACTORY_USER: ${{secrets.UBIQUE_ARTIFACTORY_USER}}
+          UBIQUE_ARTIFACTORY_PASS: ${{secrets.UBIQUE_ARTIFACTORY_PASS}}
         run: cd android; ./gradlew assembleDebug -P'android.injected.build.abi=arm64-v8a'

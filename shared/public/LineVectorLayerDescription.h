@@ -23,6 +23,7 @@ public:
                     std::shared_ptr<Value> lineDashArray = nullptr,
                     std::shared_ptr<Value> lineBlur = nullptr,
                     std::shared_ptr<Value> lineCap = nullptr,
+                    std::shared_ptr<Value> lineOffset = nullptr,
                     double dpFactor = 1.0):
     lineColor(lineColor),
     lineOpacity(lineOpacity),
@@ -30,9 +31,10 @@ public:
     lineDashArray(lineDashArray),
     lineBlur(lineBlur),
     lineCap(lineCap),
+    lineOffset(lineOffset),
     dpFactor(dpFactor) {}
 
-    std::unordered_set<std::string> getUsedKeys() {
+    std::unordered_set<std::string> getUsedKeys() const {
         std::unordered_set<std::string> usedKeys;
         std::vector<std::shared_ptr<Value>> values = { lineColor, lineOpacity, lineWidth, lineBlur, lineDashArray, lineCap };
 
@@ -76,6 +78,12 @@ public:
         return lineCap ? lineCap->evaluateOr(context, defaultValue) : defaultValue;
     }
 
+    double getLineOffset(const EvaluationContext &context) {
+        static const double defaultValue = 0.0;
+        double offset = lineOffset ? lineOffset->evaluateOr(context, defaultValue) : defaultValue;
+        return std::min(offset * dpFactor, getLineWidth(context) * 0.5);
+    }
+
 private:
     std::shared_ptr<Value> lineColor;
     std::shared_ptr<Value> lineOpacity;
@@ -83,6 +91,7 @@ private:
     std::shared_ptr<Value> lineWidth;
     std::shared_ptr<Value> lineDashArray;
     std::shared_ptr<Value> lineCap;
+    std::shared_ptr<Value> lineOffset;
     double dpFactor;
 };
 
@@ -98,12 +107,18 @@ public:
                                int maxZoom,
                                std::shared_ptr<Value> filter,
                                LineVectorStyle style,
-                               std::optional<int32_t> renderPassIndex):
-    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, filter, renderPassIndex),
+                               std::optional<int32_t> renderPassIndex,
+                               std::shared_ptr<Value> interactable):
+    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, filter, renderPassIndex, interactable),
     style(style) {};
 
+    std::unique_ptr<VectorLayerDescription> clone() override {
+        return std::make_unique<LineVectorLayerDescription>(identifier, source, sourceId, minZoom, maxZoom,
+                                                            filter ? filter->clone() : nullptr, style, renderPassIndex,
+                                                            interactable ? interactable->clone() : nullptr);
+    }
 
-    virtual std::unordered_set<std::string> getUsedKeys() override {
+    virtual std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
 
         auto parentKeys = VectorLayerDescription::getUsedKeys();

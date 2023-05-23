@@ -36,7 +36,7 @@ public enum PipelineDescriptorFactory {
         guard let vertexFunction = library.makeFunction(name: vertexShader),
               let fragmentFunction = library.makeFunction(name: fragmentShader)
         else {
-            fatalError("Cannot locate the shaders for UBTileModel")
+            fatalError("Cannot locate the shaders for \(label)")
         }
 
         pipelineDescriptor.vertexFunction = vertexFunction
@@ -57,54 +57,58 @@ extension PipelineDescriptorFactory {
 
 public enum Pipeline: String, CaseIterable {
     case alphaShader
+    case alphaInstancedShader
     case lineGroupShader
     case polygonGroupShader
-    case pointShader
     case colorShader
     case roundColorShader
     case clearStencilShader
     case textShader
     case rasterShader
+    case stretchShader
 
     var label: String {
         switch self {
             case .alphaShader: return "Alpha shader with texture"
+            case .alphaInstancedShader: return "Alpha instanced shader with texture"
             case .lineGroupShader: return "Line Group shader"
             case .polygonGroupShader: return "Polygon Group shader"
-            case .pointShader: return "Point (round) shader with color"
             case .colorShader: return "Color shader"
             case .roundColorShader: return "Round color shader"
             case .clearStencilShader: return "Clear stencil shader"
             case .textShader: return "Text shader"
             case .rasterShader: return "Raster shader"
+            case .stretchShader: return "Stretch shader"
         }
     }
 
     var vertexShader: String {
         switch self {
             case .alphaShader: return "baseVertexShader"
+            case .alphaInstancedShader: return "alphaInstancedVertexShader"
             case .lineGroupShader: return "lineGroupVertexShader"
             case .polygonGroupShader: return "polygonGroupVertexShader"
-            case .pointShader: return "pointVertexShader"
             case .colorShader: return "colorVertexShader"
             case .roundColorShader: return "colorVertexShader"
             case .clearStencilShader: return "stencilClearVertexShader"
             case .textShader: return "textVertexShader"
             case .rasterShader: return "rasterVertexShader"
+            case .stretchShader: return "stretchVertexShader"
         }
     }
 
     var fragmentShader: String {
         switch self {
             case .alphaShader: return "baseFragmentShader"
+            case .alphaInstancedShader: return "alphaInstancedFragmentShader"
             case .lineGroupShader: return "lineGroupFragmentShader"
             case .polygonGroupShader: return "polygonGroupFragmentShader"
-            case .pointShader: return "pointFragmentShader"
             case .colorShader: return "colorFragmentShader"
             case .roundColorShader: return "roundColorFragmentShader"
             case .clearStencilShader: return "stencilClearFragmentShader"
             case .textShader: return "textFragmentShader"
             case .rasterShader: return "rasterFragmentShader"
+            case .stretchShader: return "stretchFragmentShader"
         }
     }
 

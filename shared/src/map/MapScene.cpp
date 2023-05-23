@@ -213,6 +213,12 @@ void MapScene::invalidate() {
 void MapScene::drawFrame() {
     isInvalidated.clear();
 
+    if (scheduler && scheduler->hasSeparateGraphicsInvocation()) {
+        if (scheduler->runGraphicsTasks()) {
+            invalidate();
+        }
+    }
+
     if (!isResumed)
         return;
 
@@ -223,7 +229,6 @@ void MapScene::drawFrame() {
 
     {
         std::lock_guard<std::recursive_mutex> lock(layersMutex);
-
         for (const auto &layer : layers) {
             layer.second->update();
         }
@@ -234,6 +239,8 @@ void MapScene::drawFrame() {
             }
         }
     }
+
+    auto startRealDraw = std::chrono::steady_clock::now();
 
     scene->drawFrame();
 }
@@ -269,7 +276,11 @@ void MapScene::pause() {
         }));
 }
 
-
+void MapScene::destroy() {
+    scheduler->destroy();
+    scheduler = nullptr;
+    callbackHandler = nullptr;
+}
 
 void MapScene::drawReadyFrame(const ::RectCoord &bounds, float timeout,
                               const std::shared_ptr<MapReadyCallbackInterface> &callbacks) {

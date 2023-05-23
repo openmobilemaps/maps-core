@@ -92,28 +92,28 @@ void ColorLineShaderOpenGl::setHighlighted(bool highlighted) {
 }
 
 std::string ColorLineShaderOpenGl::getVertexShader() {
-    return UBRendererShaderCode(
+    return OMMVersionedGlesShaderCode(320 es,
             precision highp float;
 
             uniform mat4 uMVPMatrix;
-            attribute vec2 vPosition;
-            attribute vec2 vWidthNormal;
-            attribute vec2 vLengthNormal;
-            attribute vec2 vPointA;
-            attribute vec2 vPointB;
-            attribute float vSegmentStartLPos;
-            attribute float vStyleInfo;
+            in vec2 vPosition;
+            in vec2 vWidthNormal;
+            in vec2 vLengthNormal;
+            in vec2 vPointA;
+            in vec2 vPointB;
+            in float vSegmentStartLPos;
+            in float vStyleInfo;
             // lineStyles: {float width, float isScaled, int capType} -> stride = 3
-            uniform float lineStyles[3];
+            in float lineStyles[3];
             // lineStyles: {vec4 color} -> stride = 4
-            uniform float lineColors[4];
+            in float lineColors[4];
             // lineStyles: {vec4 gapColor} -> stride = 4
-            uniform float lineGapColors[4];
-            uniform int numStyles;
-            uniform float scaleFactor;
+            in float lineGapColors[4];
+            in int numStyles;
+            in float scaleFactor;
 
-            varying float radius; varying float segmentStartLPos; varying float fSegmentType;
-            varying vec2 pointDeltaA; varying vec2 pointBDeltaA; varying vec4 color; varying vec4 gapColor; varying float capType;
+            out float radius; out float segmentStartLPos; out float fSegmentType;
+            out vec2 pointDeltaA; out vec2 pointBDeltaA; out vec4 color; out vec4 gapColor; out float capType;
 
             void main() {
                 float width = lineStyles[0];
@@ -142,64 +142,66 @@ std::string ColorLineShaderOpenGl::getVertexShader() {
 }
 
 std::string ColorLineShaderOpenGl::getFragmentShader() {
-    return UBRendererShaderCode(precision highp float;
+    return OMMVersionedGlesShaderCode(320 es,
+                        precision highp float;
+                        // lineDashValues: {int numDashInfo, vec4 dashArray} -> stride = 5
+                        uniform float lineDashValues[5];
 
-                                        // lineDashValues: {int numDashInfo, vec4 dashArray} -> stride = 5
-                                        uniform float lineDashValues[5];
+                        in float radius; in float segmentStartLPos;
+                        in float fSegmentType; // 0: inner segment, 1: line start segment (i.e. A is first point in
+                        // line), 2: line end segment, 3: start and end in segment
+                        in vec2 pointDeltaA; in vec2 pointBDeltaA; in vec4 color;
+                        in float capType; // 0: butt, 1: round, 2: square
+                        in vec4 gapColor;
 
-                                        varying float radius; varying float segmentStartLPos;
-                                        varying float fSegmentType; // 0: inner segment, 1: line start segment (i.e. A is first point in
-                                        // line), 2: line end segment, 3: start and end in segment
-                                        varying vec2 pointDeltaA; varying vec2 pointBDeltaA; varying vec4 color;
-                                        varying float capType; // 0: butt, 1: round, 2: square
-                                        varying vec4 gapColor;
+                        out vec4 fragmentColor;
 
-                                        void main() {
-                                            int segmentType = int(floor(fSegmentType + 0.5));
-                                            int iCapType = int(floor(capType + 0.5));
-                                            float lineLength = length(pointBDeltaA);
-                                            float t = dot(pointDeltaA, normalize(pointBDeltaA)) / lineLength;
-                                            float d;
-                                            if (t < 0.0 || t > 1.0) {
-                                                if (segmentType == 0 || iCapType == 1 || (segmentType == 2 && t < 0.0) ||
-                                                    (segmentType == 1 && t > 1.0)) {
-                                                    d = min(length(pointDeltaA), length(pointDeltaA - pointBDeltaA));
-                                                } else if (iCapType == 2) {
-                                                    float dLen = t < 0.0 ? -t * lineLength : (t - 1.0) * lineLength;
-                                                    vec2 intersectPt = t * pointBDeltaA;
-                                                    float dOrth = abs(length(pointDeltaA - intersectPt));
-                                                    d = max(dLen, dOrth);
-                                                } else {
-                                                    discard;
-                                                }
-                                            } else {
-                                                vec2 intersectPt = t * pointBDeltaA;
-                                                d = abs(length(pointDeltaA - intersectPt));
-                                            }
+                        void main() {
+                            int segmentType = int(floor(fSegmentType + 0.5));
+                            int iCapType = int(floor(capType + 0.5));
+                            float lineLength = length(pointBDeltaA);
+                            float t = dot(pointDeltaA, normalize(pointBDeltaA)) / lineLength;
+                            float d;
+                            if (t < 0.0 || t > 1.0) {
+                                if (segmentType == 0 || iCapType == 1 || (segmentType == 2 && t < 0.0) ||
+                                    (segmentType == 1 && t > 1.0)) {
+                                    d = min(length(pointDeltaA), length(pointDeltaA - pointBDeltaA));
+                                } else if (iCapType == 2) {
+                                    float dLen = t < 0.0 ? -t * lineLength : (t - 1.0) * lineLength;
+                                    vec2 intersectPt = t * pointBDeltaA;
+                                    float dOrth = abs(length(pointDeltaA - intersectPt));
+                                    d = max(dLen, dOrth);
+                                } else {
+                                    discard;
+                                }
+                            } else {
+                                vec2 intersectPt = t * pointBDeltaA;
+                                d = abs(length(pointDeltaA - intersectPt));
+                            }
 
-                                            if (d > radius) {
-                                                discard;
-                                            }
+                            if (d > radius) {
+                                discard;
+                            }
 
-                                            vec4 fragColor = color;
-                                            int numDashInfos = int(floor(lineDashValues[0] + 0.5));
-                                            if (numDashInfos > 0) {
-                                                int baseDashInfos = 1;
-                                                float factorToT = radius * 2.0 / lineLength;
-                                                float dashTotal = lineDashValues[baseDashInfos + (numDashInfos - 1)] * factorToT;
-                                                float startOffsetSegment = mod(segmentStartLPos / lineLength, dashTotal);
-                                                float intraDashPos = mod(t + startOffsetSegment, dashTotal);
-                                                // unrolled for efficiency reasons
-                                                if ((intraDashPos > lineDashValues[baseDashInfos + 0] * factorToT &&
-                                                     intraDashPos < lineDashValues[baseDashInfos + 1] * factorToT) ||
-                                                    (intraDashPos > lineDashValues[baseDashInfos + 2] * factorToT &&
-                                                     intraDashPos < lineDashValues[baseDashInfos + 3] * factorToT)) {
-                                                    fragColor = gapColor;
-                                                }
-                                            }
+                            vec4 fragColor = color;
+                            int numDashInfos = int(floor(lineDashValues[0] + 0.5));
+                            if (numDashInfos > 0) {
+                                int baseDashInfos = 1;
+                                float factorToT = radius * 2.0 / lineLength;
+                                float dashTotal = lineDashValues[baseDashInfos + (numDashInfos - 1)] * factorToT;
+                                float startOffsetSegment = mod(segmentStartLPos / lineLength, dashTotal);
+                                float intraDashPos = mod(t + startOffsetSegment, dashTotal);
+                                // unrolled for efficiency reasons
+                                if ((intraDashPos > lineDashValues[baseDashInfos + 0] * factorToT &&
+                                     intraDashPos < lineDashValues[baseDashInfos + 1] * factorToT) ||
+                                    (intraDashPos > lineDashValues[baseDashInfos + 2] * factorToT &&
+                                     intraDashPos < lineDashValues[baseDashInfos + 3] * factorToT)) {
+                                    fragColor = gapColor;
+                                }
+                            }
 
-                                            gl_FragColor = fragColor;
-                                            gl_FragColor.a = 1.0;
-                                            gl_FragColor *= fragColor.a;
-                                        });
+                            fragmentColor = fragColor;
+                            fragmentColor.a = 1.0;
+                            fragmentColor *= fragColor.a;
+                        });
 }

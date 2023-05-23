@@ -51,6 +51,9 @@ jobs:
           SIGNING_KEY_PASSWORD: ${{secrets.MAVEN_SIGNING_KEY_PASSPHRASE}}
           SONATYPE_NEXUS_USERNAME: ${{secrets.SONATYPE_NEXUS_USERNAME}}
           SONATYPE_NEXUS_PASSWORD: ${{secrets.SONATYPE_NEXUS_PASSWORD}}
+          UBIQUE_ARTIFACTORY_URL: ${{secrets.UBIQUE_ARTIFACTORY_URL}}
+          UBIQUE_ARTIFACTORY_USER: ${{secrets.UBIQUE_ARTIFACTORY_USER}}
+          UBIQUE_ARTIFACTORY_PASS: ${{secrets.UBIQUE_ARTIFACTORY_PASS}}
         run: |
           cd android
           echo "### Maven Dependency - Maven Central" >> $GITHUB_STEP_SUMMARY

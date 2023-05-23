@@ -20,7 +20,7 @@ struct Tiled2dMapRasterTileInfo {
     std::shared_ptr<TextureHolderInterface> textureHolder;
     std::vector<::PolygonCoord> masks;
 
-    Tiled2dMapRasterTileInfo(Tiled2dMapTileInfo tileInfo, const std::shared_ptr<TextureHolderInterface> textureHolder, const std::vector<::PolygonCoord> & masks)
+    Tiled2dMapRasterTileInfo(Tiled2dMapTileInfo tileInfo, const std::shared_ptr<TextureHolderInterface> textureHolder, const std::vector<::PolygonCoord> masks)
         : tileInfo(tileInfo)
         , textureHolder(textureHolder)
         , masks(masks) {}

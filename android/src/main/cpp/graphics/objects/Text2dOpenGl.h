@@ -42,6 +42,8 @@ class Text2dOpenGl : public GraphicsObjectInterface,
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
                         int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
+    void setTextsShared(const SharedBytes &vertices, const SharedBytes &indices) override;
+
     virtual void setTexts(const std::vector<TextDescription> &texts) override;
 
     virtual void loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
@@ -52,37 +54,29 @@ class Text2dOpenGl : public GraphicsObjectInterface,
 
     virtual void setIsInverseMasked(bool inversed) override;
 
-  protected:
-    virtual void adjustTextureCoordinates();
-
+protected:
     virtual void prepareTextureDraw(std::shared_ptr<OpenGlContext> &openGLContext, int mProgram);
 
     void prepareGlData(const std::shared_ptr<OpenGlContext> &openGlContext, const int &programHandle);
 
-    void prepareTextureCoordsGlData(const std::shared_ptr<OpenGlContext> &openGlContext, const int &programHandle);
-
     void removeGlBuffers();
-
-    void removeTextureCoordsGlBuffers();
 
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
 
-    int mvpMatrixHandle;
-    int positionHandle;
-    GLuint vertexBuffer;
-    std::vector<GLfloat> vertices;
-    int textureCoordinateHandle;
-    GLuint textureCoordsBuffer;
-    std::vector<GLfloat> textureCoords;
-    GLuint indexBuffer;
-    std::vector<GLubyte> indices;
-
-    std::vector<GlyphDescription> glyphDescriptions;
+    int mvpMatrixHandle = -1;
+    int positionHandle = -1;
+    int textureCoordinateHandle = -1;
+    GLuint vertexAttribBuffer = -1;
+    bool hasVertexBuffer = false;
+    std::vector<GLfloat> textVertexAttributes;
+    GLuint indexBuffer = -1;
+    bool hasIndexBuffer = false;
+    std::vector<GLushort> textIndices;
 
     std::shared_ptr<TextureHolderInterface> textureHolder;
     int texturePointer;
-    double factorHeight = 1.0;
-    double factorWidth = 1.0;
+    int textureCoordScaleFactorHandle = -1;
+    std::vector<GLfloat> textureCoordScaleFactor = {1.0, 1.0};
 
     bool ready = false;
     bool textureCoordsReady = false;

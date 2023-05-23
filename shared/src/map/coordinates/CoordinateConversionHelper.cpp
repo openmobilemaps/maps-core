@@ -31,7 +31,7 @@ std::shared_ptr<CoordinateConversionHelperInterface> CoordinateConversionHelperI
 }
 
 CoordinateConversionHelper::CoordinateConversionHelper(MapCoordinateSystem mapCoordinateSystem)
-    : mapCoordinateSystemIdentier(mapCoordinateSystem.identifier)
+    : mapCoordinateSystemIdentifier(mapCoordinateSystem.identifier)
     , renderSystemConverter(std::make_shared<DefaultSystemToRenderConverter>(mapCoordinateSystem)) {
     registerConverter(renderSystemConverter);
     addDefaultConverters();
@@ -99,7 +99,7 @@ RectCoord CoordinateConversionHelper::convertRectToRenderSystem(const RectCoord 
 }
 
 Coord CoordinateConversionHelper::convertToRenderSystem(const Coord &coordinate) {
-    if (coordinate.systemIdentifier == mapCoordinateSystemIdentier) {
+    if (coordinate.systemIdentifier == mapCoordinateSystemIdentifier) {
         return renderSystemConverter->convert(coordinate);
     } else {
         return convert(CoordinateSystemIdentifiers::RENDERSYSTEM(), coordinate);

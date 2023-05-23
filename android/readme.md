@@ -6,7 +6,7 @@
   <img width="200" height="45" src="../logo.svg" />
   <br />
   <br />
-  The lightweight and modern Map SDK for Android (6.0+) and iOS (10+)
+  The lightweight and modern Map SDK for Android (8.0+, OpenGl ES 3.2) and iOS (10+)
   <br />
   <br />
   <a href="https://openmobilemaps.io/">openmobilemaps.io</a>
@@ -65,7 +65,7 @@ This library is available on MavenCentral. To add it to your Android project, ad
 
 ```
 dependencies {
-  implementation 'io.openmobilemaps:mapscore:1.5.2'
+  implementation 'io.openmobilemaps:mapscore:1.5.3'
 }
 ```
 

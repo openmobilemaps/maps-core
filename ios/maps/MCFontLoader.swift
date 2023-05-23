@@ -55,28 +55,43 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface {
                 let data = try Data(contentsOf: URL(fileURLWithPath: path), options: .mappedIfSafe)
                 let jsonResult = try JSONSerialization.jsonObject(with: data, options: .mutableLeaves)
                 if let jsonResult = jsonResult as? [String: AnyObject] {
-                    let fontInfo = MCFontWrapper(name: string(dict: jsonResult, value: "name"), ascender: double(dict: jsonResult, value: "ascender"), descender: double(dict: jsonResult, value: "descender"), spaceAdvance: double(dict: jsonResult, value: "space_advance"), bitmapSize: MCVec2D(x: double(dict: jsonResult, value: "bitmap_width"), y: double(dict: jsonResult, value: "bitmap_height")), size: Double(UIScreen.main.nativeScale) * double(dict: jsonResult, value: "size"))
+                    let fontInfoJson = jsonResult["info"] as! [String: AnyObject]
+                    let commonJson = jsonResult["common"] as! [String: AnyObject]
+
+                    let size = double(dict: fontInfoJson, value: "size")
+                    let imageSize = double(dict: commonJson, value: "scaleW")
+
+                    let fontInfo = MCFontWrapper(name: font.name, lineHeight: double(dict: commonJson, value: "lineHeight"), base: double(dict: commonJson, value: "base"), bitmapSize: MCVec2D(x: imageSize, y: imageSize), size: Double(UIScreen.pixelsPerInch) * size)
 
                     var glyphs: [MCFontGlyph] = []
-                    for glyph in jsonResult["glyph_data"] as? [String: AnyObject] ?? [:] {
-                        let character = glyph.key
 
-                        if let d = glyph.value as? [String: AnyObject] {
-                            let s0 = double(dict: d, value: "s0")
-                            let s1 = double(dict: d, value: "s1")
-                            let t0 = 1.0 - double(dict: d, value: "t0")
-                            let t1 = 1.0 - double(dict: d, value: "t1")
-                            let bearing = MCVec2D(x: double(dict: d, value: "bearing_x"), y: double(dict: d, value: "bearing_y"))
+                    for g in jsonResult["chars"] as! [NSDictionary] {
+                        var glyph : [String:AnyObject] = [:]
+                        for a in g {
+                            glyph[a.key as! String] = a.value as AnyObject
+                        }
+
+                            let character = string(dict: glyph, value: "char")
+
+                            var s0 = double(dict: glyph, value: "x")
+                            var s1 = s0 + double(dict: glyph, value: "width")
+                            var t0 = double(dict: glyph, value: "y")
+                            var t1 = t0 + double(dict: glyph, value: "height")
+
+                            s0 = s0 / imageSize
+                            s1 = s1 / imageSize
+                            t0 = t0 / imageSize
+                            t1 = t1 / imageSize
+
+                            let bearing = MCVec2D(x: double(dict: glyph, value: "xoffset") / size, y: -double(dict: glyph, value: "yoffset") / size)
 
                             let uv = MCQuad2dD(topLeft: MCVec2D(x: s0, y: t1), topRight: MCVec2D(x: s1, y: t1), bottomRight: MCVec2D(x: s1, y: t0), bottomLeft: MCVec2D(x: s0, y: t0))
 
-                            let glyph = MCFontGlyph(charCode: character, advance: MCVec2D(x: double(dict: d, value: "advance_x"), y: double(dict: d, value: "advance_y")), boundingBoxSize: MCVec2D(x: double(dict: d, value: "bbox_width"), y: double(dict: d, value: "bbox_height")), bearing: bearing, uv: uv)
-                            glyphs.append(glyph)
-                        }
+                        let glyphGlyhph = MCFontGlyph(charCode: character, advance: MCVec2D(x: double(dict: glyph, value: "xadvance") / size, y:0.0), boundingBoxSize: MCVec2D(x: double(dict: glyph, value: "width") / size, y: double(dict: glyph, value: "height") / size), bearing: bearing, uv: uv)
+                            glyphs.append(glyphGlyhph)
                     }
 
                     let fontData = MCFontData(info: fontInfo, glyphs: glyphs)
-
                     fontDataDictionary[font.name] = fontData
 
                     return fontData

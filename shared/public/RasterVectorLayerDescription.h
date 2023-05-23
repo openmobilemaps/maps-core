@@ -25,7 +25,7 @@ public:
                       std::shared_ptr<Value> rasterSaturation):
     rasterOpacity(rasterOpacity), rasterBrightnessMin(rasterBrightnessMin), rasterBrightnessMax(rasterBrightnessMax), rasterContrast(rasterContrast), rasterSaturation(rasterSaturation) {}
 
-    std::unordered_set<std::string> getUsedKeys() {
+    std::unordered_set<std::string> getUsedKeys() const {
         std::unordered_set<std::string> usedKeys;
         std::vector<std::shared_ptr<Value>> values = { 
             rasterOpacity, 
@@ -110,12 +110,31 @@ public:
                                  bool maskTiles,
                                  double zoomLevelScaleFactor,
                                  std::optional<int32_t> renderPassIndex,
-                                 bool overzoom,
-                                 bool underzoom):
-    VectorLayerDescription(identifier, "", "", minZoom, maxZoom, nullptr, renderPassIndex),
-    style(style), url(url), adaptScaleToScreen(adaptScaleToScreen), numDrawPreviousLayers(numDrawPreviousLayers), maskTiles(maskTiles), zoomLevelScaleFactor(zoomLevelScaleFactor), overzoom(overzoom), underzoom(underzoom)  {};
+                                 std::shared_ptr<Value> interactable,
+                                 bool underzoom,
+                                 bool overzoom):
+    VectorLayerDescription(identifier, identifier, "", minZoom, maxZoom, nullptr, renderPassIndex, interactable),
+    style(style), url(url), underzoom(underzoom), overzoom(overzoom), adaptScaleToScreen(adaptScaleToScreen), numDrawPreviousLayers(numDrawPreviousLayers),
+    maskTiles(maskTiles), zoomLevelScaleFactor(zoomLevelScaleFactor) {};
 
-    virtual std::unordered_set<std::string> getUsedKeys() override {
+
+    std::unique_ptr<VectorLayerDescription> clone() override {
+        return std::make_unique<RasterVectorLayerDescription>(identifier,
+                                            minZoom,
+                                            maxZoom,
+                                            url,
+                                            style,
+                                            adaptScaleToScreen,
+                                            numDrawPreviousLayers,
+                                            maskTiles,
+                                            zoomLevelScaleFactor,
+                                            renderPassIndex,
+                                            interactable ? interactable->clone() : nullptr,
+                                            underzoom,
+                                            overzoom);
+    }
+
+    virtual std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
 
         auto parentKeys = VectorLayerDescription::getUsedKeys();

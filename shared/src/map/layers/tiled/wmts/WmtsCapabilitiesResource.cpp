@@ -12,7 +12,6 @@
 #include "CoordinateConversionHelper.h"
 #include "CoordinateSystemIdentifiers.h"
 #include "Tiled2dMapRasterLayerInterface.h"
-#include "WmtsLayerConfiguration.h"
 #include "WmtsLayerDescription.h"
 #include "WmtsLayerDimension.h"
 #include "WmtsTileMatrixSet.h"

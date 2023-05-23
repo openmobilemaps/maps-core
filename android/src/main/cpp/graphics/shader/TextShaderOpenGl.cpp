@@ -18,15 +18,12 @@ void TextShaderOpenGl::setColor(const ::Color & color) {
     this->color = std::vector<float>{color.r, color.g, color.b, color.a};
 }
 
-void TextShaderOpenGl::setHaloColor(const ::Color & color) {
+void TextShaderOpenGl::setHaloColor(const ::Color & color, double width) {
     this->haloColor = std::vector<float>{color.r, color.g, color.b, color.a};
+    this->haloWidth = width;
 }
 
-void TextShaderOpenGl::setScale(float scale) { this->scale = scale; }
-
-void TextShaderOpenGl::setReferencePoint(const Vec3D &point) {
-    this->referencePoint = {(float)point.x, (float)point.y, (float)point.z};
-}
+void TextShaderOpenGl::setOpacity(float opacity) { this->opacity = opacity; }
 
 void TextShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
@@ -57,52 +54,63 @@ void TextShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterfa
     int haloColorHandle = glGetUniformLocation(program, "haloColor");
     glUniform4fv(haloColorHandle, 1, &haloColor[0]);
 
-    int refPointHandle = glGetUniformLocation(program, "referencePoint");
-    glUniform3fv(refPointHandle, 1, &referencePoint[0]);
+    int haloWidthHandle = glGetUniformLocation(program, "haloWidth");
+    glUniform1f(haloWidthHandle, haloWidth);
 
-    int scaleHandle = glGetUniformLocation(program, "scale");
-    glUniform1f(scaleHandle, scale);
+    int opacityHandle = glGetUniformLocation(program, "opacity");
+    glUniform1f(opacityHandle, opacity);
 }
 
 std::string TextShaderOpenGl::getVertexShader() {
-    return UBRendererShaderCode(uniform mat4 uMVPMatrix;
-                                        attribute vec2 vPosition;
-                                        attribute vec2 texCoordinate;
-                                        uniform vec3 referencePoint;
-                                        uniform float scale;
-                                        varying vec2 vTextCoord;
+    return OMMVersionedGlesShaderCode(320 es,
+                                      uniform mat4 uMVPMatrix;
+                                      uniform vec2 textureCoordScaleFactor;
+                                      in vec2 vPosition;
+                                      in vec2 texCoordinate;
+                                      out vec2 vTextCoord;
 
-                                        void main() {
-                                            vec2 pos = (uMVPMatrix * vec4(vPosition.xy, 0.0, 1.0)).xy;
-                                            vec2 ref = (uMVPMatrix * vec4(referencePoint.xy, 0.0, 1.0)).xy;
-                                            pos = ref.xy + (pos.xy - ref.xy) * scale;
-                                            gl_Position = vec4(pos.xy, 0.0, 1.0);
-                                            vTextCoord = texCoordinate;
-                                        });
+                                      void main() {
+                                          gl_Position = vec4((uMVPMatrix * vec4(vPosition.xy, 0.0, 1.0)).xy, 0.0, 1.0);
+                                          vTextCoord = textureCoordScaleFactor * texCoordinate;
+                                      });
 }
 
 std::string TextShaderOpenGl::getFragmentShader() {
-    return UBRendererShaderCode(precision highp float;
-                                        uniform sampler2D texture;
-                                        uniform vec4 color;
-                                        uniform vec4 haloColor;
-                                        varying vec2 vTextCoord;
+    return OMMVersionedGlesShaderCode(320 es,
+                                      precision highp float;
+                                      uniform sampler2D textureSampler;
+                                      uniform vec4 color;
+                                      uniform vec4 haloColor;
+                                      uniform float opacity;
+                                      uniform float haloWidth;
+                                      in vec2 vTextCoord;
+                                      out vec4 fragmentColor;
 
-                                        void main() {
-                                            vec4 dist = texture2D(texture, vTextCoord);
-                                            if (haloColor.a == 0.0 && dist.x <= 0.5) {
-                                                discard;
-                                            }
+                                      void main() {
+                                          vec4 dist = texture(textureSampler, vTextCoord);
 
-                                            float delta = 0.1;
-                                            float alpha = smoothstep(0.5 - delta, 0.5 + delta, dist.x);
-                                            vec4 glyphColor = vec4(color.r, color.g, color.b, color.a * alpha);
-                                            vec4 mixed = mix(haloColor, glyphColor, alpha);
-                                            float a2 = smoothstep(0.40, 0.5, sqrt(dist.x));
-                                            gl_FragColor = mixed;
-                                            gl_FragColor.a = 1.0;
-                                            gl_FragColor *= a2;
-                                        });
+                                          if(opacity == 0.0) {
+                                              discard;
+                                          }
+
+                                          float median = max(min(dist.r, dist.g), min(max(dist.r, dist.g), dist.b)) / dist.a;
+
+                                          float w = fwidth(median);
+                                          float alpha = smoothstep(0.5 - w, 0.5 + w, median);
+
+                                          vec4 mixed = mix(haloColor, color, alpha);
+
+                                          if(haloWidth > 0.0) {
+                                              float start = (0.0 + 0.5 * (1.0 - haloWidth)) - w;
+                                              float end = start + w;
+                                              float a2 = smoothstep(start, end, median) * opacity;
+                                              fragmentColor = mixed;
+                                              fragmentColor.a = 1.0;
+                                              fragmentColor *= a2;
+                                          } else {
+                                              fragmentColor = mixed;
+                                          }
+                                      });
 }
 
 std::shared_ptr<ShaderProgramInterface> TextShaderOpenGl::asShaderProgramInterface() { return shared_from_this(); }

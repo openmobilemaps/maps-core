@@ -19,10 +19,34 @@ struct SpriteDesc {
     int y;
     int width;
     int height;
-    int pixelRatio;
+    float pixelRatio;
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(SpriteDesc, x, y, width, height, pixelRatio)
+    std::vector<float> content;
+    std::vector<std::pair<float,float>> stretchX;
+    std::vector<std::pair<float, float>> stretchY;
 };
+
+inline void to_json(nlohmann::json& j, const SpriteDesc& spriteDesc) {}
+
+inline void from_json(const nlohmann::json& j, SpriteDesc& spriteDesc) {
+    j.at("x").get_to(spriteDesc.x);
+    j.at("y").get_to(spriteDesc.y);
+    j.at("width").get_to(spriteDesc.width);
+    j.at("height").get_to(spriteDesc.height);
+    j.at("pixelRatio").get_to(spriteDesc.pixelRatio);
+
+    if (j.contains("content")) {
+        j.at("content").get_to(spriteDesc.content);
+    }
+
+    if (j.contains("stretchX")) {
+        j.at("stretchX").get_to(spriteDesc.stretchX);
+    }
+
+    if (j.contains("stretchY")) {
+        j.at("stretchY").get_to(spriteDesc.stretchY);
+    }
+}
 
 struct SpriteData {
     std::unordered_map<std::string, SpriteDesc> sprites;

@@ -14,6 +14,7 @@
 #include "LineGroup2dOpenGl.h"
 #include "Polygon2dOpenGl.h"
 #include "PolygonGroup2dOpenGl.h"
+#include "Quad2dInstancedOpenGl.h"
 #include "Quad2dOpenGl.h"
 #include "Text2dOpenGl.h"
 
@@ -52,4 +53,9 @@ std::shared_ptr<Polygon2dInterface> GraphicsObjectFactoryOpenGl::createPolygonMa
 
 std::shared_ptr<TextInterface> GraphicsObjectFactoryOpenGl::createText(const std::shared_ptr<::ShaderProgramInterface> &shader) {
     return std::make_shared<Text2dOpenGl>(shader);
+}
+
+std::shared_ptr<Quad2dInstancedInterface> GraphicsObjectFactoryOpenGl::createQuadInstanced(
+        const std::shared_ptr<::ShaderProgramInterface> &shader) {
+    return std::make_shared<Quad2dInstancedOpenGl>(shader);
 }

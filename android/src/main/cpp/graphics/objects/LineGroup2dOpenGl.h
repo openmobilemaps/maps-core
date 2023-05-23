@@ -54,9 +54,9 @@ protected:
     int scaleFactorHandle;
     int positionHandle;
     int widthNormalHandle;
-    int lengthNormalHandle;
     int pointAHandle;
     int pointBHandle;
+    int vertexIndexHandle;
     int segmentStartLPosHandle;
     int styleInfoHandle;
     GLuint vertexAttribBuffer;

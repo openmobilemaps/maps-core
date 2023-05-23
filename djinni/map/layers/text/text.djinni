@@ -21,6 +21,25 @@ text_justify = enum {
     RIGHT;
 }
 
+text_symbol_placement = enum {
+    POINT;
+    LINE;
+    LINE_CENTER;
+}
+
+symbol_alignment = enum {
+    MAP;
+    VIEWPORT;
+    AUTO;
+}
+
+icon_text_fit = enum {
+    NONE;
+    WIDTH;
+    HEIGHT;
+    BOTH;
+}
+
 formatted_string_entry = record {
     text: string;
     scale: f32;
@@ -33,6 +52,7 @@ text_factory = interface +c {
 text_layer_interface = interface +c {
     static create(font_loader: font_loader_interface) : text_layer_interface;
     set_texts(texts: list<text_info_interface>);
+
     asLayerInterface(): layer_interface;
     invalidate();
 }
@@ -43,5 +63,7 @@ text_info_interface = interface +c +j +o {
     get_font(): font;
     get_text_anchor(): anchor;
     get_text_justify(): text_justify;
+    get_symbol_placement(): text_symbol_placement;
+    get_line_coordinates(): optional<list<coord>>;
 }
 
