@@ -16,5 +16,5 @@ public:
 
     virtual /*not-null*/ std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() = 0;
 
-    virtual void renderAsMask(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const ::RenderPassConfig & renderPass, int64_t mvpMatrix, double screenPixelAsRealMeterFactor) = 0;
+    virtual void renderAsMask(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const ::RenderPassConfig & renderPass, int64_t mvpMatrix, int64_t modelViewMatrix, double screenPixelAsRealMeterFactor) = 0;
 };

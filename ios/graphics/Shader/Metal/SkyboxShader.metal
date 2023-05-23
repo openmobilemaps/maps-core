@@ -40,14 +40,16 @@ float fbm(float3 p)
 
 vertex VertexOut
 skyboxVertexShader(const VertexIn3D vertexIn [[stage_in]],
-                 constant float4x4 &mvpMatrix [[buffer(1)]])
+                   constant float4x4 &mvpMatrix [[buffer(1)]],
+                   constant float4x4 &modelViewMatrix [[buffer(2)]])
 {
   float4 p = mvpMatrix * float4(vertexIn.position.xyz, 1.0);
   p.z = p.w;
+  float4 n = modelViewMatrix * float4(vertexIn.position.xyz, 1.0);
   VertexOut out {
     .position = p,
     .uv = vertexIn.uv,
-    .n = vertexIn.position.xyz,
+    .n = n.xyz / n.w,
     .pointsize = 0
   };
 
@@ -91,11 +93,14 @@ float3 calculateSunPosition(int day, float time) {
 
 fragment float4
 skyboxFragmentShader(const VertexOut vertexIn [[stage_in]],
-      constant float &time [[buffer(1)]])
+      constant float &time [[buffer(1)]],
+      constant float4x4 &modelViewMatrix [[buffer(2)]])
 {
 
 
   float3 fsun = calculateSunPosition(120, time);
+  float4 fsun4 = (modelViewMatrix * float4(fsun, 1.0));
+  fsun = -fsun4.xyz / fsun4.w;
 
 //  float4 unprojected1 = inverseMvpMatrix * float4(vertexIn.uv.xy, 0.8, 1.0);
 //  unprojected1 /= unprojected1.w;

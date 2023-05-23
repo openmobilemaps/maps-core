@@ -129,6 +129,7 @@ public class RenderingContext: NSObject {
                                 context: self,
                                 renderPass: pass,
                                 mvpMatrix: 0,
+                                modelViewMatrix: 0,
                                 isMasked: false,
                                 screenPixelAsRealMeterFactor: 1)
     }

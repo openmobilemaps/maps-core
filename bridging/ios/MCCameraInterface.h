@@ -10,6 +10,8 @@
 
 - (nonnull NSArray<NSNumber *> *)getVpMatrix;
 
+- (nonnull NSArray<NSNumber *> *)getViewMatrix;
+
 - (double)getScalingFactor;
 
 - (void)viewportSizeChanged;

@@ -52,6 +52,7 @@ final class Polygon3d: BaseGraphicsObject {
                          context: RenderingContext,
                          renderPass: MCRenderPassConfig,
                          mvpMatrix: Int64,
+                         modelViewMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
 
@@ -113,6 +114,13 @@ final class Polygon3d: BaseGraphicsObject {
         var time = Float(-Self.renderStartTime.timeIntervalSinceNow)
         encoder.setVertexBytes(&time, length: MemoryLayout<Float>.stride, index: 2)
         encoder.setVertexBytes(&layerOffset, length: MemoryLayout<Int32>.stride, index: 3)
+
+        if shader is SkyboxShader {
+            if let matrixPointer = UnsafeRawPointer(bitPattern: Int(modelViewMatrix)) {
+                encoder.setVertexBytes(matrixPointer, length: 64, index: 2)
+                encoder.setFragmentBytes(matrixPointer, length: 64, index: 2)
+            }
+        }
 
 
         if shader is SphereProjectionShader, let tessellationFactorBuffer = tessellationFactorBuffer {
@@ -198,6 +206,7 @@ extension Polygon3d: MCMaskingObjectInterface {
     func render(asMask context: MCRenderingContextInterface?,
                 renderPass: MCRenderPassConfig,
                 mvpMatrix: Int64,
+                modelViewMatrix: Int64,
                 screenPixelAsRealMeterFactor _: Double) {
         guard isReady(),
               let context = context as? RenderingContext,

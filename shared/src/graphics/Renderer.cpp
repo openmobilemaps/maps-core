@@ -36,6 +36,8 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
 
     auto vpMatrix = camera->getVpMatrix();
     auto vpMatrixPointer = (int64_t)vpMatrix.data();
+    auto viewMatrix = camera->getViewMatrix();
+    auto viewMatrixPointer = (int64_t)viewMatrix.data();
 
     auto identityMatrix = std::vector<float>(16, 0.0);
     Matrix::setIdentityM(identityMatrix, 0);
@@ -67,10 +69,10 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
                 if (hasMask && !task.target) {
                     renderingContext->preRenderStencilMask(task.target);
                     if (task.target) {
-                        maskObject->renderAsMask(renderingContext, config, identityMatrixPointer, factor);
+                        maskObject->renderAsMask(renderingContext, config, identityMatrixPointer, identityMatrixPointer, factor);
                     }
                     else {
-                        maskObject->renderAsMask(renderingContext, config, vpMatrixPointer, factor);
+                        maskObject->renderAsMask(renderingContext, config, vpMatrixPointer, viewMatrixPointer, factor);
                     }
                     //LogDebug << "Has mask and mask is: " <<= (maskObject->asGraphicsObject()->isReady() ? "ready" : "not ready");
                 }
@@ -78,15 +80,15 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
                 for (const auto &renderObject : renderObjects) {
                     const auto &graphicsObject = renderObject->getGraphicsObject();
                     if (renderObject->isScreenSpaceCoords()) {
-                        graphicsObject->render(renderingContext, config, (int64_t) identityMatrix.data(), hasMask, factor / renderObject->getScreenSpaceScalingFactor());
+                        graphicsObject->render(renderingContext, config, (int64_t) identityMatrix.data(), (int64_t) identityMatrix.data(), hasMask, factor / renderObject->getScreenSpaceScalingFactor());
                     } else if (renderObject->hasCustomModelMatrix()) {
-                        Matrix::multiplyMMC(tempMvpMatrix, 0, vpMatrix, 0, renderObject->getCustomModelMatrix(), 0);
-                        graphicsObject->render(renderingContext, config, (int64_t)tempMvpMatrix.data(), hasMask,
+                        Matrix::multiplyMMC(tempMvpMatrix, 0, vpMatrix, 0, renderObject->getCustomModelMatrix() , 0);
+                        graphicsObject->render(renderingContext, config, (int64_t)tempMvpMatrix.data(), (int64_t) identityMatrix.data() , hasMask,
                                                factor);
                     } else if (task.target) {
-                        graphicsObject->render(renderingContext, config, identityMatrixPointer, false, factor);
+                        graphicsObject->render(renderingContext, config, identityMatrixPointer, identityMatrixPointer, false, factor);
                     } else {
-                        graphicsObject->render(renderingContext, config, vpMatrixPointer, hasMask, factor);
+                        graphicsObject->render(renderingContext, config, vpMatrixPointer, viewMatrixPointer, hasMask, factor);
                     }
                 }
 

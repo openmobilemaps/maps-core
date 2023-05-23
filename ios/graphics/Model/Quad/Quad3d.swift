@@ -83,6 +83,7 @@ final class Quad3d: BaseGraphicsObject {
                          context: RenderingContext,
                          renderPass: MCRenderPassConfig,
                          mvpMatrix: Int64,
+                         modelViewMatrix _: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
         guard isReady(),
@@ -159,6 +160,7 @@ extension Quad3d: MCMaskingObjectInterface {
     func render(asMask context: MCRenderingContextInterface?,
                 renderPass: MCRenderPassConfig,
                 mvpMatrix: Int64,
+                modelViewMatrix: Int64,
                 screenPixelAsRealMeterFactor: Double) {
         guard isReady(),
               let context = context as? RenderingContext,
@@ -170,6 +172,7 @@ extension Quad3d: MCMaskingObjectInterface {
                context: context,
                renderPass: renderPass,
                mvpMatrix: mvpMatrix,
+               modelViewMatrix: modelViewMatrix,
                isMasked: false,
                screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)
     }

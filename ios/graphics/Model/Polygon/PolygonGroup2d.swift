@@ -50,6 +50,7 @@ final class PolygonGroup2d: BaseGraphicsObject {
                          context: RenderingContext,
                          renderPass: MCRenderPassConfig,
                          mvpMatrix: Int64,
+                         modelViewMatrix _: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
         lock.lock()

@@ -28,5 +28,5 @@ public:
     virtual void setIsInverseMasked(bool inversed) = 0;
 
     /** Render the graphics object; ensure calling on graphics thread */
-    virtual void render(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const ::RenderPassConfig & renderPass, int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) = 0;
+    virtual void render(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const ::RenderPassConfig & renderPass, int64_t mvpMatrix, int64_t modelViewMatrix, bool isMasked, double screenPixelAsRealMeterFactor) = 0;
 };

@@ -21,12 +21,12 @@ graphics_object_interface = interface +c +j +o {
     # if setting this flag the masked is applied inversly
     set_is_inverse_masked(inversed: bool);
     # Render the graphics object; ensure calling on graphics thread
-    render(context: rendering_context_interface, render_pass: render_pass_config, mvp_matrix: i64, is_masked: bool, screenPixelAsRealMeterFactor: f64);
+    render(context: rendering_context_interface, render_pass: render_pass_config, mvp_matrix: i64, model_view_matrix: i64, is_masked: bool, screenPixelAsRealMeterFactor: f64);
 }
 
 masking_object_interface = interface +c +j +o {
     as_graphics_object(): graphics_object_interface;
-	render_as_mask(context: rendering_context_interface, render_pass: render_pass_config, mvp_matrix: i64, screenPixelAsRealMeterFactor: f64);
+	render_as_mask(context: rendering_context_interface, render_pass: render_pass_config, mvp_matrix: i64, model_view_matrix: i64, screenPixelAsRealMeterFactor: f64);
 }
 
 graphics_object_factory_interface = interface +c +j +o {

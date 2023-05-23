@@ -31,6 +31,7 @@ final class Polygon2d: BaseGraphicsObject {
                          context: RenderingContext,
                          renderPass: MCRenderPassConfig,
                          mvpMatrix: Int64,
+                         modelViewMatrix _: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
         lock.lock()
@@ -97,6 +98,7 @@ extension Polygon2d: MCMaskingObjectInterface {
     func render(asMask context: MCRenderingContextInterface?,
                 renderPass: MCRenderPassConfig,
                 mvpMatrix: Int64,
+                modelViewMatrix: Int64,
                 screenPixelAsRealMeterFactor _: Double) {
         guard isReady(),
               let context = context as? RenderingContext,

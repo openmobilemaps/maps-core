@@ -44,11 +44,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)renderAsMask:(nullable id<MCRenderingContextInterface>)context
           renderPass:(nonnull MCRenderPassConfig *)renderPass
            mvpMatrix:(int64_t)mvpMatrix
+     modelViewMatrix:(int64_t)modelViewMatrix
 screenPixelAsRealMeterFactor:(double)screenPixelAsRealMeterFactor {
     try {
         _cppRefHandle.get()->renderAsMask(::djinni_generated::RenderingContextInterface::toCpp(context),
                                           ::djinni_generated::RenderPassConfig::toCpp(renderPass),
                                           ::djinni::I64::toCpp(mvpMatrix),
+                                          ::djinni::I64::toCpp(modelViewMatrix),
                                           ::djinni::F64::toCpp(screenPixelAsRealMeterFactor));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -69,12 +71,13 @@ public:
             return ::djinni_generated::GraphicsObjectInterface::toCpp(objcpp_result_);
         }
     }
-    void renderAsMask(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const ::RenderPassConfig & c_renderPass, int64_t c_mvpMatrix, double c_screenPixelAsRealMeterFactor) override
+    void renderAsMask(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const ::RenderPassConfig & c_renderPass, int64_t c_mvpMatrix, int64_t c_modelViewMatrix, double c_screenPixelAsRealMeterFactor) override
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() renderAsMask:(::djinni_generated::RenderingContextInterface::fromCpp(c_context))
                                                         renderPass:(::djinni_generated::RenderPassConfig::fromCpp(c_renderPass))
                                                          mvpMatrix:(::djinni::I64::fromCpp(c_mvpMatrix))
+                                                   modelViewMatrix:(::djinni::I64::fromCpp(c_modelViewMatrix))
                                       screenPixelAsRealMeterFactor:(::djinni::F64::fromCpp(c_screenPixelAsRealMeterFactor))];
         }
     }

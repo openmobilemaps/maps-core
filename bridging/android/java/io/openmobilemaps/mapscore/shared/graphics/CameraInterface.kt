@@ -10,6 +10,8 @@ abstract class CameraInterface {
 
     abstract fun getVpMatrix(): ArrayList<Float>
 
+    abstract fun getViewMatrix(): ArrayList<Float>
+
     abstract fun getScalingFactor(): Double
 
     abstract fun viewportSizeChanged()
@@ -33,6 +35,12 @@ abstract class CameraInterface {
             return native_getVpMatrix(this.nativeRef)
         }
         private external fun native_getVpMatrix(_nativeRef: Long): ArrayList<Float>
+
+        override fun getViewMatrix(): ArrayList<Float> {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getViewMatrix(this.nativeRef)
+        }
+        private external fun native_getViewMatrix(_nativeRef: Long): ArrayList<Float>
 
         override fun getScalingFactor(): Double {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

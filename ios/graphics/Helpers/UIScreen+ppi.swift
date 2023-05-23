@@ -88,7 +88,12 @@ extension UIScreen {
                 if UIScreen.main.scale == 3 {
                     return UIScreen.main.nativeScale == 3 ? 458 : 401
                 }
-                return 326
+                #if targetEnvironment(macCatalyst)
+                    return 100
+                #else
+                    return 326
+                #endif
+
         }
     }()
 

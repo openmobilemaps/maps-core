@@ -342,6 +342,9 @@ std::shared_ptr<::CameraInterface> MapCamera2d::asCameraInterface() { return sha
     return Vec2D(outVec[0] / outVec[3], outVec[1] / outVec[3]);
 }
 
+std::vector<float> MapCamera2d::getViewMatrix() {
+    return viewMatrix;
+}
 
 std::vector<float> MapCamera2d::getVpMatrix() {
     {
@@ -433,7 +436,7 @@ std::vector<float> MapCamera2d::getVpMatrix() {
 
 //        Matrix::translateM(newViewMatrix, 0, 0.0, +0.3, 0.0);
 
-//        angle += 0.1;
+        angle += 0.1;
 
 
 

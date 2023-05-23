@@ -40,6 +40,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nonnull NSArray<NSNumber *> *)getViewMatrix {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getViewMatrix();
+        return ::djinni::List<::djinni::F32>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (double)getScalingFactor {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getScalingFactor();
@@ -73,6 +80,13 @@ public:
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getVpMatrix];
+            return ::djinni::List<::djinni::F32>::toCpp(objcpp_result_);
+        }
+    }
+    std::vector<float> getViewMatrix() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getViewMatrix];
             return ::djinni::List<::djinni::F32>::toCpp(objcpp_result_);
         }
     }

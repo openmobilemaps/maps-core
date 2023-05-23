@@ -84,6 +84,7 @@ renderer_interface = interface +c +j +o {
 
 camera_interface = interface +c +j +o {
     get_vp_matrix() : list<f32>;
+    get_view_matrix(): list<f32>;
     get_scaling_factor(): f64;
     viewport_size_changed();
     project(position: coord): vec_2_d;
