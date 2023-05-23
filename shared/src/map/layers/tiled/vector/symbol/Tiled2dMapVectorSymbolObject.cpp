@@ -411,7 +411,7 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
 
     // TODO: maybe most of this can be done in setup?
     stretchInfos[infoOffset + 0] = scaleX;
-    stretchInfos[infoOffset + 5] = scaleY;
+    stretchInfos[infoOffset + 1] = scaleY;
 
 //TODO: fixme on Android
 //#ifdef __ANDROID__
@@ -422,30 +422,30 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
 
     if (stretchSpriteInfo->stretchX.size() >= 1) {
         auto [begin, end] = stretchSpriteInfo->stretchX[0];
-        stretchInfos[infoOffset + 1] = (begin / stretchSpriteInfo->width);
-        stretchInfos[infoOffset + 2] = (end / stretchSpriteInfo->width) ;
+        stretchInfos[infoOffset + 2] = (begin / stretchSpriteInfo->width);
+        stretchInfos[infoOffset + 3] = (end / stretchSpriteInfo->width) ;
 
         if (stretchSpriteInfo->stretchX.size() >= 2) {
             auto [begin1, end1] = stretchSpriteInfo->stretchX[1];
-            stretchInfos[infoOffset + 3] = (begin1 / stretchSpriteInfo->width);
-            stretchInfos[infoOffset + 4] = (end1 / stretchSpriteInfo->width);
+            stretchInfos[infoOffset + 4] = (begin1 / stretchSpriteInfo->width);
+            stretchInfos[infoOffset + 5] = (end1 / stretchSpriteInfo->width);
         } else {
-            stretchInfos[infoOffset + 3] = stretchInfos[infoOffset + 2];
-            stretchInfos[infoOffset + 4] = stretchInfos[infoOffset + 2];
+            stretchInfos[infoOffset + 4] = stretchInfos[infoOffset + 3];
+            stretchInfos[infoOffset + 5] = stretchInfos[infoOffset + 3];
         }
 
-        const float sumStretchedX = (stretchInfos[infoOffset + 2] - stretchInfos[infoOffset + 1]) + (stretchInfos[infoOffset + 4] - stretchInfos[infoOffset + 3]);
+        const float sumStretchedX = (stretchInfos[infoOffset + 3] - stretchInfos[infoOffset + 2]) + (stretchInfos[infoOffset + 5] - stretchInfos[infoOffset + 4]);
         const float sumUnstretchedX = 1.0f - sumStretchedX;
         const float scaleStretchX = (scaleX - sumUnstretchedX) / sumStretchedX;
 
-        const float sX0 = stretchInfos[infoOffset + 1] / scaleX;
-        const float eX0 = sX0 + scaleStretchX / scaleX * (stretchInfos[infoOffset + 2] - stretchInfos[infoOffset + 1]);
-        const float sX1 = eX0 + (stretchInfos[infoOffset + 3] - stretchInfos[infoOffset + 2]) / scaleX;
-        const float eX1 = sX1 + scaleStretchX / scaleX * (stretchInfos[infoOffset + 4] - stretchInfos[infoOffset + 3]);
-        stretchInfos[infoOffset + 1] = sX0;
-        stretchInfos[infoOffset + 2] = eX0;
-        stretchInfos[infoOffset + 3] = sX1;
-        stretchInfos[infoOffset + 4] = eX1;
+        const float sX0 = stretchInfos[infoOffset + 2] / scaleX;
+        const float eX0 = sX0 + scaleStretchX / scaleX * (stretchInfos[infoOffset + 3] - stretchInfos[infoOffset + 2]);
+        const float sX1 = eX0 + (stretchInfos[infoOffset + 4] - stretchInfos[infoOffset + 3]) / scaleX;
+        const float eX1 = sX1 + scaleStretchX / scaleX * (stretchInfos[infoOffset + 5] - stretchInfos[infoOffset + 4]);
+        stretchInfos[infoOffset + 2] = sX0;
+        stretchInfos[infoOffset + 3] = eX0;
+        stretchInfos[infoOffset + 4] = sX1;
+        stretchInfos[infoOffset + 5] = eX1;
     }
 
     if (stretchSpriteInfo->stretchY.size() >= 1) {

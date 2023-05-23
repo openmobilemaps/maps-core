@@ -198,9 +198,9 @@ void Quad2dStretchedInstancedOpenGl::renderAsMask(const std::shared_ptr<::Render
 
 void Quad2dStretchedInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                           int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
-    if (!ready || (usesTextureCoords && !textureCoordsReady) || instanceCount == 0)
+    if (!ready || (usesTextureCoords && !textureCoordsReady) || instanceCount == 0 || buffersNotReady) {
         return;
-    OpenGlHelper::checkGlError("UBCM: Check pre render call");
+    }
 
     glUseProgram(programHandle);
 
@@ -223,35 +223,34 @@ void Quad2dStretchedInstancedOpenGl::render(const std::shared_ptr<::RenderingCon
         auto textureFactorHandle = glGetUniformLocation(programHandle, "textureFactor");
         glUniform2f(textureFactorHandle, factorWidth, factorHeight);
     }
-    OpenGlHelper::checkGlError("UBCM: Check pre attributes");
 
     glBindBuffer(GL_ARRAY_BUFFER, positionsBuffer);
-    glVertexAttribPointer(instPositionsHandle, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+    glVertexAttribPointer(instPositionsHandle, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(instPositionsHandle);
     glVertexAttribDivisor(instPositionsHandle, 1);
 
     glBindBuffer(GL_ARRAY_BUFFER, textureCoordinatesListBuffer);
-    glVertexAttribPointer(instTextureCoordinatesHandle, 4, GL_FLOAT, GL_FALSE, 0, NULL);
+    glVertexAttribPointer(instTextureCoordinatesHandle, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(instTextureCoordinatesHandle);
     glVertexAttribDivisor(instTextureCoordinatesHandle, 1);
 
     glBindBuffer(GL_ARRAY_BUFFER, scalesBuffer);
-    glVertexAttribPointer(instScalesHandle, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+    glVertexAttribPointer(instScalesHandle, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(instScalesHandle);
     glVertexAttribDivisor(instScalesHandle, 1);
 
     glBindBuffer(GL_ARRAY_BUFFER, rotationsBuffer);
-    glVertexAttribPointer(instRotationsHandle, 1, GL_FLOAT, GL_FALSE, 0, NULL);
+    glVertexAttribPointer(instRotationsHandle, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(instRotationsHandle);
     glVertexAttribDivisor(instRotationsHandle, 1);
 
     glBindBuffer(GL_ARRAY_BUFFER, alphasBuffer);
-    glVertexAttribPointer(instAlphasHandle, 1, GL_FLOAT, GL_FALSE, 0, NULL);
+    glVertexAttribPointer(instAlphasHandle, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(instAlphasHandle);
     glVertexAttribDivisor(instAlphasHandle, 1);
 
     glBindBuffer(GL_ARRAY_BUFFER, stretchInfoBuffer);
-    glVertexAttribPointer(instStretchScalesHandle, 2, GL_FLOAT, GL_FALSE, 10 * sizeof(GLfloat), NULL);
+    glVertexAttribPointer(instStretchScalesHandle, 2, GL_FLOAT, GL_FALSE, 10 * sizeof(GLfloat), nullptr);
     glEnableVertexAttribArray(instStretchScalesHandle);
     glVertexAttribDivisor(instStretchScalesHandle, 1);
     glVertexAttribPointer(instStretchXsHandle, 4, GL_FLOAT, GL_FALSE, 10 * sizeof(GLfloat), (float*) (2 * sizeof(GLfloat)));
@@ -263,7 +262,6 @@ void Quad2dStretchedInstancedOpenGl::render(const std::shared_ptr<::RenderingCon
 
 
     shaderProgram->preRender(context);
-    OpenGlHelper::checkGlError("UBCM: Check post-pre-shader");
 
     // enable vPosition attribs
     glEnableVertexAttribArray(positionHandle);
@@ -281,11 +279,8 @@ void Quad2dStretchedInstancedOpenGl::render(const std::shared_ptr<::RenderingCon
 
     // Draw the triangles
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-    OpenGlHelper::checkGlError("UBCM: Check prerender");
-    LogDebug <<= "UBCM: render stretched instances: " + std::to_string(instanceCount);
     glDrawElementsInstanced(GL_TRIANGLES,6, GL_UNSIGNED_BYTE, nullptr, instanceCount);
     std::stringstream ss;
-    ss << "UBCM: Check postrender " << this;
     OpenGlHelper::checkGlError(ss.str());
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -299,7 +294,6 @@ void Quad2dStretchedInstancedOpenGl::render(const std::shared_ptr<::RenderingCon
     glVertexAttribDivisor(instStretchXsHandle, 0);
     glVertexAttribDivisor(instStretchYsHandle, 0);
 
-    OpenGlHelper::checkGlError("UBCM: Check post divisor");
 
 
     // Disable vertex array
@@ -316,11 +310,9 @@ void Quad2dStretchedInstancedOpenGl::render(const std::shared_ptr<::RenderingCon
     glDisableVertexAttribArray(instStretchXsHandle);
     glDisableVertexAttribArray(instStretchYsHandle);
 
-    OpenGlHelper::checkGlError("UBCM: Check post disable");
 
     glDisable(GL_BLEND);
 
-    OpenGlHelper::checkGlError("UBCM: Check post-teardown");
 }
 
 void Quad2dStretchedInstancedOpenGl::prepareTextureDraw(std::shared_ptr<OpenGlContext> &openGLContext, int programHandle) {
@@ -344,54 +336,55 @@ void Quad2dStretchedInstancedOpenGl::setInstanceCount(int count) {
 }
 
 void Quad2dStretchedInstancedOpenGl::setPositions(const SharedBytes &positions) {
-    OpenGlHelper::checkGlError("UBCM: Check before BindBuffer - positions");
-    writeToBuffer(positions, positionsBuffer);
-    LogDebug <<= "UBCM: write positions to buffer: " + std::to_string(positions.elementCount) + " elements (" + std::to_string(positions.bytesPerElement) + " * " + std::to_string(positions.elementCount) + ")";
-    OpenGlHelper::checkGlError("UBCM: Check after BindBuffer - positions");
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (writeToBuffer(positions, positionsBuffer)) {
+        buffersNotReady &= ~(1);
+    }
 }
 
 void Quad2dStretchedInstancedOpenGl::setRotations(const SharedBytes &rotations) {
-    OpenGlHelper::checkGlError("UBCM: Check before BindBuffer - rotations");
-    writeToBuffer(rotations, rotationsBuffer);
-    LogDebug <<= "UBCM: write rotations to buffer: " + std::to_string(rotations.elementCount) + " elements (" + std::to_string(rotations.bytesPerElement) + " * " + std::to_string(rotations.elementCount) + ")";
-    OpenGlHelper::checkGlError("UBCM: Check after BindBuffer - rotations");
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (writeToBuffer(rotations, rotationsBuffer)) {
+        buffersNotReady &= ~(1 << 1);
+    }
 }
 
 void Quad2dStretchedInstancedOpenGl::setScales(const SharedBytes &scales) {
-    OpenGlHelper::checkGlError("UBCM: Check before BindBuffer - scales");
-    writeToBuffer(scales, scalesBuffer);
-    LogDebug <<= "UBCM: write scales to buffer: " + std::to_string(scales.elementCount) + " elements (" + std::to_string(scales.bytesPerElement) + " * " + std::to_string(scales.elementCount) + ")";
-    OpenGlHelper::checkGlError("UBCM: Check after BindBuffer - scales");
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (writeToBuffer(scales, scalesBuffer)) {
+        buffersNotReady &= ~(1 << 2);
+    }
  }
 
 void Quad2dStretchedInstancedOpenGl::setTextureCoordinates(const SharedBytes &textureCoordinates) {
-    OpenGlHelper::checkGlError("UBCM: Check before BindBuffer - textureCoordinates");
-    writeToBuffer(textureCoordinates, textureCoordinatesListBuffer);
-    LogDebug <<= "UBCM: write textureCoordinates to buffer: " + std::to_string(textureCoordinates.elementCount) + " elements (" + std::to_string(textureCoordinates.bytesPerElement) + " * " + std::to_string(textureCoordinates.elementCount) + ")";
-    OpenGlHelper::checkGlError("UBCM: Check after BindBuffer - textureCoordinates");
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (writeToBuffer(textureCoordinates, textureCoordinatesListBuffer)) {
+        buffersNotReady &= ~(1 << 3);
+    }
 }
 
 void Quad2dStretchedInstancedOpenGl::setAlphas(const SharedBytes &values) {
-    OpenGlHelper::checkGlError("UBCM: Check before BindBuffer - alphas");
-    writeToBuffer(values, alphasBuffer);
-    LogDebug <<= "UBCM: write alphas to buffer: " + std::to_string(values.elementCount) + " elements (" + std::to_string(values.bytesPerElement) + " * " + std::to_string(values.elementCount) + ")";
-    OpenGlHelper::checkGlError("UBCM: Check after BindBuffer - alphas");
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (writeToBuffer(values, alphasBuffer)) {
+        buffersNotReady &= ~(1 << 4);
+    }
 }
 
 void Quad2dStretchedInstancedOpenGl::setStretchInfos(const ::SharedBytes &values) {
-    OpenGlHelper::checkGlError("UBCM: Check before BindBuffer - stretchInfos");
-    writeToBuffer(values, stretchInfoBuffer);
-    LogDebug <<= "UBCM: write stretchInfos to buffer: " + std::to_string(values.elementCount) + " elements (" + std::to_string(values.bytesPerElement) + " * " + std::to_string(values.elementCount) + ")";
-    OpenGlHelper::checkGlError("UBCM: Check after BindBuffer - stretchInfos");
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (writeToBuffer(values, stretchInfoBuffer)) {
+        buffersNotReady &= ~(1 << 5);
+    }
 }
 
-void Quad2dStretchedInstancedOpenGl::writeToBuffer(const ::SharedBytes &data, GLuint target) {
+bool Quad2dStretchedInstancedOpenGl::writeToBuffer(const ::SharedBytes &data, GLuint target) {
     if(!ready){
-        LogError <<= "🥴 Writing to buffer before it was created.";
-        return;
+        LogWarning <<= "🥴 Writing to buffer before it was created.";
+        return false;
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, target);
     glBufferData(GL_ARRAY_BUFFER, data.elementCount * data.bytesPerElement, (void *) data.address, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    return true;
 }

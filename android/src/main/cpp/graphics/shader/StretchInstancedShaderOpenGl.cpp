@@ -51,8 +51,8 @@ std::string StretchInstancedShaderOpenGl::getVertexShader() {
                                       in vec4 aStretchX;
                                       in vec4 aStretchY;
 
-                                      out vec2 v_texcoord;
-                                      out vec4 v_texcoordInstance;
+                                      out vec2 v_texCoord;
+                                      out vec4 v_texCoordInstance;
                                       out float v_alpha;
                                       out vec2 v_stretchScales;
                                       out vec4 v_stretchX;
@@ -60,7 +60,6 @@ std::string StretchInstancedShaderOpenGl::getVertexShader() {
 
                                       void main() {
                                           float angle = aRotation * 3.14159265 / 180.0;
-
                                           mat4 model_matrix = mat4(
                                                   vec4(cos(angle) * aScale.x, -sin(angle) * aScale.x, 0, 0),
                                                   vec4(sin(angle) * aScale.y, cos(angle) * aScale.y, 0, 0),
@@ -71,8 +70,8 @@ std::string StretchInstancedShaderOpenGl::getVertexShader() {
                                           mat4 matrix = uMVPMatrix * model_matrix;
 
                                           gl_Position = matrix * vPosition;
-                                          v_texcoordInstance = aTexCoordinate;
-                                          v_texcoord = texCoordinate;
+                                          v_texCoordInstance = aTexCoordinate;
+                                          v_texCoord = texCoordinate;
                                           v_alpha = aAlpha;
                                           v_stretchScales = aStretchScales;
                                           v_stretchX = aStretchX;
@@ -89,8 +88,8 @@ std::string StretchInstancedShaderOpenGl::getFragmentShader() {
 
                                       uniform vec2 textureFactor;
 
-                                      in vec2 v_texcoord;
-                                      in vec4 v_texcoordInstance;
+                                      in vec2 v_texCoord;
+                                      in vec4 v_texCoordInstance;
                                       in float v_alpha;
                                       in vec2 v_stretchScales; // scale x, y
                                       in vec4 v_stretchX; // x0 begin, x0 end, x1 begin, x1 end
@@ -99,8 +98,8 @@ std::string StretchInstancedShaderOpenGl::getFragmentShader() {
                                       out vec4 fragmentColor;
 
                                       void main() {
-                                          vec2 texCoordNorm = (v_texcoordInstance.xy + v_texcoordInstance.zw * vec2(v_texcoord.x, (1.0 - v_texcoord.y))) * textureFactor;
-                                          //vec2 texCoordNorm = v_texCoord;
+                                          vec4 adjTexCoordIns = vec4(v_texCoordInstance.x, v_texCoordInstance.y + v_texCoordInstance.w, v_texCoordInstance.z, -v_texCoordInstance.w) * textureFactor.xyxy;
+                                          vec2 texCoordNorm = v_texCoord;
 
                                           // X
                                           if (v_stretchX.x != v_stretchX.y) {
@@ -129,11 +128,10 @@ std::string StretchInstancedShaderOpenGl::getFragmentShader() {
                                           }
 
                                           // remap final normalized uv to sprite atlas coordinates
-
-                                          texCoordNorm = v_texcoordInstance.xy + v_texcoordInstance.zw * vec2(texCoordNorm.x, 1.0 - texCoordNorm.y);
+                                          texCoordNorm = adjTexCoordIns.xy + adjTexCoordIns.zw * texCoordNorm;
                                           vec4 color = texture(textureSampler, texCoordNorm);
                                           float a = color.a * v_alpha;
-                                          fragmentColor = vec4(1.0, 0.0, 0.0, 1.0) + 0.0 * vec4(color.rgb * a, a);
+                                          fragmentColor = vec4(v_texCoord, 0.0, 1.0) * 0.25 + 0.75 * vec4(color.rgb * a, a);
                                       }
     );
 }

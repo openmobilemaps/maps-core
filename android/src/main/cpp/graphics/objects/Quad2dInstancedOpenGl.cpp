@@ -224,7 +224,6 @@ void Quad2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
     glVertexAttribPointer(instPositionsHandle, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(instPositionsHandle);
     glVertexAttribDivisor(instPositionsHandle, 1);
-
     glBindBuffer(GL_ARRAY_BUFFER, rotationsBuffer);
     glVertexAttribPointer(instRotationsHandle, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(instRotationsHandle);

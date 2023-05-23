@@ -216,7 +216,7 @@ public:
 
                     layers.push_back(layerDesc);
 
-            } else if (val["type"] == "symbol" && val["id"] == "landcover_pt") {
+            } else if (val["type"] == "symbol" && (val["id"] == "poi_motorway" || val["id"] == "road_number")) {
 
                     SymbolVectorStyle style(parser.parseValue(val["layout"]["text-size"]),
                                             parser.parseValue(val["paint"]["text-color"]),

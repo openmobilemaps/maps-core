@@ -68,12 +68,12 @@ stretchInstancedFragmentShader(StretchedInstancedVertexOut in [[stage_in]],
     }
 
     const int infoOffset = in.stretchInfoIndex * 10;
-    const float scaleX = stretchInfos[infoOffset + 0];
-    const float stretchX0Begin = stretchInfos[infoOffset + 1];
-    const float stretchX0End = stretchInfos[infoOffset + 2];
-    const float stretchX1Begin = stretchInfos[infoOffset + 3];
-    const float stretchX1End = stretchInfos[infoOffset + 4];
-    const float scaleY = stretchInfos[infoOffset + 5];
+const float scaleX = stretchInfos[infoOffset + 0];
+const float scaleY = stretchInfos[infoOffset + 1];
+const float stretchX0Begin = stretchInfos[infoOffset + 2];
+const float stretchX0End = stretchInfos[infoOffset + 3];
+const float stretchX1Begin = stretchInfos[infoOffset + 4];
+const float stretchX1End = stretchInfos[infoOffset + 5];
     const float stretchY0Begin = stretchInfos[infoOffset + 6];
     const float stretchY0End = stretchInfos[infoOffset + 7];
     const float stretchY1Begin = stretchInfos[infoOffset + 8];
