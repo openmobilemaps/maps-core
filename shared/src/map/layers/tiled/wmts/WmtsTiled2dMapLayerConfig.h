@@ -17,7 +17,7 @@
 
 class WmtsTiled2dMapLayerConfig : public Tiled2dMapLayerConfig {
   public:
-    WmtsTiled2dMapLayerConfig(const WmtsLayerDescription &description, std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfo,
+    WmtsTiled2dMapLayerConfig(const WmtsLayerDescription &description, const std::vector<Tiled2dMapZoomLevelInfo> &zoomLevelInfo,
                               const Tiled2dMapZoomInfo &zoomInfo, const std::string &coordinateSystemIdentifier,
                               const std::string &matrixSetIdentifier);
 

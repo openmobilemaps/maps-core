@@ -49,7 +49,7 @@ void Text2dOpenGl::setTextsShared(const SharedBytes &vertices, const SharedBytes
     dataReady = true;
 }
 
-void Text2dOpenGl::setTexts(const std::vector<TextDescription> &texts) {
+void Text2dOpenGl::setTextsLegacy(const std::vector<TextDescription> &texts) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     ready = false;
     dataReady = false;

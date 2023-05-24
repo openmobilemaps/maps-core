@@ -46,7 +46,11 @@ void Tiled2dMapVectorRasterTile::update() {
 
     const EvaluationContext evalContext(zoomIdentifier, FeatureContext());
     const auto rasterStyle = std::static_pointer_cast<RasterVectorLayerDescription>(description)->style.getRasterStyle(evalContext);
+    if(rasterStyle == lastStyle) {
+        return;
+    }
     tileObject->setStyle(rasterStyle);
+    lastStyle = rasterStyle;
 }
 
 void Tiled2dMapVectorRasterTile::clear() {

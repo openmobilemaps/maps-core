@@ -14,5 +14,7 @@ public:
 
     virtual void setStyles(const ::SharedBytes & styles) = 0;
 
+    virtual void setDashingScaleFactor(float factor) = 0;
+
     virtual /*not-null*/ std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() = 0;
 };

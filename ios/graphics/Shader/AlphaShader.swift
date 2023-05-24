@@ -35,10 +35,10 @@ class AlphaShader: BaseShader {
         }
     }
 
-    override func preRender(encoder: MTLRenderCommandEncoder, context _: RenderingContext) {
+    override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
         guard let pipeline = pipeline else { return }
 
-        encoder.setRenderPipelineState(pipeline)
+        context.setRenderPipelineStateIfNeeded(pipeline)
         encoder.setFragmentBuffer(buffer, offset: 0, index: 1)
     }
 }

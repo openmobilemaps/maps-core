@@ -56,7 +56,7 @@ public:
     }
 
     static double getZoomIdentifier(double zoom) {
-        return log(Tiled2dMapVectorRasterSubLayerConfig::baseValueZoom / zoom) / log(2);
+        return std::round(log(Tiled2dMapVectorRasterSubLayerConfig::baseValueZoom / zoom) / log(2) * 100) / 100;
     }
 
     std::string getLayerName() override {
@@ -65,6 +65,11 @@ public:
 
     std::optional<Tiled2dMapVectorSettings> getVectorSettings() override {
         return std::nullopt;
+    }
+
+    static constexpr double getZoomFactorAtIdentifier(double zoomIdentifier) {
+        double factor = pow(2, zoomIdentifier);
+        return Tiled2dMapVectorRasterSubLayerConfig::baseValueZoom / factor;
     }
 
 private:

@@ -35,6 +35,13 @@
 #include "Tiled2dMapVectorLineTile.h"
 #include "Tiled2dMapVectorRasterTile.h"
 #include "SpriteData.h"
+#include "Tiled2dMapVectorBackgroundSubLayer.h"
+#include "Tiled2dMapVectorSourceTileDataManager.h"
+#include "Tiled2dMapVectorSourceRasterTileDataManager.h"
+#include "Tiled2dMapVectorSourceVectorTileDataManager.h"
+#include "Tiled2dMapVectorSourceSymbolDataManager.h"
+#include "Tiled2dMapVectorSourceSymbolCollisionManager.h"
+#include "Tiled2dMapVectorInteractionManager.h"
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::string &remoteStyleJsonUrl,
@@ -193,7 +200,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     std::vector<WeakActor<Tiled2dMapSourceInterface>> sourceInterfaces;
     std::vector<Actor<Tiled2dMapRasterSource>> rasterSources;
 
-    std::unordered_map<std::string, Actor<Tiled2dMapVectorSource>> vectorTileSource;
+    std::unordered_map<std::string, Actor<Tiled2dMapVectorSource>> vectorTileSources;
 
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceTileDataManager>> sourceTileManagers;
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceSymbolDataManager>> symbolSourceDataManagers;
@@ -257,7 +264,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                           layers,
                                                           source,
                                                           mapInterface->getCamera()->getScreenDensityPpi());
-        vectorTileSource[source] = vectorSource;
+        vectorTileSources[source] = vectorSource;
         sourceInterfaces.push_back(vectorSource.weakActor<Tiled2dMapSourceInterface>());
         auto sourceDataManagerMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
         auto sourceManagerActor = Actor<Tiled2dMapVectorSourceVectorTileDataManager>(sourceDataManagerMailbox,
@@ -293,7 +300,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     interactionManager = std::make_unique<Tiled2dMapVectorInteractionManager>(interactionDataManagers, mapDescription);
 
     this->rasterTileSources = rasterSources;
-    this->vectorTileSources = vectorTileSource;
+    this->vectorTileSources = vectorTileSources;
     this->symbolSourceDataManagers = symbolSourceDataManagers;
     this->sourceDataManagers = sourceTileManagers;
 
@@ -345,48 +352,15 @@ std::shared_ptr<::LayerInterface> Tiled2dMapVectorLayer::asLayerInterface() {
 }
 
 void Tiled2dMapVectorLayer::update() {
-    // TODO: update tiles
-
-
-
-//    bool needsCollisionDetection = false;
-//    for (auto it = sublayers.rbegin(); it != sublayers.rend(); ++it) {
-//        if (auto symbolLayer = std::dynamic_pointer_cast<Tiled2dMapVectorSymbolSubLayer>(*it)) {
-//            if (symbolLayer->isDirty()) {
-//                needsCollisionDetection = true;
-//                break;
-//            }
-//        }
-//    }
-//    if (needsCollisionDetection) {
-//        std::vector<OBB2D> placements;
-//        for (auto it = sublayers.rbegin(); it != sublayers.rend(); ++it)
-//        {
-//            if (auto symbolLayer = std::dynamic_pointer_cast<Tiled2dMapVectorSymbolSubLayer>(*it)) {
-//                symbolLayer->collisionDetection(placements);
-//            }
-//        }
-//    }
-//}
-
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-//        sourceDataManager.syncAccess([](auto manager) {
-//            manager->update();
-//        });
         sourceDataManager.message(&Tiled2dMapVectorSourceTileDataManager::update);
     }
-//
-//    for (const auto  &[source, sourceDataManager] : symbolSourceDataManagers) {
-//        sourceDataManager.message(&Tiled2dMapVectorSourceSymbolDataManager::update);
-//    }
 
     if (collisionManager) {
-        collisionManager.syncAccess([](auto manager) {
-            manager->collisionDetection();
+        collisionManager.syncAccess([](const auto &manager) {
             manager->update();
         });
-/*        collisionManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceSymbolCollisionManager::collisionDetection);
-        collisionManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceSymbolCollisionManager::update);*/
+        collisionManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceSymbolCollisionManager::collisionDetection);
     }
 }
 
@@ -395,33 +369,56 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::build
     return currentRenderPasses;
 }
 
-void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, bool isSymbol, const std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> &renderPasses) {
+void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, bool isSymbol, const std::vector<std::shared_ptr<TileRenderDescription>> &renderDescription) {
     std::vector<std::shared_ptr<RenderPassInterface>> newPasses;
 
     if (isSymbol) {
-        sourceRenderPassesMap[source].symbolRenderPasses = renderPasses;
+        sourceRenderDescriptionMap[source].symbolRenderDescriptions = renderDescription;
     } else {
-        sourceRenderPassesMap[source].renderPasses = renderPasses;
+        sourceRenderDescriptionMap[source].renderDescriptions = renderDescription;
     }
-
 
     if (backgroundLayer) {
         auto backgroundLayerPasses = backgroundLayer->buildRenderPasses();
         newPasses.insert(newPasses.end(), backgroundLayerPasses.begin(), backgroundLayerPasses.end());
     }
 
-    std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> orderedPasses;
-    for (const auto &[source, indexPasses] : sourceRenderPassesMap) {
-        orderedPasses.insert(orderedPasses.end(), indexPasses.renderPasses.begin(), indexPasses.renderPasses.end());
-        orderedPasses.insert(orderedPasses.end(), indexPasses.symbolRenderPasses.begin(), indexPasses.symbolRenderPasses.end());
+    std::vector<std::shared_ptr<TileRenderDescription>> orderedRenderDescriptions;
+    for (const auto &[source, indexPasses] : sourceRenderDescriptionMap) {
+        orderedRenderDescriptions.insert(orderedRenderDescriptions.end(), indexPasses.renderDescriptions.begin(), indexPasses.renderDescriptions.end());
+        orderedRenderDescriptions.insert(orderedRenderDescriptions.end(), indexPasses.symbolRenderDescriptions.begin(), indexPasses.symbolRenderDescriptions.end());
     }
 
-    std::sort(orderedPasses.begin(), orderedPasses.end(), [](const auto &lhs, const auto &rhs) {
-        return std::get<0>(lhs) < std::get<0>(rhs);
+    std::sort(orderedRenderDescriptions.begin(), orderedRenderDescriptions.end(), [](const auto &lhs, const auto &rhs) {
+        return lhs->layerIndex < rhs->layerIndex;
     });
 
-    for (const auto &[index, pass] : orderedPasses) {
-        newPasses.push_back(pass);
+    std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;
+    std::shared_ptr<MaskingObjectInterface> lastMask = nullptr;
+
+    for (const auto &description : orderedRenderDescriptions) {
+        if (description->maskingObject != lastMask && !renderObjects.empty()) {
+            newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(0), renderObjects, lastMask));
+            renderObjects.clear();
+            lastMask = nullptr;
+        }
+
+        if (description->isModifyingMask) {
+            if (!renderObjects.empty()) {
+                newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(0), renderObjects, lastMask));
+            }
+            renderObjects.clear();
+            lastMask = nullptr;
+            newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(0), description->renderObjects, description->maskingObject));
+        } else {
+            renderObjects.insert(renderObjects.end(), description->renderObjects.begin(), description->renderObjects.end());
+            lastMask = description->maskingObject;
+        }
+    }
+    if (!renderObjects.empty()) {
+        newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(0), renderObjects, lastMask));
+        renderObjects.clear();
+        lastMask = nullptr;
     }
 
     {
@@ -619,6 +616,10 @@ void Tiled2dMapVectorLayer::didLoadSpriteData(std::shared_ptr<SpriteData> sprite
     for (const auto &[source, manager] : symbolSourceDataManagers) {
         manager.message(&Tiled2dMapVectorSourceSymbolDataManager::setSprites, spriteData, spriteTexture);
     }
+
+    for (const auto &[source, manager] : sourceDataManagers) {
+        manager.message(&Tiled2dMapVectorSourceTileDataManager::setSprites, spriteData, spriteTexture);
+    }
 }
 
 void Tiled2dMapVectorLayer::setScissorRect(const std::optional<::RectI> &scissorRect) {
@@ -684,7 +685,8 @@ void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDe
     bool needsTileReplace = legacyDescription->source != layerDescription->source
                             || legacyDescription->sourceId != layerDescription->sourceId
                             || legacyDescription->minZoom != layerDescription->minZoom
-                            || legacyDescription->maxZoom != layerDescription->maxZoom;
+                            || legacyDescription->maxZoom != layerDescription->maxZoom
+                            || legacyDescription->filter != layerDescription->filter;
 
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
         if (legacySource == source || newSource == source) {
@@ -720,10 +722,13 @@ std::optional<FeatureContext> Tiled2dMapVectorLayer::getFeatureContext(int64_t i
 
 std::shared_ptr<VectorLayerDescription> Tiled2dMapVectorLayer::getLayerDescriptionWithIdentifier(std::string identifier) {
     if (mapDescription) {
-        for (auto const &layer: mapDescription->layers) {
-            if (layer->identifier == identifier) {
-                return layer->clone();
-            }
+        auto it = std::find_if(mapDescription->layers.begin(), mapDescription->layers.end(),
+            [&identifier](const auto& layer) {
+                return layer->identifier == identifier;
+            });
+
+        if (it != mapDescription->layers.end()) {
+            return (*it)->clone();
         }
     }
     return nullptr;

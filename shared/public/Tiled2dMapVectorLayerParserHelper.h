@@ -156,7 +156,7 @@ public:
                     renderPassIndex = val["metadata"].value("render-pass-index", 0);
                 }
                 if (!val["metadata"]["interactable"].is_null()) {
-                    interactable = parser.parseValue(val["metadata"]["render-pass-index"]);
+                    interactable = parser.parseValue(val["metadata"]["interactable"]);
                 }
             }
 
@@ -216,7 +216,7 @@ public:
 
                     layers.push_back(layerDesc);
 
-                } else if (val["type"] == "symbol") {
+            } else if (val["type"] == "symbol") {
 
                     SymbolVectorStyle style(parser.parseValue(val["layout"]["text-size"]),
                                             parser.parseValue(val["paint"]["text-color"]),
@@ -247,6 +247,7 @@ public:
                                             parser.parseValue(val["layout"]["icon-text-fit"]),
                                             parser.parseValue(val["layout"]["icon-text-fit-padding"]),
                                             parser.parseValue(val["paint"]["icon-opacity"]),
+                                            parser.parseValue(val["layout"]["icon-rotate"]),
                                             parser.parseValue(val["layout"]["text-line-height"]),
                                             parser.parseValue(val["layout"]["text-letter-spacing"]),
                                             parser.parseValue(val["layout"]["text-max-width"]),
@@ -265,12 +266,13 @@ public:
                                                                                     renderPassIndex,
                                                                                     interactable);
                     layers.push_back(layerDesc);
-                } else if (val["type"] == "fill" && val["paint"]["fill-pattern"].is_null()) {
+                } else if (val["type"] == "fill") {
 
                     std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
 
                     PolygonVectorStyle style(parser.parseValue(val["paint"]["fill-color"]),
-                                             parser.parseValue(val["paint"]["fill-opacity"]));
+                                             parser.parseValue(val["paint"]["fill-opacity"]),
+                                             parser.parseValue(val["paint"]["fill-pattern"]));
 
                     auto layerDesc = std::make_shared<PolygonVectorLayerDescription>(val["id"],
                                                                                      val["source"],

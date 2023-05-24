@@ -5,6 +5,7 @@
 #import "MCLineGroupShaderInterface.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
+#import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCShaderProgramInterface+Private.h"
 #import "MCSharedBytes+Private.h"
@@ -38,6 +39,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setDashingScaleFactor:(float)factor {
+    try {
+        _cppRefHandle.get()->setDashingScaleFactor(::djinni::F32::toCpp(factor));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nullable id<MCShaderProgramInterface>)asShaderProgramInterface {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->asShaderProgramInterface();
@@ -58,6 +65,12 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() setStyles:(::djinni_generated::SharedBytes::fromCpp(c_styles))];
+        }
+    }
+    void setDashingScaleFactor(float c_factor) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setDashingScaleFactor:(::djinni::F32::fromCpp(c_factor))];
         }
     }
     /*not-null*/ std::shared_ptr<::ShaderProgramInterface> asShaderProgramInterface() override

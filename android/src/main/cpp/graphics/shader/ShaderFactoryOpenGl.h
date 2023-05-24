@@ -14,23 +14,28 @@
 
 class ShaderFactoryOpenGl : public ShaderFactoryInterface {
 
-    virtual std::shared_ptr<AlphaShaderInterface> createAlphaShader() override;
-
-    virtual std::shared_ptr<LineGroupShaderInterface> createLineGroupShader() override;
-
-    virtual std::shared_ptr<ColorShaderInterface> createColorShader() override;
-
-    virtual std::shared_ptr<ColorCircleShaderInterface> createColorCircleShader() override;
-
-    virtual std::shared_ptr<PolygonGroupShaderInterface> createPolygonGroupShader() override;
-
-    virtual std::shared_ptr<TextShaderInterface> createTextShader() override;
-
-    virtual std::shared_ptr<AlphaInstancedShaderInterface> createAlphaInstancedShader() override;
-
 public:
+    std::shared_ptr<AlphaShaderInterface> createAlphaShader() override;
+
+    std::shared_ptr<AlphaInstancedShaderInterface> createAlphaInstancedShader() override;
+
+    std::shared_ptr<LineGroupShaderInterface> createLineGroupShader() override;
+
+    std::shared_ptr<ColorShaderInterface> createColorShader() override;
+
+    std::shared_ptr<ColorCircleShaderInterface> createColorCircleShader() override;
+
+    std::shared_ptr<PolygonGroupShaderInterface> createPolygonGroupShader() override;
+
+    std::shared_ptr<PolygonPatternGroupShaderInterface> createPolygonPatternGroupShader() override;
+
+    std::shared_ptr<TextShaderInterface> createTextShader() override;
+
+    std::shared_ptr<TextInstancedShaderInterface> createTextInstancedShader() override;
+
+    std::shared_ptr<RasterShaderInterface> createRasterShader() override;
+
     std::shared_ptr<StretchShaderInterface> createStretchShader() override;
 
-public:
-    std::shared_ptr<RasterShaderInterface> createRasterShader() override;
+    std::shared_ptr<StretchInstancedShaderInterface> createStretchInstancedShader() override;
 };

@@ -43,4 +43,6 @@ public:
 private:
     std::shared_ptr<Textured2dLayerObject> tileObject;
     std::shared_ptr<TextureHolderInterface> tileData;
+
+    std::optional<RasterShaderStyle> lastStyle;
 };

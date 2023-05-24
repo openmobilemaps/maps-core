@@ -58,7 +58,7 @@ final class PolygonGroup2d: BaseGraphicsObject {
         }
 
         guard let verticesBuffer = verticesBuffer,
-              let indicesBuffer = indicesBuffer else { return }
+              let indicesBuffer = indicesBuffer, shader.polygonStyleBuffer != nil else { return }
 
         #if DEBUG
         encoder.pushDebugGroup("PolygonGroup2d")

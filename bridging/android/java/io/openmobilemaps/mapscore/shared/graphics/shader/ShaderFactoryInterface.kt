@@ -20,11 +20,17 @@ abstract class ShaderFactoryInterface {
 
     abstract fun createPolygonGroupShader(): PolygonGroupShaderInterface
 
+    abstract fun createPolygonPatternGroupShader(): PolygonPatternGroupShaderInterface
+
     abstract fun createTextShader(): TextShaderInterface
+
+    abstract fun createTextInstancedShader(): TextInstancedShaderInterface
 
     abstract fun createRasterShader(): RasterShaderInterface
 
     abstract fun createStretchShader(): StretchShaderInterface
+
+    abstract fun createStretchInstancedShader(): StretchInstancedShaderInterface
 
     private class CppProxy : ShaderFactoryInterface {
         private val nativeRef: Long
@@ -74,11 +80,23 @@ abstract class ShaderFactoryInterface {
         }
         private external fun native_createPolygonGroupShader(_nativeRef: Long): PolygonGroupShaderInterface
 
+        override fun createPolygonPatternGroupShader(): PolygonPatternGroupShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createPolygonPatternGroupShader(this.nativeRef)
+        }
+        private external fun native_createPolygonPatternGroupShader(_nativeRef: Long): PolygonPatternGroupShaderInterface
+
         override fun createTextShader(): TextShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_createTextShader(this.nativeRef)
         }
         private external fun native_createTextShader(_nativeRef: Long): TextShaderInterface
+
+        override fun createTextInstancedShader(): TextInstancedShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createTextInstancedShader(this.nativeRef)
+        }
+        private external fun native_createTextInstancedShader(_nativeRef: Long): TextInstancedShaderInterface
 
         override fun createRasterShader(): RasterShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
@@ -91,5 +109,11 @@ abstract class ShaderFactoryInterface {
             return native_createStretchShader(this.nativeRef)
         }
         private external fun native_createStretchShader(_nativeRef: Long): StretchShaderInterface
+
+        override fun createStretchInstancedShader(): StretchInstancedShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createStretchInstancedShader(this.nativeRef)
+        }
+        private external fun native_createStretchInstancedShader(_nativeRef: Long): StretchInstancedShaderInterface
     }
 }

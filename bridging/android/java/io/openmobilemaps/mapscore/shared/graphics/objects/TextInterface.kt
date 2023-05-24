@@ -8,8 +8,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class TextInterface {
 
-    abstract fun setTexts(texts: ArrayList<TextDescription>)
-
     abstract fun setTextsShared(vertices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
     abstract fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
@@ -29,12 +27,6 @@ abstract class TextInterface {
         }
 
         external fun nativeDestroy(nativeRef: Long)
-
-        override fun setTexts(texts: ArrayList<TextDescription>) {
-            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setTexts(this.nativeRef, texts)
-        }
-        private external fun native_setTexts(_nativeRef: Long, texts: ArrayList<TextDescription>)
 
         override fun setTextsShared(vertices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

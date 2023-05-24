@@ -24,6 +24,7 @@
 
 class Tiled2dMapVectorLayer;
 class Tiled2dMapVectorTile;
+class SpriteData;
 
 class Tiled2dMapVectorSourceDataManager : public ActorObject {
 public:
@@ -67,6 +68,8 @@ public:
 
     virtual void clearTouch() = 0;
 
+    virtual void setSprites(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) {}
+
 protected:
     std::weak_ptr<MapInterface> mapInterface;
     const WeakActor<Tiled2dMapVectorLayer> vectorLayer;
@@ -75,6 +78,7 @@ protected:
     std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> selectionDelegate;
 
     std::unordered_map<std::string, int32_t> layerNameIndexMap;
+    std::unordered_set<int32_t> modifyingMaskLayers;
 
     std::optional<::RectI> scissorRect = std::nullopt;
 };

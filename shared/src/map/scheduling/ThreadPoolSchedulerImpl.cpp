@@ -18,7 +18,7 @@ std::shared_ptr<SchedulerInterface> ThreadPoolScheduler::create(const std::share
 ThreadPoolSchedulerImpl::ThreadPoolSchedulerImpl(const std::shared_ptr<ThreadPoolCallbacks> &callbacks,
                                                  bool separateGraphicsQueue)
         : callbacks(callbacks), separateGraphicsQueue(separateGraphicsQueue), delayedTaskThread(&ThreadPoolSchedulerImpl::delayedTasksThread, this), nextWakeup(std::chrono::system_clock::now() + std::chrono::seconds(1)) {
-    unsigned int maxNumThreads = std::floorf(std::thread::hardware_concurrency() * 0.75f);
+    unsigned int maxNumThreads = std::thread::hardware_concurrency();
     if (maxNumThreads < 1) maxNumThreads = DEFAULT_MAX_NUM_THREADS;
     for (std::size_t i = 0u; i < maxNumThreads; ++i) {
         threads.emplace_back(makeSchedulerThread(i, TaskPriority::NORMAL));
@@ -29,6 +29,14 @@ ThreadPoolSchedulerImpl::~ThreadPoolSchedulerImpl() {
     {
         std::lock_guard<std::mutex> lock(defaultMutex);
         terminated = true;
+    }
+    {
+        std::lock_guard<std::mutex> lock(graphicsMutex);
+        graphicsQueue.clear();
+    }
+    {
+        std::lock_guard<std::mutex> lock(defaultMutex);
+        defaultQueue.clear();
     }
     defaultCv.notify_all();
     delayedTasksCv.notify_all();

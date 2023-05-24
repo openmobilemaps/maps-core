@@ -41,10 +41,15 @@ public:
     bool onClickConfirmed(const Vec2F &posScreen) override;
 
 private:
-    void addPolygons(const std::vector<std::tuple<std::vector<std::tuple<std::vector<Coord>, int>>, std::vector<uint16_t>>> &polygons);
 
-    void setupPolygons(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects,
-                       const std::vector<std::shared_ptr<GraphicsObjectInterface>> &oldPolygonObjects);
+    struct ObjectDescriptions {
+        std::vector<std::tuple<std::vector<::Coord>, int>> vertices;
+        std::vector<uint16_t> indices;
+    };
+
+    void addPolygons(const std::vector<ObjectDescriptions> &polygons);
+
+    void setupPolygons(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects);
 
 
     std::shared_ptr<PolygonGroupShaderInterface> shader;

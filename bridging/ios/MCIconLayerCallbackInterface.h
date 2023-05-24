@@ -9,4 +9,6 @@
 
 - (BOOL)onClickConfirmed:(nonnull NSArray<MCIconInfoInterface *> *)icons;
 
+- (BOOL)onLongPress:(nonnull NSArray<MCIconInfoInterface *> *)icons;
+
 @end

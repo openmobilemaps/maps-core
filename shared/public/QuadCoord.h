@@ -12,6 +12,15 @@ struct QuadCoord final {
     Coord bottomRight;
     Coord bottomLeft;
 
+    friend bool operator==(const QuadCoord& lhs, const QuadCoord& rhs);
+    friend bool operator!=(const QuadCoord& lhs, const QuadCoord& rhs);
+
+    friend bool operator<(const QuadCoord& lhs, const QuadCoord& rhs);
+    friend bool operator>(const QuadCoord& lhs, const QuadCoord& rhs);
+
+    friend bool operator<=(const QuadCoord& lhs, const QuadCoord& rhs);
+    friend bool operator>=(const QuadCoord& lhs, const QuadCoord& rhs);
+
     QuadCoord(Coord topLeft_,
               Coord topRight_,
               Coord bottomRight_,

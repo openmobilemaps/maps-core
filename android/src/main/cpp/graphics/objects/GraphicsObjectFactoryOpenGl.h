@@ -13,21 +13,29 @@
 #include "GraphicsObjectFactoryInterface.h"
 
 class GraphicsObjectFactoryOpenGl : public GraphicsObjectFactoryInterface {
+public:
+    std::shared_ptr<Quad2dInterface> createQuad(const std::shared_ptr<::ShaderProgramInterface> &shader) override;
 
-    virtual std::shared_ptr<Quad2dInterface> createQuad(const std::shared_ptr<::ShaderProgramInterface> &shader) override;
+    std::shared_ptr<Line2dInterface> createLine(const std::shared_ptr<::ShaderProgramInterface> &Shader) override;
 
-    virtual std::shared_ptr<Polygon2dInterface> createPolygon(const std::shared_ptr<::ShaderProgramInterface> &shader) override;
+    std::shared_ptr<Polygon2dInterface> createPolygon(const std::shared_ptr<::ShaderProgramInterface> &shader) override;
 
     virtual std::shared_ptr<LineGroup2dInterface> createLineGroup(const std::shared_ptr<::ShaderProgramInterface> &shader) override;
+    std::shared_ptr<LineGroup2dInterface> createLineGroup(const std::shared_ptr<::ShaderProgramInterface> &shader) override;
 
-    virtual std::shared_ptr<PolygonGroup2dInterface>
-    createPolygonGroup(const std::shared_ptr<::ShaderProgramInterface> &shader) override;
+    std::shared_ptr<PolygonGroup2dInterface> createPolygonGroup(const std::shared_ptr<::ShaderProgramInterface> &shader) override;
 
-    virtual std::shared_ptr<Quad2dInterface> createQuadMask() override;
+    std::shared_ptr<PolygonPatternGroup2dInterface> createPolygonPatternGroup(const std::shared_ptr<::ShaderProgramInterface> &shader) override;
 
-    virtual std::shared_ptr<Polygon2dInterface> createPolygonMask() override;
+    std::shared_ptr<Quad2dInterface> createQuadMask() override;
 
-    virtual std::shared_ptr<TextInterface> createText(const std::shared_ptr<::ShaderProgramInterface> &shader) override;
+    std::shared_ptr<Polygon2dInterface> createPolygonMask() override;
 
-    virtual std::shared_ptr<Quad2dInstancedInterface> createQuadInstanced(const std::shared_ptr< ::ShaderProgramInterface> &shader) override;
+    std::shared_ptr<TextInterface> createText(const std::shared_ptr<::ShaderProgramInterface> &shader) override;
+
+    std::shared_ptr<TextInstancedInterface> createTextInstanced(const std::shared_ptr<::ShaderProgramInterface> & shader) override;
+
+    std::shared_ptr<Quad2dInstancedInterface> createQuadInstanced(const std::shared_ptr< ::ShaderProgramInterface> &shader) override;
+
+    std::shared_ptr<Quad2dStretchedInstancedInterface> createQuadStretchedInstanced(const std::shared_ptr<::ShaderProgramInterface> &shader) override;
 };

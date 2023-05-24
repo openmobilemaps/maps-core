@@ -6,4 +6,18 @@ package io.openmobilemaps.mapscore.shared.map.coordinates
 data class RectCoord(
     var topLeft: Coord,
     var bottomRight: Coord,
-)
+) : Comparable<RectCoord> {
+
+    override fun compareTo(other: RectCoord): Int {
+        var tempResult = 0
+        tempResult = this.topLeft.compareTo(other.topLeft)
+        if (tempResult != 0) {
+            return tempResult
+        }
+        tempResult = this.bottomRight.compareTo(other.bottomRight)
+        if (tempResult != 0) {
+            return tempResult
+        }
+        return 0
+    }
+}

@@ -64,7 +64,7 @@ public:
 
     void ring_end(vtzero::ring_type ringType) noexcept {
         if (!currentFeature.empty()) {
-            currentFeature.push_back(Coord(currentFeature[0]));
+            currentFeature.push_back(currentFeature[0]);
 
             switch (ringType) {
                 case vtzero::ring_type::outer:

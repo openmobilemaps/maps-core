@@ -14,15 +14,21 @@ abstract class GraphicsObjectFactoryInterface {
 
     abstract fun createQuadInstanced(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Quad2dInstancedInterface
 
+    abstract fun createQuadStretchedInstanced(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Quad2dStretchedInstancedInterface
+
     abstract fun createLineGroup(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): LineGroup2dInterface
 
     abstract fun createPolygonGroup(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): PolygonGroup2dInterface
+
+    abstract fun createPolygonPatternGroup(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): PolygonPatternGroup2dInterface
 
     abstract fun createQuadMask(): Quad2dInterface
 
     abstract fun createPolygonMask(): Polygon2dInterface
 
     abstract fun createText(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): TextInterface
+
+    abstract fun createTextInstanced(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): TextInstancedInterface
 
     private class CppProxy : GraphicsObjectFactoryInterface {
         private val nativeRef: Long
@@ -54,6 +60,12 @@ abstract class GraphicsObjectFactoryInterface {
         }
         private external fun native_createQuadInstanced(_nativeRef: Long, shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Quad2dInstancedInterface
 
+        override fun createQuadStretchedInstanced(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Quad2dStretchedInstancedInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createQuadStretchedInstanced(this.nativeRef, shader)
+        }
+        private external fun native_createQuadStretchedInstanced(_nativeRef: Long, shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Quad2dStretchedInstancedInterface
+
         override fun createLineGroup(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): LineGroup2dInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_createLineGroup(this.nativeRef, shader)
@@ -65,6 +77,12 @@ abstract class GraphicsObjectFactoryInterface {
             return native_createPolygonGroup(this.nativeRef, shader)
         }
         private external fun native_createPolygonGroup(_nativeRef: Long, shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): PolygonGroup2dInterface
+
+        override fun createPolygonPatternGroup(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): PolygonPatternGroup2dInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createPolygonPatternGroup(this.nativeRef, shader)
+        }
+        private external fun native_createPolygonPatternGroup(_nativeRef: Long, shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): PolygonPatternGroup2dInterface
 
         override fun createQuadMask(): Quad2dInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
@@ -83,5 +101,11 @@ abstract class GraphicsObjectFactoryInterface {
             return native_createText(this.nativeRef, shader)
         }
         private external fun native_createText(_nativeRef: Long, shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): TextInterface
+
+        override fun createTextInstanced(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): TextInstancedInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createTextInstanced(this.nativeRef, shader)
+        }
+        private external fun native_createTextInstanced(_nativeRef: Long, shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): TextInstancedInterface
     }
 }

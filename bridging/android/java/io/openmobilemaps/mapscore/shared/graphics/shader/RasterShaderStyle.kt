@@ -9,7 +9,7 @@ data class RasterShaderStyle(
     var brightnessMax: Float,
     var contrast: Float,
     var saturation: Float,
-) {
+) : Comparable<RasterShaderStyle> {
 
     companion object {
         val DEFAULT_STYLE: RasterShaderStyle = RasterShaderStyle(
@@ -18,5 +18,60 @@ data class RasterShaderStyle(
             1.0f /* brightnessMax */ ,
             0.0f /* contrast */ ,
             0.0f /* saturation */ )
+    }
+
+    override fun compareTo(other: RasterShaderStyle): Int {
+        var tempResult = 0
+        if (this.opacity < other.opacity) {
+            tempResult = -1;
+        } else if (this.opacity > other.opacity) {
+            tempResult = 1;
+        } else {
+            tempResult = 0;
+        }
+        if (tempResult != 0) {
+            return tempResult
+        }
+        if (this.brightnessMin < other.brightnessMin) {
+            tempResult = -1;
+        } else if (this.brightnessMin > other.brightnessMin) {
+            tempResult = 1;
+        } else {
+            tempResult = 0;
+        }
+        if (tempResult != 0) {
+            return tempResult
+        }
+        if (this.brightnessMax < other.brightnessMax) {
+            tempResult = -1;
+        } else if (this.brightnessMax > other.brightnessMax) {
+            tempResult = 1;
+        } else {
+            tempResult = 0;
+        }
+        if (tempResult != 0) {
+            return tempResult
+        }
+        if (this.contrast < other.contrast) {
+            tempResult = -1;
+        } else if (this.contrast > other.contrast) {
+            tempResult = 1;
+        } else {
+            tempResult = 0;
+        }
+        if (tempResult != 0) {
+            return tempResult
+        }
+        if (this.saturation < other.saturation) {
+            tempResult = -1;
+        } else if (this.saturation > other.saturation) {
+            tempResult = 1;
+        } else {
+            tempResult = 0;
+        }
+        if (tempResult != 0) {
+            return tempResult
+        }
+        return 0
     }
 }

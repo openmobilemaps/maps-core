@@ -38,8 +38,9 @@ void LineGroup2dOpenGl::setLines(const ::SharedBytes & lines, const ::SharedByte
 
 void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (ready || !dataReady)
+    if (ready || !dataReady) {
         return;
+    }
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     if (openGlContext->getProgram(shaderProgram->getProgramName()) == 0) {
@@ -91,8 +92,10 @@ void LineGroup2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inv
 void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                                int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
 
-    if (!ready)
+    if (!ready) {
         return;
+    }
+
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     if (isMasked) {
@@ -148,7 +151,6 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     // Draw the triangle
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glDrawElements(GL_TRIANGLES, lineIndices.size(), GL_UNSIGNED_INT, nullptr);
-
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 

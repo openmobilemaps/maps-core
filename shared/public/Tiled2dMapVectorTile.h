@@ -22,6 +22,7 @@
 #include "VectorLayerDescription.h"
 #include "Tiled2dMapVectorLayerTileCallbackInterface.h"
 #include "Tiled2dMapVectorLayerSelectionCallbackInterface.h"
+#include "SpriteData.h"
 
 typedef std::shared_ptr<TextureHolderInterface> Tiled2dMapVectorTileDataRaster;
 typedef std::shared_ptr<std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>> Tiled2dMapVectorTileDataVector;
@@ -55,6 +56,8 @@ public:
     virtual void setVectorTileData(const Tiled2dMapVectorTileDataVector &tileData) {};
 
     virtual void setRasterTileData(const Tiled2dMapVectorTileDataRaster &tileData) {};
+
+    virtual void setSpriteData(const std::shared_ptr<SpriteData> &spriteData, const std::shared_ptr<TextureHolderInterface> &spriteTexture) {};
 
     void setSelectionDelegate(const std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate);
 

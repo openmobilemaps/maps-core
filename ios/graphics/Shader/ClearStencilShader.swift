@@ -37,7 +37,7 @@ class ClearStencilShader: BaseShader {
         guard let encoder = (context as? RenderingContext)?.encoder,
               let pipeline = pipeline else { return }
 
-        encoder.setRenderPipelineState(pipeline)
+        (context as? RenderingContext)?.setRenderPipelineStateIfNeeded(pipeline)
         encoder.setDepthStencilState(clearMask)
     }
 }

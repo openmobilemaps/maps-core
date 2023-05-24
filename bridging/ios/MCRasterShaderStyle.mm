@@ -45,6 +45,85 @@
     return s_defaultStyle;
 }
 
+- (BOOL)isEqual:(id)other
+{
+    if (![other isKindOfClass:[MCRasterShaderStyle class]]) {
+        return NO;
+    }
+    MCRasterShaderStyle *typedOther = (MCRasterShaderStyle *)other;
+    return self.opacity == typedOther.opacity &&
+            self.brightnessMin == typedOther.brightnessMin &&
+            self.brightnessMax == typedOther.brightnessMax &&
+            self.contrast == typedOther.contrast &&
+            self.saturation == typedOther.saturation;
+}
+
+- (NSUInteger)hash
+{
+    return NSStringFromClass([self class]).hash ^
+            (NSUInteger)self.opacity ^
+            (NSUInteger)self.brightnessMin ^
+            (NSUInteger)self.brightnessMax ^
+            (NSUInteger)self.contrast ^
+            (NSUInteger)self.saturation;
+}
+
+- (NSComparisonResult)compare:(MCRasterShaderStyle *)other
+{
+    NSComparisonResult tempResult;
+    if (self.opacity < other.opacity) {
+        tempResult = NSOrderedAscending;
+    } else if (self.opacity > other.opacity) {
+        tempResult = NSOrderedDescending;
+    } else {
+        tempResult = NSOrderedSame;
+    }
+    if (tempResult != NSOrderedSame) {
+        return tempResult;
+    }
+    if (self.brightnessMin < other.brightnessMin) {
+        tempResult = NSOrderedAscending;
+    } else if (self.brightnessMin > other.brightnessMin) {
+        tempResult = NSOrderedDescending;
+    } else {
+        tempResult = NSOrderedSame;
+    }
+    if (tempResult != NSOrderedSame) {
+        return tempResult;
+    }
+    if (self.brightnessMax < other.brightnessMax) {
+        tempResult = NSOrderedAscending;
+    } else if (self.brightnessMax > other.brightnessMax) {
+        tempResult = NSOrderedDescending;
+    } else {
+        tempResult = NSOrderedSame;
+    }
+    if (tempResult != NSOrderedSame) {
+        return tempResult;
+    }
+    if (self.contrast < other.contrast) {
+        tempResult = NSOrderedAscending;
+    } else if (self.contrast > other.contrast) {
+        tempResult = NSOrderedDescending;
+    } else {
+        tempResult = NSOrderedSame;
+    }
+    if (tempResult != NSOrderedSame) {
+        return tempResult;
+    }
+    if (self.saturation < other.saturation) {
+        tempResult = NSOrderedAscending;
+    } else if (self.saturation > other.saturation) {
+        tempResult = NSOrderedDescending;
+    } else {
+        tempResult = NSOrderedSame;
+    }
+    if (tempResult != NSOrderedSame) {
+        return tempResult;
+    }
+    return NSOrderedSame;
+}
+
 #ifndef DJINNI_DISABLE_DESCRIPTION_METHODS
 - (NSString *)description
 {

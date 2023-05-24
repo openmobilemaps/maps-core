@@ -351,9 +351,7 @@ public:
         return "";
     }
 
-
 private:
-
 
     bool isExpression(const nlohmann::json &json, const std::string expression) {
         return json.is_string() && toLower(json) == expression;

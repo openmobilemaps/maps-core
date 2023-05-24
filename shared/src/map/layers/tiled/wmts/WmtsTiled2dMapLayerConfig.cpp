@@ -13,7 +13,7 @@
 #include "Tiled2dMapVectorSettings.h"
 
 WmtsTiled2dMapLayerConfig::WmtsTiled2dMapLayerConfig(const WmtsLayerDescription &description,
-                                                     std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfo,
+                                                     const std::vector<Tiled2dMapZoomLevelInfo> &zoomLevelInfo,
                                                      const Tiled2dMapZoomInfo &zoomInfo,
                                                      const std::string &coordinateSystemIdentifier,
                                                      const std::string &matrixSetIdentifier)

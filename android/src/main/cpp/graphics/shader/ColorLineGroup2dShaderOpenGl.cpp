@@ -47,6 +47,8 @@ void ColorLineGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingCo
         glUniform1fv(lineStylesHandle, sizeLineValuesArray, &lineValues[0]);
         int numStylesHandle = glGetUniformLocation(program, "numStyles");
         glUniform1i(numStylesHandle, numStyles);
+        int dashingScaleFactorHandle = glGetUniformLocation(program, "dashingScaleFactor");
+        glUniform1f(dashingScaleFactorHandle, dashingScaleFactor);
     }
 }
 
@@ -61,6 +63,12 @@ void ColorLineGroup2dShaderOpenGl::setStyles(const ::SharedBytes & styles) {
         numStyles = styles.elementCount;
     }
 }
+
+void ColorLineGroup2dShaderOpenGl::setDashingScaleFactor(float factor) {
+    {
+        std::lock_guard<std::recursive_mutex> overlayLock(styleMutex);
+        this->dashingScaleFactor = factor;
+    }}
 
 std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
     return OMMVersionedGlesShaderCode(320 es,
@@ -88,8 +96,9 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                                       //        };
                                       uniform float lineValues[) + std::to_string(sizeLineValuesArray) + OMMShaderCode(];
                                       uniform int numStyles; uniform float scaleFactor;
+                                      uniform float dashingScaleFactor;
                                       out float fStyleIndexBase; out float radius; out float segmentStartLPos; out float fSegmentType;
-                                      out vec2 pointDeltaA; out vec2 pointBDeltaA; out vec4 color;
+                                      out vec2 pointDeltaA; out vec2 pointBDeltaA; out vec4 color; out float dashingSize;
 
                                        void main() {
                                        float fStyleIndex = mod(vStyleInfo, 256.0);
@@ -109,35 +118,38 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                                        fStyleIndexBase = float(styleIndexBase);
                                        fSegmentType = vStyleInfo / 256.0;
 
-                                       vec2 widthNormal = vWidthNormal;
-                                       vec2 lengthNormal = vec2(widthNormal.y, -widthNormal.x);
+                                           vec2 widthNormal = vWidthNormal;
+                                           vec2 lengthNormal = vec2(widthNormal.y, -widthNormal.x);
 
-                                       if(vVertexIndex == 0.0) {
-                                           lengthNormal *= -1.0;
-                                           widthNormal *= -1.0;
-                                       } else if(vVertexIndex == 1.0) {
-                                           lengthNormal *= -1.0;
-                                       } else if(vVertexIndex == 2.0) {
-                                           // all fine
-                                       } else if(vVertexIndex == 3.0) {
-                                           widthNormal *= -1.0;
-                                       }
+                                           if(vVertexIndex == 0.0) {
+                                               lengthNormal *= -1.0;
+                                               widthNormal *= -1.0;
+                                           } else if(vVertexIndex == 1.0) {
+                                               lengthNormal *= -1.0;
+                                           } else if(vVertexIndex == 2.0) {
+                                               // all fine
+                                           } else if(vVertexIndex == 3.0) {
+                                               widthNormal *= -1.0;
+                                           }
 
                                        float offsetFloat = lineValues[styleIndexBase + 18] * scaleFactor;
                                        vec4 offset = vec4(vWidthNormal.x * offsetFloat, vWidthNormal.y * offsetFloat, 0.0, 0.0);
 
-                                       float scaledWidth = width * 0.5;
-                                       if (isScaled > 0.0) {
-                                        scaledWidth = scaledWidth * scaleFactor;
-                                       }
-                                               vec4 trfPosition = uMVPMatrix * vec4(vPosition.xy, 0.0, 1.0);
-                                               vec4 displ = vec4((lengthNormal + widthNormal).xy, 0.0, 0.0) * vec4(scaledWidth, scaledWidth, 0.0, 0.0) + offset;
-                                               vec4 trfDispl = uMVPMatrix * displ;
-                                               vec4 extendedPosition = vec4(vPosition.xy, 0.0, 1.0) + displ;
-                                               radius = scaledWidth;
-                                               pointDeltaA = (extendedPosition.xy - vPointA);
-                                               pointBDeltaA = vPointB - vPointA;
-                                               gl_Position = trfPosition + trfDispl;
+                                           float scaledWidth = width * 0.5;
+                                           dashingSize = width;
+                                           if (isScaled > 0.0) {
+                                               scaledWidth = scaledWidth * scaleFactor;
+                                               dashingSize *= dashingScaleFactor;
+                                           }
+
+                                           vec4 trfPosition = uMVPMatrix * vec4(vPosition.xy, 0.0, 1.0);
+                                           vec4 displ = vec4((lengthNormal + widthNormal).xy, 0.0, 0.0) * vec4(scaledWidth, scaledWidth, 0.0, 0.0) + offset;
+                                           vec4 trfDispl = uMVPMatrix * displ;
+                                           vec4 extendedPosition = vec4(vPosition.xy, 0.0, 1.0) + displ;
+                                           radius = scaledWidth;
+                                           pointDeltaA = (extendedPosition.xy - vPointA);
+                                           pointBDeltaA = vPointB - vPointA;
+                                           gl_Position = trfPosition + trfDispl;
                                        }
                                        );
 }
@@ -148,6 +160,7 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
                                       uniform float lineValues[) + std::to_string(sizeLineValuesArray) + OMMShaderCode(];
                                       in float fStyleIndexBase; in float radius; in float segmentStartLPos;
                                       in float fSegmentType; // 0: inner segment, 1: line start segment (i.e. A is first point in line), 2: line end segment, 3: start and end in segment
+                                      in float dashingSize;
                                       in vec2 pointDeltaA; in vec2 pointBDeltaA; in vec4 color;
 
                                       out vec4 fragmentColor;
@@ -191,7 +204,7 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
                                                                     lineValues[gapColorIndexBase + 2], lineValues[gapColorIndexBase + 3]);
 
                                                int baseDashInfos = dashBase + 1;
-                                               float factorToT = radius * 2.0 / lineLength;
+                                               float factorToT = dashingSize / lineLength;
                                                float dashTotal = lineValues[baseDashInfos + (numDashInfos - 1)] * factorToT;
                                                float startOffsetSegment = mod(segmentStartLPos / lineLength, dashTotal);
                                                float intraDashPos = mod(t + startOffsetSegment, dashTotal);

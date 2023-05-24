@@ -8,8 +8,11 @@
 #include "NativeColorShaderInterface.h"
 #include "NativeLineGroupShaderInterface.h"
 #include "NativePolygonGroupShaderInterface.h"
+#include "NativePolygonPatternGroupShaderInterface.h"
 #include "NativeRasterShaderInterface.h"
+#include "NativeStretchInstancedShaderInterface.h"
 #include "NativeStretchShaderInterface.h"
+#include "NativeTextInstancedShaderInterface.h"
 #include "NativeTextShaderInterface.h"
 
 namespace djinni_generated {
@@ -70,6 +73,14 @@ NativeShaderFactoryInterface::JavaProxy::~JavaProxy() = default;
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativePolygonGroupShaderInterface::toCpp(jniEnv, jret);
 }
+/*not-null*/ std::shared_ptr<::PolygonPatternGroupShaderInterface> NativeShaderFactoryInterface::JavaProxy::createPolygonPatternGroupShader() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeShaderFactoryInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_createPolygonPatternGroupShader);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativePolygonPatternGroupShaderInterface::toCpp(jniEnv, jret);
+}
 /*not-null*/ std::shared_ptr<::TextShaderInterface> NativeShaderFactoryInterface::JavaProxy::createTextShader() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -77,6 +88,14 @@ NativeShaderFactoryInterface::JavaProxy::~JavaProxy() = default;
     auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_createTextShader);
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativeTextShaderInterface::toCpp(jniEnv, jret);
+}
+/*not-null*/ std::shared_ptr<::TextInstancedShaderInterface> NativeShaderFactoryInterface::JavaProxy::createTextInstancedShader() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeShaderFactoryInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_createTextInstancedShader);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativeTextInstancedShaderInterface::toCpp(jniEnv, jret);
 }
 /*not-null*/ std::shared_ptr<::RasterShaderInterface> NativeShaderFactoryInterface::JavaProxy::createRasterShader() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
@@ -93,6 +112,14 @@ NativeShaderFactoryInterface::JavaProxy::~JavaProxy() = default;
     auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_createStretchShader);
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativeStretchShaderInterface::toCpp(jniEnv, jret);
+}
+/*not-null*/ std::shared_ptr<::StretchInstancedShaderInterface> NativeShaderFactoryInterface::JavaProxy::createStretchInstancedShader() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeShaderFactoryInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_createStretchInstancedShader);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativeStretchInstancedShaderInterface::toCpp(jniEnv, jret);
 }
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderFactoryInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
@@ -156,12 +183,30 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shade
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderFactoryInterface_00024CppProxy_native_1createPolygonPatternGroupShader(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::ShaderFactoryInterface>(nativeRef);
+        auto r = ref->createPolygonPatternGroupShader();
+        return ::djinni::release(::djinni_generated::NativePolygonPatternGroupShaderInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderFactoryInterface_00024CppProxy_native_1createTextShader(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::ShaderFactoryInterface>(nativeRef);
         auto r = ref->createTextShader();
         return ::djinni::release(::djinni_generated::NativeTextShaderInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderFactoryInterface_00024CppProxy_native_1createTextInstancedShader(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::ShaderFactoryInterface>(nativeRef);
+        auto r = ref->createTextInstancedShader();
+        return ::djinni::release(::djinni_generated::NativeTextInstancedShaderInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
@@ -180,6 +225,15 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shade
         const auto& ref = ::djinni::objectFromHandleAddress<::ShaderFactoryInterface>(nativeRef);
         auto r = ref->createStretchShader();
         return ::djinni::release(::djinni_generated::NativeStretchShaderInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderFactoryInterface_00024CppProxy_native_1createStretchInstancedShader(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::ShaderFactoryInterface>(nativeRef);
+        auto r = ref->createStretchInstancedShader();
+        return ::djinni::release(::djinni_generated::NativeStretchInstancedShaderInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

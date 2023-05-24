@@ -10,6 +10,8 @@
 
 - (void)setStyles:(nonnull MCSharedBytes *)styles;
 
+- (void)setDashingScaleFactor:(float)factor;
+
 - (nullable id<MCShaderProgramInterface>)asShaderProgramInterface;
 
 @end

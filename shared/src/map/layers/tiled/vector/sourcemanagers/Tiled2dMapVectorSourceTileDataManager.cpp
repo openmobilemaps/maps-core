@@ -11,6 +11,7 @@
 #include "Tiled2dMapVectorSourceTileDataManager.h"
 #include "Tiled2dMapVectorRasterTile.h"
 #include "Tiled2dMapVectorPolygonTile.h"
+#include "Tiled2dMapVectorPolygonPatternTile.h"
 #include "Tiled2dMapVectorLineTile.h"
 #include "Tiled2dMapVectorLayer.h"
 #include "RenderPass.h"
@@ -18,30 +19,29 @@
 void Tiled2dMapVectorSourceTileDataManager::update() {
     for (const auto &[tileInfo, subTiles] : tiles) {
         for (const auto &[index, identifier, tile]: subTiles) {
-            /*tile.syncAccess([](auto t) {
+            tile.syncAccess([](auto t) {
                 t->update();
-            });*/ //TODO: EXPERIMENTAL
-            tile.message(&Tiled2dMapVectorTile::update);
+            });
         }
     }
 }
 
+
 void Tiled2dMapVectorSourceTileDataManager::pregenerateRenderPasses() {
-    std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> renderPasses;
+    std::vector<std::shared_ptr<Tiled2dMapVectorLayer::TileRenderDescription>> renderDescriptions;
     for (const auto &[tile, subTiles] : tileRenderObjectsMap) {
         const auto tileMaskWrapper = tileMaskMap.find(tile);
         if (tilesReady.count(tile) > 0 && tileMaskWrapper != tileMaskMap.end()) {
             const auto &mask = tileMaskWrapper->second.getGraphicsMaskObject();
             for (const auto &[layerIndex, renderObjects]: subTiles) {
-                renderPasses.emplace_back(layerIndex, std::make_shared<RenderPass>(RenderPassConfig(0),
-                                                                                   renderObjects,
-                                                                                   mask));
+                const bool modifiesMask = modifyingMaskLayers.find(layerIndex) != modifyingMaskLayers.end();
+                renderDescriptions.push_back(std::make_shared<Tiled2dMapVectorLayer::TileRenderDescription>(Tiled2dMapVectorLayer::TileRenderDescription{layerIndex, renderObjects, mask, modifiesMask}));
             }
         }
     }
-    vectorLayer.syncAccess([source = this->source, &renderPasses](const auto &layer){
+    vectorLayer.syncAccess([source = this->source, &renderDescriptions](const auto &layer){
         if(auto strong = layer.lock()) {
-            strong->onRenderPassUpdate(source, false, renderPasses);
+            strong->onRenderPassUpdate(source, false, renderDescriptions);
         }
     });
 }
@@ -204,12 +204,21 @@ Actor<Tiled2dMapVectorTile> Tiled2dMapVectorSourceTileDataManager::createTileAct
         case VectorLayerType::polygon: {
             auto mailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
 
-            auto polygonActor = Actor<Tiled2dMapVectorPolygonTile>(mailbox, (std::weak_ptr<MapInterface>) mapInterface,
-                                                                   tileInfo, selfActor,
-                                                                   std::static_pointer_cast<PolygonVectorLayerDescription>(
-                                                                           layerDescription));
+            auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(layerDescription);
 
-            actor = polygonActor.strongActor<Tiled2dMapVectorTile>();
+            if (polygonDescription->style.hasPatternPotentially()) {
+                auto polygonActor = Actor<Tiled2dMapVectorPolygonPatternTile>(mailbox, (std::weak_ptr<MapInterface>) mapInterface,
+                                                                           tileInfo, selfActor,
+                                                                           polygonDescription,
+                                                                              spriteData, spriteTexture);
+                actor = polygonActor.strongActor<Tiled2dMapVectorTile>();
+            } else {
+                auto polygonActor = Actor<Tiled2dMapVectorPolygonTile>(mailbox, (std::weak_ptr<MapInterface>) mapInterface,
+                                                                       tileInfo, selfActor,
+                                                                       polygonDescription);
+                actor = polygonActor.strongActor<Tiled2dMapVectorTile>();
+            }
+
             break;
         }
         case VectorLayerType::symbol: {
@@ -230,7 +239,7 @@ Actor<Tiled2dMapVectorTile> Tiled2dMapVectorSourceTileDataManager::createTileAct
             break;
         }
     }
-    return std::move(actor);
+    return actor;
 }
 
 void Tiled2dMapVectorSourceTileDataManager::tileIsReady(const Tiled2dMapTileInfo &tile,
@@ -293,6 +302,9 @@ void Tiled2dMapVectorSourceTileDataManager::tileIsInteractable(const std::string
 
 bool
 Tiled2dMapVectorSourceTileDataManager::onClickUnconfirmed(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) {
+    if (interactableLayers.empty()) {
+        return false;
+    }
     for (const auto &[tileInfo, subTiles]: tiles) {
         for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
             if (interactableLayers.count(std::get<1>(*rIter)) == 0 || layers.count(std::get<1>(*rIter)) == 0) {
@@ -311,6 +323,9 @@ Tiled2dMapVectorSourceTileDataManager::onClickUnconfirmed(const std::unordered_s
 
 bool
 Tiled2dMapVectorSourceTileDataManager::onClickConfirmed(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) {
+    if (interactableLayers.empty()) {
+        return false;
+    }
     for (const auto &[tileInfo, subTiles]: tiles) {
         for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
             if (interactableLayers.count(std::get<1>(*rIter)) == 0 || layers.count(std::get<1>(*rIter)) == 0) {
@@ -328,6 +343,9 @@ Tiled2dMapVectorSourceTileDataManager::onClickConfirmed(const std::unordered_set
 }
 
 bool Tiled2dMapVectorSourceTileDataManager::onDoubleClick(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) {
+    if (interactableLayers.empty()) {
+        return false;
+    }
     for (const auto &[tileInfo, subTiles]: tiles) {
         for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
             if (interactableLayers.count(std::get<1>(*rIter)) == 0 || layers.count(std::get<1>(*rIter)) == 0) {
@@ -345,6 +363,9 @@ bool Tiled2dMapVectorSourceTileDataManager::onDoubleClick(const std::unordered_s
 }
 
 bool Tiled2dMapVectorSourceTileDataManager::onLongPress(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) {
+    if (interactableLayers.empty()) {
+        return false;
+    }
     for (const auto &[tileInfo, subTiles]: tiles) {
         for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
             if (interactableLayers.count(std::get<1>(*rIter)) == 0 || layers.count(std::get<1>(*rIter)) == 0) {
@@ -363,6 +384,9 @@ bool Tiled2dMapVectorSourceTileDataManager::onLongPress(const std::unordered_set
 
 bool Tiled2dMapVectorSourceTileDataManager::onTwoFingerClick(const std::unordered_set<std::string> &layers, const Vec2F &posScreen1,
                                                              const Vec2F &posScreen2) {
+    if (interactableLayers.empty()) {
+        return false;
+    }
     for (const auto &[tileInfo, subTiles]: tiles) {
         for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
             if (interactableLayers.count(std::get<1>(*rIter)) == 0 || layers.count(std::get<1>(*rIter)) == 0) {
@@ -380,9 +404,32 @@ bool Tiled2dMapVectorSourceTileDataManager::onTwoFingerClick(const std::unordere
 }
 
 void Tiled2dMapVectorSourceTileDataManager::clearTouch() {
+    if (interactableLayers.empty()) {
+        return;
+    }
     for (const auto &[tileInfo, subTiles]: tiles) {
         for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
             std::get<2>(*rIter).message(&Tiled2dMapVectorTile::clearTouch);
         }
     }
+}
+
+void Tiled2dMapVectorSourceTileDataManager::setSprites(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) {
+    this->spriteData = spriteData;
+    this->spriteTexture = spriteTexture;
+
+    if (!tiles.empty()) {
+        auto selfActor = WeakActor(mailbox, weak_from_this());
+        selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceTileDataManager::setupExistingTilesWithSprite);
+    }
+}
+
+void Tiled2dMapVectorSourceTileDataManager::setupExistingTilesWithSprite() {
+    for (const auto &[tile, subTiles] : tiles) {
+        for (const auto &[index, string, actor]: subTiles) {
+            actor.message(&Tiled2dMapVectorTile::setSpriteData, spriteData, spriteTexture);
+        }
+    }
+
+    pregenerateRenderPasses();
 }

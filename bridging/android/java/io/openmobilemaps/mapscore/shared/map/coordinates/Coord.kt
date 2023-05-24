@@ -8,4 +8,44 @@ data class Coord(
     var x: Double,
     var y: Double,
     var z: Double,
-)
+) : Comparable<Coord> {
+
+    override fun compareTo(other: Coord): Int {
+        var tempResult = 0
+        tempResult = this.systemIdentifier.compareTo(other.systemIdentifier)
+        if (tempResult != 0) {
+            return tempResult
+        }
+        if (this.x < other.x) {
+            tempResult = -1;
+        } else if (this.x > other.x) {
+            tempResult = 1;
+        } else {
+            tempResult = 0;
+        }
+        if (tempResult != 0) {
+            return tempResult
+        }
+        if (this.y < other.y) {
+            tempResult = -1;
+        } else if (this.y > other.y) {
+            tempResult = 1;
+        } else {
+            tempResult = 0;
+        }
+        if (tempResult != 0) {
+            return tempResult
+        }
+        if (this.z < other.z) {
+            tempResult = -1;
+        } else if (this.z > other.z) {
+            tempResult = 1;
+        } else {
+            tempResult = 0;
+        }
+        if (tempResult != 0) {
+            return tempResult
+        }
+        return 0
+    }
+}

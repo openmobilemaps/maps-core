@@ -3,15 +3,12 @@
 
 #import "MCRenderingContextInterface.h"
 #import "MCSharedBytes.h"
-#import "MCTextDescription.h"
 #import <Foundation/Foundation.h>
 @protocol MCGraphicsObjectInterface;
 @protocol MCTextureHolderInterface;
 
 
 @protocol MCTextInterface
-
-- (void)setTexts:(nonnull NSArray<MCTextDescription *> *)texts;
 
 - (void)setTextsShared:(nonnull MCSharedBytes *)vertices
                indices:(nonnull MCSharedBytes *)indices;

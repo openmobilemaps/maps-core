@@ -22,6 +22,8 @@ final class LineGroup2d: BaseGraphicsObject {
     private var stencilState: MTLDepthStencilState?
     private var maskedStencilState: MTLDepthStencilState?
 
+    private var customScreenPixelFactor: Float = 0
+
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         guard let shader = shader as? LineGroupShader else {
             fatalError("LineGroup2d only supports LineGroupShader")
@@ -101,6 +103,8 @@ final class LineGroup2d: BaseGraphicsObject {
 
         shader.screenPixelAsRealMeterFactor = Float(screenPixelAsRealMeterFactor)
 
+        encoder.setVertexBytes(&customScreenPixelFactor, length: MemoryLayout<Float>.stride, index: 3)
+
         shader.setupProgram(context)
         shader.preRender(context)
 
@@ -146,6 +150,12 @@ extension LineGroup2d: MCLineGroup2dInterface {
             indicesCount = Int(indices.elementCount)
             lineVerticesBuffer = verticesBuffer
             lineIndicesBuffer = indicesBuffer
+        }
+    }
+
+    func setScalingFactor(_ factor: Float) {
+        lock.withCritical {
+            customScreenPixelFactor = factor
         }
     }
 

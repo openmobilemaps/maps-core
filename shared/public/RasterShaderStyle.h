@@ -14,6 +14,15 @@ struct RasterShaderStyle final {
     float contrast;
     float saturation;
 
+    friend bool operator==(const RasterShaderStyle& lhs, const RasterShaderStyle& rhs);
+    friend bool operator!=(const RasterShaderStyle& lhs, const RasterShaderStyle& rhs);
+
+    friend bool operator<(const RasterShaderStyle& lhs, const RasterShaderStyle& rhs);
+    friend bool operator>(const RasterShaderStyle& lhs, const RasterShaderStyle& rhs);
+
+    friend bool operator<=(const RasterShaderStyle& lhs, const RasterShaderStyle& rhs);
+    friend bool operator>=(const RasterShaderStyle& lhs, const RasterShaderStyle& rhs);
+
     RasterShaderStyle(float opacity_,
                       float brightnessMin_,
                       float brightnessMax_,

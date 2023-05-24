@@ -29,7 +29,7 @@ struct LineVertexIn {
     float2 lineA [[attribute(2)]];
     float2 lineB [[attribute(3)]];
     float vertexIndex [[attribute(4)]];
-    float lenghtPrefix [[attribute(5)]];
+    float lengthPrefix [[attribute(5)]];
     float stylingIndex [[attribute(6)]];
 };
 
@@ -41,8 +41,9 @@ struct LineVertexOut {
     int stylingIndex;
     float width;
     int segmentType;
-    float lenghtPrefix;
+    float lengthPrefix;
     float scalingFactor;
+    float dashingSize;
 };
 
 struct LineStyling {
@@ -69,15 +70,18 @@ vertex LineVertexOut
 lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
                       constant float4x4 &mvpMatrix [[buffer(1)]],
                       constant float &scalingFactor [[buffer(2)]],
-                      constant float *styling [[buffer(3)]])
+                      constant float &dashingScalingFactor [[buffer(3)]],
+                      constant float *styling [[buffer(4)]])
 {
     int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 19;
 
-    // extend position in width direction and in lenght direction by width / 2.0
+    // extend position in width direction and in length direction by width / 2.0
     float width = styling[styleIndex] / 2.0;
+    float dashingSize = styling[styleIndex];
 
     if (styling[styleIndex + 9] > 0.0) {
         width *= scalingFactor;
+        dashingSize *= dashingScalingFactor;
     }
 
     float2 widthNormal = vertexIn.widthNormal;
@@ -112,8 +116,9 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
         .stylingIndex = styleIndex,
         .width = width,
         .segmentType = segmentType,
-        .lenghtPrefix = vertexIn.lenghtPrefix,
-        .scalingFactor = scalingFactor
+        .lengthPrefix = vertexIn.lengthPrefix,
+        .scalingFactor = scalingFactor,
+        .dashingSize = dashingSize
     };
 
     return out;
@@ -181,7 +186,7 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
 
     float factorToT = (in.width * 2) / lineLength;
     float dashTotal = dashArray[3] * factorToT;
-    float startOffsetSegment = fmod(in.lenghtPrefix / lineLength, dashTotal);
+    float startOffsetSegment = fmod(in.lengthPrefix / lineLength, dashTotal);
     float intraDashPos = fmod(t + startOffsetSegment, dashTotal);
 
     if ((intraDashPos > dashArray[0] * factorToT && intraDashPos < dashArray[1] * factorToT) ||

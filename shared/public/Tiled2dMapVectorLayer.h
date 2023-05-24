@@ -25,14 +25,15 @@
 #include "Tiled2dMapLayerMaskWrapper.h"
 #include "TiledLayerError.h"
 #include "Actor.h"
-#include "Tiled2dMapVectorBackgroundSubLayer.h"
-#include "Tiled2dMapVectorSourceTileDataManager.h"
-#include "Tiled2dMapVectorSourceRasterTileDataManager.h"
-#include "Tiled2dMapVectorSourceVectorTileDataManager.h"
-#include "Tiled2dMapVectorSourceSymbolDataManager.h"
-#include "Tiled2dMapVectorSourceSymbolCollisionManager.h"
-#include "Tiled2dMapVectorInteractionManager.h"
 #include <unordered_map>
+
+class Tiled2dMapVectorBackgroundSubLayer;
+class Tiled2dMapVectorSourceTileDataManager;
+class Tiled2dMapVectorSourceRasterTileDataManager;
+class Tiled2dMapVectorSourceVectorTileDataManager;
+class Tiled2dMapVectorSourceSymbolDataManager;
+class Tiled2dMapVectorSourceSymbolCollisionManager;
+class Tiled2dMapVectorInteractionManager;
 
 class Tiled2dMapVectorLayer
         : public Tiled2dMapLayer,
@@ -70,7 +71,14 @@ public:
 
     virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override;
 
-    virtual void onRenderPassUpdate(const std::string &source, bool isSymbol, const std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> &renderPasses);
+    struct TileRenderDescription {
+        int32_t layerIndex;
+        std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;
+        std::shared_ptr<MaskingObjectInterface> maskingObject;
+        bool isModifyingMask;
+    };
+
+    virtual void onRenderPassUpdate(const std::string &source, bool isSymbol, const std::vector<std::shared_ptr<TileRenderDescription>> &renderDescription);
 
     virtual void onAdded(const std::shared_ptr<::MapInterface> &mapInterface, int32_t layerIndex) override;
 
@@ -170,7 +178,7 @@ private:
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceTileDataManager>> sourceDataManagers;
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceSymbolDataManager>> symbolSourceDataManagers;
     Actor<Tiled2dMapVectorSourceSymbolCollisionManager> collisionManager;
-    std::unique_ptr<Tiled2dMapVectorInteractionManager> interactionManager;
+    std::shared_ptr<Tiled2dMapVectorInteractionManager> interactionManager;
 
     std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> selectionDelegate;
     std::optional<int64_t> selectedFeatureIdentifier;
@@ -178,12 +186,12 @@ private:
     std::recursive_mutex renderPassMutex;
     std::vector<std::shared_ptr<RenderPassInterface>> currentRenderPasses;
 
-    struct SourceRenderPasses {
-        std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> renderPasses;
-        std::vector<std::tuple<int32_t, std::shared_ptr<RenderPassInterface>>> symbolRenderPasses;
+    struct SourceRenderDescriptions {
+        std::vector<std::shared_ptr<TileRenderDescription>> renderDescriptions;
+        std::vector<std::shared_ptr<TileRenderDescription>> symbolRenderDescriptions;
     };
 
-    std::unordered_map<std::string, SourceRenderPasses> sourceRenderPassesMap;
+    std::unordered_map<std::string, SourceRenderDescriptions> sourceRenderDescriptionMap;
 
     std::atomic_bool isLoadingStyleJson = false;
     std::atomic_bool isResumed = false;

@@ -39,7 +39,7 @@ private:
         void setScales(const ::SharedBytes & scales) override;
         void setRotations(const ::SharedBytes & rotations) override;
         void setAlphas(const ::SharedBytes & values) override;
-        void setTexureCoordinates(const ::SharedBytes & textureCoordinates) override;
+        void setTextureCoordinates(const ::SharedBytes & textureCoordinates) override;
         void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & textureHolder) override;
         void removeTexture() override;
         /*not-null*/ std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override;
@@ -56,7 +56,7 @@ private:
     const jmethodID method_setScales { ::djinni::jniGetMethodID(clazz.get(), "setScales", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
     const jmethodID method_setRotations { ::djinni::jniGetMethodID(clazz.get(), "setRotations", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
     const jmethodID method_setAlphas { ::djinni::jniGetMethodID(clazz.get(), "setAlphas", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
-    const jmethodID method_setTexureCoordinates { ::djinni::jniGetMethodID(clazz.get(), "setTexureCoordinates", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
+    const jmethodID method_setTextureCoordinates { ::djinni::jniGetMethodID(clazz.get(), "setTextureCoordinates", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
     const jmethodID method_loadTexture { ::djinni::jniGetMethodID(clazz.get(), "loadTexture", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface;Lio/openmobilemaps/mapscore/shared/graphics/objects/TextureHolderInterface;)V") };
     const jmethodID method_removeTexture { ::djinni::jniGetMethodID(clazz.get(), "removeTexture", "()V") };
     const jmethodID method_asGraphicsObject { ::djinni::jniGetMethodID(clazz.get(), "asGraphicsObject", "()Lio/openmobilemaps/mapscore/shared/graphics/objects/GraphicsObjectInterface;") };
