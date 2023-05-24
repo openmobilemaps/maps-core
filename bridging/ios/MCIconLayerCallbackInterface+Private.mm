@@ -39,6 +39,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (BOOL)onLongPress:(nonnull NSArray<MCIconInfoInterface *> *)icons {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->onLongPress(::djinni::List<::djinni_generated::IconInfoInterface>::toCpp(icons));
+        return ::djinni::Bool::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class IconLayerCallbackInterface::ObjcProxy final
@@ -52,6 +59,13 @@ public:
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() onClickConfirmed:(::djinni::List<::djinni_generated::IconInfoInterface>::fromCpp(c_icons))];
+            return ::djinni::Bool::toCpp(objcpp_result_);
+        }
+    }
+    bool onLongPress(const std::vector</*not-null*/ std::shared_ptr<::IconInfoInterface>> & c_icons) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() onLongPress:(::djinni::List<::djinni_generated::IconInfoInterface>::fromCpp(c_icons))];
             return ::djinni::Bool::toCpp(objcpp_result_);
         }
     }
