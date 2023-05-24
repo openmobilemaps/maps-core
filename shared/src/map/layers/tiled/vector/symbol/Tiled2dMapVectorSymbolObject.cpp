@@ -509,31 +509,45 @@ void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &posi
 std::optional<RectCoord> Tiled2dMapVectorSymbolObject::getCombinedBoundingBox() {
     std::optional<RectCoord> combined;
 
-    std::vector<RectCoord*> boxes;
-    if (labelObject && labelObject->boundingBox.topLeft.x != 0) {
-        boxes.push_back(&labelObject->boundingBox);
-    }
-    if (iconBoundingBox.topLeft.x != 0){
-        boxes.push_back(&iconBoundingBox);
-    }
-    if (stretchIconBoundingBox.topLeft.x != 0){
-        boxes.push_back(&stretchIconBoundingBox);
-    }
+        const RectCoord* boxes[3] = { nullptr };
+        int boxCount = 0;
 
-    if (boxes.empty()) {
-        return std::nullopt;
-    }
+        if (labelObject && labelObject->boundingBox.topLeft.x != 0) {
+            boxes[boxCount++] = &labelObject->boundingBox;
+        }
+        if (iconBoundingBox.topLeft.x != 0) {
+            boxes[boxCount++] = &iconBoundingBox;
+        }
+        if (stretchIconBoundingBox.topLeft.x != 0) {
+            boxes[boxCount++] = &stretchIconBoundingBox;
+        }
 
-    combined = *(*boxes.rbegin());
-    boxes.pop_back();
+        if (boxCount == 0) {
+            return std::nullopt;
+        }
 
-    while (!boxes.empty()) {
-        combined = RectCoord(Coord(combined->topLeft.systemIdentifier,std::min(combined->topLeft.x, (*boxes.rbegin())->topLeft.x), std::min(combined->topLeft.y, (*boxes.rbegin())->topLeft.y), combined->topLeft.z),
-                             Coord(combined->topLeft.systemIdentifier, std::max(combined->bottomRight.x,  (*boxes.rbegin())->bottomRight.x), std::max(combined->bottomRight.y,  (*boxes.rbegin())->bottomRight.y), combined->topLeft.z));
-        boxes.pop_back();
-    }
+        const RectCoord& firstBox = *boxes[boxCount - 1];
+        combined = firstBox;
 
-    return combined;
+        const double initialMinX = firstBox.topLeft.x;
+        const double initialMinY = firstBox.topLeft.y;
+        const double initialMaxX = firstBox.bottomRight.x;
+        const double initialMaxY = firstBox.bottomRight.y;
+
+        for (int i = boxCount - 2; i >= 0; --i) {
+            const RectCoord& currentBox = *boxes[i];
+            const int minX = std::min(initialMinX, currentBox.topLeft.x);
+            const int minY = std::min(initialMinY, currentBox.topLeft.y);
+            const int maxX = std::max(initialMaxX, currentBox.bottomRight.x);
+            const int maxY = std::max(initialMaxY, currentBox.bottomRight.y);
+
+            combined = RectCoord(
+                Coord(combined->topLeft.systemIdentifier, minX, minY, combined->topLeft.z),
+                Coord(combined->topLeft.systemIdentifier, maxX, maxY, combined->topLeft.z)
+            );
+        }
+
+        return combined;
 }
 
 void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<std::vector<OBB2D>> placements) {
