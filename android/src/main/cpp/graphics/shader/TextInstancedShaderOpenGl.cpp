@@ -39,36 +39,36 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
     return OMMVersionedGlesShaderCode(320 es,
                                       uniform mat4 uMVPMatrix;
 
-                                              in vec4 vPosition;
-                                              in vec2 texCoordinate;
+                                      in vec4 vPosition;
+                                      in vec2 texCoordinate;
 
-                                              in vec2 aPosition;
-                                              in vec4 aTexCoordinate;
-                                              in vec2 aScale;
-                                              in float aRotation;
-                                              in uint aStyleIndex;
+                                      in vec2 aPosition;
+                                      in vec4 aTexCoordinate;
+                                      in vec2 aScale;
+                                      in float aRotation;
+                                      in uint aStyleIndex;
 
-                                              out vec2 v_texCoord;
-                                              out vec4 v_texCoordInstance;
-                                              out flat uint vStyleIndex;
+                                      out vec2 v_texCoord;
+                                      out vec4 v_texCoordInstance;
+                                      out flat uint vStyleIndex;
 
-                                              void main() {
-                                                  float angle = aRotation * 3.14159265 / 180.0;
+                                      void main() {
+                                          float angle = aRotation * 3.14159265 / 180.0;
 
-                                                  mat4 model_matrix = mat4(
-                                                          vec4(cos(angle) * aScale.x, -sin(angle) * aScale.x, 0.0, 0.0),
-                                                          vec4(sin(angle) * aScale.y, cos(angle) * aScale.y, 0.0, 0.0),
-                                                          vec4(0.0, 0.0, 1.0, 0.0),
-                                                          vec4(aPosition.x, aPosition.y, 1.0, 1.0)
-                                                  );
+                                          mat4 model_matrix = mat4(
+                                                  vec4(cos(angle) * aScale.x, -sin(angle) * aScale.x, 0.0, 0.0),
+                                                  vec4(sin(angle) * aScale.y, cos(angle) * aScale.y, 0.0, 0.0),
+                                                  vec4(0.0, 0.0, 1.0, 0.0),
+                                                  vec4(aPosition.x, aPosition.y, 1.0, 1.0)
+                                          );
 
-                                                  mat4 matrix = uMVPMatrix * model_matrix;
+                                          mat4 matrix = uMVPMatrix * model_matrix;
 
-                                                  gl_Position = matrix * vPosition;
-                                                  v_texCoordInstance = aTexCoordinate;
-                                                  v_texCoord = texCoordinate;
-                                                  vStyleIndex = aStyleIndex;
-                                              }
+                                          gl_Position = matrix * vPosition;
+                                          v_texCoordInstance = aTexCoordinate;
+                                          v_texCoord = texCoordinate;
+                                          vStyleIndex = aStyleIndex;
+                                      }
     );
 }
 

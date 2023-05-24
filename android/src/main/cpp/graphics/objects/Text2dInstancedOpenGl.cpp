@@ -17,7 +17,7 @@
 Text2dInstancedOpenGl::Text2dInstancedOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
         : shaderProgram(shader) {}
 
-bool Text2dInstancedOpenGl::isReady() { return ready && (!usesTextureCoords || textureHolder); }
+bool Text2dInstancedOpenGl::isReady() { return ready && (!usesTextureCoords || textureHolder) && !buffersNotReady; }
 
 std::shared_ptr<GraphicsObjectInterface> Text2dInstancedOpenGl::asGraphicsObject() { return shared_from_this(); }
 
@@ -25,6 +25,7 @@ void Text2dInstancedOpenGl::clear() {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (ready) {
         removeGlBuffers();
+        buffersNotReady = 0b00111111;
     }
     if (textureCoordsReady) {
         removeTextureCoordsGlBuffers();

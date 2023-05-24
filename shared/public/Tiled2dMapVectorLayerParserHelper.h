@@ -266,7 +266,7 @@ public:
                                                                                     renderPassIndex,
                                                                                     interactable);
                     layers.push_back(layerDesc);
-                } else if (val["type"] == "fill" && val["paint"]["fill-pattern"].is_null()) {
+                } else if (val["type"] == "fill") {
 
                     std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
 

@@ -17,7 +17,7 @@
 Quad2dInstancedOpenGl::Quad2dInstancedOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
     : shaderProgram(shader) {}
 
-bool Quad2dInstancedOpenGl::isReady() { return ready && (!usesTextureCoords || textureHolder); }
+bool Quad2dInstancedOpenGl::isReady() { return ready && (!usesTextureCoords || textureHolder) && !buffersNotReady; }
 
 std::shared_ptr<GraphicsObjectInterface> Quad2dInstancedOpenGl::asGraphicsObject() { return shared_from_this(); }
 
@@ -261,7 +261,6 @@ void Quad2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
 
     glDrawElementsInstanced(GL_TRIANGLES,6, GL_UNSIGNED_BYTE, nullptr, instanceCount);
-    //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, nullptr);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     glVertexAttribDivisor(instPositionsHandle, 0);

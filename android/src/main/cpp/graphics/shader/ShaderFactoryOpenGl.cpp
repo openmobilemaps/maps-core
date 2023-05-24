@@ -14,6 +14,7 @@
 #include "ColorLineGroup2dShaderOpenGl.h"
 #include "ColorLineShaderOpenGl.h"
 #include "ColorPolygonGroup2dShaderOpenGl.h"
+#include "PolygonPatternGroup2dShaderOpenGl.h"
 #include "ColorShaderOpenGl.h"
 #include "TextShaderOpenGl.h"
 #include "TextInstancedShaderOpenGl.h"
@@ -55,7 +56,7 @@ std::shared_ptr<PolygonGroupShaderInterface> ShaderFactoryOpenGl::createPolygonG
 }
 
 std::shared_ptr<PolygonPatternGroupShaderInterface> ShaderFactoryOpenGl::createPolygonPatternGroupShader() {
-    return std::shared_ptr<PolygonPatternGroupShaderInterface>(); // TODO: UBCM
+    return std::make_shared<PolygonPatternGroup2dShaderOpenGl>();
 }
 
 std::shared_ptr<TextShaderInterface> ShaderFactoryOpenGl::createTextShader() {
