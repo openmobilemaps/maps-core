@@ -25,14 +25,15 @@
 #include "Tiled2dMapLayerMaskWrapper.h"
 #include "TiledLayerError.h"
 #include "Actor.h"
-#include "Tiled2dMapVectorBackgroundSubLayer.h"
-#include "Tiled2dMapVectorSourceTileDataManager.h"
-#include "Tiled2dMapVectorSourceRasterTileDataManager.h"
-#include "Tiled2dMapVectorSourceVectorTileDataManager.h"
-#include "Tiled2dMapVectorSourceSymbolDataManager.h"
-#include "Tiled2dMapVectorSourceSymbolCollisionManager.h"
-#include "Tiled2dMapVectorInteractionManager.h"
 #include <unordered_map>
+
+class Tiled2dMapVectorBackgroundSubLayer;
+class Tiled2dMapVectorSourceTileDataManager;
+class Tiled2dMapVectorSourceRasterTileDataManager;
+class Tiled2dMapVectorSourceVectorTileDataManager;
+class Tiled2dMapVectorSourceSymbolDataManager;
+class Tiled2dMapVectorSourceSymbolCollisionManager;
+class Tiled2dMapVectorInteractionManager;
 
 class Tiled2dMapVectorLayer
         : public Tiled2dMapLayer,
@@ -177,7 +178,7 @@ private:
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceTileDataManager>> sourceDataManagers;
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceSymbolDataManager>> symbolSourceDataManagers;
     Actor<Tiled2dMapVectorSourceSymbolCollisionManager> collisionManager;
-    std::unique_ptr<Tiled2dMapVectorInteractionManager> interactionManager;
+    std::shared_ptr<Tiled2dMapVectorInteractionManager> interactionManager;
 
     std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> selectionDelegate;
     std::optional<int64_t> selectedFeatureIdentifier;

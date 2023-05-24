@@ -15,6 +15,7 @@
 #include "Matrix.h"
 #include "StretchShaderInfo.h"
 #include "Quad2dInstancedInterface.h"
+#include "RenderObject.h"
 
 Tiled2dMapVectorSourceSymbolDataManager::Tiled2dMapVectorSourceSymbolDataManager(const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
                                                                                  const std::shared_ptr<VectorMapDescription> &mapDescription,

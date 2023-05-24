@@ -35,6 +35,13 @@
 #include "Tiled2dMapVectorLineTile.h"
 #include "Tiled2dMapVectorRasterTile.h"
 #include "SpriteData.h"
+#include "Tiled2dMapVectorBackgroundSubLayer.h"
+#include "Tiled2dMapVectorSourceTileDataManager.h"
+#include "Tiled2dMapVectorSourceRasterTileDataManager.h"
+#include "Tiled2dMapVectorSourceVectorTileDataManager.h"
+#include "Tiled2dMapVectorSourceSymbolDataManager.h"
+#include "Tiled2dMapVectorSourceSymbolCollisionManager.h"
+#include "Tiled2dMapVectorInteractionManager.h"
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::string &remoteStyleJsonUrl,
@@ -673,7 +680,8 @@ void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDe
     bool needsTileReplace = legacyDescription->source != layerDescription->source
                             || legacyDescription->sourceId != layerDescription->sourceId
                             || legacyDescription->minZoom != layerDescription->minZoom
-                            || legacyDescription->maxZoom != layerDescription->maxZoom;
+                            || legacyDescription->maxZoom != layerDescription->maxZoom
+                            || legacyDescription->filter != layerDescription->filter;
 
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
         if (legacySource == source || newSource == source) {
