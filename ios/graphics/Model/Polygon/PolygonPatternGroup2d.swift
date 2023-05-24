@@ -65,11 +65,11 @@ final class PolygonPatternGroup2d: BaseGraphicsObject {
             lock.unlock()
         }
 
-        guard let verticesBuffer,
-              let indicesBuffer,
-              let opacitiesBuffer,
-              let textureCoordinatesBuffer,
-              let texture else { return }
+        guard let verticesBuffer = verticesBuffer,
+              let indicesBuffer = indicesBuffer,
+              let opacitiesBuffer = opacitiesBuffer,
+              let textureCoordinatesBuffer = textureCoordinatesBuffer,
+              let texture = texture else { return }
 
         #if DEBUG
         encoder.pushDebugGroup("PolygonPatternGroup2d")

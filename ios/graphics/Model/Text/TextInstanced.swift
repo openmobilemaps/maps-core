@@ -66,12 +66,12 @@ final class TextInstanced: BaseGraphicsObject {
 
         guard let verticesBuffer = verticesBuffer,
               let indicesBuffer = indicesBuffer,
-              let positionsBuffer,
-                let scalesBuffer,
-                let rotationsBuffer,
-                let textureCoordinatesBuffer,
-                let styleIndicesBuffer,
-                let styleBuffer,
+              let positionsBuffer = positionsBuffer,
+                let scalesBuffer = scalesBuffer,
+                let rotationsBuffer = rotationsBuffer,
+                let textureCoordinatesBuffer = textureCoordinatesBuffer,
+                let styleIndicesBuffer = styleIndicesBuffer,
+                let styleBuffer = styleBuffer,
               instanceCount != 0 else { return }
 
         if isMasked {

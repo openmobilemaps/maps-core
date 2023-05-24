@@ -76,14 +76,14 @@ final class Quad2dInstanced: BaseGraphicsObject {
                          mvpMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
-        guard let verticesBuffer,
-              let indicesBuffer,
+        guard let verticesBuffer = verticesBuffer,
+              let indicesBuffer = indicesBuffer,
               instanceCount != 0,
-              let positionsBuffer,
-              let scalesBuffer,
-              let rotationsBuffer,
-              let textureCoordinatesBuffer,
-              let alphaBuffer
+              let positionsBuffer = positionsBuffer,
+              let scalesBuffer = scalesBuffer,
+              let rotationsBuffer = rotationsBuffer,
+              let textureCoordinatesBuffer = textureCoordinatesBuffer,
+              let alphaBuffer = alphaBuffer
         else {
             return
         }

@@ -77,15 +77,15 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject {
                          mvpMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
-        guard let verticesBuffer,
-              let indicesBuffer,
-              let positionsBuffer,
-              let scalesBuffer,
-              let rotationsBuffer,
-              let textureCoordinatesBuffer,
-              let alphaBuffer,
-              let stretchInfoBuffer,
-              let texture,
+        guard let verticesBuffer = verticesBuffer,
+              let indicesBuffer = indicesBuffer,
+              let positionsBuffer = positionsBuffer,
+              let scalesBuffer = scalesBuffer,
+              let rotationsBuffer = rotationsBuffer,
+              let textureCoordinatesBuffer = textureCoordinatesBuffer,
+              let alphaBuffer = alphaBuffer,
+              let stretchInfoBuffer = stretchInfoBuffer,
+              let texture = texture,
               instanceCount != 0 else {
             return
         }
