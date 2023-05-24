@@ -80,10 +80,10 @@ class StretchShader: BaseShader {
         }
     }
 
-    override func preRender(encoder: MTLRenderCommandEncoder, context _: RenderingContext) {
+    override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
         guard let pipeline = pipeline else { return }
 
-        encoder.setRenderPipelineState(pipeline)
+        context.setRenderPipelineStateIfNeeded(pipeline)
         encoder.setFragmentBuffer(alphaBuffer, offset: 0, index: 1)
         encoder.setFragmentBuffer(infoBuffer, offset: 0, index: 2)
     }

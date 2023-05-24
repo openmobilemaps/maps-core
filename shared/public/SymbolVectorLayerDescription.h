@@ -52,6 +52,7 @@ public:
                       std::shared_ptr<Value> iconTextFit,
                       std::shared_ptr<Value> iconTextFitPadding,
                       std::shared_ptr<Value> iconOpacity,
+                      std::shared_ptr<Value> iconRotate,
                       std::shared_ptr<Value> textLineHeight,
                       std::shared_ptr<Value> textLetterSpacing,
                       std::shared_ptr<Value> textMaxWidth,
@@ -87,6 +88,7 @@ public:
     iconTextFit(iconTextFit),
     iconTextFitPadding(iconTextFitPadding),
     iconOpacity(iconOpacity),
+    iconRotate(iconRotate),
     textRotationAlignment(textRotationAlignment),
     iconRotationAlignment(iconRotationAlignment),
     dpFactor(dpFactor) {}
@@ -101,7 +103,7 @@ public:
             iconAnchor, iconOffset, textAnchor, textVariableAnchor, textRotate, symbolSpacing,
             iconSize, textLineHeight, textLetterSpacing, textAllowOverlap, iconAllowOverlap,
             iconPadding, textOpacity, iconOpacity, iconRotationAlignment, textRotationAlignment,
-            iconTextFit, iconTextFitPadding, textMaxWidth, textMaxAngle
+            iconTextFit, iconTextFitPadding, textMaxWidth, textMaxAngle, iconRotate
         };
 
         for (auto const &value: values) {
@@ -218,6 +220,10 @@ public:
         return iconImage ? iconImage->evaluateOr(context, defaultValue) : defaultValue;
     }
 
+    bool hasIconImagePotentially() {
+        return iconImage ? true : false;
+    }
+
     Anchor getIconAnchor(const EvaluationContext &context) {
         static const Anchor defaultValue = Anchor::CENTER;
         return iconAnchor ? iconAnchor->evaluateOr(context, defaultValue) : defaultValue;
@@ -251,6 +257,11 @@ public:
     double getTextRotate(const EvaluationContext &context) {
         static const double defaultValue = 0.0;
         return textRotate ? textRotate->evaluateOr(context, defaultValue) : defaultValue;
+    }
+
+    double getIconRotate(const EvaluationContext &context) {
+        static const double defaultValue = 0.0;
+        return iconRotate ? iconRotate->evaluateOr(context, defaultValue) : defaultValue;
     }
 
     double getSymbolSpacing(const EvaluationContext &context) {
@@ -337,6 +348,7 @@ private:
     std::shared_ptr<Value> iconTextFit;
     std::shared_ptr<Value> iconTextFitPadding;
     std::shared_ptr<Value> iconOpacity;
+    std::shared_ptr<Value> iconRotate;
     std::shared_ptr<Value> textRotationAlignment;
     std::shared_ptr<Value> iconRotationAlignment;
     double dpFactor;

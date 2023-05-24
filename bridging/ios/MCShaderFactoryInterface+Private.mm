@@ -13,8 +13,11 @@
 #import "MCColorShaderInterface+Private.h"
 #import "MCLineGroupShaderInterface+Private.h"
 #import "MCPolygonGroupShaderInterface+Private.h"
+#import "MCPolygonPatternGroupShaderInterface+Private.h"
 #import "MCRasterShaderInterface+Private.h"
+#import "MCStretchInstancedShaderInterface+Private.h"
 #import "MCStretchShaderInterface+Private.h"
+#import "MCTextInstancedShaderInterface+Private.h"
 #import "MCTextShaderInterface+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -89,10 +92,24 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable id<MCPolygonPatternGroupShaderInterface>)createPolygonPatternGroupShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createPolygonPatternGroupShader();
+        return ::djinni_generated::PolygonPatternGroupShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nullable id<MCTextShaderInterface>)createTextShader {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createTextShader();
         return ::djinni_generated::TextShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCTextInstancedShaderInterface>)createTextInstancedShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createTextInstancedShader();
+        return ::djinni_generated::TextInstancedShaderInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -107,6 +124,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createStretchShader();
         return ::djinni_generated::StretchShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCStretchInstancedShaderInterface>)createStretchInstancedShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createStretchInstancedShader();
+        return ::djinni_generated::StretchInstancedShaderInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -168,11 +192,25 @@ public:
             return ::djinni_generated::PolygonGroupShaderInterface::toCpp(objcpp_result_);
         }
     }
+    /*not-null*/ std::shared_ptr<::PolygonPatternGroupShaderInterface> createPolygonPatternGroupShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygonPatternGroupShader];
+            return ::djinni_generated::PolygonPatternGroupShaderInterface::toCpp(objcpp_result_);
+        }
+    }
     /*not-null*/ std::shared_ptr<::TextShaderInterface> createTextShader() override
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createTextShader];
             return ::djinni_generated::TextShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::TextInstancedShaderInterface> createTextInstancedShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createTextInstancedShader];
+            return ::djinni_generated::TextInstancedShaderInterface::toCpp(objcpp_result_);
         }
     }
     /*not-null*/ std::shared_ptr<::RasterShaderInterface> createRasterShader() override
@@ -187,6 +225,13 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createStretchShader];
             return ::djinni_generated::StretchShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::StretchInstancedShaderInterface> createStretchInstancedShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createStretchInstancedShader];
+            return ::djinni_generated::StretchInstancedShaderInterface::toCpp(objcpp_result_);
         }
     }
 };

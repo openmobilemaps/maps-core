@@ -23,6 +23,37 @@
                              bottomRight:bottomRight];
 }
 
+- (BOOL)isEqual:(id)other
+{
+    if (![other isKindOfClass:[MCRectCoord class]]) {
+        return NO;
+    }
+    MCRectCoord *typedOther = (MCRectCoord *)other;
+    return [self.topLeft isEqual:typedOther.topLeft] &&
+            [self.bottomRight isEqual:typedOther.bottomRight];
+}
+
+- (NSUInteger)hash
+{
+    return NSStringFromClass([self class]).hash ^
+            self.topLeft.hash ^
+            self.bottomRight.hash;
+}
+
+- (NSComparisonResult)compare:(MCRectCoord *)other
+{
+    NSComparisonResult tempResult;
+    tempResult = [self.topLeft compare:other.topLeft];
+    if (tempResult != NSOrderedSame) {
+        return tempResult;
+    }
+    tempResult = [self.bottomRight compare:other.bottomRight];
+    if (tempResult != NSOrderedSame) {
+        return tempResult;
+    }
+    return NSOrderedSame;
+}
+
 #ifndef DJINNI_DISABLE_DESCRIPTION_METHODS
 - (NSString *)description
 {

@@ -53,7 +53,7 @@ Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(con
                         vtzero::decode_geometry(feature.geometry(), geometryHandler);
                         geometryHandler.limitHoles(500);
                         layerFeatureMap->at(sourceLayerName)->push_back({featureContext, geometryHandler});
-                    } catch (vtzero::geometry_exception &geometryException) {
+                    } catch (const vtzero::geometry_exception &geometryException) {
                         LogError <<= "geometryException for tile " + std::to_string(tile.zoomIdentifier) + "/" + std::to_string(tile.x) + "/" + std::to_string(tile.y);
                         continue;
                     }
@@ -67,11 +67,11 @@ Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(con
 
         if (!isTileVisible(tile)) return Tiled2dMapVectorTileInfo::FeatureMap();
     }
-    catch (protozero::invalid_tag_exception tagException) {
+    catch (const protozero::invalid_tag_exception &tagException) {
         LogError <<= "Invalid tag exception for tile " + std::to_string(tile.zoomIdentifier) + "/" +
         std::to_string(tile.x) + "/" + std::to_string(tile.y);
     }
-    catch (protozero::unknown_pbf_wire_type_exception typeException) {
+    catch (const protozero::unknown_pbf_wire_type_exception &typeException) {
         LogError <<= "Unknown wire type exception for tile " + std::to_string(tile.zoomIdentifier) + "/" +
         std::to_string(tile.x) + "/" + std::to_string(tile.y);
     }

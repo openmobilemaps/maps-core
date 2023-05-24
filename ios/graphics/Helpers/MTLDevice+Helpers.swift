@@ -31,3 +31,18 @@ extension MTLBuffer {
     }
 }
 
+extension Optional where Wrapped == MTLBuffer {
+    mutating func copyOrCreate(from sharedBytes: MCSharedBytes, device: MTLDevice) {
+        switch self {
+            case .none:
+                self = device.makeBuffer(from: sharedBytes)
+            case .some(let wrapped):
+                if wrapped.length == Int(sharedBytes.elementCount * sharedBytes.bytesPerElement) {
+                    wrapped.copyMemory(from: sharedBytes)
+                } else {
+                    self = device.makeBuffer(from: sharedBytes)
+                }
+
+        }
+    }
+}

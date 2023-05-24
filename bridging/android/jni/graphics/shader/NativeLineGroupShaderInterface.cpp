@@ -28,6 +28,14 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_L
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_LineGroupShaderInterface_00024CppProxy_native_1setDashingScaleFactor(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jfloat j_factor)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::LineGroupShaderInterface>(nativeRef);
+        ref->setDashingScaleFactor(::djinni::F32::toCpp(jniEnv, j_factor));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
 CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_LineGroupShaderInterface_00024CppProxy_native_1asShaderProgramInterface(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {

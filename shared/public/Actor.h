@@ -260,7 +260,7 @@ public:
 
 
     template <typename Fn, class... Args>
-    inline void message(const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, Fn fn, Args&&... args) const {
+    inline void messagePrecisely(const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, Fn fn, Args&&... args) const {
         if(!receivingMailbox || !object) {
             return;
         }

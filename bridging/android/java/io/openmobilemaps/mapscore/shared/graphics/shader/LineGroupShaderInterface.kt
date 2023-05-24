@@ -10,6 +10,8 @@ abstract class LineGroupShaderInterface {
 
     abstract fun setStyles(styles: ArrayList<io.openmobilemaps.mapscore.shared.map.layers.line.LineStyle>)
 
+    abstract fun setDashingScaleFactor(factor: Float)
+
     abstract fun asShaderProgramInterface(): ShaderProgramInterface
 
     private class CppProxy : LineGroupShaderInterface {
@@ -29,6 +31,12 @@ abstract class LineGroupShaderInterface {
             native_setStyles(this.nativeRef, styles)
         }
         private external fun native_setStyles(_nativeRef: Long, styles: ArrayList<io.openmobilemaps.mapscore.shared.map.layers.line.LineStyle>)
+
+        override fun setDashingScaleFactor(factor: Float) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setDashingScaleFactor(this.nativeRef, factor)
+        }
+        private external fun native_setDashingScaleFactor(_nativeRef: Long, factor: Float)
 
         override fun asShaderProgramInterface(): ShaderProgramInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

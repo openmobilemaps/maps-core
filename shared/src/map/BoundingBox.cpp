@@ -78,7 +78,7 @@ Coord BoundingBox::getMin() {
 }
 
 Coord BoundingBox::getMax() {
-    return min;
+    return max;
 }
 
 std::string BoundingBox::getSystemIdentifier() {

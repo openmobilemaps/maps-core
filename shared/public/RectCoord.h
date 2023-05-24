@@ -10,6 +10,15 @@ struct RectCoord final {
     Coord topLeft;
     Coord bottomRight;
 
+    friend bool operator==(const RectCoord& lhs, const RectCoord& rhs);
+    friend bool operator!=(const RectCoord& lhs, const RectCoord& rhs);
+
+    friend bool operator<(const RectCoord& lhs, const RectCoord& rhs);
+    friend bool operator>(const RectCoord& lhs, const RectCoord& rhs);
+
+    friend bool operator<=(const RectCoord& lhs, const RectCoord& rhs);
+    friend bool operator>=(const RectCoord& lhs, const RectCoord& rhs);
+
     RectCoord(Coord topLeft_,
               Coord bottomRight_)
     : topLeft(std::move(topLeft_))

@@ -16,4 +16,6 @@
 
 @property (nonatomic, readonly, nonnull) MCCoord * bottomRight;
 
+- (NSComparisonResult)compare:(nonnull MCRectCoord *)other;
+
 @end

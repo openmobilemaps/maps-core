@@ -500,6 +500,11 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
                 tileWrapper.isVisible = false;
                 it = decltype(it){currentTiles.erase( std::next(it).base() )};
                 it = std::prev(it);
+                
+                if (freePolygonDiff) {
+                    gpc_free_polygon(&polygonDiff);
+                }
+                continue;
             } else {
                 gpc_polygon resultingMask;
 
@@ -509,6 +514,10 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
                     tileWrapper.isVisible = false;
                     it = decltype(it){currentTiles.erase( std::next(it).base() )};
                     it = std::prev(it);
+                    if (freePolygonDiff) {
+                        gpc_free_polygon(&polygonDiff);
+                    }
+                    continue;
                 } else {
                     tileWrapper.masks = gpc_get_polygon_coord(&polygonDiff, tileInfo.bounds.topLeft.systemIdentifier);
                 }

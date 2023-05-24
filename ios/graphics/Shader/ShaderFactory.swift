@@ -20,6 +20,10 @@ class ShaderFactory: MCShaderFactoryInterface {
         PolygonGroupShader()
     }
 
+    func createPolygonPatternGroupShader() -> MCPolygonPatternGroupShaderInterface? {
+        PolygonPatternGroupShader()
+    }
+
     func createColorCircleShader() -> MCColorCircleShaderInterface? {
         ColorCircleShader()
     }
@@ -50,5 +54,13 @@ class ShaderFactory: MCShaderFactoryInterface {
 
     func createStretchShader() -> MCStretchShaderInterface? {
         StretchShader()
+    }
+
+    func createTextInstancedShader() -> MCTextInstancedShaderInterface? {
+        TextInstancedShader()
+    }
+
+    func createStretchInstancedShader() -> MCStretchInstancedShaderInterface? {
+        StretchInstancedShader()
     }
 }

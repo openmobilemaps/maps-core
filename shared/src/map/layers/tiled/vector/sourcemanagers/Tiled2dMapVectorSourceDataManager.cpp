@@ -25,6 +25,9 @@ Tiled2dMapVectorSourceDataManager::Tiled2dMapVectorSourceDataManager(const WeakA
         const auto &layerDescription = mapDescription->layers.at(index);
         if (layerDescription->source == source) {
             layerNameIndexMap[layerDescription->identifier] = index;
+            if (layerDescription->getType() == VectorLayerType::line) {
+                modifyingMaskLayers.insert(index);
+            }
         }
     }
 }

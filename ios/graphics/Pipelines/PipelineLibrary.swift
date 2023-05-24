@@ -60,12 +60,15 @@ public enum Pipeline: String, CaseIterable {
     case alphaInstancedShader
     case lineGroupShader
     case polygonGroupShader
+    case polygonPatternGroupShader
     case colorShader
     case roundColorShader
     case clearStencilShader
     case textShader
+    case textInstancedShader
     case rasterShader
     case stretchShader
+    case stretchInstancedShader
 
     var label: String {
         switch self {
@@ -73,12 +76,15 @@ public enum Pipeline: String, CaseIterable {
             case .alphaInstancedShader: return "Alpha instanced shader with texture"
             case .lineGroupShader: return "Line Group shader"
             case .polygonGroupShader: return "Polygon Group shader"
+            case .polygonPatternGroupShader: return "Polygon Group Pattern shader"
             case .colorShader: return "Color shader"
             case .roundColorShader: return "Round color shader"
             case .clearStencilShader: return "Clear stencil shader"
             case .textShader: return "Text shader"
+            case .textInstancedShader: return "Text Instanced shader"
             case .rasterShader: return "Raster shader"
             case .stretchShader: return "Stretch shader"
+            case .stretchInstancedShader: return "Stretch Instanced shader"
         }
     }
 
@@ -88,12 +94,15 @@ public enum Pipeline: String, CaseIterable {
             case .alphaInstancedShader: return "alphaInstancedVertexShader"
             case .lineGroupShader: return "lineGroupVertexShader"
             case .polygonGroupShader: return "polygonGroupVertexShader"
+            case .polygonPatternGroupShader: return "polygonPatternGroupVertexShader"
             case .colorShader: return "colorVertexShader"
             case .roundColorShader: return "colorVertexShader"
             case .clearStencilShader: return "stencilClearVertexShader"
             case .textShader: return "textVertexShader"
+            case .textInstancedShader: return "textInstancedVertexShader"
             case .rasterShader: return "rasterVertexShader"
             case .stretchShader: return "stretchVertexShader"
+            case .stretchInstancedShader: return "stretchInstancedVertexShader"
         }
     }
 
@@ -103,19 +112,22 @@ public enum Pipeline: String, CaseIterable {
             case .alphaInstancedShader: return "alphaInstancedFragmentShader"
             case .lineGroupShader: return "lineGroupFragmentShader"
             case .polygonGroupShader: return "polygonGroupFragmentShader"
+            case .polygonPatternGroupShader: return "polygonPatternGroupFragmentShader"
             case .colorShader: return "colorFragmentShader"
             case .roundColorShader: return "roundColorFragmentShader"
             case .clearStencilShader: return "stencilClearFragmentShader"
             case .textShader: return "textFragmentShader"
+            case .textInstancedShader: return "textInstancedFragmentShader"
             case .rasterShader: return "rasterFragmentShader"
             case .stretchShader: return "stretchFragmentShader"
+            case .stretchInstancedShader: return "stretchInstancedFragmentShader"
         }
     }
 
     var vertexDescriptor: MTLVertexDescriptor {
         switch self {
             case .lineGroupShader: return LineVertex.descriptor
-            case .polygonGroupShader: return PolygonVertex.descriptor
+            case .polygonGroupShader, .polygonPatternGroupShader: return PolygonVertex.descriptor
             default: return Vertex.descriptor
         }
     }

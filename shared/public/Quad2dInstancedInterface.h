@@ -29,7 +29,7 @@ public:
 
     virtual void setAlphas(const ::SharedBytes & values) = 0;
 
-    virtual void setTexureCoordinates(const ::SharedBytes & textureCoordinates) = 0;
+    virtual void setTextureCoordinates(const ::SharedBytes & textureCoordinates) = 0;
 
     virtual void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const /*not-null*/ std::shared_ptr<TextureHolderInterface> & textureHolder) = 0;
 

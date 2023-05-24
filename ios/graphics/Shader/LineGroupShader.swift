@@ -111,11 +111,11 @@ class LineGroupShader: BaseShader {
         guard let encoder = context.encoder,
               let pipeline = pipeline else { return }
 
-        encoder.setRenderPipelineState(pipeline)
+        context.setRenderPipelineStateIfNeeded(pipeline)
 
         encoder.setVertexBytes(&screenPixelAsRealMeterFactor, length: MemoryLayout<Float>.stride, index: 2)
 
-        encoder.setVertexBuffer(lineStyleBuffer, offset: 0, index: 3)
+        encoder.setVertexBuffer(lineStyleBuffer, offset: 0, index: 4)
 
         encoder.setFragmentBuffer(lineStyleBuffer, offset: 0, index: 1)
     }
@@ -136,6 +136,10 @@ extension LineGroupShader: MCLineGroupShaderInterface {
         guard styles.elementCount < self.styleBufferSize else { fatalError("line style error exceeds buffer size") }
 
         lineStyleBuffer.copyMemory(from: styles)
+    }
+
+    func setDashingScaleFactor(_ factor: Float) {
+        
     }
 
     func asShaderProgram() -> MCShaderProgramInterface? {

@@ -20,9 +20,15 @@ shader_factory_interface = interface +c +j +o {
     create_color_shader() : color_shader_interface;
     create_color_circle_shader() : color_circle_shader_interface;
     create_polygon_group_shader(): polygon_group_shader_interface;
+    create_polygon_pattern_group_shader(): polygon_pattern_group_shader_interface;
+
     create_text_shader() : text_shader_interface;
+    create_text_instanced_shader(): text_instanced_shader_interface;
+
     create_raster_shader() : raster_shader_interface;
     create_stretch_shader(): stretch_shader_interface;
+
+    create_stretch_instanced_shader(): stretch_instanced_shader_interface;
 }
 
 raster_shader_style = record {
@@ -39,7 +45,7 @@ raster_shader_style = record {
         contrast = 0.0,
         saturation = 0.0
     };
-}
+} deriving (eq, ord)
 
 raster_shader_interface = interface +c +o {
     set_style(style: raster_shader_style);
@@ -80,6 +86,10 @@ stretch_shader_interface = interface +c +o {
     as_shader_program_interface() : shader_program_interface;
 }
 
+stretch_instanced_shader_interface = interface +c +o {
+    as_shader_program_interface() : shader_program_interface;
+}
+
 color_shader_interface = interface +c +o {
     set_color(red: f32, green: f32, blue: f32, alpha: f32);
     as_shader_program_interface() : shader_program_interface;
@@ -93,6 +103,7 @@ color_line_shader_interface = interface +c +o {
 
 line_group_shader_interface = interface +c +o {
     set_styles(styles: list<line_style>);
+    set_dashing_scale_factor(factor: f32);
     as_shader_program_interface() : shader_program_interface;
 }
 
@@ -106,9 +117,17 @@ polygon_group_shader_interface = interface +c +o {
     as_shader_program_interface() : shader_program_interface;
 }
 
+polygon_pattern_group_shader_interface = interface +c +o {
+    as_shader_program_interface() : shader_program_interface;
+}
+
 text_shader_interface = interface +c +o {
     set_color(color: color);
     set_opacity(opacity: f32);
     set_halo_color(color: color, width: f64);
+    as_shader_program_interface() : shader_program_interface;
+}
+
+text_instanced_shader_interface = interface +c +o {
     as_shader_program_interface() : shader_program_interface;
 }

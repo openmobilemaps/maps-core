@@ -825,7 +825,7 @@ std::vector<BreakResult> TextHelper::bestBreakIndices(std::vector<std::string> &
     std::vector<std::shared_ptr<Break>> potentials;
 
     for(int i=0; i<letters.size(); ++i) {
-        auto &l = letters[i];
+        const auto &l = letters[i];
 
         if(i < letters.size() - 1 && allowsLineBreak(l)) {
             float additionalCost = 0;

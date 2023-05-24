@@ -15,6 +15,7 @@
 #include "earcut.hpp"
 #include "Logger.h"
 #include "PolygonHelper.h"
+#include "CoordinateSystemIdentifiers.h"
 
 namespace mapbox {
     namespace util {
@@ -39,8 +40,7 @@ Tiled2dMapVectorPolygonTile::Tiled2dMapVectorPolygonTile(const std::weak_ptr<Map
                                                          const Tiled2dMapTileInfo &tileInfo,
                                                          const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
                                                          const std::shared_ptr<PolygonVectorLayerDescription> &description)
-        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, tileCallbackInterface) {
-    usedKeys = std::move(description->getUsedKeys());
+        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, tileCallbackInterface), usedKeys(std::move(description->getUsedKeys())) {
     auto pMapInterface = mapInterface.lock();
     if (pMapInterface) {
         shader = pMapInterface->getShaderFactory()->createPolygonGroupShader();
@@ -109,23 +109,24 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
         return;
     }
 
-    std::string layerName = description->sourceId;
+    const std::string layerName = description->sourceId;
 
-    std::string defIdPrefix =
-            std::to_string(tileInfo.x) + "/" + std::to_string(tileInfo.y) + "_" + layerName + "_";
-    if (!tileData->empty() &&
-        description->minZoom <= tileInfo.zoomIdentifier &&
-        description->maxZoom >= tileInfo.zoomIdentifier) {
+    const auto indicesLimit = std::numeric_limits<uint16_t>::max();
+
+    if (!tileData->empty()) {
 
         bool anyInteractable = false;
 
-        std::vector<std::tuple<std::vector<std::tuple<std::vector<Coord>, int>>, std::vector<uint16_t>>> objectDescriptions;
+        std::vector<ObjectDescriptions> objectDescriptions;
         objectDescriptions.push_back({{},{}});
 
-        std::vector<int32_t> indices;
         std::int32_t indices_offset = 0;
 
+#ifndef __APPLE__
         for (auto featureIt = tileData->rbegin(); featureIt != tileData->rend(); featureIt++) {
+#else
+        for (auto featureIt = tileData->begin(); featureIt != tileData->end(); featureIt++) {
+#endif
 
             const auto &[featureContext, geometryHandler] = *featureIt;
 
@@ -138,61 +139,8 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
 
                 std::vector<Coord> positions;
 
-                bool interactable = description->isInteractable(evalContext);
-                for (int i = 0; i < polygonCoordinates.size(); i++) {
-
-                    size_t verticesCount = polygonCoordinates[i].size();
-
-                    // TODO: Android/iOS currently only supports 16bit indices
-                    // more complex polygons may need to be simplified on-device to render them correctly
-                    if (verticesCount >= std::numeric_limits<uint16_t>::max()) {
-                        LogError <<= "Too many vertices in a polygon to use 16bit indices: " + std::to_string(verticesCount);
-                        continue;
-                    }
-
-                    std::vector<std::vector<::Coord>> pol = { polygonCoordinates[i] };
-
-                    for (auto const &hole: polygonHoles[i]) {
-
-                        if (verticesCount + hole.size() >= std::numeric_limits<uint16_t>::max()) {
-                            LogError <<= "Too many vertices by polygon holes to use 16bit indices - remaining holes are dropped";
-                            break;
-                        }
-
-                        verticesCount += hole.size();
-                        pol.push_back(hole);
-                    }
-
-                    std::vector<uint16_t> new_indices = mapbox::earcut<uint16_t>(pol);
-
-                    size_t posAdded = 0;
-                    for (auto const &coords: pol) {
-                        positions.insert(positions.end(), coords.begin(), coords.end());
-                        posAdded += coords.size();
-                    }
-
-                    // check overflow
-                    size_t new_size = indices_offset + posAdded;
-
-                    if (new_size >= std::numeric_limits<uint16_t>::max()) {
-                        objectDescriptions.push_back({{}, {}});
-                        indices_offset = 0;
-                    }
-
-                    for (auto const &index: new_indices) {
-                        std::get<1>(objectDescriptions.back()).push_back(indices_offset + index);
-                    }
-
-                    indices_offset += posAdded;
-
-                    if (interactable) {
-                        anyInteractable = true;
-                        hitDetectionPolygonMap[tileInfo].push_back(
-                                {PolygonCoord(polygonCoordinates[i], polygonHoles[i]), featureContext});
-                    }
-                }
-
                 int styleIndex = -1;
+                
                 {
                     auto const hash = featureContext.getStyleHash(usedKeys);
 
@@ -210,7 +158,60 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
                     }
                 }
 
-                std::get<0>(objectDescriptions.back()).push_back({positions, styleIndex});
+                bool interactable = description->isInteractable(evalContext);
+                for (int i = 0; i < polygonCoordinates.size(); i++) {
+
+                    size_t verticesCount = polygonCoordinates[i].size();
+
+                    // TODO: Android/iOS currently only supports 16bit indices
+                    // more complex polygons may need to be simplified on-device to render them correctly
+                    if (verticesCount >= indicesLimit) {
+                        LogError <<= "Too many vertices in a polygon to use 16bit indices: " + std::to_string(verticesCount);
+                        continue;
+                    }
+
+                    std::vector<std::vector<::Coord>> pol = { polygonCoordinates[i] };
+
+                    for (auto const &hole: polygonHoles[i]) {
+
+                        if (verticesCount + hole.size() >= indicesLimit) {
+                            LogError <<= "Too many vertices by polygon holes to use 16bit indices - remaining holes are dropped";
+                            break;
+                        }
+
+                        verticesCount += hole.size();
+                        pol.push_back(hole);
+                    }
+
+                    std::vector<uint16_t> new_indices = mapbox::earcut<uint16_t>(pol);
+
+                    for (auto const &coords: pol) {
+                        positions.insert(positions.end(), coords.begin(), coords.end());
+                    }
+
+                    // check overflow
+                    size_t new_size = indices_offset + verticesCount;
+
+                    if (new_size >= indicesLimit) {
+                        objectDescriptions.push_back({{},{}});
+                        indices_offset = 0;
+                    }
+
+                    for (auto const &index: new_indices) {
+                        objectDescriptions.back().indices.push_back(indices_offset + index);
+                    }
+
+                    objectDescriptions.back().vertices.push_back({positions, styleIndex});
+                    positions.clear();
+
+                    indices_offset += verticesCount;
+
+                    if (interactable) {
+                        anyInteractable = true;
+                        hitDetectionPolygonMap[tileInfo].push_back(
+                                {PolygonCoord(polygonCoordinates[i], polygonHoles[i]), featureContext});
+                    }
+                }
             }
         }
 
@@ -225,13 +226,9 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
     }
 }
 
-void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::tuple<std::vector<std::tuple<std::vector<Coord>, int>>, std::vector<uint16_t>>> &polygons) {
-    std::vector<std::shared_ptr<GraphicsObjectInterface>> oldGraphicsObjects;
-    for (const auto &polygon : this->polygons) {
-        oldGraphicsObjects.push_back(polygon->getPolygonObject());
-    }
+void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<ObjectDescriptions> &polygons) {
 
-    if (polygons.empty() && oldGraphicsObjects.empty()) {
+    if (polygons.empty()) {
         auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
         tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
         return;
@@ -246,32 +243,27 @@ void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::tuple<std::
         return;
     }
 
-    std::vector<std::shared_ptr<PolygonGroup2dLayerObject>> polygonObjects;
     std::vector<std::shared_ptr<GraphicsObjectInterface>> newGraphicObjects;
 
-    for (auto const& tuple: polygons) {
+    for (auto const& polygon: polygons) {
         const auto polygonObject = objectFactory->createPolygonGroup(shader->asShaderProgramInterface());
 
         auto layerObject = std::make_shared<PolygonGroup2dLayerObject>(converter, polygonObject, shader);
-        layerObject->setVertices(std::get<0>(tuple), std::get<1>(tuple));
+        layerObject->setVertices(polygon.vertices, polygon.indices);
 
         this->polygons.emplace_back(layerObject);
         newGraphicObjects.push_back(polygonObject->asGraphicsObject());
     }
 
 #ifdef __APPLE__
-    setupPolygons(newGraphicObjects, oldGraphicsObjects);
+    setupPolygons(newGraphicObjects);
 #else
     auto selfActor = WeakActor(mailbox, shared_from_this()->weak_from_this());
-    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorPolygonTile::setupPolygons, newGraphicObjects, oldGraphicsObjects);
+    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorPolygonTile::setupPolygons, newGraphicObjects);
 #endif
 }
 
-void Tiled2dMapVectorPolygonTile::setupPolygons(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects,
-                                                const std::vector<std::shared_ptr<GraphicsObjectInterface>> &oldPolygonObjects) {
-    for (const auto &polygon : oldPolygonObjects) {
-        if (polygon->isReady()) polygon->clear();
-    }
+void Tiled2dMapVectorPolygonTile::setupPolygons(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects) {
 
     auto mapInterface = this->mapInterface.lock();
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
@@ -295,13 +287,14 @@ std::vector<std::shared_ptr<RenderObjectInterface>> Tiled2dMapVectorPolygonTile:
         }
     }
 
-    return std::move(newRenderObjects);
+    return newRenderObjects;
 }
 
 bool Tiled2dMapVectorPolygonTile::onClickConfirmed(const Vec2F &posScreen) {
     auto mapInterface = this->mapInterface.lock();
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
-    if (!camera || !selectionDelegate) {
+    auto converter = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
+    if (!camera || !selectionDelegate || !converter) {
         return false;
     }
     auto point = camera->coordFromScreenPosition(posScreen);
@@ -309,7 +302,7 @@ bool Tiled2dMapVectorPolygonTile::onClickConfirmed(const Vec2F &posScreen) {
     for (auto const &[tileInfo, polygonTuples] : hitDetectionPolygonMap) {
         for (auto const &[polygon, featureContext]: polygonTuples) {
             if (PolygonHelper::pointInside(polygon, point, mapInterface->getCoordinateConverterHelper())) {
-                selectionDelegate->didSelectFeature(featureContext.getFeatureInfo(), description->identifier, point);
+                selectionDelegate->didSelectFeature(featureContext.getFeatureInfo(), description->identifier, converter->convert(CoordinateSystemIdentifiers::EPSG4326(), point));
                 return true;
             }
         }

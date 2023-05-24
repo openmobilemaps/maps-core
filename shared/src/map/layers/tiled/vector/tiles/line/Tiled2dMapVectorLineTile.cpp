@@ -18,9 +18,7 @@ Tiled2dMapVectorLineTile::Tiled2dMapVectorLineTile(const std::weak_ptr<MapInterf
                                                          const Tiled2dMapTileInfo &tileInfo,
                                                          const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
                                                          const std::shared_ptr<LineVectorLayerDescription> &description)
-        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, tileCallbackInterface) {
-    usedKeys = std::move(description->getUsedKeys());
-}
+        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, tileCallbackInterface), usedKeys(description->getUsedKeys()) {}
 
 void Tiled2dMapVectorLineTile::updateVectorLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                                       const Tiled2dMapVectorTileDataVector &tileData) {
@@ -39,12 +37,21 @@ void Tiled2dMapVectorLineTile::update() {
     }
     
     auto mapInterface = this->mapInterface.lock();
-    if (!mapInterface) {
+    auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+    if (!mapInterface || !camera) {
         return;
     }
-
-    double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(mapInterface->getCamera()->getZoom());
+    const double cameraZoom = camera->getZoom();
+     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(cameraZoom);
     zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.zoomIdentifier);
+
+    const auto zoom = Tiled2dMapVectorRasterSubLayerConfig::getZoomFactorAtIdentifier(floor(zoomIdentifier));
+    const auto cameraScalingFactor = camera->asCameraInterface()->getScalingFactor();
+    const auto scalingFactor = (cameraScalingFactor / cameraZoom) * zoom;
+
+    for (auto const &line: lines) {
+        line->setScalingFactor(scalingFactor);
+    }
 
     auto lineDescription = std::static_pointer_cast<LineVectorLayerDescription>(description);
 
@@ -104,6 +111,8 @@ void Tiled2dMapVectorLineTile::update() {
             shaders.at(styleGroupId)->setStyles(reusableLineStyles.at(styleGroupId));
         }
     }
+
+
 }
 
 void Tiled2dMapVectorLineTile::clear() {
@@ -183,7 +192,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                 }
 
                 if (subGroupCoordCount.count(styleGroupIndex) == 0) {
-                    subGroupCoordCount[styleGroupIndex] = 0;
+                    subGroupCoordCount.try_emplace(styleGroupIndex, 0);
                 }
 
                 const VectorTileGeometryHandler &geometryHandler = std::get<1>(*featureIt);
@@ -230,12 +239,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
 
 
 void Tiled2dMapVectorLineTile::addLines(const std::unordered_map<int, std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> &styleIdLinesMap) {
-    std::vector<std::shared_ptr<GraphicsObjectInterface>> oldGraphicsObjects;
-    for (const auto &polygon : this->lines) {
-        oldGraphicsObjects.push_back(polygon->getLineObject());
-    }
-
-    if (styleIdLinesMap.empty() && oldGraphicsObjects.empty()) {
+    if (styleIdLinesMap.empty()) {
         auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
         tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
         return;
@@ -251,8 +255,8 @@ void Tiled2dMapVectorLineTile::addLines(const std::unordered_map<int, std::vecto
     std::vector<std::shared_ptr<LineGroup2dLayerObject>> lineGroupObjects;
     std::vector<std::shared_ptr<GraphicsObjectInterface>> newGraphicObjects;
 
-    for (const auto &[styleGroupIndex, lines] : styleIdLinesMap) {
-        for (const auto &lineSubGroup: lines) {
+    for (const auto &[styleGroupIndex, styleLines] : styleIdLinesMap) {
+        for (const auto &lineSubGroup: styleLines) {
             auto lineGroupGraphicsObject = objectFactory->createLineGroup(shaders.at(styleGroupIndex)->asShaderProgramInterface());
 
             auto lineGroupObject = std::make_shared<LineGroup2dLayerObject>(coordinateConverterHelper,
@@ -268,20 +272,15 @@ void Tiled2dMapVectorLineTile::addLines(const std::unordered_map<int, std::vecto
     lines = lineGroupObjects;
 
 #ifdef __APPLE__
-    setupLines(newGraphicObjects, oldGraphicsObjects);
+    setupLines(newGraphicObjects);
 #else
     auto selfActor = WeakActor(mailbox, weak_from_this());
-    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorLineTile::setupLines, newGraphicObjects, oldGraphicsObjects);
+    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorLineTile::setupLines, newGraphicObjects);
 #endif
 
 }
 
-void Tiled2dMapVectorLineTile::setupLines(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newLineGraphicsObjects,
-                                          const std::vector<std::shared_ptr<GraphicsObjectInterface>> &oldLineGraphicsObjects) {
-    for (const auto &line : oldLineGraphicsObjects) {
-        if (line->isReady()) line->clear();
-    }
-
+void Tiled2dMapVectorLineTile::setupLines(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newLineGraphicsObjects) {
     auto mapInterface = this->mapInterface.lock();
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!renderingContext) {
@@ -307,7 +306,7 @@ std::vector<std::shared_ptr<RenderObjectInterface>> Tiled2dMapVectorLineTile::ge
         }
     }
 
-    return std::move(newRenderObjects);
+    return newRenderObjects;
 }
 
 bool Tiled2dMapVectorLineTile::onClickConfirmed(const Vec2F &posScreen) {

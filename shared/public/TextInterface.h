@@ -6,17 +6,13 @@
 #include "RenderingContextInterface.h"
 #include "SharedBytes.h"
 #include <memory>
-#include <vector>
 
 class GraphicsObjectInterface;
 class TextureHolderInterface;
-struct TextDescription;
 
 class TextInterface {
 public:
     virtual ~TextInterface() = default;
-
-    virtual void setTexts(const std::vector<TextDescription> & texts) = 0;
 
     virtual void setTextsShared(const ::SharedBytes & vertices, const ::SharedBytes & indices) = 0;
 

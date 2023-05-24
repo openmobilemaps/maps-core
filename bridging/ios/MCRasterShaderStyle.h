@@ -29,5 +29,7 @@
 
 @property (nonatomic, readonly) float saturation;
 
+- (NSComparisonResult)compare:(nonnull MCRasterShaderStyle *)other;
+
 @end
 

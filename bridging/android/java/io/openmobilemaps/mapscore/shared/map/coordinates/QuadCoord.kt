@@ -8,4 +8,26 @@ data class QuadCoord(
     var topRight: Coord,
     var bottomRight: Coord,
     var bottomLeft: Coord,
-)
+) : Comparable<QuadCoord> {
+
+    override fun compareTo(other: QuadCoord): Int {
+        var tempResult = 0
+        tempResult = this.topLeft.compareTo(other.topLeft)
+        if (tempResult != 0) {
+            return tempResult
+        }
+        tempResult = this.topRight.compareTo(other.topRight)
+        if (tempResult != 0) {
+            return tempResult
+        }
+        tempResult = this.bottomRight.compareTo(other.bottomRight)
+        if (tempResult != 0) {
+            return tempResult
+        }
+        tempResult = this.bottomLeft.compareTo(other.bottomLeft)
+        if (tempResult != 0) {
+            return tempResult
+        }
+        return 0
+    }
+}
