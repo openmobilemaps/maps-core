@@ -436,7 +436,7 @@ std::vector<float> MapCamera2d::getVpMatrix() {
 
 //        Matrix::translateM(newViewMatrix, 0, 0.0, +0.3, 0.0);
 
-        angle += 0.1;
+//        angle += 0.1;
 
 
 

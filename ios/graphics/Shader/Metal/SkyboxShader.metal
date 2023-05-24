@@ -79,7 +79,7 @@ float3 calculateSunPosition(int day, float time) {
   dec = dec * 0.01745;
 
   // Adjust RA based on the time of day
-  RA = RA + (time / 24.0) * 2 * 3.14159;
+  RA = RA + (time) * 2 * 3.14159;
 
   // Calculate the sun's position in Cartesian coordinates
   float cosDec = cos(dec);
@@ -98,7 +98,7 @@ skyboxFragmentShader(const VertexOut vertexIn [[stage_in]],
 {
 
 
-  float3 fsun = calculateSunPosition(120, time);
+  float3 fsun = calculateSunPosition(120, time / 24.0);
   float4 fsun4 = (modelViewMatrix * float4(fsun, 1.0));
   fsun = -fsun4.xyz / fsun4.w;
 
