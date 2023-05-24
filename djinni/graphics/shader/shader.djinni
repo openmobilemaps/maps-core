@@ -45,7 +45,7 @@ raster_shader_style = record {
         contrast = 0.0,
         saturation = 0.0
     };
-}
+} deriving (eq, ord)
 
 raster_shader_interface = interface +c +o {
     set_style(style: raster_shader_style);

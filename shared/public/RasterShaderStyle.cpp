@@ -9,3 +9,61 @@ RasterShaderStyle const RasterShaderStyle::DEFAULT_STYLE = RasterShaderStyle(
     1.0f /* brightnessMax */ ,
     0.0f /* contrast */ ,
     0.0f /* saturation */ );
+
+bool operator==(const RasterShaderStyle& lhs, const RasterShaderStyle& rhs) {
+    return lhs.opacity == rhs.opacity &&
+           lhs.brightnessMin == rhs.brightnessMin &&
+           lhs.brightnessMax == rhs.brightnessMax &&
+           lhs.contrast == rhs.contrast &&
+           lhs.saturation == rhs.saturation;
+}
+
+bool operator!=(const RasterShaderStyle& lhs, const RasterShaderStyle& rhs) {
+    return !(lhs == rhs);
+}
+
+bool operator<(const RasterShaderStyle& lhs, const RasterShaderStyle& rhs) {
+    if (lhs.opacity < rhs.opacity) {
+        return true;
+    }
+    if (rhs.opacity < lhs.opacity) {
+        return false;
+    }
+    if (lhs.brightnessMin < rhs.brightnessMin) {
+        return true;
+    }
+    if (rhs.brightnessMin < lhs.brightnessMin) {
+        return false;
+    }
+    if (lhs.brightnessMax < rhs.brightnessMax) {
+        return true;
+    }
+    if (rhs.brightnessMax < lhs.brightnessMax) {
+        return false;
+    }
+    if (lhs.contrast < rhs.contrast) {
+        return true;
+    }
+    if (rhs.contrast < lhs.contrast) {
+        return false;
+    }
+    if (lhs.saturation < rhs.saturation) {
+        return true;
+    }
+    if (rhs.saturation < lhs.saturation) {
+        return false;
+    }
+    return false;
+}
+
+bool operator>(const RasterShaderStyle& lhs, const RasterShaderStyle& rhs) {
+    return rhs < lhs;
+}
+
+bool operator<=(const RasterShaderStyle& lhs, const RasterShaderStyle& rhs) {
+    return !(rhs < lhs);
+}
+
+bool operator>=(const RasterShaderStyle& lhs, const RasterShaderStyle& rhs) {
+    return !(lhs < rhs);
+}
