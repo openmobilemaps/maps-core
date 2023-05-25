@@ -20,8 +20,9 @@
 Tiled2dMapVectorSourceSymbolDataManager::Tiled2dMapVectorSourceSymbolDataManager(const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
                                                                                  const std::shared_ptr<VectorMapDescription> &mapDescription,
                                                                                  const std::string &source,
-                                                                                 const std::shared_ptr<FontLoaderInterface> &fontLoader) :
-Tiled2dMapVectorSourceDataManager(vectorLayer, mapDescription, source), fontLoader(fontLoader)
+                                                                                 const std::shared_ptr<FontLoaderInterface> &fontLoader,
+                                                                                 const WeakActor<Tiled2dMapVectorSource> &vectorSource) :
+Tiled2dMapVectorSourceDataManager(vectorLayer, mapDescription, source), fontLoader(fontLoader), vectorSource(vectorSource)
 {
     for (const auto &layer: mapDescription->layers) {
         if (layer->getType() == VectorLayerType::symbol && layer->source == source) {
@@ -78,7 +79,65 @@ void Tiled2dMapVectorSourceSymbolDataManager::setAlpha(float alpha) {
 void Tiled2dMapVectorSourceSymbolDataManager::updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription,
                                                                      int32_t legacyIndex,
                                                                      bool needsTileReplace) {
-    // TODO: update layer description of symbols
+    auto mapInterface = this->mapInterface.lock();
+    if (!mapInterface) {
+        return;
+    }
+
+    for (const auto &[tile, symbolGroupMap]: tileSymbolGroupMap) {
+        for (const auto &[layerIdentifier, symbolGroups]: symbolGroupMap) {
+            for(const auto &symbolGroup: symbolGroups) {
+                symbolGroup.message(&Tiled2dMapVectorSymbolGroup::resetCollisionCache);
+            }
+        }
+    }
+
+    if (layerDescription->source != source || layerDescription->getType() != VectorLayerType::symbol) {
+        return;
+    }
+
+    layerDescriptions.erase(layerDescription->identifier);
+    layerDescriptions.insert({layerDescription->identifier, std::static_pointer_cast<SymbolVectorLayerDescription>(layerDescription)});
+
+    auto const &currentTileInfos = vectorSource.converse(&Tiled2dMapVectorSource::getCurrentTiles).get();
+
+    std::vector<Actor<Tiled2dMapVectorSymbolGroup>> toSetup;
+    std::unordered_set<Tiled2dMapTileInfo> tilesToRemove;
+
+    for (const auto &tileData: currentTileInfos) {
+        auto tileGroup = tileSymbolGroupMap.find(tileData.tileInfo);
+        if (tileGroup == tileSymbolGroupMap.end()) {
+            continue;
+        }
+
+        tileGroup->second.erase(layerDescription->identifier);
+
+        // If new source of layer is not handled by this manager, continue
+        if (layerDescription->source != source) {
+            continue;
+        }
+
+        const auto &dataIt = tileData.layerFeatureMaps->find(layerDescription->sourceId);
+
+        if (dataIt != tileData.layerFeatureMaps->end()) {
+            // there is something in this layer to display
+            const auto &newSymbolGroup = createSymbolGroup(tileData.tileInfo, layerDescription->identifier, dataIt->second);
+            if (newSymbolGroup) {
+                tileSymbolGroupMap.at(tileData.tileInfo)[layerDescription->identifier].push_back(*newSymbolGroup);
+                toSetup.push_back(*newSymbolGroup);
+            }
+        }
+    }
+#ifdef __APPLE__
+    setupSymbolGroups(toSetup, tilesToRemove);
+#else
+    auto selfActor = WeakActor(mailbox, weak_from_this());
+    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups, toSetup, tilesToRemove);
+#endif
+
+
+    mapInterface->invalidate();
+    
 }
 
 void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::string &sourceName,

@@ -146,6 +146,10 @@ public:
         initialize();
     }
 
+    Vec2D getCenter() const {
+        return center;
+    }
+
     void update(const RectCoord& rect) {
         corner[0] = Vec2D(rect.topLeft.x, rect.bottomRight.y);
         corner[1] = Vec2D(rect.bottomRight.x, rect.bottomRight.y);

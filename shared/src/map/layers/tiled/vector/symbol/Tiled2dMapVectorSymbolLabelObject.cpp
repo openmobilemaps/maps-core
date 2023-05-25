@@ -91,6 +91,9 @@ referenceSize(fontResult->fontData->info.size)
                 if(it != breaks.end()) {
                     // add line break
                     if(it->keepLetter && found) {
+                        if (!isSpace) {
+                            characterCount += 1;
+                        }
                         splittedTextInfo.emplace_back(index, entry.scale);
                     }
                     // use -1 as line break
@@ -514,8 +517,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
                 scales[2 * (countOffset + centerPositions.size()) + 1] = charSize.y;
                 rotations[countOffset + centerPositions.size()] = -angle;
 
-                centerPositions.push_back(Vec2D((quad.topLeft.x + quad.topRight.x) / 2,
-                                                 (quad.bottomLeft.y + quad.topLeft.y ) / 2));
+                centerPositions.push_back(OBB2D(quad).getCenter());
             }
 
 

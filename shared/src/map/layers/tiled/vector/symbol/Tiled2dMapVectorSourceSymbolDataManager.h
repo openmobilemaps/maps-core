@@ -29,7 +29,8 @@ public:
     Tiled2dMapVectorSourceSymbolDataManager(const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
                                           const std::shared_ptr<VectorMapDescription> &mapDescription,
                                           const std::string &source,
-                                          const std::shared_ptr<FontLoaderInterface> &fontLoader);
+                                          const std::shared_ptr<FontLoaderInterface> &fontLoader,
+                                          const WeakActor<Tiled2dMapVectorSource> &vectorSource);
 
     void onAdded(const std::weak_ptr< ::MapInterface> &mapInterface) override;
 
@@ -68,7 +69,6 @@ public:
     std::shared_ptr<FontLoaderResult> loadFont(const std::string &fontName) override;
 
 private:
-
     std::optional<Actor<Tiled2dMapVectorSymbolGroup>> createSymbolGroup(const Tiled2dMapTileInfo &tileInfo, const std::string &layerIdentifier, const std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features);
 
     void setupSymbolGroups(const std::vector<Actor<Tiled2dMapVectorSymbolGroup>> &toSetup, const std::unordered_set<Tiled2dMapTileInfo> &tilesToRemove);
@@ -76,6 +76,8 @@ private:
     void setupExistingSymbolWithSprite();
 
     void pregenerateRenderPasses();
+
+    const WeakActor<Tiled2dMapVectorSource> vectorSource;
     
     std::unordered_map<std::string, std::shared_ptr<FontLoaderResult>> fontLoaderResults;
 

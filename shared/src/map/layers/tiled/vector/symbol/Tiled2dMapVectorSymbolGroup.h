@@ -49,6 +49,8 @@ public:
     std::optional<VectorLayerFeatureInfo> onClickConfirmed(const OBB2D &tinyClickBox);
 
     std::shared_ptr<PolygonGroup2dLayerObject> boundingBoxLayerObject;
+
+    void resetCollisionCache();
 private:
 
     inline std::optional<Tiled2dMapVectorSymbolSubLayerPositioningWrapper> getPositioning(std::vector<::Coord>::const_iterator &iterator, const std::vector<::Coord> & collection);
