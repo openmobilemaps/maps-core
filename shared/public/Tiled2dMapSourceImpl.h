@@ -144,16 +144,16 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & viewMa
         const double boundsTop = layerBounds.topLeft.y;
         const Coord topLeft = Coord(layerSystemId, candidate.x * tileWidthAdj + boundsLeft, candidate.y * tileHeightAdj + boundsTop, focusPointAltitude);
 
-        const double heightRange = 200;
+        const double heightRange = 0;
 
         const Coord topRight = Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y, focusPointAltitude - heightRange / 2.0);
         const Coord bottomLeft = Coord(layerSystemId, topLeft.x, topLeft.y + tileHeightAdj, focusPointAltitude- heightRange / 2.0);
         const Coord bottomRight = Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y + tileHeightAdj, focusPointAltitude- heightRange / 2.0);
 
         const Coord topLeftHigh = Coord(layerSystemId, topLeft.x, topLeft.y, focusPointAltitude + heightRange / 2.0);
-        const Coord topRightHigh = Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y, focusPointAltitude + heightRange / 2.0);
-        const Coord bottomLeftHigh = Coord(layerSystemId, topLeft.x, topLeft.y + tileHeightAdj, focusPointAltitude + heightRange / 2.0);
-        const Coord bottomRightHigh = Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y + tileHeightAdj, focusPointAltitude + heightRange / 2.0);
+        const Coord topRightHigh = Coord(layerSystemId, topRight.x , topRight.y, focusPointAltitude + heightRange / 2.0);
+        const Coord bottomLeftHigh = Coord(layerSystemId, bottomLeft.x, bottomLeft.y, focusPointAltitude + heightRange / 2.0);
+        const Coord bottomRightHigh = Coord(layerSystemId, bottomRight.x, bottomRight.y, focusPointAltitude + heightRange / 2.0);
 
         auto topLeftView = transformToView(topLeft, viewMatrix);
         auto topRightView = transformToView(topRight, viewMatrix);
@@ -189,7 +189,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & viewMa
 
             // 0.5: half of view on each side of center
             // 1.02: increase angle with padding
-            float fovFactor = 0.5 * 1.05;
+            float fovFactor = 0.5 * 1.0;
 
             if (topLeftVA < -verticalFov * fovFactor && topRightVA < -verticalFov * fovFactor && bottomLeftVA < -verticalFov * fovFactor && bottomRightVA < -verticalFov * fovFactor &&
                 topLeftHighVA < -verticalFov * fovFactor && topRightHighVA < -verticalFov * fovFactor && bottomLeftHighVA < -verticalFov * fovFactor && bottomRightHighVA < -verticalFov * fovFactor

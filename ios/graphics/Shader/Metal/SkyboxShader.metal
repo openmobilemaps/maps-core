@@ -114,8 +114,8 @@ skyboxFragmentShader(const VertexOut vertexIn [[stage_in]],
   float3 pos = normalize(vertexIn.n);
 //  return float4(abs(pos.z), 0, 0, 1.0);
 
-  float cirrus = 0.4;
-  float cumulus = 0.1;
+  float cirrus = 0.7;
+  float cumulus = 0.0; // disabled below due to performance
 
   const float Br = 0.0025;
   const float Bm = 0.0003;
@@ -141,11 +141,11 @@ skyboxFragmentShader(const VertexOut vertexIn [[stage_in]],
   color.rgb = mix(color.rgb, extinction * 4.0, density * max(pos.y, 0.0));
 
   // Cumulus Clouds
-  for (int i = 0; i < 10; i++)
-  {
-    float density = smoothstep(1.0 - cumulus, 1.0, fbm((0.7 + float(i) * 0.01) * pos.xyz / pos.y + time * 0.3));
-    color.rgb = mix(color.rgb, extinction * density * 5.0, min(density, 1.0) * max(pos.y, 0.0));
-  }
+//  for (int i = 0; i < 10; i++)
+//  {
+//    float density = smoothstep(1.0 - cumulus, 1.0, fbm((0.7 + float(i) * 0.01) * pos.xyz / pos.y + time * 0.3));
+//    color.rgb = mix(color.rgb, extinction * density * 5.0, min(density, 1.0) * max(pos.y, 0.0));
+//  }
 
   // Dithering Noise
   color.rgb += noise(pos * 1000) * 0.01;

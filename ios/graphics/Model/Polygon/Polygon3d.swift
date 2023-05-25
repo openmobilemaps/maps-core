@@ -251,7 +251,7 @@ extension Polygon3d: MCMaskingObjectInterface {
             encoder.setTessellationFactorBuffer(tessellationFactorBuffer, offset: 0, instanceStride: 0)
             
             encoder.setFragmentSamplerState(sampler, index: 0)
-            encoder.setVertexSamplerState(sampler, index: 0)
+            encoder.setVertexSamplerState(heightSampler, index: 0)
             
             encoder.drawIndexedPatches(numberOfPatchControlPoints: 3, patchStart: 0, patchCount: self.indicesCount / 3, patchIndexBuffer: nil, patchIndexBufferOffset: 0, controlPointIndexBuffer: indicesBuffer, controlPointIndexBufferOffset: 0, instanceCount: 1, baseInstance: 0)
         }

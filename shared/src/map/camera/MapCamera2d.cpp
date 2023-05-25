@@ -420,9 +420,14 @@ std::vector<float> MapCamera2d::getVpMatrix() {
 
         Matrix::setIdentityM(newProjectionMatrix, 0);
 
-        float fov = 90; // zoom / 70800;
 
+        float fov = 45.0; // zoom / 70800;
+
+        // aspect ratio
         float vpr = (float)sizeViewport.x / (float)sizeViewport.y;
+        if (vpr > 1) {
+            fov /= vpr;
+        }
 
 
 
@@ -672,8 +677,9 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
         long long newTimestamp = DateHelper::currentTimeMicros();
         long long deltaMcs = std::max(newTimestamp - currentDragTimestamp, 8000ll);
         float averageFactor = currentDragVelocity.x == 0 && currentDragVelocity.y == 0 ? 1.0 : 0.5;
-        currentDragVelocity.x = (1 - averageFactor) * currentDragVelocity.x + averageFactor * xDiffMap / (deltaMcs / 16000.0);
-        currentDragVelocity.y = (1 - averageFactor) * currentDragVelocity.y + averageFactor * yDiffMap / (deltaMcs / 16000.0);
+        float fasterIneratia = 10.0f;
+        currentDragVelocity.x = (1 - averageFactor) * currentDragVelocity.x + averageFactor * xDiffMap / (deltaMcs / 16000.0) * fasterIneratia;
+        currentDragVelocity.y = (1 - averageFactor) * currentDragVelocity.y + averageFactor * yDiffMap / (deltaMcs / 16000.0) * fasterIneratia;
         currentDragTimestamp = newTimestamp;
     }
     // this->validVpMatrix = false;
@@ -712,7 +718,7 @@ void MapCamera2d::inertiaStep() {
         return;
     }
 
-    float factor = std::pow(0.95, delta);
+    float factor = std::pow(0.99, delta);
     if (delta > inertia->t1) {
         factor *= std::pow(0.6, delta - inertia->t1);
     }
