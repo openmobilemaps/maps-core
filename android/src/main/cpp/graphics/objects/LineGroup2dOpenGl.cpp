@@ -11,6 +11,7 @@
 #include "LineGroup2dOpenGl.h"
 #include <cmath>
 #include <string>
+#include <ColorLineGroup2dShaderOpenGl.h>
 
 LineGroup2dOpenGl::LineGroup2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
     : shaderProgram(shader) {}
@@ -85,6 +86,9 @@ void LineGroup2dOpenGl::clear() {
 void LineGroup2dOpenGl::removeGlBuffers() {
     glDeleteBuffers(1, &vertexAttribBuffer);
     glDeleteBuffers(1, &indexBuffer);
+    if (auto shader = std::dynamic_pointer_cast<ColorLineGroup2dShaderOpenGl>(shaderProgram)) {
+        shader->clear();
+    }
 }
 
 void LineGroup2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
@@ -151,6 +155,7 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     // Draw the triangle
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glDrawElements(GL_TRIANGLES, lineIndices.size(), GL_UNSIGNED_INT, nullptr);
+    OpenGlHelper::checkGlError("glDrawElements");
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
