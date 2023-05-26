@@ -144,7 +144,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & viewMa
         const double boundsTop = layerBounds.topLeft.y;
         const Coord topLeft = Coord(layerSystemId, candidate.x * tileWidthAdj + boundsLeft, candidate.y * tileHeightAdj + boundsTop, focusPointAltitude);
 
-        const double heightRange = 0;
+        const double heightRange = 1000;
 
         const Coord topRight = Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y, focusPointAltitude - heightRange / 2.0);
         const Coord bottomLeft = Coord(layerSystemId, topLeft.x, topLeft.y + tileHeightAdj, focusPointAltitude- heightRange / 2.0);

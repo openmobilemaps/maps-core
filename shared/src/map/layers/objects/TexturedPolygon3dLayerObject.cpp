@@ -110,6 +110,18 @@ void TexturedPolygon3dLayerObject::setPolygons(const std::vector<::PolygonCoord>
         }
     }
 
+    Coord renderCoordTopLeft = conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), bounds.topLeft);
+    Coord renderCoordBottomRight = conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), bounds.bottomRight);
+    float lx = renderCoordTopLeft.x;
+    float rx = renderCoordBottomRight.x;
+    float ly = renderCoordTopLeft.y;
+    float ry = renderCoordBottomRight.y;
+    float f = 0.02;
+    for (int i = 0; i<vertices.size(); i += 6) {
+        vertices[i] = ((vertices[i]-lx) / (rx-lx) * (1+f) - f/2) * (rx-lx) + lx;
+        vertices[i+1] = ((vertices[i+1]-ly) / (ry-ly) * (1+f) - f/2) * (ry-ly) + ly;
+    }
+
     auto attr = SharedBytes((int64_t)vertices.data(), (int32_t)vertices.size(), (int32_t)sizeof(float));
     auto ind = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(uint16_t));
 

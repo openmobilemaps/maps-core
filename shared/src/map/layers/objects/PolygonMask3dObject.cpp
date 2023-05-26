@@ -10,6 +10,7 @@
 
 #include "PolygonMask3dObject.h"
 #include "EarcutVec2D.h"
+#include <limits>
 
 std::shared_ptr<PolygonMaskObject3dInterface>
 PolygonMaskObject3dInterface::create(const std::shared_ptr<::GraphicsObjectFactoryInterface> &graphicsObjectFactory,
