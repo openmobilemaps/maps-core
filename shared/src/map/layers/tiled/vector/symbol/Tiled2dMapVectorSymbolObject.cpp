@@ -19,7 +19,7 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                                                            const Tiled2dMapTileInfo &tileInfo,
                                                            const std::string &layerIdentifier,
                                                            const std::shared_ptr<SymbolVectorLayerDescription> &description,
-                                                           const FeatureContext &featureContext,
+                                                           const std::shared_ptr<FeatureContext> featureContext,
                                                            const std::vector<FormattedStringEntry> &text,
                                                            const std::string &fullText,
                                                            const ::Coord &coordinate,
@@ -629,7 +629,7 @@ std::optional<VectorLayerFeatureInfo> Tiled2dMapVectorSymbolObject::onClickConfi
     orientedBox.update(*combinedBox);
 
     if (orientedBox.overlaps(tinyClickBox)) {
-        return featureContext.getFeatureInfo();
+        return featureContext->getFeatureInfo();
     }
     
     return std::nullopt;

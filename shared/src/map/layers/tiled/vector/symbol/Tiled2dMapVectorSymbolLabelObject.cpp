@@ -12,7 +12,7 @@
 #include "TextHelper.h"
 
 Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::shared_ptr<CoordinateConversionHelperInterface> &converter,
-                                                                     const FeatureContext featureContext,
+                                                                     const std::shared_ptr<FeatureContext> featureContext,
                                                                      const std::shared_ptr<SymbolVectorLayerDescription> &description,
                                                                      const std::vector<FormattedStringEntry> &text,
                                                                      const std::string &fullText,

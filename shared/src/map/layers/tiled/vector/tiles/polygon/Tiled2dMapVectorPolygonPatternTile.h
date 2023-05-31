@@ -61,7 +61,7 @@ private:
     std::shared_ptr<PolygonPatternGroupShaderInterface> shader;
 
     std::vector<std::shared_ptr<PolygonPatternGroup2dLayerObject>> polygons;
-    std::vector<std::tuple<size_t, FeatureContext>> featureGroups;
+    std::vector<std::tuple<size_t, std::shared_ptr<FeatureContext>>> featureGroups;
     std::unordered_set<std::string> usedKeys;
 
     std::shared_ptr<SpriteData> spriteData;
@@ -70,5 +70,5 @@ private:
     std::vector<float> opacities;
     std::vector<float> textureCoordinates;
 
-    std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<PolygonCoord, FeatureContext>>> hitDetectionPolygonMap;
+    std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<PolygonCoord, std::shared_ptr<FeatureContext>>>> hitDetectionPolygonMap;
 };

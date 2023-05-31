@@ -27,7 +27,7 @@ Tiled2dMapVectorSourceDataManager(vectorLayer, mapDescription, source), fontLoad
     for (const auto &layer: mapDescription->layers) {
         if (layer->getType() == VectorLayerType::symbol && layer->source == source) {
             layerDescriptions.insert({layer->identifier, std::static_pointer_cast<SymbolVectorLayerDescription>(layer)});
-            if (layer->isInteractable(EvaluationContext(std::nullopt, FeatureContext()))) {
+            if (layer->isInteractable(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>()))) {
                 interactableLayers.insert(layer->identifier);
             }
         }

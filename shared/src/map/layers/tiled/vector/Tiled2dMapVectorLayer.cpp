@@ -706,14 +706,14 @@ void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDe
     }
 }
 
-std::optional<FeatureContext> Tiled2dMapVectorLayer::getFeatureContext(int64_t identifier) {
+std::optional<std::shared_ptr<FeatureContext>> Tiled2dMapVectorLayer::getFeatureContext(int64_t identifier) {
     for (const auto &[source, vectorTileSource] : vectorTileSources) {
         auto const &currentTileInfos = vectorTileSource.converse(&Tiled2dMapVectorSource::getCurrentTiles).get();
 
         for (auto const &tile: currentTileInfos) {
             for (auto it = tile.layerFeatureMaps->begin(); it != tile.layerFeatureMaps->end(); it++) {
                 for (auto const &[featureContext, geometry]: *it->second) {
-                    if (featureContext.identifier == identifier) {
+                    if (featureContext->identifier == identifier) {
                         return featureContext;
                     }
                 }

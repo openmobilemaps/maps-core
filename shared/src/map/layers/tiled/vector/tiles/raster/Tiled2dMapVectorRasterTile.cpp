@@ -22,7 +22,7 @@ Tiled2dMapVectorRasterTile::Tiled2dMapVectorRasterTile(const std::weak_ptr<MapIn
     auto pMapInterface = mapInterface.lock();
     if (pMapInterface) {
         auto shader = pMapInterface->getShaderFactory()->createRasterShader();
-        shader->asShaderProgramInterface()->setBlendMode(description->style.getBlendMode(EvaluationContext(std::nullopt, FeatureContext())));
+        shader->asShaderProgramInterface()->setBlendMode(description->style.getBlendMode(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>())));
         auto quad = pMapInterface->getGraphicsObjectFactory()->createQuad(shader->asShaderProgramInterface());
         tileObject = std::make_shared<Textured2dLayerObject>(quad, shader, pMapInterface);
         tileObject->setRectCoord(tileInfo.bounds);
@@ -45,7 +45,7 @@ void Tiled2dMapVectorRasterTile::update() {
 
     zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.zoomIdentifier);
 
-    const EvaluationContext evalContext(zoomIdentifier, FeatureContext());
+    const EvaluationContext evalContext(zoomIdentifier, std::make_shared<FeatureContext>());
     const auto rasterStyle = std::static_pointer_cast<RasterVectorLayerDescription>(description)->style.getRasterStyle(evalContext);
     if(rasterStyle == lastStyle) {
         return;

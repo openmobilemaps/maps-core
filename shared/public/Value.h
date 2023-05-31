@@ -242,10 +242,10 @@ public:
 class EvaluationContext {
 public:
     std::optional<double> zoomLevel;
-    const FeatureContext &feature;
+    const std::shared_ptr<FeatureContext> feature;
 
     EvaluationContext(std::optional<double> zoomLevel,
-                      const FeatureContext &feature) : zoomLevel(zoomLevel), feature(feature) {};
+                      const std::shared_ptr<FeatureContext> feature) : zoomLevel(zoomLevel), feature(feature) {};
 };
 
 class Value {
@@ -522,7 +522,7 @@ public:
             return *context.zoomLevel;
         }
 
-        const auto& result = context.feature.getValue(key);
+        const auto& result = context.feature->getValue(key);
         if(!std::holds_alternative<std::monostate>(result)) {
             return result;
         }
@@ -597,7 +597,7 @@ public:
         if (std::holds_alternative<std::string>(value)) {
             std::string res = std::get<std::string>(value);
 
-            const auto &result = context.feature.getValue(res);
+            const auto &result = context.feature->getValue(res);
 
             if(!std::holds_alternative<std::monostate>(result)) {
                 return result;
@@ -654,7 +654,7 @@ public:
     }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
-        return context.feature.contains(key);
+        return context.feature->contains(key);
     };
 private:
     const std::string key;
@@ -1219,7 +1219,7 @@ public:
     }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
-        const auto &p = context.feature.getValue(key);
+        const auto &p = context.feature->getValue(key);
 
         if(!std::holds_alternative<std::monostate>(p)) {
             for(const auto& m : valueMapping) {
@@ -1400,7 +1400,7 @@ public:
     }
 
  ValueVariant evaluate(const EvaluationContext &context) const override {
-        auto const &value = context.feature.getValue(key);
+        auto const &value = context.feature->getValue(key);
         return values.count(value) != 0;
     };
 };
@@ -1421,7 +1421,7 @@ public:
     }
 
  ValueVariant evaluate(const EvaluationContext &context) const override {
-        auto const &value = context.feature.getValue(key);
+        auto const &value = context.feature->getValue(key);
         return values.count(value) == 0;
     };
 };

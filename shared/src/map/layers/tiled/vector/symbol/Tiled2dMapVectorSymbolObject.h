@@ -31,7 +31,7 @@ public:
                                  const Tiled2dMapTileInfo &tileInfo,
                                  const std::string &layerIdentifier,
                                  const std::shared_ptr<SymbolVectorLayerDescription> &description,
-                                 const FeatureContext &featureContext,
+                                 const std::shared_ptr<FeatureContext> featureContext,
                                  const std::vector<FormattedStringEntry> &text,
                                  const std::string &fullText,
                                  const ::Coord &coordinate,
@@ -82,7 +82,7 @@ private:
 
     std::shared_ptr<Tiled2dMapVectorSymbolLabelObject> labelObject;
 
-    const FeatureContext featureContext;
+    const std::shared_ptr<FeatureContext> featureContext;
 
     std::shared_ptr<SymbolInfo> textInfo;
 

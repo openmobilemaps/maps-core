@@ -14,6 +14,7 @@
 #include "BackgroundVectorLayerDescription.h"
 #include "ColorShaderInterface.h"
 #include "RenderObject.h"
+#include "Tiled2dMapVectorTileInfo.h"
 
 class Tiled2dMapVectorBackgroundSubLayer : public Tiled2dMapVectorSubLayer, public std::enable_shared_from_this<Tiled2dMapVectorBackgroundSubLayer> {
 public:
@@ -42,7 +43,7 @@ public:
     virtual std::vector<std::shared_ptr<RenderPassInterface>> buildRenderPasses(const std::unordered_set<Tiled2dMapTileInfo> &tiles) override;
 
     virtual void updateTileData(const Tiled2dMapTileInfo &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask,
-                                const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) override {};
+                                const std::vector<Tiled2dMapVectorTileInfo::FeatureTuple> &layerFeatures) override {};
 
     void updateTileMask(const Tiled2dMapTileInfo &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask) override {};
 

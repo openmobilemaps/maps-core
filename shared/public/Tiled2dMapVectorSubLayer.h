@@ -21,6 +21,7 @@
 #include "VectorLayerDescription.h"
 #include "Tiled2dMapVectorLayerTileCallbackInterface.h"
 #include "Textured2dLayerObject.h"
+#include "Tiled2dMapVectorTileInfo.h"
 
 class Tiled2dMapVectorSubLayer : public SimpleLayerInterface {
 public:
@@ -49,7 +50,7 @@ public:
     virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> &maskingObject) override;
 
     virtual void updateTileData(const Tiled2dMapTileInfo &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask,
-                   const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures);
+                   const std::vector<Tiled2dMapVectorTileInfo::FeatureTuple> &layerFeatures);
 
     virtual void updateTileMask(const Tiled2dMapTileInfo &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask);
 

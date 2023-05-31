@@ -44,7 +44,7 @@ Tiled2dMapVectorPolygonTile::Tiled2dMapVectorPolygonTile(const std::weak_ptr<Map
     auto pMapInterface = mapInterface.lock();
     if (pMapInterface) {
         shader = pMapInterface->getShaderFactory()->createPolygonGroupShader();
-        shader->asShaderProgramInterface()->setBlendMode(description->style.getBlendMode(EvaluationContext(std::nullopt, FeatureContext())));
+        shader->asShaderProgramInterface()->setBlendMode(description->style.getBlendMode(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>())));
     }
 }
 
@@ -131,7 +131,7 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
 
             const auto &[featureContext, geometryHandler] = *featureIt;
 
-            if (featureContext.geomType != vtzero::GeomType::POLYGON) { continue; }
+            if (featureContext->geomType != vtzero::GeomType::POLYGON) { continue; }
 
             EvaluationContext evalContext = EvaluationContext(tileInfo.zoomIdentifier, featureContext);
             if (description->filter == nullptr || description->filter->evaluateOr(evalContext, true)) {
@@ -143,7 +143,7 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
                 int styleIndex = -1;
                 
                 {
-                    auto const hash = featureContext.getStyleHash(usedKeys);
+                    auto const hash = featureContext->getStyleHash(usedKeys);
 
                     for (size_t i = 0; i != featureGroups.size(); i++) {
                         auto const &[groupHash, group] = featureGroups.at(i);
@@ -303,7 +303,7 @@ bool Tiled2dMapVectorPolygonTile::onClickConfirmed(const Vec2F &posScreen) {
     for (auto const &[tileInfo, polygonTuples] : hitDetectionPolygonMap) {
         for (auto const &[polygon, featureContext]: polygonTuples) {
             if (PolygonHelper::pointInside(polygon, point, mapInterface->getCoordinateConverterHelper())) {
-                selectionDelegate->didSelectFeature(featureContext.getFeatureInfo(), description->identifier, converter->convert(CoordinateSystemIdentifiers::EPSG4326(), point));
+                selectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier, converter->convert(CoordinateSystemIdentifiers::EPSG4326(), point));
                 return true;
             }
         }
