@@ -33,7 +33,9 @@ void TextInstancedShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingCo
     openGlContext->storeProgram(programName, program);
 }
 
-void TextInstancedShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {}
+void TextInstancedShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
+    BaseShaderProgramOpenGl::preRender(context);
+}
 
 std::string TextInstancedShaderOpenGl::getVertexShader() {
     return OMMVersionedGlesShaderCode(320 es,

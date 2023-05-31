@@ -105,7 +105,7 @@ public:
                                                                                      minZoom,
                                                                                      maxZoom,
                                                                                      url,
-                                                                                     RasterVectorStyle(nullptr, nullptr, nullptr, nullptr, nullptr),
+                                                                                     RasterVectorStyle(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr),
                                                                                      adaptScaleToScreen,
                                                                                      numDrawPreviousLayers,
                                                                                      maskTiles,
@@ -151,6 +151,7 @@ public:
 
             std::optional<int32_t> renderPassIndex;
             std::shared_ptr<Value> interactable;
+            std::shared_ptr<Value> blendMode;
             if (val["metadata"].is_object()) {
                 if (val["metadata"]["render-pass-index"].is_number()) {
                     renderPassIndex = val["metadata"].value("render-pass-index", 0);
@@ -158,12 +159,16 @@ public:
                 if (!val["metadata"]["interactable"].is_null()) {
                     interactable = parser.parseValue(val["metadata"]["interactable"]);
                 }
+                if (!val["metadata"]["blend-mode"].is_null()) {
+                    blendMode = parser.parseValue(val["metadata"]["blend-mode"]);
+                }
             }
 
             if (val["type"] == "background" && !val["paint"]["background-color"].is_null()) {
                 auto layerDesc = std::make_shared<BackgroundVectorLayerDescription>(val["id"],
                                                                                     BackgroundVectorStyle(parser.parseValue(
-                                                                                            val["paint"]["background-color"])),
+                                                                                            val["paint"]["background-color"]),
+                                                                                                          blendMode),
                                                                                     renderPassIndex,
                                                                                     interactable);
                 layers.push_back(layerDesc);
@@ -179,7 +184,8 @@ public:
                                                                            parser.parseValue(val["paint"]["raster-brightness-min"]),
                                                                            parser.parseValue(val["paint"]["raster-brightness-max"]),
                                                                            parser.parseValue(val["paint"]["raster-contrast"]),
-                                                                           parser.parseValue(val["paint"]["raster-saturation"])),
+                                                                           parser.parseValue(val["paint"]["raster-saturation"]),
+                                                                           blendMode),
                                              layer->adaptScaleToScreen,
                                              layer->numDrawPreviousLayers,
                                              layer->maskTiles,
@@ -209,6 +215,7 @@ public:
                             parser.parseValue(val["paint"]["line-blur"]),
                             parser.parseValue(val["layout"]["line-cap"]),
                             parser.parseValue(val["paint"]["line-offset"]),
+                            blendMode,
                             dpFactor
                         ),
                         renderPassIndex,
@@ -252,6 +259,7 @@ public:
                                             parser.parseValue(val["layout"]["text-letter-spacing"]),
                                             parser.parseValue(val["layout"]["text-max-width"]),
                                             parser.parseValue(val["layout"]["text-max-angle"]),
+                                            blendMode,
                                             dpFactor);
 
                     std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
@@ -272,7 +280,8 @@ public:
 
                     PolygonVectorStyle style(parser.parseValue(val["paint"]["fill-color"]),
                                              parser.parseValue(val["paint"]["fill-opacity"]),
-                                             parser.parseValue(val["paint"]["fill-pattern"]));
+                                             parser.parseValue(val["paint"]["fill-pattern"]),
+                                             blendMode);
 
                     auto layerDesc = std::make_shared<PolygonVectorLayerDescription>(val["id"],
                                                                                      val["source"],

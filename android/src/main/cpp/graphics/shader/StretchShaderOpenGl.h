@@ -18,7 +18,6 @@
 #include <vector>
 
 class StretchShaderOpenGl : public BaseShaderProgramOpenGl,
-                          public ShaderProgramInterface,
                           public StretchShaderInterface,
                           public std::enable_shared_from_this<ShaderProgramInterface> {
 

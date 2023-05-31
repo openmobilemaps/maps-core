@@ -14,7 +14,9 @@
 
 std::string StretchInstancedShaderOpenGl::getProgramName() { return "UBMAP_StretchInstancedShaderOpenGl"; }
 
-void StretchInstancedShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {}
+void StretchInstancedShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
+    BaseShaderProgramOpenGl::preRender(context);
+}
 
 void StretchInstancedShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);

@@ -7,6 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
+#import "MCBlendMode+Private.h"
 #import "MCRenderingContextInterface+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -51,6 +52,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setBlendMode:(MCBlendMode)blendMode {
+    try {
+        _cppRefHandle.get()->setBlendMode(::djinni::Enum<::BlendMode, MCBlendMode>::toCpp(blendMode));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class ShaderProgramInterface::ObjcProxy final
@@ -77,6 +84,12 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() preRender:(::djinni_generated::RenderingContextInterface::fromCpp(c_context))];
+        }
+    }
+    void setBlendMode(::BlendMode c_blendMode) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setBlendMode:(::djinni::Enum<::BlendMode, MCBlendMode>::fromCpp(c_blendMode))];
         }
     }
 };

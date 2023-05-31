@@ -16,13 +16,13 @@
 
 class BackgroundVectorStyle {
 public:
-    BackgroundVectorStyle(std::shared_ptr<Value> color): color(color) {}
+    BackgroundVectorStyle(std::shared_ptr<Value> color, std::shared_ptr<Value> blendMode): color(color), blendMode(blendMode) {}
 
     std::unordered_set<std::string> getUsedKeys() const {
 
         std::unordered_set<std::string> usedKeys;
         std::vector<std::shared_ptr<Value>> values = {
-            color
+            color, blendMode
         };
 
         for (auto const &value: values) {
@@ -34,6 +34,11 @@ public:
         return usedKeys;
     };
 
+    BlendMode getBlendMode(const EvaluationContext &context) const {
+        static const BlendMode defaultValue = BlendMode::NORMAL;
+        return blendMode ? blendMode->evaluateOr(context, defaultValue) : defaultValue;
+    }
+
     Color getColor(const EvaluationContext &context){
         static const Color defaultValue = ColorUtil::c(0, 0, 0, 1.0);
         return color ? color->evaluateOr(context, defaultValue) : defaultValue;
@@ -41,6 +46,7 @@ public:
 
 private:
     std::shared_ptr<Value> color;
+    std::shared_ptr<Value> blendMode;
 };
 
 class BackgroundVectorLayerDescription: public VectorLayerDescription {

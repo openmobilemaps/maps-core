@@ -7,6 +7,8 @@
 #include <memory>
 #include <string>
 
+enum class BlendMode;
+
 class ShaderProgramInterface {
 public:
     virtual ~ShaderProgramInterface() = default;
@@ -16,4 +18,6 @@ public:
     virtual void setupProgram(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context) = 0;
 
     virtual void preRender(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context) = 0;
+
+    virtual void setBlendMode(BlendMode blendMode) = 0;
 };

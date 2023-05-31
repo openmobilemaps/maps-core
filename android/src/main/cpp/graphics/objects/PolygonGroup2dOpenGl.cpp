@@ -97,9 +97,6 @@ void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterf
     int mProgram = openGlContext->getProgram(shaderProgram->getProgramName());
     glUseProgram(mProgram);
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
     glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
 
     shaderProgram->preRender(context);

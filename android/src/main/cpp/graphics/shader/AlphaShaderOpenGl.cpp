@@ -17,6 +17,7 @@ std::string AlphaShaderOpenGl::getProgramName() { return "UBMAP_AlphaShaderOpenG
 void AlphaShaderOpenGl::updateAlpha(float value) { alpha = value; }
 
 void AlphaShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
+    BaseShaderProgramOpenGl::preRender(context);
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     int alphaLocation = glGetUniformLocation(openGlContext->getProgram(getProgramName()), "alpha");
     glUniform1f(alphaLocation, alpha);

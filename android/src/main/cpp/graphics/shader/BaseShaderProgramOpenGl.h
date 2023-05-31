@@ -16,8 +16,9 @@
 #include "Logger.h"
 #include "ShaderProgramInterface.h"
 #include "opengl_wrapper.h"
+#include "BlendMode.h"
 
-class BaseShaderProgramOpenGl {
+class BaseShaderProgramOpenGl: public ShaderProgramInterface {
   protected:
     int loadShader(int type, std::string shaderCode);
 
@@ -26,4 +27,13 @@ class BaseShaderProgramOpenGl {
     virtual std::string getVertexShader();
 
     virtual std::string getFragmentShader();
+
+public:
+    void preRender(const std::shared_ptr<::RenderingContextInterface> &context) override;
+
+protected:
+
+    virtual void setBlendMode(BlendMode blendMode) override;
+
+    BlendMode blendMode = BlendMode::NORMAL;
 };

@@ -239,10 +239,6 @@ void Text2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     // Apply the projection and view transformation
     glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
 
-    // Enable blending
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
     // Draw the triangles
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glDrawElements(GL_TRIANGLES, textIndices.size(), GL_UNSIGNED_SHORT, nullptr);

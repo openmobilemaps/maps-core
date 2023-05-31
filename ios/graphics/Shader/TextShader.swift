@@ -13,7 +13,6 @@ import MapCoreSharedModule
 import Metal
 
 class TextShader: BaseShader {
-    private var pipeline: MTLRenderPipelineState?
     private var opacity: Float = 1.0
     private var color = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
     private var haloColor = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
@@ -21,7 +20,7 @@ class TextShader: BaseShader {
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline.textShader.rawValue)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: .textShader, blendMode: blendMode).json)
         }
     }
 

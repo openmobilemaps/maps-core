@@ -35,6 +35,7 @@ void RasterShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextIn
 }
 
 void RasterShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
+    BaseShaderProgramOpenGl::preRender(context);
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     int styleValuesLocation = glGetUniformLocation(openGlContext->getProgram(getProgramName()), "styleValues");
     glUniform1fv(styleValuesLocation, (GLsizei) styleValues.size(), &styleValues[0]);

@@ -19,10 +19,12 @@ public:
 
     PolygonVectorStyle(std::shared_ptr<Value> fillColor,
                        std::shared_ptr<Value> fillOpacity,
-                       std::shared_ptr<Value> fillPattern):
+                       std::shared_ptr<Value> fillPattern,
+                       std::shared_ptr<Value> blendMode):
     fillColor(fillColor),
     fillOpacity(fillOpacity),
-    fillPattern(fillPattern) {}
+    fillPattern(fillPattern),
+    blendMode(blendMode) {}
 
     std::unordered_set<std::string> getUsedKeys() const {
 
@@ -39,6 +41,11 @@ public:
 
         return usedKeys;
     };
+
+    BlendMode getBlendMode(const EvaluationContext &context) const {
+        static const BlendMode defaultValue = BlendMode::NORMAL;
+        return blendMode ? blendMode->evaluateOr(context, defaultValue) : defaultValue;
+    }
 
     Color getFillColor(const EvaluationContext &context) const {
         static const Color defaultValue = ColorUtil::c(0, 0, 0, 1.0);
@@ -64,6 +71,7 @@ private:
     std::shared_ptr<Value> fillColor;
     std::shared_ptr<Value> fillOpacity;
     std::shared_ptr<Value> fillPattern;
+    std::shared_ptr<Value> blendMode;
 };
 
 class PolygonVectorLayerDescription: public VectorLayerDescription {

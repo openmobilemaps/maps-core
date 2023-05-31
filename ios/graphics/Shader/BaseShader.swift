@@ -13,6 +13,11 @@ import MapCoreSharedModule
 import Metal
 
 open class BaseShader: MCShaderProgramInterface {
+
+    var blendMode: MCBlendMode = .NORMAL
+
+    var pipeline: MTLRenderPipelineState?
+
     public init() {
     }
 
@@ -31,5 +36,12 @@ open class BaseShader: MCShaderProgramInterface {
 
     open func preRender(encoder _: MTLRenderCommandEncoder,
                         context _: RenderingContext) {
+    }
+
+    open func setBlendMode(_ blendMode: MCBlendMode) {
+        guard blendMode != self.blendMode else { return }
+        self.blendMode = blendMode
+        pipeline = nil
+        setupProgram(nil)
     }
 }

@@ -18,7 +18,6 @@
 #include <vector>
 
 class RasterShaderOpenGl : public BaseShaderProgramOpenGl,
-                           public ShaderProgramInterface,
                            public RasterShaderInterface,
                            public std::enable_shared_from_this<ShaderProgramInterface> {
 public:

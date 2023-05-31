@@ -13,7 +13,6 @@ import MapCoreSharedModule
 import Metal
 
 class ClearStencilShader: BaseShader {
-    private var pipeline: MTLRenderPipelineState?
 
     lazy var clearMask: MTLDepthStencilState? = {
         let descriptor = MTLStencilDescriptor()
@@ -29,7 +28,7 @@ class ClearStencilShader: BaseShader {
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline.clearStencilShader.rawValue)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: .clearStencilShader, blendMode: blendMode).json)
         }
     }
 

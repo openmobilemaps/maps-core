@@ -22,8 +22,9 @@ public:
                       std::shared_ptr<Value> rasterBrightnessMin,
                       std::shared_ptr<Value> rasterBrightnessMax,
                       std::shared_ptr<Value> rasterContrast,
-                      std::shared_ptr<Value> rasterSaturation):
-    rasterOpacity(rasterOpacity), rasterBrightnessMin(rasterBrightnessMin), rasterBrightnessMax(rasterBrightnessMax), rasterContrast(rasterContrast), rasterSaturation(rasterSaturation) {}
+                      std::shared_ptr<Value> rasterSaturation,
+                      std::shared_ptr<Value> blendMode):
+    rasterOpacity(rasterOpacity), rasterBrightnessMin(rasterBrightnessMin), rasterBrightnessMax(rasterBrightnessMax), rasterContrast(rasterContrast), rasterSaturation(rasterSaturation), blendMode(blendMode) {}
 
     std::unordered_set<std::string> getUsedKeys() const {
         std::unordered_set<std::string> usedKeys;
@@ -32,7 +33,8 @@ public:
             rasterBrightnessMin,
             rasterBrightnessMax,
             rasterContrast,
-            rasterSaturation 
+            rasterSaturation,
+            blendMode
         };
 
         for (auto const &value: values) {
@@ -42,6 +44,11 @@ public:
         }
 
         return usedKeys;
+    }
+
+    BlendMode getBlendMode(const EvaluationContext &context) const {
+        static const BlendMode defaultValue = BlendMode::NORMAL;
+        return blendMode ? blendMode->evaluateOr(context, defaultValue) : defaultValue;
     }
     
     RasterShaderStyle getRasterStyle(const EvaluationContext &context) {
@@ -85,6 +92,7 @@ private:
     std::shared_ptr<Value> rasterBrightnessMax;
     std::shared_ptr<Value> rasterContrast;
     std::shared_ptr<Value> rasterSaturation;
+    std::shared_ptr<Value> blendMode;
 };
 
 class RasterVectorLayerDescription: public VectorLayerDescription  {

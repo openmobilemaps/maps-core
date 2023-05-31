@@ -16,7 +16,6 @@
 #include "ShaderProgramInterface.h"
 
 class AlphaShaderOpenGl : public BaseShaderProgramOpenGl,
-                          public ShaderProgramInterface,
                           public AlphaShaderInterface,
                           public std::enable_shared_from_this<ShaderProgramInterface> {
 

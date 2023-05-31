@@ -15,13 +15,11 @@ import Metal
 class ColorShader: BaseShader {
     private var color = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
 
-    private var pipeline: MTLRenderPipelineState?
-
     private var stencilState: MTLDepthStencilState?
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline.colorShader.rawValue)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: .colorShader, blendMode: blendMode).json)
         }
     }
 

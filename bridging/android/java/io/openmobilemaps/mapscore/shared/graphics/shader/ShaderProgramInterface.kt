@@ -14,6 +14,8 @@ abstract class ShaderProgramInterface {
 
     abstract fun preRender(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface)
 
+    abstract fun setBlendMode(blendMode: BlendMode)
+
     private class CppProxy : ShaderProgramInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -43,5 +45,11 @@ abstract class ShaderProgramInterface {
             native_preRender(this.nativeRef, context)
         }
         private external fun native_preRender(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface)
+
+        override fun setBlendMode(blendMode: BlendMode) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setBlendMode(this.nativeRef, blendMode)
+        }
+        private external fun native_setBlendMode(_nativeRef: Long, blendMode: BlendMode)
     }
 }

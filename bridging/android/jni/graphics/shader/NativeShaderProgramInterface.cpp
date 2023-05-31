@@ -3,6 +3,7 @@
 
 #include "NativeShaderProgramInterface.h"  // my header
 #include "Marshal.hpp"
+#include "NativeBlendMode.h"
 #include "NativeRenderingContextInterface.h"
 
 namespace djinni_generated {
@@ -41,6 +42,14 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_S
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::ShaderProgramInterface>(nativeRef);
         ref->preRender(::djinni_generated::NativeRenderingContextInterface::toCpp(jniEnv, j_context));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderProgramInterface_00024CppProxy_native_1setBlendMode(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_blendMode)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::ShaderProgramInterface>(nativeRef);
+        ref->setBlendMode(::djinni_generated::NativeBlendMode::toCpp(jniEnv, j_blendMode));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

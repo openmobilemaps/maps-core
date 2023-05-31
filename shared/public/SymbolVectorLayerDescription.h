@@ -57,6 +57,7 @@ public:
                       std::shared_ptr<Value> textLetterSpacing,
                       std::shared_ptr<Value> textMaxWidth,
                       std::shared_ptr<Value> textMaxAngle,
+                      std::shared_ptr<Value> blendMode,
                       double dpFactor):
     textSize(textSize),
     textFont(textFont),
@@ -91,6 +92,7 @@ public:
     iconRotate(iconRotate),
     textRotationAlignment(textRotationAlignment),
     iconRotationAlignment(iconRotationAlignment),
+    blendMode(blendMode),
     dpFactor(dpFactor) {}
 
 
@@ -103,7 +105,7 @@ public:
             iconAnchor, iconOffset, textAnchor, textVariableAnchor, textRotate, symbolSpacing,
             iconSize, textLineHeight, textLetterSpacing, textAllowOverlap, iconAllowOverlap,
             iconPadding, textOpacity, iconOpacity, iconRotationAlignment, textRotationAlignment,
-            iconTextFit, iconTextFitPadding, textMaxWidth, textMaxAngle, iconRotate
+            iconTextFit, iconTextFitPadding, textMaxWidth, textMaxAngle, iconRotate, blendMode
         };
 
         for (auto const &value: values) {
@@ -114,6 +116,11 @@ public:
 
         return usedKeys;
     };
+
+    BlendMode getBlendMode(const EvaluationContext &context) const {
+        static const BlendMode defaultValue = BlendMode::NORMAL;
+        return blendMode ? blendMode->evaluateOr(context, defaultValue) : defaultValue;
+    }
 
     double getTextSize(const EvaluationContext &context) {
         static const double defaultValue = 16.0;
@@ -351,6 +358,7 @@ private:
     std::shared_ptr<Value> iconRotate;
     std::shared_ptr<Value> textRotationAlignment;
     std::shared_ptr<Value> iconRotationAlignment;
+    std::shared_ptr<Value> blendMode;
     double dpFactor;
 
 

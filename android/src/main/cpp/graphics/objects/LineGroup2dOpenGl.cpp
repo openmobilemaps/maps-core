@@ -122,9 +122,6 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
     glUniform1f(scaleFactorHandle, screenPixelAsRealMeterFactor);
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
     shaderProgram->preRender(openGlContext);
 
     // Prepare the vertex attributes

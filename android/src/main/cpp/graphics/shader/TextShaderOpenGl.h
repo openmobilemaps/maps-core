@@ -17,7 +17,6 @@
 #include <vector>
 
 class TextShaderOpenGl : public BaseShaderProgramOpenGl,
-                         public ShaderProgramInterface,
                          public TextShaderInterface,
                          public std::enable_shared_from_this<ShaderProgramInterface> {
 
