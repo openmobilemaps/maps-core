@@ -47,7 +47,11 @@ private:
 
 
     static const int maxNumLinePoints = std::numeric_limits<uint16_t>::max() / 4 + 1; // 4 vertices per line coord, only 2 at the start/end
-    static const int maxStylesPerGroup = 48;
+#ifdef __ANDROID__
+    static const int maxStylesPerGroup = 32;
+#else
+    static const int maxStylesPerGroup = 256;
+#endif
 
     std::vector<std::shared_ptr<LineGroupShaderInterface>> shaders;
 

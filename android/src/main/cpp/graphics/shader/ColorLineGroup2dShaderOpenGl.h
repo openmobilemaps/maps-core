@@ -44,7 +44,7 @@ protected:
 
     float dashingScaleFactor = 1.0;
 
-    const int maxNumStyles = 48;
+    const int maxNumStyles = 32;
     //const int sizeStyleValues = 3;
     //const int sizeColorValues = 4;
     //const int sizeGapColorValues = 4;
