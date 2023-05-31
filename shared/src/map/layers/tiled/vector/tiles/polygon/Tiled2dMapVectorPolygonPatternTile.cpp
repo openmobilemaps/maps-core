@@ -48,7 +48,7 @@ Tiled2dMapVectorPolygonPatternTile::Tiled2dMapVectorPolygonPatternTile(const std
     auto pMapInterface = mapInterface.lock();
     if (pMapInterface) {
         shader = pMapInterface->getShaderFactory()->createPolygonPatternGroupShader();
-        shader->asShaderProgramInterface()->setBlendMode(description->style.getBlendMode(EvaluationContext(std::nullopt, FeatureContext())));
+        shader->asShaderProgramInterface()->setBlendMode(description->style.getBlendMode(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>())));
     }
 }
 
@@ -136,7 +136,7 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
 
             const auto &[featureContext, geometryHandler] = *featureIt;
 
-            if (featureContext.geomType != vtzero::GeomType::POLYGON) { continue; }
+            if (featureContext->geomType != vtzero::GeomType::POLYGON) { continue; }
 
             EvaluationContext evalContext = EvaluationContext(tileInfo.zoomIdentifier, featureContext);
             if (description->filter == nullptr || description->filter->evaluateOr(evalContext, true)) {
@@ -148,7 +148,7 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
                 int styleIndex = -1;
 
                 {
-                    auto const hash = featureContext.getStyleHash(usedKeys);
+                    auto const hash = featureContext->getStyleHash(usedKeys);
 
                     for (size_t i = 0; i != featureGroups.size(); i++) {
                         auto const &[groupHash, group] = featureGroups.at(i);
@@ -364,7 +364,7 @@ bool Tiled2dMapVectorPolygonPatternTile::onClickConfirmed(const Vec2F &posScreen
     for (auto const &[tileInfo, polygonTuples] : hitDetectionPolygonMap) {
         for (auto const &[polygon, featureContext]: polygonTuples) {
             if (PolygonHelper::pointInside(polygon, point, mapInterface->getCoordinateConverterHelper())) {
-                selectionDelegate->didSelectFeature(featureContext.getFeatureInfo(), description->identifier, point);
+                selectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier, point);
                 return true;
             }
         }

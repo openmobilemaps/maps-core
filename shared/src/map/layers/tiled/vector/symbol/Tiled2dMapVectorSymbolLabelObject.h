@@ -26,7 +26,7 @@
 class Tiled2dMapVectorSymbolLabelObject {
 public:
     Tiled2dMapVectorSymbolLabelObject(const std::shared_ptr<CoordinateConversionHelperInterface> &converter,
-                                      const FeatureContext featureContext,
+                                      const std::shared_ptr<FeatureContext> featureContext,
                                       const std::shared_ptr<SymbolVectorLayerDescription> &description,
                                       const std::vector<FormattedStringEntry> &text,
                                       const std::string &fullText,
@@ -65,7 +65,7 @@ private:
     std::pair<int, double> indexAtDistance(const std::pair<int, double> &index, double distance);
 
     const std::shared_ptr<SymbolVectorLayerDescription> description;
-    const FeatureContext featureContext;
+    const std::shared_ptr<FeatureContext> featureContext;
     const TextSymbolPlacement textSymbolPlacement;
     const SymbolAlignment rotationAlignment;
     const TextJustify textJustify;

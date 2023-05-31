@@ -108,7 +108,7 @@ public:
 
     void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription);
 
-    std::optional<FeatureContext> getFeatureContext(int64_t identifier);
+    std::optional<std::shared_ptr<FeatureContext>> getFeatureContext(int64_t identifier);
 
     // Touch Interface
     bool onTouchDown(const Vec2F &posScreen) override;

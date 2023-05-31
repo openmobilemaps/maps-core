@@ -15,6 +15,7 @@
 #include "RenderObject.h"
 #include "RenderPass.h"
 #include "LambdaTask.h"
+#include "Tiled2dMapVectorTileInfo.h"
 
 void Tiled2dMapVectorSubLayer::update() {
 
@@ -63,7 +64,7 @@ void Tiled2dMapVectorSubLayer::show() {
 
 
 void Tiled2dMapVectorSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask,
-                            const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) {
+                            const std::vector<Tiled2dMapVectorTileInfo::FeatureTuple> &layerFeatures) {
     if (!mapInterface) return;
 
     std::lock_guard<std::recursive_mutex> lock(maskMutex);

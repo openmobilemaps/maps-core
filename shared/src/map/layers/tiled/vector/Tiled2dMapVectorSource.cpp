@@ -12,6 +12,7 @@
 #include "Tiled2dMapVectorSource.h"
 #include "vtzero/vector_tile.hpp"
 #include "Logger.h"
+#include "Tiled2dMapVectorTileInfo.h"
 
 Tiled2dMapVectorSource::Tiled2dMapVectorSource(const MapConfig &mapConfig,
                                                const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
@@ -36,7 +37,7 @@ void Tiled2dMapVectorSource::cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIn
 }
 
 Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(const DataLoaderResult &loadedData, const Tiled2dMapTileInfo &tile) {
-    auto layerFeatureMap = std::make_shared<std::unordered_map<std::string, std::shared_ptr<std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>>>>();
+    auto layerFeatureMap = std::make_shared<std::unordered_map<std::string, std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>>>>();
     try {
         vtzero::vector_tile tileData((char*)loadedData.data->buf(), loadedData.data->len());
 
@@ -44,10 +45,10 @@ Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(con
             std::string sourceLayerName = std::string(layer.name());
             if ((layersToDecode.empty() || layersToDecode.count(sourceLayerName) > 0) && !layer.empty()) {
                 int extent = (int) layer.extent();
-                layerFeatureMap->emplace(sourceLayerName, std::make_shared<std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>>());
+                layerFeatureMap->emplace(sourceLayerName, std::make_shared<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>>());
                 layerFeatureMap->at(sourceLayerName)->reserve(layer.num_features());
                 while (const auto &feature = layer.next_feature()) {
-                    auto const featureContext = FeatureContext(feature);
+                    auto const featureContext = std::make_shared<FeatureContext>(feature);
                     try {
                         VectorTileGeometryHandler geometryHandler = VectorTileGeometryHandler(tile.bounds, extent, layerConfig->getVectorSettings());
                         vtzero::decode_geometry(feature.geometry(), geometryHandler);

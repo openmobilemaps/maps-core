@@ -57,9 +57,9 @@ private:
 
     std::vector<std::shared_ptr<LineGroup2dLayerObject>> lines;
 
-    std::vector<std::vector<std::tuple<size_t, FeatureContext>>> featureGroups;
+    std::vector<std::vector<std::tuple<size_t, std::shared_ptr<FeatureContext>>>> featureGroups;
 
-    std::vector<std::tuple<std::vector<std::vector<::Coord>>, FeatureContext>> hitDetection;
+    std::vector<std::tuple<std::vector<std::vector<::Coord>>, std::shared_ptr<FeatureContext>>> hitDetection;
 
     std::unordered_set<std::string> usedKeys;
 

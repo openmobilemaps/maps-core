@@ -81,7 +81,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
         const double symbolSpacingPx = layerDescription->style.getSymbolSpacing(evalContext);
         const double symbolSpacingMeters = symbolSpacingPx * tilePixelFactor;
 
-        if (context.geomType != vtzero::GeomType::POINT) {
+        if (context->geomType != vtzero::GeomType::POINT) {
 
             double distance = 0;
             double totalDistance = 0;
@@ -217,7 +217,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
     if (instanceCounts.icons != 0) {
         auto shader = strongMapInterface->getShaderFactory()->createAlphaInstancedShader()->asShaderProgramInterface();
-        shader->setBlendMode(layerDescription->style.getBlendMode(EvaluationContext(std::nullopt, FeatureContext())));
+        shader->setBlendMode(layerDescription->style.getBlendMode(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>())));
         iconInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createQuadInstanced(shader);
 
         iconInstancedObject->setInstanceCount(instanceCounts.icons);
@@ -232,7 +232,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
     if (instanceCounts.stretchedIcons != 0) {
         auto shader = strongMapInterface->getShaderFactory()->createStretchInstancedShader()->asShaderProgramInterface();
-        shader->setBlendMode(layerDescription->style.getBlendMode(EvaluationContext(std::nullopt, FeatureContext())));
+        shader->setBlendMode(layerDescription->style.getBlendMode(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>())));
         stretchedInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createQuadStretchedInstanced(shader);
 
         stretchedInstancedObject->setInstanceCount(instanceCounts.stretchedIcons);
@@ -247,7 +247,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
     if (instanceCounts.textCharacters != 0) {
         auto shader = strongMapInterface->getShaderFactory()->createTextInstancedShader()->asShaderProgramInterface();
-        shader->setBlendMode(layerDescription->style.getBlendMode(EvaluationContext(std::nullopt, FeatureContext())));
+        shader->setBlendMode(layerDescription->style.getBlendMode(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>())));
         textInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createTextInstanced(shader);
         textInstancedObject->setInstanceCount(instanceCounts.textCharacters);
 
@@ -420,7 +420,7 @@ std::shared_ptr<Tiled2dMapVectorSymbolObject>
 Tiled2dMapVectorSymbolGroup::createSymbolObject(const Tiled2dMapTileInfo &tileInfo,
                                                 const std::string &layerIdentifier,
                                                 const std::shared_ptr<SymbolVectorLayerDescription> &description,
-                                                const FeatureContext &featureContext,
+                                                const std::shared_ptr<FeatureContext> &featureContext,
                                                 const std::vector<FormattedStringEntry> &text,
                                                 const std::string &fullText,
                                                 const ::Coord &coordinate,

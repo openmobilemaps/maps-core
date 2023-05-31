@@ -17,7 +17,7 @@
 #include <functional>
 
 struct Tiled2dMapVectorTileInfo {
-    using FeatureTuple = std::tuple<const FeatureContext, const VectorTileGeometryHandler>;
+    using FeatureTuple = std::tuple<const std::shared_ptr<FeatureContext>, const VectorTileGeometryHandler>;
     using FeatureMap = std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<std::vector<FeatureTuple>>>>;
 
     const Tiled2dMapTileInfo tileInfo;

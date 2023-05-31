@@ -23,9 +23,10 @@
 #include "Tiled2dMapVectorLayerTileCallbackInterface.h"
 #include "Tiled2dMapVectorLayerSelectionCallbackInterface.h"
 #include "SpriteData.h"
+#include "Tiled2dMapVectorTileInfo.h"
 
 typedef std::shared_ptr<TextureHolderInterface> Tiled2dMapVectorTileDataRaster;
-typedef std::shared_ptr<std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>>> Tiled2dMapVectorTileDataVector;
+typedef std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> Tiled2dMapVectorTileDataVector;
 
 class Tiled2dMapVectorTile : public ActorObject,
                              public SimpleTouchInterface {

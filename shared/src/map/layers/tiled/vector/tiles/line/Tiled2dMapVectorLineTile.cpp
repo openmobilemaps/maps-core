@@ -191,13 +191,13 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
         bool anyInteractable = false;
 
         for (auto featureIt = tileData->rbegin(); featureIt != tileData->rend(); ++featureIt) {
-            const FeatureContext &featureContext = std::get<0>(*featureIt);
+            std::shared_ptr<FeatureContext> featureContext = std::get<0>(*featureIt);
             EvaluationContext evalContext = EvaluationContext(tileInfo.zoomIdentifier, featureContext);
             if ((description->filter == nullptr || description->filter->evaluateOr(evalContext, true))) {
                 int styleGroupIndex = -1;
                 int styleIndex = -1;
                 {
-                    auto const hash = featureContext.getStyleHash(usedKeys);
+                    auto const hash = featureContext->getStyleHash(usedKeys);
 
                     auto indexPair = styleHashToGroupMap.find(hash);
                     if (indexPair != styleHashToGroupMap.end()) {
@@ -217,10 +217,10 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                             styleIndex = 0;
                             auto shader = shaderFactory->createLineGroupShader();
                             auto lineDescription = std::static_pointer_cast<LineVectorLayerDescription>(description);
-                            shader->asShaderProgramInterface()->setBlendMode(lineDescription->style.getBlendMode(EvaluationContext(std::nullopt, FeatureContext())));
+                            shader->asShaderProgramInterface()->setBlendMode(lineDescription->style.getBlendMode(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>())));
                             shaders.push_back(shader);
                             reusableLineStyles.push_back({ reusableStyle });
-                            featureGroups.push_back(std::vector<std::tuple<size_t, FeatureContext>>{{hash, featureContext}});
+                            featureGroups.push_back(std::vector<std::tuple<size_t, std::shared_ptr<FeatureContext>>>{{hash, featureContext}});
                         }
                         styleHashToGroupMap.insert({hash, {styleGroupIndex, styleIndex}});
                     }
@@ -361,7 +361,7 @@ bool Tiled2dMapVectorLineTile::onClickConfirmed(const Vec2F &posScreen) {
         for (auto const &coordinates: lineCoordinateVector) {
             auto lineWidth = lineDescription->style.getLineWidth(EvaluationContext(zoomIdentifier, featureContext));
             if (LineHelper::pointWithin(coordinates, point, lineWidth, coordinateConverter)) {
-                selectionDelegate->didSelectFeature(featureContext.getFeatureInfo(), description->identifier, point);
+                selectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier, point);
                 return true;
             }
         }

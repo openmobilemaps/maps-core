@@ -58,7 +58,7 @@ private:
     inline std::shared_ptr<Tiled2dMapVectorSymbolObject> createSymbolObject(const Tiled2dMapTileInfo &tileInfo,
                                                                      const std::string &layerIdentifier,
                                                                      const std::shared_ptr<SymbolVectorLayerDescription> &description,
-                                                                     const FeatureContext &featureContext,
+                                                                     const std::shared_ptr<FeatureContext> &featureContext,
                                                                      const std::vector<FormattedStringEntry> &text,
                                                                      const std::string &fullText,
                                                                      const ::Coord &coordinate,
