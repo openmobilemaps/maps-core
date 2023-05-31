@@ -92,3 +92,21 @@ std::string BaseShaderProgramOpenGl::getFragmentShader() {
                                       }
     );
 }
+
+void BaseShaderProgramOpenGl::setBlendMode(BlendMode blendMode) {
+    this->blendMode = blendMode;
+}
+
+void BaseShaderProgramOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
+    glEnable(GL_BLEND);
+    switch (blendMode) {
+        case BlendMode::NORMAL: {
+            glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+            break;
+        }
+        case BlendMode::MULTIPLY: {
+            glBlendFunc(GL_DST_COLOR, GL_ONE_MINUS_SRC_ALPHA);
+            break;
+        }
+    }
+}

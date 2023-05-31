@@ -14,7 +14,9 @@
 
 std::string AlphaInstancedShaderOpenGl::getProgramName() { return "UBMAP_AlphaInstancedShaderOpenGl"; }
 
-void AlphaInstancedShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {}
+void AlphaInstancedShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
+    BaseShaderProgramOpenGl::preRender(context);
+}
 
 void AlphaInstancedShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);

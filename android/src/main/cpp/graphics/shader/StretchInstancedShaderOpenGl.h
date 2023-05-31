@@ -16,7 +16,6 @@
 #include "ShaderProgramInterface.h"
 
 class StretchInstancedShaderOpenGl : public BaseShaderProgramOpenGl,
-                          public ShaderProgramInterface,
                           public StretchInstancedShaderInterface,
                           public std::enable_shared_from_this<StretchInstancedShaderOpenGl> {
 

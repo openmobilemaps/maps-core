@@ -17,7 +17,6 @@
 #include <vector>
 
 class PolygonPatternGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
-                         public ShaderProgramInterface,
                          public PolygonPatternGroupShaderInterface,
                          public std::enable_shared_from_this<ShaderProgramInterface> {
 

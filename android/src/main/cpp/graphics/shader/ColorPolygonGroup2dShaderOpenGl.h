@@ -17,7 +17,6 @@
 
 class ColorPolygonGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
                                         public PolygonGroupShaderInterface,
-                                        public ShaderProgramInterface,
                                         public std::enable_shared_from_this<ShaderProgramInterface> {
   public:
     virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() override;

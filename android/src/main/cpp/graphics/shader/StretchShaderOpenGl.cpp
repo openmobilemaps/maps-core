@@ -15,6 +15,7 @@
 std::string StretchShaderOpenGl::getProgramName() { return "UBMAP_StretchShaderOpenGl"; }
 
 void StretchShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
+    BaseShaderProgramOpenGl::preRender(context);
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     int alphaLocation = glGetUniformLocation(openGlContext->getProgram(getProgramName()), "alpha");
     glUniform1f(alphaLocation, alpha);

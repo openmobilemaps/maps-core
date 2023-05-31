@@ -33,7 +33,9 @@ void PolygonPatternGroup2dShaderOpenGl::setupProgram(const std::shared_ptr<::Ren
     openGlContext->storeProgram(programName, program);
 }
 
-void PolygonPatternGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {}
+void PolygonPatternGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
+    BaseShaderProgramOpenGl::preRender(context);
+}
 
 std::string PolygonPatternGroup2dShaderOpenGl::getVertexShader() {
     return OMMVersionedGlesShaderCode(320 es,
