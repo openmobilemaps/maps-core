@@ -9,7 +9,6 @@
  */
 
 #include "LineLayer.h"
-#include "ColorLineShaderInterface.h"
 #include "GraphicsObjectInterface.h"
 #include "LambdaTask.h"
 #include "LineHelper.h"
@@ -80,8 +79,8 @@ void LineLayer::add(const std::shared_ptr<LineInfoInterface> &line) {
         return;
     }
 
-    auto shader = shaderFactory->createColorLineShader();
-    auto lineGraphicsObject = objectFactory->createLine(shader->asShaderProgramInterface());
+    auto shader = shaderFactory->createLineGroupShader();
+    auto lineGraphicsObject = objectFactory->createLineGroup(shader->asShaderProgramInterface());
 
     auto lineObject = std::make_shared<Line2dLayerObject>(mapInterface->getCoordinateConverterHelper(), lineGraphicsObject, shader);
 
@@ -105,7 +104,7 @@ void LineLayer::add(const std::shared_ptr<LineInfoInterface> &line) {
     generateRenderPasses();
 }
 
-void LineLayer::setupLine(const std::shared_ptr<Line2dInterface> &line) {
+void LineLayer::setupLine(const std::shared_ptr<LineGroup2dInterface> &line) {
     auto mapInterface = this->mapInterface;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!renderingContext) {

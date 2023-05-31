@@ -6,7 +6,6 @@
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
 #import "DJIObjcWrapperCache+Private.h"
-#import "MCLine2dInterface+Private.h"
 #import "MCLineGroup2dInterface+Private.h"
 #import "MCPolygon2dInterface+Private.h"
 #import "MCPolygonGroup2dInterface+Private.h"
@@ -45,13 +44,6 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createQuad(::djinni_generated::ShaderProgramInterface::toCpp(shader));
         return ::djinni_generated::Quad2dInterface::fromCpp(objcpp_result_);
-    } DJINNI_TRANSLATE_EXCEPTIONS()
-}
-
-- (nullable id<MCLine2dInterface>)createLine:(nullable id<MCShaderProgramInterface>)shader {
-    try {
-        auto objcpp_result_ = _cppRefHandle.get()->createLine(::djinni_generated::ShaderProgramInterface::toCpp(shader));
-        return ::djinni_generated::Line2dInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -139,13 +131,6 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createQuad:(::djinni_generated::ShaderProgramInterface::fromCpp(c_shader))];
             return ::djinni_generated::Quad2dInterface::toCpp(objcpp_result_);
-        }
-    }
-    /*not-null*/ std::shared_ptr<::Line2dInterface> createLine(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & c_shader) override
-    {
-        @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createLine:(::djinni_generated::ShaderProgramInterface::fromCpp(c_shader))];
-            return ::djinni_generated::Line2dInterface::toCpp(objcpp_result_);
         }
     }
     /*not-null*/ std::shared_ptr<::Polygon2dInterface> createPolygon(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & c_shader) override

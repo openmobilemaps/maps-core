@@ -3,9 +3,8 @@
 
 #pragma once
 
-#include "LineStyle.h"
+#include "SharedBytes.h"
 #include <memory>
-#include <vector>
 
 class ShaderProgramInterface;
 
@@ -13,7 +12,7 @@ class LineGroupShaderInterface {
 public:
     virtual ~LineGroupShaderInterface() = default;
 
-    virtual void setStyles(const std::vector<::LineStyle> & styles) = 0;
+    virtual void setStyles(const ::SharedBytes & styles) = 0;
 
     virtual void setDashingScaleFactor(float factor) = 0;
 

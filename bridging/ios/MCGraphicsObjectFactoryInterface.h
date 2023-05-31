@@ -3,7 +3,6 @@
 
 #import "MCShaderProgramInterface.h"
 #import <Foundation/Foundation.h>
-@protocol MCLine2dInterface;
 @protocol MCLineGroup2dInterface;
 @protocol MCPolygon2dInterface;
 @protocol MCPolygonGroup2dInterface;
@@ -18,8 +17,6 @@
 @protocol MCGraphicsObjectFactoryInterface
 
 - (nullable id<MCQuad2dInterface>)createQuad:(nullable id<MCShaderProgramInterface>)shader;
-
-- (nullable id<MCLine2dInterface>)createLine:(nullable id<MCShaderProgramInterface>)shader;
 
 - (nullable id<MCPolygon2dInterface>)createPolygon:(nullable id<MCShaderProgramInterface>)shader;
 

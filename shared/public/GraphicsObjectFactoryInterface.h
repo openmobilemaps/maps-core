@@ -6,7 +6,6 @@
 #include "ShaderProgramInterface.h"
 #include <memory>
 
-class Line2dInterface;
 class LineGroup2dInterface;
 class Polygon2dInterface;
 class PolygonGroup2dInterface;
@@ -22,8 +21,6 @@ public:
     virtual ~GraphicsObjectFactoryInterface() = default;
 
     virtual /*not-null*/ std::shared_ptr<Quad2dInterface> createQuad(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
-
-    virtual /*not-null*/ std::shared_ptr<Line2dInterface> createLine(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
 
     virtual /*not-null*/ std::shared_ptr<Polygon2dInterface> createPolygon(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
 

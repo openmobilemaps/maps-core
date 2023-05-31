@@ -13,12 +13,11 @@
 #include "ShaderFactoryInterface.h"
 
 class ShaderFactoryOpenGl : public ShaderFactoryInterface {
+
 public:
     std::shared_ptr<AlphaShaderInterface> createAlphaShader() override;
 
     std::shared_ptr<AlphaInstancedShaderInterface> createAlphaInstancedShader() override;
-
-    std::shared_ptr<ColorLineShaderInterface> createColorLineShader() override;
 
     std::shared_ptr<LineGroupShaderInterface> createLineGroupShader() override;
 

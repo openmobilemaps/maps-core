@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class LineGroupShaderInterface {
 
-    abstract fun setStyles(styles: ArrayList<io.openmobilemaps.mapscore.shared.map.layers.line.LineStyle>)
+    abstract fun setStyles(styles: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
     abstract fun setDashingScaleFactor(factor: Float)
 
@@ -26,11 +26,11 @@ abstract class LineGroupShaderInterface {
 
         external fun nativeDestroy(nativeRef: Long)
 
-        override fun setStyles(styles: ArrayList<io.openmobilemaps.mapscore.shared.map.layers.line.LineStyle>) {
+        override fun setStyles(styles: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_setStyles(this.nativeRef, styles)
         }
-        private external fun native_setStyles(_nativeRef: Long, styles: ArrayList<io.openmobilemaps.mapscore.shared.map.layers.line.LineStyle>)
+        private external fun native_setStyles(_nativeRef: Long, styles: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
         override fun setDashingScaleFactor(factor: Float) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

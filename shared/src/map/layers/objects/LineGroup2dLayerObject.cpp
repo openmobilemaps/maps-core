@@ -11,6 +11,7 @@
 #include "LineGroup2dLayerObject.h"
 #include "RenderLineDescription.h"
 #include "Logger.h"
+#include "ShaderLineStyle.h"
 
 #include <cmath>
 
@@ -160,7 +161,27 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<C
 }
 
 void LineGroup2dLayerObject::setStyles(const std::vector<LineStyle> &styles) {
-    shader->setStyles(styles);
+    std::vector<ShaderLineStyle> shaderLineStyles;
+    for(auto& s : styles) {
+        auto cap = 1;
+        switch(s.lineCap) {
+            case LineCapType::BUTT: { cap = 0; break; }
+            case LineCapType::ROUND: { cap = 1; break; }
+            case LineCapType::SQUARE: { cap = 2; break; }
+            default: { cap = 1; }
+        }
+
+        auto dn = s.dashArray.size();
+        auto dValue0 = dn > 0 ? s.dashArray[0] : 0.0;
+        auto dValue1 = (dn > 1 ? s.dashArray[1] : 0.0) + dValue0;
+        auto dValue2 = (dn > 2 ? s.dashArray[2] : 0.0) + dValue1;
+        auto dValue3 = (dn > 3 ? s.dashArray[3] : 0.0) + dValue2;
+
+        shaderLineStyles.push_back(ShaderLineStyle(s.width, s.color.normal.r, s.color.normal.g, s.color.normal.b, s.color.normal.a, s.gapColor.normal.r, s.gapColor.normal.g, s.gapColor.normal.b, s.gapColor.normal.a, s.widthType == SizeType::SCREEN_PIXEL ? 1.0 : 0.0, s.opacity, s.blur, cap, dn, dValue0, dValue1, dValue2, dValue3, s.offset));
+    }
+
+    auto bytes = SharedBytes((int64_t)styles.data(), (int)styles.size(), 19 * sizeof(float));
+    shader->setStyles(bytes);
 }
 
 void LineGroup2dLayerObject::setScalingFactor(float factor) {

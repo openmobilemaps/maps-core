@@ -15,7 +15,6 @@ shader_program_interface = interface +c +o {
 shader_factory_interface = interface +c +j +o {
     create_alpha_shader() : alpha_shader_interface;
     create_alpha_instanced_shader(): alpha_instanced_shader_interface;
-    create_color_line_shader() : color_line_shader_interface;
     create_line_group_shader(): line_group_shader_interface;
     create_color_shader() : color_shader_interface;
     create_color_circle_shader() : color_circle_shader_interface;
@@ -95,14 +94,8 @@ color_shader_interface = interface +c +o {
     as_shader_program_interface() : shader_program_interface;
 }
 
-color_line_shader_interface = interface +c +o {
-    set_style(line_style: line_style);
-    set_highlighted(highlighted: bool);
-    as_shader_program_interface() : shader_program_interface;
-}
-
 line_group_shader_interface = interface +c +o {
-    set_styles(styles: list<line_style>);
+    set_styles(styles: shared_bytes);
     set_dashing_scale_factor(factor: f32);
     as_shader_program_interface() : shader_program_interface;
 }

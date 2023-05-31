@@ -12,11 +12,14 @@
 #include <cmath>
 
 Line2dLayerObject::Line2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
-                                     const std::shared_ptr<Line2dInterface> &line,
-                                     const std::shared_ptr<ColorLineShaderInterface> &shader)
+                                     const std::shared_ptr<LineGroup2dInterface> &line,
+                                     const std::shared_ptr<LineGroupShaderInterface> &shader)
     : conversionHelper(conversionHelper)
     , line(line)
-    , shader(shader) {
+    , shader(shader)
+    , style(ColorStateList(Color(0.0f,0.0f,0.0f,0.0f), Color(0.0f,0.0f,0.0f,0.0f)), ColorStateList(Color(0.0f,0.0f,0.0f,0.0f), Color(0.0f,0.0f,0.0f,0.0f)), 0.0, 0.0, SizeType::SCREEN_PIXEL, 0.0, std::vector<float>(), LineCapType::BUTT, 0.0)
+    , highlighted(false)
+{
     renderConfig = {std::make_shared<RenderConfig>(line->asGraphicsObject(), 0)};
 }
 
@@ -145,12 +148,69 @@ void Line2dLayerObject::setPositions(const std::vector<Coord> &positions) {
 
     auto attributes = SharedBytes((int64_t) lineAttributes.data(), (int32_t) lineAttributes.size(), (int32_t) sizeof(float));
     auto indices = SharedBytes((int64_t) lineIndices.data(), (int32_t) lineIndices.size(), (int32_t) sizeof(uint32_t));
-    line->setLine(attributes, indices);
+
+    line->setLines(attributes, indices);
 }
 
-void Line2dLayerObject::setStyle(const LineStyle &style) { shader->setStyle(style); }
+void Line2dLayerObject::setStyle(const LineStyle &style_) {
+    style = style_;
+    setStyle(style, highlighted);
+}
 
-void Line2dLayerObject::setHighlighted(bool highlighted) { shader->setHighlighted(highlighted); }
+void Line2dLayerObject::setHighlighted(bool highlighted_) {
+    highlighted = highlighted_;
+    setStyle(style, highlighted);
+}
+
+void Line2dLayerObject::setStyle(const LineStyle &style, bool highlighted) {
+    ShaderLineStyle s(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+
+    s.colorR = highlighted ? style.color.highlighted.r : style.color.normal.r;
+    s.colorG = highlighted ? style.color.highlighted.g : style.color.normal.g;
+    s.colorB =  highlighted ? style.color.highlighted.b : style.color.normal.b;
+    s.colorA = highlighted ? style.color.highlighted.a : style.color.normal.a;
+
+    s.gapColorR = highlighted ? style.gapColor.highlighted.r : style.gapColor.normal.r;
+    s.gapColorG = highlighted ? style.gapColor.highlighted.g : style.gapColor.normal.g;
+    s.gapColorB =  highlighted ? style.gapColor.highlighted.b : style.gapColor.normal.b;
+    s.gapColorA = highlighted ? style.gapColor.highlighted.a : style.gapColor.normal.a;
+
+    s.opacity = style.opacity;
+    s.blur = style.blur;
+
+    // width type
+    auto widthType = SizeType::SCREEN_PIXEL;
+    auto widthAsPixel = (style.widthType == SizeType::SCREEN_PIXEL ? 1 : 0);
+    s.widthAsPixel = widthAsPixel;
+
+    s.width = style.width;
+
+    // dashes
+    auto dashArray = style.dashArray;
+    auto dn = dashArray.size();
+    s.numDashValue = dn;
+    s.dashValue0 = dn > 0 ? dashArray[0] : 0.0;
+    s.dashValue1 = (dn > 1 ? dashArray[1] : 0.0) + s.dashValue0;
+    s.dashValue2 = (dn > 2 ? dashArray[2] : 0.0) + s.dashValue1;
+    s.dashValue3 = (dn > 3 ? dashArray[3] : 0.0) + s.dashValue2;
+
+    // line caps
+    auto lineCap = style.lineCap;
+
+    auto cap = 1;
+    switch(lineCap){
+        case LineCapType::BUTT: { cap = 0; break; }
+        case LineCapType::ROUND: { cap = 1; break; }
+        case LineCapType::SQUARE: { cap = 2; break; }
+        default: { cap = 1; }
+    }
+
+    s.lineCap = cap;
+    s.offset = style.offset;
+
+    auto buffer = SharedBytes((int64_t)&s, 1, 19 * sizeof(float));;
+    shader->setStyles(buffer);
+}
 
 std::shared_ptr<GraphicsObjectInterface> Line2dLayerObject::getLineObject() { return line->asGraphicsObject(); }
 

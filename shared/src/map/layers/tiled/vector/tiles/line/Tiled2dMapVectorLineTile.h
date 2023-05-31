@@ -14,6 +14,7 @@
 #include "MapInterface.h"
 #include "LineVectorLayerDescription.h"
 #include "LineGroup2dLayerObject.h"
+#include "ShaderLineStyle.h"
 
 class Tiled2dMapVectorLineTile
         : public Tiled2dMapVectorTile,
@@ -46,7 +47,11 @@ private:
 
 
     static const int maxNumLinePoints = std::numeric_limits<uint16_t>::max() / 4 + 1; // 4 vertices per line coord, only 2 at the start/end
-    static const int maxStylesPerGroup = 48;
+#ifdef __ANDROID__
+    static const int maxStylesPerGroup = 32;
+#else
+    static const int maxStylesPerGroup = 256;
+#endif
 
     std::vector<std::shared_ptr<LineGroupShaderInterface>> shaders;
 
@@ -58,6 +63,6 @@ private:
 
     std::unordered_set<std::string> usedKeys;
 
-    std::vector<std::vector<LineStyle>> reusableLineStyles;
+    std::vector<std::vector<ShaderLineStyle>> reusableLineStyles;
     std::unordered_map<size_t, std::pair<int, int>> styleHashToGroupMap;
 };

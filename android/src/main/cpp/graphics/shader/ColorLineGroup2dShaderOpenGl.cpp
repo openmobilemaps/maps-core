@@ -52,36 +52,15 @@ void ColorLineGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingCo
     }
 }
 
-void ColorLineGroup2dShaderOpenGl::setStyles(const std::vector<::LineStyle> &lineStyles) {
-    std::vector<float> lineValues(sizeLineValuesArray, 0.0);
-    int numStyles = std::min((int) lineStyles.size(), maxNumStyles);
-    for (int i = 0; i < numStyles; i++) {
-        const auto &style = lineStyles[i];
-        lineValues[sizeLineValues * i] = style.width;
-        lineValues[sizeLineValues * i + 1] = style.widthType == SizeType::SCREEN_PIXEL ? 1.0f : 0.0f;
-        lineValues[sizeLineValues * i + 2] = (int)style.lineCap;
-        lineValues[sizeLineValues * i + 3] = style.color.normal.r;
-        lineValues[sizeLineValues * i + 4] = style.color.normal.g;
-        lineValues[sizeLineValues * i + 5] = style.color.normal.b;
-        lineValues[sizeLineValues * i + 6] = style.color.normal.a * style.opacity;
-        lineValues[sizeLineValues * i + 7] = style.gapColor.normal.r;
-        lineValues[sizeLineValues * i + 8] = style.gapColor.normal.g;
-        lineValues[sizeLineValues * i + 9] = style.gapColor.normal.b;
-        lineValues[sizeLineValues * i + 10] = style.gapColor.normal.a * style.opacity;
-        int numDashInfo = std::min((int)style.dashArray.size(), maxNumDashValues); // Max num dash infos: 4 (2 dash/gap lengths)
-        lineValues[sizeLineValues * i + 11] = style.offset;
-        lineValues[sizeLineValues * i + 12] = numDashInfo;
-        float sum = 0.0;
-        for (int iDash = 0; iDash < numDashInfo; iDash++) {
-            sum += style.dashArray.at(iDash);
-            lineValues[sizeLineValues * i + 13 + iDash] = sum;
-        }
-    }
-
+void ColorLineGroup2dShaderOpenGl::setStyles(const ::SharedBytes & styles) {
     {
         std::lock_guard<std::recursive_mutex> overlayLock(styleMutex);
-        this->lineValues = lineValues;
-        this->numStyles = numStyles;
+        lineValues.resize(styles.elementCount * styles.bytesPerElement / 4);
+        if(styles.elementCount > 0) {
+            std::memcpy(lineValues.data(), (void *)styles.address, styles.elementCount * styles.bytesPerElement);
+        }
+
+        numStyles = styles.elementCount;
     }
 }
 
@@ -103,16 +82,18 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                                       in float vSegmentStartLPos;
                                       in float vStyleInfo;
                                       // lineValues:
-                                      // {float width (0),
-                                      // float isScaled (1),
-                                      // int capType (2),
-                                      // vec4 color (3),
-                                      // vec4 gapColor (7),
-                                      // int numDashInfo (11),
-                                      // float offset (12)
-                                      // vec4 dashArray (13)
-                                      // }
-                                      // -> stride = 17
+                                      //        struct LineStyling {
+                                      //            float width; // 0
+                                      //            float4 color; // 1 2 3 4
+                                      //            float4 gapColor; // 5 6 7 8
+                                      //            float widthAsPixels; // 9
+                                      //            float opacity; // 10
+                                      //            float blur; // 11
+                                      //            float capType; // 12
+                                      //            float numDashValues; // 13
+                                      //            float dashArray[4]; // 14 15 16 17
+                                      //            float offset; // 18
+                                      //        };
                                       uniform float lineValues[) + std::to_string(sizeLineValuesArray) + OMMShaderCode(];
                                       uniform int numStyles; uniform float scaleFactor;
                                       uniform float dashingScaleFactor;
@@ -120,22 +101,22 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                                       out vec2 pointDeltaA; out vec2 pointBDeltaA; out vec4 color; out float dashingSize;
 
                                        void main() {
-                                           float fStyleIndex = mod(vStyleInfo, 256.0);
-                                           int lineIndex = int(floor(fStyleIndex + 0.5));
-                                           if (lineIndex < 0) {
-                                                lineIndex = 0;
-                                           } else if (lineIndex > numStyles) {
-                                                lineIndex = numStyles;
-                                           }
-                                           int styleIndexBase = ) + std::to_string(sizeLineValues) + OMMShaderCode(* lineIndex;
-                                           int colorIndexBase = styleIndexBase + 3;
-                                           float width = lineValues[styleIndexBase];
-                                           float isScaled = lineValues[styleIndexBase + 1];
-                                           color = vec4(lineValues[colorIndexBase], lineValues[colorIndexBase + 1], lineValues[colorIndexBase + 2],
-                                                        lineValues[colorIndexBase + 3]);
-                                           segmentStartLPos = vSegmentStartLPos;
-                                           fStyleIndexBase = float(styleIndexBase);
-                                           fSegmentType = vStyleInfo / 256.0;
+                                       float fStyleIndex = mod(vStyleInfo, 256.0);
+                                       int lineIndex = int(floor(fStyleIndex + 0.5));
+                                       if (lineIndex < 0) {
+                                            lineIndex = 0;
+                                       } else if (lineIndex > numStyles) {
+                                            lineIndex = numStyles;
+                                       }
+                                       int styleIndexBase = ) + std::to_string(sizeLineValues) + OMMShaderCode(* lineIndex;
+                                       int colorIndexBase = styleIndexBase + 1;
+                                       float width = lineValues[styleIndexBase];
+                                       float isScaled = lineValues[styleIndexBase + 9];
+                                       color = vec4(lineValues[colorIndexBase], lineValues[colorIndexBase + 1], lineValues[colorIndexBase + 2],
+                                                    lineValues[colorIndexBase + 3]);
+                                       segmentStartLPos = vSegmentStartLPos;
+                                       fStyleIndexBase = float(styleIndexBase);
+                                       fSegmentType = vStyleInfo / 256.0;
 
                                            vec2 widthNormal = vWidthNormal;
                                            vec2 lengthNormal = vec2(widthNormal.y, -widthNormal.x);
@@ -151,8 +132,8 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                                                widthNormal *= -1.0;
                                            }
 
-                                           float offsetFloat = lineValues[styleIndexBase + 11] * scaleFactor;
-                                           vec4 offset = vec4(vWidthNormal.x * offsetFloat, vWidthNormal.y * offsetFloat, 0.0, 0.0);
+                                       float offsetFloat = lineValues[styleIndexBase + 18] * scaleFactor;
+                                       vec4 offset = vec4(vWidthNormal.x * offsetFloat, vWidthNormal.y * offsetFloat, 0.0, 0.0);
 
                                            float scaledWidth = width * 0.5;
                                            dashingSize = width;
@@ -187,7 +168,7 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
                                        void main() {
                                            int segmentType = int(floor(fSegmentType + 0.5));
                                            // 0: butt, 1: round, 2: square
-                                           int iCapType = int(floor(lineValues[int(fStyleIndexBase) + 2] + 0.5));
+                                           int iCapType = int(floor(lineValues[int(fStyleIndexBase) + 12] + 0.5));
                                            float lineLength = length(pointBDeltaA);
                                            float t = dot(pointDeltaA, normalize(pointBDeltaA)) / lineLength;
                                            float d;
@@ -212,12 +193,13 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
                                            }
 
                                            vec4 fragColor = color;
+                                           float opacity = lineValues[int(fStyleIndexBase) + 10];
 
-                                           int dashBase = int(fStyleIndexBase) + 3 + 4 + 4 + 1;
+                                           int dashBase = int(fStyleIndexBase) + 13;
                                            // dash values: {int numDashInfo, vec4 dashArray} -> stride = 5
                                            int numDashInfos = int(floor(lineValues[dashBase] + 0.5));
                                            if (numDashInfos > 0) {
-                                               int gapColorIndexBase = int(fStyleIndexBase) + 3 + 4;
+                                               int gapColorIndexBase = int(fStyleIndexBase) + 5;
                                                vec4 gapColor = vec4(lineValues[gapColorIndexBase], lineValues[gapColorIndexBase + 1],
                                                                     lineValues[gapColorIndexBase + 2], lineValues[gapColorIndexBase + 3]);
 
@@ -237,6 +219,6 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
 
                                            fragmentColor = fragColor;
                                            fragmentColor.a = 1.0;
-                                           fragmentColor *= fragColor.a;
+                                           fragmentColor *= fragColor.a * opacity;
                                        });
 }
