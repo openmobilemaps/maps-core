@@ -41,8 +41,6 @@ class LineGroupShader: BaseShader {
 
     let styleBufferSize: Int
 
-    private var pipeline: MTLRenderPipelineState?
-
     var screenPixelAsRealMeterFactor: Float = 1.0
 
     var currentStyles: [MCLineStyle] = []
@@ -62,7 +60,7 @@ class LineGroupShader: BaseShader {
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline.lineGroupShader.rawValue)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: .lineGroupShader, blendMode: blendMode).json)
         }
     }
 

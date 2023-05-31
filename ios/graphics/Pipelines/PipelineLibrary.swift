@@ -15,6 +15,7 @@ public enum PipelineDescriptorFactory {
                                           label: String,
                                           vertexShader: String,
                                           fragmentShader: String,
+                                          blendMode: MCBlendMode,
                                           library: MTLLibrary = MetalContext.current.library) -> MTLRenderPipelineDescriptor {
         let pipelineDescriptor = MTLRenderPipelineDescriptor()
         pipelineDescriptor.colorAttachments[0].pixelFormat = MetalContext.current.colorPixelFormat
@@ -23,12 +24,26 @@ public enum PipelineDescriptorFactory {
         let renderbufferAttachment = pipelineDescriptor.colorAttachments[0]
         renderbufferAttachment?.pixelFormat = MetalContext.current.colorPixelFormat
         renderbufferAttachment?.isBlendingEnabled = true
-        renderbufferAttachment?.rgbBlendOperation = .add
-        renderbufferAttachment?.alphaBlendOperation = .add
-        renderbufferAttachment?.sourceRGBBlendFactor = .one
-        renderbufferAttachment?.sourceAlphaBlendFactor = .one
-        renderbufferAttachment?.destinationRGBBlendFactor = .oneMinusSourceAlpha
-        renderbufferAttachment?.destinationAlphaBlendFactor = .oneMinusSourceAlpha
+
+        switch blendMode {
+            case .NORMAL :
+                renderbufferAttachment?.rgbBlendOperation = .add
+                renderbufferAttachment?.alphaBlendOperation = .add
+                renderbufferAttachment?.sourceRGBBlendFactor = .one
+                renderbufferAttachment?.sourceAlphaBlendFactor = .one
+                renderbufferAttachment?.destinationRGBBlendFactor = .oneMinusSourceAlpha
+                renderbufferAttachment?.destinationAlphaBlendFactor = .oneMinusSourceAlpha
+            case .MULTIPLY:
+                renderbufferAttachment?.rgbBlendOperation = .add
+                renderbufferAttachment?.alphaBlendOperation = .add
+                renderbufferAttachment?.sourceRGBBlendFactor = .destinationColor
+                renderbufferAttachment?.sourceAlphaBlendFactor = .destinationAlpha
+                renderbufferAttachment?.destinationRGBBlendFactor = .oneMinusSourceAlpha
+                renderbufferAttachment?.destinationAlphaBlendFactor = .oneMinusSourceAlpha
+
+            @unknown default:
+                fatalError("blendMode not implemented")
+        }
 
         pipelineDescriptor.stencilAttachmentPixelFormat = .stencil8
         pipelineDescriptor.label = label
@@ -48,14 +63,55 @@ public enum PipelineDescriptorFactory {
 
 extension PipelineDescriptorFactory {
     static func pipelineDescriptor(pipeline: Pipeline) -> MTLRenderPipelineDescriptor {
-        pipelineDescriptor(vertexDescriptor: pipeline.vertexDescriptor,
-                           label: pipeline.label,
-                           vertexShader: pipeline.vertexShader,
-                           fragmentShader: pipeline.fragmentShader)
+        pipelineDescriptor(vertexDescriptor: pipeline.type.vertexDescriptor,
+                           label: pipeline.type.label,
+                           vertexShader: pipeline.type.vertexShader,
+                           fragmentShader: pipeline.type.fragmentShader,
+                           blendMode: pipeline.blendMode)
     }
 }
 
-public enum Pipeline: String, CaseIterable {
+public struct Pipeline: Codable, CaseIterable {
+    let type: PipelineType
+    let blendMode: MCBlendMode
+
+    init(type: PipelineType, blendMode: MCBlendMode) {
+        self.type = type
+        self.blendMode = blendMode
+    }
+
+    public init?(json: String) {
+        guard let data = json.data(using: .utf8),
+            let obj = try? JSONDecoder().decode(Pipeline.self, from: data) else {
+            return nil
+        }
+        self = obj
+    }
+
+    public static var allCases: [Pipeline] {
+        return Array(PipelineType.allCases.map { type in
+            MCBlendMode.allCases.map { blendMode in
+                Pipeline(type: type, blendMode: blendMode)
+            }
+        }.joined())
+    }
+
+    public var json: String {
+        do {
+            let jsonData = try JSONEncoder().encode(self)
+
+            guard let jsonString = String(data: jsonData, encoding: .utf8) else {
+                fatalError("unable to encode Pipeline")
+            }
+            return jsonString
+        } catch {
+            fatalError("An error occurred while encoding Pipeline: \(error)")
+        }
+    }
+
+}
+
+public enum PipelineType: String, CaseIterable, Codable {
     case alphaShader
     case alphaInstancedShader
     case lineGroupShader
@@ -135,12 +191,19 @@ public enum Pipeline: String, CaseIterable {
 
 public class PipelineLibrary: StaticMetalLibrary<String, MTLRenderPipelineState> {
     init(device: MTLDevice) throws {
-        try super.init(Pipeline.allCases.map(\.rawValue)) { key -> MTLRenderPipelineState in
-            guard let pipeline = Pipeline(rawValue: key) else {
+        try super.init(Pipeline.allCases.map(\.json)) { key -> MTLRenderPipelineState in
+            guard let pipeline = Pipeline(json: key) else {
                 throw LibraryError.invalidKey
             }
             let pipelineDescriptor = PipelineDescriptorFactory.pipelineDescriptor(pipeline: pipeline)
             return try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
         }
+    }
+}
+
+
+extension MCBlendMode: Codable, CaseIterable {
+    public static var allCases: [MCBlendMode] {
+        return [.NORMAL, .MULTIPLY]
     }
 }

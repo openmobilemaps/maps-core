@@ -16,13 +16,11 @@ import UIKit
 class PolygonGroupShader: BaseShader {
     var polygonStyleBuffer: MTLBuffer?
 
-    private var pipeline: MTLRenderPipelineState?
-
     override init() {}
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline.polygonGroupShader.rawValue)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: .polygonGroupShader, blendMode: blendMode).json)
         }
     }
 

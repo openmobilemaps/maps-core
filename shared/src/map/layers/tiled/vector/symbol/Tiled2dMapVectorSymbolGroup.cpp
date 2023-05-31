@@ -216,7 +216,9 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
     }
 
     if (instanceCounts.icons != 0) {
-        iconInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createQuadInstanced(strongMapInterface->getShaderFactory()->createAlphaInstancedShader()->asShaderProgramInterface());
+        auto shader = strongMapInterface->getShaderFactory()->createAlphaInstancedShader()->asShaderProgramInterface();
+        shader->setBlendMode(layerDescription->style.getBlendMode(EvaluationContext(std::nullopt, FeatureContext())));
+        iconInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createQuadInstanced(shader);
 
         iconInstancedObject->setInstanceCount(instanceCounts.icons);
 
@@ -229,7 +231,9 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
 
     if (instanceCounts.stretchedIcons != 0) {
-        stretchedInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createQuadStretchedInstanced(strongMapInterface->getShaderFactory()->createStretchInstancedShader()->asShaderProgramInterface());
+        auto shader = strongMapInterface->getShaderFactory()->createStretchInstancedShader()->asShaderProgramInterface();
+        shader->setBlendMode(layerDescription->style.getBlendMode(EvaluationContext(std::nullopt, FeatureContext())));
+        stretchedInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createQuadStretchedInstanced(shader);
 
         stretchedInstancedObject->setInstanceCount(instanceCounts.stretchedIcons);
 
@@ -242,7 +246,9 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
     }
 
     if (instanceCounts.textCharacters != 0) {
-        textInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createTextInstanced(strongMapInterface->getShaderFactory()->createTextInstancedShader()->asShaderProgramInterface());
+        auto shader = strongMapInterface->getShaderFactory()->createTextInstancedShader()->asShaderProgramInterface();
+        shader->setBlendMode(layerDescription->style.getBlendMode(EvaluationContext(std::nullopt, FeatureContext())));
+        textInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createTextInstanced(shader);
         textInstancedObject->setInstanceCount(instanceCounts.textCharacters);
 
         textStyles.resize(textStyleCount * 9, 0.0);

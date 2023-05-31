@@ -20,6 +20,7 @@
 void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32_t layerIndex) {
     Tiled2dMapVectorSubLayer::onAdded(mapInterface, layerIndex);
     shader = mapInterface->getShaderFactory()->createColorShader();
+    shader->asShaderProgramInterface()->setBlendMode(description->style.getBlendMode(EvaluationContext(std::nullopt, FeatureContext())));
     
     auto object = mapInterface->getGraphicsObjectFactory()->createQuad(shader->asShaderProgramInterface());
     object->setFrame(Quad2dD(Vec2D(-1, 1),

@@ -6,10 +6,16 @@
 @extern "../../yaml/shared_bytes.yaml"
 @extern "../../yaml/color.yaml"
 
+blend_mode = enum {
+    normal;
+    multiply;
+}
+
 shader_program_interface = interface +c +o {
     get_program_name() : string;
     setup_program(context: rendering_context_interface);
     pre_render(context: rendering_context_interface);
+    set_blend_mode(blend_mode: blend_mode);
 }
 
 shader_factory_interface = interface +c +j +o {

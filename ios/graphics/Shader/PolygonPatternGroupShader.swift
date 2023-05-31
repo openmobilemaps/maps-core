@@ -14,13 +14,11 @@ import Metal
 import UIKit
 
 class PolygonPatternGroupShader: BaseShader {
-    private var pipeline: MTLRenderPipelineState?
-
     override init() {}
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline.polygonPatternGroupShader.rawValue)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: .polygonPatternGroupShader, blendMode: blendMode).json)
         }
     }
 

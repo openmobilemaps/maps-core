@@ -31,12 +31,10 @@ struct RasterShaderStyle: Equatable {
 class RasterShader: BaseShader {
     private var rasterStyleBuffer: MTLBuffer
     private var rasterStyleBufferContents : UnsafeMutablePointer<RasterShaderStyle>
+
+    private let shader : PipelineType
     
-    private var pipeline: MTLRenderPipelineState?
-    
-    private let shader : Pipeline
-    
-    init(shader : Pipeline = Pipeline.rasterShader) {
+    init(shader : PipelineType = .rasterShader) {
         self.shader = shader
         guard let buffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<RasterShaderStyle>.stride, options: []) else { fatalError("Could not create buffer") }
         self.rasterStyleBuffer = buffer
@@ -46,7 +44,7 @@ class RasterShader: BaseShader {
     
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(shader.rawValue)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode).json)
         }
     }
     

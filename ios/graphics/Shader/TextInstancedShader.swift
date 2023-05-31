@@ -13,11 +13,9 @@ import MapCoreSharedModule
 import Metal
 
 class TextInstancedShader: BaseShader {
-    private var pipeline: MTLRenderPipelineState?
-
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline.textInstancedShader.rawValue)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: .textInstancedShader, blendMode: blendMode).json)
         }
     }
 

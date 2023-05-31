@@ -24,6 +24,7 @@ public:
                     std::shared_ptr<Value> lineBlur = nullptr,
                     std::shared_ptr<Value> lineCap = nullptr,
                     std::shared_ptr<Value> lineOffset = nullptr,
+                    std::shared_ptr<Value> blendMode = nullptr,
                     double dpFactor = 1.0):
     lineColor(lineColor),
     lineOpacity(lineOpacity),
@@ -32,11 +33,12 @@ public:
     lineBlur(lineBlur),
     lineCap(lineCap),
     lineOffset(lineOffset),
+    blendMode(blendMode),
     dpFactor(dpFactor) {}
 
     std::unordered_set<std::string> getUsedKeys() const {
         std::unordered_set<std::string> usedKeys;
-        std::vector<std::shared_ptr<Value>> values = { lineColor, lineOpacity, lineWidth, lineBlur, lineDashArray, lineCap };
+        std::vector<std::shared_ptr<Value>> values = { lineColor, lineOpacity, lineWidth, lineBlur, lineDashArray, lineCap, blendMode };
 
         for (auto const &value: values) {
             if (!value) continue;
@@ -46,6 +48,11 @@ public:
 
         return usedKeys;
     };
+
+    BlendMode getBlendMode(const EvaluationContext &context) const {
+        static const BlendMode defaultValue = BlendMode::NORMAL;
+        return blendMode ? blendMode->evaluateOr(context, defaultValue) : defaultValue;
+    }
 
     Color getLineColor(const EvaluationContext &context){
         static const Color defaultValue = ColorUtil::c(0, 0, 0, 1.0);
@@ -92,6 +99,7 @@ private:
     std::shared_ptr<Value> lineDashArray;
     std::shared_ptr<Value> lineCap;
     std::shared_ptr<Value> lineOffset;
+    std::shared_ptr<Value> blendMode;
     double dpFactor;
 };
 

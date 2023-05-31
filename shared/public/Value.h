@@ -36,6 +36,7 @@
 #include "VectorLayerFeatureInfo.h"
 #include "SymbolAlignment.h"
 #include "IconTextFit.h"
+#include "BlendMode.h"
 
 namespace std {
     template <>
@@ -329,6 +330,15 @@ public:
         return std::nullopt;
     }
 
+    std::optional<::BlendMode> blendModeFromString(const std::string &value) const {
+        if (value == "multiply") {
+            return BlendMode::MULTIPLY;
+        } else  if (value == "normal") {
+            return BlendMode::NORMAL;
+        }
+        return std::nullopt;
+    }
+
 
     std::optional<::SymbolAlignment> alignmentFromString(const std::string &value) const {
         if (value == "auto") {
@@ -371,6 +381,16 @@ public:
         if(value == "line") { return TextSymbolPlacement::LINE; }
         if(value == "line-center") { return TextSymbolPlacement::LINE_CENTER; }
         return std::nullopt;
+    }
+
+    template<>
+    BlendMode evaluateOr(const EvaluationContext &context, const BlendMode &alternative) const {
+        auto const &value = evaluateOr(context, std::string(""));
+        auto blendMode = blendModeFromString(value);
+        if (blendMode) {
+            return *blendMode;
+        }
+        return alternative;
     }
 
     template<>
