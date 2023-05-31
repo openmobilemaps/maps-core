@@ -407,11 +407,14 @@ void Tiled2dMapSource<T, L, R>::didLoad(Tiled2dMapTileInfo tile, size_t loaderIn
 
             auto taskIdentifier = "Tiled2dMapSource_loadingErrorTask";
 
+            auto strongScheduler = scheduler.lock();
+            if (strongScheduler) {
+                auto weakActor = WeakActor<Tiled2dMapSource>(mailbox, std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this()));
+                strongScheduler->addTask(std::make_shared<LambdaTask>(TaskConfig(taskIdentifier, delay, TaskPriority::NORMAL, ExecutionEnvironment::IO), [weakActor, tile, loaderIndex] {
+                    weakActor.message(&Tiled2dMapSource::performLoadingTask, tile, loaderIndex);
+                }));
 
-            auto weakActor = WeakActor<Tiled2dMapSource>(mailbox, std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this()));
-            scheduler->addTask(std::make_shared<LambdaTask>(TaskConfig(taskIdentifier, delay, TaskPriority::NORMAL, ExecutionEnvironment::IO), [weakActor, tile, loaderIndex] {
-                weakActor.message(&Tiled2dMapSource::performLoadingTask, tile, loaderIndex);
-            }));
+            }
 
             break;
         }

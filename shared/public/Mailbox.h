@@ -123,9 +123,9 @@ public:
                 pushLambda(graphicsQueueMutex, graphicsQueue);
                 break;
         }
-
-        if (wasEmpty) {
-            scheduler->addTask(makeTask(shared_from_this(), environment));
+        auto strongScheduler = scheduler.lock();
+        if (wasEmpty && strongScheduler) {
+            strongScheduler->addTask(makeTask(shared_from_this(), environment));
         }
     };
     
@@ -152,9 +152,10 @@ public:
                 break;
         }
         (*message)();
-        
-        if (!wasEmpty) {
-            scheduler->addTask(makeTask(shared_from_this(), environment));
+
+        auto strongScheduler = scheduler.lock();
+        if (!wasEmpty && strongScheduler) {
+            strongScheduler->addTask(makeTask(shared_from_this(), environment));
         }
     }
     
@@ -179,7 +180,7 @@ public:
 
     std::recursive_mutex receivingMutex;
 private:
-    std::shared_ptr<SchedulerInterface> scheduler;
+    std::weak_ptr<SchedulerInterface> scheduler;
 
     std::mutex pushingMutex;
 

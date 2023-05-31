@@ -111,7 +111,7 @@ public:
     std::shared_ptr<Tiled2dMapLayerConfig> layerConfig;
     std::string layerSystemId;
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
-    std::shared_ptr<SchedulerInterface> scheduler;
+    std::weak_ptr<SchedulerInterface> scheduler;
     std::shared_ptr<::ErrorManager> errorManager;
 
     std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfos;

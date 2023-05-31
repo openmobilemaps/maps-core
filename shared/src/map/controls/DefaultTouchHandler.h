@@ -76,7 +76,7 @@ private:
     std::recursive_mutex listenerMutex;
     std::list<ListenerEntry> listeners; // ordered by the decreasing index
 
-    const std::shared_ptr<SchedulerInterface> scheduler;
+    const std::weak_ptr<SchedulerInterface> scheduler;
 
     TouchHandlingState state;
     long long stateTime;
