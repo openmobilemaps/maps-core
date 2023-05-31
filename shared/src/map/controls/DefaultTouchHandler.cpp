@@ -160,9 +160,12 @@ void DefaultTouchHandler::handleTouchDown(Vec2F position) {
         state = ONE_FINGER_DOWN;
     }
     stateTime = DateHelper::currentTimeMillis();
-    scheduler->addTask(std::make_shared<LambdaTask>(
-        TaskConfig("LongPressTask", LONG_PRESS_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
-        [=] { checkState(); }));
+    auto strongScheduler = scheduler.lock();
+    if (strongScheduler) {
+        strongScheduler->addTask(std::make_shared<LambdaTask>(
+                                                              TaskConfig("LongPressTask", LONG_PRESS_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
+                                                              [=] { checkState(); }));
+    }
     {
         std::lock_guard<std::recursive_mutex> lock(listenerMutex);
         for (auto &[index, listener]: listeners) {
@@ -242,9 +245,12 @@ void DefaultTouchHandler::handleTouchUp() {
             state = IDLE;
         } else {
             state = ONE_FINGER_UP_AFTER_CLICK;
-            scheduler->addTask(std::make_shared<LambdaTask>(
-                TaskConfig("DoubleTapTask", DOUBLE_TAP_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
-                [=] { checkState(); }));
+            auto strongScheduler = scheduler.lock();
+            if (strongScheduler) {
+                strongScheduler->addTask(std::make_shared<LambdaTask>(
+                                                                      TaskConfig("DoubleTapTask", DOUBLE_TAP_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
+                                                                      [=] { checkState(); }));
+            }
         }
 
     } else if (state == TWO_FINGER_DOWN && stateTime >= DateHelper::currentTimeMillis() - TWO_FINGER_TOUCH_TIMEOUT) {
@@ -306,9 +312,12 @@ void DefaultTouchHandler::handleTwoFingerDown() {
     }
     state = TWO_FINGER_DOWN;
     stateTime = DateHelper::currentTimeMillis();
-    scheduler->addTask(std::make_shared<LambdaTask>(
-        TaskConfig("LongPressTask", LONG_PRESS_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
-        [=] { checkState(); }));
+    auto strongScheduler = scheduler.lock();
+    if (strongScheduler) {
+        strongScheduler->addTask(std::make_shared<LambdaTask>(
+                                                              TaskConfig("LongPressTask", LONG_PRESS_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
+                                                              [=] { checkState(); }));
+    }
     {
         std::lock_guard<std::recursive_mutex> lock(listenerMutex);
         for (auto &[index, listener]: listeners) {
