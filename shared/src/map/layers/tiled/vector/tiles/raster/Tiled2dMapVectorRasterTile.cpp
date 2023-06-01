@@ -13,12 +13,15 @@
 #include "Tiled2dMapVectorRasterSubLayerConfig.h"
 #include "RasterShaderInterface.h"
 #include "RenderPass.h"
+#include "Tiled2dMapVectorStyleParser.h"
 
 Tiled2dMapVectorRasterTile::Tiled2dMapVectorRasterTile(const std::weak_ptr<MapInterface> &mapInterface,
                                                        const Tiled2dMapTileInfo &tileInfo,
                                                        const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
                                                        const std::shared_ptr<RasterVectorLayerDescription> &description)
-                                                       : Tiled2dMapVectorTile(mapInterface, tileInfo, description, tileCallbackInterface){
+                                                       : Tiled2dMapVectorTile(mapInterface, tileInfo, description, tileCallbackInterface),
+                                                       usedKeys(description->getUsedKeys()) {
+    isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
     auto pMapInterface = mapInterface.lock();
     if (pMapInterface) {
         auto shader = pMapInterface->getShaderFactory()->createRasterShader();
@@ -32,6 +35,8 @@ Tiled2dMapVectorRasterTile::Tiled2dMapVectorRasterTile(const std::weak_ptr<MapIn
 void Tiled2dMapVectorRasterTile::updateRasterLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                                         const Tiled2dMapVectorTileDataRaster &tileData) {
     Tiled2dMapVectorTile::updateRasterLayerDescription(description, tileData);
+    isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
+    lastZoom = std::nullopt;
     setRasterTileData(tileData);
 }
 
@@ -41,9 +46,18 @@ void Tiled2dMapVectorRasterTile::update() {
     if (!mapInterface || !camera) {
         return;
     }
-    double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
 
+    if (!isStyleZoomDependant && lastZoom) {
+        return;
+    }
+
+    double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
     zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.zoomIdentifier);
+
+    if (isStyleZoomDependant && lastZoom && *lastZoom == zoomIdentifier) {
+        return;
+    }
+    lastZoom = zoomIdentifier;
 
     const EvaluationContext evalContext(zoomIdentifier, std::make_shared<FeatureContext>());
     const auto rasterStyle = std::static_pointer_cast<RasterVectorLayerDescription>(description)->style.getRasterStyle(evalContext);

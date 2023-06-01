@@ -21,28 +21,28 @@
 #include <unordered_set>
 
 class Tiled2dMapVectorStyleParser {
-    const std::string literalExpression = "literal";
-    const std::string getExpression = "get";
-    const std::string hasExpression = "has";
-    const std::string inExpression = "in";
-    const std::string notInExpression = "!in";
-    const std::unordered_set<std::string> compareExpression = { "==", "!=", "<", "<=", ">", ">="};
-    const std::unordered_set<std::string> mathExpression = { "-", "+", "/", "*", "%", "^"};
-    const std::string allExpression = "all";
-    const std::string anyExpression = "any";
-    const std::string caseExpression = "case";
-    const std::string matchExpression = "match";
-    const std::string toStringExpression = "to-string";
-    const std::string toNumberExpression = "to-number";
-    const std::string stopsExpression = "stops";
-    const std::string stepExpression = "step";
-    const std::string interpolateExpression = "interpolate";
-    const std::string formatExpression = "format";
-    const std::string concatExpression = "concat";
-    const std::string lengthExpression = "length";
-    const std::string notExpression = "!";
-
 public:
+    static const std::string literalExpression;
+    static const std::string getExpression;
+    static const std::string hasExpression;
+    static const std::string inExpression;
+    static const std::string notInExpression;
+    static const std::unordered_set<std::string> compareExpression;
+    static const std::unordered_set<std::string> mathExpression;
+    static const std::string allExpression;
+    static const std::string anyExpression;
+    static const std::string caseExpression;
+    static const std::string matchExpression;
+    static const std::string toStringExpression;
+    static const std::string toNumberExpression;
+    static const std::string stopsExpression;
+    static const std::string stepExpression;
+    static const std::string interpolateExpression;
+    static const std::string formatExpression;
+    static const std::string concatExpression;
+    static const std::string lengthExpression;
+    static const std::string notExpression;
+    static const std::string zoomExpression;
 
     std::shared_ptr<Value> parseValue(nlohmann::json json) {
         if (json.is_array()) {

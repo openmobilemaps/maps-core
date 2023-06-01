@@ -44,5 +44,9 @@ private:
     std::shared_ptr<Textured2dLayerObject> tileObject;
     std::shared_ptr<TextureHolderInterface> tileData;
 
+    std::unordered_set<std::string> usedKeys;
+    bool isStyleZoomDependant = true;
+    std::optional<double> lastZoom = std::nullopt;
+
     std::optional<RasterShaderStyle> lastStyle;
 };
