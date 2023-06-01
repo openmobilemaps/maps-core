@@ -26,7 +26,7 @@ class ColorCircleShader: BaseShader {
     override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
         guard let pipeline = pipeline else { return }
         context.setRenderPipelineStateIfNeeded(pipeline)
-        encoder.setFragmentBytes(&color, length: MemoryLayout<SIMD4<Float>>.stride, index: 1)
+        context.setFragmentBytes(&color, length: MemoryLayout<SIMD4<Float>>.stride, index: 1)
     }
 }
 

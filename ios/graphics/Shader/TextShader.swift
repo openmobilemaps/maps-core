@@ -29,12 +29,12 @@ class TextShader: BaseShader {
 
         context.setRenderPipelineStateIfNeeded(pipeline)
 
-        encoder.setFragmentBytes(&color, length: MemoryLayout<SIMD4<Float>>.stride, index: 1)
+        context.setFragmentBytes(&color, length: MemoryLayout<SIMD4<Float>>.stride, index: 1)
 
-        encoder.setFragmentBytes(&haloColor, length: MemoryLayout<SIMD4<Float>>.stride, index: 2)
+        context.setFragmentBytes(&haloColor, length: MemoryLayout<SIMD4<Float>>.stride, index: 2)
 
-        encoder.setFragmentBytes(&opacity, length: MemoryLayout<Float>.stride, index: 3)
-        encoder.setFragmentBytes(&haloWidth, length: MemoryLayout<Float>.stride, index: 4)
+        context.setFragmentBytes(&opacity, length: MemoryLayout<Float>.stride, index: 3)
+        context.setFragmentBytes(&haloWidth, length: MemoryLayout<Float>.stride, index: 4)
     }
 }
 

@@ -33,13 +33,13 @@ class LineGroupShader: BaseShader {
 
         context.setRenderPipelineStateIfNeeded(pipeline)
 
-        encoder.setVertexBytes(&screenPixelAsRealMeterFactor, length: MemoryLayout<Float>.stride, index: 2)
+        context.setVertexBytes(&screenPixelAsRealMeterFactor, length: MemoryLayout<Float>.stride, index: 2)
 
-        encoder.setVertexBytes(&dashingScaleFactor, length: MemoryLayout<Float>.stride, index: 3)
+        context.setVertexBytes(&dashingScaleFactor, length: MemoryLayout<Float>.stride, index: 3)
 
-        encoder.setVertexBuffer(lineStyleBuffer, offset: 0, index: 4)
+        context.setVertexBuffer(lineStyleBuffer, offset: 0, index: 4)
 
-        encoder.setFragmentBuffer(lineStyleBuffer, offset: 0, index: 1)
+        context.setFragmentBuffer(lineStyleBuffer, offset: 0, index: 1)
     }
 }
 

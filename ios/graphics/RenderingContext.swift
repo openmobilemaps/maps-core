@@ -61,13 +61,83 @@ public class RenderingContext: NSObject {
     var currentPipeline: MTLRenderPipelineState?
 
     func setRenderPipelineStateIfNeeded(_ pipelineState: MTLRenderPipelineState) {
-        guard currentPipeline?.hash != pipelineState.hash else {
+        if currentPipeline?.hash == pipelineState.hash {
             return
         }
         currentPipeline = pipelineState
         encoder?.setRenderPipelineState(pipelineState)
     }
 
+
+    var currentSampler: (MTLSamplerState?, Int)?
+    func setFragmentSamplerState(_ sampler: MTLSamplerState?, index: Int) {
+        if currentSampler?.0?.hash == sampler?.hash,
+              currentSampler?.1 == index {
+            return
+        }
+        currentSampler = (sampler, index)
+        encoder?.setFragmentSamplerState(sampler, index: index)
+    }
+
+    var vertextBindings: [Int: (Int?, Int)] = [:]
+    func setVertexBytes(_ bytes: UnsafeRawPointer, length: Int, index: Int) {
+        if let currentBinding = vertextBindings[index],
+              currentBinding.0 == bytes.hashValue,
+              currentBinding.1 == length  {
+            return
+        }
+        encoder?.setVertexBytes(bytes, length: length, index: index)
+        vertextBindings[index] = (bytes.hashValue, length)
+    }
+    func setVertexBuffer(_ buffer: MTLBuffer?, offset: Int, index: Int) {
+        if let currentBinding = vertextBindings[index],
+              currentBinding.0 == buffer?.hash,
+              currentBinding.1 == offset {
+            return
+        }
+        encoder?.setVertexBuffer(buffer, offset: offset, index: index)
+        vertextBindings[index] = (buffer?.hash, offset)
+    }
+
+    var fragmentBindings: [Int: (Int?, Int)] = [:]
+    func setFragmentBytes(_ bytes: UnsafeRawPointer, length: Int, index: Int) {
+        if let currentBinding = fragmentBindings[index],
+              currentBinding.0 == bytes.hashValue,
+              currentBinding.1 == length  {
+            return
+        }
+        encoder?.setFragmentBytes(bytes, length: length, index: index)
+        fragmentBindings[index] = (bytes.hashValue, length)
+    }
+
+    func setFragmentBuffer(_ buffer: MTLBuffer?, offset: Int, index: Int) {
+        if let currentBinding = fragmentBindings[index],
+              currentBinding.0 == buffer?.hash,
+              currentBinding.1 == offset {
+            return
+        }
+        encoder?.setFragmentBuffer(buffer, offset: offset, index: index)
+        fragmentBindings[index] = (buffer?.hash, offset)
+    }
+
+    var currentDepthStencilState: MTLDepthStencilState?
+    func setDepthStencilState(_ depthStencilState: MTLDepthStencilState?) {
+        if currentDepthStencilState?.hash == depthStencilState?.hash {
+            return
+        }
+        currentDepthStencilState = depthStencilState
+        encoder?.setDepthStencilState(depthStencilState)
+    }
+
+    var currentTexture: (MTLTexture?, Int)?
+    func setFragmentTexture(_ texture: MTLTexture?, index: Int) {
+        if currentTexture?.0?.hash == texture?.hash,
+              currentTexture?.1 == index {
+            return
+        }
+        currentTexture = (texture, index)
+        encoder?.setFragmentTexture(texture, index: index)
+    }
 
     /// a Quad that fills the whole viewport
     /// this is needed to clear the stencilbuffer
@@ -102,7 +172,12 @@ extension RenderingContext: MCRenderingContextInterface {
     }
 
     public func setupDrawFrame() {
-        currentPipeline = nil;
+        currentPipeline = nil
+        currentSampler = nil
+        currentTexture = nil
+        currentDepthStencilState = nil
+        vertextBindings.removeAll(keepingCapacity: true)
+        fragmentBindings.removeAll(keepingCapacity: true)
     }
 
     public func onSurfaceCreated() {

@@ -82,8 +82,8 @@ class StretchShader: BaseShader {
         guard let pipeline = pipeline else { return }
 
         context.setRenderPipelineStateIfNeeded(pipeline)
-        encoder.setFragmentBuffer(alphaBuffer, offset: 0, index: 1)
-        encoder.setFragmentBuffer(infoBuffer, offset: 0, index: 2)
+        context.setFragmentBuffer(alphaBuffer, offset: 0, index: 1)
+        context.setFragmentBuffer(infoBuffer, offset: 0, index: 2)
     }
 }
 

@@ -52,7 +52,7 @@ class RasterShader: BaseShader {
         guard let pipeline = pipeline else { return }
         
         context.setRenderPipelineStateIfNeeded(pipeline)
-        encoder.setFragmentBuffer(rasterStyleBuffer, offset: 0, index: 1)
+        context.setFragmentBuffer(rasterStyleBuffer, offset: 0, index: 1)
     }
 }
 

@@ -30,7 +30,7 @@ class PolygonGroupShader: BaseShader {
 
         context.setRenderPipelineStateIfNeeded(pipeline)
 
-        encoder.setFragmentBuffer(polygonStyleBuffer, offset: 0, index: 1)
+        context.setFragmentBuffer(polygonStyleBuffer, offset: 0, index: 1)
     }
 }
 

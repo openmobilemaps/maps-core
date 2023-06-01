@@ -82,29 +82,29 @@ final class PolygonPatternGroup2d: BaseGraphicsObject {
             if stencilState == nil {
                 setupStencilStates()
             }
-            encoder.setDepthStencilState(stencilState)
+            context.setDepthStencilState(stencilState)
             encoder.setStencilReferenceValue(0b1100_0000)
         }
 
         shader.setupProgram(context)
         shader.preRender(context)
 
-        encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
+        context.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {
-            encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+            context.setVertexBytes(matrixPointer, length: 64, index: 1)
         }
         if customScreenPixelFactor != 0 {
-            encoder.setVertexBytes(&customScreenPixelFactor, length: MemoryLayout<Float>.stride, index: 2)
+            context.setVertexBytes(&customScreenPixelFactor, length: MemoryLayout<Float>.stride, index: 2)
         } else {
             screenPixelFactor = Float(screenPixelAsRealMeterFactor)
-            encoder.setVertexBytes(&screenPixelFactor, length: MemoryLayout<Float>.stride, index: 2)
+            context.setVertexBytes(&screenPixelFactor, length: MemoryLayout<Float>.stride, index: 2)
         }
 
-        encoder.setFragmentTexture(texture, index: 0)
-        encoder.setFragmentSamplerState(sampler, index: 0)
+        context.setFragmentTexture(texture, index: 0)
+        context.setFragmentSamplerState(sampler, index: 0)
 
-        encoder.setFragmentBuffer(opacitiesBuffer, offset: 0, index: 0)
-        encoder.setFragmentBuffer(textureCoordinatesBuffer, offset: 0, index: 1)
+        context.setFragmentBuffer(opacitiesBuffer, offset: 0, index: 0)
+        context.setFragmentBuffer(textureCoordinatesBuffer, offset: 0, index: 1)
 
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,
