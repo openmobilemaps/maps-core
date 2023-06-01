@@ -1226,7 +1226,13 @@ public:
     LogOpValue(const LogOpType &logOpType, const std::shared_ptr<Value> &lhs, const std::shared_ptr<Value> &rhs = nullptr) : logOpType(logOpType), lhs(lhs), rhs(rhs) {}
 
     std::unique_ptr<Value> clone() override {
-        return std::make_unique<LogOpValue>(logOpType, lhs->clone(), rhs->clone());
+        switch (logOpType) {
+            case LogOpType::AND:
+            case LogOpType::OR:
+                return std::make_unique<LogOpValue>(logOpType, lhs->clone(), rhs->clone());
+            case LogOpType::NOT:
+                return std::make_unique<LogOpValue>(logOpType, lhs->clone());
+        }
     }
 
     std::unordered_set<std::string> getUsedKeys() const override {
