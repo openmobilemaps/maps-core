@@ -103,8 +103,6 @@ final class LineGroup2d: BaseGraphicsObject {
 
         shader.screenPixelAsRealMeterFactor = Float(screenPixelAsRealMeterFactor)
 
-        encoder.setVertexBytes(&customScreenPixelFactor, length: MemoryLayout<Float>.stride, index: 3)
-
         shader.setupProgram(context)
         shader.preRender(context)
 
