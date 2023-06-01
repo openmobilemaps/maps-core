@@ -57,6 +57,8 @@ private:
     std::vector<std::shared_ptr<PolygonGroup2dLayerObject>> polygons;
     std::vector<std::tuple<size_t, std::shared_ptr<FeatureContext>>> featureGroups;
     std::unordered_set<std::string> usedKeys;
+    bool isStyleZoomDependant = true;
+    std::optional<double> lastZoom = std::nullopt;
 
     std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<PolygonCoord, std::shared_ptr<FeatureContext>>>> hitDetectionPolygonMap;
 };

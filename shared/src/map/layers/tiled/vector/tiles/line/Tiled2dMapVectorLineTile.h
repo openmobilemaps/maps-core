@@ -62,6 +62,8 @@ private:
     std::vector<std::tuple<std::vector<std::vector<::Coord>>, std::shared_ptr<FeatureContext>>> hitDetection;
 
     std::unordered_set<std::string> usedKeys;
+    bool isStyleZoomDependant = true;
+    std::optional<double> lastZoom = std::nullopt;
 
     std::vector<std::vector<ShaderLineStyle>> reusableLineStyles;
     std::unordered_map<size_t, std::pair<int, int>> styleHashToGroupMap;

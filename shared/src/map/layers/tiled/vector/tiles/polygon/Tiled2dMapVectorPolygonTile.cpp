@@ -16,6 +16,7 @@
 #include "Logger.h"
 #include "PolygonHelper.h"
 #include "CoordinateSystemIdentifiers.h"
+#include "Tiled2dMapVectorStyleParser.h"
 
 namespace mapbox {
     namespace util {
@@ -41,6 +42,7 @@ Tiled2dMapVectorPolygonTile::Tiled2dMapVectorPolygonTile(const std::weak_ptr<Map
                                                          const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
                                                          const std::shared_ptr<PolygonVectorLayerDescription> &description)
         : Tiled2dMapVectorTile(mapInterface, tileInfo, description, tileCallbackInterface), usedKeys(std::move(description->getUsedKeys())) {
+    isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
     auto pMapInterface = mapInterface.lock();
     if (pMapInterface) {
         shader = pMapInterface->getShaderFactory()->createPolygonGroupShader();
@@ -54,6 +56,8 @@ void Tiled2dMapVectorPolygonTile::updateVectorLayerDescription(const std::shared
     featureGroups.clear();
     hitDetectionPolygonMap.clear();
     usedKeys = std::move(description->getUsedKeys());
+    isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
+    lastZoom = std::nullopt;
     setVectorTileData(tileData);
 }
 
@@ -63,8 +67,18 @@ void Tiled2dMapVectorPolygonTile::update() {
     if (!mapInterface || !camera) {
         return;
     }
+
+    if (!isStyleZoomDependant && lastZoom) {
+        return;
+    }
+
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
     zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.zoomIdentifier);
+
+    if (isStyleZoomDependant && lastZoom && *lastZoom == zoomIdentifier) {
+        return;
+    }
+    lastZoom = zoomIdentifier;
 
     std::vector<float> shaderStyles;
     auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
@@ -129,14 +143,14 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
         for (auto featureIt = tileData->begin(); featureIt != tileData->end(); featureIt++) {
 #endif
 
-            const auto &[featureContext, geometryHandler] = *featureIt;
+            const auto [featureContext, geometryHandler] = *featureIt;
 
             if (featureContext->geomType != vtzero::GeomType::POLYGON) { continue; }
 
             EvaluationContext evalContext = EvaluationContext(tileInfo.zoomIdentifier, featureContext);
             if (description->filter == nullptr || description->filter->evaluateOr(evalContext, true)) {
-                const auto &polygonCoordinates = geometryHandler.getPolygonCoordinates();
-                const auto &polygonHoles = geometryHandler.getHoleCoordinates();
+                const auto &polygonCoordinates = geometryHandler->getPolygonCoordinates();
+                const auto &polygonHoles = geometryHandler->getHoleCoordinates();
 
                 std::vector<Coord> positions;
 

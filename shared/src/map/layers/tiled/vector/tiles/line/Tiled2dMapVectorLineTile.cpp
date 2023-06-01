@@ -13,12 +13,15 @@
 #include "RenderObject.h"
 #include "LineHelper.h"
 #include "Tiled2dMapVectorRasterSubLayerConfig.h"
+#include "Tiled2dMapVectorStyleParser.h"
 
 Tiled2dMapVectorLineTile::Tiled2dMapVectorLineTile(const std::weak_ptr<MapInterface> &mapInterface,
                                                          const Tiled2dMapTileInfo &tileInfo,
                                                          const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
                                                          const std::shared_ptr<LineVectorLayerDescription> &description)
-        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, tileCallbackInterface), usedKeys(description->getUsedKeys()) {}
+        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, tileCallbackInterface), usedKeys(description->getUsedKeys()) {
+    isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
+}
 
 void Tiled2dMapVectorLineTile::updateVectorLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                                       const Tiled2dMapVectorTileDataVector &tileData) {
@@ -28,6 +31,8 @@ void Tiled2dMapVectorLineTile::updateVectorLayerDescription(const std::shared_pt
     styleHashToGroupMap.clear();
     hitDetection.clear();
     usedKeys = std::move(description->getUsedKeys());
+    isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
+    lastZoom = std::nullopt;
     setVectorTileData(tileData);
 }
 
@@ -41,9 +46,19 @@ void Tiled2dMapVectorLineTile::update() {
     if (!mapInterface || !camera) {
         return;
     }
+
+    if (!isStyleZoomDependant && lastZoom) {
+        return;
+    }
+
     const double cameraZoom = camera->getZoom();
      double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(cameraZoom);
     zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.zoomIdentifier);
+
+    if (isStyleZoomDependant && lastZoom && *lastZoom == zoomIdentifier) {
+        return;
+    }
+    lastZoom = zoomIdentifier;
 
     const auto zoom = Tiled2dMapVectorRasterSubLayerConfig::getZoomFactorAtIdentifier(floor(zoomIdentifier));
     const auto cameraScalingFactor = camera->asCameraInterface()->getScalingFactor();
@@ -230,10 +245,10 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                     subGroupCoordCount.try_emplace(styleGroupIndex, 0);
                 }
 
-                const VectorTileGeometryHandler &geometryHandler = std::get<1>(*featureIt);
+                const std::shared_ptr<VectorTileGeometryHandler> geometryHandler = std::get<1>(*featureIt);
                 std::vector<std::vector<::Coord>> lineCoordinatesVector;
 
-                for (const auto &lineCoordinates: geometryHandler.getLineCoordinates()) {
+                for (const auto &lineCoordinates: geometryHandler->getLineCoordinates()) {
                     if (lineCoordinates.empty()) { continue; }
 
                     int numCoords = (int)lineCoordinates.size();

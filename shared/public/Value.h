@@ -593,6 +593,40 @@ public:
         return std::make_unique<StaticValue>(value);
     }
 
+    std::unordered_set<std::string> getUsedKeys() const override {
+        if (std::holds_alternative<std::string>(value)) {
+            std::string res = std::get<std::string>(value);
+            std::unordered_set<std::string> usedKeys = { res };
+
+            auto begin = res.find("{");
+            auto end = res.find("}", begin);
+
+            while ( begin != std::string::npos &&
+                    end != std::string::npos &&
+                    end > begin &&
+                    (begin == 0 || res[begin - 1] != '\\') &&
+                    (end == 0 || res[end - 1] != '\\')) {
+
+                std::string key = res.substr (begin + 1,(end - begin) - 1);
+                usedKeys.insert(key);
+                begin = res.find("{", (begin + key.size()));
+                end = res.find("}", begin);
+            }
+
+            return usedKeys;
+
+        } else if (std::holds_alternative<std::vector<std::string>>(value)) {
+            std::vector<std::string> res = std::get<std::vector<std::string>>(value);
+            if (!res.empty() && *res.begin() == "zoom") {
+                return { "zoom" };
+            }
+            return {};
+        } else {
+            return {};
+        }
+
+    }
+
     ValueVariant evaluate(const EvaluationContext &context) const override {
         if (std::holds_alternative<std::string>(value)) {
             std::string res = std::get<std::string>(value);
@@ -731,7 +765,7 @@ public:
     }
 
     std::unordered_set<std::string> getUsedKeys() const override {
-        std::unordered_set<std::string> usedKeys;
+        std::unordered_set<std::string> usedKeys = { "zoom" };
         for (auto const &step: steps) {
             auto const setKeys = std::get<1>(step)->getUsedKeys();
             usedKeys.insert(setKeys.begin(), setKeys.end());
@@ -821,7 +855,7 @@ public:
     }
 
     std::unordered_set<std::string> getUsedKeys() const override {
-        std::unordered_set<std::string> usedKeys;
+        std::unordered_set<std::string> usedKeys = {"zoom"};
         for (auto const &step: steps) {
             auto const setKeys = std::get<1>(step)->getUsedKeys();
             usedKeys.insert(setKeys.begin(), setKeys.end());
@@ -891,7 +925,7 @@ public:
     }
 
     std::unordered_set<std::string> getUsedKeys() const override {
-        std::unordered_set<std::string> usedKeys;
+        std::unordered_set<std::string> usedKeys = {"zoom"};
         for (auto const &stop: stops) {
             auto const setKeys = std::get<1>(stop)->getUsedKeys();
             usedKeys.insert(setKeys.begin(), setKeys.end());

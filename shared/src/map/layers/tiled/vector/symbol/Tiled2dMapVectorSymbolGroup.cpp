@@ -89,11 +89,11 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
             bool wasPlaced = false;
 
             std::vector<Coord> line = {};
-            for (const auto &points: geometry.getPointCoordinates()) {
+            for (const auto &points: geometry->getPointCoordinates()) {
                 line.insert(line.end(), points.begin(), points.end());
             }
 
-            for (const auto &points: geometry.getPointCoordinates()) {
+            for (const auto &points: geometry->getPointCoordinates()) {
 
                 for (auto pointIt = points.begin(); pointIt != points.end(); pointIt++) {
                     auto point = *pointIt;
@@ -131,7 +131,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
             // if no label was placed, place it in the middle of the line
             if (!wasPlaced) {
                 distance = 0;
-                for (const auto &points: geometry.getPointCoordinates()) {
+                for (const auto &points: geometry->getPointCoordinates()) {
                     for (auto pointIt = points.begin(); pointIt != points.end(); pointIt++) {
                         auto point = *pointIt;
 
@@ -174,7 +174,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                 }
             }
         } else {
-            for (const auto &p: geometry.getPointCoordinates()) {
+            for (const auto &p: geometry->getPointCoordinates()) {
                 auto midP = p.begin() + p.size() / 2;
                 std::optional<double> angle = std::nullopt;
 

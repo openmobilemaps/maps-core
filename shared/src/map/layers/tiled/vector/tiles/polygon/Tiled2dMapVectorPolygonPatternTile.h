@@ -63,6 +63,8 @@ private:
     std::vector<std::shared_ptr<PolygonPatternGroup2dLayerObject>> polygons;
     std::vector<std::tuple<size_t, std::shared_ptr<FeatureContext>>> featureGroups;
     std::unordered_set<std::string> usedKeys;
+    bool isStyleZoomDependant = true;
+    std::optional<double> lastZoom = std::nullopt;
 
     std::shared_ptr<SpriteData> spriteData;
     std::shared_ptr<TextureHolderInterface> spriteTexture;

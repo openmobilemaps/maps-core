@@ -13,50 +13,14 @@ import MapCoreSharedModule
 import Metal
 import UIKit
 
-struct LineGroupStyle: Equatable {
-    var width: Float
-    var colorR: Float
-    var colorG: Float
-    var colorB: Float
-    var colorA: Float
-    var gapColorR: Float
-    var gapColorG: Float
-    var gapColorB: Float
-    var gapColorA: Float
-    var widthAsPixels: Float
-    var opacity: Float
-    var blur: Float
-    var lineCap: Float
-    var numDashValues: Float
-    var dashValue0: Float = 0
-    var dashValue1: Float = 0
-    var dashValue2: Float = 0
-    var dashValue3: Float = 0
-    var offset: Float = 0
-}
-
 class LineGroupShader: BaseShader {
-    private var lineStyleBuffer: MTLBuffer
-    private var lineStyleBufferContents : UnsafeMutablePointer<LineGroupStyle>
-
-    let styleBufferSize: Int
+    private var lineStyleBuffer: MTLBuffer?
 
     var screenPixelAsRealMeterFactor: Float = 1.0
 
-    var currentStyles: [MCLineStyle] = []
+    var dashingScaleFactor: Float = 1.0
 
-    enum State {
-        case normal, highlighted
-    }
-
-    private var state = State.normal
-
-    init(styleBufferSize: Int = 256) {
-        self.styleBufferSize = styleBufferSize
-        guard let buffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<LineGroupStyle>.stride * self.styleBufferSize, options: []) else { fatalError("Could not create buffer") }
-        lineStyleBuffer = buffer
-        lineStyleBufferContents = buffer.contents().bindMemory(to: LineGroupStyle.self, capacity: self.styleBufferSize)
-    }
+    override init() { }
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
@@ -65,12 +29,13 @@ class LineGroupShader: BaseShader {
     }
 
     override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
-        guard let encoder = context.encoder,
-              let pipeline = pipeline else { return }
+        guard let pipeline = pipeline else { return }
 
         context.setRenderPipelineStateIfNeeded(pipeline)
 
         encoder.setVertexBytes(&screenPixelAsRealMeterFactor, length: MemoryLayout<Float>.stride, index: 2)
+
+        encoder.setVertexBytes(&dashingScaleFactor, length: MemoryLayout<Float>.stride, index: 3)
 
         encoder.setVertexBuffer(lineStyleBuffer, offset: 0, index: 4)
 
@@ -81,12 +46,11 @@ class LineGroupShader: BaseShader {
 extension LineGroupShader: MCLineGroupShaderInterface {
 
     func setStyles(_ styles: MCSharedBytes) {
-        guard styles.elementCount < self.styleBufferSize else { fatalError("line style error exceeds buffer size") }
-        lineStyleBuffer.copyMemory(from: styles)
+        lineStyleBuffer.copyOrCreate(from: styles, device: MetalContext.current.device)
     }
 
     func setDashingScaleFactor(_ factor: Float) {
-        
+        dashingScaleFactor = factor;
     }
 
     func asShaderProgram() -> MCShaderProgramInterface? {
