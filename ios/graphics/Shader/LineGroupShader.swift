@@ -14,7 +14,7 @@ import Metal
 import UIKit
 
 class LineGroupShader: BaseShader {
-    private var lineStyleBuffer: MTLBuffer?
+    var lineStyleBuffer: MTLBuffer?
 
     var screenPixelAsRealMeterFactor: Float = 1.0
 
