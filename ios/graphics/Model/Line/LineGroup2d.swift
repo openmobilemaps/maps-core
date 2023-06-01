@@ -76,7 +76,8 @@ final class LineGroup2d: BaseGraphicsObject {
         }
 
         guard let lineVerticesBuffer = lineVerticesBuffer,
-              let lineIndicesBuffer = lineIndicesBuffer
+              let lineIndicesBuffer = lineIndicesBuffer,
+              shader.lineStyleBuffer != nil
         else { return }
 
         #if DEBUG
