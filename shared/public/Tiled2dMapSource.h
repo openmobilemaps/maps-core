@@ -33,6 +33,8 @@
 #include "gpc.h"
 #include "Actor.h"
 #include "Future.hpp"
+#include "LoaderStatus.h"
+#include "LRUCache.h"
 
 template<class R>
 struct TileWrapper {
@@ -101,7 +103,9 @@ public:
             
     virtual ::djinni::Future<L> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) = 0;
             
-    void didLoad(Tiled2dMapTileInfo tile, size_t loaderIndex, const L &loaderResult);
+    void didLoad(Tiled2dMapTileInfo tile, size_t loaderIndex, const R &result);
+
+    void didFailToLoad(Tiled2dMapTileInfo tile, size_t loaderIndex, const LoaderStatus &status, const std::optional<std::string> &errorCode);
 
   protected:
 
@@ -121,6 +125,8 @@ public:
     std::optional<int32_t> maxZoomLevelIdentifier;
 
     std::map<Tiled2dMapTileInfo, TileWrapper<R>> currentTiles;
+
+    LRUCache<Tiled2dMapTileInfo, R> tileCache { 128 };
 
     int currentZoomLevelIdentifier = 0;
 
