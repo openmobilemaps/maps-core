@@ -43,18 +43,14 @@ Tiled2dMapVectorPolygonTile::Tiled2dMapVectorPolygonTile(const std::weak_ptr<Map
                                                          const std::shared_ptr<PolygonVectorLayerDescription> &description)
         : Tiled2dMapVectorTile(mapInterface, tileInfo, description, tileCallbackInterface), usedKeys(std::move(description->getUsedKeys())) {
     isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
-    auto pMapInterface = mapInterface.lock();
-    if (pMapInterface) {
-        shader = pMapInterface->getShaderFactory()->createPolygonGroupShader();
-        shader->asShaderProgramInterface()->setBlendMode(description->style.getBlendMode(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>())));
-    }
 }
 
 void Tiled2dMapVectorPolygonTile::updateVectorLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                                          const Tiled2dMapVectorTileDataVector &tileData) {
     Tiled2dMapVectorTile::updateVectorLayerDescription(description, tileData);
     featureGroups.clear();
-    hitDetectionPolygonMap.clear();
+    styleHashToGroupMap.clear();
+    hitDetectionPolygons.clear();
     usedKeys = std::move(description->getUsedKeys());
     isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
     lastZoom = std::nullopt;
@@ -62,6 +58,10 @@ void Tiled2dMapVectorPolygonTile::updateVectorLayerDescription(const std::shared
 }
 
 void Tiled2dMapVectorPolygonTile::update() {
+    if (shaders.empty()) {
+        return;
+    }
+
     auto mapInterface = this->mapInterface.lock();
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
     if (!mapInterface || !camera) {
@@ -80,22 +80,25 @@ void Tiled2dMapVectorPolygonTile::update() {
     }
     lastZoom = zoomIdentifier;
 
-    std::vector<float> shaderStyles;
     auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
-    for (auto const &[hash, feature]: featureGroups) {
-        const auto& ec = EvaluationContext(zoomIdentifier, feature);
-        const auto& color = polygonDescription->style.getFillColor(ec);
-        const auto& opacity = polygonDescription->style.getFillOpacity(ec);
+    size_t numStyleGroups = featureGroups.size();
+    for (int styleGroupId = 0; styleGroupId < numStyleGroups; styleGroupId++) {
+        std::vector<float> shaderStyles;
+        for (auto const &[hash, feature]: featureGroups.at(styleGroupId)) {
+            const auto& ec = EvaluationContext(zoomIdentifier, feature);
+            const auto& color = polygonDescription->style.getFillColor(ec);
+            const auto& opacity = polygonDescription->style.getFillOpacity(ec);
 
-        shaderStyles.push_back(color.r);
-        shaderStyles.push_back(color.g);
-        shaderStyles.push_back(color.b);
-        shaderStyles.push_back(color.a);
-        shaderStyles.push_back(opacity * alpha);
+            shaderStyles.push_back(color.r);
+            shaderStyles.push_back(color.g);
+            shaderStyles.push_back(color.b);
+            shaderStyles.push_back(color.a);
+            shaderStyles.push_back(opacity * alpha);
+        }
+        auto s = SharedBytes((int64_t)shaderStyles.data(), (int32_t)featureGroups.at(styleGroupId).size(), 5 * (int32_t)sizeof(float));
+        shaders[styleGroupId]->setStyles(s);
     }
 
-    auto s = SharedBytes((int64_t)shaderStyles.data(), (int32_t)featureGroups.size(), 5 * (int32_t)sizeof(float));
-    shader->setStyles(s);
 }
 
 void Tiled2dMapVectorPolygonTile::clear() {
@@ -119,8 +122,9 @@ void Tiled2dMapVectorPolygonTile::setup() {
 }
 
 void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDataVector &tileData) {
-
-    if (!mapInterface.lock()) {
+    auto mapInterface = this->mapInterface.lock();
+    const auto &shaderFactory = mapInterface ? mapInterface->getShaderFactory() : nullptr;
+    if (!shaderFactory) {
         return;
     }
 
@@ -132,10 +136,8 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
 
         bool anyInteractable = false;
 
-        std::vector<ObjectDescriptions> objectDescriptions;
-        objectDescriptions.push_back({{},{}});
-
-        std::int32_t indices_offset = 0;
+        std::unordered_map<int, std::vector<ObjectDescriptions>> styleGroupNewPolygonsMap;
+        std::unordered_map<int, int32_t> styleIndicesOffsets;
 
 #ifndef __APPLE__
         for (auto featureIt = tileData->rbegin(); featureIt != tileData->rend(); featureIt++) {
@@ -155,25 +157,37 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
                 std::vector<Coord> positions;
 
                 int styleIndex = -1;
+                int styleGroupIndex = -1;
                 
                 {
                     auto const hash = featureContext->getStyleHash(usedKeys);
 
-                    for (size_t i = 0; i != featureGroups.size(); i++) {
-                        auto const &[groupHash, group] = featureGroups.at(i);
-                        if (hash == groupHash) {
-                            styleIndex = (int) i;
-                            break;
-                        }
+                    auto indexPair = styleHashToGroupMap.find(hash);
+                    if (indexPair != styleHashToGroupMap.end()) {
+                        styleGroupIndex = indexPair->second.first;
+                        styleIndex = indexPair->second.second;
                     }
 
                     if (styleIndex == -1) {
-                        featureGroups.push_back({ hash, featureContext });
-                        styleIndex = (int) featureGroups.size() - 1;
+                        if (!featureGroups.empty() && featureGroups.back().size() < maxStylesPerGroup) {
+                            styleGroupIndex = (int) featureGroups.size() - 1;
+                            styleIndex = (int) featureGroups.back().size();
+                            featureGroups.at(styleGroupIndex).emplace_back(hash, featureContext);
+                        } else {
+                            styleGroupIndex = (int) featureGroups.size();
+                            styleIndex = 0;
+                            auto shader = shaderFactory->createPolygonGroupShader();
+                            auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
+                            shader->asShaderProgramInterface()->setBlendMode(polygonDescription->style.getBlendMode(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>())));
+                            shaders.push_back(shader);
+                            featureGroups.push_back(std::vector<std::tuple<size_t, std::shared_ptr<FeatureContext>>>{{hash, featureContext}});
+                            styleGroupNewPolygonsMap[styleGroupIndex].push_back({{},{}});
+                            styleIndicesOffsets[styleGroupIndex] = 0;
+                        }
+                        styleHashToGroupMap.insert({hash, {styleGroupIndex, styleIndex}});
                     }
                 }
 
-                bool interactable = description->isInteractable(evalContext);
                 for (int i = 0; i < polygonCoordinates.size(); i++) {
 
                     size_t verticesCount = polygonCoordinates[i].size();
@@ -205,26 +219,27 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
                     }
 
                     // check overflow
-                    size_t new_size = indices_offset + verticesCount;
-
+                    int32_t indexOffset = styleIndicesOffsets.at(styleGroupIndex);
+                    size_t new_size = indexOffset + verticesCount;
                     if (new_size >= indicesLimit) {
-                        objectDescriptions.push_back({{},{}});
-                        indices_offset = 0;
+                        styleGroupNewPolygonsMap[styleGroupIndex].push_back({{},{}});
+                        styleIndicesOffsets[styleGroupIndex] = 0;
+                        indexOffset = 0;
                     }
 
                     for (auto const &index: new_indices) {
-                        objectDescriptions.back().indices.push_back(indices_offset + index);
+                        styleGroupNewPolygonsMap.at(styleGroupIndex).back().indices.push_back(indexOffset + index);
                     }
 
-                    objectDescriptions.back().vertices.push_back({positions, styleIndex});
+                    styleGroupNewPolygonsMap.at(styleGroupIndex).back().vertices.emplace_back(positions, styleIndex);
                     positions.clear();
 
-                    indices_offset += verticesCount;
+                    styleIndicesOffsets.at(styleGroupIndex) += verticesCount;
 
+                    bool interactable = description->isInteractable(evalContext);
                     if (interactable) {
                         anyInteractable = true;
-                        hitDetectionPolygonMap[tileInfo].push_back(
-                                {PolygonCoord(polygonCoordinates[i], polygonHoles[i]), featureContext});
+                        hitDetectionPolygons.emplace_back(PolygonCoord(polygonCoordinates[i], polygonHoles[i]), featureContext);
                     }
                 }
             }
@@ -234,16 +249,16 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
             tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsInteractable, description->identifier);
         }
 
-        addPolygons(objectDescriptions);
+        addPolygons(styleGroupNewPolygonsMap);
     } else {
         auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
         tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
     }
 }
 
-void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<ObjectDescriptions> &polygons) {
+void Tiled2dMapVectorPolygonTile::addPolygons(const std::unordered_map<int, std::vector<ObjectDescriptions>> &styleGroupNewPolygonsMap) {
 
-    if (polygons.empty()) {
+    if (styleGroupNewPolygonsMap.empty()) {
         auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
         tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
         return;
@@ -254,21 +269,27 @@ void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<ObjectDescriptio
     auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
     auto converter = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
 
-    if (!mapInterface || !objectFactory || !scheduler || !converter || !shader) {
+    if (!mapInterface || !objectFactory || !scheduler || !converter || shaders.empty()) {
         return;
     }
 
+    std::vector<std::shared_ptr<PolygonGroup2dLayerObject>> polygonGroupObjects;
     std::vector<std::shared_ptr<GraphicsObjectInterface>> newGraphicObjects;
 
-    for (auto const& polygon: polygons) {
-        const auto polygonObject = objectFactory->createPolygonGroup(shader->asShaderProgramInterface());
+    for (auto const &[styleGroupIndex, polygonDescs]: styleGroupNewPolygonsMap) {
+        const auto &shader = shaders.at(styleGroupIndex);
+        for (const auto &polygonDesc: polygonDescs) {
+            const auto polygonObject = objectFactory->createPolygonGroup(shader->asShaderProgramInterface());
 
-        auto layerObject = std::make_shared<PolygonGroup2dLayerObject>(converter, polygonObject, shader);
-        layerObject->setVertices(polygon.vertices, polygon.indices);
+            auto layerObject = std::make_shared<PolygonGroup2dLayerObject>(converter, polygonObject, shader);
+            layerObject->setVertices(polygonDesc.vertices, polygonDesc.indices);
 
-        this->polygons.emplace_back(layerObject);
-        newGraphicObjects.push_back(polygonObject->asGraphicsObject());
+            polygonGroupObjects.emplace_back(layerObject);
+            newGraphicObjects.push_back(polygonObject->asGraphicsObject());
+        }
     }
+
+    polygons = polygonGroupObjects;
 
 #ifdef __APPLE__
     setupPolygons(newGraphicObjects);
@@ -314,12 +335,11 @@ bool Tiled2dMapVectorPolygonTile::onClickConfirmed(const Vec2F &posScreen) {
     }
     auto point = camera->coordFromScreenPosition(posScreen);
 
-    for (auto const &[tileInfo, polygonTuples] : hitDetectionPolygonMap) {
-        for (auto const &[polygon, featureContext]: polygonTuples) {
-            if (PolygonHelper::pointInside(polygon, point, mapInterface->getCoordinateConverterHelper())) {
-                selectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier, converter->convert(CoordinateSystemIdentifiers::EPSG4326(), point));
-                return true;
-            }
+    for (auto const &[polygon, featureContext]: hitDetectionPolygons) {
+        if (PolygonHelper::pointInside(polygon, point, mapInterface->getCoordinateConverterHelper())) {
+            selectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier,
+                                                converter->convert(CoordinateSystemIdentifiers::EPSG4326(), point));
+            return true;
         }
     }
 

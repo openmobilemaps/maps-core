@@ -47,26 +47,22 @@ void Tiled2dMapVectorLineTile::update() {
         return;
     }
 
-    if (!isStyleZoomDependant && lastZoom) {
-        return;
-    }
-
     const double cameraZoom = camera->getZoom();
      double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(cameraZoom);
     zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.zoomIdentifier);
 
-    if (isStyleZoomDependant && lastZoom && *lastZoom == zoomIdentifier) {
-        return;
-    }
-    lastZoom = zoomIdentifier;
-
-    const auto zoom = Tiled2dMapVectorRasterSubLayerConfig::getZoomFactorAtIdentifier(floor(zoomIdentifier));
-    const auto cameraScalingFactor = camera->asCameraInterface()->getScalingFactor();
-    const auto scalingFactor = (cameraScalingFactor / cameraZoom) * zoom;
+    auto zoom = Tiled2dMapVectorRasterSubLayerConfig::getZoomFactorAtIdentifier(floor(zoomIdentifier));
+    auto scalingFactor = (camera->asCameraInterface()->getScalingFactor() / cameraZoom) * zoom;
 
     for (auto const &line: lines) {
         line->setScalingFactor(scalingFactor);
     }
+
+    if (lastZoom && ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant)) {
+        return;
+    }
+
+    lastZoom = zoomIdentifier;
 
     auto lineDescription = std::static_pointer_cast<LineVectorLayerDescription>(description);
 
@@ -305,13 +301,14 @@ void Tiled2dMapVectorLineTile::addLines(const std::unordered_map<int, std::vecto
     std::vector<std::shared_ptr<LineGroup2dLayerObject>> lineGroupObjects;
     std::vector<std::shared_ptr<GraphicsObjectInterface>> newGraphicObjects;
 
-    for (const auto &[styleGroupIndex, styleLines] : styleIdLinesMap) {
+    for (const auto &[styleGroupIndex, styleLines]: styleIdLinesMap) {
         for (const auto &lineSubGroup: styleLines) {
-            auto lineGroupGraphicsObject = objectFactory->createLineGroup(shaders.at(styleGroupIndex)->asShaderProgramInterface());
+            const auto &shader = shaders.at(styleGroupIndex);
+            auto lineGroupGraphicsObject = objectFactory->createLineGroup(shader->asShaderProgramInterface());
 
             auto lineGroupObject = std::make_shared<LineGroup2dLayerObject>(coordinateConverterHelper,
                                                                             lineGroupGraphicsObject,
-                                                                            shaders.at(styleGroupIndex));
+                                                                            shader);
             lineGroupObject->setLines(lineSubGroup);
 
             lineGroupObjects.push_back(lineGroupObject);
