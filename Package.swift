@@ -23,7 +23,7 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/UbiqueInnovation/djinni.git", branch: "feature/snapchat-merge")
+        .package(url: "https://github.com/UbiqueInnovation/djinni.git", branch: "master")
     ],
     targets: [
         .target(
