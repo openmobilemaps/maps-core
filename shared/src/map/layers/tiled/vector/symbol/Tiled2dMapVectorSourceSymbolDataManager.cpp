@@ -222,7 +222,7 @@ std::optional<Actor<Tiled2dMapVectorSymbolGroup>> Tiled2dMapVectorSourceSymbolDa
                                                                                                                    const std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features) {
 
     const auto fontProvider = WeakActor(mailbox, weak_from_this()).weakActor<Tiled2dMapVectorFontProvider>();
-    auto mailbox = std::make_shared<Mailbox>(mapInterface.lock()->getScheduler());
+    auto mailbox = std::make_shared<Mailbox>(mapInterface.lock()->getScheduler(), "Tiled2dMapVectorSymbolGroup");
     Actor<Tiled2dMapVectorSymbolGroup> symbolGroupActor = Actor<Tiled2dMapVectorSymbolGroup>(mailbox, mapInterface, fontProvider, tileInfo, layerIdentifier, layerDescriptions.at(layerIdentifier));
     bool success = symbolGroupActor.unsafe()->initialize(features);
     symbolGroupActor.unsafe()->setAlpha(alpha);

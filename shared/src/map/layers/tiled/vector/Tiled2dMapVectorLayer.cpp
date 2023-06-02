@@ -191,7 +191,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
         return;
     }
     
-    auto selfMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+    auto selfMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler(), "Tiled2dMapVectorLayer");
     auto castedMe = std::static_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
     auto selfActor = WeakActor<Tiled2dMapVectorLayer>(selfMailbox, castedMe);
     auto selfRasterActor = WeakActor<Tiled2dMapRasterSourceListener>(selfMailbox, castedMe);
@@ -218,7 +218,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                 break;
             }
             case raster: {
-                auto sourceMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+                auto sourceMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler(), "Tiled2dMapRasterSource");
                 auto sourceActor = Actor<Tiled2dMapRasterSource>(sourceMailbox,
                                                                  mapInterface->getMapConfig(),
                                                                  std::make_shared<Tiled2dMapVectorRasterSubLayerConfig>(
@@ -229,7 +229,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                  selfRasterActor,
                                                                  mapInterface->getCamera()->getScreenDensityPpi());
                 rasterSources.push_back(sourceActor);
-                auto sourceDataManagerMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+                auto sourceDataManagerMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler(), "Tiled2dMapVectorSourceRasterTileDataManager");
                 auto sourceManagerActor = Actor<Tiled2dMapVectorSourceRasterTileDataManager>(sourceDataManagerMailbox,
                                                                                              selfActor,
                                                                                              mapDescription,
@@ -254,7 +254,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     }
 
     for (auto const &[source, layers]: layersToDecode) {
-        auto sourceMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+        auto sourceMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler(), "Tiled2dMapVectorSource");
         auto vectorSource = Actor<Tiled2dMapVectorSource>(sourceMailbox,
                                                           mapInterface->getMapConfig(),
                                                           layerConfigs[source],
@@ -267,7 +267,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                           mapInterface->getCamera()->getScreenDensityPpi());
         vectorTileSources[source] = vectorSource;
         sourceInterfaces.push_back(vectorSource.weakActor<Tiled2dMapSourceInterface>());
-        auto sourceDataManagerMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+        auto sourceDataManagerMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler(), "Tiled2dMapVectorSourceVectorTileDataManager");
         auto sourceManagerActor = Actor<Tiled2dMapVectorSourceVectorTileDataManager>(sourceDataManagerMailbox,
                                                                                      selfActor,
                                                                                      mapDescription,
@@ -277,7 +277,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
         interactionDataManagers[source].push_back(sourceManagerActor.weakActor<Tiled2dMapVectorSourceDataManager>());
 
         if (symbolSources.count(source) != 0) {
-            auto symbolSourceDataManagerMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+            auto symbolSourceDataManagerMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler(), "Tiled2dMapVectorSourceSymbolDataManager");
             auto actor = Actor<Tiled2dMapVectorSourceSymbolDataManager>(symbolSourceDataManagerMailbox,
                                                                         selfActor,
                                                                         mapDescription,
@@ -296,7 +296,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     }
 
     if(!weakSymbolSourceDataManagers.empty()) {
-        auto collisionManagerMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+        auto collisionManagerMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler(), "Tiled2dMapVectorSourceSymbolCollisionManager");
         collisionManager.emplaceObject(collisionManagerMailbox, weakSymbolSourceDataManagers, mapDescription);
     }
 

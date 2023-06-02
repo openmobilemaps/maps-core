@@ -14,6 +14,8 @@
 #include <future>
 #include "assert.h"
 #include "Logger.h"
+#include "DateHelper.h"
+#include <atomic>
 
 enum class MailboxDuplicationStrategy {
     none = 0,
@@ -28,13 +30,14 @@ enum class MailboxExecutionEnvironment {
 class MailboxMessage {
 public:
     MailboxMessage(const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, void* identifier)
-    : strategy(strategy), environment(environment), identifier(identifier) {}
+    : strategy(strategy), environment(environment), identifier(identifier), startTime(DateHelper::currentTimeMicros()) {}
     virtual ~MailboxMessage() = default;
     virtual void operator()() = 0;
     
     const MailboxDuplicationStrategy strategy;
     const MailboxExecutionEnvironment environment;
     const void* identifier;
+    long long startTime;
 };
 
 template <class Object, class MemberFn, class ArgsTuple>
@@ -99,7 +102,7 @@ public:
 
 class Mailbox: public std::enable_shared_from_this<Mailbox>  {
 public:
-    Mailbox(std::shared_ptr<SchedulerInterface> scheduler): scheduler(scheduler) {};
+    Mailbox(std::shared_ptr<SchedulerInterface> scheduler, std::string identifier): scheduler(scheduler), identifier(identifier) {};
     
     void push(std::unique_ptr<MailboxMessage> message) {
         std::lock_guard<std::mutex> pushingLock(pushingMutex);
@@ -172,6 +175,12 @@ public:
                 receiveLambda(graphicsQueueMutex, graphicsQueue);
                 break;
         }
+        messageCount += 1;
+        totalWaitingTime += DateHelper::currentTimeMicros() - message->startTime;
+        if (messageCount % 100 == 0) {
+            auto avg = totalWaitingTime / messageCount / 1000.0;
+            LogDebug << "[" << identifier <<= "] Average message waiting time is " + std::to_string(avg) + "ms";
+        }
         (*message)();
 
         auto strongScheduler = scheduler.lock();
@@ -211,4 +220,9 @@ private:
     std::deque<std::unique_ptr<MailboxMessage>> computationQueue;
     std::mutex graphicsQueueMutex;
     std::deque<std::unique_ptr<MailboxMessage>> graphicsQueue;
+
+
+    std::string identifier;
+    int messageCount;
+    double totalWaitingTime;
 };
