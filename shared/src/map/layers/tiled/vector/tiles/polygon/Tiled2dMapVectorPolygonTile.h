@@ -47,7 +47,7 @@ private:
         std::vector<uint16_t> indices;
     };
 
-    void addPolygons(const std::unordered_map<int, std::vector<ObjectDescriptions>> &styleIdPolygonsMap);
+    void addPolygons(const std::unordered_map<int, std::vector<ObjectDescriptions>> &styleGroupNewPolygonsMap);
 
     void setupPolygons(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects);
 
