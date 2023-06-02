@@ -72,33 +72,33 @@ void Tiled2dMapVectorPolygonPatternTile::update() {
         return;
     }
 
-    if (!isStyleZoomDependant && lastZoom) {
-        return;
-    }
-
     double cameraZoom = camera->getZoom();
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(cameraZoom);
     zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.zoomIdentifier);
 
-    if (isStyleZoomDependant && lastZoom && *lastZoom == zoomIdentifier) {
+    auto zoom = Tiled2dMapVectorRasterSubLayerConfig::getZoomFactorAtIdentifier(floor(zoomIdentifier));
+    auto scalingFactor = (camera->asCameraInterface()->getScalingFactor() / cameraZoom) * zoom;
+
+    if (lastZoom && ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant)) {
+        for (auto const &polygon: polygons) {
+            polygon->setScalingFactor(scalingFactor);
+        }
         return;
     }
+
     lastZoom = zoomIdentifier;
 
     auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
     int index = 0;
     opacities.resize(featureGroups.size(), 1.0);
     for (auto const &[hash, feature]: featureGroups) {
-        const auto& ec = EvaluationContext(zoomIdentifier, feature);
-        const auto& opacity = polygonDescription->style.getFillOpacity(ec);
+        const auto &ec = EvaluationContext(zoomIdentifier, feature);
+        const auto &opacity = polygonDescription->style.getFillOpacity(ec);
         opacities[index] = alpha * opacity;
         index++;
     }
 
-    auto zoom = Tiled2dMapVectorRasterSubLayerConfig::getZoomFactorAtIdentifier(floor(zoomIdentifier));
-    auto scalingFactor = (camera->asCameraInterface()->getScalingFactor() / cameraZoom) * zoom;
-
-    for(auto const &polygon: polygons) {
+    for (auto const &polygon: polygons) {
         polygon->setOpacities(opacities);
         polygon->setScalingFactor(scalingFactor);
     }

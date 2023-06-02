@@ -47,18 +47,23 @@ private:
         std::vector<uint16_t> indices;
     };
 
-    void addPolygons(const std::vector<ObjectDescriptions> &polygons);
+    void addPolygons(const std::unordered_map<int, std::vector<ObjectDescriptions>> &styleIdPolygonsMap);
 
     void setupPolygons(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects);
 
+#ifdef __ANDROID__
+    static const int maxStylesPerGroup = 32;
+#else
+    static const int maxStylesPerGroup = 256;
+#endif
 
-    std::shared_ptr<PolygonGroupShaderInterface> shader;
-
+    std::vector<std::shared_ptr<PolygonGroupShaderInterface>> shaders;
     std::vector<std::shared_ptr<PolygonGroup2dLayerObject>> polygons;
-    std::vector<std::tuple<size_t, std::shared_ptr<FeatureContext>>> featureGroups;
+    std::vector<std::vector<std::tuple<size_t, std::shared_ptr<FeatureContext>>>> featureGroups;
+    std::unordered_map<size_t, std::pair<int, int>> styleHashToGroupMap;
     std::unordered_set<std::string> usedKeys;
     bool isStyleZoomDependant = true;
     std::optional<double> lastZoom = std::nullopt;
 
-    std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<PolygonCoord, std::shared_ptr<FeatureContext>>>> hitDetectionPolygonMap;
+    std::vector<std::tuple<PolygonCoord, std::shared_ptr<FeatureContext>>> hitDetectionPolygons;
 };
