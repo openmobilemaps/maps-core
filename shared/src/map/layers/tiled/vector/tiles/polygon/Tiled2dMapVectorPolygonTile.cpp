@@ -81,13 +81,14 @@ void Tiled2dMapVectorPolygonTile::update() {
     lastZoom = zoomIdentifier;
 
     auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
+    bool inZoomRange = polygonDescription->maxZoom >= zoomIdentifier && polygonDescription->minZoom <= zoomIdentifier;
     size_t numStyleGroups = featureGroups.size();
     for (int styleGroupId = 0; styleGroupId < numStyleGroups; styleGroupId++) {
         std::vector<float> shaderStyles;
         for (auto const &[hash, feature]: featureGroups.at(styleGroupId)) {
             const auto& ec = EvaluationContext(zoomIdentifier, feature);
-            const auto& color = polygonDescription->style.getFillColor(ec);
-            const auto& opacity = polygonDescription->style.getFillOpacity(ec);
+            const auto& color = inZoomRange ? polygonDescription->style.getFillColor(ec) : Color(0.0, 0.0, 0.0, 0.0);
+            const auto& opacity = inZoomRange ? polygonDescription->style.getFillOpacity(ec) : 0.0;
 
             shaderStyles.push_back(color.r);
             shaderStyles.push_back(color.g);

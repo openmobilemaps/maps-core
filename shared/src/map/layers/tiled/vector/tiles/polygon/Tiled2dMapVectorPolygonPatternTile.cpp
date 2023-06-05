@@ -91,15 +91,20 @@ void Tiled2dMapVectorPolygonPatternTile::update() {
     lastZoom = zoomIdentifier;
 
     auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
-    size_t numStyleGroups = featureGroups.size();
+    bool inZoomRange = polygonDescription->maxZoom >= zoomIdentifier && polygonDescription->minZoom <= zoomIdentifier;
     opacities.clear();
+    size_t numStyleGroups = featureGroups.size();
     for (int styleGroupId = 0; styleGroupId < numStyleGroups; styleGroupId++) {
         opacities.push_back(std::vector<float>(featureGroups.at(styleGroupId).size()));
         int index = 0;
         for (const auto &[hash, feature]: featureGroups.at(styleGroupId)) {
-            const auto &ec = EvaluationContext(zoomIdentifier, feature);
-            const auto &opacity = polygonDescription->style.getFillOpacity(ec);
-            opacities[styleGroupId][index] = alpha * opacity;
+            if (inZoomRange) {
+                const auto &ec = EvaluationContext(zoomIdentifier, feature);
+                const auto &opacity = polygonDescription->style.getFillOpacity(ec);
+                opacities[styleGroupId][index] = alpha * opacity;
+            } else {
+                opacities[styleGroupId][index] = 0.0;
+            }
             index++;
         }
         for (const auto &polygon: styleGroupPolygonsMap.at(styleGroupId)) {
