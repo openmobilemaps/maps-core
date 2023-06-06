@@ -166,7 +166,7 @@ bool ThreadPoolSchedulerImpl::runGraphicsTasks() {
     bool noTasksLeft;
     auto start = std::chrono::steady_clock::now();
     int i;
-    for (i = 0; i < MAX_NUM_GRAPHICS_TASKS; i++) {
+    for (i = 1; i <= MAX_NUM_GRAPHICS_TASKS; i++) {
         {
             std::unique_lock<std::mutex> lock(graphicsMutex);
             if (graphicsQueue.empty()) {
@@ -180,8 +180,9 @@ bool ThreadPoolSchedulerImpl::runGraphicsTasks() {
                 noTasksLeft = graphicsQueue.empty();
             }
         }
-        auto cwtMs = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start);
-        if (cwtMs.count() >= MAX_TIME_GRAPHICS_TASKS_MS) {
+        auto cwtMs = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count();
+        auto avgMs = cwtMs / (double) i;
+        if (cwtMs >= MAX_TIME_GRAPHICS_TASKS_MS || (cwtMs + avgMs * (i + 1)) >= MAX_TIME_GRAPHICS_TASKS_MS) {
             {
                 std::unique_lock<std::mutex> lock(graphicsMutex);
                 noTasksLeft = graphicsQueue.empty();
