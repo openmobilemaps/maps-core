@@ -2,7 +2,7 @@ package io.openmobilemaps.mapscore.map.loader
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
+import android.util.Log
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import io.openmobilemaps.mapscore.graphics.BitmapTextureHolder
@@ -67,11 +67,15 @@ open class FontLoader(context: Context, private val dpFactor: Float) : FontLoade
         fontMap[fontData.info.name] = FontDataHolder(fontAtlas, fontData)
     }
 
-    override fun loadFont(font: Font): FontLoaderResult =
-        fontMap[font.name]?.let { fontDataHolder ->
+    override fun loadFont(font: Font): FontLoaderResult {
+        val fontDataHolder = fontMap[font.name]
+        return if (fontDataHolder != null) {
             FontLoaderResult(fontDataHolder.fontTexture, fontDataHolder.fontData, LoaderStatus.OK)
-        } ?: FontLoaderResult(null, null, LoaderStatus.ERROR_OTHER)
-
+        } else {
+            Log.e(FontLoader::class.java.canonicalName, "Couldn't load font name: ${font.name}!")
+            FontLoaderResult(null, null, LoaderStatus.ERROR_OTHER)
+        }
+    }
 
     private data class FontDataHolder(val fontTexture: BitmapTextureHolder, val fontData: FontData)
 
