@@ -58,12 +58,12 @@ private:
     std::condition_variable defaultCv;
 
     bool separateGraphicsQueue;
-    static const uint8_t MAX_NUM_GRAPHICS_TASKS = 4;
+    static const uint8_t MAX_NUM_GRAPHICS_TASKS = 8;
     static const uint64_t MAX_TIME_GRAPHICS_TASKS_MS = 4;
     std::mutex graphicsMutex;
 
     std::deque<std::shared_ptr<TaskInterface>> graphicsQueue;
-    static const uint8_t DEFAULT_MAX_NUM_THREADS = 4;
+    static const uint8_t DEFAULT_MAX_NUM_THREADS = 8;
     std::vector<std::thread> threads;
 
     using TimeStamp = std::chrono::time_point<std::chrono::system_clock>;
