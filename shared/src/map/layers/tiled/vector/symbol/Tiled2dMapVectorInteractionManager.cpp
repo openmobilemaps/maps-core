@@ -132,7 +132,9 @@ bool Tiled2dMapVectorInteractionManager::callInReverseOrder(F&& managerLambda) {
         auto sourceDataManagers = sourceDataManagersMap.find(currentSource);
         if (sourceDataManagers != sourceDataManagersMap.end()) {
             for(auto const &sourceDataManager: sourceDataManagers->second) {
-                return sourceDataManager.syncAccess(reducedLambda);
+                if (sourceDataManager.syncAccess(reducedLambda)) {
+                    return true;
+                }
             }
         }
     }
