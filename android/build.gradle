@@ -102,10 +102,6 @@ android {
 		targetCompatibility JavaVersion.VERSION_11
 	}
 
-	kotlinOptions {
-		jvmTarget = '11'
-	}
-
 	buildFeatures {
 		prefabPublishing true
 	}
@@ -124,6 +120,11 @@ android {
 			}
 		}
 	}
+}
+
+project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+	compilerOptions.jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11 // Kotlin 1.8+
+	kotlinOptions.jvmTarget = "11" // deprecated since Kotlin 1.8
 }
 
 task copyHeaders() {
