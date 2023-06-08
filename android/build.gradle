@@ -17,7 +17,7 @@ buildscript {
 	}
 
 	ext{
-		kotlin_version = "1.8.0"
+		kotlin_version = "1.8.21"
 
 		ubiqueUrl = System.getenv('UBIQUE_ARTIFACTORY_URL') ?: readPropertyWithDefault('ubiqueArtifactoryUrl', '')
 		ubiqueUser = System.getenv('UBIQUE_ARTIFACTORY_USER') ?: readPropertyWithDefault('ubiqueArtifactoryUser', '')
@@ -40,7 +40,7 @@ buildscript {
 		mavenCentral()
 	}
 	dependencies {
-		classpath 'com.android.tools.build:gradle:7.4.0'
+		classpath 'com.android.tools.build:gradle:8.0.2'
 		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
 		classpath 'com.vanniktech:gradle-maven-publish-plugin:0.24.0'
@@ -62,6 +62,8 @@ apply plugin: 'kotlin-kapt'
 import com.vanniktech.maven.publish.SonatypeHost
 
 android {
+	namespace 'io.openmobilemaps.mapscore'
+
 	compileSdkVersion 33
 
 	defaultConfig {
@@ -93,6 +95,15 @@ android {
 				srcDir '../bridging/android/java'
 			}
 		}
+	}
+
+	compileOptions {
+		sourceCompatibility JavaVersion.VERSION_17
+		targetCompatibility JavaVersion.VERSION_17
+	}
+
+	kotlinOptions {
+		jvmTarget = '17'
 	}
 
 	buildFeatures {
@@ -179,14 +190,14 @@ dependencies {
 	implementation fileTree(dir: 'libs', include: ['*.jar'])
 	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 	implementation 'androidx.annotation:annotation:1.5.0'
-	implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.1'
-	implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4'
+	implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.1'
+	implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.0'
 
 	implementation 'com.squareup.moshi:moshi:1.14.0'
 	kapt 'com.squareup.moshi:moshi-kotlin-codegen:1.14.0'
-	implementation 'com.squareup.okhttp3:okhttp:4.10.0'
+	implementation 'com.squareup.okhttp3:okhttp:4.11.0'
 
-	implementation 'ch.ubique.android:djinni-support-lib:0.1.0'
+	implementation 'ch.ubique.android:djinni-support-lib:1.0.0'
 
 	testImplementation 'junit:junit:4.13.2'
 	androidTestImplementation 'androidx.test.ext:junit:1.1.5'
