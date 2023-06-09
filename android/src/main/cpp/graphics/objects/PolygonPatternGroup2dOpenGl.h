@@ -98,6 +98,10 @@ protected:
     int textureCoordinatesHandle;
     GLuint textureCoordinatesBuffer;
 
+    const int maxNumStyles = 16;
+    const int sizeOpacitiesValuesArray = maxNumStyles;
+    const int sizeTextureCoordinatesValuesArray = 5 * 16;
+
 private:
     bool writeToShaderStorageBuffer(const ::SharedBytes &data, GLuint target);
 

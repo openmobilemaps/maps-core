@@ -40,7 +40,6 @@ int BaseShaderProgramOpenGl::loadShader(int type, std::string shaderCode) {
 
         LogError <<= ".";
     }
-
     return shader;
 }
 
@@ -105,7 +104,7 @@ void BaseShaderProgramOpenGl::preRender(const std::shared_ptr<::RenderingContext
             break;
         }
         case BlendMode::MULTIPLY: {
-            glBlendFunc(GL_DST_COLOR, GL_ONE_MINUS_SRC_ALPHA);
+            glBlendFuncSeparate(GL_DST_COLOR, GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA);
             break;
         }
     }

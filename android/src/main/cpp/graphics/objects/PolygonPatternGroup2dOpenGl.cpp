@@ -166,9 +166,9 @@ void PolygonPatternGroup2dOpenGl::render(const std::shared_ptr<::RenderingContex
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);*/
 
     int textureCoordinatesHandle = glGetUniformLocation(program, "textureCoordinates");
-    glUniform1fv(textureCoordinatesHandle, 5 * 32, &textureCoordinates[0]);
+    glUniform1fv(textureCoordinatesHandle, sizeTextureCoordinatesValuesArray, &textureCoordinates[0]);
     int opacitiesHandle = glGetUniformLocation(program, "opacities");
-    glUniform1fv(opacitiesHandle, 32, &opacities[0]);
+    glUniform1fv(opacitiesHandle, sizeOpacitiesValuesArray, &opacities[0]);
 
     shaderProgram->preRender(context);
 
@@ -220,26 +220,20 @@ void PolygonPatternGroup2dOpenGl::setScalingFactor(float factor) {
 
 void PolygonPatternGroup2dOpenGl::setOpacities(const SharedBytes &values) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-/*    if (writeToShaderStorageBuffer(values, opacitiesBuffer)) {
-        buffersNotReady &= ~(1);
-    }*/
     if (values.elementCount == 0) {
         return;
     }
-    this->opacities.resize(values.elementCount * values.bytesPerElement / 4);
+    this->opacities.resize(sizeOpacitiesValuesArray, 0.0);
     std::memcpy(this->opacities.data(), (void *)values.address, values.elementCount * values.bytesPerElement);
     buffersNotReady &= ~(1);
 }
 
 void PolygonPatternGroup2dOpenGl::setTextureCoordinates(const SharedBytes &textureCoordinates) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-/*    if (writeToShaderStorageBuffer(textureCoordinates, textureCoordinatesBuffer)) {
-        buffersNotReady &= ~(1 << 1);
-    }*/
     if (textureCoordinates.elementCount == 0) {
         return;
     }
-    this->textureCoordinates.resize(textureCoordinates.elementCount * textureCoordinates.bytesPerElement / 4);
+    this->textureCoordinates.resize(sizeTextureCoordinatesValuesArray, 0.0);
     std::memcpy(this->textureCoordinates.data(), (void *)textureCoordinates.address, textureCoordinates.elementCount * textureCoordinates.bytesPerElement);
     buffersNotReady &= ~(1 << 1);
 }

@@ -395,7 +395,7 @@ void Tiled2dMapVectorPolygonPatternTile::setupTextureCoordinates() {
                 textureCoordinates[styleGroupId][offset + 4] = spriteIt->second.width + (spriteIt->second.height << 16);
 
             } else {
-                LogError << "Unable to find sprite " << patternName;
+                LogError << "Unable to find sprite " <<= patternName;
             }
             index++;
         }
