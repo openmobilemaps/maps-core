@@ -49,6 +49,9 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
 
     renderCoordinate = converter->convertToRenderSystem(coordinate);
 
+    textAllowOverlap = description->style.getTextAllowOverlap(evalContext);
+    iconAllowOverlap = description->style.getIconAllowOverlap(evalContext);
+
     if (hasIcon) {
         if (description->style.getIconTextFit(evalContext) == IconTextFit::NONE) {
             instanceCounts.icons = 1;
@@ -512,13 +515,13 @@ std::optional<RectCoord> Tiled2dMapVectorSymbolObject::getCombinedBoundingBox() 
         const RectCoord* boxes[3] = { nullptr };
         int boxCount = 0;
 
-        if (labelObject && labelObject->boundingBox.topLeft.x != 0) {
+        if (!textAllowOverlap && labelObject && labelObject->boundingBox.topLeft.x != 0) {
             boxes[boxCount++] = &labelObject->boundingBox;
         }
-        if (iconBoundingBox.topLeft.x != 0) {
+        if (!iconAllowOverlap && iconBoundingBox.topLeft.x != 0) {
             boxes[boxCount++] = &iconBoundingBox;
         }
-        if (stretchIconBoundingBox.topLeft.x != 0) {
+        if (!iconAllowOverlap && stretchIconBoundingBox.topLeft.x != 0) {
             boxes[boxCount++] = &stretchIconBoundingBox;
         }
 
@@ -536,15 +539,10 @@ std::optional<RectCoord> Tiled2dMapVectorSymbolObject::getCombinedBoundingBox() 
 
         for (int i = boxCount - 2; i >= 0; --i) {
             const RectCoord& currentBox = *boxes[i];
-            const int minX = std::min(initialMinX, currentBox.topLeft.x);
-            const int minY = std::min(initialMinY, currentBox.topLeft.y);
-            const int maxX = std::max(initialMaxX, currentBox.bottomRight.x);
-            const int maxY = std::max(initialMaxY, currentBox.bottomRight.y);
-
-            combined = RectCoord(
-                Coord(combined->topLeft.systemIdentifier, minX, minY, combined->topLeft.z),
-                Coord(combined->topLeft.systemIdentifier, maxX, maxY, combined->topLeft.z)
-            );
+            combined->topLeft.x = std::min(initialMinX, currentBox.topLeft.x);
+            combined->topLeft.y = std::min(initialMinY, currentBox.topLeft.y);
+            combined->bottomRight.x = std::max(initialMaxX, currentBox.bottomRight.x);
+            combined->bottomRight.y = std::max(initialMaxY, currentBox.bottomRight.y);
         }
 
         return combined;
