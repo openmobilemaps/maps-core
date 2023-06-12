@@ -179,14 +179,11 @@ void Tiled2dMapVectorSourceRasterTileDataManager::updateLayerDescription(std::sh
                     subTiles->second.push_back(
                             {legacyIndex, layerDescription->identifier, actor.strongActor<Tiled2dMapVectorTile>()});
                 } else {
-                    for (auto subTileIter = subTiles->second.begin(); subTileIter != subTiles->second.end(); subTileIter++) {
-                        if (std::get<0>(*subTileIter) > legacyIndex) {
-                            subTiles->second.insert(subTileIter - 1,
-                                                    {legacyIndex, layerDescription->identifier,
-                                                     actor.strongActor<Tiled2dMapVectorTile>()});
-                            break;
-                        }
-                    }
+                    auto insertionPoint = std::lower_bound(subTiles->second.begin(), subTiles->second.end(), legacyIndex, [](const auto& subTile, int index) {
+                        return std::get<0>(subTile) < index;
+                    });
+
+                    subTiles->second.insert(insertionPoint, {legacyIndex, layerDescription->identifier, actor.strongActor<Tiled2dMapVectorTile>()});
                 }
 
                 auto indexControlSet = tilesReadyControlSet.find(tileData.tileInfo);
