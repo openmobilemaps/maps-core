@@ -183,12 +183,11 @@ void Tiled2dMapVectorSourceVectorTileDataManager::updateLayerDescription(std::sh
                 if (subTiles->second.empty()) {
                     subTiles->second.push_back({legacyIndex, layerDescription->identifier, actor.strongActor<Tiled2dMapVectorTile>()});
                 } else {
-                    for (auto subTileIter = subTiles->second.begin(); subTileIter != subTiles->second.end(); subTileIter++) {
-                        if (std::get<0>(*subTileIter) > legacyIndex) {
-                            subTiles->second.insert(subTileIter, {legacyIndex, layerDescription->identifier, actor.strongActor<Tiled2dMapVectorTile>()});
-                            break;
-                        }
-                    }
+                    auto insertionPoint = std::lower_bound(subTiles->second.begin(), subTiles->second.end(), legacyIndex, [](const auto& subTile, int index) {
+                        return std::get<0>(subTile) < index;
+                    });
+
+                    subTiles->second.insert(insertionPoint, {legacyIndex, layerDescription->identifier, actor.strongActor<Tiled2dMapVectorTile>()});
                 }
 
                 auto controlSetEntry = tilesReadyControlSet.find(tileData.tileInfo);
