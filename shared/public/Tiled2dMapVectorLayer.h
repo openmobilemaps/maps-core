@@ -167,6 +167,7 @@ private:
     std::optional<std::string> remoteStyleJsonUrl;
     std::optional<std::string> fallbackStyleJsonString;
 
+    std::recursive_mutex mapDescriptionMutex;
     std::shared_ptr<VectorMapDescription> mapDescription;
 
     std::shared_ptr<Tiled2dMapVectorBackgroundSubLayer> backgroundLayer;
