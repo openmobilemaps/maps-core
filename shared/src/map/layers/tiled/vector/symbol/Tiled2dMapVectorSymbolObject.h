@@ -119,4 +119,7 @@ private:
 
     std::optional<double> lastTextUpdateScaleFactor;
     std::optional<double> lastTextUpdateRotation;
+
+    bool textAllowOverlap;
+    bool iconAllowOverlap;
 };
