@@ -912,42 +912,6 @@ private:
     std::vector<std::tuple<double, std::shared_ptr<Value>>> steps;
 };
 
-class StopValue : public Value {
-public:
-    StopValue(const std::vector<std::tuple<double, std::shared_ptr<Value>>> stops) : stops(stops) {}
-
-    std::unique_ptr<Value> clone() override {
-        std::vector<std::tuple<double, std::shared_ptr<Value>>> clonedStops;
-        for (const auto &[stop, value] : stops) {
-            clonedStops.emplace_back(stop, value->clone());
-        }
-        return std::make_unique<StopValue>(std::move(clonedStops));
-    }
-
-    std::unordered_set<std::string> getUsedKeys() const override {
-        std::unordered_set<std::string> usedKeys = {"zoom"};
-        for (auto const &stop: stops) {
-            auto const setKeys = std::get<1>(stop)->getUsedKeys();
-            usedKeys.insert(setKeys.begin(), setKeys.end());
-        }
-        return usedKeys;
-    }
-
-    ValueVariant evaluate(const EvaluationContext &context) const override {
-        double zoom = context.zoomLevel.has_value() ? context.zoomLevel.value() : 0.0;
-        for (const auto &stop : stops) {
-            double stopZoom = std::get<0>(stop);
-            if (stopZoom > zoom) {
-                return std::get<1>(stop)->evaluate(context);
-            }
-        }
-        const auto last = std::get<1>(stops[(int) stops.size() - 1]);
-        return last->evaluate(context);
-    }
-private:
-    std::vector<std::tuple<double, std::shared_ptr<Value>>> stops;
-};
-
 enum class PropertyCompareType {
     EQUAL,
     NOTEQUAL,
