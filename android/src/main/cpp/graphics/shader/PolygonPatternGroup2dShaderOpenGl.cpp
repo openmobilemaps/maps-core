@@ -59,12 +59,6 @@ std::string PolygonPatternGroup2dShaderOpenGl::getVertexShader() {
 std::string PolygonPatternGroup2dShaderOpenGl::getFragmentShader() {
     return OMMVersionedGlesShaderCode(320 es,
                                       precision highp float;
-                                      /*layout(std430, binding = 0) buffer textureCoordinatesBuffer {
-                                          float textureCoordinates[]; // 4 floats (x, y, width and height) in uv space and 2 uint_16 values for the pixel with and height for each polygon style
-                                      };
-                                      layout(std430, binding = 1) buffer opacityBuffer {
-                                          float opacities[]; // 1 float (opacity) per polygon style
-                                      };*/
 
                                       uniform sampler2D uTextureSampler;
                                       uniform vec2 uTextureFactor;
