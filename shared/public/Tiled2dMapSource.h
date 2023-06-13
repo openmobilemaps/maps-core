@@ -126,7 +126,7 @@ public:
 
     std::map<Tiled2dMapTileInfo, TileWrapper<R>> currentTiles;
 
-    LRUCache<Tiled2dMapTileInfo, R> tileCache { 128 };
+    LRUCache<Tiled2dMapTileInfo, R> tileCache { 32 };
 
     int currentZoomLevelIdentifier = 0;
 
