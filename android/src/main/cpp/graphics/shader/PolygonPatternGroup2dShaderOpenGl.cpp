@@ -49,7 +49,7 @@ std::string PolygonPatternGroup2dShaderOpenGl::getVertexShader() {
                                       out flat uint styleIndex;
 
                                       void main() {
-                                          pixelPosition = abs(vPosition.xy * vec2(1.0 / uScalingFactor, 1.0 / uScalingFactor));
+                                          pixelPosition = vPosition.xy * vec2(1.0 / uScalingFactor, 1.0 / uScalingFactor);
                                           styleIndex = uint(floor(vStyleIndex + 0.5));
                                           gl_Position = uMVPMatrix * vec4(vPosition, 0.0, 1.0);
                                       }
@@ -91,7 +91,7 @@ std::string PolygonPatternGroup2dShaderOpenGl::getFragmentShader() {
                                           float combined = textureCoordinates[styleOffset + 4];
                                           vec2 pixelSize = vec2(mod(combined, 65536.0), combined / 65536.0);
 
-                                          vec2 uv = (vec2(mod(pixelPosition.x, pixelSize.x), mod(pixelPosition.y, pixelSize.y)) / pixelSize);
+                                          vec2 uv = mod(vec2(mod(pixelPosition.x, pixelSize.x), mod(pixelPosition.y, pixelSize.y)) / pixelSize + vec2(1.0, 1.0), vec2(1.0, 1.0));
                                           vec2 texUv = uvOrig + uvSize * uv;
                                           vec4 color = texture(uTextureSampler, texUv);
 

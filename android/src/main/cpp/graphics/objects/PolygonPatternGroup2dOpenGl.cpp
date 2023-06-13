@@ -88,7 +88,7 @@ void PolygonPatternGroup2dOpenGl::clear() {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (ready) {
         removeGlBuffers();
-        buffersNotReady = 0b00000011;
+        //buffersNotReady = 0b00000011;
     }
     if (textureHolder) {
         removeTexture();

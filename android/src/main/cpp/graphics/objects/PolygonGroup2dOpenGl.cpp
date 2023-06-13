@@ -90,7 +90,7 @@ void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterf
 
     if (isMasked) {
         glStencilFunc(GL_EQUAL, isMaskInversed ? 0 : 128, 128);
-        glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
     }
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);

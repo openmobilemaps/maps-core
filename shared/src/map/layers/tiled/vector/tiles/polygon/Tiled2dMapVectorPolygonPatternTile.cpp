@@ -128,9 +128,15 @@ void Tiled2dMapVectorPolygonPatternTile::setup() {
         return;
     }
     const auto &context = mapInterface->getRenderingContext();
+    const auto &spriteTexture = this->spriteTexture;
     for (const auto &[styleGroupId, polygons] : styleGroupPolygonsMap) {
         for (const auto &polygon: polygons) {
-            if (!polygon->getPolygonObject()->isReady()) polygon->getPolygonObject()->setup(context);
+            if (!polygon->getPolygonObject()->isReady()) {
+                polygon->getPolygonObject()->setup(context);
+                if (spriteTexture) {
+                    polygon->loadTexture(context, spriteTexture);
+                }
+            }
         }
     }
 
