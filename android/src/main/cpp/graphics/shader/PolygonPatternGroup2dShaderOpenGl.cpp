@@ -49,7 +49,7 @@ std::string PolygonPatternGroup2dShaderOpenGl::getVertexShader() {
                                       out flat uint styleIndex;
 
                                       void main() {
-                                          pixelPosition = abs(vPosition.xy * vec2(1.0 / uScalingFactor, 1.0 / uScalingFactor));
+                                          pixelPosition = vPosition.xy * vec2(1.0 / uScalingFactor, 1.0 / uScalingFactor);
                                           styleIndex = uint(floor(vStyleIndex + 0.5));
                                           gl_Position = uMVPMatrix * vec4(vPosition, 0.0, 1.0);
                                       }
@@ -59,42 +59,39 @@ std::string PolygonPatternGroup2dShaderOpenGl::getVertexShader() {
 std::string PolygonPatternGroup2dShaderOpenGl::getFragmentShader() {
     return OMMVersionedGlesShaderCode(320 es,
                                       precision highp float;
-                                              /*layout(std430, binding = 0) buffer textureCoordinatesBuffer {
-                                                  float textureCoordinates[]; // 4 floats (x, y, width and height) in uv space and 2 uint_16 values for the pixel with and height for each polygon style
-                                              };
-                                              layout(std430, binding = 1) buffer opacityBuffer {
-                                                  float opacities[]; // 1 float (opacity) per polygon style
-                                              };*/
 
-                                              uniform sampler2D uTextureSampler;
-                                              uniform vec2 uTextureFactor;
-                                              uniform float textureCoordinates[5 * 32];
-                                              uniform float opacities[32];
+                                      uniform sampler2D uTextureSampler;
+                                      uniform vec2 uTextureFactor;
+                                      uniform float textureCoordinates[5 * 16];
+                                      uniform float opacities[16];
 
-                                              in vec2 pixelPosition;
-                                              in flat uint styleIndex;
+                                      in vec2 pixelPosition;
+                                      in flat uint styleIndex;
 
-                                              out vec4 fragmentColor;
+                                      out vec4 fragmentColor;
 
-                                              void main() {
-                                                  float opacity = opacities[int(styleIndex)];
-                                                  /*if (opacity == 0.0) {
-                                                      discard;
-                                                  }*/
+                                      void main() {
+                                          float opacity = opacities[int(styleIndex)];
+                                          if (opacity == 0.0) {
+                                              discard;
+                                          }
 
-                                                  int styleOffset = min(int(styleIndex) * 5, 31 * 5);
-                                                  vec2 uvOrig = vec2(textureCoordinates[styleOffset], textureCoordinates[styleOffset + 1] + textureCoordinates[styleOffset + 3]) * uTextureFactor;
-                                                  vec2 uvSize = vec2(textureCoordinates[styleOffset + 2], -textureCoordinates[styleOffset + 3]) * uTextureFactor;
-                                                  float combined = textureCoordinates[styleOffset + 4];
-                                                  vec2 pixelSize = vec2(mod(combined, 65536.0), combined / 65536.0);
+                                          int styleOffset = min(int(styleIndex) * 5, 16 * 5);
+                                          vec2 uvSize = vec2(textureCoordinates[styleOffset + 2], -textureCoordinates[styleOffset + 3]) * uTextureFactor;
+                                          if (uvSize.x == 0.0 && uvSize.y == 0.0) {
+                                              discard;
+                                          }
+                                          vec2 uvOrig = vec2(textureCoordinates[styleOffset], textureCoordinates[styleOffset + 1] + textureCoordinates[styleOffset + 3]) * uTextureFactor;
+                                          float combined = textureCoordinates[styleOffset + 4];
+                                          vec2 pixelSize = vec2(mod(combined, 65536.0), combined / 65536.0);
 
-                                                  vec2 uv = (vec2(mod(pixelPosition.x, pixelSize.x), mod(pixelPosition.y, pixelSize.y)) / pixelSize);
-                                                  vec2 texUv = uvOrig + uvSize * uv;
-                                                  vec4 color = texture(uTextureSampler, texUv);
+                                          vec2 uv = mod(vec2(mod(pixelPosition.x, pixelSize.x), mod(pixelPosition.y, pixelSize.y)) / pixelSize + vec2(1.0, 1.0), vec2(1.0, 1.0));
+                                          vec2 texUv = uvOrig + uvSize * uv;
+                                          vec4 color = texture(uTextureSampler, texUv);
 
-                                                  float a = color.a * opacity;
-                                                  fragmentColor = vec4(color.rgb * a, a);
-                                              }
-    );
+                                          float a = color.a * opacity;
+                                          fragmentColor = vec4(color.rgb * a, a);
+                                      }
+);
 }
 std::shared_ptr<ShaderProgramInterface> PolygonPatternGroup2dShaderOpenGl::asShaderProgramInterface() { return shared_from_this(); }

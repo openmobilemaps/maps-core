@@ -175,14 +175,14 @@ Tiled2dMapVectorLayer::getLayerConfig(const std::shared_ptr<VectorMapSourceDescr
 }
 
 void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription) {
+    std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
+    this->mapDescription = mapDescription;
+    this->layerConfigs.clear();
 
-        this->mapDescription = mapDescription;
-        this->layerConfigs.clear();
-
-        for (auto const &source: mapDescription->vectorSources) {
-            layerConfigs[source->identifier] = getLayerConfig(source);
-        }
-        initializeVectorLayer();
+    for (auto const &source: mapDescription->vectorSources) {
+        layerConfigs[source->identifier] = getLayerConfig(source);
+    }
+    initializeVectorLayer();
 }
 
 void Tiled2dMapVectorLayer::initializeVectorLayer() {
@@ -354,7 +354,7 @@ std::shared_ptr<::LayerInterface> Tiled2dMapVectorLayer::asLayerInterface() {
 
 void Tiled2dMapVectorLayer::update() {
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-        sourceDataManager.message(&Tiled2dMapVectorSourceTileDataManager::update);
+        sourceDataManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::update);
     }
 
     if (collisionManager) {
@@ -665,15 +665,19 @@ void Tiled2dMapVectorLayer::setSelectedFeatureIdentifier(std::optional<int64_t> 
 void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription) {
     std::shared_ptr<VectorLayerDescription> legacyDescription;
     int32_t legacyIndex = -1;
-    size_t numLayers = mapDescription->layers.size();
-    for (int index = 0; index < numLayers; index++) {
-        if (mapDescription->layers[index]->identifier == layerDescription->identifier) {
-            legacyDescription = mapDescription->layers[index];
-            legacyIndex = index;
-            mapDescription->layers[index] = layerDescription;
-            break;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
+        size_t numLayers = mapDescription->layers.size();
+        for (int index = 0; index < numLayers; index++) {
+            if (mapDescription->layers[index]->identifier == layerDescription->identifier) {
+                legacyDescription = mapDescription->layers[index];
+                legacyIndex = index;
+                mapDescription->layers[index] = layerDescription;
+                break;
+            }
         }
     }
+
 
     if (legacyIndex < 0) {
         return;
@@ -725,6 +729,7 @@ std::optional<std::shared_ptr<FeatureContext>> Tiled2dMapVectorLayer::getFeature
 }
 
 std::shared_ptr<VectorLayerDescription> Tiled2dMapVectorLayer::getLayerDescriptionWithIdentifier(std::string identifier) {
+    std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
     if (mapDescription) {
         auto it = std::find_if(mapDescription->layers.begin(), mapDescription->layers.end(),
             [&identifier](const auto& layer) {

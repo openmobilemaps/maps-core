@@ -40,5 +40,5 @@ class ColorPolygonGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
     GLint numStyles = 0;
 
     const int sizeStyleValues = 5;
-    const int sizeStyleValuesArray = sizeStyleValues * 32;
+    const int sizeStyleValuesArray = sizeStyleValues * 16;
 };

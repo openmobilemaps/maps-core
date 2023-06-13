@@ -47,28 +47,25 @@ void Tiled2dMapVectorLineTile::update() {
         return;
     }
 
-    if (!isStyleZoomDependant && lastZoom) {
-        return;
-    }
-
     const double cameraZoom = camera->getZoom();
      double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(cameraZoom);
     zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.zoomIdentifier);
 
-    if (isStyleZoomDependant && lastZoom && *lastZoom == zoomIdentifier) {
-        return;
-    }
-    lastZoom = zoomIdentifier;
-
-    const auto zoom = Tiled2dMapVectorRasterSubLayerConfig::getZoomFactorAtIdentifier(floor(zoomIdentifier));
-    const auto cameraScalingFactor = camera->asCameraInterface()->getScalingFactor();
-    const auto scalingFactor = (cameraScalingFactor / cameraZoom) * zoom;
+    auto zoom = Tiled2dMapVectorRasterSubLayerConfig::getZoomFactorAtIdentifier(floor(zoomIdentifier));
+    auto scalingFactor = (camera->asCameraInterface()->getScalingFactor() / cameraZoom) * zoom;
 
     for (auto const &line: lines) {
         line->setScalingFactor(scalingFactor);
     }
 
+    if (lastZoom && ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant)) {
+        return;
+    }
+
+    lastZoom = zoomIdentifier;
+
     auto lineDescription = std::static_pointer_cast<LineVectorLayerDescription>(description);
+    bool inZoomRange = lineDescription->maxZoom >= zoomIdentifier && lineDescription->minZoom <= zoomIdentifier;
 
     size_t numStyleGroups = featureGroups.size();
     for (int styleGroupId = 0; styleGroupId < numStyleGroups; styleGroupId++) {
@@ -79,7 +76,7 @@ void Tiled2dMapVectorLineTile::update() {
             auto &style = reusableLineStyles.at(styleGroupId).at(i);
 
             // color
-            auto color = lineDescription->style.getLineColor(context);
+            auto color = inZoomRange ? lineDescription->style.getLineColor(context) : Color(0.0, 0.0, 0.0, 0.0);
             if (color.r != style.colorR || color.g != style.colorG || color.b != style.colorB || color.a != style.colorA) {
                 style.colorR = color.r;
                 style.colorG = color.g;
@@ -89,14 +86,14 @@ void Tiled2dMapVectorLineTile::update() {
             }
 
             // opacity
-            float opacity = lineDescription->style.getLineOpacity(context);
+            float opacity = inZoomRange ? lineDescription->style.getLineOpacity(context) : 0.0;
             if (opacity != style.opacity) {
                 style.opacity = opacity * alpha;
                 needsUpdate = true;
             }
 
             // blue
-            float blur = lineDescription->style.getLineBlur(context);
+            float blur = inZoomRange ? lineDescription->style.getLineBlur(context) : 0.0;
             if (blur != style.blur) {
                 style.blur = blur;
                 needsUpdate = true;
@@ -111,14 +108,14 @@ void Tiled2dMapVectorLineTile::update() {
             }
 
             // width
-            float width = lineDescription->style.getLineWidth(context);
+            float width = inZoomRange ? lineDescription->style.getLineWidth(context) : 0.0;
             if (width != style.width) {
                 style.width = width;
                 needsUpdate = true;
             }
 
             // dashes
-            auto dashArray = lineDescription->style.getLineDashArray(context);
+            auto dashArray = inZoomRange ? lineDescription->style.getLineDashArray(context) : std::vector<float>{};
             auto dn = dashArray.size();
             auto dValue0 = dn > 0 ? dashArray[0] : 0.0;
             auto dValue1 = (dn > 1 ? dashArray[1] : 0.0) + dValue0;
@@ -151,7 +148,7 @@ void Tiled2dMapVectorLineTile::update() {
             }
 
             // offset
-            auto offset = lineDescription->style.getLineOffset(context);
+            auto offset = inZoomRange ? lineDescription->style.getLineOffset(context) : 0.0;
             if(offset != style.offset) {
                 style.offset = offset;
                 needsUpdate = true;
@@ -305,13 +302,14 @@ void Tiled2dMapVectorLineTile::addLines(const std::unordered_map<int, std::vecto
     std::vector<std::shared_ptr<LineGroup2dLayerObject>> lineGroupObjects;
     std::vector<std::shared_ptr<GraphicsObjectInterface>> newGraphicObjects;
 
-    for (const auto &[styleGroupIndex, styleLines] : styleIdLinesMap) {
+    for (const auto &[styleGroupIndex, styleLines]: styleIdLinesMap) {
         for (const auto &lineSubGroup: styleLines) {
-            auto lineGroupGraphicsObject = objectFactory->createLineGroup(shaders.at(styleGroupIndex)->asShaderProgramInterface());
+            const auto &shader = shaders.at(styleGroupIndex);
+            auto lineGroupGraphicsObject = objectFactory->createLineGroup(shader->asShaderProgramInterface());
 
             auto lineGroupObject = std::make_shared<LineGroup2dLayerObject>(coordinateConverterHelper,
                                                                             lineGroupGraphicsObject,
-                                                                            shaders.at(styleGroupIndex));
+                                                                            shader);
             lineGroupObject->setLines(lineSubGroup);
 
             lineGroupObjects.push_back(lineGroupObject);
