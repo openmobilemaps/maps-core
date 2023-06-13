@@ -57,6 +57,10 @@ public:
         return fillOpacity ? fillOpacity->evaluateOr(context, defaultValue) : defaultValue;
     }
 
+    void setFillOpacity(std::shared_ptr<Value> opacityValue) {
+        fillOpacity = opacityValue;
+    }
+
     std::string getFillPattern(const EvaluationContext &context) const {
         static const std::string defaultValue = "";
         return fillPattern ? fillPattern->evaluateOr(context, defaultValue) : defaultValue;

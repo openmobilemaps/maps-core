@@ -64,6 +64,10 @@ public:
         return lineOpacity ? lineOpacity->evaluateOr(context, defaultValue) : defaultValue;
     }
 
+    void setLineOpacity(std::shared_ptr<Value> opacityValue) {
+        lineOpacity = opacityValue;
+    }
+
     double getLineBlur(const EvaluationContext &context){
         static const double defaultValue = 0.0;
         return lineBlur ? lineBlur->evaluateOr(context, defaultValue) : defaultValue;
