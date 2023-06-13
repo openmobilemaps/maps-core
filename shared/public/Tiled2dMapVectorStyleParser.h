@@ -295,7 +295,7 @@ public:
                 steps.push_back({stop[0].get<double>(), parseValue(stop[1])});
             }
 
-            return std::make_shared<StopValue>(steps);
+            return std::make_shared<InterpolatedValue>(1.0, steps);
 
         } else if (!json.is_null() && json.is_primitive()) {
             return std::make_shared<StaticValue>(getVariant(json));
