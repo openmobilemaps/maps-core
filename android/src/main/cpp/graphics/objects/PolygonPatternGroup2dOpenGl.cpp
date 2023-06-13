@@ -76,11 +76,6 @@ void PolygonPatternGroup2dOpenGl::prepareGlData(const int &programHandle) {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * indices.size(), &indices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    /*textureCoordinatesHandle = glGetProgramResourceIndex(programHandle, GL_SHADER_STORAGE_BLOCK, "textureCoordinatesBuffer");
-    glGenBuffers(1, &textureCoordinatesBuffer);
-    opacitiesHandle = glGetProgramResourceIndex(programHandle, GL_SHADER_STORAGE_BLOCK, "opacityBuffer");
-    glGenBuffers(1, &opacitiesBuffer);*/
-
     mvpMatrixHandle = glGetUniformLocation(programHandle, "uMVPMatrix");
 }
 
@@ -88,7 +83,6 @@ void PolygonPatternGroup2dOpenGl::clear() {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (ready) {
         removeGlBuffers();
-        buffersNotReady = 0b00000011;
     }
     if (textureHolder) {
         removeTexture();
@@ -99,9 +93,6 @@ void PolygonPatternGroup2dOpenGl::clear() {
 void PolygonPatternGroup2dOpenGl::removeGlBuffers() {
     glDeleteBuffers(1, &vertexBuffer);
     glDeleteBuffers(1, &indexBuffer);
-
-    /*glDeleteBuffers(1, &opacitiesBuffer);
-    glDeleteBuffers(1, &textureCoordinatesBuffer);*/
 }
 
 void PolygonPatternGroup2dOpenGl::loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
@@ -159,16 +150,10 @@ void PolygonPatternGroup2dOpenGl::render(const std::shared_ptr<::RenderingContex
     auto scalingFactorHandle = glGetUniformLocation(programHandle, "uScalingFactor");
     glUniform1f(scalingFactorHandle, scalingFactor);
 
-    /*glBindBuffer(GL_SHADER_STORAGE_BUFFER, textureCoordinatesBuffer);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, textureCoordinatesHandle, textureCoordinatesBuffer);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, opacitiesBuffer);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, opacitiesHandle, opacitiesBuffer);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);*/
-
     int textureCoordinatesHandle = glGetUniformLocation(program, "textureCoordinates");
-    glUniform1fv(textureCoordinatesHandle, 5 * 32, &textureCoordinates[0]);
+    glUniform1fv(textureCoordinatesHandle, sizeTextureCoordinatesValuesArray, &textureCoordinates[0]);
     int opacitiesHandle = glGetUniformLocation(program, "opacities");
-    glUniform1fv(opacitiesHandle, 32, &opacities[0]);
+    glUniform1fv(opacitiesHandle, sizeOpacitiesValuesArray, &opacities[0]);
 
     shaderProgram->preRender(context);
 
@@ -220,38 +205,20 @@ void PolygonPatternGroup2dOpenGl::setScalingFactor(float factor) {
 
 void PolygonPatternGroup2dOpenGl::setOpacities(const SharedBytes &values) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-/*    if (writeToShaderStorageBuffer(values, opacitiesBuffer)) {
-        buffersNotReady &= ~(1);
-    }*/
     if (values.elementCount == 0) {
         return;
     }
-    this->opacities.resize(values.elementCount * values.bytesPerElement / 4);
+    this->opacities.resize(sizeOpacitiesValuesArray, 0.0);
     std::memcpy(this->opacities.data(), (void *)values.address, values.elementCount * values.bytesPerElement);
     buffersNotReady &= ~(1);
 }
 
 void PolygonPatternGroup2dOpenGl::setTextureCoordinates(const SharedBytes &textureCoordinates) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-/*    if (writeToShaderStorageBuffer(textureCoordinates, textureCoordinatesBuffer)) {
-        buffersNotReady &= ~(1 << 1);
-    }*/
     if (textureCoordinates.elementCount == 0) {
         return;
     }
-    this->textureCoordinates.resize(textureCoordinates.elementCount * textureCoordinates.bytesPerElement / 4);
+    this->textureCoordinates.resize(sizeTextureCoordinatesValuesArray, 0.0);
     std::memcpy(this->textureCoordinates.data(), (void *)textureCoordinates.address, textureCoordinates.elementCount * textureCoordinates.bytesPerElement);
     buffersNotReady &= ~(1 << 1);
-}
-
-bool PolygonPatternGroup2dOpenGl::writeToShaderStorageBuffer(const ::SharedBytes &data, GLuint target) {
-    if(!ready){
-        // Writing to buffer before it was created
-        return false;
-    }
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, target);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, data.elementCount * data.bytesPerElement, (void *) data.address, GL_DYNAMIC_DRAW);
-    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-    return true;
 }

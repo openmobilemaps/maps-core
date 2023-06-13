@@ -74,6 +74,6 @@ std::string RasterShaderOpenGl::getFragmentShader() {
 
                                           vec3 brightnessMin = vec3(styleValues[3]);
                                           vec3 brightnessMax = vec3(styleValues[4]);
-                                          fragmentColor = vec4(mix(brightnessMin, brightnessMax, rgb) * color.a, color.a);
+                                          fragmentColor = vec4(mix(brightnessMin, brightnessMax, rgb) * styleValues[0], color.a);
                                       });
 }

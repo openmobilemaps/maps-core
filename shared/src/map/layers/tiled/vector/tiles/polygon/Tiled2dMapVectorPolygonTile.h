@@ -52,7 +52,7 @@ private:
     void setupPolygons(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects);
 
 #ifdef __ANDROID__
-    static const int maxStylesPerGroup = 32;
+    static const int maxStylesPerGroup = 16;
 #else
     static const int maxStylesPerGroup = 256;
 #endif
