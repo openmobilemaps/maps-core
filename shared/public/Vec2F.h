@@ -9,6 +9,15 @@ struct Vec2F final {
     float x;
     float y;
 
+    friend bool operator==(const Vec2F& lhs, const Vec2F& rhs);
+    friend bool operator!=(const Vec2F& lhs, const Vec2F& rhs);
+
+    friend bool operator<(const Vec2F& lhs, const Vec2F& rhs);
+    friend bool operator>(const Vec2F& lhs, const Vec2F& rhs);
+
+    friend bool operator<=(const Vec2F& lhs, const Vec2F& rhs);
+    friend bool operator>=(const Vec2F& lhs, const Vec2F& rhs);
+
     Vec2F(float x_,
           float y_)
     : x(std::move(x_))

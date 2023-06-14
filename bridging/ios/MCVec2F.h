@@ -15,4 +15,6 @@
 
 @property (nonatomic, readonly) float y;
 
+- (NSComparisonResult)compare:(nonnull MCVec2F *)other;
+
 @end

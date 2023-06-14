@@ -53,8 +53,9 @@ public:
     std::shared_ptr<FontLoaderResult> getFont() {
         return fontResult;
     }
-    
-    RectCoord boundingBox;
+
+    Quad2dD boundingBox;
+    Vec2D dimensions = Vec2D(0.0, 0.0);
 private:
 
     void updatePropertiesPoint(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation);

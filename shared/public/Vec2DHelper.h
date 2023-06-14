@@ -9,7 +9,10 @@
  */
 
 #pragma once
+
 #include "Vec2D.h"
+#include "Quad2dD.h"
+#include <vector>
 
 class Vec2DHelper {
   public:
@@ -18,7 +21,13 @@ class Vec2DHelper {
 
     static ::Vec2D midpoint(const ::Vec2D &from, const ::Vec2D &to);
 
+    static double crossProduct(const Vec2D& A, const Vec2D& B, const Vec2D& C);
+
     static ::Vec2D rotate(const ::Vec2D &p, const ::Vec2D &origin, double angleDegree);
+
+    static std::vector<Vec2D> convexHull(std::vector<Vec2D>& points);
+
+    static Quad2dD minimumAreaEnclosingRectangle(std::vector<Vec2D>& points);
 
     static double squaredLength(const ::Vec2D &vector);
 

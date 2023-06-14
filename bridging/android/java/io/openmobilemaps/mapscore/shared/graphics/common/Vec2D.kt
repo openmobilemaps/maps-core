@@ -6,4 +6,30 @@ package io.openmobilemaps.mapscore.shared.graphics.common
 data class Vec2D(
     var x: Double,
     var y: Double,
-)
+) : Comparable<Vec2D> {
+
+    override fun compareTo(other: Vec2D): Int {
+        var tempResult = 0
+        if (this.x < other.x) {
+            tempResult = -1;
+        } else if (this.x > other.x) {
+            tempResult = 1;
+        } else {
+            tempResult = 0;
+        }
+        if (tempResult != 0) {
+            return tempResult
+        }
+        if (this.y < other.y) {
+            tempResult = -1;
+        } else if (this.y > other.y) {
+            tempResult = 1;
+        } else {
+            tempResult = 0;
+        }
+        if (tempResult != 0) {
+            return tempResult
+        }
+        return 0
+    }
+}

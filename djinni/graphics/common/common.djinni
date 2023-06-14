@@ -22,7 +22,7 @@ rect_d = record {
 vec_2_f = record {
     x: f32;
     y: f32;
-}
+} deriving (eq, ord)
 
 vec_3_f = record {
     x: f32;
@@ -44,7 +44,7 @@ vec_3_i = record {
 vec_2_d = record {
     x: f64;
     y: f64;
-}
+} deriving (eq, ord)
 
 vec_3_d = record {
     x: f64;

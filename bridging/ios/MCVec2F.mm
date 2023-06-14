@@ -23,6 +23,49 @@
                                  y:y];
 }
 
+- (BOOL)isEqual:(id)other
+{
+    if (![other isKindOfClass:[MCVec2F class]]) {
+        return NO;
+    }
+    MCVec2F *typedOther = (MCVec2F *)other;
+    return self.x == typedOther.x &&
+            self.y == typedOther.y;
+}
+
+- (NSUInteger)hash
+{
+    return NSStringFromClass([self class]).hash ^
+            (NSUInteger)self.x ^
+            (NSUInteger)self.y;
+}
+
+- (NSComparisonResult)compare:(MCVec2F *)other
+{
+    NSComparisonResult tempResult;
+    if (self.x < other.x) {
+        tempResult = NSOrderedAscending;
+    } else if (self.x > other.x) {
+        tempResult = NSOrderedDescending;
+    } else {
+        tempResult = NSOrderedSame;
+    }
+    if (tempResult != NSOrderedSame) {
+        return tempResult;
+    }
+    if (self.y < other.y) {
+        tempResult = NSOrderedAscending;
+    } else if (self.y > other.y) {
+        tempResult = NSOrderedDescending;
+    } else {
+        tempResult = NSOrderedSame;
+    }
+    if (tempResult != NSOrderedSame) {
+        return tempResult;
+    }
+    return NSOrderedSame;
+}
+
 #ifndef DJINNI_DISABLE_DESCRIPTION_METHODS
 - (NSString *)description
 {
