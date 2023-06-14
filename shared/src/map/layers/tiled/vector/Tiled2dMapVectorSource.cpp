@@ -63,10 +63,7 @@ Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(con
                     layerFeatureMap->erase(sourceLayerName);
                 }
             }
-            if (!isTileVisible(tile)) return Tiled2dMapVectorTileInfo::FeatureMap();
         }
-
-        if (!isTileVisible(tile)) return Tiled2dMapVectorTileInfo::FeatureMap();
     }
     catch (const protozero::invalid_tag_exception &tagException) {
         LogError <<= "Invalid tag exception for tile " + std::to_string(tile.zoomIdentifier) + "/" +
