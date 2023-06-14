@@ -88,7 +88,7 @@ std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
                 }
                 styleIndex = styleIndex * 5;
                 color = vec4(polygonStyles[styleIndex], polygonStyles[styleIndex + 1],
-                             polygonStyles[styleIndex + 2], polygonStyles[styleIndex + 3]) * polygonStyles[styleIndex + 4];
+                             polygonStyles[styleIndex + 2], polygonStyles[styleIndex + 3] * polygonStyles[styleIndex + 4]);
                 gl_Position = uMVPMatrix * vec4(vPosition, 0.0, 1.0);
             });
 }
