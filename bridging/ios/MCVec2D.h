@@ -15,4 +15,6 @@
 
 @property (nonatomic, readonly) double y;
 
+- (NSComparisonResult)compare:(nonnull MCVec2D *)other;
+
 @end

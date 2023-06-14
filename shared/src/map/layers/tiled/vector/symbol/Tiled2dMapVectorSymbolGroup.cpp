@@ -15,6 +15,7 @@
 #include "TextInstancedShaderInterface.h"
 #include "Quad2dInstancedInterface.h"
 #include "StretchInstancedShaderInterface.h"
+#include "CoordinateSystemIdentifiers.h"
 
 Tiled2dMapVectorSymbolGroup::Tiled2dMapVectorSymbolGroup(const std::weak_ptr<MapInterface> &mapInterface,
                                                          const WeakActor<Tiled2dMapVectorFontProvider> &fontProvider,
@@ -360,10 +361,10 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                 if (combinedBox) {
                     vertices.push_back({
                         std::vector<::Coord> {
-                            combinedBox->topLeft,
-                            Coord(combinedBox->topLeft.systemIdentifier, combinedBox->bottomRight.x, combinedBox->topLeft.y, 0),
-                            combinedBox->bottomRight,
-                            Coord(combinedBox->topLeft.systemIdentifier, combinedBox->topLeft.x, combinedBox->bottomRight.y, 0)
+                            Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), combinedBox->topLeft.x, combinedBox->topLeft.y, 0.0),
+                            Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), combinedBox->topRight.x, combinedBox->topRight.y, 0.0),
+                            Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), combinedBox->bottomRight.x, combinedBox->bottomRight.y, 0.0),
+                            Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), combinedBox->bottomLeft.x, combinedBox->bottomLeft.y, 0.0),
                         },
                         object->collides ? 1 : 0
                     });

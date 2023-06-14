@@ -9,6 +9,15 @@ struct Vec2D final {
     double x;
     double y;
 
+    friend bool operator==(const Vec2D& lhs, const Vec2D& rhs);
+    friend bool operator!=(const Vec2D& lhs, const Vec2D& rhs);
+
+    friend bool operator<(const Vec2D& lhs, const Vec2D& rhs);
+    friend bool operator>(const Vec2D& lhs, const Vec2D& rhs);
+
+    friend bool operator<=(const Vec2D& lhs, const Vec2D& rhs);
+    friend bool operator>=(const Vec2D& lhs, const Vec2D& rhs);
+
     Vec2D(double x_,
           double y_)
     : x(std::move(x_))

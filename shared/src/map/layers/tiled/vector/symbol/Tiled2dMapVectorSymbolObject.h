@@ -69,7 +69,7 @@ public:
 
     int64_t symbolSortKey;
 
-    std::optional<RectCoord> getCombinedBoundingBox();
+    std::optional<Quad2dD> getCombinedBoundingBox();
 
     bool collides = false;
 
@@ -104,8 +104,8 @@ private:
     Vec2D stretchSpriteSize = Vec2D(0.0, 0.0);
     std::optional<SpriteDesc> stretchSpriteInfo;
 
-    RectCoord iconBoundingBox;
-    RectCoord stretchIconBoundingBox;
+    Quad2dD iconBoundingBox;
+    Quad2dD stretchIconBoundingBox;
 
     OBB2D orientedBox;
 

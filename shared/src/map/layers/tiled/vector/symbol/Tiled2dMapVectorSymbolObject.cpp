@@ -30,8 +30,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                                                            const TextJustify &textJustify,
                                                            const TextSymbolPlacement &textSymbolPlacement) :
     description(description), coordinate(coordinate), mapInterface(mapInterface), featureContext(featureContext),
-    iconBoundingBox(Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0), Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0)),
-    stretchIconBoundingBox(Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0), Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0)) {
+    iconBoundingBox(Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0)),
+    stretchIconBoundingBox(Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0)) {
     auto strongMapInterface = mapInterface.lock();
     auto objectFactory = strongMapInterface ? strongMapInterface->getGraphicsObjectFactory() : nullptr;
     auto camera = strongMapInterface ? strongMapInterface->getCamera() : nullptr;
@@ -237,10 +237,11 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &scal
     scales[2 * countOffset] = spriteSize.x * iconSize;
     scales[2 * countOffset + 1] = spriteSize.y * iconSize;
 
-    iconBoundingBox.topLeft.x = renderCoordinate.x - spriteSize.x * iconSize * 0.5;
-    iconBoundingBox.topLeft.y = renderCoordinate.y - spriteSize.y * iconSize * 0.5;
-    iconBoundingBox.bottomRight.x = renderCoordinate.x + spriteSize.x * iconSize * 0.5;
-    iconBoundingBox.bottomRight.y = renderCoordinate.y + spriteSize.y * iconSize * 0.5;
+    Vec2D origin(renderCoordinate.x, renderCoordinate.y);
+    iconBoundingBox.topLeft = Vec2DHelper::rotate(Vec2D(renderCoordinate.x - spriteSize.x * iconSize * 0.5, renderCoordinate.y - spriteSize.y * iconSize * 0.5), origin, rotations[countOffset]);
+    iconBoundingBox.topRight = Vec2DHelper::rotate(Vec2D(renderCoordinate.x + spriteSize.x * iconSize * 0.5, renderCoordinate.y - spriteSize.y * iconSize * 0.5), origin, rotations[countOffset]);
+    iconBoundingBox.bottomRight = Vec2DHelper::rotate(Vec2D(renderCoordinate.x + spriteSize.x * iconSize * 0.5, renderCoordinate.y + spriteSize.y * iconSize * 0.5), origin, rotations[countOffset]);
+    iconBoundingBox.bottomLeft = Vec2DHelper::rotate(Vec2D(renderCoordinate.x - spriteSize.x * iconSize * 0.5, renderCoordinate.y + spriteSize.y * iconSize * 0.5), origin, rotations[countOffset]);
 
     if (collides) {
         alphas[countOffset] = 0;
@@ -356,8 +357,9 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
 
     alphas[countOffset] = description->style.getIconOpacity(evalContext);
 
-    //TODO: rotations
-    rotations[countOffset] = 0.0;
+    if (lastIconUpdateRotation != rotation && iconRotationAlignment != SymbolAlignment::MAP) {
+        rotations[countOffset] = rotation;
+    }
 
     auto padding = description->style.getIconTextFitPadding(evalContext);
 
@@ -373,8 +375,8 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
 
     const auto iconSize = description->style.getIconSize(evalContext);
 
-    const auto textWidth = (labelObject->boundingBox.bottomRight.x - labelObject->boundingBox.topLeft.x) + (leftPadding + rightPadding);
-    const auto textHeight = (labelObject->boundingBox.bottomRight.y - labelObject->boundingBox.topLeft.y) + (topPadding + bottomPadding);
+    const auto textWidth = labelObject->dimensions.x + (leftPadding + rightPadding);
+    const auto textHeight = labelObject->dimensions.y + (topPadding + bottomPadding);
 
     auto scaleX = std::max(1.0, textWidth / (spriteWidth * iconSize));
     auto scaleY = std::max(1.0, textHeight / (spriteHeight * iconSize));
@@ -393,22 +395,20 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
 
     Coord renderPos = renderCoordinate;
     auto iconOffset = description->style.getIconOffset(evalContext);
-    renderPos.y -= iconOffset.y * scaleFactor;
-    renderPos.x += iconOffset.x * scaleFactor;
+    auto offset = Vec2D((-iconOffset.x) * scaleFactor - leftPadding * 0.5 + rightPadding * 0.5, iconOffset.y * scaleFactor + topPadding * 0.5 - bottomPadding * 0.5);
 
-    positions[2 * countOffset] = renderPos.x - leftPadding * 0.5 + rightPadding * 0.5;
-    positions[2 * countOffset + 1] = renderPos.y + topPadding * 0.5 - bottomPadding * 0.5;
+    offset = Vec2DHelper::rotate(offset, Vec2D(0, 0), -rotation);
 
-    stretchIconBoundingBox.topLeft.x = positions[2 * countOffset] - spriteWidth * 0.5;
-    stretchIconBoundingBox.topLeft.y = positions[2 * countOffset + 1] - spriteHeight * 0.5;
-    stretchIconBoundingBox.bottomRight.x = positions[2 * countOffset] + spriteWidth * 0.5;
-    stretchIconBoundingBox.bottomRight.y = positions[2 * countOffset + 1] + spriteHeight * 0.5;
+    positions[2 * countOffset] = renderPos.x + offset.x;
+    positions[2 * countOffset + 1] = renderPos.y + offset.y;
 
     const float textPadding = description->style.getTextPadding(evalContext) * scaleFactor;
-    stretchIconBoundingBox.topLeft.x -= textPadding;
-    stretchIconBoundingBox.topLeft.y -= textPadding;
-    stretchIconBoundingBox.bottomRight.x += textPadding;
-    stretchIconBoundingBox.bottomRight.y += textPadding;
+
+    Vec2D origin(positions[2 * countOffset], positions[2 * countOffset + 1]);
+    stretchIconBoundingBox.topLeft = Vec2DHelper::rotate(Vec2D(positions[2 * countOffset] - spriteWidth * 0.5 - textPadding, positions[2 * countOffset + 1] - spriteHeight * 0.5 - textPadding), origin, rotations[countOffset]);
+    stretchIconBoundingBox.topRight = Vec2DHelper::rotate(Vec2D(positions[2 * countOffset] + spriteWidth * 0.5 + textPadding, positions[2 * countOffset + 1] - spriteHeight * 0.5 - textPadding), origin, rotations[countOffset]);
+    stretchIconBoundingBox.bottomRight = Vec2DHelper::rotate(Vec2D(positions[2 * countOffset] + spriteWidth * 0.5 + textPadding, positions[2 * countOffset + 1] + spriteHeight * 0.5 + textPadding), origin, rotations[countOffset]);
+    stretchIconBoundingBox.bottomLeft = Vec2DHelper::rotate(Vec2D(positions[2 * countOffset] - spriteWidth * 0.5 - textPadding, positions[2 * countOffset + 1] + spriteHeight * 0.5 + textPadding), origin, rotations[countOffset]);
 
     const int infoOffset = countOffset * 10;
 
@@ -509,43 +509,37 @@ void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &posi
     lastStretchIconUpdateScaleFactor = std::nullopt;
 }
 
-std::optional<RectCoord> Tiled2dMapVectorSymbolObject::getCombinedBoundingBox() {
-    std::optional<RectCoord> combined;
+std::optional<Quad2dD> Tiled2dMapVectorSymbolObject::getCombinedBoundingBox() {
+    std::optional<Quad2dD> combined;
 
-        const RectCoord* boxes[3] = { nullptr };
-        int boxCount = 0;
+    const Quad2dD* boxes[3] = { nullptr };
+    int boxCount = 0;
 
-        if (!textAllowOverlap && labelObject && labelObject->boundingBox.topLeft.x != 0) {
-            boxes[boxCount++] = &labelObject->boundingBox;
-        }
-        if (!iconAllowOverlap && iconBoundingBox.topLeft.x != 0) {
-            boxes[boxCount++] = &iconBoundingBox;
-        }
-        if (!iconAllowOverlap && stretchIconBoundingBox.topLeft.x != 0) {
-            boxes[boxCount++] = &stretchIconBoundingBox;
-        }
+    if (!textAllowOverlap && labelObject && labelObject->boundingBox.topLeft.x != 0) {
+        boxes[boxCount++] = &labelObject->boundingBox;
+    }
+    if (!iconAllowOverlap && iconBoundingBox.topLeft.x != 0) {
+        boxes[boxCount++] = &iconBoundingBox;
+    }
+    if (!iconAllowOverlap && stretchIconBoundingBox.topLeft.x != 0) {
+        boxes[boxCount++] = &stretchIconBoundingBox;
+    }
 
-        if (boxCount == 0) {
-            return std::nullopt;
-        }
+    if (boxCount == 0) {
+        return std::nullopt;
+    }
 
-        const RectCoord& firstBox = *boxes[boxCount - 1];
-        combined = firstBox;
+    std::vector<Vec2D> points;
+    points.reserve(boxCount * 4);
 
-        const double initialMinX = firstBox.topLeft.x;
-        const double initialMinY = firstBox.topLeft.y;
-        const double initialMaxX = firstBox.bottomRight.x;
-        const double initialMaxY = firstBox.bottomRight.y;
+    for (int i = boxCount - 1; i >= 0; --i) {
+        points.push_back(boxes[i]->topLeft);
+        points.push_back(boxes[i]->topRight);
+        points.push_back(boxes[i]->bottomLeft);
+        points.push_back(boxes[i]->bottomRight);
+    }
 
-        for (int i = boxCount - 2; i >= 0; --i) {
-            const RectCoord& currentBox = *boxes[i];
-            combined->topLeft.x = std::min(initialMinX, currentBox.topLeft.x);
-            combined->topLeft.y = std::min(initialMinY, currentBox.topLeft.y);
-            combined->bottomRight.x = std::max(initialMaxX, currentBox.bottomRight.x);
-            combined->bottomRight.y = std::max(initialMaxY, currentBox.bottomRight.y);
-        }
-
-        return combined;
+    return Vec2DHelper::minimumAreaEnclosingRectangle(points);
 }
 
 void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<std::vector<OBB2D>> placements) {

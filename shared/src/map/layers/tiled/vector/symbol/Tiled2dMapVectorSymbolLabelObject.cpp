@@ -42,7 +42,7 @@ offset(offset),
 fontResult(fontResult),
 fullText(fullText),
 lineCoordinates(lineCoordinates),
-boundingBox(Coord("", 0.0, 0.0, 0.0), Coord("", 0.0, 0.0, 0.0)),
+boundingBox(Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0)),
 referencePoint(converter->convertToRenderSystem(coordinate)),
 referenceSize(fontResult->fontData->info.size)
 {
@@ -325,7 +325,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
     Vec2D textOffset(offset.x * offsetMultiplier, offset.y * offsetMultiplier);
 
-    Vec2D anchorOffset(0.0, 0.0);
+    Vec2D anchorOffset(-min.x, -min.y);
 
     switch (textAnchor) {
         case Anchor::CENTER:
@@ -372,8 +372,8 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
     anchorOffset = Vec2DHelper::rotate(anchorOffset, Vec2D(0, 0), angle);
 
-    auto dx = referencePoint.x + anchorOffset.x - min.x;
-    auto dy = referencePoint.y + anchorOffset.y - min.y;
+    auto dx = referencePoint.x + anchorOffset.x;
+    auto dy = referencePoint.y + anchorOffset.y;
 
     assert(centerPositions.size() == characterCount);
 
@@ -386,23 +386,31 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
         const float scaleXH = scales[2 * countOffset + 0] / 2.0;
         const float scaleYH = scales[2 * countOffset + 1] / 2.0;
 
-        box->addPoint(dx + rotated.x - scaleXH, dy + rotated.y - scaleYH, referencePoint.z);
-        box->addPoint(dx + rotated.x + scaleXH, dy + rotated.y - scaleYH, referencePoint.z);
-        box->addPoint(dx + rotated.x - scaleXH, dy + rotated.y + scaleYH, referencePoint.z);
-        box->addPoint(dx + rotated.x + scaleXH, dy + rotated.y + scaleYH, referencePoint.z);
+        box->addPoint(dx + centerPosition.x - scaleXH, dy + centerPosition.y - scaleYH, referencePoint.z);
+        box->addPoint(dx + centerPosition.x + scaleXH, dy + centerPosition.y - scaleYH, referencePoint.z);
+        box->addPoint(dx + centerPosition.x - scaleXH, dy + centerPosition.y + scaleYH, referencePoint.z);
+        box->addPoint(dx + centerPosition.x + scaleXH, dy + centerPosition.y + scaleYH, referencePoint.z);
 
         countOffset += 1;
     }
 
-    boundingBox = box ? RectCoord(box->min, box->max) : RectCoord(referencePoint, referencePoint);
-    
+    auto rectBoundingBox = box ? RectCoord(box->min, box->max) : RectCoord(referencePoint, referencePoint);
+
     const float padding = description->style.getTextPadding(evalContext) * scaleFactor;
 
-    boundingBox.topLeft.x -= padding;
-    boundingBox.topLeft.y -= padding;
+    rectBoundingBox.topLeft.x -= padding;
+    rectBoundingBox.topLeft.y -= padding;
 
-    boundingBox.bottomRight.x += padding;
-    boundingBox.bottomRight.y += padding;
+    rectBoundingBox.bottomRight.x += padding;
+    rectBoundingBox.bottomRight.y += padding;
+
+    dimensions.x = rectBoundingBox.bottomRight.x - rectBoundingBox.topLeft.x;
+    dimensions.y = rectBoundingBox.bottomRight.y - rectBoundingBox.topLeft.y;
+
+    boundingBox = Quad2dD(Vec2DHelper::rotate(Vec2D(rectBoundingBox.topLeft.x, rectBoundingBox.topLeft.y), Vec2D(dx, dy), angle),
+                          Vec2DHelper::rotate(Vec2D(rectBoundingBox.bottomRight.x, rectBoundingBox.topLeft.y), Vec2D(dx, dy), angle),
+                          Vec2DHelper::rotate(Vec2D(rectBoundingBox.bottomRight.x, rectBoundingBox.bottomRight.y), Vec2D(dx, dy), angle),
+                          Vec2DHelper::rotate(Vec2D(rectBoundingBox.topLeft.x, rectBoundingBox.bottomRight.y), Vec2D(dx, dy), angle));
 }
 
 double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation) {
@@ -561,10 +569,15 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
         const float padding = description->style.getTextPadding(evalContext) * scaleFactor;
         const auto min = box->min;
         const auto max = box->max;
-        boundingBox = RectCoord(Coord(min.systemIdentifier, min.x - padding, min.y - padding, min.z),
-                                Coord(min.systemIdentifier, max.x + padding, max.y + padding, min.z));
+        boundingBox.topLeft = Vec2D(min.x - padding, min.y - padding);
+        boundingBox.topRight = Vec2D(max.x + padding, min.y - padding);
+        boundingBox.bottomRight = Vec2D(max.x + padding, max.y + padding);
+        boundingBox.bottomLeft = Vec2D(min.x + padding, max.y + padding);
     } else {
-        boundingBox = RectCoord(referencePoint, referencePoint);
+        boundingBox.topLeft = Vec2D(0.0, 0.0);
+        boundingBox.topRight = Vec2D(0.0, 0.0);
+        boundingBox.bottomRight = Vec2D(0.0, 0.0);
+        boundingBox.bottomLeft = Vec2D(0.0, 0.0);
     }
 
     return (double)rotated / (double)total;
