@@ -69,7 +69,7 @@ public:
 
     int64_t symbolSortKey;
 
-    std::optional<Quad2dD> getCombinedBoundingBox();
+    std::optional<Quad2dD> getCombinedBoundingBox(bool considerOverlapFlag);
 
     bool collides = false;
 
