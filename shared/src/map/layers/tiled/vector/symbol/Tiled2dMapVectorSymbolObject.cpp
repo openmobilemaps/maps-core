@@ -586,6 +586,12 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
     }
 
     auto combinedBox = getCombinedBoundingBox(true);
+    if (combinedBox == std::nullopt) {
+        this->collides = false;
+        setCollisionAt(zoomIdentifier, false);
+        return;
+    }
+
     orientedBox.update(*combinedBox);
 
     for(auto it = placements->begin(); it != placements->end(); it++) {
