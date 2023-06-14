@@ -509,19 +509,19 @@ void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &posi
     lastStretchIconUpdateScaleFactor = std::nullopt;
 }
 
-std::optional<RectCoord> Tiled2dMapVectorSymbolObject::getCombinedBoundingBox() {
+std::optional<RectCoord> Tiled2dMapVectorSymbolObject::getCombinedBoundingBox(bool considerOverlapFlag) {
     std::optional<RectCoord> combined;
 
         const RectCoord* boxes[3] = { nullptr };
         int boxCount = 0;
 
-        if (!textAllowOverlap && labelObject && labelObject->boundingBox.topLeft.x != 0) {
+        if ((!considerOverlapFlag || !textAllowOverlap) && labelObject && labelObject->boundingBox.topLeft.x != 0) {
             boxes[boxCount++] = &labelObject->boundingBox;
         }
-        if (!iconAllowOverlap && iconBoundingBox.topLeft.x != 0) {
+        if ((!considerOverlapFlag || !iconAllowOverlap) && iconBoundingBox.topLeft.x != 0) {
             boxes[boxCount++] = &iconBoundingBox;
         }
-        if (!iconAllowOverlap && stretchIconBoundingBox.topLeft.x != 0) {
+        if ((!considerOverlapFlag || !iconAllowOverlap) && stretchIconBoundingBox.topLeft.x != 0) {
             boxes[boxCount++] = &stretchIconBoundingBox;
         }
 
@@ -578,14 +578,14 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
         }
         this->collides = *cachedCollision;
         if (!this->collides){
-            auto combinedBox = getCombinedBoundingBox();
+            auto combinedBox = getCombinedBoundingBox(true);
             orientedBox.update(*combinedBox);
             placements->push_back(orientedBox);
         }
         return;
     }
 
-    auto combinedBox = getCombinedBoundingBox();
+    auto combinedBox = getCombinedBoundingBox(true);
     orientedBox.update(*combinedBox);
 
     for(auto it = placements->begin(); it != placements->end(); it++) {
@@ -623,7 +623,7 @@ std::optional<VectorLayerFeatureInfo> Tiled2dMapVectorSymbolObject::onClickConfi
         return std::nullopt;
     }
 
-    auto combinedBox = getCombinedBoundingBox();
+    auto combinedBox = getCombinedBoundingBox(false);
     orientedBox.update(*combinedBox);
 
     if (orientedBox.overlaps(tinyClickBox)) {

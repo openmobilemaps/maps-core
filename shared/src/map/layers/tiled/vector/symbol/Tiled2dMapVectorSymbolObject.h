@@ -69,7 +69,7 @@ public:
 
     int64_t symbolSortKey;
 
-    std::optional<RectCoord> getCombinedBoundingBox();
+    std::optional<RectCoord> getCombinedBoundingBox(bool considerOverlapFlag);
 
     bool collides = false;
 
