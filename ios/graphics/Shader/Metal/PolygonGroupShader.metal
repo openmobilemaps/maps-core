@@ -84,7 +84,7 @@ polygonPatternGroupFragmentShader(PolygonPatternGroupVertexOut in [[stage_in]],
     const float2 pixelSize = float2(combined & 0xFF, combined >> 16);
 
     const float2 uv = fmod(fmod(in.pixelPosition, pixelSize) / pixelSize + float2(1.0, 1.0), float2(1.0, 1.0));
-    const float2 texUv = uvOrig + uvSize * float2(uv.x, 1 - uv.y);
+    const float2 texUv = uvOrig + uvSize * float2(uv.x, uv.y);
     const float4 color = texture0.sample(textureSampler, texUv);
 
     const float a = color.a * opacity[int(in.stylingIndex)];
