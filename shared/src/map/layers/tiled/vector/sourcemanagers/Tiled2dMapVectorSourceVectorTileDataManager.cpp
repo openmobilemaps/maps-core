@@ -158,11 +158,15 @@ void Tiled2dMapVectorSourceVectorTileDataManager::updateLayerDescription(std::sh
 
         if (needsTileReplace) {
             // Remove invalid legacy tile (only one - identifier is unique)
-            subTiles->second.erase(std::remove_if(subTiles->second.begin(), subTiles->second.end(),
-                                                  [&identifier = layerDescription->identifier]
-                                                          (const std::tuple<int32_t, std::string, Actor<Tiled2dMapVectorTile>> &subTile) {
-                                                      return std::get<1>(subTile) == identifier;
-                                                  }));
+            auto legacyPos = std::remove_if(subTiles->second.begin(), subTiles->second.end(),
+                                            [&identifier = layerDescription->identifier]
+                                                    (const std::tuple<int32_t, std::string, Actor<Tiled2dMapVectorTile>> &subTile) {
+                                                return std::get<1>(subTile) == identifier;
+                                            });
+            if (legacyPos == subTiles->second.end()) {
+                continue;
+            }
+            subTiles->second.erase(legacyPos);
 
             // If new source of layer is not handled by this manager, continue
             if (layerDescription->source != source) {
