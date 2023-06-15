@@ -470,7 +470,6 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
         return;
     }
 
-
     if (currentTiles.empty()) {
         return;
     }
@@ -500,9 +499,10 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
     for (auto it = currentTiles.rbegin(); it != currentTiles.rend(); it++ ){
         auto &[tileInfo, tileWrapper] = *it;
 
-        tileWrapper.isVisible = true;
+        tileWrapper.state = TileState::VISIBLE;
 
         if (readyTiles.count(tileInfo) == 0) {
+            tileWrapper.state = TileState::IN_SETUP;
             continue;
         }
 
@@ -522,10 +522,10 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
             }
 
             if(completeViewBoundsDrawn) {
-                tileWrapper.isVisible = false;
-                it = decltype(it){currentTiles.erase( std::next(it).base() )};
-                it = std::prev(it);
-                continue;
+                tileWrapper.state = TileState::CACHED;
+//                it = decltype(it){currentTiles.erase( std::next(it).base() )};
+//                it = std::prev(it);
+//                continue;
             }
 
             gpc_polygon polygonDiff;
@@ -538,27 +538,26 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
             }
 
             if (polygonDiff.contour == NULL) {
-                tileWrapper.isVisible = false;
-                it = decltype(it){currentTiles.erase( std::next(it).base() )};
-                it = std::prev(it);
-                
-                if (freePolygonDiff) {
-                    gpc_free_polygon(&polygonDiff);
-                }
-                continue;
+                tileWrapper.state = TileState::CACHED;
+//                it = decltype(it){currentTiles.erase( std::next(it).base() )};
+//                it = std::prev(it);
+//                if (freePolygonDiff) {
+//                    gpc_free_polygon(&polygonDiff);
+//                }
+//                continue;
             } else {
                 gpc_polygon resultingMask;
 
                 gpc_polygon_clip(GPC_INT, &polygonDiff, &currentViewBoundsPolygon, &resultingMask);
 
                 if (resultingMask.contour == NULL) {
-                    tileWrapper.isVisible = false;
-                    it = decltype(it){currentTiles.erase( std::next(it).base() )};
-                    it = std::prev(it);
-                    if (freePolygonDiff) {
-                        gpc_free_polygon(&polygonDiff);
-                    }
-                    continue;
+                    tileWrapper.state = TileState::CACHED;
+//                    it = decltype(it){currentTiles.erase( std::next(it).base() )};
+//                    it = std::prev(it);
+//                    if (freePolygonDiff) {
+//                        gpc_free_polygon(&polygonDiff);
+//                    }
+//                    continue;
                 } else {
                     tileWrapper.masks = gpc_get_polygon_coord(&polygonDiff, tileInfo.bounds.topLeft.systemIdentifier);
                 }
@@ -574,7 +573,7 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
         }
 
         // add tileBounds to currentTileMask
-        if (tileWrapper.isVisible) {
+        if (tileWrapper.state == TileState::VISIBLE) {
             if (isFirst) {
                 gpc_set_polygon({ tileWrapper.tileBounds }, &currentTileMask);
                 isFirst = false;

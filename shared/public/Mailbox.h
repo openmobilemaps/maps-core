@@ -130,10 +130,20 @@ public:
     };
     
     void receive(const MailboxExecutionEnvironment &environment) {
-        std::lock_guard<std::recursive_mutex> receivingLock(receivingMutex);
+        // Make sure to never block the graphics queue
+        if (environment == MailboxExecutionEnvironment::graphics) {
+            if (!receivingMutex.try_lock()) {
+                auto strongScheduler = scheduler.lock();
+                if (strongScheduler) {
+                    strongScheduler->addTask(makeTask(shared_from_this(), environment));
+                }
+                return;
+            }
+        } else {
+            receivingMutex.lock();
+        }
         std::unique_ptr<MailboxMessage> message;
         bool wasEmpty;
-
 
         auto receiveLambda = [&message, &wasEmpty](std::mutex& mutex, std::deque<std::unique_ptr<MailboxMessage>> &queue) {
             std::lock_guard<std::mutex> queueLock(mutex);
@@ -157,6 +167,8 @@ public:
         if (!wasEmpty && strongScheduler) {
             strongScheduler->addTask(makeTask(shared_from_this(), environment));
         }
+
+        receivingMutex.unlock();
     }
     
     static inline std::shared_ptr<LambdaTask> makeTask(std::weak_ptr<Mailbox> mailbox, MailboxExecutionEnvironment environment){

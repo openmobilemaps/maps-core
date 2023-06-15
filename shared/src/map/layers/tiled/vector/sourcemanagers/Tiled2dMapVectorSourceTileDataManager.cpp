@@ -18,10 +18,14 @@
 
 void Tiled2dMapVectorSourceTileDataManager::update() {
     for (const auto &[tileInfo, subTiles] : tiles) {
-        for (const auto &[index, identifier, tile]: subTiles) {
-            tile.syncAccess([](auto t) {
-                t->update();
-            });
+        const auto tileMaskWrapper = tileMaskMap.find(tileInfo);
+        const auto tileState = tileStateMap.find(tileInfo);
+        if (tilesReady.count(tileInfo) > 0 && tileMaskWrapper != tileMaskMap.end() && tileState != tileStateMap.end() && tileState->second == TileState::VISIBLE) {
+            for (const auto &[index, identifier, tile]: subTiles) {
+                tile.syncAccess([](auto t) {
+                    t->update();
+                });
+            }
         }
     }
 }
@@ -31,7 +35,8 @@ void Tiled2dMapVectorSourceTileDataManager::pregenerateRenderPasses() {
     std::vector<std::shared_ptr<Tiled2dMapVectorLayer::TileRenderDescription>> renderDescriptions;
     for (const auto &[tile, subTiles] : tileRenderObjectsMap) {
         const auto tileMaskWrapper = tileMaskMap.find(tile);
-        if (tilesReady.count(tile) > 0 && tileMaskWrapper != tileMaskMap.end()) {
+        const auto tileState = tileStateMap.find(tile);
+        if (tilesReady.count(tile) > 0 && tileMaskWrapper != tileMaskMap.end() && tileState != tileStateMap.end() && tileState->second == TileState::VISIBLE) {
             const auto &mask = tileMaskWrapper->second.getGraphicsMaskObject();
             for (const auto &[layerIndex, renderObjects]: subTiles) {
                 const bool modifiesMask = modifyingMaskLayers.find(layerIndex) != modifyingMaskLayers.end();
@@ -156,6 +161,8 @@ void Tiled2dMapVectorSourceTileDataManager::updateMaskObjects(
             }
         }
         tiles.erase(tileToRemove);
+
+        tileStateMap.erase(tileToRemove);
 
         auto maskIt = tileMaskMap.find(tileToRemove);
         if (maskIt != tileMaskMap.end()) {
@@ -306,6 +313,10 @@ Tiled2dMapVectorSourceTileDataManager::onClickUnconfirmed(const std::unordered_s
         return false;
     }
     for (const auto &[tileInfo, subTiles]: tiles) {
+        const auto tileState = tileStateMap.find(tileInfo);
+        if (tileState == tileStateMap.end() || tileState->second != TileState::VISIBLE) {
+            continue;
+        }
         for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
             if (interactableLayers.count(std::get<1>(*rIter)) == 0 || layers.count(std::get<1>(*rIter)) == 0) {
                 continue;
@@ -327,6 +338,10 @@ Tiled2dMapVectorSourceTileDataManager::onClickConfirmed(const std::unordered_set
         return false;
     }
     for (const auto &[tileInfo, subTiles]: tiles) {
+        const auto tileState = tileStateMap.find(tileInfo);
+        if (tileState == tileStateMap.end() || tileState->second != TileState::VISIBLE) {
+            continue;
+        }
         for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
             if (interactableLayers.count(std::get<1>(*rIter)) == 0 || layers.count(std::get<1>(*rIter)) == 0) {
                 continue;
@@ -347,6 +362,10 @@ bool Tiled2dMapVectorSourceTileDataManager::onDoubleClick(const std::unordered_s
         return false;
     }
     for (const auto &[tileInfo, subTiles]: tiles) {
+        const auto tileState = tileStateMap.find(tileInfo);
+        if (tileState == tileStateMap.end() || tileState->second != TileState::VISIBLE) {
+            continue;
+        }
         for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
             if (interactableLayers.count(std::get<1>(*rIter)) == 0 || layers.count(std::get<1>(*rIter)) == 0) {
                 continue;
@@ -367,6 +386,10 @@ bool Tiled2dMapVectorSourceTileDataManager::onLongPress(const std::unordered_set
         return false;
     }
     for (const auto &[tileInfo, subTiles]: tiles) {
+        const auto tileState = tileStateMap.find(tileInfo);
+        if (tileState == tileStateMap.end() || tileState->second != TileState::VISIBLE) {
+            continue;
+        }
         for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
             if (interactableLayers.count(std::get<1>(*rIter)) == 0 || layers.count(std::get<1>(*rIter)) == 0) {
                 continue;
@@ -388,6 +411,10 @@ bool Tiled2dMapVectorSourceTileDataManager::onTwoFingerClick(const std::unordere
         return false;
     }
     for (const auto &[tileInfo, subTiles]: tiles) {
+        const auto tileState = tileStateMap.find(tileInfo);
+        if (tileState == tileStateMap.end() || tileState->second != TileState::VISIBLE) {
+            continue;
+        }
         for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
             if (interactableLayers.count(std::get<1>(*rIter)) == 0 || layers.count(std::get<1>(*rIter)) == 0) {
                 continue;
@@ -408,9 +435,14 @@ void Tiled2dMapVectorSourceTileDataManager::clearTouch() {
         return;
     }
     for (const auto &[tileInfo, subTiles]: tiles) {
+        const auto tileState = tileStateMap.find(tileInfo);
+        if (tileState == tileStateMap.end() || tileState->second != TileState::VISIBLE) {
+            continue;
+        }
         for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
             std::get<2>(*rIter).message(&Tiled2dMapVectorTile::clearTouch);
         }
+
     }
 }
 

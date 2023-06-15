@@ -63,6 +63,8 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
         std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> newTileMasks;
         for (const auto &tileEntry : tilesToKeep) {
 
+            tileStateMap[tileEntry->tileInfo] = tileEntry->state;
+
             size_t existingPolygonHash = 0;
             auto it = tileMaskMap.find(tileEntry->tileInfo);
             if (it != tileMaskMap.end()) {
@@ -89,6 +91,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
             std::unordered_set<int32_t> indexControlSet;
 
             tiles[tile->tileInfo] = {};
+            tileStateMap[tile->tileInfo] = tile->state;
 
             for (int32_t index = 0; index < mapDescription->layers.size(); index++) {
                 auto const &layer= mapDescription->layers.at(index);

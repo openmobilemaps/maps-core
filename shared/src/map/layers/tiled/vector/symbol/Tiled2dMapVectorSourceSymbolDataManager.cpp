@@ -152,7 +152,6 @@ void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::st
 
     // Just insert pointers here since we will only access the objects inside this method where we know that currentTileInfos is retained
     std::vector<const Tiled2dMapVectorTileInfo*> tilesToAdd;
-    std::vector<const Tiled2dMapVectorTileInfo*> tilesToKeep;
 
     std::unordered_set<Tiled2dMapTileInfo> tilesToRemove;
 
@@ -160,7 +159,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::st
         if (tileSymbolGroupMap.count(vectorTileInfo.tileInfo) == 0) {
             tilesToAdd.push_back(&vectorTileInfo);
         } else {
-            tilesToKeep.push_back(&vectorTileInfo);
+            tileStateMap[vectorTileInfo.tileInfo] = vectorTileInfo.state;
         }
     }
 
@@ -185,6 +184,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::st
 
     for (const auto &tile : tilesToAdd) {
         tileSymbolGroupMap[tile->tileInfo] = {};
+        tileStateMap[tile->tileInfo] = tile->state;
 
         for (const auto &[layerIdentifier, layer]: layerDescriptions) {
             const auto &dataIt = tile->layerFeatureMaps->find(layer->sourceId);
@@ -229,6 +229,8 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups(const std::vecto
     if (!context) { return; }
 
     for (const auto &tile: tilesToRemove) {
+        tileStateMap.erase(tile);
+
         auto tileIt = tileSymbolGroupMap.find(tile);
         if (tileIt != tileSymbolGroupMap.end()) {
             for (const auto &[s, symbolGroups] : tileIt->second) {
@@ -308,6 +310,10 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
 
     for (const auto layerIdentifier: layerIdentifiers) {
         for (const auto &[tile, symbolGroupsMap]: tileSymbolGroupMap) {
+            const auto tileState = tileStateMap.find(tile);
+            if (tileState == tileStateMap.end() || tileState->second != TileState::VISIBLE) {
+                continue;
+            }
             const auto objectsIt = symbolGroupsMap.find(layerIdentifier);
             if (objectsIt != symbolGroupsMap.end()) {
                 for (auto &symbolGroup: objectsIt->second) {
@@ -335,6 +341,10 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
     const auto scaleFactor = camera->mapUnitsFromPixels(1.0);
 
     for (const auto &[tile, symbolGroupsMap]: tileSymbolGroupMap) {
+        const auto tileState = tileStateMap.find(tile);
+        if (tileState == tileStateMap.end() || tileState->second != TileState::VISIBLE) {
+            continue;
+        }
         for (const auto &[layerIdentifier, symbolGroups]: symbolGroupsMap) {
             const auto &description = layerDescriptions.at(layerIdentifier);
             for (auto &symbolGroup: symbolGroups) {
@@ -358,6 +368,10 @@ void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
 
     for (const auto &[tile, symbolGroupsMap]: tileSymbolGroupMap) {
+        const auto tileState = tileStateMap.find(tile);
+        if (tileState == tileStateMap.end() || tileState->second != TileState::VISIBLE) {
+            continue;
+        }
         for (const auto &[layerIdentifier, symbolGroups]: symbolGroupsMap) {
             const int32_t index = layerNameIndexMap.at(layerIdentifier);
 
@@ -420,6 +434,10 @@ bool Tiled2dMapVectorSourceSymbolDataManager::onClickConfirmed(const std::unorde
                                Vec2D(clickCoordsRenderCoord.x - clickPadding, clickCoordsRenderCoord.y + clickPadding)));
 
     for(const auto &[tile, symbolGroupsMap]: tileSymbolGroupMap) {
+        const auto tileState = tileStateMap.find(tile);
+        if (tileState == tileStateMap.end() || tileState->second != TileState::VISIBLE) {
+            continue;
+        }
         for (const auto &[layerIdentifier, symbolGroups] : symbolGroupsMap) {
             if (interactableLayers.count(layerIdentifier) == 0) {
                 continue;

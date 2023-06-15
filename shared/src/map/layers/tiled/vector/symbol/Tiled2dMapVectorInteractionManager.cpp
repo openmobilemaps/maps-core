@@ -27,7 +27,7 @@ bool Tiled2dMapVectorInteractionManager::onClickUnconfirmed(const Vec2F &posScre
         }
         return false;
     };
-    return callInReverseOrder(lambda);;
+    return callInReverseOrder(lambda);
 }
 
 bool Tiled2dMapVectorInteractionManager::onClickConfirmed(const Vec2F &posScreen) {

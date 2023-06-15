@@ -73,6 +73,7 @@ protected:
     std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<int32_t, std::vector<std::shared_ptr<RenderObjectInterface>>>>> tileRenderObjectsMap;
     std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<int32_t, std::string, Actor<Tiled2dMapVectorTile>>>> tiles;
     std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> tileMaskMap;
+    std::unordered_map<Tiled2dMapTileInfo, TileState> tileStateMap;
     std::unordered_set<Tiled2dMapTileInfo> tilesReady;
     std::unordered_map<Tiled2dMapTileInfo, std::unordered_set<int32_t>> tilesReadyControlSet;
 

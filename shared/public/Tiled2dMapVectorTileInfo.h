@@ -15,6 +15,7 @@
 #include "PolygonCoord.h"
 #include "VectorTileGeometryHandler.h"
 #include <functional>
+#include "TileState.h"
 
 struct Tiled2dMapVectorTileInfo {
     using FeatureTuple = std::tuple<const std::shared_ptr<FeatureContext>, const std::shared_ptr<VectorTileGeometryHandler>>;
@@ -23,13 +24,16 @@ struct Tiled2dMapVectorTileInfo {
     const Tiled2dMapTileInfo tileInfo;
     const FeatureMap layerFeatureMaps;
     const std::vector<::PolygonCoord> masks;
+    const TileState state;
 
     Tiled2dMapVectorTileInfo(Tiled2dMapTileInfo tileInfo,
                              const FeatureMap &layerFeatureMaps,
-                             const std::vector<::PolygonCoord> &masks)
+                             const std::vector<::PolygonCoord> &masks,
+                             const TileState state)
         : tileInfo(tileInfo)
         , layerFeatureMaps(layerFeatureMaps)
-        , masks(masks) {}
+        , masks(masks)
+        , state(state) {}
 
     bool operator==(const Tiled2dMapVectorTileInfo &o) const { return tileInfo == o.tileInfo; }
 

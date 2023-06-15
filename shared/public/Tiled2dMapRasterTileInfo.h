@@ -14,16 +14,19 @@
 #include "PolygonCoord.h"
 #include "Tiled2dMapTileInfo.h"
 #include <functional>
+#include "TileState.h"
 
 struct Tiled2dMapRasterTileInfo {
     Tiled2dMapTileInfo tileInfo;
     std::shared_ptr<TextureHolderInterface> textureHolder;
     std::vector<::PolygonCoord> masks;
+    const TileState state;
 
-    Tiled2dMapRasterTileInfo(Tiled2dMapTileInfo tileInfo, const std::shared_ptr<TextureHolderInterface> textureHolder, const std::vector<::PolygonCoord> masks)
+    Tiled2dMapRasterTileInfo(Tiled2dMapTileInfo tileInfo, const std::shared_ptr<TextureHolderInterface> textureHolder, const std::vector<::PolygonCoord> masks, const TileState state)
         : tileInfo(tileInfo)
         , textureHolder(textureHolder)
-        , masks(masks) {}
+        , masks(masks)
+        , state(state){}
 
     void updateMasks(const std::vector<::PolygonCoord> & masks){
         this->masks = masks;

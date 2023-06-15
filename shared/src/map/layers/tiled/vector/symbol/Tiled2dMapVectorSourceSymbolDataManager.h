@@ -83,6 +83,8 @@ private:
 
     std::unordered_map<Tiled2dMapTileInfo, std::unordered_map<std::string, std::vector<Actor<Tiled2dMapVectorSymbolGroup>>>> tileSymbolGroupMap;
 
+    std::unordered_map<Tiled2dMapTileInfo, TileState> tileStateMap;
+
     std::unordered_map<std::string, std::shared_ptr<SymbolVectorLayerDescription>> layerDescriptions;
 
     TextHelper textHelper;

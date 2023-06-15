@@ -354,6 +354,10 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
                 continue;
             }
 
+            if (entry.first.state == TileState::CACHED) {
+                continue;
+            }
+
             auto const &renderObject = entry.second->getRenderObject();
 
             if (layerConfig->getZoomInfo().maskTile) {
