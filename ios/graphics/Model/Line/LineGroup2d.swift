@@ -95,10 +95,10 @@ final class LineGroup2d: BaseGraphicsObject {
         // draw call
 
         if isMasked {
-            encoder.setDepthStencilState(maskedStencilState)
+            context.setDepthStencilState(maskedStencilState)
             encoder.setStencilReferenceValue(0b1100_0000)
         } else {
-            encoder.setDepthStencilState(stencilState)
+            context.setDepthStencilState(stencilState)
             encoder.setStencilReferenceValue(0xFF)
         }
 
@@ -107,9 +107,9 @@ final class LineGroup2d: BaseGraphicsObject {
         shader.setupProgram(context)
         shader.preRender(context)
 
-        encoder.setVertexBuffer(lineVerticesBuffer, offset: 0, index: 0)
+        context.setVertexBuffer(lineVerticesBuffer, offset: 0, index: 0)
         let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix))!
-        encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+        context.setVertexBytes(matrixPointer, length: 64, index: 1)
 
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,

@@ -52,7 +52,7 @@ final class Polygon2d: BaseGraphicsObject {
             if stencilState == nil {
                 setupStencilStates()
             }
-            encoder.setDepthStencilState(stencilState)
+            context.setDepthStencilState(stencilState)
             if maskInverse {
                 encoder.setStencilReferenceValue(0b0000_0000)
             } else {
@@ -63,9 +63,9 @@ final class Polygon2d: BaseGraphicsObject {
         shader.setupProgram(context)
         shader.preRender(context)
 
-        encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
+        context.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {
-            encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+            context.setVertexBytes(matrixPointer, length: 64, index: 1)
         }
 
         encoder.drawIndexedPrimitives(type: .triangle,
@@ -120,16 +120,16 @@ extension Polygon2d: MCMaskingObjectInterface {
 
         if let mask = context.polygonMask {
             encoder.setStencilReferenceValue(0xFF)
-            encoder.setDepthStencilState(mask)
+            context.setDepthStencilState(mask)
         }
 
         // stencil prepare pass
         shader.setupProgram(context)
         shader.preRender(context)
 
-        encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
+        context.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {
-            encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+            context.setVertexBytes(matrixPointer, length: 64, index: 1)
         }
 
         encoder.drawIndexedPrimitives(type: .triangle,

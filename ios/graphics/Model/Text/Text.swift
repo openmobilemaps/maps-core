@@ -63,10 +63,10 @@ final class Text: BaseGraphicsObject {
             if stencilState == nil {
                 setupStencilStates()
             }
-            encoder.setDepthStencilState(stencilState)
+            context.setDepthStencilState(stencilState)
             encoder.setStencilReferenceValue(0b1000_0000)
         } else {
-            encoder.setDepthStencilState(context.defaultMask)
+            context.setDepthStencilState(context.defaultMask)
         }
 
         #if DEBUG
@@ -79,15 +79,15 @@ final class Text: BaseGraphicsObject {
         shader.setupProgram(context)
         shader.preRender(context)
 
-        encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
+        context.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {
-            encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+            context.setVertexBytes(matrixPointer, length: 64, index: 1)
         }
 
-        encoder.setFragmentSamplerState(sampler, index: 0)
+        context.setFragmentSamplerState(sampler, index: 0)
 
         if let texture = texture {
-            encoder.setFragmentTexture(texture, index: 0)
+            context.setFragmentTexture(texture, index: 0)
         }
 
         encoder.drawIndexedPrimitives(type: .triangle,

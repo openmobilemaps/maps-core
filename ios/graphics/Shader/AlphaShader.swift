@@ -37,7 +37,7 @@ class AlphaShader: BaseShader {
         guard let pipeline = pipeline else { return }
 
         context.setRenderPipelineStateIfNeeded(pipeline)
-        encoder.setFragmentBuffer(buffer, offset: 0, index: 1)
+        context.setFragmentBuffer(buffer, offset: 0, index: 1)
     }
 }
 

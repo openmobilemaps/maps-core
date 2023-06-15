@@ -71,16 +71,16 @@ final class PolygonGroup2d: BaseGraphicsObject {
             if stencilState == nil {
                 setupStencilStates()
             }
-            encoder.setDepthStencilState(stencilState)
+            context.setDepthStencilState(stencilState)
             encoder.setStencilReferenceValue(0b1100_0000)
         }
 
         shader.setupProgram(context)
         shader.preRender(context)
 
-        encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
+        context.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {
-            encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+            context.setVertexBytes(matrixPointer, length: 64, index: 1)
         }
 
         encoder.drawIndexedPrimitives(type: .triangle,

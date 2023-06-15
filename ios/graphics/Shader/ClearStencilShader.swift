@@ -33,10 +33,10 @@ class ClearStencilShader: BaseShader {
     }
 
     override func preRender(_ context: MCRenderingContextInterface?) {
-        guard let encoder = (context as? RenderingContext)?.encoder,
+        guard let context = context as? RenderingContext,
               let pipeline = pipeline else { return }
 
-        (context as? RenderingContext)?.setRenderPipelineStateIfNeeded(pipeline)
-        encoder.setDepthStencilState(clearMask)
+        context.setRenderPipelineStateIfNeeded(pipeline)
+        context.setDepthStencilState(clearMask)
     }
 }
