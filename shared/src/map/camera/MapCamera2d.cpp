@@ -784,7 +784,7 @@ Coord MapCamera2d::getBoundsCorrectedCoords(const Coord &coords) {
 }
 
 Coord MapCamera2d::adjustCoordForPadding(const Coord &coords, double targetZoom) {
-    Coord coordinates = coords;
+    Coord coordinates = mapInterface->getCoordinateConverterHelper()->convert(mapCoordinateSystem.identifier, coords);
 
     auto adjustedZoom = std::clamp(targetZoom, zoomMax, zoomMin);
 
