@@ -282,9 +282,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite() {
     for (const auto &[tile, symbolGroupMap]: tileSymbolGroupMap) {
         for (const auto &[layerIdentifier, symbolGroups]: symbolGroupMap) {
             for (auto &symbolGroup: symbolGroups) {
-                symbolGroup.syncAccess([&](auto group){
-                    group->setupObjects(spriteData, spriteTexture);
-                });
+                symbolGroup.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSymbolGroup::setupObjects, spriteData, spriteTexture);
             }
         }
     }
