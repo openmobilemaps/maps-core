@@ -420,14 +420,14 @@ void Tiled2dMapVectorSourceTileDataManager::setSprites(std::shared_ptr<SpriteDat
 
     if (!tiles.empty()) {
         auto selfActor = WeakActor(mailbox, weak_from_this());
-        selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceTileDataManager::setupExistingTilesWithSprite);
+        selfActor.message(&Tiled2dMapVectorSourceTileDataManager::setupExistingTilesWithSprite);
     }
 }
 
 void Tiled2dMapVectorSourceTileDataManager::setupExistingTilesWithSprite() {
     for (const auto &[tile, subTiles] : tiles) {
         for (const auto &[index, string, actor]: subTiles) {
-            actor.message(&Tiled2dMapVectorTile::setSpriteData, spriteData, spriteTexture);
+            actor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorTile::setSpriteData, spriteData, spriteTexture);
         }
     }
 
