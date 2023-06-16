@@ -138,6 +138,50 @@ const Tiled2dMapVectorSymbolObject::SymbolObjectInstanceCounts Tiled2dMapVectorS
     return instanceCounts;
 }
 
+::Coord Tiled2dMapVectorSymbolObject::getRenderCoordinates(Anchor iconAnchor, double rotation, double iconWidth, double iconHeight) {
+    Vec2D anchorOffset(0, 0);
+
+    switch (iconAnchor) {
+        case Anchor::CENTER:
+            break;
+        case Anchor::LEFT:
+            anchorOffset.x -= iconWidth / 2.0;
+            break;
+        case Anchor::RIGHT:
+            anchorOffset.x += iconWidth / 2.0;
+            break;
+        case Anchor::TOP:
+            anchorOffset.y -= iconHeight / 2.0;
+            break;
+        case Anchor::BOTTOM:
+            anchorOffset.y += iconHeight / 2.0;
+            break;
+        case Anchor::TOP_LEFT:
+            anchorOffset.x -= iconWidth / 2.0;
+            anchorOffset.y -= iconHeight / 2.0;
+            break;
+        case Anchor::TOP_RIGHT:
+            anchorOffset.x += iconWidth / 2.0;
+            anchorOffset.y -= iconHeight / 2.0;
+            break;
+        case Anchor::BOTTOM_LEFT:
+            anchorOffset.x -= iconWidth / 2.0;
+            anchorOffset.y += iconHeight / 2.0;
+            break;
+        case Anchor::BOTTOM_RIGHT:
+            anchorOffset.x += iconWidth / 2.0;
+            anchorOffset.y += iconHeight / 2.0;
+            break;
+        default:
+            break;
+    }
+
+    auto c = initialRenderCoordinateVec - anchorOffset;
+    auto rotated = Vec2DHelper::rotate(c, initialRenderCoordinateVec, rotation);
+
+    return ::Coord(renderCoordinate.systemIdentifier, rotated.x, rotated.y, renderCoordinate.z);
+}
+
 void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &positions, std::vector<float> &rotations, std::vector<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData) {
 
     if (instanceCounts.icons == 0) {
@@ -158,8 +202,7 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
     renderCoordinate.y -= iconOffset.y;
     renderCoordinate.x += iconOffset.x;
 
-    positions[2 * countOffset] = renderCoordinate.x;
-    positions[2 * countOffset + 1] = renderCoordinate.y;
+    initialRenderCoordinateVec = Vec2D(renderCoordinate.x, renderCoordinate.y);
 
     auto iconImage = description->style.getIconImage(evalContext);
 
@@ -168,6 +211,8 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
     } else {
         const auto textureWidth = (double) spriteTexture->getImageWidth();
         const auto textureHeight = (double) spriteTexture->getImageHeight();
+
+        renderCoordinate = getRenderCoordinates(description->style.getIconAnchor(evalContext), -rotations[countOffset], textureWidth, textureHeight);
 
         const auto spriteIt = spriteData->sprites.find(iconImage);
         if (spriteIt == spriteData->sprites.end()) {
@@ -192,6 +237,9 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
         lastIconUpdateRotation = -1.0;
     }
 
+    positions[2 * countOffset] = renderCoordinate.x;
+    positions[2 * countOffset + 1] = renderCoordinate.y;
+
     iconRotationAlignment = description->style.getIconRotationAlignment(evalContext);
 
     if (iconRotationAlignment == SymbolAlignment::MAP) {
@@ -201,7 +249,7 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
     countOffset += instanceCounts.icons;
 }
 
-void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation) {
+void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation) {
 
     if (instanceCounts.icons == 0) {
         return;
@@ -234,14 +282,22 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &scal
     }
 
     auto iconSize = description->style.getIconSize(evalContext) * scaleFactor;
-    scales[2 * countOffset] = spriteSize.x * iconSize;
-    scales[2 * countOffset + 1] = spriteSize.y * iconSize;
+    auto iconWidth = spriteSize.x * iconSize;
+    auto iconHeight = spriteSize.y * iconSize;
+
+    scales[2 * countOffset] = iconWidth;
+    scales[2 * countOffset + 1] = iconHeight;
+
+    renderCoordinate = getRenderCoordinates(description->style.getIconAnchor(evalContext), -rotations[countOffset], iconWidth, iconHeight);
+
+    positions[2 * countOffset] = renderCoordinate.x;
+    positions[2 * countOffset + 1] = renderCoordinate.y;
 
     Vec2D origin(renderCoordinate.x, renderCoordinate.y);
-    iconBoundingBox.topLeft = Vec2DHelper::rotate(Vec2D(renderCoordinate.x - spriteSize.x * iconSize * 0.5, renderCoordinate.y - spriteSize.y * iconSize * 0.5), origin, rotations[countOffset]);
-    iconBoundingBox.topRight = Vec2DHelper::rotate(Vec2D(renderCoordinate.x + spriteSize.x * iconSize * 0.5, renderCoordinate.y - spriteSize.y * iconSize * 0.5), origin, rotations[countOffset]);
-    iconBoundingBox.bottomRight = Vec2DHelper::rotate(Vec2D(renderCoordinate.x + spriteSize.x * iconSize * 0.5, renderCoordinate.y + spriteSize.y * iconSize * 0.5), origin, rotations[countOffset]);
-    iconBoundingBox.bottomLeft = Vec2DHelper::rotate(Vec2D(renderCoordinate.x - spriteSize.x * iconSize * 0.5, renderCoordinate.y + spriteSize.y * iconSize * 0.5), origin, rotations[countOffset]);
+    iconBoundingBox.topLeft = Vec2DHelper::rotate(Vec2D(renderCoordinate.x - iconWidth * 0.5, renderCoordinate.y - iconHeight * 0.5), origin, -rotations[countOffset]);
+    iconBoundingBox.topRight = Vec2DHelper::rotate(Vec2D(renderCoordinate.x + iconWidth * 0.5, renderCoordinate.y - iconHeight * 0.5), origin, -rotations[countOffset]);
+    iconBoundingBox.bottomRight = Vec2DHelper::rotate(Vec2D(renderCoordinate.x + iconWidth * 0.5, renderCoordinate.y + iconHeight * 0.5), origin, -rotations[countOffset]);
+    iconBoundingBox.bottomLeft = Vec2DHelper::rotate(Vec2D(renderCoordinate.x - iconWidth * 0.5, renderCoordinate.y + iconHeight * 0.5), origin, -rotations[countOffset]);
 
     if (collides) {
         alphas[countOffset] = 0;

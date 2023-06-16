@@ -323,12 +323,13 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
         uint16_t textStyleOffset = 0;
 
         for(auto const object: symbolObjects) {
-            object->updateIconProperties(iconScales, iconRotations, iconAlphas, iconOffset, zoomIdentifier, scaleFactor, rotation);
+            object->updateIconProperties(iconPositions, iconScales, iconRotations, iconAlphas, iconOffset, zoomIdentifier, scaleFactor, rotation);
             object->updateStretchIconProperties(stretchedIconPositions,stretchedIconScales, stretchedIconRotations, stretchedIconAlphas, stretchedIconStretchInfos, stretchedIconOffset, zoomIdentifier, scaleFactor, rotation);
             object->updateTextProperties(textPositions, textScales, textRotations, textStyles, textOffset, textStyleOffset, zoomIdentifier, scaleFactor, rotation);
         }
 
         if (iconInstancedObject) {
+            iconInstancedObject->setPositions(SharedBytes((int64_t)iconPositions.data(), (int32_t)iconPositions.size(), 2 * (int32_t)sizeof(float)));
             iconInstancedObject->setAlphas(SharedBytes((int64_t)iconAlphas.data(), (int32_t)iconAlphas.size(), (int32_t)sizeof(float)));
             iconInstancedObject->setScales(SharedBytes((int64_t)iconScales.data(), (int32_t)iconAlphas.size(), 2 * (int32_t)sizeof(float)));
             iconInstancedObject->setRotations(SharedBytes((int64_t)iconRotations.data(), (int32_t)iconAlphas.size(), 1 * (int32_t)sizeof(float)));
@@ -357,7 +358,7 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
 
             int32_t currentVerticeIndex = 0;
             for (const auto &object: symbolObjects) {
-                const auto &combinedBox = object->getCombinedBoundingBox();
+                const auto &combinedBox = object->getCombinedBoundingBox(false);
                 if (combinedBox) {
                     vertices.push_back({
                         std::vector<::Coord> {
