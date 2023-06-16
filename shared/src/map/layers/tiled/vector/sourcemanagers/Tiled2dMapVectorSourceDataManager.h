@@ -42,8 +42,6 @@ public:
 
     virtual void setAlpha(float alpha) = 0;
 
-    virtual void setScissorRect(const std::optional<RectI> &scissorRect);
-
     virtual void setSelectionDelegate(const std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate);
 
     virtual void setSelectedFeatureIdentifier(std::optional<int64_t> identifier);

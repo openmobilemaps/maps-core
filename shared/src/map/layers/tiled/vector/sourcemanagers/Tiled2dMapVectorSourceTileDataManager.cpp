@@ -103,11 +103,6 @@ void Tiled2dMapVectorSourceTileDataManager::setAlpha(float alpha) {
     }
 }
 
-void Tiled2dMapVectorSourceTileDataManager::setScissorRect(const std::optional<RectI> &scissorRect) {
-    Tiled2dMapVectorSourceDataManager::setScissorRect(scissorRect);
-    pregenerateRenderPasses();
-}
-
 void Tiled2dMapVectorSourceTileDataManager::setSelectionDelegate(const std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate) {
     Tiled2dMapVectorSourceDataManager::setSelectionDelegate(selectionDelegate);
     for (const auto &[tileInfo, subTiles] : tiles) {

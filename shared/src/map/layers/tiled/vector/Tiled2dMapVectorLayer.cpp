@@ -371,13 +371,16 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::build
 }
 
 void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, bool isSymbol, const std::vector<std::shared_ptr<TileRenderDescription>> &renderDescription) {
-    std::vector<std::shared_ptr<RenderPassInterface>> newPasses;
-
     if (isSymbol) {
         sourceRenderDescriptionMap[source].symbolRenderDescriptions = renderDescription;
     } else {
         sourceRenderDescriptionMap[source].renderDescriptions = renderDescription;
     }
+    pregenerateRenderPasses();
+}
+
+void Tiled2dMapVectorLayer::pregenerateRenderPasses() {
+    std::vector<std::shared_ptr<RenderPassInterface>> newPasses;
 
     if (backgroundLayer) {
         auto backgroundLayerPasses = backgroundLayer->buildRenderPasses();
@@ -420,6 +423,12 @@ void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, bool i
         newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(0), renderObjects, lastMask));
         renderObjects.clear();
         lastMask = nullptr;
+    }
+
+    if (scissorRect) {
+        for(const auto &pass: newPasses) {
+            std::static_pointer_cast<RenderPass>(pass)->setScissoringRect(scissorRect);
+        }
     }
 
     {
@@ -625,12 +634,7 @@ void Tiled2dMapVectorLayer::didLoadSpriteData(std::shared_ptr<SpriteData> sprite
 
 void Tiled2dMapVectorLayer::setScissorRect(const std::optional<::RectI> &scissorRect) {
     this->scissorRect = scissorRect;
-    for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-        sourceDataManager.message(&Tiled2dMapVectorSourceDataManager::setScissorRect, scissorRect);
-    }
-    for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
-        sourceDataManager.message(&Tiled2dMapVectorSourceDataManager::setScissorRect, scissorRect);
-    }
+    pregenerateRenderPasses();
     auto mapInterface = this->mapInterface;
     if (mapInterface) {
         mapInterface->invalidate();

@@ -92,6 +92,8 @@ public:
 
     virtual float getAlpha() override;
 
+    void pregenerateRenderPasses();
+
     void forceReload() override;
 
     void onTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) override;
