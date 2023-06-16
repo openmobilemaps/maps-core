@@ -46,7 +46,7 @@ public:
 
     void collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<std::vector<OBB2D>> placements);
 
-    std::optional<VectorLayerFeatureInfo> onClickConfirmed(const OBB2D &tinyClickBox);
+    std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> onClickConfirmed(const OBB2D &tinyClickBox);
 
     std::shared_ptr<PolygonGroup2dLayerObject> boundingBoxLayerObject;
 

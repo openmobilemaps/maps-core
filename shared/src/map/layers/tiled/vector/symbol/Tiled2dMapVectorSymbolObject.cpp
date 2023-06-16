@@ -674,7 +674,7 @@ void Tiled2dMapVectorSymbolObject::resetCollisionCache() {
     collisionMap.clear();
 }
 
-std::optional<VectorLayerFeatureInfo> Tiled2dMapVectorSymbolObject::onClickConfirmed(const OBB2D &tinyClickBox) {
+std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolObject::onClickConfirmed(const OBB2D &tinyClickBox) {
     if (collides) {
         return std::nullopt;
     }
@@ -683,7 +683,7 @@ std::optional<VectorLayerFeatureInfo> Tiled2dMapVectorSymbolObject::onClickConfi
     orientedBox.update(*combinedBox);
 
     if (orientedBox.overlaps(tinyClickBox)) {
-        return featureContext->getFeatureInfo();
+        return std::make_tuple(coordinate, featureContext->getFeatureInfo());
     }
     
     return std::nullopt;

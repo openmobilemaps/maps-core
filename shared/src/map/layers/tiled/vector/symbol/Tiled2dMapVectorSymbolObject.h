@@ -77,7 +77,7 @@ public:
 
     void resetCollisionCache();
 
-    std::optional<VectorLayerFeatureInfo> onClickConfirmed(const OBB2D &tinyClickBox);
+    std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> onClickConfirmed(const OBB2D &tinyClickBox);
 private:
     ::Coord getRenderCoordinates(Anchor iconAnchor, double rotation, double iconWidth, double iconHeight);
 

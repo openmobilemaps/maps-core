@@ -427,7 +427,7 @@ bool Tiled2dMapVectorSourceSymbolDataManager::onClickConfirmed(const std::unorde
                     return group->onClickConfirmed(tinyClickBox);
                 });
                 if (result) {
-                    selectionDelegate->didSelectFeature(*result, layerIdentifier, conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), clickCoords));
+                    selectionDelegate->didSelectFeature(std::get<1>(*result), layerIdentifier, conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), std::get<0>(*result)));
                     return true;
                 }
             }
