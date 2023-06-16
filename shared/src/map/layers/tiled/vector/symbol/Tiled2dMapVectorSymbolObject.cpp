@@ -48,6 +48,7 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     const bool hasIcon = description->style.hasIconImagePotentially();
 
     renderCoordinate = converter->convertToRenderSystem(coordinate);
+    initialRenderCoordinateVec = Vec2D(renderCoordinate.x, renderCoordinate.y);
 
     textAllowOverlap = description->style.getTextAllowOverlap(evalContext);
     iconAllowOverlap = description->style.getIconAllowOverlap(evalContext);
@@ -199,10 +200,8 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
     const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
 
     auto iconOffset = description->style.getIconOffset(evalContext);
-    renderCoordinate.y -= iconOffset.y;
-    renderCoordinate.x += iconOffset.x;
-
-    initialRenderCoordinateVec = Vec2D(renderCoordinate.x, renderCoordinate.y);
+    initialRenderCoordinateVec.y -= iconOffset.y;
+    initialRenderCoordinateVec.x += iconOffset.x;
 
     auto iconImage = description->style.getIconImage(evalContext);
 
