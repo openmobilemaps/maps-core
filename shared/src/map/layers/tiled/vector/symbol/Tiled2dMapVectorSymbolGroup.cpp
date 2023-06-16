@@ -357,7 +357,8 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
 
             int32_t currentVerticeIndex = 0;
             for (const auto &object: symbolObjects) {
-                const auto &combinedBox = object->getCombinedBoundingBox();
+                if (!object->getIsOpaque()) continue;
+                const auto &combinedBox = object->getCombinedBoundingBox(true);
                 if (combinedBox) {
                     vertices.push_back({
                         std::vector<::Coord> {

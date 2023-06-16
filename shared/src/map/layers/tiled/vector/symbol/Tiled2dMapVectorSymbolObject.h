@@ -73,6 +73,8 @@ public:
 
     bool collides = false;
 
+    bool getIsOpaque();
+
     void collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<std::vector<OBB2D>> placements);
 
     void resetCollisionCache();
@@ -122,4 +124,7 @@ private:
 
     bool textAllowOverlap;
     bool iconAllowOverlap;
+
+    bool isIconOpaque = true;
+    bool isStretchIconOpaque = true;
 };

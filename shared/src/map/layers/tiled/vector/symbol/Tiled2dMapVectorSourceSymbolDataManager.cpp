@@ -248,6 +248,16 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups(const std::vecto
             group->setupObjects(spriteData, spriteTexture);
         });
     }
+
+    for (const auto &[tile, symbolGroupMap]: tileSymbolGroupMap) {
+        for (const auto &[layerIdentifier, symbolGroups]: symbolGroupMap) {
+            for (auto &symbolGroup: symbolGroups) {
+                symbolGroup.syncAccess([&](auto group){
+                    group->resetCollisionCache();
+                });
+            }
+        }
+    }
     
     pregenerateRenderPasses();
 }
@@ -342,7 +352,8 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
 
     for (const auto &[tile, symbolGroupsMap]: tileSymbolGroupMap) {
         const auto tileState = tileStateMap.find(tile);
-        if (tileState == tileStateMap.end() || tileState->second != TileState::VISIBLE) {
+        if (tileState == tileStateMap.end() || tileState->second == TileState::CACHED) {
+            LogDebug <<= "Skipping tile " + tile.to_string() + " state is " + std::to_string((int)tileState->second);
             continue;
         }
         for (const auto &[layerIdentifier, symbolGroups]: symbolGroupsMap) {

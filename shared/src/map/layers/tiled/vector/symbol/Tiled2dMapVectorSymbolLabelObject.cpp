@@ -164,29 +164,26 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
         }
         styleOffset += 1;
         return;
+    } else {
+        auto opacity = description->style.getTextOpacity(evalContext);
+        auto textColor = description->style.getTextColor(evalContext);
+        auto haloColor = description->style.getTextHaloColor(evalContext);
+        auto haloWidth = description->style.getTextHaloWidth(evalContext);
+
+        styles[(9 * styleOffset) + 0] = textColor.r; //R
+        styles[(9 * styleOffset) + 1] = textColor.g; //G
+        styles[(9 * styleOffset) + 2] = textColor.b; //B
+        styles[(9 * styleOffset) + 3] = textColor.a * opacity; //A
+        styles[(9 * styleOffset) + 4] = haloColor.r; //R
+        styles[(9 * styleOffset) + 5] = haloColor.g; //G
+        styles[(9 * styleOffset) + 6] = haloColor.b; //B
+        styles[(9 * styleOffset) + 7] = haloColor.a * opacity; //A
+        styles[(9 * styleOffset) + 8] = haloWidth;
+
+        isOpaque = opacity != 0.0;
     }
-
-    auto opacity = description->style.getTextOpacity(evalContext);
-    auto textColor = description->style.getTextColor(evalContext);
-    auto haloColor = description->style.getTextHaloColor(evalContext);
-    auto haloWidth = description->style.getTextHaloWidth(evalContext);
-
-    styles[(9 * styleOffset) + 0] = textColor.r; //R
-    styles[(9 * styleOffset) + 1] = textColor.g; //G
-    styles[(9 * styleOffset) + 2] = textColor.b; //B
-    styles[(9 * styleOffset) + 3] = textColor.a * opacity; //A
-    styles[(9 * styleOffset) + 4] = haloColor.r; //R
-    styles[(9 * styleOffset) + 5] = haloColor.g; //G
-    styles[(9 * styleOffset) + 6] = haloColor.b; //B
-    styles[(9 * styleOffset) + 7] = haloColor.a * opacity; //A
-    styles[(9 * styleOffset) + 8] = haloWidth;
 
     styleOffset += 1;
-
-    if (opacity == 0.0) {
-        countOffset += characterCount;
-        return;
-    }
 
     switch(textSymbolPlacement) {
         case TextSymbolPlacement::LINE_CENTER:

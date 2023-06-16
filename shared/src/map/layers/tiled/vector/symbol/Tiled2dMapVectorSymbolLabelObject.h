@@ -55,6 +55,9 @@ public:
     }
 
     Quad2dD boundingBox;
+
+    bool isOpaque = true;
+
     Vec2D dimensions = Vec2D(0.0, 0.0);
 private:
 
@@ -99,7 +102,6 @@ private:
     const std::string fullText;
 
     bool wasRotated = false;
-
     std::vector<Coord> renderLineCoordinates;
     std::optional<std::vector<Coord>> lineCoordinates;
 };

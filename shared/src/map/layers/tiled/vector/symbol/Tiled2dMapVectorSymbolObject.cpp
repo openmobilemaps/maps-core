@@ -109,6 +109,7 @@ std::optional<bool> Tiled2dMapVectorSymbolObject::hasCollision(float zoom) {
     if(collisionMap.size() == 0) {
         return std::nullopt;
     }
+    return std::nullopt;
 
     auto low = collisionMap.lower_bound(zoom);
 
@@ -253,8 +254,8 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &scal
         lastIconUpdateRotation = rotation;
         return;
     }
-
     alphas[countOffset] = description->style.getIconOpacity(evalContext);
+    isIconOpaque = alphas[countOffset] == 0;
 
     countOffset += instanceCounts.icons;
 
@@ -356,6 +357,7 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
 
     alphas[countOffset] = description->style.getIconOpacity(evalContext);
+    isStretchIconOpaque = alphas[countOffset] == 0;
 
     if (lastIconUpdateRotation != rotation && iconRotationAlignment != SymbolAlignment::MAP) {
         rotations[countOffset] = rotation;
@@ -543,7 +545,7 @@ std::optional<Quad2dD> Tiled2dMapVectorSymbolObject::getCombinedBoundingBox(bool
 }
 
 void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<std::vector<OBB2D>> placements) {
-    if (!(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier)) {
+    if (!(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier) || !getIsOpaque()) {
         iconBoundingBox.topLeft.x = 0.0;
         iconBoundingBox.topLeft.y = 0.0;
         iconBoundingBox.bottomRight.x = 0.0;
@@ -631,4 +633,8 @@ std::optional<VectorLayerFeatureInfo> Tiled2dMapVectorSymbolObject::onClickConfi
     }
     
     return std::nullopt;
+}
+
+bool Tiled2dMapVectorSymbolObject::getIsOpaque() {
+    return (!labelObject || labelObject->isOpaque) || isIconOpaque || isStretchIconOpaque;
 }
