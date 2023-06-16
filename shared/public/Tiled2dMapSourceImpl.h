@@ -523,9 +523,7 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
 
             if(completeViewBoundsDrawn) {
                 tileWrapper.state = TileState::CACHED;
-//                it = decltype(it){currentTiles.erase( std::next(it).base() )};
-//                it = std::prev(it);
-//                continue;
+                continue;
             }
 
             gpc_polygon polygonDiff;
@@ -539,12 +537,10 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
 
             if (polygonDiff.contour == NULL) {
                 tileWrapper.state = TileState::CACHED;
-//                it = decltype(it){currentTiles.erase( std::next(it).base() )};
-//                it = std::prev(it);
-//                if (freePolygonDiff) {
-//                    gpc_free_polygon(&polygonDiff);
-//                }
-//                continue;
+                if (freePolygonDiff) {
+                    gpc_free_polygon(&polygonDiff);
+                }
+                continue;
             } else {
                 gpc_polygon resultingMask;
 
@@ -552,12 +548,10 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
 
                 if (resultingMask.contour == NULL) {
                     tileWrapper.state = TileState::CACHED;
-//                    it = decltype(it){currentTiles.erase( std::next(it).base() )};
-//                    it = std::prev(it);
-//                    if (freePolygonDiff) {
-//                        gpc_free_polygon(&polygonDiff);
-//                    }
-//                    continue;
+                    if (freePolygonDiff) {
+                        gpc_free_polygon(&polygonDiff);
+                    }
+                    continue;
                 } else {
                     tileWrapper.masks = gpc_get_polygon_coord(&polygonDiff, tileInfo.bounds.topLeft.systemIdentifier);
                 }

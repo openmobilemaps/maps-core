@@ -353,7 +353,6 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
     for (const auto &[tile, symbolGroupsMap]: tileSymbolGroupMap) {
         const auto tileState = tileStateMap.find(tile);
         if (tileState == tileStateMap.end() || tileState->second == TileState::CACHED) {
-            LogDebug <<= "Skipping tile " + tile.to_string() + " state is " + std::to_string((int)tileState->second);
             continue;
         }
         for (const auto &[layerIdentifier, symbolGroups]: symbolGroupsMap) {
