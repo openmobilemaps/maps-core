@@ -102,6 +102,7 @@ public:
                 }
 
                 rasterLayerMap[key] = std::make_shared<RasterVectorLayerDescription>(layerName,
+                                                                                     key,
                                                                                      minZoom,
                                                                                      maxZoom,
                                                                                      url,
@@ -177,6 +178,7 @@ public:
                 auto layer = rasterLayerMap.at(val["source"]);
 
                 auto newLayer = std::make_shared<RasterVectorLayerDescription>(val["id"],
+                                             val["source"],
                                              val.value("minzoom", layer->minZoom),
                                              val.value("maxzoom", layer->maxZoom),
                                              layer->url,

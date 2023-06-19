@@ -47,7 +47,6 @@ public:
     }
 
     std::string getLayerName() override {
-        LogDebug <<= "vector layer config get identifier";
         return description->identifier;
     }
 

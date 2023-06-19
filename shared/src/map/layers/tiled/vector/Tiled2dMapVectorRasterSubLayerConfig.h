@@ -60,7 +60,7 @@ public:
     }
 
     std::string getLayerName() override {
-        return description->identifier;
+        return description->source;
     }
 
     std::optional<Tiled2dMapVectorSettings> getVectorSettings() override {
