@@ -184,6 +184,8 @@ void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::st
 
     for (const auto &tile : tilesToAdd) {
         tileSymbolGroupMap[tile->tileInfo] = {};
+        
+        assert(tileStateMap.count(tile->tileInfo) == 0);
         tileStateMap[tile->tileInfo] = tile->state;
 
         for (const auto &[layerIdentifier, layer]: layerDescriptions) {

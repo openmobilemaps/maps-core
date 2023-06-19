@@ -20,12 +20,22 @@ void Tiled2dMapVectorSourceTileDataManager::update() {
     for (const auto &[tileInfo, subTiles] : tiles) {
         const auto tileMaskWrapper = tileMaskMap.find(tileInfo);
         const auto tileState = tileStateMap.find(tileInfo);
-        if (tilesReady.count(tileInfo) > 0 && tileMaskWrapper != tileMaskMap.end() && tileState != tileStateMap.end() && tileState->second == TileState::VISIBLE) {
-            for (const auto &[index, identifier, tile]: subTiles) {
-                tile.syncAccess([](auto t) {
-                    t->update();
-                });
-            }
+
+        if (tilesReady.count(tileInfo) == 0) {
+            // Tile is not ready
+            continue;
+        }
+
+        assert(tileState != tileStateMap.end());
+        if (tileState == tileStateMap.end() || tileState->second == TileState::CACHED) {
+            // Tile is in cached state
+            continue;
+        }
+
+        for (const auto &[index, identifier, tile]: subTiles) {
+            tile.syncAccess([](auto t) {
+                t->update();
+            });
         }
     }
 }
@@ -36,12 +46,28 @@ void Tiled2dMapVectorSourceTileDataManager::pregenerateRenderPasses() {
     for (const auto &[tile, subTiles] : tileRenderObjectsMap) {
         const auto tileMaskWrapper = tileMaskMap.find(tile);
         const auto tileState = tileStateMap.find(tile);
-        if (tilesReady.count(tile) > 0 && tileMaskWrapper != tileMaskMap.end() && tileState != tileStateMap.end() && tileState->second == TileState::VISIBLE) {
-            const auto &mask = tileMaskWrapper->second.getGraphicsMaskObject();
-            for (const auto &[layerIndex, renderObjects]: subTiles) {
-                const bool modifiesMask = modifyingMaskLayers.find(layerIndex) != modifyingMaskLayers.end();
-                renderDescriptions.push_back(std::make_shared<Tiled2dMapVectorLayer::TileRenderDescription>(Tiled2dMapVectorLayer::TileRenderDescription{layerIndex, renderObjects, mask, modifiesMask}));
-            }
+        if (tilesReady.count(tile) == 0) {
+            // Tile is not ready
+            continue;
+        }
+
+        assert(tileState != tileStateMap.end());
+        if (tileState == tileStateMap.end() || tileState->second != TileState::VISIBLE) {
+            // Tile is not visible or the mask is not yet ready
+            continue;
+        }
+
+        assert(tileMaskWrapper != tileMaskMap.end());
+        if (tileMaskWrapper == tileMaskMap.end()) {
+            // There is no mask for this tile
+            continue;
+        }
+
+        const std::shared_ptr<MaskingObjectInterface> &mask = tileMaskWrapper->second.getGraphicsMaskObject();
+        assert(mask->asGraphicsObject()->isReady());
+        for (const auto &[layerIndex, renderObjects]: subTiles) {
+            const bool modifiesMask = modifyingMaskLayers.find(layerIndex) != modifyingMaskLayers.end();
+            renderDescriptions.push_back(std::make_shared<Tiled2dMapVectorLayer::TileRenderDescription>(Tiled2dMapVectorLayer::TileRenderDescription{layerIndex, renderObjects, mask, modifiesMask}));
         }
     }
     vectorLayer.syncAccess([source = this->source, &renderDescriptions](const auto &layer){
@@ -299,7 +325,6 @@ void Tiled2dMapVectorSourceTileDataManager::tileIsReady(const Tiled2dMapTileInfo
 
     if (isCompletelyReady) {
         onTileCompletelyReady(tile);
-        pregenerateRenderPasses();
     }
 }
 
