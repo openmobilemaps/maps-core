@@ -125,7 +125,7 @@ public:
     style(style) {};
 
     std::unique_ptr<VectorLayerDescription> clone() override {
-        return std::make_unique<LineVectorLayerDescription>(identifier, source, sourceId, minZoom, maxZoom,
+        return std::make_unique<LineVectorLayerDescription>(identifier, source, sourceLayer, minZoom, maxZoom,
                                                             filter ? filter->clone() : nullptr, style, renderPassIndex,
                                                             interactable ? interactable->clone() : nullptr);
     }

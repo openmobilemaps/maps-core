@@ -129,7 +129,7 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
         return;
     }
 
-    const std::string layerName = description->sourceId;
+    const std::string layerName = description->sourceLayer;
 
     const auto indicesLimit = std::numeric_limits<uint16_t>::max();
 

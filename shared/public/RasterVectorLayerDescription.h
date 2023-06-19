@@ -109,6 +109,7 @@ public:
     bool underzoom;
 
     RasterVectorLayerDescription(std::string identifier,
+                                 std::string source,
                                  int minZoom,
                                  int maxZoom,
                                  std::string url,
@@ -121,13 +122,14 @@ public:
                                  std::shared_ptr<Value> interactable,
                                  bool underzoom,
                                  bool overzoom):
-    VectorLayerDescription(identifier, identifier, "", minZoom, maxZoom, nullptr, renderPassIndex, interactable),
+    VectorLayerDescription(identifier, source, "", minZoom, maxZoom, nullptr, renderPassIndex, interactable),
     style(style), url(url), underzoom(underzoom), overzoom(overzoom), adaptScaleToScreen(adaptScaleToScreen), numDrawPreviousLayers(numDrawPreviousLayers),
     maskTiles(maskTiles), zoomLevelScaleFactor(zoomLevelScaleFactor) {};
 
 
     std::unique_ptr<VectorLayerDescription> clone() override {
         return std::make_unique<RasterVectorLayerDescription>(identifier,
+                                            source,
                                             minZoom,
                                             maxZoom,
                                             url,

@@ -21,7 +21,7 @@ class VectorLayerDescription {
 public:
     std::string identifier;
     std::string source;
-    std::string sourceId;
+    std::string sourceLayer;
     int minZoom;
     int maxZoom;
     std::shared_ptr<Value> filter;
@@ -59,14 +59,14 @@ public:
                            std::shared_ptr<Value> filter,
                            std::optional<int32_t> renderPassIndex,
                            std::shared_ptr<Value> interactable):
-    identifier(identifier),
-    source(source),
-    sourceId(sourceId),
-    minZoom(minZoom),
-    maxZoom(maxZoom),
-    filter(filter),
-    renderPassIndex(renderPassIndex),
-    interactable(interactable) {}
+            identifier(identifier),
+            source(source),
+            sourceLayer(sourceId),
+            minZoom(minZoom),
+            maxZoom(maxZoom),
+            filter(filter),
+            renderPassIndex(renderPassIndex),
+            interactable(interactable) {}
 
     virtual ~VectorLayerDescription() = default;
 

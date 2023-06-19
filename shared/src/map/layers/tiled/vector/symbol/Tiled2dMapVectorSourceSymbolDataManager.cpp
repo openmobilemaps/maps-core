@@ -117,7 +117,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::updateLayerDescription(std::shared
             continue;
         }
 
-        const auto &dataIt = tileData.layerFeatureMaps->find(layerDescription->sourceId);
+        const auto &dataIt = tileData.layerFeatureMaps->find(layerDescription->sourceLayer);
 
         if (dataIt != tileData.layerFeatureMaps->end()) {
             // there is something in this layer to display
@@ -187,7 +187,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::st
         tileSymbolGroupMap[tile->tileInfo] = {};
 
         for (const auto &[layerIdentifier, layer]: layerDescriptions) {
-            const auto &dataIt = tile->layerFeatureMaps->find(layer->sourceId);
+            const auto &dataIt = tile->layerFeatureMaps->find(layer->sourceLayer);
 
             if (dataIt != tile->layerFeatureMaps->end()) {
                 // there is something in this layer to display

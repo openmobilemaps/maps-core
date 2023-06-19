@@ -246,7 +246,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
             case line:
             case polygon:
             case custom: {
-                layersToDecode[layerDesc->source].insert(layerDesc->sourceId);
+                layersToDecode[layerDesc->source].insert(layerDesc->sourceLayer);
                 break;
             }
         }
@@ -692,7 +692,7 @@ void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDe
 
     // Evaluate if a complete replacement of the tiles is needed (source/zoom adjustments may lead to a different set of created tiles)
     bool needsTileReplace = legacyDescription->source != layerDescription->source
-                            || legacyDescription->sourceId != layerDescription->sourceId
+                            || legacyDescription->sourceLayer != layerDescription->sourceLayer
                             || legacyDescription->minZoom != layerDescription->minZoom
                             || legacyDescription->maxZoom != layerDescription->maxZoom
                             || legacyDescription->filter != layerDescription->filter;
