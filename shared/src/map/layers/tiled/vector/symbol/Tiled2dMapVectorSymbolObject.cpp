@@ -109,8 +109,6 @@ std::optional<bool> Tiled2dMapVectorSymbolObject::hasCollision(float zoom) {
     if(collisionMap.size() == 0) {
         return std::nullopt;
     }
-    return std::nullopt;
-
     auto low = collisionMap.lower_bound(zoom);
 
     if(low == collisionMap.end()) {
@@ -517,7 +515,7 @@ std::optional<Quad2dD> Tiled2dMapVectorSymbolObject::getCombinedBoundingBox(bool
     const Quad2dD* boxes[3] = { nullptr };
     int boxCount = 0;
 
-        if ((!considerOverlapFlag || !textAllowOverlap) && labelObject && labelObject->boundingBox.topLeft.x != 0) {
+    if ((!considerOverlapFlag || !textAllowOverlap) && labelObject && labelObject->boundingBox.topLeft.x != 0) {
         boxes[boxCount++] = &labelObject->boundingBox;
     }
         if ((!considerOverlapFlag || !iconAllowOverlap) && iconBoundingBox.topLeft.x != 0) {
@@ -544,6 +542,19 @@ std::optional<Quad2dD> Tiled2dMapVectorSymbolObject::getCombinedBoundingBox(bool
     return Vec2DHelper::minimumAreaEnclosingRectangle(points);
 }
 
+bool Tiled2dMapVectorSymbolObject::isPlaced() {
+    if (labelObject && labelObject->boundingBox.topLeft.x != 0) {
+        return true;
+    }
+    if (iconBoundingBox.topLeft.x != 0) {
+        return true;
+    }
+    if (stretchIconBoundingBox.topLeft.x != 0) {
+        return true;
+    }
+    return false;
+}
+
 void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<std::vector<OBB2D>> placements) {
     if (!(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier) || !getIsOpaque()) {
         iconBoundingBox.topLeft.x = 0.0;
@@ -562,6 +573,10 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
             labelObject->boundingBox.bottomRight.x = 0.0;
             labelObject->boundingBox.bottomRight.y = 0.0;
         }
+        return;
+    }
+
+    if(!isPlaced()) {
         return;
     }
 

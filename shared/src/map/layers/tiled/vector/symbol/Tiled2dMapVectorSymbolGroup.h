@@ -51,6 +51,9 @@ public:
     std::shared_ptr<PolygonGroup2dLayerObject> boundingBoxLayerObject;
 
     void resetCollisionCache();
+
+    void clear();
+    void setup();
 private:
 
     inline std::optional<Tiled2dMapVectorSymbolSubLayerPositioningWrapper> getPositioning(std::vector<::Coord>::const_iterator &iterator, const std::vector<::Coord> & collection);
@@ -71,8 +74,6 @@ private:
 
 private:
     std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>> symbolObjects;
-
-
 
     const std::weak_ptr<MapInterface> mapInterface;
     const Tiled2dMapTileInfo tileInfo;

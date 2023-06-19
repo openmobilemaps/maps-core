@@ -358,6 +358,7 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
             int32_t currentVerticeIndex = 0;
             for (const auto &object: symbolObjects) {
                 if (!object->getIsOpaque()) continue;
+                if (object->collides) continue;
                 const auto &combinedBox = object->getCombinedBoundingBox(true);
                 if (combinedBox) {
                     vertices.push_back({
@@ -459,3 +460,30 @@ std::optional<VectorLayerFeatureInfo> Tiled2dMapVectorSymbolGroup::onClickConfir
     }
     return std::nullopt;
 }
+
+void Tiled2dMapVectorSymbolGroup::clear() {
+    if (iconInstancedObject) {
+        iconInstancedObject->asGraphicsObject()->clear();
+    }
+    if (stretchedInstancedObject) {
+        stretchedInstancedObject->asGraphicsObject()->clear();
+    }
+    if (textInstancedObject) {
+        textInstancedObject->asGraphicsObject()->clear();
+    }
+}
+
+
+void Tiled2dMapVectorSymbolGroup::setup() {
+    const auto context = mapInterface.lock()->getRenderingContext();
+    if (iconInstancedObject) {
+        iconInstancedObject->asGraphicsObject()->setup(context);
+    }
+    if (stretchedInstancedObject) {
+        stretchedInstancedObject->asGraphicsObject()->setup(context);
+    }
+    if (textInstancedObject) {
+        textInstancedObject->asGraphicsObject()->setup(context);
+    }
+}
+

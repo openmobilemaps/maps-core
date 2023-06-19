@@ -48,8 +48,9 @@ void Tiled2dMapVectorSourceSymbolDataManager::pause() {
     for (const auto &[tileInfo, tileSymbolGroups]: tileSymbolGroupMap) {
         for (const auto &[s, symbolGroups]: tileSymbolGroups) {
             for (const auto &symbolGroup: symbolGroups) {
-//TODO: implement me
-//                symbolGroup->clear();
+                symbolGroup.syncAccess([&](auto group){
+                    group->clear();
+                });
             }
         }
     }
@@ -65,8 +66,9 @@ void Tiled2dMapVectorSourceSymbolDataManager::resume() {
     for (const auto &[tileInfo, tileSymbolGroups]: tileSymbolGroupMap) {
         for (const auto &[s, symbolGroups]: tileSymbolGroups) {
             for (const auto &symbolGroup: symbolGroups) {
-//TODO: implement me
-//                symbolGroup->setup();
+                symbolGroup.syncAccess([&](auto group){
+                    group->setup();
+                });
             }
         }
     }
@@ -84,14 +86,6 @@ void Tiled2dMapVectorSourceSymbolDataManager::updateLayerDescription(std::shared
         return;
     }
 
-    for (const auto &[tile, symbolGroupMap]: tileSymbolGroupMap) {
-        for (const auto &[layerIdentifier, symbolGroups]: symbolGroupMap) {
-            for(const auto &symbolGroup: symbolGroups) {
-                symbolGroup.message(&Tiled2dMapVectorSymbolGroup::resetCollisionCache);
-            }
-        }
-    }
-
     if (layerDescription->source != source || layerDescription->getType() != VectorLayerType::symbol) {
         return;
     }
@@ -103,6 +97,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::updateLayerDescription(std::shared
 
     std::vector<Actor<Tiled2dMapVectorSymbolGroup>> toSetup;
     std::unordered_set<Tiled2dMapTileInfo> tilesToRemove;
+    std::unordered_set<Tiled2dMapTileInfo> tilesToReset;
 
     for (const auto &tileData: currentTileInfos) {
         auto tileGroup = tileSymbolGroupMap.find(tileData.tileInfo);
@@ -128,16 +123,9 @@ void Tiled2dMapVectorSourceSymbolDataManager::updateLayerDescription(std::shared
             }
         }
     }
-#ifdef __APPLE__
-    setupSymbolGroups(toSetup, tilesToRemove);
-#else
+
     auto selfActor = WeakActor(mailbox, weak_from_this());
-    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups, toSetup, tilesToRemove);
-#endif
-
-
-    mapInterface->invalidate();
-    
+    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups, toSetup, tilesToRemove, tilesToReset);
 }
 
 void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::string &sourceName,
@@ -154,12 +142,25 @@ void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::st
     std::vector<const Tiled2dMapVectorTileInfo*> tilesToAdd;
 
     std::unordered_set<Tiled2dMapTileInfo> tilesToRemove;
+    std::unordered_set<Tiled2dMapTileInfo> tilesToReset;
+
+    bool stateUpdated = false;
 
     for (const auto &vectorTileInfo: currentTileInfos) {
         if (tileSymbolGroupMap.count(vectorTileInfo.tileInfo) == 0) {
             tilesToAdd.push_back(&vectorTileInfo);
         } else {
-            tileStateMap[vectorTileInfo.tileInfo] = vectorTileInfo.state;
+            auto tileStateIt = tileStateMap.find(vectorTileInfo.tileInfo);
+            assert(tileStateIt != tileStateMap.end());
+            if (tileStateIt->second != vectorTileInfo.state) {
+                tileStateIt->second = vectorTileInfo.state;
+
+                stateUpdated |= true;
+
+                if (vectorTileInfo.state == TileState::CACHED) {
+                    tilesToReset.insert(vectorTileInfo.tileInfo);
+                }
+            }
         }
     }
 
@@ -176,7 +177,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::st
         }
     }
 
-    if (tilesToAdd.empty() && tilesToRemove.empty()) {
+    if (tilesToAdd.empty() && tilesToRemove.empty() && tilesToReset.empty() && !stateUpdated) {
         return;
     }
 
@@ -202,15 +203,8 @@ void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::st
         }
     }
 
-#ifdef __APPLE__
-    setupSymbolGroups(toSetup, tilesToRemove);
-#else
     auto selfActor = WeakActor(mailbox, weak_from_this());
-    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups, toSetup, tilesToRemove);
-#endif
-
-
-    mapInterface->invalidate();
+    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups, toSetup, tilesToRemove, tilesToReset);
 }
 
 std::optional<Actor<Tiled2dMapVectorSymbolGroup>> Tiled2dMapVectorSourceSymbolDataManager::createSymbolGroup(const Tiled2dMapTileInfo &tileInfo,
@@ -225,10 +219,20 @@ std::optional<Actor<Tiled2dMapVectorSymbolGroup>> Tiled2dMapVectorSourceSymbolDa
 }
 
 
-void Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups(const std::vector<Actor<Tiled2dMapVectorSymbolGroup>> &toSetup, const std::unordered_set<Tiled2dMapTileInfo> &tilesToRemove) {
+void Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups(const std::vector<Actor<Tiled2dMapVectorSymbolGroup>> toSetup, const std::unordered_set<Tiled2dMapTileInfo> tilesToRemove, const std::unordered_set<Tiled2dMapTileInfo> tilesToReset) {
     auto mapInterface = this->mapInterface.lock();
     auto context = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!context) { return; }
+
+    for (const auto &tile: tilesToReset) {
+        for (const auto &[layerIdentifier, symbolGroups]: tileSymbolGroupMap[tile]) {
+            for (auto &symbolGroup: symbolGroups) {
+                symbolGroup.syncAccess([&](auto group){
+                    group->resetCollisionCache();
+                });
+            }
+        }
+    }
 
     for (const auto &tile: tilesToRemove) {
         tileStateMap.erase(tile);
@@ -237,8 +241,9 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups(const std::vecto
         if (tileIt != tileSymbolGroupMap.end()) {
             for (const auto &[s, symbolGroups] : tileIt->second) {
                 for (const auto &symbolGroup : symbolGroups) {
-                    //TODO: implement me
-//                    symbolGroup->clear();
+                    symbolGroup.syncAccess([&](auto group){
+                        group->clear();
+                    });
                 }
             }
             tileSymbolGroupMap.erase(tileIt);
@@ -260,7 +265,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups(const std::vecto
             }
         }
     }
-    
+
     pregenerateRenderPasses();
 }
 
@@ -323,7 +328,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
     for (const auto layerIdentifier: layerIdentifiers) {
         for (const auto &[tile, symbolGroupsMap]: tileSymbolGroupMap) {
             const auto tileState = tileStateMap.find(tile);
-            if (tileState == tileStateMap.end() || tileState->second != TileState::VISIBLE) {
+            if (tileState == tileStateMap.end() || tileState->second == TileState::CACHED) {
                 continue;
             }
             const auto objectsIt = symbolGroupsMap.find(layerIdentifier);
@@ -413,12 +418,13 @@ void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
         }
     }
 
-    //TODO: message this
     vectorLayer.syncAccess([source = this->source, &renderDescriptions](const auto &layer){
         if(auto strong = layer.lock()) {
             strong->onRenderPassUpdate(source, true, renderDescriptions);
         }
     });
+
+    mapInterface->invalidate();
 }
 
 bool Tiled2dMapVectorSourceSymbolDataManager::onClickUnconfirmed(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) {

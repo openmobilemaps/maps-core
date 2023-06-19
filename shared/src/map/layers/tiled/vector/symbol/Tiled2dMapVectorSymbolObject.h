@@ -71,7 +71,7 @@ public:
 
     std::optional<Quad2dD> getCombinedBoundingBox(bool considerOverlapFlag);
 
-    bool collides = false;
+    bool collides = true;
 
     bool getIsOpaque();
 
@@ -127,4 +127,6 @@ private:
 
     bool isIconOpaque = true;
     bool isStretchIconOpaque = true;
+
+    bool isPlaced();
 };
