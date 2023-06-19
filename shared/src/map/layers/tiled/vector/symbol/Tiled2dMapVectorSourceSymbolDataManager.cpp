@@ -256,16 +256,6 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups(const std::vecto
         });
     }
 
-    for (const auto &[tile, symbolGroupMap]: tileSymbolGroupMap) {
-        for (const auto &[layerIdentifier, symbolGroups]: symbolGroupMap) {
-            for (auto &symbolGroup: symbolGroups) {
-                symbolGroup.syncAccess([&](auto group){
-                    group->resetCollisionCache();
-                });
-            }
-        }
-    }
-
     pregenerateRenderPasses();
 }
 

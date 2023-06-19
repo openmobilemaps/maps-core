@@ -150,25 +150,16 @@ void Tiled2dMapVectorSymbolLabelObject::setupProperties(std::vector<float> &text
 }
 
 void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const bool collides, const double rotation) {
-    auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
+    const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
 
     if (collides || !(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier)) {
         styles[(9 * styleOffset) + 3] = 0;
         styles[(9 * styleOffset) + 7] = 0;
-        for (int i = 0; i != characterCount; i++) {
-            positions[(2 * countOffset) + 0] = 0;
-            positions[(2 * countOffset) + 1] = 0;
-            scales[2 * (countOffset) + 0] = 0;
-            scales[2 * (countOffset) + 1] = 0;
-            countOffset += 1;
-        }
-        styleOffset += 1;
-        return;
     } else {
-        auto opacity = description->style.getTextOpacity(evalContext);
-        auto textColor = description->style.getTextColor(evalContext);
-        auto haloColor = description->style.getTextHaloColor(evalContext);
-        auto haloWidth = description->style.getTextHaloWidth(evalContext);
+        const auto opacity = description->style.getTextOpacity(evalContext);
+        const auto textColor = description->style.getTextColor(evalContext);
+        const auto haloColor = description->style.getTextHaloColor(evalContext);
+        const auto haloWidth = description->style.getTextHaloWidth(evalContext);
 
         styles[(9 * styleOffset) + 0] = textColor.r; //R
         styles[(9 * styleOffset) + 1] = textColor.g; //G
@@ -217,9 +208,9 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
 
 void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation) {
     
-    auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
+    const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
     
-    float fontSize = scaleFactor * description->style.getTextSize(evalContext);
+    const float fontSize = scaleFactor * description->style.getTextSize(evalContext);
     
     auto pen = Vec2D(0.0, 0.0);
     
