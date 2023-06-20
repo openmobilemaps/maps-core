@@ -234,6 +234,7 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
 
         lastIconUpdateScaleFactor = -1.0;
         lastIconUpdateRotation = -1.0;
+        lastIconUpdateAlpha = -1.0;
     }
 
     positions[2 * countOffset] = renderCoordinate.x;
@@ -254,7 +255,7 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
         return;
     }
 
-    if (lastIconUpdateScaleFactor == scaleFactor && lastIconUpdateRotation == rotation) {
+    if (lastIconUpdateScaleFactor == scaleFactor && lastIconUpdateRotation == rotation && lastIconUpdateAlpha == alpha) {
         countOffset += instanceCounts.icons;
         return;
     }
@@ -266,6 +267,7 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
 
         lastIconUpdateScaleFactor = scaleFactor;
         lastIconUpdateRotation = rotation;
+        lastIconUpdateAlpha = alpha;
         return;
     }
 
@@ -306,15 +308,17 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
 
         lastIconUpdateScaleFactor = scaleFactor;
         lastIconUpdateRotation = rotation;
+        lastIconUpdateAlpha = alpha;
         return;
     }
 
-    alphas[countOffset] = description->style.getIconOpacity(evalContext);
+    alphas[countOffset] = description->style.getIconOpacity(evalContext) * alpha;
 
     countOffset += instanceCounts.icons;
 
     lastIconUpdateScaleFactor = scaleFactor;
     lastIconUpdateRotation = rotation;
+    lastIconUpdateAlpha = alpha;
 }
 
 
@@ -410,7 +414,7 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
 
     const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
 
-    alphas[countOffset] = description->style.getIconOpacity(evalContext);
+    alphas[countOffset] = description->style.getIconOpacity(evalContext) * alpha;
 
     if (lastIconUpdateRotation != rotation && iconRotationAlignment != SymbolAlignment::MAP) {
         rotations[countOffset] = rotation;
@@ -470,13 +474,6 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     // TODO: maybe most of this can be done in setup?
     stretchInfos[infoOffset + 0] = scaleX;
     stretchInfos[infoOffset + 1] = scaleY;
-
-//TODO: fixme on Android
-//#ifdef __ANDROID__
-//    stretchinfo.uv.y -= stretchinfo.uv.height; // OpenGL uv coordinates are bottom to top
-//    stretchinfo.uv.width *= textureWidthFactor; // Android textures are scaled to the size of a power of 2
-//    stretchinfo.uv.height *= textureHeightFactor;
-//#endif
 
     if (stretchSpriteInfo->stretchX.size() >= 1) {
         auto [begin, end] = stretchSpriteInfo->stretchX[0];
@@ -559,7 +556,7 @@ void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &posi
         countOffset += instanceCounts.textCharacters;
         return;
     }
-    labelObject->updateProperties(positions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, collides, rotation);
+    labelObject->updateProperties(positions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, collides, rotation, alpha);
 
     lastStretchIconUpdateScaleFactor = std::nullopt;
 }
@@ -686,4 +683,8 @@ std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolO
     }
     
     return std::nullopt;
+}
+
+void Tiled2dMapVectorSymbolObject::setAlpha(float alpha) {
+    this->alpha = alpha;
 }

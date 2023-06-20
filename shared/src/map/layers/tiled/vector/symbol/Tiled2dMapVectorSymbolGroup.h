@@ -50,6 +50,8 @@ public:
 
     std::shared_ptr<PolygonGroup2dLayerObject> boundingBoxLayerObject;
 
+    void setAlpha(float alpha);
+
     void resetCollisionCache();
 private:
 
@@ -103,6 +105,8 @@ private:
     std::vector<float> stretchedIconAlphas;
     std::vector<float> stretchedIconStretchInfos;
     std::vector<float> stretchedIconTextureCoordinates;
+
+    float alpha = 1.0;
 
     bool anyInteractable = false;
 };

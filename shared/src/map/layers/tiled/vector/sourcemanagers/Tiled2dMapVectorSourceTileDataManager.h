@@ -78,4 +78,6 @@ protected:
 
     std::shared_ptr<SpriteData> spriteData;
     std::shared_ptr<TextureHolderInterface> spriteTexture;
+
+    float alpha = 1.0;
 };

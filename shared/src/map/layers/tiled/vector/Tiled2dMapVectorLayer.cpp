@@ -235,6 +235,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                                              mapDescription,
                                                                                              layerDesc->source,
                                                                                              sourceActor.weakActor<Tiled2dMapRasterSource>());
+                sourceManagerActor.unsafe()->setAlpha(alpha);
                 sourceTileManagers[layerDesc->source] = sourceManagerActor.strongActor<Tiled2dMapVectorSourceTileDataManager>();
                 sourceInterfaces.push_back(sourceActor.weakActor<Tiled2dMapSourceInterface>());
                 interactionDataManagers[layerDesc->source].push_back(sourceManagerActor.weakActor<Tiled2dMapVectorSourceDataManager>());
@@ -283,6 +284,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                         source,
                                                                         fontLoader,
                                                                         vectorSource.weakActor<Tiled2dMapVectorSource>());
+            actor.unsafe()->setAlpha(alpha);
             symbolSourceDataManagers[source] = actor;
             interactionDataManagers[source].push_back(actor.weakActor<Tiled2dMapVectorSourceDataManager>());
         }

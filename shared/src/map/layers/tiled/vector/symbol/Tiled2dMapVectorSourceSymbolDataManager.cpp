@@ -74,6 +74,13 @@ void Tiled2dMapVectorSourceSymbolDataManager::resume() {
 
 void Tiled2dMapVectorSourceSymbolDataManager::setAlpha(float alpha) {
     this->alpha = alpha;
+    for (const auto &[tileInfo, tileSymbolGroups]: tileSymbolGroupMap) {
+        for (const auto &[s, symbolGroups]: tileSymbolGroups) {
+            for (const auto &symbolGroup: symbolGroups) {
+               symbolGroup.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSymbolGroup::setAlpha, alpha);
+            }
+        }
+    }
 }
 
 void Tiled2dMapVectorSourceSymbolDataManager::updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription,
@@ -219,6 +226,7 @@ std::optional<Actor<Tiled2dMapVectorSymbolGroup>> Tiled2dMapVectorSourceSymbolDa
     auto mailbox = std::make_shared<Mailbox>(mapInterface.lock()->getScheduler());
     Actor<Tiled2dMapVectorSymbolGroup> symbolGroupActor = Actor<Tiled2dMapVectorSymbolGroup>(mailbox, mapInterface, fontProvider, tileInfo, layerIdentifier, layerDescriptions.at(layerIdentifier));
     bool success = symbolGroupActor.unsafe()->initialize(features);
+    symbolGroupActor.unsafe()->setAlpha(alpha);
     return success ? symbolGroupActor : std::optional<Actor<Tiled2dMapVectorSymbolGroup>>();
 }
 
