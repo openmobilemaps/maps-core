@@ -240,8 +240,6 @@ void MapScene::drawFrame() {
         }
     }
 
-    auto startRealDraw = std::chrono::steady_clock::now();
-
     scene->drawFrame();
 }
 

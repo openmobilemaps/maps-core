@@ -318,7 +318,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
     for (const auto layerIdentifier: layerIdentifiers) {
         for (const auto &[tile, symbolGroupsMap]: tileSymbolGroupMap) {
             const auto tileState = tileStateMap.find(tile);
-            if (tileState == tileStateMap.end() || tileState->second == TileState::CACHED) {
+            if (tileState == tileStateMap.end() || tileState->second != TileState::VISIBLE) {
                 continue;
             }
             const auto objectsIt = symbolGroupsMap.find(layerIdentifier);
@@ -349,7 +349,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
 
     for (const auto &[tile, symbolGroupsMap]: tileSymbolGroupMap) {
         const auto tileState = tileStateMap.find(tile);
-        if (tileState == tileStateMap.end() || tileState->second == TileState::CACHED) {
+        if (tileState == tileStateMap.end() || tileState->second != TileState::VISIBLE) {
             continue;
         }
         for (const auto &[layerIdentifier, symbolGroups]: symbolGroupsMap) {
@@ -371,8 +371,6 @@ void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
     }
 
     std::vector<std::shared_ptr<Tiled2dMapVectorLayer::TileRenderDescription>> renderDescriptions;
-
-    double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
 
     for (const auto &[tile, symbolGroupsMap]: tileSymbolGroupMap) {
         const auto tileState = tileStateMap.find(tile);

@@ -365,7 +365,9 @@ void Tiled2dMapVectorLayer::update() {
                 manager->update();
             });
         }
-        collisionManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceSymbolCollisionManager::collisionDetection);
+        collisionManager.syncAccess([](const auto &manager) {
+            manager->collisionDetection();
+        });
     }
 }
 

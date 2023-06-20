@@ -178,8 +178,6 @@ void TextLayerObject::layoutPoint(float scale, bool updateObject) {
         indices.clear();
         indices.reserve(numGlyphs * 6);
 
-        std::chrono::time_point<std::chrono::steady_clock> startFill = std::chrono::high_resolution_clock::now();
-
         int indicesStart = 0;
 
         int characterCount = 0;

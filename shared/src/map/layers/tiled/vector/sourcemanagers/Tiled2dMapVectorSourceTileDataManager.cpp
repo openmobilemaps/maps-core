@@ -18,7 +18,6 @@
 
 void Tiled2dMapVectorSourceTileDataManager::update() {
     for (const auto &[tileInfo, subTiles] : tiles) {
-        const auto tileMaskWrapper = tileMaskMap.find(tileInfo);
         const auto tileState = tileStateMap.find(tileInfo);
 
         if (tilesReady.count(tileInfo) == 0) {
@@ -86,9 +85,7 @@ void Tiled2dMapVectorSourceTileDataManager::pause() {
 
     for (const auto &[tileInfo, subTiles] : tiles) {
         for (const auto &[index, identifier, tile]: subTiles) {
-            tile.syncAccess([](const auto &t){
-                t->clear();
-            });
+            tile.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorTile::clear);
         }
     }
 
