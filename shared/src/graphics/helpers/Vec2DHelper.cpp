@@ -24,12 +24,12 @@ double Vec2DHelper::distanceSquared(const ::Vec2D &from, const ::Vec2D &to) {
 }
 
 ::Vec2D Vec2DHelper::rotate(const Vec2D &p, const Vec2D &origin, double angleDegree) {
-    double sinAngle = sin(angleDegree * M_PI / 180.0);
-    double cosAngle = cos(angleDegree * M_PI / 180.0);
-    double x = p.x - origin.x;
-    double y = p.y - origin.y;
-    double rX = x * cosAngle - y * sinAngle;
-    double rY = x * sinAngle + y * cosAngle;
+    const double sinAngle = sin(angleDegree * M_PI / 180.0);
+    const double cosAngle = cos(angleDegree * M_PI / 180.0);
+    const double x = p.x - origin.x;
+    const double y = p.y - origin.y;
+    const double rX = x * cosAngle - y * sinAngle;
+    const double rY = x * sinAngle + y * cosAngle;
     return Vec2D(rX + origin.x, rY + origin.y);
 }
 

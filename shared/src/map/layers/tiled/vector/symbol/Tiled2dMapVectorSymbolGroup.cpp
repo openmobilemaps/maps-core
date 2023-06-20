@@ -282,7 +282,7 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
     int textOffset = 0;
     uint16_t textStyleOffset = 0;
 
-    for(auto const object: symbolObjects) {
+    for(auto const &object: symbolObjects) {
         object->setupIconProperties(iconPositions, iconRotations, iconTextureCoordinates, iconOffset, tileInfo.zoomIdentifier, spriteTexture, spriteData);
         object->setupStretchIconProperties(stretchedIconPositions, stretchedIconTextureCoordinates, stretchedIconOffset, tileInfo.zoomIdentifier, spriteTexture, spriteData);
         object->setupTextProperties(textTextureCoordinates, textStyleIndices, textOffset, textStyleOffset, tileInfo.zoomIdentifier);
@@ -322,7 +322,7 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
         int textOffset = 0;
         uint16_t textStyleOffset = 0;
 
-        for(auto const object: symbolObjects) {
+        for(auto const &object: symbolObjects) {
             object->updateIconProperties(iconScales, iconRotations, iconAlphas, iconOffset, zoomIdentifier, scaleFactor, rotation);
             object->updateStretchIconProperties(stretchedIconPositions,stretchedIconScales, stretchedIconRotations, stretchedIconAlphas, stretchedIconStretchInfos, stretchedIconOffset, zoomIdentifier, scaleFactor, rotation);
             object->updateTextProperties(textPositions, textScales, textRotations, textStyles, textOffset, textStyleOffset, zoomIdentifier, scaleFactor, rotation);
@@ -436,13 +436,13 @@ Tiled2dMapVectorSymbolGroup::createSymbolObject(const Tiled2dMapTileInfo &tileIn
 }
 
 void Tiled2dMapVectorSymbolGroup::collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<std::vector<OBB2D>> placements) {
-    for(auto const object: symbolObjects) {
+    for(auto const &object: symbolObjects) {
         object->collisionDetection(zoomIdentifier, rotation, scaleFactor, placements);
     }
 }
 
 void Tiled2dMapVectorSymbolGroup::resetCollisionCache() {
-    for(auto const object: symbolObjects) {
+    for(auto const &object: symbolObjects) {
         object->resetCollisionCache();
     }
 }

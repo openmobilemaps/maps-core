@@ -126,6 +126,9 @@ referenceSize(fontResult->fontData->info.size)
                        [converter](const auto& l) {
             return converter->convertToRenderSystem(l);
         });
+        renderLineCoordinatesCount = renderLineCoordinates.size();
+    } else {
+        renderLineCoordinatesCount = 0;
     }
 }
 
@@ -231,7 +234,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
         angle = -rotation;
     }
     
-    for(auto& i : splittedTextInfo) {
+    for(const auto &i : splittedTextInfo) {
         if(i.glyphIndex >= 0) {
             auto &d = fontResult->fontData->glyphs[i.glyphIndex];
             auto size = Vec2D(d.boundingBoxSize.x * fontSize * i.scale, d.boundingBoxSize.y * fontSize * i.scale);
@@ -420,7 +423,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
 
     double size = 0;
 
-    for(auto& i : splittedTextInfo) {
+    for(const auto &i : splittedTextInfo) {
         if(i.glyphIndex < 0) {
             size += spaceAdvance * fontSize * i.scale;
         } else {
@@ -452,11 +455,11 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             auto advance = Vec2D(d.advance.x * fontSize * i.scale, d.advance.y * fontSize * i.scale);
 
             // Punkt auf Linie
-            auto p = pointAtIndex(currentIndex, true);
+            const auto &p = pointAtIndex(currentIndex, true);
 
             // get before and after to calculate angle
-            auto before = pointAtIndex(indexAtDistance(currentIndex, -charSize.x * 0.5), false);
-            auto after = pointAtIndex(indexAtDistance(currentIndex, charSize.x * 0.5), false);
+            const auto &before = pointAtIndex(indexAtDistance(currentIndex, -charSize.x * 0.5), false);
+            const auto &after = pointAtIndex(indexAtDistance(currentIndex, charSize.x * 0.5), false);
 
             double angle = atan2((before.y - after.y), -(before.x - after.x));
             angle *= (180.0 / M_PI);
@@ -486,7 +489,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             currentIndex = indexAtDistance(currentIndex, advance.x * (1.0 + letterSpacing));
 
             // if we are at the end, and we were at the end (lastIndex), then clear and skip
-            if(currentIndex.first == renderLineCoordinates.size() - 1 && lastIndex.first == currentIndex.first && (lastIndex.second == currentIndex.second)) {
+            if(currentIndex.first == renderLineCoordinatesCount - 1 && lastIndex.first == currentIndex.first && (lastIndex.second == currentIndex.second)) {
                 centerPositions.clear();
                 break;
             }
@@ -497,7 +500,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             auto br = Vec2D(xw, y);
 
             Quad2dD quad = Quad2dD(tl, tr, br, bl);
-            quad = TextHelper::rotateQuad2d(quad, Vec2D(p.x, p.y), angle);
+            quad = TextHelper::rotateQuad2d(quad, p, angle);
 
             auto dy = Vec2DHelper::normalize(Vec2D(quad.bottomLeft.x - quad.topLeft.x, quad.bottomLeft.y - quad.topLeft.y));
             dy.x *= lineCenteringParameter * fontSize;
@@ -578,9 +581,9 @@ std::pair<int, double> Tiled2dMapVectorSymbolLabelObject::findReferencePointIndi
     double tMin = 0.0f;
     int iMin = 0;
 
-    for(int i=1; i<renderLineCoordinates.size(); ++i) {
-        auto start = renderLineCoordinates[i-1];
-        auto end = renderLineCoordinates[i];
+    for(int i=1; i < renderLineCoordinatesCount; ++i) {
+        auto start = renderLineCoordinates.at(i-1);
+        auto end = renderLineCoordinates.at(i);
 
         auto length = Vec2DHelper::distance(Vec2D(start.x, start.y), Vec2D(end.x, end.y));
 
@@ -604,10 +607,10 @@ std::pair<int, double> Tiled2dMapVectorSymbolLabelObject::findReferencePointIndi
 }
 
 
-Coord Tiled2dMapVectorSymbolLabelObject::pointAtIndex(const std::pair<int, double> &index, bool useRender) {
-    auto s = useRender ? renderLineCoordinates[index.first] : (*lineCoordinates)[index.first];
-    auto e = useRender ?  renderLineCoordinates[index.first + 1 < renderLineCoordinates.size() ? (index.first + 1) : index.first] : (*lineCoordinates)[index.first + 1 < renderLineCoordinates.size() ? (index.first + 1) : index.first];
-    return Coord(s.systemIdentifier, s.x + (e.x - s.x) * index.second, s.y + (e.y - s.y) * index.second, s.z + (e.z - s.z) * index.second);
+Vec2D Tiled2dMapVectorSymbolLabelObject::pointAtIndex(const std::pair<int, double> &index, bool useRender) {
+    const auto &s = useRender ? renderLineCoordinates[index.first] : (*lineCoordinates)[index.first];
+    const auto &e = useRender ?  renderLineCoordinates[index.first + 1 < renderLineCoordinatesCount ? (index.first + 1) : index.first] : (*lineCoordinates)[index.first + 1 < renderLineCoordinatesCount ? (index.first + 1) : index.first];
+    return Vec2D(s.x + (e.x - s.x) * index.second, s.y + (e.y - s.y) * index.second);
 }
 
 std::pair<int, double> Tiled2dMapVectorSymbolLabelObject::indexAtDistance(const std::pair<int, double> &index, double distance) {
@@ -616,41 +619,40 @@ std::pair<int, double> Tiled2dMapVectorSymbolLabelObject::indexAtDistance(const 
     auto dist = std::abs(distance);
 
     if(distance >= 0) {
-        auto start = std::min(index.first + 1, (int)renderLineCoordinates.size() - 1);
+        auto start = std::min(index.first + 1, (int)renderLineCoordinatesCount - 1);
 
-        for(int i=start; i<renderLineCoordinates.size(); i++) {
-            auto &next = renderLineCoordinates[i];
+        for(int i = start; i < renderLineCoordinatesCount; i++) {
+            const auto &next = renderLineCoordinates.at(i);
 
-            double d = Vec2DHelper::distance(Vec2D(current.x, current.y), Vec2D(next.x, next.y));
+            const double d = Vec2DHelper::distance(current, Vec2D(next.x, next.y));
 
             if(dist > d) {
                 dist -= d;
-                current = next;
+                current.x = next.x;
+                current.y = next.y;
                 currentIndex = std::make_pair(i, 0.0);
             } else {
-                float dFactor = dist / d;
-                return std::make_pair(currentIndex.first, currentIndex.second + dFactor * (1.0 - currentIndex.second));
+                return std::make_pair(currentIndex.first, currentIndex.second + dist / d * (1.0 - currentIndex.second));
             }
         }
     } else {
         auto start = index.first;
 
-        for(int i=start; i>=0; i--) {
-            auto &next = renderLineCoordinates[i];
+        for(int i = start; i >= 0; i--) {
+            const auto &next = renderLineCoordinates.at(i);
 
-            auto d = Vec2DHelper::distance(Vec2D(current.x, current.y), Vec2D(next.x, next.y));
+            const auto d = Vec2DHelper::distance(current, Vec2D(next.x, next.y));
 
             if(dist > d) {
                 dist -= d;
-                current = next;
+                current.x = next.x;
+                current.y = next.y;
                 currentIndex = std::make_pair(i, 0.0);
             } else {
-                float dFactor = dist / d;
-
                 if(i == currentIndex.first) {
-                    return std::make_pair(i, currentIndex.second - currentIndex.second * dFactor);
+                    return std::make_pair(i, currentIndex.second - currentIndex.second * dist / d);
                 } else {
-                    return std::make_pair(i, 1.0 - dFactor);
+                    return std::make_pair(i, 1.0 - dist / d);
                 }
             }
         }
