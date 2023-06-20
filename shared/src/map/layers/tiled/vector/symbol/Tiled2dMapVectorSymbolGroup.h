@@ -23,7 +23,7 @@
 #include "Quad2dStretchedInstancedInterface.h"
 #include "PolygonGroup2dLayerObject.h"
 
-//#define DRAW_TEXT_BOUNDING_BOX
+#define DRAW_TEXT_BOUNDING_BOX
 
 class Tiled2dMapVectorSymbolGroup : public ActorObject {
 public:
@@ -53,7 +53,6 @@ public:
     void resetCollisionCache();
 
     void clear();
-    void setup();
 private:
 
     inline std::optional<Tiled2dMapVectorSymbolSubLayerPositioningWrapper> getPositioning(std::vector<::Coord>::const_iterator &iterator, const std::vector<::Coord> & collection);

@@ -471,18 +471,3 @@ void Tiled2dMapVectorSymbolGroup::clear() {
         textInstancedObject->asGraphicsObject()->clear();
     }
 }
-
-
-void Tiled2dMapVectorSymbolGroup::setup() {
-    const auto context = mapInterface.lock()->getRenderingContext();
-    if (iconInstancedObject) {
-        iconInstancedObject->asGraphicsObject()->setup(context);
-    }
-    if (stretchedInstancedObject) {
-        stretchedInstancedObject->asGraphicsObject()->setup(context);
-    }
-    if (textInstancedObject) {
-        textInstancedObject->asGraphicsObject()->setup(context);
-    }
-}
-
