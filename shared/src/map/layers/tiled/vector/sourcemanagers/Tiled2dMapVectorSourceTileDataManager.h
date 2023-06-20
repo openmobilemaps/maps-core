@@ -30,8 +30,6 @@ public:
 
     virtual void setAlpha(float alpha) override;
 
-    virtual void setScissorRect(const std::optional<RectI> &scissorRect) override;
-
     virtual void tileIsReady(const Tiled2dMapTileInfo &tile,
                              const std::string &layerIdentifier,
                              const WeakActor<Tiled2dMapVectorTile> &tileActor) override;
@@ -81,4 +79,6 @@ protected:
 
     std::shared_ptr<SpriteData> spriteData;
     std::shared_ptr<TextureHolderInterface> spriteTexture;
+
+    float alpha = 1.0;
 };

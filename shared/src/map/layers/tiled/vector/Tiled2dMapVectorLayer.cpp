@@ -235,6 +235,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                                              mapDescription,
                                                                                              layerDesc->source,
                                                                                              sourceActor.weakActor<Tiled2dMapRasterSource>());
+                sourceManagerActor.unsafe()->setAlpha(alpha);
                 sourceTileManagers[layerDesc->source] = sourceManagerActor.strongActor<Tiled2dMapVectorSourceTileDataManager>();
                 sourceInterfaces.push_back(sourceActor.weakActor<Tiled2dMapSourceInterface>());
                 interactionDataManagers[layerDesc->source].push_back(sourceManagerActor.weakActor<Tiled2dMapVectorSourceDataManager>());
@@ -246,7 +247,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
             case line:
             case polygon:
             case custom: {
-                layersToDecode[layerDesc->source].insert(layerDesc->sourceId);
+                layersToDecode[layerDesc->source].insert(layerDesc->sourceLayer);
                 break;
             }
         }
@@ -283,6 +284,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                         source,
                                                                         fontLoader,
                                                                         vectorSource.weakActor<Tiled2dMapVectorSource>());
+            actor.unsafe()->setAlpha(alpha);
             symbolSourceDataManagers[source] = actor;
             interactionDataManagers[source].push_back(actor.weakActor<Tiled2dMapVectorSourceDataManager>());
         }
@@ -377,13 +379,16 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::build
 }
 
 void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, bool isSymbol, const std::vector<std::shared_ptr<TileRenderDescription>> &renderDescription) {
-    std::vector<std::shared_ptr<RenderPassInterface>> newPasses;
-
     if (isSymbol) {
         sourceRenderDescriptionMap[source].symbolRenderDescriptions = renderDescription;
     } else {
         sourceRenderDescriptionMap[source].renderDescriptions = renderDescription;
     }
+    pregenerateRenderPasses();
+}
+
+void Tiled2dMapVectorLayer::pregenerateRenderPasses() {
+    std::vector<std::shared_ptr<RenderPassInterface>> newPasses;
 
     if (backgroundLayer) {
         auto backgroundLayerPasses = backgroundLayer->buildRenderPasses();
@@ -426,6 +431,12 @@ void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, bool i
         newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(0), renderObjects, lastMask));
         renderObjects.clear();
         lastMask = nullptr;
+    }
+
+    if (scissorRect) {
+        for(const auto &pass: newPasses) {
+            std::static_pointer_cast<RenderPass>(pass)->setScissoringRect(scissorRect);
+        }
     }
 
     {
@@ -631,12 +642,7 @@ void Tiled2dMapVectorLayer::didLoadSpriteData(std::shared_ptr<SpriteData> sprite
 
 void Tiled2dMapVectorLayer::setScissorRect(const std::optional<::RectI> &scissorRect) {
     this->scissorRect = scissorRect;
-    for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-        sourceDataManager.message(&Tiled2dMapVectorSourceDataManager::setScissorRect, scissorRect);
-    }
-    for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
-        sourceDataManager.message(&Tiled2dMapVectorSourceDataManager::setScissorRect, scissorRect);
-    }
+    pregenerateRenderPasses();
     auto mapInterface = this->mapInterface;
     if (mapInterface) {
         mapInterface->invalidate();
@@ -694,7 +700,7 @@ void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDe
 
     // Evaluate if a complete replacement of the tiles is needed (source/zoom adjustments may lead to a different set of created tiles)
     bool needsTileReplace = legacyDescription->source != layerDescription->source
-                            || legacyDescription->sourceId != layerDescription->sourceId
+                            || legacyDescription->sourceLayer != layerDescription->sourceLayer
                             || legacyDescription->minZoom != layerDescription->minZoom
                             || legacyDescription->maxZoom != layerDescription->maxZoom
                             || legacyDescription->filter != layerDescription->filter;

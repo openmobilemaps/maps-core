@@ -95,7 +95,7 @@ void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std
 
             for (int32_t index = 0; index < mapDescription->layers.size(); index++) {
                 auto const &layer= mapDescription->layers.at(index);
-                if (layer->getType() != VectorLayerType::raster || layer->identifier != layerName) {
+                if (layer->getType() != VectorLayerType::raster || layer->source != layerName) {
                     continue;
                 }
 

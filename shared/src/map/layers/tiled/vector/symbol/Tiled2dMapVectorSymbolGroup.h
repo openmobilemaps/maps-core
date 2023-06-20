@@ -46,9 +46,11 @@ public:
 
     void collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<std::vector<OBB2D>> placements);
 
-    std::optional<VectorLayerFeatureInfo> onClickConfirmed(const OBB2D &tinyClickBox);
+    std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> onClickConfirmed(const OBB2D &tinyClickBox);
 
     std::shared_ptr<PolygonGroup2dLayerObject> boundingBoxLayerObject;
+
+    void setAlpha(float alpha);
 
     void resetCollisionCache();
 
@@ -103,6 +105,8 @@ private:
     std::vector<float> stretchedIconAlphas;
     std::vector<float> stretchedIconStretchInfos;
     std::vector<float> stretchedIconTextureCoordinates;
+
+    float alpha = 1.0;
 
     bool anyInteractable = false;
 };

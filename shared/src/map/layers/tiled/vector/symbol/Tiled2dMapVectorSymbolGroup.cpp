@@ -116,6 +116,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                         const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, context, text, fullText, position, line, fontList, anchor, pos->angle, justify, placement);
 
                         if (symbolObject) {
+                            symbolObject->setAlpha(alpha);
                             const auto counts = symbolObject->getInstanceCounts();
                             if (counts.icons + counts.stretchedIcons + counts.textCharacters != 0) {
                                 symbolObjects.push_back(symbolObject);
@@ -162,6 +163,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
                             const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, context, text, fullText, position, line, fontList, anchor, pos->angle, justify, placement);
                             if (symbolObject) {
+                                symbolObject->setAlpha(alpha);
                                 const auto counts = symbolObject->getInstanceCounts();
                                 if (counts.icons + counts.stretchedIcons + counts.textCharacters != 0) {
                                     wasPlaced = true;
@@ -182,6 +184,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                 const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, context, text, fullText, *midP, std::nullopt, fontList, anchor, angle, justify, placement);
 
                 if (symbolObject) {
+                    symbolObject->setAlpha(alpha);
                     const auto counts = symbolObject->getInstanceCounts();
                     if (counts.icons + counts.stretchedIcons + counts.textCharacters != 0) {
                         symbolObjects.push_back(symbolObject);
@@ -323,12 +326,13 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
         uint16_t textStyleOffset = 0;
 
         for(auto const &object: symbolObjects) {
-            object->updateIconProperties(iconScales, iconRotations, iconAlphas, iconOffset, zoomIdentifier, scaleFactor, rotation);
+            object->updateIconProperties(iconPositions, iconScales, iconRotations, iconAlphas, iconOffset, zoomIdentifier, scaleFactor, rotation);
             object->updateStretchIconProperties(stretchedIconPositions,stretchedIconScales, stretchedIconRotations, stretchedIconAlphas, stretchedIconStretchInfos, stretchedIconOffset, zoomIdentifier, scaleFactor, rotation);
             object->updateTextProperties(textPositions, textScales, textRotations, textStyles, textOffset, textStyleOffset, zoomIdentifier, scaleFactor, rotation);
         }
 
         if (iconInstancedObject) {
+            iconInstancedObject->setPositions(SharedBytes((int64_t)iconPositions.data(), (int32_t)iconPositions.size(), 2 * (int32_t)sizeof(float)));
             iconInstancedObject->setAlphas(SharedBytes((int64_t)iconAlphas.data(), (int32_t)iconAlphas.size(), (int32_t)sizeof(float)));
             iconInstancedObject->setScales(SharedBytes((int64_t)iconScales.data(), (int32_t)iconAlphas.size(), 2 * (int32_t)sizeof(float)));
             iconInstancedObject->setRotations(SharedBytes((int64_t)iconRotations.data(), (int32_t)iconAlphas.size(), 1 * (int32_t)sizeof(float)));
@@ -447,7 +451,7 @@ void Tiled2dMapVectorSymbolGroup::resetCollisionCache() {
     }
 }
 
-std::optional<VectorLayerFeatureInfo> Tiled2dMapVectorSymbolGroup::onClickConfirmed(const OBB2D &tinyClickBox) {
+std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolGroup::onClickConfirmed(const OBB2D &tinyClickBox) {
     if (!anyInteractable) {
         return std::nullopt;
     }
@@ -458,6 +462,12 @@ std::optional<VectorLayerFeatureInfo> Tiled2dMapVectorSymbolGroup::onClickConfir
         }
     }
     return std::nullopt;
+}
+
+void Tiled2dMapVectorSymbolGroup::setAlpha(float alpha) {
+    for(auto const object: symbolObjects) {
+        object->setAlpha(alpha);
+    }
 }
 
 void Tiled2dMapVectorSymbolGroup::clear() {

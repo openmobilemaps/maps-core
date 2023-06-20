@@ -68,17 +68,18 @@ void Tiled2dMapVectorPolygonTile::update() {
         return;
     }
 
-    if (!isStyleZoomDependant && lastZoom) {
+    if (!isStyleZoomDependant && lastZoom && lastAlpha == alpha) {
         return;
     }
 
     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
     zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.zoomIdentifier);
 
-    if (isStyleZoomDependant && lastZoom && *lastZoom == zoomIdentifier) {
+    if (isStyleZoomDependant && lastZoom && *lastZoom == zoomIdentifier && lastAlpha == alpha) {
         return;
     }
     lastZoom = zoomIdentifier;
+    lastAlpha = alpha;
 
     auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
     bool inZoomRange = polygonDescription->maxZoom >= zoomIdentifier && polygonDescription->minZoom <= zoomIdentifier;
@@ -129,7 +130,7 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
         return;
     }
 
-    const std::string layerName = description->sourceId;
+    const std::string layerName = description->sourceLayer;
 
     const auto indicesLimit = std::numeric_limits<uint16_t>::max();
 

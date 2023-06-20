@@ -107,7 +107,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
                 if (layer->source != sourceName) {
                     continue;
                 }
-                auto const mapIt = tile->layerFeatureMaps->find(layer->sourceId);
+                auto const mapIt = tile->layerFeatureMaps->find(layer->sourceLayer);
                 if (mapIt == tile->layerFeatureMaps->end()) {
                     continue;
                 }
@@ -185,7 +185,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::updateLayerDescription(std::sh
                 continue;
             }
 
-            auto const mapIt = tileData.layerFeatureMaps->find(layerDescription->sourceId);
+            auto const mapIt = tileData.layerFeatureMaps->find(layerDescription->sourceLayer);
             if (mapIt == tileData.layerFeatureMaps->end()) {
                 continue;
             }
@@ -220,7 +220,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::updateLayerDescription(std::sh
         } else {
             for (auto &[index, identifier, tile]  : subTiles->second) {
                 if (identifier == layerDescription->identifier) {
-                    auto const mapIt = tileData.layerFeatureMaps->find(layerDescription->sourceId);
+                    auto const mapIt = tileData.layerFeatureMaps->find(layerDescription->sourceLayer);
                     if (mapIt == tileData.layerFeatureMaps->end()) {
                         break;
                     }

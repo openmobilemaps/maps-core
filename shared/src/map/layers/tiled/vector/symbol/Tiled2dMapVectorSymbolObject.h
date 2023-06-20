@@ -47,7 +47,7 @@ public:
     const SymbolObjectInstanceCounts getInstanceCounts() const;
 
     void setupIconProperties(std::vector<float> &positions, std::vector<float> &rotations, std::vector<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData);
-    void updateIconProperties(std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation);
+    void updateIconProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation);
 
     void setupTextProperties(std::vector<float> &textureCoordinates, std::vector<uint16_t> &styleIndices, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier);
     void updateTextProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation);
@@ -79,8 +79,11 @@ public:
 
     void resetCollisionCache();
 
-    std::optional<VectorLayerFeatureInfo> onClickConfirmed(const OBB2D &tinyClickBox);
+    std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> onClickConfirmed(const OBB2D &tinyClickBox);
+
+    void setAlpha(float alpha);
 private:
+    ::Coord getRenderCoordinates(Anchor iconAnchor, double rotation, double iconWidth, double iconHeight);
 
     std::shared_ptr<Tiled2dMapVectorSymbolLabelObject> labelObject;
 
@@ -98,6 +101,7 @@ private:
 
     const ::Coord coordinate;
     ::Coord renderCoordinate = Coord("", 0, 0, 0);
+    Vec2D initialRenderCoordinateVec = Vec2D(0, 0);
 
     SymbolObjectInstanceCounts instanceCounts = {0,0,0};
 
@@ -115,6 +119,7 @@ private:
 
     std::optional<double> lastIconUpdateScaleFactor;
     std::optional<double> lastIconUpdateRotation;
+    std::optional<float> lastIconUpdateAlpha;
 
     std::optional<double> lastStretchIconUpdateScaleFactor;
     std::optional<double> lastStretchIconUpdateRotation;
@@ -125,6 +130,7 @@ private:
     bool textAllowOverlap;
     bool iconAllowOverlap;
 
+    float alpha = 1.0;
     bool isIconOpaque = true;
     bool isStretchIconOpaque = true;
 
