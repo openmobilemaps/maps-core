@@ -152,7 +152,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::st
         } else {
             auto tileStateIt = tileStateMap.find(vectorTileInfo.tileInfo);
             assert(tileStateIt != tileStateMap.end());
-            if (tileStateIt == tileStateMap.end() && tileStateIt->second != vectorTileInfo.state) {
+            if (tileStateIt != tileStateMap.end() && tileStateIt->second != vectorTileInfo.state) {
                 tileStateIt->second = vectorTileInfo.state;
 
                 stateUpdated |= true;
