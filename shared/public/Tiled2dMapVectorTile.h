@@ -70,6 +70,7 @@ protected:
     std::shared_ptr<VectorLayerDescription> description;
     const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> tileCallbackInterface;
 
+    std::optional<float> lastAlpha = std::nullopt;
     float alpha = 1.0;
 
     std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> selectionDelegate;

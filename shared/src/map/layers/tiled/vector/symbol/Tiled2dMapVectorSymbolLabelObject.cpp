@@ -149,7 +149,7 @@ void Tiled2dMapVectorSymbolLabelObject::setupProperties(std::vector<float> &text
     styleOffset += 1;
 }
 
-void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const bool collides, const double rotation) {
+void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const bool collides, const double rotation, const float alpha) {
     auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
 
     if (collides || !(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier)) {
@@ -174,11 +174,11 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
     styles[(9 * styleOffset) + 0] = textColor.r; //R
     styles[(9 * styleOffset) + 1] = textColor.g; //G
     styles[(9 * styleOffset) + 2] = textColor.b; //B
-    styles[(9 * styleOffset) + 3] = textColor.a * opacity; //A
+    styles[(9 * styleOffset) + 3] = textColor.a * opacity * alpha; //A
     styles[(9 * styleOffset) + 4] = haloColor.r; //R
     styles[(9 * styleOffset) + 5] = haloColor.g; //G
     styles[(9 * styleOffset) + 6] = haloColor.b; //B
-    styles[(9 * styleOffset) + 7] = haloColor.a * opacity; //A
+    styles[(9 * styleOffset) + 7] = haloColor.a * opacity * alpha; //A
     styles[(9 * styleOffset) + 8] = haloWidth;
 
     styleOffset += 1;

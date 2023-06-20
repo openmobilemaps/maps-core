@@ -96,6 +96,7 @@ void Tiled2dMapVectorSourceTileDataManager::resume() {
 }
 
 void Tiled2dMapVectorSourceTileDataManager::setAlpha(float alpha) {
+    this->alpha = alpha;
     for (const auto &[tileInfo, subTiles] : tiles) {
         for (const auto &[index, identifier, tile]: subTiles) {
             tile.message(&Tiled2dMapVectorTile::setAlpha, alpha);
@@ -233,6 +234,9 @@ Actor<Tiled2dMapVectorTile> Tiled2dMapVectorSourceTileDataManager::createTileAct
         case VectorLayerType::custom: {
             break;
         }
+    }
+    if (actor) {
+        actor.unsafe()->setAlpha(alpha);
     }
     return actor;
 }

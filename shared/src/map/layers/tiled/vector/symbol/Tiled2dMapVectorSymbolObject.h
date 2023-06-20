@@ -78,6 +78,8 @@ public:
     void resetCollisionCache();
 
     std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> onClickConfirmed(const OBB2D &tinyClickBox);
+
+    void setAlpha(float alpha);
 private:
     ::Coord getRenderCoordinates(Anchor iconAnchor, double rotation, double iconWidth, double iconHeight);
 
@@ -115,6 +117,7 @@ private:
 
     std::optional<double> lastIconUpdateScaleFactor;
     std::optional<double> lastIconUpdateRotation;
+    std::optional<float> lastIconUpdateAlpha;
 
     std::optional<double> lastStretchIconUpdateScaleFactor;
     std::optional<double> lastStretchIconUpdateRotation;
@@ -124,4 +127,6 @@ private:
 
     bool textAllowOverlap;
     bool iconAllowOverlap;
+
+    float alpha = 1.0;
 };
