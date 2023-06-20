@@ -57,7 +57,6 @@ void Tiled2dMapVectorSourceTileDataManager::pregenerateRenderPasses() {
             continue;
         }
 
-        assert(tileMaskWrapper != tileMaskMap.end());
         if (tileMaskWrapper == tileMaskMap.end()) {
             // There is no mask for this tile
             continue;
