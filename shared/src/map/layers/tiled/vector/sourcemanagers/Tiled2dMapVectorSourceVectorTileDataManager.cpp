@@ -39,7 +39,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
 
         std::unordered_set<Tiled2dMapTileInfo> tilesToRemove;
 
-        bool stateUpdated = false;
+        std::unordered_map<Tiled2dMapTileInfo, TileState> tileStateUpdates;
 
         for (const auto &vectorTileInfo: currentTileInfos) {
             if (tiles.count(vectorTileInfo.tileInfo) == 0) {
@@ -66,12 +66,9 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
         for (const auto &tileEntry : tilesToKeep) {
 
             auto tileStateIt = tileStateMap.find(tileEntry->tileInfo);
-            assert(tileStateIt != tileStateMap.end());
-            if (tileStateIt->second != tileEntry->state) {
-                tileStateIt->second = tileEntry->state;
-                stateUpdated |= true;
+            if (tileStateIt == tileStateMap.end() || tileStateIt->second != tileEntry->state) {
+                tileStateUpdates[tileEntry->tileInfo] = tileEntry->state;
             }
-
 
             size_t existingPolygonHash = 0;
             auto it = tileMaskMap.find(tileEntry->tileInfo);
@@ -92,7 +89,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
             }
         }
 
-        if (tilesToAdd.empty() && tilesToRemove.empty() && newTileMasks.empty() && !stateUpdated) return;
+        if (tilesToAdd.empty() && tilesToRemove.empty() && newTileMasks.empty() && tileStateUpdates.empty()) return;
 
         for (const auto &tile : tilesToAdd) {
 
@@ -100,7 +97,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
 
             tiles[tile->tileInfo] = {};
             assert(tileStateMap.count(tile->tileInfo) == 0);
-            tileStateMap[tile->tileInfo] = tile->state;
+            tileStateUpdates[tile->tileInfo] = tile->state;
 
             for (int32_t index = 0; index < mapDescription->layers.size(); index++) {
                 auto const &layer= mapDescription->layers.at(index);
@@ -134,10 +131,10 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
             }
         }
 
-        if (!(newTileMasks.empty() && tilesToRemove.empty() && !stateUpdated)) {
+        if (!(newTileMasks.empty() && tilesToRemove.empty() && tileStateUpdates.empty())) {
             auto castedMe = std::static_pointer_cast<Tiled2dMapVectorSourceTileDataManager>(shared_from_this());
             auto selfActor = WeakActor<Tiled2dMapVectorSourceTileDataManager>(mailbox, castedMe);
-            selfActor.messagePrecisely(MailboxDuplicationStrategy::replaceNewest, MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceTileDataManager::updateMaskObjects, newTileMasks, tilesToRemove);
+            selfActor.messagePrecisely(MailboxDuplicationStrategy::replaceNewest, MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceTileDataManager::updateMaskObjects, newTileMasks, tilesToRemove, tileStateUpdates);
         }
     }
     mapInterface->invalidate();

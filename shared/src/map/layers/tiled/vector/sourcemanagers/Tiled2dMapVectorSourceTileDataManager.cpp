@@ -25,7 +25,6 @@ void Tiled2dMapVectorSourceTileDataManager::update() {
             continue;
         }
 
-        assert(tileState != tileStateMap.end());
         if (tileState == tileStateMap.end() || tileState->second == TileState::CACHED) {
             // Tile is in cached state
             continue;
@@ -151,10 +150,16 @@ void Tiled2dMapVectorSourceTileDataManager::setSelectedFeatureIdentifier(std::op
 
 void Tiled2dMapVectorSourceTileDataManager::updateMaskObjects(
         const std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> &toSetupMaskObject,
-        const std::unordered_set<Tiled2dMapTileInfo> &tilesToRemove) {
+        const std::unordered_set<Tiled2dMapTileInfo> &tilesToRemove,
+        const std::unordered_map<Tiled2dMapTileInfo, TileState> &tileStateUpdates) {
     auto mapInterface = this->mapInterface.lock();
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!renderingContext) return;
+
+    for (const auto &[tile, state]: tileStateUpdates) {
+        tileStateMap[tile] = state;
+    }
+
 
     for (const auto &[tileInfo, wrapper] : toSetupMaskObject) {
         wrapper.getGraphicsObject()->setup(renderingContext);
