@@ -45,7 +45,7 @@ float Tiled2dMapVectorTile::getAlpha() {
     return alpha;
 }
 
-void Tiled2dMapVectorTile::setSelectionDelegate(const std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate) {
+void Tiled2dMapVectorTile::setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate) {
     this->selectionDelegate = selectionDelegate;
 }
 

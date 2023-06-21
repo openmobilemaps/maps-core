@@ -40,7 +40,7 @@ void Tiled2dMapVectorSourceDataManager::onRemoved() {
     this->mapInterface = std::weak_ptr<MapInterface>();
 }
 
-void Tiled2dMapVectorSourceDataManager::setSelectionDelegate(const std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate) {
+void Tiled2dMapVectorSourceDataManager::setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate) {
     this->selectionDelegate = selectionDelegate;
 }
 

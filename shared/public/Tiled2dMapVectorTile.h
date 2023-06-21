@@ -60,7 +60,7 @@ public:
 
     virtual void setSpriteData(const std::shared_ptr<SpriteData> &spriteData, const std::shared_ptr<TextureHolderInterface> &spriteTexture) {};
 
-    void setSelectionDelegate(const std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate);
+    void setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate);
 
     void setSelectedFeatureIdentifier(std::optional<int64_t> identifier);
 
@@ -73,6 +73,6 @@ protected:
     std::optional<float> lastAlpha = std::nullopt;
     float alpha = 1.0;
 
-    std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> selectionDelegate;
+    std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> selectionDelegate;
     std::optional<int64_t> selectedFeatureIdentifier;
 };

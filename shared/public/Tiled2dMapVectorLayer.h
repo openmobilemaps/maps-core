@@ -183,7 +183,7 @@ private:
     Actor<Tiled2dMapVectorSourceSymbolCollisionManager> collisionManager;
     std::shared_ptr<Tiled2dMapVectorInteractionManager> interactionManager;
 
-    std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> selectionDelegate;
+    std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> selectionDelegate;
     std::optional<int64_t> selectedFeatureIdentifier;
 
     std::recursive_mutex renderPassMutex;

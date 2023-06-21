@@ -307,8 +307,8 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     this->symbolSourceDataManagers = symbolSourceDataManagers;
     this->sourceDataManagers = sourceTileManagers;
 
-    if (selectionDelegate) {
-        setSelectionDelegate(selectionDelegate);
+    if (auto strongSelectionDelegate = selectionDelegate.lock()) {
+        setSelectionDelegate(strongSelectionDelegate);
     }
 
     if (selectedFeatureIdentifier) {
