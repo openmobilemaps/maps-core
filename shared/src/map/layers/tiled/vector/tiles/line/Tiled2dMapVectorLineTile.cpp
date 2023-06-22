@@ -362,7 +362,8 @@ bool Tiled2dMapVectorLineTile::onClickConfirmed(const Vec2F &posScreen) {
     const auto mapInterface = this->mapInterface.lock();
     const auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
     const auto coordinateConverter = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
-    if (!camera || !selectionDelegate || !coordinateConverter) {
+    auto strongSelectionDelegate = selectionDelegate.lock();
+    if (!camera || !strongSelectionDelegate || !coordinateConverter) {
         return false;
     }
 
@@ -375,7 +376,7 @@ bool Tiled2dMapVectorLineTile::onClickConfirmed(const Vec2F &posScreen) {
         for (auto const &coordinates: lineCoordinateVector) {
             auto lineWidth = lineDescription->style.getLineWidth(EvaluationContext(zoomIdentifier, featureContext));
             if (LineHelper::pointWithin(coordinates, point, lineWidth, coordinateConverter)) {
-                selectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier, point);
+                strongSelectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier, point);
                 return true;
             }
         }

@@ -416,14 +416,15 @@ bool Tiled2dMapVectorPolygonPatternTile::onClickConfirmed(const Vec2F &posScreen
     auto mapInterface = this->mapInterface.lock();
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
     auto converter = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
-    if (!camera || !selectionDelegate || !converter) {
+    auto strongSelectionDelegate = selectionDelegate.lock();
+    if (!camera || !strongSelectionDelegate || !converter) {
         return false;
     }
     auto point = camera->coordFromScreenPosition(posScreen);
 
     for (auto const &[polygon, featureContext]: hitDetectionPolygons) {
         if (PolygonHelper::pointInside(polygon, point, mapInterface->getCoordinateConverterHelper())) {
-            selectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier,
+            strongSelectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier,
                                                 converter->convert(CoordinateSystemIdentifiers::EPSG4326(), point));
             return true;
         }

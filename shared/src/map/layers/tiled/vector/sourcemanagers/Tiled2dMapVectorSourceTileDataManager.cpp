@@ -104,7 +104,7 @@ void Tiled2dMapVectorSourceTileDataManager::setAlpha(float alpha) {
     }
 }
 
-void Tiled2dMapVectorSourceTileDataManager::setSelectionDelegate(const std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate) {
+void Tiled2dMapVectorSourceTileDataManager::setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate) {
     Tiled2dMapVectorSourceDataManager::setSelectionDelegate(selectionDelegate);
     for (const auto &[tileInfo, subTiles] : tiles) {
         for (const auto &[index, identifier, tile] : subTiles) {
