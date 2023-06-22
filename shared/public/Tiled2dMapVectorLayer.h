@@ -104,6 +104,8 @@ public:
 
     void setSelectionDelegate(const std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate) override;
 
+    void setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate);
+
     void setSelectedFeatureIdentifier(std::optional<int64_t> identifier);
 
     std::shared_ptr<VectorLayerDescription> getLayerDescriptionWithIdentifier(std::string identifier);
@@ -183,6 +185,7 @@ private:
     Actor<Tiled2dMapVectorSourceSymbolCollisionManager> collisionManager;
     std::shared_ptr<Tiled2dMapVectorInteractionManager> interactionManager;
 
+    std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> strongSelectionDelegate;
     std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> selectionDelegate;
     std::optional<int64_t> selectedFeatureIdentifier;
 

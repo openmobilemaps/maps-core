@@ -307,8 +307,10 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     this->symbolSourceDataManagers = symbolSourceDataManagers;
     this->sourceDataManagers = sourceTileManagers;
 
-    if (auto strongSelectionDelegate = selectionDelegate.lock()) {
+    if(strongSelectionDelegate) {
         setSelectionDelegate(strongSelectionDelegate);
+    } else if (auto ptr = selectionDelegate.lock()) {
+        setSelectionDelegate(selectionDelegate);
     }
 
     if (selectedFeatureIdentifier) {
@@ -643,15 +645,20 @@ void Tiled2dMapVectorLayer::setScissorRect(const std::optional<::RectI> &scissor
     }
 }
 
-void Tiled2dMapVectorLayer::setSelectionDelegate(const std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate) {
+void Tiled2dMapVectorLayer::setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate) {
     this->selectionDelegate = selectionDelegate;
-
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
         sourceDataManager.message(&Tiled2dMapVectorSourceTileDataManager::setSelectionDelegate, selectionDelegate);
     }
     for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
         sourceDataManager.message(&Tiled2dMapVectorSourceSymbolDataManager::setSelectionDelegate, selectionDelegate);
     }
+}
+
+void Tiled2dMapVectorLayer::setSelectionDelegate(const std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate) {
+    this->strongSelectionDelegate = selectionDelegate;
+    this->selectionDelegate = selectionDelegate;
+    setSelectionDelegate(std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface>(selectionDelegate));;
 }
 
 void Tiled2dMapVectorLayer::setSelectedFeatureIdentifier(std::optional<int64_t> identifier) {
