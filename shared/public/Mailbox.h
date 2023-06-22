@@ -13,6 +13,7 @@
 #include <deque>
 #include <future>
 #include "assert.h"
+#include "Logger.h"
 
 enum class MailboxDuplicationStrategy {
     none = 0,
@@ -52,7 +53,11 @@ public:
 
     template <std::size_t... I>
     void invoke(std::index_sequence<I...>) {
-        ((*object).*memberFn)(std::move(std::get<I>(argsTuple))...);
+        if (auto strongObject = object.lock()) {
+            ((*strongObject).*memberFn)(std::move(std::get<I>(argsTuple))...);
+        } else {
+            LogError <<= "Mailbox Object is expired";
+        }
     }
 
     Object object;
@@ -77,7 +82,13 @@ public:
 
     template <std::size_t... I>
     ResultType ask(std::index_sequence<I...>) {
-        return ((*object).*memberFn)(std::move(std::get<I>(argsTuple))...);
+        if (auto strongObject = object.lock()) {
+            return ((*strongObject).*memberFn)(std::move(std::get<I>(argsTuple))...);
+        } else {
+            LogError <<= "Mailbox Object is expired";
+            throw std::invalid_argument("Mailbox Object is expired");
+            return ResultType();
+        }
     }
 
     Object object;

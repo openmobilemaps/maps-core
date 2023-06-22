@@ -42,7 +42,7 @@ public:
 
     virtual void setAlpha(float alpha) = 0;
 
-    virtual void setSelectionDelegate(const std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate);
+    virtual void setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate);
 
     virtual void setSelectedFeatureIdentifier(std::optional<int64_t> identifier);
 
@@ -73,7 +73,7 @@ protected:
     const WeakActor<Tiled2dMapVectorLayer> vectorLayer;
     const std::shared_ptr<VectorMapDescription> mapDescription;
     const std::string source;
-    std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> selectionDelegate;
+    std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> selectionDelegate;
 
     std::unordered_map<std::string, int32_t> layerNameIndexMap;
     std::unordered_set<int32_t> modifyingMaskLayers;

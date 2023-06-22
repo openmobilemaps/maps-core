@@ -28,13 +28,13 @@ public:
 };
 
 template <class Object, class MemberFn, class... Args>
-inline std::unique_ptr<MailboxMessage> makeMessage(const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, Object& object, MemberFn memberFn, Args&&... args) {
+inline std::unique_ptr<MailboxMessage> makeMessage(const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, Object object, MemberFn memberFn, Args&&... args) {
     auto tuple = std::make_tuple(std::forward<Args>(args)...);
     return std::make_unique<MailboxMessageImpl<Object, MemberFn, decltype(tuple)>>(object, memberFn, strategy, environment, std::move(tuple));
 }
 
 template <class ResultType, class Object, class MemberFn, class... Args>
-std::unique_ptr<MailboxMessage> makeAskMessage(const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, std::promise<ResultType>&& promise, Object& object, MemberFn memberFn, Args&&... args) {
+std::unique_ptr<MailboxMessage> makeAskMessage(const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, std::promise<ResultType>&& promise, Object object, MemberFn memberFn, Args&&... args) {
     auto tuple = std::make_tuple(std::forward<Args>(args)...);
     return std::make_unique<AskMessageImpl<ResultType, Object, MemberFn, decltype(tuple)>>(std::move(promise), object, memberFn, strategy, environment, std::move(tuple));
 }
@@ -82,7 +82,7 @@ public:
         auto strongObject = object.lock();
         auto strongMailbox = receivingMailbox.lock();
         if (strongObject && strongMailbox) {
-            strongMailbox->push(makeMessage(MailboxDuplicationStrategy::none, MailboxExecutionEnvironment::computation, strongObject, fn, std::forward<Args>(args)...));
+            strongMailbox->push(makeMessage(MailboxDuplicationStrategy::none, MailboxExecutionEnvironment::computation, object, fn, std::forward<Args>(args)...));
         } else {
             LogError <<= "WeakActor holds nullptr";
         }
@@ -93,7 +93,7 @@ public:
         auto strongObject = object.lock();
         auto strongMailbox = receivingMailbox.lock();
         if (strongObject && strongMailbox) {
-            strongMailbox->push(makeMessage(strategy, MailboxExecutionEnvironment::computation, strongObject, fn, std::forward<Args>(args)...));
+            strongMailbox->push(makeMessage(strategy, MailboxExecutionEnvironment::computation, object, fn, std::forward<Args>(args)...));
         } else {
             LogError <<= "WeakActor holds nullptr";
         }
@@ -104,7 +104,7 @@ public:
         auto strongObject = object.lock();
         auto strongMailbox = receivingMailbox.lock();
         if (strongObject && strongMailbox) {
-            strongMailbox->push(makeMessage(MailboxDuplicationStrategy::none, environment, strongObject, fn, std::forward<Args>(args)...));
+            strongMailbox->push(makeMessage(MailboxDuplicationStrategy::none, environment, object, fn, std::forward<Args>(args)...));
         } else {
             LogError <<= "WeakActor holds nullptr";
         }
@@ -115,7 +115,7 @@ public:
         auto strongObject = object.lock();
         auto strongMailbox = receivingMailbox.lock();
         if (strongObject && strongMailbox) {
-            strongMailbox->push(makeMessage(strategy, environment, strongObject, fn, std::forward<Args>(args)...));
+            strongMailbox->push(makeMessage(strategy, environment, object, fn, std::forward<Args>(args)...));
         } else {
             LogError <<= "WeakActor holds nullptr";
         }
@@ -133,7 +133,7 @@ public:
         auto future = promise.get_future();
 
         if (strongObject && strongMailbox) {
-            strongMailbox->push(makeAskMessage(MailboxDuplicationStrategy::none, MailboxExecutionEnvironment::computation, std::move(promise), strongObject, fn, std::forward<Args>(args)...));
+            strongMailbox->push(makeAskMessage(MailboxDuplicationStrategy::none, MailboxExecutionEnvironment::computation, std::move(promise), object, fn, std::forward<Args>(args)...));
         } else {
             LogError <<= "WeakActor holds nullptr";
         }
@@ -151,7 +151,7 @@ public:
         auto future = promise.get_future();
 
         if (strongObject && strongMailbox) {
-            strongMailbox->push(makeAskMessage(MailboxDuplicationStrategy::none, environment, std::move(promise), strongObject, fn, std::forward<Args>(args)...));
+            strongMailbox->push(makeAskMessage(MailboxDuplicationStrategy::none, environment, std::move(promise), object, fn, std::forward<Args>(args)...));
         } else {
             LogError <<= "WeakActor holds nullptr";
         }
@@ -237,7 +237,7 @@ public:
         if(!receivingMailbox || !object) {
             return;
         }
-        receivingMailbox->push(makeMessage(MailboxDuplicationStrategy::none, MailboxExecutionEnvironment::computation, object, fn, std::forward<Args>(args)...));
+        receivingMailbox->push(makeMessage(MailboxDuplicationStrategy::none, MailboxExecutionEnvironment::computation, std::weak_ptr<Object>(object), fn, std::forward<Args>(args)...));
     }
 
     
@@ -246,7 +246,7 @@ public:
         if(!receivingMailbox || !object) {
             return;
         }
-        receivingMailbox->push(makeMessage(strategy, MailboxExecutionEnvironment::computation, object, fn, std::forward<Args>(args)...));
+        receivingMailbox->push(makeMessage(strategy, MailboxExecutionEnvironment::computation, std::weak_ptr<Object>(object), fn, std::forward<Args>(args)...));
     }
 
 
@@ -255,7 +255,7 @@ public:
         if(!receivingMailbox || !object) {
             return;
         }
-        receivingMailbox->push(makeMessage(MailboxDuplicationStrategy::none, environment, object, fn, std::forward<Args>(args)...));
+        receivingMailbox->push(makeMessage(MailboxDuplicationStrategy::none, environment, std::weak_ptr<Object>(object), fn, std::forward<Args>(args)...));
     }
 
 
@@ -264,7 +264,7 @@ public:
         if(!receivingMailbox || !object) {
             return;
         }
-        receivingMailbox->push(makeMessage(strategy, environment, object, fn, std::forward<Args>(args)...));
+        receivingMailbox->push(makeMessage(strategy, environment, std::weak_ptr<Object>(object), fn, std::forward<Args>(args)...));
     }
 
     template <typename Fn, class... Args>
@@ -273,7 +273,7 @@ public:
         
         std::promise<ResultType> promise;
         auto future = promise.get_future();
-        receivingMailbox->push(makeAskMessage(MailboxDuplicationStrategy::none, MailboxExecutionEnvironment::computation, std::move(promise), object, fn, std::forward<Args>(args)...));
+        receivingMailbox->push(makeAskMessage(MailboxDuplicationStrategy::none, MailboxExecutionEnvironment::computation, std::move(promise), std::weak_ptr<Object>(object), fn, std::forward<Args>(args)...));
         return future;
     }
 
@@ -283,7 +283,7 @@ public:
 
         std::promise<ResultType> promise;
         auto future = promise.get_future();
-        receivingMailbox->push(makeAskMessage(MailboxDuplicationStrategy::none, environment, std::move(promise), object, fn, std::forward<Args>(args)...));
+        receivingMailbox->push(makeAskMessage(MailboxDuplicationStrategy::none, environment, std::move(promise), std::weak_ptr<Object>(object), fn, std::forward<Args>(args)...));
         return future;
     }
     

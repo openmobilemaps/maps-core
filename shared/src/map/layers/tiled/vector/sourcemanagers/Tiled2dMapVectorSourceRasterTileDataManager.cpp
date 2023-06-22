@@ -106,8 +106,8 @@ void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std
                     Actor<Tiled2dMapVectorTile> actor = createTileActor(tile.tileInfo, layer);
 
                     if (actor) {
-                        if (selectionDelegate) {
-                            actor.message(&Tiled2dMapVectorTile::setSelectionDelegate, selectionDelegate);
+                        if (auto strongSelectionDelegate = selectionDelegate.lock()) {
+                            actor.message(&Tiled2dMapVectorTile::setSelectionDelegate, strongSelectionDelegate);
                         }
 
                         indexControlSet.insert(index);
@@ -179,8 +179,8 @@ void Tiled2dMapVectorSourceRasterTileDataManager::updateLayerDescription(std::sh
 
             Actor<Tiled2dMapVectorTile> actor = createTileActor(tileData.tileInfo, layerDescription);
             if (actor) {
-                if (selectionDelegate) {
-                    actor.message(&Tiled2dMapVectorTile::setSelectionDelegate, selectionDelegate);
+                if (auto strongSelectionDelegate = selectionDelegate.lock()) {
+                    actor.message(&Tiled2dMapVectorTile::setSelectionDelegate, strongSelectionDelegate);
                 }
 
                 if (subTiles->second.empty()) {

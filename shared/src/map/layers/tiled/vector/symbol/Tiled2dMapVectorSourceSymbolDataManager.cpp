@@ -428,8 +428,8 @@ bool Tiled2dMapVectorSourceSymbolDataManager::onClickConfirmed(const std::unorde
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface.lock() : nullptr;
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
     auto conversionHelper = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
-    
-    if (!camera || !conversionHelper || !selectionDelegate) {
+    auto strongSelectionDelegate = selectionDelegate.lock();
+    if (!camera || !conversionHelper || !strongSelectionDelegate) {
         return false;
     }
 
@@ -457,7 +457,7 @@ bool Tiled2dMapVectorSourceSymbolDataManager::onClickConfirmed(const std::unorde
                     return group->onClickConfirmed(tinyClickBox);
                 });
                 if (result) {
-                    selectionDelegate->didSelectFeature(std::get<1>(*result), layerIdentifier, conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), std::get<0>(*result)));
+                    strongSelectionDelegate->didSelectFeature(std::get<1>(*result), layerIdentifier, conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), std::get<0>(*result)));
                     return true;
                 }
             }
