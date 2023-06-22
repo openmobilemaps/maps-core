@@ -148,7 +148,7 @@ void Tiled2dMapVectorSourceTileDataManager::updateMaskObjects(
         auto tilesVectorIt = tiles.find(tileToRemove);
         if (tilesVectorIt != tiles.end()) {
             for (const auto &[index, identifier, tile]: tiles.at(tileToRemove)) {
-                tile.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorTile::clear);
+                tile.unsafe()->clear();
             }
         }
         tiles.erase(tileToRemove);
