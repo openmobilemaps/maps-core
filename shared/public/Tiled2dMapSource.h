@@ -35,6 +35,7 @@
 #include "Future.hpp"
 #include "LoaderStatus.h"
 #include "LRUCache.h"
+#include "TileState.h"
 
 template<class R>
 struct TileWrapper {
@@ -43,7 +44,7 @@ public:
     std::vector<::PolygonCoord> masks;
     const PolygonCoord tileBounds;
     gpc_polygon tilePolygon;
-    bool isVisible = true;
+    TileState state = TileState::IN_SETUP;
 
     TileWrapper(const R &result,
                 const std::vector<::PolygonCoord> & masks,

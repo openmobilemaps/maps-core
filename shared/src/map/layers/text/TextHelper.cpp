@@ -750,12 +750,11 @@ unsigned char *StrToUprExt(unsigned char *pString) {
 }
 
 Quad2dD TextHelper::rotateQuad2d(const Quad2dD &quad, const Vec2D &aroundPoint, double angleDegrees) {
-    Vec2D midPoint = aroundPoint;
-    auto newTopLeft = Vec2DHelper::rotate(quad.topLeft, midPoint, angleDegrees);
-    auto newTopRight = Vec2DHelper::rotate(quad.topRight, midPoint, angleDegrees);
-    auto newBottomLeft = Vec2DHelper::rotate(quad.bottomLeft, midPoint, angleDegrees);
-    auto newBottomRight = Vec2DHelper::rotate(quad.bottomRight, midPoint, angleDegrees);
-    return Quad2dD(newTopLeft, newTopRight, newBottomRight, newBottomLeft);
+    const Vec2D midPoint = aroundPoint;
+    return Quad2dD(Vec2DHelper::rotate(quad.topLeft, midPoint, angleDegrees),
+                   Vec2DHelper::rotate(quad.topRight, midPoint, angleDegrees),
+                   Vec2DHelper::rotate(quad.bottomRight, midPoint, angleDegrees),
+                   Vec2DHelper::rotate(quad.bottomLeft, midPoint, angleDegrees));
 }
 
 // MARK: - Line Breaks

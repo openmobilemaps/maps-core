@@ -34,6 +34,7 @@ public:
                                                             const std::vector<std::shared_ptr<::LoaderInterface>> &loaders) {
         DataLoaderResult result = LoaderHelper::loadData(styleJsonUrl, std::nullopt, loaders);
         if (result.status != LoaderStatus::OK) {
+            LogError <<= "Unable to Load style.json from " + styleJsonUrl + " errorCode: " + (result.errorCode ? *result.errorCode : "");
             return Tiled2dMapVectorLayerParserResult(nullptr, result.status, result.errorCode);
         }
         auto string = std::string((char*)result.data->buf(), result.data->len());

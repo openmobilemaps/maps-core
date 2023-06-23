@@ -71,7 +71,9 @@ public:
 
     std::optional<Quad2dD> getCombinedBoundingBox(bool considerOverlapFlag);
 
-    bool collides = false;
+    bool collides = true;
+
+    bool getIsOpaque();
 
     void collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<std::vector<OBB2D>> placements);
 
@@ -129,4 +131,8 @@ private:
     bool iconAllowOverlap;
 
     float alpha = 1.0;
+    bool isIconOpaque = true;
+    bool isStretchIconOpaque = true;
+
+    bool isPlaced();
 };

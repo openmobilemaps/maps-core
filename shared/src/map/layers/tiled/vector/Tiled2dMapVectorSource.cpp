@@ -83,11 +83,11 @@ void Tiled2dMapVectorSource::notifyTilesUpdates() {
 
 std::unordered_set<Tiled2dMapVectorTileInfo> Tiled2dMapVectorSource::getCurrentTiles() {
     std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos;
-    for (const auto &[tileInfo, tileWrapper] : currentTiles) {
-        if (tileWrapper.isVisible) {
-            currentTileInfos.insert(Tiled2dMapVectorTileInfo(tileInfo, tileWrapper.result, tileWrapper.masks));
+    std::transform(currentTiles.begin(), currentTiles.end(), std::inserter(currentTileInfos, currentTileInfos.end()), [](const auto& tilePair) {
+            const auto& [tileInfo, tileWrapper] = tilePair;
+            return Tiled2dMapVectorTileInfo(std::move(tileInfo), std::move(tileWrapper.result), std::move(tileWrapper.masks), std::move(tileWrapper.state));
         }
-    }
+    );
     return currentTileInfos;
 }
 

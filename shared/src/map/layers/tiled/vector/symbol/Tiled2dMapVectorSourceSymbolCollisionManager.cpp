@@ -42,15 +42,3 @@ void Tiled2dMapVectorSourceSymbolCollisionManager::collisionDetection() {
         symbolSourceDataManagers.at(currentSource).syncAccess(lambda);
     }
 }
-
-void Tiled2dMapVectorSourceSymbolCollisionManager::update() {
-    const auto lambda = [](auto manager){
-        if (auto strongManager = manager.lock()) {
-            strongManager->update();
-        }
-    };
-
-    for(const auto &[source, symbolManager] : symbolSourceDataManagers) {
-        symbolManager.syncAccess(lambda);
-    }
-}

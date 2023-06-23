@@ -358,14 +358,20 @@ std::shared_ptr<::LayerInterface> Tiled2dMapVectorLayer::asLayerInterface() {
 
 void Tiled2dMapVectorLayer::update() {
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-        sourceDataManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::update);
+        sourceDataManager.syncAccess([](const auto &manager) {
+            manager->update();
+        });
     }
 
     if (collisionManager) {
+        for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
+            sourceDataManager.syncAccess([](const auto &manager) {
+                manager->update();
+            });
+        }
         collisionManager.syncAccess([](const auto &manager) {
-            manager->update();
+            manager->collisionDetection();
         });
-        collisionManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceSymbolCollisionManager::collisionDetection);
     }
 }
 

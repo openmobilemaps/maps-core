@@ -24,12 +24,12 @@ double Vec2DHelper::distanceSquared(const ::Vec2D &from, const ::Vec2D &to) {
 }
 
 ::Vec2D Vec2DHelper::rotate(const Vec2D &p, const Vec2D &origin, double angleDegree) {
-    double sinAngle = sin(angleDegree * M_PI / 180.0);
-    double cosAngle = cos(angleDegree * M_PI / 180.0);
-    double x = p.x - origin.x;
-    double y = p.y - origin.y;
-    double rX = x * cosAngle - y * sinAngle;
-    double rY = x * sinAngle + y * cosAngle;
+    const double sinAngle = sin(angleDegree * M_PI / 180.0);
+    const double cosAngle = cos(angleDegree * M_PI / 180.0);
+    const double x = p.x - origin.x;
+    const double y = p.y - origin.y;
+    const double rX = x * cosAngle - y * sinAngle;
+    const double rY = x * sinAngle + y * cosAngle;
     return Vec2D(rX + origin.x, rY + origin.y);
 }
 
@@ -74,44 +74,42 @@ Quad2dD Vec2DHelper::minimumAreaEnclosingRectangle(std::vector<Vec2D>& points) {
     Quad2dD minRectangle({0, 0}, {0, 0}, {0, 0}, {0, 0});
 
     for (size_t i = 0; i < hull.size(); ++i) {
-            size_t nextIndex = (i + 1) % hull.size();
-            double dx = hull[nextIndex].x - hull[i].x;
-            double dy = hull[nextIndex].y - hull[i].y;
-            double angle = std::atan2(dy, dx);
+        const size_t nextIndex = (i + 1) % hull.size();
+        const double dx = hull[nextIndex].x - hull[i].x;
+        const double dy = hull[nextIndex].y - hull[i].y;
+        const double angle = std::atan2(dy, dx);
 
-            double minX = std::numeric_limits<double>::max();
-            double maxX = std::numeric_limits<double>::lowest();
-            double minY = std::numeric_limits<double>::max();
-            double maxY = std::numeric_limits<double>::lowest();
-            for (const Vec2D& point : points) {
-                double rotatedX = (point.x - hull[i].x) * std::cos(-angle) - (point.y - hull[i].y) * std::sin(-angle);
-                double rotatedY = (point.x - hull[i].x) * std::sin(-angle) + (point.y - hull[i].y) * std::cos(-angle);
-                minX = std::min(minX, rotatedX);
-                maxX = std::max(maxX, rotatedX);
-                minY = std::min(minY, rotatedY);
-                maxY = std::max(maxY, rotatedY);
-            }
-
-            double width = maxX - minX;
-            double height = maxY - minY;
-            double area = width * height;
-
-            if (area < minArea) {
-                minArea = area;
-                minRectangle = {
-                    {hull[i].x + minX * std::cos(angle) - minY * std::sin(angle),
-                     hull[i].y + minX * std::sin(angle) + minY * std::cos(angle)},
-                    {hull[i].x + maxX * std::cos(angle) - minY * std::sin(angle),
-                     hull[i].y + maxX * std::sin(angle) + minY * std::cos(angle)},
-                    {hull[i].x + maxX * std::cos(angle) - maxY * std::sin(angle),
-                     hull[i].y + maxX * std::sin(angle) + maxY * std::cos(angle)},
-                    {hull[i].x + minX * std::cos(angle) - maxY * std::sin(angle),
-                     hull[i].y + minX * std::sin(angle) + maxY * std::cos(angle)}
-                };
-            }
+        double minX = std::numeric_limits<double>::max();
+        double maxX = std::numeric_limits<double>::lowest();
+        double minY = std::numeric_limits<double>::max();
+        double maxY = std::numeric_limits<double>::lowest();
+        for (const Vec2D& point : points) {
+            const double rotatedX = (point.x - hull[i].x) * std::cos(-angle) - (point.y - hull[i].y) * std::sin(-angle);
+            const double rotatedY = (point.x - hull[i].x) * std::sin(-angle) + (point.y - hull[i].y) * std::cos(-angle);
+            minX = std::min(minX, rotatedX);
+            maxX = std::max(maxX, rotatedX);
+            minY = std::min(minY, rotatedY);
+            maxY = std::max(maxY, rotatedY);
         }
 
-        return minRectangle;
+        const double width = maxX - minX;
+        const double height = maxY - minY;
+        const double area = width * height;
+
+        if (area < minArea) {
+            minArea = area;
+            minRectangle.topLeft.x = hull[i].x + minX * std::cos(angle) - minY * std::sin(angle);
+            minRectangle.topLeft.y = hull[i].y + minX * std::sin(angle) + minY * std::cos(angle);
+            minRectangle.topRight.x = hull[i].x + maxX * std::cos(angle) - minY * std::sin(angle);
+            minRectangle.topRight.y = hull[i].y + maxX * std::sin(angle) + minY * std::cos(angle);
+            minRectangle.bottomRight.x = hull[i].x + maxX * std::cos(angle) - maxY * std::sin(angle);
+            minRectangle.bottomRight.y = hull[i].y + maxX * std::sin(angle) + maxY * std::cos(angle);
+            minRectangle.bottomLeft.x = hull[i].x + minX * std::cos(angle) - maxY * std::sin(angle);
+            minRectangle.bottomLeft.y = hull[i].y + minX * std::sin(angle) + maxY * std::cos(angle);
+        }
+    }
+
+    return minRectangle;
 }
 
 Vec2D operator+( const ::Vec2D& left, const ::Vec2D& right ) {

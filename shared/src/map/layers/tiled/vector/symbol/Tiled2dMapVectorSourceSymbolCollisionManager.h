@@ -18,11 +18,7 @@ class Tiled2dMapVectorSourceSymbolCollisionManager: public ActorObject {
 public:
     Tiled2dMapVectorSourceSymbolCollisionManager(const std::unordered_map<std::string, WeakActor<Tiled2dMapVectorSourceSymbolDataManager>> &symbolSourceDataManagers,
                                                  std::shared_ptr<VectorMapDescription> mapDescription): symbolSourceDataManagers(symbolSourceDataManagers), mapDescription(mapDescription)  {};
-
-    void update();
-
     void collisionDetection();
-
 private:
     std::unordered_map<std::string, WeakActor<Tiled2dMapVectorSourceSymbolDataManager>> symbolSourceDataManagers;
     std::shared_ptr<VectorMapDescription> mapDescription;

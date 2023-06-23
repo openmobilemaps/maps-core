@@ -71,7 +71,7 @@ public:
 private:
     std::optional<Actor<Tiled2dMapVectorSymbolGroup>> createSymbolGroup(const Tiled2dMapTileInfo &tileInfo, const std::string &layerIdentifier, const std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features);
 
-    void setupSymbolGroups(const std::vector<Actor<Tiled2dMapVectorSymbolGroup>> &toSetup, const std::unordered_set<Tiled2dMapTileInfo> &tilesToRemove);
+    void setupSymbolGroups(const std::vector<Actor<Tiled2dMapVectorSymbolGroup>> toSetup, const std::unordered_set<Tiled2dMapTileInfo> tilesToRemove, const std::unordered_map<Tiled2dMapTileInfo, TileState> tileStateUpdates);
 
     void setupExistingSymbolWithSprite();
 
@@ -82,6 +82,8 @@ private:
     std::unordered_map<std::string, std::shared_ptr<FontLoaderResult>> fontLoaderResults;
 
     std::unordered_map<Tiled2dMapTileInfo, std::unordered_map<std::string, std::vector<Actor<Tiled2dMapVectorSymbolGroup>>>> tileSymbolGroupMap;
+
+    std::unordered_map<Tiled2dMapTileInfo, TileState> tileStateMap;
 
     std::unordered_map<std::string, std::shared_ptr<SymbolVectorLayerDescription>> layerDescriptions;
 

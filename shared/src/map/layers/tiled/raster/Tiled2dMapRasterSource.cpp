@@ -48,11 +48,12 @@ void Tiled2dMapRasterSource::notifyTilesUpdates() {
 
 std::unordered_set<Tiled2dMapRasterTileInfo> Tiled2dMapRasterSource::getCurrentTiles() {
     std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos;
-    for (auto it = currentTiles.rbegin(); it != currentTiles.rend(); it++ ) {
-        auto &[tileInfo, tileWrapper] = *it;
-        if (tileWrapper.isVisible) {
-            currentTileInfos.insert(Tiled2dMapRasterTileInfo(tileInfo, tileWrapper.result, tileWrapper.masks));
+    currentTileInfos.reserve(currentTiles.size());
+    std::transform(currentTiles.rbegin(), currentTiles.rend(), std::inserter(currentTileInfos, currentTileInfos.end()),
+        [](const auto& tilePair) {
+            const auto& [tileInfo, tileWrapper] = tilePair;
+            return Tiled2dMapRasterTileInfo(std::move(tileInfo), std::move(tileWrapper.result), std::move(tileWrapper.masks), std::move(tileWrapper.state));
         }
-    }
+    );
     return currentTileInfos;
 }

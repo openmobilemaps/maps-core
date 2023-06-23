@@ -53,6 +53,8 @@ public:
     void setAlpha(float alpha);
 
     void resetCollisionCache();
+
+    void clear();
 private:
 
     inline std::optional<Tiled2dMapVectorSymbolSubLayerPositioningWrapper> getPositioning(std::vector<::Coord>::const_iterator &iterator, const std::vector<::Coord> & collection);
@@ -73,8 +75,6 @@ private:
 
 private:
     std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>> symbolObjects;
-
-
 
     const std::weak_ptr<MapInterface> mapInterface;
     const Tiled2dMapTileInfo tileInfo;

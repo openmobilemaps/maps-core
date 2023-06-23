@@ -212,7 +212,6 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
                     }
                 }
 
-                bool interactable = description->isInteractable(evalContext);
                 for (int i = 0; i < polygonCoordinates.size(); i++) {
 
                     size_t verticesCount = polygonCoordinates[i].size();
