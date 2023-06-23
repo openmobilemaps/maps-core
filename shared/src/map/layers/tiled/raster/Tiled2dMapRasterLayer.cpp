@@ -297,6 +297,7 @@ void Tiled2dMapRasterLayer::setupTiles(
         std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
 
         for (const auto &[tile, tileObject] : tilesToClean) {
+            tileObject->getGraphicsObject()->clear();
             tileObjectMap.erase(tile);
             tileMaskMap.erase(tile.tileInfo);
         }
