@@ -25,7 +25,7 @@ class TextShader: BaseShader {
     }
 
     override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
-        guard let pipeline = pipeline else { return }
+        guard let pipeline else { return }
 
         context.setRenderPipelineStateIfNeeded(pipeline)
 

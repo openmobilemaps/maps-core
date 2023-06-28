@@ -28,7 +28,6 @@ struct StretchShaderInfoSwift: Equatable {
 
     var uvOrig: SIMD2<Float>
     var uvSize: SIMD2<Float>
-    
 
     init(info: MCStretchShaderInfo = MCStretchShaderInfo(scaleX: 1, stretchX0Begin: -1, stretchX0End: -1, stretchX1Begin: -1, stretchX1End: -1, scaleY: 1, stretchY0Begin: -1, stretchY0End: -1, stretchY1Begin: -1, stretchY1End: -1, uv: MCRectD(x: 0, y: 0, width: 0, height: 0))) {
         scaleX = info.scaleX
@@ -49,16 +48,16 @@ struct StretchShaderInfoSwift: Equatable {
 
 class StretchShader: BaseShader {
     private let alphaBuffer: MTLBuffer
-    private var alphaContent : UnsafeMutablePointer<Float>
+    private var alphaContent: UnsafeMutablePointer<Float>
 
-    private var infoContent : UnsafeMutablePointer<StretchShaderInfoSwift>
+    private var infoContent: UnsafeMutablePointer<StretchShaderInfoSwift>
     private let infoBuffer: MTLBuffer
 
-    private let shader : PipelineType
+    private let shader: PipelineType
 
     private var stretchInfo = StretchShaderInfoSwift()
 
-    init(shader : PipelineType = .stretchShader) {
+    init(shader: PipelineType = .stretchShader) {
         self.shader = shader
 
         guard let infoBuffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<StretchShaderInfoSwift>.stride, options: []) else { fatalError("Could not create buffer") }
@@ -79,7 +78,7 @@ class StretchShader: BaseShader {
     }
 
     override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
-        guard let pipeline = pipeline else { return }
+        guard let pipeline else { return }
 
         context.setRenderPipelineStateIfNeeded(pipeline)
         encoder.setFragmentBuffer(alphaBuffer, offset: 0, index: 1)

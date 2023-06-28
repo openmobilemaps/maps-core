@@ -77,15 +77,15 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject {
                          mvpMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
-        guard let verticesBuffer = verticesBuffer,
-              let indicesBuffer = indicesBuffer,
-              let positionsBuffer = positionsBuffer,
-              let scalesBuffer = scalesBuffer,
-              let rotationsBuffer = rotationsBuffer,
-              let textureCoordinatesBuffer = textureCoordinatesBuffer,
-              let alphaBuffer = alphaBuffer,
-              let stretchInfoBuffer = stretchInfoBuffer,
-              let texture = texture,
+        guard let verticesBuffer,
+              let indicesBuffer,
+              let positionsBuffer,
+              let scalesBuffer,
+              let rotationsBuffer,
+              let textureCoordinatesBuffer,
+              let alphaBuffer,
+              let stretchInfoBuffer,
+              let texture,
               instanceCount != 0 else {
             return
         }
@@ -96,10 +96,10 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject {
         }
 
         #if DEBUG
-        encoder.pushDebugGroup(label)
-        defer {
-            encoder.popDebugGroup()
-        }
+            encoder.pushDebugGroup(label)
+            defer {
+                encoder.popDebugGroup()
+            }
         #endif
 
         if isMasked {
@@ -143,7 +143,6 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject {
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0,
                                       instanceCount: instanceCount)
-
     }
 }
 
@@ -249,7 +248,8 @@ extension Quad2dStretchedInstanced: MCQuad2dStretchedInstancedInterface {
         }
     }
 
-    func removeTexture() {}
+    func removeTexture() {
+    }
 
     func asGraphicsObject() -> MCGraphicsObjectInterface? {
         self

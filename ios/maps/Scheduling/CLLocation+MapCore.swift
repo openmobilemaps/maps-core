@@ -29,7 +29,7 @@ public extension CLLocationCoordinate2D {
 
 public extension MCCoord {
     var clLocation: CLLocation? {
-        guard let coord = clLocationCoordinate else { return nil}
+        guard let coord = clLocationCoordinate else { return nil }
         return CLLocation(latitude: coord.latitude, longitude: coord.longitude)
     }
 

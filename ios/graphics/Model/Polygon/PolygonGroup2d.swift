@@ -57,14 +57,14 @@ final class PolygonGroup2d: BaseGraphicsObject {
             lock.unlock()
         }
 
-        guard let verticesBuffer = verticesBuffer,
-              let indicesBuffer = indicesBuffer, shader.polygonStyleBuffer != nil else { return }
+        guard let verticesBuffer,
+              let indicesBuffer, shader.polygonStyleBuffer != nil else { return }
 
         #if DEBUG
-        encoder.pushDebugGroup("PolygonGroup2d")
-        defer {
-            encoder.popDebugGroup()
-        }
+            encoder.pushDebugGroup("PolygonGroup2d")
+            defer {
+                encoder.popDebugGroup()
+            }
         #endif
 
         if isMasked {
@@ -88,7 +88,6 @@ final class PolygonGroup2d: BaseGraphicsObject {
                                       indexType: .uint16,
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
-
     }
 }
 

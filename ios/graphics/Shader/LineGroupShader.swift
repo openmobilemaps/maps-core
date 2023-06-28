@@ -20,7 +20,8 @@ class LineGroupShader: BaseShader {
 
     var dashingScaleFactor: Float = 1.0
 
-    override init() { }
+    override init() {
+    }
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
@@ -29,7 +30,7 @@ class LineGroupShader: BaseShader {
     }
 
     override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
-        guard let pipeline = pipeline else { return }
+        guard let pipeline else { return }
 
         context.setRenderPipelineStateIfNeeded(pipeline)
 
@@ -44,13 +45,12 @@ class LineGroupShader: BaseShader {
 }
 
 extension LineGroupShader: MCLineGroupShaderInterface {
-
     func setStyles(_ styles: MCSharedBytes) {
         lineStyleBuffer.copyOrCreate(from: styles, device: MetalContext.current.device)
     }
 
     func setDashingScaleFactor(_ factor: Float) {
-        dashingScaleFactor = factor;
+        dashingScaleFactor = factor
     }
 
     func asShaderProgram() -> MCShaderProgramInterface? {

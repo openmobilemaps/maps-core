@@ -37,15 +37,15 @@ final class Polygon2d: BaseGraphicsObject {
         defer {
             lock.unlock()
         }
-        
-        guard let verticesBuffer = verticesBuffer,
-              let indicesBuffer = indicesBuffer else { return }
+
+        guard let verticesBuffer,
+              let indicesBuffer else { return }
 
         #if DEBUG
-        encoder.pushDebugGroup("Polygon2d")
-        defer {
-            encoder.popDebugGroup()
-        }
+            encoder.pushDebugGroup("Polygon2d")
+            defer {
+                encoder.popDebugGroup()
+            }
         #endif
 
         if isMasked {
@@ -73,7 +73,6 @@ final class Polygon2d: BaseGraphicsObject {
                                       indexType: .uint16,
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
-
     }
 
     private func setupStencilStates() {
@@ -107,15 +106,15 @@ extension Polygon2d: MCMaskingObjectInterface {
             lock.unlock()
         }
 
-        guard let verticesBuffer = verticesBuffer,
-              let indicesBuffer = indicesBuffer
+        guard let verticesBuffer,
+              let indicesBuffer
         else { return }
 
         #if DEBUG
-        encoder.pushDebugGroup("Polygon2dMask")
-        defer {
-            encoder.popDebugGroup()
-        }
+            encoder.pushDebugGroup("Polygon2dMask")
+            defer {
+                encoder.popDebugGroup()
+            }
         #endif
 
         if let mask = context.polygonMask {
@@ -137,7 +136,6 @@ extension Polygon2d: MCMaskingObjectInterface {
                                       indexType: .uint16,
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
-
     }
 }
 

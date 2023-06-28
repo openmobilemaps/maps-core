@@ -39,8 +39,8 @@ final class LineGroup2d: BaseGraphicsObject {
         ss.stencilFailureOperation = .keep
         ss.depthFailureOperation = .keep
         ss.depthStencilPassOperation = .incrementClamp
-        ss.writeMask = 0b01111111
-        ss.readMask =  0b11111111
+        ss.writeMask = 0b0111_1111
+        ss.readMask = 0b1111_1111
 
         let s = MTLDepthStencilDescriptor()
         s.frontFaceStencil = ss
@@ -75,18 +75,17 @@ final class LineGroup2d: BaseGraphicsObject {
             lock.unlock()
         }
 
-        guard let lineVerticesBuffer = lineVerticesBuffer,
-              let lineIndicesBuffer = lineIndicesBuffer,
+        guard let lineVerticesBuffer,
+              let lineIndicesBuffer,
               shader.lineStyleBuffer != nil
         else { return }
 
         #if DEBUG
-        encoder.pushDebugGroup("LineGroup2d")
-        defer {
-            encoder.popDebugGroup()
-        }
+            encoder.pushDebugGroup("LineGroup2d")
+            defer {
+                encoder.popDebugGroup()
+            }
         #endif
-
 
         if stencilState == nil {
             setupStencilBufferDescriptor()
@@ -120,14 +119,12 @@ final class LineGroup2d: BaseGraphicsObject {
         if !isMasked {
             context.clearStencilBuffer()
         }
-
     }
 }
 
 extension LineGroup2d: MCLineGroup2dInterface {
     func setLines(_ lines: MCSharedBytes, indices: MCSharedBytes) {
         guard lines.elementCount != 0 else {
-
             lock.withCritical {
                 lineVerticesBuffer = nil
                 lineIndicesBuffer = nil

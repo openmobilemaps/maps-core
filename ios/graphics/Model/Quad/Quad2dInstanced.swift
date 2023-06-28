@@ -76,14 +76,14 @@ final class Quad2dInstanced: BaseGraphicsObject {
                          mvpMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
-        guard let verticesBuffer = verticesBuffer,
-              let indicesBuffer = indicesBuffer,
+        guard let verticesBuffer,
+              let indicesBuffer,
               instanceCount != 0,
-              let positionsBuffer = positionsBuffer,
-              let scalesBuffer = scalesBuffer,
-              let rotationsBuffer = rotationsBuffer,
-              let textureCoordinatesBuffer = textureCoordinatesBuffer,
-              let alphaBuffer = alphaBuffer
+              let positionsBuffer,
+              let scalesBuffer,
+              let rotationsBuffer,
+              let textureCoordinatesBuffer,
+              let alphaBuffer
         else {
             return
         }
@@ -92,16 +92,16 @@ final class Quad2dInstanced: BaseGraphicsObject {
         defer {
             lock.unlock()
         }
-        if (shader is AlphaInstancedShader), texture == nil {
+        if shader is AlphaInstancedShader, texture == nil {
             ready = false
             return
         }
 
         #if DEBUG
-        encoder.pushDebugGroup(label)
-        defer {
-            encoder.popDebugGroup()
-        }
+            encoder.pushDebugGroup(label)
+            defer {
+                encoder.popDebugGroup()
+            }
         #endif
 
         if isMasked {
@@ -135,7 +135,7 @@ final class Quad2dInstanced: BaseGraphicsObject {
 
         encoder.setFragmentSamplerState(sampler, index: 0)
 
-        if let texture = texture {
+        if let texture {
             encoder.setFragmentTexture(texture, index: 0)
         }
 
@@ -145,7 +145,6 @@ final class Quad2dInstanced: BaseGraphicsObject {
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0,
                                       instanceCount: instanceCount)
-
     }
 }
 
@@ -245,7 +244,8 @@ extension Quad2dInstanced: MCQuad2dInstancedInterface {
         }
     }
 
-    func removeTexture() {}
+    func removeTexture() {
+    }
 
     func asGraphicsObject() -> MCGraphicsObjectInterface? {
         self

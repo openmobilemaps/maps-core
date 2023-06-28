@@ -26,7 +26,7 @@ public enum PipelineDescriptorFactory {
         renderbufferAttachment?.isBlendingEnabled = true
 
         switch blendMode {
-            case .NORMAL :
+            case .NORMAL:
                 renderbufferAttachment?.rgbBlendOperation = .add
                 renderbufferAttachment?.alphaBlendOperation = .add
                 renderbufferAttachment?.sourceRGBBlendFactor = .one
@@ -82,14 +82,14 @@ public struct Pipeline: Codable, CaseIterable {
 
     public init?(json: String) {
         guard let data = json.data(using: .utf8),
-            let obj = try? JSONDecoder().decode(Pipeline.self, from: data) else {
+              let obj = try? JSONDecoder().decode(Pipeline.self, from: data) else {
             return nil
         }
         self = obj
     }
 
     public static var allCases: [Pipeline] {
-        return Array(PipelineType.allCases.map { type in
+        Array(PipelineType.allCases.map { type in
             MCBlendMode.allCases.map { blendMode in
                 Pipeline(type: type, blendMode: blendMode)
             }
@@ -108,7 +108,6 @@ public struct Pipeline: Codable, CaseIterable {
             fatalError("An error occurred while encoding Pipeline: \(error)")
         }
     }
-
 }
 
 public enum PipelineType: String, CaseIterable, Codable {
@@ -201,9 +200,8 @@ public class PipelineLibrary: StaticMetalLibrary<String, MTLRenderPipelineState>
     }
 }
 
-
 extension MCBlendMode: Codable, CaseIterable {
     public static var allCases: [MCBlendMode] {
-        return [.NORMAL, .MULTIPLY]
+        [.NORMAL, .MULTIPLY]
     }
 }

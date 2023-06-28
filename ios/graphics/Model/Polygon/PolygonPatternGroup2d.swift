@@ -65,17 +65,17 @@ final class PolygonPatternGroup2d: BaseGraphicsObject {
             lock.unlock()
         }
 
-        guard let verticesBuffer = verticesBuffer,
-              let indicesBuffer = indicesBuffer,
-              let opacitiesBuffer = opacitiesBuffer,
-              let textureCoordinatesBuffer = textureCoordinatesBuffer,
-              let texture = texture else { return }
+        guard let verticesBuffer,
+              let indicesBuffer,
+              let opacitiesBuffer,
+              let textureCoordinatesBuffer,
+              let texture else { return }
 
         #if DEBUG
-        encoder.pushDebugGroup("PolygonPatternGroup2d")
-        defer {
-            encoder.popDebugGroup()
-        }
+            encoder.pushDebugGroup("PolygonPatternGroup2d")
+            defer {
+                encoder.popDebugGroup()
+            }
         #endif
 
         if isMasked {
@@ -111,7 +111,6 @@ final class PolygonPatternGroup2d: BaseGraphicsObject {
                                       indexType: .uint16,
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
-
     }
 }
 
@@ -155,7 +154,7 @@ extension PolygonPatternGroup2d: MCPolygonPatternGroup2dInterface {
             customScreenPixelFactor = factor
         }
     }
-    
+
     func loadTexture(_ context: MCRenderingContextInterface?, textureHolder: MCTextureHolderInterface?) {
         guard let textureHolder = textureHolder as? TextureHolder else {
             fatalError("unexpected TextureHolder")
@@ -171,6 +170,6 @@ extension PolygonPatternGroup2d: MCPolygonPatternGroup2dInterface {
             texture = nil
         }
     }
-    
+
     func asGraphicsObject() -> MCGraphicsObjectInterface? { self }
 }
