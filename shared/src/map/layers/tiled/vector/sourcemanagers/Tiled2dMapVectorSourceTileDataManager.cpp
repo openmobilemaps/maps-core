@@ -49,7 +49,6 @@ void Tiled2dMapVectorSourceTileDataManager::pregenerateRenderPasses() {
             continue;
         }
 
-        assert(tileState != tileStateMap.end());
         if (tileState == tileStateMap.end() || tileState->second != TileState::VISIBLE) {
             // Tile is not visible or the mask is not yet ready
             continue;
@@ -307,6 +306,12 @@ void Tiled2dMapVectorSourceTileDataManager::tileIsReady(const Tiled2dMapTileInfo
             tilesReady.insert(tile);
             isCompletelyReady = true;
         }
+    }
+
+    auto tileStateMapIt = tileStateMap.find(tile);
+    if (isCompletelyReady && tileStateMapIt != tileStateMap.end() && tileStateMapIt->second == TileState::VISIBLE) {
+        pregenerateRenderPasses();
+        return;
     }
 
     auto tileRenderObjects = tileRenderObjectsMap.find(tile);
