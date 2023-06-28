@@ -332,7 +332,7 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
         }
 
         if (iconInstancedObject) {
-            iconInstancedObject->setPositions(SharedBytes((int64_t)iconPositions.data(), (int32_t)iconPositions.size(), 2 * (int32_t)sizeof(float)));
+            iconInstancedObject->setPositions(SharedBytes((int64_t)iconPositions.data(), (int32_t)iconAlphas.size(), 2 * (int32_t)sizeof(float)));
             iconInstancedObject->setAlphas(SharedBytes((int64_t)iconAlphas.data(), (int32_t)iconAlphas.size(), (int32_t)sizeof(float)));
             iconInstancedObject->setScales(SharedBytes((int64_t)iconScales.data(), (int32_t)iconAlphas.size(), 2 * (int32_t)sizeof(float)));
             iconInstancedObject->setRotations(SharedBytes((int64_t)iconRotations.data(), (int32_t)iconAlphas.size(), 1 * (int32_t)sizeof(float)));
