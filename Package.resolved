@@ -5,8 +5,8 @@
         "package": "DjinniSupport",
         "repositoryURL": "https://github.com/UbiqueInnovation/djinni.git",
         "state": {
-          "branch": "feature/snapchat-merge",
-          "revision": "954445bc7425a238414b50dee8da79d38857999f",
+          "branch": "master",
+          "revision": "f803f3674e7632ce3c8cba414f0b1378b188dab7",
           "version": null
         }
       }
