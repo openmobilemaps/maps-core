@@ -297,21 +297,14 @@ void Tiled2dMapVectorSourceTileDataManager::tileIsReady(const Tiled2dMapTileInfo
     bool isCompletelyReady = false;
     {
         const auto &tileControlSet = tilesReadyControlSet.find(tile);
-        if (tileControlSet == tilesReadyControlSet.end()) {
-            return;
+        if (tileControlSet != tilesReadyControlSet.end()) {
+            tileControlSet->second.erase(layerIndex);
+            if (tileControlSet->second.empty()) {
+                tilesReadyControlSet.erase(tile);
+                tilesReady.insert(tile);
+                isCompletelyReady = true;
+            }
         }
-        tileControlSet->second.erase(layerIndex);
-        if (tileControlSet->second.empty()) {
-            tilesReadyControlSet.erase(tile);
-            tilesReady.insert(tile);
-            isCompletelyReady = true;
-        }
-    }
-
-    auto tileStateMapIt = tileStateMap.find(tile);
-    if (isCompletelyReady && tileStateMapIt != tileStateMap.end() && tileStateMapIt->second == TileState::VISIBLE) {
-        pregenerateRenderPasses();
-        return;
     }
 
     auto tileRenderObjects = tileRenderObjectsMap.find(tile);
@@ -326,6 +319,12 @@ void Tiled2dMapVectorSourceTileDataManager::tileIsReady(const Tiled2dMapTileInfo
         tileRenderObjectsMap[tile].emplace_back(layerIndex, renderObjects);
     } else {
         tileRenderObjectsMap[tile].emplace_back(layerIndex, renderObjects);
+    }
+
+    auto tileStateMapIt = tileStateMap.find(tile);
+    if (isCompletelyReady && tileStateMapIt != tileStateMap.end() && tileStateMapIt->second == TileState::VISIBLE) {
+        pregenerateRenderPasses();
+        return;
     }
 
     if (isCompletelyReady) {
