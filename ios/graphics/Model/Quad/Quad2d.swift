@@ -68,23 +68,23 @@ final class Quad2d: BaseGraphicsObject {
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
         guard isReady(),
-              let verticesBuffer = verticesBuffer,
-              let indicesBuffer = indicesBuffer else { return }
+              let verticesBuffer,
+              let indicesBuffer else { return }
 
         lock.lock()
         defer {
             lock.unlock()
         }
-        if (shader is AlphaShader || shader is RasterShader), texture == nil {
+        if shader is AlphaShader || shader is RasterShader, texture == nil {
             ready = false
             return
         }
 
         #if DEBUG
-        encoder.pushDebugGroup(label)
-        defer {
-            encoder.popDebugGroup()
-        }
+            encoder.pushDebugGroup(label)
+            defer {
+                encoder.popDebugGroup()
+            }
         #endif
 
         if isMasked {
@@ -110,7 +110,7 @@ final class Quad2d: BaseGraphicsObject {
 
         encoder.setFragmentSamplerState(sampler, index: 0)
 
-        if let texture = texture {
+        if let texture {
             encoder.setFragmentTexture(texture, index: 0)
         }
 
@@ -119,7 +119,6 @@ final class Quad2d: BaseGraphicsObject {
                                       indexType: .uint16,
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
-
     }
 }
 
@@ -180,10 +179,10 @@ extension Quad2d: MCQuad2dInterface {
             fatalError("unexpected TextureHolder")
         }
         texture = textureHolder.texture
-
     }
 
-    func removeTexture() {}
+    func removeTexture() {
+    }
 
     func asGraphicsObject() -> MCGraphicsObjectInterface? {
         self

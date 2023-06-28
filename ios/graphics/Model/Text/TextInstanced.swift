@@ -64,14 +64,14 @@ final class TextInstanced: BaseGraphicsObject {
             lock.unlock()
         }
 
-        guard let verticesBuffer = verticesBuffer,
-              let indicesBuffer = indicesBuffer,
-              let positionsBuffer = positionsBuffer,
-                let scalesBuffer = scalesBuffer,
-                let rotationsBuffer = rotationsBuffer,
-                let textureCoordinatesBuffer = textureCoordinatesBuffer,
-                let styleIndicesBuffer = styleIndicesBuffer,
-                let styleBuffer = styleBuffer,
+        guard let verticesBuffer,
+              let indicesBuffer,
+              let positionsBuffer,
+              let scalesBuffer,
+              let rotationsBuffer,
+              let textureCoordinatesBuffer,
+              let styleIndicesBuffer,
+              let styleBuffer,
               instanceCount != 0 else { return }
 
         if isMasked {
@@ -85,10 +85,10 @@ final class TextInstanced: BaseGraphicsObject {
         }
 
         #if DEBUG
-        encoder.pushDebugGroup("TextInstanced")
-        defer {
-            encoder.popDebugGroup()
-        }
+            encoder.pushDebugGroup("TextInstanced")
+            defer {
+                encoder.popDebugGroup()
+            }
         #endif
 
         shader.setupProgram(context)
@@ -101,7 +101,7 @@ final class TextInstanced: BaseGraphicsObject {
 
         encoder.setFragmentSamplerState(sampler, index: 0)
 
-        if let texture = texture {
+        if let texture {
             encoder.setFragmentTexture(texture, index: 0)
         }
 
@@ -113,14 +113,12 @@ final class TextInstanced: BaseGraphicsObject {
 
         encoder.setFragmentBuffer(styleBuffer, offset: 0, index: 1)
 
-
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,
                                       indexType: .uint16,
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0,
                                       instanceCount: instanceCount)
-
     }
 }
 
@@ -207,7 +205,6 @@ extension TextInstanced: MCTextInstancedInterface {
             styleBuffer.copyOrCreate(from: values, device: device)
         }
     }
-
 
     func removeTexture() {
         lock.withCritical {

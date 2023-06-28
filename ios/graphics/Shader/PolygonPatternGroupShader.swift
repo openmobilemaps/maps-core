@@ -14,7 +14,8 @@ import Metal
 import UIKit
 
 class PolygonPatternGroupShader: BaseShader {
-    override init() {}
+    override init() {
+    }
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
@@ -23,13 +24,12 @@ class PolygonPatternGroupShader: BaseShader {
     }
 
     override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
-        guard let pipeline = pipeline else { return }
+        guard let pipeline else { return }
         context.setRenderPipelineStateIfNeeded(pipeline)
     }
 }
 
 extension PolygonPatternGroupShader: MCPolygonPatternGroupShaderInterface {
-
     func asShaderProgram() -> MCShaderProgramInterface? {
         self
     }

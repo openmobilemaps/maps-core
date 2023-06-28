@@ -13,9 +13,9 @@ import MapCoreSharedModule
 import Metal
 
 class StretchInstancedShader: BaseShader {
-    private let shader : PipelineType
+    private let shader: PipelineType
 
-    init(shader : PipelineType = .stretchInstancedShader) {
+    init(shader: PipelineType = .stretchInstancedShader) {
         self.shader = shader
     }
 
@@ -26,7 +26,7 @@ class StretchInstancedShader: BaseShader {
     }
 
     override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
-        guard let pipeline = pipeline else { return }
+        guard let pipeline else { return }
 
         context.setRenderPipelineStateIfNeeded(pipeline)
     }

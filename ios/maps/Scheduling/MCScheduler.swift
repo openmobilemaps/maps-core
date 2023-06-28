@@ -20,7 +20,6 @@ private class WeakOperation {
 }
 
 open class MCScheduler: MCSchedulerInterface {
-
     private let ioQueue = OperationQueue(concurrentOperations: 64, qos: .userInteractive)
 
     private let computationQueue = OperationQueue(concurrentOperations: 20, qos: .userInteractive)
@@ -39,18 +38,18 @@ open class MCScheduler: MCSchedulerInterface {
     }
 
     public func addTask(_ task: MCTaskInterface?) {
-        guard let task = task else { return }
+        guard let task else { return }
 
         let config = task.getConfig()
         let delay = TimeInterval(Double(config.delay) / 1000.0)
 
-        if config.executionEnvironment == .GRAPHICS && delay == 0.0 {
+        if config.executionEnvironment == .GRAPHICS, delay == 0.0 {
             task.run()
             return
         }
 
         internalSchedulerQueue.asyncAfter(deadline: .now() + delay) { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
 
             let operation = TaskOperation(task: task, scheduler: self)
 
@@ -68,9 +67,9 @@ open class MCScheduler: MCSchedulerInterface {
             self.outstandingOperations[config.id] = .init(operation)
 
             operation.completionBlock = { [weak self] in
-                guard let self = self else { return }
+                guard let self else { return }
                 self.internalSchedulerQueue.async { [weak self] in
-                    guard let self = self else { return }
+                    guard let self else { return }
                     self.outstandingOperations.removeValue(forKey: config.id)
                 }
             }
@@ -131,7 +130,6 @@ open class MCScheduler: MCSchedulerInterface {
     public func hasSeparateGraphicsInvocation() -> Bool { false }
 
     public func runGraphicsTasks() -> Bool { false }
-
 }
 
 private extension OperationQueue {

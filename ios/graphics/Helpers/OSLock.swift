@@ -1,6 +1,6 @@
 //
 //  OSLock.swift
-//  
+//
 //
 //  Created by Stefan Mitterrutzner on 01.12.22.
 //
@@ -19,7 +19,7 @@ public class OSLock {
     }
 
     func trylock() -> Bool {
-        return os_unfair_lock_trylock(oslock)
+        os_unfair_lock_trylock(oslock)
     }
 
     func withCritical<Result>(_ section: () throws -> Result) rethrows -> Result {

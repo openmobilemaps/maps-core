@@ -30,7 +30,6 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface {
 
     // MARK: - Loader
 
-
     public func load(_ font: MCFont) -> MCFontLoaderResult {
         loadingQueue.sync {
             guard let image = getFontImage(font: font) else {
@@ -44,7 +43,6 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface {
             return .init(imageData: image, fontData: data, status: .OK)
         }
     }
-
 
     private func getFontData(font: MCFont) -> MCFontData? {
         if let fontData = fontDataDictionary[font.name] {
@@ -66,29 +64,29 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface {
                     var glyphs: [MCFontGlyph] = []
 
                     for g in jsonResult["chars"] as! [NSDictionary] {
-                        var glyph : [String:AnyObject] = [:]
+                        var glyph: [String: AnyObject] = [:]
                         for a in g {
                             glyph[a.key as! String] = a.value as AnyObject
                         }
 
-                            let character = string(dict: glyph, value: "char")
+                        let character = string(dict: glyph, value: "char")
 
-                            var s0 = double(dict: glyph, value: "x")
-                            var s1 = s0 + double(dict: glyph, value: "width")
-                            var t0 = double(dict: glyph, value: "y")
-                            var t1 = t0 + double(dict: glyph, value: "height")
+                        var s0 = double(dict: glyph, value: "x")
+                        var s1 = s0 + double(dict: glyph, value: "width")
+                        var t0 = double(dict: glyph, value: "y")
+                        var t1 = t0 + double(dict: glyph, value: "height")
 
-                            s0 = s0 / imageSize
-                            s1 = s1 / imageSize
-                            t0 = t0 / imageSize
-                            t1 = t1 / imageSize
+                        s0 = s0 / imageSize
+                        s1 = s1 / imageSize
+                        t0 = t0 / imageSize
+                        t1 = t1 / imageSize
 
-                            let bearing = MCVec2D(x: double(dict: glyph, value: "xoffset") / size, y: -double(dict: glyph, value: "yoffset") / size)
+                        let bearing = MCVec2D(x: double(dict: glyph, value: "xoffset") / size, y: -double(dict: glyph, value: "yoffset") / size)
 
-                            let uv = MCQuad2dD(topLeft: MCVec2D(x: s0, y: t1), topRight: MCVec2D(x: s1, y: t1), bottomRight: MCVec2D(x: s1, y: t0), bottomLeft: MCVec2D(x: s0, y: t0))
+                        let uv = MCQuad2dD(topLeft: MCVec2D(x: s0, y: t1), topRight: MCVec2D(x: s1, y: t1), bottomRight: MCVec2D(x: s1, y: t0), bottomLeft: MCVec2D(x: s0, y: t0))
 
-                        let glyphGlyhph = MCFontGlyph(charCode: character, advance: MCVec2D(x: double(dict: glyph, value: "xadvance") / size, y:0.0), boundingBoxSize: MCVec2D(x: double(dict: glyph, value: "width") / size, y: double(dict: glyph, value: "height") / size), bearing: bearing, uv: uv)
-                            glyphs.append(glyphGlyhph)
+                        let glyphGlyhph = MCFontGlyph(charCode: character, advance: MCVec2D(x: double(dict: glyph, value: "xadvance") / size, y: 0.0), boundingBoxSize: MCVec2D(x: double(dict: glyph, value: "width") / size, y: double(dict: glyph, value: "height") / size), bearing: bearing, uv: uv)
+                        glyphs.append(glyphGlyhph)
                     }
 
                     let fontData = MCFontData(info: fontInfo, glyphs: glyphs)
@@ -120,7 +118,7 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface {
         let image = UIImage(named: font.name, in: bundle, compatibleWith: nil)
 
         guard let cgImage = image?.cgImage,
-                let textureHolder = try? TextureHolder(cgImage) else {
+              let textureHolder = try? TextureHolder(cgImage) else {
             return nil
         }
 

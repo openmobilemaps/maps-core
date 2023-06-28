@@ -56,8 +56,8 @@ final class Text: BaseGraphicsObject {
             lock.unlock()
         }
 
-        guard let verticesBuffer = verticesBuffer,
-              let indicesBuffer = indicesBuffer else { return }
+        guard let verticesBuffer,
+              let indicesBuffer else { return }
 
         if isMasked {
             if stencilState == nil {
@@ -70,10 +70,10 @@ final class Text: BaseGraphicsObject {
         }
 
         #if DEBUG
-        encoder.pushDebugGroup("Text")
-        defer {
-            encoder.popDebugGroup()
-        }
+            encoder.pushDebugGroup("Text")
+            defer {
+                encoder.popDebugGroup()
+            }
         #endif
 
         shader.setupProgram(context)
@@ -86,7 +86,7 @@ final class Text: BaseGraphicsObject {
 
         encoder.setFragmentSamplerState(sampler, index: 0)
 
-        if let texture = texture {
+        if let texture {
             encoder.setFragmentTexture(texture, index: 0)
         }
 
@@ -95,7 +95,6 @@ final class Text: BaseGraphicsObject {
                                       indexType: .uint16,
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
-
     }
 }
 
@@ -129,7 +128,8 @@ extension Text: MCTextInterface {
         texture = textureHolder.texture
     }
 
-    func removeTexture() {}
+    func removeTexture() {
+    }
 
     func asGraphicsObject() -> MCGraphicsObjectInterface? {
         self

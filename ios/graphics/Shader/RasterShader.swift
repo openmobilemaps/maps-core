@@ -12,13 +12,13 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 
-struct RasterShaderStyle: Equatable { 
+struct RasterShaderStyle: Equatable {
     let opacity: Float
     let brightnessMin: Float
     let brightnessMax: Float
     let contrast: Float
     let saturation: Float
-    
+
     init(style: MCRasterShaderStyle) {
         self.opacity = style.opacity
         self.brightnessMin = style.brightnessMin
@@ -30,38 +30,37 @@ struct RasterShaderStyle: Equatable {
 
 class RasterShader: BaseShader {
     private var rasterStyleBuffer: MTLBuffer
-    private var rasterStyleBufferContents : UnsafeMutablePointer<RasterShaderStyle>
+    private var rasterStyleBufferContents: UnsafeMutablePointer<RasterShaderStyle>
 
-    private let shader : PipelineType
-    
-    init(shader : PipelineType = .rasterShader) {
+    private let shader: PipelineType
+
+    init(shader: PipelineType = .rasterShader) {
         self.shader = shader
         guard let buffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<RasterShaderStyle>.stride, options: []) else { fatalError("Could not create buffer") }
         self.rasterStyleBuffer = buffer
         self.rasterStyleBufferContents = self.rasterStyleBuffer.contents().bindMemory(to: RasterShaderStyle.self, capacity: 1)
         self.rasterStyleBufferContents[0] = RasterShaderStyle(style: .default())
     }
-    
+
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
             pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode).json)
         }
     }
-    
+
     override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
-        guard let pipeline = pipeline else { return }
-        
+        guard let pipeline else { return }
+
         context.setRenderPipelineStateIfNeeded(pipeline)
         encoder.setFragmentBuffer(rasterStyleBuffer, offset: 0, index: 1)
     }
 }
 
 extension RasterShader: MCRasterShaderInterface {
-    
     func setStyle(_ style: MCRasterShaderStyle) {
         rasterStyleBufferContents[0] = RasterShaderStyle(style: style)
     }
-    
+
     func asShaderProgram() -> MCShaderProgramInterface? {
         self
     }

@@ -6,7 +6,7 @@ let package = Package(
     name: "MapCore",
     platforms: [
         .iOS(.v11),
-        .macOS(.v10_13)
+        .macOS(.v10_13),
     ],
     products: [
         .library(
@@ -23,7 +23,7 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/UbiqueInnovation/djinni.git", branch: "master")
+        .package(url: "https://github.com/UbiqueInnovation/djinni.git", branch: "master"),
     ],
     targets: [
         .target(
@@ -115,14 +115,14 @@ let package = Package(
             path: "ios",
             exclude: ["readme.md"],
             resources: [
-                .process("graphics/Shader/Metal/")
+                .process("graphics/Shader/Metal/"),
             ]
         ),
         .target(
             name: "MapCoreSharedModule",
             dependencies: [
                 "MapCoreSharedModuleCpp",
-                .product(name: "DjinniSupport", package: "djinni")
+                .product(name: "DjinniSupport", package: "djinni"),
             ],
             path: "bridging/ios",
             publicHeadersPath: ""
@@ -130,9 +130,9 @@ let package = Package(
         .target(
             name: "MapCoreSharedModuleCpp",
             dependencies: [
-                "vtzero", 
+                "vtzero",
                 "earcut",
-                .product(name: "DjinniSupport", package: "djinni")
+                .product(name: "DjinniSupport", package: "djinni"),
             ],
             path: "shared",
             sources: ["src", "public"],
@@ -168,8 +168,8 @@ let package = Package(
                 .headerSearchPath("src/external/pugixml"),
                 .define("DEBUG", to: "1", .when(configuration: .debug)),
                 .define("NDEBUG", to: "1", .when(configuration: .release)),
-                .define("_LIBCPP_DISABLE_AVAILABILITY", to: "1",.when(configuration: .debug)),
-                .define("_LIBCPP_DISABLE_AVAILABILITY", to: "1",.when(configuration: .release))
+                .define("_LIBCPP_DISABLE_AVAILABILITY", to: "1", .when(configuration: .debug)),
+                .define("_LIBCPP_DISABLE_AVAILABILITY", to: "1", .when(configuration: .release)),
             ]
         ),
     ],

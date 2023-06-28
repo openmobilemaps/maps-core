@@ -26,7 +26,7 @@ open class MCMapViewTouchHandler: NSObject {
     }
 
     func touchesBegan(_ touches: Set<UITouch>, with _: UIEvent?) {
-        guard let touchHandler = touchHandler else { return }
+        guard let touchHandler else { return }
         touches.forEach {
             activeTouches.insert($0)
             originalTouchLocations[$0] = $0.location(in: mapView)
@@ -35,7 +35,7 @@ open class MCMapViewTouchHandler: NSObject {
     }
 
     private func touchUp(_ touches: Set<UITouch>) {
-        guard let touchHandler = touchHandler else { return }
+        guard let touchHandler else { return }
         touches.forEach {
             activeTouches.insert($0)
 
@@ -51,7 +51,7 @@ open class MCMapViewTouchHandler: NSObject {
     }
 
     func touchesCancelled(_ touches: Set<UITouch>, with _: UIEvent?) {
-        guard let touchHandler = touchHandler else { return }
+        guard let touchHandler else { return }
         touches.forEach {
             activeTouches.insert($0)
 
@@ -63,7 +63,7 @@ open class MCMapViewTouchHandler: NSObject {
     }
 
     func touchesMoved(_ touches: Set<UITouch>, with _: UIEvent?) {
-        guard let touchHandler = touchHandler else { return }
+        guard let touchHandler else { return }
 
         func CGPointDistanceSquared(from: CGPoint, to: CGPoint) -> Double {
             (from.x - to.x) * (from.x - to.x) + (from.y - to.y) * (from.y - to.y)
@@ -84,7 +84,7 @@ open class MCMapViewTouchHandler: NSObject {
     }
 }
 
-private extension Set where Element == UITouch {
+private extension Set<UITouch> {
     func asMCTouchLocation(in view: UIView, scale: Float) -> [MCVec2F] {
         map {
             let location = $0.location(in: view)

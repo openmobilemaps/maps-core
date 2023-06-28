@@ -13,9 +13,9 @@ import MapCoreSharedModule
 import Metal
 
 class AlphaInstancedShader: BaseShader {
-    private let shader : PipelineType
+    private let shader: PipelineType
 
-    init(shader : PipelineType = .alphaInstancedShader) {
+    init(shader: PipelineType = .alphaInstancedShader) {
         self.shader = shader
     }
 
@@ -26,7 +26,7 @@ class AlphaInstancedShader: BaseShader {
     }
 
     override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
-        guard let pipeline = pipeline else { return }
+        guard let pipeline else { return }
 
         context.setRenderPipelineStateIfNeeded(pipeline)
     }

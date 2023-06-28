@@ -16,7 +16,8 @@ import UIKit
 class PolygonGroupShader: BaseShader {
     var polygonStyleBuffer: MTLBuffer?
 
-    override init() {}
+    override init() {
+    }
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
@@ -26,7 +27,7 @@ class PolygonGroupShader: BaseShader {
 
     override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
         guard let encoder = context.encoder,
-              let pipeline = pipeline else { return }
+              let pipeline else { return }
 
         context.setRenderPipelineStateIfNeeded(pipeline)
 

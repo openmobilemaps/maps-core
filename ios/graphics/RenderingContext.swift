@@ -68,7 +68,6 @@ public class RenderingContext: NSObject {
         encoder?.setRenderPipelineState(pipelineState)
     }
 
-
     /// a Quad that fills the whole viewport
     /// this is needed to clear the stencilbuffer
     lazy var stencilClearQuad: Quad2d = {
@@ -83,7 +82,7 @@ public class RenderingContext: NSObject {
     }()
 
     public func clearStencilBuffer() {
-        guard let encoder = encoder else { return }
+        guard let encoder else { return }
         stencilClearQuad.render(encoder: encoder,
                                 context: self,
                                 renderPass: .init(renderPass: 0),
@@ -102,7 +101,7 @@ extension RenderingContext: MCRenderingContextInterface {
     }
 
     public func setupDrawFrame() {
-        currentPipeline = nil;
+        currentPipeline = nil
     }
 
     public func onSurfaceCreated() {

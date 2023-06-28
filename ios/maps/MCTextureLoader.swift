@@ -8,22 +8,20 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
+import DjinniSupport
 import MapCoreSharedModule
 import UIKit
-import DjinniSupport
 
 open class MCTextureLoader: MCLoaderInterface {
-
     private let session: URLSession
 
     public var isRasterDebugModeEnabled: Bool
-    
+
     var taskQueue = DispatchQueue(label: "MCTextureLoader.tasks")
     var tasks: [String: URLSessionTask] = [:]
 
-    public init(urlSession: URLSession? = nil)
-    {
-        if let urlSession = urlSession {
+    public init(urlSession: URLSession? = nil) {
+        if let urlSession {
             session = urlSession
         } else {
             let sessionConfig = URLSessionConfiguration.default
@@ -46,42 +44,42 @@ open class MCTextureLoader: MCLoaderInterface {
         semaphore.wait()
         return result!
     }
-    
+
     open func loadTextureAsnyc(_ url: String, etag: String?) -> DJFuture<MCTextureLoaderResult> {
         let urlString = url
-        
+
         guard let url = URL(string: urlString) else {
             preconditionFailure("invalid url: \(urlString)")
         }
-        
+
         var urlRequest = URLRequest(url: url)
-        
+
         modifyUrlRequest(request: &urlRequest)
-        
-        var wasCached = false;
+
+        var wasCached = false
         if isRasterDebugModeEnabled,
            session.configuration.urlCache?.cachedResponse(for: urlRequest) != nil {
             wasCached = true
         }
-        
+
         let promise = DJPromise<MCTextureLoaderResult>()
-        
+
         var task = session.dataTask(with: urlRequest) { [weak self] data, response_, error_ in
-            guard let self = self else { return }
-            
+            guard let self else { return }
+
             self.taskQueue.sync {
                 _ = self.tasks.removeValue(forKey: urlString) == nil
             }
-            
+
             let result: Data? = data
             let response: HTTPURLResponse? = response_ as? HTTPURLResponse
             let error: NSError? = error_ as NSError?
-            
+
             if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorTimedOut {
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_TIMEOUT, errorCode: (error?.code).stringOrNil))
-                return 
+                return
             }
-            
+
             if response?.statusCode == 404 {
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_404, errorCode: (response?.statusCode).stringOrNil))
                 return
@@ -92,12 +90,12 @@ open class MCTextureLoader: MCLoaderInterface {
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_NETWORK, errorCode: (response?.statusCode).stringOrNil))
                 return
             }
-            
+
             guard let data = result else {
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: (response?.statusCode).stringOrNil))
                 return
             }
-            
+
             do {
                 if self.isRasterDebugModeEnabled,
                    let uiImage = UIImage(data: data) {
@@ -111,7 +109,7 @@ open class MCTextureLoader: MCLoaderInterface {
                         return
                     }
                 }
-                
+
                 let textureHolder = try TextureHolder(data)
                 promise.setValue(.init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil))
                 return
@@ -125,7 +123,7 @@ open class MCTextureLoader: MCLoaderInterface {
                     promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: "MNL"))
                     return
                 }
-                
+
                 let renderer = UIGraphicsImageRenderer(size: uiImage.size)
                 let img = renderer.image { ctx in
                     if self.isRasterDebugModeEnabled {
@@ -134,26 +132,24 @@ open class MCTextureLoader: MCLoaderInterface {
                         uiImage.draw(in: .init(origin: .init(), size: uiImage.size))
                     }
                 }
-                
+
                 guard let cgImage = img.cgImage,
                       let textureHolder = try? TextureHolder(cgImage) else {
                     promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: "UINL"))
                     return
                 }
-                
+
                 promise.setValue(.init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil))
                 return
             }
-            
         }
-        
+
         taskQueue.sync {
             tasks[urlString] = task
-            
         }
-        
+
         modifyDataTask(task: &task)
-        
+
         task.resume()
         return promise.getFuture()
     }
@@ -169,23 +165,23 @@ open class MCTextureLoader: MCLoaderInterface {
         semaphore.wait()
         return result!
     }
-    
+
     public func loadDataAsync(_ url: String, etag: String?) -> DJFuture<MCDataLoaderResult> {
         let urlString = url
-        
+
         guard let url = URL(string: urlString) else {
             preconditionFailure("invalid url: \(urlString)")
         }
-        
+
         var urlRequest = URLRequest(url: url)
-        
+
         modifyUrlRequest(request: &urlRequest)
-        
+
         let promise = DJPromise<MCDataLoaderResult>()
-        
+
         var task = session.dataTask(with: urlRequest) { [weak self] data, response_, error_ in
-            guard let self = self else { return }
-            
+            guard let self else { return }
+
             self.taskQueue.sync {
                 _ = self.tasks.removeValue(forKey: urlString) == nil
             }
@@ -193,12 +189,12 @@ open class MCTextureLoader: MCLoaderInterface {
             let result: Data? = data
             let response: HTTPURLResponse? = response_ as? HTTPURLResponse
             let error: NSError? = error_ as NSError?
-            
+
             if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorTimedOut {
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_TIMEOUT, errorCode: (error?.code).stringOrNil))
-                return 
+                return
             }
-            
+
             if response?.statusCode == 404 {
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_404, errorCode: (response?.statusCode).stringOrNil))
                 return
@@ -209,28 +205,25 @@ open class MCTextureLoader: MCLoaderInterface {
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_NETWORK, errorCode: (response?.statusCode).stringOrNil))
                 return
             }
-            
+
             guard let data = result else {
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: (response?.statusCode).stringOrNil))
                 return
             }
-            
+
             promise.setValue(.init(data: data, etag: response?.etag, status: .OK, errorCode: nil))
-            return
-            
         }
-        
+
         taskQueue.sync {
             tasks[urlString] = task
-            
         }
-        
+
         modifyDataTask(task: &task)
-        
+
         task.resume()
         return promise.getFuture()
     }
-    
+
     public func cancel(_ url: String) {
         self.taskQueue.sync {
             if let task = self.tasks[url] {
@@ -245,7 +238,7 @@ open class MCTextureLoader: MCLoaderInterface {
     open func modifyDataTask(task _: inout URLSessionDataTask) {
     }
 
-    func applyDebugWatermark(url: String, byteCount: Int, image: UIImage, wasCached: Bool , ctx: UIGraphicsRendererContext) {
+    func applyDebugWatermark(url: String, byteCount: Int, image: UIImage, wasCached: Bool, ctx: UIGraphicsRendererContext) {
         let size = image.size
 
         image.draw(in: .init(origin: .init(), size: size))
@@ -253,7 +246,7 @@ open class MCTextureLoader: MCLoaderInterface {
         guard isRasterDebugModeEnabled else { return }
 
         ctx.cgContext.setFillColor(gray: 0.1, alpha: 0.2)
-        ctx.fill( .init(origin: .init(), size: size), blendMode: .normal)
+        ctx.fill(.init(origin: .init(), size: size), blendMode: .normal)
 
         ctx.cgContext.setStrokeColor(UIColor.black.cgColor)
         ctx.cgContext.setLineWidth(5.0)
@@ -262,8 +255,8 @@ open class MCTextureLoader: MCLoaderInterface {
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.alignment = .center
 
-        let attrs: [NSAttributedString.Key : Any] = [NSAttributedString.Key.paragraphStyle: paragraphStyle,
-                                                     NSAttributedString.Key.backgroundColor: wasCached ? UIColor.lightGray.cgColor : UIColor.white.cgColor]
+        let attrs: [NSAttributedString.Key: Any] = [NSAttributedString.Key.paragraphStyle: paragraphStyle,
+                                                    NSAttributedString.Key.backgroundColor: wasCached ? UIColor.lightGray.cgColor : UIColor.white.cgColor]
 
         let byteCountString = ByteCountFormatter().string(fromByteCount: Int64(byteCount))
         let loadedString = wasCached ? "Loaded from Cache" : "Loaded from www"
@@ -285,7 +278,7 @@ extension HTTPURLResponse {
     }
 }
 
-private extension Optional where Wrapped == Int {
+private extension Int? {
     var stringOrNil: String {
         switch self {
             case .none:

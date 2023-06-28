@@ -14,12 +14,12 @@ import Metal
 
 class AlphaShader: BaseShader {
     private var alpha: Float = 1.0
-    private var alphaContent : UnsafeMutablePointer<Float>
+    private var alphaContent: UnsafeMutablePointer<Float>
 
-    private let shader : PipelineType
+    private let shader: PipelineType
     private let buffer: MTLBuffer
 
-    init(shader : PipelineType = .alphaShader) {
+    init(shader: PipelineType = .alphaShader) {
         self.shader = shader
         guard let buffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<Float>.stride, options: []) else { fatalError("Could not create buffer") }
         self.buffer = buffer
@@ -34,7 +34,7 @@ class AlphaShader: BaseShader {
     }
 
     override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
-        guard let pipeline = pipeline else { return }
+        guard let pipeline else { return }
 
         context.setRenderPipelineStateIfNeeded(pipeline)
         encoder.setFragmentBuffer(buffer, offset: 0, index: 1)

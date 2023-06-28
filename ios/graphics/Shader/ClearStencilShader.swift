@@ -13,7 +13,6 @@ import MapCoreSharedModule
 import Metal
 
 class ClearStencilShader: BaseShader {
-
     lazy var clearMask: MTLDepthStencilState? = {
         let descriptor = MTLStencilDescriptor()
         descriptor.stencilCompareFunction = .always
@@ -34,7 +33,7 @@ class ClearStencilShader: BaseShader {
 
     override func preRender(_ context: MCRenderingContextInterface?) {
         guard let encoder = (context as? RenderingContext)?.encoder,
-              let pipeline = pipeline else { return }
+              let pipeline else { return }
 
         (context as? RenderingContext)?.setRenderPipelineStateIfNeeded(pipeline)
         encoder.setDepthStencilState(clearMask)
