@@ -78,4 +78,6 @@ private:
     std::vector<std::vector<float>> textureCoordinates;
 
     std::vector<std::tuple<PolygonCoord, std::shared_ptr<FeatureContext>>> hitDetectionPolygons;
+
+    std::vector<std::shared_ptr<PolygonPatternGroup2dLayerObject>> toClear;
 };

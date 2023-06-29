@@ -67,4 +67,6 @@ private:
 
     std::vector<std::vector<ShaderLineStyle>> reusableLineStyles;
     std::unordered_map<size_t, std::pair<int, int>> styleHashToGroupMap;
+
+    std::vector<std::shared_ptr<LineGroup2dLayerObject>> toClear;
 };

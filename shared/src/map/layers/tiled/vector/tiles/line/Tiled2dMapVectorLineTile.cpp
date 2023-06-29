@@ -26,19 +26,48 @@ Tiled2dMapVectorLineTile::Tiled2dMapVectorLineTile(const std::weak_ptr<MapInterf
 void Tiled2dMapVectorLineTile::updateVectorLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                                       const Tiled2dMapVectorTileDataVector &tileData) {
     Tiled2dMapVectorTile::updateVectorLayerDescription(description, tileData);
-    featureGroups.clear();
-    reusableLineStyles.clear();
-    styleHashToGroupMap.clear();
-    hitDetection.clear();
-    usedKeys = std::move(description->getUsedKeys());
+    const auto newUsedKeys = description->getUsedKeys();
+    bool usedKeysContainsNewUsedKeys = true;;
+    if (usedKeysContainsNewUsedKeys) {
+        for (const auto &key : newUsedKeys ) {
+            if (usedKeys.count(key) == 0) {
+                usedKeysContainsNewUsedKeys = false;
+                break;
+            }
+        }
+    }
     isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
     lastZoom = std::nullopt;
-    setVectorTileData(tileData);
+    lastAlpha = std::nullopt;
+
+    usedKeys = std::move(newUsedKeys);
+    if (usedKeysContainsNewUsedKeys) {
+        auto selfActor = WeakActor(mailbox, shared_from_this()->weak_from_this());
+        selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorLineTile::update);
+        
+        tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this()));
+    } else {
+        reusableLineStyles.clear();
+        featureGroups.clear();
+        styleHashToGroupMap.clear();
+        hitDetection.clear();
+        toClear.insert(toClear.begin(), lines.begin(), lines.end());
+        lines.clear();
+        shaders.clear();
+        setVectorTileData(tileData);
+    }
 }
 
 void Tiled2dMapVectorLineTile::update() {
     if (shaders.empty()) {
         return;
+    }
+
+    if (!toClear.empty()) {
+        for (auto const &line: toClear) {
+            if (line->getLineObject()->isReady()) line->getLineObject()->clear();
+        }
+        toClear.clear();
     }
     
     auto mapInterface = this->mapInterface.lock();

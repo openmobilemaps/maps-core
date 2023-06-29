@@ -280,6 +280,23 @@ void Tiled2dMapVectorSourceTileDataManager::tileIsReady(const Tiled2dMapTileInfo
     if (!tileActor) {
         return;
     }
+
+    auto tilesIt = tiles.find(tile);
+    if (tilesIt == tiles.end()) {
+        return;
+    }
+
+    bool found = false;
+    for (auto const [index, string, actor]: tilesIt->second) {
+        if (layerIdentifier == layerIdentifier && actor.unsafe() == tileActor.unsafe().lock()) {
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        return;
+    }
+
     const auto &renderObjects = tileActor.syncAccess([](const auto &t){
         if (auto strongT = t.lock()) {
             return strongT->generateRenderObjects();

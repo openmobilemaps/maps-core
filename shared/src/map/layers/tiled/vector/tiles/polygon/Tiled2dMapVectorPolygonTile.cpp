@@ -66,6 +66,8 @@ void Tiled2dMapVectorPolygonTile::updateVectorLayerDescription(const std::shared
     if (usedKeysContainsNewUsedKeys) {
         auto selfActor = WeakActor(mailbox, shared_from_this()->weak_from_this());
         selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorPolygonTile::update);
+
+        tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this()));
     } else {
         featureGroups.clear();
         styleHashToGroupMap.clear();
@@ -80,6 +82,13 @@ void Tiled2dMapVectorPolygonTile::updateVectorLayerDescription(const std::shared
 void Tiled2dMapVectorPolygonTile::update() {
     if (shaders.empty()) {
         return;
+    }
+
+    if (!toClear.empty()) {
+        for (auto const &polygon: toClear) {
+            if (polygon->getPolygonObject()->isReady()) polygon->getPolygonObject()->clear();
+        }
+        toClear.clear();
     }
 
     auto mapInterface = this->mapInterface.lock();
@@ -141,10 +150,6 @@ void Tiled2dMapVectorPolygonTile::setup() {
     auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
     tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
 
-    for (auto const &polygon: toClear) {
-        if (polygon->getPolygonObject()->isReady()) polygon->getPolygonObject()->clear();
-    }
-    toClear.clear();
 }
 
 void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDataVector &tileData) {
