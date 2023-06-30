@@ -111,11 +111,13 @@ void Tiled2dMapVectorSourceSymbolDataManager::updateLayerDescription(std::shared
             continue;
         }
 
-        for (const auto &[_, groups] : tileGroup->second) {
-            for (const auto &group : groups) {
+        auto tileGroupIt = tileGroup->second.find(layerDescription->identifier);
+        if (tileGroupIt != tileGroup->second.end()) {
+            for (const auto &group : tileGroupIt->second) {
                 toClear.push_back(group);
             }
         }
+
         tileGroup->second.erase(layerDescription->identifier);
 
         // If new source of layer is not handled by this manager, continue
