@@ -40,13 +40,13 @@ void Tiled2dMapVectorLineTile::updateVectorLayerDescription(const std::shared_pt
     lastZoom = std::nullopt;
     lastAlpha = std::nullopt;
 
-    usedKeys = std::move(newUsedKeys);
     if (usedKeysContainsNewUsedKeys) {
         auto selfActor = WeakActor(mailbox, shared_from_this()->weak_from_this());
         selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorLineTile::update);
         
         tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this()));
     } else {
+        usedKeys = std::move(newUsedKeys);
         reusableLineStyles.clear();
         featureGroups.clear();
         styleHashToGroupMap.clear();
