@@ -259,6 +259,8 @@ public:
 
     virtual ValueVariant evaluate(const EvaluationContext &context) const = 0;
 
+    virtual bool isEqual(const std::shared_ptr<Value> &other) const = 0;
+
     template<typename T>
     T evaluateOr(const EvaluationContext &context, const T &alternative) const {
         auto const &value = evaluate(context);
@@ -529,6 +531,13 @@ public:
 
         return "";
     };
+
+    bool isEqual(const std::shared_ptr<Value> &other) const override {
+        if (auto casted = std::dynamic_pointer_cast<GetPropertyValue>(other)) {
+            return casted->key == key;
+        }
+        return false;
+    };
 private:
     const std::string key;
 };
@@ -582,6 +591,13 @@ public:
                 return std::string("");
             }
         }, value->evaluate(context));
+    };
+
+    bool isEqual(const std::shared_ptr<Value> &other) const override {
+        if (auto casted = std::dynamic_pointer_cast<ToStringValue>(other)) {
+            return value && casted->value && casted->value->isEqual(value);
+        }
+        return false;
     };
 };
 
@@ -671,6 +687,13 @@ public:
         }
 
     };
+
+    bool isEqual(const std::shared_ptr<Value> &other) const override {
+        if (auto casted = std::dynamic_pointer_cast<StaticValue>(other)) {
+            return casted->value == value;
+        }
+        return false;
+    };
 private:
     const ValueVariant value;
 };
@@ -689,6 +712,13 @@ public:
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
         return context.feature->contains(key);
+    };
+
+    bool isEqual(const std::shared_ptr<Value> &other) const override {
+        if (auto casted = std::dynamic_pointer_cast<HasPropertyValue>(other)) {
+            return casted->key == key;
+        }
+        return false;
     };
 private:
     const std::string key;
@@ -735,6 +765,13 @@ public:
                 return 0.0;
             }
         }, value->evaluate(context));
+    };
+
+    bool isEqual(const std::shared_ptr<Value> &other) const override {
+        if (auto casted = std::dynamic_pointer_cast<ScaleValue>(other)) {
+            return value && casted->value && casted->value->isEqual(value) && scale == casted->scale;
+        }
+        return false;
     };
 private:
     const std::shared_ptr<Value> value;
@@ -789,6 +826,27 @@ public:
         }
         const auto last = std::get<1>(steps[maxStepInd]);
         return last->evaluate(context);
+    }
+
+    bool isEqual(const std::shared_ptr<Value> &other) const override {
+        if (auto casted = std::dynamic_pointer_cast<InterpolatedValue>(other)) {
+            if (casted->interpolationBase != interpolationBase) {
+                return false;
+            }
+            if (casted->steps.size() != steps.size()) {
+                return false;
+            }
+            for (int i = 0; i < steps.size(); i++) {
+                if (std::get<0>(casted->steps[i]) != std::get<0>(steps[i])) {
+                    return false;
+                }
+                if (std::get<1>(casted->steps[i]) && std::get<1>(steps[i]) && !std::get<1>(casted->steps[i])->isEqual(std::get<1>(steps[i]))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     ValueVariant interpolate(const double &interpolationFactor, const ValueVariant &yBase, const ValueVariant &yTop) const {
@@ -884,6 +942,28 @@ public:
         const auto step = std::get<1>(steps[index]);
         return step->evaluate(context);
     }
+
+    bool isEqual(const std::shared_ptr<Value> &other) const override {
+        if (auto casted = std::dynamic_pointer_cast<BezierInterpolatedValue>(other)) {
+            if (casted->bezier != bezier) {
+                return false;
+            }
+            if (casted->steps.size() != steps.size()) {
+                return false;
+            }
+            for (int i = 0; i < steps.size(); i++) {
+                if (std::get<0>(casted->steps[i]) != std::get<0>(steps[i])) {
+                    return false;
+                }
+                if (std::get<1>(casted->steps[i]) && std::get<1>(steps[i]) && !std::get<1>(casted->steps[i])->isEqual(std::get<1>(steps[i]))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
     ValueVariant interpolate(const double &interpolationFactor, const ValueVariant &yBase, const ValueVariant &yTop) const {
 
         if (std::holds_alternative<int64_t>(yBase) && std::holds_alternative<int64_t>(yTop)) {
@@ -908,8 +988,8 @@ public:
 
 
 private:
-    UnitBezier bezier;
-    std::vector<std::tuple<double, std::shared_ptr<Value>>> steps;
+    const UnitBezier bezier;
+    const std::vector<std::tuple<double, std::shared_ptr<Value>>> steps;
 };
 
 enum class PropertyCompareType {
@@ -1022,6 +1102,44 @@ public:
         }
         return std::get<1>(*stops.rbegin())->evaluate(context);
     }
+    bool isEqual(const std::shared_ptr<Value>& other) const override {
+        if (auto casted = std::dynamic_pointer_cast<StepValue>(other)) {
+            // Compare the compareValue member
+            if (!compareValue->isEqual(casted->compareValue)) {
+                return false;
+            }
+
+            // Compare the stops member
+            if (stops.size() != casted->stops.size()) {
+                return false;
+            }
+
+            for (size_t i = 0; i < stops.size(); ++i) {
+                const auto &thisStop = stops[i];
+                const auto &otherStop = casted->stops[i];
+
+                // Compare the first value in the tuple
+                if (std::get<0>(thisStop) && std::get<0>(otherStop) && !std::get<0>(thisStop)->isEqual(std::get<0>(otherStop))) {
+                    return false;
+                }
+
+                // Compare the second value in the tuple
+                if (std::get<1>(thisStop) && std::get<1>(otherStop) && !std::get<1>(thisStop)->isEqual(std::get<1>(otherStop))) {
+                    return false;
+                }
+            }
+
+            // Compare the defaultValue member
+            if (!defaultValue->isEqual(casted->defaultValue)) {
+                return false;
+            }
+
+            return true; // All members are equal
+        }
+
+        return false; // Not the same type or nullptr
+    }
+
 private:
     const std::shared_ptr<Value> compareValue;
     std::vector<std::tuple<std::shared_ptr<Value>, std::shared_ptr<Value>>> stops;
@@ -1062,6 +1180,40 @@ public:
         }
         return defaultValue->evaluate(context);
     }
+
+    bool isEqual(const std::shared_ptr<Value>& other) const override {
+        if (auto casted = std::dynamic_pointer_cast<CaseValue>(other)) {
+            // Compare the cases member
+            if (cases.size() != casted->cases.size()) {
+                return false;
+            }
+
+            for (size_t i = 0; i < cases.size(); ++i) {
+                const auto &thisCase = cases[i];
+                const auto &otherCase = casted->cases[i];
+
+                // Compare the first value in the tuple (condition)
+                if (std::get<0>(thisCase) && std::get<0>(otherCase) && !std::get<0>(thisCase)->isEqual(std::get<0>(otherCase))) {
+                    return false;
+                }
+
+                // Compare the second value in the tuple (value)
+                if (!std::get<1>(thisCase)->isEqual(std::get<1>(otherCase))) {
+                    return false;
+                }
+            }
+
+            // Compare the defaultValue member
+            if (!defaultValue->isEqual(casted->defaultValue)) {
+                return false;
+            }
+
+            return true; // All members are equal
+        }
+
+        return false; // Not the same type or nullptr
+    }
+
 private:
     const std::vector<std::tuple<std::shared_ptr<Value>, std::shared_ptr<Value>>> cases;
     const std::shared_ptr<Value> defaultValue;
@@ -1119,6 +1271,17 @@ public:
             }
         }, value->evaluate(context));
     };
+
+    bool isEqual(const std::shared_ptr<Value>& other) const override {
+        if (auto casted = std::dynamic_pointer_cast<ToNumberValue>(other)) {
+            // Compare the value member
+            if (value && casted->value && !value->isEqual(casted->value)) {
+                return false;
+            }
+            return true; // All members are equal
+        }
+        return false; // Not the same type or nullptr
+    }
 };
 
 
@@ -1180,8 +1343,39 @@ public:
 
         return defaultValue->evaluate(context);
     };
-};
 
+    bool isEqual(const std::shared_ptr<Value>& other) const override {
+        if (auto casted = std::dynamic_pointer_cast<MatchValue>(other)) {
+            // Compare the compareValue member
+            if (!compareValue->isEqual(casted->compareValue)) {
+                return false;
+            }
+            // Compare the valueMapping member
+            if (valueMapping.size() != casted->valueMapping.size()) {
+                return false;
+            }
+
+            for (size_t i = 0; i < valueMapping.size(); ++i) {
+                const auto &thisPair = valueMapping[i];
+                const auto &otherPair = casted->valueMapping[i];
+                // Compare the first value in the pair (ValueVariant)
+                if (thisPair.first != otherPair.first) {
+                    return false;
+                }
+                // Compare the second value in the pair (Value)
+                if (thisPair.second && otherPair.second && !thisPair.second->isEqual(otherPair.second)) {
+                    return false;
+                }
+            }
+            // Compare the defaultValue member
+            if (!defaultValue->isEqual(casted->defaultValue)) {
+                return false;
+            }
+            return true; // All members are equal
+        }
+        return false; // Not the same type or nullptr
+    };
+};
 
 
 class PropertyFilter : public Value {
@@ -1228,6 +1422,44 @@ public:
         }
 
         return defaultValue->evaluate(context);
+    };
+
+    bool isEqual(const std::shared_ptr<Value>& other) const override {
+        if (auto casted = std::dynamic_pointer_cast<PropertyFilter>(other)) {
+            // Compare the defaultValue member
+            if (!defaultValue->isEqual(casted->defaultValue)) {
+                return false;
+            }
+
+            // Compare the valueMapping member
+            if (valueMapping.size() != casted->valueMapping.size()) {
+                return false;
+            }
+
+            for (size_t i = 0; i < valueMapping.size(); ++i) {
+                const auto &thisPair = valueMapping[i];
+                const auto &otherPair = casted->valueMapping[i];
+
+                // Compare the first value in the pair (ValueVariant)
+                if (thisPair.first != otherPair.first) {
+                    return false;
+                }
+
+                // Compare the second value in the pair (Value)
+                if (thisPair.second && otherPair.second && !thisPair.second->isEqual(otherPair.second)) {
+                    return false;
+                }
+            }
+
+            // Compare the key member
+            if (key != casted->key) {
+                return false;
+            }
+
+            return true; // All members are equal
+        }
+
+        return false; // Not the same type or nullptr
     };
 };
 
@@ -1278,6 +1510,27 @@ public:
         }
     };
 
+    bool isEqual(const std::shared_ptr<Value>& other) const override {
+        if (auto casted = std::dynamic_pointer_cast<LogOpValue>(other)) {
+            // Compare the logOpType member
+            if (logOpType != casted->logOpType) {
+                return false;
+            }
+
+            if (lhs && casted->lhs && !lhs->isEqual(casted->lhs)) {
+                return false;
+            }
+
+            if (rhs && casted->rhs && !rhs->isEqual(casted->rhs)) {
+                return false;
+            }
+
+            return true; // All members are equal
+        }
+
+        return false; // Not the same type or nullptr
+    };
+
 private:
     const LogOpType logOpType;
     const std::shared_ptr<Value> lhs;
@@ -1314,6 +1567,26 @@ public:
         return true;
     };
 
+    bool isEqual(const std::shared_ptr<Value>& other) const override {
+        if (auto casted = std::dynamic_pointer_cast<AllValue>(other)) {
+            // Compare the sizes of the values vectors
+            if (values.size() != casted->values.size()) {
+                return false;
+            }
+
+            // Compare each value in the values vectors
+            for (size_t i = 0; i < values.size(); ++i) {
+                if (values[i] && casted->values[i] && !values[i]->isEqual(casted->values[i])) {
+                    return false;
+                }
+            }
+            return true; // All values are equal
+        }
+
+        return false; // Not the same type or nullptr
+    };
+
+
 private:
     const std::vector<const std::shared_ptr<Value>> values;
 };
@@ -1347,6 +1620,25 @@ public:
         }
         return false;
     };
+
+    bool isEqual(const std::shared_ptr<Value>& other) const override {
+        if (auto casted = std::dynamic_pointer_cast<AnyValue>(other)) {
+            // Compare the sizes of the values vectors
+            if (values.size() != casted->values.size()) {
+                return false;
+            }
+            
+            // Compare each value in the values vectors
+            for (size_t i = 0; i < values.size(); ++i) {
+                if (values[i] && casted->values[i] && !values[i]->isEqual(casted->values[i])) {
+                    return false;
+                }
+            }
+            return true; // All values are equal
+        }
+        
+        return false; // Not the same type or nullptr
+    }
 
 private:
     const std::vector<const std::shared_ptr<Value>> values;
@@ -1382,6 +1674,27 @@ public:
      return ValueVariantCompareHelper::compare(lhsValue, rhsValue, type);
  };
 
+    bool isEqual(const std::shared_ptr<Value>& other) const override {
+        if (auto casted = std::dynamic_pointer_cast<PropertyCompareValue>(other)) {
+            if (lhs && casted->lhs && !lhs->isEqual(casted->lhs)) {
+                return false;
+            }
+
+            if (rhs && casted->rhs && !rhs->isEqual(casted->rhs)) {
+                return false;
+            }
+
+            // Compare the comparison type
+            if (type != casted->type) {
+                return false;
+            }
+
+            return true; // All values and types are equal
+        }
+
+        return false; // Not the same type or nullptr
+    }
+
 private:
     const std::shared_ptr<Value> lhs;
     const std::shared_ptr<Value> rhs;
@@ -1403,10 +1716,30 @@ public:
         return { key };
     }
 
- ValueVariant evaluate(const EvaluationContext &context) const override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         auto const &value = context.feature->getValue(key);
         return values.count(value) != 0;
     };
+
+
+    bool isEqual(const std::shared_ptr<Value>& other) const override {
+        if (auto casted = std::dynamic_pointer_cast<InFilter>(other)) {
+            // Compare the key
+            if (key != casted->key) {
+                return false;
+            }
+
+            // Compare the values
+            if (values != casted->values) {
+                return false;
+            }
+
+            return true; // Key and values are equal
+        }
+
+        return false; // Not the same type or nullptr
+    }
+
 };
 
 class NotInFilter : public Value {
@@ -1424,10 +1757,26 @@ public:
         return { key };
     }
 
- ValueVariant evaluate(const EvaluationContext &context) const override {
+    ValueVariant evaluate(const EvaluationContext &context) const override {
         auto const &value = context.feature->getValue(key);
         return values.count(value) == 0;
     };
+
+
+    bool isEqual(const std::shared_ptr<Value>& other) const override {
+        if (auto casted = std::dynamic_pointer_cast<NotInFilter>(other)) {
+            // Compare the key
+            if (key != casted->key) {
+                return false;
+            }
+            // Compare the values
+            if (values != casted->values) {
+                return false;
+            }
+            return true; // Key and values are equal
+        }
+        return false; // Not the same type or nullptr
+    }
 };
 
 struct FormatValueWrapper {
@@ -1465,6 +1814,32 @@ public:
         }
         return result;
     };
+
+    bool isEqual(const std::shared_ptr<Value>& other) const override {
+        if (auto casted = std::dynamic_pointer_cast<FormatValue>(other)) {
+            // Compare the values
+            if (values.size() != casted->values.size()) {
+                return false;
+            }
+
+            for (size_t i = 0; i < values.size(); i++) {
+                const FormatValueWrapper& thisWrapper = values[i];
+                const FormatValueWrapper& otherWrapper = casted->values[i];
+
+                if (thisWrapper.value && otherWrapper.value && !thisWrapper.value->isEqual(otherWrapper.value)) {
+                    return false;
+                }
+                if (thisWrapper.scale != otherWrapper.scale) {
+                    return false;
+                }
+            }
+
+            return true; // Values are equal
+        }
+
+        return false; // Not the same type or nullptr
+    }
+
 private:
     const std::vector<FormatValueWrapper> values;
 };
@@ -1521,20 +1896,40 @@ public:
         }
     };
 
+    bool isEqual(const std::shared_ptr<Value>& other) const override {
+        if (auto casted = std::dynamic_pointer_cast<MathValue>(other)) {
+            // Compare the values
+            if (lhs && casted->lhs && !lhs->isEqual(casted->lhs)) {
+                return false;
+            }
+            if (rhs && casted->rhs && !rhs->isEqual(casted->rhs)) {
+                return false;
+            }
+            if (operation != casted->operation) {
+                return false;
+            }
+
+            return true; // Values are equal
+        }
+
+        return false; // Not the same type or nullptr
+    }
+
+
 private:
     const std::shared_ptr<Value> lhs;
     const std::shared_ptr<Value> rhs;
     const MathOperation operation;
 };
 
-class LenghtValue: public Value {
+class LengthValue: public Value {
     const std::shared_ptr<Value> value;
 
 public:
-    LenghtValue(const std::shared_ptr<Value> value): value(value) {}
+    LengthValue(const std::shared_ptr<Value> value): value(value) {}
 
     std::unique_ptr<Value> clone() override {
-        return std::make_unique<LenghtValue>(value->clone());
+        return std::make_unique<LengthValue>(value->clone());
     }
 
     std::unordered_set<std::string> getUsedKeys() const override {
@@ -1572,4 +1967,18 @@ public:
             }
         }, value->evaluate(context));
     };
+
+    bool isEqual(const std::shared_ptr<Value>& other) const override {
+        if (auto casted = std::dynamic_pointer_cast<LengthValue>(other)) {
+            // Compare the value member
+            if (value && casted->value && !value->isEqual(casted->value)) {
+                return false;
+            }
+
+            return true; // Values are equal
+        }
+
+        return false; // Not the same type or nullptr
+    }
+
 };
