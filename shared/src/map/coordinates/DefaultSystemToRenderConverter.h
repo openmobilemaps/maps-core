@@ -34,9 +34,9 @@ class DefaultSystemToRenderConverter : public CoordinateConverterInterface {
         return Coord(getTo(), x - halfWidth, y - halfHeight, coordinate.z);
     }
 
-    virtual std::string getFrom() override { return mapCoordinateSystemIdentifier; }
+    virtual int32_t getFrom() override { return mapCoordinateSystemIdentifier; }
 
-    virtual std::string getTo() override { return CoordinateSystemIdentifiers::RENDERSYSTEM(); }
+    virtual int32_t getTo() override { return CoordinateSystemIdentifiers::RENDERSYSTEM(); }
 
   private:
     double boundsLeft;
@@ -46,5 +46,5 @@ class DefaultSystemToRenderConverter : public CoordinateConverterInterface {
     double halfWidth;
     double halfHeight;
 
-    std::string mapCoordinateSystemIdentifier;
+    int32_t mapCoordinateSystemIdentifier;
 };

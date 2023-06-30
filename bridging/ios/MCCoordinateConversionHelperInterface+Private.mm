@@ -47,19 +47,19 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nonnull MCCoord *)convert:(nonnull NSString *)to
+- (nonnull MCCoord *)convert:(int32_t)to
                   coordinate:(nonnull MCCoord *)coordinate {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->convert(::djinni::String::toCpp(to),
+        auto objcpp_result_ = _cppRefHandle.get()->convert(::djinni::I32::toCpp(to),
                                                            ::djinni_generated::Coord::toCpp(coordinate));
         return ::djinni_generated::Coord::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nonnull MCRectCoord *)convertRect:(nonnull NSString *)to
+- (nonnull MCRectCoord *)convertRect:(int32_t)to
                                 rect:(nonnull MCRectCoord *)rect {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->convertRect(::djinni::String::toCpp(to),
+        auto objcpp_result_ = _cppRefHandle.get()->convertRect(::djinni::I32::toCpp(to),
                                                                ::djinni_generated::RectCoord::toCpp(rect));
         return ::djinni_generated::RectCoord::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
@@ -72,10 +72,10 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nonnull MCQuadCoord *)convertQuad:(nonnull NSString *)to
+- (nonnull MCQuadCoord *)convertQuad:(int32_t)to
                                 quad:(nonnull MCQuadCoord *)quad {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->convertQuad(::djinni::String::toCpp(to),
+        auto objcpp_result_ = _cppRefHandle.get()->convertQuad(::djinni::I32::toCpp(to),
                                                                ::djinni_generated::QuadCoord::toCpp(quad));
         return ::djinni_generated::QuadCoord::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()

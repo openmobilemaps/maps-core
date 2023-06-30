@@ -21,7 +21,7 @@ public:
 
     ~Tiled2dMapVectorLayerConfig() {}
 
-    std::string getCoordinateSystemIdentifier() override {
+    int32_t getCoordinateSystemIdentifier() override {
         return epsg3857Id;
     }
 
@@ -61,7 +61,7 @@ private:
 
     const double baseValueZoom = 500000000.0;
     const double baseValueWidth = 40075016.0;
-    const std::string epsg3857Id = CoordinateSystemIdentifiers::EPSG3857();
+    const int32_t epsg3857Id = CoordinateSystemIdentifiers::EPSG3857();
     const RectCoord epsg3857Bounds = RectCoord(
             Coord(epsg3857Id, -20037508.34, 20037508.34, 0.0),
             Coord(epsg3857Id, 20037508.34, -20037508.34, 0.0)

@@ -3,55 +3,55 @@ coordinate_conversion_helper_interface = interface +c {
     # It can not be used to convert coordinates into rendering space.
     static independent_instance(): coordinate_conversion_helper_interface;
     register_converter(converter: coordinate_converter_interface);
-    convert(to: string, coordinate: coord) : coord;
-    convert_rect(to: string, rect: rect_coord) : rect_coord;
+    convert(to: i32, coordinate: coord) : coord;
+    convert_rect(to: i32, rect: rect_coord) : rect_coord;
     convert_rect_to_render_system(rect: rect_coord) : rect_coord;
-    convert_quad(to: string, quad: quad_coord) : quad_coord;
+    convert_quad(to: i32, quad: quad_coord) : quad_coord;
     convert_quad_to_render_system(quad: quad_coord) : quad_coord;
     convert_to_render_system(coordinate: coord) : coord;
 }
 
 coordinate_converter_interface = interface +c +j +o {
     convert(coordinate: coord) : coord;
-    get_from() : string;
-    get_to() : string;
+    get_from() : i32;
+    get_to() : i32;
 }
 
 bounding_box_interface = interface +c {
-    static create(system_identifier: string) : bounding_box_interface;
+    static create(system_identifier: i32) : bounding_box_interface;
     add_point(p: coord);
     as_rect_coord() : rect_coord;
     get_center() : coord;
     get_min() : coord;
     get_max() : coord;
-    get_system_identifier() : string;
+    get_system_identifier() : i32;
 }
 
 coordinate_system_identifiers = interface +c {
-    static RENDERSYSTEM(): string;
+    static RENDERSYSTEM(): i32;
 
     # WGS 84 / Pseudo-Mercator
     # https://epsg.io/3857
-    static EPSG3857(): string;
+    static EPSG3857(): i32;
 
     # WGS 84
     # https://epsg.io/4326
-    static EPSG4326(): string;
+    static EPSG4326(): i32;
 
     # LV03+
     # https://epsg.io/2056
-    static EPSG2056(): string;
+    static EPSG2056(): i32;
 
     # CH1903 / LV03
     # https://epsg.io/21781
-    static EPSG21781(): string;
+    static EPSG21781(): i32;
 
     # e.g. urn:ogc:def:crs:EPSG:21781
-    static from_crs_identifier(identifier: string): string;
+    static from_crs_identifier(identifier: string): i32;
 }
 
 map_coordinate_system = record {
-    identifier: string;
+    identifier: i32;
     bounds: rect_coord;
     unit_to_screen_meter_factor: f32;
 }
@@ -63,7 +63,7 @@ coordinate_system_factory = interface +c {
 }
 
 coord = record {
-    system_identifier: string;
+    system_identifier: i32;
     x: f64;
     y: f64;
     z: f64;

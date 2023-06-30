@@ -12,14 +12,14 @@ auto WmtsTileMatrixSet::toCpp(ObjcType obj) -> CppType
 {
     assert(obj);
     return {::djinni::String::toCpp(obj.identifier),
-            ::djinni::String::toCpp(obj.coordinateSystemIdentifier),
+            ::djinni::I32::toCpp(obj.coordinateSystemIdentifier),
             ::djinni::List<::djinni_generated::WmtsTileMatrix>::toCpp(obj.matrices)};
 }
 
 auto WmtsTileMatrixSet::fromCpp(const CppType& cpp) -> ObjcType
 {
     return [[MCWmtsTileMatrixSet alloc] initWithIdentifier:(::djinni::String::fromCpp(cpp.identifier))
-                                coordinateSystemIdentifier:(::djinni::String::fromCpp(cpp.coordinateSystemIdentifier))
+                                coordinateSystemIdentifier:(::djinni::I32::fromCpp(cpp.coordinateSystemIdentifier))
                                                   matrices:(::djinni::List<::djinni_generated::WmtsTileMatrix>::fromCpp(cpp.matrices))];
 }
 

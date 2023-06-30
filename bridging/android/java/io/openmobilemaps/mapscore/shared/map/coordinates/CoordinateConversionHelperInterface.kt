@@ -15,13 +15,13 @@ abstract class CoordinateConversionHelperInterface {
 
     abstract fun registerConverter(converter: CoordinateConverterInterface)
 
-    abstract fun convert(to: String, coordinate: Coord): Coord
+    abstract fun convert(to: Int, coordinate: Coord): Coord
 
-    abstract fun convertRect(to: String, rect: RectCoord): RectCoord
+    abstract fun convertRect(to: Int, rect: RectCoord): RectCoord
 
     abstract fun convertRectToRenderSystem(rect: RectCoord): RectCoord
 
-    abstract fun convertQuad(to: String, quad: QuadCoord): QuadCoord
+    abstract fun convertQuad(to: Int, quad: QuadCoord): QuadCoord
 
     abstract fun convertQuadToRenderSystem(quad: QuadCoord): QuadCoord
 
@@ -45,17 +45,17 @@ abstract class CoordinateConversionHelperInterface {
         }
         private external fun native_registerConverter(_nativeRef: Long, converter: CoordinateConverterInterface)
 
-        override fun convert(to: String, coordinate: Coord): Coord {
+        override fun convert(to: Int, coordinate: Coord): Coord {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_convert(this.nativeRef, to, coordinate)
         }
-        private external fun native_convert(_nativeRef: Long, to: String, coordinate: Coord): Coord
+        private external fun native_convert(_nativeRef: Long, to: Int, coordinate: Coord): Coord
 
-        override fun convertRect(to: String, rect: RectCoord): RectCoord {
+        override fun convertRect(to: Int, rect: RectCoord): RectCoord {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_convertRect(this.nativeRef, to, rect)
         }
-        private external fun native_convertRect(_nativeRef: Long, to: String, rect: RectCoord): RectCoord
+        private external fun native_convertRect(_nativeRef: Long, to: Int, rect: RectCoord): RectCoord
 
         override fun convertRectToRenderSystem(rect: RectCoord): RectCoord {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
@@ -63,11 +63,11 @@ abstract class CoordinateConversionHelperInterface {
         }
         private external fun native_convertRectToRenderSystem(_nativeRef: Long, rect: RectCoord): RectCoord
 
-        override fun convertQuad(to: String, quad: QuadCoord): QuadCoord {
+        override fun convertQuad(to: Int, quad: QuadCoord): QuadCoord {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_convertQuad(this.nativeRef, to, quad)
         }
-        private external fun native_convertQuad(_nativeRef: Long, to: String, quad: QuadCoord): QuadCoord
+        private external fun native_convertQuad(_nativeRef: Long, to: Int, quad: QuadCoord): QuadCoord
 
         override fun convertQuadToRenderSystem(quad: QuadCoord): QuadCoord {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

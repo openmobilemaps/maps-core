@@ -39,17 +39,17 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nonnull NSString *)getFrom {
+- (int32_t)getFrom {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getFrom();
-        return ::djinni::String::fromCpp(objcpp_result_);
+        return ::djinni::I32::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nonnull NSString *)getTo {
+- (int32_t)getTo {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getTo();
-        return ::djinni::String::fromCpp(objcpp_result_);
+        return ::djinni::I32::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -69,18 +69,18 @@ public:
             return ::djinni_generated::Coord::toCpp(objcpp_result_);
         }
     }
-    std::string getFrom() override
+    int32_t getFrom() override
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getFrom];
-            return ::djinni::String::toCpp(objcpp_result_);
+            return ::djinni::I32::toCpp(objcpp_result_);
         }
     }
-    std::string getTo() override
+    int32_t getTo() override
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getTo];
-            return ::djinni::String::toCpp(objcpp_result_);
+            return ::djinni::I32::toCpp(objcpp_result_);
         }
     }
 };

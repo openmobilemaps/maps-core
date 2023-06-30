@@ -3,8 +3,8 @@
 
 #pragma once
 
+#include <cstdint>
 #include <memory>
-#include <string>
 
 struct Coord;
 struct RectCoord;
@@ -13,7 +13,7 @@ class BoundingBoxInterface {
 public:
     virtual ~BoundingBoxInterface() = default;
 
-    static /*not-null*/ std::shared_ptr<BoundingBoxInterface> create(const std::string & systemIdentifier);
+    static /*not-null*/ std::shared_ptr<BoundingBoxInterface> create(int32_t systemIdentifier);
 
     virtual void addPoint(const Coord & p) = 0;
 
@@ -25,5 +25,5 @@ public:
 
     virtual Coord getMax() = 0;
 
-    virtual std::string getSystemIdentifier() = 0;
+    virtual int32_t getSystemIdentifier() = 0;
 };

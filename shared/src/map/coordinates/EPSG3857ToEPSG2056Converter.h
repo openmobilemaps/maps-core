@@ -42,9 +42,9 @@ public:
         return Coord(getTo(), x, y, z);
     }
 
-    virtual std::string getFrom() override { return CoordinateSystemIdentifiers::EPSG3857(); }
+    virtual int32_t getFrom() override { return CoordinateSystemIdentifiers::EPSG3857(); }
 
-    virtual std::string getTo() override { return CoordinateSystemIdentifiers::EPSG2056(); }
+    virtual int32_t getTo() override { return CoordinateSystemIdentifiers::EPSG2056(); }
 private:
     inline double DECtoSEX(double angle) const {
         // Extract DMS

@@ -74,9 +74,9 @@ int32_t numZ) override {
 
         std::vector<::Tiled2dMapZoomLevelInfo> zoomLevels;
 
-        std::string coordinateSystem = matrixSet.coordinateSystemIdentifier;
+        int32_t coordinateSystem = matrixSet.coordinateSystemIdentifier;
 
-        auto bounds = RectCoord(Coord("", 0, 0, 0), Coord("", 0, 0, 0));
+        auto bounds = RectCoord(Coord(0, 0, 0, 0), Coord(0, 0, 0, 0));
 
         for (auto &matrix : matrixSet.matrices) {
             int32_t zoomLevelIdentifier = stoi(matrix.identifier);
@@ -195,10 +195,9 @@ int32_t numZ) override {
         std::string identifier = tileMatrixSet.child_value("ows:Identifier");
 
         std::string supportedCRS = tileMatrixSet.child_value("ows:SupportedCRS");
-        std::string coordinateSystem = CoordinateSystemIdentifiers::fromCrsIdentifier(supportedCRS);
-        if (coordinateSystem == "") {
+        auto coordinateSystem = CoordinateSystemIdentifiers::fromCrsIdentifier(supportedCRS);
+        if (coordinateSystem == -1) {
             printf("unknown coordinate system %s\n", supportedCRS.c_str());
-            coordinateSystem = supportedCRS;
         }
         std::vector<WmtsTileMatrix> matrices;
 

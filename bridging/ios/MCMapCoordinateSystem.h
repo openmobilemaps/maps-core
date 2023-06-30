@@ -7,14 +7,14 @@
 @interface MCMapCoordinateSystem : NSObject
 - (nonnull instancetype)init NS_UNAVAILABLE;
 + (nonnull instancetype)new NS_UNAVAILABLE;
-- (nonnull instancetype)initWithIdentifier:(nonnull NSString *)identifier
+- (nonnull instancetype)initWithIdentifier:(int32_t)identifier
                                     bounds:(nonnull MCRectCoord *)bounds
                    unitToScreenMeterFactor:(float)unitToScreenMeterFactor NS_DESIGNATED_INITIALIZER;
-+ (nonnull instancetype)mapCoordinateSystemWithIdentifier:(nonnull NSString *)identifier
++ (nonnull instancetype)mapCoordinateSystemWithIdentifier:(int32_t)identifier
                                                    bounds:(nonnull MCRectCoord *)bounds
                                   unitToScreenMeterFactor:(float)unitToScreenMeterFactor;
 
-@property (nonatomic, readonly, nonnull) NSString * identifier;
+@property (nonatomic, readonly) int32_t identifier;
 
 @property (nonatomic, readonly, nonnull) MCRectCoord * bounds;
 

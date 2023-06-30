@@ -4,15 +4,15 @@
 #pragma once
 
 #include "RectCoord.h"
-#include <string>
+#include <cstdint>
 #include <utility>
 
 struct MapCoordinateSystem final {
-    std::string identifier;
+    int32_t identifier;
     RectCoord bounds;
     float unitToScreenMeterFactor;
 
-    MapCoordinateSystem(std::string identifier_,
+    MapCoordinateSystem(int32_t identifier_,
                         RectCoord bounds_,
                         float unitToScreenMeterFactor_)
     : identifier(std::move(identifier_))

@@ -60,12 +60,12 @@ void CoordinateConversionHelper::registerConverter(const std::shared_ptr<Coordin
     precomputeConverterHelper();
 }
 
-Coord CoordinateConversionHelper::convert(const std::string &to, const Coord &coordinate) {
+Coord CoordinateConversionHelper::convert(const int32_t to, const Coord &coordinate) {
     if (coordinate.systemIdentifier == to) {
         return coordinate;
     }
 
-    const auto tuple = std::tuple<std::string, std::string>(coordinate.systemIdentifier, to);
+    const auto tuple = std::tuple<int32_t, int32_t>(coordinate.systemIdentifier, to);
 
     // first try if we can directly convert
     auto c = fromToConverterMap.find(tuple);
@@ -86,11 +86,11 @@ Coord CoordinateConversionHelper::convert(const std::string &to, const Coord &co
         return intermediateCoord;
     }
 
-    throw std::invalid_argument("Could not find an eligible converter from: \'" + coordinate.systemIdentifier + "\' to \'" + to +
+    throw std::invalid_argument("Could not find an eligible converter from: \'" + std::to_string(coordinate.systemIdentifier) + "\' to \'" + std::to_string(to) +
                                 "\'");
 }
 
-RectCoord CoordinateConversionHelper::convertRect(const std::string &to, const RectCoord &rect) {
+RectCoord CoordinateConversionHelper::convertRect(const int32_t to, const RectCoord &rect) {
     return RectCoord(convert(to, rect.topLeft), convert(to, rect.bottomRight));
 }
 
@@ -108,7 +108,7 @@ Coord CoordinateConversionHelper::convertToRenderSystem(const Coord &coordinate)
     }
 }
 
-QuadCoord CoordinateConversionHelper::convertQuad(const std::string &to, const QuadCoord &quad) {
+QuadCoord CoordinateConversionHelper::convertQuad(const int32_t to, const QuadCoord &quad) {
     Coord topLeft = convert(to, quad.topLeft);
     Coord topRight = convert(to, quad.topRight);
     Coord bottomRight = convert(to, quad.bottomRight);

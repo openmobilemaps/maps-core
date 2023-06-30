@@ -13,7 +13,7 @@
 #include "CoordinateConversionHelperInterface.h"
 #include "CoordinateSystemIdentifiers.h"
 
-std::shared_ptr<BoundingBoxInterface> BoundingBoxInterface::create(const std::string & systemIdentifier) {
+std::shared_ptr<BoundingBoxInterface> BoundingBoxInterface::create(int32_t systemIdentifier) {
     return std::make_shared<BoundingBox>(systemIdentifier);
 }
 
@@ -23,7 +23,7 @@ BoundingBox::BoundingBox()
     , max(CoordinateSystemIdentifiers::RENDERSYSTEM(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min(),
       std::numeric_limits<float>::min()) {}
 
-BoundingBox::BoundingBox(const std::string &systemIdentifier)
+BoundingBox::BoundingBox(const int32_t systemIdentifier)
     : systemIdentifier(systemIdentifier)
     , min(systemIdentifier, std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max())
     , max(systemIdentifier, std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(),
@@ -81,6 +81,6 @@ Coord BoundingBox::getMax() {
     return max;
 }
 
-std::string BoundingBox::getSystemIdentifier() {
+int32_t BoundingBox::getSystemIdentifier() {
     return systemIdentifier;
 }

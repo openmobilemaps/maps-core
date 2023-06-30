@@ -6,6 +6,7 @@
 #include "Tiled2dMapLayerConfig.h"
 #include "Tiled2dMapZoomInfo.h"
 #include "Tiled2dMapZoomLevelInfo.h"
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
@@ -16,5 +17,5 @@ class WmtsTiled2dMapLayerConfigFactory {
 public:
     virtual ~WmtsTiled2dMapLayerConfigFactory() = default;
 
-    static /*not-null*/ std::shared_ptr<::Tiled2dMapLayerConfig> create(const WmtsLayerDescription & wmtsLayerConfiguration, const std::vector<::Tiled2dMapZoomLevelInfo> & zoomLevelInfo, const ::Tiled2dMapZoomInfo & zoomInfo, const std::string & coordinateSystemIdentifier, const std::string & matrixSetIdentifier);
+    static /*not-null*/ std::shared_ptr<::Tiled2dMapLayerConfig> create(const WmtsLayerDescription & wmtsLayerConfiguration, const std::vector<::Tiled2dMapZoomLevelInfo> & zoomLevelInfo, const ::Tiled2dMapZoomInfo & zoomInfo, int32_t coordinateSystemIdentifier, const std::string & matrixSetIdentifier);
 };

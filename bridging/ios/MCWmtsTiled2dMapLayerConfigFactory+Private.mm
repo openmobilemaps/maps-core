@@ -37,13 +37,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 + (nullable id<MCTiled2dMapLayerConfig>)create:(nonnull MCWmtsLayerDescription *)wmtsLayerConfiguration
                                  zoomLevelInfo:(nonnull NSArray<MCTiled2dMapZoomLevelInfo *> *)zoomLevelInfo
                                       zoomInfo:(nonnull MCTiled2dMapZoomInfo *)zoomInfo
-                    coordinateSystemIdentifier:(nonnull NSString *)coordinateSystemIdentifier
+                    coordinateSystemIdentifier:(int32_t)coordinateSystemIdentifier
                            matrixSetIdentifier:(nonnull NSString *)matrixSetIdentifier {
     try {
         auto objcpp_result_ = ::WmtsTiled2dMapLayerConfigFactory::create(::djinni_generated::WmtsLayerDescription::toCpp(wmtsLayerConfiguration),
                                                                          ::djinni::List<::djinni_generated::Tiled2dMapZoomLevelInfo>::toCpp(zoomLevelInfo),
                                                                          ::djinni_generated::Tiled2dMapZoomInfo::toCpp(zoomInfo),
-                                                                         ::djinni::String::toCpp(coordinateSystemIdentifier),
+                                                                         ::djinni::I32::toCpp(coordinateSystemIdentifier),
                                                                          ::djinni::String::toCpp(matrixSetIdentifier));
         return ::djinni_generated::Tiled2dMapLayerConfig::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()

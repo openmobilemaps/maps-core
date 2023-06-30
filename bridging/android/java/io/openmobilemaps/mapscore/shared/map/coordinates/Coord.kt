@@ -4,7 +4,7 @@
 package io.openmobilemaps.mapscore.shared.map.coordinates
 
 data class Coord(
-    var systemIdentifier: String,
+    var systemIdentifier: Int,
     var x: Double,
     var y: Double,
     var z: Double,
@@ -12,7 +12,13 @@ data class Coord(
 
     override fun compareTo(other: Coord): Int {
         var tempResult = 0
-        tempResult = this.systemIdentifier.compareTo(other.systemIdentifier)
+        if (this.systemIdentifier < other.systemIdentifier) {
+            tempResult = -1;
+        } else if (this.systemIdentifier > other.systemIdentifier) {
+            tempResult = 1;
+        } else {
+            tempResult = 0;
+        }
         if (tempResult != 0) {
             return tempResult
         }

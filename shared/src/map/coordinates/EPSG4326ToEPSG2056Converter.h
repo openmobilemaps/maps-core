@@ -43,9 +43,9 @@ class EPSG4326ToEPSG2056Converter : public CoordinateConverterInterface {
         return Coord(getTo(), x, y, z);
     }
 
-    virtual std::string getFrom() override { return CoordinateSystemIdentifiers::EPSG4326(); }
+    virtual int32_t getFrom() override { return CoordinateSystemIdentifiers::EPSG4326(); }
 
-    virtual std::string getTo() override { return CoordinateSystemIdentifiers::EPSG2056(); }
+    virtual int32_t getTo() override { return CoordinateSystemIdentifiers::EPSG2056(); }
 
   private:
     inline double DECtoSEX(double angle) const {

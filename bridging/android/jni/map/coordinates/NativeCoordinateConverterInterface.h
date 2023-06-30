@@ -34,8 +34,8 @@ private:
         ~JavaProxy();
 
         ::Coord convert(const ::Coord & coordinate) override;
-        std::string getFrom() override;
-        std::string getTo() override;
+        int32_t getFrom() override;
+        int32_t getTo() override;
 
     private:
         friend ::djinni::JniInterface<::CoordinateConverterInterface, ::djinni_generated::NativeCoordinateConverterInterface>;
@@ -43,8 +43,8 @@ private:
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/coordinates/CoordinateConverterInterface") };
     const jmethodID method_convert { ::djinni::jniGetMethodID(clazz.get(), "convert", "(Lio/openmobilemaps/mapscore/shared/map/coordinates/Coord;)Lio/openmobilemaps/mapscore/shared/map/coordinates/Coord;") };
-    const jmethodID method_getFrom { ::djinni::jniGetMethodID(clazz.get(), "getFrom", "()Ljava/lang/String;") };
-    const jmethodID method_getTo { ::djinni::jniGetMethodID(clazz.get(), "getTo", "()Ljava/lang/String;") };
+    const jmethodID method_getFrom { ::djinni::jniGetMethodID(clazz.get(), "getFrom", "()I") };
+    const jmethodID method_getTo { ::djinni::jniGetMethodID(clazz.get(), "getTo", "()I") };
 };
 
 } // namespace djinni_generated

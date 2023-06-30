@@ -25,9 +25,9 @@ private:
     friend ::djinni::JniClass<NativeWmtsTileMatrixSet>;
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/layers/tiled/raster/wmts/WmtsTileMatrixSet") };
-    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/util/ArrayList;)V") };
+    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Ljava/lang/String;ILjava/util/ArrayList;)V") };
     const jfieldID field_identifier { ::djinni::jniGetFieldID(clazz.get(), "identifier", "Ljava/lang/String;") };
-    const jfieldID field_coordinateSystemIdentifier { ::djinni::jniGetFieldID(clazz.get(), "coordinateSystemIdentifier", "Ljava/lang/String;") };
+    const jfieldID field_coordinateSystemIdentifier { ::djinni::jniGetFieldID(clazz.get(), "coordinateSystemIdentifier", "I") };
     const jfieldID field_matrices { ::djinni::jniGetFieldID(clazz.get(), "matrices", "Ljava/util/ArrayList;") };
 };
 

@@ -3,11 +3,11 @@
 
 #pragma once
 
-#include <string>
+#include <cstdint>
 #include <utility>
 
 struct Coord final {
-    std::string systemIdentifier;
+    int32_t systemIdentifier;
     double x;
     double y;
     double z;
@@ -21,7 +21,7 @@ struct Coord final {
     friend bool operator<=(const Coord& lhs, const Coord& rhs);
     friend bool operator>=(const Coord& lhs, const Coord& rhs);
 
-    Coord(std::string systemIdentifier_,
+    Coord(int32_t systemIdentifier_,
           double x_,
           double y_,
           double z_)

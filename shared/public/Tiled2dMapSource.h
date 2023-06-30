@@ -114,7 +114,7 @@ public:
 
     MapConfig mapConfig;
     std::shared_ptr<Tiled2dMapLayerConfig> layerConfig;
-    std::string layerSystemId;
+    int32_t layerSystemId;
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
     std::weak_ptr<SchedulerInterface> scheduler;
     std::shared_ptr<::ErrorManager> errorManager;

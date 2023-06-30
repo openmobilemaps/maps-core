@@ -3,38 +3,39 @@
 
 #pragma once
 
+#include <cstdint>
 #include <string>
 
 class CoordinateSystemIdentifiers {
 public:
     virtual ~CoordinateSystemIdentifiers() = default;
 
-    static std::string RENDERSYSTEM();
+    static int32_t RENDERSYSTEM();
 
     /**
      * WGS 84 / Pseudo-Mercator
      * https://epsg.io/3857
      */
-    static std::string EPSG3857();
+    static int32_t EPSG3857();
 
     /**
      * WGS 84
      * https://epsg.io/4326
      */
-    static std::string EPSG4326();
+    static int32_t EPSG4326();
 
     /**
      * LV03+
      * https://epsg.io/2056
      */
-    static std::string EPSG2056();
+    static int32_t EPSG2056();
 
     /**
      * CH1903 / LV03
      * https://epsg.io/21781
      */
-    static std::string EPSG21781();
+    static int32_t EPSG21781();
 
     /** e.g. urn:ogc:def:crs:EPSG:21781 */
-    static std::string fromCrsIdentifier(const std::string & identifier);
+    static int32_t fromCrsIdentifier(const std::string & identifier);
 };

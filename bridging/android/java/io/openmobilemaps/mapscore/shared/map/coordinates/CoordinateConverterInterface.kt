@@ -10,9 +10,9 @@ abstract class CoordinateConverterInterface {
 
     abstract fun convert(coordinate: Coord): Coord
 
-    abstract fun getFrom(): String
+    abstract fun getFrom(): Int
 
-    abstract fun getTo(): String
+    abstract fun getTo(): Int
 
     private class CppProxy : CoordinateConverterInterface {
         private val nativeRef: Long
@@ -32,16 +32,16 @@ abstract class CoordinateConverterInterface {
         }
         private external fun native_convert(_nativeRef: Long, coordinate: Coord): Coord
 
-        override fun getFrom(): String {
+        override fun getFrom(): Int {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_getFrom(this.nativeRef)
         }
-        private external fun native_getFrom(_nativeRef: Long): String
+        private external fun native_getFrom(_nativeRef: Long): Int
 
-        override fun getTo(): String {
+        override fun getTo(): Int {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_getTo(this.nativeRef)
         }
-        private external fun native_getTo(_nativeRef: Long): String
+        private external fun native_getTo(_nativeRef: Long): Int
     }
 }

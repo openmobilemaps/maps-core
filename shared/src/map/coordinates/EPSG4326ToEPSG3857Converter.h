@@ -29,7 +29,7 @@ class EPSG4326ToEPSG3857Converter : public CoordinateConverterInterface {
         return Coord(getTo(), x, y, coordinate.z);
     }
 
-    virtual std::string getFrom() override { return CoordinateSystemIdentifiers::EPSG4326(); }
+    virtual int32_t getFrom() override { return CoordinateSystemIdentifiers::EPSG4326(); }
 
-    virtual std::string getTo() override { return CoordinateSystemIdentifiers::EPSG3857(); }
+    virtual int32_t getTo() override { return CoordinateSystemIdentifiers::EPSG3857(); }
 };

@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class Tiled2dMapLayerConfig {
 
-    abstract fun getCoordinateSystemIdentifier(): String
+    abstract fun getCoordinateSystemIdentifier(): Int
 
     abstract fun getTileUrl(x: Int, y: Int, t: Int, zoom: Int): String
 
@@ -32,11 +32,11 @@ abstract class Tiled2dMapLayerConfig {
 
         external fun nativeDestroy(nativeRef: Long)
 
-        override fun getCoordinateSystemIdentifier(): String {
+        override fun getCoordinateSystemIdentifier(): Int {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_getCoordinateSystemIdentifier(this.nativeRef)
         }
-        private external fun native_getCoordinateSystemIdentifier(_nativeRef: Long): String
+        private external fun native_getCoordinateSystemIdentifier(_nativeRef: Long): Int
 
         override fun getTileUrl(x: Int, y: Int, t: Int, zoom: Int): String {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

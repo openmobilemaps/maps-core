@@ -24,21 +24,21 @@ NativeCoordinateConverterInterface::JavaProxy::~JavaProxy() = default;
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativeCoord::toCpp(jniEnv, jret);
 }
-std::string NativeCoordinateConverterInterface::JavaProxy::getFrom() {
+int32_t NativeCoordinateConverterInterface::JavaProxy::getFrom() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeCoordinateConverterInterface>::get();
-    auto jret = (jstring)jniEnv->CallObjectMethod(Handle::get().get(), data.method_getFrom);
+    auto jret = jniEnv->CallIntMethod(Handle::get().get(), data.method_getFrom);
     ::djinni::jniExceptionCheck(jniEnv);
-    return ::djinni::String::toCpp(jniEnv, jret);
+    return ::djinni::I32::toCpp(jniEnv, jret);
 }
-std::string NativeCoordinateConverterInterface::JavaProxy::getTo() {
+int32_t NativeCoordinateConverterInterface::JavaProxy::getTo() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeCoordinateConverterInterface>::get();
-    auto jret = (jstring)jniEnv->CallObjectMethod(Handle::get().get(), data.method_getTo);
+    auto jret = jniEnv->CallIntMethod(Handle::get().get(), data.method_getTo);
     ::djinni::jniExceptionCheck(jniEnv);
-    return ::djinni::String::toCpp(jniEnv, jret);
+    return ::djinni::I32::toCpp(jniEnv, jret);
 }
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateConverterInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
@@ -57,21 +57,21 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinate
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jstring JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateConverterInterface_00024CppProxy_native_1getFrom(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jint JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateConverterInterface_00024CppProxy_native_1getFrom(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::CoordinateConverterInterface>(nativeRef);
         auto r = ref->getFrom();
-        return ::djinni::release(::djinni::String::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni::I32::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jstring JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateConverterInterface_00024CppProxy_native_1getTo(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jint JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateConverterInterface_00024CppProxy_native_1getTo(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::CoordinateConverterInterface>(nativeRef);
         auto r = ref->getTo();
-        return ::djinni::release(::djinni::String::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni::I32::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

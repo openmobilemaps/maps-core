@@ -34,10 +34,10 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (nonnull NSString *)getCoordinateSystemIdentifier {
+- (int32_t)getCoordinateSystemIdentifier {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getCoordinateSystemIdentifier();
-        return ::djinni::String::fromCpp(objcpp_result_);
+        return ::djinni::I32::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -91,11 +91,11 @@ class Tiled2dMapLayerConfig::ObjcProxy final
     friend class ::djinni_generated::Tiled2dMapLayerConfig;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    std::string getCoordinateSystemIdentifier() override
+    int32_t getCoordinateSystemIdentifier() override
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getCoordinateSystemIdentifier];
-            return ::djinni::String::toCpp(objcpp_result_);
+            return ::djinni::I32::toCpp(objcpp_result_);
         }
     }
     std::string getTileUrl(int32_t c_x, int32_t c_y, int32_t c_t, int32_t c_zoom) override
