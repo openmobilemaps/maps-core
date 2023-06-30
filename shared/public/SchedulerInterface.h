@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+class SchedulerGraphicsTaskCallbacks;
 class TaskInterface;
 
 class SchedulerInterface {
@@ -31,4 +32,6 @@ public:
 
     /** Execute added graphics tasks. Returns true, if there are unprocessed tasks in the queue after the execution. */
     virtual bool runGraphicsTasks() = 0;
+
+    virtual void setSchedulerGraphicsTaskCallbacks(const /*not-null*/ std::shared_ptr<SchedulerGraphicsTaskCallbacks> & callbacks) = 0;
 };

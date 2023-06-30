@@ -35,6 +35,8 @@ MapScene::MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig &mapCo
     // workaround to use sharedpointer to self from constructor
     auto ptr = std::shared_ptr<MapScene>(this, [](MapScene *) {});
 
+    scheduler->setSchedulerGraphicsTaskCallbacks(ptr);
+
     // add default camera
     setCamera(MapCamera2dInterface::create(ptr, pixelDensity));
 }
@@ -343,4 +345,8 @@ void MapScene::forceReload() {
     for (const auto &[index, layer] : layers) {
         layer->forceReload();
     }
+}
+
+void MapScene::requestGraphicsTaskExecution() {
+    invalidate();
 }

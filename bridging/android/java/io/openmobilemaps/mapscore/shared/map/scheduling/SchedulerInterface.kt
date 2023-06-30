@@ -27,6 +27,8 @@ abstract class SchedulerInterface {
     /** Execute added graphics tasks. Returns true, if there are unprocessed tasks in the queue after the execution. */
     abstract fun runGraphicsTasks(): Boolean
 
+    abstract fun setSchedulerGraphicsTaskCallbacks(callbacks: SchedulerGraphicsTaskCallbacks)
+
     private class CppProxy : SchedulerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -92,5 +94,11 @@ abstract class SchedulerInterface {
             return native_runGraphicsTasks(this.nativeRef)
         }
         private external fun native_runGraphicsTasks(_nativeRef: Long): Boolean
+
+        override fun setSchedulerGraphicsTaskCallbacks(callbacks: SchedulerGraphicsTaskCallbacks) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setSchedulerGraphicsTaskCallbacks(this.nativeRef, callbacks)
+        }
+        private external fun native_setSchedulerGraphicsTaskCallbacks(_nativeRef: Long, callbacks: SchedulerGraphicsTaskCallbacks)
     }
 }

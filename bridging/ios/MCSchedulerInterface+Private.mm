@@ -7,6 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
+#import "MCSchedulerGraphicsTaskCallbacks+Private.h"
 #import "MCTaskInterface+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -88,6 +89,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setSchedulerGraphicsTaskCallbacks:(nullable MCSchedulerGraphicsTaskCallbacks *)callbacks {
+    try {
+        _cppRefHandle.get()->setSchedulerGraphicsTaskCallbacks(::djinni_generated::SchedulerGraphicsTaskCallbacks::toCpp(callbacks));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class SchedulerInterface::ObjcProxy final
@@ -151,6 +158,12 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() runGraphicsTasks];
             return ::djinni::Bool::toCpp(objcpp_result_);
+        }
+    }
+    void setSchedulerGraphicsTaskCallbacks(const /*not-null*/ std::shared_ptr<::SchedulerGraphicsTaskCallbacks> & c_callbacks) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setSchedulerGraphicsTaskCallbacks:(::djinni_generated::SchedulerGraphicsTaskCallbacks::fromCpp(c_callbacks))];
         }
     }
 };
