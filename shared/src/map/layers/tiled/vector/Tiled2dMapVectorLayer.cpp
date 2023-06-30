@@ -710,7 +710,7 @@ void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDe
                             || legacyDescription->sourceLayer != layerDescription->sourceLayer
                             || legacyDescription->minZoom != layerDescription->minZoom
                             || legacyDescription->maxZoom != layerDescription->maxZoom
-                            || legacyDescription->filter != layerDescription->filter;
+                            || !((legacyDescription->filter == nullptr && layerDescription->filter == nullptr ) || legacyDescription->filter->isEqual(layerDescription->filter));
 
     if (layerDescription->getType() == VectorLayerType::symbol) {
         for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {

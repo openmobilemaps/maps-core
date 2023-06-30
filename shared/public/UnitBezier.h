@@ -104,6 +104,11 @@ public:
             std::tie(rhs.cx, rhs.bx, rhs.ax, rhs.cy, rhs.by, rhs.ay);
     }
 
+    bool operator!=(const UnitBezier& rhs) const {
+        return std::tie(cx, bx, ax, cy, by, ay) !=
+            std::tie(rhs.cx, rhs.bx, rhs.ax, rhs.cy, rhs.by, rhs.ay);
+    }
+
   private:
     const double cx;
     const double bx;

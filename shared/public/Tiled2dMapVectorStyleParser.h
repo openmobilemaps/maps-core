@@ -251,7 +251,7 @@ public:
 
             // Example: ["length",["to-string",["get","ele"]]]
             else if (isExpression(json[0], lengthExpression)) {
-                return std::make_shared<LenghtValue>(parseValue(json[1]));
+                return std::make_shared<LengthValue>(parseValue(json[1]));
             }
 
             // Example: ["!",["has","population"]]
