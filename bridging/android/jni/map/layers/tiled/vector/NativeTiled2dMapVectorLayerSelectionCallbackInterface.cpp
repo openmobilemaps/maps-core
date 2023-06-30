@@ -26,6 +26,15 @@ void NativeTiled2dMapVectorLayerSelectionCallbackInterface::JavaProxy::didSelect
                            ::djinni::get(::djinni_generated::NativeCoord::fromCpp(jniEnv, c_coord)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
+bool NativeTiled2dMapVectorLayerSelectionCallbackInterface::JavaProxy::didClickBackgroundConfirmed(const ::Coord & c_coord) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeTiled2dMapVectorLayerSelectionCallbackInterface>::get();
+    auto jret = jniEnv->CallBooleanMethod(Handle::get().get(), data.method_didClickBackgroundConfirmed,
+                                          ::djinni::get(::djinni_generated::NativeCoord::fromCpp(jniEnv, c_coord)));
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni::Bool::toCpp(jniEnv, jret);
+}
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerSelectionCallbackInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
@@ -42,6 +51,15 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_
                               ::djinni::String::toCpp(jniEnv, j_layerIdentifier),
                               ::djinni_generated::NativeCoord::toCpp(jniEnv, j_coord));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerSelectionCallbackInterface_00024CppProxy_native_1didClickBackgroundConfirmed(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeCoord::JniType j_coord)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapVectorLayerSelectionCallbackInterface>(nativeRef);
+        auto r = ref->didClickBackgroundConfirmed(::djinni_generated::NativeCoord::toCpp(jniEnv, j_coord));
+        return ::djinni::release(::djinni::Bool::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
 } // namespace djinni_generated

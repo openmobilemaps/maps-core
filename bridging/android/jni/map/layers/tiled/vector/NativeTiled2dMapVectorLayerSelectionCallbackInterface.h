@@ -34,6 +34,7 @@ private:
         ~JavaProxy();
 
         void didSelectFeature(const ::VectorLayerFeatureInfo & featureInfo, const std::string & layerIdentifier, const ::Coord & coord) override;
+        bool didClickBackgroundConfirmed(const ::Coord & coord) override;
 
     private:
         friend ::djinni::JniInterface<::Tiled2dMapVectorLayerSelectionCallbackInterface, ::djinni_generated::NativeTiled2dMapVectorLayerSelectionCallbackInterface>;
@@ -41,6 +42,7 @@ private:
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/layers/tiled/vector/Tiled2dMapVectorLayerSelectionCallbackInterface") };
     const jmethodID method_didSelectFeature { ::djinni::jniGetMethodID(clazz.get(), "didSelectFeature", "(Lio/openmobilemaps/mapscore/shared/map/layers/tiled/vector/VectorLayerFeatureInfo;Ljava/lang/String;Lio/openmobilemaps/mapscore/shared/map/coordinates/Coord;)V") };
+    const jmethodID method_didClickBackgroundConfirmed { ::djinni::jniGetMethodID(clazz.get(), "didClickBackgroundConfirmed", "(Lio/openmobilemaps/mapscore/shared/map/coordinates/Coord;)Z") };
 };
 
 } // namespace djinni_generated

@@ -772,7 +772,20 @@ bool Tiled2dMapVectorLayer::onClickUnconfirmed(const Vec2F &posScreen) {
 }
 
 bool Tiled2dMapVectorLayer::onClickConfirmed(const Vec2F &posScreen) {
-    return interactionManager->onClickConfirmed(posScreen);
+    if (interactionManager->onClickConfirmed(posScreen)) {
+        return true;
+    }
+    auto mapInterface = this->mapInterface;
+    auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+    if (!camera) {
+        return false;
+    }
+    if(strongSelectionDelegate) {
+        return strongSelectionDelegate->didClickBackgroundConfirmed(camera->coordFromScreenPosition(posScreen));
+    } else if (auto ptr = selectionDelegate.lock()) {
+        return ptr->didClickBackgroundConfirmed(camera->coordFromScreenPosition(posScreen));
+    }
+    return false;
 }
 
 bool Tiled2dMapVectorLayer::onDoubleClick(const Vec2F &posScreen) {

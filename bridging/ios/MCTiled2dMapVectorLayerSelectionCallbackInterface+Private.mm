@@ -43,6 +43,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (BOOL)didClickBackgroundConfirmed:(nonnull MCCoord *)coord {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->didClickBackgroundConfirmed(::djinni_generated::Coord::toCpp(coord));
+        return ::djinni::Bool::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class Tiled2dMapVectorLayerSelectionCallbackInterface::ObjcProxy final
@@ -58,6 +65,13 @@ public:
             [djinni_private_get_proxied_objc_object() didSelectFeature:(::djinni_generated::VectorLayerFeatureInfo::fromCpp(c_featureInfo))
                                                        layerIdentifier:(::djinni::String::fromCpp(c_layerIdentifier))
                                                                  coord:(::djinni_generated::Coord::fromCpp(c_coord))];
+        }
+    }
+    bool didClickBackgroundConfirmed(const ::Coord & c_coord) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() didClickBackgroundConfirmed:(::djinni_generated::Coord::fromCpp(c_coord))];
+            return ::djinni::Bool::toCpp(objcpp_result_);
         }
     }
 };
