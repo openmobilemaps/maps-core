@@ -77,11 +77,11 @@ std::string PolygonPatternGroup2dShaderOpenGl::getFragmentShader() {
                                           }
 
                                           int styleOffset = min(int(styleIndex) * 5, 16 * 5);
-                                          vec2 uvSize = vec2(textureCoordinates[styleOffset + 2], -textureCoordinates[styleOffset + 3]) * uTextureFactor;
+                                          vec2 uvSize = vec2(textureCoordinates[styleOffset + 2], textureCoordinates[styleOffset + 3]) * uTextureFactor;
                                           if (uvSize.x == 0.0 && uvSize.y == 0.0) {
                                               discard;
                                           }
-                                          vec2 uvOrig = vec2(textureCoordinates[styleOffset], textureCoordinates[styleOffset + 1] + textureCoordinates[styleOffset + 3]) * uTextureFactor;
+                                          vec2 uvOrig = vec2(textureCoordinates[styleOffset], textureCoordinates[styleOffset + 1]) * uTextureFactor;
                                           float combined = textureCoordinates[styleOffset + 4];
                                           vec2 pixelSize = vec2(mod(combined, 65536.0), combined / 65536.0);
 
