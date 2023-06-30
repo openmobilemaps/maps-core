@@ -10,6 +10,8 @@ abstract class Tiled2dMapVectorLayerSelectionCallbackInterface {
 
     abstract fun didSelectFeature(featureInfo: VectorLayerFeatureInfo, layerIdentifier: String, coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord)
 
+    abstract fun didClickBackgroundConfirmed(coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): Boolean
+
     private class CppProxy : Tiled2dMapVectorLayerSelectionCallbackInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -27,5 +29,11 @@ abstract class Tiled2dMapVectorLayerSelectionCallbackInterface {
             native_didSelectFeature(this.nativeRef, featureInfo, layerIdentifier, coord)
         }
         private external fun native_didSelectFeature(_nativeRef: Long, featureInfo: VectorLayerFeatureInfo, layerIdentifier: String, coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord)
+
+        override fun didClickBackgroundConfirmed(coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): Boolean {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_didClickBackgroundConfirmed(this.nativeRef, coord)
+        }
+        private external fun native_didClickBackgroundConfirmed(_nativeRef: Long, coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): Boolean
     }
 }
