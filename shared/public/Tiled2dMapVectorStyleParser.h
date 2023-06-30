@@ -115,6 +115,9 @@ public:
                         values.push_back(v);
                     }
                 }
+                if (values.empty()) {
+                    return nullptr;
+                }
                 return std::make_shared<AllValue>(values);
             }
 

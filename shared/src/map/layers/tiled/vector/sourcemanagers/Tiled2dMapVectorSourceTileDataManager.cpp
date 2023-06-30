@@ -49,7 +49,6 @@ void Tiled2dMapVectorSourceTileDataManager::pregenerateRenderPasses() {
             continue;
         }
 
-        assert(tileState != tileStateMap.end());
         if (tileState == tileStateMap.end() || tileState->second != TileState::VISIBLE) {
             // Tile is not visible or the mask is not yet ready
             continue;
@@ -281,6 +280,23 @@ void Tiled2dMapVectorSourceTileDataManager::tileIsReady(const Tiled2dMapTileInfo
     if (!tileActor) {
         return;
     }
+
+    auto tilesIt = tiles.find(tile);
+    if (tilesIt == tiles.end()) {
+        return;
+    }
+
+    bool found = false;
+    for (auto const [index, string, actor]: tilesIt->second) {
+        if (layerIdentifier == layerIdentifier && actor.unsafe() == tileActor.unsafe().lock()) {
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        return;
+    }
+
     const auto &renderObjects = tileActor.syncAccess([](const auto &t){
         if (auto strongT = t.lock()) {
             return strongT->generateRenderObjects();
@@ -298,14 +314,13 @@ void Tiled2dMapVectorSourceTileDataManager::tileIsReady(const Tiled2dMapTileInfo
     bool isCompletelyReady = false;
     {
         const auto &tileControlSet = tilesReadyControlSet.find(tile);
-        if (tileControlSet == tilesReadyControlSet.end()) {
-            return;
-        }
-        tileControlSet->second.erase(layerIndex);
-        if (tileControlSet->second.empty()) {
-            tilesReadyControlSet.erase(tile);
-            tilesReady.insert(tile);
-            isCompletelyReady = true;
+        if (tileControlSet != tilesReadyControlSet.end()) {
+            tileControlSet->second.erase(layerIndex);
+            if (tileControlSet->second.empty()) {
+                tilesReadyControlSet.erase(tile);
+                tilesReady.insert(tile);
+                isCompletelyReady = true;
+            }
         }
     }
 
@@ -321,6 +336,12 @@ void Tiled2dMapVectorSourceTileDataManager::tileIsReady(const Tiled2dMapTileInfo
         tileRenderObjectsMap[tile].emplace_back(layerIndex, renderObjects);
     } else {
         tileRenderObjectsMap[tile].emplace_back(layerIndex, renderObjects);
+    }
+
+    auto tileStateMapIt = tileStateMap.find(tile);
+    if (isCompletelyReady && tileStateMapIt != tileStateMap.end() && tileStateMapIt->second == TileState::VISIBLE) {
+        pregenerateRenderPasses();
+        return;
     }
 
     if (isCompletelyReady) {

@@ -48,18 +48,47 @@ Tiled2dMapVectorPolygonTile::Tiled2dMapVectorPolygonTile(const std::weak_ptr<Map
 void Tiled2dMapVectorPolygonTile::updateVectorLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                                          const Tiled2dMapVectorTileDataVector &tileData) {
     Tiled2dMapVectorTile::updateVectorLayerDescription(description, tileData);
-    featureGroups.clear();
-    styleHashToGroupMap.clear();
-    hitDetectionPolygons.clear();
-    usedKeys = std::move(description->getUsedKeys());
+    const auto newUsedKeys = description->getUsedKeys();
+    bool usedKeysContainsNewUsedKeys = true;;
+    if (usedKeysContainsNewUsedKeys) {
+        for (const auto &key : newUsedKeys ) {
+            if (usedKeys.count(key) == 0) {
+                usedKeysContainsNewUsedKeys = false;
+                break;
+            }
+        }
+    }
     isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
     lastZoom = std::nullopt;
-    setVectorTileData(tileData);
+    lastAlpha = std::nullopt;
+
+    usedKeys = std::move(newUsedKeys);
+    if (usedKeysContainsNewUsedKeys) {
+        auto selfActor = WeakActor(mailbox, shared_from_this()->weak_from_this());
+        selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorPolygonTile::update);
+
+        tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this()));
+    } else {
+        featureGroups.clear();
+        styleHashToGroupMap.clear();
+        hitDetectionPolygons.clear();
+        toClear.insert(toClear.begin(), polygons.begin(), polygons.end());
+        polygons.clear();
+        shaders.clear();
+        setVectorTileData(tileData);
+    }
 }
 
 void Tiled2dMapVectorPolygonTile::update() {
     if (shaders.empty()) {
         return;
+    }
+
+    if (!toClear.empty()) {
+        for (auto const &polygon: toClear) {
+            if (polygon->getPolygonObject()->isReady()) polygon->getPolygonObject()->clear();
+        }
+        toClear.clear();
     }
 
     auto mapInterface = this->mapInterface.lock();
@@ -86,11 +115,11 @@ void Tiled2dMapVectorPolygonTile::update() {
     size_t numStyleGroups = featureGroups.size();
     for (int styleGroupId = 0; styleGroupId < numStyleGroups; styleGroupId++) {
         std::vector<float> shaderStyles;
+        shaderStyles.reserve(featureGroups.at(styleGroupId).size() * 5);
         for (auto const &[hash, feature]: featureGroups.at(styleGroupId)) {
             const auto& ec = EvaluationContext(zoomIdentifier, feature);
             const auto& color = inZoomRange ? polygonDescription->style.getFillColor(ec) : Color(0.0, 0.0, 0.0, 0.0);
             const auto& opacity = inZoomRange ? polygonDescription->style.getFillOpacity(ec) : 0.0;
-
             shaderStyles.push_back(color.r);
             shaderStyles.push_back(color.g);
             shaderStyles.push_back(color.b);
@@ -100,7 +129,6 @@ void Tiled2dMapVectorPolygonTile::update() {
         auto s = SharedBytes((int64_t)shaderStyles.data(), (int32_t)featureGroups.at(styleGroupId).size(), 5 * (int32_t)sizeof(float));
         shaders[styleGroupId]->setStyles(s);
     }
-
 }
 
 void Tiled2dMapVectorPolygonTile::clear() {
@@ -121,6 +149,7 @@ void Tiled2dMapVectorPolygonTile::setup() {
 
     auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
     tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
+
 }
 
 void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDataVector &tileData) {

@@ -31,5 +31,7 @@ protected:
     void onTileCompletelyReady(const Tiled2dMapTileInfo tileInfo) override;
 
 private:
+    void clearTiles(const std::vector<Actor<Tiled2dMapVectorTile>> &tilesToClear);
+
     const WeakActor<Tiled2dMapVectorSource> vectorSource;
 };

@@ -3,6 +3,7 @@
 
 #include "NativeSchedulerInterface.h"  // my header
 #include "Marshal.hpp"
+#include "NativeSchedulerGraphicsTaskCallbacks.h"
 #include "NativeTaskInterface.h"
 
 namespace djinni_generated {
@@ -82,6 +83,14 @@ bool NativeSchedulerInterface::JavaProxy::runGraphicsTasks() {
     auto jret = jniEnv->CallBooleanMethod(Handle::get().get(), data.method_runGraphicsTasks);
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::Bool::toCpp(jniEnv, jret);
+}
+void NativeSchedulerInterface::JavaProxy::setSchedulerGraphicsTaskCallbacks(const /*not-null*/ std::shared_ptr<::SchedulerGraphicsTaskCallbacks> & c_callbacks) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeSchedulerInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_setSchedulerGraphicsTaskCallbacks,
+                           ::djinni::get(::djinni_generated::NativeSchedulerGraphicsTaskCallbacks::fromCpp(jniEnv, c_callbacks)));
+    ::djinni::jniExceptionCheck(jniEnv);
 }
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_scheduling_SchedulerInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
@@ -163,6 +172,14 @@ CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_schedulin
         auto r = ref->runGraphicsTasks();
         return ::djinni::release(::djinni::Bool::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_scheduling_SchedulerInterface_00024CppProxy_native_1setSchedulerGraphicsTaskCallbacks(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_callbacks)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::SchedulerInterface>(nativeRef);
+        ref->setSchedulerGraphicsTaskCallbacks(::djinni_generated::NativeSchedulerGraphicsTaskCallbacks::toCpp(jniEnv, j_callbacks));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
 } // namespace djinni_generated

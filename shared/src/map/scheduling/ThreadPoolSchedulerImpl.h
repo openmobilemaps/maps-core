@@ -12,6 +12,7 @@
 #include "ThreadPoolCallbacks.h"
 #include "TaskInterface.h"
 #include "TaskConfig.h"
+#include "SchedulerGraphicsTaskCallbacks.h"
 #include <condition_variable>
 #include <mutex>
 #include <deque>
@@ -21,8 +22,7 @@
 
 class ThreadPoolSchedulerImpl: public SchedulerInterface {
 public:
-    ThreadPoolSchedulerImpl(const std::shared_ptr<ThreadPoolCallbacks> &callbacks,
-                            bool separateGraphicsQueue);
+    ThreadPoolSchedulerImpl(const std::shared_ptr<ThreadPoolCallbacks> &callbacks);
 
     ~ThreadPoolSchedulerImpl();
     
@@ -31,6 +31,8 @@ public:
     virtual void addTasks(const std::vector<std::shared_ptr<TaskInterface>> & tasks) override;
 
     virtual void removeTask(const std::string & id) override;
+
+    virtual void setSchedulerGraphicsTaskCallbacks(const /*not-null*/ std::shared_ptr<SchedulerGraphicsTaskCallbacks> & callbacks) override;
 
     virtual void clear() override;
 
@@ -75,4 +77,6 @@ private:
     std::vector<std::pair<std::shared_ptr<TaskInterface>, TimeStamp>> delayedTasks;
 
     bool terminated{false};
+
+    std::weak_ptr<SchedulerGraphicsTaskCallbacks> graphicsCallbacks;
 };

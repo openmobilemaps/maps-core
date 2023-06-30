@@ -231,9 +231,9 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
         textureCoordinates[4 * countOffset + 2] = ((double) spriteIt->second.width) / textureWidth;
         textureCoordinates[4 * countOffset + 3] = ((double) spriteIt->second.height) / textureHeight;
 
-        lastIconUpdateScaleFactor = -1.0;
-        lastIconUpdateRotation = -1.0;
-        lastIconUpdateAlpha = -1.0;
+        lastIconUpdateScaleFactor = std::nullopt;
+        lastIconUpdateRotation = std::nullopt;
+        lastIconUpdateAlpha = std::nullopt;
     }
 
     positions[2 * countOffset] = renderCoordinate.x;
@@ -650,6 +650,11 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
 
     auto combinedBox = getCombinedBoundingBox(true);
     if (combinedBox == std::nullopt) {
+        if (this->collides) {
+            lastIconUpdateScaleFactor = std::nullopt;
+            lastStretchIconUpdateScaleFactor = std::nullopt;
+            lastTextUpdateScaleFactor = std::nullopt;
+        }
         this->collides = false;
         setCollisionAt(zoomIdentifier, false);
         return;

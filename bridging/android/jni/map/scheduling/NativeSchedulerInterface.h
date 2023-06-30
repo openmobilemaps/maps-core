@@ -42,6 +42,7 @@ private:
         void destroy() override;
         bool hasSeparateGraphicsInvocation() override;
         bool runGraphicsTasks() override;
+        void setSchedulerGraphicsTaskCallbacks(const /*not-null*/ std::shared_ptr<::SchedulerGraphicsTaskCallbacks> & callbacks) override;
 
     private:
         friend ::djinni::JniInterface<::SchedulerInterface, ::djinni_generated::NativeSchedulerInterface>;
@@ -57,6 +58,7 @@ private:
     const jmethodID method_destroy { ::djinni::jniGetMethodID(clazz.get(), "destroy", "()V") };
     const jmethodID method_hasSeparateGraphicsInvocation { ::djinni::jniGetMethodID(clazz.get(), "hasSeparateGraphicsInvocation", "()Z") };
     const jmethodID method_runGraphicsTasks { ::djinni::jniGetMethodID(clazz.get(), "runGraphicsTasks", "()Z") };
+    const jmethodID method_setSchedulerGraphicsTaskCallbacks { ::djinni::jniGetMethodID(clazz.get(), "setSchedulerGraphicsTaskCallbacks", "(Lio/openmobilemaps/mapscore/shared/map/scheduling/SchedulerGraphicsTaskCallbacks;)V") };
 };
 
 } // namespace djinni_generated

@@ -52,13 +52,37 @@ Tiled2dMapVectorPolygonPatternTile::Tiled2dMapVectorPolygonPatternTile(const std
 void Tiled2dMapVectorPolygonPatternTile::updateVectorLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                                          const Tiled2dMapVectorTileDataVector &tileData) {
     Tiled2dMapVectorTile::updateVectorLayerDescription(description, tileData);
-    featureGroups.clear();
-    styleHashToGroupMap.clear();
-    hitDetectionPolygons.clear();
-    usedKeys = std::move(description->getUsedKeys());
+    const auto newUsedKeys = description->getUsedKeys();
+    bool usedKeysContainsNewUsedKeys = true;;
+    if (usedKeysContainsNewUsedKeys) {
+        for (const auto &key : newUsedKeys ) {
+            if (usedKeys.count(key) == 0) {
+                usedKeysContainsNewUsedKeys = false;
+                break;
+            }
+        }
+    }
     isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
     lastZoom = std::nullopt;
-    setVectorTileData(tileData);
+    lastAlpha = std::nullopt;
+
+    usedKeys = std::move(newUsedKeys);
+    if (usedKeysContainsNewUsedKeys) {
+        auto selfActor = WeakActor(mailbox, shared_from_this()->weak_from_this());
+        selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorPolygonPatternTile::update);
+        
+        tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this()));
+    } else {
+        featureGroups.clear();
+        styleHashToGroupMap.clear();
+        hitDetectionPolygons.clear();
+        for (const auto polygons: styleGroupPolygonsMap) {
+            toClear.insert(toClear.begin(), polygons.second.begin(), polygons.second.end());
+        }
+        styleGroupPolygonsMap.clear();
+        shaders.clear();
+        setVectorTileData(tileData);
+    }
 }
 
 void Tiled2dMapVectorPolygonPatternTile::update() {

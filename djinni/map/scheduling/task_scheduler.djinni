@@ -1,3 +1,7 @@
+scheduler_graphics_task_callbacks = interface +c {
+    requestGraphicsTaskExecution();
+}
+
 scheduler_interface = interface +c +j +o {
     addTask(task: task_interface);
     addTasks(tasks: list<task_interface>);
@@ -9,6 +13,7 @@ scheduler_interface = interface +c +j +o {
     has_separate_graphics_invocation(): bool;
     # Execute added graphics tasks. Returns true, if there are unprocessed tasks in the queue after the execution.
     run_graphics_tasks(): bool;
+    set_scheduler_graphics_task_callbacks(callbacks: scheduler_graphics_task_callbacks);
 }
 
 task_interface = interface +c +j +o {

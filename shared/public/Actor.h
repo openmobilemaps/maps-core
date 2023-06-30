@@ -175,8 +175,8 @@ public:
         return lambda(object);
     }
     
-    inline const std::shared_ptr<Object>& unsafe() const {
-        return object.lock();
+    inline const std::weak_ptr<Object>& unsafe() const {
+        return object;
     }
     
 private:

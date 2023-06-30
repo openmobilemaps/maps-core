@@ -66,4 +66,6 @@ private:
     std::optional<double> lastZoom = std::nullopt;
 
     std::vector<std::tuple<PolygonCoord, std::shared_ptr<FeatureContext>>> hitDetectionPolygons;
+
+    std::vector<std::shared_ptr<PolygonGroup2dLayerObject>> toClear;
 };

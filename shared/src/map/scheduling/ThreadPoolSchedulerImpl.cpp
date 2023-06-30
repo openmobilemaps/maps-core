@@ -12,12 +12,11 @@
 #include <cmath>
 
 std::shared_ptr<SchedulerInterface> ThreadPoolScheduler::create(const std::shared_ptr<ThreadPoolCallbacks> &callbacks) {
-    return std::make_shared<ThreadPoolSchedulerImpl>(callbacks, true);
+    return std::make_shared<ThreadPoolSchedulerImpl>(callbacks);
 }
 
-ThreadPoolSchedulerImpl::ThreadPoolSchedulerImpl(const std::shared_ptr<ThreadPoolCallbacks> &callbacks,
-                                                 bool separateGraphicsQueue)
-        : callbacks(callbacks), separateGraphicsQueue(separateGraphicsQueue), delayedTaskThread(&ThreadPoolSchedulerImpl::delayedTasksThread, this), nextWakeup(std::chrono::system_clock::now() + std::chrono::seconds(1)) {
+ThreadPoolSchedulerImpl::ThreadPoolSchedulerImpl(const std::shared_ptr<ThreadPoolCallbacks> &callbacks)
+        : callbacks(callbacks), separateGraphicsQueue(false), delayedTaskThread(&ThreadPoolSchedulerImpl::delayedTasksThread, this), nextWakeup(std::chrono::system_clock::now() + std::chrono::seconds(1)) {
     unsigned int maxNumThreads = std::thread::hardware_concurrency();
     if (maxNumThreads < 1) maxNumThreads = DEFAULT_MAX_NUM_THREADS;
     for (std::size_t i = 0u; i < maxNumThreads; ++i) {
@@ -68,6 +67,9 @@ void ThreadPoolSchedulerImpl::addTaskIgnoringDelay(const std::shared_ptr<TaskInt
     if (separateGraphicsQueue && config.executionEnvironment == ExecutionEnvironment::GRAPHICS) {
         std::lock_guard<std::mutex> lock(graphicsMutex);
         graphicsQueue.push_back(task);
+        if (auto strongCallback = graphicsCallbacks.lock()) {
+            strongCallback->requestGraphicsTaskExecution();
+        }
     } else {
         std::lock_guard<std::mutex> lock(defaultMutex);
         defaultQueue.push_back(task);
@@ -222,4 +224,9 @@ void ThreadPoolSchedulerImpl::delayedTasksThread() {
             }
         }
     }
+}
+
+void ThreadPoolSchedulerImpl::setSchedulerGraphicsTaskCallbacks(const /*not-null*/ std::shared_ptr<SchedulerGraphicsTaskCallbacks> & callbacks) {
+    graphicsCallbacks = callbacks;
+    separateGraphicsQueue = callbacks != nullptr;
 }
