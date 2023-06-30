@@ -156,8 +156,9 @@ void Tiled2dMapVectorSourceRasterTileDataManager::updateLayerDescription(std::sh
         }
 
         if (needsTileReplace) {
+            std::vector<Actor<Tiled2dMapVectorTile>> tilesToClear;
             // Remove invalid legacy tile (only one - identifier is unique)
-            auto legacyPos = std::remove_if(subTiles->second.begin(), subTiles->second.end(),
+            auto legacyPos = std::find_if(subTiles->second.begin(), subTiles->second.end(),
                                             [&identifier = layerDescription->identifier]
                                                     (const std::tuple<int32_t, std::string, Actor<Tiled2dMapVectorTile>> &subTile) {
                                                 return std::get<1>(subTile) == identifier;
@@ -165,6 +166,7 @@ void Tiled2dMapVectorSourceRasterTileDataManager::updateLayerDescription(std::sh
             if (legacyPos == subTiles->second.end()) {
                 continue;
             }
+            tilesToClear.push_back(std::get<2>(*legacyPos));
             subTiles->second.erase(legacyPos);
 
             // If new source of layer is not handled by this manager, continue
@@ -203,6 +205,9 @@ void Tiled2dMapVectorSourceRasterTileDataManager::updateLayerDescription(std::sh
                 tilesReady.erase(tileData.tileInfo);
 
                 actor.message(&Tiled2dMapVectorTile::setRasterTileData, tileData.textureHolder);
+                auto castedMe = std::static_pointer_cast<Tiled2dMapVectorSourceRasterTileDataManager>(shared_from_this());
+                auto selfActor = WeakActor<Tiled2dMapVectorSourceRasterTileDataManager>(mailbox, castedMe);
+                selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceRasterTileDataManager::clearTiles, tilesToClear);
             }
         } else {
             for (auto &[index, identifier, tile]  : subTiles->second) {
@@ -222,5 +227,13 @@ void Tiled2dMapVectorSourceRasterTileDataManager::updateLayerDescription(std::sh
             }
         }
 
+    }
+}
+
+void Tiled2dMapVectorSourceRasterTileDataManager::clearTiles(const std::vector<Actor<Tiled2dMapVectorTile>> &tilesToClear) {
+    for (const auto &tile: tilesToClear) {
+        tile.syncAccess([&](auto tileActor){
+            tileActor->clear();
+        });
     }
 }
