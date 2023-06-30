@@ -10,12 +10,21 @@
 
 package io.openmobilemaps.mapscore.map.scheduling
 
-import io.openmobilemaps.mapscore.shared.map.scheduling.*
-import kotlinx.coroutines.*
+import io.openmobilemaps.mapscore.shared.map.scheduling.ExecutionEnvironment
+import io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerGraphicsTaskCallbacks
+import io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerInterface
+import io.openmobilemaps.mapscore.shared.map.scheduling.TaskConfig
+import io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface
+import io.openmobilemaps.mapscore.shared.map.scheduling.TaskPriority
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.collections.ArrayList
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -32,6 +41,7 @@ class AndroidScheduler(
 	private val delayedTaskMap: ConcurrentHashMap<String, Job> = ConcurrentHashMap()
 
 	private var schedulerCallback: AndroidSchedulerCallback? = schedulerCallback
+	private var graphicsTaskCallbacks: SchedulerGraphicsTaskCallbacks? = null
 
 	init {
 		TaskPriority.values().forEach { taskQueueMap.put(it, ConcurrentLinkedQueue()) }
@@ -81,6 +91,7 @@ class AndroidScheduler(
 		val executionEnvironment = task.getConfig().executionEnvironment
 		if (executionEnvironment == ExecutionEnvironment.GRAPHICS) {
 			schedulerCallback?.scheduleOnGlThread(task)
+			graphicsTaskCallbacks?.requestGraphicsTaskExecution()
 		} else {
 			val dispatcher = when (executionEnvironment) {
 				ExecutionEnvironment.IO -> dispatchers.io
@@ -137,6 +148,10 @@ class AndroidScheduler(
 	override fun hasSeparateGraphicsInvocation(): Boolean = false
 
 	override fun runGraphicsTasks(): Boolean = false // unused
+
+	override fun setSchedulerGraphicsTaskCallbacks(callbacks: SchedulerGraphicsTaskCallbacks) {
+		graphicsTaskCallbacks = callbacks
+	}
 
 	fun launchCoroutine(
 		context: CoroutineContext = EmptyCoroutineContext,
