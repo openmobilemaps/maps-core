@@ -17,16 +17,15 @@
 #include "MapCoordinateSystem.h"
 
 /// Convert WGS 84 / Pseudo-Mercator to LV03
-///  https://epsg.io/4326 to https://epsg.io/2056
-class EPSG4326ToEPSG2056Converter : public CoordinateConverterInterface {
-  public:
-    EPSG4326ToEPSG2056Converter() {}
+/// https://epsg.io/3857 to https://epsg.io/2056
+class EPSG3857ToEPSG2056Converter : public CoordinateConverterInterface {
+public:
+    EPSG3857ToEPSG2056Converter() {}
 
-    virtual Coord convert(const Coord &coordinate) override {
-
-        // Converts degrees dec to sex and Converts degrees to seconds (sex)
-        double lat = DEGtoSEC(DECtoSEX(coordinate.y));
-        double lng = DEGtoSEC(DECtoSEX(coordinate.x));
+    virtual Coord convert(const Coord& coordinate) override {
+        // Converts degrees dec to sex
+        const double lat = DEGtoSEC(DECtoSEX(atan(exp(coordinate.y * M_PI / 20037508.34)) * 360 / M_PI - 90));
+        const double lng = DEGtoSEC(DECtoSEX(coordinate.x * 180 / 20037508.34));
 
         // Axiliary values (% Bern)
         const double lat_aux = (lat - 169028.66) / 10000.;
@@ -43,11 +42,10 @@ class EPSG4326ToEPSG2056Converter : public CoordinateConverterInterface {
         return Coord(getTo(), x, y, z);
     }
 
-    virtual std::string getFrom() override { return CoordinateSystemIdentifiers::EPSG4326(); }
+    virtual std::string getFrom() override { return CoordinateSystemIdentifiers::EPSG3857(); }
 
     virtual std::string getTo() override { return CoordinateSystemIdentifiers::EPSG2056(); }
-
-  private:
+private:
     inline double DECtoSEX(double angle) const {
         // Extract DMS
         const double deg = angle;

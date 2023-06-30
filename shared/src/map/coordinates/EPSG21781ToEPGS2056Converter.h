@@ -23,10 +23,8 @@ class EPSG21781ToEPGS2056Converter : public CoordinateConverterInterface {
     EPSG21781ToEPGS2056Converter() {}
 
     virtual Coord convert(const Coord &coordinate) override {
-
-        double x = coordinate.x + 2000000;
-        double y = coordinate.y + 1000000;
-
+        const double x = coordinate.x + 2000000;
+        const double y = coordinate.y + 1000000;
         return Coord(getTo(), x, y, coordinate.z);
     }
 

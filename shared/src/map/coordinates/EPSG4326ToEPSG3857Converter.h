@@ -24,10 +24,8 @@ class EPSG4326ToEPSG3857Converter : public CoordinateConverterInterface {
 
     virtual Coord convert(const Coord &coordinate) override {
 
-        double x = coordinate.x * 20037508.34 / 180;
-        double y = log(tan(((90 + coordinate.y) * M_PI) / 360)) / (M_PI / 180);
-        y = (y * 20037508.34) / 180;
-
+        const double x = coordinate.x * 20037508.34 / 180;
+        const double y = ((log(tan(((90 + coordinate.y) * M_PI) / 360)) / (M_PI / 180)) * 20037508.34) / 180;
         return Coord(getTo(), x, y, coordinate.z);
     }
 

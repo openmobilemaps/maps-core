@@ -15,6 +15,7 @@
 #include "EPSG2056ToEPSG4326Converter.h"
 #include "EPSG21781ToEPGS2056Converter.h"
 #include "EPSG3857ToEPSG4326Converter.h"
+#include "EPSG3857ToEPSG2056Converter.h"
 #include "EPSG4326ToEPSG2056Converter.h"
 #include "EPSG4326ToEPSG3857Converter.h"
 
@@ -46,6 +47,7 @@ CoordinateConversionHelper::CoordinateConversionHelper() { addDefaultConverters(
 void CoordinateConversionHelper::addDefaultConverters() {
     registerConverter(std::make_shared<EPSG4326ToEPSG3857Converter>());
     registerConverter(std::make_shared<EPSG3857ToEPSG4326Converter>());
+    registerConverter(std::make_shared<EPSG3857ToEPSG2056Converter>());
     registerConverter(std::make_shared<EPSG2056ToEPSG4326Converter>());
     registerConverter(std::make_shared<EPSG4326ToEPSG2056Converter>());
     registerConverter(std::make_shared<EPSG2056ToEPGS21781Converter>());
