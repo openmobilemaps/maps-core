@@ -98,7 +98,7 @@ public:
 
     void setTileReady(const Tiled2dMapTileInfo &tile);
 
-    void setTilesReady(const std::vector<const Tiled2dMapTileInfo> &tiles);
+    void setTilesReady(const std::vector<Tiled2dMapTileInfo> &tiles);
             
     virtual void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) = 0;
             
