@@ -292,8 +292,9 @@ public:
     }
 
     int64_t getTextMaxWidth(const EvaluationContext &context) {
+        static const int64_t averageCharacterWidth = 2.0;
         static const int64_t defaultValue = 10;
-        return textMaxWidth ? textMaxWidth->evaluateOr(context, defaultValue) : defaultValue;
+        return (textMaxWidth ? textMaxWidth->evaluateOr(context, defaultValue) : defaultValue) * averageCharacterWidth;
     }
 
     double getTextMaxAngle(const EvaluationContext &context) {
