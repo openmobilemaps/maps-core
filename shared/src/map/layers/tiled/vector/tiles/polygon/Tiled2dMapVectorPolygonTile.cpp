@@ -170,11 +170,7 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
         std::unordered_map<int, std::vector<ObjectDescriptions>> styleGroupNewPolygonsMap;
         std::unordered_map<int, int32_t> styleIndicesOffsets;
 
-#ifndef __APPLE__
-        for (auto featureIt = tileData->rbegin(); featureIt != tileData->rend(); featureIt++) {
-#else
         for (auto featureIt = tileData->begin(); featureIt != tileData->end(); featureIt++) {
-#endif
 
             const auto [featureContext, geometryHandler] = *featureIt;
 

@@ -187,11 +187,7 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
 
         std::int32_t indices_offset = 0;
 
-#ifndef __APPLE__
-        for (auto featureIt = tileData->rbegin(); featureIt != tileData->rend(); featureIt++) {
-#else
         for (auto featureIt = tileData->begin(); featureIt != tileData->end(); featureIt++) {
-#endif
 
             const auto [featureContext, geometryHandler] = *featureIt;
 
