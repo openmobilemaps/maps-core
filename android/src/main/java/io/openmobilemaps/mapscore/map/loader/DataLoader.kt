@@ -44,9 +44,12 @@ open class DataLoader(
 
 	protected var okHttpClient = initializeClient()
 
-	protected open fun createClient(): OkHttpClient = OkHttpClient.Builder()
+	protected open fun createClient(interceptors: List<Interceptor>? = null): OkHttpClient = OkHttpClient.Builder()
 		.addInterceptor(UserAgentInterceptor(userAgent))
 		.addInterceptor(RefererInterceptor(referrer))
+		.apply {
+			interceptors?.forEach { addInterceptor(it) }
+		}
 		.connectionPool(ConnectionPool(8, 5000L, TimeUnit.MILLISECONDS))
 		.cache(Cache(cacheDirectory, cacheSize))
 		.dispatcher(Dispatcher().apply { maxRequestsPerHost = 8 })
@@ -57,13 +60,14 @@ open class DataLoader(
 		cacheDirectory: File? = null,
 		cacheSize: Long? = null,
 		referrer: String? = null,
-		userAgent: String? = null
+		userAgent: String? = null,
+		interceptors: List<Interceptor>? = null
 	) {
 		cacheDirectory?.let { this.cacheDirectory = cacheDirectory }
 		cacheSize?.let { this.cacheSize = cacheSize }
 		referrer?.let { this.referrer = it }
 		userAgent?.let { this.userAgent = it }
-		okHttpClient = createClient()
+		okHttpClient = createClient(interceptors)
 	}
 
 	override fun loadTexture(url: String, etag: String?): TextureLoaderResult {
