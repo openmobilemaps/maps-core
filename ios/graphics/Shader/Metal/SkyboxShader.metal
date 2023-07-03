@@ -100,7 +100,8 @@ skyboxFragmentShader(const VertexOut vertexIn [[stage_in]],
 
   float3 fsun = calculateSunPosition(120, time / 24.0);
   float4 fsun4 = (modelViewMatrix * float4(fsun, 1.0));
-  fsun = -fsun4.xyz / fsun4.w;
+  fsun = fsun4.xyz / fsun4.w;
+  fsun.y *= -1;
 
 //  float4 unprojected1 = inverseMvpMatrix * float4(vertexIn.uv.xy, 0.8, 1.0);
 //  unprojected1 /= unprojected1.w;
@@ -114,7 +115,23 @@ skyboxFragmentShader(const VertexOut vertexIn [[stage_in]],
   float3 pos = normalize(vertexIn.n);
 //  return float4(abs(pos.z), 0, 0, 1.0);
 
-  float cirrus = 0.7;
+  float longitude = vertexIn.uv.x / 180 * 3.14159;
+  float latitude = vertexIn.uv.y / 180 * 3.14159;
+
+  float sinLon = sin(longitude * 2.0);     // [0, 1, 0, -1, 0]
+  float cosLon = cos(longitude * 2.0);     // [1, 0, -1, 0, 1]
+  float sinLatH = sin(latitude / 2.0); // [0, 1, 0, -1, 0]
+  float cosLatH = cos(latitude / 2.0); // [1, 0, -1, 0, 1]
+
+  float x3D = sinLon * sinLatH;
+  float y3D = cosLatH;
+  float z3D = cosLon * sinLatH;
+//  float3 pos = normalize(float3(x3D, y3D, z3D));
+
+//  return float4(latitude, longitude, 0.0, 3.14159) / 3.14159;
+//  return float4(float3(pos.z)*0.5+0.5, 1.0);
+
+  float cirrus = 0.9;
   float cumulus = 0.0; // disabled below due to performance
 
   const float Br = 0.0025;

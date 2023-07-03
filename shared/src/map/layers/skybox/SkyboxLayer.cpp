@@ -56,14 +56,14 @@ void SkyboxLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, int
     auto shader = mapInterface->getShaderFactory()->createSkyboxShader();
     auto polygon = mapInterface->getGraphicsObjectFactory()->createPolygon3d(shader);
     std::vector<float> vertices = {
-        -10.0f, -10.0f, -10.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f, // V0
-        10.0f, -10.0f, -10.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f,  // V1
-        10.0f, 10.0f, -10.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f,   // V2
-        -10.0f, 10.0f, -10.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f,  // V3
-        -10.0f, -10.0f, 10.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f,  // V4
-        10.0f, -10.0f, 10.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f,   // V5
-        10.0f, 10.0f, 10.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f,    // V6
-        -10.0f, 10.0f, 10.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f    // V7
+        -10.0f, -10.0f, -10.0f, 10.0f, 45.0f, 45.0f, 0.0f, 0.0f, // V0
+        10.0f, -10.0f, -10.0f, 10.0f, 45.0f, 135.0f, 0.0f, 0.0f,  // V1
+        10.0f, 10.0f, -10.0f, 10.0f, 135.0f, 135.0f, 0.0f, 0.0f,   // V2
+        -10.0f, 10.0f, -10.0f, 10.0f, 135.0f, 45.0f, 0.0f, 0.0f,  // V3
+        -10.0f, -10.0f, 10.0f, 10.0f, 45.0f, 315.0f, 0.0f, 0.0f,  // V4
+        10.0f, -10.0f, 10.0f, 10.0f, 45.0f, 225.0f, 0.0f, 0.0f,   // V5
+        10.0f, 10.0f, 10.0f, 10.0f, 135.0f, 225.0f, 0.0f, 0.0f,    // V6
+        -10.0f, 10.0f, 10.0f, 10.0f, 135.0f, 315.0f, 0.0f, 0.0f    // V7
     };
 
     std::vector<uint16_t> indices = {
