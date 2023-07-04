@@ -142,7 +142,7 @@ val layerConfig = object : Tiled2dMapLayerConfig() {
 			)
     
 			// Defines to map coordinate system of the layer
-			override fun getCoordinateSystemIdentifier() : String = CoordinateSystemIdentifiers.EPSG3857()
+			override fun getCoordinateSystemIdentifier() : Int = CoordinateSystemIdentifiers.EPSG3857()
 
 	        // Name of the layer
 			override fun getLayerName(): String = "OSMLayer"
@@ -151,8 +151,10 @@ val layerConfig = object : Tiled2dMapLayerConfig() {
 			override fun getTileUrl(x: Int, y: Int, zoom: Int): String = 
 				"https://add-osm-web-server-address-here/$zoom/$x/$y.png"
 
-			// Defines both an additional scale factor for the tiles, as well as how many
-			// layers above the ideal one should be loaded an displayed as well.
+			// Defines both an additional scale factor for the tiles (and if they are scaled 
+			// to match the target devices screen density), how many layers above the ideal 
+			// one should be loaded an displayed as well, as well as if the layer is drawn,
+			// when the zoom is smaller/larger than the valid range
 			override fun getZoomInfo(): Tiled2dMapZoomInfo = Tiled2dMapZoomInfo(
 				zoomLevelScaleFactor = 0.6f,
 				numDrawPreviousLayers = 2,
