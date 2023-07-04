@@ -25,7 +25,8 @@ class Vec2DHelper {
 
     static ::Vec2D rotate(const ::Vec2D &p, const ::Vec2D &origin, double angleDegree);
 
-    static std::vector<Vec2D> convexHull(std::vector<Vec2D>& points);
+    // returns the indices that form the convex hull
+    static std::vector<size_t> convexHull(std::vector<Vec2D>& points);
 
     static Quad2dD minimumAreaEnclosingRectangle(std::vector<Vec2D>& points);
 
