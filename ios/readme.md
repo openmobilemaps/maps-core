@@ -50,8 +50,10 @@ To display a map, you first need to add a layer config for your project. The lay
 import MapCore
 
 class TiledLayerConfig: MCTiled2dMapLayerConfig {
-    // Defines both an additional scale factor for the tiles, as well as how many
- 		// layers above the ideal one should be loaded an displayed as well.
+    // Defines both an additional scale factor for the tiles (and if they are scaled 
+    // to match the target devices screen density), how many layers above the ideal 
+    // one should be loaded an displayed as well, as well as if the layer is drawn,
+    // when the zoom is smaller/larger than the valid range
     func getZoomInfo() -> MCTiled2dMapZoomInfo {
       MCTiled2dMapZoomInfo(zoomLevelScaleFactor: 0.65,
                            numDrawPreviousLayers: 1,
@@ -59,7 +61,7 @@ class TiledLayerConfig: MCTiled2dMapLayerConfig {
     }
 
     // Defines to map coordinate system of the layer
-    public func getCoordinateSystemIdentifier() -> String {
+    public func getCoordinateSystemIdentifier() -> Int32 {
       MCCoordinateSystemIdentifiers.epsg3857()
     }
 
