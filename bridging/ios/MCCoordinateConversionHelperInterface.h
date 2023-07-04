@@ -19,15 +19,15 @@
 
 - (void)registerConverter:(nullable id<MCCoordinateConverterInterface>)converter;
 
-- (nonnull MCCoord *)convert:(nonnull NSString *)to
+- (nonnull MCCoord *)convert:(int32_t)to
                   coordinate:(nonnull MCCoord *)coordinate;
 
-- (nonnull MCRectCoord *)convertRect:(nonnull NSString *)to
+- (nonnull MCRectCoord *)convertRect:(int32_t)to
                                 rect:(nonnull MCRectCoord *)rect;
 
 - (nonnull MCRectCoord *)convertRectToRenderSystem:(nonnull MCRectCoord *)rect;
 
-- (nonnull MCQuadCoord *)convertQuad:(nonnull NSString *)to
+- (nonnull MCQuadCoord *)convertQuad:(int32_t)to
                                 quad:(nonnull MCQuadCoord *)quad;
 
 - (nonnull MCQuadCoord *)convertQuadToRenderSystem:(nonnull MCQuadCoord *)quad;

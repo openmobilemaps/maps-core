@@ -9,7 +9,7 @@
 
 @interface MCBoundingBoxInterface : NSObject
 
-+ (nullable MCBoundingBoxInterface *)create:(nonnull NSString *)systemIdentifier;
++ (nullable MCBoundingBoxInterface *)create:(int32_t)systemIdentifier;
 
 - (void)addPoint:(nonnull MCCoord *)p;
 
@@ -21,6 +21,6 @@
 
 - (nonnull MCCoord *)getMax;
 
-- (nonnull NSString *)getSystemIdentifier;
+- (int32_t)getSystemIdentifier;
 
 @end

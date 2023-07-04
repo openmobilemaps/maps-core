@@ -20,10 +20,10 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_B
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_BoundingBoxInterface_create(JNIEnv* jniEnv, jobject /*this*/, jstring j_systemIdentifier)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_BoundingBoxInterface_create(JNIEnv* jniEnv, jobject /*this*/, jint j_systemIdentifier)
 {
     try {
-        auto r = ::BoundingBoxInterface::create(::djinni::String::toCpp(jniEnv, j_systemIdentifier));
+        auto r = ::BoundingBoxInterface::create(::djinni::I32::toCpp(jniEnv, j_systemIdentifier));
         return ::djinni::release(::djinni_generated::NativeBoundingBoxInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
@@ -72,12 +72,12 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinate
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jstring JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_BoundingBoxInterface_00024CppProxy_native_1getSystemIdentifier(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jint JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_BoundingBoxInterface_00024CppProxy_native_1getSystemIdentifier(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::BoundingBoxInterface>(nativeRef);
         auto r = ref->getSystemIdentifier();
-        return ::djinni::release(::djinni::String::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni::I32::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

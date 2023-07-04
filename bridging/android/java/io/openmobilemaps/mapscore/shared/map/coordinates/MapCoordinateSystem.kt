@@ -4,7 +4,7 @@
 package io.openmobilemaps.mapscore.shared.map.coordinates
 
 data class MapCoordinateSystem(
-    var identifier: String,
+    var identifier: Int,
     var bounds: RectCoord,
     var unitToScreenMeterFactor: Float,
 )

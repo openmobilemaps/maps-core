@@ -30,45 +30,45 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-+ (nonnull NSString *)RENDERSYSTEM {
++ (int32_t)RENDERSYSTEM {
     try {
         auto objcpp_result_ = ::CoordinateSystemIdentifiers::RENDERSYSTEM();
-        return ::djinni::String::fromCpp(objcpp_result_);
+        return ::djinni::I32::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-+ (nonnull NSString *)EPSG3857 {
++ (int32_t)EPSG3857 {
     try {
         auto objcpp_result_ = ::CoordinateSystemIdentifiers::EPSG3857();
-        return ::djinni::String::fromCpp(objcpp_result_);
+        return ::djinni::I32::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-+ (nonnull NSString *)EPSG4326 {
++ (int32_t)EPSG4326 {
     try {
         auto objcpp_result_ = ::CoordinateSystemIdentifiers::EPSG4326();
-        return ::djinni::String::fromCpp(objcpp_result_);
+        return ::djinni::I32::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-+ (nonnull NSString *)EPSG2056 {
++ (int32_t)EPSG2056 {
     try {
         auto objcpp_result_ = ::CoordinateSystemIdentifiers::EPSG2056();
-        return ::djinni::String::fromCpp(objcpp_result_);
+        return ::djinni::I32::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-+ (nonnull NSString *)EPSG21781 {
++ (int32_t)EPSG21781 {
     try {
         auto objcpp_result_ = ::CoordinateSystemIdentifiers::EPSG21781();
-        return ::djinni::String::fromCpp(objcpp_result_);
+        return ::djinni::I32::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-+ (nonnull NSString *)fromCrsIdentifier:(nonnull NSString *)identifier {
++ (int32_t)fromCrsIdentifier:(nonnull NSString *)identifier {
     try {
         auto objcpp_result_ = ::CoordinateSystemIdentifiers::fromCrsIdentifier(::djinni::String::toCpp(identifier));
-        return ::djinni::String::fromCpp(objcpp_result_);
+        return ::djinni::I32::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

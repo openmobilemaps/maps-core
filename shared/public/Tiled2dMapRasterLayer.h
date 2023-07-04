@@ -63,8 +63,8 @@ public:
     virtual void resume() override;
 
     virtual void setupTiles(
-            const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToSetup,
-            const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToClean);
+            const std::vector<const std::pair<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToSetup,
+            const std::vector<const std::pair<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToClean);
 
     virtual void generateRenderPasses();
 

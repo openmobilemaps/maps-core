@@ -607,7 +607,7 @@ void Tiled2dMapSource<T, L, R>::setTileReady(const Tiled2dMapTileInfo &tile) {
 }
 
 template<class T, class L, class R>
-void Tiled2dMapSource<T, L, R>::setTilesReady(const std::vector<const Tiled2dMapTileInfo> &tiles) {
+void Tiled2dMapSource<T, L, R>::setTilesReady(const std::vector<Tiled2dMapTileInfo> &tiles) {
     bool needsUpdate = false;
     
     for (auto const &tile: tiles) {

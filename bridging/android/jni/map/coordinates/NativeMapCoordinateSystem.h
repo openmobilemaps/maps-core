@@ -25,8 +25,8 @@ private:
     friend ::djinni::JniClass<NativeMapCoordinateSystem>;
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/coordinates/MapCoordinateSystem") };
-    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Ljava/lang/String;Lio/openmobilemaps/mapscore/shared/map/coordinates/RectCoord;F)V") };
-    const jfieldID field_identifier { ::djinni::jniGetFieldID(clazz.get(), "identifier", "Ljava/lang/String;") };
+    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(ILio/openmobilemaps/mapscore/shared/map/coordinates/RectCoord;F)V") };
+    const jfieldID field_identifier { ::djinni::jniGetFieldID(clazz.get(), "identifier", "I") };
     const jfieldID field_bounds { ::djinni::jniGetFieldID(clazz.get(), "bounds", "Lio/openmobilemaps/mapscore/shared/map/coordinates/RectCoord;") };
     const jfieldID field_unitToScreenMeterFactor { ::djinni::jniGetFieldID(clazz.get(), "unitToScreenMeterFactor", "F") };
 };

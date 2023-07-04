@@ -17,13 +17,13 @@ NativeTiled2dMapLayerConfig::JavaProxy::JavaProxy(JniType j) : Handle(::djinni::
 
 NativeTiled2dMapLayerConfig::JavaProxy::~JavaProxy() = default;
 
-std::string NativeTiled2dMapLayerConfig::JavaProxy::getCoordinateSystemIdentifier() {
+int32_t NativeTiled2dMapLayerConfig::JavaProxy::getCoordinateSystemIdentifier() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeTiled2dMapLayerConfig>::get();
-    auto jret = (jstring)jniEnv->CallObjectMethod(Handle::get().get(), data.method_getCoordinateSystemIdentifier);
+    auto jret = jniEnv->CallIntMethod(Handle::get().get(), data.method_getCoordinateSystemIdentifier);
     ::djinni::jniExceptionCheck(jniEnv);
-    return ::djinni::String::toCpp(jniEnv, jret);
+    return ::djinni::I32::toCpp(jniEnv, jret);
 }
 std::string NativeTiled2dMapLayerConfig::JavaProxy::getTileUrl(int32_t c_x, int32_t c_y, int32_t c_t, int32_t c_zoom) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
@@ -77,12 +77,12 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jstring JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapLayerConfig_00024CppProxy_native_1getCoordinateSystemIdentifier(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jint JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapLayerConfig_00024CppProxy_native_1getCoordinateSystemIdentifier(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapLayerConfig>(nativeRef);
         auto r = ref->getCoordinateSystemIdentifier();
-        return ::djinni::release(::djinni::String::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni::I32::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

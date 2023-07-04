@@ -6,16 +6,16 @@
 @interface MCCoord : NSObject
 - (nonnull instancetype)init NS_UNAVAILABLE;
 + (nonnull instancetype)new NS_UNAVAILABLE;
-- (nonnull instancetype)initWithSystemIdentifier:(nonnull NSString *)systemIdentifier
+- (nonnull instancetype)initWithSystemIdentifier:(int32_t)systemIdentifier
                                                x:(double)x
                                                y:(double)y
                                                z:(double)z NS_DESIGNATED_INITIALIZER;
-+ (nonnull instancetype)coordWithSystemIdentifier:(nonnull NSString *)systemIdentifier
++ (nonnull instancetype)coordWithSystemIdentifier:(int32_t)systemIdentifier
                                                 x:(double)x
                                                 y:(double)y
                                                 z:(double)z;
 
-@property (nonatomic, readonly, nonnull) NSString * systemIdentifier;
+@property (nonatomic, readonly) int32_t systemIdentifier;
 
 @property (nonatomic, readonly) double x;
 

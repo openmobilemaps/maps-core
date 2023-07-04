@@ -16,7 +16,7 @@ class Tiled2dMapLayerConfig {
 public:
     virtual ~Tiled2dMapLayerConfig() = default;
 
-    virtual std::string getCoordinateSystemIdentifier() = 0;
+    virtual int32_t getCoordinateSystemIdentifier() = 0;
 
     virtual std::string getTileUrl(int32_t x, int32_t y, int32_t t, int32_t zoom) = 0;
 

@@ -98,7 +98,7 @@ public:
 
     void setTileReady(const Tiled2dMapTileInfo &tile);
 
-    void setTilesReady(const std::vector<const Tiled2dMapTileInfo> &tiles);
+    void setTilesReady(const std::vector<Tiled2dMapTileInfo> &tiles);
             
     virtual void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) = 0;
             
@@ -114,7 +114,7 @@ public:
 
     MapConfig mapConfig;
     std::shared_ptr<Tiled2dMapLayerConfig> layerConfig;
-    std::string layerSystemId;
+    int32_t layerSystemId;
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
     std::weak_ptr<SchedulerInterface> scheduler;
     std::shared_ptr<::ErrorManager> errorManager;

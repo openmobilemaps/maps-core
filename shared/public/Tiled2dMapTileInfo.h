@@ -12,6 +12,7 @@
 
 #include "RectCoord.h"
 #include <stdint.h>
+#include <string>
 
 struct Tiled2dMapTileInfo {
     RectCoord bounds;

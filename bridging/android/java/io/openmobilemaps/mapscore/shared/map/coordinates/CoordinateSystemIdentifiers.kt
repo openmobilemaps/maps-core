@@ -10,22 +10,22 @@ abstract class CoordinateSystemIdentifiers {
 
     companion object {
         @JvmStatic
-        external fun RENDERSYSTEM(): String
+        external fun RENDERSYSTEM(): Int
 
         @JvmStatic
-        external fun EPSG3857(): String
+        external fun EPSG3857(): Int
 
         @JvmStatic
-        external fun EPSG4326(): String
+        external fun EPSG4326(): Int
 
         @JvmStatic
-        external fun EPSG2056(): String
+        external fun EPSG2056(): Int
 
         @JvmStatic
-        external fun EPSG21781(): String
+        external fun EPSG21781(): Int
 
         @JvmStatic
-        external fun fromCrsIdentifier(identifier: String): String
+        external fun fromCrsIdentifier(identifier: String): Int
     }
 
     private class CppProxy : CoordinateSystemIdentifiers {

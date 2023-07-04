@@ -33,13 +33,13 @@ class CoordinateConversionHelper : public CoordinateConversionHelperInterface {
 
     virtual void registerConverter(const std::shared_ptr<CoordinateConverterInterface> &converter) override;
 
-    virtual Coord convert(const std::string &to, const Coord &coordinate) override;
+    virtual Coord convert(const int32_t to, const Coord &coordinate) override;
 
-    virtual RectCoord convertRect(const std::string &to, const RectCoord &rect) override;
+    virtual RectCoord convertRect(const int32_t to, const RectCoord &rect) override;
 
     virtual RectCoord convertRectToRenderSystem(const RectCoord &rect) override;
 
-    virtual QuadCoord convertQuad(const std::string &to, const QuadCoord &quad) override;
+    virtual QuadCoord convertQuad(const int32_t to, const QuadCoord &quad) override;
 
     virtual QuadCoord convertQuadToRenderSystem(const QuadCoord &quad) override;
 
@@ -48,14 +48,14 @@ class CoordinateConversionHelper : public CoordinateConversionHelperInterface {
   private:
     void addDefaultConverters();
 
-    std::unordered_map<std::tuple<std::string, std::string>, std::shared_ptr<CoordinateConverterInterface>> fromToConverterMap;
+    std::unordered_map<std::tuple<int32_t, int32_t>, std::shared_ptr<CoordinateConverterInterface>> fromToConverterMap;
 
-    std::unordered_map<std::tuple<std::string, std::string>, std::vector<std::shared_ptr<CoordinateConverterInterface>>>
+    std::unordered_map<std::tuple<int32_t, int32_t>, std::vector<std::shared_ptr<CoordinateConverterInterface>>>
         converterHelper;
 
     std::shared_ptr<CoordinateConverterInterface> renderSystemConverter;
 
-    std::string mapCoordinateSystemIdentifier;
+    int32_t mapCoordinateSystemIdentifier;
 
     std::recursive_mutex converterMutex;
 

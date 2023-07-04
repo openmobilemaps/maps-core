@@ -13,7 +13,7 @@ NativeCoord::~NativeCoord() = default;
 auto NativeCoord::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinni::LocalRef<JniType> {
     const auto& data = ::djinni::JniClass<NativeCoord>::get();
     auto r = ::djinni::LocalRef<JniType>{jniEnv->NewObject(data.clazz.get(), data.jconstructor,
-                                                           ::djinni::get(::djinni::String::fromCpp(jniEnv, c.systemIdentifier)),
+                                                           ::djinni::get(::djinni::I32::fromCpp(jniEnv, c.systemIdentifier)),
                                                            ::djinni::get(::djinni::F64::fromCpp(jniEnv, c.x)),
                                                            ::djinni::get(::djinni::F64::fromCpp(jniEnv, c.y)),
                                                            ::djinni::get(::djinni::F64::fromCpp(jniEnv, c.z)))};
@@ -25,7 +25,7 @@ auto NativeCoord::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
     ::djinni::JniLocalScope jscope(jniEnv, 5);
     assert(j != nullptr);
     const auto& data = ::djinni::JniClass<NativeCoord>::get();
-    return {::djinni::String::toCpp(jniEnv, (jstring)jniEnv->GetObjectField(j, data.field_systemIdentifier)),
+    return {::djinni::I32::toCpp(jniEnv, jniEnv->GetIntField(j, data.field_systemIdentifier)),
             ::djinni::F64::toCpp(jniEnv, jniEnv->GetDoubleField(j, data.field_x)),
             ::djinni::F64::toCpp(jniEnv, jniEnv->GetDoubleField(j, data.field_y)),
             ::djinni::F64::toCpp(jniEnv, jniEnv->GetDoubleField(j, data.field_z))};

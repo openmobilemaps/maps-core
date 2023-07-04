@@ -8,15 +8,15 @@
 - (nonnull instancetype)init NS_UNAVAILABLE;
 + (nonnull instancetype)new NS_UNAVAILABLE;
 - (nonnull instancetype)initWithIdentifier:(nonnull NSString *)identifier
-                coordinateSystemIdentifier:(nonnull NSString *)coordinateSystemIdentifier
+                coordinateSystemIdentifier:(int32_t)coordinateSystemIdentifier
                                   matrices:(nonnull NSArray<MCWmtsTileMatrix *> *)matrices NS_DESIGNATED_INITIALIZER;
 + (nonnull instancetype)wmtsTileMatrixSetWithIdentifier:(nonnull NSString *)identifier
-                             coordinateSystemIdentifier:(nonnull NSString *)coordinateSystemIdentifier
+                             coordinateSystemIdentifier:(int32_t)coordinateSystemIdentifier
                                                matrices:(nonnull NSArray<MCWmtsTileMatrix *> *)matrices;
 
 @property (nonatomic, readonly, nonnull) NSString * identifier;
 
-@property (nonatomic, readonly, nonnull) NSString * coordinateSystemIdentifier;
+@property (nonatomic, readonly) int32_t coordinateSystemIdentifier;
 
 @property (nonatomic, readonly, nonnull) NSArray<MCWmtsTileMatrix *> * matrices;
 

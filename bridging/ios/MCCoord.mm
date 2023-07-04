@@ -6,13 +6,13 @@
 
 @implementation MCCoord
 
-- (nonnull instancetype)initWithSystemIdentifier:(nonnull NSString *)systemIdentifier
+- (nonnull instancetype)initWithSystemIdentifier:(int32_t)systemIdentifier
                                                x:(double)x
                                                y:(double)y
                                                z:(double)z
 {
     if (self = [super init]) {
-        _systemIdentifier = [systemIdentifier copy];
+        _systemIdentifier = systemIdentifier;
         _x = x;
         _y = y;
         _z = z;
@@ -20,7 +20,7 @@
     return self;
 }
 
-+ (nonnull instancetype)coordWithSystemIdentifier:(nonnull NSString *)systemIdentifier
++ (nonnull instancetype)coordWithSystemIdentifier:(int32_t)systemIdentifier
                                                 x:(double)x
                                                 y:(double)y
                                                 z:(double)z
@@ -37,7 +37,7 @@
         return NO;
     }
     MCCoord *typedOther = (MCCoord *)other;
-    return [self.systemIdentifier isEqualToString:typedOther.systemIdentifier] &&
+    return self.systemIdentifier == typedOther.systemIdentifier &&
             self.x == typedOther.x &&
             self.y == typedOther.y &&
             self.z == typedOther.z;
@@ -46,7 +46,7 @@
 - (NSUInteger)hash
 {
     return NSStringFromClass([self class]).hash ^
-            self.systemIdentifier.hash ^
+            (NSUInteger)self.systemIdentifier ^
             (NSUInteger)self.x ^
             (NSUInteger)self.y ^
             (NSUInteger)self.z;
@@ -55,7 +55,13 @@
 - (NSComparisonResult)compare:(MCCoord *)other
 {
     NSComparisonResult tempResult;
-    tempResult = [self.systemIdentifier compare:other.systemIdentifier];
+    if (self.systemIdentifier < other.systemIdentifier) {
+        tempResult = NSOrderedAscending;
+    } else if (self.systemIdentifier > other.systemIdentifier) {
+        tempResult = NSOrderedDescending;
+    } else {
+        tempResult = NSOrderedSame;
+    }
     if (tempResult != NSOrderedSame) {
         return tempResult;
     }
@@ -95,7 +101,7 @@
 #ifndef DJINNI_DISABLE_DESCRIPTION_METHODS
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p systemIdentifier:%@ x:%@ y:%@ z:%@>", self.class, (void *)self, self.systemIdentifier, @(self.x), @(self.y), @(self.z)];
+    return [NSString stringWithFormat:@"<%@ %p systemIdentifier:%@ x:%@ y:%@ z:%@>", self.class, (void *)self, @(self.systemIdentifier), @(self.x), @(self.y), @(self.z)];
 }
 
 #endif

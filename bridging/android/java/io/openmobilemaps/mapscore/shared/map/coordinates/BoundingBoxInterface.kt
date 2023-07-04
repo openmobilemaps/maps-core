@@ -10,7 +10,7 @@ abstract class BoundingBoxInterface {
 
     companion object {
         @JvmStatic
-        external fun create(systemIdentifier: String): BoundingBoxInterface
+        external fun create(systemIdentifier: Int): BoundingBoxInterface
     }
 
     abstract fun addPoint(p: Coord)
@@ -23,7 +23,7 @@ abstract class BoundingBoxInterface {
 
     abstract fun getMax(): Coord
 
-    abstract fun getSystemIdentifier(): String
+    abstract fun getSystemIdentifier(): Int
 
     private class CppProxy : BoundingBoxInterface {
         private val nativeRef: Long
@@ -67,10 +67,10 @@ abstract class BoundingBoxInterface {
         }
         private external fun native_getMax(_nativeRef: Long): Coord
 
-        override fun getSystemIdentifier(): String {
+        override fun getSystemIdentifier(): Int {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_getSystemIdentifier(this.nativeRef)
         }
-        private external fun native_getSystemIdentifier(_nativeRef: Long): String
+        private external fun native_getSystemIdentifier(_nativeRef: Long): Int
     }
 }

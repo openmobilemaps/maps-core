@@ -100,7 +100,7 @@ private:
     const std::shared_ptr<SymbolVectorLayerDescription> description;
 
     const ::Coord coordinate;
-    ::Coord renderCoordinate = Coord("", 0, 0, 0);
+    ::Coord renderCoordinate = Coord(0, 0, 0, 0);
     Vec2D initialRenderCoordinateVec = Vec2D(0, 0);
 
     SymbolObjectInstanceCounts instanceCounts = {0,0,0};

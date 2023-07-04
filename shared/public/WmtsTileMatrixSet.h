@@ -4,17 +4,18 @@
 #pragma once
 
 #include "WmtsTileMatrix.h"
+#include <cstdint>
 #include <string>
 #include <utility>
 #include <vector>
 
 struct WmtsTileMatrixSet final {
     std::string identifier;
-    std::string coordinateSystemIdentifier;
+    int32_t coordinateSystemIdentifier;
     std::vector<WmtsTileMatrix> matrices;
 
     WmtsTileMatrixSet(std::string identifier_,
-                      std::string coordinateSystemIdentifier_,
+                      int32_t coordinateSystemIdentifier_,
                       std::vector<WmtsTileMatrix> matrices_)
     : identifier(std::move(identifier_))
     , coordinateSystemIdentifier(std::move(coordinateSystemIdentifier_))

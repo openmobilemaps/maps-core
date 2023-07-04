@@ -10,25 +10,25 @@
 
 #include "CoordinateSystemIdentifiers.h"
 
-std::string CoordinateSystemIdentifiers::RENDERSYSTEM() { return "render_system"; };
+int32_t CoordinateSystemIdentifiers::RENDERSYSTEM() { return 0; };
 
 // WGS 84 / Pseudo-Mercator
 // https://epsg.io/3857
-std::string CoordinateSystemIdentifiers::EPSG3857() { return "EPSG:3857"; };
+int32_t CoordinateSystemIdentifiers::EPSG3857() { return 3857; };
 
 // WGS 84
 // https://epsg.io/4326
-std::string CoordinateSystemIdentifiers::EPSG4326() { return "EPSG:4326"; };
+int32_t CoordinateSystemIdentifiers::EPSG4326() { return 4326; };
 
 // LV03+
 // https://epsg.io/2056
-std::string CoordinateSystemIdentifiers::EPSG2056() { return "EPSG:2056"; };
+int32_t CoordinateSystemIdentifiers::EPSG2056() { return 2056; };
 
 // CH1903 / LV03
 // https://epsg.io/21781
-std::string CoordinateSystemIdentifiers::EPSG21781() { return "EPSG:21781"; };
+int32_t CoordinateSystemIdentifiers::EPSG21781() { return 21781; };
 
-std::string CoordinateSystemIdentifiers::fromCrsIdentifier(const std::string &identifier) {
+int32_t CoordinateSystemIdentifiers::fromCrsIdentifier(const std::string &identifier) {
     if (identifier == "urn:ogc:def:crs:EPSG:3857" || identifier == "urn:ogc:def:crs:EPSG::3857" || identifier == "EPSG:3857" ||
         identifier == "urn:ogc:def:crs:EPSG:6.3:3857" || identifier == "urn:ogc:def:crs:EPSG:6.18.3:3857")
         return EPSG3857();
@@ -40,5 +40,5 @@ std::string CoordinateSystemIdentifiers::fromCrsIdentifier(const std::string &id
     if (identifier == "urn:ogc:def:crs:EPSG:21781" || identifier == "urn:ogc:def:crs:EPSG::21781" || identifier == "EPSG:21781")
         return EPSG21781();
 
-    return "";
+    return -1;
 };

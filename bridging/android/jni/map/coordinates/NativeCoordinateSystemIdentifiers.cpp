@@ -18,51 +18,51 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_C
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jstring JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateSystemIdentifiers_RENDERSYSTEM(JNIEnv* jniEnv, jobject /*this*/)
+CJNIEXPORT jint JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateSystemIdentifiers_RENDERSYSTEM(JNIEnv* jniEnv, jobject /*this*/)
 {
     try {
         auto r = ::CoordinateSystemIdentifiers::RENDERSYSTEM();
-        return ::djinni::release(::djinni::String::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni::I32::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jstring JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateSystemIdentifiers_EPSG3857(JNIEnv* jniEnv, jobject /*this*/)
+CJNIEXPORT jint JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateSystemIdentifiers_EPSG3857(JNIEnv* jniEnv, jobject /*this*/)
 {
     try {
         auto r = ::CoordinateSystemIdentifiers::EPSG3857();
-        return ::djinni::release(::djinni::String::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni::I32::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jstring JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateSystemIdentifiers_EPSG4326(JNIEnv* jniEnv, jobject /*this*/)
+CJNIEXPORT jint JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateSystemIdentifiers_EPSG4326(JNIEnv* jniEnv, jobject /*this*/)
 {
     try {
         auto r = ::CoordinateSystemIdentifiers::EPSG4326();
-        return ::djinni::release(::djinni::String::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni::I32::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jstring JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateSystemIdentifiers_EPSG2056(JNIEnv* jniEnv, jobject /*this*/)
+CJNIEXPORT jint JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateSystemIdentifiers_EPSG2056(JNIEnv* jniEnv, jobject /*this*/)
 {
     try {
         auto r = ::CoordinateSystemIdentifiers::EPSG2056();
-        return ::djinni::release(::djinni::String::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni::I32::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jstring JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateSystemIdentifiers_EPSG21781(JNIEnv* jniEnv, jobject /*this*/)
+CJNIEXPORT jint JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateSystemIdentifiers_EPSG21781(JNIEnv* jniEnv, jobject /*this*/)
 {
     try {
         auto r = ::CoordinateSystemIdentifiers::EPSG21781();
-        return ::djinni::release(::djinni::String::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni::I32::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jstring JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateSystemIdentifiers_fromCrsIdentifier(JNIEnv* jniEnv, jobject /*this*/, jstring j_identifier)
+CJNIEXPORT jint JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateSystemIdentifiers_fromCrsIdentifier(JNIEnv* jniEnv, jobject /*this*/, jstring j_identifier)
 {
     try {
         auto r = ::CoordinateSystemIdentifiers::fromCrsIdentifier(::djinni::String::toCpp(jniEnv, j_identifier));
-        return ::djinni::release(::djinni::String::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni::I32::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

@@ -9,7 +9,7 @@
 
 @protocol MCTiled2dMapLayerConfig
 
-- (nonnull NSString *)getCoordinateSystemIdentifier;
+- (int32_t)getCoordinateSystemIdentifier;
 
 - (nonnull NSString *)getTileUrl:(int32_t)x
                                y:(int32_t)y

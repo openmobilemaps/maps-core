@@ -10,7 +10,7 @@ namespace djinni_generated {
 auto Coord::toCpp(ObjcType obj) -> CppType
 {
     assert(obj);
-    return {::djinni::String::toCpp(obj.systemIdentifier),
+    return {::djinni::I32::toCpp(obj.systemIdentifier),
             ::djinni::F64::toCpp(obj.x),
             ::djinni::F64::toCpp(obj.y),
             ::djinni::F64::toCpp(obj.z)};
@@ -18,7 +18,7 @@ auto Coord::toCpp(ObjcType obj) -> CppType
 
 auto Coord::fromCpp(const CppType& cpp) -> ObjcType
 {
-    return [[MCCoord alloc] initWithSystemIdentifier:(::djinni::String::fromCpp(cpp.systemIdentifier))
+    return [[MCCoord alloc] initWithSystemIdentifier:(::djinni::I32::fromCpp(cpp.systemIdentifier))
                                                    x:(::djinni::F64::fromCpp(cpp.x))
                                                    y:(::djinni::F64::fromCpp(cpp.y))
                                                    z:(::djinni::F64::fromCpp(cpp.z))];

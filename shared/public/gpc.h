@@ -131,7 +131,7 @@ void gpc_set_polygon (const std::vector<std::vector<::Coord>>& p, gpc_polygon *p
 
 void gpc_set_polygon (const PolygonCoord& p, gpc_polygon *polygon);
 
-std::vector<::PolygonCoord> gpc_get_polygon_coord (gpc_polygon *polygon, const std::string &systemIdentifier);
+std::vector<::PolygonCoord> gpc_get_polygon_coord (gpc_polygon *polygon, const int32_t systemIdentifier);
 
 #endif
 

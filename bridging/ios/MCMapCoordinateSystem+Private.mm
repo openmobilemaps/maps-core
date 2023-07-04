@@ -11,14 +11,14 @@ namespace djinni_generated {
 auto MapCoordinateSystem::toCpp(ObjcType obj) -> CppType
 {
     assert(obj);
-    return {::djinni::String::toCpp(obj.identifier),
+    return {::djinni::I32::toCpp(obj.identifier),
             ::djinni_generated::RectCoord::toCpp(obj.bounds),
             ::djinni::F32::toCpp(obj.unitToScreenMeterFactor)};
 }
 
 auto MapCoordinateSystem::fromCpp(const CppType& cpp) -> ObjcType
 {
-    return [[MCMapCoordinateSystem alloc] initWithIdentifier:(::djinni::String::fromCpp(cpp.identifier))
+    return [[MCMapCoordinateSystem alloc] initWithIdentifier:(::djinni::I32::fromCpp(cpp.identifier))
                                                       bounds:(::djinni_generated::RectCoord::fromCpp(cpp.bounds))
                                      unitToScreenMeterFactor:(::djinni::F32::fromCpp(cpp.unitToScreenMeterFactor))];
 }

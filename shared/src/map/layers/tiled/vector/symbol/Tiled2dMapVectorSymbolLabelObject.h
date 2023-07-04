@@ -84,7 +84,7 @@ private:
 
     const std::shared_ptr<FontLoaderResult> fontResult;
 
-    Coord referencePoint = Coord("",0,0,0);
+    Coord referencePoint = Coord(0,0,0,0);
     float referenceSize;
 
 

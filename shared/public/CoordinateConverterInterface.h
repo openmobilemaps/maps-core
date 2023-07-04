@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <string>
+#include <cstdint>
 
 struct Coord;
 
@@ -13,7 +13,7 @@ public:
 
     virtual Coord convert(const Coord & coordinate) = 0;
 
-    virtual std::string getFrom() = 0;
+    virtual int32_t getFrom() = 0;
 
-    virtual std::string getTo() = 0;
+    virtual int32_t getTo() = 0;
 };

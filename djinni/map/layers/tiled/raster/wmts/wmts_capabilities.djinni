@@ -23,7 +23,7 @@ wmts_tile_matrix = record {
 }
 wmts_tile_matrix_set = record {
     identifier: string;
-    coordinate_system_identifier: string;
+    coordinate_system_identifier: i32;
     matrices: list<wmts_tile_matrix>;
 }
 wmts_layer_description = record {
@@ -56,6 +56,6 @@ wmts_tiled_2d_map_layer_config_factory = interface +c {
     static create(wmts_layer_configuration: wmts_layer_description,
                   zoom_level_info: list<tiled_2d_map_zoom_level_info>,
                   zoom_info: tiled_2d_map_zoom_info,
-                  coordinate_system_identifier: string,
+                  coordinate_system_identifier: i32,
                   matrix_set_identifier: string) : tiled_2d_map_layer_config;
 }

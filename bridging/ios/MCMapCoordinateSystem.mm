@@ -6,19 +6,19 @@
 
 @implementation MCMapCoordinateSystem
 
-- (nonnull instancetype)initWithIdentifier:(nonnull NSString *)identifier
+- (nonnull instancetype)initWithIdentifier:(int32_t)identifier
                                     bounds:(nonnull MCRectCoord *)bounds
                    unitToScreenMeterFactor:(float)unitToScreenMeterFactor
 {
     if (self = [super init]) {
-        _identifier = [identifier copy];
+        _identifier = identifier;
         _bounds = bounds;
         _unitToScreenMeterFactor = unitToScreenMeterFactor;
     }
     return self;
 }
 
-+ (nonnull instancetype)mapCoordinateSystemWithIdentifier:(nonnull NSString *)identifier
++ (nonnull instancetype)mapCoordinateSystemWithIdentifier:(int32_t)identifier
                                                    bounds:(nonnull MCRectCoord *)bounds
                                   unitToScreenMeterFactor:(float)unitToScreenMeterFactor
 {
@@ -30,7 +30,7 @@
 #ifndef DJINNI_DISABLE_DESCRIPTION_METHODS
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p identifier:%@ bounds:%@ unitToScreenMeterFactor:%@>", self.class, (void *)self, self.identifier, self.bounds, @(self.unitToScreenMeterFactor)];
+    return [NSString stringWithFormat:@"<%@ %p identifier:%@ bounds:%@ unitToScreenMeterFactor:%@>", self.class, (void *)self, @(self.identifier), self.bounds, @(self.unitToScreenMeterFactor)];
 }
 
 #endif
