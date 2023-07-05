@@ -13,21 +13,21 @@ abstract class WmtsCapabilitiesResource {
         external fun create(xml: String): WmtsCapabilitiesResource
     }
 
-    abstract fun createLayer(identifier: String, tileLoaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface
+    abstract fun createLayer(identifier: String, tileLoaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface?
 
-    abstract fun createLayerTimed(identifier: String, tileLoaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, numT: Int): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface
+    abstract fun createLayerTimed(identifier: String, tileLoaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, numT: Int): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface?
 
-    abstract fun createLayerWithZoomInfo(identifier: String, tileLoaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface
+    abstract fun createLayerWithZoomInfo(identifier: String, tileLoaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface?
 
-    abstract fun createLayerWithZoomInfoTimed(identifier: String, tileLoaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo, numT: Int): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface
+    abstract fun createLayerWithZoomInfoTimed(identifier: String, tileLoaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo, numT: Int): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface?
 
-    abstract fun createLayerConfig(identifier: String): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig
+    abstract fun createLayerConfig(identifier: String): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig?
 
-    abstract fun createLayerConfigTimed(identifier: String, numT: Int): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig
+    abstract fun createLayerConfigTimed(identifier: String, numT: Int): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig?
 
-    abstract fun createLayerConfigWithZoomInfo(identifier: String, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig
+    abstract fun createLayerConfigWithZoomInfo(identifier: String, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig?
 
-    abstract fun createLayerConfigWithZoomInfoTimed(identifier: String, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo, numT: Int): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig
+    abstract fun createLayerConfigWithZoomInfoTimed(identifier: String, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo, numT: Int): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig?
 
     abstract fun getAllLayers(): ArrayList<WmtsLayerDescription>
 
@@ -43,53 +43,53 @@ abstract class WmtsCapabilitiesResource {
 
         external fun nativeDestroy(nativeRef: Long)
 
-        override fun createLayer(identifier: String, tileLoaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface {
+        override fun createLayer(identifier: String, tileLoaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface? {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_createLayer(this.nativeRef, identifier, tileLoaders)
         }
-        private external fun native_createLayer(_nativeRef: Long, identifier: String, tileLoaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface
+        private external fun native_createLayer(_nativeRef: Long, identifier: String, tileLoaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface?
 
-        override fun createLayerTimed(identifier: String, tileLoaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, numT: Int): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface {
+        override fun createLayerTimed(identifier: String, tileLoaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, numT: Int): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface? {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_createLayerTimed(this.nativeRef, identifier, tileLoaders, numT)
         }
-        private external fun native_createLayerTimed(_nativeRef: Long, identifier: String, tileLoaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, numT: Int): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface
+        private external fun native_createLayerTimed(_nativeRef: Long, identifier: String, tileLoaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, numT: Int): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface?
 
-        override fun createLayerWithZoomInfo(identifier: String, tileLoaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface {
+        override fun createLayerWithZoomInfo(identifier: String, tileLoaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface? {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_createLayerWithZoomInfo(this.nativeRef, identifier, tileLoaders, zoomInfo)
         }
-        private external fun native_createLayerWithZoomInfo(_nativeRef: Long, identifier: String, tileLoaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface
+        private external fun native_createLayerWithZoomInfo(_nativeRef: Long, identifier: String, tileLoaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface?
 
-        override fun createLayerWithZoomInfoTimed(identifier: String, tileLoaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo, numT: Int): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface {
+        override fun createLayerWithZoomInfoTimed(identifier: String, tileLoaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo, numT: Int): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface? {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_createLayerWithZoomInfoTimed(this.nativeRef, identifier, tileLoaders, zoomInfo, numT)
         }
-        private external fun native_createLayerWithZoomInfoTimed(_nativeRef: Long, identifier: String, tileLoaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo, numT: Int): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface
+        private external fun native_createLayerWithZoomInfoTimed(_nativeRef: Long, identifier: String, tileLoaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo, numT: Int): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface?
 
-        override fun createLayerConfig(identifier: String): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig {
+        override fun createLayerConfig(identifier: String): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig? {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_createLayerConfig(this.nativeRef, identifier)
         }
-        private external fun native_createLayerConfig(_nativeRef: Long, identifier: String): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig
+        private external fun native_createLayerConfig(_nativeRef: Long, identifier: String): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig?
 
-        override fun createLayerConfigTimed(identifier: String, numT: Int): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig {
+        override fun createLayerConfigTimed(identifier: String, numT: Int): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig? {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_createLayerConfigTimed(this.nativeRef, identifier, numT)
         }
-        private external fun native_createLayerConfigTimed(_nativeRef: Long, identifier: String, numT: Int): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig
+        private external fun native_createLayerConfigTimed(_nativeRef: Long, identifier: String, numT: Int): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig?
 
-        override fun createLayerConfigWithZoomInfo(identifier: String, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig {
+        override fun createLayerConfigWithZoomInfo(identifier: String, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig? {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_createLayerConfigWithZoomInfo(this.nativeRef, identifier, zoomInfo)
         }
-        private external fun native_createLayerConfigWithZoomInfo(_nativeRef: Long, identifier: String, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig
+        private external fun native_createLayerConfigWithZoomInfo(_nativeRef: Long, identifier: String, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig?
 
-        override fun createLayerConfigWithZoomInfoTimed(identifier: String, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo, numT: Int): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig {
+        override fun createLayerConfigWithZoomInfoTimed(identifier: String, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo, numT: Int): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig? {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_createLayerConfigWithZoomInfoTimed(this.nativeRef, identifier, zoomInfo, numT)
         }
-        private external fun native_createLayerConfigWithZoomInfoTimed(_nativeRef: Long, identifier: String, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo, numT: Int): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig
+        private external fun native_createLayerConfigWithZoomInfoTimed(_nativeRef: Long, identifier: String, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo, numT: Int): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig?
 
         override fun getAllLayers(): ArrayList<WmtsLayerDescription> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

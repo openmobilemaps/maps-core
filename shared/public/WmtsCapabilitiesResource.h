@@ -9,6 +9,7 @@
 #include "Tiled2dMapZoomInfo.h"
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -20,21 +21,21 @@ public:
 
     static /*not-null*/ std::shared_ptr<WmtsCapabilitiesResource> create(const std::string & xml);
 
-    virtual /*not-null*/ std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayer(const std::string & identifier, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & tileLoaders) = 0;
+    virtual /*nullable*/ std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayer(const std::string & identifier, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & tileLoaders) = 0;
 
-    virtual /*not-null*/ std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayerTimed(const std::string & identifier, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & tileLoaders, int32_t numT) = 0;
+    virtual /*nullable*/ std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayerTimed(const std::string & identifier, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & tileLoaders, int32_t numT) = 0;
 
-    virtual /*not-null*/ std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayerWithZoomInfo(const std::string & identifier, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & tileLoaders, const ::Tiled2dMapZoomInfo & zoomInfo) = 0;
+    virtual /*nullable*/ std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayerWithZoomInfo(const std::string & identifier, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & tileLoaders, const ::Tiled2dMapZoomInfo & zoomInfo) = 0;
 
-    virtual /*not-null*/ std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayerWithZoomInfoTimed(const std::string & identifier, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & tileLoaders, const ::Tiled2dMapZoomInfo & zoomInfo, int32_t numT) = 0;
+    virtual /*nullable*/ std::shared_ptr<::Tiled2dMapRasterLayerInterface> createLayerWithZoomInfoTimed(const std::string & identifier, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & tileLoaders, const ::Tiled2dMapZoomInfo & zoomInfo, int32_t numT) = 0;
 
-    virtual /*not-null*/ std::shared_ptr<::Tiled2dMapLayerConfig> createLayerConfig(const std::string & identifier) = 0;
+    virtual /*nullable*/ std::shared_ptr<::Tiled2dMapLayerConfig> createLayerConfig(const std::string & identifier) = 0;
 
-    virtual /*not-null*/ std::shared_ptr<::Tiled2dMapLayerConfig> createLayerConfigTimed(const std::string & identifier, int32_t numT) = 0;
+    virtual /*nullable*/ std::shared_ptr<::Tiled2dMapLayerConfig> createLayerConfigTimed(const std::string & identifier, int32_t numT) = 0;
 
-    virtual /*not-null*/ std::shared_ptr<::Tiled2dMapLayerConfig> createLayerConfigWithZoomInfo(const std::string & identifier, const ::Tiled2dMapZoomInfo & zoomInfo) = 0;
+    virtual /*nullable*/ std::shared_ptr<::Tiled2dMapLayerConfig> createLayerConfigWithZoomInfo(const std::string & identifier, const ::Tiled2dMapZoomInfo & zoomInfo) = 0;
 
-    virtual /*not-null*/ std::shared_ptr<::Tiled2dMapLayerConfig> createLayerConfigWithZoomInfoTimed(const std::string & identifier, const ::Tiled2dMapZoomInfo & zoomInfo, int32_t numT) = 0;
+    virtual /*nullable*/ std::shared_ptr<::Tiled2dMapLayerConfig> createLayerConfigWithZoomInfoTimed(const std::string & identifier, const ::Tiled2dMapZoomInfo & zoomInfo, int32_t numT) = 0;
 
     virtual std::vector<WmtsLayerDescription> getAllLayers() = 0;
 };

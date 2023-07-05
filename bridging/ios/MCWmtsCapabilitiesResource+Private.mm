@@ -47,7 +47,7 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createLayer(::djinni::String::toCpp(identifier),
                                                                ::djinni::List<::djinni_generated::LoaderInterface>::toCpp(tileLoaders));
-        return ::djinni_generated::Tiled2dMapRasterLayerInterface::fromCpp(objcpp_result_);
+        return ::djinni::Optional<std::optional, ::djinni_generated::Tiled2dMapRasterLayerInterface>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -58,7 +58,7 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
         auto objcpp_result_ = _cppRefHandle.get()->createLayerTimed(::djinni::String::toCpp(identifier),
                                                                     ::djinni::List<::djinni_generated::LoaderInterface>::toCpp(tileLoaders),
                                                                     ::djinni::I32::toCpp(numT));
-        return ::djinni_generated::Tiled2dMapRasterLayerInterface::fromCpp(objcpp_result_);
+        return ::djinni::Optional<std::optional, ::djinni_generated::Tiled2dMapRasterLayerInterface>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -69,7 +69,7 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
         auto objcpp_result_ = _cppRefHandle.get()->createLayerWithZoomInfo(::djinni::String::toCpp(identifier),
                                                                            ::djinni::List<::djinni_generated::LoaderInterface>::toCpp(tileLoaders),
                                                                            ::djinni_generated::Tiled2dMapZoomInfo::toCpp(zoomInfo));
-        return ::djinni_generated::Tiled2dMapRasterLayerInterface::fromCpp(objcpp_result_);
+        return ::djinni::Optional<std::optional, ::djinni_generated::Tiled2dMapRasterLayerInterface>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -82,14 +82,14 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
                                                                                 ::djinni::List<::djinni_generated::LoaderInterface>::toCpp(tileLoaders),
                                                                                 ::djinni_generated::Tiled2dMapZoomInfo::toCpp(zoomInfo),
                                                                                 ::djinni::I32::toCpp(numT));
-        return ::djinni_generated::Tiled2dMapRasterLayerInterface::fromCpp(objcpp_result_);
+        return ::djinni::Optional<std::optional, ::djinni_generated::Tiled2dMapRasterLayerInterface>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
 - (nullable id<MCTiled2dMapLayerConfig>)createLayerConfig:(nonnull NSString *)identifier {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createLayerConfig(::djinni::String::toCpp(identifier));
-        return ::djinni_generated::Tiled2dMapLayerConfig::fromCpp(objcpp_result_);
+        return ::djinni::Optional<std::optional, ::djinni_generated::Tiled2dMapLayerConfig>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -98,7 +98,7 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createLayerConfigTimed(::djinni::String::toCpp(identifier),
                                                                           ::djinni::I32::toCpp(numT));
-        return ::djinni_generated::Tiled2dMapLayerConfig::fromCpp(objcpp_result_);
+        return ::djinni::Optional<std::optional, ::djinni_generated::Tiled2dMapLayerConfig>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -107,7 +107,7 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createLayerConfigWithZoomInfo(::djinni::String::toCpp(identifier),
                                                                                  ::djinni_generated::Tiled2dMapZoomInfo::toCpp(zoomInfo));
-        return ::djinni_generated::Tiled2dMapLayerConfig::fromCpp(objcpp_result_);
+        return ::djinni::Optional<std::optional, ::djinni_generated::Tiled2dMapLayerConfig>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -118,7 +118,7 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
         auto objcpp_result_ = _cppRefHandle.get()->createLayerConfigWithZoomInfoTimed(::djinni::String::toCpp(identifier),
                                                                                       ::djinni_generated::Tiled2dMapZoomInfo::toCpp(zoomInfo),
                                                                                       ::djinni::I32::toCpp(numT));
-        return ::djinni_generated::Tiled2dMapLayerConfig::fromCpp(objcpp_result_);
+        return ::djinni::Optional<std::optional, ::djinni_generated::Tiled2dMapLayerConfig>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
