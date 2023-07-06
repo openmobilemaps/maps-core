@@ -218,7 +218,8 @@ lineLayer?.add(MCLineFactory.createLine("lineIdentifier",
                                                            widthType: .SCREEN_PIXEL,
                                                            width: 50,
                                                            dashArray: [1,1],
-                                                           lineCap: .BUTT)))
+                                                           lineCap: .BUTT,
+                                                           offset: 0.0)))
                                                            
     mapView.add(layer: lineLayer?.asLayerInterface())
 ```

@@ -31,39 +31,39 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_til
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT ::djinni_generated::NativeTiled2dMapRasterLayerInterface::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_wmts_WmtsCapabilitiesResource_00024CppProxy_native_1createLayer(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_identifier, jobject j_tileLoaders)
+CJNIEXPORT ::djinni_generated::NativeTiled2dMapRasterLayerInterface::Boxed::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_wmts_WmtsCapabilitiesResource_00024CppProxy_native_1createLayer(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_identifier, jobject j_tileLoaders)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::WmtsCapabilitiesResource>(nativeRef);
         auto r = ref->createLayer(::djinni::String::toCpp(jniEnv, j_identifier),
                                   ::djinni::List<::djinni_generated::NativeLoaderInterface>::toCpp(jniEnv, j_tileLoaders));
-        return ::djinni::release(::djinni_generated::NativeTiled2dMapRasterLayerInterface::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni_generated::NativeTiled2dMapRasterLayerInterface>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT ::djinni_generated::NativeTiled2dMapRasterLayerInterface::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_wmts_WmtsCapabilitiesResource_00024CppProxy_native_1createLayerTimed(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_identifier, jobject j_tileLoaders, jint j_numT)
+CJNIEXPORT ::djinni_generated::NativeTiled2dMapRasterLayerInterface::Boxed::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_wmts_WmtsCapabilitiesResource_00024CppProxy_native_1createLayerTimed(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_identifier, jobject j_tileLoaders, jint j_numT)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::WmtsCapabilitiesResource>(nativeRef);
         auto r = ref->createLayerTimed(::djinni::String::toCpp(jniEnv, j_identifier),
                                        ::djinni::List<::djinni_generated::NativeLoaderInterface>::toCpp(jniEnv, j_tileLoaders),
                                        ::djinni::I32::toCpp(jniEnv, j_numT));
-        return ::djinni::release(::djinni_generated::NativeTiled2dMapRasterLayerInterface::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni_generated::NativeTiled2dMapRasterLayerInterface>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT ::djinni_generated::NativeTiled2dMapRasterLayerInterface::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_wmts_WmtsCapabilitiesResource_00024CppProxy_native_1createLayerWithZoomInfo(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_identifier, jobject j_tileLoaders, ::djinni_generated::NativeTiled2dMapZoomInfo::JniType j_zoomInfo)
+CJNIEXPORT ::djinni_generated::NativeTiled2dMapRasterLayerInterface::Boxed::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_wmts_WmtsCapabilitiesResource_00024CppProxy_native_1createLayerWithZoomInfo(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_identifier, jobject j_tileLoaders, ::djinni_generated::NativeTiled2dMapZoomInfo::JniType j_zoomInfo)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::WmtsCapabilitiesResource>(nativeRef);
         auto r = ref->createLayerWithZoomInfo(::djinni::String::toCpp(jniEnv, j_identifier),
                                               ::djinni::List<::djinni_generated::NativeLoaderInterface>::toCpp(jniEnv, j_tileLoaders),
                                               ::djinni_generated::NativeTiled2dMapZoomInfo::toCpp(jniEnv, j_zoomInfo));
-        return ::djinni::release(::djinni_generated::NativeTiled2dMapRasterLayerInterface::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni_generated::NativeTiled2dMapRasterLayerInterface>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT ::djinni_generated::NativeTiled2dMapRasterLayerInterface::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_wmts_WmtsCapabilitiesResource_00024CppProxy_native_1createLayerWithZoomInfoTimed(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_identifier, jobject j_tileLoaders, ::djinni_generated::NativeTiled2dMapZoomInfo::JniType j_zoomInfo, jint j_numT)
+CJNIEXPORT ::djinni_generated::NativeTiled2dMapRasterLayerInterface::Boxed::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_wmts_WmtsCapabilitiesResource_00024CppProxy_native_1createLayerWithZoomInfoTimed(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_identifier, jobject j_tileLoaders, ::djinni_generated::NativeTiled2dMapZoomInfo::JniType j_zoomInfo, jint j_numT)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::WmtsCapabilitiesResource>(nativeRef);
@@ -71,47 +71,47 @@ CJNIEXPORT ::djinni_generated::NativeTiled2dMapRasterLayerInterface::JniType JNI
                                                    ::djinni::List<::djinni_generated::NativeLoaderInterface>::toCpp(jniEnv, j_tileLoaders),
                                                    ::djinni_generated::NativeTiled2dMapZoomInfo::toCpp(jniEnv, j_zoomInfo),
                                                    ::djinni::I32::toCpp(jniEnv, j_numT));
-        return ::djinni::release(::djinni_generated::NativeTiled2dMapRasterLayerInterface::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni_generated::NativeTiled2dMapRasterLayerInterface>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT ::djinni_generated::NativeTiled2dMapLayerConfig::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_wmts_WmtsCapabilitiesResource_00024CppProxy_native_1createLayerConfig(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_identifier)
+CJNIEXPORT ::djinni_generated::NativeTiled2dMapLayerConfig::Boxed::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_wmts_WmtsCapabilitiesResource_00024CppProxy_native_1createLayerConfig(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_identifier)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::WmtsCapabilitiesResource>(nativeRef);
         auto r = ref->createLayerConfig(::djinni::String::toCpp(jniEnv, j_identifier));
-        return ::djinni::release(::djinni_generated::NativeTiled2dMapLayerConfig::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni_generated::NativeTiled2dMapLayerConfig>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT ::djinni_generated::NativeTiled2dMapLayerConfig::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_wmts_WmtsCapabilitiesResource_00024CppProxy_native_1createLayerConfigTimed(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_identifier, jint j_numT)
+CJNIEXPORT ::djinni_generated::NativeTiled2dMapLayerConfig::Boxed::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_wmts_WmtsCapabilitiesResource_00024CppProxy_native_1createLayerConfigTimed(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_identifier, jint j_numT)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::WmtsCapabilitiesResource>(nativeRef);
         auto r = ref->createLayerConfigTimed(::djinni::String::toCpp(jniEnv, j_identifier),
                                              ::djinni::I32::toCpp(jniEnv, j_numT));
-        return ::djinni::release(::djinni_generated::NativeTiled2dMapLayerConfig::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni_generated::NativeTiled2dMapLayerConfig>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT ::djinni_generated::NativeTiled2dMapLayerConfig::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_wmts_WmtsCapabilitiesResource_00024CppProxy_native_1createLayerConfigWithZoomInfo(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_identifier, ::djinni_generated::NativeTiled2dMapZoomInfo::JniType j_zoomInfo)
+CJNIEXPORT ::djinni_generated::NativeTiled2dMapLayerConfig::Boxed::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_wmts_WmtsCapabilitiesResource_00024CppProxy_native_1createLayerConfigWithZoomInfo(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_identifier, ::djinni_generated::NativeTiled2dMapZoomInfo::JniType j_zoomInfo)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::WmtsCapabilitiesResource>(nativeRef);
         auto r = ref->createLayerConfigWithZoomInfo(::djinni::String::toCpp(jniEnv, j_identifier),
                                                     ::djinni_generated::NativeTiled2dMapZoomInfo::toCpp(jniEnv, j_zoomInfo));
-        return ::djinni::release(::djinni_generated::NativeTiled2dMapLayerConfig::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni_generated::NativeTiled2dMapLayerConfig>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT ::djinni_generated::NativeTiled2dMapLayerConfig::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_wmts_WmtsCapabilitiesResource_00024CppProxy_native_1createLayerConfigWithZoomInfoTimed(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_identifier, ::djinni_generated::NativeTiled2dMapZoomInfo::JniType j_zoomInfo, jint j_numT)
+CJNIEXPORT ::djinni_generated::NativeTiled2dMapLayerConfig::Boxed::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_wmts_WmtsCapabilitiesResource_00024CppProxy_native_1createLayerConfigWithZoomInfoTimed(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_identifier, ::djinni_generated::NativeTiled2dMapZoomInfo::JniType j_zoomInfo, jint j_numT)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::WmtsCapabilitiesResource>(nativeRef);
         auto r = ref->createLayerConfigWithZoomInfoTimed(::djinni::String::toCpp(jniEnv, j_identifier),
                                                          ::djinni_generated::NativeTiled2dMapZoomInfo::toCpp(jniEnv, j_zoomInfo),
                                                          ::djinni::I32::toCpp(jniEnv, j_numT));
-        return ::djinni::release(::djinni_generated::NativeTiled2dMapLayerConfig::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni_generated::NativeTiled2dMapLayerConfig>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

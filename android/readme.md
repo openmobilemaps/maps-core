@@ -278,7 +278,8 @@ val line = LineFactory.createLine(
 		widthType = SizeType.SCREEN_PIXEL,
 		width = lineWidth,
 		dashArray = arrayListOf(4.0f, 2.0f),
-		lineCap = LineCapType.SQUARE
+		lineCap = LineCapType.SQUARE,
+        0f
 	)
 )
 lineLayer.add(line)
