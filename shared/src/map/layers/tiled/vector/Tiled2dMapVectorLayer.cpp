@@ -537,8 +537,9 @@ void Tiled2dMapVectorLayer::forceReload() {
 }
 
 void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) {
-    for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-        sourceDataManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::onRasterTilesUpdated, layerName, currentTileInfos);
+    auto sourceManager = sourceDataManagers.find(layerName);
+    if (sourceManager != sourceDataManagers.end()) {
+        sourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::onRasterTilesUpdated, layerName, currentTileInfos);
     }
 }
 
