@@ -18,6 +18,7 @@ struct RasterStyle {
     float brightnessMax;
     float contrast;
     float saturation;
+    float gamma;
 };
 
 vertex VertexOut
@@ -57,6 +58,9 @@ rasterFragmentShader(VertexOut in [[stage_in]],
     
     float3 brightnessMin = float3(styling[0].brightnessMin, styling[0].brightnessMin, styling[0].brightnessMin);
     float3 brightnessMax = float3(styling[0].brightnessMax, styling[0].brightnessMax, styling[0].brightnessMax);
+
+    float gamma = styling[0].gamma;
+    rgb = pow(rgb, (1.0 / (gamma) ));
     
     return float4(mix(brightnessMin, brightnessMax, rgb) * color.a, color.a);
     

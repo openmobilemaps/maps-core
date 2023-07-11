@@ -42,13 +42,15 @@ raster_shader_style = record {
     brightness_max: f32;
     contrast: f32;
     saturation: f32;
+    gamma: f32;
 
     const default_style: raster_shader_style = {
         opacity = 1.0,
         brightness_min = 0.0,
         brightness_max = 1.0,
         contrast = 0.0,
-        saturation = 0.0
+        saturation = 0.0,
+        gamma = 0.0
     };
 } deriving (eq, ord)
 

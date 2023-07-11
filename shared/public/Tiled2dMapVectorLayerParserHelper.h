@@ -107,7 +107,7 @@ public:
                                                                                      minZoom,
                                                                                      maxZoom,
                                                                                      url,
-                                                                                     RasterVectorStyle(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr),
+                                                                                     RasterVectorStyle(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr),
                                                                                      adaptScaleToScreen,
                                                                                      numDrawPreviousLayers,
                                                                                      maskTiles,
@@ -184,11 +184,12 @@ public:
                                              val.value("maxzoom", layer->maxZoom),
                                              layer->url,
                                              RasterVectorStyle(parser.parseValue(val["paint"]["raster-opacity"]),
-                                                                           parser.parseValue(val["paint"]["raster-brightness-min"]),
-                                                                           parser.parseValue(val["paint"]["raster-brightness-max"]),
-                                                                           parser.parseValue(val["paint"]["raster-contrast"]),
-                                                                           parser.parseValue(val["paint"]["raster-saturation"]),
-                                                                           blendMode),
+                                                                parser.parseValue(val["paint"]["raster-brightness-min"]),
+                                                                parser.parseValue(val["paint"]["raster-brightness-max"]),
+                                                                parser.parseValue(val["paint"]["raster-contrast"]),
+                                                                parser.parseValue(val["paint"]["raster-saturation"]),
+                                                                parser.parseValue(val["metadata"]["raster-gamma"]),
+                                                                blendMode),
                                              layer->adaptScaleToScreen,
                                              layer->numDrawPreviousLayers,
                                              layer->maskTiles,
@@ -197,7 +198,6 @@ public:
                                              interactable,
                                              layer->underzoom,
                                              layer->overzoom);
-                
                 layers.push_back(newLayer);
             }else if (val["type"] == "line") {
 

@@ -23,8 +23,9 @@ public:
                       std::shared_ptr<Value> rasterBrightnessMax,
                       std::shared_ptr<Value> rasterContrast,
                       std::shared_ptr<Value> rasterSaturation,
+                      std::shared_ptr<Value> rasterGamma,
                       std::shared_ptr<Value> blendMode):
-    rasterOpacity(rasterOpacity), rasterBrightnessMin(rasterBrightnessMin), rasterBrightnessMax(rasterBrightnessMax), rasterContrast(rasterContrast), rasterSaturation(rasterSaturation), blendMode(blendMode) {}
+    rasterOpacity(rasterOpacity), rasterBrightnessMin(rasterBrightnessMin), rasterBrightnessMax(rasterBrightnessMax), rasterContrast(rasterContrast), rasterSaturation(rasterSaturation), rasterGamma(rasterGamma), blendMode(blendMode) {}
 
     std::unordered_set<std::string> getUsedKeys() const {
         std::unordered_set<std::string> usedKeys;
@@ -34,6 +35,7 @@ public:
             rasterBrightnessMax,
             rasterContrast,
             rasterSaturation,
+            rasterGamma,
             blendMode
         };
 
@@ -57,7 +59,8 @@ public:
             (float) getRasterBrightnessMin(context),
             (float) getRasterBrightnessMax(context),
             (float) getRasterContrast(context),
-            (float) getRasterSaturation(context)
+            (float) getRasterSaturation(context),
+            (float) getRasterGamma(context)
         };
     }
 
@@ -80,10 +83,15 @@ public:
         double defaultValue = 0.0;
         return rasterContrast ? rasterContrast->evaluateOr(context, defaultValue) : defaultValue;
     }
-    
+
     double getRasterSaturation(const EvaluationContext &context) {
         double defaultValue = 0.0;
         return rasterSaturation ? rasterSaturation->evaluateOr(context, defaultValue) : defaultValue;
+    }
+
+    double getRasterGamma(const EvaluationContext &context) {
+        double defaultValue = 1.0;
+        return rasterGamma ? rasterGamma->evaluateOr(context, defaultValue) : defaultValue;
     }
     
 private:
@@ -92,6 +100,7 @@ private:
     std::shared_ptr<Value> rasterBrightnessMax;
     std::shared_ptr<Value> rasterContrast;
     std::shared_ptr<Value> rasterSaturation;
+    std::shared_ptr<Value> rasterGamma;
     std::shared_ptr<Value> blendMode;
 };
 

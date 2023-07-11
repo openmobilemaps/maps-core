@@ -26,8 +26,9 @@ public:
         onUpdate(RasterShaderStyle(startValue.opacity + (endValue.opacity - startValue.opacity) * adjustedProgress, 
                                    startValue.brightnessMin + (endValue.brightnessMin - startValue.brightnessMin) * adjustedProgress, 
                                    startValue.brightnessMax + (endValue.brightnessMax - startValue.brightnessMax) * adjustedProgress, 
-                                   startValue.contrast + (endValue.contrast - startValue.contrast) * adjustedProgress, 
-                                   startValue.saturation + (endValue.saturation - startValue.saturation) * adjustedProgress));
+                                   startValue.contrast + (endValue.contrast - startValue.contrast) * adjustedProgress,
+                                   startValue.saturation + (endValue.saturation - startValue.saturation) * adjustedProgress,
+                                   startValue.gamma + (endValue.gamma - startValue.gamma) * adjustedProgress));
     };
 };
 
