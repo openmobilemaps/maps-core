@@ -164,6 +164,8 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
         std::vector<const std::pair<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> tilesToSetup, tilesToClean;
         std::vector<const std::shared_ptr<MaskingObjectInterface>> newMaskObjects;
         std::vector<const std::shared_ptr<MaskingObjectInterface>> obsoleteMaskObjects;
+        
+        std::vector<Tiled2dMapRasterTileInfo> tileStateUpdates;
 
         {
             std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
@@ -183,8 +185,13 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
 
             std::unordered_set<Tiled2dMapRasterTileInfo> tilesToRemove;
             for (const auto &tileEntry : tileObjectMap) {
-                if (currentTileInfos.count(tileEntry.first) == 0 || !shouldLoadTile(tileEntry.first.tileInfo)){
+                auto currentTileInfosIt = currentTileInfos.find(tileEntry.first);
+                if (currentTileInfosIt == currentTileInfos.end() || !shouldLoadTile(tileEntry.first.tileInfo)){
                     tilesToRemove.insert(tileEntry.first);
+                } else {
+                    if (tileEntry.first.state != currentTileInfosIt->state) {
+                        tileStateUpdates.push_back(*currentTileInfosIt);
+                    }
                 }
             }
 
@@ -257,11 +264,11 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
 
         scheduler->addTask(std::make_shared<LambdaTask>(
                 TaskConfig("Tiled2dMapRasterLayer_onTilesUpdated", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
-                [weakSelfPtr, tilesToSetup, tilesToClean, newMaskObjects, obsoleteMaskObjects] {
+                [weakSelfPtr, tilesToSetup, tilesToClean, newMaskObjects, obsoleteMaskObjects, tileStateUpdates] {
                     auto selfPtr = weakSelfPtr.lock();
                     if (selfPtr) {
                         selfPtr->updateMaskObjects(newMaskObjects, obsoleteMaskObjects);
-                        selfPtr->setupTiles(tilesToSetup, tilesToClean);
+                        selfPtr->setupTiles(tilesToSetup, tilesToClean, tileStateUpdates);
                     }
                 }));
     }
@@ -285,7 +292,8 @@ void Tiled2dMapRasterLayer::updateMaskObjects(const std::vector<const std::share
 
 void Tiled2dMapRasterLayer::setupTiles(
         const std::vector<const std::pair<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToSetup,
-        const std::vector<const std::pair<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToClean) {
+        const std::vector<const std::pair<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToClean,
+        const std::vector<Tiled2dMapRasterTileInfo> &tileStateUpdates) {
     auto mapInterface = this->mapInterface;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!renderingContext) {
@@ -300,6 +308,14 @@ void Tiled2dMapRasterLayer::setupTiles(
             tileObject->getGraphicsObject()->clear();
             tileObjectMap.erase(tile);
             tileMaskMap.erase(tile.tileInfo);
+        }
+
+        for (const auto &stateUpdate: tileStateUpdates) {
+            auto it = tileObjectMap.find(stateUpdate);
+            assert(it != tileObjectMap.end());
+            auto extracted = tileObjectMap.extract(it);
+            extracted.key() = stateUpdate;
+            tileObjectMap.insert(std::move(extracted));
         }
 
         for (const auto &tile : tilesToSetup) {
