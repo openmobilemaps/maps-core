@@ -186,6 +186,12 @@ void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDes
 }
 
 void Tiled2dMapVectorLayer::initializeVectorLayer() {
+
+    if (!sourceDataManagers.empty() || !symbolSourceDataManagers.empty() || !rasterTileSources.empty()) {
+        // do nothing if the layer is already initialized
+        return;
+    }
+
     auto mapInterface = this->mapInterface;
     if (!mapInterface) {
         return;
@@ -456,8 +462,8 @@ void Tiled2dMapVectorLayer::onAdded(const std::shared_ptr<::MapInterface> &mapIn
         return;
     }
 
-    // TODO: really necessary?
-    //initializeVectorLayer();
+    // this is needed if the layer is initialized with a style.json string
+    initializeVectorLayer();
 }
 
 void Tiled2dMapVectorLayer::onRemoved() {

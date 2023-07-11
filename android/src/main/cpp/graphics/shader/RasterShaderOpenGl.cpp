@@ -51,14 +51,15 @@ void RasterShaderOpenGl::setStyle(const RasterShaderStyle &style) {
      styleValues[2] = style.saturation > 0.0f ? (1.0f - 1.0f / (1.001f - style.saturation)) : (-style.saturation);
      styleValues[3] = style.brightnessMin;
      styleValues[4] = style.brightnessMax;
+     styleValues[5] = style.gamma;
 }
 
 std::string RasterShaderOpenGl::getFragmentShader() {
     return OMMVersionedGlesShaderCode(320 es,
                                       precision mediump float;
                                       uniform sampler2D textureSampler;
-                                      // [0] opacity, 0-1 | [1] contrast, 0-1 | [2] saturation, 1-0 | [3] brightnessMin, 0-1 | [4] brightnessMax, 0-1
-                                      uniform highp float styleValues[5];
+                                      // [0] opacity, 0-1 | [1] contrast, 0-1 | [2] saturation, 1-0 | [3] brightnessMin, 0-1 | [4] brightnessMax, 0-1 | [5] gamma, 0.1-10
+                                      uniform highp float styleValues[6];
                                       in vec2 v_texcoord;
                                       out vec4 fragmentColor;
 
@@ -74,6 +75,9 @@ std::string RasterShaderOpenGl::getFragmentShader() {
 
                                           vec3 brightnessMin = vec3(styleValues[3]);
                                           vec3 brightnessMax = vec3(styleValues[4]);
+
+                                          rgb = pow(rgb, vec3(1.0 / styleValues[5]));
+
                                           fragmentColor = vec4(mix(brightnessMin, brightnessMax, rgb) * styleValues[0], color.a);
                                       });
 }

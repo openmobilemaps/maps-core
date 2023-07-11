@@ -213,10 +213,12 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
     std::vector<Tiled2dMapTileInfo> toRemove;
 
     int currentZoomLevelIdentifier = this->currentZoomLevelIdentifier;
+    bool onlyCurrent = !zoomInfo.maskTile && zoomInfo.numDrawPreviousLayers == 0;
     for (const auto &[tileInfo, tileWrapper] : currentTiles) {
         bool found = false;
 
-        if (tileInfo.zoomIdentifier <= currentZoomLevelIdentifier || zoomInfo.numDrawPreviousLayers == 0) {
+        if ((!onlyCurrent && tileInfo.zoomIdentifier <= currentZoomLevelIdentifier)
+            || (onlyCurrent && tileInfo.zoomIdentifier == currentZoomLevelIdentifier)) {
             for (const auto &layer: pyramid) {
                 for (auto const &tile: layer.visibleTiles) {
                     if (tileInfo == tile.tileInfo) {

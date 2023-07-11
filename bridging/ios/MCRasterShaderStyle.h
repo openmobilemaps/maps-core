@@ -11,12 +11,14 @@
                           brightnessMin:(float)brightnessMin
                           brightnessMax:(float)brightnessMax
                                contrast:(float)contrast
-                             saturation:(float)saturation NS_DESIGNATED_INITIALIZER;
+                             saturation:(float)saturation
+                                  gamma:(float)gamma NS_DESIGNATED_INITIALIZER;
 + (nonnull instancetype)rasterShaderStyleWithOpacity:(float)opacity
                                        brightnessMin:(float)brightnessMin
                                        brightnessMax:(float)brightnessMax
                                             contrast:(float)contrast
-                                          saturation:(float)saturation;
+                                          saturation:(float)saturation
+                                               gamma:(float)gamma;
 
 + (MCRasterShaderStyle * __nonnull)defaultStyle;
 @property (nonatomic, readonly) float opacity;
@@ -28,6 +30,8 @@
 @property (nonatomic, readonly) float contrast;
 
 @property (nonatomic, readonly) float saturation;
+
+@property (nonatomic, readonly) float gamma;
 
 - (NSComparisonResult)compare:(nonnull MCRasterShaderStyle *)other;
 
