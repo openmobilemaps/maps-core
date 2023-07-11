@@ -58,7 +58,7 @@ std::string RasterShaderOpenGl::getFragmentShader() {
     return OMMVersionedGlesShaderCode(320 es,
                                       precision mediump float;
                                       uniform sampler2D textureSampler;
-                                      // [0] opacity, 0-1 | [1] contrast, 0-1 | [2] saturation, 1-0 | [3] brightnessMin, 0-1 | [4] brightnessMax, 0-1 | [4] gamma, 0.1-10
+                                      // [0] opacity, 0-1 | [1] contrast, 0-1 | [2] saturation, 1-0 | [3] brightnessMin, 0-1 | [4] brightnessMax, 0-1 | [5] gamma, 0.1-10
                                       uniform highp float styleValues[6];
                                       in vec2 v_texcoord;
                                       out vec4 fragmentColor;
