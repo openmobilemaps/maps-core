@@ -216,7 +216,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
     for (const auto &[tileInfo, tileWrapper] : currentTiles) {
         bool found = false;
 
-        if (tileInfo.zoomIdentifier <= currentZoomLevelIdentifier) {
+        if (tileInfo.zoomIdentifier <= currentZoomLevelIdentifier || zoomInfo.numDrawPreviousLayers == 0) {
             for (const auto &layer: pyramid) {
                 for (auto const &tile: layer.visibleTiles) {
                     if (tileInfo == tile.tileInfo) {
