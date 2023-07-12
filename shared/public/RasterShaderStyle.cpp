@@ -9,7 +9,7 @@ RasterShaderStyle const RasterShaderStyle::DEFAULT_STYLE = RasterShaderStyle(
     1.0f /* brightnessMax */ ,
     0.0f /* contrast */ ,
     0.0f /* saturation */ ,
-    0.0f /* gamma */ );
+    1.0f /* gamma */ );
 
 bool operator==(const RasterShaderStyle& lhs, const RasterShaderStyle& rhs) {
     return lhs.opacity == rhs.opacity &&

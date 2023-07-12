@@ -46,7 +46,7 @@
             brightnessMax:1.0f
             contrast:0.0f
             saturation:0.0f
-            gamma:0.0f];
+            gamma:1.0f];
     return s_defaultStyle;
 }
 

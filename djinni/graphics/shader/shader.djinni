@@ -50,7 +50,7 @@ raster_shader_style = record {
         brightness_max = 1.0,
         contrast = 0.0,
         saturation = 0.0,
-        gamma = 0.0
+        gamma = 1.0
     };
 } deriving (eq, ord)
 
