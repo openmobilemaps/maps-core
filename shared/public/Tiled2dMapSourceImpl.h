@@ -325,9 +325,8 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(Tiled2dMapTileInfo tile, size
         currentlyLoading.insert({tile, loaderIndex});
         readyTiles.erase(tile);
 
-        LogDebug << "DBG: performLoadingTask " <<= tile.to_string();
         loadDataAsync(tile, loaderIndex).then([weakActor, loaderIndex, tile, weakSelfPtr](::djinni::Future<L> result) {
-            LogDebug << "DBG: finishedLoading " <<= tile.to_string();
+
             auto strongSelf = weakSelfPtr.lock();
             if (strongSelf) {
                 auto res = result.get();
@@ -355,7 +354,6 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(Tiled2dMapTileInfo tile, size
 
 template<class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::didLoad(Tiled2dMapTileInfo tile, size_t loaderIndex, const R &result) {
-    LogDebug << "DBG: didLoad " <<= tile.to_string();
     currentlyLoading.erase(tile);
 
     const bool isVisible = currentVisibleTiles.count(tile);
