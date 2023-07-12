@@ -318,7 +318,6 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(Tiled2dMapTileInfo tile, size
     auto weakActor = WeakActor<Tiled2dMapSource>(mailbox, std::static_pointer_cast<Tiled2dMapSource>(shared_from_this()));
 
     auto cacheResult = tileCache.get(tile);
-    cacheResult = std::nullopt;
     if (cacheResult) {
         weakActor.message(&Tiled2dMapSource::didLoad, tile, loaderIndex, *cacheResult);
     } else {
@@ -481,15 +480,22 @@ void Tiled2dMapSource<T, L, R>::performDelayedTasks() {
     const auto now = DateHelper::currentTimeMillis();
     long long minDelay = std::numeric_limits<long long>::max();
 
+    std::vector<std::pair<int, Tiled2dMapTileInfo>> toLoad;
+
     for (auto &[loaderIndex, errors]: errorTiles) {
         for(auto &[tile, errorInfo]: errors) {
             if (errorInfo.lastLoad + errorInfo.delay >= now) {
-                performLoadingTask(tile, loaderIndex);
+                toLoad.push_back({loaderIndex, tile});
             } else {
                 minDelay = std::min(minDelay, errorInfo.delay);
             }
         }
     }
+
+    for (auto &[loaderIndex, tile]: toLoad) {
+        performLoadingTask(tile, loaderIndex);
+    }
+
     if (minDelay != std::numeric_limits<long long>::max()) {
         nextDelayTaskExecution = now + minDelay;
 
