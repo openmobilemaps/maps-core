@@ -36,6 +36,10 @@ void Tiled2dMapRasterSource::cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIn
     return loaders[loaderIndex]->loadTextureAsnyc(url, std::nullopt);
 }
 
+bool Tiled2dMapRasterSource::hasExpensivePostLoadingTask() {
+    return false;
+}
+
 std::shared_ptr<::TextureHolderInterface> Tiled2dMapRasterSource::postLoadingTask(const TextureLoaderResult &loadedData,
                                                                                   const Tiled2dMapTileInfo &tile) {
     return loadedData.data;

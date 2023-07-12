@@ -36,6 +36,10 @@ void Tiled2dMapVectorSource::cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIn
     loaders[loaderIndex]->cancel(url);
 }
 
+bool Tiled2dMapVectorSource::hasExpensivePostLoadingTask() {
+    return true;
+}
+
 Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(const DataLoaderResult &loadedData, const Tiled2dMapTileInfo &tile) {
     auto layerFeatureMap = std::make_shared<std::unordered_map<std::string, std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>>>>();
     try {
