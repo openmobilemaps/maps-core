@@ -19,7 +19,7 @@ data class RasterShaderStyle(
             1.0f /* brightnessMax */ ,
             0.0f /* contrast */ ,
             0.0f /* saturation */ ,
-            0.0f /* gamma */ )
+            1.0f /* gamma */ )
     }
 
     override fun compareTo(other: RasterShaderStyle): Int {
