@@ -28,6 +28,7 @@
 class Tiled2dMapVectorSymbolGroup : public ActorObject {
 public:
     Tiled2dMapVectorSymbolGroup(const std::weak_ptr<MapInterface> &mapInterface,
+                                const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                 const WeakActor<Tiled2dMapVectorFontProvider> &fontProvider,
                                 const Tiled2dMapTileInfo &tileInfo,
                                 const std::string &layerIdentifier,
@@ -57,26 +58,29 @@ public:
     void clear();
 private:
 
-    inline std::optional<Tiled2dMapVectorSymbolSubLayerPositioningWrapper> getPositioning(std::vector<::Coord>::const_iterator &iterator, const std::vector<::Coord> & collection);
+    inline std::optional<Tiled2dMapVectorSymbolSubLayerPositioningWrapper>
+    getPositioning(std::vector<::Coord>::const_iterator &iterator, const std::vector<::Coord> &collection);
 
     inline std::shared_ptr<Tiled2dMapVectorSymbolObject> createSymbolObject(const Tiled2dMapTileInfo &tileInfo,
-                                                                     const std::string &layerIdentifier,
-                                                                     const std::shared_ptr<SymbolVectorLayerDescription> &description,
-                                                                     const std::shared_ptr<FeatureContext> &featureContext,
-                                                                     const std::vector<FormattedStringEntry> &text,
-                                                                     const std::string &fullText,
-                                                                     const ::Coord &coordinate,
-                                                                     const std::optional<std::vector<Coord>> &lineCoordinates,
-                                                                     const std::vector<std::string> &fontList,
-                                                                     const Anchor &textAnchor,
-                                                                     const std::optional<double> &angle,
-                                                                     const TextJustify &textJustify,
-                                                                     const TextSymbolPlacement &textSymbolPlacement);
+                                                                            const std::string &layerIdentifier,
+                                                                            const std::shared_ptr<SymbolVectorLayerDescription> &description,
+                                                                            const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
+                                                                            const std::shared_ptr<FeatureContext> &featureContext,
+                                                                            const std::vector<FormattedStringEntry> &text,
+                                                                            const std::string &fullText,
+                                                                            const ::Coord &coordinate,
+                                                                            const std::optional<std::vector<Coord>> &lineCoordinates,
+                                                                            const std::vector<std::string> &fontList,
+                                                                            const Anchor &textAnchor,
+                                                                            const std::optional<double> &angle,
+                                                                            const TextJustify &textJustify,
+                                                                            const TextSymbolPlacement &textSymbolPlacement);
 
 private:
     std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>> symbolObjects;
 
     const std::weak_ptr<MapInterface> mapInterface;
+    std::shared_ptr<Tiled2dMapVectorLayerConfig> layerConfig;
     const Tiled2dMapTileInfo tileInfo;
     const std::string layerIdentifier;
     std::shared_ptr<SymbolVectorLayerDescription> layerDescription;

@@ -15,9 +15,10 @@
 Tiled2dMapVectorSourceRasterTileDataManager::Tiled2dMapVectorSourceRasterTileDataManager(
         const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
         const std::shared_ptr<VectorMapDescription> &mapDescription,
+        const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
         const std::string &source,
         const WeakActor<Tiled2dMapRasterSource> &rasterSource)
-        : Tiled2dMapVectorSourceTileDataManager(vectorLayer, mapDescription, source),
+        : Tiled2dMapVectorSourceTileDataManager(vectorLayer, mapDescription, layerConfig, source),
           rasterSource(rasterSource) {}
 
 void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std::string &layerName,

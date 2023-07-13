@@ -13,7 +13,13 @@ abstract class Tiled2dMapVectorLayerInterface {
         external fun createFromStyleJson(layerName: String, path: String, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface, dpFactor: Double): Tiled2dMapVectorLayerInterface
 
         @JvmStatic
+        external fun createFromStyleJsonWithZoomInfo(layerName: String, path: String, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface, dpFactor: Double, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo): Tiled2dMapVectorLayerInterface
+
+        @JvmStatic
         external fun createFromLocalStyleJson(layerName: String, styleJson: String, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface, dpFactor: Double): Tiled2dMapVectorLayerInterface
+
+        @JvmStatic
+        external fun createFromLocalStyleJsonWithZoomInfo(layerName: String, styleJson: String, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface, dpFactor: Double, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo): Tiled2dMapVectorLayerInterface
     }
 
     abstract fun setSelectionDelegate(selectionDelegate: Tiled2dMapVectorLayerSelectionCallbackInterface)

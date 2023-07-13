@@ -24,6 +24,7 @@
 #include "Tiled2dMapVectorLayerSelectionCallbackInterface.h"
 #include "SpriteData.h"
 #include "Tiled2dMapVectorTileInfo.h"
+#include "Tiled2dMapVectorLayerConfig.h"
 
 typedef std::shared_ptr<TextureHolderInterface> Tiled2dMapVectorTileDataRaster;
 typedef std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> Tiled2dMapVectorTileDataVector;
@@ -34,6 +35,7 @@ public:
     Tiled2dMapVectorTile(const std::weak_ptr<MapInterface> &mapInterface,
                          const Tiled2dMapTileInfo &tileInfo,
                          const std::shared_ptr<VectorLayerDescription> &description,
+                         const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                          const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileReadyInterface);
 
     virtual void updateVectorLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
@@ -68,6 +70,7 @@ protected:
     const std::weak_ptr<MapInterface> mapInterface;
     const Tiled2dMapTileInfo tileInfo;
     std::shared_ptr<VectorLayerDescription> description;
+    std::shared_ptr<Tiled2dMapVectorLayerConfig> layerConfig;
     const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> tileCallbackInterface;
 
     std::optional<float> lastAlpha = std::nullopt;

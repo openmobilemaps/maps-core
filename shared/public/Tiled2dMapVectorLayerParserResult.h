@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "VectorMapDescription.h"
+#include "VectorMapSourceDescription.h"
 #include "LoaderStatus.h"
 #include <memory>
 #include <optional>

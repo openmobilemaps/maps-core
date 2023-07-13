@@ -23,10 +23,12 @@
 #include "SpriteData.h"
 #include "TextLayerObject.h" // TODO: remove usage of TextLayerObject (and File)
 #include "OBB2D.h"
+#include "Tiled2dMapVectorLayerConfig.h"
 
 class Tiled2dMapVectorSymbolObject {
 public:
     Tiled2dMapVectorSymbolObject(const std::weak_ptr<MapInterface> &mapInterface,
+                                 const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                  const WeakActor<Tiled2dMapVectorFontProvider> &fontProvider,
                                  const Tiled2dMapTileInfo &tileInfo,
                                  const std::string &layerIdentifier,
@@ -84,6 +86,8 @@ public:
     void setAlpha(float alpha);
 private:
     ::Coord getRenderCoordinates(Anchor iconAnchor, double rotation, double iconWidth, double iconHeight);
+
+    std::shared_ptr<Tiled2dMapVectorLayerConfig> layerConfig;
 
     std::shared_ptr<Tiled2dMapVectorSymbolLabelObject> labelObject;
 

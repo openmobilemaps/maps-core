@@ -9,7 +9,7 @@
  */
 
 #include "Tiled2dMapVectorPolygonPatternTile.h"
-#include "Tiled2dMapVectorRasterSubLayerConfig.h"
+#include "Tiled2dMapVectorLayerConfig.h"
 #include "RenderObject.h"
 #include "MapCamera2dInterface.h"
 #include "PolygonGroupShaderInterface.h"
@@ -40,12 +40,13 @@ namespace mapbox {
 } // namespace mapbox
 
 Tiled2dMapVectorPolygonPatternTile::Tiled2dMapVectorPolygonPatternTile(const std::weak_ptr<MapInterface> &mapInterface,
-                                                         const Tiled2dMapTileInfo &tileInfo,
-                                                         const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
-                                                         const std::shared_ptr<PolygonVectorLayerDescription> &description,
-                                                         const std::shared_ptr<SpriteData> &spriteData,
-                                                        const std::shared_ptr<TextureHolderInterface> &spriteTexture)
-        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, tileCallbackInterface), spriteData(spriteData), spriteTexture(spriteTexture), usedKeys(description->getUsedKeys()) {
+                                                                       const Tiled2dMapTileInfo &tileInfo,
+                                                                       const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
+                                                                       const std::shared_ptr<PolygonVectorLayerDescription> &description,
+                                                                       const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
+                                                                       const std::shared_ptr<SpriteData> &spriteData,
+                                                                       const std::shared_ptr<TextureHolderInterface> &spriteTexture)
+        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, layerConfig, tileCallbackInterface), spriteData(spriteData), spriteTexture(spriteTexture), usedKeys(description->getUsedKeys()) {
     isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
 }
 
@@ -97,10 +98,10 @@ void Tiled2dMapVectorPolygonPatternTile::update() {
     }
 
     double cameraZoom = camera->getZoom();
-    double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(cameraZoom);
+    double zoomIdentifier = layerConfig->getZoomIdentifier(cameraZoom);
     zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.zoomIdentifier);
 
-    auto zoom = Tiled2dMapVectorRasterSubLayerConfig::getZoomFactorAtIdentifier(floor(zoomIdentifier));
+    auto zoom = layerConfig->getZoomFactorAtIdentifier(floor(zoomIdentifier));
     auto scalingFactor = (camera->asCameraInterface()->getScalingFactor() / cameraZoom) * zoom;
 
     if (lastZoom && ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant)) {
@@ -394,7 +395,7 @@ void Tiled2dMapVectorPolygonPatternTile::setupTextureCoordinates() {
     }
 
     double cameraZoom = camera->getZoom();
-    double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(cameraZoom);
+    double zoomIdentifier = layerConfig->getZoomIdentifier(cameraZoom);
     zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.zoomIdentifier);
 
     auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);

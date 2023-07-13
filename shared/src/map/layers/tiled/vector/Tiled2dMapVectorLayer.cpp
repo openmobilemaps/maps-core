@@ -47,13 +47,15 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::string &remoteStyleJsonUrl,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
                                              const std::shared_ptr<::FontLoaderInterface> &fontLoader,
-                                             double dpFactor) :
+                                             double dpFactor,
+                                             const std::optional<Tiled2dMapZoomInfo> &customZoomInfo) :
         Tiled2dMapLayer(),
         layerName(layerName),
         remoteStyleJsonUrl(remoteStyleJsonUrl),
         loaders(loaders),
         fontLoader(fontLoader),
-        dpFactor(dpFactor) {}
+        dpFactor(dpFactor),
+        customZoomInfo(customZoomInfo) {}
 
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
@@ -61,35 +63,39 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::string &fallbackStyleJsonString,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
                                              const std::shared_ptr<::FontLoaderInterface> &fontLoader,
-                                             double dpFactor) :
+                                             double dpFactor,
+                                             const std::optional<Tiled2dMapZoomInfo> &customZoomInfo) :
         Tiled2dMapLayer(),
         layerName(layerName),
         remoteStyleJsonUrl(remoteStyleJsonUrl),
         fallbackStyleJsonString(fallbackStyleJsonString),
         loaders(loaders),
         fontLoader(fontLoader),
+        dpFactor(dpFactor),
+        customZoomInfo(customZoomInfo) {}
 
-        dpFactor(dpFactor) {
-        }
-
-Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName, const std::shared_ptr<VectorMapDescription> &mapDescription,
+Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
+                                             const std::shared_ptr<VectorMapDescription> &mapDescription,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
-                                             const std::shared_ptr<::FontLoaderInterface> &fontLoader) :
+                                             const std::shared_ptr<::FontLoaderInterface> &fontLoader,
+                                             const std::optional<Tiled2dMapZoomInfo> &customZoomInfo) :
         Tiled2dMapLayer(),
         layerName(layerName),
         loaders(loaders),
-        fontLoader(fontLoader) {
+        fontLoader(fontLoader),
+        customZoomInfo(customZoomInfo) {
     setMapDescription(mapDescription);
 }
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
-                                             const std::shared_ptr<::FontLoaderInterface> &fontLoader) :
+                                             const std::shared_ptr<::FontLoaderInterface> &fontLoader,
+                                             const std::optional<Tiled2dMapZoomInfo> &customZoomInfo) :
         Tiled2dMapLayer(),
         layerName(layerName),
         loaders(loaders),
-        fontLoader(fontLoader) {
-}
+        fontLoader(fontLoader),
+        customZoomInfo(customZoomInfo) {}
 
 void Tiled2dMapVectorLayer::scheduleStyleJsonLoading() {
     isLoadingStyleJson = true;
@@ -169,9 +175,10 @@ std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJsonLocally(std::
     }
 }
 
-std::shared_ptr<Tiled2dMapLayerConfig>
+std::shared_ptr<Tiled2dMapVectorLayerConfig>
 Tiled2dMapVectorLayer::getLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &source) {
-    return std::make_shared<Tiled2dMapVectorLayerConfig>(source);
+    return customZoomInfo.has_value() ? std::make_shared<Tiled2dMapVectorLayerConfig>(source, *customZoomInfo)
+                                      : std::make_shared<Tiled2dMapVectorLayerConfig>(source);
 }
 
 void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription) {
@@ -224,12 +231,15 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                 break;
             }
             case raster: {
+                auto rasterSubLayerConfig = customZoomInfo.has_value() ? std::make_shared<Tiled2dMapVectorRasterSubLayerConfig>(
+                        std::static_pointer_cast<RasterVectorLayerDescription>(layerDesc), *customZoomInfo)
+                                                                       : std::make_shared<Tiled2dMapVectorRasterSubLayerConfig>(
+                                std::static_pointer_cast<RasterVectorLayerDescription>(layerDesc));
+
                 auto sourceMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
                 auto sourceActor = Actor<Tiled2dMapRasterSource>(sourceMailbox,
                                                                  mapInterface->getMapConfig(),
-                                                                 std::make_shared<Tiled2dMapVectorRasterSubLayerConfig>(
-                                                                         std::static_pointer_cast<RasterVectorLayerDescription>(
-                                                                                 layerDesc)),
+                                                                 rasterSubLayerConfig,
                                                                  mapInterface->getCoordinateConverterHelper(),
                                                                  mapInterface->getScheduler(), loaders,
                                                                  selfRasterActor,
@@ -239,6 +249,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                 auto sourceManagerActor = Actor<Tiled2dMapVectorSourceRasterTileDataManager>(sourceDataManagerMailbox,
                                                                                              selfActor,
                                                                                              mapDescription,
+                                                                                             rasterSubLayerConfig,
                                                                                              layerDesc->source,
                                                                                              sourceActor.weakActor<Tiled2dMapRasterSource>());
                 sourceManagerActor.unsafe()->setAlpha(alpha);
@@ -260,10 +271,11 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     }
 
     for (auto const &[source, layers]: layersToDecode) {
+        auto layerConfig = layerConfigs[source];
         auto sourceMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
         auto vectorSource = Actor<Tiled2dMapVectorSource>(sourceMailbox,
                                                           mapInterface->getMapConfig(),
-                                                          layerConfigs[source],
+                                                          layerConfig,
                                                           mapInterface->getCoordinateConverterHelper(),
                                                           mapInterface->getScheduler(),
                                                           loaders,
@@ -277,6 +289,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
         auto sourceManagerActor = Actor<Tiled2dMapVectorSourceVectorTileDataManager>(sourceDataManagerMailbox,
                                                                                      selfActor,
                                                                                      mapDescription,
+                                                                                     layerConfig,
                                                                                      source,
                                                                                      vectorSource.weakActor<Tiled2dMapVectorSource>());
         sourceTileManagers[source] = sourceManagerActor.strongActor<Tiled2dMapVectorSourceTileDataManager>();
@@ -287,6 +300,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
             auto actor = Actor<Tiled2dMapVectorSourceSymbolDataManager>(symbolSourceDataManagerMailbox,
                                                                         selfActor,
                                                                         mapDescription,
+                                                                        layerConfig,
                                                                         source,
                                                                         fontLoader,
                                                                         vectorSource.weakActor<Tiled2dMapVectorSource>());

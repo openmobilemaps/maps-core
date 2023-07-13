@@ -9,7 +9,7 @@
  */
 
 #include "Tiled2dMapVectorPolygonTile.h"
-#include "Tiled2dMapVectorRasterSubLayerConfig.h"
+#include "Tiled2dMapVectorLayerConfig.h"
 #include "RenderObject.h"
 #include "MapCamera2dInterface.h"
 #include "earcut.hpp"
@@ -40,8 +40,9 @@ namespace mapbox {
 Tiled2dMapVectorPolygonTile::Tiled2dMapVectorPolygonTile(const std::weak_ptr<MapInterface> &mapInterface,
                                                          const Tiled2dMapTileInfo &tileInfo,
                                                          const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
-                                                         const std::shared_ptr<PolygonVectorLayerDescription> &description)
-        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, tileCallbackInterface), usedKeys(std::move(description->getUsedKeys())) {
+                                                         const std::shared_ptr<PolygonVectorLayerDescription> &description,
+                                                         const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig)
+        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, layerConfig, tileCallbackInterface), usedKeys(std::move(description->getUsedKeys())) {
     isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
 }
 
@@ -101,7 +102,7 @@ void Tiled2dMapVectorPolygonTile::update() {
         return;
     }
 
-    double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
+    double zoomIdentifier = layerConfig->getZoomIdentifier(camera->getZoom());
     zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.zoomIdentifier);
 
     if (isStyleZoomDependant && lastZoom && *lastZoom == zoomIdentifier && lastAlpha == alpha) {

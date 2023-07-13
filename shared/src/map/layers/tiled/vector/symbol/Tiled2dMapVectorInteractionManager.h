@@ -11,7 +11,7 @@
 #pragma once
 
 #include "Tiled2dMapVectorSourceDataManager.h"
-#include "VectorMapDescription.h"
+#include "VectorMapSourceDescription.h"
 #include "TouchInterface.h"
 #include <unordered_map>
 

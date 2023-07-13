@@ -12,7 +12,8 @@
 
 #include "MapInterface.h"
 #include "Tiled2dMapTileInfo.h"
-#include "VectorMapDescription.h"
+#include "Tiled2dMapVectorLayerConfig.h"
+#include "VectorMapSourceDescription.h"
 #include "RenderPassInterface.h"
 #include "Tiled2dMapRasterTileInfo.h"
 #include "Tiled2dMapVectorTileInfo.h"
@@ -29,8 +30,9 @@ class SpriteData;
 class Tiled2dMapVectorSourceDataManager : public ActorObject {
 public:
     Tiled2dMapVectorSourceDataManager(const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
-                                          const std::shared_ptr<VectorMapDescription> &mapDescription,
-                                          const std::string &source);
+                                      const std::shared_ptr<VectorMapDescription> &mapDescription,
+                                      const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
+                                      const std::string &source);
 
     virtual void onAdded(const std::weak_ptr<::MapInterface> &mapInterface);
 
@@ -72,6 +74,7 @@ protected:
     std::weak_ptr<MapInterface> mapInterface;
     const WeakActor<Tiled2dMapVectorLayer> vectorLayer;
     const std::shared_ptr<VectorMapDescription> mapDescription;
+    std::shared_ptr<Tiled2dMapVectorLayerConfig> layerConfig;
     const std::string source;
     std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> selectionDelegate;
 

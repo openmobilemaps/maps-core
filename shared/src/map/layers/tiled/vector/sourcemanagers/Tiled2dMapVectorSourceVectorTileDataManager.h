@@ -17,6 +17,7 @@ class Tiled2dMapVectorSourceVectorTileDataManager : public Tiled2dMapVectorSourc
 public:
     Tiled2dMapVectorSourceVectorTileDataManager(const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
                                                 const std::shared_ptr<VectorMapDescription> &mapDescription,
+                                                const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                                 const std::string &source,
                                                 const WeakActor<Tiled2dMapVectorSource> &vectorSource);
 

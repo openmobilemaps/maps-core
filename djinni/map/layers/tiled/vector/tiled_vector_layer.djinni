@@ -1,4 +1,4 @@
-@extern "../../../../yaml/tiled_2d_map_layer_config.yaml"
+@extern "../../../../yaml/tiled_2d_map_zoom_info.yaml"
 @extern "../../../../yaml/loader_interface.yaml"
 @extern "../../../../yaml/layer_interface.yaml"
 @extern "../../../../yaml/tiled_2d_map_raster_layer_interface.yaml"
@@ -8,8 +8,9 @@
 
 tiled_2d_map_vector_layer_interface = interface +c {
     static create_from_style_json(layer_name: string, path: string, loaders: list<loader_interface>, font_loader: font_loader_interface, dpFactor: f64): tiled_2d_map_vector_layer_interface;
-
+    static create_from_style_json_with_zoom_info(layer_name: string, path: string, loaders: list<loader_interface>, font_loader: font_loader_interface, dpFactor: f64, zoom_info: tiled_2d_map_zoom_info): tiled_2d_map_vector_layer_interface;
     static create_from_local_style_json(layer_name: string, style_json: string, loaders: list<loader_interface>, font_loader: font_loader_interface, dpFactor: f64): tiled_2d_map_vector_layer_interface;
+    static create_from_local_style_json_with_zoom_info(layer_name: string, style_json: string, loaders: list<loader_interface>, font_loader: font_loader_interface, dpFactor: f64, zoom_info: tiled_2d_map_zoom_info): tiled_2d_map_vector_layer_interface;
 
     set_selection_delegate(selection_delegate: tiled_2d_map_vector_layer_selection_callback_interface);
 

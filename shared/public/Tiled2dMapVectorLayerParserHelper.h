@@ -12,7 +12,7 @@
 
 #include "Logger.h"
 #include "json.h"
-#include "VectorMapDescription.h"
+#include "VectorMapSourceDescription.h"
 #include "DataLoaderResult.h"
 #include "Tiled2dMapVectorLayer.h"
 #include "LineVectorLayerDescription.h"

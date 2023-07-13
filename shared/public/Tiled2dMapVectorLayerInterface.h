@@ -6,6 +6,7 @@
 #include "FontLoaderInterface.h"
 #include "LayerInterface.h"
 #include "LoaderInterface.h"
+#include "Tiled2dMapZoomInfo.h"
 #include <memory>
 #include <string>
 #include <vector>
@@ -18,7 +19,11 @@ public:
 
     static /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerInterface> createFromStyleJson(const std::string & layerName, const std::string & path, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & loaders, const /*not-null*/ std::shared_ptr<::FontLoaderInterface> & fontLoader, double dpFactor);
 
+    static /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerInterface> createFromStyleJsonWithZoomInfo(const std::string & layerName, const std::string & path, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & loaders, const /*not-null*/ std::shared_ptr<::FontLoaderInterface> & fontLoader, double dpFactor, const ::Tiled2dMapZoomInfo & zoomInfo);
+
     static /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerInterface> createFromLocalStyleJson(const std::string & layerName, const std::string & styleJson, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & loaders, const /*not-null*/ std::shared_ptr<::FontLoaderInterface> & fontLoader, double dpFactor);
+
+    static /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerInterface> createFromLocalStyleJsonWithZoomInfo(const std::string & layerName, const std::string & styleJson, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & loaders, const /*not-null*/ std::shared_ptr<::FontLoaderInterface> & fontLoader, double dpFactor, const ::Tiled2dMapZoomInfo & zoomInfo);
 
     virtual void setSelectionDelegate(const /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> & selectionDelegate) = 0;
 

@@ -16,10 +16,12 @@
 #include "RenderPass.h"
 
 Tiled2dMapVectorSourceDataManager::Tiled2dMapVectorSourceDataManager(const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
-                                                                             const std::shared_ptr<VectorMapDescription> &mapDescription,
-                                                                             const std::string &source)
+                                                                     const std::shared_ptr<VectorMapDescription> &mapDescription,
+                                                                     const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
+                                                                     const std::string &source)
         : vectorLayer(vectorLayer),
           mapDescription(mapDescription),
+          layerConfig(layerConfig),
           source(source) {
     for (int32_t index = 0; index < mapDescription->layers.size(); index++) {
         const auto &layerDescription = mapDescription->layers.at(index);

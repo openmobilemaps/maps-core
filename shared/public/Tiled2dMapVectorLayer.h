@@ -18,13 +18,14 @@
 #include "Tiled2dMapVectorSourceListener.h"
 #include "Tiled2dMapVectorSubLayer.h"
 #include "Tiled2dMapVectorTile.h"
-#include "VectorMapDescription.h"
+#include "VectorMapSourceDescription.h"
 #include "FontLoaderInterface.h"
 #include "PolygonMaskObject.h"
 #include "Tiled2dMapVectorLayerTileCallbackInterface.h"
 #include "Tiled2dMapLayerMaskWrapper.h"
 #include "TiledLayerError.h"
 #include "Actor.h"
+#include "Tiled2dMapVectorLayerConfig.h"
 #include <unordered_map>
 
 class Tiled2dMapVectorBackgroundSubLayer;
@@ -47,23 +48,27 @@ public:
                           const std::string &remoteStyleJsonUrl,
                           const std::vector <std::shared_ptr<::LoaderInterface>> &loaders,
                           const std::shared_ptr<::FontLoaderInterface> &fontLoader,
-                          double dpFactor);
+                          double dpFactor,
+                          const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt);
 
     Tiled2dMapVectorLayer(const std::string &layerName,
                           const std::string &remoteStyleJsonUrl,
                           const std::string &fallbackStyleJsonString,
                           const std::vector <std::shared_ptr<::LoaderInterface>> &loaders,
                           const std::shared_ptr<::FontLoaderInterface> &fontLoader,
-                          double dpFactor);
+                          double dpFactor,
+                          const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt);
 
     Tiled2dMapVectorLayer(const std::string &layerName,
                           const std::shared_ptr<VectorMapDescription> & mapDescription,
                           const std::vector<std::shared_ptr<::LoaderInterface>> & loaders,
-                          const std::shared_ptr<::FontLoaderInterface> & fontLoader);
+                          const std::shared_ptr<::FontLoaderInterface> & fontLoader,
+                          const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt);
 
     Tiled2dMapVectorLayer(const std::string &layerName,
                           const std::vector<std::shared_ptr<::LoaderInterface>> & loaders,
-                          const std::shared_ptr<::FontLoaderInterface> & fontLoader);
+                          const std::shared_ptr<::FontLoaderInterface> &fontLoader,
+                          const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt);
 
     virtual std::shared_ptr<::LayerInterface> asLayerInterface() override;
 
@@ -138,7 +143,7 @@ public:
     void clearTouch() override;
 
 protected:
-    virtual std::shared_ptr<Tiled2dMapLayerConfig> getLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &source);
+    virtual std::shared_ptr<Tiled2dMapVectorLayerConfig> getLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &source);
 
     virtual void setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription);
 
@@ -168,6 +173,7 @@ private:
     const std::optional<double> dpFactor;
 
     const std::string layerName;
+    std::optional<Tiled2dMapZoomInfo> customZoomInfo;
     std::optional<std::string> remoteStyleJsonUrl;
     std::optional<std::string> fallbackStyleJsonString;
 
@@ -176,7 +182,7 @@ private:
 
     std::shared_ptr<Tiled2dMapVectorBackgroundSubLayer> backgroundLayer;
 
-    std::unordered_map<std::string, std::shared_ptr<Tiled2dMapLayerConfig>> layerConfigs;
+    std::unordered_map<std::string, std::shared_ptr<Tiled2dMapVectorLayerConfig>> layerConfigs;
 
     const std::shared_ptr<FontLoaderInterface> fontLoader;
 

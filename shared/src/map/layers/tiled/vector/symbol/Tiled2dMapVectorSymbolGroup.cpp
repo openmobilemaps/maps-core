@@ -18,15 +18,17 @@
 #include "CoordinateSystemIdentifiers.h"
 
 Tiled2dMapVectorSymbolGroup::Tiled2dMapVectorSymbolGroup(const std::weak_ptr<MapInterface> &mapInterface,
+                                                         const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                                          const WeakActor<Tiled2dMapVectorFontProvider> &fontProvider,
                                                          const Tiled2dMapTileInfo &tileInfo,
                                                          const std::string &layerIdentifier,
                                                          const std::shared_ptr<SymbolVectorLayerDescription> &layerDescription)
-: mapInterface(mapInterface),
-tileInfo(tileInfo),
-layerIdentifier(layerIdentifier),
-layerDescription(layerDescription),
-fontProvider(fontProvider){}
+        : mapInterface(mapInterface),
+          layerConfig(layerConfig),
+          tileInfo(tileInfo),
+          layerIdentifier(layerIdentifier),
+          layerDescription(layerDescription),
+          fontProvider(fontProvider) {}
 
 bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features) {
 
@@ -113,7 +115,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
                         auto position = pos->centerPosition;
 
-                        const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, context, text, fullText, position, line, fontList, anchor, pos->angle, justify, placement);
+                        const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig, context, text, fullText, position, line, fontList, anchor, pos->angle, justify, placement);
 
                         if (symbolObject) {
                             symbolObject->setAlpha(alpha);
@@ -161,7 +163,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
                             auto position = pos->centerPosition;
 
-                            const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, context, text, fullText, position, line, fontList, anchor, pos->angle, justify, placement);
+                            const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig, context, text, fullText, position, line, fontList, anchor, pos->angle, justify, placement);
                             if (symbolObject) {
                                 symbolObject->setAlpha(alpha);
                                 const auto counts = symbolObject->getInstanceCounts();
@@ -181,7 +183,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                 auto midP = p.begin() + p.size() / 2;
                 std::optional<double> angle = std::nullopt;
 
-                const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, context, text, fullText, *midP, std::nullopt, fontList, anchor, angle, justify, placement);
+                const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig, context, text, fullText, *midP, std::nullopt, fontList, anchor, angle, justify, placement);
 
                 if (symbolObject) {
                     symbolObject->setAlpha(alpha);
@@ -426,6 +428,7 @@ std::shared_ptr<Tiled2dMapVectorSymbolObject>
 Tiled2dMapVectorSymbolGroup::createSymbolObject(const Tiled2dMapTileInfo &tileInfo,
                                                 const std::string &layerIdentifier,
                                                 const std::shared_ptr<SymbolVectorLayerDescription> &description,
+                                                const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                                 const std::shared_ptr<FeatureContext> &featureContext,
                                                 const std::vector<FormattedStringEntry> &text,
                                                 const std::string &fullText,
@@ -436,7 +439,7 @@ Tiled2dMapVectorSymbolGroup::createSymbolObject(const Tiled2dMapTileInfo &tileIn
                                                 const std::optional<double> &angle,
                                                 const TextJustify &textJustify,
                                                 const TextSymbolPlacement &textSymbolPlacement) {
-    return std::make_shared<Tiled2dMapVectorSymbolObject>(mapInterface, fontProvider, tileInfo, layerIdentifier, description, featureContext, text, fullText, coordinate, lineCoordinates, fontList, textAnchor, angle, textJustify, textSymbolPlacement);
+    return std::make_shared<Tiled2dMapVectorSymbolObject>(mapInterface, layerConfig, fontProvider, tileInfo, layerIdentifier, description, featureContext, text, fullText, coordinate, lineCoordinates, fontList, textAnchor, angle, textJustify, textSymbolPlacement);
 }
 
 void Tiled2dMapVectorSymbolGroup::collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<std::vector<OBB2D>> placements) {

@@ -4,6 +4,7 @@
 #import "MCFontLoaderInterface.h"
 #import "MCLayerInterface.h"
 #import "MCLoaderInterface.h"
+#import "MCTiled2dMapZoomInfo.h"
 #import <Foundation/Foundation.h>
 @class MCTiled2dMapVectorLayerInterface;
 @protocol MCTiled2dMapVectorLayerSelectionCallbackInterface;
@@ -17,11 +18,25 @@
                                                         fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
                                                           dpFactor:(double)dpFactor;
 
++ (nullable MCTiled2dMapVectorLayerInterface *)createFromStyleJsonWithZoomInfo:(nonnull NSString *)layerName
+                                                                          path:(nonnull NSString *)path
+                                                                       loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
+                                                                    fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
+                                                                      dpFactor:(double)dpFactor
+                                                                      zoomInfo:(nonnull MCTiled2dMapZoomInfo *)zoomInfo;
+
 + (nullable MCTiled2dMapVectorLayerInterface *)createFromLocalStyleJson:(nonnull NSString *)layerName
                                                               styleJson:(nonnull NSString *)styleJson
                                                                 loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
                                                              fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
                                                                dpFactor:(double)dpFactor;
+
++ (nullable MCTiled2dMapVectorLayerInterface *)createFromLocalStyleJsonWithZoomInfo:(nonnull NSString *)layerName
+                                                                          styleJson:(nonnull NSString *)styleJson
+                                                                            loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
+                                                                         fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
+                                                                           dpFactor:(double)dpFactor
+                                                                           zoomInfo:(nonnull MCTiled2dMapZoomInfo *)zoomInfo;
 
 - (void)setSelectionDelegate:(nullable id<MCTiled2dMapVectorLayerSelectionCallbackInterface>)selectionDelegate;
 
