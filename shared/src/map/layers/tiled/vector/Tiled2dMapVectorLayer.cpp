@@ -292,6 +292,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                                      layerConfig,
                                                                                      source,
                                                                                      vectorSource.weakActor<Tiled2dMapVectorSource>());
+        sourceManagerActor.unsafe()->setAlpha(alpha);
         sourceTileManagers[source] = sourceManagerActor.strongActor<Tiled2dMapVectorSourceTileDataManager>();
         interactionDataManagers[source].push_back(sourceManagerActor.weakActor<Tiled2dMapVectorSourceDataManager>());
 
