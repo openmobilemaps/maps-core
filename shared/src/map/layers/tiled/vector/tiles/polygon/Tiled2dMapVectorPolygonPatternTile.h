@@ -21,12 +21,13 @@ class Tiled2dMapVectorPolygonPatternTile
         : public Tiled2dMapVectorTile,
           public std::enable_shared_from_this<Tiled2dMapVectorPolygonPatternTile> {
 public:
-              Tiled2dMapVectorPolygonPatternTile(const std::weak_ptr<MapInterface> &mapInterface,
-                                const Tiled2dMapTileInfo &tileInfo,
-                                const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
-                                const std::shared_ptr<PolygonVectorLayerDescription> &description,
-                                const std::shared_ptr<SpriteData> &spriteData,
-                                const std::shared_ptr<TextureHolderInterface> &spriteTexture);
+    Tiled2dMapVectorPolygonPatternTile(const std::weak_ptr<MapInterface> &mapInterface,
+                                       const Tiled2dMapTileInfo &tileInfo,
+                                       const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
+                                       const std::shared_ptr<PolygonVectorLayerDescription> &description,
+                                       const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
+                                       const std::shared_ptr<SpriteData> &spriteData,
+                                       const std::shared_ptr<TextureHolderInterface> &spriteTexture);
 
     void updateVectorLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                 const Tiled2dMapVectorTileDataVector &layerFeatures) override;

@@ -10,7 +10,7 @@
 
 #include "Tiled2dMapVectorSourceSymbolDataManager.h"
 #include "Tiled2dMapVectorLayer.h"
-#include "Tiled2dMapVectorRasterSubLayerConfig.h"
+#include "Tiled2dMapVectorLayerConfig.h"
 #include "RenderPass.h"
 #include "Matrix.h"
 #include "StretchShaderInfo.h"
@@ -19,10 +19,11 @@
 
 Tiled2dMapVectorSourceSymbolDataManager::Tiled2dMapVectorSourceSymbolDataManager(const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
                                                                                  const std::shared_ptr<VectorMapDescription> &mapDescription,
+                                                                                 const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                                                                  const std::string &source,
                                                                                  const std::shared_ptr<FontLoaderInterface> &fontLoader,
                                                                                  const WeakActor<Tiled2dMapVectorSource> &vectorSource) :
-Tiled2dMapVectorSourceDataManager(vectorLayer, mapDescription, source), fontLoader(fontLoader), vectorSource(vectorSource)
+Tiled2dMapVectorSourceDataManager(vectorLayer, mapDescription, layerConfig, source), fontLoader(fontLoader), vectorSource(vectorSource)
 {
     for (const auto &layer: mapDescription->layers) {
         if (layer->getType() == VectorLayerType::symbol && layer->source == source) {
@@ -223,7 +224,7 @@ std::optional<Actor<Tiled2dMapVectorSymbolGroup>> Tiled2dMapVectorSourceSymbolDa
 
     const auto fontProvider = WeakActor(mailbox, weak_from_this()).weakActor<Tiled2dMapVectorFontProvider>();
     auto mailbox = std::make_shared<Mailbox>(mapInterface.lock()->getScheduler());
-    Actor<Tiled2dMapVectorSymbolGroup> symbolGroupActor = Actor<Tiled2dMapVectorSymbolGroup>(mailbox, mapInterface, fontProvider, tileInfo, layerIdentifier, layerDescriptions.at(layerIdentifier));
+    Actor<Tiled2dMapVectorSymbolGroup> symbolGroupActor = Actor<Tiled2dMapVectorSymbolGroup>(mailbox, mapInterface, layerConfig, fontProvider, tileInfo, layerIdentifier, layerDescriptions.at(layerIdentifier));
     bool success = symbolGroupActor.unsafe()->initialize(features);
     symbolGroupActor.unsafe()->setAlpha(alpha);
     return success ? symbolGroupActor : std::optional<Actor<Tiled2dMapVectorSymbolGroup>>();
@@ -326,7 +327,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
     }
 
     double zoom = camera->getZoom();
-    double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(zoom);
+    double zoomIdentifier = layerConfig->getZoomIdentifier(zoom);
     double rotation = -camera->getRotation();
     auto scaleFactor = camera->mapUnitsFromPixels(1.0);
 
@@ -357,7 +358,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
         return;
     }
 
-    const double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
+    const double zoomIdentifier = layerConfig->getZoomIdentifier(camera->getZoom());
     const double rotation = camera->getRotation();
 
     const auto scaleFactor = camera->mapUnitsFromPixels(1.0);

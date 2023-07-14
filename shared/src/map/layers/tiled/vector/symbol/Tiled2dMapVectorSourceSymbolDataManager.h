@@ -28,6 +28,7 @@ class Tiled2dMapVectorSourceSymbolDataManager:
 public:
     Tiled2dMapVectorSourceSymbolDataManager(const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
                                           const std::shared_ptr<VectorMapDescription> &mapDescription,
+                                          const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                           const std::string &source,
                                           const std::shared_ptr<FontLoaderInterface> &fontLoader,
                                           const WeakActor<Tiled2dMapVectorSource> &vectorSource);

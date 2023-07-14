@@ -17,12 +17,13 @@
 class Tiled2dMapVectorRasterTile : public Tiled2dMapVectorTile, public std::enable_shared_from_this<Tiled2dMapVectorRasterTile> {
 public:
     Tiled2dMapVectorRasterTile(const std::weak_ptr<MapInterface> &mapInterface,
-                                const Tiled2dMapTileInfo &tileInfo,
-                                const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
-                                const std::shared_ptr<RasterVectorLayerDescription> &description);
+                               const Tiled2dMapTileInfo &tileInfo,
+                               const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
+                               const std::shared_ptr<RasterVectorLayerDescription> &description,
+                               const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig);
 
     void updateRasterLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
-                                const Tiled2dMapVectorTileDataRaster &tileData) override;
+                                      const Tiled2dMapVectorTileDataRaster &tileData) override;
 
     void update() override;
 

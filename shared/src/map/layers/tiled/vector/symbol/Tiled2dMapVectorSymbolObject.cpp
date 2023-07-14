@@ -9,12 +9,13 @@
  */
 
 #include "Tiled2dMapVectorSymbolObject.h"
-#include "Tiled2dMapVectorRasterSubLayerConfig.h"
+#include "Tiled2dMapVectorLayerConfig.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "CoordinateSystemIdentifiers.h"
 
 
 Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<MapInterface> &mapInterface,
+                                                           const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                                            const WeakActor<Tiled2dMapVectorFontProvider> &fontProvider,
                                                            const Tiled2dMapTileInfo &tileInfo,
                                                            const std::string &layerIdentifier,
@@ -29,7 +30,7 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                                                            const std::optional<double> &angle,
                                                            const TextJustify &textJustify,
                                                            const TextSymbolPlacement &textSymbolPlacement) :
-    description(description), coordinate(coordinate), mapInterface(mapInterface), featureContext(featureContext),
+    description(description), layerConfig(layerConfig), coordinate(coordinate), mapInterface(mapInterface), featureContext(featureContext),
     iconBoundingBox(Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0)),
     stretchIconBoundingBox(Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0)) {
     auto strongMapInterface = mapInterface.lock();
@@ -41,7 +42,7 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
         return;
     }
 
-    double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
+    double zoomIdentifier = layerConfig->getZoomIdentifier(camera->getZoom());
 
     const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
 

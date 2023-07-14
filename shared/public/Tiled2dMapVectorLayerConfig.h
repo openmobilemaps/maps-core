@@ -9,6 +9,10 @@
  */
 #pragma once
 
+#include "Tiled2dMapLayerConfig.h"
+#include "Tiled2dMapZoomInfo.h"
+#include "Tiled2dMapZoomLevelInfo.h"
+#include "VectorMapSourceDescription.h"
 #include "VectorLayerDescription.h"
 #include "CoordinateSystemIdentifiers.h"
 #include "Tiled2dMapVectorSettings.h"
@@ -16,8 +20,9 @@
 
 class Tiled2dMapVectorLayerConfig : public Tiled2dMapLayerConfig {
 public:
-    Tiled2dMapVectorLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &layerDescription, bool underzoom = false, bool overzoom = true)
-            : description(layerDescription), underzoom(underzoom), overzoom(overzoom) {}
+    Tiled2dMapVectorLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &sourceDescription,
+                                const Tiled2dMapZoomInfo &zoomInfo = Tiled2dMapZoomInfo(1.0, 0, false, true, false, true))
+            : sourceDescription(sourceDescription), zoomInfo(zoomInfo) {}
 
     ~Tiled2dMapVectorLayerConfig() {}
 
@@ -26,7 +31,7 @@ public:
     }
 
     std::string getTileUrl(int32_t x, int32_t y, int32_t t, int32_t zoom) override {
-        std::string url = description->vectorUrl;
+        std::string url = sourceDescription->vectorUrl;
         size_t zoomIndex = url.find("{z}", 0);
         if (zoomIndex == std::string::npos) throw std::invalid_argument("Layer url \'" + url + "\' has no valid format!");
         url = url.replace(zoomIndex, 3, std::to_string(zoom));
@@ -43,35 +48,41 @@ public:
     }
 
     Tiled2dMapZoomInfo getZoomInfo() override {
-        return defaultZoomInfo;
+        return zoomInfo;
     }
 
     std::string getLayerName() override {
-        return description->identifier;
+        return sourceDescription->identifier;
     }
 
     std::optional<Tiled2dMapVectorSettings> getVectorSettings() override {
         return std::nullopt;
     }
 
-private:
-    std::shared_ptr<VectorMapSourceDescription> description;
-    bool underzoom;
-    bool overzoom;
+    double getZoomIdentifier(double zoom) {
+        return std::round(log(baseValueZoom * zoomInfo.zoomLevelScaleFactor / zoom) / log(2) * 100) / 100;
+    }
 
-    const double baseValueZoom = 500000000.0;
+    double getZoomFactorAtIdentifier(double zoomIdentifier) {
+        double factor = pow(2, zoomIdentifier);
+        return baseValueZoom * zoomInfo.zoomLevelScaleFactor / factor;
+    }
+
+protected:
+    std::shared_ptr<VectorMapSourceDescription> sourceDescription;
+    Tiled2dMapZoomInfo zoomInfo;
+
+    static constexpr double baseValueZoom = 500000000.0;
     const double baseValueWidth = 40075016.0;
     const int32_t epsg3857Id = CoordinateSystemIdentifiers::EPSG3857();
     const RectCoord epsg3857Bounds = RectCoord(
             Coord(epsg3857Id, -20037508.34, 20037508.34, 0.0),
             Coord(epsg3857Id, 20037508.34, -20037508.34, 0.0)
     );
-    
-    const Tiled2dMapZoomInfo defaultZoomInfo = Tiled2dMapZoomInfo(1.0,  0, false, true, underzoom, overzoom);
 
     virtual std::vector<Tiled2dMapZoomLevelInfo> getDefaultEpsg3857ZoomLevels() {
         std::vector<Tiled2dMapZoomLevelInfo> infos;
-        for (int i = description->minZoom; i <= description->maxZoom; i++) {
+        for (int i = sourceDescription->minZoom; i <= sourceDescription->maxZoom; i++) {
             double factor = pow(2, i);
             double zoom = baseValueZoom / factor;
             double width = baseValueWidth / factor;

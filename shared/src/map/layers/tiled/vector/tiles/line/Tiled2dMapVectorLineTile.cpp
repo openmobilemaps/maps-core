@@ -12,14 +12,15 @@
 #include "MapCamera2dInterface.h"
 #include "RenderObject.h"
 #include "LineHelper.h"
-#include "Tiled2dMapVectorRasterSubLayerConfig.h"
+#include "Tiled2dMapVectorLayerConfig.h"
 #include "Tiled2dMapVectorStyleParser.h"
 
 Tiled2dMapVectorLineTile::Tiled2dMapVectorLineTile(const std::weak_ptr<MapInterface> &mapInterface,
                                                          const Tiled2dMapTileInfo &tileInfo,
                                                          const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
-                                                         const std::shared_ptr<LineVectorLayerDescription> &description)
-        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, tileCallbackInterface), usedKeys(description->getUsedKeys()) {
+                                                         const std::shared_ptr<LineVectorLayerDescription> &description,
+                                                   const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig)
+        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, layerConfig, tileCallbackInterface), usedKeys(description->getUsedKeys()) {
     isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
 }
 
@@ -77,10 +78,10 @@ void Tiled2dMapVectorLineTile::update() {
     }
 
     const double cameraZoom = camera->getZoom();
-     double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(cameraZoom);
+     double zoomIdentifier = layerConfig->getZoomIdentifier(cameraZoom);
     zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.zoomIdentifier);
 
-    auto zoom = Tiled2dMapVectorRasterSubLayerConfig::getZoomFactorAtIdentifier(floor(zoomIdentifier));
+    auto zoom = layerConfig->getZoomFactorAtIdentifier(floor(zoomIdentifier));
     auto scalingFactor = (camera->asCameraInterface()->getScalingFactor() / cameraZoom) * zoom;
 
     for (auto const &line: lines) {
@@ -397,7 +398,7 @@ bool Tiled2dMapVectorLineTile::onClickConfirmed(const Vec2F &posScreen) {
     }
 
     auto point = camera->coordFromScreenPosition(posScreen);
-    double zoomIdentifier = Tiled2dMapVectorRasterSubLayerConfig::getZoomIdentifier(camera->getZoom());
+    double zoomIdentifier = layerConfig->getZoomIdentifier(camera->getZoom());
 
     auto lineDescription = std::static_pointer_cast<LineVectorLayerDescription>(description);
 
