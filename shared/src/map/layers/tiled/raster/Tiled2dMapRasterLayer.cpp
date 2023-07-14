@@ -311,10 +311,11 @@ void Tiled2dMapRasterLayer::setupTiles(
         }
 
         for (const auto &stateUpdate: tileStateUpdates) {
-            auto it = tileObjectMap.find(stateUpdate);
-            auto extracted = tileObjectMap.extract(it);
-            extracted.key() = stateUpdate;
-            tileObjectMap.insert(std::move(extracted));
+            auto extracted = tileObjectMap.extract(stateUpdate);
+            if(extracted) {
+                extracted.key() = stateUpdate;
+                tileObjectMap.insert(std::move(extracted));
+            }
         }
 
         for (const auto &tile : tilesToSetup) {
