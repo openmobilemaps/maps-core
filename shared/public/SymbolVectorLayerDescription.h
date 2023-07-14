@@ -35,6 +35,7 @@ public:
                       std::shared_ptr<Value> textRadialOffset,
                       std::shared_ptr<Value> textPadding,
                       std::shared_ptr<Value> textAnchor,
+                      std::shared_ptr<Value> textJustify,
                       std::shared_ptr<Value> textVariableAnchor,
                       std::shared_ptr<Value> textRotate,
                       std::shared_ptr<Value> textAllowOverlap,
@@ -75,6 +76,7 @@ public:
     iconAnchor(iconAnchor),
     iconOffset(iconOffset),
     textAnchor(textAnchor),
+    textJustify(textJustify),
     textVariableAnchor(textVariableAnchor),
     textRotate(textRotate),
     textOpacity(textOpacity),
@@ -248,7 +250,7 @@ public:
 
     TextJustify getTextJustify(const EvaluationContext &context) {
         static const TextJustify defaultValue = TextJustify::CENTER;
-        return textAnchor ? textAnchor->evaluateOr(context, defaultValue) : defaultValue;
+        return textJustify ? textJustify->evaluateOr(context, defaultValue) : defaultValue;
     }
 
     TextSymbolPlacement getTextSymbolPlacement(const EvaluationContext &context) {
@@ -335,12 +337,12 @@ private:
     std::shared_ptr<Value> textHaloWidth;
     std::shared_ptr<Value> textPadding;
     std::shared_ptr<Value> textAnchor;
+    std::shared_ptr<Value> textJustify;
     std::shared_ptr<Value> textVariableAnchor;
     std::shared_ptr<Value> textRotate;
     std::shared_ptr<Value> textAllowOverlap;
     std::shared_ptr<Value> textLineHeight;
     std::shared_ptr<Value> textLetterSpacing;
-    std::shared_ptr<Value> textJustify;
     std::shared_ptr<Value> textMaxWidth;
     std::shared_ptr<Value> textMaxAngle;
     std::shared_ptr<Value> textOpacity;

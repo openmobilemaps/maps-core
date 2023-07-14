@@ -240,6 +240,7 @@ public:
                                             parser.parseValue(val["layout"]["text-radial-offset"]),
                                             parser.parseValue(val["layout"]["text-padding"]),
                                             parser.parseValue(val["layout"]["text-anchor"]),
+                                            parser.parseValue(val["layout"]["text-justify"]),
                                             parser.parseValue(val["layout"]["text-variable-anchor"]),
                                             parser.parseValue(val["layout"]["text-rotate"]),
                                             parser.parseValue(val["layout"]["text-allow-overlap"]),
