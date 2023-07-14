@@ -199,12 +199,11 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
     styleOffset += 1;
 
     switch(textSymbolPlacement) {
-        case TextSymbolPlacement::LINE_CENTER:
         case TextSymbolPlacement::POINT: {
             updatePropertiesPoint(positions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, rotation);
             break;
         }
-
+        case TextSymbolPlacement::LINE_CENTER:
         case TextSymbolPlacement::LINE: {
 
             if (rotationAlignment == SymbolAlignment::VIEWPORT) {
