@@ -85,11 +85,11 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
         const double symbolSpacingMeters = symbolSpacingPx * tilePixelFactor;
 
         if (context->geomType != vtzero::GeomType::POINT) {
-
             double distance = 0;
             double totalDistance = 0;
 
             bool wasPlaced = false;
+            bool isLineCenter = placement == TextSymbolPlacement::LINE_CENTER;
 
             std::vector<Coord> line = {};
             for (const auto &points: geometry->getPointCoordinates()) {
@@ -108,10 +108,9 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                         totalDistance += addDistance;
                     }
 
-
                     auto pos = getPositioning(pointIt, points);
 
-                    if (distance > symbolSpacingMeters && pos) {
+                    if (!isLineCenter && distance > symbolSpacingMeters && pos) {
 
                         auto position = pos->centerPosition;
 
@@ -133,7 +132,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
             }
 
             // if no label was placed, place it in the middle of the line
-            if (!wasPlaced) {
+            if (isLineCenter || !wasPlaced) {
                 distance = 0;
                 for (const auto &points: geometry->getPointCoordinates()) {
                     for (auto pointIt = points.begin(); pointIt != points.end(); pointIt++) {

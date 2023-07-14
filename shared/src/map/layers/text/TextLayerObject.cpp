@@ -138,25 +138,16 @@ void TextLayerObject::update(float scale, bool updateObject) {
             break;
         }
 
-        case TextSymbolPlacement::LINE_CENTER: {
-            layoutPoint(scale, updateObject);
-            break;
-        }
-
+        case TextSymbolPlacement::LINE_CENTER:
         case TextSymbolPlacement::LINE: {
+            auto rotatedFactor = layoutLine(scale, updateObject);
 
-            if (rotationAlignment == SymbolAlignment::VIEWPORT) {
-                layoutPoint(scale, updateObject);
-            } else {
-                auto rotatedFactor = layoutLine(scale, updateObject);
+            if (rotatedFactor > 0.5 && lineCoordinates && !rotated) {
+                std::reverse((*lineCoordinates).begin(), (*lineCoordinates).end());
+                std::reverse(renderLineCoordinates.begin(), renderLineCoordinates.end());
 
-                if(rotatedFactor > 0.5 && lineCoordinates && !rotated) {
-                    std::reverse((*lineCoordinates).begin(), (*lineCoordinates).end());
-                    std::reverse(renderLineCoordinates.begin(), renderLineCoordinates.end());
-
-                    layoutLine(scale, updateObject);
-                    rotated = true;
-                }
+                layoutLine(scale, updateObject);
+                rotated = true;
             }
 
             break;
