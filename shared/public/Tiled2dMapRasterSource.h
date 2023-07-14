@@ -37,6 +37,8 @@ class Tiled2dMapRasterSource
         
     virtual ::djinni::Future<TextureLoaderResult> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
 
+    virtual bool hasExpensivePostLoadingTask() override;
+
     virtual std::shared_ptr<::TextureHolderInterface> postLoadingTask(const TextureLoaderResult &loadedData,
                                                                       const Tiled2dMapTileInfo &tile) override;
 

@@ -108,7 +108,10 @@ public:
 
     void didFailToLoad(Tiled2dMapTileInfo tile, size_t loaderIndex, const LoaderStatus &status, const std::optional<std::string> &errorCode);
 
+    void performDelayedTasks();
+
   protected:
+    virtual bool hasExpensivePostLoadingTask() = 0;
 
     virtual R postLoadingTask(const L &loadedData, const Tiled2dMapTileInfo &tile) = 0;
 
@@ -162,6 +165,7 @@ private:
     };
 
     std::unordered_map<size_t, std::map<Tiled2dMapTileInfo, ErrorInfo>> errorTiles;
+    std::optional<long long> nextDelayTaskExecution;
 
     std::unordered_set<Tiled2dMapTileInfo> notFoundTiles;
 };

@@ -44,6 +44,8 @@ protected:
     virtual void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
     
     virtual ::djinni::Future<DataLoaderResult> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
+
+    virtual bool hasExpensivePostLoadingTask() override;
     
     virtual Tiled2dMapVectorTileInfo::FeatureMap postLoadingTask(const DataLoaderResult &loadedData, const Tiled2dMapTileInfo &tile) override;
 

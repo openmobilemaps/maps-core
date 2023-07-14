@@ -325,18 +325,23 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(Tiled2dMapTileInfo tile, size
         readyTiles.erase(tile);
 
         loadDataAsync(tile, loaderIndex).then([weakActor, loaderIndex, tile, weakSelfPtr](::djinni::Future<L> result) {
+
             auto strongSelf = weakSelfPtr.lock();
             if (strongSelf) {
                 auto res = result.get();
                 if (res.status == LoaderStatus::OK) {
-                    auto strongScheduler = strongSelf->scheduler.lock();
-                    if (strongScheduler) {
-                        strongScheduler->addTask(std::make_shared<LambdaTask>(TaskConfig("postLoadingTask", 0.0, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION), [tile, loaderIndex, weakSelfPtr, weakActor, res] {
-                            auto strongSelf = weakSelfPtr.lock();
-                            if (strongSelf) {
-                                weakActor.message(&Tiled2dMapSource::didLoad, tile, loaderIndex,strongSelf->postLoadingTask(res, tile));
-                            }
-                        }));
+                    if (strongSelf->hasExpensivePostLoadingTask()) {
+                        auto strongScheduler = strongSelf->scheduler.lock();
+                        if (strongScheduler) {
+                            strongScheduler->addTask(std::make_shared<LambdaTask>(TaskConfig("postLoadingTask", 0.0, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION), [tile, loaderIndex, weakSelfPtr, weakActor, res] {
+                                auto strongSelf = weakSelfPtr.lock();
+                                if (strongSelf) {
+                                    weakActor.message(&Tiled2dMapSource::didLoad, tile, loaderIndex,strongSelf->postLoadingTask(res, tile));
+                                }
+                            }));
+                        }
+                    } else {
+                        weakActor.message(&Tiled2dMapSource::didLoad, tile, loaderIndex,strongSelf->postLoadingTask(res, tile));
                     }
                 } else {
                     weakActor.message(&Tiled2dMapSource::didFailToLoad, tile, loaderIndex, res.status, res.errorCode);
@@ -426,15 +431,15 @@ void Tiled2dMapSource<T, L, R>::didFailToLoad(Tiled2dMapTileInfo tile, size_t lo
         case LoaderStatus::ERROR_TIMEOUT:
         case LoaderStatus::ERROR_OTHER:
         case LoaderStatus::ERROR_NETWORK: {
+            const auto now = DateHelper::currentTimeMillis();
             int64_t delay = 0;
             if (errorTiles[loaderIndex].count(tile) != 0) {
-                errorTiles[loaderIndex].at(tile).lastLoad = DateHelper::currentTimeMillis();
+                errorTiles[loaderIndex].at(tile).lastLoad = now;
                 errorTiles[loaderIndex].at(tile).delay = std::min(2 * errorTiles[loaderIndex].at(tile).delay, MAX_WAIT_TIME);
             } else {
-                errorTiles[loaderIndex][tile] = {DateHelper::currentTimeMillis(), MIN_WAIT_TIME};
+                errorTiles[loaderIndex][tile] = {now, MIN_WAIT_TIME};
             }
             delay = errorTiles[loaderIndex].at(tile).delay;
-
 
             if (errorManager) {
                 errorManager->addTiledLayerError(TiledLayerError(status,
@@ -445,17 +450,19 @@ void Tiled2dMapSource<T, L, R>::didFailToLoad(Tiled2dMapTileInfo tile, size_t lo
                                                                  tile.bounds));
             }
 
-            auto taskIdentifier = "Tiled2dMapSource_loadingErrorTask";
+            if (!nextDelayTaskExecution || nextDelayTaskExecution > now + delay ) {
+                nextDelayTaskExecution = now + delay;
 
-            auto strongScheduler = scheduler.lock();
-            if (strongScheduler) {
-                auto weakActor = WeakActor<Tiled2dMapSource>(mailbox, std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this()));
-                strongScheduler->addTask(std::make_shared<LambdaTask>(TaskConfig(taskIdentifier, delay, TaskPriority::NORMAL, ExecutionEnvironment::IO), [weakActor, tile, loaderIndex] {
-                    weakActor.message(&Tiled2dMapSource::performLoadingTask, tile, loaderIndex);
-                }));
+                auto taskIdentifier = "Tiled2dMapSource_loadingErrorTask";
 
+                auto strongScheduler = scheduler.lock();
+                if (strongScheduler) {
+                    auto weakActor = WeakActor<Tiled2dMapSource>(mailbox, std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this()));
+                    strongScheduler->addTask(std::make_shared<LambdaTask>(TaskConfig(taskIdentifier, delay, TaskPriority::NORMAL, ExecutionEnvironment::IO), [weakActor] {
+                        weakActor.message(&Tiled2dMapSource::performDelayedTasks);
+                    }));
+                }
             }
-
             break;
         }
     }
@@ -463,6 +470,45 @@ void Tiled2dMapSource<T, L, R>::didFailToLoad(Tiled2dMapTileInfo tile, size_t lo
     updateTileMasks();
 
     notifyTilesUpdates();
+}
+
+
+template<class T, class L, class R>
+void Tiled2dMapSource<T, L, R>::performDelayedTasks() {
+    nextDelayTaskExecution = std::nullopt;
+
+    const auto now = DateHelper::currentTimeMillis();
+    long long minDelay = std::numeric_limits<long long>::max();
+
+    std::vector<std::pair<int, Tiled2dMapTileInfo>> toLoad;
+
+    for (auto &[loaderIndex, errors]: errorTiles) {
+        for(auto &[tile, errorInfo]: errors) {
+            if (errorInfo.lastLoad + errorInfo.delay >= now) {
+                toLoad.push_back({loaderIndex, tile});
+            } else {
+                minDelay = std::min(minDelay, errorInfo.delay);
+            }
+        }
+    }
+
+    for (auto &[loaderIndex, tile]: toLoad) {
+        performLoadingTask(tile, loaderIndex);
+    }
+
+    if (minDelay != std::numeric_limits<long long>::max()) {
+        nextDelayTaskExecution = now + minDelay;
+
+        auto taskIdentifier = "Tiled2dMapSource_loadingErrorTask";
+
+        auto strongScheduler = scheduler.lock();
+        if (strongScheduler) {
+            auto weakActor = WeakActor<Tiled2dMapSource>(mailbox, std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this()));
+            strongScheduler->addTask(std::make_shared<LambdaTask>(TaskConfig(taskIdentifier, minDelay, TaskPriority::NORMAL, ExecutionEnvironment::IO), [weakActor] {
+                weakActor.message(&Tiled2dMapSource::performDelayedTasks);
+            }));
+        }
+    }
 }
 
 template<class T, class L, class R>
