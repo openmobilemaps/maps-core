@@ -72,7 +72,7 @@ private:
     const std::shared_ptr<FeatureContext> featureContext;
     const TextSymbolPlacement textSymbolPlacement;
     const SymbolAlignment rotationAlignment;
-    const TextJustify textJustify;
+    TextJustify textJustify = TextJustify::LEFT;
     const Anchor textAnchor;
     const Vec2F offset;
 

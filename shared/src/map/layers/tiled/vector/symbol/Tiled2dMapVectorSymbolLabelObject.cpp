@@ -36,7 +36,6 @@ description(description),
 lineHeight(lineHeight),
 letterSpacing(letterSpacing),
 maxCharacterAngle(maxCharacterAngle),
-textJustify(textJustify),
 textAnchor(textAnchor),
 offset(offset),
 fontResult(fontResult),
@@ -129,6 +128,26 @@ referenceSize(fontResult->fontData->info.size)
         renderLineCoordinatesCount = renderLineCoordinates.size();
     } else {
         renderLineCoordinatesCount = 0;
+    }
+
+    if (textJustify == TextJustify::AUTO) {
+        switch (textAnchor) {
+            case Anchor::TOP_LEFT:
+            case Anchor::LEFT:
+            case Anchor::BOTTOM_LEFT:
+                this->textJustify = TextJustify::LEFT;
+                break;
+            case Anchor::TOP_RIGHT:
+            case Anchor::RIGHT:
+            case Anchor::BOTTOM_RIGHT:
+                this->textJustify = TextJustify::RIGHT;
+                break;
+            case Anchor::CENTER:
+            case Anchor::TOP:
+            case Anchor::BOTTOM:
+                this->textJustify = TextJustify::CENTER;
+                break;
+        }
     }
 }
 
@@ -289,6 +308,8 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
     Vec2D centerSize((centerMax.x - centerMin.x), (centerMax.y - centerMin.y));
 
     switch (textJustify) {
+        case TextJustify::AUTO:
+            // Should have been finalized to one of the below. Otherwise use default LEFT.
         case TextJustify::LEFT:
             //Nothing to do here
             break;

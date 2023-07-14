@@ -4,6 +4,7 @@
 package io.openmobilemaps.mapscore.shared.map.layers.text
 
 enum class TextJustify {
+    AUTO,
     LEFT,
     CENTER,
     RIGHT,

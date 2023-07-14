@@ -5,7 +5,8 @@
 
 typedef NS_ENUM(NSInteger, MCTextJustify)
 {
-    MCTextJustifyLEFT = 0,
-    MCTextJustifyCENTER = 1,
-    MCTextJustifyRIGHT = 2,
+    MCTextJustifyAUTO = 0,
+    MCTextJustifyLEFT = 1,
+    MCTextJustifyCENTER = 2,
+    MCTextJustifyRIGHT = 3,
 };

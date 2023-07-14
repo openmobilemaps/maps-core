@@ -367,8 +367,10 @@ public:
     }
 
 
-    std::optional<::TextJustify> jusitfyFromString(const std::string &value) const {
-        if (value == "center") {
+    std::optional<::TextJustify> justifyFromString(const std::string &value) const {
+        if (value == "auto") {
+            return TextJustify::AUTO;
+        } else if (value == "center") {
             return TextJustify::CENTER;
         } else if (value == "left") {
             return TextJustify::LEFT;
@@ -428,7 +430,7 @@ public:
     template<>
     TextJustify evaluateOr(const EvaluationContext &context, const TextJustify &alternative) const {
         auto const &value = evaluateOr(context, std::string(""));
-        auto anchor = jusitfyFromString(value);
+        auto anchor = justifyFromString(value);
         if (anchor) {
             return *anchor;
         }

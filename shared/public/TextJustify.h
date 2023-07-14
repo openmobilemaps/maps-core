@@ -6,13 +6,15 @@
 #include <functional>
 
 enum class TextJustify : int {
-    LEFT = 0,
-    CENTER = 1,
-    RIGHT = 2,
+    AUTO = 0,
+    LEFT = 1,
+    CENTER = 2,
+    RIGHT = 3,
 };
 
 constexpr const char* toString(TextJustify e) noexcept {
     constexpr const char* names[] = {
+        "AUTO",
         "LEFT",
         "CENTER",
         "RIGHT",

@@ -16,6 +16,7 @@ anchor = enum {
 }
 
 text_justify = enum {
+    AUTO;
     LEFT;
     CENTER;
     RIGHT;
