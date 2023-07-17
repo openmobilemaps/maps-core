@@ -685,7 +685,6 @@ void Tiled2dMapVectorSymbolObject::resetCollisionCache() {
     lastIconUpdateScaleFactor = std::nullopt;
     lastStretchIconUpdateScaleFactor = std::nullopt;
     lastTextUpdateScaleFactor = std::nullopt;
-    this->collides = true;
     collisionMap.clear();
 }
 
