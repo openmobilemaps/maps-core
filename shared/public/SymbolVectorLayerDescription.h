@@ -301,7 +301,7 @@ public:
 
     double getTextMaxAngle(const EvaluationContext &context) {
         static const double defaultValue = 45.0f;
-        return textMaxWidth ? textMaxWidth->evaluateOr(context, defaultValue) : defaultValue;
+        return textMaxAngle ? textMaxAngle->evaluateOr(context, defaultValue) : defaultValue;
     }
 
     SymbolAlignment getTextRotationAlignment(const EvaluationContext &context) {
