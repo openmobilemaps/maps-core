@@ -56,7 +56,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
         std::vector<FormattedStringEntry> text = layerDescription->style.getTextField(evalContext);
 
-        if (layerDescription->style.getTextTransform(evalContext) == TextTransform::UPPERCASE && text.size() > 2) {
+        if (layerDescription->style.getTextTransform(evalContext) == TextTransform::UPPERCASE) {
             for (auto &e: text) {
                 e.text = TextHelper::uppercase(e.text);
             }
