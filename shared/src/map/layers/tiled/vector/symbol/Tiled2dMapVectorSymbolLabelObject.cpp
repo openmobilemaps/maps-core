@@ -247,7 +247,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
     const auto textAlignment = description->style.getTextRotationAlignment(evalContext);
 
     float angle;
-    if (textAlignment == SymbolAlignment::MAP) {
+    if (textAlignment == SymbolAlignment::MAP || textAlignment == SymbolAlignment::AUTO) {
         angle = description->style.getTextRotate(evalContext);
     } else {
         angle = -rotation;
