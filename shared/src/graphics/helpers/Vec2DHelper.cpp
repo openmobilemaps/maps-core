@@ -46,7 +46,7 @@ std::vector<size_t> Vec2DHelper::convexHull(std::vector<Vec2D>& points) {
 
     std::vector<size_t> hull;
 
-    if (points.size() < 3) {
+    if (points.size() <= 3) {
         for (size_t i = 0; i != points.size(); i++) {
             hull.push_back(i);
         }
