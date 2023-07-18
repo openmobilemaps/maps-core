@@ -84,6 +84,10 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
         const double symbolSpacingPx = layerDescription->style.getSymbolSpacing(evalContext);
         const double symbolSpacingMeters = symbolSpacingPx * tilePixelFactor;
 
+        const auto iconOptional = layerDescription->style.getIconOptional(evalContext);
+        const auto textOptional = layerDescription->style.getTextOptional(evalContext);
+        const auto hasIcon = layerDescription->style.hasIconImagePotentially();
+
         if (context->geomType != vtzero::GeomType::POINT) {
             double distance = 0;
             double totalDistance = 0;
@@ -114,7 +118,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
                         auto position = pos->centerPosition;
 
-                        const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig, context, text, fullText, position, line, fontList, anchor, pos->angle, justify, placement);
+                        const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig, context, text, fullText, position, line, fontList, anchor, pos->angle, justify, placement, false);
 
                         if (symbolObject) {
                             symbolObject->setAlpha(alpha);
@@ -123,6 +127,35 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                                 symbolObjects.push_back(symbolObject);
                                 textPositionMap[fullText].push_back(position);
                                 wasPlaced = true;
+                            }
+                        }
+
+                        if (hasIcon) {
+                            if (textOptional) {
+                                const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig, context, {}, "", position, line, fontList, anchor, pos->angle, justify, placement, false);
+
+                                if (symbolObject) {
+                                    symbolObject->setAlpha(alpha);
+                                    const auto counts = symbolObject->getInstanceCounts();
+                                    if (counts.icons + counts.stretchedIcons + counts.textCharacters != 0) {
+                                        symbolObjects.push_back(symbolObject);
+                                        textPositionMap[fullText].push_back(position);
+                                        wasPlaced = true;
+                                    }
+                                }
+                            }
+                            if (iconOptional) {
+                                const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig, context, text, fullText, position, line, fontList, anchor, pos->angle, justify, placement, true);
+
+                                if (symbolObject) {
+                                    symbolObject->setAlpha(alpha);
+                                    const auto counts = symbolObject->getInstanceCounts();
+                                    if (counts.icons + counts.stretchedIcons + counts.textCharacters != 0) {
+                                        symbolObjects.push_back(symbolObject);
+                                        textPositionMap[fullText].push_back(position);
+                                        wasPlaced = true;
+                                    }
+                                }
                             }
                         }
 
@@ -162,7 +195,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
                             auto position = pos->centerPosition;
 
-                            const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig, context, text, fullText, position, line, fontList, anchor, pos->angle, justify, placement);
+                            const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig, context, text, fullText, position, line, fontList, anchor, pos->angle, justify, placement, false);
                             if (symbolObject) {
                                 symbolObject->setAlpha(alpha);
                                 const auto counts = symbolObject->getInstanceCounts();
@@ -172,6 +205,34 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                                     textPositionMap[fullText].push_back(position);
                                 }
                             }
+
+                            if (hasIcon) {
+                                if (textOptional) {
+                                    const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig, context, {}, "", position, line, fontList, anchor, pos->angle, justify, placement, false);
+                                    if (symbolObject) {
+                                        symbolObject->setAlpha(alpha);
+                                        const auto counts = symbolObject->getInstanceCounts();
+                                        if (counts.icons + counts.stretchedIcons + counts.textCharacters != 0) {
+                                            wasPlaced = true;
+                                            symbolObjects.push_back(symbolObject);
+                                            textPositionMap[fullText].push_back(position);
+                                        }
+                                    }
+                                }
+                                if (iconOptional) {
+                                    const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig, context, text, fullText, position, line, fontList, anchor, pos->angle, justify, placement, true);
+                                    if (symbolObject) {
+                                        symbolObject->setAlpha(alpha);
+                                        const auto counts = symbolObject->getInstanceCounts();
+                                        if (counts.icons + counts.stretchedIcons + counts.textCharacters != 0) {
+                                            wasPlaced = true;
+                                            symbolObjects.push_back(symbolObject);
+                                            textPositionMap[fullText].push_back(position);
+                                        }
+                                    }
+                                }
+                            }
+
                             distance = 0;
                         }
                     }
@@ -182,7 +243,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                 auto midP = p.begin() + p.size() / 2;
                 std::optional<double> angle = std::nullopt;
 
-                const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig, context, text, fullText, *midP, std::nullopt, fontList, anchor, angle, justify, placement);
+                const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig, context, text, fullText, *midP, std::nullopt, fontList, anchor, angle, justify, placement, false);
 
                 if (symbolObject) {
                     symbolObject->setAlpha(alpha);
@@ -192,6 +253,30 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                     }
                 }
 
+                if (hasIcon) {
+                    if (textOptional) {
+                        const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig, context, {}, "", *midP, std::nullopt, fontList, anchor, angle, justify, placement, false);
+
+                        if (symbolObject) {
+                            symbolObject->setAlpha(alpha);
+                            const auto counts = symbolObject->getInstanceCounts();
+                            if (counts.icons + counts.stretchedIcons + counts.textCharacters != 0) {
+                                symbolObjects.push_back(symbolObject);
+                            }
+                        }
+                    }
+                    if (iconOptional) {
+                        const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig, context, text, fullText, *midP, std::nullopt, fontList, anchor, angle, justify, placement, true);
+
+                        if (symbolObject) {
+                            symbolObject->setAlpha(alpha);
+                            const auto counts = symbolObject->getInstanceCounts();
+                            if (counts.icons + counts.stretchedIcons + counts.textCharacters != 0) {
+                                symbolObjects.push_back(symbolObject);
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -437,8 +522,9 @@ Tiled2dMapVectorSymbolGroup::createSymbolObject(const Tiled2dMapTileInfo &tileIn
                                                 const Anchor &textAnchor,
                                                 const std::optional<double> &angle,
                                                 const TextJustify &textJustify,
-                                                const TextSymbolPlacement &textSymbolPlacement) {
-    return std::make_shared<Tiled2dMapVectorSymbolObject>(mapInterface, layerConfig, fontProvider, tileInfo, layerIdentifier, description, featureContext, text, fullText, coordinate, lineCoordinates, fontList, textAnchor, angle, textJustify, textSymbolPlacement);
+                                                const TextSymbolPlacement &textSymbolPlacement,
+                                                const bool hideIcon) {
+    return std::make_shared<Tiled2dMapVectorSymbolObject>(mapInterface, layerConfig, fontProvider, tileInfo, layerIdentifier, description, featureContext, text, fullText, coordinate, lineCoordinates, fontList, textAnchor, angle, textJustify, textSymbolPlacement, hideIcon);
 }
 
 void Tiled2dMapVectorSymbolGroup::collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<std::vector<OBB2D>> placements) {

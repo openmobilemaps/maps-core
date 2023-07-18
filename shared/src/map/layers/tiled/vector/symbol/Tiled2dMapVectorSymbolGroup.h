@@ -74,7 +74,8 @@ private:
                                                                             const Anchor &textAnchor,
                                                                             const std::optional<double> &angle,
                                                                             const TextJustify &textJustify,
-                                                                            const TextSymbolPlacement &textSymbolPlacement);
+                                                                            const TextSymbolPlacement &textSymbolPlacement,
+                                                                            const bool hideIcon);
 
 private:
     std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>> symbolObjects;
