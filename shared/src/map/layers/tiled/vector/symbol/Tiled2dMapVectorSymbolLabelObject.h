@@ -101,7 +101,6 @@ private:
 
     const std::string fullText;
 
-    bool wasRotated = false;
     size_t renderLineCoordinatesCount;
     std::vector<Coord> renderLineCoordinates;
     std::optional<std::vector<Coord>> lineCoordinates;
