@@ -29,7 +29,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                                                            const Anchor &textAnchor,
                                                            const std::optional<double> &angle,
                                                            const TextJustify &textJustify,
-                                                           const TextSymbolPlacement &textSymbolPlacement) :
+                                                           const TextSymbolPlacement &textSymbolPlacement,
+                                                           const bool hideIcon) :
     description(description), layerConfig(layerConfig), coordinate(coordinate), mapInterface(mapInterface), featureContext(featureContext),
     iconBoundingBox(Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0)),
     stretchIconBoundingBox(Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0)) {
@@ -54,7 +55,7 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     textAllowOverlap = description->style.getTextAllowOverlap(evalContext);
     iconAllowOverlap = description->style.getIconAllowOverlap(evalContext);
 
-    if (hasIcon) {
+    if (hasIcon && !hideIcon) {
         if (description->style.getIconTextFit(evalContext) == IconTextFit::NONE) {
             instanceCounts.icons = 1;
         } else {

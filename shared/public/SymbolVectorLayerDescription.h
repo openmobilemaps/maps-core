@@ -40,6 +40,7 @@ public:
                       std::shared_ptr<Value> textRotate,
                       std::shared_ptr<Value> textAllowOverlap,
                       std::shared_ptr<Value> textRotationAlignment,
+                      std::shared_ptr<Value> textOptional,
                       std::shared_ptr<Value> symbolSortKey,
                       std::shared_ptr<Value> symbolSpacing,
                       std::shared_ptr<Value> symbolPlacement,
@@ -54,6 +55,7 @@ public:
                       std::shared_ptr<Value> iconTextFitPadding,
                       std::shared_ptr<Value> iconOpacity,
                       std::shared_ptr<Value> iconRotate,
+                      std::shared_ptr<Value> iconOptional,
                       std::shared_ptr<Value> textLineHeight,
                       std::shared_ptr<Value> textLetterSpacing,
                       std::shared_ptr<Value> textMaxWidth,
@@ -78,6 +80,7 @@ public:
     textAnchor(textAnchor),
     textJustify(textJustify),
     textVariableAnchor(textVariableAnchor),
+    textOptional(textOptional),
     textRotate(textRotate),
     textOpacity(textOpacity),
     symbolSpacing(symbolSpacing),
@@ -92,6 +95,7 @@ public:
     iconTextFitPadding(iconTextFitPadding),
     iconOpacity(iconOpacity),
     iconRotate(iconRotate),
+    iconOptional(iconOptional),
     textRotationAlignment(textRotationAlignment),
     iconRotationAlignment(iconRotationAlignment),
     blendMode(blendMode),
@@ -107,7 +111,8 @@ public:
             iconAnchor, iconOffset, textAnchor, textVariableAnchor, textRotate, symbolSpacing,
             iconSize, textLineHeight, textLetterSpacing, textAllowOverlap, iconAllowOverlap,
             iconPadding, textOpacity, iconOpacity, iconRotationAlignment, textRotationAlignment,
-            iconTextFit, iconTextFitPadding, textMaxWidth, textMaxAngle, iconRotate, blendMode
+            iconTextFit, iconTextFitPadding, textMaxWidth, textMaxAngle, iconRotate, blendMode,
+            textOptional, iconOptional
         };
 
         for (auto const &value: values) {
@@ -243,6 +248,16 @@ public:
         return iconOffset ? iconOffset->evaluateOr(context, defaultValue) : defaultValue;
     }
 
+    bool getIconOptional(const EvaluationContext &context) {
+        static const bool defaultValue = false;
+        return iconOptional ? iconOptional->evaluateOr(context, defaultValue) : defaultValue;
+    }
+
+    bool getTextOptional(const EvaluationContext &context) {
+        static const bool defaultValue = false;
+        return textOptional ? textOptional->evaluateOr(context, defaultValue) : defaultValue;
+    }
+
     Anchor getTextAnchor(const EvaluationContext &context) {
         static const Anchor defaultValue = Anchor::CENTER;
         return textAnchor ? textAnchor->evaluateOr(context, defaultValue) : defaultValue;
@@ -346,6 +361,7 @@ private:
     std::shared_ptr<Value> textMaxWidth;
     std::shared_ptr<Value> textMaxAngle;
     std::shared_ptr<Value> textOpacity;
+    std::shared_ptr<Value> textOptional;
     std::shared_ptr<Value> symbolSortKey;
     std::shared_ptr<Value> symbolSpacing;
     std::shared_ptr<Value> symbolPlacement;
@@ -359,6 +375,7 @@ private:
     std::shared_ptr<Value> iconTextFitPadding;
     std::shared_ptr<Value> iconOpacity;
     std::shared_ptr<Value> iconRotate;
+    std::shared_ptr<Value> iconOptional;
     std::shared_ptr<Value> textRotationAlignment;
     std::shared_ptr<Value> iconRotationAlignment;
     std::shared_ptr<Value> blendMode;
