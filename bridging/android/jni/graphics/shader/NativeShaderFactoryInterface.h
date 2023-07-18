@@ -45,6 +45,7 @@ private:
         /*not-null*/ std::shared_ptr<::RasterShaderInterface> createRasterShader() override;
         /*not-null*/ std::shared_ptr<::StretchShaderInterface> createStretchShader() override;
         /*not-null*/ std::shared_ptr<::StretchInstancedShaderInterface> createStretchInstancedShader() override;
+        /*not-null*/ std::shared_ptr<::TextureInterpolationShaderInterface> createTextureInterpolationShader() override;
 
     private:
         friend ::djinni::JniInterface<::ShaderFactoryInterface, ::djinni_generated::NativeShaderFactoryInterface>;
@@ -63,6 +64,7 @@ private:
     const jmethodID method_createRasterShader { ::djinni::jniGetMethodID(clazz.get(), "createRasterShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/RasterShaderInterface;") };
     const jmethodID method_createStretchShader { ::djinni::jniGetMethodID(clazz.get(), "createStretchShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/StretchShaderInterface;") };
     const jmethodID method_createStretchInstancedShader { ::djinni::jniGetMethodID(clazz.get(), "createStretchInstancedShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/StretchInstancedShaderInterface;") };
+    const jmethodID method_createTextureInterpolationShader { ::djinni::jniGetMethodID(clazz.get(), "createTextureInterpolationShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/TextureInterpolationShaderInterface;") };
 };
 
 } // namespace djinni_generated

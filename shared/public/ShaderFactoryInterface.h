@@ -17,6 +17,7 @@ class StretchInstancedShaderInterface;
 class StretchShaderInterface;
 class TextInstancedShaderInterface;
 class TextShaderInterface;
+class TextureInterpolationShaderInterface;
 
 class ShaderFactoryInterface {
 public:
@@ -45,4 +46,6 @@ public:
     virtual /*not-null*/ std::shared_ptr<StretchShaderInterface> createStretchShader() = 0;
 
     virtual /*not-null*/ std::shared_ptr<StretchInstancedShaderInterface> createStretchInstancedShader() = 0;
+
+    virtual /*not-null*/ std::shared_ptr<TextureInterpolationShaderInterface> createTextureInterpolationShader() = 0;
 };

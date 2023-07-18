@@ -18,6 +18,7 @@
 #import "MCStretchShaderInterface+Private.h"
 #import "MCTextInstancedShaderInterface+Private.h"
 #import "MCTextShaderInterface+Private.h"
+#import "MCTextureInterpolationShaderInterface+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -126,6 +127,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable id<MCTextureInterpolationShaderInterface>)createTextureInterpolationShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createTextureInterpolationShader();
+        return ::djinni_generated::TextureInterpolationShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class ShaderFactoryInterface::ObjcProxy final
@@ -217,6 +225,13 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createStretchInstancedShader];
             return ::djinni_generated::StretchInstancedShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::TextureInterpolationShaderInterface> createTextureInterpolationShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createTextureInterpolationShader];
+            return ::djinni_generated::TextureInterpolationShaderInterface::toCpp(objcpp_result_);
         }
     }
 };

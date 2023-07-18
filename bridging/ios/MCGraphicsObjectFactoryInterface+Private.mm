@@ -12,6 +12,7 @@
 #import "MCPolygonPatternGroup2dInterface+Private.h"
 #import "MCQuad2dInstancedInterface+Private.h"
 #import "MCQuad2dInterface+Private.h"
+#import "MCQuad2dInterpolatedInterface+Private.h"
 #import "MCQuad2dStretchedInstancedInterface+Private.h"
 #import "MCShaderProgramInterface+Private.h"
 #import "MCTextInstancedInterface+Private.h"
@@ -65,6 +66,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createQuadStretchedInstanced(::djinni_generated::ShaderProgramInterface::toCpp(shader));
         return ::djinni_generated::Quad2dStretchedInstancedInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCQuad2dInterpolatedInterface>)createQuadInterpolated:(nullable id<MCShaderProgramInterface>)shader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createQuadInterpolated(::djinni_generated::ShaderProgramInterface::toCpp(shader));
+        return ::djinni_generated::Quad2dInterpolatedInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -152,6 +160,13 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createQuadStretchedInstanced:(::djinni_generated::ShaderProgramInterface::fromCpp(c_shader))];
             return ::djinni_generated::Quad2dStretchedInstancedInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::Quad2dInterpolatedInterface> createQuadInterpolated(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & c_shader) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createQuadInterpolated:(::djinni_generated::ShaderProgramInterface::fromCpp(c_shader))];
+            return ::djinni_generated::Quad2dInterpolatedInterface::toCpp(objcpp_result_);
         }
     }
     /*not-null*/ std::shared_ptr<::LineGroup2dInterface> createLineGroup(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & c_shader) override

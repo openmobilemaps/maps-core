@@ -14,6 +14,7 @@
 @protocol MCStretchShaderInterface;
 @protocol MCTextInstancedShaderInterface;
 @protocol MCTextShaderInterface;
+@protocol MCTextureInterpolationShaderInterface;
 
 
 @protocol MCShaderFactoryInterface
@@ -41,5 +42,7 @@
 - (nullable id<MCStretchShaderInterface>)createStretchShader;
 
 - (nullable id<MCStretchInstancedShaderInterface>)createStretchInstancedShader;
+
+- (nullable id<MCTextureInterpolationShaderInterface>)createTextureInterpolationShader;
 
 @end

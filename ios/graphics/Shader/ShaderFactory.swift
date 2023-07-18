@@ -12,6 +12,10 @@ import Foundation
 import MapCoreSharedModule
 
 class ShaderFactory: MCShaderFactoryInterface {
+    func createTextureInterpolationShader() -> MCTextureInterpolationShaderInterface? {
+        TextureInterpolationShader()
+    }
+    
     func createTextShader() -> MCTextShaderInterface? {
         TextShader()
     }

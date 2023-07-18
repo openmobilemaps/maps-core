@@ -31,6 +31,7 @@ graphics_object_factory_interface = interface +c +j +o {
 
     create_quad_instanced(shader: shader_program_interface): quad_2d_instanced_interface;
     create_quad_stretched_instanced(shader: shader_program_interface): quad_2d_stretched_instanced_interface;
+    create_quad_interpolated(shader: shader_program_interface): quad_2d_interpolated_interface;
     create_line_group(shader: shader_program_interface): line_group_2d_interface;
     create_polygon_group(shader: shader_program_interface): polygon_group_2d_interface;
     create_polygon_pattern_group(shader: shader_program_interface): polygon_pattern_group_2d_interface;
@@ -69,7 +70,7 @@ quad_2d_instanced_interface = interface +c +j +o {
     as_masking_object(): masking_object_interface;
 }
 
-    quad_2d_stretched_instanced_interface = interface +c +j +o {
+quad_2d_stretched_instanced_interface = interface +c +j +o {
     set_frame(frame: quad_2d_d);
 
     set_instance_count(count: i32);
@@ -98,6 +99,15 @@ quad_2d_instanced_interface = interface +c +j +o {
     load_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
     remove_texture();
 
+    as_graphics_object(): graphics_object_interface;
+    as_masking_object(): masking_object_interface;
+}
+
+quad_2d_interpolated_interface = interface +c +j +o {
+    set_frame(frame: quad_2d_d, texture_coordinates: rect_d);
+    load_textures(context: rendering_context_interface, texture_holder_1: texture_holder_interface, texture_holder_2: texture_holder_interface);
+    load_color_legend_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
+    remove_textures();
     as_graphics_object(): graphics_object_interface;
     as_masking_object(): masking_object_interface;
 }

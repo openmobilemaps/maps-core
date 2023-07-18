@@ -5,6 +5,7 @@
 @extern "../../yaml/rect_d.yaml"
 @extern "../../yaml/shared_bytes.yaml"
 @extern "../../yaml/color.yaml"
+@extern "../../yaml/texture_holder_interface.yaml"
 
 blend_mode = enum {
     normal;
@@ -34,6 +35,8 @@ shader_factory_interface = interface +c +j +o {
     create_stretch_shader(): stretch_shader_interface;
 
     create_stretch_instanced_shader(): stretch_instanced_shader_interface;
+    
+    create_texture_interpolation_shader(): texture_interpolation_shader_interface;
 }
 
 raster_shader_style = record {
@@ -131,4 +134,9 @@ text_shader_interface = interface +c +o {
 
 text_instanced_shader_interface = interface +c +o {
     as_shader_program_interface() : shader_program_interface;
+}
+
+texture_interpolation_shader_interface = interface +c +o {
+    set_interpolation_factor(interpolation: f32);
+    as_shader_program_interface(): shader_program_interface;
 }

@@ -12,6 +12,11 @@ import Foundation
 import MapCoreSharedModule
 
 class GraphicsFactory: MCGraphicsObjectFactoryInterface {
+    func createQuadInterpolated(_ shader: MCShaderProgramInterface?) -> MCQuad2dInterpolatedInterface? {
+        guard let shader else { fatalError("No Shader provided") }
+        return Quad2dInterpolated(shader: shader, metalContext: .current)
+    }
+    
     func createPolygonGroup(_ shader: MCShaderProgramInterface?) -> MCPolygonGroup2dInterface? {
         guard let shader else { fatalError("No Shader provided") }
         return PolygonGroup2d(shader: shader, metalContext: .current)

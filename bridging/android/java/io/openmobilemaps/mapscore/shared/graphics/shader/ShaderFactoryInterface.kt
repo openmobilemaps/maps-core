@@ -32,6 +32,8 @@ abstract class ShaderFactoryInterface {
 
     abstract fun createStretchInstancedShader(): StretchInstancedShaderInterface
 
+    abstract fun createTextureInterpolationShader(): TextureInterpolationShaderInterface
+
     private class CppProxy : ShaderFactoryInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -115,5 +117,11 @@ abstract class ShaderFactoryInterface {
             return native_createStretchInstancedShader(this.nativeRef)
         }
         private external fun native_createStretchInstancedShader(_nativeRef: Long): StretchInstancedShaderInterface
+
+        override fun createTextureInterpolationShader(): TextureInterpolationShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createTextureInterpolationShader(this.nativeRef)
+        }
+        private external fun native_createTextureInterpolationShader(_nativeRef: Long): TextureInterpolationShaderInterface
     }
 }
