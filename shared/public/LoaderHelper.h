@@ -57,7 +57,7 @@ private:
         if (loaderIndex >= loaders.size()) {
             promise->setValue(std::move(TextureLoaderResult(nullptr, std::nullopt, LoaderStatus::NOOP, std::nullopt)));
         } else {
-            loaders.at(loaderIndex)->loadTextureAsnyc(url, etag).then([&url, &etag, &loaders, loaderIndex, promise](::djinni::Future<::TextureLoaderResult> result) {
+            loaders.at(loaderIndex)->loadTextureAsnyc(url, etag).then([url, etag, &loaders, loaderIndex, promise](::djinni::Future<::TextureLoaderResult> result) {
                 const auto textureResult = result.get();
                 if (textureResult.status != LoaderStatus::NOOP || loaderIndex == loaders.size() - 1) {
                     promise->setValue(std::move(textureResult));
