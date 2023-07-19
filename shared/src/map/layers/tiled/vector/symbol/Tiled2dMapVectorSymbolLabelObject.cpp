@@ -208,18 +208,18 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
         case TextSymbolPlacement::LINE: {
 
             if (rotationAlignment == SymbolAlignment::VIEWPORT) {
-                updatePropertiesPoint(positions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, rotation);
+                updatePropertiesPoint(positions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor,
+                                      rotation);
             } else {
-                auto rotatedFactor = updatePropertiesLine(positions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, rotation);
-
-                if(rotatedFactor > 0.5 && lineCoordinates && !wasRotated) {
+                auto rotatedFactor = updatePropertiesLine(positions, scales, rotations, styles, countOffset, styleOffset,
+                                                          zoomIdentifier, scaleFactor, rotation);
+                if(rotatedFactor > 0.5 && lineCoordinates) {
                     std::reverse((*lineCoordinates).begin(), (*lineCoordinates).end());
                     std::reverse(renderLineCoordinates.begin(), renderLineCoordinates.end());
 
                     countOffset -= characterCount;
 
                     updatePropertiesLine(positions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, rotation);
-                    wasRotated = true;
                 }
             }
 
@@ -456,8 +456,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
 
     currentIndex = indexAtDistance(currentIndex, -size * 0.5);
 
-    int total = 0;
-    int rotated = 0;
+    double averageAngle = 0.0;
 
     int index = 0;
     double lastAngle = 0.0;
@@ -500,8 +499,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             auto x = p.x + bearing.x;
             auto y = p.y - bearing.y;
 
-            rotated += (angle > 90 || angle < -90) ? 1 : 0;
-            total++;
+            averageAngle += std::fmod(angle + 360.0, 360.0) / splittedTextInfo.size();
 
             auto xw = x + charSize.x;
             auto yh = y + charSize.y;
@@ -592,7 +590,13 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
         boundingBox.bottomLeft = Vec2D(0.0, 0.0);
     }
 
-    return (double)rotated / (double)total;
+    double recompRotation = fmod(-rotation + 360.0, 360.0);
+    double diff = std::min(std::abs(averageAngle - recompRotation),
+                          std::abs(averageAngle + 360.0 - recompRotation));
+    double averageAngleFlipped = fmod(averageAngle + 180.0, 360.0);
+    double diffFlipped = std::min(std::abs(averageAngleFlipped - recompRotation),
+                                 std::abs(averageAngleFlipped + 360.0 - recompRotation));
+    return diff > (diffFlipped + 10.0) ? 1.0 : 0.0;
 }
 
 std::pair<int, double> Tiled2dMapVectorSymbolLabelObject::findReferencePointIndices() {
