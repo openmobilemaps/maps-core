@@ -42,7 +42,7 @@ final class Quad2dInterpolated: BaseGraphicsObject {
         self.label = label
         self.shader = shader
         super.init(device: metalContext.device,
-                   sampler: metalContext.samplerLibrary.value(Sampler.magNearest.rawValue))
+                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue))
     }
 
     private func setupStencilStates() {
