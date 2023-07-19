@@ -252,7 +252,12 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
     } else {
         angle = description->style.getTextRotate(evalContext) - rotation;
     }
-    
+
+
+    Vec2D anchorOffset(0.0, 0.0);
+
+    std::vector<double> baseLines;
+
     for(const auto &i : splittedTextInfo) {
         if(i.glyphIndex >= 0) {
             auto &d = fontResult->fontData->glyphs[i.glyphIndex];
@@ -272,12 +277,21 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
                     box = BoundingBox(referencePoint.systemIdentifier);
                     centerPosBox = BoundingBox(referencePoint.systemIdentifier);
                 }
-                
+
+                baseLines.push_back(yh);
+
                 box->addPoint(quad.topLeft.x, quad.topLeft.y, referencePoint.z);
                 box->addPoint(quad.topRight.x, quad.topRight.y, referencePoint.z);
                 box->addPoint(quad.bottomLeft.x, quad.bottomLeft.y, referencePoint.z);
                 box->addPoint(quad.bottomRight.x, quad.bottomRight.y, referencePoint.z);
-                
+
+                if (pen.x == 0.0 && pen.y == 0.0) {
+                    // only look at first character for offset
+                    // this way the left top edge of the first character is exactly in the origin.
+                    anchorOffset.x = -box->min.x;
+                    anchorOffset.y = -box->min.y;
+                }
+
                 scales[2 * (countOffset + centerPositions.size()) + 0] = size.x;
                 scales[2 * (countOffset + centerPositions.size()) + 1] = size.y;
                 rotations[countOffset + centerPositions.size()] = -angle;
@@ -294,18 +308,26 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
             lineEndIndices.push_back(centerPositions.size() - 1);
             pen.x = 0.0;
             pen.y += fontSize;
+
+            baseLines.clear();
         }
     }
-    
+
+    // Use the median base line of the last line for size calculations
+    // This way labels with decent look better placed.
+    std::sort(baseLines.begin(), baseLines.end());
+    double medianLastBaseLine = box->max.y;
+
+    if (baseLines.size() % 2 == 0) {
+        medianLastBaseLine = (baseLines[baseLines.size() / 2 - 1] + baseLines[baseLines.size() / 2]) / 2;
+    } else {
+        medianLastBaseLine = baseLines[baseLines.size() / 2];
+    }
+
     lineEndIndices.push_back(centerPositions.size() - 1);
 
-    Vec2D min(box->min.x, box->min.y);
-    Vec2D max(box->max.x, box->max.y);
-    Vec2D size((max.x - min.x), (max.y - min.y));
-
-    Vec2D centerMin(centerPosBox->min.x, centerPosBox->min.y);
-    Vec2D centerMax(centerPosBox->max.x, centerPosBox->max.y);
-    Vec2D centerSize((centerMax.x - centerMin.x), (centerMax.y - centerMin.y));
+    const Vec2D size((box->max.x - box->min.x), (medianLastBaseLine - box->min.y));
+    const Vec2D centerSize((centerPosBox->max.x - centerPosBox->min.x), (centerPosBox->max.y - centerPosBox->min.y));
 
     switch (textJustify) {
         case TextJustify::AUTO:
@@ -316,7 +338,6 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
         case TextJustify::RIGHT:
         case TextJustify::CENTER: {
             size_t lineStart = 0;
-
             for (auto const lineEndIndex: lineEndIndices) {
                 double lineWidth = centerPositions[lineEndIndex].x - centerPositions[lineStart].x;
                 auto factor = textJustify == TextJustify::CENTER ? 2.0 : 1.0;
@@ -328,16 +349,11 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
                 lineStart = lineEndIndex + 1;
             }
-
             break;
         }
     }
 
-    double offsetMultiplier = fontSize;
-
-    Vec2D textOffset(offset.x * offsetMultiplier, offset.y * offsetMultiplier);
-
-    Vec2D anchorOffset(-min.x, -min.y);
+    const Vec2D textOffset(offset.x * fontSize, offset.y * fontSize);
 
     switch (textAnchor) {
         case Anchor::CENTER:
@@ -384,8 +400,8 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
     anchorOffset = Vec2DHelper::rotate(anchorOffset, Vec2D(0, 0), angle);
 
-    auto dx = referencePoint.x + anchorOffset.x;
-    auto dy = referencePoint.y + anchorOffset.y;
+    const auto dx = referencePoint.x + anchorOffset.x;
+    const auto dy = referencePoint.y + anchorOffset.y;
 
     assert(centerPositions.size() == characterCount);
 
