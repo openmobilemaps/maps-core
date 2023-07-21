@@ -472,7 +472,9 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
 
     currentIndex = indexAtDistance(currentIndex, -size * 0.5);
 
-    double averageAngle = 0.0;
+    double averageAngleS = 0.0;
+    double averageAngleC = 0.0;
+    int numSymbols = splittedTextInfo.size();
 
     int index = 0;
     double lastAngle = 0.0;
@@ -497,11 +499,11 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             const auto &before = pointAtIndex(indexAtDistance(currentIndex, -charSize.x * 0.5), false);
             const auto &after = pointAtIndex(indexAtDistance(currentIndex, charSize.x * 0.5), false);
 
-            double angle = atan2((before.y - after.y), -(before.x - after.x));
-            angle *= (180.0 / M_PI);
+            double angleRad = atan2((before.y - after.y), -(before.x - after.x));
+            double angleDeg = angleRad * (180.0 / M_PI);
 
             if(index > 1) {
-                auto diff = fabs(lastAngle - angle);
+                auto diff = fabs(lastAngle - angleDeg);
                 auto min = std::min(360.0 - diff, diff);
 
                 if(min > maxCharacterAngle) {
@@ -510,12 +512,13 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
                 }
             }
 
-            lastAngle = angle;
+            lastAngle = angleDeg;
 
             auto x = p.x + bearing.x;
             auto y = p.y - bearing.y;
 
-            averageAngle += std::fmod(angle + 360.0, 360.0) / splittedTextInfo.size();
+            averageAngleS += sin(angleRad) / numSymbols;
+            averageAngleC += cos(angleRad) / numSymbols;
 
             auto xw = x + charSize.x;
             auto yh = y + charSize.y;
@@ -535,7 +538,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             auto br = Vec2D(xw, y);
 
             Quad2dD quad = Quad2dD(tl, tr, br, bl);
-            quad = TextHelper::rotateQuad2d(quad, p, angle);
+            quad = TextHelper::rotateQuad2d(quad, p, angleDeg);
 
             auto dy = Vec2DHelper::normalize(Vec2D(quad.bottomLeft.x - quad.topLeft.x, quad.bottomLeft.y - quad.topLeft.y));
             dy.x *= lineCenteringParameter * fontSize;
@@ -549,7 +552,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             if (d.charCode != " ") {
                 scales[2 * (countOffset + centerPositions.size()) + 0] = charSize.x;
                 scales[2 * (countOffset + centerPositions.size()) + 1] = charSize.y;
-                rotations[countOffset + centerPositions.size()] = -angle;
+                rotations[countOffset + centerPositions.size()] = -angleDeg;
 
                 centerPositions.push_back(OBB2D(quad).getCenter());
             }
@@ -607,12 +610,11 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
     }
 
     double recompRotation = fmod(-rotation + 360.0, 360.0);
-    double diff = std::min(std::abs(averageAngle - recompRotation),
-                          std::abs(averageAngle + 360.0 - recompRotation));
-    double averageAngleFlipped = fmod(averageAngle + 180.0, 360.0);
-    double diffFlipped = std::min(std::abs(averageAngleFlipped - recompRotation),
-                                 std::abs(averageAngleFlipped + 360.0 - recompRotation));
-    return diff > (diffFlipped + 10.0) ? 1.0 : 0.0;
+    double averageAngle = fmod(atan2(averageAngleS, averageAngleC) * 180.0 / M_PI + 360.0, 360.0);
+    double diff = std::min(std::min(std::abs(averageAngle - recompRotation),
+                          std::abs(averageAngle + 360.0 - recompRotation)),
+                          std::abs(averageAngle - (recompRotation + 360.0)));
+    return diff > 95.0 ? 1.0 : 0.0; // flip with margin to prevent rapid flips
 }
 
 std::pair<int, double> Tiled2dMapVectorSymbolLabelObject::findReferencePointIndices() {
