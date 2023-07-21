@@ -238,10 +238,6 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
 
     for (const auto &removedTile : toRemove) {
         gpc_free_polygon(&currentTiles.at(removedTile).tilePolygon);
-        auto tileIt = currentTiles.find(removedTile);
-        if (tileIt != currentTiles.end()) {
-            tileCache.store(removedTile, tileIt->second.result);
-        }
         currentTiles.erase(removedTile);
         currentlyLoading.erase(removedTile);
 
@@ -317,38 +313,36 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(Tiled2dMapTileInfo tile, size
     std::weak_ptr<Tiled2dMapSource> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this());
     auto weakActor = WeakActor<Tiled2dMapSource>(mailbox, std::static_pointer_cast<Tiled2dMapSource>(shared_from_this()));
 
-    auto cacheResult = tileCache.get(tile);
-    if (cacheResult) {
-        weakActor.message(&Tiled2dMapSource::didLoad, tile, loaderIndex, *cacheResult);
-    } else {
-        currentlyLoading.insert({tile, loaderIndex});
-        readyTiles.erase(tile);
+    currentlyLoading.insert({tile, loaderIndex});
+    readyTiles.erase(tile);
 
-        loadDataAsync(tile, loaderIndex).then([weakActor, loaderIndex, tile, weakSelfPtr](::djinni::Future<L> result) {
+    loadDataAsync(tile, loaderIndex).then([weakActor, loaderIndex, tile, weakSelfPtr](::djinni::Future<L> result) {
 
-            auto strongSelf = weakSelfPtr.lock();
-            if (strongSelf) {
-                auto res = result.get();
-                if (res.status == LoaderStatus::OK) {
-                    if (strongSelf->hasExpensivePostLoadingTask()) {
-                        auto strongScheduler = strongSelf->scheduler.lock();
-                        if (strongScheduler) {
-                            strongScheduler->addTask(std::make_shared<LambdaTask>(TaskConfig("postLoadingTask", 0.0, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION), [tile, loaderIndex, weakSelfPtr, weakActor, res] {
-                                auto strongSelf = weakSelfPtr.lock();
-                                if (strongSelf) {
-                                    weakActor.message(&Tiled2dMapSource::didLoad, tile, loaderIndex,strongSelf->postLoadingTask(res, tile));
-                                }
-                            }));
-                        }
-                    } else {
-                        weakActor.message(&Tiled2dMapSource::didLoad, tile, loaderIndex,strongSelf->postLoadingTask(res, tile));
+        auto strongSelf = weakSelfPtr.lock();
+        if (strongSelf) {
+            auto res = result.get();
+            if (res.status == LoaderStatus::OK) {
+                if (strongSelf->hasExpensivePostLoadingTask()) {
+                    auto strongScheduler = strongSelf->scheduler.lock();
+                    if (strongScheduler) {
+                        strongScheduler->addTask(std::make_shared<LambdaTask>(
+                                TaskConfig("postLoadingTask", 0.0, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
+                                [tile, loaderIndex, weakSelfPtr, weakActor, res] {
+                                    auto strongSelf = weakSelfPtr.lock();
+                                    if (strongSelf) {
+                                        weakActor.message(&Tiled2dMapSource::didLoad, tile, loaderIndex,
+                                                          strongSelf->postLoadingTask(res, tile));
+                                    }
+                                }));
                     }
                 } else {
-                    weakActor.message(&Tiled2dMapSource::didFailToLoad, tile, loaderIndex, res.status, res.errorCode);
+                    weakActor.message(&Tiled2dMapSource::didLoad, tile, loaderIndex, strongSelf->postLoadingTask(res, tile));
                 }
+            } else {
+                weakActor.message(&Tiled2dMapSource::didFailToLoad, tile, loaderIndex, res.status, res.errorCode);
             }
-        });
-    }
+        }
+    });
 }
 
 template<class T, class L, class R>
