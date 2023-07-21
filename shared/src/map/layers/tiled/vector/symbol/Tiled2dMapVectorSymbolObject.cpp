@@ -273,10 +273,11 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
 
     const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
 
-    if (iconRotationAlignment == SymbolAlignment::VIEWPORT || description->style.getTextSymbolPlacement(evalContext) == TextSymbolPlacement::POINT) {
-        rotations[countOffset] = rotation;
-    } else {
-        rotations[countOffset] = -description->style.getIconRotate(evalContext);;
+    rotations[countOffset] = -description->style.getIconRotate(evalContext);
+
+    if (iconRotationAlignment == SymbolAlignment::VIEWPORT ||
+        (iconRotationAlignment == SymbolAlignment::AUTO && description->style.getTextSymbolPlacement(evalContext) == TextSymbolPlacement::POINT)) {
+        rotations[countOffset] += rotation;
     }
 
     auto iconSize = description->style.getIconSize(evalContext) * scaleFactor;
