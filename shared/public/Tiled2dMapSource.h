@@ -34,7 +34,6 @@
 #include "Actor.h"
 #include "Future.hpp"
 #include "LoaderStatus.h"
-#include "LRUCache.h"
 #include "TileState.h"
 
 template<class R>
@@ -129,8 +128,6 @@ public:
     std::optional<int32_t> maxZoomLevelIdentifier;
 
     std::map<Tiled2dMapTileInfo, TileWrapper<R>> currentTiles;
-
-    LRUCache<Tiled2dMapTileInfo, R> tileCache { 32 };
 
     int currentZoomLevelIdentifier = 0;
 
