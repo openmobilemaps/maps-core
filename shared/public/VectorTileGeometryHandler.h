@@ -14,7 +14,26 @@
 #include "RectCoord.h"
 #include "Tiled2dMapVectorSettings.h"
 #include "vtzero/geometry.hpp"
+#include "earcut.hpp"
 #include "Logger.h"
+
+namespace mapbox {
+    namespace util {
+        template <>
+        struct nth<0, vtzero::point> {
+            inline static auto get(const vtzero::point &t) {
+                return t.x;
+            };
+        };
+        template <>
+        struct nth<1, vtzero::point> {
+            inline static auto get(const vtzero::point &t) {
+                return t.y;
+            };
+        };
+    } // namespace util
+} // namespace mapbox
+
 
 class VectorTileGeometryHandler {
 public:
@@ -56,29 +75,70 @@ public:
     void ring_begin(uint32_t count) {
         currentFeature = std::vector<::Coord>();
         currentFeature.reserve(count);
+
+        polygonCurrentRing = std::vector<vtzero::point>();
+        polygonCurrentRing.reserve(count);
     }
 
     void ring_point(vtzero::point point) noexcept {
         currentFeature.emplace_back(coordinateFromPoint(point));
+
+        polygonCurrentRing.emplace_back(point);
     }
 
     void ring_end(vtzero::ring_type ringType) noexcept {
-        if (!currentFeature.empty()) {
+        if (!polygonCurrentRing.empty()) {
             currentFeature.push_back(currentFeature[0]);
+
+            polygonCurrentRing.push_back(polygonCurrentRing[0]);
 
             switch (ringType) {
                 case vtzero::ring_type::outer:
                     coordinates.push_back(currentFeature);
                     holes.push_back(std::vector<std::vector<::Coord>>());
+
+                    polygonPoints.push_back(polygonCurrentRing);
+                    polygonHoles.push_back(std::vector<std::vector<vtzero::point>>());
                     break;
                 case vtzero::ring_type::inner:
                     holes.back().push_back(currentFeature);
+
+                    polygonHoles.back().push_back(polygonCurrentRing);
                     break;
                 case vtzero::ring_type::invalid:
                     currentFeature.clear();
+
+                    polygonCurrentRing.clear();
                     break;
             }
             currentFeature.clear();
+            
+            polygonCurrentRing.clear();
+        }
+    }
+
+    void triangulatePolygons() {
+        if (polygonPoints.empty()) {
+            return;
+        }
+
+        for (int i = 0; i < polygonPoints.size(); i++) {
+            std::vector<std::vector<vtzero::point>> polygon;
+            polygon.push_back(polygonPoints[i]);
+            for(auto const &hole: polygonHoles[i]) {
+                polygon.push_back(hole);
+            }
+            limitHoles(polygon, 500);
+
+            std::vector<uint16_t> indices = mapbox::earcut<uint16_t>(polygon);
+
+            polygons.push_back({{}, indices});
+
+            for (auto const &points: polygon) {
+                for (auto const &point: points) {
+                    polygons.back().coordinates.push_back(coordinateFromPoint(point));
+                }
+            }
         }
     }
 
@@ -91,26 +151,21 @@ public:
         return std::move(lineCoordinates);
     }
 
-    const std::vector<std::vector<::Coord>> getPolygonCoordinates() const {
-        return coordinates;
-    }
+    struct TriangulatedPolyon {
+        std::vector<Coord> coordinates;
+        std::vector<uint16_t> indices;
+    };
 
-    void limitHoles(uint32_t maxHoles) {
-        for (auto &polygonHoles: holes) {
-            if (polygonHoles.size() > maxHoles) {
-                std::nth_element(polygonHoles.begin(),
-                                 polygonHoles.begin() + maxHoles,
-                                 polygonHoles.end(),
-                                 [](const auto &a, const auto &b) {
-                                     return std::fabs(signedArea(a)) > std::fabs(signedArea(b));
-                                 });
-                polygonHoles.resize(maxHoles);
-            }
-        }
+    const std::vector<TriangulatedPolyon> getPolygons() const {
+        return polygons;
     }
 
     const std::vector<std::vector<std::vector<::Coord>>> getHoleCoordinates() const {
         return holes;
+    }
+
+    const std::vector<std::vector<::Coord>> getPolygonCoordinates() const {
+        return coordinates;
     }
 
     const std::vector<std::vector<::Coord>> getPointCoordinates() const {
@@ -121,6 +176,11 @@ public:
         currentFeature.clear();
         coordinates.clear();
         holes.clear();
+
+        polygons.clear();
+        polygonPoints.clear();
+        polygonHoles.clear();
+        polygonCurrentRing.clear();
     }
 
 private:
@@ -149,20 +209,35 @@ private:
         return Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0);
     }
 
-    static double signedArea(const std::vector<::Coord>& hole) {
+    static double signedArea(const std::vector<vtzero::point>& hole) {
         double sum = 0;
         for (std::size_t i = 0, len = hole.size(), j = len - 1; i < len; j = i++) {
-            const ::Coord& p1 = hole[i];
-            const ::Coord& p2 = hole[j];
+            const auto& p1 = hole[i];
+            const auto& p2 = hole[j];
             sum += (p2.x - p1.x) * (p1.y + p2.y);
         }
         return sum;
     }
 
-private:
+    void limitHoles(std::vector<std::vector<vtzero::point>> &polygon, uint32_t maxHoles) {
+        if (polygon.size() > 1 + maxHoles) {
+             std::nth_element(
+                 polygon.begin() + 1, polygon.begin() + 1 + maxHoles, polygon.end(), [](const auto& a, const auto& b) {
+                     return std::fabs(signedArea(a)) > std::fabs(signedArea(b));
+                 });
+             polygon.resize(1 + maxHoles);
+         }
+    }
+
     std::vector<::Coord> currentFeature;
     std::vector<std::vector<::Coord>> coordinates;
     std::vector<std::vector<std::vector<::Coord>>> holes;
+
+    std::vector<vtzero::point> polygonCurrentRing;
+    std::vector<std::vector<vtzero::point>> polygonPoints;
+    std::vector<std::vector<std::vector<vtzero::point>>> polygonHoles;
+
+    std::vector<TriangulatedPolyon> polygons;
 
     Tiled2dMapVectorTileOrigin origin;
     RectCoord tileCoords;

@@ -20,25 +20,6 @@
 #include "TextureHolderInterface.h"
 #include "Tiled2dMapVectorStyleParser.h"
 
-namespace mapbox {
-    namespace util {
-
-        template <>
-        struct nth<0, ::Coord> {
-            inline static auto get(const ::Coord &t) {
-                return t.x;
-            };
-        };
-        template <>
-        struct nth<1, ::Coord> {
-            inline static auto get(const ::Coord &t) {
-                return t.y;
-            };
-        };
-
-    } // namespace util
-} // namespace mapbox
-
 Tiled2dMapVectorPolygonPatternTile::Tiled2dMapVectorPolygonPatternTile(const std::weak_ptr<MapInterface> &mapInterface,
                                                                        const Tiled2dMapTileInfo &tileInfo,
                                                                        const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
@@ -196,8 +177,6 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
 
             EvaluationContext evalContext = EvaluationContext(tileInfo.zoomIdentifier, featureContext);
             if (description->filter == nullptr || description->filter->evaluateOr(evalContext, true)) {
-                const auto &polygonCoordinates = geometryHandler->getPolygonCoordinates();
-                const auto &polygonHoles = geometryHandler->getHoleCoordinates();
 
                 std::vector<Coord> positions;
 
@@ -233,34 +212,20 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
                     }
                 }
 
-                for (int i = 0; i < polygonCoordinates.size(); i++) {
+                const auto &polygons = geometryHandler->getPolygons();
 
-                    size_t verticesCount = polygonCoordinates[i].size();
+                const auto &polygonCoordinates = geometryHandler->getPolygonCoordinates();
+                const auto &polygonHoles = geometryHandler->getHoleCoordinates();
 
-                    // TODO: Android/iOS currently only supports 16bit indices
+                for (int i = 0; i < polygons.size(); i++) {
+                    const auto &polygon = polygons[i];
+
+                    size_t verticesCount = polygon.coordinates.size();
+
                     // more complex polygons may need to be simplified on-device to render them correctly
                     if (verticesCount >= indicesLimit) {
                         LogError <<= "Too many vertices in a polygon to use 16bit indices: " + std::to_string(verticesCount);
                         continue;
-                    }
-
-                    std::vector<std::vector<::Coord>> pol = { polygonCoordinates[i] };
-
-                    for (auto const &hole: polygonHoles[i]) {
-
-                        if (verticesCount + hole.size() >= indicesLimit) {
-                            LogError <<= "Too many vertices by polygon holes to use 16bit indices - remaining holes are dropped";
-                            break;
-                        }
-
-                        verticesCount += hole.size();
-                        pol.push_back(hole);
-                    }
-
-                    std::vector<uint16_t> new_indices = mapbox::earcut<uint16_t>(pol);
-
-                    for (auto const &coords: pol) {
-                        positions.insert(positions.end(), coords.begin(), coords.end());
                     }
 
                     // check overflow
@@ -272,12 +237,11 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
                         indexOffset = 0;
                     }
 
-                    for (auto const &index: new_indices) {
+                    for (auto const &index: polygon.indices) {
                         styleGroupNewPolygonsMap.at(styleGroupIndex).back().indices.push_back(indexOffset + index);
                     }
 
-                    styleGroupNewPolygonsMap.at(styleGroupIndex).back().vertices.emplace_back(positions, styleIndex);
-                    positions.clear();
+                    styleGroupNewPolygonsMap.at(styleGroupIndex).back().vertices.emplace_back(polygon.coordinates, styleIndex);
 
                     styleIndicesOffsets.at(styleGroupIndex) += verticesCount;
 
