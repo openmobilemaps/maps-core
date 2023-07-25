@@ -111,9 +111,10 @@ public:
 
         for (int i = 0; i < polygonPoints.size(); i++) {
             std::vector<std::vector<vtzero::point>> polygon;
-            polygon.push_back(polygonPoints[i]);
+            polygon.reserve(polygonHoles[i].size() + 1);
+            polygon.emplace_back(std::move(polygonPoints[i]));
             for(auto const &hole: polygonHoles[i]) {
-                polygon.push_back(hole);
+                polygon.emplace_back(std::move(hole));
             }
             limitHoles(polygon, 500);
 
