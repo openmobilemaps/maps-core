@@ -46,6 +46,12 @@ void PolygonGroup2dLayerObject::setVertices(const std::vector<std::tuple<std::ve
     polygon->setVertices(v, i);
 }
 
+void PolygonGroup2dLayerObject::setVertices(const std::vector<float> &verticesBuffer, const std::vector<uint16_t> & indices) {
+    auto i = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(uint16_t));
+    auto v = SharedBytes((int64_t)verticesBuffer.data(), (int32_t)verticesBuffer.size(), (int32_t)sizeof(float));
+    polygon->setVertices(v, i);
+}
+
 void PolygonGroup2dLayerObject::setStyles(const std::vector<PolygonStyle> &styles) {
     std::vector<float> shaderStyles;
 

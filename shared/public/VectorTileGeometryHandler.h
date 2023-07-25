@@ -17,6 +17,7 @@
 #include "earcut.hpp"
 #include "Logger.h"
 #include "CoordinateConversionHelperInterface.h"
+#include "CoordinateSystemIdentifiers.h"
 
 namespace mapbox {
     namespace util {
@@ -38,11 +39,12 @@ namespace mapbox {
 
 class VectorTileGeometryHandler {
 public:
-    VectorTileGeometryHandler(::RectCoord tileCoords, int extent, const std::optional<Tiled2dMapVectorSettings> &vectorSettings)
+    VectorTileGeometryHandler(::RectCoord tileCoords, int extent, const std::optional<Tiled2dMapVectorSettings> &vectorSettings, const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper)
     : tileCoords(tileCoords),
       // use standard TOP_LEFT origin, when no vector settings given.
       origin(vectorSettings ? vectorSettings->tileOrigin : Tiled2dMapVectorTileOrigin::TOP_LEFT),
-      extent((double)extent)
+      extent((double)extent),
+      conversionHelper(conversionHelper)
     {};
 
     VectorTileGeometryHandler(const VectorTileGeometryHandler& other) = delete;
@@ -124,7 +126,7 @@ public:
 
             for (auto const &points: polygon) {
                 for (auto const &point: points) {
-                    polygons.back().coordinates.push_back(coordinateFromPoint(point));
+                    polygons.back().coordinates.push_back(vecFromPoint(point));
                 }
             }
         }
@@ -137,13 +139,18 @@ public:
         std::vector<std::vector<::Coord>> lineCoordinates;
         lineCoordinates.insert(lineCoordinates.end(), coordinates.begin(), coordinates.end());
         for (const auto &polygon : polygons) {
-            lineCoordinates.push_back(polygon.coordinates);
+            if (!polygon.coordinates.empty()) {
+                lineCoordinates.push_back({});
+                for(const auto &coord: polygon.coordinates) {
+                    lineCoordinates.back().push_back(Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), coord.x, coord.y, 0));
+                }
+            }
         }
         return std::move(lineCoordinates);
     }
 
     struct TriangulatedPolygon {
-        std::vector<Coord> coordinates;
+        std::vector<Vec2F> coordinates;
         std::vector<uint16_t> indices;
     };
 
@@ -165,7 +172,7 @@ public:
         polygonCurrentRing.clear();
     }
 
-    static inline double signedTriangleArea(const Coord& a, const Coord& b, const Coord& c) {
+    static inline double signedTriangleArea(const Vec2F& a, const Vec2F& b, const Vec2F& c) {
         return (b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y);
     }
 
@@ -174,19 +181,20 @@ public:
         if (polygon.coordinates.empty()) {
             return false;
         }
-        auto convertedPoint = conversionHelper->convert(polygon.coordinates.begin()->systemIdentifier, point);
+        const auto convertedPoint = conversionHelper->convertToRenderSystem(point);
+        const auto vecPoint = Vec2F(convertedPoint.x, convertedPoint.y);
 
         float d1, d2, d3;
         bool has_neg, has_pos;
 
         for (size_t i = 0; i < polygon.indices.size(); i += 3) {
-            const Coord& v1 = polygon.coordinates[polygon.indices[i]];
-            const Coord& v2 = polygon.coordinates[polygon.indices[i + 1]];
-            const Coord& v3 = polygon.coordinates[polygon.indices[i + 2]];
+            const auto& v1 = polygon.coordinates[polygon.indices[i]];
+            const auto& v2 = polygon.coordinates[polygon.indices[i + 1]];
+            const auto& v3 = polygon.coordinates[polygon.indices[i + 2]];
 
-            d1 = signedTriangleArea(v1, v2, convertedPoint);
-            d2 = signedTriangleArea(v2, v3, convertedPoint);
-            d3 = signedTriangleArea(v3, v1, convertedPoint);
+            d1 = signedTriangleArea(v1, v2, vecPoint);
+            d2 = signedTriangleArea(v2, v3, vecPoint);
+            d3 = signedTriangleArea(v3, v1, vecPoint);
 
             has_neg = (d1 < 0) || (d2 < 0) || (d3 < 0);
             has_pos = (d1 > 0) || (d2 > 0) || (d3 > 0);
@@ -218,11 +226,17 @@ private:
             }
         }
 
-        auto x = tileCoords.topLeft.x * (1.0 - tx) + tileCoords.bottomRight.x * tx;
-        auto y = tileCoords.topLeft.y * (1.0 - ty) + tileCoords.bottomRight.y * ty;
+        const auto x = tileCoords.topLeft.x * (1.0 - tx) + tileCoords.bottomRight.x * tx;
+        const auto y = tileCoords.topLeft.y * (1.0 - ty) + tileCoords.bottomRight.y * ty;
 
-        return Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0);
+        return conversionHelper->convertToRenderSystem(Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0));
     }
+
+    inline Vec2F vecFromPoint(const vtzero::point &point) {
+        const auto coord = coordinateFromPoint(point);
+        return Vec2F(coord.x, coord.y);
+    }
+
 
     static double signedArea(const std::vector<vtzero::point>& hole) {
         double sum = 0;
@@ -256,4 +270,6 @@ private:
     Tiled2dMapVectorTileOrigin origin;
     RectCoord tileCoords;
     double extent;
+
+    const std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
 };

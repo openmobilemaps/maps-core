@@ -48,7 +48,7 @@ public:
 
 private:
     struct ObjectDescriptions {
-        std::vector<std::tuple<std::vector<::Coord>, int>> vertices;
+        std::vector<float> vertices;
         std::vector<uint16_t> indices;
     };
 

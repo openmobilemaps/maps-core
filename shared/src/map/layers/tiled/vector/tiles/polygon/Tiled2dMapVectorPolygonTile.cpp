@@ -219,7 +219,11 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
                         styleGroupNewPolygonsMap.at(styleGroupIndex).back().indices.push_back(indexOffset + index);
                     }
 
-                    styleGroupNewPolygonsMap.at(styleGroupIndex).back().vertices.emplace_back(polygon.coordinates, styleIndex);
+                    for (auto const &coordinate: polygon.coordinates) {
+                        styleGroupNewPolygonsMap.at(styleGroupIndex).back().vertices.push_back(coordinate.x);
+                        styleGroupNewPolygonsMap.at(styleGroupIndex).back().vertices.push_back(coordinate.y);
+                        styleGroupNewPolygonsMap.at(styleGroupIndex).back().vertices.push_back(styleIndex);
+                    }
 
                     styleIndicesOffsets.at(styleGroupIndex) += verticesCount;
 
@@ -324,7 +328,7 @@ bool Tiled2dMapVectorPolygonTile::onClickConfirmed(const Vec2F &posScreen) {
     auto point = camera->coordFromScreenPosition(posScreen);
 
     for (auto const &[polygon, featureContext]: hitDetectionPolygons) {
-        if (VectorTileGeometryHandler::isPointInTriangulatedPolygon(point, polygon, mapInterface->getCoordinateConverterHelper())) {
+        if (VectorTileGeometryHandler::isPointInTriangulatedPolygon(point, polygon, converter)) {
             strongSelectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier,
                                                 converter->convert(CoordinateSystemIdentifiers::EPSG4326(), point));
             return true;

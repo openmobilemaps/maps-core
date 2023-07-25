@@ -58,7 +58,7 @@ Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(con
                 while (const auto &feature = layer.next_feature()) {
                     auto const featureContext = std::make_shared<FeatureContext>(feature);
                     try {
-                        std::shared_ptr<VectorTileGeometryHandler> geometryHandler = std::make_shared<VectorTileGeometryHandler>(tile.bounds, extent, layerConfig->getVectorSettings());
+                        std::shared_ptr<VectorTileGeometryHandler> geometryHandler = std::make_shared<VectorTileGeometryHandler>(tile.bounds, extent, layerConfig->getVectorSettings(), conversionHelper);
                         vtzero::decode_geometry(feature.geometry(), *geometryHandler);
                         geometryHandler->triangulatePolygons();
                         layerFeatureMap->at(sourceLayerName)->push_back({featureContext, geometryHandler});
