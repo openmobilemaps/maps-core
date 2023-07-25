@@ -66,7 +66,7 @@ private:
     bool isStyleZoomDependant = true;
     std::optional<double> lastZoom = std::nullopt;
 
-    std::vector<std::tuple<PolygonCoord, std::shared_ptr<FeatureContext>>> hitDetectionPolygons;
+    std::vector<std::tuple<VectorTileGeometryHandler::TriangulatedPolygon, std::shared_ptr<FeatureContext>>> hitDetectionPolygons;
 
     std::vector<std::shared_ptr<PolygonGroup2dLayerObject>> toClear;
 };

@@ -195,9 +195,6 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
                 }
                 const auto &polygons = geometryHandler->getPolygons();
 
-                const auto &polygonCoordinates = geometryHandler->getPolygonCoordinates();
-                const auto &polygonHoles = geometryHandler->getHoleCoordinates();
-
                 for (int i = 0; i < polygons.size(); i++) {
                     const auto &polygon = polygons[i];
 
@@ -229,7 +226,7 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
                     bool interactable = description->isInteractable(evalContext);
                     if (interactable) {
                         anyInteractable = true;
-                        hitDetectionPolygons.emplace_back(PolygonCoord(polygonCoordinates[i], polygonHoles[i]), featureContext);
+                        hitDetectionPolygons.emplace_back(polygon, featureContext);
                     }
                 }
             }
@@ -327,7 +324,7 @@ bool Tiled2dMapVectorPolygonTile::onClickConfirmed(const Vec2F &posScreen) {
     auto point = camera->coordFromScreenPosition(posScreen);
 
     for (auto const &[polygon, featureContext]: hitDetectionPolygons) {
-        if (PolygonHelper::pointInside(polygon, point, mapInterface->getCoordinateConverterHelper())) {
+        if (VectorTileGeometryHandler::isPointInTriangulatedPolygon(point, polygon, mapInterface->getCoordinateConverterHelper())) {
             strongSelectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier,
                                                 converter->convert(CoordinateSystemIdentifiers::EPSG4326(), point));
             return true;

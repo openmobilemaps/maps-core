@@ -78,7 +78,7 @@ private:
     std::vector<std::vector<float>> opacities;
     std::vector<std::vector<float>> textureCoordinates;
 
-    std::vector<std::tuple<PolygonCoord, std::shared_ptr<FeatureContext>>> hitDetectionPolygons;
+    std::vector<std::tuple<VectorTileGeometryHandler::TriangulatedPolygon, std::shared_ptr<FeatureContext>>> hitDetectionPolygons;
 
     std::vector<std::shared_ptr<PolygonPatternGroup2dLayerObject>> toClear;
 };

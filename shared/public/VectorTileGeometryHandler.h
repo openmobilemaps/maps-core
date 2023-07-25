@@ -16,6 +16,7 @@
 #include "vtzero/geometry.hpp"
 #include "earcut.hpp"
 #include "Logger.h"
+#include "CoordinateConversionHelperInterface.h"
 
 namespace mapbox {
     namespace util {
@@ -43,6 +44,8 @@ public:
       origin(vectorSettings ? vectorSettings->tileOrigin : Tiled2dMapVectorTileOrigin::TOP_LEFT),
       extent((double)extent)
     {};
+
+    VectorTileGeometryHandler(const VectorTileGeometryHandler& other) = delete;
 
     void points_begin(const uint32_t count) {
         currentFeature = std::vector<::Coord>();
@@ -73,46 +76,30 @@ public:
     }
 
     void ring_begin(uint32_t count) {
-        currentFeature = std::vector<::Coord>();
-        currentFeature.reserve(count);
-
         polygonCurrentRing = std::vector<vtzero::point>();
         polygonCurrentRing.reserve(count);
     }
 
     void ring_point(vtzero::point point) noexcept {
-        currentFeature.emplace_back(coordinateFromPoint(point));
-
         polygonCurrentRing.emplace_back(point);
     }
 
     void ring_end(vtzero::ring_type ringType) noexcept {
         if (!polygonCurrentRing.empty()) {
-            currentFeature.push_back(currentFeature[0]);
-
             polygonCurrentRing.push_back(polygonCurrentRing[0]);
 
             switch (ringType) {
                 case vtzero::ring_type::outer:
-                    coordinates.push_back(currentFeature);
-                    holes.push_back(std::vector<std::vector<::Coord>>());
-
                     polygonPoints.push_back(polygonCurrentRing);
                     polygonHoles.push_back(std::vector<std::vector<vtzero::point>>());
                     break;
                 case vtzero::ring_type::inner:
-                    holes.back().push_back(currentFeature);
-
                     polygonHoles.back().push_back(polygonCurrentRing);
                     break;
                 case vtzero::ring_type::invalid:
-                    currentFeature.clear();
-
                     polygonCurrentRing.clear();
                     break;
             }
-            currentFeature.clear();
-            
             polygonCurrentRing.clear();
         }
     }
@@ -140,32 +127,27 @@ public:
                 }
             }
         }
+
+        polygonHoles.clear();
+        polygonPoints.clear();
     }
 
     std::vector<std::vector<::Coord>> getLineCoordinates() const {
         std::vector<std::vector<::Coord>> lineCoordinates;
         lineCoordinates.insert(lineCoordinates.end(), coordinates.begin(), coordinates.end());
-        for (const auto &hole : holes) {
-            lineCoordinates.insert(lineCoordinates.end(), hole.begin(), hole.end());
+        for (const auto &polygon : polygons) {
+            lineCoordinates.push_back(polygon.coordinates);
         }
         return std::move(lineCoordinates);
     }
 
-    struct TriangulatedPolyon {
+    struct TriangulatedPolygon {
         std::vector<Coord> coordinates;
         std::vector<uint16_t> indices;
     };
 
-    const std::vector<TriangulatedPolyon> getPolygons() const {
+    const std::vector<TriangulatedPolygon> getPolygons() const {
         return polygons;
-    }
-
-    const std::vector<std::vector<std::vector<::Coord>>> getHoleCoordinates() const {
-        return holes;
-    }
-
-    const std::vector<std::vector<::Coord>> getPolygonCoordinates() const {
-        return coordinates;
     }
 
     const std::vector<std::vector<::Coord>> getPointCoordinates() const {
@@ -175,12 +157,44 @@ public:
     void reset() {
         currentFeature.clear();
         coordinates.clear();
-        holes.clear();
 
         polygons.clear();
         polygonPoints.clear();
         polygonHoles.clear();
         polygonCurrentRing.clear();
+    }
+
+    static inline double signedTriangleArea(const Coord& a, const Coord& b, const Coord& c) {
+        return (b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y);
+    }
+
+    // Check if a point is inside a polygon using the winding number algorithm
+    static bool isPointInTriangulatedPolygon(const Coord& point, const TriangulatedPolygon& polygon, const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper) {
+        if (polygon.coordinates.empty()) {
+            return false;
+        }
+        auto convertedPoint = conversionHelper->convert(polygon.coordinates.begin()->systemIdentifier, point);
+
+        float d1, d2, d3;
+        bool has_neg, has_pos;
+
+        for (size_t i = 0; i < polygon.indices.size(); i += 3) {
+            const Coord& v1 = polygon.coordinates[polygon.indices[i]];
+            const Coord& v2 = polygon.coordinates[polygon.indices[i + 1]];
+            const Coord& v3 = polygon.coordinates[polygon.indices[i + 2]];
+
+            d1 = signedTriangleArea(v1, v2, convertedPoint);
+            d2 = signedTriangleArea(v2, v3, convertedPoint);
+            d3 = signedTriangleArea(v3, v1, convertedPoint);
+
+            has_neg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+            has_pos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+
+            if (!(has_neg && has_pos)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 private:
@@ -231,13 +245,12 @@ private:
 
     std::vector<::Coord> currentFeature;
     std::vector<std::vector<::Coord>> coordinates;
-    std::vector<std::vector<std::vector<::Coord>>> holes;
 
     std::vector<vtzero::point> polygonCurrentRing;
     std::vector<std::vector<vtzero::point>> polygonPoints;
     std::vector<std::vector<std::vector<vtzero::point>>> polygonHoles;
 
-    std::vector<TriangulatedPolyon> polygons;
+    std::vector<TriangulatedPolygon> polygons;
 
     Tiled2dMapVectorTileOrigin origin;
     RectCoord tileCoords;
