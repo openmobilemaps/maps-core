@@ -311,10 +311,9 @@ void Tiled2dMapVectorPolygonPatternTile::addPolygons(const std::unordered_map<in
 
     auto mapInterface = this->mapInterface.lock();
     auto objectFactory = mapInterface ? mapInterface->getGraphicsObjectFactory() : nullptr;
-    auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
     auto converter = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
 
-    if (!mapInterface || !objectFactory || !scheduler || !converter || shaders.empty()) {
+    if (!mapInterface || !objectFactory || !converter || shaders.empty()) {
         return;
     }
 
