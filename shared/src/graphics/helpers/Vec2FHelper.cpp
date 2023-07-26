@@ -28,3 +28,27 @@ double Vec2FHelper::distance(const ::Vec2F &from, const ::Vec2F &to) {
     float rY = x * sinAngle + y * cosAngle;
     return Vec2F(rX + origin.x, rY + origin.y);
 }
+
+double Vec2FHelper::squaredLength(const ::Vec2F &vector) {
+    return vector * vector;
+}
+
+Vec2F Vec2FHelper::normalize(const ::Vec2F &vector) {
+    return vector / std::sqrt(Vec2FHelper::squaredLength(vector));
+}
+
+Vec2F operator+( const ::Vec2F& left, const ::Vec2F& right ) {
+    return Vec2F(left.x + right.x, left.y + right.y);
+}
+
+Vec2F operator-( const ::Vec2F& left, const ::Vec2F& right ) {
+    return Vec2F(left.x - right.x, left.y - right.y);
+}
+
+double operator*( const ::Vec2F& left, const ::Vec2F& right ) {
+    return left.x * right.x + left.y * right.y;
+}
+
+Vec2F operator/( const ::Vec2F& left, const double& val ) {
+    return Vec2F(left.x / val, left.y / val);
+}

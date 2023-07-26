@@ -48,7 +48,7 @@ public:
 
 private:
     struct ObjectDescriptions {
-        std::vector<std::tuple<std::vector<::Coord>, int>> vertices;
+        std::vector<float> vertices;
         std::vector<uint16_t> indices;
     };
 
@@ -78,7 +78,7 @@ private:
     std::vector<std::vector<float>> opacities;
     std::vector<std::vector<float>> textureCoordinates;
 
-    std::vector<std::tuple<PolygonCoord, std::shared_ptr<FeatureContext>>> hitDetectionPolygons;
+    std::vector<std::tuple<VectorTileGeometryHandler::TriangulatedPolygon, std::shared_ptr<FeatureContext>>> hitDetectionPolygons;
 
     std::vector<std::shared_ptr<PolygonPatternGroup2dLayerObject>> toClear;
 };

@@ -23,12 +23,16 @@ Tiled2dMapVectorSource::Tiled2dMapVectorSource(const MapConfig &mapConfig,
                                                const std::unordered_set<std::string> &layersToDecode,
                                                const std::string &sourceName,
                                                float screenDensityPpi)
-        : Tiled2dMapSource<djinni::DataRef, DataLoaderResult, Tiled2dMapVectorTileInfo::FeatureMap>(mapConfig, layerConfig, conversionHelper, scheduler, screenDensityPpi, tileLoaders.size()),
+        : Tiled2dMapSource<std::shared_ptr<djinni::DataRef>, std::shared_ptr<DataLoaderResult>, Tiled2dMapVectorTileInfo::FeatureMap>(mapConfig, layerConfig, conversionHelper, scheduler, screenDensityPpi, tileLoaders.size()),
 loaders(tileLoaders), layersToDecode(layersToDecode), listener(listener), sourceName(sourceName) {}
 
-::djinni::Future<DataLoaderResult> Tiled2dMapVectorSource::loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) {
+::djinni::Future<std::shared_ptr<DataLoaderResult>> Tiled2dMapVectorSource::loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) {
     auto const url = layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier);
-    return loaders[loaderIndex]->loadDataAsync(url, std::nullopt);
+    auto promise = std::make_shared<::djinni::Promise<std::shared_ptr<DataLoaderResult>>>();
+    loaders[loaderIndex]->loadDataAsync(url, std::nullopt).then([promise](::djinni::Future<::DataLoaderResult> result) {
+        promise->setValue(std::make_shared<DataLoaderResult>(result.get()));
+    });
+    return promise->getFuture();
 }
 
 void Tiled2dMapVectorSource::cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) {
@@ -40,10 +44,10 @@ bool Tiled2dMapVectorSource::hasExpensivePostLoadingTask() {
     return true;
 }
 
-Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(const DataLoaderResult &loadedData, const Tiled2dMapTileInfo &tile) {
+Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(const std::shared_ptr<DataLoaderResult> &loadedData, const Tiled2dMapTileInfo &tile) {
     auto layerFeatureMap = std::make_shared<std::unordered_map<std::string, std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>>>>();
     try {
-        vtzero::vector_tile tileData((char*)loadedData.data->buf(), loadedData.data->len());
+        vtzero::vector_tile tileData((char*)loadedData->data->buf(), loadedData->data->len());
 
         while (auto layer = tileData.next_layer()) {
             std::string sourceLayerName = std::string(layer.name());
@@ -54,9 +58,9 @@ Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(con
                 while (const auto &feature = layer.next_feature()) {
                     auto const featureContext = std::make_shared<FeatureContext>(feature);
                     try {
-                        std::shared_ptr<VectorTileGeometryHandler> geometryHandler = std::make_shared<VectorTileGeometryHandler>(tile.bounds, extent, layerConfig->getVectorSettings());
+                        std::shared_ptr<VectorTileGeometryHandler> geometryHandler = std::make_shared<VectorTileGeometryHandler>(tile.bounds, extent, layerConfig->getVectorSettings(), conversionHelper);
                         vtzero::decode_geometry(feature.geometry(), *geometryHandler);
-                        geometryHandler->limitHoles(500);
+                        geometryHandler->triangulatePolygons();
                         layerFeatureMap->at(sourceLayerName)->push_back({featureContext, geometryHandler});
                     } catch (const vtzero::geometry_exception &geometryException) {
                         LogError <<= "geometryException for tile " + std::to_string(tile.zoomIdentifier) + "/" + std::to_string(tile.x) + "/" + std::to_string(tile.y);

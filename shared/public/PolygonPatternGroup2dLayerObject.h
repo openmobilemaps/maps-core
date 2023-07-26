@@ -18,6 +18,7 @@
 #include "PolygonPatternGroup2dInterface.h"
 #include "RenderConfig.h"
 #include "Vec2D.h"
+#include "Vec2F.h"
 
 class PolygonPatternGroup2dLayerObject : public LayerObjectInterface {
   public:
@@ -31,6 +32,8 @@ class PolygonPatternGroup2dLayerObject : public LayerObjectInterface {
     virtual std::vector<std::shared_ptr<RenderConfigInterface>> getRenderConfig() override;
 
     void setVertices(const std::vector<std::tuple<std::vector<::Coord>, int>> & vertices, const std::vector<uint16_t> & indices);
+
+    void setVertices(const std::vector<float> &verticesBuffer, const std::vector<uint16_t> & indices);
 
     void setOpacities(const std::vector<float> &opacities);
 

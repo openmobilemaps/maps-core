@@ -48,6 +48,12 @@ void PolygonPatternGroup2dLayerObject::setVertices(const std::vector<std::tuple<
     polygon->setVertices(v, i);
 }
 
+void PolygonPatternGroup2dLayerObject::setVertices(const std::vector<float> &verticesBuffer, const std::vector<uint16_t> & indices) {
+    auto i = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(uint16_t));
+    auto v = SharedBytes((int64_t)verticesBuffer.data(), (int32_t)verticesBuffer.size(), (int32_t)sizeof(float));
+    polygon->setVertices(v, i);
+}
+
 void PolygonPatternGroup2dLayerObject::setOpacities(const std::vector<float> &opacities) {
     polygon->setOpacities(SharedBytes((int64_t)opacities.data(), (int32_t)opacities.size(), (int32_t)sizeof(float)));
 }
