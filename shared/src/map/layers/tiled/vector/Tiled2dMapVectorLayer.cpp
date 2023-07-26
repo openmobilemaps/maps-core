@@ -686,7 +686,7 @@ void Tiled2dMapVectorLayer::setSelectionDelegate(const std::weak_ptr<Tiled2dMapV
 void Tiled2dMapVectorLayer::setSelectionDelegate(const std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate) {
     this->strongSelectionDelegate = selectionDelegate;
     this->selectionDelegate = selectionDelegate;
-    setSelectionDelegate(std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface>(selectionDelegate));;
+    setSelectionDelegate(std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface>(selectionDelegate));
 }
 
 void Tiled2dMapVectorLayer::setSelectedFeatureIdentifier(std::optional<int64_t> identifier) {

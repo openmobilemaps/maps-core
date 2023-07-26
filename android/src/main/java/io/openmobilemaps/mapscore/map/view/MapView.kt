@@ -105,9 +105,10 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	@OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 	open fun onDestroy() {
 		setRenderer(null)
-		mapInterface?.destroy()
+		val map = mapInterface
 		mapInterface = null
 		touchHandler = null
+		map?.let { Thread { it.destroy() }.start() }
 	}
 
 	fun setTouchEnabled(enabled: Boolean) {

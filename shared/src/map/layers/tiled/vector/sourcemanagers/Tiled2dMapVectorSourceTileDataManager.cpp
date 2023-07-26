@@ -288,7 +288,7 @@ void Tiled2dMapVectorSourceTileDataManager::tileIsReady(const Tiled2dMapTileInfo
 
     bool found = false;
     for (auto const [index, string, actor]: tilesIt->second) {
-        if (layerIdentifier == layerIdentifier && actor.unsafe() == tileActor.unsafe().lock()) {
+        if (layerIdentifier == string && actor.unsafe() == tileActor.unsafe().lock()) {
             found = true;
             break;
         }

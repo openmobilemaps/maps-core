@@ -28,15 +28,15 @@ void Tiled2dMapVectorLineTile::updateVectorLayerDescription(const std::shared_pt
                                                       const Tiled2dMapVectorTileDataVector &tileData) {
     Tiled2dMapVectorTile::updateVectorLayerDescription(description, tileData);
     const auto newUsedKeys = description->getUsedKeys();
-    bool usedKeysContainsNewUsedKeys = true;;
-    if (usedKeysContainsNewUsedKeys) {
-        for (const auto &key : newUsedKeys ) {
-            if (usedKeys.count(key) == 0) {
-                usedKeysContainsNewUsedKeys = false;
-                break;
-            }
+    bool usedKeysContainsNewUsedKeys = true;
+
+    for (const auto &key : newUsedKeys ) {
+        if (usedKeys.count(key) == 0) {
+            usedKeysContainsNewUsedKeys = false;
+            break;
         }
     }
+
     isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
     lastZoom = std::nullopt;
     lastAlpha = std::nullopt;
@@ -190,7 +190,7 @@ void Tiled2dMapVectorLineTile::update() {
 
         if (needsUpdate) {
             auto &styles = reusableLineStyles[styleGroupId];
-            auto buffer = SharedBytes((int64_t)styles.data(), (int)styles.size(), 19 * sizeof(float));;
+            auto buffer = SharedBytes((int64_t)styles.data(), (int)styles.size(), 19 * sizeof(float));
             shaders[styleGroupId]->setStyles(buffer);
         }
     }
@@ -295,7 +295,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
 
                 if (description->isInteractable(evalContext)) {
                     anyInteractable = true;
-                    hitDetection.push_back({lineCoordinatesVector, featureContext});;
+                    hitDetection.push_back({lineCoordinatesVector, featureContext});
                 }
             }
         }

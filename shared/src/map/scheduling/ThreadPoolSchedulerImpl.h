@@ -24,8 +24,6 @@ class ThreadPoolSchedulerImpl: public SchedulerInterface {
 public:
     ThreadPoolSchedulerImpl(const std::shared_ptr<ThreadPoolCallbacks> &callbacks);
 
-    ~ThreadPoolSchedulerImpl();
-    
     virtual void addTask(const std::shared_ptr<TaskInterface> & task) override;
 
     virtual void addTasks(const std::vector<std::shared_ptr<TaskInterface>> & tasks) override;

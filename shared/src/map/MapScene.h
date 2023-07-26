@@ -23,8 +23,6 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public Sche
     MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig &mapConfig,
              const std::shared_ptr<::SchedulerInterface> &scheduler, float pixelDensity);
 
-    virtual ~MapScene();
-
     virtual std::shared_ptr<::GraphicsObjectFactoryInterface> getGraphicsObjectFactory() override;
 
     virtual std::shared_ptr<::ShaderFactoryInterface> getShaderFactory() override;
