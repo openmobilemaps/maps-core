@@ -58,6 +58,8 @@ open class MCMapView: MTKView {
             DispatchQueue.global().async { [mapInterface] in
                 mapInterface.destroy()
             }
+        } else {
+            mapInterface.destroy()
         }
     }
 
