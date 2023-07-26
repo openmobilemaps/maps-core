@@ -40,7 +40,10 @@ abstract class GraphicsObjectFactoryInterface {
             NativeObjectManager.register(this, nativeRef)
         }
 
-        external fun nativeDestroy(nativeRef: Long)
+        companion object {
+            @JvmStatic
+            external fun nativeDestroy(nativeRef: Long)
+        }
 
         override fun createQuad(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Quad2dInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

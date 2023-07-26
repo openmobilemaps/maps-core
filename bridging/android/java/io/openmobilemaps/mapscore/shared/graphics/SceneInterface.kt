@@ -46,7 +46,10 @@ abstract class SceneInterface {
             NativeObjectManager.register(this, nativeRef)
         }
 
-        external fun nativeDestroy(nativeRef: Long)
+        companion object {
+            @JvmStatic
+            external fun nativeDestroy(nativeRef: Long)
+        }
 
         override fun setCallbackHandler(callbackInterface: SceneCallbackInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

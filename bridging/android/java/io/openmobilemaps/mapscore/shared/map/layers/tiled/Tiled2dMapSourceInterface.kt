@@ -40,7 +40,10 @@ abstract class Tiled2dMapSourceInterface {
             NativeObjectManager.register(this, nativeRef)
         }
 
-        external fun nativeDestroy(nativeRef: Long)
+        companion object {
+            @JvmStatic
+            external fun nativeDestroy(nativeRef: Long)
+        }
 
         override fun onVisibleBoundsChanged(visibleBounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, curT: Int, zoom: Double) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

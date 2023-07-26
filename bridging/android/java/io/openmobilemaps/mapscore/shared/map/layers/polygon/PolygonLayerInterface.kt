@@ -43,7 +43,10 @@ abstract class PolygonLayerInterface {
             NativeObjectManager.register(this, nativeRef)
         }
 
-        external fun nativeDestroy(nativeRef: Long)
+        companion object {
+            @JvmStatic
+            external fun nativeDestroy(nativeRef: Long)
+        }
 
         override fun setPolygons(polygons: ArrayList<PolygonInfo>) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

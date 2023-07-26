@@ -45,7 +45,10 @@ abstract class LineLayerInterface {
             NativeObjectManager.register(this, nativeRef)
         }
 
-        external fun nativeDestroy(nativeRef: Long)
+        companion object {
+            @JvmStatic
+            external fun nativeDestroy(nativeRef: Long)
+        }
 
         override fun setLines(lines: ArrayList<LineInfoInterface>) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

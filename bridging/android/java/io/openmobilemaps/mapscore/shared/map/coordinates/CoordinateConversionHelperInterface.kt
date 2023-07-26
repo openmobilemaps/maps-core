@@ -37,7 +37,10 @@ abstract class CoordinateConversionHelperInterface {
             NativeObjectManager.register(this, nativeRef)
         }
 
-        external fun nativeDestroy(nativeRef: Long)
+        companion object {
+            @JvmStatic
+            external fun nativeDestroy(nativeRef: Long)
+        }
 
         override fun registerConverter(converter: CoordinateConverterInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
