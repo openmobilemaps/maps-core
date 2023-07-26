@@ -50,13 +50,11 @@ void Tiled2dMapVectorPolygonTile::updateVectorLayerDescription(const std::shared
                                                          const Tiled2dMapVectorTileDataVector &tileData) {
     Tiled2dMapVectorTile::updateVectorLayerDescription(description, tileData);
     const auto newUsedKeys = description->getUsedKeys();
-    bool usedKeysContainsNewUsedKeys = true;;
-    if (usedKeysContainsNewUsedKeys) {
-        for (const auto &key : newUsedKeys ) {
-            if (usedKeys.count(key) == 0) {
-                usedKeysContainsNewUsedKeys = false;
-                break;
-            }
+    bool usedKeysContainsNewUsedKeys = true;
+    for (const auto &key : newUsedKeys ) {
+        if (usedKeys.count(key) == 0) {
+            usedKeysContainsNewUsedKeys = false;
+            break;
         }
     }
     isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();

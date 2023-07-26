@@ -316,8 +316,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
     // Use the median base line of the last line for size calculations
     // This way labels with decent look better placed.
     std::sort(baseLines.begin(), baseLines.end());
-    double medianLastBaseLine = box->max.y;
-
+    double medianLastBaseLine;
     if (baseLines.size() % 2 == 0) {
         medianLastBaseLine = (baseLines[baseLines.size() / 2 - 1] + baseLines[baseLines.size() / 2]) / 2;
     } else {
@@ -474,7 +473,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
 
     double averageAngleS = 0.0;
     double averageAngleC = 0.0;
-    int numSymbols = splittedTextInfo.size();
+    int numSymbols = (int)splittedTextInfo.size();
 
     int index = 0;
     double lastAngle = 0.0;

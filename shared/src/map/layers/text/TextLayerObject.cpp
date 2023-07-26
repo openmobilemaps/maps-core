@@ -171,7 +171,6 @@ void TextLayerObject::layoutPoint(float scale, bool updateObject) {
 
         int indicesStart = 0;
 
-        int characterCount = 0;
         std::vector<size_t> lineEndIndices;
 
         for(auto& i : splittedTextInfo) {
@@ -252,6 +251,7 @@ void TextLayerObject::layoutPoint(float scale, bool updateObject) {
             Vec2D size((max.x - min.x), (max.y - min.y));
 
             switch (textInfo->getTextJustify()) {
+                case TextJustify::AUTO:
                 case TextJustify::LEFT:
                     //Nothing to do here
                     break;
@@ -373,8 +373,6 @@ float TextLayerObject::layoutLine(float scale, bool updateObject) {
     vertices.reserve(numGlyphs * 24);
     std::vector<int16_t> indices;
     indices.reserve(numGlyphs * 6);
-
-    std::vector<size_t> lineEndIndices;
 
     auto currentIndex = findReferencePointIndices();
 
@@ -581,11 +579,10 @@ std::pair<int, double> TextLayerObject::indexAtDistance(const std::pair<int, dou
     if(distance >= 0) {
         auto start = std::min(index.first + 1, (int)renderLineCoordinates.size() - 1);
 
-        double d = 0.0;
         for(int i=start; i<renderLineCoordinates.size(); i++) {
             auto &next = renderLineCoordinates[i];
 
-            d = Vec2DHelper::distance(Vec2D(current.x, current.y), Vec2D(next.x, next.y));
+            double d = Vec2DHelper::distance(Vec2D(current.x, current.y), Vec2D(next.x, next.y));
 
             if(dist > d) {
                 dist -= d;
