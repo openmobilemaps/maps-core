@@ -114,8 +114,22 @@ public:
         for (int i = 0; i < polygonPoints.size(); i++) {
             std::vector<std::vector<vtzero::point>> polygon;
             polygon.reserve(polygonHoles[i].size() + 1);
+            coordinates.reserve(coordinates.size() + polygon.capacity());
+
+            coordinates.emplace_back();
+            coordinates.back().reserve(polygonPoints[i].size());
+            for (auto const &point: polygonPoints[i]){
+                coordinates.back().push_back(coordinateFromPoint(point, false));
+            }
             polygon.emplace_back(std::move(polygonPoints[i]));
+
             for(auto const &hole: polygonHoles[i]) {
+                coordinates.emplace_back();
+                coordinates.back().reserve(hole.size());
+                for (auto const &point: hole){
+                    coordinates.back().push_back(coordinateFromPoint(point, false));
+                }
+
                 polygon.emplace_back(std::move(hole));
             }
             limitHoles(polygon, 500);
@@ -124,13 +138,9 @@ public:
 
             polygons.push_back({{}, indices});
 
-            if (coordinates.empty()) {
-                coordinates.push_back({});
-            }
             for (auto const &points: polygon) {
                 for (auto const &point: points) {
                     polygons.back().coordinates.push_back(vecFromPoint(point));
-                    coordinates.back().push_back(coordinateFromPoint(point, false));
                 }
             }
         }
@@ -140,17 +150,7 @@ public:
     }
 
     std::vector<std::vector<::Coord>> getLineCoordinates() const {
-        std::vector<std::vector<::Coord>> lineCoordinates;
-        lineCoordinates.insert(lineCoordinates.end(), coordinates.begin(), coordinates.end());
-        for (const auto &polygon : polygons) {
-            if (!polygon.coordinates.empty()) {
-                lineCoordinates.push_back({});
-                for(const auto &coord: polygon.coordinates) {
-                    lineCoordinates.back().push_back(Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), coord.x, coord.y, 0));
-                }
-            }
-        }
-        return std::move(lineCoordinates);
+        return std::move(coordinates);
     }
 
     struct TriangulatedPolygon {
@@ -159,11 +159,11 @@ public:
     };
 
     const std::vector<TriangulatedPolygon> getPolygons() const {
-        return polygons;
+        return std::move(polygons);
     }
 
     const std::vector<std::vector<::Coord>> getPointCoordinates() const {
-        return coordinates;
+        return std::move(coordinates);
     }
 
     static inline double signedTriangleArea(const Vec2F& a, const Vec2F& b, const Vec2F& c) {
