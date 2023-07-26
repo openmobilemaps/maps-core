@@ -55,7 +55,7 @@ public:
     }
 
     void points_point(const vtzero::point point) {
-        currentFeature.emplace_back(coordinateFromPoint(point));
+        currentFeature.emplace_back(coordinateFromPoint(point, false));
     }
 
     void points_end() {
@@ -69,7 +69,7 @@ public:
     }
 
     void linestring_point(const vtzero::point point) {
-        currentFeature.emplace_back(coordinateFromPoint(point));
+        currentFeature.emplace_back(coordinateFromPoint(point, false));
     }
 
     void linestring_end() {
@@ -124,9 +124,13 @@ public:
 
             polygons.push_back({{}, indices});
 
+            if (coordinates.empty()) {
+                coordinates.push_back({});
+            }
             for (auto const &points: polygon) {
                 for (auto const &point: points) {
                     polygons.back().coordinates.push_back(vecFromPoint(point));
+                    coordinates.back().push_back(coordinateFromPoint(point, false));
                 }
             }
         }
@@ -160,16 +164,6 @@ public:
 
     const std::vector<std::vector<::Coord>> getPointCoordinates() const {
         return coordinates;
-    }
-
-    void reset() {
-        currentFeature.clear();
-        coordinates.clear();
-
-        polygons.clear();
-        polygonPoints.clear();
-        polygonHoles.clear();
-        polygonCurrentRing.clear();
     }
 
     static inline double signedTriangleArea(const Vec2F& a, const Vec2F& b, const Vec2F& c) {
@@ -207,7 +201,7 @@ public:
     }
 
 private:
-    inline Coord coordinateFromPoint(const vtzero::point &point) {
+    inline Coord coordinateFromPoint(const vtzero::point &point, bool renderSystem) {
         auto tx = point.x / extent;
         auto ty = point.y / extent;
 
@@ -229,11 +223,15 @@ private:
         const auto x = tileCoords.topLeft.x * (1.0 - tx) + tileCoords.bottomRight.x * tx;
         const auto y = tileCoords.topLeft.y * (1.0 - ty) + tileCoords.bottomRight.y * ty;
 
-        return conversionHelper->convertToRenderSystem(Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0));
+        if (renderSystem) {
+            return conversionHelper->convertToRenderSystem(Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0));
+        } else {
+            return Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0);
+        }
     }
 
     inline Vec2F vecFromPoint(const vtzero::point &point) {
-        const auto coord = coordinateFromPoint(point);
+        const auto coord = coordinateFromPoint(point, true);
         return Vec2F(coord.x, coord.y);
     }
 
