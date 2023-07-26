@@ -52,6 +52,15 @@ open class MCMapView: MTKView {
         fatalError("init(coder:) has not been implemented")
     }
 
+    deinit {
+        if Thread.isMainThread {
+            // make sure the mapInterface is destroyed from a background thread
+            DispatchQueue.global().async { [mapInterface] in
+                mapInterface.destroy()
+            }
+        }
+    }
+
     private func setup() {
         renderingContext.sceneView = self
 

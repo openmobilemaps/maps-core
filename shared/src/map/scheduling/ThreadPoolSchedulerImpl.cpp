@@ -37,6 +37,11 @@ ThreadPoolSchedulerImpl::~ThreadPoolSchedulerImpl() {
         std::lock_guard<std::mutex> lock(defaultMutex);
         defaultQueue.clear();
     }
+    {
+        std::unique_lock<std::mutex> lock(delayedTasksMutex);
+        nextWakeup = std::chrono::system_clock::now();
+    }
+
     defaultCv.notify_all();
     delayedTasksCv.notify_all();
     delayedTaskThread.join();
