@@ -26,7 +26,10 @@ abstract class TouchHandlerInterface {
             NativeObjectManager.register(this, nativeRef)
         }
 
-        external fun nativeDestroy(nativeRef: Long)
+        companion object {
+            @JvmStatic
+            external fun nativeDestroy(nativeRef: Long)
+        }
 
         override fun onTouchEvent(touchEvent: TouchEvent) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

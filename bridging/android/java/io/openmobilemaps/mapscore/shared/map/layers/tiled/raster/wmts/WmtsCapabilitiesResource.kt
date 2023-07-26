@@ -41,7 +41,10 @@ abstract class WmtsCapabilitiesResource {
             NativeObjectManager.register(this, nativeRef)
         }
 
-        external fun nativeDestroy(nativeRef: Long)
+        companion object {
+            @JvmStatic
+            external fun nativeDestroy(nativeRef: Long)
+        }
 
         override fun createLayer(identifier: String, tileLoaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface? {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

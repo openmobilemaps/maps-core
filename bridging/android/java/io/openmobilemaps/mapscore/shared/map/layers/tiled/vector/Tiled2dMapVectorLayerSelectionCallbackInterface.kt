@@ -22,7 +22,10 @@ abstract class Tiled2dMapVectorLayerSelectionCallbackInterface {
             NativeObjectManager.register(this, nativeRef)
         }
 
-        external fun nativeDestroy(nativeRef: Long)
+        companion object {
+            @JvmStatic
+            external fun nativeDestroy(nativeRef: Long)
+        }
 
         override fun didSelectFeature(featureInfo: VectorLayerFeatureInfo, layerIdentifier: String, coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

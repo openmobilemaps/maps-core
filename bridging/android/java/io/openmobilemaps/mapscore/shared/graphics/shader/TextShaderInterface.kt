@@ -26,7 +26,10 @@ abstract class TextShaderInterface {
             NativeObjectManager.register(this, nativeRef)
         }
 
-        external fun nativeDestroy(nativeRef: Long)
+        companion object {
+            @JvmStatic
+            external fun nativeDestroy(nativeRef: Long)
+        }
 
         override fun setColor(color: io.openmobilemaps.mapscore.shared.graphics.common.Color) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

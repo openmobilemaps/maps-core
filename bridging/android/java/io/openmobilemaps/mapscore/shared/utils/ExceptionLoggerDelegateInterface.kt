@@ -20,7 +20,10 @@ abstract class ExceptionLoggerDelegateInterface {
             NativeObjectManager.register(this, nativeRef)
         }
 
-        external fun nativeDestroy(nativeRef: Long)
+        companion object {
+            @JvmStatic
+            external fun nativeDestroy(nativeRef: Long)
+        }
 
         override fun logMessage(errorDomain: String, code: Int, customValues: HashMap<String, String>, function: String, file: String, line: Int) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
