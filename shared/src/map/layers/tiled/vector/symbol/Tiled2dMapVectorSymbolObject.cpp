@@ -561,8 +561,6 @@ void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &posi
 }
 
 std::optional<Quad2dD> Tiled2dMapVectorSymbolObject::getCombinedBoundingBox(bool considerOverlapFlag) {
-    std::optional<Quad2dD> combined;
-
     const Quad2dD* boxes[3] = { nullptr };
     int boxCount = 0;
 

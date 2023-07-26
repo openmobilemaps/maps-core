@@ -32,13 +32,11 @@ void Tiled2dMapVectorPolygonTile::updateVectorLayerDescription(const std::shared
                                                          const Tiled2dMapVectorTileDataVector &tileData) {
     Tiled2dMapVectorTile::updateVectorLayerDescription(description, tileData);
     const auto newUsedKeys = description->getUsedKeys();
-    bool usedKeysContainsNewUsedKeys = true;;
-    if (usedKeysContainsNewUsedKeys) {
-        for (const auto &key : newUsedKeys ) {
-            if (usedKeys.count(key) == 0) {
-                usedKeysContainsNewUsedKeys = false;
-                break;
-            }
+    bool usedKeysContainsNewUsedKeys = true;
+    for (const auto &key : newUsedKeys ) {
+        if (usedKeys.count(key) == 0) {
+            usedKeysContainsNewUsedKeys = false;
+            break;
         }
     }
     isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
@@ -257,10 +255,9 @@ void Tiled2dMapVectorPolygonTile::addPolygons(const std::unordered_map<int, std:
 
     auto mapInterface = this->mapInterface.lock();
     auto objectFactory = mapInterface ? mapInterface->getGraphicsObjectFactory() : nullptr;
-    auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
     auto converter = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
 
-    if (!mapInterface || !objectFactory || !scheduler || !converter || shaders.empty()) {
+    if (!mapInterface || !objectFactory || !converter || shaders.empty()) {
         return;
     }
 

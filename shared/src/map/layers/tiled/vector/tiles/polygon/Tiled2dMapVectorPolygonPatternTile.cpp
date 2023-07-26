@@ -35,7 +35,7 @@ void Tiled2dMapVectorPolygonPatternTile::updateVectorLayerDescription(const std:
                                                          const Tiled2dMapVectorTileDataVector &tileData) {
     Tiled2dMapVectorTile::updateVectorLayerDescription(description, tileData);
     const auto newUsedKeys = description->getUsedKeys();
-    bool usedKeysContainsNewUsedKeys = true;;
+    bool usedKeysContainsNewUsedKeys = true;
     if (usedKeysContainsNewUsedKeys) {
         for (const auto &key : newUsedKeys ) {
             if (usedKeys.count(key) == 0) {
@@ -276,10 +276,9 @@ void Tiled2dMapVectorPolygonPatternTile::addPolygons(const std::unordered_map<in
 
     auto mapInterface = this->mapInterface.lock();
     auto objectFactory = mapInterface ? mapInterface->getGraphicsObjectFactory() : nullptr;
-    auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
     auto converter = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
 
-    if (!mapInterface || !objectFactory || !scheduler || !converter || shaders.empty()) {
+    if (!mapInterface || !objectFactory || !converter || shaders.empty()) {
         return;
     }
 

@@ -208,7 +208,7 @@ void Line2dLayerObject::setStyle(const LineStyle &style, bool highlighted) {
     s.lineCap = cap;
     s.offset = style.offset;
 
-    auto buffer = SharedBytes((int64_t)&s, 1, 19 * sizeof(float));;
+    auto buffer = SharedBytes((int64_t)&s, 1, 19 * sizeof(float));
     shader->setStyles(buffer);
 }
 
