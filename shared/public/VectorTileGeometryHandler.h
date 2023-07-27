@@ -149,8 +149,8 @@ public:
         polygonPoints.clear();
     }
 
-    std::vector<std::vector<::Coord>> getLineCoordinates() const {
-        return std::move(coordinates);
+    const std::vector<std::vector<::Coord>> &getLineCoordinates() {
+        return coordinates;
     }
 
     struct TriangulatedPolygon {
@@ -158,12 +158,12 @@ public:
         std::vector<uint16_t> indices;
     };
 
-    const std::vector<TriangulatedPolygon> getPolygons() const {
-        return std::move(polygons);
+    const std::vector<TriangulatedPolygon> &getPolygons() const {
+        return polygons;
     }
 
-    const std::vector<std::vector<::Coord>> getPointCoordinates() const {
-        return std::move(coordinates);
+    const std::vector<std::vector<::Coord>> &getPointCoordinates() const {
+        return coordinates;
     }
 
     static inline double signedTriangleArea(const Vec2F& a, const Vec2F& b, const Vec2F& c) {
