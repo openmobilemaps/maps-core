@@ -74,7 +74,7 @@ private:
     //contains the tasks and the timestamp at which they were added to the list
     std::vector<std::pair<std::shared_ptr<TaskInterface>, TimeStamp>> delayedTasks;
 
-    bool terminated{false};
+    std::atomic_bool terminated{false};
 
     std::weak_ptr<SchedulerGraphicsTaskCallbacks> graphicsCallbacks;
 };
