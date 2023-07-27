@@ -86,6 +86,9 @@ public:
 
     void setAlpha(float alpha);
 private:
+    double lastZoomEvaluation = -1;
+    void evaluateStyleProperties(const double zoomIdentifier);
+
     ::Coord getRenderCoordinates(Anchor iconAnchor, double rotation, double iconWidth, double iconHeight);
 
     std::shared_ptr<Tiled2dMapVectorLayerConfig> layerConfig;

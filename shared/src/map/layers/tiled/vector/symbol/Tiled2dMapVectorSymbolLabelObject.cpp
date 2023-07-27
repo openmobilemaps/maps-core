@@ -159,10 +159,7 @@ int Tiled2dMapVectorSymbolLabelObject::getCharacterCount(){
 void Tiled2dMapVectorSymbolLabelObject::setupProperties(std::vector<float> &textureCoordinates, std::vector<uint16_t> &styleIndices, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier) {
     const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
 
-    textSize = description->style.getTextSize(evalContext);
-    textAlignment = description->style.getTextRotationAlignment(evalContext);
-    textRotate = description->style.getTextRotate(evalContext);
-    textPadding = description->style.getTextPadding(evalContext);
+    evaluateStyleProperties(zoomIdentifier);
 
     for(auto &i : splittedTextInfo) {
         auto& d = fontResult->fontData->glyphs[i.glyphIndex];
@@ -179,18 +176,39 @@ void Tiled2dMapVectorSymbolLabelObject::setupProperties(std::vector<float> &text
     styleOffset += 1;
 }
 
+
+void Tiled2dMapVectorSymbolLabelObject::evaluateStyleProperties(const double zoomIdentifier) {
+    auto roundedZoom = std::round(zoomIdentifier * 100.0) / 100.0;
+
+    if (roundedZoom == lastZoomEvaluation) {
+        return;
+    }
+
+    const auto evalContext = EvaluationContext(roundedZoom, featureContext);
+
+    textSize = description->style.getTextSize(evalContext);
+    textAlignment = description->style.getTextRotationAlignment(evalContext);
+    textRotate = description->style.getTextRotate(evalContext);
+    textPadding = description->style.getTextPadding(evalContext);
+
+    opacity = description->style.getTextOpacity(evalContext);
+    textColor = description->style.getTextColor(evalContext);
+    haloColor = description->style.getTextHaloColor(evalContext);
+    haloWidth = description->style.getTextHaloWidth(evalContext);
+
+    lastZoomEvaluation = roundedZoom;
+}
+
+
 void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const bool collides, const double rotation, const float alpha) {
     const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
+
+    evaluateStyleProperties(zoomIdentifier);
 
     if (collides || !(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier)) {
         styles[(9 * styleOffset) + 3] = 0;
         styles[(9 * styleOffset) + 7] = 0;
     } else {
-        const auto opacity = description->style.getTextOpacity(evalContext);
-        const auto textColor = description->style.getTextColor(evalContext);
-        const auto haloColor = description->style.getTextHaloColor(evalContext);
-        const auto haloWidth = description->style.getTextHaloWidth(evalContext);
-
         styles[(9 * styleOffset) + 0] = textColor.r; //R
         styles[(9 * styleOffset) + 1] = textColor.g; //G
         styles[(9 * styleOffset) + 2] = textColor.b; //B

@@ -43,25 +43,14 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
         return;
     }
 
-    double zoomIdentifier = layerConfig->getZoomIdentifier(camera->getZoom());
-
-    const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
+    const auto evalContext = EvaluationContext(tileInfo.zoomIdentifier, featureContext);
 
     const bool hasIcon = description->style.hasIconImagePotentially();
 
     renderCoordinate = converter->convertToRenderSystem(coordinate);
     initialRenderCoordinateVec = Vec2D(renderCoordinate.x, renderCoordinate.y);
 
-    textAllowOverlap = description->style.getTextAllowOverlap(evalContext);
-    iconAllowOverlap = description->style.getIconAllowOverlap(evalContext);
-
-    iconRotate = -description->style.getIconRotate(evalContext);
-    iconAnchor = description->style.getIconAnchor(evalContext);
-    iconSize = description->style.getIconSize(evalContext);
-    iconOffset = description->style.getIconOffset(evalContext);
-    iconTextFitPadding = description->style.getIconTextFitPadding(evalContext);
-    iconTextFit = description->style.getIconTextFit(evalContext);
-    textPadding = description->style.getTextPadding(evalContext);
+        evaluateStyleProperties(tileInfo.zoomIdentifier);
 
     if (hasIcon && !hideIcon) {
         if (iconTextFit == IconTextFit::NONE) {
@@ -110,6 +99,29 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     }
 
     symbolSortKey = description->style.getSymbolSortKey(evalContext);
+}
+
+void Tiled2dMapVectorSymbolObject::evaluateStyleProperties(const double zoomIdentifier) {
+    auto roundedZoom = std::round(zoomIdentifier * 100.0) / 100.0;
+
+    if (roundedZoom == lastZoomEvaluation) {
+        return;
+    }
+    
+    const auto evalContext = EvaluationContext(roundedZoom, featureContext);
+
+    textAllowOverlap = description->style.getTextAllowOverlap(evalContext);
+    iconAllowOverlap = description->style.getIconAllowOverlap(evalContext);
+
+    iconRotate = -description->style.getIconRotate(evalContext);
+    iconAnchor = description->style.getIconAnchor(evalContext);
+    iconSize = description->style.getIconSize(evalContext);
+    iconOffset = description->style.getIconOffset(evalContext);
+    iconTextFitPadding = description->style.getIconTextFitPadding(evalContext);
+    iconTextFit = description->style.getIconTextFit(evalContext);
+    textPadding = description->style.getTextPadding(evalContext);
+
+    lastZoomEvaluation = roundedZoom;
 }
 
 void Tiled2dMapVectorSymbolObject::setCollisionAt(float zoom, bool isCollision) {
@@ -278,6 +290,8 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
     auto converter = strongMapInterface ? strongMapInterface->getCoordinateConverterHelper() : nullptr;
     auto camera = strongMapInterface ? strongMapInterface->getCamera() : nullptr;
 
+    evaluateStyleProperties(zoomIdentifier);
+
     const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
 
     rotations[countOffset] = iconRotate;
@@ -414,6 +428,8 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     if (!converter || !camera) {
         return;
     }
+
+    evaluateStyleProperties(zoomIdentifier);
 
     const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
 
