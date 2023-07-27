@@ -101,12 +101,9 @@ void ThreadPoolSchedulerImpl::resume() {
 
 
 void ThreadPoolSchedulerImpl::destroy() {
+    terminated = true;
     callbacks = nullptr;
 
-    {
-        std::lock_guard<std::mutex> lock(defaultMutex);
-        terminated = true;
-    }
     {
         std::lock_guard<std::mutex> lock(graphicsMutex);
         graphicsQueue.clear();
@@ -173,6 +170,9 @@ bool ThreadPoolSchedulerImpl::runGraphicsTasks() {
     int i;
     for (i = 1; i <= MAX_NUM_GRAPHICS_TASKS; i++) {
         {
+            if (terminated) {
+                return false;
+            }
             std::unique_lock<std::mutex> lock(graphicsMutex);
             if (graphicsQueue.empty()) {
                 noTasksLeft = true;
@@ -189,13 +189,16 @@ bool ThreadPoolSchedulerImpl::runGraphicsTasks() {
         auto avgMs = cwtMs / (double) i;
         if (cwtMs >= MAX_TIME_GRAPHICS_TASKS_MS || (cwtMs + avgMs * (i + 1)) >= MAX_TIME_GRAPHICS_TASKS_MS) {
             {
+                if (terminated) {
+                    return false;
+                }
                 std::unique_lock<std::mutex> lock(graphicsMutex);
                 noTasksLeft = graphicsQueue.empty();
             }
             break;
         }
     }
-    return !noTasksLeft;
+    return !noTasksLeft && !terminated;
 }
 
 void ThreadPoolSchedulerImpl::delayedTasksThread() {
