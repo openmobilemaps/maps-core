@@ -139,5 +139,14 @@ private:
     bool isIconOpaque = true;
     bool isStretchIconOpaque = true;
 
+    double iconRotate;
+    double iconSize;
+    std::vector<float> iconTextFitPadding;
+    TextSymbolPlacement textSymbolPlacement;
+    double textPadding = 0;
+    Anchor iconAnchor;
+    Vec2F iconOffset = Vec2F(0.0, 0.0);
+    IconTextFit iconTextFit = IconTextFit::NONE;
+
     bool isPlaced();
 };

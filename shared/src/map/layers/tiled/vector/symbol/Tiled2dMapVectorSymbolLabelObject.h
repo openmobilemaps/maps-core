@@ -104,4 +104,9 @@ private:
     size_t renderLineCoordinatesCount;
     std::vector<Coord> renderLineCoordinates;
     std::optional<std::vector<Coord>> lineCoordinates;
+
+    double textSize = 0;
+    double textRotate = 0;
+    double textPadding = 0;
+    SymbolAlignment textAlignment = SymbolAlignment::AUTO;
 };
