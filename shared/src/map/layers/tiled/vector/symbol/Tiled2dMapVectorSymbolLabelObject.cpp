@@ -157,6 +157,10 @@ int Tiled2dMapVectorSymbolLabelObject::getCharacterCount(){
 }
 
 void Tiled2dMapVectorSymbolLabelObject::setupProperties(std::vector<float> &textureCoordinates, std::vector<uint16_t> &styleIndices, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier) {
+    const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
+
+    evaluateStyleProperties(zoomIdentifier);
+
     for(auto &i : splittedTextInfo) {
         auto& d = fontResult->fontData->glyphs[i.glyphIndex];
         if(i.glyphIndex >= 0 && d.charCode != " ") {
@@ -172,18 +176,39 @@ void Tiled2dMapVectorSymbolLabelObject::setupProperties(std::vector<float> &text
     styleOffset += 1;
 }
 
+
+void Tiled2dMapVectorSymbolLabelObject::evaluateStyleProperties(const double zoomIdentifier) {
+    auto roundedZoom = std::round(zoomIdentifier * 100.0) / 100.0;
+
+    if (roundedZoom == lastZoomEvaluation) {
+        return;
+    }
+
+    const auto evalContext = EvaluationContext(roundedZoom, featureContext);
+
+    textSize = description->style.getTextSize(evalContext);
+    textAlignment = description->style.getTextRotationAlignment(evalContext);
+    textRotate = description->style.getTextRotate(evalContext);
+    textPadding = description->style.getTextPadding(evalContext);
+
+    opacity = description->style.getTextOpacity(evalContext);
+    textColor = description->style.getTextColor(evalContext);
+    haloColor = description->style.getTextHaloColor(evalContext);
+    haloWidth = description->style.getTextHaloWidth(evalContext);
+
+    lastZoomEvaluation = roundedZoom;
+}
+
+
 void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const bool collides, const double rotation, const float alpha) {
     const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
+
+    evaluateStyleProperties(zoomIdentifier);
 
     if (collides || !(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier)) {
         styles[(9 * styleOffset) + 3] = 0;
         styles[(9 * styleOffset) + 7] = 0;
     } else {
-        const auto opacity = description->style.getTextOpacity(evalContext);
-        const auto textColor = description->style.getTextColor(evalContext);
-        const auto haloColor = description->style.getTextHaloColor(evalContext);
-        const auto haloWidth = description->style.getTextHaloWidth(evalContext);
-
         styles[(9 * styleOffset) + 0] = textColor.r; //R
         styles[(9 * styleOffset) + 1] = textColor.g; //G
         styles[(9 * styleOffset) + 2] = textColor.b; //B
@@ -232,27 +257,24 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
     
     const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
     
-    const float fontSize = scaleFactor * description->style.getTextSize(evalContext);
+    const float fontSize = scaleFactor * textSize;
     
     auto pen = Vec2D(0.0, 0.0);
     
-    std::optional<BoundingBox> box = std::nullopt;
-    std::optional<BoundingBox> centerPosBox = std::nullopt;
+    BoundingBox box(referencePoint.systemIdentifier);
+    BoundingBox centerPosBox(referencePoint.systemIdentifier);
 
     centerPositions.clear();
     centerPositions.reserve(characterCount);
     
     std::vector<size_t> lineEndIndices;
 
-    const auto textAlignment = description->style.getTextRotationAlignment(evalContext);
-
     float angle;
     if (textAlignment == SymbolAlignment::MAP) {
-        angle = description->style.getTextRotate(evalContext);
+        angle = textRotate;
     } else {
-        angle = description->style.getTextRotate(evalContext) - rotation;
+        angle = textRotate - rotation;
     }
-
 
     Vec2D anchorOffset(0.0, 0.0);
 
@@ -273,34 +295,27 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
                 
                 Quad2dD quad = Quad2dD(Vec2D(x, yh), Vec2D(xw, yh), Vec2D(xw, y), Vec2D(x, y));
 
-                if (!box) {
-                    box = BoundingBox(referencePoint.systemIdentifier);
-                    centerPosBox = BoundingBox(referencePoint.systemIdentifier);
-                }
-
                 baseLines.push_back(yh);
 
-                box->addPoint(quad.topLeft.x, quad.topLeft.y, referencePoint.z);
-                box->addPoint(quad.topRight.x, quad.topRight.y, referencePoint.z);
-                box->addPoint(quad.bottomLeft.x, quad.bottomLeft.y, referencePoint.z);
-                box->addPoint(quad.bottomRight.x, quad.bottomRight.y, referencePoint.z);
+                box.addPoint(quad.topLeft.x, quad.topLeft.y, referencePoint.z);
+                box.addPoint(quad.topRight.x, quad.topRight.y, referencePoint.z);
+                box.addPoint(quad.bottomLeft.x, quad.bottomLeft.y, referencePoint.z);
+                box.addPoint(quad.bottomRight.x, quad.bottomRight.y, referencePoint.z);
 
                 if (pen.x == 0.0 && pen.y == 0.0) {
                     // only look at first character for offset
                     // this way the left top edge of the first character is exactly in the origin.
-                    anchorOffset.x = -box->min.x;
-                    anchorOffset.y = -box->min.y;
+                    anchorOffset.x = -box.min.x;
+                    anchorOffset.y = -box.min.y;
                 }
 
                 scales[2 * (countOffset + centerPositions.size()) + 0] = size.x;
                 scales[2 * (countOffset + centerPositions.size()) + 1] = size.y;
                 rotations[countOffset + centerPositions.size()] = -angle;
 
-                centerPosBox->addPoint(x + size.x / 2, y + size.y / 2, referencePoint.z);
+                centerPosBox.addPoint(x + size.x / 2, y + size.y / 2, referencePoint.z);
                 centerPositions.push_back(Vec2D(x + size.x / 2,
                                                 y + size.y / 2));
-
-
             }
 
             pen.x += advance.x * (1.0 + letterSpacing);
@@ -325,8 +340,8 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
     lineEndIndices.push_back(centerPositions.size() - 1);
 
-    const Vec2D size((box->max.x - box->min.x), (medianLastBaseLine - box->min.y));
-    const Vec2D centerSize((centerPosBox->max.x - centerPosBox->min.x), (centerPosBox->max.y - centerPosBox->min.y));
+    const Vec2D size((box.max.x - box.min.x), (medianLastBaseLine - box.min.y));
+    const Vec2D centerSize((centerPosBox.max.x - centerPosBox.min.x), (centerPosBox.max.y - centerPosBox.min.y));
 
     switch (textJustify) {
         case TextJustify::AUTO:
@@ -413,17 +428,17 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
         const float scaleXH = scales[2 * countOffset + 0] / 2.0;
         const float scaleYH = scales[2 * countOffset + 1] / 2.0;
 
-        box->addPoint(dx + centerPosition.x - scaleXH, dy + centerPosition.y - scaleYH, referencePoint.z);
-        box->addPoint(dx + centerPosition.x + scaleXH, dy + centerPosition.y - scaleYH, referencePoint.z);
-        box->addPoint(dx + centerPosition.x - scaleXH, dy + centerPosition.y + scaleYH, referencePoint.z);
-        box->addPoint(dx + centerPosition.x + scaleXH, dy + centerPosition.y + scaleYH, referencePoint.z);
+        box.addPoint(dx + centerPosition.x - scaleXH, dy + centerPosition.y - scaleYH, referencePoint.z);
+        box.addPoint(dx + centerPosition.x + scaleXH, dy + centerPosition.y - scaleYH, referencePoint.z);
+        box.addPoint(dx + centerPosition.x - scaleXH, dy + centerPosition.y + scaleYH, referencePoint.z);
+        box.addPoint(dx + centerPosition.x + scaleXH, dy + centerPosition.y + scaleYH, referencePoint.z);
 
         countOffset += 1;
     }
 
-    auto rectBoundingBox = box ? RectCoord(box->min, box->max) : RectCoord(referencePoint, referencePoint);
+    auto rectBoundingBox = box ? RectCoord(box.min, box.max) : RectCoord(referencePoint, referencePoint);
 
-    const float padding = description->style.getTextPadding(evalContext) * scaleFactor;
+    const float padding = textPadding * scaleFactor;
 
     rectBoundingBox.topLeft.x -= padding;
     rectBoundingBox.topLeft.y -= padding;
@@ -448,7 +463,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
 
     auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
 
-    float fontSize = scaleFactor * description->style.getTextSize(evalContext);
+    const float fontSize = scaleFactor * textSize;
 
     std::optional<BoundingBox> box = std::nullopt;
 
@@ -594,7 +609,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
     assert(countOffset == countBefore + characterCount);
 
     if (box) {
-        const float padding = description->style.getTextPadding(evalContext) * scaleFactor;
+        const float padding = textPadding * scaleFactor;
         const auto min = box->min;
         const auto max = box->max;
         boundingBox.topLeft = Vec2D(min.x - padding, min.y - padding);

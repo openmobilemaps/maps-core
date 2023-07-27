@@ -86,6 +86,9 @@ public:
 
     void setAlpha(float alpha);
 private:
+    double lastZoomEvaluation = -1;
+    void evaluateStyleProperties(const double zoomIdentifier);
+
     ::Coord getRenderCoordinates(Anchor iconAnchor, double rotation, double iconWidth, double iconHeight);
 
     std::shared_ptr<Tiled2dMapVectorLayerConfig> layerConfig;
@@ -138,6 +141,15 @@ private:
     float alpha = 1.0;
     bool isIconOpaque = true;
     bool isStretchIconOpaque = true;
+
+    double iconRotate;
+    double iconSize;
+    std::vector<float> iconTextFitPadding;
+    TextSymbolPlacement textSymbolPlacement;
+    double textPadding = 0;
+    Anchor iconAnchor;
+    Vec2F iconOffset = Vec2F(0.0, 0.0);
+    IconTextFit iconTextFit = IconTextFit::NONE;
 
     bool isPlaced();
 };
