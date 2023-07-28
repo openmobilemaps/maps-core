@@ -204,7 +204,10 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
         return;
     }
     
-    auto selfMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+    std::shared_ptr<Mailbox> selfMailbox = mailbox;
+    if (!mailbox) {
+        selfMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+    }
     auto castedMe = std::static_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
     auto selfActor = WeakActor<Tiled2dMapVectorLayer>(selfMailbox, castedMe);
     auto selfRasterActor = WeakActor<Tiled2dMapRasterSourceListener>(selfMailbox, castedMe);
