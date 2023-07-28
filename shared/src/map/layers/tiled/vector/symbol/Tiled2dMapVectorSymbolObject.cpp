@@ -50,7 +50,7 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     renderCoordinate = converter->convertToRenderSystem(coordinate);
     initialRenderCoordinateVec = Vec2D(renderCoordinate.x, renderCoordinate.y);
 
-        evaluateStyleProperties(tileInfo.zoomIdentifier);
+    evaluateStyleProperties(tileInfo.zoomIdentifier);
 
     if (hasIcon && !hideIcon) {
         if (iconTextFit == IconTextFit::NONE) {
@@ -354,9 +354,6 @@ void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(std::vector<float>
     }
 
     const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
-
-    renderCoordinate.y -= iconOffset.y;
-    renderCoordinate.x += iconOffset.x;
 
     positions[2 * countOffset] = renderCoordinate.x;
     positions[2 * countOffset + 1] = renderCoordinate.y;
