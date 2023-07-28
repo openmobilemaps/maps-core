@@ -29,11 +29,17 @@ BoundingBox::BoundingBox(const int32_t systemIdentifier)
     , max(systemIdentifier, std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(),
           std::numeric_limits<float>::lowest()) {}
 
-
 BoundingBox::BoundingBox(const Coord& p):
     systemIdentifier(p.systemIdentifier),
     min(p),
     max(p) {}
+
+BoundingBox::operator bool() {
+    return min.x != std::numeric_limits<float>::max() ||
+           min.y != std::numeric_limits<float>::max() ||
+           max.x != std::numeric_limits<float>::min() ||
+           max.y != std::numeric_limits<float>::min();
+}
 
 void BoundingBox::addPoint(const Coord &p) {
     auto const &conv = CoordinateConversionHelperInterface::independentInstance()->convert(systemIdentifier, p);

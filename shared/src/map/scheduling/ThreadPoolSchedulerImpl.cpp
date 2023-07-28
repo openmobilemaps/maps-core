@@ -24,30 +24,6 @@ ThreadPoolSchedulerImpl::ThreadPoolSchedulerImpl(const std::shared_ptr<ThreadPoo
     }
 }
 
-ThreadPoolSchedulerImpl::~ThreadPoolSchedulerImpl() {
-    {
-        std::lock_guard<std::mutex> lock(defaultMutex);
-        terminated = true;
-    }
-    {
-        std::lock_guard<std::mutex> lock(graphicsMutex);
-        graphicsQueue.clear();
-    }
-    {
-        std::lock_guard<std::mutex> lock(defaultMutex);
-        defaultQueue.clear();
-    }
-    defaultCv.notify_all();
-    delayedTasksCv.notify_all();
-    delayedTaskThread.join();
-    
-    for (auto& thread : threads) {
-        if (std::this_thread::get_id() != thread.get_id()) {
-            thread.join();
-        }
-    }
-}
-
 void ThreadPoolSchedulerImpl::addTask(const std::shared_ptr<TaskInterface> & task) {
     assert(task);
     auto const &config = task->getConfig();
@@ -125,7 +101,31 @@ void ThreadPoolSchedulerImpl::resume() {
 
 
 void ThreadPoolSchedulerImpl::destroy() {
+    terminated = true;
     callbacks = nullptr;
+
+    {
+        std::lock_guard<std::mutex> lock(graphicsMutex);
+        graphicsQueue.clear();
+    }
+    {
+        std::lock_guard<std::mutex> lock(defaultMutex);
+        defaultQueue.clear();
+    }
+    {
+        std::unique_lock<std::mutex> lock(delayedTasksMutex);
+        nextWakeup = std::chrono::system_clock::now();
+    }
+
+    defaultCv.notify_all();
+    delayedTasksCv.notify_all();
+    delayedTaskThread.join();
+
+    for (auto& thread : threads) {
+        if (std::this_thread::get_id() != thread.get_id()) {
+            thread.join();
+        }
+    }
 }
 
 std::thread ThreadPoolSchedulerImpl::makeSchedulerThread(size_t index, TaskPriority priority) {
@@ -170,6 +170,9 @@ bool ThreadPoolSchedulerImpl::runGraphicsTasks() {
     int i;
     for (i = 1; i <= MAX_NUM_GRAPHICS_TASKS; i++) {
         {
+            if (terminated) {
+                return false;
+            }
             std::unique_lock<std::mutex> lock(graphicsMutex);
             if (graphicsQueue.empty()) {
                 noTasksLeft = true;
@@ -186,13 +189,16 @@ bool ThreadPoolSchedulerImpl::runGraphicsTasks() {
         auto avgMs = cwtMs / (double) i;
         if (cwtMs >= MAX_TIME_GRAPHICS_TASKS_MS || (cwtMs + avgMs * (i + 1)) >= MAX_TIME_GRAPHICS_TASKS_MS) {
             {
+                if (terminated) {
+                    return false;
+                }
                 std::unique_lock<std::mutex> lock(graphicsMutex);
                 noTasksLeft = graphicsQueue.empty();
             }
             break;
         }
     }
-    return !noTasksLeft;
+    return !noTasksLeft && !terminated;
 }
 
 void ThreadPoolSchedulerImpl::delayedTasksThread() {

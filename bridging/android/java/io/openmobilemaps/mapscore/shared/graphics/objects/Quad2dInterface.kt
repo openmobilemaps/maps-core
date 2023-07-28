@@ -28,7 +28,10 @@ abstract class Quad2dInterface {
             NativeObjectManager.register(this, nativeRef)
         }
 
-        external fun nativeDestroy(nativeRef: Long)
+        companion object {
+            @JvmStatic
+            external fun nativeDestroy(nativeRef: Long)
+        }
 
         override fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.RectD) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

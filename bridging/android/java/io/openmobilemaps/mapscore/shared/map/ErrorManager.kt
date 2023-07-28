@@ -35,7 +35,10 @@ abstract class ErrorManager {
             NativeObjectManager.register(this, nativeRef)
         }
 
-        external fun nativeDestroy(nativeRef: Long)
+        companion object {
+            @JvmStatic
+            external fun nativeDestroy(nativeRef: Long)
+        }
 
         override fun addTiledLayerError(error: TiledLayerError) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

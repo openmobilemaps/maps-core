@@ -22,6 +22,8 @@ class BoundingBox: public BoundingBoxInterface, public std::enable_shared_from_t
     BoundingBox(const int32_t systemIdentifier);
     BoundingBox(const Coord& p);
 
+    operator bool();
+
     void addPoint(const double x, const double y, const double z);
     void addPoint(const Coord& p);
     void addBox(const std::optional<BoundingBox>& box);

@@ -18,7 +18,7 @@
 #include "Tiled2dMapRasterSourceListener.h"
 
 class Tiled2dMapRasterSource
-    : public Tiled2dMapSource<TextureHolderInterface, TextureLoaderResult, std::shared_ptr<::TextureHolderInterface>> {
+    : public Tiled2dMapSource<TextureHolderInterface, std::shared_ptr<TextureLoaderResult>, std::shared_ptr<::TextureHolderInterface>> {
   public:
     Tiled2dMapRasterSource(const MapConfig &mapConfig,
                            const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
@@ -35,11 +35,11 @@ class Tiled2dMapRasterSource
   protected:
     virtual void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
         
-    virtual ::djinni::Future<TextureLoaderResult> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
+    virtual ::djinni::Future<std::shared_ptr<TextureLoaderResult>> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
 
     virtual bool hasExpensivePostLoadingTask() override;
 
-    virtual std::shared_ptr<::TextureHolderInterface> postLoadingTask(const TextureLoaderResult &loadedData,
+    virtual std::shared_ptr<::TextureHolderInterface> postLoadingTask(const std::shared_ptr<TextureLoaderResult> &loadedData,
                                                                       const Tiled2dMapTileInfo &tile) override;
 
 

@@ -51,7 +51,10 @@ abstract class LayerInterface {
             NativeObjectManager.register(this, nativeRef)
         }
 
-        external fun nativeDestroy(nativeRef: Long)
+        companion object {
+            @JvmStatic
+            external fun nativeDestroy(nativeRef: Long)
+        }
 
         override fun setMaskingObject(maskingObject: io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface?) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

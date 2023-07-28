@@ -64,6 +64,9 @@ private:
     void updatePropertiesPoint(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation);
     double updatePropertiesLine(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation);
 
+    double lastZoomEvaluation = -1;
+    void evaluateStyleProperties(const double zoomIdentifier);
+
     std::pair<int, double> findReferencePointIndices();
     Vec2D pointAtIndex(const std::pair<int, double> &index, bool useRender);
     std::pair<int, double> indexAtDistance(const std::pair<int, double> &index, double distance);
@@ -104,4 +107,14 @@ private:
     size_t renderLineCoordinatesCount;
     std::vector<Coord> renderLineCoordinates;
     std::optional<std::vector<Coord>> lineCoordinates;
+
+    double textSize = 0;
+    double textRotate = 0;
+    double textPadding = 0;
+    SymbolAlignment textAlignment = SymbolAlignment::AUTO;
+
+    double opacity;
+    Color textColor = Color(0.0 ,0.0, 0.0, 0.0);
+    Color haloColor = Color(0.0 ,0.0, 0.0, 0.0);
+    double haloWidth;
 };

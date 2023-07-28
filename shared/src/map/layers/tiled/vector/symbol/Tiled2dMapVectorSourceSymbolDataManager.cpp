@@ -158,14 +158,12 @@ void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::st
     std::unordered_set<Tiled2dMapTileInfo> tilesToRemove;
     std::unordered_map<Tiled2dMapTileInfo, TileState> tileStateUpdates;
 
-    bool stateUpdated = false;
-
     for (const auto &vectorTileInfo: currentTileInfos) {
         if (tileSymbolGroupMap.count(vectorTileInfo.tileInfo) == 0) {
             tilesToAdd.push_back(&vectorTileInfo);
         } else {
             auto tileStateIt = tileStateMap.find(vectorTileInfo.tileInfo);
-            if (tileStateIt == tileStateMap.end() || (tileStateIt != tileStateMap.end() && tileStateIt->second != vectorTileInfo.state)) {
+            if (tileStateIt == tileStateMap.end() || (tileStateIt->second != vectorTileInfo.state)) {
                 tileStateUpdates[vectorTileInfo.tileInfo] = vectorTileInfo.state;
             }
         }
@@ -231,10 +229,10 @@ std::optional<Actor<Tiled2dMapVectorSymbolGroup>> Tiled2dMapVectorSourceSymbolDa
 }
 
 
-void Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups(const std::vector<Actor<Tiled2dMapVectorSymbolGroup>> toSetup,
-                                                                const std::vector<Actor<Tiled2dMapVectorSymbolGroup>> toClear,
-                                                                const std::unordered_set<Tiled2dMapTileInfo> tilesStatesToRemove,
-                                                                const std::unordered_map<Tiled2dMapTileInfo, TileState> tileStateUpdates) {
+void Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups(const std::vector<Actor<Tiled2dMapVectorSymbolGroup>> &toSetup,
+                                                                const std::vector<Actor<Tiled2dMapVectorSymbolGroup>> &toClear,
+                                                                const std::unordered_set<Tiled2dMapTileInfo> &tilesStatesToRemove,
+                                                                const std::unordered_map<Tiled2dMapTileInfo, TileState> &tileStateUpdates) {
     auto mapInterface = this->mapInterface.lock();
     auto context = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!context) { return; }
@@ -243,7 +241,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups(const std::vecto
         auto tileStateIt = tileStateMap.find(tile);
         if (tileStateIt == tileStateMap.end()) {
             tileStateMap[tile] = state;
-        } else if (tileStateIt->second != state) {
+        } else {
             tileStateIt->second = state;
         }
     }

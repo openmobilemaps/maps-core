@@ -20,7 +20,9 @@
 #include <vector>
 #include "DataRef.hpp"
 
-class Tiled2dMapVectorSource : public Tiled2dMapSource<djinni::DataRef, DataLoaderResult, Tiled2dMapVectorTileInfo::FeatureMap>  {
+class Tiled2dMapVectorSource : public Tiled2dMapSource<std::shared_ptr<djinni::DataRef>,
+                                                        std::shared_ptr<DataLoaderResult>,
+                                                        Tiled2dMapVectorTileInfo::FeatureMap>  {
 public:
     Tiled2dMapVectorSource(const MapConfig &mapConfig,
                            const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
@@ -43,11 +45,11 @@ protected:
     
     virtual void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
     
-    virtual ::djinni::Future<DataLoaderResult> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
+    virtual ::djinni::Future<std::shared_ptr<DataLoaderResult>> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
 
     virtual bool hasExpensivePostLoadingTask() override;
     
-    virtual Tiled2dMapVectorTileInfo::FeatureMap postLoadingTask(const DataLoaderResult &loadedData, const Tiled2dMapTileInfo &tile) override;
+    virtual Tiled2dMapVectorTileInfo::FeatureMap postLoadingTask(const std::shared_ptr<DataLoaderResult> &loadedData, const Tiled2dMapTileInfo &tile) override;
 
 private:
     const std::vector<std::shared_ptr<::LoaderInterface>> loaders;

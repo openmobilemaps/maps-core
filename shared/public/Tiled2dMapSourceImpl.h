@@ -321,7 +321,7 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(Tiled2dMapTileInfo tile, size
         auto strongSelf = weakSelfPtr.lock();
         if (strongSelf) {
             auto res = result.get();
-            if (res.status == LoaderStatus::OK) {
+            if (res->status == LoaderStatus::OK) {
                 if (strongSelf->hasExpensivePostLoadingTask()) {
                     auto strongScheduler = strongSelf->scheduler.lock();
                     if (strongScheduler) {
@@ -339,7 +339,7 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(Tiled2dMapTileInfo tile, size
                     weakActor.message(&Tiled2dMapSource::didLoad, tile, loaderIndex, strongSelf->postLoadingTask(res, tile));
                 }
             } else {
-                weakActor.message(&Tiled2dMapSource::didFailToLoad, tile, loaderIndex, res.status, res.errorCode);
+                weakActor.message(&Tiled2dMapSource::didFailToLoad, tile, loaderIndex, res->status, res->errorCode);
             }
         }
     });

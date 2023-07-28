@@ -24,8 +24,6 @@ class ThreadPoolSchedulerImpl: public SchedulerInterface {
 public:
     ThreadPoolSchedulerImpl(const std::shared_ptr<ThreadPoolCallbacks> &callbacks);
 
-    ~ThreadPoolSchedulerImpl();
-    
     virtual void addTask(const std::shared_ptr<TaskInterface> & task) override;
 
     virtual void addTasks(const std::vector<std::shared_ptr<TaskInterface>> & tasks) override;
@@ -76,7 +74,7 @@ private:
     //contains the tasks and the timestamp at which they were added to the list
     std::vector<std::pair<std::shared_ptr<TaskInterface>, TimeStamp>> delayedTasks;
 
-    bool terminated{false};
+    std::atomic_bool terminated{false};
 
     std::weak_ptr<SchedulerGraphicsTaskCallbacks> graphicsCallbacks;
 };

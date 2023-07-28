@@ -30,7 +30,10 @@ abstract class Tiled2dMapLayerConfig {
             NativeObjectManager.register(this, nativeRef)
         }
 
-        external fun nativeDestroy(nativeRef: Long)
+        companion object {
+            @JvmStatic
+            external fun nativeDestroy(nativeRef: Long)
+        }
 
         override fun getCoordinateSystemIdentifier(): Int {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

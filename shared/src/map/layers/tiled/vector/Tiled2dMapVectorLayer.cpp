@@ -204,7 +204,10 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
         return;
     }
     
-    auto selfMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+    std::shared_ptr<Mailbox> selfMailbox = mailbox;
+    if (!mailbox) {
+        selfMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+    }
     auto castedMe = std::static_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
     auto selfActor = WeakActor<Tiled2dMapVectorLayer>(selfMailbox, castedMe);
     auto selfRasterActor = WeakActor<Tiled2dMapRasterSourceListener>(selfMailbox, castedMe);
@@ -686,7 +689,7 @@ void Tiled2dMapVectorLayer::setSelectionDelegate(const std::weak_ptr<Tiled2dMapV
 void Tiled2dMapVectorLayer::setSelectionDelegate(const std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate) {
     this->strongSelectionDelegate = selectionDelegate;
     this->selectionDelegate = selectionDelegate;
-    setSelectionDelegate(std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface>(selectionDelegate));;
+    setSelectionDelegate(std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface>(selectionDelegate));
 }
 
 void Tiled2dMapVectorLayer::setSelectedFeatureIdentifier(std::optional<int64_t> identifier) {
