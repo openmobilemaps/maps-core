@@ -3,12 +3,16 @@
 
 package io.openmobilemaps.mapscore.shared.map.coordinates
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class Coord(
     var systemIdentifier: Int,
     var x: Double,
     var y: Double,
     var z: Double,
-) : Comparable<Coord> {
+) : Comparable<Coord>, Parcelable {
 
     override fun compareTo(other: Coord): Int {
         var tempResult = 0

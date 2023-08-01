@@ -67,19 +67,19 @@ coord = record {
     x: f64;
     y: f64;
     z: f64;
-} deriving (eq, ord)
+} deriving (eq, ord, parcelable)
 
 rect_coord = record {
     top_left: coord;
     bottom_right: coord;
-} deriving (eq, ord)
+} deriving (eq, ord, parcelable)
 
 quad_coord = record {
     top_left: coord;
     top_right: coord;
     bottom_right: coord;
     bottom_left: coord;
-} deriving (eq, ord)
+} deriving (eq, ord, parcelable)
 
 polygon_coord = record {
     positions: list<coord>;
