@@ -453,26 +453,26 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
                           Vec2DHelper::rotate(Vec2D(rectBoundingBox.bottomRight.x, rectBoundingBox.bottomRight.y), Vec2D(dx, dy), angle),
                           Vec2DHelper::rotate(Vec2D(rectBoundingBox.topLeft.x, rectBoundingBox.bottomRight.y), Vec2D(dx, dy), angle));
     if (rotationAlignment != SymbolAlignment::MAP) {
-        boundingBoxViewportAligned = RectD(dx, dy, dimensions.x, dimensions.y);
+        boundingBoxViewportAligned = RectD(dx, dy, dimensions.x + padding, dimensions.y + padding);
         boundingBoxCircles = std::nullopt;
     } else {
         std::vector<CircleD> circles;
+        Vec2D origin = Vec2D(dx, dy);
         Vec2D lastCirclePosition = Vec2D(0, 0);
         double lastRadius = 0;
         size_t count = centerPositions.size();
         for (int i = 0; i < count; i++) {
-            // TODO UBCM: fix rotation misalignment
-            double newX = dx + centerPositions.at(i).x;
-            double newY = dy + centerPositions.at(i).y;
+            Vec2D newPos = Vec2D(dx + centerPositions.at(i).x, dy + centerPositions.at(i).y);
+            newPos = Vec2DHelper::rotate(newPos, origin, angle);
             double newRadius = std::max(scales[2 * i] / 2.0,
                                         scales[2 * i + 1] / 2.0);
-            if (std::sqrt((newX - lastCirclePosition.x) * (newX - lastCirclePosition.x) +
-                          (newY - lastCirclePosition.y) * (newY - lastCirclePosition.y)) <= lastRadius + newRadius) {
+            if (i != count - 1 && std::sqrt((newPos.x - lastCirclePosition.x) * (newPos.x - lastCirclePosition.x) +
+                                            (newPos.y - lastCirclePosition.y) * (newPos.y - lastCirclePosition.y)) <=
+                                  lastRadius + newRadius) {
                 continue;
             }
-            circles.emplace_back(Vec2D(newX, newY), newRadius);
-            lastCirclePosition.x = newX;
-            lastCirclePosition.y = newY;
+            circles.emplace_back(newPos, newRadius + padding);
+            lastCirclePosition = newPos;
             lastRadius = newRadius;
         }
         boundingBoxCircles = circles;
@@ -519,6 +519,8 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
     double lastAngle = 0.0;
 
     double lineCenteringParameter = -fontResult->fontData->info.base / fontResult->fontData->info.lineHeight;
+
+    double maxCharDim = 0.0;
 
     for(auto &i : splittedTextInfo) {
         if(i.glyphIndex < 0) {
@@ -591,6 +593,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             if (d.charCode != " ") {
                 scales[2 * (countOffset + centerPositions.size()) + 0] = charSize.x;
                 scales[2 * (countOffset + centerPositions.size()) + 1] = charSize.y;
+                maxCharDim = std::max(maxCharDim, std::max(charSize.x, charSize.y));
                 rotations[countOffset + centerPositions.size()] = -angleDeg;
 
                 centerPositions.push_back(OBB2D(quad).getCenter());
@@ -646,17 +649,17 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
         Vec2D lastCirclePosition = Vec2D(0, 0);
         double lastRadius = 0;
         size_t count = centerPositions.size();
+        size_t initialOffset = countOffset - count;
         for (int i = 0; i < count; i++) {
             double newX = centerPositions.at(i).x;
             double newY = centerPositions.at(i).y;
-            double newRadius = std::max(scales[2 * i] / 2.0,
-                                        scales[2 * i + 1] / 2.0) + padding;
+            double newRadius = maxCharDim / 2.0;
             if (i != count - 1 && std::sqrt((newX - lastCirclePosition.x) * (newX - lastCirclePosition.x) +
                                             (newY - lastCirclePosition.y) * (newY - lastCirclePosition.y))
                                   <= lastRadius + newRadius) {
                 continue;
             }
-            circles.emplace_back(Vec2D(newX, newY), newRadius);
+            circles.emplace_back(Vec2D(newX, newY), newRadius + padding);
             lastCirclePosition.x = newX;
             lastCirclePosition.y = newY;
             lastRadius = newRadius;

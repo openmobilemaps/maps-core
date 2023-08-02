@@ -15,7 +15,7 @@ void Tiled2dMapVectorSourceSymbolCollisionManager::collisionDetection(const std:
     std::vector<std::string> layers;
     std::string currentSource;
 
-    // TODO UBCM: Detect smarter if rebuilding the CollisionGrid is really necessary
+    // TODO UBCM: Smarter logic to check if rebuilding the CollisionGrid is really necessary
     if (!enforceRecomputation && vpMatrix == lastVpMatrix) {
         return;
     }

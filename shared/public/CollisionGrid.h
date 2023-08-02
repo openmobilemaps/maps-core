@@ -71,7 +71,7 @@ public:
      * Add a collision grid aligned rectangle (when projected with the provided vpMatrix) and receive the feedback,
      * if it has collided with the previous content of the grid. Only added, when not colliding!
      */
-    bool addAndCheckAlignedRectCollision(const RectD &rectangle) {
+    bool addAndCheckCollisionAlignedRect(const RectD &rectangle) {
         RectI projectedRectangle = getProjectedRectangle(rectangle);
         std::optional<IndexRange> indexRange = getIndexRangeForRectangle(projectedRectangle);
         if (!indexRange.has_value()) {
@@ -104,7 +104,7 @@ public:
     * Add a vector of circles (which are then projected with the provided vpMatrix) and receive the feedback, if they have collided
     * with the previous content of the grid. Assumed to remain circles in the projected space. Only added, when not colliding!
     */
-    bool addAndCheckCirclesCollision(const std::vector<CircleD> &circles) {
+    bool addAndCheckCollisionCircles(const std::vector<CircleD> &circles) {
         if (circles.empty()) {
             // No circles -> no collision
             return false;
@@ -175,28 +175,6 @@ private:
         return {Vec2I(std::round((origin.at(0) / origin.at(3)) * halfWidth + halfWidth),
                       std::round((origin.at(1) / origin.at(3)) * halfHeight + halfHeight)),
                 iRadius};
-    }
-
-    std::vector<CircleI> getProjectedCirclesEqualRadius(const std::vector<CircleI> &circles) {
-        std::vector<CircleI> result;
-        std::vector<float> origin(4);
-        std::vector<float> radius(4);
-        int32_t iRadius = 0;
-        for (const CircleI &circle: circles) {
-            Matrix::multiplyMMC(origin, 0, vpMatrix, 0,
-                                {(float) circle.origin.x, (float) circle.origin.y, 0.0, 1.0}, 0);
-            if (iRadius == 0) {
-                Matrix::multiplyMMC(radius, 0, vpMatrix, 0,
-                                    {(float) circle.radius, (float) circle.radius, 0.0, 0.0}, 0);
-                radius.at(0) = radius.at(0) * halfWidth;
-                radius.at(1) = radius.at(1) * halfHeight;
-                iRadius = std::round(std::sqrt(radius.at(0) * radius.at(0) + radius.at(1) + radius.at(1)));
-            }
-            result.emplace_back(CircleI(Vec2I(std::round((origin.at(0) / origin.at(3)) * halfWidth + halfWidth),
-                                              std::round((origin.at(1) / origin.at(3)) * halfHeight + halfHeight)),
-                                        iRadius));
-        }
-        return result;
     }
 
     /**

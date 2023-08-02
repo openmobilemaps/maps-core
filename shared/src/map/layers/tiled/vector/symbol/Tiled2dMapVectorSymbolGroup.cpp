@@ -524,52 +524,57 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                 }
 
                 if (!object->getIsOpaque()) continue;
-                const auto &viewportAlignedBox = object->getViewportAlignedBoundingBox(true);
-                if (viewportAlignedBox) {
-                    // Align rectangle to viewport
-                    const double sinAngle = sin(-rotation * M_PI / 180.0);
-                    const double cosAngle = cos(-rotation * M_PI / 180.0);
-                    Vec2D rotWidth = Vec2D(viewportAlignedBox->width * cosAngle, viewportAlignedBox->width * sinAngle);
-                    Vec2D rotHeight = Vec2D(-viewportAlignedBox->height * sinAngle, viewportAlignedBox->height * cosAngle);
-                    vertices.push_back({std::vector<::Coord>{
-                            Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(),viewportAlignedBox->x, viewportAlignedBox->y, 0.0),
-                            Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(),viewportAlignedBox->x + rotWidth.x, viewportAlignedBox->y + rotWidth.y, 0.0),
-                            Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(),viewportAlignedBox->x + rotWidth.x + rotHeight.x,viewportAlignedBox->y + rotWidth.y + rotHeight.y, 0.0),
-                            Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(),viewportAlignedBox->x + rotHeight.x, viewportAlignedBox->y + rotHeight.y, 0.0),
-                    }, object->collides ? 1 : 0});
-                    indices.push_back(currentVertexIndex);
-                    indices.push_back(currentVertexIndex + 1);
-                    indices.push_back(currentVertexIndex + 2);
-
-                    indices.push_back(currentVertexIndex);
-                    indices.push_back(currentVertexIndex + 3);
-                    indices.push_back(currentVertexIndex + 2);
-
-                    currentVertexIndex += 4;
-                } else {
-                    const auto &circles = object->getMapAlignedBoundingCircles(true);
-                    if (circles && !circles->empty()) {
-                        for (const auto &circle: *circles) {
-                            const size_t numCirclePoints = 8;
-                            std::vector<Coord> coords;
+                const auto &circles = object->getMapAlignedBoundingCircles(true);
+                if (circles && !circles->empty()) {
+                    for (const auto &circle: *circles) {
+                        const size_t numCirclePoints = 8;
+                        std::vector<Coord> coords;
+                        coords.emplace_back(CoordinateSystemIdentifiers::RENDERSYSTEM(),
+                                            circle.origin.x, circle.origin.y, 0.0);
+                        for (size_t i = 0; i < numCirclePoints; i++) {
+                            float angle = i * (2 * M_PI / numCirclePoints);
                             coords.emplace_back(CoordinateSystemIdentifiers::RENDERSYSTEM(),
-                                                circle.origin.x, circle.origin.y, 0.0);
-                            for (size_t i = 0; i < numCirclePoints; i++) {
-                                float angle = i * (2 * M_PI / numCirclePoints);
-                                coords.emplace_back(CoordinateSystemIdentifiers::RENDERSYSTEM(),
-                                                    circle.origin.x + circle.radius * std::cos(angle),
-                                                    circle.origin.y + circle.radius * std::sin(angle),
-                                                    0.0);
+                                                circle.origin.x + circle.radius * std::cos(angle),
+                                                circle.origin.y + circle.radius * std::sin(angle),
+                                                0.0);
 
-                                indices.push_back(currentVertexIndex);
-                                indices.push_back(currentVertexIndex + i + 1);
-                                indices.push_back(currentVertexIndex + (i + 1) % numCirclePoints + 1);
-                            }
-                            vertices.push_back({coords, object->collides ? 1 : 0});
-
-                            currentVertexIndex += (numCirclePoints + 1);
+                            indices.push_back(currentVertexIndex);
+                            indices.push_back(currentVertexIndex + i + 1);
+                            indices.push_back(currentVertexIndex + (i + 1) % numCirclePoints + 1);
                         }
-                    } /*else {
+                        vertices.push_back({coords, object->collides ? 1 : 0});
+
+                        currentVertexIndex += (numCirclePoints + 1);
+                    }
+                } else {
+                    const auto &viewportAlignedBox = object->getViewportAlignedBoundingBox(true);
+                    if (viewportAlignedBox) {
+                        // Align rectangle to viewport
+                        const double sinAngle = sin(-rotation * M_PI / 180.0);
+                        const double cosAngle = cos(-rotation * M_PI / 180.0);
+                        Vec2D rotWidth = Vec2D(viewportAlignedBox->width * cosAngle, viewportAlignedBox->width * sinAngle);
+                        Vec2D rotHeight = Vec2D(-viewportAlignedBox->height * sinAngle, viewportAlignedBox->height * cosAngle);
+                        vertices.push_back({std::vector<::Coord>{
+                                Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), viewportAlignedBox->x, viewportAlignedBox->y,
+                                      0.0),
+                                Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), viewportAlignedBox->x + rotWidth.x,
+                                      viewportAlignedBox->y + rotWidth.y, 0.0),
+                                Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), viewportAlignedBox->x + rotWidth.x + rotHeight.x,
+                                      viewportAlignedBox->y + rotWidth.y + rotHeight.y, 0.0),
+                                Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), viewportAlignedBox->x + rotHeight.x,
+                                      viewportAlignedBox->y + rotHeight.y, 0.0),
+                        }, object->collides ? 1 : 0});
+                        indices.push_back(currentVertexIndex);
+                        indices.push_back(currentVertexIndex + 1);
+                        indices.push_back(currentVertexIndex + 2);
+
+                        indices.push_back(currentVertexIndex);
+                        indices.push_back(currentVertexIndex + 3);
+                        indices.push_back(currentVertexIndex + 2);
+
+                        currentVertexIndex += 4;
+
+                    }/*else {
                         const auto &combinedBox = object->getCombinedBoundingBox(true);
                         if (combinedBox) {
                             vertices.push_back({std::vector<::Coord>{
@@ -600,6 +605,7 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                     return;
                 }
 
+                boundingBoxLayerObject->getPolygonObject()->clear();
                 boundingBoxLayerObject->setVertices(vertices, indices);
                 boundingBoxLayerObject->getPolygonObject()->setup(mapInterface.lock()->getRenderingContext());
             }
