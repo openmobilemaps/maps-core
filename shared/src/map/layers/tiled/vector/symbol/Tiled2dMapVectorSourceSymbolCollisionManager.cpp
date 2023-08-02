@@ -9,16 +9,23 @@
  */
 
 #include "Tiled2dMapVectorSourceSymbolCollisionManager.h"
+#include "CollisionGrid.h"
 
-void Tiled2dMapVectorSourceSymbolCollisionManager::collisionDetection() {
+void Tiled2dMapVectorSourceSymbolCollisionManager::collisionDetection(const std::vector<float> &vpMatrix, const Vec2I &viewportSize, float viewportRotation, bool enforceRecomputation) {
     std::vector<std::string> layers;
     std::string currentSource;
 
-    std::shared_ptr<std::vector<OBB2D>> placements = std::make_shared<std::vector<OBB2D>>();
+    // TODO UBCM: Detect smarter if rebuilding the CollisionGrid is really necessary
+    if (!enforceRecomputation && vpMatrix == lastVpMatrix) {
+        return;
+    }
+    lastVpMatrix = vpMatrix;
 
-    const auto lambda = [&placements, &layers](auto manager){
+    auto collisionGrid = std::make_shared<CollisionGrid>(vpMatrix, viewportSize, viewportRotation);
+
+    const auto lambda = [&collisionGrid, &layers](auto manager){
         if (auto strongManager = manager.lock()) {
-            strongManager->collisionDetection(layers, placements);
+            strongManager->collisionDetection(layers, collisionGrid);
         }
     };
 

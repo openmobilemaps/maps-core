@@ -59,6 +59,16 @@ quad_2d_d = record {
     bottom_left: vec_2_d;
 }
 
+circle_d = record {
+    origin: vec_2_d;
+    radius: f64;
+}
+
+circle_i = record {
+    origin: vec_2_i;
+    radius: i32;
+}
+
 color = record {
     r: f32;
     g: f32;

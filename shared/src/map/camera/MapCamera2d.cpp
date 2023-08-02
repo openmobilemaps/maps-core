@@ -342,6 +342,15 @@ std::vector<float> MapCamera2d::getVpMatrix() {
     return newVpMatrix;
 }
 
+std::optional<std::vector<float>> MapCamera2d::getLastVpMatrix() {
+    if (!lastVpBounds) {
+        return std::nullopt;
+    }
+    std::vector<float> vpCopy;
+    std::copy(newVpMatrix.begin(), newVpMatrix.end(), std::back_inserter(vpCopy));
+    return vpCopy;
+}
+
 std::optional<::RectCoord> MapCamera2d::getLastVpMatrixViewBounds() {
     std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
     return lastVpBounds;

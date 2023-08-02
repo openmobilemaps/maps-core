@@ -78,6 +78,8 @@ abstract class MapCamera2dInterface {
 
     abstract fun asCameraInterface(): io.openmobilemaps.mapscore.shared.graphics.CameraInterface
 
+    abstract fun getLastVpMatrix(): ArrayList<Float>?
+
     abstract fun getLastVpMatrixViewBounds(): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord?
 
     abstract fun getLastVpMatrixRotation(): Float?
@@ -290,6 +292,12 @@ abstract class MapCamera2dInterface {
             return native_asCameraInterface(this.nativeRef)
         }
         private external fun native_asCameraInterface(_nativeRef: Long): io.openmobilemaps.mapscore.shared.graphics.CameraInterface
+
+        override fun getLastVpMatrix(): ArrayList<Float>? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getLastVpMatrix(this.nativeRef)
+        }
+        private external fun native_getLastVpMatrix(_nativeRef: Long): ArrayList<Float>?
 
         override fun getLastVpMatrixViewBounds(): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord? {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

@@ -320,7 +320,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite() {
     pregenerateRenderPasses();
 }
 
-void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std::string> layerIdentifiers, std::shared_ptr<std::vector<OBB2D>> placements) {
+void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std::string> layerIdentifiers, std::shared_ptr<CollisionGrid> collisionGrid) {
     auto mapInterface = this->mapInterface.lock();
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
@@ -343,8 +343,8 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
             const auto objectsIt = symbolGroupsMap.find(layerIdentifier);
             if (objectsIt != symbolGroupsMap.end()) {
                 for (auto &symbolGroup: objectsIt->second) {
-                    symbolGroup.syncAccess([&zoomIdentifier, &rotation, &scaleFactor, &placements](auto group){
-                        group->collisionDetection(zoomIdentifier, rotation, scaleFactor, placements);
+                    symbolGroup.syncAccess([&zoomIdentifier, &rotation, &scaleFactor, &collisionGrid](auto group){
+                        group->collisionDetection(zoomIdentifier, rotation, scaleFactor, collisionGrid);
                     });
                 }
             }

@@ -231,7 +231,6 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
         }
         case TextSymbolPlacement::LINE_CENTER:
         case TextSymbolPlacement::LINE: {
-
             if (rotationAlignment == SymbolAlignment::VIEWPORT) {
                 updatePropertiesPoint(positions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor,
                                       rotation);
@@ -453,6 +452,32 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
                           Vec2DHelper::rotate(Vec2D(rectBoundingBox.bottomRight.x, rectBoundingBox.topLeft.y), Vec2D(dx, dy), angle),
                           Vec2DHelper::rotate(Vec2D(rectBoundingBox.bottomRight.x, rectBoundingBox.bottomRight.y), Vec2D(dx, dy), angle),
                           Vec2DHelper::rotate(Vec2D(rectBoundingBox.topLeft.x, rectBoundingBox.bottomRight.y), Vec2D(dx, dy), angle));
+    if (rotationAlignment != SymbolAlignment::MAP) {
+        boundingBoxViewportAligned = RectD(dx, dy, dimensions.x, dimensions.y);
+        boundingBoxCircles = std::nullopt;
+    } else {
+        std::vector<CircleD> circles;
+        Vec2D lastCirclePosition = Vec2D(0, 0);
+        double lastRadius = 0;
+        size_t count = centerPositions.size();
+        for (int i = 0; i < count; i++) {
+            // TODO UBCM: fix rotation misalignment
+            double newX = dx + centerPositions.at(i).x;
+            double newY = dy + centerPositions.at(i).y;
+            double newRadius = std::max(scales[2 * i] / 2.0,
+                                        scales[2 * i + 1] / 2.0);
+            if (std::sqrt((newX - lastCirclePosition.x) * (newX - lastCirclePosition.x) +
+                          (newY - lastCirclePosition.y) * (newY - lastCirclePosition.y)) <= lastRadius + newRadius) {
+                continue;
+            }
+            circles.emplace_back(Vec2D(newX, newY), newRadius);
+            lastCirclePosition.x = newX;
+            lastCirclePosition.y = newY;
+            lastRadius = newRadius;
+        }
+        boundingBoxCircles = circles;
+        boundingBoxViewportAligned = std::nullopt;
+    }
 }
 
 double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation) {
@@ -616,12 +641,34 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
         boundingBox.topRight = Vec2D(max.x + padding, min.y - padding);
         boundingBox.bottomRight = Vec2D(max.x + padding, max.y + padding);
         boundingBox.bottomLeft = Vec2D(min.x + padding, max.y + padding);
+
+        std::vector<CircleD> circles;
+        Vec2D lastCirclePosition = Vec2D(0, 0);
+        double lastRadius = 0;
+        size_t count = centerPositions.size();
+        for (int i = 0; i < count; i++) {
+            double newX = centerPositions.at(i).x;
+            double newY = centerPositions.at(i).y;
+            double newRadius = std::max(scales[2 * i] / 2.0,
+                                        scales[2 * i + 1] / 2.0) + padding;
+            if (i != count - 1 && std::sqrt((newX - lastCirclePosition.x) * (newX - lastCirclePosition.x) +
+                                            (newY - lastCirclePosition.y) * (newY - lastCirclePosition.y))
+                                  <= lastRadius + newRadius) {
+                continue;
+            }
+            circles.emplace_back(Vec2D(newX, newY), newRadius);
+            lastCirclePosition.x = newX;
+            lastCirclePosition.y = newY;
+            lastRadius = newRadius;
+        }
+        boundingBoxCircles = circles;
     } else {
         boundingBox.topLeft = Vec2D(0.0, 0.0);
         boundingBox.topRight = Vec2D(0.0, 0.0);
         boundingBox.bottomRight = Vec2D(0.0, 0.0);
         boundingBox.bottomLeft = Vec2D(0.0, 0.0);
     }
+    boundingBoxViewportAligned = std::nullopt;
 
     double recompRotation = fmod(-rotation + 360.0, 360.0);
     double averageAngle = fmod(atan2(averageAngleS, averageAngleC) * 180.0 / M_PI + 360.0, 360.0);

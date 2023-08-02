@@ -313,6 +313,15 @@ CJNIEXPORT ::djinni_generated::NativeCameraInterface::JniType JNICALL Java_io_op
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1getLastVpMatrix(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        auto r = ref->getLastVpMatrix();
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni::List<::djinni::F32>>::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 CJNIEXPORT ::djinni_generated::NativeRectCoord::Boxed::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1getLastVpMatrixViewBounds(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {

@@ -271,6 +271,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable NSArray<NSNumber *> *)getLastVpMatrix {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getLastVpMatrix();
+        return ::djinni::Optional<std::optional, ::djinni::List<::djinni::F32>>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nullable MCRectCoord *)getLastVpMatrixViewBounds {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getLastVpMatrixViewBounds();

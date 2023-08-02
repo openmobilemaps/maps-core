@@ -22,8 +22,8 @@
 #include "Actor.h"
 #include "SpriteData.h"
 #include "TextLayerObject.h" // TODO: remove usage of TextLayerObject (and File)
-#include "OBB2D.h"
 #include "Tiled2dMapVectorLayerConfig.h"
+#include "CollisionGrid.h"
 
 class Tiled2dMapVectorSymbolObject {
 public:
@@ -74,11 +74,15 @@ public:
 
     std::optional<Quad2dD> getCombinedBoundingBox(bool considerOverlapFlag);
 
+    std::optional<RectD> getViewportAlignedBoundingBox(bool considerOverlapFlag);
+
+    std::optional<std::vector<CircleD>> getMapAlignedBoundingCircles(bool considerOverlapFlag);
+
     bool collides = true;
 
     bool getIsOpaque();
 
-    void collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<std::vector<OBB2D>> placements);
+    void collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<CollisionGrid> collisionGrid);
 
     void resetCollisionCache();
 
@@ -119,7 +123,9 @@ private:
     std::optional<SpriteDesc> stretchSpriteInfo;
 
     Quad2dD iconBoundingBox;
+    RectD iconBoundingBoxViewportAligned;
     Quad2dD stretchIconBoundingBox;
+    RectD stretchIconBoundingBoxViewportAligned;
 
     OBB2D orientedBox;
 

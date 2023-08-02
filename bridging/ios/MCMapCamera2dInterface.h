@@ -91,6 +91,8 @@
 
 - (nullable id<MCCameraInterface>)asCameraInterface;
 
+- (nullable NSArray<NSNumber *> *)getLastVpMatrix;
+
 - (nullable MCRectCoord *)getLastVpMatrixViewBounds;
 
 - (nullable NSNumber *)getLastVpMatrixRotation;

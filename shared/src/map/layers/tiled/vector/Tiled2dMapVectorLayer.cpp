@@ -388,13 +388,24 @@ void Tiled2dMapVectorLayer::update() {
     }
 
     if (collisionManager) {
+        auto mapInterface = this->mapInterface;
+        auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
+        auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+        if (!camera) {
+            return;
+        }
+        bool enforceUpdate = !prevCollisionStillValid.test_and_set();
+        Vec2I viewportSize = renderingContext->getViewportSize();
+        float viewportRotation = camera->getRotation();
+        std::optional<std::vector<float>> vpMatrix = camera->getLastVpMatrix();
+        if (!vpMatrix) return;
         for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
             sourceDataManager.syncAccess([](const auto &manager) {
                 manager->update();
             });
         }
-        collisionManager.syncAccess([](const auto &manager) {
-            manager->collisionDetection();
+        collisionManager.syncAccess([&vpMatrix, &viewportSize, viewportRotation, enforceUpdate](const auto &manager) {
+            manager->collisionDetection(*vpMatrix, viewportSize, viewportRotation, enforceUpdate);
         });
     }
 }
@@ -411,6 +422,7 @@ void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, bool i
         sourceRenderDescriptionMap[source].renderDescriptions = renderDescription;
     }
     pregenerateRenderPasses();
+    prevCollisionStillValid.clear();
 }
 
 void Tiled2dMapVectorLayer::pregenerateRenderPasses() {

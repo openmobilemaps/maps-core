@@ -189,6 +189,7 @@ private:
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceTileDataManager>> sourceDataManagers;
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceSymbolDataManager>> symbolSourceDataManagers;
     Actor<Tiled2dMapVectorSourceSymbolCollisionManager> collisionManager;
+    std::atomic_flag prevCollisionStillValid;
     std::shared_ptr<Tiled2dMapVectorInteractionManager> interactionManager;
 
     std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> strongSelectionDelegate;
