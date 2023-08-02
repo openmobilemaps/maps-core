@@ -154,27 +154,30 @@ public:
 
 private:
     RectI getProjectedRectangle(const RectD &rectangle) {
-        std::vector<float> origin(4), width(4), height(4);
-        Matrix::multiply(vpMatrix, {(float) rectangle.x, (float) rectangle.y, 0.0, 1.0}, origin);
-        Matrix::multiply(vpMatrix, {(float) rectangle.width * cosNegGridAngle, (float) rectangle.width * sinNegGridAngle, 0.0, 0.0}, width);
-        Matrix::multiply(vpMatrix, {(float) -rectangle.height * sinNegGridAngle, (float) rectangle.height * cosNegGridAngle, 0.0, 0.0}, height);
-        RectI result = RectI(std::round((origin.at(0) / origin.at(3)) * halfWidth + halfWidth),
-                     std::round((origin.at(1) / origin.at(3)) * halfHeight + halfHeight),
-                     std::round((width.at(0) + height.at(0)) * halfWidth), // by assumption aligned with projected space
-                     std::round((width.at(1) + height.at(1)) * halfHeight)); // by assumption aligned with projected space
-        return result;
+        std::vector<float> temp(4);
+        Matrix::multiply(vpMatrix, {(float) rectangle.x, (float) rectangle.y, 0.0, 1.0}, temp);
+        int32_t originX = std::round((temp.at(0) / temp.at(3)) * halfWidth + halfWidth);
+        int32_t originY = std::round((temp.at(1) / temp.at(3)) * halfHeight + halfHeight);
+        Matrix::multiply(vpMatrix, {(float) rectangle.width * cosNegGridAngle, (float) rectangle.width * sinNegGridAngle, 0.0, 0.0}, temp);
+        float width = temp.at(0);
+        float height = temp.at(1);
+        Matrix::multiply(vpMatrix, {(float) -rectangle.height * sinNegGridAngle, (float) rectangle.height * cosNegGridAngle, 0.0, 0.0}, temp);
+        width += temp.at(0);
+        height += temp.at(1);
+        return {originX, originY, (int32_t) std::round(width * halfWidth),
+                (int32_t) std::round(height * halfHeight)}; // by assumption aligned with projected space
     }
 
     CircleI getProjectedCircle(const CircleD &circle) {
-        std::vector<float> origin(4), radius(4);
-        Matrix::multiply(vpMatrix, {(float) circle.origin.x, (float) circle.origin.y, 0.0, 1.0}, origin);
-        Matrix::multiply(vpMatrix, {(float) circle.radius, (float) circle.radius, 0.0, 0.0}, radius);
-        radius.at(0) = radius.at(0) * halfWidth;
-        radius.at(1) = radius.at(1) * halfHeight;
-        int32_t iRadius = std::round(std::sqrt(radius.at(0) * radius.at(0) + radius.at(1) + radius.at(1)));
-        return {Vec2I(std::round((origin.at(0) / origin.at(3)) * halfWidth + halfWidth),
-                      std::round((origin.at(1) / origin.at(3)) * halfHeight + halfHeight)),
-                iRadius};
+        std::vector<float> temp(4);
+        Matrix::multiply(vpMatrix, {(float) circle.origin.x, (float) circle.origin.y, 0.0, 1.0}, temp);
+        Vec2I origin = Vec2I(std::round((temp.at(0) / temp.at(3)) * halfWidth + halfWidth),
+                             std::round((temp.at(1) / temp.at(3)) * halfHeight + halfHeight));
+        Matrix::multiply(vpMatrix, {(float) circle.radius, (float) circle.radius, 0.0, 0.0}, temp);
+        temp.at(0) = temp.at(0) * halfWidth;
+        temp.at(1) = temp.at(1) * halfHeight;
+        int32_t iRadius = std::round(std::sqrt(temp.at(0) * temp.at(0) + temp.at(1) + temp.at(1)));
+        return {origin, iRadius};
     }
 
     /**

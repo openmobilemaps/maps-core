@@ -100,6 +100,17 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
         const auto letterSpacing = description->style.getTextLetterSpacing(evalContext);
 
         labelRotationAlignment = description->style.getTextRotationAlignment(evalContext);
+        if (labelRotationAlignment == SymbolAlignment::AUTO) {
+            switch (textSymbolPlacement) {
+                case TextSymbolPlacement::POINT:
+                    labelRotationAlignment = SymbolAlignment::VIEWPORT;
+                    break;
+                case TextSymbolPlacement::LINE:
+                case TextSymbolPlacement::LINE_CENTER:
+                    labelRotationAlignment = SymbolAlignment::MAP;
+                    break;
+            }
+        }
         labelObject = std::make_shared<Tiled2dMapVectorSymbolLabelObject>(converter, featureContext, description, text, fullText, coordinate, lineCoordinates, textAnchor, angle, textJustify, fontResult, textOffset, description->style.getTextLineHeight(evalContext), letterSpacing, description->style.getTextMaxWidth(evalContext), description->style.getTextMaxAngle(evalContext), labelRotationAlignment, textSymbolPlacement);
 
         instanceCounts.textCharacters = labelObject->getCharacterCount();
