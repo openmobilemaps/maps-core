@@ -58,6 +58,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'com.vanniktech.maven.publish'
 apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-parcelize'
 
 import com.vanniktech.maven.publish.SonatypeHost
 
