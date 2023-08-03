@@ -277,7 +277,10 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
     Vec2D anchorOffset(0.0, 0.0);
 
-    std::vector<double> baseLines;
+    static std::vector<double> baseLines;
+    baseLines.clear();
+
+    float yOffset = 0;
 
     for(const auto &i : splittedTextInfo) {
         if(i.glyphIndex >= 0) {
@@ -305,7 +308,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
                     // only look at first character for offset
                     // this way the left top edge of the first character is exactly in the origin.
                     anchorOffset.x = -box.min.x;
-                    anchorOffset.y = -box.min.y;
+                    yOffset = box.min.y;
                 }
 
                 scales[2 * (countOffset + centerPositions.size()) + 0] = size.x;
@@ -371,15 +374,15 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
     switch (textAnchor) {
         case Anchor::CENTER:
             anchorOffset.x -= size.x / 2.0 - textOffset.x;
-            anchorOffset.y -= size.y / 2.0 + textOffset.y;
+            anchorOffset.y -= yOffset + size.y / 2.0 - textOffset.y;
             break;
         case Anchor::LEFT:
             anchorOffset.x += textOffset.x;
-            anchorOffset.y -= size.y / 2.0 + textOffset.y;
+            anchorOffset.y -= yOffset + size.y / 2.0 - textOffset.y;
             break;
         case Anchor::RIGHT:
             anchorOffset.x -= size.x - textOffset.x;
-            anchorOffset.y -= size.y / 2.0 + textOffset.y;
+            anchorOffset.y -= yOffset + size.y / 2.0 - textOffset.y;
             break;
         case Anchor::TOP:
             anchorOffset.x -= size.x / 2.0 - textOffset.x;
@@ -387,23 +390,23 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
             break;
         case Anchor::BOTTOM:
             anchorOffset.x -= size.x / 2.0 - textOffset.x;
-            anchorOffset.y -= size.y + textOffset.y + fontSize * 0.5;
+            anchorOffset.y -= yOffset + size.y + textOffset.y + fontSize * 0.5;
             break;
         case Anchor::TOP_LEFT:
             anchorOffset.x -= -textOffset.x;
             anchorOffset.y -= textOffset.y;
             break;
         case Anchor::TOP_RIGHT:
-            anchorOffset.x -= size.x -textOffset.x;
+            anchorOffset.x -= size.x - textOffset.x;
             anchorOffset.y -= textOffset.y;
             break;
         case Anchor::BOTTOM_LEFT:
             anchorOffset.x -= -textOffset.x;
-            anchorOffset.y -= size.y + textOffset.y;
+            anchorOffset.y -= size.y - textOffset.y;
             break;
         case Anchor::BOTTOM_RIGHT:
             anchorOffset.x -= size.x -textOffset.x;
-            anchorOffset.y -= size.y + textOffset.y;
+            anchorOffset.y -= size.y - textOffset.y;
             break;
         default:
             break;

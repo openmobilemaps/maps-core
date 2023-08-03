@@ -94,7 +94,7 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
         // TODO: currently only shifting to top right
         if (textRadialOffset != 0) {
             textOffset.x += textRadialOffset;
-            textOffset.y += textRadialOffset;
+            textOffset.y -= textRadialOffset;
         }
 
         const auto letterSpacing = description->style.getTextLetterSpacing(evalContext);
