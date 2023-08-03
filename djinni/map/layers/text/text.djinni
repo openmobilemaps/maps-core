@@ -41,6 +41,12 @@ icon_text_fit = enum {
     BOTH;
 }
 
+symbol_z_order = enum {
+    AUTO;
+    VIEWPORT_Y;
+    SOURCE;
+}
+
 formatted_string_entry = record {
     text: string;
     scale: f32;

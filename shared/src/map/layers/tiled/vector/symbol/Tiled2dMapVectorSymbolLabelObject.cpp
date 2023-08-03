@@ -432,6 +432,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
     assert(centerPositions.size() == characterCount);
 
+    float maxSymbolRadius = 0.0;
     for(auto const centerPosition: centerPositions) {
         auto rotated = Vec2DHelper::rotate(centerPosition, Vec2D(0, 0), angle);
 
@@ -440,6 +441,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
         const float scaleXH = scales[2 * countOffset + 0] / 2.0;
         const float scaleYH = scales[2 * countOffset + 1] / 2.0;
+        maxSymbolRadius = std::max(maxSymbolRadius, std::max(scaleXH, scaleYH));
 
         const double x1 = dx + centerPosition.x - scaleXH;
         const double x2 = dx + centerPosition.x + scaleXH;
@@ -480,21 +482,17 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
         std::vector<CircleD> circles;
         Vec2D origin = Vec2D(dx, dy);
         Vec2D lastCirclePosition = Vec2D(0, 0);
-        double lastRadius = 0;
         size_t count = centerPositions.size();
         for (int i = 0; i < count; i++) {
             Vec2D newPos = Vec2D(dx + centerPositions.at(i).x, dy + centerPositions.at(i).y);
             newPos = Vec2DHelper::rotate(newPos, origin, angle);
-            double newRadius = std::max(scales[2 * i] / 2.0,
-                                        scales[2 * i + 1] / 2.0);
             if (i != count - 1 && std::sqrt((newPos.x - lastCirclePosition.x) * (newPos.x - lastCirclePosition.x) +
                                             (newPos.y - lastCirclePosition.y) * (newPos.y - lastCirclePosition.y)) <=
-                                  lastRadius + newRadius) {
+                                          (2.0 * maxSymbolRadius) * collisionDistanceBias) {
                 continue;
             }
-            circles.emplace_back(newPos, newRadius + scaledTextPadding);
+            circles.emplace_back(newPos, maxSymbolRadius + scaledTextPadding);
             lastCirclePosition = newPos;
-            lastRadius = newRadius;
         }
         boundingBoxCircles = circles;
         boundingBoxViewportAligned = std::nullopt;
@@ -542,7 +540,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
 
     double lineCenteringParameter = -fontResult->fontData->info.base / fontResult->fontData->info.lineHeight;
 
-    double maxCharDim = 0.0;
+    double maxSymbolRadius = 0.0;
 
     for(auto &i : splittedTextInfo) {
         if(i.glyphIndex < 0) {
@@ -615,7 +613,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             if (d.charCode != " ") {
                 scales[2 * (countOffset + centerPositions.size()) + 0] = charSize.x;
                 scales[2 * (countOffset + centerPositions.size()) + 1] = charSize.y;
-                maxCharDim = std::max(maxCharDim, std::max(charSize.x, charSize.y));
+                maxSymbolRadius = std::max(maxSymbolRadius, std::max(charSize.x * 0.5, charSize.y * 0.5));
                 rotations[countOffset + centerPositions.size()] = -angleDeg;
 
                 centerPositions.push_back(OBB2D(quad).getCenter());
@@ -670,16 +668,14 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
         for (int i = 0; i < count; i++) {
             double newX = centerPositions.at(i).x;
             double newY = centerPositions.at(i).y;
-            double newRadius = maxCharDim / 2.0;
             if (i != count - 1 && std::sqrt((newX - lastCirclePosition.x) * (newX - lastCirclePosition.x) +
                                             (newY - lastCirclePosition.y) * (newY - lastCirclePosition.y))
-                                  <= lastRadius + newRadius) {
+                                  <= (maxSymbolRadius * 2.0) * collisionDistanceBias) {
                 continue;
             }
-            circles.emplace_back(Vec2D(newX, newY), newRadius + padding);
+            circles.emplace_back(Vec2D(newX, newY), maxSymbolRadius + padding);
             lastCirclePosition.x = newX;
             lastCirclePosition.y = newY;
-            lastRadius = newRadius;
         }
         boundingBoxCircles = circles;
     } else {

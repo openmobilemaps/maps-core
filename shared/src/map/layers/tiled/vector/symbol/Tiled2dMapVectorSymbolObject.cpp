@@ -138,7 +138,7 @@ void Tiled2dMapVectorSymbolObject::evaluateStyleProperties(const double zoomIden
     iconOffset = description->style.getIconOffset(evalContext);
     iconTextFitPadding = description->style.getIconTextFitPadding(evalContext);
     iconTextFit = description->style.getIconTextFit(evalContext);
-    textPadding = description->style.getTextPadding(evalContext);
+    iconPadding = description->style.getIconPadding(evalContext);
 
     lastZoomEvaluation = roundedZoom;
 }
@@ -323,7 +323,7 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
     const auto iconWidth = spriteSize.x * iconSize * scaleFactor;
     const auto iconHeight = spriteSize.y * iconSize * scaleFactor;
 
-    const float scaledTextPadding = textPadding * scaleFactor;
+    const float scaledIconPadding = iconPadding * scaleFactor;
 
     scales[2 * countOffset] = iconWidth;
     scales[2 * countOffset + 1] = iconHeight;
@@ -333,15 +333,15 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
     positions[2 * countOffset] = renderCoordinate.x;
     positions[2 * countOffset + 1] = renderCoordinate.y;
 
-    iconBoundingBoxViewportAligned.x = renderCoordinate.x - iconWidth * 0.5 - scaledTextPadding;
-    iconBoundingBoxViewportAligned.y = renderCoordinate.y - iconWidth * 0.5 - scaledTextPadding;
-    iconBoundingBoxViewportAligned.width = iconWidth + 2.0 * scaledTextPadding;
-    iconBoundingBoxViewportAligned.height = iconHeight + 2.0 * scaledTextPadding;
+    iconBoundingBoxViewportAligned.x = renderCoordinate.x - iconWidth * 0.5 - scaledIconPadding;
+    iconBoundingBoxViewportAligned.y = renderCoordinate.y - iconWidth * 0.5 - scaledIconPadding;
+    iconBoundingBoxViewportAligned.width = iconWidth + 2.0 * scaledIconPadding;
+    iconBoundingBoxViewportAligned.height = iconHeight + 2.0 * scaledIconPadding;
     Vec2D origin(renderCoordinate.x, renderCoordinate.y);
-    iconBoundingBox.topLeft = Vec2DHelper::rotate(Vec2D(renderCoordinate.x - iconWidth * 0.5 - scaledTextPadding, renderCoordinate.y - iconHeight * 0.5 - scaledTextPadding), origin, -rotations[countOffset]);
-    iconBoundingBox.topRight = Vec2DHelper::rotate(Vec2D(renderCoordinate.x + iconWidth * 0.5 + scaledTextPadding, renderCoordinate.y - iconHeight * 0.5 - scaledTextPadding), origin, -rotations[countOffset]);
-    iconBoundingBox.bottomRight = Vec2DHelper::rotate(Vec2D(renderCoordinate.x + iconWidth * 0.5 + scaledTextPadding, renderCoordinate.y + iconHeight * 0.5 + scaledTextPadding), origin, -rotations[countOffset]);
-    iconBoundingBox.bottomLeft = Vec2DHelper::rotate(Vec2D(renderCoordinate.x - iconWidth * 0.5 - scaledTextPadding, renderCoordinate.y + iconHeight * 0.5 + scaledTextPadding), origin, -rotations[countOffset]);
+    iconBoundingBox.topLeft = Vec2DHelper::rotate(Vec2D(renderCoordinate.x - iconWidth * 0.5 - scaledIconPadding, renderCoordinate.y - iconHeight * 0.5 - scaledIconPadding), origin, -rotations[countOffset]);
+    iconBoundingBox.topRight = Vec2DHelper::rotate(Vec2D(renderCoordinate.x + iconWidth * 0.5 + scaledIconPadding, renderCoordinate.y - iconHeight * 0.5 - scaledIconPadding), origin, -rotations[countOffset]);
+    iconBoundingBox.bottomRight = Vec2DHelper::rotate(Vec2D(renderCoordinate.x + iconWidth * 0.5 + scaledIconPadding, renderCoordinate.y + iconHeight * 0.5 + scaledIconPadding), origin, -rotations[countOffset]);
+    iconBoundingBox.bottomLeft = Vec2DHelper::rotate(Vec2D(renderCoordinate.x - iconWidth * 0.5 - scaledIconPadding, renderCoordinate.y + iconHeight * 0.5 + scaledIconPadding), origin, -rotations[countOffset]);
 
     if (collides) {
         alphas[countOffset] = 0;
@@ -496,17 +496,17 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     positions[2 * countOffset] = renderPos.x + offset.x;
     positions[2 * countOffset + 1] = renderPos.y + offset.y;
 
-    const float scaledTextPadding = textPadding * scaleFactor;
+    const float scaledIconPadding = iconPadding * scaleFactor;
 
     Vec2D origin(positions[2 * countOffset], positions[2 * countOffset + 1]);
-    stretchIconBoundingBoxViewportAligned.x = origin.x - spriteWidth * 0.5 - scaledTextPadding;
-    stretchIconBoundingBoxViewportAligned.y = origin.y - spriteHeight * 0.5 - scaledTextPadding;
-    stretchIconBoundingBoxViewportAligned.width = spriteWidth + 2.0 * scaledTextPadding;
-    stretchIconBoundingBoxViewportAligned.height = spriteHeight + 2.0 * scaledTextPadding;
-    stretchIconBoundingBox.topLeft = Vec2DHelper::rotate(Vec2D(positions[2 * countOffset] - spriteWidth * 0.5 - scaledTextPadding, positions[2 * countOffset + 1] - spriteHeight * 0.5 - scaledTextPadding), origin, rotations[countOffset]);
-    stretchIconBoundingBox.topRight = Vec2DHelper::rotate(Vec2D(positions[2 * countOffset] + spriteWidth * 0.5 + scaledTextPadding, positions[2 * countOffset + 1] - spriteHeight * 0.5 - scaledTextPadding), origin, rotations[countOffset]);
-    stretchIconBoundingBox.bottomRight = Vec2DHelper::rotate(Vec2D(positions[2 * countOffset] + spriteWidth * 0.5 + scaledTextPadding, positions[2 * countOffset + 1] + spriteHeight * 0.5 + scaledTextPadding), origin, rotations[countOffset]);
-    stretchIconBoundingBox.bottomLeft = Vec2DHelper::rotate(Vec2D(positions[2 * countOffset] - spriteWidth * 0.5 - scaledTextPadding, positions[2 * countOffset + 1] + spriteHeight * 0.5 + scaledTextPadding), origin, rotations[countOffset]);
+    stretchIconBoundingBoxViewportAligned.x = origin.x - spriteWidth * 0.5 - scaledIconPadding;
+    stretchIconBoundingBoxViewportAligned.y = origin.y - spriteHeight * 0.5 - scaledIconPadding;
+    stretchIconBoundingBoxViewportAligned.width = spriteWidth + 2.0 * scaledIconPadding;
+    stretchIconBoundingBoxViewportAligned.height = spriteHeight + 2.0 * scaledIconPadding;
+    stretchIconBoundingBox.topLeft = Vec2DHelper::rotate(Vec2D(positions[2 * countOffset] - spriteWidth * 0.5 - scaledIconPadding, positions[2 * countOffset + 1] - spriteHeight * 0.5 - scaledIconPadding), origin, rotations[countOffset]);
+    stretchIconBoundingBox.topRight = Vec2DHelper::rotate(Vec2D(positions[2 * countOffset] + spriteWidth * 0.5 + scaledIconPadding, positions[2 * countOffset + 1] - spriteHeight * 0.5 - scaledIconPadding), origin, rotations[countOffset]);
+    stretchIconBoundingBox.bottomRight = Vec2DHelper::rotate(Vec2D(positions[2 * countOffset] + spriteWidth * 0.5 + scaledIconPadding, positions[2 * countOffset + 1] + spriteHeight * 0.5 + scaledIconPadding), origin, rotations[countOffset]);
+    stretchIconBoundingBox.bottomLeft = Vec2DHelper::rotate(Vec2D(positions[2 * countOffset] - spriteWidth * 0.5 - scaledIconPadding, positions[2 * countOffset + 1] + spriteHeight * 0.5 + scaledIconPadding), origin, rotations[countOffset]);
 
     const int infoOffset = countOffset * 10;
 

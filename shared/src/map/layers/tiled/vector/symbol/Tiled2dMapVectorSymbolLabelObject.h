@@ -121,4 +121,6 @@ private:
     Color textColor = Color(0.0 ,0.0, 0.0, 0.0);
     Color haloColor = Color(0.0 ,0.0, 0.0, 0.0);
     double haloWidth;
+
+    static constexpr double collisionDistanceBias = 0.75;
 };

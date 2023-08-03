@@ -20,6 +20,7 @@
 #include "SymbolAlignment.h"
 #include "ColorUtil.h"
 #include "IconTextFit.h"
+#include "SymbolZOrder.h"
 
 class SymbolVectorStyle {
 public:
@@ -61,6 +62,7 @@ public:
                       std::shared_ptr<Value> textMaxWidth,
                       std::shared_ptr<Value> textMaxAngle,
                       std::shared_ptr<Value> blendMode,
+                      std::shared_ptr<Value> symbolZOrder,
                       double dpFactor):
     textSize(textSize),
     textFont(textFont),
@@ -99,6 +101,7 @@ public:
     textRotationAlignment(textRotationAlignment),
     iconRotationAlignment(iconRotationAlignment),
     blendMode(blendMode),
+    symbolZOrder(symbolZOrder),
     dpFactor(dpFactor) {}
 
 
@@ -112,7 +115,7 @@ public:
             iconSize, textLineHeight, textLetterSpacing, textAllowOverlap, iconAllowOverlap,
             iconPadding, textOpacity, iconOpacity, iconRotationAlignment, textRotationAlignment,
             iconTextFit, iconTextFitPadding, textMaxWidth, textMaxAngle, iconRotate, blendMode,
-            textOptional, iconOptional
+            textOptional, iconOptional, symbolZOrder
         };
 
         for (auto const &value: values) {
@@ -340,6 +343,11 @@ public:
         return iconTextFitPadding ? iconTextFitPadding->evaluateOr(context, defaultValue) : defaultValue;
     }
 
+    SymbolZOrder getSymbolZOrder(const EvaluationContext &context) {
+        static const SymbolZOrder defaultValue = SymbolZOrder::AUTO;
+        return symbolZOrder ? symbolSortKey->evaluateOr(context, defaultValue) : defaultValue;
+    }
+
 private:
     std::shared_ptr<Value> textSize;
     std::shared_ptr<Value> textFont;
@@ -379,6 +387,7 @@ private:
     std::shared_ptr<Value> textRotationAlignment;
     std::shared_ptr<Value> iconRotationAlignment;
     std::shared_ptr<Value> blendMode;
+    std::shared_ptr<Value> symbolZOrder;
     double dpFactor;
 
 

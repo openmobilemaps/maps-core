@@ -37,6 +37,7 @@
 #include "SymbolAlignment.h"
 #include "IconTextFit.h"
 #include "BlendMode.h"
+#include "SymbolZOrder.h"
 
 namespace std {
     template <>
@@ -341,6 +342,17 @@ public:
         return std::nullopt;
     }
 
+    std::optional<::SymbolZOrder> symbolZOrderFromString(const std::string &value) const {
+        if (value == "source") {
+            return SymbolZOrder::SOURCE;
+        } else if (value == "viewport-y") {
+            return SymbolZOrder::VIEWPORT_Y;
+        } else if (value == "auto") {
+            return SymbolZOrder::AUTO;
+        }
+        return std::nullopt;
+    }
+
 
     std::optional<::SymbolAlignment> alignmentFromString(const std::string &value) const {
         if (value == "auto") {
@@ -393,6 +405,16 @@ public:
         auto blendMode = blendModeFromString(value);
         if (blendMode) {
             return *blendMode;
+        }
+        return alternative;
+    }
+
+    template<>
+    SymbolZOrder evaluateOr(const EvaluationContext &context, const SymbolZOrder &alternative) const {
+        auto const &value = evaluateOr(context, std::string(""));
+        auto symbolZOrder = symbolZOrderFromString(value);
+        if (symbolZOrder) {
+            return *symbolZOrder;
         }
         return alternative;
     }

@@ -43,7 +43,8 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
     std::unordered_map<std::string, std::vector<Coord>> textPositionMap;
 
-    for (auto const &[context, geometry]: *features) {
+    for (auto it = features->rbegin(); it != features->rend(); it++) {
+        auto const &[context, geometry] = *it;
 
         const auto evalContext = EvaluationContext(tileInfo.zoomIdentifier, context);
 
@@ -319,7 +320,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
         return false;
     }
 
-    std::sort(symbolObjects.begin(), symbolObjects.end(),
+    std::stable_sort(symbolObjects.rbegin(), symbolObjects.rend(),
               [](const auto &a, const auto &b) -> bool {
                   return a->symbolSortKey < b->symbolSortKey;
               });
@@ -679,7 +680,7 @@ Tiled2dMapVectorSymbolGroup::createSymbolObject(const Tiled2dMapTileInfo &tileIn
 
 void Tiled2dMapVectorSymbolGroup::collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor,
                                                      std::shared_ptr<CollisionGrid> collisionGrid) {
-    for (auto const &object: symbolObjects) {
+    for (const auto &object : symbolObjects) {
         object->collisionDetection(zoomIdentifier, rotation, scaleFactor, collisionGrid);
     }
 }
