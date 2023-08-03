@@ -259,14 +259,18 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
     const float fontSize = scaleFactor * textSize;
     
     auto pen = Vec2D(0.0, 0.0);
-    
-    BoundingBox box(referencePoint.systemIdentifier);
-    BoundingBox centerPosBox(referencePoint.systemIdentifier);
+
+    Vec2D boxMin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+    Vec2D boxMax(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
+
+    Vec2D centerPosBoxMin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+    Vec2D centerPosBoxMax(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
 
     centerPositions.clear();
     centerPositions.reserve(characterCount);
     
-    std::vector<size_t> lineEndIndices;
+    static std::vector<size_t> lineEndIndices;
+    lineEndIndices.clear();
 
     float angle;
     if (textAlignment == SymbolAlignment::MAP) {
@@ -299,23 +303,29 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
                 baseLines.push_back(yh);
 
-                box.addPoint(quad.topLeft.x, quad.topLeft.y, referencePoint.z);
-                box.addPoint(quad.topRight.x, quad.topRight.y, referencePoint.z);
-                box.addPoint(quad.bottomLeft.x, quad.bottomLeft.y, referencePoint.z);
-                box.addPoint(quad.bottomRight.x, quad.bottomRight.y, referencePoint.z);
+                boxMin.x = std::min(boxMin.x, std::min(quad.topLeft.x, std::min(quad.topRight.x, std::min(quad.bottomLeft.x, quad.bottomRight.x))));
+                boxMin.y = std::min(boxMin.y, std::min(quad.topLeft.y, std::min(quad.topRight.y, std::min(quad.bottomLeft.y, quad.bottomRight.y))));
+
+                boxMax.x = std::max(boxMax.x, std::max(quad.topLeft.x, std::max(quad.topRight.x, std::max(quad.bottomLeft.x, quad.bottomRight.x))));
+                boxMax.y = std::max(boxMax.y, std::max(quad.topLeft.y, std::max(quad.topRight.y, std::max(quad.bottomLeft.y, quad.bottomRight.y))));
 
                 if (pen.x == 0.0 && pen.y == 0.0) {
                     // only look at first character for offset
                     // this way the left top edge of the first character is exactly in the origin.
-                    anchorOffset.x = -box.min.x;
-                    yOffset = box.min.y;
+                    anchorOffset.x = -boxMin.x;
+                    yOffset = boxMin.y;
                 }
 
                 scales[2 * (countOffset + centerPositions.size()) + 0] = size.x;
                 scales[2 * (countOffset + centerPositions.size()) + 1] = size.y;
                 rotations[countOffset + centerPositions.size()] = -angle;
 
-                centerPosBox.addPoint(x + size.x / 2, y + size.y / 2, referencePoint.z);
+                centerPosBoxMin.x = std::min(centerPosBoxMin.x, x + size.x / 2);
+                centerPosBoxMax.x = std::max(centerPosBoxMin.x, x + size.x / 2);
+
+                centerPosBoxMin.y = std::min(centerPosBoxMin.y, y + size.y / 2);
+                centerPosBoxMax.y = std::max(centerPosBoxMin.y, y + size.y / 2);
+
                 centerPositions.push_back(Vec2D(x + size.x / 2,
                                                 y + size.y / 2));
             }
@@ -342,8 +352,8 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
     lineEndIndices.push_back(centerPositions.size() - 1);
 
-    const Vec2D size((box.max.x - box.min.x), (medianLastBaseLine - box.min.y));
-    const Vec2D centerSize((centerPosBox.max.x - centerPosBox.min.x), (centerPosBox.max.y - centerPosBox.min.y));
+    const Vec2D size((boxMax.x - boxMin.x), (medianLastBaseLine - boxMin.y));
+    const Vec2D centerSize((centerPosBoxMax.x - centerPosBoxMin.x), (centerPosBoxMax.y - centerPosBoxMin.y));
 
     switch (textJustify) {
         case TextJustify::AUTO:
@@ -412,7 +422,8 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
             break;
     }
 
-    box = BoundingBox(referencePoint.systemIdentifier);
+    Coord boundingBoxMin(referencePoint.systemIdentifier, std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), referencePoint.z);
+    Coord boundingBoxMax(referencePoint.systemIdentifier, std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), referencePoint.z);
 
     anchorOffset = Vec2DHelper::rotate(anchorOffset, Vec2D(0, 0), angle);
 
@@ -430,15 +441,22 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
         const float scaleXH = scales[2 * countOffset + 0] / 2.0;
         const float scaleYH = scales[2 * countOffset + 1] / 2.0;
 
-        box.addPoint(dx + centerPosition.x - scaleXH, dy + centerPosition.y - scaleYH, referencePoint.z);
-        box.addPoint(dx + centerPosition.x + scaleXH, dy + centerPosition.y - scaleYH, referencePoint.z);
-        box.addPoint(dx + centerPosition.x - scaleXH, dy + centerPosition.y + scaleYH, referencePoint.z);
-        box.addPoint(dx + centerPosition.x + scaleXH, dy + centerPosition.y + scaleYH, referencePoint.z);
+        const double x1 = dx + centerPosition.x - scaleXH;
+        const double x2 = dx + centerPosition.x + scaleXH;
+
+        const double y1 = dy + centerPosition.y - scaleYH;
+        const double y2 = dy + centerPosition.y + scaleYH;
+
+        boundingBoxMin.x = std::min(boundingBoxMin.x, std::min(x1, x2));
+        boundingBoxMin.y = std::min(boundingBoxMin.y, std::min(y1, y2));
+
+        boundingBoxMax.x = std::max(boundingBoxMax.x, std::max(x1, x2));
+        boundingBoxMax.y = std::max(boundingBoxMax.y, std::max(y1, y2));
 
         countOffset += 1;
     }
 
-    auto rectBoundingBox = box ? RectCoord(box.min, box.max) : RectCoord(referencePoint, referencePoint);
+    auto rectBoundingBox = (!centerPositions.empty()) ? RectCoord(boundingBoxMin, boundingBoxMax) :  RectCoord(referencePoint, referencePoint);
 
     const float scaledTextPadding = textPadding * scaleFactor;
 
@@ -493,7 +511,8 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
 
     const float fontSize = scaleFactor * textSize;
 
-    std::optional<BoundingBox> box = std::nullopt;
+    Vec2D boxMin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+    Vec2D boxMax(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
 
     centerPositions.clear();
     centerPositions.reserve(characterCount);
@@ -603,14 +622,11 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             }
 
 
-            if (!box) {
-                box = BoundingBox(Coord(referencePoint.systemIdentifier, quad.topLeft.x, quad.topRight.y, referencePoint.z));
-            }
+            boxMin.x = std::min(boxMin.x, std::min(quad.topLeft.x, std::min(quad.topRight.x, std::min(quad.bottomLeft.x, quad.bottomRight.x))));
+            boxMin.y = std::min(boxMin.y, std::min(quad.topLeft.y, std::min(quad.topRight.y, std::min(quad.bottomLeft.y, quad.bottomRight.y))));
 
-            box->addPoint(quad.topLeft.x, quad.topLeft.y, referencePoint.z);
-            box->addPoint(quad.topRight.x, quad.topRight.y, referencePoint.z);
-            box->addPoint(quad.bottomLeft.x, quad.bottomLeft.y, referencePoint.z);
-            box->addPoint(quad.bottomRight.x, quad.bottomRight.y, referencePoint.z);
+            boxMax.x = std::max(boxMax.x, std::max(quad.topLeft.x, std::max(quad.topRight.x, std::max(quad.bottomLeft.x, quad.bottomRight.x))));
+            boxMax.y = std::max(boxMax.y, std::max(quad.topLeft.y, std::max(quad.topRight.y, std::max(quad.bottomLeft.y, quad.bottomRight.y))));
 
             index += 1;
         }
@@ -634,19 +650,17 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             scales[2 * (countOffset) + 1] = 0;
             countOffset += 1;
         }
-        box = std::nullopt;
+        boxMin.x = std::numeric_limits<float>::max();
     }
 
     assert(countOffset == countBefore + characterCount);
 
-    if (box) {
+    if (boxMin.x != std::numeric_limits<float>::max()) {
         const float padding = textPadding * scaleFactor;
-        const auto min = box->min;
-        const auto max = box->max;
-        boundingBox.topLeft = Vec2D(min.x - padding, min.y - padding);
-        boundingBox.topRight = Vec2D(max.x + padding, min.y - padding);
-        boundingBox.bottomRight = Vec2D(max.x + padding, max.y + padding);
-        boundingBox.bottomLeft = Vec2D(min.x + padding, max.y + padding);
+        boundingBox.topLeft = Vec2D(boxMin.x - padding, boxMin.y - padding);
+        boundingBox.topRight = Vec2D(boxMax.x + padding, boxMin.y - padding);
+        boundingBox.bottomRight = Vec2D(boxMax.x + padding, boxMax.y + padding);
+        boundingBox.bottomLeft = Vec2D(boxMin.x + padding, boxMax.y + padding);
 
         std::vector<CircleD> circles;
         Vec2D lastCirclePosition = Vec2D(0, 0);
