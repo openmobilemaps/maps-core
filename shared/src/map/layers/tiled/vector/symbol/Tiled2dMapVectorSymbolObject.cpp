@@ -709,7 +709,7 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
     }
 
     bool willCollide = true;
-    if (textSymbolPlacement == TextSymbolPlacement::POINT && labelRotationAlignment != SymbolAlignment::MAP) {
+    if (labelRotationAlignment == SymbolAlignment::VIEWPORT) {
         std::optional<RectD> boundingRect = getViewportAlignedBoundingBox(true);
         // Collide, if no valid boundingRect
         willCollide = !boundingRect.has_value() || collisionGrid->addAndCheckCollisionAlignedRect(*boundingRect);
