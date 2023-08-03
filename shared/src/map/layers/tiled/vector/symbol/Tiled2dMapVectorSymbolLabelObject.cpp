@@ -440,13 +440,13 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
     auto rectBoundingBox = box ? RectCoord(box.min, box.max) : RectCoord(referencePoint, referencePoint);
 
-    const float padding = textPadding * scaleFactor;
+    const float scaledTextPadding = textPadding * scaleFactor;
 
-    rectBoundingBox.topLeft.x -= padding;
-    rectBoundingBox.topLeft.y -= padding;
+    rectBoundingBox.topLeft.x -= scaledTextPadding;
+    rectBoundingBox.topLeft.y -= scaledTextPadding;
 
-    rectBoundingBox.bottomRight.x += padding;
-    rectBoundingBox.bottomRight.y += padding;
+    rectBoundingBox.bottomRight.x += scaledTextPadding;
+    rectBoundingBox.bottomRight.y += scaledTextPadding;
 
     dimensions.x = rectBoundingBox.bottomRight.x - rectBoundingBox.topLeft.x;
     dimensions.y = rectBoundingBox.bottomRight.y - rectBoundingBox.topLeft.y;
@@ -456,7 +456,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
                           Vec2DHelper::rotate(Vec2D(rectBoundingBox.bottomRight.x, rectBoundingBox.bottomRight.y), Vec2D(dx, dy), angle),
                           Vec2DHelper::rotate(Vec2D(rectBoundingBox.topLeft.x, rectBoundingBox.bottomRight.y), Vec2D(dx, dy), angle));
     if (rotationAlignment != SymbolAlignment::MAP) {
-        boundingBoxViewportAligned = RectD(dx, dy, dimensions.x + padding, dimensions.y + padding);
+        boundingBoxViewportAligned = RectD(dx, dy, dimensions.x + scaledTextPadding, dimensions.y + scaledTextPadding);
         boundingBoxCircles = std::nullopt;
     } else {
         std::vector<CircleD> circles;
@@ -474,7 +474,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
                                   lastRadius + newRadius) {
                 continue;
             }
-            circles.emplace_back(newPos, newRadius + padding);
+            circles.emplace_back(newPos, newRadius + scaledTextPadding);
             lastCirclePosition = newPos;
             lastRadius = newRadius;
         }
