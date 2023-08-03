@@ -18,7 +18,7 @@
 #include "Matrix.h"
 #include <vector>
 
-class IndexRange {
+struct IndexRange {
 public:
     int16_t xMin = std::numeric_limits<int16_t>::max();
     int16_t xMax = std::numeric_limits<int16_t>::min();
@@ -73,12 +73,12 @@ public:
      */
     bool addAndCheckCollisionAlignedRect(const RectD &rectangle) {
         RectI projectedRectangle = getProjectedRectangle(rectangle);
-        std::optional<IndexRange> indexRange = getIndexRangeForRectangle(projectedRectangle);
-        if (!indexRange.has_value()) {
+        IndexRange indexRange = getIndexRangeForRectangle(projectedRectangle);
+        if (!indexRange.isValid(numCellsX - 1, numCellsY - 1)) {
             return true; // Fully outside of bounds - not relevant
         }
-        for (int16_t y = indexRange->yMin; y <= indexRange->yMax; y++) {
-            for (int16_t x = indexRange->xMin; x <= indexRange->xMax; x++) {
+        for (int16_t y = indexRange.yMin; y <= indexRange.yMax; y++) {
+            for (int16_t x = indexRange.xMin; x <= indexRange.xMax; x++) {
                 for (const auto &rect : gridRects[y][x]) {
                     if (checkRectCollision(projectedRectangle, rect)) {
                         return true;
@@ -92,8 +92,8 @@ public:
             }
         }
         // Only insert, when not colliding
-        for (int16_t y = indexRange->yMin; y <= indexRange->yMax; y++) {
-            for (int16_t x = indexRange->xMin; x <= indexRange->xMax; x++) {
+        for (int16_t y = indexRange.yMin; y <= indexRange.yMax; y++) {
+            for (int16_t x = indexRange.xMin; x <= indexRange.xMax; x++) {
                 gridRects[y][x].push_back(projectedRectangle);
             }
         }
@@ -113,9 +113,9 @@ public:
         std::vector<std::tuple<CircleI, IndexRange>> projectedCircles;
         for (const auto &circle : circles) {
             auto projectedCircle = getProjectedCircle(circle);
-            auto indexRange = getIndexRangeForCircle(projectedCircle);
-            if (indexRange.has_value()) {
-                projectedCircles.emplace_back(projectedCircle, *indexRange);
+            IndexRange indexRange = getIndexRangeForCircle(projectedCircle);
+            if (indexRange.isValid(numCellsX - 1, numCellsY - 1)) {
+                projectedCircles.emplace_back(projectedCircle, indexRange);
             }
         }
 
@@ -183,34 +183,26 @@ private:
     /**
      * Get index range for a projected rectangle
      */
-    std::optional<IndexRange> getIndexRangeForRectangle(const RectI &rectangle) {
+    IndexRange getIndexRangeForRectangle(const RectI &rectangle) {
         IndexRange result;
-        result.addXIndex(std::round(rectangle.x / cellSize), numCellsX - 1);
-        result.addXIndex(std::round((rectangle.x + rectangle.width) / cellSize), numCellsX - 1);
-        result.addYIndex(std::round(rectangle.y / cellSize), numCellsY - 1);
-        result.addYIndex(std::round((rectangle.y + rectangle.height) / cellSize), numCellsY - 1);
-        if (result.isValid(numCellsX - 1, numCellsY - 1)) {
-            return result;
-        } else {
-            return std::nullopt;
-        }
+        result.addXIndex(std::floor(rectangle.x / cellSize), numCellsX - 1);
+        result.addXIndex(std::floor((rectangle.x + rectangle.width) / cellSize), numCellsX - 1);
+        result.addYIndex(std::floor(rectangle.y / cellSize), numCellsY - 1);
+        result.addYIndex(std::floor((rectangle.y + rectangle.height) / cellSize), numCellsY - 1);
+        return result;
     }
 
     /**
      * Get index range for a projected circle
      */
-    std::optional<IndexRange> getIndexRangeForCircle(const CircleI &circle) {
+    IndexRange getIndexRangeForCircle(const CircleI &circle) {
         IndexRange result;
         // May include unnecessary grid cell in the corner in certain cases
-        result.addXIndex(std::round((circle.origin.x - circle.radius) / cellSize), numCellsX - 1);
-        result.addXIndex(std::round((circle.origin.x + circle.radius) / cellSize), numCellsX - 1);
-        result.addYIndex(std::round((circle.origin.y - circle.radius) / cellSize), numCellsY - 1);
-        result.addYIndex(std::round((circle.origin.y + circle.radius) / cellSize), numCellsY - 1);
-        if (result.isValid(numCellsX - 1, numCellsY - 1)) {
-            return result;
-        } else {
-            return std::nullopt;
-        }
+        result.addXIndex(std::floor((circle.origin.x - circle.radius) / cellSize), numCellsX - 1);
+        result.addXIndex(std::floor((circle.origin.x + circle.radius) / cellSize), numCellsX - 1);
+        result.addYIndex(std::floor((circle.origin.y - circle.radius) / cellSize), numCellsY - 1);
+        result.addYIndex(std::floor((circle.origin.y + circle.radius) / cellSize), numCellsY - 1);
+        return result;
     }
 
     bool checkRectCollision(const RectI &rect1, const RectI &rect2) {

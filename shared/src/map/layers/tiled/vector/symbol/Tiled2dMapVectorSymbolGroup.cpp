@@ -525,7 +525,7 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
 
                 if (!object->getIsOpaque()) continue;
                 const auto &circles = object->getMapAlignedBoundingCircles(true);
-                if (circles && !circles->empty()) {
+                if (false && circles && !circles->empty()) {
                     for (const auto &circle: *circles) {
                         const size_t numCirclePoints = 8;
                         std::vector<Coord> coords;

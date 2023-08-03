@@ -331,8 +331,8 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
     positions[2 * countOffset] = renderCoordinate.x;
     positions[2 * countOffset + 1] = renderCoordinate.y;
 
-    iconBoundingBoxViewportAligned.x = renderCoordinate.x;
-    iconBoundingBoxViewportAligned.y = renderCoordinate.y;
+    iconBoundingBoxViewportAligned.x = renderCoordinate.x - iconWidth * 0.5;
+    iconBoundingBoxViewportAligned.y = renderCoordinate.y - iconWidth * 0.5;
     iconBoundingBoxViewportAligned.width = iconWidth;
     iconBoundingBoxViewportAligned.height = iconHeight;
     Vec2D origin(renderCoordinate.x, renderCoordinate.y);
@@ -497,10 +497,10 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     const float textPadding = textPadding * scaleFactor;
 
     Vec2D origin(positions[2 * countOffset], positions[2 * countOffset + 1]);
-    stretchIconBoundingBoxViewportAligned.x = origin.x;
-    stretchIconBoundingBoxViewportAligned.y = origin.y;
-    stretchIconBoundingBoxViewportAligned.width = spriteWidth;
-    stretchIconBoundingBoxViewportAligned.height = spriteHeight;
+    stretchIconBoundingBoxViewportAligned.x = origin.x - spriteWidth * 0.5 - textPadding;
+    stretchIconBoundingBoxViewportAligned.y = origin.y - spriteHeight * 0.5 - textPadding;
+    stretchIconBoundingBoxViewportAligned.width = spriteWidth + textPadding;
+    stretchIconBoundingBoxViewportAligned.height = spriteHeight + textPadding;
     stretchIconBoundingBox.topLeft = Vec2DHelper::rotate(Vec2D(positions[2 * countOffset] - spriteWidth * 0.5 - textPadding, positions[2 * countOffset + 1] - spriteHeight * 0.5 - textPadding), origin, rotations[countOffset]);
     stretchIconBoundingBox.topRight = Vec2DHelper::rotate(Vec2D(positions[2 * countOffset] + spriteWidth * 0.5 + textPadding, positions[2 * countOffset + 1] - spriteHeight * 0.5 - textPadding), origin, rotations[countOffset]);
     stretchIconBoundingBox.bottomRight = Vec2DHelper::rotate(Vec2D(positions[2 * countOffset] + spriteWidth * 0.5 + textPadding, positions[2 * countOffset + 1] + spriteHeight * 0.5 + textPadding), origin, rotations[countOffset]);
