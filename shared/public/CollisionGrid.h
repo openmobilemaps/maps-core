@@ -53,8 +53,8 @@ public:
               sinNegGridAngle(std::sin(-gridAngle * M_PI / 180.0)),
               cosNegGridAngle(std::cos(-gridAngle * M_PI / 180.0)) {
         cellSize = std::min(size.x, size.y) / (float) numCellsMinDim;
-        numCellsX = std::ceil(size.x / cellSize);
-        numCellsY = std::ceil(size.y / cellSize);
+        numCellsX = std::ceil(size.x / cellSize) + 2 * numCellsPadding;
+        numCellsY = std::ceil(size.y / cellSize) + 2 * numCellsPadding;
         halfWidth = size.x / 2.0f;
         halfHeight = size.y / 2.0f;
         gridRects.reserve(numCellsY);
@@ -258,10 +258,10 @@ private:
      */
     IndexRange getIndexRangeForRectangle(const RectI &rectangle) {
         IndexRange result;
-        result.addXIndex(std::floor((rectangle.x - collisionBias) / cellSize), numCellsX - 1);
-        result.addXIndex(std::floor((rectangle.x + rectangle.width + collisionBias) / cellSize), numCellsX - 1);
-        result.addYIndex(std::floor((rectangle.y - collisionBias) / cellSize), numCellsY - 1);
-        result.addYIndex(std::floor((rectangle.y + rectangle.height + collisionBias) / cellSize), numCellsY - 1);
+        result.addXIndex(std::floor((rectangle.x - collisionBias) / cellSize) + numCellsPadding, numCellsX - 1);
+        result.addXIndex(std::floor((rectangle.x + rectangle.width + collisionBias) / cellSize) + numCellsPadding, numCellsX - 1);
+        result.addYIndex(std::floor((rectangle.y - collisionBias) / cellSize) + numCellsPadding, numCellsY - 1);
+        result.addYIndex(std::floor((rectangle.y + rectangle.height + collisionBias) / cellSize) + numCellsPadding, numCellsY - 1);
         return result;
     }
 
@@ -271,10 +271,10 @@ private:
     IndexRange getIndexRangeForCircle(const CircleI &circle) {
         IndexRange result;
         // May include unnecessary corner grid cells
-        result.addXIndex(std::floor((circle.x - circle.radius - collisionBias) / cellSize), numCellsX - 1);
-        result.addXIndex(std::floor((circle.x + circle.radius + collisionBias) / cellSize), numCellsX - 1);
-        result.addYIndex(std::floor((circle.y - circle.radius - collisionBias) / cellSize), numCellsY - 1);
-        result.addYIndex(std::floor((circle.y + circle.radius + collisionBias) / cellSize), numCellsY - 1);
+        result.addXIndex(std::floor((circle.x - circle.radius - collisionBias) / cellSize) + numCellsPadding, numCellsX - 1);
+        result.addXIndex(std::floor((circle.x + circle.radius + collisionBias) / cellSize) + numCellsPadding, numCellsX - 1);
+        result.addYIndex(std::floor((circle.y - circle.radius - collisionBias) / cellSize) + numCellsPadding, numCellsY - 1);
+        result.addYIndex(std::floor((circle.y + circle.radius + collisionBias) / cellSize) + numCellsPadding, numCellsY - 1);
         return result;
     }
 
@@ -304,8 +304,9 @@ private:
         return distanceSq < (r * r);
     }
 
-
     const static int32_t numCellsMinDim = 20; // TODO: use smart calculations to define grid number on initialize (e.g. with first insertion o.s.)
+    // Additional cell padding around the viewport;
+    static constexpr int32_t numCellsPadding = 5;
 
     const std::vector<float> vpMatrix;
     const Vec2I size;
