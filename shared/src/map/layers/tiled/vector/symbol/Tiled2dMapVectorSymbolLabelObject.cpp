@@ -321,10 +321,10 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
                 rotations[countOffset + centerPositions.size()] = -angle;
 
                 centerPosBoxMin.x = std::min(centerPosBoxMin.x, x + size.x / 2);
-                centerPosBoxMax.x = std::max(centerPosBoxMin.x, x + size.x / 2);
+                centerPosBoxMax.x = std::max(centerPosBoxMax.x, x + size.x / 2);
 
                 centerPosBoxMin.y = std::min(centerPosBoxMin.y, y + size.y / 2);
-                centerPosBoxMax.y = std::max(centerPosBoxMin.y, y + size.y / 2);
+                centerPosBoxMax.y = std::max(centerPosBoxMax.y, y + size.y / 2);
 
                 centerPositions.push_back(Vec2D(x + size.x / 2,
                                                 y + size.y / 2));
