@@ -10,6 +10,7 @@
 
 #include "Tiled2dMapVectorSymbolLabelObject.h"
 #include "TextHelper.h"
+#include "fast_atan2.h"
 
 Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::shared_ptr<CoordinateConversionHelperInterface> &converter,
                                                                      const std::shared_ptr<FeatureContext> featureContext,
@@ -560,7 +561,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             const auto &before = pointAtIndex(indexAtDistance(currentIndex, -charSize.x * 0.5), false);
             const auto &after = pointAtIndex(indexAtDistance(currentIndex, charSize.x * 0.5), false);
 
-            double angleRad = atan2((before.y - after.y), -(before.x - after.x));
+            double angleRad = atan2_approximation((before.y - after.y), -(before.x - after.x));
             double angleDeg = angleRad * (180.0 / M_PI);
 
             if(index > 1) {
@@ -687,7 +688,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
     boundingBoxViewportAligned = std::nullopt;
 
     double recompRotation = fmod(-rotation + 360.0, 360.0);
-    double averageAngle = fmod(atan2(averageAngleS, averageAngleC) * 180.0 / M_PI + 360.0, 360.0);
+    double averageAngle = fmod(atan2_approximation(averageAngleS, averageAngleC) * 180.0 / M_PI + 360.0, 360.0);
     double diff = std::min(std::min(std::abs(averageAngle - recompRotation),
                           std::abs(averageAngle + 360.0 - recompRotation)),
                           std::abs(averageAngle - (recompRotation + 360.0)));
