@@ -190,10 +190,9 @@ public:
         }
 
         // Only insert when none colliding
-        IndexRange insertionRange;
         for (const auto &[projectedCircle, indexRange, contentHash, symbolSpacing] : projectedCircles) {
-            for (int16_t y = insertionRange.yMin; y <= insertionRange.yMax; y++) {
-                for (int16_t x = insertionRange.xMin; x <= insertionRange.xMax; x++) {
+            for (int16_t y = indexRange.yMin; y <= indexRange.yMax; y++) {
+                for (int16_t x = indexRange.xMin; x <= indexRange.xMax; x++) {
                     gridCircles[y][x].push_back(projectedCircle);
                 }
             }
@@ -322,7 +321,7 @@ private:
     std::unordered_map<size_t, std::vector<CircleI>> spacedCircles;
 
     // Additional padding to the advantage of established collision primitives to resolve any rounding errors
-    static constexpr int32_t collisionBias = 2;
+    static constexpr int32_t collisionBias = 0;
 
     std::vector<float> temp1 = {0, 0, 0, 0}, temp2 = {0, 0, 0, 0};
 };

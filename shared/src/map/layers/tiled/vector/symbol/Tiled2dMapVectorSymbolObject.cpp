@@ -62,6 +62,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
 
     evaluateStyleProperties(tileInfo.zoomIdentifier);
 
+    iconRotationAlignment = description->style.getIconRotationAlignment(evalContext);
+
     if (hasIcon && !hideIcon) {
         if (iconTextFit == IconTextFit::NONE) {
             instanceCounts.icons = 1;
@@ -102,22 +104,22 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
 
         const auto letterSpacing = description->style.getTextLetterSpacing(evalContext);
 
-        labelRotationAlignment = description->style.getTextRotationAlignment(evalContext);
-        if (labelRotationAlignment == SymbolAlignment::AUTO) {
-            switch (textSymbolPlacement) {
-                case TextSymbolPlacement::POINT:
-                    labelRotationAlignment = SymbolAlignment::VIEWPORT;
-                    break;
-                case TextSymbolPlacement::LINE:
-                case TextSymbolPlacement::LINE_CENTER:
-                    labelRotationAlignment = SymbolAlignment::MAP;
-                    break;
-            }
-        }
+        SymbolAlignment labelRotationAlignment = description->style.getTextRotationAlignment(evalContext);
+        boundingBoxRotationAlignment = labelRotationAlignment;
         labelObject = std::make_shared<Tiled2dMapVectorSymbolLabelObject>(converter, featureContext, description, text, fullText, coordinate, lineCoordinates, textAnchor, angle, textJustify, fontResult, textOffset, description->style.getTextLineHeight(evalContext), letterSpacing, description->style.getTextMaxWidth(evalContext), description->style.getTextMaxAngle(evalContext), labelRotationAlignment, textSymbolPlacement);
 
         instanceCounts.textCharacters = labelObject->getCharacterCount();
 
+    } else {
+        boundingBoxRotationAlignment = iconRotationAlignment;
+    }
+
+    if (boundingBoxRotationAlignment == SymbolAlignment::AUTO) {
+        if (textSymbolPlacement == TextSymbolPlacement::POINT) {
+            boundingBoxRotationAlignment = SymbolAlignment::VIEWPORT;
+        } else {
+            boundingBoxRotationAlignment = SymbolAlignment::MAP;
+        }
     }
 
     symbolSortKey = description->style.getSymbolSortKey(evalContext);
@@ -726,11 +728,15 @@ bool Tiled2dMapVectorSymbolObject::isPlaced() {
 void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<CollisionGrid> collisionGrid) {
     if (!(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier) || !getIsOpaque() || !isPlaced()) {
         // not visible
+        collides = true;
+        lastIconUpdateScaleFactor = std::nullopt;
+        lastStretchIconUpdateScaleFactor = std::nullopt;
+        lastTextUpdateScaleFactor = std::nullopt;
         return;
     }
 
     bool willCollide = true;
-    if (labelRotationAlignment == SymbolAlignment::VIEWPORT) {
+    if (boundingBoxRotationAlignment == SymbolAlignment::VIEWPORT) {
         std::optional<CollisionRectD> boundingRect = getViewportAlignedBoundingBox(zoomIdentifier, false, true);
         // Collide, if no valid boundingRect
         willCollide = !boundingRect.has_value() || collisionGrid->addAndCheckCollisionAlignedRect(*boundingRect);

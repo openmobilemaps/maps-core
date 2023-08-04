@@ -152,7 +152,7 @@ private:
     float iconSize;
     std::vector<float> iconTextFitPadding;
     TextSymbolPlacement textSymbolPlacement;
-    SymbolAlignment labelRotationAlignment = SymbolAlignment::AUTO;
+    SymbolAlignment boundingBoxRotationAlignment = SymbolAlignment::AUTO;
     float iconPadding = 0;
     Anchor iconAnchor;
     Vec2F iconOffset = Vec2F(0.0, 0.0);
