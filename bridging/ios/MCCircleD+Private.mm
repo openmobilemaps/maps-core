@@ -3,7 +3,6 @@
 
 #import "MCCircleD+Private.h"
 #import "DJIMarshal+Private.h"
-#import "MCVec2D+Private.h"
 #include <cassert>
 
 namespace djinni_generated {
@@ -11,14 +10,16 @@ namespace djinni_generated {
 auto CircleD::toCpp(ObjcType obj) -> CppType
 {
     assert(obj);
-    return {::djinni_generated::Vec2D::toCpp(obj.origin),
+    return {::djinni::F64::toCpp(obj.x),
+            ::djinni::F64::toCpp(obj.y),
             ::djinni::F64::toCpp(obj.radius)};
 }
 
 auto CircleD::fromCpp(const CppType& cpp) -> ObjcType
 {
-    return [[MCCircleD alloc] initWithOrigin:(::djinni_generated::Vec2D::fromCpp(cpp.origin))
-                                      radius:(::djinni::F64::fromCpp(cpp.radius))];
+    return [[MCCircleD alloc] initWithX:(::djinni::F64::fromCpp(cpp.x))
+                                      y:(::djinni::F64::fromCpp(cpp.y))
+                                 radius:(::djinni::F64::fromCpp(cpp.radius))];
 }
 
 } // namespace djinni_generated

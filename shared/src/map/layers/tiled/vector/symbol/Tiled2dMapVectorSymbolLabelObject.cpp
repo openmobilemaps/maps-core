@@ -491,7 +491,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
                                           (2.0 * maxSymbolRadius) * collisionDistanceBias) {
                 continue;
             }
-            circles.emplace_back(newPos, maxSymbolRadius + scaledTextPadding);
+            circles.emplace_back(newPos.x, newPos.y, maxSymbolRadius + scaledTextPadding);
             lastCirclePosition = newPos;
         }
         boundingBoxCircles = circles;
@@ -673,7 +673,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
                                   <= (maxSymbolRadius * 2.0) * collisionDistanceBias) {
                 continue;
             }
-            circles.emplace_back(Vec2D(newX, newY), maxSymbolRadius + padding);
+            circles.emplace_back(newX, newY, maxSymbolRadius + padding);
             lastCirclePosition.x = newX;
             lastCirclePosition.y = newY;
         }

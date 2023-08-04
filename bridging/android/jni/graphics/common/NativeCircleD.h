@@ -25,8 +25,9 @@ private:
     friend ::djinni::JniClass<NativeCircleD>;
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/common/CircleD") };
-    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2D;D)V") };
-    const jfieldID field_origin { ::djinni::jniGetFieldID(clazz.get(), "origin", "Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2D;") };
+    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(DDD)V") };
+    const jfieldID field_x { ::djinni::jniGetFieldID(clazz.get(), "x", "D") };
+    const jfieldID field_y { ::djinni::jniGetFieldID(clazz.get(), "y", "D") };
     const jfieldID field_radius { ::djinni::jniGetFieldID(clazz.get(), "radius", "D") };
 };
 

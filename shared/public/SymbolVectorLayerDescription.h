@@ -293,7 +293,7 @@ public:
 
     double getSymbolSpacing(const EvaluationContext &context) {
         static const double defaultValue = 250.0;
-        return symbolSpacing ? symbolSpacing->evaluateOr(context, defaultValue) : defaultValue;
+        return (symbolSpacing ? symbolSpacing->evaluateOr(context, defaultValue) : defaultValue) * dpFactor;
     }
 
     double getIconSize(const EvaluationContext &context) {

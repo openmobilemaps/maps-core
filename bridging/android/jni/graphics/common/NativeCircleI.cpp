@@ -3,7 +3,6 @@
 
 #include "NativeCircleI.h"  // my header
 #include "Marshal.hpp"
-#include "NativeVec2I.h"
 
 namespace djinni_generated {
 
@@ -14,17 +13,19 @@ NativeCircleI::~NativeCircleI() = default;
 auto NativeCircleI::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinni::LocalRef<JniType> {
     const auto& data = ::djinni::JniClass<NativeCircleI>::get();
     auto r = ::djinni::LocalRef<JniType>{jniEnv->NewObject(data.clazz.get(), data.jconstructor,
-                                                           ::djinni::get(::djinni_generated::NativeVec2I::fromCpp(jniEnv, c.origin)),
+                                                           ::djinni::get(::djinni::I32::fromCpp(jniEnv, c.x)),
+                                                           ::djinni::get(::djinni::I32::fromCpp(jniEnv, c.y)),
                                                            ::djinni::get(::djinni::I32::fromCpp(jniEnv, c.radius)))};
     ::djinni::jniExceptionCheck(jniEnv);
     return r;
 }
 
 auto NativeCircleI::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
-    ::djinni::JniLocalScope jscope(jniEnv, 3);
+    ::djinni::JniLocalScope jscope(jniEnv, 4);
     assert(j != nullptr);
     const auto& data = ::djinni::JniClass<NativeCircleI>::get();
-    return {::djinni_generated::NativeVec2I::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_origin)),
+    return {::djinni::I32::toCpp(jniEnv, jniEnv->GetIntField(j, data.field_x)),
+            ::djinni::I32::toCpp(jniEnv, jniEnv->GetIntField(j, data.field_y)),
             ::djinni::I32::toCpp(jniEnv, jniEnv->GetIntField(j, data.field_radius))};
 }
 

@@ -12,6 +12,7 @@
 #include "Tiled2dMapVectorLayerConfig.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "CoordinateSystemIdentifiers.h"
+#include "HashedTuple.h"
 
 
 Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<MapInterface> &mapInterface,
@@ -51,6 +52,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     }
 
     const auto evalContext = EvaluationContext(tileInfo.zoomIdentifier, featureContext);
+    std::string iconName = description->style.getIconImage(evalContext);
+    contentHash = std::hash<std::tuple<std::string, std::string, std::string>>()(std::tuple<std::string, std::string, std::string>(layerIdentifier, iconName, fullText));
 
     const bool hasIcon = description->style.hasIconImagePotentially();
 
@@ -632,7 +635,7 @@ std::optional<Quad2dD> Tiled2dMapVectorSymbolObject::getCombinedBoundingBox(bool
     return Vec2DHelper::minimumAreaEnclosingRectangle(points);
 }
 
-std::optional<RectD> Tiled2dMapVectorSymbolObject::getViewportAlignedBoundingBox(bool considerOverlapFlag) {
+std::optional<CollisionRectD> Tiled2dMapVectorSymbolObject::getViewportAlignedBoundingBox(double zoomIdentifier, bool considerSymbolSpacing, bool considerOverlapFlag) {
     double minX = std::numeric_limits<double>::max(), maxX = std::numeric_limits<double>::lowest(), minY = std::numeric_limits<double>::max(), maxY = std::numeric_limits<double>::lowest();
     bool hasBox = false;
 
@@ -662,24 +665,42 @@ std::optional<RectD> Tiled2dMapVectorSymbolObject::getViewportAlignedBoundingBox
         return std::nullopt;
     }
 
-    return RectD(minX, minY, maxX - minX, maxY - minY);
+    double symbolSpacingPx = 0;
+    size_t contentHash = 0;
+    if (considerSymbolSpacing) {
+        const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
+        symbolSpacingPx = description->style.getSymbolSpacing(evalContext);
+        contentHash = this->contentHash;
+    }
+
+    return CollisionRectD(minX, minY, maxX - minX, maxY - minY, contentHash, symbolSpacingPx);
 }
 
-std::optional<std::vector<CircleD>> Tiled2dMapVectorSymbolObject::getMapAlignedBoundingCircles(bool considerOverlapFlag) {
-    std::vector<CircleD> circles;
+std::optional<std::vector<CollisionCircleD>> Tiled2dMapVectorSymbolObject::getMapAlignedBoundingCircles(double zoomIdentifier, bool considerSymbolSpacing, bool considerOverlapFlag) {
+    std::vector<CollisionCircleD> circles;
+
+    double symbolSpacingPx = 0;
+    size_t contentHash = 0;
+    if (considerSymbolSpacing) {
+        const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
+        symbolSpacingPx = description->style.getSymbolSpacing(evalContext);
+        contentHash = this->contentHash;
+    }
 
     if ((!considerOverlapFlag || !textAllowOverlap) && labelObject && labelObject->boundingBoxCircles.has_value()) {
-        circles.insert(circles.end(), labelObject->boundingBoxCircles->begin(), labelObject->boundingBoxCircles->end());
+        for (const auto &circle: *labelObject->boundingBoxCircles) {
+            circles.emplace_back(circle.x, circle.y, circle.radius, contentHash, symbolSpacingPx);
+        }
     }
     if ((!considerOverlapFlag || !iconAllowOverlap) && iconBoundingBoxViewportAligned.width != 0) {
-        circles.emplace_back(Vec2D(iconBoundingBoxViewportAligned.x + 0.5 * iconBoundingBoxViewportAligned.width,
-                                   iconBoundingBoxViewportAligned.y + 0.5 * iconBoundingBoxViewportAligned.height),
-                             iconBoundingBoxViewportAligned.width * 0.5);
+        circles.emplace_back(iconBoundingBoxViewportAligned.x + 0.5 * iconBoundingBoxViewportAligned.width,
+                             iconBoundingBoxViewportAligned.y + 0.5 * iconBoundingBoxViewportAligned.height,
+                             iconBoundingBoxViewportAligned.width * 0.5, contentHash, symbolSpacingPx);
     }
     if ((!considerOverlapFlag || !iconAllowOverlap) && stretchIconBoundingBoxViewportAligned.width != 0) {
-        circles.emplace_back(Vec2D(stretchIconBoundingBoxViewportAligned.x + 0.5 * stretchIconBoundingBoxViewportAligned.width,
-                                   stretchIconBoundingBoxViewportAligned.y + 0.5 * stretchIconBoundingBoxViewportAligned.height),
-                             stretchIconBoundingBoxViewportAligned.width * 0.5);
+        circles.emplace_back(stretchIconBoundingBoxViewportAligned.x + 0.5 * stretchIconBoundingBoxViewportAligned.width,
+                             stretchIconBoundingBoxViewportAligned.y + 0.5 * stretchIconBoundingBoxViewportAligned.height,
+                             stretchIconBoundingBoxViewportAligned.width * 0.5, contentHash, symbolSpacingPx);
     }
 
     if (circles.empty()) {
@@ -710,11 +731,11 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
 
     bool willCollide = true;
     if (labelRotationAlignment == SymbolAlignment::VIEWPORT) {
-        std::optional<RectD> boundingRect = getViewportAlignedBoundingBox(true);
+        std::optional<CollisionRectD> boundingRect = getViewportAlignedBoundingBox(zoomIdentifier, false, true);
         // Collide, if no valid boundingRect
         willCollide = !boundingRect.has_value() || collisionGrid->addAndCheckCollisionAlignedRect(*boundingRect);
     } else {
-        std::optional<std::vector<CircleD>> boundingCircles = getMapAlignedBoundingCircles(true);
+        std::optional<std::vector<CollisionCircleD>> boundingCircles = getMapAlignedBoundingCircles(zoomIdentifier, textSymbolPlacement != TextSymbolPlacement::POINT, true);
         // Collide, if no valid boundingCircles
         willCollide = !boundingCircles.has_value() || collisionGrid->addAndCheckCollisionCircles(*boundingCircles);
     }

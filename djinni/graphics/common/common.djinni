@@ -60,12 +60,14 @@ quad_2d_d = record {
 }
 
 circle_d = record {
-    origin: vec_2_d;
+    x: f64;
+    y: f64;
     radius: f64;
 }
 
 circle_i = record {
-    origin: vec_2_i;
+    x: i32;
+    y: i32;
     radius: i32;
 }
 

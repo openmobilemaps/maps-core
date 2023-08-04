@@ -3,17 +3,19 @@
 
 #pragma once
 
-#include "Vec2I.h"
 #include <cstdint>
 #include <utility>
 
 struct CircleI final {
-    Vec2I origin;
+    int32_t x;
+    int32_t y;
     int32_t radius;
 
-    CircleI(Vec2I origin_,
+    CircleI(int32_t x_,
+            int32_t y_,
             int32_t radius_)
-    : origin(std::move(origin_))
+    : x(std::move(x_))
+    , y(std::move(y_))
     , radius(std::move(radius_))
     {}
 };

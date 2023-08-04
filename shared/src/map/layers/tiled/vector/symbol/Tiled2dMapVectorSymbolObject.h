@@ -74,9 +74,9 @@ public:
 
     std::optional<Quad2dD> getCombinedBoundingBox(bool considerOverlapFlag);
 
-    std::optional<RectD> getViewportAlignedBoundingBox(bool considerOverlapFlag);
+    std::optional<CollisionRectD> getViewportAlignedBoundingBox(double zoomIdentifier, bool considerSymbolSpacing, bool considerOverlapFlag);
 
-    std::optional<std::vector<CircleD>> getMapAlignedBoundingCircles(bool considerOverlapFlag);
+    std::optional<std::vector<CollisionCircleD>> getMapAlignedBoundingCircles(double zoomIdentifier, bool considerSymbolSpacing, bool considerOverlapFlag);
 
     bool collides = true;
 
@@ -157,6 +157,8 @@ private:
     Anchor iconAnchor;
     Vec2F iconOffset = Vec2F(0.0, 0.0);
     IconTextFit iconTextFit = IconTextFit::NONE;
+
+    size_t contentHash = 0;
 
     bool isPlaced();
 };

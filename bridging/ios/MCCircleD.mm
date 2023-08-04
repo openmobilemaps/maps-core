@@ -6,27 +6,31 @@
 
 @implementation MCCircleD
 
-- (nonnull instancetype)initWithOrigin:(nonnull MCVec2D *)origin
-                                radius:(double)radius
+- (nonnull instancetype)initWithX:(double)x
+                                y:(double)y
+                           radius:(double)radius
 {
     if (self = [super init]) {
-        _origin = origin;
+        _x = x;
+        _y = y;
         _radius = radius;
     }
     return self;
 }
 
-+ (nonnull instancetype)circleDWithOrigin:(nonnull MCVec2D *)origin
-                                   radius:(double)radius
++ (nonnull instancetype)circleDWithX:(double)x
+                                   y:(double)y
+                              radius:(double)radius
 {
-    return [[self alloc] initWithOrigin:origin
-                                 radius:radius];
+    return [[self alloc] initWithX:x
+                                 y:y
+                            radius:radius];
 }
 
 #ifndef DJINNI_DISABLE_DESCRIPTION_METHODS
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p origin:%@ radius:%@>", self.class, (void *)self, self.origin, @(self.radius)];
+    return [NSString stringWithFormat:@"<%@ %p x:%@ y:%@ radius:%@>", self.class, (void *)self, @(self.x), @(self.y), @(self.radius)];
 }
 
 #endif

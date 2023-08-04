@@ -3,7 +3,6 @@
 
 #include "NativeCircleD.h"  // my header
 #include "Marshal.hpp"
-#include "NativeVec2D.h"
 
 namespace djinni_generated {
 
@@ -14,17 +13,19 @@ NativeCircleD::~NativeCircleD() = default;
 auto NativeCircleD::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinni::LocalRef<JniType> {
     const auto& data = ::djinni::JniClass<NativeCircleD>::get();
     auto r = ::djinni::LocalRef<JniType>{jniEnv->NewObject(data.clazz.get(), data.jconstructor,
-                                                           ::djinni::get(::djinni_generated::NativeVec2D::fromCpp(jniEnv, c.origin)),
+                                                           ::djinni::get(::djinni::F64::fromCpp(jniEnv, c.x)),
+                                                           ::djinni::get(::djinni::F64::fromCpp(jniEnv, c.y)),
                                                            ::djinni::get(::djinni::F64::fromCpp(jniEnv, c.radius)))};
     ::djinni::jniExceptionCheck(jniEnv);
     return r;
 }
 
 auto NativeCircleD::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
-    ::djinni::JniLocalScope jscope(jniEnv, 3);
+    ::djinni::JniLocalScope jscope(jniEnv, 4);
     assert(j != nullptr);
     const auto& data = ::djinni::JniClass<NativeCircleD>::get();
-    return {::djinni_generated::NativeVec2D::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_origin)),
+    return {::djinni::F64::toCpp(jniEnv, jniEnv->GetDoubleField(j, data.field_x)),
+            ::djinni::F64::toCpp(jniEnv, jniEnv->GetDoubleField(j, data.field_y)),
             ::djinni::F64::toCpp(jniEnv, jniEnv->GetDoubleField(j, data.field_radius))};
 }
 

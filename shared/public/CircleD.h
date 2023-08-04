@@ -3,16 +3,18 @@
 
 #pragma once
 
-#include "Vec2D.h"
 #include <utility>
 
 struct CircleD final {
-    Vec2D origin;
+    double x;
+    double y;
     double radius;
 
-    CircleD(Vec2D origin_,
+    CircleD(double x_,
+            double y_,
             double radius_)
-    : origin(std::move(origin_))
+    : x(std::move(x_))
+    , y(std::move(y_))
     , radius(std::move(radius_))
     {}
 };
