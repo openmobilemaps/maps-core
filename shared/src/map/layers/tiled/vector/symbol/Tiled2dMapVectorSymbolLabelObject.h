@@ -72,8 +72,61 @@ private:
     void evaluateStyleProperties(const double zoomIdentifier);
 
     std::pair<int, double> findReferencePointIndices();
-    Vec2D pointAtIndex(const std::pair<int, double> &index, bool useRender);
-    std::pair<int, double> indexAtDistance(const std::pair<int, double> &index, double distance);
+    
+    inline Vec2D pointAtIndex(const std::pair<int, double> &index, bool useRender) {
+        const auto &s = useRender ? renderLineCoordinates[index.first] : (*lineCoordinates)[index.first];
+        const auto &e = useRender ?  renderLineCoordinates[index.first + 1 < renderLineCoordinatesCount ? (index.first + 1) : index.first] : (*lineCoordinates)[index.first + 1 < renderLineCoordinatesCount ? (index.first + 1) : index.first];
+        return Vec2D(s.x + (e.x - s.x) * index.second, s.y + (e.y - s.y) * index.second);
+    }
+
+    inline std::pair<int, double> indexAtDistance(const std::pair<int, double> &index, double distance) {
+        auto current = pointAtIndex(index, true);
+        auto currentIndex = index;
+        auto dist = std::abs(distance);
+
+        if(distance >= 0) {
+            auto start = std::min(index.first + 1, (int)renderLineCoordinatesCount - 1);
+
+            for(int i = start; i < renderLineCoordinatesCount; i++) {
+                const auto &next = renderLineCoordinates.at(i);
+
+                const double d = Vec2DHelper::distance(current, Vec2D(next.x, next.y));
+
+                if(dist > d) {
+                    dist -= d;
+                    current.x = next.x;
+                    current.y = next.y;
+                    currentIndex = std::make_pair(i, 0.0);
+                } else {
+                    return std::make_pair(currentIndex.first, currentIndex.second + dist / d * (1.0 - currentIndex.second));
+                }
+            }
+        } else {
+            auto start = index.first;
+
+            for(int i = start; i >= 0; i--) {
+                const auto &next = renderLineCoordinates.at(i);
+
+                const auto d = Vec2DHelper::distance(current, Vec2D(next.x, next.y));
+
+                if(dist > d) {
+                    dist -= d;
+                    current.x = next.x;
+                    current.y = next.y;
+                    currentIndex = std::make_pair(i, 0.0);
+                } else {
+                    if(i == currentIndex.first) {
+                        return std::make_pair(i, currentIndex.second - currentIndex.second * dist / d);
+                    } else {
+                        return std::make_pair(i, 1.0 - dist / d);
+                    }
+                }
+            }
+
+        }
+
+        return currentIndex;
+    }
 
     const std::shared_ptr<SymbolVectorLayerDescription> description;
     const std::shared_ptr<FeatureContext> featureContext;
@@ -105,6 +158,7 @@ private:
 
     int characterCount = 0;
     std::vector<SplitInfo> splittedTextInfo;
+    int numSymbols;
 public:
     const std::string fullText;
 private:

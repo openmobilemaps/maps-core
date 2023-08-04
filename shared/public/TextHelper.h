@@ -17,7 +17,7 @@
 #include "Vec2F.h"
 #include "Quad2dD.h"
 #include "SymbolAlignment.h"
-
+#include "Vec2DHelper.h"
 #include <optional>
 
 struct BreakResult {
@@ -44,7 +44,12 @@ class TextHelper {
 
     static std::string uppercase(const std::string &string);
 
-    static Quad2dD rotateQuad2d(const Quad2dD &quad, const Vec2D &aroundPoint, double angleDegrees);
+    inline static Quad2dD rotateQuad2d(const Quad2dD &quad, const Vec2D &aroundPoint, double angleDegrees) {
+        return Quad2dD(Vec2DHelper::rotate(quad.topLeft, aroundPoint, angleDegrees),
+                       Vec2DHelper::rotate(quad.topRight, aroundPoint, angleDegrees),
+                       Vec2DHelper::rotate(quad.bottomRight, aroundPoint, angleDegrees),
+                       Vec2DHelper::rotate(quad.bottomLeft, aroundPoint, angleDegrees));
+    }
 
     static std::vector<std::string> splitWstring(const std::string &word);
 
