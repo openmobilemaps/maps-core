@@ -22,6 +22,18 @@ struct CollisionRectD {
             : x(x), y(y), width(width), height(height), contentHash(contentHash), symbolSpacing(symbolSpacing) {}
 };
 
+struct CollisionRectF {
+    float x;
+    float y;
+    float width;
+    float height;
+    size_t contentHash;
+    float symbolSpacing; // In projected space of the CollisionGrid
+
+    CollisionRectF(float x, float y, float width, float height, size_t contentHash = 0, float symbolSpacing = 0)
+            : x(x), y(y), width(width), height(height), contentHash(contentHash), symbolSpacing(symbolSpacing) {}
+};
+
 struct CollisionRectI {
     int32_t x;
     int32_t y;
@@ -42,6 +54,17 @@ struct CollisionCircleD {
     double symbolSpacing; // In projected space of the CollisionGrid
 
     CollisionCircleD(double x, double y, double radius, size_t contentHash = 0, double symbolSpacing = 0)
+            : x(x), y(y), radius(radius), contentHash(contentHash), symbolSpacing(symbolSpacing) {}
+};
+
+struct CollisionCircleF {
+    float x;
+    float y;
+    float radius;
+    size_t contentHash;
+    float symbolSpacing; // In projected space of the CollisionGrid
+
+    CollisionCircleF(float x, float y, float radius, size_t contentHash = 0, float symbolSpacing = 0)
             : x(x), y(y), radius(radius), contentHash(contentHash), symbolSpacing(symbolSpacing) {}
 };
 

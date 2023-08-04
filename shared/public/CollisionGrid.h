@@ -11,8 +11,8 @@
 #pragma once
 
 #include "Matrix.h"
-#include "RectI.h"
-#include "CircleI.h"
+#include "RectF.h"
+#include "CircleF.h"
 #include "CollisionPrimitives.h"
 #include <vector>
 
@@ -69,8 +69,8 @@ public:
      * Add a collision grid aligned rectangle (when projected with the provided vpMatrix) and receive the feedback,
      * if it has collided with the previous content of the grid. Only added, when not colliding!
      */
-    bool addAndCheckCollisionAlignedRect(const CollisionRectD &rectangle) {
-        RectI projectedRectangle = getProjectedRectangle(rectangle);
+    bool addAndCheckCollisionAlignedRect(const CollisionRectF &rectangle) {
+        RectF projectedRectangle = getProjectedRectangle(rectangle);
         IndexRange indexRange = getIndexRangeForRectangle(projectedRectangle);
         if (!indexRange.isValid(numCellsX - 1, numCellsY - 1)) {
             return true; // Fully outside of bounds - not relevant
@@ -130,13 +130,13 @@ public:
     * Add a vector of circles (which are then projected with the provided vpMatrix) and receive the feedback, if they have collided
     * with the previous content of the grid. Assumed to remain circles in the projected space. Only added, when not colliding!
     */
-    bool addAndCheckCollisionCircles(const std::vector<CollisionCircleD> &circles) {
+    bool addAndCheckCollisionCircles(const std::vector<CollisionCircleF> &circles) {
         if (circles.empty()) {
             // No circles -> no collision
             return false;
         }
 
-        std::vector<std::tuple<CircleI, IndexRange, size_t, int32_t>> projectedCircles;
+        std::vector<std::tuple<CircleF, IndexRange, size_t, int32_t>> projectedCircles;
         for (const auto &circle : circles) {
             auto projectedCircle = getProjectedCircle(circle);
             IndexRange indexRange = getIndexRangeForCircle(projectedCircle);
@@ -204,14 +204,14 @@ public:
     }
 
 private:
-    RectI getProjectedRectangle(const CollisionRectD &rectangle) {
+    RectF getProjectedRectangle(const CollisionRectF &rectangle) {
         temp2[0] = rectangle.x;
         temp2[1] = rectangle.y;
         temp2[2] = 0.0;
         temp2[3] = 1.0;
         Matrix::multiply(vpMatrix, temp2, temp1);
-        int32_t originX = std::round((temp1.at(0) / temp1.at(3)) * halfWidth + halfWidth);
-        int32_t originY = std::round((temp1.at(1) / temp1.at(3)) * halfHeight + halfHeight);
+        float originX = ((temp1.at(0) / temp1.at(3)) * halfWidth + halfWidth);
+        float originY = ((temp1.at(1) / temp1.at(3)) * halfHeight + halfHeight);
         temp2[0] = rectangle.width * cosNegGridAngle;
         temp2[1] = rectangle.width * sinNegGridAngle;
         temp2[2] = 0.0;
@@ -226,22 +226,22 @@ private:
         Matrix::multiply(vpMatrix, temp2, temp1);
         w += temp1.at(0);
         h += temp1.at(1);
-        int32_t width = std::round(w * halfWidth); // by assumption aligned with projected space
-        int32_t height = std::round(h * halfHeight); // by assumption aligned with projected space
+        float width = (w * halfWidth); // by assumption aligned with projected space
+        float height = (h * halfHeight); // by assumption aligned with projected space
         originX = std::min(originX, originX + width);
         originY = std::min(originY, originY + height);
         // Rectangle origin is chosen as the min/min corner with width/height always positive
         return {originX, originY, std::abs(width), std::abs(height)};
     }
 
-    CircleI getProjectedCircle(const CollisionCircleD &circle) {
+    CircleF getProjectedCircle(const CollisionCircleF &circle) {
         temp2[0] = circle.x;
         temp2[1] = circle.y;
         temp2[2] = 0.0;
         temp2[3] = 1.0;
         Matrix::multiply(vpMatrix, temp2, temp1);
-        int32_t originX = std::round((temp1.at(0) / temp1.at(3)) * halfWidth + halfWidth);
-        int32_t originY = std::round((temp1.at(1) / temp1.at(3)) * halfHeight + halfHeight);
+        float originX = ((temp1.at(0) / temp1.at(3)) * halfWidth + halfWidth);
+        float originY = ((temp1.at(1) / temp1.at(3)) * halfHeight + halfHeight);
         temp2[0] = circle.radius;
         temp2[1] = circle.radius;
         temp2[2] = 0.0;
@@ -249,14 +249,14 @@ private:
         Matrix::multiply(vpMatrix, temp2, temp1);
         temp1.at(0) = temp1.at(0) * halfWidth;
         temp1.at(1) = temp1.at(1) * halfHeight;
-        int32_t iRadius = std::abs(std::round(std::sqrt(temp1.at(0) * temp1.at(0) + temp1.at(1) + temp1.at(1))));
+        float iRadius = std::abs((std::sqrt(temp1.at(0) * temp1.at(0) + temp1.at(1) + temp1.at(1))));
         return {originX, originY, iRadius};
     }
 
     /**
      * Get index range for a projected rectangle
      */
-    IndexRange getIndexRangeForRectangle(const RectI &rectangle) {
+    IndexRange getIndexRangeForRectangle(const RectF &rectangle) {
         IndexRange result;
         result.addXIndex(std::floor((rectangle.x - collisionBias) / cellSize) + numCellsPadding, numCellsX - 1);
         result.addXIndex(std::floor((rectangle.x + rectangle.width + collisionBias) / cellSize) + numCellsPadding, numCellsX - 1);
@@ -268,7 +268,7 @@ private:
     /**
      * Get index range for a projected circle
      */
-    IndexRange getIndexRangeForCircle(const CircleI &circle) {
+    IndexRange getIndexRangeForCircle(const CircleF &circle) {
         IndexRange result;
         // May include unnecessary corner grid cells
         result.addXIndex(std::floor((circle.x - circle.radius - collisionBias) / cellSize) + numCellsPadding, numCellsX - 1);
@@ -278,35 +278,35 @@ private:
         return result;
     }
 
-    bool checkRectCollision(const RectI &rect1, const RectI &rect2, int32_t addSpacing = 0) {
+    bool checkRectCollision(const RectF &rect1, const RectF &rect2, int32_t addSpacing = 0) {
         return (rect1.x < (rect2.x + rect2.width + addSpacing + collisionBias)) &&
                ((rect1.x + rect1.width) > (rect2.x - addSpacing - collisionBias)) &&
                (rect1.y < (rect2.y + rect2.height + addSpacing + collisionBias)) &&
                ((rect1.y + rect1.height) > (rect2.y - addSpacing - collisionBias));
     }
 
-    bool checkRectCircleCollision(const RectI &rect, const CircleI &circle, int32_t addSpacing = 0) {
-        int32_t minX = std::min(rect.x + rect.width, rect.x);
-        int32_t minY = std::min(rect.y + rect.height, rect.y);
-        int32_t closestX = std::max(minX, std::min(minX + std::abs(rect.width), circle.x));
-        int32_t closestY = std::max(minY, std::min(minY + std::abs(rect.height), circle.y));
-        int32_t dX = closestX - circle.x;
-        int32_t dY = closestY - circle.y;
-        int32_t r = circle.radius + addSpacing + collisionBias;
+    bool checkRectCircleCollision(const RectF &rect, const CircleF &circle, int32_t addSpacing = 0) {
+        float minX = std::min(rect.x + rect.width, rect.x);
+        float minY = std::min(rect.y + rect.height, rect.y);
+        float closestX = std::max(minX, std::min(minX + rect.width, circle.x));
+        float closestY = std::max(minY, std::min(minY + rect.height, circle.y));
+        float dX = closestX - circle.x;
+        float dY = closestY - circle.y;
+        float r = circle.radius + addSpacing + collisionBias;
         return (dX * dX + dY * dY) < (r * r);
     }
 
-    bool checkCircleCollision(const CircleI &circle1, const CircleI &circle2, int32_t addSpacing = 0) {
-        int32_t dX = circle1.x - circle2.x;
-        int32_t dY = circle1.y - circle2.y;
-        int32_t distanceSq = dX * dX + dY * dY;
-        int32_t r = circle1.radius + circle2.radius + addSpacing + collisionBias;
+    bool checkCircleCollision(const CircleF &circle1, const CircleF &circle2, int32_t addSpacing = 0) {
+        float dX = circle1.x - circle2.x;
+        float dY = circle1.y - circle2.y;
+        float distanceSq = dX * dX + dY * dY;
+        float r = circle1.radius + circle2.radius + addSpacing + collisionBias;
         return distanceSq < (r * r);
     }
 
     const static int32_t numCellsMinDim = 20; // TODO: use smart calculations to define grid number on initialize (e.g. with first insertion o.s.)
     // Additional cell padding around the viewport;
-    static constexpr int32_t numCellsPadding = 5;
+    static constexpr int32_t numCellsPadding = 4;
 
     const std::vector<float> vpMatrix;
     const Vec2I size;
@@ -316,10 +316,10 @@ private:
     int16_t numCellsY;
     float halfWidth;
     float halfHeight;
-    std::vector<std::vector<std::vector<RectI>>> gridRects; // vector of rectangles in a 2-dimensional gridRects[y][x]
-    std::vector<std::vector<std::vector<CircleI>>> gridCircles; // vector of circles in a 2-dimensional gridCircles[y][x]
-    std::unordered_map<size_t, std::vector<RectI>> spacedRects;
-    std::unordered_map<size_t, std::vector<CircleI>> spacedCircles;
+    std::vector<std::vector<std::vector<RectF>>> gridRects; // vector of rectangles in a 2-dimensional gridRects[y][x]
+    std::vector<std::vector<std::vector<CircleF>>> gridCircles; // vector of circles in a 2-dimensional gridCircles[y][x]
+    std::unordered_map<size_t, std::vector<RectF>> spacedRects;
+    std::unordered_map<size_t, std::vector<CircleF>> spacedCircles;
 
     // Additional padding to the advantage of established collision primitives to resolve any rounding errors
     static constexpr int32_t collisionBias = 0;

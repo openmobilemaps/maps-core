@@ -65,6 +65,12 @@ circle_d = record {
     radius: f64;
 }
 
+circle_f = record {
+    x: f32;
+    y: f32;
+    radius: f32;
+}
+
 circle_i = record {
     x: i32;
     y: i32;

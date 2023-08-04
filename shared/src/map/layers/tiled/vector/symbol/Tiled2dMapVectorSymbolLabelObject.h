@@ -105,9 +105,9 @@ private:
 
     int characterCount = 0;
     std::vector<SplitInfo> splittedTextInfo;
-
+public:
     const std::string fullText;
-
+private:
     size_t renderLineCoordinatesCount;
     std::vector<Coord> renderLineCoordinates;
     std::optional<std::vector<Coord>> lineCoordinates;
