@@ -25,6 +25,8 @@
 #include "CollisionGrid.h"
 
 //#define DRAW_TEXT_BOUNDING_BOX
+//#define DRAW_TEXT_BOUNDING_BOX_WITH_COLLISIONS
+
 
 class Tiled2dMapVectorSymbolGroup : public ActorObject {
 public:
@@ -35,10 +37,11 @@ public:
                                 const std::string &layerIdentifier,
                                 const std::shared_ptr<SymbolVectorLayerDescription> &layerDescription);
 
-    bool initialize(const std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features);
+    bool initialize(const std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features,
+                    std::shared_ptr<std::unordered_map<size_t, std::shared_ptr<SymbolAnimationCoordinator>>> animationCoordinators);
 
 
-    void update(const double zoomIdentifier, const double rotation, const double scaleFactor);
+    void update(const double zoomIdentifier, const double rotation, const double scaleFactor, long long now);
 
     void setupObjects(const std::shared_ptr<SpriteData> &spriteData, const std::shared_ptr<TextureHolderInterface> &spriteTexture);
     
@@ -53,6 +56,8 @@ public:
     std::shared_ptr<PolygonGroup2dLayerObject> boundingBoxLayerObject;
 
     void setAlpha(float alpha);
+
+    void placedInCache();
 
     void resetCollisionCache();
 
@@ -76,7 +81,8 @@ private:
                                                                             const std::optional<double> &angle,
                                                                             const TextJustify &textJustify,
                                                                             const TextSymbolPlacement &textSymbolPlacement,
-                                                                            const bool hideIcon);
+                                                                            const bool hideIcon,
+                                                                            std::shared_ptr<std::unordered_map<size_t, std::shared_ptr<SymbolAnimationCoordinator>>> animationCoordinators);
 
 private:
     std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>> symbolObjects;

@@ -35,6 +35,7 @@
 #include "Tiled2dMapVectorLineTile.h"
 #include "Tiled2dMapVectorRasterTile.h"
 #include "SpriteData.h"
+#include "DateHelper.h"
 #include "Tiled2dMapVectorBackgroundSubLayer.h"
 #include "Tiled2dMapVectorSourceTileDataManager.h"
 #include "Tiled2dMapVectorSourceRasterTileDataManager.h"
@@ -381,6 +382,7 @@ std::shared_ptr<::LayerInterface> Tiled2dMapVectorLayer::asLayerInterface() {
 }
 
 void Tiled2dMapVectorLayer::update() {
+    long long now = DateHelper::currentTimeMillis();
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
         sourceDataManager.syncAccess([](const auto &manager) {
             manager->update();
@@ -400,8 +402,8 @@ void Tiled2dMapVectorLayer::update() {
         std::optional<std::vector<float>> vpMatrix = camera->getLastVpMatrix();
         if (!vpMatrix) return;
         for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
-            sourceDataManager.syncAccess([](const auto &manager) {
-                manager->update();
+            sourceDataManager.syncAccess([&now](const auto &manager) {
+                manager->update(now);
             });
         }
         collisionManager.syncAccess([&vpMatrix, &viewportSize, viewportRotation, enforceUpdate](const auto &manager) {

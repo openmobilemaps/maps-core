@@ -10,6 +10,8 @@
 
 #include "Tiled2dMapVectorSymbolLabelObject.h"
 #include "TextHelper.h"
+#include "DateHelper.h"
+#include "SymbolAnimationCoordinator.h"
 #include "fast_atan2.h"
 
 Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::shared_ptr<CoordinateConversionHelperInterface> &converter,
@@ -29,7 +31,8 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
                                                                      const int64_t maxCharacterWidth,
                                                                      const double maxCharacterAngle,
                                                                      const SymbolAlignment rotationAlignment,
-                                                                     const TextSymbolPlacement &textSymbolPlacement):
+                                                                     const TextSymbolPlacement &textSymbolPlacement,
+                                                                     std::shared_ptr<SymbolAnimationCoordinator> animationCoordinator):
 textSymbolPlacement(textSymbolPlacement),
 rotationAlignment(rotationAlignment),
 featureContext(featureContext),
@@ -45,7 +48,8 @@ fullText(fullText),
 lineCoordinates(lineCoordinates),
 boundingBox(Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0)),
 referencePoint(converter->convertToRenderSystem(coordinate)),
-referenceSize(fontResult->fontData->info.size)
+referenceSize(fontResult->fontData->info.size),
+animationCoordinator(animationCoordinator)
 {
     auto spaceIt = std::find_if(fontResult->fontData->glyphs.begin(), fontResult->fontData->glyphs.end(), [](const auto& d) {
         return d.charCode == " ";
@@ -203,27 +207,33 @@ void Tiled2dMapVectorSymbolLabelObject::evaluateStyleProperties(const double zoo
 }
 
 
-void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const bool collides, const double rotation, const float alpha) {
+void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const bool collides, const double rotation, const float alpha, const bool isCoordinateOwner, long long now) {
     const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
 
     evaluateStyleProperties(zoomIdentifier);
 
-    if (collides || !(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier)) {
-        styles[(9 * styleOffset) + 3] = 0;
-        styles[(9 * styleOffset) + 7] = 0;
-    } else {
-        styles[(9 * styleOffset) + 0] = textColor.r; //R
-        styles[(9 * styleOffset) + 1] = textColor.g; //G
-        styles[(9 * styleOffset) + 2] = textColor.b; //B
-        styles[(9 * styleOffset) + 3] = textColor.a * opacity * alpha; //A
-        styles[(9 * styleOffset) + 4] = haloColor.r; //R
-        styles[(9 * styleOffset) + 5] = haloColor.g; //G
-        styles[(9 * styleOffset) + 6] = haloColor.b; //B
-        styles[(9 * styleOffset) + 7] = haloColor.a * opacity * alpha; //A
-        styles[(9 * styleOffset) + 8] = haloWidth;
+    float alphaFactor;
 
-        isOpaque = opacity != 0.0;
+    if (!isCoordinateOwner) {
+        alphaFactor = 0.0;
+    } else if (collides || !(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier)) {
+        alphaFactor = animationCoordinator->getTextAlpha(0.0, now);
+    } else {
+        float targetAlpha = opacity * alpha;
+        alphaFactor = animationCoordinator->getTextAlpha(targetAlpha, now);
     }
+
+    styles[(9 * styleOffset) + 0] = textColor.r; //R
+    styles[(9 * styleOffset) + 1] = textColor.g; //G
+    styles[(9 * styleOffset) + 2] = textColor.b; //B
+    styles[(9 * styleOffset) + 3] = textColor.a * alphaFactor; //A
+    styles[(9 * styleOffset) + 4] = haloColor.r; //R
+    styles[(9 * styleOffset) + 5] = haloColor.g; //G
+    styles[(9 * styleOffset) + 6] = haloColor.b; //B
+    styles[(9 * styleOffset) + 7] = haloColor.a * alphaFactor; //A
+    styles[(9 * styleOffset) + 8] = haloWidth;
+
+    isOpaque = opacity != 0.0;
 
     styleOffset += 1;
 

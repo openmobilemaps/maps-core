@@ -23,7 +23,7 @@ Tiled2dMapVectorSourceSymbolDataManager::Tiled2dMapVectorSourceSymbolDataManager
                                                                                  const std::string &source,
                                                                                  const std::shared_ptr<FontLoaderInterface> &fontLoader,
                                                                                  const WeakActor<Tiled2dMapVectorSource> &vectorSource) :
-Tiled2dMapVectorSourceDataManager(vectorLayer, mapDescription, layerConfig, source), fontLoader(fontLoader), vectorSource(vectorSource)
+Tiled2dMapVectorSourceDataManager(vectorLayer, mapDescription, layerConfig, source), fontLoader(fontLoader), vectorSource(vectorSource), animationCoordinators(std::make_shared<std::unordered_map<size_t, std::shared_ptr<SymbolAnimationCoordinator>>>())
 {
     for (const auto &layer: mapDescription->layers) {
         if (layer->getType() == VectorLayerType::symbol && layer->source == source) {
@@ -223,7 +223,7 @@ std::optional<Actor<Tiled2dMapVectorSymbolGroup>> Tiled2dMapVectorSourceSymbolDa
     const auto fontProvider = WeakActor(mailbox, weak_from_this()).weakActor<Tiled2dMapVectorFontProvider>();
     auto mailbox = std::make_shared<Mailbox>(mapInterface.lock()->getScheduler());
     Actor<Tiled2dMapVectorSymbolGroup> symbolGroupActor = Actor<Tiled2dMapVectorSymbolGroup>(mailbox, mapInterface, layerConfig, fontProvider, tileInfo, layerIdentifier, layerDescriptions.at(layerIdentifier));
-    bool success = symbolGroupActor.unsafe()->initialize(features);
+    bool success = symbolGroupActor.unsafe()->initialize(features, animationCoordinators);
     symbolGroupActor.unsafe()->setAlpha(alpha);
     return success ? symbolGroupActor : std::optional<Actor<Tiled2dMapVectorSymbolGroup>>();
 }
@@ -244,6 +244,15 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups(const std::vecto
         } else {
             tileStateIt->second = state;
         }
+        if (state == TileState::CACHED) {
+            for (const auto &[layerIdentifier, symbolGroups]: tileSymbolGroupMap.at(tile)) {
+                for (auto &symbolGroup: symbolGroups) {
+                    symbolGroup.syncAccess([&](auto group){
+                        group->placedInCache();
+                    });
+                }
+            }
+        }
     }
 
     for (const auto &tile: tilesStatesToRemove) {
@@ -261,6 +270,15 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups(const std::vecto
         symbolGroup.syncAccess([&](auto group){
             group->setupObjects(spriteData, spriteTexture);
         });
+    }
+
+    if (!toClear.empty()) {
+        for (auto it = animationCoordinators->cbegin(), next_it = it; it != animationCoordinators->cend(); it = next_it) {
+          ++next_it;
+          if (!it->second->isUsed()) {
+            animationCoordinators->erase(it);
+          }
+        }
     }
 
     for (const auto &[tile, symbolGroupMap]: tileSymbolGroupMap) {
@@ -352,7 +370,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
     }
 }
 
-void Tiled2dMapVectorSourceSymbolDataManager::update() {
+void Tiled2dMapVectorSourceSymbolDataManager::update(long long now) {
     auto mapInterface = this->mapInterface.lock();
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
@@ -374,10 +392,17 @@ void Tiled2dMapVectorSourceSymbolDataManager::update() {
         for (const auto &[layerIdentifier, symbolGroups]: symbolGroupsMap) {
             const auto &description = layerDescriptions.at(layerIdentifier);
             for (auto &symbolGroup: symbolGroups) {
-                symbolGroup.syncAccess([&zoomIdentifier, &rotation, &scaleFactor](auto group){
-                    group->update(zoomIdentifier, rotation, scaleFactor);
+                symbolGroup.syncAccess([&zoomIdentifier, &rotation, &scaleFactor, &now](auto group){
+                    group->update(zoomIdentifier, rotation, scaleFactor, now);
                 });
             }
+        }
+    }
+
+    for (const auto &[id, coordinator]: *animationCoordinators) {
+        if (coordinator->isAnimating()) {
+            mapInterface->invalidate();
+            break;
         }
     }
 }

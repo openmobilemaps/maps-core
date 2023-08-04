@@ -21,6 +21,7 @@
 #include "TextInstancedInterface.h"
 #include "Tiled2dMapVectorFontProvider.h"
 #include "CollisionGrid.h"
+#include "SymbolAnimationCoordinator.h"
 
 class Tiled2dMapVectorSourceSymbolDataManager:
         public Tiled2dMapVectorSourceDataManager,
@@ -52,7 +53,7 @@ public:
 
     void collisionDetection(std::vector<std::string> layerIdentifiers, std::shared_ptr<CollisionGrid> collisionGrid);
 
-    void update();
+    void update(long long now);
 
     void setSprites(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) override;
 
@@ -103,4 +104,6 @@ private:
     float alpha = 1.0;
 
     std::unordered_set<std::string> interactableLayers;
+
+    std::shared_ptr<std::unordered_map<size_t, std::shared_ptr<SymbolAnimationCoordinator>>> animationCoordinators;
 };
