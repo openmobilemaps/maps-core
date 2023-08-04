@@ -388,6 +388,19 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
     }
 
 #ifdef DRAW_TEXT_BOUNDING_BOX
+    textSymbolPlacement = layerDescription->style.getTextSymbolPlacement(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>()));
+    labelRotationAlignment = layerDescription->style.getTextRotationAlignment(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>()));
+    if (labelRotationAlignment == SymbolAlignment::AUTO) {
+        switch (textSymbolPlacement) {
+            case TextSymbolPlacement::POINT:
+                labelRotationAlignment = SymbolAlignment::VIEWPORT;
+                break;
+            case TextSymbolPlacement::LINE:
+            case TextSymbolPlacement::LINE_CENTER:
+                labelRotationAlignment = SymbolAlignment::MAP;
+                break;
+        }
+    }
     if (instanceCounts.icons + instanceCounts.stretchedIcons + instanceCounts.textCharacters > 0) {
         auto shader = strongMapInterface->getShaderFactory()->createPolygonGroupShader();
         auto object = strongMapInterface->getGraphicsObjectFactory()->createPolygonGroup(shader->asShaderProgramInterface());
@@ -525,18 +538,18 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                 }
 
                 if (!object->getIsOpaque()) continue;
-                const auto &circles = object->getMapAlignedBoundingCircles(true);
-                if (circles && !circles->empty()) {
+                const auto &circles = object->getMapAlignedBoundingCircles(zoomIdentifier, false, true);
+                if (labelRotationAlignment == SymbolAlignment::MAP && circles && !circles->empty()) {
                     for (const auto &circle: *circles) {
                         const size_t numCirclePoints = 8;
                         std::vector<Coord> coords;
                         coords.emplace_back(CoordinateSystemIdentifiers::RENDERSYSTEM(),
-                                            circle.origin.x, circle.origin.y, 0.0);
+                                            circle.x, circle.y, 0.0);
                         for (size_t i = 0; i < numCirclePoints; i++) {
                             float angle = i * (2 * M_PI / numCirclePoints);
                             coords.emplace_back(CoordinateSystemIdentifiers::RENDERSYSTEM(),
-                                                circle.origin.x + circle.radius * std::cos(angle),
-                                                circle.origin.y + circle.radius * std::sin(angle),
+                                                circle.x + circle.radius * std::cos(angle),
+                                                circle.y + circle.radius * std::sin(angle),
                                                 0.0);
 
                             indices.push_back(currentVertexIndex);
@@ -548,7 +561,7 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                         currentVertexIndex += (numCirclePoints + 1);
                     }
                 } else {
-                    const auto &viewportAlignedBox = object->getViewportAlignedBoundingBox(true);
+                    const auto &viewportAlignedBox = object->getViewportAlignedBoundingBox(zoomIdentifier, false, true);
                     if (viewportAlignedBox) {
                         // Align rectangle to viewport
                         const double sinAngle = sin(-rotation * M_PI / 180.0);

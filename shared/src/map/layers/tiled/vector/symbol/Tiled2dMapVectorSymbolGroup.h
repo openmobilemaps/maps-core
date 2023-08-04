@@ -115,4 +115,9 @@ private:
     float alpha = 1.0;
 
     bool anyInteractable = false;
+
+#ifdef DRAW_TEXT_BOUNDING_BOX
+    TextSymbolPlacement textSymbolPlacement;
+    SymbolAlignment labelRotationAlignment;
+#endif
 };
