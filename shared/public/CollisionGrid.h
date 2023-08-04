@@ -205,8 +205,12 @@ public:
 
 private:
     RectF getProjectedRectangle(const CollisionRectF &rectangle) {
-        temp2[0] = rectangle.x;
-        temp2[1] = rectangle.y;
+        temp2[0] = rectangle.x - rectangle.anchorX; // move x to the anchor
+        temp2[1] = rectangle.y - rectangle.anchorY;
+        temp2[2] = temp2[0] * cosNegGridAngle - temp2[1] * sinNegGridAngle; // rotate x
+        temp2[3] = temp2[0] * sinNegGridAngle + temp2[1] * cosNegGridAngle;
+        temp2[0] = temp2[2] + rectangle.anchorX; // move rotated x to correct location relativ to the anchor
+        temp2[1] = temp2[3] + rectangle.anchorY;
         temp2[2] = 0.0;
         temp2[3] = 1.0;
         Matrix::multiply(vpMatrix, temp2, temp1);
@@ -304,7 +308,8 @@ private:
         return distanceSq < (r * r);
     }
 
-    const static int32_t numCellsMinDim = 20; // TODO: use smart calculations to define grid number on initialize (e.g. with first insertion o.s.)
+    // TODO: use smart calculations to define grid number on initialize (e.g. with first insertion o.s.)
+    const static int32_t numCellsMinDim = 20;
     // Additional cell padding around the viewport;
     static constexpr int32_t numCellsPadding = 4;
 

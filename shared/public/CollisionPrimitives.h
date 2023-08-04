@@ -11,6 +11,8 @@
 #pragma once
 
 struct CollisionRectD {
+    double anchorX;
+    double anchorY;
     double x;
     double y;
     double width;
@@ -18,11 +20,13 @@ struct CollisionRectD {
     size_t contentHash;
     double symbolSpacing; // In projected space of the CollisionGrid
 
-    CollisionRectD(double x, double y, double width, double height, size_t contentHash = 0, double symbolSpacing = 0)
-            : x(x), y(y), width(width), height(height), contentHash(contentHash), symbolSpacing(symbolSpacing) {}
+    CollisionRectD(double anchorX, double anchorY, double x, double y, double width, double height, size_t contentHash = 0, double symbolSpacing = 0)
+            : anchorX(anchorX), anchorY(anchorY), x(x), y(y), width(width), height(height), contentHash(contentHash), symbolSpacing(symbolSpacing) {}
 };
 
 struct CollisionRectF {
+    float anchorX;
+    float anchorY;
     float x;
     float y;
     float width;
@@ -30,11 +34,13 @@ struct CollisionRectF {
     size_t contentHash;
     float symbolSpacing; // In projected space of the CollisionGrid
 
-    CollisionRectF(float x, float y, float width, float height, size_t contentHash = 0, float symbolSpacing = 0)
-            : x(x), y(y), width(width), height(height), contentHash(contentHash), symbolSpacing(symbolSpacing) {}
+    CollisionRectF(float anchorX, float anchorY, float x, float y, float width, float height, size_t contentHash = 0, float symbolSpacing = 0)
+            : anchorX(anchorX), anchorY(anchorY), x(x), y(y), width(width), height(height), contentHash(contentHash), symbolSpacing(symbolSpacing) {}
 };
 
 struct CollisionRectI {
+    int32_t anchorX;
+    int32_t anchorY;
     int32_t x;
     int32_t y;
     int32_t width;
@@ -42,8 +48,8 @@ struct CollisionRectI {
     size_t contentHash;
     int32_t symbolSpacing; // In projected space of the CollisionGrid
 
-    CollisionRectI(int32_t x, int32_t y, int32_t width, int32_t height, size_t contentHash = 0, int32_t symbolSpacing = 0)
-            : x(x), y(y), width(width), height(height), contentHash(contentHash), symbolSpacing(symbolSpacing) {}
+    CollisionRectI(int32_t anchorX, int32_t anchorY, int32_t x, int32_t y, int32_t width, int32_t height, size_t contentHash = 0, int32_t symbolSpacing = 0)
+            : anchorX(anchorX), anchorY(anchorY), x(x), y(y), width(width), height(height), contentHash(contentHash), symbolSpacing(symbolSpacing) {}
 };
 
 struct CollisionCircleD {

@@ -641,11 +641,16 @@ std::optional<CollisionRectF> Tiled2dMapVectorSymbolObject::getViewportAlignedBo
     double minX = std::numeric_limits<double>::max(), maxX = std::numeric_limits<double>::lowest(), minY = std::numeric_limits<double>::max(), maxY = std::numeric_limits<double>::lowest();
     bool hasBox = false;
 
+    float anchorX = renderCoordinate.x;
+    float anchorY = renderCoordinate.y;
+
     if ((!considerOverlapFlag || !textAllowOverlap) && labelObject && labelObject->boundingBoxViewportAligned.has_value()) {
         minX = std::min(minX, std::min(labelObject->boundingBoxViewportAligned->x, labelObject->boundingBoxViewportAligned->x + labelObject->boundingBoxViewportAligned->width));
         maxX = std::max(maxX, std::max(labelObject->boundingBoxViewportAligned->x, labelObject->boundingBoxViewportAligned->x + labelObject->boundingBoxViewportAligned->width));
         minY = std::min(minY, std::min(labelObject->boundingBoxViewportAligned->y, labelObject->boundingBoxViewportAligned->y + labelObject->boundingBoxViewportAligned->height));
         maxY = std::max(maxY, std::max(labelObject->boundingBoxViewportAligned->y, labelObject->boundingBoxViewportAligned->y + labelObject->boundingBoxViewportAligned->height));
+        anchorX = labelObject->boundingBoxViewportAligned->anchorX;
+        anchorY = labelObject->boundingBoxViewportAligned->anchorY;
         hasBox = true;
     }
     if ((!considerOverlapFlag || !iconAllowOverlap) && iconBoundingBoxViewportAligned.x != 0) {
@@ -675,7 +680,7 @@ std::optional<CollisionRectF> Tiled2dMapVectorSymbolObject::getViewportAlignedBo
         contentHash = this->contentHash;
     }
 
-    return CollisionRectF(minX, minY, maxX - minX, maxY - minY, contentHash, symbolSpacingPx);
+    return CollisionRectF(anchorX, anchorY, minX, minY, maxX - minX, maxY - minY, contentHash, symbolSpacingPx);
 }
 
 std::optional<std::vector<CollisionCircleF>> Tiled2dMapVectorSymbolObject::getMapAlignedBoundingCircles(double zoomIdentifier, bool considerSymbolSpacing, bool considerOverlapFlag) {

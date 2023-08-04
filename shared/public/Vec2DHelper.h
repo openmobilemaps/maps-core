@@ -13,6 +13,7 @@
 #include "Vec2D.h"
 #include "Quad2dD.h"
 #include <vector>
+#include <cmath>
 
 
 inline Vec2D operator+( const ::Vec2D& left, const ::Vec2D& right ) {

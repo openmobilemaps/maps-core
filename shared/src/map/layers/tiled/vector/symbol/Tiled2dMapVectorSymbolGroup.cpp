@@ -561,22 +561,25 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                         currentVertexIndex += (numCirclePoints + 1);
                     }
                 } else {
-                    const auto &viewportAlignedBox = object->getViewportAlignedBoundingBox(zoomIdentifier, false, true);
+                    const auto &viewportAlignedBox = object->getViewportAlignedBoundingBox(zoomIdentifier, rotation, false, true);
                     if (viewportAlignedBox) {
                         // Align rectangle to viewport
                         const double sinAngle = sin(-rotation * M_PI / 180.0);
                         const double cosAngle = cos(-rotation * M_PI / 180.0);
                         Vec2D rotWidth = Vec2D(viewportAlignedBox->width * cosAngle, viewportAlignedBox->width * sinAngle);
                         Vec2D rotHeight = Vec2D(-viewportAlignedBox->height * sinAngle, viewportAlignedBox->height * cosAngle);
+                        Vec2D rotOrigin = Vec2DHelper::rotate(Vec2D(viewportAlignedBox->x, viewportAlignedBox->y),
+                                                              Vec2D(viewportAlignedBox->anchorX, viewportAlignedBox->anchorY),
+                                                              -rotation);
                         vertices.push_back({std::vector<::Coord>{
-                                Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), viewportAlignedBox->x, viewportAlignedBox->y,
-                                      0.0),
-                                Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), viewportAlignedBox->x + rotWidth.x,
-                                      viewportAlignedBox->y + rotWidth.y, 0.0),
-                                Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), viewportAlignedBox->x + rotWidth.x + rotHeight.x,
-                                      viewportAlignedBox->y + rotWidth.y + rotHeight.y, 0.0),
-                                Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), viewportAlignedBox->x + rotHeight.x,
-                                      viewportAlignedBox->y + rotHeight.y, 0.0),
+                                Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(),
+                                      rotOrigin.x, rotOrigin.y,0.0),
+                                Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(),
+                                      rotOrigin.x + rotWidth.x,rotOrigin.y + rotWidth.y, 0.0),
+                                Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(),
+                                      rotOrigin.x + rotWidth.x + rotHeight.x,rotOrigin.y + rotWidth.y + rotHeight.y, 0.0),
+                                Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(),
+                                      rotOrigin.x + rotHeight.x,rotOrigin.y + rotHeight.y, 0.0),
                         }, object->collides ? 1 : 0});
                         indices.push_back(currentVertexIndex);
                         indices.push_back(currentVertexIndex + 1);
@@ -587,6 +590,26 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                         indices.push_back(currentVertexIndex + 2);
 
                         currentVertexIndex += 4;
+
+                        /*// Draw anchor
+                        const size_t numCirclePoints = 8;
+                        std::vector<Coord> coords;
+                        coords.emplace_back(CoordinateSystemIdentifiers::RENDERSYSTEM(),
+                                            viewportAlignedBox->anchorX, viewportAlignedBox->anchorY, 0.0);
+                        for (size_t i = 0; i < numCirclePoints; i++) {
+                            float angle = i * (2 * M_PI / numCirclePoints);
+                            coords.emplace_back(CoordinateSystemIdentifiers::RENDERSYSTEM(),
+                                                viewportAlignedBox->anchorX + viewportAlignedBox->height * 0.1 * std::cos(angle),
+                                                viewportAlignedBox->anchorY + viewportAlignedBox->height * 0.1 * std::sin(angle),
+                                                0.0);
+
+                            indices.push_back(currentVertexIndex);
+                            indices.push_back(currentVertexIndex + i + 1);
+                            indices.push_back(currentVertexIndex + (i + 1) % numCirclePoints + 1);
+                        }
+                        vertices.push_back({coords, 1});
+
+                        currentVertexIndex += (numCirclePoints + 1);*/
 
                     }/*else {
                         const auto &combinedBox = object->getCombinedBoundingBox(true);

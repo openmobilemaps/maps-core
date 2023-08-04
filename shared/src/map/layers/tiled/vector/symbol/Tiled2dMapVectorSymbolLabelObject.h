@@ -13,6 +13,7 @@
 #include "Vec2F.h"
 #include "RectD.h"
 #include "CircleD.h"
+#include "CollisionPrimitives.h"
 #include "SymbolVectorLayerDescription.h"
 #include "Value.h"
 #include "SymbolInfo.h"
@@ -56,7 +57,7 @@ public:
         return fontResult;
     }
 
-    std::optional<RectD> boundingBoxViewportAligned = std::nullopt;
+    std::optional<CollisionRectD> boundingBoxViewportAligned = std::nullopt;
     std::optional<std::vector<CircleD>> boundingBoxCircles = std::nullopt;
     Quad2dD boundingBox;
 

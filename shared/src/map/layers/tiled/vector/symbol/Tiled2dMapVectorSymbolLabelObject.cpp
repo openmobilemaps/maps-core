@@ -429,10 +429,12 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
     Coord boundingBoxMin(referencePoint.systemIdentifier, std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), referencePoint.z);
     Coord boundingBoxMax(referencePoint.systemIdentifier, std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), referencePoint.z);
 
-    anchorOffset = Vec2DHelper::rotate(anchorOffset, Vec2D(0, 0), angle);
+    Vec2D anchorOffsetRot = Vec2DHelper::rotate(anchorOffset, Vec2D(0, 0), angle);
 
     const auto dx = referencePoint.x + anchorOffset.x;
     const auto dy = referencePoint.y + anchorOffset.y;
+    const auto dxRot = referencePoint.x + anchorOffsetRot.x;
+    const auto dyRot = referencePoint.y + anchorOffsetRot.y;
 
     assert(centerPositions.size() == characterCount);
 
@@ -440,8 +442,8 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
     for(auto const centerPosition: centerPositions) {
         auto rotated = Vec2DHelper::rotate(centerPosition, Vec2D(0, 0), angle);
 
-        positions[2 * countOffset + 0] = rotated.x + dx;
-        positions[2 * countOffset + 1] = rotated.y + dy;
+        positions[2 * countOffset + 0] = rotated.x + dxRot;
+        positions[2 * countOffset + 1] = rotated.y + dyRot;
 
         const float scaleXH = scales[2 * countOffset + 0] / 2.0;
         const float scaleYH = scales[2 * countOffset + 1] / 2.0;
@@ -480,7 +482,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
                           Vec2DHelper::rotate(Vec2D(rectBoundingBox.bottomRight.x, rectBoundingBox.bottomRight.y), Vec2D(dx, dy), angle),
                           Vec2DHelper::rotate(Vec2D(rectBoundingBox.topLeft.x, rectBoundingBox.bottomRight.y), Vec2D(dx, dy), angle));
     if (rotationAlignment != SymbolAlignment::MAP) {
-        boundingBoxViewportAligned = RectD(dx, dy, dimensions.x + scaledTextPadding, dimensions.y + scaledTextPadding);
+        boundingBoxViewportAligned = CollisionRectD(referencePoint.x, referencePoint.y, boundingBoxMin.x - scaledTextPadding, boundingBoxMin.y - scaledTextPadding, dimensions.x, dimensions.y);
         boundingBoxCircles = std::nullopt;
     } else {
         std::vector<CircleD> circles;
