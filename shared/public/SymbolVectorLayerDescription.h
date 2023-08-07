@@ -340,7 +340,6 @@ public:
         return iconTextFitPadding ? iconTextFitPadding->evaluateOr(context, defaultValue) : defaultValue;
     }
 
-private:
     std::shared_ptr<Value> textSize;
     std::shared_ptr<Value> textFont;
     std::shared_ptr<Value> textField;
@@ -379,6 +378,8 @@ private:
     std::shared_ptr<Value> textRotationAlignment;
     std::shared_ptr<Value> iconRotationAlignment;
     std::shared_ptr<Value> blendMode;
+private:
+
     double dpFactor;
 
 

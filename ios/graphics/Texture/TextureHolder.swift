@@ -18,7 +18,7 @@ enum TextureHolderError: Error {
 
 @objc
 public class TextureHolder: NSObject {
-    let texture: MTLTexture
+    public let texture: MTLTexture
 
     let textureUsableSize: TextureUsableSize?
 
