@@ -20,7 +20,7 @@ open class BaseGraphicsObject {
     public let sampler: MTLSamplerState
 
     var maskInverse = false
-    var ready = false
+    public var ready = false
 
     var isReadyFlag = false
 
@@ -53,7 +53,7 @@ extension BaseGraphicsObject: MCGraphicsObjectInterface {
         self.ready = false
     }
 
-    public func isReady() -> Bool { ready }
+    open func isReady() -> Bool { ready }
 
     public func setIsInverseMasked(_ inversed: Bool) {
         maskInverse = inversed

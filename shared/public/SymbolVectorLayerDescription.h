@@ -348,7 +348,6 @@ public:
         return symbolZOrder ? symbolSortKey->evaluateOr(context, defaultValue) : defaultValue;
     }
 
-private:
     std::shared_ptr<Value> textSize;
     std::shared_ptr<Value> textFont;
     std::shared_ptr<Value> textField;

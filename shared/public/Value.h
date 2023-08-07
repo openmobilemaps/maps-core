@@ -268,6 +268,16 @@ public:
         if (std::holds_alternative<T>(value)) {
             return std::get<T>(value);
         }
+        
+        if constexpr (std::is_same<T, std::string>::value) {
+            if (std::holds_alternative<std::vector<FormattedStringEntry>>(value)) {
+                std::string concatenated = "";
+                for (auto &s: std::get<std::vector<FormattedStringEntry>>(value)) {
+                    concatenated += s.text;
+                }
+                return concatenated;
+            }
+        }
 
         // if a color is requested and we got a string we try to convert the string to a color
         if constexpr (std::is_same<T, Color>::value) {

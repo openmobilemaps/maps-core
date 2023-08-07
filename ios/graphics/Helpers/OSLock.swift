@@ -10,19 +10,19 @@ import os.lock
 
 // Wrapper around os_unfair_lock_t
 public class OSLock {
-    func lock() {
+    public func lock() {
         os_unfair_lock_lock(oslock)
     }
 
-    func unlock() {
+    public  func unlock() {
         os_unfair_lock_unlock(oslock)
     }
 
-    func trylock() -> Bool {
+    public func trylock() -> Bool {
         os_unfair_lock_trylock(oslock)
     }
 
-    func withCritical<Result>(_ section: () throws -> Result) rethrows -> Result {
+    public func withCritical<Result>(_ section: () throws -> Result) rethrows -> Result {
         if !os_unfair_lock_trylock(oslock) {
             os_unfair_lock_lock(oslock)
         }
