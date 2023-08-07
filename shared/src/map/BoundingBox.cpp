@@ -20,8 +20,8 @@ std::shared_ptr<BoundingBoxInterface> BoundingBoxInterface::create(int32_t syste
 BoundingBox::BoundingBox()
     : systemIdentifier(CoordinateSystemIdentifiers::RENDERSYSTEM())
     , min(CoordinateSystemIdentifiers::RENDERSYSTEM(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max())
-    , max(CoordinateSystemIdentifiers::RENDERSYSTEM(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min(),
-      std::numeric_limits<float>::min()) {}
+    , max(CoordinateSystemIdentifiers::RENDERSYSTEM(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(),
+      std::numeric_limits<float>::lowest()) {}
 
 BoundingBox::BoundingBox(const int32_t systemIdentifier)
     : systemIdentifier(systemIdentifier)

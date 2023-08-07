@@ -20,6 +20,7 @@
 #include "Tiled2dMapVectorSymbolGroup.h"
 #include "TextInstancedInterface.h"
 #include "Tiled2dMapVectorFontProvider.h"
+#include "CollisionGrid.h"
 
 class Tiled2dMapVectorSourceSymbolDataManager:
         public Tiled2dMapVectorSourceDataManager,
@@ -49,7 +50,7 @@ public:
                                 int32_t legacyIndex,
                                 bool needsTileReplace) override;
 
-    void collisionDetection(std::vector<std::string> layerIdentifiers, std::shared_ptr<std::vector<OBB2D>> placements);
+    void collisionDetection(std::vector<std::string> layerIdentifiers, std::shared_ptr<CollisionGrid> collisionGrid);
 
     void update();
 

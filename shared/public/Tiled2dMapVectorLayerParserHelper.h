@@ -265,6 +265,7 @@ public:
                                             parser.parseValue(val["layout"]["text-letter-spacing"]),
                                             parser.parseValue(val["layout"]["text-max-width"]),
                                             parser.parseValue(val["layout"]["text-max-angle"]),
+                                            parser.parseValue(val["layout"]["symbol-z-order"]),
                                             blendMode,
                                             dpFactor);
 

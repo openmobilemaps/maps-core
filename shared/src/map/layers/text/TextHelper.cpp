@@ -749,14 +749,6 @@ unsigned char *StrToUprExt(unsigned char *pString) {
     return pString;
 }
 
-Quad2dD TextHelper::rotateQuad2d(const Quad2dD &quad, const Vec2D &aroundPoint, double angleDegrees) {
-    const Vec2D midPoint = aroundPoint;
-    return Quad2dD(Vec2DHelper::rotate(quad.topLeft, midPoint, angleDegrees),
-                   Vec2DHelper::rotate(quad.topRight, midPoint, angleDegrees),
-                   Vec2DHelper::rotate(quad.bottomRight, midPoint, angleDegrees),
-                   Vec2DHelper::rotate(quad.bottomLeft, midPoint, angleDegrees));
-}
-
 // MARK: - Line Breaks
 
 bool isSpecialCharacter(const std::string &c) {

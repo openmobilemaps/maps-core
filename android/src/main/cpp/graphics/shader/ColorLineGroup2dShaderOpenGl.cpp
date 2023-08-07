@@ -96,61 +96,72 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                                       //            float offset; // 18
                                       //        };
                                       uniform float lineValues[) + std::to_string(sizeLineValuesArray) + OMMShaderCode(];
-                                      uniform int numStyles; uniform float scaleFactor;
+                                      uniform int numStyles;
+                                      uniform float scaleFactor;
                                       uniform float dashingScaleFactor;
-                                      out float fStyleIndexBase; out float radius; out float segmentStartLPos; out float fSegmentType;
-                                      out vec2 pointDeltaA; out vec2 pointBDeltaA; out vec4 color; out float dashingSize;
+                                      out float fStyleIndexBase;
+                                      out float radius;
+                                      out float segmentStartLPos;
+                                      out float fSegmentType;
+                                      out vec2 pointDeltaA;
+                                      out vec2 pointBDeltaA;
+                                      out vec4 color;
+                                      out float dashingSize;
+                                      out float scaledBlur;
 
                                        void main() {
-                                       float fStyleIndex = mod(vStyleInfo, 256.0);
-                                       int lineIndex = int(floor(fStyleIndex + 0.5));
-                                       if (lineIndex < 0) {
-                                            lineIndex = 0;
-                                       } else if (lineIndex > numStyles) {
-                                            lineIndex = numStyles;
-                                       }
-                                       int styleIndexBase = ) + std::to_string(sizeLineValues) + OMMShaderCode(* lineIndex;
-                                       int colorIndexBase = styleIndexBase + 1;
-                                       float width = lineValues[styleIndexBase];
-                                       float isScaled = lineValues[styleIndexBase + 9];
-                                       color = vec4(lineValues[colorIndexBase], lineValues[colorIndexBase + 1], lineValues[colorIndexBase + 2],
-                                                    lineValues[colorIndexBase + 3]);
-                                       segmentStartLPos = vSegmentStartLPos;
-                                       fStyleIndexBase = float(styleIndexBase);
-                                       fSegmentType = vStyleInfo / 256.0;
-
-                                           vec2 widthNormal = vWidthNormal;
-                                           vec2 lengthNormal = vec2(widthNormal.y, -widthNormal.x);
-
-                                           if(vVertexIndex == 0.0) {
-                                               lengthNormal *= -1.0;
-                                               widthNormal *= -1.0;
-                                           } else if(vVertexIndex == 1.0) {
-                                               lengthNormal *= -1.0;
-                                           } else if(vVertexIndex == 2.0) {
-                                               // all fine
-                                           } else if(vVertexIndex == 3.0) {
-                                               widthNormal *= -1.0;
+                                           float fStyleIndex = mod(vStyleInfo, 256.0);
+                                           int lineIndex = int(floor(fStyleIndex + 0.5));
+                                           if (lineIndex < 0) {
+                                                lineIndex = 0;
+                                           } else if (lineIndex > numStyles) {
+                                                lineIndex = numStyles;
                                            }
+                                           int styleIndexBase = ) + std::to_string(sizeLineValues) + OMMShaderCode(* lineIndex;
+                                           int colorIndexBase = styleIndexBase + 1;
+                                           float width = lineValues[styleIndexBase];
+                                           float isScaled = lineValues[styleIndexBase + 9];
+                                           float blur = lineValues[styleIndexBase + 11];
+                                           color = vec4(lineValues[colorIndexBase], lineValues[colorIndexBase + 1], lineValues[colorIndexBase + 2],
+                                                        lineValues[colorIndexBase + 3]);
+                                           segmentStartLPos = vSegmentStartLPos;
+                                           fStyleIndexBase = float(styleIndexBase);
+                                           fSegmentType = vStyleInfo / 256.0;
 
-                                       float offsetFloat = lineValues[styleIndexBase + 18] * scaleFactor;
-                                       vec4 offset = vec4(vWidthNormal.x * offsetFloat, vWidthNormal.y * offsetFloat, 0.0, 0.0);
+                                               vec2 widthNormal = vWidthNormal;
+                                               vec2 lengthNormal = vec2(widthNormal.y, -widthNormal.x);
 
-                                           float scaledWidth = width * 0.5;
-                                           dashingSize = width;
-                                           if (isScaled > 0.0) {
-                                               scaledWidth = scaledWidth * scaleFactor;
-                                               dashingSize *= dashingScaleFactor;
-                                           }
+                                               if(vVertexIndex == 0.0) {
+                                                   lengthNormal *= -1.0;
+                                                   widthNormal *= -1.0;
+                                               } else if(vVertexIndex == 1.0) {
+                                                   lengthNormal *= -1.0;
+                                               } else if(vVertexIndex == 2.0) {
+                                                   // all fine
+                                               } else if(vVertexIndex == 3.0) {
+                                                   widthNormal *= -1.0;
+                                               }
 
-                                           vec4 trfPosition = uMVPMatrix * vec4(vPosition.xy, 0.0, 1.0);
-                                           vec4 displ = vec4((lengthNormal + widthNormal).xy, 0.0, 0.0) * vec4(scaledWidth, scaledWidth, 0.0, 0.0) + offset;
-                                           vec4 trfDispl = uMVPMatrix * displ;
-                                           vec4 extendedPosition = vec4(vPosition.xy, 0.0, 1.0) + displ;
-                                           radius = scaledWidth;
-                                           pointDeltaA = (extendedPosition.xy - vPointA);
-                                           pointBDeltaA = vPointB - vPointA;
-                                           gl_Position = trfPosition + trfDispl;
+                                           float offsetFloat = lineValues[styleIndexBase + 18] * scaleFactor;
+                                           vec4 offset = vec4(vWidthNormal.x * offsetFloat, vWidthNormal.y * offsetFloat, 0.0, 0.0);
+
+                                               float scaledWidth = width * 0.5;
+                                               dashingSize = width;
+                                               if (isScaled > 0.0) {
+                                                   scaledWidth = scaledWidth * scaleFactor;
+                                                   blur = blur * scaleFactor;
+                                                   dashingSize *= dashingScaleFactor;
+                                               }
+
+                                               vec4 trfPosition = uMVPMatrix * vec4(vPosition.xy, 0.0, 1.0);
+                                               vec4 displ = vec4((lengthNormal + widthNormal).xy, 0.0, 0.0) * vec4(scaledWidth, scaledWidth, 0.0, 0.0) + offset;
+                                               vec4 trfDispl = uMVPMatrix * displ;
+                                               vec4 extendedPosition = vec4(vPosition.xy, 0.0, 1.0) + displ;
+                                               radius = scaledWidth;
+                                               scaledBlur = blur;
+                                               pointDeltaA = (extendedPosition.xy - vPointA);
+                                               pointBDeltaA = vPointB - vPointA;
+                                               gl_Position = trfPosition + trfDispl;
                                        }
                                        );
 }
@@ -159,10 +170,15 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
     return OMMVersionedGlesShaderCode(320 es,
                                       precision highp float;
                                       uniform float lineValues[) + std::to_string(sizeLineValuesArray) + OMMShaderCode(];
-                                      in float fStyleIndexBase; in float radius; in float segmentStartLPos;
+                                      in float fStyleIndexBase;
+                                      in float radius;
+                                      in float segmentStartLPos;
+                                      in float scaledBlur;
                                       in float fSegmentType; // 0: inner segment, 1: line start segment (i.e. A is first point in line), 2: line end segment, 3: start and end in segment
                                       in float dashingSize;
-                                      in vec2 pointDeltaA; in vec2 pointBDeltaA; in vec4 color;
+                                      in vec2 pointDeltaA;
+                                      in vec2 pointBDeltaA;
+                                      in vec4 color;
 
                                       out vec4 fragmentColor;
 
@@ -217,6 +233,15 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
                                                     fragColor = gapColor;
                                                 }
                                             }
+
+
+                                           if (scaledBlur > 0.0 && t > 0.0 && t < 1.0) {
+                                               float nonBlurRange = radius - scaledBlur;
+                                               if (d > nonBlurRange) {
+                                                   opacity *= clamp(1.0 - max(0.0, d - nonBlurRange) / scaledBlur, 0.0, 1.0);
+                                               }
+                                           }
+
 
                                            fragmentColor = fragColor;
                                            fragmentColor.a = 1.0;

@@ -44,6 +44,7 @@ struct LineVertexOut {
     float lengthPrefix;
     float scalingFactor;
     float dashingSize;
+    float scaledBlur;
 };
 
 struct LineStyling {
@@ -79,7 +80,10 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
     float width = styling[styleIndex] / 2.0;
     float dashingSize = styling[styleIndex];
 
+    float blur = styling[styleIndex + 11];
+
     if (styling[styleIndex + 9] > 0.0) {
+        blur *= scalingFactor;
         width *= scalingFactor;
         dashingSize *= dashingScalingFactor;
     }
@@ -118,7 +122,8 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
         .segmentType = segmentType,
         .lengthPrefix = vertexIn.lengthPrefix,
         .scalingFactor = scalingFactor,
-        .dashingSize = dashingSize
+        .dashingSize = dashingSize,
+        .scaledBlur = blur
     };
 
     return out;
@@ -164,19 +169,14 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
   float a = colorA * opacity;
   float aGap = colorAGap * opacity;
 
-  float blur = styling[in.stylingIndex + 11];
-
-  if(styling[in.stylingIndex + 9] && blur > 0) {
-    float blurRange = (in.width - (blur * in.scalingFactor * 0.5));
-    float2 intersectPt = t * in.lineB;
-    float blurD = abs(length(in.lineA - intersectPt));
-    if (blurD > blurRange) {
-      a *= clamp(1 - (blurD - blurRange) / (blur * in.scalingFactor * 0.5) ,0.0, 1.0);
+  if(in.scaledBlur > 0 && t > 0.0 && t < 1.0) {
+    float nonBlurRange = (in.width - in.scaledBlur);
+    if (d > nonBlurRange) {
+      a *= clamp(1 - max(0.0, d - nonBlurRange) / (in.scaledBlur) ,0.0, 1.0);
     }
   }
 
   float numDash = styling[in.stylingIndex + 13];
-
 
   if(numDash > 0) {
     float dashArray[4] = { styling[in.stylingIndex + 14],

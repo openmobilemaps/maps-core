@@ -22,8 +22,8 @@
 #include "Actor.h"
 #include "SpriteData.h"
 #include "TextLayerObject.h" // TODO: remove usage of TextLayerObject (and File)
-#include "OBB2D.h"
 #include "Tiled2dMapVectorLayerConfig.h"
+#include "CollisionGrid.h"
 
 class Tiled2dMapVectorSymbolObject {
 public:
@@ -74,11 +74,15 @@ public:
 
     std::optional<Quad2dD> getCombinedBoundingBox(bool considerOverlapFlag);
 
+    std::optional<CollisionRectF> getViewportAlignedBoundingBox(double zoomIdentifier, bool considerSymbolSpacing, bool considerOverlapFlag);
+
+    std::optional<std::vector<CollisionCircleF>> getMapAlignedBoundingCircles(double zoomIdentifier, bool considerSymbolSpacing, bool considerOverlapFlag);
+
     bool collides = true;
 
     bool getIsOpaque();
 
-    void collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<std::vector<OBB2D>> placements);
+    void collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<CollisionGrid> collisionGrid);
 
     void resetCollisionCache();
 
@@ -119,7 +123,9 @@ private:
     std::optional<SpriteDesc> stretchSpriteInfo;
 
     Quad2dD iconBoundingBox;
+    RectD iconBoundingBoxViewportAligned;
     Quad2dD stretchIconBoundingBox;
+    RectD stretchIconBoundingBoxViewportAligned;
 
     OBB2D orientedBox;
 
@@ -142,14 +148,17 @@ private:
     bool isIconOpaque = true;
     bool isStretchIconOpaque = true;
 
-    double iconRotate;
-    double iconSize;
+    float iconRotate;
+    float iconSize;
     std::vector<float> iconTextFitPadding;
     TextSymbolPlacement textSymbolPlacement;
-    double textPadding = 0;
+    SymbolAlignment boundingBoxRotationAlignment = SymbolAlignment::AUTO;
+    float iconPadding = 0;
     Anchor iconAnchor;
     Vec2F iconOffset = Vec2F(0.0, 0.0);
     IconTextFit iconTextFit = IconTextFit::NONE;
+
+    size_t contentHash = 0;
 
     bool isPlaced();
 };

@@ -85,6 +85,8 @@ public:
 
     virtual /*not-null*/ std::shared_ptr<::CameraInterface> asCameraInterface() = 0;
 
+    virtual std::optional<std::vector<float>> getLastVpMatrix() = 0;
+
     virtual std::optional<::RectCoord> getLastVpMatrixViewBounds() = 0;
 
     virtual std::optional<float> getLastVpMatrixRotation() = 0;

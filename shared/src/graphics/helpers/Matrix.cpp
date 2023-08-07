@@ -564,20 +564,14 @@ std::vector<float> Matrix::multiply(const std::vector<float> &M, const std::vect
     // calculates Mx and returns result
     std::vector<float> result = {0.0, 0.0, 0.0, 0.0};
 
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            result[i] += M[I(j, i)] * x[j];
-        }
-    }
+    Matrix::multiply(M, x, result);
 
     return result;
 }
 
 void Matrix::multiply(const std::vector<float> &M, const std::vector<float> &x, std::vector<float> &result) {
-    for (int i = 0; i < 4; i++) {
-        result[i] = 0.0;
-        for (int j = 0; j < 4; j++) {
-            result[i] += M[I(j, i)] * x[j];
-        }
-    }
+    result[0] = M[I(0, 0)] * x[0] + M[I(1, 0)] * x[1] + M[I(2, 0)] * x[2] + M[I(3, 0)] * x[3];
+    result[1] = M[I(0, 1)] * x[0] + M[I(1, 1)] * x[1] + M[I(2, 1)] * x[2] + M[I(3, 1)] * x[3];
+    result[2] = M[I(0, 2)] * x[0] + M[I(1, 2)] * x[1] + M[I(2, 2)] * x[2] + M[I(3, 2)] * x[3];
+    result[3] = M[I(0, 3)] * x[0] + M[I(1, 3)] * x[1] + M[I(2, 3)] * x[2] + M[I(3, 3)] * x[3];
 }

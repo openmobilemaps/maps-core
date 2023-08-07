@@ -70,7 +70,8 @@ public:
 
     double getLineBlur(const EvaluationContext &context){
         static const double defaultValue = 0.0;
-        return lineBlur ? lineBlur->evaluateOr(context, defaultValue) : defaultValue;
+        double value = lineBlur ? lineBlur->evaluateOr(context, defaultValue) : defaultValue;
+        return value * dpFactor;
     }
 
     double getLineWidth(const EvaluationContext &context){
