@@ -1705,6 +1705,20 @@ public:
      auto const &lhsValue = lhs->evaluate(context);
      auto const &rhsValue = rhs->evaluate(context);
 
+     if (std::holds_alternative<Color>(lhsValue) && std::holds_alternative<std::string>(rhsValue)) {
+         auto lhsColor = std::get<Color>(lhsValue);
+         if (auto rhsColor = ColorUtil::fromString(std::get<std::string>(rhsValue))) {
+             return lhsColor == *rhsColor;
+         }
+     }
+     
+     if (std::holds_alternative<std::string>(lhsValue) && std::holds_alternative<Color>(rhsValue)) {
+         auto rhsColor = std::get<Color>(rhsValue);
+         if (auto lhsColor = ColorUtil::fromString(std::get<std::string>(lhsValue))) {
+             return *lhsColor == rhsColor;
+         }
+     }
+     
      return ValueVariantCompareHelper::compare(lhsValue, rhsValue, type);
  };
 
