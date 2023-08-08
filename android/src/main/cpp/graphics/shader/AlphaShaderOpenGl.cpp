@@ -12,20 +12,21 @@
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
 
-std::string AlphaShaderOpenGl::getProgramName() { return "UBMAP_AlphaShaderOpenGl"; }
+const std::string AlphaShaderOpenGl::programName = "UBMAP_AlphaShaderOpenGl";
+
+std::string AlphaShaderOpenGl::getProgramName() { return programName; }
 
 void AlphaShaderOpenGl::updateAlpha(float value) { alpha = value; }
 
 void AlphaShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
     BaseShaderProgramOpenGl::preRender(context);
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    int alphaLocation = glGetUniformLocation(openGlContext->getProgram(getProgramName()), "alpha");
+    int alphaLocation = glGetUniformLocation(openGlContext->getProgram(programName), "alpha");
     glUniform1f(alphaLocation, alpha);
 }
 
 void AlphaShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    std::string programName = getProgramName();
     // prepare shaders and OpenGL program
     int vertexShader = loadShader(GL_VERTEX_SHADER, getVertexShader());
     int fragmentShader = loadShader(GL_FRAGMENT_SHADER, getFragmentShader());

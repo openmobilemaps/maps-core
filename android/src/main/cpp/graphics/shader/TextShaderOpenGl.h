@@ -41,6 +41,8 @@ class TextShaderOpenGl : public BaseShaderProgramOpenGl,
     virtual std::string getVertexShader() override;
 
   private:
+    const static std::string programName;
+
     std::vector<float> color = {0.0, 0.0, 0.0, 1.0};
     std::vector<float> haloColor = {0.0, 0.0, 0.0, 1.0};
     float opacity = 0.0;

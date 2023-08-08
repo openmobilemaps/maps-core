@@ -43,11 +43,13 @@ void PolygonGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterfa
         return;
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    if (openGlContext->getProgram(shaderProgram->getProgramName()) == 0) {
+    programName = shaderProgram->getProgramName();
+    program = openGlContext->getProgram(programName);
+    if (program == 0) {
         shaderProgram->setupProgram(openGlContext);
+        program = openGlContext->getProgram(programName);
     }
 
-    int program = openGlContext->getProgram(shaderProgram->getProgramName());
     glUseProgram(program);
 
     positionHandle = glGetAttribLocation(program, "vPosition");
@@ -94,8 +96,7 @@ void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterf
     }
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    int mProgram = openGlContext->getProgram(shaderProgram->getProgramName());
-    glUseProgram(mProgram);
+    glUseProgram(program);
 
     glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
 

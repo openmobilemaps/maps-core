@@ -12,11 +12,12 @@
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
 
-std::string ColorShaderOpenGl::getProgramName() { return "UBMAP_ColorShaderOpenGl"; }
+const std::string ColorShaderOpenGl::programName = "UBMAP_ColorShaderOpenGl";
+
+std::string ColorShaderOpenGl::getProgramName() { return programName; }
 
 void ColorShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    std::string programName = getProgramName();
     // prepare shaders and OpenGL program
     int vertexShader = loadShader(GL_VERTEX_SHADER, getVertexShader());
     int fragmentShader = loadShader(GL_FRAGMENT_SHADER, getFragmentShader());
@@ -35,7 +36,7 @@ void ColorShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInt
 void ColorShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
     BaseShaderProgramOpenGl::preRender(context);
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    int program = openGlContext->getProgram(getProgramName());
+    int program = openGlContext->getProgram(programName);
 
     int mColorHandle = glGetUniformLocation(program, "vColor");
     glUniform4fv(mColorHandle, 1, &color[0]);

@@ -13,13 +13,14 @@
 #include "OpenGlHelper.h"
 #include "ColorPolygonGroup2dShaderOpenGl.h"
 
+const std::string ColorPolygonGroup2dShaderOpenGl::programName = "UBMAP_ColorPolygonGroupShaderOpenGl";
+
 std::shared_ptr<ShaderProgramInterface> ColorPolygonGroup2dShaderOpenGl::asShaderProgramInterface() { return shared_from_this(); }
 
-std::string ColorPolygonGroup2dShaderOpenGl::getProgramName() { return "UBMAP_ColorPolygonGroupShaderOpenGl"; }
+std::string ColorPolygonGroup2dShaderOpenGl::getProgramName() { return programName; }
 
 void ColorPolygonGroup2dShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    std::string programName = getProgramName();
     // prepare shaders and OpenGL program
     int vertexShader = loadShader(GL_VERTEX_SHADER, getVertexShader());
     int fragmentShader = loadShader(GL_FRAGMENT_SHADER, getFragmentShader());
@@ -40,7 +41,7 @@ void ColorPolygonGroup2dShaderOpenGl::setupProgram(const std::shared_ptr<::Rende
 void ColorPolygonGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
     BaseShaderProgramOpenGl::preRender(context);
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    int program = openGlContext->getProgram(getProgramName());
+    int program = openGlContext->getProgram(programName);
 
     {
         std::lock_guard<std::recursive_mutex> overlayLock(styleMutex);

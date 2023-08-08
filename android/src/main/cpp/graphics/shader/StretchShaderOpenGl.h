@@ -38,6 +38,8 @@ protected:
     virtual std::string getFragmentShader() override;
 
   private:
+    const static std::string programName;
+
     float alpha = 1;
     StretchShaderInfo stretchShaderInfo = StretchShaderInfo(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, RectD(0.0, 0.0, 1.0, 1.0));
 };
