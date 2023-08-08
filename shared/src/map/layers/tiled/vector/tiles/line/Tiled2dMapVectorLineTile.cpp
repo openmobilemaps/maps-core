@@ -83,20 +83,21 @@ void Tiled2dMapVectorLineTile::update() {
 
     auto zoom = layerConfig->getZoomFactorAtIdentifier(floor(zoomIdentifier));
     auto scalingFactor = (camera->asCameraInterface()->getScalingFactor() / cameraZoom) * zoom;
+    
+    auto lineDescription = std::static_pointer_cast<LineVectorLayerDescription>(description);
+    bool inZoomRange = lineDescription->maxZoom >= zoomIdentifier && lineDescription->minZoom <= zoomIdentifier;
 
     for (auto const &line: lines) {
         line->setScalingFactor(scalingFactor);
     }
 
-    if (lastAlpha == alpha && lastZoom && ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant)) {
+    if (lastAlpha == alpha && lastZoom && ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant) && (lastInZoomRange && *lastInZoomRange == inZoomRange)) {
         return;
     }
 
     lastZoom = zoomIdentifier;
     lastAlpha = alpha;
-
-    auto lineDescription = std::static_pointer_cast<LineVectorLayerDescription>(description);
-    bool inZoomRange = lineDescription->maxZoom >= zoomIdentifier && lineDescription->minZoom <= zoomIdentifier;
+    lastInZoomRange = inZoomRange;
 
     size_t numStyleGroups = featureGroups.size();
     for (int styleGroupId = 0; styleGroupId < numStyleGroups; styleGroupId++) {
