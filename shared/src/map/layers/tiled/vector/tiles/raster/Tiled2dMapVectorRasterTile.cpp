@@ -47,22 +47,27 @@ void Tiled2dMapVectorRasterTile::update() {
     if (!mapInterface || !camera) {
         return;
     }
-
-    if (!isStyleZoomDependant && lastZoom && lastAlpha == alpha) {
-        return;
-    }
-
+    
     double zoomIdentifier = layerConfig->getZoomIdentifier(camera->getZoom());
     zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.zoomIdentifier);
+    
+    auto rasterDescription = std::static_pointer_cast<RasterVectorLayerDescription>(description);
+    bool inZoomRange = rasterDescription->maxZoom >= zoomIdentifier && rasterDescription->minZoom <= zoomIdentifier;
 
-    if (isStyleZoomDependant && lastZoom && *lastZoom == zoomIdentifier && lastAlpha == alpha) {
+    if (lastZoom && ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant) && lastAlpha == alpha && (lastInZoomRange && *lastInZoomRange == inZoomRange)) {
         return;
     }
     lastZoom = zoomIdentifier;
     lastAlpha = alpha;
+    lastInZoomRange = inZoomRange;
 
     const EvaluationContext evalContext(zoomIdentifier, std::make_shared<FeatureContext>());
-    const auto rasterStyle = std::static_pointer_cast<RasterVectorLayerDescription>(description)->style.getRasterStyle(evalContext);
+    auto rasterStyle = rasterDescription->style.getRasterStyle(evalContext);
+    
+    if (!inZoomRange) {
+        rasterStyle.opacity = 0.0;
+    }
+    
     if(rasterStyle == lastStyle) {
         return;
     }

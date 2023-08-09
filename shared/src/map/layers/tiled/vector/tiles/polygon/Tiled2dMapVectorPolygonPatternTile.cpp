@@ -85,7 +85,10 @@ void Tiled2dMapVectorPolygonPatternTile::update() {
     auto zoom = layerConfig->getZoomFactorAtIdentifier(floor(zoomIdentifier));
     auto scalingFactor = (camera->asCameraInterface()->getScalingFactor() / cameraZoom) * zoom;
 
-    if (lastZoom && ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant)) {
+    auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
+    bool inZoomRange = polygonDescription->maxZoom >= zoomIdentifier && polygonDescription->minZoom <= zoomIdentifier;
+    
+    if (lastZoom && ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant) && (lastInZoomRange && *lastInZoomRange == inZoomRange)) {
         for (const auto &[styleGroupId, polygons] : styleGroupPolygonsMap) {
             for (const auto &polygon: polygons) {
                 polygon->setScalingFactor(scalingFactor);
@@ -95,9 +98,8 @@ void Tiled2dMapVectorPolygonPatternTile::update() {
     }
 
     lastZoom = zoomIdentifier;
+    lastInZoomRange = inZoomRange;
 
-    auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
-    bool inZoomRange = polygonDescription->maxZoom >= zoomIdentifier && polygonDescription->minZoom <= zoomIdentifier;
     opacities.clear();
     size_t numStyleGroups = featureGroups.size();
     for (int styleGroupId = 0; styleGroupId < numStyleGroups; styleGroupId++) {

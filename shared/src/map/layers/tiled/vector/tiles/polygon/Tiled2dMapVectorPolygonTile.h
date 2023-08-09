@@ -65,6 +65,7 @@ private:
     std::unordered_set<std::string> usedKeys;
     bool isStyleZoomDependant = true;
     std::optional<double> lastZoom = std::nullopt;
+    std::optional<bool> lastInZoomRange = std::nullopt;
 
     std::vector<std::tuple<VectorTileGeometryHandler::TriangulatedPolygon, std::shared_ptr<FeatureContext>>> hitDetectionPolygons;
 
