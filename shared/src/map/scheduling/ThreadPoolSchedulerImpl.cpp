@@ -18,7 +18,7 @@ std::shared_ptr<SchedulerInterface> ThreadPoolScheduler::create(const std::share
 ThreadPoolSchedulerImpl::ThreadPoolSchedulerImpl(const std::shared_ptr<ThreadPoolCallbacks> &callbacks)
         : callbacks(callbacks), separateGraphicsQueue(false), delayedTaskThread(&ThreadPoolSchedulerImpl::delayedTasksThread, this), nextWakeup(std::chrono::system_clock::now() + std::chrono::seconds(1)) {
     unsigned int maxNumThreads = std::thread::hardware_concurrency();
-    if (maxNumThreads < 1) maxNumThreads = DEFAULT_MAX_NUM_THREADS;
+    if (maxNumThreads < DEFAULT_MIN_NUM_THREADS) maxNumThreads = DEFAULT_MIN_NUM_THREADS;
     for (std::size_t i = 0u; i < maxNumThreads; ++i) {
         threads.emplace_back(makeSchedulerThread(i, TaskPriority::NORMAL));
     }
