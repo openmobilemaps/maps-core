@@ -31,7 +31,7 @@ Tiled2dMapVectorSymbolGroup::Tiled2dMapVectorSymbolGroup(const std::weak_ptr<Map
           fontProvider(fontProvider) {}
 
 bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features,
-                                             std::shared_ptr<std::unordered_map<size_t, std::shared_ptr<SymbolAnimationCoordinator>>> animationCoordinators) {
+                                             std::shared_ptr<std::unordered_map<size_t, std::vector<std::shared_ptr<SymbolAnimationCoordinator>>>> animationCoordinators) {
 
     auto strongMapInterface = this->mapInterface.lock();
     auto camera = strongMapInterface ? strongMapInterface->getCamera() : nullptr;
@@ -69,7 +69,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
         for (const auto &textEntry: text) {
             fullText += textEntry.text;
         }
-        
+
         auto anchor = layerDescription->style.getTextAnchor(evalContext);
         const auto &justify = layerDescription->style.getTextJustify(evalContext);
         const auto &placement = layerDescription->style.getTextSymbolPlacement(evalContext);
@@ -722,7 +722,7 @@ Tiled2dMapVectorSymbolGroup::createSymbolObject(const Tiled2dMapTileInfo &tileIn
                                                 const TextJustify &textJustify,
                                                 const TextSymbolPlacement &textSymbolPlacement,
                                                 const bool hideIcon,
-                                                std::shared_ptr<std::unordered_map<size_t, std::shared_ptr<SymbolAnimationCoordinator>>> animationCoordinators) {
+                                                std::shared_ptr<std::unordered_map<size_t, std::vector<std::shared_ptr<SymbolAnimationCoordinator>>>> animationCoordinators) {
     return std::make_shared<Tiled2dMapVectorSymbolObject>(mapInterface, layerConfig, fontProvider, tileInfo, layerIdentifier,
                                                           description, featureContext, text, fullText, coordinate, lineCoordinates,
                                                           fontList, textAnchor, angle, textJustify, textSymbolPlacement, hideIcon, animationCoordinators);

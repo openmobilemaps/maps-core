@@ -32,7 +32,7 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                                                            const TextJustify &textJustify,
                                                            const TextSymbolPlacement &textSymbolPlacement,
                                                            const bool hideIcon,
-                                                           std::shared_ptr<std::unordered_map<size_t, std::shared_ptr<SymbolAnimationCoordinator>>> animationCoordinators) :
+                                                           std::shared_ptr<std::unordered_map<size_t, std::vector<std::shared_ptr<SymbolAnimationCoordinator>>>> animationCoordinators) :
     description(description),
     layerConfig(layerConfig),
     coordinate(coordinate),
@@ -77,17 +77,22 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
 
     const bool hasText = !fullText.empty();
 
-    const int roundedX = int(coordinate.x / 100);
-    const int roundedY = int(coordinate.y / 100);
-
-    crossTileIdentifier = std::hash<std::tuple<std::string, std::string, std::string, int, int>>()(std::tuple<std::string, std::string, std::string, int, int>(fullText, iconName, layerIdentifier, roundedX, roundedY));
+    crossTileIdentifier = std::hash<std::tuple<std::string, std::string, bool>>()(std::tuple<std::string, std::string, bool>(fullText, layerIdentifier, hasIcon));
 
     auto coordinatorIt = animationCoordinators->find(crossTileIdentifier);
     if (coordinatorIt != animationCoordinators->end()) {
-        animationCoordinator = coordinatorIt->second;
-    } else {
-        animationCoordinator = std::make_shared<SymbolAnimationCoordinator>();
-        animationCoordinators->insert({crossTileIdentifier, animationCoordinator});
+        for (auto const &coordinator: coordinatorIt->second) {
+            if (coordinator->isMatching(coordinate, tileInfo.zoomIdentifier)) {
+                animationCoordinator = coordinator;
+            }
+        }
+    }
+
+    if (!animationCoordinator) {
+        double xTolerance = std::ceil(std::abs(tileInfo.bounds.bottomRight.x - tileInfo.bounds.topLeft.x) / 4096.0);
+        double yTolerance = std::ceil(std::abs(tileInfo.bounds.bottomRight.y - tileInfo.bounds.topLeft.y) / 4096.0);
+        animationCoordinator = std::make_shared<SymbolAnimationCoordinator>(coordinate, tileInfo.zoomIdentifier, xTolerance, yTolerance);
+        animationCoordinators->insert({crossTileIdentifier, { animationCoordinator }});
     }
 
     if (!animationCoordinator->isOwned.test_and_set()) {

@@ -44,7 +44,7 @@ public:
                                  const TextJustify &textJustify,
                                  const TextSymbolPlacement &textSymbolPlacement,
                                  const bool hideIcon,
-                                 std::shared_ptr<std::unordered_map<size_t, std::shared_ptr<SymbolAnimationCoordinator>>> animationCoordinators);
+                                 std::shared_ptr<std::unordered_map<size_t, std::vector<std::shared_ptr<SymbolAnimationCoordinator>>>> animationCoordinators);
 
     ~Tiled2dMapVectorSymbolObject() {
         if (animationCoordinator) {

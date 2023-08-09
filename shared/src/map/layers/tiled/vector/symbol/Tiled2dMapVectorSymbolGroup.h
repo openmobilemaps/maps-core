@@ -38,7 +38,7 @@ public:
                                 const std::shared_ptr<SymbolVectorLayerDescription> &layerDescription);
 
     bool initialize(const std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features,
-                    std::shared_ptr<std::unordered_map<size_t, std::shared_ptr<SymbolAnimationCoordinator>>> animationCoordinators);
+                    std::shared_ptr<std::unordered_map<size_t, std::vector<std::shared_ptr<SymbolAnimationCoordinator>>>> animationCoordinators);
 
 
     void update(const double zoomIdentifier, const double rotation, const double scaleFactor, long long now);
@@ -82,7 +82,7 @@ private:
                                                                             const TextJustify &textJustify,
                                                                             const TextSymbolPlacement &textSymbolPlacement,
                                                                             const bool hideIcon,
-                                                                            std::shared_ptr<std::unordered_map<size_t, std::shared_ptr<SymbolAnimationCoordinator>>> animationCoordinators);
+                                                                            std::shared_ptr<std::unordered_map<size_t, std::vector<std::shared_ptr<SymbolAnimationCoordinator>>>> animationCoordinators);
 
 private:
     std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>> symbolObjects;

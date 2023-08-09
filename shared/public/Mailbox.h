@@ -41,7 +41,7 @@ template <class Object, class MemberFn, class ArgsTuple>
 class MailboxMessageImpl: public MailboxMessage {
 public:
     MailboxMessageImpl(Object object_, MemberFn memberFn_, const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, ArgsTuple argsTuple_)
-      : MailboxMessage(strategy, environment, (void*)(void*&) memberFn_),
+      : MailboxMessage(strategy, environment, static_cast<void*>(&memberFn_)),
         object(object_),
         memberFn(memberFn_),
         argsTuple(std::move(argsTuple_)) {

@@ -23,7 +23,7 @@ Tiled2dMapVectorSourceSymbolDataManager::Tiled2dMapVectorSourceSymbolDataManager
                                                                                  const std::string &source,
                                                                                  const std::shared_ptr<FontLoaderInterface> &fontLoader,
                                                                                  const WeakActor<Tiled2dMapVectorSource> &vectorSource) :
-Tiled2dMapVectorSourceDataManager(vectorLayer, mapDescription, layerConfig, source), fontLoader(fontLoader), vectorSource(vectorSource), animationCoordinators(std::make_shared<std::unordered_map<size_t, std::shared_ptr<SymbolAnimationCoordinator>>>())
+Tiled2dMapVectorSourceDataManager(vectorLayer, mapDescription, layerConfig, source), fontLoader(fontLoader), vectorSource(vectorSource), animationCoordinators(std::make_shared<std::unordered_map<size_t, std::vector<std::shared_ptr<SymbolAnimationCoordinator>>>>())
 {
     for (const auto &layer: mapDescription->layers) {
         if (layer->getType() == VectorLayerType::symbol && layer->source == source) {
@@ -273,9 +273,11 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups(const std::vecto
     }
 
     if (!toClear.empty()) {
-        for (auto it = animationCoordinators->cbegin(), next_it = it; it != animationCoordinators->cend(); it = next_it) {
+        for (auto it = animationCoordinators->begin(), next_it = it; it != animationCoordinators->end(); it = next_it) {
           ++next_it;
-          if (!it->second->isUsed()) {
+            it->second.erase(std::remove_if(it->second.begin(), it->second.end(),
+                                   [](auto coordinator) { return !coordinator->isUsed(); }), it->second.end());
+          if (it->second.empty()) {
             animationCoordinators->erase(it);
           }
         }
@@ -399,10 +401,12 @@ void Tiled2dMapVectorSourceSymbolDataManager::update(long long now) {
         }
     }
 
-    for (const auto &[id, coordinator]: *animationCoordinators) {
-        if (coordinator->isAnimating()) {
-            mapInterface->invalidate();
-            break;
+    for (const auto &[id, coordinators]: *animationCoordinators) {
+        for (const auto &coordinator: coordinators) {
+            if (coordinator->isAnimating()) {
+                mapInterface->invalidate();
+                break;
+            }
         }
     }
 }

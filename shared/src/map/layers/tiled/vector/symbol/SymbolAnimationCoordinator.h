@@ -12,13 +12,29 @@
 
 #include "AnimationInterpolator.h"
 #include "Tiled2dMapTileInfo.h"
+#include "Coord.h"
 #include <atomic>
 
 #define COLLISION_ANIMATION_DURATION_MS 300.0f
 
 class SymbolAnimationCoordinator {
 public:
-    SymbolAnimationCoordinator(): interpolator(InterpolatorFunction::EaseInOut) {}
+    SymbolAnimationCoordinator(const Coord &coordinate,
+                                const int zoomIdentifier,
+                                const double xTolerance,
+                                const double yTolerance):
+    interpolator(InterpolatorFunction::EaseInOut),
+    coordinate(coordinate),
+    zoomIdentifier(zoomIdentifier),
+    xTolerance(xTolerance),
+    yTolerance(yTolerance) {}
+
+    bool isMatching(const Coord &coordinate, const int zoomIdentifier) const {
+        const double xDistance = std::abs(this->coordinate.x - coordinate.x);
+        const double yDistance = std::abs(this->coordinate.y - coordinate.y);
+        const bool matching = xDistance <= xTolerance && yDistance <= yTolerance;
+        return matching;
+    }
 
     float getIconAlpha(float targetAlpha, long long now) {
         return internalGetAlpha(targetAlpha, now, lastIconAlpha, iconAnimationStart);
@@ -71,6 +87,11 @@ public:
     bool isColliding = true;
 
 private:
+    const Coord coordinate;
+    const int zoomIdentifier;
+    const double xTolerance;
+    const double yTolerance;
+
     long long iconAnimationStart = 0;
     float lastIconAlpha = 0;
 
