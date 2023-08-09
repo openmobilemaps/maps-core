@@ -98,6 +98,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
             std::unordered_set<int32_t> indexControlSet;
 
             tiles[tile->tileInfo] = {};
+            assert(tileStateMap.count(tile->tileInfo) == 0);
             tileStateUpdates[tile->tileInfo] = tile->state;
 
             for (int32_t index = 0; index < mapDescription->layers.size(); index++) {

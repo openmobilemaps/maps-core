@@ -70,6 +70,8 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
             fullText += textEntry.text;
         }
 
+//        if (fullText != "Luzern") continue;
+
         auto anchor = layerDescription->style.getTextAnchor(evalContext);
         const auto &justify = layerDescription->style.getTextJustify(evalContext);
         const auto &placement = layerDescription->style.getTextSymbolPlacement(evalContext);
@@ -130,13 +132,9 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                                                                      pos->angle, justify, placement, false, animationCoordinators);
 
                         if (symbolObject) {
-                            symbolObject->setAlpha(alpha);
-                            const auto counts = symbolObject->getInstanceCounts();
-                            if (counts.icons + counts.stretchedIcons + counts.textCharacters != 0) {
-                                symbolObjects.push_back(symbolObject);
-                                textPositionMap[fullText].push_back(position);
-                                wasPlaced = true;
-                            }
+                            symbolObjects.push_back(symbolObject);
+                            textPositionMap[fullText].push_back(position);
+                            wasPlaced = true;
                         }
 
                         if (hasIcon) {
@@ -146,13 +144,9 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                                                                              anchor, pos->angle, justify, placement, false, animationCoordinators);
 
                                 if (symbolObject) {
-                                    symbolObject->setAlpha(alpha);
-                                    const auto counts = symbolObject->getInstanceCounts();
-                                    if (counts.icons + counts.stretchedIcons + counts.textCharacters != 0) {
-                                        symbolObjects.push_back(symbolObject);
-                                        textPositionMap[fullText].push_back(position);
-                                        wasPlaced = true;
-                                    }
+                                    symbolObjects.push_back(symbolObject);
+                                    textPositionMap[fullText].push_back(position);
+                                    wasPlaced = true;
                                 }
                             }
                             if (iconOptional) {
@@ -162,13 +156,9 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                                                                              true, animationCoordinators);
 
                                 if (symbolObject) {
-                                    symbolObject->setAlpha(alpha);
-                                    const auto counts = symbolObject->getInstanceCounts();
-                                    if (counts.icons + counts.stretchedIcons + counts.textCharacters != 0) {
-                                        symbolObjects.push_back(symbolObject);
-                                        textPositionMap[fullText].push_back(position);
-                                        wasPlaced = true;
-                                    }
+                                    symbolObjects.push_back(symbolObject);
+                                    textPositionMap[fullText].push_back(position);
+                                    wasPlaced = true;
                                 }
                             }
                         }
@@ -221,13 +211,9 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                                                                          context, text, fullText, position, line, fontList, anchor,
                                                                          pos->angle, justify, placement, false, animationCoordinators);
                             if (symbolObject) {
-                                symbolObject->setAlpha(alpha);
-                                const auto counts = symbolObject->getInstanceCounts();
-                                if (counts.icons + counts.stretchedIcons + counts.textCharacters != 0) {
-                                    wasPlaced = true;
-                                    symbolObjects.push_back(symbolObject);
-                                    textPositionMap[fullText].push_back(position);
-                                }
+                                symbolObjects.push_back(symbolObject);
+                                textPositionMap[fullText].push_back(position);
+                                wasPlaced = true;
                             }
 
                             if (hasIcon) {
@@ -237,13 +223,9 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                                                                                  fontList, anchor, pos->angle, justify, placement,
                                                                                  false, animationCoordinators);
                                     if (symbolObject) {
-                                        symbolObject->setAlpha(alpha);
-                                        const auto counts = symbolObject->getInstanceCounts();
-                                        if (counts.icons + counts.stretchedIcons + counts.textCharacters != 0) {
-                                            wasPlaced = true;
-                                            symbolObjects.push_back(symbolObject);
-                                            textPositionMap[fullText].push_back(position);
-                                        }
+                                        symbolObjects.push_back(symbolObject);
+                                        textPositionMap[fullText].push_back(position);
+                                        wasPlaced = true;
                                     }
                                 }
                                 if (iconOptional) {
@@ -252,13 +234,9 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                                                                                  line, fontList, anchor, pos->angle, justify,
                                                                                  placement, true, animationCoordinators);
                                     if (symbolObject) {
-                                        symbolObject->setAlpha(alpha);
-                                        const auto counts = symbolObject->getInstanceCounts();
-                                        if (counts.icons + counts.stretchedIcons + counts.textCharacters != 0) {
-                                            wasPlaced = true;
-                                            symbolObjects.push_back(symbolObject);
-                                            textPositionMap[fullText].push_back(position);
-                                        }
+                                        symbolObjects.push_back(symbolObject);
+                                        textPositionMap[fullText].push_back(position);
+                                        wasPlaced = true;
                                     }
                                 }
                             }
@@ -278,11 +256,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                                                              placement, false, animationCoordinators);
 
                 if (symbolObject) {
-                    symbolObject->setAlpha(alpha);
-                    const auto counts = symbolObject->getInstanceCounts();
-                    if (counts.icons + counts.stretchedIcons + counts.textCharacters != 0) {
-                        symbolObjects.push_back(symbolObject);
-                    }
+                    symbolObjects.push_back(symbolObject);
                 }
 
                 if (hasIcon) {
@@ -292,11 +266,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                                                                      justify, placement, false, animationCoordinators);
 
                         if (symbolObject) {
-                            symbolObject->setAlpha(alpha);
-                            const auto counts = symbolObject->getInstanceCounts();
-                            if (counts.icons + counts.stretchedIcons + counts.textCharacters != 0) {
-                                symbolObjects.push_back(symbolObject);
-                            }
+                            symbolObjects.push_back(symbolObject);
                         }
                     }
                     if (iconOptional) {
@@ -305,11 +275,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                                                                      angle, justify, placement, true, animationCoordinators);
 
                         if (symbolObject) {
-                            symbolObject->setAlpha(alpha);
-                            const auto counts = symbolObject->getInstanceCounts();
-                            if (counts.icons + counts.stretchedIcons + counts.textCharacters != 0) {
-                                symbolObjects.push_back(symbolObject);
-                            }
+                            symbolObjects.push_back(symbolObject);
                         }
                     }
                 }
@@ -723,9 +689,16 @@ Tiled2dMapVectorSymbolGroup::createSymbolObject(const Tiled2dMapTileInfo &tileIn
                                                 const TextSymbolPlacement &textSymbolPlacement,
                                                 const bool hideIcon,
                                                 std::shared_ptr<std::unordered_map<size_t, std::vector<std::shared_ptr<SymbolAnimationCoordinator>>>> animationCoordinators) {
-    return std::make_shared<Tiled2dMapVectorSymbolObject>(mapInterface, layerConfig, fontProvider, tileInfo, layerIdentifier,
+    auto symbolObject = std::make_shared<Tiled2dMapVectorSymbolObject>(mapInterface, layerConfig, fontProvider, tileInfo, layerIdentifier,
                                                           description, featureContext, text, fullText, coordinate, lineCoordinates,
                                                           fontList, textAnchor, angle, textJustify, textSymbolPlacement, hideIcon, animationCoordinators);
+    symbolObject->setAlpha(alpha);
+    const auto counts = symbolObject->getInstanceCounts();
+    if (counts.icons + counts.stretchedIcons + counts.textCharacters == 0) {
+        return nullptr;
+    } else {
+        return symbolObject;
+    }
 }
 
 void Tiled2dMapVectorSymbolGroup::collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor,

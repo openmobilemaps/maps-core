@@ -14,6 +14,8 @@
 #include "CoordinateSystemIdentifiers.h"
 #include "HashedTuple.h"
 #include "DateHelper.h"
+#include "Tiled2dMapSourceInterface.h"
+#include "Tiled2dMapSource.h"
 
 Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<MapInterface> &mapInterface,
                                                            const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
@@ -94,6 +96,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
         animationCoordinator = std::make_shared<SymbolAnimationCoordinator>(coordinate, tileInfo.zoomIdentifier, xTolerance, yTolerance);
         animationCoordinators->insert({crossTileIdentifier, { animationCoordinator }});
     }
+
+    animationCoordinator->increaseUsage();
 
     if (!animationCoordinator->isOwned.test_and_set()) {
         isCoordinateOwner = true;
@@ -342,7 +346,7 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
         alphas[countOffset] = 0.0;
     } else if (!(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier)) {
         alphas[countOffset] = animationCoordinator->getIconAlpha(0.0, now);
-    } else if (animationCoordinator->isColliding) {
+    } else if (animationCoordinator->isColliding()) {
         alphas[countOffset] = animationCoordinator->getIconAlpha(0.0, now);
     } else {
         alphas[countOffset] = animationCoordinator->getIconAlpha(description->style.getIconOpacity(evalContext) * alpha, now);
@@ -450,7 +454,7 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
 
     if (!isCoordinateOwner) {
         alphas[countOffset] = 0.0;
-    } else if (animationCoordinator->isColliding || !(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier) || !stretchSpriteInfo) {
+    } else if (animationCoordinator->isColliding() || !(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier) || !stretchSpriteInfo) {
         alphas[countOffset] = animationCoordinator->getStretchIconAlpha(0.0, now);
     } else {
         alphas[countOffset] = animationCoordinator->getStretchIconAlpha(description->style.getIconOpacity(evalContext) * alpha, now);
@@ -610,7 +614,7 @@ void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &posi
         countOffset += instanceCounts.textCharacters;
         return;
     }
-    labelObject->updateProperties(positions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, animationCoordinator->isColliding, rotation, alpha, isCoordinateOwner, now);
+    labelObject->updateProperties(positions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, animationCoordinator->isColliding(), rotation, alpha, isCoordinateOwner, now);
 
     if (!animationCoordinator->isTextAnimating()) {
         lastTextUpdateScaleFactor = scaleFactor;
@@ -753,7 +757,7 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
 
     if (!(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier) || !getIsOpaque() || !isPlaced()) {
         // not visible
-        animationCoordinator->isColliding = true;
+        animationCoordinator->setColliding(true);
         lastIconUpdateScaleFactor = std::nullopt;
         lastStretchIconUpdateScaleFactor = std::nullopt;
         lastTextUpdateScaleFactor = std::nullopt;
@@ -781,8 +785,7 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
         }
     }
 
-    if (animationCoordinator->isColliding != willCollide) {
-        animationCoordinator->isColliding = willCollide;
+    if (animationCoordinator->setColliding(willCollide)) {
         lastIconUpdateScaleFactor = std::nullopt;
         lastStretchIconUpdateScaleFactor = std::nullopt;
         lastTextUpdateScaleFactor = std::nullopt;
@@ -797,7 +800,7 @@ void Tiled2dMapVectorSymbolObject::resetCollisionCache() {
 }
 
 std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolObject::onClickConfirmed(const OBB2D &tinyClickBox) {
-    if (animationCoordinator->isColliding) {
+    if (animationCoordinator->isColliding()) {
         return std::nullopt;
     }
 

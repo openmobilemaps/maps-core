@@ -15,14 +15,16 @@
 #include "Coord.h"
 #include <atomic>
 
-#define COLLISION_ANIMATION_DURATION_MS 300.0f
+#define SYMBOL_ANIMATION_DURATION_MS 300.0f
+#define SYMBOL_ANIMATION_DELAY_MS 18ll
+
 
 class SymbolAnimationCoordinator {
 public:
     SymbolAnimationCoordinator(const Coord &coordinate,
-                                const int zoomIdentifier,
-                                const double xTolerance,
-                                const double yTolerance):
+                               const int zoomIdentifier,
+                               const double xTolerance,
+                               const double yTolerance):
     interpolator(InterpolatorFunction::EaseInOut),
     coordinate(coordinate),
     zoomIdentifier(zoomIdentifier),
@@ -30,9 +32,10 @@ public:
     yTolerance(yTolerance) {}
 
     bool isMatching(const Coord &coordinate, const int zoomIdentifier) const {
+        const double toleranceFactor = std::max(1.0, std::pow(2, this->zoomIdentifier - zoomIdentifier));
         const double xDistance = std::abs(this->coordinate.x - coordinate.x);
         const double yDistance = std::abs(this->coordinate.y - coordinate.y);
-        const bool matching = xDistance <= xTolerance && yDistance <= yTolerance;
+        const bool matching = xDistance <= xTolerance * toleranceFactor && yDistance <= yTolerance * toleranceFactor;
         return matching;
     }
 
@@ -84,7 +87,16 @@ public:
 
     std::atomic_flag isOwned = ATOMIC_FLAG_INIT;
 
-    bool isColliding = true;
+    // returns true if the value was changed
+    bool setColliding(const bool isColliding) {
+        const bool wasChanged = collides != isColliding;
+        collides = isColliding;
+        return wasChanged;
+    }
+
+    bool isColliding() {
+        return collides;
+    }
 
 private:
     const Coord coordinate;
@@ -103,14 +115,16 @@ private:
 
     int usageCount = 0;
 
+    bool collides = true;
+
     AnimationInterpolator interpolator;
 
     float internalGetAlpha(float targetAlpha, long long now, float &lastAlpha, long long &animationStart) {
         if (lastAlpha != targetAlpha) {
             if (animationStart == 0) {
-                animationStart = now;
+                animationStart = now + SYMBOL_ANIMATION_DELAY_MS;
             }
-            float progress = std::min(double(now - animationStart) / COLLISION_ANIMATION_DURATION_MS, 1.0);
+            float progress = std::min(double(std::max(now - animationStart, 0ll)) / SYMBOL_ANIMATION_DURATION_MS, 1.0);
             if (progress == 1.0) {
                 animationStart = 0;
                 lastAlpha = targetAlpha;
