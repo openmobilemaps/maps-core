@@ -12,6 +12,7 @@
 #include <mutex>
 #include <deque>
 #include <future>
+#include <typeinfo>
 #include "assert.h"
 #include "Logger.h"
 
@@ -27,21 +28,21 @@ enum class MailboxExecutionEnvironment {
 
 class MailboxMessage {
 public:
-    MailboxMessage(const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, void* identifier)
+    MailboxMessage(const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, size_t identifier)
     : strategy(strategy), environment(environment), identifier(identifier) {}
     virtual ~MailboxMessage() = default;
     virtual void operator()() = 0;
     
     const MailboxDuplicationStrategy strategy;
     const MailboxExecutionEnvironment environment;
-    const void* identifier;
+    const size_t identifier;
 };
 
 template <class Object, class MemberFn, class ArgsTuple>
 class MailboxMessageImpl: public MailboxMessage {
 public:
     MailboxMessageImpl(Object object_, MemberFn memberFn_, const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, ArgsTuple argsTuple_)
-      : MailboxMessage(strategy, environment, static_cast<void*>(&memberFn_)),
+      : MailboxMessage(strategy, environment, typeid(MemberFn).hash_code()),
         object(object_),
         memberFn(memberFn_),
         argsTuple(std::move(argsTuple_)) {
@@ -69,7 +70,7 @@ template <class ResultType, class Object, class MemberFn, class ArgsTuple>
 class AskMessageImpl : public MailboxMessage {
 public:
     AskMessageImpl(std::promise<ResultType> promise_, Object object_, MemberFn memberFn_, const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, ArgsTuple argsTuple_)
-        : MailboxMessage(strategy, environment, (void*)(void*&) memberFn_),
+        : MailboxMessage(strategy, environment, typeid(MemberFn).hash_code()),
           object(object_),
           memberFn(memberFn_),
           argsTuple(std::move(argsTuple_)),
