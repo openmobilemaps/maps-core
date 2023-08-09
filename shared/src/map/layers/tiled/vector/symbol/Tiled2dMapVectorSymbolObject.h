@@ -97,8 +97,6 @@ public:
 
     void collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<CollisionGrid> collisionGrid);
 
-    void resetCollisionCache();
-
     std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> onClickConfirmed(const OBB2D &tinyClickBox);
 
     void setAlpha(float alpha);

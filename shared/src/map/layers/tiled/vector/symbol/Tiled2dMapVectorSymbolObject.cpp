@@ -793,12 +793,6 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
 
 }
 
-void Tiled2dMapVectorSymbolObject::resetCollisionCache() {
-    lastIconUpdateScaleFactor = std::nullopt;
-    lastStretchIconUpdateScaleFactor = std::nullopt;
-    lastTextUpdateScaleFactor = std::nullopt;
-}
-
 std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolObject::onClickConfirmed(const OBB2D &tinyClickBox) {
     if (animationCoordinator->isColliding()) {
         return std::nullopt;

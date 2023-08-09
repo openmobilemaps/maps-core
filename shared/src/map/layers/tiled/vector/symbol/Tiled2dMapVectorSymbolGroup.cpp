@@ -708,12 +708,6 @@ void Tiled2dMapVectorSymbolGroup::collisionDetection(const double zoomIdentifier
     }
 }
 
-void Tiled2dMapVectorSymbolGroup::resetCollisionCache() {
-    for (auto const &object: symbolObjects) {
-        object->resetCollisionCache();
-    }
-}
-
 std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolGroup::onClickConfirmed(const OBB2D &tinyClickBox) {
     if (!anyInteractable) {
         return std::nullopt;

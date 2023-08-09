@@ -299,13 +299,6 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups(const std::unord
         if (tileState == tileStateMap.end() || tileState->second != TileState::VISIBLE) {
             continue;
         }
-        for (const auto &[layerIdentifier, symbolGroups]: symbolGroupMap) {
-            for (auto &symbolGroup: symbolGroups) {
-                symbolGroup.syncAccess([&](auto group){
-                    group->resetCollisionCache();
-                });
-            }
-        }
     }
 
     pregenerateRenderPasses();

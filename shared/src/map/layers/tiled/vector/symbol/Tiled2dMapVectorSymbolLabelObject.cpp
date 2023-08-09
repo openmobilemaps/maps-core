@@ -679,9 +679,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
 
         std::vector<CircleD> circles;
         Vec2D lastCirclePosition = Vec2D(0, 0);
-        double lastRadius = 0;
         size_t count = centerPositions.size();
-        size_t initialOffset = countOffset - count;
         for (int i = 0; i < count; i++) {
             double newX = centerPositions.at(i).x;
             double newY = centerPositions.at(i).y;

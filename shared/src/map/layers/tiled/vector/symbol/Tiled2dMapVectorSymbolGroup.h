@@ -59,8 +59,6 @@ public:
 
     void placedInCache();
 
-    void resetCollisionCache();
-
     void clear();
 private:
 
