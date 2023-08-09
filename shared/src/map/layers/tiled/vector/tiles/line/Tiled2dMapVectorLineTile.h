@@ -65,6 +65,7 @@ private:
     std::unordered_set<std::string> usedKeys;
     bool isStyleZoomDependant = true;
     std::optional<double> lastZoom = std::nullopt;
+    std::optional<bool> lastInZoomRange = std::nullopt;
 
     std::vector<std::vector<ShaderLineStyle>> reusableLineStyles;
     std::unordered_map<size_t, std::pair<int, int>> styleHashToGroupMap;

@@ -198,6 +198,17 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
 
     if (!sourceDataManagers.empty() || !symbolSourceDataManagers.empty() || !rasterTileSources.empty()) {
         // do nothing if the layer is already initialized
+
+        Tiled2dMapLayer::onAdded(mapInterface, layerIndex);
+        mapInterface->getTouchHandler()->insertListener(std::dynamic_pointer_cast<TouchInterface>(shared_from_this()), layerIndex);
+
+        if (backgroundLayer) {
+            backgroundLayer->onAdded(mapInterface, layerIndex);
+        }
+
+        if (!isResumed) {
+            resume();
+        }
         return;
     }
 

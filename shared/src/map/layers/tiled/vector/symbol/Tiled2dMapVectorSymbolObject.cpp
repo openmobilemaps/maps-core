@@ -765,11 +765,20 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
     if (boundingBoxRotationAlignment == SymbolAlignment::VIEWPORT) {
         std::optional<CollisionRectF> boundingRect = getViewportAlignedBoundingBox(zoomIdentifier, false, true);
         // Collide, if no valid boundingRect
-        willCollide = !boundingRect.has_value() || collisionGrid->addAndCheckCollisionAlignedRect(*boundingRect);
+        if (boundingRect.has_value()) {
+            willCollide = collisionGrid->addAndCheckCollisionAlignedRect(*boundingRect);
+        } else {
+            willCollide = false;
+        }
+
     } else {
         std::optional<std::vector<CollisionCircleF>> boundingCircles = getMapAlignedBoundingCircles(zoomIdentifier, textSymbolPlacement != TextSymbolPlacement::POINT, true);
         // Collide, if no valid boundingCircles
-        willCollide = !boundingCircles.has_value() || collisionGrid->addAndCheckCollisionCircles(*boundingCircles);
+        if (boundingCircles.has_value()) {
+            willCollide = collisionGrid->addAndCheckCollisionCircles(*boundingCircles);
+        } else {
+            willCollide = false;
+        }
     }
 
     if (animationCoordinator->isColliding != willCollide) {
