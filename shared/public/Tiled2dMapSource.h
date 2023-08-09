@@ -56,12 +56,21 @@ public:
 };
 
 
+class Tiled2dMapSourceReadyInterface {
+public:
+    virtual ~Tiled2dMapSourceReadyInterface() = default;
+
+    virtual void setTileReady(const Tiled2dMapTileInfo &tile) = 0;
+};
+
+
 // T is the Object used for loading
 // L is the Loading type
 // R is the Result type
 template<class T, class L, class R>
 class Tiled2dMapSource :
         public Tiled2dMapSourceInterface,
+        public Tiled2dMapSourceReadyInterface,
         public std::enable_shared_from_this<Tiled2dMapSourceInterface>,
         public ActorObject {
 public:
@@ -95,7 +104,7 @@ public:
 
     virtual void forceReload() override;
 
-    void setTileReady(const Tiled2dMapTileInfo &tile);
+    void setTileReady(const Tiled2dMapTileInfo &tile) override;
 
     void setTilesReady(const std::vector<Tiled2dMapTileInfo> &tiles);
             

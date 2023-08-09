@@ -21,6 +21,7 @@
 #include "Tiled2dMapLayerMaskWrapper.h"
 #include "Tiled2dMapVectorLayerSelectionCallbackInterface.h"
 #include "Actor.h"
+#include "Tiled2dMapVectorReadyManager.h"
 #include <unordered_set>
 
 class Tiled2dMapVectorLayer;
@@ -32,7 +33,8 @@ public:
     Tiled2dMapVectorSourceDataManager(const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
                                       const std::shared_ptr<VectorMapDescription> &mapDescription,
                                       const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
-                                      const std::string &source);
+                                      const std::string &source,
+                                      const Actor<Tiled2dMapVectorReadyManager> &readyManager);
 
     virtual void onAdded(const std::weak_ptr<::MapInterface> &mapInterface);
 
@@ -82,4 +84,7 @@ protected:
     std::unordered_set<int32_t> modifyingMaskLayers;
 
     std::optional<::RectI> scissorRect = std::nullopt;
+
+
+    const Actor<Tiled2dMapVectorReadyManager> readyManager;
 };
