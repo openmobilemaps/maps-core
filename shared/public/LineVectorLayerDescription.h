@@ -49,54 +49,49 @@ public:
         return usedKeys;
     };
 
-    BlendMode getBlendMode(const EvaluationContext &context) const {
+    BlendMode getBlendMode(const EvaluationContext &context) {
         static const BlendMode defaultValue = BlendMode::NORMAL;
-        return blendMode ? blendMode->evaluateOr(context, defaultValue) : defaultValue;
+        return blendModeEvaluator.getResult(blendMode, context, defaultValue);
     }
 
     Color getLineColor(const EvaluationContext &context){
         static const Color defaultValue = ColorUtil::c(0, 0, 0, 1.0);
-        return lineColor ? lineColor->evaluateOr(context, defaultValue) : defaultValue;
+        return lineColorEvaluator.getResult(lineColor, context, defaultValue);
     }
 
     double getLineOpacity(const EvaluationContext &context){
         static const double defaultValue = 1.0;
-        return lineOpacity ? lineOpacity->evaluateOr(context, defaultValue) : defaultValue;
-    }
-
-    void setLineOpacity(std::shared_ptr<Value> opacityValue) {
-        lineOpacity = opacityValue;
+        return lineOpacityEvaluator.getResult(lineOpacity, context, defaultValue);
     }
 
     double getLineBlur(const EvaluationContext &context){
         static const double defaultValue = 0.0;
-        double value = lineBlur ? lineBlur->evaluateOr(context, defaultValue) : defaultValue;
+        double value = lineBlurEvaluator.getResult(lineBlur, context, defaultValue);
         return value * dpFactor;
     }
 
     double getLineWidth(const EvaluationContext &context){
         static const double defaultValue = 1.0;
-        double value = lineWidth ? lineWidth->evaluateOr(context, defaultValue) : defaultValue;
+        double value = lineWidthEvaluator.getResult(lineWidth, context, defaultValue);
         return value * dpFactor;
     }
 
     std::vector<float> getLineDashArray(const EvaluationContext &context){
         static const std::vector<float> defaultValue = {};
-        return lineDashArray ? lineDashArray->evaluateOr(context, defaultValue) : defaultValue;
+        return lineDashArrayEvaluator.getResult(lineDashArray, context, defaultValue);
     }
 
     LineCapType getLineCap(const EvaluationContext &context){
         static const LineCapType defaultValue = LineCapType::BUTT;
-        return lineCap ? lineCap->evaluateOr(context, defaultValue) : defaultValue;
+        return lineCapEvaluator.getResult(lineCap, context, defaultValue);
     }
 
     double getLineOffset(const EvaluationContext &context) {
         static const double defaultValue = 0.0;
-        double offset = lineOffset ? lineOffset->evaluateOr(context, defaultValue) : defaultValue;
+        double offset = lineOffsetEvaluator.getResult(lineOffset, context, defaultValue);
         return std::min(offset * dpFactor, getLineWidth(context) * 0.5);
     }
 
-private:
     std::shared_ptr<Value> lineColor;
     std::shared_ptr<Value> lineOpacity;
     std::shared_ptr<Value> lineBlur;
@@ -105,6 +100,17 @@ private:
     std::shared_ptr<Value> lineCap;
     std::shared_ptr<Value> lineOffset;
     std::shared_ptr<Value> blendMode;
+
+private:
+    ValueEvaluator<Color> lineColorEvaluator;
+    ValueEvaluator<double> lineOpacityEvaluator;
+    ValueEvaluator<double> lineBlurEvaluator;
+    ValueEvaluator<double> lineWidthEvaluator;
+    ValueEvaluator<std::vector<float>> lineDashArrayEvaluator;
+    ValueEvaluator<LineCapType> lineCapEvaluator;
+    ValueEvaluator<double> lineOffsetEvaluator;
+    ValueEvaluator<BlendMode> blendModeEvaluator;
+
     double dpFactor;
 };
 

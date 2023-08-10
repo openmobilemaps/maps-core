@@ -48,7 +48,7 @@ public:
         return usedKeys;
     }
 
-    BlendMode getBlendMode(const EvaluationContext &context) const {
+    BlendMode getBlendMode(const EvaluationContext &context) {
         static const BlendMode defaultValue = BlendMode::NORMAL;
         return blendMode ? blendMode->evaluateOr(context, defaultValue) : defaultValue;
     }
@@ -66,35 +66,34 @@ public:
 
     double getRasterOpacity(const EvaluationContext &context) {
         double defaultValue = 1.0;
-        return rasterOpacity ? rasterOpacity->evaluateOr(context, defaultValue) : defaultValue;
+        return rasterOpacityEvaluator.getResult(rasterOpacity, context, defaultValue);
     }
     
     double getRasterBrightnessMin(const EvaluationContext &context) {
         double defaultValue = 0.0;
-        return rasterBrightnessMin ? rasterBrightnessMin->evaluateOr(context, defaultValue) : defaultValue;
+        return rasterBrightnessMinEvaluator.getResult(rasterBrightnessMin, context, defaultValue);
     }
     
     double getRasterBrightnessMax(const EvaluationContext &context) {
         double defaultValue = 1.0;
-        return rasterBrightnessMax ? rasterBrightnessMax->evaluateOr(context, defaultValue) : defaultValue;
+        return rasterBrightnessMaxEvaluator.getResult(rasterBrightnessMax, context, defaultValue);
     }
     
     double getRasterContrast(const EvaluationContext &context) {
         double defaultValue = 0.0;
-        return rasterContrast ? rasterContrast->evaluateOr(context, defaultValue) : defaultValue;
+        return rasterContrastEvaluator.getResult(rasterContrast, context, defaultValue);
     }
 
     double getRasterSaturation(const EvaluationContext &context) {
         double defaultValue = 0.0;
-        return rasterSaturation ? rasterSaturation->evaluateOr(context, defaultValue) : defaultValue;
+        return rasterSaturationEvaluator.getResult(rasterSaturation, context, defaultValue);
     }
 
     double getRasterGamma(const EvaluationContext &context) {
         double defaultValue = 1.0;
-        return rasterGamma ? rasterGamma->evaluateOr(context, defaultValue) : defaultValue;
+        return rasterGammaEvaluator.getResult(rasterGamma, context, defaultValue);
     }
-    
-private:
+
     std::shared_ptr<Value> rasterOpacity;
     std::shared_ptr<Value> rasterBrightnessMin;
     std::shared_ptr<Value> rasterBrightnessMax;
@@ -102,6 +101,14 @@ private:
     std::shared_ptr<Value> rasterSaturation;
     std::shared_ptr<Value> rasterGamma;
     std::shared_ptr<Value> blendMode;
+private:
+    ValueEvaluator<double> rasterOpacityEvaluator;
+    ValueEvaluator<double> rasterBrightnessMinEvaluator;
+    ValueEvaluator<double> rasterBrightnessMaxEvaluator;
+    ValueEvaluator<double> rasterContrastEvaluator;
+    ValueEvaluator<double> rasterSaturationEvaluator;
+    ValueEvaluator<double> rasterGammaEvaluator;
+    ValueEvaluator<BlendMode> blendModeEvaluator;
 };
 
 class RasterVectorLayerDescription: public VectorLayerDescription  {
