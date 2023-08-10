@@ -31,5 +31,5 @@ private:
 
     std::unordered_map<Tiled2dMapTileInfo, size_t> tileDataProcessCount;
 
-    size_t managerCount;
+    size_t managerCount = 0;
 };

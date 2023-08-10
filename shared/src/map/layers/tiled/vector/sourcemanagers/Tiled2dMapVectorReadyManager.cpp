@@ -25,7 +25,6 @@ void Tiled2dMapVectorReadyManager::didProcessData(const Tiled2dMapTileInfo &tile
             auto tileIt = tileNotReadyCount.find(tile);
             if (tileIt == tileNotReadyCount.end()) {
                 tileDataProcessCount.erase(tile);
-                tileNotReadyCount.erase(tile);
                 vectorSource.message(&Tiled2dMapSourceReadyInterface::setTileReady, tile);
             }
         }
