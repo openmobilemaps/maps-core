@@ -91,7 +91,8 @@ textInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
       float a2 = smoothstep(start, end, median) * color.a;
       return float4(mixed.r * a2, mixed.g * a2, mixed.b * a2, a2);
     } else {
-      return mixed;
+      float a2 = alpha * color.a;
+      return float4(mixed.r * a2, mixed.g * a2, mixed.b * a2, a2);
     }
 
     return mixed;
