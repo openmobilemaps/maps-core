@@ -60,7 +60,7 @@ public class RenderingContext: NSObject {
 
     var currentPipeline: MTLRenderPipelineState?
 
-    func setRenderPipelineStateIfNeeded(_ pipelineState: MTLRenderPipelineState) {
+    open func setRenderPipelineStateIfNeeded(_ pipelineState: MTLRenderPipelineState) {
         guard currentPipeline?.hash != pipelineState.hash else {
             return
         }
