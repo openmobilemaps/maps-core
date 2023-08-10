@@ -12,6 +12,7 @@
 
 #include "VectorLayerDescription.h"
 #include "Color.h"
+#include "geojsonvt.hpp"
 
 class VectorMapSourceDescription {
 public:
@@ -25,6 +26,8 @@ public:
                          int minZoom,
                          int maxZoom):
     identifier(identifier), vectorUrl(vectorUrl), minZoom(minZoom), maxZoom(maxZoom) {}
+
+    const static std::shared_ptr<VectorMapSourceDescription> geoJsonDescription() { return  std::make_shared<VectorMapSourceDescription>("","geojson://{z}/{x}/{y}", 0, 18); };
 };
 
 class VectorMapDescription {
@@ -33,10 +36,12 @@ public:
     std::vector<std::shared_ptr<VectorMapSourceDescription>> vectorSources;
     std::vector<std::shared_ptr<VectorLayerDescription>> layers;
     std::optional<std::string> spriteBaseUrl;
+    std::map<std::string, std::shared_ptr<GeoJSONVT>> geoJsonSources;
 
     VectorMapDescription(std::string identifier,
                          std::vector<std::shared_ptr<VectorMapSourceDescription>> vectorSources,
                          std::vector<std::shared_ptr<VectorLayerDescription>> layers,
-                         std::optional<std::string> spriteBaseUrl):
-    identifier(identifier), vectorSources(vectorSources), layers(layers), spriteBaseUrl(spriteBaseUrl) {}
+                         std::optional<std::string> spriteBaseUrl,
+                         std::map<std::string, std::shared_ptr<GeoJSONVT>> geoJsonSources):
+    identifier(identifier), vectorSources(vectorSources), layers(layers), spriteBaseUrl(spriteBaseUrl), geoJsonSources(geoJsonSources) {}
 };

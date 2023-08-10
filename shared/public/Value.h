@@ -104,10 +104,10 @@ struct property_value_mapping : vtzero::property_value_mapping {
 };
 
 class FeatureContext {
+public:
     using keyType = std::string;
     using valueType = ValueVariant;
     using mapType = std::vector<std::pair<keyType, valueType>>;
-
 private:
     mapType propertiesMap;
 
@@ -121,6 +121,16 @@ public:
     propertiesMap(std::move(other.propertiesMap)),
     geomType(other.geomType),
     identifier(other.identifier) {}
+
+
+    FeatureContext(vtzero::GeomType geomType,
+                   mapType propertiesMap,
+                   uint64_t identifier):
+    propertiesMap(std::move(propertiesMap)),
+    geomType(geomType),
+    identifier(identifier){
+        initialize();
+    }
 
     FeatureContext(vtzero::feature const &feature) {
         geomType = feature.geometry_type();
@@ -140,6 +150,10 @@ public:
             identifier = hash;
         }
 
+        initialize();
+    };
+
+    void initialize() {
         propertiesMap.push_back(std::make_pair("identifier", int64_t(identifier)));
 
         switch (geomType) {
@@ -160,7 +174,7 @@ public:
                 break;
             }
         }
-    };
+    }
 
     bool contains(const std::string &key) const {
         for(const auto& p : propertiesMap) {
