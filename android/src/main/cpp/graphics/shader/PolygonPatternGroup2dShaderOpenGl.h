@@ -30,6 +30,8 @@ class PolygonPatternGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
     virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() override;
 
   protected:
+    const static std::string programName;
+
     virtual std::string getFragmentShader() override;
 
     virtual std::string getVertexShader() override;

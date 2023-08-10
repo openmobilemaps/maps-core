@@ -33,5 +33,7 @@ class ColorCircleShaderOpenGl : public BaseShaderProgramOpenGl,
     virtual std::string getFragmentShader() override;
 
   private:
+    const static std::string programName;
+
     std::vector<float> color;
 };

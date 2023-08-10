@@ -11,13 +11,14 @@
 #include "RasterShaderOpenGl.h"
 #include "OpenGlContext.h"
 
+const std::string RasterShaderOpenGl::programName = "UBMAP_RasterShaderOpenGl";
+
 std::string RasterShaderOpenGl::getProgramName() {
-    return "UBMAP_RasterShaderOpenGl";
+    return programName;
 }
 
 void RasterShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    std::string programName = getProgramName();
 
     int vertexShader = loadShader(GL_VERTEX_SHADER, getVertexShader());
     int fragmentShader = loadShader(GL_FRAGMENT_SHADER, getFragmentShader());
@@ -37,7 +38,7 @@ void RasterShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextIn
 void RasterShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
     BaseShaderProgramOpenGl::preRender(context);
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    int styleValuesLocation = glGetUniformLocation(openGlContext->getProgram(getProgramName()), "styleValues");
+    int styleValuesLocation = glGetUniformLocation(openGlContext->getProgram(programName), "styleValues");
     glUniform1fv(styleValuesLocation, (GLsizei) styleValues.size(), &styleValues[0]);
 }
 

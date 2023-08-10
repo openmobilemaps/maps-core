@@ -12,7 +12,9 @@
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
 
-std::string TextShaderOpenGl::getProgramName() { return "UBMAP_TextShaderOpenGl"; }
+const std::string TextShaderOpenGl::programName = "UBMAP_TextShaderOpenGl";
+
+std::string TextShaderOpenGl::getProgramName() { return programName; }
 
 void TextShaderOpenGl::setColor(const ::Color & color) {
     this->color = std::vector<float>{color.r, color.g, color.b, color.a};
@@ -27,7 +29,6 @@ void TextShaderOpenGl::setOpacity(float opacity) { this->opacity = opacity; }
 
 void TextShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    std::string programName = getProgramName();
     // prepare shaders and OpenGL program
     int vertexShader = loadShader(GL_VERTEX_SHADER, getVertexShader());
     int fragmentShader = loadShader(GL_FRAGMENT_SHADER, getFragmentShader());
@@ -47,7 +48,7 @@ void TextShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInte
 void TextShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
     BaseShaderProgramOpenGl::preRender(context);
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    int program = openGlContext->getProgram(getProgramName());
+    int program = openGlContext->getProgram(programName);
 
     int colorHandle = glGetUniformLocation(program, "color");
     glUniform4fv(colorHandle, 1, &color[0]);

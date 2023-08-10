@@ -12,26 +12,27 @@
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
 
-std::string StretchShaderOpenGl::getProgramName() { return "UBMAP_StretchShaderOpenGl"; }
+const std::string StretchShaderOpenGl::programName = "UBMAP_StretchShaderOpenGl";
+
+std::string StretchShaderOpenGl::getProgramName() { return programName; }
 
 void StretchShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
     BaseShaderProgramOpenGl::preRender(context);
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    int alphaLocation = glGetUniformLocation(openGlContext->getProgram(getProgramName()), "alpha");
+    int alphaLocation = glGetUniformLocation(openGlContext->getProgram(programName), "alpha");
     glUniform1f(alphaLocation, alpha);
-    int uvSpriteLocation = glGetUniformLocation(openGlContext->getProgram(getProgramName()), "uvSprite"); // we receive the texture/uv-values upside down, the Quad already compensates for that
+    int uvSpriteLocation = glGetUniformLocation(openGlContext->getProgram(programName), "uvSprite"); // we receive the texture/uv-values upside down, the Quad already compensates for that
     glUniform4f(uvSpriteLocation, (float) stretchShaderInfo.uv.x, (float) stretchShaderInfo.uv.y, (float) stretchShaderInfo.uv.width, (float) stretchShaderInfo.uv.height);
-    int scalesLocation = glGetUniformLocation(openGlContext->getProgram(getProgramName()), "scales");
+    int scalesLocation = glGetUniformLocation(openGlContext->getProgram(programName), "scales");
     glUniform2f(scalesLocation, stretchShaderInfo.scaleX, stretchShaderInfo.scaleY);
-    int stretchXLocation = glGetUniformLocation(openGlContext->getProgram(getProgramName()), "stretchX");
+    int stretchXLocation = glGetUniformLocation(openGlContext->getProgram(programName), "stretchX");
     glUniform4f(stretchXLocation, stretchShaderInfo.stretchX0Begin, stretchShaderInfo.stretchX0End, stretchShaderInfo.stretchX1Begin, stretchShaderInfo.stretchX1End);
-    int stretchYLocation = glGetUniformLocation(openGlContext->getProgram(getProgramName()), "stretchY");
+    int stretchYLocation = glGetUniformLocation(openGlContext->getProgram(programName), "stretchY");
     glUniform4f(stretchYLocation, stretchShaderInfo.stretchY0Begin, stretchShaderInfo.stretchY0End, stretchShaderInfo.stretchY1Begin, stretchShaderInfo.stretchY1End);
 }
 
 void StretchShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    std::string programName = getProgramName();
     // prepare shaders and OpenGL program
     int vertexShader = loadShader(GL_VERTEX_SHADER, getVertexShader());
     int fragmentShader = loadShader(GL_FRAGMENT_SHADER, getFragmentShader());

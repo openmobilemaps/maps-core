@@ -50,6 +50,9 @@ protected:
     virtual void removeGlBuffers();
 
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
+    std::string programName;
+    int program = 0;
+
     int mvpMatrixHandle;
     int scaleFactorHandle;
     int positionHandle;

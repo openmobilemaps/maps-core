@@ -37,6 +37,8 @@ protected:
     virtual std::string getFragmentShader() override;
 
   private:
+    static const std::string programName;
+
     std::recursive_mutex styleMutex;
     std::vector<GLfloat> lineValues;
     GLint numStyles = 0;

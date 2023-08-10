@@ -12,11 +12,12 @@
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
 
-std::string ColorCircleShaderOpenGl::getProgramName() { return "UBMAP_ColorCircleShaderOpenGl"; }
+const std::string ColorCircleShaderOpenGl::programName = "UBMAP_ColorCircleShaderOpenGl";
+
+std::string ColorCircleShaderOpenGl::getProgramName() { return programName; }
 
 void ColorCircleShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    std::string programName = getProgramName();
     // prepare shaders and OpenGL program
     int vertexShader = loadShader(GL_VERTEX_SHADER, getVertexShader());
     int fragmentShader = loadShader(GL_FRAGMENT_SHADER, getFragmentShader());
@@ -35,7 +36,7 @@ void ColorCircleShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingCont
 void ColorCircleShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
     BaseShaderProgramOpenGl::preRender(context);
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    int program = openGlContext->getProgram(getProgramName());
+    int program = openGlContext->getProgram(programName);
 
     int mColorHandle = glGetUniformLocation(program, "vColor");
     glUniform4fv(mColorHandle, 1, &color[0]);

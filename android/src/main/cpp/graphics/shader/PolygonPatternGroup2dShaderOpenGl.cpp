@@ -12,11 +12,12 @@
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
 
-std::string PolygonPatternGroup2dShaderOpenGl::getProgramName() { return "UBMAP_PolygonPatternGroup2dShaderOpenGl"; }
+const std::string PolygonPatternGroup2dShaderOpenGl::programName = "UBMAP_PolygonPatternGroup2dShaderOpenGl";
+
+std::string PolygonPatternGroup2dShaderOpenGl::getProgramName() { return programName; }
 
 void PolygonPatternGroup2dShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    std::string programName = getProgramName();
     // prepare shaders and OpenGL program
     int vertexShader = loadShader(GL_VERTEX_SHADER, getVertexShader());
     int fragmentShader = loadShader(GL_FRAGMENT_SHADER, getFragmentShader());

@@ -116,24 +116,25 @@ void Text2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &con
     }
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    int program = openGlContext->getProgram(shaderProgram->getProgramName());
+    programName = shaderProgram->getProgramName();
+    program = openGlContext->getProgram(programName);
     if (program == 0) {
         shaderProgram->setupProgram(openGlContext);
-        program = openGlContext->getProgram(shaderProgram->getProgramName());
-    }
+        program = openGlContext->getProgram(programName);
+        }
 
     glUseProgram(program);
-    prepareGlData(openGlContext, program);
+    prepareGlData(program);
 
     ready = true;
 }
 
-void Text2dOpenGl::prepareGlData(const std::shared_ptr<OpenGlContext> &openGlContext, const int &programHandle) {
+void Text2dOpenGl::prepareGlData(int program) {
     if (positionHandle < 0) {
-        positionHandle = glGetAttribLocation(programHandle, "vPosition");
+        positionHandle = glGetAttribLocation(program, "vPosition");
     }
     if (textureCoordinateHandle < 0) {
-        textureCoordinateHandle = glGetAttribLocation(programHandle, "texCoordinate");
+        textureCoordinateHandle = glGetAttribLocation(program, "texCoordinate");
     }
 
     if (!hasVertexBuffer) {
@@ -153,10 +154,10 @@ void Text2dOpenGl::prepareGlData(const std::shared_ptr<OpenGlContext> &openGlCon
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     if (mvpMatrixHandle < 0) {
-        mvpMatrixHandle = glGetUniformLocation(programHandle, "uMVPMatrix");
+        mvpMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
     }
     if (textureCoordScaleFactorHandle < 0) {
-        textureCoordScaleFactorHandle = glGetUniformLocation(programHandle, "textureCoordScaleFactor");
+        textureCoordScaleFactorHandle = glGetUniformLocation(program, "textureCoordScaleFactor");
     }
 }
 
@@ -216,11 +217,9 @@ void Text2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
         glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
     }
 
-    std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    int mProgram = openGlContext->getProgram(shaderProgram->getProgramName());
-    glUseProgram(mProgram);
+    glUseProgram(program);
 
-    prepareTextureDraw(openGlContext, mProgram);
+    prepareTextureDraw(program);
 
     shaderProgram->preRender(context);
 
@@ -256,7 +255,7 @@ void Text2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     glDisable(GL_BLEND);
 }
 
-void Text2dOpenGl::prepareTextureDraw(std::shared_ptr<OpenGlContext> &openGLContext, int mProgram) {
+void Text2dOpenGl::prepareTextureDraw(int program) {
     if (!textureHolder) {
         return;
     }
@@ -268,6 +267,6 @@ void Text2dOpenGl::prepareTextureDraw(std::shared_ptr<OpenGlContext> &openGLCont
     glBindTexture(GL_TEXTURE_2D, (unsigned int)texturePointer);
 
     // Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0.
-    int mTextureUniformHandle = glGetUniformLocation(mProgram, "texture");
+    int mTextureUniformHandle = glGetUniformLocation(program, "texture");
     glUniform1i(mTextureUniformHandle, 0);
 }
