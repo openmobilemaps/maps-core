@@ -89,6 +89,8 @@ public:
     std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> onClickConfirmed(const OBB2D &tinyClickBox);
 
     void setAlpha(float alpha);
+
+    void updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription);
 private:
     double lastZoomEvaluation = -1;
     void evaluateStyleProperties(const double zoomIdentifier);
@@ -109,7 +111,7 @@ private:
 
     const std::weak_ptr<MapInterface> mapInterface;
 
-    const std::shared_ptr<SymbolVectorLayerDescription> description;
+    std::shared_ptr<SymbolVectorLayerDescription> description;
 
     const ::Coord coordinate;
     ::Coord renderCoordinate = Coord(0, 0, 0, 0);
