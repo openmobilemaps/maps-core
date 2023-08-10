@@ -22,6 +22,7 @@
 #include "Tiled2dMapVectorFontProvider.h"
 #include "CollisionGrid.h"
 #include "SymbolAnimationCoordinator.h"
+#include "SymbolAnimationCoordinatorMap.h"
 
 class Tiled2dMapVectorSourceSymbolDataManager:
         public Tiled2dMapVectorSourceDataManager,
@@ -106,5 +107,5 @@ private:
 
     std::unordered_set<std::string> interactableLayers;
 
-    std::shared_ptr<std::unordered_map<size_t, std::vector<std::shared_ptr<SymbolAnimationCoordinator>>>> animationCoordinators;
+    std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap;
 };

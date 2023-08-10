@@ -75,14 +75,12 @@ public:
         return usageCount;
     }
 
-    int increaseUsage() {
-        usageCount++;
-        return usageCount;
+    int increaseUsage() {;
+        return ++usageCount;
     }
 
     int decreaseUsage() {
-        usageCount--;
-        return usageCount;
+        return --usageCount;
     }
 
     std::atomic_flag isOwned = ATOMIC_FLAG_INIT;
@@ -113,7 +111,7 @@ private:
     long long textAnimationStart = 0;
     float lastTextAlpha = 0;
 
-    int usageCount = 0;
+    std::atomic_int usageCount = 0;
 
     bool collides = true;
 

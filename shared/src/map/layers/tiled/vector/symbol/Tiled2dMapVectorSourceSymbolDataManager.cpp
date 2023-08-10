@@ -24,7 +24,7 @@ Tiled2dMapVectorSourceSymbolDataManager::Tiled2dMapVectorSourceSymbolDataManager
                                                                                  const std::shared_ptr<FontLoaderInterface> &fontLoader,
                                                                                  const WeakActor<Tiled2dMapVectorSource> &vectorSource,
                                                                                  const Actor<Tiled2dMapVectorReadyManager> &readyManager) :
-Tiled2dMapVectorSourceDataManager(vectorLayer, mapDescription, layerConfig, source, readyManager), fontLoader(fontLoader), vectorSource(vectorSource), animationCoordinators(std::make_shared<std::unordered_map<size_t, std::vector<std::shared_ptr<SymbolAnimationCoordinator>>>>())
+Tiled2dMapVectorSourceDataManager(vectorLayer, mapDescription, layerConfig, source, readyManager), fontLoader(fontLoader), vectorSource(vectorSource), animationCoordinatorMap(std::make_shared<SymbolAnimationCoordinatorMap>())
 {
 
     readyManager.message(&Tiled2dMapVectorReadyManager::registerManager);
@@ -231,7 +231,7 @@ std::optional<Actor<Tiled2dMapVectorSymbolGroup>> Tiled2dMapVectorSourceSymbolDa
     const auto fontProvider = WeakActor(mailbox, weak_from_this()).weakActor<Tiled2dMapVectorFontProvider>();
     auto mailbox = std::make_shared<Mailbox>(mapInterface.lock()->getScheduler());
     Actor<Tiled2dMapVectorSymbolGroup> symbolGroupActor = Actor<Tiled2dMapVectorSymbolGroup>(mailbox, mapInterface, layerConfig, fontProvider, tileInfo, layerIdentifier, layerDescriptions.at(layerIdentifier));
-    bool success = symbolGroupActor.unsafe()->initialize(features, animationCoordinators);
+    bool success = symbolGroupActor.unsafe()->initialize(features, animationCoordinatorMap);
     symbolGroupActor.unsafe()->setAlpha(alpha);
     return success ? symbolGroupActor : std::optional<Actor<Tiled2dMapVectorSymbolGroup>>();
 }
@@ -284,14 +284,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups(const std::unord
     }
 
     if (!toClear.empty()) {
-        for (auto it = animationCoordinators->begin(), next_it = it; it != animationCoordinators->end(); it = next_it) {
-          ++next_it;
-            it->second.erase(std::remove_if(it->second.begin(), it->second.end(),
-                                   [](auto coordinator) { return !coordinator->isUsed(); }), it->second.end());
-          if (it->second.empty()) {
-            animationCoordinators->erase(it);
-          }
-        }
+        animationCoordinatorMap->clearAnimationCoordinators();
     }
 
     for (const auto &[tile, symbolGroupMap]: tileSymbolGroupMap) {
@@ -405,13 +398,8 @@ void Tiled2dMapVectorSourceSymbolDataManager::update(long long now) {
         }
     }
 
-    for (const auto &[id, coordinators]: *animationCoordinators) {
-        for (const auto &coordinator: coordinators) {
-            if (coordinator->isAnimating()) {
-                mapInterface->invalidate();
-                break;
-            }
-        }
+    if (animationCoordinatorMap->isAnimating()) {
+        mapInterface->invalidate();
     }
 }
 

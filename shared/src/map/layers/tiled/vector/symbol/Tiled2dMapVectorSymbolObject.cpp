@@ -34,7 +34,7 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                                                            const TextJustify &textJustify,
                                                            const TextSymbolPlacement &textSymbolPlacement,
                                                            const bool hideIcon,
-                                                           std::shared_ptr<std::unordered_map<size_t, std::vector<std::shared_ptr<SymbolAnimationCoordinator>>>> animationCoordinators) :
+                                                           std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap) :
     description(description),
     layerConfig(layerConfig),
     coordinate(coordinate),
@@ -80,25 +80,11 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     const bool hasText = !fullText.empty();
 
     crossTileIdentifier = std::hash<std::tuple<std::string, std::string, bool>>()(std::tuple<std::string, std::string, bool>(fullText, layerIdentifier, hasIcon));
+    double xTolerance = std::ceil(std::abs(tileInfo.bounds.bottomRight.x - tileInfo.bounds.topLeft.x) / 4096.0);
+    double yTolerance = std::ceil(std::abs(tileInfo.bounds.bottomRight.y - tileInfo.bounds.topLeft.y) / 4096.0);
 
-    auto coordinatorIt = animationCoordinators->find(crossTileIdentifier);
-    if (coordinatorIt != animationCoordinators->end()) {
-        for (auto const &coordinator: coordinatorIt->second) {
-            if (coordinator->isMatching(coordinate, tileInfo.zoomIdentifier)) {
-                animationCoordinator = coordinator;
-            }
-        }
-    }
-
-    if (!animationCoordinator) {
-        double xTolerance = std::ceil(std::abs(tileInfo.bounds.bottomRight.x - tileInfo.bounds.topLeft.x) / 4096.0);
-        double yTolerance = std::ceil(std::abs(tileInfo.bounds.bottomRight.y - tileInfo.bounds.topLeft.y) / 4096.0);
-        animationCoordinator = std::make_shared<SymbolAnimationCoordinator>(coordinate, tileInfo.zoomIdentifier, xTolerance, yTolerance);
-        animationCoordinators->insert({crossTileIdentifier, { animationCoordinator }});
-    }
-
+    animationCoordinator = animationCoordinatorMap->getOrAddAnimationController(crossTileIdentifier, coordinate, tileInfo.zoomIdentifier, xTolerance, yTolerance);
     animationCoordinator->increaseUsage();
-
     if (!animationCoordinator->isOwned.test_and_set()) {
         isCoordinateOwner = true;
     }
@@ -424,7 +410,6 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     if (instanceCounts.stretchedIcons == 0) {
         return;
     }
-
     if (!isCoordinateOwner) {
         if (!animationCoordinator->isOwned.test_and_set()) {
             isCoordinateOwner = true;
@@ -526,7 +511,7 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     if (stretchSpriteInfo->stretchX.size() >= 1) {
         auto [begin, end] = stretchSpriteInfo->stretchX[0];
         stretchInfos[infoOffset + 2] = (begin / stretchSpriteInfo->width);
-        stretchInfos[infoOffset + 3] = (end / stretchSpriteInfo->width) ;
+        stretchInfos[infoOffset + 3] = (end / stretchSpriteInfo->width);
 
         if (stretchSpriteInfo->stretchX.size() >= 2) {
             auto [begin1, end1] = stretchSpriteInfo->stretchX[1];

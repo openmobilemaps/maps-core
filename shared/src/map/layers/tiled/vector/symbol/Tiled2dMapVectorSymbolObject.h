@@ -24,6 +24,7 @@
 #include "TextLayerObject.h" // TODO: remove usage of TextLayerObject (and File)
 #include "Tiled2dMapVectorLayerConfig.h"
 #include "CollisionGrid.h"
+#include "SymbolAnimationCoordinatorMap.h"
 
 class Tiled2dMapVectorSymbolObject {
 public:
@@ -44,7 +45,7 @@ public:
                                  const TextJustify &textJustify,
                                  const TextSymbolPlacement &textSymbolPlacement,
                                  const bool hideIcon,
-                                 std::shared_ptr<std::unordered_map<size_t, std::vector<std::shared_ptr<SymbolAnimationCoordinator>>>> animationCoordinators);
+                                 std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap);
 
     ~Tiled2dMapVectorSymbolObject() {
         if (animationCoordinator) {
