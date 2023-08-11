@@ -57,6 +57,8 @@ public:
     void resetCollisionCache();
 
     void clear();
+
+    void updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription);
 private:
 
     inline std::optional<Tiled2dMapVectorSymbolSubLayerPositioningWrapper>
