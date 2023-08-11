@@ -118,7 +118,10 @@ std::string TextInstancedShaderOpenGl::getFragmentShader() {
                                                       fragmentColor.a = 1.0;
                                                       fragmentColor *= a2;
                                                   } else {
+                                                      float a2 = alpha * color.a;
                                                       fragmentColor = mixed;
+                                                      fragmentColor.a = 1.0;
+                                                      fragmentColor *= a2;
                                                   }
                                               }
     );

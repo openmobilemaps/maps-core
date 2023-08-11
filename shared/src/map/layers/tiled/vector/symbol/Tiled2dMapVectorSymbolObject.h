@@ -24,6 +24,7 @@
 #include "TextLayerObject.h" // TODO: remove usage of TextLayerObject (and File)
 #include "Tiled2dMapVectorLayerConfig.h"
 #include "CollisionGrid.h"
+#include "SymbolAnimationCoordinatorMap.h"
 
 class Tiled2dMapVectorSymbolObject {
 public:
@@ -43,25 +44,40 @@ public:
                                  const std::optional<double> &angle,
                                  const TextJustify &textJustify,
                                  const TextSymbolPlacement &textSymbolPlacement,
-                                 const bool hideIcon);
+                                 const bool hideIcon,
+                                 std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap);
+
+    ~Tiled2dMapVectorSymbolObject() {
+        if (animationCoordinator) {
+            if (isCoordinateOwner) {
+                animationCoordinator->isOwned.clear();
+                isCoordinateOwner = false;
+            }
+            animationCoordinator->decreaseUsage();
+        }
+    }
+
+    void placedInCache() {
+        if (animationCoordinator) {
+            if (isCoordinateOwner) {
+                animationCoordinator->isOwned.clear();
+                isCoordinateOwner = false;
+            }
+        }
+    }
 
     struct SymbolObjectInstanceCounts { int icons, textCharacters, stretchedIcons; };
 
     const SymbolObjectInstanceCounts getInstanceCounts() const;
 
     void setupIconProperties(std::vector<float> &positions, std::vector<float> &rotations, std::vector<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData);
-    void updateIconProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation);
+    void updateIconProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now);
 
     void setupTextProperties(std::vector<float> &textureCoordinates, std::vector<uint16_t> &styleIndices, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier);
-    void updateTextProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation);
+    void updateTextProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now);
 
     void setupStretchIconProperties(std::vector<float> &positions, std::vector<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData);
-    void updateStretchIconProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, std::vector<float> &stretchInfos, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation);
-
-    // TODO: Provide collision computation interface. But handle pre-computation/caching in SymbolGroup
-    void setCollisionAt(float zoom, bool isCollision);
-
-    std::optional<bool> hasCollision(float zoom);
+    void updateStretchIconProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, std::vector<float> &stretchInfos, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now);
 
     std::shared_ptr<FontLoaderResult> getFont() {
         if (labelObject) {
@@ -78,19 +94,18 @@ public:
 
     std::optional<std::vector<CollisionCircleF>> getMapAlignedBoundingCircles(double zoomIdentifier, bool considerSymbolSpacing, bool considerOverlapFlag);
 
-    bool collides = true;
-
     bool getIsOpaque();
 
     void collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<CollisionGrid> collisionGrid);
-
-    void resetCollisionCache();
 
     std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> onClickConfirmed(const OBB2D &tinyClickBox);
 
     void setAlpha(float alpha);
 
     void updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription);
+
+    std::shared_ptr<SymbolAnimationCoordinator> animationCoordinator;
+    bool isCoordinateOwner = false;
 private:
     double lastZoomEvaluation = -1;
     void evaluateStyleProperties(const double zoomIdentifier);
@@ -106,8 +121,6 @@ private:
     std::shared_ptr<SymbolInfo> textInfo;
 
     bool isInteractable = false;
-
-    std::map<float, bool> collisionMap = {};
 
     const std::weak_ptr<MapInterface> mapInterface;
 
@@ -163,4 +176,7 @@ private:
     size_t contentHash = 0;
 
     bool isPlaced();
+
+    size_t crossTileIdentifier;
+
 };

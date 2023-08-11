@@ -17,9 +17,12 @@ Tiled2dMapVectorSourceRasterTileDataManager::Tiled2dMapVectorSourceRasterTileDat
         const std::shared_ptr<VectorMapDescription> &mapDescription,
         const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
         const std::string &source,
-        const WeakActor<Tiled2dMapRasterSource> &rasterSource)
-        : Tiled2dMapVectorSourceTileDataManager(vectorLayer, mapDescription, layerConfig, source),
-          rasterSource(rasterSource) {}
+        const WeakActor<Tiled2dMapRasterSource> &rasterSource,
+        const Actor<Tiled2dMapVectorReadyManager> &readyManager)
+        : Tiled2dMapVectorSourceTileDataManager(vectorLayer, mapDescription, layerConfig, source, readyManager),
+          rasterSource(rasterSource) {
+              readyManager.message(&Tiled2dMapVectorReadyManager::registerManager);
+}
 
 void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std::string &layerName,
                                                                        std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) {
@@ -120,11 +123,11 @@ void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std
                 }
             }
 
-            if (indexControlSet.empty()) {
-                rasterSource.message(&Tiled2dMapRasterSource::setTileReady, tile.tileInfo);
-            } else {
+            if (!indexControlSet.empty()) {
                 tilesReadyControlSet[tile.tileInfo] = indexControlSet;
             }
+
+            readyManager.message(&Tiled2dMapVectorReadyManager::didProcessData, tile.tileInfo, indexControlSet.empty() ? 0 : 1);
         }
 
         if (!(newTileMasks.empty() && tilesToRemove.empty() && tileStateUpdates.empty())) {
@@ -138,7 +141,7 @@ void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std
 }
 
 void Tiled2dMapVectorSourceRasterTileDataManager::onTileCompletelyReady(const Tiled2dMapTileInfo tileInfo) {
-    rasterSource.message(&Tiled2dMapRasterSource::setTileReady, tileInfo);
+    readyManager.message(&Tiled2dMapVectorReadyManager::setReady, tileInfo, 1);
 }
 
 void Tiled2dMapVectorSourceRasterTileDataManager::updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription,

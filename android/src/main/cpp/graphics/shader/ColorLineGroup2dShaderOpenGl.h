@@ -19,6 +19,8 @@ class ColorLineGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
                                      public LineGroupShaderInterface,
                                      public std::enable_shared_from_this<ShaderProgramInterface> {
   public:
+    ColorLineGroup2dShaderOpenGl();
+
     virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() override;
 
     virtual std::string getProgramName() override;

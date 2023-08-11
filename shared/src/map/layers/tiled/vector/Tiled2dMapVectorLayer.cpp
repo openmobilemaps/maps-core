@@ -35,6 +35,7 @@
 #include "Tiled2dMapVectorLineTile.h"
 #include "Tiled2dMapVectorRasterTile.h"
 #include "SpriteData.h"
+#include "DateHelper.h"
 #include "Tiled2dMapVectorBackgroundSubLayer.h"
 #include "Tiled2dMapVectorSourceTileDataManager.h"
 #include "Tiled2dMapVectorSourceRasterTileDataManager.h"
@@ -42,6 +43,7 @@
 #include "Tiled2dMapVectorSourceSymbolDataManager.h"
 #include "Tiled2dMapVectorSourceSymbolCollisionManager.h"
 #include "Tiled2dMapVectorInteractionManager.h"
+#include "Tiled2dMapVectorReadyManager.h"
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::string &remoteStyleJsonUrl,
@@ -259,13 +261,19 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                  selfRasterActor,
                                                                  mapInterface->getCamera()->getScreenDensityPpi());
                 rasterSources.push_back(sourceActor);
+
+
+                auto readyManagerMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+                auto readyManager = Actor<Tiled2dMapVectorReadyManager>(readyManagerMailbox, sourceActor.weakActor<Tiled2dMapSourceReadyInterface>());
+
                 auto sourceDataManagerMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
                 auto sourceManagerActor = Actor<Tiled2dMapVectorSourceRasterTileDataManager>(sourceDataManagerMailbox,
                                                                                              selfActor,
                                                                                              mapDescription,
                                                                                              rasterSubLayerConfig,
                                                                                              layerDesc->source,
-                                                                                             sourceActor.weakActor<Tiled2dMapRasterSource>());
+                                                                                             sourceActor.weakActor<Tiled2dMapRasterSource>(),
+                                                                                             readyManager);
                 sourceManagerActor.unsafe()->setAlpha(alpha);
                 sourceTileManagers[layerDesc->source] = sourceManagerActor.strongActor<Tiled2dMapVectorSourceTileDataManager>();
                 sourceInterfaces.push_back(sourceActor.weakActor<Tiled2dMapSourceInterface>());
@@ -299,13 +307,18 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                           mapInterface->getCamera()->getScreenDensityPpi());
         vectorTileSources[source] = vectorSource;
         sourceInterfaces.push_back(vectorSource.weakActor<Tiled2dMapSourceInterface>());
+
+        auto readyManagerMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+        auto readyManager = Actor<Tiled2dMapVectorReadyManager>(readyManagerMailbox, vectorSource.weakActor<Tiled2dMapSourceReadyInterface>());
+
         auto sourceDataManagerMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
         auto sourceManagerActor = Actor<Tiled2dMapVectorSourceVectorTileDataManager>(sourceDataManagerMailbox,
                                                                                      selfActor,
                                                                                      mapDescription,
                                                                                      layerConfig,
                                                                                      source,
-                                                                                     vectorSource.weakActor<Tiled2dMapVectorSource>());
+                                                                                     vectorSource.weakActor<Tiled2dMapVectorSource>(),
+                                                                                     readyManager);
         sourceManagerActor.unsafe()->setAlpha(alpha);
         sourceTileManagers[source] = sourceManagerActor.strongActor<Tiled2dMapVectorSourceTileDataManager>();
         interactionDataManagers[source].push_back(sourceManagerActor.weakActor<Tiled2dMapVectorSourceDataManager>());
@@ -318,7 +331,8 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                         layerConfig,
                                                                         source,
                                                                         fontLoader,
-                                                                        vectorSource.weakActor<Tiled2dMapVectorSource>());
+                                                                        vectorSource.weakActor<Tiled2dMapVectorSource>(),
+                                                                        readyManager);
             actor.unsafe()->setAlpha(alpha);
             symbolSourceDataManagers[source] = actor;
             interactionDataManagers[source].push_back(actor.weakActor<Tiled2dMapVectorSourceDataManager>());
@@ -392,6 +406,7 @@ std::shared_ptr<::LayerInterface> Tiled2dMapVectorLayer::asLayerInterface() {
 }
 
 void Tiled2dMapVectorLayer::update() {
+    long long now = DateHelper::currentTimeMillis();
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
         sourceDataManager.syncAccess([](const auto &manager) {
             manager->update();
@@ -411,8 +426,8 @@ void Tiled2dMapVectorLayer::update() {
         std::optional<std::vector<float>> vpMatrix = camera->getLastVpMatrix();
         if (!vpMatrix) return;
         for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
-            sourceDataManager.syncAccess([](const auto &manager) {
-                manager->update();
+            sourceDataManager.syncAccess([&now](const auto &manager) {
+                manager->update(now);
             });
         }
         collisionManager.syncAccess([&vpMatrix, &viewportSize, viewportRotation, enforceUpdate](const auto &manager) {

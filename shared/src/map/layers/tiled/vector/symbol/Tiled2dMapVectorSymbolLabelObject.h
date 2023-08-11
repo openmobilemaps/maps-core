@@ -25,6 +25,9 @@
 #include "Actor.h"
 #include "BoundingBox.h"
 #include "SpriteData.h"
+#include "SymbolAnimationCoordinator.h"
+
+class SymbolAnimationCoordinator;
 
 class Tiled2dMapVectorSymbolLabelObject {
 public:
@@ -45,13 +48,14 @@ public:
                                       const int64_t maxCharacterWidth,
                                       const double maxCharacterAngle,
                                       const SymbolAlignment rotationAlignment,
-                                      const TextSymbolPlacement &textSymbolPlacement);
+                                      const TextSymbolPlacement &textSymbolPlacement,
+                                      std::shared_ptr<SymbolAnimationCoordinator> animationCoordinator);
 
     int getCharacterCount();
 
     void setupProperties(std::vector<float> &textureCoordinates, std::vector<uint16_t> &styleIndices, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier);
 
-    void updateProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const bool collides, const double rotation, const float alpha);
+    void updateProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const bool collides, const double rotation, const float alpha, const bool isCoordinateOwner, long long now);
 
     std::shared_ptr<FontLoaderResult> getFont() {
         return fontResult;
@@ -179,5 +183,6 @@ private:
     Color haloColor = Color(0.0 ,0.0, 0.0, 0.0);
     double haloWidth;
 
+    std::shared_ptr<SymbolAnimationCoordinator> animationCoordinator;
     static constexpr double collisionDistanceBias = 0.75;
 };

@@ -12,6 +12,7 @@
 
 #include "Tiled2dMapVectorSourceTileDataManager.h"
 #include "Tiled2dMapVectorSource.h"
+#include "Tiled2dMapVectorReadyManager.h"
 
 class Tiled2dMapVectorSourceVectorTileDataManager : public Tiled2dMapVectorSourceTileDataManager {
 public:
@@ -19,7 +20,8 @@ public:
                                                 const std::shared_ptr<VectorMapDescription> &mapDescription,
                                                 const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                                 const std::string &source,
-                                                const WeakActor<Tiled2dMapVectorSource> &vectorSource);
+                                                const WeakActor<Tiled2dMapVectorSource> &vectorSource,
+                                                const Actor<Tiled2dMapVectorReadyManager> &readyManager);
 
     void onVectorTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) override;
 

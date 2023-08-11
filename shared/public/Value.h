@@ -932,6 +932,14 @@ public:
 
     ValueVariant interpolate(const double &interpolationFactor, const ValueVariant &yBase, const ValueVariant &yTop) const {
 
+        if (std::holds_alternative<std::string>(yBase) && std::holds_alternative<std::string>(yTop)) {
+            if (interpolationFactor <  0.5 ){
+                return yBase;
+            } else {
+                return yTop;
+            }
+        }
+
         if (std::holds_alternative<int64_t>(yBase) && std::holds_alternative<int64_t>(yTop)) {
             return std::get<int64_t>(yBase) + (std::get<int64_t>(yTop) - std::get<int64_t>(yBase)) * interpolationFactor;
         }
