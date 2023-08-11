@@ -420,7 +420,7 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
         }
     }
 
-    if (lastStretchIconUpdateScaleFactor == zoomIdentifier && lastStretchIconUpdateRotation == rotation) {
+    if (!stretchSpriteInfo.has_value() || lastStretchIconUpdateScaleFactor == zoomIdentifier && lastStretchIconUpdateRotation == rotation) {
         countOffset += instanceCounts.stretchedIcons;
         return;
     }
