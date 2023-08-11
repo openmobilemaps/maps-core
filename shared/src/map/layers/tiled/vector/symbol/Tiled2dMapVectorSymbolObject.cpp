@@ -100,7 +100,7 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                 return provider.lock()->loadFont(font);
             });
 
-            if (fontResult && fontResult->status != LoaderStatus::OK) {
+            if (fontResult && fontResult->status == LoaderStatus::OK) {
                 break;
             }
         }
