@@ -20,7 +20,9 @@ Tiled2dMapVectorSourceRasterTileDataManager::Tiled2dMapVectorSourceRasterTileDat
         const WeakActor<Tiled2dMapRasterSource> &rasterSource,
         const Actor<Tiled2dMapVectorReadyManager> &readyManager)
         : Tiled2dMapVectorSourceTileDataManager(vectorLayer, mapDescription, layerConfig, source, readyManager),
-          rasterSource(rasterSource) {}
+          rasterSource(rasterSource) {
+              readyManager.message(&Tiled2dMapVectorReadyManager::registerManager);
+}
 
 void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std::string &layerName,
                                                                        std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) {
