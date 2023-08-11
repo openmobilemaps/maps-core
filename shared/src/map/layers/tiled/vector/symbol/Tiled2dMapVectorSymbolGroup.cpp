@@ -70,8 +70,6 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
             fullText += textEntry.text;
         }
 
-//        if (fullText != "Luzern") continue;
-
         auto anchor = layerDescription->style.getTextAnchor(evalContext);
         const auto &justify = layerDescription->style.getTextJustify(evalContext);
         const auto &placement = layerDescription->style.getTextSymbolPlacement(evalContext);
