@@ -62,7 +62,11 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface {
                     let size = double(dict: fontInfoJson, value: "size")
                     let imageSize = double(dict: commonJson, value: "scaleW")
 
-                    let fontInfo = MCFontWrapper(name: font.name, lineHeight: double(dict: commonJson, value: "lineHeight"), base: double(dict: commonJson, value: "base"), bitmapSize: MCVec2D(x: imageSize, y: imageSize), size: Double(UIScreen.pixelsPerInch) * size)
+                    let fontInfo = MCFontWrapper(name: font.name,
+                                                 lineHeight: double(dict: commonJson, value: "lineHeight") / size,
+                                                 base: double(dict: commonJson, value: "base") / size,
+                                                 bitmapSize: MCVec2D(x: imageSize, y: imageSize),
+                                                 size: Double(UIScreen.pixelsPerInch) * size)
 
                     var glyphs: [MCFontGlyph] = []
 
