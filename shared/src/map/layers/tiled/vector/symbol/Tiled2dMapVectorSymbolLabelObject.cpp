@@ -356,7 +356,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
                 lineEndIndices.push_back(centerPositions.size() - 1);
             }
             pen.x = 0.0;
-            pen.y += fontSize;
+            pen.y += fontSize * lineHeight;
 
             baseLines.clear();
         }
@@ -424,7 +424,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
             break;
         case Anchor::BOTTOM:
             anchorOffset.x -= size.x / 2.0 - textOffset.x;
-            anchorOffset.y -= yOffset + size.y - textOffset.y;
+            anchorOffset.y -= yOffset + size.y + fontSize * lineHeight * 0.5;
             break;
         case Anchor::TOP_LEFT:
             anchorOffset.x -= -textOffset.x;
@@ -436,11 +436,11 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
             break;
         case Anchor::BOTTOM_LEFT:
             anchorOffset.x -= -textOffset.x;
-            anchorOffset.y -= yOffset + size.y - textOffset.y;
+            anchorOffset.y -= yOffset + size.y + fontSize * lineHeight * 0.5;
             break;
         case Anchor::BOTTOM_RIGHT:
             anchorOffset.x -= size.x -textOffset.x;
-            anchorOffset.y -= yOffset + size.y - textOffset.y;
+            anchorOffset.y -= yOffset + size.y + fontSize * lineHeight * 0.5;
             break;
         default:
             break;
