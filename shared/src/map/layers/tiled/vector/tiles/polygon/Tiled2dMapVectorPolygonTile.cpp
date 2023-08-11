@@ -78,21 +78,19 @@ void Tiled2dMapVectorPolygonTile::update() {
         return;
     }
 
-    if (!isStyleZoomDependant && lastZoom && lastAlpha == alpha) {
-        return;
-    }
-
     double zoomIdentifier = layerConfig->getZoomIdentifier(camera->getZoom());
     zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.zoomIdentifier);
 
-    if (isStyleZoomDependant && lastZoom && *lastZoom == zoomIdentifier && lastAlpha == alpha) {
+    auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
+    bool inZoomRange = polygonDescription->maxZoom >= zoomIdentifier && polygonDescription->minZoom <= zoomIdentifier;
+    
+    if (lastZoom && ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant) && lastAlpha == alpha && (lastInZoomRange && *lastInZoomRange == inZoomRange)) {
         return;
     }
     lastZoom = zoomIdentifier;
     lastAlpha = alpha;
+    lastInZoomRange = inZoomRange;
 
-    auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
-    bool inZoomRange = polygonDescription->maxZoom >= zoomIdentifier && polygonDescription->minZoom <= zoomIdentifier;
     size_t numStyleGroups = featureGroups.size();
     for (int styleGroupId = 0; styleGroupId < numStyleGroups; styleGroupId++) {
         std::vector<float> shaderStyles;

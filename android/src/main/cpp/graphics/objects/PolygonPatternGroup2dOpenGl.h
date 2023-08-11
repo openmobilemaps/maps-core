@@ -62,13 +62,14 @@ class PolygonPatternGroup2dOpenGl : public GraphicsObjectInterface,
 protected:
     virtual void prepareTextureDraw(int mProgram);
 
-    void prepareGlData(const int &programHandle);
+    void prepareGlData(int program);
 
     void removeGlBuffers();
 
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
+    std::string programName;
+    int program;
 
-    int programHandle;
     int mvpMatrixHandle;
     int positionHandle;
     int styleIndexHandle;

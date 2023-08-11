@@ -55,13 +55,15 @@ class Text2dOpenGl : public GraphicsObjectInterface,
     virtual void setIsInverseMasked(bool inversed) override;
 
 protected:
-    virtual void prepareTextureDraw(std::shared_ptr<OpenGlContext> &openGLContext, int mProgram);
+    virtual void prepareTextureDraw(int program);
 
-    void prepareGlData(const std::shared_ptr<OpenGlContext> &openGlContext, const int &programHandle);
+    void prepareGlData(int program);
 
     void removeGlBuffers();
 
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
+    std::string programName;
+    int program;
 
     int mvpMatrixHandle = -1;
     int positionHandle = -1;

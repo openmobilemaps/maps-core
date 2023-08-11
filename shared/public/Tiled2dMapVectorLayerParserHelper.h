@@ -71,7 +71,7 @@ public:
                 double zoomLevelScaleFactor = 0.65;
                 
                 bool overzoom = true;
-                bool underzoom = true;
+                bool underzoom = false;
 
                 int minZoom = val.value("minzoom", 0);
                 int maxZoom = val.value("maxzoom", 22);

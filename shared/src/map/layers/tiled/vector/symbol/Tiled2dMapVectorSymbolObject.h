@@ -102,6 +102,8 @@ public:
 
     void setAlpha(float alpha);
 
+    void updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription);
+
     std::shared_ptr<SymbolAnimationCoordinator> animationCoordinator;
     bool isCoordinateOwner = false;
 private:
@@ -122,7 +124,7 @@ private:
 
     const std::weak_ptr<MapInterface> mapInterface;
 
-    const std::shared_ptr<SymbolVectorLayerDescription> description;
+    std::shared_ptr<SymbolVectorLayerDescription> description;
 
     const ::Coord coordinate;
     ::Coord renderCoordinate = Coord(0, 0, 0, 0);

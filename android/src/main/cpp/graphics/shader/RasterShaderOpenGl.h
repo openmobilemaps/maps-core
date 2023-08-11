@@ -36,6 +36,8 @@ protected:
     std::string getFragmentShader() override;
 
 private:
+    const static std::string programName;
+
     std::vector<GLfloat> styleValues = {1.0, 1.0, 1.0, 0.0, 1.0, 1.0};
 };
 

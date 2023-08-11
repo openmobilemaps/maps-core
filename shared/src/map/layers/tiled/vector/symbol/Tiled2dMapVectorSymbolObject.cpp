@@ -44,29 +44,29 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     iconBoundingBoxViewportAligned(0, 0, 0, 0),
     stretchIconBoundingBox(Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0)),
     stretchIconBoundingBoxViewportAligned(0, 0, 0, 0),
-    textSymbolPlacement(textSymbolPlacement) {
+textSymbolPlacement(textSymbolPlacement) {
     auto strongMapInterface = mapInterface.lock();
     auto objectFactory = strongMapInterface ? strongMapInterface->getGraphicsObjectFactory() : nullptr;
     auto camera = strongMapInterface ? strongMapInterface->getCamera() : nullptr;
     auto converter = strongMapInterface ? strongMapInterface->getCoordinateConverterHelper() : nullptr;
-
+    
     if (!objectFactory || !camera || !converter) {
         return;
     }
-
+    
     const auto evalContext = EvaluationContext(tileInfo.zoomIdentifier, featureContext);
     std::string iconName = description->style.getIconImage(evalContext);
     contentHash = std::hash<std::tuple<std::string, std::string, std::string>>()(std::tuple<std::string, std::string, std::string>(layerIdentifier, iconName, fullText));
-
+    
     const bool hasIcon = description->style.hasIconImagePotentially();
-
+    
     renderCoordinate = converter->convertToRenderSystem(coordinate);
     initialRenderCoordinateVec = Vec2D(renderCoordinate.x, renderCoordinate.y);
-
+    
     evaluateStyleProperties(tileInfo.zoomIdentifier);
-
+    
     iconRotationAlignment = description->style.getIconRotationAlignment(evalContext);
-
+    
     if (hasIcon && !hideIcon) {
         if (iconTextFit == IconTextFit::NONE) {
             instanceCounts.icons = 1;
@@ -136,6 +136,25 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     }
 
     symbolSortKey = description->style.getSymbolSortKey(evalContext);
+}
+
+void Tiled2dMapVectorSymbolObject::updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription) {
+    this->description = layerDescription;
+    if (labelObject) {
+        labelObject->updateLayerDescription(layerDescription);
+    }
+
+    lastZoomEvaluation = -1;
+
+    lastIconUpdateScaleFactor = std::nullopt;
+    lastIconUpdateRotation = std::nullopt;
+    lastIconUpdateAlpha = std::nullopt;
+
+    lastStretchIconUpdateScaleFactor = std::nullopt;
+    lastStretchIconUpdateRotation = std::nullopt;
+
+    lastTextUpdateScaleFactor = std::nullopt;
+    lastTextUpdateRotation = std::nullopt;
 }
 
 void Tiled2dMapVectorSymbolObject::evaluateStyleProperties(const double zoomIdentifier) {

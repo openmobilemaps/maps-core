@@ -34,5 +34,7 @@ class AlphaShaderOpenGl : public BaseShaderProgramOpenGl,
     virtual std::string getFragmentShader() override;
 
   private:
+    const static std::string programName;
+
     float alpha = 1;
 };

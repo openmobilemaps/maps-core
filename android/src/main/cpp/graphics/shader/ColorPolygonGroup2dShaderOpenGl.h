@@ -35,6 +35,8 @@ class ColorPolygonGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
     virtual std::string getFragmentShader() override;
 
   private:
+    const static std::string programName;
+
     std::recursive_mutex styleMutex;
     std::vector<GLfloat> polygonStyles;
     GLint numStyles = 0;

@@ -12,7 +12,9 @@
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
 
-std::string StretchInstancedShaderOpenGl::getProgramName() { return "UBMAP_StretchInstancedShaderOpenGl"; }
+const std::string StretchInstancedShaderOpenGl::programName = "UBMAP_StretchInstancedShaderOpenGl";
+
+std::string StretchInstancedShaderOpenGl::getProgramName() { return programName; }
 
 void StretchInstancedShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
     BaseShaderProgramOpenGl::preRender(context);
@@ -20,7 +22,6 @@ void StretchInstancedShaderOpenGl::preRender(const std::shared_ptr<::RenderingCo
 
 void StretchInstancedShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    std::string programName = getProgramName();
     // prepare shaders and OpenGL program
     int vertexShader = loadShader(GL_VERTEX_SHADER, getVertexShader());
     int fragmentShader = loadShader(GL_FRAGMENT_SHADER, getFragmentShader());

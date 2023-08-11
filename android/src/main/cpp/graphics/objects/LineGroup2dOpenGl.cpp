@@ -43,11 +43,13 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
     }
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    if (openGlContext->getProgram(shaderProgram->getProgramName()) == 0) {
+    programName = shaderProgram->getProgramName();
+    program = openGlContext->getProgram(programName);
+    if (program == 0) {
         shaderProgram->setupProgram(openGlContext);
+        program = openGlContext->getProgram(programName);
     }
 
-    int program = openGlContext->getProgram(shaderProgram->getProgramName());
     glUseProgram(program);
 
     positionHandle = glGetAttribLocation(program, "vPosition");
@@ -115,7 +117,6 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
     // Add program to OpenGL environment
-    int program = openGlContext->getProgram(shaderProgram->getProgramName());
     glUseProgram(program);
 
     // Apply the projection and view transformation

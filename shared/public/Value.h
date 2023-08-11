@@ -540,6 +540,53 @@ public:
 
 };
 
+template<class ResultType>
+class ValueEvaluator {
+public:
+    ValueEvaluator() {}
+
+    inline ResultType getResult(const std::shared_ptr<Value> &value, const EvaluationContext &context, const ResultType defaultValue) {
+        if (!value) {
+            return defaultValue;
+        }
+        if (lastValuePtr != value.get()) {
+            lastResults.clear();
+            staticValue = std::nullopt;
+            const auto usedKeys = value->getUsedKeys();
+            isStatic = usedKeys.empty();
+            if (isStatic) {
+                staticValue = value->evaluateOr(context, defaultValue);
+            } else {
+                isZoomdependent = usedKeys.count("zoom") != 0;
+            }
+            lastValuePtr = value.get();
+        }
+
+        if (isStatic) {
+            return *staticValue;
+        }
+
+        const auto identifier = (context.feature->identifier << 12) | (uint64_t)((isZoomdependent ? (context.zoomLevel ? *context.zoomLevel : 0.f) : 0.f) * 100);
+
+        const auto lastResultIt = lastResults.find(identifier);
+        if (lastResultIt != lastResults.end()) {
+            return lastResultIt->second;
+        }
+
+        const auto result = value->evaluateOr(context, defaultValue);
+        lastResults.insert({identifier, result});
+        return result;
+    }
+
+private:
+    std::unordered_map<uint64_t, ResultType> lastResults;
+
+    std::optional<ResultType> staticValue;
+
+    bool isZoomdependent = false;
+    bool isStatic = false;
+    void* lastValuePtr = nullptr;
+};
 
 class GetPropertyValue : public Value {
 public:

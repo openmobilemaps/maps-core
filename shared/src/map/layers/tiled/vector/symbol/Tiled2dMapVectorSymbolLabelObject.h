@@ -61,6 +61,8 @@ public:
         return fontResult;
     }
 
+    void updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription);
+
     std::optional<CollisionRectD> boundingBoxViewportAligned = std::nullopt;
     std::optional<std::vector<CircleD>> boundingBoxCircles = std::nullopt;
     Quad2dD boundingBox;
@@ -133,7 +135,7 @@ private:
         return currentIndex;
     }
 
-    const std::shared_ptr<SymbolVectorLayerDescription> description;
+    std::shared_ptr<SymbolVectorLayerDescription> description;
     const std::shared_ptr<FeatureContext> featureContext;
     const TextSymbolPlacement textSymbolPlacement;
     const SymbolAlignment rotationAlignment;

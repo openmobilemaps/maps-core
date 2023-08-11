@@ -102,49 +102,72 @@ void Tiled2dMapVectorSourceSymbolDataManager::updateLayerDescription(std::shared
         return;
     }
 
-    layerDescriptions.erase(layerDescription->identifier);
-    layerDescriptions.insert({layerDescription->identifier, std::static_pointer_cast<SymbolVectorLayerDescription>(layerDescription)});
+    auto oldStyle = layerDescriptions.at(layerDescription->identifier);
+    auto castedDescription = std::static_pointer_cast<SymbolVectorLayerDescription>(layerDescription);
 
-    auto const &currentTileInfos = vectorSource.converse(&Tiled2dMapVectorSource::getCurrentTiles).get();
+    bool iconWasAdded = false;
 
-    std::unordered_map<Tiled2dMapTileInfo, std::vector<Actor<Tiled2dMapVectorSymbolGroup>>> toSetup;
-    std::vector<Actor<Tiled2dMapVectorSymbolGroup>> toClear;
-
-    for (const auto &tileData: currentTileInfos) {
-        auto tileGroup = tileSymbolGroupMap.find(tileData.tileInfo);
-        if (tileGroup == tileSymbolGroupMap.end()) {
-            continue;
-        }
-
-        auto tileGroupIt = tileGroup->second.find(layerDescription->identifier);
-        if (tileGroupIt != tileGroup->second.end()) {
-            for (const auto &group : tileGroupIt->second) {
-                toClear.push_back(group);
-            }
-        }
-
-        tileGroup->second.erase(layerDescription->identifier);
-
-        // If new source of layer is not handled by this manager, continue
-        if (layerDescription->source != source) {
-            continue;
-        }
-
-        const auto &dataIt = tileData.layerFeatureMaps->find(layerDescription->sourceLayer);
-
-        if (dataIt != tileData.layerFeatureMaps->end()) {
-            // there is something in this layer to display
-            const auto &newSymbolGroup = createSymbolGroup(tileData.tileInfo, layerDescription->identifier, dataIt->second);
-            if (newSymbolGroup) {
-                tileSymbolGroupMap.at(tileData.tileInfo)[layerDescription->identifier].push_back(*newSymbolGroup);
-                toSetup[tileData.tileInfo].push_back(*newSymbolGroup);
-            }
-        }
+    if (oldStyle->style.hasIconImagePotentially() != castedDescription->style.hasIconImagePotentially() &&  oldStyle->style.hasIconImagePotentially() == false) {
+        iconWasAdded = true;
     }
 
-    auto selfActor = WeakActor(mailbox, weak_from_this());
-    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups, toSetup,
-                      toClear, std::unordered_set<Tiled2dMapTileInfo>{}, std::unordered_map<Tiled2dMapTileInfo, TileState>{});
+    layerDescriptions.erase(layerDescription->identifier);
+    layerDescriptions.insert({layerDescription->identifier, castedDescription});
+
+    if (needsTileReplace || iconWasAdded) {
+        auto const &currentTileInfos = vectorSource.converse(&Tiled2dMapVectorSource::getCurrentTiles).get();
+
+        std::unordered_map<Tiled2dMapTileInfo, std::vector<Actor<Tiled2dMapVectorSymbolGroup>>> toSetup;
+        std::vector<Actor<Tiled2dMapVectorSymbolGroup>> toClear;
+
+        for (const auto &tileData: currentTileInfos) {
+            auto tileGroup = tileSymbolGroupMap.find(tileData.tileInfo);
+            if (tileGroup == tileSymbolGroupMap.end()) {
+                continue;
+            }
+
+            auto tileGroupIt = tileGroup->second.find(layerDescription->identifier);
+            if (tileGroupIt != tileGroup->second.end()) {
+                for (const auto &group : tileGroupIt->second) {
+                    toClear.push_back(group);
+                }
+            }
+
+            tileGroup->second.erase(layerDescription->identifier);
+
+            // If new source of layer is not handled by this manager, continue
+            if (layerDescription->source != source) {
+                continue;
+            }
+
+            const auto &dataIt = tileData.layerFeatureMaps->find(layerDescription->sourceLayer);
+
+            if (dataIt != tileData.layerFeatureMaps->end()) {
+                // there is something in this layer to display
+                const auto &newSymbolGroup = createSymbolGroup(tileData.tileInfo, layerDescription->identifier, dataIt->second);
+                if (newSymbolGroup) {
+                    tileSymbolGroupMap.at(tileData.tileInfo)[layerDescription->identifier].push_back(*newSymbolGroup);
+                    toSetup[tileData.tileInfo].push_back(*newSymbolGroup);
+                }
+            }
+        }
+
+        auto selfActor = WeakActor(mailbox, weak_from_this());
+        selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups, toSetup,
+                          toClear, std::unordered_set<Tiled2dMapTileInfo>{}, std::unordered_map<Tiled2dMapTileInfo, TileState>{});
+    } else {
+        for (const auto &[tileInfo, groupMap]: tileSymbolGroupMap) {
+            auto const groupsIt = groupMap.find(layerDescription->identifier);
+            if (groupsIt != groupMap.end()) {
+                for (const auto &group: groupsIt->second) {
+                    group.messagePrecisely(MailboxDuplicationStrategy::replaceNewest, MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSymbolGroup::updateLayerDescription, castedDescription);
+                }
+            }
+        }
+
+        mapInterface->invalidate();
+
+    }
 }
 
 void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::string &sourceName,

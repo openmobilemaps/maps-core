@@ -12,11 +12,12 @@
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
 
-std::string TextInstancedShaderOpenGl::getProgramName() { return "UBMAP_TextInstancedShaderOpenGl"; }
+const std::string TextInstancedShaderOpenGl::programName = "UBMAP_TextInstancedShaderOpenGl";
+
+std::string TextInstancedShaderOpenGl::getProgramName() { return programName; }
 
 void TextInstancedShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    std::string programName = getProgramName();
     // prepare shaders and OpenGL program
     int vertexShader = loadShader(GL_VERTEX_SHADER, getVertexShader());
     int fragmentShader = loadShader(GL_FRAGMENT_SHADER, getFragmentShader());

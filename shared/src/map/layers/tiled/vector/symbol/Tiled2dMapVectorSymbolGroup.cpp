@@ -380,6 +380,16 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
     return true;
 }
 
+void Tiled2dMapVectorSymbolGroup::updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription) {
+    this->layerDescription = layerDescription;
+    for (auto const &object: symbolObjects) {
+        object->updateLayerDescription(layerDescription);
+    }
+    if (spriteData && spriteTexture) {
+        setupObjects(spriteData, spriteTexture);
+    }
+}
+
 void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData> &spriteData,
                                                const std::shared_ptr<TextureHolderInterface> &spriteTexture) {
     const auto context = mapInterface.lock()->getRenderingContext();
@@ -398,9 +408,11 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
     }
 
     if (spriteTexture && spriteData && iconInstancedObject) {
-        iconInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)));
-        iconInstancedObject->loadTexture(context, spriteTexture);
-        iconInstancedObject->asGraphicsObject()->setup(context);
+        if (this->spriteData == nullptr) {
+            iconInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)));
+            iconInstancedObject->loadTexture(context, spriteTexture);
+            iconInstancedObject->asGraphicsObject()->setup(context);
+        }
         iconInstancedObject->setPositions(
                 SharedBytes((int64_t) iconPositions.data(), (int32_t) iconAlphas.size(), 2 * (int32_t) sizeof(float)));
         iconInstancedObject->setTextureCoordinates(
@@ -408,9 +420,11 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
     }
 
     if (spriteTexture && spriteData && stretchedInstancedObject) {
-        stretchedInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)));
-        stretchedInstancedObject->loadTexture(context, spriteTexture);
-        stretchedInstancedObject->asGraphicsObject()->setup(context);
+        if (this->spriteData == nullptr) {
+            stretchedInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)));
+            stretchedInstancedObject->loadTexture(context, spriteTexture);
+            stretchedInstancedObject->asGraphicsObject()->setup(context);
+        }
         stretchedInstancedObject->setPositions(
                 SharedBytes((int64_t) stretchedIconPositions.data(), (int32_t) stretchedIconAlphas.size(),
                             2 * (int32_t) sizeof(float)));
@@ -420,14 +434,19 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
     }
 
     if (textInstancedObject) {
-        textInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)));
-        textInstancedObject->loadTexture(context, fontResult->imageData);
-        textInstancedObject->asGraphicsObject()->setup(context);
+        if (this->spriteData == nullptr) {
+            textInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)));
+            textInstancedObject->loadTexture(context, fontResult->imageData);
+            textInstancedObject->asGraphicsObject()->setup(context);
+        }
         textInstancedObject->setTextureCoordinates(
                 SharedBytes((int64_t) textTextureCoordinates.data(), (int32_t) textRotations.size(), 4 * (int32_t) sizeof(float)));
         textInstancedObject->setStyleIndices(
                 SharedBytes((int64_t) textStyleIndices.data(), (int32_t) textStyleIndices.size(), 1 * (int32_t) sizeof(uint16_t)));
     }
+
+    this->spriteData = spriteData;
+    this->spriteTexture = spriteTexture;
 }
 
 void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const double rotation, const double scaleFactor, long long now) {

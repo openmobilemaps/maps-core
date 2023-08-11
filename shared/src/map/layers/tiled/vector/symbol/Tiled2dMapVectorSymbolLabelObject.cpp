@@ -159,6 +159,12 @@ animationCoordinator(animationCoordinator)
     }
 }
 
+void Tiled2dMapVectorSymbolLabelObject::updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription) {
+    this->description = layerDescription;
+    lastZoomEvaluation = -1;
+}
+
+
 int Tiled2dMapVectorSymbolLabelObject::getCharacterCount(){
     return characterCount;
 }

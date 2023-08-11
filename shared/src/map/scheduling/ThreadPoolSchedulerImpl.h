@@ -62,7 +62,7 @@ private:
     std::mutex graphicsMutex;
 
     std::deque<std::shared_ptr<TaskInterface>> graphicsQueue;
-    static const uint8_t DEFAULT_MAX_NUM_THREADS = 8;
+    static const uint8_t DEFAULT_MIN_NUM_THREADS = 8;
     std::vector<std::thread> threads;
 
     using TimeStamp = std::chrono::time_point<std::chrono::system_clock>;
