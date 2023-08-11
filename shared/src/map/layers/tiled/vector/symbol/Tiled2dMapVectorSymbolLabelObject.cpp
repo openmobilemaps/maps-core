@@ -352,9 +352,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
             pen.x += advance.x * (1.0 + letterSpacing);
         } else if(i.glyphIndex == -1) {
-            if (!centerPositions.empty()) {
-                lineEndIndices.push_back(centerPositions.size() - 1);
-            }
+            lineEndIndices.push_back(centerPositions.size() - 1);
             pen.x = 0.0;
             pen.y += fontSize;
 
@@ -372,9 +370,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
         medianLastBaseLine = baseLines[baseLines.size() / 2];
     }
 
-    if (!centerPositions.empty()) {
-        lineEndIndices.push_back(centerPositions.size() - 1);
-    }
+    lineEndIndices.push_back(centerPositions.size() - 1);
 
     const Vec2D size((boxMax.x - boxMin.x), (medianLastBaseLine - boxMin.y));
     const Vec2D centerSize((centerPosBoxMax.x - centerPosBoxMin.x), (centerPosBoxMax.y - centerPosBoxMin.y));
@@ -420,11 +416,11 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
             break;
         case Anchor::TOP:
             anchorOffset.x -= size.x / 2.0 - textOffset.x;
-            anchorOffset.y -= textOffset.y;
+            anchorOffset.y = textOffset.y;
             break;
         case Anchor::BOTTOM:
             anchorOffset.x -= size.x / 2.0 - textOffset.x;
-            anchorOffset.y -= yOffset + size.y - textOffset.y;
+            anchorOffset.y -= yOffset + size.y + textOffset.y + fontSize * 0.5;
             break;
         case Anchor::TOP_LEFT:
             anchorOffset.x -= -textOffset.x;
@@ -436,11 +432,11 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
             break;
         case Anchor::BOTTOM_LEFT:
             anchorOffset.x -= -textOffset.x;
-            anchorOffset.y -= yOffset + size.y - textOffset.y;
+            anchorOffset.y -= size.y - textOffset.y;
             break;
         case Anchor::BOTTOM_RIGHT:
             anchorOffset.x -= size.x -textOffset.x;
-            anchorOffset.y -= yOffset + size.y - textOffset.y;
+            anchorOffset.y -= size.y - textOffset.y;
             break;
         default:
             break;

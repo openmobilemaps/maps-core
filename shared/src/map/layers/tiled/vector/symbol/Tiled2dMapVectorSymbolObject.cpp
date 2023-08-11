@@ -100,7 +100,7 @@ textSymbolPlacement(textSymbolPlacement) {
                 return provider.lock()->loadFont(font);
             });
 
-            if (fontResult && fontResult->status == LoaderStatus::OK) {
+            if (fontResult && fontResult->status != LoaderStatus::OK) {
                 break;
             }
         }
