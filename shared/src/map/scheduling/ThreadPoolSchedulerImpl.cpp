@@ -16,12 +16,14 @@ std::shared_ptr<SchedulerInterface> ThreadPoolScheduler::create(const std::share
 }
 
 ThreadPoolSchedulerImpl::ThreadPoolSchedulerImpl(const std::shared_ptr<ThreadPoolCallbacks> &callbacks)
-        : callbacks(callbacks), separateGraphicsQueue(false), delayedTaskThread(&ThreadPoolSchedulerImpl::delayedTasksThread, this), nextWakeup(std::chrono::system_clock::now() + std::chrono::seconds(1)) {
+        : callbacks(callbacks), separateGraphicsQueue(false), nextWakeup(std::chrono::system_clock::now() + std::chrono::seconds(1)) {
     unsigned int maxNumThreads = std::thread::hardware_concurrency();
     if (maxNumThreads < 1) maxNumThreads = DEFAULT_MAX_NUM_THREADS;
+    threads.reserve(maxNumThreads + 1);
     for (std::size_t i = 0u; i < maxNumThreads; ++i) {
         threads.emplace_back(makeSchedulerThread(i, TaskPriority::NORMAL));
     }
+    threads.emplace_back(makeDelayedTasksThread());
 }
 
 void ThreadPoolSchedulerImpl::addTask(const std::shared_ptr<TaskInterface> & task) {
@@ -119,7 +121,6 @@ void ThreadPoolSchedulerImpl::destroy() {
 
     defaultCv.notify_all();
     delayedTasksCv.notify_all();
-    delayedTaskThread.join();
 
     for (auto& thread : threads) {
         if (std::this_thread::get_id() != thread.get_id()) {
@@ -201,35 +202,37 @@ bool ThreadPoolSchedulerImpl::runGraphicsTasks() {
     return !noTasksLeft && !terminated;
 }
 
-void ThreadPoolSchedulerImpl::delayedTasksThread() {
-    auto callbacks = this->callbacks;
-    if (callbacks) {
-        callbacks->setCurrentThreadName(std::string{"MapSDK_delayed_tasks"});
-    }
-
-    while (true) {
-        std::unique_lock<std::mutex> lock(delayedTasksMutex);
-        delayedTasksCv.wait_until(lock, nextWakeup);
-
-        if (terminated) {
-            return;
+std::thread ThreadPoolSchedulerImpl::makeDelayedTasksThread() {
+    return std::thread([this] {
+        auto callbacks = this->callbacks;
+        if (callbacks) {
+            callbacks->setCurrentThreadName(std::string{"MapSDK_delayed_tasks"});
         }
 
-        auto now = std::chrono::system_clock::now();
+        while (true) {
+            std::unique_lock<std::mutex> lock(delayedTasksMutex);
+            delayedTasksCv.wait_until(lock, nextWakeup);
 
-        nextWakeup = TimeStamp::max();
+            if (terminated) {
+                return;
+            }
 
-        for (auto it = delayedTasks.begin(); it != delayedTasks.end();) {
-            // lets schedule this task
-            if(it->second <= now) {
-                addTaskIgnoringDelay(it->first);
-                it = delayedTasks.erase(it);
-            } else {
-                nextWakeup = std::min(nextWakeup, it->second);
-                it++;
+            auto now = std::chrono::system_clock::now();
+
+            nextWakeup = TimeStamp::max();
+
+            for (auto it = delayedTasks.begin(); it != delayedTasks.end();) {
+                // lets schedule this task
+                if(it->second <= now) {
+                    addTaskIgnoringDelay(it->first);
+                    it = delayedTasks.erase(it);
+                } else {
+                    nextWakeup = std::min(nextWakeup, it->second);
+                    it++;
+                }
             }
         }
-    }
+    });
 }
 
 void ThreadPoolSchedulerImpl::setSchedulerGraphicsTaskCallbacks(const /*not-null*/ std::shared_ptr<SchedulerGraphicsTaskCallbacks> & callbacks) {
