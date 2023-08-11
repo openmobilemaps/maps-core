@@ -42,28 +42,24 @@ public:
         return usedKeys;
     };
 
-    BlendMode getBlendMode(const EvaluationContext &context) const {
+    BlendMode getBlendMode(const EvaluationContext &context) {
         static const BlendMode defaultValue = BlendMode::NORMAL;
-        return blendMode ? blendMode->evaluateOr(context, defaultValue) : defaultValue;
+        return blendModeEvaluator.getResult(blendMode, context, defaultValue);
     }
 
-    Color getFillColor(const EvaluationContext &context) const {
+    Color getFillColor(const EvaluationContext &context) {
         static const Color defaultValue = ColorUtil::c(0, 0, 0, 1.0);
-        return fillColor ? fillColor->evaluateOr(context, defaultValue) : defaultValue;
+        return fillColorEvaluator.getResult(fillColor, context, defaultValue);
     }
 
-    double getFillOpacity(const EvaluationContext &context) const {
+    double getFillOpacity(const EvaluationContext &context) {
         static const double defaultValue = 1.0;
-        return fillOpacity ? fillOpacity->evaluateOr(context, defaultValue) : defaultValue;
+        return fillOpacityEvaluator.getResult(fillOpacity, context, defaultValue);
     }
 
-    void setFillOpacity(std::shared_ptr<Value> opacityValue) {
-        fillOpacity = opacityValue;
-    }
-
-    std::string getFillPattern(const EvaluationContext &context) const {
+    std::string getFillPattern(const EvaluationContext &context) {
         static const std::string defaultValue = "";
-        return fillPattern ? fillPattern->evaluateOr(context, defaultValue) : defaultValue;
+        return fillPatternEvaluator.getResult(fillPattern, context, defaultValue);
     }
 
     bool hasPatternPotentially() {
@@ -76,6 +72,12 @@ private:
     std::shared_ptr<Value> fillOpacity;
     std::shared_ptr<Value> fillPattern;
     std::shared_ptr<Value> blendMode;
+private:
+
+    ValueEvaluator<Color> fillColorEvaluator;
+    ValueEvaluator<double> fillOpacityEvaluator;
+    ValueEvaluator<std::string> fillPatternEvaluator;
+    ValueEvaluator<BlendMode> blendModeEvaluator;
 };
 
 class PolygonVectorLayerDescription: public VectorLayerDescription {
