@@ -12,6 +12,10 @@
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
 
+ColorLineGroup2dShaderOpenGl::ColorLineGroup2dShaderOpenGl() {
+    lineValues.resize(sizeLineValuesArray * sizeof(GLfloat));
+}
+
 std::shared_ptr<ShaderProgramInterface> ColorLineGroup2dShaderOpenGl::asShaderProgramInterface() { return shared_from_this(); }
 
 std::string ColorLineGroup2dShaderOpenGl::getProgramName() { return "UBMAP_ColorLineGroupShaderOpenGl"; }
@@ -56,7 +60,6 @@ void ColorLineGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingCo
 void ColorLineGroup2dShaderOpenGl::setStyles(const ::SharedBytes & styles) {
     {
         std::lock_guard<std::recursive_mutex> overlayLock(styleMutex);
-        lineValues.resize(styles.elementCount * styles.bytesPerElement / 4);
         if(styles.elementCount > 0) {
             std::memcpy(lineValues.data(), (void *)styles.address, styles.elementCount * styles.bytesPerElement);
         }
