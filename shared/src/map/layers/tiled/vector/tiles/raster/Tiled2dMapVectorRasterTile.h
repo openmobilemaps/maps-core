@@ -48,6 +48,7 @@ private:
     std::unordered_set<std::string> usedKeys;
     bool isStyleZoomDependant = true;
     std::optional<double> lastZoom = std::nullopt;
+    std::optional<bool> lastInZoomRange = std::nullopt;
 
     std::optional<RasterShaderStyle> lastStyle;
 };
