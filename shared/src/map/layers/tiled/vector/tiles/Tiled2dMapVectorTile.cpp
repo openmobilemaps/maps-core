@@ -50,7 +50,3 @@ float Tiled2dMapVectorTile::getAlpha() {
 void Tiled2dMapVectorTile::setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate) {
     this->selectionDelegate = selectionDelegate;
 }
-
-void Tiled2dMapVectorTile::setSelectedFeatureIdentifier(std::optional<int64_t> identifier) {
-    selectedFeatureIdentifier = identifier;
-}

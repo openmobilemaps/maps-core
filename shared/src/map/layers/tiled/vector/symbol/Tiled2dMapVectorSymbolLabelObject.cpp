@@ -204,7 +204,7 @@ void Tiled2dMapVectorSymbolLabelObject::evaluateStyleProperties(const double zoo
     textRotate = description->style.getTextRotate(evalContext);
     textPadding = description->style.getTextPadding(evalContext);
 
-    opacity = description->style.getTextOpacity(evalContext);
+    textOpacity = description->style.getTextOpacity(evalContext);
     textColor = description->style.getTextColor(evalContext);
     haloColor = description->style.getTextHaloColor(evalContext);
     haloWidth = description->style.getTextHaloWidth(evalContext);
@@ -219,13 +219,12 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
     evaluateStyleProperties(zoomIdentifier);
 
     float alphaFactor;
-
     if (!isCoordinateOwner) {
         alphaFactor = 0.0;
     } else if (collides || !(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier)) {
         alphaFactor = animationCoordinator->getTextAlpha(0.0, now);
     } else {
-        float targetAlpha = opacity * alpha;
+        float targetAlpha = textOpacity * alpha;
         alphaFactor = animationCoordinator->getTextAlpha(targetAlpha, now);
     }
 
@@ -239,7 +238,7 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
     styles[(9 * styleOffset) + 7] = haloColor.a * alphaFactor; //A
     styles[(9 * styleOffset) + 8] = haloWidth;
 
-    isOpaque = opacity != 0.0;
+    isOpaque = styles[(9 * styleOffset) + 3] != 0.0;
 
     styleOffset += 1;
 

@@ -362,10 +362,6 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
         setSelectionDelegate(selectionDelegate);
     }
 
-    if (selectedFeatureIdentifier) {
-        setSelectedFeatureIdentifier(selectedFeatureIdentifier);
-    }
-
     setSourceInterfaces(sourceInterfaces);
 
     Tiled2dMapLayer::onAdded(mapInterface, layerIndex);
@@ -728,20 +724,6 @@ void Tiled2dMapVectorLayer::setSelectionDelegate(const std::shared_ptr<Tiled2dMa
     this->strongSelectionDelegate = selectionDelegate;
     this->selectionDelegate = selectionDelegate;
     setSelectionDelegate(std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface>(selectionDelegate));
-}
-
-void Tiled2dMapVectorLayer::setSelectedFeatureIdentifier(std::optional<int64_t> identifier) {
-    this->selectedFeatureIdentifier = identifier;
-    for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-        sourceDataManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::setSelectedFeatureIdentifier, identifier);
-    }
-    for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
-        sourceDataManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceSymbolDataManager::setSelectedFeatureIdentifier, identifier);
-    }
-    auto mapInterface = this->mapInterface;
-    if (mapInterface) {
-        mapInterface->invalidate();
-    }
 }
 
 void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription) {

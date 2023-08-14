@@ -64,8 +64,6 @@ public:
 
     void setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate);
 
-    void setSelectedFeatureIdentifier(std::optional<int64_t> identifier);
-
 protected:
     const std::weak_ptr<MapInterface> mapInterface;
     const Tiled2dMapTileInfo tileInfo;
@@ -77,5 +75,4 @@ protected:
     float alpha = 1.0;
 
     std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> selectionDelegate;
-    std::optional<int64_t> selectedFeatureIdentifier;
 };

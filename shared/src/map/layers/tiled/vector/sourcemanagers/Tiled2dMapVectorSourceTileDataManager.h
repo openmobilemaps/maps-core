@@ -38,8 +38,6 @@ public:
 
     virtual void setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate) override;
 
-    void setSelectedFeatureIdentifier(std::optional<int64_t> identifier) override;
-
     void updateMaskObjects(const std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> &toSetupMaskObject,
                            const std::unordered_set<Tiled2dMapTileInfo> &tilesToRemove,
                            const std::unordered_map<Tiled2dMapTileInfo, TileState> &tileStateUpdates);

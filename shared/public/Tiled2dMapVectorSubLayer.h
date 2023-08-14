@@ -60,8 +60,6 @@ public:
 
     void setTilesReadyDelegate(const std::weak_ptr<Tiled2dMapVectorLayerTileCallbackInterface> readyDelegate);
 
-    virtual void setSelectedFeatureIdentfier(std::optional<int64_t> identifier);
-
 protected:
     void setupGraphicsObject(const std::shared_ptr<Textured2dLayerObject> &object, const std::shared_ptr<TextureHolderInterface> &texture);
 
@@ -77,7 +75,5 @@ protected:
 
     std::weak_ptr<Tiled2dMapVectorLayerTileCallbackInterface> readyDelegate;
 
-    std::recursive_mutex selectedFeatureIdentifierMutex;
-    std::optional<int64_t> selectedFeatureIdentifier;
     float alpha = 1.0;
 };

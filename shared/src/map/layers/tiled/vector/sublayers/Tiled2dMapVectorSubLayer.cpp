@@ -98,18 +98,6 @@ void Tiled2dMapVectorSubLayer::setTilesReadyDelegate(const std::weak_ptr<Tiled2d
     this->readyDelegate = readyDelegate;
 }
 
-void Tiled2dMapVectorSubLayer::setSelectedFeatureIdentfier(std::optional<int64_t> identifier) {
-    {
-        std::lock_guard<std::recursive_mutex> lock(selectedFeatureIdentifierMutex);
-        selectedFeatureIdentifier = identifier;
-    }
-    auto mapInterface = this->mapInterface;
-    if (mapInterface) {
-        mapInterface->invalidate();
-    }
-}
-
-
 void Tiled2dMapVectorSubLayer::setAlpha(float alpha) {
     if (this->alpha == alpha) {
         return;
