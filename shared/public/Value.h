@@ -1170,6 +1170,13 @@ public:
 
     std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
+        
+        auto const compareValueKeys = compareValue->getUsedKeys();
+        usedKeys.insert(compareValueKeys.begin(), compareValueKeys.end());
+
+        auto const defaultValueKeys = defaultValue->getUsedKeys();
+        usedKeys.insert(defaultValueKeys.begin(), defaultValueKeys.end());
+
         for (auto const &stop: stops) {
             auto const setKeys = std::get<1>(stop)->getUsedKeys();
             usedKeys.insert(setKeys.begin(), setKeys.end());
@@ -1249,6 +1256,10 @@ public:
 
     std::unordered_set<std::string> getUsedKeys() const override {
         std::unordered_set<std::string> usedKeys;
+
+        auto const defaultValueKeys = defaultValue->getUsedKeys();
+        usedKeys.insert(defaultValueKeys.begin(), defaultValueKeys.end());
+
         for (auto const &[condition, value]: cases) {
             if (condition) {
                 auto const conditionKeys = condition->getUsedKeys();
