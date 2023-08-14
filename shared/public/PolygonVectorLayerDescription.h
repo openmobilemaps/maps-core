@@ -66,14 +66,13 @@ public:
         return fillPattern ? true : false;
     }
 
-
-private:
+public:
     std::shared_ptr<Value> fillColor;
     std::shared_ptr<Value> fillOpacity;
     std::shared_ptr<Value> fillPattern;
     std::shared_ptr<Value> blendMode;
+    
 private:
-
     ValueEvaluator<Color> fillColorEvaluator;
     ValueEvaluator<double> fillOpacityEvaluator;
     ValueEvaluator<std::string> fillPatternEvaluator;
