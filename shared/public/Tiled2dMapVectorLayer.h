@@ -111,8 +111,6 @@ public:
 
     void setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate);
 
-    void setSelectedFeatureIdentifier(std::optional<int64_t> identifier);
-
     std::shared_ptr<VectorLayerDescription> getLayerDescriptionWithIdentifier(std::string identifier);
 
     void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription);
@@ -194,8 +192,7 @@ private:
 
     std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> strongSelectionDelegate;
     std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> selectionDelegate;
-    std::optional<int64_t> selectedFeatureIdentifier;
-
+    
     std::recursive_mutex renderPassMutex;
     std::vector<std::shared_ptr<RenderPassInterface>> currentRenderPasses;
 

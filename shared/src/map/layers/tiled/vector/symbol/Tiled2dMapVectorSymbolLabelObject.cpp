@@ -204,7 +204,7 @@ void Tiled2dMapVectorSymbolLabelObject::evaluateStyleProperties(const double zoo
     textRotate = description->style.getTextRotate(evalContext);
     textPadding = description->style.getTextPadding(evalContext);
 
-    opacity = description->style.getTextOpacity(evalContext);
+    textOpacity = description->style.getTextOpacity(evalContext);
     textColor = description->style.getTextColor(evalContext);
     haloColor = description->style.getTextHaloColor(evalContext);
     haloWidth = description->style.getTextHaloWidth(evalContext);
@@ -219,13 +219,12 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
     evaluateStyleProperties(zoomIdentifier);
 
     float alphaFactor;
-
     if (!isCoordinateOwner) {
         alphaFactor = 0.0;
     } else if (collides || !(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier)) {
         alphaFactor = animationCoordinator->getTextAlpha(0.0, now);
     } else {
-        float targetAlpha = opacity * alpha;
+        float targetAlpha = textOpacity * alpha;
         alphaFactor = animationCoordinator->getTextAlpha(targetAlpha, now);
     }
 
@@ -239,7 +238,7 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
     styles[(9 * styleOffset) + 7] = haloColor.a * alphaFactor; //A
     styles[(9 * styleOffset) + 8] = haloWidth;
 
-    isOpaque = opacity != 0.0;
+    isOpaque = styles[(9 * styleOffset) + 3] != 0.0;
 
     styleOffset += 1;
 
@@ -356,7 +355,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
                 lineEndIndices.push_back(centerPositions.size() - 1);
             }
             pen.x = 0.0;
-            pen.y += fontSize;
+            pen.y += fontSize * lineHeight;
 
             baseLines.clear();
         }
@@ -407,40 +406,44 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
     switch (textAnchor) {
         case Anchor::CENTER:
+        case Anchor::TOP:
+        case Anchor::BOTTOM:
             anchorOffset.x -= size.x / 2.0 - textOffset.x;
-            anchorOffset.y -= yOffset + size.y / 2.0 - textOffset.y;
             break;
         case Anchor::LEFT:
+        case Anchor::TOP_LEFT:
+        case Anchor::BOTTOM_LEFT:
             anchorOffset.x += textOffset.x;
-            anchorOffset.y -= yOffset + size.y / 2.0 - textOffset.y;
             break;
         case Anchor::RIGHT:
+        case Anchor::TOP_RIGHT:
+        case Anchor::BOTTOM_RIGHT:
             anchorOffset.x -= size.x - textOffset.x;
+            break;
+        default:
+            break;
+    }
+
+    switch (textAnchor) {
+        case Anchor::CENTER:
+        case Anchor::LEFT:
+        case Anchor::RIGHT:
             anchorOffset.y -= yOffset + size.y / 2.0 - textOffset.y;
             break;
         case Anchor::TOP:
-            anchorOffset.x -= size.x / 2.0 - textOffset.x;
-            anchorOffset.y -= textOffset.y;
+        case Anchor::TOP_LEFT:
+        case Anchor::TOP_RIGHT:
+            anchorOffset.y -= textOffset.y + yOffset;
             break;
         case Anchor::BOTTOM:
-            anchorOffset.x -= size.x / 2.0 - textOffset.x;
-            anchorOffset.y -= yOffset + size.y - textOffset.y;
-            break;
-        case Anchor::TOP_LEFT:
-            anchorOffset.x -= -textOffset.x;
-            anchorOffset.y -= textOffset.y;
-            break;
-        case Anchor::TOP_RIGHT:
-            anchorOffset.x -= size.x - textOffset.x;
-            anchorOffset.y -= textOffset.y;
-            break;
         case Anchor::BOTTOM_LEFT:
-            anchorOffset.x -= -textOffset.x;
-            anchorOffset.y -= yOffset + size.y - textOffset.y;
-            break;
         case Anchor::BOTTOM_RIGHT:
-            anchorOffset.x -= size.x -textOffset.x;
-            anchorOffset.y -= yOffset + size.y - textOffset.y;
+            anchorOffset.y -= size.y;
+            if (textOffset.y != 0.0) {
+                anchorOffset.y += textOffset.y;
+            } else {
+                anchorOffset.y -= (fontResult->fontData->info.lineHeight - fontResult->fontData->info.base) * fontSize + yOffset;
+            }
             break;
         default:
             break;

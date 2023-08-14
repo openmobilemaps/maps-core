@@ -47,5 +47,3 @@ void Tiled2dMapVectorSourceDataManager::onRemoved() {
 void Tiled2dMapVectorSourceDataManager::setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate) {
     this->selectionDelegate = selectionDelegate;
 }
-
-void Tiled2dMapVectorSourceDataManager::setSelectedFeatureIdentifier(std::optional<int64_t> identifier) {}

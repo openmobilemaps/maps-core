@@ -178,7 +178,7 @@ private:
     double textPadding = 0;
     SymbolAlignment textAlignment = SymbolAlignment::AUTO;
 
-    double opacity;
+    double textOpacity;
     Color textColor = Color(0.0 ,0.0, 0.0, 0.0);
     Color haloColor = Color(0.0 ,0.0, 0.0, 0.0);
     double haloWidth;

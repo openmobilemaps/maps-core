@@ -138,15 +138,6 @@ void Tiled2dMapVectorSourceTileDataManager::setSelectionDelegate(const std::weak
     }
 }
 
-void Tiled2dMapVectorSourceTileDataManager::setSelectedFeatureIdentifier(std::optional<int64_t> identifier) {
-    Tiled2dMapVectorSourceDataManager::setSelectedFeatureIdentifier(identifier);
-    for (const auto &[tileInfo, subTiles] : tiles) {
-        for (const auto &[index, layerIdentifier, tile] : subTiles) {
-            tile.message(&Tiled2dMapVectorTile::setSelectedFeatureIdentifier, identifier);
-        }
-    }
-}
-
 void Tiled2dMapVectorSourceTileDataManager::updateMaskObjects(
         const std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> &toSetupMaskObject,
         const std::unordered_set<Tiled2dMapTileInfo> &tilesToRemove,

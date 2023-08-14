@@ -26,8 +26,8 @@ open class FontLoader(context: Context, private val dpFactor: Float) : FontLoade
 
         val fontWrapper = FontWrapper(
             fontJson.info.face,
-            fontJson.common.lineHeight.toDouble(),
-            fontJson.common.base.toDouble(),
+            fontJson.common.lineHeight.toDouble() / size,
+            fontJson.common.base.toDouble() / size,
             Vec2D(imageSize, imageSize),
             size * dpFactor
         )
