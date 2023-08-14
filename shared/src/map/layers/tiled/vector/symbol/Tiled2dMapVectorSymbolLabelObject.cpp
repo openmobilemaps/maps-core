@@ -442,7 +442,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
             if (textOffset.y != 0.0) {
                 anchorOffset.y += textOffset.y;
             } else {
-                anchorOffset.y -= (fontResult->fontData->info.lineHeight - fontResult->fontData->info.base) * fontSize;
+                anchorOffset.y -= (fontResult->fontData->info.lineHeight - fontResult->fontData->info.base) * fontSize + yOffset;
             }
             break;
         default:
