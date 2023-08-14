@@ -522,9 +522,17 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                 }
 
                 if (!object->getIsOpaque()) continue;
+
+                if (!object->isCoordinateOwner) continue;
+
+
 #ifndef DRAW_TEXT_BOUNDING_BOX_WITH_COLLISIONS
-                    if (!(object->animationCoordinator->isColliding && object->isCoordinateOwner)) {
+                if (object->animationCoordinator->isColliding()) {
+                    continue;
+                }
 #endif
+
+
                 const auto &circles = object->getMapAlignedBoundingCircles(zoomIdentifier, false, true);
                 if (labelRotationAlignment == SymbolAlignment::MAP && circles && !circles->empty()) {
                     for (const auto &circle: *circles) {
@@ -543,18 +551,12 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                             indices.push_back(currentVertexIndex + i + 1);
                             indices.push_back(currentVertexIndex + (i + 1) % numCirclePoints + 1);
                         }
-                        vertices.push_back({coords, (object->animationCoordinator->isColliding && object->isCoordinateOwner) ? 1 : 0});
+                        vertices.push_back({coords, (object->animationCoordinator->isColliding()) ? 1 : 0});
 
                         currentVertexIndex += (numCirclePoints + 1);
                     }
-#ifndef DRAW_TEXT_BOUNDING_BOX_WITH_COLLISIONS
-                }
-#endif
                 } else {
-#ifndef DRAW_TEXT_BOUNDING_BOX_WITH_COLLISIONS
-                    if (!(object->animationCoordinator->isColliding && object->isCoordinateOwner)) {
-#endif
-                    const auto &viewportAlignedBox = object->getViewportAlignedBoundingBox(zoomIdentifier, rotation, false, true);
+                    const auto &viewportAlignedBox = object->getViewportAlignedBoundingBox(zoomIdentifier, false, true);
                     if (viewportAlignedBox) {
                         // Align rectangle to viewport
                         const double sinAngle = sin(-rotation * M_PI / 180.0);
@@ -573,7 +575,7 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                                       rotOrigin.x + rotWidth.x + rotHeight.x,rotOrigin.y + rotWidth.y + rotHeight.y, 0.0),
                                 Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(),
                                       rotOrigin.x + rotHeight.x,rotOrigin.y + rotHeight.y, 0.0),
-                        }, object->collides ? 1 : 0});
+                        }, object->animationCoordinator->isColliding() ? 1 : 0});
                         indices.push_back(currentVertexIndex);
                         indices.push_back(currentVertexIndex + 1);
                         indices.push_back(currentVertexIndex + 2);
@@ -583,56 +585,8 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                         indices.push_back(currentVertexIndex + 2);
 
                         currentVertexIndex += 4;
-
-                        /*// Draw anchor
-                        const size_t numCirclePoints = 8;
-                        std::vector<Coord> coords;
-                        coords.emplace_back(CoordinateSystemIdentifiers::RENDERSYSTEM(),
-                                            viewportAlignedBox->anchorX, viewportAlignedBox->anchorY, 0.0);
-                        for (size_t i = 0; i < numCirclePoints; i++) {
-                            float angle = i * (2 * M_PI / numCirclePoints);
-                            coords.emplace_back(CoordinateSystemIdentifiers::RENDERSYSTEM(),
-                                                viewportAlignedBox->anchorX + viewportAlignedBox->height * 0.1 * std::cos(angle),
-                                                viewportAlignedBox->anchorY + viewportAlignedBox->height * 0.1 * std::sin(angle),
-                                                0.0);
-
-                            indices.push_back(currentVertexIndex);
-                            indices.push_back(currentVertexIndex + i + 1);
-                            indices.push_back(currentVertexIndex + (i + 1) % numCirclePoints + 1);
-                        }
-                        vertices.push_back({coords, 1});
-
-                        currentVertexIndex += (numCirclePoints + 1);*/
-
-                    }/*else {
-                        const auto &combinedBox = object->getCombinedBoundingBox(true);
-                        if (combinedBox) {
-                            vertices.push_back({std::vector<::Coord>{
-                                    Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(),
-                                          combinedBox->topLeft.x, combinedBox->topLeft.y, 0.0),
-                                    Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(),
-                                          combinedBox->topRight.x, combinedBox->topRight.y, 0.0),
-                                    Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(),
-                                          combinedBox->bottomRight.x, combinedBox->bottomRight.y, 0.0),
-                                    Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(),
-                                          combinedBox->bottomLeft.x, combinedBox->bottomLeft.y, 0.0),
-                            }, object->collides ? 1 : 0});
-                            indices.push_back(currentVerticeIndex);
-                            indices.push_back(currentVerticeIndex + 1);
-                            indices.push_back(currentVerticeIndex + 2);
-
-
-                            indices.push_back(currentVerticeIndex);
-                            indices.push_back(currentVerticeIndex + 3);
-                            indices.push_back(currentVerticeIndex + 2);
-
-                            currentVerticeIndex += 4;
-                        }
-                    }*/
+                    }
                 }
-#ifndef DRAW_TEXT_BOUNDING_BOX_WITH_COLLISIONS
-                }
-#endif
 
                 if (currentVertexIndex == 0) {
                     return;
