@@ -348,46 +348,6 @@ public:
         return symbolZOrderEvaluator.getResult(symbolZOrder, context, defaultValue);
     }
 
-    ValueEvaluator<BlendMode> blendModeEvaluator;
-    ValueEvaluator<double> textSizeEvaluator;
-    ValueEvaluator<std::vector<std::string>> textFontEvaluator;
-    ValueEvaluator<std::vector<FormattedStringEntry>> textFieldEvaluator;
-    ValueEvaluator<TextTransform> textTransformEvaluator;
-    ValueEvaluator<Vec2F> textOffsetEvaluator;
-    ValueEvaluator<double> textRadialOffsetEvaluator;
-    ValueEvaluator<Color> textColorEvaluator;
-    ValueEvaluator<Color> textHaloColorEvaluator;
-    ValueEvaluator<double> textHaloWidthEvaluator;
-    ValueEvaluator<double> textPaddingEvaluator;
-    ValueEvaluator<double> iconPaddingEvaluator;
-    ValueEvaluator<double> textLetterSpacingEvaluator;
-    ValueEvaluator<double> textOpacityEvaluator;
-    ValueEvaluator<double> iconOpacityEvaluator;
-    ValueEvaluator<bool> textAllowOverlapEvaluator;
-    ValueEvaluator<int64_t> symbolSortKeyEvaluator;
-    ValueEvaluator<std::string> iconImageEvaluator;
-    ValueEvaluator<Anchor> iconAnchorEvaluator;
-    ValueEvaluator<Vec2F> iconOffsetEvaluator;
-    ValueEvaluator<bool> iconOptionalEvaluator;
-    ValueEvaluator<bool> textOptionalEvaluator;
-    ValueEvaluator<Anchor> textAnchorEvaluator;
-    ValueEvaluator<TextJustify> textJustifyEvaluator;
-    ValueEvaluator<TextSymbolPlacement> textSymbolPlacementEvaluator;
-    ValueEvaluator<std::vector<Anchor>> textVariableAnchorEvaluator;
-    ValueEvaluator<double> textRotateEvaluator;
-    ValueEvaluator<double> iconRotateEvaluator;
-    ValueEvaluator<double> symbolSpacingEvaluator;
-    ValueEvaluator<double> iconSizeEvaluator;
-    ValueEvaluator<bool> iconAllowOverlapEvaluator;
-    ValueEvaluator<double> textLineHeightEvaluator;
-    ValueEvaluator<int64_t> textMaxWidthEvaluator;
-    ValueEvaluator<double> textMaxAngleEvaluator;
-    ValueEvaluator<SymbolAlignment> textRotationAlignmentEvaluator;
-    ValueEvaluator<SymbolAlignment> iconRotationAlignmentEvaluator;
-    ValueEvaluator<IconTextFit> iconTextFitEvaluator;
-    ValueEvaluator<std::vector<float>> iconTextFitPaddingEvaluator;
-    ValueEvaluator<SymbolZOrder> symbolZOrderEvaluator;
-
     std::shared_ptr<Value> textSize;
     std::shared_ptr<Value> textFont;
     std::shared_ptr<Value> textField;
@@ -427,6 +387,47 @@ public:
     std::shared_ptr<Value> iconRotationAlignment;
     std::shared_ptr<Value> blendMode;
     std::shared_ptr<Value> symbolZOrder;
+    
+private:
+    ValueEvaluator<BlendMode> blendModeEvaluator;
+    ValueEvaluator<double> textSizeEvaluator;
+    ValueEvaluator<std::vector<std::string>> textFontEvaluator;
+    ValueEvaluator<std::vector<FormattedStringEntry>> textFieldEvaluator;
+    ValueEvaluator<TextTransform> textTransformEvaluator;
+    ValueEvaluator<Vec2F> textOffsetEvaluator;
+    ValueEvaluator<double> textRadialOffsetEvaluator;
+    ValueEvaluator<Color> textColorEvaluator;
+    ValueEvaluator<Color> textHaloColorEvaluator;
+    ValueEvaluator<double> textHaloWidthEvaluator;
+    ValueEvaluator<double> textPaddingEvaluator;
+    ValueEvaluator<double> iconPaddingEvaluator;
+    ValueEvaluator<double> textLetterSpacingEvaluator;
+    ValueEvaluator<double> textOpacityEvaluator;
+    ValueEvaluator<double> iconOpacityEvaluator;
+    ValueEvaluator<bool> textAllowOverlapEvaluator;
+    ValueEvaluator<int64_t> symbolSortKeyEvaluator;
+    ValueEvaluator<std::string> iconImageEvaluator;
+    ValueEvaluator<Anchor> iconAnchorEvaluator;
+    ValueEvaluator<Vec2F> iconOffsetEvaluator;
+    ValueEvaluator<bool> iconOptionalEvaluator;
+    ValueEvaluator<bool> textOptionalEvaluator;
+    ValueEvaluator<Anchor> textAnchorEvaluator;
+    ValueEvaluator<TextJustify> textJustifyEvaluator;
+    ValueEvaluator<TextSymbolPlacement> textSymbolPlacementEvaluator;
+    ValueEvaluator<std::vector<Anchor>> textVariableAnchorEvaluator;
+    ValueEvaluator<double> textRotateEvaluator;
+    ValueEvaluator<double> iconRotateEvaluator;
+    ValueEvaluator<double> symbolSpacingEvaluator;
+    ValueEvaluator<double> iconSizeEvaluator;
+    ValueEvaluator<bool> iconAllowOverlapEvaluator;
+    ValueEvaluator<double> textLineHeightEvaluator;
+    ValueEvaluator<int64_t> textMaxWidthEvaluator;
+    ValueEvaluator<double> textMaxAngleEvaluator;
+    ValueEvaluator<SymbolAlignment> textRotationAlignmentEvaluator;
+    ValueEvaluator<SymbolAlignment> iconRotationAlignmentEvaluator;
+    ValueEvaluator<IconTextFit> iconTextFitEvaluator;
+    ValueEvaluator<std::vector<float>> iconTextFitPaddingEvaluator;
+    ValueEvaluator<SymbolZOrder> symbolZOrderEvaluator;
     double dpFactor;
 
 
