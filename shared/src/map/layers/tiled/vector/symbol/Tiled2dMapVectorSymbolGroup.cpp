@@ -754,6 +754,8 @@ void Tiled2dMapVectorSymbolGroup::clear() {
     if (textInstancedObject) {
         textInstancedObject->asGraphicsObject()->clear();
     }
+    this->spriteData = nullptr;
+    this->spriteTexture = nullptr;
 }
 
 void Tiled2dMapVectorSymbolGroup::placedInCache() {
