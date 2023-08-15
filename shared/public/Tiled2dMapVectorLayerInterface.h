@@ -8,6 +8,7 @@
 #include "LoaderInterface.h"
 #include "Tiled2dMapZoomInfo.h"
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -28,4 +29,6 @@ public:
     virtual void setSelectionDelegate(const /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> & selectionDelegate) = 0;
 
     virtual /*not-null*/ std::shared_ptr<::LayerInterface> asLayerInterface() = 0;
+
+    virtual std::optional<std::string> getStyleMetadataJson() = 0;
 };

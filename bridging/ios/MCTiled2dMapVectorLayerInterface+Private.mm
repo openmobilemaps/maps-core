@@ -112,6 +112,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable NSString *)getStyleMetadataJson {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getStyleMetadataJson();
+        return ::djinni::Optional<std::optional, ::djinni::String>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 auto Tiled2dMapVectorLayerInterface::toCpp(ObjcType objc) -> CppType

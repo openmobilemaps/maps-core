@@ -42,4 +42,6 @@
 
 - (nullable id<MCLayerInterface>)asLayerInterface;
 
+- (nullable NSString *)getStyleMetadataJson;
+
 @end
