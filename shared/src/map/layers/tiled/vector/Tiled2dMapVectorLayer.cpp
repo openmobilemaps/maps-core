@@ -152,6 +152,7 @@ std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJsonRemotely() {
     auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromUrl(layerName, *remoteStyleJsonUrl, *dpFactor, loaders);
     if (parseResult.status == LoaderStatus::OK) {
         setMapDescription(parseResult.mapDescription);
+        metadata = parseResult.metadata;
         return std::nullopt;
     } else {
         return TiledLayerError(parseResult.status, parseResult.errorCode, layerName,
@@ -170,6 +171,7 @@ std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJsonLocally(std::
 
     if (parseResult.status == LoaderStatus::OK) {
         setMapDescription(parseResult.mapDescription);
+        metadata = parseResult.metadata;
         return std::nullopt;
     } else {
         return TiledLayerError(parseResult.status, parseResult.errorCode, layerName,
@@ -863,4 +865,8 @@ bool Tiled2dMapVectorLayer::onTwoFingerMoveComplete() {
 
 void Tiled2dMapVectorLayer::clearTouch() {
     return interactionManager->clearTouch();
+}
+
+std::optional<std::string> Tiled2dMapVectorLayer::getStyleMetadataJson() {
+    return metadata;
 }

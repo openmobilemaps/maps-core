@@ -140,6 +140,8 @@ public:
 
     void clearTouch() override;
 
+    virtual std::optional<std::string> getStyleMetadataJson() override;
+
 protected:
     virtual std::shared_ptr<Tiled2dMapVectorLayerConfig> getLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &source);
 
@@ -160,6 +162,8 @@ protected:
     virtual std::optional<TiledLayerError> loadStyleJsonRemotely();
     virtual std::optional<TiledLayerError> loadStyleJsonLocally(std::string styleJsonString);
 
+protected:
+    std::optional<std::string> metadata = std::nullopt;
 
 private:
     void scheduleStyleJsonLoading();

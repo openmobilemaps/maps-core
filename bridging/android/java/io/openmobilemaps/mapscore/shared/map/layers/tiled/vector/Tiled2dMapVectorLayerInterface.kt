@@ -26,6 +26,8 @@ abstract class Tiled2dMapVectorLayerInterface {
 
     abstract fun asLayerInterface(): io.openmobilemaps.mapscore.shared.map.LayerInterface
 
+    abstract fun getStyleMetadataJson(): String?
+
     private class CppProxy : Tiled2dMapVectorLayerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -52,5 +54,11 @@ abstract class Tiled2dMapVectorLayerInterface {
             return native_asLayerInterface(this.nativeRef)
         }
         private external fun native_asLayerInterface(_nativeRef: Long): io.openmobilemaps.mapscore.shared.map.LayerInterface
+
+        override fun getStyleMetadataJson(): String? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getStyleMetadataJson(this.nativeRef)
+        }
+        private external fun native_getStyleMetadataJson(_nativeRef: Long): String?
     }
 }

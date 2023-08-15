@@ -35,7 +35,7 @@ public:
         DataLoaderResult result = LoaderHelper::loadData(styleJsonUrl, std::nullopt, loaders);
         if (result.status != LoaderStatus::OK) {
             LogError <<= "Unable to Load style.json from " + styleJsonUrl + " errorCode: " + (result.errorCode ? *result.errorCode : "");
-            return Tiled2dMapVectorLayerParserResult(nullptr, result.status, result.errorCode);
+            return Tiled2dMapVectorLayerParserResult(nullptr, result.status, result.errorCode, std::nullopt);
         }
         auto string = std::string((char*)result.data->buf(), result.data->len());
 
@@ -53,7 +53,7 @@ public:
             json = nlohmann::json::parse(styleJsonString);
         }
         catch (nlohmann::json::parse_error &ex) {
-            return Tiled2dMapVectorLayerParserResult(nullptr, LoaderStatus::ERROR_OTHER, "");
+            return Tiled2dMapVectorLayerParserResult(nullptr, LoaderStatus::ERROR_OTHER, "", std::nullopt);
         }
 
         std::vector<std::shared_ptr<VectorLayerDescription>> layers;
@@ -86,7 +86,7 @@ public:
                 } else if (val["url"].is_string()) {
                     auto result = LoaderHelper::loadData(val["url"].get<std::string>(), std::nullopt, loaders);
                     if (result.status != LoaderStatus::OK) {
-                        return Tiled2dMapVectorLayerParserResult(nullptr, result.status, result.errorCode);
+                        return Tiled2dMapVectorLayerParserResult(nullptr, result.status, result.errorCode, std::nullopt);
                     }
                     auto string = std::string((char *) result.data->buf(), result.data->len());
                     nlohmann::json json;
@@ -94,7 +94,7 @@ public:
                         json = nlohmann::json::parse(string);
                     }
                     catch (nlohmann::json::parse_error &ex) {
-                        return Tiled2dMapVectorLayerParserResult(nullptr, LoaderStatus::ERROR_OTHER, "");
+                        return Tiled2dMapVectorLayerParserResult(nullptr, LoaderStatus::ERROR_OTHER, "", std::nullopt);
                     }
                     url = json["tiles"].begin()->get<std::string>();
 
@@ -121,7 +121,7 @@ public:
             if (val["type"].get<std::string>() == "vector" && val["url"].is_string()) {
                 auto result = LoaderHelper::loadData(val["url"].get<std::string>(), std::nullopt, loaders);
                 if (result.status != LoaderStatus::OK) {
-                    return Tiled2dMapVectorLayerParserResult(nullptr, result.status, result.errorCode);
+                    return Tiled2dMapVectorLayerParserResult(nullptr, result.status, result.errorCode, std::nullopt);
                 }
                 auto string = std::string((char*)result.data->buf(), result.data->len());
                 nlohmann::json json;
@@ -130,7 +130,7 @@ public:
                     tileJsons[key] = nlohmann::json::parse(string);
                 }
                 catch (nlohmann::json::parse_error &ex) {
-                    return Tiled2dMapVectorLayerParserResult(nullptr, LoaderStatus::ERROR_OTHER, "");
+                    return Tiled2dMapVectorLayerParserResult(nullptr, LoaderStatus::ERROR_OTHER, "", std::nullopt);
                 }
 
             }
@@ -142,6 +142,14 @@ public:
 
         Tiled2dMapVectorStyleParser parser;
 
+        std::optional<std::string> metadata;
+        std::shared_ptr<Value> globalIsInteractable;
+
+        if(json["metadata"].is_object()) {
+            metadata = json["metadata"].dump();
+            globalIsInteractable = parser.parseValue(json["metadata"]["interactable"]);
+        }
+
         for (auto&[key, val]: json["layers"].items()) {
 			if (!val["source-layer"].is_string() && !(val["type"] == "raster" || val["type"] == "background") ) {
                 // layers without a source-layer are currently not supported
@@ -152,7 +160,8 @@ public:
             }
 
             std::optional<int32_t> renderPassIndex;
-            std::shared_ptr<Value> interactable;
+            std::shared_ptr<Value> interactable = globalIsInteractable;
+
             std::shared_ptr<Value> blendMode;
             if (val["metadata"].is_object()) {
                 if (val["metadata"]["render-pass-index"].is_number()) {
@@ -322,6 +331,6 @@ public:
                                                               sourceDescriptions,
                                                               layers,
                                                               sprite);
-        return Tiled2dMapVectorLayerParserResult(mapDesc, LoaderStatus::OK, "");
+        return Tiled2dMapVectorLayerParserResult(mapDesc, LoaderStatus::OK, "", metadata);
     }
 };
