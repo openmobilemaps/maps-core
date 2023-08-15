@@ -43,8 +43,9 @@ class TextShaderOpenGl : public BaseShaderProgramOpenGl,
   private:
     const static std::string programName;
 
-    std::vector<float> color = {0.0, 0.0, 0.0, 1.0};
-    std::vector<float> haloColor = {0.0, 0.0, 0.0, 1.0};
+    std::mutex dataMutex;
+    std::vector<float> color = {0.0, 0.0, 0.0, 0.0};
+    std::vector<float> haloColor = {0.0, 0.0, 0.0, 0.0};
     float opacity = 0.0;
     float haloWidth = 0.0f;
 };

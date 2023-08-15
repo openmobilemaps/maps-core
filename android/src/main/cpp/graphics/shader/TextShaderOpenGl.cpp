@@ -17,11 +17,19 @@ const std::string TextShaderOpenGl::programName = "UBMAP_TextShaderOpenGl";
 std::string TextShaderOpenGl::getProgramName() { return programName; }
 
 void TextShaderOpenGl::setColor(const ::Color & color) {
-    this->color = std::vector<float>{color.r, color.g, color.b, color.a};
+    std::lock_guard<std::mutex> lock(dataMutex);
+    this->color.at(0) = color.r;
+    this->color.at(1) = color.g;
+    this->color.at(2) = color.b;
+    this->color.at(3) = color.a;
 }
 
 void TextShaderOpenGl::setHaloColor(const ::Color & color, double width) {
-    this->haloColor = std::vector<float>{color.r, color.g, color.b, color.a};
+    std::lock_guard<std::mutex> lock(dataMutex);
+    haloColor.at(0) = color.r;
+    haloColor.at(1) = color.g;
+    haloColor.at(2) = color.b;
+    haloColor.at(3) = color.a;
     this->haloWidth = width;
 }
 
@@ -51,16 +59,19 @@ void TextShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterfa
     int program = openGlContext->getProgram(programName);
 
     int colorHandle = glGetUniformLocation(program, "color");
-    glUniform4fv(colorHandle, 1, &color[0]);
-
     int haloColorHandle = glGetUniformLocation(program, "haloColor");
-    glUniform4fv(haloColorHandle, 1, &haloColor[0]);
-
     int haloWidthHandle = glGetUniformLocation(program, "haloWidth");
-    glUniform1f(haloWidthHandle, haloWidth);
-
     int opacityHandle = glGetUniformLocation(program, "opacity");
-    glUniform1f(opacityHandle, opacity);
+    {
+        std::lock_guard<std::mutex> lock(dataMutex);
+        glUniform4fv(colorHandle, 1, &color[0]);
+        glUniform4fv(haloColorHandle, 1, &haloColor[0]);
+        glUniform1f(haloWidthHandle, haloWidth);
+        glUniform1f(opacityHandle, opacity);
+    }
+
+
+
 }
 
 std::string TextShaderOpenGl::getVertexShader() {

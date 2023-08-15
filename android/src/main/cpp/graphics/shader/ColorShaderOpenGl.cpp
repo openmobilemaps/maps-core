@@ -39,11 +39,18 @@ void ColorShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterf
     int program = openGlContext->getProgram(programName);
 
     int mColorHandle = glGetUniformLocation(program, "vColor");
-    glUniform4fv(mColorHandle, 1, &color[0]);
+    {
+        glUniform4fv(mColorHandle, 1, &color[0]);
+        std::lock_guard<std::mutex> lock(dataMutex);
+    }
 }
 
 void ColorShaderOpenGl::setColor(float red, float green, float blue, float alpha) {
-    color = std::vector<float>{red, green, blue, alpha};
+    std::lock_guard<std::mutex> lock(dataMutex);
+    color.at(0) = red;
+    color.at(1) = green;
+    color.at(2) = blue;
+    color.at(3) = alpha;
 }
 
 std::string ColorShaderOpenGl::getVertexShader() {
