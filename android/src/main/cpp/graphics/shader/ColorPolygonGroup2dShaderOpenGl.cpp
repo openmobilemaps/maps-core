@@ -13,6 +13,10 @@
 #include "OpenGlHelper.h"
 #include "ColorPolygonGroup2dShaderOpenGl.h"
 
+ColorPolygonGroup2dShaderOpenGl::ColorPolygonGroup2dShaderOpenGl() {
+    this->polygonStyles.resize(sizeStyleValuesArray);
+}
+
 const std::string ColorPolygonGroup2dShaderOpenGl::programName = "UBMAP_ColorPolygonGroupShaderOpenGl";
 
 std::shared_ptr<ShaderProgramInterface> ColorPolygonGroup2dShaderOpenGl::asShaderProgramInterface() { return shared_from_this(); }
@@ -58,7 +62,6 @@ void ColorPolygonGroup2dShaderOpenGl::preRender(const std::shared_ptr<::Renderin
 void ColorPolygonGroup2dShaderOpenGl::setStyles(const ::SharedBytes & styles) {
     {
         std::lock_guard<std::recursive_mutex> overlayLock(styleMutex);
-        this->polygonStyles.resize(sizeStyleValuesArray);
         if (styles.elementCount > 0) {
             std::memcpy(this->polygonStyles.data(), (void *) styles.address,
                     styles.elementCount * styles.bytesPerElement);

@@ -13,7 +13,7 @@
 #include "OpenGlHelper.h"
 
 ColorLineGroup2dShaderOpenGl::ColorLineGroup2dShaderOpenGl() {
-    lineValues.resize(sizeLineValuesArray * sizeof(GLfloat));
+    lineValues.resize(sizeLineValuesArray);
 }
 
 const std::string ColorLineGroup2dShaderOpenGl::programName = "UBMAP_ColorLineGroupShaderOpenGl";

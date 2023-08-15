@@ -39,7 +39,10 @@ void RasterShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInter
     BaseShaderProgramOpenGl::preRender(context);
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     int styleValuesLocation = glGetUniformLocation(openGlContext->getProgram(programName), "styleValues");
-    glUniform1fv(styleValuesLocation, (GLsizei) styleValues.size(), &styleValues[0]);
+    {
+        std::lock_guard<std::mutex> lock(dataMutex);
+        glUniform1fv(styleValuesLocation, (GLsizei) styleValues.size(), &styleValues[0]);
+    }
 }
 
 std::shared_ptr<ShaderProgramInterface> RasterShaderOpenGl::asShaderProgramInterface() {
@@ -47,6 +50,7 @@ std::shared_ptr<ShaderProgramInterface> RasterShaderOpenGl::asShaderProgramInter
 }
 
 void RasterShaderOpenGl::setStyle(const RasterShaderStyle &style) {
+    std::lock_guard<std::mutex> lock(dataMutex);
      styleValues[0] = style.opacity;
      styleValues[1] = style.contrast > 0.0f ? (1.0f / (1.0f - style.contrast)) : (1.0f + style.contrast);
      styleValues[2] = style.saturation > 0.0f ? (1.0f - 1.0f / (1.001f - style.saturation)) : (-style.saturation);

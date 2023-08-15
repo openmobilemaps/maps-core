@@ -38,6 +38,7 @@ protected:
 private:
     const static std::string programName;
 
+    std::mutex dataMutex;
     std::vector<GLfloat> styleValues = {1.0, 1.0, 1.0, 0.0, 1.0, 1.0};
 };
 

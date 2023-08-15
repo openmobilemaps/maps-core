@@ -37,5 +37,6 @@ class ColorShaderOpenGl : public BaseShaderProgramOpenGl,
   private:
     const static std::string programName;
 
+    std::mutex dataMutex;
     std::vector<float> color = {0, 0, 0, 0};
 };
