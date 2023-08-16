@@ -384,17 +384,18 @@ void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(std::vector<float>
 
     const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
 
-    positions[2 * countOffset] = renderCoordinate.x;
-    positions[2 * countOffset + 1] = renderCoordinate.y;
+    const auto textureWidth = (double) spriteTexture->getImageWidth();
+    const auto textureHeight = (double) spriteTexture->getImageHeight();
+    
+    initialRenderCoordinateVec.y -= iconOffset.y;
+    initialRenderCoordinateVec.x += iconOffset.x;
 
     auto iconImage = description->style.getIconImage(evalContext);
 
     if (iconImage.empty() || !spriteTexture) {
         // TODO: make sure icon is not rendered
     } else {
-
-        const auto textureWidth = (double) spriteTexture->getImageWidth();
-        const auto textureHeight = (double) spriteTexture->getImageHeight();
+        renderCoordinate = getRenderCoordinates(iconAnchor, 0.0, textureWidth, textureHeight);
 
         const auto spriteIt = spriteData->sprites.find(iconImage);
         if (spriteIt == spriteData->sprites.end()) {
@@ -419,6 +420,9 @@ void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(std::vector<float>
 
     }
 
+    positions[2 * countOffset] = renderCoordinate.x;
+    positions[2 * countOffset + 1] = renderCoordinate.y;
+    
     countOffset += instanceCounts.stretchedIcons;
 
     lastStretchIconUpdateScaleFactor = std::nullopt;
@@ -500,14 +504,14 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
 
     scales[2 * countOffset] = spriteWidth;
     scales[2 * countOffset + 1] = spriteHeight;
-
-    Coord renderPos = renderCoordinate;
-    auto offset = Vec2D((-iconOffset.x) * scaleFactor - leftPadding * 0.5 + rightPadding * 0.5, iconOffset.y * scaleFactor + topPadding * 0.5 - bottomPadding * 0.5);
-
+    
+    renderCoordinate = getRenderCoordinates(iconAnchor, -rotations[countOffset], spriteWidth, spriteHeight);
+        
+    auto offset = Vec2D((-iconOffset.x) * scaleFactor - leftPadding, iconOffset.y * scaleFactor - topPadding * 0.5 + bottomPadding * 0.5);
     offset = Vec2DHelper::rotate(offset, Vec2D(0, 0), -rotation);
 
-    positions[2 * countOffset] = renderPos.x + offset.x;
-    positions[2 * countOffset + 1] = renderPos.y + offset.y;
+    positions[2 * countOffset] = renderCoordinate.x + offset.x;
+    positions[2 * countOffset + 1] = renderCoordinate.y + offset.y;
 
     const float scaledIconPadding = iconPadding * scaleFactor;
 
