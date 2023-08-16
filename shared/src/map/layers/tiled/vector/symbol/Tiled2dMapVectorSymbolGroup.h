@@ -38,6 +38,8 @@ public:
                                 const std::shared_ptr<SymbolVectorLayerDescription> &layerDescription);
 
     bool initialize(const std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features,
+                    int32_t featuresBase,
+                    int32_t featuresCount,
                     std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap);
 
 

@@ -74,7 +74,7 @@ public:
     std::shared_ptr<FontLoaderResult> loadFont(const std::string &fontName) override;
 
 private:
-    std::optional<Actor<Tiled2dMapVectorSymbolGroup>> createSymbolGroup(const Tiled2dMapTileInfo &tileInfo, const std::string &layerIdentifier, const std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features);
+    std::vector<Actor<Tiled2dMapVectorSymbolGroup>> createSymbolGroups(const Tiled2dMapTileInfo &tileInfo, const std::string &layerIdentifier, const std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> &features);
 
     void setupSymbolGroups(const std::unordered_map<Tiled2dMapTileInfo, std::vector<Actor<Tiled2dMapVectorSymbolGroup>>> &toSetup,
                            const std::vector<Actor<Tiled2dMapVectorSymbolGroup>> &toClear,
@@ -108,4 +108,11 @@ private:
     std::unordered_set<std::string> interactableLayers;
 
     std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap;
+
+#ifdef __ANDROID__
+    // Higher counts may cause issues for instanced text rendering
+    int32_t maxNumFeaturesPerGroup = 3500;
+#else
+    int32_t maxNumFeaturesPerGroup = std::numeric_limits<int32_t>().max();
+#endif
 };
