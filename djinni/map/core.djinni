@@ -65,6 +65,7 @@ map_interface = interface +c {
 
 map_callback_interface = interface +c +j +o {
     invalidate();
+    on_map_resumed();
 }
 
 map_ready_callback_interface = interface +j +o {

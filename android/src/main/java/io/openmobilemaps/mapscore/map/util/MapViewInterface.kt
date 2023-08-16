@@ -1,6 +1,5 @@
 package io.openmobilemaps.mapscore.map.util
 
-import io.openmobilemaps.mapscore.map.scheduling.AndroidScheduler
 import io.openmobilemaps.mapscore.shared.graphics.common.Color
 import io.openmobilemaps.mapscore.shared.map.LayerInterface
 import io.openmobilemaps.mapscore.shared.map.MapCamera2dInterface

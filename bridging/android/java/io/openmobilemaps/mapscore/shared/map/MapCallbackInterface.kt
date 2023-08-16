@@ -10,6 +10,8 @@ abstract class MapCallbackInterface {
 
     abstract fun invalidate()
 
+    abstract fun onMapResumed()
+
     private class CppProxy : MapCallbackInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -30,5 +32,11 @@ abstract class MapCallbackInterface {
             native_invalidate(this.nativeRef)
         }
         private external fun native_invalidate(_nativeRef: Long)
+
+        override fun onMapResumed() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_onMapResumed(this.nativeRef)
+        }
+        private external fun native_onMapResumed(_nativeRef: Long)
     }
 }

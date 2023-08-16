@@ -8,4 +8,6 @@ public:
     virtual ~MapCallbackInterface() = default;
 
     virtual void invalidate() = 0;
+
+    virtual void onMapResumed() = 0;
 };

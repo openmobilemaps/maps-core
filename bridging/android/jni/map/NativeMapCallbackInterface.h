@@ -34,6 +34,7 @@ private:
         ~JavaProxy();
 
         void invalidate() override;
+        void onMapResumed() override;
 
     private:
         friend ::djinni::JniInterface<::MapCallbackInterface, ::djinni_generated::NativeMapCallbackInterface>;
@@ -41,6 +42,7 @@ private:
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/MapCallbackInterface") };
     const jmethodID method_invalidate { ::djinni::jniGetMethodID(clazz.get(), "invalidate", "()V") };
+    const jmethodID method_onMapResumed { ::djinni::jniGetMethodID(clazz.get(), "onMapResumed", "()V") };
 };
 
 } // namespace djinni_generated
