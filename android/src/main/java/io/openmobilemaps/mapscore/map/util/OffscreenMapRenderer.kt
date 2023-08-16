@@ -35,6 +35,10 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 			override fun invalidate() {
 				glThread.requestRender()
 			}
+
+			override fun onMapResumed() {
+				// not used
+			}
 		})
 		mapInterface.setBackgroundColor(Color(1f, 1f, 1f, 1f))
 		this.mapInterface = mapInterface

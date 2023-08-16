@@ -8,4 +8,6 @@
 
 - (void)invalidate;
 
+- (void)onMapResumed;
+
 @end

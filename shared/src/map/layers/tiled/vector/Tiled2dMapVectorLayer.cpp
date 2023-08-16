@@ -562,10 +562,14 @@ void Tiled2dMapVectorLayer::resume() {
     }
 
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-        sourceDataManager.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceTileDataManager::resume);
+        sourceDataManager.syncAccess([](const auto &manager){
+            manager->resume();
+        });
     }
     for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
-        sourceDataManager.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceSymbolDataManager::resume);
+        sourceDataManager.syncAccess([](const auto &manager){
+            manager->resume();
+        });
     }
 }
 

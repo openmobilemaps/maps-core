@@ -17,4 +17,6 @@ class MCMapViewCallbackHandler: MCMapCallbackInterface {
     func invalidate() {
         invalidateCallback?()
     }
+
+    func onMapResumed() { /* not used */ }
 }

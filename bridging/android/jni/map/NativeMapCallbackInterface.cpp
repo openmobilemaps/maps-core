@@ -20,6 +20,13 @@ void NativeMapCallbackInterface::JavaProxy::invalidate() {
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_invalidate);
     ::djinni::jniExceptionCheck(jniEnv);
 }
+void NativeMapCallbackInterface::JavaProxy::onMapResumed() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeMapCallbackInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_onMapResumed);
+    ::djinni::jniExceptionCheck(jniEnv);
+}
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCallbackInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
@@ -33,6 +40,14 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCallbackIn
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::MapCallbackInterface>(nativeRef);
         ref->invalidate();
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCallbackInterface_00024CppProxy_native_1onMapResumed(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCallbackInterface>(nativeRef);
+        ref->onMapResumed();
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

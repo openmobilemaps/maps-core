@@ -36,6 +36,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)onMapResumed {
+    try {
+        _cppRefHandle.get()->onMapResumed();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class MapCallbackInterface::ObjcProxy final
@@ -49,6 +55,12 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() invalidate];
+        }
+    }
+    void onMapResumed() override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() onMapResumed];
         }
     }
 };

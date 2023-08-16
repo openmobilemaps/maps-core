@@ -31,6 +31,8 @@ import io.openmobilemaps.mapscore.shared.map.controls.TouchAction
 import io.openmobilemaps.mapscore.shared.map.controls.TouchEvent
 import io.openmobilemaps.mapscore.shared.map.controls.TouchHandlerInterface
 import io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.microedition.khronos.egl.EGLConfig
@@ -50,6 +52,9 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	private var saveFrameSpec: SaveFrameSpec? = null
 	private var saveFrameCallback: SaveFrameCallback? = null
 
+	private val mapViewStateMutable = MutableStateFlow(MapViewState.UNINITIALIZED)
+	val mapViewState = mapViewStateMutable.asStateFlow()
+
 	open fun setupMap(mapConfig: MapConfig, useMSAA: Boolean = false) {
 		val densityExact = resources.displayMetrics.xdpi
 
@@ -63,10 +68,15 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 			override fun invalidate() {
 				requestRender()
 			}
+
+			override fun onMapResumed() {
+				mapViewStateMutable.value = MapViewState.RESUMED
+			}
 		})
 		mapInterface.setBackgroundColor(Color(1f, 1f, 1f, 1f))
 		touchHandler = mapInterface.getTouchHandler()
 		this.mapInterface = mapInterface
+		mapViewStateMutable.value = MapViewState.INITIALIZED
 	}
 
 	fun registerLifecycle(lifecycle: Lifecycle) {
@@ -99,11 +109,13 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
 	@OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
 	open fun onPause() {
+		mapViewStateMutable.value = MapViewState.PAUSED
 		requireMapInterface().pause()
 	}
 
 	@OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 	open fun onDestroy() {
+		mapViewStateMutable.value = MapViewState.DESTROYED
 		setRenderer(null)
 		val map = mapInterface
 		mapInterface = null

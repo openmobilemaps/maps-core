@@ -250,6 +250,8 @@ void MapScene::resume() {
             for (const auto &layer : selfPtr->layers) {
                 layer.second->resume();
             }
+
+            selfPtr->callbackHandler->onMapResumed();
         }));
 }
 
