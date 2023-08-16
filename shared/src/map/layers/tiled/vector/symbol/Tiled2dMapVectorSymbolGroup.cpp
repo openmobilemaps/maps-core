@@ -31,6 +31,8 @@ Tiled2dMapVectorSymbolGroup::Tiled2dMapVectorSymbolGroup(const std::weak_ptr<Map
           fontProvider(fontProvider) {}
 
 bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features,
+                                             int32_t featuresBase,
+                                             int32_t featuresCount,
                                              std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap) {
 
     auto strongMapInterface = this->mapInterface.lock();
@@ -44,7 +46,8 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
     std::unordered_map<std::string, std::vector<Coord>> textPositionMap;
 
-    for (auto it = features->rbegin(); it != features->rend(); it++) {
+    int32_t featuresRBase = features->size() - (featuresBase + featuresCount);
+    for (auto it = features->rbegin() + featuresRBase; it != features->rbegin() + featuresRBase + featuresCount; it++) {
         auto const &[context, geometry] = *it;
 
         const auto evalContext = EvaluationContext(tileInfo.zoomIdentifier, context);
