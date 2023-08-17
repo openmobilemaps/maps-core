@@ -12,7 +12,7 @@
 
 #include "VectorLayerDescription.h"
 #include "Color.h"
-#include "geojsonvt.hpp"
+#include "GeoJsonTypes.h"
 
 class VectorMapSourceDescription {
 public:
@@ -36,12 +36,12 @@ public:
     std::vector<std::shared_ptr<VectorMapSourceDescription>> vectorSources;
     std::vector<std::shared_ptr<VectorLayerDescription>> layers;
     std::optional<std::string> spriteBaseUrl;
-    std::map<std::string, std::shared_ptr<GeoJSONVT>> geoJsonSources;
+    std::map<std::string, std::shared_ptr<GeoJSONVTInterface>> geoJsonSources;
 
     VectorMapDescription(std::string identifier,
                          std::vector<std::shared_ptr<VectorMapSourceDescription>> vectorSources,
                          std::vector<std::shared_ptr<VectorLayerDescription>> layers,
                          std::optional<std::string> spriteBaseUrl,
-                         std::map<std::string, std::shared_ptr<GeoJSONVT>> geoJsonSources):
+                         std::map<std::string, std::shared_ptr<GeoJSONVTInterface>> geoJsonSources):
     identifier(identifier), vectorSources(vectorSources), layers(layers), spriteBaseUrl(spriteBaseUrl), geoJsonSources(geoJsonSources) {}
 };

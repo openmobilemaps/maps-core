@@ -33,7 +33,7 @@ public:
                                const std::unordered_set<std::string> &layersToDecode,
                                const std::string &sourceName,
                                float screenDensityPpi,
-                               std::shared_ptr<GeoJSONVT> geoJson) :
+                               std::shared_ptr<GeoJSONVTInterface> geoJson) :
     Tiled2dMapVectorSource(mapConfig, layerConfig, conversionHelper, scheduler, tileLoaders, listener, layersToDecode, sourceName, screenDensityPpi),
     geoJson(geoJson) {}
 
@@ -66,7 +66,7 @@ protected:
         const auto &geoJsonTile = geoJson->getTile(tile.zoomIdentifier, tile.x, tile.y);
         Tiled2dMapVectorTileInfo::FeatureMap featureMap = std::make_shared<std::unordered_map<std::string, std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>>>>();
         std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features = std::make_shared<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>>();
-        for (const auto &feature: geoJsonTile.features) {
+        for (const auto &feature: geoJsonTile.getFeatures()) {
             features->push_back({feature->featureContext, std::make_shared<VectorTileGeometryHandler>(feature, tile.bounds, conversionHelper)});
         }
         featureMap->insert({
@@ -76,5 +76,5 @@ protected:
     }
 
 private:
-    const std::shared_ptr<GeoJSONVT> geoJson;
+    const std::shared_ptr<GeoJSONVTInterface> geoJson;
 };

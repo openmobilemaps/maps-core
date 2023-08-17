@@ -61,7 +61,7 @@ public:
 
         std::map<std::string, std::shared_ptr<RasterVectorLayerDescription>> rasterLayerMap;
 
-        std::map<std::string, std::shared_ptr<GeoJSONVT>> geojsonSources;
+        std::map<std::string, std::shared_ptr<GeoJSONVTInterface>> geojsonSources;
 
         std::map<std::string, nlohmann::json> tileJsons;
         for (auto&[key, val]: json["sources"].items()) {

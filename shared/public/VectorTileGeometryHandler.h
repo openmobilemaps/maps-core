@@ -61,7 +61,7 @@ public:
       conversionHelper(conversionHelper)
     {};
 
-    VectorTileGeometryHandler(std::shared_ptr<GeoJsonGeometry> geometry, ::RectCoord tileCoords, const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper): tileCoords(tileCoords), conversionHelper(conversionHelper) {
+    VectorTileGeometryHandler(const std::shared_ptr<GeoJsonGeometry> &geometry, ::RectCoord tileCoords, const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper): tileCoords(tileCoords), conversionHelper(conversionHelper) {
         switch (geometry->featureContext->geomType) {
             case vtzero::GeomType::POINT:
             case vtzero::GeomType::LINESTRING: {

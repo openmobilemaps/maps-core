@@ -6,10 +6,15 @@
 #include "Vec2D.h"
 #include "CoordinateConversionHelperInterface.h"
 
-struct Tile {
+struct Tile: public GeoJSONTileInterface {
     std::vector<std::shared_ptr<GeoJsonGeometry>> features;
     uint32_t num_points = 0;
     uint32_t num_simplified = 0;
+
+public:
+    const std::vector<std::shared_ptr<GeoJsonGeometry>>& getFeatures() const override {
+        return features;
+    };
 };
 
 class InternalTile {

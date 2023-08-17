@@ -36,7 +36,7 @@ inline uint64_t toID(uint8_t z, uint32_t x, uint32_t y) {
     return (((1ull << z) * y + x) * 32) + z;
 }
 
-class GeoJSONVT {
+class GeoJSONVT: public GeoJSONVTInterface {
 public:
     const Options options;
 
@@ -53,7 +53,7 @@ public:
         splitTile(geoJson->geometries, 0, 0, 0);
     }
 
-    const Tile& getTile(const uint8_t z, const uint32_t x_, const uint32_t y) {
+    const GeoJSONTileInterface& getTile(const uint8_t z, const uint32_t x_, const uint32_t y) override {
         if (z > options.maxZoom)
             throw std::runtime_error("Requested zoom higher than maxZoom: " + std::to_string(z));
 
