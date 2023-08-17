@@ -507,7 +507,40 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     
     renderCoordinate = getRenderCoordinates(iconAnchor, -rotations[countOffset], spriteWidth, spriteHeight);
         
-    auto offset = Vec2D((-iconOffset.x) * scaleFactor - leftPadding, iconOffset.y * scaleFactor - topPadding * 0.5 + bottomPadding * 0.5);
+    Vec2D offset = Vec2D(0, 0);
+    
+    switch (iconAnchor) {
+        case Anchor::CENTER:
+            offset = Vec2D((-iconOffset.x) * scaleFactor - leftPadding * 0.5 + rightPadding * 0.5, iconOffset.y * scaleFactor - topPadding * 0.5 + bottomPadding * 0.5);
+            break;
+        case Anchor::LEFT:
+            offset = Vec2D((-iconOffset.x) * scaleFactor - leftPadding, iconOffset.y * scaleFactor - topPadding * 0.5 + bottomPadding * 0.5);
+            break;
+        case Anchor::RIGHT:
+            offset = Vec2D((-iconOffset.x) * scaleFactor + rightPadding, iconOffset.y * scaleFactor - topPadding * 0.5 + bottomPadding * 0.5);
+            break;
+        case Anchor::TOP:
+            offset = Vec2D((-iconOffset.x) * scaleFactor - leftPadding * 0.5 + rightPadding * 0.5, iconOffset.y * scaleFactor - topPadding);
+            break;
+        case Anchor::BOTTOM:
+            offset = Vec2D((-iconOffset.x) * scaleFactor - leftPadding * 0.5 + rightPadding * 0.5, iconOffset.y * scaleFactor + bottomPadding);
+            break;
+        case Anchor::TOP_LEFT:
+            offset = Vec2D((-iconOffset.x) * scaleFactor - leftPadding, iconOffset.y * scaleFactor - topPadding);
+            break;
+        case Anchor::TOP_RIGHT:
+            offset = Vec2D((-iconOffset.x) * scaleFactor + rightPadding, iconOffset.y * scaleFactor - topPadding);
+            break;
+        case Anchor::BOTTOM_LEFT:
+            offset = Vec2D((-iconOffset.x) * scaleFactor - leftPadding, iconOffset.y * scaleFactor + bottomPadding);
+            break;
+        case Anchor::BOTTOM_RIGHT:
+            offset = Vec2D((-iconOffset.x) * scaleFactor + rightPadding, iconOffset.y * scaleFactor + bottomPadding);
+            break;
+        default:
+            break;
+    }
+    
     offset = Vec2DHelper::rotate(offset, Vec2D(0, 0), -rotation);
 
     positions[2 * countOffset] = renderCoordinate.x + offset.x;
