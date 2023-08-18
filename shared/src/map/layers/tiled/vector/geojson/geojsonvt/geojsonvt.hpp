@@ -12,7 +12,7 @@
 
 struct TileOptions {
     // simplification tolerance (higher means simpler)
-    double tolerance = 3;
+    double tolerance = 1.0;
 
     // tile extent
     uint16_t extent = 4096;

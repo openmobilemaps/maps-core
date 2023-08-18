@@ -219,8 +219,6 @@ public:
                         polygons.back().coordinates.push_back(Vec2F(converted.x, converted.y));
                     }
                 }
-            } else {
-                LogError <<= "Indices are empty!!";
             }
         }
     }

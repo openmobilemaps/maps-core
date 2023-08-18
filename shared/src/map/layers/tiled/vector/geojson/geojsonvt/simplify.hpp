@@ -67,6 +67,7 @@ inline void simplify(std::vector<Coord>& points, size_t first, size_t last, doub
 
 inline void simplify(std::vector<Coord>& points, double tolerance) {
     const size_t len = points.size();
+    if (len == 0) return;
 
     // always retain the endpoints (1 is the max value)
     points[0].z = 1.0;

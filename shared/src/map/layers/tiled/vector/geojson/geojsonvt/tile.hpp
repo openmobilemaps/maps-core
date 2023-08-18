@@ -67,43 +67,55 @@ private:
         std::vector<std::vector<::Coord>> coordinates;
         std::vector<std::vector<std::vector<::Coord>>> holes;
 
-        featureContext = geometry->featureContext;
-        coordinates.reserve(geometry->coordinates.size());
+        size_t len = geometry->coordinates.size();
 
-        for (const auto& points : geometry->coordinates) {
+        featureContext = geometry->featureContext;
+        coordinates.reserve(len);
+
+        std::vector<size_t> polygonIndices;
+        polygonIndices.reserve(len);
+
+        for (size_t i = 0; i != len; i++) {
             std::vector<::Coord> temp;
-            temp.reserve(points.size());
-            for (const auto& point : points) {
-                temp.push_back(transform(point));
+            temp.reserve(geometry->coordinates.at(i).size());
+            simplify(geometry->coordinates.at(i), tolerance);
+            for (const auto& point : geometry->coordinates.at(i)) {
+                if (point.z > sq_tolerance) {
+                    temp.push_back(transform(point));
+                }
             }
-            simplify(temp, tolerance);
-            num_points += temp.size();
-            coordinates.push_back(temp);
+
+            if (!temp.empty()) {
+                num_points += temp.size();
+                coordinates.push_back(std::move(temp));
+                polygonIndices.push_back(i);
+            }
         }
 
-        holes.reserve(geometry->holes.size());
+        holes.reserve(polygonIndices.size());
 
-        for (const auto& pointsVec : geometry->holes) {
+        for (auto const &index: polygonIndices) {
             std::vector<std::vector<::Coord>> temp;
-            temp.reserve(pointsVec.size());
-            for (const auto& points : pointsVec) {
+            temp.reserve(geometry->holes.at(index).size());
+            for (auto &points : geometry->holes.at(index)) {
                 std::vector<::Coord> temp1;
-                temp1.reserve(points.size());
-                for (const auto& point : points) {
-                    temp1.push_back(transform(point));
-                }
                 simplify(temp1, tolerance);
+                temp1.reserve(points.size());
+                for (const auto &point : points) {
+                    if (point.z > sq_tolerance) {
+                        temp1.push_back(transform(point));
+                    }
+                }
                 num_points += temp1.size();
-                temp.push_back(temp1);
+                temp.push_back(std::move(temp1));
             }
-            holes.push_back(temp);
+            holes.push_back(std::move(temp));
         }
 
         if (num_points != 0) {
             tile.num_points += num_points;
             tile.features.push_back(std::make_shared<GeoJsonGeometry>(featureContext, coordinates, holes));
         }
-
     }
 
     Coord transform(const Coord& p) {
