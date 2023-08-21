@@ -43,6 +43,7 @@ public:
                                       const TextJustify &textJustify,
                                       const std::shared_ptr<FontLoaderResult> fontResult,
                                       const Vec2F &offset,
+                                      const double radialOffset,
                                       const double lineHeight,
                                       const double letterSpacing,
                                       const int64_t maxCharacterWidth,
@@ -142,6 +143,7 @@ private:
     TextJustify textJustify;
     const Anchor textAnchor;
     const Vec2F offset;
+    const double radialOffset;
 
     float spaceAdvance = 0.0f;
 
