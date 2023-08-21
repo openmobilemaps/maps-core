@@ -44,6 +44,7 @@
 #include "Tiled2dMapVectorSourceSymbolCollisionManager.h"
 #include "Tiled2dMapVectorInteractionManager.h"
 #include "Tiled2dMapVectorReadyManager.h"
+#include "Tiled2dVectorGeoJsonSource.h"
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::string &remoteStyleJsonUrl,
@@ -193,6 +194,9 @@ void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDes
     for (auto const &source: mapDescription->vectorSources) {
         layerConfigs[source->identifier] = getLayerConfig(source);
     }
+    for (auto const &[source, geoJson]: mapDescription->geoJsonSources) {
+        layerConfigs[source] = getLayerConfig(VectorMapSourceDescription::geoJsonDescription());
+    }
     initializeVectorLayer();
 }
 
@@ -295,18 +299,36 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     }
 
     for (auto const &[source, layers]: layersToDecode) {
+
+
         auto layerConfig = layerConfigs[source];
         auto sourceMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
-        auto vectorSource = Actor<Tiled2dMapVectorSource>(sourceMailbox,
-                                                          mapInterface->getMapConfig(),
-                                                          layerConfig,
-                                                          mapInterface->getCoordinateConverterHelper(),
-                                                          mapInterface->getScheduler(),
-                                                          loaders,
-                                                          selfVectorActor,
-                                                          layers,
-                                                          source,
-                                                          mapInterface->getCamera()->getScreenDensityPpi());
+
+        Actor<Tiled2dMapVectorSource> vectorSource;
+        if (mapDescription->geoJsonSources.count(source) != 0) {
+            vectorSource = Actor<Tiled2dVectorGeoJsonSource>(sourceMailbox,
+                                                              mapInterface->getMapConfig(),
+                                                              layerConfig,
+                                                              mapInterface->getCoordinateConverterHelper(),
+                                                              mapInterface->getScheduler(),
+                                                              loaders,
+                                                              selfVectorActor,
+                                                              layers,
+                                                              source,
+                                                              mapInterface->getCamera()->getScreenDensityPpi(),
+                                                              mapDescription->geoJsonSources.at(source)).strongActor<Tiled2dMapVectorSource>();
+        } else {
+            vectorSource = Actor<Tiled2dMapVectorSource>(sourceMailbox,
+                                                              mapInterface->getMapConfig(),
+                                                              layerConfig,
+                                                              mapInterface->getCoordinateConverterHelper(),
+                                                              mapInterface->getScheduler(),
+                                                              loaders,
+                                                              selfVectorActor,
+                                                              layers,
+                                                              source,
+                                                              mapInterface->getCamera()->getScreenDensityPpi());
+        }
         vectorTileSources[source] = vectorSource;
         sourceInterfaces.push_back(vectorSource.weakActor<Tiled2dMapSourceInterface>());
 
@@ -471,6 +493,9 @@ void Tiled2dMapVectorLayer::pregenerateRenderPasses() {
     std::shared_ptr<MaskingObjectInterface> lastMask = nullptr;
 
     for (const auto &description : orderedRenderDescriptions) {
+        if (description->renderObjects.empty()) {
+            continue;
+        }
         if (description->maskingObject != lastMask && !renderObjects.empty()) {
             newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(0), renderObjects, lastMask));
             renderObjects.clear();

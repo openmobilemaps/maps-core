@@ -177,6 +177,8 @@ open class MCTextureLoader: MCLoaderInterface {
 
         modifyUrlRequest(request: &urlRequest)
 
+        urlRequest.cachePolicy = .reloadRevalidatingCacheData;
+
         let promise = DJPromise<MCDataLoaderResult>()
 
         var task = session.dataTask(with: urlRequest) { [weak self] data, response_, error_ in

@@ -18,6 +18,7 @@
 #include "Logger.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "CoordinateSystemIdentifiers.h"
+#include "GeoJsonTypes.h"
 
 namespace mapbox {
     namespace util {
@@ -30,6 +31,19 @@ namespace mapbox {
         template <>
         struct nth<1, vtzero::point> {
             inline static auto get(const vtzero::point &t) {
+                return t.y;
+            };
+        };
+
+        template <>
+        struct nth<0, Coord> {
+            inline static auto get(const Coord &t) {
+                return t.x;
+            };
+        };
+        template <>
+        struct nth<1, Coord> {
+            inline static auto get(const Coord &t) {
                 return t.y;
             };
         };
@@ -46,6 +60,27 @@ public:
       extent((double)extent),
       conversionHelper(conversionHelper)
     {};
+
+    VectorTileGeometryHandler(const std::shared_ptr<GeoJsonGeometry> &geometry, ::RectCoord tileCoords, const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper): tileCoords(tileCoords), conversionHelper(conversionHelper) {
+        switch (geometry->featureContext->geomType) {
+            case vtzero::GeomType::POINT:
+            case vtzero::GeomType::LINESTRING: {
+                for (auto const &points: geometry->coordinates) {
+                    std::vector<Coord> temp;
+                    for (auto const &point: points) {
+                        temp.push_back(point);
+                    }
+                    coordinates.push_back(temp);
+                }
+                break;
+            }
+            case vtzero::GeomType::POLYGON:
+                triangulateGeoJsonPolygons(geometry);
+                break;
+            case vtzero::GeomType::UNKNOWN:
+                break;
+        }
+    }
 
     VectorTileGeometryHandler(const VectorTileGeometryHandler& other) = delete;
 
@@ -149,6 +184,45 @@ public:
         polygonPoints.clear();
     }
 
+    void triangulateGeoJsonPolygons(const std::shared_ptr<GeoJsonGeometry> &geometry) {
+        for (int i = 0; i < geometry->coordinates.size(); i++) {
+            std::vector<std::vector<Coord>> polygon;
+            polygon.reserve(geometry->coordinates[i].size() + 1);
+            coordinates.reserve(coordinates.size() + polygon.capacity());
+
+            coordinates.emplace_back();
+            coordinates.back().reserve(geometry->coordinates[i].size());
+            for (auto const &point: geometry->coordinates[i]){
+                coordinates.back().push_back(point);
+            }
+            polygon.emplace_back(geometry->coordinates[i]);
+
+            for(auto const &hole: geometry->holes[i]) {
+                coordinates.emplace_back();
+                coordinates.back().reserve(hole.size());
+                for (auto const &point: hole){
+                    coordinates.back().push_back(point);
+                }
+
+                polygon.emplace_back(hole);
+            }
+            limitHoles(polygon, 500);
+
+            std::vector<uint16_t> indices = mapbox::earcut<uint16_t>(polygon);
+
+            if (!indices.empty()) {
+                polygons.push_back({{}, indices});
+
+                for (auto const &points: polygon) {
+                    for (auto const &point: points) {
+                        auto converted = conversionHelper->convertToRenderSystem(point);
+                        polygons.back().coordinates.push_back(Vec2F(converted.x, converted.y));
+                    }
+                }
+            }
+        }
+    }
+
     const std::vector<std::vector<::Coord>> &getLineCoordinates() {
         return coordinates;
     }
@@ -247,6 +321,26 @@ private:
     }
 
     void limitHoles(std::vector<std::vector<vtzero::point>> &polygon, uint32_t maxHoles) {
+        if (polygon.size() > 1 + maxHoles) {
+             std::nth_element(
+                 polygon.begin() + 1, polygon.begin() + 1 + maxHoles, polygon.end(), [](const auto& a, const auto& b) {
+                     return std::fabs(signedArea(a)) > std::fabs(signedArea(b));
+                 });
+             polygon.resize(1 + maxHoles);
+         }
+    }
+
+    static double signedArea(const std::vector<Coord>& hole) {
+        double sum = 0;
+        for (std::size_t i = 0, len = hole.size(), j = len - 1; i < len; j = i++) {
+            const auto& p1 = hole[i];
+            const auto& p2 = hole[j];
+            sum += (p2.x - p1.x) * (p1.y + p2.y);
+        }
+        return sum;
+    }
+
+    void limitHoles(std::vector<std::vector<Coord>> &polygon, uint32_t maxHoles) {
         if (polygon.size() > 1 + maxHoles) {
              std::nth_element(
                  polygon.begin() + 1, polygon.begin() + 1 + maxHoles, polygon.end(), [](const auto& a, const auto& b) {

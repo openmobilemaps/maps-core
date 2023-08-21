@@ -236,6 +236,9 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
 
         for (auto featureIt = tileData->rbegin(); featureIt != tileData->rend(); ++featureIt) {
             std::shared_ptr<FeatureContext> featureContext = std::get<0>(*featureIt);
+            
+            if (featureContext->geomType != vtzero::GeomType::POLYGON && featureContext->geomType != vtzero::GeomType::LINESTRING) { continue; }
+
             EvaluationContext evalContext = EvaluationContext(tileInfo.zoomIdentifier, featureContext);
             if ((description->filter == nullptr || description->filter->evaluateOr(evalContext, true))) {
                 int styleGroupIndex = -1;

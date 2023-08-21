@@ -51,7 +51,6 @@ protected:
     
     virtual Tiled2dMapVectorTileInfo::FeatureMap postLoadingTask(const std::shared_ptr<DataLoaderResult> &loadedData, const Tiled2dMapTileInfo &tile) override;
 
-private:
     const std::vector<std::shared_ptr<::LoaderInterface>> loaders;
     const std::unordered_set<std::string> layersToDecode;
     

@@ -154,6 +154,8 @@ let package = Package(
                 .headerSearchPath("src/map/layers/tiled/raster"),
                 .headerSearchPath("src/map/layers/tiled/wmts"),
                 .headerSearchPath("src/map/layers/tiled/vector"),
+                .headerSearchPath("src/map/layers/tiled/vector/geojson"),
+                .headerSearchPath("src/map/layers/tiled/vector/geojson/geojsonvt"),
                 .headerSearchPath("src/map/layers/tiled/vector/sourcemanagers"),
                 .headerSearchPath("src/map/layers/tiled/vector/tiles"),
                 .headerSearchPath("src/map/layers/tiled/vector/tiles/line"),
