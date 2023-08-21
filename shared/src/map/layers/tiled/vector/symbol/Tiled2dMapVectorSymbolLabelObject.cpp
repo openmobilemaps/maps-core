@@ -26,6 +26,7 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
                                                                      const TextJustify &textJustify,
                                                                      const std::shared_ptr<FontLoaderResult> fontResult,
                                                                      const Vec2F &offset,
+                                                                     const double radialOffset,
                                                                      const double lineHeight,
                                                                      const double letterSpacing,
                                                                      const int64_t maxCharacterWidth,
@@ -43,6 +44,7 @@ maxCharacterAngle(maxCharacterAngle),
 textAnchor(textAnchor),
 textJustify(textJustify),
 offset(offset),
+radialOffset(radialOffset),
 fontResult(fontResult),
 fullText(fullText),
 lineCoordinates(lineCoordinates),
@@ -330,8 +332,10 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
                 if (pen.x == 0.0 && pen.y == 0.0) {
                     // only look at first character for offset
                     // this way the left top edge of the first character is exactly in the origin.
-                    anchorOffset.x = -boxMin.x;
-                    yOffset = boxMin.y;
+                    if (radialOffset == 0.0) {
+                        anchorOffset.x = -boxMin.x;
+                        yOffset = boxMin.y;
+                    }
                 }
 
                 const size_t centerPositionSize = centerPositions.size();
@@ -402,23 +406,32 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
         }
     }
 
-    const Vec2D textOffset(offset.x * fontSize, offset.y * fontSize);
+    // TODO: currently only shifting to top right
+    Vec2D textOffset(0.0, 0.0);
+    if (radialOffset != 0) {
+        // Text offset is ignored when radial offset is set
+        textOffset.x = radialOffset;
+        textOffset.y = -radialOffset;
+    } else {
+        textOffset.x = offset.x;
+        textOffset.y = offset.y;
+    }
 
     switch (textAnchor) {
         case Anchor::CENTER:
         case Anchor::TOP:
         case Anchor::BOTTOM:
-            anchorOffset.x -= size.x / 2.0 - textOffset.x;
+            anchorOffset.x -= size.x / 2.0 - textOffset.x * fontSize;
             break;
         case Anchor::LEFT:
         case Anchor::TOP_LEFT:
         case Anchor::BOTTOM_LEFT:
-            anchorOffset.x += textOffset.x;
+            anchorOffset.x += textOffset.x * fontSize;
             break;
         case Anchor::RIGHT:
         case Anchor::TOP_RIGHT:
         case Anchor::BOTTOM_RIGHT:
-            anchorOffset.x -= size.x - textOffset.x;
+            anchorOffset.x -= size.x - textOffset.x * fontSize;
             break;
         default:
             break;
@@ -428,21 +441,21 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
         case Anchor::CENTER:
         case Anchor::LEFT:
         case Anchor::RIGHT:
-            anchorOffset.y -= yOffset + size.y / 2.0 - textOffset.y;
+            anchorOffset.y -= yOffset + size.y / 2.0 + textOffset.y * fontSize;
             break;
         case Anchor::TOP:
         case Anchor::TOP_LEFT:
         case Anchor::TOP_RIGHT:
-            anchorOffset.y -= textOffset.y + yOffset;
+            anchorOffset.y -= textOffset.y * fontSize - yOffset;
             break;
         case Anchor::BOTTOM:
         case Anchor::BOTTOM_LEFT:
         case Anchor::BOTTOM_RIGHT:
-            anchorOffset.y -= size.y;
-            if (textOffset.y != 0.0) {
-                anchorOffset.y += textOffset.y;
+            if (radialOffset != 0.0) {
+                anchorOffset.y -= (lineHeight - fontResult->fontData->info.lineHeight + 1.0 - textOffset.y) * fontSize;
             } else {
-                anchorOffset.y -= (fontResult->fontData->info.lineHeight - fontResult->fontData->info.base) * fontSize + yOffset;
+                anchorOffset.y = -size.y;
+                anchorOffset.y -= ((fontResult->fontData->info.lineHeight - fontResult->fontData->info.base) * lineHeight - textOffset.y) * fontSize + yOffset;
             }
             break;
         default:

@@ -107,19 +107,12 @@ textSymbolPlacement(textSymbolPlacement) {
 
 
         auto textOffset = description->style.getTextOffset(evalContext);
-
         const auto textRadialOffset = description->style.getTextRadialOffset(evalContext);
-        // TODO: currently only shifting to top right
-        if (textRadialOffset != 0) {
-            textOffset.x += textRadialOffset;
-            textOffset.y -= textRadialOffset;
-        }
-
         const auto letterSpacing = description->style.getTextLetterSpacing(evalContext);
 
         SymbolAlignment labelRotationAlignment = description->style.getTextRotationAlignment(evalContext);
         boundingBoxRotationAlignment = labelRotationAlignment;
-        labelObject = std::make_shared<Tiled2dMapVectorSymbolLabelObject>(converter, featureContext, description, text, fullText, coordinate, lineCoordinates, textAnchor, angle, textJustify, fontResult, textOffset, description->style.getTextLineHeight(evalContext), letterSpacing, description->style.getTextMaxWidth(evalContext), description->style.getTextMaxAngle(evalContext), labelRotationAlignment, textSymbolPlacement, animationCoordinator);
+        labelObject = std::make_shared<Tiled2dMapVectorSymbolLabelObject>(converter, featureContext, description, text, fullText, coordinate, lineCoordinates, textAnchor, angle, textJustify, fontResult, textOffset, textRadialOffset, description->style.getTextLineHeight(evalContext), letterSpacing, description->style.getTextMaxWidth(evalContext), description->style.getTextMaxAngle(evalContext), labelRotationAlignment, textSymbolPlacement, animationCoordinator);
 
         instanceCounts.textCharacters = labelObject->getCharacterCount();
 
