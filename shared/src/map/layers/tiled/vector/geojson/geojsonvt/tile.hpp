@@ -96,6 +96,9 @@ private:
 
         for (auto const &index: polygonIndices) {
             std::vector<std::vector<::Coord>> temp;
+            if (index >= geometry->holes.size()) {
+                continue;
+            }
             temp.reserve(geometry->holes.at(index).size());
             for (auto &points : geometry->holes.at(index)) {
                 std::vector<::Coord> temp1;
