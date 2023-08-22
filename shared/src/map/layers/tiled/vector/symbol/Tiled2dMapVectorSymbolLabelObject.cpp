@@ -528,8 +528,10 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
         Vec2D lastCirclePosition = Vec2D(0, 0);
         size_t count = centerPositions.size();
         for (int i = 0; i < count; i++) {
-            Vec2D newPos = Vec2D(dx + centerPositions.at(i).x, dy + centerPositions.at(i).y);
-            newPos = Vec2DHelper::rotate(newPos, origin, angle);
+            Vec2D newPos = Vec2D(centerPositions.at(i).x, centerPositions.at(i).y);
+            newPos = Vec2DHelper::rotate(newPos, Vec2D(0, 0), angle);
+            newPos.x += dxRot;
+            newPos.y += dyRot;
             if (i != count - 1 && std::sqrt((newPos.x - lastCirclePosition.x) * (newPos.x - lastCirclePosition.x) +
                                             (newPos.y - lastCirclePosition.y) * (newPos.y - lastCirclePosition.y)) <=
                                           (2.0 * maxSymbolRadius) * collisionDistanceBias) {
