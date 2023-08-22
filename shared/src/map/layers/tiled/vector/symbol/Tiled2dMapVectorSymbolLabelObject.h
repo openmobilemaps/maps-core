@@ -187,4 +187,6 @@ private:
 
     std::shared_ptr<SymbolAnimationCoordinator> animationCoordinator;
     static constexpr double collisionDistanceBias = 0.75;
+
+    bool wasReversed = false;
 };

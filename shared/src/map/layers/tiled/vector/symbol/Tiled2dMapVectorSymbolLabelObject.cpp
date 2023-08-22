@@ -261,6 +261,8 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
                     std::reverse((*lineCoordinates).begin(), (*lineCoordinates).end());
                     std::reverse(renderLineCoordinates.begin(), renderLineCoordinates.end());
 
+                    wasReversed = !wasReversed;
+
                     countOffset -= characterCount;
 
                     updatePropertiesLine(positions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, rotation);
@@ -572,6 +574,11 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
     }
 
     currentIndex = indexAtDistance(currentIndex, -size * 0.5);
+    auto yOffset = Vec2D(0.0, offset.y * fontSize);
+
+    if (wasReversed) {
+        yOffset.y *= -1;
+    }
 
     double averageAngleS = 0.0;
     double averageAngleC = 0.0;
@@ -616,8 +623,8 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
 
             lastAngle = angleDeg;
 
-            auto x = p.x + bearing.x;
-            auto y = p.y - bearing.y;
+            auto x = p.x + bearing.x + yOffset.x;
+            auto y = p.y - bearing.y + yOffset.y;
 
             averageAngleS += sin(angleRad) / numSymbols;
             averageAngleC += cos(angleRad) / numSymbols;

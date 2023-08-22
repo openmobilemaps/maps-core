@@ -28,6 +28,14 @@ inline double operator*( const ::Vec2D& left, const ::Vec2D& right ) {
     return left.x * right.x + left.y * right.y;
 }
 
+inline Vec2D operator*( const ::Vec2D& left, const double& val) {
+    return Vec2D(left.x * val, left.y * val);
+}
+
+inline Vec2D operator*( const ::Vec2D& left, const float& val) {
+    return Vec2D(left.x * val, left.y * val);
+}
+
 inline Vec2D operator/( const ::Vec2D& left, const double& val ) {
     return Vec2D(left.x / val, left.y / val);
 }
