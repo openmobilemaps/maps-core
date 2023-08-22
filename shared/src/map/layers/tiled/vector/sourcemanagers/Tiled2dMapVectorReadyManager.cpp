@@ -24,12 +24,14 @@ void Tiled2dMapVectorReadyManager::didProcessData(const Tiled2dMapTileInfo &tile
         if (tileProcessIt->second == managerCount && notReadyCount == 0) {
             auto tileIt = tileNotReadyCount.find(tile);
             if (tileIt == tileNotReadyCount.end()) {
-                tileDataProcessCount.erase(tile);
+                tileDataProcessCount.erase(tileProcessIt);
                 vectorSource.message(&Tiled2dMapSourceReadyInterface::setTileReady, tile);
+                return;
             }
         }
     } else if (managerCount == 1 && notReadyCount == 0) {
         vectorSource.message(&Tiled2dMapSourceReadyInterface::setTileReady, tile);
+        return;
     } else {
         tileDataProcessCount.insert({tile, 1});
     }
@@ -49,13 +51,25 @@ void Tiled2dMapVectorReadyManager::setReady(const Tiled2dMapTileInfo &tile, cons
     if (tileIt != tileNotReadyCount.end()){
         tileIt->second -= readyCount;
         if (tileIt->second <= 0) {
-            tileNotReadyCount.erase(tile);
-
             auto tileProcessIt = tileDataProcessCount.find(tile);
             if (tileProcessIt->second == managerCount) {
-                tileDataProcessCount.erase(tile);
+                tileDataProcessCount.erase(tileProcessIt);
+                tileNotReadyCount.erase(tileIt);
                 vectorSource.message(&Tiled2dMapSourceReadyInterface::setTileReady, tile);
             }
+        }
+    }
+}
+
+void Tiled2dMapVectorReadyManager::remove(const std::unordered_set<Tiled2dMapTileInfo> &tilesToRemove) {
+    for (const auto &tile: tilesToRemove) {
+        auto tileIt = tileNotReadyCount.find(tile);
+        if (tileIt != tileNotReadyCount.end()){
+            tileNotReadyCount.erase(tileIt);
+        }
+        auto tileProcessIt = tileDataProcessCount.find(tile);
+        if (tileProcessIt != tileDataProcessCount.end()) {
+            tileDataProcessCount.erase(tileProcessIt);
         }
     }
 }

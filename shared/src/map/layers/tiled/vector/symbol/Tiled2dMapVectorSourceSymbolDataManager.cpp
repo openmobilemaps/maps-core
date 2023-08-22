@@ -308,6 +308,10 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups(const std::unord
         tileSymbolGroupMap.erase(tile);
     }
 
+    readyManager.syncAccess([tilesStatesToRemove](auto manager){
+        manager->remove(tilesStatesToRemove);
+    });
+
     for (const auto &symbolGroup: toClear) {
         symbolGroup.syncAccess([&](auto group){
             group->clear();

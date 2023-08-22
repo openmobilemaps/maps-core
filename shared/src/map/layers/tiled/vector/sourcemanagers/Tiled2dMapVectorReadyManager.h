@@ -24,6 +24,8 @@ public:
 
     void setReady(const Tiled2dMapTileInfo &tile, const size_t readyCount);
 
+    void remove(const std::unordered_set<Tiled2dMapTileInfo> &tilesToRemove);
+
 private:
     const WeakActor<Tiled2dMapSourceReadyInterface> vectorSource;
 
