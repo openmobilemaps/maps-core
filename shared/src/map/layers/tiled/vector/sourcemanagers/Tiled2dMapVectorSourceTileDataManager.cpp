@@ -190,6 +190,10 @@ void Tiled2dMapVectorSourceTileDataManager::updateMaskObjects(
         tileRenderObjectsMap.erase(tileToRemove);
     }
 
+    readyManager.syncAccess([tilesToRemove](auto manager){
+        manager->remove(tilesToRemove);
+    });
+
     pregenerateRenderPasses();
 
     mapInterface->invalidate();
