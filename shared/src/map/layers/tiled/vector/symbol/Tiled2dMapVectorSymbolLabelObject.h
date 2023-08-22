@@ -50,7 +50,8 @@ public:
                                       const double maxCharacterAngle,
                                       const SymbolAlignment rotationAlignment,
                                       const TextSymbolPlacement &textSymbolPlacement,
-                                      std::shared_ptr<SymbolAnimationCoordinator> animationCoordinator);
+                                      std::shared_ptr<SymbolAnimationCoordinator> animationCoordinator,
+                                      const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager);
 
     int getCharacterCount();
 
@@ -189,4 +190,6 @@ private:
     static constexpr double collisionDistanceBias = 0.75;
 
     bool wasReversed = false;
+
+    const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> featureStateManager;
 };

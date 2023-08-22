@@ -5,6 +5,7 @@
 #import "MCLayerInterface.h"
 #import "MCLoaderInterface.h"
 #import "MCTiled2dMapZoomInfo.h"
+#import "MCVectorLayerFeatureInfoValue.h"
 #import <Foundation/Foundation.h>
 @class MCTiled2dMapVectorLayerInterface;
 @protocol MCTiled2dMapVectorLayerSelectionCallbackInterface;
@@ -43,5 +44,8 @@
 - (nullable id<MCLayerInterface>)asLayerInterface;
 
 - (nullable NSString *)getStyleMetadataJson;
+
+- (void)setFeatureState:(nonnull NSString *)identifier
+             properties:(nonnull NSDictionary<NSString *, MCVectorLayerFeatureInfoValue *> *)properties;
 
 @end

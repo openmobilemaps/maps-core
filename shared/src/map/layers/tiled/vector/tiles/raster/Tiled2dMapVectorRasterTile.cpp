@@ -19,14 +19,16 @@ Tiled2dMapVectorRasterTile::Tiled2dMapVectorRasterTile(const std::weak_ptr<MapIn
                                                        const Tiled2dMapTileInfo &tileInfo,
                                                        const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
                                                        const std::shared_ptr<RasterVectorLayerDescription> &description,
-                                                       const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig)
-                                                       : Tiled2dMapVectorTile(mapInterface, tileInfo, description, layerConfig, tileCallbackInterface),
+                                                       const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
+                                                       const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager)
+                                                       : Tiled2dMapVectorTile(mapInterface, tileInfo, description, layerConfig, tileCallbackInterface, featureStateManager),
                                                        usedKeys(description->getUsedKeys()) {
     isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
+    isStyleFeatureStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end();
     auto pMapInterface = mapInterface.lock();
     if (pMapInterface) {
         auto shader = pMapInterface->getShaderFactory()->createRasterShader();
-        shader->asShaderProgramInterface()->setBlendMode(description->style.getBlendMode(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>())));
+        shader->asShaderProgramInterface()->setBlendMode(description->style.getBlendMode(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>(), featureStateManager)));
         auto quad = pMapInterface->getGraphicsObjectFactory()->createQuad(shader->asShaderProgramInterface());
         tileObject = std::make_shared<Textured2dLayerObject>(quad, shader, pMapInterface);
         tileObject->setRectCoord(tileInfo.bounds);
@@ -37,6 +39,7 @@ void Tiled2dMapVectorRasterTile::updateRasterLayerDescription(const std::shared_
                                                         const Tiled2dMapVectorTileDataRaster &tileData) {
     Tiled2dMapVectorTile::updateRasterLayerDescription(description, tileData);
     isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
+    isStyleFeatureStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end();
     lastZoom = std::nullopt;
     setRasterTileData(tileData);
 }
@@ -54,14 +57,18 @@ void Tiled2dMapVectorRasterTile::update() {
     auto rasterDescription = std::static_pointer_cast<RasterVectorLayerDescription>(description);
     bool inZoomRange = rasterDescription->maxZoom >= zoomIdentifier && rasterDescription->minZoom <= zoomIdentifier;
 
-    if (lastZoom && ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant) && lastAlpha == alpha && (lastInZoomRange && *lastInZoomRange == inZoomRange)) {
+    if (lastZoom &&
+        ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant)
+        && lastAlpha == alpha &&
+        (lastInZoomRange && *lastInZoomRange == inZoomRange) &&
+        !isStyleFeatureStateDependant) {
         return;
     }
     lastZoom = zoomIdentifier;
     lastAlpha = alpha;
     lastInZoomRange = inZoomRange;
 
-    const EvaluationContext evalContext(zoomIdentifier, std::make_shared<FeatureContext>());
+    const EvaluationContext evalContext(zoomIdentifier, std::make_shared<FeatureContext>(), featureStateManager);
     auto rasterStyle = rasterDescription->style.getRasterStyle(evalContext);
     
     if (!inZoomRange) {

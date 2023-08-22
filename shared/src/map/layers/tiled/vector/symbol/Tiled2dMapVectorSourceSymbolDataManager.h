@@ -35,7 +35,8 @@ public:
                                           const std::string &source,
                                           const std::shared_ptr<FontLoaderInterface> &fontLoader,
                                           const WeakActor<Tiled2dMapVectorSource> &vectorSource,
-                                            const Actor<Tiled2dMapVectorReadyManager> &readyManager);
+                                            const Actor<Tiled2dMapVectorReadyManager> &readyManager,
+                                            const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager);
 
     void onAdded(const std::weak_ptr< ::MapInterface> &mapInterface) override;
 

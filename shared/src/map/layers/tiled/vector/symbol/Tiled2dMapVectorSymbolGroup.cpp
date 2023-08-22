@@ -22,13 +22,15 @@ Tiled2dMapVectorSymbolGroup::Tiled2dMapVectorSymbolGroup(const std::weak_ptr<Map
                                                          const WeakActor<Tiled2dMapVectorFontProvider> &fontProvider,
                                                          const Tiled2dMapTileInfo &tileInfo,
                                                          const std::string &layerIdentifier,
-                                                         const std::shared_ptr<SymbolVectorLayerDescription> &layerDescription)
+                                                         const std::shared_ptr<SymbolVectorLayerDescription> &layerDescription,
+                                                         const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager)
         : mapInterface(mapInterface),
           layerConfig(layerConfig),
           tileInfo(tileInfo),
           layerIdentifier(layerIdentifier),
           layerDescription(layerDescription),
-          fontProvider(fontProvider) {}
+          fontProvider(fontProvider),
+          featureStateManager(featureStateManager){}
 
 bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features,
                                              int32_t featuresBase,
@@ -50,7 +52,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
     for (auto it = features->rbegin() + featuresRBase; it != features->rbegin() + featuresRBase + featuresCount; it++) {
         auto const &[context, geometry] = *it;
 
-        const auto evalContext = EvaluationContext(tileInfo.zoomIdentifier, context);
+        const auto evalContext = EvaluationContext(tileInfo.zoomIdentifier, context, featureStateManager);
 
         if ((layerDescription->filter != nullptr && !layerDescription->filter->evaluateOr(evalContext, true))) {
             continue;
@@ -306,7 +308,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
     if (instanceCounts.icons != 0) {
         auto shader = strongMapInterface->getShaderFactory()->createAlphaInstancedShader()->asShaderProgramInterface();
         shader->setBlendMode(
-                layerDescription->style.getBlendMode(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>())));
+                layerDescription->style.getBlendMode(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>(), featureStateManager)));
         iconInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createQuadInstanced(shader);
 
         iconInstancedObject->setInstanceCount(instanceCounts.icons);
@@ -322,7 +324,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
     if (instanceCounts.stretchedIcons != 0) {
         auto shader = strongMapInterface->getShaderFactory()->createStretchInstancedShader()->asShaderProgramInterface();
         shader->setBlendMode(
-                layerDescription->style.getBlendMode(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>())));
+                layerDescription->style.getBlendMode(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>(), featureStateManager)));
         stretchedInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createQuadStretchedInstanced(shader);
 
         stretchedInstancedObject->setInstanceCount(instanceCounts.stretchedIcons);
@@ -338,7 +340,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
     if (instanceCounts.textCharacters != 0) {
         auto shader = strongMapInterface->getShaderFactory()->createTextInstancedShader()->asShaderProgramInterface();
         shader->setBlendMode(
-                layerDescription->style.getBlendMode(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>())));
+                layerDescription->style.getBlendMode(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>(), featureStateManager)));
         textInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createTextInstanced(shader);
         textInstancedObject->setInstanceCount(instanceCounts.textCharacters);
 
@@ -351,8 +353,8 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
     }
 
 #ifdef DRAW_TEXT_BOUNDING_BOX
-    textSymbolPlacement = layerDescription->style.getTextSymbolPlacement(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>()));
-    labelRotationAlignment = layerDescription->style.getTextRotationAlignment(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>()));
+    textSymbolPlacement = layerDescription->style.getTextSymbolPlacement(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>(), featureStateManager));
+    labelRotationAlignment = layerDescription->style.getTextRotationAlignment(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>(), featureStateManager));
     if (labelRotationAlignment == SymbolAlignment::AUTO) {
         switch (textSymbolPlacement) {
             case TextSymbolPlacement::POINT:
@@ -661,7 +663,7 @@ Tiled2dMapVectorSymbolGroup::createSymbolObject(const Tiled2dMapTileInfo &tileIn
                                                 std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap) {
     auto symbolObject = std::make_shared<Tiled2dMapVectorSymbolObject>(mapInterface, layerConfig, fontProvider, tileInfo, layerIdentifier,
                                                           description, featureContext, text, fullText, coordinate, lineCoordinates,
-                                                          fontList, textAnchor, angle, textJustify, textSymbolPlacement, hideIcon, animationCoordinatorMap);
+                                                          fontList, textAnchor, angle, textJustify, textSymbolPlacement, hideIcon, animationCoordinatorMap, featureStateManager);
     symbolObject->setAlpha(alpha);
     const auto counts = symbolObject->getInstanceCounts();
     if (counts.icons + counts.stretchedIcons + counts.textCharacters == 0) {

@@ -58,7 +58,8 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         loaders(loaders),
         fontLoader(fontLoader),
         dpFactor(dpFactor),
-        customZoomInfo(customZoomInfo) {}
+        customZoomInfo(customZoomInfo),
+        featureStateManager(std::make_shared<Tiled2dMapVectorFeatureStateManager>()) {}
 
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
@@ -75,7 +76,8 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         loaders(loaders),
         fontLoader(fontLoader),
         dpFactor(dpFactor),
-        customZoomInfo(customZoomInfo) {}
+        customZoomInfo(customZoomInfo),
+        featureStateManager(std::make_shared<Tiled2dMapVectorFeatureStateManager>())  {}
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::shared_ptr<VectorMapDescription> &mapDescription,
@@ -86,7 +88,8 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         layerName(layerName),
         loaders(loaders),
         fontLoader(fontLoader),
-        customZoomInfo(customZoomInfo) {
+        customZoomInfo(customZoomInfo),
+        featureStateManager(std::make_shared<Tiled2dMapVectorFeatureStateManager>())  {
     setMapDescription(mapDescription);
 }
 
@@ -98,7 +101,8 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         layerName(layerName),
         loaders(loaders),
         fontLoader(fontLoader),
-        customZoomInfo(customZoomInfo) {}
+        customZoomInfo(customZoomInfo),
+        featureStateManager(std::make_shared<Tiled2dMapVectorFeatureStateManager>())  {}
 
 void Tiled2dMapVectorLayer::scheduleStyleJsonLoading() {
     isLoadingStyleJson = true;
@@ -279,7 +283,8 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                                              rasterSubLayerConfig,
                                                                                              layerDesc->source,
                                                                                              sourceActor.weakActor<Tiled2dMapRasterSource>(),
-                                                                                             readyManager);
+                                                                                             readyManager,
+                                                                                             featureStateManager);
                 sourceManagerActor.unsafe()->setAlpha(alpha);
                 sourceTileManagers[layerDesc->source] = sourceManagerActor.strongActor<Tiled2dMapVectorSourceTileDataManager>();
                 sourceInterfaces.push_back(sourceActor.weakActor<Tiled2dMapSourceInterface>());
@@ -342,7 +347,8 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                                      layerConfig,
                                                                                      source,
                                                                                      vectorSource.weakActor<Tiled2dMapVectorSource>(),
-                                                                                     readyManager);
+                                                                                     readyManager,
+                                                                                     featureStateManager);
         sourceManagerActor.unsafe()->setAlpha(alpha);
         sourceTileManagers[source] = sourceManagerActor.strongActor<Tiled2dMapVectorSourceTileDataManager>();
         interactionDataManagers[source].push_back(sourceManagerActor.weakActor<Tiled2dMapVectorSourceDataManager>());
@@ -356,7 +362,8 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                         source,
                                                                         fontLoader,
                                                                         vectorSource.weakActor<Tiled2dMapVectorSource>(),
-                                                                        readyManager);
+                                                                        readyManager,
+                                                                        featureStateManager);
             actor.unsafe()->setAlpha(alpha);
             symbolSourceDataManagers[source] = actor;
             interactionDataManagers[source].push_back(actor.weakActor<Tiled2dMapVectorSourceDataManager>());
@@ -406,7 +413,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
         return layer->getType() == VectorLayerType::background;
     });
     if (backgroundLayerDesc != mapDescription->layers.end()) {
-        backgroundLayer = std::make_shared<Tiled2dMapVectorBackgroundSubLayer>(std::static_pointer_cast<BackgroundVectorLayerDescription>(*backgroundLayerDesc));
+        backgroundLayer = std::make_shared<Tiled2dMapVectorBackgroundSubLayer>(std::static_pointer_cast<BackgroundVectorLayerDescription>(*backgroundLayerDesc), featureStateManager);
         backgroundLayer->onAdded(mapInterface, layerIndex);
     }
 
@@ -898,4 +905,12 @@ void Tiled2dMapVectorLayer::clearTouch() {
 
 std::optional<std::string> Tiled2dMapVectorLayer::getStyleMetadataJson() {
     return metadata;
+}
+
+void Tiled2dMapVectorLayer::setFeatureState(const std::string & identifier, const std::unordered_map<std::string, VectorLayerFeatureInfoValue> & properties) {
+    
+    featureStateManager->setFeatureState(identifier, properties);
+
+    if (mapInterface)
+        mapInterface->invalidate();
 }

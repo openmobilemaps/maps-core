@@ -35,7 +35,8 @@ public:
                                 const WeakActor<Tiled2dMapVectorFontProvider> &fontProvider,
                                 const Tiled2dMapTileInfo &tileInfo,
                                 const std::string &layerIdentifier,
-                                const std::shared_ptr<SymbolVectorLayerDescription> &layerDescription);
+                                const std::shared_ptr<SymbolVectorLayerDescription> &layerDescription,
+                                const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager);
 
     bool initialize(const std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features,
                     int32_t featuresBase,
@@ -123,6 +124,8 @@ private:
     float alpha = 1.0;
 
     bool anyInteractable = false;
+
+    const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> featureStateManager;
 
 #ifdef DRAW_TEXT_BOUNDING_BOX
     TextSymbolPlacement textSymbolPlacement;

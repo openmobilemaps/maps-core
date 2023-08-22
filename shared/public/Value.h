@@ -38,6 +38,9 @@
 #include "IconTextFit.h"
 #include "BlendMode.h"
 #include "SymbolZOrder.h"
+#include "ValueVariant.h"
+#include "Tiled2dMapVectorFeatureStateManager.h"
+
 
 namespace std {
     template <>
@@ -81,22 +84,6 @@ namespace std {
         }
     };
 }
-
-// helper type for the visitor #4
-template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-
-// explicit deduction guide (not needed as of C++20)
-template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
-
-typedef std::variant<std::string,
-                     double,
-                     int64_t,
-                     bool,
-                     Color,
-                     std::vector<float>,
-                     std::vector<std::string>,
-                     std::vector<FormattedStringEntry>,
-                     std::monostate> ValueVariant;
 
 struct property_value_mapping : vtzero::property_value_mapping {
     using float_type = double;
@@ -197,6 +184,9 @@ public:
     }
 
     size_t getStyleHash(const std::unordered_set<std::string> &usedKeys) const {
+        if (usedKeys.count("feature-state") != 0) {
+            return rand();
+        }
         size_t hash = 0;
         for(auto const &[key, val]: propertiesMap) {
             if (usedKeys.count(key) != 0) {
@@ -258,9 +248,12 @@ class EvaluationContext {
 public:
     std::optional<double> zoomLevel;
     const std::shared_ptr<FeatureContext> feature;
+    std::shared_ptr<Tiled2dMapVectorFeatureStateManager> featureStateManager;
 
     EvaluationContext(std::optional<double> zoomLevel,
-                      const std::shared_ptr<FeatureContext> feature) : zoomLevel(zoomLevel), feature(feature) {};
+                      const std::shared_ptr<FeatureContext> feature,
+                      std::shared_ptr<Tiled2dMapVectorFeatureStateManager> featureStateManager) :
+    zoomLevel(zoomLevel), feature(feature), featureStateManager(featureStateManager) {};
 };
 
 class Value {
@@ -571,7 +564,8 @@ public:
             if (isStatic) {
                 staticValue = value->evaluateOr(context, defaultValue);
             } else {
-                isZoomdependent = usedKeys.count("zoom") != 0;
+                isZoomDependent = usedKeys.count("zoom") != 0;
+                isFeatureStateDependent = usedKeys.count("feature-state") != 0;
             }
             lastValuePtr = value.get();
         }
@@ -580,7 +574,12 @@ public:
             return *staticValue;
         }
 
-        const auto identifier = (context.feature->identifier << 12) | (uint64_t)((isZoomdependent ? (context.zoomLevel ? *context.zoomLevel : 0.f) : 0.f) * 100);
+        if (isFeatureStateDependent) {
+            // TODO: maybe we can hash the feature-state or something
+            return value->evaluateOr(context, defaultValue);
+        }
+
+        const auto identifier = (context.feature->identifier << 12) | (uint64_t)((isZoomDependent ? (context.zoomLevel ? *context.zoomLevel : 0.f) : 0.f) * 100);
 
         const auto lastResultIt = lastResults.find(identifier);
         if (lastResultIt != lastResults.end()) {
@@ -597,7 +596,8 @@ private:
 
     std::optional<ResultType> staticValue;
 
-    bool isZoomdependent = false;
+    bool isZoomDependent = false;
+    bool isFeatureStateDependent = false;
     bool isStatic = false;
     void* lastValuePtr = nullptr;
 };
@@ -629,6 +629,42 @@ public:
 
     bool isEqual(const std::shared_ptr<Value> &other) const override {
         if (auto casted = std::dynamic_pointer_cast<GetPropertyValue>(other)) {
+            return casted->key == key;
+        }
+        return false;
+    };
+private:
+    const std::string key;
+};
+
+#include "Logger.h"
+
+class FeatureStateValue : public Value {
+public:
+    FeatureStateValue(const std::string key) : key(key) {};
+
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<GetPropertyValue>(key);
+    }
+
+    std::unordered_set<std::string> getUsedKeys() const override {
+        // FeatureStateValue can not be grouped
+        return { "feature-state" };
+    }
+
+    ValueVariant evaluate(const EvaluationContext &context) const override {
+        const auto& stateMap = context.featureStateManager->getFeatureState(context.feature->identifier);
+        const auto& result = stateMap.find(key);
+        if (result != stateMap.end()) {
+            if(!std::holds_alternative<std::monostate>(result->second)) {
+                return result->second;
+            }
+        }
+        return "";
+    };
+
+    bool isEqual(const std::shared_ptr<Value> &other) const override {
+        if (auto casted = std::dynamic_pointer_cast<FeatureStateValue>(other)) {
             return casted->key == key;
         }
         return false;
@@ -1398,6 +1434,62 @@ public:
     }
 };
 
+class ToBoolValue: public Value {
+    const std::vector<std::shared_ptr<Value>> values;
+
+public:
+    ToBoolValue(const std::shared_ptr<Value> value): values({ value }) {}
+
+    ToBoolValue(const std::vector<std::shared_ptr<Value>> values): values(values) {}
+
+    std::unique_ptr<Value> clone() override {
+        std::vector<std::shared_ptr<Value>> clonedValues;
+        for (const auto &value: values) {
+            clonedValues.push_back(value->clone());
+        }
+        return std::make_unique<ToBoolValue>(clonedValues);
+    }
+
+    std::unordered_set<std::string> getUsedKeys() const override {
+        std::unordered_set<std::string> usedKeys;
+        for (const auto &value: values) {
+            const auto valueKeys = value->getUsedKeys();
+            usedKeys.insert(valueKeys.begin(), valueKeys.end());
+        }
+        return usedKeys;
+    }
+
+    ValueVariant evaluate(const EvaluationContext &context) const override {
+        for (const auto &value: values) {
+            auto variant = value->evaluate(context);
+            if (std::holds_alternative<bool>(variant)) {
+                return std::get<bool>(variant);
+            }
+        }
+        return false;
+    };
+
+    bool isEqual(const std::shared_ptr<Value>& other) const override {
+        if (auto casted = std::dynamic_pointer_cast<ToBoolValue>(other)) {
+            // Compare the value members
+            for (const auto &value: values) {
+                bool found = false;
+                for (auto const &castedValue: casted->values) {
+                    if (value && castedValue && value->isEqual(castedValue)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    return false;
+                }
+            }
+            return true; // All members are equal
+        }
+        return false; // Not the same type or nullptr
+    }
+};
+
 
 class MatchValue: public Value {
     const std::shared_ptr<Value> compareValue;
@@ -2108,5 +2200,4 @@ public:
 
         return false; // Not the same type or nullptr
     }
-
 };

@@ -43,6 +43,8 @@ public:
     static const std::string lengthExpression;
     static const std::string notExpression;
     static const std::string zoomExpression;
+    static const std::string booleanExpression;
+    static const std::string featureStateExpression;
 
     std::shared_ptr<Value> parseValue(nlohmann::json json) {
         if (json.is_array()) {
@@ -57,6 +59,11 @@ public:
                     key = "$type";
                 }
                 return std::make_shared<GetPropertyValue>(key);
+
+                // Example: [ "get", "class" ]
+            } else if (isExpression(json[0], featureStateExpression) && json.size() == 2 && json[1].is_string()) {
+                auto key = json[1].get<std::string>();
+                return std::make_shared<FeatureStateValue>(key);
 
                 // Example: [ "has", "ref" ]
             } else if (isExpression(json[0], hasExpression) && json.size() == 2 && json[1].is_string()) {
@@ -283,6 +290,15 @@ public:
             // Example: ["%",["to-number",["get","ele"]],100]
             else if (isExpression(json[0], mathExpression)) {
                 return std::make_shared<MathValue>(parseValue(json[1]), parseValue(json[2]), getMathOperation(json[0]));
+            }
+
+            // Example: ["boolean", ["feature-state", "hover"], false]
+            else if (isExpression(json[0], booleanExpression)) {
+                std::vector<std::shared_ptr<Value>> values;
+                for (auto it = json.begin() + 1; it != json.end(); it += 1) {
+                    values.push_back(parseValue(*it));
+                }
+                return std::make_shared<ToBoolValue>(values);
             }
 
             // Example: [0.3, 1.0, 5.0]

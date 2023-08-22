@@ -10,9 +10,11 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 class Tiled2dMapVectorLayerSelectionCallbackInterface;
+struct VectorLayerFeatureInfoValue;
 
 class Tiled2dMapVectorLayerInterface {
 public:
@@ -31,4 +33,6 @@ public:
     virtual /*not-null*/ std::shared_ptr<::LayerInterface> asLayerInterface() = 0;
 
     virtual std::optional<std::string> getStyleMetadataJson() = 0;
+
+    virtual void setFeatureState(const std::string & identifier, const std::unordered_map<std::string, VectorLayerFeatureInfoValue> & properties) = 0;
 };

@@ -23,8 +23,9 @@ Tiled2dMapVectorSourceSymbolDataManager::Tiled2dMapVectorSourceSymbolDataManager
                                                                                  const std::string &source,
                                                                                  const std::shared_ptr<FontLoaderInterface> &fontLoader,
                                                                                  const WeakActor<Tiled2dMapVectorSource> &vectorSource,
-                                                                                 const Actor<Tiled2dMapVectorReadyManager> &readyManager) :
-Tiled2dMapVectorSourceDataManager(vectorLayer, mapDescription, layerConfig, source, readyManager), fontLoader(fontLoader), vectorSource(vectorSource), animationCoordinatorMap(std::make_shared<SymbolAnimationCoordinatorMap>())
+                                                                                 const Actor<Tiled2dMapVectorReadyManager> &readyManager,
+                                                                                 const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager) :
+Tiled2dMapVectorSourceDataManager(vectorLayer, mapDescription, layerConfig, source, readyManager, featureStateManager), fontLoader(fontLoader), vectorSource(vectorSource), animationCoordinatorMap(std::make_shared<SymbolAnimationCoordinatorMap>())
 {
 
     readyManager.message(&Tiled2dMapVectorReadyManager::registerManager);
@@ -32,7 +33,7 @@ Tiled2dMapVectorSourceDataManager(vectorLayer, mapDescription, layerConfig, sour
     for (const auto &layer: mapDescription->layers) {
         if (layer->getType() == VectorLayerType::symbol && layer->source == source) {
             layerDescriptions.insert({layer->identifier, std::static_pointer_cast<SymbolVectorLayerDescription>(layer)});
-            if (layer->isInteractable(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>()))) {
+            if (layer->isInteractable(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>(), featureStateManager))) {
                 interactableLayers.insert(layer->identifier);
             }
         }
@@ -263,7 +264,8 @@ std::vector<Actor<Tiled2dMapVectorSymbolGroup>> Tiled2dMapVectorSourceSymbolData
                                                                                                  fontProvider, tileInfo,
                                                                                                  layerIdentifier,
                                                                                                  layerDescriptions.at(
-                                                                                                         layerIdentifier));
+                                                                                                         layerIdentifier),
+                                                                                                 featureStateManager);
         bool initialized = symbolGroupActor.unsafe()->initialize(features,
                                                                  featuresBase,
                                                                  std::min(featuresBase + maxNumFeaturesPerGroup, numFeatures) - featuresBase,
