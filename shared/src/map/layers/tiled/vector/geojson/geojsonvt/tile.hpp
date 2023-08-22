@@ -72,8 +72,8 @@ private:
         featureContext = geometry->featureContext;
         coordinates.reserve(len);
 
-        std::vector<size_t> polygonIndices;
-        polygonIndices.reserve(len);
+        std::vector<size_t> coordIndices;
+        coordIndices.reserve(len);
 
         for (size_t i = 0; i != len; i++) {
             std::vector<::Coord> temp;
@@ -88,14 +88,17 @@ private:
             if (!temp.empty()) {
                 num_points += temp.size();
                 coordinates.push_back(std::move(temp));
-                polygonIndices.push_back(i);
+                coordIndices.push_back(i);
             }
         }
 
-        holes.reserve(polygonIndices.size());
+        holes.reserve(coordIndices.size());
 
-        for (auto const &index: polygonIndices) {
+        for (auto const &index: coordIndices) {
             std::vector<std::vector<::Coord>> temp;
+            if (index >= geometry->holes.size()) {
+                continue;
+            }
             temp.reserve(geometry->holes.at(index).size());
             for (auto &points : geometry->holes.at(index)) {
                 std::vector<::Coord> temp1;
