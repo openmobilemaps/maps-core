@@ -131,7 +131,6 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                         const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig,
                                                                      context, text, fullText, position, line, fontList, anchor,
                                                                      pos->angle, justify, placement, false, animationCoordinatorMap);
-
                         if (symbolObject) {
                             symbolObjects.push_back(symbolObject);
                             textPositionMap[fullText].push_back(position);
@@ -174,18 +173,14 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                 distance = 0;
                 double targetDistancePosition = (totalDistance / 2.0);
                 for (const auto &points: pointCoordinates) {
-                    for (auto pointIt = points.begin(); pointIt != points.end(); pointIt++) {
+                    for (auto pointIt = points.begin() + 1; pointIt != points.end(); pointIt++) {
                         auto point = *pointIt;
 
                         double interpolationValue;
-                        if (pointIt != points.begin()) {
-                            auto last = std::prev(pointIt);
-                            double addDistance = Vec2DHelper::distance(Vec2D(last->x, last->y), Vec2D(point.x, point.y));
-                            interpolationValue = (targetDistancePosition - distance) / addDistance;
-                            distance += addDistance;
-                        } else {
-                            continue;
-                        }
+                        auto last = std::prev(pointIt);
+                        double addDistance = Vec2DHelper::distance(Vec2D(last->x, last->y), Vec2D(point.x, point.y));
+                        interpolationValue = (targetDistancePosition - distance) / addDistance;
+                        distance += addDistance;
 
                         auto pos = getPositioning(pointIt, points, interpolationValue);
 
@@ -203,7 +198,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                         }
 
 
-                        if (distance >= targetDistancePosition && !wasPlaced && pos &&
+                        if (distance >= targetDistancePosition && pos &&
                             (!closestOther || *closestOther > symbolSpacingMeters)) {
 
                             auto position = pos->centerPosition;
@@ -622,7 +617,6 @@ Tiled2dMapVectorSymbolGroup::getPositioning(std::vector<::Coord>::const_iterator
         prev = std::prev(prev);
 
         if (prev == collection.begin()) {
-            prev = std::next(prev);
             break;
         }
     }

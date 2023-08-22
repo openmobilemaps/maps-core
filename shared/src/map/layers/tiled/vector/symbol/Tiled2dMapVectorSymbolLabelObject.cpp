@@ -578,6 +578,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
 
     int index = 0;
     double lastAngle = 0.0;
+    double lastAngleDiffs = 0.0;
 
     double lineCenteringParameter = -fontResult->fontData->info.base / fontResult->fontData->info.lineHeight;
 
@@ -586,7 +587,6 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
     for(auto &i : splittedTextInfo) {
         if(i.glyphIndex < 0) {
             currentIndex = indexAtDistance(currentIndex, spaceAdvance * fontSize * i.scale);
-            lastAngle = 0;
             index = 0;
         } else {
             auto& d = fontResult->fontData->glyphs[i.glyphIndex];
@@ -594,24 +594,26 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             auto bearing = Vec2D(d.bearing.x * fontSize * i.scale, d.bearing.y * fontSize * i.scale);
             auto advance = Vec2D(d.advance.x * fontSize * i.scale, d.advance.y * fontSize * i.scale);
 
+            auto halfSpace = std::max(charSize.x, advance.x) * 0.5;
+
             // Punkt auf Linie
             const auto &p = pointAtIndex(currentIndex, true);
 
             // get before and after to calculate angle
-            const auto &before = pointAtIndex(indexAtDistance(currentIndex, -charSize.x * 0.5), false);
-            const auto &after = pointAtIndex(indexAtDistance(currentIndex, charSize.x * 0.5), false);
+            const auto &before = pointAtIndex(indexAtDistance(currentIndex, -halfSpace), false);
+            const auto &after = pointAtIndex(indexAtDistance(currentIndex, halfSpace), false);
 
             double angleRad = atan2_approximation((before.y - after.y), -(before.x - after.x));
             double angleDeg = angleRad * (180.0 / M_PI);
 
-            if(index > 1) {
+            if(index > 0) {
                 auto diff = fabs(lastAngle - angleDeg);
                 auto min = std::min(360.0 - diff, diff);
-
-                if(min > maxCharacterAngle) {
+                if(min + lastAngleDiffs > maxCharacterAngle) {
                     centerPositions.clear();
                     break;
                 }
+                lastAngleDiffs = 0.5 * lastAngleDiffs + min;
             }
 
             lastAngle = angleDeg;
@@ -727,11 +729,14 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
     }
     boundingBoxViewportAligned = std::nullopt;
 
-    double recompRotation = fmod(-rotation + 360.0, 360.0);
-    double averageAngle = fmod(atan2_approximation(averageAngleS, averageAngleC) * 180.0 / M_PI + 360.0, 360.0);
-    double diff = std::min(std::min(std::abs(averageAngle - recompRotation),
-                          std::abs(averageAngle + 360.0 - recompRotation)),
-                          std::abs(averageAngle - (recompRotation + 360.0)));
+    double diff = 0;
+    if (!centerPositions.empty()) {
+        double recompRotation = fmod(-rotation + 360.0, 360.0);
+        double averageAngle = fmod(atan2_approximation(averageAngleS, averageAngleC) * 180.0 / M_PI + 360.0, 360.0);
+        diff = std::min(std::min(std::abs(averageAngle - recompRotation),
+                                 std::abs(averageAngle + 360.0 - recompRotation)),
+                        std::abs(averageAngle - (recompRotation + 360.0)));
+    }
     return diff > 95.0 ? 1.0 : 0.0; // flip with margin to prevent rapid flips
 }
 
