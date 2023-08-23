@@ -34,7 +34,7 @@ public:
             return std::make_pair(entry.first, convertToValueVariant(entry.second));
         });
 
-        std::lock_guard<std::recursive_mutex> lock(mutex);
+        std::lock_guard<std::mutex> lock(mutex);
 
         featureStates.erase(std::remove_if(featureStates.begin(), featureStates.end(),
                                            [intIdentifier](const auto& item) {
@@ -51,16 +51,16 @@ public:
         }
     }
 
-    FeatureState getFeatureState(const uint64_t &identifier) {
+    FeatureState& getFeatureState(const uint64_t &identifier) {
         if (!hasValues.test()) {
             return emptyState;
         }
-        std::lock_guard<std::recursive_mutex> lock(mutex);
+        std::lock_guard<std::mutex> lock(mutex);
         auto it = std::find_if(featureStates.begin(), featureStates.end(),
                                [identifier](const auto& item) {
             return item.first == identifier;
         });
-        
+
         if (it != featureStates.end()) {
             return it->second;
         }
@@ -74,7 +74,7 @@ public:
 
 private:
     std::vector<std::pair<uint64_t, FeatureState>> featureStates;
-    std::recursive_mutex mutex;
+    std::mutex mutex;
     FeatureState emptyState;
 
     std::atomic_flag hasValues = ATOMIC_FLAG_INIT;
