@@ -574,7 +574,7 @@ public:
             return *staticValue;
         }
 
-        if (isFeatureStateDependent) {
+        if (isFeatureStateDependent && !context.featureStateManager->empty()) {
             // TODO: maybe we can hash the feature-state or something
             return value->evaluateOr(context, defaultValue);
         }

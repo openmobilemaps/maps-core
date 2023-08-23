@@ -31,6 +31,16 @@ vector_layer_feature_info_value = record {
     list_string__value: optional<list<string>>;
 }
 
+feature_info_value_factory = interface +c {
+    static create_string(value: string) : vector_layer_feature_info_value;
+    static create_double(value: f64) : vector_layer_feature_info_value;
+    static create_int(value: i64) : vector_layer_feature_info_value;
+    static create_bool(value: bool) : vector_layer_feature_info_value;
+    static create_color(value: color) : vector_layer_feature_info_value;
+    static create_list_float(value: list<f32>) : vector_layer_feature_info_value;
+    static create_list_string(value: list<string>) : vector_layer_feature_info_value;
+}
+
 vector_layer_feature_info = record {
     identifier: string;
     properties: map<string, vector_layer_feature_info_value>;
