@@ -60,7 +60,7 @@ public:
                 }
                 return std::make_shared<GetPropertyValue>(key);
 
-                // Example: [ "get", "class" ]
+                // Example: [ "feature-state", "hover" ]
             } else if (isExpression(json[0], featureStateExpression) && json.size() == 2 && json[1].is_string()) {
                 auto key = json[1].get<std::string>();
                 return std::make_shared<FeatureStateValue>(key);

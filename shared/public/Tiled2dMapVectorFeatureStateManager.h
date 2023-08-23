@@ -25,7 +25,15 @@ public:
     Tiled2dMapVectorFeatureStateManager() {};
 
     void setFeatureState(const std::string & identifier, const std::unordered_map<std::string, VectorLayerFeatureInfoValue> & properties) {
-        uint64_t intIdentifier = std::stoull(identifier);
+        uint64_t intIdentifier = 0;
+        try {
+            intIdentifier = std::stoull(identifier);
+        } catch (const std::invalid_argument &e) {
+            return;
+        } catch (const std::out_of_range &e) {
+            return;
+        }
+
         FeatureState convertedProperties;
         convertedProperties.reserve(properties.size());
         std::transform(properties.begin(), properties.end(),
@@ -43,16 +51,14 @@ public:
 
         if (!convertedProperties.empty()) {
             featureStates.emplace_back(intIdentifier, std::move(convertedProperties));
-            hasValues.test_and_set();
+            hasNoValues = false;
         } else {
-            if (featureStates.empty()) {
-                hasValues.clear();
-            }
+            hasNoValues = !featureStates.empty();
         }
     }
 
     FeatureState& getFeatureState(const uint64_t &identifier) {
-        if (!hasValues.test()) {
+        if (hasNoValues) {
             return emptyState;
         }
         std::lock_guard<std::mutex> lock(mutex);
@@ -69,7 +75,7 @@ public:
     }
 
     bool empty() {
-        return !hasValues.test();
+        return hasNoValues;
     }
 
 private:
@@ -77,7 +83,7 @@ private:
     std::mutex mutex;
     FeatureState emptyState;
 
-    std::atomic_flag hasValues = ATOMIC_FLAG_INIT;
+    std::atomic_bool hasNoValues = true;
 
     ValueVariant convertToValueVariant(const VectorLayerFeatureInfoValue &valueInfo) {
         if (valueInfo.stringValue) { return *valueInfo.stringValue; }
