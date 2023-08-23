@@ -16,6 +16,7 @@
 #include "DateHelper.h"
 #include "Tiled2dMapSourceInterface.h"
 #include "Tiled2dMapSource.h"
+#include "Tiled2dMapVectorStyleParser.h"
 
 Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<MapInterface> &mapInterface,
                                                            const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
@@ -131,6 +132,10 @@ featureStateManager(featureStateManager) {
     }
 
     symbolSortKey = description->style.getSymbolSortKey(evalContext);
+
+    const auto &usedKeys = description->getUsedKeys();
+    isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
+    isStyleFeatureStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end();
 }
 
 void Tiled2dMapVectorSymbolObject::updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription) {
@@ -140,6 +145,10 @@ void Tiled2dMapVectorSymbolObject::updateLayerDescription(const std::shared_ptr<
     }
 
     lastZoomEvaluation = -1;
+
+    const auto &usedKeys = description->getUsedKeys();
+    isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
+    isStyleFeatureStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end();
 
     lastIconUpdateScaleFactor = std::nullopt;
     lastIconUpdateRotation = std::nullopt;
@@ -153,9 +162,14 @@ void Tiled2dMapVectorSymbolObject::updateLayerDescription(const std::shared_ptr<
 }
 
 void Tiled2dMapVectorSymbolObject::evaluateStyleProperties(const double zoomIdentifier) {
+
+    if (isStyleZoomDependant == false && lastZoomEvaluation == -1) {
+        return;
+    }
+
     auto roundedZoom = std::round(zoomIdentifier * 100.0) / 100.0;
 
-    if (roundedZoom == lastZoomEvaluation) {
+    if (isStyleFeatureStateDependant == false && roundedZoom == lastZoomEvaluation) {
         return;
     }
     
@@ -298,7 +312,12 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
         }
     }
 
-    if (lastIconUpdateScaleFactor == scaleFactor && lastIconUpdateRotation == rotation && lastIconUpdateAlpha == alpha) {
+    if (lastIconUpdateScaleFactor && isStyleZoomDependant == false) {
+        countOffset += instanceCounts.icons;
+        return;
+    }
+
+    if (isStyleFeatureStateDependant == false && lastIconUpdateScaleFactor == scaleFactor && lastIconUpdateRotation == rotation && lastIconUpdateAlpha == alpha) {
         countOffset += instanceCounts.icons;
         return;
     }

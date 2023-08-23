@@ -147,6 +147,9 @@ private:
 
     SymbolAlignment iconRotationAlignment = SymbolAlignment::AUTO;
 
+    bool isStyleZoomDependant = true;
+    bool isStyleFeatureStateDependant = true;
+
     std::optional<double> lastIconUpdateScaleFactor;
     std::optional<double> lastIconUpdateRotation;
     std::optional<float> lastIconUpdateAlpha;
