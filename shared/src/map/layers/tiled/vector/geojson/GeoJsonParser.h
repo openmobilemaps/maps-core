@@ -32,7 +32,7 @@ public:
 
 class GeoJsonParser {
 public:
-    static std::shared_ptr<GeoJSONVTInterface> parse(const nlohmann::json &geojson) {
+    static std::shared_ptr<GeoJson> getGeoJson(const nlohmann::json &geojson) {
         // preconditions
         if (!geojson["type"].is_string() ||
             geojson["type"] != "FeatureCollection" ||
@@ -86,10 +86,21 @@ public:
 
             geoJson->geometries.push_back(geometry);
         }
-
+        
+        return geoJson;
+    }
+    
+    static std::shared_ptr<GeoJSONVTInterface> getGeoJsonVt(const nlohmann::json &geojson) {
+        auto geoJson = getGeoJson(geojson);
+        
+        if (!geoJson) {
+            return nullptr;
+        }
+        
         return std::static_pointer_cast<GeoJSONVTInterface>(std::make_shared<GeoJSONVT>(geoJson));
     }
-
+    
+private:
     static FeatureContext::mapType parseProperties(const nlohmann::json &properties) {
         FeatureContext::mapType propertyMap;
         if (properties.is_object()) {

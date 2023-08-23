@@ -1,0 +1,7 @@
+
+@extern "../../../yaml/vector_layer_feature_info.yaml"
+
+geo_json_feature_parser_interface = interface +c {
+    static create() : geo_json_feature_parser_interface;
+    parse(geo_json: string): optional<list<vector_layer_feature_info>>;
+}

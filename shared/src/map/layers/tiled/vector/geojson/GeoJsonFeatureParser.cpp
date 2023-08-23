@@ -1,0 +1,32 @@
+/*
+ * Copyright (c) 2021 Ubique Innovation AG <https://www.ubique.ch>
+ *
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ *  SPDX-License-Identifier: MPL-2.0
+ */
+
+#include "GeoJsonFeatureParser.h"
+#include "GeoJsonFeatureParserInterface.h"
+#include "GeoJsonParser.h"
+
+
+GeoJsonFeatureParser::GeoJsonFeatureParser() {}
+
+std::optional<std::vector<::VectorLayerFeatureInfo>> GeoJsonFeatureParser::parse(const std::string & geoJson) {
+    nlohmann::json json;
+    try {
+        json = nlohmann::json::parse(geoJson);
+        auto geoJsonObject = GeoJsonParser::getGeoJson(json);
+        std::vector<::VectorLayerFeatureInfo> features = {};
+        for (auto &geometry: geoJsonObject->geometries) {
+            features.push_back(geometry->featureContext->getFeatureInfo());
+        }
+        return features;
+    }
+    catch (nlohmann::json::parse_error &ex) {
+        return std::nullopt;
+    }
+}
