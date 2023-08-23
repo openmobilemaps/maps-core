@@ -26,6 +26,7 @@
 #include "TiledLayerError.h"
 #include "Actor.h"
 #include "Tiled2dMapVectorLayerConfig.h"
+#include "Tiled2dMapVectorFeatureStateManager.h"
 #include <unordered_map>
 
 class Tiled2dMapVectorBackgroundSubLayer;
@@ -142,6 +143,8 @@ public:
 
     virtual std::optional<std::string> getStyleMetadataJson() override;
 
+    virtual void setFeatureState(const std::string & identifier, const std::unordered_map<std::string, VectorLayerFeatureInfoValue> & properties) override;
+
 protected:
     virtual std::shared_ptr<Tiled2dMapVectorLayerConfig> getLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &source);
 
@@ -215,6 +218,8 @@ private:
 
     std::shared_ptr<SpriteData> spriteData;
     std::shared_ptr<::TextureHolderInterface> spriteTexture;
+
+    std::shared_ptr<Tiled2dMapVectorFeatureStateManager> featureStateManager;
 };
 
 

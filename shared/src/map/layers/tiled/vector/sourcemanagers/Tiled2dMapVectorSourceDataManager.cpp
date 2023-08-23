@@ -19,12 +19,14 @@ Tiled2dMapVectorSourceDataManager::Tiled2dMapVectorSourceDataManager(const WeakA
                                                                      const std::shared_ptr<VectorMapDescription> &mapDescription,
                                                                      const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                                                      const std::string &source,
-                                                                     const Actor<Tiled2dMapVectorReadyManager> &readyManager)
+                                                                     const Actor<Tiled2dMapVectorReadyManager> &readyManager,
+                                                                     const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager)
         : vectorLayer(vectorLayer),
           mapDescription(mapDescription),
           layerConfig(layerConfig),
           source(source),
-          readyManager(readyManager) {
+          readyManager(readyManager),
+          featureStateManager(featureStateManager) {
     for (int32_t index = 0; index < mapDescription->layers.size(); index++) {
         const auto &layerDescription = mapDescription->layers.at(index);
         if (layerDescription->source == source) {

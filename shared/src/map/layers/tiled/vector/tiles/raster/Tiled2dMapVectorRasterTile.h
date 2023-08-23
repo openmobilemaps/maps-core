@@ -20,7 +20,8 @@ public:
                                const Tiled2dMapTileInfo &tileInfo,
                                const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
                                const std::shared_ptr<RasterVectorLayerDescription> &description,
-                               const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig);
+                               const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
+                               const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager);
 
     void updateRasterLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                       const Tiled2dMapVectorTileDataRaster &tileData) override;
@@ -47,6 +48,7 @@ private:
 
     std::unordered_set<std::string> usedKeys;
     bool isStyleZoomDependant = true;
+    bool isStyleFeatureStateDependant = true;
     std::optional<double> lastZoom = std::nullopt;
     std::optional<bool> lastInZoomRange = std::nullopt;
 

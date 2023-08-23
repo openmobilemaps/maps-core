@@ -21,7 +21,7 @@ void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterf
     Tiled2dMapVectorSubLayer::onAdded(mapInterface, layerIndex);
     shader = mapInterface->getShaderFactory()->createColorShader();
     shader->asShaderProgramInterface()->setBlendMode(
-            description->style.getBlendMode(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>())));
+            description->style.getBlendMode(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>(), featureStateManager)));
 
     auto object = mapInterface->getGraphicsObjectFactory()->createQuad(shader->asShaderProgramInterface());
     object->setFrame(Quad2dD(Vec2D(-1, 1),
@@ -30,7 +30,7 @@ void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterf
                              Vec2D(-1, -1)),
                      RectD(0, 0, 1, 1));
 
-    auto color = description->style.getColor(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>()));
+    auto color = description->style.getColor(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>(), featureStateManager));
     shader->setColor(color.r, color.g, color.b, color.a * alpha);
     renderObject = std::make_shared<RenderObject>(object->asGraphicsObject(), true);
     auto renderPass = std::make_shared<RenderPass>(RenderPassConfig(0), std::vector<std::shared_ptr<::RenderObjectInterface>> { renderObject } );
@@ -99,6 +99,6 @@ std::string Tiled2dMapVectorBackgroundSubLayer::getLayerDescriptionIdentifier() 
 void Tiled2dMapVectorBackgroundSubLayer::setAlpha(float alpha) {
     Tiled2dMapVectorSubLayer::setAlpha(alpha);
 
-    auto color = description->style.getColor(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>()));
+    auto color = description->style.getColor(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>(), featureStateManager));
     shader->setColor(color.r, color.g, color.b, color.a * alpha);
 }

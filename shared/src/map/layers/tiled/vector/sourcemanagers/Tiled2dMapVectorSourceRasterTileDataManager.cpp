@@ -13,15 +13,16 @@
 #include "Tiled2dMapVectorLayer.h"
 
 Tiled2dMapVectorSourceRasterTileDataManager::Tiled2dMapVectorSourceRasterTileDataManager(
-        const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
-        const std::shared_ptr<VectorMapDescription> &mapDescription,
-        const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
-        const std::string &source,
-        const WeakActor<Tiled2dMapRasterSource> &rasterSource,
-        const Actor<Tiled2dMapVectorReadyManager> &readyManager)
-        : Tiled2dMapVectorSourceTileDataManager(vectorLayer, mapDescription, layerConfig, source, readyManager),
-          rasterSource(rasterSource) {
-              readyManager.message(&Tiled2dMapVectorReadyManager::registerManager);
+                                                                                         const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
+                                                                                         const std::shared_ptr<VectorMapDescription> &mapDescription,
+                                                                                         const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
+                                                                                         const std::string &source,
+                                                                                         const WeakActor<Tiled2dMapRasterSource> &rasterSource,
+                                                                                         const Actor<Tiled2dMapVectorReadyManager> &readyManager,
+                                                                                         const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager)
+: Tiled2dMapVectorSourceTileDataManager(vectorLayer, mapDescription, layerConfig, source, readyManager, featureStateManager),
+rasterSource(rasterSource) {
+    readyManager.message(&Tiled2dMapVectorReadyManager::registerManager);
 }
 
 void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std::string &layerName,

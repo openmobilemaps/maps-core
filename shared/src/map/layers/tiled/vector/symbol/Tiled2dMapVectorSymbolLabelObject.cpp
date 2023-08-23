@@ -33,7 +33,8 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
                                                                      const double maxCharacterAngle,
                                                                      const SymbolAlignment rotationAlignment,
                                                                      const TextSymbolPlacement &textSymbolPlacement,
-                                                                     std::shared_ptr<SymbolAnimationCoordinator> animationCoordinator):
+                                                                     std::shared_ptr<SymbolAnimationCoordinator> animationCoordinator,
+                                                                     const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager):
 textSymbolPlacement(textSymbolPlacement),
 rotationAlignment(rotationAlignment),
 featureContext(featureContext),
@@ -51,7 +52,8 @@ lineCoordinates(lineCoordinates),
 boundingBox(Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0)),
 referencePoint(converter->convertToRenderSystem(coordinate)),
 referenceSize(fontResult->fontData->info.size),
-animationCoordinator(animationCoordinator)
+animationCoordinator(animationCoordinator),
+featureStateManager(featureStateManager)
 {
     auto spaceIt = std::find_if(fontResult->fontData->glyphs.begin(), fontResult->fontData->glyphs.end(), [](const auto& d) {
         return d.charCode == " ";
@@ -172,7 +174,7 @@ int Tiled2dMapVectorSymbolLabelObject::getCharacterCount(){
 }
 
 void Tiled2dMapVectorSymbolLabelObject::setupProperties(std::vector<float> &textureCoordinates, std::vector<uint16_t> &styleIndices, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier) {
-    const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
+    const auto evalContext = EvaluationContext(zoomIdentifier, featureContext, featureStateManager);
 
     evaluateStyleProperties(zoomIdentifier);
 
@@ -199,7 +201,7 @@ void Tiled2dMapVectorSymbolLabelObject::evaluateStyleProperties(const double zoo
         return;
     }
 
-    const auto evalContext = EvaluationContext(roundedZoom, featureContext);
+    const auto evalContext = EvaluationContext(roundedZoom, featureContext, featureStateManager);
 
     textSize = description->style.getTextSize(evalContext);
     textAlignment = description->style.getTextRotationAlignment(evalContext);
@@ -216,7 +218,7 @@ void Tiled2dMapVectorSymbolLabelObject::evaluateStyleProperties(const double zoo
 
 
 void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const bool collides, const double rotation, const float alpha, const bool isCoordinateOwner, long long now) {
-    const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
+    const auto evalContext = EvaluationContext(zoomIdentifier, featureContext, featureStateManager);
 
     evaluateStyleProperties(zoomIdentifier);
 
@@ -276,7 +278,7 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
 
 void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation) {
     
-    const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
+    const auto evalContext = EvaluationContext(zoomIdentifier, featureContext, featureStateManager);
     
     const float fontSize = scaleFactor * textSize;
     
@@ -552,7 +554,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
         return 0;
     }
 
-    auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
+    auto evalContext = EvaluationContext(zoomIdentifier, featureContext, featureStateManager);
 
     const float fontSize = scaleFactor * textSize;
 
