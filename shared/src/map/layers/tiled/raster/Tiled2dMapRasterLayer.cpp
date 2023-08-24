@@ -47,19 +47,24 @@ void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapIn
     if (!mailbox) {
         selfMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
     }
-    auto castedMe = std::static_pointer_cast<Tiled2dMapRasterLayer>(shared_from_this());
-    auto selfActor = WeakActor<Tiled2dMapRasterSourceListener>(selfMailbox, castedMe);
-    
-    auto mailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
-    rasterSource.emplaceObject(mailbox, mapInterface->getMapConfig(), layerConfig, mapInterface->getCoordinateConverterHelper(), mapInterface->getScheduler(), tileLoaders, selfActor, mapInterface->getCamera()->getScreenDensityPpi());
 
-    setSourceInterfaces({rasterSource.weakActor<Tiled2dMapSourceInterface>()});
-    
+    if (sourceInterfaces.empty() || this->mailbox != mailbox) {
+        auto castedMe = std::static_pointer_cast<Tiled2dMapRasterLayer>(shared_from_this());
+        auto selfActor = WeakActor<Tiled2dMapRasterSourceListener>(selfMailbox, castedMe);
+
+        auto mailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+        rasterSource.emplaceObject(mailbox, mapInterface->getMapConfig(), layerConfig, mapInterface->getCoordinateConverterHelper(), mapInterface->getScheduler(), tileLoaders, selfActor, mapInterface->getCamera()->getScreenDensityPpi());
+
+        setSourceInterfaces({rasterSource.weakActor<Tiled2dMapSourceInterface>()});
+    }
+
     Tiled2dMapLayer::onAdded(mapInterface, layerIndex);
 
     if (registerToTouchHandler) {
         mapInterface->getTouchHandler()->insertListener(std::dynamic_pointer_cast<TouchInterface>(shared_from_this()), layerIndex);
     }
+
+    resume();
 }
 
 void Tiled2dMapRasterLayer::onRemoved() {
