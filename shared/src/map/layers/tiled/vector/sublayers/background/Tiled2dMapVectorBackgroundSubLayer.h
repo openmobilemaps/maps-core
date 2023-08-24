@@ -18,7 +18,8 @@
 
 class Tiled2dMapVectorBackgroundSubLayer : public Tiled2dMapVectorSubLayer, public std::enable_shared_from_this<Tiled2dMapVectorBackgroundSubLayer> {
 public:
-    Tiled2dMapVectorBackgroundSubLayer(const std::shared_ptr<BackgroundVectorLayerDescription> &description): description(description) {};
+    Tiled2dMapVectorBackgroundSubLayer(const std::shared_ptr<BackgroundVectorLayerDescription> &description,
+                                       const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager): description(description), featureStateManager(featureStateManager) {};
 
     ~Tiled2dMapVectorBackgroundSubLayer() {}
 
@@ -58,4 +59,6 @@ private:
 
     std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
     std::shared_ptr<::ColorShaderInterface> shader;
+
+    const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> featureStateManager;
 };

@@ -8,6 +8,7 @@
 #include "NativeLoaderInterface.h"
 #include "NativeTiled2dMapVectorLayerSelectionCallbackInterface.h"
 #include "NativeTiled2dMapZoomInfo.h"
+#include "NativeVectorLayerFeatureInfoValue.h"
 
 namespace djinni_generated {
 
@@ -97,6 +98,15 @@ CJNIEXPORT jstring JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_til
         auto r = ref->getStyleMetadataJson();
         return ::djinni::release(::djinni::Optional<std::optional, ::djinni::String>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_00024CppProxy_native_1setFeatureState(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_identifier, jobject j_properties)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapVectorLayerInterface>(nativeRef);
+        ref->setFeatureState(::djinni::String::toCpp(jniEnv, j_identifier),
+                             ::djinni::Map<::djinni::String, ::djinni_generated::NativeVectorLayerFeatureInfoValue>::toCpp(jniEnv, j_properties));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
 } // namespace djinni_generated

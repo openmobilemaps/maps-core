@@ -11,6 +11,7 @@
 #import "MCLoaderInterface+Private.h"
 #import "MCTiled2dMapVectorLayerSelectionCallbackInterface+Private.h"
 #import "MCTiled2dMapZoomInfo+Private.h"
+#import "MCVectorLayerFeatureInfoValue+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -116,6 +117,14 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getStyleMetadataJson();
         return ::djinni::Optional<std::optional, ::djinni::String>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setFeatureState:(nonnull NSString *)identifier
+             properties:(nonnull NSDictionary<NSString *, MCVectorLayerFeatureInfoValue *> *)properties {
+    try {
+        _cppRefHandle.get()->setFeatureState(::djinni::String::toCpp(identifier),
+                                             ::djinni::Map<::djinni::String, ::djinni_generated::VectorLayerFeatureInfoValue>::toCpp(properties));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

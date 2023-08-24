@@ -23,9 +23,11 @@ Tiled2dMapVectorPolygonTile::Tiled2dMapVectorPolygonTile(const std::weak_ptr<Map
                                                          const Tiled2dMapTileInfo &tileInfo,
                                                          const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
                                                          const std::shared_ptr<PolygonVectorLayerDescription> &description,
-                                                         const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig)
-        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, layerConfig, tileCallbackInterface), usedKeys(std::move(description->getUsedKeys())) {
+                                                         const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
+                                                         const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager)
+        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, layerConfig, tileCallbackInterface, featureStateManager), usedKeys(std::move(description->getUsedKeys())) {
     isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
+    isStyleFeatureStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end();
 }
 
 void Tiled2dMapVectorPolygonTile::updateVectorLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
@@ -40,6 +42,7 @@ void Tiled2dMapVectorPolygonTile::updateVectorLayerDescription(const std::shared
         }
     }
     isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
+    isStyleFeatureStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end();
     lastZoom = std::nullopt;
     lastAlpha = std::nullopt;
 
@@ -84,7 +87,11 @@ void Tiled2dMapVectorPolygonTile::update() {
     auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
     bool inZoomRange = polygonDescription->maxZoom >= zoomIdentifier && polygonDescription->minZoom <= zoomIdentifier;
     
-    if (lastZoom && ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant) && lastAlpha == alpha && (lastInZoomRange && *lastInZoomRange == inZoomRange)) {
+    if (lastZoom &&
+        ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant) &&
+        lastAlpha == alpha &&
+        (lastInZoomRange && *lastInZoomRange == inZoomRange) &&
+        !isStyleFeatureStateDependant) {
         return;
     }
     lastZoom = zoomIdentifier;
@@ -96,7 +103,7 @@ void Tiled2dMapVectorPolygonTile::update() {
         std::vector<float> shaderStyles;
         shaderStyles.reserve(featureGroups.at(styleGroupId).size() * 5);
         for (auto const &[hash, feature]: featureGroups.at(styleGroupId)) {
-            const auto& ec = EvaluationContext(zoomIdentifier, feature);
+            const auto& ec = EvaluationContext(zoomIdentifier, feature, featureStateManager);
             const auto& color = inZoomRange ? polygonDescription->style.getFillColor(ec) : Color(0.0, 0.0, 0.0, 0.0);
             const auto& opacity = inZoomRange ? polygonDescription->style.getFillOpacity(ec) : 0.0;
             shaderStyles.push_back(color.r);
@@ -155,7 +162,7 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
 
             if (featureContext->geomType != vtzero::GeomType::POLYGON) { continue; }
 
-            EvaluationContext evalContext = EvaluationContext(tileInfo.zoomIdentifier, featureContext);
+            EvaluationContext evalContext = EvaluationContext(tileInfo.zoomIdentifier, featureContext, featureStateManager);
             if (description->filter == nullptr || description->filter->evaluateOr(evalContext, true)) {
 
                 int styleIndex = -1;
@@ -180,7 +187,7 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
                             styleIndex = 0;
                             auto shader = shaderFactory->createPolygonGroupShader();
                             auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
-                            shader->asShaderProgramInterface()->setBlendMode(polygonDescription->style.getBlendMode(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>())));
+                            shader->asShaderProgramInterface()->setBlendMode(polygonDescription->style.getBlendMode(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>(), featureStateManager)));
                             shaders.push_back(shader);
                             featureGroups.push_back(std::vector<std::tuple<size_t, std::shared_ptr<FeatureContext>>>{{hash, featureContext}});
                             styleGroupNewPolygonsMap[styleGroupIndex].push_back({{},{}});

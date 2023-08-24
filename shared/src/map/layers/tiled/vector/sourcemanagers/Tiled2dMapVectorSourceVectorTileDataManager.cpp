@@ -13,14 +13,15 @@
 #include "Tiled2dMapVectorLayer.h"
 
 Tiled2dMapVectorSourceVectorTileDataManager::Tiled2dMapVectorSourceVectorTileDataManager(
-        const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
-        const std::shared_ptr<VectorMapDescription> &mapDescription,
-        const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
-        const std::string &source,
-        const WeakActor<Tiled2dMapVectorSource> &vectorSource,
-        const Actor<Tiled2dMapVectorReadyManager> &readyManager)
-        : Tiled2dMapVectorSourceTileDataManager(vectorLayer, mapDescription, layerConfig, source, readyManager),
-          vectorSource(vectorSource) {
+                                                                                         const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
+                                                                                         const std::shared_ptr<VectorMapDescription> &mapDescription,
+                                                                                         const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
+                                                                                         const std::string &source,
+                                                                                         const WeakActor<Tiled2dMapVectorSource> &vectorSource,
+                                                                                         const Actor<Tiled2dMapVectorReadyManager> &readyManager,
+                                                                                         const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager)
+: Tiled2dMapVectorSourceTileDataManager(vectorLayer, mapDescription, layerConfig, source, readyManager, featureStateManager),
+vectorSource(vectorSource) {
     readyManager.message(&Tiled2dMapVectorReadyManager::registerManager);
 }
 

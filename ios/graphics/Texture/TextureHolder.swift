@@ -42,8 +42,19 @@ public class TextureHolder: NSObject {
             MTKTextureLoader.Option.textureStorageMode: MTLStorageMode.shared.rawValue,
         ]
 
-        let texture = try MetalContext.current.textureLoader.newTexture(cgImage: cgImage, options: options)
-        self.init(texture)
+        do {
+            let texture = try MetalContext.current.textureLoader.newTexture(cgImage: cgImage, options: options)
+
+            self.init(texture)
+        } catch {
+            guard let fixedImage = UIImage(cgImage: cgImage).ub_metalFixMe().cgImage else {
+                throw error
+            }
+
+            let texture = try MetalContext.current.textureLoader.newTexture(cgImage: fixedImage, options: options)
+
+            self.init(texture)
+        }
     }
 
     public convenience init(name: String, scaleFactor: Double, bundle: Bundle?) throws {

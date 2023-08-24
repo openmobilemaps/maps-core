@@ -34,7 +34,8 @@ public:
                                       const std::shared_ptr<VectorMapDescription> &mapDescription,
                                       const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                       const std::string &source,
-                                      const Actor<Tiled2dMapVectorReadyManager> &readyManager);
+                                      const Actor<Tiled2dMapVectorReadyManager> &readyManager,
+                                      const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager);
 
     virtual void onAdded(const std::weak_ptr<::MapInterface> &mapInterface);
 
@@ -83,6 +84,7 @@ protected:
 
     std::optional<::RectI> scissorRect = std::nullopt;
 
-
     const Actor<Tiled2dMapVectorReadyManager> readyManager;
+
+    const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> featureStateManager;
 };

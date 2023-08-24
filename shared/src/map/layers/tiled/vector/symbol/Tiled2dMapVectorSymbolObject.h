@@ -45,7 +45,8 @@ public:
                                  const TextJustify &textJustify,
                                  const TextSymbolPlacement &textSymbolPlacement,
                                  const bool hideIcon,
-                                 std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap);
+                                 std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap,
+                                 const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager);
 
     ~Tiled2dMapVectorSymbolObject() {
         if (animationCoordinator) {
@@ -146,6 +147,9 @@ private:
 
     SymbolAlignment iconRotationAlignment = SymbolAlignment::AUTO;
 
+    bool isStyleZoomDependant = true;
+    bool isStyleFeatureStateDependant = true;
+
     std::optional<double> lastIconUpdateScaleFactor;
     std::optional<double> lastIconUpdateRotation;
     std::optional<float> lastIconUpdateAlpha;
@@ -179,4 +183,5 @@ private:
 
     size_t crossTileIdentifier;
 
+    const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> featureStateManager;
 };

@@ -21,7 +21,8 @@ public:
                                                 const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                                 const std::string &source,
                                                 const WeakActor<Tiled2dMapVectorSource> &vectorSource,
-                                                const Actor<Tiled2dMapVectorReadyManager> &readyManager);
+                                                const Actor<Tiled2dMapVectorReadyManager> &readyManager,
+                                                const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager);
 
     void onVectorTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) override;
 

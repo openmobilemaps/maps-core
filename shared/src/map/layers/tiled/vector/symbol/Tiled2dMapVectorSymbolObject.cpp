@@ -16,6 +16,7 @@
 #include "DateHelper.h"
 #include "Tiled2dMapSourceInterface.h"
 #include "Tiled2dMapSource.h"
+#include "Tiled2dMapVectorStyleParser.h"
 
 Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<MapInterface> &mapInterface,
                                                            const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
@@ -34,7 +35,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                                                            const TextJustify &textJustify,
                                                            const TextSymbolPlacement &textSymbolPlacement,
                                                            const bool hideIcon,
-                                                           std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap) :
+                                                           std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap,
+                                                           const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager) :
     description(description),
     layerConfig(layerConfig),
     coordinate(coordinate),
@@ -44,7 +46,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     iconBoundingBoxViewportAligned(0, 0, 0, 0),
     stretchIconBoundingBox(Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0)),
     stretchIconBoundingBoxViewportAligned(0, 0, 0, 0),
-textSymbolPlacement(textSymbolPlacement) {
+textSymbolPlacement(textSymbolPlacement),
+featureStateManager(featureStateManager) {
     auto strongMapInterface = mapInterface.lock();
     auto objectFactory = strongMapInterface ? strongMapInterface->getGraphicsObjectFactory() : nullptr;
     auto camera = strongMapInterface ? strongMapInterface->getCamera() : nullptr;
@@ -54,7 +57,7 @@ textSymbolPlacement(textSymbolPlacement) {
         return;
     }
     
-    const auto evalContext = EvaluationContext(tileInfo.zoomIdentifier, featureContext);
+    const auto evalContext = EvaluationContext(tileInfo.zoomIdentifier, featureContext, featureStateManager);
     std::string iconName = description->style.getIconImage(evalContext);
     contentHash = std::hash<std::tuple<std::string, std::string, std::string>>()(std::tuple<std::string, std::string, std::string>(layerIdentifier, iconName, fullText));
     
@@ -112,7 +115,7 @@ textSymbolPlacement(textSymbolPlacement) {
 
         SymbolAlignment labelRotationAlignment = description->style.getTextRotationAlignment(evalContext);
         boundingBoxRotationAlignment = labelRotationAlignment;
-        labelObject = std::make_shared<Tiled2dMapVectorSymbolLabelObject>(converter, featureContext, description, text, fullText, coordinate, lineCoordinates, textAnchor, angle, textJustify, fontResult, textOffset, textRadialOffset, description->style.getTextLineHeight(evalContext), letterSpacing, description->style.getTextMaxWidth(evalContext), description->style.getTextMaxAngle(evalContext), labelRotationAlignment, textSymbolPlacement, animationCoordinator);
+        labelObject = std::make_shared<Tiled2dMapVectorSymbolLabelObject>(converter, featureContext, description, text, fullText, coordinate, lineCoordinates, textAnchor, angle, textJustify, fontResult, textOffset, textRadialOffset, description->style.getTextLineHeight(evalContext), letterSpacing, description->style.getTextMaxWidth(evalContext), description->style.getTextMaxAngle(evalContext), labelRotationAlignment, textSymbolPlacement, animationCoordinator, featureStateManager);
 
         instanceCounts.textCharacters = labelObject->getCharacterCount();
 
@@ -129,6 +132,10 @@ textSymbolPlacement(textSymbolPlacement) {
     }
 
     symbolSortKey = description->style.getSymbolSortKey(evalContext);
+
+    const auto &usedKeys = description->getUsedKeys();
+    isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
+    isStyleFeatureStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end();
 }
 
 void Tiled2dMapVectorSymbolObject::updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription) {
@@ -138,6 +145,10 @@ void Tiled2dMapVectorSymbolObject::updateLayerDescription(const std::shared_ptr<
     }
 
     lastZoomEvaluation = -1;
+
+    const auto &usedKeys = description->getUsedKeys();
+    isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
+    isStyleFeatureStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end();
 
     lastIconUpdateScaleFactor = std::nullopt;
     lastIconUpdateRotation = std::nullopt;
@@ -151,13 +162,18 @@ void Tiled2dMapVectorSymbolObject::updateLayerDescription(const std::shared_ptr<
 }
 
 void Tiled2dMapVectorSymbolObject::evaluateStyleProperties(const double zoomIdentifier) {
+
+    if (isStyleZoomDependant == false && lastZoomEvaluation == -1) {
+        return;
+    }
+
     auto roundedZoom = std::round(zoomIdentifier * 100.0) / 100.0;
 
-    if (roundedZoom == lastZoomEvaluation) {
+    if (isStyleFeatureStateDependant == false && roundedZoom == lastZoomEvaluation) {
         return;
     }
     
-    const auto evalContext = EvaluationContext(roundedZoom, featureContext);
+    const auto evalContext = EvaluationContext(roundedZoom, featureContext, featureStateManager);
 
     textAllowOverlap = description->style.getTextAllowOverlap(evalContext);
     iconAllowOverlap = description->style.getIconAllowOverlap(evalContext);
@@ -235,7 +251,7 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
         return;
     }
 
-    const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
+    const auto evalContext = EvaluationContext(zoomIdentifier, featureContext, featureStateManager);
 
     initialRenderCoordinateVec.y -= iconOffset.y;
     initialRenderCoordinateVec.x += iconOffset.x;
@@ -296,7 +312,12 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
         }
     }
 
-    if (lastIconUpdateScaleFactor == scaleFactor && lastIconUpdateRotation == rotation && lastIconUpdateAlpha == alpha) {
+    if (lastIconUpdateScaleFactor && isStyleZoomDependant == false) {
+        countOffset += instanceCounts.icons;
+        return;
+    }
+
+    if (isStyleFeatureStateDependant == false && lastIconUpdateScaleFactor == scaleFactor && lastIconUpdateRotation == rotation && lastIconUpdateAlpha == alpha) {
         countOffset += instanceCounts.icons;
         return;
     }
@@ -307,7 +328,7 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
 
     evaluateStyleProperties(zoomIdentifier);
 
-    const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
+    const auto evalContext = EvaluationContext(zoomIdentifier, featureContext, featureStateManager);
 
     rotations[countOffset] = iconRotate;
 
@@ -375,7 +396,7 @@ void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(std::vector<float>
         return;
     }
 
-    const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
+    const auto evalContext = EvaluationContext(zoomIdentifier, featureContext, featureStateManager);
 
     const auto textureWidth = (double) spriteTexture->getImageWidth();
     const auto textureHeight = (double) spriteTexture->getImageHeight();
@@ -451,7 +472,7 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
 
     evaluateStyleProperties(zoomIdentifier);
 
-    const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
+    const auto evalContext = EvaluationContext(zoomIdentifier, featureContext, featureStateManager);
 
     if (!isCoordinateOwner) {
         alphas[countOffset] = 0.0;
@@ -730,7 +751,7 @@ std::optional<CollisionRectF> Tiled2dMapVectorSymbolObject::getViewportAlignedBo
     double symbolSpacingPx = 0;
     size_t contentHash = 0;
     if (considerSymbolSpacing) {
-        const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
+        const auto evalContext = EvaluationContext(zoomIdentifier, featureContext, featureStateManager);
         symbolSpacingPx = description->style.getSymbolSpacing(evalContext);
         contentHash = this->contentHash;
     }
@@ -744,7 +765,7 @@ std::optional<std::vector<CollisionCircleF>> Tiled2dMapVectorSymbolObject::getMa
     double symbolSpacingPx = 0;
     size_t contentHash = 0;
     if (considerSymbolSpacing) {
-        const auto evalContext = EvaluationContext(zoomIdentifier, featureContext);
+        const auto evalContext = EvaluationContext(zoomIdentifier, featureContext, featureStateManager);
         symbolSpacingPx = description->style.getSymbolSpacing(evalContext);
         contentHash = this->contentHash;
     }
