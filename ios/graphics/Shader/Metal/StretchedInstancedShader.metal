@@ -17,7 +17,7 @@ struct StretchedInstancedVertexOut {
   float2 uv;
   float4 texureCoordinates;
   float alpha;
-  uint16_t stretchInfoIndex;
+  uint stretchInfoIndex;
 };
 
 vertex StretchedInstancedVertexOut
@@ -28,7 +28,7 @@ stretchInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                              constant float *rotations [[buffer(4)]],
                              constant float4 *texureCoordinates [[buffer(5)]],
                              constant float *alphas [[buffer(6)]],
-                             ushort instanceId [[instance_id]])
+                             uint instanceId [[instance_id]])
 {
   const float2 position = positions[instanceId];
   const float2 scale = scales[instanceId];

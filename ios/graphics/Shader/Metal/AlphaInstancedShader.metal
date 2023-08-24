@@ -28,7 +28,7 @@ alphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                            constant float *rotations [[buffer(4)]],
                            constant float2 *texureCoordinates [[buffer(5)]],
                            constant float *alphas [[buffer(6)]],
-                           ushort instanceId [[instance_id]])
+                           uint instanceId [[instance_id]])
 {
   const float2 position = positions[instanceId];
   const float2 scale = scales[instanceId];
