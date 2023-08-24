@@ -30,6 +30,10 @@ abstract class Tiled2dMapVectorLayerInterface {
 
     abstract fun setFeatureState(identifier: String, properties: HashMap<String, VectorLayerFeatureInfoValue>)
 
+    abstract fun addDynamicFeature(identifier: String)
+
+    abstract fun removeDynamicFeature(identifier: String)
+
     private class CppProxy : Tiled2dMapVectorLayerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -68,5 +72,17 @@ abstract class Tiled2dMapVectorLayerInterface {
             native_setFeatureState(this.nativeRef, identifier, properties)
         }
         private external fun native_setFeatureState(_nativeRef: Long, identifier: String, properties: HashMap<String, VectorLayerFeatureInfoValue>)
+
+        override fun addDynamicFeature(identifier: String) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_addDynamicFeature(this.nativeRef, identifier)
+        }
+        private external fun native_addDynamicFeature(_nativeRef: Long, identifier: String)
+
+        override fun removeDynamicFeature(identifier: String) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_removeDynamicFeature(this.nativeRef, identifier)
+        }
+        private external fun native_removeDynamicFeature(_nativeRef: Long, identifier: String)
     }
 }

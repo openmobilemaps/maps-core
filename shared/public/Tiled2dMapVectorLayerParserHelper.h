@@ -63,6 +63,8 @@ public:
 
         std::map<std::string, std::shared_ptr<GeoJSONVTInterface>> geojsonSources;
 
+        std::optional<std::string> dynamicSourceName;
+
         std::map<std::string, nlohmann::json> tileJsons;
         for (auto&[key, val]: json["sources"].items()) {
             if (!val["type"].is_string()) {
@@ -125,6 +127,8 @@ public:
                                                                                      underzoom,
                                                                                      overzoom);
                 
+            } else if (type == "vector" && val["is_dynamic"].is_boolean() && val["is_dynamic"].get<bool>()) {
+                dynamicSourceName = key;
             } else if (type == "vector" && val["url"].is_string()) {
                 auto result = LoaderHelper::loadData(val["url"].get<std::string>(), std::nullopt, loaders);
                 if (result.status != LoaderStatus::OK) {
@@ -352,7 +356,8 @@ public:
                                                               sourceDescriptions,
                                                               layers,
                                                               sprite,
-                                                              geojsonSources);
+                                                              geojsonSources,
+                                                              dynamicSourceName);
         return Tiled2dMapVectorLayerParserResult(mapDesc, LoaderStatus::OK, "", metadata);
     }
 };

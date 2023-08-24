@@ -27,6 +27,7 @@
 #include "Actor.h"
 #include "Tiled2dMapVectorLayerConfig.h"
 #include "Tiled2dMapVectorFeatureStateManager.h"
+#include "Tiled2dMapVectorDynamicSource.h"
 #include <unordered_map>
 
 class Tiled2dMapVectorBackgroundSubLayer;
@@ -145,6 +146,10 @@ public:
 
     virtual void setFeatureState(const std::string & identifier, const std::unordered_map<std::string, VectorLayerFeatureInfoValue> & properties) override;
 
+    virtual void addDynamicFeature(const std::string & identifier) override;
+
+    virtual void removeDynamicFeature(const std::string & identifier) override;
+
 protected:
     virtual std::shared_ptr<Tiled2dMapVectorLayerConfig> getLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &source);
 
@@ -158,6 +163,7 @@ protected:
 
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSource>> vectorTileSources;
     std::vector<Actor<Tiled2dMapRasterSource>> rasterTileSources;
+    Actor<Tiled2dMapVectorDynamicSource> dynamicSource;
 
     const std::vector<std::shared_ptr<::LoaderInterface>> loaders;
 

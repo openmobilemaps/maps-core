@@ -20,9 +20,14 @@
 #include <vector>
 #include "DataRef.hpp"
 
+class Tiled2dMapVectorSourceInterface {
+public:
+    virtual std::unordered_set<Tiled2dMapVectorTileInfo> getCurrentTiles() = 0;
+};
+
 class Tiled2dMapVectorSource : public Tiled2dMapSource<std::shared_ptr<djinni::DataRef>,
                                                         std::shared_ptr<DataLoaderResult>,
-                                                        Tiled2dMapVectorTileInfo::FeatureMap>  {
+                                                        Tiled2dMapVectorTileInfo::FeatureMap>, public Tiled2dMapVectorSourceInterface  {
 public:
     Tiled2dMapVectorSource(const MapConfig &mapConfig,
                            const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
@@ -34,7 +39,7 @@ public:
                            const std::string &sourceName,
                            float screenDensityPpi);
 
-    std::unordered_set<Tiled2dMapVectorTileInfo> getCurrentTiles();
+    std::unordered_set<Tiled2dMapVectorTileInfo> getCurrentTiles() override;
 
     virtual void pause() override;
 

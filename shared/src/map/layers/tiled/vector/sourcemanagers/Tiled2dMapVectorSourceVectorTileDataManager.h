@@ -20,7 +20,7 @@ public:
                                                 const std::shared_ptr<VectorMapDescription> &mapDescription,
                                                 const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                                 const std::string &source,
-                                                const WeakActor<Tiled2dMapVectorSource> &vectorSource,
+                                                const WeakActor<Tiled2dMapVectorSourceInterface> &vectorSource,
                                                 const Actor<Tiled2dMapVectorReadyManager> &readyManager,
                                                 const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager);
 
@@ -37,5 +37,5 @@ protected:
 private:
     void clearTiles(const std::vector<Actor<Tiled2dMapVectorTile>> &tilesToClear);
 
-    const WeakActor<Tiled2dMapVectorSource> vectorSource;
+    const WeakActor<Tiled2dMapVectorSourceInterface> vectorSource;
 };

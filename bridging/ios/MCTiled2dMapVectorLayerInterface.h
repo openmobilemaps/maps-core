@@ -48,4 +48,8 @@
 - (void)setFeatureState:(nonnull NSString *)identifier
              properties:(nonnull NSDictionary<NSString *, MCVectorLayerFeatureInfoValue *> *)properties;
 
+- (void)addDynamicFeature:(nonnull NSString *)identifier;
+
+- (void)removeDynamicFeature:(nonnull NSString *)identifier;
+
 @end

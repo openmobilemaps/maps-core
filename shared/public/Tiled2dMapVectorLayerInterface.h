@@ -35,4 +35,8 @@ public:
     virtual std::optional<std::string> getStyleMetadataJson() = 0;
 
     virtual void setFeatureState(const std::string & identifier, const std::unordered_map<std::string, VectorLayerFeatureInfoValue> & properties) = 0;
+
+    virtual void addDynamicFeature(const std::string & identifier) = 0;
+
+    virtual void removeDynamicFeature(const std::string & identifier) = 0;
 };

@@ -22,7 +22,7 @@ Tiled2dMapVectorSourceSymbolDataManager::Tiled2dMapVectorSourceSymbolDataManager
                                                                                  const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                                                                  const std::string &source,
                                                                                  const std::shared_ptr<FontLoaderInterface> &fontLoader,
-                                                                                 const WeakActor<Tiled2dMapVectorSource> &vectorSource,
+                                                                                 const WeakActor<Tiled2dMapVectorSourceInterface> &vectorSource,
                                                                                  const Actor<Tiled2dMapVectorReadyManager> &readyManager,
                                                                                  const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager) :
 Tiled2dMapVectorSourceDataManager(vectorLayer, mapDescription, layerConfig, source, readyManager, featureStateManager), fontLoader(fontLoader), vectorSource(vectorSource), animationCoordinatorMap(std::make_shared<SymbolAnimationCoordinatorMap>())
@@ -116,7 +116,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::updateLayerDescription(std::shared
     layerDescriptions.insert({layerDescription->identifier, castedDescription});
 
     if (needsTileReplace || iconWasAdded) {
-        auto const &currentTileInfos = vectorSource.converse(&Tiled2dMapVectorSource::getCurrentTiles).get();
+        auto const &currentTileInfos = vectorSource.converse(&Tiled2dMapVectorSourceInterface::getCurrentTiles).get();
 
         std::unordered_map<Tiled2dMapTileInfo, std::vector<Actor<Tiled2dMapVectorSymbolGroup>>> toSetup;
         std::vector<Actor<Tiled2dMapVectorSymbolGroup>> toClear;

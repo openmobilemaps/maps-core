@@ -34,7 +34,7 @@ public:
                                           const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                           const std::string &source,
                                           const std::shared_ptr<FontLoaderInterface> &fontLoader,
-                                          const WeakActor<Tiled2dMapVectorSource> &vectorSource,
+                                          const WeakActor<Tiled2dMapVectorSourceInterface> &vectorSource,
                                             const Actor<Tiled2dMapVectorReadyManager> &readyManager,
                                             const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager);
 
@@ -86,7 +86,7 @@ private:
 
     void pregenerateRenderPasses();
 
-    const WeakActor<Tiled2dMapVectorSource> vectorSource;
+    const WeakActor<Tiled2dMapVectorSourceInterface> vectorSource;
     
     std::unordered_map<std::string, std::shared_ptr<FontLoaderResult>> fontLoaderResults;
 

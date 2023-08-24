@@ -201,6 +201,10 @@ void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDes
     for (auto const &[source, geoJson]: mapDescription->geoJsonSources) {
         layerConfigs[source] = getLayerConfig(VectorMapSourceDescription::geoJsonDescription());
     }
+    if (mapDescription->dynamicSourceName) {
+        layerConfigs[*mapDescription->dynamicSourceName] = getLayerConfig(VectorMapSourceDescription::dynamicDescription());
+    }
+
     initializeVectorLayer();
 }
 
@@ -310,7 +314,9 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
         auto sourceMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
 
         Actor<Tiled2dMapVectorSource> vectorSource;
-        if (mapDescription->geoJsonSources.count(source) != 0) {
+        if (source == mapDescription->dynamicSourceName) {
+            continue;
+        } else if (mapDescription->geoJsonSources.count(source) != 0) {
             vectorSource = Actor<Tiled2dVectorGeoJsonSource>(sourceMailbox,
                                                               mapInterface->getMapConfig(),
                                                               layerConfig,
@@ -346,7 +352,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                                      mapDescription,
                                                                                      layerConfig,
                                                                                      source,
-                                                                                     vectorSource.weakActor<Tiled2dMapVectorSource>(),
+                                                                                     vectorSource.weakActor<Tiled2dMapVectorSourceInterface>(),
                                                                                      readyManager,
                                                                                      featureStateManager);
         sourceManagerActor.unsafe()->setAlpha(alpha);
@@ -361,7 +367,45 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                         layerConfig,
                                                                         source,
                                                                         fontLoader,
-                                                                        vectorSource.weakActor<Tiled2dMapVectorSource>(),
+                                                                        vectorSource.weakActor<Tiled2dMapVectorSourceInterface>(),
+                                                                        readyManager,
+                                                                        featureStateManager);
+            actor.unsafe()->setAlpha(alpha);
+            symbolSourceDataManagers[source] = actor;
+            interactionDataManagers[source].push_back(actor.weakActor<Tiled2dMapVectorSourceDataManager>());
+        }
+    }
+
+    if (mapDescription->dynamicSourceName) {
+        dynamicSource.emplaceObject(std::make_shared<Mailbox>(mapInterface->getScheduler()), selfVectorActor, vectorTileSources);
+        const auto source = *mapDescription->dynamicSourceName;
+        const auto layerConfig = layerConfigs[source];
+
+        const auto readyManagerMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+        const auto readyManager = Actor<Tiled2dMapVectorReadyManager>(readyManagerMailbox, dynamicSource.weakActor<Tiled2dMapSourceReadyInterface>());
+
+        const auto sourceDataManagerMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+        const auto sourceManagerActor = Actor<Tiled2dMapVectorSourceVectorTileDataManager>(sourceDataManagerMailbox,
+                                                                                     selfActor,
+                                                                                     mapDescription,
+                                                                                     layerConfig,
+                                                                                     source,
+                                                                                     dynamicSource.weakActor<Tiled2dMapVectorSourceInterface>(),
+                                                                                     readyManager,
+                                                                                     featureStateManager);
+        sourceManagerActor.unsafe()->setAlpha(alpha);
+        sourceTileManagers[source] = sourceManagerActor.strongActor<Tiled2dMapVectorSourceTileDataManager>();
+        interactionDataManagers[source].push_back(sourceManagerActor.weakActor<Tiled2dMapVectorSourceDataManager>());
+
+        if (symbolSources.count(source) != 0) {
+            auto symbolSourceDataManagerMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
+            auto actor = Actor<Tiled2dMapVectorSourceSymbolDataManager>(symbolSourceDataManagerMailbox,
+                                                                        selfActor,
+                                                                        mapDescription,
+                                                                        layerConfig,
+                                                                        source,
+                                                                        fontLoader,
+                                                                        dynamicSource.weakActor<Tiled2dMapVectorSourceInterface>(),
                                                                         readyManager,
                                                                         featureStateManager);
             actor.unsafe()->setAlpha(alpha);
@@ -648,6 +692,10 @@ void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &sourceName, std::u
     if (symbolSourceManager != symbolSourceDataManagers.end()) {
         symbolSourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::onVectorTilesUpdated, sourceName, currentTileInfos);
     }
+
+    if (dynamicSource) {
+        dynamicSource.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorDynamicSource::onVectorTilesUpdated, sourceName, currentTileInfos);
+    }
 }
 
 void Tiled2dMapVectorLayer::loadSpriteData() {
@@ -913,4 +961,16 @@ void Tiled2dMapVectorLayer::setFeatureState(const std::string & identifier, cons
 
     if (mapInterface)
         mapInterface->invalidate();
+}
+
+void Tiled2dMapVectorLayer::addDynamicFeature(const std::string & identifier) {
+    if (dynamicSource) {
+        dynamicSource.message(&Tiled2dMapVectorDynamicSource::addDynamicFeature, identifier);
+    }
+}
+
+void Tiled2dMapVectorLayer::removeDynamicFeature(const std::string & identifier) {
+    if (dynamicSource) {
+        dynamicSource.message(&Tiled2dMapVectorDynamicSource::removeDynamicFeature, identifier);
+    }
 }

@@ -28,6 +28,8 @@ public:
     identifier(identifier), vectorUrl(vectorUrl), minZoom(minZoom), maxZoom(maxZoom) {}
 
     const static std::shared_ptr<VectorMapSourceDescription> geoJsonDescription() { return  std::make_shared<VectorMapSourceDescription>("","geojson://{z}/{x}/{y}", 0, 18); };
+
+    const static std::shared_ptr<VectorMapSourceDescription> dynamicDescription() { return  std::make_shared<VectorMapSourceDescription>("","dynamic://{z}/{x}/{y}", 0, 0); };
 };
 
 class VectorMapDescription {
@@ -37,11 +39,13 @@ public:
     std::vector<std::shared_ptr<VectorLayerDescription>> layers;
     std::optional<std::string> spriteBaseUrl;
     std::map<std::string, std::shared_ptr<GeoJSONVTInterface>> geoJsonSources;
+    std::optional<std::string> dynamicSourceName;
 
     VectorMapDescription(std::string identifier,
                          std::vector<std::shared_ptr<VectorMapSourceDescription>> vectorSources,
                          std::vector<std::shared_ptr<VectorLayerDescription>> layers,
                          std::optional<std::string> spriteBaseUrl,
-                         std::map<std::string, std::shared_ptr<GeoJSONVTInterface>> geoJsonSources):
-    identifier(identifier), vectorSources(vectorSources), layers(layers), spriteBaseUrl(spriteBaseUrl), geoJsonSources(geoJsonSources) {}
+                         std::map<std::string, std::shared_ptr<GeoJSONVTInterface>> geoJsonSources,
+                         std::optional<std::string> dynamicSourceName):
+    identifier(identifier), vectorSources(vectorSources), layers(layers), spriteBaseUrl(spriteBaseUrl), geoJsonSources(geoJsonSources), dynamicSourceName(dynamicSourceName) {}
 };

@@ -17,7 +17,7 @@ Tiled2dMapVectorSourceVectorTileDataManager::Tiled2dMapVectorSourceVectorTileDat
                                                                                          const std::shared_ptr<VectorMapDescription> &mapDescription,
                                                                                          const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                                                                          const std::string &source,
-                                                                                         const WeakActor<Tiled2dMapVectorSource> &vectorSource,
+                                                                                         const WeakActor<Tiled2dMapVectorSourceInterface> &vectorSource,
                                                                                          const Actor<Tiled2dMapVectorReadyManager> &readyManager,
                                                                                          const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager)
 : Tiled2dMapVectorSourceTileDataManager(vectorLayer, mapDescription, layerConfig, source, readyManager, featureStateManager),
@@ -156,7 +156,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::updateLayerDescription(std::sh
         return;
     }
 
-    auto const &currentTileInfos = vectorSource.converse(&Tiled2dMapVectorSource::getCurrentTiles).get();
+    auto const &currentTileInfos = vectorSource.converse(&Tiled2dMapVectorSourceInterface::getCurrentTiles).get();
 
     for (const auto &tileData: currentTileInfos) {
         auto subTiles = tiles.find(tileData.tileInfo);
