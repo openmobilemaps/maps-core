@@ -134,7 +134,6 @@ featureStateManager(featureStateManager) {
     symbolSortKey = description->style.getSymbolSortKey(evalContext);
 
     const auto &usedKeys = description->getUsedKeys();
-    isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
     isStyleFeatureStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end();
 }
 
@@ -147,7 +146,6 @@ void Tiled2dMapVectorSymbolObject::updateLayerDescription(const std::shared_ptr<
     lastZoomEvaluation = -1;
 
     const auto &usedKeys = description->getUsedKeys();
-    isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
     isStyleFeatureStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end();
 
     lastIconUpdateScaleFactor = std::nullopt;
