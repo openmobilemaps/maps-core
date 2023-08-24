@@ -244,16 +244,19 @@ public:
 };
 
 
+// The Evaluation Context is needed to evaluate Value properties.
+// Please note that all members are only references; therefore, they have to be kept alive
+// as long as the evaluation context is used.
 class EvaluationContext {
 public:
-    std::optional<double> zoomLevel;
-    const std::shared_ptr<FeatureContext> feature;
-    std::shared_ptr<Tiled2dMapVectorFeatureStateManager> featureStateManager;
+    const std::optional<double> &zoomLevel;
+    const std::shared_ptr<FeatureContext> &feature;
+    const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager;
 
-    EvaluationContext(std::optional<double> zoomLevel,
-                      const std::shared_ptr<FeatureContext> feature,
-                      std::shared_ptr<Tiled2dMapVectorFeatureStateManager> featureStateManager) :
-    zoomLevel(zoomLevel), feature(feature), featureStateManager(featureStateManager) {};
+    EvaluationContext(const std::optional<double> &zoomLevel,
+                      const std::shared_ptr<FeatureContext> &feature,
+                      const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager) :
+        zoomLevel(zoomLevel), feature(feature), featureStateManager(featureStateManager) {}
 };
 
 class Value {
