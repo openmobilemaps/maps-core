@@ -46,7 +46,8 @@ public:
                                  const TextSymbolPlacement &textSymbolPlacement,
                                  const bool hideIcon,
                                  std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap,
-                                 const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager);
+                                 const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager,
+                                 const std::unordered_set<std::string> &usedKeys);
 
     ~Tiled2dMapVectorSymbolObject() {
         if (animationCoordinator) {
@@ -103,7 +104,7 @@ public:
 
     void setAlpha(float alpha);
 
-    void updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription);
+    void updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription, const std::unordered_set<std::string> &usedKeys);
 
     std::shared_ptr<SymbolAnimationCoordinator> animationCoordinator;
     bool isCoordinateOwner = false;
@@ -167,6 +168,7 @@ private:
     bool isIconOpaque = true;
     bool isStretchIconOpaque = true;
 
+    float iconOpacity;
     float iconRotate;
     float iconSize;
     std::vector<float> iconTextFitPadding;

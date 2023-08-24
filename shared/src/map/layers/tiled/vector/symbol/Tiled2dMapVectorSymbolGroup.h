@@ -131,4 +131,6 @@ private:
     TextSymbolPlacement textSymbolPlacement;
     SymbolAlignment labelRotationAlignment;
 #endif
+
+    std::unordered_set<std::string> usedKeys;
 };
