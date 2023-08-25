@@ -39,6 +39,8 @@ void Tiled2dMapLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterfac
         }
     }
 
+    resume();
+
     auto camera = std::dynamic_pointer_cast<MapCamera2dInterface>(mapInterface->getCamera());
     if (camera) {
         camera->addListener(shared_from_this());
@@ -47,6 +49,8 @@ void Tiled2dMapLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterfac
 }
 
 void Tiled2dMapLayer::onRemoved() {
+    pause();
+    
     if (mapInterface) {
         auto camera = std::dynamic_pointer_cast<MapCamera2dInterface>(mapInterface->getCamera());
         if (camera) {

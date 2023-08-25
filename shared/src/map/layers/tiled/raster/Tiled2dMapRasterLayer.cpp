@@ -63,8 +63,6 @@ void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapIn
     if (registerToTouchHandler) {
         mapInterface->getTouchHandler()->insertListener(std::dynamic_pointer_cast<TouchInterface>(shared_from_this()), layerIndex);
     }
-
-    resume();
 }
 
 void Tiled2dMapRasterLayer::onRemoved() {
@@ -72,7 +70,6 @@ void Tiled2dMapRasterLayer::onRemoved() {
     if (mapInterface && registerToTouchHandler) {
         mapInterface->getTouchHandler()->removeListener(std::dynamic_pointer_cast<TouchInterface>(shared_from_this()));
     }
-    pause();
     Tiled2dMapLayer::onRemoved();
 }
 
@@ -184,7 +181,13 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
                 if (shouldLoadTile(rasterTileInfo.tileInfo)) {
                     auto it = tileObjectMap.find(rasterTileInfo);
                     if (it == tileObjectMap.end()) {
-                        tilesToAdd.insert(rasterTileInfo);
+                        bool found = std::any_of(this->tilesToSetup.begin(), this->tilesToSetup.end(), [&rasterTileInfo](const auto& tilePair) {
+                            return tilePair.first == rasterTileInfo;
+                        });
+
+                        if (!found) {
+                            tilesToAdd.insert(rasterTileInfo);
+                        }
                     }
                 }
             }
@@ -273,8 +276,13 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
             }
 
             for (const auto &tile : tilesToRemove) {
-                auto tileObject = tileObjectMap.at(tile);
-                tilesToClean.emplace_back(std::make_pair(tile, tileObject));
+                bool found = std::any_of(this->tilesToClean.begin(), this->tilesToClean.end(), [&tile](const auto& tilePair) {
+                    return tilePair.first == tile;
+                });
+                if (!found) {
+                    auto tileObject = tileObjectMap.at(tile);
+                    tilesToClean.emplace_back(std::make_pair(tile, tileObject));
+                }
             }
         }
 
