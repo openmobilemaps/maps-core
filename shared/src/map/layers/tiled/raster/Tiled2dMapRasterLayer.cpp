@@ -169,9 +169,9 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
             return;
         }
         
-        std::vector<const std::pair<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> tilesToSetup, tilesToClean;
-        std::vector<const std::shared_ptr<MaskingObjectInterface>> newMaskObjects;
-        std::vector<const std::shared_ptr<MaskingObjectInterface>> obsoleteMaskObjects;
+        std::vector<std::pair<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> tilesToSetup, tilesToClean;
+        std::vector<std::shared_ptr<MaskingObjectInterface>> newMaskObjects;
+        std::vector<std::shared_ptr<MaskingObjectInterface>> obsoleteMaskObjects;
         
         std::vector<Tiled2dMapRasterTileInfo> tileStateUpdates;
 
@@ -224,6 +224,16 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
 
             auto const &zoomInfo = layerConfig->getZoomInfo();
             for (const auto &tile : tilesToAdd) {
+                bool found = false;
+                for(const auto &[exTile, object]: this->tilesToSetup) {
+                    if (exTile == tile) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) {
+                    continue;
+                }
                 std::shared_ptr<Textured2dLayerObject> tileObject;
                 if (shader) {
                     tileObject = std::make_shared<Textured2dLayerObject>(graphicsFactory->createQuad(shader), mapInterface);
@@ -268,49 +278,42 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
             }
         }
 
-        std::weak_ptr<Tiled2dMapRasterLayer> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapRasterLayer>(shared_from_this());
-
-        scheduler->addTask(std::make_shared<LambdaTask>(
-                TaskConfig("Tiled2dMapRasterLayer_onTilesUpdated", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
-                [weakSelfPtr, tilesToSetup, tilesToClean, newMaskObjects, obsoleteMaskObjects, tileStateUpdates] {
-                    auto selfPtr = weakSelfPtr.lock();
-                    if (selfPtr) {
-                        selfPtr->updateMaskObjects(newMaskObjects, obsoleteMaskObjects);
-                        selfPtr->setupTiles(tilesToSetup, tilesToClean, tileStateUpdates);
-                    }
-                }));
+        if (!(tilesToSetup.empty() && tilesToClean.empty() && newMaskObjects.empty() && obsoleteMaskObjects.empty()&& tileStateUpdates.empty())) {
+            auto castedMe = std::static_pointer_cast<Tiled2dMapRasterLayer>(shared_from_this());
+            auto selfActor = WeakActor<Tiled2dMapRasterLayer>(mailbox, castedMe);
+            this->tilesToSetup.insert(this->tilesToSetup.end(), tilesToSetup.begin(), tilesToSetup.end());
+            this->tilesToClean.insert(this->tilesToClean.end(), tilesToClean.begin(), tilesToClean.end());
+            this->newMaskObjects.insert(this->newMaskObjects.end(), newMaskObjects.begin(), newMaskObjects.end());
+            this->obsoleteMaskObjects.insert(this->obsoleteMaskObjects.end(), obsoleteMaskObjects.begin(), obsoleteMaskObjects.end());
+            this->tileStateUpdates.insert(this->tileStateUpdates.end(), tileStateUpdates.begin(), tileStateUpdates.end());
+            selfActor.messagePrecisely(MailboxDuplicationStrategy::replaceNewest, MailboxExecutionEnvironment::graphics, &Tiled2dMapRasterLayer::setupTiles);
+        }
     }
 }
 
 
-void Tiled2dMapRasterLayer::updateMaskObjects(const std::vector<const std::shared_ptr<MaskingObjectInterface>> &newMaskObjects,
-                                              const std::vector<const std::shared_ptr<MaskingObjectInterface>> &obsoleteMaskObjects) {
-    if (!mapInterface) return;
-    std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
-    for (const auto &mask : newMaskObjects) {
-        const auto &object = mask->asGraphicsObject();
-        if (!object->isReady()) object->setup(mapInterface->getRenderingContext());
-    }
-    for (const auto &mask : obsoleteMaskObjects) {
-        const auto &object = mask->asGraphicsObject();
-        if (object->isReady()) object->clear();
-    }
-}
-
-
-void Tiled2dMapRasterLayer::setupTiles(
-        const std::vector<const std::pair<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToSetup,
-        const std::vector<const std::pair<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToClean,
-        const std::vector<Tiled2dMapRasterTileInfo> &tileStateUpdates) {
+void Tiled2dMapRasterLayer::setupTiles() {
     auto mapInterface = this->mapInterface;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!renderingContext) {
         return;
     }
-    
+
     std::vector<Tiled2dMapTileInfo> tilesReady;
     {
         std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
+
+        for (const auto &mask : newMaskObjects) {
+            const auto &object = mask->asGraphicsObject();
+            if (!object->isReady()) object->setup(mapInterface->getRenderingContext());
+        }
+        newMaskObjects.clear();
+
+        for (const auto &mask : obsoleteMaskObjects) {
+            const auto &object = mask->asGraphicsObject();
+            if (object->isReady()) object->clear();
+        }
+        obsoleteMaskObjects.clear();
 
         for (const auto &[tile, tileObject] : tilesToClean) {
             tileObject->getGraphicsObject()->clear();
@@ -325,6 +328,7 @@ void Tiled2dMapRasterLayer::setupTiles(
                 tileObjectMap.insert(std::move(extracted));
             }
         }
+        tileStateUpdates.clear();
 
         for (const auto &tile : tilesToSetup) {
             const auto &tileInfo = tile.first;
@@ -342,6 +346,7 @@ void Tiled2dMapRasterLayer::setupTiles(
             tilesReady.push_back(tileInfo.tileInfo);
         }
     }
+    tilesToSetup.clear();
 
     generateRenderPasses();
 
@@ -353,6 +358,7 @@ void Tiled2dMapRasterLayer::setupTiles(
             if (!tileObject) continue;
             tileObject->getQuadObject()->removeTexture();
         }
+        tilesToClean.clear();
     }
     
     rasterSource.message(&Tiled2dMapRasterSource::setTilesReady, tilesReady);
