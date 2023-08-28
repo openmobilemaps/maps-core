@@ -2081,11 +2081,10 @@ class MathValue: public Value {
 public:
     MathValue(const std::shared_ptr<Value> lhs, const std::shared_ptr<Value> rhs, const MathOperation operation) : lhs(lhs), rhs( rhs), operation(operation) {
         assert(lhs);
-        assert(rhs);
     }
 
     std::unique_ptr<Value> clone() override {
-        return std::make_unique<MathValue>(lhs->clone(), rhs->clone(), operation);
+        return std::make_unique<MathValue>(lhs->clone(), rhs ? rhs->clone() : nullptr, operation);
     }
 
     std::unordered_set<std::string> getUsedKeys() const override {
@@ -2094,17 +2093,20 @@ public:
         auto const lhsKeys = lhs->getUsedKeys();
         usedKeys.insert(lhsKeys.begin(), lhsKeys.end());
 
-        auto const rhsKeys = rhs->getUsedKeys();
-        usedKeys.insert(rhsKeys.begin(), rhsKeys.end());
+        if (rhs) {
+            auto const rhsKeys = rhs->getUsedKeys();
+            usedKeys.insert(rhsKeys.begin(), rhsKeys.end());
+        }
 
         return usedKeys;
     }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
         auto const lhsValue = lhs->evaluateOr(context, (int64_t) 0);
-        auto const rhsValue = rhs->evaluateOr(context, (int64_t) 0);
+        auto const rhsValue = rhs ? rhs->evaluateOr(context, (int64_t) 0) : 0;
         switch (operation) {
             case MathOperation::MINUS:
+                if (!rhs) { return 0 - lhsValue; }
                 return lhsValue - rhsValue;
             case MathOperation::PLUS:
                 return lhsValue + rhsValue;
