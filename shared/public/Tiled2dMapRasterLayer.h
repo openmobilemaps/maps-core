@@ -62,10 +62,7 @@ public:
 
     virtual void resume() override;
 
-    virtual void setupTiles(
-            const std::vector<const std::pair<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToSetup,
-            const std::vector<const std::pair<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToClean,
-            const std::vector<Tiled2dMapRasterTileInfo> &tileStateUpdates);
+    virtual void setupTiles();
 
     virtual void generateRenderPasses();
 
@@ -107,9 +104,6 @@ public:
                                   
     void onTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) override;
 private:
-    virtual void updateMaskObjects(const std::vector<const std::shared_ptr<MaskingObjectInterface>> &newMaskObjects,
-                                   const std::vector<const std::shared_ptr<MaskingObjectInterface>> &obsoleteMaskObjects);
-
     virtual void enableAnimations(bool enabled) override;
 
     virtual LayerReadyState isReadyToRenderOffscreen() override;
@@ -137,4 +131,10 @@ protected:
     ::RasterShaderStyle style = RasterShaderStyle::DEFAULT_STYLE;
     bool animationsEnabled = true;
     bool registerToTouchHandler = true;
+
+    std::vector<std::shared_ptr<MaskingObjectInterface>> newMaskObjects;
+    std::vector<std::shared_ptr<MaskingObjectInterface>> obsoleteMaskObjects;
+    std::vector<std::pair<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> tilesToSetup;
+    std::vector<std::pair<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> tilesToClean;
+    std::vector<Tiled2dMapRasterTileInfo> tileStateUpdates;
 };

@@ -30,7 +30,8 @@ Tiled2dMapVectorSymbolGroup::Tiled2dMapVectorSymbolGroup(const std::weak_ptr<Map
           layerIdentifier(layerIdentifier),
           layerDescription(layerDescription),
           fontProvider(fontProvider),
-          featureStateManager(featureStateManager){}
+          featureStateManager(featureStateManager),
+          usedKeys(layerDescription->getUsedKeys()) {}
 
 bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features,
                                              int32_t featuresBase,
@@ -48,7 +49,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
     std::unordered_map<std::string, std::vector<Coord>> textPositionMap;
 
-    int32_t featuresRBase = features->size() - (featuresBase + featuresCount);
+    int32_t featuresRBase = (int32_t)features->size() - (featuresBase + featuresCount);
     for (auto it = features->rbegin() + featuresRBase; it != features->rbegin() + featuresRBase + featuresCount; it++) {
         auto const &[context, geometry] = *it;
 
@@ -382,8 +383,9 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
 void Tiled2dMapVectorSymbolGroup::updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription) {
     this->layerDescription = layerDescription;
+    usedKeys = layerDescription->getUsedKeys();
     for (auto const &object: symbolObjects) {
-        object->updateLayerDescription(layerDescription);
+        object->updateLayerDescription(layerDescription, usedKeys);
     }
     if (spriteData && spriteTexture) {
         setupObjects(spriteData, spriteTexture);
@@ -663,7 +665,7 @@ Tiled2dMapVectorSymbolGroup::createSymbolObject(const Tiled2dMapTileInfo &tileIn
                                                 std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap) {
     auto symbolObject = std::make_shared<Tiled2dMapVectorSymbolObject>(mapInterface, layerConfig, fontProvider, tileInfo, layerIdentifier,
                                                           description, featureContext, text, fullText, coordinate, lineCoordinates,
-                                                          fontList, textAnchor, angle, textJustify, textSymbolPlacement, hideIcon, animationCoordinatorMap, featureStateManager);
+                                                          fontList, textAnchor, angle, textJustify, textSymbolPlacement, hideIcon, animationCoordinatorMap, featureStateManager, usedKeys);
     symbolObject->setAlpha(alpha);
     const auto counts = symbolObject->getInstanceCounts();
     if (counts.icons + counts.stretchedIcons + counts.textCharacters == 0) {
