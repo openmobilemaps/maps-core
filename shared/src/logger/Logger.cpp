@@ -72,27 +72,27 @@ void Logger::log(int prio, const char *tag, const char *fmt, ...) const {
 #if (defined(__APPLE__) && !defined(BANDIT_TESTING)) || defined(_WIN32)
     switch (priority) {
     case 0: {
-        os_log(OS_LOG_DEFAULT, "%s", fmt);
+        os_log(OS_LOG_DEFAULT, "%{public}s", fmt);
         break;
     }
     case 1: {
-        os_log_error(OS_LOG_DEFAULT, "%s", fmt);
+        os_log_error(OS_LOG_DEFAULT, "%{public}s", fmt);
         break;
     }
     case 2: {
-        os_log_debug(OS_LOG_DEFAULT, "%s", fmt);
+        os_log_debug(OS_LOG_DEFAULT, "%{public}s", fmt);
         break;
     }
     case 3: {
-        os_log_info(OS_LOG_DEFAULT, "%s", fmt);
+        os_log_info(OS_LOG_DEFAULT, "%{public}s", fmt);
         break;
     }
     case 4: {
-        os_log(OS_LOG_DEFAULT, "%s", fmt);
+        os_log(OS_LOG_DEFAULT, "%{public}s", fmt);
         break;
     }
     default: {
-        os_log(OS_LOG_DEFAULT, "%s", fmt);
+        os_log(OS_LOG_DEFAULT, "%{PUBLIC}s", fmt);
     }
     }
 #endif

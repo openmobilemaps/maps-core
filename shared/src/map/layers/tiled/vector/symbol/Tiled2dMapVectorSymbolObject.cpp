@@ -36,7 +36,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                                                            const TextSymbolPlacement &textSymbolPlacement,
                                                            const bool hideIcon,
                                                            std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap,
-                                                           const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager) :
+                                                           const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager,
+                                                           const std::unordered_set<std::string> &usedKeys) :
     description(description),
     layerConfig(layerConfig),
     coordinate(coordinate),
@@ -133,11 +134,10 @@ featureStateManager(featureStateManager) {
 
     symbolSortKey = description->style.getSymbolSortKey(evalContext);
 
-    const auto &usedKeys = description->getUsedKeys();
     isStyleFeatureStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end();
 }
 
-void Tiled2dMapVectorSymbolObject::updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription) {
+void Tiled2dMapVectorSymbolObject::updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription, const std::unordered_set<std::string> &usedKeys) {
     this->description = layerDescription;
     if (labelObject) {
         labelObject->updateLayerDescription(layerDescription);
@@ -145,7 +145,6 @@ void Tiled2dMapVectorSymbolObject::updateLayerDescription(const std::shared_ptr<
 
     lastZoomEvaluation = -1;
 
-    const auto &usedKeys = description->getUsedKeys();
     isStyleFeatureStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end();
 
     lastIconUpdateScaleFactor = std::nullopt;
@@ -177,12 +176,17 @@ void Tiled2dMapVectorSymbolObject::evaluateStyleProperties(const double zoomIden
     iconAllowOverlap = description->style.getIconAllowOverlap(evalContext);
 
     iconRotate = -description->style.getIconRotate(evalContext);
-    iconAnchor = description->style.getIconAnchor(evalContext);
     iconSize = description->style.getIconSize(evalContext);
     iconOffset = description->style.getIconOffset(evalContext);
-    iconTextFitPadding = description->style.getIconTextFitPadding(evalContext);
     iconTextFit = description->style.getIconTextFit(evalContext);
     iconPadding = description->style.getIconPadding(evalContext);
+    iconOpacity = description->style.getIconOpacity(evalContext);
+
+    // only evaluate these properties once since they are expensive and should not change
+    if (lastZoomEvaluation == -1) {
+        iconTextFitPadding = description->style.getIconTextFitPadding(evalContext);
+        iconAnchor = description->style.getIconAnchor(evalContext);
+    }
 
     lastZoomEvaluation = roundedZoom;
 }
@@ -326,8 +330,6 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
 
     evaluateStyleProperties(zoomIdentifier);
 
-    const auto evalContext = EvaluationContext(zoomIdentifier, featureContext, featureStateManager);
-
     rotations[countOffset] = iconRotate;
 
     if (iconRotationAlignment == SymbolAlignment::VIEWPORT ||
@@ -366,7 +368,7 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
     } else if (animationCoordinator->isColliding()) {
         alphas[countOffset] = animationCoordinator->getIconAlpha(0.0, now);
     } else {
-        alphas[countOffset] = animationCoordinator->getIconAlpha(description->style.getIconOpacity(evalContext) * alpha, now);
+        alphas[countOffset] = animationCoordinator->getIconAlpha(iconOpacity * alpha, now);
     }
 
     isIconOpaque = alphas[countOffset] == 0;
@@ -470,14 +472,12 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
 
     evaluateStyleProperties(zoomIdentifier);
 
-    const auto evalContext = EvaluationContext(zoomIdentifier, featureContext, featureStateManager);
-
     if (!isCoordinateOwner) {
         alphas[countOffset] = 0.0;
     } else if (animationCoordinator->isColliding() || !(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier) || !stretchSpriteInfo) {
         alphas[countOffset] = animationCoordinator->getStretchIconAlpha(0.0, now);
     } else {
-        alphas[countOffset] = animationCoordinator->getStretchIconAlpha(description->style.getIconOpacity(evalContext) * alpha, now);
+        alphas[countOffset] = animationCoordinator->getStretchIconAlpha(iconOpacity * alpha, now);
     }
 
     if (!animationCoordinator->isStretchIconAnimating()) {
