@@ -161,7 +161,7 @@ public:
                     geojson = val["data"];
                 }
 
-                geojsonSources[key] = GeoJsonParser::parse(geojson);
+                geojsonSources[key] = GeoJsonParser::getGeoJsonVt(geojson);
             }
         }
 
