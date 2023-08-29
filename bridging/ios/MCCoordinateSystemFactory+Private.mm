@@ -5,6 +5,7 @@
 #import "MCCoordinateSystemFactory.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
+#import "DJIMarshal+Private.h"
 #import "MCMapCoordinateSystem+Private.h"
 #include <exception>
 #include <stdexcept>
