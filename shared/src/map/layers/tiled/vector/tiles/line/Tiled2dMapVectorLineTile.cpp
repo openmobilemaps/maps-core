@@ -271,7 +271,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                             styleIndex = 0;
                             auto shader = shaderFactory->createLineGroupShader();
                             auto lineDescription = std::static_pointer_cast<LineVectorLayerDescription>(description);
-                            shader->asShaderProgramInterface()->setBlendMode(lineDescription->style.getBlendMode(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>(), featureStateManager)));
+                            shader->asShaderProgramInterface()->setBlendMode(lineDescription->style.getBlendMode(EvaluationContext(0.0, std::make_shared<FeatureContext>(), featureStateManager)));
                             shaders.push_back(shader);
                             reusableLineStyles.push_back({ reusableStyle });
                             featureGroups.push_back(std::vector<std::tuple<size_t, std::shared_ptr<FeatureContext>>>{{hash, featureContext}});

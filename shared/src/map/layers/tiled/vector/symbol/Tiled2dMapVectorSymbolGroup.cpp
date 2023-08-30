@@ -309,7 +309,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
     if (instanceCounts.icons != 0) {
         auto shader = strongMapInterface->getShaderFactory()->createAlphaInstancedShader()->asShaderProgramInterface();
         shader->setBlendMode(
-                layerDescription->style.getBlendMode(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>(), featureStateManager)));
+                layerDescription->style.getBlendMode(EvaluationContext(0.0, std::make_shared<FeatureContext>(), featureStateManager)));
         iconInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createQuadInstanced(shader);
 
         iconInstancedObject->setInstanceCount(instanceCounts.icons);
@@ -325,7 +325,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
     if (instanceCounts.stretchedIcons != 0) {
         auto shader = strongMapInterface->getShaderFactory()->createStretchInstancedShader()->asShaderProgramInterface();
         shader->setBlendMode(
-                layerDescription->style.getBlendMode(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>(), featureStateManager)));
+                layerDescription->style.getBlendMode(EvaluationContext(0.0, std::make_shared<FeatureContext>(), featureStateManager)));
         stretchedInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createQuadStretchedInstanced(shader);
 
         stretchedInstancedObject->setInstanceCount(instanceCounts.stretchedIcons);
@@ -341,7 +341,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
     if (instanceCounts.textCharacters != 0) {
         auto shader = strongMapInterface->getShaderFactory()->createTextInstancedShader()->asShaderProgramInterface();
         shader->setBlendMode(
-                layerDescription->style.getBlendMode(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>(), featureStateManager)));
+                layerDescription->style.getBlendMode(EvaluationContext(0.0, std::make_shared<FeatureContext>(), featureStateManager)));
         textInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createTextInstanced(shader);
         textInstancedObject->setInstanceCount(instanceCounts.textCharacters);
 
@@ -354,8 +354,8 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
     }
 
 #ifdef DRAW_TEXT_BOUNDING_BOX
-    textSymbolPlacement = layerDescription->style.getTextSymbolPlacement(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>(), featureStateManager));
-    labelRotationAlignment = layerDescription->style.getTextRotationAlignment(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>(), featureStateManager));
+    textSymbolPlacement = layerDescription->style.getTextSymbolPlacement(EvaluationContext(0.0, std::make_shared<FeatureContext>(), featureStateManager));
+    labelRotationAlignment = layerDescription->style.getTextRotationAlignment(EvaluationContext(0.0, std::make_shared<FeatureContext>(), featureStateManager));
     if (labelRotationAlignment == SymbolAlignment::AUTO) {
         switch (textSymbolPlacement) {
             case TextSymbolPlacement::POINT:

@@ -33,7 +33,7 @@ Tiled2dMapVectorSourceDataManager(vectorLayer, mapDescription, layerConfig, sour
     for (const auto &layer: mapDescription->layers) {
         if (layer->getType() == VectorLayerType::symbol && layer->source == source) {
             layerDescriptions.insert({layer->identifier, std::static_pointer_cast<SymbolVectorLayerDescription>(layer)});
-            if (layer->isInteractable(EvaluationContext(std::nullopt, std::make_shared<FeatureContext>(), featureStateManager))) {
+            if (layer->isInteractable(EvaluationContext(0.0, std::make_shared<FeatureContext>(), featureStateManager))) {
                 interactableLayers.insert(layer->identifier);
             }
         }
