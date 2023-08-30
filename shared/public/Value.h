@@ -622,12 +622,7 @@ public:
             return context.zoomLevel ? context.zoomLevel : 0.0;
         }
 
-        const auto& result = context.feature->getValue(key);
-        if(!std::holds_alternative<std::monostate>(result)) {
-            return result;
-        }
-
-        return "";
+        return context.feature->getValue(key);
     };
 
     bool isEqual(const std::shared_ptr<Value> &other) const override {
@@ -2201,6 +2196,62 @@ public:
             return true; // Values are equal
         }
 
+        return false; // Not the same type or nullptr
+    }
+};
+
+class CoalesceValue : public Value {
+private:
+    const std::vector<std::shared_ptr<Value>> values;
+public:
+    CoalesceValue(const std::vector<std::shared_ptr<Value>> &values): values(values){}
+
+    std::unique_ptr<Value> clone() override {
+        std::vector<std::shared_ptr<Value>> clonedValues;
+        for (const auto &value: values) {
+            clonedValues.push_back(value->clone());
+        }
+        return std::make_unique<CoalesceValue>(clonedValues);
+    }
+
+    std::unordered_set<std::string> getUsedKeys() const override {
+        std::unordered_set<std::string> usedKeys;
+        for (const auto &value: values) {
+            const auto valueKeys = value->getUsedKeys();
+            usedKeys.insert(valueKeys.begin(), valueKeys.end());
+        }
+        return usedKeys;
+    }
+
+
+    ValueVariant evaluate(const EvaluationContext &context) const override {
+        for (const auto &value: values) {
+            auto result = value->evaluate(context);
+            if (!std::holds_alternative<std::monostate>(result)) {
+                return result;
+            }
+        }
+        return std::monostate();
+    };
+
+
+    bool isEqual(const std::shared_ptr<Value>& other) const override {
+        if (auto casted = std::dynamic_pointer_cast<CoalesceValue>(other)) {
+            // Compare the value members
+            for (const auto &value: values) {
+                bool found = false;
+                for (auto const &castedValue: casted->values) {
+                    if (value && castedValue && value->isEqual(castedValue)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    return false;
+                }
+            }
+            return true; // All members are equal
+        }
         return false; // Not the same type or nullptr
     }
 };
