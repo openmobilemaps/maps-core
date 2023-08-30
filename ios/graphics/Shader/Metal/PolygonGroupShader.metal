@@ -44,7 +44,7 @@ polygonGroupFragmentShader(PolygonGroupVertexOut in [[stage_in]],
                         constant PolygonGroupStyling *styling [[buffer(1)]])
 {
     PolygonGroupStyling s = styling[int(in.stylingIndex)];
-    return float4(s.color[0], s.color[1], s.color[2], s.color[3]) * s.opacity;
+    return float4(s.color[0], s.color[1], s.color[2], 1.0) * s.opacity * s.color[3];
 }
 
 struct PolygonPatternGroupVertexOut {
