@@ -96,13 +96,16 @@ std::vector<std::shared_ptr<LayerInterface>> MapScene::getLayers() {
 
 void MapScene::addLayer(const std::shared_ptr<::LayerInterface> &layer) {
     removeLayer(layer);
-    std::lock_guard<std::recursive_mutex> lock(layersMutex);
-    int topIndex = -1;
-    if (!layers.empty())
-        topIndex = layers.rbegin()->first;
-    int atIndex = topIndex + 1;
-    layers[atIndex] = layer;
-    layer->onAdded(shared_from_this(), atIndex);
+    {
+        std::lock_guard<std::recursive_mutex> lock(layersMutex);
+        int topIndex = -1;
+        if (!layers.empty())
+            topIndex = layers.rbegin()->first;
+        int atIndex = topIndex + 1;
+        layers[atIndex] = layer;
+        layer->onAdded(shared_from_this(), atIndex);
+    }
+    invalidate();
 }
 
 void MapScene::insertLayerAt(const std::shared_ptr<LayerInterface> &layer, int32_t atIndex) {
@@ -114,11 +117,14 @@ void MapScene::insertLayerAt(const std::shared_ptr<LayerInterface> &layer, int32
     }
     removeLayer(layer);
     layer->onAdded(shared_from_this(), atIndex);
-    std::lock_guard<std::recursive_mutex> lock(layersMutex);
-    if (layers.count(atIndex) > 0) {
-        layers[atIndex]->onRemoved();
+    {
+        std::lock_guard<std::recursive_mutex> lock(layersMutex);
+        if (layers.count(atIndex) > 0) {
+            layers[atIndex]->onRemoved();
+        }
+        layers[atIndex] = layer;
     }
-    layers[atIndex] = layer;
+    invalidate();
 };
 
 void MapScene::insertLayerAbove(const std::shared_ptr<LayerInterface> &layer, const std::shared_ptr<LayerInterface> &above) {
@@ -145,6 +151,7 @@ void MapScene::insertLayerAbove(const std::shared_ptr<LayerInterface> &layer, co
         layers = newLayers;
     }
     layer->onAdded(shared_from_this(), atIndex);
+    invalidate();
 };
 
 void MapScene::insertLayerBelow(const std::shared_ptr<LayerInterface> &layer, const std::shared_ptr<LayerInterface> &below) {
@@ -170,6 +177,7 @@ void MapScene::insertLayerBelow(const std::shared_ptr<LayerInterface> &layer, co
         layers = newLayers;
     }
     layer->onAdded(shared_from_this(), atIndex);
+    invalidate();
 };
 
 void MapScene::removeLayer(const std::shared_ptr<::LayerInterface> &layer) {
@@ -187,6 +195,7 @@ void MapScene::removeLayer(const std::shared_ptr<::LayerInterface> &layer) {
             layer->onRemoved();
         }
     }
+    invalidate();
 }
 
 void MapScene::setViewportSize(const ::Vec2I &size) {
