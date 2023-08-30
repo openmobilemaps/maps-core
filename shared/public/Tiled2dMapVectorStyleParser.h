@@ -45,6 +45,7 @@ public:
     static const std::string zoomExpression;
     static const std::string booleanExpression;
     static const std::string featureStateExpression;
+    static const std::string coalesceExpression;
 
     std::shared_ptr<Value> parseValue(nlohmann::json json) {
         if (json.is_array()) {
@@ -299,6 +300,15 @@ public:
                     values.push_back(parseValue(*it));
                 }
                 return std::make_shared<ToBoolValue>(values);
+            }
+
+            // Example: [ "coalesce", ["get", "name_de"], ["get", "name_en"], ["get", "name"]]
+            else if (isExpression(json[0], coalesceExpression)) {
+                std::vector<std::shared_ptr<Value>> values;
+                for (auto it = json.begin() + 1; it != json.end(); it += 1) {
+                    values.push_back(parseValue(*it));
+                }
+                return std::make_shared<CoalesceValue>(values);
             }
 
             // Example: [0.3, 1.0, 5.0]

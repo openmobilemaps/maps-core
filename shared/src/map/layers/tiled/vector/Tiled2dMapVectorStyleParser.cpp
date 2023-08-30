@@ -33,3 +33,4 @@ const std::string Tiled2dMapVectorStyleParser::notExpression = "!";
 const std::string Tiled2dMapVectorStyleParser::zoomExpression = "zoom";
 const std::string Tiled2dMapVectorStyleParser::booleanExpression = "boolean";
 const std::string Tiled2dMapVectorStyleParser::featureStateExpression = "feature-state";
+const std::string Tiled2dMapVectorStyleParser::coalesceExpression = "coalesce";
