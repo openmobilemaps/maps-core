@@ -35,8 +35,11 @@
 
 class ColorUtil {
 public:
-    static Color c(int r, int g, int b, float a = 0.0) {
+    static Color c(int r, int g, int b, float a = 1.0) {
         return Color(((float)r) / 255.0,((float)g) / 255.0,((float)b) / 255.0, a);
+    }
+    static Color cInt(int r, int g, int b, int a = 255) {
+        return Color(((float)r) / 255.0,((float)g) / 255.0,((float)b) / 255.0, ((float)a) / 255.0);
     }
 private:
     static const std::map<std::string, Color> namedColors;
@@ -146,6 +149,18 @@ public:
                         1
                     );
                 }
+            } else if (str.length() == 9) {
+                int64_t iv = parseInt(str.substr(1), 16);  // TODO(deanm): Stricter parsing.
+                if (!(iv >= 0 && iv <= 0xffffffff)) {
+                    return std::nullopt;  // Covers NaN.
+                } else {
+                    return cInt(
+                            static_cast<uint8_t>((iv & 0xff0000) >> 16),
+                            static_cast<uint8_t>((iv & 0xff00) >> 8),
+                            static_cast<uint8_t>(iv & 0xff),
+                            static_cast<uint8_t>((iv & 0xff000000) >> 24)
+                    );
+                }
             }
 
             return std::nullopt;
@@ -171,10 +186,10 @@ public:
                 }
 
                 return c(
-                    parse_css_int(params[0]),
-                    parse_css_int(params[1]),
-                    parse_css_int(params[2]),
-                    alpha
+                        parse_css_int(params[0]),
+                        parse_css_int(params[1]),
+                        parse_css_int(params[2]),
+                        alpha
                 );
 
             } else if (fname == "hsla" || fname == "hsl") {
