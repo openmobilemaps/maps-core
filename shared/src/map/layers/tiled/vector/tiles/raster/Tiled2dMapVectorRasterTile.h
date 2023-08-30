@@ -53,4 +53,6 @@ private:
     std::optional<bool> lastInZoomRange = std::nullopt;
 
     std::optional<RasterShaderStyle> lastStyle;
+
+    Tiled2dMapZoomInfo zoomInfo;
 };

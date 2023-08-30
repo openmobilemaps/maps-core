@@ -22,7 +22,7 @@ Tiled2dMapVectorRasterTile::Tiled2dMapVectorRasterTile(const std::weak_ptr<MapIn
                                                        const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                                        const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager)
                                                        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, layerConfig, tileCallbackInterface, featureStateManager),
-                                                       usedKeys(description->getUsedKeys()) {
+                                                       usedKeys(description->getUsedKeys()), zoomInfo(layerConfig->getZoomInfo()) {
     isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
     isStyleFeatureStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end();
     auto pMapInterface = mapInterface.lock();
@@ -55,7 +55,7 @@ void Tiled2dMapVectorRasterTile::update() {
     zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.zoomIdentifier);
     
     auto rasterDescription = std::static_pointer_cast<RasterVectorLayerDescription>(description);
-    bool inZoomRange = rasterDescription->maxZoom >= zoomIdentifier && rasterDescription->minZoom <= zoomIdentifier;
+    bool inZoomRange = (rasterDescription->maxZoom >= zoomIdentifier || zoomInfo.overzoom) && (rasterDescription->minZoom <= zoomIdentifier || zoomInfo.underzoom);
 
     if (lastZoom &&
         ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant)
