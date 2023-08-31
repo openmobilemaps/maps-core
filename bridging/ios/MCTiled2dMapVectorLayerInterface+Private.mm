@@ -102,7 +102,7 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 
 - (void)setSelectionDelegate:(nullable id<MCTiled2dMapVectorLayerSelectionCallbackInterface>)selectionDelegate {
     try {
-        _cppRefHandle.get()->setSelectionDelegate(::djinni_generated::Tiled2dMapVectorLayerSelectionCallbackInterface::toCpp(selectionDelegate));
+        _cppRefHandle.get()->setSelectionDelegate(::djinni::Optional<std::optional, ::djinni_generated::Tiled2dMapVectorLayerSelectionCallbackInterface>::toCpp(selectionDelegate));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

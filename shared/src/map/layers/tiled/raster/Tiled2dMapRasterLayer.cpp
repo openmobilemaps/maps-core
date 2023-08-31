@@ -66,6 +66,8 @@ void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapIn
 }
 
 void Tiled2dMapRasterLayer::onRemoved() {
+    pause();
+
     auto mapInterface = this->mapInterface;
     if (mapInterface && registerToTouchHandler) {
         mapInterface->getTouchHandler()->removeListener(std::dynamic_pointer_cast<TouchInterface>(shared_from_this()));
@@ -104,6 +106,7 @@ void Tiled2dMapRasterLayer::pause() {
         if (tileObject.second && tileObject.second->getGraphicsObject()->isReady()) {
             tileObject.second->getGraphicsObject()->clear();
         }
+        tileObject.second->getQuadObject()->removeTexture();
     }
     for (const auto &tileMask : tileMaskMap) {
         if (tileMask.second.getGraphicsObject() && tileMask.second.getGraphicsObject()->isReady())

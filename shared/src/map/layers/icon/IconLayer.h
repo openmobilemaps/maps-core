@@ -81,6 +81,8 @@ class IconLayer : public IconLayerInterface,
     virtual float getAlpha() override;
 
   private:
+    virtual void clearSync(const std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>> &iconsToClear);
+
     void
     setupIconObjects(const std::vector<std::tuple<const std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>>
                          &iconObjects);
