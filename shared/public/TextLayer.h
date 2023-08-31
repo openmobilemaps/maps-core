@@ -56,6 +56,7 @@ class TextLayer : public TextLayerInterface, public SimpleLayerInterface, public
 
   private:
     void clear();
+    void clearSync(const std::unordered_map<std::shared_ptr<TextInfoInterface>, std::shared_ptr<TextLayerObject>> &textsToClear);
     void generateRenderPasses();
 
     void add(const std::shared_ptr<TextInfoInterface> &text);

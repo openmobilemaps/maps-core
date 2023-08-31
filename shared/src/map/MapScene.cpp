@@ -192,7 +192,15 @@ void MapScene::removeLayer(const std::shared_ptr<::LayerInterface> &layer) {
         }
         if (targetIndex >= 0) {
             layers.erase(targetIndex);
-            layer->onRemoved();
+            auto scheduler = this->scheduler;
+            if (scheduler) {
+                scheduler->addTask(
+                        std::make_shared<LambdaTask>(
+                                TaskConfig("MapScene_removeLayer", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+                                [layer] {
+                                    layer->onRemoved();
+                                }));
+            }
         }
     }
     invalidate();

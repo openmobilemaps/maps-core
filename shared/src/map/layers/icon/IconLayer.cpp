@@ -168,11 +168,12 @@ void IconLayer::clear() {
     }
     {
         std::lock_guard<std::recursive_mutex> lock(iconsMutex);
+        std::weak_ptr<IconLayer> weakSelfPtr = std::dynamic_pointer_cast<IconLayer>(shared_from_this());
         auto iconsToClear = icons;
         scheduler->addTask(std::make_shared<LambdaTask>(
-            TaskConfig("IconLayer_clear", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [=] {
-                for (auto &icon : iconsToClear) {
-                    icon.second->getGraphicsObject()->clear();
+            TaskConfig("IconLayer_clear", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [weakSelfPtr, iconsToClear] {
+                if (auto self = weakSelfPtr.lock()) {
+                    self->clearSync(iconsToClear);
                 }
             }));
         icons.clear();
@@ -183,6 +184,10 @@ void IconLayer::clear() {
     }
     renderPassObjectMap.clear();
     mapInterface->invalidate();
+}
+
+void IconLayer::clearSync(const std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>> &iconsToClear) {
+
 }
 
 void IconLayer::setCallbackHandler(const std::shared_ptr<IconLayerCallbackInterface> &handler) { this->callbackHandler = handler; }
@@ -285,6 +290,8 @@ void IconLayer::onRemoved() {
         addingQueue.clear();
     }
 
+    pause();
+
     auto mapInterface = this->mapInterface;
     if (mapInterface && isLayerClickable) {
         mapInterface->getTouchHandler()->removeListener(shared_from_this());
@@ -301,7 +308,10 @@ void IconLayer::pause() {
             addingQueue.push_back(icon.first);
         }
     }
-    clear();
+
+    std::lock_guard<std::recursive_mutex> lock(iconsMutex);
+    clearSync(icons);
+    icons.clear();
 }
 
 void IconLayer::resume() {

@@ -48,6 +48,7 @@ std::vector<std::shared_ptr<LineInfoInterface>> LineLayer::getLines() {
 }
 
 void LineLayer::remove(const std::shared_ptr<LineInfoInterface> &line) {
+    auto mapInterface = this->mapInterface;
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         addingQueue.erase(std::remove(addingQueue.begin(), addingQueue.end(), line), addingQueue.end());
@@ -57,14 +58,24 @@ void LineLayer::remove(const std::shared_ptr<LineInfoInterface> &line) {
         std::lock_guard<std::recursive_mutex> lock(linesMutex);
         for (auto it = lines.begin(); it != lines.end(); it++) {
             if (it->first->getIdentifier() == line->getIdentifier()) {
+                auto linePtr = it->second;
+                auto scheduler = mapInterface->getScheduler();
+                if (scheduler) {
+                    scheduler->addTask(std::make_shared<LambdaTask>(
+                            TaskConfig("IconLayer_clearLine", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+                            [linePtr] {
+                                if (linePtr) {
+                                    linePtr->getLineObject()->clear();
+                                }
+                            }));
+                }
                 lines.erase(it);
                 break;
             }
         }
     }
     generateRenderPasses();
-    if (mapInterface)
-        mapInterface->invalidate();
+    mapInterface->invalidate();
 }
 
 void LineLayer::add(const std::shared_ptr<LineInfoInterface> &line) {
@@ -121,6 +132,7 @@ void LineLayer::setupLine(const std::shared_ptr<LineGroup2dInterface> &line) {
 }
 
 void LineLayer::clear() {
+    auto mapInterface = this->mapInterface;
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         addingQueue.clear();
@@ -128,11 +140,22 @@ void LineLayer::clear() {
     }
     {
         std::lock_guard<std::recursive_mutex> lock(linesMutex);
+        auto scheduler = mapInterface->getScheduler();
+        if (scheduler) {
+            auto linesToClear = lines;
+            scheduler->addTask(std::make_shared<LambdaTask>(TaskConfig("LineLayer_clearLines", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [linesToClear]{
+                for (const auto &line : linesToClear) {
+                    line.second->getLineObject()->clear();
+                }
+            }));
+            for (const auto &line: lines) {
+                line.second->getLineObject()->clear();
+            }
+        }
         lines.clear();
     }
     generateRenderPasses();
-    if (mapInterface)
-        mapInterface->invalidate();
+    mapInterface->invalidate();
 }
 
 void LineLayer::setCallbackHandler(const std::shared_ptr<LineLayerCallbackInterface> &handler) { callbackHandler = handler; }
@@ -209,6 +232,8 @@ void LineLayer::onRemoved() {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         addingQueue.clear();
     }
+
+    pause();
 
     if (mapInterface && isLayerClickable)
         mapInterface->getTouchHandler()->removeListener(shared_from_this());
