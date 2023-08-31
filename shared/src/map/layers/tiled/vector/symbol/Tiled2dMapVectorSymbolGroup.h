@@ -52,7 +52,7 @@ public:
     std::shared_ptr<Quad2dStretchedInstancedInterface> stretchedInstancedObject;
     std::shared_ptr<TextInstancedInterface> textInstancedObject;
 
-    void collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<CollisionGrid> collisionGrid);
+    std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>>& getSymbolObjects();
 
     std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> onClickConfirmed(const OBB2D &tinyClickBox);
 

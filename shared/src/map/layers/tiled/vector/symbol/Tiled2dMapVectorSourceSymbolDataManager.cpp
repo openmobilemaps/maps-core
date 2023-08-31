@@ -398,6 +398,8 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
     auto scaleFactor = camera->mapUnitsFromPixels(1.0);
 
     for (const auto layerIdentifier: layerIdentifiers) {
+        std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>> allObjects;
+
         for (const auto &[tile, symbolGroupsMap]: tileSymbolGroupMap) {
             const auto tileState = tileStateMap.find(tile);
             if (tileState == tileStateMap.end() || tileState->second != TileState::VISIBLE) {
@@ -406,11 +408,22 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
             const auto objectsIt = symbolGroupsMap.find(layerIdentifier);
             if (objectsIt != symbolGroupsMap.end()) {
                 for (auto &symbolGroup: objectsIt->second) {
-                    symbolGroup.syncAccess([&zoomIdentifier, &rotation, &scaleFactor, &collisionGrid](auto group){
-                        group->collisionDetection(zoomIdentifier, rotation, scaleFactor, collisionGrid);
+
+                    symbolGroup.syncAccess([&allObjects](auto group){
+                        const auto &objects = group->getSymbolObjects();
+                        allObjects.reserve(allObjects.size() + objects.size());
+                        allObjects.insert(allObjects.end(), objects.begin(), objects.end());
                     });
                 }
             }
+        }
+        std::stable_sort(allObjects.rbegin(), allObjects.rend(),
+                         [](const auto &a, const auto &b) -> bool {
+            return a->symbolSortKey > b->symbolSortKey;
+        });
+
+        for (const auto &object: allObjects) {
+            object->collisionDetection(zoomIdentifier, rotation, scaleFactor, collisionGrid);
         }
     }
 }

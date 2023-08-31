@@ -288,7 +288,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
     std::stable_sort(symbolObjects.rbegin(), symbolObjects.rend(),
               [](const auto &a, const auto &b) -> bool {
-                  return a->symbolSortKey < b->symbolSortKey;
+                  return a->symbolSortKey > b->symbolSortKey;
               });
 
     // TODO: make filtering based on collision at zoomLevel tileInfo.zoomIdentifier + 1
@@ -675,11 +675,8 @@ Tiled2dMapVectorSymbolGroup::createSymbolObject(const Tiled2dMapTileInfo &tileIn
     }
 }
 
-void Tiled2dMapVectorSymbolGroup::collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor,
-                                                     std::shared_ptr<CollisionGrid> collisionGrid) {
-    for (const auto &object : symbolObjects) {
-        object->collisionDetection(zoomIdentifier, rotation, scaleFactor, collisionGrid);
-    }
+std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>>& Tiled2dMapVectorSymbolGroup::getSymbolObjects() {
+    return symbolObjects;
 }
 
 std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolGroup::onClickConfirmed(const OBB2D &tinyClickBox) {
