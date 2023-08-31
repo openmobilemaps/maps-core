@@ -83,8 +83,10 @@ void PolygonLayer::remove(const PolygonInfo &polygon) {
             scheduler->addTask(std::make_shared<LambdaTask>(
                     TaskConfig("PolygonLayer_clearPolygon", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
                     [polygonsToClear] {
-                        for (const auto polygon : polygonsToClear) {
-                            polygon->getPolygonObject()->clear();
+                        for (const auto polygon: polygonsToClear) {
+                            if (polygon->getPolygonObject()->isReady()) {
+                                polygon->getPolygonObject()->clear();
+                            }
                         }
                     }));
         }
@@ -177,7 +179,9 @@ void PolygonLayer::clear() {
             scheduler->addTask(std::make_shared<LambdaTask>(TaskConfig("LineLayer_clearLines", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [polygonsToClear]{
                 for (const auto &polygon : polygonsToClear) {
                     for (const auto &p : polygon.second) {
-                        p.second->getPolygonObject()->clear();
+                        if (p.second->getPolygonObject()->isReady()) {
+                            p.second->getPolygonObject()->clear();
+                        }
                     }
                 }
             }));
@@ -196,7 +200,9 @@ void PolygonLayer::pause() {
     std::lock_guard<std::recursive_mutex> overlayLock(polygonsMutex);
     for (const auto &polygon : polygons) {
         for (auto &p : polygon.second) {
-            p.second->getPolygonObject()->clear();
+            if (p.second->getPolygonObject()->isReady()) {
+                p.second->getPolygonObject()->clear();
+            }
         }
     }
     if (mask) {

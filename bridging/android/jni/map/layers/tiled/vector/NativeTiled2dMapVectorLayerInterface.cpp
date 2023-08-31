@@ -78,7 +78,7 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapVectorLayerInterface>(nativeRef);
-        ref->setSelectionDelegate(::djinni_generated::NativeTiled2dMapVectorLayerSelectionCallbackInterface::toCpp(jniEnv, j_selectionDelegate));
+        ref->setSelectionDelegate(::djinni::Optional<std::optional, ::djinni_generated::NativeTiled2dMapVectorLayerSelectionCallbackInterface>::toCpp(jniEnv, j_selectionDelegate));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

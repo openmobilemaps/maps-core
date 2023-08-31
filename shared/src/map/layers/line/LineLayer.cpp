@@ -145,12 +145,11 @@ void LineLayer::clear() {
             auto linesToClear = lines;
             scheduler->addTask(std::make_shared<LambdaTask>(TaskConfig("LineLayer_clearLines", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [linesToClear]{
                 for (const auto &line : linesToClear) {
-                    line.second->getLineObject()->clear();
+                    if (line.second->getLineObject()->isReady()) {
+                        line.second->getLineObject()->clear();
+                    }
                 }
             }));
-            for (const auto &line: lines) {
-                line.second->getLineObject()->clear();
-            }
         }
         lines.clear();
     }

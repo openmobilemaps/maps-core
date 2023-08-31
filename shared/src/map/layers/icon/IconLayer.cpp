@@ -43,8 +43,7 @@ std::vector<std::shared_ptr<IconInfoInterface>> IconLayer::getIcons() {
 void IconLayer::remove(const std::shared_ptr<IconInfoInterface> &icon) {
     auto lockSelfPtr = shared_from_this();
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
-    auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
-    if (!scheduler) {
+    if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         addingQueue.erase(std::remove(addingQueue.begin(), addingQueue.end(), icon), addingQueue.end());
         return;
@@ -55,10 +54,16 @@ void IconLayer::remove(const std::shared_ptr<IconInfoInterface> &icon) {
             if (it->first->getIdentifier() == icon->getIdentifier()) {
                 auto graphicsObject = it->second->getGraphicsObject();
                 icons.erase(it);
-                scheduler->addTask(
-                    std::make_shared<LambdaTask>(TaskConfig("IconLayer_remove_" + icon->getIdentifier(), 0, TaskPriority::NORMAL,
-                                                            ExecutionEnvironment::GRAPHICS),
-                                                 [=] { graphicsObject->clear(); }));
+                auto scheduler = mapInterface->getScheduler();
+                if (scheduler && graphicsObject->isReady()) {
+                    scheduler->addTask(
+                            std::make_shared<LambdaTask>(
+                                    TaskConfig("IconLayer_remove_" + icon->getIdentifier(), 0, TaskPriority::NORMAL,
+                                               ExecutionEnvironment::GRAPHICS),
+                                    [=] {
+                                        graphicsObject->clear();
+                                    }));
+                }
                 break;
             }
         }
@@ -187,7 +192,11 @@ void IconLayer::clear() {
 }
 
 void IconLayer::clearSync(const std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>> &iconsToClear) {
-
+    for (const auto &icon : iconsToClear) {
+        if (icon.second->getGraphicsObject()->isReady()) {
+            icon.second->getGraphicsObject()->clear();
+        }
+    }
 }
 
 void IconLayer::setCallbackHandler(const std::shared_ptr<IconLayerCallbackInterface> &handler) { this->callbackHandler = handler; }

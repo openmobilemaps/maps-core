@@ -105,8 +105,8 @@ void Tiled2dMapRasterLayer::pause() {
     for (const auto &tileObject : tileObjectMap) {
         if (tileObject.second && tileObject.second->getGraphicsObject()->isReady()) {
             tileObject.second->getGraphicsObject()->clear();
-            tileObject.second->getQuadObject()->removeTexture();
         }
+        tileObject.second->getQuadObject()->removeTexture();
     }
     for (const auto &tileMask : tileMaskMap) {
         if (tileMask.second.getGraphicsObject() && tileMask.second.getGraphicsObject()->isReady())

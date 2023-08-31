@@ -166,7 +166,8 @@ void TextLayer::clear() {
 
 void TextLayer::clearSync(const std::unordered_map<std::shared_ptr<TextInfoInterface>, std::shared_ptr<TextLayerObject>> &textsToClear) {
     for (auto &text : textsToClear) {
-        text.second->getTextObject()->asGraphicsObject()->clear();
+        if (text.second->getTextGraphicsObject()->isReady())
+        text.second->getTextGraphicsObject()->clear();
         text.second->getTextObject()->removeTexture();
     }
 }

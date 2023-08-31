@@ -292,11 +292,6 @@ void MapScene::destroy() {
     scheduler->destroy();
     scheduler = nullptr;
     callbackHandler = nullptr;
-
-    std::lock_guard<std::recursive_mutex> lock(layersMutex);
-    for (const auto &layerEntry : layers) {
-        layerEntry.second->onRemoved();
-    }
 }
 
 void MapScene::drawReadyFrame(const ::RectCoord &bounds, float timeout,

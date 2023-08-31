@@ -28,7 +28,7 @@ public:
 
     static /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerInterface> createFromLocalStyleJsonWithZoomInfo(const std::string & layerName, const std::string & styleJson, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & loaders, const /*not-null*/ std::shared_ptr<::FontLoaderInterface> & fontLoader, double dpFactor, const ::Tiled2dMapZoomInfo & zoomInfo);
 
-    virtual void setSelectionDelegate(const /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> & selectionDelegate) = 0;
+    virtual void setSelectionDelegate(const /*nullable*/ std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> & selectionDelegate) = 0;
 
     virtual /*not-null*/ std::shared_ptr<::LayerInterface> asLayerInterface() = 0;
 

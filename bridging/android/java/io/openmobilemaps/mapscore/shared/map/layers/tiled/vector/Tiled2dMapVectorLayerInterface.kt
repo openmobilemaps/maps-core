@@ -22,7 +22,7 @@ abstract class Tiled2dMapVectorLayerInterface {
         external fun createFromLocalStyleJsonWithZoomInfo(layerName: String, styleJson: String, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface, dpFactor: Double, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo): Tiled2dMapVectorLayerInterface
     }
 
-    abstract fun setSelectionDelegate(selectionDelegate: Tiled2dMapVectorLayerSelectionCallbackInterface)
+    abstract fun setSelectionDelegate(selectionDelegate: Tiled2dMapVectorLayerSelectionCallbackInterface?)
 
     abstract fun asLayerInterface(): io.openmobilemaps.mapscore.shared.map.LayerInterface
 
@@ -45,11 +45,11 @@ abstract class Tiled2dMapVectorLayerInterface {
             external fun nativeDestroy(nativeRef: Long)
         }
 
-        override fun setSelectionDelegate(selectionDelegate: Tiled2dMapVectorLayerSelectionCallbackInterface) {
+        override fun setSelectionDelegate(selectionDelegate: Tiled2dMapVectorLayerSelectionCallbackInterface?) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_setSelectionDelegate(this.nativeRef, selectionDelegate)
         }
-        private external fun native_setSelectionDelegate(_nativeRef: Long, selectionDelegate: Tiled2dMapVectorLayerSelectionCallbackInterface)
+        private external fun native_setSelectionDelegate(_nativeRef: Long, selectionDelegate: Tiled2dMapVectorLayerSelectionCallbackInterface?)
 
         override fun asLayerInterface(): io.openmobilemaps.mapscore.shared.map.LayerInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
