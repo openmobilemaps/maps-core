@@ -32,7 +32,7 @@ extension MTLBuffer {
 }
 
 extension MTLBuffer? {
-    mutating func copyOrCreate(from sharedBytes: MCSharedBytes, device: MTLDevice) {
+    mutating public func copyOrCreate(from sharedBytes: MCSharedBytes, device: MTLDevice) {
         switch self {
             case .none:
                 self = device.makeBuffer(from: sharedBytes)
