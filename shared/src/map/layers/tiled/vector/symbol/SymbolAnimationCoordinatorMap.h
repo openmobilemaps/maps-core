@@ -23,6 +23,9 @@ public:
                     return coordinator;
                 }
             }
+            auto animationCoordinator = std::make_shared<SymbolAnimationCoordinator>(coord, zoomIdentifier, xTolerance, yTolerance);
+            coordinatorIt->second.push_back(animationCoordinator);
+            return animationCoordinator;
         }
 
         auto animationCoordinator = std::make_shared<SymbolAnimationCoordinator>(coord, zoomIdentifier, xTolerance, yTolerance);
