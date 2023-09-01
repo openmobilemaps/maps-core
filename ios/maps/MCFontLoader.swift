@@ -34,12 +34,12 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface {
     public func load(_ font: MCFont) -> MCFontLoaderResult {
         loadingQueue.sync {
             guard let image = getFontImage(font: font) else {
-                os_log("MCFontLoader: unable to load font image for %@", log: OSLog.default, type: .error, font.name)
+                os_log("MCFontLoader: unable to load font image for %{public}@", log: OSLog.default, type: .error, font.name)
                 return .init(imageData: nil, fontData: nil, status: .ERROR_OTHER)
             }
 
             guard let data = getFontData(font: font) else {
-                os_log("MCFontLoader: unable to load font data for %@", log: OSLog.default, type: .error, font.name)
+                os_log("MCFontLoader: unable to load font data for %{public}@", log: OSLog.default, type: .error, font.name)
                 return .init(imageData: nil, fontData: nil, status: .ERROR_OTHER)
             }
 
