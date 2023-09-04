@@ -49,9 +49,10 @@ void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterf
                 if (!selfPtr) {
                     return;
                 }
+                auto mapInterface = selfPtr->mapInterface;
 
-                if (!selfPtr->renderObject->getGraphicsObject()->isReady()) {
-                    selfPtr->renderObject->getGraphicsObject()->setup(selfPtr->mapInterface->getRenderingContext());
+                if (mapInterface && !selfPtr->renderObject->getGraphicsObject()->isReady()) {
+                    selfPtr->renderObject->getGraphicsObject()->setup(mapInterface->getRenderingContext());
                 }
             }));
 }
@@ -79,8 +80,14 @@ void Tiled2dMapVectorBackgroundSubLayer::pause() {
 void Tiled2dMapVectorBackgroundSubLayer::resume() {
     Tiled2dMapVectorSubLayer::resume();
 
+    auto mapInterface = this->mapInterface;
+    auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
+    if (!renderingContext) {
+        return;
+    }
+
     if (renderObject && !renderObject->getGraphicsObject()->isReady()) {
-        renderObject->getGraphicsObject()->setup(mapInterface->getRenderingContext());
+        renderObject->getGraphicsObject()->setup(renderingContext);
     }
 }
 

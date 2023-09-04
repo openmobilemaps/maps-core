@@ -295,11 +295,14 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups(const std::unord
             tileStateIt->second = state;
         }
         if (state == TileState::CACHED) {
-            for (const auto &[layerIdentifier, symbolGroups]: tileSymbolGroupMap.at(tile)) {
-                for (auto &symbolGroup: symbolGroups) {
-                    symbolGroup.syncAccess([&](auto group){
-                        group->placedInCache();
-                    });
+            auto tileSymbolGroupMapIt = tileSymbolGroupMap.find(tile);
+            if (tileSymbolGroupMapIt != tileSymbolGroupMap.end()) {
+                for (const auto &[layerIdentifier, symbolGroups]: tileSymbolGroupMapIt->second) {
+                    for (auto &symbolGroup: symbolGroups) {
+                        symbolGroup.syncAccess([&](auto group){
+                            group->placedInCache();
+                        });
+                    }
                 }
             }
         }
