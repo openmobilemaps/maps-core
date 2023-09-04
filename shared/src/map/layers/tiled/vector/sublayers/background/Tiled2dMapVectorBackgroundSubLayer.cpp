@@ -80,8 +80,14 @@ void Tiled2dMapVectorBackgroundSubLayer::pause() {
 void Tiled2dMapVectorBackgroundSubLayer::resume() {
     Tiled2dMapVectorSubLayer::resume();
 
-    if (mapInterface && renderObject && !renderObject->getGraphicsObject()->isReady()) {
-        renderObject->getGraphicsObject()->setup(mapInterface->getRenderingContext());
+    auto mapInterface = this->mapInterface;
+    auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
+    if (!renderingContext) {
+        return;
+    }
+
+    if (renderObject && !renderObject->getGraphicsObject()->isReady()) {
+        renderObject->getGraphicsObject()->setup(renderingContext);
     }
 }
 
