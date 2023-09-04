@@ -82,8 +82,9 @@ featureStateManager(featureStateManager) {
     isInteractable = description->isInteractable(evalContext);
 
     const bool hasText = !fullText.empty();
+    const size_t contentHash = featureContext->getStyleHash(usedKeys);
 
-    crossTileIdentifier = std::hash<std::tuple<std::string, std::string, bool>>()(std::tuple<std::string, std::string, bool>(fullText, layerIdentifier, hasIcon));
+    crossTileIdentifier = std::hash<std::tuple<std::string, std::string, bool, size_t>>()(std::tuple<std::string, std::string, bool, size_t>(fullText, layerIdentifier, hasIcon, contentHash));
     double xTolerance = std::ceil(std::abs(tileInfo.bounds.bottomRight.x - tileInfo.bounds.topLeft.x) / 4096.0);
     double yTolerance = std::ceil(std::abs(tileInfo.bounds.bottomRight.y - tileInfo.bounds.topLeft.y) / 4096.0);
 
