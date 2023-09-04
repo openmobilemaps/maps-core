@@ -63,6 +63,8 @@ public:
                       std::shared_ptr<Value> textMaxAngle,
                       std::shared_ptr<Value> blendMode,
                       std::shared_ptr<Value> symbolZOrder,
+                      int64_t transitionDuration,
+                      int64_t transitionDelay,
                       double dpFactor):
     textSize(textSize),
     textFont(textFont),
@@ -102,6 +104,8 @@ public:
     iconRotationAlignment(iconRotationAlignment),
     blendMode(blendMode),
     symbolZOrder(symbolZOrder),
+    transitionDuration(transitionDuration),
+    transitionDelay(transitionDelay),
     dpFactor(dpFactor) {}
 
 
@@ -348,6 +352,14 @@ public:
         return symbolZOrderEvaluator.getResult(symbolZOrder, context, defaultValue);
     }
 
+    const int64_t getTransitionDuration() const {
+        return transitionDuration;
+    }
+
+    const int64_t getTransitionDelay() const {
+        return transitionDelay;
+    }
+
     std::shared_ptr<Value> textSize;
     std::shared_ptr<Value> textFont;
     std::shared_ptr<Value> textField;
@@ -387,7 +399,9 @@ public:
     std::shared_ptr<Value> iconRotationAlignment;
     std::shared_ptr<Value> blendMode;
     std::shared_ptr<Value> symbolZOrder;
-    
+    int64_t transitionDuration;
+    int64_t transitionDelay;
+
 private:
     ValueEvaluator<BlendMode> blendModeEvaluator;
     ValueEvaluator<double> textSizeEvaluator;

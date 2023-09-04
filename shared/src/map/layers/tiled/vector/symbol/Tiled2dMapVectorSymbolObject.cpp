@@ -88,7 +88,7 @@ featureStateManager(featureStateManager) {
     double xTolerance = std::ceil(std::abs(tileInfo.bounds.bottomRight.x - tileInfo.bounds.topLeft.x) / 4096.0);
     double yTolerance = std::ceil(std::abs(tileInfo.bounds.bottomRight.y - tileInfo.bounds.topLeft.y) / 4096.0);
 
-    animationCoordinator = animationCoordinatorMap->getOrAddAnimationController(crossTileIdentifier, coordinate, tileInfo.zoomIdentifier, xTolerance, yTolerance);
+    animationCoordinator = animationCoordinatorMap->getOrAddAnimationController(crossTileIdentifier, coordinate, tileInfo.zoomIdentifier, xTolerance, yTolerance, description->style.getTransitionDuration(), description->style.getTransitionDelay());
     animationCoordinator->increaseUsage();
     if (!animationCoordinator->isOwned.test_and_set()) {
         isCoordinateOwner = true;

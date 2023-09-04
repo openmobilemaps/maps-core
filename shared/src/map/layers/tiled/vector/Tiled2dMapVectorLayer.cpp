@@ -130,9 +130,14 @@ void Tiled2dMapVectorLayer::scheduleStyleJsonLoading() {
                         }
                     }
 
+                    selfPtr->didLoadStyleJson(layerError);
                     selfPtr->isLoadingStyleJson = false;
                 }
             }));
+}
+
+void Tiled2dMapVectorLayer::didLoadStyleJson(const std::optional<TiledLayerError> &error) {
+
 }
 
 std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJson() {
