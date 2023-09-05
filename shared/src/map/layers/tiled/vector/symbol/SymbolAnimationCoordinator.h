@@ -15,21 +15,21 @@
 #include "Coord.h"
 #include <atomic>
 
-#define SYMBOL_ANIMATION_DURATION_MS 300.0f
-#define SYMBOL_ANIMATION_DELAY_MS 18ll
-
-
 class SymbolAnimationCoordinator {
 public:
     SymbolAnimationCoordinator(const Coord &coordinate,
                                const int zoomIdentifier,
                                const double xTolerance,
-                               const double yTolerance):
+                               const double yTolerance,
+                               const int64_t animationDuration,
+                               const int64_t animationDelay):
     interpolator(InterpolatorFunction::EaseInOut),
     coordinate(coordinate),
     zoomIdentifier(zoomIdentifier),
     xTolerance(xTolerance),
-    yTolerance(yTolerance) {}
+    yTolerance(yTolerance),
+    animationDuration(animationDuration),
+    animationDelay(animationDelay){}
 
     bool isMatching(const Coord &coordinate, const int zoomIdentifier) const {
         const double toleranceFactor = std::max(1.0, std::pow(2, this->zoomIdentifier - zoomIdentifier));
@@ -117,12 +117,18 @@ private:
 
     AnimationInterpolator interpolator;
 
+    const int64_t animationDuration;
+    const int64_t animationDelay;
+
     float internalGetAlpha(float targetAlpha, long long now, float &lastAlpha, long long &animationStart) {
+        if (animationDuration == 0) {
+            return targetAlpha;
+        }
         if (lastAlpha != targetAlpha) {
             if (animationStart == 0) {
-                animationStart = now + SYMBOL_ANIMATION_DELAY_MS;
+                animationStart = now + animationDelay;
             }
-            float progress = std::min(double(std::max(now - animationStart, 0ll)) / SYMBOL_ANIMATION_DURATION_MS, 1.0);
+            float progress = std::min(double(std::max(now - animationStart, 0ll)) / animationDuration, 1.0);
             if (progress == 1.0) {
                 animationStart = 0;
                 lastAlpha = targetAlpha;

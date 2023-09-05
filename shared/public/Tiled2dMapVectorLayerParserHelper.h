@@ -175,6 +175,14 @@ public:
             globalIsInteractable = parser.parseValue(json["metadata"]["interactable"]);
         }
 
+        int64_t globalTransitionDuration = 300;
+        int64_t globalTransitionDelay = 0;
+        if(json["transition"].is_object()) {
+            globalTransitionDuration = json["transition"].value("duration", globalTransitionDuration);
+            globalTransitionDelay = json["transition"].value("delay", globalTransitionDelay);
+
+        }
+
         for (auto&[key, val]: json["layers"].items()) {
 			if (val["layout"].is_object() && val["layout"]["visibility"] == "none") {
                 continue;
@@ -194,6 +202,13 @@ public:
                 if (!val["metadata"]["blend-mode"].is_null()) {
                     blendMode = parser.parseValue(val["metadata"]["blend-mode"]);
                 }
+            }
+
+            int64_t transitionDuration = globalTransitionDuration;
+            int64_t transitionDelay = globalTransitionDelay;
+            if(val["transition"].is_object()) {
+                transitionDuration = val["transition"].value("duration", transitionDuration);
+                transitionDelay = val["transition"].value("delay", transitionDelay);
             }
 
             if (val["type"] == "background" && !val["paint"]["background-color"].is_null()) {
@@ -297,6 +312,8 @@ public:
                                             parser.parseValue(val["layout"]["text-max-angle"]),
                                             parser.parseValue(val["layout"]["symbol-z-order"]),
                                             blendMode,
+                                            transitionDuration,
+                                            transitionDelay,
                                             dpFactor);
 
                     std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);

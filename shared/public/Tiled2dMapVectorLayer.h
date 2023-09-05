@@ -165,9 +165,12 @@ protected:
     virtual std::optional<TiledLayerError> loadStyleJsonRemotely();
     virtual std::optional<TiledLayerError> loadStyleJsonLocally(std::string styleJsonString);
 
+
 protected:
     std::optional<std::string> metadata = std::nullopt;
 
+    std::atomic_bool isLoadingStyleJson = false;
+    virtual void didLoadStyleJson(const std::optional<TiledLayerError> &error);
 private:
     void scheduleStyleJsonLoading();
 
@@ -210,7 +213,6 @@ private:
 
     std::unordered_map<std::string, SourceRenderDescriptions> sourceRenderDescriptionMap;
 
-    std::atomic_bool isLoadingStyleJson = false;
     std::atomic_bool isResumed = false;
 
     float alpha = 1.0;

@@ -14,7 +14,14 @@
 
 class SymbolAnimationCoordinatorMap {
 public:
-    std::shared_ptr<SymbolAnimationCoordinator> getOrAddAnimationController(size_t crossTileIdentifier, const Coord &coord, int zoomIdentifier, double xTolerance, double yTolerance) {
+
+    std::shared_ptr<SymbolAnimationCoordinator> getOrAddAnimationController(size_t crossTileIdentifier,
+                                                                            const Coord &coord,
+                                                                            int zoomIdentifier,
+                                                                            double xTolerance,
+                                                                            double yTolerance,
+                                                                            const int64_t animationDuration,
+                                                                            const int64_t animationDelay) {
         std::lock_guard<std::mutex> lock(mapMutex);
         auto coordinatorIt = animationCoordinators.find(crossTileIdentifier);
         if (coordinatorIt != animationCoordinators.end()) {
@@ -23,12 +30,12 @@ public:
                     return coordinator;
                 }
             }
-            auto animationCoordinator = std::make_shared<SymbolAnimationCoordinator>(coord, zoomIdentifier, xTolerance, yTolerance);
+            auto animationCoordinator = std::make_shared<SymbolAnimationCoordinator>(coord, zoomIdentifier, xTolerance, yTolerance, animationDuration, animationDelay);
             coordinatorIt->second.push_back(animationCoordinator);
             return animationCoordinator;
         }
 
-        auto animationCoordinator = std::make_shared<SymbolAnimationCoordinator>(coord, zoomIdentifier, xTolerance, yTolerance);
+        auto animationCoordinator = std::make_shared<SymbolAnimationCoordinator>(coord, zoomIdentifier, xTolerance, yTolerance, animationDuration, animationDelay);
         animationCoordinators.insert({crossTileIdentifier, { animationCoordinator }});
         return animationCoordinator;
     }
