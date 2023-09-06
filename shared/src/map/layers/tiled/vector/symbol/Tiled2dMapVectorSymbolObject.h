@@ -153,15 +153,16 @@ private:
     bool isStyleZoomDependant = true;
     bool isStyleFeatureStateDependant = true;
 
-    std::optional<double> lastIconUpdateScaleFactor;
-    std::optional<double> lastIconUpdateRotation;
-    std::optional<float> lastIconUpdateAlpha;
+    // the following flags are all optional, if they are set to -1 it is not set
+    double lastIconUpdateScaleFactor;
+    double lastIconUpdateRotation;
+    float lastIconUpdateAlpha;
 
-    std::optional<double> lastStretchIconUpdateScaleFactor;
-    std::optional<double> lastStretchIconUpdateRotation;
+    double lastStretchIconUpdateScaleFactor;
+    double lastStretchIconUpdateRotation;
 
-    std::optional<double> lastTextUpdateScaleFactor;
-    std::optional<double> lastTextUpdateRotation;
+    double lastTextUpdateScaleFactor;
+    double lastTextUpdateRotation;
 
     bool textAllowOverlap;
     bool iconAllowOverlap;
