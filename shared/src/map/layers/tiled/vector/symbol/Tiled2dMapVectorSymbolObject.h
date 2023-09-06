@@ -47,7 +47,8 @@ public:
                                  const bool hideIcon,
                                  std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap,
                                  const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager,
-                                 const std::unordered_set<std::string> &usedKeys);
+                                 const std::unordered_set<std::string> &usedKeys,
+                                 const size_t symbolTileIndex);
 
     ~Tiled2dMapVectorSymbolObject() {
         if (animationCoordinator) {
@@ -89,6 +90,7 @@ public:
     }
 
     int64_t symbolSortKey;
+    const size_t symbolTileIndex;
 
     std::optional<Quad2dD> getCombinedBoundingBox(bool considerOverlapFlag);
 

@@ -37,7 +37,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                                                            const bool hideIcon,
                                                            std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap,
                                                            const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager,
-                                                           const std::unordered_set<std::string> &usedKeys) :
+                                                           const std::unordered_set<std::string> &usedKeys,
+                                                           const size_t symbolTileIndex) :
     description(description),
     layerConfig(layerConfig),
     coordinate(coordinate),
@@ -48,7 +49,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     stretchIconBoundingBox(Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0)),
     stretchIconBoundingBoxViewportAligned(0, 0, 0, 0),
 textSymbolPlacement(textSymbolPlacement),
-featureStateManager(featureStateManager) {
+featureStateManager(featureStateManager),
+symbolTileIndex(symbolTileIndex) {
     auto strongMapInterface = mapInterface.lock();
     auto objectFactory = strongMapInterface ? strongMapInterface->getGraphicsObjectFactory() : nullptr;
     auto camera = strongMapInterface ? strongMapInterface->getCamera() : nullptr;

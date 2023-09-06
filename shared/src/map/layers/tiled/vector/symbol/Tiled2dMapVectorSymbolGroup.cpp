@@ -49,10 +49,9 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
     std::unordered_map<std::string, std::vector<Coord>> textPositionMap;
 
-    int32_t featuresRBase = (int32_t)features->size() - (featuresBase + featuresCount);
-    for (auto it = features->rbegin() + featuresRBase; it != features->rbegin() + featuresRBase + featuresCount; it++) {
-        auto const &[context, geometry] = *it;
-
+    size_t featureTileIndex = -1;
+    for (auto const &[context, geometry]: *features) {
+        featureTileIndex++;
         const auto evalContext = EvaluationContext(tileInfo.zoomIdentifier, context, featureStateManager);
 
         if ((layerDescription->filter != nullptr && !layerDescription->filter->evaluateOr(evalContext, true))) {
@@ -133,7 +132,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
                         const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig,
                                                                      context, text, fullText, position, line, fontList, anchor,
-                                                                     pos->angle, justify, placement, false, animationCoordinatorMap);
+                                                                     pos->angle, justify, placement, false, animationCoordinatorMap, featureTileIndex);
                         if (symbolObject) {
                             symbolObjects.push_back(symbolObject);
                             textPositionMap[fullText].push_back(position);
@@ -144,7 +143,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                             if (textOptional) {
                                 const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription,
                                                                              layerConfig, context, {}, "", position, line, fontList,
-                                                                             anchor, pos->angle, justify, placement, false, animationCoordinatorMap);
+                                                                             anchor, pos->angle, justify, placement, false, animationCoordinatorMap, featureTileIndex);
 
                                 if (symbolObject) {
                                     symbolObjects.push_back(symbolObject);
@@ -156,7 +155,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                                 const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription,
                                                                              layerConfig, context, text, fullText, position, line,
                                                                              fontList, anchor, pos->angle, justify, placement,
-                                                                             true, animationCoordinatorMap);
+                                                                             true, animationCoordinatorMap, featureTileIndex);
 
                                 if (symbolObject) {
                                     symbolObjects.push_back(symbolObject);
@@ -208,7 +207,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
                             const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig,
                                                                          context, text, fullText, position, line, fontList, anchor,
-                                                                         pos->angle, justify, placement, false, animationCoordinatorMap);
+                                                                         pos->angle, justify, placement, false, animationCoordinatorMap, featureTileIndex);
                             if (symbolObject) {
                                 symbolObjects.push_back(symbolObject);
                                 textPositionMap[fullText].push_back(position);
@@ -220,7 +219,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                                     const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription,
                                                                                  layerConfig, context, {}, "", position, line,
                                                                                  fontList, anchor, pos->angle, justify, placement,
-                                                                                 false, animationCoordinatorMap);
+                                                                                 false, animationCoordinatorMap, featureTileIndex);
                                     if (symbolObject) {
                                         symbolObjects.push_back(symbolObject);
                                         textPositionMap[fullText].push_back(position);
@@ -231,7 +230,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                                     const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription,
                                                                                  layerConfig, context, text, fullText, position,
                                                                                  line, fontList, anchor, pos->angle, justify,
-                                                                                 placement, true, animationCoordinatorMap);
+                                                                                 placement, true, animationCoordinatorMap, featureTileIndex);
                                     if (symbolObject) {
                                         symbolObjects.push_back(symbolObject);
                                         textPositionMap[fullText].push_back(position);
@@ -252,7 +251,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
 
                 const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig, context,
                                                              text, fullText, *midP, std::nullopt, fontList, anchor, angle, justify,
-                                                             placement, false, animationCoordinatorMap);
+                                                             placement, false, animationCoordinatorMap, featureTileIndex);
 
                 if (symbolObject) {
                     symbolObjects.push_back(symbolObject);
@@ -262,7 +261,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                     if (textOptional) {
                         const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig,
                                                                      context, {}, "", *midP, std::nullopt, fontList, anchor, angle,
-                                                                     justify, placement, false, animationCoordinatorMap);
+                                                                     justify, placement, false, animationCoordinatorMap, featureTileIndex);
 
                         if (symbolObject) {
                             symbolObjects.push_back(symbolObject);
@@ -271,7 +270,7 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
                     if (iconOptional) {
                         const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig,
                                                                      context, text, fullText, *midP, std::nullopt, fontList, anchor,
-                                                                     angle, justify, placement, true, animationCoordinatorMap);
+                                                                     angle, justify, placement, true, animationCoordinatorMap, featureTileIndex);
 
                         if (symbolObject) {
                             symbolObjects.push_back(symbolObject);
@@ -285,11 +284,6 @@ bool Tiled2dMapVectorSymbolGroup::initialize(const std::shared_ptr<std::vector<T
     if (symbolObjects.empty()) {
         return false;
     }
-
-    std::stable_sort(symbolObjects.rbegin(), symbolObjects.rend(),
-              [](const auto &a, const auto &b) -> bool {
-                  return a->symbolSortKey > b->symbolSortKey;
-              });
 
     // TODO: make filtering based on collision at zoomLevel tileInfo.zoomIdentifier + 1
 
@@ -662,10 +656,11 @@ Tiled2dMapVectorSymbolGroup::createSymbolObject(const Tiled2dMapTileInfo &tileIn
                                                 const TextJustify &textJustify,
                                                 const TextSymbolPlacement &textSymbolPlacement,
                                                 const bool hideIcon,
-                                                std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap) {
+                                                std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap,
+                                                const size_t symbolTileIndex) {
     auto symbolObject = std::make_shared<Tiled2dMapVectorSymbolObject>(mapInterface, layerConfig, fontProvider, tileInfo, layerIdentifier,
                                                           description, featureContext, text, fullText, coordinate, lineCoordinates,
-                                                          fontList, textAnchor, angle, textJustify, textSymbolPlacement, hideIcon, animationCoordinatorMap, featureStateManager, usedKeys);
+                                                          fontList, textAnchor, angle, textJustify, textSymbolPlacement, hideIcon, animationCoordinatorMap, featureStateManager, usedKeys, symbolTileIndex);
     symbolObject->setAlpha(alpha);
     const auto counts = symbolObject->getInstanceCounts();
     if (counts.icons + counts.stretchedIcons + counts.textCharacters == 0) {
