@@ -70,10 +70,9 @@ std::string RasterShaderOpenGl::getFragmentShader() {
 
                                       void main() {
                                           vec4 color = texture(textureSampler, v_texcoord);
-                                          if (styleValues[0] == 0.0) {
+                                          if (styleValues[0] == 0.0 || color.a == 0.0) {
                                               discard;
                                           }
-                                          color.a *= styleValues[0];
                                           float average = (color.r + color.g + color.b) / 3.0;
                                           vec3 rgb = color.rgb + (vec3(average) - color.rgb) * styleValues[2];
                                           rgb = (rgb - vec3(0.5)) * styleValues[1] + 0.5;
@@ -82,7 +81,7 @@ std::string RasterShaderOpenGl::getFragmentShader() {
                                           vec3 brightnessMax = vec3(styleValues[4]);
 
                                           rgb = pow(rgb, vec3(1.0 / styleValues[5]));
-
-                                          fragmentColor = vec4(mix(brightnessMin, brightnessMax, rgb) * styleValues[0], color.a);
+                                          rgb = mix(brightnessMin, brightnessMax, min(rgb / color.a, vec3(1.0)));
+                                          fragmentColor = vec4(rgb * color.a, color.a) * styleValues[0];
                                       });
 }
