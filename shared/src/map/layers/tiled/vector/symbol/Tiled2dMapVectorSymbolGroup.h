@@ -85,7 +85,8 @@ private:
                                                                             const TextJustify &textJustify,
                                                                             const TextSymbolPlacement &textSymbolPlacement,
                                                                             const bool hideIcon,
-                                                                            std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap);
+                                                                            std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap,
+                                                                            const size_t symbolTileIndex);
 
 private:
     std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>> symbolObjects;

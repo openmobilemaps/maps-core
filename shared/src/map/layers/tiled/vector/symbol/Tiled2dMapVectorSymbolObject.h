@@ -47,7 +47,8 @@ public:
                                  const bool hideIcon,
                                  std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap,
                                  const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager,
-                                 const std::unordered_set<std::string> &usedKeys);
+                                 const std::unordered_set<std::string> &usedKeys,
+                                 const size_t symbolTileIndex);
 
     ~Tiled2dMapVectorSymbolObject() {
         if (animationCoordinator) {
@@ -89,6 +90,7 @@ public:
     }
 
     int64_t symbolSortKey;
+    const size_t symbolTileIndex;
 
     std::optional<Quad2dD> getCombinedBoundingBox(bool considerOverlapFlag);
 
@@ -151,15 +153,16 @@ private:
     bool isStyleZoomDependant = true;
     bool isStyleFeatureStateDependant = true;
 
-    std::optional<double> lastIconUpdateScaleFactor;
-    std::optional<double> lastIconUpdateRotation;
-    std::optional<float> lastIconUpdateAlpha;
+    // the following flags are all optional, if they are set to -1 it is not set
+    double lastIconUpdateScaleFactor;
+    double lastIconUpdateRotation;
+    float lastIconUpdateAlpha;
 
-    std::optional<double> lastStretchIconUpdateScaleFactor;
-    std::optional<double> lastStretchIconUpdateRotation;
+    double lastStretchIconUpdateScaleFactor;
+    double lastStretchIconUpdateRotation;
 
-    std::optional<double> lastTextUpdateScaleFactor;
-    std::optional<double> lastTextUpdateRotation;
+    double lastTextUpdateScaleFactor;
+    double lastTextUpdateRotation;
 
     bool textAllowOverlap;
     bool iconAllowOverlap;

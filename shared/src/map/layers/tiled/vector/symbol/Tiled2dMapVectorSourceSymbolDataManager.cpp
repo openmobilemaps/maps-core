@@ -422,6 +422,9 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
         }
         std::stable_sort(allObjects.rbegin(), allObjects.rend(),
                          [](const auto &a, const auto &b) -> bool {
+            if (a->symbolSortKey == b->symbolSortKey) {
+                return a->symbolTileIndex > b->symbolTileIndex;
+            }
             return a->symbolSortKey > b->symbolSortKey;
         });
 

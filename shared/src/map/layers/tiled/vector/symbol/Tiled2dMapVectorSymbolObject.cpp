@@ -37,7 +37,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                                                            const bool hideIcon,
                                                            std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap,
                                                            const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager,
-                                                           const std::unordered_set<std::string> &usedKeys) :
+                                                           const std::unordered_set<std::string> &usedKeys,
+                                                           const size_t symbolTileIndex) :
     description(description),
     layerConfig(layerConfig),
     coordinate(coordinate),
@@ -48,7 +49,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     stretchIconBoundingBox(Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0)),
     stretchIconBoundingBoxViewportAligned(0, 0, 0, 0),
 textSymbolPlacement(textSymbolPlacement),
-featureStateManager(featureStateManager) {
+featureStateManager(featureStateManager),
+symbolTileIndex(symbolTileIndex) {
     auto strongMapInterface = mapInterface.lock();
     auto objectFactory = strongMapInterface ? strongMapInterface->getGraphicsObjectFactory() : nullptr;
     auto camera = strongMapInterface ? strongMapInterface->getCamera() : nullptr;
@@ -148,15 +150,15 @@ void Tiled2dMapVectorSymbolObject::updateLayerDescription(const std::shared_ptr<
 
     isStyleFeatureStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end();
 
-    lastIconUpdateScaleFactor = std::nullopt;
-    lastIconUpdateRotation = std::nullopt;
-    lastIconUpdateAlpha = std::nullopt;
+    lastIconUpdateScaleFactor = -1;
+    lastIconUpdateRotation = -1;
+    lastIconUpdateAlpha = -1;
 
-    lastStretchIconUpdateScaleFactor = std::nullopt;
-    lastStretchIconUpdateRotation = std::nullopt;
+    lastStretchIconUpdateScaleFactor = -1;
+    lastStretchIconUpdateRotation = -1;
 
-    lastTextUpdateScaleFactor = std::nullopt;
-    lastTextUpdateRotation = std::nullopt;
+    lastTextUpdateScaleFactor = -1;
+    lastTextUpdateRotation = -1;
 }
 
 void Tiled2dMapVectorSymbolObject::evaluateStyleProperties(const double zoomIdentifier) {
@@ -288,9 +290,9 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
         textureCoordinates[4 * countOffset + 2] = ((double) spriteIt->second.width) / textureWidth;
         textureCoordinates[4 * countOffset + 3] = ((double) spriteIt->second.height) / textureHeight;
 
-        lastIconUpdateScaleFactor = std::nullopt;
-        lastIconUpdateRotation = std::nullopt;
-        lastIconUpdateAlpha = std::nullopt;
+        lastIconUpdateScaleFactor = -1;
+        lastIconUpdateRotation = -1;
+        lastIconUpdateAlpha = -1;
     }
 
     positions[2 * countOffset] = renderCoordinate.x;
@@ -309,13 +311,13 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
         if (!animationCoordinator->isOwned.test_and_set()) {
             isCoordinateOwner = true;
 
-            lastIconUpdateScaleFactor = std::nullopt;
-            lastStretchIconUpdateScaleFactor = std::nullopt;
-            lastTextUpdateScaleFactor = std::nullopt;
+            lastIconUpdateScaleFactor = -1;
+            lastStretchIconUpdateScaleFactor = -1;
+            lastTextUpdateScaleFactor = -1;
         }
     }
 
-    if (lastIconUpdateScaleFactor && isStyleZoomDependant == false) {
+    if (lastIconUpdateScaleFactor != -1 && isStyleZoomDependant == false) {
         countOffset += instanceCounts.icons;
         return;
     }
@@ -440,7 +442,7 @@ void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(std::vector<float>
     
     countOffset += instanceCounts.stretchedIcons;
 
-    lastStretchIconUpdateScaleFactor = std::nullopt;
+    lastStretchIconUpdateScaleFactor = -1;
 }
 
 void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, std::vector<float> &stretchInfos, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now) {
@@ -452,9 +454,9 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
         if (!animationCoordinator->isOwned.test_and_set()) {
             isCoordinateOwner = true;
 
-            lastIconUpdateScaleFactor = std::nullopt;
-            lastStretchIconUpdateScaleFactor = std::nullopt;
-            lastTextUpdateScaleFactor = std::nullopt;
+            lastIconUpdateScaleFactor = -1;
+            lastStretchIconUpdateScaleFactor = -1;
+            lastTextUpdateScaleFactor = -1;
         }
     }
 
@@ -650,9 +652,9 @@ void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &posi
         if (!animationCoordinator->isOwned.test_and_set()) {
             isCoordinateOwner = true;
 
-            lastIconUpdateScaleFactor = std::nullopt;
-            lastStretchIconUpdateScaleFactor = std::nullopt;
-            lastTextUpdateScaleFactor = std::nullopt;
+            lastIconUpdateScaleFactor = -1;
+            lastStretchIconUpdateScaleFactor = -1;
+            lastTextUpdateScaleFactor = -1;
         }
     }
 
@@ -677,7 +679,7 @@ void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &posi
         lastTextUpdateRotation = rotation;
     }
 
-    lastStretchIconUpdateScaleFactor = std::nullopt;
+    lastStretchIconUpdateScaleFactor = -1;
 }
 
 
@@ -814,9 +816,9 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
     if (!(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier) || !getIsOpaque() || !isPlaced()) {
         // not visible
         animationCoordinator->setColliding(true);
-        lastIconUpdateScaleFactor = std::nullopt;
-        lastStretchIconUpdateScaleFactor = std::nullopt;
-        lastTextUpdateScaleFactor = std::nullopt;
+        lastIconUpdateScaleFactor = -1;
+        lastStretchIconUpdateScaleFactor = -1;
+        lastTextUpdateScaleFactor = -1;
         return;
     }
 
@@ -842,9 +844,9 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
     }
 
     if (animationCoordinator->setColliding(willCollide)) {
-        lastIconUpdateScaleFactor = std::nullopt;
-        lastStretchIconUpdateScaleFactor = std::nullopt;
-        lastTextUpdateScaleFactor = std::nullopt;
+        lastIconUpdateScaleFactor = -1;
+        lastStretchIconUpdateScaleFactor = -1;
+        lastTextUpdateScaleFactor = -1;
     }
 
 }
