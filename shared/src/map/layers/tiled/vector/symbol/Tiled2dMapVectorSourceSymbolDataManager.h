@@ -24,6 +24,23 @@
 #include "SymbolAnimationCoordinator.h"
 #include "SymbolAnimationCoordinatorMap.h"
 
+struct InstanceCounter {
+    InstanceCounter() : baseValue(0), decreasingCounter(0) {}
+
+    void increaseBase() {
+        baseValue++;
+        decreasingCounter++;
+    }
+
+    bool decreaseAndCheckFinal() {
+        return --decreasingCounter <= 0;
+    }
+
+    uint16_t baseValue;
+private:
+    uint16_t decreasingCounter;
+};
+
 class Tiled2dMapVectorSourceSymbolDataManager:
         public Tiled2dMapVectorSourceDataManager,
         public std::enable_shared_from_this<Tiled2dMapVectorSourceSymbolDataManager>,
@@ -74,12 +91,14 @@ public:
 
     std::shared_ptr<FontLoaderResult> loadFont(const std::string &fontName) override;
 
-    void onSymbolGroupInitializedAndSetupped(bool success, const Tiled2dMapTileInfo &tileInfo, const std::string &layerIdentifier, const WeakActor<Tiled2dMapVectorSymbolGroup> &symbolGroup);
+    void onSymbolGroupInitialized(bool success, const Tiled2dMapTileInfo &tileInfo, const std::string &layerIdentifier, const WeakActor<Tiled2dMapVectorSymbolGroup> &symbolGroup);
 
 private:
     std::vector<Actor<Tiled2dMapVectorSymbolGroup>>
     createSymbolGroups(const Tiled2dMapTileInfo &tileInfo, const std::string &layerIdentifier,
                        std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features);
+
+    void setupSymbolGroups(const Tiled2dMapTileInfo &tileInfo, const std::string &layerIdentifier);
 
     void updateSymbolGroups(const std::vector<Actor<Tiled2dMapVectorSymbolGroup>> &toClear,
                            const std::unordered_set<Tiled2dMapTileInfo> &tilesStatesToRemove,
@@ -94,7 +113,7 @@ private:
     
     std::unordered_map<std::string, std::shared_ptr<FontLoaderResult>> fontLoaderResults;
 
-    std::unordered_map<Tiled2dMapTileInfo, std::unordered_map<std::string, std::vector<Actor<Tiled2dMapVectorSymbolGroup>>>> tileSymbolGroupMap;
+    std::unordered_map<Tiled2dMapTileInfo, std::unordered_map<std::string, std::tuple<InstanceCounter, std::vector<Actor<Tiled2dMapVectorSymbolGroup>>>>> tileSymbolGroupMap;
 
     std::unordered_map<Tiled2dMapTileInfo, TileState> tileStateMap;
 

@@ -45,8 +45,6 @@ public:
                     int32_t featuresCount,
                     std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap,
                     const WeakActor<Tiled2dMapVectorSourceSymbolDataManager> &symbolManagerActor,
-                    std::shared_ptr<TextureHolderInterface> spriteTexture,
-                    std::shared_ptr<SpriteData> spriteData,
                     float alpha = 1.0);
 
     void update(const double zoomIdentifier, const double rotation, const double scaleFactor, long long now);
