@@ -149,14 +149,13 @@ void Tiled2dMapVectorSourceSymbolDataManager::updateLayerDescription(std::shared
                 if (!newSymbolGroups.empty()) {
                     for (const auto &group : newSymbolGroups) {
                         tileSymbolGroupMap.at(tileData.tileInfo)[layerDescription->identifier].push_back(group);
-                        toSetup[tileData.tileInfo].push_back(group);
                     }
                 }
             }
         }
 
         auto selfActor = WeakActor(mailbox, weak_from_this());
-        selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups, toSetup,
+        selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceSymbolDataManager::updateSymbolGroups,
                           toClear, std::unordered_set<Tiled2dMapTileInfo>{}, std::unordered_map<Tiled2dMapTileInfo, TileState>{});
     } else {
         for (const auto &[tileInfo, groupMap]: tileSymbolGroupMap) {
@@ -237,7 +236,6 @@ void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::st
                 if (!newSymbolGroups.empty()) {
                     for (const auto &group : newSymbolGroups) {
                         tileSymbolGroupMap.at(tile->tileInfo)[layerIdentifier].push_back(group);
-                        toSetup[tile->tileInfo].push_back(group);
                         notReadyCount += 1;
                     }
                 }
@@ -248,39 +246,59 @@ void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::st
     }
 
     auto selfActor = WeakActor(mailbox, weak_from_this());
-    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups, toSetup, toClear, tilesToRemove, tileStateUpdates);
+    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceSymbolDataManager::updateSymbolGroups, toClear, tilesToRemove, tileStateUpdates);
 }
 
 std::vector<Actor<Tiled2dMapVectorSymbolGroup>> Tiled2dMapVectorSourceSymbolDataManager::createSymbolGroups(const Tiled2dMapTileInfo &tileInfo,
                                                                                                                    const std::string &layerIdentifier,
-                                                                                                                   const std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> &features) {
+                                                                                                                   std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features) {
+    auto selfActor = WeakActor(mailbox, weak_from_this());
     std::vector<Actor<Tiled2dMapVectorSymbolGroup>> symbolGroups = {};
-    int32_t numFeatures = features ? (int32_t) features->size() : 0;
-    for (int32_t featuresBase = 0; featuresBase < numFeatures; featuresBase += maxNumFeaturesPerGroup) {
+    uint32_t numFeatures = features ? (uint32_t) features->size() : 0;
+    for (uint32_t featuresBase = 0; featuresBase < numFeatures; featuresBase += maxNumFeaturesPerGroup) {
         const auto fontProvider = WeakActor(mailbox, weak_from_this()).weakActor<Tiled2dMapVectorFontProvider>();
         auto mailbox = std::make_shared<Mailbox>(mapInterface.lock()->getScheduler());
-        Actor<Tiled2dMapVectorSymbolGroup> symbolGroupActor = Actor<Tiled2dMapVectorSymbolGroup>(mailbox, mapInterface,
+        Actor<Tiled2dMapVectorSymbolGroup> symbolGroupActor = Actor<Tiled2dMapVectorSymbolGroup>(mailbox,
+                                                                                                 featuresBase, // unique within tile
+                                                                                                 mapInterface,
                                                                                                  layerConfig,
                                                                                                  fontProvider, tileInfo,
                                                                                                  layerIdentifier,
                                                                                                  layerDescriptions.at(
                                                                                                          layerIdentifier),
                                                                                                  featureStateManager);
-        bool initialized = symbolGroupActor.unsafe()->initialize(features,
-                                                                 featuresBase,
-                                                                 std::min(featuresBase + maxNumFeaturesPerGroup, numFeatures) - featuresBase,
-                                                                 animationCoordinatorMap);
-        symbolGroupActor.unsafe()->setAlpha(alpha);
-        if (initialized) {
-            symbolGroups.push_back(symbolGroupActor);
-        }
+        symbolGroupActor.message(&Tiled2dMapVectorSymbolGroup::initialize, features, featuresBase,
+                                 std::min(featuresBase + maxNumFeaturesPerGroup, numFeatures) - featuresBase,
+                                 animationCoordinatorMap, selfActor, spriteTexture, spriteData, alpha);
+        symbolGroups.push_back(symbolGroupActor);
     }
     return symbolGroups;
 }
 
+void Tiled2dMapVectorSourceSymbolDataManager::onSymbolGroupInitializedAndSetupped(bool success, const Tiled2dMapTileInfo &tileInfo,
+                                                                                  const std::string &layerIdentifier,
+                                                                                  const WeakActor<Tiled2dMapVectorSymbolGroup> &symbolGroup) {
+    auto weakGroup = symbolGroup.unsafe();
+    auto group = weakGroup.lock();
+    if (!success && group) {
+        uint32_t targetGroupId = group->groupId;
+        auto tileIt = tileSymbolGroupMap.find(tileInfo);
+        if (tileIt != tileSymbolGroupMap.end()) {
+            auto layerIt = tileIt->second.find(layerIdentifier);
+            if (layerIt != tileIt->second.end()) {
+                for (auto groupIt = layerIt->second.begin(); groupIt != layerIt->second.end(); groupIt++) {
+                    if (groupIt->unsafe()->groupId == targetGroupId) {
+                        layerIt->second.erase(groupIt);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    readyManager.message(&Tiled2dMapVectorReadyManager::setReady, tileInfo, 1);
+}
 
-void Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups(const std::unordered_map<Tiled2dMapTileInfo, std::vector<Actor<Tiled2dMapVectorSymbolGroup>>> &toSetup,
-                                                                const std::vector<Actor<Tiled2dMapVectorSymbolGroup>> &toClear,
+void Tiled2dMapVectorSourceSymbolDataManager::updateSymbolGroups(const std::vector<Actor<Tiled2dMapVectorSymbolGroup>> &toClear,
                                                                 const std::unordered_set<Tiled2dMapTileInfo> &tilesStatesToRemove,
                                                                 const std::unordered_map<Tiled2dMapTileInfo, TileState> &tileStateUpdates) {
     auto mapInterface = this->mapInterface.lock();
@@ -318,18 +336,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups(const std::unord
     });
 
     for (const auto &symbolGroup: toClear) {
-        symbolGroup.syncAccess([&](auto group){
-            group->clear();
-        });
-    }
-
-    for (const auto &[tile, groups]: toSetup) {
-        for (const auto &symbolGroup: groups) {
-            symbolGroup.syncAccess([&](auto group){
-                group->setupObjects(spriteData, spriteTexture);
-            });
-        }
-        readyManager.message(&Tiled2dMapVectorReadyManager::setReady, tile, groups.size());
+        symbolGroup.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSymbolGroup::clear);
     }
 
     if (!toClear.empty()) {
@@ -378,7 +385,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite() {
     for (const auto &[tile, symbolGroupMap]: tileSymbolGroupMap) {
         for (const auto &[layerIdentifier, symbolGroups]: symbolGroupMap) {
             for (auto &symbolGroup: symbolGroups) {
-                symbolGroup.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSymbolGroup::setupObjects, spriteData, spriteTexture);
+                symbolGroup.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSymbolGroup::setupObjects, spriteData, spriteTexture, std::nullopt);
             }
         }
     }

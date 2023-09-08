@@ -25,16 +25,27 @@ public:
                     std::shared_ptr<Value> lineCap = nullptr,
                     std::shared_ptr<Value> lineOffset = nullptr,
                     std::shared_ptr<Value> blendMode = nullptr,
-                    double dpFactor = 1.0):
-    lineColor(lineColor),
-    lineOpacity(lineOpacity),
-    lineWidth(lineWidth),
-    lineDashArray(lineDashArray),
-    lineBlur(lineBlur),
-    lineCap(lineCap),
-    lineOffset(lineOffset),
-    blendMode(blendMode),
-    dpFactor(dpFactor) {}
+                    double dpFactor = 1.0)
+            : lineColor(lineColor),
+              lineOpacity(lineOpacity),
+              lineWidth(lineWidth),
+              lineDashArray(lineDashArray),
+              lineBlur(lineBlur),
+              lineCap(lineCap),
+              lineOffset(lineOffset),
+              blendMode(blendMode),
+              dpFactor(dpFactor) {}
+
+    LineVectorStyle(LineVectorStyle &style)
+            : lineColor(style.lineColor),
+              lineOpacity(style.lineOpacity),
+              lineWidth(style.lineWidth),
+              lineDashArray(style.lineDashArray),
+              lineBlur(style.lineBlur),
+              lineCap(style.lineCap),
+              lineOffset(style.lineOffset),
+              blendMode(style.blendMode),
+              dpFactor(style.dpFactor) {}
 
     std::unordered_set<std::string> getUsedKeys() const {
         std::unordered_set<std::string> usedKeys;

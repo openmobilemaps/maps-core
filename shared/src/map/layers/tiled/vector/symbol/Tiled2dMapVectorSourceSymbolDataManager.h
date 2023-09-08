@@ -74,13 +74,17 @@ public:
 
     std::shared_ptr<FontLoaderResult> loadFont(const std::string &fontName) override;
 
-private:
-    std::vector<Actor<Tiled2dMapVectorSymbolGroup>> createSymbolGroups(const Tiled2dMapTileInfo &tileInfo, const std::string &layerIdentifier, const std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> &features);
+    void onSymbolGroupInitializedAndSetupped(bool success, const Tiled2dMapTileInfo &tileInfo, const std::string &layerIdentifier, const WeakActor<Tiled2dMapVectorSymbolGroup> &symbolGroup);
 
-    void setupSymbolGroups(const std::unordered_map<Tiled2dMapTileInfo, std::vector<Actor<Tiled2dMapVectorSymbolGroup>>> &toSetup,
-                           const std::vector<Actor<Tiled2dMapVectorSymbolGroup>> &toClear,
+private:
+    std::vector<Actor<Tiled2dMapVectorSymbolGroup>>
+    createSymbolGroups(const Tiled2dMapTileInfo &tileInfo, const std::string &layerIdentifier,
+                       std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features);
+
+    void updateSymbolGroups(const std::vector<Actor<Tiled2dMapVectorSymbolGroup>> &toClear,
                            const std::unordered_set<Tiled2dMapTileInfo> &tilesStatesToRemove,
                            const std::unordered_map<Tiled2dMapTileInfo, TileState> &tileStateUpdates);
+
 
     void setupExistingSymbolWithSprite();
 
