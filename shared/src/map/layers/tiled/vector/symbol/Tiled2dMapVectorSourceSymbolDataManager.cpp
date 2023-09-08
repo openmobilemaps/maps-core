@@ -24,9 +24,9 @@ Tiled2dMapVectorSourceSymbolDataManager::Tiled2dMapVectorSourceSymbolDataManager
                                                                                  const std::shared_ptr<FontLoaderInterface> &fontLoader,
                                                                                  const WeakActor<Tiled2dMapVectorSource> &vectorSource,
                                                                                  const Actor<Tiled2dMapVectorReadyManager> &readyManager,
-                                                                                 const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager) :
-Tiled2dMapVectorSourceDataManager(vectorLayer, mapDescription, layerConfig, source, readyManager, featureStateManager), fontLoader(fontLoader), vectorSource(vectorSource), animationCoordinatorMap(std::make_shared<SymbolAnimationCoordinatorMap>())
-{
+                                                                                 const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager)
+        : Tiled2dMapVectorSourceDataManager(vectorLayer, mapDescription, layerConfig, source, readyManager, featureStateManager),
+        fontLoader(fontLoader), vectorSource(vectorSource), animationCoordinatorMap(std::make_shared<SymbolAnimationCoordinatorMap>()) {
 
     readyManager.message(&Tiled2dMapVectorReadyManager::registerManager);
 
@@ -40,13 +40,19 @@ Tiled2dMapVectorSourceDataManager(vectorLayer, mapDescription, layerConfig, sour
     }
 }
 
-void Tiled2dMapVectorSourceSymbolDataManager::onAdded(const std::weak_ptr< ::MapInterface> &mapInterface) {
+void Tiled2dMapVectorSourceSymbolDataManager::onAdded(const std::weak_ptr<::MapInterface> &mapInterface) {
     Tiled2dMapVectorSourceDataManager::onAdded(mapInterface);
+    auto strongMapInterface = mapInterface.lock();
+    if (strongMapInterface) {
+        fontProviderManager = Actor<Tiled2dMapVectorSymbolFontProviderManager>(std::make_shared<Mailbox>(strongMapInterface->getScheduler()), fontLoader);
+    }
     textHelper.setMapInterface(mapInterface);
 }
 
 void Tiled2dMapVectorSourceSymbolDataManager::onRemoved() {
     Tiled2dMapVectorSourceDataManager::onRemoved();
+    mapInterface = std::weak_ptr<MapInterface>();
+    fontProviderManager = Actor<Tiled2dMapVectorSymbolFontProviderManager>();
     // Clear (on GLThread!) and remove all symbol groups - they're dependant on the mapInterface
 }
 
@@ -258,13 +264,13 @@ std::vector<Actor<Tiled2dMapVectorSymbolGroup>> Tiled2dMapVectorSourceSymbolData
     std::vector<Actor<Tiled2dMapVectorSymbolGroup>> symbolGroups = {};
     uint32_t numFeatures = features ? (uint32_t) features->size() : 0;
     for (uint32_t featuresBase = 0; featuresBase < numFeatures; featuresBase += maxNumFeaturesPerGroup) {
-        const auto fontProvider = WeakActor(mailbox, weak_from_this()).weakActor<Tiled2dMapVectorFontProvider>();
         auto mailbox = std::make_shared<Mailbox>(mapInterface.lock()->getScheduler());
         Actor<Tiled2dMapVectorSymbolGroup> symbolGroupActor = Actor<Tiled2dMapVectorSymbolGroup>(mailbox,
                                                                                                  featuresBase, // unique within tile
                                                                                                  mapInterface,
                                                                                                  layerConfig,
-                                                                                                 fontProvider, tileInfo,
+                                                                                                 fontProviderManager.weakActor<Tiled2dMapVectorFontProvider>(),
+                                                                                                 tileInfo,
                                                                                                  layerIdentifier,
                                                                                                  layerDescriptions.at(
                                                                                                          layerIdentifier),
@@ -378,18 +384,6 @@ void Tiled2dMapVectorSourceSymbolDataManager::updateSymbolGroups(const std::vect
     }
 
     pregenerateRenderPasses();
-}
-
-std::shared_ptr<FontLoaderResult> Tiled2dMapVectorSourceSymbolDataManager::loadFont(const std::string &fontName) {
-    if (fontLoaderResults.count(fontName) > 0) {
-        return fontLoaderResults.at(fontName);
-    } else {
-        auto fontResult = std::make_shared<FontLoaderResult>(fontLoader->loadFont(Font(fontName)));
-        if (fontResult->status == LoaderStatus::OK && fontResult->fontData && fontResult->imageData) {
-            fontLoaderResults.insert({fontName, fontResult});
-        }
-        return fontResult;
-    }
 }
 
 void Tiled2dMapVectorSourceSymbolDataManager::setSprites(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) {
