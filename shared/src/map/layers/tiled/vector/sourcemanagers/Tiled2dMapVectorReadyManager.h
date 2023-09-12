@@ -18,11 +18,11 @@ class Tiled2dMapVectorReadyManager : public ActorObject  {
 public:
     Tiled2dMapVectorReadyManager(const WeakActor<Tiled2dMapSourceReadyInterface> vectorSource);
 
-    void registerManager();
+    size_t registerManager();
 
-    void didProcessData(const Tiled2dMapTileInfo &tile, const size_t notReadyCount);
+    void didProcessData(size_t managerIndex, const Tiled2dMapTileInfo &tile, const size_t notReadyCount);
 
-    void setReady(const Tiled2dMapTileInfo &tile, const size_t readyCount);
+    void setReady(size_t managerIndex, const Tiled2dMapTileInfo &tile, const size_t readyCount);
 
     void remove(const std::unordered_set<Tiled2dMapTileInfo> &tilesToRemove);
 
@@ -34,4 +34,5 @@ private:
     std::unordered_map<Tiled2dMapTileInfo, size_t> tileDataProcessCount;
 
     size_t managerCount = 0;
+    size_t managerCountControlVal = 0;
 };
