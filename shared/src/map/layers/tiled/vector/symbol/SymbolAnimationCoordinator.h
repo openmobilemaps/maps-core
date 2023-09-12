@@ -32,7 +32,7 @@ public:
     animationDelay(animationDelay){}
 
     bool isMatching(const Coord &coordinate, const int zoomIdentifier) const {
-        const double toleranceFactor = std::max(1.0, std::pow(2, this->zoomIdentifier - zoomIdentifier));
+        const double toleranceFactor = 1 << std::max(0, this->zoomIdentifier - zoomIdentifier); // more efficient than: std::max(1.0, std::pow(2, this->zoomIdentifier - zoomIdentifier))
         const double xDistance = std::abs(this->coordinate.x - coordinate.x);
         const double yDistance = std::abs(this->coordinate.y - coordinate.y);
         const bool matching = xDistance <= xTolerance * toleranceFactor && yDistance <= yTolerance * toleranceFactor;

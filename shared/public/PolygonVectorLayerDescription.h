@@ -26,6 +26,12 @@ public:
     fillPattern(fillPattern),
     blendMode(blendMode) {}
 
+    PolygonVectorStyle(PolygonVectorStyle &style)
+    : fillColor(style.fillColor),
+      fillOpacity(style.fillOpacity),
+      fillPattern(style.fillPattern),
+      blendMode(style.blendMode) {}
+
     std::unordered_set<std::string> getUsedKeys() const {
 
         std::unordered_set<std::string> usedKeys;

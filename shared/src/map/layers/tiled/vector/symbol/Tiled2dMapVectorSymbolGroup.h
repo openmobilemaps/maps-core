@@ -27,10 +27,12 @@
 //#define DRAW_TEXT_BOUNDING_BOX
 //#define DRAW_TEXT_BOUNDING_BOX_WITH_COLLISIONS
 
+class Tiled2dMapVectorSourceSymbolDataManager;
 
-class Tiled2dMapVectorSymbolGroup : public ActorObject {
+class Tiled2dMapVectorSymbolGroup : public ActorObject, public std::enable_shared_from_this<Tiled2dMapVectorSymbolGroup> {
 public:
-    Tiled2dMapVectorSymbolGroup(const std::weak_ptr<MapInterface> &mapInterface,
+    Tiled2dMapVectorSymbolGroup(uint32_t groupId,
+                                const std::weak_ptr<MapInterface> &mapInterface,
                                 const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                 const WeakActor<Tiled2dMapVectorFontProvider> &fontProvider,
                                 const Tiled2dMapTileInfo &tileInfo,
@@ -38,15 +40,16 @@ public:
                                 const std::shared_ptr<SymbolVectorLayerDescription> &layerDescription,
                                 const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager);
 
-    bool initialize(const std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features,
+    void initialize(std::weak_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> weakFeatures,
                     int32_t featuresBase,
                     int32_t featuresCount,
-                    std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap);
-
+                    std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap,
+                    const WeakActor<Tiled2dMapVectorSourceSymbolDataManager> &symbolManagerActor,
+                    float alpha = 1.0);
 
     void update(const double zoomIdentifier, const double rotation, const double scaleFactor, long long now);
 
-    void setupObjects(const std::shared_ptr<SpriteData> &spriteData, const std::shared_ptr<TextureHolderInterface> &spriteTexture);
+    void setupObjects(const std::shared_ptr<SpriteData> &spriteData, const std::shared_ptr<TextureHolderInterface> &spriteTexture, const std::optional<WeakActor<Tiled2dMapVectorSourceSymbolDataManager>> &symbolDataManager = std::nullopt);
     
     std::shared_ptr<Quad2dInstancedInterface> iconInstancedObject;
     std::shared_ptr<Quad2dStretchedInstancedInterface> stretchedInstancedObject;
@@ -88,6 +91,8 @@ private:
                                                                             std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap,
                                                                             const size_t symbolTileIndex);
 
+public:
+    uint32_t groupId;
 private:
     std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>> symbolObjects;
 

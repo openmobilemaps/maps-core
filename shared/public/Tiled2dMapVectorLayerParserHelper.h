@@ -109,13 +109,14 @@ public:
                     minZoom = json.value("minzoom", 0);
                     maxZoom = json.value("maxzoom", 22);
                 }
-                
+
+                RasterVectorStyle style = RasterVectorStyle(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
                 rasterLayerMap[key] = std::make_shared<RasterVectorLayerDescription>(layerName,
                                                                                      key,
                                                                                      minZoom,
                                                                                      maxZoom,
                                                                                      url,
-                                                                                     RasterVectorStyle(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr),
+                                                                                     style,
                                                                                      adaptScaleToScreen,
                                                                                      numDrawPreviousLayers,
                                                                                      maskTiles,
@@ -219,136 +220,136 @@ public:
                                                                                     renderPassIndex,
                                                                                     interactable);
                 layers.push_back(layerDesc);
-                
+
             } else if (val["type"] == "raster" && rasterLayerMap.count(val["source"]) != 0) {
                 auto layer = rasterLayerMap.at(val["source"]);
-
+                RasterVectorStyle style = RasterVectorStyle(parser.parseValue(val["paint"]["raster-opacity"]),
+                                                            parser.parseValue(val["paint"]["raster-brightness-min"]),
+                                                            parser.parseValue(val["paint"]["raster-brightness-max"]),
+                                                            parser.parseValue(val["paint"]["raster-contrast"]),
+                                                            parser.parseValue(val["paint"]["raster-saturation"]),
+                                                            parser.parseValue(val["metadata"]["raster-gamma"]),
+                                                            blendMode);
                 auto newLayer = std::make_shared<RasterVectorLayerDescription>(val["id"],
-                                             val["source"],
-                                             val.value("minzoom", layer->minZoom),
-                                             val.value("maxzoom", layer->maxZoom),
-                                             layer->url,
-                                             RasterVectorStyle(parser.parseValue(val["paint"]["raster-opacity"]),
-                                                                parser.parseValue(val["paint"]["raster-brightness-min"]),
-                                                                parser.parseValue(val["paint"]["raster-brightness-max"]),
-                                                                parser.parseValue(val["paint"]["raster-contrast"]),
-                                                                parser.parseValue(val["paint"]["raster-saturation"]),
-                                                                parser.parseValue(val["metadata"]["raster-gamma"]),
-                                                                blendMode),
-                                             layer->adaptScaleToScreen,
-                                             layer->numDrawPreviousLayers,
-                                             layer->maskTiles,
-                                             layer->zoomLevelScaleFactor,
-                                             layer->renderPassIndex,
-                                             interactable,
-                                             layer->underzoom,
-                                             layer->overzoom);
+                                                                               val["source"],
+                                                                               val.value("minzoom", layer->minZoom),
+                                                                               val.value("maxzoom", layer->maxZoom),
+                                                                               layer->url,
+                                                                               style,
+                                                                               layer->adaptScaleToScreen,
+                                                                               layer->numDrawPreviousLayers,
+                                                                               layer->maskTiles,
+                                                                               layer->zoomLevelScaleFactor,
+                                                                               layer->renderPassIndex,
+                                                                               interactable,
+                                                                               layer->underzoom,
+                                                                               layer->overzoom);
                 layers.push_back(newLayer);
             } else if (val["type"] == "line") {
 
-                    std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
-
-                    auto layerDesc = std::make_shared<LineVectorLayerDescription>(
+                std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
+                LineVectorStyle style = LineVectorStyle(
+                        parser.parseValue(val["paint"]["line-color"]),
+                        parser.parseValue(val["paint"]["line-opacity"]),
+                        parser.parseValue(val["paint"]["line-width"]),
+                        parser.parseValue(val["paint"]["line-dasharray"]),
+                        parser.parseValue(val["paint"]["line-blur"]),
+                        parser.parseValue(val["layout"]["line-cap"]),
+                        parser.parseValue(val["paint"]["line-offset"]),
+                        blendMode,
+                        dpFactor
+                );
+                auto layerDesc = std::make_shared<LineVectorLayerDescription>(
                         val["id"],
                         val["source"],
                         val.value("source-layer", ""),
                         val.value("minzoom", 0),
                         val.value("maxzoom", 24),
                         filter,
-                        LineVectorStyle(
-                            parser.parseValue(val["paint"]["line-color"]),
-                            parser.parseValue(val["paint"]["line-opacity"]),
-                            parser.parseValue(val["paint"]["line-width"]),
-                            parser.parseValue(val["paint"]["line-dasharray"]),
-                            parser.parseValue(val["paint"]["line-blur"]),
-                            parser.parseValue(val["layout"]["line-cap"]),
-                            parser.parseValue(val["paint"]["line-offset"]),
-                            blendMode,
-                            dpFactor
-                        ),
+                        style,
                         renderPassIndex,
                         interactable);
 
-                    layers.push_back(layerDesc);
+                layers.push_back(layerDesc);
 
             } else if (val["type"] == "symbol") {
 
-                    SymbolVectorStyle style(parser.parseValue(val["layout"]["text-size"]),
-                                            parser.parseValue(val["paint"]["text-color"]),
-                                            parser.parseValue(val["paint"]["text-halo-color"]),
-                                            parser.parseValue(val["paint"]["text-halo-width"]),
-                                            parser.parseValue(val["paint"]["text-opacity"]),
-                                            parser.parseValue(val["layout"]["text-font"]),
-                                            parser.parseValue(val["layout"]["text-field"]),
-                                            parser.parseValue(val["layout"]["text-transform"]),
-                                            parser.parseValue(val["layout"]["text-offset"]),
-                                            parser.parseValue(val["layout"]["text-radial-offset"]),
-                                            parser.parseValue(val["layout"]["text-padding"]),
-                                            parser.parseValue(val["layout"]["text-anchor"]),
-                                            parser.parseValue(val["layout"]["text-justify"]),
-                                            parser.parseValue(val["layout"]["text-variable-anchor"]),
-                                            parser.parseValue(val["layout"]["text-rotate"]),
-                                            parser.parseValue(val["layout"]["text-allow-overlap"]),
-                                            parser.parseValue(val["layout"]["text-rotation-alignment"]),
-                                            parser.parseValue(val["layout"]["text-optional"]),
-                                            parser.parseValue(val["layout"]["symbol-sort-key"]),
-                                            parser.parseValue(val["layout"]["symbol-spacing"]),
-                                            parser.parseValue(val["layout"]["symbol-placement"]),
-                                            parser.parseValue(val["layout"]["icon-rotation-alignment"]),
-                                            parser.parseValue(val["layout"]["icon-image"]),
-                                            parser.parseValue(val["layout"]["icon-anchor"]),
-                                            parser.parseValue(val["layout"]["icon-offset"]),
-                                            parser.parseValue(val["layout"]["icon-size"]),
-                                            parser.parseValue(val["layout"]["icon-allow-overlap"]),
-                                            parser.parseValue(val["layout"]["icon-padding"]),
-                                            parser.parseValue(val["layout"]["icon-text-fit"]),
-                                            parser.parseValue(val["layout"]["icon-text-fit-padding"]),
-                                            parser.parseValue(val["paint"]["icon-opacity"]),
-                                            parser.parseValue(val["layout"]["icon-rotate"]),
-                                            parser.parseValue(val["layout"]["icon-optional"]),
-                                            parser.parseValue(val["layout"]["text-line-height"]),
-                                            parser.parseValue(val["layout"]["text-letter-spacing"]),
-                                            parser.parseValue(val["layout"]["text-max-width"]),
-                                            parser.parseValue(val["layout"]["text-max-angle"]),
-                                            parser.parseValue(val["layout"]["symbol-z-order"]),
-                                            blendMode,
-                                            transitionDuration,
-                                            transitionDelay,
-                                            dpFactor);
+                SymbolVectorStyle style(parser.parseValue(val["layout"]["text-size"]),
+                                        parser.parseValue(val["paint"]["text-color"]),
+                                        parser.parseValue(val["paint"]["text-halo-color"]),
+                                        parser.parseValue(val["paint"]["text-halo-width"]),
+                                        parser.parseValue(val["paint"]["text-opacity"]),
+                                        parser.parseValue(val["layout"]["text-font"]),
+                                        parser.parseValue(val["layout"]["text-field"]),
+                                        parser.parseValue(val["layout"]["text-transform"]),
+                                        parser.parseValue(val["layout"]["text-offset"]),
+                                        parser.parseValue(val["layout"]["text-radial-offset"]),
+                                        parser.parseValue(val["layout"]["text-padding"]),
+                                        parser.parseValue(val["layout"]["text-anchor"]),
+                                        parser.parseValue(val["layout"]["text-justify"]),
+                                        parser.parseValue(val["layout"]["text-variable-anchor"]),
+                                        parser.parseValue(val["layout"]["text-rotate"]),
+                                        parser.parseValue(val["layout"]["text-allow-overlap"]),
+                                        parser.parseValue(val["layout"]["text-rotation-alignment"]),
+                                        parser.parseValue(val["layout"]["text-optional"]),
+                                        parser.parseValue(val["layout"]["symbol-sort-key"]),
+                                        parser.parseValue(val["layout"]["symbol-spacing"]),
+                                        parser.parseValue(val["layout"]["symbol-placement"]),
+                                        parser.parseValue(val["layout"]["icon-rotation-alignment"]),
+                                        parser.parseValue(val["layout"]["icon-image"]),
+                                        parser.parseValue(val["layout"]["icon-anchor"]),
+                                        parser.parseValue(val["layout"]["icon-offset"]),
+                                        parser.parseValue(val["layout"]["icon-size"]),
+                                        parser.parseValue(val["layout"]["icon-allow-overlap"]),
+                                        parser.parseValue(val["layout"]["icon-padding"]),
+                                        parser.parseValue(val["layout"]["icon-text-fit"]),
+                                        parser.parseValue(val["layout"]["icon-text-fit-padding"]),
+                                        parser.parseValue(val["paint"]["icon-opacity"]),
+                                        parser.parseValue(val["layout"]["icon-rotate"]),
+                                        parser.parseValue(val["layout"]["icon-optional"]),
+                                        parser.parseValue(val["layout"]["text-line-height"]),
+                                        parser.parseValue(val["layout"]["text-letter-spacing"]),
+                                        parser.parseValue(val["layout"]["text-max-width"]),
+                                        parser.parseValue(val["layout"]["text-max-angle"]),
+                                        parser.parseValue(val["layout"]["symbol-z-order"]),
+                                        blendMode,
+                                        transitionDuration,
+                                        transitionDelay,
+                                        dpFactor);
 
-                    std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
+                std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
 
-                    auto layerDesc = std::make_shared<SymbolVectorLayerDescription>(val["id"],
-                                                                                    val["source"],
-                                                                                    val.value("source-layer", ""),
-                                                                                    val.value("minzoom", 0),
-                                                                                    val.value("maxzoom", 24),
-                                                                                    filter,
-                                                                                    style,
-                                                                                    renderPassIndex,
-                                                                                    interactable);
-                    layers.push_back(layerDesc);
-                } else if (val["type"] == "fill") {
+                auto layerDesc = std::make_shared<SymbolVectorLayerDescription>(val["id"],
+                                                                                val["source"],
+                                                                                val.value("source-layer", ""),
+                                                                                val.value("minzoom", 0),
+                                                                                val.value("maxzoom", 24),
+                                                                                filter,
+                                                                                style,
+                                                                                renderPassIndex,
+                                                                                interactable);
+                layers.push_back(layerDesc);
+            } else if (val["type"] == "fill") {
 
-                    std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
+                std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
 
-                    PolygonVectorStyle style(parser.parseValue(val["paint"]["fill-color"]),
-                                             parser.parseValue(val["paint"]["fill-opacity"]),
-                                             parser.parseValue(val["paint"]["fill-pattern"]),
-                                             blendMode);
+                PolygonVectorStyle style(parser.parseValue(val["paint"]["fill-color"]),
+                                         parser.parseValue(val["paint"]["fill-opacity"]),
+                                         parser.parseValue(val["paint"]["fill-pattern"]),
+                                         blendMode);
 
-                    auto layerDesc = std::make_shared<PolygonVectorLayerDescription>(val["id"],
-                                                                                     val["source"],
-                                                                                     val.value("source-layer", ""),
-                                                                                     val.value("minzoom", 0),
-                                                                                     val.value("maxzoom", 24),
-                                                                                     filter,
-                                                                                     style,
-                                                                                     renderPassIndex,
-                                                                                     interactable);
+                auto layerDesc = std::make_shared<PolygonVectorLayerDescription>(val["id"],
+                                                                                 val["source"],
+                                                                                 val.value("source-layer", ""),
+                                                                                 val.value("minzoom", 0),
+                                                                                 val.value("maxzoom", 24),
+                                                                                 filter,
+                                                                                 style,
+                                                                                 renderPassIndex,
+                                                                                 interactable);
 
-                    layers.push_back(layerDesc);
-                }
+                layers.push_back(layerDesc);
+            }
         }
 
         std::vector<std::shared_ptr<VectorMapSourceDescription>> sourceDescriptions;

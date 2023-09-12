@@ -17,15 +17,19 @@
 
 class RasterVectorStyle {
 public:
-
     RasterVectorStyle(std::shared_ptr<Value> rasterOpacity,
                       std::shared_ptr<Value> rasterBrightnessMin,
                       std::shared_ptr<Value> rasterBrightnessMax,
                       std::shared_ptr<Value> rasterContrast,
                       std::shared_ptr<Value> rasterSaturation,
                       std::shared_ptr<Value> rasterGamma,
-                      std::shared_ptr<Value> blendMode):
-    rasterOpacity(rasterOpacity), rasterBrightnessMin(rasterBrightnessMin), rasterBrightnessMax(rasterBrightnessMax), rasterContrast(rasterContrast), rasterSaturation(rasterSaturation), rasterGamma(rasterGamma), blendMode(blendMode) {}
+                      std::shared_ptr<Value> blendMode) :
+            rasterOpacity(rasterOpacity), rasterBrightnessMin(rasterBrightnessMin), rasterBrightnessMax(rasterBrightnessMax),
+            rasterContrast(rasterContrast), rasterSaturation(rasterSaturation), rasterGamma(rasterGamma), blendMode(blendMode) {}
+
+    RasterVectorStyle(RasterVectorStyle &style) :
+            rasterOpacity(style.rasterOpacity), rasterBrightnessMin(style.rasterBrightnessMin), rasterBrightnessMax(style.rasterBrightnessMax),
+            rasterContrast(style.rasterContrast), rasterSaturation(style.rasterSaturation), rasterGamma(style.rasterGamma), blendMode(style.blendMode) {}
 
     std::unordered_set<std::string> getUsedKeys() const {
         std::unordered_set<std::string> usedKeys;

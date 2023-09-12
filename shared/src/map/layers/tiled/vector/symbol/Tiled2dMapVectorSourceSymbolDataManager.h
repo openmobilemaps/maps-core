@@ -23,11 +23,28 @@
 #include "CollisionGrid.h"
 #include "SymbolAnimationCoordinator.h"
 #include "SymbolAnimationCoordinatorMap.h"
+#include "Tiled2dMapVectorSymbolFontProviderManager.h"
+
+struct InstanceCounter {
+    InstanceCounter() : baseValue(0), decreasingCounter(0) {}
+
+    void increaseBase() {
+        baseValue++;
+        decreasingCounter++;
+    }
+
+    bool decreaseAndCheckFinal() {
+        return --decreasingCounter <= 0;
+    }
+
+    uint16_t baseValue;
+private:
+    uint16_t decreasingCounter;
+};
 
 class Tiled2dMapVectorSourceSymbolDataManager:
         public Tiled2dMapVectorSourceDataManager,
-        public std::enable_shared_from_this<Tiled2dMapVectorSourceSymbolDataManager>,
-        public Tiled2dMapVectorFontProvider {
+        public std::enable_shared_from_this<Tiled2dMapVectorSourceSymbolDataManager> {
 public:
     Tiled2dMapVectorSourceSymbolDataManager(const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
                                           const std::shared_ptr<VectorMapDescription> &mapDescription,
@@ -72,36 +89,36 @@ public:
 
     void clearTouch() override;
 
-    std::shared_ptr<FontLoaderResult> loadFont(const std::string &fontName) override;
+    void onSymbolGroupInitialized(bool success, const Tiled2dMapTileInfo &tileInfo, const std::string &layerIdentifier, const WeakActor<Tiled2dMapVectorSymbolGroup> &symbolGroup);
 
 private:
-    std::vector<Actor<Tiled2dMapVectorSymbolGroup>> createSymbolGroups(const Tiled2dMapTileInfo &tileInfo, const std::string &layerIdentifier, const std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> &features);
+    std::vector<Actor<Tiled2dMapVectorSymbolGroup>>
+    createSymbolGroups(const Tiled2dMapTileInfo &tileInfo, const std::string &layerIdentifier,
+                       std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features);
 
-    void setupSymbolGroups(const std::unordered_map<Tiled2dMapTileInfo, std::vector<Actor<Tiled2dMapVectorSymbolGroup>>> &toSetup,
-                           const std::vector<Actor<Tiled2dMapVectorSymbolGroup>> &toClear,
+    void setupSymbolGroups(const Tiled2dMapTileInfo &tileInfo, const std::string &layerIdentifier);
+
+    void updateSymbolGroups(const std::vector<Actor<Tiled2dMapVectorSymbolGroup>> &toClear,
                            const std::unordered_set<Tiled2dMapTileInfo> &tilesStatesToRemove,
                            const std::unordered_map<Tiled2dMapTileInfo, TileState> &tileStateUpdates);
+
 
     void setupExistingSymbolWithSprite();
 
     void pregenerateRenderPasses();
 
     const WeakActor<Tiled2dMapVectorSource> vectorSource;
-    
-    std::unordered_map<std::string, std::shared_ptr<FontLoaderResult>> fontLoaderResults;
 
-    std::unordered_map<Tiled2dMapTileInfo, std::unordered_map<std::string, std::vector<Actor<Tiled2dMapVectorSymbolGroup>>>> tileSymbolGroupMap;
-
+    std::unordered_map<Tiled2dMapTileInfo, std::unordered_map<std::string, std::tuple<InstanceCounter, std::vector<Actor<Tiled2dMapVectorSymbolGroup>>>>> tileSymbolGroupMap;
     std::unordered_map<Tiled2dMapTileInfo, TileState> tileStateMap;
 
     std::unordered_map<std::string, std::shared_ptr<SymbolVectorLayerDescription>> layerDescriptions;
 
     TextHelper textHelper;
-
-    const std::shared_ptr<FontLoaderInterface> fontLoader;
+    std::shared_ptr<FontLoaderInterface> fontLoader;
+    Actor<Tiled2dMapVectorSymbolFontProviderManager> fontProviderManager;
 
     std::shared_ptr<TextureHolderInterface> spriteTexture;
-
     std::shared_ptr<SpriteData> spriteData;
 
     float alpha = 1.0;

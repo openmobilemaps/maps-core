@@ -40,6 +40,7 @@
 #include "SymbolZOrder.h"
 #include "ValueVariant.h"
 #include "Tiled2dMapVectorFeatureStateManager.h"
+#include <mutex>
 
 
 namespace std {
@@ -553,9 +554,8 @@ public:
 template<class ResultType>
 class ValueEvaluator {
 public:
-    ValueEvaluator() {}
-
     inline ResultType getResult(const std::shared_ptr<Value> &value, const EvaluationContext &context, const ResultType defaultValue) {
+        std::lock_guard<std::mutex> lock(mutex);
         if (!value) {
             return defaultValue;
         }
@@ -596,9 +596,9 @@ public:
 
 private:
     std::unordered_map<uint64_t, ResultType> lastResults;
+    std::mutex mutex;
 
     std::optional<ResultType> staticValue;
-
     bool isZoomDependent = false;
     bool isFeatureStateDependent = false;
     bool isStatic = false;
