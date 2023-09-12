@@ -138,61 +138,65 @@ void Tiled2dMapVectorSourceTileDataManager::setSelectionDelegate(const std::weak
     }
 }
 
-void Tiled2dMapVectorSourceTileDataManager::updateMaskObjects(
-        const std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> &toSetupMaskObject,
-        const std::unordered_set<Tiled2dMapTileInfo> &tilesToRemove,
-        const std::unordered_map<Tiled2dMapTileInfo, TileState> &tileStateUpdates) {
+void Tiled2dMapVectorSourceTileDataManager::updateMaskObjects() {
     auto mapInterface = this->mapInterface.lock();
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!renderingContext) return;
 
-    for (const auto &[tile, state]: tileStateUpdates) {
-        tileStateMap[tile] = state;
-    }
+    {
+        std::lock_guard<std::recursive_mutex> updateLock(updateMutex);
 
-
-    for (const auto &[tileInfo, wrapper] : toSetupMaskObject) {
-        wrapper.getGraphicsObject()->setup(renderingContext);
-
-        std::shared_ptr<GraphicsObjectInterface> toClear;
-        auto it = tileMaskMap.find(tileInfo);
-        if (it != tileMaskMap.end() && it->second.getGraphicsMaskObject()) {
-            toClear = it->second.getGraphicsMaskObject()->asGraphicsObject();
+        for (const auto &[tile, state]: tileStateUpdates) {
+            tileStateMap[tile] = state;
         }
-        tileMaskMap[tileInfo] = wrapper;
+        tileStateUpdates.clear();
 
-        if (toClear) {
-            toClear->clear();
-        }
-    }
+        for (const auto &[tileInfo, wrapper]: tileMasksToSetup) {
+            wrapper.getGraphicsObject()->setup(renderingContext);
 
-    for (const auto &tileToRemove: tilesToRemove) {
-        auto tilesVectorIt = tiles.find(tileToRemove);
-        if (tilesVectorIt != tiles.end()) {
-            for (const auto &[index, identifier, tile]: tiles.at(tileToRemove)) {
-                tile.unsafe()->clear();
+            std::shared_ptr<GraphicsObjectInterface> toClear;
+            auto it = tileMaskMap.find(tileInfo);
+            if (it != tileMaskMap.end() && it->second.getGraphicsMaskObject()) {
+                toClear = it->second.getGraphicsMaskObject()->asGraphicsObject();
+            }
+            tileMaskMap[tileInfo] = wrapper;
+
+            if (toClear) {
+                toClear->clear();
             }
         }
-        tiles.erase(tileToRemove);
+        tileMasksToSetup.clear();
 
-        tileStateMap.erase(tileToRemove);
+        for (const auto &tileToRemove: tilesToRemove) {
+            auto tilesVectorIt = tiles.find(tileToRemove);
+            if (tilesVectorIt != tiles.end()) {
+                for (const auto &[index, identifier, tile]: tiles.at(tileToRemove)) {
+                    tile.unsafe()->clear();
+                }
+            }
+            tiles.erase(tileToRemove);
 
-        auto maskIt = tileMaskMap.find(tileToRemove);
-        if (maskIt != tileMaskMap.end()) {
-            const auto &object = maskIt->second.getGraphicsMaskObject()->asGraphicsObject();
-            if (object->isReady()) object->clear();
+            tileStateMap.erase(tileToRemove);
 
-            tileMaskMap.erase(tileToRemove);
+            auto maskIt = tileMaskMap.find(tileToRemove);
+            if (maskIt != tileMaskMap.end()) {
+                const auto &object = maskIt->second.getGraphicsMaskObject()->asGraphicsObject();
+                if (object->isReady()) object->clear();
+
+                tileMaskMap.erase(tileToRemove);
+            }
+
+            tilesReady.erase(tileToRemove);
+            tilesReadyControlSet.erase(tileToRemove);
+            tileRenderObjectsMap.erase(tileToRemove);
         }
 
-        tilesReady.erase(tileToRemove);
-        tilesReadyControlSet.erase(tileToRemove);
-        tileRenderObjectsMap.erase(tileToRemove);
+        std::unordered_set<Tiled2dMapTileInfo> localToRemove = std::unordered_set(tilesToRemove);
+        tilesToRemove.clear();
+        readyManager.syncAccess([localToRemove](auto manager) {
+            manager->remove(localToRemove);
+        });
     }
-
-    readyManager.syncAccess([tilesToRemove](auto manager){
-        manager->remove(tilesToRemove);
-    });
 
     pregenerateRenderPasses();
 

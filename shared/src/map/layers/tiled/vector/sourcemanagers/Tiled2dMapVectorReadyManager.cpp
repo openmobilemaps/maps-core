@@ -13,15 +13,17 @@
 Tiled2dMapVectorReadyManager::Tiled2dMapVectorReadyManager(const WeakActor<Tiled2dMapSourceReadyInterface> vectorSource): vectorSource(vectorSource) {}
 
 
-void Tiled2dMapVectorReadyManager::registerManager() {
-    managerCount += 1;
+size_t Tiled2dMapVectorReadyManager::registerManager() {
+    size_t newVal = 1 << (managerCount++);
+    managerCountControlVal += newVal;
+    return newVal;
 }
 
-void Tiled2dMapVectorReadyManager::didProcessData(const Tiled2dMapTileInfo &tile, const size_t notReadyCount) {
+void Tiled2dMapVectorReadyManager::didProcessData(size_t managerIndex, const Tiled2dMapTileInfo &tile, const size_t notReadyCount) {
     auto tileProcessIt = tileDataProcessCount.find(tile);
     if (tileProcessIt != tileDataProcessCount.end()){
-        tileProcessIt->second += 1;
-        if (tileProcessIt->second == managerCount && notReadyCount == 0) {
+        tileProcessIt->second |= managerIndex;
+        if (tileProcessIt->second == managerCountControlVal && notReadyCount == 0) {
             auto tileIt = tileNotReadyCount.find(tile);
             if (tileIt == tileNotReadyCount.end()) {
                 tileDataProcessCount.erase(tileProcessIt);
@@ -33,7 +35,7 @@ void Tiled2dMapVectorReadyManager::didProcessData(const Tiled2dMapTileInfo &tile
         vectorSource.message(&Tiled2dMapSourceReadyInterface::setTileReady, tile);
         return;
     } else {
-        tileDataProcessCount.insert({tile, 1});
+        tileDataProcessCount.insert({tile, managerIndex});
     }
 
     if (notReadyCount != 0) {
@@ -46,13 +48,13 @@ void Tiled2dMapVectorReadyManager::didProcessData(const Tiled2dMapTileInfo &tile
     }
 }
 
-void Tiled2dMapVectorReadyManager::setReady(const Tiled2dMapTileInfo &tile, const size_t readyCount) {
+void Tiled2dMapVectorReadyManager::setReady(size_t managerIndex, const Tiled2dMapTileInfo &tile, const size_t readyCount) {
     auto tileIt = tileNotReadyCount.find(tile);
     if (tileIt != tileNotReadyCount.end()){
         tileIt->second -= readyCount;
         if (tileIt->second <= 0) {
             auto tileProcessIt = tileDataProcessCount.find(tile);
-            if (tileProcessIt->second == managerCount) {
+            if (tileProcessIt->second == managerCountControlVal) {
                 tileDataProcessCount.erase(tileProcessIt);
                 tileNotReadyCount.erase(tileIt);
                 vectorSource.message(&Tiled2dMapSourceReadyInterface::setTileReady, tile);

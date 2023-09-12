@@ -85,6 +85,7 @@ protected:
     std::optional<::RectI> scissorRect = std::nullopt;
 
     const Actor<Tiled2dMapVectorReadyManager> readyManager;
+    size_t readyManagerIndex;
 
     const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> featureStateManager;
 };

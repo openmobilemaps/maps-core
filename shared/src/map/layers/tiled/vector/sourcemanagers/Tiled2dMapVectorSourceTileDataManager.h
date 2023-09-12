@@ -38,9 +38,7 @@ public:
 
     virtual void setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate) override;
 
-    void updateMaskObjects(const std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> &toSetupMaskObject,
-                           const std::unordered_set<Tiled2dMapTileInfo> &tilesToRemove,
-                           const std::unordered_map<Tiled2dMapTileInfo, TileState> &tileStateUpdates);
+    void updateMaskObjects();
 
     bool onClickUnconfirmed(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) override;
 
@@ -73,6 +71,12 @@ protected:
     std::unordered_map<Tiled2dMapTileInfo, TileState> tileStateMap;
     std::unordered_set<Tiled2dMapTileInfo> tilesReady;
     std::unordered_map<Tiled2dMapTileInfo, std::unordered_set<int32_t>> tilesReadyControlSet;
+
+    std::atomic_flag updateFlag = ATOMIC_FLAG_INIT;
+    std::recursive_mutex updateMutex;
+    std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> tileMasksToSetup;
+    std::unordered_set<Tiled2dMapTileInfo> tilesToRemove;
+    std::unordered_map<Tiled2dMapTileInfo, TileState> tileStateUpdates;
 
     std::unordered_set<std::string> interactableLayers;
 

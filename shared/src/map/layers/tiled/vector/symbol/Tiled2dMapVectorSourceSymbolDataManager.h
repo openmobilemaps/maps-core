@@ -37,6 +37,10 @@ struct InstanceCounter {
         return --decreasingCounter <= 0;
     }
 
+    bool isDone() {
+        return decreasingCounter <= 0;
+    }
+
     uint16_t baseValue;
 private:
     uint16_t decreasingCounter;
@@ -98,10 +102,7 @@ private:
 
     void setupSymbolGroups(const Tiled2dMapTileInfo &tileInfo, const std::string &layerIdentifier);
 
-    void updateSymbolGroups(const std::vector<Actor<Tiled2dMapVectorSymbolGroup>> &toClear,
-                           const std::unordered_set<Tiled2dMapTileInfo> &tilesStatesToRemove,
-                           const std::unordered_map<Tiled2dMapTileInfo, TileState> &tileStateUpdates);
-
+    void updateSymbolGroups();
 
     void setupExistingSymbolWithSprite();
 
@@ -111,6 +112,12 @@ private:
 
     std::unordered_map<Tiled2dMapTileInfo, std::unordered_map<std::string, std::tuple<InstanceCounter, std::vector<Actor<Tiled2dMapVectorSymbolGroup>>>>> tileSymbolGroupMap;
     std::unordered_map<Tiled2dMapTileInfo, TileState> tileStateMap;
+
+    std::atomic_flag updateFlag = ATOMIC_FLAG_INIT;
+    std::recursive_mutex updateMutex;
+    std::vector<Actor<Tiled2dMapVectorSymbolGroup>> tilesToClear;
+    std::unordered_set<Tiled2dMapTileInfo> tileStatesToRemove;
+    std::unordered_map<Tiled2dMapTileInfo, TileState> tileStateUpdates;
 
     std::unordered_map<std::string, std::shared_ptr<SymbolVectorLayerDescription>> layerDescriptions;
 
