@@ -42,12 +42,25 @@ template <class Object, class MemberFn, class ArgsTuple>
 class MailboxMessageImpl: public MailboxMessage {
 public:
     MailboxMessageImpl(Object object_, MemberFn memberFn_, const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, ArgsTuple argsTuple_)
-      : MailboxMessage(strategy, environment, typeid(MemberFn).hash_code()),
+      : MailboxMessage(strategy, environment, calculateIdentifier(object_, memberFn_)),
         object(object_),
         memberFn(memberFn_),
         argsTuple(std::move(argsTuple_)) {
     }
-    
+
+    static size_t calculateIdentifier(const Object& object, MemberFn memberFn) {
+        size_t hash = typeid(Object).hash_code();
+        hash_combine(hash, &memberFn);
+        return hash;
+    }
+
+    template <typename T>
+    static void hash_combine(size_t& seed, const T& value) {
+        std::hash<T> hasher;
+        seed ^= hasher(value) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    }
+
+
     void operator()() override {
         invoke(std::make_index_sequence<std::tuple_size_v<ArgsTuple>>());
     }
