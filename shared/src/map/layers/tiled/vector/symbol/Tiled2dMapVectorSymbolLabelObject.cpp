@@ -310,6 +310,8 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
     float yOffset = 0;
 
+    pen.y -= fontSize * lineHeight * 0.25;
+
     for(const auto &i : splittedTextInfo) {
         if(i.glyphIndex >= 0) {
             auto &d = fontResult->fontData->glyphs[i.glyphIndex];
@@ -445,8 +447,8 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
         case Anchor::CENTER:
         case Anchor::LEFT:
         case Anchor::RIGHT:
-            anchorOffset.y = -size.y;
-            anchorOffset.y -= textOffset.y * fontSize - yOffset;
+            anchorOffset.y = -size.y * 0.5;
+            anchorOffset.y += textOffset.y * fontSize + yOffset;
             break;
         case Anchor::TOP:
         case Anchor::TOP_LEFT:
