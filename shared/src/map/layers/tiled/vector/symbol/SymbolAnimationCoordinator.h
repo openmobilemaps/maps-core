@@ -96,9 +96,9 @@ public:
         return collides;
     }
 
-private:
     const Coord coordinate;
     const int zoomIdentifier;
+private:
     const double xTolerance;
     const double yTolerance;
 

@@ -12,6 +12,12 @@
 
 #include "SymbolAnimationCoordinator.h"
 
+struct CoordinatorXCompare {
+    bool operator() (const std::shared_ptr<SymbolAnimationCoordinator> &a, const std::shared_ptr<SymbolAnimationCoordinator> &b) {
+        return a->coordinate.x < b->coordinate.x;
+    };
+};
+
 class SymbolAnimationCoordinatorMap {
 public:
 
@@ -25,27 +31,61 @@ public:
         std::lock_guard<std::mutex> lock(mapMutex);
         auto coordinatorIt = animationCoordinators.find(crossTileIdentifier);
         if (coordinatorIt != animationCoordinators.end()) {
-            for (auto const &coordinator: coordinatorIt->second) {
-                if (coordinator->isMatching(coord, zoomIdentifier)) {
-                    return coordinator;
+            for (auto &[levelZoomIdentifier, coordinators]: coordinatorIt->second) {
+                if (levelZoomIdentifier == zoomIdentifier) {
+                    // never expect merge on same level
+                    continue;
                 }
+                size_t numElements = coordinators.size();
+
+                double toleranceFactor = 1 << std::max(0, levelZoomIdentifier - zoomIdentifier);
+                double maxXTolerance = toleranceFactor * xTolerance;
+
+                std::set<std::shared_ptr<SymbolAnimationCoordinator>, CoordinatorXCompare>::const_iterator targetIt = coordinators.begin();
+                if (numElements > MIN_NUM_SEARCH) {
+                    targetIt = std::lower_bound(coordinators.begin(),
+                                                coordinators.end(),
+                                                coord.x,
+                                                [](const std::shared_ptr<SymbolAnimationCoordinator> &a, const double &value) {
+                                                    return a->coordinate.x < value;
+                                                });
+                }
+
+                while (targetIt != coordinators.end()) {
+                    if (targetIt->get()->isMatching(coord, zoomIdentifier)) {
+                        return *targetIt;
+                    } else if (targetIt->get()->coordinate.x > coord.x + maxXTolerance) {
+                        break;
+                    }
+                    targetIt++;
+                }
+
+                auto animationCoordinator = std::make_shared<SymbolAnimationCoordinator>(coord, zoomIdentifier, xTolerance,
+                                                                                         yTolerance, animationDuration,
+                                                                                         animationDelay);
+                coordinators.insert(animationCoordinator);
+                return animationCoordinator;
             }
-            auto animationCoordinator = std::make_shared<SymbolAnimationCoordinator>(coord, zoomIdentifier, xTolerance, yTolerance, animationDuration, animationDelay);
-            coordinatorIt->second.push_back(animationCoordinator);
-            return animationCoordinator;
         }
 
-        auto animationCoordinator = std::make_shared<SymbolAnimationCoordinator>(coord, zoomIdentifier, xTolerance, yTolerance, animationDuration, animationDelay);
-        animationCoordinators.insert({crossTileIdentifier, { animationCoordinator }});
+        auto animationCoordinator = std::make_shared<SymbolAnimationCoordinator>(coord, zoomIdentifier, xTolerance, yTolerance,
+                                                                                 animationDuration, animationDelay);
+        std::set<std::shared_ptr<SymbolAnimationCoordinator>, CoordinatorXCompare> newSet;
+        newSet.insert(animationCoordinator);
+        std::map<int, std::set<std::shared_ptr<SymbolAnimationCoordinator>, CoordinatorXCompare>> newMap;
+        newMap.insert(std::make_pair(zoomIdentifier, newSet));
+        animationCoordinators.insert({crossTileIdentifier, newMap});
         return animationCoordinator;
     }
 
     bool isAnimating() {
         std::lock_guard<std::mutex> lock(mapMutex);
         for (const auto &[id, coordinators]: animationCoordinators) {
-            for (const auto &coordinator: coordinators) {
-                if (coordinator->isAnimating()) {
-                    return true;
+            for (const auto &[levelZoomIdentifier, coordinatorSet]: coordinators) {
+                for (const auto &coordinator: coordinatorSet) {
+                    if (coordinator->isAnimating()) {
+                        return true;
+                    }
                 }
             }
         }
@@ -56,8 +96,19 @@ public:
         std::lock_guard<std::mutex> lock(mapMutex);
         for (auto it = animationCoordinators.begin(), next_it = it; it != animationCoordinators.end(); it = next_it) {
             ++next_it;
-            it->second.erase(std::remove_if(it->second.begin(), it->second.end(),
-                                            [](auto coordinator) { return !coordinator->isUsed(); }), it->second.end());
+            for (auto setIt = it->second.begin(), nextSetIt = setIt; setIt != it->second.end(); setIt = nextSetIt) {
+                ++nextSetIt;
+                for (auto coordsIt = setIt->second.begin(); coordsIt != setIt->second.end();) {
+                    if (!coordsIt->get()->isUsed()) {
+                        coordsIt = setIt->second.erase(coordsIt);
+                    } else {
+                        ++coordsIt;
+                    }
+                }
+                if (setIt->second.empty()) {
+                    it->second.erase(setIt);
+                }
+            }
             if (it->second.empty()) {
                 animationCoordinators.erase(it);
             }
@@ -65,6 +116,8 @@ public:
     }
 
 private:
+    static const size_t MIN_NUM_SEARCH = 20;
+
     std::mutex mapMutex;
-    std::unordered_map<size_t, std::vector<std::shared_ptr<SymbolAnimationCoordinator>>> animationCoordinators;
+    std::unordered_map<size_t, std::map<int, std::set<std::shared_ptr<SymbolAnimationCoordinator>, CoordinatorXCompare>>> animationCoordinators;
 };
