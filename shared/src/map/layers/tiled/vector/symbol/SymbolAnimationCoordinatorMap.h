@@ -32,11 +32,11 @@ public:
         auto coordinatorIt = animationCoordinators.find(crossTileIdentifier);
         if (coordinatorIt != animationCoordinators.end()) {
             for (auto &[levelZoomIdentifier, coordinators]: coordinatorIt->second) {
-                if (levelZoomIdentifier == zoomIdentifier) {
-                    // never expect merge on same level
+                size_t numElements = coordinators.size();
+                if (levelZoomIdentifier == zoomIdentifier && numElements <= MIN_NUM_SEARCH) {
+                    // limit comparisons with equal zoomIdentifier entries
                     continue;
                 }
-                size_t numElements = coordinators.size();
 
                 double toleranceFactor = 1 << std::max(0, levelZoomIdentifier - zoomIdentifier);
                 double maxXTolerance = toleranceFactor * xTolerance;
@@ -116,7 +116,7 @@ public:
     }
 
 private:
-    static const size_t MIN_NUM_SEARCH = 20;
+    static const size_t MIN_NUM_SEARCH = 9;
 
     std::mutex mapMutex;
     std::unordered_map<size_t, std::map<int, std::set<std::shared_ptr<SymbolAnimationCoordinator>, CoordinatorXCompare>>> animationCoordinators;
