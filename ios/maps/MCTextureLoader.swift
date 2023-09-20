@@ -166,7 +166,7 @@ open class MCTextureLoader: MCLoaderInterface {
         return result!
     }
 
-    public func loadDataAsync(_ url: String, etag: String?) -> DJFuture<MCDataLoaderResult> {
+    open func loadDataAsync(_ url: String, etag: String?) -> DJFuture<MCDataLoaderResult> {
         let urlString = url
 
         guard let url = URL(string: urlString) else {
