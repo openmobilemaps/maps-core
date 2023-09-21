@@ -224,6 +224,8 @@ void LineLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32
     if (isLayerClickable) {
         mapInterface->getTouchHandler()->insertListener(shared_from_this(), layerIndex);
     }
+    
+    resume();
 }
 
 void LineLayer::onRemoved() {
