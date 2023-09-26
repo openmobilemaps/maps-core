@@ -438,6 +438,9 @@ std::shared_ptr<::LayerInterface> Tiled2dMapVectorLayer::asLayerInterface() {
 }
 
 void Tiled2dMapVectorLayer::update() {
+    if (isHidden) {
+        return;
+    }
     long long now = DateHelper::currentTimeMillis();
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
         sourceDataManager.syncAccess([](const auto &manager) {
@@ -469,6 +472,9 @@ void Tiled2dMapVectorLayer::update() {
 }
 
 std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::buildRenderPasses() {
+    if (isHidden) {
+        return {};
+    }
     std::lock_guard<std::recursive_mutex> lock(renderPassMutex);
     return currentRenderPasses;
 }
