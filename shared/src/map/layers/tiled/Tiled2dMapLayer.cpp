@@ -77,6 +77,9 @@ void Tiled2dMapLayer::resume() {
 }
 
 void Tiled2dMapLayer::hide() {
+    if (isHidden) {
+        return;
+    }
     isHidden = true;
     {
         std::lock_guard<std::recursive_mutex> lock(sourcesMutex);
@@ -90,6 +93,9 @@ void Tiled2dMapLayer::hide() {
 }
 
 void Tiled2dMapLayer::show() {
+    if (isHidden == false) {
+        return;
+    }
     isHidden = false;
     {
         std::lock_guard<std::recursive_mutex> lock(sourcesMutex);
