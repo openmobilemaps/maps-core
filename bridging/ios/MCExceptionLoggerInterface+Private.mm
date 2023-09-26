@@ -5,6 +5,7 @@
 #import "MCExceptionLoggerInterface.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
+#import "DJIMarshal+Private.h"
 #import "MCExceptionLoggerDelegateInterface+Private.h"
 #include <exception>
 #include <stdexcept>
