@@ -32,6 +32,8 @@
 
 - (nonnull MCCoord *)getCenterPosition;
 
+- (void)reloadMapConfig;
+
 - (void)setZoom:(double)zoom
        animated:(BOOL)animated;
 

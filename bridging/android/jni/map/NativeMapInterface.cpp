@@ -107,6 +107,14 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterfa
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1setMapConfig(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_mapConfig)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
+        ref->setMapConfig(::djinni_generated::NativeMapConfig::toCpp(jniEnv, j_mapConfig));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
 CJNIEXPORT ::djinni_generated::NativeCoordinateConversionHelperInterface::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1getCoordinateConverterHelper(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {

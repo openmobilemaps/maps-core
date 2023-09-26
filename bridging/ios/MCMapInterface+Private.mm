@@ -111,6 +111,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setMapConfig:(nonnull MCMapConfig *)mapConfig {
+    try {
+        _cppRefHandle.get()->setMapConfig(::djinni_generated::MapConfig::toCpp(mapConfig));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nullable MCCoordinateConversionHelperInterface *)getCoordinateConverterHelper {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getCoordinateConverterHelper();

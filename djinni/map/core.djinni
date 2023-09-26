@@ -30,6 +30,7 @@ map_interface = interface +c {
     get_scheduler() : scheduler_interface;
     get_rendering_context() : rendering_context_interface;
     get_map_config() : map_config;
+    set_map_config(map_config: map_config);
     get_coordinate_converter_helper() : coordinate_conversion_helper_interface;
 
     set_camera(camera: map_camera_2d_interface);
@@ -116,6 +117,8 @@ map_camera_2d_interface = interface +c {
     move_to_center_position(center_position: coord, animated: bool);
     move_to_bounding_box(bounding_box: rect_coord, padding_pc: f32, animated: bool, max_zoom: optional<f64>);
     get_center_position(): coord;
+
+    reload_map_config();
 
     set_zoom(zoom: f64, animated: bool);
     get_zoom(): f64;

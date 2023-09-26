@@ -44,6 +44,8 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual ::Coord getCenterPosition() override;
 
+    virtual void reloadMapConfig() override;
+
     virtual void setZoom(double zoom, bool animated) override;
 
     virtual double getZoom() override;

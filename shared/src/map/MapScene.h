@@ -33,6 +33,8 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public Sche
 
     virtual MapConfig getMapConfig() override;
 
+    virtual void setMapConfig(const MapConfig & mapConfig) override;
+
     virtual std::shared_ptr<::CoordinateConversionHelperInterface> getCoordinateConverterHelper() override;
 
     virtual void setCallbackHandler(const std::shared_ptr<MapCallbackInterface> &callbackInterface) override;
@@ -84,7 +86,7 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public Sche
     LayerReadyState getLayersReadyState();
 
   private:
-    const MapConfig mapConfig;
+    MapConfig mapConfig;
 
     std::shared_ptr<MapCallbackInterface> callbackHandler;
 

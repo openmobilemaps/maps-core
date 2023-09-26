@@ -105,6 +105,7 @@ void Tiled2dMapLayer::show() {
 void Tiled2dMapLayer::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom) {
     std::lock_guard<std::recursive_mutex> lock(sourcesMutex);
     for (const auto &sourceInterface : sourceInterfaces) {
+        printf("message onVisibleBoundsChanged\n");
         sourceInterface.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapSourceInterface::onVisibleBoundsChanged,
                                 visibleBounds, curT, zoom);
     }

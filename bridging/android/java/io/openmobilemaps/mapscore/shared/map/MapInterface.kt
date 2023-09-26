@@ -28,6 +28,8 @@ abstract class MapInterface {
 
     abstract fun getMapConfig(): MapConfig
 
+    abstract fun setMapConfig(mapConfig: MapConfig)
+
     abstract fun getCoordinateConverterHelper(): io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface
 
     abstract fun setCamera(camera: MapCamera2dInterface)
@@ -122,6 +124,12 @@ abstract class MapInterface {
             return native_getMapConfig(this.nativeRef)
         }
         private external fun native_getMapConfig(_nativeRef: Long): MapConfig
+
+        override fun setMapConfig(mapConfig: MapConfig) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setMapConfig(this.nativeRef, mapConfig)
+        }
+        private external fun native_setMapConfig(_nativeRef: Long, mapConfig: MapConfig)
 
         override fun getCoordinateConverterHelper(): io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

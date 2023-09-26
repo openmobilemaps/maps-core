@@ -43,6 +43,8 @@ public:
 
     virtual MapConfig getMapConfig() = 0;
 
+    virtual void setMapConfig(const MapConfig & mapConfig) = 0;
+
     virtual /*not-null*/ std::shared_ptr<::CoordinateConversionHelperInterface> getCoordinateConverterHelper() = 0;
 
     virtual void setCamera(const /*not-null*/ std::shared_ptr<MapCamera2dInterface> & camera) = 0;

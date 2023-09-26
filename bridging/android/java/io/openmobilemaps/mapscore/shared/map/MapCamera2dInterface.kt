@@ -23,6 +23,8 @@ abstract class MapCamera2dInterface {
 
     abstract fun getCenterPosition(): io.openmobilemaps.mapscore.shared.map.coordinates.Coord
 
+    abstract fun reloadMapConfig()
+
     abstract fun setZoom(zoom: Double, animated: Boolean)
 
     abstract fun getZoom(): Double
@@ -130,6 +132,12 @@ abstract class MapCamera2dInterface {
             return native_getCenterPosition(this.nativeRef)
         }
         private external fun native_getCenterPosition(_nativeRef: Long): io.openmobilemaps.mapscore.shared.map.coordinates.Coord
+
+        override fun reloadMapConfig() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_reloadMapConfig(this.nativeRef)
+        }
+        private external fun native_reloadMapConfig(_nativeRef: Long)
 
         override fun setZoom(zoom: Double, animated: Boolean) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

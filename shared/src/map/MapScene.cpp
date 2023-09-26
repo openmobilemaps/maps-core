@@ -51,6 +51,20 @@ std::shared_ptr<::RenderingContextInterface> MapScene::getRenderingContext() { r
 
 MapConfig MapScene::getMapConfig() { return mapConfig; }
 
+void MapScene::setMapConfig(const MapConfig & _mapConfig) {
+    mapConfig = _mapConfig;
+    conversionHelper = std::make_shared<CoordinateConversionHelper>(mapConfig.mapCoordinateSystem);
+
+    camera->reloadMapConfig();
+
+    auto layers = getLayers();
+    for(const auto & layer : layers) {
+        addLayer(layer);
+    }
+
+    invalidate();
+}
+
 std::shared_ptr<::CoordinateConversionHelperInterface> MapScene::getCoordinateConverterHelper() { return conversionHelper; }
 
 void MapScene::setCallbackHandler(const std::shared_ptr<MapCallbackInterface> &callbackInterface) {

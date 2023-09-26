@@ -43,6 +43,8 @@
 
 - (nonnull MCMapConfig *)getMapConfig;
 
+- (void)setMapConfig:(nonnull MCMapConfig *)mapConfig;
+
 - (nullable MCCoordinateConversionHelperInterface *)getCoordinateConverterHelper;
 
 - (void)setCamera:(nullable MCMapCamera2dInterface *)camera;

@@ -42,6 +42,22 @@ MapCamera2d::MapCamera2d(const std::shared_ptr<MapInterface> &mapInterface, floa
     zoom = zoomMax;
 }
 
+void MapCamera2d::reloadMapConfig() {
+    conversionHelper = mapInterface->getCoordinateConverterHelper();
+    mapCoordinateSystem = mapInterface->getMapConfig().mapCoordinateSystem;
+
+    bounds = mapCoordinateSystem.bounds;
+
+    auto mapConfig = mapInterface->getMapConfig();
+    mapCoordinateSystem = mapConfig.mapCoordinateSystem;
+    mapSystemRtl = mapCoordinateSystem.bounds.bottomRight.x > mapCoordinateSystem.bounds.topLeft.x;
+    mapSystemTtb = mapCoordinateSystem.bounds.bottomRight.y > mapCoordinateSystem.bounds.topLeft.y;
+
+    centerPosition = conversionHelper->convert(mapCoordinateSystem.identifier, centerPosition);
+
+    viewportSizeChanged();
+}
+
 void MapCamera2d::viewportSizeChanged() {
     Vec2I viewportSize = mapInterface->getRenderingContext()->getViewportSize();
     if (viewportSize.x > 0 && viewportSize.y > 0 && zoomMin < 0) {

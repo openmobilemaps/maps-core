@@ -30,6 +30,8 @@ public:
 
     virtual ::Coord getCenterPosition() = 0;
 
+    virtual void reloadMapConfig() = 0;
+
     virtual void setZoom(double zoom, bool animated) = 0;
 
     virtual double getZoom() = 0;

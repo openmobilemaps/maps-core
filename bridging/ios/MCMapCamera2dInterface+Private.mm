@@ -88,6 +88,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)reloadMapConfig {
+    try {
+        _cppRefHandle.get()->reloadMapConfig();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)setZoom:(double)zoom
        animated:(BOOL)animated {
     try {
