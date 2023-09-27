@@ -78,6 +78,9 @@ void Tiled2dMapRasterLayer::onRemoved() {
 std::shared_ptr<::LayerInterface> Tiled2dMapRasterLayer::asLayerInterface() { return shared_from_this(); }
 
 void Tiled2dMapRasterLayer::update() {
+    if (isHidden) {
+        return;
+    }
     auto mapInterface = this->mapInterface;
     if (mapInterface && mask) {
         if (!mask->asGraphicsObject()->isReady())
@@ -91,6 +94,9 @@ void Tiled2dMapRasterLayer::update() {
 }
 
 std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapRasterLayer::buildRenderPasses() {
+    if (isHidden) {
+        return {};
+    }
     std::lock_guard<std::recursive_mutex> overlayLock(renderPassMutex);
     return renderPasses;
 }

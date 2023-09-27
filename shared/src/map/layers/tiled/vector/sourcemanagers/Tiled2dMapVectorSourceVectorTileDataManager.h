@@ -29,8 +29,6 @@ public:
     virtual void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription,
                                         int32_t legacyIndex,
                                         bool needsTileReplace) override;
-
-
 protected:
     void onTileCompletelyReady(const Tiled2dMapTileInfo tileInfo) override;
 

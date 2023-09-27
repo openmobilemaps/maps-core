@@ -130,8 +130,8 @@ void Tiled2dMapVectorLayer::scheduleStyleJsonLoading() {
                         }
                     }
 
-                    selfPtr->didLoadStyleJson(layerError);
                     selfPtr->isLoadingStyleJson = false;
+                    selfPtr->didLoadStyleJson(layerError);
                 }
             }));
 }
@@ -438,6 +438,9 @@ std::shared_ptr<::LayerInterface> Tiled2dMapVectorLayer::asLayerInterface() {
 }
 
 void Tiled2dMapVectorLayer::update() {
+    if (isHidden) {
+        return;
+    }
     long long now = DateHelper::currentTimeMillis();
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
         sourceDataManager.syncAccess([](const auto &manager) {
@@ -469,6 +472,9 @@ void Tiled2dMapVectorLayer::update() {
 }
 
 std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::buildRenderPasses() {
+    if (isHidden) {
+        return {};
+    }
     std::lock_guard<std::recursive_mutex> lock(renderPassMutex);
     return currentRenderPasses;
 }
@@ -767,6 +773,84 @@ void Tiled2dMapVectorLayer::setSelectionDelegate(const std::shared_ptr<Tiled2dMa
     this->strongSelectionDelegate = selectionDelegate;
     this->selectionDelegate = selectionDelegate;
     setSelectionDelegate(std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface>(selectionDelegate));
+}
+
+void Tiled2dMapVectorLayer::updateLayerDescriptions(const std::vector<std::shared_ptr<VectorLayerDescription>> &layerDescriptions) {
+
+    struct UpdateVector {
+        std::vector<Tiled2dMapVectorLayerUpdateInformation> symbolUpdates;
+        std::vector<Tiled2dMapVectorLayerUpdateInformation> updates;
+    };
+
+    std::map<std::string, UpdateVector> updateInformationsMap;
+
+    for (const auto layerDescription: layerDescriptions) {
+        std::shared_ptr<VectorLayerDescription> legacyDescription;
+        int32_t legacyIndex = -1;
+        {
+            std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
+            size_t numLayers = mapDescription->layers.size();
+            for (int index = 0; index < numLayers; index++) {
+                if (mapDescription->layers[index]->identifier == layerDescription->identifier) {
+                    legacyDescription = mapDescription->layers[index];
+                    legacyIndex = index;
+                    mapDescription->layers[index] = layerDescription;
+                    break;
+                }
+            }
+        }
+
+
+        if (legacyIndex < 0) {
+            return;
+        }
+
+        auto legacySource = legacyDescription->source;
+        auto newSource = layerDescription->source;
+
+        // Evaluate if a complete replacement of the tiles is needed (source/zoom adjustments may lead to a different set of created tiles)
+        bool needsTileReplace = legacyDescription->source != layerDescription->source
+        || legacyDescription->sourceLayer != layerDescription->sourceLayer
+        || legacyDescription->minZoom != layerDescription->minZoom
+        || legacyDescription->maxZoom != layerDescription->maxZoom
+        || !((legacyDescription->filter == nullptr && layerDescription->filter == nullptr ) || (legacyDescription->filter && legacyDescription->filter->isEqual(layerDescription->filter)));
+
+        auto existing = updateInformationsMap.find(layerDescription->source);
+        if (existing != updateInformationsMap.end()) {
+            if (layerDescription->getType() == VectorLayerType::symbol) {
+                existing->second.symbolUpdates.push_back({layerDescription, legacyDescription, legacyIndex, needsTileReplace});
+            } else {
+                existing->second.updates.push_back({layerDescription, legacyDescription, legacyIndex, needsTileReplace});
+            }
+        } else {
+            if (layerDescription->getType() == VectorLayerType::symbol) {
+                updateInformationsMap.insert({ layerDescription->source, {{{layerDescription, legacyDescription, legacyIndex, needsTileReplace}}, {}}});
+            } else {
+                updateInformationsMap.insert({ layerDescription->source, {{}, {{layerDescription, legacyDescription, legacyIndex, needsTileReplace}}}});
+            }
+        }
+    }
+
+    for (const auto [updateSource, updateInformations]: updateInformationsMap) {
+        if (!updateInformations.symbolUpdates.empty()) {
+            for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
+                if (updateSource == source) {
+                    sourceDataManager.syncAccess([&objects = updateInformations.symbolUpdates] (const auto &manager) {
+                        manager->updateLayerDescriptions(objects);
+                    });
+                }
+            }
+        } else if (!updateInformations.updates.empty()) {
+            for (const auto &[source, sourceDataManager]: sourceDataManagers) {
+                if (updateSource == source) {
+                    sourceDataManager.syncAccess([&objects = updateInformations.updates] (const auto &manager) {
+                        manager->updateLayerDescriptions(objects);
+                    });
+                }
+            }
+        }
+    }
+
 }
 
 void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription) {
