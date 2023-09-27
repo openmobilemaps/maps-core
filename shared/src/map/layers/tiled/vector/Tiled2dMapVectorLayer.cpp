@@ -775,6 +775,80 @@ void Tiled2dMapVectorLayer::setSelectionDelegate(const std::shared_ptr<Tiled2dMa
     setSelectionDelegate(std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface>(selectionDelegate));
 }
 
+void Tiled2dMapVectorLayer::updateLayerDescriptions(const std::vector<std::shared_ptr<VectorLayerDescription>> &layerDescriptions) {
+
+    struct UpdateVector {
+        std::vector<Tiled2dMapVectorLayerUpdateInformation> symbolUpdates;
+        std::vector<Tiled2dMapVectorLayerUpdateInformation> updates;
+    };
+
+    std::map<std::string, UpdateVector> updateInformationsMap;
+
+    for (const auto layerDescription: layerDescriptions) {
+        std::shared_ptr<VectorLayerDescription> legacyDescription;
+        int32_t legacyIndex = -1;
+        {
+            std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
+            size_t numLayers = mapDescription->layers.size();
+            for (int index = 0; index < numLayers; index++) {
+                if (mapDescription->layers[index]->identifier == layerDescription->identifier) {
+                    legacyDescription = mapDescription->layers[index];
+                    legacyIndex = index;
+                    mapDescription->layers[index] = layerDescription;
+                    break;
+                }
+            }
+        }
+
+
+        if (legacyIndex < 0) {
+            return;
+        }
+
+        auto legacySource = legacyDescription->source;
+        auto newSource = layerDescription->source;
+
+        // Evaluate if a complete replacement of the tiles is needed (source/zoom adjustments may lead to a different set of created tiles)
+        bool needsTileReplace = legacyDescription->source != layerDescription->source
+        || legacyDescription->sourceLayer != layerDescription->sourceLayer
+        || legacyDescription->minZoom != layerDescription->minZoom
+        || legacyDescription->maxZoom != layerDescription->maxZoom
+        || !((legacyDescription->filter == nullptr && layerDescription->filter == nullptr ) || (legacyDescription->filter && legacyDescription->filter->isEqual(layerDescription->filter)));
+
+        auto existing = updateInformationsMap.find(layerDescription->source);
+        if (existing != updateInformationsMap.end()) {
+            if (layerDescription->getType() == VectorLayerType::symbol) {
+                existing->second.symbolUpdates.push_back({layerDescription, legacyIndex, needsTileReplace});
+            } else {
+                existing->second.updates.push_back({layerDescription, legacyIndex, needsTileReplace});
+            }
+        } else {
+            if (layerDescription->getType() == VectorLayerType::symbol) {
+                updateInformationsMap.insert({ layerDescription->source, {{{layerDescription, legacyIndex, needsTileReplace}}, {}}});
+            } else {
+                updateInformationsMap.insert({ layerDescription->source, {{}, {{layerDescription, legacyIndex, needsTileReplace}}}});
+            }
+        }
+    }
+
+    for (const auto [updateSource, updateInformations]: updateInformationsMap) {
+        if (!updateInformations.symbolUpdates.empty()) {
+            for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
+                if (updateSource == source) {
+                    sourceDataManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceDataManager::updateLayerDescriptions, updateInformations.symbolUpdates);
+                }
+            }
+        } else if (!updateInformations.updates.empty()) {
+            for (const auto &[source, sourceDataManager]: sourceDataManagers) {
+                if (updateSource == source) {
+                    sourceDataManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceDataManager::updateLayerDescriptions, updateInformations.updates);
+                }
+            }
+        }
+    }
+
+}
+
 void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription) {
     std::shared_ptr<VectorLayerDescription> legacyDescription;
     int32_t legacyIndex = -1;

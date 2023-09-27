@@ -37,6 +37,12 @@ class Tiled2dMapVectorSourceSymbolDataManager;
 class Tiled2dMapVectorSourceSymbolCollisionManager;
 class Tiled2dMapVectorInteractionManager;
 
+struct Tiled2dMapVectorLayerUpdateInformation {
+    std::shared_ptr<VectorLayerDescription> layerDescription;
+    int32_t legacyIndex;
+    bool needsTileReplace;
+};
+
 class Tiled2dMapVectorLayer
         : public Tiled2dMapLayer,
           public TouchInterface,
@@ -115,6 +121,8 @@ public:
     std::shared_ptr<VectorLayerDescription> getLayerDescriptionWithIdentifier(std::string identifier);
 
     void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription);
+
+    void updateLayerDescriptions(const std::vector<std::shared_ptr<VectorLayerDescription>> &layerDescriptions);
 
     std::optional<std::shared_ptr<FeatureContext>> getFeatureContext(int64_t identifier);
 
