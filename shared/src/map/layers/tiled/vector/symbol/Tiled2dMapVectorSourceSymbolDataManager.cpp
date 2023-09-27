@@ -108,7 +108,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::updateLayerDescriptions(std::vecto
             continue;
         }
 
-        auto oldStyle = layerDescriptions.at(layerUpdate.layerDescription->identifier);
+        auto oldStyle = std::static_pointer_cast<SymbolVectorLayerDescription>(layerUpdate.oldLayerDescription);
         auto castedDescription = std::static_pointer_cast<SymbolVectorLayerDescription>(layerUpdate.layerDescription);
 
         bool iconWasAdded = false;

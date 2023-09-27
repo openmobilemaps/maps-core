@@ -39,6 +39,7 @@ class Tiled2dMapVectorInteractionManager;
 
 struct Tiled2dMapVectorLayerUpdateInformation {
     std::shared_ptr<VectorLayerDescription> layerDescription;
+    std::shared_ptr<VectorLayerDescription> oldLayerDescription;
     int32_t legacyIndex;
     bool needsTileReplace;
 };

@@ -130,8 +130,8 @@ void Tiled2dMapVectorLayer::scheduleStyleJsonLoading() {
                         }
                     }
 
-                    selfPtr->didLoadStyleJson(layerError);
                     selfPtr->isLoadingStyleJson = false;
+                    selfPtr->didLoadStyleJson(layerError);
                 }
             }));
 }
@@ -818,15 +818,15 @@ void Tiled2dMapVectorLayer::updateLayerDescriptions(const std::vector<std::share
         auto existing = updateInformationsMap.find(layerDescription->source);
         if (existing != updateInformationsMap.end()) {
             if (layerDescription->getType() == VectorLayerType::symbol) {
-                existing->second.symbolUpdates.push_back({layerDescription, legacyIndex, needsTileReplace});
+                existing->second.symbolUpdates.push_back({layerDescription, legacyDescription, legacyIndex, needsTileReplace});
             } else {
-                existing->second.updates.push_back({layerDescription, legacyIndex, needsTileReplace});
+                existing->second.updates.push_back({layerDescription, legacyDescription, legacyIndex, needsTileReplace});
             }
         } else {
             if (layerDescription->getType() == VectorLayerType::symbol) {
-                updateInformationsMap.insert({ layerDescription->source, {{{layerDescription, legacyIndex, needsTileReplace}}, {}}});
+                updateInformationsMap.insert({ layerDescription->source, {{{layerDescription, legacyDescription, legacyIndex, needsTileReplace}}, {}}});
             } else {
-                updateInformationsMap.insert({ layerDescription->source, {{}, {{layerDescription, legacyIndex, needsTileReplace}}}});
+                updateInformationsMap.insert({ layerDescription->source, {{}, {{layerDescription, legacyDescription, legacyIndex, needsTileReplace}}}});
             }
         }
     }
@@ -835,13 +835,17 @@ void Tiled2dMapVectorLayer::updateLayerDescriptions(const std::vector<std::share
         if (!updateInformations.symbolUpdates.empty()) {
             for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
                 if (updateSource == source) {
-                    sourceDataManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceDataManager::updateLayerDescriptions, updateInformations.symbolUpdates);
+                    sourceDataManager.syncAccess([&objects = updateInformations.symbolUpdates] (const auto &manager) {
+                        manager->updateLayerDescriptions(objects);
+                    });
                 }
             }
         } else if (!updateInformations.updates.empty()) {
             for (const auto &[source, sourceDataManager]: sourceDataManagers) {
                 if (updateSource == source) {
-                    sourceDataManager.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceDataManager::updateLayerDescriptions, updateInformations.updates);
+                    sourceDataManager.syncAccess([&objects = updateInformations.updates] (const auto &manager) {
+                        manager->updateLayerDescriptions(objects);
+                    });
                 }
             }
         }
