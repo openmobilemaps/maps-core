@@ -71,6 +71,8 @@ public:
 
     void onVectorTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) override;
 
+    void updateLayerDescriptions(std::vector<Tiled2dMapVectorLayerUpdateInformation> layerUpdates) override;
+
     void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription,
                                 int32_t legacyIndex,
                                 bool needsTileReplace) override;
