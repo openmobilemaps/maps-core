@@ -103,8 +103,13 @@ symbolTileIndex(symbolTileIndex) {
 
         for (const auto &font: fontList) {
             // try to load a font until we succeed
-            fontResult = fontProvider.syncAccess([font] (auto provider) {
-                return provider.lock()->loadFont(font);
+            fontResult = fontProvider.syncAccess([font] (auto provider) -> std::shared_ptr<FontLoaderResult>  {
+                auto ptr = provider.lock();
+                if (ptr) {
+                    return ptr->loadFont(font);
+                } else {
+                    return nullptr;
+                }
             });
 
             if (fontResult && fontResult->status == LoaderStatus::OK) {

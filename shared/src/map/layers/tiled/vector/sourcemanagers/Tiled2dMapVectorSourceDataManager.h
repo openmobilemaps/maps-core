@@ -27,6 +27,7 @@
 class Tiled2dMapVectorLayer;
 class Tiled2dMapVectorTile;
 class SpriteData;
+class Tiled2dMapVectorLayerUpdateInformation;
 
 class Tiled2dMapVectorSourceDataManager : public ActorObject {
 public:
@@ -56,6 +57,8 @@ public:
     virtual void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription,
                                         int32_t legacyIndex,
                                         bool needsTileReplace) = 0;
+
+    virtual void updateLayerDescriptions(std::vector<Tiled2dMapVectorLayerUpdateInformation> layerUpdates);
 
     virtual bool onClickUnconfirmed(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) = 0;
 
