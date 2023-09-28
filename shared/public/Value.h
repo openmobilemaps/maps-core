@@ -1873,6 +1873,11 @@ public:
      auto const &lhsValue = lhs->evaluate(context);
      auto const &rhsValue = rhs->evaluate(context);
 
+     // Do not try to compare not existent values. Parent value will handle default case.
+     if (std::holds_alternative<std::monostate>(lhsValue) || std::holds_alternative<std::monostate>(rhsValue)) {
+         return std::monostate();
+     }
+
      if (std::holds_alternative<Color>(lhsValue) && std::holds_alternative<std::string>(rhsValue)) {
          auto lhsColor = std::get<Color>(lhsValue);
          if (auto rhsColor = ColorUtil::fromString(std::get<std::string>(rhsValue))) {
