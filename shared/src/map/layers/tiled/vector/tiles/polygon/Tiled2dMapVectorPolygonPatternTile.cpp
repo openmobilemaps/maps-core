@@ -184,7 +184,7 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
             if (featureContext->geomType != vtzero::GeomType::POLYGON) { continue; }
 
             EvaluationContext evalContext = EvaluationContext(tileInfo.zoomIdentifier, featureContext, featureStateManager);
-            if (description->filter == nullptr || description->filter->evaluateOr(evalContext, true)) {
+            if (description->filter == nullptr || description->filter->evaluateOr(evalContext, false)) {
 
                 std::vector<Coord> positions;
 

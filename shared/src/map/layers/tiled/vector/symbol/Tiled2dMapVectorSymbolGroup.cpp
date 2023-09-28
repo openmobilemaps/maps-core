@@ -70,7 +70,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         auto const &[context, geometry] = *it;
         const auto evalContext = EvaluationContext(tileInfo.zoomIdentifier, context, featureStateManager);
 
-        if ((layerDescription->filter != nullptr && !layerDescription->filter->evaluateOr(evalContext, true))) {
+        if ((layerDescription->filter != nullptr && !layerDescription->filter->evaluateOr(evalContext, false))) {
             continue;
         }
 

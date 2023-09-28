@@ -163,7 +163,7 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
             if (featureContext->geomType != vtzero::GeomType::POLYGON) { continue; }
 
             EvaluationContext evalContext = EvaluationContext(tileInfo.zoomIdentifier, featureContext, featureStateManager);
-            if (description->filter == nullptr || description->filter->evaluateOr(evalContext, true)) {
+            if (description->filter == nullptr || description->filter->evaluateOr(evalContext, false)) {
 
                 int styleIndex = -1;
                 int styleGroupIndex = -1;
