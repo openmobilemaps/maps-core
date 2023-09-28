@@ -34,7 +34,8 @@ final class TextInstanced: BaseGraphicsObject {
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader as! TextInstancedShader
         super.init(device: metalContext.device,
-                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue))
+                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue),
+                   label: "TextInstanced")
     }
 
     private func setupStencilStates() {
@@ -85,7 +86,7 @@ final class TextInstanced: BaseGraphicsObject {
         }
 
         #if DEBUG
-            encoder.pushDebugGroup("TextInstanced")
+            encoder.pushDebugGroup(label)
             defer {
                 encoder.popDebugGroup()
             }

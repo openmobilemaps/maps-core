@@ -349,6 +349,9 @@ void Tiled2dMapVectorLineTile::addLines(const std::unordered_map<int, std::vecto
             const auto &shader = shaders.at(styleGroupIndex);
             auto lineGroupGraphicsObject = objectFactory->createLineGroup(shader->asShaderProgramInterface());
 
+#if DEBUG
+            lineGroupGraphicsObject->asGraphicsObject()->setDebugLabel(description->identifier);
+#endif
             auto lineGroupObject = std::make_shared<LineGroup2dLayerObject>(coordinateConverterHelper,
                                                                             lineGroupGraphicsObject,
                                                                             shader);

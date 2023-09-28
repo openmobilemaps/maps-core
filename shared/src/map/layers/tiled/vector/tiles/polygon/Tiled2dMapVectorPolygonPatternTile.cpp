@@ -297,6 +297,9 @@ void Tiled2dMapVectorPolygonPatternTile::addPolygons(const std::unordered_map<in
         const auto &shader = shaders.at(styleGroupIndex);
         for (const auto &polygonDesc: polygonDescs) {
             const auto polygonObject = objectFactory->createPolygonPatternGroup(shader->asShaderProgramInterface());
+#if DEBUG
+            polygonObject->asGraphicsObject()->setDebugLabel(description->identifier);
+#endif
 
             auto layerObject = std::make_shared<PolygonPatternGroup2dLayerObject>(converter, polygonObject, shader);
             layerObject->setVertices(polygonDesc.vertices, polygonDesc.indices);

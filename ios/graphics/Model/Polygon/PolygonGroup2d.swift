@@ -27,7 +27,8 @@ final class PolygonGroup2d: BaseGraphicsObject {
         }
         self.shader = shader
         super.init(device: metalContext.device,
-                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue))
+                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue),
+                   label: "PolygonGroup2d")
     }
 
     private func setupStencilStates() {
@@ -61,7 +62,7 @@ final class PolygonGroup2d: BaseGraphicsObject {
               let indicesBuffer, shader.polygonStyleBuffer != nil else { return }
 
         #if DEBUG
-            encoder.pushDebugGroup("PolygonGroup2d")
+            encoder.pushDebugGroup(label)
             defer {
                 encoder.popDebugGroup()
             }
