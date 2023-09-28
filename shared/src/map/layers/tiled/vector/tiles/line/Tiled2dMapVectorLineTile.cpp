@@ -247,7 +247,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
             if (featureContext->geomType != vtzero::GeomType::POLYGON && featureContext->geomType != vtzero::GeomType::LINESTRING) { continue; }
 
             EvaluationContext evalContext = EvaluationContext(tileInfo.zoomIdentifier, featureContext, featureStateManager);
-            if ((description->filter == nullptr || description->filter->evaluateOr(evalContext, true))) {
+            if ((description->filter == nullptr || description->filter->evaluateOr(evalContext, false))) {
                 int styleGroupIndex = -1;
                 int styleIndex = -1;
                 {
@@ -349,6 +349,9 @@ void Tiled2dMapVectorLineTile::addLines(const std::unordered_map<int, std::vecto
             const auto &shader = shaders.at(styleGroupIndex);
             auto lineGroupGraphicsObject = objectFactory->createLineGroup(shader->asShaderProgramInterface());
 
+#if DEBUG
+            lineGroupGraphicsObject->asGraphicsObject()->setDebugLabel(description->identifier);
+#endif
             auto lineGroupObject = std::make_shared<LineGroup2dLayerObject>(coordinateConverterHelper,
                                                                             lineGroupGraphicsObject,
                                                                             shader);

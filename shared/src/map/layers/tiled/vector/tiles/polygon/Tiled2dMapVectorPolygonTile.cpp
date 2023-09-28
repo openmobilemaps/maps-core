@@ -163,7 +163,7 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
             if (featureContext->geomType != vtzero::GeomType::POLYGON) { continue; }
 
             EvaluationContext evalContext = EvaluationContext(tileInfo.zoomIdentifier, featureContext, featureStateManager);
-            if (description->filter == nullptr || description->filter->evaluateOr(evalContext, true)) {
+            if (description->filter == nullptr || description->filter->evaluateOr(evalContext, false)) {
 
                 int styleIndex = -1;
                 int styleGroupIndex = -1;
@@ -273,6 +273,9 @@ void Tiled2dMapVectorPolygonTile::addPolygons(const std::unordered_map<int, std:
         const auto &shader = shaders.at(styleGroupIndex);
         for (const auto &polygonDesc: polygonDescs) {
             const auto polygonObject = objectFactory->createPolygonGroup(shader->asShaderProgramInterface());
+#if DEBUG
+            polygonObject->asGraphicsObject()->setDebugLabel(description->identifier);
+#endif
 
             auto layerObject = std::make_shared<PolygonGroup2dLayerObject>(converter, polygonObject, shader);
             layerObject->setVertices(polygonDesc.vertices, polygonDesc.indices);

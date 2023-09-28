@@ -96,25 +96,25 @@ public:
                 }
             }
         }
+        for (int16_t y = std::max(indexRange.yMin, int16_t(0)); y <= std::min(indexRange.yMax, int16_t(numCellsY - 1)); y++) {
+            for (int16_t x = std::max(indexRange.xMin, int16_t(0)); x <= std::min(indexRange.xMax, int16_t(numCellsX - 1)); x++) {
+                    for (const auto &rect : gridRects[y][x]) {
+                        if (checkRectCollision(projectedRectangle, rect)) {
+                            return true;
+                        }
+                    }
+                    for (const auto &circle : gridCircles[y][x]) {
+                        if (checkRectCircleCollision(projectedRectangle, circle)) {
+                            return true;
+                        }
+                    }
 
-        for (int16_t y = indexRange.yMin; y <= indexRange.yMax; y++) {
-            for (int16_t x = indexRange.xMin; x <= indexRange.xMax; x++) {
-                for (const auto &rect : gridRects[y][x]) {
-                    if (checkRectCollision(projectedRectangle, rect)) {
-                        return true;
-                    }
-                }
-                for (const auto &circle : gridCircles[y][x]) {
-                    if (checkRectCircleCollision(projectedRectangle, circle)) {
-                        return true;
-                    }
-                }
             }
         }
 
         // Only insert, when not colliding
-        for (int16_t y = indexRange.yMin; y <= indexRange.yMax; y++) {
-            for (int16_t x = indexRange.xMin; x <= indexRange.xMax; x++) {
+        for (int16_t y = std::max(indexRange.yMin, int16_t(0)); y <= std::min(indexRange.yMax, int16_t(numCellsY - 1)); y++) {
+            for (int16_t x = std::max(indexRange.xMin, int16_t(0)); x <= std::min(indexRange.xMax, int16_t(numCellsX - 1)); x++) {
                 gridRects[y][x].push_back(projectedRectangle);
             }
         }

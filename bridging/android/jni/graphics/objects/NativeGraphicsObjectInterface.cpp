@@ -47,6 +47,14 @@ void NativeGraphicsObjectInterface::JavaProxy::setIsInverseMasked(bool c_inverse
                            ::djinni::get(::djinni::Bool::fromCpp(jniEnv, c_inversed)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
+void NativeGraphicsObjectInterface::JavaProxy::setDebugLabel(const std::string & c_label) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeGraphicsObjectInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_setDebugLabel,
+                           ::djinni::get(::djinni::String::fromCpp(jniEnv, c_label)));
+    ::djinni::jniExceptionCheck(jniEnv);
+}
 void NativeGraphicsObjectInterface::JavaProxy::render(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const ::RenderPassConfig & c_renderPass, int64_t c_mvpMatrix, bool c_isMasked, double c_screenPixelAsRealMeterFactor) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -97,6 +105,14 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::GraphicsObjectInterface>(nativeRef);
         ref->setIsInverseMasked(::djinni::Bool::toCpp(jniEnv, j_inversed));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_GraphicsObjectInterface_00024CppProxy_native_1setDebugLabel(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_label)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::GraphicsObjectInterface>(nativeRef);
+        ref->setDebugLabel(::djinni::String::toCpp(jniEnv, j_label));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

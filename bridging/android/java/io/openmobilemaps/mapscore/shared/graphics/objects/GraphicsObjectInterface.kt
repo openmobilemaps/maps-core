@@ -24,6 +24,8 @@ abstract class GraphicsObjectInterface {
     abstract fun setIsInverseMasked(inversed: Boolean)
 
     /** Render the graphics object; ensure calling on graphics thread */
+    abstract fun setDebugLabel(label: String)
+
     abstract fun render(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, mvpMatrix: Long, isMasked: Boolean, screenPixelAsRealMeterFactor: Double)
 
     private class CppProxy : GraphicsObjectInterface {
@@ -64,6 +66,12 @@ abstract class GraphicsObjectInterface {
             native_setIsInverseMasked(this.nativeRef, inversed)
         }
         private external fun native_setIsInverseMasked(_nativeRef: Long, inversed: Boolean)
+
+        override fun setDebugLabel(label: String) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setDebugLabel(this.nativeRef, label)
+        }
+        private external fun native_setDebugLabel(_nativeRef: Long, label: String)
 
         override fun render(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, mvpMatrix: Long, isMasked: Boolean, screenPixelAsRealMeterFactor: Double) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

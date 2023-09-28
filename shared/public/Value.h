@@ -1873,6 +1873,24 @@ public:
      auto const &lhsValue = lhs->evaluate(context);
      auto const &rhsValue = rhs->evaluate(context);
 
+     // Do not try to compare not existent values. Parent value will handle default case.
+     if (std::holds_alternative<std::monostate>(lhsValue) || std::holds_alternative<std::monostate>(rhsValue)) {
+         switch (type) {
+             case PropertyCompareType::EQUAL:
+                 return lhs == rhs;
+             case PropertyCompareType::NOTEQUAL:
+                 return lhs != rhs;
+             case PropertyCompareType::LESS:
+                 return std::monostate();
+             case PropertyCompareType::LESSEQUAL:
+                 return std::monostate();
+             case PropertyCompareType::GREATER:
+                 return std::monostate();
+             case PropertyCompareType::GREATEREQUAL:
+                 return std::monostate();
+         }
+     }
+
      if (std::holds_alternative<Color>(lhsValue) && std::holds_alternative<std::string>(rhsValue)) {
          auto lhsColor = std::get<Color>(lhsValue);
          if (auto rhsColor = ColorUtil::fromString(std::get<std::string>(rhsValue))) {
