@@ -78,7 +78,7 @@ private:
     double updatePropertiesLine(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation);
 
     double lastZoomEvaluation = -1;
-    bool evaluateStyleProperties(const double zoomIdentifier);
+    void evaluateStyleProperties(const double zoomIdentifier);
 
     std::pair<int, double> findReferencePointIndices();
     
