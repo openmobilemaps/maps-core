@@ -166,16 +166,16 @@ void Tiled2dMapVectorSymbolObject::updateLayerDescription(const std::shared_ptr<
     lastTextUpdateRotation = -1;
 }
 
-bool Tiled2dMapVectorSymbolObject::evaluateStyleProperties(const double zoomIdentifier) {
+void Tiled2dMapVectorSymbolObject::evaluateStyleProperties(const double zoomIdentifier) {
 
     if (isStyleZoomDependant == false && lastZoomEvaluation == -1) {
-        return false;
+        return;
     }
 
     auto roundedZoom = std::round(zoomIdentifier * 100.0) / 100.0;
 
     if (isStyleFeatureStateDependant == false && roundedZoom == lastZoomEvaluation) {
-        return false;
+        return;
     }
     
     const auto evalContext = EvaluationContext(roundedZoom, featureContext, featureStateManager);
@@ -197,8 +197,6 @@ bool Tiled2dMapVectorSymbolObject::evaluateStyleProperties(const double zoomIden
     }
 
     lastZoomEvaluation = roundedZoom;
-    
-    return true;
 }
 
 const Tiled2dMapVectorSymbolObject::SymbolObjectInstanceCounts Tiled2dMapVectorSymbolObject::getInstanceCounts() const {
@@ -338,15 +336,7 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
     auto converter = strongMapInterface ? strongMapInterface->getCoordinateConverterHelper() : nullptr;
     auto camera = strongMapInterface ? strongMapInterface->getCamera() : nullptr;
 
-    if (!converter || !camera) {
-        countOffset += instanceCounts.stretchedIcons;
-        return;
-    }
-
-    if (!evaluateStyleProperties(zoomIdentifier) && isStyleFeatureStateDependant == false ) {
-        countOffset += instanceCounts.icons;
-        return;
-    }
+    evaluateStyleProperties(zoomIdentifier);
 
     rotations[countOffset] = iconRotate;
 
@@ -485,7 +475,6 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     auto camera = strongMapInterface ? strongMapInterface->getCamera() : nullptr;
 
     if (!converter || !camera) {
-        countOffset += instanceCounts.stretchedIcons;
         return;
     }
 

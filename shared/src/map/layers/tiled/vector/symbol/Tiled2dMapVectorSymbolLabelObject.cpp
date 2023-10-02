@@ -194,11 +194,11 @@ void Tiled2dMapVectorSymbolLabelObject::setupProperties(std::vector<float> &text
 }
 
 
-bool Tiled2dMapVectorSymbolLabelObject::evaluateStyleProperties(const double zoomIdentifier) {
+void Tiled2dMapVectorSymbolLabelObject::evaluateStyleProperties(const double zoomIdentifier) {
     auto roundedZoom = std::round(zoomIdentifier * 100.0) / 100.0;
 
     if (roundedZoom == lastZoomEvaluation) {
-        return false;
+        return;
     }
 
     const auto evalContext = EvaluationContext(roundedZoom, featureContext, featureStateManager);
@@ -214,7 +214,6 @@ bool Tiled2dMapVectorSymbolLabelObject::evaluateStyleProperties(const double zoo
     haloWidth = description->style.getTextHaloWidth(evalContext);
 
     lastZoomEvaluation = roundedZoom;
-    return true;
 }
 
 

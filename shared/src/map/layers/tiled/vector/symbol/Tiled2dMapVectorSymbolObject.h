@@ -112,8 +112,7 @@ public:
     bool isCoordinateOwner = false;
 private:
     double lastZoomEvaluation = -1;
-    // returns true when the values potentially could have changed
-    bool evaluateStyleProperties(const double zoomIdentifier);
+    void evaluateStyleProperties(const double zoomIdentifier);
 
     ::Coord getRenderCoordinates(Anchor iconAnchor, double rotation, double iconWidth, double iconHeight);
 
