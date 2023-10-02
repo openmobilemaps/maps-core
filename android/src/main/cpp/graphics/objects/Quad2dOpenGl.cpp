@@ -235,3 +235,7 @@ void Quad2dOpenGl::prepareTextureDraw(int program) {
     int textureUniformHandle = glGetUniformLocation(program, "textureSampler");
     glUniform1i(textureUniformHandle, 0);
 }
+
+void Quad2dOpenGl::setDebugLabel(const std::string &label) {
+    // not used
+}

@@ -47,7 +47,9 @@ class Polygon2dOpenGl : public GraphicsObjectInterface,
 
     virtual void setIsInverseMasked(bool inversed) override;
 
-  protected:
+    void setDebugLabel(const std::string &label) override;
+
+protected:
     void prepareGlData(int program);
 
     void removeGlBuffers();

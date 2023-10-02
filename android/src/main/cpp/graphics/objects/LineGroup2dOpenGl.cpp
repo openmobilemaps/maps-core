@@ -166,3 +166,7 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
         glDisable(GL_STENCIL_TEST);
     }
 }
+
+void LineGroup2dOpenGl::setDebugLabel(const std::string &label) {
+    // not used
+}

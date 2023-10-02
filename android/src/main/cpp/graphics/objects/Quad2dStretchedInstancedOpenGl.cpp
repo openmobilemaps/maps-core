@@ -378,3 +378,7 @@ bool Quad2dStretchedInstancedOpenGl::writeToBuffer(const ::SharedBytes &data, GL
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     return true;
 }
+
+void Quad2dStretchedInstancedOpenGl::setDebugLabel(const std::string &label) {
+    // not used
+}
