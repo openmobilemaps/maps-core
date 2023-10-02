@@ -219,3 +219,7 @@ void PolygonPatternGroup2dOpenGl::setTextureCoordinates(const SharedBytes &textu
     std::memcpy(this->textureCoordinates.data(), (void *)textureCoordinates.address, textureCoordinates.elementCount * textureCoordinates.bytesPerElement);
     buffersNotReady &= ~(1 << 1);
 }
+
+void PolygonPatternGroup2dOpenGl::setDebugLabel(const std::string &label) {
+    // not used
+}

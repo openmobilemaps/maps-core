@@ -51,6 +51,8 @@ class PolygonPatternGroup2dOpenGl : public GraphicsObjectInterface,
 
     virtual void setIsInverseMasked(bool inversed) override;
 
+    void setDebugLabel(const std::string &label) override;
+
     void setVertices(const SharedBytes &vertices, const SharedBytes &indices) override;
 
     void setTextureCoordinates(const ::SharedBytes &textureCoordinates) override;

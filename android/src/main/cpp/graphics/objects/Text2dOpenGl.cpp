@@ -270,3 +270,7 @@ void Text2dOpenGl::prepareTextureDraw(int program) {
     int mTextureUniformHandle = glGetUniformLocation(program, "texture");
     glUniform1i(mTextureUniformHandle, 0);
 }
+
+void Text2dOpenGl::setDebugLabel(const std::string &label) {
+    // not used
+}

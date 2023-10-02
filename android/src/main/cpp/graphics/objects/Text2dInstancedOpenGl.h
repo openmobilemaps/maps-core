@@ -47,6 +47,8 @@ public:
 
     virtual void setIsInverseMasked(bool inversed) override;
 
+    void setDebugLabel(const std::string &label) override;
+
     virtual void setInstanceCount(int32_t count) override;
 
     virtual void setPositions(const ::SharedBytes &positions) override;
