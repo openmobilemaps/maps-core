@@ -67,7 +67,6 @@ public:
 
     std::optional<CollisionRectD> boundingBoxViewportAligned = std::nullopt;
     std::optional<std::vector<CircleD>> boundingBoxCircles = std::nullopt;
-    Quad2dD boundingBox;
 
     bool isOpaque = true;
 

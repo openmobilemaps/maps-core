@@ -57,7 +57,7 @@ public:
 
     std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>>& getSymbolObjects();
 
-    std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> onClickConfirmed(const OBB2D &tinyClickBox);
+    std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> onClickConfirmed(const CircleD &clickHitCircle);
 
     std::shared_ptr<PolygonGroup2dLayerObject> boundingBoxLayerObject;
 

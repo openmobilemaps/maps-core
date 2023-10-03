@@ -15,7 +15,6 @@
 #include "Value.h"
 #include "SymbolInfo.h"
 #include "StretchShaderInterface.h"
-#include "OBB2D.h"
 #include "MapInterface.h"
 #include "Tiled2dMapVectorFontProvider.h"
 #include "Tiled2dMapVectorSymbolLabelObject.h"
@@ -92,8 +91,6 @@ public:
     int64_t symbolSortKey;
     const size_t symbolTileIndex;
 
-    std::optional<Quad2dD> getCombinedBoundingBox(bool considerOverlapFlag);
-
     std::optional<CollisionRectF> getViewportAlignedBoundingBox(double zoomIdentifier, bool considerSymbolSpacing, bool considerOverlapFlag);
 
     std::optional<std::vector<CollisionCircleF>> getMapAlignedBoundingCircles(double zoomIdentifier, bool considerSymbolSpacing, bool considerOverlapFlag);
@@ -102,7 +99,7 @@ public:
 
     void collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<CollisionGrid> collisionGrid);
 
-    std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> onClickConfirmed(const OBB2D &tinyClickBox);
+    std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> onClickConfirmed(const CircleD &clickHitCircle);
 
     void setAlpha(float alpha);
 
@@ -141,12 +138,8 @@ private:
     Vec2D stretchSpriteSize = Vec2D(0.0, 0.0);
     std::optional<SpriteDesc> stretchSpriteInfo;
 
-    Quad2dD iconBoundingBox;
     RectD iconBoundingBoxViewportAligned;
-    Quad2dD stretchIconBoundingBox;
     RectD stretchIconBoundingBoxViewportAligned;
-
-    OBB2D orientedBox;
 
     SymbolAlignment iconRotationAlignment = SymbolAlignment::AUTO;
 
