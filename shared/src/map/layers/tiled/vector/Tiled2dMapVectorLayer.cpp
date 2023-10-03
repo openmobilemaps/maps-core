@@ -26,7 +26,6 @@
 #include "PolygonMaskObject.h"
 #include "CoordinatesUtil.h"
 #include "RenderPass.h"
-#include "OBB2D.h"
 #include "DataLoaderResult.h"
 #include "TextureLoaderResult.h"
 #include "PolygonCompare.h"

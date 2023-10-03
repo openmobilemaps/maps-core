@@ -711,12 +711,12 @@ std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>>& Tiled2dMapVectorSymb
     return symbolObjects;
 }
 
-std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolGroup::onClickConfirmed(const OBB2D &tinyClickBox) {
+std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolGroup::onClickConfirmed(const CircleD &clickHitCircle) {
     if (!anyInteractable) {
         return std::nullopt;
     }
     for (const auto object: symbolObjects) {
-        const auto result = object->onClickConfirmed(tinyClickBox);
+        const auto result = object->onClickConfirmed(clickHitCircle);
         if (result) {
             return result;
         }

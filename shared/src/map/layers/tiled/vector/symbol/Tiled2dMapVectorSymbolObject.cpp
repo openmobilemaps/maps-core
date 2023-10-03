@@ -17,6 +17,7 @@
 #include "Tiled2dMapSourceInterface.h"
 #include "Tiled2dMapSource.h"
 #include "Tiled2dMapVectorStyleParser.h"
+#include "CollisionUtil.h"
 
 Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<MapInterface> &mapInterface,
                                                            const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
@@ -44,9 +45,7 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     coordinate(coordinate),
     mapInterface(mapInterface),
     featureContext(featureContext),
-    iconBoundingBox(Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0)),
     iconBoundingBoxViewportAligned(0, 0, 0, 0),
-    stretchIconBoundingBox(Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0)),
     stretchIconBoundingBoxViewportAligned(0, 0, 0, 0),
 textSymbolPlacement(textSymbolPlacement),
 featureStateManager(featureStateManager),
@@ -362,12 +361,6 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
     iconBoundingBoxViewportAligned.y = renderCoordinate.y - iconWidth * 0.5 - scaledIconPadding;
     iconBoundingBoxViewportAligned.width = iconWidth + 2.0 * scaledIconPadding;
     iconBoundingBoxViewportAligned.height = iconHeight + 2.0 * scaledIconPadding;
-    Vec2D origin(renderCoordinate.x, renderCoordinate.y);
-    iconBoundingBox.topLeft = Vec2DHelper::rotate(Vec2D(renderCoordinate.x - iconWidth * 0.5 - scaledIconPadding, renderCoordinate.y - iconHeight * 0.5 - scaledIconPadding), origin, -rotations[countOffset]);
-    iconBoundingBox.topRight = Vec2DHelper::rotate(Vec2D(renderCoordinate.x + iconWidth * 0.5 + scaledIconPadding, renderCoordinate.y - iconHeight * 0.5 - scaledIconPadding), origin, -rotations[countOffset]);
-    iconBoundingBox.bottomRight = Vec2DHelper::rotate(Vec2D(renderCoordinate.x + iconWidth * 0.5 + scaledIconPadding, renderCoordinate.y + iconHeight * 0.5 + scaledIconPadding), origin, -rotations[countOffset]);
-    iconBoundingBox.bottomLeft = Vec2DHelper::rotate(Vec2D(renderCoordinate.x - iconWidth * 0.5 - scaledIconPadding, renderCoordinate.y + iconHeight * 0.5 + scaledIconPadding), origin, -rotations[countOffset]);
-
 
     if (!isCoordinateOwner) {
         alphas[countOffset] = 0.0;
@@ -573,10 +566,6 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     stretchIconBoundingBoxViewportAligned.y = origin.y - spriteHeight * 0.5 - scaledIconPadding;
     stretchIconBoundingBoxViewportAligned.width = spriteWidth + 2.0 * scaledIconPadding;
     stretchIconBoundingBoxViewportAligned.height = spriteHeight + 2.0 * scaledIconPadding;
-    stretchIconBoundingBox.topLeft = Vec2DHelper::rotate(Vec2D(positions[2 * countOffset] - spriteWidth * 0.5 - scaledIconPadding, positions[2 * countOffset + 1] - spriteHeight * 0.5 - scaledIconPadding), origin, rotations[countOffset]);
-    stretchIconBoundingBox.topRight = Vec2DHelper::rotate(Vec2D(positions[2 * countOffset] + spriteWidth * 0.5 + scaledIconPadding, positions[2 * countOffset + 1] - spriteHeight * 0.5 - scaledIconPadding), origin, rotations[countOffset]);
-    stretchIconBoundingBox.bottomRight = Vec2DHelper::rotate(Vec2D(positions[2 * countOffset] + spriteWidth * 0.5 + scaledIconPadding, positions[2 * countOffset + 1] + spriteHeight * 0.5 + scaledIconPadding), origin, rotations[countOffset]);
-    stretchIconBoundingBox.bottomLeft = Vec2DHelper::rotate(Vec2D(positions[2 * countOffset] - spriteWidth * 0.5 - scaledIconPadding, positions[2 * countOffset + 1] + spriteHeight * 0.5 + scaledIconPadding), origin, rotations[countOffset]);
 
     const int infoOffset = countOffset * 10;
 
@@ -687,38 +676,6 @@ void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &posi
     lastStretchIconUpdateScaleFactor = -1;
 }
 
-
-std::optional<Quad2dD> Tiled2dMapVectorSymbolObject::getCombinedBoundingBox(bool considerOverlapFlag) {
-    const Quad2dD* boxes[3] = { nullptr };
-    int boxCount = 0;
-
-    if ((!considerOverlapFlag || !textAllowOverlap) && labelObject && labelObject->boundingBox.topLeft.x != 0) {
-        boxes[boxCount++] = &labelObject->boundingBox;
-    }
-        if ((!considerOverlapFlag || !iconAllowOverlap) && iconBoundingBox.topLeft.x != 0) {
-        boxes[boxCount++] = &iconBoundingBox;
-    }
-        if ((!considerOverlapFlag || !iconAllowOverlap) && stretchIconBoundingBox.topLeft.x != 0) {
-        boxes[boxCount++] = &stretchIconBoundingBox;
-    }
-
-    if (boxCount == 0) {
-        return std::nullopt;
-    }
-
-    std::vector<Vec2D> points;
-    points.reserve(boxCount * 4);
-
-    for (int i = boxCount - 1; i >= 0; --i) {
-        points.push_back(boxes[i]->topLeft);
-        points.push_back(boxes[i]->topRight);
-        points.push_back(boxes[i]->bottomLeft);
-        points.push_back(boxes[i]->bottomRight);
-    }
-
-    return Vec2DHelper::minimumAreaEnclosingRectangle(points);
-}
-
 std::optional<CollisionRectF> Tiled2dMapVectorSymbolObject::getViewportAlignedBoundingBox(double zoomIdentifier, bool considerSymbolSpacing, bool considerOverlapFlag) {
     double minX = std::numeric_limits<double>::max(), maxX = std::numeric_limits<double>::lowest(), minY = std::numeric_limits<double>::max(), maxY = std::numeric_limits<double>::lowest();
     bool hasBox = false;
@@ -800,13 +757,13 @@ std::optional<std::vector<CollisionCircleF>> Tiled2dMapVectorSymbolObject::getMa
 }
 
 bool Tiled2dMapVectorSymbolObject::isPlaced() {
-    if (labelObject && labelObject->boundingBox.topLeft.x != 0) {
+    if (labelObject && (labelObject->boundingBoxViewportAligned.has_value() || labelObject->boundingBoxCircles.has_value())) {
         return true;
     }
-    if (iconBoundingBox.topLeft.x != 0) {
+    if (iconBoundingBoxViewportAligned.x != 0) {
         return true;
     }
-    if (stretchIconBoundingBox.topLeft.x != 0) {
+    if (stretchIconBoundingBoxViewportAligned.x != 0) {
         return true;
     }
     return false;
@@ -856,18 +813,25 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
 
 }
 
-std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolObject::onClickConfirmed(const OBB2D &tinyClickBox) {
+std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolObject::onClickConfirmed(const CircleD &clickHitCircle) {
     if (animationCoordinator->isColliding()) {
         return std::nullopt;
     }
 
-    auto combinedBox = getCombinedBoundingBox(false);
-    orientedBox.update(*combinedBox);
-
-    if (orientedBox.overlaps(tinyClickBox)) {
-        return std::make_tuple(coordinate, featureContext->getFeatureInfo());
+    if (boundingBoxRotationAlignment == SymbolAlignment::VIEWPORT) {
+        if ((labelObject && labelObject->boundingBoxViewportAligned.has_value() && CollisionUtil::checkRectCircleCollision(*labelObject->boundingBoxViewportAligned, clickHitCircle))
+        || (iconBoundingBoxViewportAligned.x != 0 && CollisionUtil::checkRectCircleCollision(iconBoundingBoxViewportAligned, clickHitCircle))
+        || (stretchIconBoundingBoxViewportAligned.x != 0 && CollisionUtil::checkRectCircleCollision(stretchIconBoundingBoxViewportAligned, clickHitCircle))) {
+            return std::make_tuple(coordinate, featureContext->getFeatureInfo());
+        }
+    } else {
+        if ((labelObject && labelObject->boundingBoxCircles.has_value() && CollisionUtil::checkCirclesCollision(*labelObject->boundingBoxCircles, clickHitCircle))
+        || (iconBoundingBoxViewportAligned.width != 0 && CollisionUtil::checkRectCircleCollision(iconBoundingBoxViewportAligned, clickHitCircle))
+        || (stretchIconBoundingBoxViewportAligned.width != 0 && CollisionUtil::checkRectCircleCollision(stretchIconBoundingBoxViewportAligned, clickHitCircle))) {
+            return std::make_tuple(coordinate, featureContext->getFeatureInfo());
+        }
     }
-    
+
     return std::nullopt;
 }
 

@@ -698,11 +698,7 @@ bool Tiled2dMapVectorSourceSymbolDataManager::onClickConfirmed(const std::unorde
     Coord clickCoordsRenderCoord = conversionHelper->convertToRenderSystem(clickCoords);
 
     double clickPadding = camera->mapUnitsFromPixels(16);
-
-    OBB2D tinyClickBox(Quad2dD(Vec2D(clickCoordsRenderCoord.x - clickPadding, clickCoordsRenderCoord.y - clickPadding),
-                               Vec2D(clickCoordsRenderCoord.x + clickPadding, clickCoordsRenderCoord.y - clickPadding),
-                               Vec2D(clickCoordsRenderCoord.x + clickPadding, clickCoordsRenderCoord.y + clickPadding),
-                               Vec2D(clickCoordsRenderCoord.x - clickPadding, clickCoordsRenderCoord.y + clickPadding)));
+    CircleD clickHitCircle(clickCoordsRenderCoord.x, clickCoordsRenderCoord.y, clickPadding);
 
     for(const auto &[tile, symbolGroupsMap]: tileSymbolGroupMap) {
         const auto tileState = tileStateMap.find(tile);
@@ -714,8 +710,8 @@ bool Tiled2dMapVectorSourceSymbolDataManager::onClickConfirmed(const std::unorde
                 continue;
             }
             for (const auto &symbolGroup : std::get<1>(symbolGroups)) {
-                auto result = symbolGroup.syncAccess([&tinyClickBox](auto group){
-                    return group->onClickConfirmed(tinyClickBox);
+                auto result = symbolGroup.syncAccess([&clickHitCircle](auto group){
+                    return group->onClickConfirmed(clickHitCircle);
                 });
                 if (result) {
                     strongSelectionDelegate->didSelectFeature(std::get<1>(*result), layerIdentifier, conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), std::get<0>(*result)));

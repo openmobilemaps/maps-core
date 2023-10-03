@@ -34,28 +34,26 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
                                                                      const SymbolAlignment rotationAlignment,
                                                                      const TextSymbolPlacement &textSymbolPlacement,
                                                                      std::shared_ptr<SymbolAnimationCoordinator> animationCoordinator,
-                                                                     const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager):
-textSymbolPlacement(textSymbolPlacement),
-rotationAlignment(rotationAlignment),
-featureContext(featureContext),
-description(description),
-lineHeight(lineHeight),
-letterSpacing(letterSpacing),
-maxCharacterAngle(maxCharacterAngle),
-textAnchor(textAnchor),
-textJustify(textJustify),
-offset(offset),
-radialOffset(radialOffset),
-fontResult(fontResult),
-fullText(fullText),
-lineCoordinates(lineCoordinates),
-boundingBox(Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0), Vec2D(0, 0)),
-referencePoint(converter->convertToRenderSystem(coordinate)),
-referenceSize(fontResult->fontData->info.size),
-animationCoordinator(animationCoordinator),
-featureStateManager(featureStateManager)
-{
-    auto spaceIt = std::find_if(fontResult->fontData->glyphs.begin(), fontResult->fontData->glyphs.end(), [](const auto& d) {
+                                                                     const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager)
+        : textSymbolPlacement(textSymbolPlacement),
+          rotationAlignment(rotationAlignment),
+          featureContext(featureContext),
+          description(description),
+          lineHeight(lineHeight),
+          letterSpacing(letterSpacing),
+          maxCharacterAngle(maxCharacterAngle),
+          textAnchor(textAnchor),
+          textJustify(textJustify),
+          offset(offset),
+          radialOffset(radialOffset),
+          fontResult(fontResult),
+          fullText(fullText),
+          lineCoordinates(lineCoordinates),
+          referencePoint(converter->convertToRenderSystem(coordinate)),
+          referenceSize(fontResult->fontData->info.size),
+          animationCoordinator(animationCoordinator),
+          featureStateManager(featureStateManager) {
+    auto spaceIt = std::find_if(fontResult->fontData->glyphs.begin(), fontResult->fontData->glyphs.end(), [](const auto &d) {
         return d.charCode == " ";
     });
 
@@ -520,10 +518,6 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
     dimensions.x = rectBoundingBox.bottomRight.x - rectBoundingBox.topLeft.x;
     dimensions.y = rectBoundingBox.bottomRight.y - rectBoundingBox.topLeft.y;
 
-    boundingBox = Quad2dD(Vec2DHelper::rotate(Vec2D(rectBoundingBox.topLeft.x, rectBoundingBox.topLeft.y), Vec2D(dx, dy), angle),
-                          Vec2DHelper::rotate(Vec2D(rectBoundingBox.bottomRight.x, rectBoundingBox.topLeft.y), Vec2D(dx, dy), angle),
-                          Vec2DHelper::rotate(Vec2D(rectBoundingBox.bottomRight.x, rectBoundingBox.bottomRight.y), Vec2D(dx, dy), angle),
-                          Vec2DHelper::rotate(Vec2D(rectBoundingBox.topLeft.x, rectBoundingBox.bottomRight.y), Vec2D(dx, dy), angle));
     if (rotationAlignment != SymbolAlignment::MAP) {
         boundingBoxViewportAligned = CollisionRectD(referencePoint.x, referencePoint.y, boundingBoxMin.x - scaledTextPadding, boundingBoxMin.y - scaledTextPadding, dimensions.x, dimensions.y);
         boundingBoxCircles = std::nullopt;
@@ -714,10 +708,6 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
 
     if (boxMin.x != std::numeric_limits<float>::max()) {
         const float padding = textPadding * scaleFactor;
-        boundingBox.topLeft = Vec2D(boxMin.x - padding, boxMin.y - padding);
-        boundingBox.topRight = Vec2D(boxMax.x + padding, boxMin.y - padding);
-        boundingBox.bottomRight = Vec2D(boxMax.x + padding, boxMax.y + padding);
-        boundingBox.bottomLeft = Vec2D(boxMin.x + padding, boxMax.y + padding);
 
         std::vector<CircleD> circles;
         Vec2D lastCirclePosition = Vec2D(0, 0);
@@ -735,11 +725,6 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             lastCirclePosition.y = newY;
         }
         boundingBoxCircles = circles;
-    } else {
-        boundingBox.topLeft = Vec2D(0.0, 0.0);
-        boundingBox.topRight = Vec2D(0.0, 0.0);
-        boundingBox.bottomRight = Vec2D(0.0, 0.0);
-        boundingBox.bottomLeft = Vec2D(0.0, 0.0);
     }
     boundingBoxViewportAligned = std::nullopt;
 
