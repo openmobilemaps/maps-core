@@ -103,7 +103,22 @@ void MapScene::addLayer(const std::shared_ptr<::LayerInterface> &layer) {
             topIndex = layers.rbegin()->first;
         int atIndex = topIndex + 1;
         layers[atIndex] = layer;
-        layer->onAdded(shared_from_this(), atIndex);
+        std::weak_ptr<LayerInterface> newLayer = layer;
+        auto weakSelfPtr = weak_from_this();
+        scheduler->addTask(
+                std::make_shared<LambdaTask>(
+                        TaskConfig("MapScene_addLayerResume", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+                        [weakSelfPtr, newLayer, atIndex] {
+                            auto strongSelf = weakSelfPtr.lock();
+                            if (auto newStrong = newLayer.lock()) {
+                                if (strongSelf) {
+                                    newStrong->onAdded(strongSelf, atIndex);
+                                    if (strongSelf->isResumed) {
+                                        newStrong->resume();
+                                    }
+                                }
+                            }
+                        }));
     }
     invalidate();
 }
@@ -116,11 +131,31 @@ void MapScene::insertLayerAt(const std::shared_ptr<LayerInterface> &layer, int32
         }
     }
     removeLayer(layer);
-    layer->onAdded(shared_from_this(), atIndex);
+    std::weak_ptr<LayerInterface> newLayer = layer;
     {
         std::lock_guard<std::recursive_mutex> lock(layersMutex);
         if (layers.count(atIndex) > 0) {
-            layers[atIndex]->onRemoved();
+            std::weak_ptr<LayerInterface> oldLayer = layers[atIndex];
+            auto weakSelfPtr = weak_from_this();
+            scheduler->addTask(
+                    std::make_shared<LambdaTask>(
+                            TaskConfig("MapScene_replaceLayer", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+                            [weakSelfPtr, oldLayer, newLayer, atIndex] {
+                                auto strongSelf = weakSelfPtr.lock();
+                                bool isResumed = strongSelf && strongSelf->isResumed;
+                                if (auto oldStrong = oldLayer.lock()) {
+                                    if (isResumed) {
+                                        oldStrong->pause();
+                                    }
+                                    oldStrong->onRemoved();
+                                }
+                                if (auto newStrong = newLayer.lock()) {
+                                    newStrong->onAdded(strongSelf, atIndex);
+                                    if (isResumed) {
+                                        newStrong->resume();
+                                    }
+                                }
+                            }));
         }
         layers[atIndex] = layer;
     }
@@ -151,6 +186,19 @@ void MapScene::insertLayerAbove(const std::shared_ptr<LayerInterface> &layer, co
         layers = newLayers;
     }
     layer->onAdded(shared_from_this(), atIndex);
+    std::weak_ptr<LayerInterface> newLayer = layer;
+    auto weakSelfPtr = weak_from_this();
+    scheduler->addTask(
+            std::make_shared<LambdaTask>(
+                    TaskConfig("MapScene_insertLayerResume", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+                    [weakSelfPtr, newLayer] {
+                        auto strongSelf = weakSelfPtr.lock();
+                        if (auto newStrong = newLayer.lock()) {
+                            if (strongSelf && strongSelf->isResumed) {
+                                newStrong->resume();
+                            }
+                        }
+                    }));
     invalidate();
 };
 
@@ -177,6 +225,19 @@ void MapScene::insertLayerBelow(const std::shared_ptr<LayerInterface> &layer, co
         layers = newLayers;
     }
     layer->onAdded(shared_from_this(), atIndex);
+    std::weak_ptr<LayerInterface> newLayer = layer;
+    auto weakSelfPtr = weak_from_this();
+    scheduler->addTask(
+            std::make_shared<LambdaTask>(
+                    TaskConfig("MapScene_insertLayerResume", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+                    [weakSelfPtr, newLayer] {
+                        auto strongSelf = weakSelfPtr.lock();
+                        if (auto newStrong = newLayer.lock()) {
+                            if (strongSelf && strongSelf->isResumed) {
+                                newStrong->resume();
+                            }
+                        }
+                    }));
     invalidate();
 };
 
@@ -193,12 +254,18 @@ void MapScene::removeLayer(const std::shared_ptr<::LayerInterface> &layer) {
         if (targetIndex >= 0) {
             layers.erase(targetIndex);
             auto scheduler = this->scheduler;
+            auto weakSelf = weak_from_this();
             if (scheduler) {
                 scheduler->addTask(
                         std::make_shared<LambdaTask>(
                                 TaskConfig("MapScene_removeLayer", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
-                                [layer] {
-                                    layer->onRemoved();
+                                [weakSelf, layer] {
+                                    if (auto strongSelf = weakSelf.lock()) {
+                                        if (strongSelf->isResumed) {
+                                            layer->pause();
+                                        }
+                                        layer->onRemoved();
+                                    }
                                 }));
             }
         }
@@ -256,7 +323,6 @@ void MapScene::drawFrame() {
 }
 
 void MapScene::resume() {
-    isResumed = true;
     std::weak_ptr<MapScene> weakSelfPtr = weak_from_this();
     scheduler->addTask(
         std::make_shared<LambdaTask>(TaskConfig("MapScene_resume", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [weakSelfPtr] {
@@ -268,6 +334,7 @@ void MapScene::resume() {
                 layer.second->resume();
             }
 
+            selfPtr->isResumed = true;
             selfPtr->callbackHandler->onMapResumed();
         }));
 }

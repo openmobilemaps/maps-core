@@ -224,8 +224,6 @@ void LineLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32
     if (isLayerClickable) {
         mapInterface->getTouchHandler()->insertListener(shared_from_this(), layerIndex);
     }
-    
-    resume();
 }
 
 void LineLayer::onRemoved() {
@@ -233,8 +231,6 @@ void LineLayer::onRemoved() {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         addingQueue.clear();
     }
-
-    pause();
 
     if (mapInterface && isLayerClickable)
         mapInterface->getTouchHandler()->removeListener(shared_from_this());

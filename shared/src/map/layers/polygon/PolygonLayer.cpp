@@ -296,8 +296,6 @@ void PolygonLayer::onRemoved() {
         addingQueue.clear();
     }
 
-    pause();
-
     if (mapInterface && isLayerClickable)
         mapInterface->getTouchHandler()->removeListener(shared_from_this());
     mapInterface = nullptr;
