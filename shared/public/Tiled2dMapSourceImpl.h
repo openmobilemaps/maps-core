@@ -37,6 +37,9 @@ Tiled2dMapSource<T, L, R>::Tiled2dMapSource(const MapConfig &mapConfig, const st
               [](const Tiled2dMapZoomLevelInfo &a, const Tiled2dMapZoomLevelInfo &b) -> bool { return a.zoom > b.zoom; });
 }
 
+const static double VIEWBOUNDS_PADDING_MIN_DIM_PC = 0.15;
+const static int8_t ALWAYS_KEEP_LEVEL_TARGET_ZOOM_OFFSET = -8;
+
 template<class T, class L, class R>
 bool Tiled2dMapSource<T, L, R>::isTileVisible(const Tiled2dMapTileInfo &tileInfo) {
     return currentVisibleTiles.count(tileInfo) > 0;
@@ -85,12 +88,29 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
     int targetZoomLevelIdentifier = zoomLevelInfos.at(targetZoomLayer).zoomLevelIdentifier;
     int startZoomLayer = 0;
     int endZoomLevel = std::min((int) numZoomLevels - 1, targetZoomLayer + 2);
+    int keepZoomLevelOffset = std::max(zoomLevelInfos.at(startZoomLayer).zoomLevelIdentifier,
+                                       zoomLevelInfos.at(endZoomLevel).zoomLevelIdentifier + ALWAYS_KEEP_LEVEL_TARGET_ZOOM_OFFSET) -
+                              targetZoomLevelIdentifier;
 
     int distanceWeight = 100;
     int zoomLevelWeight = 1000 * zoomLevelInfos.at(0).numTilesT;
     int zDistanceWeight = 1000 * zoomLevelInfos.at(0).numTilesT;
 
     std::vector<VisibleTilesLayer> layers;
+
+    double visibleWidth = visibleBoundsLayer.bottomRight.x - visibleBoundsLayer.topLeft.x;
+    double visibleHeight = visibleBoundsLayer.topLeft.y - visibleBoundsLayer.bottomRight.y;
+    double viewboundsPadding = VIEWBOUNDS_PADDING_MIN_DIM_PC * std::min(std::abs(visibleWidth), std::abs(visibleHeight));
+
+    double signWidth = visibleWidth / std::abs(visibleWidth);
+    const double visibleLeft = visibleBoundsLayer.topLeft.x - signWidth * viewboundsPadding;
+    const double visibleRight = visibleBoundsLayer.bottomRight.x + signWidth * viewboundsPadding;
+    visibleWidth = std::abs(visibleWidth) + 2 * viewboundsPadding;
+
+    double signHeight = visibleHeight / std::abs(visibleHeight);
+    const double visibleTop = visibleBoundsLayer.topLeft.y + signHeight * viewboundsPadding;
+    const double visibleBottom = visibleBoundsLayer.bottomRight.y - signHeight * viewboundsPadding;
+    visibleHeight = std::abs(visibleHeight) + 2 * viewboundsPadding;
 
     for (int i = startZoomLayer; i <= endZoomLevel; i++) {
         const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(i);
@@ -116,17 +136,12 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
         const double tileWidthAdj = leftToRight ? tileWidth : -tileWidth;
         const double tileHeightAdj = topToBottom ? tileWidth : -tileWidth;
 
-        const double visibleLeft = visibleBoundsLayer.topLeft.x;
-        const double visibleRight = visibleBoundsLayer.bottomRight.x;
-        const double visibleWidth = std::abs(visibleLeft - visibleRight);
         const double boundsLeft = layerBounds.topLeft.x;
         const int startTileLeft =
                 std::floor(std::max(leftToRight ? (visibleLeft - boundsLeft) : (boundsLeft - visibleLeft), 0.0) / tileWidth);
         const int maxTileLeft = std::floor(
                 std::max(leftToRight ? (visibleRight - boundsLeft) : (boundsLeft - visibleRight), 0.0) / tileWidth);
-        const double visibleTop = visibleBoundsLayer.topLeft.y;
-        const double visibleBottom = visibleBoundsLayer.bottomRight.y;
-        const double visibleHeight = std::abs(visibleTop - visibleBottom);
+
         const double boundsTop = layerBounds.topLeft.y;
         const int startTileTop = std::floor(std::max(topToBottom ? (visibleTop - boundsTop) : (boundsTop - visibleTop), 0.0) / tileWidth);
         const int maxTileTop = std::floor(
@@ -150,8 +165,6 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
                     const double tileCenterX = topLeft.x + 0.5f * tileWidthAdj;
                     const double tileCenterY = topLeft.y + 0.5f * tileHeightAdj;
                     const double tileCenterDis = std::sqrt(std::pow(tileCenterX - centerVisibleX, 2.0) + std::pow(tileCenterY - centerVisibleY, 2.0));
-
-                    const int zDis = 1 + std::abs(t - curT);
 
                     float distanceFactor = (tileCenterDis / maxDisCenter) * distanceWeight;
                     float zoomlevelFactor = zoomDistanceFactor * zoomLevelWeight;
@@ -179,20 +192,20 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
         currentZoomLevelIdentifier = targetZoomLevelIdentifier;
     }
 
-    onVisibleTilesChanged(layers);
+    onVisibleTilesChanged(layers, keepZoomLevelOffset);
     currentViewBounds = visibleBoundsLayer;
 }
 
 template<class T, class L, class R>
-void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid) {
+void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, int keepZoomLevelOffset) {
 
     currentVisibleTiles.clear();
 
     std::vector<PrioritizedTiled2dMapTileInfo> toAdd;
 
-    // make sure all tiles on the current zoom level are scheduled to load
+    // make sure all tiles on the current zoom level are scheduled to load (as well as those from the level we always want to keep)
     for (const auto &layer: pyramid) {
-        if (layer.targetZoomLevelOffset <= 0 && layer.targetZoomLevelOffset >= -zoomInfo.numDrawPreviousLayers){
+        if ((layer.targetZoomLevelOffset <= 0 && layer.targetZoomLevelOffset >= -zoomInfo.numDrawPreviousLayers) || layer.targetZoomLevelOffset == keepZoomLevelOffset){
             for (auto const &tileInfo: layer.visibleTiles) {
                 currentVisibleTiles.insert(tileInfo.tileInfo);
 
@@ -219,7 +232,8 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
         bool found = false;
 
         if ((!onlyCurrent && tileInfo.zoomIdentifier <= currentZoomLevelIdentifier)
-            || (onlyCurrent && tileInfo.zoomIdentifier == currentZoomLevelIdentifier)) {
+            || (onlyCurrent && tileInfo.zoomIdentifier == currentZoomLevelIdentifier)
+            || tileInfo.zoomIdentifier == (currentZoomLevelIdentifier + keepZoomLevelOffset)) {
             for (const auto &layer: pyramid) {
                 for (auto const &tile: layer.visibleTiles) {
                     if (tileInfo == tile.tileInfo) {
@@ -520,7 +534,7 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
     std::vector<Tiled2dMapTileInfo> tilesToRemove;
 
     int currentZoomLevelIdentifier = this->currentZoomLevelIdentifier;
-    
+
     gpc_polygon currentTileMask;
     bool freeCurrent = false;
     currentTileMask.num_contours = 0;
@@ -539,7 +553,7 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
 
     bool completeViewBoundsDrawn = false;
 
-    for (auto it = currentTiles.rbegin(); it != currentTiles.rend(); it++ ){
+    for (auto it = currentTiles.rbegin(); it != currentTiles.rend(); it++){
         auto &[tileInfo, tileWrapper] = *it;
 
         tileWrapper.state = TileState::VISIBLE;
@@ -552,7 +566,7 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
         if (tileInfo.zoomIdentifier != currentZoomLevelIdentifier) {
 
             if (currentTileMask.num_contours != 0) {
-                if(!completeViewBoundsDrawn) {
+                if (!completeViewBoundsDrawn) {
                     gpc_polygon diff;
                     gpc_polygon_clip(GPC_DIFF, &currentViewBoundsPolygon, &currentTileMask, &diff);
 
@@ -564,7 +578,7 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
                 }
             }
 
-            if(completeViewBoundsDrawn) {
+            if (completeViewBoundsDrawn) {
                 tileWrapper.state = TileState::CACHED;
                 continue;
             }

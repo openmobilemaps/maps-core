@@ -87,7 +87,7 @@ Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(con
 
 void Tiled2dMapVectorSource::notifyTilesUpdates() {
     listener.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceListener::onTilesUpdated, sourceName, getCurrentTiles());
-};
+}
 
 std::unordered_set<Tiled2dMapVectorTileInfo> Tiled2dMapVectorSource::getCurrentTiles() {
     std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos;

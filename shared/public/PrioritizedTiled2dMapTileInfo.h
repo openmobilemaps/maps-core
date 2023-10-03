@@ -46,7 +46,7 @@ struct VisibleTilesLayer {
 
     // 0 means this is the target zoom level
     // negative means this is "above" the target
-    // positive mens this is "below" the target
+    // positive means this is "below" the target
     int targetZoomLevelOffset;
 
     VisibleTilesLayer(const std::unordered_set<PrioritizedTiled2dMapTileInfo> &visibleTiles, int targetZoomLevelOffset): visibleTiles(visibleTiles), targetZoomLevelOffset(targetZoomLevelOffset) {}
