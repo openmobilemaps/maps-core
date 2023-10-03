@@ -89,8 +89,6 @@ void TextLayer::onRemoved() {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         addingQueue.clear();
     }
-
-    pause();
 }
 
 void TextLayer::pause() {

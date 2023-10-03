@@ -97,7 +97,7 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
         return;
     }
 
-    std::vector<std::tuple<const std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>> iconObjects;
+    std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>> iconObjects;
 
     for (const auto &icon : icons) {
         auto shader = shaderFactory->createAlphaShader();
@@ -116,7 +116,7 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
         iconObject->setRectCoord(
             RectCoord(Coord(iconPosRender.systemIdentifier, iconPosRender.x - leftW, iconPosRender.y - topH, iconPosRender.y),
                       Coord(iconPosRender.systemIdentifier, iconPosRender.x + rightW, iconPosRender.y + bottomH, iconPosRender.y)));
-        iconObjects.push_back(std::make_tuple(icon, iconObject));
+        iconObjects.push_back(std::make_pair(icon, iconObject));
 
         {
             std::lock_guard<std::recursive_mutex> lock(iconsMutex);
@@ -140,16 +140,16 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
 }
 
 void IconLayer::setupIconObjects(
-    const std::vector<std::tuple<const std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>> &iconObjects) {
+    const std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>> &iconObjects) {
     auto mapInterface = this->mapInterface;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!renderingContext) {
         return;
     }
 
-    for (const auto iconTuple : iconObjects) {
-        const auto &icon = std::get<0>(iconTuple);
-        const auto &iconObject = std::get<1>(iconTuple);
+    for (const auto iconPair : iconObjects) {
+        const auto &icon = iconPair.first;
+        const auto &iconObject = iconPair.second;
 
         iconObject->getGraphicsObject()->setup(renderingContext);
         iconObject->getQuadObject()->loadTexture(renderingContext, icon->getTexture());
@@ -299,8 +299,6 @@ void IconLayer::onRemoved() {
         addingQueue.clear();
     }
 
-    pause();
-
     auto mapInterface = this->mapInterface;
     if (mapInterface && isLayerClickable) {
         mapInterface->getTouchHandler()->removeListener(shared_from_this());
@@ -310,34 +308,20 @@ void IconLayer::onRemoved() {
 
 void IconLayer::pause() {
     {
-        std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> newRenderPassObjectMap;
-        std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(addingQueueMutex, iconsMutex);
-        addingQueue.clear();
-        for (const auto &icon : icons) {
-            addingQueue.push_back(icon.first);
-        }
+        std::lock_guard<std::recursive_mutex> lock(iconsMutex);
+        clearSync(icons);
     }
 
-    std::lock_guard<std::recursive_mutex> lock(iconsMutex);
-    clearSync(icons);
-    icons.clear();
+    if (mask) {
+        if (mask->asGraphicsObject()->isReady())
+            mask->asGraphicsObject()->clear();
+    }
 }
 
 void IconLayer::resume() {
-    std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
-    if (!addingQueue.empty()) {
-        std::vector<std::shared_ptr<IconInfoInterface>> icons;
-        for (auto const &icon : addingQueue) {
-            icons.push_back(icon);
-        }
-        addingQueue.clear();
-        addIcons(icons);
-    }
-    if (mask) {
-        auto mapInterface = this->mapInterface;
-        auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
-        if (renderingContext && !mask->asGraphicsObject()->isReady())
-            mask->asGraphicsObject()->setup(renderingContext);
+    {
+        std::lock_guard<std::recursive_mutex> lock(iconsMutex);
+        setupIconObjects(icons);
     }
 }
 
