@@ -31,7 +31,7 @@ final class Quad2d: BaseGraphicsObject {
     init(shader: MCShaderProgramInterface, metalContext: MetalContext, label: String = "Quad2d") {
         self.shader = shader
         super.init(device: metalContext.device,
-                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue),
+                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
                    label: label)
     }
 

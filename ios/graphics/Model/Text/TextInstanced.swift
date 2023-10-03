@@ -34,7 +34,7 @@ final class TextInstanced: BaseGraphicsObject {
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader as! TextInstancedShader
         super.init(device: metalContext.device,
-                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue),
+                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
                    label: "TextInstanced")
     }
 

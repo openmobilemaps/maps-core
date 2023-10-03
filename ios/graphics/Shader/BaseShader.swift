@@ -13,9 +13,9 @@ import MapCoreSharedModule
 import Metal
 
 open class BaseShader: MCShaderProgramInterface {
-    var blendMode: MCBlendMode = .NORMAL
+    open var blendMode: MCBlendMode = .NORMAL
 
-    var pipeline: MTLRenderPipelineState?
+    open var pipeline: MTLRenderPipelineState?
 
     public init() {
     }
