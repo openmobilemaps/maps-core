@@ -55,9 +55,9 @@ protected:
     virtual void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) override {};
 
     virtual ::djinni::Future<std::shared_ptr<DataLoaderResult>> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) override {
-        auto promise = ::djinni::Promise<std::shared_ptr<DataLoaderResult>>();
-        promise.setValue(std::make_shared<DataLoaderResult>(std::nullopt, std::nullopt, LoaderStatus::OK, std::nullopt));
-        return promise.getFuture();
+        auto promise = std::make_shared<::djinni::Promise<std::shared_ptr<DataLoaderResult>>>();
+        geoJson->waitIfNotLoaded(promise);
+        return promise->getFuture();
     };
 
     virtual bool hasExpensivePostLoadingTask() override { return false; };
