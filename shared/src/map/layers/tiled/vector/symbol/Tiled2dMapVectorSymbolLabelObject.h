@@ -18,7 +18,6 @@
 #include "Value.h"
 #include "SymbolInfo.h"
 #include "StretchShaderInterface.h"
-#include "OBB2D.h"
 #include "MapInterface.h"
 #include "Tiled2dMapVectorFontProvider.h"
 #include "CoordinateConversionHelperInterface.h"
@@ -26,6 +25,7 @@
 #include "BoundingBox.h"
 #include "SpriteData.h"
 #include "SymbolAnimationCoordinator.h"
+#include "Vec2DHelper.h"
 
 class SymbolAnimationCoordinator;
 
