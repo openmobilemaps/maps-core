@@ -25,6 +25,7 @@
 #include "Tiled2dMapVectorLayerParserResult.h"
 #include "LoaderHelper.h"
 #include "GeoJsonParser.h"
+#include "GeoJsonVTFactory.h"
 #include <string>
 
 class Tiled2dMapVectorLayerParserHelper {
@@ -144,25 +145,13 @@ public:
             } else if (type == "geojson") {
                 nlohmann::json geojson;
                 if (val["data"].is_string()) {
-                    // load geojson
-                    auto result = LoaderHelper::loadData(val["data"].get<std::string>(), std::nullopt, loaders);
-                    if (result.status != LoaderStatus::OK) {
-                        return Tiled2dMapVectorLayerParserResult(nullptr, result.status, result.errorCode, std::nullopt);
-                    }
-                    auto string = std::string((char*)result.data->buf(), result.data->len());
-                    nlohmann::json json;
-                    try {
-                        geojson = nlohmann::json::parse(string);
-                    }
-                    catch (nlohmann::json::parse_error &ex) {
-                        return Tiled2dMapVectorLayerParserResult(nullptr, LoaderStatus::ERROR_OTHER, "", std::nullopt);
-                    }
+                    geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(val["data"].get<std::string>(), loaders);
                 } else {
                     assert(val["data"].is_object());
-                    geojson = val["data"];
+                    geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(GeoJsonParser::getGeoJson(val["data"]));
                 }
 
-                geojsonSources[key] = GeoJsonParser::getGeoJsonVt(geojson);
+
             }
         }
 

@@ -9,6 +9,10 @@
 #include <map>
 #include <unordered_map>
 #include "GeoJsonTypes.h"
+#include "GeoJsonParser.h"
+
+#include "LoaderInterface.h"
+#include "LoaderHelper.h"
 
 struct TileOptions {
     // simplification tolerance (higher means simpler)
@@ -36,7 +40,7 @@ inline uint64_t toID(uint8_t z, uint32_t x, uint32_t y) {
     return (((1ull << z) * y + x) * 32) + z;
 }
 
-class GeoJSONVT: public GeoJSONVTInterface {
+class GeoJSONVT: public GeoJSONVTInterface, public std::enable_shared_from_this<GeoJSONVT> {
 public:
     const Options options;
 
@@ -44,13 +48,71 @@ public:
 
     GeoJSONVT(const std::shared_ptr<GeoJson> &geoJson,
               const Options& options_ = Options())
-        : options(options_) {
+    : options(options_), loadingResult(DataLoaderResult(std::nullopt, std::nullopt, LoaderStatus::OK, std::nullopt)){
 
         const uint32_t z2 = 1u << options.maxZoom;
 
         convert(geoJson->geometries, (options.tolerance / options.extent) / z2);
 
         splitTile(geoJson->geometries, 0, 0, 0);
+    }
+
+    GeoJSONVT(const std::string &geoJsonUrl,
+              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
+              const Options& options_ = Options())
+    : options(options_), geoJsonUrl(geoJsonUrl), loaders(loaders) {}
+
+    const std::string geoJsonUrl;
+    std::vector<std::shared_ptr<::LoaderInterface>> loaders;
+    std::recursive_mutex mutex;
+    std::optional<DataLoaderResult> loadingResult;
+    std::vector<std::shared_ptr<::djinni::Promise<std::shared_ptr<DataLoaderResult>>>> waitingPromises;
+
+    void load() {
+        auto weakSelf = weak_from_this();
+        LoaderHelper::loadDataAsync(geoJsonUrl, std::nullopt, loaders).then([weakSelf](auto resultFuture){
+            auto self = weakSelf.lock();
+            if (!self) return;
+            auto result = resultFuture.get();
+
+            if (result.status != LoaderStatus::OK) {
+                LogError <<= "Unable to load geoJson";
+
+            } else {
+                auto string = std::string((char*)result.data->buf(), result.data->len());
+                nlohmann::json json;
+                try {
+                    json = nlohmann::json::parse(string);
+                    auto geoJson = GeoJsonParser::getGeoJson(json);
+
+                    const uint32_t z2 = 1u << self->options.maxZoom;
+
+                    convert(geoJson->geometries, (self->options.tolerance / self->options.extent) / z2);
+
+                    self->splitTile(geoJson->geometries, 0, 0, 0);
+                }
+                catch (nlohmann::json::parse_error &ex) {
+                    self->loadingResult = DataLoaderResult(std::nullopt, std::nullopt, LoaderStatus::ERROR_OTHER, "parse error");
+                    LogError <<= "Unable to parse geoJson";
+                    return;
+                }
+            }
+            self->loadingResult = DataLoaderResult(std::nullopt, std::nullopt, result.status, result.errorCode);
+            self->loaders.clear();
+
+            LogDebug << "GeoJson was loaded from " << self->geoJsonUrl;
+
+            self->resolveAllWaitingPromises();
+        });
+    }
+
+    void waitIfNotLoaded(std::shared_ptr<::djinni::Promise<std::shared_ptr<DataLoaderResult>>> promise) override {
+        std::lock_guard<std::recursive_mutex> lock(mutex);
+        if (loadingResult) {
+            promise->setValue(std::make_shared<DataLoaderResult>(std::nullopt, std::nullopt, loadingResult->status, loadingResult->errorCode));
+        } else {
+            waitingPromises.push_back(promise);
+        }
     }
 
     const GeoJSONTileInterface& getTile(const uint8_t z, const uint32_t x_, const uint32_t y) override {
@@ -175,5 +237,13 @@ private:
         
         // if we sliced further down, no need to keep source geometry
         tile.source_features.clear();
+    }
+
+    void resolveAllWaitingPromises() {
+        std::lock_guard<std::recursive_mutex> lock(mutex);
+        for (const auto promise: waitingPromises) {
+            promise->setValue(std::make_shared<DataLoaderResult>(std::nullopt, std::nullopt, loadingResult->status, loadingResult->errorCode));
+        }
+        waitingPromises.clear();
     }
 };
