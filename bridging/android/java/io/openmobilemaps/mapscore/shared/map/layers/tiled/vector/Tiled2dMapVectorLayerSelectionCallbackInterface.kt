@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class Tiled2dMapVectorLayerSelectionCallbackInterface {
 
-    abstract fun didSelectFeature(featureInfo: VectorLayerFeatureInfo, layerIdentifier: String, coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord)
+    abstract fun didSelectFeature(featureInfo: VectorLayerFeatureInfo, layerIdentifier: String, coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): Boolean
 
     abstract fun didClickBackgroundConfirmed(coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): Boolean
 
@@ -27,11 +27,11 @@ abstract class Tiled2dMapVectorLayerSelectionCallbackInterface {
             external fun nativeDestroy(nativeRef: Long)
         }
 
-        override fun didSelectFeature(featureInfo: VectorLayerFeatureInfo, layerIdentifier: String, coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord) {
+        override fun didSelectFeature(featureInfo: VectorLayerFeatureInfo, layerIdentifier: String, coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): Boolean {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_didSelectFeature(this.nativeRef, featureInfo, layerIdentifier, coord)
+            return native_didSelectFeature(this.nativeRef, featureInfo, layerIdentifier, coord)
         }
-        private external fun native_didSelectFeature(_nativeRef: Long, featureInfo: VectorLayerFeatureInfo, layerIdentifier: String, coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord)
+        private external fun native_didSelectFeature(_nativeRef: Long, featureInfo: VectorLayerFeatureInfo, layerIdentifier: String, coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): Boolean
 
         override fun didClickBackgroundConfirmed(coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): Boolean {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

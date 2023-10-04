@@ -714,8 +714,9 @@ bool Tiled2dMapVectorSourceSymbolDataManager::onClickConfirmed(const std::unorde
                     return group->onClickConfirmed(clickHitCircle);
                 });
                 if (result) {
-                    strongSelectionDelegate->didSelectFeature(std::get<1>(*result), layerIdentifier, conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), std::get<0>(*result)));
-                    return true;
+                    if (strongSelectionDelegate->didSelectFeature(std::get<1>(*result), layerIdentifier, conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), std::get<0>(*result)))) {
+                        return true;
+                    }
                 }
             }
         }
