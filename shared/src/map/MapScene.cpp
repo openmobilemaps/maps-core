@@ -134,29 +134,27 @@ void MapScene::insertLayerAt(const std::shared_ptr<LayerInterface> &layer, int32
     std::weak_ptr<LayerInterface> newLayer = layer;
     {
         std::lock_guard<std::recursive_mutex> lock(layersMutex);
-        if (layers.count(atIndex) > 0) {
-            std::weak_ptr<LayerInterface> oldLayer = layers[atIndex];
-            auto weakSelfPtr = weak_from_this();
-            scheduler->addTask(
-                    std::make_shared<LambdaTask>(
-                            TaskConfig("MapScene_replaceLayer", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
-                            [weakSelfPtr, oldLayer, newLayer, atIndex] {
-                                auto strongSelf = weakSelfPtr.lock();
-                                bool isResumed = strongSelf && strongSelf->isResumed;
-                                if (auto oldStrong = oldLayer.lock()) {
-                                    if (isResumed) {
-                                        oldStrong->pause();
-                                    }
-                                    oldStrong->onRemoved();
+        std::weak_ptr<LayerInterface> oldLayer = layers.count(atIndex) > 0 ? layers[atIndex] : std::weak_ptr<LayerInterface>();
+        auto weakSelfPtr = weak_from_this();
+        scheduler->addTask(
+                std::make_shared<LambdaTask>(
+                        TaskConfig("MapScene_replaceLayer", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+                        [weakSelfPtr, oldLayer, newLayer, atIndex] {
+                            auto strongSelf = weakSelfPtr.lock();
+                            bool isResumed = strongSelf && strongSelf->isResumed;
+                            if (auto oldStrong = oldLayer.lock()) {
+                                if (isResumed) {
+                                    oldStrong->pause();
                                 }
-                                if (auto newStrong = newLayer.lock()) {
-                                    newStrong->onAdded(strongSelf, atIndex);
-                                    if (isResumed) {
-                                        newStrong->resume();
-                                    }
+                                oldStrong->onRemoved();
+                            }
+                            if (auto newStrong = newLayer.lock()) {
+                                newStrong->onAdded(strongSelf, atIndex);
+                                if (isResumed) {
+                                    newStrong->resume();
                                 }
-                            }));
-        }
+                            }
+                        }));
         layers[atIndex] = layer;
     }
     invalidate();
