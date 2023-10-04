@@ -334,9 +334,10 @@ bool Tiled2dMapVectorPolygonTile::onClickConfirmed(const Vec2F &posScreen) {
 
     for (auto const &[polygon, featureContext]: hitDetectionPolygons) {
         if (VectorTileGeometryHandler::isPointInTriangulatedPolygon(point, polygon, converter)) {
-            strongSelectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier,
-                                                converter->convert(CoordinateSystemIdentifiers::EPSG4326(), point));
-            return true;
+            if (strongSelectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier,
+                                                          converter->convert(CoordinateSystemIdentifiers::EPSG4326(), point))) {
+                return true;
+            }
         }
     }
 
