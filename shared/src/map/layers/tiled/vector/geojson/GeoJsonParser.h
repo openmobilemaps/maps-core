@@ -50,7 +50,7 @@ public:
                 !feature["geometry"]["type"].is_string() ||
                 !feature["geometry"]["coordinates"].is_array()) {
                 LogError <<= "Geojson feature is not valid";
-                return nullptr;
+                continue;
             }
             const auto geometryType = feature["geometry"]["type"];
             const auto coordinates = feature["geometry"]["coordinates"];

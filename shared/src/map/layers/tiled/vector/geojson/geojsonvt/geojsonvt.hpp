@@ -84,12 +84,13 @@ public:
                 try {
                     json = nlohmann::json::parse(string);
                     auto geoJson = GeoJsonParser::getGeoJson(json);
+                    if (geoJson) {
+                        const uint32_t z2 = 1u << self->options.maxZoom;
 
-                    const uint32_t z2 = 1u << self->options.maxZoom;
+                        convert(geoJson->geometries, (self->options.tolerance / self->options.extent) / z2);
 
-                    convert(geoJson->geometries, (self->options.tolerance / self->options.extent) / z2);
-
-                    self->splitTile(geoJson->geometries, 0, 0, 0);
+                        self->splitTile(geoJson->geometries, 0, 0, 0);
+                    }
                 }
                 catch (nlohmann::json::parse_error &ex) {
                     self->loadingResult = DataLoaderResult(std::nullopt, std::nullopt, LoaderStatus::ERROR_OTHER, "parse error");
