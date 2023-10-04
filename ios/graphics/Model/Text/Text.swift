@@ -26,7 +26,7 @@ final class Text: BaseGraphicsObject {
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader as! TextShader
         super.init(device: metalContext.device,
-                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue),
+                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
                    label: "Text")
     }
 

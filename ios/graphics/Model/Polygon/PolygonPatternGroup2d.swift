@@ -35,7 +35,7 @@ final class PolygonPatternGroup2d: BaseGraphicsObject {
         }
         self.shader = shader
         super.init(device: metalContext.device,
-                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue),
+                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
                    label: "PolygonPatternGroup2d")
     }
 
