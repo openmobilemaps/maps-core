@@ -568,7 +568,6 @@ void Tiled2dMapVectorLayer::onRemoved() {
         mapInterface->getTouchHandler()->removeListener(std::dynamic_pointer_cast<TouchInterface>(shared_from_this()));
     }
     Tiled2dMapLayer::onRemoved();
-    pause();
 
     if (backgroundLayer) {
         backgroundLayer->onRemoved();
