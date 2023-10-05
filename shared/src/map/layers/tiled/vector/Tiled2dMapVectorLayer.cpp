@@ -668,7 +668,7 @@ void Tiled2dMapVectorLayer::loadSpriteData() {
         return;
     }
 
-    bool scale2x = camera->getScreenDensityPpi() >= 320.0;
+    bool scale2x = camera->getScreenDensityPpi() >= 264.0;
     std::stringstream ssTexture;
     ssTexture << *mapDescription->spriteBaseUrl << (scale2x ? "@2x" : "") << ".png";
     std::string urlTexture = ssTexture.str();
