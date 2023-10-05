@@ -14,6 +14,7 @@
 #include "RectF.h"
 #include "CircleF.h"
 #include "CollisionPrimitives.h"
+#include "CollisionUtil.h"
 #include <vector>
 
 struct IndexRange {
@@ -81,7 +82,7 @@ public:
             if (equalRects != spacedRects.end()) {
                 for (const auto &other : equalRects->second) {
                     // Assume equal symbol spacing for all primitives with matching content
-                    if (checkRectCollision(projectedRectangle, other, rectangle.symbolSpacing)) {
+                    if (CollisionUtil::checkRectCollision(projectedRectangle, other, rectangle.symbolSpacing)) {
                         return true;
                     }
                 }
@@ -90,31 +91,31 @@ public:
             if (equalCircles != spacedCircles.end()) {
                 for (const auto &other : equalCircles->second) {
                     // Assume equal symbol spacing for all primitives with matching content
-                    if (checkRectCircleCollision(projectedRectangle, other, rectangle.symbolSpacing)) {
+                    if (CollisionUtil::checkRectCircleCollision(projectedRectangle, other, rectangle.symbolSpacing)) {
                         return true;
                     }
                 }
             }
         }
+        for (int16_t y = std::max(indexRange.yMin, int16_t(0)); y <= std::min(indexRange.yMax, int16_t(numCellsY - 1)); y++) {
+            for (int16_t x = std::max(indexRange.xMin, int16_t(0)); x <= std::min(indexRange.xMax, int16_t(numCellsX - 1)); x++) {
+                    for (const auto &rect : gridRects[y][x]) {
+                        if (CollisionUtil::checkRectCollision(projectedRectangle, rect)) {
+                            return true;
+                        }
+                    }
+                    for (const auto &circle : gridCircles[y][x]) {
+                        if (CollisionUtil::checkRectCircleCollision(projectedRectangle, circle)) {
+                            return true;
+                        }
+                    }
 
-        for (int16_t y = indexRange.yMin; y <= indexRange.yMax; y++) {
-            for (int16_t x = indexRange.xMin; x <= indexRange.xMax; x++) {
-                for (const auto &rect : gridRects[y][x]) {
-                    if (checkRectCollision(projectedRectangle, rect)) {
-                        return true;
-                    }
-                }
-                for (const auto &circle : gridCircles[y][x]) {
-                    if (checkRectCircleCollision(projectedRectangle, circle)) {
-                        return true;
-                    }
-                }
             }
         }
 
         // Only insert, when not colliding
-        for (int16_t y = indexRange.yMin; y <= indexRange.yMax; y++) {
-            for (int16_t x = indexRange.xMin; x <= indexRange.xMax; x++) {
+        for (int16_t y = std::max(indexRange.yMin, int16_t(0)); y <= std::min(indexRange.yMax, int16_t(numCellsY - 1)); y++) {
+            for (int16_t x = std::max(indexRange.xMin, int16_t(0)); x <= std::min(indexRange.xMax, int16_t(numCellsX - 1)); x++) {
                 gridRects[y][x].push_back(projectedRectangle);
             }
         }
@@ -157,7 +158,7 @@ public:
                 if (equalRects != spacedRects.end()) {
                     for (const auto &other : equalRects->second) {
                         // Assume equal symbol spacing for all primitives with matching content
-                        if (checkRectCircleCollision(other, projectedCircle, symbolSpacing)) {
+                        if (CollisionUtil::checkRectCircleCollision(other, projectedCircle, symbolSpacing)) {
                             return true;
                         }
                     }
@@ -166,7 +167,7 @@ public:
                 if (equalCircles != spacedCircles.end()) {
                     for (const auto &other : equalCircles->second) {
                         // Assume equal symbol spacing for all primitives with matching content
-                        if (checkCircleCollision(projectedCircle, other, symbolSpacing)) {
+                        if (CollisionUtil::checkCircleCollision(projectedCircle, other, symbolSpacing)) {
                             return true;
                         }
                     }
@@ -176,12 +177,12 @@ public:
             for (int16_t y = indexRange.yMin; y <= indexRange.yMax; y++) {
                 for (int16_t x = indexRange.xMin; x <= indexRange.xMax; x++) {
                     for (const auto &rect : gridRects[y][x]) {
-                        if (checkRectCircleCollision(rect, projectedCircle)) {
+                        if (CollisionUtil::checkRectCircleCollision(rect, projectedCircle)) {
                             return true;
                         }
                     }
                     for (const auto &circle : gridCircles[y][x]) {
-                        if (checkCircleCollision(projectedCircle, circle)) {
+                        if (CollisionUtil::checkCircleCollision(projectedCircle, circle)) {
                             return true;
                         }
                     }
@@ -262,10 +263,10 @@ private:
      */
     IndexRange getIndexRangeForRectangle(const RectF &rectangle) {
         IndexRange result;
-        result.addXIndex(std::floor((rectangle.x - collisionBias) / cellSize) + numCellsPadding, numCellsX - 1);
-        result.addXIndex(std::floor((rectangle.x + rectangle.width + collisionBias) / cellSize) + numCellsPadding, numCellsX - 1);
-        result.addYIndex(std::floor((rectangle.y - collisionBias) / cellSize) + numCellsPadding, numCellsY - 1);
-        result.addYIndex(std::floor((rectangle.y + rectangle.height + collisionBias) / cellSize) + numCellsPadding, numCellsY - 1);
+        result.addXIndex(std::floor(rectangle.x / cellSize) + numCellsPadding, numCellsX - 1);
+        result.addXIndex(std::floor((rectangle.x + rectangle.width) / cellSize) + numCellsPadding, numCellsX - 1);
+        result.addYIndex(std::floor(rectangle.y / cellSize) + numCellsPadding, numCellsY - 1);
+        result.addYIndex(std::floor((rectangle.y + rectangle.height) / cellSize) + numCellsPadding, numCellsY - 1);
         return result;
     }
 
@@ -275,37 +276,11 @@ private:
     IndexRange getIndexRangeForCircle(const CircleF &circle) {
         IndexRange result;
         // May include unnecessary corner grid cells
-        result.addXIndex(std::floor((circle.x - circle.radius - collisionBias) / cellSize) + numCellsPadding, numCellsX - 1);
-        result.addXIndex(std::floor((circle.x + circle.radius + collisionBias) / cellSize) + numCellsPadding, numCellsX - 1);
-        result.addYIndex(std::floor((circle.y - circle.radius - collisionBias) / cellSize) + numCellsPadding, numCellsY - 1);
-        result.addYIndex(std::floor((circle.y + circle.radius + collisionBias) / cellSize) + numCellsPadding, numCellsY - 1);
+        result.addXIndex(std::floor((circle.x - circle.radius) / cellSize) + numCellsPadding, numCellsX - 1);
+        result.addXIndex(std::floor((circle.x + circle.radius) / cellSize) + numCellsPadding, numCellsX - 1);
+        result.addYIndex(std::floor((circle.y - circle.radius) / cellSize) + numCellsPadding, numCellsY - 1);
+        result.addYIndex(std::floor((circle.y + circle.radius) / cellSize) + numCellsPadding, numCellsY - 1);
         return result;
-    }
-
-    bool checkRectCollision(const RectF &rect1, const RectF &rect2, int32_t addSpacing = 0) {
-        return (rect1.x < (rect2.x + rect2.width + addSpacing + collisionBias)) &&
-               ((rect1.x + rect1.width) > (rect2.x - addSpacing - collisionBias)) &&
-               (rect1.y < (rect2.y + rect2.height + addSpacing + collisionBias)) &&
-               ((rect1.y + rect1.height) > (rect2.y - addSpacing - collisionBias));
-    }
-
-    bool checkRectCircleCollision(const RectF &rect, const CircleF &circle, int32_t addSpacing = 0) {
-        float minX = std::min(rect.x + rect.width, rect.x);
-        float minY = std::min(rect.y + rect.height, rect.y);
-        float closestX = std::max(minX, std::min(minX + rect.width, circle.x));
-        float closestY = std::max(minY, std::min(minY + rect.height, circle.y));
-        float dX = closestX - circle.x;
-        float dY = closestY - circle.y;
-        float r = circle.radius + addSpacing + collisionBias;
-        return (dX * dX + dY * dY) < (r * r);
-    }
-
-    bool checkCircleCollision(const CircleF &circle1, const CircleF &circle2, int32_t addSpacing = 0) {
-        float dX = circle1.x - circle2.x;
-        float dY = circle1.y - circle2.y;
-        float distanceSq = dX * dX + dY * dY;
-        float r = circle1.radius + circle2.radius + addSpacing + collisionBias;
-        return distanceSq < (r * r);
     }
 
     // TODO: use smart calculations to define grid number on initialize (e.g. with first insertion o.s.)
@@ -325,9 +300,6 @@ private:
     std::vector<std::vector<std::vector<CircleF>>> gridCircles; // vector of circles in a 2-dimensional gridCircles[y][x]
     std::unordered_map<size_t, std::vector<RectF>> spacedRects;
     std::unordered_map<size_t, std::vector<CircleF>> spacedCircles;
-
-    // Additional padding to the advantage of established collision primitives to resolve any rounding errors
-    static constexpr int32_t collisionBias = 0;
 
     std::vector<float> temp1 = {0, 0, 0, 0}, temp2 = {0, 0, 0, 0};
 };

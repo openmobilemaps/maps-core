@@ -24,7 +24,8 @@ final class Polygon2d: BaseGraphicsObject {
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader
         super.init(device: metalContext.device,
-                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue))
+                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
+                   label: "Polygon2d")
     }
 
     override func render(encoder: MTLRenderCommandEncoder,
@@ -42,7 +43,7 @@ final class Polygon2d: BaseGraphicsObject {
               let indicesBuffer else { return }
 
         #if DEBUG
-            encoder.pushDebugGroup("Polygon2d")
+            encoder.pushDebugGroup(label)
             defer {
                 encoder.popDebugGroup()
             }

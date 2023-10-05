@@ -26,7 +26,6 @@
 #include "PolygonMaskObject.h"
 #include "CoordinatesUtil.h"
 #include "RenderPass.h"
-#include "OBB2D.h"
 #include "DataLoaderResult.h"
 #include "TextureLoaderResult.h"
 #include "PolygonCompare.h"
@@ -569,7 +568,6 @@ void Tiled2dMapVectorLayer::onRemoved() {
         mapInterface->getTouchHandler()->removeListener(std::dynamic_pointer_cast<TouchInterface>(shared_from_this()));
     }
     Tiled2dMapLayer::onRemoved();
-    pause();
 
     if (backgroundLayer) {
         backgroundLayer->onRemoved();
@@ -670,7 +668,7 @@ void Tiled2dMapVectorLayer::loadSpriteData() {
         return;
     }
 
-    bool scale2x = camera->getScreenDensityPpi() >= 320.0;
+    bool scale2x = camera->getScreenDensityPpi() >= 264.0;
     std::stringstream ssTexture;
     ssTexture << *mapDescription->spriteBaseUrl << (scale2x ? "@2x" : "") << ".png";
     std::string urlTexture = ssTexture.str();

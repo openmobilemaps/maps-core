@@ -41,8 +41,6 @@ Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapL
           registerToTouchHandler(registerToTouchHandler) {}
 
 void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterface, int32_t layerIndex) {
-    
-    
     std::shared_ptr<Mailbox> selfMailbox = mailbox;
     if (!mailbox) {
         selfMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
@@ -66,8 +64,6 @@ void Tiled2dMapRasterLayer::onAdded(const std::shared_ptr<::MapInterface> &mapIn
 }
 
 void Tiled2dMapRasterLayer::onRemoved() {
-    pause();
-
     auto mapInterface = this->mapInterface;
     if (mapInterface && registerToTouchHandler) {
         mapInterface->getTouchHandler()->removeListener(std::dynamic_pointer_cast<TouchInterface>(shared_from_this()));

@@ -107,6 +107,8 @@ open class DataLoader(
                     )
                 } else if (response.code == 404) {
                     result.setValue(TextureLoaderResult(null, null, LoaderStatus.ERROR_404, response.code.toString()))
+                } else if (response.code == 400) {
+                    result.setValue(TextureLoaderResult(null, null, LoaderStatus.ERROR_400, response.code.toString()))
                 } else {
                     result.setValue(TextureLoaderResult(null, null, LoaderStatus.ERROR_OTHER, response.code.toString()))
                 }
@@ -157,6 +159,8 @@ open class DataLoader(
 					)
 				} else if (response.code == 404) {
 					result.setValue(DataLoaderResult(null, null, LoaderStatus.ERROR_404, response.code.toString()))
+				} else if (response.code == 400) {
+					result.setValue(DataLoaderResult(null, null, LoaderStatus.ERROR_400, response.code.toString()))
 				} else {
 					result.setValue(DataLoaderResult(null, null, LoaderStatus.ERROR_OTHER, response.code.toString()))
 				}

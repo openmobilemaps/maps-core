@@ -8,7 +8,7 @@
 
 @protocol MCTiled2dMapVectorLayerSelectionCallbackInterface
 
-- (void)didSelectFeature:(nonnull MCVectorLayerFeatureInfo *)featureInfo
+- (BOOL)didSelectFeature:(nonnull MCVectorLayerFeatureInfo *)featureInfo
          layerIdentifier:(nonnull NSString *)layerIdentifier
                    coord:(nonnull MCCoord *)coord;
 

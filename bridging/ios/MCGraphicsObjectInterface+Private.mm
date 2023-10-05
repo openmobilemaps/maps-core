@@ -58,6 +58,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setDebugLabel:(nonnull NSString *)label {
+    try {
+        _cppRefHandle.get()->setDebugLabel(::djinni::String::toCpp(label));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)render:(nullable id<MCRenderingContextInterface>)context
     renderPass:(nonnull MCRenderPassConfig *)renderPass
      mvpMatrix:(int64_t)mvpMatrix
@@ -104,6 +110,12 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() setIsInverseMasked:(::djinni::Bool::fromCpp(c_inversed))];
+        }
+    }
+    void setDebugLabel(const std::string & c_label) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setDebugLabel:(::djinni::String::fromCpp(c_label))];
         }
     }
     void render(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const ::RenderPassConfig & c_renderPass, int64_t c_mvpMatrix, bool c_isMasked, double c_screenPixelAsRealMeterFactor) override

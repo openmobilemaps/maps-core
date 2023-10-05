@@ -12,8 +12,8 @@
 #include "GeoJsonTypes.h"
 #include "json.h"
 #include <random>
-#include "geojsonvt.hpp"
 #include "simplify.hpp"
+#include "CoordinateSystemIdentifiers.h"
 
 class UUIDGenerator {
 private:
@@ -50,7 +50,7 @@ public:
                 !feature["geometry"]["type"].is_string() ||
                 !feature["geometry"]["coordinates"].is_array()) {
                 LogError <<= "Geojson feature is not valid";
-                return nullptr;
+                continue;
             }
             const auto geometryType = feature["geometry"]["type"];
             const auto coordinates = feature["geometry"]["coordinates"];
@@ -89,17 +89,7 @@ public:
         
         return geoJson;
     }
-    
-    static std::shared_ptr<GeoJSONVTInterface> getGeoJsonVt(const nlohmann::json &geojson) {
-        auto geoJson = getGeoJson(geojson);
-        
-        if (!geoJson) {
-            return nullptr;
-        }
-        
-        return std::static_pointer_cast<GeoJSONVTInterface>(std::make_shared<GeoJSONVT>(geoJson));
-    }
-    
+
 private:
     static FeatureContext::mapType parseProperties(const nlohmann::json &properties) {
         FeatureContext::mapType propertyMap;

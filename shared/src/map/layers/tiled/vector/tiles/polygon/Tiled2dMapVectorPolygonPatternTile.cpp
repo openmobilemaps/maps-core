@@ -184,7 +184,7 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
             if (featureContext->geomType != vtzero::GeomType::POLYGON) { continue; }
 
             EvaluationContext evalContext = EvaluationContext(tileInfo.zoomIdentifier, featureContext, featureStateManager);
-            if (description->filter == nullptr || description->filter->evaluateOr(evalContext, true)) {
+            if (description->filter == nullptr || description->filter->evaluateOr(evalContext, false)) {
 
                 std::vector<Coord> positions;
 
@@ -297,6 +297,9 @@ void Tiled2dMapVectorPolygonPatternTile::addPolygons(const std::unordered_map<in
         const auto &shader = shaders.at(styleGroupIndex);
         for (const auto &polygonDesc: polygonDescs) {
             const auto polygonObject = objectFactory->createPolygonPatternGroup(shader->asShaderProgramInterface());
+#if DEBUG
+            polygonObject->asGraphicsObject()->setDebugLabel(description->identifier);
+#endif
 
             auto layerObject = std::make_shared<PolygonPatternGroup2dLayerObject>(converter, polygonObject, shader);
             layerObject->setVertices(polygonDesc.vertices, polygonDesc.indices);
@@ -416,9 +419,10 @@ bool Tiled2dMapVectorPolygonPatternTile::onClickConfirmed(const Vec2F &posScreen
 
     for (auto const &[polygon, featureContext]: hitDetectionPolygons) {
         if (VectorTileGeometryHandler::isPointInTriangulatedPolygon(point, polygon, converter)) {
-            strongSelectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier,
-                                                converter->convert(CoordinateSystemIdentifiers::EPSG4326(), point));
-            return true;
+            if (strongSelectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier,
+                                                          converter->convert(CoordinateSystemIdentifiers::EPSG4326(), point))) {
+                return true;
+            }
         }
     }
 

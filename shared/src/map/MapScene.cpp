@@ -111,15 +111,38 @@ std::vector<std::shared_ptr<LayerInterface>> MapScene::getLayers() {
 void MapScene::addLayer(const std::shared_ptr<::LayerInterface> &layer) {
     removeLayer(layer);
     {
-        std::lock_guard<std::recursive_mutex> lock(layersMutex);
-        int topIndex = -1;
-        if (!layers.empty())
-            topIndex = layers.rbegin()->first;
-        int atIndex = topIndex + 1;
-        layers[atIndex] = layer;
-        layer->onAdded(shared_from_this(), atIndex);
+        auto weakSelfPtr = weak_from_this();
+        scheduler->addTask(
+                std::make_shared<LambdaTask>(
+                        TaskConfig("MapScene_addLayer", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+                        [weakSelfPtr, layer] {
+                            auto strongSelf = weakSelfPtr.lock();
+                            if (!strongSelf) {
+                                return;
+                            }
+                            int atIndex;
+                            {
+                                std::lock_guard<std::recursive_mutex> lock(strongSelf->layersMutex);
+                                int topIndex = -1;
+                                if (!strongSelf->layers.empty())
+                                    topIndex = strongSelf->layers.rbegin()->first;
+                                atIndex = topIndex + 1;
+                            }
+
+                            layer->onAdded(strongSelf, atIndex);
+
+                            {
+                                std::lock_guard<std::recursive_mutex> lock(strongSelf->layersMutex);
+                                strongSelf->layers[atIndex] = layer;
+                            }
+
+                            if (strongSelf->isResumed) {
+                                layer->resume();
+                            }
+
+                            strongSelf->invalidate();
+                        }));
     }
-    invalidate();
 }
 
 void MapScene::insertLayerAt(const std::shared_ptr<LayerInterface> &layer, int32_t atIndex) {
@@ -130,94 +153,190 @@ void MapScene::insertLayerAt(const std::shared_ptr<LayerInterface> &layer, int32
         }
     }
     removeLayer(layer);
-    layer->onAdded(shared_from_this(), atIndex);
     {
-        std::lock_guard<std::recursive_mutex> lock(layersMutex);
-        if (layers.count(atIndex) > 0) {
-            layers[atIndex]->onRemoved();
-        }
-        layers[atIndex] = layer;
+        auto weakSelfPtr = weak_from_this();
+        scheduler->addTask(
+                std::make_shared<LambdaTask>(
+                        TaskConfig("MapScene_insertLayerAt", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+                        [weakSelfPtr, layer, atIndex] {
+                            auto strongSelf = weakSelfPtr.lock();
+                            if (!strongSelf) {
+                                return;
+                            }
+
+                            std::shared_ptr<LayerInterface> oldLayer;
+                            {
+                                std::lock_guard<std::recursive_mutex> lock(strongSelf->layersMutex);
+                                oldLayer = strongSelf->layers.count(atIndex) > 0 ? strongSelf->layers[atIndex] : nullptr;
+                            }
+
+                            if (oldLayer == layer) {
+                                return;
+                            }
+
+                            bool isResumed = strongSelf->isResumed;
+                            if (oldLayer) {
+                                if (isResumed) {
+                                    oldLayer->pause();
+                                }
+                                oldLayer->onRemoved();
+                            }
+
+                            layer->onAdded(strongSelf, atIndex);
+
+                            {
+                                std::lock_guard<std::recursive_mutex> lock(strongSelf->layersMutex);
+                                strongSelf->layers[atIndex] = layer;
+                            }
+
+                            if (isResumed) {
+                                layer->resume();
+                            }
+
+                            strongSelf->invalidate();
+                        }));
     }
-    invalidate();
 };
 
 void MapScene::insertLayerAbove(const std::shared_ptr<LayerInterface> &layer, const std::shared_ptr<LayerInterface> &above) {
     removeLayer(layer);
-    int atIndex;
-    {
-        std::lock_guard<std::recursive_mutex> lock(layersMutex);
-        int targetIndex = -1;
-        for (const auto &[i, l]: layers) {
-            if (l == above) {
-                targetIndex = i;
-                break;
-            }
-        }
-        if (targetIndex < 0) {
-            throw std::invalid_argument("MapScene does not contain above layer");
-        }
-        std::map<int, std::shared_ptr<LayerInterface>> newLayers;
-        for (auto iter = layers.rbegin(); iter != layers.rend(); iter++) {
-            newLayers[iter->first > targetIndex ? iter->first + 1 : iter->first] = iter->second;
-        }
-        atIndex = targetIndex + 1;
-        newLayers[atIndex] = layer;
-        layers = newLayers;
-    }
-    layer->onAdded(shared_from_this(), atIndex);
-    invalidate();
+
+    auto weakSelfPtr = weak_from_this();
+    scheduler->addTask(
+            std::make_shared<LambdaTask>(
+                    TaskConfig("MapScene_insertLayerAbove", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+                    [weakSelfPtr, layer, above] {
+                        auto strongSelf = weakSelfPtr.lock();
+                        if (!strongSelf) {
+                            return;
+                        }
+
+                        std::map<int, std::shared_ptr<LayerInterface>> newLayers;
+
+                        int atIndex;
+                        {
+                            std::lock_guard<std::recursive_mutex> lock(strongSelf->layersMutex);
+                            int targetIndex = -1;
+                            for (const auto &[i, l]: strongSelf->layers) {
+                                if (l == above) {
+                                    targetIndex = i;
+                                    break;
+                                }
+                            }
+                            if (targetIndex < 0) {
+                                throw std::invalid_argument("MapScene does not contain above layer");
+                            }
+                            for (auto iter = strongSelf->layers.rbegin(); iter != strongSelf->layers.rend(); iter++) {
+                                newLayers[iter->first > targetIndex ? iter->first + 1 : iter->first] = iter->second;
+                            }
+                            atIndex = targetIndex + 1;
+                            newLayers[atIndex] = layer;
+                        }
+                        layer->onAdded(strongSelf, atIndex);
+
+                        {
+                            std::lock_guard<std::recursive_mutex> lock(strongSelf->layersMutex);
+                            strongSelf->layers = newLayers;
+                        }
+
+                        if (strongSelf->isResumed) {
+                            layer->resume();
+                        }
+
+                        strongSelf->invalidate();
+                    }));
 };
 
 void MapScene::insertLayerBelow(const std::shared_ptr<LayerInterface> &layer, const std::shared_ptr<LayerInterface> &below) {
     removeLayer(layer);
-    int atIndex;
-    {
-        std::lock_guard<std::recursive_mutex> lock(layersMutex);
-        int targetIndex = -1;
-        for (const auto &[i, l]: layers) {
-            if (l == below) {
-                targetIndex = i;
-                break;
-            }
-        }
-        if (targetIndex < 0) {
-            throw std::invalid_argument("MapScene does not contain below layer");
-        }
-        std::map<int, std::shared_ptr<LayerInterface>> newLayers;
-        for (auto iter = layers.rbegin(); iter != layers.rend(); iter++) {
-            newLayers[iter->first >= targetIndex ? iter->first + 1 : iter->first] = iter->second;
-        }
-        newLayers[targetIndex] = layer;
-        layers = newLayers;
-    }
-    layer->onAdded(shared_from_this(), atIndex);
-    invalidate();
+
+    std::weak_ptr<LayerInterface> newLayer = layer;
+    auto weakSelfPtr = weak_from_this();
+    scheduler->addTask(
+            std::make_shared<LambdaTask>(
+                    TaskConfig("MapScene_insertLayerBelow", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+                    [weakSelfPtr, layer, below] {
+                        auto strongSelf = weakSelfPtr.lock();
+                        if (!strongSelf) {
+                            return;
+                        }
+
+                        std::map<int, std::shared_ptr<LayerInterface>> newLayers;
+                        int atIndex;
+                        {
+                            std::lock_guard<std::recursive_mutex> lock(strongSelf->layersMutex);
+                            int targetIndex = -1;
+                            for (const auto &[i, l]: strongSelf->layers) {
+                                if (l == below) {
+                                    targetIndex = i;
+                                    break;
+                                }
+                            }
+                            if (targetIndex < 0) {
+                                throw std::invalid_argument("MapScene does not contain below layer");
+                            }
+
+                            for (auto iter = strongSelf->layers.rbegin(); iter != strongSelf->layers.rend(); iter++) {
+                                newLayers[iter->first >= targetIndex ? iter->first + 1 : iter->first] = iter->second;
+                            }
+                            newLayers[targetIndex] = layer;
+                        }
+
+                        layer->onAdded(strongSelf, atIndex);
+
+                        {
+                            std::lock_guard<std::recursive_mutex> lock(strongSelf->layersMutex);
+                            strongSelf->layers = newLayers;
+                        }
+
+
+                        if (strongSelf->isResumed) {
+                            layer->resume();
+                        }
+
+                        strongSelf->invalidate();
+                    }));
 };
 
 void MapScene::removeLayer(const std::shared_ptr<::LayerInterface> &layer) {
     {
-        std::lock_guard<std::recursive_mutex> lock(layersMutex);
-        int targetIndex = -1;
-        for (const auto &[i, l] : layers) {
-            if (l == layer) {
-                targetIndex = i;
-                break;
-            }
-        }
-        if (targetIndex >= 0) {
-            layers.erase(targetIndex);
-            auto scheduler = this->scheduler;
-            if (scheduler) {
-                scheduler->addTask(
-                        std::make_shared<LambdaTask>(
-                                TaskConfig("MapScene_removeLayer", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
-                                [layer] {
-                                    layer->onRemoved();
-                                }));
-            }
+        auto scheduler = this->scheduler;
+        auto weakSelf = weak_from_this();
+        if (scheduler) {
+            scheduler->addTask(
+                    std::make_shared<LambdaTask>(
+                            TaskConfig("MapScene_removeLayer", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+                            [weakSelf, layer] {
+                                auto strongSelf = weakSelf.lock();
+                                if (!strongSelf) {
+                                    return;
+                                }
+
+                                {
+                                    std::lock_guard<std::recursive_mutex> lock(strongSelf->layersMutex);
+                                    int targetIndex = -1;
+                                    for (const auto &[i, l]: strongSelf->layers) {
+                                        if (l == layer) {
+                                            targetIndex = i;
+                                            break;
+                                        }
+                                    }
+                                    if (targetIndex < 0) {
+                                        return;
+                                    }
+
+                                    strongSelf->layers.erase(targetIndex);
+                                }
+
+                                if (strongSelf->isResumed) {
+                                    layer->pause();
+                                }
+                                layer->onRemoved();
+
+                                strongSelf->invalidate();
+                            }));
         }
     }
-    invalidate();
 }
 
 void MapScene::setViewportSize(const ::Vec2I &size) {
@@ -270,7 +389,6 @@ void MapScene::drawFrame() {
 }
 
 void MapScene::resume() {
-    isResumed = true;
     std::weak_ptr<MapScene> weakSelfPtr = weak_from_this();
     scheduler->addTask(
         std::make_shared<LambdaTask>(TaskConfig("MapScene_resume", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [weakSelfPtr] {
@@ -282,6 +400,7 @@ void MapScene::resume() {
                 layer.second->resume();
             }
 
+            selfPtr->isResumed = true;
             selfPtr->callbackHandler->onMapResumed();
         }));
 }

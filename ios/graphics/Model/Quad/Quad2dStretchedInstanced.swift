@@ -38,13 +38,11 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject {
 
     private var renderAsMask = false
 
-    private let label: String
-
     init(shader: MCShaderProgramInterface, metalContext: MetalContext, label: String = "Quad2dStretchedInstanced") {
-        self.label = label
         self.shader = shader
         super.init(device: metalContext.device,
-                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue))
+                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
+                   label: label)
     }
 
     private func setupStencilStates() {

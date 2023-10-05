@@ -19,6 +19,8 @@ open class BaseGraphicsObject {
 
     public let sampler: MTLSamplerState
 
+    public var label: String
+
     var maskInverse = false
     public var ready = false
 
@@ -28,9 +30,10 @@ open class BaseGraphicsObject {
     // therefore it has to be held for the shortest time possible
     public let lock = OSLock()
 
-    public init(device: MTLDevice, sampler: MTLSamplerState) {
+    public init(device: MTLDevice, sampler: MTLSamplerState, label: String = "") {
         self.device = device
         self.sampler = sampler
+        self.label = label
     }
 
     open func render(encoder _: MTLRenderCommandEncoder,
@@ -54,6 +57,10 @@ extension BaseGraphicsObject: MCGraphicsObjectInterface {
     }
 
     open func isReady() -> Bool { ready }
+
+    open func setDebugLabel(_ label: String) {
+        self.label += ": \(label)"
+    }
 
     public func setIsInverseMasked(_ inversed: Bool) {
         maskInverse = inversed

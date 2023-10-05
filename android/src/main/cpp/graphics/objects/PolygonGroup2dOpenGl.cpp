@@ -123,3 +123,7 @@ void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterf
 
     glDisable(GL_BLEND);
 }
+
+void PolygonGroup2dOpenGl::setDebugLabel(const std::string &label) {
+    // not used
+}

@@ -148,3 +148,7 @@ void Polygon2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInter
     drawPolygon(openGlContext, program, mvpMatrix);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
+
+void Polygon2dOpenGl::setDebugLabel(const std::string &label) {
+    // not used
+}

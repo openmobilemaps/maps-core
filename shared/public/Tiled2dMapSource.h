@@ -156,7 +156,7 @@ public:
 private:
     void performLoadingTask(Tiled2dMapTileInfo tile, size_t loaderIndex);
 
-    void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid);
+    void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, int keepZoomLevelOffset = 0);
 
     void updateTileMasks();
 

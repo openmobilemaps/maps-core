@@ -12,7 +12,7 @@ class Tiled2dMapVectorLayerSelectionCallbackInterface {
 public:
     virtual ~Tiled2dMapVectorLayerSelectionCallbackInterface() = default;
 
-    virtual void didSelectFeature(const VectorLayerFeatureInfo & featureInfo, const std::string & layerIdentifier, const ::Coord & coord) = 0;
+    virtual bool didSelectFeature(const VectorLayerFeatureInfo & featureInfo, const std::string & layerIdentifier, const ::Coord & coord) = 0;
 
     virtual bool didClickBackgroundConfirmed(const ::Coord & coord) = 0;
 };
