@@ -2,7 +2,7 @@ name: Upload AAR to Sonatype Nexus
 
 on:
   push:
-    branches: [ develop, feature/automatic-pr-creation ]
+    branches: [ develop ]
 
 jobs:
   build:
@@ -82,7 +82,7 @@ jobs:
                 owner: organization,
                 repo: repoName,
                 workflow_id: 'dependencies-pr.yml',
-                ref: 'feature/automatic-pr-creation',
+                ref: 'develop',
                 inputs: inputs
               });
 
