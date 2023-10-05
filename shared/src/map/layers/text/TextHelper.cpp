@@ -23,6 +23,7 @@
 #include "Vec2DHelper.h"
 
 unsigned char *StrToUprExt(unsigned char *pString);
+#define INF INT_MAX
 
 std::vector<std::string> TextHelper::splitWstring(const std::string &word) {
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
@@ -759,8 +760,12 @@ bool isLineBreak(const std::string &c) {
     return c == "\n";
 }
 
+bool isSpace(const std::string &c) {
+    return c == " ";
+}
+
 bool allowsLineBreak(const std::string &c) {
-    return isSpecialCharacter(c) || isLineBreak(c) || c == " ";
+    return isSpecialCharacter(c) || isLineBreak(c) || isSpace(c);
 }
 
 class Break {
@@ -774,74 +779,151 @@ class Break {
     float cost;
 };
 
-float calculateCost(float lineWidth, float targetWidth, float additionalCost, bool isLast) {
-    float cost = std::pow(lineWidth - targetWidth, 2.0);
+struct Result {
+    int64_t cost;
+    int index;
+} ;
 
-    if(isLast) {
-        return cost * ((lineWidth < targetWidth) ? 0.5 : 2.0);
-    }
-
-    if (additionalCost < 0) {
-        return cost - additionalCost * additionalCost;
-    }
-
-    return cost + additionalCost * additionalCost;
-}
-
-std::shared_ptr<Break> evaluate(int nextIndex, float targetWidth, const std::vector<std::shared_ptr<Break>> &potentials, int additionalCost, bool isLast) {
-
-    std::shared_ptr<Break> bestPrior = nullptr;
-    float bestCost = calculateCost(nextIndex, targetWidth, additionalCost, isLast);
-
-    for (const auto& potential : potentials) {
-        float lineWidth = nextIndex - potential->index;
-        float cost = calculateCost(lineWidth, targetWidth, additionalCost, isLast) + potential->cost;
-        if(cost <= bestCost) {
-            bestPrior = potential;
-            bestCost = cost;
+std::vector<std::string> splitIntoWords(std::vector<std::string> &letters) {
+    std::vector<std::string> words;
+    std::string word;
+    for (std::string c : letters) {
+        if (c == " " || c == "\n" || c == "-" || c == "/") {
+            if (!word.empty()) {
+                words.push_back(word);
+                word.clear();
+            }
+            if (c != " ") {
+                words.push_back(c);
+            }
+        } else {
+            word += c;
         }
     }
+    if (!word.empty()) {
+        words.push_back(word);
+    }
+    return words;
+}
 
-    return std::make_shared<Break>(nextIndex, bestPrior, bestCost);
+// Cost for a given lineLength
+int64_t cost(int lineLength, std::string lastWord, int64_t targetWidth, int64_t maxCharacterWidth) {
+    // Breaking at a lineBreak is cheap
+    if (isLineBreak(lastWord)) {
+        return -1000000;
+    }
+    
+    int cost = pow(targetWidth - lineLength, 2);
+
+    // Breaking at a special character is more expensive than breaking at a space
+    if (isSpecialCharacter(lastWord)) {
+        cost *= 2;
+    }
+    
+    return cost;
+}
+
+
+// Returns cost and index of best wrap when considering all words beginning with word at index "start"
+Result minCost(std::vector<std::string> &words, int start, int64_t targetWidth, int64_t maxCharacterWidth) {
+    size_t n = words.size();
+    
+    if (n==1) {
+        return {0, -1};
+    }
+    
+    if(start == n - 1 || start == n) {
+        // last line is free
+        return {0, -1};
+    }
+    
+    // If the word is longer than maxCharacterWidth, we display the entire word anyways and assign it a cost of 0
+    if (words[start].size() > maxCharacterWidth) {
+        return {0 + minCost(words, start + 1, targetWidth, maxCharacterWidth).cost, start+1};
+    }
+    
+    int currentLineLength = 0;
+    int64_t currMinCost = INF;
+    int curBestIndex = -1;
+    
+    // Compute how expensive it is to have words [start...i] on first line
+    for(int i=start; i<words.size(); ++i) {
+        size_t wordLength = words[i].size();
+        
+        if (currentLineLength + wordLength > maxCharacterWidth) {
+            // word is longer than maxCharacterWidth
+            break;
+        }
+        
+        currentLineLength += wordLength;
+        
+        if (i != 0) {
+            // Add spacer width
+            currentLineLength += 1;
+        }
+        
+        int64_t c = cost(currentLineLength, words[i], targetWidth, maxCharacterWidth);
+        Result r =  minCost(words, i + 1, targetWidth, maxCharacterWidth);
+        
+        // Best cost when adding words [start...i] to the first line
+        // - Cost of adding all words from [start, i]
+        // - Whatever the cost is of the cheapest wordWrapping of all other words
+        int64_t newCost = c + r.cost;
+        
+        if (newCost < currMinCost) {
+            // Breaking after index i is less expensive!
+            currMinCost = newCost;
+            curBestIndex = i;
+        }
+    }
+    
+    if (curBestIndex != -1) {
+        return {currMinCost, curBestIndex + 1};
+    } else {
+        return {currMinCost, -1};
+    }
 }
 
 std::vector<BreakResult> TextHelper::bestBreakIndices(std::vector<std::string> &letters, int64_t maxCharacterWidth) {
     if(letters.size() == 0) {
         return {};
     }
-
+    
+    auto words = splitIntoWords(letters);
+    size_t n = words.size();
+    
+    // ~Knuth-Pass algorithm tries to make all lines approximately the same length
     float targetBreakCount = std::ceil(letters.size() / (float)maxCharacterWidth);
     float targetWidth = (float)letters.size() / targetBreakCount;
-
-    std::vector<std::shared_ptr<Break>> potentials;
-
-    for(int i=0; i<letters.size(); ++i) {
-        const auto &l = letters[i];
-
-        if(i < letters.size() - 1 && allowsLineBreak(l)) {
-            float additionalCost = 0;
-            if (isLineBreak(l)) {
-                additionalCost = -100000;
+    
+    std::vector<int> bestBreakIndices;
+    
+    int currentWordIndex = 0;
+    std::vector<BreakResult> breaks = {};
+    int curLetterIndex = 0;
+    
+    while (currentWordIndex != -1) {
+        int nextBestWordIndex = minCost(words, currentWordIndex, targetWidth, maxCharacterWidth).index;
+        
+        if (nextBestWordIndex != -1 ) {
+            // Compute letter index from words
+            for (int i = currentWordIndex;i<nextBestWordIndex;i++) {
+                std::string w = words[i];
+                curLetterIndex += TextHelper::splitWstring(w).size();
+                
+                if (!isSpecialCharacter(w) && !isSpecialCharacter(words[i+1]) && !isLineBreak(words[i]) && !isLineBreak(words[i+1])) {
+                    // Take into account spacing between words
+                    curLetterIndex +=1 ;
+                }
             }
-
-            if (isSpecialCharacter(l)) {
-                additionalCost = 100;
+            
+            if (!isLineBreak(words[nextBestWordIndex])) {
+                breaks.push_back(BreakResult(curLetterIndex - 1, isSpecialCharacter(letters[curLetterIndex])));
             }
-
-            auto b = evaluate(i+1, targetWidth, potentials, additionalCost, false);
-            potentials.push_back(b);
         }
+        
+        currentWordIndex = nextBestWordIndex;
     }
-
-    auto last = evaluate((int)letters.size(), targetWidth, potentials, 0, true);
-
-    std::vector<BreakResult> leastBads;
-    auto prior = last->prior;
-    while (prior) {
-        auto b = BreakResult(prior->index - 1, isSpecialCharacter(letters[prior->index]));
-        leastBads.push_back(b);
-        prior = prior->prior;
-    }
-
-    return leastBads;
+    
+    return breaks;
 }

@@ -63,7 +63,7 @@ TextLayerObject::TextLayerObject(const std::shared_ptr<TextInterface> &text, con
             }
         }
 
-        breaks = TextHelper::bestBreakIndices(letters, maxCharacterWidth);
+        breaks = TextHelper::bestBreakIndices(letters, 15);
     }
 
     int currentLetterIndex = 0;
