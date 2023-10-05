@@ -9,6 +9,10 @@ jobs:
     name: "Upload AAR to Sonatype Nexus"
     runs-on: ubuntu-latest
 
+    outputs:
+      artifactId: ${{ steps.vars.outputs.artifactId }}
+      version: ${{ steps.vars.outputs.version }}
+
     steps:
       - uses: actions/checkout@v3
         with:
@@ -60,4 +64,4 @@ jobs:
       - run: |
           echo "Artifact ID: ${{ needs.build.outputs.artifactId }}"
           echo "Version: ${{ needs.build.outputs.version }}"
-          echo "Sub-Repos: ${{ vars.SUB_REPOS }}
+          echo "Sub-Repos: ${{ vars.SUB_REPOS }}"
