@@ -289,6 +289,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::st
     auto coordinateConverterHelper = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
     auto shaderFactory = mapInterface ? mapInterface->getShaderFactory() : nullptr;
     if (!graphicsFactory || !shaderFactory) {
+        updateFlag.clear();
         return;
     }
 
