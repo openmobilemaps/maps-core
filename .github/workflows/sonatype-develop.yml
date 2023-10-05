@@ -61,7 +61,40 @@ jobs:
     needs: build
 
     steps:
-      - run: |
-          echo "Artifact ID: ${{ needs.build.outputs.artifactId }}"
-          echo "Version: ${{ needs.build.outputs.version }}"
-          echo "Sub-Repos: ${{ vars.SUB_REPOS }}"
+      - name: Trigger sub-repo workflow
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.UBIQUE_JENKINS_PAT }}
+          script: |
+            let subrepos = "${{ vars.SUB_REPOS }}".split(",");
+            for (let i in subrepos) {
+              let subrepo = subrepos[i];
+              let organization = subrepo.split("/")[0];
+              let repoName = subrepo.split("/")[1];
+              let inputs = {
+                "mapsCoreCommitHash": "$GITHUB_SHA", 
+                "mapsCoreArtifactId": "${{ needs.build.outputs.artifactId }}", 
+                "mapsCoreArtifactVersion": "${{ needs.build.outputs.version }}"
+              }
+              const result = await github.rest.actions.createWorkflowDispatch({
+                owner: organization,
+                repo: repoName,
+                workflow_id: 'dependencies-pr.yml',
+                ref: 'feature/automatic-pr-creation',
+                inputs: inputs
+              })
+              console.log(result)
+            }
+
+#      - run: |
+#          IFS=',' #setting space as delimiter
+#          read -ra repos <<< "${{ vars.SUB_REPOS }}" #reading str as an array as tokens separated by IFS
+#
+#          data='{"mapsCoreCommitHash": "$GITHUB_SHA", "mapsCoreArtifactId": "${{ needs.build.outputs.artifactId }}", "mapsCoreArtifactVersion": "${{ needs.build.outputs.version }}"}'
+#
+#          for repo in "${repos[@]}";
+#          do
+#            workflowUrl="https://api.github.com/repos/$repo/actions/workflows/dependencies-pr.yaml/dispatches"
+#            curl -XPOST -u "${{ secrets.UBIQUE_JENKINS_USER }}:${{ secrets.UBIQUE_JENKINS_PAT }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" $workflowUrl --data '$data'
+#          done
+          
