@@ -15,6 +15,7 @@
 #include <typeinfo>
 #include "assert.h"
 #include "Logger.h"
+#include <functional>
 
 enum class MailboxDuplicationStrategy {
     none = 0,
@@ -50,6 +51,8 @@ public:
 
     static size_t calculateIdentifier(const Object& object, MemberFn memberFn) {
         size_t hash = typeid(Object).hash_code();
+        size_t hashFn = typeid(MemberFn).hash_code();
+        hash_combine(hash, hashFn);
         hash_combine(hash, &memberFn);
         return hash;
     }
@@ -57,7 +60,8 @@ public:
     template <typename T>
     static void hash_combine(size_t& seed, const T& value) {
         std::hash<T> hasher;
-        seed ^= hasher(value) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        auto v = hasher(value);
+        seed ^= v + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     }
 
 
