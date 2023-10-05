@@ -72,29 +72,22 @@ jobs:
               let organization = subrepo.split("/")[0];
               let repoName = subrepo.split("/")[1];
               let inputs = {
-                "mapsCoreCommitHash": "$GITHUB_SHA", 
+                "mapsCoreBranch": "${{ github.ref_name }}",
+                "mapsCoreCommitHash": "${{ github.sha }}", 
                 "mapsCoreArtifactId": "${{ needs.build.outputs.artifactId }}", 
                 "mapsCoreArtifactVersion": "${{ needs.build.outputs.version }}"
               }
+
               const result = await github.rest.actions.createWorkflowDispatch({
                 owner: organization,
                 repo: repoName,
                 workflow_id: 'dependencies-pr.yml',
                 ref: 'feature/automatic-pr-creation',
                 inputs: inputs
-              })
-              console.log(result)
-            }
+              });
 
-#      - run: |
-#          IFS=',' #setting space as delimiter
-#          read -ra repos <<< "${{ vars.SUB_REPOS }}" #reading str as an array as tokens separated by IFS
-#
-#          data='{"mapsCoreCommitHash": "$GITHUB_SHA", "mapsCoreArtifactId": "${{ needs.build.outputs.artifactId }}", "mapsCoreArtifactVersion": "${{ needs.build.outputs.version }}"}'
-#
-#          for repo in "${repos[@]}";
-#          do
-#            workflowUrl="https://api.github.com/repos/$repo/actions/workflows/dependencies-pr.yaml/dispatches"
-#            curl -XPOST -u "${{ secrets.UBIQUE_JENKINS_USER }}:${{ secrets.UBIQUE_JENKINS_PAT }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" $workflowUrl --data '$data'
-#          done
+              if (result.status > 299) {
+                console.log(result);
+              }
+            }
           
