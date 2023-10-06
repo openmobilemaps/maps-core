@@ -97,8 +97,8 @@ public:
                 }
             }
         }
-        for (int16_t y = std::max(indexRange.yMin, int16_t(0)); y <= std::min(indexRange.yMax, int16_t(numCellsY - 1)); y++) {
-            for (int16_t x = std::max(indexRange.xMin, int16_t(0)); x <= std::min(indexRange.xMax, int16_t(numCellsX - 1)); x++) {
+        for (int16_t y = indexRange.yMin; y <= indexRange.yMax; y++) {
+            for (int16_t x = indexRange.xMin; x <= indexRange.xMax; x++) {
                     for (const auto &rect : gridRects[y][x]) {
                         if (CollisionUtil::checkRectCollision(projectedRectangle, rect)) {
                             return true;
@@ -114,8 +114,8 @@ public:
         }
 
         // Only insert, when not colliding
-        for (int16_t y = std::max(indexRange.yMin, int16_t(0)); y <= std::min(indexRange.yMax, int16_t(numCellsY - 1)); y++) {
-            for (int16_t x = std::max(indexRange.xMin, int16_t(0)); x <= std::min(indexRange.xMax, int16_t(numCellsX - 1)); x++) {
+        for (int16_t y = indexRange.yMin; y <= indexRange.yMax; y++) {
+            for (int16_t x = indexRange.xMin; x <= indexRange.xMax; x++) {
                 gridRects[y][x].push_back(projectedRectangle);
             }
         }
@@ -123,7 +123,6 @@ public:
         if (rectangle.contentHash != 0 && rectangle.symbolSpacing > 0) {
             spacedRects[rectangle.contentHash].push_back(projectedRectangle);
         }
-
         return false;
     }
 
@@ -137,7 +136,7 @@ public:
             return false;
         }
 
-        std::vector<std::tuple<CircleF, IndexRange, size_t, int32_t>> projectedCircles;
+        std::vector<std::tuple<CircleF, IndexRange, size_t, int16_t>> projectedCircles;
         for (const auto &circle : circles) {
             auto projectedCircle = getProjectedCircle(circle);
             IndexRange indexRange = getIndexRangeForCircle(projectedCircle);
@@ -263,10 +262,10 @@ private:
      */
     IndexRange getIndexRangeForRectangle(const RectF &rectangle) {
         IndexRange result;
-        result.addXIndex(std::floor(rectangle.x / cellSize) + numCellsPadding, numCellsX - 1);
-        result.addXIndex(std::floor((rectangle.x + rectangle.width) / cellSize) + numCellsPadding, numCellsX - 1);
-        result.addYIndex(std::floor(rectangle.y / cellSize) + numCellsPadding, numCellsY - 1);
-        result.addYIndex(std::floor((rectangle.y + rectangle.height) / cellSize) + numCellsPadding, numCellsY - 1);
+        result.addXIndex(std::floor(std::clamp(rectangle.x / cellSize, limitLow, limitHigh)) + numCellsPadding, numCellsX - 1);
+        result.addXIndex(std::floor(std::clamp(rectangle.x + rectangle.width, limitLow, limitHigh) / cellSize) + numCellsPadding, numCellsX - 1);
+        result.addYIndex(std::floor(std::clamp(rectangle.y / cellSize, limitLow, limitHigh)) + numCellsPadding, numCellsY - 1);
+        result.addYIndex(std::floor(std::clamp(rectangle.y + rectangle.height, limitLow, limitHigh) / cellSize) + numCellsPadding, numCellsY - 1);
         return result;
     }
 
@@ -276,17 +275,20 @@ private:
     IndexRange getIndexRangeForCircle(const CircleF &circle) {
         IndexRange result;
         // May include unnecessary corner grid cells
-        result.addXIndex(std::floor((circle.x - circle.radius) / cellSize) + numCellsPadding, numCellsX - 1);
-        result.addXIndex(std::floor((circle.x + circle.radius) / cellSize) + numCellsPadding, numCellsX - 1);
-        result.addYIndex(std::floor((circle.y - circle.radius) / cellSize) + numCellsPadding, numCellsY - 1);
-        result.addYIndex(std::floor((circle.y + circle.radius) / cellSize) + numCellsPadding, numCellsY - 1);
+        result.addXIndex(std::floor(std::clamp(circle.x - circle.radius, limitLow, limitHigh) / cellSize) + numCellsPadding, numCellsX - 1);
+        result.addXIndex(std::floor(std::clamp(circle.x + circle.radius, limitLow, limitHigh) / cellSize) + numCellsPadding, numCellsX - 1);
+        result.addYIndex(std::floor(std::clamp(circle.y - circle.radius, limitLow, limitHigh) / cellSize) + numCellsPadding, numCellsY - 1);
+        result.addYIndex(std::floor(std::clamp(circle.y + circle.radius, limitLow, limitHigh) / cellSize) + numCellsPadding, numCellsY - 1);
         return result;
     }
 
     // TODO: use smart calculations to define grid number on initialize (e.g. with first insertion o.s.)
-    const static int32_t numCellsMinDim = 20;
+    const static int16_t numCellsMinDim = 20;
     // Additional cell padding around the viewport;
-    static constexpr int32_t numCellsPadding = 4;
+    static constexpr int16_t numCellsPadding = 4;
+
+    static constexpr float limitLow = std::numeric_limits<int16_t>::min();
+    static constexpr float limitHigh = std::numeric_limits<int16_t>::max();
 
     const std::vector<float> vpMatrix;
     const Vec2I size;
