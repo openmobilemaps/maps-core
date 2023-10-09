@@ -14,13 +14,13 @@ NativeVectorLayerFeatureInfoValue::~NativeVectorLayerFeatureInfoValue() = defaul
 auto NativeVectorLayerFeatureInfoValue::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinni::LocalRef<JniType> {
     const auto& data = ::djinni::JniClass<NativeVectorLayerFeatureInfoValue>::get();
     auto r = ::djinni::LocalRef<JniType>{jniEnv->NewObject(data.clazz.get(), data.jconstructor,
-                                                           ::djinni::get(::djinni::Optional<std::optional, ::djinni::String>::fromCpp(jniEnv, c.stringValue)),
-                                                           ::djinni::get(::djinni::Optional<std::optional, ::djinni::F64>::fromCpp(jniEnv, c.doubleValue)),
-                                                           ::djinni::get(::djinni::Optional<std::optional, ::djinni::I64>::fromCpp(jniEnv, c.intValue)),
-                                                           ::djinni::get(::djinni::Optional<std::optional, ::djinni::Bool>::fromCpp(jniEnv, c.boolValue)),
-                                                           ::djinni::get(::djinni::Optional<std::optional, ::djinni_generated::NativeColor>::fromCpp(jniEnv, c.colorValue)),
-                                                           ::djinni::get(::djinni::Optional<std::optional, ::djinni::List<::djinni::F32>>::fromCpp(jniEnv, c.listFloatValue)),
-                                                           ::djinni::get(::djinni::Optional<std::optional, ::djinni::List<::djinni::String>>::fromCpp(jniEnv, c.listStringValue)))};
+                                                           ::djinni::get(::djinni::Optional<std::optional, ::djinni::String>::fromCpp(jniEnv, c.stringVal)),
+                                                           ::djinni::get(::djinni::Optional<std::optional, ::djinni::F64>::fromCpp(jniEnv, c.doubleVal)),
+                                                           ::djinni::get(::djinni::Optional<std::optional, ::djinni::I64>::fromCpp(jniEnv, c.intVal)),
+                                                           ::djinni::get(::djinni::Optional<std::optional, ::djinni::Bool>::fromCpp(jniEnv, c.boolVal)),
+                                                           ::djinni::get(::djinni::Optional<std::optional, ::djinni_generated::NativeColor>::fromCpp(jniEnv, c.colorVal)),
+                                                           ::djinni::get(::djinni::Optional<std::optional, ::djinni::List<::djinni::F32>>::fromCpp(jniEnv, c.listFloatVal)),
+                                                           ::djinni::get(::djinni::Optional<std::optional, ::djinni::List<::djinni::String>>::fromCpp(jniEnv, c.listStringVal)))};
     ::djinni::jniExceptionCheck(jniEnv);
     return r;
 }
@@ -29,13 +29,13 @@ auto NativeVectorLayerFeatureInfoValue::toCpp(JNIEnv* jniEnv, JniType j) -> CppT
     ::djinni::JniLocalScope jscope(jniEnv, 8);
     assert(j != nullptr);
     const auto& data = ::djinni::JniClass<NativeVectorLayerFeatureInfoValue>::get();
-    return {::djinni::Optional<std::optional, ::djinni::String>::toCpp(jniEnv, (jstring)jniEnv->GetObjectField(j, data.field_stringValue)),
-            ::djinni::Optional<std::optional, ::djinni::F64>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_doubleValue)),
-            ::djinni::Optional<std::optional, ::djinni::I64>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_intValue)),
-            ::djinni::Optional<std::optional, ::djinni::Bool>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_boolValue)),
-            ::djinni::Optional<std::optional, ::djinni_generated::NativeColor>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_colorValue)),
-            ::djinni::Optional<std::optional, ::djinni::List<::djinni::F32>>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_listFloatValue)),
-            ::djinni::Optional<std::optional, ::djinni::List<::djinni::String>>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_listStringValue))};
+    return {::djinni::Optional<std::optional, ::djinni::String>::toCpp(jniEnv, (jstring)jniEnv->GetObjectField(j, data.field_stringVal)),
+            ::djinni::Optional<std::optional, ::djinni::F64>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_doubleVal)),
+            ::djinni::Optional<std::optional, ::djinni::I64>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_intVal)),
+            ::djinni::Optional<std::optional, ::djinni::Bool>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_boolVal)),
+            ::djinni::Optional<std::optional, ::djinni_generated::NativeColor>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_colorVal)),
+            ::djinni::Optional<std::optional, ::djinni::List<::djinni::F32>>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_listFloatVal)),
+            ::djinni::Optional<std::optional, ::djinni::List<::djinni::String>>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_listStringVal))};
 }
 
 } // namespace djinni_generated

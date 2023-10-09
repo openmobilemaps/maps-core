@@ -711,7 +711,7 @@ public:
             },
             [](const std::vector<FormattedStringEntry> &val){
                 std::string string = "";
-                for(auto const v: val) {
+                for(auto const &v: val) {
                     string += v.text;
                 }
                 return string;
@@ -1761,7 +1761,7 @@ public:
     }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
-        for (auto const value: values) {
+        for (auto const &value: values) {
             if (!value->evaluateOr(context, false)) {
                 return false;
             }

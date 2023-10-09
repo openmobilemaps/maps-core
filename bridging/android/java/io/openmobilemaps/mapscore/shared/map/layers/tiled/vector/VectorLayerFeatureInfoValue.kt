@@ -4,11 +4,11 @@
 package io.openmobilemaps.mapscore.shared.map.layers.tiled.vector
 
 data class VectorLayerFeatureInfoValue(
-    var stringValue: String?,
-    var doubleValue: Double?,
-    var intValue: Long?,
-    var boolValue: Boolean?,
-    var colorValue: io.openmobilemaps.mapscore.shared.graphics.common.Color?,
-    var listFloatValue: ArrayList<Float>?,
-    var listStringValue: ArrayList<String>?,
+    var stringVal: String?,
+    var doubleVal: Double?,
+    var intVal: Long?,
+    var boolVal: Boolean?,
+    var colorVal: io.openmobilemaps.mapscore.shared.graphics.common.Color?,
+    var listFloatVal: ArrayList<Float>?,
+    var listStringVal: ArrayList<String>?,
 )

@@ -121,8 +121,7 @@ let package = Package(
         .target(
             name: "MapCoreSharedModule",
             dependencies: [
-                "MapCoreSharedModuleCpp",
-                .product(name: "DjinniSupport", package: "djinni"),
+                "MapCoreSharedModuleCpp"
             ],
             path: "bridging/ios",
             publicHeadersPath: ""
