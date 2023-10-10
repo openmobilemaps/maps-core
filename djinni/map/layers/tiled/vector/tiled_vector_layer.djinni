@@ -22,13 +22,13 @@ tiled_2d_map_vector_layer_interface = interface +c {
 }
 
 vector_layer_feature_info_value = record {
-    string_value: optional<string>;
-    double_value: optional<f64>;
-    int_value: optional<i64>;
-    bool_value: optional<bool>;
-    color_value: optional<color>;
-    list_float_value: optional<list<f32>>;
-    list_string__value: optional<list<string>>;
+    string_val: optional<string>;
+    double_val: optional<f64>;
+    int_val: optional<i64>;
+    bool_val: optional<bool>;
+    color_val: optional<color>;
+    list_float_val: optional<list<f32>>;
+    list_string__val: optional<list<string>>;
 }
 
 feature_info_value_factory = interface +c {

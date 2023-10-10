@@ -11,24 +11,24 @@ namespace djinni_generated {
 auto VectorLayerFeatureInfoValue::toCpp(ObjcType obj) -> CppType
 {
     assert(obj);
-    return {::djinni::Optional<std::optional, ::djinni::String>::toCpp(obj.stringValue),
-            ::djinni::Optional<std::optional, ::djinni::F64>::toCpp(obj.doubleValue),
-            ::djinni::Optional<std::optional, ::djinni::I64>::toCpp(obj.intValue),
-            ::djinni::Optional<std::optional, ::djinni::Bool>::toCpp(obj.boolValue),
-            ::djinni::Optional<std::optional, ::djinni_generated::Color>::toCpp(obj.colorValue),
-            ::djinni::Optional<std::optional, ::djinni::List<::djinni::F32>>::toCpp(obj.listFloatValue),
-            ::djinni::Optional<std::optional, ::djinni::List<::djinni::String>>::toCpp(obj.listStringValue)};
+    return {::djinni::Optional<std::optional, ::djinni::String>::toCpp(obj.stringVal),
+            ::djinni::Optional<std::optional, ::djinni::F64>::toCpp(obj.doubleVal),
+            ::djinni::Optional<std::optional, ::djinni::I64>::toCpp(obj.intVal),
+            ::djinni::Optional<std::optional, ::djinni::Bool>::toCpp(obj.boolVal),
+            ::djinni::Optional<std::optional, ::djinni_generated::Color>::toCpp(obj.colorVal),
+            ::djinni::Optional<std::optional, ::djinni::List<::djinni::F32>>::toCpp(obj.listFloatVal),
+            ::djinni::Optional<std::optional, ::djinni::List<::djinni::String>>::toCpp(obj.listStringVal)};
 }
 
 auto VectorLayerFeatureInfoValue::fromCpp(const CppType& cpp) -> ObjcType
 {
-    return [[MCVectorLayerFeatureInfoValue alloc] initWithStringValue:(::djinni::Optional<std::optional, ::djinni::String>::fromCpp(cpp.stringValue))
-                                                          doubleValue:(::djinni::Optional<std::optional, ::djinni::F64>::fromCpp(cpp.doubleValue))
-                                                             intValue:(::djinni::Optional<std::optional, ::djinni::I64>::fromCpp(cpp.intValue))
-                                                            boolValue:(::djinni::Optional<std::optional, ::djinni::Bool>::fromCpp(cpp.boolValue))
-                                                           colorValue:(::djinni::Optional<std::optional, ::djinni_generated::Color>::fromCpp(cpp.colorValue))
-                                                       listFloatValue:(::djinni::Optional<std::optional, ::djinni::List<::djinni::F32>>::fromCpp(cpp.listFloatValue))
-                                                      listStringValue:(::djinni::Optional<std::optional, ::djinni::List<::djinni::String>>::fromCpp(cpp.listStringValue))];
+    return [[MCVectorLayerFeatureInfoValue alloc] initWithStringVal:(::djinni::Optional<std::optional, ::djinni::String>::fromCpp(cpp.stringVal))
+                                                          doubleVal:(::djinni::Optional<std::optional, ::djinni::F64>::fromCpp(cpp.doubleVal))
+                                                             intVal:(::djinni::Optional<std::optional, ::djinni::I64>::fromCpp(cpp.intVal))
+                                                            boolVal:(::djinni::Optional<std::optional, ::djinni::Bool>::fromCpp(cpp.boolVal))
+                                                           colorVal:(::djinni::Optional<std::optional, ::djinni_generated::Color>::fromCpp(cpp.colorVal))
+                                                       listFloatVal:(::djinni::Optional<std::optional, ::djinni::List<::djinni::F32>>::fromCpp(cpp.listFloatVal))
+                                                      listStringVal:(::djinni::Optional<std::optional, ::djinni::List<::djinni::String>>::fromCpp(cpp.listStringVal))];
 }
 
 } // namespace djinni_generated

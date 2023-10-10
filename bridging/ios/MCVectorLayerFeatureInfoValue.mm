@@ -6,47 +6,47 @@
 
 @implementation MCVectorLayerFeatureInfoValue
 
-- (nonnull instancetype)initWithStringValue:(nullable NSString *)stringValue
-                                doubleValue:(nullable NSNumber *)doubleValue
-                                   intValue:(nullable NSNumber *)intValue
-                                  boolValue:(nullable NSNumber *)boolValue
-                                 colorValue:(nullable MCColor *)colorValue
-                             listFloatValue:(nullable NSArray<NSNumber *> *)listFloatValue
-                            listStringValue:(nullable NSArray<NSString *> *)listStringValue
+- (nonnull instancetype)initWithStringVal:(nullable NSString *)stringVal
+                                doubleVal:(nullable NSNumber *)doubleVal
+                                   intVal:(nullable NSNumber *)intVal
+                                  boolVal:(nullable NSNumber *)boolVal
+                                 colorVal:(nullable MCColor *)colorVal
+                             listFloatVal:(nullable NSArray<NSNumber *> *)listFloatVal
+                            listStringVal:(nullable NSArray<NSString *> *)listStringVal
 {
     if (self = [super init]) {
-        _stringValue = [stringValue copy];
-        _doubleValue = doubleValue;
-        _intValue = intValue;
-        _boolValue = boolValue;
-        _colorValue = colorValue;
-        _listFloatValue = [listFloatValue copy];
-        _listStringValue = [listStringValue copy];
+        _stringVal = [stringVal copy];
+        _doubleVal = doubleVal;
+        _intVal = intVal;
+        _boolVal = boolVal;
+        _colorVal = colorVal;
+        _listFloatVal = [listFloatVal copy];
+        _listStringVal = [listStringVal copy];
     }
     return self;
 }
 
-+ (nonnull instancetype)vectorLayerFeatureInfoValueWithStringValue:(nullable NSString *)stringValue
-                                                       doubleValue:(nullable NSNumber *)doubleValue
-                                                          intValue:(nullable NSNumber *)intValue
-                                                         boolValue:(nullable NSNumber *)boolValue
-                                                        colorValue:(nullable MCColor *)colorValue
-                                                    listFloatValue:(nullable NSArray<NSNumber *> *)listFloatValue
-                                                   listStringValue:(nullable NSArray<NSString *> *)listStringValue
++ (nonnull instancetype)vectorLayerFeatureInfoValueWithStringVal:(nullable NSString *)stringVal
+                                                       doubleVal:(nullable NSNumber *)doubleVal
+                                                          intVal:(nullable NSNumber *)intVal
+                                                         boolVal:(nullable NSNumber *)boolVal
+                                                        colorVal:(nullable MCColor *)colorVal
+                                                    listFloatVal:(nullable NSArray<NSNumber *> *)listFloatVal
+                                                   listStringVal:(nullable NSArray<NSString *> *)listStringVal
 {
-    return [[self alloc] initWithStringValue:stringValue
-                                 doubleValue:doubleValue
-                                    intValue:intValue
-                                   boolValue:boolValue
-                                  colorValue:colorValue
-                              listFloatValue:listFloatValue
-                             listStringValue:listStringValue];
+    return [[self alloc] initWithStringVal:stringVal
+                                 doubleVal:doubleVal
+                                    intVal:intVal
+                                   boolVal:boolVal
+                                  colorVal:colorVal
+                              listFloatVal:listFloatVal
+                             listStringVal:listStringVal];
 }
 
 #ifndef DJINNI_DISABLE_DESCRIPTION_METHODS
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p stringValue:%@ doubleValue:%@ intValue:%@ boolValue:%@ colorValue:%@ listFloatValue:%@ listStringValue:%@>", self.class, (void *)self, self.stringValue, self.doubleValue, self.intValue, self.boolValue, self.colorValue, self.listFloatValue, self.listStringValue];
+    return [NSString stringWithFormat:@"<%@ %p stringVal:%@ doubleVal:%@ intVal:%@ boolVal:%@ colorVal:%@ listFloatVal:%@ listStringVal:%@>", self.class, (void *)self, self.stringVal, self.doubleVal, self.intVal, self.boolVal, self.colorVal, self.listFloatVal, self.listStringVal];
 }
 
 #endif

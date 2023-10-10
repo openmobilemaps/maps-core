@@ -86,13 +86,13 @@ private:
     std::atomic_bool hasNoValues = true;
 
     ValueVariant convertToValueVariant(const VectorLayerFeatureInfoValue &valueInfo) {
-        if (valueInfo.stringValue) { return *valueInfo.stringValue; }
-        else if (valueInfo.doubleValue) { return *valueInfo.doubleValue; }
-        else if (valueInfo.intValue) { return *valueInfo.intValue; }
-        else if (valueInfo.boolValue) { return *valueInfo.boolValue; }
-        else if (valueInfo.colorValue) { return *valueInfo.colorValue; }
-        else if (valueInfo.listFloatValue) { return *valueInfo.listFloatValue; }
-        else if (valueInfo.listStringValue) { return *valueInfo.listStringValue; }
+        if (valueInfo.stringVal) { return *valueInfo.stringVal; }
+        else if (valueInfo.doubleVal) { return *valueInfo.doubleVal; }
+        else if (valueInfo.intVal) { return *valueInfo.intVal; }
+        else if (valueInfo.boolVal) { return *valueInfo.boolVal; }
+        else if (valueInfo.colorVal) { return *valueInfo.colorVal; }
+        else if (valueInfo.listFloatVal) { return *valueInfo.listFloatVal; }
+        else if (valueInfo.listStringVal) { return *valueInfo.listStringVal; }
         else { return std::monostate(); }
     }
 };

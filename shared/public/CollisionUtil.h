@@ -12,6 +12,7 @@
 
 #include "Matrix.h"
 #include "RectF.h"
+#include "RectD.h"
 #include "CircleF.h"
 #include "CollisionPrimitives.h"
 #include <vector>

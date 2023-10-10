@@ -26,13 +26,13 @@ private:
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/layers/tiled/vector/VectorLayerFeatureInfoValue") };
     const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Ljava/lang/String;Ljava/lang/Double;Ljava/lang/Long;Ljava/lang/Boolean;Lio/openmobilemaps/mapscore/shared/graphics/common/Color;Ljava/util/ArrayList;Ljava/util/ArrayList;)V") };
-    const jfieldID field_stringValue { ::djinni::jniGetFieldID(clazz.get(), "stringValue", "Ljava/lang/String;") };
-    const jfieldID field_doubleValue { ::djinni::jniGetFieldID(clazz.get(), "doubleValue", "Ljava/lang/Double;") };
-    const jfieldID field_intValue { ::djinni::jniGetFieldID(clazz.get(), "intValue", "Ljava/lang/Long;") };
-    const jfieldID field_boolValue { ::djinni::jniGetFieldID(clazz.get(), "boolValue", "Ljava/lang/Boolean;") };
-    const jfieldID field_colorValue { ::djinni::jniGetFieldID(clazz.get(), "colorValue", "Lio/openmobilemaps/mapscore/shared/graphics/common/Color;") };
-    const jfieldID field_listFloatValue { ::djinni::jniGetFieldID(clazz.get(), "listFloatValue", "Ljava/util/ArrayList;") };
-    const jfieldID field_listStringValue { ::djinni::jniGetFieldID(clazz.get(), "listStringValue", "Ljava/util/ArrayList;") };
+    const jfieldID field_stringVal { ::djinni::jniGetFieldID(clazz.get(), "stringVal", "Ljava/lang/String;") };
+    const jfieldID field_doubleVal { ::djinni::jniGetFieldID(clazz.get(), "doubleVal", "Ljava/lang/Double;") };
+    const jfieldID field_intVal { ::djinni::jniGetFieldID(clazz.get(), "intVal", "Ljava/lang/Long;") };
+    const jfieldID field_boolVal { ::djinni::jniGetFieldID(clazz.get(), "boolVal", "Ljava/lang/Boolean;") };
+    const jfieldID field_colorVal { ::djinni::jniGetFieldID(clazz.get(), "colorVal", "Lio/openmobilemaps/mapscore/shared/graphics/common/Color;") };
+    const jfieldID field_listFloatVal { ::djinni::jniGetFieldID(clazz.get(), "listFloatVal", "Ljava/util/ArrayList;") };
+    const jfieldID field_listStringVal { ::djinni::jniGetFieldID(clazz.get(), "listStringVal", "Ljava/util/ArrayList;") };
 };
 
 } // namespace djinni_generated

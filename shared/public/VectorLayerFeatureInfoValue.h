@@ -11,27 +11,27 @@
 #include <vector>
 
 struct VectorLayerFeatureInfoValue final {
-    std::optional<std::string> stringValue;
-    std::optional<double> doubleValue;
-    std::optional<int64_t> intValue;
-    std::optional<bool> boolValue;
-    std::optional<::Color> colorValue;
-    std::optional<std::vector<float>> listFloatValue;
-    std::optional<std::vector<std::string>> listStringValue;
+    std::optional<std::string> stringVal;
+    std::optional<double> doubleVal;
+    std::optional<int64_t> intVal;
+    std::optional<bool> boolVal;
+    std::optional<::Color> colorVal;
+    std::optional<std::vector<float>> listFloatVal;
+    std::optional<std::vector<std::string>> listStringVal;
 
-    VectorLayerFeatureInfoValue(std::optional<std::string> stringValue_,
-                                std::optional<double> doubleValue_,
-                                std::optional<int64_t> intValue_,
-                                std::optional<bool> boolValue_,
-                                std::optional<::Color> colorValue_,
-                                std::optional<std::vector<float>> listFloatValue_,
-                                std::optional<std::vector<std::string>> listStringValue_)
-    : stringValue(std::move(stringValue_))
-    , doubleValue(std::move(doubleValue_))
-    , intValue(std::move(intValue_))
-    , boolValue(std::move(boolValue_))
-    , colorValue(std::move(colorValue_))
-    , listFloatValue(std::move(listFloatValue_))
-    , listStringValue(std::move(listStringValue_))
+    VectorLayerFeatureInfoValue(std::optional<std::string> stringVal_,
+                                std::optional<double> doubleVal_,
+                                std::optional<int64_t> intVal_,
+                                std::optional<bool> boolVal_,
+                                std::optional<::Color> colorVal_,
+                                std::optional<std::vector<float>> listFloatVal_,
+                                std::optional<std::vector<std::string>> listStringVal_)
+    : stringVal(std::move(stringVal_))
+    , doubleVal(std::move(doubleVal_))
+    , intVal(std::move(intVal_))
+    , boolVal(std::move(boolVal_))
+    , colorVal(std::move(colorVal_))
+    , listFloatVal(std::move(listFloatVal_))
+    , listStringVal(std::move(listStringVal_))
     {}
 };
