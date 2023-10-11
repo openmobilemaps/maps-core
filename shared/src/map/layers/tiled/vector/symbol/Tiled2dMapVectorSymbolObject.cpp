@@ -524,31 +524,31 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     
     switch (iconAnchor) {
         case Anchor::CENTER:
-            offset = Vec2D((-iconOffset.x) * scaleFactor - leftPadding * 0.5 + rightPadding * 0.5, iconOffset.y * scaleFactor - topPadding * 0.5 + bottomPadding * 0.5);
+            offset = Vec2D((-iconOffset.x - leftPadding * 0.5 + rightPadding * 0.5) * scaleX, (iconOffset.y - topPadding * 0.5 + bottomPadding * 0.5) * scaleY);
             break;
         case Anchor::LEFT:
-            offset = Vec2D((-iconOffset.x) * scaleFactor - leftPadding, iconOffset.y * scaleFactor - topPadding * 0.5 + bottomPadding * 0.5);
+            offset = Vec2D((-iconOffset.x - leftPadding) * scaleX, (iconOffset.y - topPadding * 0.5 + bottomPadding * 0.5) * scaleY);
             break;
         case Anchor::RIGHT:
-            offset = Vec2D((-iconOffset.x) * scaleFactor + rightPadding, iconOffset.y * scaleFactor - topPadding * 0.5 + bottomPadding * 0.5);
+            offset = Vec2D((-iconOffset.x + rightPadding) * scaleX, (iconOffset.y - topPadding * 0.5 + bottomPadding * 0.5) * scaleY);
             break;
         case Anchor::TOP:
-            offset = Vec2D((-iconOffset.x) * scaleFactor - leftPadding * 0.5 + rightPadding * 0.5, iconOffset.y * scaleFactor - topPadding);
+            offset = Vec2D((-iconOffset.x - leftPadding * 0.5 + rightPadding * 0.5) * scaleX, (iconOffset.y - topPadding) * scaleY);
             break;
         case Anchor::BOTTOM:
-            offset = Vec2D((-iconOffset.x) * scaleFactor - leftPadding * 0.5 + rightPadding * 0.5, iconOffset.y * scaleFactor + bottomPadding);
+            offset = Vec2D((-iconOffset.x - leftPadding * 0.5 + rightPadding * 0.5) * scaleX, (iconOffset.y + bottomPadding) * scaleY);
             break;
         case Anchor::TOP_LEFT:
-            offset = Vec2D((-iconOffset.x) * scaleFactor - leftPadding, iconOffset.y * scaleFactor - topPadding);
+            offset = Vec2D((-iconOffset.x - leftPadding) * scaleX, (iconOffset.y - topPadding) * scaleY);
             break;
         case Anchor::TOP_RIGHT:
-            offset = Vec2D((-iconOffset.x) * scaleFactor + rightPadding, iconOffset.y * scaleFactor - topPadding);
+            offset = Vec2D((-iconOffset.x + rightPadding) * scaleX, (iconOffset.y - topPadding) * scaleY);
             break;
         case Anchor::BOTTOM_LEFT:
-            offset = Vec2D((-iconOffset.x) * scaleFactor - leftPadding, iconOffset.y * scaleFactor + bottomPadding);
+            offset = Vec2D((-iconOffset.x - leftPadding) * scaleX, (iconOffset.y + bottomPadding) * scaleY);
             break;
         case Anchor::BOTTOM_RIGHT:
-            offset = Vec2D((-iconOffset.x) * scaleFactor + rightPadding, iconOffset.y * scaleFactor + bottomPadding);
+            offset = Vec2D((-iconOffset.x + rightPadding) * scaleX, (iconOffset.y + bottomPadding) * scaleY);
             break;
         default:
             break;
