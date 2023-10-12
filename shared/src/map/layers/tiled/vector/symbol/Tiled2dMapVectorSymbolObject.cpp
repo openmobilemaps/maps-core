@@ -490,8 +490,8 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
 
     const double densityOffset = (camera->getScreenDensityPpi() / 160.0) / stretchSpriteInfo->pixelRatio;
 
-    auto spriteWidth = stretchSpriteInfo->width * scaleFactor;
-    auto spriteHeight = stretchSpriteInfo->height * scaleFactor;
+    auto spriteWidth = stretchSpriteInfo->width * densityOffset * scaleFactor;
+    auto spriteHeight = stretchSpriteInfo->height * densityOffset * scaleFactor;
 
     const float topPadding = iconTextFitPadding[0] * stretchSpriteInfo->pixelRatio * densityOffset * scaleFactor;
     const float rightPadding = iconTextFitPadding[1] * stretchSpriteInfo->pixelRatio * densityOffset * scaleFactor;
