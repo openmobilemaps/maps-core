@@ -27,4 +27,6 @@ public:
                                                                       const double &dpFactor,
                                                                       const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
                                                                       const std::unordered_map<std::string, std::string> & sourceUrlParams);
+
+    static std::string replaceUrlParams(const std::string & url, const std::unordered_map<std::string, std::string> & sourceUrlParams);
 };

@@ -642,7 +642,7 @@ float Tiled2dMapVectorLayer::getAlpha() { return alpha; }
 
 
 void Tiled2dMapVectorLayer::forceReload() {
-    if (!isLoadingStyleJson && remoteStyleJsonUrl.has_value() && !mapDescription && !vectorTileSources.empty()) {
+    if (!isLoadingStyleJson && remoteStyleJsonUrl.has_value() && !mapDescription && vectorTileSources.empty()) {
         scheduleStyleJsonLoading();
         return;
     }

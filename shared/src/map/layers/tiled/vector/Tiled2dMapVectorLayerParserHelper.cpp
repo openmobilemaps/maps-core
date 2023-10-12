@@ -43,6 +43,15 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
     return parseStyleJsonFromString(layerName, string, dpFactor, loaders, sourceUrlParams);
 };
 
+std::string Tiled2dMapVectorLayerParserHelper::replaceUrlParams(const std::string & url, const std::unordered_map<std::string, std::string> & sourceUrlParams) {
+    std::string replaced = url;
+    for (const auto & param : sourceUrlParams) {
+        size_t xIndex = replaced.find("{" + param.first + "}", 0);
+        if (xIndex == std::string::npos) continue;;
+        replaced = replaced.replace(xIndex, param.first.size() + 2, param.second);
+    }
+    return replaced;
+}
 
 Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(const std::string &layerName,
                                                         const std::string &styleJsonString,
@@ -94,7 +103,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                 maskTiles = val.value("maskTiles", maskTiles);
                 zoomLevelScaleFactor = val.value("zoomLevelScaleFactor", zoomLevelScaleFactor);
             } else if (val["url"].is_string()) {
-                auto result = LoaderHelper::loadData(val["url"].get<std::string>(), std::nullopt, loaders);
+                auto result = LoaderHelper::loadData(replaceUrlParams(val["url"].get<std::string>(), sourceUrlParams), std::nullopt, loaders);
                 if (result.status != LoaderStatus::OK) {
                     return Tiled2dMapVectorLayerParserResult(nullptr, result.status, result.errorCode, std::nullopt);
                 }
@@ -129,7 +138,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                                                  overzoom);
 
         } else if (type == "vector" && val["url"].is_string()) {
-            auto result = LoaderHelper::loadData(val["url"].get<std::string>(), std::nullopt, loaders);
+            auto result = LoaderHelper::loadData(replaceUrlParams(val["url"].get<std::string>(), sourceUrlParams), std::nullopt, loaders);
             if (result.status != LoaderStatus::OK) {
                 return Tiled2dMapVectorLayerParserResult(nullptr, result.status, result.errorCode, std::nullopt);
             }
@@ -146,7 +155,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
         } else if (type == "geojson") {
             nlohmann::json geojson;
             if (val["data"].is_string()) {
-                geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(val["data"].get<std::string>(), loaders);
+                geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(replaceUrlParams(val["data"].get<std::string>(), sourceUrlParams), loaders);
             } else {
                 assert(val["data"].is_object());
                 geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(GeoJsonParser::getGeoJson(val["data"]));
