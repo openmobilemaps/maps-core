@@ -508,16 +508,12 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     double textHeight = 0.0;
 
     if (labelObject) {
-         textWidth = labelObject->dimensions.x + (leftPadding + rightPadding);
+        textWidth = labelObject->dimensions.x + (leftPadding + rightPadding);
         textHeight = labelObject->dimensions.y + (topPadding + bottomPadding);
     }
 
-    if (description->identifier == "stop_location_rotation_flat") {
-        printf("stop_location_rotation_flat");
-    }
-
-    auto scaleX = std::max(1.0, textWidth / (spriteWidth * iconSize));
-    auto scaleY = std::max(1.0, textHeight / (spriteHeight * iconSize));
+    const auto scaleX = std::max(1.0, textWidth / (spriteWidth * iconSize));
+    const auto scaleY = std::max(1.0, textHeight / (spriteHeight * iconSize));
 
     if (iconTextFit == IconTextFit::WIDTH || iconTextFit == IconTextFit::BOTH) {
         spriteWidth *= scaleX;
