@@ -50,7 +50,8 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
                                              const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                                              double dpFactor,
-                                             const std::optional<Tiled2dMapZoomInfo> &customZoomInfo) :
+                                             const std::optional<Tiled2dMapZoomInfo> &customZoomInfo,
+                                             const std::unordered_map<std::string, std::string> & sourceUrlParams) :
         Tiled2dMapLayer(),
         layerName(layerName),
         remoteStyleJsonUrl(remoteStyleJsonUrl),
@@ -58,7 +59,8 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         fontLoader(fontLoader),
         dpFactor(dpFactor),
         customZoomInfo(customZoomInfo),
-        featureStateManager(std::make_shared<Tiled2dMapVectorFeatureStateManager>()) {}
+        featureStateManager(std::make_shared<Tiled2dMapVectorFeatureStateManager>()),
+        sourceUrlParams(sourceUrlParams)  {}
 
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
@@ -67,7 +69,8 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
                                              const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                                              double dpFactor,
-                                             const std::optional<Tiled2dMapZoomInfo> &customZoomInfo) :
+                                             const std::optional<Tiled2dMapZoomInfo> &customZoomInfo,
+                                             const std::unordered_map<std::string, std::string> & sourceUrlParams) :
         Tiled2dMapLayer(),
         layerName(layerName),
         remoteStyleJsonUrl(remoteStyleJsonUrl),
@@ -76,32 +79,37 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         fontLoader(fontLoader),
         dpFactor(dpFactor),
         customZoomInfo(customZoomInfo),
-        featureStateManager(std::make_shared<Tiled2dMapVectorFeatureStateManager>())  {}
+        featureStateManager(std::make_shared<Tiled2dMapVectorFeatureStateManager>()),
+        sourceUrlParams(sourceUrlParams)   {}
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::shared_ptr<VectorMapDescription> &mapDescription,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
                                              const std::shared_ptr<::FontLoaderInterface> &fontLoader,
-                                             const std::optional<Tiled2dMapZoomInfo> &customZoomInfo) :
+                                             const std::optional<Tiled2dMapZoomInfo> &customZoomInfo,
+                                             const std::unordered_map<std::string, std::string> & sourceUrlParams) :
         Tiled2dMapLayer(),
         layerName(layerName),
         loaders(loaders),
         fontLoader(fontLoader),
         customZoomInfo(customZoomInfo),
-        featureStateManager(std::make_shared<Tiled2dMapVectorFeatureStateManager>())  {
-    setMapDescription(mapDescription);
+        featureStateManager(std::make_shared<Tiled2dMapVectorFeatureStateManager>()),
+        sourceUrlParams(sourceUrlParams)   {
+            setMapDescription(mapDescription);
 }
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
                                              const std::shared_ptr<::FontLoaderInterface> &fontLoader,
-                                             const std::optional<Tiled2dMapZoomInfo> &customZoomInfo) :
+                                             const std::optional<Tiled2dMapZoomInfo> &customZoomInfo,
+                                             const std::unordered_map<std::string, std::string> & sourceUrlParams) :
         Tiled2dMapLayer(),
         layerName(layerName),
         loaders(loaders),
         fontLoader(fontLoader),
         customZoomInfo(customZoomInfo),
-        featureStateManager(std::make_shared<Tiled2dMapVectorFeatureStateManager>())  {}
+        featureStateManager(std::make_shared<Tiled2dMapVectorFeatureStateManager>()),
+        sourceUrlParams(sourceUrlParams) {}
 
 void Tiled2dMapVectorLayer::scheduleStyleJsonLoading() {
     isLoadingStyleJson = true;
@@ -158,7 +166,7 @@ std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJsonRemotely() {
     if (!remoteStyleJsonUrl.has_value() || !dpFactor.has_value()) {
         return std::nullopt;
     }
-    auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromUrl(layerName, *remoteStyleJsonUrl, *dpFactor, loaders);
+    auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromUrl(layerName, *remoteStyleJsonUrl, *dpFactor, loaders, sourceUrlParams);
     if (parseResult.status == LoaderStatus::OK) {
         setMapDescription(parseResult.mapDescription);
         metadata = parseResult.metadata;
@@ -176,7 +184,7 @@ std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJsonLocally(std::
         return std::nullopt;
     }
 
-    auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(layerName, styleJsonString, *dpFactor, loaders);
+    auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(layerName, styleJsonString, *dpFactor, loaders, sourceUrlParams);
 
     if (parseResult.status == LoaderStatus::OK) {
         setMapDescription(parseResult.mapDescription);

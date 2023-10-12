@@ -74,6 +74,60 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_til
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_createFromStyleJsonWithUrlParams(JNIEnv* jniEnv, jobject /*this*/, jstring j_layerName, jstring j_path, jobject j_loaders, ::djinni_generated::NativeFontLoaderInterface::JniType j_fontLoader, jdouble j_dpFactor, jobject j_sourceUrlParams)
+{
+    try {
+        auto r = ::Tiled2dMapVectorLayerInterface::createFromStyleJsonWithUrlParams(::djinni::String::toCpp(jniEnv, j_layerName),
+                                                                                    ::djinni::String::toCpp(jniEnv, j_path),
+                                                                                    ::djinni::List<::djinni_generated::NativeLoaderInterface>::toCpp(jniEnv, j_loaders),
+                                                                                    ::djinni_generated::NativeFontLoaderInterface::toCpp(jniEnv, j_fontLoader),
+                                                                                    ::djinni::F64::toCpp(jniEnv, j_dpFactor),
+                                                                                    ::djinni::Map<::djinni::String, ::djinni::String>::toCpp(jniEnv, j_sourceUrlParams));
+        return ::djinni::release(::djinni_generated::NativeTiled2dMapVectorLayerInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_createFromStyleJsonWithZoomInfoUrlParams(JNIEnv* jniEnv, jobject /*this*/, jstring j_layerName, jstring j_path, jobject j_loaders, ::djinni_generated::NativeFontLoaderInterface::JniType j_fontLoader, jdouble j_dpFactor, ::djinni_generated::NativeTiled2dMapZoomInfo::JniType j_zoomInfo, jobject j_sourceUrlParams)
+{
+    try {
+        auto r = ::Tiled2dMapVectorLayerInterface::createFromStyleJsonWithZoomInfoUrlParams(::djinni::String::toCpp(jniEnv, j_layerName),
+                                                                                            ::djinni::String::toCpp(jniEnv, j_path),
+                                                                                            ::djinni::List<::djinni_generated::NativeLoaderInterface>::toCpp(jniEnv, j_loaders),
+                                                                                            ::djinni_generated::NativeFontLoaderInterface::toCpp(jniEnv, j_fontLoader),
+                                                                                            ::djinni::F64::toCpp(jniEnv, j_dpFactor),
+                                                                                            ::djinni_generated::NativeTiled2dMapZoomInfo::toCpp(jniEnv, j_zoomInfo),
+                                                                                            ::djinni::Map<::djinni::String, ::djinni::String>::toCpp(jniEnv, j_sourceUrlParams));
+        return ::djinni::release(::djinni_generated::NativeTiled2dMapVectorLayerInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_createFromLocalStyleJsonWithUrlParams(JNIEnv* jniEnv, jobject /*this*/, jstring j_layerName, jstring j_styleJson, jobject j_loaders, ::djinni_generated::NativeFontLoaderInterface::JniType j_fontLoader, jdouble j_dpFactor, jobject j_sourceUrlParams)
+{
+    try {
+        auto r = ::Tiled2dMapVectorLayerInterface::createFromLocalStyleJsonWithUrlParams(::djinni::String::toCpp(jniEnv, j_layerName),
+                                                                                         ::djinni::String::toCpp(jniEnv, j_styleJson),
+                                                                                         ::djinni::List<::djinni_generated::NativeLoaderInterface>::toCpp(jniEnv, j_loaders),
+                                                                                         ::djinni_generated::NativeFontLoaderInterface::toCpp(jniEnv, j_fontLoader),
+                                                                                         ::djinni::F64::toCpp(jniEnv, j_dpFactor),
+                                                                                         ::djinni::Map<::djinni::String, ::djinni::String>::toCpp(jniEnv, j_sourceUrlParams));
+        return ::djinni::release(::djinni_generated::NativeTiled2dMapVectorLayerInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_createFromLocalStyleJsonWithZoomInfoUrlParams(JNIEnv* jniEnv, jobject /*this*/, jstring j_layerName, jstring j_styleJson, jobject j_loaders, ::djinni_generated::NativeFontLoaderInterface::JniType j_fontLoader, jdouble j_dpFactor, ::djinni_generated::NativeTiled2dMapZoomInfo::JniType j_zoomInfo, jobject j_sourceUrlParams)
+{
+    try {
+        auto r = ::Tiled2dMapVectorLayerInterface::createFromLocalStyleJsonWithZoomInfoUrlParams(::djinni::String::toCpp(jniEnv, j_layerName),
+                                                                                                 ::djinni::String::toCpp(jniEnv, j_styleJson),
+                                                                                                 ::djinni::List<::djinni_generated::NativeLoaderInterface>::toCpp(jniEnv, j_loaders),
+                                                                                                 ::djinni_generated::NativeFontLoaderInterface::toCpp(jniEnv, j_fontLoader),
+                                                                                                 ::djinni::F64::toCpp(jniEnv, j_dpFactor),
+                                                                                                 ::djinni_generated::NativeTiled2dMapZoomInfo::toCpp(jniEnv, j_zoomInfo),
+                                                                                                 ::djinni::Map<::djinni::String, ::djinni::String>::toCpp(jniEnv, j_sourceUrlParams));
+        return ::djinni::release(::djinni_generated::NativeTiled2dMapVectorLayerInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_00024CppProxy_native_1setSelectionDelegate(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_selectionDelegate)
 {
     try {

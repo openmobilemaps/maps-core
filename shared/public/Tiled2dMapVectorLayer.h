@@ -57,7 +57,8 @@ public:
                           const std::vector <std::shared_ptr<::LoaderInterface>> &loaders,
                           const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                           double dpFactor,
-                          const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt);
+                          const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt, 
+                          const std::unordered_map<std::string, std::string> & sourceUrlParams = {});
 
     Tiled2dMapVectorLayer(const std::string &layerName,
                           const std::string &remoteStyleJsonUrl,
@@ -65,18 +66,21 @@ public:
                           const std::vector <std::shared_ptr<::LoaderInterface>> &loaders,
                           const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                           double dpFactor,
-                          const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt);
+                          const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt, 
+                          const std::unordered_map<std::string, std::string> & sourceUrlParams = {});
 
     Tiled2dMapVectorLayer(const std::string &layerName,
                           const std::shared_ptr<VectorMapDescription> & mapDescription,
                           const std::vector<std::shared_ptr<::LoaderInterface>> & loaders,
                           const std::shared_ptr<::FontLoaderInterface> & fontLoader,
-                          const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt);
+                          const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt, 
+                          const std::unordered_map<std::string, std::string> & sourceUrlParams = {});
 
     Tiled2dMapVectorLayer(const std::string &layerName,
                           const std::vector<std::shared_ptr<::LoaderInterface>> & loaders,
                           const std::shared_ptr<::FontLoaderInterface> &fontLoader,
-                          const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt);
+                          const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt,
+                          const std::unordered_map<std::string, std::string> & sourceUrlParams = {});
 
     virtual std::shared_ptr<::LayerInterface> asLayerInterface() override;
 
@@ -188,6 +192,8 @@ private:
     int32_t layerIndex = -1;
 
     const std::optional<double> dpFactor;
+
+    const std::unordered_map<std::string, std::string> sourceUrlParams;
 
     const std::string layerName;
     std::optional<Tiled2dMapZoomInfo> customZoomInfo;

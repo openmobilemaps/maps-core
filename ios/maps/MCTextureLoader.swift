@@ -85,6 +85,11 @@ open class MCTextureLoader: MCLoaderInterface {
                 return
             }
 
+            if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorCancelled {
+                promise.setValue(.init(data: nil, etag: nil, status: .OK, errorCode: nil))
+                return
+            }
+
             if response?.statusCode == 404 {
                 #if DEBUG
                 print("Failed to load \(url): 404, \(data.map { String(data: $0, encoding: .utf8) ?? "?" } ?? "?")")
@@ -96,6 +101,9 @@ open class MCTextureLoader: MCLoaderInterface {
                 print("Failed to load \(url): 400, \(data.map { String(data: $0, encoding: .utf8) ?? "?" } ?? "?")")
                 #endif
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_400, errorCode: (response?.statusCode).stringOrNil))
+                return
+            } else if response?.statusCode == 204 {
+                promise.setValue(.init(data: nil, etag: response?.etag, status: .OK, errorCode: nil))
                 return
             } else if response?.statusCode != 200 {
                 #if DEBUG
@@ -228,6 +236,9 @@ open class MCTextureLoader: MCLoaderInterface {
                 print("Failed to load \(url): 400, \(data.map { String(data: $0, encoding: .utf8) ?? "?" } ?? "?")")
                 #endif
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_400, errorCode: (response?.statusCode).stringOrNil))
+                return
+            } else if response?.statusCode == 204 {
+                promise.setValue(.init(data: nil, etag: response?.etag, status: .OK, errorCode: nil))
                 return
             } else if response?.statusCode != 200 {
                 #if DEBUG

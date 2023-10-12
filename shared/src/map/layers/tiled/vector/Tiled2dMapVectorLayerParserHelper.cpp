@@ -31,7 +31,8 @@
 Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromUrl(const std::string &layerName,
                                                         const std::string &styleJsonUrl,
                                                         const double &dpFactor,
-                                                        const std::vector<std::shared_ptr<::LoaderInterface>> &loaders) {
+                                                                                           const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
+                                                                                           const std::unordered_map<std::string, std::string> & sourceUrlParams) {
     DataLoaderResult result = LoaderHelper::loadData(styleJsonUrl, std::nullopt, loaders);
     if (result.status != LoaderStatus::OK) {
         LogError <<= "Unable to Load style.json from " + styleJsonUrl + " errorCode: " + (result.errorCode ? *result.errorCode : "");
@@ -39,14 +40,15 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
     }
     auto string = std::string((char*)result.data->buf(), result.data->len());
 
-    return parseStyleJsonFromString(layerName, string, dpFactor, loaders);
+    return parseStyleJsonFromString(layerName, string, dpFactor, loaders, sourceUrlParams);
 };
 
 
 Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(const std::string &layerName,
                                                         const std::string &styleJsonString,
                                                         const double &dpFactor,
-                                                        const std::vector<std::shared_ptr<::LoaderInterface>> &loaders) {
+                                                                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
+                                                                                              const std::unordered_map<std::string, std::string> & sourceUrlParams) {
 
     nlohmann::json json;
 

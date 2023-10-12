@@ -100,6 +100,78 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
++ (nullable MCTiled2dMapVectorLayerInterface *)createFromStyleJsonWithUrlParams:(nonnull NSString *)layerName
+                                                                           path:(nonnull NSString *)path
+                                                                        loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
+                                                                     fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
+                                                                       dpFactor:(double)dpFactor
+                                                                sourceUrlParams:(nonnull NSDictionary<NSString *, NSString *> *)sourceUrlParams {
+    try {
+        auto objcpp_result_ = ::Tiled2dMapVectorLayerInterface::createFromStyleJsonWithUrlParams(::djinni::String::toCpp(layerName),
+                                                                                                 ::djinni::String::toCpp(path),
+                                                                                                 ::djinni::List<::djinni_generated::LoaderInterface>::toCpp(loaders),
+                                                                                                 ::djinni_generated::FontLoaderInterface::toCpp(fontLoader),
+                                                                                                 ::djinni::F64::toCpp(dpFactor),
+                                                                                                 ::djinni::Map<::djinni::String, ::djinni::String>::toCpp(sourceUrlParams));
+        return ::djinni_generated::Tiled2dMapVectorLayerInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
++ (nullable MCTiled2dMapVectorLayerInterface *)createFromStyleJsonWithZoomInfoUrlParams:(nonnull NSString *)layerName
+                                                                                   path:(nonnull NSString *)path
+                                                                                loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
+                                                                             fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
+                                                                               dpFactor:(double)dpFactor
+                                                                               zoomInfo:(nonnull MCTiled2dMapZoomInfo *)zoomInfo
+                                                                        sourceUrlParams:(nonnull NSDictionary<NSString *, NSString *> *)sourceUrlParams {
+    try {
+        auto objcpp_result_ = ::Tiled2dMapVectorLayerInterface::createFromStyleJsonWithZoomInfoUrlParams(::djinni::String::toCpp(layerName),
+                                                                                                         ::djinni::String::toCpp(path),
+                                                                                                         ::djinni::List<::djinni_generated::LoaderInterface>::toCpp(loaders),
+                                                                                                         ::djinni_generated::FontLoaderInterface::toCpp(fontLoader),
+                                                                                                         ::djinni::F64::toCpp(dpFactor),
+                                                                                                         ::djinni_generated::Tiled2dMapZoomInfo::toCpp(zoomInfo),
+                                                                                                         ::djinni::Map<::djinni::String, ::djinni::String>::toCpp(sourceUrlParams));
+        return ::djinni_generated::Tiled2dMapVectorLayerInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
++ (nullable MCTiled2dMapVectorLayerInterface *)createFromLocalStyleJsonWithUrlParams:(nonnull NSString *)layerName
+                                                                           styleJson:(nonnull NSString *)styleJson
+                                                                             loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
+                                                                          fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
+                                                                            dpFactor:(double)dpFactor
+                                                                     sourceUrlParams:(nonnull NSDictionary<NSString *, NSString *> *)sourceUrlParams {
+    try {
+        auto objcpp_result_ = ::Tiled2dMapVectorLayerInterface::createFromLocalStyleJsonWithUrlParams(::djinni::String::toCpp(layerName),
+                                                                                                      ::djinni::String::toCpp(styleJson),
+                                                                                                      ::djinni::List<::djinni_generated::LoaderInterface>::toCpp(loaders),
+                                                                                                      ::djinni_generated::FontLoaderInterface::toCpp(fontLoader),
+                                                                                                      ::djinni::F64::toCpp(dpFactor),
+                                                                                                      ::djinni::Map<::djinni::String, ::djinni::String>::toCpp(sourceUrlParams));
+        return ::djinni_generated::Tiled2dMapVectorLayerInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
++ (nullable MCTiled2dMapVectorLayerInterface *)createFromLocalStyleJsonWithZoomInfoUrlParams:(nonnull NSString *)layerName
+                                                                                   styleJson:(nonnull NSString *)styleJson
+                                                                                     loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
+                                                                                  fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
+                                                                                    dpFactor:(double)dpFactor
+                                                                                    zoomInfo:(nonnull MCTiled2dMapZoomInfo *)zoomInfo
+                                                                             sourceUrlParams:(nonnull NSDictionary<NSString *, NSString *> *)sourceUrlParams {
+    try {
+        auto objcpp_result_ = ::Tiled2dMapVectorLayerInterface::createFromLocalStyleJsonWithZoomInfoUrlParams(::djinni::String::toCpp(layerName),
+                                                                                                              ::djinni::String::toCpp(styleJson),
+                                                                                                              ::djinni::List<::djinni_generated::LoaderInterface>::toCpp(loaders),
+                                                                                                              ::djinni_generated::FontLoaderInterface::toCpp(fontLoader),
+                                                                                                              ::djinni::F64::toCpp(dpFactor),
+                                                                                                              ::djinni_generated::Tiled2dMapZoomInfo::toCpp(zoomInfo),
+                                                                                                              ::djinni::Map<::djinni::String, ::djinni::String>::toCpp(sourceUrlParams));
+        return ::djinni_generated::Tiled2dMapVectorLayerInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)setSelectionDelegate:(nullable id<MCTiled2dMapVectorLayerSelectionCallbackInterface>)selectionDelegate {
     try {
         _cppRefHandle.get()->setSelectionDelegate(::djinni::Optional<std::optional, ::djinni_generated::Tiled2dMapVectorLayerSelectionCallbackInterface>::toCpp(selectionDelegate));

@@ -20,6 +20,18 @@ abstract class Tiled2dMapVectorLayerInterface {
 
         @JvmStatic
         external fun createFromLocalStyleJsonWithZoomInfo(layerName: String, styleJson: String, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface, dpFactor: Double, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo): Tiled2dMapVectorLayerInterface
+
+        @JvmStatic
+        external fun createFromStyleJsonWithUrlParams(layerName: String, path: String, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface, dpFactor: Double, sourceUrlParams: HashMap<String, String>): Tiled2dMapVectorLayerInterface
+
+        @JvmStatic
+        external fun createFromStyleJsonWithZoomInfoUrlParams(layerName: String, path: String, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface, dpFactor: Double, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo, sourceUrlParams: HashMap<String, String>): Tiled2dMapVectorLayerInterface
+
+        @JvmStatic
+        external fun createFromLocalStyleJsonWithUrlParams(layerName: String, styleJson: String, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface, dpFactor: Double, sourceUrlParams: HashMap<String, String>): Tiled2dMapVectorLayerInterface
+
+        @JvmStatic
+        external fun createFromLocalStyleJsonWithZoomInfoUrlParams(layerName: String, styleJson: String, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface, dpFactor: Double, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo, sourceUrlParams: HashMap<String, String>): Tiled2dMapVectorLayerInterface
     }
 
     abstract fun setSelectionDelegate(selectionDelegate: Tiled2dMapVectorLayerSelectionCallbackInterface?)

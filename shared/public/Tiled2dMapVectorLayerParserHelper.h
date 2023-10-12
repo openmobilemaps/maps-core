@@ -19,10 +19,12 @@ public:
     static Tiled2dMapVectorLayerParserResult parseStyleJsonFromUrl(const std::string &layerName,
                                                                    const std::string &styleJsonUrl,
                                                                    const double &dpFactor,
-                                                                   const std::vector<std::shared_ptr<::LoaderInterface>> &loaders);
+                                                                   const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
+                                                                   const std::unordered_map<std::string, std::string> & sourceUrlParams);
 
     static Tiled2dMapVectorLayerParserResult parseStyleJsonFromString(const std::string &layerName,
                                                                       const std::string &styleJsonString,
                                                                       const double &dpFactor,
-                                                                      const std::vector<std::shared_ptr<::LoaderInterface>> &loaders);
+                                                                      const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
+                                                                      const std::unordered_map<std::string, std::string> & sourceUrlParams);
 };
