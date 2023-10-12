@@ -296,7 +296,8 @@ public:
 
     Vec2F getIconOffset(const EvaluationContext &context) {
         static const Vec2F defaultValue(0.0, 0.0);
-        return iconOffsetEvaluator.getResult(iconOffset, context, defaultValue);
+        const auto result = iconOffsetEvaluator.getResult(iconOffset, context, defaultValue);
+        return Vec2F(result.x * dpFactor, result.x * dpFactor);
     }
 
     bool getIconOptional(const EvaluationContext &context) {
