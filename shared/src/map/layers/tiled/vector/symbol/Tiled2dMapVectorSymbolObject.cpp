@@ -488,8 +488,10 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
 
     isStretchIconOpaque = alphas[countOffset] == 0;
 
+    rotations[countOffset] = iconRotate;
+
     if (lastIconUpdateRotation != rotation && iconRotationAlignment != SymbolAlignment::MAP) {
-        rotations[countOffset] = rotation;
+        rotations[countOffset] += rotation;
     }
 
     const double densityOffset = (camera->getScreenDensityPpi() / 160.0) / stretchSpriteInfo->pixelRatio;
@@ -502,11 +504,16 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     const float bottomPadding = iconTextFitPadding[2] * stretchSpriteInfo->pixelRatio * densityOffset * scaleFactor;
     const float leftPadding = iconTextFitPadding[3] * stretchSpriteInfo->pixelRatio * densityOffset * scaleFactor;
 
-    const auto textWidth = labelObject->dimensions.x + (leftPadding + rightPadding);
-    const auto textHeight = labelObject->dimensions.y + (topPadding + bottomPadding);
+    double textWidth = 0.0;
+    double textHeight = 0.0;
 
-    auto scaleX = std::max(1.0, textWidth / (spriteWidth * iconSize));
-    auto scaleY = std::max(1.0, textHeight / (spriteHeight * iconSize));
+    if (labelObject) {
+        textWidth = labelObject->dimensions.x + (leftPadding + rightPadding);
+        textHeight = labelObject->dimensions.y + (topPadding + bottomPadding);
+    }
+
+    const auto scaleX = std::max(1.0, textWidth / (spriteWidth * iconSize));
+    const auto scaleY = std::max(1.0, textHeight / (spriteHeight * iconSize));
 
     if (iconTextFit == IconTextFit::WIDTH || iconTextFit == IconTextFit::BOTH) {
         spriteWidth *= scaleX;
