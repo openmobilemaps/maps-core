@@ -20,12 +20,14 @@ open class MCTextureLoader: MCLoaderInterface {
     var taskQueue = DispatchQueue(label: "MCTextureLoader.tasks")
     var tasks: [String: URLSessionTask] = [:]
 
+    public let urlCache = URLCache(memoryCapacity: 100 * 1024 * 1024, diskCapacity: 500 * 1024 * 1024, diskPath: "ch.openmobilemaps.urlcache")
+
     public init(urlSession: URLSession? = nil) {
         if let urlSession {
             session = urlSession
         } else {
             let sessionConfig = URLSessionConfiguration.default
-            sessionConfig.urlCache = URLCache(memoryCapacity: 100 * 1024 * 1024, diskCapacity: 500 * 1024 * 1024, diskPath: "ch.openmobilemaps.urlcache")
+            sessionConfig.urlCache = urlCache
             sessionConfig.networkServiceType = .responsiveData
             session = .init(configuration: sessionConfig)
         }
@@ -76,17 +78,29 @@ open class MCTextureLoader: MCLoaderInterface {
             let error: NSError? = error_ as NSError?
 
             if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorTimedOut {
+                #if DEBUG
+                print("Failed to load \(url): Timeout")
+                #endif
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_TIMEOUT, errorCode: (error?.code).stringOrNil))
                 return
             }
 
             if response?.statusCode == 404 {
+                #if DEBUG
+                print("Failed to load \(url): 404, \(data.map { String(data: $0, encoding: .utf8) ?? "?" } ?? "?")")
+                #endif
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_404, errorCode: (response?.statusCode).stringOrNil))
                 return
             } else if response?.statusCode == 400 {
+                #if DEBUG
+                print("Failed to load \(url): 400, \(data.map { String(data: $0, encoding: .utf8) ?? "?" } ?? "?")")
+                #endif
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_400, errorCode: (response?.statusCode).stringOrNil))
                 return
             } else if response?.statusCode != 200 {
+                #if DEBUG
+                print("Failed to load \(url): \(response?.statusCode ?? 0), \(data.map { String(data: $0, encoding: .utf8) ?? "?" } ?? "?")")
+                #endif
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_NETWORK, errorCode: (response?.statusCode).stringOrNil))
                 return
             }
@@ -191,17 +205,34 @@ open class MCTextureLoader: MCLoaderInterface {
             let error: NSError? = error_ as NSError?
 
             if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorTimedOut {
+                #if DEBUG
+                print("Failed to load \(url): Timeout")
+                #endif
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_TIMEOUT, errorCode: (error?.code).stringOrNil))
                 return
             }
 
+            if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorCancelled {
+                promise.setValue(.init(data: nil, etag: nil, status: .OK, errorCode: nil))
+                return
+            }
+
             if response?.statusCode == 404 {
+                #if DEBUG
+                print("Failed to load \(url): 404, \(data.map { String(data: $0, encoding: .utf8) ?? "?" } ?? "?")")
+                #endif
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_404, errorCode: (response?.statusCode).stringOrNil))
                 return
             } else if response?.statusCode == 400 {
+                #if DEBUG
+                print("Failed to load \(url): 400, \(data.map { String(data: $0, encoding: .utf8) ?? "?" } ?? "?")")
+                #endif
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_400, errorCode: (response?.statusCode).stringOrNil))
                 return
             } else if response?.statusCode != 200 {
+                #if DEBUG
+                print("Failed to load \(url): \(response?.statusCode ?? 0), \(data.map { String(data: $0, encoding: .utf8) ?? "?" } ?? "?")")
+                #endif
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_NETWORK, errorCode: (response?.statusCode).stringOrNil))
                 return
             }
