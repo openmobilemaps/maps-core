@@ -262,9 +262,6 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
 
     const auto evalContext = EvaluationContext(zoomIdentifier, featureContext, featureStateManager);
 
-    initialRenderCoordinateVec.y -= iconOffset.y;
-    initialRenderCoordinateVec.x += iconOffset.x;
-
     auto iconImage = description->style.getIconImage(evalContext);
 
     if (iconImage.empty() || !spriteTexture) {
@@ -354,8 +351,8 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
 
     renderCoordinate = getRenderCoordinates(iconAnchor, -rotations[countOffset], iconWidth, iconHeight);
 
-    positions[2 * countOffset] = renderCoordinate.x;
-    positions[2 * countOffset + 1] = renderCoordinate.y;
+    positions[2 * countOffset] = renderCoordinate.x + iconOffset.x * scaleFactor * iconSize;
+    positions[2 * countOffset + 1] = renderCoordinate.y + iconOffset.y * scaleFactor * iconSize;
 
     iconBoundingBoxViewportAligned.x = renderCoordinate.x - iconWidth * 0.5 - scaledIconPadding;
     iconBoundingBoxViewportAligned.y = renderCoordinate.y - iconWidth * 0.5 - scaledIconPadding;
@@ -402,9 +399,6 @@ void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(std::vector<float>
     const auto textureWidth = (double) spriteTexture->getImageWidth();
     const auto textureHeight = (double) spriteTexture->getImageHeight();
     
-    initialRenderCoordinateVec.y -= iconOffset.y;
-    initialRenderCoordinateVec.x += iconOffset.x;
-
     auto iconImage = description->style.getIconImage(evalContext);
 
     if (iconImage.empty() || !spriteTexture) {
