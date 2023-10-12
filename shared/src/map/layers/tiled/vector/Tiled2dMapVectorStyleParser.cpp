@@ -13,6 +13,7 @@
 const std::string Tiled2dMapVectorStyleParser::literalExpression = "literal";
 const std::string Tiled2dMapVectorStyleParser::getExpression = "get";
 const std::string Tiled2dMapVectorStyleParser::hasExpression = "has";
+const std::string Tiled2dMapVectorStyleParser::hasNotExpression = "!has";
 const std::string Tiled2dMapVectorStyleParser::inExpression = "in";
 const std::string Tiled2dMapVectorStyleParser::notInExpression = "!in";
 const std::unordered_set<std::string> Tiled2dMapVectorStyleParser::compareExpression = { "==", "!=", "<", "<=", ">", ">="};

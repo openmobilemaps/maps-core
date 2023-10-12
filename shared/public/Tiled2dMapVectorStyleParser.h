@@ -25,6 +25,7 @@ public:
     static const std::string literalExpression;
     static const std::string getExpression;
     static const std::string hasExpression;
+    static const std::string hasNotExpression;
     static const std::string inExpression;
     static const std::string notInExpression;
     static const std::unordered_set<std::string> compareExpression;
@@ -66,9 +67,15 @@ public:
                 auto key = json[1].get<std::string>();
                 return std::make_shared<FeatureStateValue>(key);
 
-                // Example: [ "has", "ref" ]
-            } else if (isExpression(json[0], hasExpression) && json.size() == 2 && json[1].is_string()) {
-                return std::make_shared<HasPropertyValue>(json[1].get<std::string>());
+                // Example: [ "has",  "ref" ]
+                //          [ "!has", "ref"]
+            } else if ((isExpression(json[0], hasExpression) || isExpression(json[0], hasNotExpression)) && json.size() == 2 && json[1].is_string()) {
+                if (isExpression(json[0], hasExpression)) {
+                    return std::make_shared<HasPropertyValue>(json[1].get<std::string>());
+                }
+                else {
+                    return std::make_shared<HasNotPropertyValue>(json[1].get<std::string>());
+                }
 
                 // Example: [ "in", "admin_level", 2, 4 ]
                 //          [ "in", ["get", "subclass"], ["literal", ["allotments", "forest", "glacier", "golf_course", "park"]]]

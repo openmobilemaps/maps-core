@@ -853,6 +853,32 @@ private:
     const std::string key;
 };
 
+class HasNotPropertyValue : public Value {
+public:
+    HasNotPropertyValue(const std::string key) : key(key) {};
+
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<HasNotPropertyValue>(key);
+    }
+
+    std::unordered_set<std::string> getUsedKeys() const override {
+        return { key };
+    }
+
+    ValueVariant evaluate(const EvaluationContext &context) const override {
+        return !context.feature->contains(key);
+    };
+
+    bool isEqual(const std::shared_ptr<Value> &other) const override {
+        if (auto casted = std::dynamic_pointer_cast<HasNotPropertyValue>(other)) {
+            return casted->key == key;
+        }
+        return false;
+    };
+private:
+    const std::string key;
+};
+
 
 class ScaleValue : public Value {
 public:
