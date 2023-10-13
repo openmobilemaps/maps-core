@@ -493,21 +493,19 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     auto spriteWidth = stretchSpriteInfo->width * densityOffset * scaleFactor;
     auto spriteHeight = stretchSpriteInfo->height * densityOffset * scaleFactor;
 
-    const float topPadding = iconTextFitPadding[0] * stretchSpriteInfo->pixelRatio * densityOffset * scaleFactor;
-    const float rightPadding = iconTextFitPadding[1] * stretchSpriteInfo->pixelRatio * densityOffset * scaleFactor;
-    const float bottomPadding = iconTextFitPadding[2] * stretchSpriteInfo->pixelRatio * densityOffset * scaleFactor;
-    const float leftPadding = iconTextFitPadding[3] * stretchSpriteInfo->pixelRatio * densityOffset * scaleFactor;
+    const float topPadding = iconTextFitPadding[0] * densityOffset * scaleFactor;
+    const float rightPadding = iconTextFitPadding[1] * densityOffset * scaleFactor;
+    const float bottomPadding = iconTextFitPadding[2] * densityOffset * scaleFactor;
+    const float leftPadding = iconTextFitPadding[3] * densityOffset * scaleFactor;
 
-    double textWidth = 0.0;
-    double textHeight = 0.0;
-
+    auto scaleX = 1.0;
+    auto scaleY = 1.0;
     if (labelObject) {
-        textWidth = labelObject->dimensions.x + (leftPadding + rightPadding);
-        textHeight = labelObject->dimensions.y + (topPadding + bottomPadding);
+        const double textWidth = labelObject->dimensions.x + (leftPadding + rightPadding);
+        const double textHeight = labelObject->dimensions.y + (topPadding + bottomPadding);
+        scaleX = std::max(1.0, textWidth / (spriteWidth * iconSize));
+        scaleY = std::max(1.0, textHeight / (spriteHeight * iconSize));
     }
-
-    const auto scaleX = std::max(1.0, textWidth / (spriteWidth * iconSize));
-    const auto scaleY = std::max(1.0, textHeight / (spriteHeight * iconSize));
 
     if (iconTextFit == IconTextFit::WIDTH || iconTextFit == IconTextFit::BOTH) {
         spriteWidth *= scaleX;
