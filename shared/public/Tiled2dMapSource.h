@@ -174,6 +174,8 @@ private:
     std::optional<long long> nextDelayTaskExecution;
 
     std::unordered_set<Tiled2dMapTileInfo> notFoundTiles;
+
+    size_t lastVisibleTilesHash;
 };
 
 #include "Tiled2dMapSourceImpl.h"

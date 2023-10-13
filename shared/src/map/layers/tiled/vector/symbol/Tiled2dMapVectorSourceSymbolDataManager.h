@@ -79,7 +79,7 @@ public:
 
     void collisionDetection(std::vector<std::string> layerIdentifiers, std::shared_ptr<CollisionGrid> collisionGrid);
 
-    void update(long long now);
+    bool update(long long now);
 
     void setSprites(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) override;
 

@@ -213,7 +213,15 @@ private:
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSourceSymbolDataManager>> symbolSourceDataManagers;
     Actor<Tiled2dMapVectorSourceSymbolCollisionManager> collisionManager;
     std::atomic_flag prevCollisionStillValid;
+    std::atomic_flag tilesStillValid;
     std::shared_ptr<Tiled2dMapVectorInteractionManager> interactionManager;
+
+              long long lastDataManagerUpdate = 0;
+              long long lastCollitionCheck = 0;
+              double lastDataManagerZoom = 0;
+              bool isAnimating = false;
+
+              long long totalCount = 0, updateCount = 0, collisionCount = 0;
 
     std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> strongSelectionDelegate;
     std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> selectionDelegate;

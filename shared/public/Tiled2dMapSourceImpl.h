@@ -45,6 +45,13 @@ bool Tiled2dMapSource<T, L, R>::isTileVisible(const Tiled2dMapTileInfo &tileInfo
     return currentVisibleTiles.count(tileInfo) > 0;
 }
 
+template <typename T>
+static void hash_combine(size_t& seed, const T& value) {
+    std::hash<T> hasher;
+    auto v = hasher(value);
+    seed ^= v + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+}
+
 template<class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, int curT, double zoom) {
     if (isPaused) {
@@ -112,6 +119,8 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
     const double visibleBottom = visibleBoundsLayer.bottomRight.y - signHeight * viewboundsPadding;
     visibleHeight = std::abs(visibleHeight) + 2 * viewboundsPadding;
 
+    size_t visibleTileHash = 0;
+
     for (int i = startZoomLayer; i <= endZoomLevel; i++) {
         const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(i);
 
@@ -150,6 +159,13 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
         const double maxDisCenterX = visibleWidth * 0.5 + tileWidth;
         const double maxDisCenterY = visibleHeight * 0.5 + tileWidth;
         const double maxDisCenter = std::sqrt(maxDisCenterX * maxDisCenterX + maxDisCenterY * maxDisCenterY);
+
+        hash_combine(visibleTileHash, std::hash<int>{}(i));
+        hash_combine(visibleTileHash, std::hash<int>{}(startTileLeft));
+        hash_combine(visibleTileHash, std::hash<int>{}(maxTileLeft));
+        hash_combine(visibleTileHash, std::hash<int>{}(startTileTop));
+        hash_combine(visibleTileHash, std::hash<int>{}(maxTileTop));
+        hash_combine(visibleTileHash, std::hash<int>{}(zoomLevelInfo.numTilesT));
 
         for (int x = startTileLeft; x <= maxTileLeft && x < zoomLevelInfo.numTilesX; x++) {
             for (int y = startTileTop; y <= maxTileTop && y < zoomLevelInfo.numTilesY; y++) {
@@ -192,7 +208,10 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
         currentZoomLevelIdentifier = targetZoomLevelIdentifier;
     }
 
-    onVisibleTilesChanged(layers, keepZoomLevelOffset);
+    if (lastVisibleTilesHash != visibleTileHash) {
+        lastVisibleTilesHash = visibleTileHash;
+        onVisibleTilesChanged(layers, keepZoomLevelOffset);
+    }
     currentViewBounds = visibleBoundsLayer;
 }
 

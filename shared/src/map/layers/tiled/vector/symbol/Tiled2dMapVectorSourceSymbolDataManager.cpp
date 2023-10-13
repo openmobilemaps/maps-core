@@ -595,7 +595,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
     }
 }
 
-void Tiled2dMapVectorSourceSymbolDataManager::update(long long now) {
+bool Tiled2dMapVectorSourceSymbolDataManager::update(long long now) {
     auto mapInterface = this->mapInterface.lock();
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
@@ -626,7 +626,9 @@ void Tiled2dMapVectorSourceSymbolDataManager::update(long long now) {
 
     if (animationCoordinatorMap->isAnimating()) {
         mapInterface->invalidate();
+        return true;
     }
+    return false;
 }
 
 void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {

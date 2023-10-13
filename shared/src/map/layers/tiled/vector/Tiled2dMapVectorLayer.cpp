@@ -462,19 +462,39 @@ void Tiled2dMapVectorLayer::update() {
         if (!camera) {
             return;
         }
-        bool enforceUpdate = !prevCollisionStillValid.test_and_set();
-        Vec2I viewportSize = renderingContext->getViewportSize();
-        float viewportRotation = camera->getRotation();
-        std::optional<std::vector<float>> vpMatrix = camera->getLastVpMatrix();
-        if (!vpMatrix) return;
-        for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
-            sourceDataManager.syncAccess([&now](const auto &manager) {
-                manager->update(now);
-            });
+        double newZoom = camera->getZoom();
+        auto now = DateHelper::currentTimeMillis();
+        bool newIsAnimating = false;
+        totalCount += 1;
+        bool tilesChanged = !tilesStillValid.test_and_set();
+        if (abs(newZoom-lastDataManagerZoom) / std::max(newZoom, 1.0) > 0.001 || now - lastDataManagerUpdate > 1000 || isAnimating || tilesChanged) {
+            lastDataManagerUpdate = now;
+            lastDataManagerZoom = newZoom;
+
+            Vec2I viewportSize = renderingContext->getViewportSize();
+            float viewportRotation = camera->getRotation();
+            std::optional<std::vector<float>> vpMatrix = camera->getLastVpMatrix();
+            if (!vpMatrix) return;
+            for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
+                bool a = sourceDataManager.syncAccess([&now](const auto &manager) {
+                    return manager->update(now);
+                });
+                newIsAnimating |= a;
+            }
+            isAnimating = newIsAnimating;
+            updateCount += 1;
+            if (now - lastCollitionCheck > 3000 || tilesChanged) {
+                lastCollitionCheck = now;
+                collisionCount += 1;
+//                printf("update: %f, collision: %f\n", (double)updateCount / (double)totalCount, (double)collisionCount / (double)totalCount);
+                bool enforceUpdate = !prevCollisionStillValid.test_and_set();
+                collisionManager.syncAccess([&vpMatrix, &viewportSize, viewportRotation, enforceUpdate](const auto &manager) {
+                    manager->collisionDetection(*vpMatrix, viewportSize, viewportRotation, enforceUpdate);
+                });
+            }
         }
-        collisionManager.syncAccess([&vpMatrix, &viewportSize, viewportRotation, enforceUpdate](const auto &manager) {
-            manager->collisionDetection(*vpMatrix, viewportSize, viewportRotation, enforceUpdate);
-        });
+
+
     }
 }
 
@@ -654,6 +674,7 @@ void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &layerName, std::un
     if (sourceManager != sourceDataManagers.end()) {
         sourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::onRasterTilesUpdated, layerName, currentTileInfos);
     }
+    tilesStillValid.clear();
 }
 
 void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) {
@@ -665,6 +686,7 @@ void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &sourceName, std::u
     if (symbolSourceManager != symbolSourceDataManagers.end()) {
         symbolSourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::onVectorTilesUpdated, sourceName, currentTileInfos);
     }
+    tilesStillValid.clear();
 }
 
 void Tiled2dMapVectorLayer::loadSpriteData() {
