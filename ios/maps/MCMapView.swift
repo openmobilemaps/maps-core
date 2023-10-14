@@ -83,6 +83,8 @@ open class MCMapView: MTKView {
 
         preferredFramesPerSecond = 120
 
+        sampleCount = 4 // samples per pixel
+
         callbackHandler.invalidateCallback = { [weak self] in
             self?.invalidate()
         }
