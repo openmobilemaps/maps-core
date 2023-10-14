@@ -13,7 +13,7 @@
 #include "SymbolAnimationCoordinator.h"
 
 struct CoordinatorXCompare {
-    bool operator() (const std::shared_ptr<SymbolAnimationCoordinator> &a, const std::shared_ptr<SymbolAnimationCoordinator> &b) {
+    bool operator() (const std::shared_ptr<SymbolAnimationCoordinator> &a, const std::shared_ptr<SymbolAnimationCoordinator> &b) const {
         return a->coordinate.x < b->coordinate.x;
     };
 };
