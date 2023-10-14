@@ -527,7 +527,7 @@ void MapCamera2d::inertiaStep() {
     double delta = (now - inertia->timestampStart) / 16000.0;
     double deltaPrev = (now - inertia->timestampUpdate) / 16000.0;
 
-    if (delta * 0.1 >= inertia->t1 + inertia->t2) {
+    if (delta >= inertia->t1 + inertia->t2) {
         inertia = std::nullopt;
         return;
     }
