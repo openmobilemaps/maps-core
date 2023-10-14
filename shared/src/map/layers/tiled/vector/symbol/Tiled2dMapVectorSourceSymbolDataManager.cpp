@@ -609,11 +609,20 @@ bool Tiled2dMapVectorSourceSymbolDataManager::update(long long now) {
 
     const auto scaleFactor = camera->mapUnitsFromPixels(1.0);
 
+    bool inSetup = false;
+
     for (const auto &[tile, symbolGroupsMap]: tileSymbolGroupMap) {
         const auto tileState = tileStateMap.find(tile);
-        if (tileState == tileStateMap.end() || tileState->second != TileState::VISIBLE) {
+        if (tileState == tileStateMap.end()) {
             continue;
         }
+        if (tileState->second != TileState::VISIBLE) {
+            if (tileState->second == TileState::IN_SETUP) {
+                inSetup = true;
+            }
+            continue;
+        }
+
         for (const auto &[layerIdentifier, symbolGroups]: symbolGroupsMap) {
             const auto &description = layerDescriptions.at(layerIdentifier);
             for (auto &symbolGroup: std::get<1>(symbolGroups)) {
@@ -628,7 +637,7 @@ bool Tiled2dMapVectorSourceSymbolDataManager::update(long long now) {
         mapInterface->invalidate();
         return true;
     }
-    return false;
+    return inSetup;
 }
 
 void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {

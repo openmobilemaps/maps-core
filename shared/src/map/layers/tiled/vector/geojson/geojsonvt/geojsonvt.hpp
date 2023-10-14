@@ -107,6 +107,15 @@ public:
         });
     }
 
+    void reload(const std::vector<std::shared_ptr<::LoaderInterface>> &loaders) override {
+        std::lock_guard<std::recursive_mutex> lock(mutex);
+        auto self = shared_from_this();
+        self->loadingResult = std::nullopt;
+        self->loaders = loaders;
+        self->tiles.clear();
+        load();
+    }
+
     void waitIfNotLoaded(std::shared_ptr<::djinni::Promise<std::shared_ptr<DataLoaderResult>>> promise) override {
         std::lock_guard<std::recursive_mutex> lock(mutex);
         if (loadingResult) {

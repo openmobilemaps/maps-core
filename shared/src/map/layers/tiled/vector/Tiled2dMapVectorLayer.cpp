@@ -483,7 +483,7 @@ void Tiled2dMapVectorLayer::update() {
             }
             isAnimating = newIsAnimating;
             updateCount += 1;
-            if (now - lastCollitionCheck > 3000 || tilesChanged) {
+            if (now - lastCollitionCheck > 2000 || tilesChanged) {
                 lastCollitionCheck = now;
                 collisionCount += 1;
 //                printf("update: %f, collision: %f\n", (double)updateCount / (double)totalCount, (double)collisionCount / (double)totalCount);

@@ -75,6 +75,15 @@ protected:
         return featureMap;
     }
 
+    virtual void clearData() override {
+        lastVisibleTilesHash = 0;
+        readyTiles.clear();
+        auto lastPyramide = currentPyramid;
+        onVisibleTilesChanged({});
+        onVisibleTilesChanged(lastPyramide);
+        notifyTilesUpdates();
+    }
+
 private:
     const std::shared_ptr<GeoJSONVTInterface> geoJson;
 };

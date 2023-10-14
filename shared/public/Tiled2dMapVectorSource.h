@@ -41,6 +41,9 @@ public:
     virtual void resume() override;
 
     virtual void notifyTilesUpdates() override;
+
+    std::string getSourceName();
+    virtual void clearData();
 protected:
     
     virtual void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) override;

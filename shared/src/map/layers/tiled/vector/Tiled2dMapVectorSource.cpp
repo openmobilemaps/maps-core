@@ -106,3 +106,10 @@ void Tiled2dMapVectorSource::pause() {
 void Tiled2dMapVectorSource::resume() {
     // TODO: Reload textures of current tiles
 }
+
+std::string Tiled2dMapVectorSource::getSourceName() {
+    return sourceName;
+}
+
+void Tiled2dMapVectorSource::clearData() {
+}

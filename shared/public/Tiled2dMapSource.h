@@ -153,10 +153,13 @@ public:
     float screenDensityPpi;
     std::set<Tiled2dMapTileInfo> readyTiles;
 
+    size_t lastVisibleTilesHash;
+            
+    void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, int keepZoomLevelOffset = 0);
+
 private:
     void performLoadingTask(Tiled2dMapTileInfo tile, size_t loaderIndex);
 
-    void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, int keepZoomLevelOffset = 0);
 
     void updateTileMasks();
 
@@ -175,7 +178,6 @@ private:
 
     std::unordered_set<Tiled2dMapTileInfo> notFoundTiles;
 
-    size_t lastVisibleTilesHash;
 };
 
 #include "Tiled2dMapSourceImpl.h"
