@@ -22,8 +22,9 @@ Tiled2dMapVectorSource::Tiled2dMapVectorSource(const MapConfig &mapConfig,
                                                const WeakActor<Tiled2dMapVectorSourceListener> &listener,
                                                const std::unordered_set<std::string> &layersToDecode,
                                                const std::string &sourceName,
-                                               float screenDensityPpi)
-        : Tiled2dMapSource<std::shared_ptr<djinni::DataRef>, std::shared_ptr<DataLoaderResult>, Tiled2dMapVectorTileInfo::FeatureMap>(mapConfig, layerConfig, conversionHelper, scheduler, screenDensityPpi, tileLoaders.size()),
+                                               float screenDensityPpi,
+                                               std::string layerName)
+        : Tiled2dMapSource<std::shared_ptr<djinni::DataRef>, std::shared_ptr<DataLoaderResult>, Tiled2dMapVectorTileInfo::FeatureMap>(mapConfig, layerConfig, conversionHelper, scheduler, screenDensityPpi, tileLoaders.size(), layerName),
 loaders(tileLoaders), layersToDecode(layersToDecode), listener(listener), sourceName(sourceName) {}
 
 ::djinni::Future<std::shared_ptr<DataLoaderResult>> Tiled2dMapVectorSource::loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) {

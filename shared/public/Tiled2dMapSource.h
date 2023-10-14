@@ -78,7 +78,8 @@ public:
                      const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                      const std::shared_ptr<SchedulerInterface> &scheduler,
                      float screenDensityPpi,
-                     size_t loaderCount);
+                     size_t loaderCount,
+                     std::string layerName);
 
     virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, int curT, double zoom) override;
 
@@ -177,6 +178,8 @@ private:
     std::optional<long long> nextDelayTaskExecution;
 
     std::unordered_set<Tiled2dMapTileInfo> notFoundTiles;
+
+    std::string layerName;
 
 };
 

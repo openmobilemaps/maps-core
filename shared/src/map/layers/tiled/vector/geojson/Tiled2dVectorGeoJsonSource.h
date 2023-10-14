@@ -33,8 +33,9 @@ public:
                                const std::unordered_set<std::string> &layersToDecode,
                                const std::string &sourceName,
                                float screenDensityPpi,
-                               std::shared_ptr<GeoJSONVTInterface> geoJson) :
-    Tiled2dMapVectorSource(mapConfig, layerConfig, conversionHelper, scheduler, tileLoaders, listener, layersToDecode, sourceName, screenDensityPpi),
+                               std::shared_ptr<GeoJSONVTInterface> geoJson,
+                               std::string layerName) :
+    Tiled2dMapVectorSource(mapConfig, layerConfig, conversionHelper, scheduler, tileLoaders, listener, layersToDecode, sourceName, screenDensityPpi, layerName),
     geoJson(geoJson) {}
 
     std::unordered_set<Tiled2dMapVectorTileInfo> getCurrentTiles() {

@@ -26,7 +26,8 @@ class Tiled2dMapRasterSource
                            const std::shared_ptr<SchedulerInterface> &scheduler,
                            const std::vector<std::shared_ptr<::LoaderInterface>> & loaders,
                            const WeakActor<Tiled2dMapRasterSourceListener> &listener,
-                           float screenDensityPpi);
+                           float screenDensityPpi,
+                           std::string layerName);
 
     std::unordered_set<Tiled2dMapRasterTileInfo> getCurrentTiles();
 

@@ -281,7 +281,8 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                  mapInterface->getCoordinateConverterHelper(),
                                                                  mapInterface->getScheduler(), loaders,
                                                                  selfRasterActor,
-                                                                 mapInterface->getCamera()->getScreenDensityPpi());
+                                                                 mapInterface->getCamera()->getScreenDensityPpi(),
+                                                                 layerName);
                 rasterSources.push_back(sourceActor);
 
 
@@ -333,7 +334,8 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                               layers,
                                                               source,
                                                               mapInterface->getCamera()->getScreenDensityPpi(),
-                                                              mapDescription->geoJsonSources.at(source)).strongActor<Tiled2dMapVectorSource>();
+                                                              mapDescription->geoJsonSources.at(source),
+                                                              layerName).strongActor<Tiled2dMapVectorSource>();
         } else {
             vectorSource = Actor<Tiled2dMapVectorSource>(sourceMailbox,
                                                               mapInterface->getMapConfig(),
@@ -344,7 +346,8 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                               selfVectorActor,
                                                               layers,
                                                               source,
-                                                              mapInterface->getCamera()->getScreenDensityPpi());
+                                                              mapInterface->getCamera()->getScreenDensityPpi(),
+                                                              layerName);
         }
         vectorTileSources[source] = vectorSource;
         sourceInterfaces.push_back(vectorSource.weakActor<Tiled2dMapSourceInterface>());

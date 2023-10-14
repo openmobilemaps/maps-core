@@ -20,9 +20,10 @@ Tiled2dMapRasterSource::Tiled2dMapRasterSource(const MapConfig &mapConfig,
                                                const std::shared_ptr<SchedulerInterface> &scheduler,
                                                const std::vector<std::shared_ptr<::LoaderInterface>> & loaders,
                                                const WeakActor<Tiled2dMapRasterSourceListener> &listener,
-                                               float screenDensityPpi)
+                                               float screenDensityPpi,
+                                               std::string layerName)
     : Tiled2dMapSource<TextureHolderInterface, std::shared_ptr<TextureLoaderResult>, std::shared_ptr<::TextureHolderInterface>>(
-          mapConfig, layerConfig, conversionHelper, scheduler, screenDensityPpi, loaders.size())
+          mapConfig, layerConfig, conversionHelper, scheduler, screenDensityPpi, loaders.size(), layerName)
 , loaders(loaders)
 , rasterLayerActor(listener){}
 

@@ -23,7 +23,8 @@ Tiled2dMapSource<T, L, R>::Tiled2dMapSource(const MapConfig &mapConfig, const st
                                          const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                          const std::shared_ptr<SchedulerInterface> &scheduler,
                                          float screenDensityPpi,
-                                         size_t loaderCount)
+                                         size_t loaderCount,
+                                         std::string layerName)
     : mapConfig(mapConfig)
     , layerConfig(layerConfig)
     , conversionHelper(conversionHelper)
@@ -32,7 +33,8 @@ Tiled2dMapSource<T, L, R>::Tiled2dMapSource(const MapConfig &mapConfig, const st
     , zoomInfo(layerConfig->getZoomInfo())
     , layerSystemId(layerConfig->getCoordinateSystemIdentifier())
     , isPaused(false)
-    , screenDensityPpi(screenDensityPpi) {
+    , screenDensityPpi(screenDensityPpi)
+    , layerName(layerName) {
     std::sort(zoomLevelInfos.begin(), zoomLevelInfos.end(),
               [](const Tiled2dMapZoomLevelInfo &a, const Tiled2dMapZoomLevelInfo &b) -> bool { return a.zoom > b.zoom; });
 }
@@ -448,7 +450,7 @@ void Tiled2dMapSource<T, L, R>::didFailToLoad(Tiled2dMapTileInfo tile, size_t lo
             if (errorManager) {
                 errorManager->addTiledLayerError(TiledLayerError(status,
                                                                  errorCode,
-                                                                 layerConfig->getLayerName(),
+                                                                 layerName,
                                                                  layerConfig->getTileUrl(tile.x, tile.y, tile.t,tile.zoomIdentifier),
                                                                  false,
                                                                  tile.bounds));
