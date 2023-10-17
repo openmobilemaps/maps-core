@@ -14,6 +14,7 @@
 #include "MapCamera2dInterface.h"
 #include "RenderObject.h"
 #include "RenderPass.h"
+#include "BlendMode.h"
 #include <IconType.h>
 
 IconLayer::IconLayer()
@@ -101,6 +102,7 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
 
     for (const auto &icon : icons) {
         auto shader = shaderFactory->createAlphaShader();
+        shader->asShaderProgramInterface()->setBlendMode(icon->getBlendMode());
         auto quadObject = objectFactory->createQuad(shader->asShaderProgramInterface());
 
         auto iconObject = std::make_shared<Textured2dLayerObject>(quadObject, shader, mapInterface);

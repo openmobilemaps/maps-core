@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "BlendMode.h"
 #include "Coord.h"
 #include "TextureHolderInterface.h"
 #include "Vec2F.h"
@@ -16,7 +17,7 @@ class IconFactory {
 public:
     virtual ~IconFactory() = default;
 
-    static /*not-null*/ std::shared_ptr<IconInfoInterface> createIcon(const std::string & identifier, const ::Coord & coordinate, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & texture, const ::Vec2F & iconSize, IconType scaleType);
+    static /*not-null*/ std::shared_ptr<IconInfoInterface> createIcon(const std::string & identifier, const ::Coord & coordinate, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & texture, const ::Vec2F & iconSize, IconType scaleType, ::BlendMode blendMode);
 
-    static /*not-null*/ std::shared_ptr<IconInfoInterface> createIconWithAnchor(const std::string & identifier, const ::Coord & coordinate, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & texture, const ::Vec2F & iconSize, IconType scaleType, const ::Vec2F & iconAnchor);
+    static /*not-null*/ std::shared_ptr<IconInfoInterface> createIconWithAnchor(const std::string & identifier, const ::Coord & coordinate, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & texture, const ::Vec2F & iconSize, IconType scaleType, ::BlendMode blendMode, const ::Vec2F & iconAnchor);
 };

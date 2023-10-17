@@ -11,13 +11,14 @@
 #include "IconInfo.h"
 
 IconInfo::IconInfo(const std::string &identifier, const Coord &coordinate, const std::shared_ptr<::TextureHolderInterface> &texture,
-                   const Vec2F &iconSize, IconType type, const ::Vec2F &anchor)
+                   const Vec2F &iconSize, IconType type, const ::Vec2F &anchor, BlendMode blendMode)
     : identifier(identifier)
     , coordinate(coordinate)
     , texture(texture)
     , iconSize(iconSize)
     , type(type)
-    , anchor(anchor) {}
+    , anchor(anchor)
+    , blendMode(blendMode) {}
 
 std::string IconInfo::getIdentifier() { return identifier; }
 
@@ -36,3 +37,5 @@ void IconInfo::setType(IconType type) { this->type = type; }
 IconType IconInfo::getType() { return type; }
 
 ::Vec2F IconInfo::getIconAnchor() { return anchor; }
+
+BlendMode IconInfo::getBlendMode() { return blendMode; }

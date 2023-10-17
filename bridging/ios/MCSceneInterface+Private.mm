@@ -5,6 +5,7 @@
 #import "MCSceneInterface.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
+#import "DJIMarshal+Private.h"
 #import "MCCameraInterface+Private.h"
 #import "MCGraphicsObjectFactoryInterface+Private.h"
 #import "MCRendererInterface+Private.h"

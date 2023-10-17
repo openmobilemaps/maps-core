@@ -196,7 +196,8 @@ let icon = MCIconFactory.createIcon("icon",
                          coordinate: coordinate,
                          texture: texture,
                          iconSize: .init(x: Float(texture.getImageWidth()), y: Float(texture.getImageHeight())),
-                         scale: .FIXED)
+                         scale: .FIXED,
+                         blendMode: .NORMAL)
 iconLayer?.add(icon)
 iconLayer?.setCallbackHandler(handler)
 mapView.add(layer: iconLayer?.asLayerInterface())

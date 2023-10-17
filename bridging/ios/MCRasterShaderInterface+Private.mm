@@ -5,6 +5,7 @@
 #import "MCRasterShaderInterface.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
+#import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCRasterShaderStyle+Private.h"
 #import "MCShaderProgramInterface+Private.h"

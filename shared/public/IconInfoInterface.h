@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "BlendMode.h"
 #include "Coord.h"
 #include "TextureHolderInterface.h"
 #include "Vec2F.h"
@@ -32,4 +33,6 @@ public:
     virtual IconType getType() = 0;
 
     virtual ::Vec2F getIconAnchor() = 0;
+
+    virtual ::BlendMode getBlendMode() = 0;
 };
