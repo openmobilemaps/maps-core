@@ -69,6 +69,14 @@ std::optional<::Tiled2dMapVectorSettings> NativeTiled2dMapLayerConfig::JavaProxy
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::Optional<std::optional, ::djinni_generated::NativeTiled2dMapVectorSettings>::toCpp(jniEnv, jret);
 }
+std::vector<double> NativeTiled2dMapLayerConfig::JavaProxy::getExtent() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeTiled2dMapLayerConfig>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getExtent);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni::Array<::djinni::F64, ::djinni::JavaClassName<'D'>>::toCpp(jniEnv, jret);
+}
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapLayerConfig_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
@@ -131,6 +139,15 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_til
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapLayerConfig>(nativeRef);
         auto r = ref->getVectorSettings();
         return ::djinni::release(::djinni::Optional<std::optional, ::djinni_generated::NativeTiled2dMapVectorSettings>::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapLayerConfig_00024CppProxy_native_1getExtent(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapLayerConfig>(nativeRef);
+        auto r = ref->getExtent();
+        return ::djinni::release(::djinni::Array<::djinni::F64, ::djinni::JavaClassName<'D'>>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

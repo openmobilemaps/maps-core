@@ -24,4 +24,6 @@
 
 - (nullable MCTiled2dMapVectorSettings *)getVectorSettings;
 
+- (nonnull NSArray<NSNumber *> *)getExtent;
+
 @end

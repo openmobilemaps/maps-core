@@ -94,6 +94,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
 
             int minZoom = val.value("minzoom", 0);
             int maxZoom = val.value("maxzoom", 22);
+            std::vector<double> extent = {};
 
             if (val["tiles"].is_array()) {
                 auto str = val.dump();
@@ -116,6 +117,9 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                     return Tiled2dMapVectorLayerParserResult(nullptr, LoaderStatus::ERROR_OTHER, "", std::nullopt);
                 }
                 url = json["tiles"].begin()->get<std::string>();
+                for (auto &el : json["extent"].items()) {
+                    extent.push_back(el.value());
+                }
 
                 minZoom = json.value("minzoom", 0);
                 maxZoom = json.value("maxzoom", 22);
@@ -135,7 +139,9 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                                                  std::nullopt,
                                                                                  nullptr,
                                                                                  underzoom,
-                                                                                 overzoom);
+                                                                                 overzoom,
+                                                                                 extent
+                                                                                 );
 
         } else if (type == "vector" && val["url"].is_string()) {
             auto result = LoaderHelper::loadData(replaceUrlParams(val["url"].get<std::string>(), sourceUrlParams), std::nullopt, loaders);
@@ -229,6 +235,10 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                         parser.parseValue(val["paint"]["raster-saturation"]),
                                                         parser.parseValue(val["metadata"]["raster-gamma"]),
                                                         blendMode);
+            std::vector<double> extent;
+            for (auto &el : json["extent"].items()) {
+                extent.push_back(el.value());
+            }
             auto newLayer = std::make_shared<RasterVectorLayerDescription>(val["id"],
                                                                            val["source"],
                                                                            val.value("minzoom", layer->minZoom),
@@ -242,7 +252,8 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                                            layer->renderPassIndex,
                                                                            interactable,
                                                                            layer->underzoom,
-                                                                           layer->overzoom);
+                                                                           layer->overzoom,
+                                                                           extent);
             layers.push_back(newLayer);
         } else if (val["type"] == "line") {
 
@@ -353,10 +364,16 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
 
     std::vector<std::shared_ptr<VectorMapSourceDescription>> sourceDescriptions;
     for (auto const &[identifier, tileJson]: tileJsons) {
+        std::vector<double> extent;
+        for (auto &el : tileJson["extent"].items()) {
+            extent.push_back(el.value());
+        }
         sourceDescriptions.push_back(std::make_shared<VectorMapSourceDescription>(identifier,
                                                                tileJson["tiles"].begin()->get<std::string>(),
                                                                tileJson["minzoom"].get<int>(),
-                                                                                 tileJson["maxzoom"].get<int>()));
+                                                                                 tileJson["maxzoom"].get<int>(),
+                                                                                  extent
+                                                                                  ));
     }
 
 

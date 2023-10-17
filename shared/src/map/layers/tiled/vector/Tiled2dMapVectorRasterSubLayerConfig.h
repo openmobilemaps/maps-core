@@ -24,7 +24,7 @@ public:
                                          const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt)
             : Tiled2dMapVectorLayerConfig(
             std::make_shared<VectorMapSourceDescription>(layerDescription->source, layerDescription->url,
-                                                         layerDescription->minZoom, layerDescription->maxZoom)),
+                                                         layerDescription->minZoom, layerDescription->maxZoom, layerDescription->extent)),
               description(layerDescription) {
         if (customZoomInfo.has_value()) {
             zoomInfo = Tiled2dMapZoomInfo(customZoomInfo->zoomLevelScaleFactor * description->zoomLevelScaleFactor,

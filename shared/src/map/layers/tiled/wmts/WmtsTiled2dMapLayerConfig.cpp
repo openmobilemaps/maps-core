@@ -61,3 +61,8 @@ Tiled2dMapZoomInfo WmtsTiled2dMapLayerConfig::getZoomInfo() { return zoomInfo; }
 std::optional<Tiled2dMapVectorSettings> WmtsTiled2dMapLayerConfig::getVectorSettings() {
     return std::nullopt;
 }
+
+std::vector<double> WmtsTiled2dMapLayerConfig::getExtent() {
+    printf("WARNUNG: WmtsTiled2dMapLayerConfig not implemented");
+    return {};
+}

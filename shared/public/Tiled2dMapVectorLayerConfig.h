@@ -68,6 +68,10 @@ public:
         return baseValueZoom * zoomInfo.zoomLevelScaleFactor / factor;
     }
 
+    std::vector<double> getExtent() override {
+        return sourceDescription->extent;
+    }
+
 protected:
     std::shared_ptr<VectorMapSourceDescription> sourceDescription;
     Tiled2dMapZoomInfo zoomInfo;
