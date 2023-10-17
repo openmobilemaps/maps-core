@@ -19,55 +19,27 @@
                                                         fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
                                                           dpFactor:(double)dpFactor;
 
-+ (nullable MCTiled2dMapVectorLayerInterface *)createFromStyleJsonWithZoomInfo:(nonnull NSString *)layerName
-                                                                          path:(nonnull NSString *)path
-                                                                       loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
-                                                                    fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
-                                                                      dpFactor:(double)dpFactor
-                                                                      zoomInfo:(nonnull MCTiled2dMapZoomInfo *)zoomInfo;
-
 + (nullable MCTiled2dMapVectorLayerInterface *)createFromLocalStyleJson:(nonnull NSString *)layerName
                                                               styleJson:(nonnull NSString *)styleJson
                                                                 loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
                                                              fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
                                                                dpFactor:(double)dpFactor;
 
++ (nullable MCTiled2dMapVectorLayerInterface *)createFromStyleJsonWithZoomInfo:(nonnull NSString *)layerName
+                                                                          path:(nonnull NSString *)path
+                                                                       loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
+                                                                    fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
+                                                                      dpFactor:(double)dpFactor
+                                                                      zoomInfo:(nullable MCTiled2dMapZoomInfo *)zoomInfo
+                                                               sourceUrlParams:(nullable NSDictionary<NSString *, NSString *> *)sourceUrlParams;
+
 + (nullable MCTiled2dMapVectorLayerInterface *)createFromLocalStyleJsonWithZoomInfo:(nonnull NSString *)layerName
                                                                           styleJson:(nonnull NSString *)styleJson
                                                                             loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
                                                                          fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
                                                                            dpFactor:(double)dpFactor
-                                                                           zoomInfo:(nonnull MCTiled2dMapZoomInfo *)zoomInfo;
-
-+ (nullable MCTiled2dMapVectorLayerInterface *)createFromStyleJsonWithUrlParams:(nonnull NSString *)layerName
-                                                                           path:(nonnull NSString *)path
-                                                                        loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
-                                                                     fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
-                                                                       dpFactor:(double)dpFactor
-                                                                sourceUrlParams:(nonnull NSDictionary<NSString *, NSString *> *)sourceUrlParams;
-
-+ (nullable MCTiled2dMapVectorLayerInterface *)createFromStyleJsonWithZoomInfoUrlParams:(nonnull NSString *)layerName
-                                                                                   path:(nonnull NSString *)path
-                                                                                loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
-                                                                             fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
-                                                                               dpFactor:(double)dpFactor
-                                                                               zoomInfo:(nonnull MCTiled2dMapZoomInfo *)zoomInfo
-                                                                        sourceUrlParams:(nonnull NSDictionary<NSString *, NSString *> *)sourceUrlParams;
-
-+ (nullable MCTiled2dMapVectorLayerInterface *)createFromLocalStyleJsonWithUrlParams:(nonnull NSString *)layerName
-                                                                           styleJson:(nonnull NSString *)styleJson
-                                                                             loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
-                                                                          fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
-                                                                            dpFactor:(double)dpFactor
-                                                                     sourceUrlParams:(nonnull NSDictionary<NSString *, NSString *> *)sourceUrlParams;
-
-+ (nullable MCTiled2dMapVectorLayerInterface *)createFromLocalStyleJsonWithZoomInfoUrlParams:(nonnull NSString *)layerName
-                                                                                   styleJson:(nonnull NSString *)styleJson
-                                                                                     loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
-                                                                                  fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
-                                                                                    dpFactor:(double)dpFactor
-                                                                                    zoomInfo:(nonnull MCTiled2dMapZoomInfo *)zoomInfo
-                                                                             sourceUrlParams:(nonnull NSDictionary<NSString *, NSString *> *)sourceUrlParams;
+                                                                           zoomInfo:(nullable MCTiled2dMapZoomInfo *)zoomInfo
+                                                                    sourceUrlParams:(nullable NSDictionary<NSString *, NSString *> *)sourceUrlParams;
 
 - (void)setSelectionDelegate:(nullable id<MCTiled2dMapVectorLayerSelectionCallbackInterface>)selectionDelegate;
 
