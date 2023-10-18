@@ -601,7 +601,7 @@ bool Tiled2dMapVectorSourceSymbolDataManager::update(long long now) {
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     auto converter = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
     if (!camera || !converter || !renderingContext) {
-        return;
+        return false;
     }
 
     const double zoomIdentifier = layerConfig->getZoomIdentifier(camera->getZoom());
