@@ -162,12 +162,12 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
         int maxTileTop = std::floor(
                 std::max(topToBottom ? (visibleBottom - boundsTop) : (boundsTop - visibleBottom), 0.0) / tileWidth);
 
-        if (extent.size() == 4) {
+        if (extent.has_value() && extent->size() == 4) {
 
-            const double extentLeft = leftToRight ? extent[0] : extent[2];
-            const double extentRight = leftToRight ? extent[2] : extent[0];
-            const double extentTop = leftToRight ? extent[3] : extent[1];
-            const double extentBottom = leftToRight ? extent[1] : extent[3];
+            const double extentLeft = leftToRight ? extent->at(0) : extent->at(2);
+            const double extentRight = leftToRight ? extent->at(2) : extent->at(0);
+            const double extentTop = leftToRight ? extent->at(3) : extent->at(1);
+            const double extentBottom = leftToRight ? extent->at(1) : extent->at(3);
 
             int extentTileLeft =
             std::floor(std::max(leftToRight ? (extentLeft - boundsLeft) : (boundsLeft - extentLeft), 0.0) / tileWidth);

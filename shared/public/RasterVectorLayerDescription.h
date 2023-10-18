@@ -127,7 +127,7 @@ public:
     double zoomLevelScaleFactor;
     bool overzoom;
     bool underzoom;
-    std::vector<double> extent;
+    std::optional<std::vector<double>> extent;
 
     RasterVectorLayerDescription(std::string identifier,
                                  std::string source,
@@ -143,7 +143,7 @@ public:
                                  std::shared_ptr<Value> interactable,
                                  bool underzoom,
                                  bool overzoom,
-                                 std::vector<double> extent):
+                                 std::optional<std::vector<double>> extent):
     VectorLayerDescription(identifier, source, "", minZoom, maxZoom, nullptr, renderPassIndex, interactable),
     style(style), url(url), underzoom(underzoom), overzoom(overzoom), adaptScaleToScreen(adaptScaleToScreen), numDrawPreviousLayers(numDrawPreviousLayers),
     maskTiles(maskTiles), zoomLevelScaleFactor(zoomLevelScaleFactor), extent(extent) {};

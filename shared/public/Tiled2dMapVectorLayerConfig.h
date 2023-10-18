@@ -68,7 +68,7 @@ public:
         return baseValueZoom * zoomInfo.zoomLevelScaleFactor / factor;
     }
 
-    std::vector<double> getExtent() override {
+    std::optional<std::vector<double>> getExtent() override {
         return sourceDescription->extent;
     }
 

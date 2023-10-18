@@ -94,7 +94,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
 
             int minZoom = val.value("minzoom", 0);
             int maxZoom = val.value("maxzoom", 22);
-            std::vector<double> extent = {};
+            std::optional<std::vector<double>> extent;
 
             if (val["tiles"].is_array()) {
                 auto str = val.dump();
@@ -117,8 +117,12 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                     return Tiled2dMapVectorLayerParserResult(nullptr, LoaderStatus::ERROR_OTHER, "", std::nullopt);
                 }
                 url = json["tiles"].begin()->get<std::string>();
-                for (auto &el : json["extent"].items()) {
-                    extent.push_back(el.value());
+
+                if (json.contains("extent")) {
+                    extent = {};
+                    for (auto &el: json["extent"].items()) {
+                        extent->push_back(el.value());
+                    }
                 }
 
                 minZoom = json.value("minzoom", 0);
@@ -235,9 +239,12 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                         parser.parseValue(val["paint"]["raster-saturation"]),
                                                         parser.parseValue(val["metadata"]["raster-gamma"]),
                                                         blendMode);
-            std::vector<double> extent;
-            for (auto &el : json["extent"].items()) {
-                extent.push_back(el.value());
+            std::optional<std::vector<double>> extent;
+            if (json.contains("extent")) {
+                extent = {};
+                for (auto &el: json["extent"].items()) {
+                    extent->push_back(el.value());
+                }
             }
             auto newLayer = std::make_shared<RasterVectorLayerDescription>(val["id"],
                                                                            val["source"],
@@ -364,16 +371,20 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
 
     std::vector<std::shared_ptr<VectorMapSourceDescription>> sourceDescriptions;
     for (auto const &[identifier, tileJson]: tileJsons) {
-        std::vector<double> extent;
-        for (auto &el : tileJson["extent"].items()) {
-            extent.push_back(el.value());
+        std::optional<std::vector<double>> extent;
+        if (tileJson.contains("extent")) {
+            extent = {};
+            for (auto &el: tileJson["extent"].items()) {
+                extent->push_back(el.value());
+            }
         }
-        sourceDescriptions.push_back(std::make_shared<VectorMapSourceDescription>(identifier,
-                                                               tileJson["tiles"].begin()->get<std::string>(),
-                                                               tileJson["minzoom"].get<int>(),
-                                                                                 tileJson["maxzoom"].get<int>(),
-                                                                                  extent
-                                                                                  ));
+        sourceDescriptions.push_back(
+                std::make_shared<VectorMapSourceDescription>(identifier,
+                                                             tileJson["tiles"].begin()->get<std::string>(),
+                                                             tileJson["minzoom"].get<int>(),
+                                                             tileJson["maxzoom"].get<int>(),
+                                                             extent
+                ));
     }
 
 

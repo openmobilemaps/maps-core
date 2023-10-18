@@ -11,6 +11,7 @@
 #include "WmtsTiled2dMapLayerConfig.h"
 
 #include "Tiled2dMapVectorSettings.h"
+#include "Logger.h"
 
 WmtsTiled2dMapLayerConfig::WmtsTiled2dMapLayerConfig(const WmtsLayerDescription &description,
                                                      const std::vector<Tiled2dMapZoomLevelInfo> &zoomLevelInfo,
@@ -62,7 +63,7 @@ std::optional<Tiled2dMapVectorSettings> WmtsTiled2dMapLayerConfig::getVectorSett
     return std::nullopt;
 }
 
-std::vector<double> WmtsTiled2dMapLayerConfig::getExtent() {
-    printf("WARNUNG: WmtsTiled2dMapLayerConfig not implemented");
-    return {};
+std::optional<std::vector<double>> WmtsTiled2dMapLayerConfig::getExtent() {
+    LogInfo <<= "WARNUNG: WmtsTiled2dMapLayerConfig not implemented";
+    return std::nullopt;
 }

@@ -20,17 +20,17 @@ public:
     std::string vectorUrl;
     int minZoom;
     int maxZoom;
-    std::vector<double> extent;
+    std::optional<std::vector<double>> extent;
 
     VectorMapSourceDescription(std::string identifier,
                          std::string vectorUrl,
                          int minZoom,
                          int maxZoom,
-                        std::vector<double> extent):
+                        std::optional<std::vector<double>> extent):
     identifier(identifier), vectorUrl(vectorUrl), minZoom(minZoom), maxZoom(maxZoom), extent(extent) {}
 
     const static std::shared_ptr<VectorMapSourceDescription> geoJsonDescription() {
-        return  std::make_shared<VectorMapSourceDescription>("","geojson://{z}/{x}/{y}", 0, 18, std::vector<double>());
+        return  std::make_shared<VectorMapSourceDescription>("","geojson://{z}/{x}/{y}", 0, 18, std::nullopt);
     };
 };
 
