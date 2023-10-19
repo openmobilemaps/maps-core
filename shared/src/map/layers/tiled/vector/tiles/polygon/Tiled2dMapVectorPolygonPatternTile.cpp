@@ -27,10 +27,10 @@ Tiled2dMapVectorPolygonPatternTile::Tiled2dMapVectorPolygonPatternTile(const std
                                                                        const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                                                        const std::shared_ptr<SpriteData> &spriteData,
                                                                        const std::shared_ptr<TextureHolderInterface> &spriteTexture,
-                                                                       const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager)
+                                                                       const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager)
         : Tiled2dMapVectorTile(mapInterface, tileInfo, description, layerConfig, tileCallbackInterface, featureStateManager), spriteData(spriteData), spriteTexture(spriteTexture), usedKeys(description->getUsedKeys()) {
     isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
-    isStyleFeatureStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end();
+    isStyleStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end() || usedKeys.find(Tiled2dMapVectorStyleParser::globalStateExpression) != usedKeys.end() ;
 }
 
 void Tiled2dMapVectorPolygonPatternTile::updateVectorLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
@@ -47,7 +47,7 @@ void Tiled2dMapVectorPolygonPatternTile::updateVectorLayerDescription(const std:
         }
     }
     isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
-    isStyleFeatureStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end();
+    isStyleStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end() || usedKeys.find(Tiled2dMapVectorStyleParser::globalStateExpression) != usedKeys.end() ;
     lastZoom = std::nullopt;
     lastAlpha = std::nullopt;
 
@@ -94,7 +94,7 @@ void Tiled2dMapVectorPolygonPatternTile::update() {
     if (lastZoom &&
         ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant)
         && (lastInZoomRange && *lastInZoomRange == inZoomRange) &&
-        !isStyleFeatureStateDependant) {
+        !isStyleStateDependant) {
         for (const auto &[styleGroupId, polygons] : styleGroupPolygonsMap) {
             for (const auto &polygon: polygons) {
                 polygon->setScalingFactor(scalingFactor);

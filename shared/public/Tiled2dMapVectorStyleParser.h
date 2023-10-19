@@ -46,6 +46,7 @@ public:
     static const std::string zoomExpression;
     static const std::string booleanExpression;
     static const std::string featureStateExpression;
+    static const std::string globalStateExpression;
     static const std::string coalesceExpression;
 
     std::shared_ptr<Value> parseValue(nlohmann::json json) {
@@ -66,6 +67,11 @@ public:
             } else if (isExpression(json[0], featureStateExpression) && json.size() == 2 && json[1].is_string()) {
                 auto key = json[1].get<std::string>();
                 return std::make_shared<FeatureStateValue>(key);
+
+                // Example: [ "global-state",  "hover" ]
+            } else if (isExpression(json[0], globalStateExpression) && json.size() == 2 && json[1].is_string()) {
+                auto key = json[1].get<std::string>();
+                return std::make_shared<GlobalStateValue>(key);
 
                 // Example: [ "has",  "ref" ]
                 //          [ "!has", "ref"]

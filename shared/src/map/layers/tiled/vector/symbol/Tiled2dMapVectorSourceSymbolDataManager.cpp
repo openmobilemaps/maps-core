@@ -24,7 +24,7 @@ Tiled2dMapVectorSourceSymbolDataManager::Tiled2dMapVectorSourceSymbolDataManager
                                                                                  const std::shared_ptr<FontLoaderInterface> &fontLoader,
                                                                                  const WeakActor<Tiled2dMapVectorSource> &vectorSource,
                                                                                  const Actor<Tiled2dMapVectorReadyManager> &readyManager,
-                                                                                 const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager)
+                                                                                 const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager)
         : Tiled2dMapVectorSourceDataManager(vectorLayer, mapDescription, layerConfig, source, readyManager, featureStateManager),
         fontLoader(fontLoader), vectorSource(vectorSource), animationCoordinatorMap(std::make_shared<SymbolAnimationCoordinatorMap>()) {
 

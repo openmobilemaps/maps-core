@@ -19,7 +19,7 @@ Tiled2dMapVectorSourceRasterTileDataManager::Tiled2dMapVectorSourceRasterTileDat
                                                                                          const std::string &source,
                                                                                          const WeakActor<Tiled2dMapRasterSource> &rasterSource,
                                                                                          const Actor<Tiled2dMapVectorReadyManager> &readyManager,
-                                                                                         const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager)
+                                                                                         const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager)
 : Tiled2dMapVectorSourceTileDataManager(vectorLayer, mapDescription, layerConfig, source, readyManager, featureStateManager),
 rasterSource(rasterSource) {}
 

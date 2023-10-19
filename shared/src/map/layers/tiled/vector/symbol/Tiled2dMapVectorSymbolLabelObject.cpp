@@ -12,6 +12,7 @@
 #include "TextHelper.h"
 #include "DateHelper.h"
 #include "SymbolAnimationCoordinator.h"
+#include "Tiled2dMapVectorStyleParser.h"
 #include "fast_atan2.h"
 
 Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::shared_ptr<CoordinateConversionHelperInterface> &converter,
@@ -34,7 +35,7 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
                                                                      const SymbolAlignment rotationAlignment,
                                                                      const TextSymbolPlacement &textSymbolPlacement,
                                                                      std::shared_ptr<SymbolAnimationCoordinator> animationCoordinator,
-                                                                     const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager)
+                                                                     const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager)
         : textSymbolPlacement(textSymbolPlacement),
           rotationAlignment(rotationAlignment),
           featureContext(featureContext),
@@ -52,7 +53,7 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
           referencePoint(converter->convertToRenderSystem(coordinate)),
           referenceSize(fontResult->fontData->info.size),
           animationCoordinator(animationCoordinator),
-          featureStateManager(featureStateManager) {
+          stateManager(featureStateManager) {
     auto spaceIt = std::find_if(fontResult->fontData->glyphs.begin(), fontResult->fontData->glyphs.end(), [](const auto &d) {
         return d.charCode == " ";
     });
@@ -159,10 +160,15 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
                 break;
         }
     }
+
+    const auto &usedKeys = description->getUsedKeys();
+    isStyleStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end() || usedKeys.find(Tiled2dMapVectorStyleParser::globalStateExpression) != usedKeys.end() ;
 }
 
 void Tiled2dMapVectorSymbolLabelObject::updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription) {
     this->description = layerDescription;
+    const auto &usedKeys = description->getUsedKeys();
+    isStyleStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end() || usedKeys.find(Tiled2dMapVectorStyleParser::globalStateExpression) != usedKeys.end() ;
     lastZoomEvaluation = -1;
 }
 
@@ -172,7 +178,7 @@ int Tiled2dMapVectorSymbolLabelObject::getCharacterCount(){
 }
 
 void Tiled2dMapVectorSymbolLabelObject::setupProperties(std::vector<float> &textureCoordinates, std::vector<uint16_t> &styleIndices, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier) {
-    const auto evalContext = EvaluationContext(zoomIdentifier, featureContext, featureStateManager);
+    const auto evalContext = EvaluationContext(zoomIdentifier, featureContext, stateManager);
 
     evaluateStyleProperties(zoomIdentifier);
 
@@ -195,11 +201,11 @@ void Tiled2dMapVectorSymbolLabelObject::setupProperties(std::vector<float> &text
 void Tiled2dMapVectorSymbolLabelObject::evaluateStyleProperties(const double zoomIdentifier) {
     auto roundedZoom = std::round(zoomIdentifier * 100.0) / 100.0;
 
-    if (roundedZoom == lastZoomEvaluation) {
+    if (roundedZoom == lastZoomEvaluation && !isStyleStateDependant) {
         return;
     }
 
-    const auto evalContext = EvaluationContext(roundedZoom, featureContext, featureStateManager);
+    const auto evalContext = EvaluationContext(roundedZoom, featureContext, stateManager);
 
     textSize = description->style.getTextSize(evalContext);
     textAlignment = description->style.getTextRotationAlignment(evalContext);
@@ -216,7 +222,7 @@ void Tiled2dMapVectorSymbolLabelObject::evaluateStyleProperties(const double zoo
 
 
 void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const bool collides, const double rotation, const float alpha, const bool isCoordinateOwner, long long now) {
-    const auto evalContext = EvaluationContext(zoomIdentifier, featureContext, featureStateManager);
+    const auto evalContext = EvaluationContext(zoomIdentifier, featureContext, stateManager);
 
     evaluateStyleProperties(zoomIdentifier);
 
@@ -276,7 +282,7 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
 
 void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation) {
     
-    const auto evalContext = EvaluationContext(zoomIdentifier, featureContext, featureStateManager);
+    const auto evalContext = EvaluationContext(zoomIdentifier, featureContext, stateManager);
     
     const float fontSize = scaleFactor * textSize;
     
@@ -550,7 +556,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
         return 0;
     }
 
-    auto evalContext = EvaluationContext(zoomIdentifier, featureContext, featureStateManager);
+    auto evalContext = EvaluationContext(zoomIdentifier, featureContext, stateManager);
 
     const float fontSize = scaleFactor * textSize;
 

@@ -37,7 +37,7 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                                                            const TextSymbolPlacement &textSymbolPlacement,
                                                            const bool hideIcon,
                                                            std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap,
-                                                           const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager,
+                                                           const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
                                                            const std::unordered_set<std::string> &usedKeys,
                                                            const size_t symbolTileIndex) :
     description(description),
@@ -141,7 +141,7 @@ symbolTileIndex(symbolTileIndex) {
 
     symbolSortKey = description->style.getSymbolSortKey(evalContext);
 
-    isStyleFeatureStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end();
+    isStyleStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end() || usedKeys.find(Tiled2dMapVectorStyleParser::globalStateExpression) != usedKeys.end() ;
 }
 
 void Tiled2dMapVectorSymbolObject::updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription, const std::unordered_set<std::string> &usedKeys) {
@@ -152,7 +152,7 @@ void Tiled2dMapVectorSymbolObject::updateLayerDescription(const std::shared_ptr<
 
     lastZoomEvaluation = -1;
 
-    isStyleFeatureStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end();
+    isStyleStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end() || usedKeys.find(Tiled2dMapVectorStyleParser::globalStateExpression) != usedKeys.end() ;
 
     lastIconUpdateScaleFactor = -1;
     lastIconUpdateRotation = -1;
@@ -167,13 +167,13 @@ void Tiled2dMapVectorSymbolObject::updateLayerDescription(const std::shared_ptr<
 
 void Tiled2dMapVectorSymbolObject::evaluateStyleProperties(const double zoomIdentifier) {
 
-    if (isStyleZoomDependant == false && lastZoomEvaluation == -1) {
+    if (!isStyleZoomDependant && lastZoomEvaluation == -1) {
         return;
     }
 
     auto roundedZoom = std::round(zoomIdentifier * 100.0) / 100.0;
 
-    if (isStyleFeatureStateDependant == false && roundedZoom == lastZoomEvaluation) {
+    if (!isStyleStateDependant && roundedZoom == lastZoomEvaluation) {
         return;
     }
     
@@ -318,12 +318,12 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
         }
     }
 
-    if (lastIconUpdateScaleFactor != -1 && isStyleZoomDependant == false) {
+    if (lastIconUpdateScaleFactor != -1 && !isStyleZoomDependant) {
         countOffset += instanceCounts.icons;
         return;
     }
 
-    if (isStyleFeatureStateDependant == false && lastIconUpdateScaleFactor == scaleFactor && lastIconUpdateRotation == rotation && lastIconUpdateAlpha == alpha) {
+    if (!isStyleStateDependant && lastIconUpdateScaleFactor == scaleFactor && lastIconUpdateRotation == rotation && lastIconUpdateAlpha == alpha) {
         countOffset += instanceCounts.icons;
         return;
     }
@@ -654,13 +654,13 @@ void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &posi
     }
 
 
-    if (lastTextUpdateScaleFactor == scaleFactor && lastTextUpdateRotation == rotation) {
+    if (lastTextUpdateScaleFactor == scaleFactor && lastTextUpdateRotation == rotation && !isStyleZoomDependant) {
         styleOffset += instanceCounts.textCharacters == 0 ? 0 : 1;
         countOffset += instanceCounts.textCharacters;
         return;
     }
 
-    if (instanceCounts.textCharacters ==  0 || !labelObject) {
+    if ((instanceCounts.textCharacters ==  0 || !labelObject) && !isStyleZoomDependant) {
         styleOffset += instanceCounts.textCharacters == 0 ? 0 : 1;
         countOffset += instanceCounts.textCharacters;
         return;

@@ -58,7 +58,7 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         fontLoader(fontLoader),
         dpFactor(dpFactor),
         customZoomInfo(customZoomInfo),
-        featureStateManager(std::make_shared<Tiled2dMapVectorFeatureStateManager>()) {}
+        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>()) {}
 
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
@@ -76,7 +76,7 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         fontLoader(fontLoader),
         dpFactor(dpFactor),
         customZoomInfo(customZoomInfo),
-        featureStateManager(std::make_shared<Tiled2dMapVectorFeatureStateManager>())  {}
+        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>())  {}
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::shared_ptr<VectorMapDescription> &mapDescription,
@@ -88,7 +88,7 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         loaders(loaders),
         fontLoader(fontLoader),
         customZoomInfo(customZoomInfo),
-        featureStateManager(std::make_shared<Tiled2dMapVectorFeatureStateManager>())  {
+        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>())  {
     setMapDescription(mapDescription);
 }
 
@@ -101,7 +101,7 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         loaders(loaders),
         fontLoader(fontLoader),
         customZoomInfo(customZoomInfo),
-        featureStateManager(std::make_shared<Tiled2dMapVectorFeatureStateManager>())  {}
+        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>())  {}
 
 void Tiled2dMapVectorLayer::scheduleStyleJsonLoading() {
     isLoadingStyleJson = true;
@@ -995,8 +995,14 @@ std::optional<std::string> Tiled2dMapVectorLayer::getStyleMetadataJson() {
 }
 
 void Tiled2dMapVectorLayer::setFeatureState(const std::string & identifier, const std::unordered_map<std::string, VectorLayerFeatureInfoValue> & properties) {
-    
     featureStateManager->setFeatureState(identifier, properties);
+
+    if (mapInterface)
+        mapInterface->invalidate();
+}
+
+void Tiled2dMapVectorLayer::setGlobalState(const std::unordered_map<std::string, VectorLayerFeatureInfoValue> &properties) {
+    featureStateManager->setGlobalState(properties);
 
     if (mapInterface)
         mapInterface->invalidate();

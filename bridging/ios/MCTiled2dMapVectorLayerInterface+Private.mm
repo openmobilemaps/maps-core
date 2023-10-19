@@ -128,6 +128,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setGlobalState:(nonnull NSDictionary<NSString *, MCVectorLayerFeatureInfoValue *> *)properties {
+    try {
+        _cppRefHandle.get()->setGlobalState(::djinni::Map<::djinni::String, ::djinni_generated::VectorLayerFeatureInfoValue>::toCpp(properties));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 auto Tiled2dMapVectorLayerInterface::toCpp(ObjcType objc) -> CppType

@@ -38,7 +38,7 @@ public:
                                 const Tiled2dMapTileInfo &tileInfo,
                                 const std::string &layerIdentifier,
                                 const std::shared_ptr<SymbolVectorLayerDescription> &layerDescription,
-                                const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager);
+                                const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager);
 
     void initialize(std::weak_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> weakFeatures,
                     int32_t featuresBase,
@@ -131,7 +131,7 @@ private:
 
     bool anyInteractable = false;
 
-    const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> featureStateManager;
+    const std::shared_ptr<Tiled2dMapVectorStateManager> featureStateManager;
 
 #ifdef DRAW_TEXT_BOUNDING_BOX
     TextSymbolPlacement textSymbolPlacement;
