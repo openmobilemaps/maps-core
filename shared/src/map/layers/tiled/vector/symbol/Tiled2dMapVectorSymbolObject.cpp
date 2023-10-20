@@ -179,6 +179,13 @@ void Tiled2dMapVectorSymbolObject::evaluateStyleProperties(const double zoomIden
     
     const auto evalContext = EvaluationContext(roundedZoom, featureContext, featureStateManager);
 
+    iconOpacity = description->style.getIconOpacity(evalContext);
+
+    if (iconOpacity == 0.0) {
+        lastZoomEvaluation = roundedZoom;
+        return;
+    }
+
     textAllowOverlap = description->style.getTextAllowOverlap(evalContext);
     iconAllowOverlap = description->style.getIconAllowOverlap(evalContext);
 
@@ -187,7 +194,6 @@ void Tiled2dMapVectorSymbolObject::evaluateStyleProperties(const double zoomIden
     iconOffset = description->style.getIconOffset(evalContext);
     iconTextFit = description->style.getIconTextFit(evalContext);
     iconPadding = description->style.getIconPadding(evalContext);
-    iconOpacity = description->style.getIconOpacity(evalContext);
 
     // only evaluate these properties once since they are expensive and should not change
     if (lastZoomEvaluation == -1) {

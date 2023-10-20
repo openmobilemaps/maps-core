@@ -207,12 +207,17 @@ void Tiled2dMapVectorSymbolLabelObject::evaluateStyleProperties(const double zoo
 
     const auto evalContext = EvaluationContext(roundedZoom, featureContext, stateManager);
 
+    textOpacity = description->style.getTextOpacity(evalContext);
+    if (textOpacity == 0.0) {
+        lastZoomEvaluation = roundedZoom;
+        return;
+    }
+
     textSize = description->style.getTextSize(evalContext);
     textAlignment = description->style.getTextRotationAlignment(evalContext);
     textRotate = description->style.getTextRotate(evalContext);
     textPadding = description->style.getTextPadding(evalContext);
 
-    textOpacity = description->style.getTextOpacity(evalContext);
     textColor = description->style.getTextColor(evalContext);
     haloColor = description->style.getTextHaloColor(evalContext);
     haloWidth = description->style.getTextHaloWidth(evalContext);
