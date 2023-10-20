@@ -775,7 +775,7 @@ class Break {
 };
 
 float calculateCost(float lineWidth, float targetWidth, float additionalCost, bool isLast) {
-    float cost = std::pow(lineWidth - targetWidth, 2.0);
+    float cost = std::pow(abs(lineWidth - targetWidth), 2.0);
 
     if(isLast) {
         return cost * ((lineWidth < targetWidth) ? 0.5 : 2.0);
@@ -806,6 +806,42 @@ std::shared_ptr<Break> evaluate(int nextIndex, float targetWidth, const std::vec
 }
 
 std::vector<BreakResult> TextHelper::bestBreakIndices(std::vector<std::string> &letters, int64_t maxCharacterWidth) {
+
+    std::vector<std::vector<std::string>> strings = {};
+    std::vector<std::string> current = {};
+
+    for(auto& l : letters) {
+        if(isLineBreak(l)) {
+            strings.push_back(current);
+            strings.push_back({ l });
+            current.clear();
+        } else {
+            current.push_back(l);
+        }
+    }
+
+    std::vector<BreakResult> result = {};
+    int currentIndex = 0;
+
+    for(auto& s : strings) {
+        if(s.size() == 1 && isLineBreak(s[0])) {
+            result.push_back(BreakResult(currentIndex, true));
+        } else {
+            auto breaks = bestBreakIndicesSub(s, maxCharacterWidth);
+
+            for(auto& b : breaks) {
+                b.index += currentIndex;
+                result.push_back(b);
+            }
+        }
+        currentIndex += s.size();
+    }
+
+    return result;
+}
+
+
+std::vector<BreakResult> TextHelper::bestBreakIndicesSub(std::vector<std::string> &letters, int64_t maxCharacterWidth) {
     if(letters.size() == 0) {
         return {};
     }
@@ -820,9 +856,9 @@ std::vector<BreakResult> TextHelper::bestBreakIndices(std::vector<std::string> &
 
         if(i < letters.size() - 1 && allowsLineBreak(l)) {
             float additionalCost = 0;
-            if (isLineBreak(l)) {
-                additionalCost = -100000;
-            }
+//            if (isLineBreak(l)) {
+//                additionalCost = -1000000;
+//            }
 
             if (isSpecialCharacter(l)) {
                 additionalCost = 100;
