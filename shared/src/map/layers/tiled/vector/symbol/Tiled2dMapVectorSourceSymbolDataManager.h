@@ -77,6 +77,8 @@ public:
                                 int32_t legacyIndex,
                                 bool needsTileReplace) override;
 
+    void reloadLayerContent(const std::vector<std::tuple<std::string, std::string>> &sourceLayerIdentifierPairs);
+
     void collisionDetection(std::vector<std::string> layerIdentifiers, std::shared_ptr<CollisionGrid> collisionGrid);
 
     void update(long long now);
