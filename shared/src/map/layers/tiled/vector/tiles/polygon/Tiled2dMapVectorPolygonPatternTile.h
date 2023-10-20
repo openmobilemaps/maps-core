@@ -28,7 +28,7 @@ public:
                                        const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                        const std::shared_ptr<SpriteData> &spriteData,
                                        const std::shared_ptr<TextureHolderInterface> &spriteTexture,
-                                       const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager);
+                                       const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager);
 
     void updateVectorLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                 const Tiled2dMapVectorTileDataVector &layerFeatures) override;
@@ -71,7 +71,7 @@ private:
     std::unordered_map<size_t, std::pair<int, int>> styleHashToGroupMap;
     std::unordered_set<std::string> usedKeys;
     bool isStyleZoomDependant = true;
-    bool isStyleFeatureStateDependant = true;
+    bool isStyleStateDependant = true;
     std::optional<double> lastZoom = std::nullopt;
     std::optional<bool> lastInZoomRange = std::nullopt;
 

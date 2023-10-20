@@ -45,7 +45,7 @@ public:
                                  const TextSymbolPlacement &textSymbolPlacement,
                                  const bool hideIcon,
                                  std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap,
-                                 const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager,
+                                 const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
                                  const std::unordered_set<std::string> &usedKeys,
                                  const size_t symbolTileIndex);
 
@@ -144,7 +144,7 @@ private:
     SymbolAlignment iconRotationAlignment = SymbolAlignment::AUTO;
 
     bool isStyleZoomDependant = true;
-    bool isStyleFeatureStateDependant = true;
+    bool isStyleStateDependant = true;
 
     // the following flags are all optional, if they are set to -1 it is not set
     double lastIconUpdateScaleFactor;
@@ -181,5 +181,5 @@ private:
 
     size_t crossTileIdentifier;
 
-    const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> featureStateManager;
+    const std::shared_ptr<Tiled2dMapVectorStateManager> featureStateManager;
 };

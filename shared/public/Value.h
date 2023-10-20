@@ -39,7 +39,7 @@
 #include "BlendMode.h"
 #include "SymbolZOrder.h"
 #include "ValueVariant.h"
-#include "Tiled2dMapVectorFeatureStateManager.h"
+#include "Tiled2dMapVectorStateManager.h"
 #include <mutex>
 
 
@@ -185,7 +185,7 @@ public:
     }
 
     size_t getStyleHash(const std::unordered_set<std::string> &usedKeys) const {
-        if (usedKeys.count("feature-state") != 0) {
+        if (usedKeys.count("feature-state") != 0 || usedKeys.count("global-state") != 0) {
             return rand();
         }
         size_t hash = 0;
@@ -252,11 +252,11 @@ class EvaluationContext {
 public:
     const double zoomLevel;
     const std::shared_ptr<FeatureContext> &feature;
-    const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager;
+    const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager;
 
     EvaluationContext(const double zoomLevel,
                       const std::shared_ptr<FeatureContext> &feature,
-                      const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager) :
+                      const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager) :
         zoomLevel(zoomLevel), feature(feature), featureStateManager(featureStateManager) {}
 };
 
@@ -568,7 +568,7 @@ public:
                 staticValue = value->evaluateOr(context, defaultValue);
             } else {
                 isZoomDependent = usedKeys.count("zoom") != 0;
-                isFeatureStateDependent = usedKeys.count("feature-state") != 0;
+                isStateDependant = usedKeys.count("feature-state") != 0 || usedKeys.count("global-state") != 0;
             }
             lastValuePtr = value.get();
         }
@@ -577,7 +577,7 @@ public:
             return *staticValue;
         }
 
-        if (isFeatureStateDependent && !context.featureStateManager->empty()) {
+        if (isStateDependant && !context.featureStateManager->empty()) {
             // TODO: maybe we can hash the feature-state or something
             return value->evaluateOr(context, defaultValue);
         }
@@ -600,7 +600,7 @@ private:
 
     std::optional<ResultType> staticValue;
     bool isZoomDependent = false;
-    bool isFeatureStateDependent = false;
+    bool isStateDependant = false;
     bool isStatic = false;
     void* lastValuePtr = nullptr;
 };
@@ -642,7 +642,7 @@ public:
     FeatureStateValue(const std::string key) : key(key) {};
 
     std::unique_ptr<Value> clone() override {
-        return std::make_unique<GetPropertyValue>(key);
+        return std::make_unique<FeatureStateValue>(key);
     }
 
     std::unordered_set<std::string> getUsedKeys() const override {
@@ -658,11 +658,38 @@ public:
                 return result->second;
             }
         }
-        return "";
+        return std::monostate();
     };
 
     bool isEqual(const std::shared_ptr<Value> &other) const override {
         if (auto casted = std::dynamic_pointer_cast<FeatureStateValue>(other)) {
+            return casted->key == key;
+        }
+        return false;
+    };
+private:
+    const std::string key;
+};
+
+class GlobalStateValue : public Value {
+public:
+    GlobalStateValue(const std::string key) : key(key) {};
+
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<GlobalStateValue>(key);
+    }
+
+    std::unordered_set<std::string> getUsedKeys() const override {
+        // GlobalStateValue can not be grouped
+        return { "global-state" };
+    }
+
+    ValueVariant evaluate(const EvaluationContext &context) const override {
+        return context.featureStateManager->getGlobalState(key);
+    };
+
+    bool isEqual(const std::shared_ptr<Value> &other) const override {
+        if (auto casted = std::dynamic_pointer_cast<GlobalStateValue>(other)) {
             return casted->key == key;
         }
         return false;

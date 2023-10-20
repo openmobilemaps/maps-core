@@ -22,13 +22,16 @@ public:
                                                 const std::string &source,
                                                 const WeakActor<Tiled2dMapVectorSource> &vectorSource,
                                                 const Actor<Tiled2dMapVectorReadyManager> &readyManager,
-                                                const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager);
+                                                const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager);
 
     void onVectorTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) override;
 
     virtual void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription,
                                         int32_t legacyIndex,
                                         bool needsTileReplace) override;
+
+    virtual void reloadLayerContent(const std::vector<std::tuple<std::shared_ptr<VectorLayerDescription>, int32_t>> &descriptionLayerIndexPairs) override;
+
 protected:
     void onTileCompletelyReady(const Tiled2dMapTileInfo tileInfo) override;
 

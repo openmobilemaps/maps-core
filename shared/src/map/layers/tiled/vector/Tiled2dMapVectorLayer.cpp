@@ -44,6 +44,7 @@
 #include "Tiled2dMapVectorInteractionManager.h"
 #include "Tiled2dMapVectorReadyManager.h"
 #include "Tiled2dVectorGeoJsonSource.h"
+#include "Tiled2dMapVectorStyleParser.h"
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::string &remoteStyleJsonUrl,
@@ -58,7 +59,7 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         fontLoader(fontLoader),
         dpFactor(dpFactor),
         customZoomInfo(customZoomInfo),
-        featureStateManager(std::make_shared<Tiled2dMapVectorFeatureStateManager>()) {}
+        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>()) {}
 
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
@@ -76,7 +77,7 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         fontLoader(fontLoader),
         dpFactor(dpFactor),
         customZoomInfo(customZoomInfo),
-        featureStateManager(std::make_shared<Tiled2dMapVectorFeatureStateManager>())  {}
+        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>())  {}
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::shared_ptr<VectorMapDescription> &mapDescription,
@@ -88,7 +89,7 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         loaders(loaders),
         fontLoader(fontLoader),
         customZoomInfo(customZoomInfo),
-        featureStateManager(std::make_shared<Tiled2dMapVectorFeatureStateManager>())  {
+        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>())  {
     setMapDescription(mapDescription);
 }
 
@@ -101,7 +102,7 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         loaders(loaders),
         fontLoader(fontLoader),
         customZoomInfo(customZoomInfo),
-        featureStateManager(std::make_shared<Tiled2dMapVectorFeatureStateManager>())  {}
+        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>())  {}
 
 void Tiled2dMapVectorLayer::scheduleStyleJsonLoading() {
     isLoadingStyleJson = true;
@@ -995,9 +996,49 @@ std::optional<std::string> Tiled2dMapVectorLayer::getStyleMetadataJson() {
 }
 
 void Tiled2dMapVectorLayer::setFeatureState(const std::string & identifier, const std::unordered_map<std::string, VectorLayerFeatureInfoValue> & properties) {
-    
     featureStateManager->setFeatureState(identifier, properties);
 
-    if (mapInterface)
+    if (auto mapInterface = this->mapInterface) {
         mapInterface->invalidate();
+    }
+}
+
+void Tiled2dMapVectorLayer::setGlobalState(const std::unordered_map<std::string, VectorLayerFeatureInfoValue> &properties) {
+    featureStateManager->setGlobalState(properties);
+
+    std::unordered_map<std::string, std::vector<std::tuple<std::string, std::string>>> sourceLayerIdentifiersMap;
+    std::unordered_map<std::string, std::vector<std::tuple<std::shared_ptr<VectorLayerDescription>, int32_t>>> sourcelayerDescriptionIndexMap;
+    int32_t layerIndex = -1;
+    for (const auto &layerDescription : mapDescription->layers) {
+        layerIndex++;
+        if (!layerDescription->filter) {
+            continue;
+        }
+        const auto &usedKeys = layerDescription->filter->getUsedKeys();
+        if (usedKeys.find(Tiled2dMapVectorStyleParser::globalStateExpression) != usedKeys.end()) {
+            if (layerDescription->getType() == VectorLayerType::symbol) {
+                sourceLayerIdentifiersMap[layerDescription->source].emplace_back(layerDescription->sourceLayer,
+                                                                                 layerDescription->identifier);
+            } else {
+                sourcelayerDescriptionIndexMap[layerDescription->source].push_back({layerDescription, layerIndex});
+            }
+        }
+    }
+
+    for (const auto &[source, sourceLayerIdentifiers]: sourceLayerIdentifiersMap) {
+        const auto &symbolManager = symbolSourceDataManagers.find(source);
+        if (symbolManager != symbolSourceDataManagers.end()) {
+            symbolManager->second.message(&Tiled2dMapVectorSourceSymbolDataManager::reloadLayerContent, sourceLayerIdentifiers);
+        }
+    }
+    for (const auto &[source, descriptionIndexPairs]: sourcelayerDescriptionIndexMap) {
+        const auto &dataManager = sourceDataManagers.find(source);
+        if (dataManager != sourceDataManagers.end()) {
+            dataManager->second.message(&Tiled2dMapVectorSourceTileDataManager::reloadLayerContent, descriptionIndexPairs);
+        }
+    }
+
+    if (auto mapInterface = this->mapInterface) {
+        mapInterface->invalidate();
+    }
 }

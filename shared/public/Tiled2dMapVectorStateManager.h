@@ -18,11 +18,11 @@
 #include <variant>
 #include <atomic>
 
-class Tiled2dMapVectorFeatureStateManager {
+class Tiled2dMapVectorStateManager {
 public:
     using FeatureState = std::unordered_map<std::string, ValueVariant>;
 
-    Tiled2dMapVectorFeatureStateManager() {};
+    Tiled2dMapVectorStateManager() {};
 
     void setFeatureState(const std::string & identifier, const std::unordered_map<std::string, VectorLayerFeatureInfoValue> & properties) {
         uint64_t intIdentifier = 0;
@@ -53,7 +53,7 @@ public:
             featureStates.emplace_back(intIdentifier, std::move(convertedProperties));
             hasNoValues = false;
         } else {
-            hasNoValues = !featureStates.empty();
+            hasNoValues = !featureStates.empty() && !globalState.empty();
         }
     }
 
@@ -78,7 +78,32 @@ public:
         return hasNoValues;
     }
 
+    void setGlobalState(const std::unordered_map<std::string, VectorLayerFeatureInfoValue> & properties) {
+        std::lock_guard<std::mutex> lock(mutex);
+        globalState.clear();
+        for (const auto &property : properties) {
+            globalState.emplace(property.first, convertToValueVariant(property.second));
+        }
+
+        hasNoValues = !properties.empty() && !featureStates.empty();
+    }
+
+    ValueVariant getGlobalState(const std::string &key) {
+        if (hasNoValues) {
+            return std::monostate();
+        }
+
+        std::lock_guard<std::mutex> lock(mutex);
+
+        const auto &entry = globalState.find(key);
+        if (entry != globalState.end()) {
+            return entry->second;
+        }
+        return std::monostate();
+    }
+
 private:
+    std::unordered_map<std::string, ValueVariant> globalState;
     std::vector<std::pair<uint64_t, FeatureState>> featureStates;
     std::mutex mutex;
     FeatureState emptyState;

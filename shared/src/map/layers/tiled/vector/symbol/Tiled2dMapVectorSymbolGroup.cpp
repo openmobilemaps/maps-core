@@ -25,7 +25,7 @@ Tiled2dMapVectorSymbolGroup::Tiled2dMapVectorSymbolGroup(uint32_t groupId,
                                                          const Tiled2dMapTileInfo &tileInfo,
                                                          const std::string &layerIdentifier,
                                                          const std::shared_ptr<SymbolVectorLayerDescription> &layerDescription,
-                                                         const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager)
+                                                         const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager)
         : groupId(groupId),
           mapInterface(mapInterface),
           layerConfig(layerConfig),
@@ -375,8 +375,8 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
     }
 
 #ifdef DRAW_TEXT_BOUNDING_BOX
-    textSymbolPlacement = layerDescription->style.getTextSymbolPlacement(EvaluationContext(0.0, std::make_shared<FeatureContext>(), featureStateManager));
-    labelRotationAlignment = layerDescription->style.getTextRotationAlignment(EvaluationContext(0.0, std::make_shared<FeatureContext>(), featureStateManager));
+    textSymbolPlacement = layerDescription->style.getTextSymbolPlacement(EvaluationContext(0.0, std::make_shared<FeatureContext>(), stateManager));
+    labelRotationAlignment = layerDescription->style.getTextRotationAlignment(EvaluationContext(0.0, std::make_shared<FeatureContext>(), stateManager));
     if (labelRotationAlignment == SymbolAlignment::AUTO) {
         switch (textSymbolPlacement) {
             case TextSymbolPlacement::POINT:

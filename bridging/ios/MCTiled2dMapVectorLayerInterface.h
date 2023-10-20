@@ -48,4 +48,6 @@
 - (void)setFeatureState:(nonnull NSString *)identifier
              properties:(nonnull NSDictionary<NSString *, MCVectorLayerFeatureInfoValue *> *)properties;
 
+- (void)setGlobalState:(nonnull NSDictionary<NSString *, MCVectorLayerFeatureInfoValue *> *)properties;
+
 @end
