@@ -642,6 +642,9 @@ void Tiled2dMapVectorSymbolObject::setupTextProperties(std::vector<float> &textu
 }
 
 void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now) {
+    if (!labelObject) {
+        return;
+    }
 
     if (!isCoordinateOwner) {
         if (!animationCoordinator->isOwned.test_and_set()) {
