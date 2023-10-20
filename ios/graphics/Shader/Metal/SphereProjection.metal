@@ -87,18 +87,22 @@ sphereProjectionVertexShader(const patch_control_point<VertexIn> patch [[stage_i
     float latitude = pos.y / 90.0 * pi - pi; // [-2pi, 0]
 
 
-//    if (uv.x == 0) {
-//        longitude -= 0.00001;
-//    }
-//    else if (uv.x == 1) {
-//        longitude += 0.00001;
-//    }
-//    if (uv.y == 0) {
-//        latitude += 0.00001;
-//    }
-//    else if (uv.y == 1) {
-//        latitude -= 0.00001;
-//    }
+    if (uv.x == 0) {
+        longitude -= 0.000005;
+        radius *= 0.99999;
+    }
+    else if (uv.x == 1) {
+        longitude += 0.000005;
+        radius *= 0.99999;
+    }
+    if (uv.y == 0) {
+        latitude += 0.000005;
+        radius *= 0.99999;
+    }
+    else if (uv.y == 1) {
+        latitude -= 0.000005;
+        radius *= 0.99999;
+    }
 
     float sinLon = sin(longitude);     // [0, 1, 0, -1, 0]
     float cosLon = cos(longitude);     // [1, 0, -1, 0, 1]
@@ -113,11 +117,11 @@ sphereProjectionVertexShader(const patch_control_point<VertexIn> patch [[stage_i
 
 
   float4 position = mvpMatrix * float4(pos3d, 1.0);
-    float s = 0.8;
-    float z = position.z / position.w * s;
-    z = z + layerOffset * -s * 0.03;
-
-    position.z = z * position.w;
+//    float s = 0.8;
+//    float z = position.z / position.w * s;
+//    z = z*s + (2-layerOffset) * (1-s) * 0.3;
+//
+//    position.z = z * position.w;
 
 
   VertexOut out {

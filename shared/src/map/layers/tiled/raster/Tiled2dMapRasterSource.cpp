@@ -38,7 +38,7 @@ void Tiled2dMapRasterSource::cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIn
 
 LoaderStatus Tiled2dMapRasterSource::getLoaderStatus(const std::pair<TextureLoaderResult, std::optional<TextureLoaderResult>> &loaderResult) {
     if (loaderResult.second && loaderResult.first.status == LoaderStatus::OK) {
-        return LoaderStatus::OK;
+//        return LoaderStatus::OK;
         return loaderResult.second->status;
     }
     return loaderResult.first.status;

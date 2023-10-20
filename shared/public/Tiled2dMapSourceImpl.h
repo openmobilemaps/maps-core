@@ -283,10 +283,11 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> & viewMa
         double leftLengthPx = Vec2DHelper::distance(topLeftScreenPx, bottomLeftScreenPx);
         double rightLengthPx = Vec2DHelper::distance(topRightScreenPx, bottomRightScreenPx);
 
-        const double maxLength = 512 * 1.5;
+        const double maxLength = 512 * 1.0;
 
 
         bool preciseEnough = topLengthPx <= maxLength && bottomLengthPx <= maxLength && leftLengthPx <= maxLength && rightLengthPx <= maxLength;
+//        preciseEnough = candidate.levelIndex == 21;
         bool lastLevel = candidate.levelIndex == maxLevelAvailable;
         if (preciseEnough || lastLevel) {
 
@@ -1117,13 +1118,16 @@ void Tiled2dMapSource<T, L, R>::resume() {
 
 template<class T, class L, class R>
 ::LayerReadyState Tiled2dMapSource<T, L, R>::isReadyToRenderOffscreen() {
-    if(notFoundTiles.size() > 0) {
-        return LayerReadyState::ERROR;
+    std::unordered_set<Tiled2dMapTileInfo> tileErrors;
+
+    for (auto const &nf : notFoundTiles) {
+        tileErrors.insert(nf);
     }
 
+
     for (auto const &[index, errors]: errorTiles) {
-        if (errors.size() > 0) {
-            return LayerReadyState::ERROR;
+        for(auto const &[e, ig] : errors) {
+            tileErrors.insert(e);
         }
     }
 
@@ -1132,7 +1136,7 @@ template<class T, class L, class R>
     }
 
     for(auto& visible : currentVisibleTiles) {
-        if(currentTiles.count(visible) == 0) {
+        if(currentTiles.count(visible) == 0 && tileErrors.count(visible) == 0) {
             return LayerReadyState::NOT_READY;
         }
     }

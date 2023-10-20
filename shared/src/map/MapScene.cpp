@@ -289,7 +289,7 @@ void MapScene::drawReadyFrame(const ::RectCoord &bounds, float timeout,
     callbacks->stateDidUpdate(state);
 
     auto camera = getCamera();
-    camera->moveToBoundingBox(bounds, 0.0, false, std::nullopt);
+    //camera->moveToBoundingBox(bounds, 0.0, false, std::nullopt);
     camera->freeze(true);
 
     invalidate();

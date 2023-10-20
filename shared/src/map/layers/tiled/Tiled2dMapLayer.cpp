@@ -155,12 +155,26 @@ std::optional<int32_t> Tiled2dMapLayer::getMaxZoomLevelIdentifier() {
 }
 
 LayerReadyState Tiled2dMapLayer::isReadyToRenderOffscreen() {
-    // TODO: adjust for multiple sources
-    //if (sourceInterface) {
-      //  return sourceInterface->isReadyToRenderOffscreen();
-    //}
-
-    return LayerReadyState::READY;
+    bool isNotReady = false;
+    for (const auto &source : sourceInterfaces) {
+        auto state = source.syncAccess([](const auto &source) {
+            if(auto strong = source.lock()) {
+                return strong->isReadyToRenderOffscreen();
+            }
+            return LayerReadyState::ERROR;
+        });
+        switch (state) {
+            case LayerReadyState::ERROR:
+            case LayerReadyState::TIMEOUT_ERROR:
+                return state;
+            case LayerReadyState::NOT_READY:
+                isNotReady = true;
+                break;
+            case LayerReadyState::READY:
+                break;
+        }
+    }
+    return isNotReady ? LayerReadyState::NOT_READY : LayerReadyState::READY;
 }
 
 void Tiled2dMapLayer::setErrorManager(const std::shared_ptr<::ErrorManager> &errorManager) {

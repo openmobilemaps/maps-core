@@ -97,6 +97,7 @@ skyboxFragmentShader(const VertexOut vertexIn [[stage_in]],
       constant float4x4 &modelViewMatrix [[buffer(2)]])
 {
 
+  return float4(1,1,1,1);
 
   float3 fsun = calculateSunPosition(120, time / 24.0);
   float4 fsun4 = (modelViewMatrix * float4(fsun, 1.0));

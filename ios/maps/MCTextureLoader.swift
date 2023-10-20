@@ -81,7 +81,15 @@ open class MCTextureLoader: MCLoaderInterface {
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_TIMEOUT, errorCode: (error?.code).stringOrNil))
                 return 
             }
-            
+
+            if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorCancelled {
+                return
+            }
+
+//            if response?.statusCode != 200 {
+                print(url, response?.statusCode ?? 0, error_)
+//            }
+
             if response?.statusCode == 404 {
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_404, errorCode: (response?.statusCode).stringOrNil))
                 return

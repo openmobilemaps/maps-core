@@ -73,6 +73,11 @@ final class Polygon3d: BaseGraphicsObject {
             return
         }
 
+        if shader is SphereColorShader, texture == nil || heightTexture == nil {
+            ready = false
+            return
+        }
+
 #if DEBUG
         encoder.pushDebugGroup(label)
         defer {
@@ -96,7 +101,7 @@ final class Polygon3d: BaseGraphicsObject {
 
         shader.setupProgram(context)
 
-        encoder.setCullMode(.back)
+        encoder.setCullMode(.none)
         
         shader.preRender(context, pass: renderPass)
 
@@ -107,9 +112,11 @@ final class Polygon3d: BaseGraphicsObject {
 
         encoder.setFragmentSamplerState(sampler, index: 0)
         encoder.setVertexSamplerState(heightSampler, index: 0)
+        encoder.setFragmentSamplerState(heightSampler, index: 1)
 
         encoder.setFragmentTexture(texture, index: 0)
         encoder.setVertexTexture(heightTexture, index: 0)
+        encoder.setFragmentTexture(heightTexture, index: 1)
 
         var time = Float(-Self.renderStartTime.timeIntervalSinceNow)
         encoder.setVertexBytes(&time, length: MemoryLayout<Float>.stride, index: 2)
