@@ -56,5 +56,8 @@ class TextHelper {
     static std::vector<BreakResult> bestBreakIndices(std::vector<std::string> &letters, int64_t maxCharacterWidth);
 
   private:
+    static std::vector<BreakResult> bestBreakIndicesSub(std::vector<std::string> &letters, int64_t maxCharacterWidth);
+
+  private:
     std::weak_ptr<MapInterface> mapInterface;
 };
