@@ -165,8 +165,6 @@ protected:
 
     virtual void didLoadSpriteData(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<::TextureHolderInterface> spriteTexture);
 
-    void applyGlobalStateIfPossible();
-
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSource>> vectorTileSources;
     std::vector<Actor<Tiled2dMapRasterSource>> rasterTileSources;
 

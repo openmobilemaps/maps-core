@@ -774,7 +774,7 @@ class Break {
     float cost;
 };
 
-double calculateCost(float lineWidth, float targetWidth, float additionalCost, bool isLast) {
+float calculateCost(float lineWidth, float targetWidth, float additionalCost, bool isLast) {
     float cost = std::pow(lineWidth - targetWidth, 2.0);
 
     if(isLast) {
