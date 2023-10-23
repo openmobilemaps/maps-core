@@ -185,6 +185,8 @@ private:
 
     void initializeVectorLayer();
 
+    void applyGlobalStateIfPossible();
+
     int32_t layerIndex = -1;
 
     const std::optional<double> dpFactor;

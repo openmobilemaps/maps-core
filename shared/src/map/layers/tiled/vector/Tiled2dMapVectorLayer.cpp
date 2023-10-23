@@ -206,7 +206,9 @@ void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDes
     for (auto const &[source, geoJson]: mapDescription->geoJsonSources) {
         layerConfigs[source] = getLayerConfig(VectorMapSourceDescription::geoJsonDescription());
     }
+    
     initializeVectorLayer();
+    applyGlobalStateIfPossible();
 }
 
 void Tiled2dMapVectorLayer::initializeVectorLayer() {
@@ -1005,6 +1007,13 @@ void Tiled2dMapVectorLayer::setFeatureState(const std::string & identifier, cons
 
 void Tiled2dMapVectorLayer::setGlobalState(const std::unordered_map<std::string, VectorLayerFeatureInfoValue> &properties) {
     featureStateManager->setGlobalState(properties);
+    applyGlobalStateIfPossible();
+}
+
+void Tiled2dMapVectorLayer::applyGlobalStateIfPossible() {
+    auto mapInterface = this->mapInterface;
+    auto mapDescription = this->mapDescription;
+    if(!mapInterface || !mapDescription) { return; }
 
     std::unordered_map<std::string, std::vector<std::tuple<std::string, std::string>>> sourceLayerIdentifiersMap;
     std::unordered_map<std::string, std::vector<std::tuple<std::shared_ptr<VectorLayerDescription>, int32_t>>> sourcelayerDescriptionIndexMap;
@@ -1038,7 +1047,5 @@ void Tiled2dMapVectorLayer::setGlobalState(const std::unordered_map<std::string,
         }
     }
 
-    if (auto mapInterface = this->mapInterface) {
-        mapInterface->invalidate();
-    }
+    mapInterface->invalidate();
 }
