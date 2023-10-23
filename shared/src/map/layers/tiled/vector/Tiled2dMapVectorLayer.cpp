@@ -1011,7 +1011,9 @@ void Tiled2dMapVectorLayer::setGlobalState(const std::unordered_map<std::string,
 }
 
 void Tiled2dMapVectorLayer::applyGlobalStateIfPossible() {
-    if(mapDescription == nullptr) { return; }
+    auto mapInterface = this->mapInterface;
+    auto mapDescription = this->mapDescription;
+    if(!mapInterface || !mapDescription) { return; }
 
     std::unordered_map<std::string, std::vector<std::tuple<std::string, std::string>>> sourceLayerIdentifiersMap;
     std::unordered_map<std::string, std::vector<std::tuple<std::shared_ptr<VectorLayerDescription>, int32_t>>> sourcelayerDescriptionIndexMap;
@@ -1045,7 +1047,5 @@ void Tiled2dMapVectorLayer::applyGlobalStateIfPossible() {
         }
     }
 
-    if (auto mapInterface = this->mapInterface) {
-        mapInterface->invalidate();
-    }
+    mapInterface->invalidate();
 }
