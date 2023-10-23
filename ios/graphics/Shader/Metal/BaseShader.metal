@@ -69,7 +69,7 @@ shadedFragmentShader(VertexOut in [[stage_in]],
   float s = in.n.x * 0.5 + in.n.y * 0.5 + in.n.z * 0.3;
 //  s = s * 0.5 + 0.5;
   s = 0.8 + 0.1 * sin(time/24.0*2.0*3.14159 - 1.8);
-  float d = max(0.0, 1.0 - max(0.0, in.position.z - 0.98) * 20.0); //- max(0.0, min(1.0, in.position.z / 0.8 - 0.6));
+  float d = max(0.0, 1.0 - max(0.0, in.position.z - 0.99) * 20.0); //- max(0.0, min(1.0, in.position.z / 0.8 - 0.6));
   float a = color.a * alpha;
 
   if (a == 0) {
@@ -77,7 +77,7 @@ shadedFragmentShader(VertexOut in [[stage_in]],
   }
 
 
-  return float4(color.r * a * s * r, color.g * a * s * r, color.b * a * s * r, a) * d + (1.0-d) * float4(1,1,1,1);
+  return float4(color.r * a * s * r * 0.5, color.g * a * s * r * 0.5, color.b * a * s * r * 0.5, a) * d + (1.0-d) * float4(1,1,1,1);
 }
 
 vertex VertexOut

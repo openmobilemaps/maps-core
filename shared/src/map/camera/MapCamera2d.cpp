@@ -430,7 +430,7 @@ std::vector<float> MapCamera2d::getVpMatrix() {
         Matrix::setIdentityM(newProjectionMatrix, 0);
 
 
-        float fov = 25.0; // zoom / 70800;
+        float fov = 45.0; // zoom / 70800;
 
         // aspect ratio
         float vpr = (float)sizeViewport.x / (float)sizeViewport.y;
@@ -451,7 +451,6 @@ std::vector<float> MapCamera2d::getVpMatrix() {
 //        Matrix::translateM(newViewMatrix, 0, 0.0, +0.3, 0.0);
 
 //        angle += 0.03;
-
 
 
 
