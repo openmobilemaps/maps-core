@@ -358,12 +358,6 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
                 scales[2 * (countOffset + centerPositionSize) + 1] = size.y;
                 rotations[countOffset + centerPositionSize] = -angle;
 
-                centerPosBoxMin.x = std::min(centerPosBoxMin.x, x + size.x / 2);
-                centerPosBoxMax.x = std::max(centerPosBoxMax.x, x + size.x / 2);
-
-                centerPosBoxMin.y = std::min(centerPosBoxMin.y, y + size.y / 2);
-                centerPosBoxMax.y = std::max(centerPosBoxMax.y, y + size.y / 2);
-
                 centerPositions.push_back(Vec2D(x + size.x / 2,
                                                 y + size.y / 2));
             }
@@ -395,7 +389,6 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
     }
 
     const Vec2D size((boxMax.x - boxMin.x), (medianLastBaseLine - boxMin.y));
-    const Vec2D centerSize((centerPosBoxMax.x - centerPosBoxMin.x), (centerPosBoxMax.y - centerPosBoxMin.y));
 
     switch (textJustify) {
         case TextJustify::AUTO:
@@ -407,9 +400,11 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
         case TextJustify::CENTER: {
             size_t lineStart = 0;
             for (auto const lineEndIndex: lineEndIndices) {
-                double lineWidth = centerPositions[lineEndIndex].x - centerPositions[lineStart].x;
                 auto factor = textJustify == TextJustify::CENTER ? 2.0 : 1.0;
-                double delta = (centerSize.x - lineWidth) / factor;
+                double startFirst = centerPositions[lineStart].x - scales[2 * (countOffset + lineStart)] * 0.5;
+                double endLast = centerPositions[lineEndIndex].x + scales[2 * (countOffset + lineEndIndex)] * 0.5;
+                double lineWidth = endLast - startFirst;
+                double delta = (size.x - lineWidth) / factor;
 
                 for(size_t i = lineStart; i <= lineEndIndex; i++) {
                     centerPositions[i].x += delta;
@@ -462,7 +457,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
         case Anchor::TOP:
         case Anchor::TOP_LEFT:
         case Anchor::TOP_RIGHT:
-            anchorOffset.y -= textOffset.y * fontSize - yOffset;
+            anchorOffset.y += textOffset.y * fontSize + yOffset;
             break;
         case Anchor::BOTTOM:
         case Anchor::BOTTOM_LEFT:
