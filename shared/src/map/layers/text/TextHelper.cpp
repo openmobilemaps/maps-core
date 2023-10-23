@@ -774,8 +774,8 @@ class Break {
     float cost;
 };
 
-float calculateCost(float lineWidth, float targetWidth, float additionalCost, bool isLast) {
-    float cost = std::pow(abs(lineWidth - targetWidth), 2.0);
+double calculateCost(float lineWidth, float targetWidth, float additionalCost, bool isLast) {
+    float cost = std::pow(lineWidth - targetWidth, 2.0);
 
     if(isLast) {
         return cost * ((lineWidth < targetWidth) ? 0.5 : 2.0);
@@ -842,7 +842,7 @@ std::vector<BreakResult> TextHelper::bestBreakIndices(std::vector<std::string> &
 
 
 std::vector<BreakResult> TextHelper::bestBreakIndicesSub(std::vector<std::string> &letters, int64_t maxCharacterWidth) {
-    if(letters.size() == 0) {
+    if(letters.size() == 0 || letters.size() < maxCharacterWidth) {
         return {};
     }
 
@@ -856,9 +856,6 @@ std::vector<BreakResult> TextHelper::bestBreakIndicesSub(std::vector<std::string
 
         if(i < letters.size() - 1 && allowsLineBreak(l)) {
             float additionalCost = 0;
-//            if (isLineBreak(l)) {
-//                additionalCost = -1000000;
-//            }
 
             if (isSpecialCharacter(l)) {
                 additionalCost = 100;
