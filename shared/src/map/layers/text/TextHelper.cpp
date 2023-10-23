@@ -820,6 +820,10 @@ std::vector<BreakResult> TextHelper::bestBreakIndices(std::vector<std::string> &
         }
     }
 
+    if(current.size() >  0) {
+        strings.push_back(current);
+    }
+
     std::vector<BreakResult> result = {};
     int currentIndex = 0;
 
