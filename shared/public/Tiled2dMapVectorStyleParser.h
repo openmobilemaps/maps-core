@@ -40,6 +40,7 @@ public:
     static const std::string stepExpression;
     static const std::string interpolateExpression;
     static const std::string formatExpression;
+    static const std::string numberFormatExpression;
     static const std::string concatExpression;
     static const std::string lengthExpression;
     static const std::string notExpression;
@@ -256,6 +257,18 @@ public:
                 }
 
                 return std::make_shared<FormatValue>(values);
+            }
+
+            // Example: ["number-format",["get","temperature"], { "min-fraction-digits": 1, "max-fraction-digits": 1}]
+            else if (isExpression(json[0], numberFormatExpression)) {
+                const auto &value = parseValue(json[1]);
+                int minFractionDigits = 0;
+                int maxFractionDigits = 0;
+                if (json[2].is_object()) {
+                    minFractionDigits = json[2].value("min-fraction-digits", 0);
+                    maxFractionDigits = json[2].value("max-fraction-digits", 0);
+                }
+                return std::make_shared<NumberFormatValue>(value, minFractionDigits, maxFractionDigits);
             }
 
             // Example: ["concat",["get","ele"],"\n\n",["get","lake_depth"]]

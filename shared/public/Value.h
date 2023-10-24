@@ -41,6 +41,7 @@
 #include "ValueVariant.h"
 #include "Tiled2dMapVectorStateManager.h"
 #include <mutex>
+#include <iomanip>
 
 
 namespace std {
@@ -2131,6 +2132,89 @@ private:
     const std::vector<FormatValueWrapper> values;
 };
 
+class NumberFormatValue : public Value {
+public:
+    NumberFormatValue(const std::shared_ptr<Value> &value, int minFractionDigits = 0, int maxFactionDigits = 0)
+            : value(value), minFractionDigits(minFractionDigits), maxFractionDigits(maxFactionDigits) {}
+
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<NumberFormatValue>(value->clone(), minFractionDigits, maxFractionDigits);
+    }
+
+    std::unordered_set<std::string> getUsedKeys() const override {
+        return value->getUsedKeys();
+    }
+
+    ValueVariant evaluate(const EvaluationContext &context) const override {
+        auto valueVariant = value->evaluate(context);
+
+        std::optional<double> numberValue = std::nullopt;
+        if (std::holds_alternative<double>(valueVariant)) {
+            numberValue = std::get<double>(valueVariant);
+        } else if (std::holds_alternative<int64_t>(valueVariant)) {
+            numberValue = std::get<int64_t>(valueVariant);
+        } else if (std::holds_alternative<std::string>(valueVariant)) {
+            // try to parse the string
+            try {
+                numberValue = std::stod(std::get<std::string>(valueVariant));
+            } catch (const std::invalid_argument &e) {
+                return std::monostate();
+            }
+        }
+
+        if (!numberValue.has_value()) {
+            return std::monostate();
+        }
+
+        double factor = std::pow(10, maxFractionDigits);
+        double roundedVal = std::round(*numberValue * factor) / factor;
+
+        std::stringstream resultStream;
+        resultStream << std::fixed << std::setprecision(maxFractionDigits) << roundedVal;
+        std::string result = resultStream.str();
+        size_t decimalPointPos = result.find('.');
+        if (decimalPointPos != std::string::npos) {
+            while (result.back() == '0' || result.length() - decimalPointPos - 1 > maxFractionDigits) {
+                result.pop_back();
+            }
+        }
+        if (maxFractionDigits == 0) {
+            if (result.back() == '.') {
+                result.pop_back();
+            }
+        } else if (minFractionDigits > 0) {
+            if (decimalPointPos == std::string::npos) {
+                decimalPointPos = result.length();
+                result += '.';
+            }
+            int fractionDigits = result.length() - decimalPointPos - 1;
+            int zerosToAdd = minFractionDigits - fractionDigits;
+            if (zerosToAdd > 0) {
+                result.append(zerosToAdd, '0');
+            }
+        }
+
+        return result;
+    }
+
+    bool isEqual(const std::shared_ptr<Value> &other) const override {
+        if (auto casted = std::dynamic_pointer_cast<NumberFormatValue>(other)) {
+            if (value && casted->value && !value->isEqual(casted->value)) {
+                return false;
+            }
+            if (minFractionDigits != casted->minFractionDigits || maxFractionDigits != casted->maxFractionDigits) {
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+private:
+    const std::shared_ptr<Value> value;
+    int minFractionDigits = 0;
+    int maxFractionDigits = 0;
+};
 
 enum class MathOperation {
     MINUS,

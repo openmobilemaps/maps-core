@@ -28,6 +28,7 @@ const std::string Tiled2dMapVectorStyleParser::stopsExpression = "stops";
 const std::string Tiled2dMapVectorStyleParser::stepExpression = "step";
 const std::string Tiled2dMapVectorStyleParser::interpolateExpression = "interpolate";
 const std::string Tiled2dMapVectorStyleParser::formatExpression = "format";
+const std::string Tiled2dMapVectorStyleParser::numberFormatExpression = "number-format";
 const std::string Tiled2dMapVectorStyleParser::concatExpression = "concat";
 const std::string Tiled2dMapVectorStyleParser::lengthExpression = "length";
 const std::string Tiled2dMapVectorStyleParser::notExpression = "!";
