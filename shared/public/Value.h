@@ -1992,21 +1992,65 @@ private:
 class InFilter : public Value {
 private:
     const std::unordered_set<ValueVariant> values;
+    const std::shared_ptr<Value> dynamicValues;
     const std::string key;
 public:
-    InFilter(const std::string &key, const std::unordered_set<ValueVariant> values) :values(values), key(key) {}
+    InFilter(const std::string &key, const std::unordered_set<ValueVariant> values, const std::shared_ptr<Value> dynamicValues) :values(values), key(key), dynamicValues(dynamicValues) {}
 
     std::unique_ptr<Value> clone() override {
-        return std::make_unique<InFilter>(key, values);
+        return std::make_unique<InFilter>(key, values, dynamicValues);
     }
 
     std::unordered_set<std::string> getUsedKeys() const override {
-        return { key };
+        std::unordered_set<std::string> usedKeys = { key };
+        if (dynamicValues) {
+            auto const setKeys = dynamicValues->getUsedKeys();
+            usedKeys.insert(setKeys.begin(), setKeys.end());
+        }
+        return usedKeys;
     }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
         auto const &value = context.feature->getValue(key);
-        return values.count(value) != 0;
+        if (values.count(value) != 0) {
+            return true;
+        }
+        if (dynamicValues) {
+            bool isString = std::holds_alternative<std::string>(value);
+            bool isDouble = std::holds_alternative<double>(value);
+            bool isInt = std::holds_alternative<int64_t>(value);
+            if (!isString && !isDouble && !isInt) {
+                return false;
+            }
+
+            auto const dynamicVariants = dynamicValues->evaluate(context);
+
+            if (isString && std::holds_alternative<std::vector<std::string>>(dynamicVariants)) {
+                const std::string stringValue = std::get<std::string>(value);
+                const std::vector<std::string> strings = std::get<std::vector<std::string>>(dynamicVariants);
+                for (auto const &string: strings) {
+                    if (string == stringValue) {
+                        return true;
+                    }
+                }
+            } else if ((isDouble || isInt) && std::holds_alternative<std::vector<float>>(dynamicVariants)) {
+                double doubleValue;
+                if (isDouble) {
+                    doubleValue = std::get<double>(value);
+                } else {
+                    doubleValue = std::get<int64_t>(value);
+                }
+
+                const std::vector<float> floats = std::get<std::vector<float>>(dynamicVariants);
+                for (auto const &f: floats) {
+                    if (f == doubleValue) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     };
 
 
@@ -2022,6 +2066,10 @@ public:
                 return false;
             }
 
+            if (dynamicValues != casted->dynamicValues) {
+                return false;
+            }
+
             return true; // Key and values are equal
         }
 
@@ -2033,21 +2081,59 @@ public:
 class NotInFilter : public Value {
 private:
     const std::unordered_set<ValueVariant> values;
+    const std::shared_ptr<Value> dynamicValues;
     const std::string key;
 public:
-    NotInFilter(const std::string &key, const std::unordered_set<ValueVariant> values) :values(values), key(key) {}
+    NotInFilter(const std::string &key, const std::unordered_set<ValueVariant> values, const std::shared_ptr<Value> dynamicValues) :values(values), key(key), dynamicValues(dynamicValues) {}
 
     std::unique_ptr<Value> clone() override {
-        return std::make_unique<NotInFilter>(key, values);
+        return std::make_unique<NotInFilter>(key, values, dynamicValues);
     }
 
     std::unordered_set<std::string> getUsedKeys() const override {
-        return { key };
+        std::unordered_set<std::string> usedKeys = { key };
+        if (dynamicValues) {
+            auto const setKeys = dynamicValues->getUsedKeys();
+            usedKeys.insert(setKeys.begin(), setKeys.end());
+        }
+        return usedKeys;
     }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
         auto const &value = context.feature->getValue(key);
-        return values.count(value) == 0;
+        if (values.count(value) != 0) {
+            return false;
+        }
+
+        if (dynamicValues) {
+            bool isString = std::holds_alternative<std::string>(value);
+            bool isDouble = std::holds_alternative<double>(value);
+            if (!isString && !isDouble) {
+                return true;
+            }
+
+            auto const dynamicVariants = dynamicValues->evaluate(context);
+
+            if (isString && std::holds_alternative<std::vector<std::string>>(dynamicVariants)) {
+                const std::string stringValue = std::get<std::string>(value);
+                const std::vector<std::string> strings = std::get<std::vector<std::string>>(dynamicVariants);
+                for (auto const &string: strings) {
+                    if (string == stringValue) {
+                        return false;
+                    }
+                }
+            } else if (isDouble && std::holds_alternative<std::vector<float>>(dynamicVariants)) {
+                const double doubleValue = std::get<double>(value);
+                const std::vector<float> floats = std::get<std::vector<float>>(dynamicVariants);
+                for (auto const &f: floats) {
+                    if (f == doubleValue) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
     };
 
 
@@ -2061,6 +2147,11 @@ public:
             if (values != casted->values) {
                 return false;
             }
+
+            if (dynamicValues != casted->dynamicValues) {
+                return false;
+            }
+
             return true; // Key and values are equal
         }
         return false; // Not the same type or nullptr

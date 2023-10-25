@@ -88,12 +88,17 @@ public:
                 //          [ "in", ["get", "subclass"], ["literal", ["allotments", "forest", "glacier", "golf_course", "park"]]]
             } else if ((isExpression(json[0], inExpression) || isExpression(json[0], notInExpression)) && (json[1].is_string() || (json[1].is_array() && json[1][0] == getExpression))) {
                 std::unordered_set<ValueVariant> values;
+                std::shared_ptr<Value> dynamicValues;
+
 
                 if (json[2].is_array()){
                     if (json[2][0] == literalExpression && json[2][1].is_array()) {
                         for (auto it = json[2][1].begin(); it != json[2][1].end(); it++) {
                             values.insert(getVariant(*it));
                         }
+                    // Example:  ["in", ["get", "plz"], ["global-state", "favoritesPlz"]],
+                    } else if ((json[2][0] == globalStateExpression || json[2][0] == featureStateExpression ) && json[2][1].is_string()) {
+                        dynamicValues = parseValue(json[2]);
                     } else {
                         for (auto it = json[2].begin(); it != json[2].end(); it++) {
                             values.insert(getVariant(*it));
@@ -113,9 +118,9 @@ public:
                 }
 
                 if (isExpression(json[0], inExpression)) {
-                    return std::make_shared<InFilter>(key,values);
+                    return std::make_shared<InFilter>(key, values, dynamicValues);
                 } else {
-                    return std::make_shared<NotInFilter>(key,values);
+                    return std::make_shared<NotInFilter>(key, values, dynamicValues);
                 }
 
             // Example: [ "!=", "intermittent", 1 ]
