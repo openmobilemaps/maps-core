@@ -243,7 +243,7 @@ public:
                 for (auto it = json.begin() + 1; it != json.end(); it += 1) {
                     auto const &value = parseValue(*it);
                     float scale = 1.0;
-                    if ((it + 1)->is_object()) {
+                    if (it + 1 != json.end() && (it + 1)->is_object()) {
                         for (auto const &[key, value] : (it + 1)->items()) {
                             if (key == "font-scale") {
                                 scale = value.get<float>();
