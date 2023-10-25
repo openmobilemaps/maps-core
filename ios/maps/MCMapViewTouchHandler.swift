@@ -25,7 +25,7 @@ open class MCMapViewTouchHandler: NSObject {
         super.init()
     }
 
-    func touchesBegan(_ touches: Set<UITouch>, with _: UIEvent?) {
+    public func touchesBegan(_ touches: Set<UITouch>, with _: UIEvent?) {
         guard let touchHandler else { return }
         touches.forEach {
             activeTouches.insert($0)
@@ -46,11 +46,11 @@ open class MCMapViewTouchHandler: NSObject {
         }
     }
 
-    func touchesEnded(_ touches: Set<UITouch>, with _: UIEvent?) {
+    public func touchesEnded(_ touches: Set<UITouch>, with _: UIEvent?) {
         touchUp(touches)
     }
 
-    func touchesCancelled(_ touches: Set<UITouch>, with _: UIEvent?) {
+    public func touchesCancelled(_ touches: Set<UITouch>, with _: UIEvent?) {
         guard let touchHandler else { return }
         touches.forEach {
             activeTouches.insert($0)
@@ -62,7 +62,7 @@ open class MCMapViewTouchHandler: NSObject {
         }
     }
 
-    func touchesMoved(_ touches: Set<UITouch>, with _: UIEvent?) {
+    public func touchesMoved(_ touches: Set<UITouch>, with _: UIEvent?) {
         guard let touchHandler else { return }
 
         func CGPointDistanceSquared(from: CGPoint, to: CGPoint) -> Double {

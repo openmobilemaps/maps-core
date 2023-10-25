@@ -25,7 +25,7 @@ open class MCMapView: MTKView {
     private var framesToRender: UInt = 1
     private let framesToRenderAfterInvalidate: UInt = 25
 
-    private let touchHandler: MCMapViewTouchHandler
+    public let touchHandler: MCMapViewTouchHandler
     private let callbackHandler = MCMapViewCallbackHandler()
 
     public weak var sizeDelegate: MCMapSizeDelegate?
