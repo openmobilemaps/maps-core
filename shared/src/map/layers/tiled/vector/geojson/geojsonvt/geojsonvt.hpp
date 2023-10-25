@@ -42,13 +42,19 @@ inline uint64_t toID(uint8_t z, uint32_t x, uint32_t y) {
 
 class GeoJSONVT: public GeoJSONVTInterface, public std::enable_shared_from_this<GeoJSONVT> {
 public:
-    const Options options;
+    Options options;
 
     const Tile emptyTile = Tile();
 
     GeoJSONVT(const std::shared_ptr<GeoJson> &geoJson,
               const Options& options_ = Options())
     : options(options_), loadingResult(DataLoaderResult(std::nullopt, std::nullopt, LoaderStatus::OK, std::nullopt)){
+
+        // If the GeoJSON contains only points, there is no need to split it into smaller tiles,
+        // as there are no opportunities for simplification, merging, or meaningful point reduction.
+        if (geoJson->hasOnlyPoints) {
+            options.maxZoom = 0;
+        }
 
         const uint32_t z2 = 1u << options.maxZoom;
 
@@ -85,6 +91,11 @@ public:
                     json = nlohmann::json::parse(string);
                     auto geoJson = GeoJsonParser::getGeoJson(json);
                     if (geoJson) {
+
+                        if (geoJson->hasOnlyPoints) {
+                            self->options.maxZoom = 0;
+                        }
+
                         const uint32_t z2 = 1u << self->options.maxZoom;
 
                         convert(geoJson->geometries, (self->options.tolerance / self->options.extent) / z2);

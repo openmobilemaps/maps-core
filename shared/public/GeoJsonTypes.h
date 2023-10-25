@@ -120,5 +120,6 @@ inline Coord intersect<1>(const Coord& a, const Coord& b, const double y, const 
 class GeoJson {
 public:
     std::vector<std::shared_ptr<GeoJsonGeometry>> geometries;
+    bool hasOnlyPoints = true;
 };
 
