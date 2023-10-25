@@ -1050,6 +1050,12 @@ void Tiled2dMapVectorLayer::applyGlobalStateIfPossible() {
     mapInterface->invalidate();
 }
 
+LayerReadyState Tiled2dMapVectorLayer::isReadyToRenderOffscreen() {
+    if (layerConfigs.empty() || sourceInterfaces.empty()) {
+        return LayerReadyState::NOT_READY;
+    }
+    return Tiled2dMapLayer::isReadyToRenderOffscreen();
+}
 void Tiled2dMapVectorLayer::setMinZoomLevelIdentifier(std::optional<int32_t> value) {
     Tiled2dMapLayer::setMinZoomLevelIdentifier(value);
 }
