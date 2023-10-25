@@ -468,7 +468,7 @@ void Tiled2dMapVectorLayer::update() {
             });
         }
         collisionManager.syncAccess([&vpMatrix, &viewportSize, viewportRotation, enforceUpdate](const auto &manager) {
-            manager->collisionDetection(*vpMatrix, viewportSize, viewportRotation, true);
+            manager->collisionDetection(*vpMatrix, viewportSize, viewportRotation, enforceUpdate);
         });
     }
 }
@@ -1064,4 +1064,8 @@ void Tiled2dMapVectorLayer::setMaxZoomLevelIdentifier(std::optional<int32_t> val
 
 std::optional<int32_t> Tiled2dMapVectorLayer::getMaxZoomLevelIdentifier() {
     return Tiled2dMapLayer::getMaxZoomLevelIdentifier();
+}
+
+void Tiled2dMapVectorLayer::invalidateCollisionState() {
+    prevCollisionStillValid.clear();
 }
