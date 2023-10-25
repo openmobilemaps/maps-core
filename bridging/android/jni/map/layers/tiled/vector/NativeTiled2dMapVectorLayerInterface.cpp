@@ -91,6 +91,40 @@ CJNIEXPORT ::djinni_generated::NativeLayerInterface::JniType JNICALL Java_io_ope
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_00024CppProxy_native_1setMinZoomLevelIdentifier(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_value)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapVectorLayerInterface>(nativeRef);
+        ref->setMinZoomLevelIdentifier(::djinni::Optional<std::optional, ::djinni::I32>::toCpp(jniEnv, j_value));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_00024CppProxy_native_1getMinZoomLevelIdentifier(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapVectorLayerInterface>(nativeRef);
+        auto r = ref->getMinZoomLevelIdentifier();
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni::I32>::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_00024CppProxy_native_1setMaxZoomLevelIdentifier(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_value)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapVectorLayerInterface>(nativeRef);
+        ref->setMaxZoomLevelIdentifier(::djinni::Optional<std::optional, ::djinni::I32>::toCpp(jniEnv, j_value));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_00024CppProxy_native_1getMaxZoomLevelIdentifier(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapVectorLayerInterface>(nativeRef);
+        auto r = ref->getMaxZoomLevelIdentifier();
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni::I32>::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 CJNIEXPORT jstring JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_00024CppProxy_native_1getStyleMetadataJson(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {

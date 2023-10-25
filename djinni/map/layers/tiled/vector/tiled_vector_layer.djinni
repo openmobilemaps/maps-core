@@ -16,6 +16,12 @@ tiled_2d_map_vector_layer_interface = interface +c {
 
     asLayerInterface(): layer_interface;
 
+    set_min_zoom_level_identifier(value: optional<i32>);
+    get_min_zoom_level_identifier(): optional<i32>;
+
+    set_max_zoom_level_identifier(value: optional<i32>);
+    get_max_zoom_level_identifier(): optional<i32>;
+
     get_style_metadata_json(): optional<string>;
 
     set_feature_state(identifier: string, properties: map<string, vector_layer_feature_info_value>);

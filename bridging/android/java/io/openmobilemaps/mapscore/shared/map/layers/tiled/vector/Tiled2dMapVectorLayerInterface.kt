@@ -26,6 +26,14 @@ abstract class Tiled2dMapVectorLayerInterface {
 
     abstract fun asLayerInterface(): io.openmobilemaps.mapscore.shared.map.LayerInterface
 
+    abstract fun setMinZoomLevelIdentifier(value: Int?)
+
+    abstract fun getMinZoomLevelIdentifier(): Int?
+
+    abstract fun setMaxZoomLevelIdentifier(value: Int?)
+
+    abstract fun getMaxZoomLevelIdentifier(): Int?
+
     abstract fun getStyleMetadataJson(): String?
 
     abstract fun setFeatureState(identifier: String, properties: HashMap<String, VectorLayerFeatureInfoValue>)
@@ -58,6 +66,30 @@ abstract class Tiled2dMapVectorLayerInterface {
             return native_asLayerInterface(this.nativeRef)
         }
         private external fun native_asLayerInterface(_nativeRef: Long): io.openmobilemaps.mapscore.shared.map.LayerInterface
+
+        override fun setMinZoomLevelIdentifier(value: Int?) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setMinZoomLevelIdentifier(this.nativeRef, value)
+        }
+        private external fun native_setMinZoomLevelIdentifier(_nativeRef: Long, value: Int?)
+
+        override fun getMinZoomLevelIdentifier(): Int? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getMinZoomLevelIdentifier(this.nativeRef)
+        }
+        private external fun native_getMinZoomLevelIdentifier(_nativeRef: Long): Int?
+
+        override fun setMaxZoomLevelIdentifier(value: Int?) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setMaxZoomLevelIdentifier(this.nativeRef, value)
+        }
+        private external fun native_setMaxZoomLevelIdentifier(_nativeRef: Long, value: Int?)
+
+        override fun getMaxZoomLevelIdentifier(): Int? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getMaxZoomLevelIdentifier(this.nativeRef)
+        }
+        private external fun native_getMaxZoomLevelIdentifier(_nativeRef: Long): Int?
 
         override fun getStyleMetadataJson(): String? {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

@@ -5,6 +5,7 @@
 #import "MCGraphicsObjectFactoryInterface.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
+#import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCLineGroup2dInterface+Private.h"
 #import "MCPolygon2dInterface+Private.h"

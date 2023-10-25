@@ -1049,3 +1049,19 @@ void Tiled2dMapVectorLayer::applyGlobalStateIfPossible() {
 
     mapInterface->invalidate();
 }
+
+void Tiled2dMapVectorLayer::setMinZoomLevelIdentifier(std::optional<int32_t> value) {
+    Tiled2dMapLayer::setMinZoomLevelIdentifier(value);
+}
+
+std::optional<int32_t> Tiled2dMapVectorLayer::getMinZoomLevelIdentifier() {
+    return Tiled2dMapLayer::getMinZoomLevelIdentifier();
+}
+
+void Tiled2dMapVectorLayer::setMaxZoomLevelIdentifier(std::optional<int32_t> value) {
+    Tiled2dMapLayer::setMaxZoomLevelIdentifier(value);
+}
+
+std::optional<int32_t> Tiled2dMapVectorLayer::getMaxZoomLevelIdentifier() {
+    return Tiled2dMapLayer::getMaxZoomLevelIdentifier();
+}
