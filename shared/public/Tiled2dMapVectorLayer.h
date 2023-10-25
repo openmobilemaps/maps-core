@@ -127,6 +127,8 @@ public:
 
     std::optional<std::shared_ptr<FeatureContext>> getFeatureContext(int64_t identifier);
 
+    LayerReadyState isReadyToRenderOffscreen() override;
+
     void setMinZoomLevelIdentifier(std::optional<int32_t> value) override;
 
     std::optional<int32_t> getMinZoomLevelIdentifier() override;
