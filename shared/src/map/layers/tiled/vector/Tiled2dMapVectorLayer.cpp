@@ -468,7 +468,7 @@ void Tiled2dMapVectorLayer::update() {
             });
         }
         collisionManager.syncAccess([&vpMatrix, &viewportSize, viewportRotation, enforceUpdate](const auto &manager) {
-            manager->collisionDetection(*vpMatrix, viewportSize, viewportRotation, enforceUpdate);
+            manager->collisionDetection(*vpMatrix, viewportSize, viewportRotation, true);
         });
     }
 }
