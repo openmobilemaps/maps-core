@@ -507,6 +507,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups(const Tiled2dMap
             group->setupObjects(spriteData, spriteTexture);
         });
     }
+    vectorLayer.message(&Tiled2dMapVectorLayer::invalidateCollisionState);
     readyManager.message(&Tiled2dMapVectorReadyManager::setReady, readyManagerIndex, tileInfo, std::get<0>(layerIt->second).baseValue);
 }
 
@@ -558,13 +559,6 @@ void Tiled2dMapVectorSourceSymbolDataManager::updateSymbolGroups() {
             animationCoordinatorMap->clearAnimationCoordinators();
         }
         tilesToClear.clear();
-    }
-
-    for (const auto &[tile, symbolGroupMap]: tileSymbolGroupMap) {
-        const auto tileState = tileStateMap.find(tile);
-        if (tileState == tileStateMap.end() || tileState->second != TileState::VISIBLE) {
-            continue;
-        }
     }
 
     pregenerateRenderPasses();

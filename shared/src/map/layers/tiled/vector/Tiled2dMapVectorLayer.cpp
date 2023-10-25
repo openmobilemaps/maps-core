@@ -1065,3 +1065,7 @@ void Tiled2dMapVectorLayer::setMaxZoomLevelIdentifier(std::optional<int32_t> val
 std::optional<int32_t> Tiled2dMapVectorLayer::getMaxZoomLevelIdentifier() {
     return Tiled2dMapLayer::getMaxZoomLevelIdentifier();
 }
+
+void Tiled2dMapVectorLayer::invalidateCollisionState() {
+    prevCollisionStillValid.clear();
+}
