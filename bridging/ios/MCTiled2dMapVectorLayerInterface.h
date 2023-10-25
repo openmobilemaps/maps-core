@@ -43,6 +43,14 @@
 
 - (nullable id<MCLayerInterface>)asLayerInterface;
 
+- (void)setMinZoomLevelIdentifier:(nullable NSNumber *)value;
+
+- (nullable NSNumber *)getMinZoomLevelIdentifier;
+
+- (void)setMaxZoomLevelIdentifier:(nullable NSNumber *)value;
+
+- (nullable NSNumber *)getMaxZoomLevelIdentifier;
+
 - (nullable NSString *)getStyleMetadataJson;
 
 - (void)setFeatureState:(nonnull NSString *)identifier

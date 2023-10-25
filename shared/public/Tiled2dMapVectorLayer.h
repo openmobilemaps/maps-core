@@ -127,6 +127,14 @@ public:
 
     std::optional<std::shared_ptr<FeatureContext>> getFeatureContext(int64_t identifier);
 
+    void setMinZoomLevelIdentifier(std::optional<int32_t> value) override;
+
+    std::optional<int32_t> getMinZoomLevelIdentifier() override;
+
+    void setMaxZoomLevelIdentifier(std::optional<int32_t> value) override;
+
+    std::optional<int32_t> getMaxZoomLevelIdentifier() override;
+
     // Touch Interface
     bool onTouchDown(const Vec2F &posScreen) override;
 

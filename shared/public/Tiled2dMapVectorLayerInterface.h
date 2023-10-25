@@ -7,6 +7,7 @@
 #include "LayerInterface.h"
 #include "LoaderInterface.h"
 #include "Tiled2dMapZoomInfo.h"
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <string>
@@ -31,6 +32,14 @@ public:
     virtual void setSelectionDelegate(const /*nullable*/ std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> & selectionDelegate) = 0;
 
     virtual /*not-null*/ std::shared_ptr<::LayerInterface> asLayerInterface() = 0;
+
+    virtual void setMinZoomLevelIdentifier(std::optional<int32_t> value) = 0;
+
+    virtual std::optional<int32_t> getMinZoomLevelIdentifier() = 0;
+
+    virtual void setMaxZoomLevelIdentifier(std::optional<int32_t> value) = 0;
+
+    virtual std::optional<int32_t> getMaxZoomLevelIdentifier() = 0;
 
     virtual std::optional<std::string> getStyleMetadataJson() = 0;
 
