@@ -411,13 +411,16 @@ std::vector<float> MapCamera2d::getVpMatrix() {
         float R = 6371000;
         float longitude = focusPointPosition.x; //  px / R;
         float latitude = focusPointPosition.y; // 2*atan(exp(py / R)) - 3.1415926 / 2;
+       // cameraPitch = 90 + getMaxZoom();
         cameraPitch = 90;
+
         focusPointAltitude = focusPointPosition.z;
 //        cameraDistance = 500;
 //        angle = 90;
 //        angle = 124.5673482026389;
-        cameraDistance = zoom / R;
-        float maxD = cameraDistance * 2.0;
+        cameraDistance = (zoom*0.98) / R;
+ //       float maxD = cameraDistance * 2.0;
+        float maxD = cameraDistance * 1.3;
         float minD = 100.0 / R;
 //        angle += 0.1;
 //
@@ -430,8 +433,9 @@ std::vector<float> MapCamera2d::getVpMatrix() {
         Matrix::setIdentityM(newProjectionMatrix, 0);
 
 
+       // float fov = 45.0; // zoom / 70800;
         float fov = 45.0; // zoom / 70800;
-
+        
         // aspect ratio
         float vpr = (float)sizeViewport.x / (float)sizeViewport.y;
         if (vpr > 1) {
