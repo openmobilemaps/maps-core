@@ -2108,7 +2108,8 @@ public:
         if (dynamicValues) {
             bool isString = std::holds_alternative<std::string>(value);
             bool isDouble = std::holds_alternative<double>(value);
-            if (!isString && !isDouble) {
+            bool isInt = std::holds_alternative<int64_t>(value);
+            if (!isString && !isDouble && !isInt) {
                 return true;
             }
 
@@ -2122,8 +2123,14 @@ public:
                         return false;
                     }
                 }
-            } else if (isDouble && std::holds_alternative<std::vector<float>>(dynamicVariants)) {
-                const double doubleValue = std::get<double>(value);
+            } else if ((isDouble || isInt) && std::holds_alternative<std::vector<float>>(dynamicVariants)) {
+                double doubleValue;
+                if (isDouble) {
+                    doubleValue = std::get<double>(value);
+                } else {
+                    doubleValue = std::get<int64_t>(value);
+                }
+
                 const std::vector<float> floats = std::get<std::vector<float>>(dynamicVariants);
                 for (auto const &f: floats) {
                     if (f == doubleValue) {
