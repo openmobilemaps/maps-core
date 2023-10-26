@@ -23,8 +23,8 @@ Tiled2dMapVectorRasterTile::Tiled2dMapVectorRasterTile(const std::weak_ptr<MapIn
                                                        const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager)
                                                        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, layerConfig, tileCallbackInterface, featureStateManager),
                                                        usedKeys(description->getUsedKeys()), zoomInfo(layerConfig->getZoomInfo()) {
-    isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
-    isStyleStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end() || usedKeys.find(Tiled2dMapVectorStyleParser::globalStateExpression) != usedKeys.end() ;
+    isStyleZoomDependant = usedKeys.containsUsedKey(Tiled2dMapVectorStyleParser::zoomExpression);
+    isStyleStateDependant = usedKeys.isStateDependant();
     auto pMapInterface = mapInterface.lock();
     if (pMapInterface) {
         auto shader = pMapInterface->getShaderFactory()->createRasterShader();
@@ -41,8 +41,8 @@ Tiled2dMapVectorRasterTile::Tiled2dMapVectorRasterTile(const std::weak_ptr<MapIn
 void Tiled2dMapVectorRasterTile::updateRasterLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                                         const Tiled2dMapVectorTileDataRaster &tileData) {
     Tiled2dMapVectorTile::updateRasterLayerDescription(description, tileData);
-    isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
-    isStyleStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end() || usedKeys.find(Tiled2dMapVectorStyleParser::globalStateExpression) != usedKeys.end() ;
+    isStyleZoomDependant = usedKeys.containsUsedKey(Tiled2dMapVectorStyleParser::zoomExpression);
+    isStyleStateDependant = usedKeys.isStateDependant();
     lastZoom = std::nullopt;
     setRasterTileData(tileData);
 }

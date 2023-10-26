@@ -162,13 +162,13 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
     }
 
     const auto &usedKeys = description->getUsedKeys();
-    isStyleStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end() || usedKeys.find(Tiled2dMapVectorStyleParser::globalStateExpression) != usedKeys.end() ;
+    isStyleStateDependant = usedKeys.isStateDependant();
 }
 
 void Tiled2dMapVectorSymbolLabelObject::updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription) {
     this->description = layerDescription;
     const auto &usedKeys = description->getUsedKeys();
-    isStyleStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end() || usedKeys.find(Tiled2dMapVectorStyleParser::globalStateExpression) != usedKeys.end() ;
+    isStyleStateDependant = usedKeys.isStateDependant();
     lastZoomEvaluation = -1;
 }
 

@@ -63,7 +63,7 @@ private:
 
     std::vector<std::tuple<std::vector<std::vector<::Coord>>, std::shared_ptr<FeatureContext>>> hitDetection;
 
-    std::unordered_set<std::string> usedKeys;
+    UsedKeysCollection usedKeys;
     bool isStyleZoomDependant = true;
     bool isStyleStateDependant = true;
     std::optional<double> lastZoom = std::nullopt;

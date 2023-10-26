@@ -38,7 +38,7 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                                                            const bool hideIcon,
                                                            std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap,
                                                            const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
-                                                           const std::unordered_set<std::string> &usedKeys,
+                                                           const UsedKeysCollection &usedKeys,
                                                            const size_t symbolTileIndex) :
     description(description),
     layerConfig(layerConfig),
@@ -83,7 +83,7 @@ symbolTileIndex(symbolTileIndex) {
     isInteractable = description->isInteractable(evalContext);
 
     const bool hasText = !fullText.empty();
-    const size_t contentHash = featureContext->getStyleHash(usedKeys);
+    const size_t contentHash = usedKeys.getHash(evalContext);
 
     crossTileIdentifier = std::hash<std::tuple<std::string, std::string, bool, size_t>>()(std::tuple<std::string, std::string, bool, size_t>(fullText, layerIdentifier, hasIcon, contentHash));
     double xTolerance = std::ceil(std::abs(tileInfo.bounds.bottomRight.x - tileInfo.bounds.topLeft.x) / 4096.0);
@@ -141,10 +141,10 @@ symbolTileIndex(symbolTileIndex) {
 
     symbolSortKey = description->style.getSymbolSortKey(evalContext);
 
-    isStyleStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end() || usedKeys.find(Tiled2dMapVectorStyleParser::globalStateExpression) != usedKeys.end() ;
+    isStyleStateDependant = usedKeys.isStateDependant();
 }
 
-void Tiled2dMapVectorSymbolObject::updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription, const std::unordered_set<std::string> &usedKeys) {
+void Tiled2dMapVectorSymbolObject::updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription, const UsedKeysCollection &usedKeys) {
     this->description = layerDescription;
     if (labelObject) {
         labelObject->updateLayerDescription(layerDescription);
@@ -152,7 +152,7 @@ void Tiled2dMapVectorSymbolObject::updateLayerDescription(const std::shared_ptr<
 
     lastZoomEvaluation = -1;
 
-    isStyleStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end() || usedKeys.find(Tiled2dMapVectorStyleParser::globalStateExpression) != usedKeys.end() ;
+    isStyleStateDependant = usedKeys.isStateDependant();
 
     lastIconUpdateScaleFactor = -1;
     lastIconUpdateRotation = -1;
