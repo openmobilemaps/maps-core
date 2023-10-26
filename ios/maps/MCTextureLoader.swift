@@ -86,7 +86,6 @@ open class MCTextureLoader: MCLoaderInterface {
             }
 
             if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorCancelled {
-                promise.setValue(.init(data: nil, etag: nil, status: .OK, errorCode: nil))
                 return
             }
 
@@ -221,7 +220,6 @@ open class MCTextureLoader: MCLoaderInterface {
             }
 
             if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorCancelled {
-                promise.setValue(.init(data: nil, etag: nil, status: .OK, errorCode: nil))
                 return
             }
 

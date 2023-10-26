@@ -121,7 +121,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                 if (json.contains("extent")) {
                     extent = {};
                     for (auto &el: json["extent"].items()) {
-                        extent->push_back(el.value());
+                        extent->push_back(el.value().get<double>());
                     }
                 }
 
@@ -243,7 +243,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             if (json.contains("extent")) {
                 extent = {};
                 for (auto &el: json["extent"].items()) {
-                    extent->push_back(el.value());
+                    extent->push_back(el.value().get<double>());
                 }
             }
             auto newLayer = std::make_shared<RasterVectorLayerDescription>(val["id"],
@@ -375,7 +375,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
         if (tileJson.contains("extent")) {
             extent = {};
             for (auto &el: tileJson["extent"].items()) {
-                extent->push_back(el.value());
+                extent->push_back(el.value().get<double>());
             }
         }
         sourceDescriptions.push_back(
