@@ -14,6 +14,7 @@
 #include <variant>
 #include <vector>
 #include <iomanip>
+#include <sstream>
 #include "FormattedStringEntry.h"
 #include "Color.h"
 
