@@ -29,14 +29,14 @@ public:
 
     virtual VectorLayerType getType() = 0;
 
-    virtual std::unordered_set<std::string> getUsedKeys() const {
-        std::unordered_set<std::string> usedKeys;
+    virtual UsedKeysCollection getUsedKeys() const {
+        UsedKeysCollection usedKeys;
         std::vector<std::shared_ptr<Value>> values = { filter, interactable };
 
         for (auto const &value: values) {
             if (!value) continue;
             auto const setKeys = value->getUsedKeys();
-            usedKeys.insert(setKeys.begin(), setKeys.end());
+            usedKeys.includeOther(setKeys);
         }
 
         return usedKeys;

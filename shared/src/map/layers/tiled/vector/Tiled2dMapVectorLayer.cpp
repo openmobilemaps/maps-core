@@ -1024,7 +1024,7 @@ void Tiled2dMapVectorLayer::applyGlobalStateIfPossible() {
             continue;
         }
         const auto &usedKeys = layerDescription->filter->getUsedKeys();
-        if (usedKeys.find(Tiled2dMapVectorStyleParser::globalStateExpression) != usedKeys.end()) {
+        if (!usedKeys.globalStateKeys.empty()) {
             if (layerDescription->getType() == VectorLayerType::symbol) {
                 sourceLayerIdentifiersMap[layerDescription->source].emplace_back(layerDescription->sourceLayer,
                                                                                  layerDescription->identifier);

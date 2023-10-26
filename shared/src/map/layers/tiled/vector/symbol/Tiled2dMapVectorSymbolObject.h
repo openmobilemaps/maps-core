@@ -46,7 +46,7 @@ public:
                                  const bool hideIcon,
                                  std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap,
                                  const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
-                                 const std::unordered_set<std::string> &usedKeys,
+                                 const UsedKeysCollection &usedKeys,
                                  const size_t symbolTileIndex);
 
     ~Tiled2dMapVectorSymbolObject() {
@@ -103,7 +103,7 @@ public:
 
     void setAlpha(float alpha);
 
-    void updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription, const std::unordered_set<std::string> &usedKeys);
+    void updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription, const UsedKeysCollection &usedKeys);
 
     std::shared_ptr<SymbolAnimationCoordinator> animationCoordinator;
     bool isCoordinateOwner = false;

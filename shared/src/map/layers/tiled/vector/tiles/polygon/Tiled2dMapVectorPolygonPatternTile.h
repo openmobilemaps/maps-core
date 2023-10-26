@@ -69,7 +69,7 @@ private:
     std::unordered_map<int, std::vector<std::shared_ptr<PolygonPatternGroup2dLayerObject>>> styleGroupPolygonsMap;
     std::vector<std::vector<std::tuple<size_t, std::shared_ptr<FeatureContext>>>> featureGroups;
     std::unordered_map<size_t, std::pair<int, int>> styleHashToGroupMap;
-    std::unordered_set<std::string> usedKeys;
+    UsedKeysCollection usedKeys;
     bool isStyleZoomDependant = true;
     bool isStyleStateDependant = true;
     std::optional<double> lastZoom = std::nullopt;

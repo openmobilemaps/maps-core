@@ -138,5 +138,5 @@ private:
     SymbolAlignment labelRotationAlignment;
 #endif
 
-    std::unordered_set<std::string> usedKeys;
+    UsedKeysCollection usedKeys;
 };
