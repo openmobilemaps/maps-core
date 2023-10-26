@@ -24,9 +24,10 @@ Tiled2dMapVectorSourceSymbolDataManager::Tiled2dMapVectorSourceSymbolDataManager
                                                                                  const std::shared_ptr<FontLoaderInterface> &fontLoader,
                                                                                  const WeakActor<Tiled2dMapVectorSource> &vectorSource,
                                                                                  const Actor<Tiled2dMapVectorReadyManager> &readyManager,
-                                                                                 const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager)
+                                                                                 const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
+                                                                                 const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate)
         : Tiled2dMapVectorSourceDataManager(vectorLayer, mapDescription, layerConfig, source, readyManager, featureStateManager),
-        fontLoader(fontLoader), vectorSource(vectorSource), animationCoordinatorMap(std::make_shared<SymbolAnimationCoordinatorMap>()) {
+        fontLoader(fontLoader), vectorSource(vectorSource), animationCoordinatorMap(std::make_shared<SymbolAnimationCoordinatorMap>()), symbolDelegate(symbolDelegate) {
 
     for (const auto &layer: mapDescription->layers) {
         if (layer->getType() == VectorLayerType::symbol && layer->source == source) {
@@ -453,7 +454,8 @@ std::vector<Actor<Tiled2dMapVectorSymbolGroup>> Tiled2dMapVectorSourceSymbolData
                                                                                                  layerIdentifier,
                                                                                                  layerDescriptions.at(
                                                                                                          layerIdentifier),
-                                                                                                 featureStateManager);
+                                                                                                 featureStateManager,
+                                                                                                 symbolDelegate);
         symbolGroupActor.message(&Tiled2dMapVectorSymbolGroup::initialize, features, featuresBase,
                                  std::min(featuresBase + maxNumFeaturesPerGroup, numFeatures) - featuresBase,
                                  animationCoordinatorMap, selfActor, alpha);
@@ -689,23 +691,8 @@ void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
             std::vector<std::shared_ptr< ::RenderObjectInterface>> renderObjects;
             for (const auto &group: std::get<1>(symbolGroups)) {
                 group.syncAccess([&renderObjects](auto group){
-                    auto iconObject = group->iconInstancedObject;
-                    if (iconObject) {
-                        renderObjects.push_back(std::make_shared<RenderObject>(iconObject->asGraphicsObject()));
-                    }
-                    auto stretchIconObject = group->stretchedInstancedObject;
-                    if (stretchIconObject) {
-                        renderObjects.push_back(std::make_shared<RenderObject>(stretchIconObject->asGraphicsObject()));
-                    }
-                    auto textObject = group->textInstancedObject;
-                    if (textObject) {
-                        renderObjects.push_back(std::make_shared<RenderObject>(textObject->asGraphicsObject()));
-                    }
-
-                    auto boundingBoxLayerObject = group->boundingBoxLayerObject;
-                    if (boundingBoxLayerObject) {
-                        renderObjects.push_back(std::make_shared<RenderObject>(boundingBoxLayerObject->getPolygonObject()));
-                    }
+                    auto groupRenderObjects = group->getRenderObjects();
+                    renderObjects.insert(renderObjects.end(), std::make_move_iterator(groupRenderObjects.begin()), std::make_move_iterator(groupRenderObjects.end()));
                 });
             }
 
@@ -784,4 +771,8 @@ bool Tiled2dMapVectorSourceSymbolDataManager::onTwoFingerClick(const std::unorde
 
 void Tiled2dMapVectorSourceSymbolDataManager::clearTouch() {
 
+}
+
+void Tiled2dMapVectorSourceSymbolDataManager::setSymbolDelegate(const /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> & symbolDelegate) {
+    this->symbolDelegate = symbolDelegate;
 }

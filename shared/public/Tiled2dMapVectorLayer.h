@@ -64,7 +64,8 @@ public:
                           const std::vector <std::shared_ptr<::LoaderInterface>> &loaders,
                           const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                           double dpFactor,
-                          const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt);
+                          const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt,
+                          const /*nullable*/ std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> & symbolDelegate = nullptr);
 
     Tiled2dMapVectorLayer(const std::string &layerName,
                           const std::string &remoteStyleJsonUrl,
@@ -254,6 +255,7 @@ private:
     std::shared_ptr<::TextureHolderInterface> spriteTexture;
 
     std::shared_ptr<Tiled2dMapVectorStateManager> featureStateManager;
+    std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> symbolDelegate;
 };
 
 

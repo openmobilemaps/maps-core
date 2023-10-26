@@ -10,7 +10,7 @@ abstract class Tiled2dMapVectorLayerInterface {
 
     companion object {
         @JvmStatic
-        external fun createFromStyleJson(layerName: String, path: String, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface, dpFactor: Double): Tiled2dMapVectorLayerInterface
+        external fun createFromStyleJson(layerName: String, path: String, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface, dpFactor: Double, symbolDelegate: Tiled2dMapVectorLayerSymbolDelegateInterface?): Tiled2dMapVectorLayerInterface
 
         @JvmStatic
         external fun createFromStyleJsonWithZoomInfo(layerName: String, path: String, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface, dpFactor: Double, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo): Tiled2dMapVectorLayerInterface

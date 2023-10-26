@@ -24,6 +24,7 @@
 #include "SymbolAnimationCoordinator.h"
 #include "SymbolAnimationCoordinatorMap.h"
 #include "Tiled2dMapVectorSymbolFontProviderManager.h"
+#include "Tiled2dMapVectorLayerSymbolDelegateInterface.h"
 
 struct InstanceCounter {
     InstanceCounter() : baseValue(0), decreasingCounter(0) {}
@@ -57,7 +58,8 @@ public:
                                           const std::shared_ptr<FontLoaderInterface> &fontLoader,
                                           const WeakActor<Tiled2dMapVectorSource> &vectorSource,
                                             const Actor<Tiled2dMapVectorReadyManager> &readyManager,
-                                            const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager);
+                                            const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
+                                            const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate);
 
     void onAdded(const std::weak_ptr< ::MapInterface> &mapInterface) override;
 
@@ -99,6 +101,8 @@ public:
 
     void onSymbolGroupInitialized(bool success, const Tiled2dMapTileInfo &tileInfo, const std::string &layerIdentifier, const WeakActor<Tiled2dMapVectorSymbolGroup> &symbolGroup);
 
+    void setSymbolDelegate(const /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> & symbolDelegate);
+
 private:
     std::vector<Actor<Tiled2dMapVectorSymbolGroup>>
     createSymbolGroups(const Tiled2dMapTileInfo &tileInfo, const std::string &layerIdentifier,
@@ -137,6 +141,7 @@ private:
     std::unordered_set<std::string> interactableLayers;
 
     std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap;
+    std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> symbolDelegate;
 
 #ifdef __ANDROID__
     // Higher counts may cause issues for instanced text rendering

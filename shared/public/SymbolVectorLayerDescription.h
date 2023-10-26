@@ -47,6 +47,7 @@ public:
                       std::shared_ptr<Value> symbolPlacement,
                       std::shared_ptr<Value> iconRotationAlignment,
                       std::shared_ptr<Value> iconImage,
+                      std::shared_ptr<Value> iconImageCustomProvider,
                       std::shared_ptr<Value> iconAnchor,
                       std::shared_ptr<Value> iconOffset,
                       std::shared_ptr<Value> iconSize,
@@ -79,6 +80,7 @@ public:
     symbolSortKey(symbolSortKey),
     symbolPlacement(symbolPlacement),
     iconImage(iconImage),
+    iconImageCustomProvider(iconImageCustomProvider),
     iconAnchor(iconAnchor),
     iconOffset(iconOffset),
     textAnchor(textAnchor),
@@ -123,6 +125,7 @@ public:
               symbolSortKey(style.symbolSortKey),
               symbolPlacement(style.symbolPlacement),
               iconImage(style.iconImage),
+              iconImageCustomProvider(style.iconImageCustomProvider),
               iconAnchor(style.iconAnchor),
               iconOffset(style.iconOffset),
               textAnchor(style.textAnchor),
@@ -163,7 +166,7 @@ public:
             iconSize, textLineHeight, textLetterSpacing, textAllowOverlap, iconAllowOverlap,
             iconPadding, textOpacity, iconOpacity, iconRotationAlignment, textRotationAlignment,
             iconTextFit, iconTextFitPadding, textMaxWidth, textMaxAngle, iconRotate, blendMode,
-            textOptional, iconOptional, symbolZOrder
+            textOptional, iconOptional, symbolZOrder, iconImageCustomProvider
         };
 
         for (auto const &value: values) {
@@ -285,8 +288,13 @@ public:
         return iconImageEvaluator.getResult(iconImage, context, defaultValue);
     }
 
+    bool getIconImageCustomProvider(const EvaluationContext &context) {
+        static const bool defaultValue = false;
+        return iconImageCustomProviderEvaluator.getResult(iconImageCustomProvider, context, defaultValue);
+    }
+
     bool hasIconImagePotentially() {
-        return iconImage ? true : false;
+        return (iconImage || iconImageCustomProvider) ? true : false;
     }
 
     Anchor getIconAnchor(const EvaluationContext &context) {
@@ -430,6 +438,7 @@ public:
     std::shared_ptr<Value> symbolSpacing;
     std::shared_ptr<Value> symbolPlacement;
     std::shared_ptr<Value> iconImage;
+    std::shared_ptr<Value> iconImageCustomProvider;
     std::shared_ptr<Value> iconAnchor;
     std::shared_ptr<Value> iconOffset;
     std::shared_ptr<Value> iconSize;
@@ -466,6 +475,7 @@ private:
     ValueEvaluator<bool> textAllowOverlapEvaluator;
     ValueEvaluator<int64_t> symbolSortKeyEvaluator;
     ValueEvaluator<std::string> iconImageEvaluator;
+    ValueEvaluator<bool> iconImageCustomProviderEvaluator;
     ValueEvaluator<Anchor> iconAnchorEvaluator;
     ValueEvaluator<Vec2F> iconOffsetEvaluator;
     ValueEvaluator<bool> iconOptionalEvaluator;

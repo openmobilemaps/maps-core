@@ -19,8 +19,9 @@ Tiled2dMapVectorLayerInterface::createFromStyleJson(const std::string &layerName
                                                     const std::string &path,
                                                     const std::vector <std::shared_ptr<::LoaderInterface>> &loaders,
                                                     const std::shared_ptr<::FontLoaderInterface> &fontLoader,
-                                                    double dpFactor) {
-    return std::make_shared<Tiled2dMapVectorLayer>(layerName, path, loaders, fontLoader, dpFactor);
+                                                    double dpFactor,
+                                                    const /*nullable*/ std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> & symbolDelegate) {
+    return std::make_shared<Tiled2dMapVectorLayer>(layerName, path, loaders, fontLoader, dpFactor, std::nullopt, symbolDelegate);
 }
 
 std::shared_ptr<Tiled2dMapVectorLayerInterface>

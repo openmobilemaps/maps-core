@@ -16,13 +16,14 @@
 
 class Tiled2dMapVectorLayerLocalDataProviderInterface;
 class Tiled2dMapVectorLayerSelectionCallbackInterface;
+class Tiled2dMapVectorLayerSymbolDelegateInterface;
 struct VectorLayerFeatureInfoValue;
 
 class Tiled2dMapVectorLayerInterface {
 public:
     virtual ~Tiled2dMapVectorLayerInterface() = default;
 
-    static /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerInterface> createFromStyleJson(const std::string & layerName, const std::string & path, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & loaders, const /*not-null*/ std::shared_ptr<::FontLoaderInterface> & fontLoader, double dpFactor);
+    static /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerInterface> createFromStyleJson(const std::string & layerName, const std::string & path, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & loaders, const /*not-null*/ std::shared_ptr<::FontLoaderInterface> & fontLoader, double dpFactor, const /*nullable*/ std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> & symbolDelegate);
 
     static /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerInterface> createFromStyleJsonWithZoomInfo(const std::string & layerName, const std::string & path, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & loaders, const /*not-null*/ std::shared_ptr<::FontLoaderInterface> & fontLoader, double dpFactor, const ::Tiled2dMapZoomInfo & zoomInfo);
 

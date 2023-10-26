@@ -11,6 +11,7 @@
 #import "MCLoaderInterface+Private.h"
 #import "MCTiled2dMapVectorLayerLocalDataProviderInterface+Private.h"
 #import "MCTiled2dMapVectorLayerSelectionCallbackInterface+Private.h"
+#import "MCTiled2dMapVectorLayerSymbolDelegateInterface+Private.h"
 #import "MCTiled2dMapZoomInfo+Private.h"
 #import "MCVectorLayerFeatureInfoValue+Private.h"
 #include <exception>
@@ -41,13 +42,15 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
                                                               path:(nonnull NSString *)path
                                                            loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
                                                         fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
-                                                          dpFactor:(double)dpFactor {
+                                                          dpFactor:(double)dpFactor
+                                                    symbolDelegate:(nullable id<MCTiled2dMapVectorLayerSymbolDelegateInterface>)symbolDelegate {
     try {
         auto objcpp_result_ = ::Tiled2dMapVectorLayerInterface::createFromStyleJson(::djinni::String::toCpp(layerName),
                                                                                     ::djinni::String::toCpp(path),
                                                                                     ::djinni::List<::djinni_generated::LoaderInterface>::toCpp(loaders),
                                                                                     ::djinni_generated::FontLoaderInterface::toCpp(fontLoader),
-                                                                                    ::djinni::F64::toCpp(dpFactor));
+                                                                                    ::djinni::F64::toCpp(dpFactor),
+                                                                                    ::djinni::Optional<std::optional, ::djinni_generated::Tiled2dMapVectorLayerSymbolDelegateInterface>::toCpp(symbolDelegate));
         return ::djinni_generated::Tiled2dMapVectorLayerInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }

@@ -10,6 +10,7 @@
 @class MCTiled2dMapVectorLayerInterface;
 @protocol MCTiled2dMapVectorLayerLocalDataProviderInterface;
 @protocol MCTiled2dMapVectorLayerSelectionCallbackInterface;
+@protocol MCTiled2dMapVectorLayerSymbolDelegateInterface;
 
 
 @interface MCTiled2dMapVectorLayerInterface : NSObject
@@ -18,7 +19,8 @@
                                                               path:(nonnull NSString *)path
                                                            loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
                                                         fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
-                                                          dpFactor:(double)dpFactor;
+                                                          dpFactor:(double)dpFactor
+                                                    symbolDelegate:(nullable id<MCTiled2dMapVectorLayerSymbolDelegateInterface>)symbolDelegate;
 
 + (nullable MCTiled2dMapVectorLayerInterface *)createFromStyleJsonWithZoomInfo:(nonnull NSString *)layerName
                                                                           path:(nonnull NSString *)path

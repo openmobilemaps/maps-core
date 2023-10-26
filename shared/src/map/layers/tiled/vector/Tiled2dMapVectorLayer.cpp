@@ -51,7 +51,7 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
                                              const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                                              double dpFactor,
-                                             const std::optional<Tiled2dMapZoomInfo> &customZoomInfo) :
+                                             const std::optional<Tiled2dMapZoomInfo> &customZoomInfo, const /*nullable*/ std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> & symbolDelegate) :
         Tiled2dMapLayer(),
         layerName(layerName),
         remoteStyleJsonUrl(remoteStyleJsonUrl),
@@ -59,7 +59,8 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         fontLoader(fontLoader),
         dpFactor(dpFactor),
         customZoomInfo(customZoomInfo),
-        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>()) {}
+        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>()),
+        symbolDelegate(symbolDelegate) {}
 
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
@@ -374,7 +375,8 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                         fontLoader,
                                                                         vectorSource.weakActor<Tiled2dMapVectorSource>(),
                                                                         readyManager,
-                                                                        featureStateManager);
+                                                                        featureStateManager,
+                                                                        symbolDelegate);
             actor.unsafe()->setAlpha(alpha);
             symbolSourceDataManagers[source] = actor;
             interactionDataManagers[source].push_back(actor.weakActor<Tiled2dMapVectorSourceDataManager>());

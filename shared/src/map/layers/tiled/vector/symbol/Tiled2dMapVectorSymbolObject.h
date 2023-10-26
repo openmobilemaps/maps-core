@@ -47,7 +47,8 @@ public:
                                  std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap,
                                  const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
                                  const UsedKeysCollection &usedKeys,
-                                 const size_t symbolTileIndex);
+                                 const size_t symbolTileIndex,
+                                 const bool hasCustomTexture);
 
     ~Tiled2dMapVectorSymbolObject() {
         if (animationCoordinator) {
@@ -106,7 +107,12 @@ public:
     void updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription, const UsedKeysCollection &usedKeys);
 
     std::shared_ptr<SymbolAnimationCoordinator> animationCoordinator;
+
     bool isCoordinateOwner = false;
+
+    const std::shared_ptr<FeatureContext> featureContext;
+
+    bool hasCustomTexture;
 private:
     double lastZoomEvaluation = -1;
     void evaluateStyleProperties(const double zoomIdentifier);
@@ -116,8 +122,6 @@ private:
     std::shared_ptr<Tiled2dMapVectorLayerConfig> layerConfig;
 
     std::shared_ptr<Tiled2dMapVectorSymbolLabelObject> labelObject;
-
-    const std::shared_ptr<FeatureContext> featureContext;
 
     std::shared_ptr<SymbolInfo> textInfo;
 

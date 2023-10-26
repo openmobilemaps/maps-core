@@ -8,6 +8,7 @@
 #include "NativeLoaderInterface.h"
 #include "NativeTiled2dMapVectorLayerLocalDataProviderInterface.h"
 #include "NativeTiled2dMapVectorLayerSelectionCallbackInterface.h"
+#include "NativeTiled2dMapVectorLayerSymbolDelegateInterface.h"
 #include "NativeTiled2dMapZoomInfo.h"
 #include "NativeVectorLayerFeatureInfoValue.h"
 
@@ -25,14 +26,15 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_createFromStyleJson(JNIEnv* jniEnv, jobject /*this*/, jstring j_layerName, jstring j_path, jobject j_loaders, ::djinni_generated::NativeFontLoaderInterface::JniType j_fontLoader, jdouble j_dpFactor)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_createFromStyleJson(JNIEnv* jniEnv, jobject /*this*/, jstring j_layerName, jstring j_path, jobject j_loaders, ::djinni_generated::NativeFontLoaderInterface::JniType j_fontLoader, jdouble j_dpFactor, jobject j_symbolDelegate)
 {
     try {
         auto r = ::Tiled2dMapVectorLayerInterface::createFromStyleJson(::djinni::String::toCpp(jniEnv, j_layerName),
                                                                        ::djinni::String::toCpp(jniEnv, j_path),
                                                                        ::djinni::List<::djinni_generated::NativeLoaderInterface>::toCpp(jniEnv, j_loaders),
                                                                        ::djinni_generated::NativeFontLoaderInterface::toCpp(jniEnv, j_fontLoader),
-                                                                       ::djinni::F64::toCpp(jniEnv, j_dpFactor));
+                                                                       ::djinni::F64::toCpp(jniEnv, j_dpFactor),
+                                                                       ::djinni::Optional<std::optional, ::djinni_generated::NativeTiled2dMapVectorLayerSymbolDelegateInterface>::toCpp(jniEnv, j_symbolDelegate));
         return ::djinni::release(::djinni_generated::NativeTiled2dMapVectorLayerInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

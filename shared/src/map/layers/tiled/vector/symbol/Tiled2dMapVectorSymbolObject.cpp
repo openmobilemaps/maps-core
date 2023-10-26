@@ -39,7 +39,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                                                            std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap,
                                                            const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
                                                            const UsedKeysCollection &usedKeys,
-                                                           const size_t symbolTileIndex) :
+                                                           const size_t symbolTileIndex,
+                                                           const bool hasCustomTexture) :
     description(description),
     layerConfig(layerConfig),
     coordinate(coordinate),
@@ -49,7 +50,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     stretchIconBoundingBoxViewportAligned(0, 0, 0, 0),
 textSymbolPlacement(textSymbolPlacement),
 featureStateManager(featureStateManager),
-symbolTileIndex(symbolTileIndex) {
+symbolTileIndex(symbolTileIndex),
+hasCustomTexture(hasCustomTexture) {
     auto strongMapInterface = mapInterface.lock();
     auto objectFactory = strongMapInterface ? strongMapInterface->getGraphicsObjectFactory() : nullptr;
     auto camera = strongMapInterface ? strongMapInterface->getCamera() : nullptr;
@@ -272,7 +274,7 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
 
     auto iconImage = description->style.getIconImage(evalContext);
 
-    if (iconImage.empty() || !spriteTexture) {
+    if ((iconImage.empty() && !hasCustomTexture) || !spriteTexture) {
         // TODO: make sure icon is not rendered
     } else {
         const auto textureWidth = (double) spriteTexture->getImageWidth();
@@ -280,24 +282,37 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
 
         renderCoordinate = getRenderCoordinates(iconAnchor, -rotations[countOffset], textureWidth, textureHeight);
 
-        const auto spriteIt = spriteData->sprites.find(iconImage);
-        if (spriteIt == spriteData->sprites.end()) {
-            LogError << "Unable to find sprite " << iconImage;
-            positions[2 * countOffset] = 0;
-            positions[2 * countOffset + 1] = 0;
-            countOffset += instanceCounts.icons;
-            return;
+        int spriteX = 0;
+        int spriteY = 0;
+        int spriteWidth = textureWidth;
+        int spriteHeight = textureHeight;
+        float spritePixelRatio = float(camera->getScreenDensityPpi() / 160.0);
+
+        if (!hasCustomTexture) {
+            const auto spriteIt = spriteData->sprites.find(iconImage);
+            if (spriteIt == spriteData->sprites.end()) {
+                LogError << "Unable to find sprite " << iconImage;
+                positions[2 * countOffset] = 0;
+                positions[2 * countOffset + 1] = 0;
+                countOffset += instanceCounts.icons;
+                return;
+            }
+            spriteX = spriteIt->second.x;
+            spriteY = spriteIt->second.y;
+            spriteWidth = spriteIt->second.width;
+            spriteHeight = spriteIt->second.height;
+            spritePixelRatio = spriteIt->second.pixelRatio;
         }
 
-        const double densityOffset = (camera->getScreenDensityPpi() / 160.0) / spriteIt->second.pixelRatio;
+        const double densityOffset = (camera->getScreenDensityPpi() / 160.0) / spritePixelRatio;
 
-        spriteSize.x = spriteIt->second.width * densityOffset;
-        spriteSize.y = spriteIt->second.height * densityOffset;
+        spriteSize.x = spriteWidth * densityOffset;
+        spriteSize.y = spriteHeight * densityOffset;
 
-        textureCoordinates[4 * countOffset + 0] = ((double) spriteIt->second.x) / textureWidth;
-        textureCoordinates[4 * countOffset + 1] = ((double) spriteIt->second.y) / textureHeight;
-        textureCoordinates[4 * countOffset + 2] = ((double) spriteIt->second.width) / textureWidth;
-        textureCoordinates[4 * countOffset + 3] = ((double) spriteIt->second.height) / textureHeight;
+        textureCoordinates[4 * countOffset + 0] = ((double) spriteX) / textureWidth;
+        textureCoordinates[4 * countOffset + 1] = ((double) spriteY) / textureHeight;
+        textureCoordinates[4 * countOffset + 2] = ((double) spriteWidth) / textureWidth;
+        textureCoordinates[4 * countOffset + 3] = ((double) spriteHeight) / textureHeight;
 
         lastIconUpdateScaleFactor = -1;
         lastIconUpdateRotation = -1;
