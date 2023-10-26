@@ -8,6 +8,7 @@
 #import "MCVectorLayerFeatureInfoValue.h"
 #import <Foundation/Foundation.h>
 @class MCTiled2dMapVectorLayerInterface;
+@protocol MCTiled2dMapVectorLayerLocalDataProviderInterface;
 @protocol MCTiled2dMapVectorLayerSelectionCallbackInterface;
 
 
@@ -38,6 +39,12 @@
                                                                          fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
                                                                            dpFactor:(double)dpFactor
                                                                            zoomInfo:(nonnull MCTiled2dMapZoomInfo *)zoomInfo;
+
++ (nullable MCTiled2dMapVectorLayerInterface *)createFromLocalDataProvider:(nullable id<MCTiled2dMapVectorLayerLocalDataProviderInterface>)localDataProvider
+                                                                 layerName:(nonnull NSString *)layerName
+                                                                   loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
+                                                                fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
+                                                                  dpFactor:(double)dpFactor;
 
 - (void)setSelectionDelegate:(nullable id<MCTiled2dMapVectorLayerSelectionCallbackInterface>)selectionDelegate;
 

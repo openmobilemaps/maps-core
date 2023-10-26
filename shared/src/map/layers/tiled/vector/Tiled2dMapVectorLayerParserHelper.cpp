@@ -31,6 +31,7 @@
 Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromUrl(const std::string &layerName,
                                                         const std::string &styleJsonUrl,
                                                         const double &dpFactor,
+                                                        const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider,
                                                         const std::vector<std::shared_ptr<::LoaderInterface>> &loaders) {
     DataLoaderResult result = LoaderHelper::loadData(styleJsonUrl, std::nullopt, loaders);
     if (result.status != LoaderStatus::OK) {
@@ -39,13 +40,14 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
     }
     auto string = std::string((char*)result.data->buf(), result.data->len());
 
-    return parseStyleJsonFromString(layerName, string, dpFactor, loaders);
+    return parseStyleJsonFromString(layerName, string, dpFactor, localDataProvider, loaders);
 };
 
 
 Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(const std::string &layerName,
                                                         const std::string &styleJsonString,
                                                         const double &dpFactor,
+                                                        const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider,
                                                         const std::vector<std::shared_ptr<::LoaderInterface>> &loaders) {
 
     nlohmann::json json;
@@ -144,13 +146,11 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
         } else if (type == "geojson") {
             nlohmann::json geojson;
             if (val["data"].is_string()) {
-                geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(val["data"].get<std::string>(), loaders);
+                geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(val["data"].get<std::string>(), loaders, localDataProvider);
             } else {
                 assert(val["data"].is_object());
                 geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(GeoJsonParser::getGeoJson(val["data"]));
             }
-
-
         }
     }
 

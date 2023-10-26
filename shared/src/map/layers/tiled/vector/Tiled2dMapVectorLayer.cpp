@@ -159,7 +159,7 @@ std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJsonRemotely() {
     if (!remoteStyleJsonUrl.has_value() || !dpFactor.has_value()) {
         return std::nullopt;
     }
-    auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromUrl(layerName, *remoteStyleJsonUrl, *dpFactor, loaders);
+    auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromUrl(layerName, *remoteStyleJsonUrl, *dpFactor, localDataProvider, loaders);
     if (parseResult.status == LoaderStatus::OK) {
         setMapDescription(parseResult.mapDescription);
         metadata = parseResult.metadata;
@@ -177,7 +177,7 @@ std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJsonLocally(std::
         return std::nullopt;
     }
 
-    auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(layerName, styleJsonString, *dpFactor, loaders);
+    auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(layerName, styleJsonString, *dpFactor, localDataProvider, loaders);
 
     if (parseResult.status == LoaderStatus::OK) {
         setMapDescription(parseResult.mapDescription);
@@ -691,7 +691,14 @@ void Tiled2dMapVectorLayer::loadSpriteData() {
 
     auto context = std::make_shared<Context>(2);
 
-    LoaderHelper::loadDataAsync(urlData, std::nullopt, loaders).then([context] (auto result) {
+    std::shared_ptr<::djinni::Future<::DataLoaderResult>> jsonLoaderFuture;
+    if(localDataProvider) {
+        jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(localDataProvider->loadSpriteJsonAsync(scale2x ? 2 : 1));
+    } else {
+        jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(LoaderHelper::loadDataAsync(urlData, std::nullopt, loaders));
+    }
+
+    jsonLoaderFuture->then([context] (auto result) {
         auto dataResult = result.get();
         if (dataResult.status == LoaderStatus::OK) {
             auto string = std::string((char*)dataResult.data->buf(), dataResult.data->len());
@@ -720,7 +727,14 @@ void Tiled2dMapVectorLayer::loadSpriteData() {
         }
     });
 
-    LoaderHelper::loadTextureAsync(urlTexture, std::nullopt, loaders).then([context] (auto result) {
+    std::shared_ptr<::djinni::Future<::TextureLoaderResult>> textureLoaderFuture;
+    if(localDataProvider) {
+        textureLoaderFuture = std::make_shared<::djinni::Future<::TextureLoaderResult>>(localDataProvider->loadSpriteAsync(scale2x ? 2 : 1));
+    } else {
+        textureLoaderFuture = std::make_shared<::djinni::Future<::TextureLoaderResult>>(LoaderHelper::loadTextureAsync(urlTexture, std::nullopt, loaders));
+    }
+
+    textureLoaderFuture->then([context] (auto result) {
         auto textureResult = result.get();
         if (textureResult.status == LoaderStatus::OK) {
             context->spriteTexture = textureResult.data;

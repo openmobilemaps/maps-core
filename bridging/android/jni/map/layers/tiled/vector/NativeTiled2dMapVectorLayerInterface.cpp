@@ -6,6 +6,7 @@
 #include "NativeFontLoaderInterface.h"
 #include "NativeLayerInterface.h"
 #include "NativeLoaderInterface.h"
+#include "NativeTiled2dMapVectorLayerLocalDataProviderInterface.h"
 #include "NativeTiled2dMapVectorLayerSelectionCallbackInterface.h"
 #include "NativeTiled2dMapZoomInfo.h"
 #include "NativeVectorLayerFeatureInfoValue.h"
@@ -70,6 +71,18 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_til
                                                                                         ::djinni_generated::NativeFontLoaderInterface::toCpp(jniEnv, j_fontLoader),
                                                                                         ::djinni::F64::toCpp(jniEnv, j_dpFactor),
                                                                                         ::djinni_generated::NativeTiled2dMapZoomInfo::toCpp(jniEnv, j_zoomInfo));
+        return ::djinni::release(::djinni_generated::NativeTiled2dMapVectorLayerInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_createFromLocalDataProvider(JNIEnv* jniEnv, jobject /*this*/, jobject j_localDataProvider, jstring j_layerName, jobject j_loaders, ::djinni_generated::NativeFontLoaderInterface::JniType j_fontLoader, jdouble j_dpFactor)
+{
+    try {
+        auto r = ::Tiled2dMapVectorLayerInterface::createFromLocalDataProvider(::djinni_generated::NativeTiled2dMapVectorLayerLocalDataProviderInterface::toCpp(jniEnv, j_localDataProvider),
+                                                                               ::djinni::String::toCpp(jniEnv, j_layerName),
+                                                                               ::djinni::List<::djinni_generated::NativeLoaderInterface>::toCpp(jniEnv, j_loaders),
+                                                                               ::djinni_generated::NativeFontLoaderInterface::toCpp(jniEnv, j_fontLoader),
+                                                                               ::djinni::F64::toCpp(jniEnv, j_dpFactor));
         return ::djinni::release(::djinni_generated::NativeTiled2dMapVectorLayerInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

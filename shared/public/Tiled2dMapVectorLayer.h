@@ -27,6 +27,7 @@
 #include "Actor.h"
 #include "Tiled2dMapVectorLayerConfig.h"
 #include "Tiled2dMapVectorStateManager.h"
+#include "Tiled2dMapVectorLayerLocalDataProviderInterface.h"
 #include <unordered_map>
 
 class Tiled2dMapVectorBackgroundSubLayer;
@@ -225,7 +226,8 @@ private:
 
     std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> strongSelectionDelegate;
     std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> selectionDelegate;
-    
+    std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> localDataProvider;
+
     std::recursive_mutex renderPassMutex;
     std::vector<std::shared_ptr<RenderPassInterface>> currentRenderPasses;
 
