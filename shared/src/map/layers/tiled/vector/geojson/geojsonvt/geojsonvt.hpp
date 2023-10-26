@@ -48,7 +48,7 @@ public:
 
     GeoJSONVT(const std::shared_ptr<GeoJson> &geoJson,
               const Options& options_ = Options())
-    : options(options_), loadingResult(DataLoaderResult(std::nullopt, std::nullopt, LoaderStatus::OK, std::nullopt)){
+    : options(options_), loadingResult(DataLoaderResult(std::nullopt, std::nullopt, LoaderStatus::OK, std::nullopt)) {
 
         // If the GeoJSON contains only points, there is no need to split it into smaller tiles,
         // as there are no opportunities for simplification, merging, or meaningful point reduction.
@@ -65,18 +65,28 @@ public:
 
     GeoJSONVT(const std::string &geoJsonUrl,
               const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
+              const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider,
               const Options& options_ = Options())
-    : options(options_), geoJsonUrl(geoJsonUrl), loaders(loaders) {}
+    : options(options_), geoJsonUrl(geoJsonUrl), loaders(loaders), localDataProvider(localDataProvider) {}
 
     const std::string geoJsonUrl;
     std::vector<std::shared_ptr<::LoaderInterface>> loaders;
+    std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> localDataProvider;
     std::recursive_mutex mutex;
     std::optional<DataLoaderResult> loadingResult;
     std::vector<std::shared_ptr<::djinni::Promise<std::shared_ptr<DataLoaderResult>>>> waitingPromises;
 
     void load() {
         auto weakSelf = weak_from_this();
-        LoaderHelper::loadDataAsync(geoJsonUrl, std::nullopt, loaders).then([weakSelf](auto resultFuture){
+
+        std::shared_ptr<::djinni::Future<::DataLoaderResult>> jsonLoaderFuture;
+        if(localDataProvider) {
+            jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(localDataProvider->loadGeojson());
+        } else {
+            jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(LoaderHelper::loadDataAsync(geoJsonUrl, std::nullopt, loaders));
+        }
+
+        jsonLoaderFuture->then([weakSelf](auto resultFuture){
             auto self = weakSelf.lock();
             if (!self) return;
             auto result = resultFuture.get();

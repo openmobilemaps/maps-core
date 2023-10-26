@@ -14,6 +14,7 @@
 #include <unordered_map>
 #include <vector>
 
+class Tiled2dMapVectorLayerLocalDataProviderInterface;
 class Tiled2dMapVectorLayerSelectionCallbackInterface;
 struct VectorLayerFeatureInfoValue;
 
@@ -28,6 +29,8 @@ public:
     static /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerInterface> createFromLocalStyleJson(const std::string & layerName, const std::string & styleJson, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & loaders, const /*not-null*/ std::shared_ptr<::FontLoaderInterface> & fontLoader, double dpFactor);
 
     static /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerInterface> createFromLocalStyleJsonWithZoomInfo(const std::string & layerName, const std::string & styleJson, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & loaders, const /*not-null*/ std::shared_ptr<::FontLoaderInterface> & fontLoader, double dpFactor, const ::Tiled2dMapZoomInfo & zoomInfo);
+
+    static /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerInterface> createFromLocalDataProvider(const /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> & localDataProvider, const std::string & layerName, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & loaders, const /*not-null*/ std::shared_ptr<::FontLoaderInterface> & fontLoader, double dpFactor);
 
     virtual void setSelectionDelegate(const /*nullable*/ std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> & selectionDelegate) = 0;
 

@@ -6,11 +6,18 @@
 @extern "../../../../yaml/color.yaml"
 @extern "../../../../yaml/coord.yaml"
 
+@extern "../../../../yaml/texture_loader_result.yaml"
+@extern "../../../../yaml/data_loader_result.yaml"
+
+
+@extern "../../../../../external/djinni/support-lib/future.yaml"
+
 tiled_2d_map_vector_layer_interface = interface +c {
     static create_from_style_json(layer_name: string, path: string, loaders: list<loader_interface>, font_loader: font_loader_interface, dpFactor: f64): tiled_2d_map_vector_layer_interface;
     static create_from_style_json_with_zoom_info(layer_name: string, path: string, loaders: list<loader_interface>, font_loader: font_loader_interface, dpFactor: f64, zoom_info: tiled_2d_map_zoom_info): tiled_2d_map_vector_layer_interface;
     static create_from_local_style_json(layer_name: string, style_json: string, loaders: list<loader_interface>, font_loader: font_loader_interface, dpFactor: f64): tiled_2d_map_vector_layer_interface;
     static create_from_local_style_json_with_zoom_info(layer_name: string, style_json: string, loaders: list<loader_interface>, font_loader: font_loader_interface, dpFactor: f64, zoom_info: tiled_2d_map_zoom_info): tiled_2d_map_vector_layer_interface;
+    static create_from_local_data_provider(local_data_provider: tiled_2d_map_vector_layer_local_data_provider_interface, layer_name: string, loaders: list<loader_interface>, font_loader: font_loader_interface, dpFactor: f64): tiled_2d_map_vector_layer_interface;
 
     set_selection_delegate(selection_delegate: optional<tiled_2d_map_vector_layer_selection_callback_interface>);
 
@@ -56,4 +63,12 @@ vector_layer_feature_info = record {
 tiled_2d_map_vector_layer_selection_callback_interface = interface +c +j +o {
     did_select_feature(feature_info: vector_layer_feature_info, layer_identifier: string, coord: coord): bool;
     did_click_background_confirmed(coord: coord) : bool;
+}
+
+tiled_2d_map_vector_layer_local_data_provider_interface = interface +c +j +o {
+    get_style_json(): string;
+
+    load_sprite_async(scale: i32): future<texture_loader_result>;
+    load_sprite_json_async(scale: i32): future<data_loader_result>;
+    load_geojson(): future<data_loader_result>;
 }

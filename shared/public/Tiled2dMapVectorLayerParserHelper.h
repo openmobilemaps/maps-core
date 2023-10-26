@@ -13,16 +13,19 @@
 #include <string>
 #include "LoaderInterface.h"
 #include "Tiled2dMapVectorLayerParserResult.h"
+#include "Tiled2dMapVectorLayerLocalDataProviderInterface.h"
 
 class Tiled2dMapVectorLayerParserHelper {
 public:
     static Tiled2dMapVectorLayerParserResult parseStyleJsonFromUrl(const std::string &layerName,
                                                                    const std::string &styleJsonUrl,
                                                                    const double &dpFactor,
+                                                                   const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider,
                                                                    const std::vector<std::shared_ptr<::LoaderInterface>> &loaders);
 
     static Tiled2dMapVectorLayerParserResult parseStyleJsonFromString(const std::string &layerName,
                                                                       const std::string &styleJsonString,
                                                                       const double &dpFactor,
+                                                                      const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider,
                                                                       const std::vector<std::shared_ptr<::LoaderInterface>> &loaders);
 };
