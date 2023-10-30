@@ -45,6 +45,12 @@ struct Tiled2dMapVectorLayerUpdateInformation {
     bool needsTileReplace;
 };
 
+enum class StateType : int {
+    FEATURE = 0,
+    GLOBAL = 1,
+    BOTH = 2,
+};
+
 class Tiled2dMapVectorLayer
         : public Tiled2dMapLayer,
           public TouchInterface,
@@ -198,8 +204,8 @@ private:
 
     void initializeVectorLayer();
 
-    void applyGlobalStateIfPossible();
-
+    void applyGlobalOrFeatureStateIfPossible(StateType type);
+    
     int32_t layerIndex = -1;
 
     const std::optional<double> dpFactor;
