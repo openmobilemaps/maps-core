@@ -90,6 +90,7 @@ public:
         std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;
         std::shared_ptr<MaskingObjectInterface> maskingObject;
         bool isModifyingMask;
+        int32_t renderPassIndex;
     };
 
     virtual void onRenderPassUpdate(const std::string &source, bool isSymbol, const std::vector<std::shared_ptr<TileRenderDescription>> &renderDescription);
