@@ -51,7 +51,7 @@ public:
                                       const SymbolAlignment rotationAlignment,
                                       const TextSymbolPlacement &textSymbolPlacement,
                                       std::shared_ptr<SymbolAnimationCoordinator> animationCoordinator,
-                                      const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager);
+                                      const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager);
 
     int getCharacterCount();
 
@@ -76,6 +76,7 @@ private:
     void updatePropertiesPoint(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation);
     double updatePropertiesLine(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation);
 
+    bool isStyleStateDependant = true;
     double lastZoomEvaluation = -1;
     void evaluateStyleProperties(const double zoomIdentifier);
 
@@ -190,5 +191,5 @@ private:
 
     bool wasReversed = false;
 
-    const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> featureStateManager;
+    const std::shared_ptr<Tiled2dMapVectorStateManager> stateManager;
 };

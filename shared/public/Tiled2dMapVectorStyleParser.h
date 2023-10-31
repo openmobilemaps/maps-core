@@ -40,12 +40,14 @@ public:
     static const std::string stepExpression;
     static const std::string interpolateExpression;
     static const std::string formatExpression;
+    static const std::string numberFormatExpression;
     static const std::string concatExpression;
     static const std::string lengthExpression;
     static const std::string notExpression;
     static const std::string zoomExpression;
     static const std::string booleanExpression;
     static const std::string featureStateExpression;
+    static const std::string globalStateExpression;
     static const std::string coalesceExpression;
 
     std::shared_ptr<Value> parseValue(nlohmann::json json) {
@@ -67,6 +69,11 @@ public:
                 auto key = json[1].get<std::string>();
                 return std::make_shared<FeatureStateValue>(key);
 
+                // Example: [ "global-state",  "hover" ]
+            } else if (isExpression(json[0], globalStateExpression) && json.size() == 2 && json[1].is_string()) {
+                auto key = json[1].get<std::string>();
+                return std::make_shared<GlobalStateValue>(key);
+
                 // Example: [ "has",  "ref" ]
                 //          [ "!has", "ref"]
             } else if ((isExpression(json[0], hasExpression) || isExpression(json[0], hasNotExpression)) && json.size() == 2 && json[1].is_string()) {
@@ -81,12 +88,17 @@ public:
                 //          [ "in", ["get", "subclass"], ["literal", ["allotments", "forest", "glacier", "golf_course", "park"]]]
             } else if ((isExpression(json[0], inExpression) || isExpression(json[0], notInExpression)) && (json[1].is_string() || (json[1].is_array() && json[1][0] == getExpression))) {
                 std::unordered_set<ValueVariant> values;
+                std::shared_ptr<Value> dynamicValues;
+
 
                 if (json[2].is_array()){
                     if (json[2][0] == literalExpression && json[2][1].is_array()) {
                         for (auto it = json[2][1].begin(); it != json[2][1].end(); it++) {
                             values.insert(getVariant(*it));
                         }
+                    // Example:  ["in", ["get", "plz"], ["global-state", "favoritesPlz"]],
+                    } else if ((json[2][0] == globalStateExpression || json[2][0] == featureStateExpression ) && json[2][1].is_string()) {
+                        dynamicValues = parseValue(json[2]);
                     } else {
                         for (auto it = json[2].begin(); it != json[2].end(); it++) {
                             values.insert(getVariant(*it));
@@ -106,9 +118,9 @@ public:
                 }
 
                 if (isExpression(json[0], inExpression)) {
-                    return std::make_shared<InFilter>(key,values);
+                    return std::make_shared<InFilter>(key, values, dynamicValues);
                 } else {
-                    return std::make_shared<NotInFilter>(key,values);
+                    return std::make_shared<NotInFilter>(key, values, dynamicValues);
                 }
 
             // Example: [ "!=", "intermittent", 1 ]
@@ -236,7 +248,7 @@ public:
                 for (auto it = json.begin() + 1; it != json.end(); it += 1) {
                     auto const &value = parseValue(*it);
                     float scale = 1.0;
-                    if ((it + 1)->is_object()) {
+                    if (it + 1 != json.end() && (it + 1)->is_object()) {
                         for (auto const &[key, value] : (it + 1)->items()) {
                             if (key == "font-scale") {
                                 scale = value.get<float>();
@@ -250,6 +262,18 @@ public:
                 }
 
                 return std::make_shared<FormatValue>(values);
+            }
+
+            // Example: ["number-format",["get","temperature"], { "min-fraction-digits": 1, "max-fraction-digits": 1}]
+            else if (isExpression(json[0], numberFormatExpression)) {
+                const auto &value = parseValue(json[1]);
+                int minFractionDigits = 0;
+                int maxFractionDigits = 0;
+                if (json[2].is_object()) {
+                    minFractionDigits = json[2].value("min-fraction-digits", 0);
+                    maxFractionDigits = json[2].value("max-fraction-digits", 0);
+                }
+                return std::make_shared<NumberFormatValue>(value, minFractionDigits, maxFractionDigits);
             }
 
             // Example: ["concat",["get","ele"],"\n\n",["get","lake_depth"]]

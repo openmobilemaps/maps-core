@@ -20,7 +20,7 @@ Tiled2dMapVectorSourceDataManager::Tiled2dMapVectorSourceDataManager(const WeakA
                                                                      const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                                                      const std::string &source,
                                                                      const Actor<Tiled2dMapVectorReadyManager> &readyManager,
-                                                                     const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager)
+                                                                     const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager)
         : vectorLayer(vectorLayer),
           mapDescription(mapDescription),
           layerConfig(layerConfig),

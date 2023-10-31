@@ -806,7 +806,47 @@ std::shared_ptr<Break> evaluate(int nextIndex, float targetWidth, const std::vec
 }
 
 std::vector<BreakResult> TextHelper::bestBreakIndices(std::vector<std::string> &letters, int64_t maxCharacterWidth) {
-    if(letters.size() == 0) {
+
+    std::vector<std::vector<std::string>> strings = {};
+    std::vector<std::string> current = {};
+
+    for(auto& l : letters) {
+        if(isLineBreak(l)) {
+            strings.push_back(current);
+            strings.push_back({ l });
+            current.clear();
+        } else {
+            current.push_back(l);
+        }
+    }
+
+    if(current.size() >  0) {
+        strings.push_back(current);
+    }
+
+    std::vector<BreakResult> result = {};
+    int currentIndex = 0;
+
+    for(auto& s : strings) {
+        if(s.size() == 1 && isLineBreak(s[0])) {
+            result.push_back(BreakResult(currentIndex, true));
+        } else {
+            auto breaks = bestBreakIndicesSub(s, maxCharacterWidth);
+
+            for(auto& b : breaks) {
+                b.index += currentIndex;
+                result.push_back(b);
+            }
+        }
+        currentIndex += s.size();
+    }
+
+    return result;
+}
+
+
+std::vector<BreakResult> TextHelper::bestBreakIndicesSub(std::vector<std::string> &letters, int64_t maxCharacterWidth) {
+    if(letters.size() == 0 || letters.size() < maxCharacterWidth) {
         return {};
     }
 
@@ -820,9 +860,6 @@ std::vector<BreakResult> TextHelper::bestBreakIndices(std::vector<std::string> &
 
         if(i < letters.size() - 1 && allowsLineBreak(l)) {
             float additionalCost = 0;
-            if (isLineBreak(l)) {
-                additionalCost = -100000;
-            }
 
             if (isSpecialCharacter(l)) {
                 additionalCost = 100;

@@ -6,6 +6,7 @@
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
+#import "MCBlendMode+Private.h"
 #import "MCCoord+Private.h"
 #import "MCIconInfoInterface+Private.h"
 #import "MCIconType+Private.h"
@@ -39,13 +40,15 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
                                   coordinate:(nonnull MCCoord *)coordinate
                                      texture:(nullable id<MCTextureHolderInterface>)texture
                                     iconSize:(nonnull MCVec2F *)iconSize
-                                   scaleType:(MCIconType)scaleType {
+                                   scaleType:(MCIconType)scaleType
+                                   blendMode:(MCBlendMode)blendMode {
     try {
         auto objcpp_result_ = ::IconFactory::createIcon(::djinni::String::toCpp(identifier),
                                                         ::djinni_generated::Coord::toCpp(coordinate),
                                                         ::djinni_generated::TextureHolderInterface::toCpp(texture),
                                                         ::djinni_generated::Vec2F::toCpp(iconSize),
-                                                        ::djinni::Enum<::IconType, MCIconType>::toCpp(scaleType));
+                                                        ::djinni::Enum<::IconType, MCIconType>::toCpp(scaleType),
+                                                        ::djinni::Enum<::BlendMode, MCBlendMode>::toCpp(blendMode));
         return ::djinni_generated::IconInfoInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -55,6 +58,7 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
                                                texture:(nullable id<MCTextureHolderInterface>)texture
                                               iconSize:(nonnull MCVec2F *)iconSize
                                              scaleType:(MCIconType)scaleType
+                                             blendMode:(MCBlendMode)blendMode
                                             iconAnchor:(nonnull MCVec2F *)iconAnchor {
     try {
         auto objcpp_result_ = ::IconFactory::createIconWithAnchor(::djinni::String::toCpp(identifier),
@@ -62,6 +66,7 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
                                                                   ::djinni_generated::TextureHolderInterface::toCpp(texture),
                                                                   ::djinni_generated::Vec2F::toCpp(iconSize),
                                                                   ::djinni::Enum<::IconType, MCIconType>::toCpp(scaleType),
+                                                                  ::djinni::Enum<::BlendMode, MCBlendMode>::toCpp(blendMode),
                                                                   ::djinni_generated::Vec2F::toCpp(iconAnchor));
         return ::djinni_generated::IconInfoInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()

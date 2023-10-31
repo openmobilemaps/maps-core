@@ -24,7 +24,7 @@ Tiled2dMapVectorSourceSymbolDataManager::Tiled2dMapVectorSourceSymbolDataManager
                                                                                  const std::shared_ptr<FontLoaderInterface> &fontLoader,
                                                                                  const WeakActor<Tiled2dMapVectorSource> &vectorSource,
                                                                                  const Actor<Tiled2dMapVectorReadyManager> &readyManager,
-                                                                                 const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager)
+                                                                                 const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager)
         : Tiled2dMapVectorSourceDataManager(vectorLayer, mapDescription, layerConfig, source, readyManager, featureStateManager),
         fontLoader(fontLoader), vectorSource(vectorSource), animationCoordinatorMap(std::make_shared<SymbolAnimationCoordinatorMap>()) {
 
@@ -278,6 +278,57 @@ void Tiled2dMapVectorSourceSymbolDataManager::updateLayerDescription(std::shared
     }
 }
 
+void Tiled2dMapVectorSourceSymbolDataManager::reloadLayerContent(const std::vector<std::tuple<std::string, std::string>> &sourceLayerIdentifierPairs) {
+    auto mapInterface = this->mapInterface.lock();
+    if (!mapInterface) {
+        return;
+    }
+
+    auto const &currentTileInfos = vectorSource.converse(&Tiled2dMapVectorSource::getCurrentTiles).get();
+
+    {
+        std::lock_guard<std::recursive_mutex> updateLock(updateMutex);
+        for (const auto &[sourceLayer, layerIdentifier]: sourceLayerIdentifierPairs) {
+            for (const auto &tileData: currentTileInfos) {
+                auto tileGroup = tileSymbolGroupMap.find(tileData.tileInfo);
+                if (tileGroup == tileSymbolGroupMap.end()) {
+                    continue;
+                }
+
+                auto tileGroupIt = tileGroup->second.find(layerIdentifier);
+                if (tileGroupIt != tileGroup->second.end()) {
+                    for (const auto &group: std::get<1>(tileGroupIt->second)) {
+                        this->tilesToClear.push_back(group);
+                    }
+                }
+
+                tileGroup->second.erase(layerIdentifier);
+
+                const auto &dataIt = tileData.layerFeatureMaps->find(sourceLayer);
+
+                if (dataIt != tileData.layerFeatureMaps->end()) {
+                    // there is something in this layer to display
+                    const auto &newSymbolGroups = createSymbolGroups(tileData.tileInfo, layerIdentifier,
+                                                                     dataIt->second);
+                    if (!newSymbolGroups.empty()) {
+                        for (const auto &group: newSymbolGroups) {
+                            std::get<1>(tileSymbolGroupMap.at(tileData.tileInfo)[layerIdentifier]).push_back(group);
+                            std::get<0>(tileSymbolGroupMap.at(tileData.tileInfo)[layerIdentifier]).increaseBase();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    auto selfActor = WeakActor(mailbox, weak_from_this());
+    selfActor.messagePrecisely(MailboxDuplicationStrategy::replaceNewest, MailboxExecutionEnvironment::graphics,
+                               &Tiled2dMapVectorSourceSymbolDataManager::updateSymbolGroups);
+
+    mapInterface->invalidate();
+
+}
+
 void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::string &sourceName,
                                                                    std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) {
     if (updateFlag.test_and_set()) {
@@ -456,6 +507,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups(const Tiled2dMap
             group->setupObjects(spriteData, spriteTexture);
         });
     }
+    vectorLayer.message(&Tiled2dMapVectorLayer::invalidateCollisionState);
     readyManager.message(&Tiled2dMapVectorReadyManager::setReady, readyManagerIndex, tileInfo, std::get<0>(layerIt->second).baseValue);
 }
 
@@ -509,13 +561,6 @@ void Tiled2dMapVectorSourceSymbolDataManager::updateSymbolGroups() {
         tilesToClear.clear();
     }
 
-    for (const auto &[tile, symbolGroupMap]: tileSymbolGroupMap) {
-        const auto tileState = tileStateMap.find(tile);
-        if (tileState == tileStateMap.end() || tileState->second != TileState::VISIBLE) {
-            continue;
-        }
-    }
-
     pregenerateRenderPasses();
 }
 
@@ -562,7 +607,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
     auto scaleFactor = camera->mapUnitsFromPixels(1.0);
 
     for (const auto layerIdentifier: layerIdentifiers) {
-        std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>> allObjects;
+        std::vector<SymbolObjectCollisionWrapper> allObjects;
 
         for (const auto &[tile, symbolGroupsMap]: tileSymbolGroupMap) {
             const auto tileState = tileStateMap.find(tile);
@@ -574,23 +619,18 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
                 for (auto &symbolGroup: std::get<1>(objectsIt->second)) {
 
                     symbolGroup.syncAccess([&allObjects](auto group){
-                        const auto &objects = group->getSymbolObjects();
+                        auto objects = group->getSymbolObjectsForCollision();
                         allObjects.reserve(allObjects.size() + objects.size());
-                        allObjects.insert(allObjects.end(), objects.begin(), objects.end());
+                        allObjects.insert(allObjects.end(), std::make_move_iterator(objects.begin()),
+                                          std::make_move_iterator(objects.end()));
                     });
                 }
             }
         }
-        std::stable_sort(allObjects.rbegin(), allObjects.rend(),
-                         [](const auto &a, const auto &b) -> bool {
-            if (a->symbolSortKey == b->symbolSortKey) {
-                return a->symbolTileIndex > b->symbolTileIndex;
-            }
-            return a->symbolSortKey > b->symbolSortKey;
-        });
+        std::stable_sort(allObjects.rbegin(), allObjects.rend());
 
-        for (const auto &object: allObjects) {
-            object->collisionDetection(zoomIdentifier, rotation, scaleFactor, collisionGrid);
+        for (const auto &objectWrapper: allObjects) {
+            objectWrapper.symbolObject->collisionDetection(zoomIdentifier, rotation, scaleFactor, collisionGrid);
         }
     }
 }
@@ -679,7 +719,10 @@ void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
                     }
                 });
             }
-            renderDescriptions.push_back(std::make_shared<Tiled2dMapVectorLayer::TileRenderDescription>(Tiled2dMapVectorLayer::TileRenderDescription{index, renderObjects, nullptr, false}));
+
+            const auto optRenderPassIndex = mapDescription->layers[index]->renderPassIndex;
+            const int32_t renderPassIndex = optRenderPassIndex ? *optRenderPassIndex : 0;
+            renderDescriptions.push_back(std::make_shared<Tiled2dMapVectorLayer::TileRenderDescription>(Tiled2dMapVectorLayer::TileRenderDescription{index, renderObjects, nullptr, false, renderPassIndex}));
         }
     }
 

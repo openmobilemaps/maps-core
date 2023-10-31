@@ -23,6 +23,7 @@
 #include "Quad2dStretchedInstancedInterface.h"
 #include "PolygonGroup2dLayerObject.h"
 #include "CollisionGrid.h"
+#include "SymbolObjectCollisionWrapper.h"
 
 //#define DRAW_TEXT_BOUNDING_BOX
 //#define DRAW_TEXT_BOUNDING_BOX_WITH_COLLISIONS
@@ -38,7 +39,7 @@ public:
                                 const Tiled2dMapTileInfo &tileInfo,
                                 const std::string &layerIdentifier,
                                 const std::shared_ptr<SymbolVectorLayerDescription> &layerDescription,
-                                const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager);
+                                const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager);
 
     void initialize(std::weak_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> weakFeatures,
                     int32_t featuresBase,
@@ -55,7 +56,7 @@ public:
     std::shared_ptr<Quad2dStretchedInstancedInterface> stretchedInstancedObject;
     std::shared_ptr<TextInstancedInterface> textInstancedObject;
 
-    std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>>& getSymbolObjects();
+    std::vector<SymbolObjectCollisionWrapper> getSymbolObjectsForCollision();
 
     std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> onClickConfirmed(const CircleD &clickHitCircle);
 
@@ -131,12 +132,12 @@ private:
 
     bool anyInteractable = false;
 
-    const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> featureStateManager;
+    const std::shared_ptr<Tiled2dMapVectorStateManager> featureStateManager;
 
 #ifdef DRAW_TEXT_BOUNDING_BOX
     TextSymbolPlacement textSymbolPlacement;
     SymbolAlignment labelRotationAlignment;
 #endif
 
-    std::unordered_set<std::string> usedKeys;
+    UsedKeysCollection usedKeys;
 };

@@ -44,6 +44,7 @@
 #include "Tiled2dMapVectorInteractionManager.h"
 #include "Tiled2dMapVectorReadyManager.h"
 #include "Tiled2dVectorGeoJsonSource.h"
+#include "Tiled2dMapVectorStyleParser.h"
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::string &remoteStyleJsonUrl,
@@ -59,8 +60,9 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         fontLoader(fontLoader),
         dpFactor(dpFactor),
         customZoomInfo(customZoomInfo),
-        featureStateManager(std::make_shared<Tiled2dMapVectorFeatureStateManager>()),
-        sourceUrlParams(sourceUrlParams)  {}
+        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>()),
+        sourceUrlParams(sourceUrlParams)
+         {}
 
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
@@ -79,8 +81,9 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         fontLoader(fontLoader),
         dpFactor(dpFactor),
         customZoomInfo(customZoomInfo),
-        featureStateManager(std::make_shared<Tiled2dMapVectorFeatureStateManager>()),
-        sourceUrlParams(sourceUrlParams)   {}
+        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>()),
+        sourceUrlParams(sourceUrlParams)
+        {}
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::shared_ptr<VectorMapDescription> &mapDescription,
@@ -93,10 +96,11 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         loaders(loaders),
         fontLoader(fontLoader),
         customZoomInfo(customZoomInfo),
-        featureStateManager(std::make_shared<Tiled2dMapVectorFeatureStateManager>()),
-        sourceUrlParams(sourceUrlParams)   {
+        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>()),
+        sourceUrlParams(sourceUrlParams)
+        {
             setMapDescription(mapDescription);
-}
+        }
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
@@ -108,8 +112,9 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         loaders(loaders),
         fontLoader(fontLoader),
         customZoomInfo(customZoomInfo),
-        featureStateManager(std::make_shared<Tiled2dMapVectorFeatureStateManager>()),
-        sourceUrlParams(sourceUrlParams) {}
+        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>()),
+        sourceUrlParams(sourceUrlParams)
+        {}
 
 void Tiled2dMapVectorLayer::scheduleStyleJsonLoading() {
     isLoadingStyleJson = true;
@@ -166,7 +171,7 @@ std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJsonRemotely() {
     if (!remoteStyleJsonUrl.has_value() || !dpFactor.has_value()) {
         return std::nullopt;
     }
-    auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromUrl(layerName, *remoteStyleJsonUrl, *dpFactor, loaders, sourceUrlParams);
+    auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromUrl(layerName, *remoteStyleJsonUrl, *dpFactor, localDataProvider, loaders, sourceUrlParams);
     if (parseResult.status == LoaderStatus::OK) {
         setMapDescription(parseResult.mapDescription);
         metadata = parseResult.metadata;
@@ -184,7 +189,7 @@ std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJsonLocally(std::
         return std::nullopt;
     }
 
-    auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(layerName, styleJsonString, *dpFactor, loaders, sourceUrlParams);
+    auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(layerName, styleJsonString, *dpFactor, localDataProvider, loaders, sourceUrlParams);
 
     if (parseResult.status == LoaderStatus::OK) {
         setMapDescription(parseResult.mapDescription);
@@ -211,9 +216,11 @@ void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDes
         layerConfigs[source->identifier] = getLayerConfig(source);
     }
     for (auto const &[source, geoJson]: mapDescription->geoJsonSources) {
-        layerConfigs[source] = getLayerConfig(VectorMapSourceDescription::geoJsonDescription());
+        layerConfigs[source] = getLayerConfig(VectorMapSourceDescription::geoJsonDescription(geoJson->getMaxZoom()));
     }
+    
     initializeVectorLayer();
+    applyGlobalOrFeatureStateIfPossible(StateType::BOTH);
 }
 
 void Tiled2dMapVectorLayer::initializeVectorLayer() {
@@ -324,18 +331,22 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
 
         Actor<Tiled2dMapVectorSource> vectorSource;
         if (mapDescription->geoJsonSources.count(source) != 0) {
-            vectorSource = Actor<Tiled2dVectorGeoJsonSource>(sourceMailbox,
-                                                              mapInterface->getMapConfig(),
-                                                              layerConfig,
-                                                              mapInterface->getCoordinateConverterHelper(),
-                                                              mapInterface->getScheduler(),
-                                                              loaders,
-                                                              selfVectorActor,
-                                                              layers,
-                                                              source,
-                                                              mapInterface->getCamera()->getScreenDensityPpi(),
-                                                              mapDescription->geoJsonSources.at(source),
-                                                              layerName).strongActor<Tiled2dMapVectorSource>();
+            auto geoJsonSource = Actor<Tiled2dVectorGeoJsonSource>(sourceMailbox,
+                                                                   mapInterface->getMapConfig(),
+                                                                   layerConfig,
+                                                                   mapInterface->getCoordinateConverterHelper(),
+                                                                   mapInterface->getScheduler(),
+                                                                   loaders,
+                                                                   selfVectorActor,
+                                                                   layers,
+                                                                   source,
+                                                                   mapInterface->getCamera()->getScreenDensityPpi(),
+                                                                   mapDescription->geoJsonSources.at(source),
+                                                                   layerName);
+            vectorSource = geoJsonSource.strongActor<Tiled2dMapVectorSource>();
+
+            mapDescription->geoJsonSources.at(source)->setDelegate(geoJsonSource.weakActor<GeoJSONTileDelegate>());
+
         } else {
             vectorSource = Actor<Tiled2dMapVectorSource>(sourceMailbox,
                                                               mapInterface->getMapConfig(),
@@ -539,31 +550,33 @@ void Tiled2dMapVectorLayer::pregenerateRenderPasses() {
 
     std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;
     std::shared_ptr<MaskingObjectInterface> lastMask = nullptr;
+    int32_t lastRenderPassIndex = 0;
 
     for (const auto &description : orderedRenderDescriptions) {
         if (description->renderObjects.empty()) {
             continue;
         }
         if (description->maskingObject != lastMask && !renderObjects.empty()) {
-            newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(0), renderObjects, lastMask));
+            newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex), renderObjects, lastMask));
             renderObjects.clear();
             lastMask = nullptr;
         }
 
         if (description->isModifyingMask) {
             if (!renderObjects.empty()) {
-                newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(0), renderObjects, lastMask));
+                newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex), renderObjects, lastMask));
             }
             renderObjects.clear();
             lastMask = nullptr;
-            newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(0), description->renderObjects, description->maskingObject));
+            newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex), description->renderObjects, description->maskingObject));
         } else {
             renderObjects.insert(renderObjects.end(), description->renderObjects.begin(), description->renderObjects.end());
             lastMask = description->maskingObject;
+            lastRenderPassIndex = description->renderPassIndex;
         }
     }
     if (!renderObjects.empty()) {
-        newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(0), renderObjects, lastMask));
+        newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(lastRenderPassIndex), renderObjects, lastMask));
         renderObjects.clear();
         lastMask = nullptr;
     }
@@ -721,7 +734,14 @@ void Tiled2dMapVectorLayer::loadSpriteData() {
 
     auto context = std::make_shared<Context>(2);
 
-    LoaderHelper::loadDataAsync(urlData, std::nullopt, loaders).then([context] (auto result) {
+    std::shared_ptr<::djinni::Future<::DataLoaderResult>> jsonLoaderFuture;
+    if(localDataProvider) {
+        jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(localDataProvider->loadSpriteJsonAsync(scale2x ? 2 : 1));
+    } else {
+        jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(LoaderHelper::loadDataAsync(urlData, std::nullopt, loaders));
+    }
+
+    jsonLoaderFuture->then([context] (auto result) {
         auto dataResult = result.get();
         if (dataResult.status == LoaderStatus::OK) {
             auto string = std::string((char*)dataResult.data->buf(), dataResult.data->len());
@@ -750,7 +770,14 @@ void Tiled2dMapVectorLayer::loadSpriteData() {
         }
     });
 
-    LoaderHelper::loadTextureAsync(urlTexture, std::nullopt, loaders).then([context] (auto result) {
+    std::shared_ptr<::djinni::Future<::TextureLoaderResult>> textureLoaderFuture;
+    if(localDataProvider) {
+        textureLoaderFuture = std::make_shared<::djinni::Future<::TextureLoaderResult>>(localDataProvider->loadSpriteAsync(scale2x ? 2 : 1));
+    } else {
+        textureLoaderFuture = std::make_shared<::djinni::Future<::TextureLoaderResult>>(LoaderHelper::loadTextureAsync(urlTexture, std::nullopt, loaders));
+    }
+
+    textureLoaderFuture->then([context] (auto result) {
         auto textureResult = result.get();
         if (textureResult.status == LoaderStatus::OK) {
             context->spriteTexture = textureResult.data;
@@ -1028,9 +1055,78 @@ std::optional<std::string> Tiled2dMapVectorLayer::getStyleMetadataJson() {
 }
 
 void Tiled2dMapVectorLayer::setFeatureState(const std::string & identifier, const std::unordered_map<std::string, VectorLayerFeatureInfoValue> & properties) {
-    
     featureStateManager->setFeatureState(identifier, properties);
+    applyGlobalOrFeatureStateIfPossible(StateType::FEATURE);
+}
 
-    if (mapInterface)
-        mapInterface->invalidate();
+void Tiled2dMapVectorLayer::setGlobalState(const std::unordered_map<std::string, VectorLayerFeatureInfoValue> &properties) {
+    featureStateManager->setGlobalState(properties);
+    applyGlobalOrFeatureStateIfPossible(StateType::GLOBAL);
+}
+
+void Tiled2dMapVectorLayer::applyGlobalOrFeatureStateIfPossible(StateType type) {
+    auto mapInterface = this->mapInterface;
+    auto mapDescription = this->mapDescription;
+    if(!mapInterface || !mapDescription) { return; }
+
+    std::unordered_map<std::string, std::vector<std::tuple<std::string, std::string>>> sourceLayerIdentifiersMap;
+    std::unordered_map<std::string, std::vector<std::tuple<std::shared_ptr<VectorLayerDescription>, int32_t>>> sourcelayerDescriptionIndexMap;
+    int32_t layerIndex = -1;
+    for (const auto &layerDescription : mapDescription->layers) {
+        layerIndex++;
+        if (!layerDescription->filter) {
+            continue;
+        }
+        const auto &usedKeys = layerDescription->filter->getUsedKeys();
+        if (((type == StateType::GLOBAL || type == StateType::BOTH) && !usedKeys.globalStateKeys.empty()) || ((type == StateType::FEATURE ||type == StateType::BOTH) && !usedKeys.featureStateKeys.empty())) {
+            if (layerDescription->getType() == VectorLayerType::symbol) {
+                sourceLayerIdentifiersMap[layerDescription->source].emplace_back(layerDescription->sourceLayer,
+                                                                                 layerDescription->identifier);
+            } else {
+                sourcelayerDescriptionIndexMap[layerDescription->source].push_back({layerDescription, layerIndex});
+            }
+        }
+    }
+
+    for (const auto &[source, sourceLayerIdentifiers]: sourceLayerIdentifiersMap) {
+        const auto &symbolManager = symbolSourceDataManagers.find(source);
+        if (symbolManager != symbolSourceDataManagers.end()) {
+            symbolManager->second.message(&Tiled2dMapVectorSourceSymbolDataManager::reloadLayerContent, sourceLayerIdentifiers);
+        }
+    }
+    for (const auto &[source, descriptionIndexPairs]: sourcelayerDescriptionIndexMap) {
+        const auto &dataManager = sourceDataManagers.find(source);
+        if (dataManager != sourceDataManagers.end()) {
+            dataManager->second.message(&Tiled2dMapVectorSourceTileDataManager::reloadLayerContent, descriptionIndexPairs);
+        }
+    }
+
+    mapInterface->invalidate();
+}
+
+LayerReadyState Tiled2dMapVectorLayer::isReadyToRenderOffscreen() {
+    if (layerConfigs.empty() || sourceInterfaces.empty()) {
+        return LayerReadyState::NOT_READY;
+    }
+    return Tiled2dMapLayer::isReadyToRenderOffscreen();
+}
+
+void Tiled2dMapVectorLayer::setMinZoomLevelIdentifier(std::optional<int32_t> value) {
+    Tiled2dMapLayer::setMinZoomLevelIdentifier(value);
+}
+
+std::optional<int32_t> Tiled2dMapVectorLayer::getMinZoomLevelIdentifier() {
+    return Tiled2dMapLayer::getMinZoomLevelIdentifier();
+}
+
+void Tiled2dMapVectorLayer::setMaxZoomLevelIdentifier(std::optional<int32_t> value) {
+    Tiled2dMapLayer::setMaxZoomLevelIdentifier(value);
+}
+
+std::optional<int32_t> Tiled2dMapVectorLayer::getMaxZoomLevelIdentifier() {
+    return Tiled2dMapLayer::getMaxZoomLevelIdentifier();
+}
+
+void Tiled2dMapVectorLayer::invalidateCollisionState() {
+    prevCollisionStillValid.clear();
 }

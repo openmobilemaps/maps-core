@@ -19,7 +19,7 @@ Tiled2dMapVectorSourceVectorTileDataManager::Tiled2dMapVectorSourceVectorTileDat
                                                                                          const std::string &source,
                                                                                          const WeakActor<Tiled2dMapVectorSource> &vectorSource,
                                                                                          const Actor<Tiled2dMapVectorReadyManager> &readyManager,
-                                                                                         const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager)
+                                                                                         const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager)
 : Tiled2dMapVectorSourceTileDataManager(vectorLayer, mapDescription, layerConfig, source, readyManager, featureStateManager),
 vectorSource(vectorSource) {}
 
@@ -255,6 +255,77 @@ void Tiled2dMapVectorSourceVectorTileDataManager::updateLayerDescription(std::sh
                     tile.message(&Tiled2dMapVectorTile::updateVectorLayerDescription, layerDescription, mapIt->second);
                     break;
                 }
+            }
+        }
+    }
+}
+
+void Tiled2dMapVectorSourceVectorTileDataManager::reloadLayerContent(const std::vector<std::tuple<std::shared_ptr<VectorLayerDescription>, int32_t>> &descriptionLayerIndexPairs) {
+    auto mapInterface = this->mapInterface.lock();
+    if (!mapInterface) {
+        return;
+    }
+
+    auto const &currentTileInfos = vectorSource.converse(&Tiled2dMapVectorSource::getCurrentTiles).get();
+
+    for (const auto &[layerDescription, layerIndex]: descriptionLayerIndexPairs) {
+
+        for (const auto &tileData: currentTileInfos) {
+            auto subTiles = tiles.find(tileData.tileInfo);
+            if (subTiles == tiles.end()) {
+                continue;
+            }
+
+            std::vector<Actor<Tiled2dMapVectorTile>> tilesToClear;
+            // Remove invalid legacy tile (only one - identifier is unique)
+            auto legacyPos = std::find_if(subTiles->second.begin(), subTiles->second.end(),
+                                          [&identifier = layerDescription->identifier]
+                                                  (const std::tuple<int32_t, std::string, Actor<Tiled2dMapVectorTile>> &subTile) {
+                                              return std::get<1>(subTile) == identifier;
+                                          });
+            if (legacyPos == subTiles->second.end()) {
+                continue;
+            }
+            tilesToClear.push_back(std::get<2>(*legacyPos));
+            subTiles->second.erase(legacyPos);
+
+            auto const mapIt = tileData.layerFeatureMaps->find(layerDescription->sourceLayer);
+            if (mapIt == tileData.layerFeatureMaps->end()) {
+                continue;
+            }
+
+            Actor<Tiled2dMapVectorTile> actor = createTileActor(tileData.tileInfo, layerDescription);
+            if (actor) {
+                if (auto strongSelectionDelegate = selectionDelegate.lock()) {
+                    actor.message(&Tiled2dMapVectorTile::setSelectionDelegate, strongSelectionDelegate);
+                }
+
+                if (subTiles->second.empty()) {
+                    subTiles->second.push_back(
+                            {layerIndex, layerDescription->identifier, actor.strongActor<Tiled2dMapVectorTile>()});
+                } else {
+                    auto insertionPoint = std::lower_bound(subTiles->second.begin(), subTiles->second.end(), layerIndex,
+                                                           [](const auto &subTile, int index) {
+                                                               return std::get<0>(subTile) < index;
+                                                           });
+
+                    subTiles->second.insert(insertionPoint,
+                                            {layerIndex, layerDescription->identifier, actor.strongActor<Tiled2dMapVectorTile>()});
+                }
+
+                auto controlSetEntry = tilesReadyControlSet.find(tileData.tileInfo);
+                if (controlSetEntry == tilesReadyControlSet.end()) {
+                    tilesReadyControlSet[tileData.tileInfo] = {layerIndex};
+                } else {
+                    controlSetEntry->second.insert(layerIndex);
+                }
+                tilesReady.erase(tileData.tileInfo);
+
+                actor.message(&Tiled2dMapVectorTile::setVectorTileData, mapIt->second);
+                auto castedMe = std::static_pointer_cast<Tiled2dMapVectorSourceVectorTileDataManager>(shared_from_this());
+                auto selfActor = WeakActor<Tiled2dMapVectorSourceVectorTileDataManager>(mailbox, castedMe);
+                selfActor.message(MailboxExecutionEnvironment::graphics,
+                                  &Tiled2dMapVectorSourceVectorTileDataManager::clearTiles, tilesToClear);
             }
         }
     }

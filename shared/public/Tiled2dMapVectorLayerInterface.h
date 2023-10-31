@@ -7,12 +7,14 @@
 #include "LayerInterface.h"
 #include "LoaderInterface.h"
 #include "Tiled2dMapZoomInfo.h"
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
+class Tiled2dMapVectorLayerLocalDataProviderInterface;
 class Tiled2dMapVectorLayerSelectionCallbackInterface;
 struct VectorLayerFeatureInfoValue;
 
@@ -24,15 +26,23 @@ public:
 
     static /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerInterface> createFromLocalStyleJson(const std::string & layerName, const std::string & styleJson, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & loaders, const /*not-null*/ std::shared_ptr<::FontLoaderInterface> & fontLoader, double dpFactor);
 
-    static /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerInterface> createFromStyleJsonWithZoomInfo(const std::string & layerName, const std::string & path, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & loaders, const /*not-null*/ std::shared_ptr<::FontLoaderInterface> & fontLoader, double dpFactor, const std::optional<::Tiled2dMapZoomInfo> & zoomInfo, const std::optional<std::unordered_map<std::string, std::string>> & sourceUrlParams);
-
-    static /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerInterface> createFromLocalStyleJsonWithZoomInfo(const std::string & layerName, const std::string & styleJson, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & loaders, const /*not-null*/ std::shared_ptr<::FontLoaderInterface> & fontLoader, double dpFactor, const std::optional<::Tiled2dMapZoomInfo> & zoomInfo, const std::optional<std::unordered_map<std::string, std::string>> & sourceUrlParams);
+    static /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerInterface> createCustom(const std::string & layerName, const std::optional<std::string> & styleUrl, const std::optional<std::string> & styleJson, const /*nullable*/ std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> & localDataProvider, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & loaders, const /*not-null*/ std::shared_ptr<::FontLoaderInterface> & fontLoader, double dpFactor, const std::optional<::Tiled2dMapZoomInfo> & zoomInfo, const std::optional<std::unordered_map<std::string, std::string>> & sourceUrlParams);
 
     virtual void setSelectionDelegate(const /*nullable*/ std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> & selectionDelegate) = 0;
 
     virtual /*not-null*/ std::shared_ptr<::LayerInterface> asLayerInterface() = 0;
 
+    virtual void setMinZoomLevelIdentifier(std::optional<int32_t> value) = 0;
+
+    virtual std::optional<int32_t> getMinZoomLevelIdentifier() = 0;
+
+    virtual void setMaxZoomLevelIdentifier(std::optional<int32_t> value) = 0;
+
+    virtual std::optional<int32_t> getMaxZoomLevelIdentifier() = 0;
+
     virtual std::optional<std::string> getStyleMetadataJson() = 0;
 
     virtual void setFeatureState(const std::string & identifier, const std::unordered_map<std::string, VectorLayerFeatureInfoValue> & properties) = 0;
+
+    virtual void setGlobalState(const std::unordered_map<std::string, VectorLayerFeatureInfoValue> & properties) = 0;
 };

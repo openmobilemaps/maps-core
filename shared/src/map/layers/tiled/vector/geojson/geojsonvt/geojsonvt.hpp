@@ -42,13 +42,19 @@ inline uint64_t toID(uint8_t z, uint32_t x, uint32_t y) {
 
 class GeoJSONVT: public GeoJSONVTInterface, public std::enable_shared_from_this<GeoJSONVT> {
 public:
-    const Options options;
+    Options options;
 
     const Tile emptyTile = Tile();
 
     GeoJSONVT(const std::shared_ptr<GeoJson> &geoJson,
               const Options& options_ = Options())
-    : options(options_), loadingResult(DataLoaderResult(std::nullopt, std::nullopt, LoaderStatus::OK, std::nullopt)){
+    : options(options_), loadingResult(DataLoaderResult(std::nullopt, std::nullopt, LoaderStatus::OK, std::nullopt)) {
+
+        // If the GeoJSON contains only points, there is no need to split it into smaller tiles,
+        // as there are no opportunities for simplification, merging, or meaningful point reduction.
+        if (geoJson->hasOnlyPoints) {
+            options.maxZoom = 0;
+        }
 
         const uint32_t z2 = 1u << options.maxZoom;
 
@@ -59,18 +65,29 @@ public:
 
     GeoJSONVT(const std::string &geoJsonUrl,
               const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
+              const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider,
               const Options& options_ = Options())
-    : options(options_), geoJsonUrl(geoJsonUrl), loaders(loaders) {}
+    : options(options_), geoJsonUrl(geoJsonUrl), loaders(loaders), localDataProvider(localDataProvider) {}
 
     const std::string geoJsonUrl;
     std::vector<std::shared_ptr<::LoaderInterface>> loaders;
+    std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> localDataProvider;
     std::recursive_mutex mutex;
     std::optional<DataLoaderResult> loadingResult;
     std::vector<std::shared_ptr<::djinni::Promise<std::shared_ptr<DataLoaderResult>>>> waitingPromises;
+    WeakActor<GeoJSONTileDelegate> delegate;
 
     void load() {
         auto weakSelf = weak_from_this();
-        LoaderHelper::loadDataAsync(geoJsonUrl, std::nullopt, loaders).then([weakSelf](auto resultFuture){
+
+        std::shared_ptr<::djinni::Future<::DataLoaderResult>> jsonLoaderFuture;
+        if(localDataProvider) {
+            jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(localDataProvider->loadGeojson());
+        } else {
+            jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(LoaderHelper::loadDataAsync(geoJsonUrl, std::nullopt, loaders));
+        }
+
+        jsonLoaderFuture->then([weakSelf](auto resultFuture){
             auto self = weakSelf.lock();
             if (!self) return;
             auto result = resultFuture.get();
@@ -85,11 +102,18 @@ public:
                     json = nlohmann::json::parse(string);
                     auto geoJson = GeoJsonParser::getGeoJson(json);
                     if (geoJson) {
+
+                        if (geoJson->hasOnlyPoints) {
+                            self->options.maxZoom = 0;
+                        }
+
                         const uint32_t z2 = 1u << self->options.maxZoom;
 
                         convert(geoJson->geometries, (self->options.tolerance / self->options.extent) / z2);
 
                         self->splitTile(geoJson->geometries, 0, 0, 0);
+
+                        self->delegate.message(&GeoJSONTileDelegate::didLoad, self->options.maxZoom);
                     }
                 }
                 catch (nlohmann::json::parse_error &ex) {
@@ -107,7 +131,18 @@ public:
         });
     }
 
-    void reload(const std::vector<std::shared_ptr<::LoaderInterface>> &loaders) override {
+    void setDelegate(const WeakActor<GeoJSONTileDelegate> delegate) override {
+        this->delegate = delegate;
+        if (loadingResult) {
+            delegate.message(&GeoJSONTileDelegate::didLoad, options.maxZoom);
+        }
+    }
+
+    uint8_t getMaxZoom() override {
+        return options.maxZoom;
+    }
+
+	void reload(const std::vector<std::shared_ptr<::LoaderInterface>> &loaders) override {
         std::lock_guard<std::recursive_mutex> lock(mutex);
         auto self = shared_from_this();
         self->loadingResult = std::nullopt;
@@ -115,6 +150,7 @@ public:
         self->tiles.clear();
         load();
     }
+
 
     void waitIfNotLoaded(std::shared_ptr<::djinni::Promise<std::shared_ptr<DataLoaderResult>>> promise) override {
         std::lock_guard<std::recursive_mutex> lock(mutex);

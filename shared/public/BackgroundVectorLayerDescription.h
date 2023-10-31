@@ -18,17 +18,17 @@ class BackgroundVectorStyle {
 public:
     BackgroundVectorStyle(std::shared_ptr<Value> color, std::shared_ptr<Value> blendMode): color(color), blendMode(blendMode) {}
 
-    std::unordered_set<std::string> getUsedKeys() const {
+    UsedKeysCollection getUsedKeys() const {
 
-        std::unordered_set<std::string> usedKeys;
+        UsedKeysCollection usedKeys;
         std::vector<std::shared_ptr<Value>> values = {
             color, blendMode
         };
 
         for (auto const &value: values) {
             if (!value) continue;
-            auto const setKeys = value->getUsedKeys();
-            usedKeys.insert(setKeys.begin(), setKeys.end());
+            auto const keys = value->getUsedKeys();
+            usedKeys.includeOther(keys);
         }
 
         return usedKeys;
@@ -66,14 +66,14 @@ public:
                                                                   interactable ? interactable->clone() : nullptr);
     }
 
-    virtual std::unordered_set<std::string> getUsedKeys() const override {
-        std::unordered_set<std::string> usedKeys;
+    virtual UsedKeysCollection getUsedKeys() const override {
+        UsedKeysCollection usedKeys;
 
         auto parentKeys = VectorLayerDescription::getUsedKeys();
-        usedKeys.insert(parentKeys.begin(), parentKeys.end());
+        usedKeys.includeOther(parentKeys);
 
         auto styleKeys = style.getUsedKeys();
-        usedKeys.insert(styleKeys.begin(), styleKeys.end());
+        usedKeys.includeOther(styleKeys);
 
         return usedKeys;
     };

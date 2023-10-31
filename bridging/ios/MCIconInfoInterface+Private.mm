@@ -6,6 +6,7 @@
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
+#import "MCBlendMode+Private.h"
 #import "MCCoord+Private.h"
 #import "MCIconType+Private.h"
 #import "MCTextureHolderInterface+Private.h"
@@ -91,6 +92,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getIconAnchor();
         return ::djinni_generated::Vec2F::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (MCBlendMode)getBlendMode {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getBlendMode();
+        return ::djinni::Enum<::BlendMode, MCBlendMode>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

@@ -32,9 +32,9 @@ public:
       fillPattern(style.fillPattern),
       blendMode(style.blendMode) {}
 
-    std::unordered_set<std::string> getUsedKeys() const {
+    UsedKeysCollection getUsedKeys() const {
 
-        std::unordered_set<std::string> usedKeys;
+        UsedKeysCollection usedKeys;
         std::vector<std::shared_ptr<Value>> values = {
             fillColor, fillOpacity, fillPattern
         };
@@ -42,7 +42,7 @@ public:
         for (auto const &value: values) {
             if (!value) continue;
             auto const setKeys = value->getUsedKeys();
-            usedKeys.insert(setKeys.begin(), setKeys.end());
+            usedKeys.includeOther(setKeys);
         }
 
         return usedKeys;
@@ -108,14 +108,14 @@ public:
                                                                interactable ? interactable->clone() : nullptr);
     }
 
-    virtual std::unordered_set<std::string> getUsedKeys() const override {
-        std::unordered_set<std::string> usedKeys;
+    virtual UsedKeysCollection getUsedKeys() const override {
+        UsedKeysCollection usedKeys;
 
         auto parentKeys = VectorLayerDescription::getUsedKeys();
-        usedKeys.insert(parentKeys.begin(), parentKeys.end());
+        usedKeys.includeOther(parentKeys);
 
         auto styleKeys = style.getUsedKeys();
-        usedKeys.insert(styleKeys.begin(), styleKeys.end());
+        usedKeys.includeOther(styleKeys);
 
         return usedKeys;
     };

@@ -26,7 +26,8 @@
 #include "TiledLayerError.h"
 #include "Actor.h"
 #include "Tiled2dMapVectorLayerConfig.h"
-#include "Tiled2dMapVectorFeatureStateManager.h"
+#include "Tiled2dMapVectorStateManager.h"
+#include "Tiled2dMapVectorLayerLocalDataProviderInterface.h"
 #include <unordered_map>
 
 class Tiled2dMapVectorBackgroundSubLayer;
@@ -42,6 +43,12 @@ struct Tiled2dMapVectorLayerUpdateInformation {
     std::shared_ptr<VectorLayerDescription> oldLayerDescription;
     int32_t legacyIndex;
     bool needsTileReplace;
+};
+
+enum class StateType : int {
+    FEATURE = 0,
+    GLOBAL = 1,
+    BOTH = 2,
 };
 
 class Tiled2dMapVectorLayer
@@ -93,6 +100,7 @@ public:
         std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;
         std::shared_ptr<MaskingObjectInterface> maskingObject;
         bool isModifyingMask;
+        int32_t renderPassIndex;
     };
 
     virtual void onRenderPassUpdate(const std::string &source, bool isSymbol, const std::vector<std::shared_ptr<TileRenderDescription>> &renderDescription);
@@ -131,6 +139,16 @@ public:
 
     std::optional<std::shared_ptr<FeatureContext>> getFeatureContext(int64_t identifier);
 
+    LayerReadyState isReadyToRenderOffscreen() override;
+
+    void setMinZoomLevelIdentifier(std::optional<int32_t> value) override;
+
+    std::optional<int32_t> getMinZoomLevelIdentifier() override;
+
+    void setMaxZoomLevelIdentifier(std::optional<int32_t> value) override;
+
+    std::optional<int32_t> getMaxZoomLevelIdentifier() override;
+
     // Touch Interface
     bool onTouchDown(const Vec2F &posScreen) override;
 
@@ -158,14 +176,16 @@ public:
 
     virtual void setFeatureState(const std::string & identifier, const std::unordered_map<std::string, VectorLayerFeatureInfoValue> & properties) override;
 
+    virtual void setGlobalState(const std::unordered_map<std::string, VectorLayerFeatureInfoValue> & properties) override;
+
+    void invalidateCollisionState();
+
 protected:
     virtual std::shared_ptr<Tiled2dMapVectorLayerConfig> getLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &source);
 
     virtual void setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription);
 
     virtual void loadSpriteData();
-    
-    std::string getSpriteUrl(std::string baseUrl, bool is2x, bool isPng);
 
     virtual void didLoadSpriteData(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<::TextureHolderInterface> spriteTexture);
 
@@ -189,6 +209,8 @@ private:
 
     void initializeVectorLayer();
 
+    void applyGlobalOrFeatureStateIfPossible(StateType type);
+    
     int32_t layerIndex = -1;
 
     const std::optional<double> dpFactor;
@@ -225,7 +247,8 @@ private:
 
     std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> strongSelectionDelegate;
     std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> selectionDelegate;
-    
+    std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> localDataProvider;
+
     std::recursive_mutex renderPassMutex;
     std::vector<std::shared_ptr<RenderPassInterface>> currentRenderPasses;
 
@@ -244,7 +267,7 @@ private:
     std::shared_ptr<SpriteData> spriteData;
     std::shared_ptr<::TextureHolderInterface> spriteTexture;
 
-    std::shared_ptr<Tiled2dMapVectorFeatureStateManager> featureStateManager;
+    std::shared_ptr<Tiled2dMapVectorStateManager> featureStateManager;
 };
 
 

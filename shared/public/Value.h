@@ -39,8 +39,9 @@
 #include "BlendMode.h"
 #include "SymbolZOrder.h"
 #include "ValueVariant.h"
-#include "Tiled2dMapVectorFeatureStateManager.h"
+#include "Tiled2dMapVectorStateManager.h"
 #include <mutex>
+#include <iomanip>
 
 
 namespace std {
@@ -96,7 +97,7 @@ public:
     using keyType = std::string;
     using valueType = ValueVariant;
     using mapType = std::vector<std::pair<keyType, valueType>>;
-private:
+
     mapType propertiesMap;
 
 public:
@@ -184,19 +185,6 @@ public:
         return std::monostate();
     }
 
-    size_t getStyleHash(const std::unordered_set<std::string> &usedKeys) const {
-        if (usedKeys.count("feature-state") != 0) {
-            return rand();
-        }
-        size_t hash = 0;
-        for(auto const &[key, val]: propertiesMap) {
-            if (usedKeys.count(key) != 0) {
-                std::hash_combine(hash, std::hash<valueType>{}(val));
-            }
-        }
-        return hash;
-    }
-
     VectorLayerFeatureInfo getFeatureInfo() const {
         std::string identifier = std::to_string(this->identifier);
         std::unordered_map<std::string, VectorLayerFeatureInfoValue> properties;
@@ -252,13 +240,98 @@ class EvaluationContext {
 public:
     const double zoomLevel;
     const std::shared_ptr<FeatureContext> &feature;
-    const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager;
+    const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager;
 
     EvaluationContext(const double zoomLevel,
                       const std::shared_ptr<FeatureContext> &feature,
-                      const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager) :
+                      const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager) :
         zoomLevel(zoomLevel), feature(feature), featureStateManager(featureStateManager) {}
 };
+
+
+class UsedKeysCollection {
+public:
+    std::unordered_set<std::string> usedKeys;
+    std::unordered_set<std::string> featureStateKeys;
+    std::unordered_set<std::string> globalStateKeys;
+
+    UsedKeysCollection() {};
+
+    UsedKeysCollection(const std::unordered_set<std::string> &usedKeys) : usedKeys(usedKeys) {};
+
+    UsedKeysCollection(const std::unordered_set<std::string> &usedKeys,
+                       const std::unordered_set<std::string> &featureStateKeys,
+                       const std::unordered_set<std::string> &globalStateKeys)
+            : usedKeys(usedKeys),
+              featureStateKeys(featureStateKeys),
+              globalStateKeys(globalStateKeys) {};
+
+    void includeOther(const UsedKeysCollection &other) {
+        usedKeys.insert(other.usedKeys.begin(), other.usedKeys.end());
+        featureStateKeys.insert(other.featureStateKeys.begin(), other.featureStateKeys.end());
+        globalStateKeys.insert(other.globalStateKeys.begin(), other.globalStateKeys.end());
+    };
+
+    bool isStateDependant() const {
+        return !(featureStateKeys.empty() && globalStateKeys.empty());
+    };
+
+    bool containsUsedKey(const std::string &key) const {
+        return usedKeys.find(key) != usedKeys.end();
+    }
+
+    bool empty() const {
+        return usedKeys.empty() && featureStateKeys.empty() && globalStateKeys.empty();
+    }
+
+    bool covers(const UsedKeysCollection &other) {
+        for (const auto &keyOther : other.usedKeys) {
+            if (usedKeys.find(keyOther) == usedKeys.end()) {
+                return false;
+            }
+        }
+        for (const auto &keyOther : other.featureStateKeys) {
+            if (featureStateKeys.find(keyOther) == featureStateKeys.end()) {
+                return false;
+            }
+        }
+        for (const auto &keyOther : other.globalStateKeys) {
+            if (globalStateKeys.find(keyOther) == globalStateKeys.end()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    size_t getHash(const EvaluationContext &context) const {
+        size_t hash = 0;
+        if (context.feature) {
+            for (const auto &[propertyKey, propertyValue] : context.feature->propertiesMap) {
+                if (containsUsedKey(propertyKey)) {
+                    std::hash_combine(hash, std::hash<FeatureContext::valueType>{}(propertyValue));
+                }
+            }
+        }
+        if (context.featureStateManager) {
+            if (context.feature) {
+                for (const auto &featureStateKey: featureStateKeys) {
+                    const auto &state = context.featureStateManager->getFeatureState(context.feature->identifier);
+                    const auto &value = state.find(featureStateKey);
+                    if (value != state.end()) {
+                        std::hash_combine(hash, std::hash<ValueVariant>{}(value->second));
+                    }
+                }
+            }
+            for (const auto &globalStateKey: globalStateKeys) {
+                const auto &value = context.featureStateManager->getGlobalState(globalStateKey);
+                std::hash_combine(hash, std::hash<ValueVariant>{}(value));
+            }
+        }
+        return hash;
+    };
+};
+
 
 class Value {
 public:
@@ -267,7 +340,7 @@ public:
 
     virtual std::unique_ptr<Value> clone() = 0;
 
-    virtual std::unordered_set<std::string> getUsedKeys() const { return {}; };
+    virtual UsedKeysCollection getUsedKeys() const { return UsedKeysCollection(); };
 
     virtual ValueVariant evaluate(const EvaluationContext &context) const = 0;
 
@@ -562,13 +635,13 @@ public:
         if (lastValuePtr != value.get()) {
             lastResults.clear();
             staticValue = std::nullopt;
-            const auto usedKeys = value->getUsedKeys();
-            isStatic = usedKeys.empty();
+            const auto usedKeysCollection = value->getUsedKeys();
+            isStatic = usedKeysCollection.empty();
             if (isStatic) {
                 staticValue = value->evaluateOr(context, defaultValue);
             } else {
-                isZoomDependent = usedKeys.count("zoom") != 0;
-                isFeatureStateDependent = usedKeys.count("feature-state") != 0;
+                isZoomDependent = usedKeysCollection.usedKeys.count("zoom") != 0;
+                isStateDependant = usedKeysCollection.isStateDependant();
             }
             lastValuePtr = value.get();
         }
@@ -577,7 +650,7 @@ public:
             return *staticValue;
         }
 
-        if (isFeatureStateDependent && !context.featureStateManager->empty()) {
+        if (isStateDependant && !context.featureStateManager->empty()) {
             // TODO: maybe we can hash the feature-state or something
             return value->evaluateOr(context, defaultValue);
         }
@@ -600,7 +673,7 @@ private:
 
     std::optional<ResultType> staticValue;
     bool isZoomDependent = false;
-    bool isFeatureStateDependent = false;
+    bool isStateDependant = false;
     bool isStatic = false;
     void* lastValuePtr = nullptr;
 };
@@ -613,8 +686,8 @@ public:
         return std::make_unique<GetPropertyValue>(key);
     }
 
-    std::unordered_set<std::string> getUsedKeys() const override {
-        return { key };
+    UsedKeysCollection getUsedKeys() const override {
+        return UsedKeysCollection({ key });
     }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
@@ -642,12 +715,11 @@ public:
     FeatureStateValue(const std::string key) : key(key) {};
 
     std::unique_ptr<Value> clone() override {
-        return std::make_unique<GetPropertyValue>(key);
+        return std::make_unique<FeatureStateValue>(key);
     }
 
-    std::unordered_set<std::string> getUsedKeys() const override {
-        // FeatureStateValue can not be grouped
-        return { "feature-state" };
+    UsedKeysCollection getUsedKeys() const override {
+        return UsedKeysCollection({}, {key}, {});
     }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
@@ -658,11 +730,37 @@ public:
                 return result->second;
             }
         }
-        return "";
+        return std::monostate();
     };
 
     bool isEqual(const std::shared_ptr<Value> &other) const override {
         if (auto casted = std::dynamic_pointer_cast<FeatureStateValue>(other)) {
+            return casted->key == key;
+        }
+        return false;
+    };
+private:
+    const std::string key;
+};
+
+class GlobalStateValue : public Value {
+public:
+    GlobalStateValue(const std::string key) : key(key) {};
+
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<GlobalStateValue>(key);
+    }
+
+    UsedKeysCollection getUsedKeys() const override {
+        return UsedKeysCollection({}, {}, {key});
+    }
+
+    ValueVariant evaluate(const EvaluationContext &context) const override {
+        return context.featureStateManager->getGlobalState(key);
+    };
+
+    bool isEqual(const std::shared_ptr<Value> &other) const override {
+        if (auto casted = std::dynamic_pointer_cast<GlobalStateValue>(other)) {
             return casted->key == key;
         }
         return false;
@@ -681,45 +779,12 @@ public:
         return std::make_unique<ToStringValue>(value->clone());
     }
 
-    std::unordered_set<std::string> getUsedKeys() const override {
+    UsedKeysCollection getUsedKeys() const override {
         return value->getUsedKeys();
     }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
-        return std::visit(overloaded {
-            [](const std::string &val){
-                return val;
-            },
-            [](double val){
-                // strip all decimal places
-                return std::to_string((int64_t)val);
-            },
-            [](int64_t val){
-                return std::to_string(val);
-            },
-            [](bool val){
-                return std::string("");
-            },
-            [](const Color &val){
-                return std::string("");
-            },
-            [](const std::vector<float> &val){
-                return std::string("");
-            },
-            [](const std::vector<std::string> &val){
-                return std::string("");
-            },
-            [](const std::vector<FormattedStringEntry> &val){
-                std::string string = "";
-                for(auto const &v: val) {
-                    string += v.text;
-                }
-                return string;
-            },
-            [](const std::monostate &val) {
-                return std::string("");
-            }
-        }, value->evaluate(context));
+        return std::visit(valueVariantToStringVisitor, value->evaluate(context));
     };
 
     bool isEqual(const std::shared_ptr<Value> &other) const override {
@@ -738,7 +803,7 @@ public:
         return std::make_unique<StaticValue>(value);
     }
 
-    std::unordered_set<std::string> getUsedKeys() const override {
+    UsedKeysCollection getUsedKeys() const override {
         if (std::holds_alternative<std::string>(value)) {
             std::string res = std::get<std::string>(value);
             std::unordered_set<std::string> usedKeys = { res };
@@ -758,16 +823,16 @@ public:
                 end = res.find("}", begin);
             }
 
-            return usedKeys;
+            return UsedKeysCollection(usedKeys);
 
         } else if (std::holds_alternative<std::vector<std::string>>(value)) {
             std::vector<std::string> res = std::get<std::vector<std::string>>(value);
             if (!res.empty() && *res.begin() == "zoom") {
-                return { "zoom" };
+                return UsedKeysCollection({ "zoom" });
             }
-            return {};
+            return UsedKeysCollection();
         } else {
-            return {};
+            return UsedKeysCollection();
         }
 
     }
@@ -835,8 +900,8 @@ public:
         return std::make_unique<HasPropertyValue>(key);
     }
 
-    std::unordered_set<std::string> getUsedKeys() const override {
-        return { key };
+    UsedKeysCollection getUsedKeys() const override {
+        return UsedKeysCollection({ key });
     }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
@@ -861,8 +926,8 @@ public:
         return std::make_unique<HasNotPropertyValue>(key);
     }
 
-    std::unordered_set<std::string> getUsedKeys() const override {
-        return { key };
+    UsedKeysCollection getUsedKeys() const override {
+        return UsedKeysCollection({ key });
     }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
@@ -888,7 +953,7 @@ public:
         return std::make_unique<ScaleValue>(value->clone(), scale);
     }
 
-    std::unordered_set<std::string> getUsedKeys() const override { return value->getUsedKeys(); }
+    UsedKeysCollection getUsedKeys() const override { return value->getUsedKeys(); }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
         return std::visit(overloaded {
@@ -956,11 +1021,11 @@ public:
         return std::make_unique<InterpolatedValue>(interpolationBase, std::move(clonedSteps));
     }
 
-    std::unordered_set<std::string> getUsedKeys() const override {
-        std::unordered_set<std::string> usedKeys = { "zoom" };
+    UsedKeysCollection getUsedKeys() const override {
+        UsedKeysCollection usedKeys = UsedKeysCollection({ "zoom" });
         for (auto const &step: steps) {
-            auto const setKeys = std::get<1>(step)->getUsedKeys();
-            usedKeys.insert(setKeys.begin(), setKeys.end());
+            auto const stepKeys = std::get<1>(step)->getUsedKeys();
+            usedKeys.includeOther(stepKeys);
         }
         return usedKeys;
     }
@@ -1074,11 +1139,11 @@ public:
         return std::make_unique<BezierInterpolatedValue>(bezier, std::move(clonedSteps));
     }
 
-    std::unordered_set<std::string> getUsedKeys() const override {
-        std::unordered_set<std::string> usedKeys = {"zoom"};
+    UsedKeysCollection getUsedKeys() const override {
+        UsedKeysCollection usedKeys = UsedKeysCollection({"zoom"});
         for (auto const &step: steps) {
-            auto const setKeys = std::get<1>(step)->getUsedKeys();
-            usedKeys.insert(setKeys.begin(), setKeys.end());
+            auto const stepKeys = std::get<1>(step)->getUsedKeys();
+            usedKeys.includeOther(stepKeys);
         }
         return usedKeys;
     }
@@ -1240,18 +1305,18 @@ public:
         return std::make_unique<StepValue>(compareValue->clone(), std::move(clonedStops), defaultValue->clone());
     }
 
-    std::unordered_set<std::string> getUsedKeys() const override {
-        std::unordered_set<std::string> usedKeys;
+    UsedKeysCollection getUsedKeys() const override {
+        UsedKeysCollection usedKeys;
         
         auto const compareValueKeys = compareValue->getUsedKeys();
-        usedKeys.insert(compareValueKeys.begin(), compareValueKeys.end());
+        usedKeys.includeOther(compareValueKeys);
 
         auto const defaultValueKeys = defaultValue->getUsedKeys();
-        usedKeys.insert(defaultValueKeys.begin(), defaultValueKeys.end());
+        usedKeys.includeOther(defaultValueKeys);
 
         for (auto const &stop: stops) {
             auto const setKeys = std::get<1>(stop)->getUsedKeys();
-            usedKeys.insert(setKeys.begin(), setKeys.end());
+            usedKeys.includeOther(setKeys);
         }
         return usedKeys;
     }
@@ -1326,20 +1391,20 @@ public:
         return std::make_unique<CaseValue>(std::move(clonedCases), defaultValue->clone());
     }
 
-    std::unordered_set<std::string> getUsedKeys() const override {
-        std::unordered_set<std::string> usedKeys;
+    UsedKeysCollection getUsedKeys() const override {
+        UsedKeysCollection usedKeys;
 
         auto const defaultValueKeys = defaultValue->getUsedKeys();
-        usedKeys.insert(defaultValueKeys.begin(), defaultValueKeys.end());
+        usedKeys.includeOther(defaultValueKeys);
 
         for (auto const &[condition, value]: cases) {
             if (condition) {
                 auto const conditionKeys = condition->getUsedKeys();
-                usedKeys.insert(conditionKeys.begin(), conditionKeys.end());
+                usedKeys.includeOther(conditionKeys);
             }
 
             auto const valueKeys = value->getUsedKeys();
-            usedKeys.insert(valueKeys.begin(), valueKeys.end());
+            usedKeys.includeOther(valueKeys);
         }
         return usedKeys;
     }
@@ -1402,7 +1467,7 @@ public:
         return std::make_unique<ToNumberValue>(value->clone());
     }
 
-    std::unordered_set<std::string> getUsedKeys() const override {
+    UsedKeysCollection getUsedKeys() const override {
         return value->getUsedKeys();
     }
 
@@ -1472,11 +1537,11 @@ public:
         return std::make_unique<ToBoolValue>(clonedValues);
     }
 
-    std::unordered_set<std::string> getUsedKeys() const override {
-        std::unordered_set<std::string> usedKeys;
+    UsedKeysCollection getUsedKeys() const override {
+        UsedKeysCollection usedKeys;
         for (const auto &value: values) {
             const auto valueKeys = value->getUsedKeys();
-            usedKeys.insert(valueKeys.begin(), valueKeys.end());
+            usedKeys.includeOther(valueKeys);
         }
         return usedKeys;
     }
@@ -1543,18 +1608,18 @@ public:
         return std::make_unique<MatchValue>(compareValue->clone(), std::move(clonedMapping), defaultValue->clone());
     }
 
-    std::unordered_set<std::string> getUsedKeys() const override {
-        std::unordered_set<std::string> usedKeys;
+    UsedKeysCollection getUsedKeys() const override {
+        UsedKeysCollection usedKeys;
 
         auto const compareValueKeys = compareValue->getUsedKeys();
-        usedKeys.insert(compareValueKeys.begin(), compareValueKeys.end());
+        usedKeys.includeOther(compareValueKeys);
 
         auto const defaultValueKeys = defaultValue->getUsedKeys();
-        usedKeys.insert(defaultValueKeys.begin(), defaultValueKeys.end());
+        usedKeys.includeOther(defaultValueKeys);
 
         for (auto const &i: valueMapping) {
             auto const valueKeys = i.second->getUsedKeys();
-            usedKeys.insert(valueKeys.begin(), valueKeys.end());
+            usedKeys.includeOther(valueKeys);
         }
 
         return usedKeys;
@@ -1634,8 +1699,8 @@ public:
         return std::make_unique<PropertyFilter>(std::move(clonedMapping), defaultValue->clone(), key);
     }
 
-    std::unordered_set<std::string> getUsedKeys() const override {
-        return { key };
+    UsedKeysCollection getUsedKeys() const override {
+        return UsedKeysCollection({ key });
     }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
@@ -1713,15 +1778,15 @@ public:
         }
     }
 
-    std::unordered_set<std::string> getUsedKeys() const override {
-        std::unordered_set<std::string> usedKeys;
+    UsedKeysCollection getUsedKeys() const override {
+        UsedKeysCollection usedKeys;
 
         auto const lhsKeys = lhs->getUsedKeys();
-        usedKeys.insert(lhsKeys.begin(), lhsKeys.end());
+        usedKeys.includeOther(lhsKeys);
 
         if (rhs) {
             auto const rhsKeys = rhs->getUsedKeys();
-            usedKeys.insert(rhsKeys.begin(), rhsKeys.end());
+            usedKeys.includeOther(rhsKeys);
         }
 
         return usedKeys;
@@ -1777,11 +1842,11 @@ public:
         return std::make_unique<AllValue>(std::move(clonedValues));
     }
 
-    std::unordered_set<std::string> getUsedKeys() const override {
-        std::unordered_set<std::string> usedKeys;
+    UsedKeysCollection getUsedKeys() const override {
+        UsedKeysCollection usedKeys;
         for (auto const &value: values) {
             auto const setKeys = value->getUsedKeys();
-            usedKeys.insert(setKeys.begin(), setKeys.end());
+            usedKeys.includeOther(setKeys);
         }
         return usedKeys;
     }
@@ -1831,11 +1896,11 @@ public:
         return std::make_unique<AnyValue>(std::move(clonedValues));
     }
 
-    std::unordered_set<std::string> getUsedKeys() const override {
-        std::unordered_set<std::string> usedKeys;
+    UsedKeysCollection getUsedKeys() const override {
+        UsedKeysCollection usedKeys;
         for (auto const &value: values) {
             auto const setKeys = value->getUsedKeys();
-            usedKeys.insert(setKeys.begin(), setKeys.end());
+            usedKeys.includeOther(setKeys);
         }
         return usedKeys;
     }
@@ -1883,14 +1948,14 @@ public:
         return std::make_unique<PropertyCompareValue>(lhs->clone(), rhs->clone(), type);
     }
 
-    std::unordered_set<std::string> getUsedKeys() const override {
-        std::unordered_set<std::string> usedKeys;
+    UsedKeysCollection getUsedKeys() const override {
+        UsedKeysCollection usedKeys;
 
         auto const lhsKeys = lhs->getUsedKeys();
-        usedKeys.insert(lhsKeys.begin(), lhsKeys.end());
+        usedKeys.includeOther(lhsKeys);
 
         auto const rhsKeys = rhs->getUsedKeys();
-        usedKeys.insert(rhsKeys.begin(), rhsKeys.end());
+        usedKeys.includeOther(rhsKeys);
 
         return usedKeys;
     }
@@ -1964,21 +2029,65 @@ private:
 class InFilter : public Value {
 private:
     const std::unordered_set<ValueVariant> values;
+    const std::shared_ptr<Value> dynamicValues;
     const std::string key;
 public:
-    InFilter(const std::string &key, const std::unordered_set<ValueVariant> values) :values(values), key(key) {}
+    InFilter(const std::string &key, const std::unordered_set<ValueVariant> values, const std::shared_ptr<Value> dynamicValues) :values(values), key(key), dynamicValues(dynamicValues) {}
 
     std::unique_ptr<Value> clone() override {
-        return std::make_unique<InFilter>(key, values);
+        return std::make_unique<InFilter>(key, values, dynamicValues);
     }
 
-    std::unordered_set<std::string> getUsedKeys() const override {
-        return { key };
+    UsedKeysCollection getUsedKeys() const override {
+        UsedKeysCollection usedKeys = UsedKeysCollection({ key });
+        if (dynamicValues) {
+            auto const setKeys = dynamicValues->getUsedKeys();
+            usedKeys.includeOther(setKeys);
+        }
+        return usedKeys;
     }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
         auto const &value = context.feature->getValue(key);
-        return values.count(value) != 0;
+        if (values.count(value) != 0) {
+            return true;
+        }
+        if (dynamicValues) {
+            bool isString = std::holds_alternative<std::string>(value);
+            bool isDouble = std::holds_alternative<double>(value);
+            bool isInt = std::holds_alternative<int64_t>(value);
+            if (!isString && !isDouble && !isInt) {
+                return false;
+            }
+
+            auto const dynamicVariants = dynamicValues->evaluate(context);
+
+            if (isString && std::holds_alternative<std::vector<std::string>>(dynamicVariants)) {
+                const std::string stringValue = std::get<std::string>(value);
+                const std::vector<std::string> strings = std::get<std::vector<std::string>>(dynamicVariants);
+                for (auto const &string: strings) {
+                    if (string == stringValue) {
+                        return true;
+                    }
+                }
+            } else if ((isDouble || isInt) && std::holds_alternative<std::vector<float>>(dynamicVariants)) {
+                double doubleValue;
+                if (isDouble) {
+                    doubleValue = std::get<double>(value);
+                } else {
+                    doubleValue = std::get<int64_t>(value);
+                }
+
+                const std::vector<float> floats = std::get<std::vector<float>>(dynamicVariants);
+                for (auto const &f: floats) {
+                    if (f == doubleValue) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     };
 
 
@@ -1994,6 +2103,10 @@ public:
                 return false;
             }
 
+            if (dynamicValues != casted->dynamicValues) {
+                return false;
+            }
+
             return true; // Key and values are equal
         }
 
@@ -2005,21 +2118,66 @@ public:
 class NotInFilter : public Value {
 private:
     const std::unordered_set<ValueVariant> values;
+    const std::shared_ptr<Value> dynamicValues;
     const std::string key;
 public:
-    NotInFilter(const std::string &key, const std::unordered_set<ValueVariant> values) :values(values), key(key) {}
+    NotInFilter(const std::string &key, const std::unordered_set<ValueVariant> values, const std::shared_ptr<Value> dynamicValues) :values(values), key(key), dynamicValues(dynamicValues) {}
 
     std::unique_ptr<Value> clone() override {
-        return std::make_unique<NotInFilter>(key, values);
+        return std::make_unique<NotInFilter>(key, values, dynamicValues);
     }
 
-    std::unordered_set<std::string> getUsedKeys() const override {
-        return { key };
+    UsedKeysCollection getUsedKeys() const override {
+        UsedKeysCollection usedKeys = UsedKeysCollection({ key });
+        if (dynamicValues) {
+            auto const setKeys = dynamicValues->getUsedKeys();
+            usedKeys.includeOther(setKeys);
+        }
+        return usedKeys;
     }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
         auto const &value = context.feature->getValue(key);
-        return values.count(value) == 0;
+        if (values.count(value) != 0) {
+            return false;
+        }
+
+        if (dynamicValues) {
+            bool isString = std::holds_alternative<std::string>(value);
+            bool isDouble = std::holds_alternative<double>(value);
+            bool isInt = std::holds_alternative<int64_t>(value);
+            if (!isString && !isDouble && !isInt) {
+                return true;
+            }
+
+            auto const dynamicVariants = dynamicValues->evaluate(context);
+
+            if (isString && std::holds_alternative<std::vector<std::string>>(dynamicVariants)) {
+                const std::string stringValue = std::get<std::string>(value);
+                const std::vector<std::string> strings = std::get<std::vector<std::string>>(dynamicVariants);
+                for (auto const &string: strings) {
+                    if (string == stringValue) {
+                        return false;
+                    }
+                }
+            } else if ((isDouble || isInt) && std::holds_alternative<std::vector<float>>(dynamicVariants)) {
+                double doubleValue;
+                if (isDouble) {
+                    doubleValue = std::get<double>(value);
+                } else {
+                    doubleValue = std::get<int64_t>(value);
+                }
+
+                const std::vector<float> floats = std::get<std::vector<float>>(dynamicVariants);
+                for (auto const &f: floats) {
+                    if (f == doubleValue) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
     };
 
 
@@ -2033,6 +2191,11 @@ public:
             if (values != casted->values) {
                 return false;
             }
+
+            if (dynamicValues != casted->dynamicValues) {
+                return false;
+            }
+
             return true; // Key and values are equal
         }
         return false; // Not the same type or nullptr
@@ -2057,11 +2220,11 @@ public:
         return std::make_unique<FormatValue>(std::move(values));
     }
 
-    std::unordered_set<std::string> getUsedKeys() const override {
-        std::unordered_set<std::string> usedKeys;
+    UsedKeysCollection getUsedKeys() const override {
+        UsedKeysCollection usedKeys;
         for (auto const &wrapper: values) {
             auto const setKeys = wrapper.value->getUsedKeys();
-            usedKeys.insert(setKeys.begin(), setKeys.end());
+            usedKeys.includeOther(setKeys);
         }
         return usedKeys;
     }
@@ -2104,6 +2267,89 @@ private:
     const std::vector<FormatValueWrapper> values;
 };
 
+class NumberFormatValue : public Value {
+public:
+    NumberFormatValue(const std::shared_ptr<Value> &value, int minFractionDigits = 0, int maxFactionDigits = 0)
+            : value(value), minFractionDigits(minFractionDigits), maxFractionDigits(maxFactionDigits) {}
+
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<NumberFormatValue>(value->clone(), minFractionDigits, maxFractionDigits);
+    }
+
+    UsedKeysCollection getUsedKeys() const override {
+        return value->getUsedKeys();
+    }
+
+    ValueVariant evaluate(const EvaluationContext &context) const override {
+        auto valueVariant = value->evaluate(context);
+
+        std::optional<double> numberValue = std::nullopt;
+        if (std::holds_alternative<double>(valueVariant)) {
+            numberValue = std::get<double>(valueVariant);
+        } else if (std::holds_alternative<int64_t>(valueVariant)) {
+            numberValue = std::get<int64_t>(valueVariant);
+        } else if (std::holds_alternative<std::string>(valueVariant)) {
+            // try to parse the string
+            try {
+                numberValue = std::stod(std::get<std::string>(valueVariant));
+            } catch (const std::invalid_argument &e) {
+                return std::monostate();
+            }
+        }
+
+        if (!numberValue.has_value()) {
+            return std::monostate();
+        }
+
+        double factor = std::pow(10, maxFractionDigits);
+        double roundedVal = std::round(*numberValue * factor) / factor;
+
+        std::stringstream resultStream;
+        resultStream << std::fixed << std::setprecision(maxFractionDigits) << roundedVal;
+        std::string result = resultStream.str();
+        size_t decimalPointPos = result.find('.');
+        if (decimalPointPos != std::string::npos) {
+            while (result.back() == '0' || result.length() - decimalPointPos - 1 > maxFractionDigits) {
+                result.pop_back();
+            }
+        }
+        if (maxFractionDigits == 0) {
+            if (result.back() == '.') {
+                result.pop_back();
+            }
+        } else if (minFractionDigits > 0) {
+            if (decimalPointPos == std::string::npos) {
+                decimalPointPos = result.length();
+                result += '.';
+            }
+            int fractionDigits = result.length() - decimalPointPos - 1;
+            int zerosToAdd = minFractionDigits - fractionDigits;
+            if (zerosToAdd > 0) {
+                result.append(zerosToAdd, '0');
+            }
+        }
+
+        return result;
+    }
+
+    bool isEqual(const std::shared_ptr<Value> &other) const override {
+        if (auto casted = std::dynamic_pointer_cast<NumberFormatValue>(other)) {
+            if (value && casted->value && !value->isEqual(casted->value)) {
+                return false;
+            }
+            if (minFractionDigits != casted->minFractionDigits || maxFractionDigits != casted->maxFractionDigits) {
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+private:
+    const std::shared_ptr<Value> value;
+    int minFractionDigits = 0;
+    int maxFractionDigits = 0;
+};
 
 enum class MathOperation {
     MINUS,
@@ -2124,15 +2370,15 @@ public:
         return std::make_unique<MathValue>(lhs->clone(), rhs ? rhs->clone() : nullptr, operation);
     }
 
-    std::unordered_set<std::string> getUsedKeys() const override {
-        std::unordered_set<std::string> usedKeys;
+    UsedKeysCollection getUsedKeys() const override {
+        UsedKeysCollection usedKeys;
 
         auto const lhsKeys = lhs->getUsedKeys();
-        usedKeys.insert(lhsKeys.begin(), lhsKeys.end());
+        usedKeys.includeOther(lhsKeys);
 
         if (rhs) {
             auto const rhsKeys = rhs->getUsedKeys();
-            usedKeys.insert(rhsKeys.begin(), rhsKeys.end());
+            usedKeys.includeOther(rhsKeys);
         }
 
         return usedKeys;
@@ -2194,7 +2440,7 @@ public:
         return std::make_unique<LengthValue>(value->clone());
     }
 
-    std::unordered_set<std::string> getUsedKeys() const override {
+    UsedKeysCollection getUsedKeys() const override {
         return value->getUsedKeys();
     }
 
@@ -2258,11 +2504,11 @@ public:
         return std::make_unique<CoalesceValue>(clonedValues);
     }
 
-    std::unordered_set<std::string> getUsedKeys() const override {
-        std::unordered_set<std::string> usedKeys;
+    UsedKeysCollection getUsedKeys() const override {
+        UsedKeysCollection usedKeys;
         for (const auto &value: values) {
             const auto valueKeys = value->getUsedKeys();
-            usedKeys.insert(valueKeys.begin(), valueKeys.end());
+            usedKeys.includeOther(valueKeys);
         }
         return usedKeys;
     }

@@ -13,13 +13,16 @@
 
 std::shared_ptr<IconInfoInterface> IconFactory::createIcon(const std::string &identifier, const ::Coord &coordinate,
                                                            const std::shared_ptr<::TextureHolderInterface> &texture,
-                                                           const ::Vec2F &iconSize, IconType scaleType) {
-    return std::make_shared<IconInfo>(identifier, coordinate, texture, iconSize, scaleType, Vec2F(0.5, 0.5));
+                                                           const ::Vec2F &iconSize, IconType scaleType, BlendMode blendMode) {
+    return std::make_shared<IconInfo>(identifier, coordinate, texture, iconSize, scaleType, Vec2F(0.5, 0.5), blendMode);
 }
 
-std::shared_ptr<IconInfoInterface> IconFactory::createIconWithAnchor(const std::string &identifier, const Coord &coordinate,
+std::shared_ptr<IconInfoInterface> IconFactory::createIconWithAnchor(const std::string &identifier, const 
+                                                                     Coord &coordinate,
                                                                      const std::shared_ptr<::TextureHolderInterface> &texture,
-                                                                     const Vec2F &iconSize, IconType scaleType,
+                                                                     const Vec2F &iconSize, 
+                                                                     IconType scaleType,
+                                                                     BlendMode blendMode,
                                                                      const Vec2F &iconAnchor) {
-    return std::make_shared<IconInfo>(identifier, coordinate, texture, iconSize, scaleType, iconAnchor);
+    return std::make_shared<IconInfo>(identifier, coordinate, texture, iconSize, scaleType, iconAnchor, blendMode);
 }

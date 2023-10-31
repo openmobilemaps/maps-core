@@ -65,15 +65,19 @@ public:
             } else if(geometryType == "LineString") {
                 geometry = parseLineString(coordinates);
                 geomType = vtzero::GeomType::LINESTRING;
+                geoJson->hasOnlyPoints = false;
             } else if(geometryType == "MultiLineString") {
                 geometry = parseMultiLineString(coordinates);
                 geomType = vtzero::GeomType::LINESTRING;
+                geoJson->hasOnlyPoints = false;
             } else if(geometryType == "Polygon") {
                 geometry = parsePolygon(coordinates);
                 geomType = vtzero::GeomType::POLYGON;
+                geoJson->hasOnlyPoints = false;
             } else if(geometryType == "MultiPolygon") {
                 geometry = parseMultiPolygon(coordinates);
                 geomType = vtzero::GeomType::POLYGON;
+                geoJson->hasOnlyPoints = false;
             }
 
             if (!geometry) {

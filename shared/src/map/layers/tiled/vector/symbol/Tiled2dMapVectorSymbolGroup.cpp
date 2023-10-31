@@ -25,7 +25,7 @@ Tiled2dMapVectorSymbolGroup::Tiled2dMapVectorSymbolGroup(uint32_t groupId,
                                                          const Tiled2dMapTileInfo &tileInfo,
                                                          const std::string &layerIdentifier,
                                                          const std::shared_ptr<SymbolVectorLayerDescription> &layerDescription,
-                                                         const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager)
+                                                         const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager)
         : groupId(groupId),
           mapInterface(mapInterface),
           layerConfig(layerConfig),
@@ -375,8 +375,8 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
     }
 
 #ifdef DRAW_TEXT_BOUNDING_BOX
-    textSymbolPlacement = layerDescription->style.getTextSymbolPlacement(EvaluationContext(0.0, std::make_shared<FeatureContext>(), featureStateManager));
-    labelRotationAlignment = layerDescription->style.getTextRotationAlignment(EvaluationContext(0.0, std::make_shared<FeatureContext>(), featureStateManager));
+    textSymbolPlacement = layerDescription->style.getTextSymbolPlacement(EvaluationContext(0.0, std::make_shared<FeatureContext>(), stateManager));
+    labelRotationAlignment = layerDescription->style.getTextRotationAlignment(EvaluationContext(0.0, std::make_shared<FeatureContext>(), stateManager));
     if (labelRotationAlignment == SymbolAlignment::AUTO) {
         switch (textSymbolPlacement) {
             case TextSymbolPlacement::POINT:
@@ -707,8 +707,14 @@ Tiled2dMapVectorSymbolGroup::createSymbolObject(const Tiled2dMapTileInfo &tileIn
     }
 }
 
-std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>>& Tiled2dMapVectorSymbolGroup::getSymbolObjects() {
-    return symbolObjects;
+std::vector<SymbolObjectCollisionWrapper> Tiled2dMapVectorSymbolGroup::getSymbolObjectsForCollision() {
+    std::vector<SymbolObjectCollisionWrapper> wrapperObjects;
+    wrapperObjects.reserve(symbolObjects.size());
+    std::transform(symbolObjects.cbegin(), symbolObjects.cend(), std::back_inserter(wrapperObjects),
+                   [](const std::shared_ptr<Tiled2dMapVectorSymbolObject> &symbolObject) {
+                       return SymbolObjectCollisionWrapper(symbolObject);
+                   });
+    return wrapperObjects;
 }
 
 std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolGroup::onClickConfirmed(const CircleD &clickHitCircle) {

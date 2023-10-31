@@ -16,19 +16,26 @@ abstract class Tiled2dMapVectorLayerInterface {
         external fun createFromLocalStyleJson(layerName: String, styleJson: String, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface, dpFactor: Double): Tiled2dMapVectorLayerInterface
 
         @JvmStatic
-        external fun createFromStyleJsonWithZoomInfo(layerName: String, path: String, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface, dpFactor: Double, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo?, sourceUrlParams: HashMap<String, String>?): Tiled2dMapVectorLayerInterface
-
-        @JvmStatic
-        external fun createFromLocalStyleJsonWithZoomInfo(layerName: String, styleJson: String, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface, dpFactor: Double, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo?, sourceUrlParams: HashMap<String, String>?): Tiled2dMapVectorLayerInterface
+        external fun createCustom(layerName: String, styleUrl: String?, styleJson: String?, localDataProvider: Tiled2dMapVectorLayerLocalDataProviderInterface?, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface, dpFactor: Double, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo?, sourceUrlParams: HashMap<String, String>?): Tiled2dMapVectorLayerInterface
     }
 
     abstract fun setSelectionDelegate(selectionDelegate: Tiled2dMapVectorLayerSelectionCallbackInterface?)
 
     abstract fun asLayerInterface(): io.openmobilemaps.mapscore.shared.map.LayerInterface
 
+    abstract fun setMinZoomLevelIdentifier(value: Int?)
+
+    abstract fun getMinZoomLevelIdentifier(): Int?
+
+    abstract fun setMaxZoomLevelIdentifier(value: Int?)
+
+    abstract fun getMaxZoomLevelIdentifier(): Int?
+
     abstract fun getStyleMetadataJson(): String?
 
     abstract fun setFeatureState(identifier: String, properties: HashMap<String, VectorLayerFeatureInfoValue>)
+
+    abstract fun setGlobalState(properties: HashMap<String, VectorLayerFeatureInfoValue>)
 
     private class CppProxy : Tiled2dMapVectorLayerInterface {
         private val nativeRef: Long
@@ -57,6 +64,30 @@ abstract class Tiled2dMapVectorLayerInterface {
         }
         private external fun native_asLayerInterface(_nativeRef: Long): io.openmobilemaps.mapscore.shared.map.LayerInterface
 
+        override fun setMinZoomLevelIdentifier(value: Int?) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setMinZoomLevelIdentifier(this.nativeRef, value)
+        }
+        private external fun native_setMinZoomLevelIdentifier(_nativeRef: Long, value: Int?)
+
+        override fun getMinZoomLevelIdentifier(): Int? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getMinZoomLevelIdentifier(this.nativeRef)
+        }
+        private external fun native_getMinZoomLevelIdentifier(_nativeRef: Long): Int?
+
+        override fun setMaxZoomLevelIdentifier(value: Int?) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setMaxZoomLevelIdentifier(this.nativeRef, value)
+        }
+        private external fun native_setMaxZoomLevelIdentifier(_nativeRef: Long, value: Int?)
+
+        override fun getMaxZoomLevelIdentifier(): Int? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getMaxZoomLevelIdentifier(this.nativeRef)
+        }
+        private external fun native_getMaxZoomLevelIdentifier(_nativeRef: Long): Int?
+
         override fun getStyleMetadataJson(): String? {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_getStyleMetadataJson(this.nativeRef)
@@ -68,5 +99,11 @@ abstract class Tiled2dMapVectorLayerInterface {
             native_setFeatureState(this.nativeRef, identifier, properties)
         }
         private external fun native_setFeatureState(_nativeRef: Long, identifier: String, properties: HashMap<String, VectorLayerFeatureInfoValue>)
+
+        override fun setGlobalState(properties: HashMap<String, VectorLayerFeatureInfoValue>) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setGlobalState(this.nativeRef, properties)
+        }
+        private external fun native_setGlobalState(_nativeRef: Long, properties: HashMap<String, VectorLayerFeatureInfoValue>)
     }
 }

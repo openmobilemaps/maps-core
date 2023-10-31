@@ -20,27 +20,20 @@ Tiled2dMapVectorLineTile::Tiled2dMapVectorLineTile(const std::weak_ptr<MapInterf
                                                          const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
                                                          const std::shared_ptr<LineVectorLayerDescription> &description,
                                                    const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
-                                                   const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager)
+                                                   const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager)
         : Tiled2dMapVectorTile(mapInterface, tileInfo, description, layerConfig, tileCallbackInterface, featureStateManager), usedKeys(description->getUsedKeys()) {
-    isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
-    isStyleFeatureStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end();
+    isStyleZoomDependant = usedKeys.usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.usedKeys.end();
+    isStyleStateDependant = usedKeys.isStateDependant();
 }
 
 void Tiled2dMapVectorLineTile::updateVectorLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                                       const Tiled2dMapVectorTileDataVector &tileData) {
     Tiled2dMapVectorTile::updateVectorLayerDescription(description, tileData);
     const auto newUsedKeys = description->getUsedKeys();
-    bool usedKeysContainsNewUsedKeys = true;
-
-    for (const auto &key : newUsedKeys ) {
-        if (usedKeys.count(key) == 0) {
-            usedKeysContainsNewUsedKeys = false;
-            break;
-        }
-    }
-
-    isStyleZoomDependant = usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.end();
-    isStyleFeatureStateDependant = usedKeys.find(Tiled2dMapVectorStyleParser::featureStateExpression) != usedKeys.end();
+    bool usedKeysContainsNewUsedKeys = usedKeys.covers(newUsedKeys);
+    isStyleZoomDependant = newUsedKeys.containsUsedKey(Tiled2dMapVectorStyleParser::zoomExpression);
+    isStyleStateDependant = newUsedKeys.isStateDependant();
+    usedKeys = newUsedKeys;
     lastZoom = std::nullopt;
     lastAlpha = std::nullopt;
 
@@ -98,7 +91,7 @@ void Tiled2dMapVectorLineTile::update() {
         lastZoom &&
         ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant) &&
         (lastInZoomRange && *lastInZoomRange == inZoomRange) &&
-        !isStyleFeatureStateDependant) {
+        !isStyleStateDependant) {
         return;
     }
 
@@ -251,7 +244,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                 int styleGroupIndex = -1;
                 int styleIndex = -1;
                 {
-                    auto const hash = featureContext->getStyleHash(usedKeys);
+                    auto const hash = usedKeys.getHash(evalContext);
 
                     auto indexPair = styleHashToGroupMap.find(hash);
                     if (indexPair != styleHashToGroupMap.end()) {

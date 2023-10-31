@@ -8,6 +8,7 @@
 #import "MCVectorLayerFeatureInfoValue.h"
 #import <Foundation/Foundation.h>
 @class MCTiled2dMapVectorLayerInterface;
+@protocol MCTiled2dMapVectorLayerLocalDataProviderInterface;
 @protocol MCTiled2dMapVectorLayerSelectionCallbackInterface;
 
 
@@ -25,29 +26,33 @@
                                                              fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
                                                                dpFactor:(double)dpFactor;
 
-+ (nullable MCTiled2dMapVectorLayerInterface *)createFromStyleJsonWithZoomInfo:(nonnull NSString *)layerName
-                                                                          path:(nonnull NSString *)path
-                                                                       loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
-                                                                    fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
-                                                                      dpFactor:(double)dpFactor
-                                                                      zoomInfo:(nullable MCTiled2dMapZoomInfo *)zoomInfo
-                                                               sourceUrlParams:(nullable NSDictionary<NSString *, NSString *> *)sourceUrlParams;
-
-+ (nullable MCTiled2dMapVectorLayerInterface *)createFromLocalStyleJsonWithZoomInfo:(nonnull NSString *)layerName
-                                                                          styleJson:(nonnull NSString *)styleJson
-                                                                            loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
-                                                                         fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
-                                                                           dpFactor:(double)dpFactor
-                                                                           zoomInfo:(nullable MCTiled2dMapZoomInfo *)zoomInfo
-                                                                    sourceUrlParams:(nullable NSDictionary<NSString *, NSString *> *)sourceUrlParams;
++ (nullable MCTiled2dMapVectorLayerInterface *)createCustom:(nonnull NSString *)layerName
+                                                   styleUrl:(nullable NSString *)styleUrl
+                                                  styleJson:(nullable NSString *)styleJson
+                                          localDataProvider:(nullable id<MCTiled2dMapVectorLayerLocalDataProviderInterface>)localDataProvider
+                                                    loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders
+                                                 fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
+                                                   dpFactor:(double)dpFactor
+                                                   zoomInfo:(nullable MCTiled2dMapZoomInfo *)zoomInfo
+                                            sourceUrlParams:(nullable NSDictionary<NSString *, NSString *> *)sourceUrlParams;
 
 - (void)setSelectionDelegate:(nullable id<MCTiled2dMapVectorLayerSelectionCallbackInterface>)selectionDelegate;
 
 - (nullable id<MCLayerInterface>)asLayerInterface;
 
+- (void)setMinZoomLevelIdentifier:(nullable NSNumber *)value;
+
+- (nullable NSNumber *)getMinZoomLevelIdentifier;
+
+- (void)setMaxZoomLevelIdentifier:(nullable NSNumber *)value;
+
+- (nullable NSNumber *)getMaxZoomLevelIdentifier;
+
 - (nullable NSString *)getStyleMetadataJson;
 
 - (void)setFeatureState:(nonnull NSString *)identifier
              properties:(nonnull NSDictionary<NSString *, MCVectorLayerFeatureInfoValue *> *)properties;
+
+- (void)setGlobalState:(nonnull NSDictionary<NSString *, MCVectorLayerFeatureInfoValue *> *)properties;
 
 @end

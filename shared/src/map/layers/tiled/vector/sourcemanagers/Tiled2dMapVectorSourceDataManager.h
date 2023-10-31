@@ -36,7 +36,7 @@ public:
                                       const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                       const std::string &source,
                                       const Actor<Tiled2dMapVectorReadyManager> &readyManager,
-                                      const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> &featureStateManager);
+                                      const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager);
 
     virtual void onAdded(const std::weak_ptr<::MapInterface> &mapInterface);
 
@@ -90,5 +90,5 @@ protected:
     const Actor<Tiled2dMapVectorReadyManager> readyManager;
     size_t readyManagerIndex;
 
-    const std::shared_ptr<Tiled2dMapVectorFeatureStateManager> featureStateManager;
+    const std::shared_ptr<Tiled2dMapVectorStateManager> featureStateManager;
 };

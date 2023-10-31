@@ -250,7 +250,8 @@ val icon = IconFactory.createIcon(
 	coordinate = coordinate,
 	texture = texture,
 	iconSize = Vec2F(iconSize, iconSize),
-	scaleType = IconType.INVARIANT
+	scaleType = IconType.INVARIANT,
+    blendMode = BlendMode.NORMAL
 )
 iconLayer.add(icon)
 iconLayer.setCallbackHandler(object : IconLayerCallbackInterface(){
