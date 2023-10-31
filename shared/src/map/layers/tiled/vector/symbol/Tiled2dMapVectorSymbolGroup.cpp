@@ -707,8 +707,14 @@ Tiled2dMapVectorSymbolGroup::createSymbolObject(const Tiled2dMapTileInfo &tileIn
     }
 }
 
-std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>>& Tiled2dMapVectorSymbolGroup::getSymbolObjects() {
-    return symbolObjects;
+std::vector<SymbolObjectCollisionWrapper> Tiled2dMapVectorSymbolGroup::getSymbolObjectsForCollision() {
+    std::vector<SymbolObjectCollisionWrapper> wrapperObjects;
+    wrapperObjects.reserve(symbolObjects.size());
+    std::transform(symbolObjects.cbegin(), symbolObjects.cend(), std::back_inserter(wrapperObjects),
+                   [](const std::shared_ptr<Tiled2dMapVectorSymbolObject> &symbolObject) {
+                       return SymbolObjectCollisionWrapper(symbolObject);
+                   });
+    return wrapperObjects;
 }
 
 std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolGroup::onClickConfirmed(const CircleD &clickHitCircle) {

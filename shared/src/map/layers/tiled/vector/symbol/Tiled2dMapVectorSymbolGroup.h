@@ -23,6 +23,7 @@
 #include "Quad2dStretchedInstancedInterface.h"
 #include "PolygonGroup2dLayerObject.h"
 #include "CollisionGrid.h"
+#include "SymbolObjectCollisionWrapper.h"
 
 //#define DRAW_TEXT_BOUNDING_BOX
 //#define DRAW_TEXT_BOUNDING_BOX_WITH_COLLISIONS
@@ -55,7 +56,7 @@ public:
     std::shared_ptr<Quad2dStretchedInstancedInterface> stretchedInstancedObject;
     std::shared_ptr<TextInstancedInterface> textInstancedObject;
 
-    std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>>& getSymbolObjects();
+    std::vector<SymbolObjectCollisionWrapper> getSymbolObjectsForCollision();
 
     std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> onClickConfirmed(const CircleD &clickHitCircle);
 
