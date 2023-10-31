@@ -21,8 +21,10 @@
 #include "DataRef.hpp"
 #include "geojsonvt.hpp"
 #include "Tiled2dMapVectorSource.h"
+#include "VectorMapSourceDescription.h"
+#include "Tiled2dMapVectorLayerConfig.h"
 
-class Tiled2dVectorGeoJsonSource : public Tiled2dMapVectorSource  {
+class Tiled2dVectorGeoJsonSource : public Tiled2dMapVectorSource, public GeoJSONTileDelegate  {
 public:
     Tiled2dVectorGeoJsonSource(const MapConfig &mapConfig,
                                const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
@@ -50,6 +52,10 @@ public:
     virtual void notifyTilesUpdates() override {
         listener.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceListener::onTilesUpdated, sourceName, getCurrentTiles());
     };
+
+    void didLoad(uint8_t maxZoom) override {
+        layerConfig = std::make_shared<Tiled2dMapVectorLayerConfig>(VectorMapSourceDescription::geoJsonDescription(maxZoom));
+    }
 protected:
 
     virtual void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) override {};

@@ -204,7 +204,7 @@ void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDes
         layerConfigs[source->identifier] = getLayerConfig(source);
     }
     for (auto const &[source, geoJson]: mapDescription->geoJsonSources) {
-        layerConfigs[source] = getLayerConfig(VectorMapSourceDescription::geoJsonDescription());
+        layerConfigs[source] = getLayerConfig(VectorMapSourceDescription::geoJsonDescription(geoJson->getMaxZoom()));
     }
     
     initializeVectorLayer();
@@ -318,17 +318,21 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
 
         Actor<Tiled2dMapVectorSource> vectorSource;
         if (mapDescription->geoJsonSources.count(source) != 0) {
-            vectorSource = Actor<Tiled2dVectorGeoJsonSource>(sourceMailbox,
-                                                              mapInterface->getMapConfig(),
-                                                              layerConfig,
-                                                              mapInterface->getCoordinateConverterHelper(),
-                                                              mapInterface->getScheduler(),
-                                                              loaders,
-                                                              selfVectorActor,
-                                                              layers,
-                                                              source,
-                                                              mapInterface->getCamera()->getScreenDensityPpi(),
-                                                              mapDescription->geoJsonSources.at(source)).strongActor<Tiled2dMapVectorSource>();
+            auto geoJsonSource = Actor<Tiled2dVectorGeoJsonSource>(sourceMailbox,
+                                                                   mapInterface->getMapConfig(),
+                                                                   layerConfig,
+                                                                   mapInterface->getCoordinateConverterHelper(),
+                                                                   mapInterface->getScheduler(),
+                                                                   loaders,
+                                                                   selfVectorActor,
+                                                                   layers,
+                                                                   source,
+                                                                   mapInterface->getCamera()->getScreenDensityPpi(),
+                                                                   mapDescription->geoJsonSources.at(source));
+            vectorSource = geoJsonSource.strongActor<Tiled2dMapVectorSource>();
+
+            mapDescription->geoJsonSources.at(source)->setDelegate(geoJsonSource.weakActor<GeoJSONTileDelegate>());
+
         } else {
             vectorSource = Actor<Tiled2dMapVectorSource>(sourceMailbox,
                                                               mapInterface->getMapConfig(),
