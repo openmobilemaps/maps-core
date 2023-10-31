@@ -607,7 +607,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
     auto scaleFactor = camera->mapUnitsFromPixels(1.0);
 
     for (const auto layerIdentifier: layerIdentifiers) {
-        std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>> allObjects;
+        std::vector<SymbolObjectCollisionWrapper> allObjects;
 
         for (const auto &[tile, symbolGroupsMap]: tileSymbolGroupMap) {
             const auto tileState = tileStateMap.find(tile);
@@ -619,23 +619,18 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
                 for (auto &symbolGroup: std::get<1>(objectsIt->second)) {
 
                     symbolGroup.syncAccess([&allObjects](auto group){
-                        const auto &objects = group->getSymbolObjects();
+                        auto objects = group->getSymbolObjectsForCollision();
                         allObjects.reserve(allObjects.size() + objects.size());
-                        allObjects.insert(allObjects.end(), objects.begin(), objects.end());
+                        allObjects.insert(allObjects.end(), std::make_move_iterator(objects.begin()),
+                                          std::make_move_iterator(objects.end()));
                     });
                 }
             }
         }
-        std::stable_sort(allObjects.rbegin(), allObjects.rend(),
-                         [](const auto &a, const auto &b) -> bool {
-            if (a->symbolSortKey == b->symbolSortKey) {
-                return a->symbolTileIndex > b->symbolTileIndex;
-            }
-            return a->symbolSortKey > b->symbolSortKey;
-        });
+        std::stable_sort(allObjects.rbegin(), allObjects.rend());
 
-        for (const auto &object: allObjects) {
-            object->collisionDetection(zoomIdentifier, rotation, scaleFactor, collisionGrid);
+        for (const auto &objectWrapper: allObjects) {
+            objectWrapper.symbolObject->collisionDetection(zoomIdentifier, rotation, scaleFactor, collisionGrid);
         }
     }
 }
