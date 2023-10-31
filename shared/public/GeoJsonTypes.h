@@ -17,6 +17,7 @@
 #include <limits>
 #include "DataLoaderResult.h"
 #include "Future.hpp"
+#include "Actor.h"
 
 class GeoJsonGeometry {
 public:
@@ -62,10 +63,17 @@ public:
     virtual const std::vector<std::shared_ptr<GeoJsonGeometry>>& getFeatures() const = 0;
 };
 
+class GeoJSONTileDelegate {
+public:
+    virtual void didLoad(uint8_t maxZoom) = 0;
+};
+
 class GeoJSONVTInterface {
 public:
     virtual const GeoJSONTileInterface& getTile(const uint8_t z, const uint32_t x_, const uint32_t y) = 0;
     virtual void waitIfNotLoaded(std::shared_ptr<::djinni::Promise<std::shared_ptr<DataLoaderResult>>> promise) = 0;
+    virtual uint8_t getMaxZoom() = 0;
+    virtual void setDelegate(const WeakActor<GeoJSONTileDelegate> delegate) = 0;
 };
 
 template <uint8_t I, typename T>

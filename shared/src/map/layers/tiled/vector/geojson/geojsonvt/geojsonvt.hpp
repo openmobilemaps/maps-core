@@ -75,6 +75,7 @@ public:
     std::recursive_mutex mutex;
     std::optional<DataLoaderResult> loadingResult;
     std::vector<std::shared_ptr<::djinni::Promise<std::shared_ptr<DataLoaderResult>>>> waitingPromises;
+    WeakActor<GeoJSONTileDelegate> delegate;
 
     void load() {
         auto weakSelf = weak_from_this();
@@ -111,6 +112,8 @@ public:
                         convert(geoJson->geometries, (self->options.tolerance / self->options.extent) / z2);
 
                         self->splitTile(geoJson->geometries, 0, 0, 0);
+
+                        self->delegate.message(&GeoJSONTileDelegate::didLoad, self->options.maxZoom);
                     }
                 }
                 catch (nlohmann::json::parse_error &ex) {
@@ -126,6 +129,17 @@ public:
 
             self->resolveAllWaitingPromises();
         });
+    }
+
+    void setDelegate(const WeakActor<GeoJSONTileDelegate> delegate) override {
+        this->delegate = delegate;
+        if (loadingResult) {
+            delegate.message(&GeoJSONTileDelegate::didLoad, options.maxZoom);
+        }
+    }
+
+    uint8_t getMaxZoom() override {
+        return options.maxZoom;
     }
 
     void waitIfNotLoaded(std::shared_ptr<::djinni::Promise<std::shared_ptr<DataLoaderResult>>> promise) override {

@@ -27,7 +27,7 @@ public:
                          int maxZoom):
     identifier(identifier), vectorUrl(vectorUrl), minZoom(minZoom), maxZoom(maxZoom) {}
 
-    const static std::shared_ptr<VectorMapSourceDescription> geoJsonDescription() { return  std::make_shared<VectorMapSourceDescription>("","geojson://{z}/{x}/{y}", 0, 18); };
+    const static std::shared_ptr<VectorMapSourceDescription> geoJsonDescription(int maxZoom) { return  std::make_shared<VectorMapSourceDescription>("","geojson://{z}/{x}/{y}", 0, maxZoom); };
 };
 
 class VectorMapDescription {
