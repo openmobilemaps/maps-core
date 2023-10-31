@@ -208,7 +208,7 @@ void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDes
     }
     
     initializeVectorLayer();
-    applyGlobalStateIfPossible();
+    applyGlobalOrFeatureStateIfPossible(StateType::BOTH);
 }
 
 void Tiled2dMapVectorLayer::initializeVectorLayer() {
@@ -1019,18 +1019,15 @@ std::optional<std::string> Tiled2dMapVectorLayer::getStyleMetadataJson() {
 
 void Tiled2dMapVectorLayer::setFeatureState(const std::string & identifier, const std::unordered_map<std::string, VectorLayerFeatureInfoValue> & properties) {
     featureStateManager->setFeatureState(identifier, properties);
-
-    if (auto mapInterface = this->mapInterface) {
-        mapInterface->invalidate();
-    }
+    applyGlobalOrFeatureStateIfPossible(StateType::FEATURE);
 }
 
 void Tiled2dMapVectorLayer::setGlobalState(const std::unordered_map<std::string, VectorLayerFeatureInfoValue> &properties) {
     featureStateManager->setGlobalState(properties);
-    applyGlobalStateIfPossible();
+    applyGlobalOrFeatureStateIfPossible(StateType::GLOBAL);
 }
 
-void Tiled2dMapVectorLayer::applyGlobalStateIfPossible() {
+void Tiled2dMapVectorLayer::applyGlobalOrFeatureStateIfPossible(StateType type) {
     auto mapInterface = this->mapInterface;
     auto mapDescription = this->mapDescription;
     if(!mapInterface || !mapDescription) { return; }
@@ -1044,7 +1041,7 @@ void Tiled2dMapVectorLayer::applyGlobalStateIfPossible() {
             continue;
         }
         const auto &usedKeys = layerDescription->filter->getUsedKeys();
-        if (!usedKeys.globalStateKeys.empty()) {
+        if (((type == StateType::GLOBAL || type == StateType::BOTH) && !usedKeys.globalStateKeys.empty()) || ((type == StateType::FEATURE ||type == StateType::BOTH) && !usedKeys.featureStateKeys.empty())) {
             if (layerDescription->getType() == VectorLayerType::symbol) {
                 sourceLayerIdentifiersMap[layerDescription->source].emplace_back(layerDescription->sourceLayer,
                                                                                  layerDescription->identifier);
@@ -1076,6 +1073,7 @@ LayerReadyState Tiled2dMapVectorLayer::isReadyToRenderOffscreen() {
     }
     return Tiled2dMapLayer::isReadyToRenderOffscreen();
 }
+
 void Tiled2dMapVectorLayer::setMinZoomLevelIdentifier(std::optional<int32_t> value) {
     Tiled2dMapLayer::setMinZoomLevelIdentifier(value);
 }
