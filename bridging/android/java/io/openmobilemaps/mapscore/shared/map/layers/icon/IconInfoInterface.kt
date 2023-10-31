@@ -26,6 +26,8 @@ abstract class IconInfoInterface {
 
     abstract fun getIconAnchor(): io.openmobilemaps.mapscore.shared.graphics.common.Vec2F
 
+    abstract fun getBlendMode(): io.openmobilemaps.mapscore.shared.graphics.shader.BlendMode
+
     private class CppProxy : IconInfoInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -94,5 +96,11 @@ abstract class IconInfoInterface {
             return native_getIconAnchor(this.nativeRef)
         }
         private external fun native_getIconAnchor(_nativeRef: Long): io.openmobilemaps.mapscore.shared.graphics.common.Vec2F
+
+        override fun getBlendMode(): io.openmobilemaps.mapscore.shared.graphics.shader.BlendMode {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getBlendMode(this.nativeRef)
+        }
+        private external fun native_getBlendMode(_nativeRef: Long): io.openmobilemaps.mapscore.shared.graphics.shader.BlendMode
     }
 }

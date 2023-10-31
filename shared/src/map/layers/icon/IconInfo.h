@@ -15,7 +15,7 @@
 class IconInfo : public IconInfoInterface {
   public:
     IconInfo(const std::string &identifier, const ::Coord &coordinate, const std::shared_ptr<::TextureHolderInterface> &texture,
-             const ::Vec2F &iconSize, IconType type, const ::Vec2F &anchor);
+             const ::Vec2F &iconSize, IconType type, const ::Vec2F &anchor, BlendMode blendMode);
 
     virtual ~IconInfo() {}
 
@@ -37,6 +37,8 @@ class IconInfo : public IconInfoInterface {
 
     virtual ::Vec2F getIconAnchor() override;
 
+    virtual ::BlendMode getBlendMode() override;
+
   private:
     std::string identifier;
     Coord coordinate;
@@ -44,4 +46,5 @@ class IconInfo : public IconInfoInterface {
     Vec2F iconSize;
     IconType type;
     Vec2F anchor;
+    BlendMode blendMode;
 };

@@ -3,6 +3,7 @@
 
 #include "NativeIconInfoInterface.h"  // my header
 #include "Marshal.hpp"
+#include "NativeBlendMode.h"
 #include "NativeCoord.h"
 #include "NativeIconType.h"
 #include "NativeTextureHolderInterface.h"
@@ -97,6 +98,15 @@ CJNIEXPORT ::djinni_generated::NativeVec2F::JniType JNICALL Java_io_openmobilema
         const auto& ref = ::djinni::objectFromHandleAddress<::IconInfoInterface>(nativeRef);
         auto r = ref->getIconAnchor();
         return ::djinni::release(::djinni_generated::NativeVec2F::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT ::djinni_generated::NativeBlendMode::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icon_IconInfoInterface_00024CppProxy_native_1getBlendMode(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::IconInfoInterface>(nativeRef);
+        auto r = ref->getBlendMode();
+        return ::djinni::release(::djinni_generated::NativeBlendMode::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
