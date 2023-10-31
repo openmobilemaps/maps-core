@@ -713,7 +713,10 @@ void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
                     }
                 });
             }
-            renderDescriptions.push_back(std::make_shared<Tiled2dMapVectorLayer::TileRenderDescription>(Tiled2dMapVectorLayer::TileRenderDescription{index, renderObjects, nullptr, false}));
+
+            const auto optRenderPassIndex = mapDescription->layers[index]->renderPassIndex;
+            const int32_t renderPassIndex = optRenderPassIndex ? *optRenderPassIndex : 0;
+            renderDescriptions.push_back(std::make_shared<Tiled2dMapVectorLayer::TileRenderDescription>(Tiled2dMapVectorLayer::TileRenderDescription{index, renderObjects, nullptr, false, renderPassIndex}));
         }
     }
 

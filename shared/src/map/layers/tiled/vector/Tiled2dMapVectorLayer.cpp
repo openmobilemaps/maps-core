@@ -511,31 +511,33 @@ void Tiled2dMapVectorLayer::pregenerateRenderPasses() {
 
     std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;
     std::shared_ptr<MaskingObjectInterface> lastMask = nullptr;
+    int32_t lastRenderPassIndex = 0;
 
     for (const auto &description : orderedRenderDescriptions) {
         if (description->renderObjects.empty()) {
             continue;
         }
         if (description->maskingObject != lastMask && !renderObjects.empty()) {
-            newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(0), renderObjects, lastMask));
+            newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex), renderObjects, lastMask));
             renderObjects.clear();
             lastMask = nullptr;
         }
 
         if (description->isModifyingMask) {
             if (!renderObjects.empty()) {
-                newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(0), renderObjects, lastMask));
+                newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex), renderObjects, lastMask));
             }
             renderObjects.clear();
             lastMask = nullptr;
-            newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(0), description->renderObjects, description->maskingObject));
+            newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex), description->renderObjects, description->maskingObject));
         } else {
             renderObjects.insert(renderObjects.end(), description->renderObjects.begin(), description->renderObjects.end());
             lastMask = description->maskingObject;
+            lastRenderPassIndex = description->renderPassIndex;
         }
     }
     if (!renderObjects.empty()) {
-        newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(0), renderObjects, lastMask));
+        newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(lastRenderPassIndex), renderObjects, lastMask));
         renderObjects.clear();
         lastMask = nullptr;
     }
