@@ -18,6 +18,7 @@
 #include "CoordinateSystemIdentifiers.h"
 #include "Tiled2dMapVectorSourceSymbolDataManager.h"
 #include "RenderObject.h"
+#include "Tiled2dMapVectorAssetInfo.h"
 
 Tiled2dMapVectorSymbolGroup::Tiled2dMapVectorSymbolGroup(uint32_t groupId,
                                                          const std::weak_ptr<MapInterface> &mapInterface,
@@ -67,6 +68,8 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
             (0.0254 / camera->getScreenDensityPpi()) * layerConfig->getZoomFactorAtIdentifier(tileInfo.zoomIdentifier - 1);
 
     std::unordered_map<std::string, std::vector<Coord>> textPositionMap;
+
+    std::vector<VectorLayerFeatureInfo> featureInfosWithCustomAssets;
 
     size_t featureTileIndex = -1;
     int32_t featuresRBase = (int32_t)features->size() - (featuresBase + featuresCount);
@@ -309,10 +312,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         if (wasPlaced) {
             // load custom icon if flag is set
             if (hasImageFromCustomProvider && symbolDelegate) {
-                auto object =  strongMapInterface->getGraphicsObjectFactory()->createQuadInstanced(alphaInstancedShader);
-                object->setInstanceCount(1);
-                customTextures.insert({ context->identifier,  CustomIconDescriptor(symbolDelegate->getCustomAssetFor(context->getFeatureInfo(), layerDescription->identifier),
-                                                                                   object)});
+                featureInfosWithCustomAssets.push_back(context->getFeatureInfo());
             }
         }
     }
@@ -320,6 +320,13 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
     if (symbolObjects.empty()) {
         symbolManagerActor.message(&Tiled2dMapVectorSourceSymbolDataManager::onSymbolGroupInitialized, false, tileInfo, layerIdentifier, selfActor);
         return;
+    }
+
+    auto customAssetPages = symbolDelegate->getCustomAssetsFor(featureInfosWithCustomAssets, layerDescription->identifier);
+    for (const auto &page: customAssetPages) {
+        auto object =  strongMapInterface->getGraphicsObjectFactory()->createQuadInstanced(alphaInstancedShader);
+        object->setInstanceCount((int32_t)page.featureIdentifiersUv.size());
+        customTextures.push_back(CustomIconDescriptor(page.texture, object, page.featureIdentifiersUv));
     }
 
     Tiled2dMapVectorSymbolObject::SymbolObjectInstanceCounts instanceCounts{0, 0, 0};
@@ -449,30 +456,36 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
         if (spriteTexture && spriteData) {
             if (!object->hasCustomTexture) {
                 object->setupIconProperties(iconPositions, iconRotations, iconTextureCoordinates, iconOffset, tileInfo.zoomIdentifier,
-                                            spriteTexture, spriteData);
+                                            spriteTexture, spriteData, std::nullopt);
             } else {
-                auto customIt = customTextures.find(object->featureContext->identifier);
-                if (customIt != customTextures.end()) {
-                    int offset = 0;
+                for (size_t i = 0; i != customTextures.size(); i++) {
+                    auto identifier = object->stringIdentifier;
+                    auto uvIt = customTextures[i].featureIdentifiersUv.find(identifier);
+                    if (uvIt != customTextures[i].featureIdentifiersUv.end()) {
+                        object->customTexturePage = i;
+                        object->customTextureOffset = (int)std::distance(customTextures[i].featureIdentifiersUv.begin(),uvIt);
 
-                    object->setupIconProperties(customIt->second.iconPositions, customIt->second.iconRotations, customIt->second.iconTextureCoordinates, offset, tileInfo.zoomIdentifier,
-                                                customIt->second.texture, nullptr);
-
-                    customIt->second.renderObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)));
-                    customIt->second.renderObject->loadTexture(context, customIt->second.texture);
-                    customIt->second.renderObject->asGraphicsObject()->setup(context);
-
-
-                    customIt->second.renderObject->setPositions(
-                            SharedBytes((int64_t) customIt->second.iconPositions.data(), (int32_t) 1, 2 * (int32_t) sizeof(float)));
-                    customIt->second.renderObject->setTextureCoordinates(
-                            SharedBytes((int64_t) customIt->second.iconTextureCoordinates.data(), (int32_t) 1, 4 * (int32_t) sizeof(float)));
+                        int offset = object->customTextureOffset;
+                        assert(offset < customTextures[i].iconRotations.size());
+                        object->setupIconProperties(customTextures[i].iconPositions, customTextures[i].iconRotations, customTextures[i].iconTextureCoordinates, offset, tileInfo.zoomIdentifier, customTextures[i].texture, nullptr, uvIt->second);
+                        break;
+                    }
                 }
             }
             object->setupStretchIconProperties(stretchedIconPositions, stretchedIconTextureCoordinates, stretchedIconOffset,
                                                tileInfo.zoomIdentifier, spriteTexture, spriteData);
         }
         object->setupTextProperties(textTextureCoordinates, textStyleIndices, textOffset, textStyleOffset, tileInfo.zoomIdentifier);
+    }
+
+    for (const auto &customDescriptor: customTextures) {
+        customDescriptor.renderObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)));
+        customDescriptor.renderObject->loadTexture(context, customDescriptor.texture);
+        customDescriptor.renderObject->asGraphicsObject()->setup(context);
+
+        int32_t count = (int32_t)customDescriptor.featureIdentifiersUv.size();
+        customDescriptor.renderObject->setPositions(SharedBytes((int64_t) customDescriptor.iconPositions.data(), count, 2 * (int32_t) sizeof(float)));
+        customDescriptor.renderObject->setTextureCoordinates(SharedBytes((int64_t) customDescriptor.iconTextureCoordinates.data(), count, 4 * (int32_t) sizeof(float)));
     }
 
     if (spriteTexture && spriteData && iconInstancedObject) {
@@ -534,22 +547,10 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
 
         for (auto const &object: symbolObjects) {
             if (object->hasCustomTexture) {
-                auto customIt = customTextures.find(object->featureContext->identifier);
-                if (customIt != customTextures.end()) {
-                    int offset = 0;
+                auto &page = customTextures[object->customTexturePage];
+                int offset = (int)object->customTextureOffset;
+                object->updateIconProperties(page.iconPositions, page.iconScales, page.iconRotations, page.iconAlphas, offset, zoomIdentifier,scaleFactor, rotation, now);
 
-                    object->updateIconProperties(customIt->second.iconPositions, customIt->second.iconScales, customIt->second.iconRotations, customIt->second.iconAlphas, offset, zoomIdentifier,scaleFactor, rotation, now);
-
-                    customIt->second.renderObject->setPositions(
-                            SharedBytes((int64_t) customIt->second.iconPositions.data(), (int32_t) 1, 2 * (int32_t) sizeof(float)));
-                    customIt->second.renderObject->setAlphas(
-                            SharedBytes((int64_t) customIt->second.iconAlphas.data(), (int32_t) 1, (int32_t) sizeof(float)));
-                    customIt->second.renderObject->setScales(
-                            SharedBytes((int64_t) customIt->second.iconScales.data(), (int32_t) 1, 2 * (int32_t) sizeof(float)));
-                    customIt->second.renderObject->setRotations(
-                            SharedBytes((int64_t) customIt->second.iconRotations.data(), (int32_t) 1, 1 * (int32_t) sizeof(float)));
-
-                }
             } else {
                 object->updateIconProperties(iconPositions, iconScales, iconRotations, iconAlphas, iconOffset, zoomIdentifier,
                                              scaleFactor, rotation, now);
@@ -559,6 +560,18 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                                                 scaleFactor, rotation, now);
             object->updateTextProperties(textPositions, textScales, textRotations, textStyles, textOffset, textStyleOffset,
                                          zoomIdentifier, scaleFactor, rotation, now);
+        }
+
+        for (const auto &customDescriptor: customTextures) {
+            int32_t count = (int32_t)customDescriptor.featureIdentifiersUv.size();
+            customDescriptor.renderObject->setPositions(
+                    SharedBytes((int64_t) customDescriptor.iconPositions.data(), (int32_t) count, 2 * (int32_t) sizeof(float)));
+            customDescriptor.renderObject->setAlphas(
+                    SharedBytes((int64_t) customDescriptor.iconAlphas.data(), (int32_t) count, (int32_t) sizeof(float)));
+            customDescriptor.renderObject->setScales(
+                    SharedBytes((int64_t) customDescriptor.iconScales.data(), (int32_t) count, 2 * (int32_t) sizeof(float)));
+            customDescriptor.renderObject->setRotations(
+                    SharedBytes((int64_t) customDescriptor.iconRotations.data(), (int32_t) count, 1 * (int32_t) sizeof(float)));
         }
 
         if (iconInstancedObject) {
@@ -824,7 +837,7 @@ std::vector<std::shared_ptr< ::RenderObjectInterface>> Tiled2dMapVectorSymbolGro
         renderObjects.push_back(std::make_shared<RenderObject>(iconObject->asGraphicsObject()));
     }
 
-    for (const auto &[identifier, descriptor]: customTextures) {
+    for (const auto &descriptor: customTextures) {
         renderObjects.push_back(std::make_shared<RenderObject>(descriptor.renderObject->asGraphicsObject()));
     }
 

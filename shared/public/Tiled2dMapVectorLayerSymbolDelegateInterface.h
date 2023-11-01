@@ -3,15 +3,15 @@
 
 #pragma once
 
-#include "TextureHolderInterface.h"
-#include <memory>
 #include <string>
+#include <vector>
 
+struct Tiled2dMapVectorAssetInfo;
 struct VectorLayerFeatureInfo;
 
 class Tiled2dMapVectorLayerSymbolDelegateInterface {
 public:
     virtual ~Tiled2dMapVectorLayerSymbolDelegateInterface() = default;
 
-    virtual /*not-null*/ std::shared_ptr<::TextureHolderInterface> getCustomAssetFor(const VectorLayerFeatureInfo & featureInfo, const std::string & layerIdentifier) = 0;
+    virtual std::vector<Tiled2dMapVectorAssetInfo> getCustomAssetsFor(const std::vector<VectorLayerFeatureInfo> & featureInfos, const std::string & layerIdentifier) = 0;
 };

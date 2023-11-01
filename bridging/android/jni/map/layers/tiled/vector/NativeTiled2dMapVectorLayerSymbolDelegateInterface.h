@@ -33,14 +33,14 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        /*not-null*/ std::shared_ptr<::TextureHolderInterface> getCustomAssetFor(const ::VectorLayerFeatureInfo & featureInfo, const std::string & layerIdentifier) override;
+        std::vector<::Tiled2dMapVectorAssetInfo> getCustomAssetsFor(const std::vector<::VectorLayerFeatureInfo> & featureInfos, const std::string & layerIdentifier) override;
 
     private:
         friend ::djinni::JniInterface<::Tiled2dMapVectorLayerSymbolDelegateInterface, ::djinni_generated::NativeTiled2dMapVectorLayerSymbolDelegateInterface>;
     };
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/layers/tiled/vector/Tiled2dMapVectorLayerSymbolDelegateInterface") };
-    const jmethodID method_getCustomAssetFor { ::djinni::jniGetMethodID(clazz.get(), "getCustomAssetFor", "(Lio/openmobilemaps/mapscore/shared/map/layers/tiled/vector/VectorLayerFeatureInfo;Ljava/lang/String;)Lio/openmobilemaps/mapscore/shared/graphics/objects/TextureHolderInterface;") };
+    const jmethodID method_getCustomAssetsFor { ::djinni::jniGetMethodID(clazz.get(), "getCustomAssetsFor", "(Ljava/util/ArrayList;Ljava/lang/String;)Ljava/util/ArrayList;") };
 };
 
 } // namespace djinni_generated

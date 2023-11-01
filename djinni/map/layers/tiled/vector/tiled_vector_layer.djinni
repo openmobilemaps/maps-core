@@ -6,6 +6,7 @@
 @extern "../../../../yaml/texture_holder_interface.yaml"
 @extern "../../../../yaml/color.yaml"
 @extern "../../../../yaml/coord.yaml"
+@extern "../../../../yaml/rect_i.yaml"
 
 @extern "../../../../yaml/texture_loader_result.yaml"
 @extern "../../../../yaml/data_loader_result.yaml"
@@ -98,6 +99,11 @@ tiled_2d_map_vector_layer_local_data_provider_interface = interface +c +j +o {
     load_geojson(): future<data_loader_result>;
 }
 
+tiled_2d_map_vector_asset_info = record {
+    feature_identifiers_uv: map<string, rect_i>;
+    texture: optional<texture_holder_interface>;
+}
+
 tiled_2d_map_vector_layer_symbol_delegate_interface = interface +c +j +o {
-    get_custom_asset_for(feature_info: vector_layer_feature_info, layer_identifier: string): texture_holder_interface;
+    get_custom_assets_for(feature_infos: list<vector_layer_feature_info>, layer_identifier: string): list<tiled_2d_map_vector_asset_info>;
 }

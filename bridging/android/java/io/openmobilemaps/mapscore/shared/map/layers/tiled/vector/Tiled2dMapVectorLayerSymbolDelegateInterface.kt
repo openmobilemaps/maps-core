@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class Tiled2dMapVectorLayerSymbolDelegateInterface {
 
-    abstract fun getCustomAssetFor(featureInfo: VectorLayerFeatureInfo, layerIdentifier: String): io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface
+    abstract fun getCustomAssetsFor(featureInfos: ArrayList<VectorLayerFeatureInfo>, layerIdentifier: String): ArrayList<Tiled2dMapVectorAssetInfo>
 
     private class CppProxy : Tiled2dMapVectorLayerSymbolDelegateInterface {
         private val nativeRef: Long
@@ -25,10 +25,10 @@ abstract class Tiled2dMapVectorLayerSymbolDelegateInterface {
             external fun nativeDestroy(nativeRef: Long)
         }
 
-        override fun getCustomAssetFor(featureInfo: VectorLayerFeatureInfo, layerIdentifier: String): io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface {
+        override fun getCustomAssetsFor(featureInfos: ArrayList<VectorLayerFeatureInfo>, layerIdentifier: String): ArrayList<Tiled2dMapVectorAssetInfo> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_getCustomAssetFor(this.nativeRef, featureInfo, layerIdentifier)
+            return native_getCustomAssetsFor(this.nativeRef, featureInfos, layerIdentifier)
         }
-        private external fun native_getCustomAssetFor(_nativeRef: Long, featureInfo: VectorLayerFeatureInfo, layerIdentifier: String): io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface
+        private external fun native_getCustomAssetsFor(_nativeRef: Long, featureInfos: ArrayList<VectorLayerFeatureInfo>, layerIdentifier: String): ArrayList<Tiled2dMapVectorAssetInfo>
     }
 }

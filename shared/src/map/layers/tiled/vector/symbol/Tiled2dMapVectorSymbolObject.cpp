@@ -73,7 +73,9 @@ hasCustomTexture(hasCustomTexture) {
     evaluateStyleProperties(tileInfo.zoomIdentifier);
     
     iconRotationAlignment = description->style.getIconRotationAlignment(evalContext);
-    
+
+    stringIdentifier = std::to_string(featureContext->identifier);
+
     if (hasIcon && !hideIcon) {
         if (iconTextFit == IconTextFit::NONE) {
             instanceCounts.icons = 1;
@@ -256,7 +258,7 @@ const Tiled2dMapVectorSymbolObject::SymbolObjectInstanceCounts Tiled2dMapVectorS
     return ::Coord(renderCoordinate.systemIdentifier, rotated.x, rotated.y, renderCoordinate.z);
 }
 
-void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &positions, std::vector<float> &rotations, std::vector<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData) {
+void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &positions, std::vector<float> &rotations, std::vector<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData, const std::optional<RectI> customUv) {
 
     if (instanceCounts.icons == 0) {
         return;
@@ -302,6 +304,11 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
             spriteWidth = spriteIt->second.width;
             spriteHeight = spriteIt->second.height;
             spritePixelRatio = spriteIt->second.pixelRatio;
+        } else {
+            spriteX = customUv->x;
+            spriteY = customUv->y;
+            spriteWidth = customUv->width;
+            spriteHeight = customUv->height;
         }
 
         const double densityOffset = (camera->getScreenDensityPpi() / 160.0) / spritePixelRatio;

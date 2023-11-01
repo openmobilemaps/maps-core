@@ -3,7 +3,7 @@
 
 #include "NativeTiled2dMapVectorLayerSymbolDelegateInterface.h"  // my header
 #include "Marshal.hpp"
-#include "NativeTextureHolderInterface.h"
+#include "NativeTiled2dMapVectorAssetInfo.h"
 #include "NativeVectorLayerFeatureInfo.h"
 
 namespace djinni_generated {
@@ -16,15 +16,15 @@ NativeTiled2dMapVectorLayerSymbolDelegateInterface::JavaProxy::JavaProxy(JniType
 
 NativeTiled2dMapVectorLayerSymbolDelegateInterface::JavaProxy::~JavaProxy() = default;
 
-/*not-null*/ std::shared_ptr<::TextureHolderInterface> NativeTiled2dMapVectorLayerSymbolDelegateInterface::JavaProxy::getCustomAssetFor(const ::VectorLayerFeatureInfo & c_featureInfo, const std::string & c_layerIdentifier) {
+std::vector<::Tiled2dMapVectorAssetInfo> NativeTiled2dMapVectorLayerSymbolDelegateInterface::JavaProxy::getCustomAssetsFor(const std::vector<::VectorLayerFeatureInfo> & c_featureInfos, const std::string & c_layerIdentifier) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeTiled2dMapVectorLayerSymbolDelegateInterface>::get();
-    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getCustomAssetFor,
-                                         ::djinni::get(::djinni_generated::NativeVectorLayerFeatureInfo::fromCpp(jniEnv, c_featureInfo)),
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getCustomAssetsFor,
+                                         ::djinni::get(::djinni::List<::djinni_generated::NativeVectorLayerFeatureInfo>::fromCpp(jniEnv, c_featureInfos)),
                                          ::djinni::get(::djinni::String::fromCpp(jniEnv, c_layerIdentifier)));
     ::djinni::jniExceptionCheck(jniEnv);
-    return ::djinni_generated::NativeTextureHolderInterface::toCpp(jniEnv, jret);
+    return ::djinni::List<::djinni_generated::NativeTiled2dMapVectorAssetInfo>::toCpp(jniEnv, jret);
 }
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerSymbolDelegateInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
@@ -34,13 +34,13 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT ::djinni_generated::NativeTextureHolderInterface::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerSymbolDelegateInterface_00024CppProxy_native_1getCustomAssetFor(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_featureInfo, jstring j_layerIdentifier)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerSymbolDelegateInterface_00024CppProxy_native_1getCustomAssetsFor(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_featureInfos, jstring j_layerIdentifier)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapVectorLayerSymbolDelegateInterface>(nativeRef);
-        auto r = ref->getCustomAssetFor(::djinni_generated::NativeVectorLayerFeatureInfo::toCpp(jniEnv, j_featureInfo),
-                                        ::djinni::String::toCpp(jniEnv, j_layerIdentifier));
-        return ::djinni::release(::djinni_generated::NativeTextureHolderInterface::fromCpp(jniEnv, r));
+        auto r = ref->getCustomAssetsFor(::djinni::List<::djinni_generated::NativeVectorLayerFeatureInfo>::toCpp(jniEnv, j_featureInfos),
+                                         ::djinni::String::toCpp(jniEnv, j_layerIdentifier));
+        return ::djinni::release(::djinni::List<::djinni_generated::NativeTiled2dMapVectorAssetInfo>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

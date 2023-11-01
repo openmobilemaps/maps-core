@@ -120,17 +120,20 @@ private:
         std::vector<float> iconTextureCoordinates;
         std::shared_ptr<TextureHolderInterface> texture;
         std::shared_ptr<Quad2dInstancedInterface> renderObject;
+        std::unordered_map<std::string, ::RectI> featureIdentifiersUv;
 
-        CustomIconDescriptor(std::shared_ptr<TextureHolderInterface> texture, std::shared_ptr<Quad2dInstancedInterface> renderObject): texture(texture), renderObject(renderObject) {
-            iconAlphas.resize(1, 0.0);
-            iconRotations.resize(1, 0.0);
-            iconScales.resize(2, 0.0);
-            iconPositions.resize(2, 0.0);
-            iconTextureCoordinates.resize(4, 0.0);
+        CustomIconDescriptor(std::shared_ptr<TextureHolderInterface> texture, std::shared_ptr<Quad2dInstancedInterface> renderObject, std::unordered_map<std::string, ::RectI> featureIdentifiersUv): texture(texture), renderObject(renderObject), featureIdentifiersUv(featureIdentifiersUv) {
+            auto count = featureIdentifiersUv.size();
+
+            iconAlphas.resize(count, 0.0);
+            iconRotations.resize(count, 0.0);
+            iconScales.resize(count * 2, 0.0);
+            iconPositions.resize(count * 2, 0.0);
+            iconTextureCoordinates.resize(count * 4, 0.0);
         }
     };
 
-    std::unordered_map<uint64_t, CustomIconDescriptor> customTextures;
+    std::vector<CustomIconDescriptor> customTextures;
 
 
     std::vector<float> iconPositions;

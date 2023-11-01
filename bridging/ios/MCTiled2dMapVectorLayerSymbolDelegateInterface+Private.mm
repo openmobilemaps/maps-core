@@ -7,7 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
-#import "MCTextureHolderInterface+Private.h"
+#import "MCTiled2dMapVectorAssetInfo+Private.h"
 #import "MCVectorLayerFeatureInfo+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -33,12 +33,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (nullable id<MCTextureHolderInterface>)getCustomAssetFor:(nonnull MCVectorLayerFeatureInfo *)featureInfo
-                                           layerIdentifier:(nonnull NSString *)layerIdentifier {
+- (nonnull NSArray<MCTiled2dMapVectorAssetInfo *> *)getCustomAssetsFor:(nonnull NSArray<MCVectorLayerFeatureInfo *> *)featureInfos
+                                                       layerIdentifier:(nonnull NSString *)layerIdentifier {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->getCustomAssetFor(::djinni_generated::VectorLayerFeatureInfo::toCpp(featureInfo),
-                                                                     ::djinni::String::toCpp(layerIdentifier));
-        return ::djinni_generated::TextureHolderInterface::fromCpp(objcpp_result_);
+        auto objcpp_result_ = _cppRefHandle.get()->getCustomAssetsFor(::djinni::List<::djinni_generated::VectorLayerFeatureInfo>::toCpp(featureInfos),
+                                                                      ::djinni::String::toCpp(layerIdentifier));
+        return ::djinni::List<::djinni_generated::Tiled2dMapVectorAssetInfo>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -51,12 +51,12 @@ class Tiled2dMapVectorLayerSymbolDelegateInterface::ObjcProxy final
     friend class ::djinni_generated::Tiled2dMapVectorLayerSymbolDelegateInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    /*not-null*/ std::shared_ptr<::TextureHolderInterface> getCustomAssetFor(const ::VectorLayerFeatureInfo & c_featureInfo, const std::string & c_layerIdentifier) override
+    std::vector<::Tiled2dMapVectorAssetInfo> getCustomAssetsFor(const std::vector<::VectorLayerFeatureInfo> & c_featureInfos, const std::string & c_layerIdentifier) override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getCustomAssetFor:(::djinni_generated::VectorLayerFeatureInfo::fromCpp(c_featureInfo))
-                                                                              layerIdentifier:(::djinni::String::fromCpp(c_layerIdentifier))];
-            return ::djinni_generated::TextureHolderInterface::toCpp(objcpp_result_);
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getCustomAssetsFor:(::djinni::List<::djinni_generated::VectorLayerFeatureInfo>::fromCpp(c_featureInfos))
+                                                                               layerIdentifier:(::djinni::String::fromCpp(c_layerIdentifier))];
+            return ::djinni::List<::djinni_generated::Tiled2dMapVectorAssetInfo>::toCpp(objcpp_result_);
         }
     }
 };
