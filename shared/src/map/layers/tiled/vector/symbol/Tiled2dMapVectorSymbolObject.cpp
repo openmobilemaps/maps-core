@@ -501,10 +501,10 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     auto spriteWidth = stretchSpriteInfo->width * densityOffset * scaleFactor;
     auto spriteHeight = stretchSpriteInfo->height * densityOffset * scaleFactor;
 
-    const float topPadding = iconTextFitPadding[0] * densityOffset * scaleFactor;
-    const float rightPadding = iconTextFitPadding[1] * densityOffset * scaleFactor;
-    const float bottomPadding = iconTextFitPadding[2] * densityOffset * scaleFactor;
-    const float leftPadding = iconTextFitPadding[3] * densityOffset * scaleFactor;
+    const float topPadding = iconTextFitPadding[0] * stretchSpriteInfo->pixelRatio * densityOffset * scaleFactor;
+    const float rightPadding = iconTextFitPadding[1] * stretchSpriteInfo->pixelRatio * densityOffset * scaleFactor;
+    const float bottomPadding = iconTextFitPadding[2] * stretchSpriteInfo->pixelRatio * densityOffset * scaleFactor;
+    const float leftPadding = iconTextFitPadding[3] * stretchSpriteInfo->pixelRatio * densityOffset * scaleFactor;
 
     auto scaleX = 1.0;
     auto scaleY = 1.0;
