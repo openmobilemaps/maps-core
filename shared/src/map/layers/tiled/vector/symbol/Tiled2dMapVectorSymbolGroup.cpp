@@ -326,11 +326,13 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         return;
     }
 
-    auto customAssetPages = symbolDelegate->getCustomAssetsFor(featureInfosWithCustomAssets, layerDescription->identifier);
-    for (const auto &page: customAssetPages) {
-        auto object =  strongMapInterface->getGraphicsObjectFactory()->createQuadInstanced(alphaInstancedShader);
-        object->setInstanceCount((int32_t)page.featureIdentifiersUv.size());
-        customTextures.push_back(CustomIconDescriptor(page.texture, object, page.featureIdentifiersUv));
+    if (symbolDelegate && !featureInfosWithCustomAssets.empty()) {
+        auto customAssetPages = symbolDelegate->getCustomAssetsFor(featureInfosWithCustomAssets, layerDescription->identifier);
+        for (const auto &page: customAssetPages) {
+            auto object = strongMapInterface->getGraphicsObjectFactory()->createQuadInstanced(alphaInstancedShader);
+            object->setInstanceCount((int32_t) page.featureIdentifiersUv.size());
+            customTextures.push_back(CustomIconDescriptor(page.texture, object, page.featureIdentifiersUv));
+        }
     }
 
     Tiled2dMapVectorSymbolObject::SymbolObjectInstanceCounts instanceCounts{0, 0, 0};
