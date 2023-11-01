@@ -15,6 +15,8 @@
 
 - (nonnull DJFuture<MCDataLoaderResult *> *)loadSpriteJsonAsync:(int32_t)scale;
 
-- (nonnull DJFuture<MCDataLoaderResult *> *)loadGeojson;
+- (BOOL)providesGeojsonData:(nonnull NSString *)url;
+
+- (nonnull DJFuture<MCDataLoaderResult *> *)loadGeojson:(nonnull NSString *)url;
 
 @end
