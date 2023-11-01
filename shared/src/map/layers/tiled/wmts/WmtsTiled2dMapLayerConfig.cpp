@@ -64,6 +64,6 @@ std::optional<Tiled2dMapVectorSettings> WmtsTiled2dMapLayerConfig::getVectorSett
 }
 
 std::optional<std::vector<double>> WmtsTiled2dMapLayerConfig::getExtent() {
-    LogInfo <<= "WARNUNG: WmtsTiled2dMapLayerConfig not implemented";
+    LogInfo <<= "WARNING: WmtsTiled2dMapLayerConfig not implemented";
     return std::nullopt;
 }
