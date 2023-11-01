@@ -50,12 +50,6 @@ public:
               const Options& options_ = Options())
     : options(options_), loadingResult(DataLoaderResult(std::nullopt, std::nullopt, LoaderStatus::OK, std::nullopt)) {
 
-        // If the GeoJSON contains only points, there is no need to split it into smaller tiles,
-        // as there are no opportunities for simplification, merging, or meaningful point reduction.
-        if (geoJson->hasOnlyPoints) {
-            options.maxZoom = 0;
-        }
-
         const uint32_t z2 = 1u << options.maxZoom;
 
         convert(geoJson->geometries, (options.tolerance / options.extent) / z2);
@@ -102,10 +96,6 @@ public:
                     json = nlohmann::json::parse(string);
                     auto geoJson = GeoJsonParser::getGeoJson(json);
                     if (geoJson) {
-
-                        if (geoJson->hasOnlyPoints) {
-                            self->options.maxZoom = 0;
-                        }
 
                         const uint32_t z2 = 1u << self->options.maxZoom;
 
