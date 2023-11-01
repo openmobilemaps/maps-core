@@ -80,9 +80,9 @@ public:
     void load() {
         auto weakSelf = weak_from_this();
 
-        std::shared_ptr<::djinni::Future<::DataLoaderResult>> jsonLoaderFuture;
-        if(localDataProvider) {
-            jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(localDataProvider->loadGeojson());
+        std::shared_ptr<::djinni::Future<::DataLoaderResult>> jsonLoaderFuture = nullptr;
+        if(localDataProvider && localDataProvider->providesGeojsonData(geoJsonUrl)) {
+            jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(localDataProvider->loadGeojson(geoJsonUrl));
         } else {
             jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(LoaderHelper::loadDataAsync(geoJsonUrl, std::nullopt, loaders));
         }

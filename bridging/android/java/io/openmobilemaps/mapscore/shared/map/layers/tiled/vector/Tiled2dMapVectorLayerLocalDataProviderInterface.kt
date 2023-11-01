@@ -14,7 +14,9 @@ abstract class Tiled2dMapVectorLayerLocalDataProviderInterface {
 
     abstract fun loadSpriteJsonAsync(scale: Int): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult>
 
-    abstract fun loadGeojson(): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult>
+    abstract fun providesGeojsonData(url: String): Boolean
+
+    abstract fun loadGeojson(url: String): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult>
 
     private class CppProxy : Tiled2dMapVectorLayerLocalDataProviderInterface {
         private val nativeRef: Long
@@ -49,10 +51,16 @@ abstract class Tiled2dMapVectorLayerLocalDataProviderInterface {
         }
         private external fun native_loadSpriteJsonAsync(_nativeRef: Long, scale: Int): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult>
 
-        override fun loadGeojson(): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult> {
+        override fun providesGeojsonData(url: String): Boolean {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_loadGeojson(this.nativeRef)
+            return native_providesGeojsonData(this.nativeRef, url)
         }
-        private external fun native_loadGeojson(_nativeRef: Long): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult>
+        private external fun native_providesGeojsonData(_nativeRef: Long, url: String): Boolean
+
+        override fun loadGeojson(url: String): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult> {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_loadGeojson(this.nativeRef, url)
+        }
+        private external fun native_loadGeojson(_nativeRef: Long, url: String): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult>
     }
 }

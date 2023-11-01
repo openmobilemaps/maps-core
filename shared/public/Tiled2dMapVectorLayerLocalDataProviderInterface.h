@@ -19,5 +19,7 @@ public:
 
     virtual ::djinni::Future<::DataLoaderResult> loadSpriteJsonAsync(int32_t scale) = 0;
 
-    virtual ::djinni::Future<::DataLoaderResult> loadGeojson() = 0;
+    virtual bool providesGeojsonData(const std::string & url) = 0;
+
+    virtual ::djinni::Future<::DataLoaderResult> loadGeojson(const std::string & url) = 0;
 };
