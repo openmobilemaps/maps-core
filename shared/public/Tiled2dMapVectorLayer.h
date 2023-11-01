@@ -180,6 +180,8 @@ public:
 
     void invalidateCollisionState();
 
+    virtual void reloadDataSource(const std::string & sourceName) override;
+
 protected:
     virtual std::shared_ptr<Tiled2dMapVectorLayerConfig> getLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &source);
 
@@ -238,12 +240,10 @@ private:
     std::atomic_flag tilesStillValid;
     std::shared_ptr<Tiled2dMapVectorInteractionManager> interactionManager;
 
-              long long lastDataManagerUpdate = 0;
-              long long lastCollitionCheck = 0;
-              double lastDataManagerZoom = 0;
-              bool isAnimating = false;
-
-              long long totalCount = 0, updateCount = 0, collisionCount = 0;
+    long long lastDataManagerUpdate = 0;
+    long long lastCollitionCheck = 0;
+    double lastDataManagerZoom = 0;
+    bool isAnimating = false;
 
     std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> strongSelectionDelegate;
     std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> selectionDelegate;

@@ -97,6 +97,11 @@ std::unordered_set<Tiled2dMapVectorTileInfo> Tiled2dMapVectorSource::getCurrentT
             return Tiled2dMapVectorTileInfo(std::move(tileInfo), std::move(tileWrapper.result), std::move(tileWrapper.masks), std::move(tileWrapper.state));
         }
     );
+    std::transform(outdatedTiles.begin(), outdatedTiles.end(), std::inserter(currentTileInfos, currentTileInfos.end()), [](const auto& tilePair) {
+        const auto& [tileInfo, tileWrapper] = tilePair;
+        return Tiled2dMapVectorTileInfo(std::move(tileInfo), std::move(tileWrapper.result), std::move(tileWrapper.masks), std::move(TileState::OUTDATED_VISIBLE));
+    }
+                   );
     return currentTileInfos;
 }
 
@@ -112,5 +117,3 @@ std::string Tiled2dMapVectorSource::getSourceName() {
     return sourceName;
 }
 
-void Tiled2dMapVectorSource::clearData() {
-}

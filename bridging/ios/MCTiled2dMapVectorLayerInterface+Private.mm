@@ -150,6 +150,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)reloadDataSource:(nonnull NSString *)sourceName {
+    try {
+        _cppRefHandle.get()->reloadDataSource(::djinni::String::toCpp(sourceName));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 auto Tiled2dMapVectorLayerInterface::toCpp(ObjcType objc) -> CppType

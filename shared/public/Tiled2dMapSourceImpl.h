@@ -267,6 +267,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
     }
 
     currentPyramid = pyramid;
+    currentKeepZoomLevelOffset = keepZoomLevelOffset;
 
     // we only remove tiles that are not visible anymore directly
     // tile from upper zoom levels will be removed as soon as the correct tiles are loaded if mask tiles is enabled
@@ -698,6 +699,7 @@ void Tiled2dMapSource<T, L, R>::setTileReady(const Tiled2dMapTileInfo &tile) {
     if (readyTiles.count(tile) == 0) {
         if (currentTiles.count(tile) != 0){
             readyTiles.insert(tile);
+            outdatedTiles.erase(tile);
             needsUpdate = true;
         }
     }
@@ -717,6 +719,7 @@ void Tiled2dMapSource<T, L, R>::setTilesReady(const std::vector<Tiled2dMapTileIn
         if (readyTiles.count(tile) == 0) {
             if (currentTiles.count(tile) != 0){
                 readyTiles.insert(tile);
+                outdatedTiles.erase(tile);
                 needsUpdate = true;
             }
         }
@@ -804,4 +807,21 @@ void Tiled2dMapSource<T, L, R>::forceReload() {
         }
     }
 
+}
+
+template<class T, class L, class R>
+void Tiled2dMapSource<T, L, R>::reloadTiles() {
+    outdatedTiles.clear();
+//    outdatedTiles.insert(currentTiles.begin(), currentTiles.end());
+    
+    currentTiles.clear();
+    readyTiles.clear();
+
+    for (auto it = currentlyLoading.begin(); it != currentlyLoading.end();) {
+        cancelLoad(it->first, it->second);
+    }
+    currentlyLoading.clear();
+    errorTiles.clear();
+
+    onVisibleTilesChanged(currentPyramid, currentKeepZoomLevelOffset);
 }

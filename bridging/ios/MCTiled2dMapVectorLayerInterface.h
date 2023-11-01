@@ -55,4 +55,6 @@
 
 - (void)setGlobalState:(nonnull NSDictionary<NSString *, MCVectorLayerFeatureInfoValue *> *)properties;
 
+- (void)reloadDataSource:(nonnull NSString *)sourceName;
+
 @end

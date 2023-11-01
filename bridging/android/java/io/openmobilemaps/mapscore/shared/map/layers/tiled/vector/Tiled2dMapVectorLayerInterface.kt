@@ -37,6 +37,8 @@ abstract class Tiled2dMapVectorLayerInterface {
 
     abstract fun setGlobalState(properties: HashMap<String, VectorLayerFeatureInfoValue>)
 
+    abstract fun reloadDataSource(sourceName: String)
+
     private class CppProxy : Tiled2dMapVectorLayerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -105,5 +107,11 @@ abstract class Tiled2dMapVectorLayerInterface {
             native_setGlobalState(this.nativeRef, properties)
         }
         private external fun native_setGlobalState(_nativeRef: Long, properties: HashMap<String, VectorLayerFeatureInfoValue>)
+
+        override fun reloadDataSource(sourceName: String) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_reloadDataSource(this.nativeRef, sourceName)
+        }
+        private external fun native_reloadDataSource(_nativeRef: Long, sourceName: String)
     }
 }

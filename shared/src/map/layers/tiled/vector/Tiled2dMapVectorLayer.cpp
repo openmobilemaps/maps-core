@@ -454,6 +454,22 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     }
 }
 
+void Tiled2dMapVectorLayer::reloadDataSource(const std::string &sourceName) {
+    if (const auto &geoSource = mapDescription->geoJsonSources[sourceName]) {
+        geoSource->reload(loaders);
+        auto promise = std::make_shared<::djinni::Promise<std::shared_ptr<DataLoaderResult>>>();
+        geoSource->waitIfNotLoaded(promise);
+        promise->getFuture().wait();
+    }
+
+    if (auto &source = vectorTileSources[sourceName]) {
+        source.syncAccess([](const auto &source) {
+            source->reloadTiles();
+        });
+    }
+
+}
+
 std::shared_ptr<::LayerInterface> Tiled2dMapVectorLayer::asLayerInterface() {
     return shared_from_this();
 }
@@ -479,7 +495,6 @@ void Tiled2dMapVectorLayer::update() {
         double newZoom = camera->getZoom();
         auto now = DateHelper::currentTimeMillis();
         bool newIsAnimating = false;
-        totalCount += 1;
         bool tilesChanged = !tilesStillValid.test_and_set();
         if (abs(newZoom-lastDataManagerZoom) / std::max(newZoom, 1.0) > 0.001 || now - lastDataManagerUpdate > 1000 || isAnimating || tilesChanged) {
             lastDataManagerUpdate = now;
@@ -496,11 +511,8 @@ void Tiled2dMapVectorLayer::update() {
                 newIsAnimating |= a;
             }
             isAnimating = newIsAnimating;
-            updateCount += 1;
             if (now - lastCollitionCheck > 2000 || tilesChanged) {
                 lastCollitionCheck = now;
-                collisionCount += 1;
-//                printf("update: %f, collision: %f\n", (double)updateCount / (double)totalCount, (double)collisionCount / (double)totalCount);
                 bool enforceUpdate = !prevCollisionStillValid.test_and_set();
                 collisionManager.syncAccess([&vpMatrix, &viewportSize, viewportRotation, enforceUpdate](const auto &manager) {
                     manager->collisionDetection(*vpMatrix, viewportSize, viewportRotation, enforceUpdate);

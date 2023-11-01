@@ -105,6 +105,8 @@ public:
 
     virtual void forceReload() override;
 
+    virtual void reloadTiles();
+
     void setTileReady(const Tiled2dMapTileInfo &tile) override;
 
     void setTilesReady(const std::vector<Tiled2dMapTileInfo> &tiles);
@@ -138,12 +140,14 @@ public:
     std::optional<int32_t> maxZoomLevelIdentifier;
 
     std::map<Tiled2dMapTileInfo, TileWrapper<R>> currentTiles;
+    std::map<Tiled2dMapTileInfo, TileWrapper<R>> outdatedTiles;
 
     int currentZoomLevelIdentifier = 0;
 
     std::unordered_set<Tiled2dMapTileInfo> currentVisibleTiles;
 
     std::vector<VisibleTilesLayer> currentPyramid;
+    int currentKeepZoomLevelOffset;
 
     RectCoord currentViewBounds = RectCoord(Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0),
                                             Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0));

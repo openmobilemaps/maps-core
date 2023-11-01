@@ -35,7 +35,7 @@ struct Tiled2dMapVectorTileInfo {
         , masks(masks)
         , state(state) {}
 
-    bool operator==(const Tiled2dMapVectorTileInfo &o) const { return tileInfo == o.tileInfo; }
+    bool operator==(const Tiled2dMapVectorTileInfo &o) const { return tileInfo == o.tileInfo && layerFeatureMaps.get() == o.layerFeatureMaps.get(); }
 
     bool operator<(const Tiled2dMapVectorTileInfo &o) const { return tileInfo < o.tileInfo; }
 };

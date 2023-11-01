@@ -47,6 +47,11 @@ public:
                 return Tiled2dMapVectorTileInfo(std::move(tileInfo), std::move(tileWrapper.result), std::move(tileWrapper.masks), std::move(tileWrapper.state));
             }
         );
+        std::transform(outdatedTiles.begin(), outdatedTiles.end(), std::inserter(currentTileInfos, currentTileInfos.end()), [](const auto& tilePair) {
+            const auto& [tileInfo, tileWrapper] = tilePair;
+            return Tiled2dMapVectorTileInfo(std::move(tileInfo), std::move(tileWrapper.result), std::move(tileWrapper.masks), std::move(TileState::OUTDATED_VISIBLE));
+        }
+                       );
         return currentTileInfos;
     }
 
@@ -80,15 +85,6 @@ protected:
             "", features
         });
         return featureMap;
-    }
-
-    virtual void clearData() override {
-        lastVisibleTilesHash = 0;
-        readyTiles.clear();
-        auto lastPyramide = currentPyramid;
-        onVisibleTilesChanged({});
-        onVisibleTilesChanged(lastPyramide);
-        notifyTilesUpdates();
     }
 
 private:

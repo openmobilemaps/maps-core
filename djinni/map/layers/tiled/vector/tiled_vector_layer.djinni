@@ -32,6 +32,8 @@ tiled_2d_map_vector_layer_interface = interface +c {
 
     set_feature_state(identifier: string, properties: map<string, vector_layer_feature_info_value>);
     set_global_state(properties: map<string, vector_layer_feature_info_value>);
+
+    reload_data_source(source_name: string);
 }
 
 vector_layer_feature_info_value = record {
