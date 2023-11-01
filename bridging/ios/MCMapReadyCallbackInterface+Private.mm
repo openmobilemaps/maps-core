@@ -3,7 +3,6 @@
 
 #import "MCMapReadyCallbackInterface+Private.h"
 #import "MCMapReadyCallbackInterface.h"
-#import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCLayerReadyState+Private.h"
 #include <stdexcept>

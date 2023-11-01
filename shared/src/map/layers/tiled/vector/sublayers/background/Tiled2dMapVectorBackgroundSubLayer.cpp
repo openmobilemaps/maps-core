@@ -16,12 +16,14 @@
 #include "RenderObject.h"
 #include "SchedulerInterface.h"
 #include "LambdaTask.h"
+#include "MapCamera2dInterface.h"
 
 void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32_t layerIndex) {
     Tiled2dMapVectorSubLayer::onAdded(mapInterface, layerIndex);
+    this->dpFactor = mapInterface->getCamera()->getScreenDensityPpi() / 160.0;
     shader = mapInterface->getShaderFactory()->createColorShader();
     shader->asShaderProgramInterface()->setBlendMode(
-            description->style.getBlendMode(EvaluationContext(0.0, std::make_shared<FeatureContext>(), featureStateManager)));
+            description->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
 
     auto object = mapInterface->getGraphicsObjectFactory()->createQuad(shader->asShaderProgramInterface());
     object->setFrame(Quad2dD(Vec2D(-1, 1),
@@ -30,7 +32,7 @@ void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterf
                              Vec2D(-1, -1)),
                      RectD(0, 0, 1, 1));
 
-    auto color = description->style.getColor(EvaluationContext(0.0, std::make_shared<FeatureContext>(), featureStateManager));
+    auto color = description->style.getColor(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager));
     shader->setColor(color.r, color.g, color.b, color.a * alpha);
     renderObject = std::make_shared<RenderObject>(object->asGraphicsObject(), true);
     auto renderPass = std::make_shared<RenderPass>(RenderPassConfig(0), std::vector<std::shared_ptr<::RenderObjectInterface>> { renderObject } );
@@ -106,6 +108,6 @@ std::string Tiled2dMapVectorBackgroundSubLayer::getLayerDescriptionIdentifier() 
 void Tiled2dMapVectorBackgroundSubLayer::setAlpha(float alpha) {
     Tiled2dMapVectorSubLayer::setAlpha(alpha);
 
-    auto color = description->style.getColor(EvaluationContext(0.0, std::make_shared<FeatureContext>(), featureStateManager));
+    auto color = description->style.getColor(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager));
     shader->setColor(color.r, color.g, color.b, color.a * alpha);
 }

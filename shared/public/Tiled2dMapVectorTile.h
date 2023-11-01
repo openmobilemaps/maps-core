@@ -74,6 +74,7 @@ protected:
 
     std::optional<float> lastAlpha = std::nullopt;
     float alpha = 1.0;
+    double dpFactor = 1.0;
 
     std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> selectionDelegate;
 

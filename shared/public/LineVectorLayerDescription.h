@@ -24,8 +24,7 @@ public:
                     std::shared_ptr<Value> lineBlur = nullptr,
                     std::shared_ptr<Value> lineCap = nullptr,
                     std::shared_ptr<Value> lineOffset = nullptr,
-                    std::shared_ptr<Value> blendMode = nullptr,
-                    double dpFactor = 1.0)
+                    std::shared_ptr<Value> blendMode = nullptr)
             : lineColor(lineColor),
               lineOpacity(lineOpacity),
               lineWidth(lineWidth),
@@ -33,8 +32,7 @@ public:
               lineBlur(lineBlur),
               lineCap(lineCap),
               lineOffset(lineOffset),
-              blendMode(blendMode),
-              dpFactor(dpFactor) {}
+              blendMode(blendMode) {}
 
     LineVectorStyle(LineVectorStyle &style)
             : lineColor(style.lineColor),
@@ -44,8 +42,7 @@ public:
               lineBlur(style.lineBlur),
               lineCap(style.lineCap),
               lineOffset(style.lineOffset),
-              blendMode(style.blendMode),
-              dpFactor(style.dpFactor) {}
+              blendMode(style.blendMode) {}
 
     UsedKeysCollection getUsedKeys() const {
         UsedKeysCollection usedKeys;
@@ -78,13 +75,13 @@ public:
     double getLineBlur(const EvaluationContext &context){
         static const double defaultValue = 0.0;
         double value = lineBlurEvaluator.getResult(lineBlur, context, defaultValue);
-        return value * dpFactor;
+        return value * context.dpFactor;
     }
 
     double getLineWidth(const EvaluationContext &context){
         static const double defaultValue = 1.0;
         double value = lineWidthEvaluator.getResult(lineWidth, context, defaultValue);
-        return value * dpFactor;
+        return value * context.dpFactor;
     }
 
     std::vector<float> getLineDashArray(const EvaluationContext &context){
@@ -100,7 +97,7 @@ public:
     double getLineOffset(const EvaluationContext &context) {
         static const double defaultValue = 0.0;
         double offset = lineOffsetEvaluator.getResult(lineOffset, context, defaultValue);
-        return std::min(offset * dpFactor, getLineWidth(context) * 0.5);
+        return std::min(offset * context.dpFactor, getLineWidth(context) * 0.5);
     }
 
     std::shared_ptr<Value> lineColor;
@@ -121,8 +118,6 @@ private:
     ValueEvaluator<LineCapType> lineCapEvaluator;
     ValueEvaluator<double> lineOffsetEvaluator;
     ValueEvaluator<BlendMode> blendModeEvaluator;
-
-    double dpFactor;
 };
 
 class LineVectorLayerDescription: public VectorLayerDescription {

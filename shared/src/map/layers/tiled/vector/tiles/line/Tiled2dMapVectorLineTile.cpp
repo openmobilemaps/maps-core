@@ -104,7 +104,7 @@ void Tiled2dMapVectorLineTile::update() {
         int i = 0;
         bool needsUpdate = false;
         for (auto const &[key, feature]: featureGroups.at(styleGroupId)) {
-            auto const &context = EvaluationContext(zoomIdentifier, feature, featureStateManager);
+            auto const &context = EvaluationContext(zoomIdentifier, dpFactor, feature, featureStateManager);
             auto &style = reusableLineStyles.at(styleGroupId).at(i);
 
             // color
@@ -239,7 +239,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
             
             if (featureContext->geomType != vtzero::GeomType::POLYGON && featureContext->geomType != vtzero::GeomType::LINESTRING) { continue; }
 
-            EvaluationContext evalContext = EvaluationContext(tileInfo.zoomIdentifier, featureContext, featureStateManager);
+            EvaluationContext evalContext = EvaluationContext(tileInfo.zoomIdentifier, dpFactor, featureContext, featureStateManager);
             if ((description->filter == nullptr || description->filter->evaluateOr(evalContext, false))) {
                 int styleGroupIndex = -1;
                 int styleIndex = -1;
@@ -264,7 +264,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                             styleIndex = 0;
                             auto shader = shaderFactory->createLineGroupShader();
                             auto lineDescription = std::static_pointer_cast<LineVectorLayerDescription>(description);
-                            shader->asShaderProgramInterface()->setBlendMode(lineDescription->style.getBlendMode(EvaluationContext(0.0, std::make_shared<FeatureContext>(), featureStateManager)));
+                            shader->asShaderProgramInterface()->setBlendMode(lineDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
                             shaders.push_back(shader);
                             reusableLineStyles.push_back({ reusableStyle });
                             featureGroups.push_back(std::vector<std::tuple<size_t, std::shared_ptr<FeatureContext>>>{{hash, featureContext}});
@@ -411,7 +411,7 @@ bool Tiled2dMapVectorLineTile::onClickConfirmed(const Vec2F &posScreen) {
 
     for (auto const &[lineCoordinateVector, featureContext]: hitDetection) {
         for (auto const &coordinates: lineCoordinateVector) {
-            auto lineWidth = lineDescription->style.getLineWidth(EvaluationContext(zoomIdentifier, featureContext, featureStateManager));
+            auto lineWidth = lineDescription->style.getLineWidth(EvaluationContext(zoomIdentifier, dpFactor, featureContext, featureStateManager));
             if (LineHelper::pointWithin(coordinates, point, lineWidth, coordinateConverter)) {
                 if (strongSelectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier, point)) {
                     return true;

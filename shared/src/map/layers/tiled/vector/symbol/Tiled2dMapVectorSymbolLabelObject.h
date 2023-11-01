@@ -51,7 +51,8 @@ public:
                                       const SymbolAlignment rotationAlignment,
                                       const TextSymbolPlacement &textSymbolPlacement,
                                       std::shared_ptr<SymbolAnimationCoordinator> animationCoordinator,
-                                      const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager);
+                                      const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
+                                      double dpFactor);
 
     int getCharacterCount();
 
@@ -169,9 +170,9 @@ private:
     int characterCount = 0;
     std::vector<SplitInfo> splittedTextInfo;
     int numSymbols;
-public:
+
     const std::string fullText;
-private:
+
     size_t renderLineCoordinatesCount;
     std::vector<Coord> renderLineCoordinates;
     std::optional<std::vector<Coord>> lineCoordinates;
@@ -192,4 +193,6 @@ private:
     bool wasReversed = false;
 
     const std::shared_ptr<Tiled2dMapVectorStateManager> stateManager;
+
+    double dpFactor = 1.0;
 };
