@@ -239,13 +239,15 @@ public:
 class EvaluationContext {
 public:
     const double zoomLevel;
+    const double dpFactor;
     const std::shared_ptr<FeatureContext> &feature;
     const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager;
 
     EvaluationContext(const double zoomLevel,
+                      const double dpFactor,
                       const std::shared_ptr<FeatureContext> &feature,
                       const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager) :
-        zoomLevel(zoomLevel), feature(feature), featureStateManager(featureStateManager) {}
+        zoomLevel(zoomLevel), dpFactor(dpFactor), feature(feature), featureStateManager(featureStateManager) {}
 };
 
 

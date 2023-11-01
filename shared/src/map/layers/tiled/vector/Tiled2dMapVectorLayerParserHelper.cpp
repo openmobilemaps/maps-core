@@ -30,7 +30,6 @@
 
 Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromUrl(const std::string &layerName,
                                                         const std::string &styleJsonUrl,
-                                                        const double &dpFactor,
                                                         const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider,
                                                         const std::vector<std::shared_ptr<::LoaderInterface>> &loaders) {
     DataLoaderResult result = LoaderHelper::loadData(styleJsonUrl, std::nullopt, loaders);
@@ -40,13 +39,12 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
     }
     auto string = std::string((char*)result.data->buf(), result.data->len());
 
-    return parseStyleJsonFromString(layerName, string, dpFactor, localDataProvider, loaders);
+    return parseStyleJsonFromString(layerName, string, localDataProvider, loaders);
 };
 
 
 Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(const std::string &layerName,
                                                         const std::string &styleJsonString,
-                                                        const double &dpFactor,
                                                         const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider,
                                                         const std::vector<std::shared_ptr<::LoaderInterface>> &loaders) {
 
@@ -244,8 +242,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                     parser.parseValue(val["paint"]["line-blur"]),
                     parser.parseValue(val["layout"]["line-cap"]),
                     parser.parseValue(val["paint"]["line-offset"]),
-                    blendMode,
-                    dpFactor
+                    blendMode
             );
             auto layerDesc = std::make_shared<LineVectorLayerDescription>(
                     val["id"],
@@ -303,8 +300,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                     parser.parseValue(val["layout"]["symbol-z-order"]),
                                     blendMode,
                                     transitionDuration,
-                                    transitionDelay,
-                                    dpFactor);
+                                    transitionDelay);
 
             std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
 

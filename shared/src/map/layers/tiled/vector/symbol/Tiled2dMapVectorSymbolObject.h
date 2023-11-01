@@ -48,7 +48,8 @@ public:
                                  const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
                                  const UsedKeysCollection &usedKeys,
                                  const size_t symbolTileIndex,
-                                 const bool hasCustomTexture);
+                                 const bool hasCustomTexture,
+                                 const double dpFactor);
 
     ~Tiled2dMapVectorSymbolObject() {
         if (animationCoordinator) {
@@ -169,6 +170,7 @@ private:
     bool textAllowOverlap;
     bool iconAllowOverlap;
 
+    double dpFactor = 1.0;
     float alpha = 1.0;
     bool isIconOpaque = true;
     bool isStretchIconOpaque = true;

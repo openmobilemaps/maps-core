@@ -5,7 +5,6 @@
 #import "MCTaskInterface.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
-#import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCTaskConfig+Private.h"
 #include <exception>

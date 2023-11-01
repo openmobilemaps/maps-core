@@ -158,6 +158,7 @@ private:
     std::vector<float> stretchedIconTextureCoordinates;
 
     float alpha = 1.0;
+    double dpFactor = 1.0;
 
     bool anyInteractable = false;
 

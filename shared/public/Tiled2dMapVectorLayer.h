@@ -63,28 +63,29 @@ public:
                           const std::string &remoteStyleJsonUrl,
                           const std::vector <std::shared_ptr<::LoaderInterface>> &loaders,
                           const std::shared_ptr<::FontLoaderInterface> &fontLoader,
-                          double dpFactor,
                           const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt,
-                          const /*nullable*/ std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> & symbolDelegate = nullptr);
+                          const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate = nullptr);
 
     Tiled2dMapVectorLayer(const std::string &layerName,
                           const std::string &remoteStyleJsonUrl,
                           const std::string &fallbackStyleJsonString,
                           const std::vector <std::shared_ptr<::LoaderInterface>> &loaders,
                           const std::shared_ptr<::FontLoaderInterface> &fontLoader,
-                          double dpFactor,
-                          const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt);
+                          const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt,
+                          const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate = nullptr);
 
     Tiled2dMapVectorLayer(const std::string &layerName,
                           const std::shared_ptr<VectorMapDescription> & mapDescription,
                           const std::vector<std::shared_ptr<::LoaderInterface>> & loaders,
                           const std::shared_ptr<::FontLoaderInterface> & fontLoader,
-                          const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt);
+                          const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt,
+                          const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate = nullptr);
 
     Tiled2dMapVectorLayer(const std::string &layerName,
                           const std::vector<std::shared_ptr<::LoaderInterface>> & loaders,
                           const std::shared_ptr<::FontLoaderInterface> &fontLoader,
-                          const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt);
+                          const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt,
+                          const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate = nullptr);
 
     virtual std::shared_ptr<::LayerInterface> asLayerInterface() override;
 
@@ -178,9 +179,9 @@ public:
     void invalidateCollisionState();
 
 protected:
-    virtual std::shared_ptr<Tiled2dMapVectorLayerConfig> getLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &source);
+    void setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription);
 
-    virtual void setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription);
+    virtual std::shared_ptr<Tiled2dMapVectorLayerConfig> getLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &source);
 
     virtual void loadSpriteData();
 
@@ -209,8 +210,6 @@ private:
     void applyGlobalOrFeatureStateIfPossible(StateType type);
     
     int32_t layerIndex = -1;
-
-    const std::optional<double> dpFactor;
 
     const std::string layerName;
     std::optional<Tiled2dMapZoomInfo> customZoomInfo;

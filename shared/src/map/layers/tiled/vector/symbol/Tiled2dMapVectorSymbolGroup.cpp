@@ -38,7 +38,11 @@ Tiled2dMapVectorSymbolGroup::Tiled2dMapVectorSymbolGroup(uint32_t groupId,
           fontProvider(fontProvider),
           featureStateManager(featureStateManager),
           symbolDelegate(symbolDelegate),
-          usedKeys(layerDescription->getUsedKeys()) {}
+          usedKeys(layerDescription->getUsedKeys()) {
+    if (auto strongMapInterface = mapInterface.lock()) {
+        dpFactor = strongMapInterface->getCamera()->getScreenDensityPpi() / 160.0;
+    }
+}
 
 void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> weakFeatures,
                                              int32_t featuresBase,
@@ -76,7 +80,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
     for (auto it = features->rbegin() + featuresRBase; it != features->rbegin() + featuresRBase + featuresCount; it++) {
         featureTileIndex++;
         auto const &[context, geometry] = *it;
-        const auto evalContext = EvaluationContext(tileInfo.zoomIdentifier, context, featureStateManager);
+        const auto evalContext = EvaluationContext(tileInfo.zoomIdentifier, dpFactor, context, featureStateManager);
 
         if ((layerDescription->filter != nullptr && !layerDescription->filter->evaluateOr(evalContext, false))) {
             continue;
@@ -346,7 +350,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
 
     if (instanceCounts.icons != 0) {
         alphaInstancedShader->setBlendMode(
-                layerDescription->style.getBlendMode(EvaluationContext(0.0, std::make_shared<FeatureContext>(), featureStateManager)));
+                layerDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
         iconInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createQuadInstanced(alphaInstancedShader);
 #if DEBUG
         iconInstancedObject->asGraphicsObject()->setDebugLabel(layerDescription->identifier);
@@ -365,7 +369,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
     if (instanceCounts.stretchedIcons != 0) {
         auto shader = strongMapInterface->getShaderFactory()->createStretchInstancedShader()->asShaderProgramInterface();
         shader->setBlendMode(
-                layerDescription->style.getBlendMode(EvaluationContext(0.0, std::make_shared<FeatureContext>(), featureStateManager)));
+                layerDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
         stretchedInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createQuadStretchedInstanced(shader);
 #if DEBUG
         stretchedInstancedObject->asGraphicsObject()->setDebugLabel(layerDescription->identifier);
@@ -384,7 +388,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
     if (instanceCounts.textCharacters != 0) {
         auto shader = strongMapInterface->getShaderFactory()->createTextInstancedShader()->asShaderProgramInterface();
         shader->setBlendMode(
-                layerDescription->style.getBlendMode(EvaluationContext(0.0, std::make_shared<FeatureContext>(), featureStateManager)));
+                layerDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
         textInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createTextInstanced(shader);
 #if DEBUG
         textInstancedObject->asGraphicsObject()->setDebugLabel(layerDescription->identifier);
@@ -769,7 +773,7 @@ Tiled2dMapVectorSymbolGroup::createSymbolObject(const Tiled2dMapTileInfo &tileIn
                                                 const bool hasCustomTexture) {
     auto symbolObject = std::make_shared<Tiled2dMapVectorSymbolObject>(mapInterface, layerConfig, fontProvider, tileInfo, layerIdentifier,
                                                           description, featureContext, text, fullText, coordinate, lineCoordinates,
-                                                          fontList, textAnchor, angle, textJustify, textSymbolPlacement, hideIcon, animationCoordinatorMap, featureStateManager, usedKeys, symbolTileIndex, hasCustomTexture);
+                                                          fontList, textAnchor, angle, textJustify, textSymbolPlacement, hideIcon, animationCoordinatorMap, featureStateManager, usedKeys, symbolTileIndex, hasCustomTexture, dpFactor);
     symbolObject->setAlpha(alpha);
     const auto counts = symbolObject->getInstanceCounts();
     if (counts.icons + counts.stretchedIcons + counts.textCharacters == 0) {
