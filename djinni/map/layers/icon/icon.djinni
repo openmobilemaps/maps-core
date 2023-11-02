@@ -39,7 +39,11 @@ icon_layer_interface = interface +c {
     set_icons(icons: list<icon_info_interface>);
     get_icons(): list<icon_info_interface>;
     remove(icon: icon_info_interface);
+    remove_list(icons: list<icon_info_interface>);
+    remove_identifier(identifier: string);
+    remove_identifier_list(identifiers: list<string>);
     add(icon: icon_info_interface);
+    add_list(icons: list<icon_info_interface>);
     clear();
     set_callback_handler(handler: icon_layer_callback_interface);
     asLayerInterface(): layer_interface;

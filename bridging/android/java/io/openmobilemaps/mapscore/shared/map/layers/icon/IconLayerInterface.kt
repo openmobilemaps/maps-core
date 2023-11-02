@@ -19,7 +19,15 @@ abstract class IconLayerInterface {
 
     abstract fun remove(icon: IconInfoInterface)
 
+    abstract fun removeList(icons: ArrayList<IconInfoInterface>)
+
+    abstract fun removeIdentifier(identifier: String)
+
+    abstract fun removeIdentifierList(identifiers: ArrayList<String>)
+
     abstract fun add(icon: IconInfoInterface)
+
+    abstract fun addList(icons: ArrayList<IconInfoInterface>)
 
     abstract fun clear()
 
@@ -64,11 +72,35 @@ abstract class IconLayerInterface {
         }
         private external fun native_remove(_nativeRef: Long, icon: IconInfoInterface)
 
+        override fun removeList(icons: ArrayList<IconInfoInterface>) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_removeList(this.nativeRef, icons)
+        }
+        private external fun native_removeList(_nativeRef: Long, icons: ArrayList<IconInfoInterface>)
+
+        override fun removeIdentifier(identifier: String) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_removeIdentifier(this.nativeRef, identifier)
+        }
+        private external fun native_removeIdentifier(_nativeRef: Long, identifier: String)
+
+        override fun removeIdentifierList(identifiers: ArrayList<String>) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_removeIdentifierList(this.nativeRef, identifiers)
+        }
+        private external fun native_removeIdentifierList(_nativeRef: Long, identifiers: ArrayList<String>)
+
         override fun add(icon: IconInfoInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_add(this.nativeRef, icon)
         }
         private external fun native_add(_nativeRef: Long, icon: IconInfoInterface)
+
+        override fun addList(icons: ArrayList<IconInfoInterface>) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_addList(this.nativeRef, icons)
+        }
+        private external fun native_addList(_nativeRef: Long, icons: ArrayList<IconInfoInterface>)
 
         override fun clear() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

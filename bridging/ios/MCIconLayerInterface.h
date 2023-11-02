@@ -18,7 +18,15 @@
 
 - (void)remove:(nullable MCIconInfoInterface *)icon;
 
+- (void)removeList:(nonnull NSArray<MCIconInfoInterface *> *)icons;
+
+- (void)removeIdentifier:(nonnull NSString *)identifier;
+
+- (void)removeIdentifierList:(nonnull NSArray<NSString *> *)identifiers;
+
 - (void)add:(nullable MCIconInfoInterface *)icon;
+
+- (void)addList:(nonnull NSArray<MCIconInfoInterface *> *)icons;
 
 - (void)clear;
 
