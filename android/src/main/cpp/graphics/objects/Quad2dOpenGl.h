@@ -72,6 +72,7 @@ protected:
     std::string programName;
     int program;
 
+    bool glDataBuffersGenerated = false;
     int mvpMatrixHandle;
     int positionHandle;
     GLuint vertexBuffer;

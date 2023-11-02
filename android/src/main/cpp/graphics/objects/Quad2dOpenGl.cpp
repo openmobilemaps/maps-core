@@ -46,9 +46,10 @@ void Quad2dOpenGl::setFrame(const Quad2dD &frame, const RectD &textureCoordinate
 }
 
 void Quad2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
-    if (ready)
-        return;
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (ready) {
+        return;
+    }
 
     float frameZ = 0;
     vertices = {
@@ -80,18 +81,25 @@ void Quad2dOpenGl::prepareGlData(int program) {
     glUseProgram(program);
 
     positionHandle = glGetAttribLocation(program, "vPosition");
+    if (glDataBuffersGenerated) {
+        glDeleteBuffers(1, &vertexBuffer);
+    }
     glGenBuffers(1, &vertexBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+    if (glDataBuffersGenerated) {
+        glDeleteBuffers(1, &indexBuffer);
+    }
     glGenBuffers(1, &indexBuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLubyte) * indices.size(), &indices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     mvpMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
+    glDataBuffersGenerated = true;
 }
 
 void Quad2dOpenGl::prepareTextureCoordsGlData(int program) {
@@ -174,6 +182,7 @@ void Quad2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterfac
 
 void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                           int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (!ready || (usesTextureCoords && !textureCoordsReady))
         return;
 

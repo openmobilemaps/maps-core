@@ -54,11 +54,43 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icon_I
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icon_IconLayerInterface_00024CppProxy_native_1removeList(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_icons)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::IconLayerInterface>(nativeRef);
+        ref->removeList(::djinni::List<::djinni_generated::NativeIconInfoInterface>::toCpp(jniEnv, j_icons));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icon_IconLayerInterface_00024CppProxy_native_1removeIdentifier(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_identifier)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::IconLayerInterface>(nativeRef);
+        ref->removeIdentifier(::djinni::String::toCpp(jniEnv, j_identifier));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icon_IconLayerInterface_00024CppProxy_native_1removeIdentifierList(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_identifiers)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::IconLayerInterface>(nativeRef);
+        ref->removeIdentifierList(::djinni::List<::djinni::String>::toCpp(jniEnv, j_identifiers));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icon_IconLayerInterface_00024CppProxy_native_1add(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_icon)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::IconLayerInterface>(nativeRef);
         ref->add(::djinni_generated::NativeIconInfoInterface::toCpp(jniEnv, j_icon));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icon_IconLayerInterface_00024CppProxy_native_1addList(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_icons)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::IconLayerInterface>(nativeRef);
+        ref->addList(::djinni::List<::djinni_generated::NativeIconInfoInterface>::toCpp(jniEnv, j_icons));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
