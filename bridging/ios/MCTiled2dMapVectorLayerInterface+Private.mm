@@ -156,6 +156,14 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)reloadLocalDataSource:(nonnull NSString *)sourceName
+                      geoJson:(nonnull NSString *)geoJson {
+    try {
+        _cppRefHandle.get()->reloadLocalDataSource(::djinni::String::toCpp(sourceName),
+                                                   ::djinni::String::toCpp(geoJson));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 auto Tiled2dMapVectorLayerInterface::toCpp(ObjcType objc) -> CppType

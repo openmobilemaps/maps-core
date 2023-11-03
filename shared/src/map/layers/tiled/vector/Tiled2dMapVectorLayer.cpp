@@ -45,6 +45,7 @@
 #include "Tiled2dMapVectorReadyManager.h"
 #include "Tiled2dVectorGeoJsonSource.h"
 #include "Tiled2dMapVectorStyleParser.h"
+#include "GeoJsonVTFactory.h"
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::string &remoteStyleJsonUrl,
@@ -468,6 +469,27 @@ void Tiled2dMapVectorLayer::reloadDataSource(const std::string &sourceName) {
         });
     }
 
+}
+
+void Tiled2dMapVectorLayer::reloadLocalDataSource(const std::string &sourceName, const std::string &geoJson) {
+    if (const auto &geoSource = mapDescription->geoJsonSources[sourceName]) {
+
+        nlohmann::json json;
+
+        try {
+            json = nlohmann::json::parse(geoJson);
+        }
+        catch (nlohmann::json::parse_error &ex) {
+            return;
+        }
+
+        geoSource->reload(GeoJsonParser::getGeoJson(json));
+    }
+    if (auto &source = vectorTileSources[sourceName]) {
+        source.syncAccess([](const auto &source) {
+            source->reloadTiles();
+        });
+    }
 }
 
 std::shared_ptr<::LayerInterface> Tiled2dMapVectorLayer::asLayerInterface() {

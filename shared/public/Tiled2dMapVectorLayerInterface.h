@@ -47,4 +47,6 @@ public:
     virtual void setGlobalState(const std::unordered_map<std::string, VectorLayerFeatureInfoValue> & properties) = 0;
 
     virtual void reloadDataSource(const std::string & sourceName) = 0;
+
+    virtual void reloadLocalDataSource(const std::string & sourceName, const std::string & geoJson) = 0;
 };

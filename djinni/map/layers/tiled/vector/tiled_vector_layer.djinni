@@ -34,6 +34,7 @@ tiled_2d_map_vector_layer_interface = interface +c {
     set_global_state(properties: map<string, vector_layer_feature_info_value>);
 
     reload_data_source(source_name: string);
+    reload_local_data_source(source_name: string, geo_json: string);
 }
 
 vector_layer_feature_info_value = record {

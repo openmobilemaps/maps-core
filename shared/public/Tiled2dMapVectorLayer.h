@@ -182,6 +182,8 @@ public:
 
     virtual void reloadDataSource(const std::string & sourceName) override;
 
+    virtual void reloadLocalDataSource(const std::string & sourceName, const std::string & geoJson) override;
+
 protected:
     virtual std::shared_ptr<Tiled2dMapVectorLayerConfig> getLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &source);
 

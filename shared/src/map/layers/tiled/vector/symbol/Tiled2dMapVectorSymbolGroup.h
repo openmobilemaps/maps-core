@@ -37,6 +37,7 @@ public:
                                 const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                 const WeakActor<Tiled2dMapVectorFontProvider> &fontProvider,
                                 const Tiled2dMapTileInfo &tileInfo,
+                                const int64_t tileVersion,
                                 const std::string &layerIdentifier,
                                 const std::shared_ptr<SymbolVectorLayerDescription> &layerDescription,
                                 const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager);
@@ -133,6 +134,8 @@ private:
     bool anyInteractable = false;
 
     const std::shared_ptr<Tiled2dMapVectorStateManager> featureStateManager;
+
+    int64_t tileVersion;
 
 #ifdef DRAW_TEXT_BOUNDING_BOX
     TextSymbolPlacement textSymbolPlacement;

@@ -141,6 +141,15 @@ public:
         load();
     }
 
+    void reload(const std::shared_ptr<GeoJson> &geoJson) override {
+        const uint32_t z2 = 1u << options.maxZoom;
+
+        convert(geoJson->geometries, (options.tolerance / options.extent) / z2);
+
+        tiles.clear();
+        splitTile(geoJson->geometries, 0, 0, 0);
+    }
+
 
     void waitIfNotLoaded(std::shared_ptr<::djinni::Promise<std::shared_ptr<DataLoaderResult>>> promise) override {
         std::lock_guard<std::recursive_mutex> lock(mutex);

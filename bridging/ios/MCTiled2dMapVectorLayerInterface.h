@@ -57,4 +57,7 @@
 
 - (void)reloadDataSource:(nonnull NSString *)sourceName;
 
+- (void)reloadLocalDataSource:(nonnull NSString *)sourceName
+                      geoJson:(nonnull NSString *)geoJson;
+
 @end

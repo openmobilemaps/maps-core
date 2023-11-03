@@ -812,7 +812,7 @@ void Tiled2dMapSource<T, L, R>::forceReload() {
 template<class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::reloadTiles() {
     outdatedTiles.clear();
-//    outdatedTiles.insert(currentTiles.begin(), currentTiles.end());
+    outdatedTiles.insert(currentTiles.begin(), currentTiles.end());
     
     currentTiles.clear();
     readyTiles.clear();
