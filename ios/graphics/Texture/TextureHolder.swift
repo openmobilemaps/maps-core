@@ -18,7 +18,7 @@ enum TextureHolderError: Error {
 
 @objc
 public class TextureHolder: NSObject {
-    let texture: MTLTexture
+    var texture: MTLTexture!
 
     let textureUsableSize: TextureUsableSize?
 
@@ -65,7 +65,9 @@ public class TextureHolder: NSObject {
 }
 
 extension TextureHolder: MCTextureHolderInterface {
-    public func clearFromGraphics() {}
+    public func clearFromGraphics() {
+        texture = nil
+    }
 
     public func attachToGraphics() -> Int32 { 0 }
 

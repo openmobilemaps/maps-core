@@ -27,6 +27,12 @@ Tiled2dMapRasterSource::Tiled2dMapRasterSource(const MapConfig &mapConfig,
 , loaders(loaders)
 , rasterLayerActor(listener), heightLayerConfig(heightLayerConfig) {}
 
+Tiled2dMapRasterSource::~Tiled2dMapRasterSource() {
+    for (const auto &tile : currentTiles) {
+        tile.second.result.second->clearFromGraphics();
+    }
+}
+
 void Tiled2dMapRasterSource::cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) {
     std::string const url = layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier);
     loaders[loaderIndex]->cancel(url);

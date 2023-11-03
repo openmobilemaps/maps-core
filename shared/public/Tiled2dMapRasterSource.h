@@ -39,7 +39,9 @@ std::pair<std::shared_ptr<::TextureHolderInterface>, std::shared_ptr<::TextureHo
 
     LoaderStatus getLoaderStatus(const std::pair<TextureLoaderResult, std::optional<TextureLoaderResult>> &loaderResult) override;
     std::optional<std::string> getErrorCode(const std::pair<TextureLoaderResult, std::optional<TextureLoaderResult>> &loaderResult) override;
-        
+
+    ~Tiled2dMapRasterSource();
+
   protected:
     virtual void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
         

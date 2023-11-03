@@ -26,27 +26,19 @@ ThreadPoolSchedulerImpl::ThreadPoolSchedulerImpl(const std::shared_ptr<ThreadPoo
 }
 
 ThreadPoolSchedulerImpl::~ThreadPoolSchedulerImpl() {
-    {
-        std::lock_guard<std::mutex> lock(defaultMutex);
-        terminated = true;
-    }
-    defaultCv.notify_all();
-    delayedTasksCv.notify_all();
-    delayedTaskThread.join();
 
-    delayedTasks.clear();
-    
-    for (auto& thread : threads) {
-        if (std::this_thread::get_id() != thread.get_id()) {
-            thread.join();
-        }
-    }
 
-    threads.clear();
 }
 
 void ThreadPoolSchedulerImpl::addTask(const std::shared_ptr<TaskInterface> & task) {
     assert(task);
+    {
+        std::lock_guard<std::mutex> lock(defaultMutex);
+        if (terminated) {
+            task->run();
+            return;
+        }
+    }
     auto const &config = task->getConfig();
 
     if (config.delay != 0) {
@@ -59,6 +51,13 @@ void ThreadPoolSchedulerImpl::addTask(const std::shared_ptr<TaskInterface> & tas
 }
 
 void ThreadPoolSchedulerImpl::addTaskIgnoringDelay(const std::shared_ptr<TaskInterface> & task) {
+    {
+        std::lock_guard<std::mutex> lock(defaultMutex);
+        if (terminated) {
+            task->run();
+            return;
+        }
+    }
     auto const &config = task->getConfig();
 
     if (separateGraphicsQueue && config.executionEnvironment == ExecutionEnvironment::GRAPHICS) {
@@ -72,6 +71,7 @@ void ThreadPoolSchedulerImpl::addTaskIgnoringDelay(const std::shared_ptr<TaskInt
 }
 
 void ThreadPoolSchedulerImpl::addTasks(const std::vector<std::shared_ptr<TaskInterface>> & tasks) {
+    
     for (auto const &task : tasks) {
         addTask(task);
     }
@@ -99,14 +99,44 @@ void ThreadPoolSchedulerImpl::removeTask(const std::string & id) {
 }
 
 void ThreadPoolSchedulerImpl::clear() {
+
+
     {
         std::lock_guard<std::mutex> lock(defaultMutex);
-        defaultQueue.clear();
+        terminated = true;
+    }
+
+    {
+        std::unique_lock<std::mutex> lock(defaultMutex);
+        // execute tasks as long as there are tasks
+        while(!defaultQueue.empty()) {
+            auto task = std::move(defaultQueue.front());
+            defaultQueue.pop_front();
+            lock.unlock();
+            if (task) task->run();
+            lock.lock();
+        }
     }
     {
         std::lock_guard<std::mutex> lock(graphicsMutex);
         graphicsQueue.clear();
     }
+
+    defaultCv.notify_all();
+    delayedTasksCv.notify_all();
+    delayedTaskThread.join();
+
+    delayedTasks.clear();
+
+    for (auto& thread : threads) {
+        if (std::this_thread::get_id() != thread.get_id()) {
+            thread.join();
+        }
+    }
+
+    threads.clear();
+
+
 }
 
 void ThreadPoolSchedulerImpl::pause() {

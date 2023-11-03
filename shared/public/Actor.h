@@ -58,7 +58,7 @@ public:
     }
     
     WeakActor(): object(), receivingMailbox() {}
-    
+
     constexpr explicit operator bool() const noexcept {
         return receivingMailbox.lock() && object.lock();
     }

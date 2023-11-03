@@ -30,13 +30,15 @@ open class MCMapView: MTKView {
 
     public weak var sizeDelegate: MCMapSizeDelegate?
 
+    private var scheduler = MCThreadPoolScheduler.create()
+
     public init(mapConfig: MCMapConfig, pixelsPerInch: Float? = nil) {
         let renderingContext = RenderingContext()
         guard let mapInterface = MCMapInterface.create(GraphicsFactory(),
                                                        shaderFactory: ShaderFactory(),
                                                        renderingContext: renderingContext,
                                                        mapConfig: mapConfig,
-                                                       scheduler: MCThreadPoolScheduler.create(),
+                                                       scheduler: scheduler,
                                                        pixelDensity: pixelsPerInch ?? Float(UIScreen.pixelsPerInch)) else {
             fatalError("Can't create MCMapInterface")
         }
@@ -45,6 +47,18 @@ open class MCMapView: MTKView {
         touchHandler = MCMapViewTouchHandler(touchHandler: mapInterface.getTouchHandler())
         super.init(frame: .zero, device: MetalContext.current.device)
         setup()
+    }
+
+    deinit {
+
+        if Thread.isMainThread {
+            // make sure the mapInterface is destroyed from a background thread
+            DispatchQueue.global().async { [scheduler] in
+                scheduler.clear()
+            }
+        } else {
+            scheduler.clear()
+        }
     }
 
     @available(*, unavailable)

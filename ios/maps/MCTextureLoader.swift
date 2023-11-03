@@ -21,6 +21,12 @@ open class MCTextureLoader: MCLoaderInterface {
     var taskQueue = DispatchQueue(label: "MCTextureLoader.tasks")
     var tasks: [String: URLSessionTask] = [:]
 
+    public func pause() {
+        taskQueue.sync {
+            tasks.removeAll()
+        }
+    }
+
     public init(urlSession: URLSession? = nil)
     {
         if let urlSession = urlSession {
@@ -87,7 +93,7 @@ open class MCTextureLoader: MCLoaderInterface {
             }
 
 //            if response?.statusCode != 200 {
-                print(url, response?.statusCode ?? 0, error_)
+                // print(url, response?.statusCode ?? 0, error_)
 //            }
 
             if response?.statusCode == 404 {
