@@ -17,7 +17,8 @@ buildscript {
 	}
 
 	ext{
-		kotlin_version = "1.8.21"
+		kotlin_version = "1.9.20"
+		ksp_version = "1.9.20-1.0.13"
 
 		ubiqueUrl = System.getenv('UBIQUE_ARTIFACTORY_URL') ?: readPropertyWithDefault('ubiqueArtifactoryUrl', '')
 		ubiqueUser = System.getenv('UBIQUE_ARTIFACTORY_USER') ?: readPropertyWithDefault('ubiqueArtifactoryUser', '')
@@ -40,11 +41,12 @@ buildscript {
 		mavenCentral()
 	}
 	dependencies {
-		classpath 'com.android.tools.build:gradle:8.0.2'
+		classpath 'com.android.tools.build:gradle:8.1.2'
+		classpath "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$ksp_version"
 		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
-		classpath 'com.vanniktech:gradle-maven-publish-plugin:0.25.2'
-		classpath 'org.jetbrains.dokka:dokka-gradle-plugin:1.7.10'
+		classpath 'com.vanniktech:gradle-maven-publish-plugin:0.25.3'
+		classpath 'org.jetbrains.dokka:dokka-gradle-plugin:1.9.10'
 	}
 }
 
@@ -57,7 +59,7 @@ repositories {
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'com.vanniktech.maven.publish'
-apply plugin: 'kotlin-kapt'
+apply plugin: 'com.google.devtools.ksp'
 apply plugin: 'kotlin-parcelize'
 
 import com.vanniktech.maven.publish.SonatypeHost
@@ -65,11 +67,11 @@ import com.vanniktech.maven.publish.SonatypeHost
 android {
 	namespace 'io.openmobilemaps.mapscore'
 
-	compileSdkVersion 33
+	compileSdk 34
 
 	defaultConfig {
-		minSdkVersion 26
-		targetSdkVersion 33
+		minSdk 26
+		targetSdk 34
 		versionName VERSION_NAME
 		versionCode Integer.parseInt(VERSION_CODE)
 
@@ -128,8 +130,7 @@ android {
 }
 
 project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
-	compilerOptions.jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11 // Kotlin 1.8+
-	kotlinOptions.jvmTarget = "11" // deprecated since Kotlin 1.8
+	compilerOptions.jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
 }
 
 task copyHeaders() {
@@ -195,12 +196,12 @@ mavenPublishing {
 dependencies {
 	implementation fileTree(dir: 'libs', include: ['*.jar'])
 	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-	implementation 'androidx.annotation:annotation:1.5.0'
-	implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.1'
-	implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.0'
+	implementation 'androidx.annotation:annotation:1.7.0'
+	implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.2'
+	implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
 
-	implementation 'com.squareup.moshi:moshi:1.14.0'
-	kapt 'com.squareup.moshi:moshi-kotlin-codegen:1.14.0'
+	implementation 'com.squareup.moshi:moshi:1.15.0'
+	ksp 'com.squareup.moshi:moshi-kotlin-codegen:1.15.0'
 	implementation 'com.squareup.okhttp3:okhttp:4.11.0'
 
 	implementation 'ch.ubique.android:djinni-support-lib:1.0.4'
