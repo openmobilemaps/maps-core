@@ -77,21 +77,23 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         fontLoader(fontLoader),
         customZoomInfo(customZoomInfo),
         featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>()),
-        symbolDelegate(symbolDelegate)  {}
+        symbolDelegate(symbolDelegate) {}
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::shared_ptr<VectorMapDescription> &mapDescription,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
                                              const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                                              const std::optional<Tiled2dMapZoomInfo> &customZoomInfo,
-                                             const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate) :
+                                             const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate,
+                                             const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider) :
         Tiled2dMapLayer(),
         layerName(layerName),
         loaders(loaders),
         fontLoader(fontLoader),
         customZoomInfo(customZoomInfo),
         featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>()),
-        symbolDelegate(symbolDelegate)  {
+        symbolDelegate(symbolDelegate),
+        localDataProvider(localDataProvider) {
     setMapDescription(mapDescription);
 }
 

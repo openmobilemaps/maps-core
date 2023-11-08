@@ -41,7 +41,7 @@ Tiled2dMapVectorLayerInterface::createExplicitly(const std::string &layerName,
         }
 
         if (parserResult.has_value() && parserResult->status == LoaderStatus::OK) {
-            return std::make_shared<Tiled2dMapVectorLayer>(layerName, parserResult->mapDescription, loaders, fontLoader, customZoomInfo, symbolDelegate);
+            return std::make_shared<Tiled2dMapVectorLayer>(layerName, parserResult->mapDescription, loaders, fontLoader, customZoomInfo, symbolDelegate, localDataProvider);
         } else {
             return nullptr;
         }
